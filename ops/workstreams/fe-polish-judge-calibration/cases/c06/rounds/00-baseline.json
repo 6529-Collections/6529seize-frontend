@@ -1,0 +1,206 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-1440x1000-01.png through evidence/page-1440x1000-05.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-390x844-01.png through evidence/page-390x844-09.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001"],
+      "note": "The intro, art, collection and acquisition, scholarship, governance, next stage and sources sections cover what the Museum is, how it works and where to go next. But the section that shows what it holds is headed by a leaked record path and a TODO note, not a heading."
+    },
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-006"],
+      "note": "The sequence is logical: definition, art, collection, scholarship, public access, governance, plans, care, then sources. Three Collection links with three different labels lead to the same place."
+    },
+    "J03": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "In the art section, the leaked path at heading size and the primary-blue TODO subheading pull the eye. Collection care is the only boxed section, which gives a secondary section too much emphasis."
+    },
+    "J04": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "The page has a dark, restrained, art-led museum look with iron hairlines and primary accents. Two things are off-system: a file path plus commit hash used as a heading (hashes as texture), and the square, unpadded bordered box around Collection care."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-390x844-03.png"
+      ],
+      "findings": [],
+      "note": "Editorial spacing suits an About page. The three-work art grid and the two-column sections scan well. Minor: the caption rules and the section divider double up below the art grid."
+    },
+    "J06": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-390x844-09.png"
+      ],
+      "findings": ["F-002", "F-005"],
+      "note": "Collection care's heading and text sit flush against the box border and start about 3px off the shared left edge. The portrait photograph is centered in its column but its caption is left-aligned to the column edge."
+    },
+    "J07": {
+      "score": 6.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-004", "F-006"],
+      "note": "A TODO and a record path are visible in the art section. The rest of the copy is mostly specific, but it relies on TDH, which is never defined, and on abstract phrasing such as 'Adopted effects' and 'a reliable path to an authorized Ethereum action'."
+    },
+    "J10": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-09.png"
+      ],
+      "findings": ["F-001", "F-003"],
+      "note": "Sections and art stack correctly into one column at 390. But the leaked heading and the TODO line overflow and clip at the viewport edge, and the capture ends before the last source link and the Source and contribute strip."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "fail",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["I2", "J07", "J01", "J03", "J04", "J10"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png; evidence/page-390x844-02.png",
+      "observation": "Under the 'THE ART' label, the section heading reads 'records/entities/6529NM-W-0008.json @ 9aea66c07d'. The line beneath it, in primary-blue tracked caps, reads 'TODO(CURATOR): REPLACE WITH FINAL VISITOR COPY BEFORE LAUNCH.' At 390 the path cannot wrap, so it overflows the content column and is clipped at the viewport edge ('records/entities/6529N…'). The TODO line also runs past the right edge.",
+      "consequence": "The visitor's first view of the art is framed by an internal file path, a commit hash and a developer note. This tells visitors the publication is unfinished and leaves the holdings section with no meaningful title. On mobile the heading is partly unreadable and causes horizontal overflow.",
+      "change": "Replace the heading with visitor copy that names the content, such as 'Works in the Collection'. Delete the TODO line, or replace it with a one-sentence subheading grounded in the record, such as 'Selected works by Casey Reas and David Seymour.' Do both through i18n message keys. Also let the section heading wrap long tokens (for example tw-break-words) so no title can overflow at 390.",
+      "acceptance_check": "At 1440 and 390, the rendered page shows no file path, record ID, commit hash, or TODO/developer note anywhere. The art section heading names its content in plain language. At 390 the heading and subheading wrap inside the content column with no clipped text and no horizontal overflow.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J06", "J04", "J03"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png; evidence/page-390x844-08.png; evidence/page-390x844-09.png",
+      "observation": "'Collection care' is the only section drawn inside a full rectangular border. The border has square corners and a heavier left edge. There is no left inner padding: the heading and the body text sit directly against the left border at both viewports. The heading starts about 3px right of every other section heading.",
+      "consequence": "It reads as a layout bug and breaks the page's hairline-divider rhythm. It gives a secondary section more weight than the main sections and makes the publication look unfinished.",
+      "change": "Remove the border and give the section the same top-hairline treatment and left alignment as 'Collection and acquisition' and 'How the Museum works'. If a framed callout is truly intended, use tw-rounded-xl with a tw-border-white/10 edge and even inner padding (about 24px on desktop, 16px on mobile).",
+      "acceptance_check": "At 1440 and 390, the Collection care heading aligns to the same left edge as the other section headings, and no text touches a border. If the section stays framed, the frame is rounded-xl with visible inner padding on all four sides.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 390x844 · en-US",
+      "evidence": "evidence/page-390x844-09.png; evidence/page-1440x1000-04.png; evidence/page-1440x1000-05.png",
+      "observation": "The 390 full-page capture ends about 20px below the 'On-chain transition · Museum Safe' link row. At 1440 the page also shows a fifth Institutional sources link ('View the public record') and the 'Source and contribute' strip (Read the source, Propose an edit, Contributor guide, Related works and context). Neither appears at 390. This may be a capture artifact or content clipping; the evidence alone cannot tell which.",
+      "consequence": "Mobile visitors may lose the public-record link and the source and contribution path, which are what back the page's institutional claims.",
+      "change": "Find what ends the page at that link row: a fixed-height or overflow-hidden container, or a capture taken before layout settled. Make the full tail render, then recapture.",
+      "acceptance_check": "A fresh full-page 390x844 capture shows all five Institutional sources links, the Source and contribute strip, and bottom spacing below the last element.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png; evidence/page-1440x1000-04.png; evidence/page-390x844-06.png; evidence/page-390x844-07.png; evidence/page-390x844-08.png",
+      "observation": "Explanations aimed at visitors rely on internal terms and abstractions:\n- 'TDH-weighted voting' (TDH is never defined)\n- 'Adopted effects and proposals awaiting adoption remain separate in the public record'\n- 'object-level rights record'\n- 'Decision-constrained custody'\n- 'will have a form that can be independently verified on Ethereum'\n- 'a reliable path to an authorized Ethereum action'\nAlso, Collection care says in the present tense that the Museum 'is built to survive changes in ... signers', while 'The next stage' says custody controls are still to come.",
+      "consequence": "The audience, visitors new to the Museum, cannot tell who votes, what TDH measures, what an 'effect' is, or which safeguards exist today and which are planned. That weakens the 'how it works' half of the primary task.",
+      "change": "Define TDH at first use, as a draft for the builder to verify: 'Network members vote on major collecting and policy decisions; votes are weighted by TDH (Total Days Held), a measure of how long members have held 6529 collection NFTs.'\nReplace the 'Adopted effects' sentence with 'Adopted decisions and open proposals are listed separately in the public record.'\nUse 'rights record for each work' in place of 'object-level rights record'.\nRewrite each next-stage item to name who acts and what gets recorded.\nIn Collection care, separate the safeguards in place today from the planned ones.\nMake all of these through i18n message keys.",
+      "acceptance_check": "TDH is defined or linked at first use. No sentence uses 'effects', 'object-level', or 'decision-constrained' without a plain explanation. Each next-stage item names an actor and an outcome. Collection care's tense matches what the next-stage section says exists today.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png; evidence/page-1440x1000-02.png",
+      "observation": "The portrait David Seymour photograph is centered in its grid column, but its caption starts at the column's left edge. Its two-line title also pushes its caption rule about 4px below the rules of the neighboring works. The captions give title and artist but no date.",
+      "consequence": "There is a small misalignment in the only art on the page, and the captions are thinner than museum labels usually are.",
+      "change": "Align the caption to the image's left edge (or left-align the image), and align the caption rules across the row. Add the year where the record has it.",
+      "acceptance_check": "At 1440, each caption's left edge matches its image's left edge, the caption rules share a baseline, and dates appear where the record supplies them.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-006",
+      "targets": ["J07", "J02"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png; evidence/page-1440x1000-02.png; evidence/page-1440x1000-03.png",
+      "observation": "The same destination is labelled three ways: 'View the Collection', 'Explore the Collection', and the primary button 'Explore the collection'. The button uses a lowercase 'c', while the rest of the page treats Collection as a proper noun.",
+      "consequence": "Minor inconsistency and repetition in the next-step links.",
+      "change": "Use one label with consistent capitalization, such as 'Explore the Collection', and drop the redundant repeats.",
+      "acceptance_check": "Every link to the Collection uses the same capitalized label, and no section repeats a Collection link already offered just above it.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Dark, restrained museum layout: iron hairline section dividers, primary-blue tracked section labels, and black surfaces",
+    "Hero h1 and two-paragraph intro that say plainly what the Museum is and what it does",
+    "Art shown whole at the correct aspect ratio with title and artist captions, and the portrait photograph left uncropped",
+    "Two-column heading/body section pattern and the consistent underlined primary text-link style",
+    "'How the Museum works' naming a real mechanism (TDH-weighted voting) and pairing each claim with a link to decisions, the repository, or the rights handbook",
+    "'The next stage' clearly framed as future work, separate from current practice",
+    "Institutional sources link row and the Source and contribute strip (Read the source, Propose an edit, Contributor guide)",
+    "Primary and secondary rounded-lg button pair in 'A museum open to the public'",
+    "Mobile single-column stacking of the art and sections with readable line lengths"
+  ]
+}
