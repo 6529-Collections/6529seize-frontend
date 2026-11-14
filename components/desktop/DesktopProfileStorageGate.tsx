@@ -9,7 +9,10 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { DesktopProfileRecoveryContext } from "@/contexts/DesktopProfileRecoveryContext";
+import {
+  DesktopProfileRecoveryContext,
+  DesktopProfileRestoringContext,
+} from "@/contexts/DesktopProfileRecoveryContext";
 import { isDesktopShell } from "@/helpers/desktop-shell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -90,15 +93,16 @@ export default function DesktopProfileStorageGate({
       setGeneration((value) => value + 1);
     };
     const current = getPageDesktopProfileState();
-    initializeDesktopProfiles(current, (restored) => {
-      // Throws on an invalid snapshot; the app then runs signed out.
-      const written = restoreDesktopProfileState(restored);
-      if (active && !isSameDesktopProfileState(current, written)) {
-        remountApp();
-      }
-    })
-      .then(() => {
-        if (active) setStartup("ready");
+    // Throws on an invalid snapshot; the app then runs signed out. The
+    // restore is shared, so after a Strict Mode re-run or a remount the
+    // mounted gate still compares the result and remounts the app.
+    initializeDesktopProfiles(current, restoreDesktopProfileState)
+      .then((written) => {
+        if (!active) return undefined;
+        if (written && !isSameDesktopProfileState(current, written)) {
+          remountApp();
+        }
+        setStartup("ready");
         return undefined;
       })
       .catch(() => {
@@ -134,7 +138,11 @@ export default function DesktopProfileStorageGate({
     <DesktopProfileRecoveryContext.Provider
       value={isDesktop && startup === "signed-out"}
     >
-      <Fragment key={generation}>{children}</Fragment>
+      <DesktopProfileRestoringContext.Provider
+        value={isDesktop && startup === "restoring"}
+      >
+        <Fragment key={generation}>{children}</Fragment>
+      </DesktopProfileRestoringContext.Provider>
       {isDesktop && startup === "signed-out" && (
         <div className={NOTICE_CLASS}>
           <p id={restoreErrorId} role="alert" className="tw-mt-0">

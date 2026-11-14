@@ -38,10 +38,22 @@ function parseDesktopProfile(value: unknown): DesktopProfile {
   };
 }
 
+/** A JWT issued for this wallet: decodable, with `sub` equal to the address. */
+function isTokenForAddress(jwt: string, address: string): boolean {
+  try {
+    const { sub } = jwtDecode<{ readonly sub?: unknown }>(jwt);
+    return typeof sub === "string" && sub.toLowerCase() === address;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Normalize the page's saved accounts into the snapshot the desktop shell
  * accepts: valid, unique, at most five, with the active account kept. A
- * malformed entry is skipped instead of blocking start-up.
+ * malformed entry is skipped instead of blocking start-up, and a token that
+ * was not issued for its account's address is dropped (the account stays,
+ * signed out) so the strict restore check never rejects the whole snapshot.
  */
 export function getDesktopProfileMigrationState(
   value: unknown
@@ -55,7 +67,11 @@ export function getDesktopProfileMigrationState(
     : [];
   for (const candidate of rawAccounts) {
     try {
-      const account = parseDesktopProfile(candidate);
+      const parsed = parseDesktopProfile(candidate);
+      const account =
+        parsed.jwt !== null && !isTokenForAddress(parsed.jwt, parsed.address)
+          ? { ...parsed, jwt: null }
+          : parsed;
       if (!seen.has(account.address)) {
         seen.add(account.address);
         accounts.push(account);
@@ -78,16 +94,6 @@ export function getDesktopProfileMigrationState(
     accounts: retained,
     activeAddress: selected ? (active as string) : null,
   };
-}
-
-/** A JWT issued for this wallet: decodable, with `sub` equal to the address. */
-function isTokenForAddress(jwt: string, address: string): boolean {
-  try {
-    const { sub } = jwtDecode<{ readonly sub?: unknown }>(jwt);
-    return typeof sub === "string" && sub.toLowerCase() === address;
-  } catch {
-    return false;
-  }
 }
 
 /**
