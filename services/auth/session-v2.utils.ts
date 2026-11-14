@@ -215,11 +215,17 @@ async function rollbackUnpersistedSession(
 export async function getSessionNonce({
   signerAddress,
   deviceGrant,
+  forDesktopSignIn = false,
 }: {
   readonly signerAddress: string;
   readonly deviceGrant?: SessionNonceDeviceGrantParams | undefined;
+  /**
+   * A 6529 Desktop challenge requested from a browser (the browser
+   * connector): `client_type=desktop`, without this page's own sign-in.
+   */
+  readonly forDesktopSignIn?: boolean | undefined;
 }): Promise<ApiSessionNonceResponse> {
-  const clientType = getSessionClientType();
+  const clientType = forDesktopSignIn ? "desktop" : getSessionClientType();
   // Only web (SIWE) challenges can carry a device grant.
   const deviceGrantParams =
     deviceGrant && clientType === "web" ? deviceGrant : {};
@@ -238,6 +244,7 @@ export async function getSessionNonce({
       chain_id: "1",
       ...deviceGrantParams,
     },
+    ...(forDesktopSignIn ? { includeWalletAuth: false } : {}),
     errorMode: "structured",
   });
 }

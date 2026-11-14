@@ -3953,6 +3953,29 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopUpdate.failed": "The update could not be downloaded.",
   "desktopUpdate.retry": "Try again",
   "desktopUpdate.later": "Not now",
+  "browserConnector.title": "Sign in to 6529 Desktop",
+  "browserConnector.description":
+    "Sign in to 6529 Desktop with a browser wallet.",
+  "browserConnector.checking": "Checking the sign-in link…",
+  "browserConnector.target.local":
+    "This returns to 6529 Desktop (local build).",
+  "browserConnector.target.staging":
+    "This returns to 6529 Desktop (staging build).",
+  "browserConnector.signing": "Waiting for your wallet to sign…",
+  "browserConnector.connectIntro":
+    "Connect the browser wallet you want to use in 6529 Desktop.",
+  "browserConnector.connect": "Connect wallet",
+  "browserConnector.signIntro":
+    "Sign a message with {address} to sign in to 6529 Desktop. Signing costs nothing.",
+  "browserConnector.sign": "Sign and return to 6529 Desktop",
+  "browserConnector.failed": "The message was not signed. Try again.",
+  "browserConnector.returned":
+    "Signed. Return to 6529 Desktop to finish. You can close this tab.",
+  "browserConnector.openApp": "Open 6529 Desktop",
+  "browserConnector.problem.invalid":
+    "This link is not a valid 6529 Desktop sign-in link. Start again from 6529 Desktop.",
+  "browserConnector.problem.expired":
+    "This sign-in link has expired. Start again from 6529 Desktop.",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",
