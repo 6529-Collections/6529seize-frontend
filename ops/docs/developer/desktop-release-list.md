@@ -51,7 +51,12 @@ keeps being served for up to an hour, otherwise both routes answer 503.
 | No bucket is set, or no bundle is stored yet | 404, `No release list yet.` | `text/plain; charset=utf-8`, `Cache-Control: public, max-age=60` |
 | The bundle is refused, or S3 fails, with no good pair in the last hour | 503, `The release list is unavailable.` | `Cache-Control: no-store`, `Retry-After: 60` |
 
-Each server reads the bundle once a minute.
+Each server reads the bundle once a minute. Only a served pair is kept to
+fall back on: a 404 is never stretched over a later failure (no bundle, then
+an S3 error or a refused bundle, answers 503). Deleting the bundle withdraws
+the list: S3 reads are strongly consistent, so a missing object is a definite
+answer, not a failure, and both routes answer 404 within a minute (plus the
+404's one-minute edge cache) instead of serving the deleted list for an hour.
 
 There is no redirect (the app refuses redirects) and no password gate.
 Production serves both paths to everyone; on staging they sit behind the

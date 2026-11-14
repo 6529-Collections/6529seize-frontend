@@ -33,7 +33,11 @@ const BUNDLE_VERSION = 1;
 // What 6529 Desktop accepts; anything larger is refused rather than served.
 const MAX_LIST_BYTES = 56 * 1024;
 const MAX_SIGNATURE_BYTES = 1024;
-const BUNDLE_KEYS = ["list", "signature", "version"];
+const BUNDLE_KEYS: ReadonlySet<string> = new Set([
+  "version",
+  "list",
+  "signature",
+]);
 // The standard alphabet with padding; the length and the round trip in
 // decodePart make it strict and canonical.
 const BASE64 = /^[A-Za-z0-9+/]+={0,2}$/;
@@ -76,6 +80,14 @@ function decodePart(value: unknown, maxBytes: number): Buffer | null {
     : null;
 }
 
+function hasExactlyBundleKeys(record: object): boolean {
+  const keys = Object.keys(record);
+  return (
+    keys.length === BUNDLE_KEYS.size &&
+    keys.every((key) => BUNDLE_KEYS.has(key))
+  );
+}
+
 type Bundle = { readonly list: Buffer; readonly signature: Buffer };
 
 /** The bundle's two parts, or why it is refused. */
@@ -90,7 +102,7 @@ function parseBundle(body: Uint8Array): Bundle | string {
     typeof json !== "object" ||
     json === null ||
     Array.isArray(json) ||
-    Object.keys(json).sort().join() !== BUNDLE_KEYS.join()
+    !hasExactlyBundleKeys(json)
   ) {
     return "the bundle does not hold exactly version, list and signature";
   }
@@ -199,7 +211,10 @@ async function getSnapshot(): Promise<SignedListSnapshot> {
   const at = Date.now();
   if (snapshot.state !== "error") {
     current = { snapshot, at, source };
-    lastGood = current;
+    // Only a served pair is worth keeping through a failure. A missing
+    // bundle is S3's definite answer (reads are strongly consistent), so a
+    // deleted bundle withdraws the list rather than leaving it up an hour.
+    lastGood = snapshot.state === "ok" ? current : null;
     return snapshot;
   }
   const served =

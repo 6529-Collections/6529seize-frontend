@@ -270,6 +270,47 @@ describe("6529 Desktop release list routes", () => {
       "the bundle turns malformed",
       () => storeHasBundle(bundleBytes({ version: 1, list })),
     ],
+  ])(
+    "answers 503, not 404, when %s after no bundle",
+    async (_name, breakIt) => {
+      const now = jest.spyOn(Date, "now").mockReturnValue(1_000_000);
+      storeHasBundle(null);
+      expect((await getList(new Request(LIST_URL))).status).toBe(404);
+
+      now.mockReturnValue(1_000_000 + 61_000);
+      breakIt();
+
+      expect((await getList(new Request(LIST_URL))).status).toBe(503);
+    }
+  );
+
+  it("withdraws the list when the bundle is deleted, keeping nothing to fall back on", async () => {
+    const now = jest.spyOn(Date, "now").mockReturnValue(1_000_000);
+    storeHasBundle(bundleBytes(validBundle()));
+    expect((await getList(new Request(LIST_URL))).status).toBe(200);
+
+    now.mockReturnValue(1_000_000 + 61_000);
+    storeHasBundle(null);
+    expect((await getList(new Request(LIST_URL))).status).toBe(404);
+
+    now.mockReturnValue(1_000_000 + 122_000);
+    mockRead.mockResolvedValue({ state: "error", reason: "S3 answered 500" });
+    expect((await getList(new Request(LIST_URL))).status).toBe(503);
+  });
+
+  it.each<[string, () => void]>([
+    [
+      "the bucket fails",
+      () =>
+        mockRead.mockResolvedValue({
+          state: "error",
+          reason: "S3 answered 500",
+        }),
+    ],
+    [
+      "the bundle turns malformed",
+      () => storeHasBundle(bundleBytes({ version: 1, list })),
+    ],
   ])("keeps serving the last good pair when %s", async (_name, breakIt) => {
     const now = jest.spyOn(Date, "now").mockReturnValue(1_000_000);
     storeHasBundle(bundleBytes(validBundle()));
