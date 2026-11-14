@@ -37,7 +37,7 @@ export const defaultConnectModalView = (): ConnectModalView =>
  * `openWebConnection` opens the wallet modal itself, for the WalletConnect
  * choice.
  */
-export async function openConnectEntryPoint({
+async function openConnectEntryPoint({
   source,
   isSigningOutAll,
   openWebConnection,
