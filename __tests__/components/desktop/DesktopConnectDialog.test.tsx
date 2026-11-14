@@ -22,6 +22,11 @@ const setStatus = (status: string) => {
 jest.mock("@/services/desktop/browserConnectorSignIn", () => ({
   startBrowserConnectorSignIn: jest.fn().mockResolvedValue(undefined),
   cancelBrowserConnectorSignIn: jest.fn(),
+  resetFinishedBrowserConnectorStatus: () => {
+    if (mockStatus !== "waiting" && mockStatus !== "signing-in") {
+      mockStatus = "idle";
+    }
+  },
   getBrowserConnectorStatus: () => mockStatus,
   getServerBrowserConnectorStatus: () => "idle",
   subscribeBrowserConnectorStatus: (listener: () => void) => {
@@ -113,6 +118,50 @@ describe("DesktopConnectDialog", () => {
     expect(screen.getByRole("alert")).toHaveTextContent("did not work");
   });
 
+  it("keeps a way out while signing in, without cancelling the sign-in", async () => {
+    const user = userEvent.setup();
+    render(<DesktopConnectDialog />);
+    open();
+
+    setStatus("signing-in");
+    expect(screen.getByText("Signing in…")).toBeInTheDocument();
+    // The dialog's own Close button stays available while signing in.
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(cancelBrowserConnectorSignIn).not.toHaveBeenCalled();
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("button", { name: /Use a browser wallet/ })
+      ).not.toBeInTheDocument()
+    );
+  });
+
+  it("does not show an earlier finished sign-in when reopened", () => {
+    mockStatus = "failed";
+    render(<DesktopConnectDialog />);
+    open();
+
+    expect(screen.getByRole("alert")).toBeEmptyDOMElement();
+    expect(
+      screen.getByRole("button", { name: /Use a browser wallet/ })
+    ).toBeEnabled();
+  });
+
+  it("comes back with the reason when WalletConnect cannot open", async () => {
+    const user = userEvent.setup();
+    openWalletConnect.mockRejectedValueOnce(new Error("appkit"));
+    render(<DesktopConnectDialog />);
+    open();
+
+    await user.click(
+      screen.getByRole("button", { name: /Scan with a mobile wallet/ })
+    );
+
+    expect(
+      await screen.findByText("Could not open WalletConnect. Try again.")
+    ).toBeInTheDocument();
+  });
+
   it("says when the browser could not be opened", async () => {
     const user = userEvent.setup();
     jest
@@ -125,9 +174,9 @@ describe("DesktopConnectDialog", () => {
       screen.getByRole("button", { name: /Use a browser wallet/ })
     );
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Could not open your browser"
-    );
+    expect(
+      await screen.findByText(/Could not open your browser/)
+    ).toBeInTheDocument();
   });
 
   it("closes when the browser sign-in finishes", async () => {

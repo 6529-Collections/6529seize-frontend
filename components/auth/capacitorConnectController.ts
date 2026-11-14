@@ -30,7 +30,12 @@ export async function openUserConnectionSurfaceForRuntime({
 }): Promise<void> {
   // 6529 Desktop offers its own choice first: WalletConnect, or a browser
   // wallet through the browser connector.
+  // Like the Capacitor options, this resolves once the choice is shown.
   if (!isSigningOutAll && isDesktopShell()) {
+    logSecurityEvent(
+      SecurityEventType.WALLET_CONNECTION_ATTEMPT,
+      createConnectionEventContext(source)
+    );
     openDesktopConnectDialog(() => openWebConnection(source));
     return;
   }

@@ -19,6 +19,7 @@ import {
 import {
   closeDesktopConnectDialog,
   getDesktopConnectDialogOpener,
+  openDesktopConnectDialog,
   getServerDesktopConnectDialogOpener,
   subscribeDesktopConnectDialog,
 } from "@/services/desktop/desktopConnectDialog";
@@ -91,7 +92,9 @@ export default function DesktopConnectDialog() {
     getBrowserConnectorStatus,
     getServerBrowserConnectorStatus
   );
-  const [startFailed, setStartFailed] = useState(false);
+  const [problem, setProblem] = useState<
+    "start-failed" | "walletconnect-failed" | null
+  >(null);
   const isOpen = openWalletConnect !== null;
   const isBusy = status === "waiting" || status === "signing-in";
 
@@ -100,26 +103,43 @@ export default function DesktopConnectDialog() {
     if (isOpen && status === "signed-in") closeDesktopConnectDialog();
   }, [isOpen, status]);
 
+  // Waiting for the browser can be cancelled. Once the app is signing in
+  // with the returned signature, closing (the dialog's own Close button or
+  // Escape) only hides the dialog: the sign-in finishes on its own.
   const close = () => {
     if (status === "waiting") cancelBrowserConnectorSignIn();
-    setStartFailed(false);
+    setProblem(null);
     closeDesktopConnectDialog();
   };
 
   const chooseWalletConnect = () => {
-    if (!openWalletConnect) return;
+    const open = openWalletConnect;
+    if (!open) return;
+    setProblem(null);
     closeDesktopConnectDialog();
-    openWalletConnect().catch(() => undefined);
+    open().catch(() => {
+      // Bring the choice back with the reason, instead of failing silently.
+      openDesktopConnectDialog(open);
+      setProblem("walletconnect-failed");
+    });
   };
 
   const chooseBrowserWallet = () => {
-    setStartFailed(false);
-    startBrowserConnectorSignIn().catch(() => setStartFailed(true));
+    setProblem(null);
+    startBrowserConnectorSignIn().catch(() => setProblem("start-failed"));
   };
 
-  const statusKey =
-    status in STATUS_MESSAGES
-      ? STATUS_MESSAGES[status as keyof typeof STATUS_MESSAGES]
+  let alertText: string | null = null;
+  if (problem === "start-failed") {
+    alertText = t(locale, "desktopConnect.status.startFailed");
+  } else if (problem === "walletconnect-failed") {
+    alertText = t(locale, "desktopConnect.status.walletConnectFailed");
+  } else if (status === "failed" || status === "expired") {
+    alertText = t(locale, STATUS_MESSAGES[status]);
+  }
+  const statusText =
+    status === "waiting" || status === "signing-in"
+      ? t(locale, STATUS_MESSAGES[status])
       : null;
 
   return (
@@ -143,24 +163,20 @@ export default function DesktopConnectDialog() {
           onClick={chooseBrowserWallet}
           disabled={isBusy}
         />
-        {startFailed && (
-          <p role="alert" className="tw-m-0 tw-text-sm tw-text-red">
-            {t(locale, "desktopConnect.status.startFailed")}
-          </p>
-        )}
-        {statusKey !== null &&
-          (status === "failed" || status === "expired" ? (
-            <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-200">
-              {t(locale, statusKey)}
-            </p>
-          ) : (
-            <output
-              aria-live="polite"
-              className="tw-block tw-text-sm tw-text-iron-200"
-            >
-              {t(locale, statusKey)}
-            </output>
-          ))}
+        {/* Both live regions stay in the dialog; only their text changes. */}
+        <div
+          role="alert"
+          className="tw-text-sm tw-text-iron-200 empty:tw-hidden"
+        >
+          {alertText}
+        </div>
+        <output
+          aria-live="polite"
+          aria-atomic="true"
+          className="tw-block tw-text-sm tw-text-iron-200 empty:tw-hidden"
+        >
+          {statusText}
+        </output>
         {status === "waiting" && (
           <button
             type="button"

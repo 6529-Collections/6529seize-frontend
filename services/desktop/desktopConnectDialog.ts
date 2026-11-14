@@ -4,6 +4,8 @@
  * it if the user picks WalletConnect.
  */
 
+import { resetFinishedBrowserConnectorStatus } from "./browserConnectorSignIn";
+
 type OpenWalletConnect = () => Promise<void>;
 
 let openWalletConnect: OpenWalletConnect | null = null;
@@ -14,6 +16,8 @@ const notify = () => {
 };
 
 export function openDesktopConnectDialog(open: OpenWalletConnect): void {
+  // A finished or failed earlier browser sign-in must not show again.
+  resetFinishedBrowserConnectorStatus();
   openWalletConnect = open;
   notify();
 }

@@ -3968,6 +3968,8 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopConnect.status.startFailed":
     "Could not open your browser. Try again.",
   "desktopConnect.cancel": "Cancel",
+  "desktopConnect.status.walletConnectFailed":
+    "Could not open WalletConnect. Try again.",
   "browserConnector.title": "Sign in to 6529 Desktop",
   "browserConnector.description":
     "Sign in to 6529 Desktop with a browser wallet.",

@@ -55,6 +55,13 @@ const clearPending = () => {
   pending = null;
 };
 
+/** Back to idle after a sign-in finished, failed or expired. */
+export function resetFinishedBrowserConnectorStatus(): void {
+  if (status !== "waiting" && status !== "signing-in") {
+    setBrowserConnectorStatus("idle");
+  }
+}
+
 /** Stop waiting for the browser (the user cancelled). */
 export function cancelBrowserConnectorSignIn(): void {
   clearPending();
