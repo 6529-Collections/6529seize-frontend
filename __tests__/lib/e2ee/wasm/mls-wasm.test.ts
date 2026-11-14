@@ -54,6 +54,7 @@ interface ModuleInfo {
   ciphersuite: number;
   ciphersuites: number[];
   metadata_extension: number;
+  self_sync_extension: number;
 }
 
 const wasmBytes = (): Uint8Array =>
@@ -309,6 +310,7 @@ describe("mls wasm module", () => {
     expect(info.ciphersuite).toBe(0x004f);
     expect(info.ciphersuites).toEqual([0x004f, E2EE_CIPHERSUITE]);
     expect(info.metadata_extension).toBe(0xf529);
+    expect(info.self_sync_extension).toBe(0xf52a);
   });
 
   it("computes H/TAG digests identical to viem ABI encoding", () => {
@@ -453,6 +455,60 @@ describe("mls wasm module", () => {
     expect(alice.summary(old).ciphersuite).toBe(0x004f);
     alice.send(ds, g, "after reload");
     expect(text(asMessage(bob.sync(ds, g)[0]))).toBe("after reload");
+  });
+
+  it("runs a self group of one user's devices on 0x004E, admitting only capable KeyPackages (P60)", () => {
+    const ds = new DeliveryService();
+    const g = handle("self");
+    const phone = new Client("alice-phone");
+    const laptop = new Client("alice-laptop");
+    const selfMetadata = {
+      v: 1,
+      g,
+      kind: "self",
+      name: null,
+      admins: ["p-alice"],
+      created_by: "p-alice",
+      history: "from_join",
+      created: 1_762_790_400_000,
+    };
+    const created = parse<GroupSummary>(
+      phone.device.createGroup(g, JSON.stringify(selfMetadata), 0x004e)
+    );
+    ds.create(g, created.commit_key);
+    phone.cursor.set(g, 0);
+    expect(created.metadata).toEqual(selfMetadata);
+    const result = phone.commit(ds, g, {
+      add_key_packages: [laptop.keyPackage(0x004e)],
+    });
+    laptop.join(ds, g, defined(result.welcome, "welcome"), 0x004e);
+    expect(laptop.summary(g).metadata).toEqual(selfMetadata);
+    phone.send(ds, g, "read up to here");
+    expect(text(asMessage(laptop.sync(ds, g)[0]))).toBe("read up to here");
+
+    // Every KeyPackage this module makes says it supports self groups, so
+    // the engine can tell it from one made before them.
+    const info = parse<{ ciphersuite: number; self_sync: boolean }>(
+      mls.keyPackageInfo(b64ToBytes(laptop.keyPackage(0x004e)))
+    );
+    expect(info).toEqual({ ciphersuite: 0x004e, self_sync: true });
+    expect(() => mls.keyPackageInfo(new Uint8Array([1, 2, 3]))).toThrow(
+      /^E2EE_WASM:BAD_KEY_PACKAGE:/
+    );
+
+    for (const bad of [
+      { ...selfMetadata, kind: "channel" },
+      { ...selfMetadata, created: -1 },
+      { ...selfMetadata, created: "soon" },
+    ]) {
+      expect(() =>
+        phone.device.createGroup(
+          handle("bad-self"),
+          JSON.stringify({ ...bad, g: handle("bad-self") }),
+          0x004e
+        )
+      ).toThrow(/^E2EE_WASM:BAD_METADATA:/);
+    }
   });
 
   it("runs a three-person group with a removal and survives a reload", () => {

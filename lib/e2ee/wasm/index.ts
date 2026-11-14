@@ -15,6 +15,7 @@ import initMlsWasm, {
   entryDigest,
   epochCommitment,
   hTag,
+  keyPackageInfo,
   messageDigest,
   moduleInfo,
   revokeDigest,
@@ -37,6 +38,7 @@ export interface MlsWasmExports {
   readonly rosterDigest: typeof rosterDigest;
   readonly epochCommitment: typeof epochCommitment;
   readonly moduleInfo: typeof moduleInfo;
+  readonly keyPackageInfo: typeof keyPackageInfo;
 }
 
 interface LoadMlsWasmOptions {
@@ -67,9 +69,8 @@ async function fetchModule(url: string): Promise<Uint8Array<ArrayBuffer>> {
 
 async function verifyModule(bytes: Uint8Array<ArrayBuffer>): Promise<void> {
   // Typed as optional: older WebViews and plain-HTTP origins lack WebCrypto.
-  const subtle: SubtleCrypto | undefined = (
-    globalThis as { crypto?: Crypto }
-  ).crypto?.subtle;
+  const subtle: SubtleCrypto | undefined = (globalThis as { crypto?: Crypto })
+    .crypto?.subtle;
   if (subtle === undefined) {
     throw new Error(`${LOAD_ERROR}: WebCrypto is not available`);
   }
@@ -104,6 +105,7 @@ async function instantiate(
     rosterDigest,
     epochCommitment,
     moduleInfo,
+    keyPackageInfo,
   });
 }
 

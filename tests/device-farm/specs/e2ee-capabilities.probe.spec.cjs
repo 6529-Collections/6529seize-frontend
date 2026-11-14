@@ -44,11 +44,11 @@ const PROBE_TIMEOUT_MS = 150000;
 // __tests__/lib/e2ee/wasm/probeManifest.test.ts fails when a module rebuild
 // leaves them behind. The env overrides point at another target's module.
 const MLS_WASM = {
-  path: process.env.E2EE_WASM_PATH || "/e2ee/mls-wasm-530b38d27f820745.wasm",
+  path: process.env.E2EE_WASM_PATH || "/e2ee/mls-wasm-c9da1d45d847bdf8.wasm",
   sha256:
     process.env.E2EE_WASM_SHA256 ||
-    "530b38d27f8207451ce64e6ab29acec3cbadceb9ae1102f824b5c85fea06e682",
-  bytes: Number(process.env.E2EE_WASM_BYTES || 1806438),
+    "c9da1d45d847bdf8c2093d1c59da5e2c315c1e6fc83503e15a0e89b135c79e2f",
+  bytes: Number(process.env.E2EE_WASM_BYTES || 1808575),
 };
 
 /**
@@ -215,7 +215,8 @@ function startProbe(config) {
         nextVersion: window.next ? window.next.version || "present" : null,
         bodyTextLength: (document.body.innerText || "").trim().length,
         bodyTextStart: (document.body.innerText || "").trim().slice(0, 40),
-        pageOfDoom: (document.body.innerText || "").indexOf("Page of Doom") >= 0,
+        pageOfDoom:
+          (document.body.innerText || "").indexOf("Page of Doom") >= 0,
       };
     });
 
@@ -501,9 +502,10 @@ function startProbe(config) {
         setUnion: typeof Set.prototype.union,
         compressionStream: typeof CompressionStream,
         sharedArrayBuffer: typeof SharedArrayBuffer,
-        instantiateStreaming: typeof WebAssembly === "object"
-          ? typeof WebAssembly.instantiateStreaming
-          : "n/a",
+        instantiateStreaming:
+          typeof WebAssembly === "object"
+            ? typeof WebAssembly.instantiateStreaming
+            : "n/a",
       };
     });
   }
@@ -539,7 +541,9 @@ async function openPageWithFallback(driver, pageUrl) {
     await openPage(driver, pageUrl, PAGE_LOAD_TIMEOUT_MS);
     return "webdriver-url";
   } catch (error) {
-    console.warn(`url() navigation failed (${error.message}); using location.assign`);
+    console.warn(
+      `url() navigation failed (${error.message}); using location.assign`
+    );
     await driver.execute((url) => {
       window.location.assign(url);
     }, pageUrl);
@@ -656,6 +660,10 @@ describe("E2EE capability probe (real device)", function () {
     console.log(`E2EE_PROBE_RESULT ${JSON.stringify(result)}`);
     writeArtifact(result);
     await saveScreenshot(driver, "e2ee-probe-home");
-    assert.notEqual(result.probe, null, "The capability probe must collect data");
+    assert.notEqual(
+      result.probe,
+      null,
+      "The capability probe must collect data"
+    );
   });
 });
