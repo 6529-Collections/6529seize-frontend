@@ -1556,6 +1556,17 @@ test("shared post loads only its surroundings and fills the rest as the reader s
     name: "Wave chat file upload area",
     exact: true,
   });
+  // Requests that fill the gap forward start below the latest page (102+).
+  let gapFills = 0;
+  page.on("request", (request) => {
+    const params = new URL(request.url()).searchParams;
+    if (
+      params.get("search_strategy") === "FIND_NEWER" &&
+      Number(params.get("serial_no_limit")) < 102
+    ) {
+      gapFills += 1;
+    }
+  });
   await page.goto(`/waves/${WAVE}?serialNo=20`, {
     waitUntil: "domcontentloaded",
   });
@@ -1586,11 +1597,20 @@ test("shared post loads only its surroundings and fills the rest as the reader s
   await expect(post(40)).toBeAttached({ timeout: 10000 });
   await expect(post(89)).toBeAttached();
   await expect(post(39)).toBeInViewport();
-  // One page per approach: the fill moved the marker out of reach, so the
-  // rest of the gap waits for more scrolling.
-  await expect(
-    chat.getByRole("button", { name: "Load more messages" }).last()
-  ).not.toBeInViewport();
+  // One page per approach: the fill moved the marker beyond its 200px
+  // auto-load margin, so the rest of the gap waits for more scrolling. Match
+  // the marker in every state; a second fill would relabel it.
+  const marker = chat
+    .getByRole("button", { name: /more messages|Could not load messages/ })
+    .last();
+  const viewportHeight = page.viewportSize()?.height ?? 0;
+  await expect
+    .poll(async () => {
+      const box = await marker.boundingBox();
+      return box ? box.y - viewportHeight : null;
+    })
+    .toBeGreaterThan(200);
+  expect(gapFills).toBe(1);
   await expect(post(90)).toHaveCount(0);
   await expect(post(39)).toBeInViewport();
 
