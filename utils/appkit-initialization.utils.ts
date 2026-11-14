@@ -1,3 +1,4 @@
+import { isDesktopApp } from "@/helpers/desktop-shell";
 import {
   createAppKit,
   type ChainAdapter,
@@ -149,6 +150,7 @@ function buildAppKitConfig(
   }
 
   const walletFeaturesOrder: WalletFeature[] = ["send"];
+  const isDesktop = isDesktopApp();
 
   return {
     adapters: [adapter] as ChainAdapter[],
@@ -169,10 +171,22 @@ function buildAppKitConfig(
     enableWalletGuide: false,
     // On web the Base Account (Coinbase) connector comes from
     // AppKitAdapterManager with SDK telemetry off; AppKit reuses it.
-    enableCoinbase: !isCapacitor,
+    enableCoinbase: !isCapacitor && !isDesktop,
     ...(isCapacitor ? { excludeWalletIds: [COINBASE_WALLET_ID] } : undefined),
-    featuredWalletIds: ["metamask", "walletConnect"],
-    allWallets: "SHOW" as const,
+    // The 6529 Desktop window has no browser wallet extensions and opens no
+    // pop-ups: it offers WalletConnect only (browser wallets go through the
+    // browser connector instead).
+    ...(isDesktop
+      ? {
+          enableEIP6963: false,
+          enableInjected: false,
+          featuredWalletIds: [],
+          allWallets: "HIDE" as const,
+        }
+      : {
+          featuredWalletIds: ["metamask", "walletConnect"],
+          allWallets: "SHOW" as const,
+        }),
     features: {
       // Optional Reown modal analytics stay off. AppKit 1.8.19 still sends
       // its mandatory INITIALIZE/CONNECT_SUCCESS events and wallet-list

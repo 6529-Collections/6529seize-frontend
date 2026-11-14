@@ -3953,6 +3953,21 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopUpdate.failed": "The update could not be downloaded.",
   "desktopUpdate.retry": "Try again",
   "desktopUpdate.later": "Not now",
+  "desktopConnect.title": "Connect a wallet",
+  "desktopConnect.walletConnect": "Scan with a mobile wallet",
+  "desktopConnect.walletConnectDescription":
+    "Use WalletConnect with the wallet app on your phone.",
+  "desktopConnect.browserWallet": "Use a browser wallet",
+  "desktopConnect.browserWalletDescription":
+    "Sign in with a wallet extension in your web browser.",
+  "desktopConnect.status.waiting":
+    "Finish signing in in your browser. This waits for two minutes.",
+  "desktopConnect.status.signingIn": "Signing in…",
+  "desktopConnect.status.failed": "Signing in did not work. Try again.",
+  "desktopConnect.status.expired": "The browser sign-in timed out. Try again.",
+  "desktopConnect.status.startFailed":
+    "Could not open your browser. Try again.",
+  "desktopConnect.cancel": "Cancel",
   "browserConnector.title": "Sign in to 6529 Desktop",
   "browserConnector.description":
     "Sign in to 6529 Desktop with a browser wallet.",

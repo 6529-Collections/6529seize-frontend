@@ -55,6 +55,7 @@ import AndroidBackNavigation from "@/components/navigation/AndroidBackNavigation
 import DesktopNavigationBridge from "@/components/desktop/DesktopNavigationBridge";
 import DesktopNotificationsBridge from "@/components/desktop/DesktopNotificationsBridge";
 import DesktopBrowserConnectorBridge from "@/components/desktop/DesktopBrowserConnectorBridge";
+import DesktopConnectDialog from "@/components/desktop/DesktopConnectDialog";
 
 export default function Providers({
   children,
@@ -91,6 +92,7 @@ export default function Providers({
                 <DesktopNavigationBridge />
                 <DesktopNotificationsBridge />
                 <DesktopBrowserConnectorBridge />
+                <DesktopConnectDialog />
                 <LocaleMessagesGate>{children}</LocaleMessagesGate>
               </NavigationHistoryProvider>
             </WaveInformationProvider>
