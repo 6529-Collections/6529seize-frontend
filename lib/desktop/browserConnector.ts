@@ -43,14 +43,14 @@ export function normalizeDesktopScheme(value: unknown): DesktopScheme | null {
 export const isBrowserConnectorPath = (pathname: string | null): boolean =>
   pathname === BROWSER_CONNECTOR_PATH;
 
-/** A fresh, unguessable request id (URL-safe). */
+/** A fresh, unguessable request id (URL-safe). Browser-only (Web Crypto). */
 export function createBrowserConnectorRequestId(): string {
   const bytes = new Uint8Array(24);
   crypto.getRandomValues(bytes);
+  // 24 bytes encode to 32 base64 characters with no padding.
   return btoa(String.fromCodePoint(...bytes))
     .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replace(/=+$/, "");
+    .replaceAll("/", "_");
 }
 
 /** The page the desktop app opens in the system browser. */
@@ -74,7 +74,6 @@ export function buildBrowserConnectorUrl({
 
 type BrowserConnectorRequestProblem =
   | "invalid-scheme"
-  | "wrong-build"
   | "invalid-request"
   | "expired";
 
@@ -88,21 +87,18 @@ export type BrowserConnectorRequest =
   | { readonly ok: false; readonly problem: BrowserConnectorRequestProblem };
 
 /**
- * Validate the page's query. `buildScheme` is the scheme this local server
- * was built for, when the build sets one; a link for another build is
- * refused, so a signature never goes to a different 6529 Desktop.
+ * Validate the page's query. The scheme is the one the desktop app that
+ * opened this page reported at run time; the page (in the system browser,
+ * without the desktop bridge) cannot check it against anything else, so it
+ * accepts only the 6529 Desktop schemes. A link for another installed build
+ * reaches that build, which has no matching request and ignores it.
  */
 export function parseBrowserConnectorRequest(
   params: { get(name: string): string | null },
-  now: number,
-  buildScheme: string | undefined
+  now: number
 ): BrowserConnectorRequest {
   const scheme = normalizeDesktopScheme(params.get("scheme"));
   if (!scheme) return { ok: false, problem: "invalid-scheme" };
-  const expectedScheme = normalizeDesktopScheme(buildScheme);
-  if (expectedScheme !== null && expectedScheme !== scheme) {
-    return { ok: false, problem: "wrong-build" };
-  }
   const requestId = params.get("request") ?? "";
   const expiresAt = Number(params.get("expires"));
   if (!REQUEST_ID.test(requestId) || !Number.isSafeInteger(expiresAt)) {

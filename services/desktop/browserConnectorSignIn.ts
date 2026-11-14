@@ -94,14 +94,21 @@ export async function startBrowserConnectorSignIn(): Promise<void> {
     }, BROWSER_CONNECTOR_TIMEOUT_MS),
   };
   setBrowserConnectorStatus("waiting");
-  api.openExternal(
-    buildBrowserConnectorUrl({
-      origin: window.location.origin,
-      scheme,
-      requestId,
-      expiresAt,
-    })
-  );
+  try {
+    api.openExternal(
+      buildBrowserConnectorUrl({
+        origin: window.location.origin,
+        scheme,
+        requestId,
+        expiresAt,
+      })
+    );
+  } catch (error) {
+    // No browser opened: do not leave a request waiting for nothing.
+    clearPending();
+    setBrowserConnectorStatus("failed");
+    throw error;
+  }
 }
 
 /**

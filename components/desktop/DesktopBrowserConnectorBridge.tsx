@@ -48,8 +48,8 @@ export default function DesktopBrowserConnectorBridge() {
           signerAddress: result.address,
           role: null,
         });
-        // The session must be for the wallet that signed.
-        if (session.address.toLowerCase() !== result.address) {
+        // The session must be for the wallet that signed (both lower-cased).
+        if (session.address.toLowerCase() !== result.address.toLowerCase()) {
           setBrowserConnectorStatus("failed");
           return;
         }

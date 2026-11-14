@@ -3954,6 +3954,14 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopUpdate.retry": "Try again",
   "desktopUpdate.later": "Not now",
   "browserConnector.title": "Sign in to 6529 Desktop",
+  "browserConnector.description":
+    "Sign in to 6529 Desktop with a browser wallet.",
+  "browserConnector.checking": "Checking the sign-in link…",
+  "browserConnector.target.local":
+    "This returns to 6529 Desktop (local build).",
+  "browserConnector.target.staging":
+    "This returns to 6529 Desktop (staging build).",
+  "browserConnector.signing": "Waiting for your wallet to sign…",
   "browserConnector.connectIntro":
     "Connect the browser wallet you want to use in 6529 Desktop.",
   "browserConnector.connect": "Connect wallet",
@@ -3966,8 +3974,6 @@ export const EN_US_ROOT_MESSAGES = {
   "browserConnector.openApp": "Open 6529 Desktop",
   "browserConnector.problem.invalid":
     "This link is not a valid 6529 Desktop sign-in link. Start again from 6529 Desktop.",
-  "browserConnector.problem.wrongBuild":
-    "This link is for a different 6529 Desktop build. Start again from the app you are using.",
   "browserConnector.problem.expired":
     "This sign-in link has expired. Start again from 6529 Desktop.",
   "headerShare.qr.browserAlt": "Current page QR code",

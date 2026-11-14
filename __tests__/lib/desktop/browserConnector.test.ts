@@ -64,33 +64,18 @@ describe("parseBrowserConnectorRequest", () => {
   };
 
   it("accepts a valid request", () => {
-    expect(parseBrowserConnectorRequest(params(valid), NOW, undefined)).toEqual(
-      {
-        ok: true,
-        scheme: "localcore6529",
-        requestId: REQUEST_ID,
-        expiresAt: NOW + 60_000,
-      }
-    );
+    expect(parseBrowserConnectorRequest(params(valid), NOW)).toEqual({
+      ok: true,
+      scheme: "localcore6529",
+      requestId: REQUEST_ID,
+      expiresAt: NOW + 60_000,
+    });
   });
 
   it("refuses a scheme outside the 6529 Desktop schemes", () => {
     expect(
-      parseBrowserConnectorRequest(
-        params({ ...valid, scheme: "evil" }),
-        NOW,
-        undefined
-      )
+      parseBrowserConnectorRequest(params({ ...valid, scheme: "evil" }), NOW)
     ).toEqual({ ok: false, problem: "invalid-scheme" });
-  });
-
-  it("refuses a link for another build when this server knows its scheme", () => {
-    expect(
-      parseBrowserConnectorRequest(params(valid), NOW, "core6529")
-    ).toEqual({ ok: false, problem: "wrong-build" });
-    expect(
-      parseBrowserConnectorRequest(params(valid), NOW, "localcore6529").ok
-    ).toBe(true);
   });
 
   it("refuses malformed request ids and expiry", () => {
@@ -100,12 +85,16 @@ describe("parseBrowserConnectorRequest", () => {
       { expires: "soon" },
     ]) {
       expect(
-        parseBrowserConnectorRequest(
-          params({ ...valid, ...bad }),
-          NOW,
-          undefined
-        )
+        parseBrowserConnectorRequest(params({ ...valid, ...bad }), NOW)
       ).toEqual({ ok: false, problem: "invalid-request" });
+    }
+  });
+
+  it("accepts any 6529 Desktop scheme the app reported", () => {
+    for (const scheme of ["localcore6529", "stagingcore6529", "core6529"]) {
+      expect(
+        parseBrowserConnectorRequest(params({ ...valid, scheme }), NOW).ok
+      ).toBe(true);
     }
   });
 
@@ -113,8 +102,7 @@ describe("parseBrowserConnectorRequest", () => {
     expect(
       parseBrowserConnectorRequest(
         params({ ...valid, expires: String(NOW) }),
-        NOW,
-        undefined
+        NOW
       )
     ).toEqual({ ok: false, problem: "expired" });
     expect(
@@ -123,8 +111,7 @@ describe("parseBrowserConnectorRequest", () => {
           ...valid,
           expires: String(NOW + BROWSER_CONNECTOR_TIMEOUT_MS * 3),
         }),
-        NOW,
-        undefined
+        NOW
       )
     ).toEqual({ ok: false, problem: "expired" });
   });

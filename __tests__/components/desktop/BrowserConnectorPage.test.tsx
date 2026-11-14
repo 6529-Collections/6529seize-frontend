@@ -53,10 +53,31 @@ describe("BrowserConnectorPage", () => {
     search = new URLSearchParams({ scheme: "evil", request: REQUEST_ID });
     render(<BrowserConnectorPage />);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      "not a valid 6529 Desktop sign-in link"
-    );
+    expect(
+      await screen.findByText(/not a valid 6529 Desktop sign-in link/)
+    ).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("not a valid");
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it.each([
+    ["localcore6529", "This returns to 6529 Desktop (local build)."],
+    ["stagingcore6529", "This returns to 6529 Desktop (staging build)."],
+    ["core6529", null],
+  ])("says which build a %s link returns to", async (scheme, label) => {
+    search = new URLSearchParams({
+      scheme,
+      request: REQUEST_ID,
+      expires: String(Date.now() + 60_000),
+    });
+    render(<BrowserConnectorPage />);
+
+    await screen.findByRole("button", { name: "Connect wallet" });
+    if (label) {
+      expect(screen.getByText(label)).toBeInTheDocument();
+    } else {
+      expect(screen.queryByText(/returns to 6529 Desktop/)).toBeNull();
+    }
   });
 
   it("refuses an expired link", async () => {
@@ -67,7 +88,7 @@ describe("BrowserConnectorPage", () => {
     });
     render(<BrowserConnectorPage />);
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("expired");
+    expect(await screen.findByText(/has expired/)).toBeInTheDocument();
   });
 
   it("asks for a wallet first", async () => {
@@ -130,7 +151,8 @@ describe("BrowserConnectorPage", () => {
       })
     );
 
-    expect(await screen.findByRole("alert")).toHaveTextContent("not signed");
+    expect(await screen.findByText(/was not signed/)).toBeInTheDocument();
+    expect(screen.getByRole("alert")).toHaveTextContent("was not signed");
     expect(assign).not.toHaveBeenCalled();
   });
 });

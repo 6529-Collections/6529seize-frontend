@@ -126,6 +126,16 @@ describe("browser connector sign-in in 6529 Desktop", () => {
     expect(getBrowserConnectorStatus()).toBe("waiting");
   });
 
+  it("does not leave a request waiting when the browser cannot be opened", async () => {
+    installDesktopShell();
+    api.openExternal.mockImplementationOnce(() => {
+      throw new Error("no browser");
+    });
+
+    await expect(startBrowserConnectorSignIn()).rejects.toThrow("no browser");
+    expect(getBrowserConnectorStatus()).toBe("failed");
+  });
+
   it("never falls back to a default scheme", async () => {
     api = createApi(null);
     installDesktopShell();

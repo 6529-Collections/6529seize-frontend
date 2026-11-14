@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { publicEnv } from "@/config/env";
 import { loadDesktopUrlInPlace } from "@/helpers/desktop-navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -24,10 +23,16 @@ type Step =
 const BUTTON_CLASS =
   "tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-5 tw-py-2.5 tw-font-semibold tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
 
+// Which app the signature goes back to, said plainly for builds other than
+// the production app (the link scheme decides it).
+const BUILD_LABELS = {
+  localcore6529: "browserConnector.target.local",
+  stagingcore6529: "browserConnector.target.staging",
+} as const;
+
 const PROBLEM_MESSAGES = {
   "invalid-scheme": "browserConnector.problem.invalid",
   "invalid-request": "browserConnector.problem.invalid",
-  "wrong-build": "browserConnector.problem.wrongBuild",
   expired: "browserConnector.problem.expired",
 } as const;
 
@@ -37,7 +42,7 @@ const getServerHydrated = () => false;
 
 // Validity depends on the current time, so it is read only in the browser.
 const readRequest = (params: { get(name: string): string | null }) =>
-  parseBrowserConnectorRequest(params, Date.now(), publicEnv.CORE_SCHEME);
+  parseBrowserConnectorRequest(params, Date.now());
 
 const hasExpired = (expiresAt: number) => expiresAt <= Date.now();
 
@@ -100,51 +105,55 @@ export default function BrowserConnectorPage() {
     }
   };
 
-  let content: React.ReactNode;
+  // The live regions are always in the page and only their text changes,
+  // so screen readers announce each message.
+  let alertText: string | null = null;
+  let statusText: string | null = null;
+  let content: React.ReactNode = null;
   if (request === null) {
-    content = null;
+    statusText = t(locale, "browserConnector.checking");
   } else if (!request.ok) {
-    content = (
-      <p role="alert">{t(locale, PROBLEM_MESSAGES[request.problem])}</p>
-    );
+    alertText = t(locale, PROBLEM_MESSAGES[request.problem]);
   } else if (step.kind === "returned") {
+    statusText = t(locale, "browserConnector.returned");
     content = (
-      <>
-        <p role="status">{t(locale, "browserConnector.returned")}</p>
-        <a
-          href={step.deepLink}
-          className={`${BUTTON_CLASS} tw-inline-flex tw-items-center tw-no-underline`}
-        >
-          {t(locale, "browserConnector.openApp")}
-        </a>
-      </>
+      <a
+        href={step.deepLink}
+        className={`${BUTTON_CLASS} tw-inline-flex tw-items-center tw-no-underline`}
+      >
+        {t(locale, "browserConnector.openApp")}
+      </a>
     );
-  } else if (!address) {
+  } else if (address) {
+    if (step.kind === "failed") {
+      alertText = t(locale, "browserConnector.failed");
+    } else if (step.kind === "signing") {
+      statusText = t(locale, "browserConnector.signing");
+    }
     content = (
       <>
-        <p>{t(locale, "browserConnector.connectIntro")}</p>
-        <button type="button" className={BUTTON_CLASS} onClick={seizeConnect}>
-          {t(locale, "browserConnector.connect")}
+        <p className="tw-m-0 tw-break-all">
+          {t(locale, "browserConnector.signIntro", { address })}
+        </p>
+        <button
+          type="button"
+          className={BUTTON_CLASS}
+          aria-disabled={step.kind === "signing"}
+          onClick={() => {
+            if (step.kind === "signing") return;
+            signIn().catch(() => setStep({ kind: "failed" }));
+          }}
+        >
+          {t(locale, "browserConnector.sign")}
         </button>
       </>
     );
   } else {
     content = (
       <>
-        <p>{t(locale, "browserConnector.signIntro", { address })}</p>
-        {step.kind === "failed" && (
-          <p role="alert">{t(locale, "browserConnector.failed")}</p>
-        )}
-        <button
-          type="button"
-          className={BUTTON_CLASS}
-          disabled={step.kind === "signing"}
-          aria-busy={step.kind === "signing"}
-          onClick={() => {
-            signIn().catch(() => setStep({ kind: "failed" }));
-          }}
-        >
-          {t(locale, "browserConnector.sign")}
+        <p className="tw-m-0">{t(locale, "browserConnector.connectIntro")}</p>
+        <button type="button" className={BUTTON_CLASS} onClick={seizeConnect}>
+          {t(locale, "browserConnector.connect")}
         </button>
       </>
     );
@@ -156,6 +165,24 @@ export default function BrowserConnectorPage() {
         <h1 className="tw-m-0 tw-text-xl tw-font-semibold">
           {t(locale, "browserConnector.title")}
         </h1>
+        <div role="alert" className="empty:tw-hidden">
+          {alertText}
+        </div>
+        {request?.ok && request.scheme in BUILD_LABELS && (
+          <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+            {t(
+              locale,
+              BUILD_LABELS[request.scheme as keyof typeof BUILD_LABELS]
+            )}
+          </p>
+        )}
+        <output
+          aria-live="polite"
+          aria-atomic="true"
+          className="tw-block empty:tw-hidden"
+        >
+          {statusText}
+        </output>
         {content}
       </section>
     </main>
