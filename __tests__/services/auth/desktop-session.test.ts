@@ -132,7 +132,7 @@ describe("desktop sessions through window.nativeAuth", () => {
       role: "0x2222222222222222222222222222222222222222",
     });
     expect(commonApiPost).not.toHaveBeenCalled();
-    expect(response.native_refresh_token).toBe("");
+    expect(response).toHaveProperty("native_refresh_token", "");
   });
 
   it("stores the access token without touching page refresh-token storage", async () => {
