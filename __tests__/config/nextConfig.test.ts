@@ -46,6 +46,14 @@ describe("shared Next config", () => {
     });
   });
 
+  it("sends the retired Prenodes page to the validator", async () => {
+    expect(await sharedConfig(publicEnv, "").redirects?.()).toContainEqual({
+      source: "/network/prenodes",
+      destination: "/validator",
+      permanent: true,
+    });
+  });
+
   it("sets no trace exclusions", () => {
     expect(
       sharedConfig(publicEnv, "").outputFileTracingExcludes

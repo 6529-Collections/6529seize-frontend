@@ -1131,25 +1131,16 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
     } else if (strategy === "FIND_OLDER") {
       selected = drops.filter((drop) => drop.serial_no < serial);
     } else if (strategy === "FIND_NEWER") {
-      selected = drops.filter((drop) => drop.serial_no > serial);
+      // Like the API, return the posts nearest the serial, not the latest.
+      selected = drops
+        .filter((drop) => drop.serial_no > serial)
+        .slice(-(Number(params.get("limit")) || 50));
     }
     return route.fulfill({
       json: {
         ...feed,
         drops: selected.slice(0, Number(params.get("limit")) || 50),
       },
-    });
-  });
-  await page.route("**/api/drop-ids?**", (route) => {
-    const params = new URL(route.request().url()).searchParams;
-    const minimum = Number(params.get("min_serial_no"));
-    return route.fulfill({
-      json: drops
-        .filter((drop) => drop.serial_no >= minimum)
-        .map((drop) => ({
-          id: drop.id,
-          serial_no: drop.serial_no,
-        })),
     });
   });
   return {
@@ -1323,7 +1314,9 @@ test("resume shows the latest page before missed history and preserves the compo
     await expect(composer).toHaveText("Keep this unsent draft");
     // A blocked history request must not keep the current conversation stale.
     await expect(fixture.post(1151)).toBeInViewport();
-    const gap = page.getByRole("button", { name: /missed messages/ }).last();
+    const gap = page
+      .getByRole("button", { name: /more messages|Could not load messages/ })
+      .last();
     await gap.scrollIntoViewIfNeeded();
     await expect.poll(() => olderRequests).toBeGreaterThan(0);
     await expect(gap).toBeDisabled();
@@ -1331,13 +1324,11 @@ test("resume shows the latest page before missed history and preserves the compo
       path: testInfo.outputPath("resume-missed-history.png"),
     });
     history.release();
-    await expect(gap).toContainText(
-      "Could not load missed messages. Try again"
-    );
+    await expect(gap).toContainText("Could not load messages. Try again");
     await gap.click();
     await expect(fixture.post(1101)).toBeAttached();
     await expect(
-      page.getByRole("status").filter({ hasText: "Missed messages loaded" })
+      page.getByRole("status").filter({ hasText: "More messages loaded" })
     ).toBeAttached();
     await expect(composer).toHaveText("Keep this unsent draft");
     await expectNoHorizontalOverflow(page);
@@ -1554,6 +1545,84 @@ test("shared post stays in view after URL cleanup and delayed loading", async ({
     .click();
   await expect(post(SHARED_POST_GUEST ? 151 : 152)).toBeInViewport();
   await expect(post(20)).not.toBeInViewport();
+});
+
+test("shared post loads only its surroundings and fills the rest as the reader scrolls down", async ({
+  page,
+  baseURL,
+}) => {
+  const { post } = await sharedPostFixture(page, baseURL);
+  const chat = page.getByRole("region", {
+    name: "Wave chat file upload area",
+    exact: true,
+  });
+  // Requests that fill the gap forward start below the latest page (102+).
+  let gapFills = 0;
+  page.on("request", (request) => {
+    const params = new URL(request.url()).searchParams;
+    if (
+      params.get("search_strategy") === "FIND_NEWER" &&
+      Number(params.get("serial_no_limit")) < 102
+    ) {
+      gapFills += 1;
+    }
+  });
+  await page.goto(`/waves/${WAVE}?serialNo=20`, {
+    waitUntil: "domcontentloaded",
+  });
+  await expect(post(20)).toBeInViewport({ timeout: 30000 });
+  // The fixture serves posts 2-39 around the target and 102-151 as the
+  // latest page. The 62 posts between them must not be loaded or rendered.
+  await expect(post(39)).toBeAttached();
+  await expect(post(151)).toBeAttached();
+  await expect(post(40)).toHaveCount(0);
+  await expect(post(101)).toHaveCount(0);
+  const rendered = await chat
+    .getByText(/^Shared link fixture post \d+$/)
+    .count();
+  expect(rendered).toBeGreaterThan(0);
+  // At most the 38 posts around the target and the 50 latest ones.
+  expect(rendered).toBeLessThanOrEqual(88);
+
+  // Scroll down as a reader would; wheel input also ends the hold that keeps
+  // the shared post in view.
+  await chat.hover();
+  await expect(async () => {
+    await page.mouse.wheel(0, 400);
+    await expect(post(39)).toBeInViewport({ timeout: 500 });
+  }).toPass({ timeout: 20000 });
+
+  // Reaching the end of the loaded posts loads the next ones in reading
+  // order, below the reader, without moving what they are looking at.
+  await expect(post(40)).toBeAttached({ timeout: 10000 });
+  await expect(post(89)).toBeAttached();
+  await expect(post(39)).toBeInViewport();
+  // One page per approach: the fill moved the marker beyond its 200px
+  // auto-load margin, so the rest of the gap waits for more scrolling. Match
+  // the marker in every state; a second fill would relabel it.
+  const marker = chat
+    .getByRole("button", { name: /more messages|Could not load messages/ })
+    .last();
+  const viewportHeight = page.viewportSize()?.height ?? 0;
+  await expect
+    .poll(async () => {
+      const box = await marker.boundingBox();
+      return box ? box.y - viewportHeight : null;
+    })
+    .toBeGreaterThan(200);
+  expect(gapFills).toBe(1);
+  await expect(post(90)).toHaveCount(0);
+  await expect(post(39)).toBeInViewport();
+
+  await expect(async () => {
+    await page.mouse.wheel(0, 600);
+    await expect(post(101)).toBeAttached({ timeout: 500 });
+  }).toPass({ timeout: 30000 });
+  // The gap is closed: every post from the target to the latest is present.
+  for (const serial of [41, 60, 90, 101, 102]) {
+    await expect(post(serial)).toBeAttached();
+  }
+  await expectNoHorizontalOverflow(page);
 });
 
 test("copied shared post links settle in a separate tab and when reopened", async ({

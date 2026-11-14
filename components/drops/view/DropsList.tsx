@@ -475,6 +475,7 @@ const DropsList = memo(
               gap={gap}
               scrollContainerRef={scrollContainerRef}
               onAnnounce={announceHistory}
+              suspendAutoLoad={suspendLightDropHydration}
             />
           ) : null;
         return [historyGap, boostCard, unreadDivider, dropElement].filter(

@@ -29,9 +29,9 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.jso
 
 export const ES_ES_MESSAGES = {
   "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
-  "waves.historyGap.load": "Cargar mensajes pendientes",
-  "waves.historyGap.loaded": "Mensajes pendientes cargados",
-  "waves.historyGap.loading": "Cargando mensajes pendientes…",
+  "waves.historyGap.load": "Cargar más mensajes",
+  "waves.historyGap.loaded": "Más mensajes cargados",
+  "waves.historyGap.loading": "Cargando más mensajes…",
   "waves.historyGap.retry": "No se pudieron cargar los mensajes. Reintentar",
 
   "waves.myVotes.sort": "Ordenar por",

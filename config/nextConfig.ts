@@ -211,6 +211,13 @@ export function sharedConfig(
           destination: "/stream",
           permanent: true,
         },
+        // Prenodes were retired and their servers shut down; the 6529
+        // validator replaces them.
+        {
+          source: "/network/prenodes",
+          destination: "/validator",
+          permanent: true,
+        },
       ]);
     },
     logging: {

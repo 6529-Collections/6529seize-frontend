@@ -142,7 +142,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Network:
   `/network`, `/network/activity`, `/network/definitions`,
   `/network/health`, `/network/health/network-tdh`, `/network/levels`,
-  `/network/nerd/{param*}`, `/network/prenodes`, `/network/tdh`,
+  `/network/nerd/{param*}`, `/network/tdh`,
   `/network/tdh/historic-boosts`, `/network/xtdh`, `/xtdh`
 - Safe Collecting:
   `/safe-collecting` and `/safe-collecting/{param+}`

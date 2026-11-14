@@ -15449,11 +15449,19 @@ paths:
       tags:
         - Policies
       summary: Save the current EULA acceptance for a device
+      description: |
+        Works without a token, since consent is recorded before sign-in.
+        When the request carries a valid token for the caller's own profile
+        and the device has no record yet, that profile is recorded as the
+        record's owner. Saving again for an existing device refreshes the
+        acceptance and keeps the existing owner, including no owner.
       operationId: saveEulaConsent
-      security: []
+      security:
+        - bearerAuth: []
+        - {}
       x-6529-router:
         enabled: true
-        auth: none
+        auth: optional
         handler:
           import: "@/api/policies/eula-consent.handlers"
           name: handleSaveEulaConsent
@@ -15476,6 +15484,10 @@ paths:
       tags:
         - Policies
       summary: Delete the EULA acceptance for a device
+      description: |
+        Removes the device's record only when it is owned by the caller's
+        profile. Records that are missing, have no owner or belong to another
+        profile are left in place and get the same response.
       operationId: deleteEulaConsent
       security:
         - bearerAuth: []
@@ -15493,7 +15505,7 @@ paths:
               $ref: "#/components/schemas/ApiDeleteEulaConsentRequest"
       responses:
         "200":
-          description: EULA acceptance deleted
+          description: Request processed; any record owned by the caller is deleted
           content:
             application/json:
               schema:
