@@ -125,17 +125,9 @@ export default function DesktopUpdateNotice() {
       return;
     }
     try {
-      // Typed void; a host may still return its IPC promise. A throw or a
-      // rejection leaves the notice in "failed" (errors the host reports
-      // later arrive through onUpdateError).
-      const result: unknown = updater.downloadUpdate();
-      if (
-        typeof result === "object" &&
-        result !== null &&
-        typeof (result as { readonly then?: unknown }).then === "function"
-      ) {
-        Promise.resolve(result).catch(fail);
-      }
+      // A throw or a rejected IPC promise leaves the notice in "failed";
+      // errors the host reports later arrive through onUpdateError.
+      updater.downloadUpdate()?.catch(fail);
     } catch {
       fail();
     }
