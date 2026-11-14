@@ -11,7 +11,7 @@ import {
   isWalletRequestSignedBy,
   parseWalletBridgeCapabilities,
   parseWalletBridgeResponse,
-  parseWalletBridgeStart,
+  parseWalletBridgeStatus,
   parseWalletRequest,
   parseWalletRequestFragment,
   parseWalletResult,
@@ -38,7 +38,8 @@ const NOW = 1_800_000_000_000;
 const ORIGIN = "http://localhost:6529";
 const ID = "A".repeat(43);
 const SIGNATURE = `0x${"ab".repeat(65)}`;
-const TX_HASH = `0x${"cd".repeat(32)}`;
+// A 32-byte value (shaped like a transaction hash): never a valid answer.
+const NOT_A_SIGNATURE = `0x${"cd".repeat(32)}`;
 
 const typedData = {
   domain: { name: "6529", version: "1", chainId: 1 },
@@ -214,6 +215,48 @@ describe("parseWalletRequest: eth_signTypedData_v4", () => {
     }
   });
 
+  it("reads domain chain ids exactly, up to 2^53 - 1", () => {
+    const withChain = (chainId: unknown) =>
+      JSON.stringify({ ...JSON.parse(payload), domain: { chainId } });
+    const problemFor = (
+      chainId: unknown,
+      allowed: readonly number[] = CHAINS
+    ) => {
+      const result = parseWalletRequest(
+        input("eth_signTypedData_v4", [ADDRESS, withChain(chainId)], {
+          chainId: allowed[0],
+        }),
+        allowed
+      );
+      return result.ok ? null : result.problem;
+    };
+    const max = Number.MAX_SAFE_INTEGER;
+    // The largest id is accepted in every form and still compared exactly.
+    for (const chainId of [max, String(max), "0x1fffffffffffff"]) {
+      expect(problemFor(chainId, [max])).toBeNull();
+      expect(problemFor(chainId)).toBe("wrong-chain");
+    }
+    // One above it is never rounded down into range.
+    for (const chainId of [
+      "9007199254740992",
+      "0x20000000000000",
+      "0x1fffffffffffff1",
+      "0x00000000000000001",
+      9007199254740992,
+      "99999999999999999999",
+      "0x",
+      "0",
+      0,
+      -1,
+      "01",
+      "1e3",
+    ]) {
+      expect(problemFor(chainId, [max])).toBe("invalid-params");
+    }
+    // Leading zero hex digits within 16 digits read as the same id.
+    expect(problemFor("0x0000000000000001")).toBeNull();
+  });
+
   it.each([
     ["not JSON", "{"],
     ["not an object", "[]"],
@@ -358,8 +401,28 @@ describe("request envelope", () => {
   ) => {
     const bytes = new TextEncoder().encode(JSON.stringify(value));
     const signature = await signer.signMessage({ message: { raw: bytes } });
-    return buildWalletRequestFragment(bytes, signature);
+    const fragment = buildWalletRequestFragment(bytes, signature);
+    if (fragment === null) throw new Error("fragment too large");
+    return fragment;
   };
+
+  it("refuses to build a fragment larger than the page accepts", () => {
+    const signature = `0x${"11".repeat(65)}` as const;
+    expect(
+      buildWalletRequestFragment(new Uint8Array(30 * 1024), signature)
+    ).toBeNull();
+    expect(
+      buildWalletRequestFragment(new Uint8Array(24 * 1024), signature)
+    ).toBeNull();
+    const fits = buildWalletRequestFragment(
+      new Uint8Array(20 * 1024).fill(0xfb),
+      signature
+    );
+    expect(fits).not.toBeNull();
+    expect(fits!.length).toBeLessThanOrEqual(32 * 1024);
+    // Chunked encoding: no padding, URL-safe alphabet.
+    expect(fits).toMatch(/^#w=[A-Za-z0-9_-]+&s=0x[0-9a-f]+$/);
+  });
 
   it("round-trips and verifies against the shell's signer only", async () => {
     const fragment = await signedFragment(envelope());
@@ -464,6 +527,7 @@ describe("request envelope", () => {
     });
     for (const value of [
       envelope({ expiresAt: NOW + 1000 }),
+      envelope({ issuedAt: NOW + 50_000, expiresAt: NOW + 40_000 }),
       envelope({ issuedAt: NOW + 120_000, expiresAt: NOW + 130_000 }),
       envelope({ expiresAt: NOW + WALLET_REQUEST_TTL_MS + 1 }),
     ]) {
@@ -517,7 +581,7 @@ describe("wallet results", () => {
     expect(
       parseWalletResult(ok(SIGNATURE.toUpperCase().replace("0X", "0x")))
     ).toEqual(ok(SIGNATURE));
-    for (const value of [TX_HASH, `${SIGNATURE}00`, "0x", 42]) {
+    for (const value of [NOT_A_SIGNATURE, `${SIGNATURE}00`, "0x", 42]) {
       expect(parseWalletResult(ok(value as string))).toBeNull();
     }
   });
@@ -553,7 +617,10 @@ describe("wallet results", () => {
       { v: 2, id: ID, ok: true, value: SIGNATURE },
       { v: 1, id: "short", ok: true, value: SIGNATURE },
       { v: 1, id: ID, ok: "yes", value: SIGNATURE },
-      { v: 1, id: ID, ok: true, value: SIGNATURE, pad: "x".repeat(2000) },
+      { v: 1, id: ID, ok: true, value: SIGNATURE, pad: "x" },
+      { v: 1, id: ID, ok: true, value: SIGNATURE, code: "failed" },
+      { v: 1, id: ID, ok: false, code: "failed", value: SIGNATURE },
+      { v: 1, id: ID, ok: true },
     ]) {
       expect(parseWalletResult(value)).toBeNull();
     }
@@ -582,11 +649,26 @@ describe("parseWalletBridgeResponse", () => {
     }
   });
 
+  it("keeps a fixed diagnostic reason and drops anything else", () => {
+    expect(
+      parseWalletBridgeResponse({
+        ok: false,
+        code: "failed",
+        reason: "unverified-signature",
+      })
+    ).toEqual({ ok: false, code: "failed", reason: "unverified-signature" });
+    for (const reason of ["Has Spaces", "x".repeat(41), 42, "0x1234"]) {
+      expect(
+        parseWalletBridgeResponse({ ok: false, code: "failed", reason })
+      ).toEqual({ ok: false, code: "failed" });
+    }
+  });
+
   it("turns anything unexpected into a failure", () => {
     for (const value of [
       undefined,
       "0x",
-      { ok: true, value: TX_HASH },
+      { ok: true, value: NOT_A_SIGNATURE },
       { ok: false, code: "pwned" },
       { ok: false },
     ]) {
@@ -598,35 +680,53 @@ describe("parseWalletBridgeResponse", () => {
   });
 });
 
-describe("parseWalletBridgeStart", () => {
-  it("passes an open request with its code and expiry", () => {
+describe("parseWalletBridgeStatus", () => {
+  it("passes an open request with its code", () => {
     expect(
-      parseWalletBridgeStart(
-        { ok: true, requestCode: "A1B-2C3", expiresAt: NOW + 120_000 },
-        NOW
-      )
-    ).toEqual({ ok: true, requestCode: "A1B-2C3", expiresAt: NOW + 120_000 });
+      parseWalletBridgeStatus({
+        pending: true,
+        code: "A1B-2C3",
+        method: "personal_sign",
+        expiresAt: NOW,
+      })
+    ).toEqual({
+      pending: true,
+      requestCode: "A1B-2C3",
+      method: "personal_sign",
+      expiresAt: NOW,
+    });
   });
 
-  it("passes known failures and turns anything else into a failure", () => {
-    expect(parseWalletBridgeStart({ ok: false, code: "busy" }, NOW)).toEqual({
-      ok: false,
-      code: "busy",
-    });
+  it("reads anything unexpected as no open request", () => {
     for (const value of [
       undefined,
-      { ok: false, code: "pwned" },
-      { ok: true, requestCode: "a1b-2c3", expiresAt: NOW + 1000 },
-      { ok: true, requestCode: "A1B2C3", expiresAt: NOW + 1000 },
-      { ok: true, requestCode: "A1B-2C3", expiresAt: NOW },
-      { ok: true, requestCode: "A1B-2C3", expiresAt: NOW + 10 * 60_000 },
-      { ok: true, requestCode: "A1B-2C3", expiresAt: "soon" },
-      { ok: true, requestCode: "A1B-2C3", id: ID },
+      { pending: false, code: "A1B-2C3" },
+      {
+        pending: true,
+        code: "a1b-2c3",
+        method: "personal_sign",
+        expiresAt: NOW,
+      },
+      {
+        pending: true,
+        code: "A1B2C3",
+        method: "personal_sign",
+        expiresAt: NOW,
+      },
+      {
+        pending: true,
+        code: "A1B-2C3",
+        method: "eth_sendTransaction",
+        expiresAt: NOW,
+      },
+      {
+        pending: true,
+        code: "A1B-2C3",
+        method: "personal_sign",
+        expiresAt: "x",
+      },
     ]) {
-      expect(parseWalletBridgeStart(value, NOW)).toEqual({
-        ok: false,
-        code: "failed",
-      });
+      expect(parseWalletBridgeStatus(value)).toEqual({ pending: false });
     }
   });
 });

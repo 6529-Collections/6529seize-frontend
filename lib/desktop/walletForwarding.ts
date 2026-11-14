@@ -12,8 +12,10 @@
  * 2. The browser page (`/browser-connector#w=...&s=...`) acts only on an
  *    envelope signed by that key, shows what will be signed, and returns
  *    the wallet's answer through `<scheme>://wallet?data=...`.
- * 3. The shell consumes that link itself (once, before expiry) and answers
- *    the app page with a `WalletBridgeResponse`.
+ * 3. The shell consumes that link itself (once, before expiry), checks the
+ *    signature, and answers the app page with a `WalletBridgeResponse`.
+ *    While a request is open the shell reports a `WalletBridgeStatus` with
+ *    the short code the browser page also shows.
  *
  * Version 1 forwards signatures only: `personal_sign` and
  * `eth_signTypedData_v4`. Nothing that sends a transaction is forwarded.
@@ -57,7 +59,6 @@ type DesktopScheme = (typeof DESKTOP_SCHEMES)[number];
 const MAX_MESSAGE_BYTES = 8 * 1024;
 const MAX_TYPED_DATA_CHARS = 16 * 1024;
 const MAX_ENVELOPE_CHARS = 32 * 1024;
-const MAX_RESULT_CHARS = 1024;
 const MAX_TYPED_DATA_TYPES = 32;
 const MAX_TYPED_DATA_FIELDS = 64;
 
@@ -153,18 +154,25 @@ const sameAddress = (value: unknown, address: Address): boolean =>
   isAddress(value, { strict: false }) &&
   value.toLowerCase() === address.toLowerCase();
 
-/** A chain id as wallets send it: a safe integer, decimal or hex string. */
+/** The largest chain id accepted: 2^53 - 1, so every id is exact. */
+const MAX_CHAIN_ID = BigInt(Number.MAX_SAFE_INTEGER);
+
+/**
+ * A chain id as wallets send it: a safe integer, or a decimal or `0x` hex
+ * string, in 1..2^53-1. Strings are read with BigInt, so no value is
+ * rounded before the bound is checked.
+ */
 function readChainId(value: unknown): number | null {
-  let parsed: number | null = null;
+  let parsed: bigint | null = null;
   if (typeof value === "number") {
-    parsed = value;
-  } else if (typeof value === "string" && /^0x[0-9a-fA-F]{1,13}$/.test(value)) {
-    parsed = Number.parseInt(value.slice(2), 16);
-  } else if (typeof value === "string" && /^[1-9]\d{0,15}$/.test(value)) {
-    parsed = Number(value);
+    parsed = Number.isSafeInteger(value) ? BigInt(value) : null;
+  } else if (typeof value === "string" && /^0x[0-9a-fA-F]{1,16}$/.test(value)) {
+    parsed = BigInt(value);
+  } else if (typeof value === "string" && /^[1-9]\d{0,19}$/.test(value)) {
+    parsed = BigInt(value);
   }
-  return parsed !== null && Number.isSafeInteger(parsed) && parsed > 0
-    ? parsed
+  return parsed !== null && parsed > 0n && parsed <= MAX_CHAIN_ID
+    ? Number(parsed)
     : null;
 }
 
@@ -374,11 +382,16 @@ export type WalletEnvelopeProblem =
   | "expired"
   | WalletRequestProblem;
 
-const toBase64Url = (bytes: Uint8Array): string =>
-  btoa(String.fromCodePoint(...bytes))
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replace(/=+$/, "");
+/** Base64url without padding, built in chunks (no whole-array spreading). */
+function toBase64Url(bytes: Uint8Array): string {
+  let binary = "";
+  for (let start = 0; start < bytes.length; start += 0x2000) {
+    binary += String.fromCharCode(...bytes.subarray(start, start + 0x2000));
+  }
+  let encoded = btoa(binary).replaceAll("+", "-").replaceAll("/", "_");
+  while (encoded.endsWith("=")) encoded = encoded.slice(0, -1);
+  return encoded;
+}
 
 function fromBase64Url(value: string): Uint8Array | null {
   if (!/^[A-Za-z0-9_-]+$/.test(value)) return null;
@@ -393,17 +406,24 @@ function fromBase64Url(value: string): Uint8Array | null {
 /**
  * The browser page's fragment: `w` is the envelope's UTF-8 JSON bytes
  * (base64url), `s` the shell's EIP-191 signature over exactly those bytes.
- * The shell builds it the same way; this is the reference.
+ * The shell builds it the same way; this is the reference. Null when the
+ * fragment would exceed the cap the page applies when parsing, so a
+ * request too large to open is refused before the browser is asked.
  */
 export function buildWalletRequestFragment(
   envelopeBytes: Uint8Array,
   signature: Hex
-): string {
+): string | null {
+  // Base64 grows by 4/3: refuse before encoding anything too large.
+  if (Math.ceil(envelopeBytes.length / 3) * 4 > MAX_ENVELOPE_CHARS) {
+    return null;
+  }
   const params = new URLSearchParams({
     w: toBase64Url(envelopeBytes),
     s: signature,
   });
-  return `#${params.toString()}`;
+  const fragment = `#${params.toString()}`;
+  return fragment.length > MAX_ENVELOPE_CHARS ? null : fragment;
 }
 
 export function encodeWalletRequestEnvelope(
@@ -480,6 +500,7 @@ export function parseWalletRequestFragment(
   if (!envelope) return fail("malformed");
   if (envelope.origin !== context.origin) return fail("wrong-origin");
   if (
+    envelope.expiresAt <= envelope.issuedAt ||
     envelope.expiresAt <= context.now ||
     envelope.issuedAt > context.now + 60_000 ||
     envelope.expiresAt - envelope.issuedAt > WALLET_REQUEST_TTL_MS
@@ -555,6 +576,15 @@ export type WalletResult =
       readonly code: WalletResultFailure;
     };
 
+/** `v`, `id`, `ok` and `value` (success) or `code` (failure), nothing else. */
+function hasResultKeys(value: Record<string, unknown>): boolean {
+  const own = Object.keys(value);
+  const expected = ["v", "id", "ok", value["ok"] === true ? "value" : "code"];
+  return (
+    own.length === expected.length && expected.every((key) => own.includes(key))
+  );
+}
+
 /** A 65-byte signature, as an externally owned account's wallet returns. */
 const isSignature = (value: unknown): value is Hex =>
   typeof value === "string" && SIGNATURE.test(value);
@@ -571,12 +601,9 @@ export function buildWalletResultDeepLink(
  * matches the id to its live request.
  */
 export function parseWalletResult(value: unknown): WalletResult | null {
-  if (!isRecord(value)) return null;
-  try {
-    if (JSON.stringify(value).length > MAX_RESULT_CHARS) return null;
-  } catch {
-    return null;
-  }
+  // Exactly the result's keys: every field is then bounded by its own
+  // check, with no need to serialize untrusted input to measure it.
+  if (!isRecord(value) || !hasResultKeys(value)) return null;
   const { v, id, ok } = value;
   if (
     v !== WALLET_FORWARDING_VERSION ||
@@ -619,44 +646,18 @@ const isBridgeFailure = (value: unknown): value is WalletBridgeFailure =>
   typeof value === "string" &&
   (WALLET_BRIDGE_FAILURES as readonly string[]).includes(value);
 
-/**
- * The shell's answer to `window.desktopWallet.begin(...)`: the request is
- * open and the browser was asked to show it, or why not. `requestCode` is
- * the short code the browser page also shows; the request id itself never
- * reaches the app page.
- */
-export type WalletBridgeStart =
-  | {
-      readonly ok: true;
-      readonly requestCode: string;
-      readonly expiresAt: number;
-    }
-  | { readonly ok: false; readonly code: WalletBridgeFailure };
+/** A fixed diagnostic word the shell may add to a failure; never data. */
+const REASON = /^[a-z][a-z-]{0,39}$/;
 
-/** Validate the shell's start answer; anything unexpected is a failure. */
-export function parseWalletBridgeStart(
-  value: unknown,
-  now: number
-): WalletBridgeStart {
-  if (isRecord(value) && value["ok"] === true) {
-    const { requestCode, expiresAt } = value;
-    return typeof requestCode === "string" &&
-      REQUEST_CODE.test(requestCode) &&
-      typeof expiresAt === "number" &&
-      Number.isSafeInteger(expiresAt) &&
-      expiresAt > now &&
-      expiresAt <= now + WALLET_REQUEST_TTL_MS + 60_000
-      ? { ok: true, requestCode, expiresAt }
-      : { ok: false, code: "failed" };
-  }
-  const code = isRecord(value) ? value["code"] : undefined;
-  return { ok: false, code: isBridgeFailure(code) ? code : "failed" };
-}
-
-/** The shell's answer to `window.desktopWallet.wait()`. */
+/** The shell's answer to `window.desktopWallet.request(...)`. */
 export type WalletBridgeResponse =
   | { readonly ok: true; readonly value: Hex }
-  | { readonly ok: false; readonly code: WalletBridgeFailure };
+  | {
+      readonly ok: false;
+      readonly code: WalletBridgeFailure;
+      /** For example `unverified-signature`, `too-large`. */
+      readonly reason?: string;
+    };
 
 /** Validate the shell's answer; anything unexpected counts as a failure. */
 export function parseWalletBridgeResponse(
@@ -669,7 +670,46 @@ export function parseWalletBridgeResponse(
       : { ok: false, code: "failed" };
   }
   const code = isRecord(value) ? value["code"] : undefined;
-  return { ok: false, code: isBridgeFailure(code) ? code : "failed" };
+  const reason = isRecord(value) ? value["reason"] : undefined;
+  return {
+    ok: false,
+    code: isBridgeFailure(code) ? code : "failed",
+    ...(typeof reason === "string" && REASON.test(reason) ? { reason } : {}),
+  };
+}
+
+/**
+ * The shell's `window.desktopWallet.status()` and `onStatusChange` payload:
+ * whether a request is open, with the short code the browser page also
+ * shows. The request id itself never reaches the app page.
+ */
+export type WalletBridgeStatus =
+  | { readonly pending: false }
+  | {
+      readonly pending: true;
+      readonly requestCode: string;
+      readonly method: WalletForwardingMethod;
+      readonly expiresAt: number;
+    };
+
+/** Validate a shell status; anything unexpected reads as no open request. */
+export function parseWalletBridgeStatus(value: unknown): WalletBridgeStatus {
+  if (!isRecord(value) || value["pending"] !== true) return { pending: false };
+  const { code, method, expiresAt } = value;
+  return typeof code === "string" &&
+    REQUEST_CODE.test(code) &&
+    typeof method === "string" &&
+    (WALLET_FORWARDING_METHODS as readonly string[]).includes(method) &&
+    typeof expiresAt === "number" &&
+    Number.isSafeInteger(expiresAt) &&
+    expiresAt > 0
+    ? {
+        pending: true,
+        requestCode: code,
+        method: method as WalletForwardingMethod,
+        expiresAt,
+      }
+    : { pending: false };
 }
 
 /**
