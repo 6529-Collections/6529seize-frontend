@@ -89,7 +89,7 @@
       // 6529 Desktop wallet forwarding: the page/shell contract lands before
       // its browser page and connector; its Jest contract is the consumer
       // until the browser-page PR imports it and removes this exemption.
-      "lib/desktop/walletForwarding.ts": ["files", "exports", "types"],
+      "lib/desktop/wallet-forwarding/**": ["files", "exports", "types"],
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],

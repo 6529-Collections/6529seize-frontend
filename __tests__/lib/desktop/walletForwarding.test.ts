@@ -21,7 +21,7 @@ import {
   walletRequestCode,
   type WalletRequestEnvelope,
   type WalletRequestInput,
-} from "@/lib/desktop/walletForwarding";
+} from "@/lib/desktop/wallet-forwarding";
 
 // Public development keys (Hardhat/Anvil accounts 0 and 1); never funded.
 const SHELL_KEY =
@@ -467,22 +467,42 @@ describe("readWalletMessageText", () => {
   });
 });
 
-describe("fitsWalletRequestFragment", () => {
+describe("request size: accepted only when the browser fragment fits", () => {
+  // Every envelope field at its longest, with a valid lifetime.
+  const LONG_ORIGIN = "http://localhost:65535";
+  const longEnvelope = (
+    request: WalletRequestInput
+  ): WalletRequestEnvelope => ({
+    v: 1,
+    id: "A".repeat(43),
+    scheme: "stagingcore6529",
+    origin: LONG_ORIGIN,
+    issuedAt: NOW,
+    expiresAt: NOW + WALLET_REQUEST_TTL_MS,
+    request,
+  });
   const typedRequest = (text: string) =>
     input("eth_signTypedData_v4", [
       ADDRESS,
       JSON.stringify({
         domain: { name: "6529", version: "1", chainId: 1 },
-        types: { Note: [{ name: "text", type: "string" }] },
+        types: {
+          EIP712Domain: [
+            { name: "name", type: "string" },
+            { name: "version", type: "string" },
+            { name: "chainId", type: "uint256" },
+          ],
+          Note: [{ name: "text", type: "string" }],
+        },
         primaryType: "Note",
         message: { text },
       }),
     ]);
 
-  // The longest multibyte message that still fits, found by search.
+  // The longest payload that fits, found by search on the size rule.
   const longestFitting = (char: string) => {
     let low = 0;
-    let high = 40_000;
+    let high = 20_000;
     while (low < high) {
       const mid = Math.ceil((low + high) / 2);
       if (fitsWalletRequestFragment(typedRequest(char.repeat(mid)))) low = mid;
@@ -491,36 +511,38 @@ describe("fitsWalletRequestFragment", () => {
     return low;
   };
 
-  it.each([["€"], ["a"], ['"']])(
-    "agrees exactly with the fragment cap for %s",
+  const roundTrip = async (request: WalletRequestInput) => {
+    const bytes = encodeWalletRequestEnvelope(longEnvelope(request));
+    const fragment = buildWalletRequestFragment(
+      bytes,
+      await shell.signMessage({ message: { raw: bytes } })
+    );
+    if (fragment === null) return null;
+    const parsed = parseWalletRequestFragment(fragment, {
+      origin: LONG_ORIGIN,
+      now: NOW + 1000,
+      allowedChainIds: CHAINS,
+    });
+    return parsed.ok ? parsed.value : parsed.problem;
+  };
+
+  // A three-byte character, and one that JSON escapes twice (payload, then
+  // envelope): both reach the fragment cap before the typed-data cap.
+  it.each([["€"], ['"']])(
+    "accepts and round-trips at the limit and refuses one more %s",
     async (char) => {
       const n = longestFitting(char);
       expect(n).toBeGreaterThan(1000);
-      const build = async (count: number) => {
-        const request = typedRequest(char.repeat(count));
-        const bytes = new TextEncoder().encode(
-          JSON.stringify({
-            v: 1,
-            id: "A".repeat(43),
-            scheme: "stagingcore6529",
-            origin: "http://localhost:65535",
-            issuedAt: 9_999_999_999_999,
-            expiresAt: 9_999_999_999_999,
-            request,
-          })
-        );
-        return buildWalletRequestFragment(
-          bytes,
-          await shell.signMessage({ message: { raw: bytes } })
-        );
-      };
-      // At the limit the longest real envelope still builds; one more
-      // character is refused both by the check and by the builder.
-      expect(await build(n)).not.toBeNull();
-      expect(fitsWalletRequestFragment(typedRequest(char.repeat(n + 1)))).toBe(
-        false
-      );
-      expect(await build(n + 1)).toBeNull();
+
+      const atLimit = typedRequest(char.repeat(n));
+      expect(parse(atLimit).ok).toBe(true);
+      const delivered = await roundTrip(atLimit);
+      expect(delivered).not.toBeNull();
+      expect(typeof delivered).toBe("object");
+
+      const over = typedRequest(char.repeat(n + 1));
+      expect(problemOf(over)).toBe("too-large");
+      expect(await roundTrip(over)).toBeNull();
     }
   );
 
