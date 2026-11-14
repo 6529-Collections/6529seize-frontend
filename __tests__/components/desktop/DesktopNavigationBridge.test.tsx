@@ -1,11 +1,17 @@
 import { render } from "@testing-library/react";
 import DesktopNavigationBridge from "@/components/desktop/DesktopNavigationBridge";
+import { loadDesktopUrlInPlace } from "@/helpers/desktop-navigation";
 
 const push = jest.fn();
 const replace = jest.fn();
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ push, replace }),
+}));
+
+jest.mock("@/helpers/desktop-navigation", () => ({
+  ...jest.requireActual("@/helpers/desktop-navigation"),
+  loadDesktopUrlInPlace: jest.fn(),
 }));
 
 type NavigateListener = (event: unknown, path: string) => void;
@@ -150,15 +156,64 @@ describe("DesktopNavigationBridge", () => {
     expect(api.openExternal).toHaveBeenNthCalledWith(2, "https://example.com/");
   });
 
-  it("keeps own pages from new-window links in this window", () => {
+  it("loads own URLs from new-window links in this window", () => {
     installDesktopShell();
     render(<DesktopNavigationBridge />);
 
-    const event = clickLink("/the-memes/1", {}, { target: "_blank" });
+    const page = clickLink("/the-memes/1", {}, { target: "_blank" });
+    const download = clickLink("/api/export.csv", {}, { target: "_blank" });
 
-    expect(event.defaultPrevented).toBe(true);
-    expect(push).toHaveBeenCalledWith("/the-memes/1");
+    expect(page.defaultPrevented).toBe(true);
+    expect(download.defaultPrevented).toBe(true);
+    expect(loadDesktopUrlInPlace).toHaveBeenNthCalledWith(1, "/the-memes/1");
+    expect(loadDesktopUrlInPlace).toHaveBeenNthCalledWith(2, "/api/export.csv");
+    expect(push).not.toHaveBeenCalled();
     expect(api.openExternal).not.toHaveBeenCalled();
+  });
+
+  it("sends a crafted backslash link only to the system browser", () => {
+    installDesktopShell();
+    render(<DesktopNavigationBridge />);
+
+    clickLink(String.raw`/\evil.example/x`, {}, { target: "_blank" });
+
+    expect(loadDesktopUrlInPlace).not.toHaveBeenCalled();
+    expect(api.openExternal).toHaveBeenCalledWith("http://evil.example/x");
+  });
+
+  it("leaves a new-window click the app already handled alone", () => {
+    installDesktopShell();
+    const handled = (event: MouseEvent) => event.preventDefault();
+    const root = document.createElement("div");
+    document.body.appendChild(root);
+    root.addEventListener("click", handled);
+    const anchor = document.createElement("a");
+    anchor.setAttribute("href", "https://example.com/");
+    anchor.setAttribute("target", "_blank");
+    root.appendChild(anchor);
+    render(<DesktopNavigationBridge />);
+
+    anchor.dispatchEvent(
+      new MouseEvent("click", { bubbles: true, cancelable: true })
+    );
+
+    expect(api.openExternal).not.toHaveBeenCalled();
+    root.remove();
+  });
+
+  it("keeps listening when the shell cannot be told the page is ready", async () => {
+    installDesktopShell();
+    api.navigationReady.mockRejectedValue(new Error("closed"));
+    const consoleError = jest
+      .spyOn(console, "error")
+      .mockImplementation(() => undefined);
+    render(<DesktopNavigationBridge />);
+    await Promise.resolve();
+
+    deliver("/waves");
+
+    expect(push).toHaveBeenCalledWith("/waves");
+    consoleError.mockRestore();
   });
 
   it("leaves ordinary same-window links to the app", () => {

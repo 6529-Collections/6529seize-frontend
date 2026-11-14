@@ -42,6 +42,11 @@ export function getDesktopNavigationTarget(
   return { url: `${target.pathname}${target.search}${target.hash}`, replace };
 }
 
+/** Full page load in this window (kept separate so tests can observe it). */
+export function loadDesktopUrlInPlace(url: string): void {
+  window.location.assign(url);
+}
+
 type DesktopLinkAction =
   | { readonly kind: "navigate"; readonly url: string }
   | { readonly kind: "external"; readonly url: string };
@@ -63,8 +68,11 @@ interface LinkElement {
 /**
  * The desktop window opens no second windows. For a link click that would
  * open one (`target="_blank"`, a modifier key or the middle button), return
- * what to do instead: navigate in place for this app's own pages, or open an
- * http(s) page in the system browser. Anything else is left alone.
+ * what to do instead: load this app's own URLs in place, or open an http(s)
+ * page in the system browser. Anything else is left alone. The URL parser
+ * resolves backslashes and `//host` before the origin check, so a crafted
+ * `/\evil.example` counts as another site and only ever reaches the system
+ * browser.
  */
 export function getDesktopLinkAction(
   link: LinkElement,

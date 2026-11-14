@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import {
   getDesktopLinkAction,
   getDesktopNavigationTarget,
+  loadDesktopUrlInPlace,
 } from "@/helpers/desktop-navigation";
 import { getDesktopShellApi } from "@/helpers/desktop-shell";
 
@@ -51,6 +52,9 @@ export default function DesktopNavigationBridge() {
     const api = getDesktopShellApi();
     if (!api) return undefined;
 
+    // Listens on `document`, after React's own handlers on the root
+    // container, so a click the app already handled arrives defaultPrevented
+    // and is left alone.
     const handleLinkClick = (event: MouseEvent) => {
       if (!(event.target instanceof Element)) return;
       const link = event.target.closest("a");
@@ -59,9 +63,15 @@ export default function DesktopNavigationBridge() {
       if (!action) return;
       event.preventDefault();
       if (action.kind === "navigate") {
-        router.push(action.url);
-      } else {
+        // A full load, as the new window would have done: the link may be an
+        // app page, a file download or an API route, not only a router page.
+        loadDesktopUrlInPlace(action.url);
+        return;
+      }
+      try {
         api.openExternal(action.url);
+      } catch {
+        console.error("Could not open the link in the system browser");
       }
     };
 
@@ -71,7 +81,7 @@ export default function DesktopNavigationBridge() {
       document.removeEventListener("click", handleLinkClick);
       document.removeEventListener("auxclick", handleLinkClick);
     };
-  }, [router]);
+  }, []);
 
   return null;
 }
