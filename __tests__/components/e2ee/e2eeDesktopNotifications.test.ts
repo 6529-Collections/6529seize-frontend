@@ -186,22 +186,40 @@ describe("encrypted-message desktop notices", () => {
         configurable: true,
         value,
       });
+    const setGlobal = (key: string, value: unknown) =>
+      Object.defineProperty(globalThis, key, { configurable: true, value });
+    const installDesktopShell = () => {
+      setGlobal("api", { openExternal: jest.fn() });
+      setGlobal("nativeAuth", { sessionLogin: jest.fn() });
+    };
 
     afterEach(() => {
       setUserAgent(userAgent);
-      delete (globalThis as { notifications?: unknown }).notifications;
+      for (const key of ["notifications", "api", "nativeAuth"]) {
+        Reflect.deleteProperty(globalThis, key);
+      }
     });
 
     it("is used only in 6529 Desktop", () => {
-      const bridge = { showNotification: jest.fn() };
-      (globalThis as { notifications?: unknown }).notifications = bridge;
+      const bridge = { showNotification: jest.fn(), setBadge: jest.fn() };
+      setGlobal("notifications", bridge);
       expect(getDesktopNotificationsBridge()).toBeNull();
-      setUserAgent(`${userAgent} Electron/44.0.0`);
+      installDesktopShell();
       expect(getDesktopNotificationsBridge()).toBe(bridge);
     });
 
-    it("is absent when the desktop app exposes no notifications", () => {
+    // Every desktop build defines the shell bridge; a user agent alone (for
+    // example a browser extension spoofing "Electron") is not enough.
+    it("is not used for an Electron user agent without the desktop bridge", () => {
+      setGlobal("notifications", { showNotification: jest.fn() });
       setUserAgent(`${userAgent} Electron/44.0.0`);
+      expect(getDesktopNotificationsBridge()).toBeNull();
+    });
+
+    it("is absent when the desktop app exposes no notifications", () => {
+      installDesktopShell();
+      expect(getDesktopNotificationsBridge()).toBeNull();
+      setGlobal("notifications", { setBadge: jest.fn() });
       expect(getDesktopNotificationsBridge()).toBeNull();
     });
   });
