@@ -74,6 +74,10 @@ export interface DesktopShellApi {
   ) => void;
   readonly onOpenSearch: (callback: DesktopShellListener) => void;
   readonly offOpenSearch: (callback: DesktopShellListener) => void;
+  /** Absent in the Electron app, which never removes this listener. */
+  readonly offWalletConnection?:
+    | ((callback: DesktopShellListener<[unknown]>) => void)
+    | undefined;
   readonly onWalletConnection: (
     callback: DesktopShellListener<[unknown]>
   ) => void;

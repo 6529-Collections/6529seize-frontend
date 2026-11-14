@@ -38,6 +38,7 @@ import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext"
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import { isValidatorAuthorizePath } from "@/lib/validator-page/authorize/paths";
+import { isBrowserConnectorPath } from "@/lib/desktop/browserConnector";
 import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
@@ -53,6 +54,7 @@ import DocumentLanguage from "./DocumentLanguage";
 import AndroidBackNavigation from "@/components/navigation/AndroidBackNavigation";
 import DesktopNavigationBridge from "@/components/desktop/DesktopNavigationBridge";
 import DesktopNotificationsBridge from "@/components/desktop/DesktopNotificationsBridge";
+import DesktopBrowserConnectorBridge from "@/components/desktop/DesktopBrowserConnectorBridge";
 
 export default function Providers({
   children,
@@ -73,7 +75,10 @@ export default function Providers({
   // validator's grant; it doesn't sign in to 6529.io.
   const pathname = usePathname();
   const enableWalletAuthentication =
-    walletAuthenticationProp && !isValidatorAuthorizePath(pathname);
+    walletAuthenticationProp &&
+    !isValidatorAuthorizePath(pathname) &&
+    // The browser connector signs a 6529 Desktop challenge only.
+    !isBrowserConnectorPath(pathname);
 
   const sharedProviders = (
     <TitleProvider>
@@ -85,6 +90,7 @@ export default function Providers({
                 <AndroidBackNavigation />
                 <DesktopNavigationBridge />
                 <DesktopNotificationsBridge />
+                <DesktopBrowserConnectorBridge />
                 <LocaleMessagesGate>{children}</LocaleMessagesGate>
               </NavigationHistoryProvider>
             </WaveInformationProvider>
