@@ -98,6 +98,47 @@ describe("AppKit initialization", () => {
     );
   });
 
+  it("keeps the web wallet list outside 6529 Desktop", () => {
+    initializeAppKit({ adapter, isCapacitor: false, chains: [mainnet] });
+
+    expect(createAppKit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        featuredWalletIds: ["metamask", "walletConnect"],
+        allWallets: "SHOW",
+      })
+    );
+    expect(createAppKit).toHaveBeenCalledWith(
+      expect.not.objectContaining({ enableEIP6963: false })
+    );
+  });
+
+  it("offers WalletConnect only inside 6529 Desktop", () => {
+    Object.defineProperty(window, "api", {
+      configurable: true,
+      value: { openExternal: jest.fn() },
+    });
+    Object.defineProperty(window, "nativeAuth", {
+      configurable: true,
+      value: { sessionLogin: jest.fn() },
+    });
+    try {
+      initializeAppKit({ adapter, isCapacitor: false, chains: [mainnet] });
+
+      expect(createAppKit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enableCoinbase: false,
+          enableEIP6963: false,
+          enableInjected: false,
+          featuredWalletIds: [],
+          allWallets: "HIDE",
+        })
+      );
+    } finally {
+      Reflect.deleteProperty(window, "api");
+      Reflect.deleteProperty(window, "nativeAuth");
+    }
+  });
+
   it.each([true, false])(
     "turns off Reown modal analytics (Capacitor: %s)",
     (isCapacitor) => {

@@ -37,13 +37,10 @@ export function setBrowserConnectorStatus(next: BrowserConnectorStatus): void {
   listeners.forEach((listener) => listener());
 }
 
-/** @api The desktop connect screen reads the status. */
 export const getBrowserConnectorStatus = (): BrowserConnectorStatus => status;
-/** @api Server snapshot for useSyncExternalStore. */
 export const getServerBrowserConnectorStatus = (): BrowserConnectorStatus =>
   "idle";
 
-/** @api The desktop connect screen subscribes to the status. */
 export function subscribeBrowserConnectorStatus(
   listener: () => void
 ): () => void {
@@ -58,15 +55,13 @@ const clearPending = () => {
   pending = null;
 };
 
-/** @api Stop waiting for the browser (the user cancelled). */
+/** Stop waiting for the browser (the user cancelled). */
 export function cancelBrowserConnectorSignIn(): void {
   clearPending();
   setBrowserConnectorStatus("idle");
 }
 
 /**
- * @api Started from the desktop connect screen.
- *
  * Open the browser connector in the system browser. The return link uses
  * the scheme this desktop build reports (`window.api.getInfo().scheme`);
  * there is no default, so a build that reports none cannot start.

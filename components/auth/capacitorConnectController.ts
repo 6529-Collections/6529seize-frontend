@@ -1,3 +1,5 @@
+import { isDesktopShell } from "@/helpers/desktop-shell";
+import { openDesktopConnectDialog } from "@/services/desktop/desktopConnectDialog";
 import { useCallback } from "react";
 import { getAddress, isAddress } from "viem";
 import { SecurityEventType } from "@/types/security";
@@ -26,6 +28,13 @@ export async function openUserConnectionSurfaceForRuntime({
   readonly openWebConnection: (source: string) => Promise<void>;
   readonly setCapacitorView: (view: CapacitorConnectDialogView) => void;
 }): Promise<void> {
+  // 6529 Desktop offers its own choice first: WalletConnect, or a browser
+  // wallet through the browser connector.
+  if (!isSigningOutAll && isDesktopShell()) {
+    openDesktopConnectDialog(() => openWebConnection(source));
+    return;
+  }
+
   if (!isCapacitor) {
     await openWebConnection(source);
     return;
