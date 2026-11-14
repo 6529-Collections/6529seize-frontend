@@ -88,9 +88,12 @@ describe("shared Next config", () => {
   it("allows the Tauri IPC channel only in 6529 Desktop's own build", async () => {
     const connectSrc = async (): Promise<string> => {
       const headers = await sharedConfig(publicEnv, "").headers?.();
+      // The site-wide rule, not a route-specific policy.
       const csp = headers
-        ?.flatMap((entry) => entry.headers)
-        .find((header) => header.key === "Content-Security-Policy")?.value;
+        ?.find((entry) => entry.source === "/:path*")
+        ?.headers.find(
+          (header) => header.key === "Content-Security-Policy"
+        )?.value;
       return (
         csp
           ?.split(";")
