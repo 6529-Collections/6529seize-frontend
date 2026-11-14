@@ -6,13 +6,18 @@ import { safeLocalStorage } from "@/helpers/safeLocalStorage";
  * kept beside the IndexedDB record. The record stays the source of truth;
  * the note only answers "was this write expected to be signed?" when the
  * record cannot be read in time, so such a write is never sent unsigned
- * silently. It holds no key material and no content.
+ * silently, and names the grant (and its public key) if the browser later
+ * drops the record. It holds no private key material and no content.
  */
 interface DeviceGrantHint {
   readonly grantId: string;
   readonly expiresAt: number;
   readonly scopes: readonly string[];
   readonly ownProfileId: string | null;
+  /** When this browser last wrote the note (ms); absent on older notes. */
+  readonly writtenAt?: number | undefined;
+  /** The grant's device public key (lowercase hex); absent on older notes. */
+  readonly deviceKey?: string | undefined;
 }
 
 const HINT_KEY_PREFIX = "6529-device-grant-hint:";
@@ -30,7 +35,11 @@ const isHint = (value: unknown): value is DeviceGrantHint => {
     typeof candidate["expiresAt"] === "number" &&
     Array.isArray(candidate["scopes"]) &&
     (candidate["ownProfileId"] === null ||
-      typeof candidate["ownProfileId"] === "string")
+      typeof candidate["ownProfileId"] === "string") &&
+    (candidate["writtenAt"] === undefined ||
+      typeof candidate["writtenAt"] === "number") &&
+    (candidate["deviceKey"] === undefined ||
+      typeof candidate["deviceKey"] === "string")
   );
 };
 
@@ -62,6 +71,8 @@ export function writeDeviceGrantHint(
       expiresAt: grant.expires_at,
       scopes: [...grant.scopes],
       ownProfileId: ownProfileId ?? null,
+      writtenAt: Date.now(),
+      deviceKey: grant.device_key.toLowerCase(),
     };
     safeLocalStorage.setItem(hintKey(address), JSON.stringify(hint));
   } catch {

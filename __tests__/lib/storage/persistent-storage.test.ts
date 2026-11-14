@@ -22,6 +22,7 @@ describe("requestPersistentStorage", () => {
     globalThis.navigator,
     "storage"
   );
+  beforeEach(() => localStorage.clear());
   afterEach(() => {
     if (original) {
       Object.defineProperty(globalThis.navigator, "storage", original);
@@ -30,24 +31,36 @@ describe("requestPersistentStorage", () => {
     }
   });
 
-  it("asks once per page and ignores the answer", async () => {
+  it("asks once per page and remembers the answer for later", async () => {
     const persist = jest.fn(async () => false);
     setStorage({ persist, persisted: async () => false });
-    const { requestPersistentStorage } = loadHelper();
+    const { requestPersistentStorage, readLastPersistentStorageResult } =
+      loadHelper();
 
-    await requestPersistentStorage();
-    await requestPersistentStorage();
+    await expect(requestPersistentStorage()).resolves.toBe("denied");
+    await expect(requestPersistentStorage()).resolves.toBe("denied");
 
     expect(persist).toHaveBeenCalledTimes(1);
+    expect(readLastPersistentStorageResult()).toBe("denied");
   });
 
   it("asks nothing when storage is already persistent", async () => {
     const persist = jest.fn(async () => true);
     setStorage({ persist, persisted: async () => true });
+    const helper = loadHelper();
 
-    await loadHelper().requestPersistentStorage();
+    await expect(helper.requestPersistentStorage()).resolves.toBe("granted");
 
     expect(persist).not.toHaveBeenCalled();
+    expect(helper.readLastPersistentStorageResult()).toBe("granted");
+  });
+
+  it("records a granted request", async () => {
+    setStorage({ persist: async () => true, persisted: async () => false });
+    const helper = loadHelper();
+
+    await expect(helper.requestPersistentStorage()).resolves.toBe("granted");
+    expect(helper.readLastPersistentStorageResult()).toBe("granted");
   });
 
   it.each([
@@ -64,8 +77,8 @@ describe("requestPersistentStorage", () => {
     ],
   ])("never throws with %s", async (_label, storage) => {
     setStorage(storage as StorageManagerLike | undefined);
-    await expect(
-      loadHelper().requestPersistentStorage()
-    ).resolves.toBeUndefined();
+    await expect(loadHelper().requestPersistentStorage()).resolves.toBe(
+      "unsupported"
+    );
   });
 });

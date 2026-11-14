@@ -1,5 +1,7 @@
-import { commonApiFetch } from "@/services/api/common-api";
+import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
+  fetchDeviceGrants,
+  revokeDeviceGrant,
   fetchAuthorWallets,
   fetchDropsSignedEvents,
 } from "@/services/api/device-grants-api";
@@ -7,6 +9,7 @@ import {
 jest.mock("@/services/api/common-api", () => ({
   ...jest.requireActual("@/services/api/common-api"),
   commonApiFetch: jest.fn(),
+  commonApiPost: jest.fn(),
 }));
 
 const PRIMARY = "0xAbCd000000000000000000000000000000000001";
@@ -82,5 +85,43 @@ describe("fetchDropsSignedEvents", () => {
       signal,
       errorMode: "structured",
     });
+  });
+});
+
+describe("requests bound to one session token", () => {
+  const postMock = jest.mocked(commonApiPost);
+  const GRANT_ID = `0x${"9".repeat(64)}`;
+
+  beforeEach(() => {
+    fetchMock.mockReset().mockResolvedValue([]);
+    postMock.mockReset().mockResolvedValue({});
+  });
+
+  it("uses the stored session by default", async () => {
+    await fetchDeviceGrants();
+    await revokeDeviceGrant(GRANT_ID);
+
+    expect(fetchMock).toHaveBeenCalledWith({
+      endpoint: "device-grants",
+      signal: undefined,
+      errorMode: "structured",
+    });
+    expect(postMock).toHaveBeenCalledWith({
+      endpoint: `device-grants/${GRANT_ID}/revoke`,
+      body: {},
+      errorMode: "structured",
+    });
+  });
+
+  it("sends exactly the given token, without the session-aware retry", async () => {
+    await fetchDeviceGrants(undefined, "token-a");
+    await revokeDeviceGrant(GRANT_ID, "token-a");
+
+    const bound = {
+      includeWalletAuth: false,
+      headers: { Authorization: "Bearer token-a" },
+    };
+    expect(fetchMock).toHaveBeenCalledWith(expect.objectContaining(bound));
+    expect(postMock).toHaveBeenCalledWith(expect.objectContaining(bound));
   });
 });

@@ -12,16 +12,36 @@ import {
 } from "@/services/api/common-api";
 
 /**
+ * Sends a request with exactly this session token instead of the stored
+ * session: no session-aware 401 retry, so the token cannot be swapped for
+ * another while the request is in flight.
+ */
+const boundToSession = (sessionToken: string | undefined) =>
+  sessionToken === undefined
+    ? {}
+    : {
+        includeWalletAuth: false,
+        headers: { Authorization: `Bearer ${sessionToken}` },
+      };
+
+/** The most grants the list returns (the newest); there is no paging. */
+export const DEVICE_GRANTS_LIST_LIMIT = 100;
+
+/**
  * The device grants of the authenticated profile's wallets, newest first. The
- * API returns at most the 100 newest, including expired and revoked ones.
+ * API returns at most the DEVICE_GRANTS_LIST_LIMIT newest, including expired
+ * and revoked ones. With a session token, the request is bound to exactly
+ * that token.
  */
 export const fetchDeviceGrants = (
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  sessionToken?: string
 ): Promise<ApiDeviceGrant[]> =>
   commonApiFetch<ApiDeviceGrant[]>({
     endpoint: "device-grants",
     signal,
     errorMode: "structured",
+    ...boundToSession(sessionToken),
   });
 
 /**
@@ -72,11 +92,15 @@ export const acknowledgeDeviceGrant = (
     errorMode: "structured",
   });
 
-export const revokeDeviceGrant = (grantId: string): Promise<ApiDeviceGrant> =>
+export const revokeDeviceGrant = (
+  grantId: string,
+  sessionToken?: string
+): Promise<ApiDeviceGrant> =>
   commonApiPost<Record<string, never>, ApiDeviceGrant>({
     endpoint: `device-grants/${encodeURIComponent(grantId)}/revoke`,
     body: {},
     errorMode: "structured",
+    ...boundToSession(sessionToken),
   });
 
 /** The stored device-signed events of a drop and the grants they reference. */
