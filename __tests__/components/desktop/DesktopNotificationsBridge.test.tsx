@@ -317,6 +317,28 @@ describe("DesktopNotificationsBridge", () => {
     );
   });
 
+  it("shows every new notification after a first poll with nothing unread", async () => {
+    installDesktopShell();
+    jest.useFakeTimers();
+    jest
+      .mocked(commonApiFetch)
+      .mockResolvedValueOnce({ unread_count: 0, notifications: [] });
+    render(<DesktopNotificationsBridge />);
+    await act(async () => undefined);
+    expect(bridges.notifications.showNotification).not.toHaveBeenCalled();
+
+    jest.mocked(commonApiFetch).mockResolvedValue(followNotification(9, 8));
+    await act(async () => {
+      jest.advanceTimersByTime(15_000);
+    });
+    await act(async () => undefined);
+
+    const shownIds = bridges.notifications.showNotification.mock.calls.map(
+      (call) => call[0]
+    );
+    expect(shownIds).toEqual([8, 9]);
+  });
+
   it("shows nothing from a poll that finishes after unmount", async () => {
     installDesktopShell();
     let resolveFetch: (value: unknown) => void = () => undefined;

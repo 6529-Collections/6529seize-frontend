@@ -102,8 +102,10 @@ export default function DesktopConnectDialog() {
   const [problem, setProblem] = useState<
     "start-failed" | "walletconnect-failed" | null
   >(null);
-  // Set synchronously, so a double click starts only one browser sign-in.
-  const starting = useRef(false);
+  // The browser sign-in start in flight, set synchronously so a double click
+  // starts only one. Closing clears it; a cleared attempt's result is ignored.
+  const startAttempt = useRef<number | null>(null);
+  const attempts = useRef(0);
   const [isStarting, setIsStarting] = useState(false);
   const isOpen = openWalletConnect !== null;
   const isBusy = isStarting || status === "waiting" || status === "signing-in";
@@ -119,9 +121,11 @@ export default function DesktopConnectDialog() {
   const close = () => {
     // Also while the start is still asking the shell for its scheme (the
     // status is idle then), so the browser does not open after closing.
-    if (status === "waiting" || starting.current) {
+    if (status === "waiting" || startAttempt.current !== null) {
       cancelBrowserConnectorSignIn();
     }
+    startAttempt.current = null;
+    setIsStarting(false);
     setProblem(null);
     closeDesktopConnectDialog();
   };
@@ -139,14 +143,19 @@ export default function DesktopConnectDialog() {
   };
 
   const chooseBrowserWallet = () => {
-    if (starting.current) return;
-    starting.current = true;
+    if (startAttempt.current !== null) return;
+    attempts.current += 1;
+    const attempt = attempts.current;
+    startAttempt.current = attempt;
     setIsStarting(true);
     setProblem(null);
     startBrowserConnectorSignIn()
-      .catch(() => setProblem("start-failed"))
+      .catch(() => {
+        if (startAttempt.current === attempt) setProblem("start-failed");
+      })
       .finally(() => {
-        starting.current = false;
+        if (startAttempt.current !== attempt) return;
+        startAttempt.current = null;
         setIsStarting(false);
       });
   };
