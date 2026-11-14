@@ -211,7 +211,15 @@ const pollProfile = async (
   const first = await fetchNotificationPage(jwt, signal);
   const lastSeenId = cursor?.lastSeenId;
   if (toUnreadCount(first.unread_count) === 0) {
-    return { show: [], cursor: { lastSeenId, gaps: [] } };
+    // Nothing unread. On the first poll, start from the newest id (0 for an
+    // empty inbox), so the next poll shows everything new, not just one.
+    const baseline =
+      lastSeenId ??
+      Math.max(
+        0,
+        ...first.notifications.map((notification) => notification.id)
+      );
+    return { show: [], cursor: { lastSeenId: baseline, gaps: [] } };
   }
   if (lastSeenId === undefined) return firstProfilePoll(first.notifications);
 
