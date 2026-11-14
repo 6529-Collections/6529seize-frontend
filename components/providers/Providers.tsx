@@ -50,6 +50,7 @@ import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
 import DocumentLanguage from "./DocumentLanguage";
 import AndroidBackNavigation from "@/components/navigation/AndroidBackNavigation";
+import DesktopNavigationBridge from "@/components/desktop/DesktopNavigationBridge";
 
 export default function Providers({
   children,
@@ -80,6 +81,7 @@ export default function Providers({
             <WaveInformationProvider>
               <NavigationHistoryProvider>
                 <AndroidBackNavigation />
+                <DesktopNavigationBridge />
                 <LocaleMessagesGate>{children}</LocaleMessagesGate>
               </NavigationHistoryProvider>
             </WaveInformationProvider>
