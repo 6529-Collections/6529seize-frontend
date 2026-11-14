@@ -37,6 +37,26 @@ function decodeSegment(segment: string | undefined): string | null {
 const ALSO_OFFERED: ReadonlySet<string> = new Set(["0.1.0-rc.15"]);
 
 /**
+ * The release a /download/<version>/<file> path names: the newest, or a
+ * release in ALSO_OFFERED that the feed lists and doesn't list as unsafe.
+ */
+function releaseForVersion(
+  releases: readonly ValidatorRelease[],
+  newest: ValidatorRelease,
+  version: string | null
+): ValidatorRelease | undefined {
+  if (version === newest.version) {
+    return newest;
+  }
+  if (version === null || !ALSO_OFFERED.has(version)) {
+    return undefined;
+  }
+  return releases.find(
+    (entry) => entry.version === version && entry.unsafeReason === null
+  );
+}
+
+/**
  * Only the newest release can be downloaded (the owner, 2026-11-01 and
  * 2026-11-04): an older test release stays in the feed and on the history
  * page, with its SHA-256, but its files are not handed out. A newest
@@ -64,15 +84,7 @@ function findRelease(
   if (segments.length === 2) {
     const version = decodeSegment(segments[0]);
     const fileName = decodeSegment(segments[1]);
-    const release =
-      version === newest.version
-        ? newest
-        : version !== null && ALSO_OFFERED.has(version)
-          ? releases.find(
-              (entry) =>
-                entry.version === version && entry.unsafeReason === null
-            )
-          : undefined;
+    const release = releaseForVersion(releases, newest, version);
     return release && listed(release, fileName) ? { release, fileName } : null;
   }
   return null;
