@@ -11,10 +11,18 @@ const SITE_SEARCH_REQUEST_EVENT = "6529:open-site-search";
 
 export function requestSiteSearch(): void {
   if (typeof window === "undefined") return;
-  window.dispatchEvent(new Event(SITE_SEARCH_REQUEST_EVENT));
+  // Cancelable, so the first listener can claim it: one request opens at
+  // most one search, even if two search controls are mounted.
+  window.dispatchEvent(
+    new Event(SITE_SEARCH_REQUEST_EVENT, { cancelable: true })
+  );
 }
 
-export function useSiteSearchRequest(onRequest: () => void): void {
+/**
+ * Handle site-search requests. `onRequest` returns false when this control
+ * cannot open search right now, leaving the request for another listener.
+ */
+export function useSiteSearchRequest(onRequest: () => boolean | void): void {
   const handler = useRef(onRequest);
 
   useEffect(() => {
@@ -22,7 +30,10 @@ export function useSiteSearchRequest(onRequest: () => void): void {
   }, [onRequest]);
 
   useEffect(() => {
-    const listener = () => handler.current();
+    const listener = (event: Event) => {
+      if (event.defaultPrevented) return;
+      if (handler.current() !== false) event.preventDefault();
+    };
     window.addEventListener(SITE_SEARCH_REQUEST_EVENT, listener);
     return () => {
       window.removeEventListener(SITE_SEARCH_REQUEST_EVENT, listener);
