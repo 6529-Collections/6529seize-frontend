@@ -270,6 +270,53 @@ describe("DesktopNotificationsBridge", () => {
     expect(shownIds()).toHaveLength(52);
   });
 
+  it("shares one page budget between an open gap and a large new range", async () => {
+    installDesktopShell();
+    jest.useFakeTimers();
+    let newestId = 7;
+    jest.mocked(commonApiFetch).mockImplementation((request) => {
+      const before = Number(
+        (request.params as Record<string, string>)["id_less_than"] ?? Infinity
+      );
+      const ids = Array.from(
+        { length: newestId },
+        (_, index) => newestId - index
+      );
+      return Promise.resolve(
+        followNotification(...ids.filter((id) => id < before).slice(0, 5))
+      );
+    });
+    const poll = async () => {
+      const before = jest.mocked(commonApiFetch).mock.calls.length;
+      await act(async () => {
+        jest.advanceTimersByTime(15_000);
+      });
+      await act(async () => undefined);
+      return jest.mocked(commonApiFetch).mock.calls.length - before;
+    };
+    render(<DesktopNotificationsBridge />);
+    await waitFor(() =>
+      expect(bridges.notifications.showNotification).toHaveBeenCalledTimes(1)
+    );
+
+    // 8..58 arrive: ten pages reach 9, leaving the gap below it.
+    newestId = 58;
+    expect(await poll()).toBeLessThanOrEqual(10);
+    // 59..110 arrive too: the gap and the new range share one budget.
+    newestId = 110;
+    expect(await poll()).toBeLessThanOrEqual(10);
+    expect(await poll()).toBeLessThanOrEqual(10);
+    expect(await poll()).toBeLessThanOrEqual(10);
+
+    const shown = bridges.notifications.showNotification.mock.calls.map(
+      (call) => call[0] as number
+    );
+    // Every id from 7 to 110 exactly once.
+    expect([...shown].sort((left, right) => left - right)).toEqual(
+      Array.from({ length: 104 }, (_, index) => index + 7)
+    );
+  });
+
   it("shows nothing from a poll that finishes after unmount", async () => {
     installDesktopShell();
     let resolveFetch: (value: unknown) => void = () => undefined;
