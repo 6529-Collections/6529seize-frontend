@@ -63,7 +63,7 @@ Scroll or use the bottom arrow to leave that position.
 - `serialNo` values that cannot be parsed as integers are ignored.
 - A jump loads only the messages around the target, however old it is.
   Messages between the target and the latest page are marked by
-  `Load missed messages`. They load a page at a time as you scroll toward
+  `Load more messages`. They load a page at a time as you scroll toward
   that boundary from either side, or when you select the button, without
   moving the messages you are reading.
 - If a jump stalls, the loading overlay timeout clears and the thread stays

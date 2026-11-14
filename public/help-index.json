@@ -7,7 +7,11 @@
     {
       "id": "waves.chat-resume",
       "kind": "workflow",
-      "aliases": ["background tab catch-up", "load missed messages"],
+      "aliases": [
+        "background tab catch-up",
+        "load more messages",
+        "load missed messages"
+      ],
       "title": "Returning to an open wave tab",
       "keywords": [
         "wave",
@@ -22,8 +26,8 @@
       "facts": [
         "On desktop and mobile web, Chat shows a quiet dark unread-message badge inline with its label, capped at 99+, except for muted waves. Leaderboard, Decisions, Settings and curations preserve unread chat messages even after returning to the browser tab. Incoming chat messages add a new-message count to the browser title only while Chat is selected. Open Chat in a visible browser tab to use the conversation's normal read acknowledgement.",
         "If you were at the bottom, the conversation follows the latest messages. If you were reading older messages, it keeps your place; use the bottom control to return to latest.",
-        "After a long absence, Load missed messages marks a gap between cached history and the latest page. It loads a page when approached or selected, without delaying current messages.",
-        "If missed history fails to load, select Could not load missed messages. Try again. Already loaded messages remain available."
+        "After a long absence, or after jumping to an old message, Load more messages marks a gap between loaded history and the latest page. It loads a page when approached or selected, without delaying current messages.",
+        "If that history fails to load, select Could not load messages. Try again. Already loaded messages remain available."
       ],
       "canonical_path": "/waves",
       "tags": ["waves", "chat", "recovery"],
