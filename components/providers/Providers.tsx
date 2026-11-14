@@ -56,6 +56,7 @@ import DesktopNavigationBridge from "@/components/desktop/DesktopNavigationBridg
 import DesktopNotificationsBridge from "@/components/desktop/DesktopNotificationsBridge";
 import DesktopBrowserConnectorBridge from "@/components/desktop/DesktopBrowserConnectorBridge";
 import DesktopConnectDialog from "@/components/desktop/DesktopConnectDialog";
+import DesktopWindowChrome from "@/components/desktop/DesktopWindowChrome";
 
 export default function Providers({
   children,
@@ -93,6 +94,7 @@ export default function Providers({
                 <DesktopNotificationsBridge />
                 <DesktopBrowserConnectorBridge />
                 <DesktopConnectDialog />
+                <DesktopWindowChrome />
                 <LocaleMessagesGate>{children}</LocaleMessagesGate>
               </NavigationHistoryProvider>
             </WaveInformationProvider>

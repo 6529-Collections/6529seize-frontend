@@ -151,8 +151,8 @@ function WebSidebar({
       <div
         className={
           isMobile
-            ? "tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80] focus:tw-outline-none"
-            : "tw-fixed tw-inset-y-0 tw-left-0 tw-z-40 focus:tw-outline-none"
+            ? "tw-fixed tw-bottom-0 tw-left-0 tw-top-[var(--desktop-top-inset,0px)] tw-z-[80] focus:tw-outline-none"
+            : "tw-fixed tw-bottom-0 tw-left-0 tw-top-[var(--desktop-top-inset,0px)] tw-z-40 focus:tw-outline-none"
         }
         style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
       >

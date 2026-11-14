@@ -3953,6 +3953,13 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopUpdate.failed": "The update could not be downloaded.",
   "desktopUpdate.retry": "Try again",
   "desktopUpdate.later": "Not now",
+  "desktop.titleStrip.label": "6529 Desktop window title",
+  "desktop.titleStrip.appInfo": "App info",
+  "desktop.titleStrip.appInfoUpdate": "App info (update available)",
+  "desktop.appInfo.title": "About 6529 Desktop",
+  "desktop.appInfo.version": "Version",
+  "desktop.appInfo.environment": "Environment",
+  "desktop.appInfo.checkUpdates": "Check for updates",
   "desktopConnect.title": "Connect a wallet",
   "desktopConnect.walletConnect": "Scan with a mobile wallet",
   "desktopConnect.walletConnectDescription":

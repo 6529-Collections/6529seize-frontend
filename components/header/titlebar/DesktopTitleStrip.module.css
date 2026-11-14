@@ -1,0 +1,71 @@
+/* The 6529 Desktop title strip. The host sets the variables before first
+   paint; the fallbacks apply only if it does not. Plain CSS: app-region and
+   the host's variables are not expressible as Tailwind utilities. */
+.strip {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 1000;
+  height: var(--desktop-titlebar-height, 34px);
+  box-sizing: border-box;
+  padding: 0 calc(var(--desktop-titlebar-inset-right, 0px) + 10px) 0
+    calc(var(--desktop-titlebar-inset-left, 0px) + 10px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--desktop-titlebar-background, #000);
+  /* Inside the height: the Windows caption buttons stop above it. */
+  border-bottom: 1px solid rgba(55, 55, 62, 0.95);
+  color: #9a9a9a;
+  font-size: 12px;
+  -webkit-app-region: drag;
+  user-select: none;
+  cursor: default;
+}
+
+.strip :is(a, button, input, select, [role="button"], [tabindex]) {
+  -webkit-app-region: no-drag;
+}
+
+:root[data-desktop-focused="false"] .strip {
+  color: rgb(154 154 154 / 0.6);
+}
+
+.infoButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  min-height: 24px;
+  /* Clear of the 9 px Windows resize band at the top edge. */
+  margin-top: 4px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.infoButton:hover {
+  color: #fff;
+}
+
+.infoButton:focus-visible {
+  outline: 2px solid #84adff;
+  outline-offset: 1px;
+}
+
+.updateDot {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #31cd69;
+}
+
+.version {
+  white-space: nowrap;
+}
