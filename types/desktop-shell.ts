@@ -47,18 +47,6 @@ export interface DesktopShellInfo {
   readonly [key: string]: unknown;
 }
 
-/** The window frame: the host sets the same values as attributes on <html>. */
-export interface DesktopWindowChrome {
-  readonly platform: "windows" | "macos" | "linux";
-  /** "native": the system draws a title bar and the page draws no strip. */
-  readonly style: "overlay" | "native";
-  readonly height: number;
-  readonly insets: { readonly left: number; readonly right: number };
-  readonly maximized: boolean;
-  readonly fullscreen: boolean;
-  readonly focused: boolean;
-}
-
 /** Shell services: navigation, external links and deep links. */
 export interface DesktopShellApi {
   readonly openExternal: (url: string) => void;
@@ -94,14 +82,6 @@ export interface DesktopShellApi {
     callback: DesktopShellListener<[unknown]>
   ) => void;
   readonly getInfo: () => Promise<DesktopShellInfo>;
-  /** The window frame the host draws (absent in the Electron app). */
-  readonly getWindowChrome?: (() => Promise<DesktopWindowChrome>) | undefined;
-  readonly onWindowChromeChange?:
-    | ((callback: DesktopShellListener<[DesktopWindowChrome]>) => void)
-    | undefined;
-  readonly offWindowChromeChange?:
-    | ((callback: DesktopShellListener<[DesktopWindowChrome]>) => void)
-    | undefined;
 }
 
 /** Desktop session responses never carry the refresh token into the page. */

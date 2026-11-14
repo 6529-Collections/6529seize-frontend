@@ -3954,6 +3954,8 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopUpdate.retry": "Try again",
   "desktopUpdate.later": "Not now",
   "desktop.titleStrip.label": "6529 Desktop window title",
+  "desktop.titleStrip.back": "Back",
+  "desktop.titleStrip.forward": "Forward",
   "desktop.titleStrip.appInfo": "App info",
   "desktop.titleStrip.appInfoUpdate": "App info (update available)",
   "desktop.appInfo.title": "About 6529 Desktop",

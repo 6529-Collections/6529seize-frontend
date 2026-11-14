@@ -1,7 +1,9 @@
 /* The 6529 Desktop title strip. The host sets the variables before first
    paint; the fallbacks apply only if it does not. Plain CSS: app-region and
    the host's variables are not expressible as Tailwind utilities. */
+/* Hidden unless the host draws its controls over the page. */
 .strip {
+  display: none;
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 1000;
@@ -9,7 +11,6 @@
   box-sizing: border-box;
   padding: 0 calc(var(--desktop-titlebar-inset-right, 0px) + 10px) 0
     calc(var(--desktop-titlebar-inset-left, 0px) + 10px);
-  display: flex;
   align-items: center;
   gap: 8px;
   background: var(--desktop-titlebar-background, #000);
@@ -26,11 +27,15 @@
   -webkit-app-region: no-drag;
 }
 
+:root[data-desktop-titlebar="overlay"] .strip {
+  display: flex;
+}
+
 :root[data-desktop-focused="false"] .strip {
   color: rgb(154 154 154 / 0.6);
 }
 
-.infoButton {
+.button {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -47,11 +52,16 @@
   cursor: pointer;
 }
 
-.infoButton:hover {
+.button:hover:not(:disabled) {
   color: #fff;
 }
 
-.infoButton:focus-visible {
+.button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.button:focus-visible {
   outline: 2px solid #84adff;
   outline-offset: 1px;
 }
