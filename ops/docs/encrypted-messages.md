@@ -156,10 +156,16 @@ Setup does not open automatically after sign-in.
 
 The explanation and signature button name the permissions this device needs:
 
-- Neither permission is on: **Post Signing & DM Encryption**, with separate
-  **Signed Posts** and **Encrypted DMs** sections and **Sign to enable both**.
-- Only signing is missing: **Enable Signed Posts** and **Sign to enable Signed Posts**.
-- Only encryption is missing: **Enable Encrypted DMs** and **Sign to enable Encrypted DMs**.
+- Neither permission is on: **Turn on signed posts and encrypted DMs**, with
+  separate **Signed Posts** and **Encrypted DMs** sections and **Sign to enable
+  both**. The composer's first-time notice uses the same title, so it and the
+  dialog it opens name the same permissions. Once signed posts have expired,
+  the notice is titled **Signed posts have ended in this browser**; when
+  encrypted DMs can be turned on too, its text says the same signature also
+  turns them on, and **Renew** opens **Turn on signed posts and encrypted
+  DMs**.
+- Only signing is missing: **Turn on signed posts** and **Sign to enable Signed Posts**.
+- Only encryption is missing: **Turn on encrypted DMs** and **Sign to enable Encrypted DMs**.
   This requests encryption alone and keeps the existing signing permission.
 
 A device that used the earlier encryption sees **Upgrade encrypted messages**
@@ -548,14 +554,20 @@ time your device sees someone. Compare safety codes and check the wallets in
 
 `/messages/encrypted/devices` lists every device of your profile that can read
 your encrypted messages, marks **This device**, and shows each device's
-platform, when it was added, last seen and when it expires, and whether its
-wallet signature was verified on this device. You can rename any unrevoked
+platform, when it was added, when it was last active (**Active now** for this
+device), the date it expires, and whether its wallet signature was verified on
+this device. You can rename any unrevoked
 device belonging to your profile from any authenticated browser or app. The name
 is saved on the server and appears on your other devices after their lists refresh;
 linked signing and encryption entries share that name. You can also revoke any
-device, including this one. Revoking this device removes its
-encrypted messages and keys from this browser right away and shows the card
-to turn encrypted messages on again. Your device's data is removed only when
+device, including this one. Revoking this device opens its own
+**Revoke this browser?** dialog: it names the browser you're using, says what
+stops, and with backup on says that only messages included in your last
+backup can be restored. With backup off it warns
+that the encrypted chats in this browser can't be restored afterwards and
+offers **Set up backup first**. Revoking it removes its encrypted messages and
+keys from this browser right away and shows the card to turn encrypted
+messages on again. Your device's data is removed only when
 the revocation verifies on it (it came from that device, or from a device of
 yours this device trusts). If 6529.io lists this device as revoked but the
 revocation can't be confirmed, the device stops sending and receiving
@@ -602,9 +614,13 @@ encrypted copy of your message history so you can restore it on a new device.
   them, and references to attachments with their keys. Never the device's
   encryption state; a new device always joins chats as a new device.
 - Backups are incremental: after a change the device uploads only what
-  changed, about 30 seconds later. **Back up now** uploads immediately. The
-  section shows when the device last backed up and how much of the 256 MB
-  backup storage is used.
+  changed, about 30 seconds later. **Back up now** uploads immediately and
+  then shows "Backup is up to date." in the status line for a few seconds.
+  If the upload needs another run (another device wrote to the backup at the
+  same moment), the status says "Backing up your history…" until that run
+  succeeds, never "up to date". A failed upload shows its error and is
+  retried about 5 minutes later. The section shows when the device last backed up and how much of the
+  256 MB backup storage is used (in kB below 1 MB).
 - 6529 stores only encrypted data. It cannot read your messages, contact
   list or chat names, and cannot recover your recovery code. It can see that
   you have a backup, its size and when it changes.
@@ -617,6 +633,10 @@ encrypted copy of your message history so you can restore it on a new device.
   read-only until someone in the chat adds this device; then new messages
   continue below the restored ones. After a restore the device also keeps the
   same backup up to date.
+- **Lost your recovery code?** sits next to **Restore messages**. It first asks
+  **Start a new backup without restoring?**: starting over deletes the
+  existing backup, including messages that aren't on this browser, and can't
+  be undone. Only **Delete old backup and start over** shows a new code.
 - The backup's encrypted pieces are linked in order, so 6529 cannot reorder,
   replay or remove pieces from the middle of your history. If the restore
   finds a piece missing, out of place or altered, it says "Part of the backup
@@ -624,12 +644,18 @@ encrypted copy of your message history so you can restore it on a new device.
   devices back up at exactly the same moment, the next backup run uploads a
   fresh full copy and removes the overlapping pieces; a restore attempted in
   between also stops without importing anything.
-- **Create new recovery code** shows a new code and uploads a fresh copy of
-  your history. Your old code stops working once the new backup finishes
-  uploading. Do this after you revoke a device that had backup on: the
-  section reminds you when a device was revoked after the backup was set up.
-- **Turn off backup** deletes the encrypted backup from 6529. Your recovery
-  code stops working; messages on your devices stay.
+- **Replace recovery code** shows a new code and uploads a fresh copy of
+  your history from this browser. Your old code stops working once the new
+  backup finishes uploading, and messages that are in the backup but not on
+  this browser aren't in the new one. When you revoke a device after the
+  backup was set up, the section shows **Replace your recovery code**: if that
+  device ever restored the backup, it may still hold its key. One device is
+  named; several (for example after a clean-up) are counted in one warning,
+  with one **Replace recovery code** action.
+- **Turn off backup…** is in the section's **More backup options** menu.
+  After confirmation it deletes the encrypted backup from 6529. Your recovery
+  code stops working; messages on your devices stay, but can't be restored if
+  this browser clears its data later.
 - Attachments themselves are not copied into the backup. A restored
   attachment downloads only after this device has been added back to the
   chat, and only while the encrypted file is still stored (one year).
@@ -776,7 +802,7 @@ without images**. Images and files too large for one encrypted attachment
   on or when the current recovery code was created.
 - **Backup was turned off or replaced on another device**: restore with the
   current recovery code to back up this device too, or start a new backup.
-- **Your backup storage is full**: select **Create new recovery code** to
+- **Your backup storage is full**: select **Replace recovery code** to
   replace the backup with a compact copy.
 - **Too many devices**: revoke a device you no longer use, then select
   **Turn on this device**.

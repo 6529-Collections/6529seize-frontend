@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { requestE2eeBackupSetup } from "../backup/backupSetupRequest";
 import { E2eeBackupPanel } from "../backup/E2eeBackupPanel";
 import { E2eeDeviceList } from "./E2eeDeviceList";
 import { E2eeNewDeviceNotice } from "./E2eeNewDeviceNotice";
@@ -33,6 +34,7 @@ export function E2eeDevicesPanel() {
         devices={devices}
         engine={engine}
         onRevoked={(device) => setRevokedLabel(device.label)}
+        onSetUpBackup={requestE2eeBackupSetup}
       />
       <p role="status" className="tw-sr-only">
         {revokedLabel ? t(locale, "e2ee.devices.revokeDone") : null}

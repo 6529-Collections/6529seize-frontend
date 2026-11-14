@@ -73,6 +73,7 @@ jest.mock("@/hooks/device-signing/useMinuteClock", () => ({
 }));
 
 let mockLocalGrant: ApiDeviceGrant | null = null;
+let mockOwnKey = OWN_KEY;
 let mockLocalState: { loaded: boolean; failed: boolean } = {
   loaded: true,
   failed: false,
@@ -83,7 +84,7 @@ jest.mock("@/hooks/device-signing/useLocalDeviceKeys", () => ({
     grant: mockLocalGrant,
     // An unreadable key store reports no keys (see useLocalDeviceKeys).
     publicKeys:
-      mockLocalState.failed || !mockLocalState.loaded ? [] : [OWN_KEY],
+      mockLocalState.failed || !mockLocalState.loaded ? [] : [mockOwnKey],
   }),
 }));
 
@@ -176,6 +177,7 @@ describe("DevicesPreferencesSettings", () => {
     mockAccount = ADDRESS;
     mockLocalGrant = null;
     mockLocalState = { loaded: true, failed: false };
+    mockOwnKey = OWN_KEY;
     mockGrantsAddress = undefined;
     mockAuth = {
       activeProfileProxy: null,
@@ -237,9 +239,9 @@ describe("DevicesPreferencesSettings", () => {
         "Signed Posts · Can post, edit, delete, and react"
       )
     ).toBeVisible();
-    expect(within(rows[0]!).getByText(/Last used/)).toBeVisible();
+    expect(within(rows[0]!).getByText(/Active now/)).toBeVisible();
     expect(within(rows[1]!).queryByText("This device")).toBeNull();
-    expect(within(rows[1]!).getByText(/Not used yet/)).toBeVisible();
+    expect(within(rows[1]!).getByText(/Not active yet/)).toBeVisible();
     expect(within(rows[2]!).getByText("Expired")).toBeVisible();
     expect(
       within(rows[2]!).queryByRole("button", { name: /^Revoke / })
@@ -287,6 +289,116 @@ describe("DevicesPreferencesSettings", () => {
     expect(
       within(dialog).getByText(/Its saved chat history stays on it/)
     ).toBeVisible();
+  });
+
+  it("shows one last-active time: the later use of either permission (F-11)", () => {
+    mockEncryptionEnabled = true;
+    mockAuth = { ...mockAuth, connectedProfile: { id: "profile" } };
+    mockQuery = { ...mockQuery, data: [phone] };
+    mockEncryptionQuery.mockReturnValue({
+      isSuccess: true,
+      data: [
+        {
+          grant_id: phone.id,
+          grant_message: "combined grant",
+          revoked_at: null,
+          last_seen_at: NOW - 60_000,
+          grant: { expires_at: (NOW + DAY) / 1000 },
+        },
+      ],
+    });
+
+    render(<DevicesPreferencesSettings />);
+
+    const row = within(screen.getByRole("list", { name: "Devices" }))
+      .getAllByRole("listitem")
+      .at(0)!;
+    expect(within(row).getByText(/Last active Oct 12, 2026/)).toBeVisible();
+    expect(within(row).queryByText(/Not active yet|Not used yet/)).toBeNull();
+  });
+
+  describe("revoking this browser (F-06)", () => {
+    it("names it as the browser in use and what stops", () => {
+      mockQuery = { ...mockQuery, data: [grant(), phone] };
+      render(<DevicesPreferencesSettings />);
+
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Chrome on macOS" })
+      );
+      const dialog = screen.getByRole("dialog", {
+        name: "Revoke this browser?",
+      });
+      expect(dialog).toHaveTextContent(
+        "Chrome on macOS is the browser you’re using now."
+      );
+      expect(dialog).toHaveTextContent(
+        "Posts from here won’t be signed until you turn signed posts back on."
+      );
+      // A signed-posts-only grant holds no encrypted chats to lose.
+      expect(dialog).not.toHaveTextContent("encrypted chats");
+      expect(
+        within(dialog).getByRole("button", { name: "Revoke this browser" })
+      ).toBeInTheDocument();
+    });
+
+    it("recognises this browser whatever the case of either key", () => {
+      mockOwnKey = OWN_KEY.toUpperCase().replace("0X", "0x");
+      mockQuery = {
+        ...mockQuery,
+        data: [grant({ device_key: `0x${"aA".repeat(32)}` })],
+      };
+      render(<DevicesPreferencesSettings />);
+
+      expect(screen.getByText("This device")).toBeVisible();
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Chrome on macOS" })
+      );
+      expect(
+        screen.getByRole("dialog", { name: "Revoke this browser?" })
+      ).toBeInTheDocument();
+    });
+
+    it("warns about encrypted chats and links to backup for a linked grant", async () => {
+      mockEncryptionEnabled = true;
+      mockAuth = { ...mockAuth, connectedProfile: { id: "profile" } };
+      mockQuery = { ...mockQuery, data: [grant()] };
+      mockRevoke.mockResolvedValue(true);
+      mockEncryptionQuery.mockReturnValue({
+        isSuccess: true,
+        refetch: jest.fn(),
+        data: [
+          {
+            grant_id: grant().id,
+            grant_message: "combined grant",
+            label: "Brave on Windows",
+            revoked_at: null,
+            grant: { expires_at: (NOW + DAY) / 1000 },
+          },
+        ],
+      });
+
+      render(<DevicesPreferencesSettings />);
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Brave on Windows" })
+      );
+      const dialog = screen.getByRole("dialog", {
+        name: "Revoke this browser?",
+      });
+      expect(dialog).toHaveTextContent(
+        "This browser stops receiving encrypted DMs, and the encrypted chats saved here are deleted."
+      );
+      expect(dialog).toHaveTextContent("This browser may not be backed up.");
+      expect(
+        within(dialog).getByRole("link", { name: "Check backup first" })
+      ).toHaveAttribute("href", "/messages/encrypted/devices");
+
+      await act(async () => {
+        fireEvent.click(
+          within(dialog).getByRole("button", { name: "Revoke this browser" })
+        );
+      });
+      expect(mockRevoke).toHaveBeenCalledWith(grant());
+    });
   });
 
   describe("revoking a grant with a linked encryption device", () => {
@@ -340,11 +452,11 @@ describe("DevicesPreferencesSettings", () => {
       render(<DevicesPreferencesSettings />);
       return order;
     };
-    const confirm = async (label: string) => {
+    const confirm = async (label: string, button = "Revoke") => {
       fireEvent.click(screen.getByRole("button", { name: `Revoke ${label}` }));
       const dialog = screen.getByRole("dialog");
       await act(async () => {
-        fireEvent.click(within(dialog).getByRole("button", { name: "Revoke" }));
+        fireEvent.click(within(dialog).getByRole("button", { name: button }));
       });
     };
 
@@ -450,19 +562,20 @@ describe("DevicesPreferencesSettings", () => {
       fireEvent.click(
         screen.getByRole("button", { name: "Revoke Chrome on macOS" })
       );
+      // This browser's own dialog says its encrypted chats go right away.
       expect(
-        within(screen.getByRole("dialog")).getByText(/deleted right away/)
-      ).toBeVisible();
+        screen.getByRole("dialog", { name: "Revoke this browser?" })
+      ).toHaveTextContent("the encrypted chats saved here are deleted");
       fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
 
-      await confirm("Chrome on macOS");
+      await confirm("Chrome on macOS", "Revoke this browser");
       expect(mockRevokeE2eeDevice).toHaveBeenCalledWith(THIS_E2EE_KEY);
       expect(mockRemoveLocal).not.toHaveBeenCalled();
     });
 
     it("clears this browser's encrypted data itself when the engine is not ready", async () => {
       const order = setUp(false);
-      await confirm("Chrome on macOS");
+      await confirm("Chrome on macOS", "Revoke this browser");
       expect(order).toEqual(["grant"]);
       expect(mockRevokeE2eeDevice).not.toHaveBeenCalled();
       await waitFor(() =>
@@ -598,7 +711,7 @@ describe("DevicesPreferencesSettings", () => {
 
     expect(screen.getByText("No authorized devices yet.")).toBeVisible();
     fireEvent.click(
-      screen.getByRole("button", { name: "Enable Signed Posts" })
+      screen.getByRole("button", { name: "Turn on signed posts" })
     );
 
     expect(setup).toHaveBeenCalledWith(
@@ -614,7 +727,7 @@ describe("DevicesPreferencesSettings", () => {
     const { rerender } = render(<DevicesPreferencesSettings />);
     expect(
       screen.queryByRole("button", {
-        name: "Enable Signed Posts",
+        name: "Turn on signed posts",
       })
     ).toBeNull();
 
@@ -623,7 +736,7 @@ describe("DevicesPreferencesSettings", () => {
     rerender(<DevicesPreferencesSettings />);
     expect(
       screen.queryByRole("button", {
-        name: "Enable Signed Posts",
+        name: "Turn on signed posts",
       })
     ).toBeNull();
   });

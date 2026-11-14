@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import { getE2eeActionErrorKey } from "../e2eeErrors";
 import { E2eeDialog } from "./E2eeDialog";
+import { hasContent } from "./hasContent";
 
 interface E2eeConfirmDialogProps {
   readonly open: boolean;
@@ -14,8 +15,12 @@ interface E2eeConfirmDialogProps {
   readonly confirmLabel: string;
   readonly destructive?: boolean | undefined;
   readonly errorFallbackKey?: MessageKey | undefined;
+  /** Copy for a failed confirm; default: the encrypted-chat action errors. */
+  readonly errorKeyFor?: ((error: unknown) => MessageKey) | undefined;
   readonly onConfirm: () => Promise<void>;
   readonly onClose: () => void;
+  /** Extra detail between the body and the buttons. */
+  readonly children?: ReactNode | undefined;
 }
 
 /** Confirmation for irreversible encrypted-chat actions (revoke, leave…). */
@@ -26,8 +31,10 @@ export function E2eeConfirmDialog({
   confirmLabel,
   destructive = true,
   errorFallbackKey = "e2ee.info.actionFailed",
+  errorKeyFor,
   onConfirm,
   onClose,
+  children,
 }: E2eeConfirmDialogProps) {
   const locale = useBrowserLocale();
   const [pending, setPending] = useState(false);
@@ -50,7 +57,11 @@ export function E2eeConfirmDialog({
       onClose();
     } catch (error) {
       setPending(false);
-      setErrorKey(getE2eeActionErrorKey(error, errorFallbackKey));
+      setErrorKey(
+        errorKeyFor
+          ? errorKeyFor(error)
+          : getE2eeActionErrorKey(error, errorFallbackKey)
+      );
     }
   };
 
@@ -82,10 +93,15 @@ export function E2eeConfirmDialog({
         </>
       }
     >
-      {errorKey ? (
-        <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
-          {t(locale, errorKey)}
-        </p>
+      {hasContent(children) || errorKey ? (
+        <div className="tw-flex tw-flex-col tw-gap-3">
+          {children}
+          {errorKey ? (
+            <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
+              {t(locale, errorKey)}
+            </p>
+          ) : null}
+        </div>
       ) : null}
     </E2eeDialog>
   );

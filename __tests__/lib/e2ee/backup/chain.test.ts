@@ -478,7 +478,7 @@ async function twoWriters(server: FakeBackupServer) {
 function racingWriter(
   api: E2eeBackupApi,
   a: Device,
-  races: readonly (() => Promise<void>)[]
+  races: readonly (() => Promise<unknown>)[]
 ): Device {
   const pending = [...races];
   const racingApi: E2eeBackupApi = {
@@ -689,7 +689,13 @@ describe("backup writers keep one chain", () => {
     const racingA = racingWriter(api, a, beats);
     await racingA.manager.start();
     putBoth([a, b], message("m6", "six"));
-    await racingA.manager.backupNow();
+    // Not complete: the repair run is queued, and until it succeeds the
+    // backup reads as still uploading, never as up to date.
+    await expect(racingA.manager.backupNow()).resolves.toBe(false);
+    expect(racingA.manager.getSnapshot()).toMatchObject({
+      uploading: true,
+      lastError: null,
+    });
     // Only B's chunks landed (seqs 7-10): A's 4 attempts were all refused.
     expect(await allSeqs(api, backupId)).toEqual([
       1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
@@ -700,7 +706,8 @@ describe("backup writers keep one chain", () => {
     expect((await restoreWith(api, prepared)).code).toBeNull();
 
     // A's next run starts a new chain with a full snapshot and compacts.
-    await racingA.manager.backupNow();
+    await expect(racingA.manager.backupNow()).resolves.toBe(true);
+    expect(racingA.manager.getSnapshot().uploading).toBe(false);
     expect(await allSeqs(api, backupId)).toEqual([11]);
     const restored = await restoreWith(api, prepared);
     expect(restored.code).toBeNull();

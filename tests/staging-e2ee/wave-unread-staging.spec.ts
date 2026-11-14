@@ -2,6 +2,7 @@ import { createChatWave } from "../support/staging-e2ee/chat-wave";
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
+import { e2eeMessage } from "../support/e2ee/e2eeCopy";
 import { newRunId } from "../support/staging-e2ee/fixtures";
 import {
   attachSessionEvidence,
@@ -90,7 +91,9 @@ async function post(session: StagingE2eeSession, text: string) {
   await input.fill(text);
   await input.press("Enter");
   const message = page.getByText(text, { exact: true }).last();
-  const signedPosts = page.getByRole("dialog", { name: "Enable Signed Posts" });
+  const signedPosts = page.getByRole("dialog", {
+    name: e2eeMessage("e2ee.deviceStatus.enableProof"),
+  });
   await expect(message.or(signedPosts).first()).toBeVisible({
     timeout: UI_TIMEOUT_MS,
   });

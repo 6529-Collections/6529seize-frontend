@@ -9,6 +9,8 @@ import {
   waitFor,
 } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
+import { contextFor, E2eeTestProvider } from "../e2ee/fakeE2eeEngine";
 
 const NOW = Date.UTC(2026, 9, 12, 12, 0);
 const DAY = 86_400_000;
@@ -154,7 +156,7 @@ describe("SignedMessagesNotice", () => {
 
     expect(
       screen.getByRole("region", {
-        name: "Turn on Signed Posts (one signature)",
+        name: "Turn on signed posts",
       })
     ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
@@ -679,6 +681,46 @@ describe("SignedMessagesNotice", () => {
       expect(screen.queryByRole("button", { name: "This was me" })).toBeNull();
       expect(mockAcknowledge).not.toHaveBeenCalled();
       expect(mockRevoke).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("when encrypted DMs can be turned on too (F-18)", () => {
+    // An idle engine: encrypted DMs are allowed but not set up here yet.
+    const renderWithEncryption = () =>
+      render(
+        <E2eeTestProvider value={contextFor(null)}>
+          <SignedMessagesNotice composerEmpty />
+        </E2eeTestProvider>
+      );
+
+    it("names both permissions, as the setup dialog it opens does", () => {
+      const setup = jest.fn();
+      window.addEventListener("6529:device-setup", setup, { once: true });
+      renderWithEncryption();
+
+      expect(
+        screen.getByRole("region", {
+          name: E2EE_MESSAGES["e2ee.deviceStatus.enableBoth"],
+        })
+      ).toBeVisible();
+      expect(
+        screen.getByText(
+          "One wallet signature, no gas. Lasts 180 days in this browser."
+        )
+      ).toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
+      expect(setup).toHaveBeenCalledWith(
+        expect.objectContaining({ detail: "both" })
+      );
+    });
+
+    it("says renewing also turns on encrypted DMs", () => {
+      mockLocal = { ...mockLocal, grant: grant({ expires_at: NOW - DAY }) };
+      renderWithEncryption();
+
+      expect(
+        screen.getByText(/The same one signature also turns on encrypted DMs\.$/)
+      ).toBeVisible();
     });
   });
 });
