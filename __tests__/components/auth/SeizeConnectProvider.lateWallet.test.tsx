@@ -4,6 +4,8 @@ import {
   useSeizeConnectContext,
 } from "@/components/auth/SeizeConnectContext";
 import type { SeizeConnectContextType } from "@/components/auth/seizeConnectTypes";
+import type { AppKitModalBridgeStore } from "@/components/auth/AppKitModalBridge";
+import { AppKitBootstrapContext } from "@/components/providers/AppKitBootstrapContext";
 import {
   getConnectedWalletAccounts,
   getWalletAddress,
@@ -35,6 +37,20 @@ jest.mock("@reown/appkit/react", () => ({
   useDisconnect: () => ({ disconnect: jest.fn() }),
   useWalletInfo: () => ({ walletInfo: null }),
 }));
+// Keep the provider's real bridge store, captured so the test can check
+// that the late account really reached it.
+const mockStores: AppKitModalBridgeStore[] = [];
+jest.mock("@/components/auth/AppKitModalBridge", () => {
+  const actual = jest.requireActual("@/components/auth/AppKitModalBridge");
+  return {
+    ...actual,
+    createAppKitModalBridgeStore: () => {
+      const store = actual.createAppKitModalBridgeStore();
+      mockStores.push(store);
+      return store;
+    },
+  };
+});
 jest.mock("wagmi", () => ({
   useAccount: () => ({
     address: mockAccount.address,
@@ -56,15 +72,26 @@ const RESTORED = "0x5555555555555555555555555555555555555555";
 const OLD_WALLET = "0x4444444444444444444444444444444444444444";
 
 let context: SeizeConnectContextType | null = null;
-function Capture() {
+function Capture({ update }: { readonly update: number }) {
   context = useSeizeConnectContext();
-  return null;
+  return <span data-update={update} />;
 }
+
+// AppKit created and ready, so the provider mounts its account bridge.
+const bootstrap = {
+  status: "ready" as const,
+  hasTerminalError: false,
+  isCreated: true,
+  isReady: true,
+  isWaiting: false,
+  waitForReady: () => Promise.resolve(),
+};
 
 describe("a late wallet update after the desktop restore", () => {
   beforeEach(() => {
     localStorage.clear();
     context = null;
+    mockStores.length = 0;
     mockAccount = {
       address: undefined,
       isConnected: false,
@@ -76,29 +103,39 @@ describe("a late wallet update after the desktop restore", () => {
     });
   });
 
-  it("gives the old wallet no auth and leaves the restored profiles alone", async () => {
-    const tree = (
-      <SeizeConnectProvider>
-        <Capture />
-      </SeizeConnectProvider>
+  it("receives the late wallet through the AppKit bridge without touching stored profiles", async () => {
+    const tree = (update: number) => (
+      <AppKitBootstrapContext.Provider value={bootstrap}>
+        <SeizeConnectProvider>
+          <Capture update={update} />
+        </SeizeConnectProvider>
+      </AppKitBootstrapContext.Provider>
     );
-    const { rerender } = render(tree);
-    await waitFor(() => expect(context).not.toBeNull());
+    const { rerender } = render(tree(1));
+    await waitFor(() => expect(context?.address?.toLowerCase()).toBe(RESTORED));
+    expect(context?.hasValidWalletAuth).toBe(true);
 
-    // The reconnect from before the restore finishes with the old wallet.
+    // The reconnect from before the restore finishes with the old wallet:
+    // a new render, so the AppKit account hook reports it to the bridge.
     mockAccount = {
       address: OLD_WALLET,
       isConnected: true,
       status: "connected",
     };
-    rerender(tree);
-    await act(async () => undefined);
+    rerender(tree(2));
+    await waitFor(() =>
+      expect(mockStores[0]?.getAccountSnapshot().address).toBe(OLD_WALLET)
+    );
+    // Let the provider's 50 ms wallet-state sync run.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 80));
+    });
 
-    // The restored profile stays active with its auth; the old wallet is
-    // not taken as the active wallet's live connection.
-    expect(context?.address?.toLowerCase()).toBe(RESTORED);
-    expect(context?.hasValidWalletAuth).toBe(true);
-    expect(context?.isConnected).toBe(false);
+    // Same as on the web and in the Electron app: a connected wallet with no
+    // stored profile becomes the active wallet, unsigned, so it has no auth.
+    // The restored profile stays stored, untouched.
+    expect(context?.address?.toLowerCase()).toBe(OLD_WALLET);
+    expect(context?.hasValidWalletAuth).toBe(false);
     expect(
       getConnectedWalletAccounts().map((account) =>
         account.address.toLowerCase()
