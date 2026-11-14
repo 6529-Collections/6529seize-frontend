@@ -24,8 +24,7 @@ const POLL_INTERVAL_MS = 15_000;
 // Newest notifications fetched per profile and poll; several that arrive
 // between two polls are each shown, oldest first.
 const POLL_LIMIT = 5;
-// When more arrive between two polls, older pages are fetched back to the
-// last seen one, at most this many pages per range and poll. What a poll
+// Pages fetched per profile and poll, all ranges together. What a poll
 // cannot reach is kept as a gap and fetched by the next polls: nothing is
 // skipped.
 const MAX_POLL_PAGES = 10;
@@ -97,6 +96,8 @@ interface FetchedRange {
   readonly notifications: readonly ApiNotification[];
   /** Where to continue when the page budget ran out first; else null. */
   readonly resumeBefore: number | null;
+  /** Pages fetched for this range. */
+  readonly pagesUsed: number;
 }
 
 const isUnread = (notification: ApiNotification): boolean =>
@@ -113,16 +114,17 @@ const continueRange = async (
   after: number,
   pagesLeft: number
 ): Promise<FetchedRange> => {
-  if (page.length < POLL_LIMIT)
-    return { notifications: page, resumeBefore: null };
+  const done = { notifications: page, resumeBefore: null, pagesUsed: 0 };
+  if (page.length < POLL_LIMIT) return done;
   const oldest = Math.min(...page.map((notification) => notification.id));
-  if (oldest <= after) return { notifications: page, resumeBefore: null };
-  if (pagesLeft === 0) return { notifications: page, resumeBefore: oldest };
+  if (oldest <= after) return done;
+  if (pagesLeft === 0) return { ...done, resumeBefore: oldest };
   const next = (await fetchNotificationPage(jwt, signal, oldest)).notifications;
   const rest = await continueRange(jwt, signal, next, after, pagesLeft - 1);
   return {
     notifications: [...page, ...rest.notifications],
     resumeBefore: rest.resumeBefore,
+    pagesUsed: rest.pagesUsed + 1,
   };
 };
 
@@ -145,15 +147,21 @@ const unreadBetween = (
       isUnread(notification)
   );
 
-/** The oldest open gap: what it holds, and what is still open after this poll. */
+/**
+ * The oldest open gap, within `pagesLeft` pages: what it holds, what is
+ * still open after this poll, and the pages it used.
+ */
 const fetchGap = async (
   jwt: string,
   signal: AbortSignal,
-  gap: NotificationGap
+  gap: NotificationGap,
+  pagesLeft: number
 ): Promise<{
   readonly found: readonly ApiNotification[];
   readonly rest: NotificationGap | null;
+  readonly pagesUsed: number;
 }> => {
+  if (pagesLeft === 0) return { found: [], rest: gap, pagesUsed: 0 };
   const first = (await fetchNotificationPage(jwt, signal, gap.before))
     .notifications;
   const range = await continueRange(
@@ -161,7 +169,7 @@ const fetchGap = async (
     signal,
     first,
     gap.after,
-    MAX_POLL_PAGES - 1
+    pagesLeft - 1
   );
   return {
     found: unreadBetween(range.notifications, gap.after, gap.before),
@@ -169,6 +177,7 @@ const fetchGap = async (
       range.resumeBefore === null
         ? null
         : { before: range.resumeBefore, after: gap.after },
+    pagesUsed: range.pagesUsed + 1,
   };
 };
 
@@ -186,10 +195,11 @@ const firstProfilePoll = (
 };
 
 /**
- * One profile's poll. After the first, it fetches newest first back to the
- * last seen notification, then the oldest open gap; a range the page budget
- * could not finish becomes a gap for the next poll, so a burst of any size
- * is shown in full, a bounded number of pages at a time.
+ * One profile's poll, within one budget of MAX_POLL_PAGES pages. After the
+ * first page, it continues the oldest open gap, then fetches newest first
+ * back to the last seen notification with the pages left; a range the
+ * budget could not finish becomes a gap for the next poll, so a burst of any
+ * size is shown in full, a bounded number of pages at a time.
  */
 const pollProfile = async (
   account: ConnectedWalletAccount,
@@ -205,17 +215,19 @@ const pollProfile = async (
   }
   if (lastSeenId === undefined) return firstProfilePoll(first.notifications);
 
+  // The first page is already spent.
+  const budget = MAX_POLL_PAGES - 1;
+  const [gap, ...laterGaps] = cursor?.gaps ?? [];
+  const older = gap
+    ? await fetchGap(jwt, signal, gap, budget)
+    : { found: [], rest: null, pagesUsed: 0 };
   const top = await continueRange(
     jwt,
     signal,
     first.notifications,
     lastSeenId,
-    MAX_POLL_PAGES - 1
+    budget - older.pagesUsed
   );
-  const [gap, ...laterGaps] = cursor?.gaps ?? [];
-  const older = gap
-    ? await fetchGap(jwt, signal, gap)
-    : { found: [], rest: null };
   const shown = new Map(
     [...older.found, ...unreadBetween(top.notifications, lastSeenId)].map(
       (notification) => [notification.id, notification] as const
