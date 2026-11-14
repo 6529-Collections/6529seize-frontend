@@ -10,6 +10,7 @@ import { useEffect, useRef } from "react";
 const SITE_SEARCH_REQUEST_EVENT = "6529:open-site-search";
 
 export function requestSiteSearch(): void {
+  if (typeof window === "undefined") return;
   window.dispatchEvent(new Event(SITE_SEARCH_REQUEST_EVENT));
 }
 

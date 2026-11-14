@@ -1,5 +1,6 @@
 import { render, screen, fireEvent, act } from "@testing-library/react";
 import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
+import { requestSiteSearch } from "@/hooks/useSiteSearchRequest";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 
 let keyFilter: (e: KeyboardEvent) => boolean;
@@ -118,6 +119,18 @@ describe("HeaderSearchButton", () => {
     }
 
     expect(event.defaultPrevented).toBe(true);
+    expect(await screen.findByTestId("modal")).toBeInTheDocument();
+  });
+
+  it("opens the modal on a site-search request (the desktop app's Ctrl/Cmd+F)", async () => {
+    useDeviceInfoMock.mockReturnValue({ isApp: false } as any);
+    render(<HeaderSearchButton wave={null} />);
+    expect(screen.queryByTestId("modal")).toBeNull();
+
+    act(() => {
+      requestSiteSearch();
+    });
+
     expect(await screen.findByTestId("modal")).toBeInTheDocument();
   });
 
