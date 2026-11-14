@@ -9,6 +9,7 @@ import {
   loginWithSessionV2,
   persistSessionResponse,
 } from "@/services/auth/session-v2.utils";
+import { getSignOutAllState } from "@/services/auth/sign-out-all-state";
 import {
   setBrowserConnectorStatus,
   takeBrowserConnectorRequest,
@@ -22,22 +23,12 @@ import {
  * nothing and does nothing on the web.
  */
 export default function DesktopBrowserConnectorBridge() {
-  const { seizeAcceptConnection, isSigningOutAll } = useSeizeConnectContext();
+  const { seizeAcceptConnection } = useSeizeConnectContext();
   const acceptConnection = useRef(seizeAcceptConnection);
-  // Sign-out-all runs so far, and whether one is running: a sign-in that
-  // started before one must not save its session afterwards.
-  const signOutAll = useRef({ running: false, count: 0 });
 
   useEffect(() => {
     acceptConnection.current = seizeAcceptConnection;
   }, [seizeAcceptConnection]);
-
-  useEffect(() => {
-    const { count } = signOutAll.current;
-    signOutAll.current = isSigningOutAll
-      ? { running: true, count: count + 1 }
-      : { running: false, count };
-  }, [isSigningOutAll]);
 
   useEffect(() => {
     const api = getDesktopShellApi();
@@ -55,12 +46,17 @@ export default function DesktopBrowserConnectorBridge() {
       if (!active) return;
       const result = parseBrowserConnectorResult(payload);
       if (!result || !takeBrowserConnectorRequest(result.requestId)) return;
-      const signOutsAtStart = signOutAll.current.count;
-      // False once a sign-out-all started after this sign-in began.
-      const shouldPersist = () =>
-        active &&
-        !signOutAll.current.running &&
-        signOutAll.current.count === signOutsAtStart;
+      // Read synchronously: a sign-out-all that starts and ends between two
+      // renders still counts. False once one started after this sign-in.
+      const signOutsAtStart = getSignOutAllState().started;
+      const shouldPersist = () => {
+        const signOutAll = getSignOutAllState();
+        return (
+          active &&
+          !signOutAll.running &&
+          signOutAll.started === signOutsAtStart
+        );
+      };
       if (!shouldPersist()) {
         setBrowserConnectorStatus("failed");
         return;
