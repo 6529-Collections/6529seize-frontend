@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import BrowserWalletRequestPanel from "@/components/desktop/BrowserWalletRequestPanel";
 import { loadDesktopUrlInPlace } from "@/helpers/desktop-navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -39,6 +40,12 @@ const PROBLEM_MESSAGES = {
 const subscribeToNothing = () => () => undefined;
 const getClientHydrated = () => true;
 const getServerHydrated = () => false;
+const getClientHash = () => window.location.hash;
+const getServerHash = () => "";
+
+/** A wallet request from 6529 Desktop travels in the fragment (`#w=...`). */
+const isWalletRequestHash = (hash: string): boolean =>
+  new URLSearchParams(hash.replace(/^#/, "")).has("w");
 
 // Validity depends on the current time, so it is read only in the browser.
 const readRequest = (params: { get(name: string): string | null }) =>
@@ -47,7 +54,7 @@ const readRequest = (params: { get(name: string): string | null }) =>
 const hasExpired = (expiresAt: number) => expiresAt <= Date.now();
 
 /**
- * Runs in the system browser, opened by 6529 Desktop. The user connects a
+ * Runs in the system browser, opened by 6529 Desktop. Sign-in: the user connects a
  * browser wallet and signs a 6529 Desktop sign-in challenge; the page then
  * opens the desktop app's link with the signature. It never signs in to this
  * site and sends the signature nowhere else.
@@ -63,6 +70,11 @@ export default function BrowserConnectorPage() {
     getClientHydrated,
     getServerHydrated
   );
+  const hash = useSyncExternalStore(
+    subscribeToNothing,
+    getClientHash,
+    getServerHash
+  );
   const [expired, setExpired] = useState(false);
   const [step, setStep] = useState<Step>({ kind: "ready" });
   const parsed = useMemo<BrowserConnectorRequest | null>(
@@ -75,6 +87,13 @@ export default function BrowserConnectorPage() {
 
   const address =
     live.isConnected && live.address ? live.address.toLowerCase() : null;
+
+  // A wallet request is handled entirely by its own panel, which acts only
+  // on requests signed by this run of 6529 Desktop. Sign-in links carry no
+  // fragment and keep the flow below unchanged.
+  if (hydrated && isWalletRequestHash(hash)) {
+    return <BrowserWalletRequestPanel hash={hash} />;
+  }
 
   const signIn = async () => {
     if (!request?.ok || !address) return;

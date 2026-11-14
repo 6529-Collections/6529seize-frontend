@@ -26,6 +26,12 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/helpers/desktop-navigation", () => ({
   loadDesktopUrlInPlace: (url: string) => assign(url),
 }));
+jest.mock("@/components/desktop/BrowserWalletRequestPanel", () => ({
+  __esModule: true,
+  default: ({ hash }: { hash: string }) => (
+    <p data-testid="wallet-request-panel">{hash}</p>
+  ),
+}));
 jest.mock("@/services/auth/session-v2.utils", () => ({
   getSessionNonce: jest.fn(),
 }));
@@ -201,5 +207,38 @@ describe("BrowserConnectorPage", () => {
     expect(await screen.findByText(/was not signed/)).toBeInTheDocument();
     expect(screen.getByRole("alert")).toHaveTextContent("was not signed");
     expect(assign).not.toHaveBeenCalled();
+  });
+
+  describe("wallet requests", () => {
+    afterEach(() => {
+      globalThis.history.replaceState(null, "", "/");
+    });
+
+    it("hands a fragment request to the wallet request panel only", async () => {
+      globalThis.history.replaceState(
+        null,
+        "",
+        "/browser-connector#w=abc&s=0x1"
+      );
+      render(<BrowserConnectorPage />);
+
+      expect(
+        await screen.findByTestId("wallet-request-panel")
+      ).toHaveTextContent("#w=abc&s=0x1");
+      expect(
+        screen.queryByRole("button", { name: "Connect wallet" })
+      ).toBeNull();
+      expect(getSessionNonce).not.toHaveBeenCalled();
+    });
+
+    it("keeps the sign-in flow for a fragment without a request", async () => {
+      globalThis.history.replaceState(null, "", "/browser-connector#other");
+      render(<BrowserConnectorPage />);
+
+      expect(
+        await screen.findByRole("button", { name: "Connect wallet" })
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId("wallet-request-panel")).toBeNull();
+    });
   });
 });

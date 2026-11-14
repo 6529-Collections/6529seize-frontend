@@ -3,7 +3,7 @@ import { isDesktopApp } from "@/helpers/desktop-shell";
 
 type E2eePlatform = "web" | "desktop" | "phone";
 
-const DESKTOP_GRANT_ORIGIN = "6529 Desktop";
+export const DESKTOP_GRANT_ORIGIN = "6529 Desktop";
 
 /** Device platform recorded with an encrypted-messages device (contract 4.1). */
 export function detectE2eePlatform(): E2eePlatform {

@@ -86,10 +86,10 @@
       // optimistic send (A3), whose PR removes these.
       "lib/chat-store/**": ["files", "exports", "types"],
       "lib/action-lifecycle/**": ["files", "exports", "types"],
-      // 6529 Desktop wallet forwarding: the page/shell contract lands before
-      // its browser page and connector; its Jest contract is the consumer
-      // until the browser-page PR imports it and removes this exemption.
-      "lib/desktop/walletForwarding.ts": ["files", "exports", "types"],
+      // 6529 Desktop wallet forwarding: the browser page uses the contract;
+      // its shell-side helpers (bridge start, answer, capabilities) wait for
+      // the in-app connector, whose PR removes this exemption.
+      "lib/desktop/walletForwarding.ts": ["exports", "types"],
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],

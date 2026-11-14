@@ -4005,6 +4005,59 @@ export const EN_US_ROOT_MESSAGES = {
     "This link is not a valid 6529 Desktop sign-in link. Start again from 6529 Desktop.",
   "browserConnector.problem.expired":
     "This sign-in link has expired. Start again from 6529 Desktop.",
+  "browserConnector.wallet.title": "Sign for 6529 Desktop",
+  "browserConnector.wallet.checking": "Checking the request from 6529 Desktop…",
+  "browserConnector.wallet.code":
+    "Request code {code}. Check that 6529 Desktop shows the same code.",
+  "browserConnector.wallet.safety":
+    "6529 never asks for your recovery phrase or password. Signing costs nothing and sends no transaction.",
+  "browserConnector.wallet.messageIntro":
+    "6529 Desktop asks {address} to sign this message:",
+  "browserConnector.wallet.typedIntro": "6529 Desktop asks {address} to sign:",
+  "browserConnector.wallet.schema.encryptedMessagesGrant":
+    "Let 6529 Desktop on this computer send and read your encrypted messages.",
+  "browserConnector.wallet.schema.signedMessagesGrant":
+    "Turn on signed messages for 6529 Desktop on this computer.",
+  "browserConnector.wallet.schema.memesSubmission":
+    "Submit “{artwork}” to {destination}.",
+  "browserConnector.wallet.schema.profileSitePublish":
+    "Publish version {version} of the profile site for {handle}.",
+  "browserConnector.wallet.details": "Everything you sign",
+  "browserConnector.wallet.connectIntro":
+    "Connect the browser wallet for {address} to continue.",
+  "browserConnector.wallet.switchAccount":
+    "Your wallet is connected as {connected}. Switch it to {address} to sign.",
+  "browserConnector.wallet.switchNetwork":
+    "Switch your wallet to the network this request is for.",
+  "browserConnector.wallet.switchNetworkAction": "Switch network",
+  "browserConnector.wallet.sign": "Sign in wallet",
+  "browserConnector.wallet.decline": "Decline",
+  "browserConnector.wallet.signing": "Waiting for your wallet…",
+  "browserConnector.wallet.failed":
+    "Your wallet did not sign. Try again, or decline.",
+  "browserConnector.wallet.returned":
+    "Done. Return to 6529 Desktop. You can close this tab.",
+  "browserConnector.wallet.declined":
+    "Declined. Return to 6529 Desktop. You can close this tab.",
+  "browserConnector.wallet.problem.invalid":
+    "This page did not get a valid request from 6529 Desktop, so there is nothing to sign. Start again from 6529 Desktop.",
+  "browserConnector.wallet.problem.expired":
+    "This request has expired. Nothing was signed. Start again from 6529 Desktop.",
+  "browserConnector.wallet.refused":
+    "This page cannot show what this request would sign, so it will not ask your wallet to sign it.",
+  "browserConnector.wallet.refusal.unreadable-message":
+    "The message is not readable text.",
+  "browserConnector.wallet.refusal.sign-in-message":
+    "It is a sign-in message. Sign in from 6529 Desktop instead.",
+  "browserConnector.wallet.refusal.unknown-typed-data":
+    "It is a kind of request 6529 Desktop does not send from here. Continue in your browser on 6529.io instead.",
+  "browserConnector.wallet.refusal.wrong-wallet":
+    "It names a different wallet than the one asked to sign.",
+  "browserConnector.wallet.refusal.wrong-origin":
+    "It names a different app than 6529 Desktop.",
+  "browserConnector.wallet.refusal.statement-mismatch":
+    "Its description does not match what it would sign.",
+  "browserConnector.wallet.tellApp": "Tell 6529 Desktop and close",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",
