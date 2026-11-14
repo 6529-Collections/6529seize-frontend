@@ -18,6 +18,7 @@ type NavigateListener = (event: unknown, path: string) => void;
 
 const createApi = () => {
   const listeners = new Set<NavigateListener>();
+  const searchListeners = new Set<() => void>();
   return {
     listeners,
     openExternal: jest.fn(),
@@ -28,12 +29,12 @@ const createApi = () => {
       listeners.delete(listener)
     ),
     navigationReady: jest.fn().mockResolvedValue(undefined),
-    searchListeners: new Set<() => void>(),
-    onOpenSearch: jest.fn(function (this: void, listener: () => void) {
-      api.searchListeners.add(listener);
+    searchListeners,
+    onOpenSearch: jest.fn((listener: () => void) => {
+      searchListeners.add(listener);
     }),
     offOpenSearch: jest.fn((listener: () => void) => {
-      api.searchListeners.delete(listener);
+      searchListeners.delete(listener);
     }),
   };
 };

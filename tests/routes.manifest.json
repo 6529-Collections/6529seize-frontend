@@ -248,6 +248,10 @@
     "/bookmarks": {
       "classification": "auth"
     },
+    "/browser-connector": {
+      "classification": "exempt",
+      "exemptReason": "6529 Desktop sign-in bridge opened in the browser by the app; meaningless without the app's one-time link parameters."
+    },
     "/buidl": {
       "classification": "crawlable",
       "family": "info"
