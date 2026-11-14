@@ -21,7 +21,7 @@ const DESKTOP_SCHEMES = [
 
 type DesktopScheme = (typeof DESKTOP_SCHEMES)[number];
 
-export const BROWSER_CONNECTOR_PATH = "/browser-connector";
+const BROWSER_CONNECTOR_PATH = "/browser-connector";
 /** How long the user has to finish in the browser. */
 export const BROWSER_CONNECTOR_TIMEOUT_MS = 120_000;
 
