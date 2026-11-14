@@ -31,10 +31,18 @@ function decodeSegment(segment: string | undefined): string | null {
 }
 
 /**
+ * Older releases whose files can be downloaded again, by their own version
+ * only: the owner put rc.15 back for download (2026-11-14).
+ */
+const ALSO_OFFERED: ReadonlySet<string> = new Set(["0.1.0-rc.15"]);
+
+/**
  * Only the newest release can be downloaded (the owner, 2026-11-01 and
  * 2026-11-04): an older test release stays in the feed and on the history
  * page, with its SHA-256, but its files are not handed out. A newest
- * release the feed lists as unsafe hands out none.
+ * release the feed lists as unsafe hands out none. The one exception is a
+ * release in ALSO_OFFERED, under /download/<version>/<file>, while the feed
+ * lists it and doesn't list it as unsafe.
  */
 function findRelease(
   releases: readonly ValidatorRelease[],
@@ -44,26 +52,36 @@ function findRelease(
   if (!newest) {
     return null;
   }
-  const listed = (fileName: string | null): fileName is string =>
-    fileName !== null && newest.files.some((file) => file.name === fileName);
+  const listed = (
+    release: ValidatorRelease,
+    fileName: string | null
+  ): fileName is string =>
+    fileName !== null && release.files.some((file) => file.name === fileName);
   if (segments.length === 1) {
     const fileName = decodeSegment(segments[0]);
-    return listed(fileName) ? { release: newest, fileName } : null;
+    return listed(newest, fileName) ? { release: newest, fileName } : null;
   }
   if (segments.length === 2) {
     const version = decodeSegment(segments[0]);
     const fileName = decodeSegment(segments[1]);
-    return version === newest.version && listed(fileName)
-      ? { release: newest, fileName }
-      : null;
+    const release =
+      version === newest.version
+        ? newest
+        : version !== null && ALSO_OFFERED.has(version)
+          ? releases.find(
+              (entry) =>
+                entry.version === version && entry.unsafeReason === null
+            )
+          : undefined;
+    return release && listed(release, fileName) ? { release, fileName } : null;
   }
   return null;
 }
 
 /**
- * Finds a file of the newest release in the feed and presigns it. A file
- * the newest release does not list is never fetched, so the path cannot
- * reach other objects or an older release.
+ * Finds a file of the newest release in the feed, or of a release in
+ * ALSO_OFFERED, and presigns it. A file that release does not list is never
+ * fetched, so the path cannot reach other objects or another older release.
  */
 export async function resolveReleaseDownload(
   segments: readonly string[]
