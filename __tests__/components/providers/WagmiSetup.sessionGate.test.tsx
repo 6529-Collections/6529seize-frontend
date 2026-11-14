@@ -3,6 +3,8 @@ import userEvent from "@testing-library/user-event";
 import type { ReactNode } from "react";
 import { useAppKitBootstrap } from "@/components/providers/AppKitBootstrapContext";
 import WagmiSetup from "@/components/providers/WagmiSetup";
+import DesktopProfileStorageGate from "@/components/desktop/DesktopProfileStorageGate";
+import { getWalletAddress } from "@/services/auth/auth.utils";
 import { DesktopProfileRestoringContext } from "@/contexts/DesktopProfileRecoveryContext";
 import {
   hasPersistedWalletSession,
@@ -37,9 +39,16 @@ jest.mock("@/hooks/useAppWalletPasswordModal", () => ({
     modal: null,
   }),
 }));
-jest.mock("@capacitor/core", () => ({
-  Capacitor: { isNativePlatform: () => mockIsNativePlatform() },
-}));
+jest.mock("@capacitor/core", () => {
+  const actual = jest.requireActual("@capacitor/core");
+  return {
+    ...actual,
+    Capacitor: {
+      ...actual.Capacitor,
+      isNativePlatform: () => mockIsNativePlatform(),
+    },
+  };
+});
 // A throwing export stands in for a wallet-stack chunk that fails to load.
 jest.mock("@/components/providers/AppKitAdapterManager", () => ({
   __esModule: true,
@@ -385,5 +394,101 @@ describe("WagmiSetup wallet stack session gate", () => {
     );
     expect(createAppKitAdapter).toHaveBeenCalledTimes(1);
     expect(initializeAppKit).toHaveBeenCalledTimes(1);
+  });
+  // A route that never signs in (for example /validator/authorize) runs
+  // without the restore, so the wallet stack may reconnect there. Moving to a
+  // route that signs in must hold it on the wallet-free config from that same
+  // render until the restore settles, then hand over again after a remount.
+  it("holds reconnect from the first render after moving to a route that restores profiles", async () => {
+    const userAgent = jest
+      .spyOn(navigator, "userAgent", "get")
+      .mockReturnValue(
+        "Mozilla/5.0 (Windows NT 10.0) 6529-core Electron/41.0.0"
+      );
+    const saved = `0x${"5".repeat(40)}`;
+    let resolveRestore: (state: unknown) => void = () => undefined;
+    const restoreProfiles = jest.fn(
+      () =>
+        new Promise((resolve) => {
+          resolveRestore = resolve;
+        })
+    );
+    Object.defineProperty(window, "api", {
+      configurable: true,
+      value: { openExternal: jest.fn() },
+    });
+    Object.defineProperty(window, "nativeAuth", {
+      configurable: true,
+      value: {
+        sessionLogin: jest.fn(),
+        restoreProfiles,
+        saveProfiles: jest.fn().mockResolvedValue(undefined),
+        profilesReady: jest.fn().mockResolvedValue(undefined),
+        restartProfileRestore: jest.fn().mockResolvedValue(undefined),
+      },
+    });
+    const tree = (restoring: boolean) => (
+      <DesktopProfileStorageGate enabled={restoring}>
+        <WagmiSetup>
+          <ConnectProbe />
+        </WagmiSetup>
+      </DesktopProfileStorageGate>
+    );
+    try {
+      const { rerender } = render(tree(false));
+      await waitFor(() =>
+        expect(screen.getByTestId("wagmi-provider")).toHaveAttribute(
+          "data-config",
+          "wallet"
+        )
+      );
+      expect(screen.getByTestId("wagmi-provider")).toHaveAttribute(
+        "data-reconnect",
+        "true"
+      );
+
+      // Client-side move to a route that signs in: the restore starts.
+      rerender(tree(true));
+      expectWalletFreeProvider();
+      await waitFor(() => expect(restoreProfiles).toHaveBeenCalled());
+      expectWalletFreeProvider();
+
+      // The restore brings other profiles: the tree remounts, then the
+      // wallet config is handed over again.
+      await act(async () => {
+        resolveRestore({
+          version: 1,
+          accounts: [
+            {
+              address: saved,
+              role: null,
+              jwt: null,
+              profileId: null,
+              profileHandle: null,
+              authSessionVersion: "v2",
+              refreshToken: null,
+            },
+          ],
+          activeAddress: saved,
+        });
+      });
+      await waitFor(() =>
+        expect(screen.getByTestId("wagmi-provider")).toHaveAttribute(
+          "data-config",
+          "wallet"
+        )
+      );
+      expect(screen.getByTestId("wagmi-provider")).toHaveAttribute(
+        "data-reconnect",
+        "true"
+      );
+      // Auth follows the restored profiles in page storage, not the wallet
+      // connection made before the restore.
+      expect(getWalletAddress()).toBe(saved);
+    } finally {
+      userAgent.mockRestore();
+      Reflect.deleteProperty(window, "api");
+      Reflect.deleteProperty(window, "nativeAuth");
+    }
   });
 });
