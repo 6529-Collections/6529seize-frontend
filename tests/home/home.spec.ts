@@ -864,6 +864,12 @@ for (const slowEndpoint of ["leaderboard", "settings"] as const) {
         exact: true,
       });
       await expect.poll(() => requests).toBe(1);
+      // Early lookups can precede hydration; start the slow-response clock once
+      // the app has mounted its normal request consumers.
+      await expect(page.getByRole("main").first().locator("..")).toHaveAttribute(
+        "data-sidebar-ready",
+        "true"
+      );
       await page.clock.fastForward(20_000);
       if (slowEndpoint === "leaderboard") {
         await expect(comingUp.getByRole("status")).toHaveText(
@@ -953,6 +959,54 @@ test("Coming Up does not mislabel the current artwork while Latest Drop is delay
     ).toBeVisible();
   } finally {
     releaseArtwork();
+  }
+});
+
+test("homepage starts artwork lookups before hydration and reuses each response @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  const requests = { artwork: 0, settings: 0, winner: 0 };
+  await page.route("**/api/memes_latest", (route) => {
+    requests.artwork += 1;
+    return route.fulfill({ json: loadingTestArtwork });
+  });
+  await page.route("**/api/settings", (route) => {
+    requests.settings += 1;
+    return route.fulfill({ json: comingUpSettings });
+  });
+  await page.route("**/api/v2/waves/*/decisions?*", (route) => {
+    requests.winner += 1;
+    return route.fulfill({
+      json: { data: [], page: 1, count: 0, next: false },
+    });
+  });
+  const hydration = await gateSidebarHydration(page);
+  try {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await hydration.waitForDownloads();
+    await expect
+      .poll(() => requests)
+      .toEqual({ artwork: 1, settings: 1, winner: 1 });
+    await expect(
+      page.getByRole("main").locator('[data-home-section="Latest drop"]')
+    ).toHaveCount(0);
+    hydration.release();
+    const artwork = page.getByRole("main").getByRole("img", {
+      name: loadingTestArtwork.name,
+      exact: true,
+    });
+    await expect(artwork).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect
+      .poll(() =>
+        artwork.evaluate(
+          (img: HTMLImageElement) => img.complete && img.naturalWidth > 0
+        )
+      )
+      .toBe(true);
+    expect(requests).toEqual({ artwork: 1, settings: 1, winner: 1 });
+  } finally {
+    hydration.release();
   }
 });
 

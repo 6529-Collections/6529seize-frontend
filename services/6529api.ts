@@ -4,6 +4,7 @@ import type { DBResponse } from "@/entities/IDBResponse";
 import { recordMobileLaunchApiRequest } from "@/utils/monitoring/mobileLaunchTiming";
 import Cookies from "js-cookie";
 import { getStagingAuth } from "./auth/auth.utils";
+import { fetchWithHomeArtworkStartup } from "@/lib/home-artwork/startup-fetch";
 
 function buildAuthHeaders(init?: HeadersInit): Headers {
   const headers = new Headers(init);
@@ -34,7 +35,7 @@ export async function fetchUrl<T = DBResponse>(
 
   const headers = buildAuthHeaders(init?.headers);
   try {
-    const res = await fetch(url, {
+    const res = await fetchWithHomeArtworkStartup(url, {
       ...init,
       headers,
     });
