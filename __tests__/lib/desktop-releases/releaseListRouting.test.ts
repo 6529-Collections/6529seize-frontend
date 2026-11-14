@@ -45,7 +45,11 @@ function loadProductionProxy(): Proxy {
 describe("6529 Desktop release list routing", () => {
   afterEach(() => {
     jest.restoreAllMocks();
-    process.env["PUBLIC_RUNTIME"] = ORIGINAL_PUBLIC_RUNTIME;
+    if (ORIGINAL_PUBLIC_RUNTIME === undefined) {
+      delete process.env["PUBLIC_RUNTIME"];
+    } else {
+      process.env["PUBLIC_RUNTIME"] = ORIGINAL_PUBLIC_RUNTIME;
+    }
   });
 
   it.each(PATHS)(

@@ -29,12 +29,23 @@ function etagMatches(header: string | null, etag: string | null): boolean {
 
 type StoredObject = Extract<BucketObject, { state: "found" }>;
 
-/** A signed list and its signature, read together so they always match. */
+/**
+ * A signed list and its signature, read together so they match within one
+ * snapshot. Two requests can still span a snapshot change.
+ */
 export type SignedListSnapshot = {
   readonly state: "ok" | "missing" | "error";
   readonly feed: StoredObject | null;
   readonly signature: StoredObject | null;
+  /**
+   * Sent on both answers as `X-Release-List-Pair`, so a client can tell a
+   * list and a signature from different snapshots apart. Absent: no header.
+   */
+  readonly pairId?: string | undefined;
 };
+
+/** The header that names the list-and-signature pair an answer belongs to. */
+export const RELEASE_LIST_PAIR_HEADER = "X-Release-List-Pair";
 
 /** The plain-text answers when there is nothing to serve. */
 export type SignedListMessages = {
@@ -81,6 +92,10 @@ export function serveSignedListObject(
   }
   if (object.lastModified) {
     headers.set("Last-Modified", object.lastModified);
+  }
+  if (snapshot.pairId) {
+    headers.set(RELEASE_LIST_PAIR_HEADER, snapshot.pairId);
+    headers.set("Access-Control-Expose-Headers", RELEASE_LIST_PAIR_HEADER);
   }
   if (etagMatches(request.headers.get("if-none-match"), object.etag)) {
     return new Response(null, { status: 304, headers });

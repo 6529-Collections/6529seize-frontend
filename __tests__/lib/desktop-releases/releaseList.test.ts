@@ -16,6 +16,7 @@ jest.mock("@/lib/validator-page/releasesBucket", () => ({
 import { GET as getList } from "@/app/desktop/releases.json/route";
 import { GET as getSignature } from "@/app/desktop/releases.json.sig/route";
 import { resetDesktopReleaseListCacheForTests } from "@/lib/desktop-releases/releaseList";
+import { RELEASE_LIST_PAIR_HEADER } from "@/lib/validator-page/feedResponse";
 
 const LIST_URL = "https://6529.io/desktop/releases.json";
 const SIGNATURE_URL = "https://6529.io/desktop/releases.json.sig";
@@ -128,6 +129,40 @@ describe("6529 Desktop release list routes", () => {
     ]);
   });
 
+  it("names the pair on both answers so a mixed pair can be detected", async () => {
+    storeHasSignedList();
+    const [list, signature] = await fetchBoth();
+    const pair = list.headers.get(RELEASE_LIST_PAIR_HEADER);
+
+    expect(pair).toMatch(/^[0-9a-f]{32}$/);
+    expect(signature.headers.get(RELEASE_LIST_PAIR_HEADER)).toBe(pair);
+    expect(list.headers.get("access-control-expose-headers")).toBe(
+      RELEASE_LIST_PAIR_HEADER
+    );
+
+    // A new signature over the same list is a new pair.
+    resetDesktopReleaseListCacheForTests();
+    storeHas({
+      "feed/releases.json": found(LIST_BYTES, '"list-etag"'),
+      "feed/releases.json.sig": found(new Uint8Array([0x30, 0x46]), '"s2"'),
+    });
+    const resigned = await getList(new Request(LIST_URL));
+    expect(resigned.headers.get(RELEASE_LIST_PAIR_HEADER)).not.toBe(pair);
+  });
+
+  it("reads afresh when the bucket changes", async () => {
+    storeHasSignedList();
+    await getList(new Request(LIST_URL));
+    process.env["DESKTOP_RELEASES_BUCKET"] = "other-releases.example";
+
+    await getList(new Request(LIST_URL));
+
+    expect(mockRead).toHaveBeenLastCalledWith(
+      { bucket: "other-releases.example", region: "us-east-1" },
+      "feed/releases.json.sig"
+    );
+  });
+
   it("answers 304 when the ETag matches", async () => {
     storeHasSignedList();
 
@@ -137,6 +172,9 @@ describe("6529 Desktop release list routes", () => {
 
     expect(response.status).toBe(304);
     expect(response.body).toBeNull();
+    expect(response.headers.get(RELEASE_LIST_PAIR_HEADER)).toMatch(
+      /^[0-9a-f]{32}$/
+    );
   });
 
   it("reads the bucket's region when one is set", async () => {

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { getDesktopReleasesServerEnv } from "@/config/serverEnv";
 import {
   serveSignedListObject,
@@ -40,6 +41,20 @@ function failed(reason: string): SignedListSnapshot {
   return { state: "error", feed: null, signature: null };
 }
 
+/**
+ * Names the pair by its content, so every server answers the same name for
+ * the same list and signature. The list's length goes first, so moving bytes
+ * between the two objects changes the name.
+ */
+function pairIdOf(list: Uint8Array, signature: Uint8Array): string {
+  return createHash("sha256")
+    .update(`${list.byteLength}\n`)
+    .update(list)
+    .update(signature)
+    .digest("hex")
+    .slice(0, 32);
+}
+
 function getLocation(): BucketLocation | null {
   const env = getDesktopReleasesServerEnv();
   if (!env.releasesBucket) {
@@ -51,8 +66,9 @@ function getLocation(): BucketLocation | null {
   };
 }
 
-async function readPair(): Promise<SignedListSnapshot> {
-  const location = getLocation();
+async function readPair(
+  location: BucketLocation | null
+): Promise<SignedListSnapshot> {
   if (!location) {
     return MISSING;
   }
@@ -72,10 +88,20 @@ async function readPair(): Promise<SignedListSnapshot> {
   if (signature.state === "missing") {
     return failed("the list has no signature");
   }
-  return { state: "ok", feed: list, signature };
+  return {
+    state: "ok",
+    feed: list,
+    signature,
+    pairId: pairIdOf(list.body, signature.body),
+  };
 }
 
-type Entry = { readonly snapshot: SignedListSnapshot; readonly at: number };
+type Entry = {
+  readonly snapshot: SignedListSnapshot;
+  readonly at: number;
+  /** The bucket it was read from; another bucket starts afresh. */
+  readonly source: string;
+};
 
 let current: Entry | null = null;
 let lastGood: Entry | null = null;
@@ -86,16 +112,22 @@ let pending: Promise<SignedListSnapshot> | null = null;
  * reused for a minute.
  */
 async function getSnapshot(): Promise<SignedListSnapshot> {
+  const location = getLocation();
+  const source = location ? `${location.region}/${location.bucket}` : "";
+  if (current?.source !== source) {
+    current = null;
+    lastGood = null;
+  }
   if (current && Date.now() - current.at < SNAPSHOT_TTL_MS) {
     return current.snapshot;
   }
-  pending ??= readPair().finally(() => {
+  pending ??= readPair(location).finally(() => {
     pending = null;
   });
   const snapshot = await pending;
   const at = Date.now();
   if (snapshot.state !== "error") {
-    current = { snapshot, at };
+    current = { snapshot, at, source };
     lastGood = current;
     return snapshot;
   }
@@ -103,7 +135,11 @@ async function getSnapshot(): Promise<SignedListSnapshot> {
     lastGood && at - lastGood.at < STALE_IF_ERROR_MS
       ? lastGood.snapshot
       : snapshot;
-  current = { snapshot: served, at: at - SNAPSHOT_TTL_MS + ERROR_RETRY_MS };
+  current = {
+    snapshot: served,
+    at: at - SNAPSHOT_TTL_MS + ERROR_RETRY_MS,
+    source,
+  };
   return served;
 }
 
