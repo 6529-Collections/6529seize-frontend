@@ -237,13 +237,13 @@ export default function UserPageRepNewRepSearch({
         endpoint: `profiles/${profile.query ?? ""}/rep/rating`,
         body: { amount, category },
       }),
-    onSuccess: () => {
+    onSuccess: async () => {
       setToast({
         message: t(locale, "rep.categories.grant.toast.updated"),
         type: "success",
       });
-      onProfileRepModify({
-        targetProfile: profile,
+      await onProfileRepModify({
+        targetProfiles: [profile],
         connectedProfile,
         profileProxy: activeProfileProxy ?? null,
       });
@@ -393,7 +393,7 @@ export default function UserPageRepNewRepSearch({
                     <dt className="tw-min-w-0 tw-break-words">
                       {t(locale, "rep.categories.grant.availableRepLabel")}
                     </dt>
-                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-text-iron-300">
                       {formatNumberWithCommas(heroAvailableRep)}
                     </dd>
                   </div>
@@ -403,7 +403,7 @@ export default function UserPageRepNewRepSearch({
                         name: profile.query ?? "",
                       })}
                     </dt>
-                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-tabular-nums tw-text-iron-300">
+                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-text-iron-300">
                       {formatNumberWithCommas(
                         overview?.authenticated_user_contribution ?? 0
                       )}

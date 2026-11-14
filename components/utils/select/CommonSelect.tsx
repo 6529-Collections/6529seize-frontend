@@ -88,12 +88,15 @@ export type CommonSelectProps<T, U> =
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
-export default function CommonSelect<T, U = unknown>(
-  props: CommonSelectProps<T, U>
-) {
+export default function CommonSelect<T, U = unknown>({
+  tabsVariant,
+  ...props
+}: CommonSelectProps<T, U> & {
+  readonly tabsVariant?: CommonSelectProps<T, U>["variant"];
+}) {
   const breakpoint = useBreakpoint();
   if (breakpoint === "LG") {
-    return <CommonTabs {...props} />;
+    return <CommonTabs {...props} variant={tabsVariant ?? props.variant} />;
   } else {
     return <CommonDropdown {...props} />;
   }

@@ -29,7 +29,7 @@ import DocumentationValueEditor from "./DocumentationValueEditor";
 import {
   DocumentationButton,
   DocumentationNotice,
-  inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -167,7 +167,7 @@ export default function DocumentationAssetDetails({
         <label className="tw-block tw-text-xs tw-text-iron-400">
           {msg("uploadRole")}
           <select
-            className={`${inputClass} tw-mt-2`}
+            className={`${selectClass} tw-mt-2`}
             value={role}
             onChange={(event) => setRole(event.target.value)}
           >
@@ -285,7 +285,7 @@ function ManifestEditor({
         <label className="tw-block tw-text-xs tw-text-iron-400">
           {msg("visibility")}
           <select
-            className={`${inputClass} tw-mt-2`}
+            className={`${selectClass} tw-mt-2`}
             value={intendedVisibility}
             disabled={restricted}
             onChange={(event) =>

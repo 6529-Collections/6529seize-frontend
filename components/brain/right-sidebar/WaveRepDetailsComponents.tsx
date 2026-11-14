@@ -164,7 +164,7 @@ export function CategoryRow({
         </span>
       </span>
       <span
-        className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold tw-tabular-nums ${getRepTextClass(
+        className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold ${getRepTextClass(
           totalRep
         )}`}
       >

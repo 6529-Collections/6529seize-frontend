@@ -1,5 +1,5 @@
 import { screen, fireEvent, waitFor } from "@testing-library/react";
-import UserPageRepModifyModal from "@/components/user/rep/modify-rep/UserPageRepModifyModal";
+import UserPageRepModifyForm from "@/components/user/rep/modify-rep/UserPageRepModifyForm";
 import { renderWithAuth } from "../utils/testContexts";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 
@@ -18,15 +18,22 @@ jest.mock("@tanstack/react-query", () => {
   };
 });
 
-describe("UserPageRepModifyModal", () => {
+describe("UserPageRepModifyForm", () => {
   const onClose = jest.fn();
   const profile = { query: "alice" } as any;
   const category = "general";
 
   function renderModal() {
     return renderWithAuth(
-      <ReactQueryWrapperContext.Provider value={{ onProfileRepModify: jest.fn() } as any}>
-        <UserPageRepModifyModal onClose={onClose} profile={profile} category={category} />
+      <ReactQueryWrapperContext.Provider
+        value={{ onProfileRepModify: jest.fn() } as any}
+      >
+        <UserPageRepModifyForm
+          onCancel={onClose}
+          onSuccess={onClose}
+          profile={profile}
+          category={category}
+        />
       </ReactQueryWrapperContext.Provider>
     );
   }

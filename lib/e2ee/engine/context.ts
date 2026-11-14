@@ -320,6 +320,8 @@ export async function rollback(ctx: EngineContext): Promise<void> {
     const runtime = ctx.store.groups.get(record.g);
     if (runtime) {
       runtime.record = record;
+      // The restored cursor may predate the last catch-up: fetch again.
+      delete runtime.listedThrough;
       runtime.messages.clear();
       runtime.originals.clear();
       runtime.dirty.clear();

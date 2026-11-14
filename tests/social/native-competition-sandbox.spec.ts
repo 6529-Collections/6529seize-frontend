@@ -7988,16 +7988,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           followed_subwaves_count: 0,
         },
       }));
-      await page.route("**/api/v2/waves?**", async (route) => {
-        const params = new URL(route.request().url()).searchParams;
-        if (params.get("pinned") !== "PINNED") {
-          await route.fallback();
-          return;
-        }
-        await route.fulfill({
-          json: { data: [joined[44]], page: 1, next: false },
-        });
-      });
+      await page.route("**/api/v2/waves/pinned", (route) =>
+        route.fulfill({ json: [joined[44]] })
+      );
       let failContinuation = true;
       const requested: string[] = [];
       const offsets = new Map([

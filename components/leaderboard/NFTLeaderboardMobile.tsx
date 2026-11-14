@@ -3,7 +3,6 @@ import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import FilterButton from "@/components/utils/button/FilterButton";
 import {
   CONNECTED_TAB_INTERACTION_CLASSES,
-  CONNECTED_TAB_SURFACE_CLASSES,
   getConnectedTabStateClasses,
 } from "@/components/utils/select/tabs/connectedTabStyles";
 import { SortDirection } from "@/entities/ISort";
@@ -57,9 +56,7 @@ export function NFTLeaderboardMobileSort({
 
   return (
     <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2 md:tw-hidden">
-      <fieldset
-        className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-border-0 tw-p-0.5 tw-ring-1 tw-ring-inset`}
-      >
+      <fieldset className="tw-m-0 tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-gap-0.5 tw-border-0 tw-bg-transparent tw-p-0.5">
         <legend className="tw-sr-only">
           {t(locale, "theMemes.sorting.directionLegend")}
         </legend>

@@ -4,7 +4,7 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useId, type ReactNode } from "react";
-import { COLLECT_INPUT_CLASS } from "./CollectGoalForm";
+import { COLLECT_INPUT_CLASS, COLLECT_SELECT_CLASS } from "./CollectGoalForm";
 import {
   TDH_TARGET_HORIZONS,
   type CollectTdhTargetDraft,
@@ -78,7 +78,7 @@ export default function CollectTdhTargetForm({
               );
               if (horizon !== undefined) change({ horizonDays: horizon });
             }}
-            className={COLLECT_INPUT_CLASS}
+            className={COLLECT_SELECT_CLASS}
           >
             {TDH_TARGET_HORIZONS.map((days) => (
               <option key={days} value={days}>
@@ -111,7 +111,7 @@ export default function CollectTdhTargetForm({
                       : "total",
                 })
               }
-              className={COLLECT_INPUT_CLASS}
+              className={COLLECT_SELECT_CLASS}
             >
               <option value="total">
                 {t(locale, "collect.tdhTarget.total")}

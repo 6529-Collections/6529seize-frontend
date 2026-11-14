@@ -180,7 +180,7 @@ export default function ProfileActivityLogs({
                   filterLabel="Filter direction"
                   setSelected={onTargetType}
                   variant="connected"
-                  size="sm"
+                  connectedSize="sm"
                 />
               </div>
             )}
@@ -206,7 +206,7 @@ export default function ProfileActivityLogs({
                   filterLabel="Filter matter"
                   setSelected={onMatterChange}
                   variant="connected"
-                  size="sm"
+                  connectedSize="sm"
                 />
               </div>
               {initialParams.handleOrWallet && (
@@ -217,7 +217,7 @@ export default function ProfileActivityLogs({
                     filterLabel="Filter direction"
                     setSelected={onTargetType}
                     variant="connected"
-                    size="sm"
+                    connectedSize="sm"
                   />
                 </div>
               )}

@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  DROPDOWN_FIELD_CLASSES,
+  DROPDOWN_CHEVRON_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useId } from "react";
 import {
   Description,
@@ -97,12 +101,12 @@ export default function CollectOrderExpiryPicker({
           aria-labelledby={`${id}-duration-label`}
           aria-invalid={invalid}
           aria-errormessage={invalid ? errorId : undefined}
-          className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+          className={`${DROPDOWN_FIELD_CLASSES} tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-py-2 tw-text-left tw-text-sm`}
         >
           <span>{optionLabel(value.expiryHours)}</span>
           <ChevronDownIcon
             aria-hidden="true"
-            className="tw-size-4 tw-shrink-0 tw-text-iron-400"
+            className={DROPDOWN_CHEVRON_CLASSES}
           />
         </ListboxButton>
         <ListboxOptions

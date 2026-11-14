@@ -145,6 +145,12 @@ export async function catchUpGroup(
     }
     await afterPage(ctx, runtime, page.group, next === null);
     if (next === null) {
+      // The server read the group row before the page, so every item this
+      // device may see up to its last_seq is in what was just processed.
+      runtime.listedThrough = Math.max(
+        runtime.listedThrough ?? 0,
+        page.group.last_seq
+      );
       break;
     }
   }
@@ -278,6 +284,8 @@ async function acceptJoin(
   record.splitView = checks.splitView;
   const runtime = existing ?? newRuntime(record);
   runtime.record = record;
+  // A rejoin opens a new delivery window: catch up afresh.
+  delete runtime.listedThrough;
   ctx.store.groups.set(g, runtime);
   await applySummary(ctx, runtime, summary);
   for (const member of record.members) {
