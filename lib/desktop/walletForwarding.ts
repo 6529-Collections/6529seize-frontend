@@ -205,7 +205,10 @@ function readTypes(
   if (entries.length === 0 || entries.length > MAX_TYPED_DATA_TYPES) {
     return null;
   }
-  const types: Record<string, readonly TypedDataField[]> = {};
+  // No prototype: a type named `__proto__` or `constructor` is just a key.
+  const types: Record<string, readonly TypedDataField[]> = Object.create(
+    null
+  ) as Record<string, readonly TypedDataField[]>;
   for (const [name, fields] of entries) {
     if (!TYPE_NAME.test(name) || !Array.isArray(fields)) return null;
     if (fields.length > MAX_TYPED_DATA_FIELDS) return null;
@@ -252,7 +255,7 @@ function parseTypedData(
     !isRecord(message) ||
     typeof primaryType !== "string" ||
     primaryType === "EIP712Domain" ||
-    !(primaryType in types)
+    !Object.hasOwn(types, primaryType)
   ) {
     return fail(INVALID_PARAMS);
   }
@@ -316,26 +319,94 @@ export function parseWalletRequest(
   }
 }
 
-const UTF8 = new TextDecoder("utf-8", { fatal: true });
+/** Envelope fields at the longest the shell can make them. */
+const LONGEST_ENVELOPE_FIELDS = {
+  v: WALLET_FORWARDING_VERSION,
+  id: "A".repeat(43),
+  scheme: "stagingcore6529",
+  origin: "http://localhost:65535",
+  issuedAt: 9_999_999_999_999,
+  expiresAt: 9_999_999_999_999,
+} as const;
+
+/** `#w=` + `&s=` + a 65-byte hex signature. */
+const FRAGMENT_OVERHEAD = 3 + 3 + 132;
+
+/** Unpadded base64url length of `byteLength` bytes. */
+const base64UrlLength = (byteLength: number): number =>
+  Math.ceil((byteLength * 4) / 3);
 
 /**
- * Control characters other than tab, line feed and carriage return, and
- * bidirectional controls that can make text read differently than it signs.
+ * Whether the browser fragment for this request stays within the page's
+ * 32 Ki-character cap, measured exactly (UTF-8 bytes of the JSON envelope,
+ * then base64url) with every envelope field at its longest. The app checks
+ * this before asking the shell, so a request the browser page would reject
+ * is never sent; the shell checks the real fragment.
  */
-function isHiddenCharacter(codePoint: number): boolean {
-  if (codePoint === 0x09 || codePoint === 0x0a || codePoint === 0x0d) {
+export function fitsWalletRequestFragment(input: WalletRequestInput): boolean {
+  let byteLength: number;
+  try {
+    byteLength = new TextEncoder().encode(
+      JSON.stringify({ ...LONGEST_ENVELOPE_FIELDS, request: input })
+    ).length;
+  } catch {
     return false;
   }
-  return (
-    codePoint < 0x20 ||
-    codePoint === 0x7f ||
-    (codePoint >= 0x202a && codePoint <= 0x202e) ||
-    (codePoint >= 0x2066 && codePoint <= 0x2069)
+  return FRAGMENT_OVERHEAD + base64UrlLength(byteLength) <= MAX_ENVELOPE_CHARS;
+}
+
+// `ignoreBOM`: a leading byte-order mark is kept (and then refused), never
+// silently dropped, so the text shown is exactly the bytes signed.
+const UTF8 = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true });
+
+/**
+ * Code points a reader cannot see or tell apart from others in a preview:
+ * controls (C0 and C1, including tab and carriage return), format
+ * characters (zero-width spaces and joiners, bidirectional controls, the
+ * byte-order mark, soft hyphen, tag characters), private use, surrogates,
+ * line and paragraph separators, every space other than U+0020, variation
+ * selectors, the combining grapheme joiner, Hangul and Braille blanks.
+ * Line feed is the only line break allowed.
+ */
+const INVISIBLE_CATEGORY = /[\p{Cc}\p{Cf}\p{Co}\p{Cs}\p{Zl}\p{Zp}]/u;
+const INVISIBLE_RANGES: readonly (readonly [number, number])[] = [
+  [0x00a0, 0x00a0],
+  [0x034f, 0x034f],
+  [0x115f, 0x1160],
+  [0x1680, 0x1680],
+  [0x180b, 0x180f],
+  [0x2000, 0x200a],
+  [0x202f, 0x202f],
+  [0x205f, 0x205f],
+  [0x2800, 0x2800],
+  [0x3000, 0x3000],
+  [0x3164, 0x3164],
+  [0xfe00, 0xfe0f],
+  [0xffa0, 0xffa0],
+  [0xe0100, 0xe01ef],
+];
+
+function isInvisible(char: string): boolean {
+  if (INVISIBLE_CATEGORY.test(char)) return true;
+  const codePoint = char.codePointAt(0) ?? 0;
+  return INVISIBLE_RANGES.some(
+    ([low, high]) => codePoint >= low && codePoint <= high
   );
 }
 
-const hasHiddenCharacters = (text: string): boolean =>
-  Array.from(text).some((char) => isHiddenCharacter(char.codePointAt(0) ?? 0));
+/**
+ * True when every code point is visible and no space can hide at the end
+ * of a line or of the message, so two different byte strings never give
+ * the same preview.
+ */
+function isShowableText(text: string): boolean {
+  if (text.trim().length === 0 || text !== text.trim()) return false;
+  return text
+    .split("\n")
+    .every(
+      (line) => line === line.trimEnd() && !Array.from(line).some(isInvisible)
+    );
+}
 
 function hexToBytes(hex: string): Uint8Array {
   const bytes = new Uint8Array((hex.length - 2) / 2);
@@ -347,7 +418,10 @@ function hexToBytes(hex: string): Uint8Array {
 
 /**
  * The text of a `personal_sign` message, or null when the bytes are not
- * readable text (invalid UTF-8, hidden characters). The page refuses to
+ * text a reader can check exactly: invalid UTF-8, a byte-order mark, any
+ * invisible code point, or spaces at the start or end of the message or of
+ * a line. Decoding is exact (no replacement, no BOM stripping), so the
+ * text returned maps back to exactly one byte string. The page refuses to
  * sign what it cannot show.
  */
 export function readWalletMessageText(message: Hex): string | null {
@@ -358,7 +432,7 @@ export function readWalletMessageText(message: Hex): string | null {
   } catch {
     return null;
   }
-  return text.trim().length > 0 && !hasHiddenCharacters(text) ? text : null;
+  return isShowableText(text) ? text : null;
 }
 
 /** What the shell signs and the browser page verifies. */
@@ -386,7 +460,7 @@ export type WalletEnvelopeProblem =
 function toBase64Url(bytes: Uint8Array): string {
   let binary = "";
   for (let start = 0; start < bytes.length; start += 0x2000) {
-    binary += String.fromCharCode(...bytes.subarray(start, start + 0x2000));
+    binary += String.fromCodePoint(...bytes.subarray(start, start + 0x2000));
   }
   let encoded = btoa(binary).replaceAll("+", "-").replaceAll("/", "_");
   while (encoded.endsWith("=")) encoded = encoded.slice(0, -1);
@@ -415,7 +489,7 @@ export function buildWalletRequestFragment(
   signature: Hex
 ): string | null {
   // Base64 grows by 4/3: refuse before encoding anything too large.
-  if (Math.ceil(envelopeBytes.length / 3) * 4 > MAX_ENVELOPE_CHARS) {
+  if (base64UrlLength(envelopeBytes.length) > MAX_ENVELOPE_CHARS) {
     return null;
   }
   const params = new URLSearchParams({

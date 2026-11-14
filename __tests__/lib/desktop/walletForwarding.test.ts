@@ -12,6 +12,7 @@ import {
   parseWalletBridgeCapabilities,
   parseWalletBridgeResponse,
   parseWalletBridgeStatus,
+  fitsWalletRequestFragment,
   parseWalletRequest,
   parseWalletRequestFragment,
   parseWalletResult,
@@ -224,7 +225,7 @@ describe("parseWalletRequest: eth_signTypedData_v4", () => {
     ) => {
       const result = parseWalletRequest(
         input("eth_signTypedData_v4", [ADDRESS, withChain(chainId)], {
-          chainId: allowed[0],
+          chainId: allowed[0] ?? 1,
         }),
         allowed
       );
@@ -329,6 +330,35 @@ describe("parseWalletRequest: eth_signTypedData_v4", () => {
     );
   });
 
+  it.each([["toString"], ["constructor"], ["__proto__"], ["hasOwnProperty"]])(
+    "refuses an inherited name %s as the primary type",
+    (name) => {
+      const value = JSON.stringify({
+        domain: {},
+        types: { Grant: [{ name: "a", type: "uint8" }] },
+        primaryType: name,
+        message: {},
+      });
+      expect(problemOf(input("eth_signTypedData_v4", [ADDRESS, value]))).toBe(
+        "invalid-params"
+      );
+    }
+  );
+
+  it("keeps a type named __proto__ as an own key", () => {
+    const value = JSON.stringify({
+      domain: {},
+      types: JSON.parse('{"__proto__":[{"name":"a","type":"uint8"}]}'),
+      primaryType: "__proto__",
+      message: {},
+    });
+    const result = parse(input("eth_signTypedData_v4", [ADDRESS, value]));
+    expect(result.ok).toBe(true);
+    if (!result.ok || result.value.method !== "eth_signTypedData_v4") return;
+    expect(Object.hasOwn(result.value.typedData.types, "__proto__")).toBe(true);
+    expect(Object.getPrototypeOf(result.value.typedData.types)).toBeNull();
+  });
+
   it("refuses an object payload and too many types or fields", () => {
     expect(problemOf(input("eth_signTypedData_v4", [ADDRESS, typedData]))).toBe(
       "invalid-params"
@@ -357,26 +387,149 @@ describe("parseWalletRequest: eth_signTypedData_v4", () => {
 });
 
 describe("readWalletMessageText", () => {
-  it("returns readable text", () => {
-    expect(readWalletMessageText(toHex("Line 1\nLine 2\tend"))).toBe(
-      "Line 1\nLine 2\tend"
+  it("returns readable text exactly", () => {
+    expect(readWalletMessageText(toHex("Line 1\nLine 2 end"))).toBe(
+      "Line 1\nLine 2 end"
     );
-    expect(readWalletMessageText(toHex("Grüße 6529"))).toBe("Grüße 6529");
+    expect(readWalletMessageText(toHex("Grüße 6529 你好 🎨"))).toBe(
+      "Grüße 6529 你好 🎨"
+    );
   });
 
-  it("refuses bytes it cannot show honestly", () => {
-    for (const hex of [
-      "0x",
-      "0xzz",
-      "0xff",
-      toHex("   "),
-      toHex("a\u0000b"),
-      toHex("pay ‮evil"),
-      toHex("x⁦y"),
-      toHex("del\u007F"),
-    ] as const) {
-      expect(readWalletMessageText(hex as `0x${string}`)).toBeNull();
+  it("keeps a byte-order mark instead of hiding it, and refuses it", () => {
+    // TextDecoder drops a leading BOM by default; personal_sign signs it.
+    expect(readWalletMessageText("0xefbbbf68656c6c6f")).toBeNull();
+    expect(readWalletMessageText(toHex("hel﻿lo"))).toBeNull();
+  });
+
+  it.each([
+    ["empty", "0x"],
+    ["not hex", "0xzz"],
+    ["invalid UTF-8", "0xff"],
+    ["an overlong encoding", "0xc0af"],
+    ["a lone surrogate (CESU-8)", "0xeda080"],
+    ["only spaces", toHex("   ")],
+    ["NUL", toHex("a\u0000b")],
+    ["a C1 control", toHex("a\u0085b")],
+    ["DEL", toHex("del\u007F")],
+    ["a tab", toHex("a\tb")],
+    ["a carriage return", toHex("a\r\nb")],
+    ["a right-to-left override", toHex("pay ‮evil")],
+    ["a bidi isolate", toHex("x⁦y")],
+    ["an Arabic letter mark", toHex("x؜y")],
+    ["a zero-width space", toHex("pay​me")],
+    ["a zero-width joiner", toHex("a‍b")],
+    ["a word joiner", toHex("a⁠b")],
+    ["a soft hyphen", toHex("pay­me")],
+    ["a no-break space", toHex("a b")],
+    ["an ideographic space", toHex("a　b")],
+    ["a line separator", toHex("a b")],
+    ["a variation selector", toHex("a️b")],
+    ["a combining grapheme joiner", toHex("a͏b")],
+    ["a Hangul filler", toHex("aㅤb")],
+    ["a Braille blank", toHex("a⠀b")],
+    ["a tag character", toHex("a\u{E0041}b")],
+    ["a private-use character", toHex("ab")],
+    ["a trailing space", toHex("hello ")],
+    ["a space before a line break", toHex("hello \nworld")],
+    ["a leading line break", toHex("\nhello")],
+    ["a trailing line break", toHex("hello\n")],
+  ])("refuses %s", (_label, hex) => {
+    expect(readWalletMessageText(hex as `0x${string}`)).toBeNull();
+  });
+
+  it("never gives two different byte strings the same preview", () => {
+    const base = "Vote 7 for entry";
+    const variants = [
+      toHex(base),
+      `0xefbbbf${toHex(base).slice(2)}`,
+      toHex(`${base} `),
+      toHex(`${base}\n`),
+      toHex(base.replace(" ", "  ")),
+      toHex(base.replace(" ", " ")),
+      toHex(base.replace(" ", "\t")),
+      toHex(base.replace("e", "é")),
+      toHex(base.replace("e", "é")),
+      toHex(base.replace("7", "7​")),
+      toHex(base.replace("o", "о")),
+      toHex(base.replace(" ", "\r\n")),
+    ] as `0x${string}`[];
+    const previews = new Map<string, string>();
+    for (const hex of variants) {
+      const preview = readWalletMessageText(hex);
+      if (preview === null) continue;
+      expect(previews.get(preview) ?? hex).toBe(hex);
+      previews.set(preview, hex);
+      // The preview re-encodes to exactly the signed bytes.
+      expect(toHex(preview)).toBe(hex);
     }
+    expect(previews.size).toBeGreaterThan(3);
+  });
+});
+
+describe("fitsWalletRequestFragment", () => {
+  const typedRequest = (text: string) =>
+    input("eth_signTypedData_v4", [
+      ADDRESS,
+      JSON.stringify({
+        domain: { name: "6529", version: "1", chainId: 1 },
+        types: { Note: [{ name: "text", type: "string" }] },
+        primaryType: "Note",
+        message: { text },
+      }),
+    ]);
+
+  // The longest multibyte message that still fits, found by search.
+  const longestFitting = (char: string) => {
+    let low = 0;
+    let high = 40_000;
+    while (low < high) {
+      const mid = Math.ceil((low + high) / 2);
+      if (fitsWalletRequestFragment(typedRequest(char.repeat(mid)))) low = mid;
+      else high = mid - 1;
+    }
+    return low;
+  };
+
+  it.each([["€"], ["a"], ['"']])(
+    "agrees exactly with the fragment cap for %s",
+    async (char) => {
+      const n = longestFitting(char);
+      expect(n).toBeGreaterThan(1000);
+      const build = async (count: number) => {
+        const request = typedRequest(char.repeat(count));
+        const bytes = new TextEncoder().encode(
+          JSON.stringify({
+            v: 1,
+            id: "A".repeat(43),
+            scheme: "stagingcore6529",
+            origin: "http://localhost:65535",
+            issuedAt: 9_999_999_999_999,
+            expiresAt: 9_999_999_999_999,
+            request,
+          })
+        );
+        return buildWalletRequestFragment(
+          bytes,
+          await shell.signMessage({ message: { raw: bytes } })
+        );
+      };
+      // At the limit the longest real envelope still builds; one more
+      // character is refused both by the check and by the builder.
+      expect(await build(n)).not.toBeNull();
+      expect(fitsWalletRequestFragment(typedRequest(char.repeat(n + 1)))).toBe(
+        false
+      );
+      expect(await build(n + 1)).toBeNull();
+    }
+  );
+
+  it("is false for input that cannot be serialized", () => {
+    const circular: Record<string, unknown> = {};
+    circular["self"] = circular;
+    expect(fitsWalletRequestFragment(input("personal_sign", circular))).toBe(
+      false
+    );
   });
 });
 
@@ -458,7 +611,8 @@ describe("request envelope", () => {
       )
     );
     const forged = parseWalletRequestFragment(
-      buildWalletRequestFragment(tampered, params.get("s") as `0x${string}`),
+      buildWalletRequestFragment(tampered, params.get("s") as `0x${string}`) ??
+        "",
       context
     );
     expect(forged.ok).toBe(true);
