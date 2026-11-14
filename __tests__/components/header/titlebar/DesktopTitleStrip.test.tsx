@@ -54,6 +54,14 @@ const createBridges = (
 
 let bridges: ReturnType<typeof createBridges>;
 
+const tabStops = () =>
+  screen
+    .getAllByRole("button")
+    .filter(
+      (button) =>
+        button.closest("[role=toolbar]") !== null && button.tabIndex === 0
+    );
+
 const installDesktopShell = () => {
   Object.defineProperty(window, "api", {
     configurable: true,
@@ -101,12 +109,40 @@ describe("DesktopTitleStrip", () => {
   it("renders the strip on the web without touching any bridge", () => {
     render(<DesktopTitleStrip />);
 
-    expect(
-      screen.getByRole("group", { name: "6529 Desktop window title" })
-    ).toHaveAttribute("data-desktop-drag-region", "");
-    expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Forward" })).toBeDisabled();
+    const toolbar = screen.getByRole("toolbar", {
+      name: "6529 Desktop window title",
+    });
+    expect(toolbar).toHaveAttribute("data-desktop-drag-region", "");
+    expect(toolbar).toHaveAttribute("aria-orientation", "horizontal");
+    expect(screen.getByRole("button", { name: "Back" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "Forward" })).toHaveAttribute(
+      "aria-disabled",
+      "true"
+    );
+    // One tab stop, on the only available item.
+    expect(tabStops()).toEqual([
+      screen.getByRole("button", { name: "App info" }),
+    ]);
     expect(bridges.api.getInfo).not.toHaveBeenCalled();
+    expect(bridges.api.getNavigationState).not.toHaveBeenCalled();
+  });
+
+  it("leaves arrow keys on the rest of the page alone", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <DesktopTitleStrip />
+        <input aria-label="Page field" />
+      </>
+    );
+    const field = screen.getByRole("textbox", { name: "Page field" });
+    await user.type(field, "ab{ArrowLeft}c{Home}d{End}e");
+
+    expect(field).toHaveFocus();
+    expect(field).toHaveValue("dacbe");
   });
 
   it("offers accessible back and forward controls driven by the app's history", async () => {
@@ -117,8 +153,12 @@ describe("DesktopTitleStrip", () => {
     const back = screen.getByRole("button", { name: "Back" });
     const forward = screen.getByRole("button", { name: "Forward" });
     expect(await screen.findByText("1.2.3 local")).toBeInTheDocument();
-    expect(back).toBeEnabled();
-    expect(forward).toBeDisabled();
+    expect(back).not.toHaveAttribute("aria-disabled");
+    expect(forward).toHaveAttribute("aria-disabled", "true");
+
+    // An unavailable button ignores clicks.
+    await user.click(forward);
+    expect(bridges.api.goForward).not.toHaveBeenCalled();
     expect(back).toHaveAttribute("title", "Back");
 
     await user.click(back);
@@ -133,14 +173,116 @@ describe("DesktopTitleStrip", () => {
     expect(bridges.api.getNavigationState.mock.calls.length).toBe(
       readsBefore + 1
     );
-    expect(forward).toBeEnabled();
+    expect(forward).not.toHaveAttribute("aria-disabled");
     await user.click(forward);
     expect(bridges.api.goForward).toHaveBeenCalledTimes(1);
+  });
 
-    // Keyboard: the controls are in the tab order.
-    back.focus();
-    await user.tab();
-    expect(forward).toHaveFocus();
+  describe("toolbar keyboard", () => {
+    const renderReady = async (
+      navigation = { canGoBack: true, canGoForward: true }
+    ) => {
+      bridges = createBridges(navigation);
+      installDesktopShell();
+      render(
+        <>
+          <button type="button">Before</button>
+          <DesktopTitleStrip />
+          <button type="button">After</button>
+        </>
+      );
+      await screen.findByText("1.2.3 local");
+      return {
+        back: screen.getByRole("button", { name: "Back" }),
+        forward: screen.getByRole("button", { name: "Forward" }),
+        info: screen.getByRole("button", { name: "App info" }),
+      };
+    };
+
+    it("is a single tab stop that remembers the last focused item", async () => {
+      const user = userEvent.setup();
+      const { back, forward } = await renderReady();
+      expect(tabStops()).toEqual([back]);
+
+      screen.getByRole("button", { name: "Before" }).focus();
+      await user.tab();
+      expect(back).toHaveFocus();
+      await user.tab();
+      expect(screen.getByRole("button", { name: "After" })).toHaveFocus();
+
+      back.focus();
+      await user.keyboard("{ArrowRight}");
+      expect(forward).toHaveFocus();
+      expect(tabStops()).toEqual([forward]);
+      await user.tab({ shift: true });
+      await user.tab();
+      expect(forward).toHaveFocus();
+    });
+
+    it("moves with Left/Right (wrapping) and Home/End", async () => {
+      const user = userEvent.setup();
+      const { back, forward, info } = await renderReady();
+      back.focus();
+
+      await user.keyboard("{ArrowRight}");
+      expect(forward).toHaveFocus();
+      await user.keyboard("{ArrowRight}");
+      expect(info).toHaveFocus();
+      await user.keyboard("{ArrowRight}");
+      expect(back).toHaveFocus();
+      await user.keyboard("{ArrowLeft}");
+      expect(info).toHaveFocus();
+      await user.keyboard("{Home}");
+      expect(back).toHaveFocus();
+      await user.keyboard("{End}");
+      expect(info).toHaveFocus();
+    });
+
+    it("skips unavailable buttons but keeps them discoverable", async () => {
+      const user = userEvent.setup();
+      const { back, forward, info } = await renderReady({
+        canGoBack: true,
+        canGoForward: false,
+      });
+      back.focus();
+
+      await user.keyboard("{ArrowRight}");
+      expect(info).toHaveFocus();
+      await user.keyboard("{ArrowLeft}");
+      expect(back).toHaveFocus();
+      // Still in the accessibility tree, announced as unavailable.
+      expect(forward).toHaveAttribute("aria-disabled", "true");
+      expect(forward).toHaveAccessibleName("Forward");
+    });
+
+    it("moves the tab stop off a button that becomes unavailable", async () => {
+      const { back, info } = await renderReady({
+        canGoBack: true,
+        canGoForward: false,
+      });
+      expect(tabStops()).toEqual([back]);
+
+      bridges.navigation.canGoBack = false;
+      await act(async () => {
+        for (const listener of bridges.navListeners) listener({});
+      });
+
+      expect(tabStops()).toEqual([info]);
+    });
+
+    it("leaves arrow keys alone inside the app-info dialog", async () => {
+      const user = userEvent.setup();
+      const { info } = await renderReady();
+      await user.click(info);
+      const check = await screen.findByRole("button", {
+        name: "Check for updates",
+      });
+      check.focus();
+
+      await user.keyboard("{ArrowLeft}{Home}");
+
+      expect(check).toHaveFocus();
+    });
   });
 
   it("draws no window buttons", async () => {

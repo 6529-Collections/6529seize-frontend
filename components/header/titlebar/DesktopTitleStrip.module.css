@@ -54,11 +54,13 @@
   cursor: pointer;
 }
 
-.button:hover:not(:disabled) {
+.button:hover:not([aria-disabled="true"]) {
   color: #fff;
 }
 
-.button:disabled {
+/* Unavailable back/forward: aria-disabled keeps them in the accessibility
+   tree and keeps their tooltips; inactive controls are exempt from 1.4.3. */
+.button[aria-disabled="true"] {
   cursor: default;
   opacity: 0.4;
 }

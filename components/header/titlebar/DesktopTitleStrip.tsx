@@ -5,7 +5,12 @@ import {
   ArrowRightIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import {
+  type KeyboardEvent,
+  useEffect,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { getDesktopShellApi, getDesktopUpdater } from "@/helpers/desktop-shell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -85,6 +90,31 @@ const getNavigation = () =>
   getDesktopShellApi() ? navigationState : NO_NAVIGATION;
 const getServerNavigation = () => NO_NAVIGATION;
 
+/**
+ * The toolbar item a key press moves to (WAI-ARIA APG toolbar): Left/Right
+ * step through the enabled items and wrap, Home/End go to the first/last.
+ * Works from an unavailable item too (it can hold focus after a click).
+ */
+function nextToolbarItem(
+  key: string,
+  current: number,
+  enabled: readonly boolean[]
+): number | undefined {
+  const order = enabled.flatMap((on, index) => (on ? [index] : []));
+  switch (key) {
+    case "ArrowRight":
+      return order.find((index) => index > current) ?? order[0];
+    case "ArrowLeft":
+      return order.findLast((index) => index < current) ?? order.at(-1);
+    case "Home":
+      return order[0];
+    case "End":
+      return order.at(-1);
+    default:
+      return undefined;
+  }
+}
+
 const PLAIN = /^[\w.+-]{1,64}$/;
 const readText = (value: unknown): string | null =>
   typeof value === "string" && PLAIN.test(value) ? value : null;
@@ -114,6 +144,7 @@ export default function DesktopTitleStrip() {
   );
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [activeItem, setActiveItem] = useState(0);
 
   useEffect(() => {
     const api = getDesktopShellApi();
@@ -158,21 +189,50 @@ export default function DesktopTitleStrip() {
   const backLabel = t(locale, "desktop.titleStrip.back");
   const forwardLabel = t(locale, "desktop.titleStrip.forward");
 
+  // Toolbar items in order: back, forward, app info (always available).
+  const enabled = [navigation.canGoBack, navigation.canGoForward, true];
+  // One tab stop: the last focused item, or the first available one if that
+  // item has become unavailable.
+  const tabStop = enabled[activeItem] ? activeItem : enabled.indexOf(true);
+  const itemProps = (index: number) => ({
+    tabIndex: index === tabStop ? 0 : -1,
+    "aria-disabled": enabled[index] ? undefined : true,
+    onFocus: () => setActiveItem(index),
+  });
+
+  const onToolbarKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    // Only from the toolbar's own items; the app-info dialog sits outside.
+    const items = Array.from(
+      event.currentTarget.querySelectorAll<HTMLButtonElement>(":scope > button")
+    );
+    const current = items.findIndex((item) => item === event.target);
+    if (current === -1) return;
+    const next = nextToolbarItem(event.key, current, enabled);
+    if (next === undefined) return;
+    event.preventDefault();
+    setActiveItem(next);
+    items[next]?.focus();
+  };
+
   return (
     <>
       <div
         className={styles["strip"]}
         data-desktop-drag-region=""
-        role="group"
+        role="toolbar"
+        aria-orientation="horizontal"
         aria-label={t(locale, "desktop.titleStrip.label")}
+        onKeyDown={onToolbarKeyDown}
       >
         <button
           type="button"
           className={styles["button"]}
           aria-label={backLabel}
           title={backLabel}
-          disabled={!navigation.canGoBack}
-          onClick={() => getDesktopShellApi()?.goBack()}
+          {...itemProps(0)}
+          onClick={() => {
+            if (navigation.canGoBack) getDesktopShellApi()?.goBack();
+          }}
         >
           <ArrowLeftIcon aria-hidden="true" width={16} height={16} />
         </button>
@@ -181,8 +241,10 @@ export default function DesktopTitleStrip() {
           className={styles["button"]}
           aria-label={forwardLabel}
           title={forwardLabel}
-          disabled={!navigation.canGoForward}
-          onClick={() => getDesktopShellApi()?.goForward()}
+          {...itemProps(1)}
+          onClick={() => {
+            if (navigation.canGoForward) getDesktopShellApi()?.goForward();
+          }}
         >
           <ArrowRightIcon aria-hidden="true" width={16} height={16} />
         </button>
@@ -191,6 +253,7 @@ export default function DesktopTitleStrip() {
           className={styles["button"]}
           aria-label={infoLabel}
           title={infoLabel}
+          {...itemProps(2)}
           onClick={() => setShowInfo(true)}
         >
           <InformationCircleIcon aria-hidden="true" width={16} height={16} />
