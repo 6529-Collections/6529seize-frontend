@@ -93,6 +93,37 @@ describe("shared Next config", () => {
     ).toContain("'wasm-unsafe-eval'");
   });
 
+  it("allows the Tauri IPC channel only in 6529 Desktop's own build", async () => {
+    const connectSrc = async (): Promise<string> => {
+      const headers = await sharedConfig(publicEnv, "").headers?.();
+      // The site-wide rule, not a route-specific policy.
+      const csp = headers
+        ?.find((entry) => entry.source === "/:path*")
+        ?.headers.find(
+          (header) => header.key === "Content-Security-Policy"
+        )?.value;
+      return (
+        csp
+          ?.split(";")
+          .map((directive) => directive.trim())
+          .find((directive) => directive.startsWith("connect-src ")) ?? ""
+      );
+    };
+    const previous = process.env["DESKTOP_APP_BUILD"];
+    try {
+      delete process.env["DESKTOP_APP_BUILD"];
+      expect(await connectSrc()).not.toContain("ipc");
+      process.env["DESKTOP_APP_BUILD"] = "1";
+      expect(await connectSrc()).not.toContain("ipc");
+      process.env["DESKTOP_APP_BUILD"] = "true";
+      expect(await connectSrc()).toContain("http://ipc.localhost");
+      expect(await connectSrc()).toContain("ipc://localhost");
+    } finally {
+      if (previous === undefined) delete process.env["DESKTOP_APP_BUILD"];
+      else process.env["DESKTOP_APP_BUILD"] = previous;
+    }
+  });
+
   describe("security headers", () => {
     const sentryDsn =
       "https://0123456789abcdef0123456789abcdef@o123.ingest.us.sentry.io/456";

@@ -1,7 +1,18 @@
 "use client";
 
 import { Capacitor } from "@capacitor/core";
-import { useCallback, useEffect, useMemo, useSyncExternalStore } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useSyncExternalStore,
+} from "react";
+import {
+  DesktopProfileRecoveryContext,
+  DesktopProfileRestoringContext,
+} from "@/contexts/DesktopProfileRecoveryContext";
+import { isDesktopApp } from "@/helpers/desktop-shell";
 import { mainnet, sepolia } from "viem/chains";
 import DeferredWagmiProvider from "./DeferredWagmiProvider";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
@@ -529,6 +540,11 @@ export default function WagmiSetup({
 
   // Server requests and the first hydration render get disconnected context.
   // Keep this instance local: wallet state must never cross server requests.
+  // 6529 Desktop must not reconnect a wallet while running signed out.
+  const recoveringDesktopProfiles = useContext(DesktopProfileRecoveryContext);
+  // While the shell restores the saved profiles, stay on the wallet-free
+  // config: the real one is hydrated (and may reconnect) once that settles.
+  const restoringDesktopProfiles = useContext(DesktopProfileRestoringContext);
   const publicWagmiConfig = useMemo(
     () => createPublicWagmiConfig(chains),
     [chains]
@@ -671,9 +687,8 @@ export default function WagmiSetup({
       return;
     }
 
-    const isDesktopApp = navigator.userAgent.includes("Electron");
     const loadForStoredSession = (): boolean => {
-      if (!isCapacitor && !isDesktopApp && !hasPersistedWalletSession()) {
+      if (!isCapacitor && !isDesktopApp() && !hasPersistedWalletSession()) {
         return false;
       }
 
@@ -720,8 +735,16 @@ export default function WagmiSetup({
     <AppKitBootstrapContext.Provider value={appKitBootstrapValue}>
       {/* The temporary config must not compete for Wagmi's reconnect lock. */}
       <DeferredWagmiProvider
-        config={currentAdapter?.wagmiConfig ?? publicWagmiConfig}
-        reconnectOnMount={currentAdapter !== null}
+        config={
+          restoringDesktopProfiles
+            ? publicWagmiConfig
+            : (currentAdapter?.wagmiConfig ?? publicWagmiConfig)
+        }
+        reconnectOnMount={
+          currentAdapter !== null &&
+          !recoveringDesktopProfiles &&
+          !restoringDesktopProfiles
+        }
       >
         {children}
         {appWalletPasswordModal.modal}

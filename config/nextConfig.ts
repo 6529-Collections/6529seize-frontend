@@ -102,6 +102,15 @@ function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
   ];
 }
 
+/**
+ * Set by 6529 Desktop's web build (`DESKTOP_APP_BUILD=true`) for the bundle
+ * its local server runs. Headers are compiled into the build, so no request
+ * can change this, and the 6529.io build never sets it.
+ */
+function isDesktopAppBuild(): boolean {
+  return process.env["DESKTOP_APP_BUILD"] === "true";
+}
+
 function getAllowedDevOrigins(): string[] {
   return (
     process.env["NEXT_ALLOWED_DEV_ORIGINS"]
@@ -242,6 +251,7 @@ export function sharedConfig(
                   publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED
                 ),
                 webSocketEndpoint: publicEnv["WS_ENDPOINT"],
+                allowDesktopIpc: isDesktopAppBuild(),
                 // Local development violations are expected noise; only
                 // deployed builds report CSP violations to Sentry.
                 sentryDsn: isLocalTooling ? undefined : publicEnv.SENTRY_DSN,
