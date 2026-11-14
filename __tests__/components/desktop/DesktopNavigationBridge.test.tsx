@@ -114,6 +114,8 @@ describe("DesktopNavigationBridge", () => {
     deliver("/accept-connection-sharing?connection_share_code=abc#k=v");
     deliver("//evil.example/");
     deliver("https://evil.example/");
+    // Same origin, but normalizes to the protocol-relative "//evil.example".
+    deliver("/a/..//evil.example/x");
 
     expect(push).toHaveBeenCalledTimes(1);
     expect(push).toHaveBeenCalledWith(
@@ -179,6 +181,17 @@ describe("DesktopNavigationBridge", () => {
 
     expect(loadDesktopUrlInPlace).not.toHaveBeenCalled();
     expect(api.openExternal).toHaveBeenCalledWith("http://evil.example/x");
+  });
+
+  it("never loads a same-origin link that normalizes to //host", () => {
+    installDesktopShell();
+    render(<DesktopNavigationBridge />);
+
+    clickLink("/a/..//evil.example/x", {}, { target: "_blank" });
+
+    expect(loadDesktopUrlInPlace).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+    expect(api.openExternal).not.toHaveBeenCalled();
   });
 
   it("leaves a new-window click the app already handled alone", () => {
