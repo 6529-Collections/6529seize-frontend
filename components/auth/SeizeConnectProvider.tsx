@@ -65,6 +65,7 @@ import {
   openFreshUserConnection,
   openUserConnectionSurfaceForRuntime,
   useDisconnectExternalWalletBeforeSelection,
+  useSeizeConnect,
 } from "./capacitorConnectController";
 
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -357,9 +358,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     [capacitor.isCapacitor, isSigningOutAllRef, seizeConnectOrThrow]
   );
 
-  const seizeConnect = useCallback((): void => {
-    seizeConnectOrThrow("seizeConnect").then(undefined, () => undefined);
-  }, [seizeConnectOrThrow]);
+  const seizeConnect = useSeizeConnect(isSigningOutAllRef, seizeConnectOrThrow);
 
   const seizeConnectFresh = useCallback(
     (): Promise<void> =>
