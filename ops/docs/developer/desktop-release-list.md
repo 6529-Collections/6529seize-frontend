@@ -58,9 +58,18 @@ the list: S3 reads are strongly consistent, so a missing object is a definite
 answer, not a failure, so servers answer 404 within a minute instead of
 serving the deleted list for an hour. Clients can still receive the deleted
 list from caches: a 200 already stored by CloudFront or an HTTP cache stays
-fresh for up to five minutes. Worst case, a client sees the deleted list for
-up to six minutes after the deletion (one-minute server snapshot plus the
-200's five-minute `max-age`).
+fresh for up to five minutes. How long a client can still see the deleted
+list:
+
+- When the servers' next reads succeed: up to about six minutes (one-minute
+  server snapshot plus the 200's five-minute `max-age`).
+- When S3 reads fail after the deletion, before a server has seen the
+  missing bundle: that server keeps serving its last good pair, so up to
+  about one hour and five minutes (the last-good lifetime plus `max-age`).
+
+To withdraw a list for certain, publish a superseding signed list (a new
+bundle with a higher `sequence`) rather than rely on deletion: the app keeps
+the newest verified list and refuses an older one.
 
 There is no redirect (the app refuses redirects) and no password gate.
 Production serves both paths to everyone; on staging they sit behind the
