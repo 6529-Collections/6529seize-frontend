@@ -136,6 +136,41 @@ describe("browser connector sign-in in 6529 Desktop", () => {
     expect(getBrowserConnectorStatus()).toBe("failed");
   });
 
+  it("opens nothing when cancelled while the shell reports its scheme", async () => {
+    installDesktopShell();
+    let resolveInfo: (value: unknown) => void = () => undefined;
+    api.getInfo.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveInfo = resolve;
+      })
+    );
+    const start = startBrowserConnectorSignIn();
+
+    cancelBrowserConnectorSignIn();
+    resolveInfo({ scheme: "localcore6529" });
+    await start;
+
+    expect(api.openExternal).not.toHaveBeenCalled();
+    expect(getBrowserConnectorStatus()).toBe("idle");
+  });
+
+  it("opens only the newer request when a second start replaces the first", async () => {
+    installDesktopShell();
+    let resolveFirst: (value: unknown) => void = () => undefined;
+    api.getInfo.mockReturnValueOnce(
+      new Promise((resolve) => {
+        resolveFirst = resolve;
+      })
+    );
+    const first = startBrowserConnectorSignIn();
+    await startBrowserConnectorSignIn();
+    resolveFirst({ scheme: "localcore6529" });
+    await first;
+
+    expect(api.openExternal).toHaveBeenCalledTimes(1);
+    expect(getBrowserConnectorStatus()).toBe("waiting");
+  });
+
   it("never falls back to a default scheme", async () => {
     api = createApi(null);
     installDesktopShell();
@@ -164,6 +199,61 @@ describe("browser connector sign-in in 6529 Desktop", () => {
     });
     expect(seizeAcceptConnection).toHaveBeenCalledWith(ADDRESS);
     expect(getBrowserConnectorStatus()).toBe("signed-in");
+  });
+
+  it("leaves requests to the mounted bridge when the host cannot remove listeners", async () => {
+    // An older host without offWalletConnection keeps every listener.
+    api = {
+      ...createApi(),
+      offWalletConnection: undefined,
+    } as unknown as ReturnType<typeof createApi>;
+    installDesktopShell();
+    const first = render(<DesktopBrowserConnectorBridge />);
+    first.unmount();
+    render(<DesktopBrowserConnectorBridge />);
+    await startBrowserConnectorSignIn();
+    const { requestId } = openedRequest();
+
+    await deliver(result(requestId));
+
+    // Both listeners heard it; only the mounted bridge signed in.
+    expect(api.listeners.size).toBe(2);
+    expect(loginWithSessionV2).toHaveBeenCalledTimes(1);
+    expect(seizeAcceptConnection).toHaveBeenCalledTimes(1);
+    expect(getBrowserConnectorStatus()).toBe("signed-in");
+  });
+
+  it("does not finish a sign-in after unmount", async () => {
+    installDesktopShell();
+    type LoginResult = Awaited<ReturnType<typeof loginWithSessionV2>>;
+    let resolveLogin: (value: LoginResult) => void = () => undefined;
+    jest.mocked(loginWithSessionV2).mockReturnValue(
+      new Promise<LoginResult>((resolve) => {
+        resolveLogin = resolve;
+      })
+    );
+    const { unmount } = render(<DesktopBrowserConnectorBridge />);
+    await startBrowserConnectorSignIn();
+    await deliver(result(openedRequest().requestId));
+
+    unmount();
+    await act(async () => {
+      resolveLogin({ address: ADDRESS } as LoginResult);
+    });
+
+    expect(persistSessionResponse).not.toHaveBeenCalled();
+    expect(seizeAcceptConnection).not.toHaveBeenCalled();
+    expect(getBrowserConnectorStatus()).toBe("failed");
+  });
+
+  it("registers nothing when the host has no wallet-connection listener", async () => {
+    api = {
+      ...createApi(),
+      onWalletConnection: undefined,
+    } as unknown as ReturnType<typeof createApi>;
+    installDesktopShell();
+
+    expect(() => render(<DesktopBrowserConnectorBridge />)).not.toThrow();
   });
 
   it("ignores links for other requests, malformed links and cancelled requests", async () => {

@@ -1,11 +1,12 @@
 "use client";
 
 import {
+  ArrowTopRightOnSquareIcon,
   ChevronRightIcon,
   GlobeAltIcon,
   QrCodeIcon,
 } from "@heroicons/react/24/outline";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -35,13 +36,19 @@ function Option({
   icon,
   onClick,
   disabled = false,
+  opensBrowser = false,
 }: {
   readonly label: string;
   readonly description: string;
   readonly icon: React.ReactNode;
   readonly onClick: () => void;
   readonly disabled?: boolean;
+  /** Shows the leave-the-app mark instead of the chevron. */
+  readonly opensBrowser?: boolean;
 }) {
+  const TrailingIcon = opensBrowser
+    ? ArrowTopRightOnSquareIcon
+    : ChevronRightIcon;
   return (
     <button
       type="button"
@@ -58,9 +65,9 @@ function Option({
           {description}
         </span>
       </span>
-      <ChevronRightIcon
+      <TrailingIcon
         aria-hidden="true"
-        className="tw-size-5 tw-flex-none tw-text-iron-500"
+        className="tw-size-5 tw-flex-none tw-text-iron-400"
       />
     </button>
   );
@@ -74,9 +81,9 @@ const STATUS_MESSAGES = {
 } as const;
 
 /**
- * The 6529 Desktop connect choice: scan with a mobile wallet
- * (WalletConnect), or sign in with a browser wallet through the browser
- * connector. Seed wallets of the older desktop app are not offered: they
+ * The 6529 Desktop connect choice: sign in with a browser wallet through the
+ * browser connector (it opens the system browser, where extensions such as
+ * MetaMask live), or scan a QR code with a phone wallet (WalletConnect). Seed wallets of the older desktop app are not offered: they
  * exposed private keys to the page. Renders nothing until the shared connect
  * flow opens it, which happens only inside 6529 Desktop.
  */
@@ -95,8 +102,11 @@ export default function DesktopConnectDialog() {
   const [problem, setProblem] = useState<
     "start-failed" | "walletconnect-failed" | null
   >(null);
+  // Set synchronously, so a double click starts only one browser sign-in.
+  const starting = useRef(false);
+  const [isStarting, setIsStarting] = useState(false);
   const isOpen = openWalletConnect !== null;
-  const isBusy = status === "waiting" || status === "signing-in";
+  const isBusy = isStarting || status === "waiting" || status === "signing-in";
 
   // A finished browser sign-in closes the choice.
   useEffect(() => {
@@ -125,8 +135,16 @@ export default function DesktopConnectDialog() {
   };
 
   const chooseBrowserWallet = () => {
+    if (starting.current) return;
+    starting.current = true;
+    setIsStarting(true);
     setProblem(null);
-    startBrowserConnectorSignIn().catch(() => setProblem("start-failed"));
+    startBrowserConnectorSignIn()
+      .catch(() => setProblem("start-failed"))
+      .finally(() => {
+        starting.current = false;
+        setIsStarting(false);
+      });
   };
 
   let alertText: string | null = null;
@@ -149,18 +167,22 @@ export default function DesktopConnectDialog() {
       onClose={close}
     >
       <div className="tw-flex tw-flex-col tw-gap-3 tw-pb-2">
-        <Option
-          label={t(locale, "desktopConnect.walletConnect")}
-          description={t(locale, "desktopConnect.walletConnectDescription")}
-          icon={<QrCodeIcon aria-hidden="true" className="tw-size-6" />}
-          onClick={chooseWalletConnect}
-          disabled={isBusy}
-        />
+        <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+          {t(locale, "desktopConnect.intro")}
+        </p>
         <Option
           label={t(locale, "desktopConnect.browserWallet")}
           description={t(locale, "desktopConnect.browserWalletDescription")}
           icon={<GlobeAltIcon aria-hidden="true" className="tw-size-6" />}
           onClick={chooseBrowserWallet}
+          disabled={isBusy}
+          opensBrowser
+        />
+        <Option
+          label={t(locale, "desktopConnect.walletConnect")}
+          description={t(locale, "desktopConnect.walletConnectDescription")}
+          icon={<QrCodeIcon aria-hidden="true" className="tw-size-6" />}
+          onClick={chooseWalletConnect}
           disabled={isBusy}
         />
         {/* Both live regions stay in the dialog; only their text changes. */}
