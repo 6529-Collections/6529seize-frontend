@@ -94,7 +94,11 @@ describe("getDesktopLinkAction", () => {
     ).toEqual({ kind: "navigate", url: "/waves/abc/details" });
   });
 
-  it.each(["/a/..//evil.example/x", `${ORIGIN}/a/..//evil.example/x`])(
+  it.each([
+    "/a/..//evil.example/x",
+    `${ORIGIN}/a/..//evil.example/x`,
+    "/./..//evil.example",
+  ])(
     "never hands on a same-origin link that normalizes to //host (%p)",
     (href) => {
       expect(

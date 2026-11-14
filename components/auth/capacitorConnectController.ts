@@ -132,7 +132,7 @@ export function useSeizeConnect(
       isSigningOutAll: isSigningOutAllRef.current,
       openWebConnection,
       openDefault: openWebConnection,
-    }).then(undefined, () => undefined);
+    }).catch(() => undefined);
   }, [isSigningOutAllRef, openWebConnection]);
 }
 

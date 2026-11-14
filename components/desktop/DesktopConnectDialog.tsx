@@ -117,7 +117,11 @@ export default function DesktopConnectDialog() {
   // with the returned signature, closing (the dialog's own Close button or
   // Escape) only hides the dialog: the sign-in finishes on its own.
   const close = () => {
-    if (status === "waiting") cancelBrowserConnectorSignIn();
+    // Also while the start is still asking the shell for its scheme (the
+    // status is idle then), so the browser does not open after closing.
+    if (status === "waiting" || starting.current) {
+      cancelBrowserConnectorSignIn();
+    }
     setProblem(null);
     closeDesktopConnectDialog();
   };

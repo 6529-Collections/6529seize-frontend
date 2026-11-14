@@ -228,6 +228,48 @@ describe("DesktopNotificationsBridge", () => {
     expect(commonApiFetch).toHaveBeenCalledTimes(4);
   });
 
+  it("shows every notification of a burst larger than one poll can fetch", async () => {
+    installDesktopShell();
+    jest.useFakeTimers();
+    render(<DesktopNotificationsBridge />);
+    await waitFor(() =>
+      expect(bridges.notifications.showNotification).toHaveBeenCalledTimes(1)
+    );
+
+    // Ids 8..58 arrive after 7 was seen: 51, more than ten pages of five.
+    const allIds = Array.from({ length: 58 }, (_, index) => 58 - index);
+    jest.mocked(commonApiFetch).mockImplementation((request) => {
+      const before = Number(
+        (request.params as Record<string, string>)["id_less_than"] ?? Infinity
+      );
+      return Promise.resolve(
+        followNotification(...allIds.filter((id) => id < before).slice(0, 5))
+      );
+    });
+    const shownIds = () =>
+      bridges.notifications.showNotification.mock.calls.map((call) => call[0]);
+
+    await act(async () => {
+      jest.advanceTimersByTime(15_000);
+    });
+    await act(async () => undefined);
+    // The budget reached 9; 8 is kept for the next poll, not skipped.
+    expect(shownIds()).toEqual([7, ...allIds.slice(0, 50).reverse()]);
+
+    await act(async () => {
+      jest.advanceTimersByTime(15_000);
+    });
+    await act(async () => undefined);
+    expect(shownIds()).toEqual([7, ...allIds.slice(0, 50).reverse(), 8]);
+
+    // Nothing is shown twice afterwards.
+    await act(async () => {
+      jest.advanceTimersByTime(15_000);
+    });
+    await act(async () => undefined);
+    expect(shownIds()).toHaveLength(52);
+  });
+
   it("shows nothing from a poll that finishes after unmount", async () => {
     installDesktopShell();
     let resolveFetch: (value: unknown) => void = () => undefined;
