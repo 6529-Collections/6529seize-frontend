@@ -126,6 +126,32 @@ describe("DesktopUpdateNotice", () => {
     expect(updater.downloadUpdate).toHaveBeenCalledTimes(2);
   });
 
+  it.each([
+    [
+      "throws",
+      () => {
+        throw new Error("updater busy");
+      },
+    ],
+    ["returns a rejected promise", () => Promise.reject(new Error("offline"))],
+  ])(
+    "shows the failure when starting the download %s",
+    async (_name, implementation) => {
+      const user = userEvent.setup();
+      installDesktopShell();
+      updater.downloadUpdate.mockImplementation(implementation);
+      render(<DesktopUpdateNotice />);
+      updater.emit("available", { version: "2.1.0" });
+
+      await user.click(screen.getByRole("button", { name: "Download update" }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "The update could not be downloaded."
+      );
+      expect(screen.getByRole("button", { name: "Try again" })).toBeVisible();
+    }
+  );
+
   it("can be dismissed, and ignores a malformed version", async () => {
     const user = userEvent.setup();
     installDesktopShell();
