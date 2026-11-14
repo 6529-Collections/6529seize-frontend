@@ -205,7 +205,8 @@ export default function DesktopTitleStrip() {
     const items = Array.from(
       event.currentTarget.querySelectorAll<HTMLButtonElement>(":scope > button")
     );
-    const current = items.findIndex((item) => item === event.target);
+    // -1 when focus is not on one of them.
+    const current = items.indexOf(event.target as HTMLButtonElement);
     if (current === -1) return;
     const next = nextToolbarItem(event.key, current, enabled);
     if (next === undefined) return;
