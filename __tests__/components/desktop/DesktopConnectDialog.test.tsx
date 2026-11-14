@@ -118,6 +118,29 @@ describe("DesktopConnectDialog", () => {
     expect(browser).toBeEnabled();
   });
 
+  it("cancels a browser sign-in that is still starting when closed", async () => {
+    const user = userEvent.setup();
+    let finishStart: () => void = () => undefined;
+    jest.mocked(startBrowserConnectorSignIn).mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        finishStart = resolve;
+      })
+    );
+    render(<DesktopConnectDialog />);
+    open();
+    await user.click(
+      screen.getByRole("button", { name: /Use a browser wallet/ })
+    );
+
+    // The status is still idle while the shell reports its scheme.
+    await user.click(screen.getByRole("button", { name: "Close" }));
+
+    expect(cancelBrowserConnectorSignIn).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      finishStart();
+    });
+  });
+
   it("hands WalletConnect back to the connect flow and closes", async () => {
     const user = userEvent.setup();
     render(<DesktopConnectDialog />);
