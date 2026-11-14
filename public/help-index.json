@@ -8190,12 +8190,12 @@
       "kind": "route",
       "title": "Prenodes (retired)",
       "aliases": ["prenodes", "prenode", "prenodes status", "node status"],
-      "keywords": ["network", "prenodes", "retired", "desktop", "tdh"],
+      "keywords": ["network", "prenodes", "retired", "validator"],
       "facts": [
-        "6529 Prenodes have been retired and shut down. Use the 6529 Desktop app to calculate TDH.",
-        "Old /network/prenodes links redirect permanently to /about/6529-apps, where 6529 Desktop can be downloaded."
+        "6529 Prenodes have been retired and shut down. The 6529 validator replaces them.",
+        "Old /network/prenodes links redirect permanently to /validator, the 6529 validator download page."
       ],
-      "canonical_path": "/about/6529-apps",
+      "canonical_path": "/validator",
       "related_paths": ["/network"],
       "tags": ["network", "prenodes"],
       "source_refs": ["config/nextConfig.ts"]

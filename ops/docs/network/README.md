@@ -12,9 +12,8 @@ reference routes.
   `/network/levels`.
 - Adjacent xTDH routes owned here: `/network/xtdh` (rules reference) and
   `/xtdh` (live allocations dashboard).
-- Retired route: `/network/prenodes` redirects permanently to
-  `/about/6529-apps`. Prenodes were shut down; the 6529 Desktop app calculates
-  TDH.
+- Retired route: `/network/prenodes` redirects permanently to `/validator`.
+  Prenodes were shut down; the 6529 validator replaces them.
 - Group scope behavior: `/network` owns scope controls; `/network/activity`
   has no scope controls but can consume active group scope.
 - Saved groups can be searched, created, and applied inline from `/network`

@@ -46,10 +46,10 @@ describe("shared Next config", () => {
     });
   });
 
-  it("sends the retired Prenodes page to 6529 Apps", async () => {
+  it("sends the retired Prenodes page to the validator", async () => {
     expect(await sharedConfig(publicEnv, "").redirects?.()).toContainEqual({
       source: "/network/prenodes",
-      destination: "/about/6529-apps",
+      destination: "/validator",
       permanent: true,
     });
   });

@@ -203,10 +203,10 @@ export function sharedConfig(
           permanent: true,
         },
         // Prenodes were retired and their servers shut down; the 6529
-        // Desktop app now calculates TDH.
+        // validator replaces them.
         {
           source: "/network/prenodes",
-          destination: "/about/6529-apps",
+          destination: "/validator",
           permanent: true,
         },
       ]);
