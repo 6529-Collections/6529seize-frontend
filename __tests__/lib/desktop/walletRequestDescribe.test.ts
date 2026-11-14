@@ -1,3 +1,6 @@
+/**
+ * @jest-environment-options {"url": "http://localhost:6529/"}
+ */
 import { createWalletClient, custom, toHex, type Address } from "viem";
 import { mainnet } from "viem/chains";
 import {
@@ -13,6 +16,11 @@ import {
   type WalletRequest,
 } from "@/lib/desktop/walletForwarding";
 import { describeWalletRequest } from "@/lib/desktop/walletRequestDescribe";
+import { buildCompetitionSignatureMessage } from "@/services/wallet-signatures/competition-signature";
+import {
+  buildDropSignatureMessage,
+  buildRememeSignatureMessage,
+} from "@/services/wallet-signatures/structured-wallet-signatures";
 
 const ADDRESS = "0x1111111111111111111111111111111111111111" as Address;
 const OTHER = "0x2222222222222222222222222222222222222222" as Address;
@@ -58,7 +66,7 @@ async function typedRequest(
 /** Re-serialize with a change, as a forged request would arrive. */
 async function tamper(
   typedData: unknown,
-  change: (json: Record<string, any>) => void
+  change: (json: any) => void
 ): Promise<WalletRequest> {
   const params = await captureTypedData(typedData);
   const json = JSON.parse(params[1] as string);
@@ -176,12 +184,66 @@ const profilePublish = (chainId = 1, verifyingContract?: string) => {
   };
 };
 
-describe("describeWalletRequest: messages", () => {
-  it("shows readable text in full", () => {
-    const text = "6529 Action\nVersion: 2\nAction: vote\nNonce: 1";
+const NONCE = "00000000-0000-4000-8000-000000000001";
+
+const dropMessage = (address: string = ADDRESS) =>
+  buildDropSignatureMessage({
+    address,
+    drop: {
+      wave_id: "wave-1",
+      drop_type: ApiDropType.Chat,
+      title: null,
+      parts: [{ content: "gm", media: [] }],
+      referenced_nfts: [],
+      mentioned_users: [],
+      metadata: [],
+      signature: null,
+      signer_address: address,
+    },
+    termsOfService: "Terms v1",
+  }).message;
+
+const decisionMessage = (
+  action: "VOTE_SET" | "ENTRY_CREATE",
+  wallet: string = ADDRESS
+) =>
+  buildCompetitionSignatureMessage({
+    action,
+    audience: "api.6529.io",
+    actorProfileId: "profile-1",
+    actorWallet: wallet,
+    waveId: "wave-1",
+    competitionId: "competition-1",
+    entryId: action === "VOTE_SET" ? "entry-1" : null,
+    dropId: null,
+    configVersion: 3,
+    payload: { votes: 5 },
+    nonce: NONCE,
+    issuedAt: NOW_MS,
+  });
+
+const refusalOf = (text: string) => {
+  const result = describeWalletRequest(messageRequest(text), ORIGIN);
+  return result.ok ? null : result.refusal;
+};
+
+describe("describeWalletRequest: messages (allow-list)", () => {
+  it("allows the structured drop signature this app builds", () => {
+    const text = dropMessage();
     expect(describeWalletRequest(messageRequest(text), ORIGIN)).toEqual({
       ok: true,
-      value: { kind: "message", text },
+      value: { kind: "message", text, format: "drop" },
+    });
+  });
+
+  it.each([
+    ["VOTE_SET", "decisionVote"],
+    ["ENTRY_CREATE", "decisionEntry"],
+  ] as const)("allows a decision %s signature", (action, format) => {
+    const text = decisionMessage(action);
+    expect(describeWalletRequest(messageRequest(text), ORIGIN)).toEqual({
+      ok: true,
+      value: { kind: "message", text, format },
     });
   });
 
@@ -192,11 +254,69 @@ describe("describeWalletRequest: messages", () => {
       "a SIWE message",
       "6529.io wants you to sign in with your Ethereum account:\n0x1",
     ],
+  ])("refuses %s as a sign-in message", (_label, text) => {
+    expect(refusalOf(text)).toBe("sign-in-message");
+  });
+
+  it.each([
+    [
+      "the legacy ownership nonce text",
+      "Signing this message confirms that you own the address 0x1111111111111111111111111111111111111111. Nonce: abc",
+    ],
+    ["a bare UUID nonce", NONCE],
+    ["free text", "Vote for entry 7"],
+    [
+      "a rememe signature",
+      buildRememeSignatureMessage({ address: ADDRESS, rememe: { id: 1 } })
+        .message,
+    ],
+    ["a drop signature for another wallet", dropMessage(OTHER)],
+    [
+      "a drop signature for another app",
+      dropMessage().replace(
+        "Client Origin: http://localhost:6529",
+        "Client Origin: https://6529.io"
+      ),
+    ],
+    [
+      "a drop signature for another domain",
+      dropMessage().replace("Domain: localhost:6529", "Domain: 6529.io"),
+    ],
+    [
+      "a drop signature with a longer lifetime",
+      dropMessage().replace(
+        /Expiration Time: (.*)/,
+        (_m, time: string) =>
+          `Expiration Time: ${new Date(Date.parse(time) + 1000).toISOString()}`
+      ),
+    ],
+    ["a drop signature with an extra line", `${dropMessage()}\nNote: extra`],
+    [
+      "a drop signature with a session type",
+      dropMessage().replace("Wallet: ", "Session Type: desktop\nWallet: "),
+    ],
+    [
+      "a decision signature for another wallet",
+      decisionMessage("VOTE_SET", OTHER),
+    ],
+    [
+      "a decision signature that is not canonical",
+      JSON.stringify(
+        JSON.parse(decisionMessage("VOTE_SET")),
+        null,
+        1
+      ).replaceAll("\n", ""),
+    ],
+    [
+      "a decision signature with another domain",
+      decisionMessage("VOTE_SET").replace("6529-competition-v1", "6529-login"),
+    ],
+    [
+      "a decision signature with an extra key",
+      decisionMessage("VOTE_SET").replace('{"action"', '{"a":1,"action"'),
+    ],
   ])("refuses %s", (_label, text) => {
-    expect(describeWalletRequest(messageRequest(text), ORIGIN)).toEqual({
-      ok: false,
-      refusal: "sign-in-message",
-    });
+    expect(refusalOf(text)).toBe("unknown-message");
   });
 
   it("refuses bytes that are not readable text", () => {
@@ -310,56 +430,56 @@ describe("describeWalletRequest: refusals", () => {
     it.each([
       [
         "scopes",
-        (m: Record<string, any>) => (m.scopes = "post,edit,delete,react,vote"),
+        (m: any) => (m.scopes = "post,edit,delete,react,vote"),
         "statement-mismatch",
       ],
       [
         "expiry",
-        (m: Record<string, any>) =>
+        (m: any) =>
           (m.expiresAt = String(Number(m.expiresAt) + 86_400)),
         "statement-mismatch",
       ],
       [
         "device key",
-        (m: Record<string, any>) =>
+        (m: any) =>
           (m.deviceKey = keyWithNewPrefix(m.deviceKey)),
         "statement-mismatch",
       ],
       [
         "encrypted-messages key",
-        (m: Record<string, any>) =>
+        (m: any) =>
           (m.mlsDeviceKey = keyWithNewPrefix(m.mlsDeviceKey)),
         "statement-mismatch",
       ],
       [
         "encrypted-messages key removed",
-        (m: Record<string, any>) => (m.mlsDeviceKey = `0x${"00".repeat(32)}`),
+        (m: any) => (m.mlsDeviceKey = `0x${"00".repeat(32)}`),
         "statement-mismatch",
       ],
       [
         "suites",
-        (m: Record<string, any>) => (m.ciphersuites = [3, 3]),
+        (m: any) => (m.ciphersuites = [3, 3]),
         "statement-mismatch",
       ],
       [
         "issued time beyond the grant lifetime",
-        (m: Record<string, any>) => (m.issuedAt = "1"),
+        (m: any) => (m.issuedAt = "1"),
         "statement-mismatch",
       ],
       [
         "issued time after expiry",
-        (m: Record<string, any>) =>
+        (m: any) =>
           (m.issuedAt = String(Number(m.expiresAt) + 60)),
         "statement-mismatch",
       ],
       [
         "wallet",
-        (m: Record<string, any>) => (m.wallet = OTHER),
+        (m: any) => (m.wallet = OTHER),
         "wrong-wallet",
       ],
       [
         "origin",
-        (m: Record<string, any>) => (m.origin = "6529.io"),
+        (m: any) => (m.origin = "6529.io"),
         "wrong-origin",
       ],
     ])("refuses a changed %s", async (_label, change, refusal) => {
@@ -401,20 +521,20 @@ describe("describeWalletRequest: refusals", () => {
   it.each([
     [
       "an extra signed field",
-      (json: Record<string, any>) => {
+      (json: any) => {
         json.types.MlsDeviceGrant.push({ name: "admin", type: "bool" });
         json.message.admin = true;
       },
     ],
     [
       "another domain",
-      (json: Record<string, any>) => {
+      (json: any) => {
         json.domain.name = "6529 Encrypted Messagez";
       },
     ],
     [
       "a domain type that hides a field",
-      (json: Record<string, any>) => {
+      (json: any) => {
         json.types.EIP712Domain = json.types.EIP712Domain.slice(0, 2);
       },
     ],

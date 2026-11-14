@@ -6,6 +6,8 @@ import userEvent from "@testing-library/user-event";
 import { toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import BrowserWalletRequestPanel from "@/components/desktop/BrowserWalletRequestPanel";
+import { ApiDropType } from "@/generated/models/ApiDropType";
+import { buildDropSignatureMessage } from "@/services/wallet-signatures/structured-wallet-signatures";
 import {
   buildWalletRequestFragment,
   walletRequestCode,
@@ -24,6 +26,22 @@ const ADDRESS = "0x1111111111111111111111111111111111111111";
 const OTHER = "0x2222222222222222222222222222222222222222";
 const ID = "Q".repeat(43);
 const SIGNATURE = `0x${"ab".repeat(65)}`;
+// A real drop signature as this app builds it (on the allow-list).
+const MESSAGE = buildDropSignatureMessage({
+  address: ADDRESS,
+  drop: {
+    wave_id: "wave-1",
+    drop_type: ApiDropType.Chat,
+    title: null,
+    parts: [{ content: "gm", media: [] }],
+    referenced_nfts: [],
+    mentioned_users: [],
+    metadata: [],
+    signature: null,
+    signer_address: ADDRESS,
+  },
+  termsOfService: null,
+}).message;
 
 let account: { isConnected: boolean; address?: string; chainId?: number } = {
   isConnected: true,
@@ -66,7 +84,7 @@ const envelope = (
   expiresAt: Date.now() + 60_000,
   request: {
     method: "personal_sign",
-    params: [toHex("Vote for entry 7"), ADDRESS],
+    params: [toHex(MESSAGE), ADDRESS],
     address: ADDRESS,
     chainId: 1,
   },
@@ -111,7 +129,13 @@ describe("BrowserWalletRequestPanel", () => {
   it("shows the message, the request code and signs the exact bytes", async () => {
     render(<BrowserWalletRequestPanel hash={await fragmentFor(envelope())} />);
 
-    expect(await screen.findByText("Vote for entry 7")).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        (_content, element) =>
+          element?.tagName === "PRE" && element.textContent === MESSAGE
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Create a 6529 drop/)).toBeInTheDocument();
     expect(
       screen.getByText(new RegExp(walletRequestCode(ID)))
     ).toBeInTheDocument();
@@ -127,7 +151,7 @@ describe("BrowserWalletRequestPanel", () => {
     await waitFor(() => expect(assign).toHaveBeenCalled());
     expect(signMessageAsync).toHaveBeenCalledWith({
       account: ADDRESS,
-      message: { raw: toHex("Vote for entry 7") },
+      message: { raw: toHex(MESSAGE) },
     });
     expect(returnedData()).toEqual({
       v: 1,

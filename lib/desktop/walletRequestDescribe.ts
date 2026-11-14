@@ -4,9 +4,9 @@
  *
  * Everything shown is read from the signed request itself, never from a
  * description supplied by the requester. A request the page cannot describe
- * honestly is refused: messages that are not readable text, 6529 sign-in
- * challenges (sessions start only through the sign-in flow), and typed data
- * other than the exact schemas 6529 Desktop signs.
+ * honestly is refused: messages that are not readable text or not one of
+ * the exact formats 6529 Desktop signs (an allow-list; sign-in challenges
+ * never match), and typed data other than the exact schemas it signs.
  */
 
 import { type Address, getTypesForEIP712Domain } from "viem";
@@ -41,6 +41,10 @@ import {
   readWalletMessageText,
   type WalletRequest,
 } from "@/lib/desktop/walletForwarding";
+import {
+  readWalletMessageFormat,
+  type WalletMessageFormat,
+} from "@/lib/desktop/walletMessageFormats";
 
 /** The typed-data schemas the browser page knows how to describe. */
 export type WalletTypedDataKind =
@@ -56,7 +60,11 @@ interface WalletRequestDetail {
 }
 
 export type WalletRequestDescription =
-  | { readonly kind: "message"; readonly text: string }
+  | {
+      readonly kind: "message";
+      readonly text: string;
+      readonly format: WalletMessageFormat;
+    }
   | {
       readonly kind: "typedData";
       readonly schema: WalletTypedDataKind;
@@ -71,6 +79,7 @@ export type WalletRequestDescription =
 export type WalletRequestRefusal =
   | "unreadable-message"
   | "sign-in-message"
+  | "unknown-message"
   | "unknown-typed-data"
   | "wrong-wallet"
   | "wrong-origin"
@@ -121,7 +130,9 @@ function sameJson(left: unknown, right: unknown): boolean {
     const keys = Object.keys(left);
     return (
       keys.length === Object.keys(right).length &&
-      keys.every((key) => key in right && sameJson(left[key], right[key]))
+      keys.every(
+        (key) => Object.hasOwn(right, key) && sameJson(left[key], right[key])
+      )
     );
   }
   return left === right;
@@ -320,7 +331,9 @@ export function describeWalletRequest(
     const text = readWalletMessageText(request.message);
     if (text === null) return refuse("unreadable-message");
     if (isSignInMessage(text)) return refuse("sign-in-message");
-    return { ok: true, value: { kind: "message", text } };
+    const format = readWalletMessageFormat(text, request.address, pageOrigin);
+    if (format === null) return refuse("unknown-message");
+    return { ok: true, value: { kind: "message", text, format } };
   }
   return describeTypedData(request.typedData, request, pageOrigin);
 }

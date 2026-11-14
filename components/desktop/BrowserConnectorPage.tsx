@@ -40,12 +40,33 @@ const PROBLEM_MESSAGES = {
 const subscribeToNothing = () => () => undefined;
 const getClientHydrated = () => true;
 const getServerHydrated = () => false;
-const getClientHash = () => window.location.hash;
 const getServerHash = () => "";
 
 /** A wallet request from 6529 Desktop travels in the fragment (`#w=...`). */
 const isWalletRequestHash = (hash: string): boolean =>
   new URLSearchParams(hash.replace(/^#/, "")).has("w");
+
+let takenWalletHash: string | null = null;
+
+/**
+ * Reads a wallet request from the fragment once and removes it from the
+ * address bar in the same step, before the page renders anything or makes
+ * a request, so no history entry, error report or page view keeps it.
+ * Later reads return the request taken the first time.
+ */
+function takeWalletRequestHash(): string {
+  if (takenWalletHash !== null) return takenWalletHash;
+  const { hash, pathname, search } = window.location;
+  if (!isWalletRequestHash(hash)) return "";
+  takenWalletHash = hash;
+  window.history.replaceState(window.history.state, "", pathname + search);
+  return hash;
+}
+
+/** @api Forgets the request taken from the fragment, between tests. */
+export function __resetBrowserConnectorPageForTests(): void {
+  takenWalletHash = null;
+}
 
 // Validity depends on the current time, so it is read only in the browser.
 const readRequest = (params: { get(name: string): string | null }) =>
@@ -72,7 +93,7 @@ export default function BrowserConnectorPage() {
   );
   const hash = useSyncExternalStore(
     subscribeToNothing,
-    getClientHash,
+    takeWalletRequestHash,
     getServerHash
   );
   const [expired, setExpired] = useState(false);

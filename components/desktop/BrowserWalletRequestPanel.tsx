@@ -154,9 +154,14 @@ function Details({
 }) {
   if (description.kind === "message") {
     return (
-      <pre className="tw-m-0 tw-max-h-72 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-bg-iron-900 tw-p-3 tw-font-mono tw-text-sm tw-text-iron-100">
-        {description.text}
-      </pre>
+      <>
+        <p className="tw-m-0 tw-text-lg tw-font-semibold">
+          {t(locale, `browserConnector.wallet.format.${description.format}`)}
+        </p>
+        <pre className="tw-m-0 tw-max-h-72 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-bg-iron-900 tw-p-3 tw-font-mono tw-text-sm tw-text-iron-100">
+          {description.text}
+        </pre>
+      </>
     );
   }
   return (

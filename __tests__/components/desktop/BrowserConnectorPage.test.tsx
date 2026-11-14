@@ -1,6 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import BrowserConnectorPage from "@/components/desktop/BrowserConnectorPage";
+import BrowserConnectorPage, {
+  __resetBrowserConnectorPageForTests,
+} from "@/components/desktop/BrowserConnectorPage";
 import { getSessionNonce } from "@/services/auth/session-v2.utils";
 
 const REQUEST_ID = "abcdefghijklmnopqrstuvwxyz012345";
@@ -28,8 +30,12 @@ jest.mock("@/helpers/desktop-navigation", () => ({
 }));
 jest.mock("@/components/desktop/BrowserWalletRequestPanel", () => ({
   __esModule: true,
+  // Records the address bar as the panel first sees it: the fragment must
+  // already be gone before the panel can make any request.
   default: ({ hash }: { hash: string }) => (
-    <p data-testid="wallet-request-panel">{hash}</p>
+    <p data-testid="wallet-request-panel" data-url={globalThis.location.href}>
+      {hash}
+    </p>
   ),
 }));
 jest.mock("@/services/auth/session-v2.utils", () => ({
@@ -212,6 +218,25 @@ describe("BrowserConnectorPage", () => {
   describe("wallet requests", () => {
     afterEach(() => {
       globalThis.history.replaceState(null, "", "/");
+      __resetBrowserConnectorPageForTests();
+    });
+
+    it("removes the request from the address bar before the panel renders", async () => {
+      globalThis.history.replaceState(
+        { kept: true },
+        "",
+        "/browser-connector?x=1#w=abc&s=0x1"
+      );
+      render(<BrowserConnectorPage />);
+
+      const panel = await screen.findByTestId("wallet-request-panel");
+      expect(panel).toHaveTextContent("#w=abc&s=0x1");
+      expect(panel.dataset["url"]).toBe(
+        "http://localhost/browser-connector?x=1"
+      );
+      expect(globalThis.location.hash).toBe("");
+      expect(globalThis.history.state).toEqual({ kept: true });
+      expect(document.title).not.toContain("abc");
     });
 
     it("hands a fragment request to the wallet request panel only", async () => {

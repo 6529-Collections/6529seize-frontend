@@ -4049,6 +4049,14 @@ export const EN_US_ROOT_MESSAGES = {
     "The message is not readable text.",
   "browserConnector.wallet.refusal.sign-in-message":
     "It is a sign-in message. Sign in from 6529 Desktop instead.",
+  "browserConnector.wallet.refusal.unknown-message":
+    "It is not a message 6529 Desktop signs from here. Continue on 6529.io in your browser instead.",
+  "browserConnector.wallet.format.drop":
+    "Create a 6529 drop. This also covers accepting a wave's terms.",
+  "browserConnector.wallet.format.decisionVote":
+    "Cast your vote in a 6529 decision.",
+  "browserConnector.wallet.format.decisionEntry":
+    "Submit an entry to a 6529 decision.",
   "browserConnector.wallet.refusal.unknown-typed-data":
     "It is a kind of request 6529 Desktop does not send from here. Continue in your browser on 6529.io instead.",
   "browserConnector.wallet.refusal.wrong-wallet":
