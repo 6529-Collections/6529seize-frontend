@@ -15,81 +15,101 @@ const parse = (file: string) => {
   return { source, workflow: YAML.parse(source) };
 };
 
-describe("staging Ubuntu mirror preparation", () => {
-  const steps = parse("staging-e2e.yml").workflow.jobs["staging-packs"].steps;
-  const preparation = steps.find(
-    (step: { name?: string }) =>
-      step.name === "Use HTTPS Ubuntu archive for browser dependencies"
+describe("staging bundled browser runtime", () => {
+  const { source: workflowSource, workflow } = parse("staging-e2e.yml");
+  const job = workflow.jobs["staging-packs"];
+  const steps = job.steps;
+  const verification = steps.find(
+    (step: { name?: string }) => step.name === "Verify bundled Chromium runtime"
   );
-  // Execute the actual inline program, changing only its file argument. No
-  // package manager, sudo, host APT files or network access is involved.
-  const source = (preparation.run as string)
-    .split("<<'NODE'\n")[1]!
-    .split("\nNODE")[0]!;
 
-  it("prepares the mirror before apt can acquire installation locks", () => {
-    const installIndex = steps.findIndex(
-      (step: { id?: string }) => step.id === "playwright_dependencies_primary"
+  it("pins the vendor runtime to the locked Playwright version and an immutable digest", () => {
+    const manifest = JSON.parse(fs.readFileSync("package.json", "utf8"));
+    const [tag, digest] = (job.container.image as string).split("@");
+    expect(tag).toBe(
+      `mcr.microsoft.com/playwright:v${manifest.devDependencies.playwright}-noble`
     );
-    expect(steps.indexOf(preparation)).toBeLessThan(installIndex);
-    expect(preparation.run).toContain(
-      'sudo "$(command -v node)" - /etc/apt/apt-mirrors.txt'
-    );
-    expect(preparation["continue-on-error"]).toBeUndefined();
+    expect(digest).toMatch(/^sha256:[0-9a-f]{64}$/u);
+    expect(job.container.options).toBe("--init --ipc=host");
+    expect(job.defaults.run.shell).toBe("bash");
+    expect(job.env.PLAYWRIGHT_BROWSERS_PATH).toBe("/ms-playwright");
+    expect(workflowSource).not.toContain("install-deps");
+    expect(workflowSource).not.toContain("apt-mirrors.txt");
   });
 
-  it.each([
-    [
-      "hosted runner priorities and CRLF",
-      "http://azure.archive.ubuntu.com/ubuntu/\tpriority:1\r\nhttps://archive.ubuntu.com/ubuntu/\tpriority:2\r\nhttps://security.ubuntu.com/ubuntu/\tpriority:3\r\n",
-      "https://archive.ubuntu.com/ubuntu/\tpriority:1\r\nhttps://archive.ubuntu.com/ubuntu/\tpriority:2\r\nhttps://security.ubuntu.com/ubuntu/\tpriority:3\r\n",
-    ],
-    [
-      "bare URI",
-      "http://azure.archive.ubuntu.com/ubuntu",
-      "https://archive.ubuntu.com/ubuntu",
-    ],
-    [
-      "indented URI",
-      "  http://azure.archive.ubuntu.com/ubuntu priority:1\n",
-      "  https://archive.ubuntu.com/ubuntu priority:1\n",
-    ],
-    [
-      "custom mirror",
-      "https://mirror.example.org/ubuntu/\n",
-      "https://mirror.example.org/ubuntu/\n",
-    ],
-    [
-      "similar URI",
-      "http://azure.archive.ubuntu.com/ubuntu-ports/\n",
-      "http://azure.archive.ubuntu.com/ubuntu-ports/\n",
-    ],
-    [
-      "comment",
-      "# http://azure.archive.ubuntu.com/ubuntu\n",
-      "# http://azure.archive.ubuntu.com/ubuntu\n",
-    ],
-    ["missing mirror list", null, null],
-  ])(
-    "preserves %s while removing only the failing endpoint",
-    (_label, before, after) => {
-      const root = fs.mkdtempSync(path.join(os.tmpdir(), "e2e-apt-mirror-"));
+  it("requires a working browser before either staging test mode", () => {
+    const verifyIndex = steps.indexOf(verification);
+    expect(verifyIndex).toBeGreaterThan(0);
+    expect(verification["continue-on-error"]).toBeUndefined();
+    expect(verification["timeout-minutes"]).toBe(2);
+    for (const name of [
+      "Run read-only staging packs",
+      "Run opt-in stateful staging pack",
+    ]) {
+      expect(verifyIndex).toBeLessThan(
+        steps.findIndex((step: { name?: string }) => step.name === name)
+      );
+    }
+  });
+
+  it("verifies portable workflow tools before using the GitHub API", () => {
+    const tools = steps.find(
+      (step: { name?: string }) => step.name === "Install pinned workflow tools"
+    );
+    expect(steps.indexOf(tools)).toBe(0);
+    expect(tools["continue-on-error"]).toBeUndefined();
+    expect(tools["timeout-minutes"]).toBe(5);
+    expect(tools.run).toContain("sha256sum --check --strict");
+    expect(
+      tools.run.match(
+        /curl --proto '=https' --proto-redir '=https' --tlsv1\.2/gu
+      )
+    ).toHaveLength(2);
+    expect(tools.run).toContain('echo "$tools_root/bin" >> "$GITHUB_PATH"');
+    expect(tools.run.match(/(?:gh|jq)_digest=[a-f0-9]{64}/gu)).toHaveLength(4);
+    expect(tools.run.indexOf("sha256sum --check --strict")).toBeLessThan(
+      tools.run.indexOf("tar -xzf")
+    );
+  });
+
+  it.each(["ready", "missing"])(
+    "fails closed when the bundled runtime is %s",
+    (mode) => {
+      const root = fs.mkdtempSync(
+        path.join(os.tmpdir(), "e2e-browser-runtime-")
+      );
       try {
-        const mirrorListPath = path.join(root, "apt-mirrors.txt");
-        if (before !== null) fs.writeFileSync(mirrorListPath, before);
-        const run = () =>
-          childProcess.spawnSync(process.execPath, ["-", mirrorListPath], {
-            input: source,
-            encoding: "utf8",
-            timeout: 5000,
-          });
-        for (let attempt = 0; attempt < 2; attempt += 1) {
-          const result = run();
-          expect(result.error).toBeUndefined();
-          expect(result.status).toBe(0);
-          if (after === null) expect(fs.existsSync(mirrorListPath)).toBe(false);
-          else expect(fs.readFileSync(mirrorListPath, "utf8")).toBe(after);
-        }
+        const moduleRoot = path.join(root, "node_modules", "playwright");
+        fs.mkdirSync(moduleRoot, { recursive: true });
+        fs.writeFileSync(
+          path.join(moduleRoot, "index.js"),
+          `
+exports.chromium = { launch: async () => {
+  if (process.env.RUNTIME_MODE === "missing") throw new Error("Fixture runtime unavailable");
+  return { close: async () => require("node:fs").writeFileSync(process.env.RUNTIME_CLOSED_FILE, "closed") };
+} };
+`
+        );
+        const source = (verification.run as string)
+          .split("<<'NODE'\n")[1]!
+          .split("\nNODE")[0]!;
+        const closed = path.join(root, "closed");
+        const result = childProcess.spawnSync(process.execPath, ["-"], {
+          cwd: root,
+          input: source,
+          encoding: "utf8",
+          timeout: 5000,
+          env: {
+            ...process.env,
+            RUNTIME_MODE: mode,
+            RUNTIME_CLOSED_FILE: closed,
+          },
+        });
+        expect(result.error).toBeUndefined();
+        expect(result.status).toBe(mode === "ready" ? 0 : 1);
+        expect(fs.existsSync(closed)).toBe(mode === "ready");
+        if (mode === "missing")
+          expect(result.stderr).toContain("Fixture runtime unavailable");
       } finally {
         fs.rmSync(root, { recursive: true, force: true });
       }
@@ -506,15 +526,18 @@ describe("separate post-deploy E2E", () => {
     expect(source).not.toContain("cache: pnpm");
     expect(source).not.toContain("PLAYWRIGHT_CACHE_HIT");
     expect(source).not.toContain("playwright install --with-deps chromium");
-    expect(source).toContain(
-      "./bin/6529 exec playwright install-deps chromium"
-    );
-    expect(source).toContain("Retry Playwright dependencies");
-    expect(source).toContain("./bin/6529 exec playwright install chromium");
+    if (_environment === "production") {
+      expect(source).toContain(
+        "./bin/6529 exec playwright install-deps chromium"
+      );
+      expect(source).toContain("Retry Playwright dependencies");
+      expect(source).toContain("./bin/6529 exec playwright install chromium");
+    } else {
+      expect(source).toContain("Verify bundled Chromium runtime");
+    }
   });
 
   describe.each([
-    ["staging", stagingE2e],
     ["production", productionE2e],
     ["PR Museum", parse("app-pr-ci.yml")],
   ])("%s dependency installation recovery", (environment, e2e) => {

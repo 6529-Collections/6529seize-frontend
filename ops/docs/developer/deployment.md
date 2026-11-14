@@ -49,6 +49,20 @@ run while preserving the active run, so shared staging pushes must preserve all
 previous integration changes. Separate staging E2E can overlap a later deployment
 and does not block the deployment queue.
 
+### Staging browser runtime
+
+Staging E2E uses the official Playwright Noble container, pinned by digest and
+matched to the repository's locked Playwright version. Browsers and their system
+libraries come from that image, so test startup does not depend on Ubuntu package
+mirror availability. A Chromium launch check must pass before either read-only
+or opt-in stateful packs run. When upgrading Playwright, update the image version
+and verified digest together. Deployment provenance, test selection and artifact
+checks remain the same.
+
+The container also installs digest-verified GitHub CLI and jq binaries before
+resolving deployment provenance. These tools come from their official releases,
+without an APT dependency.
+
 ## AWS deployment credentials
 
 Frontend deployment jobs use GitHub OIDC and separate scoped IAM roles. Set
