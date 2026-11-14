@@ -4023,6 +4023,108 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.menu.app": "App",
   "headerShare.menu.mobile": "6529 Mobile",
   "headerShare.menu.desktop": "6529 Desktop",
+  "desktop.profiles.restoreError":
+    "Your saved profiles could not be opened. You can browse signed out, or restart 6529 Desktop and allow access to the system keychain to restore them.",
+  "desktop.profiles.restart": "Restart to restore profiles",
+  "desktop.profiles.restartError":
+    "Could not restart 6529 Desktop. Quit and reopen it to try again.",
+  "desktop.profiles.saveError":
+    "Could not save your profiles. Retry before quitting to keep your changes.",
+  "desktop.profiles.saveRetrying": "Retrying profile save…",
+  "desktop.profiles.retry": "Retry",
+  "desktopNotifications.someone": "Someone",
+  "desktopNotifications.followed": "{handle} is now following you",
+  "desktopNotifications.viewProfile": "View profile",
+  "desktopNotifications.viewDrop": "View drop",
+  "desktopNotifications.mentioned": "{handle} mentioned you",
+  "desktopNotifications.nicTitle": "Updated NIC rating",
+  "desktopNotifications.nicBody":
+    "{handle} updated your NIC by {amount}\nNew total: {total}",
+  "desktopNotifications.repTitle": "Updated REP",
+  "desktopNotifications.repTitleCategory": "Updated REP for “{category}”",
+  "desktopNotifications.repBody":
+    "{handle} updated your REP by {amount}\nNew total: {total}",
+  "desktopNotifications.quoted": "{handle} quoted you",
+  "desktopNotifications.replied": "{handle} replied",
+  "desktopNotifications.rated": "{handle} rated {vote}",
+  "desktopNotifications.reacted": "{handle} reacted {reaction}",
+  "desktopNotifications.reactedWithImage": "{handle} reacted",
+  "desktopNotifications.reactedNamed": "{handle} reacted “{reaction}”",
+  "desktopNotifications.boosted": "{handle} boosted your drop 🔥",
+  "desktopNotifications.waveInvite": "{handle} invited you to a wave: {wave}",
+  "desktopNotifications.viewWave": "View wave",
+  "desktopNotifications.someWave": "a wave",
+  "desktopNotifications.waveDrop": "{handle} in {wave}",
+  "desktopNotifications.waveDropRated":
+    "{handle} rated a drop {vote} in {wave}",
+  "desktopNotifications.generic": "You have a new notification from {handle}",
+  "desktopNotifications.viewNotification": "View notification",
+  "desktopNotifications.mediaAttachment": "Media attachment",
+  "desktopUpdate.available": "A new version of 6529 Desktop is available.",
+  "desktopUpdate.availableVersion": "6529 Desktop {version} is available.",
+  "desktopUpdate.download": "Download update",
+  "desktopUpdate.downloading": "Downloading the update…",
+  "desktopUpdate.downloadingPercent": "Downloading the update… {percent}",
+  "desktopUpdate.ready": "The update is ready. Restart 6529 Desktop to finish.",
+  "desktopUpdate.restart": "Restart to update",
+  "desktopUpdate.failed": "The update could not be downloaded.",
+  "desktopUpdate.retry": "Try again",
+  "desktopUpdate.later": "Not now",
+  "desktop.titleStrip.label": "6529 Desktop window title",
+  "desktop.titleStrip.back": "Back",
+  "desktop.titleStrip.forward": "Forward",
+  "desktop.titleStrip.refresh": "Refresh",
+  "desktop.titleStrip.copyLink": "Copy link",
+  "desktop.titleStrip.linkCopied": "Link copied",
+  "desktop.titleStrip.copyFailed": "Could not copy the link",
+  "desktop.titleStrip.appInfo": "App info",
+  "desktop.titleStrip.appInfoUpdate": "App info (update available)",
+  "desktop.appInfo.title": "About 6529 Desktop",
+  "desktop.appInfo.version": "Version",
+  "desktop.appInfo.environment": "Environment",
+  "desktop.appInfo.checkUpdates": "Check for updates",
+  "desktopConnect.title": "Connect a wallet",
+  "desktopConnect.intro":
+    "6529 Desktop cannot use browser extensions directly. Choose how to connect:",
+  "desktopConnect.walletConnect": "Scan with a phone wallet",
+  "desktopConnect.walletConnectDescription":
+    "WalletConnect: scan a QR code with the wallet app on your phone.",
+  "desktopConnect.browserWallet": "Use a browser wallet",
+  "desktopConnect.browserWalletDescription":
+    "MetaMask, Rabby and other browser extensions. Opens your web browser.",
+  "desktopConnect.status.waiting":
+    "Finish signing in in your browser. This waits for two minutes.",
+  "desktopConnect.status.signingIn": "Signing in…",
+  "desktopConnect.status.failed": "Signing in did not work. Try again.",
+  "desktopConnect.status.expired": "The browser sign-in timed out. Try again.",
+  "desktopConnect.status.startFailed":
+    "Could not open your browser. Try again.",
+  "desktopConnect.cancel": "Cancel",
+  "desktopConnect.status.walletConnectFailed":
+    "Could not open WalletConnect. Try again.",
+  "browserConnector.title": "Sign in to 6529 Desktop",
+  "browserConnector.description":
+    "Sign in to 6529 Desktop with a browser wallet.",
+  "browserConnector.checking": "Checking the sign-in link…",
+  "browserConnector.target.local":
+    "This returns to 6529 Desktop (local build).",
+  "browserConnector.target.staging":
+    "This returns to 6529 Desktop (staging build).",
+  "browserConnector.signing": "Waiting for your wallet to sign…",
+  "browserConnector.connectIntro":
+    "Connect the browser wallet you want to use in 6529 Desktop.",
+  "browserConnector.connect": "Connect wallet",
+  "browserConnector.signIntro":
+    "Sign a message with {address} to sign in to 6529 Desktop. Signing costs nothing.",
+  "browserConnector.sign": "Sign and return to 6529 Desktop",
+  "browserConnector.failed": "The message was not signed. Try again.",
+  "browserConnector.returned":
+    "Signed. Return to 6529 Desktop to finish. You can close this tab.",
+  "browserConnector.openApp": "Open 6529 Desktop",
+  "browserConnector.problem.invalid":
+    "This link is not a valid 6529 Desktop sign-in link. Start again from 6529 Desktop.",
+  "browserConnector.problem.expired":
+    "This sign-in link has expired. Start again from 6529 Desktop.",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",

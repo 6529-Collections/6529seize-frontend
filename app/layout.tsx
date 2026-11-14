@@ -103,6 +103,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Asks 6529 Desktop for its integrated title bar; the page draws the
+            strip (DesktopTitleStrip). Browsers ignore it. */}
+        <meta name="6529-desktop-titlebar" content="1" />
         {/* First, before any bundle: browsers that cannot run the site (iOS
             before 16.4) get a notice instead of a dead page. */}
         <style dangerouslySetInnerHTML={{ __html: LEGACY_BROWSER_STYLES }} />
