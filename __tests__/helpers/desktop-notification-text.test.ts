@@ -53,7 +53,7 @@ describe("buildDesktopNotification", () => {
       {
         title: "punk6529 mentioned you",
         body: "Hello world 🔥",
-        redirectPath: "/waves?wave=wave-1&serialNo=42",
+        redirectPath: "/waves/wave-1?serialNo=42",
       }
     );
   });
@@ -62,11 +62,11 @@ describe("buildDesktopNotification", () => {
     const result = build(
       notification(ApiNotificationCause.DropQuoted, {
         related_drops: [
-          drop({ wave: { id: "dm", name: "DM", admin_group_id: "dm-1" } }),
+          drop({ wave: { id: "dm", name: "DM", is_direct_message: true } }),
         ],
       })
     );
-    expect(result?.redirectPath).toBe("/messages?wave=dm&serialNo=42");
+    expect(result?.redirectPath).toBe("/messages/dm?serialNo=42");
   });
 
   it("shows the reply, not the replied-to drop", () => {
@@ -84,7 +84,7 @@ describe("buildDesktopNotification", () => {
     expect(result).toMatchObject({
       title: "punk6529 replied",
       body: "The reply",
-      redirectPath: "/waves?wave=wave-1&serialNo=43",
+      redirectPath: "/waves/wave-1?serialNo=43",
     });
   });
 
@@ -154,6 +154,16 @@ describe("buildDesktopNotification", () => {
         })
       )?.title
     ).toBe("punk6529 reacted 🔥");
+  });
+
+  it("names a reaction it cannot show as an emoji", () => {
+    expect(
+      build(
+        notification(ApiNotificationCause.DropReacted, {
+          additional_context: { reaction: ":party_parrot:" },
+        })
+      )?.title
+    ).toBe("punk6529 reacted “party parrot”");
   });
 
   it("never announces an encrypted message (the chat code does, without the sender)", () => {

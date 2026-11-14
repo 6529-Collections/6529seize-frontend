@@ -83,19 +83,19 @@ const account = (address: string, handle: string) => ({
   refreshToken: null,
 });
 
-const followNotification = (id: number) => ({
-  unread_count: 1,
-  notifications: [
-    {
-      id,
-      cause: ApiNotificationCause.IdentitySubscribed,
-      created_at: 0,
-      read_at: null,
-      related_identity: { handle: "punk6529", pfp: null },
-      related_drops: [],
-      additional_context: {},
-    },
-  ],
+const follow = (id: number, pfp: string | null = null) => ({
+  id,
+  cause: ApiNotificationCause.IdentitySubscribed,
+  created_at: 0,
+  read_at: null,
+  related_identity: { handle: `follower${id}`, pfp },
+  related_drops: [],
+  additional_context: {},
+});
+
+const followNotification = (...ids: number[]) => ({
+  unread_count: ids.length,
+  notifications: ids.map((id) => follow(id)),
 });
 
 describe("DesktopNotificationsBridge", () => {
@@ -150,15 +150,15 @@ describe("DesktopNotificationsBridge", () => {
     );
     expect(commonApiFetch).toHaveBeenCalledWith({
       endpoint: "notifications",
-      params: { limit: "1" },
+      params: { limit: "5" },
       headers: { Authorization: "Bearer jwt-alice" },
     });
     expect(bridges.notifications.showNotification).toHaveBeenCalledWith(
       7,
       "",
-      "[alice] punk6529 is now following you",
+      "[alice] follower7 is now following you",
       "View profile",
-      "/punk6529",
+      "/follower7",
       {
         targetAddress: ADDRESS_A,
         targetProfileId: "id-a",
@@ -172,6 +172,105 @@ describe("DesktopNotificationsBridge", () => {
     await act(async () => undefined);
     expect(commonApiFetch).toHaveBeenCalledTimes(2);
     expect(bridges.notifications.showNotification).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows every notification newer than the last seen, oldest first", async () => {
+    installDesktopShell();
+    jest.useFakeTimers();
+    render(<DesktopNotificationsBridge />);
+    await waitFor(() =>
+      expect(bridges.notifications.showNotification).toHaveBeenCalledTimes(1)
+    );
+
+    jest.mocked(commonApiFetch).mockResolvedValue(followNotification(10, 9, 7));
+    await act(async () => {
+      jest.advanceTimersByTime(15_000);
+    });
+    await act(async () => undefined);
+
+    const shownIds = bridges.notifications.showNotification.mock.calls.map(
+      (call) => call[0]
+    );
+    expect(shownIds).toEqual([7, 9, 10]);
+  });
+
+  it("keeps notifying other profiles when one profile's request fails", async () => {
+    installDesktopShell();
+    jest
+      .mocked(getConnectedWalletAccounts)
+      .mockReturnValue([
+        account(ADDRESS_A, "alice"),
+        account(ADDRESS_B, "bob"),
+      ]);
+    jest
+      .mocked(commonApiFetch)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce(followNotification(8));
+
+    render(<DesktopNotificationsBridge />);
+
+    await waitFor(() =>
+      expect(bridges.notifications.showNotification).toHaveBeenCalledTimes(1)
+    );
+    expect(
+      bridges.notifications.showNotification.mock.calls[0]?.[5]
+    ).toMatchObject({ targetAddress: ADDRESS_B });
+  });
+
+  it("passes only http(s) icons to the shell", async () => {
+    installDesktopShell();
+    jest.mocked(commonApiFetch).mockResolvedValue({
+      unread_count: 1,
+      notifications: [follow(11, "javascript:alert(1)")],
+    });
+
+    render(<DesktopNotificationsBridge />);
+
+    await waitFor(() =>
+      expect(bridges.notifications.showNotification).toHaveBeenCalledTimes(1)
+    );
+    expect(bridges.notifications.showNotification.mock.calls[0]?.[1]).toBe("");
+  });
+
+  it("does not switch on a handle shared by two profiles", async () => {
+    installDesktopShell();
+    seizeContext = {
+      ...seizeContext,
+      connectedAccounts: [
+        { address: ADDRESS_A, profileId: "id-a", profileHandle: "twin" },
+        { address: ADDRESS_B, profileId: "id-b", profileHandle: "twin" },
+      ],
+    };
+    render(<DesktopNotificationsBridge />);
+
+    act(() => {
+      for (const listener of bridges.listeners) {
+        listener({}, { path: "/waves", targetProfileHandle: "twin" });
+      }
+    });
+    await act(async () => undefined);
+
+    expect(switchAccount).not.toHaveBeenCalled();
+    expect(push).not.toHaveBeenCalled();
+  });
+
+  it("does not open the page when the profile switch never completes", async () => {
+    installDesktopShell();
+    jest.useFakeTimers();
+    render(<DesktopNotificationsBridge />);
+
+    act(() => {
+      for (const listener of bridges.listeners) {
+        listener({}, { path: "/waves", targetAddress: ADDRESS_B });
+      }
+    });
+    await act(async () => {
+      jest.advanceTimersByTime(3_100);
+    });
+    await act(async () => undefined);
+
+    expect(switchAccount).toHaveBeenCalledWith(ADDRESS_B);
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("switches to the notification's profile, then opens its page", async () => {

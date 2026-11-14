@@ -1,7 +1,9 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiNotification } from "@/generated/models/ApiNotification";
 import { ApiNotificationCause } from "@/generated/models/ApiNotificationCause";
+import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { markdownToPlainText } from "@/helpers/waves/waveDescriptionPreview";
+import { formatNumber } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
@@ -92,14 +94,16 @@ export function getDesktopDropPreviewText(
   return null;
 }
 
+/** The drop in its wave or direct-message thread, via the app's own routes. */
 const getWaveRedirect = (drop: ApiDrop | undefined): string => {
   const waveId = drop?.wave.id;
   if (!waveId) return NOTIFICATIONS_PATH;
-  const isDirectMessage = drop.wave.admin_group_id?.startsWith("dm-") === true;
-  const base = isDirectMessage
-    ? `/messages?wave=${encodeURIComponent(waveId)}`
-    : `/waves?wave=${encodeURIComponent(waveId)}`;
-  return drop.serial_no ? `${base}&serialNo=${drop.serial_no}` : base;
+  return getWaveRoute({
+    waveId,
+    serialNo: drop.serial_no || undefined,
+    isDirectMessage: drop.wave.is_direct_message === true,
+    isApp: false,
+  });
 };
 
 const getContextNumber = (context: unknown, key: string): number | null => {
@@ -137,17 +141,23 @@ interface BuildContext {
 const getReaction = (
   reaction: string,
   emoji: DesktopNotificationEmoji
-): { readonly text: string; readonly iconUrl?: string } => {
+): {
+  readonly text: string;
+  readonly isEmoji: boolean;
+  readonly iconUrl?: string;
+} => {
   const trimmed = reaction.trim();
-  if (NATIVE_EMOJI.test(trimmed)) return { text: trimmed };
+  if (NATIVE_EMOJI.test(trimmed)) return { text: trimmed, isEmoji: true };
   for (const id of getEmojiIdCandidates(trimmed)) {
     const native = emoji.findNativeEmoji(id)?.skins[0]?.native;
-    if (native) return { text: native };
+    if (native) return { text: native, isEmoji: true };
     const src = emoji.findCustomEmoji(id)?.skins[0]?.src;
-    if (src) return { text: "", iconUrl: src };
+    if (src) return { text: "", isEmoji: true, iconUrl: src };
   }
-  const words = trimmed.replaceAll(":", "").replaceAll(/[-_]/g, " ");
-  return { text: `'${words}'` };
+  return {
+    text: trimmed.replaceAll(":", "").replaceAll(/[-_]/g, " "),
+    isEmoji: false,
+  };
 };
 
 const getScoreLabel = (
@@ -199,14 +209,22 @@ const buildReactionDraft = (ctx: BuildContext): Draft | null => {
   const value = getContextString(ctx.context, "reaction");
   if (!value) return null;
   const reaction = getReaction(value, ctx.emoji);
-  const title = reaction.text
-    ? t(ctx.locale, "desktopNotifications.reacted", {
-        handle: ctx.handle,
-        reaction: reaction.text,
-      })
-    : t(ctx.locale, "desktopNotifications.reactedWithImage", {
-        handle: ctx.handle,
-      });
+  let title: string;
+  if (reaction.iconUrl !== undefined) {
+    title = t(ctx.locale, "desktopNotifications.reactedWithImage", {
+      handle: ctx.handle,
+    });
+  } else if (reaction.isEmoji) {
+    title = t(ctx.locale, "desktopNotifications.reacted", {
+      handle: ctx.handle,
+      reaction: reaction.text,
+    });
+  } else {
+    title = t(ctx.locale, "desktopNotifications.reactedNamed", {
+      handle: ctx.handle,
+      reaction: reaction.text,
+    });
+  }
   return { ...ctx.dropDraft(title), iconUrl: reaction.iconUrl };
 };
 
@@ -225,7 +243,7 @@ const buildWaveInviteDraft = (ctx: BuildContext): Draft => {
     }),
     body: t(ctx.locale, "desktopNotifications.viewWave"),
     redirectPath: waveId
-      ? `/waves?wave=${encodeURIComponent(waveId)}`
+      ? getWaveRoute({ waveId, isDirectMessage: false, isApp: false })
       : NOTIFICATIONS_PATH,
   };
 };
@@ -330,10 +348,12 @@ export function buildDesktopNotification(
       ? `/${encodeURIComponent(connectedProfileHandle)}`
       : NOTIFICATIONS_PATH,
     signed: (value) =>
-      new Intl.NumberFormat(locale, { signDisplay: "exceptZero" }).format(
-        value
-      ),
-    number: (value) => new Intl.NumberFormat(locale).format(value),
+      formatNumber(locale, value, {
+        maximumFractionDigits: 0,
+        signDisplay: "exceptZero",
+      }),
+    number: (value) =>
+      formatNumber(locale, value, { maximumFractionDigits: 0 }),
     dropDraft: (title, dropIndex = 0) => {
       const drop = notification.related_drops[dropIndex];
       const preview = getDesktopDropPreviewText(drop, locale);

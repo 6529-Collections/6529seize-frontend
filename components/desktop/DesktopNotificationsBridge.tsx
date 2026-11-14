@@ -21,6 +21,9 @@ import {
 } from "@/services/auth/auth.utils";
 
 const POLL_INTERVAL_MS = 15_000;
+// Newest notifications fetched per profile and poll; several that arrive
+// between two polls are each shown, oldest first.
+const POLL_LIMIT = 5;
 const PROFILE_SWITCH_TIMEOUT_MS = 3_000;
 const PROFILE_SWITCH_POLL_MS = 50;
 
@@ -55,25 +58,72 @@ const parseNotificationTarget = (value: unknown): NotificationTarget | null => {
   };
 };
 
-const fetchLatestNotification = async (
+const fetchUnreadNotifications = async (
   account: ConnectedWalletAccount
-): Promise<{ unread: number; notification: ApiNotification | null }> => {
-  if (!account.jwt) return { unread: 0, notification: null };
+): Promise<readonly ApiNotification[]> => {
+  if (!account.jwt) return [];
   const response = await commonApiFetch<ApiNotificationsResponse>({
     endpoint: "notifications",
-    params: { limit: "1" },
+    params: { limit: String(POLL_LIMIT) },
     headers: { Authorization: `Bearer ${account.jwt}` },
   });
-  return {
-    unread: toUnreadCount(response.unread_count),
-    notification: response.notifications[0] ?? null,
-  };
+  if (toUnreadCount(response.unread_count) === 0) return [];
+  return response.notifications.filter(
+    (notification) => notification.read_at === null
+  );
 };
 
-const sleep = (ms: number) =>
+/**
+ * Which unread notifications to show for one profile, oldest first. The
+ * first poll for a profile shows only its newest unread notification, as the
+ * desktop app always has; later polls show every one newer than the newest
+ * already seen. Only the newest seen id per profile is remembered.
+ */
+const selectNewNotifications = (
+  unread: readonly ApiNotification[],
+  lastSeenId: number | undefined
+): ApiNotification[] => {
+  const newestFirst = [...unread].sort((left, right) => right.id - left.id);
+  if (lastSeenId === undefined) return newestFirst.slice(0, 1);
+  return newestFirst
+    .filter((notification) => notification.id > lastSeenId)
+    .reverse();
+};
+
+const toNotificationIcon = (url: string | null | undefined): string => {
+  if (!url) return "";
+  try {
+    const resolved = new URL(resolveIpfsUrlSync(url));
+    return resolved.protocol === "https:" || resolved.protocol === "http:"
+      ? resolved.href
+      : "";
+  } catch {
+    return "";
+  }
+};
+
+/** Resolves true once `isDone` holds, or false at the deadline. */
+const waitUntil = (isDone: () => boolean, deadline: number): Promise<boolean> =>
   new Promise((resolve) => {
-    setTimeout(resolve, ms);
+    const check = () => {
+      if (isDone()) {
+        resolve(true);
+      } else if (Date.now() >= deadline) {
+        resolve(false);
+      } else {
+        setTimeout(check, PROFILE_SWITCH_POLL_MS);
+      }
+    };
+    check();
   });
+
+const isCurrentLocation = (path: string): boolean => {
+  const target = new URL(path, window.location.origin);
+  return (
+    target.pathname === window.location.pathname &&
+    target.search === window.location.search
+  );
+};
 
 /**
  * Inside 6529 Desktop: raises a system notification for each new
@@ -92,13 +142,32 @@ export default function DesktopNotificationsBridge() {
     connectedAccountUnreadNotifications,
     seizeSwitchConnectedAccount,
   } = useSeizeConnectContext();
-  const latest = useRef({ address, connectedAccounts, connectedProfile });
-  const shownKeys = useRef(new Set<string>());
+  const latest = useRef({
+    address,
+    connectedAccounts,
+    connectedProfile,
+    locale,
+    emoji: { findNativeEmoji, findCustomEmoji },
+  });
+  const lastSeenIds = useRef(new Map<string, number>());
   const polling = useRef(false);
 
   useEffect(() => {
-    latest.current = { address, connectedAccounts, connectedProfile };
-  }, [address, connectedAccounts, connectedProfile]);
+    latest.current = {
+      address,
+      connectedAccounts,
+      connectedProfile,
+      locale,
+      emoji: { findNativeEmoji, findCustomEmoji },
+    };
+  }, [
+    address,
+    connectedAccounts,
+    connectedProfile,
+    locale,
+    findNativeEmoji,
+    findCustomEmoji,
+  ]);
 
   const badgeCount = useMemo(
     () =>
@@ -124,6 +193,13 @@ export default function DesktopNotificationsBridge() {
         return true;
       }
       const accounts = latest.current.connectedAccounts;
+      // A handle is used only when it identifies exactly one profile.
+      const byHandle = accounts.filter(
+        (account) =>
+          targetProfileHandle !== null &&
+          account.profileHandle?.toLowerCase() ===
+            targetProfileHandle.toLowerCase()
+      );
       const match =
         accounts.find(
           (account) =>
@@ -134,12 +210,7 @@ export default function DesktopNotificationsBridge() {
           (account) =>
             targetProfileId !== null && account.profileId === targetProfileId
         ) ??
-        accounts.find(
-          (account) =>
-            targetProfileHandle !== null &&
-            account.profileHandle?.toLowerCase() ===
-              targetProfileHandle.toLowerCase()
-        );
+        (byHandle.length === 1 ? byHandle[0] : undefined);
       if (!match) return false;
 
       const isActive = () =>
@@ -156,12 +227,7 @@ export default function DesktopNotificationsBridge() {
           return false;
         }
       }
-      const deadline = Date.now() + PROFILE_SWITCH_TIMEOUT_MS;
-      while (Date.now() < deadline) {
-        if (isActive()) return true;
-        await sleep(PROFILE_SWITCH_POLL_MS);
-      }
-      return isActive();
+      return await waitUntil(isActive, Date.now() + PROFILE_SWITCH_TIMEOUT_MS);
     },
     [seizeSwitchConnectedAccount]
   );
@@ -175,8 +241,7 @@ export default function DesktopNotificationsBridge() {
       switchToTargetProfile(target)
         .then((switched) => {
           if (!switched) return undefined;
-          const current = `${window.location.pathname}${window.location.search}`;
-          if (current === target.path) {
+          if (isCurrentLocation(target.path)) {
             const url = new URL(target.path, window.location.origin);
             url.searchParams.set("reload", "true");
             router.replace(`${url.pathname}${url.search}`, { scroll: false });
@@ -205,8 +270,8 @@ export default function DesktopNotificationsBridge() {
       const profileId = connected?.profileId ?? account.profileId ?? null;
       const content = buildDesktopNotification(
         notification,
-        { findNativeEmoji, findCustomEmoji },
-        locale,
+        latest.current.emoji,
+        latest.current.locale,
         profileHandle
       );
       if (!content) return;
@@ -215,11 +280,11 @@ export default function DesktopNotificationsBridge() {
         latest.current.connectedAccounts.length > 1 && profileHandle
           ? `[${profileHandle}] `
           : "";
-      const icon =
-        content.iconUrl ?? notification.related_identity?.pfp ?? null;
       notifications.showNotification(
         notification.id,
-        icon ? resolveIpfsUrlSync(icon) : "",
+        toNotificationIcon(
+          content.iconUrl ?? notification.related_identity?.pfp
+        ),
         `${prefix}${content.title}`,
         content.body,
         content.redirectPath,
@@ -230,7 +295,7 @@ export default function DesktopNotificationsBridge() {
         }
       );
     },
-    [findCustomEmoji, findNativeEmoji, locale]
+    []
   );
 
   const poll = useCallback(async () => {
@@ -239,17 +304,22 @@ export default function DesktopNotificationsBridge() {
     try {
       const accounts = getConnectedWalletAccounts();
       const results = await Promise.allSettled(
-        accounts.map(fetchLatestNotification)
+        accounts.map(fetchUnreadNotifications)
       );
       results.forEach((result, index) => {
         const account = accounts[index];
+        // A failed profile does not hold up the others.
         if (!account || result.status !== "fulfilled") return;
-        const { unread, notification } = result.value;
-        if (!notification || unread === 0) return;
-        const key = `${account.address.toLowerCase()}:${notification.id}`;
-        if (shownKeys.current.has(key)) return;
-        shownKeys.current.add(key);
-        showNotification(account, notification);
+        const key = account.address.toLowerCase();
+        const fresh = selectNewNotifications(
+          result.value,
+          lastSeenIds.current.get(key)
+        );
+        for (const notification of fresh) {
+          showNotification(account, notification);
+        }
+        const newestId = fresh.at(-1)?.id;
+        if (newestId !== undefined) lastSeenIds.current.set(key, newestId);
       });
     } finally {
       polling.current = false;

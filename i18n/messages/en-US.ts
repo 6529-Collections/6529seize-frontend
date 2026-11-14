@@ -3932,6 +3932,7 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopNotifications.rated": "{handle} rated {vote}",
   "desktopNotifications.reacted": "{handle} reacted {reaction}",
   "desktopNotifications.reactedWithImage": "{handle} reacted",
+  "desktopNotifications.reactedNamed": "{handle} reacted “{reaction}”",
   "desktopNotifications.boosted": "{handle} boosted your drop 🔥",
   "desktopNotifications.waveInvite": "{handle} invited you to a wave: {wave}",
   "desktopNotifications.viewWave": "View wave",
