@@ -1,4 +1,8 @@
 import { useCallback, useRef, useState, type RefObject } from "react";
+import {
+  noteSignOutAllFinished,
+  noteSignOutAllStarted,
+} from "@/services/auth/sign-out-all-state";
 import { logError } from "@/utils/security-logger";
 import {
   AuthenticationError,
@@ -39,6 +43,7 @@ export function useSignOutAllTransaction({
     }
     isSigningOutAllRef.current = true;
     signOutAllGenerationRef.current += 1;
+    noteSignOutAllStarted();
     setIsSigningOutAll(true);
 
     try {
@@ -74,6 +79,7 @@ export function useSignOutAllTransaction({
       }
     } finally {
       isSigningOutAllRef.current = false;
+      noteSignOutAllFinished();
       if (isMountedRef.current) {
         setIsSigningOutAll(false);
       }
