@@ -132,12 +132,64 @@ interface ProfilePoll {
   readonly cursor: NotificationCursor;
 }
 
+/** Unread notifications with ids above `after` and below `before`. */
+const unreadBetween = (
+  notifications: readonly ApiNotification[],
+  after: number,
+  before = Number.POSITIVE_INFINITY
+): ApiNotification[] =>
+  notifications.filter(
+    (notification) =>
+      notification.id > after &&
+      notification.id < before &&
+      isUnread(notification)
+  );
+
+/** The oldest open gap: what it holds, and what is still open after this poll. */
+const fetchGap = async (
+  jwt: string,
+  signal: AbortSignal,
+  gap: NotificationGap
+): Promise<{
+  readonly found: readonly ApiNotification[];
+  readonly rest: NotificationGap | null;
+}> => {
+  const first = (await fetchNotificationPage(jwt, signal, gap.before))
+    .notifications;
+  const range = await continueRange(
+    jwt,
+    signal,
+    first,
+    gap.after,
+    MAX_POLL_PAGES - 1
+  );
+  return {
+    found: unreadBetween(range.notifications, gap.after, gap.before),
+    rest:
+      range.resumeBefore === null
+        ? null
+        : { before: range.resumeBefore, after: gap.after },
+  };
+};
+
+/** The first poll shows only the newest unread notification, as the desktop app always has. */
+const firstProfilePoll = (
+  notifications: readonly ApiNotification[]
+): ProfilePoll => {
+  const newest = notifications
+    .filter(isUnread)
+    .sort((left, right) => right.id - left.id)[0];
+  return {
+    show: newest ? [newest] : [],
+    cursor: { lastSeenId: newest?.id, gaps: [] },
+  };
+};
+
 /**
- * One profile's poll. The first poll shows only the newest unread
- * notification, as the desktop app always has. Later polls fetch newest
- * first back to the last seen one, then the oldest open gap; a range the
- * page budget could not finish becomes a gap for the next poll, so a burst
- * of any size is shown in full, a bounded number of pages at a time.
+ * One profile's poll. After the first, it fetches newest first back to the
+ * last seen notification, then the oldest open gap; a range the page budget
+ * could not finish becomes a gap for the next poll, so a burst of any size
+ * is shown in full, a bounded number of pages at a time.
  */
 const pollProfile = async (
   account: ConnectedWalletAccount,
@@ -151,15 +203,8 @@ const pollProfile = async (
   if (toUnreadCount(first.unread_count) === 0) {
     return { show: [], cursor: { lastSeenId, gaps: [] } };
   }
-  if (lastSeenId === undefined) {
-    const newest = first.notifications
-      .filter(isUnread)
-      .sort((left, right) => right.id - left.id)[0];
-    return {
-      show: newest ? [newest] : [],
-      cursor: { lastSeenId: newest?.id, gaps: [] },
-    };
-  }
+  if (lastSeenId === undefined) return firstProfilePoll(first.notifications);
+
   const top = await continueRange(
     jwt,
     signal,
@@ -169,46 +214,29 @@ const pollProfile = async (
   );
   const [gap, ...laterGaps] = cursor?.gaps ?? [];
   const older = gap
-    ? await continueRange(
-        jwt,
-        signal,
-        (await fetchNotificationPage(jwt, signal, gap.before)).notifications,
-        gap.after,
-        MAX_POLL_PAGES - 1
-      )
-    : null;
-
-  const shown = new Map<number, ApiNotification>();
-  for (const notification of top.notifications) {
-    if (notification.id > lastSeenId && isUnread(notification)) {
-      shown.set(notification.id, notification);
-    }
-  }
-  for (const notification of older?.notifications ?? []) {
-    if (
-      gap &&
-      notification.id > gap.after &&
-      notification.id < gap.before &&
-      isUnread(notification)
-    ) {
-      shown.set(notification.id, notification);
-    }
-  }
-  const newestId = Math.max(
-    lastSeenId,
-    ...top.notifications.map((notification) => notification.id)
+    ? await fetchGap(jwt, signal, gap)
+    : { found: [], rest: null };
+  const shown = new Map(
+    [...older.found, ...unreadBetween(top.notifications, lastSeenId)].map(
+      (notification) => [notification.id, notification] as const
+    )
   );
-  const gaps: NotificationGap[] = [];
-  if (gap && older?.resumeBefore != null) {
-    gaps.push({ before: older.resumeBefore, after: gap.after });
-  }
-  gaps.push(...laterGaps);
-  if (top.resumeBefore !== null) {
-    gaps.push({ before: top.resumeBefore, after: lastSeenId });
-  }
+  const gaps: NotificationGap[] = [
+    ...(older.rest === null ? [] : [older.rest]),
+    ...laterGaps,
+    ...(top.resumeBefore === null
+      ? []
+      : [{ before: top.resumeBefore, after: lastSeenId }]),
+  ];
   return {
     show: [...shown.values()].sort((left, right) => left.id - right.id),
-    cursor: { lastSeenId: newestId, gaps },
+    cursor: {
+      lastSeenId: Math.max(
+        lastSeenId,
+        ...top.notifications.map((notification) => notification.id)
+      ),
+      gaps,
+    },
   };
 };
 
