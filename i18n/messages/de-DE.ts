@@ -40,9 +40,9 @@ const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
   "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
-  "waves.historyGap.load": "Verpasste Nachrichten laden",
-  "waves.historyGap.loaded": "Verpasste Nachrichten geladen",
-  "waves.historyGap.loading": "Verpasste Nachrichten werden geladen…",
+  "waves.historyGap.load": "Weitere Nachrichten laden",
+  "waves.historyGap.loaded": "Weitere Nachrichten geladen",
+  "waves.historyGap.loading": "Weitere Nachrichten werden geladen…",
   "waves.historyGap.retry":
     "Nachrichten konnten nicht geladen werden. Erneut versuchen",
 

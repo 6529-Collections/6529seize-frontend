@@ -1314,7 +1314,9 @@ test("resume shows the latest page before missed history and preserves the compo
     await expect(composer).toHaveText("Keep this unsent draft");
     // A blocked history request must not keep the current conversation stale.
     await expect(fixture.post(1151)).toBeInViewport();
-    const gap = page.getByRole("button", { name: /missed messages/ }).last();
+    const gap = page
+      .getByRole("button", { name: /more messages|Could not load messages/ })
+      .last();
     await gap.scrollIntoViewIfNeeded();
     await expect.poll(() => olderRequests).toBeGreaterThan(0);
     await expect(gap).toBeDisabled();
@@ -1322,13 +1324,11 @@ test("resume shows the latest page before missed history and preserves the compo
       path: testInfo.outputPath("resume-missed-history.png"),
     });
     history.release();
-    await expect(gap).toContainText(
-      "Could not load missed messages. Try again"
-    );
+    await expect(gap).toContainText("Could not load messages. Try again");
     await gap.click();
     await expect(fixture.post(1101)).toBeAttached();
     await expect(
-      page.getByRole("status").filter({ hasText: "Missed messages loaded" })
+      page.getByRole("status").filter({ hasText: "More messages loaded" })
     ).toBeAttached();
     await expect(composer).toHaveText("Keep this unsent draft");
     await expectNoHorizontalOverflow(page);
@@ -1556,6 +1556,17 @@ test("shared post loads only its surroundings and fills the rest as the reader s
     name: "Wave chat file upload area",
     exact: true,
   });
+  // Requests that fill the gap forward start below the latest page (102+).
+  let gapFills = 0;
+  page.on("request", (request) => {
+    const params = new URL(request.url()).searchParams;
+    if (
+      params.get("search_strategy") === "FIND_NEWER" &&
+      Number(params.get("serial_no_limit")) < 102
+    ) {
+      gapFills += 1;
+    }
+  });
   await page.goto(`/waves/${WAVE}?serialNo=20`, {
     waitUntil: "domcontentloaded",
   });
@@ -1586,8 +1597,20 @@ test("shared post loads only its surroundings and fills the rest as the reader s
   await expect(post(40)).toBeAttached({ timeout: 10000 });
   await expect(post(89)).toBeAttached();
   await expect(post(39)).toBeInViewport();
-  // One page per approach: the rest of the gap waits for more scrolling.
-  await page.waitForTimeout(2000);
+  // One page per approach: the fill moved the marker beyond its 200px
+  // auto-load margin, so the rest of the gap waits for more scrolling. Match
+  // the marker in every state; a second fill would relabel it.
+  const marker = chat
+    .getByRole("button", { name: /more messages|Could not load messages/ })
+    .last();
+  const viewportHeight = page.viewportSize()?.height ?? 0;
+  await expect
+    .poll(async () => {
+      const box = await marker.boundingBox();
+      return box ? box.y - viewportHeight : null;
+    })
+    .toBeGreaterThan(200);
+  expect(gapFills).toBe(1);
   await expect(post(90)).toHaveCount(0);
   await expect(post(39)).toBeInViewport();
 
