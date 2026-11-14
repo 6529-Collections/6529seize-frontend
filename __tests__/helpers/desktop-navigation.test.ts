@@ -32,6 +32,9 @@ describe("getDesktopNavigationTarget", () => {
     "javascript:alert(1)",
     "waves",
     "",
+    // Same origin, but normalizes to a protocol-relative "//host" path.
+    "/a/..//evil.example/x",
+    "/./..//evil.example",
   ])("refuses %p", (value) => {
     expect(getDesktopNavigationTarget(value, ORIGIN, "/")).toBeNull();
   });
@@ -80,6 +83,25 @@ describe("getDesktopLinkAction", () => {
       )
     ).toEqual({ kind: "navigate", url: "/waves" });
   });
+
+  it("resolves relative links against the open page, as the browser does", () => {
+    const page = `${ORIGIN}/waves/abc/drops?tab=1`;
+    expect(
+      getDesktopLinkAction(link("?page=2", { target: "_blank" }), click(), page)
+    ).toEqual({ kind: "navigate", url: "/waves/abc/drops?page=2" });
+    expect(
+      getDesktopLinkAction(link("details", { target: "_blank" }), click(), page)
+    ).toEqual({ kind: "navigate", url: "/waves/abc/details" });
+  });
+
+  it.each(["/a/..//evil.example/x", `${ORIGIN}/a/..//evil.example/x`])(
+    "never hands on a same-origin link that normalizes to //host (%p)",
+    (href) => {
+      expect(
+        getDesktopLinkAction(link(href, { target: "_blank" }), click(), ORIGIN)
+      ).toBeNull();
+    }
+  );
 
   it("opens other sites in the system browser", () => {
     expect(

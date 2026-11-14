@@ -78,7 +78,9 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
     { event: "keydown" }
   );
 
-  useSiteSearchRequest(openContextSearch);
+  // A site-search request (the desktop app's Ctrl/Cmd+F) opens site search
+  // even inside a wave; the button and Ctrl/Cmd+K keep the wave search there.
+  useSiteSearchRequest(() => setOpenSearch("site"));
 
   const handleWaveResultSelect = (serialNo: number) => {
     if (!wave) return;

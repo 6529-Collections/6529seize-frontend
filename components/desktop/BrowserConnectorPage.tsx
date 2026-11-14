@@ -88,10 +88,20 @@ export default function BrowserConnectorPage() {
         signerAddress: address,
         forDesktopSignIn: true,
       });
+      // The request can run out while the nonce loads or the wallet waits
+      // for a signature; the app would refuse it, so do not return then.
+      if (hasExpired(request.expiresAt)) {
+        setExpired(true);
+        return;
+      }
       const clientSignature = await signMessageAsync({
         account: address as `0x${string}`,
         message: nonce.signable_message,
       });
+      if (hasExpired(request.expiresAt)) {
+        setExpired(true);
+        return;
+      }
       const deepLink = buildBrowserConnectorDeepLink(request.scheme, {
         requestId: request.requestId,
         address,

@@ -63,12 +63,59 @@ describe("DesktopConnectDialog", () => {
     open();
 
     expect(
-      screen.getByRole("button", { name: /Scan with a mobile wallet/ })
+      screen.getByRole("button", { name: /Scan with a phone wallet/ })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Use a browser wallet/ })
     ).toBeInTheDocument();
     expect(screen.queryByText(/seed/i)).not.toBeInTheDocument();
+  });
+
+  it("tells a browser wallet from a phone wallet, browser wallet first", () => {
+    render(<DesktopConnectDialog />);
+    open();
+
+    const [browser, phone] = screen
+      .getAllByRole("button")
+      .filter((button) => /wallet/i.test(button.textContent ?? ""));
+    // A desktop MetaMask user must find the extension under the browser choice.
+    expect(browser).toHaveAccessibleName(
+      /Use a browser wallet.*MetaMask, Rabby.*Opens your web browser/
+    );
+    expect(phone).toHaveAccessibleName(
+      /Scan with a phone wallet.*WalletConnect.*phone/
+    );
+    expect(
+      screen.getByText(/cannot use browser extensions directly/)
+    ).toBeVisible();
+  });
+
+  it("starts only one browser sign-in on a double click", async () => {
+    const user = userEvent.setup();
+    let finishStart: () => void = () => undefined;
+    jest.mocked(startBrowserConnectorSignIn).mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        finishStart = resolve;
+      })
+    );
+    render(<DesktopConnectDialog />);
+    open();
+    const browser = screen.getByRole("button", {
+      name: /Use a browser wallet/,
+    });
+
+    await user.dblClick(browser);
+
+    expect(startBrowserConnectorSignIn).toHaveBeenCalledTimes(1);
+    // Both choices wait until the start settles.
+    expect(browser).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: /Scan with a phone wallet/ })
+    ).toBeDisabled();
+    await act(async () => {
+      finishStart();
+    });
+    expect(browser).toBeEnabled();
   });
 
   it("hands WalletConnect back to the connect flow and closes", async () => {
@@ -77,13 +124,13 @@ describe("DesktopConnectDialog", () => {
     open();
 
     await user.click(
-      screen.getByRole("button", { name: /Scan with a mobile wallet/ })
+      screen.getByRole("button", { name: /Scan with a phone wallet/ })
     );
 
     expect(openWalletConnect).toHaveBeenCalledTimes(1);
     await waitFor(() =>
       expect(
-        screen.queryByRole("button", { name: /Scan with a mobile wallet/ })
+        screen.queryByRole("button", { name: /Scan with a phone wallet/ })
       ).not.toBeInTheDocument()
     );
   });
@@ -154,7 +201,7 @@ describe("DesktopConnectDialog", () => {
     open();
 
     await user.click(
-      screen.getByRole("button", { name: /Scan with a mobile wallet/ })
+      screen.getByRole("button", { name: /Scan with a phone wallet/ })
     );
 
     expect(
