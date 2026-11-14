@@ -17,6 +17,7 @@ import {
   LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
   useLocalSandboxMutationGuard,
 } from "../support/localSandbox";
+import { CHROMIUM_SANDBOX } from "../support/chromiumSandbox";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import {
   GAP_SYNC_TIMING,
@@ -29,7 +30,13 @@ import {
 } from "../support/waveListScroll";
 
 // Headless Chromium otherwise hides the native scrollbar we need to exercise.
-test.use({ launchOptions: { ignoreDefaultArgs: ["--hide-scrollbars"] } });
+// launchOptions replaces the config value, so keep the sandbox setting too.
+test.use({
+  launchOptions: {
+    chromiumSandbox: CHROMIUM_SANDBOX,
+    ignoreDefaultArgs: ["--hide-scrollbars"],
+  },
+});
 
 test("saves reordered pins across reload on desktop and mobile", async ({
   page,
