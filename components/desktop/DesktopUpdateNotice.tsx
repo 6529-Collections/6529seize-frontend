@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { getDesktopUpdater } from "@/helpers/desktop-shell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
@@ -45,6 +45,9 @@ const readPercent = (progress: unknown): number | null => {
 export default function DesktopUpdateNotice() {
   const locale = useBrowserLocale();
   const messageId = useId();
+  const sectionRef = useRef<HTMLElement>(null);
+  const messageRef = useRef<HTMLElement>(null);
+  const focusMessageNext = useRef(false);
   const [state, setState] = useState<UpdateState>({ kind: "idle" });
   const [dismissed, setDismissed] = useState(false);
 
@@ -96,9 +99,23 @@ export default function DesktopUpdateNotice() {
     };
   }, []);
 
+  // The buttons change with each step; keep keyboard focus in the notice
+  // by moving it to the message when the focused button goes away.
+  useEffect(() => {
+    if (!focusMessageNext.current) return;
+    focusMessageNext.current = false;
+    messageRef.current?.focus();
+  }, [state.kind]);
+
   if (state.kind === "idle" || dismissed) return null;
 
+  const rememberFocus = () => {
+    focusMessageNext.current =
+      sectionRef.current?.contains(document.activeElement) === true;
+  };
+
   const startDownload = () => {
+    rememberFocus();
     setState({ kind: "downloading", percent: null });
     getDesktopUpdater()?.downloadUpdate();
   };
@@ -126,15 +143,33 @@ export default function DesktopUpdateNotice() {
 
   return (
     <section
+      ref={sectionRef}
       aria-labelledby={messageId}
       className={`tailwind-scope ${NOTICE_CLASS}`}
     >
       {state.kind === "failed" ? (
-        <p id={messageId} role="alert" className="tw-mb-3 tw-mt-0">
+        <p
+          ref={(element) => {
+            messageRef.current = element;
+          }}
+          id={messageId}
+          role="alert"
+          tabIndex={-1}
+          className="tw-mb-3 tw-mt-0"
+        >
           {message}
         </p>
       ) : (
-        <output id={messageId} className="tw-mb-3 tw-block">
+        <output
+          ref={(element) => {
+            messageRef.current = element;
+          }}
+          id={messageId}
+          aria-live="polite"
+          aria-atomic="true"
+          tabIndex={-1}
+          className="tw-mb-3 tw-block"
+        >
           {message}
         </output>
       )}

@@ -96,6 +96,10 @@ describe("DesktopUpdateNotice", () => {
 
     await user.click(screen.getByRole("button", { name: "Download update" }));
     expect(updater.downloadUpdate).toHaveBeenCalledTimes(1);
+    // The focused button is gone; focus moves to the announced progress.
+    const progress = screen.getByText("Downloading the update…");
+    expect(progress).toHaveFocus();
+    expect(progress).toHaveAttribute("aria-live", "polite");
 
     updater.emit("progress", { percent: 42.4 });
     expect(screen.getByText("Downloading the update… 42%")).toBeInTheDocument();
