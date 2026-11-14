@@ -4,6 +4,7 @@ import {
   getDesktopShellApi,
   getDesktopStore,
   getDesktopUpdater,
+  isDesktopApp,
   isDesktopShell,
 } from "@/helpers/desktop-shell";
 
@@ -128,6 +129,29 @@ describe("desktop-shell", () => {
     clearBridges();
     expect(isDesktopShell()).toBe(false);
     expect(getDesktopShellApi()).toBeNull();
+  });
+
+  describe("isDesktopApp", () => {
+    it("is false in a plain browser", () => {
+      expect(isDesktopApp()).toBe(false);
+    });
+
+    it("is true for the bridge-based desktop app, whose user agent has no Electron", () => {
+      installDesktopBridges();
+
+      expect(window.navigator.userAgent).not.toContain("Electron");
+      expect(isDesktopApp()).toBe(true);
+    });
+
+    it("is true for the Electron desktop app by its user agent alone", () => {
+      const userAgent = jest
+        .spyOn(window.navigator, "userAgent", "get")
+        .mockReturnValue("Mozilla/5.0 6529Desktop Electron/38.0.0");
+
+      expect(isDesktopShell()).toBe(false);
+      expect(isDesktopApp()).toBe(true);
+      userAgent.mockRestore();
+    });
   });
 
   it("returns null for an optional bridge the shell does not provide", () => {

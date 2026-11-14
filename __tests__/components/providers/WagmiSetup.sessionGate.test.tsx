@@ -293,6 +293,33 @@ describe("WagmiSetup wallet stack session gate", () => {
     }
   });
 
+  it("always loads the wallet stack in the bridge-based desktop app", async () => {
+    Object.defineProperty(window, "api", {
+      configurable: true,
+      value: { openExternal: jest.fn() },
+    });
+    Object.defineProperty(window, "nativeAuth", {
+      configurable: true,
+      value: { sessionLogin: jest.fn() },
+    });
+    try {
+      renderWagmiSetup();
+
+      await waitFor(() =>
+        expect(screen.getByLabelText("Wallet stack status")).toHaveTextContent(
+          "ready"
+        )
+      );
+      expect(hasPersistedWalletSession).not.toHaveBeenCalled();
+      expect(createAppKitAdapter).toHaveBeenCalledWith(
+        expect.objectContaining({ isCapacitor: false })
+      );
+    } finally {
+      Reflect.deleteProperty(window, "api");
+      Reflect.deleteProperty(window, "nativeAuth");
+    }
+  });
+
   // The bundler keeps rejecting a chunk that failed once in this page, so a
   // later connect intent reloads the page instead of retrying in place.
   it("reloads the page on the next connect intent after a wallet chunk fails", async () => {

@@ -109,7 +109,7 @@ export interface DesktopNativeLegacyConnectionShareResponse {
 }
 
 /** API failures cross the bridge as plain data, then become errors again. */
-interface DesktopNativeAuthFailure {
+export interface DesktopNativeAuthFailure {
   readonly kind: "native-auth-api-error";
   readonly status: number;
   readonly message: string;
@@ -158,6 +158,10 @@ export interface DesktopNativeAuth {
     readonly client_address: string;
     readonly role?: string | null | undefined;
   }) => Promise<DesktopNativeAuthSessionResponse>;
+  /**
+   * The only method that reports API failures as data. The others reject with
+   * an Error; the page validates every result either way.
+   */
   readonly sessionRefresh: (request: {
     readonly client_type?: DesktopSessionClientType | undefined;
     readonly client_address: string;
