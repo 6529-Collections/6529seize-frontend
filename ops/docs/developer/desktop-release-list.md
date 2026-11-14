@@ -51,15 +51,15 @@ keeps being served for up to an hour, otherwise both routes answer 503.
 | No bucket is set, or no bundle is stored yet | 404, `No release list yet.` | `text/plain; charset=utf-8`, `Cache-Control: public, max-age=60` |
 | The bundle is refused, or S3 fails, with no good pair in the last hour | 503, `The release list is unavailable.` | `Cache-Control: no-store`, `Retry-After: 60` |
 
-Each server reads the bundle once a minute. Only a served pair is kept to
-fall back on: a 404 is never stretched over a later failure (no bundle, then
-an S3 error or a refused bundle, answers 503). Deleting the bundle withdraws
-the list: S3 reads are strongly consistent, so a missing object is a definite
-answer, not a failure, so servers answer 404 within a minute instead of
-serving the deleted list for an hour. Clients can still receive the deleted
-list from caches: a 200 already stored by CloudFront or an HTTP cache stays
-fresh for up to five minutes. How long a client can still see the deleted
-list:
+Each server reads the bundle once a minute, or every ten seconds while reads
+are failing. Only a served pair is kept to fall back on: a 404 is
+never stretched over a later failure (no bundle, then an S3 error or a
+refused bundle, answers 503). S3 reads are strongly consistent, so a missing
+object is a definite answer, not a failure: once a server's refresh has
+successfully seen that the bundle is gone, it answers 404 and keeps nothing
+to fall back on. Clients can still receive the deleted list from caches: a
+200 already stored by CloudFront or an HTTP cache stays fresh for up to five
+minutes. How long a client can still see the deleted list:
 
 - When the servers' next reads succeed: up to about six minutes (one-minute
   server snapshot plus the 200's five-minute `max-age`).
@@ -94,10 +94,12 @@ What is not guaranteed:
 - The list and the signature are still two requests. Around a publish they
   can come from different snapshots: one server or edge location still has
   the old pair while another has the new one, and each answer can be held
-  for up to five minutes by CloudFront or an HTTP cache. For up to about
-  six minutes after a publish (one minute of server snapshot plus five of
-  `max-age`) a client can receive the new list with the old signature, or
-  the reverse. The two pair headers then differ.
+  for up to five minutes by CloudFront or an HTTP cache. A client can then
+  receive the new list with the old signature, or the reverse, and the two
+  pair headers differ. When the servers' reads succeed this lasts up to
+  about six minutes after a publish (one minute of server snapshot plus five
+  of `max-age`); a server whose reads fail keeps its last good pair, so it
+  can last up to about one hour and five minutes.
 - A `Cache-Control: no-cache` request header does not reach past CloudFront,
   which serves its stored copy. A query string does: the page cache keys on
   every query string and the routes ignore it.
