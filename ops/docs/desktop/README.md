@@ -17,6 +17,7 @@ or the 6529 Mobile app.
 
 - [Workers and TDH](feature-workers-and-tdh.md)
 - [Wallets, IPFS, updates, and logs](feature-wallets-ipfs-and-about.md)
+- [Sign with your browser wallet](feature-browser-wallet-signing.md)
 
 ## Flows
 
