@@ -7,6 +7,7 @@ import {
   invalidateCompetitionAuthors,
   invalidateCompetitionWave,
 } from "@/services/api/competitions-api";
+import { recordWaveCompetitionPresence } from "@/helpers/waves/wave-competition-presence";
 
 const entryCountEvents = new Set([
   "COMPETITION_ENTRY_CREATED",
@@ -56,6 +57,8 @@ export function useCompetitionEvents(waveId: string, enabled = true) {
         if (event?.wave_id !== waveId || seen.current.has(event.event_id))
           return;
         seen.current.add(event.event_id);
+        // The wave may have gained its first competition since its feed loaded.
+        recordWaveCompetitionPresence(waveId, true);
         revealAuthors ||= event.event_type === "COMPETITION_DECISION_COMPLETED";
         refreshActiveEntryCount ||=
           !event.event_type || entryCountEvents.has(event.event_type);

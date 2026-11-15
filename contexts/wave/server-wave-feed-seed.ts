@@ -13,6 +13,8 @@ export type ServerWaveFeedSeedResult =
       readonly waveId: string;
       readonly drops: readonly ServerWaveFeedSeedDrop[];
       readonly hasNextPage: boolean;
+      /** Whether the wave has any competition, when the feed reported it. */
+      readonly hasCompetition?: boolean | undefined;
     }
   | {
       readonly ok: false;

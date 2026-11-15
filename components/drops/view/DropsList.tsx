@@ -80,10 +80,8 @@ const MemoizedLightDrop = memo(LightDrop);
 interface DropsListItemData {
   readonly supportsReplyThreads: boolean;
   readonly showWaveInfo: boolean;
-  readonly activeDrop: ActiveDropState | null;
   readonly handleReply: DropActionHandler;
   readonly showReplyAndQuote: boolean;
-  readonly serialNo: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement | null> | null;
   readonly handleReplyClick: (serialNo: number) => void;
   readonly onQuoteClick: (drop: ApiDrop) => void;
@@ -105,13 +103,18 @@ interface DropsListRowProps {
   readonly location: DropLocation;
   readonly moderationPresentation: "default" | "profile-activity";
   readonly signatureGroup: readonly ExtendedDrop[] | undefined;
-  readonly suspendLightDropHydration: boolean;
   readonly virtualScrollRootMargin: string | undefined;
+  /** Whether this row is the jump target. */
+  readonly isTarget: boolean;
+  /** The active reply or quote state, only when it is for this row's drop. */
+  readonly activeDrop: ActiveDropState | null;
 }
 
 /**
  * One chat row. Memoized as a whole: a new message re-renders only the rows
- * whose drop, neighbours or group changed, not every row in the list.
+ * whose drop, neighbours or group changed, not every row in the list. The jump
+ * target and the active drop arrive as per-row props for the same reason: a
+ * jump or a reply then re-renders the rows it concerns, not all of them.
  */
 const DropsListRow = memo(
   ({
@@ -122,10 +125,10 @@ const DropsListRow = memo(
     location,
     moderationPresentation,
     signatureGroup,
-    suspendLightDropHydration,
     virtualScrollRootMargin,
+    isTarget,
+    activeDrop,
   }: DropsListRowProps) => {
-    const isTarget = itemData.serialNo === drop.serial_no;
     const highlightMessageOnly =
       location === DropLocation.WAVE &&
       itemData.dropViewDropId === null &&
@@ -142,11 +145,7 @@ const DropsListRow = memo(
           previousDrop={previousDrop}
           nextDrop={nextDrop}
           showWaveInfo={itemData.showWaveInfo}
-          activeDrop={
-            itemData.activeDrop?.drop.id === drop.id
-              ? itemData.activeDrop
-              : null
-          }
+          activeDrop={activeDrop}
           onReply={itemData.handleReply}
           location={location}
           showReplyAndQuote={itemData.showReplyAndQuote}
@@ -190,7 +189,6 @@ const DropsListRow = memo(
           dropSerialNo={drop.serial_no}
           waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
           type={drop.type}
-          suspendLightDropHydration={suspendLightDropHydration}
           rootMargin={virtualScrollRootMargin}
           enableLongContentCollapse={
             location === DropLocation.WAVE && itemData.dropViewDropId === null
@@ -279,10 +277,8 @@ const DropsList = memo(
       return {
         supportsReplyThreads,
         showWaveInfo,
-        activeDrop,
         handleReply,
         showReplyAndQuote,
-        serialNo,
         targetDropRef,
         handleReplyClick,
         onQuoteClick,
@@ -298,10 +294,8 @@ const DropsList = memo(
     }, [
       supportsReplyThreads,
       showWaveInfo,
-      activeDrop,
       handleReply,
       showReplyAndQuote,
-      serialNo,
       targetDropRef,
       handleReplyClick,
       onQuoteClick,
@@ -457,8 +451,9 @@ const DropsList = memo(
             location={location}
             moderationPresentation={moderationPresentation}
             signatureGroup={signatureGroups.get(drop.id)}
-            suspendLightDropHydration={suspendLightDropHydration}
             virtualScrollRootMargin={virtualScrollRootMargin}
+            isTarget={serialNo === drop.serial_no}
+            activeDrop={activeDrop?.drop.id === drop.id ? activeDrop : null}
           />
         );
 
@@ -490,6 +485,8 @@ const DropsList = memo(
       renderUnreadDivider,
       suspendLightDropHydration,
       virtualScrollRootMargin,
+      serialNo,
+      activeDrop,
       moderationPresentation,
       signatureGroups,
       historyGaps,

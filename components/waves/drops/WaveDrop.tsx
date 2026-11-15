@@ -15,6 +15,7 @@ import { buildDropUpdateRequest } from "@/helpers/waves/drop-update.helpers";
 import { useDropUpdateMutation } from "@/hooks/drops/useDropUpdateMutation";
 import useDropActionInteractionMode from "@/hooks/useDropActionInteractionMode";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import useIsMdViewportOrUnknown from "@/hooks/useIsMdViewportOrUnknown";
 import useLongPressClickSuppression from "@/hooks/useLongPressClickSuppression";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { DropLocation, hasDropFooter } from "./drop.types";
@@ -144,6 +145,7 @@ const WaveDropInner = ({
   const { canUseDesktopHoverActions, canUseTouchActionSheet } =
     useDropActionInteractionMode();
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
+  const isMdViewport = useIsMdViewportOrUnknown();
   const mobileMenu = useWaveDropMobileMenu();
   const allowLongPress = effectiveShowInteractions && canUseTouchActionSheet;
   // Pointer-driven row hover: some browsers (capability-lying convertibles)
@@ -619,6 +621,7 @@ const WaveDropInner = ({
     allowLongPress,
     handleLinkCardActionsActiveChange,
     inlineAuthorOnDesktop,
+    isMdViewport,
     mediaImageScale,
     fullWidthMedia,
     fullWidthLinkPreviews,
