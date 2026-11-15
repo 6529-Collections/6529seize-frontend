@@ -39,9 +39,9 @@ function DropSummary({
       {drop.title !== null && (
         <p className="tw-m-0 tw-break-words tw-font-semibold">{drop.title}</p>
       )}
-      {drop.parts.map((part, index) => (
-        // Parts have no ids; their order is part of what is signed.
-        <div key={`part-${index}`} className="tw-flex tw-flex-col tw-gap-1">
+      {drop.parts.map((part) => (
+        // Parts have no ids; their signed position identifies them.
+        <div key={part.position} className="tw-flex tw-flex-col tw-gap-1">
           <p className={BOX_CLASS}>
             {part.text ?? t(locale, "browserConnector.wallet.content.noText")}
           </p>

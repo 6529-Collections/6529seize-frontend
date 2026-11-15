@@ -81,12 +81,19 @@ describe("drop context", () => {
         replyToDropId: "drop-0",
         parts: [
           {
+            position: 1,
             text: "gm everyone",
             quotedDropId: "drop-q",
             media: [{ url: "https://d.6529.io/a.png", mimeType: "image/png" }],
             attachments: 1,
           },
-          { text: null, quotedDropId: null, media: [], attachments: 0 },
+          {
+            position: 2,
+            text: null,
+            quotedDropId: null,
+            media: [],
+            attachments: 0,
+          },
         ],
         metadata: [{ key: "mood", value: "sunny" }],
       },
