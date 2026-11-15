@@ -246,7 +246,7 @@ describe("BrowserWalletRequestPanel", () => {
 
     await waitFor(() =>
       expect(screen.getByRole("alert")).toHaveTextContent(
-        "It is a sign-in message."
+        "will not ask your wallet to sign this request: it is a sign-in message."
       )
     );
     expect(

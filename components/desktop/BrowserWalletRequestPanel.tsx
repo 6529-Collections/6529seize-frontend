@@ -10,6 +10,7 @@ import {
   useSwitchChain,
 } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
+import { publicEnv } from "@/config/env";
 import { loadDesktopUrlInPlace } from "@/helpers/desktop-navigation";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -27,6 +28,15 @@ import {
   type WalletRequestDescription,
   type WalletRequestRefusal,
 } from "@/lib/desktop/walletRequestDescribe";
+
+/** The website's host for this build, for "Continue on {site}" copy. */
+function getWebsiteHost(): string {
+  try {
+    return new URL(publicEnv.BASE_ENDPOINT).host;
+  } catch {
+    return "6529.io";
+  }
+}
 
 /** Where the local 6529 Desktop server reports this run's request signer. */
 const WALLET_REQUEST_SIGNER_PATH = "/browser-connector/signer";
@@ -345,10 +355,9 @@ function getMessages(
   }
   if (verified.kind === "refused") {
     return {
-      alert: `${t(locale, "browserConnector.wallet.refused")} ${t(
-        locale,
-        `browserConnector.wallet.refusal.${verified.refusal}`
-      )}`,
+      alert: t(locale, `browserConnector.wallet.refusal.${verified.refusal}`, {
+        site: getWebsiteHost(),
+      }),
       status: null,
     };
   }
