@@ -68,6 +68,16 @@ you closed the browser tab (up to three times), or **Cancel** to stop.
 - **"Another signature request is still open":** finish or cancel the open one
   first.
 
+## Localization fallback debt
+
+| Field                     | Current exception                                                                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | `/browser-connector` wallet requests (`BrowserWalletRequestPanel`), the in-app `DesktopWalletRequestDialog` and `ContinueInBrowserNotice`                                  |
+| Untranslated surface      | All `browserConnector.wallet.*` (including `.schema.*`, `.format.*`, `.refusal.*`) and `desktopWalletRequest.*` copy                                                       |
+| Current fallback behavior | The copy exists only in the `en-US` source dictionary; other locales fall back to `en-US`                                                                                 |
+| User impact               | 6529 Desktop users with another locale see this signing flow in English; the signed messages themselves are not translated by design (they are signed byte for byte)       |
+| Owner or follow-up        | Frontend localization maintainers; add `en-GB`, `fr-FR`, `es-ES` and `de-DE` entries in the progressive i18n workstream when the new 6529 Desktop is released             |
+
 ## Related Areas
 
 - [Get started](flow-getting-started.md)
