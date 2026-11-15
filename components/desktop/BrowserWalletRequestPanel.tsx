@@ -17,17 +17,18 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
   buildWalletResultDeepLink,
-  isWalletRequestSignedBy,
-  parseWalletRequestFragment,
   type ParsedWalletRequestFragment,
+  verifyWalletRequestFragment,
   walletRequestCode,
   type WalletResult,
 } from "@/lib/desktop/wallet-forwarding";
+import { shortWalletPayloadHash } from "@/lib/desktop/walletRequestContext";
 import {
   describeWalletRequest,
   type WalletRequestDescription,
   type WalletRequestRefusal,
 } from "@/lib/desktop/walletRequestDescribe";
+import BrowserWalletRequestContent from "./BrowserWalletRequestContent";
 
 /** The website's host for this build, for "Continue on {site}" copy. */
 function getWebsiteHost(): string {
@@ -89,29 +90,25 @@ async function fetchRequestSigner(): Promise<string | null> {
 }
 
 /**
- * Verify the request in this page's fragment: shape, origin, lifetime, the
- * 6529 Desktop signature, and whether it can be described. Nothing is
- * shown to sign unless every check passes.
+ * Verify the request in this page's fragment: shape, the 6529 Desktop
+ * signature, then origin, lifetime, and whether it can be described. A
+ * request 6529 Desktop did not sign is invalid whatever its times say.
+ * Nothing is shown to sign unless every check passes.
  */
 async function verifyFragment(
   hash: string,
   origin: string,
   allowedChainIds: readonly number[]
 ): Promise<Verified> {
-  const parsed = parseWalletRequestFragment(hash, {
+  const signer = await fetchRequestSigner();
+  const parsed = await verifyWalletRequestFragment(hash, {
     origin,
     now: Date.now(),
     allowedChainIds,
+    signer,
   });
   if (!parsed.ok) {
     return { kind: "invalid", expired: parsed.problem === "expired" };
-  }
-  const signer = await fetchRequestSigner();
-  if (
-    signer === null ||
-    !(await isWalletRequestSignedBy(parsed.value, signer))
-  ) {
-    return { kind: "invalid", expired: false };
   }
   const described = describeWalletRequest(parsed.value.request, origin);
   return described.ok
@@ -168,9 +165,12 @@ function Details({
         <p className="tw-m-0 tw-text-lg tw-font-semibold">
           {t(locale, `browserConnector.wallet.format.${description.format}`)}
         </p>
-        <pre className="tw-m-0 tw-max-h-72 tw-overflow-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-bg-iron-900 tw-p-3 tw-font-mono tw-text-sm tw-text-iron-100">
-          {description.text}
-        </pre>
+        <BrowserWalletRequestContent
+          text={description.text}
+          fingerprint={shortWalletPayloadHash(description.payloadHash)}
+          content={description.content}
+          locale={locale}
+        />
       </>
     );
   }

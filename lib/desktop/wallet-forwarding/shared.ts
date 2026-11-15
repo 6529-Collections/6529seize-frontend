@@ -30,6 +30,8 @@ export const MAX_TYPED_DATA_CHARS = 16 * 1024;
 export const MAX_ENVELOPE_CHARS = 32 * 1024;
 export const MAX_TYPED_DATA_TYPES = 32;
 export const MAX_TYPED_DATA_FIELDS = 64;
+/** What a `personal_sign` request's `context` may carry, in UTF-8 bytes. */
+export const MAX_CONTEXT_BYTES = 16 * 1024;
 
 /** 32 random bytes, base64url without padding. */
 export const REQUEST_ID = /^[A-Za-z0-9_-]{43}$/;
@@ -65,19 +67,38 @@ export type WalletRequest =
       readonly method: "personal_sign";
       /** The exact bytes to sign, as hex. */
       readonly message: Hex;
+      /**
+       * What the message's payload hash was made from (JSON text), so the
+       * browser page can recompute the hash and show the content. Untrusted
+       * until the page has done so; absent when the app sent none.
+       */
+      readonly context?: string;
     })
   | (WalletRequestBase & {
       readonly method: "eth_signTypedData_v4";
       readonly typedData: WalletTypedData;
     });
 
-/** What the app page hands to the shell (and the envelope carries). */
+/**
+ * What the app page hands to the shell (and the envelope carries). These
+ * keys and no others; `context` only with `personal_sign`.
+ */
 export interface WalletRequestInput {
   readonly method: string;
   readonly params: unknown;
   readonly address: string;
   readonly chainId: number;
+  readonly context?: string;
 }
+
+/** The only keys a request may have. */
+export const WALLET_REQUEST_KEYS: readonly string[] = [
+  "method",
+  "params",
+  "address",
+  "chainId",
+  "context",
+];
 
 export type WalletRequestProblem =
   | "unsupported-method"

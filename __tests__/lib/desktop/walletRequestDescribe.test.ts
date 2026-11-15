@@ -16,6 +16,10 @@ import {
   type WalletRequest,
 } from "@/lib/desktop/wallet-forwarding";
 import { describeWalletRequest } from "@/lib/desktop/walletRequestDescribe";
+import {
+  buildDecisionSignatureContext,
+  buildDropSignatureContext,
+} from "@/lib/desktop/walletRequestContext";
 import { buildCompetitionSignatureMessage } from "@/services/wallet-signatures/competition-signature";
 import {
   buildDropSignatureMessage,
@@ -84,13 +88,17 @@ async function tamper(
   return parsed.value;
 }
 
-const messageRequest = (text: string | `0x${string}`): WalletRequest => {
+const messageRequest = (
+  text: string | `0x${string}`,
+  context?: string
+): WalletRequest => {
   const parsed = parseWalletRequest(
     {
       method: "personal_sign",
       params: [text.startsWith("0x") ? text : toHex(text), ADDRESS],
       address: ADDRESS,
       chainId: 1,
+      ...(context === undefined ? {} : { context }),
     },
     [1]
   );
@@ -186,20 +194,22 @@ const profilePublish = (chainId = 1, verifyingContract?: string) => {
 
 const NONCE = "00000000-0000-4000-8000-000000000001";
 
+const DROP = (address: string) => ({
+  wave_id: "wave-1",
+  drop_type: ApiDropType.Chat,
+  title: null,
+  parts: [{ content: "gm", media: [] }],
+  referenced_nfts: [],
+  mentioned_users: [],
+  metadata: [],
+  signature: null,
+  signer_address: address,
+});
+
 const dropMessage = (address: string = ADDRESS) =>
   buildDropSignatureMessage({
     address,
-    drop: {
-      wave_id: "wave-1",
-      drop_type: ApiDropType.Chat,
-      title: null,
-      parts: [{ content: "gm", media: [] }],
-      referenced_nfts: [],
-      mentioned_users: [],
-      metadata: [],
-      signature: null,
-      signer_address: address,
-    },
+    drop: DROP(address),
     termsOfService: "Terms v1",
   }).message;
 
@@ -232,7 +242,13 @@ describe("describeWalletRequest: messages (allow-list)", () => {
     const text = dropMessage();
     expect(describeWalletRequest(messageRequest(text), ORIGIN)).toEqual({
       ok: true,
-      value: { kind: "message", text, format: "drop" },
+      value: {
+        kind: "message",
+        text,
+        format: "drop",
+        payloadHash: text.split("Payload Hash: ")[1]!.slice(0, 64),
+        content: null,
+      },
     });
   });
 
@@ -243,8 +259,43 @@ describe("describeWalletRequest: messages (allow-list)", () => {
     const text = decisionMessage(action);
     expect(describeWalletRequest(messageRequest(text), ORIGIN)).toEqual({
       ok: true,
-      value: { kind: "message", text, format },
+      value: {
+        kind: "message",
+        text,
+        format,
+        payloadHash: JSON.parse(text).payload_hash,
+        content: null,
+      },
     });
+  });
+
+  it("shows content only when it hashes to what the message commits to", () => {
+    const text = dropMessage();
+    const context = buildDropSignatureContext({
+      drop: DROP(ADDRESS),
+      termsOfService: "Terms v1",
+    });
+    const described = describeWalletRequest(
+      messageRequest(text, context),
+      ORIGIN
+    );
+    expect(described.ok && described.value.kind === "message").toBe(true);
+    if (!described.ok || described.value.kind !== "message") return;
+    expect(described.value.content).toMatchObject({
+      kind: "drop",
+      terms: "Terms v1",
+      drop: { waveId: "wave-1", parts: [{ text: "gm" }] },
+    });
+    for (const forged of [
+      context.replace('"gm"', '"gn"'),
+      buildDropSignatureContext({ drop: DROP(ADDRESS), termsOfService: null }),
+      buildDecisionSignatureContext({ votes: 5 }),
+      "not json",
+    ]) {
+      expect(
+        describeWalletRequest(messageRequest(text, forged), ORIGIN)
+      ).toEqual({ ok: false, refusal: "context-mismatch" });
+    }
   });
 
   it.each([

@@ -1,7 +1,10 @@
 import { serializeTypedData, toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { mainnet, sepolia } from "viem/chains";
-import { desktopBrowserWalletConnector } from "@/wagmiConfig/desktopBrowserWalletConnector";
+import {
+  desktopBrowserWalletConnector,
+  type PreparedWalletRequest,
+} from "@/wagmiConfig/desktopBrowserWalletConnector";
 
 // Public development key (Hardhat/Anvil account 0); never funded.
 const wallet = privateKeyToAccount(
@@ -28,16 +31,18 @@ const typedData = {
 function setup(address: string | null = wallet.address) {
   const emit = jest.fn();
   const runRequest = jest.fn();
-  const canForward = jest.fn(() => true);
+  const prepare = jest.fn<PreparedWalletRequest | null, [unknown]>(() => ({
+    fingerprint: null,
+  }));
   const connector = desktopBrowserWalletConnector({
     getAddress: () => address,
-    canForward,
+    prepare,
     runRequest,
   })({
     chains: [mainnet, sepolia],
     emitter: { emit },
   } as never);
-  return { connector, emit, runRequest, canForward };
+  return { connector, emit, runRequest, prepare };
 }
 
 const request = async (
@@ -109,12 +114,15 @@ describe("desktopBrowserWalletConnector", () => {
     await expect(
       request(connector, "personal_sign", [message, wallet.address])
     ).resolves.toBe(signature);
-    expect(runRequest).toHaveBeenCalledWith({
-      method: "personal_sign",
-      params: [message, wallet.address],
-      address: wallet.address,
-      chainId: 1,
-    });
+    expect(runRequest).toHaveBeenCalledWith(
+      {
+        method: "personal_sign",
+        params: [message, wallet.address],
+        address: wallet.address,
+        chainId: 1,
+      },
+      null
+    );
 
     runRequest.mockResolvedValue({
       ok: true,
@@ -187,17 +195,50 @@ describe("desktopBrowserWalletConnector", () => {
         json,
       ])
     ).rejects.toMatchObject({ code: 4001 });
-    expect(runRequest).toHaveBeenCalledWith({
-      method: "eth_signTypedData_v4",
-      params: [wallet.address, json],
-      address: wallet.address,
-      chainId: 1,
-    });
+    expect(runRequest).toHaveBeenCalledWith(
+      {
+        method: "eth_signTypedData_v4",
+        params: [wallet.address, json],
+        address: wallet.address,
+        chainId: 1,
+      },
+      null
+    );
+  });
+
+  it("adds the prepared context to a message and passes its fingerprint", async () => {
+    const { connector, runRequest, prepare } = setup();
+    prepare.mockReturnValue({ context: '{"v":1}', fingerprint: "aa…bb" });
+    const message = toHex("6529 Action");
+    const signature = await wallet.signMessage({ message: { raw: message } });
+    runRequest.mockResolvedValue({ ok: true, value: signature });
+    await expect(
+      request(connector, "personal_sign", [message, wallet.address])
+    ).resolves.toBe(signature);
+    expect(runRequest).toHaveBeenCalledWith(
+      {
+        method: "personal_sign",
+        params: [message, wallet.address],
+        address: wallet.address,
+        chainId: 1,
+        context: '{"v":1}',
+      },
+      "aa…bb"
+    );
+
+    // Typed data never carries context.
+    runRequest.mockClear();
+    runRequest.mockResolvedValue({ ok: false, code: "rejected" });
+    const json = serializeTypedData(typedData as never);
+    await expect(
+      request(connector, "eth_signTypedData_v4", [wallet.address, json])
+    ).rejects.toMatchObject({ code: 4001 });
+    expect(runRequest.mock.calls[0]![0]).not.toHaveProperty("context");
   });
 
   it("refuses in the app what the browser page would refuse", async () => {
-    const { connector, runRequest, canForward } = setup();
-    canForward.mockReturnValue(false);
+    const { connector, runRequest, prepare } = setup();
+    prepare.mockReturnValue(null);
     await expect(
       request(connector, "personal_sign", [toHex("free text"), wallet.address])
     ).rejects.toMatchObject({ code: 4200 });

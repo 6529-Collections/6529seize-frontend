@@ -63,7 +63,7 @@ export function useDesktopBrowserWalletConnector(
             const address = getWalletAddress();
             return isBrowserWalletProfile(address) ? address : null;
           },
-          canForward: precheck,
+          prepare: precheck,
           runRequest: runDesktopWalletRequest,
         })
       );

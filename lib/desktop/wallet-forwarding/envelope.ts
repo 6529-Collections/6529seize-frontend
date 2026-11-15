@@ -38,6 +38,7 @@ export interface WalletRequestEnvelope {
 type WalletEnvelopeProblem =
   | "missing"
   | "malformed"
+  | "unsigned"
   | "wrong-origin"
   | "expired"
   | WalletRequestProblem;
@@ -129,19 +130,16 @@ function readEnvelope(value: unknown): WalletRequestEnvelope | null {
   };
 }
 
-/**
- * Read the browser page's fragment. Checks shape, origin, lifetime and the
- * request itself; the caller must still check the signature with
- * `isWalletRequestSignedBy` before showing anything to sign.
- */
-export function parseWalletRequestFragment(
-  hash: string,
-  context: {
-    readonly origin: string;
-    readonly now: number;
-    readonly allowedChainIds: readonly number[];
-  }
-): Parsed<ParsedWalletRequestFragment, WalletEnvelopeProblem> {
+interface WalletRequestFragmentContext {
+  readonly origin: string;
+  readonly now: number;
+  readonly allowedChainIds: readonly number[];
+}
+
+type ReadFragment = Omit<ParsedWalletRequestFragment, "request">;
+
+/** The fragment's shape only: the envelope bytes, its JSON and signature. */
+function readFragment(hash: string): Parsed<ReadFragment, WalletEnvelopeProblem> {
   if (hash.length > MAX_ENVELOPE_CHARS) return fail("malformed");
   const params = new URLSearchParams(hash.replace(/^#/, ""));
   const encoded = params.get("w");
@@ -158,6 +156,18 @@ export function parseWalletRequestFragment(
   }
   const envelope = readEnvelope(json);
   if (!envelope) return fail("malformed");
+  return {
+    ok: true,
+    value: { envelope, envelopeBytes, signature: signature as Hex },
+  };
+}
+
+/** Origin, lifetime and the request itself, for a fragment already read. */
+function checkFragment(
+  read: ReadFragment,
+  context: WalletRequestFragmentContext
+): Parsed<ParsedWalletRequestFragment, WalletEnvelopeProblem> {
+  const { envelope } = read;
   if (envelope.origin !== context.origin) return fail("wrong-origin");
   if (
     envelope.expiresAt <= envelope.issuedAt ||
@@ -169,15 +179,42 @@ export function parseWalletRequestFragment(
   }
   const request = parseWalletRequest(envelope.request, context.allowedChainIds);
   if (!request.ok) return request;
-  return {
-    ok: true,
-    value: {
-      envelope,
-      request: request.value,
-      envelopeBytes,
-      signature: signature as Hex,
-    },
-  };
+  return { ok: true, value: { ...read, request: request.value } };
+}
+
+/**
+ * Read the browser page's fragment. Checks shape, origin, lifetime and the
+ * request itself, but not the signature: the browser page uses
+ * `verifyWalletRequestFragment`, which checks the signature first.
+ */
+export function parseWalletRequestFragment(
+  hash: string,
+  context: WalletRequestFragmentContext
+): Parsed<ParsedWalletRequestFragment, WalletEnvelopeProblem> {
+  const read = readFragment(hash);
+  return read.ok ? checkFragment(read.value, context) : read;
+}
+
+/**
+ * Read and verify the browser page's fragment, in this order: shape, the
+ * 6529 Desktop signature (`signer` is the address the local server reports
+ * for this run), then origin, lifetime and the request. A request that 6529
+ * Desktop did not sign is always `unsigned`, never `expired`, whatever its
+ * times say.
+ */
+export async function verifyWalletRequestFragment(
+  hash: string,
+  context: WalletRequestFragmentContext & { readonly signer: string | null }
+): Promise<Parsed<ParsedWalletRequestFragment, WalletEnvelopeProblem>> {
+  const read = readFragment(hash);
+  if (!read.ok) return read;
+  if (
+    context.signer === null ||
+    !(await isWalletRequestSignedBy(read.value, context.signer))
+  ) {
+    return fail("unsigned");
+  }
+  return checkFragment(read.value, context);
 }
 
 /**

@@ -45,6 +45,11 @@ import {
   readWalletMessageFormat,
   type WalletMessageFormat,
 } from "@/lib/desktop/walletMessageFormats";
+import {
+  readWalletPayloadHash,
+  verifyWalletRequestContext,
+  type WalletRequestContent,
+} from "@/lib/desktop/walletRequestContext";
 
 /** The typed-data schemas the browser page knows how to describe. */
 export type WalletTypedDataKind =
@@ -64,6 +69,13 @@ export type WalletRequestDescription =
       readonly kind: "message";
       readonly text: string;
       readonly format: WalletMessageFormat;
+      /** The hash the message commits its content to. */
+      readonly payloadHash: string;
+      /**
+       * The content behind that hash, recomputed and matched; null when the
+       * app sent none (the content is then known only by its hash).
+       */
+      readonly content: WalletRequestContent | null;
     }
   | {
       readonly kind: "typedData";
@@ -83,7 +95,8 @@ export type WalletRequestRefusal =
   | "unknown-typed-data"
   | "wrong-wallet"
   | "wrong-origin"
-  | "statement-mismatch";
+  | "statement-mismatch"
+  | "context-mismatch";
 
 type DescribedWalletRequest =
   | { readonly ok: true; readonly value: WalletRequestDescription }
@@ -329,7 +342,19 @@ function describeUnchecked(
     if (isSignInMessage(text)) return refuse("sign-in-message");
     const format = readWalletMessageFormat(text, request.address, pageOrigin);
     if (format === null) return refuse("unknown-message");
-    return { ok: true, value: { kind: "message", text, format } };
+    const payloadHash = readWalletPayloadHash(text, format);
+    if (payloadHash === null) return refuse("unknown-message");
+    let content: WalletRequestContent | null = null;
+    if (request.context !== undefined) {
+      // Content that does not hash to what the message commits to is never
+      // shown, and the request is not offered for signing.
+      content = verifyWalletRequestContext(text, format, request.context);
+      if (content === null) return refuse("context-mismatch");
+    }
+    return {
+      ok: true,
+      value: { kind: "message", text, format, payloadHash, content },
+    };
   }
   return describeTypedData(request.typedData, request, pageOrigin);
 }
