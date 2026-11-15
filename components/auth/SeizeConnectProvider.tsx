@@ -457,8 +457,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         if (getSessionClientType() !== "web") throw revokeError;
       }
       await removeAuthJwt();
-      // 6529 Desktop: a later sign-in to this address another way must not
-      // inherit browser-wallet forwarding (a no-op elsewhere; never throws).
+      // 6529 Desktop: no browser-wallet forwarding after logout (never throws).
       if (signedOutAddress) await forgetBrowserWalletProfile(signedOutAddress);
       refreshStoredConnectedAccounts();
 
