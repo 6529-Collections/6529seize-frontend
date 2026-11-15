@@ -11,8 +11,12 @@
  * `hooks/competitions/useWaveMayHaveCompetitionEntries.ts`.
  *
  * The flag is the same for every viewer, so it is not reset on profile switch.
- * Entries are never removed: one boolean per wave seen this session, and each
- * feed page re-asserts the current value.
+ * Entries are never removed: one boolean per wave seen this session.
+ *
+ * Once a wave is known to have a competition it stays so for the session. A
+ * feed page requested before a competition was created can arrive after the
+ * event that announced it, and must not turn lookups back off. The cost is
+ * that a wave which loses its last competition keeps looking up until reload.
  */
 const presenceByWaveId = new Map<string, boolean>();
 const listeners = new Set<() => void>();
@@ -31,10 +35,12 @@ export const recordWaveCompetitionPresence = (
   hasCompetition: boolean | undefined
 ): void => {
   // Server renders share this module across requests; only browsers keep it.
+  const known = presenceByWaveId.get(waveId);
   if (
     typeof window === "undefined" ||
     hasCompetition === undefined ||
-    presenceByWaveId.get(waveId) === hasCompetition
+    known === hasCompetition ||
+    known === true
   ) {
     return;
   }
@@ -44,6 +50,6 @@ export const recordWaveCompetitionPresence = (
   }
 };
 
-/** False only when the API has said this wave has no competition. */
+/** False only while every report for this wave has said it has no competition. */
 export const waveMayHaveCompetitionEntries = (waveId: string): boolean =>
   presenceByWaveId.get(waveId) !== false;
