@@ -8,6 +8,7 @@ import {
   isFieldType,
   isHexBytes,
   isRecord,
+  MAX_CONTEXT_BYTES,
   MAX_MESSAGE_BYTES,
   MAX_TYPED_DATA_CHARS,
   MAX_TYPED_DATA_FIELDS,
@@ -23,14 +24,34 @@ import {
   type WalletRequestBase,
   type WalletRequestInput,
   type WalletRequestProblem,
+  WALLET_REQUEST_KEYS,
   WRONG_ADDRESS,
   WRONG_CHAIN,
 } from "./shared";
 import { fitsWalletRequestFragment } from "./size";
 
+/**
+ * A `personal_sign` request's optional `context`: non-empty text of at most
+ * `MAX_CONTEXT_BYTES` UTF-8 bytes. Only its size and type are checked here;
+ * the browser page checks it against the message before showing anything.
+ */
+function readContext(
+  value: unknown
+): Parsed<string | undefined, WalletRequestProblem> {
+  if (value === undefined) return { ok: true, value: undefined };
+  if (typeof value !== "string" || value.length === 0) {
+    return fail(INVALID_PARAMS);
+  }
+  if (new TextEncoder().encode(value).length > MAX_CONTEXT_BYTES) {
+    return fail(TOO_LARGE);
+  }
+  return { ok: true, value };
+}
+
 function parsePersonalSign(
   params: readonly unknown[],
-  base: WalletRequestBase
+  base: WalletRequestBase,
+  rawContext: unknown
 ): Parsed<WalletRequest, WalletRequestProblem> {
   const [message, signer] = params;
   if (
@@ -43,9 +64,16 @@ function parsePersonalSign(
   if (message === "0x") return fail(INVALID_PARAMS);
   if ((message.length - 2) / 2 > MAX_MESSAGE_BYTES) return fail(TOO_LARGE);
   if (!sameAddress(signer, base.address)) return fail(WRONG_ADDRESS);
+  const context = readContext(rawContext);
+  if (!context.ok) return context;
   return {
     ok: true,
-    value: { ...base, method: "personal_sign", message },
+    value: {
+      ...base,
+      method: "personal_sign",
+      message,
+      ...(context.value === undefined ? {} : { context: context.value }),
+    },
   };
 }
 
@@ -146,7 +174,11 @@ function parseUnchecked(
   allowedChainIds: readonly number[]
 ): Parsed<WalletRequest, WalletRequestProblem> {
   if (!isRecord(input)) return fail(INVALID_PARAMS);
-  const { method, params, address, chainId } = input;
+  // Exactly the known keys (an absent `context` may read as undefined).
+  if (Object.keys(input).some((key) => !WALLET_REQUEST_KEYS.includes(key))) {
+    return fail(INVALID_PARAMS);
+  }
+  const { method, params, address, chainId, context } = input;
   if (
     typeof method !== "string" ||
     !(WALLET_FORWARDING_METHODS as readonly string[]).includes(method)
@@ -165,9 +197,13 @@ function parseUnchecked(
   }
   if (!Array.isArray(params)) return fail(INVALID_PARAMS);
   const base: WalletRequestBase = { address: getAddress(address), chainId };
+  // Context describes a message's payload hash; typed data has none.
+  if (method !== "personal_sign" && context !== undefined) {
+    return fail(INVALID_PARAMS);
+  }
   const parsed =
     (method as WalletForwardingMethod) === "personal_sign"
-      ? parsePersonalSign(params, base)
+      ? parsePersonalSign(params, base, context)
       : parseTypedData(params, base);
   // A request the browser page could never open is refused up front.
   if (parsed.ok && !fitsWalletRequestFragment(input)) return fail(TOO_LARGE);
