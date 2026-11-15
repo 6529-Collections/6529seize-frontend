@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRef, useState, type ReactNode } from "react";
 
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
+import ContinueInBrowserNotice from "@/components/desktop/ContinueInBrowserNotice";
+import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatList, formatPercent } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -310,6 +312,10 @@ function WalletStep({
   readonly locale: SupportedLocale;
 }) {
   const { account, signing } = session;
+  // 6529 Desktop's browser forwarding does not sign validator sessions:
+  // this page signs them on the website, with the browser wallet.
+  const forwarding = useIsDesktopBrowserWallet();
+  if (forwarding) return <ContinueInBrowserNotice />;
   if (!account) {
     return (
       <button

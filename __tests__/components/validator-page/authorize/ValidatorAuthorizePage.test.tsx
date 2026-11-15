@@ -12,6 +12,7 @@ type Wallet = {
   isSafeWallet: boolean;
   seizeConnect: jest.Mock;
   seizeConnectFresh: jest.Mock;
+  connector?: { id: string } | undefined;
 };
 
 let wallet: Wallet;
@@ -20,10 +21,16 @@ const signTypedDataAsync = jest.fn();
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => wallet,
 }));
+const continueInBrowser = jest.fn(() => true);
+jest.mock("@/services/desktop/continueInBrowser", () => ({
+  continueInBrowser: () => continueInBrowser(),
+  getWebsiteHost: () => "6529.io",
+}));
 jest.mock("wagmi", () => ({
   useAccount: () => ({
     address: wallet.address,
     isConnected: wallet.isConnected,
+    connector: wallet.connector,
   }),
   useSignTypedData: () => ({ signTypedDataAsync }),
 }));
@@ -163,6 +170,21 @@ describe("the authorize page", () => {
       )
     ).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("sends 6529 Desktop's browser forwarding to the website to sign", async () => {
+    connect();
+    wallet = { ...wallet, connector: { id: "desktopBrowserWallet" } };
+    open(FRAGMENT);
+    expect(await screen.findByText("Validator key")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Sign/ })
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Continue in your browser" })
+    );
+    expect(continueInBrowser).toHaveBeenCalledTimes(1);
+    expect(signTypedDataAsync).not.toHaveBeenCalled();
   });
 
   it("shows the validator's key and the whole draft", async () => {

@@ -71,6 +71,14 @@ jest.mock("@tanstack/react-query", () => ({
   },
   useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
+let mockForwarding = false;
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: () => mockForwarding,
+}));
+jest.mock("@/services/desktop/continueInBrowser", () => ({
+  continueInBrowser: jest.fn(() => true),
+  getWebsiteHost: () => "6529.io",
+}));
 jest.mock("@/components/collect/useMarketExecution", () => ({
   useMarketExecution: () => ({
     ready: true,
@@ -169,12 +177,27 @@ const operation: ApiMarketOperation = {
 };
 beforeEach(() => {
   jest.clearAllMocks();
+  mockForwarding = false;
   mockQueries.length = 0;
   mockRecover.mockResolvedValue(undefined);
   mockSavedIntent = null;
   mockAuth.isAuthenticated = true;
   mockAuth.activeProfileProxy = null;
   mockPayingWallet = mockAuth.connectedProfile.primary_wallet;
+});
+it("sends 6529 Desktop's browser forwarding to the website to trade", () => {
+  mockForwarding = true;
+  render(
+    <CollectTradeController
+      action="buy"
+      initialOperation={operation}
+      onClose={jest.fn()}
+    />
+  );
+  expect(
+    screen.getByRole("button", { name: "Continue in your browser" })
+  ).toBeInTheDocument();
+  expect(mockConfirm).not.toHaveBeenCalled();
 });
 it("keeps recovery bound to the original operation after the funding wallet changes profiles", async () => {
   render(

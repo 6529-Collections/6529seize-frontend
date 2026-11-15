@@ -4002,6 +4002,8 @@ export const EN_US_ROOT_MESSAGES = {
     "The signature could not be checked against your account. Smart-contract wallets such as Safe cannot sign here; continue on {site} in your browser instead.",
   "desktopWalletRequest.reopenWait": "You can open it again in a few seconds.",
   "desktopWalletRequest.continueInBrowser": "Continue in your browser",
+  "desktopWalletRequest.notForwarded":
+    "6529 Desktop does not send this kind of signature to your browser wallet. Continue on {site} in your browser, where your wallet signs it directly.",
   "browserConnector.title": "Sign in to 6529 Desktop",
   "browserConnector.description":
     "Sign in to 6529 Desktop with a browser wallet.",
