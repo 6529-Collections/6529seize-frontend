@@ -9,6 +9,10 @@ import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { type CSSProperties } from "react";
+import {
+  getDesktopAuthorHeader,
+  getMobileAuthorHeader,
+} from "./WaveDropAuthorHeaderSlots";
 import type { DropIdentityMode, DropTimestampLayout } from "./drop.types";
 import { DropLocation } from "./drop.types";
 import { getRankHoverRingClass } from "./dropRankStyles";
@@ -566,32 +570,6 @@ const getAuthorHeader = ({
   );
 };
 
-const getDesktopAuthorHeader = ({
-  showAuthorInfo,
-  inlineAuthorOnDesktop,
-  authorHeader,
-  isMdViewport,
-}: {
-  readonly showAuthorInfo: boolean;
-  readonly inlineAuthorOnDesktop: boolean;
-  readonly authorHeader: React.ReactNode;
-  readonly isMdViewport: boolean | null;
-}): React.ReactNode => {
-  if (showAuthorInfo && !inlineAuthorOnDesktop) {
-    return (
-      <div className="tw-hidden md:tw-block">
-        {isMdViewport === false ? null : authorHeader}
-      </div>
-    );
-  }
-
-  if (showAuthorInfo) {
-    return null;
-  }
-
-  return authorHeader;
-};
-
 const getContentBlock = ({
   shouldShowReplyHeader,
   onReplyClick,
@@ -655,7 +633,7 @@ const getContentBlock = ({
     active: boolean
   ) => void;
   readonly inlineAuthorOnDesktop: boolean;
-  /** Known width: only the visible header slot mounts. Null: both, CSS hides one. */
+  /** See `WaveDropAuthorHeaderSlots`. */
   readonly isMdViewport: boolean | null;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia: boolean;
@@ -694,9 +672,11 @@ const getContentBlock = ({
               inlineAuthorOnDesktop ? "" : "md:tw-hidden"
             }`}
           >
-            {inlineAuthorOnDesktop || isMdViewport !== true
-              ? authorHeader
-              : null}
+            {getMobileAuthorHeader({
+              inlineAuthorOnDesktop,
+              authorHeader,
+              isMdViewport,
+            })}
           </div>
           {showStormPartIndicator && (
             <WaveDropStormIndicator
