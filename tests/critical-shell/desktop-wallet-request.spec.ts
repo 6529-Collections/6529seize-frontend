@@ -49,13 +49,17 @@ function dropMessage(origin: string): string {
   ].join("\n");
 }
 
-async function signedFragment(origin: string, message: string) {
+async function signedFragment(
+  origin: string,
+  message: string,
+  envelopeOrigin = origin
+) {
   const now = Date.now();
   const bytes = encodeWalletRequestEnvelope({
     v: 1,
     id: ID,
     scheme: "localcore6529",
-    origin,
+    origin: envelopeOrigin,
     issuedAt: now,
     expiresAt: now + WALLET_REQUEST_TTL_MS,
     request: {
@@ -102,7 +106,7 @@ test.describe("Desktop wallet request page", () => {
     await expect(page.getByText(walletRequestCode(ID))).toBeVisible();
     await expect(page.getByText(/Create a 6529 drop/)).toBeVisible();
     await expect(page.getByRole("main").locator("pre")).toHaveText(message);
-    expect(new URL(page.url()).hash).toBe("");
+    await expect.poll(() => new URL(page.url()).hash).toBe("");
     // No wallet is connected: the page asks for one and offers no Sign.
     await expect(
       page.getByRole("button", { name: "Connect wallet" })
@@ -129,6 +133,32 @@ test.describe("Desktop wallet request page", () => {
       "did not get a valid request"
     );
     await expect(page.getByRole("main").getByRole("button")).toHaveCount(0);
-    expect(new URL(page.url()).hash).toBe("");
+    await expect.poll(() => new URL(page.url()).hash).toBe("");
+  });
+
+  test("offers nothing to sign for a request made for another origin", async ({
+    page,
+    baseURL,
+  }) => {
+    const origin = new URL(baseURL!).origin;
+    const port = Number(new URL(origin).port || "80");
+    const otherOrigin = `http://localhost:${port === 65535 ? port - 1 : port + 1}`;
+    await page.route(SIGNER_ROUTE, (route) =>
+      route.fulfill({ json: { signer: shell.address } })
+    );
+
+    await page.goto(
+      `/browser-connector${await signedFragment(
+        origin,
+        dropMessage(origin),
+        otherOrigin
+      )}`
+    );
+
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
+      "did not get a valid request"
+    );
+    await expect(page.getByRole("main").getByRole("button")).toHaveCount(0);
+    await expect.poll(() => new URL(page.url()).hash).toBe("");
   });
 });
