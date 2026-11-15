@@ -1,7 +1,13 @@
 /**
  * @jest-environment-options {"url": "http://localhost:6529/browser-connector"}
  */
-import { render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { toHex } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
@@ -317,6 +323,48 @@ describe("BrowserWalletRequestPanel", () => {
       ok: false,
       code: "rejected",
     });
+  });
+
+  it("keeps a decline made while the wallet is still open", async () => {
+    let resolveWallet: (value: string) => void = () => undefined;
+    signMessageAsync.mockReturnValue(
+      new Promise<string>((resolve) => {
+        resolveWallet = resolve;
+      })
+    );
+    render(<BrowserWalletRequestPanel hash={await fragmentFor(envelope())} />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Sign in wallet" })
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Decline" }));
+    expect(assign).toHaveBeenCalledTimes(1);
+    expect(returnedData()).toEqual({
+      v: 1,
+      id: ID,
+      ok: false,
+      code: "rejected",
+    });
+
+    // The wallet signs afterwards: nothing more is returned.
+    await act(async () => {
+      resolveWallet(SIGNATURE);
+      await Promise.resolve();
+    });
+    expect(assign).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("status")).toHaveTextContent("Declined");
+  });
+
+  it("does not open the wallet for a request that ran out", async () => {
+    jest.useFakeTimers({ doNotFake: ["queueMicrotask", "nextTick"] });
+    const hash = await fragmentFor(envelope({ expiresAt: Date.now() + 2000 }));
+    render(<BrowserWalletRequestPanel hash={hash} />);
+    const button = await screen.findByRole("button", {
+      name: "Sign in wallet",
+    });
+    jest.setSystemTime(Date.now() + 3000);
+    fireEvent.click(button);
+    expect(signMessageAsync).not.toHaveBeenCalled();
+    jest.useRealTimers();
   });
 
   it("lets the user retry after a wallet failure", async () => {
