@@ -51,8 +51,8 @@ export const MINIMUM: readonly {
   },
   {
     label: "Time on",
-    value: `${KEEP_ON_MINUTES} minutes a day`,
-    detail: "From 00:15 UTC, with sleep turned off.",
+    value: "24/7 earns the most",
+    detail: "Time off isn't penalized. It just doesn't earn while it's off.",
   },
 ];
 
@@ -140,7 +140,8 @@ export const PARTS: readonly {
   {
     key: "power",
     part: "Power",
-    answer: `On and awake for about ${KEEP_ON_MINUTES} minutes a day, from 00:15 UTC.`,
+    answer:
+      "Running 24/7 earns the most. A computer that's sometimes off isn't penalized; it just doesn't earn while it's off.",
     why: "A mini PC left on all day uses about $1.60 of power a month at the US average price.",
   },
   {
@@ -294,11 +295,13 @@ export const QUESTIONS: readonly {
 }[] = [
   {
     question: "Can I use a laptop?",
-    answer: `Yes. Keep it plugged in, with the lid open and sleep turned off, for about ${KEEP_ON_MINUTES} minutes from 00:15 UTC.`,
+    answer:
+      "Yes. Keep it plugged in, with the lid open and sleep turned off. It earns only while it's on.",
   },
   {
     question: "Can I turn it off at night?",
-    answer: `Yes, once it has signed, by about ${keepOnUntilUtc()} UTC. If it's off then, it signs when it next starts, until 19:00 UTC. A missed day costs only that day's signature, and your account keeps counting while it signs at least once every seven days.`,
+    answer:
+      "Yes. It isn't penalized; it just doesn't earn while it's off, so running 24/7 earns the most. If it's off at 00:15 UTC, it signs the day's TDH when it next starts, until 19:00 UTC. Off for 7 days in a row, it drops off the chain's validator list at 22:00 UTC, and rejoins once it's back on and up to date.",
   },
   {
     question: "Do I need my own Ethereum node?",
