@@ -274,6 +274,17 @@ describe("waves without a competition", () => {
     await waitFor(() => expect(result.current.rating).toBe(120));
   });
 
+  it("keeps looking up after a late report that the wave has none", async () => {
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockImplementation((waveId) => Promise.resolve(contextIn(waveId)));
+    recordWaveCompetitionPresence("wave-late", true);
+    // A feed page requested before the competition existed resolves afterwards.
+    recordWaveCompetitionPresence("wave-late", false);
+    const { result } = renderDropIn("wave-late");
+    await waitFor(() => expect(result.current.rating).toBe(120));
+  });
+
   it("ignores a report that omits the flag", () => {
     recordWaveCompetitionPresence("wave-omitted", false);
     recordWaveCompetitionPresence("wave-omitted", undefined);

@@ -167,10 +167,26 @@ describe("the hardware page's facts, as of 0.1.0-rc.5", () => {
     for (const page of [text, html]) {
       expect(page).not.toMatch(/random|two hours|three hours|3 hours|03:15/i);
     }
-    expect(html).toContain(`${KEEP_ON_MINUTES} minutes a day`);
     expect(html).toContain(
-      `Keep it on: 00:15 to about ${keepOnUntilUtc()} UTC`
+      `Daily TDH signing: 00:15 to about ${keepOnUntilUtc()} UTC`
     );
+  });
+
+  // The owner, 14 Nov: running 24/7 earns the most, and time off isn't
+  // penalized. The page no longer says a few minutes a day is enough.
+  it("says 24/7 earns the most and time off isn't penalized", async () => {
+    accessCookie = createAccessCookieValue(PASSWORD);
+    const html = await renderRoute();
+    expect(html).toContain("24/7 earns the most");
+    expect(html).not.toMatch(/minutes a day|Keep it on:/);
+    const offAtNight = QUESTIONS.find(
+      (q) => q.question === "Can I turn it off at night?"
+    );
+    expect(offAtNight?.answer).toContain("it just doesn't earn while it's off");
+    expect(offAtNight?.answer).toContain(
+      "drops off the chain's validator list at 22:00 UTC, and rejoins once it's back on and up to date"
+    );
+    expect(text).not.toMatch(/roster/i);
   });
 
   it("covers every part a holder asks about", () => {
