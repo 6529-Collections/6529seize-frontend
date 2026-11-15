@@ -910,7 +910,10 @@ describe("verifyWalletRequestFragment", () => {
   });
 
   it("calls a request with past times that the shell did not sign unsigned, not expired", async () => {
-    const past = envelope({ issuedAt: NOW - 600_000, expiresAt: NOW - 500_000 });
+    const past = envelope({
+      issuedAt: NOW - 600_000,
+      expiresAt: NOW - 500_000,
+    });
     await expect(
       verifyWalletRequestFragment(await fragmentFor(past, other), context)
     ).resolves.toEqual({ ok: false, problem: "unsigned" });
@@ -929,7 +932,10 @@ describe("verifyWalletRequestFragment", () => {
   it("checks origin and the request only after the signature", async () => {
     const otherOrigin = envelope({ origin: "http://localhost:6530" });
     await expect(
-      verifyWalletRequestFragment(await fragmentFor(otherOrigin, other), context)
+      verifyWalletRequestFragment(
+        await fragmentFor(otherOrigin, other),
+        context
+      )
     ).resolves.toEqual({ ok: false, problem: "unsigned" });
     await expect(
       verifyWalletRequestFragment(await fragmentFor(otherOrigin), context)
