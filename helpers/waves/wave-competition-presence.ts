@@ -9,6 +9,10 @@
  * This module has no React imports: API helpers that also run in server
  * components record into it. The hook lives in
  * `hooks/competitions/useWaveMayHaveCompetitionEntries.ts`.
+ *
+ * The flag is the same for every viewer, so it is not reset on profile switch.
+ * Entries are never removed: one boolean per wave seen this session, and each
+ * feed page re-asserts the current value.
  */
 const presenceByWaveId = new Map<string, boolean>();
 const listeners = new Set<() => void>();
@@ -43,7 +47,3 @@ export const recordWaveCompetitionPresence = (
 /** False only when the API has said this wave has no competition. */
 export const waveMayHaveCompetitionEntries = (waveId: string): boolean =>
   presenceByWaveId.get(waveId) !== false;
-
-export const resetWaveCompetitionPresenceForTests = (): void => {
-  presenceByWaveId.clear();
-};

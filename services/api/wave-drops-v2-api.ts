@@ -448,7 +448,7 @@ export async function fetchWaveDropsFeedV2({
     : await commonApiFetch<ApiWaveDropsFeedV2>(request);
 
   const wave = mapApiWaveOverviewToApiWaveMin(data.wave);
-  recordWaveCompetitionPresence(wave.id, wave.has_competition);
+  recordWaveCompetitionPresence(waveId, wave.has_competition);
   const drops = await hydrateDropsV2({
     drops: data.drops,
     headers,

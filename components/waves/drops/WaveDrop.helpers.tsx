@@ -655,11 +655,7 @@ const getContentBlock = ({
     active: boolean
   ) => void;
   readonly inlineAuthorOnDesktop: boolean;
-  /**
-   * The header has a slot beside the avatar (shown below `md`) and one above
-   * the content (shown from `md`). When the viewport width is known, only the
-   * visible slot mounts the header; while it is null both do and CSS hides one.
-   */
+  /** Known width: only the visible header slot mounts. Null: both, CSS hides one. */
   readonly isMdViewport: boolean | null;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia: boolean;

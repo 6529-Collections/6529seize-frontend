@@ -319,26 +319,29 @@ describe("WaveDrop", () => {
     }
   );
 
-  it("keeps the inline author header on desktop", () => {
-    mockIsMdViewport = true;
-    renderWithEditingDropProvider(
-      <WaveDrop
-        drop={drop}
-        previousDrop={null}
-        nextDrop={null}
-        showWaveInfo={false}
-        activeDrop={null}
-        showReplyAndQuote={false}
-        location={DropLocation.WAVE}
-        dropViewDropId={null}
-        onReply={jest.fn()}
-        onReplyClick={jest.fn()}
-        onQuoteClick={jest.fn()}
-        inlineAuthorOnDesktop
-      />
-    );
-    expect(screen.getAllByTestId("header")).toHaveLength(1);
-  });
+  it.each([true, false])(
+    "keeps the inline author header when the md viewport is %s",
+    (isMdViewport) => {
+      mockIsMdViewport = isMdViewport;
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+          inlineAuthorOnDesktop
+        />
+      );
+      expect(screen.getAllByTestId("header")).toHaveLength(1);
+    }
+  );
 
   it("shows actions on desktop", () => {
     setHoverSupport(true);
