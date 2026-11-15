@@ -17,6 +17,7 @@ import {
   parseWalletRequestFragment,
   parseWalletResult,
   readWalletMessageText,
+  verifyWalletRequestFragment,
   WALLET_REQUEST_TTL_MS,
   walletRequestCode,
   type WalletRequestEnvelope,
@@ -239,6 +240,85 @@ describe("parseWalletRequest: personal_sign", () => {
     }
     const big = `0x${"61".repeat(8 * 1024 + 1)}`;
     expect(problemOf(input("personal_sign", [big, ADDRESS]))).toBe("too-large");
+  });
+});
+
+describe("parseWalletRequest: context", () => {
+  const message = toHex("hi");
+  const context = JSON.stringify({ kind: "drop" });
+
+  it("keeps a personal_sign request's context text as sent", () => {
+    expect(
+      parse(input("personal_sign", [message, ADDRESS], { context }))
+    ).toEqual({
+      ok: true,
+      value: {
+        method: "personal_sign",
+        address: CHECKSUMMED,
+        chainId: 1,
+        message,
+        context,
+      },
+    });
+    // A key that is present but undefined is the same as no context.
+    const absent = parse(
+      input("personal_sign", [message, ADDRESS], { context: undefined })
+    );
+    expect(absent.ok && "context" in absent.value).toBe(false);
+  });
+
+  it("refuses context that is not text, is empty or is too large", () => {
+    for (const value of ["", 1, null, {}, ["x"]]) {
+      expect(
+        problemOf(
+          input("personal_sign", [message, ADDRESS], {
+            context: value as never,
+          })
+        )
+      ).toBe("invalid-params");
+    }
+    // The cap counts UTF-8 bytes: 16 KiB exactly fits, one more does not.
+    expect(
+      problemOf(
+        input("personal_sign", [message, ADDRESS], {
+          context: "é".repeat(8 * 1024),
+        })
+      )
+    ).toBeNull();
+    expect(
+      problemOf(
+        input("personal_sign", [message, ADDRESS], {
+          context: `${"é".repeat(8 * 1024)}a`,
+        })
+      )
+    ).toBe("too-large");
+  });
+
+  it("refuses context on typed data and any other extra key", () => {
+    const typed = input(
+      "eth_signTypedData_v4",
+      [ADDRESS, serializeTypedData(typedData)],
+      { context }
+    );
+    expect(problemOf(typed)).toBe("invalid-params");
+    expect(
+      problemOf({
+        ...input("personal_sign", [message, ADDRESS]),
+        label: "x",
+      } as WalletRequestInput)
+    ).toBe("invalid-params");
+  });
+
+  it("counts the context in the fragment size", () => {
+    const big = `0x${"61".repeat(8 * 1024)}`;
+    expect(problemOf(input("personal_sign", [big, ADDRESS]))).toBeNull();
+    expect(
+      problemOf(
+        input("personal_sign", [big, ADDRESS], {
+          context: "a".repeat(16 * 1024),
+        })
+      )
+    ).toBe("too-large");
   });
 });
 
@@ -789,6 +869,73 @@ describe("request envelope", () => {
       ok: false,
       problem: "wrong-address",
     });
+  });
+});
+
+describe("verifyWalletRequestFragment", () => {
+  const envelope = (
+    overrides: Partial<WalletRequestEnvelope> = {}
+  ): WalletRequestEnvelope => ({
+    v: 1,
+    id: ID,
+    scheme: "core6529",
+    origin: ORIGIN,
+    issuedAt: NOW,
+    expiresAt: NOW + WALLET_REQUEST_TTL_MS,
+    request: input("personal_sign", [toHex("hello"), ADDRESS]),
+    ...overrides,
+  });
+  const context = {
+    origin: ORIGIN,
+    now: NOW + 1000,
+    allowedChainIds: CHAINS,
+    signer: shell.address,
+  };
+  const fragmentFor = async (
+    value: WalletRequestEnvelope,
+    signer = shell
+  ): Promise<string> => {
+    const bytes = encodeWalletRequestEnvelope(value);
+    const signature = await signer.signMessage({ message: { raw: bytes } });
+    return buildWalletRequestFragment(bytes, signature) ?? "";
+  };
+
+  it("accepts a request the shell signed", async () => {
+    const verified = await verifyWalletRequestFragment(
+      await fragmentFor(envelope()),
+      context
+    );
+    expect(verified.ok && verified.value.envelope.id).toBe(ID);
+  });
+
+  it("calls a request with past times that the shell did not sign unsigned, not expired", async () => {
+    const past = envelope({ issuedAt: NOW - 600_000, expiresAt: NOW - 500_000 });
+    await expect(
+      verifyWalletRequestFragment(await fragmentFor(past, other), context)
+    ).resolves.toEqual({ ok: false, problem: "unsigned" });
+    await expect(
+      verifyWalletRequestFragment(await fragmentFor(past), {
+        ...context,
+        signer: null,
+      })
+    ).resolves.toEqual({ ok: false, problem: "unsigned" });
+    // Signed by the shell, the same times are simply expired.
+    await expect(
+      verifyWalletRequestFragment(await fragmentFor(past), context)
+    ).resolves.toEqual({ ok: false, problem: "expired" });
+  });
+
+  it("checks origin and the request only after the signature", async () => {
+    const otherOrigin = envelope({ origin: "http://localhost:6530" });
+    await expect(
+      verifyWalletRequestFragment(await fragmentFor(otherOrigin, other), context)
+    ).resolves.toEqual({ ok: false, problem: "unsigned" });
+    await expect(
+      verifyWalletRequestFragment(await fragmentFor(otherOrigin), context)
+    ).resolves.toEqual({ ok: false, problem: "wrong-origin" });
+    await expect(
+      verifyWalletRequestFragment("#w=abc&s=0x12", context)
+    ).resolves.toEqual({ ok: false, problem: "malformed" });
   });
 });
 

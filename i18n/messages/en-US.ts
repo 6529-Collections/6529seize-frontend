@@ -4085,6 +4085,27 @@ export const EN_US_ROOT_MESSAGES = {
     "This page will not ask your wallet to sign this request: it names a different app than 6529 Desktop.",
   "browserConnector.wallet.refusal.statement-mismatch":
     "This page will not ask your wallet to sign this request: its description does not match what it would sign.",
+  "browserConnector.wallet.refusal.context-mismatch":
+    "This page will not ask your wallet to sign this request: the content 6529 Desktop sent does not match what the message commits to. Nothing was signed.",
+  "browserConnector.wallet.fingerprint": "Content fingerprint: {fingerprint}",
+  "browserConnector.wallet.fingerprintOnly":
+    "6529 Desktop did not send the content, so this page cannot show it. The message below identifies the content only by its fingerprint. Check that 6529 Desktop shows the same fingerprint, and sign only if you started this action there.",
+  "browserConnector.wallet.contentVerified":
+    "This page recomputed the fingerprint from this content and it matches the message, so this is exactly what you sign.",
+  "browserConnector.wallet.content.wave": "In wave {waveId}",
+  "browserConnector.wallet.content.replyTo": "In reply to drop {dropId}",
+  "browserConnector.wallet.content.noText": "(no text)",
+  "browserConnector.wallet.content.quote": "Quotes drop {dropId}",
+  "browserConnector.wallet.content.media": "Media ({mimeType}): {url}",
+  "browserConnector.wallet.content.attachments": "Attachments: {count}",
+  "browserConnector.wallet.content.terms": "You also accept the wave's terms:",
+  "browserConnector.wallet.content.vote":
+    "Set your vote to {value} on entry {entryId}.",
+  "browserConnector.wallet.content.decision":
+    "Decision {competitionId} in wave {waveId}",
+  "browserConnector.wallet.content.committed":
+    "Everything this signature commits to",
+  "browserConnector.wallet.content.message": "The message your wallet signs",
   "browserConnector.wallet.tellApp": "Tell 6529 Desktop and close",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",

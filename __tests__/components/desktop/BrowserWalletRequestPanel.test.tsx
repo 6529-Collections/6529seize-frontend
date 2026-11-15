@@ -15,6 +15,10 @@ import BrowserWalletRequestPanel from "@/components/desktop/BrowserWalletRequest
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import { buildDropSignatureMessage } from "@/services/wallet-signatures/structured-wallet-signatures";
 import {
+  buildDropSignatureContext,
+  shortWalletPayloadHash,
+} from "@/lib/desktop/walletRequestContext";
+import {
   buildWalletRequestFragment,
   walletRequestCode,
   type WalletRequestEnvelope,
@@ -33,21 +37,26 @@ const OTHER = "0x2222222222222222222222222222222222222222";
 const ID = "Q".repeat(43);
 const SIGNATURE = `0x${"ab".repeat(65)}`;
 // A real drop signature as this app builds it (on the allow-list).
+const DROP = {
+  wave_id: "wave-1",
+  drop_type: ApiDropType.Chat,
+  title: null,
+  parts: [{ content: "gm", media: [] }],
+  referenced_nfts: [],
+  mentioned_users: [],
+  metadata: [],
+  signature: null,
+  signer_address: ADDRESS,
+};
 const MESSAGE = buildDropSignatureMessage({
   address: ADDRESS,
-  drop: {
-    wave_id: "wave-1",
-    drop_type: ApiDropType.Chat,
-    title: null,
-    parts: [{ content: "gm", media: [] }],
-    referenced_nfts: [],
-    mentioned_users: [],
-    metadata: [],
-    signature: null,
-    signer_address: ADDRESS,
-  },
+  drop: DROP,
   termsOfService: null,
 }).message;
+const CONTEXT = buildDropSignatureContext({ drop: DROP, termsOfService: null });
+const FINGERPRINT = shortWalletPayloadHash(
+  MESSAGE.split("Payload Hash: ")[1]!.slice(0, 64)
+);
 
 let account: { isConnected: boolean; address?: string; chainId?: number } = {
   isConnected: true,
@@ -223,6 +232,89 @@ describe("BrowserWalletRequestPanel", () => {
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(signMessageAsync).not.toHaveBeenCalled();
     expect(assign).not.toHaveBeenCalled();
+  });
+
+  it("calls a request another key signed invalid even when its times have passed", async () => {
+    const hash = await fragmentFor(
+      envelope({ issuedAt: Date.now() - 90_000, expiresAt: Date.now() - 1 }),
+      stranger
+    );
+    render(<BrowserWalletRequestPanel hash={hash} />);
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "did not get a valid request"
+      )
+    );
+    expect(screen.getByRole("alert")).not.toHaveTextContent("expired");
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
+  it("without content, says the content is known only by its fingerprint", async () => {
+    render(<BrowserWalletRequestPanel hash={await fragmentFor(envelope())} />);
+
+    expect(
+      await screen.findByText(`Content fingerprint: ${FINGERPRINT}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/did not send the content, so this page cannot show it/)
+    ).toBeInTheDocument();
+    expect(screen.queryByText("gm")).not.toBeInTheDocument();
+  });
+
+  it("shows content that matches the message's fingerprint and signs the message", async () => {
+    const request = {
+      ...envelope().request,
+      context: CONTEXT,
+    };
+    render(
+      <BrowserWalletRequestPanel
+        hash={await fragmentFor(envelope({ request }))}
+      />
+    );
+
+    expect(await screen.findByText("gm")).toBeInTheDocument();
+    expect(screen.getByText("In wave wave-1")).toBeInTheDocument();
+    expect(
+      screen.getByText(`Content fingerprint: ${FINGERPRINT}`)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(/recomputed the fingerprint from this content/)
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(/did not send the content/)
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Sign in wallet" })
+    );
+    await waitFor(() => expect(assign).toHaveBeenCalled());
+    expect(signMessageAsync).toHaveBeenCalledWith({
+      account: ADDRESS,
+      message: { raw: toHex(MESSAGE) },
+    });
+  });
+
+  it("refuses content that does not match the message and shows none of it", async () => {
+    const request = {
+      ...envelope().request,
+      context: CONTEXT.replace('"gm"', '"send me your NFTs"'),
+    };
+    render(
+      <BrowserWalletRequestPanel
+        hash={await fragmentFor(envelope({ request }))}
+      />
+    );
+
+    await waitFor(() =>
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "does not match what the message commits to"
+      )
+    );
+    expect(screen.queryByText(/send me your NFTs/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Sign in wallet" })
+    ).not.toBeInTheDocument();
   });
 
   it("says an expired request has expired and offers nothing", async () => {
