@@ -214,7 +214,7 @@ describe("waves without a competition", () => {
     jest.mocked(fetchDropCompetitionContext).mockReset();
   });
 
-  const renderDropIn = (waveId: string) => {
+  const renderDropIn = (waveId: string, inList = true) => {
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false } },
     });
@@ -224,7 +224,13 @@ describe("waves without a competition", () => {
     const waveDrop = dropIn(waveId);
     return {
       waveDrop,
-      ...renderHook(() => useCompetitionDrop(waveDrop), { wrapper }),
+      ...renderHook(
+        () =>
+          useCompetitionDrop(waveDrop, {
+            skipInWavesWithoutCompetition: inList,
+          }),
+        { wrapper }
+      ),
     };
   };
 
@@ -256,6 +262,15 @@ describe("waves without a competition", () => {
     const { result } = renderDropIn("wave-gains");
     expect(fetchDropCompetitionContext).not.toHaveBeenCalled();
     act(() => recordWaveCompetitionPresence("wave-gains", true));
+    await waitFor(() => expect(result.current.rating).toBe(120));
+  });
+
+  it("always looks up a drop outside a list", async () => {
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockImplementation((waveId) => Promise.resolve(contextIn(waveId)));
+    recordWaveCompetitionPresence("wave-single", false);
+    const { result } = renderDropIn("wave-single", false);
     await waitFor(() => expect(result.current.rating).toBe(120));
   });
 

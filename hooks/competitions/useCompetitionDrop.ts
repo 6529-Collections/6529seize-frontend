@@ -84,10 +84,22 @@ export function applyCompetitionDropSummary(
   return result;
 }
 
-export function useCompetitionDrop(drop: ExtendedDrop) {
+export function useCompetitionDrop(
+  drop: ExtendedDrop,
+  {
+    skipInWavesWithoutCompetition = false,
+  }: {
+    /**
+     * Lists mount one of these per row; in a wave known to have no competition
+     * they skip the lookup. Single-drop views always look up: it is one request
+     * and they show the voting controls.
+     */
+    readonly skipInWavesWithoutCompetition?: boolean;
+  } = {}
+) {
   const viewer = useCompetitionViewer();
-  // A wave with no competition has no entries, so its drops need no lookup.
-  const mayBeEntry = useWaveMayHaveCompetitionEntries(drop.wave.id);
+  const waveMayHaveEntries = useWaveMayHaveCompetitionEntries(drop.wave.id);
+  const mayBeEntry = !skipInWavesWithoutCompetition || waveMayHaveEntries;
   const context = useQuery({
     queryKey: [
       QueryKey.COMPETITION_DROP_CONTEXT,
