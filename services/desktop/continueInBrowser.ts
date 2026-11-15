@@ -2,15 +2,31 @@ import { publicEnv } from "@/config/env";
 import { getDesktopShellApi } from "@/helpers/desktop-shell";
 
 /**
- * The page the user is on, on the website: the same path, query and
- * fragment on 6529.io (or the build's own site), for actions 6529 Desktop
- * does not sign itself.
+ * Pages whose query and fragment are the task itself and carry nothing
+ * secret (the validator session draft is meant to be shared). Elsewhere
+ * only the path is carried over, so a transient token in the app's URL
+ * never reaches the system browser.
  */
+const PAGES_KEEPING_QUERY_AND_FRAGMENT = new Set(["/validator/authorize"]);
+
+/** The website's host for this build, e.g. `6529.io`, for copy. */
+export function getWebsiteHost(): string {
+  try {
+    return new URL(publicEnv.BASE_ENDPOINT).host;
+  } catch {
+    return "6529.io";
+  }
+}
+
+/** The current page on the website (same path; see above for the rest). */
 function getWebsiteUrlForCurrentPage(): string | null {
   try {
     const site = new URL(publicEnv.BASE_ENDPOINT);
     const { pathname, search, hash } = globalThis.location;
-    return new URL(`${pathname}${search}${hash}`, site.origin).href;
+    const rest = PAGES_KEEPING_QUERY_AND_FRAGMENT.has(pathname)
+      ? `${search}${hash}`
+      : "";
+    return new URL(`${pathname}${rest}`, site.origin).href;
   } catch {
     return null;
   }

@@ -4,7 +4,10 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { continueInBrowser } from "@/services/desktop/continueInBrowser";
+import {
+  continueInBrowser,
+  getWebsiteHost,
+} from "@/services/desktop/continueInBrowser";
 import {
   cancelDesktopWalletRequest,
   dismissDesktopWalletRequestStatus,
@@ -114,7 +117,11 @@ export default function DesktopWalletRequestDialog() {
           role="alert"
           className="tw-text-sm tw-text-iron-200 empty:tw-hidden"
         >
-          {finished ? t(locale, FINISHED_MESSAGES[status.kind]) : null}
+          {finished
+            ? t(locale, FINISHED_MESSAGES[status.kind], {
+                site: getWebsiteHost(),
+              })
+            : null}
         </div>
         <output
           aria-live="polite"
@@ -137,7 +144,7 @@ export default function DesktopWalletRequestDialog() {
                 className={SECONDARY_CLASS}
                 onClick={cancelDesktopWalletRequest}
               >
-                {t(locale, "desktopConnect.cancel")}
+                {t(locale, "desktopWalletRequest.cancel")}
               </button>
             </div>
           </>

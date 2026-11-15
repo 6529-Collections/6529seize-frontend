@@ -3982,23 +3982,24 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopConnect.cancel": "Cancel",
   "desktopConnect.status.walletConnectFailed":
     "Could not open WalletConnect. Try again.",
-  "desktopWalletRequest.title": "Continue in your browser",
+  "desktopWalletRequest.title": "Signature request",
   "desktopWalletRequest.waiting":
     "Your browser opened a page to sign with your wallet. Finish there; this waits for two minutes.",
   "desktopWalletRequest.code":
     "Request code {code}. The browser page shows the same code.",
   "desktopWalletRequest.reopen": "Open the page again",
   "desktopWalletRequest.close": "Close",
+  "desktopWalletRequest.cancel": "Cancel",
   "desktopWalletRequest.cancelled": "The signature request was cancelled.",
   "desktopWalletRequest.expired": "The signature request timed out. Try again.",
   "desktopWalletRequest.refused":
-    "The browser page would not sign this request. Continue on 6529.io in your browser instead.",
+    "The browser page would not sign this request. Continue on {site} in your browser instead.",
   "desktopWalletRequest.failed":
     "The signature request did not work. Try again.",
   "desktopWalletRequest.busy":
     "Another signature request is still open. Finish or cancel it first.",
   "desktopWalletRequest.unverified":
-    "The signature could not be checked against your account. Smart-contract wallets such as Safe cannot sign here; continue on 6529.io in your browser instead.",
+    "The signature could not be checked against your account. Smart-contract wallets such as Safe cannot sign here; continue on {site} in your browser instead.",
   "desktopWalletRequest.reopenWait": "You can open it again in a few seconds.",
   "desktopWalletRequest.continueInBrowser": "Continue in your browser",
   "browserConnector.title": "Sign in to 6529 Desktop",

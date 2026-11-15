@@ -11,7 +11,12 @@ import {
   UserRejectedRequestError,
 } from "viem";
 import { ChainNotConfiguredError, createConnector } from "wagmi";
-import type { WalletBridgeResponse } from "@/lib/desktop/wallet-forwarding";
+import {
+  parseWalletRequest,
+  type WalletBridgeResponse,
+  type WalletRequest,
+  type WalletRequestInput,
+} from "@/lib/desktop/wallet-forwarding";
 
 /** wagmi connector id and type for 6529 Desktop wallet forwarding. */
 export const DESKTOP_BROWSER_WALLET_CONNECTOR_ID = "desktopBrowserWallet";
@@ -23,18 +28,11 @@ interface DesktopBrowserWalletConnectorOptions {
    * Whether the browser page would sign this request (the same allow-list);
    * false refuses it in the app, before the browser opens.
    */
-  readonly canForward: (request: ForwardedRequest) => boolean;
+  readonly canForward: (request: WalletRequest) => boolean;
   /** Opens the request in the browser through the shell and waits. */
   readonly runRequest: (
-    request: ForwardedRequest
+    request: WalletRequestInput
   ) => Promise<WalletBridgeResponse>;
-}
-
-interface ForwardedRequest {
-  readonly method: string;
-  readonly params: unknown;
-  readonly address: string;
-  readonly chainId: number;
 }
 
 interface ProviderRequest {
@@ -69,29 +67,45 @@ function toProviderError(code: string): Error {
 const sameAddress = (left: string, right: string) =>
   left.toLowerCase() === right.toLowerCase();
 
-/** The wallet's signature must be the bound account's, for this request. */
+/**
+ * The request in the form the shell receives, rebuilt from the validated
+ * request alone: `personal_sign` as `[message, address]`, typed data as
+ * `[address, json]` with the exact JSON that was validated.
+ */
+function toShellInput(
+  request: WalletRequest,
+  typedDataJson: string | null
+): WalletRequestInput {
+  const { method, address, chainId } = request;
+  const params =
+    request.method === "personal_sign"
+      ? [request.message, address]
+      : [address, typedDataJson];
+  return { method, params, address, chainId };
+}
+
+/**
+ * The signer of `signature` over exactly the validated request: the
+ * message bytes, or the EIP-712 digest of the validated typed data.
+ */
 async function recoverSigner(
-  method: string,
-  params: readonly unknown[],
+  request: WalletRequest,
   signature: Hex
 ): Promise<Address | null> {
   try {
-    if (method === "personal_sign") {
+    if (request.method === "personal_sign") {
       return await recoverMessageAddress({
-        message: { raw: params[0] as Hex },
+        message: { raw: request.message },
         signature,
       });
     }
-    const typedData = JSON.parse(params[1] as string) as {
-      domain: Record<string, unknown>;
-      types: Record<string, unknown>;
-      primaryType: string;
-      message: Record<string, unknown>;
-    };
-    const { EIP712Domain: _domainType, ...types } = typedData.types;
+    const { domain, primaryType, message } = request.typedData;
+    const { EIP712Domain: _domainType, ...types } = request.typedData.types;
     return await recoverTypedDataAddress({
-      ...typedData,
+      domain,
       types,
+      primaryType,
+      message,
       signature,
     } as Parameters<typeof recoverTypedDataAddress>[0]);
   } catch {
@@ -120,16 +134,32 @@ export function desktopBrowserWalletConnector(
         : null;
     };
 
+    /**
+     * Validates the EIP-1193 request once (method, exact params, signer =
+     * the bound address, chain, size) into a typed request; that object is
+     * what is sent to the shell and what the signature is checked against.
+     * Anything else (swapped or extra params, another signer, a typed-data
+     * object instead of JSON text) is refused, never guessed.
+     */
     const forward = async (method: string, params: unknown): Promise<Hex> => {
       const address = boundAddress();
-      if (!address || !Array.isArray(params)) {
-        throw toProviderError(address ? "invalid" : "not-signed-in");
-      }
-      const request = { method, params, address, chainId };
+      if (!address) throw toProviderError("not-signed-in");
+      const parsed = parseWalletRequest(
+        { method, params, address, chainId },
+        config.chains.map((chain) => chain.id)
+      );
+      if (!parsed.ok) throw toProviderError("invalid");
+      const request = parsed.value;
       if (!options.canForward(request)) throw toProviderError("refused");
-      const response = await options.runRequest(request);
+      const typedDataJson =
+        request.method === "eth_signTypedData_v4"
+          ? ((params as readonly unknown[])[1] as string)
+          : null;
+      const response = await options.runRequest(
+        toShellInput(request, typedDataJson)
+      );
       if (!response.ok) throw toProviderError(response.code);
-      const signer = await recoverSigner(method, params, response.value);
+      const signer = await recoverSigner(request, response.value);
       if (!signer || !sameAddress(signer, address)) {
         throw toProviderError("failed");
       }
@@ -180,8 +210,8 @@ export function desktopBrowserWalletConnector(
             ? [{ address, capabilities: {} }]
             : [address];
           return Promise.resolve({ accounts, chainId } as never);
-        } catch (failure) {
-          return Promise.reject(failure as Error);
+        } catch (error_) {
+          return Promise.reject(error_ as Error);
         }
       },
       // Nothing to release: the shell keeps no connection.
@@ -196,8 +226,8 @@ export function desktopBrowserWalletConnector(
       switchChain({ chainId: next }) {
         try {
           return Promise.resolve(selectChain(next));
-        } catch (failure) {
-          return Promise.reject(failure as Error);
+        } catch (error_) {
+          return Promise.reject(error_ as Error);
         }
       },
       onAccountsChanged(accounts) {

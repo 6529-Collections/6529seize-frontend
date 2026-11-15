@@ -190,9 +190,12 @@ export function watchDesktopWalletStatus(): void {
     .catch(() => undefined);
 }
 
-const FAILURE_STATUS: Partial<
-  Record<string, DesktopWalletRequestStatus["kind"]>
-> = {
+type FinishedKind = Exclude<
+  DesktopWalletRequestStatus["kind"],
+  "idle" | "waiting"
+>;
+
+const FAILURE_STATUS: Partial<Record<string, FinishedKind>> = {
   cancelled: "cancelled",
   expired: "expired",
   busy: "busy",
@@ -208,8 +211,7 @@ function finish(response: WalletBridgeResponse): WalletBridgeResponse {
   } else if (response.reason === "unverified-signature") {
     setStatus({ kind: "unverified" });
   } else {
-    const kind = FAILURE_STATUS[response.code] ?? "failed";
-    setStatus({ kind } as DesktopWalletRequestStatus);
+    setStatus({ kind: FAILURE_STATUS[response.code] ?? "failed" });
   }
   return response;
 }

@@ -38,6 +38,8 @@ export default function DesktopBrowserWalletBridge() {
   const connectedAddress = account.address?.toLowerCase() ?? null;
   const mayForward = isBrowserWalletProfile(active);
 
+  const connecting = useRef(false);
+
   // A request belongs to the profile that started it.
   const requestProfile = useRef(active);
   useEffect(() => {
@@ -64,8 +66,19 @@ export default function DesktopBrowserWalletBridge() {
       disconnectAsync({ connector }).catch(() => undefined);
       return;
     }
-    if (!isForwarding && mayForward && account.status === "disconnected") {
-      connectAsync({ connector }).catch(() => undefined);
+    if (
+      !isForwarding &&
+      mayForward &&
+      account.status === "disconnected" &&
+      !connecting.current
+    ) {
+      // One connect at a time: wagmi reports "disconnected" until it lands.
+      connecting.current = true;
+      connectAsync({ connector })
+        .catch(() => undefined)
+        .finally(() => {
+          connecting.current = false;
+        });
     }
   }, [
     account.status,

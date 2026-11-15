@@ -27,6 +27,7 @@ jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
 }));
 jest.mock("@/services/desktop/continueInBrowser", () => ({
   continueInBrowser: () => continueInBrowser(),
+  getWebsiteHost: () => "staging.6529.io",
 }));
 jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
   __esModule: true,
@@ -69,7 +70,7 @@ describe("DesktopWalletRequestDialog", () => {
     setStatus({ kind: "waiting", requestCode: "ABC-123", expiresAt: 1 });
 
     expect(
-      screen.getByRole("dialog", { name: "Continue in your browser" })
+      screen.getByRole("dialog", { name: "Signature request" })
     ).toBeInTheDocument();
     expect(screen.getByText(/Request code ABC-123/)).toBeInTheDocument();
     expect(screen.getByRole("status")).toHaveTextContent("Finish there");
@@ -113,8 +114,8 @@ describe("DesktopWalletRequestDialog", () => {
   });
 
   it.each([
-    ["refused", /would not sign this request/, true],
-    ["unverified", /Smart-contract wallets/, true],
+    ["refused", /would not sign this request. Continue on staging\.6529\.io/, true],
+    ["unverified", /Smart-contract wallets .* continue on staging\.6529\.io/, true],
     ["busy", /Another signature request/, false],
     ["expired", /timed out/, false],
     ["cancelled", /was cancelled/, false],

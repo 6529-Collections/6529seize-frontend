@@ -1,5 +1,6 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import { toHex } from "viem";
+import { parseWalletRequest } from "@/lib/desktop/wallet-forwarding";
 import { useDesktopBrowserWalletConnector } from "@/components/providers/useDesktopBrowserWalletConnector";
 import { isDesktopShell } from "@/helpers/desktop-shell";
 import {
@@ -102,22 +103,17 @@ describe("useDesktopBrowserWalletConnector", () => {
     const { canForward } = jest.mocked(desktopBrowserWalletConnector).mock
       .calls[0]![0];
 
-    expect(
-      canForward({
+    const freeText = parseWalletRequest(
+      {
         method: "personal_sign",
         params: [toHex("free text"), ADDRESS],
         address: ADDRESS,
         chainId: 1,
-      })
-    ).toBe(false);
+      },
+      [1]
+    );
+    if (!freeText.ok) throw new Error(freeText.problem);
+    expect(canForward(freeText.value)).toBe(false);
     expect(showDesktopWalletRefusal).toHaveBeenCalledTimes(1);
-    expect(
-      canForward({
-        method: "eth_sendTransaction",
-        params: [{}],
-        address: ADDRESS,
-        chainId: 1,
-      })
-    ).toBe(false);
   });
 });

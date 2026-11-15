@@ -146,6 +146,55 @@ describe("desktopBrowserWalletConnector", () => {
     ).rejects.toMatchObject({ code: -32603 });
   });
 
+  it.each([
+    ["address-first personal_sign", (m: string) => [wallet.address, m]],
+    ["an extra parameter", (m: string) => [m, wallet.address, "extra"]],
+    ["another signer", (m: string) => [m, stranger.address]],
+    ["a non-hex message", () => ["hello", wallet.address]],
+    ["a non-string message", () => [42, wallet.address]],
+    ["no parameters", () => undefined],
+  ])("refuses %s without asking the shell", async (_label, makeParams) => {
+    const { connector, runRequest } = setup();
+    await expect(
+      request(connector, "personal_sign", makeParams(toHex("6529 Action")))
+    ).rejects.toMatchObject({ code: 4200 });
+    expect(runRequest).not.toHaveBeenCalled();
+  });
+
+  it("refuses typed data passed as an object, another signer or swapped", async () => {
+    const { connector, runRequest } = setup();
+    const json = serializeTypedData(typedData as never);
+    for (const params of [
+      [wallet.address, typedData],
+      [stranger.address, json],
+      [json, wallet.address],
+      [wallet.address, json, "extra"],
+    ]) {
+      await expect(
+        request(connector, "eth_signTypedData_v4", params)
+      ).rejects.toMatchObject({ code: 4200 });
+    }
+    expect(runRequest).not.toHaveBeenCalled();
+  });
+
+  it("sends the shell exactly the validated request", async () => {
+    const { connector, runRequest } = setup();
+    const json = serializeTypedData(typedData as never);
+    runRequest.mockResolvedValue({ ok: false, code: "rejected" });
+    await expect(
+      request(connector, "eth_signTypedData_v4", [
+        wallet.address.toLowerCase(),
+        json,
+      ])
+    ).rejects.toMatchObject({ code: 4001 });
+    expect(runRequest).toHaveBeenCalledWith({
+      method: "eth_signTypedData_v4",
+      params: [wallet.address, json],
+      address: wallet.address,
+      chainId: 1,
+    });
+  });
+
   it("refuses in the app what the browser page would refuse", async () => {
     const { connector, runRequest, canForward } = setup();
     canForward.mockReturnValue(false);

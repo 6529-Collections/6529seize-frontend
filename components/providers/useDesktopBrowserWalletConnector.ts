@@ -24,7 +24,7 @@ const loadWalletAddressReader = () =>
   );
 const loadPrecheck = () =>
   import("@/services/desktop/walletForwardingPrecheck").then(
-    (module) => module.makeWalletForwardingPrecheck
+    (module) => module.walletForwardingPrecheck
   );
 
 /**
@@ -40,7 +40,7 @@ export function useDesktopBrowserWalletConnector(
     if (currentAdapter === null || !isDesktopShell()) return undefined;
     let cancelled = false;
     const install = async () => {
-      const [methods, , getWalletAddress, makePrecheck] = await Promise.all([
+      const [methods, , getWalletAddress, precheck] = await Promise.all([
         getDesktopWalletMethods(),
         loadBrowserWalletProfiles(),
         loadWalletAddressReader(),
@@ -63,7 +63,7 @@ export function useDesktopBrowserWalletConnector(
             const address = getWalletAddress();
             return isBrowserWalletProfile(address) ? address : null;
           },
-          canForward: makePrecheck(wagmiConfig.chains.map((chain) => chain.id)),
+          canForward: precheck,
           runRequest: runDesktopWalletRequest,
         })
       );
@@ -73,8 +73,8 @@ export function useDesktopBrowserWalletConnector(
       ]);
       watchDesktopWalletStatus();
     };
-    install().catch((failure: unknown) => {
-      logErrorSecurely("[WagmiSetup] Wallet forwarding unavailable", failure);
+    install().catch((error_: unknown) => {
+      logErrorSecurely("[WagmiSetup] Wallet forwarding unavailable", error_);
     });
     return () => {
       cancelled = true;
