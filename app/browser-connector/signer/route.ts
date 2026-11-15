@@ -14,6 +14,8 @@ const NO_STORE = { "Cache-Control": "no-store" };
  */
 export function GET() {
   const signer = getDesktopWalletRequestSigner();
+  // Read only by the browser connector page's code, never shown to users,
+  // so the body is a fixed machine-readable word, not translated copy.
   if (signer === null) {
     return NextResponse.json(
       { error: "Not found" },

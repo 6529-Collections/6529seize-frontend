@@ -4063,14 +4063,12 @@ export const EN_US_ROOT_MESSAGES = {
     "This page did not get a valid request from 6529 Desktop, so there is nothing to sign. Start again from 6529 Desktop.",
   "browserConnector.wallet.problem.expired":
     "This request has expired. Nothing was signed. Start again from 6529 Desktop.",
-  "browserConnector.wallet.refused":
-    "This page cannot show what this request would sign, so it will not ask your wallet to sign it.",
   "browserConnector.wallet.refusal.unreadable-message":
-    "The message is not readable text.",
+    "This page will not ask your wallet to sign this request: the message is not readable text.",
   "browserConnector.wallet.refusal.sign-in-message":
-    "It is a sign-in message. Sign in from 6529 Desktop instead.",
+    "This page will not ask your wallet to sign this request: it is a sign-in message. Sign in from 6529 Desktop instead.",
   "browserConnector.wallet.refusal.unknown-message":
-    "It is not a message 6529 Desktop signs from here. Continue on 6529.io in your browser instead.",
+    "This page will not ask your wallet to sign this request: it is not a message 6529 Desktop signs from here. Continue on {site} in your browser instead.",
   "browserConnector.wallet.format.drop":
     "Create a 6529 drop. This also covers accepting a wave's terms.",
   "browserConnector.wallet.format.decisionVote":
@@ -4078,13 +4076,13 @@ export const EN_US_ROOT_MESSAGES = {
   "browserConnector.wallet.format.decisionEntry":
     "Submit an entry to a 6529 decision.",
   "browserConnector.wallet.refusal.unknown-typed-data":
-    "It is a kind of request 6529 Desktop does not send from here. Continue in your browser on 6529.io instead.",
+    "This page will not ask your wallet to sign this request: it is a kind of request 6529 Desktop does not send from here. Continue on {site} in your browser instead.",
   "browserConnector.wallet.refusal.wrong-wallet":
-    "It names a different wallet than the one asked to sign.",
+    "This page will not ask your wallet to sign this request: it names a different wallet than the one asked to sign.",
   "browserConnector.wallet.refusal.wrong-origin":
-    "It names a different app than 6529 Desktop.",
+    "This page will not ask your wallet to sign this request: it names a different app than 6529 Desktop.",
   "browserConnector.wallet.refusal.statement-mismatch":
-    "Its description does not match what it would sign.",
+    "This page will not ask your wallet to sign this request: its description does not match what it would sign.",
   "browserConnector.wallet.tellApp": "Tell 6529 Desktop and close",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
