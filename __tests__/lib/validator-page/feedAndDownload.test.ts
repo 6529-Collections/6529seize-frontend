@@ -1,6 +1,6 @@
 /** @jest-environment node */
 import type { BucketObject } from "@/lib/validator-page/releasesBucket";
-import { TEST_FEED } from "./fixtures";
+import { feedEntry, TEST_FEED } from "./fixtures";
 import { signFeed } from "./feedSigning";
 
 const mockRead = jest.fn<Promise<BucketObject>, [string]>();
@@ -238,5 +238,101 @@ describe("release feed endpoints and downloads", () => {
       });
     }
     expect(mockPresign).not.toHaveBeenCalled();
+  });
+
+  // The owner put rc.15 back for download (2026-11-14): its files, by its
+  // own version only. Other older releases stay as they were.
+  describe("rc.15, put back for download", () => {
+    const MSI = "6529-Validator-0.1.0-x64.msi";
+    const feedWith = (extra: Record<string, unknown> = {}) =>
+      new TextEncoder().encode(
+        JSON.stringify({
+          format: 1,
+          sequence: 17,
+          published: "2026-11-14T15:49:48Z",
+          ...extra,
+          releases: [
+            feedEntry("0.1.0-rc.17", "test", "2026-11-14"),
+            feedEntry("0.1.0-rc.16", "test", "2026-11-13"),
+            feedEntry("0.1.0-rc.15", "test", "2026-11-11"),
+            feedEntry("0.1.0-rc.14", "test", "2026-11-10"),
+          ],
+        })
+      );
+
+    it("hands out rc.15's listed files under its own version", async () => {
+      storeHasSigned(feedWith());
+      expect(await resolveReleaseDownload(["0.1.0-rc.15", MSI])).toEqual({
+        state: "found",
+        url: expect.stringContaining(`releases/0.1.0-rc.15/${MSI}`),
+      });
+      expect(mockPresign).toHaveBeenLastCalledWith(
+        `releases/0.1.0-rc.15/${MSI}`,
+        expect.objectContaining({
+          expiresInSeconds: 300,
+          responseParams: {
+            "response-content-disposition": `attachment; filename="${MSI}"`,
+          },
+        })
+      );
+      expect(
+        (await resolveReleaseDownload(["0.1.0-rc.15", "SHA256SUMS"])).state
+      ).toBe("found");
+    });
+
+    it("keeps the newest release's links and every other older release as they were", async () => {
+      storeHasSigned(feedWith());
+      await resolveReleaseDownload([MSI]);
+      expect(mockPresign).toHaveBeenLastCalledWith(
+        `releases/0.1.0-rc.17/${MSI}`,
+        expect.anything()
+      );
+      await resolveReleaseDownload(["0.1.0-rc.17", MSI]);
+      expect(mockPresign).toHaveBeenLastCalledWith(
+        `releases/0.1.0-rc.17/${MSI}`,
+        expect.anything()
+      );
+
+      mockPresign.mockClear();
+      for (const path of [
+        ["0.1.0-rc.16", MSI],
+        ["0.1.0-rc.14", MSI],
+        ["0.1.0-rc.15", "unknown.bin"],
+        ["0.1.0-rc.15"],
+        ["0.1.0-rc.15", "..", MSI],
+      ]) {
+        expect(await resolveReleaseDownload(path)).toEqual({
+          state: "not-found",
+        });
+      }
+      expect(mockPresign).not.toHaveBeenCalled();
+    });
+
+    it("hands out nothing of rc.15 when the feed lists it as unsafe", async () => {
+      storeHasSigned(
+        feedWith({
+          unsafe_versions: [{ version: "0.1.0-rc.15", reason: "Made up." }],
+        })
+      );
+      expect(await resolveReleaseDownload(["0.1.0-rc.15", MSI])).toEqual({
+        state: "not-found",
+      });
+      expect(mockPresign).not.toHaveBeenCalled();
+    });
+
+    it("hands out nothing of rc.15 when the feed no longer lists it", async () => {
+      storeHasSigned(
+        new TextEncoder().encode(
+          JSON.stringify({
+            format: 1,
+            releases: [feedEntry("0.1.0-rc.17", "test", "2026-11-14")],
+          })
+        )
+      );
+      expect(await resolveReleaseDownload(["0.1.0-rc.15", MSI])).toEqual({
+        state: "not-found",
+      });
+      expect(mockPresign).not.toHaveBeenCalled();
+    });
   });
 });
