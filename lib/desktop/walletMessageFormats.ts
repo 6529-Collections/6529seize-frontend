@@ -62,8 +62,12 @@ function readLines(text: string): string[] | null {
   return values;
 }
 
-const isTime = (value: string): boolean =>
-  ISO_TIME.test(value) && new Date(value).toISOString() === value;
+/** An exact UTC timestamp that names a real calendar date and time. */
+function isTime(value: string): boolean {
+  if (!ISO_TIME.test(value)) return false;
+  const date = new Date(value);
+  return Number.isFinite(date.getTime()) && date.toISOString() === value;
+}
 
 /**
  * The structured "6529 Action" drop signature (signed drops, wave terms,
@@ -178,6 +182,11 @@ export function readWalletMessageFormat(
   address: string,
   pageOrigin: string
 ): WalletMessageFormat | null {
-  if (isDropSignature(text, address, pageOrigin)) return "drop";
-  return readDecisionSignature(text, address);
+  try {
+    if (isDropSignature(text, address, pageOrigin)) return "drop";
+    return readDecisionSignature(text, address);
+  } catch {
+    // Untrusted text never throws out of here: it is simply not allowed.
+    return null;
+  }
 }

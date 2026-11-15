@@ -97,6 +97,20 @@ export default function DesktopWalletRequestDialog() {
   );
   const waiting = status.kind === "waiting";
   const finished = status.kind !== "idle" && !waiting;
+  // "Continue in your browser" failed for this outcome (cleared on change).
+  const [openFailedFor, setOpenFailedFor] = useState<typeof status | null>(
+    null
+  );
+  const openFailed = openFailedFor === status;
+  const setOpenFailed = (failed: boolean) =>
+    setOpenFailedFor(failed ? status : null);
+  let finishedMessage: string | null = null;
+  if (finished) {
+    const key = openFailed
+      ? "desktopWalletRequest.openFailed"
+      : FINISHED_MESSAGES[status.kind];
+    finishedMessage = t(locale, key, { site: getWebsiteHost() });
+  }
 
   const close = () => {
     if (waiting) {
@@ -117,11 +131,7 @@ export default function DesktopWalletRequestDialog() {
           role="alert"
           className="tw-text-sm tw-text-iron-200 empty:tw-hidden"
         >
-          {finished
-            ? t(locale, FINISHED_MESSAGES[status.kind], {
-                site: getWebsiteHost(),
-              })
-            : null}
+          {finishedMessage}
         </div>
         <output
           aria-live="polite"
@@ -156,8 +166,13 @@ export default function DesktopWalletRequestDialog() {
                 type="button"
                 className={PRIMARY_CLASS}
                 onClick={() => {
-                  continueInBrowser();
-                  dismissDesktopWalletRequestStatus();
+                  // Stay open with the reason if the browser did not open.
+                  if (continueInBrowser()) {
+                    setOpenFailed(false);
+                    dismissDesktopWalletRequestStatus();
+                  } else {
+                    setOpenFailed(true);
+                  }
                 }}
               >
                 {t(locale, "desktopWalletRequest.continueInBrowser")}

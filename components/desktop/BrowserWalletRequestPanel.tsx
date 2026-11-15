@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Hex } from "viem";
 import {
   useAccount,
@@ -399,8 +399,16 @@ export default function BrowserWalletRequestPanel({
       : null;
   const expired = useExpired(fragment?.envelope.expiresAt ?? null);
 
+  // The page answers at most once. Each sign attempt has an id; declining
+  // (or any answer) ends the request, so a wallet that resolves afterwards
+  // is ignored.
+  const answered = useRef(false);
+  const attempt = useRef(0);
+
   const returnToApp = (result: WalletResult, declined: boolean) => {
-    if (!fragment) return;
+    if (!fragment || answered.current) return;
+    answered.current = true;
+    attempt.current += 1;
     const deepLink = buildWalletResultDeepLink(
       fragment.envelope.scheme,
       result
@@ -415,7 +423,7 @@ export default function BrowserWalletRequestPanel({
   };
 
   const sign = async () => {
-    if (verified.kind !== "ready" || expired) return;
+    if (verified.kind !== "ready" || expired || answered.current) return;
     const { request, envelope } = verified.fragment;
     // The gate shows the button only for this account; check again here.
     if (
@@ -424,6 +432,14 @@ export default function BrowserWalletRequestPanel({
     ) {
       return;
     }
+    // Never open a wallet prompt for a request that has already run out.
+    if (envelope.expiresAt <= Date.now()) {
+      setStep({ kind: "idle" });
+      return;
+    }
+    attempt.current += 1;
+    const current = attempt.current;
+    const stillCurrent = () => current === attempt.current && !answered.current;
     setStep({ kind: "signing" });
     try {
       const signature = await signRequest(
@@ -431,6 +447,7 @@ export default function BrowserWalletRequestPanel({
         signMessageAsync,
         signTypedDataAsync
       );
+      if (!stillCurrent()) return;
       // A request that ran out while the wallet waited is refused by the app.
       if (envelope.expiresAt <= Date.now()) {
         setStep({ kind: "idle" });
@@ -438,6 +455,7 @@ export default function BrowserWalletRequestPanel({
       }
       returnToApp({ v: 1, id: envelope.id, ok: true, value: signature }, false);
     } catch (error) {
+      if (!stillCurrent()) return;
       if (isUserRejectedSigningError(error)) {
         decline("rejected");
         return;

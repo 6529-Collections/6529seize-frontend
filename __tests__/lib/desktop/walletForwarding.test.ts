@@ -133,6 +133,75 @@ describe("parseWalletRequest: common rules", () => {
   });
 });
 
+describe("parseWalletRequest: never throws", () => {
+  it("refuses arbitrary and hostile input", () => {
+    let seed = 6529;
+    const next = () => {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      return seed;
+    };
+    const atoms: unknown[] = [
+      undefined,
+      null,
+      true,
+      0,
+      -1,
+      Number.NaN,
+      1e308,
+      10n,
+      "",
+      "0x",
+      "0xzz",
+      ADDRESS,
+      "__proto__",
+      "constructor",
+      "toString",
+      [],
+      {},
+      "personal_sign",
+      "eth_signTypedData_v4",
+      "{",
+      "[]",
+    ];
+    const pick = () => atoms[next() % atoms.length];
+    const hostile = new Proxy([], {
+      get() {
+        throw new Error("getter");
+      },
+    });
+    const inputs: unknown[] = [
+      null,
+      "x",
+      hostile,
+      {
+        method: "personal_sign",
+        params: hostile,
+        address: ADDRESS,
+        chainId: 1,
+      },
+      {
+        get method() {
+          throw new Error("getter");
+        },
+      },
+      ...Array.from({ length: 300 }, () => ({
+        method: pick(),
+        params: [pick(), pick(), next() % 2 ? pick() : undefined],
+        address: pick(),
+        chainId: pick(),
+      })),
+    ];
+    for (const value of inputs) {
+      expect(() =>
+        parseWalletRequest(value as WalletRequestInput, CHAINS)
+      ).not.toThrow();
+      expect(parseWalletRequest(value as WalletRequestInput, CHAINS).ok).toBe(
+        false
+      );
+    }
+  });
+});
+
 describe("parseWalletRequest: personal_sign", () => {
   it("keeps the exact bytes and checksums the signer", () => {
     const message = toHex("Vote for entry 7");
