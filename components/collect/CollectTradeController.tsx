@@ -52,6 +52,7 @@ import CollectTransactionRecovery from "./CollectTransactionRecovery";
 import { useMarketExecution } from "./useMarketExecution";
 import ContinueInBrowserNotice from "@/components/desktop/ContinueInBrowserNotice";
 import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+import { getWebsiteHost } from "@/services/desktop/continueInBrowser";
 import { useMarketSettlement } from "./useMarketSettlement";
 import { marketReceiptRefreshInterval } from "./market-receipt-refresh";
 import { useCollectOfferIntent } from "./useCollectOfferIntent";
@@ -368,7 +369,14 @@ function CollectTradeControllerContent({
   const connectionDisabledReason = reasonKey
     ? t(locale, reasonKey)
     : collectOfferLimitReason(expected, offerMaximum, locale, offerQuantity);
+  // In 6529 Desktop's browser forwarding, trading happens on the website:
+  // the sheet cannot be confirmed and says why, beside the notice's button.
   const disabledReason =
+    (forwarding
+      ? t(locale, "desktopWalletRequest.tradeOnWebsite", {
+          site: getWebsiteHost(),
+        })
+      : undefined) ??
     connectionDisabledReason ??
     (pendingPurchase.blocked
       ? t(locale, "collect.trade.purchasePending")
