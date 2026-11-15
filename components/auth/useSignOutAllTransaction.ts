@@ -4,6 +4,7 @@ import {
   noteSignOutAllStarted,
 } from "@/services/auth/sign-out-all-state";
 import { cancelBrowserConnectorSignIn } from "@/services/desktop/browserConnectorSignIn";
+import { forgetAllBrowserWalletProfiles } from "@/services/desktop/desktopBrowserWallet";
 import { logError } from "@/utils/security-logger";
 import {
   AuthenticationError,
@@ -68,6 +69,8 @@ export function useSignOutAllTransaction({
 
       try {
         await clearAllAuthenticatedProfiles();
+        // 6529 Desktop: no profile keeps browser-wallet forwarding.
+        await forgetAllBrowserWalletProfiles();
         refreshStoredConnectedAccounts();
         setDisconnected();
       } catch (error: unknown) {

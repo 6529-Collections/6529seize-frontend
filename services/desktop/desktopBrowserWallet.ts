@@ -7,6 +7,7 @@ import {
   parseWalletBridgeCapabilities,
   parseWalletBridgeResponse,
   parseWalletBridgeStatus,
+  walletBridgeAcceptsContext,
   type WalletBridgeResponse,
   type WalletForwardingMethod,
   type WalletRequestInput,
@@ -35,6 +36,8 @@ type DesktopWalletRequestStatus =
       readonly kind: "waiting";
       readonly requestCode: string;
       readonly expiresAt: number;
+      /** Short payload hash of a drop or decision signature, else null. */
+      readonly fingerprint: string | null;
     }
   | { readonly kind: "cancelled" }
   | { readonly kind: "expired" }
@@ -54,6 +57,10 @@ let statusEventSeen = false;
 /** The request whose outcome the dialog shows; later ones are refused busy. */
 let ownerRequest: number | null = null;
 let lastRequest = 0;
+/** The open request's content fingerprint, shown next to its code. */
+let ownerFingerprint: string | null = null;
+/** Whether the shell accepts a request's `context` (from capabilities). */
+let acceptsContext = false;
 
 const setStatus = (next: DesktopWalletRequestStatus) => {
   status = next;
@@ -162,8 +169,9 @@ export async function markBrowserWalletProfile(address: string): Promise<void> {
 }
 
 /**
- * Forgets `address` when it connects another way (WalletConnect), so
- * forwarding is never offered to that profile. Never throws.
+ * Forgets `address` when it connects another way (WalletConnect) or signs
+ * out, so forwarding is never offered to that profile until it signs in
+ * with a browser wallet again. Never throws.
  */
 export async function forgetBrowserWalletProfile(
   address: string
@@ -181,23 +189,48 @@ export async function forgetBrowserWalletProfile(
 }
 
 /**
+ * Forgets every browser-wallet profile (sign out of all profiles). Clears
+ * the stored list even when it could not be read first: nothing in it is
+ * kept. Never throws.
+ */
+export async function forgetAllBrowserWalletProfiles(): Promise<void> {
+  profiles = new Set();
+  try {
+    const store = getDesktopStore();
+    if (!store) return;
+    await store.set(PROFILES_KEY, []);
+    profilesRead = true;
+  } catch {
+    // The connector still signs only for a profile with a desktop session.
+  }
+}
+
+/**
  * The methods the shell forwards: none unless it advertises forwarding
  * (`getInfo().supportsWalletForwarding === true`) and defines the bridge.
+ * Also notes whether it accepts a request's `context`.
  */
 export async function getDesktopWalletMethods(): Promise<
   readonly WalletForwardingMethod[]
 > {
+  acceptsContext = false;
   const api = getDesktopShellApi();
   const bridge = getDesktopWallet();
   if (!api || !bridge) return [];
   try {
     const info = await api.getInfo();
     if (info.supportsWalletForwarding !== true) return [];
-    return parseWalletBridgeCapabilities(await bridge.capabilities());
+    const capabilities = await bridge.capabilities();
+    acceptsContext = walletBridgeAcceptsContext(capabilities);
+    return parseWalletBridgeCapabilities(capabilities);
   } catch {
+    acceptsContext = false;
     return [];
   }
 }
+
+/** Whether requests may carry `context` (the shell said it accepts it). */
+export const desktopWalletAcceptsContext = (): boolean => acceptsContext;
 
 const applyShellStatus = (value: unknown) => {
   const shellStatus = parseWalletBridgeStatus(value);
@@ -206,6 +239,7 @@ const applyShellStatus = (value: unknown) => {
       kind: "waiting",
       requestCode: shellStatus.requestCode,
       expiresAt: shellStatus.expiresAt,
+      fingerprint: ownerRequest === null ? null : ownerFingerprint,
     });
   } else if (status.kind === "waiting") {
     // The answer itself sets the final message; until then, nothing waits.
@@ -259,9 +293,11 @@ function finish(response: WalletBridgeResponse): WalletBridgeResponse {
 /**
  * Asks the shell to open one wallet request in the browser and waits for
  * its answer. The shell allows one request at a time (`busy`).
+ * `fingerprint` is the short payload hash the browser page also shows.
  */
 export async function runDesktopWalletRequest(
-  request: WalletRequestInput
+  request: WalletRequestInput,
+  fingerprint: string | null = null
 ): Promise<WalletBridgeResponse> {
   const bridge = getDesktopWallet();
   if (!bridge) return { ok: false, code: "unsupported" };
@@ -269,14 +305,20 @@ export async function runDesktopWalletRequest(
   const id = lastRequest;
   // Only the request that was open first owns the dialog: a second one
   // (refused busy by the shell) must not replace its code and controls.
-  ownerRequest ??= id;
+  if (ownerRequest === null) {
+    ownerRequest = id;
+    ownerFingerprint = fingerprint;
+  }
   try {
     const response = parseWalletBridgeResponse(
       await bridge.request(request).catch(() => null)
     );
     return ownerRequest === id ? finish(response) : response;
   } finally {
-    if (ownerRequest === id) ownerRequest = null;
+    if (ownerRequest === id) {
+      ownerRequest = null;
+      ownerFingerprint = null;
+    }
   }
 }
 
@@ -301,6 +343,8 @@ export function __resetDesktopBrowserWalletForTests(): void {
   profilesLoading = null;
   statusEventSeen = false;
   ownerRequest = null;
+  ownerFingerprint = null;
+  acceptsContext = false;
   lastRequest = 0;
   status = IDLE;
   stopWatching?.();

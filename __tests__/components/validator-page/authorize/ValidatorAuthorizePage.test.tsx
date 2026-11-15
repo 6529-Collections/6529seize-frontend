@@ -187,6 +187,20 @@ describe("the authorize page", () => {
     expect(signTypedDataAsync).not.toHaveBeenCalled();
   });
 
+  it("shows no browser notice to 6529 Desktop's browser forwarding without a link: there is nothing to sign", async () => {
+    connect();
+    wallet = { ...wallet, connector: { id: "desktopBrowserWallet" } };
+    open(null);
+    expect(
+      await screen.findByRole("heading", { name: "Authorize your validator" })
+    ).toBeInTheDocument();
+    // The notice replaces only the wallet step, which needs a link.
+    expect(
+      screen.queryByRole("button", { name: "Continue in your browser" })
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+  });
+
   it("shows the validator's key and the whole draft", async () => {
     open(FRAGMENT);
     expect(await screen.findByText("Validator key")).toBeInTheDocument();

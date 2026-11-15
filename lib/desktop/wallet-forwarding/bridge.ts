@@ -111,3 +111,16 @@ export function parseWalletBridgeCapabilities(
   const offered: readonly unknown[] = value["methods"];
   return WALLET_FORWARDING_METHODS.filter((method) => offered.includes(method));
 }
+
+/**
+ * Whether the shell accepts a `personal_sign` request's `context` (from
+ * `capabilities()`: `{ version: 1, methods, context: true }`). A shell that
+ * does not say so refuses unknown keys, so the app sends it no context.
+ */
+export function walletBridgeAcceptsContext(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    value["version"] === WALLET_FORWARDING_VERSION &&
+    value["context"] === true
+  );
+}

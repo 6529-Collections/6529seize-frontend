@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import { AppWalletModalShell } from "@/components/app-wallets/AppWalletModalShell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import {
@@ -38,55 +38,63 @@ const FINISHED_MESSAGES = {
 /** Statuses after which the website itself is the way forward. */
 const CONTINUE_IN_BROWSER = new Set(["refused", "unverified"]);
 
+interface ReopenState {
+  readonly requestCode: string | null;
+  readonly count: number;
+  readonly coolingDown: boolean;
+}
+
 /**
- * "Open the page again", limited the way the shell limits it. Mounted per
- * request (keyed by its code), so a new request starts with no reopens.
+ * "Open the page again", limited the way the shell limits it. The count
+ * belongs to one request: a new request code starts with no reopens.
  */
-function ReopenButton({
-  locale,
-}: {
-  readonly locale: ReturnType<typeof useBrowserLocale>;
-}) {
-  const [count, setCount] = useState(0);
-  const [coolingDown, setCoolingDown] = useState(false);
+function useReopen(requestCode: string | null) {
+  const [state, setState] = useState<ReopenState>({
+    requestCode,
+    count: 0,
+    coolingDown: false,
+  });
+  const current: ReopenState =
+    state.requestCode === requestCode
+      ? state
+      : { requestCode, count: 0, coolingDown: false };
 
   useEffect(() => {
-    if (!coolingDown) return undefined;
-    const timer = setTimeout(() => setCoolingDown(false), REOPEN_COOLDOWN_MS);
+    if (!current.coolingDown) return undefined;
+    const timer = setTimeout(
+      () =>
+        setState((previous) =>
+          previous.requestCode === requestCode
+            ? { ...previous, coolingDown: false }
+            : previous
+        ),
+      REOPEN_COOLDOWN_MS
+    );
     return () => clearTimeout(timer);
-  }, [coolingDown]);
+  }, [current.coolingDown, requestCode]);
 
-  if (count >= MAX_REOPENS) return null;
-  return (
-    <>
-      <button
-        type="button"
-        className={PRIMARY_CLASS}
-        disabled={coolingDown}
-        onClick={() => {
-          reopenDesktopWalletRequest();
-          setCount(count + 1);
-          setCoolingDown(true);
-        }}
-      >
-        {t(locale, "desktopWalletRequest.reopen")}
-      </button>
-      {coolingDown && (
-        <p className="tw-m-0 tw-w-full tw-text-sm tw-text-iron-300">
-          {t(locale, "desktopWalletRequest.reopenWait")}
-        </p>
-      )}
-    </>
-  );
+  return {
+    canReopen: current.count < MAX_REOPENS,
+    coolingDown: current.coolingDown,
+    reopen: () => {
+      reopenDesktopWalletRequest();
+      setState({ requestCode, count: current.count + 1, coolingDown: true });
+    },
+  };
 }
 
 /**
  * While a wallet request waits in the browser: says where to finish, shows
- * the request code the browser page also shows, and offers to open the page
- * again or cancel. Afterwards it explains a cancelled, expired, busy,
- * refused, unverified or failed request, with "Continue in your browser"
- * where the website is the way forward. Renders nothing when no request is
- * open (always, outside 6529 Desktop with wallet forwarding).
+ * the request code (and the content fingerprint, for drops and decisions)
+ * the browser page also shows, and offers to open the page again or cancel.
+ * Afterwards it explains a cancelled, expired, busy, refused, unverified or
+ * failed request, with "Continue in your browser" where the website is the
+ * way forward. Renders nothing when no request is open (always, outside
+ * 6529 Desktop with wallet forwarding).
+ *
+ * It is the top modal layer: shown in the browser's top layer above every
+ * app modal, with any focus trap underneath (the Terms of Service modal's,
+ * for one) paused while it is open, so its controls are always reachable.
  */
 export default function DesktopWalletRequestDialog() {
   const locale = useBrowserLocale();
@@ -97,6 +105,7 @@ export default function DesktopWalletRequestDialog() {
   );
   const waiting = status.kind === "waiting";
   const finished = status.kind !== "idle" && !waiting;
+  const reopen = useReopen(waiting ? status.requestCode : null);
   // "Continue in your browser" failed for this outcome (cleared on change).
   const [openFailedFor, setOpenFailedFor] = useState<typeof status | null>(
     null
@@ -120,13 +129,73 @@ export default function DesktopWalletRequestDialog() {
     dismissDesktopWalletRequestStatus();
   };
 
+  let footer: React.ReactNode = null;
+  if (waiting) {
+    footer = (
+      <>
+        {reopen.canReopen && (
+          <button
+            type="button"
+            className={PRIMARY_CLASS}
+            disabled={reopen.coolingDown}
+            onClick={reopen.reopen}
+          >
+            {t(locale, "desktopWalletRequest.reopen")}
+          </button>
+        )}
+        <button
+          type="button"
+          className={SECONDARY_CLASS}
+          onClick={cancelDesktopWalletRequest}
+        >
+          {t(locale, "desktopWalletRequest.cancel")}
+        </button>
+      </>
+    );
+  } else if (finished) {
+    footer = (
+      <>
+        {CONTINUE_IN_BROWSER.has(status.kind) && (
+          <button
+            type="button"
+            className={PRIMARY_CLASS}
+            onClick={() => {
+              // Stay open with the reason if the browser did not open.
+              if (continueInBrowser()) {
+                setOpenFailed(false);
+                dismissDesktopWalletRequestStatus();
+              } else {
+                setOpenFailed(true);
+              }
+            }}
+          >
+            {t(locale, "desktopWalletRequest.continueInBrowser")}
+          </button>
+        )}
+        <button
+          type="button"
+          className={SECONDARY_CLASS}
+          onClick={dismissDesktopWalletRequestStatus}
+        >
+          {t(locale, "desktopWalletRequest.close")}
+        </button>
+      </>
+    );
+  }
+
+  // Mounted only while there is something to show: never on the web.
+  if (status.kind === "idle") return null;
+
   return (
-    <MobileWrapperDialog
-      isOpen={status.kind !== "idle"}
+    <AppWalletModalShell
+      layered
+      locale={locale}
+      show
       title={t(locale, "desktopWalletRequest.title")}
-      onClose={close}
+      onHide={close}
+      footer={footer}
     >
-      <div className="tw-flex tw-flex-col tw-gap-3 tw-pb-2">
+      <div className="tw-flex tw-flex-col tw-gap-3">
         <div
           role="alert"
           className="tw-text-sm tw-text-iron-200 empty:tw-hidden"
@@ -147,47 +216,21 @@ export default function DesktopWalletRequestDialog() {
                 code: status.requestCode,
               })}
             </p>
-            <div className="tw-flex tw-flex-wrap tw-gap-3">
-              <ReopenButton key={status.requestCode} locale={locale} />
-              <button
-                type="button"
-                className={SECONDARY_CLASS}
-                onClick={cancelDesktopWalletRequest}
-              >
-                {t(locale, "desktopWalletRequest.cancel")}
-              </button>
-            </div>
+            {status.fingerprint !== null && (
+              <p className="tw-m-0 tw-text-sm tw-text-iron-200">
+                {t(locale, "desktopWalletRequest.fingerprint", {
+                  fingerprint: status.fingerprint,
+                })}
+              </p>
+            )}
+            {reopen.coolingDown && reopen.canReopen && (
+              <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+                {t(locale, "desktopWalletRequest.reopenWait")}
+              </p>
+            )}
           </>
         )}
-        {finished && (
-          <div className="tw-flex tw-flex-wrap tw-gap-3">
-            {CONTINUE_IN_BROWSER.has(status.kind) && (
-              <button
-                type="button"
-                className={PRIMARY_CLASS}
-                onClick={() => {
-                  // Stay open with the reason if the browser did not open.
-                  if (continueInBrowser()) {
-                    setOpenFailed(false);
-                    dismissDesktopWalletRequestStatus();
-                  } else {
-                    setOpenFailed(true);
-                  }
-                }}
-              >
-                {t(locale, "desktopWalletRequest.continueInBrowser")}
-              </button>
-            )}
-            <button
-              type="button"
-              className={SECONDARY_CLASS}
-              onClick={dismissDesktopWalletRequestStatus}
-            >
-              {t(locale, "desktopWalletRequest.close")}
-            </button>
-          </div>
-        )}
       </div>
-    </MobileWrapperDialog>
+    </AppWalletModalShell>
   );
 }
