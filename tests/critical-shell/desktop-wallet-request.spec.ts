@@ -125,7 +125,7 @@ test.describe("Desktop wallet request page", () => {
       `/browser-connector${await signedFragment(origin, dropMessage(origin))}`
     );
 
-    await expect(page.getByRole("alert")).toContainText(
+    await expect(page.getByRole("main").getByRole("alert")).toContainText(
       "did not get a valid request"
     );
     await expect(page.getByRole("main").getByRole("button")).toHaveCount(0);
