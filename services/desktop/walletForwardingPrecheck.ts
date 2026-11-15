@@ -23,6 +23,8 @@ function contextFor(
 ): string | undefined {
   const context = takeWalletRequestContext(text);
   if (context === undefined || !desktopWalletAcceptsContext()) return undefined;
+  // Validated again on purpose, with the context: the same rules the shell
+  // and the browser page apply (size, then hash match) decide whether it goes.
   const { method, message, address, chainId } = request;
   const withContext = parseWalletRequest(
     { method, params: [message, address], address, chainId, context },
