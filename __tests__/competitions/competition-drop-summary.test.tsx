@@ -1,4 +1,10 @@
-import { render, renderHook, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   useCompetitionDrop,
@@ -13,6 +19,10 @@ import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompet
 import type { ReactNode } from "react";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { SingleWaveDrop } from "@/components/waves/drop/SingleWaveDrop";
+import {
+  recordWaveCompetitionPresence,
+  resetWaveCompetitionPresenceForTests,
+} from "@/helpers/waves/wave-competition-presence";
 
 jest.mock("@/helpers/competition.helpers", () => ({
   isMultiCompetitionEnabled: () => true,
@@ -192,6 +202,54 @@ it("refreshes the card when competition votes are invalidated", async () => {
     100
   );
 });
+describe("waves without a competition", () => {
+  beforeEach(() => {
+    jest.mocked(fetchDropCompetitionContext).mockReset();
+    resetWaveCompetitionPresenceForTests();
+  });
+  afterEach(resetWaveCompetitionPresenceForTests);
+
+  const renderDrop = () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+    return renderHook(() => useCompetitionDrop(drop), { wrapper });
+  };
+
+  it("makes no per-drop lookup once the wave is known to have none", () => {
+    recordWaveCompetitionPresence("wave", false);
+    const { result } = renderDrop();
+    expect(fetchDropCompetitionContext).not.toHaveBeenCalled();
+    expect(result.current).toBe(drop);
+  });
+
+  it("still looks up drops when the wave has a competition or is unknown", async () => {
+    jest.mocked(fetchDropCompetitionContext).mockResolvedValue(context);
+    recordWaveCompetitionPresence("other-wave", false);
+    const unknown = renderDrop();
+    await waitFor(() => expect(unknown.result.current.rating).toBe(120));
+    unknown.unmount();
+
+    jest.mocked(fetchDropCompetitionContext).mockClear();
+    recordWaveCompetitionPresence("wave", true);
+    const known = renderDrop();
+    await waitFor(() => expect(known.result.current.rating).toBe(120));
+    expect(fetchDropCompetitionContext).toHaveBeenCalledTimes(1);
+  });
+
+  it("starts looking up a mounted drop when its wave gains a competition", async () => {
+    jest.mocked(fetchDropCompetitionContext).mockResolvedValue(context);
+    recordWaveCompetitionPresence("wave", false);
+    const { result } = renderDrop();
+    expect(fetchDropCompetitionContext).not.toHaveBeenCalled();
+    act(() => recordWaveCompetitionPresence("wave", true));
+    await waitFor(() => expect(result.current.rating).toBe(120));
+  });
+});
+
 it("resolves scoped submission data before rendering a drop deep link", async () => {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },

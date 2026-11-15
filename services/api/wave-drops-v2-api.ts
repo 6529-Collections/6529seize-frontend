@@ -47,6 +47,8 @@ import type {
   ApiDropV2View,
   ApiDropWithoutWaveV2View,
 } from "@/services/api/drop-v2-view.types";
+import { recordWaveCompetitionPresence } from "@/helpers/waves/wave-competition-presence";
+import type { ApiWaveMinWithChatLinkSettings } from "@/helpers/waves/wave.helpers";
 import { fetchDropMetadataByIdV2 } from "./wave-drop-metadata-v2-api";
 import type {
   ApiWaveDropsV2PageFeed,
@@ -397,6 +399,11 @@ const fetchDropAndWaveV2 = async (
     signal,
   });
 
+/** A feed page whose wave keeps the client-only settings the mapper adds. */
+type WaveDropsFeedWithWaveSettings = Omit<ApiWaveDropsFeed, "wave"> & {
+  wave: ApiWaveMinWithChatLinkSettings;
+};
+
 export async function fetchWaveDropsFeedV2({
   waveId,
   limit,
@@ -408,7 +415,7 @@ export async function fetchWaveDropsFeedV2({
   includeFullMetadata = false,
   includeTopRaters = false,
   withRetry = false,
-}: FetchWaveDropsV2Props): Promise<ApiWaveDropsFeed> {
+}: FetchWaveDropsV2Props): Promise<WaveDropsFeedWithWaveSettings> {
   const params: Record<string, string> = {
     limit: limit.toString(),
     respect_drop_reply_collapse: "true",
@@ -441,6 +448,7 @@ export async function fetchWaveDropsFeedV2({
     : await commonApiFetch<ApiWaveDropsFeedV2>(request);
 
   const wave = mapApiWaveOverviewToApiWaveMin(data.wave);
+  recordWaveCompetitionPresence(wave.id, wave.has_competition);
   const drops = await hydrateDropsV2({
     drops: data.drops,
     headers,

@@ -9,6 +9,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
+import { useWaveMayHaveCompetitionEntries } from "./useWaveMayHaveCompetitionEntries";
 import { useCompetitionViewer } from "./useCompetitionQueries";
 
 function winnerContext(
@@ -85,6 +86,8 @@ export function applyCompetitionDropSummary(
 
 export function useCompetitionDrop(drop: ExtendedDrop) {
   const viewer = useCompetitionViewer();
+  // A wave with no competition has no entries, so its drops need no lookup.
+  const mayBeEntry = useWaveMayHaveCompetitionEntries(drop.wave.id);
   const context = useQuery({
     queryKey: [
       QueryKey.COMPETITION_DROP_CONTEXT,
@@ -92,7 +95,7 @@ export function useCompetitionDrop(drop: ExtendedDrop) {
     ],
     queryFn: ({ signal }) =>
       fetchDropCompetitionContext(drop.wave.id, drop.id, signal),
-    enabled: !drop.id.startsWith("temp-"),
+    enabled: mayBeEntry && !drop.id.startsWith("temp-"),
     retry: false,
     staleTime: 15_000,
     refetchInterval: (query) =>

@@ -88,6 +88,11 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
   return <div data-testid="mobile" data-open={String(props.isOpen)} />;
 });
 
+let mockIsMdViewport: boolean | null = null;
+jest.mock("@/hooks/useIsMdViewportOrUnknown", () => ({
+  __esModule: true,
+  default: () => mockIsMdViewport,
+}));
 jest.mock("@/hooks/isMobileDevice");
 jest.mock("@/lib/device-signing/feature", () => ({
   isSignedMessagesEnabled: () => true,
@@ -234,6 +239,7 @@ describe("WaveDrop", () => {
     mockWaveDropHeader.mockClear();
     mockMutate.mockClear();
     mockEditMentionedGroups = [];
+    mockIsMdViewport = null;
     mobileMenuProps = undefined;
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(false);
@@ -284,6 +290,55 @@ describe("WaveDrop", () => {
       expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
     }
   );
+
+  it.each([
+    { isMdViewport: true, headers: 1 },
+    { isMdViewport: false, headers: 1 },
+    // Unknown (server render, hydration): both slots mount and CSS hides one.
+    { isMdViewport: null, headers: 2 },
+  ])(
+    "mounts $headers author header(s) when the md viewport is $isMdViewport",
+    ({ isMdViewport, headers }) => {
+      mockIsMdViewport = isMdViewport;
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+        />
+      );
+      expect(screen.getAllByTestId("header")).toHaveLength(headers);
+    }
+  );
+
+  it("keeps the inline author header on desktop", () => {
+    mockIsMdViewport = true;
+    renderWithEditingDropProvider(
+      <WaveDrop
+        drop={drop}
+        previousDrop={null}
+        nextDrop={null}
+        showWaveInfo={false}
+        activeDrop={null}
+        showReplyAndQuote={false}
+        location={DropLocation.WAVE}
+        dropViewDropId={null}
+        onReply={jest.fn()}
+        onReplyClick={jest.fn()}
+        onQuoteClick={jest.fn()}
+        inlineAuthorOnDesktop
+      />
+    );
+    expect(screen.getAllByTestId("header")).toHaveLength(1);
+  });
 
   it("shows actions on desktop", () => {
     setHoverSupport(true);
