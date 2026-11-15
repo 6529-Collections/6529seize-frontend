@@ -1,6 +1,11 @@
 import { act, renderHook } from "@testing-library/react";
 import { useSignOutAllTransaction } from "@/components/auth/useSignOutAllTransaction";
 import { getSignOutAllState } from "@/services/auth/sign-out-all-state";
+import { forgetAllBrowserWalletProfiles } from "@/services/desktop/desktopBrowserWallet";
+
+jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
+  forgetAllBrowserWalletProfiles: jest.fn(() => Promise.resolve()),
+}));
 
 jest.mock("@/components/auth/seizeConnectErrors", () => ({
   ...jest.requireActual("@/components/auth/seizeConnectErrors"),
@@ -44,5 +49,22 @@ describe("useSignOutAllTransaction shared state", () => {
       started: before + 1,
       running: false,
     });
+  });
+
+  it("forgets every 6529 Desktop browser-wallet marker", async () => {
+    jest.mocked(forgetAllBrowserWalletProfiles).mockClear();
+    const { result } = renderHook(() =>
+      useSignOutAllTransaction({
+        disconnect: jest.fn(() => Promise.resolve()),
+        isMountedRef: { current: true },
+        refreshStoredConnectedAccounts: jest.fn(),
+        setDisconnected: jest.fn(),
+      })
+    );
+
+    await act(async () => {
+      await result.current.seizeDisconnectAndLogoutAll();
+    });
+    expect(forgetAllBrowserWalletProfiles).toHaveBeenCalledTimes(1);
   });
 });

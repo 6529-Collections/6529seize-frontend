@@ -44,6 +44,8 @@ export interface DesktopShellInfo {
   readonly port?: number | undefined;
   readonly scheme?: string | undefined;
   readonly environment?: string | undefined;
+  /** True in a shell that defines `window.desktopWallet`. */
+  readonly supportsWalletForwarding?: boolean | undefined;
   readonly [key: string]: unknown;
 }
 
@@ -253,4 +255,32 @@ export interface DesktopStore {
   readonly get: (key: string) => Promise<unknown>;
   readonly set: (key: string, value: unknown) => Promise<void>;
   readonly remove: (key: string) => Promise<void>;
+}
+
+/**
+ * Wallet forwarding (`window.desktopWallet`): the shell opens a signature
+ * request in the system browser for a profile that signed in with a
+ * browser wallet. The shell keeps the request id; the page sees only the
+ * short request code and the answer. Advertised by
+ * `getInfo().supportsWalletForwarding === true`; absent in older builds.
+ * Answers are validated with the parsers in `lib/desktop/wallet-forwarding`.
+ */
+export interface DesktopWallet {
+  /** Opens one request in the browser and resolves with its answer. */
+  readonly request: (request: {
+    readonly method: string;
+    readonly params: unknown;
+    readonly address: string;
+    readonly chainId: number;
+  }) => Promise<unknown>;
+  /** Cancels the open request (it then answers `cancelled`). */
+  readonly cancel: () => Promise<void>;
+  /** Opens the open request's browser page again (rate-limited). */
+  readonly reopen: () => Promise<void>;
+  /** `{ pending: false }` or `{ pending: true, code, method, expiresAt }`. */
+  readonly status: () => Promise<unknown>;
+  /** `{ version, methods }`: what this shell forwards. */
+  readonly capabilities: () => Promise<unknown>;
+  /** Calls back with the status when a request starts or ends. */
+  readonly onStatusChange: (callback: (status: unknown) => void) => () => void;
 }
