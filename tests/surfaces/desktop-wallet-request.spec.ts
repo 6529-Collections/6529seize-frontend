@@ -8,6 +8,7 @@ import {
   WALLET_REQUEST_TTL_MS,
   walletRequestCode,
 } from "../../lib/desktop/wallet-forwarding";
+import { WALLET_MESSAGE_TTL_MS } from "../../lib/desktop/walletMessageTtl";
 
 // 6529 Desktop's browser page for a forwarded wallet request: a request the
 // shell signed opens in the system browser at the app's local origin. The
@@ -40,7 +41,7 @@ function dropMessage(origin: string): string {
     `Wallet: ${ADDRESS}`,
     "Chain ID: 1",
     `Issued At: ${issuedAt.toISOString()}`,
-    `Expiration Time: ${new Date(issuedAt.getTime() + 300_000).toISOString()}`,
+    `Expiration Time: ${new Date(issuedAt.getTime() + WALLET_MESSAGE_TTL_MS).toISOString()}`,
     "Nonce: 00000000-0000-4000-8000-000000000001",
     "Action: create_drop",
     `Payload Hash: ${"ab".repeat(32)}`,
@@ -91,18 +92,24 @@ test.describe("Desktop wallet request page", () => {
       route.fulfill({ json: { signer: shell.address } })
     );
 
-    await page.goto(`/browser-connector${await signedFragment(origin, message)}`);
+    await page.goto(
+      `/browser-connector${await signedFragment(origin, message)}`
+    );
 
     await expect(
       page.getByRole("heading", { name: "Sign for 6529 Desktop" })
     ).toBeVisible();
     await expect(page.getByText(walletRequestCode(ID))).toBeVisible();
     await expect(page.getByText(/Create a 6529 drop/)).toBeVisible();
-    await expect(page.locator("pre")).toHaveText(message);
+    await expect(page.getByRole("main").locator("pre")).toHaveText(message);
     expect(new URL(page.url()).hash).toBe("");
     // No wallet is connected: the page asks for one and offers no Sign.
-    await expect(page.getByRole("button", { name: "Connect wallet" })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Sign in wallet" })).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Connect wallet" })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Sign in wallet" })
+    ).toHaveCount(0);
   });
 
   test("offers nothing to sign when another key signed the request", async ({
@@ -121,7 +128,7 @@ test.describe("Desktop wallet request page", () => {
     await expect(page.getByRole("alert")).toContainText(
       "did not get a valid request"
     );
-    await expect(page.locator("main").getByRole("button")).toHaveCount(0);
+    await expect(page.getByRole("main").getByRole("button")).toHaveCount(0);
     expect(new URL(page.url()).hash).toBe("");
   });
 });

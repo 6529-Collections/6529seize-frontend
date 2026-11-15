@@ -7,6 +7,7 @@
  */
 
 import { canonicalCompetitionJson } from "@/services/wallet-signatures/competition-signature";
+import { WALLET_MESSAGE_TTL_MS } from "@/lib/desktop/walletMessageTtl";
 
 /** What a recognised message does, for the page's summary sentence. */
 export type WalletMessageFormat = "drop" | "decisionVote" | "decisionEntry";
@@ -28,7 +29,6 @@ const UUID_V4 =
   /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const HASH = /^[0-9a-f]{64}$/;
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
-const SIGNATURE_TTL_MS = 300_000;
 
 /** The lines of a structured drop signature; `null` marks a value line. */
 const DROP_LINES: readonly (readonly [string, string | null])[] = [
@@ -88,7 +88,7 @@ function isDropSignature(
     isTime(issuedAt ?? "") &&
     isTime(expiresAt ?? "") &&
     Date.parse(expiresAt ?? "") - Date.parse(issuedAt ?? "") ===
-      SIGNATURE_TTL_MS &&
+      WALLET_MESSAGE_TTL_MS &&
     UUID_V4.test(nonce) &&
     HASH.test(payloadHash)
   );
@@ -161,7 +161,7 @@ function readDecisionSignature(
     (record["config_version"] as number) >= 0 &&
     isTimeMs(issuedAt) &&
     isTimeMs(expiresAt) &&
-    expiresAt - issuedAt === SIGNATURE_TTL_MS &&
+    expiresAt - issuedAt === WALLET_MESSAGE_TTL_MS &&
     UUID_V4.test(String(record["nonce"])) &&
     HASH.test(String(record["payload_hash"])) &&
     canonicalCompetitionJson(record) === text;
