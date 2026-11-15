@@ -108,10 +108,25 @@ describe("desktopBrowserWallet", () => {
       ).resolves.toBeUndefined();
     });
 
-    it("treats an unreadable store as empty", async () => {
+    it("offers nothing from an unreadable store and never overwrites it", async () => {
       store.get.mockRejectedValue(new Error("locked"));
       await loadBrowserWalletProfiles();
       expect(isBrowserWalletProfile(ADDRESS)).toBe(false);
+
+      // Marking retries the read; while it keeps failing, nothing is written
+      // (writing would erase other profiles' entries).
+      await markBrowserWalletProfile(OTHER);
+      expect(store.set).not.toHaveBeenCalled();
+      await forgetBrowserWalletProfile(ADDRESS);
+      expect(store.set).not.toHaveBeenCalled();
+
+      // Once the store reads again, the existing entries are kept.
+      store.get.mockResolvedValue([ADDRESS]);
+      await markBrowserWalletProfile(OTHER);
+      expect(store.set).toHaveBeenCalledWith(
+        "desktop-browser-wallet-profiles",
+        [ADDRESS, OTHER]
+      );
     });
   });
 
@@ -153,6 +168,29 @@ describe("desktopBrowserWallet", () => {
       statusListener?.({ pending: true, code: "bad" });
       expect(getDesktopWalletRequestStatus()).toEqual({ kind: "idle" });
     });
+
+    it("ignores a status snapshot older than an event", async () => {
+      let resolveSnapshot: (value: unknown) => void = () => undefined;
+      bridge.status.mockReturnValue(
+        new Promise((resolve) => {
+          resolveSnapshot = resolve;
+        })
+      );
+      watchDesktopWalletStatus();
+      statusListener?.({
+        pending: true,
+        code: "ABC-123",
+        method: "personal_sign",
+        expiresAt: 1_800_000_000_000,
+      });
+      resolveSnapshot({ pending: false });
+      await Promise.resolve();
+      await Promise.resolve();
+      expect(getDesktopWalletRequestStatus()).toMatchObject({
+        kind: "waiting",
+        requestCode: "ABC-123",
+      });
+    });
   });
 
   describe("runDesktopWalletRequest", () => {
@@ -188,6 +226,42 @@ describe("desktopBrowserWallet", () => {
       expect(getDesktopWalletRequestStatus()).toEqual({ kind });
       dismissDesktopWalletRequestStatus();
       expect(getDesktopWalletRequestStatus()).toEqual({ kind: "idle" });
+    });
+
+    it("keeps the open request's dialog when a second one is refused busy", async () => {
+      watchDesktopWalletStatus();
+      let answerFirst: (value: unknown) => void = () => undefined;
+      bridge.request
+        .mockReturnValueOnce(
+          new Promise((resolve) => {
+            answerFirst = resolve;
+          })
+        )
+        .mockResolvedValueOnce({ ok: false, code: "busy" });
+      const first = runDesktopWalletRequest(REQUEST);
+      statusListener?.({
+        pending: true,
+        code: "ABC-123",
+        method: "personal_sign",
+        expiresAt: 1_800_000_000_000,
+      });
+      await expect(runDesktopWalletRequest(REQUEST)).resolves.toEqual({
+        ok: false,
+        code: "busy",
+      });
+      expect(getDesktopWalletRequestStatus()).toMatchObject({
+        kind: "waiting",
+        requestCode: "ABC-123",
+      });
+      showDesktopWalletRefusal();
+      expect(getDesktopWalletRequestStatus()).toMatchObject({
+        kind: "waiting",
+      });
+
+      statusListener?.({ pending: false });
+      answerFirst({ ok: false, code: "expired" });
+      await first;
+      expect(getDesktopWalletRequestStatus()).toEqual({ kind: "expired" });
     });
 
     it("fails cleanly when the bridge throws, and is unsupported without it", async () => {

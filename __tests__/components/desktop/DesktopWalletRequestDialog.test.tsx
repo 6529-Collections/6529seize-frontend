@@ -12,7 +12,7 @@ const listeners = new Set<() => void>();
 const cancel = jest.fn();
 const reopen = jest.fn();
 const dismiss = jest.fn();
-const continueInBrowser = jest.fn();
+const continueInBrowser = jest.fn(() => true);
 
 jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
   getDesktopWalletRequestStatus: () => status,
@@ -113,9 +113,30 @@ describe("DesktopWalletRequestDialog", () => {
     ).toBeEnabled();
   });
 
+  it("stays open with the reason when the browser does not open", async () => {
+    continueInBrowser.mockReturnValueOnce(false);
+    render(<DesktopWalletRequestDialog />);
+    setStatus({ kind: "refused" });
+    await userEvent.click(
+      screen.getByRole("button", { name: "Continue in your browser" })
+    );
+    expect(dismiss).not.toHaveBeenCalled();
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Your browser did not open. Open staging.6529.io"
+    );
+  });
+
   it.each([
-    ["refused", /would not sign this request. Continue on staging\.6529\.io/, true],
-    ["unverified", /Smart-contract wallets .* continue on staging\.6529\.io/, true],
+    [
+      "refused",
+      /would not sign this request. Continue on staging\.6529\.io/,
+      true,
+    ],
+    [
+      "unverified",
+      /Smart-contract wallets .* continue on staging\.6529\.io/,
+      true,
+    ],
     ["busy", /Another signature request/, false],
     ["expired", /timed out/, false],
     ["cancelled", /was cancelled/, false],

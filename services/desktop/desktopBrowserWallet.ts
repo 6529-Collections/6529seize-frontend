@@ -24,7 +24,9 @@ const PROFILES_KEY = "desktop-browser-wallet-profiles";
 const ADDRESS = /^0x[0-9a-f]{40}$/;
 
 let profiles: ReadonlySet<string> = new Set();
-let profilesLoaded: Promise<void> | null = null;
+/** True once the list was read from the store (not merely defaulted). */
+let profilesRead = false;
+let profilesLoading: Promise<boolean> | null = null;
 
 /** What the waiting dialog shows. */
 type DesktopWalletRequestStatus =
@@ -47,6 +49,11 @@ const IDLE: DesktopWalletRequestStatus = { kind: "idle" };
 let status: DesktopWalletRequestStatus = IDLE;
 const listeners = new Set<() => void>();
 let stopWatching: (() => void) | null = null;
+/** True once the shell sent a status event (newer than any snapshot). */
+let statusEventSeen = false;
+/** The request whose outcome the dialog shows; later ones are refused busy. */
+let ownerRequest: number | null = null;
+let lastRequest = 0;
 
 const setStatus = (next: DesktopWalletRequestStatus) => {
   status = next;
@@ -74,7 +81,8 @@ export function dismissDesktopWalletRequestStatus(): void {
 
 /** Shows a refusal decided in the app, before the shell is asked. */
 export function showDesktopWalletRefusal(): void {
-  setStatus({ kind: "refused" });
+  // Never hide a request that is open in the browser.
+  if (status.kind !== "waiting") setStatus({ kind: "refused" });
 }
 
 const readProfiles = (value: unknown): ReadonlySet<string> =>
@@ -87,24 +95,52 @@ const readProfiles = (value: unknown): ReadonlySet<string> =>
       : []
   );
 
-/** Loads the browser-wallet profile list from the shell store once. */
-export function loadBrowserWalletProfiles(): Promise<void> {
-  profilesLoaded ??= (async () => {
-    const store = getDesktopStore();
-    if (!store) return;
+/**
+ * Reads the browser-wallet profile list from the shell store. Resolves
+ * true once it has been read; false when the store is missing or the read
+ * failed (a later call tries again). A failed read is never treated as an
+ * empty list for writing.
+ */
+function readStoredProfiles(): Promise<boolean> {
+  if (profilesRead) return Promise.resolve(true);
+  profilesLoading ??= (async () => {
     try {
+      const store = getDesktopStore();
+      if (!store) return false;
       profiles = readProfiles(await store.get(PROFILES_KEY));
+      profilesRead = true;
+      return true;
     } catch {
-      profiles = new Set();
+      return false;
+    } finally {
+      profilesLoading = null;
     }
   })();
-  return profilesLoaded;
+  return profilesLoading;
+}
+
+/** Loads the browser-wallet profile list (an unreadable list offers none). */
+export async function loadBrowserWalletProfiles(): Promise<void> {
+  await readStoredProfiles();
 }
 
 export const isBrowserWalletProfile = (address: string | null | undefined) =>
   typeof address === "string" && profiles.has(address.toLowerCase());
 
-async function saveProfiles(next: ReadonlySet<string>): Promise<void> {
+/**
+ * Changes the stored list from a baseline that was really read, retrying
+ * the read once; never writes when the list could not be read, so other
+ * profiles' entries are never lost.
+ */
+async function updateProfiles(
+  change: (current: ReadonlySet<string>) => ReadonlySet<string> | null
+): Promise<void> {
+  let read = await readStoredProfiles();
+  // One retry: a store that was briefly busy should not lose the change.
+  if (!read) read = await readStoredProfiles();
+  if (!read) return;
+  const next = change(profiles);
+  if (next === null) return;
   profiles = next;
   await getDesktopStore()?.set(PROFILES_KEY, [...next]);
 }
@@ -117,10 +153,9 @@ export async function markBrowserWalletProfile(address: string): Promise<void> {
   const normalized = address.toLowerCase();
   if (!ADDRESS.test(normalized)) return;
   try {
-    await loadBrowserWalletProfiles();
-    if (!profiles.has(normalized)) {
-      await saveProfiles(new Set([...profiles, normalized]));
-    }
+    await updateProfiles((current) =>
+      current.has(normalized) ? null : new Set([...current, normalized])
+    );
   } catch {
     // Forwarding is then simply not offered for this profile.
   }
@@ -135,12 +170,11 @@ export async function forgetBrowserWalletProfile(
 ): Promise<void> {
   const normalized = address.toLowerCase();
   try {
-    await loadBrowserWalletProfiles();
-    if (profiles.has(normalized)) {
-      await saveProfiles(
-        new Set([...profiles].filter((item) => item !== normalized))
-      );
-    }
+    await updateProfiles((current) =>
+      current.has(normalized)
+        ? new Set([...current].filter((item) => item !== normalized))
+        : null
+    );
   } catch {
     // The flag stays; the connector still signs only for the active profile.
   }
@@ -183,10 +217,16 @@ const applyShellStatus = (value: unknown) => {
 export function watchDesktopWalletStatus(): void {
   const bridge = getDesktopWallet();
   if (!bridge || stopWatching) return;
-  stopWatching = bridge.onStatusChange(applyShellStatus);
+  stopWatching = bridge.onStatusChange((value) => {
+    statusEventSeen = true;
+    applyShellStatus(value);
+  });
   bridge
     .status()
-    .then(applyShellStatus)
+    .then((value) => {
+      // A snapshot taken before an event arrived is older than it.
+      if (!statusEventSeen) applyShellStatus(value);
+    })
     .catch(() => undefined);
 }
 
@@ -225,8 +265,19 @@ export async function runDesktopWalletRequest(
 ): Promise<WalletBridgeResponse> {
   const bridge = getDesktopWallet();
   if (!bridge) return { ok: false, code: "unsupported" };
-  const answer = await bridge.request(request).catch(() => null);
-  return finish(parseWalletBridgeResponse(answer));
+  lastRequest += 1;
+  const id = lastRequest;
+  // Only the request that was open first owns the dialog: a second one
+  // (refused busy by the shell) must not replace its code and controls.
+  ownerRequest ??= id;
+  try {
+    const response = parseWalletBridgeResponse(
+      await bridge.request(request).catch(() => null)
+    );
+    return ownerRequest === id ? finish(response) : response;
+  } finally {
+    if (ownerRequest === id) ownerRequest = null;
+  }
 }
 
 /** Stops waiting for the browser; the shell answers `cancelled`. */
@@ -246,7 +297,11 @@ export function reopenDesktopWalletRequest(): void {
 /** @api Resets the module state between tests. */
 export function __resetDesktopBrowserWalletForTests(): void {
   profiles = new Set();
-  profilesLoaded = null;
+  profilesRead = false;
+  profilesLoading = null;
+  statusEventSeen = false;
+  ownerRequest = null;
+  lastRequest = 0;
   status = IDLE;
   stopWatching?.();
   stopWatching = null;
