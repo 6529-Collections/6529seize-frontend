@@ -318,12 +318,8 @@ function describeTypedData(
   return refuse("unknown-typed-data");
 }
 
-/**
- * Describe a validated request for the browser page, or say why it must be
- * refused. `pageOrigin` is the browser page's own origin, which is also the
- * app's origin.
- */
-export function describeWalletRequest(
+/** The description itself; may throw on odd input (see below). */
+function describeUnchecked(
   request: WalletRequest,
   pageOrigin: string
 ): DescribedWalletRequest {
@@ -336,4 +332,25 @@ export function describeWalletRequest(
     return { ok: true, value: { kind: "message", text, format } };
   }
   return describeTypedData(request.typedData, request, pageOrigin);
+}
+
+/**
+ * Describe a validated request for the browser page, or say why it must be
+ * refused. `pageOrigin` is the browser page's own origin, which is also the
+ * app's origin. Never throws: anything unexpected in the untrusted request
+ * (dates, nesting, values) is a refusal.
+ */
+export function describeWalletRequest(
+  request: WalletRequest,
+  pageOrigin: string
+): DescribedWalletRequest {
+  try {
+    return describeUnchecked(request, pageOrigin);
+  } catch {
+    return refuse(
+      request.method === "personal_sign"
+        ? "unknown-message"
+        : "unknown-typed-data"
+    );
+  }
 }

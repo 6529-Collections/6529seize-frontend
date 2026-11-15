@@ -3990,6 +3990,8 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopWalletRequest.reopen": "Open the page again",
   "desktopWalletRequest.close": "Close",
   "desktopWalletRequest.cancel": "Cancel",
+  "desktopWalletRequest.openFailed":
+    "Your browser did not open. Open {site} in your browser yourself.",
   "desktopWalletRequest.cancelled": "The signature request was cancelled.",
   "desktopWalletRequest.expired": "The signature request timed out. Try again.",
   "desktopWalletRequest.refused":
