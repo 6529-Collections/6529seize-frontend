@@ -19,6 +19,7 @@ import type {
   DesktopShellApi,
   DesktopStore,
   DesktopUpdater,
+  DesktopWallet,
 } from "@/types/desktop-shell";
 
 interface DesktopShellWindow {
@@ -27,6 +28,7 @@ interface DesktopShellWindow {
   readonly notifications?: unknown;
   readonly updater?: unknown;
   readonly store?: unknown;
+  readonly desktopWallet?: unknown;
 }
 
 const getShellWindow = (): DesktopShellWindow | null =>
@@ -106,3 +108,28 @@ export const getDesktopUpdater = (): DesktopUpdater | null =>
 
 /** Shell-owned key-value store; null off the desktop. */
 export const getDesktopStore = (): DesktopStore | null => getBridge("store");
+
+const DESKTOP_WALLET_METHODS = [
+  "request",
+  "cancel",
+  "reopen",
+  "status",
+  "capabilities",
+  "onStatusChange",
+] as const;
+
+/**
+ * Wallet forwarding to the system browser; null off the desktop and in
+ * desktop builds without it (the older Electron app among them).
+ */
+export function getDesktopWallet(): DesktopWallet | null {
+  if (!isDesktopShell()) {
+    return null;
+  }
+  const bridge = getShellWindow()?.desktopWallet;
+  return DESKTOP_WALLET_METHODS.every((method) =>
+    hasBridgeMethod(bridge, method)
+  )
+    ? (bridge as DesktopWallet)
+    : null;
+}

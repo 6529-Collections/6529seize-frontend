@@ -57,6 +57,8 @@ import DesktopNavigationBridge from "@/components/desktop/DesktopNavigationBridg
 import DesktopNotificationsBridge from "@/components/desktop/DesktopNotificationsBridge";
 import DesktopBrowserConnectorBridge from "@/components/desktop/DesktopBrowserConnectorBridge";
 import DesktopConnectDialog from "@/components/desktop/DesktopConnectDialog";
+import DesktopBrowserWalletBridge from "@/components/desktop/DesktopBrowserWalletBridge";
+import DesktopWalletRequestDialog from "@/components/desktop/DesktopWalletRequestDialog";
 import DesktopTitleStrip from "@/components/header/titlebar/DesktopTitleStrip";
 
 export default function Providers({
@@ -95,6 +97,8 @@ export default function Providers({
                 <DesktopNotificationsBridge />
                 <DesktopBrowserConnectorBridge />
                 <DesktopConnectDialog />
+                <DesktopBrowserWalletBridge />
+                <DesktopWalletRequestDialog />
                 <DesktopTitleStrip />
                 <LocaleMessagesGate>{children}</LocaleMessagesGate>
               </NavigationHistoryProvider>

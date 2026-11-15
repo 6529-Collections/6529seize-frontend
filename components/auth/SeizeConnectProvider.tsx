@@ -34,6 +34,7 @@ import {
   logSecurityEvent,
 } from "@/utils/security-logger";
 import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/appWalletConnectorType";
+import { forgetBrowserWalletProfile } from "@/services/desktop/desktopBrowserWallet";
 import {
   AppKitModalBridge,
   createAppKitModalBridgeStore,
@@ -443,8 +444,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
+      const signedOutAddress = getWalletAddress();
       try {
-        await logoutSessionV2({ address: getWalletAddress() });
+        await logoutSessionV2({ address: signedOutAddress });
       } catch (error: unknown) {
         const revokeError =
           error instanceof Error
@@ -455,6 +457,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         if (getSessionClientType() !== "web") throw revokeError;
       }
       await removeAuthJwt();
+      // 6529 Desktop: no browser-wallet forwarding after logout (never throws).
+      if (signedOutAddress) await forgetBrowserWalletProfile(signedOutAddress);
       refreshStoredConnectedAccounts();
 
       const nextActiveAddress = getWalletAddress();

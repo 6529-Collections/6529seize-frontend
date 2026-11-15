@@ -29,6 +29,7 @@ import {
   type AppWalletConnectorHost,
   useAppWalletConnectors,
 } from "@/components/providers/useAppWalletConnectors";
+import { useDesktopBrowserWalletConnector } from "@/components/providers/useDesktopBrowserWalletConnector";
 import {
   hasPersistedWalletSession,
   subscribeToWalletSessionChanges,
@@ -713,6 +714,8 @@ export default function WagmiSetup({
 
   // Install Capacitor app-wallet connectors on the wallet-stack adapter.
   useAppWalletConnectors(currentAdapter, appWallets, APP_WALLET_CONNECTOR_HOST);
+  // 6529 Desktop wallet forwarding, when the shell offers it.
+  useDesktopBrowserWalletConnector(currentAdapter);
 
   // A new task gives React a paint opportunity after the Wagmi provider and
   // children commit. User connect intent can start the same singleton sooner
