@@ -133,6 +133,18 @@ export function parseWalletRequest(
   input: WalletRequestInput,
   allowedChainIds: readonly number[]
 ): Parsed<WalletRequest, WalletRequestProblem> {
+  try {
+    return parseUnchecked(input, allowedChainIds);
+  } catch {
+    // Untrusted input (getters, odd values) is refused, never thrown.
+    return fail(INVALID_PARAMS);
+  }
+}
+
+function parseUnchecked(
+  input: WalletRequestInput,
+  allowedChainIds: readonly number[]
+): Parsed<WalletRequest, WalletRequestProblem> {
   if (!isRecord(input)) return fail(INVALID_PARAMS);
   const { method, params, address, chainId } = input;
   if (
