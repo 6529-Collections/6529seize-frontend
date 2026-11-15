@@ -319,6 +319,94 @@ describe("describeWalletRequest: messages (allow-list)", () => {
     expect(refusalOf(text)).toBe("unknown-message");
   });
 
+  it.each([
+    ["an impossible month", "2026-13-14T12:00:00.000Z"],
+    ["an impossible day", "2026-02-30T12:00:00.000Z"],
+    ["an impossible hour", "2026-11-14T25:00:00.000Z"],
+  ])("refuses a drop signature with %s instead of throwing", (_label, time) => {
+    const text = dropMessage().replace(/Issued At: .*/, `Issued At: ${time}`);
+    expect(() => refusalOf(text)).not.toThrow();
+    expect(refusalOf(text)).toBe("unknown-message");
+  });
+
+  it("never throws on arbitrary requests", () => {
+    // Deterministic pseudo-random values, including deep nesting.
+    let seed = 6529;
+    const next = () => {
+      seed = (seed * 1103515245 + 12345) % 2147483648;
+      return seed;
+    };
+    const atoms: unknown[] = [
+      null,
+      true,
+      0,
+      -1,
+      1e308,
+      "",
+      "x",
+      "2026-13-14T00:00:00.000Z",
+      ADDRESS,
+      OTHER,
+      "0x",
+      "__proto__",
+      "constructor",
+      [],
+      {},
+    ];
+    const value = (depth: number): unknown => {
+      const pick = next() % 4;
+      if (depth > 3 || pick === 0) return atoms[next() % atoms.length];
+      if (pick === 1) return [value(depth + 1), value(depth + 1)];
+      return {
+        [String(atoms[next() % atoms.length])]: value(depth + 1),
+        wallet: value(depth + 1),
+      };
+    };
+    const deep = `${"[".repeat(5000)}1${"]".repeat(5000)}`;
+    const payloads = [
+      ...Array.from({ length: 200 }, () =>
+        JSON.stringify({
+          domain: value(0),
+          types: value(0),
+          primaryType: atoms[next() % atoms.length],
+          message: value(0),
+        })
+      ),
+      `{"domain":{},"types":{"A":[]},"primaryType":"A","message":{"a":${deep}}}`,
+    ];
+    for (const payload of payloads) {
+      const parsed = parseWalletRequest(
+        {
+          method: "eth_signTypedData_v4",
+          params: [ADDRESS, payload],
+          address: ADDRESS,
+          chainId: 1,
+        },
+        [1]
+      );
+      if (parsed.ok) {
+        expect(() => describeWalletRequest(parsed.value, ORIGIN)).not.toThrow();
+      }
+    }
+    for (let i = 0; i < 200; i += 1) {
+      const text = Array.from({ length: next() % 15 }, () =>
+        String(atoms[next() % atoms.length])
+      ).join(next() % 2 ? String.fromCodePoint(10) : " ");
+      const parsed = parseWalletRequest(
+        {
+          method: "personal_sign",
+          params: [toHex(text), ADDRESS],
+          address: ADDRESS,
+          chainId: 1,
+        },
+        [1]
+      );
+      if (parsed.ok) {
+        expect(() => describeWalletRequest(parsed.value, ORIGIN)).not.toThrow();
+      }
+    }
+  });
+
   it("refuses bytes that are not readable text", () => {
     expect(describeWalletRequest(messageRequest("0xff00"), ORIGIN)).toEqual({
       ok: false,
@@ -435,20 +523,17 @@ describe("describeWalletRequest: refusals", () => {
       ],
       [
         "expiry",
-        (m: any) =>
-          (m.expiresAt = String(Number(m.expiresAt) + 86_400)),
+        (m: any) => (m.expiresAt = String(Number(m.expiresAt) + 86_400)),
         "statement-mismatch",
       ],
       [
         "device key",
-        (m: any) =>
-          (m.deviceKey = keyWithNewPrefix(m.deviceKey)),
+        (m: any) => (m.deviceKey = keyWithNewPrefix(m.deviceKey)),
         "statement-mismatch",
       ],
       [
         "encrypted-messages key",
-        (m: any) =>
-          (m.mlsDeviceKey = keyWithNewPrefix(m.mlsDeviceKey)),
+        (m: any) => (m.mlsDeviceKey = keyWithNewPrefix(m.mlsDeviceKey)),
         "statement-mismatch",
       ],
       [
@@ -456,11 +541,7 @@ describe("describeWalletRequest: refusals", () => {
         (m: any) => (m.mlsDeviceKey = `0x${"00".repeat(32)}`),
         "statement-mismatch",
       ],
-      [
-        "suites",
-        (m: any) => (m.ciphersuites = [3, 3]),
-        "statement-mismatch",
-      ],
+      ["suites", (m: any) => (m.ciphersuites = [3, 3]), "statement-mismatch"],
       [
         "issued time beyond the grant lifetime",
         (m: any) => (m.issuedAt = "1"),
@@ -468,20 +549,11 @@ describe("describeWalletRequest: refusals", () => {
       ],
       [
         "issued time after expiry",
-        (m: any) =>
-          (m.issuedAt = String(Number(m.expiresAt) + 60)),
+        (m: any) => (m.issuedAt = String(Number(m.expiresAt) + 60)),
         "statement-mismatch",
       ],
-      [
-        "wallet",
-        (m: any) => (m.wallet = OTHER),
-        "wrong-wallet",
-      ],
-      [
-        "origin",
-        (m: any) => (m.origin = "6529.io"),
-        "wrong-origin",
-      ],
+      ["wallet", (m: any) => (m.wallet = OTHER), "wrong-wallet"],
+      ["origin", (m: any) => (m.origin = "6529.io"), "wrong-origin"],
     ])("refuses a changed %s", async (_label, change, refusal) => {
       const request = await tamper(appGrant(), (json) => change(json.message));
       expect(describeWalletRequest(request, ORIGIN)).toEqual({
