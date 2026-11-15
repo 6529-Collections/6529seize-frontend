@@ -261,9 +261,10 @@ describe("parseWalletRequest: context", () => {
       },
     });
     // A key that is present but undefined is the same as no context.
-    const absent = parse(
-      input("personal_sign", [message, ADDRESS], { context: undefined })
-    );
+    const absent = parse({
+      ...input("personal_sign", [message, ADDRESS]),
+      context: undefined,
+    } as unknown as WalletRequestInput);
     expect(absent.ok && "context" in absent.value).toBe(false);
   });
 
