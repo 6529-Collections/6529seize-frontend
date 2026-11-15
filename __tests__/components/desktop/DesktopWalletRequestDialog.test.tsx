@@ -81,19 +81,71 @@ describe("DesktopWalletRequestDialog", () => {
     ).toBeInTheDocument();
   });
 
-  it("cancels an open request from its close control too", async () => {
-    render(<DesktopWalletRequestDialog />);
-    setStatus({
-      kind: "waiting",
-      requestCode: "ABC-123",
-      expiresAt: 1,
-      fingerprint: null,
+  const WAITING: DesktopWalletRequestStatus = {
+    kind: "waiting",
+    requestCode: "ABC-123",
+    expiresAt: 1,
+    fingerprint: null,
+  };
+  // The layered shell's two close controls: the backdrop (not tabbable) and
+  // the header's X button. Both call the dialog's onHide.
+  const closeControls = () => {
+    const [backdrop, header] = screen.getAllByRole("button", {
+      name: "Close wallet dialog",
     });
-    await userEvent.click(
-      screen.getAllByRole("button", { name: "Close wallet dialog" })[0]!
+    return { backdrop: backdrop!, header: header! };
+  };
+
+  it("names the dialog by its title", () => {
+    render(<DesktopWalletRequestDialog />);
+    setStatus(WAITING);
+    const dialog = screen.getByRole("dialog", { name: "Signature request" });
+    expect(dialog).toHaveAttribute("aria-modal", "true");
+  });
+
+  it.each(["header", "backdrop", "Escape"] as const)(
+    "cancels the open request (not just hides it) from %s while waiting",
+    async (control) => {
+      render(<DesktopWalletRequestDialog />);
+      setStatus(WAITING);
+      if (control === "Escape") {
+        await userEvent.keyboard("{Escape}");
+      } else {
+        await userEvent.click(closeControls()[control]);
+      }
+      expect(cancel).toHaveBeenCalledTimes(1);
+      expect(dismiss).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(["header", "backdrop", "Escape"] as const)(
+    "dismisses a finished request from %s without cancelling anything",
+    async (control) => {
+      render(<DesktopWalletRequestDialog />);
+      setStatus({ kind: "failed" });
+      if (control === "Escape") {
+        await userEvent.keyboard("{Escape}");
+      } else {
+        await userEvent.click(closeControls()[control]);
+      }
+      expect(dismiss).toHaveBeenCalledTimes(1);
+      expect(cancel).not.toHaveBeenCalled();
+    }
+  );
+
+  it("returns focus to the control that started the request", () => {
+    render(
+      <>
+        <button type="button">Post drop</button>
+        <DesktopWalletRequestDialog />
+      </>
     );
-    expect(cancel).toHaveBeenCalled();
-    expect(dismiss).not.toHaveBeenCalled();
+    const trigger = screen.getByRole("button", { name: "Post drop" });
+    trigger.focus();
+    setStatus(WAITING);
+    expect(trigger).not.toHaveFocus();
+    setStatus({ kind: "idle" });
+    expect(trigger).toHaveFocus();
   });
 
   it("limits reopening the way the shell does", async () => {
