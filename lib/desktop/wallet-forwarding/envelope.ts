@@ -139,7 +139,9 @@ interface WalletRequestFragmentContext {
 type ReadFragment = Omit<ParsedWalletRequestFragment, "request">;
 
 /** The fragment's shape only: the envelope bytes, its JSON and signature. */
-function readFragment(hash: string): Parsed<ReadFragment, WalletEnvelopeProblem> {
+function readFragment(
+  hash: string
+): Parsed<ReadFragment, WalletEnvelopeProblem> {
   if (hash.length > MAX_ENVELOPE_CHARS) return fail("malformed");
   const params = new URLSearchParams(hash.replace(/^#/, ""));
   const encoded = params.get("w");
