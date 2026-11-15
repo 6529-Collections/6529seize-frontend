@@ -48,6 +48,8 @@ interface DropMedia {
 }
 
 interface DropPart {
+  /** 1-based place in the drop; the order is part of what is signed. */
+  readonly position: number;
   readonly text: string | null;
   readonly quotedDropId: string | null;
   readonly media: readonly DropMedia[];
@@ -165,13 +167,13 @@ function optionalDropReference(value: unknown): string | null | undefined {
 /** An optional array whose items must all read; undefined when one fails. */
 function optionalList<T>(
   value: unknown,
-  read: (item: unknown) => T | null
+  read: (item: unknown, index: number) => T | null
 ): readonly T[] | undefined {
   if (value === undefined) return [];
   if (!Array.isArray(value)) return undefined;
   const items: T[] = [];
-  for (const item of value) {
-    const parsed = read(item);
+  for (const [index, item] of value.entries()) {
+    const parsed = read(item, index);
     if (parsed === null) return undefined;
     items.push(parsed);
   }
@@ -190,7 +192,7 @@ const readAttachment = (value: unknown): string | null =>
     ? value["attachment_id"]
     : null;
 
-function readPart(value: unknown): DropPart | null {
+function readPart(value: unknown, index: number): DropPart | null {
   if (!isRecord(value)) return null;
   const text = optionalText(value["content"]);
   const quotedDropId = optionalDropReference(value["quoted_drop"]);
@@ -204,7 +206,13 @@ function readPart(value: unknown): DropPart | null {
   ) {
     return null;
   }
-  return { text, quotedDropId, media, attachments: attachments.length };
+  return {
+    position: index + 1,
+    text,
+    quotedDropId,
+    media,
+    attachments: attachments.length,
+  };
 }
 
 const readMetadata = (
