@@ -3,6 +3,20 @@
   left: auto;
   z-index: 1000010;
   width: min(420px, calc(100vw - 32px));
+  /* Below the 6529 Desktop title strip and its window controls when the
+     host draws them over the page (--desktop-top-inset is 0 elsewhere). */
+  --toastify-toast-top: calc(
+    max(var(--toastify-toast-offset), env(safe-area-inset-top)) +
+      var(--desktop-top-inset, 0px)
+  );
+}
+
+@media only screen and (max-width: 480px) {
+  .toastContainer:global(.Toastify__toast-container--top-left),
+  .toastContainer:global(.Toastify__toast-container--top-center),
+  .toastContainer:global(.Toastify__toast-container--top-right) {
+    top: calc(env(safe-area-inset-top) + var(--desktop-top-inset, 0px));
+  }
 }
 
 .toastShell {

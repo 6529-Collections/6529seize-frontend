@@ -29,24 +29,6 @@ jest.mock("@/services/desktop/continueInBrowser", () => ({
   continueInBrowser: () => continueInBrowser(),
   getWebsiteHost: () => "staging.6529.io",
 }));
-jest.mock("@/components/mobile-wrapper-dialog/MobileWrapperDialog", () => ({
-  __esModule: true,
-  default: ({
-    isOpen,
-    title,
-    children,
-  }: {
-    isOpen: boolean;
-    title: string;
-    children: React.ReactNode;
-  }) =>
-    isOpen ? (
-      <div role="dialog" aria-label={title}>
-        {children}
-      </div>
-    ) : null,
-}));
-
 const setStatus = (next: DesktopWalletRequestStatus) => {
   status = next;
   act(() => listeners.forEach((listener) => listener()));
@@ -61,13 +43,19 @@ describe("DesktopWalletRequestDialog", () => {
   });
 
   it("renders nothing while no request is open", () => {
-    render(<DesktopWalletRequestDialog />);
-    expect(screen.queryByRole("dialog")).toBeNull();
+    const { container } = render(<DesktopWalletRequestDialog />);
+    expect(container).toBeEmptyDOMElement();
+    expect(document.querySelector("dialog")).toBeNull();
   });
 
   it("shows the request code while waiting, and cancels", async () => {
     render(<DesktopWalletRequestDialog />);
-    setStatus({ kind: "waiting", requestCode: "ABC-123", expiresAt: 1 });
+    setStatus({
+      kind: "waiting",
+      requestCode: "ABC-123",
+      expiresAt: 1,
+      fingerprint: null,
+    });
 
     expect(
       screen.getByRole("dialog", { name: "Signature request" })
@@ -78,10 +66,45 @@ describe("DesktopWalletRequestDialog", () => {
     expect(cancel).toHaveBeenCalled();
   });
 
+  it("shows the content fingerprint the browser page also shows", () => {
+    render(<DesktopWalletRequestDialog />);
+    setStatus({
+      kind: "waiting",
+      requestCode: "ABC-123",
+      expiresAt: 1,
+      fingerprint: "2c26b46b…6266e7ae",
+    });
+    expect(
+      screen.getByText(
+        /Content fingerprint 2c26b46b…6266e7ae\. The browser page shows the same fingerprint/
+      )
+    ).toBeInTheDocument();
+  });
+
+  it("cancels an open request from its close control too", async () => {
+    render(<DesktopWalletRequestDialog />);
+    setStatus({
+      kind: "waiting",
+      requestCode: "ABC-123",
+      expiresAt: 1,
+      fingerprint: null,
+    });
+    await userEvent.click(
+      screen.getAllByRole("button", { name: "Close wallet dialog" })[0]!
+    );
+    expect(cancel).toHaveBeenCalled();
+    expect(dismiss).not.toHaveBeenCalled();
+  });
+
   it("limits reopening the way the shell does", async () => {
     jest.useFakeTimers();
     render(<DesktopWalletRequestDialog />);
-    setStatus({ kind: "waiting", requestCode: "ABC-123", expiresAt: 1 });
+    setStatus({
+      kind: "waiting",
+      requestCode: "ABC-123",
+      expiresAt: 1,
+      fingerprint: null,
+    });
 
     for (let attempt = 0; attempt < 3; attempt += 1) {
       const button = screen.getByRole("button", {
@@ -107,7 +130,12 @@ describe("DesktopWalletRequestDialog", () => {
     ).toBeNull();
 
     // A new request starts over.
-    setStatus({ kind: "waiting", requestCode: "DEF-456", expiresAt: 1 });
+    setStatus({
+      kind: "waiting",
+      requestCode: "DEF-456",
+      expiresAt: 1,
+      fingerprint: null,
+    });
     expect(
       screen.getByRole("button", { name: "Open the page again" })
     ).toBeEnabled();

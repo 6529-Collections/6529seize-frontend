@@ -21,6 +21,7 @@ jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
   runDesktopWalletRequest: jest.fn(),
   showDesktopWalletRefusal: jest.fn(),
   watchDesktopWalletStatus: jest.fn(),
+  desktopWalletAcceptsContext: jest.fn(() => false),
 }));
 jest.mock("@/wagmiConfig/desktopBrowserWalletConnector", () => ({
   DESKTOP_BROWSER_WALLET_CONNECTOR_ID: "desktopBrowserWallet",
@@ -100,7 +101,7 @@ describe("useDesktopBrowserWalletConnector", () => {
     const { adapter, setState } = makeAdapter();
     renderHook(() => useDesktopBrowserWalletConnector(adapter as never));
     await waitFor(() => expect(setState).toHaveBeenCalled());
-    const { canForward } = jest.mocked(desktopBrowserWalletConnector).mock
+    const { prepare } = jest.mocked(desktopBrowserWalletConnector).mock
       .calls[0]![0];
 
     const freeText = parseWalletRequest(
@@ -113,7 +114,7 @@ describe("useDesktopBrowserWalletConnector", () => {
       [1]
     );
     if (!freeText.ok) throw new Error(freeText.problem);
-    expect(canForward(freeText.value)).toBe(false);
+    expect(prepare(freeText.value)).toBeNull();
     expect(showDesktopWalletRefusal).toHaveBeenCalledTimes(1);
   });
 });

@@ -3987,6 +3987,8 @@ export const EN_US_ROOT_MESSAGES = {
     "Your browser opened a page to sign with your wallet. Finish there; this waits for two minutes.",
   "desktopWalletRequest.code":
     "Request code {code}. The browser page shows the same code.",
+  "desktopWalletRequest.fingerprint":
+    "Content fingerprint {fingerprint}. The browser page shows the same fingerprint.",
   "desktopWalletRequest.reopen": "Open the page again",
   "desktopWalletRequest.close": "Close",
   "desktopWalletRequest.cancel": "Cancel",

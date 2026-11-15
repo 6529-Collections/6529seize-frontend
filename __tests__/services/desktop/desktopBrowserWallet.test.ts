@@ -1,7 +1,9 @@
 import {
   __resetDesktopBrowserWalletForTests,
   cancelDesktopWalletRequest,
+  desktopWalletAcceptsContext,
   dismissDesktopWalletRequestStatus,
+  forgetAllBrowserWalletProfiles,
   forgetBrowserWalletProfile,
   getDesktopWalletMethods,
   getDesktopWalletRequestStatus,
@@ -108,6 +110,46 @@ describe("desktopBrowserWallet", () => {
       ).resolves.toBeUndefined();
     });
 
+    it("does not offer forwarding to a later sign-in of the same address another way", async () => {
+      // A store that keeps what is written, as the shell's does.
+      let stored: unknown;
+      store.get.mockImplementation(async () => stored);
+      store.set.mockImplementation(async (_key: string, value: unknown) => {
+        stored = value;
+      });
+      await markBrowserWalletProfile(ADDRESS);
+      expect(isBrowserWalletProfile(ADDRESS)).toBe(true);
+
+      // Logout forgets it.
+      await forgetBrowserWalletProfile(ADDRESS);
+      // The app restarts, the same address signs in with WalletConnect (no
+      // mark): it is not a browser-wallet profile.
+      __resetDesktopBrowserWalletForTests();
+      jest.mocked(getDesktopStore).mockReturnValue(store);
+      await loadBrowserWalletProfiles();
+      expect(isBrowserWalletProfile(ADDRESS)).toBe(false);
+      expect(stored).toEqual([]);
+    });
+
+    it("forgets every profile on sign-out of all profiles, even unread", async () => {
+      store.get.mockResolvedValue([ADDRESS, OTHER]);
+      await loadBrowserWalletProfiles();
+      expect(isBrowserWalletProfile(OTHER)).toBe(true);
+      await forgetAllBrowserWalletProfiles();
+      expect(isBrowserWalletProfile(ADDRESS)).toBe(false);
+      expect(isBrowserWalletProfile(OTHER)).toBe(false);
+      expect(store.set).toHaveBeenLastCalledWith(
+        "desktop-browser-wallet-profiles",
+        []
+      );
+
+      // Never throws, with no store or a failing one.
+      store.set.mockRejectedValue(new Error("disk full"));
+      await expect(forgetAllBrowserWalletProfiles()).resolves.toBeUndefined();
+      jest.mocked(getDesktopStore).mockReturnValue(null);
+      await expect(forgetAllBrowserWalletProfiles()).resolves.toBeUndefined();
+    });
+
     it("offers nothing from an unreadable store and never overwrites it", async () => {
       store.get.mockRejectedValue(new Error("locked"));
       await loadBrowserWalletProfiles();
@@ -145,6 +187,25 @@ describe("desktopBrowserWallet", () => {
       jest.mocked(getDesktopWallet).mockReturnValue(null);
       await expect(getDesktopWalletMethods()).resolves.toEqual([]);
     });
+
+    it("sends context only to a shell that says it accepts it", async () => {
+      await getDesktopWalletMethods();
+      expect(desktopWalletAcceptsContext()).toBe(false);
+      bridge.capabilities.mockResolvedValue({
+        version: 1,
+        methods: ["personal_sign"],
+        context: true,
+      });
+      await getDesktopWalletMethods();
+      expect(desktopWalletAcceptsContext()).toBe(true);
+      bridge.capabilities.mockResolvedValue({
+        version: 1,
+        methods: ["personal_sign"],
+        context: "yes",
+      });
+      await getDesktopWalletMethods();
+      expect(desktopWalletAcceptsContext()).toBe(false);
+    });
   });
 
   describe("status", () => {
@@ -162,6 +223,7 @@ describe("desktopBrowserWallet", () => {
         kind: "waiting",
         requestCode: "ABC-123",
         expiresAt: 1_800_000_000_000,
+        fingerprint: null,
       });
       statusListener?.({ pending: false });
       expect(getDesktopWalletRequestStatus()).toEqual({ kind: "idle" });
@@ -262,6 +324,39 @@ describe("desktopBrowserWallet", () => {
       answerFirst({ ok: false, code: "expired" });
       await first;
       expect(getDesktopWalletRequestStatus()).toEqual({ kind: "expired" });
+    });
+
+    it("shows the open request's content fingerprint with its code", async () => {
+      watchDesktopWalletStatus();
+      let answer: (value: unknown) => void = () => undefined;
+      bridge.request.mockReturnValueOnce(
+        new Promise((resolve) => {
+          answer = resolve;
+        })
+      );
+      const running = runDesktopWalletRequest(REQUEST, "2c26b46b…6266e7ae");
+      statusListener?.({
+        pending: true,
+        code: "ABC-123",
+        method: "personal_sign",
+        expiresAt: 1_800_000_000_000,
+      });
+      expect(getDesktopWalletRequestStatus()).toMatchObject({
+        kind: "waiting",
+        fingerprint: "2c26b46b…6266e7ae",
+      });
+      answer({ ok: true, value: SIGNATURE });
+      await running;
+      // A later status without a request of this app's has no fingerprint.
+      statusListener?.({
+        pending: true,
+        code: "DEF-456",
+        method: "personal_sign",
+        expiresAt: 1_800_000_000_000,
+      });
+      expect(getDesktopWalletRequestStatus()).toMatchObject({
+        fingerprint: null,
+      });
     });
 
     it("fails cleanly when the bridge throws, and is unsupported without it", async () => {

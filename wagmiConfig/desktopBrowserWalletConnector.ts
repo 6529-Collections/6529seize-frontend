@@ -21,17 +21,30 @@ import {
 /** wagmi connector id and type for 6529 Desktop wallet forwarding. */
 export const DESKTOP_BROWSER_WALLET_CONNECTOR_ID = "desktopBrowserWallet";
 
+/** What the app adds to a request it forwards. */
+export interface PreparedWalletRequest {
+  /**
+   * For a `personal_sign` drop or decision signature: the content behind
+   * its payload hash, which the browser page checks and shows.
+   */
+  readonly context?: string;
+  /** The short payload hash the waiting dialog shows, or null. */
+  readonly fingerprint: string | null;
+}
+
 interface DesktopBrowserWalletConnectorOptions {
   /** The signed-in profile this connector may sign for, or null. */
   readonly getAddress: () => string | null;
   /**
-   * Whether the browser page would sign this request (the same allow-list);
-   * false refuses it in the app, before the browser opens.
+   * Null when the browser page would not sign this request (the same
+   * allow-list), which refuses it in the app before the browser opens;
+   * otherwise what to add to it.
    */
-  readonly canForward: (request: WalletRequest) => boolean;
+  readonly prepare: (request: WalletRequest) => PreparedWalletRequest | null;
   /** Opens the request in the browser through the shell and waits. */
   readonly runRequest: (
-    request: WalletRequestInput
+    request: WalletRequestInput,
+    fingerprint: string | null
   ) => Promise<WalletBridgeResponse>;
 }
 
@@ -69,19 +82,26 @@ const sameAddress = (left: string, right: string) =>
 
 /**
  * The request in the form the shell receives, rebuilt from the validated
- * request alone: `personal_sign` as `[message, address]`, typed data as
+ * request alone: `personal_sign` as `[message, address]` (with the content
+ * behind its payload hash, when the app has it), typed data as
  * `[address, json]` with the exact JSON that was validated.
  */
 function toShellInput(
   request: WalletRequest,
-  typedDataJson: string | null
+  typedDataJson: string | null,
+  context: string | undefined
 ): WalletRequestInput {
   const { method, address, chainId } = request;
-  const params =
-    request.method === "personal_sign"
-      ? [request.message, address]
-      : [address, typedDataJson];
-  return { method, params, address, chainId };
+  if (request.method === "personal_sign") {
+    return {
+      method,
+      params: [request.message, address],
+      address,
+      chainId,
+      ...(context === undefined ? {} : { context }),
+    };
+  }
+  return { method, params: [address, typedDataJson], address, chainId };
 }
 
 /**
@@ -150,13 +170,15 @@ export function desktopBrowserWalletConnector(
       );
       if (!parsed.ok) throw toProviderError("invalid");
       const request = parsed.value;
-      if (!options.canForward(request)) throw toProviderError("refused");
+      const prepared = options.prepare(request);
+      if (!prepared) throw toProviderError("refused");
       const typedDataJson =
         request.method === "eth_signTypedData_v4"
           ? ((params as readonly unknown[])[1] as string)
           : null;
       const response = await options.runRequest(
-        toShellInput(request, typedDataJson)
+        toShellInput(request, typedDataJson, prepared.context),
+        prepared.fingerprint
       );
       if (!response.ok) throw toProviderError(response.code);
       const signer = await recoverSigner(request, response.value);
