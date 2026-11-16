@@ -376,6 +376,349 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await installCategories(page, getSandboxApiOrigin(baseURL));
   });
 
+  test("opens two-step Grant Rep from You assigned and prefills filtered category choices without saving", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    let allocationReads = 0;
+    let writes = 0;
+    let searches = 0;
+    const stats = [
+      {
+        category: CATEGORY,
+        rating: 2000,
+        contributor_count: 3,
+        rater_contribution: 1000,
+      },
+      {
+        category: "Research",
+        rating: 500,
+        contributor_count: 2,
+        rater_contribution: -25,
+      },
+      ...[
+        "Music",
+        "Community",
+        "Art",
+        "Curation",
+        "Memes",
+        "AI",
+        "Photography",
+      ].map((category, index) => ({
+        category,
+        rating: 900 - index,
+        contributor_count: 1,
+        rater_contribution: 0,
+      })),
+    ];
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) => {
+        allocationReads++;
+        return route.fulfill({
+          json: {
+            ...allowance,
+            rep_rates_left_for_rater: 5000,
+            rating_stats: stats,
+          },
+        });
+      }
+    );
+    await page.route(
+      (url) =>
+        /^\/api\/+rep\/categories(?:\/availability)?$/.test(url.pathname),
+      (route) => {
+        searches++;
+        return route.fulfill({ json: [] });
+      }
+    );
+    await page.route(`${api}/api/profiles/${TARGET}/rep/rating`, (route) => {
+      writes++;
+      return route.fulfill({
+        status: 500,
+        json: { message: "Unexpected save while choosing categories" },
+      });
+    });
+    await openProfile(page);
+    await page
+      .getByRole("button", { name: "You assigned: 20", exact: true })
+      .click();
+    const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
+    const search = grant.getByRole("textbox", {
+      name: "Category to grant REP for",
+      exact: true,
+    });
+    await expect(search).toHaveValue("");
+    await expect(
+      grant.getByRole("textbox", {
+        name: "Your total REP for this category",
+        exact: true,
+      })
+    ).toHaveCount(0);
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      grant.getByRole("button", { name: "Cancel", exact: true })
+    ).toBeVisible();
+    const own = grant.getByRole("group", { name: "You assigned", exact: true });
+    const profile = grant.getByRole("group", {
+      name: "On this profile",
+      exact: true,
+    });
+    await expect(own.getByRole("button")).toHaveCount(2);
+    await expect(profile.getByRole("button")).toHaveCount(6);
+    await expect(
+      profile.getByRole("button", { name: CATEGORY, exact: true })
+    ).toHaveCount(0);
+    await page
+      .getByRole("dialog", { name: "Grant Rep", exact: true })
+      .locator(".mobile-wrapper-dialog")
+      .screenshot({ path: testInfo.outputPath("grant-rep-category-step.png") });
+    await search.fill("mu");
+    await expect(own.getByRole("button")).toHaveCount(0);
+    await profile.getByRole("button", { name: "Music", exact: true }).click();
+    const amount = grant.getByRole("textbox", {
+      name: "Your total REP for this category",
+      exact: true,
+    });
+    await expect(amount).toHaveValue("0");
+    await expect(grant.getByText("Current Rep:", { exact: true })).toHaveCount(
+      0
+    );
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeDisabled();
+    await amount.fill("35");
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeEnabled();
+    await grant
+      .getByRole("button", { name: "Change category", exact: true })
+      .click();
+    await own
+      .getByRole("button", { name: "Research -25", exact: true })
+      .click();
+    await expect(search).toHaveValue("Research");
+    await expect(search).toHaveAttribute("readonly");
+    await expect(amount).toHaveValue("-25");
+    await expect(
+      grant.getByText("Current Rep:", { exact: true })
+    ).toBeVisible();
+    await expect(
+      grant.getByText(
+        "Enter the total you want to give, including any existing rating.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await expect(
+      grant.getByRole("button", { name: "Save", exact: true })
+    ).toBeDisabled();
+    expect(allocationReads).toBe(1);
+    expect(searches).toBe(0);
+    expect(writes).toBe(0);
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page);
+    await page
+      .getByRole("dialog", { name: "Grant Rep", exact: true })
+      .locator(".mobile-wrapper-dialog")
+      .screenshot({ path: testInfo.outputPath("grant-rep-two-step.png") });
+  });
+
+  test("grants first REP from the pinned You row and refreshes the tag and header totals", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    let rating = 0;
+    const saved: unknown[] = [];
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...allowance,
+            rep_rates_left_for_rater: 80 - rating,
+            rating_stats: [
+              {
+                category: CATEGORY,
+                rating: 20 + rating,
+                contributor_count: rating === 0 ? 1 : 2,
+                rater_contribution: rating,
+              },
+            ],
+          },
+        })
+    );
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/categories?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            data: [
+              {
+                category: CATEGORY,
+                total_rep: 20 + rating,
+                contributor_count: rating === 0 ? 1 : 2,
+                authenticated_user_contribution: rating,
+                top_contributors: [],
+              },
+            ],
+            count: 1,
+            page: 1,
+            next: false,
+          },
+        })
+    );
+    await page.route(`${api}/api/profiles/${TARGET}/rep/overview*`, (route) =>
+      route.fulfill({
+        json: {
+          total_rep: 20 + rating,
+          authenticated_user_contribution: rating,
+          contributor_count: rating === 0 ? 1 : 2,
+          contributors: { data: [], page: 1, next: false, count: 0 },
+        },
+      })
+    );
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/categories/*/contributors?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            data: [
+              {
+                profile: {
+                  id: "other",
+                  handle: "other-rater",
+                  primary_address: "0x0000000000000000000000000000000000000530",
+                  pfp: "/icon-512.png",
+                },
+                contribution: 20,
+              },
+            ],
+            page: 1,
+            next: false,
+          },
+        })
+    );
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/rating`,
+      async (route) => {
+        const body: unknown = route.request().postDataJSON();
+        if (
+          typeof body !== "object" ||
+          body === null ||
+          !("amount" in body) ||
+          typeof body.amount !== "number" ||
+          !("category" in body) ||
+          body.category !== CATEGORY
+        )
+          throw new Error("Unexpected first-grant payload");
+        saved.push(body);
+        rating = body.amount;
+        await route.fulfill({ json: {} });
+      }
+    );
+    if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
+    await openProfile(page);
+    const tag = page.getByRole("button", {
+      name: `Open REP category ${CATEGORY}`,
+      exact: true,
+    });
+    await tag.click();
+    const panel = categoryPanel(page);
+    const amount = panel.getByRole("textbox", { name: "You", exact: true });
+    await expect(amount).toHaveValue("");
+    await expect(amount).toHaveAttribute("placeholder", "0");
+    if (isMobile) await expect(amount).not.toBeFocused();
+    else await expect(amount).toBeFocused();
+    await expect(panel.getByRole("link").first()).toHaveAccessibleName("You");
+    await amount.fill("15");
+    const grant = panel.getByRole("button", { name: "Grant Rep", exact: true });
+    await expect(grant).toBeEnabled();
+    expect(saved).toHaveLength(0);
+    await amount.press("Escape");
+    await expect(amount).toHaveValue("");
+    await amount.fill("15");
+    if (isMobile) await grant.click();
+    else await amount.press("Enter");
+    await expect(tag).toHaveAccessibleDescription("You assigned: 15");
+    expect(saved).toEqual([{ amount: 15, category: CATEGORY }]);
+    const rep = page
+      .getByRole("region", { name: "REP", exact: true })
+      .filter({ visible: true });
+    await expect(
+      rep.getByRole("button", { name: "You assigned: 15", exact: true })
+    ).toBeVisible();
+    await expect(rep.getByText("35", { exact: true }).first()).toBeVisible();
+    if (isMobile) await expect(panel).toBeHidden();
+    else {
+      await expect(panel).toBeVisible();
+      await expect(panel.getByText("Saved", { exact: true })).toBeVisible();
+    }
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("rep-first-contribution.png"),
+      fullPage: true,
+    });
+  });
+
+  test("keeps NIC raters beside the total on desktop and mobile", async ({
+    page,
+    baseURL,
+    isMobile,
+  }) => {
+    const api = getSandboxApiOrigin(baseURL);
+    await page.route(`${api}/api/profiles/*/cic/overview*`, (route) =>
+      route.fulfill({
+        json: {
+          total_cic: 4689,
+          authenticated_user_contribution: 100,
+          contributor_count: 3,
+          contributors: {
+            data: Array.from({ length: 3 }, (_, index) => ({
+              profile: {
+                handle: `nic-rater-${index}`,
+                primary_address: `0x${(index + 1).toString(16).padStart(40, "0")}`,
+                pfp: "/icon-512.png",
+              },
+              contribution: 100,
+            })),
+            page: 1,
+            next: false,
+            count: 3,
+          },
+        },
+      })
+    );
+    await openProfile(page);
+    if (isMobile)
+      await page.getByRole("button", { name: "NIC", exact: true }).click();
+    const nic = page.getByRole("region", { name: "NIC", exact: true });
+    const raters = nic.getByRole("button", {
+      name: "View NIC Received: 3 raters",
+    });
+    await expect(raters).toBeVisible();
+    const score = nic.getByText("4,689", { exact: true });
+    await expect(score).toBeVisible();
+    const scoreBox = await score.boundingBox();
+    const ratersBox = await raters.boundingBox();
+    expect(scoreBox).not.toBeNull();
+    expect(ratersBox).not.toBeNull();
+    expect(ratersBox!.x).toBeGreaterThan(scoreBox!.x + scoreBox!.width);
+    expect(
+      Math.abs(
+        ratersBox!.y +
+          ratersBox!.height / 2 -
+          scoreBox!.y -
+          scoreBox!.height / 2
+      )
+    ).toBeLessThanOrEqual(3);
+    await expectNoHorizontalOverflow(page);
+  });
+
   test("signed-out viewers do not see personal amounts from stale REP responses", async ({
     page,
     isMobile,
@@ -592,7 +935,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       );
     }
     // The profile summary precedes the per-category contribution indicators.
-    const assigned = repSummary.getByText(/^You assigned:/).first();
+    const assigned = repSummary.getByRole("button", {
+      name: "You assigned: 20",
+      exact: true,
+    });
     await expect(assigned).toHaveText("You assigned: 20");
     if (isMobile) {
       await expect(assigned).toHaveCSS("white-space", "nowrap");
@@ -1045,11 +1391,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await input.press(blurKey);
     await expect(input).toHaveValue("-12,345");
     expect(reads).toBe(readsBeforeTyping);
-    await panel.getByRole("button", { name: "Cancel", exact: true }).click();
+    await input.press("Escape");
+    await expect(input).toHaveValue("12345");
+    await input.press(blurKey);
     await expect(input).toHaveValue("12,345");
   });
 
-  test("keeps a category read-only when the viewer has no existing contribution", async ({
+  test("offers an empty You input when the viewer has no existing contribution", async ({
     page,
     baseURL,
   }) => {
@@ -1078,10 +1426,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       panel.getByRole("link", { name: "other-rater", exact: true })
     ).toBeVisible();
     // The authoritative rating state also overrides stale contributor summaries.
-    await expect(panel.getByRole("textbox")).toHaveCount(0);
+    await expect(
+      panel.getByRole("textbox", { name: "You", exact: true })
+    ).toHaveValue("");
+    await expect(
+      panel.getByRole("textbox", { name: "You", exact: true })
+    ).toHaveAttribute("placeholder", "0");
     await expect(
       panel.getByRole("link", { name: "You", exact: true })
-    ).toHaveCount(0);
+    ).toHaveCount(1);
     await expect(
       panel.getByRole("button", { name: "Save", exact: true })
     ).toHaveCount(0);
@@ -1233,11 +1586,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       releaseAllowance();
     }
     await expect(
-      grant.getByRole("button", { name: "Grant Rep", exact: true })
+      grant.getByRole("button", { name: "Save", exact: true })
     ).toBeEnabled();
     await expect(amount).toHaveValue("35");
     await expectDesktopRatingPosition(page, "Grant Rep");
-    await grant.getByRole("button", { name: "Grant Rep", exact: true }).click();
+    await grant.getByRole("button", { name: "Save", exact: true }).click();
     await expect(grant).toBeHidden();
     expect(saved).toEqual([{ amount: 35, category: CATEGORY }]);
     await expect(
@@ -3410,35 +3763,17 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
             expect(countBox).not.toBeNull();
             expect(ratingBox).not.toBeNull();
             if (rateBox && countBox && ratingBox) {
-              expect(rateBox.x).toBeGreaterThanOrEqual(
-                countBox.x + countBox.width + 8
+              expect(rateBox.y).toBeGreaterThanOrEqual(
+                countBox.y + countBox.height
               );
-              expect(rateBox.y + rateBox.height / 2).toBeCloseTo(
-                countBox.y + countBox.height / 2,
+              expect(rateBox.x - ratingBox.x - ratingBox.width).toBeCloseTo(
+                8,
                 0
               );
-              if (width === 320) {
-                expect(ratingBox.y).toBeGreaterThanOrEqual(
-                  rateBox.y + rateBox.height
-                );
-                expect(ratingBox.y - rateBox.y - rateBox.height).toBeCloseTo(
-                  8,
-                  0
-                );
-                expect(ratingBox.x + ratingBox.width).toBeCloseTo(
-                  rateBox.x + rateBox.width,
-                  0
-                );
-              } else {
-                expect(rateBox.x - ratingBox.x - ratingBox.width).toBeCloseTo(
-                  8,
-                  0
-                );
-                expect(ratingBox.y + ratingBox.height / 2).toBeCloseTo(
-                  rateBox.y + rateBox.height / 2,
-                  0
-                );
-              }
+              expect(ratingBox.y + ratingBox.height / 2).toBeCloseTo(
+                rateBox.y + rateBox.height / 2,
+                0
+              );
             }
           }
           await page.setViewportSize({ width: 320, height: 844 });
@@ -3465,10 +3800,18 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         expect(scoreBox).not.toBeNull();
         expect(contributorsBox).not.toBeNull();
         expect(avatarBox).not.toBeNull();
-        expect(contributorsBox!.y).toBeGreaterThanOrEqual(
-          scoreBox!.y + scoreBox!.height
-        );
-        expect(avatarBox!.x).toBeCloseTo(scoreBox!.x, 0);
+        if (direction === "Received") {
+          expect(avatarBox!.x).toBeGreaterThan(scoreBox!.x + scoreBox!.width);
+          expect(contributorsBox!.y + contributorsBox!.height / 2).toBeCloseTo(
+            scoreBox!.y + scoreBox!.height / 2,
+            0
+          );
+        } else {
+          expect(contributorsBox!.y).toBeGreaterThanOrEqual(
+            scoreBox!.y + scoreBox!.height
+          );
+          expect(avatarBox!.x).toBeCloseTo(scoreBox!.x, 0);
+        }
         expect(contributorsBox!.x).toBeGreaterThan(
           avatarBox!.x + avatarBox!.width
         );

@@ -118,6 +118,7 @@ beforeEach(() => {
   ];
   requestAuth.mockResolvedValue({ success: true });
   allocation.mockImplementation(() => ({
+    ratingStats: [],
     repState: {
       category: "Artist",
       rater_contribution: ownContribution,
@@ -210,7 +211,8 @@ it("makes the owner's received categories read-only", async () => {
   expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
 });
 
-it("does not add a You row when no REP has been given in the category", async () => {
+it("pins an empty You input for a first contribution and grants only on submit", async () => {
+  const user = userEvent.setup();
   ownContribution = 0;
   rows = [
     {
@@ -225,12 +227,26 @@ it("does not add a You row when no REP has been given in the category", async ()
   ];
   setup(target, "received", owner, true);
   await screen.findByRole("link", { name: "repqa-dana" });
-  expect(screen.getAllByRole("link")).toHaveLength(1);
-  expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
-  expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  expect(screen.getAllByRole("link")[0]).toHaveTextContent("You");
+  const input = screen.getByRole("textbox", { name: "You" });
+  expect(input).toHaveValue("");
+  expect(input).toHaveAttribute("placeholder", "0");
+  expect(input).toHaveFocus();
+  await user.type(input, "15");
+  expect(post).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: "Grant Rep" })).toBeEnabled();
+  await user.keyboard("{Escape}");
+  expect(input).toHaveValue("");
   expect(
-    screen.queryByRole("button", { name: "Save" })
+    screen.queryByRole("button", { name: "Grant Rep" })
   ).not.toBeInTheDocument();
+  await user.type(input, "15{Enter}");
+  await waitFor(() =>
+    expect(post).toHaveBeenCalledWith({
+      endpoint: "profiles/target/rep/rating",
+      body: { amount: 15, category: "Artist" },
+    })
+  );
 });
 
 it("keeps an existing negative contribution first and editable", async () => {
@@ -266,7 +282,7 @@ it("does not autofocus the mobile amount", async () => {
   expect(input).not.toHaveFocus();
 });
 
-it("removes the You row after saving zero", async () => {
+it("keeps the You input empty after removing a contribution", async () => {
   const user = userEvent.setup();
   post.mockImplementation(async () => {
     ownContribution = 0;
@@ -276,11 +292,10 @@ it("removes the You row after saving zero", async () => {
   await user.clear(input);
   await user.type(input, "0");
   await user.click(screen.getByRole("button", { name: "Save" }));
-  await waitFor(() =>
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
-  );
-  expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
-  expect(screen.getAllByRole("link")).toHaveLength(2);
+  await waitFor(() => expect(input).toHaveValue(""));
+  expect(screen.getByRole("link", { name: "You" })).toBeInTheDocument();
+  expect(screen.getByText("Saved")).toBeInTheDocument();
+  expect(screen.getAllByRole("link")).toHaveLength(3);
   expect(post).toHaveBeenCalledWith({
     endpoint: "profiles/target/rep/rating",
     body: { amount: 0, category: "Artist" },
@@ -388,6 +403,7 @@ it("explains an invalid amount on the field", async () => {
 it("blocks a batch whose first write cannot clear a negative remaining allowance", async () => {
   const user = userEvent.setup();
   allocation.mockReturnValue({
+    ratingStats: [],
     repState: {
       category: "Artist",
       rater_contribution: 30,

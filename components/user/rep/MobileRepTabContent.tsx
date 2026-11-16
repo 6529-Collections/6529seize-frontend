@@ -19,6 +19,7 @@ import RepCategoryList from "./RepCategoryList";
 import RepDirectionToggle from "./RepDirectionToggle";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
+import AssignedRepButton from "./AssignedRepButton";
 
 function RepEmptyState({
   loading,
@@ -177,21 +178,11 @@ export default function MobileRepTabContent({
                 {overview !== null &&
                   overview.authenticated_user_contribution !== null &&
                   overview.authenticated_user_contribution !== 0 && (
-                    <span className="tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-0.5 tw-whitespace-nowrap tw-text-xs tw-font-normal tw-text-iron-400">
-                      {tRich(locale, "user.profile.rep.rep.youAssigned", {
-                        value: (
-                          <span
-                            key="value"
-                            className="tw-font-medium tw-text-iron-100"
-                          >
-                            {formatInteger(
-                              locale,
-                              overview.authenticated_user_contribution
-                            )}
-                          </span>
-                        ),
-                      })}
-                    </span>
+                    <AssignedRepButton
+                      amount={overview.authenticated_user_contribution}
+                      onClick={onGrantRep}
+                      compact
+                    />
                   )}
               </div>
             </UserPageRateWrapper>

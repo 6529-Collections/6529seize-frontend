@@ -72,9 +72,7 @@ export default function NicRatingsOverview({
     />
   );
   const scoreValue = (
-    <div
-      className={`tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-emerald-400 ${compact ? "" : "tw-col-start-1 tw-row-start-2"}`}
-    >
+    <div className="tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-emerald-400">
       {score === undefined ? "—" : formatInteger(locale, score)}
     </div>
   );
@@ -112,10 +110,17 @@ export default function NicRatingsOverview({
             </h2>
             {directionToggle}
           </div>
-          {scoreValue}
+          {direction === "received" ? (
+            <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+              {scoreValue}
+              {contributors}
+            </div>
+          ) : (
+            scoreValue
+          )}
           {status}
           <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-1">
-            {contributors}
+            {direction === "given" && contributors}
             {rateButton && (
               <div className="tw-ml-auto tw-min-w-0 tw-flex-1 tw-pt-1">
                 <div className="tw-flex tw-flex-row-reverse tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
@@ -130,16 +135,25 @@ export default function NicRatingsOverview({
         <>
           {directionToggle}
           <div className="tw-mt-4 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-3 tw-gap-y-1">
-            <div className="tw-contents">
-              <p className="tw-col-start-1 tw-row-start-1 tw-m-0 tw-text-xs tw-text-iron-400">
-                {t(locale, "user.rate.nicRegion")}
-              </p>
-              {scoreValue}
-            </div>
+            <p className="tw-col-start-1 tw-row-start-1 tw-m-0 tw-text-xs tw-text-iron-400">
+              {t(locale, "user.rate.nicRegion")}
+            </p>
             {status}
-            <div className="tw-col-span-2 tw-row-start-3 tw-mt-3">
-              {contributors}
+            <div
+              className={
+                direction === "received"
+                  ? "tw-col-span-2 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3"
+                  : "tw-col-start-1 tw-row-start-2"
+              }
+            >
+              {scoreValue}
+              {direction === "received" && contributors}
             </div>
+            {direction === "given" && (
+              <div className="tw-col-span-2 tw-row-start-3 tw-mt-3">
+                {contributors}
+              </div>
+            )}
           </div>
         </>
       )}

@@ -126,6 +126,8 @@ show the profile-creation welcome.
   sign. On mobile and medium screens, this summary stays beside `Grant Rep`
   as a group at the right of the category heading. When space is tight, the
   summary moves below the button and stays right-aligned.
+- In `Received`, select `You assigned` and its chevron to open Grant Rep and
+  choose a category to edit.
 - Category headers show the name, total, up to three top-contributor avatars and
   rater/receiver count. Long names truncate. The tag opens the contributor
   panel, with separate desktop profile links on its avatars. Tags have no separate edit
@@ -191,7 +193,12 @@ show the profile-creation welcome.
   for REP keep that positioning. NIC rater and receiver lists start about 10%
   down and grow to at most 80% of the viewport height. Long content scrolls
   inside. Mobile keeps the bottom sheet.
-- Category search accepts 3-100 characters.
+- First choose a category. The search field is followed by `You assigned`
+  chips showing your categories and amounts, including negative REP, and
+  `On this profile` chips showing up to six other top categories. Typing
+  filters these choices. Long personal lists scroll within their group.
+- Category search accepts 3-100 characters for searching all categories;
+  existing profile chips can be selected without typing.
 - Results appear after a short debounce as compact category pills, including the
   typed category and matching categories returned by the existing search.
 - Similar categories remain independent and selectable. The exact
@@ -204,11 +211,14 @@ show the profile-creation welcome.
   instead shows an amber informational note explaining that the categories are
   separate and only exact `MemesNominee` counts toward the requirement. All
   other category pills keep their existing behavior.
-- Selecting an option validates availability. You can type an amount while
+- Selecting a search result validates availability; profile chips use their
+  known category names. After choosing, the category stays in the search field.
+  Select its `×` (`Change category`) to choose another category and clear the draft.
+- The amount field and primary action appear only after a category is selected.
+  You can type an amount while
   rating data loads; submitting stays disabled until the current contribution
   and allowance are available.
 - If availability fails, inline error is shown.
-- Editing text after category selection clears selected category and amount.
 - Amount accepts integers. Type the desired amount in Grant REP and Rate NIC.
   The plus/minus symbols indicate signed amounts and are not buttons.
 - Enter the desired total, including any existing contribution.
@@ -217,17 +227,22 @@ show the profile-creation welcome.
 - The saved contribution prefills an untouched amount. Once you type, your
   draft stays in place through delayed responses and background refreshes.
 - In non-proxy mode, amount clamps to allowed min/max on blur.
-- `Grant Rep` stays disabled until category is selected, amount changed, amount
+- The helper says `Enter the total you want to give, including any existing rating.`
+  `Current Rep` and `Adjustment` appear only for an existing nonzero contribution.
+  The primary action is `Save` for an existing contribution and `Grant Rep` for
+  a new one. `Cancel` remains available in both steps.
+- The primary action stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
 
 ### Edit an existing Rep category
 
 - Open a tag. In another profile's `Received` view, your current
-  contribution appears first in a pinned `You` row only if you have already
-  given REP in that category, including a negative contribution. Use `Grant Rep`
-  to add REP where you have no contribution. Authorized proxies use their
+  contribution appears first in a pinned `You` row with your avatar and an
+  amount input in every category you may rate. Existing amounts prefill,
+  including negative contributions; a new contribution starts empty with a
+  `0` placeholder. Authorized proxies use their
   grantor's contribution and allowance.
-- On desktop, opening an existing contribution focuses its amount without
+- On desktop, opening a category focuses your amount without
   selecting the digits. Mobile opens with the sheet title focused and does not open the
   keyboard automatically.
 - Type the desired total, including negative integers. Enter zero to remove a
@@ -237,9 +252,12 @@ show the profile-creation welcome.
   are plain numbers.
   A changed field shows its signed adjustment beside the input. Increases use
   emerald and decreases use rose, including the proposed total in the footer.
-  The footer compares the current and proposed category totals, with `Cancel` and `Save`.
+  In `Received`, a changed amount reveals a primary action beside the input:
+  `Grant Rep` for a first contribution, or `Save` to change an existing amount.
+  The footer compares the current and proposed category totals.
   With no changes, it shows `Open category` and the available REP allowance
-  for an eligible editor. Enter saves. Escape or Cancel discards the draft;
+  for an eligible editor. Nothing saves while typing. Enter saves and a short
+  `Saved` confirmation follows. Escape discards the draft;
   Escape again closes the list. On desktop, saving keeps the same category open
   and updates its amounts immediately. Category tags keep their order while a
   panel or sheet is open; closing it restores the current ranking by total.
@@ -287,8 +305,9 @@ show the profile-creation welcome.
 - Both directions use a compact summary with a score, avatars and a count,
   matching REP. Avatars open individual profiles; the borderless count button
   and chevron open the full list. Owners can adjust their Given ratings there.
-- On desktop, the NIC total is green, the received status sits beside its
-  label, and the avatars, count and chevron appear below the total.
+- The NIC total is green. In `Received` on desktop and mobile, contributor avatars, count and
+  chevron are right-aligned on its number row. The received accuracy status
+  keeps its existing position.
 - `Received` shows the viewed profile's incoming NIC, status and raters.
   Select the rater count and chevron to inspect the full list.
   NIC lists also show the count above their rows; REP keeps counts in the
@@ -299,7 +318,7 @@ show the profile-creation welcome.
   selected total is loading or unavailable.
   Select the receiver count and chevron to inspect or manage the full list.
 - `Rate NIC` is available only in `Received` when the viewer can rate the target.
-  On mobile, it sits on the right of the raters summary row. Your existing NIC
+  On mobile, it sits below the number row on the right. Your existing NIC
   rating stays beside the button when there is room, or below it and right-aligned
   when space is tight.
 - The NIC editor loads the current total and allowance before enabling Save.

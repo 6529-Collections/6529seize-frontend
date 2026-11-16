@@ -15,6 +15,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
+import AssignedRepButton from "../AssignedRepButton";
 import {
   canShowPersonalRepContribution,
   getCanEditRep,
@@ -125,7 +126,13 @@ export default function UserPageRepHeader({
                 ) &&
                   overview !== null &&
                   overview.authenticated_user_contribution !== null &&
-                  overview.authenticated_user_contribution !== 0 && (
+                  overview.authenticated_user_contribution !== 0 &&
+                  (canEditRep && repDirection === "received" ? (
+                    <AssignedRepButton
+                      amount={overview.authenticated_user_contribution}
+                      onClick={() => setIsGrantRepOpen(true)}
+                    />
+                  ) : (
                     <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-meta/4 tw-font-normal tw-text-iron-400">
                       {tRich(
                         locale,
@@ -147,7 +154,7 @@ export default function UserPageRepHeader({
                         }
                       )}
                     </span>
-                  )}
+                  ))}
               </div>
               {canEditRep && repDirection === "received" && (
                 <Button

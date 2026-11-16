@@ -5,7 +5,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useContext, useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import { InformationCircleIcon } from "@heroicons/react/24/outline";
+import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "./rep-search-types";
@@ -39,6 +39,7 @@ import {
   MEMES_NOMINEE_REQUIRED_REP,
 } from "@/helpers/waves/memes-nomination";
 import { getGrantRepCategoriesToDisplay } from "./grantRepCategoryOptions";
+import GrantRepCategorySuggestions from "./GrantRepCategorySuggestions";
 
 import { isRatingValue } from "../ratingsManagement";
 
@@ -78,6 +79,9 @@ export default function UserPageRepNewRepSearch({
 }) {
   const locale = useBrowserLocale();
   const amountInputId = useId();
+  const amountFormId = useId();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const selectionRequest = useRef(0);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -123,10 +127,18 @@ export default function UserPageRepNewRepSearch({
           param: debouncedValue,
         },
       }),
-    enabled: matchingSearchLength,
+    enabled:
+      matchingSearchLength && repSearch === debouncedValue && !selectedCategory,
   });
 
-  const { repState, heroAvailableRep, minMaxValues } = useRepAllocation({
+  const {
+    repState,
+    ratingStats,
+    heroAvailableRep,
+    minMaxValues,
+    isError,
+    retry,
+  } = useRepAllocation({
     profile,
     category: selectedCategory,
   });
@@ -135,6 +147,7 @@ export default function UserPageRepNewRepSearch({
     profile.id ?? profile.query ?? profile.display,
     connectedProfile?.id,
     activeProfileProxy?.id,
+    selectedCategory,
   ].join(":");
   const amountStr =
     amountDraft?.scope === amountScope
@@ -150,9 +163,11 @@ export default function UserPageRepNewRepSearch({
       (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max));
 
   const newRating = getStringAsNumberOrZero(amountStr);
-  const haveChanged = newRating !== (repState?.rater_contribution ?? 0);
+  const currentRep = repState?.rater_contribution ?? 0;
+  const haveChanged = newRating !== currentRep;
   const isGrantDisabled =
     !selectedCategory ||
+    isError ||
     !repState ||
     !amountStr ||
     !haveChanged ||
@@ -174,7 +189,9 @@ export default function UserPageRepNewRepSearch({
     setShowErrorDetails(false);
   };
 
-  const onRepSelect = async (rep: string) => {
+  const onRepSelect = async (rep: string, knownCategory = false) => {
+    if (mutating || selectedCategory === rep) return;
+    const request = ++selectionRequest.current;
     if (isHelpBotCreditRepCategory(rep)) {
       showHelpBotCreditRepCategoryError();
       return;
@@ -192,7 +209,7 @@ export default function UserPageRepNewRepSearch({
     // Search-specific minimum (below the server's 1-char floor): surface it
     // instead of silently dropping the input. Count code points to stay
     // consistent with the validator's length semantics.
-    if (getSearchLength(rep) < SEARCH_LENGTH.MIN) {
+    if (!knownCategory && getSearchLength(rep) < SEARCH_LENGTH.MIN) {
       setErrorMsg(
         t(locale, "rep.categories.validation.tooShort", {
           min: SEARCH_LENGTH.MIN,
@@ -201,27 +218,30 @@ export default function UserPageRepNewRepSearch({
       setShowErrorDetails(false);
       return;
     }
-    if (checkingAvailability) return;
-    setCheckingAvailability(true);
+    setCheckingAvailability(!knownCategory);
     try {
-      await commonApiFetch<boolean>({
-        endpoint: "/rep/categories/availability",
-        params: {
-          param: rep,
-        },
-      });
+      if (!knownCategory)
+        await commonApiFetch<boolean>({
+          endpoint: "/rep/categories/availability",
+          params: {
+            param: rep,
+          },
+        });
+      if (request !== selectionRequest.current) return;
       setSelectedCategory(rep);
       setRepSearch(rep);
+      setAmountDraft(null);
       setErrorMsg(null);
       setShowErrorDetails(true);
       setIsOpen(false);
     } catch (error: unknown) {
+      if (request !== selectionRequest.current) return;
       setErrorMsg(
         getErrorMessage(error, t(locale, "rep.categories.grant.errors.generic"))
       );
       setShowErrorDetails(true);
     } finally {
-      setCheckingAvailability(false);
+      if (request === selectionRequest.current) setCheckingAvailability(false);
     }
   };
 
@@ -288,6 +308,11 @@ export default function UserPageRepNewRepSearch({
         return;
       }
       await addRepMutation.mutateAsync({ amount, category: selectedCategory });
+    } catch (error: unknown) {
+      setErrorMsg(
+        getErrorMessage(error, t(locale, "rep.categories.grant.errors.generic"))
+      );
+      setShowErrorDetails(true);
     } finally {
       setMutating(false);
     }
@@ -295,6 +320,7 @@ export default function UserPageRepNewRepSearch({
 
   const onSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (selectedCategory) return;
     if (!repSearch) return;
     if (isMemesNomineeLookalike(repSearch)) {
       setIsOpen(true);
@@ -374,6 +400,8 @@ export default function UserPageRepNewRepSearch({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const newValue = event.target.value;
+    selectionRequest.current++;
+    setCheckingAvailability(false);
     setRepSearch(newValue);
     if (selectedCategory && newValue !== selectedCategory) {
       setSelectedCategory(null);
@@ -433,6 +461,7 @@ export default function UserPageRepNewRepSearch({
                       />
                     </svg>
                     <input
+                      ref={searchInputRef}
                       id="search-rep"
                       name="search-rep"
                       type="text"
@@ -442,8 +471,12 @@ export default function UserPageRepNewRepSearch({
                       autoCorrect="off"
                       spellCheck={false}
                       value={repSearch}
+                      readOnly={!!selectedCategory}
+                      disabled={mutating}
                       onChange={handleRepSearchChange}
-                      onFocus={() => setIsOpen(true)}
+                      onFocus={() => {
+                        if (!selectedCategory) setIsOpen(true);
+                      }}
                       aria-describedby={
                         showSubmissionGuidance
                           ? SUBMISSION_GUIDANCE_ID
@@ -455,12 +488,45 @@ export default function UserPageRepNewRepSearch({
                         "rep.categories.grant.searchPlaceholder"
                       )}
                     />
-                    {checkingAvailability && (
-                      <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
-                        <CircleLoader />
-                      </div>
+                    {selectedCategory ? (
+                      <button
+                        type="button"
+                        disabled={mutating}
+                        aria-label={t(
+                          locale,
+                          "rep.categories.grant.changeCategory"
+                        )}
+                        onClick={() => {
+                          selectionRequest.current++;
+                          setSelectedCategory(null);
+                          setRepSearch("");
+                          setAmountDraft(null);
+                          setErrorMsg(null);
+                          setIsOpen(false);
+                          searchInputRef.current?.focus();
+                        }}
+                        className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                      >
+                        <XMarkIcon aria-hidden="true" className="tw-size-4" />
+                      </button>
+                    ) : (
+                      checkingAvailability && (
+                        <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
+                          <CircleLoader />
+                        </div>
+                      )
                     )}
                   </div>
+                  {!selectedCategory && !isError && (
+                    <GrantRepCategorySuggestions
+                      ratings={ratingStats}
+                      search={repSearch}
+                      disabled={mutating}
+                      onSelect={(category) => {
+                        void onRepSelect(category, true);
+                      }}
+                    />
+                  )}
                   {showSubmissionGuidance && (
                     <output
                       id={SUBMISSION_GUIDANCE_ID}
@@ -480,7 +546,7 @@ export default function UserPageRepNewRepSearch({
                     </output>
                   )}
                   <AnimatePresence initial={false}>
-                    {isOpen && !selectedCategory && (
+                    {isOpen && repSearch.length > 0 && !selectedCategory && (
                       <motion.div
                         initial={{ opacity: 0, y: -4 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -501,46 +567,73 @@ export default function UserPageRepNewRepSearch({
                     )}
                   </AnimatePresence>
                 </form>
-                <div>
-                  <label
-                    htmlFor={amountInputId}
-                    className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
-                  >
-                    {t(locale, "rep.categories.grant.amountLabel")}
-                  </label>
-                  <div className="tw-relative tw-flex tw-w-full">
-                    <UserPageRateInput
-                      value={amountStr}
-                      onChange={setAmountStr}
-                      minMax={minMaxValues}
-                      isProxy={!!activeProfileProxy}
-                      clampOnBlur={!!repState}
-                      variant="form"
-                      inputId={amountInputId}
-                    />
+                {isError && (
+                  <div role="alert" className="tw-text-xs tw-text-iron-400">
+                    {t(locale, "rep.categories.edit.loadError")}{" "}
+                    <Button variant="ghost" size="sm" onClick={retry}>
+                      {t(locale, "rep.categories.edit.retry")}
+                    </Button>
                   </div>
-                  {selectedCategory && (
-                    <UserRateAdjustmentHelper
-                      inLineValues={true}
-                      valueLayout="inline"
-                      originalValue={repState?.rater_contribution ?? 0}
-                      adjustedValue={newRating}
-                      adjustmentType="Rep"
-                    />
-                  )}
-                </div>
+                )}
+                {selectedCategory && (
+                  <form
+                    id={amountFormId}
+                    onSubmit={(event) => {
+                      event.preventDefault();
+                      void onGrantRep();
+                    }}
+                  >
+                    <label
+                      htmlFor={amountInputId}
+                      className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
+                    >
+                      {t(locale, "rep.categories.grant.amountLabel")}
+                    </label>
+                    <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-text-iron-400">
+                      {t(locale, "user.rate.totalHelp")}
+                    </p>
+                    <div className="tw-relative tw-flex tw-w-full">
+                      <UserPageRateInput
+                        value={amountStr}
+                        onChange={setAmountStr}
+                        minMax={minMaxValues}
+                        isProxy={!!activeProfileProxy}
+                        clampOnBlur={!!repState}
+                        variant="form"
+                        inputId={amountInputId}
+                      />
+                    </div>
+                    {currentRep !== 0 && (
+                      <UserRateAdjustmentHelper
+                        inLineValues={true}
+                        valueLayout="inline"
+                        originalValue={currentRep}
+                        adjustedValue={newRating}
+                        adjustmentType="Rep"
+                      />
+                    )}
+                  </form>
+                )}
               </div>
               <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1 tw-px-4 sm:tw-px-6">
-                <Button
-                  disabled={isGrantDisabled}
-                  onClick={onGrantRep}
-                  loading={mutating}
-                  variant="action"
-                  size="xl"
-                  fullWidth
-                >
-                  {t(locale, "rep.categories.grant.actions.grant")}
-                </Button>
+                {selectedCategory && (
+                  <Button
+                    disabled={isGrantDisabled}
+                    type="submit"
+                    form={amountFormId}
+                    loading={mutating}
+                    variant="action"
+                    size="xl"
+                    fullWidth
+                  >
+                    {t(
+                      locale,
+                      currentRep !== 0
+                        ? "rep.categories.edit.save"
+                        : "rep.categories.grant.actions.grant"
+                    )}
+                  </Button>
+                )}
                 {onCancel && (
                   <Button
                     onClick={onCancel}
@@ -548,7 +641,6 @@ export default function UserPageRepNewRepSearch({
                     variant="ghost"
                     size="lg"
                     fullWidth
-                    className="tw-hidden md:tw-inline-flex"
                   >
                     {t(locale, "rep.categories.grant.actions.cancel")}
                   </Button>

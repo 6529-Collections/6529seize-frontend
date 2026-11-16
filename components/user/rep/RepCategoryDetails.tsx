@@ -3,6 +3,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
+import { isHelpBotCreditRepCategory } from "@/components/utils/input/rep-category/repCategoryConstants";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
@@ -180,7 +181,8 @@ export default function RepCategoryDetails({
   const canEdit =
     direction === "given"
       ? canManageGivenRatings(profile, connectedProfile, activeProfileProxy)
-      : getCanEditRep({
+      : !isHelpBotCreditRepCategory(category.category) &&
+        getCanEditRep({
           myProfile: connectedProfile,
           targetProfile: profile,
           activeProfileProxy,
@@ -226,6 +228,12 @@ export default function RepCategoryDetails({
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [preparing, setPreparing] = useState(false);
   const [prepareError, setPrepareError] = useState(false);
+  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    if (!saved) return;
+    const timeout = setTimeout(() => setSaved(false), 2000);
+    return () => clearTimeout(timeout);
+  }, [saved]);
   const busy = externalBusy || preparing || isSaving;
   const ready = !!repState && !isError;
   const ownContribution =
@@ -233,7 +241,7 @@ export default function RepCategoryDetails({
     items.find((row) => row.profile.id === rater?.id)?.contribution ??
     0;
   const ownContributor: Contributor | null =
-    canEdit && rater?.id && ownContribution !== 0
+    canEdit && rater?.id
       ? {
           profile: {
             id: rater.id,
@@ -305,6 +313,7 @@ export default function RepCategoryDetails({
       0
     );
   const reset = () => {
+    setSaved(false);
     setDrafts({});
     setPrepareError(false);
     clearError();
@@ -319,6 +328,7 @@ export default function RepCategoryDetails({
     let value = raw === "0-" || raw === "-0" ? "-" : raw;
     if (value.length > 1 && value.startsWith("0")) value = value.slice(1);
     if (/^-?\d*$/.test(value)) {
+      setSaved(false);
       clearError();
       setPrepareError(false);
       setDrafts((previous) => ({ ...previous, [id]: value }));
@@ -369,7 +379,10 @@ export default function RepCategoryDetails({
       submitting.current = false;
       onBusyChange(false);
     }
-    if (succeeded) onSuccess?.();
+    if (succeeded) {
+      if (direction === "received") setSaved(true);
+      onSuccess?.();
+    }
   };
   const openCategory = (
     <Button
@@ -399,6 +412,7 @@ export default function RepCategoryDetails({
       canSave={canSave}
       onCancel={reset}
       idleAction={openCategory}
+      showActions={direction === "given"}
     >
       <RatingEditorErrors
         formId={formId}
@@ -471,7 +485,9 @@ export default function RepCategoryDetails({
         {rows.map((row) => {
           const you = direction === "received" && row === ownContributor;
           const editable = canEdit && (direction === "given" || you);
-          const value = drafts[row.profile.id] ?? String(row.contribution);
+          const value =
+            drafts[row.profile.id] ??
+            (you && row.contribution === 0 ? "" : String(row.contribution));
           const descriptionId = `${formId}-${row.profile.id}-description`;
           const validation = getAmountValidation({
             value,
@@ -485,7 +501,7 @@ export default function RepCategoryDetails({
             <div
               key={row.profile.id}
               data-rating-row
-              className={`tw-flex tw-min-h-[50px] tw-min-w-0 tw-items-center tw-gap-2 tw-pb-[5px] tw-pl-2.5 tw-pr-1.5 tw-pt-[5px] ${you ? "tw-sticky tw-top-0 tw-z-10 tw-bg-[#17171B]" : ""}`}
+              className={`tw-flex tw-min-h-[50px] tw-min-w-0 tw-items-center tw-gap-2 tw-pb-[5px] tw-pl-2.5 tw-pr-1.5 tw-pt-[5px] ${you ? "tw-sticky tw-top-0 tw-z-10 tw-flex-wrap tw-bg-[#17171B]" : ""}`}
             >
               <ContributorIdentity
                 row={row}
@@ -501,22 +517,47 @@ export default function RepCategoryDetails({
                         : (row.profile.handle ?? row.profile.primary_address),
                     })}
                   </span>
-                  <RatingAmountInput
-                    ref={you ? ownAmountRef : undefined}
-                    originalAmount={row.contribution}
-                    value={ready ? value : ""}
-                    aria-labelledby={`${formId}-${row.profile.id}-name`}
-                    aria-describedby={validation.describedBy}
-                    aria-invalid={validation.invalid}
-                    readOnly={!ready || busy}
-                    placeholder={t(
-                      locale,
-                      "rep.categories.panel.loadingAmount"
+                  <div className="tw-ml-auto tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
+                    {you && saved && (
+                      <output className="tw-text-xs tw-text-iron-400">
+                        {t(locale, "rep.categories.edit.saved")}
+                      </output>
                     )}
-                    onChange={(event) =>
-                      updateDraft(row.profile.id, event.currentTarget.value)
-                    }
-                  />
+                    <RatingAmountInput
+                      ref={you ? ownAmountRef : undefined}
+                      originalAmount={row.contribution}
+                      value={ready ? value : ""}
+                      aria-labelledby={`${formId}-${row.profile.id}-name`}
+                      aria-describedby={validation.describedBy}
+                      aria-invalid={validation.invalid}
+                      readOnly={!ready || busy}
+                      placeholder={
+                        ready
+                          ? "0"
+                          : t(locale, "rep.categories.panel.loadingAmount")
+                      }
+                      onChange={(event) =>
+                        updateDraft(row.profile.id, event.currentTarget.value)
+                      }
+                    />
+                    {you && changes.length > 0 && (
+                      <Button
+                        variant="action"
+                        size={null}
+                        className="tw-min-h-11 tw-px-3 tw-text-sm lg:tw-min-h-9"
+                        type="submit"
+                        disabled={!canSave}
+                        loading={busy}
+                      >
+                        {t(
+                          locale,
+                          row.contribution === 0
+                            ? "rep.categories.grant.actions.grant"
+                            : "rep.categories.edit.save"
+                        )}
+                      </Button>
+                    )}
+                  </div>
                 </>
               ) : (
                 <span
