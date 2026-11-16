@@ -105,7 +105,10 @@ On the web and Android, the tab appears after the page loads.
    Top up by cutoff follows for owners in Plan a top up, Running low and Action
    required. The zero- and one-funded-drop Action required explanations are omitted
    because the count and deadline already convey them. States without a status
-   keep their existing explanation for owners and visitors.
+   keep their existing explanation for owners. Visitors see the status without
+   setup or funding instructions. Manual selections, eligibility and unavailable
+   coverage retain neutral explanations; balances, dates and other facts remain
+   visible. The unavailable-data tooltip also uses visitor wording.
 2. Read Subscription balance, available mints and Forecast use in the quiet facts
    zone. Desktop keeps each fact inline in 14px text. Phones place the two facts
    side by side, with 14px labels above 16px values and `N mints available` below
