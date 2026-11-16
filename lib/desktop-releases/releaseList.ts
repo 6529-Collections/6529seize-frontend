@@ -186,28 +186,33 @@ async function readPair(
 type Entry = {
   readonly snapshot: SignedFeedSnapshot;
   readonly at: number;
-  /** The bucket it was read from; another bucket starts afresh. */
-  readonly source: string;
 };
 
 type PendingRead = {
-  readonly source: string;
+  /** The bucket setting's generation when the read started. */
+  readonly generation: number;
+  /** Increases with every read started, whatever its bucket. */
+  readonly seq: number;
   readonly promise: Promise<SignedFeedSnapshot>;
 };
 
 let current: Entry | null = null;
 let lastGood: Entry | null = null;
 let pending: PendingRead | null = null;
-// The bucket the latest request asked for. A read that finishes after the
-// setting changed answers its own request but is not cached.
-let activeSource: string | null = null;
+// Bumped whenever the bucket setting changes (another bucket, or unset), so
+// reads started under an earlier setting never write the cache, even after
+// the setting comes back (A, then B, then A again).
+let generation = 0;
+let latestSource: string | null = null;
+let readSeq = 0;
+// The newest read that has written the cache; an older one never overwrites it.
+let writtenSeq = 0;
 
-function startRead(
-  location: BucketLocation | null,
-  source: string
-): PendingRead {
+function startRead(location: BucketLocation | null): PendingRead {
+  readSeq += 1;
   const read: PendingRead = {
-    source,
+    generation,
+    seq: readSeq,
     promise: readPair(location).finally(() => {
       if (pending === read) {
         pending = null;
@@ -222,8 +227,9 @@ function startRead(
 async function getSnapshot(): Promise<SignedFeedSnapshot> {
   const location = getLocation();
   const source = location ? `${location.region}/${location.bucket}` : "";
-  activeSource = source;
-  if (current?.source !== source) {
+  if (source !== latestSource) {
+    latestSource = source;
+    generation += 1;
     current = null;
     lastGood = null;
   }
@@ -231,14 +237,17 @@ async function getSnapshot(): Promise<SignedFeedSnapshot> {
     return current.snapshot;
   }
   const read =
-    pending?.source === source ? pending : startRead(location, source);
+    pending?.generation === generation ? pending : startRead(location);
   const snapshot = await read.promise;
-  if (activeSource !== source) {
+  if (read.generation !== generation || read.seq < writtenSeq) {
+    // Started under an earlier setting, or a newer read already answered:
+    // this read answers only its own request.
     return snapshot;
   }
+  writtenSeq = read.seq;
   const at = Date.now();
   if (snapshot.state !== "error") {
-    current = { snapshot, at, source };
+    current = { snapshot, at };
     // Only a served pair is worth keeping through a failure. A missing
     // bundle is S3's definite answer (reads are strongly consistent), so a
     // deleted bundle withdraws the list rather than leaving it up an hour.
@@ -249,11 +258,7 @@ async function getSnapshot(): Promise<SignedFeedSnapshot> {
     lastGood && at - lastGood.at < STALE_IF_ERROR_MS
       ? lastGood.snapshot
       : snapshot;
-  current = {
-    snapshot: served,
-    at: at - SNAPSHOT_TTL_MS + ERROR_RETRY_MS,
-    source,
-  };
+  current = { snapshot: served, at: at - SNAPSHOT_TTL_MS + ERROR_RETRY_MS };
   return served;
 }
 
@@ -270,5 +275,8 @@ export function resetDesktopReleaseListCacheForTests(): void {
   current = null;
   lastGood = null;
   pending = null;
-  activeSource = null;
+  generation = 0;
+  latestSource = null;
+  readSeq = 0;
+  writtenSeq = 0;
 }

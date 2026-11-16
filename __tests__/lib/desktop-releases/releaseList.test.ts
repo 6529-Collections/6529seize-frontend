@@ -199,62 +199,115 @@ describe("6529 Desktop release list routes", () => {
     );
   });
 
-  describe("when the bucket setting changes while a read is in flight", () => {
-    const OTHER_SIGNATURE = new Uint8Array([0x30, 0x46, 0x07]);
-    let releaseFirstRead: () => void = () => undefined;
+  describe("when reads overlap", () => {
+    const BUCKET_A = "desktop-releases.example";
+    const BUCKET_B = "other-releases.example";
+    const SIGNATURE_B = new Uint8Array([0x30, 0x46, 0x07]);
+    // Each S3 read waits until the test settles it, in any order.
+    let reads: { bucket: string; settle: (object: BucketObject) => void }[];
+
+    const foundWith = (signature: Uint8Array): BucketObject => ({
+      state: "found",
+      body: bundleBytes(validBundle(signature)),
+      etag: null,
+      lastModified: null,
+    });
+    const setBucket = (bucket: string | null) => {
+      if (bucket === null) {
+        delete process.env["DESKTOP_RELEASES_BUCKET"];
+      } else {
+        process.env["DESKTOP_RELEASES_BUCKET"] = bucket;
+      }
+    };
+    // Lets pending promise callbacks run before the next step.
+    const flush = () => new Promise((resolve) => setImmediate(resolve));
 
     beforeEach(() => {
-      // Bucket A's read waits until the test lets it finish; any other
-      // bucket answers at once with its own bundle.
-      mockRead.mockImplementation((location) => {
-        const found = (signature: Uint8Array): BucketObject => ({
-          state: "found",
-          body: bundleBytes(validBundle(signature)),
-          etag: null,
-          lastModified: null,
-        });
-        if (location.bucket === "desktop-releases.example") {
-          return new Promise((resolve) => {
-            releaseFirstRead = () => resolve(found(SIGNATURE_BYTES));
-          });
-        }
-        return Promise.resolve(found(OTHER_SIGNATURE));
-      });
+      reads = [];
+      mockRead.mockImplementation(
+        (location) =>
+          new Promise((resolve) => {
+            reads.push({ bucket: location.bucket, settle: resolve });
+          })
+      );
     });
 
-    it("reads the new bucket itself and never caches the old read", async () => {
-      const first = getSignature(new Request(SIGNATURE_URL));
-      process.env["DESKTOP_RELEASES_BUCKET"] = "other-releases.example";
+    it("lets concurrent requests for one setting share one read", async () => {
+      const first = getList(new Request(LIST_URL));
+      const second = getSignature(new Request(SIGNATURE_URL));
+      await flush();
+      reads[0]?.settle(foundWith(SIGNATURE_BYTES));
 
-      const second = await getSignature(new Request(SIGNATURE_URL));
-      releaseFirstRead();
+      expect((await first).status).toBe(200);
+      expect((await second).status).toBe(200);
+      expect(reads).toHaveLength(1);
+    });
+
+    it("reads a new bucket itself and never caches the old bucket's read", async () => {
+      const first = getSignature(new Request(SIGNATURE_URL));
+      setBucket(BUCKET_B);
+      const second = getSignature(new Request(SIGNATURE_URL));
+      await flush();
+      reads[1]?.settle(foundWith(SIGNATURE_B));
+      const secondBytes = new Uint8Array(await (await second).arrayBuffer());
+      reads[0]?.settle(foundWith(SIGNATURE_BYTES));
       await first;
       const third = await getSignature(new Request(SIGNATURE_URL));
 
-      expect(new Uint8Array(await second.arrayBuffer())).toEqual(
-        OTHER_SIGNATURE
-      );
-      expect(new Uint8Array(await third.arrayBuffer())).toEqual(
-        OTHER_SIGNATURE
-      );
-      expect(mockRead.mock.calls.map(([location]) => location.bucket)).toEqual([
-        "desktop-releases.example",
-        "other-releases.example",
-      ]);
+      expect(secondBytes).toEqual(SIGNATURE_B);
+      expect(new Uint8Array(await third.arrayBuffer())).toEqual(SIGNATURE_B);
+      expect(reads.map(({ bucket }) => bucket)).toEqual([BUCKET_A, BUCKET_B]);
     });
 
-    it("answers 404 once the bucket is unset, before and after the old read ends", async () => {
-      const first = getList(new Request(LIST_URL));
-      delete process.env["DESKTOP_RELEASES_BUCKET"];
+    it.each([
+      ["the first A read finishes last", [2, 1, 0]],
+      ["the first A read finishes first", [0, 1, 2]],
+    ])(
+      "keeps the newest A read's answer after A, B, A when %s",
+      async (_name, order) => {
+        // The first A read finds a list; by the second A read it was deleted.
+        const answers: BucketObject[] = [
+          foundWith(SIGNATURE_BYTES),
+          foundWith(SIGNATURE_B),
+          { state: "missing" },
+        ];
+        const requests = [getList(new Request(LIST_URL))];
+        setBucket(BUCKET_B);
+        requests.push(getList(new Request(LIST_URL)));
+        setBucket(BUCKET_A);
+        requests.push(getList(new Request(LIST_URL)));
+        await flush();
+        expect(reads.map(({ bucket }) => bucket)).toEqual([
+          BUCKET_A,
+          BUCKET_B,
+          BUCKET_A,
+        ]);
+        for (const index of order) {
+          reads[index]?.settle(answers[index] as BucketObject);
+          await flush();
+        }
+        await Promise.all(requests);
 
-      const second = await getList(new Request(LIST_URL));
-      releaseFirstRead();
-      await first;
-      const third = await getList(new Request(LIST_URL));
+        const after = await getList(new Request(LIST_URL));
 
-      expect(second.status).toBe(404);
-      expect(third.status).toBe(404);
-      expect(mockRead).toHaveBeenCalledTimes(1);
+        expect(after.status).toBe(404);
+        expect(reads).toHaveLength(3);
+      }
+    );
+
+    it("answers 404 after unset, A, unset, whenever A's read ends", async () => {
+      setBucket(null);
+      expect((await getList(new Request(LIST_URL))).status).toBe(404);
+      setBucket(BUCKET_A);
+      const inFlight = getList(new Request(LIST_URL));
+      setBucket(null);
+
+      expect((await getList(new Request(LIST_URL))).status).toBe(404);
+      await flush();
+      reads[0]?.settle(foundWith(SIGNATURE_BYTES));
+      expect((await inFlight).status).toBe(200);
+      expect((await getList(new Request(LIST_URL))).status).toBe(404);
+      expect(reads).toHaveLength(1);
     });
   });
 
