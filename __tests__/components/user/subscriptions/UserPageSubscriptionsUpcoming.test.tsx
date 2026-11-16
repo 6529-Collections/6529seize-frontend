@@ -460,6 +460,34 @@ describe("UserPageSubscriptionsUpcoming", () => {
     }
   );
 
+  it("uses the matching winner when indexed image fields are empty", () => {
+    jest.mocked(isMintingToday).mockReturnValue(true);
+    jest.mocked(useNowMinting).mockReturnValue({
+      ...mockNowMintingResult,
+      nft: {
+        id: 1,
+        contract: MEMES_CONTRACT,
+        thumbnail: "",
+        scaled: "",
+        icon: "",
+      } as ApiMemesExtendedData,
+    });
+    jest.mocked(useNextMintDrop).mockReturnValue({
+      ...nextMintResult,
+      nextMint: matchingWinner(1),
+    });
+    const { container } = renderComponent({
+      readonly: true,
+      memes_subscriptions: [
+        { ...mockSubscriptions[0], contract: MEMES_CONTRACT },
+      ],
+    });
+    expect(container.querySelector("img")).toHaveAttribute(
+      "src",
+      winnerThumbnail
+    );
+  });
+
   it("uses only resized GIF previews, including when every preview fails", () => {
     jest.mocked(isMintingToday).mockReturnValue(true);
     const original = winnerImage.replace(".png", ".gif");

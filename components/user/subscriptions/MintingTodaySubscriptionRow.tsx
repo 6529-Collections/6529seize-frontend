@@ -33,7 +33,7 @@ export default function MintingTodaySubscriptionRow(
   const winnerImage =
     getDropPreviewImageUrl(nextMint?.metadata) ??
     (media?.mime_type.startsWith("image/") ? media.url : undefined);
-  const source = mintedSource ?? (matchesWinner ? winnerImage : undefined);
+  const source = mintedSource || (matchesWinner ? winnerImage : undefined);
   const imageProps = {
     width: 80,
     height: 113,
