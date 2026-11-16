@@ -685,6 +685,201 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
   }
 
+  test("shows verified pre-mint artwork without image-load movement and links upcoming drops", async ({
+    page,
+  }, testInfo) => {
+    await page.clock.setFixedTime(new Date("2026-10-30T00:01:00Z"));
+    await installSubscriptionFixtures(page);
+    await page.route(
+      (url) => url.pathname.endsWith("/memes_latest"),
+      (route) => route.fulfill({ json: { id: 567 } })
+    );
+    const thumbnail =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/subscription-artwork/200x200/artwork.png";
+    let decisionRequests = 0;
+    await page.route(
+      (url) => /\/v2\/waves\/[^/]+\/decisions$/.test(url.pathname),
+      (route) => {
+        decisionRequests += 1;
+        return route.fulfill({
+          json: {
+            count: 1,
+            page: 1,
+            next: false,
+            data: [
+              {
+                decision_time: 1,
+                winners: [
+                  {
+                    place: 1,
+                    awards: [],
+                    drop: {
+                      id: "subscription-artwork-winner",
+                      serial_no: 1,
+                      created_at: 1,
+                      drop_type: "SUBMISSION",
+                      is_signed: false,
+                      hide_link_preview: false,
+                      parts_count: 1,
+                      boosts: 0,
+                      author: {
+                        id: "subscription-artist",
+                        handle: "subscription-artist",
+                        level: 1,
+                        primary_address:
+                          "0x0000000000000000000000000000000000000529",
+                        classification: "PSEUDONYM",
+                        badges: {},
+                      },
+                      submission_context: { meme_card_id: 568, voting: {} },
+                      media: [
+                        {
+                          url: thumbnail.replace("/200x200/", "/"),
+                          mime_type: "image/png",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        });
+      }
+    );
+    let releaseImage!: () => void;
+    const imageReady = new Promise<void>((resolve) => {
+      releaseImage = resolve;
+    });
+    let failImage = false;
+    let imageRequests = 0;
+    const artworkRequests: string[] = [];
+    await page.route(
+      (url) =>
+        url.origin === new URL(thumbnail).origin &&
+        url.pathname.includes("/subscription-artwork/"),
+      async (route) => {
+        imageRequests += 1;
+        const url = route.request().url();
+        artworkRequests.push(url);
+        expect([thumbnail, thumbnail.replace("200x200", "AUTOx450")]).toContain(
+          url
+        );
+        await imageReady;
+        if (failImage) await route.fulfill({ status: 404, body: "" });
+        else
+          await route.fulfill({
+            path: "public/profile-cms/templates/memes/1.webp",
+          });
+      }
+    );
+    try {
+      await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+      const upcoming = page.getByRole("region", {
+        name: "Upcoming Drops",
+        exact: true,
+      });
+      const image = page
+        .getByRole("region", { name: "Upcoming Drops", exact: true })
+        .locator("img");
+      await expect(
+        upcoming.getByRole("button", { name: "Minting Today", exact: true })
+      ).toBeVisible();
+      await expect
+        .poll(() => decisionRequests, { timeout: RESPONSE_TIMEOUT_MS })
+        .toBe(1);
+      await expect(image).toBeVisible();
+      await image.scrollIntoViewIfNeeded();
+      await expect.poll(() => imageRequests).toBe(1);
+      const before = await image.boundingBox();
+      const sectionBefore = await upcoming.boundingBox();
+      releaseImage();
+      await expect
+        .poll(() =>
+          image.evaluate(
+            (element) => (element as HTMLImageElement).naturalWidth
+          )
+        )
+        .toBeGreaterThan(0);
+      expect(await image.boundingBox()).toEqual(before);
+      expect((await upcoming.boundingBox())!.height).toBe(
+        sectionBefore!.height
+      );
+      for (const token of [568, 569, 570]) {
+        await expect(
+          upcoming
+            .getByRole("link", { name: `The Memes #${token}`, exact: true })
+            .first()
+        ).toHaveAttribute("href", `/the-memes/${token}`);
+      }
+      const title = upcoming.getByRole("link", {
+        name: "The Memes #568",
+        exact: true,
+      });
+      await title.focus();
+      await expect(title).toBeFocused();
+      await expect(title).toHaveCSS("outline-style", "solid");
+      await expect(title).toHaveCSS("outline-width", "2px");
+      await expect(upcoming.getByRole("switch")).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+      await captureSafeScreenshot(
+        page,
+        testInfo,
+        "subscription-pre-mint-artwork"
+      );
+
+      failImage = true;
+      await page.reload();
+      await waitForRouteReady(page);
+      await expect.poll(() => imageRequests).toBeGreaterThan(1);
+      await expect(image).toHaveCount(0);
+      expect(artworkRequests).not.toContain(
+        thumbnail.replace("/200x200/", "/")
+      );
+      await expect(
+        upcoming.getByRole("button", { name: "Minting Today", exact: true })
+      ).toBeVisible();
+      await title.focus();
+      await title.press("Enter");
+      await expect(page).toHaveURL(/\/the-memes\/568(?:[?#].*)?$/, {
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+    } finally {
+      releaseImage();
+    }
+  });
+
+  test("does not fetch mint-day artwork on a day without a mint", async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date("2026-10-31T00:01:00Z"));
+    await installSubscriptionFixtures(page);
+    const artworkRequests: string[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (
+        url.pathname.endsWith("/memes_latest") ||
+        /\/v2\/waves\/[^/]+\/decisions$/.test(url.pathname)
+      )
+        artworkRequests.push(url.pathname);
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    const upcoming = page.getByRole("region", {
+      name: "Upcoming Drops",
+      exact: true,
+    });
+    await expect(
+      upcoming.getByRole("link", { name: "The Memes #568", exact: true })
+    ).toBeVisible();
+    await upcoming
+      .getByRole("button", { name: "Show More", exact: true })
+      .click();
+    await expect(
+      page.getByRole("link", { name: "The Memes #572", exact: true })
+    ).toBeVisible();
+    expect(artworkRequests).toEqual([]);
+  });
+
   test("keeps a visitor's Not set up subscription status informational", async ({
     page,
   }, testInfo) => {

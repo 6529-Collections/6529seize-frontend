@@ -27,6 +27,7 @@ import {
   type ReactElement,
 } from "react";
 import { Tooltip } from "react-tooltip";
+import Link from "next/link";
 import SubscriptionHeaderLinks, {
   SubscriptionBalanceLabel,
 } from "./SubscriptionHeaderLinks";
@@ -564,9 +565,14 @@ export default function MemeSubscriptionRow(
             </div>
           )}
           <span className="tw-col-span-full tw-col-start-1 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-1.5 tw-text-sm tw-font-normal tw-tabular-nums tw-text-iron-400 max-sm:@[18rem]/drop-row:tw-col-span-1 sm:tw-col-span-1">
-            <span className="tw-whitespace-nowrap">
-              {props.title} #{props.subscription.token_id}
-            </span>
+            <Link
+              href={`/the-memes/${props.subscription.token_id}`}
+              prefetch={false}
+              className="tw-whitespace-nowrap tw-text-inherit tw-no-underline tw-decoration-white/20 tw-underline-offset-[3px] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-underline"
+            >
+              {props.title} #
+              {formatInteger(locale, props.subscription.token_id)}
+            </Link>
             {allocationDetails && props.minting_today && (
               <button
                 type="button"
