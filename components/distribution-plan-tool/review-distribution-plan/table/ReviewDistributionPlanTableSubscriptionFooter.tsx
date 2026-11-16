@@ -553,12 +553,13 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
   const canChooseMode = preparation.mode === PreparationMode.Unstarted;
   let processingControl: React.ReactNode;
   if (canChooseMode || preparation.mode === PreparationMode.Background) {
+    const planId = distributionPlan?.id ?? "";
     processingControl = (
       <ProcessAndFinalize
-        key={`${distributionPlan?.id}:${confirmedTokenId}:${resetCount}`}
+        key={`${planId}:${confirmedTokenId}:${resetCount}`}
         contract={contract}
         claim={Number(confirmedTokenId)}
-        plan={distributionPlan?.id ?? ""}
+        plan={planId}
         phaseIds={getForgePhaseIds(phases)}
         onStarted={preparation.refresh}
         disabled={isResetting || isFinalizing}

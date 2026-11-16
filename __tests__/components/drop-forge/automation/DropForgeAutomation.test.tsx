@@ -342,9 +342,8 @@ it("uses a fresh request ID when processing again after a reset", async () => {
   await waitFor(() => expect(readyButton()).toBeEnabled());
   fireEvent.click(readyButton());
   await waitFor(() => expect(startForgeProcess).toHaveBeenCalledTimes(2));
-  const [[, , , , firstId], [, , , , secondId]] =
-    jest.mocked(startForgeProcess).mock.calls;
-  expect(secondId).not.toEqual(firstId);
+  const [firstCall, secondCall] = jest.mocked(startForgeProcess).mock.calls;
+  expect(secondCall?.[4]).not.toBe(firstCall?.[4]);
 });
 
 it("refreshes the existing manual view only when another action confirms", async () => {
