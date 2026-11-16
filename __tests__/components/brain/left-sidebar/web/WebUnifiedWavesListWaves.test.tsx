@@ -16,6 +16,7 @@ import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 
+const mockOpenWave = jest.fn();
 let mockIsTouchDevice = false;
 let mockAuthResult = {
   connectedProfile: { handle: "alice" } as { readonly handle: string } | null,
@@ -27,7 +28,7 @@ jest.mock("@/components/utils/button/PrimaryButton", () => (props: any) => (
 ));
 jest.mock("@/hooks/useCreateModalState", () => ({
   __esModule: true,
-  default: () => ({ openWave: jest.fn(), isApp: false }),
+  default: () => ({ openWave: mockOpenWave, isApp: false }),
 }));
 jest.mock("@/hooks/useIsTouchDevice", () => ({
   __esModule: true,
@@ -113,6 +114,14 @@ const flushAnimatedSidebarRows = async () => {
   });
 };
 
+const advanceAnimatedSidebarRowsPastEnter = async () => {
+  await act(async () => {
+    jest.advanceTimersToNextFrame();
+    jest.advanceTimersToNextFrame();
+    await Promise.resolve();
+  });
+};
+
 beforeEach(() => {
   jest.clearAllMocks();
   globalThis.localStorage.clear();
@@ -172,6 +181,25 @@ jest.mock(
       data-score-details-disabled={String(props.scoreDetailsDisabled)}
     ></div>
   )
+);
+
+it.each([false, true])(
+  "keeps the create action named and operable with isCollapsed=%s",
+  (isCollapsed) => {
+    renderWebWaves({ isCollapsed });
+
+    const createButton = screen.getByRole("button", {
+      name: /^Create wave$/,
+    });
+    expect(createButton).toHaveAttribute("data-tooltip-content", "Create wave");
+    if (isCollapsed) {
+      expect(within(createButton).queryByText("Create wave")).toBeNull();
+    } else {
+      expect(within(createButton).getByText("Create wave")).toBeVisible();
+    }
+    fireEvent.click(createButton);
+    expect(mockOpenWave).toHaveBeenCalledTimes(1);
+  }
 );
 
 it("suppresses announcement and wave-row score details during an empty search", () => {
@@ -567,70 +595,91 @@ it("passes pin controls through for pinned announcement waves", () => {
 });
 
 it("expands regular subwaves and keeps child rows unpinned", async () => {
-  renderWebWaves({
-    waves: [
-      createMockMinimalWave({
-        id: "parent",
-        hasSubwaves: true,
-      }),
-      createMockMinimalWave({
-        id: "child",
-        parentWaveId: "parent",
-        hasSubwaves: true,
-        createdAt: 10,
-        unreadDropsCount: 1,
-        isFollowing: true,
-      }),
-    ],
-  });
+  // Fake animation frames keep the entering state observable under CI load.
+  jest.useFakeTimers();
 
-  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
-    "data-unread-subwaves",
-    "true"
-  );
-  expect(screen.queryByTestId("wave-child")).toBeNull();
-  const collapsedVirtualizerOptions =
-    mockUseVirtualizedWaves.mock.calls.at(-1)?.[0];
-  expect(
-    collapsedVirtualizerOptions.rowHeight(collapsedVirtualizerOptions.items[0])
-  ).toBe(62);
-  expect(
-    collapsedVirtualizerOptions.rowHeight(collapsedVirtualizerOptions.items[1])
-  ).toBe(42);
+  try {
+    renderWebWaves({
+      waves: [
+        createMockMinimalWave({
+          id: "parent",
+          hasSubwaves: true,
+        }),
+        createMockMinimalWave({
+          id: "child",
+          parentWaveId: "parent",
+          hasSubwaves: true,
+          createdAt: 10,
+          unreadDropsCount: 1,
+          isFollowing: true,
+        }),
+      ],
+    });
 
-  fireEvent.click(
-    screen.getByRole("button", {
-      name: "View 1 subwave for Mock Wave",
-    })
-  );
-  await flushAnimatedSidebarRows();
+    expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+      "data-unread-subwaves",
+      "true"
+    );
+    expect(screen.queryByTestId("wave-child")).toBeNull();
+    const collapsedVirtualizerOptions =
+      mockUseVirtualizedWaves.mock.calls.at(-1)?.[0];
+    expect(
+      collapsedVirtualizerOptions.rowHeight(
+        collapsedVirtualizerOptions.items[0]
+      )
+    ).toBe(62);
+    expect(
+      collapsedVirtualizerOptions.rowHeight(
+        collapsedVirtualizerOptions.items[1]
+      )
+    ).toBe(42);
 
-  expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
-  expect(
-    screen.getByRole("button", {
-      name: "Hide Mock Wave subwaves",
-    })
-  ).toHaveAttribute("aria-expanded", "true");
-  expect(screen.getByTestId("wave-parent")).toHaveAttribute(
-    "data-unread-subwaves",
-    "false"
-  );
-  expect(screen.getByTestId("wave-child")).toHaveAttribute("data-depth", "1");
-  expect(screen.getByTestId("wave-child")).toHaveAttribute(
-    "data-can-expand",
-    "false"
-  );
-  expect(screen.getByTestId("wave-child").parentElement).toHaveAttribute(
-    "data-sidebar-subwave-row-state",
-    "entering"
-  );
-  const expandedVirtualizerOptions =
-    mockUseVirtualizedWaves.mock.calls.at(-1)?.[0];
-  const expandedToggleRow = expandedVirtualizerOptions.items.find(
-    (row: { readonly key: string }) => row.key === "parent:subwaves-toggle"
-  );
-  expect(expandedVirtualizerOptions.rowHeight(expandedToggleRow)).toBe(38);
-  expect(screen.getByTestId("wave-child")).toHaveAttribute("data-pin", "false");
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "View 1 subwave for Mock Wave",
+      })
+    );
+    await flushAnimatedSidebarRows();
+
+    expect(loadSubwavesForParent).toHaveBeenCalledWith("parent");
+    expect(
+      screen.getByRole("button", {
+        name: "Hide Mock Wave subwaves",
+      })
+    ).toHaveAttribute("aria-expanded", "true");
+    expect(screen.getByTestId("wave-parent")).toHaveAttribute(
+      "data-unread-subwaves",
+      "false"
+    );
+    expect(screen.getByTestId("wave-child")).toHaveAttribute("data-depth", "1");
+    expect(screen.getByTestId("wave-child")).toHaveAttribute(
+      "data-can-expand",
+      "false"
+    );
+    expect(screen.getByTestId("wave-child").parentElement).toHaveAttribute(
+      "data-sidebar-subwave-row-state",
+      "entering"
+    );
+    const expandedVirtualizerOptions =
+      mockUseVirtualizedWaves.mock.calls.at(-1)?.[0];
+    const expandedToggleRow = expandedVirtualizerOptions.items.find(
+      (row: { readonly key: string }) => row.key === "parent:subwaves-toggle"
+    );
+    expect(expandedVirtualizerOptions.rowHeight(expandedToggleRow)).toBe(38);
+    expect(screen.getByTestId("wave-child")).toHaveAttribute(
+      "data-pin",
+      "false"
+    );
+
+    await advanceAnimatedSidebarRowsPastEnter();
+
+    expect(screen.getByTestId("wave-child").parentElement).toHaveAttribute(
+      "data-sidebar-subwave-row-state",
+      "entered"
+    );
+  } finally {
+    jest.useRealTimers();
+  }
 });
 
 it("hides expanded child rows immediately while the sidebar is collapsed", async () => {

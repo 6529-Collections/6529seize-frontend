@@ -180,12 +180,16 @@ function RepProgressSection({
   );
 }
 
-export function MainStageNominationPopoverContent() {
+export function MainStageNominationPopoverContent({
+  className = "tw-w-[min(88vw,20rem)]",
+}: {
+  readonly className?: string;
+} = {}) {
   const { hasProfile, isError, isLoading, progress } =
     useMemesNomineeProgress();
 
   return (
-    <div className="tw-w-[min(88vw,20rem)] tw-pt-1">
+    <div className={`${className} tw-pt-1`}>
       <div className="tw-mb-5 tw-flex tw-flex-col tw-items-start">
         <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2">
           <PermissionIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400" />

@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_TRIGGER_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -553,7 +554,7 @@ export default function QuorumProposalDropModal({
                 event.target.value as QuorumProposalUrgency
               )
             }
-            className="tw-form-select tw-block tw-h-11 tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-px-3 tw-text-sm tw-text-iron-50 tw-ring-1 tw-ring-inset tw-ring-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400"
+            className={`${DROPDOWN_TRIGGER_CLASSES} tw-form-select tw-block tw-h-11 tw-w-full tw-px-3 tw-text-sm`}
           >
             <option value="">Select urgency</option>
             <option value="Low">Low</option>

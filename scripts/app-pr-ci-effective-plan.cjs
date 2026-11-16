@@ -269,6 +269,7 @@ function applyEffectiveAppPrCiPlan(plan) {
   const playwrightSubmissionArtwork = files.some((file) =>
     [
       "tests/media/submission-artwork-sandbox.spec.ts",
+      "tests/media/image-viewer-layout-sandbox.spec.ts",
       "tests/media/waveImagePreviewCases.ts",
       "tests/support/videoArtworkSandbox.ts",
       "components/waves/drop/WaveDropAdditionalInfo.tsx",
@@ -276,6 +277,7 @@ function applyEffectiveAppPrCiPlan(plan) {
       "hooks/useChatVideoPoster.ts",
       "public/video-preview-placeholder.svg",
       "components/waves/drop/MemesDropArtworkHero.tsx",
+      "components/waves/drop/useAutomaticSubmissionGifOriginal.ts",
       "components/drops/view/item/content/media/DropImagePreview.tsx",
       "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
       "components/drops/view/item/content/media/DropListItemContentMedia.tsx",

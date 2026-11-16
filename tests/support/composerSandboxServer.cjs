@@ -2713,6 +2713,7 @@ const mockApiExactReadRoutes = new Map([
     "/api/v2/waves",
     () => ({ data: [localWaveOverview], page: 1, next: false }),
   ],
+  ["/api/v2/waves/pinned", () => []],
   ["/api/v2/official-waves", () => [localWaveOverview]],
   [
     "/api/v2/waves/all",

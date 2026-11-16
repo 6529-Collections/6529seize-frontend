@@ -73,13 +73,37 @@ export default function NicRatingsOverview({
   );
   const scoreValue = (
     <div
-      className={`tw-text-3xl tw-font-semibold tw-tabular-nums tw-leading-none tw-tracking-tight tw-text-emerald-400 ${compact ? "" : "tw-col-start-1 tw-row-start-2"}`}
+      className={`tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-emerald-400 ${compact ? "" : "tw-col-start-1 tw-row-start-2"}`}
     >
       {score === undefined ? "—" : formatInteger(locale, score)}
     </div>
   );
+  const rateButton =
+    direction === "received" && onRateClick ? (
+      <RateNicButton onRateClick={onRateClick} />
+    ) : null;
+  const personalRating =
+    rateButton !== null &&
+    (overview?.authenticated_user_contribution ?? 0) !== 0 ? (
+      <span
+        className={`tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400 ${compact ? "tw-max-w-full tw-flex-wrap tw-justify-end tw-text-right" : ""}`}
+      >
+        {compact && (
+          <FingerprintIcon className="tw-h-4 tw-w-4 tw-shrink-0 tw-text-emerald-400" />
+        )}
+        {t(locale, "user.profile.rep.nic.yourRating", {
+          value: formatInteger(
+            locale,
+            overview?.authenticated_user_contribution ?? 0
+          ),
+        })}
+      </span>
+    ) : null;
   return (
-    <section aria-label={t(locale, "user.rate.nicRegion")} className="tw-mb-6">
+    <section
+      aria-label={t(locale, "user.rate.nicRegion")}
+      className={compact ? undefined : "tw-mb-6"}
+    >
       {compact ? (
         <>
           <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-3 tw-gap-y-1">
@@ -90,7 +114,17 @@ export default function NicRatingsOverview({
           </div>
           {scoreValue}
           {status}
-          <div className="tw-mt-2">{contributors}</div>
+          <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-1">
+            {contributors}
+            {rateButton && (
+              <div className="tw-ml-auto tw-min-w-0 tw-flex-1 tw-pt-1">
+                <div className="tw-flex tw-flex-row-reverse tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
+                  {rateButton}
+                  {personalRating}
+                </div>
+              </div>
+            )}
+          </div>
         </>
       ) : (
         <>
@@ -123,22 +157,10 @@ export default function NicRatingsOverview({
           </Button>
         </div>
       )}
-      {direction === "received" && onRateClick && (
+      {!compact && rateButton && (
         <div className="tw-mt-4 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-          <RateNicButton onRateClick={onRateClick} />
-          {(overview?.authenticated_user_contribution ?? 0) !== 0 && (
-            <span className="tw-inline-flex tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
-              {compact && (
-                <FingerprintIcon className="tw-h-4 tw-w-4 tw-shrink-0 tw-text-emerald-400" />
-              )}
-              {t(locale, "user.profile.rep.nic.yourRating", {
-                value: formatInteger(
-                  locale,
-                  overview?.authenticated_user_contribution ?? 0
-                ),
-              })}
-            </span>
-          )}
+          {rateButton}
+          {personalRating}
         </div>
       )}
       {listOpen && (
@@ -147,6 +169,8 @@ export default function NicRatingsOverview({
           profile={profile}
           matter="NIC"
           direction={direction}
+          contributorCount={overview?.contributor_count}
+          total={score}
           onClose={() => setListOpen(false)}
         />
       )}

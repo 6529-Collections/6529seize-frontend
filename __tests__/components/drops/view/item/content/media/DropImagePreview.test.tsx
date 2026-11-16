@@ -215,27 +215,55 @@ it.each([
   }
 );
 
-it("falls back from a rejected GIF animation to a legacy preview, never the original", () => {
+it("tries both animated sizes and the original upload before showing a still", () => {
   const gif = original.replace("file.jpg", "artwork.gif");
   render(
     <DropImagePreview
       originalSrc={gif}
-      imageScale={ImageScale.AUTOx450}
+      imageScale={ImageScale.AUTOx1080}
       alt="GIF"
       fill
     />
   );
   expect(screen.getByAltText("GIF")).toHaveAttribute(
     "src",
-    gif.replace("artwork.gif", "AUTOx450_gifv2/artwork.gif")
+    gif.replace("artwork.gif", "AUTOx1080_gifv2/artwork.gif")
   );
   fireEvent.error(screen.getByAltText("GIF"));
   expect(screen.getByAltText("GIF")).toHaveAttribute(
     "src",
-    gif.replace("artwork.gif", "AUTOx450/artwork.gif")
+    gif.replace("artwork.gif", "AUTOx450_gifv2/artwork.gif")
   );
   fireEvent.error(screen.getByAltText("GIF"));
-  expect(screen.queryByRole("img")).not.toBeInTheDocument();
+  expect(screen.getByAltText("GIF")).toHaveAttribute("src", gif);
+  expect(screen.getByAltText("GIF")).toHaveAttribute(
+    "data-unoptimized",
+    "true"
+  );
+  fireEvent.error(screen.getByAltText("GIF"));
+  expect(screen.getByAltText("GIF")).toHaveAttribute(
+    "src",
+    gif.replace("artwork.gif", "AUTOx1080/artwork.gif")
+  );
+});
+
+it("keeps non-upload GIFs on bounded preview URLs", () => {
+  const gif = original.replace("/drops/", "/images/").replace(".jpg", ".gif");
+  expect(getDropImagePreviewSources(gif, ImageScale.AUTOx450)).toEqual([
+    gif.replace("file.gif", "AUTOx450_gifv2/file.gif"),
+    gif.replace("file.gif", "AUTOx450/file.gif"),
+  ]);
+  expect(
+    getDropImagePreviewSources(gif, ImageScale.AUTOx1080, {
+      preferAnimation: true,
+      allowOriginalGif: false,
+    })
+  ).toEqual([
+    gif.replace("file.gif", "AUTOx1080_gifv2/file.gif"),
+    gif.replace("file.gif", "AUTOx450_gifv2/file.gif"),
+    gif.replace("file.gif", "AUTOx1080/file.gif"),
+    gif.replace("file.gif", "AUTOx450/file.gif"),
+  ]);
 });
 
 it("reports unavailable animated previews once across legacy load and error events", () => {

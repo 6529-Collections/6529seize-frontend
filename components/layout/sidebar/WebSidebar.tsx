@@ -3,6 +3,7 @@
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { useSiteSearchRequest } from "@/hooks/useSiteSearchRequest";
 import { Tooltip as ReactTooltip } from "react-tooltip";
 import { useKey } from "react-use";
 import BellIcon from "@/components/common/icons/BellIcon";
@@ -80,6 +81,12 @@ function WebSidebar({
     { event: "keydown" }
   );
 
+  useSiteSearchRequest(() => {
+    if (!showDesktopSearch) return false;
+    setIsSearchOpen(true);
+    return true;
+  });
+
   // Close sidebar on route change when on mobile
   const prevPathnameRef = useRef(pathname);
   const isOverlayActive = isOffcanvasOpen && (isMobile || isNarrow);
@@ -146,8 +153,8 @@ function WebSidebar({
       <div
         className={
           isMobile
-            ? "tw-fixed tw-inset-y-0 tw-left-0 tw-z-[80] focus:tw-outline-none"
-            : "tw-fixed tw-inset-y-0 tw-left-0 tw-z-40 focus:tw-outline-none"
+            ? "tw-fixed tw-bottom-0 tw-left-0 tw-top-[var(--desktop-top-inset,0px)] tw-z-[80] focus:tw-outline-none"
+            : "tw-fixed tw-bottom-0 tw-left-0 tw-top-[var(--desktop-top-inset,0px)] tw-z-40 focus:tw-outline-none"
         }
         style={isMobile ? undefined : { left: "var(--layout-margin, 0px)" }}
       >

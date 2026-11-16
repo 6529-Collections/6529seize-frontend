@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  DROPDOWN_TRIGGER_CLASSES,
+  DROPDOWN_CHEVRON_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import {
   AnimatePresence,
   LazyMotion,
   domAnimation,
@@ -36,9 +40,9 @@ export default function UserPageStatsActivityWalletFilter({
   const toggleOpen = () => setIsOpen(!isOpen);
   useEffect(() => {
     if (isOpen) {
-      animateIcon(iconScope.current, { rotate: 0 });
+      animateIcon(iconScope.current, { rotate: 180 });
     } else {
-      animateIcon(iconScope.current, { rotate: -90 });
+      animateIcon(iconScope.current, { rotate: 0 });
     }
   });
   const listRef = useRef<HTMLDivElement>(null);
@@ -64,14 +68,14 @@ export default function UserPageStatsActivityWalletFilter({
             { filter: activeFilterLabel },
             locale
           )}
-          className="tw-relative tw-flex tw-w-full tw-items-center tw-rounded-lg tw-border-0 tw-bg-white/[0.03] tw-px-3.5 tw-py-2.5 tw-text-base tw-font-medium tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-white/[0.08] tw-transition tw-duration-300 tw-ease-out hover:tw-bg-white/[0.05] hover:tw-ring-white/[0.14] focus:tw-outline-none focus:tw-ring-primary-400 sm:tw-leading-6"
+          className={`${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-flex tw-w-full tw-items-center tw-px-3.5 tw-py-2.5 tw-pr-9 tw-text-base sm:tw-leading-6`}
         >
           <span>{activeFilterLabel}</span>
         </button>
         <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
           <svg
             ref={iconScope}
-            className="tw-h-4 tw-w-4 tw-text-iron-500"
+            className={DROPDOWN_CHEVRON_CLASSES}
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"

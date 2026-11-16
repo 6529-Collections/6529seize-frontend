@@ -31,14 +31,14 @@ export const APP_GRANT_DOMAIN = {
 } as const;
 
 /** Grant v2 (D172): `uint16[] ciphersuites` in place of `uint16 ciphersuite`. */
-const APP_GRANT_DOMAIN_V2 = {
+export const APP_GRANT_DOMAIN_V2 = {
   ...APP_GRANT_DOMAIN,
   version: "2",
 } as const;
 
-const APP_GRANT_PRIMARY_TYPE = "DeviceGrant";
+export const APP_GRANT_PRIMARY_TYPE = "DeviceGrant";
 
-const APP_GRANT_TYPES = {
+export const APP_GRANT_TYPES = {
   DeviceGrant: [
     { name: "statement", type: "string" },
     { name: "wallet", type: "address" },
@@ -52,7 +52,7 @@ const APP_GRANT_TYPES = {
   ],
 } as const;
 
-const APP_GRANT_TYPES_V2 = {
+export const APP_GRANT_TYPES_V2 = {
   DeviceGrant: [
     { name: "statement", type: "string" },
     { name: "wallet", type: "address" },

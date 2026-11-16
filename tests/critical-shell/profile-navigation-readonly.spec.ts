@@ -40,7 +40,7 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
     await expect(
       rep
-        .getByRole("button", { name: /^Open global REP category / })
+        .getByRole("button", { name: /^Open REP category / })
         .or(rep.getByText("No rep received yet.", { exact: true }))
         .first()
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });

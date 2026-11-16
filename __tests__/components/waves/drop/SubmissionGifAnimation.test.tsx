@@ -86,7 +86,7 @@ it.each([
   ["desktop-UA iPad", { isAppleMobile: true }],
   ["touch-first tablet", { hasTouchScreen: true }],
 ])(
-  "keeps the original GIF manual on %s and keeps the artwork loader",
+  "loads the uploaded original automatically on %s and keeps the artwork loader",
   (_surface, device) => {
     Object.assign(mockDevice, device);
     render(<MemesDropArtworkHero artworkMedia={artwork} />);
@@ -95,10 +95,7 @@ it.each([
       "tw-items-center",
       "tw-justify-center"
     );
-    const preview = screen.getByAltText("Drop media");
-    for (let attempt = 0; attempt < 4; attempt++) fireEvent.error(preview);
-    expect(screen.queryByAltText("Original GIF animation")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "View original" }));
+    rejectAnimatedPreviews();
     expect(screen.getByAltText("Original GIF animation")).toHaveAttribute(
       "src",
       src
@@ -113,6 +110,23 @@ it.each([
     expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
   }
 );
+
+it("keeps non-upload GIFs manual on touch devices", () => {
+  mockDevice.hasTouchScreen = true;
+  const url = src.replace("/drops/", "/images/");
+  render(<MemesDropArtworkHero artworkMedia={{ ...artwork, url }} />);
+  const preview = screen.getByAltText("Drop media");
+  fireEvent.error(preview);
+  fireEvent.error(preview);
+  fireEvent.load(preview);
+  expect(screen.queryByAltText("Original GIF animation")).toBeNull();
+  expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "View original" }));
+  expect(screen.getByAltText("Original GIF animation")).toHaveAttribute(
+    "src",
+    url
+  );
+});
 
 it("does not request an original before device detection resolves", () => {
   mockDetectionResolved = false;
@@ -225,7 +239,7 @@ it("clears continuous loading after original failure or a manual cancellation", 
   expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
 });
 
-it("fills a card frame without automatically loading the original GIF", () => {
+it("fills a card frame while the original upload replaces a failed GIF preview", () => {
   render(
     <DropListItemContentMediaImage src={src} imageLoadingLayout="artwork" />
   );
@@ -236,7 +250,8 @@ it("fills a card frame without automatically loading the original GIF", () => {
   );
   const preview = screen.getByAltText("Drop media");
   fireEvent.error(preview);
-  expect(screen.queryByAltText("Original GIF animation")).toBeNull();
+  expect(preview).toHaveAttribute("src", src);
+  expect(screen.getByRole("status", { name: "Loading image" })).toBeVisible();
   fireEvent.load(preview);
   expect(screen.queryByRole("status", { name: "Loading image" })).toBeNull();
 });
@@ -393,10 +408,15 @@ it("respects a manual optimized choice before animation fallbacks finish", () =>
   expect(screen.queryByAltText("Original GIF animation")).toBeNull();
 });
 
-it("does not automatically load original GIFs in ordinary drop images", () => {
-  render(<DropListItemContentMediaImage src={src} />);
+it("does not automatically load non-upload GIF originals in ordinary drop images", () => {
+  const url = src.replace("/drops/", "/images/");
+  render(<DropListItemContentMediaImage src={url} />);
   const preview = screen.getByAltText("Drop media");
   fireEvent.error(preview);
+  expect(preview).toHaveAttribute(
+    "src",
+    url.replace("art.gif", "AUTOx450/art.gif")
+  );
   fireEvent.load(preview);
   expect(screen.queryByAltText("Original GIF animation")).toBeNull();
   fireEvent.click(screen.getByRole("button", { name: "Open image preview" }));

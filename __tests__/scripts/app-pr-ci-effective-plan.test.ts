@@ -152,6 +152,7 @@ describe("effective App PR CI plan", () => {
     "hooks/useChatVideoPoster.ts",
     "public/video-preview-placeholder.svg",
     "components/waves/drop/MemesDropArtworkHero.tsx",
+    "components/waves/drop/useAutomaticSubmissionGifOriginal.ts",
     "components/drops/view/item/content/media/DropImagePreview.tsx",
     "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
     "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
@@ -1043,3 +1044,10 @@ it.each([
     ).toBe(true);
   }
 );
+
+it("selects the artwork and viewer lane for image viewer geometry coverage", () => {
+  expect(
+    executePlan(["tests/media/image-viewer-layout-sandbox.spec.ts"]).checks
+      .playwright_submission_artwork.required
+  ).toBe(true);
+});

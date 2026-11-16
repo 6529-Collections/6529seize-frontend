@@ -248,6 +248,10 @@
     "/bookmarks": {
       "classification": "auth"
     },
+    "/browser-connector": {
+      "classification": "exempt",
+      "exemptReason": "6529 Desktop sign-in and wallet-request bridge opened in the browser by the app; meaningless without the app's one-time link parameters or signed request."
+    },
     "/buidl": {
       "classification": "crawlable",
       "family": "info"
@@ -1836,10 +1840,6 @@
         "staging": "/network/nerd",
         "production": "/network/nerd"
       }
-    },
-    "/network/prenodes": {
-      "classification": "crawlable",
-      "family": "network"
     },
     "/network/tdh": {
       "classification": "crawlable",

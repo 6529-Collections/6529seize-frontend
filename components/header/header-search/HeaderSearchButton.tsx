@@ -15,6 +15,7 @@ import type { ApiWave } from "@/generated/models/ApiWave";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
+import { useSiteSearchRequest } from "@/hooks/useSiteSearchRequest";
 import { t } from "@/i18n/messages";
 
 import LazyHeaderSearchModal, {
@@ -76,6 +77,10 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
     handleSearchShortcut,
     { event: "keydown" }
   );
+
+  // A site-search request (the desktop app's Ctrl/Cmd+F) opens site search
+  // even inside a wave; the button and Ctrl/Cmd+K keep the wave search there.
+  useSiteSearchRequest(() => setOpenSearch("site"));
 
   const handleWaveResultSelect = (serialNo: number) => {
     if (!wave) return;

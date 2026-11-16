@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/components/auth/Auth";
+import { UNDERLINE_TAB_INDICATOR_CLASSES } from "@/components/common/underlineTabStyles";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { isOwnProfileRoute } from "@/helpers/ProfileHelpers";
 import { useIdentity } from "@/hooks/useIdentity";
@@ -294,7 +295,7 @@ export default function UserPageTabs({
           ))}
           <span
             aria-hidden="true"
-            className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-h-0.5 tw-w-px tw-origin-left tw-bg-primary-400 tw-transition-[transform,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
+            className={UNDERLINE_TAB_INDICATOR_CLASSES}
             style={{
               opacity: activeIndicator.visible ? 1 : 0,
               transform: `translate3d(${activeIndicator.left}px, 0, 0) scaleX(${activeIndicator.width})`,
