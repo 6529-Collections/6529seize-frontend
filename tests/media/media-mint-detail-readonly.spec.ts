@@ -1579,6 +1579,16 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   });
 
   test("renders The Memes mint page read-only", async ({ page }, testInfo) => {
+    const rootsRequests: string[] = [];
+    page.on("request", (request) => {
+      const pathname = new URL(request.url()).pathname;
+      if (
+        request.method() === "GET" &&
+        /^\/api\/minting-claims\/[^/]+\/\d+\/roots$/.test(pathname)
+      ) {
+        rootsRequests.push(pathname);
+      }
+    });
     await gotoReady(page, "/the-memes/mint");
 
     await expect(page).toHaveTitle(MEMES_MINT_TITLE_PATTERN);
@@ -1641,6 +1651,11 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("cell", { name: "Status" }).first()
     ).toBeVisible();
+    expect(rootsRequests).toHaveLength(1);
+    await testInfo.attach("mint-roots-requests", {
+      body: Buffer.from(JSON.stringify(rootsRequests)),
+      contentType: "application/json",
+    });
   });
 
   test("renders Meme Lab card activity focus with locale-preserving links", async ({
