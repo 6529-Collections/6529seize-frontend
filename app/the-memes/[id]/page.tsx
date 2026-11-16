@@ -32,7 +32,10 @@ export default async function MemePage({
       nftMeta: resolution.nftMeta,
       nftNotFound: false as const,
     };
-  } else if (resolution.kind === "published-upcoming") {
+  } else if (
+    resolution.kind === "published-upcoming" ||
+    resolution.kind === "scheduled-upcoming"
+  ) {
     initialData = { nftNotFound: true as const };
   }
 
@@ -94,5 +97,7 @@ export async function generateMetadata({
     normalizeLocale(locale),
     resolution.kind === "published" ? resolution.nft : null
   );
-  return metadata;
+  return resolution.kind === "scheduled-upcoming"
+    ? { ...metadata, robots: { index: false, follow: true } }
+    : metadata;
 }
