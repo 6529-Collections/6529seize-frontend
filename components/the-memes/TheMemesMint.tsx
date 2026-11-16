@@ -10,6 +10,7 @@ import type {
   ManifoldMintMetadata,
 } from "@/components/manifold-minting/manifold-mint-metadata";
 import { useTitle } from "@/contexts/TitleContext";
+import { MemesMintingRootsProvider } from "@/contexts/MemesMintingRootsContext";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
 import { Time } from "@/helpers/time";
 
@@ -28,7 +29,9 @@ interface TheMemesMintProps {
 export default function TheMemesMint(props: TheMemesMintProps) {
   return (
     <NftPurchasingGate redirectTo="/the-memes">
-      <TheMemesMintContent {...props} />
+      <MemesMintingRootsProvider>
+        <TheMemesMintContent {...props} />
+      </MemesMintingRootsProvider>
     </NftPurchasingGate>
   );
 }
