@@ -13,6 +13,7 @@ import { SIDEBAR_MOBILE_BREAKPOINT } from "@/constants/sidebar";
 import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { isBrowserConnectorPath } from "@/lib/desktop/browserConnector";
 import {
   markMobileLaunchStep,
   scheduleMobileLaunchFlush,
@@ -97,7 +98,9 @@ export default function LayoutWrapper({
   });
 
   const isAccessOrRestricted =
-    pathname.startsWith("/access") || pathname.startsWith("/restricted");
+    pathname.startsWith("/access") ||
+    pathname.startsWith("/restricted") ||
+    isBrowserConnectorPath(pathname);
 
   useEffect(() => {
     const flushAfterPaint = () => {

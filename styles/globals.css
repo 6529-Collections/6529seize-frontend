@@ -118,6 +118,18 @@
     );
     --pull-to-refresh-fixed-overlay-offset: 0px;
     --pull-to-refresh-fixed-overlay-transition-duration: 0ms;
+    /* Space above the page for the 6529 Desktop title strip (0 elsewhere). */
+    --desktop-top-inset: 0px;
+  }
+  /* 6529 Desktop sets data-desktop-titlebar and --desktop-titlebar-height on
+     <html> before first paint when it draws its controls over the page; the
+     page keeps that strip's height free at the top. */
+  :root[data-desktop-titlebar="overlay"] {
+    --desktop-top-inset: var(--desktop-titlebar-height, 0px);
+    --layout-viewport-height: calc(100svh - var(--desktop-top-inset));
+  }
+  :root[data-desktop-titlebar="overlay"] body {
+    padding-top: var(--desktop-top-inset);
   }
   :root[data-native-keyboard-visible="true"]:not(
       [data-layout-viewport-locked="true"]
