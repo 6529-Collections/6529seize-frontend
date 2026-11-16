@@ -1,3 +1,7 @@
+import {
+  type ApiMainStageTraitRule,
+  ApiMainStageTraitRuleTypeEnum,
+} from "@/generated/models/ApiMainStageTraitRule";
 import competitionRuleDefaults from "../support/competitionRuleDefaults.json";
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
@@ -337,6 +341,7 @@ const competition = (id: string, title: string) => ({
         ]
       : [],
   capabilities: [] as string[],
+  main_stage_trait_rules: undefined as ApiMainStageTraitRule[] | undefined,
   permissions: {
     view: true,
     submit: true,
@@ -1442,6 +1447,117 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Shared wave renamed", exact: true })
     ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+  });
+
+  test("validates Main Stage traits through the API and leaves skipped values out of the request", async ({
+    page,
+  }) => {
+    test.setTimeout(120000);
+    page.setDefaultTimeout(15000);
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    sandbox.setCompetition("alpha", {
+      main_stage_trait_rules: [
+        {
+          key: "bonus",
+          type: ApiMainStageTraitRuleTypeEnum.Text,
+          required: false,
+          default_value: "No",
+        },
+        {
+          key: "pointsSpeed",
+          type: ApiMainStageTraitRuleTypeEnum.Points,
+          required: true,
+          minimum: -10000000000,
+          maximum: 10000000000,
+        },
+      ],
+    });
+    const observed: Record<string, string>[] = [];
+    let disablePolicyOnNextCheck = false;
+    await page.route("**/main-stage-traits/validate", async (route) => {
+      if (disablePolicyOnNextCheck) {
+        sandbox.setCompetition("alpha", { main_stage_trait_rules: undefined });
+        await route.fulfill({
+          status: 404,
+          json: { error: "Policy unavailable" },
+        });
+        return;
+      }
+      const request = route.request().postDataJSON() as {
+        metadata: { data_key: string; data_value: string }[];
+      };
+      const byKey = Object.fromEntries(
+        request.metadata.map(({ data_key, data_value }) => [
+          data_key,
+          data_value,
+        ])
+      );
+      observed.push(byKey);
+      await route.fulfill({
+        json: {
+          issues:
+            byKey["pointsSpeed"] === "0"
+              ? [{ key: "pointsSpeed", code: "INVALID_POINTS" }]
+              : [],
+        },
+      });
+    });
+    await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`),
+      { timeout: 30000 }
+    );
+    await page.addStyleTag({
+      content: "nextjs-portal { display: none !important; }",
+    });
+    await page.getByRole("button", { name: /^Submit (Work|Meme)/ }).click();
+    const dialog = page.getByRole("dialog", {
+      name: "Submit Work to The Memes",
+    });
+    await dialog.getByRole("button", { name: "Check terms agreement" }).click();
+    await dialog.getByRole("button", { name: "I Agree & Continue" }).click();
+    const bonus = dialog.getByRole("textbox", { name: "Bonus", exact: true });
+    await expect(bonus).toHaveAttribute("placeholder", "Leave blank to use No");
+    await dialog
+      .getByTestId("artwork-file-input")
+      .setInputFiles("public/artwork-documentation/examples/an-alteration.png");
+    await dialog
+      .getByRole("textbox", { name: "Artwork Title", exact: true })
+      .fill("Trait validation check");
+    await dialog
+      .getByRole("textbox", { name: "Description", exact: true })
+      .fill("Local staging contract check");
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(dialog.getByText(/Enter a nonzero number/)).toBeVisible();
+    const speed = dialog.getByRole("spinbutton", {
+      name: "Points - Speed",
+      exact: true,
+    });
+    await expect(speed).toBeFocused();
+    await speed.fill("1.5");
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(
+      dialog.getByRole("textbox", { name: "About the Artist", exact: true })
+    ).toBeVisible();
+    expect(observed).toHaveLength(2);
+    expect(observed[1]).toMatchObject({ pointsSpeed: "1.5" });
+    expect(observed[1]).not.toHaveProperty("bonus");
+    await dialog.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(bonus).toHaveAttribute("placeholder", "Leave blank to use No");
+    disablePolicyOnNextCheck = true;
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(bonus).not.toHaveAttribute(
+      "placeholder",
+      "Leave blank to use No"
+    );
+    await expect(
+      dialog.getByRole("textbox", { name: "Artwork Title", exact: true })
+    ).toHaveValue("Trait validation check");
     expect(sandbox.requests).toEqual([]);
   });
 

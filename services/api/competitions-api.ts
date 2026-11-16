@@ -1,3 +1,5 @@
+import type { ApiMainStageTraitValidation } from "@/generated/models/ApiMainStageTraitValidation";
+import type { ApiValidateMainStageTraitsRequest } from "@/generated/models/ApiValidateMainStageTraitsRequest";
 import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompetitionContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ApiCompetitionComputedPhase } from "@/generated/models/ApiCompetitionComputedPhase";
@@ -55,6 +57,22 @@ export const defaultCompetitionQueryKey = (
   waveId: string,
   viewer: string | null
 ) => [QueryKey.DEFAULT_COMPETITION, { wave_id: waveId, viewer }] as const;
+
+export function validateMainStageTraits(
+  identity: CompetitionIdentity,
+  body: ApiValidateMainStageTraitsRequest,
+  signal: AbortSignal
+) {
+  return commonApiPost<
+    ApiValidateMainStageTraitsRequest,
+    ApiMainStageTraitValidation
+  >({
+    endpoint: `${competitionEndpoint(identity)}/main-stage-traits/validate`,
+    body,
+    signal,
+    errorMode: "structured",
+  });
+}
 
 export async function fetchDropCompetitionContext(
   waveId: string,

@@ -611,6 +611,14 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "signing.rabbyDescription":
     "May show the message as raw data with “Unknown Signature Type”. Review the message details before signing.",
   "signing.mismatch": "Cancel if the details do not match your submission.",
+  "traits.useNo": "Leave blank to use No",
+  "traits.checking": "Checking traits…",
+  "traits.checkFailed": "Couldn’t check artwork traits. Try again.",
+  "traits.required": "This field is required.",
+  "traits.duplicate": "Use a single value for this field.",
+  "traits.invalidChoice": "Select one of the available choices.",
+  "traits.invalidPoints": "Enter a nonzero number from {min} to {max}.",
+  "traits.invalidBoolean": "Choose Yes or No.",
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
   "identity.connectPrompt":
