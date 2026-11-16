@@ -197,11 +197,12 @@ show the profile-creation welcome.
   down and grow to at most 80% of the viewport height. Long content scrolls
   inside. Mobile keeps the bottom sheet.
 - First choose a category. The search field is followed by `You assigned`
-  chips showing your categories and amounts, including negative REP, and
-  `On this profile` chips showing up to six other top categories. Typing
-  filters these choices. Long personal lists scroll within their group.
+  chips showing your existing contributions and amounts, including negative REP.
+  This group is hidden when you have not assigned REP to this profile; the
+  modal then starts with search, the summary rows and `Cancel`. Typing
+  filters your assigned categories. Long personal lists scroll within their group.
 - Category search accepts 3-100 characters for searching all categories;
-  existing profile chips can be selected without typing.
+  existing assigned-category chips can be selected without typing.
 - Results appear after a short debounce as compact category pills, including the
   typed category and matching categories returned by the existing search.
 - Similar categories remain independent and selectable. The exact
@@ -214,7 +215,7 @@ show the profile-creation welcome.
   instead shows an amber informational note explaining that the categories are
   separate and only exact `MemesNominee` counts toward the requirement. All
   other category pills keep their existing behavior.
-- Selecting a search result validates availability; profile chips use their
+- Selecting a search result validates availability; assigned chips use their
   known category names. After choosing, the category stays in the search field.
   Select its `×` (`Change category`) to choose another category and clear the draft.
 - The amount field and primary action appear only after a category is selected.

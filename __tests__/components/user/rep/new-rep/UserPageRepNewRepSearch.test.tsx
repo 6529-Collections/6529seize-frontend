@@ -79,6 +79,10 @@ describe("UserPageRepNewRepSearch", () => {
 
   it("prefills known chips, changes categories, and distinguishes editing from a new grant", async () => {
     const user = userEvent.setup();
+    (useQuery as jest.Mock).mockReturnValue({
+      isFetching: false,
+      data: ["Music"],
+    });
     const ratings = [
       {
         category: "AI",
@@ -112,9 +116,7 @@ describe("UserPageRepNewRepSearch", () => {
     );
     const own = screen.getByRole("group", { name: "You assigned" });
     expect(
-      within(
-        screen.getByRole("group", { name: "On this profile" })
-      ).queryByRole("button", { name: "AI" })
+      screen.queryByRole("group", { name: "On this profile" })
     ).not.toBeInTheDocument();
     await user.click(within(own).getByRole("button", { name: "AI 1,000" }));
     expect(
@@ -141,19 +143,56 @@ describe("UserPageRepNewRepSearch", () => {
       screen.queryByRole("button", { name: "AI 1,000" })
     ).not.toBeInTheDocument();
     await user.click(
-      within(screen.getByRole("group", { name: "On this profile" })).getByRole(
-        "button",
-        { name: "Music" }
-      )
+      await screen.findByRole("button", { name: "Music", exact: true })
     );
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
     ).toHaveValue("0");
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     expect(screen.queryByText("Current Rep:")).not.toBeInTheDocument();
-    expect(commonApiFetch).not.toHaveBeenCalled();
+    expect(commonApiFetch).toHaveBeenCalledTimes(1);
     expect(commonApiPost).not.toHaveBeenCalled();
   });
+
+  it.each([
+    { ratingStats: [] },
+    {
+      ratingStats: [
+        {
+          category: "Music",
+          rating: 900,
+          contributor_count: 1,
+          rater_contribution: 0,
+        },
+      ],
+    },
+  ])(
+    "omits chip groups when no REP has been assigned (%j)",
+    ({ ratingStats }) => {
+      mockAllocation.mockReturnValue({ ...allocation, ratingStats });
+      render(
+        <UserPageRepNewRepSearch
+          overview={null}
+          profile={{ query: "recipient" } as ApiIdentity}
+        />
+      );
+      expect(
+        screen.getByRole("textbox", { name: "Category to grant REP for" })
+      ).toHaveValue("");
+      expect(screen.queryByRole("group")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText("No REP assigned yet.")
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("textbox", {
+          name: "Your total REP for this category",
+        })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Grant Rep", exact: true })
+      ).not.toBeInTheDocument();
+    }
+  );
 
   it("ignores a delayed search choice after the user picks a known category", async () => {
     const user = userEvent.setup();

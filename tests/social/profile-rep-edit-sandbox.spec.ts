@@ -430,7 +430,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         /^\/api\/+rep\/categories(?:\/availability)?$/.test(url.pathname),
       (route) => {
         searches++;
-        return route.fulfill({ json: [] });
+        return route.fulfill({
+          json: route.request().url().includes("/availability")
+            ? true
+            : ["Music"],
+        });
       }
     );
     await page.route(`${api}/api/profiles/${TARGET}/rep/rating`, (route) => {
@@ -468,17 +472,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(own.getByRole("button")).toHaveCount(2);
-    await expect(profile.getByRole("button")).toHaveCount(6);
-    await expect(
-      profile.getByRole("button", { name: CATEGORY, exact: true })
-    ).toHaveCount(0);
+    await expect(profile).toHaveCount(0);
+    expect(searches).toBe(0);
     await page
       .getByRole("dialog", { name: "Grant Rep", exact: true })
       .locator(".mobile-wrapper-dialog")
       .screenshot({ path: testInfo.outputPath("grant-rep-category-step.png") });
-    await search.fill("mu");
+    await search.fill("mus");
     await expect(own.getByRole("button")).toHaveCount(0);
-    await profile.getByRole("button", { name: "Music", exact: true }).click();
+    await grant.getByRole("button", { name: "Music", exact: true }).click();
     const amount = grant.getByRole("textbox", {
       name: "Your total REP for this category",
       exact: true,
@@ -516,7 +518,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("button", { name: "Save", exact: true })
     ).toBeDisabled();
     expect(allocationReads).toBe(1);
-    expect(searches).toBe(0);
+    expect(searches).toBe(2);
     expect(writes).toBe(0);
     await expectNoHorizontalOverflow(page);
     await expectAxeClean(page);
@@ -524,6 +526,74 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .getByRole("dialog", { name: "Grant Rep", exact: true })
       .locator(".mobile-wrapper-dialog")
       .screenshot({ path: testInfo.outputPath("grant-rep-two-step.png") });
+  });
+
+  test("opens Grant Rep without chip groups when no REP is assigned", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...allowance,
+            rating_stats: [
+              {
+                category: CATEGORY,
+                rating: 20,
+                contributor_count: 1,
+                rater_contribution: 0,
+              },
+            ],
+          },
+        })
+    );
+    await page.route(`${api}/api/profiles/${TARGET}/rep/overview*`, (route) =>
+      route.fulfill({
+        json: {
+          total_rep: 20,
+          authenticated_user_contribution: 0,
+          contributor_count: 1,
+          contributors: { data: [], page: 1, next: false, count: 0 },
+        },
+      })
+    );
+    await openProfile(page);
+    await page.getByRole("button", { name: "Grant Rep", exact: true }).click();
+    const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
+    await expect(
+      grant.getByRole("textbox", {
+        name: "Category to grant REP for",
+        exact: true,
+      })
+    ).toHaveValue("");
+    await expect(
+      grant.getByText("Your available REP:", { exact: true })
+    ).toBeVisible();
+    await expect(
+      grant.getByText(`Your REP assigned to ${TARGET}:`, { exact: true })
+    ).toBeVisible();
+    await expect(grant.getByText("80", { exact: true })).toBeVisible();
+    await expect(grant.getByText("0", { exact: true })).toBeVisible();
+    await expect(grant.getByRole("group")).toHaveCount(0);
+    await expect(
+      grant.getByText("No REP assigned yet.", { exact: true })
+    ).toHaveCount(0);
+    await expect(grant.getByRole("textbox")).toHaveCount(1);
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      grant.getByRole("button", { name: "Cancel", exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await grant.locator(".mobile-wrapper-dialog").screenshot({
+      path: testInfo.outputPath("grant-rep-no-assigned-chips.png"),
+    });
+    await grant.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(grant).toBeHidden();
   });
 
   test("grants first REP from the pinned You row and refreshes the tag and header totals", async ({
