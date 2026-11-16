@@ -179,6 +179,15 @@ const states: ReadonlyArray<
       next_unfunded: unfunded(575, null),
     },
   ],
+  [
+    "forecast-cap",
+    {
+      status: Status.Covered,
+      fully_funded_drops: 24,
+      funded_through: point(598),
+      next_unfunded: null,
+    },
+  ],
   ["loading", "loading"],
   ["api-error", "error"],
 ];
@@ -197,6 +206,13 @@ function coverageFor(overrides: Partial<ApiSubscriptionCoverage>) {
     allocated_mints: funded * perDrop,
     minimum_top_up: null,
     recommended_top_up: null,
+    forecast: {
+      ...subscriptionCoverageFixture().forecast,
+      horizon_start_token_id: 575,
+      horizon_end_token_id: 598,
+      horizon_drop_count: 24,
+      forecast_truncated: true,
+    },
     ...overrides,
     next_unfunded: next
       ? {
@@ -381,6 +397,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
                 "not-set-up",
                 "no-selections",
                 "zero-funded",
+                "forecast-cap",
                 "mint-paid",
                 "mint-payment-error",
                 "mint-payment-loading",
@@ -418,7 +435,15 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
             "Loading subscription coverage",
             { timeout: RESPONSE_TIMEOUT_MS }
           );
-          if (name === "mint-paid")
+          if (name === "forecast-cap") {
+            await expect(headline).toHaveText(
+              phase === "before" ? "24 drops funded" : "Next 24 drops funded"
+            );
+            await expect(overview.getByText(/Funded through/)).toHaveText(
+              "Funded through The Memes #598 · Jan 1, 2027"
+            );
+          }
+          if (phase !== "before" && name === "mint-paid")
             await expect(headline).toHaveText("Subscription paid");
           await expect(
             overview.getByText("Forecast use", { exact: true })
@@ -512,9 +537,12 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
         await expect(
           dialog.getByRole("button", { name: /Top up 0.13058 ETH/ })
         ).toBeVisible();
-        await page.getByRole("dialog", { name: "Top up", exact: true }).locator('[id^="headlessui-dialog-panel-"]').screenshot({
-          path: testInfo.outputPath("top-up-options.png"),
-        });
+        await page
+          .getByRole("dialog", { name: "Top up", exact: true })
+          .locator('[id^="headlessui-dialog-panel-"]')
+          .screenshot({
+            path: testInfo.outputPath("top-up-options.png"),
+          });
         await page.keyboard.press("Escape");
         await expect(dialog).toHaveCount(0);
         await expect(topUp).toBeFocused();

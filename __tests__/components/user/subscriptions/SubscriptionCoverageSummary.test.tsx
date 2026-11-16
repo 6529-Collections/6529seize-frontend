@@ -737,7 +737,7 @@ describe("SubscriptionCoverageSummary", () => {
       ),
     });
     expect(
-      screen.getByRole("heading", { name: "24 drops funded" })
+      screen.getByRole("heading", { name: "Next 24 drops funded" })
     ).toBeVisible();
     expect(screen.getByText("1,108 mints available")).toBeVisible();
     expect(screen.getByText("288 allocated")).toBeVisible();
@@ -884,7 +884,7 @@ function createFundedManualCoverage(): ApiSubscriptionCoverage {
   };
 }
 
-it("limits its funded claim to the forecast and explains truncation", async () => {
+it("keeps the existing projection tooltip without an extra forecast-limit note", async () => {
   const coverage = createFundedManualCoverage();
   coverage.forecast.forecast_truncated = true;
   render(
@@ -897,11 +897,17 @@ it("limits its funded claim to the forecast and explains truncation", async () =
   await userEvent
     .setup()
     .click(screen.getByRole("button", { name: "Forecast use" }));
+  const tooltip = await screen.findByRole("tooltip");
   expect(
-    within(await screen.findByRole("tooltip")).getByText(
-      "This forecast may not include all future drops."
+    within(tooltip).getByText(
+      "Projected from current eligibility, settings, balance, and the published Meme schedule."
     )
   ).toBeVisible();
+  expect(
+    within(tooltip).queryByText(
+      "This forecast may not include all future drops."
+    )
+  ).not.toBeInTheDocument();
 });
 
 describe("Mint-day subscription payment", () => {
@@ -959,9 +965,7 @@ describe("Mint-day subscription payment", () => {
       expect(
         screen.getByRole("heading", { name: "Subscription paid" })
       ).toBeVisible();
-      expect(
-        screen.getByText(/The subscription for/)
-      ).toBeVisible();
+      expect(screen.getByText(/The subscription for/)).toBeVisible();
       expect(
         screen.getByText("From the remaining balance: 0 drops funded.")
       ).toBeVisible();
@@ -1047,4 +1051,53 @@ describe("Mint-day subscription payment", () => {
       screen.getByText("The Memes #575 is not fully funded.")
     ).toBeVisible();
   });
+});
+
+describe("24-drop forecast headline", () => {
+  it.each([
+    [0, "0 drops funded"],
+    [1, "1 drop funded"],
+    [7, "7 drops funded"],
+    [23, "23 drops funded"],
+    [24, "Next 24 drops funded"],
+  ] as const)(
+    "changes only the default-window headline at %i funded drops",
+    (count, headline) => {
+      const coverage = subscriptionCoverageFixture({
+        status:
+          count < 2
+            ? ApiSubscriptionCoverageStatus.ActionRequired
+            : ApiSubscriptionCoverageStatus.Covered,
+        fully_funded_drops: count,
+        funded_through: count
+          ? { token_id: 598, mint_at: new Date("2027-01-01T15:40:00Z") }
+          : null,
+        next_unfunded: count
+          ? null
+          : subscriptionCoverageFixture().next_unfunded,
+        forecast: {
+          ...subscriptionCoverageFixture().forecast,
+          horizon_drop_count: 24,
+          forecast_truncated: true,
+        },
+      });
+      render(
+        <SubscriptionCoverageSummary
+          coverage={coverage}
+          isLoading={false}
+          isOwner
+        />
+      );
+      expect(
+        screen.getByRole("heading", { name: headline, exact: true })
+      ).toBeVisible();
+      if (count)
+        expect(screen.getByText(/Funded through/)).toHaveTextContent(
+          "Funded through The Memes #598 · Jan 1, 2027"
+        );
+      expect(
+        screen.queryByText(/24-drop limit|forecast limit/i)
+      ).not.toBeInTheDocument();
+    }
+  );
 });

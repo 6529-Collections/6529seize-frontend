@@ -31,6 +31,8 @@ import {
   type MintDaySubscriptionStatus,
 } from "./subscriptionCoverageSummary.helpers";
 
+const DEFAULT_FORECAST_DROP_LIMIT = 24;
+
 const STATUS_TEXT_CLASS = {
   neutral: "tw-text-iron-300",
   positive: "tw-text-emerald-400",
@@ -231,6 +233,13 @@ function CoverageSummaryContent({
       : presentation.tone;
   let headline = presentation.label;
   if (paid) headline = t(locale, "subscriptions.coverage.summary.paidTitle");
+  else if (
+    showFundedCount &&
+    coverage.fully_funded_drops === DEFAULT_FORECAST_DROP_LIMIT
+  )
+    headline = t(locale, "subscriptions.coverage.summary.nextFundedDrops", {
+      count: formatInteger(locale, coverage.fully_funded_drops),
+    });
   else if (showFundedCount)
     headline = getFundedDropsLabel(locale, coverage.fully_funded_drops);
 
@@ -441,16 +450,9 @@ function SubscriptionCoverageForecast({
               <p className="tw-mb-1 tw-mt-0">{description}</p>
             )}
             {coverage && (
-              <>
-                <p className="tw-m-0">
-                  {t(locale, "subscriptions.coverage.basis")}
-                </p>
-                {coverage.forecast.forecast_truncated && (
-                  <p className="tw-mb-0 tw-mt-1">
-                    {t(locale, "subscriptions.coverage.summary.truncated")}
-                  </p>
-                )}
-              </>
+              <p className="tw-m-0">
+                {t(locale, "subscriptions.coverage.basis")}
+              </p>
             )}
             {!coverage && <p className="tw-m-0">{description}</p>}
           </div>

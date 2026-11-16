@@ -4361,6 +4361,7 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.history.emptyLogs": "No logs found",
   "subscriptions.history.emptyTopups": "No Top Ups found",
   "subscriptions.history.loading": "Loading {title}",
+  "subscriptions.coverage.summary.nextFundedDrops": "Next {count} drops funded",
   "subscriptions.coverage.summary.paidTitle": "Subscription paid",
   "subscriptions.coverage.summary.paid":
     "The subscription for {meme} is already paid.",
@@ -4378,8 +4379,6 @@ export const EN_US_ROOT_MESSAGES = {
     "Top-up deadline for The Memes #{token}: {deadline}.",
   "subscriptions.coverage.summary.noDeadline":
     "A top-up deadline is not available yet.",
-  "subscriptions.coverage.summary.truncated":
-    "This forecast may not include all future drops.",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":

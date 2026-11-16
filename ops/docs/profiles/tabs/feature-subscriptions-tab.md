@@ -99,6 +99,8 @@ On the web and Android, the tab appears after the page loads.
 1. Open `/{user}/subscriptions`. The coverage card has two zones: the status,
    funded-drop headline, short explanation and owner actions above; balance,
    available mints and Forecast use below. Every loaded state has a plain reason.
+   At 24 funded drops, the headline is Next 24 drops funded. Counts below 24 and
+   the supplied Funded through line keep their existing wording and date.
    When a selected forecast is fully funded and identifies no unfunded drop, the
    card says Covered, even if only one drop was selected. An identified shortfall
    with funded drops remaining is a calm reminder; the one-funded-drop state says
@@ -121,8 +123,7 @@ On the web and Android, the tab appears after the page loads.
    the balance without parentheses. They stack below 384px. Summary dates keep their original full-year format, and deadlines retain
    their UTC time. Next unfunded remains in
    the facts only when no deadline line already names that drop. The Forecast use
-   information button retains its projection note. A truncated forecast also warns
-   that it may not include all future drops.
+   information button retains its existing projection note.
    Hover, focus or tap opens the shared tooltip; Escape or tapping elsewhere
    dismisses it. The settings and upcoming-drop facts remain in their own sections.
 3. Owners open Top up beside the message on desktop or beneath it on phones.
