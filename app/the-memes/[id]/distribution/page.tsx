@@ -11,6 +11,7 @@ import {
 } from "@/components/the-memes/MemeShared";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { Metadata } from "next";
+import { resolveMemeRoute } from "../memeRouteResolution";
 
 type MemeDistributionPageProps = {
   readonly searchParams: Promise<DistributionSearchParams>;
@@ -47,11 +48,14 @@ export async function generateMetadata({
   ]);
   const locale = getDistributionRouteLocale(resolvedSearchParams);
 
-  return getSharedAppServerSideProps(
+  const metadata = await getSharedAppServerSideProps(
     MEMES_CONTRACT,
     id,
     MEME_FOCUS.LIVE,
     true,
     locale
   );
+  return (await resolveMemeRoute(id)).kind === "scheduled-upcoming"
+    ? { ...metadata, robots: { index: false, follow: true } }
+    : metadata;
 }

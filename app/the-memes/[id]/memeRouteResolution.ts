@@ -1,4 +1,9 @@
-import { getCanonicalNextMintNumber } from "@/components/meme-calendar/meme-calendar.helpers";
+import {
+  getCanonicalNextMintNumber,
+  getCardsRemainingUntilEndOf,
+  getUpcomingMintsAcrossSeasons,
+  isMintEligibleUtcDay,
+} from "@/components/meme-calendar/meme-calendar.helpers";
 import { apiUrl } from "@/services/api/api-endpoints";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { DBResponse } from "@/entities/IDBResponse";
@@ -18,6 +23,7 @@ type MemeRouteResolution =
       readonly nftMeta: ApiMemesExtendedData;
     }
   | { readonly kind: "published-upcoming" }
+  | { readonly kind: "scheduled-upcoming" }
   | { readonly kind: "missing" }
   | { readonly kind: "unavailable" };
 
@@ -106,15 +112,23 @@ export const resolveMemeRoute = cache(
     if (nft && nftMeta && metadataResult.value.length === 1) {
       return { kind: "published", nft, nftMeta };
     }
-    if (
-      !nft &&
-      metadataResult.value.length === 0 &&
-      numericId === getCanonicalNextMintNumber()
-    ) {
-      return { kind: "published-upcoming" };
+    if (!nft && metadataResult.value.length === 0) {
+      const now = new Date();
+      if (numericId === getCanonicalNextMintNumber(now)) {
+        return { kind: "published-upcoming" };
+      }
+      // Subscriptions retain today's row through the whole UTC mint day.
+      const today = new Date(now);
+      today.setUTCHours(0, 0, 0, 0);
+      const upcomingCount =
+        getCardsRemainingUntilEndOf("szn", now) +
+        (isMintEligibleUtcDay(today) ? 1 : 0);
+      const scheduled = getUpcomingMintsAcrossSeasons(
+        upcomingCount,
+        today
+      ).some((row) => row.meme === numericId);
+      return { kind: scheduled ? "scheduled-upcoming" : "missing" };
     }
-    return !nft && metadataResult.value.length === 0
-      ? { kind: "missing" }
-      : { kind: "unavailable" };
+    return { kind: "unavailable" };
   }
 );
