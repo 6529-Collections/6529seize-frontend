@@ -212,7 +212,7 @@ function UserPageIdentityHeaderCICRateForm({
   const rateInput = (
     <div
       className={`tw-relative tw-flex tw-w-full tw-min-w-0 ${
-        isTooltip ? "tw-flex-1" : "tw-mt-2"
+        isTooltip ? "tw-flex-1" : ""
       }`}
     >
       <UserPageRateInput
@@ -233,6 +233,7 @@ function UserPageIdentityHeaderCICRateForm({
     <UserRateAdjustmentHelper
       inLineValues={true}
       valueLayout="inline"
+      variant={isTooltip ? "default" : "summary"}
       originalValue={originalRating}
       adjustedValue={newRating}
       adjustmentType="NIC"
@@ -299,7 +300,7 @@ function UserPageIdentityHeaderCICRateForm({
           <>
             <label
               htmlFor={inputId}
-              className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
+              className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
             >
               {tRich(locale, "user.rate.nic.label", {
                 profile: (
@@ -309,20 +310,21 @@ function UserPageIdentityHeaderCICRateForm({
                 ),
               })}
             </label>
-            <p className="tw-text-xs tw-text-iron-400">
+            <p className="tw-mb-2 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-500">
               {t(locale, "user.rate.totalHelp")}
             </p>
             {rateInput}
 
             {adjustmentHelper}
 
-            <div className="tw-mt-7 tw-flex tw-justify-end tw-gap-3">
+            <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-justify-end md:tw-gap-3">
               {onCancel && (
                 <Button
                   onClick={onCancel}
                   disabled={mutating}
                   variant="ghost"
                   size="lg"
+                  className="tw-w-full md:tw-w-auto"
                 >
                   {t(locale, "user.rate.cancel")}
                 </Button>
@@ -333,6 +335,7 @@ function UserPageIdentityHeaderCICRateForm({
                 loading={mutating}
                 variant="success"
                 size="lg"
+                className="tw-w-full md:tw-w-auto"
               >
                 {t(locale, "user.rate.save")}
               </Button>

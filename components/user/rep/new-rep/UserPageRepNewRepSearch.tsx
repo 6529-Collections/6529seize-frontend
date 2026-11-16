@@ -127,7 +127,7 @@ function GrantRepAmountStatus({
         : "tw-font-medium tw-text-rose-400";
   }
   return (
-    <div className="tw-flex tw-h-[42px] tw-min-w-0 tw-items-center tw-justify-between tw-gap-2">
+    <div className="tw-mt-2 tw-flex tw-h-[42px] tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-bg-white/[0.03] tw-px-3.5 tw-py-3">
       <span
         id={id}
         className={`tw-whitespace-nowrap tw-text-xs ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-500"}`}
@@ -512,7 +512,7 @@ export default function UserPageRepNewRepSearch({
   };
 
   return (
-    <div className="tw-flex tw-h-[440px] tw-max-h-[calc(100dvh-12rem)] tw-min-h-0 tw-max-w-full tw-flex-col">
+    <div className="tw-flex tw-h-[440px] tw-max-h-[calc(100dvh-12rem)] tw-min-h-0 tw-max-w-full tw-flex-col md:tw-h-[392px]">
       <div
         ref={listRef}
         className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 sm:tw-px-6"
@@ -625,7 +625,7 @@ export default function UserPageRepNewRepSearch({
         >
           <label
             htmlFor={amountInputId}
-            className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
+            className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
           >
             {t(locale, "rep.categories.grant.amountLabel")}
           </label>
@@ -677,15 +677,26 @@ export default function UserPageRepNewRepSearch({
           </div>
         )}
       </div>
-      <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-1 tw-px-4 tw-pt-4 sm:tw-px-6">
+      <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-px-4 tw-pt-4 sm:tw-px-6 md:tw-flex-row md:tw-justify-end md:tw-gap-3">
+        {onCancel && (
+          <Button
+            onClick={onCancel}
+            disabled={mutating}
+            variant="ghost"
+            size="lg"
+            className="tw-w-full md:tw-w-auto"
+          >
+            {t(locale, "rep.categories.grant.actions.cancel")}
+          </Button>
+        )}
         <Button
           disabled={isGrantDisabled}
           type="submit"
           form={amountFormId}
           loading={mutating}
           variant="action"
-          size="xl"
-          fullWidth
+          size="lg"
+          className="tw-w-full md:tw-w-auto"
         >
           {t(
             locale,
@@ -694,17 +705,6 @@ export default function UserPageRepNewRepSearch({
               : "rep.categories.grant.actions.grant"
           )}
         </Button>
-        {onCancel && (
-          <Button
-            onClick={onCancel}
-            disabled={mutating}
-            variant="ghost"
-            size="lg"
-            fullWidth
-          >
-            {t(locale, "rep.categories.grant.actions.cancel")}
-          </Button>
-        )}
       </div>
     </div>
   );
