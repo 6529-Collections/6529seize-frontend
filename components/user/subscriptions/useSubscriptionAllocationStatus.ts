@@ -76,6 +76,8 @@ export function useSubscriptionAllocationStatus({
 
   return {
     final: finalQuery.data,
+    isLoading: finalQuery.isLoading,
+    isError: finalQuery.isError,
     hasNoAllocation:
       checkPublication &&
       publicationQuery.isSuccess &&

@@ -75,7 +75,7 @@ jest.mock(
     default: ({ action, topUpAction, children }: any) => (
       <div data-testid="subscription-coverage-summary">
         Coverage summary{action}
-        {topUpAction}
+        {typeof topUpAction === "function" ? topUpAction(false) : topUpAction}
         {children}
       </div>
     ),

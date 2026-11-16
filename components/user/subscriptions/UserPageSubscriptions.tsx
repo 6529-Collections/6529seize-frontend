@@ -254,6 +254,7 @@ export default function UserPageSubscriptions(
               <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
                 <SubscriptionCoverageSummary
                   coverage={coverageQuery.data}
+                  profileKey={profileKey}
                   isLoading={coverageQuery.isLoading}
                   isOwner={isConnectedAccount}
                   showFundingPrompt={!hideNftPurchasing}
@@ -266,12 +267,12 @@ export default function UserPageSubscriptions(
                       show_refresh={isConnectedAccount}
                     />
                   }
-                  topUpAction={
+                  topUpAction={(primary) =>
                     !hideNftPurchasing &&
                     isConnectedAccount &&
                     !coverageQuery.isLoading && (
                       <SubscriptionTopUpButton
-                        status={coverageQuery.data?.status}
+                        primary={primary}
                         expanded={topUp.expanded}
                         onClick={() => topUp.setExpanded(!topUp.expanded)}
                       />

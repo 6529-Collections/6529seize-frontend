@@ -9,8 +9,8 @@ available mints, Forecast use and, when not already named by a deadline, Next
 unfunded. All dates keep their original full-year format and UTC deadline times.
 The original coverage-card gradient is unchanged.
 
-Owners see primary Top up for Action required, Running low and Not set up, with
-a transparent outlined Top up in other states. Only No upcoming drops selected
+Owners see primary Top up when the immediate selected drop is not fully funded.
+Top up stays available with a transparent outline for future funding and setup. Only No upcoming drops selected
 shows primary Choose drops first and secondary Top up second. Actions sit beside
 the message on desktop and beneath it on phones; the two phone actions share a
 row. Visitors have no owner actions, and Loading shows skeletons without actions.
@@ -98,29 +98,36 @@ On the web and Android, the tab appears after the page loads.
 
 1. Open `/{user}/subscriptions`. The coverage card has two zones: the status,
    funded-drop headline, short explanation and owner actions above; balance,
-   available mints and Forecast use below. Covered is green, Plan a top up is
-   neutral, Running low is amber and Action required is red. Visitors see neutral
-   status text except Covered. Each state keeps its existing headline and data.
-   Funded through appears when at least one drop is funded. A supplied authoritative
-   Top up by cutoff follows for owners in Plan a top up, Running low and Action
-   required. The zero- and one-funded-drop Action required explanations are omitted
-   because the count and deadline already convey them. States without a status
-   keep their existing explanation for owners. Visitors see the status without
-   setup or funding instructions. Manual selections, eligibility and unavailable
-   coverage retain neutral explanations; balances, dates and other facts remain
-   visible. The unavailable-data tooltip also uses visitor wording.
+   available mints and Forecast use below. Every loaded state has a plain reason.
+   When a selected forecast is fully funded and identifies no unfunded drop, the
+   card says Covered, even if only one drop was selected. An identified shortfall
+   with funded drops remaining is a calm reminder; the one-funded-drop state says
+   Running low. Action required is red only when the immediate selected drop is
+   not fully funded. Plan a top up is neutral, and Running low is amber. Visitors
+   see neutral status text except Covered, factual explanations and no owner actions.
+   Funded through appears when at least one drop is funded. A supplied top-up
+   deadline is shown once for the owner as an exact date and UTC time, without
+   promising receipt. If a selected drop is not funded and no deadline is known,
+   the owner sees that a deadline is not available yet. The card cannot confirm
+   mint results from balance alone; the forecast and settings can change after it is calculated.
+   On minting day, an unfunded forecast is checked against the final subscription
+   list before showing an alarm. A confirmed payment for all requested editions
+   shows Subscription paid, keeps Top up optional, and preserves the funded-drop
+   count as a remaining-balance fact. Checking and failed payment reads stay
+   neutral. Payment confirmation does not promise that the airdrop is complete.
 2. Read Subscription balance, available mints and Forecast use in the quiet facts
    zone. Desktop keeps each fact inline in 14px text. Phones place the two facts
    side by side, with 14px labels above 16px values and `N mints available` below
    the balance without parentheses. They stack below 384px. Summary dates keep their original full-year format, and deadlines retain
    their UTC time. Next unfunded remains in
    the facts only when no deadline line already names that drop. The Forecast use
-   information button retains its projection note and Covered-owner explanation.
+   information button retains its projection note. A truncated forecast also warns
+   that it may not include all future drops.
    Hover, focus or tap opens the shared tooltip; Escape or tapping elsewhere
    dismisses it. The settings and upcoming-drop facts remain in their own sections.
 3. Owners open Top up beside the message on desktop or beneath it on phones.
-   It is white and filled for Action required, Running low and Not set up, and
-   transparent with a subtle outline otherwise. No upcoming drops selected
+   It is white and filled when the immediate selected drop is not fully funded,
+   and transparent with a subtle outline for other states. No upcoming drops selected
    shows primary Choose drops first and secondary Top up second, under the
    message on desktop and side by side on phones. Choose drops still scrolls to
    and focuses Upcoming Drops. Loading shows no actions, and visitors have no
@@ -237,15 +244,17 @@ On the web and Android, the tab appears after the page loads.
   During a transaction, the existing transaction-status dialog replaces the
   amount-picker dialog. Dismissing success or error returns
   to the amount picker.
-- Coverage status ramps with urgency and pairs its color with text:
+- The shared profile header and notifications retain the API status thresholds:
   - `Covered`: at least 7 consecutive intended drops are fully funded
   - `Plan a top up`: 4-6 drops are fully funded
   - `Running low`: 2-3 drops are fully funded
   - `Action required`: 0-1 drops are fully funded
-- Status explanations use plain, professional wording without changing the
-  state labels or actions. Manual mode, the purpose of choosing drops, eligibility
-  limits and schedule-dependent refresh guidance remain explicit. `Action required`
-  distinguishes an unfunded next drop from one remaining fully funded drop.
+- The Subscription minting card uses the selected forecast to explain those
+  numbers. It says `Covered` when at least one selected drop is funded and no
+  unfunded drop is identified. One funded drop before an identified shortfall
+  says `Running low`. Every loaded state has an explanation, and only a real
+  immediate selected shortfall gets red owner emphasis. All funding controls
+  remain available to the owner, including optional future top ups.
 - Non-runway states distinguish profiles that are `Not set up`, have
   `No current eligibility`, have `No upcoming drops selected` in Manual mode,
   or cannot currently be forecast.

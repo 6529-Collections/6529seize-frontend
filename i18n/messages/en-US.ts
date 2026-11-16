@@ -4351,6 +4351,25 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.history.emptyLogs": "No logs found",
   "subscriptions.history.emptyTopups": "No Top Ups found",
   "subscriptions.history.loading": "Loading {title}",
+  "subscriptions.coverage.summary.paidTitle": "Subscription paid",
+  "subscriptions.coverage.summary.paid":
+    "The subscription for {meme} is already paid.",
+  "subscriptions.coverage.summary.remainingBalance":
+    "From the remaining balance: {funded}.",
+  "subscriptions.coverage.summary.mintDayUnavailable":
+    "Today's subscription could not be checked. It will be checked again shortly.",
+  "subscriptions.coverage.summary.shortfall":
+    "The Memes #{token} is not fully funded.",
+  "subscriptions.coverage.summary.selectedFunded":
+    "All selected drops in this forecast are funded.",
+  "subscriptions.coverage.summary.notSetUpVisitor":
+    "Subscriptions are not set up for this profile.",
+  "subscriptions.coverage.summary.deadline":
+    "Top-up deadline for The Memes #{token}: {deadline}.",
+  "subscriptions.coverage.summary.noDeadline":
+    "A top-up deadline is not available yet.",
+  "subscriptions.coverage.summary.truncated":
+    "This forecast may not include all future drops.",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":

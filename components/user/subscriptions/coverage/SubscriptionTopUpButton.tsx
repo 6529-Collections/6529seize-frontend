@@ -1,22 +1,17 @@
 import Button from "@/components/utils/button/Button";
-import { ApiSubscriptionCoverageStatus as Status } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 export default function SubscriptionTopUpButton({
-  status,
+  primary,
   expanded,
   onClick,
 }: Readonly<{
-  status: Status | undefined;
+  primary: boolean;
   expanded: boolean;
   onClick: () => void;
 }>) {
   const locale = useBrowserLocale();
-  const primary =
-    status === Status.ActionRequired ||
-    status === Status.RunningLow ||
-    status === Status.NotSetUp;
   return (
     <Button
       variant={primary ? "primary" : "secondary"}

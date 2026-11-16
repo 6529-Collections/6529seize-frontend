@@ -1,6 +1,8 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { MEMES_CONTRACT } from "@/constants/constants";
+import { useSubscriptionAllocationStatus } from "../useSubscriptionAllocationStatus";
 import { useId } from "react";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
@@ -19,15 +21,16 @@ import {
   formatSubscriptionCoverageDate,
   formatSubscriptionCoverageDeadline,
   getFundedDropsLabel,
-  getSubscriptionCoveragePresentation,
 } from "./subscriptionCoverage.helpers";
 
-const FUNDED_COUNT_STATUSES: readonly Status[] = [
-  Status.Covered,
-  Status.EarlyWarning,
-  Status.RunningLow,
-  Status.ActionRequired,
-];
+import {
+  FUNDED_COUNT_STATUSES,
+  getSubscriptionCoverageSummaryPresentation,
+  isMintDayCoverageShortfall,
+  isNextDropSubscriptionPaid,
+  type MintDaySubscriptionStatus,
+} from "./subscriptionCoverageSummary.helpers";
+
 const STATUS_TEXT_CLASS = {
   neutral: "tw-text-iron-300",
   positive: "tw-text-emerald-400",
@@ -47,49 +50,47 @@ function navigateToUpcomingDrops(event: { preventDefault(): void }) {
   globalThis.location.hash = hash;
 }
 
+const STATE_DESCRIPTIONS: Partial<
+  Record<Status, { readonly owner: MessageKey; readonly visitor: MessageKey }>
+> = {
+  [Status.NotSetUp]: {
+    owner: "subscriptions.coverage.notSetUp.description",
+    visitor: "subscriptions.coverage.summary.notSetUpVisitor",
+  },
+  [Status.NoCurrentEligibility]: {
+    owner: "subscriptions.coverage.noEligibility.description",
+    visitor: "subscriptions.coverage.visitor.noEligibility",
+  },
+  [Status.NoUpcomingSelections]: {
+    owner: "subscriptions.coverage.noSelections.description",
+    visitor: "subscriptions.coverage.visitor.noSelections",
+  },
+  [Status.Unknown]: {
+    owner: "subscriptions.coverage.unknown.description",
+    visitor: "subscriptions.coverage.visitor.unknown",
+  },
+};
+
 function getDescriptionKey(
   coverage: ApiSubscriptionCoverage | undefined,
-  isOwner: boolean
+  isOwner: boolean,
+  mintDayStatus: MintDaySubscriptionStatus | undefined
 ): MessageKey | undefined {
-  if (!coverage) {
+  if (mintDayStatus === "paid") return "subscriptions.coverage.summary.paid";
+  if (mintDayStatus === "unavailable")
+    return "subscriptions.coverage.summary.mintDayUnavailable";
+  if (!coverage)
     return isOwner
       ? "subscriptions.coverage.unavailable"
       : "subscriptions.coverage.visitor.unavailable";
+  if (FUNDED_COUNT_STATUSES.includes(coverage.status)) {
+    if (coverage.next_unfunded)
+      return "subscriptions.coverage.summary.shortfall";
+    return coverage.fully_funded_drops > 0
+      ? "subscriptions.coverage.summary.selectedFunded"
+      : "subscriptions.coverage.visitor.unknown";
   }
-  const { status, fully_funded_drops: fundedDrops } = coverage;
-  if (!isOwner) {
-    switch (status) {
-      case Status.NoCurrentEligibility:
-        return "subscriptions.coverage.visitor.noEligibility";
-      case Status.NoUpcomingSelections:
-        return "subscriptions.coverage.visitor.noSelections";
-      case Status.Unknown:
-        return "subscriptions.coverage.visitor.unknown";
-      default:
-        return undefined;
-    }
-  }
-  switch (status) {
-    case Status.Covered:
-      return "subscriptions.coverage.covered.description";
-    case Status.EarlyWarning:
-      return "subscriptions.coverage.earlyWarning.description";
-    case Status.RunningLow:
-      return "subscriptions.coverage.runningLow.description";
-    case Status.ActionRequired:
-      if (fundedDrops === 1) {
-        return "subscriptions.coverage.actionRequired.oneFundedDescription";
-      }
-      return "subscriptions.coverage.actionRequired.description";
-    case Status.NotSetUp:
-      return "subscriptions.coverage.notSetUp.description";
-    case Status.NoCurrentEligibility:
-      return "subscriptions.coverage.noEligibility.description";
-    case Status.NoUpcomingSelections:
-      return "subscriptions.coverage.noSelections.description";
-    case Status.Unknown:
-      return "subscriptions.coverage.unknown.description";
-  }
+  return STATE_DESCRIPTIONS[coverage.status]?.[isOwner ? "owner" : "visitor"];
 }
 
 function CoveragePoint({
@@ -118,7 +119,58 @@ function CoveragePoint({
   );
 }
 
-export default function SubscriptionCoverageSummary({
+type SubscriptionCoverageSummaryProps = Readonly<{
+  coverage: ApiSubscriptionCoverage | undefined;
+  isLoading: boolean;
+  isOwner: boolean;
+  profileKey?: string;
+  showFundingPrompt?: boolean;
+  action?: ReactNode;
+  topUpAction?: ReactNode | ((primary: boolean) => ReactNode);
+  children?: ReactNode;
+}>;
+
+export default function SubscriptionCoverageSummary(
+  props: SubscriptionCoverageSummaryProps
+) {
+  if (
+    props.profileKey &&
+    props.coverage &&
+    isMintDayCoverageShortfall(props.coverage)
+  ) {
+    return (
+      <MintDayCoverageSummary
+        {...props}
+        profileKey={props.profileKey}
+        coverage={props.coverage}
+      />
+    );
+  }
+  return <CoverageSummaryContent {...props} />;
+}
+
+function MintDayCoverageSummary(
+  props: SubscriptionCoverageSummaryProps & {
+    readonly profileKey: string;
+    readonly coverage: ApiSubscriptionCoverage;
+  }
+) {
+  const { final, isLoading, isError } = useSubscriptionAllocationStatus({
+    profileKey: props.profileKey,
+    contract: MEMES_CONTRACT.toLowerCase(),
+    tokenId: props.coverage.next_unfunded!.token_id,
+    first: true,
+    subscribed: true,
+  });
+  let mintDayStatus: MintDaySubscriptionStatus = "unpaid";
+  if (isLoading) mintDayStatus = "checking";
+  else if (isError) mintDayStatus = "unavailable";
+  else if (isNextDropSubscriptionPaid(props.coverage, final))
+    mintDayStatus = "paid";
+  return <CoverageSummaryContent {...props} mintDayStatus={mintDayStatus} />;
+}
+
+function CoverageSummaryContent({
   coverage,
   isLoading,
   isOwner,
@@ -126,44 +178,61 @@ export default function SubscriptionCoverageSummary({
   action,
   topUpAction,
   children,
-}: Readonly<{
-  coverage: ApiSubscriptionCoverage | undefined;
-  isLoading: boolean;
-  isOwner: boolean;
-  showFundingPrompt?: boolean;
-  action?: ReactNode;
-  topUpAction?: ReactNode;
-  children?: ReactNode;
-}>) {
+  mintDayStatus,
+}: SubscriptionCoverageSummaryProps & {
+  readonly mintDayStatus?: MintDaySubscriptionStatus;
+}) {
   const locale = useBrowserLocale();
   const status = coverage?.status ?? Status.Unknown;
-  const presentation = getSubscriptionCoveragePresentation(locale, status);
-  const descriptionKey = getDescriptionKey(coverage, isOwner);
-  const description = descriptionKey ? t(locale, descriptionKey) : undefined;
-  const pending = isLoading && !coverage;
+  const presentation = getSubscriptionCoverageSummaryPresentation(
+    locale,
+    coverage,
+    mintDayStatus
+  );
+  const descriptionKey = getDescriptionKey(coverage, isOwner, mintDayStatus);
+  const description = descriptionKey
+    ? t(locale, descriptionKey, {
+        token: coverage?.next_unfunded
+          ? formatInteger(locale, coverage.next_unfunded.token_id)
+          : "",
+        meme: coverage?.next_unfunded
+          ? t(locale, "subscriptions.coverage.memeToken", {
+              token: formatInteger(locale, coverage.next_unfunded.token_id),
+            })
+          : "",
+      })
+    : undefined;
+  const pending = (isLoading && !coverage) || mintDayStatus === "checking";
+  const paid = mintDayStatus === "paid";
   const showFundedCount = !!coverage && FUNDED_COUNT_STATUSES.includes(status);
   const fundedThrough =
     coverage && coverage.fully_funded_drops > 0
       ? coverage.funded_through
       : null;
-  const warningState =
-    status === Status.EarlyWarning ||
-    status === Status.RunningLow ||
-    status === Status.ActionRequired;
   const deadline =
-    showFundingPrompt && isOwner && warningState
+    showFundingPrompt && isOwner && !pending
       ? coverage?.next_unfunded?.top_up_deadline
       : null;
-  const showNextUnfunded = !!coverage?.next_unfunded && !deadline;
+  const showNextUnfunded =
+    !!coverage?.next_unfunded && !deadline && !paid && !pending;
   const showChooseDrops =
-    isOwner && presentation.action === "choose_drops" && !pending;
-  const showActions = isOwner && !pending && (showChooseDrops || !!topUpAction);
-  const neutralStatus =
-    status === Status.EarlyWarning || (!isOwner && status !== Status.Covered);
-  const statusTone = neutralStatus ? "neutral" : presentation.tone;
-  const headline = showFundedCount
-    ? getFundedDropsLabel(locale, coverage.fully_funded_drops)
-    : presentation.label;
+    showFundingPrompt &&
+    isOwner &&
+    presentation.action === "choose_drops" &&
+    !pending;
+  const showActions =
+    showFundingPrompt &&
+    isOwner &&
+    !pending &&
+    (showChooseDrops || !!topUpAction);
+  const statusTone =
+    !isOwner && presentation.tone !== "positive"
+      ? "neutral"
+      : presentation.tone;
+  let headline = presentation.label;
+  if (paid) headline = t(locale, "subscriptions.coverage.summary.paidTitle");
+  else if (showFundedCount)
+    headline = getFundedDropsLabel(locale, coverage.fully_funded_drops);
 
   return (
     <>
@@ -171,7 +240,7 @@ export default function SubscriptionCoverageSummary({
         <div
           className={`tw-min-w-0 ${showChooseDrops ? "sm:tw-col-span-full" : ""}`}
         >
-          {showFundedCount && (
+          {showFundedCount && !pending && (
             <span
               id="profile-subscriptions-overview-status"
               className={`tw-mb-2 tw-inline-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-leading-5 ${STATUS_TEXT_CLASS[statusTone]}`}
@@ -187,14 +256,40 @@ export default function SubscriptionCoverageSummary({
             id="profile-subscriptions-overview-title"
             tabIndex={-1}
             aria-describedby={
-              showFundedCount
-                ? "profile-subscriptions-overview-status"
-                : undefined
+              pending
+                ? undefined
+                : [
+                    showFundedCount
+                      ? "profile-subscriptions-overview-status"
+                      : null,
+                    showFundingPrompt && description
+                      ? "profile-subscriptions-overview-description"
+                      : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" ") || undefined
             }
             className={`tw-m-0 tw-font-semibold tw-tracking-tight focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${pending ? "tw-text-sm tw-font-normal tw-text-iron-400" : "tw-text-2xl tw-text-iron-100 sm:tw-text-[28px] sm:tw-leading-9"}`}
           >
             {pending ? t(locale, "subscriptions.coverage.loading") : headline}
           </h2>
+          {showFundingPrompt && !pending && description && (
+            <p
+              id="profile-subscriptions-overview-description"
+              className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400"
+            >
+              {paid && coverage?.next_unfunded
+                ? tRich(locale, "subscriptions.coverage.summary.paid", {
+                    meme: (
+                      <CoveragePoint
+                        key="meme"
+                        point={coverage.next_unfunded}
+                      />
+                    ),
+                  })
+                : description}
+            </p>
+          )}
           {fundedThrough && (
             <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
               {t(locale, "subscriptions.coverage.fundedThrough")}{" "}
@@ -203,7 +298,7 @@ export default function SubscriptionCoverageSummary({
           )}
           {deadline && coverage?.next_unfunded && (
             <p className="tw-mb-0 tw-mt-3 tw-text-pretty tw-rounded-lg tw-bg-white/[0.04] tw-px-3 tw-py-2.5 tw-text-sm tw-leading-6 tw-text-iron-200">
-              {tRich(locale, "subscriptions.coverage.topUpBy", {
+              {tRich(locale, "subscriptions.coverage.summary.deadline", {
                 deadline: (
                   <span
                     key="deadline"
@@ -216,11 +311,16 @@ export default function SubscriptionCoverageSummary({
               })}
             </p>
           )}
-          {showFundingPrompt && !showFundedCount && !pending && description && (
-            <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
-              {description}
-            </p>
-          )}
+          {showFundingPrompt &&
+            isOwner &&
+            coverage?.next_unfunded &&
+            !deadline &&
+            !paid &&
+            !pending && (
+              <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
+                {t(locale, "subscriptions.coverage.summary.noDeadline")}
+              </p>
+            )}
         </div>
         {showActions && (
           <div
@@ -241,7 +341,9 @@ export default function SubscriptionCoverageSummary({
                 />
               </ButtonLink>
             )}
-            {topUpAction}
+            {typeof topUpAction === "function"
+              ? topUpAction(presentation.tone === "danger")
+              : topUpAction}
           </div>
         )}
       </div>
@@ -253,12 +355,15 @@ export default function SubscriptionCoverageSummary({
         <SubscriptionCoverageForecast
           coverage={coverage}
           isLoading={pending}
-          description={
-            !coverage || (isOwner && status === Status.Covered)
-              ? description
-              : undefined
-          }
+          description={!coverage ? description : undefined}
         />
+        {paid && coverage && (
+          <p className="tw-col-span-full tw-m-0 tw-text-sm tw-text-iron-400">
+            {t(locale, "subscriptions.coverage.summary.remainingBalance", {
+              funded: getFundedDropsLabel(locale, coverage.fully_funded_drops),
+            })}
+          </p>
+        )}
         {showNextUnfunded && coverage?.next_unfunded && (
           <dl className="tw-col-span-full tw-m-0 tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm sm:tw-justify-start sm:tw-gap-2">
             <dt className="tw-shrink-0 tw-text-iron-500">
@@ -336,9 +441,16 @@ function SubscriptionCoverageForecast({
               <p className="tw-mb-1 tw-mt-0">{description}</p>
             )}
             {coverage && (
-              <p className="tw-m-0">
-                {t(locale, "subscriptions.coverage.basis")}
-              </p>
+              <>
+                <p className="tw-m-0">
+                  {t(locale, "subscriptions.coverage.basis")}
+                </p>
+                {coverage.forecast.forecast_truncated && (
+                  <p className="tw-mb-0 tw-mt-1">
+                    {t(locale, "subscriptions.coverage.summary.truncated")}
+                  </p>
+                )}
+              </>
             )}
             {!coverage && <p className="tw-m-0">{description}</p>}
           </div>
