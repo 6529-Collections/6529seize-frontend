@@ -14,6 +14,7 @@ import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCuration
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { getProfileWaveIdentity } from "@/hooks/useProfileWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
 import {
   EllipsisVerticalIcon,
@@ -58,6 +59,7 @@ export default function WaveDropActionsMore({
 }: WaveDropActionsMoreProps) {
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
@@ -169,6 +171,11 @@ export default function WaveDropActionsMore({
         isOpen={isOpen}
         setOpen={handleOpenChange}
         buttonRef={buttonRef}
+        scrollCueLabel={
+          !showOnlyQuickRemove && !isMobileLayoutViewport
+            ? t(locale, "waves.drop.actions.scrollForMore")
+            : undefined
+        }
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-1 tw-py-1">

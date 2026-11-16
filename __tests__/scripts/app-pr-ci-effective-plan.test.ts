@@ -256,6 +256,8 @@ describe("effective App PR CI plan", () => {
     "tests/support/composerSandboxServer.cjs",
     "components/waves/WavesMobile.tsx",
     "components/brain/BrainMobile.tsx",
+    "components/waves/drops/WaveDropActionsMore.tsx",
+    "tests/social/wave-share-image-sandbox.spec.ts",
     "components/shared/WavesMessagesWrapper.tsx",
     "components/brain/my-stream/MyStreamWaveContent.tsx",
     "tests/packs.manifest.cjs",

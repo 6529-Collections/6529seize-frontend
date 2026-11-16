@@ -47,6 +47,10 @@ threads.
 
 ### Menus and thread-state actions
 
+On desktop, open a drop's three-dot menu and select **More actions** at the
+bottom to scroll to additional items. The control disappears at the end of
+the list.
+
 - [Wave Drop Touch Menu](feature-touch-drop-menu.md)
 - [Wave Drop Set as Pinned Drop](feature-set-pinned-drop.md)
 - [Wave Drop Mark as Unread](feature-mark-as-unread.md)
