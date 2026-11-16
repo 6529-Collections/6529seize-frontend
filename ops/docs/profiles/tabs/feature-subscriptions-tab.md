@@ -156,7 +156,10 @@ On the web and Android, the tab appears after the page loads.
    together on narrower rows. Minting Today artwork sits above the full-width
    text on phones, and the Meme name stays on one line.
    Each Meme title links to its `/the-memes/{id}` page, including before minting,
-   with keyboard focus and the tab's existing link styling. On mint days, the row
+   with keyboard focus and the tab's existing link styling. Scheduled cards in
+   the upcoming subscription season open the existing upcoming-card view;
+   later placeholders stay out of search indexing until publication.
+   On mint days, the row
    uses the matching minted thumbnail or, before indexing, a Main Stage winner
    explicitly mapped to that Meme number. Winner artwork uses a small resized
    image or preview. Unmatched, unavailable or failed artwork leaves no image

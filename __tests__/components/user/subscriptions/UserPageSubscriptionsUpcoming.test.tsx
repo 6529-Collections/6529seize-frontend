@@ -44,12 +44,13 @@ const nextMintResult: ReturnType<typeof useNextMintDrop> = {
   isLoading: false,
 };
 
-const matchingWinner = (cardId: number): ApiDropV2View =>
+// Include malformed API mappings at this fixture boundary to test rejection.
+const matchingWinner = (cardId: unknown): ApiDropV2View =>
   ({
     submission_context: { meme_card_id: cardId },
     parts: [{ media: [{ url: winnerImage, mime_type: "image/png" }] }],
     metadata: [],
-  }) as ApiDropV2View;
+  }) as unknown as ApiDropV2View;
 
 const mockNowMintingResult = {
   nft: undefined,
@@ -299,7 +300,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
       within(marker).getByRole("link", { name: "The Memes #3" })
     ).toHaveAttribute("href", "/the-memes/3");
     const rowTitle = screen
-      .getAllByRole("link", { name: "The Memes #3", exact: true })
+      .getAllByRole("link", { name: "The Memes #3" })
       .find((link) => !marker.contains(link));
     expect(rowTitle).toBeDefined();
     expect(
@@ -321,7 +322,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
         within(marker).getByRole("link", { name: "The Memes #2" })
       ).toHaveAttribute("href", "/the-memes/2");
       const rowTitle = screen
-        .getAllByRole("link", { name: "The Memes #2", exact: true })
+        .getAllByRole("link", { name: "The Memes #2" })
         .find((link) => !marker.contains(link));
       expect(rowTitle).toBeDefined();
       expect(
@@ -457,30 +458,38 @@ describe("UserPageSubscriptionsUpcoming", () => {
     }
   );
 
-  it.each([574, 576, null])(
-    "omits a winner that is not confirmed as today's Meme (%s)",
-    (cardId) => {
+  it.each([
+    { token: 575, card: 574 },
+    { token: 575, card: 576 },
+    { token: 575, card: null },
+    { token: 575, card: undefined },
+    { token: 575, card: "575" },
+    { token: 575, card: 575.5 },
+    { token: 0, card: null },
+    { token: 0, card: "" },
+    { token: 0, card: 0 },
+    { token: -1, card: -1 },
+  ])(
+    "omits a winner that is not confirmed as Meme $token (card=$card)",
+    ({ token, card }) => {
       jest.mocked(isMintingToday).mockReturnValue(true);
-      const winner = matchingWinner(575);
       jest.mocked(useNextMintDrop).mockReturnValue({
         ...nextMintResult,
-        nextMint: {
-          ...winner,
-          submission_context: {
-            ...winner.submission_context!,
-            meme_card_id: cardId,
-          },
-        },
+        nextMint: matchingWinner(card),
       });
       const { container } = renderComponent({
         readonly: true,
         memes_subscriptions: [
-          { ...mockSubscriptions[0], token_id: 575, contract: MEMES_CONTRACT },
+          {
+            ...mockSubscriptions[0],
+            token_id: token,
+            contract: MEMES_CONTRACT,
+          },
         ],
       });
       expect(container.querySelector("img")).not.toBeInTheDocument();
       expect(
-        screen.getByRole("link", { name: "The Memes #575" })
+        screen.getByRole("link", { name: `The Memes #${token}` })
       ).toBeVisible();
     }
   );
