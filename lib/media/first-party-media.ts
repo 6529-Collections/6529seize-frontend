@@ -6,13 +6,15 @@ import { publicEnv } from "@/config/env";
  */
 export const PROD_MEDIA_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 
+// Same rule as getConfiguredMediaHostname in config/nextConfig.ts: https on
+// the default port only, so the CSP, first-party checks and next/image agree.
 function httpsOrigin(value: string | undefined): string | null {
   if (!value) {
     return null;
   }
   try {
     const url = new URL(value);
-    return url.protocol === "https:" ? url.origin : null;
+    return url.protocol === "https:" && url.port === "" ? url.origin : null;
   } catch {
     return null;
   }

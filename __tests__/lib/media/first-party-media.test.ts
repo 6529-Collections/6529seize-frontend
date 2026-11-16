@@ -36,6 +36,9 @@ describe("first-party media origins", () => {
   it("ignores a configured value that is not an https URL", () => {
     mockPublicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN = "http://media.staging.6529.io";
     expect(getMediaOrigin()).toBe(PROD_MEDIA_ORIGIN);
+    mockPublicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN =
+      "https://media.staging.6529.io:8443";
+    expect(getMediaOrigin()).toBe(PROD_MEDIA_ORIGIN);
     mockPublicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN = "not a url";
     expect(getMediaOrigin()).toBe(PROD_MEDIA_ORIGIN);
   });
