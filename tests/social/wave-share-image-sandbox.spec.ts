@@ -43,6 +43,31 @@ async function expectPreviewFits(dialog: Locator) {
     )
     .toBeLessThanOrEqual(1);
 }
+
+async function expectScrollArrowInCorner(
+  arrow: Locator,
+  menu: Locator,
+  edge: "top" | "bottom"
+) {
+  await expect(arrow).toHaveText("");
+  const bounds = await menu.boundingBox();
+  const arrowBounds = await arrow.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(arrowBounds).not.toBeNull();
+  if (!bounds || !arrowBounds) return;
+
+  const rightInset =
+    bounds.x + bounds.width - arrowBounds.x - arrowBounds.width;
+  const verticalInset =
+    edge === "top"
+      ? arrowBounds.y - bounds.y
+      : bounds.y + bounds.height - arrowBounds.y - arrowBounds.height;
+  expect(rightInset).toBeGreaterThanOrEqual(0);
+  expect(rightInset).toBeLessThanOrEqual(8);
+  expect(verticalInset).toBeGreaterThanOrEqual(0);
+  expect(verticalInset).toBeLessThanOrEqual(8);
+}
+
 test.describe("Share posts as image @auth @local-only", () => {
   useLocalSandboxMutationGuard(
     test,
@@ -59,7 +84,7 @@ test.describe("Share posts as image @auth @local-only", () => {
       "Only the desktop context menu has a scroll cue."
     );
     await mockSandboxGaps(page);
-    await page.setViewportSize({ width: 1280, height: 380 });
+    await page.setViewportSize({ width: 1280, height: 348 });
     await page.goto(`/waves/${WAVE}`);
 
     const row = page.getByRole("main").locator("[data-wave-drop-id]").last();
@@ -82,7 +107,8 @@ test.describe("Share posts as image @auth @local-only", () => {
     await expect(cue).toBeInViewport({ ratio: 1 });
     await expect(upCue).toHaveCount(0);
     await expect(deleteAction).not.toBeInViewport({ ratio: 1 });
-    await testInfo.attach("desktop drop menu with more actions", {
+    await expectScrollArrowInCorner(cue, menu, "bottom");
+    await testInfo.attach("desktop drop menu down arrow", {
       body: await menu.screenshot(),
       contentType: "image/png",
     });
@@ -96,6 +122,7 @@ test.describe("Share posts as image @auth @local-only", () => {
     await expect(deleteAction).toBeFocused();
     await expect(upCue).toBeInViewport({ ratio: 1 });
     await expect.poll(() => menu.boundingBox()).toEqual(initialMenuBounds);
+    await expectScrollArrowInCorner(upCue, menu, "top");
 
     await upCue.click();
     await expect(cue).toBeInViewport({ ratio: 1 });

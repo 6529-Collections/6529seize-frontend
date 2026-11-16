@@ -174,8 +174,7 @@ export default function WaveDropActionsMore({
         scrollCue={
           !showOnlyQuickRemove && !isMobileLayoutViewport
             ? {
-                label: t(locale, "waves.drop.actions.moreActions"),
-                ariaLabel: t(locale, "waves.drop.actions.scrollForMore"),
+                downLabel: t(locale, "waves.drop.actions.scrollForMore"),
                 upLabel: t(locale, "waves.drop.actions.scrollUp"),
               }
             : undefined

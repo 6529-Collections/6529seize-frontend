@@ -792,7 +792,6 @@ const WAVE_VOTE_DETAILS_MESSAGES = objectMessages("waves.voteDetails", {
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   menuLabel: "Drop actions",
-  moreActions: "More actions",
   scrollForMore: "More actions, scroll down",
   scrollUp: "Scroll up",
   reply: "Reply",

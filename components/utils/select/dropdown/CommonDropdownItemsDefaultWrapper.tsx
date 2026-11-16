@@ -17,15 +17,15 @@ import { useClickAway, useKeyPressEvent } from "react-use";
 const VIEWPORT_PADDING = 16;
 const MENU_GAP = 8;
 const DEFAULT_MENU_MIN_WIDTH = 224;
+const SCROLL_CUE_GUTTER_WIDTH = 28;
 const MENU_ACTION_SELECTOR = "button, a[href]";
 const PASSIVE_SCROLL_OPTIONS: AddEventListenerOptions = { passive: true };
 const SCROLL_CUE_BUTTON_CLASS =
-  "tw-flex tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-items-center tw-justify-center tw-gap-1.5 tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-text-iron-200 hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+  "tw-absolute tw-right-1 tw-flex tw-size-6 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-iron-800 tw-p-0 tw-text-iron-200 hover:tw-bg-iron-700 focus-visible:tw-outline focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 type DropdownHorizontalAlign = "auto" | "left" | "right";
 type ScrollDirection = "up" | "down";
 type DropdownScrollCue = {
-  readonly label: string;
-  readonly ariaLabel: string;
+  readonly downLabel: string;
   readonly upLabel: string;
 };
 const unsubscribeFromClientMount = () => undefined;
@@ -74,10 +74,10 @@ export default function CommonDropdownItemsDefaultWrapper({
   const [scrollState, setScrollState] = useState({
     up: false,
     down: false,
-    overflow: false,
   });
   const scrollCueEnabled = scrollCue !== undefined;
-  const showScrollControls = scrollCueEnabled && scrollState.overflow;
+  const menuMinWidth =
+    minWidth + (scrollCueEnabled ? SCROLL_CUE_GUTTER_WIDTH : 0);
   const mounted = useSyncExternalStore(
     subscribeToClientMount,
     getClientMountSnapshot,
@@ -109,11 +109,6 @@ export default function CommonDropdownItemsDefaultWrapper({
     const last = actions.at(-1)?.getBoundingClientRect();
     const up = first !== undefined && first.top < visible.top - 1;
     const down = last !== undefined && last.bottom > visible.bottom + 1;
-    // Measure the last action at scrollTop 0 so the footer keeps its height
-    // throughout scrolling, even as the buttons inside it change.
-    const overflow =
-      last !== undefined &&
-      last.bottom + viewport.scrollTop > visible.bottom + 1;
     const canFocus = (action: HTMLElement) => {
       const bounds = action.getBoundingClientRect();
       return (
@@ -141,11 +136,7 @@ export default function CommonDropdownItemsDefaultWrapper({
       (next ?? listRef.current)?.focus({ preventScroll: true });
     }
     setScrollState((previous) =>
-      previous.up === up &&
-      previous.down === down &&
-      previous.overflow === overflow
-        ? previous
-        : { up, down, overflow }
+      previous.up === up && previous.down === down ? previous : { up, down }
     );
   }, []);
 
@@ -215,7 +206,7 @@ export default function CommonDropdownItemsDefaultWrapper({
 
     const buttonRect = buttonRef.current.getBoundingClientRect();
     const dropdownEl = dropdownRef.current;
-    const width = Math.max(buttonRect.width, minWidth);
+    const width = Math.max(buttonRect.width, menuMinWidth);
     dropdownEl.style.width = `${width}px`;
 
     const height = listRef.current?.offsetHeight ?? dropdownEl.offsetHeight;
@@ -253,11 +244,11 @@ export default function CommonDropdownItemsDefaultWrapper({
 
     dropdownEl.style.top = `${top}px`;
     dropdownEl.style.left = `${left}px`;
-  }, [dynamicPosition, horizontalAlign, isOpen, buttonRef, minWidth]);
+  }, [dynamicPosition, horizontalAlign, isOpen, buttonRef, menuMinWidth]);
 
   useLayoutEffect(() => {
     position();
-  }, [mounted, position, showScrollControls]);
+  }, [mounted, position]);
 
   useEffect(() => {
     if (!dynamicPosition || !isOpen) return;
@@ -306,7 +297,7 @@ export default function CommonDropdownItemsDefaultWrapper({
       style={{
         left: 0,
         top: 0,
-        width: `${minWidth}px`,
+        width: `${menuMinWidth}px`,
       }}
     >
       <LazyMotion features={domAnimation}>
@@ -318,7 +309,7 @@ export default function CommonDropdownItemsDefaultWrapper({
               role="menu"
               aria-labelledby={menuLabelledBy}
               tabIndex={-1}
-              className="tw-w-full tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20"
+              className={`tw-w-full tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 tw-ring-white/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-white/20 ${scrollCueEnabled ? "tw-relative tw-pr-7" : ""}`}
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -329,7 +320,7 @@ export default function CommonDropdownItemsDefaultWrapper({
                 onScroll={scrollCueEnabled ? updateScrollCue : undefined}
                 className={`${
                   scrollCueEnabled
-                    ? "tw-max-h-[min(20rem,calc(100dvh_-_4.5rem))] tw-overscroll-y-contain"
+                    ? "tw-max-h-[min(20rem,calc(100dvh_-_2.5rem))] tw-overscroll-y-contain"
                     : "tw-max-h-80"
                 } tw-overflow-y-auto tw-overflow-x-hidden [scrollbar-color:#3f3f46_#18181b] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb:hover]:tw-bg-iron-600 [&::-webkit-scrollbar-thumb]:tw-rounded-full [&::-webkit-scrollbar-thumb]:tw-bg-iron-700 [&::-webkit-scrollbar-track]:tw-bg-iron-900 [&::-webkit-scrollbar]:tw-w-2`}
               >
@@ -341,49 +332,35 @@ export default function CommonDropdownItemsDefaultWrapper({
                   {children}
                 </ul>
               </div>
-              {showScrollControls && (
-                <div
-                  role="none"
-                  className="-tw-mb-1 tw-flex tw-h-8 tw-overflow-hidden tw-rounded-b-lg tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950"
+              {scrollCue && scrollState.up && (
+                <button
+                  ref={upCueRef}
+                  type="button"
+                  role="menuitem"
+                  aria-label={scrollCue.upLabel}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    scrollToMoreActions("up", event.currentTarget);
+                  }}
+                  className={`${SCROLL_CUE_BUTTON_CLASS} tw-top-1`}
                 >
-                  {scrollState.up && (
-                    <button
-                      ref={upCueRef}
-                      type="button"
-                      role="menuitem"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        scrollToMoreActions("up", event.currentTarget);
-                      }}
-                      className={SCROLL_CUE_BUTTON_CLASS}
-                    >
-                      <ChevronUpIcon
-                        aria-hidden="true"
-                        className="tw-size-4 tw-shrink-0"
-                      />
-                      <span className="tw-truncate">{scrollCue.upLabel}</span>
-                    </button>
-                  )}
-                  {scrollState.down && (
-                    <button
-                      ref={downCueRef}
-                      type="button"
-                      role="menuitem"
-                      aria-label={scrollCue.ariaLabel}
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        scrollToMoreActions("down", event.currentTarget);
-                      }}
-                      className={`${SCROLL_CUE_BUTTON_CLASS} ${scrollState.up ? "tw-border-l tw-border-solid tw-border-white/10" : ""}`}
-                    >
-                      <span className="tw-truncate">{scrollCue.label}</span>
-                      <ChevronDownIcon
-                        aria-hidden="true"
-                        className="tw-size-4 tw-shrink-0"
-                      />
-                    </button>
-                  )}
-                </div>
+                  <ChevronUpIcon aria-hidden="true" className="tw-size-3.5" />
+                </button>
+              )}
+              {scrollCue && scrollState.down && (
+                <button
+                  ref={downCueRef}
+                  type="button"
+                  role="menuitem"
+                  aria-label={scrollCue.downLabel}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    scrollToMoreActions("down", event.currentTarget);
+                  }}
+                  className={`${SCROLL_CUE_BUTTON_CLASS} tw-bottom-1`}
+                >
+                  <ChevronDownIcon aria-hidden="true" className="tw-size-3.5" />
+                </button>
               )}
             </m.div>
           )}
