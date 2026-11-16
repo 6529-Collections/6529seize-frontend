@@ -489,7 +489,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         .locator("..")
         .getByText("975", { exact: true })
     ).toBeVisible();
-    const surface = grant.locator(".mobile-wrapper-dialog");
+    const surface = page
+      .getByRole("dialog", { name: "Grant Rep", exact: true })
+      .locator(".mobile-wrapper-dialog");
     await expect
       .poll(() =>
         surface.evaluate((panel) => {
@@ -707,9 +709,12 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("button", { name: "Cancel", exact: true })
     ).toBeVisible();
     await expectNoHorizontalOverflow(page);
-    await grant.locator(".mobile-wrapper-dialog").screenshot({
-      path: testInfo.outputPath("grant-rep-no-assigned-chips.png"),
-    });
+    await page
+      .getByRole("dialog", { name: "Grant Rep", exact: true })
+      .locator(".mobile-wrapper-dialog")
+      .screenshot({
+        path: testInfo.outputPath("grant-rep-no-assigned-chips.png"),
+      });
     await grant.getByRole("button", { name: "Cancel", exact: true }).click();
     await expect(grant).toBeHidden();
   });
@@ -864,7 +869,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(grant).toHaveCSS("font-size", "12px");
     await expect(grant).toHaveCSS("border-radius", "8px");
     const grantBox = await grant.boundingBox();
-    const amountBox = await amount.locator("..").boundingBox();
+    const amountBox = await panel
+      .getByRole("textbox", { name: "You", exact: true })
+      .locator("..")
+      .boundingBox();
     expect(grantBox).not.toBeNull();
     expect(amountBox).not.toBeNull();
     if (grantBox && amountBox) {
@@ -995,7 +1003,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
             0
           );
         } else {
-          const groupBox = await contributors.locator("..").boundingBox();
+          const groupBox = await nic
+            .getByRole("button", {
+              name: `View NIC ${direction}: ${count} ${given ? "receivers" : "raters"}`,
+              exact: true,
+            })
+            .locator("..")
+            .boundingBox();
           expect(groupBox).not.toBeNull();
           expect(groupBox!.x).toBeCloseTo(nicBox!.x, 0);
           expect(groupBox!.y).toBeGreaterThanOrEqual(
@@ -1238,7 +1252,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       repSummary.getByRole("button", { name: /^You assigned:/ })
     ).toHaveCount(0);
-    await expect(assigned.locator("svg")).toHaveCount(0);
+    await expect(
+      repSummary
+        .getByText("You assigned: 20", { exact: true })
+        .first()
+        .locator("..")
+        .locator("svg")
+    ).toHaveCount(0);
     if (!isMobile) {
       await assigned.hover();
       await expect(assigned).toHaveCSS("color", "rgb(147, 147, 159)");
@@ -1426,7 +1446,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     expect(inputSpacing.top).toBeGreaterThanOrEqual(5);
     expect(inputSpacing.bottom).toBeGreaterThanOrEqual(5);
     const otherAmount = panel.getByText("10", { exact: true });
-    const inputBox = await input.locator("..").boundingBox();
+    const inputBox = await panel
+      .getByRole("textbox", { name: "You", exact: true })
+      .locator("..")
+      .boundingBox();
     const otherAmountBox = await otherAmount.boundingBox();
     expect(inputBox).not.toBeNull();
     expect(otherAmountBox).not.toBeNull();
@@ -3156,9 +3179,18 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         };
         let editor = await openEditor();
         await expectAxeClean(page, { include: ['[role="dialog"]'] });
-        await editor.locator(".mobile-wrapper-dialog").screenshot({
-          path: testInfo.outputPath("REP-receiver-adjust.png"),
-        });
+        await page
+          .getByRole("dialog", {
+            name:
+              matter === "REP"
+                ? `Add Rep to ${recipientHandle}`
+                : `Adjust NIC for ${recipientHandle}`,
+            exact: true,
+          })
+          .locator(".mobile-wrapper-dialog")
+          .screenshot({
+            path: testInfo.outputPath("REP-receiver-adjust.png"),
+          });
         await editor.getByRole("textbox").fill("25");
         await editor.getByRole("button", { name: "Back", exact: true }).click();
         if (matter === "REP") {
@@ -3350,9 +3382,12 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await expect(
         list.getByRole("status").getByText("910", { exact: true })
       ).toHaveCSS("color", "rgb(52, 211, 153)");
-      await list.locator(".mobile-wrapper-dialog").screenshot({
-        path: testInfo.outputPath("NIC-positive-reduction.png"),
-      });
+      await page
+        .getByRole("dialog", { name: `${matter} Given`, exact: true })
+        .locator(".mobile-wrapper-dialog")
+        .screenshot({
+          path: testInfo.outputPath("NIC-positive-reduction.png"),
+        });
       await amount().fill("-10");
       await expect(amount()).toHaveCSS("color", "rgb(251, 113, 133)");
       await expect(
