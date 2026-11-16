@@ -1,5 +1,5 @@
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
-import type { RefObject } from "react";
+import type { Ref } from "react";
 import RatingInput from "./RatingInput";
 import RatingInputSigns from "./RatingInputSigns";
 
@@ -44,7 +44,7 @@ export default function UserPageRateInput({
   readonly onChange: (value: string) => void;
   readonly minMax: { min: number; max: number };
   readonly isProxy: boolean;
-  readonly inputRef?: RefObject<HTMLInputElement | null>;
+  readonly inputRef?: Ref<HTMLInputElement>;
   readonly variant?: "compact" | "form" | "tooltip";
   readonly inputId?: string;
   readonly focusRingClassName?: string;

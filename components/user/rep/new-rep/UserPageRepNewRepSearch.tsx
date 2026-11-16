@@ -2,7 +2,14 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useContext,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -216,7 +223,6 @@ export default function UserPageRepNewRepSearch({
   const amountFormId = useId();
   const availableRepId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const amountInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
@@ -301,10 +307,13 @@ export default function UserPageRepNewRepSearch({
   const currentRep = repState?.rater_contribution ?? 0;
   const amountReady = selectedCategory !== null && repState !== null;
   const hasAmountDraft = amountDraft?.scope === amountScope;
-  useEffect(() => {
-    if (!amountReady || hasAmountDraft) return;
-    amountInputRef.current?.focus({ preventScroll: true });
-  }, [selectedCategory, amountReady, hasAmountDraft]);
+  const focusSelectedAmount = useCallback(
+    (input: HTMLInputElement | null) => {
+      if (selectedCategory && amountReady && !hasAmountDraft)
+        input?.focus({ preventScroll: true });
+    },
+    [selectedCategory, amountReady, hasAmountDraft]
+  );
   const haveChanged = amountNum !== currentRep;
   const overAllowance =
     selectedCategory !== null && isRatingValue(amountStr) && !isValidValue;
@@ -636,7 +645,7 @@ export default function UserPageRepNewRepSearch({
             {t(locale, "user.rate.totalHelp")}
           </p>
           <UserPageRateInput
-            inputRef={amountInputRef}
+            inputRef={focusSelectedAmount}
             selectOnFocus
             value={selectedCategory ? amountStr : ""}
             onChange={setAmountStr}

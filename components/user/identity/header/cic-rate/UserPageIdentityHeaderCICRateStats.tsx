@@ -100,7 +100,7 @@ export default function UserPageIdentityHeaderCICRateStats({
         {items.map((item) => (
           <span
             key={item.label}
-            className={`tw-block tw-text-iron-400 tw-font-normal${
+            className={`tw-block tw-font-normal tw-text-iron-400 ${
               item.labelBreakAll ? "tw-break-all" : ""
             }`}
           >

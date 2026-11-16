@@ -179,7 +179,7 @@ function UserPageIdentityHeaderCICRateForm({
       isTooltip ||
       isUnavailable ||
       didFocusAmount.current ||
-      !globalThis.matchMedia?.(
+      !globalThis.matchMedia(
         "(min-width: 768px) and (hover: hover) and (pointer: fine)"
       ).matches
     )

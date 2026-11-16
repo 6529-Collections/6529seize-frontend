@@ -37,7 +37,10 @@ function NicStatus({
         {compact ? (
           <UserCICTypeIcon cic={score ?? profile.cic} />
         ) : (
-          <UserCICTypeIconWrapper profile={profile} />
+          <UserCICTypeIconWrapper
+            profile={profile}
+            cic={score ?? profile.cic}
+          />
         )}
       </span>
       <UserCICStatus cic={score ?? profile.cic} />

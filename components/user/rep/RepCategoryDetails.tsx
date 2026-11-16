@@ -209,7 +209,7 @@ function RepContributionActions({
     isRatingValue(value) ? Number(value) : null
   )}`;
   return (
-    <div className="tw-flex tw-h-[42px] tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-pl-2.5 tw-pr-1.5">
+    <div className="tw-flex tw-min-h-[42px] tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-2 tw-gap-y-1 tw-py-1.5 tw-pl-2.5 tw-pr-1.5">
       <span
         className={`tw-whitespace-nowrap tw-text-xs ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-500"}`}
       >
@@ -220,7 +220,7 @@ function RepContributionActions({
           {available === null ? "—" : formatInteger(locale, available)}
         </span>
       </span>
-      <div className="tw-relative tw-flex tw-shrink-0 tw-items-center tw-gap-2.5">
+      <div className="tw-relative tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-2.5 tw-gap-y-1">
         {changed && (
           <>
             {currentAmount !== 0 && (
@@ -567,6 +567,18 @@ export default function RepCategoryDetails({
     const value =
       draft ?? (you && row.contribution === 0 ? "" : String(row.contribution));
     const descriptionId = `${formId}-${row.profile.id}-description`;
+    const amountLabel = you
+      ? {
+          "aria-label": t(locale, "rep.categories.panel.yourAmount", {
+            category: category.category,
+          }),
+        }
+      : { "aria-labelledby": `${formId}-${row.profile.id}-name` };
+    const amountDescription = you
+      ? t(locale, "user.rate.totalHelp")
+      : t(locale, "rep.categories.panel.amountFor", {
+          name: row.profile.handle ?? row.profile.primary_address,
+        });
     const validation = getAmountValidation({
       value: draft ?? String(row.contribution),
       current: row.contribution,
@@ -589,11 +601,7 @@ export default function RepCategoryDetails({
         {editable ? (
           <>
             <span id={descriptionId} className="tw-sr-only">
-              {you
-                ? t(locale, "user.rate.totalHelp")
-                : t(locale, "rep.categories.panel.amountFor", {
-                    name: row.profile.handle ?? row.profile.primary_address,
-                  })}
+              {amountDescription}
             </span>
             <RatingAmountInput
               ref={you ? ownAmountRef : undefined}
@@ -601,16 +609,7 @@ export default function RepCategoryDetails({
               showAdjustment={!you}
               subtle={you}
               value={ready ? value : ""}
-              aria-label={
-                you
-                  ? t(locale, "rep.categories.panel.yourAmount", {
-                      category: category.category,
-                    })
-                  : undefined
-              }
-              aria-labelledby={
-                you ? undefined : `${formId}-${row.profile.id}-name`
-              }
+              {...amountLabel}
               aria-describedby={validation.describedBy}
               aria-invalid={validation.invalid}
               readOnly={!ready || busy}

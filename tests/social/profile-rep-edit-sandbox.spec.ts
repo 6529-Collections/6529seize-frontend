@@ -1771,6 +1771,59 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(input).toHaveValue("12,345");
   });
 
+  test("keeps large signed REP comparisons and Save visible", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    const current = 1234567890;
+    if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
+    await installCategories(page, api, () => current);
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...allowance,
+            rating_stats: [
+              { ...allowance.rating_stats[0], rater_contribution: current },
+            ],
+          },
+        })
+    );
+    await openProfile(page);
+    await page
+      .getByRole("button", {
+        name: `Open REP category ${CATEGORY}`,
+        exact: true,
+      })
+      .click();
+    const panel = categoryPanel(page);
+    const input = panel.getByRole("textbox", {
+      name: `Your REP in ${CATEGORY}`,
+      exact: true,
+    });
+    await expect(input).toHaveValue(isMobile ? "1,234,567,890" : "1234567890");
+    await input.click();
+    await expect(input).toHaveValue("1234567890");
+    await input.fill("-1234567890");
+    await expect(input).toHaveValue("-1234567890");
+    const save = panel.getByRole("button", { name: "Save", exact: true });
+    await expect(save).toBeEnabled();
+    if (!isMobile) await save.scrollIntoViewIfNeeded();
+    await expect(save).toBeInViewport();
+    await expect(panel.getByRole("status")).toContainText("1,234,567,890");
+    await expect(panel.getByRole("status")).toContainText("-1,234,567,890");
+    await expect(
+      panel.getByText("Available REP 80", { exact: true })
+    ).toBeInViewport();
+    await expectNoHorizontalOverflow(page);
+    await panel.screenshot({
+      path: testInfo.outputPath("large-rep-comparison.png"),
+    });
+  });
+
   test("offers an empty You input when the viewer has no existing contribution", async ({
     page,
     baseURL,
