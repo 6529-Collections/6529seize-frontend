@@ -3926,6 +3926,7 @@
       ],
       "facts": [
         "Drop actions include reactions, ratings, voting, boosting, curation, replies, link copy, and pinning where allowed.",
+        "On desktop, open the three-dot menu on a post. Select the down arrow in the lower-right corner for more actions or the up arrow in the upper-right corner for earlier actions. Each arrow appears when there are actions in that direction.",
         "Submission and winner cards both support reactions and replies: hover the card on desktop or long-press its content on touch. On desktop, hover or keyboard-focus a drop action to read its label beside the control. Moving the pointer away, scrolling, resizing, pressing Escape, clicking elsewhere, or activating the control with a pointer or keyboard dismisses action tooltips. Touch uses the drop action menu.",
         "Posted full drops can support emoji reactions and clap rating with optimistic UI and rollback on failure.",
         "Desktop and touch quick reactions show up to three available emojis ranked by local usage. Each button names its emoji in its accessible label and desktop tooltip, such as React with Thumbs up. If none can be displayed, one thumbs-up fallback appears and sends a thumbs-up reaction.",
@@ -4317,6 +4318,7 @@
       ],
       "facts": [
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
+        "When the Main Stage artwork form shows Leave blank to use No, that trait is optional. Leaving it blank uses No in the preview and saved entry. Artist, Meme Name, Palette, and Card Points still require valid values. The same trait rules apply to direct API submissions.",
         "A Memes submission is a decision entry, so uploaded artwork, supporting media, preview images and promo videos keep the artist's original files, including embedded details such as location, camera details and capture time.",
         "In Artwork Details, checking Additional Action opens Your plan (optional). Describe what you will do if selected, who receives it, timing, and any costs or conditions. The plan is public with the submission and supports up to 5000 characters; a blank plan is allowed.",
         "Unchecking Additional Action keeps the plan draft during the current modal session but excludes it from the submitted metadata. Rechecking restores it. Closing the modal discards the unsaved draft.",

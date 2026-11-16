@@ -1,5 +1,6 @@
 "use client";
 import { MemeCollaboratorPicker } from "@/components/waves/memes/collaborations/MemeCollaboratorPicker";
+import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import type { ApiMemeCollaboratorProfile } from "@/generated/models/ApiMemeCollaboratorProfile";
 
 import PrimaryButton from "@/components/utils/button/PrimaryButton";
@@ -18,11 +19,13 @@ import type { TraitsData } from "../types/TraitsData";
 import type { SubmissionPhase } from "../ui/SubmissionProgress";
 import SubmissionProgress from "../ui/SubmissionProgress";
 import { useTraitsValidation } from "../validation";
+import { useMainStageArtworkValidation } from "../validation/useMainStageArtworkValidation";
 import type { ProposalCardLayout } from "@/lib/proposal-card/document";
 import { ProposalCardOption } from "../components/ProposalCardOption";
 import { getProposalCardMimeType } from "@/lib/proposal-card/media";
 
 interface ArtworkStepProps {
+  readonly competition?: ApiCompetition | null;
   readonly collaborators?: ApiMemeCollaboratorProfile[];
   readonly onCollaboratorsChange?: (
     profiles: ApiMemeCollaboratorProfile[]
@@ -79,6 +82,7 @@ interface ArtworkStepProps {
  * appearance based on the current submission phase.
  */
 const ArtworkStep: React.FC<ArtworkStepProps> = ({
+  competition,
   collaborators = [],
   onCollaboratorsChange,
   proposalFrame,
@@ -121,6 +125,10 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
 }) => {
   // Set up validation with initial empty touched fields to prevent errors on load
   const validation = useTraitsValidation(traits, initialTraits ?? traits);
+  const serverValidation = useMainStageArtworkValidation(competition, traits);
+  const traitErrors = serverValidation.rules
+    ? serverValidation.errors
+    : validation.errors;
   const locale = useBrowserLocale();
   const [mediaSubmitAttempted, setMediaSubmitAttempted] = useState(false);
   const isMediaValidationPending =
@@ -186,9 +194,29 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
 
   // Handle submission with validation
   const handleSubmit = useCallback(() => {
-    const validationResult = validation.validateAll();
     setMediaSubmitAttempted(true);
+    if (serverValidation.rules) {
+      if (!hasValidMedia) {
+        requestAnimationFrame(focusMediaControl);
+        return;
+      }
+      void serverValidation.validate().then((issues) => {
+        if (issues === null) return;
+        const firstIssue = issues[0];
+        if (firstIssue) {
+          requestAnimationFrame(() =>
+            validation.focusFirstInvalidField(
+              firstIssue.key as keyof TraitsData
+            )
+          );
+        } else {
+          onSubmit();
+        }
+      });
+      return;
+    }
 
+    const validationResult = validation.validateAll();
     if (!hasValidMedia || !validationResult.isValid) {
       requestAnimationFrame(() => {
         if (!hasValidMedia) {
@@ -202,16 +230,29 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
     }
 
     onSubmit();
-  }, [focusMediaControl, hasValidMedia, onSubmit, validation]);
+  }, [
+    focusMediaControl,
+    hasValidMedia,
+    onSubmit,
+    serverValidation,
+    validation,
+  ]);
 
   const isSubmitDisabled = useMemo(() => {
-    if (isSubmitting) return true;
+    if (isSubmitting || serverValidation.pending) return true;
     if (submissionPhase === "success") return true;
     return isMediaValidationPending;
-  }, [isMediaValidationPending, isSubmitting, submissionPhase]);
+  }, [
+    isMediaValidationPending,
+    isSubmitting,
+    serverValidation.pending,
+    submissionPhase,
+  ]);
 
   // Get button text based on submission phase
   const getButtonText = (): string => {
+    if (serverValidation.pending)
+      return t(locale, "memes.submission.traits.checking");
     switch (submissionPhase) {
       case "uploading":
         return "Uploading...";
@@ -273,8 +314,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       description={traits.description}
       onTitleChange={handleTitleChange}
       onDescriptionChange={handleDescriptionChange}
-      titleError={validation.errors.title}
-      descriptionError={validation.errors.description}
+      titleError={traitErrors.title}
+      descriptionError={traitErrors.description}
       onTitleBlur={() => handleFieldBlur("title")}
       onDescriptionBlur={() => handleFieldBlur("description")}
       showRequiredMarkers={true}
@@ -300,7 +341,8 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
       }
       traits={traits}
       setTraits={setTraits}
-      validationErrors={validation.errors}
+      traitRules={serverValidation.rules}
+      validationErrors={traitErrors}
       onFieldBlur={handleFieldBlur}
       showRequiredMarkers={true}
       size="sm"
@@ -350,6 +392,11 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
             </div>
           )}
 
+          {serverValidation.rules && serverValidation.requestFailed && (
+            <p role="alert" className="tw-text-red-400 tw-mb-2 tw-text-sm">
+              {t(locale, "memes.submission.traits.checkFailed")}
+            </p>
+          )}
           <div className="tw-flex tw-items-center tw-justify-end tw-gap-x-3">
             {onCancel && submissionPhase !== "success" ? (
               <SecondaryButton
