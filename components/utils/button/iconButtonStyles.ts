@@ -6,7 +6,7 @@ import {
   type IconButtonLayout,
 } from "./iconButtonLayouts";
 
-export type IconButtonSize = 24 | 32 | 36 | 40 | 44 | "40-sm-48";
+export type IconButtonSize = 24 | 32 | 36 | 40 | 44;
 export type IconButtonVariant =
   | "ghost"
   | "muted"
@@ -16,9 +16,7 @@ export type IconButtonVariant =
   | "contrast"
   | "action"
   | "selected"
-  | "destructive"
-  | "error"
-  | "surfaced";
+  | "destructive";
 export type IconButtonShape = "rounded" | "compact" | "circle";
 
 const SIZE_CLASSES: Record<IconButtonSize, string> = {
@@ -27,27 +25,18 @@ const SIZE_CLASSES: Record<IconButtonSize, string> = {
   36: "tw-size-9",
   40: "tw-size-10",
   44: "tw-size-11",
-  "40-sm-48": "tw-size-10 sm:tw-size-12",
 };
 
-const NEUTRAL_ICON_TEXT_CLASSES =
-  "tw-text-iron-300 desktop-hover:hover:tw-text-white";
-
-export const SURFACED_ICON_BUTTON_SURFACE_CLASSES =
-  "tw-bg-iron-900/95 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur";
-
 const TEXT_CLASSES: Record<IconButtonVariant, string> = {
-  ghost: NEUTRAL_ICON_TEXT_CLASSES,
+  ghost: "tw-text-iron-300 desktop-hover:hover:tw-text-white",
   muted: "tw-text-iron-500 desktop-hover:hover:tw-text-white",
-  subtle: NEUTRAL_ICON_TEXT_CLASSES,
+  subtle: "tw-text-iron-300 desktop-hover:hover:tw-text-white",
   secondary: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50",
   outline: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-100",
   contrast: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50",
   action: "tw-text-white",
   selected: "tw-text-primary-300",
   destructive: "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300",
-  error: "tw-text-error",
-  surfaced: NEUTRAL_ICON_TEXT_CLASSES,
 };
 
 const SURFACE_CLASSES: Record<IconButtonVariant, string> = {
@@ -68,9 +57,6 @@ const SURFACE_CLASSES: Record<IconButtonVariant, string> = {
     "tw-border-0 tw-bg-primary-500/15 tw-ring-1 tw-ring-inset tw-ring-primary-400/25",
   destructive:
     "tw-border-0 tw-bg-transparent desktop-hover:hover:tw-bg-rose-500/10",
-  error:
-    "tw-border-0 tw-bg-transparent desktop-hover:hover:tw-bg-iron-800 active:tw-bg-iron-900",
-  surfaced: `${SURFACED_ICON_BUTTON_SURFACE_CLASSES} tw-border-0 desktop-hover:hover:tw-bg-iron-800 active:tw-bg-iron-900`,
 };
 
 const INSET_SURFACE_CLASSES = {
@@ -89,7 +75,6 @@ export interface IconButtonStyleOptions {
   readonly pressEffect?: boolean | undefined;
   readonly disabled?: boolean | undefined;
   readonly pending?: boolean | undefined;
-  readonly focusInset?: boolean | undefined;
   readonly className?: string | undefined;
 }
 
@@ -107,7 +92,6 @@ export function getIconButtonClasses({
   pressEffect = false,
   disabled = false,
   pending = false,
-  focusInset = false,
   className,
   inset = false,
 }: IconButtonStyleOptions & { readonly inset?: boolean }): string {
@@ -119,11 +103,8 @@ export function getIconButtonClasses({
       className,
     });
   }
-  const focusOffsetClass = focusInset
-    ? "focus-visible:-tw-outline-offset-2"
-    : "focus-visible:tw-outline-offset-2";
   return clsx(
-    `tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-p-0 tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 ${focusOffsetClass} motion-reduce:tw-transform-none motion-reduce:tw-transition-none`,
+    "tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-p-0 tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
     SIZE_CLASSES[size],
     getIconButtonShapeClasses(shape),
     TEXT_CLASSES[variant],

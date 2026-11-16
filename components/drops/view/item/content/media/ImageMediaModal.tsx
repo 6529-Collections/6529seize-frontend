@@ -7,7 +7,6 @@ import {
 } from "./DropImagePreview";
 import { GiphyPlaybackToggle, GiphyVideoPreview } from "./GiphyVideoPreview";
 import Button from "@/components/utils/button/Button";
-import IconButton from "@/components/utils/button/IconButton";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Image from "next/image";
@@ -458,10 +457,8 @@ export function ImageMediaModal({
         )}
         {showGalleryControls && gallery && (
           <>
-            <IconButton
+            <button
               type="button"
-              size="40-sm-48"
-              variant="surfaced"
               aria-label="Previous image"
               title="Previous image"
               disabled={!gallery.canGoPrevious}
@@ -469,14 +466,12 @@ export function ImageMediaModal({
                 event.stopPropagation();
                 goToPrevious();
               }}
-              className="tw-fixed tw-left-3 tw-top-1/2 tw-z-[1101] -tw-translate-y-1/2 sm:tw-left-4"
+              className="tw-fixed tw-left-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-left-4 sm:tw-size-12"
             >
               <ChevronLeftIcon className="tw-size-6" aria-hidden="true" />
-            </IconButton>
-            <IconButton
+            </button>
+            <button
               type="button"
-              size="40-sm-48"
-              variant="surfaced"
               aria-label="Next image"
               title="Next image"
               disabled={!gallery.canGoNext}
@@ -484,10 +479,10 @@ export function ImageMediaModal({
                 event.stopPropagation();
                 goToNext();
               }}
-              className="tw-fixed tw-right-3 tw-top-1/2 tw-z-[1101] -tw-translate-y-1/2 sm:tw-right-4"
+              className="tw-fixed tw-right-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-right-4 sm:tw-size-12"
             >
               <ChevronRightIcon className="tw-size-6" aria-hidden="true" />
-            </IconButton>
+            </button>
             <div
               className="tw-fixed tw-left-1/2 tw-z-[1101] -tw-translate-x-1/2 tw-rounded-lg tw-bg-iron-900/95 tw-px-3 tw-py-1.5 tw-text-sm tw-font-medium tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur"
               data-testid="image-gallery-counter"

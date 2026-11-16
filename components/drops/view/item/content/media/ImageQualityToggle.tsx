@@ -3,9 +3,8 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import { useId } from "react";
-import IconButton from "@/components/utils/button/IconButton";
-import type { IconButtonVariant } from "@/components/utils/button/iconButtonStyles";
 
 export function ImageQualityToggle({
   showingOriginal,
@@ -27,17 +26,11 @@ export function ImageQualityToggle({
     DEFAULT_LOCALE,
     isGif ? "drop.media.originalGifFailed" : "drop.media.originalImageFailed"
   );
-  let variant: IconButtonVariant = "ghost";
-  if (showingOriginal) variant = "selected";
-  else if (failed) variant = "error";
 
   return (
     <>
-      <IconButton
+      <button
         type="button"
-        size={36}
-        variant={variant}
-        focusInset
         aria-label={label}
         aria-pressed={showingOriginal}
         aria-describedby={failed ? errorId : undefined}
@@ -46,6 +39,15 @@ export function ImageQualityToggle({
           event.stopPropagation();
           onToggle();
         }}
+        className={clsx(
+          "tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-border-0 tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-700",
+          {
+            "tw-bg-primary-500/20 tw-text-primary-300": showingOriginal,
+            "tw-bg-transparent": !showingOriginal,
+            "tw-text-iron-100": !showingOriginal && !failed,
+            "tw-text-error": !showingOriginal && failed,
+          }
+        )}
       >
         {failed ? (
           <ExclamationTriangleIcon
@@ -68,7 +70,7 @@ export function ImageQualityToggle({
             <path d="M6 8v8m0-4h4m0-4v8m4-8v8h1a4 4 0 0 0 0-8h-1Z" />
           </svg>
         )}
-      </IconButton>
+      </button>
       <span id={errorId} hidden>
         {error}
       </span>
