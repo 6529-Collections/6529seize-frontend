@@ -15,8 +15,9 @@ name: Device Farm Mobile QA
 # frontend deploy — backend releases, data, third-party SDKs), while the
 # expensive native pack (APK build + smoke + fuzz) stays weekly.
 #
-# Every job no-ops with a notice until the Device Farm secrets are configured,
-# so the schedule stays green before provisioning.
+# AWS access uses the GitHub OIDC role in the DEVICEFARM_AWS_ROLE_ARN repository
+# variable (no stored keys). Every job no-ops with a notice until that variable
+# is configured, so the schedule stays green before provisioning.
 
 on:
   workflow_dispatch:
@@ -72,7 +73,7 @@ jobs:
       native: ${{ steps.decide.outputs.native }}
       target-url: ${{ steps.decide.outputs.target-url }}
     env:
-      HAS_DEVICEFARM_CREDENTIALS: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID != '' && secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY != '' }}
+      HAS_DEVICEFARM_CREDENTIALS: ${{ vars.DEVICEFARM_AWS_ROLE_ARN != '' }}
       HAS_MOBILE_REPO_TOKEN: ${{ secrets.MOBILE_REPO_TOKEN != '' }}
       PACKS_INPUT: ${{ inputs.packs || 'all' }}
       TARGET_INPUT: ${{ inputs.target || 'production' }}
@@ -114,7 +115,7 @@ jobs:
               native) native=true ;;
             esac
           else
-            echo "::notice::Device Farm credentials (DEVICEFARM_AWS_ACCESS_KEY_ID / DEVICEFARM_AWS_SECRET_ACCESS_KEY) are not configured; skipping all Device Farm packs. See ops/docs/developer/device-farm-qa.md."
+            echo "::notice::Device Farm credentials (repository variable DEVICEFARM_AWS_ROLE_ARN with the GitHub OIDC role) are not configured; skipping all Device Farm packs. See ops/docs/developer/device-farm-qa.md."
           fi
 
           if [ "$native" = "true" ] && [ "$HAS_MOBILE_REPO_TOKEN" != "true" ]; then
@@ -187,6 +188,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     strategy:
       fail-fast: false
       matrix:
@@ -220,8 +222,8 @@ jobs:
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
-          aws-access-key-id: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.DEVICEFARM_AWS_ROLE_ARN }}
+          role-session-name: device-farm-qa-${{ github.run_id }}
           aws-region: ${{ env.DEVICEFARM_REGION }}
 
       - name: Run mobile web smoke on Device Farm
@@ -275,6 +277,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
     steps:
       - name: Checkout code
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
@@ -361,8 +364,8 @@ jobs:
         id: aws-credentials
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
         with:
-          aws-access-key-id: ${{ secrets.DEVICEFARM_AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.DEVICEFARM_AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: ${{ vars.DEVICEFARM_AWS_ROLE_ARN }}
+          role-session-name: device-farm-qa-${{ github.run_id }}
           aws-region: ${{ env.DEVICEFARM_REGION }}
 
       - name: Run native Appium smoke on Device Farm

@@ -100,13 +100,46 @@ estimating cost rather than treating an old device-count estimate as a budget.
    calibrate against real visitor device analytics (CloudWatch RUM / Mixpanel
    user agents) when adjusting.
 
-2. **CI IAM principal** — create a dedicated IAM user (or role) for the
-   workflow with this policy (Device Farm resources exist only in us-west-2):
+2. **CI AWS role (GitHub OIDC, no stored keys)** — create an IAM role that
+   only this repository's `main` branch can assume through the account's
+   existing GitHub OIDC provider (`token.actions.githubusercontent.com`).
+   Production uses `gha-devicefarm-qa` with a 1-hour session limit.
+
+   Trust policy:
 
    ```json
    {
      "Version": "2012-10-17",
      "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": {
+           "Federated": "arn:aws:iam::<account-id>:oidc-provider/token.actions.githubusercontent.com"
+         },
+         "Action": "sts:AssumeRoleWithWebIdentity",
+         "Condition": {
+           "StringEquals": {
+             "token.actions.githubusercontent.com:aud": "sts.amazonaws.com",
+             "token.actions.githubusercontent.com:sub": "repo:6529-Collections/6529seize-frontend:ref:refs/heads/main"
+           }
+         }
+       }
+     ]
+   }
+   ```
+
+   Permissions policy (Device Farm resources exist only in us-west-2):
+
+   ```json
+   {
+     "Version": "2012-10-17",
+     "Statement": [
+       {
+         "Sid": "DiscoverProjectsAndPools",
+         "Effect": "Allow",
+         "Action": ["devicefarm:ListProjects"],
+         "Resource": "*"
+       },
        {
          "Sid": "DeviceFarmQaRuns",
          "Effect": "Allow",
@@ -125,24 +158,25 @@ estimating cost rather than treating an old device-count estimate as a budget.
            "devicefarm:ListTests",
            "devicefarm:ListArtifacts"
          ],
-         "Resource": "*"
+         "Resource": "arn:aws:devicefarm:us-west-2:<account-id>:*"
        }
      ]
    }
    ```
 
-   Scope `Resource` to the project/run ARNs printed by the bootstrap script if
-   tighter scoping is desired.
+   Set the role ARN in the repository variable `DEVICEFARM_AWS_ROLE_ARN`. The
+   role is separate from the deploy roles so Device Farm access never widens
+   them. Because only `main` can assume it, a manual dispatch from another
+   branch fails at the AWS sign-in step.
 
-3. **Repository secrets**:
+3. **Repository secrets** (AWS access comes from the variable above, not a secret):
 
-   | Secret                                                              | Required for | Notes                                                                                                                                                                                                                |
-   | ------------------------------------------------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-   | `DEVICEFARM_AWS_ACCESS_KEY_ID` / `DEVICEFARM_AWS_SECRET_ACCESS_KEY` | all packs    | Credentials for the IAM principal above. Kept separate from the deploy credentials so Device Farm access never widens the deploy user.                                                                               |
-   | `MOBILE_REPO_TOKEN`                                                 | native pack  | Fine-grained PAT with read-only `contents` access to `6529-Collections/6529-core-mobile`.                                                                                                                            |
-   | `MOBILE_GOOGLE_SERVICES_JSON`                                       | optional     | Raw `google-services.json` for Firebase push in the QA build. The shell builds fine without it (the Gradle project applies the google-services plugin only when the file exists); push registration is simply inert. |
+   | Secret                        | Required for | Notes                                                                                                                                                                                                                |
+   | ----------------------------- | ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `MOBILE_REPO_TOKEN`           | native pack  | Fine-grained PAT with read-only `contents` access to `6529-Collections/6529-core-mobile`.                                                                                                                            |
+   | `MOBILE_GOOGLE_SERVICES_JSON` | optional     | Raw `google-services.json` for Firebase push in the QA build. The shell builds fine without it (the Gradle project applies the google-services plugin only when the file exists); push registration is simply inert. |
 
-   Until the secrets exist, every job in the workflow skips with a `::notice`
+   Until `DEVICEFARM_AWS_ROLE_ARN` is set, every job in the workflow skips with a `::notice`
    and the scheduled run stays green — provisioning can land after the code.
 
 4. **Actions allowlist** — this repository runs the "allow selected actions"
