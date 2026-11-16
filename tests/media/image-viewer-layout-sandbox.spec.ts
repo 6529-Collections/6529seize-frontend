@@ -129,6 +129,7 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
         page,
         context,
         baseURL,
+        browserName,
       }, testInfo) => {
         if (native) {
           await page.setViewportSize({ width: 390, height: 844 });
@@ -234,6 +235,20 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
             )
             .toBe(true);
           expect(await readBackground(page)).toEqual(before);
+          const download = viewer.getByRole("button", {
+            name: "Download media",
+            exact: true,
+          });
+          await download.focus();
+          await page.keyboard.press(
+            browserName === "webkit" ? "Alt+Tab" : "Tab"
+          );
+          await page.keyboard.press(
+            browserName === "webkit" ? "Alt+Shift+Tab" : "Shift+Tab"
+          );
+          await expect(download).toBeFocused();
+          await expect(download).toHaveCSS("outline-width", "2px");
+          await expect(download).toHaveCSS("outline-offset", "-2px");
           if (entry === "gallery") {
             for (const label of ["Previous image", "Next image"]) {
               const control = viewer.getByRole("button", {

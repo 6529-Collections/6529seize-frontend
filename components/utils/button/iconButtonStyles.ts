@@ -89,6 +89,7 @@ export interface IconButtonStyleOptions {
   readonly pressEffect?: boolean | undefined;
   readonly disabled?: boolean | undefined;
   readonly pending?: boolean | undefined;
+  readonly focusInset?: boolean | undefined;
   readonly className?: string | undefined;
 }
 
@@ -106,6 +107,7 @@ export function getIconButtonClasses({
   pressEffect = false,
   disabled = false,
   pending = false,
+  focusInset = false,
   className,
   inset = false,
 }: IconButtonStyleOptions & { readonly inset?: boolean }): string {
@@ -117,8 +119,11 @@ export function getIconButtonClasses({
       className,
     });
   }
+  const focusOffsetClass = focusInset
+    ? "focus-visible:-tw-outline-offset-2"
+    : "focus-visible:tw-outline-offset-2";
   return clsx(
-    "tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-p-0 tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
+    `tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-p-0 tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 ${focusOffsetClass} motion-reduce:tw-transform-none motion-reduce:tw-transition-none`,
     SIZE_CLASSES[size],
     getIconButtonShapeClasses(shape),
     TEXT_CLASSES[variant],

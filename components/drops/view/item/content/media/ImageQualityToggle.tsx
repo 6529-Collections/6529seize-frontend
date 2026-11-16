@@ -37,6 +37,7 @@ export function ImageQualityToggle({
         type="button"
         size={36}
         variant={variant}
+        focusInset
         aria-label={label}
         aria-pressed={showingOriginal}
         aria-describedby={failed ? errorId : undefined}

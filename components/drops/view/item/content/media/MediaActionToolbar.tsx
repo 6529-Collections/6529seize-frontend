@@ -47,6 +47,7 @@ function ToolbarButton({
       type="button"
       size={36}
       variant="ghost"
+      focusInset
       aria-label={label}
       title={label}
       onClick={onClick}
