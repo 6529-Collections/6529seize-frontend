@@ -455,9 +455,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       })
     );
     await openProfile(page);
-    await page
-      .getByRole("button", { name: "You assigned: 975", exact: true })
-      .click();
+    await page.getByRole("button", { name: "Grant Rep", exact: true }).click();
     const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
     const search = grant.getByRole("textbox", {
       name: "Category to grant REP for",
@@ -874,7 +872,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .getByRole("region", { name: "REP", exact: true })
       .filter({ visible: true });
     await expect(
-      rep.getByRole("button", { name: "You assigned: 15", exact: true })
+      rep.getByText("You assigned: 15", { exact: true }).first()
     ).toBeVisible();
     await expect(rep.getByText("35", { exact: true }).first()).toBeVisible();
     if (!isMobile) {
@@ -1158,17 +1156,30 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       );
     }
     // The profile summary precedes the per-category contribution indicators.
-    const assigned = repSummary.getByRole("button", {
-      name: "You assigned: 20",
-      exact: true,
-    });
+    const assigned = repSummary
+      .getByText("You assigned: 20", { exact: true })
+      .first()
+      .locator("..");
     await expect(assigned).toHaveText("You assigned: 20");
+    await expect(
+      repSummary.getByRole("button", { name: /^You assigned:/ })
+    ).toHaveCount(0);
+    await expect(assigned.locator("svg")).toHaveCount(0);
+    if (!isMobile) {
+      await assigned.hover();
+      await expect(assigned).toHaveCSS("color", "rgb(147, 147, 159)");
+    }
     if (isMobile) {
       await repSummary
         .getByRole("button", { name: "Grant Rep", exact: true })
         .focus();
       await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
-      await expect(assigned).toBeFocused();
+      await expect(
+        repSummary.getByRole("button", {
+          name: `Open REP category ${CATEGORY}`,
+          exact: true,
+        })
+      ).toBeFocused();
     }
     if (isMobile) {
       await expect(assigned).toHaveCSS("white-space", "nowrap");

@@ -19,7 +19,7 @@ import RepCategoryList from "./RepCategoryList";
 import RepDirectionToggle from "./RepDirectionToggle";
 import UserPageCombinedActivityLog from "./UserPageCombinedActivityLog";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
-import AssignedRepButton from "./AssignedRepButton";
+import AssignedRepSummary from "./AssignedRepSummary";
 
 function RepEmptyState({
   loading,
@@ -178,9 +178,8 @@ export default function MobileRepTabContent({
                 {overview !== null &&
                   overview.authenticated_user_contribution !== null &&
                   overview.authenticated_user_contribution !== 0 && (
-                    <AssignedRepButton
+                    <AssignedRepSummary
                       amount={overview.authenticated_user_contribution}
-                      onClick={onGrantRep}
                       compact
                     />
                   )}

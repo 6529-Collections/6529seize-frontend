@@ -126,8 +126,8 @@ show the profile-creation welcome.
   sign. On mobile and medium screens, this summary stays beside `Grant Rep`
   as a group at the right of the category heading. When space is tight, the
   summary moves below the button and stays right-aligned.
-- In `Received`, select `You assigned` and its chevron to open Grant Rep and
-  choose a category to edit.
+- `You assigned` is plain information without a chevron or hover state.
+  Select `Grant Rep` to open the modal and choose a category to grant or edit.
 - Category headers show the name, total, up to three top-contributor avatars and
   rater/receiver count. Long names truncate. The tag opens the contributor
   panel, with separate desktop profile links on its avatars. Tags have no separate edit
