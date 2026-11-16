@@ -427,10 +427,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
         ],
       });
       const image = container.querySelector("img");
-      expect(image).toHaveAttribute(
-        "src",
-        expect.stringContaining(encodeURIComponent(winnerThumbnail))
-      );
+      expect(image).toHaveAttribute("src", winnerThumbnail);
       expect(image).toHaveAttribute("width", "80");
       expect(image).toHaveAttribute("height", "113");
       expect(
@@ -448,6 +445,11 @@ describe("UserPageSubscriptionsUpcoming", () => {
           })
         ).toBeDisabled();
       fireEvent.error(image!);
+      expect(container.querySelector("img")).toHaveAttribute(
+        "src",
+        winnerThumbnail.replace("200x200", "AUTOx450")
+      );
+      fireEvent.error(container.querySelector("img")!);
       expect(container.querySelector("img")).not.toBeInTheDocument();
       expect(
         screen.getByRole("link", { name: "The Memes #575" })
@@ -457,6 +459,46 @@ describe("UserPageSubscriptionsUpcoming", () => {
       ).toBeVisible();
     }
   );
+
+  it("uses only resized GIF previews, including when every preview fails", () => {
+    jest.mocked(isMintingToday).mockReturnValue(true);
+    const original = winnerImage.replace(".png", ".gif");
+    const winner = matchingWinner(1);
+    jest.mocked(useNextMintDrop).mockReturnValue({
+      ...nextMintResult,
+      nextMint: {
+        ...winner,
+        parts: [
+          {
+            ...winner.parts[0]!,
+            media: [{ url: original, mime_type: "image/gif" }],
+          },
+        ],
+      },
+    });
+    const { container } = renderComponent({
+      readonly: true,
+      memes_subscriptions: [
+        { ...mockSubscriptions[0], contract: MEMES_CONTRACT },
+      ],
+    });
+    for (const size of [
+      "200x200_gifv2",
+      "200x200",
+      "AUTOx450_gifv2",
+      "AUTOx450",
+    ]) {
+      const image = container.querySelector("img");
+      expect(image).toHaveAttribute(
+        "src",
+        original.replace("artwork.gif", `${size}/artwork.gif`)
+      );
+      expect(image).not.toHaveAttribute("src", original);
+      fireEvent.error(image!);
+    }
+    expect(container.querySelector("img")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "The Memes #1" })).toBeVisible();
+  });
 
   it.each([
     { token: 575, card: 574 },
@@ -600,7 +642,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
       if (hasPreview)
         expect(container.querySelector("img")).toHaveAttribute(
           "src",
-          expect.stringContaining(encodeURIComponent(winnerThumbnail))
+          winnerThumbnail
         );
       else expect(container.querySelector("img")).not.toBeInTheDocument();
     }

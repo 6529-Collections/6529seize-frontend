@@ -4,7 +4,8 @@ import { useNowMinting } from "@/hooks/useNowMinting";
 import { useNextMintDrop } from "@/hooks/useNextMintDrop";
 import { isValidMemeCardId } from "@/components/memes/drops/MainStageMemeCardLink";
 import { MEMES_CONTRACT } from "@/constants/constants";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import { ImageScale } from "@/helpers/image.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import Image from "next/image";
 import { useState, type ComponentProps } from "react";
@@ -32,29 +33,29 @@ export default function MintingTodaySubscriptionRow(
   const winnerImage =
     getDropPreviewImageUrl(nextMint?.metadata) ??
     (media?.mime_type.startsWith("image/") ? media.url : undefined);
-  // Minted fields are thumbnails; also cap winner previews outside the resize CDN.
-  const source =
-    mintedSource ??
-    (matchesWinner && winnerImage
-      ? getScaledImageUri(winnerImage, ImageScale.W_200_H_200)
-      : undefined);
+  const source = mintedSource ?? (matchesWinner ? winnerImage : undefined);
+  const imageProps = {
+    width: 80,
+    height: 113,
+    className:
+      "tw-h-[68px] tw-w-12 tw-rounded-[3px] tw-object-contain tw-shadow-sm sm:tw-h-[113px] sm:tw-w-20",
+    onError: () => setFailedSource(source),
+  };
+  let artwork;
+  if (source && source !== failedSource) {
+    artwork = mintedSource ? (
+      <Image {...imageProps} src={mintedSource} alt="" unoptimized />
+    ) : (
+      <DropImagePreview
+        {...imageProps}
+        alt=""
+        originalSrc={source}
+        imageScale={ImageScale.W_200_H_200}
+        allowOriginalGif={false}
+        fallback={null}
+      />
+    );
+  }
 
-  return (
-    <MemeSubscriptionRow
-      {...props}
-      artwork={
-        source && source !== failedSource ? (
-          <Image
-            src={source}
-            alt=""
-            width={80}
-            height={113}
-            unoptimized={!!mintedSource}
-            className="tw-h-[68px] tw-w-12 tw-rounded-[3px] tw-object-contain tw-shadow-sm sm:tw-h-[113px] sm:tw-w-20"
-            onError={() => setFailedSource(source)}
-          />
-        ) : undefined
-      }
-    />
-  );
+  return <MemeSubscriptionRow {...props} artwork={artwork} />;
 }
