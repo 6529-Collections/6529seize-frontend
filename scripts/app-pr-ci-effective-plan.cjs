@@ -251,6 +251,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/brain/my-stream/MyStreamWaveContent.tsx",
         "components/waves/drops/WaveDropActionsOpen.tsx",
         "components/waves/drops/WaveDropActionsMore.tsx",
+        "components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper.tsx",
         "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
         "components/waves/drops/WaveDropMobileMenuOpen.tsx",
         "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",

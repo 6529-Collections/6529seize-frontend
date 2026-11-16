@@ -258,6 +258,7 @@ describe("effective App PR CI plan", () => {
     "components/waves/WavesMobile.tsx",
     "components/brain/BrainMobile.tsx",
     "components/waves/drops/WaveDropActionsMore.tsx",
+    "components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper.tsx",
     "components/shared/WavesMessagesWrapper.tsx",
     "components/brain/my-stream/MyStreamWaveContent.tsx",
     "tests/packs.manifest.cjs",
