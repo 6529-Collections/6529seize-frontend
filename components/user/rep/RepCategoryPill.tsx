@@ -111,7 +111,10 @@ export default function RepCategoryPill({
                 value: (
                   <span
                     key="value"
-                    className={`tw-font-medium ${direction === "received" ? "tw-text-primary-400" : "tw-text-iron-100"}`}
+                    className={clsx("tw-font-medium", {
+                      "tw-text-primary-400": direction === "received",
+                      "tw-text-iron-100": direction === "given",
+                    })}
                   >
                     {formatInteger(locale, contribution)}
                   </span>
