@@ -158,9 +158,7 @@ describe("UserPageRepNewRepSearch", () => {
     expect(
       screen.queryByRole("button", { name: "AI 1,000" })
     ).not.toBeInTheDocument();
-    await user.click(
-      await screen.findByRole("button", { name: "Music" })
-    );
+    await user.click(await screen.findByRole("button", { name: "Music" }));
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
     ).toHaveValue("0");
@@ -211,9 +209,7 @@ describe("UserPageRepNewRepSearch", () => {
           name: "Your total REP for this category",
         })
       ).toBeDisabled();
-      expect(
-      screen.getByRole("button", { name: "Grant Rep" })
-      ).toBeDisabled();
+      expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     }
   );
 
