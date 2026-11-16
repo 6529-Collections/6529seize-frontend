@@ -348,6 +348,9 @@ show the profile-creation welcome.
 - The NIC editor loads the current total and allowance before enabling Save.
   If loading fails, select `Retry`. A background refresh keeps an entered draft.
 - Enter the desired total, then select `Save`, or `Cancel` to leave without saving.
+- The Rate NIC modal keeps `Cancel` and `Save` in one row at the bottom right.
+  Cancel uses the ghost style at the same height as Save. Save stays disabled
+  until the rating changes to a valid value.
 - Statement ownership: [Profile Identity Statements](feature-identity-statements.md).
 
 ## All Receivers for REP and NIC
