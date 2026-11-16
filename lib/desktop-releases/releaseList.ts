@@ -190,14 +190,39 @@ type Entry = {
   readonly source: string;
 };
 
+type PendingRead = {
+  readonly source: string;
+  readonly promise: Promise<SignedFeedSnapshot>;
+};
+
 let current: Entry | null = null;
 let lastGood: Entry | null = null;
-let pending: Promise<SignedFeedSnapshot> | null = null;
+let pending: PendingRead | null = null;
+// The bucket the latest request asked for. A read that finishes after the
+// setting changed answers its own request but is not cached.
+let activeSource: string | null = null;
+
+function startRead(
+  location: BucketLocation | null,
+  source: string
+): PendingRead {
+  const read: PendingRead = {
+    source,
+    promise: readPair(location).finally(() => {
+      if (pending === read) {
+        pending = null;
+      }
+    }),
+  };
+  pending = read;
+  return read;
+}
 
 /** The pair, from one read of the bundle, reused for a minute. */
 async function getSnapshot(): Promise<SignedFeedSnapshot> {
   const location = getLocation();
   const source = location ? `${location.region}/${location.bucket}` : "";
+  activeSource = source;
   if (current?.source !== source) {
     current = null;
     lastGood = null;
@@ -205,10 +230,12 @@ async function getSnapshot(): Promise<SignedFeedSnapshot> {
   if (current && Date.now() - current.at < SNAPSHOT_TTL_MS) {
     return current.snapshot;
   }
-  pending ??= readPair(location).finally(() => {
-    pending = null;
-  });
-  const snapshot = await pending;
+  const read =
+    pending?.source === source ? pending : startRead(location, source);
+  const snapshot = await read.promise;
+  if (activeSource !== source) {
+    return snapshot;
+  }
   const at = Date.now();
   if (snapshot.state !== "error") {
     current = { snapshot, at, source };
@@ -243,4 +270,5 @@ export function resetDesktopReleaseListCacheForTests(): void {
   current = null;
   lastGood = null;
   pending = null;
+  activeSource = null;
 }

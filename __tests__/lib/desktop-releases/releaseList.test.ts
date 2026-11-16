@@ -199,6 +199,65 @@ describe("6529 Desktop release list routes", () => {
     );
   });
 
+  describe("when the bucket setting changes while a read is in flight", () => {
+    const OTHER_SIGNATURE = new Uint8Array([0x30, 0x46, 0x07]);
+    let releaseFirstRead: () => void = () => undefined;
+
+    beforeEach(() => {
+      // Bucket A's read waits until the test lets it finish; any other
+      // bucket answers at once with its own bundle.
+      mockRead.mockImplementation((location) => {
+        const found = (signature: Uint8Array): BucketObject => ({
+          state: "found",
+          body: bundleBytes(validBundle(signature)),
+          etag: null,
+          lastModified: null,
+        });
+        if (location.bucket === "desktop-releases.example") {
+          return new Promise((resolve) => {
+            releaseFirstRead = () => resolve(found(SIGNATURE_BYTES));
+          });
+        }
+        return Promise.resolve(found(OTHER_SIGNATURE));
+      });
+    });
+
+    it("reads the new bucket itself and never caches the old read", async () => {
+      const first = getSignature(new Request(SIGNATURE_URL));
+      process.env["DESKTOP_RELEASES_BUCKET"] = "other-releases.example";
+
+      const second = await getSignature(new Request(SIGNATURE_URL));
+      releaseFirstRead();
+      await first;
+      const third = await getSignature(new Request(SIGNATURE_URL));
+
+      expect(new Uint8Array(await second.arrayBuffer())).toEqual(
+        OTHER_SIGNATURE
+      );
+      expect(new Uint8Array(await third.arrayBuffer())).toEqual(
+        OTHER_SIGNATURE
+      );
+      expect(mockRead.mock.calls.map(([location]) => location.bucket)).toEqual([
+        "desktop-releases.example",
+        "other-releases.example",
+      ]);
+    });
+
+    it("answers 404 once the bucket is unset, before and after the old read ends", async () => {
+      const first = getList(new Request(LIST_URL));
+      delete process.env["DESKTOP_RELEASES_BUCKET"];
+
+      const second = await getList(new Request(LIST_URL));
+      releaseFirstRead();
+      await first;
+      const third = await getList(new Request(LIST_URL));
+
+      expect(second.status).toBe(404);
+      expect(third.status).toBe(404);
+      expect(mockRead).toHaveBeenCalledTimes(1);
+    });
+  });
+
   const sig = b64(SIGNATURE_BYTES);
   const list = b64(LIST_BYTES);
   it.each<[string, Uint8Array<ArrayBuffer>]>([
