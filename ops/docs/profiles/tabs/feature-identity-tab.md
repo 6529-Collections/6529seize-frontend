@@ -207,7 +207,8 @@ show the profile-creation welcome.
   border, and 14px medium text. The selected pill stays visible with a neutral
   highlight. The group is omitted when you have no existing contributions.
   Typing filters your assigned categories; after selection, all assigned pills
-  remain available. Long personal lists scroll within their fixed area.
+  remain available. Short lists fit their content without reserving an empty
+  second row; longer personal lists scroll within a capped area.
 - Category search accepts 3-100 characters for searching all categories;
   existing assigned-category chips can be selected without typing.
 - Results appear after a short debounce as compact category pills, including the

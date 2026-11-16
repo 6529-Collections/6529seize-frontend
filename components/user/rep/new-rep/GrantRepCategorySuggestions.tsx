@@ -38,7 +38,7 @@ export default function GrantRepCategorySuggestions({
   );
   if (!ratings)
     return (
-      <output className="tw-mt-4 tw-block tw-h-[108px] tw-text-xs tw-text-iron-400">
+      <output className="tw-mt-4 tw-block tw-h-[70px] tw-text-xs tw-text-iron-400">
         {t(locale, "user.rate.loading")}
       </output>
     );
@@ -56,7 +56,7 @@ export default function GrantRepCategorySuggestions({
           {formatInteger(locale, total)}
         </span>
       </legend>
-      <div className="tw-flex tw-h-[88px] tw-flex-wrap tw-content-start tw-gap-2 tw-overflow-y-auto tw-p-0.5">
+      <div className="tw-flex tw-max-h-[88px] tw-min-h-[42px] tw-flex-wrap tw-content-start tw-gap-2 tw-overflow-y-auto tw-p-0.5">
         {matches?.map((item) => (
           <button
             key={item.category}
