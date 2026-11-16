@@ -277,6 +277,7 @@ function applyEffectiveAppPrCiPlan(plan) {
       "hooks/useChatVideoPoster.ts",
       "public/video-preview-placeholder.svg",
       "components/waves/drop/MemesDropArtworkHero.tsx",
+      "components/waves/drop/useAutomaticSubmissionGifOriginal.ts",
       "components/drops/view/item/content/media/DropImagePreview.tsx",
       "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
       "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
