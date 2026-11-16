@@ -16,10 +16,14 @@ const getServerRenderSnapshot = () => false;
 
 export default function UserCICTypeIconWrapper({
   profile,
+  cic = profile.cic,
 }: {
   readonly profile: ApiIdentity;
+  readonly cic?: number;
 }) {
-  const tooltipId = `user-cic-type-tooltip-${profile.id ?? "unknown"}`;
+  const statusProfile = cic === profile.cic ? profile : { ...profile, cic };
+  const scoreSuffix = cic === profile.cic ? "" : `-score-${cic}`;
+  const tooltipId = `user-cic-type-tooltip-${profile.id ?? "unknown"}${scoreSuffix}`;
   const canRenderTooltip = useSyncExternalStore(
     subscribeToClientRender,
     getClientRenderSnapshot,
@@ -34,7 +38,7 @@ export default function UserCICTypeIconWrapper({
         aria-label={t(DEFAULT_LOCALE, "user.cicType.details")}
         className="tw-inline-flex tw-size-5 tw-cursor-help tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
       >
-        <UserCICTypeIcon cic={profile.cic} />
+        <UserCICTypeIcon cic={cic} />
       </button>
 
       {canRenderTooltip &&
@@ -55,7 +59,7 @@ export default function UserCICTypeIconWrapper({
             }}
           >
             <div className="tailwind-scope tw-max-h-[calc(100dvh-1rem)] tw-overflow-y-auto">
-              <UserCICTypeIconTooltip profile={profile} />
+              <UserCICTypeIconTooltip profile={statusProfile} />
             </div>
           </Tooltip>,
           document.body
