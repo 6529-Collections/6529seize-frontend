@@ -36,13 +36,12 @@ export async function resolveDesktopDownload(
   }
   const release = getNewestDesktopRelease(releases);
   const fileName = release ? findListedFile(release, segments) : null;
-  const location = getDesktopReleasesLocation();
-  if (!release || !fileName || !location) {
+  if (!release || !fileName) {
     return { state: "not-found" };
   }
   try {
     const url = await presignBucketObject(
-      location,
+      getDesktopReleasesLocation(),
       getReleaseObjectKey(release.version, fileName),
       {
         expiresInSeconds: DOWNLOAD_URL_TTL_SECONDS,

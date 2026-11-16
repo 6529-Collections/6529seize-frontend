@@ -1,6 +1,7 @@
+import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-import ReleaseSectionEmpty from "@/components/release-section/ReleaseSectionEmpty";
+import { ABOUT_INSET_CLASS_NAME } from "@/components/about/AboutLayout";
 import {
   BODY,
   LINK,
@@ -83,6 +84,32 @@ function chooserText(): AiChooserText {
   };
 }
 
+/** No release to offer: none uploaded yet, or the list failed to load. */
+function NoRelease({
+  state,
+}: {
+  readonly state: AiReleaseFeedSnapshot["state"];
+}) {
+  return (
+    <div
+      className={`${ABOUT_INSET_CLASS_NAME} tw-flex tw-items-start tw-gap-3 tw-p-5`}
+    >
+      <ExclamationTriangleIcon
+        aria-hidden="true"
+        className="tw-mt-0.5 tw-size-5 tw-flex-none tw-text-iron-400"
+      />
+      <p className={`tw-m-0 ${BODY}`}>
+        {t(
+          LOCALE,
+          state === "error"
+            ? "ai.download.unavailable"
+            : "ai.download.notOutYet"
+        )}
+      </p>
+    </div>
+  );
+}
+
 export default function AiDownloadPage({
   snapshot,
   platform,
@@ -120,14 +147,7 @@ export default function AiDownloadPage({
             text={chooserText()}
           />
         ) : (
-          <ReleaseSectionEmpty
-            message={t(
-              LOCALE,
-              snapshot.state === "error"
-                ? "ai.download.unavailable"
-                : "ai.download.notOutYet"
-            )}
-          />
+          <NoRelease state={snapshot.state} />
         )}
         <p className={`tw-mb-0 tw-mt-6 ${BODY}`}>
           {tRich(LOCALE, "ai.download.next", {

@@ -219,8 +219,9 @@ describe("the /desktop pages", () => {
     }
   });
 
-  it("offer nothing and read nothing before a bucket is set", async () => {
+  it("read the built-in bucket, and offer nothing before a list is published", async () => {
     delete process.env["DESKTOP_RELEASES_BUCKET"];
+    mockRead.mockResolvedValue({ state: "missing" });
     const [page, guide, , releases] = await renderAll();
     expect(page).toContain(NOT_OUT_YET);
     expect(page).toContain(">Test release<");
@@ -233,8 +234,15 @@ describe("the /desktop pages", () => {
     );
     expect(guide).toContain("6529-Desktop_&lt;version&gt;_macos-arm64.dmg");
     expect(releases).toContain("No release is published yet.");
-    expect(mockRead).not.toHaveBeenCalled();
-    expect((await fetchDownload(SETUP)).status).toBe(404);
+    expect(mockRead).toHaveBeenCalledWith(
+      { bucket: "6529-desktop-releases-06c6aa2e", region: "us-east-1" },
+      "feed/releases.bundle.json"
+    );
+    const missing = await fetchDownload(SETUP);
+    expect(missing.status).toBe(404);
+    expect(await missing.text()).toBe(
+      "The newest release has no file by that name." + String.fromCharCode(10)
+    );
     expect(mockPresign).not.toHaveBeenCalled();
   });
 

@@ -83,8 +83,9 @@ describe("6529 Desktop release list routes", () => {
     }
   });
 
-  it("answers 404 without reading anything while no bucket is set", async () => {
+  it("reads the production bucket built into the code when no setting overrides it", async () => {
     delete process.env["DESKTOP_RELEASES_BUCKET"];
+    storeHasBundle(null);
 
     for (const response of await fetchBoth()) {
       expect(response.status).toBe(404);
@@ -94,7 +95,11 @@ describe("6529 Desktop release list routes", () => {
       expect(response.headers.get("cache-control")).toBe("public, max-age=60");
       expect(await response.text()).toBe("No release list yet.\n");
     }
-    expect(mockRead).not.toHaveBeenCalled();
+    expect(mockRead).toHaveBeenCalledTimes(1);
+    expect(mockRead).toHaveBeenCalledWith(
+      { bucket: "6529-desktop-releases-06c6aa2e", region: "us-east-1" },
+      "feed/releases.bundle.json"
+    );
   });
 
   it("answers 404 for both before the first bundle", async () => {
@@ -295,19 +300,29 @@ describe("6529 Desktop release list routes", () => {
       }
     );
 
-    it("answers 404 after unset, A, unset, whenever A's read ends", async () => {
+    it("keeps the built-in bucket's answer after unset, A, unset, whenever A's read ends", async () => {
+      const BUILT_IN = "6529-desktop-releases-06c6aa2e";
       setBucket(null);
-      expect((await getList(new Request(LIST_URL))).status).toBe(404);
+      const first = getList(new Request(LIST_URL));
+      await flush();
+      reads[0]?.settle({ state: "missing" });
+      expect((await first).status).toBe(404);
       setBucket(BUCKET_A);
       const inFlight = getList(new Request(LIST_URL));
       setBucket(null);
+      const second = getList(new Request(LIST_URL));
+      await flush();
+      reads[2]?.settle({ state: "missing" });
+      expect((await second).status).toBe(404);
+      reads[1]?.settle(foundWith(SIGNATURE_BYTES));
+      expect((await inFlight).status).toBe(200);
 
       expect((await getList(new Request(LIST_URL))).status).toBe(404);
-      await flush();
-      reads[0]?.settle(foundWith(SIGNATURE_BYTES));
-      expect((await inFlight).status).toBe(200);
-      expect((await getList(new Request(LIST_URL))).status).toBe(404);
-      expect(reads).toHaveLength(1);
+      expect(reads.map(({ bucket }) => bucket)).toEqual([
+        BUILT_IN,
+        BUCKET_A,
+        BUILT_IN,
+      ]);
     });
   });
 

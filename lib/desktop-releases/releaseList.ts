@@ -29,6 +29,11 @@ import {
  */
 export const DESKTOP_BUNDLE_OBJECT_KEY = "feed/releases.bundle.json";
 
+// The private bucket that holds the list and the release files. The
+// production servers' role may read `feed/*` and `releases/*` and list the
+// bucket, so a missing object is a 404; nothing in it is public.
+// `DESKTOP_RELEASES_BUCKET` and `DESKTOP_RELEASES_REGION` override these.
+const DEFAULT_BUCKET = "6529-desktop-releases-06c6aa2e";
 const DEFAULT_REGION = "us-east-1";
 const BUNDLE_VERSION = 1;
 // What 6529 Desktop accepts; anything larger is refused rather than served.
@@ -147,27 +152,16 @@ function part(
   };
 }
 
-/**
- * The private bucket that holds the list and the release files, or null
- * while `DESKTOP_RELEASES_BUCKET` is unset.
- */
-export function getDesktopReleasesLocation(): BucketLocation | null {
+/** The private bucket that holds the list and the release files. */
+export function getDesktopReleasesLocation(): BucketLocation {
   const env = getDesktopReleasesServerEnv();
-  if (!env.releasesBucket) {
-    return null;
-  }
   return {
-    bucket: env.releasesBucket,
+    bucket: env.releasesBucket ?? DEFAULT_BUCKET,
     region: env.releasesRegion ?? DEFAULT_REGION,
   };
 }
 
-async function readPair(
-  location: BucketLocation | null
-): Promise<SignedFeedSnapshot> {
-  if (!location) {
-    return MISSING;
-  }
+async function readPair(location: BucketLocation): Promise<SignedFeedSnapshot> {
   const stored = await readBucketObject(location, DESKTOP_BUNDLE_OBJECT_KEY);
   if (stored.state === "error") {
     return failed(stored.reason);
@@ -213,7 +207,7 @@ let readSeq = 0;
 // The newest read that has written the cache; an older one never overwrites it.
 let writtenSeq = 0;
 
-function startRead(location: BucketLocation | null): PendingRead {
+function startRead(location: BucketLocation): PendingRead {
   readSeq += 1;
   const read: PendingRead = {
     generation,
@@ -235,7 +229,7 @@ function startRead(location: BucketLocation | null): PendingRead {
  */
 export async function getDesktopReleaseListSnapshot(): Promise<SignedFeedSnapshot> {
   const location = getDesktopReleasesLocation();
-  const source = location ? `${location.region}/${location.bucket}` : "";
+  const source = `${location.region}/${location.bucket}`;
   if (source !== latestSource) {
     latestSource = source;
     generation += 1;

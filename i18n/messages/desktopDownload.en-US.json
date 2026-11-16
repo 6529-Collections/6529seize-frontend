@@ -39,6 +39,8 @@
   "desktopPage.about.heading": "What 6529 Desktop is",
   "desktopPage.about.body": "6529 Desktop is a small Rust host, built with Tauri, that shows the same web interface as 6529.io from a local copy and starts the 6529 Core engine beside it.",
   "desktopPage.about.session": "Your session is kept in your operating system's credential store, and the long-lived session token is never given to the page.",
+  "desktopPage.downloadRoute.unavailable": "The release list is unavailable. Try again in a minute.",
+  "desktopPage.downloadRoute.notFound": "The newest release has no file by that name.",
   "desktopPage.files.heading": "All files",
   "desktopPage.files.build.withCommit": "Release {version}, published {date}, built from commit {commit}.",
   "desktopPage.files.build.withoutCommit": "Release {version}, published {date}.",

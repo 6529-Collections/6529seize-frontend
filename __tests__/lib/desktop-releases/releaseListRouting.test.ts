@@ -56,9 +56,9 @@ describe("6529 Desktop release list routing", () => {
     "lets %s through the production proxy with no gate or redirect",
     async (path) => {
       const fetchSpy = jest.spyOn(globalThis, "fetch");
-      expect(unstable_doesMiddlewareMatch({ config: proxyConfig, url: path })).toBe(
-        true
-      );
+      expect(
+        unstable_doesMiddlewareMatch({ config: proxyConfig, url: path })
+      ).toBe(true);
 
       const response = await loadProductionProxy()(
         new NextRequest(`https://6529.io${path}`)

@@ -1,3 +1,6 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/desktop-download";
 import { resolveDesktopDownload } from "@/lib/desktop-releases/releaseDownload";
 import { releaseDownloadResponse } from "@/lib/release-section/download";
 
@@ -13,7 +16,8 @@ export async function GET(
 ): Promise<Response> {
   const { path } = await params;
   return releaseDownloadResponse(await resolveDesktopDownload(path), {
-    unavailable: "The release list is unavailable. Try again in a minute.\n",
-    notFound: "The newest release has no file by that name.\n",
+    // A person who opens an old download link reads these in the tab.
+    unavailable: `${t(DEFAULT_LOCALE, "desktopPage.downloadRoute.unavailable")}\n`,
+    notFound: `${t(DEFAULT_LOCALE, "desktopPage.downloadRoute.notFound")}\n`,
   });
 }

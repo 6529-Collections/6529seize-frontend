@@ -87,9 +87,8 @@ export const getValidatorPageServerEnv = (): ValidatorPageServerEnv => ({
 
 /**
  * Where 6529 Desktop's signed release list and release files are stored,
- * served at `/desktop/releases.json` and `/desktop/download`. Unset bucket:
- * no list is published yet, and the site answers 404 without reading
- * anything.
+ * served at `/desktop/releases.json` and `/desktop/download`. Unset: the
+ * production bucket and region built into `lib/desktop-releases/releaseList.ts`.
  */
 type DesktopReleasesServerEnv = {
   readonly releasesBucket: string | undefined;

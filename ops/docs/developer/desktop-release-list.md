@@ -9,10 +9,10 @@ website. The site serves it like the validator's feed (see
 [Validator download page](../validator-download-page.md)): byte for byte,
 from a private S3 bucket, read through the servers' instance role.
 
-| Route | What it serves | Access |
-| --- | --- | --- |
-| `/desktop/releases.json` | The signed release list, byte for byte | Public |
-| `/desktop/releases.json.sig` | The list's signature, byte for byte | Public |
+| Route                        | What it serves                         | Access |
+| ---------------------------- | -------------------------------------- | ------ |
+| `/desktop/releases.json`     | The signed release list, byte for byte | Public |
+| `/desktop/releases.json.sig` | The list's signature, byte for byte    | Public |
 
 These routes do not check the signature: the app does, with the key built
 into it. They never serve a list without a signature. The `/desktop` pages
@@ -30,7 +30,7 @@ between two reads:
 - Shape, exactly these three fields:
 
   ```json
-  {"version":1,"list":"<base64>","signature":"<base64>"}
+  { "version": 1, "list": "<base64>", "signature": "<base64>" }
   ```
 
   `list` is the exact bytes of `releases.json` and `signature` the exact
@@ -46,12 +46,12 @@ keeps being served for up to an hour, otherwise both routes answer 503.
 
 ## Responses
 
-| Situation | Status | Headers |
-| --- | --- | --- |
-| A valid bundle is stored | 200 | `application/json; charset=utf-8` (list) or `application/octet-stream` (signature), `Cache-Control: public, max-age=300`, `X-Release-List-Pair` (see [Matching list and signature](#matching-list-and-signature)), `ETag` `"<pair>-list"` or `"<pair>-sig"`, `Last-Modified` of the bundle, `Access-Control-Allow-Origin: *`, `Access-Control-Expose-Headers: X-Release-List-Pair`, `X-Content-Type-Options: nosniff`, `X-Robots-Tag: noindex, nofollow` |
-| `If-None-Match` matches the ETag | 304 | The same headers, no body |
-| No bucket is set, or no bundle is stored yet | 404, `No release list yet.` | `text/plain; charset=utf-8`, `Cache-Control: public, max-age=60` |
-| The bundle is refused, or S3 fails, with no good pair in the last hour | 503, `The release list is unavailable.` | `Cache-Control: no-store`, `Retry-After: 60` |
+| Situation                                                              | Status                                  | Headers                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ---------------------------------------------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A valid bundle is stored                                               | 200                                     | `application/json; charset=utf-8` (list) or `application/octet-stream` (signature), `Cache-Control: public, max-age=300`, `X-Release-List-Pair` (see [Matching list and signature](#matching-list-and-signature)), `ETag` `"<pair>-list"` or `"<pair>-sig"`, `Last-Modified` of the bundle, `Access-Control-Allow-Origin: *`, `Access-Control-Expose-Headers: X-Release-List-Pair`, `X-Content-Type-Options: nosniff`, `X-Robots-Tag: noindex, nofollow` |
+| `If-None-Match` matches the ETag                                       | 304                                     | The same headers, no body                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| No bundle is stored yet                                                | 404, `No release list yet.`             | `text/plain; charset=utf-8`, `Cache-Control: public, max-age=60`                                                                                                                                                                                                                                                                                                                                                                                         |
+| The bundle is refused, or S3 fails, with no good pair in the last hour | 503, `The release list is unavailable.` | `Cache-Control: no-store`, `Retry-After: 60`                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 Each server reads the bundle once a minute, or every ten seconds while reads
 are failing. Only a served pair is kept to fall back on: a 404 is
@@ -130,14 +130,15 @@ two-request windows.
 Server environment, read at request time:
 
 - `DESKTOP_RELEASES_BUCKET`: the private bucket that holds
-  `feed/releases.bundle.json`. Unset: both paths answer 404 without reading
-  anything.
+  `feed/releases.bundle.json`. Unset: the production bucket
+  `6529-desktop-releases-06c6aa2e`, built into
+  `lib/desktop-releases/releaseList.ts` as the validator's is, so production
+  needs no setting.
 - `DESKTOP_RELEASES_REGION`: the bucket's region; `us-east-1` when unset.
 
-The servers' instance role needs `s3:GetObject` on
-`feed/releases.bundle.json` and `s3:ListBucket` on the bucket, so that a
-missing bundle reads as 404 rather than 403. The `/desktop/download` route
-also needs `s3:GetObject` on `releases/*`, where the release files are.
+The production servers' instance role may read `feed/*` and `releases/*`
+and list the bucket, so that a missing bundle reads as 404 rather than 403. The `/desktop/download` route
+reads `releases/*`, where the release files are.
 
 Code: `app/desktop/releases.json/route.ts`,
 `app/desktop/releases.json.sig/route.ts` and

@@ -40,7 +40,7 @@ answer are shared in `lib/release-section/download.ts`.
 
 ## Before a list is published
 
-Until `DESKTOP_RELEASES_BUCKET` is set and the bucket holds a list:
+Until the bucket holds a list:
 
 - `/desktop` says no release is published yet, offers no download, and
   still shows what 6529 Desktop is, that Linux comes later, and where to
@@ -56,17 +56,24 @@ Until `DESKTOP_RELEASES_BUCKET` is set and the bucket holds a list:
 ## Releases
 
 The pages read the same list `/desktop/releases.json` serves, from the
-bundle `feed/releases.bundle.json` in the Desktop releases bucket
-(`DESKTOP_RELEASES_BUCKET`, region `DESKTOP_RELEASES_REGION`, default
-`us-east-1`). The release files are in the same bucket:
+bundle `feed/releases.bundle.json` in the private bucket
+`6529-desktop-releases-06c6aa2e` in `us-east-1` (built into
+`lib/desktop-releases/releaseList.ts`; `DESKTOP_RELEASES_BUCKET` and
+`DESKTOP_RELEASES_REGION` override it). The release files are in the same
+bucket:
 
 | Key                         | Content                                                  |
 | --------------------------- | -------------------------------------------------------- |
 | `feed/releases.bundle.json` | The list and its signature, one object                   |
 | `releases/<version>/<file>` | Every file the list names for that release, by that name |
 
-The servers' instance role needs `s3:GetObject` on the bundle and on
-`releases/*`, and `s3:ListBucket` on the bucket.
+The production servers' instance role may read `feed/*` and `releases/*`
+and list the bucket, so a missing object is a 404. For 0.1.0-rc.2 the
+publisher writes, besides the bundle, each file the list names under
+`releases/0.1.0-rc.2/`, such as
+`releases/0.1.0-rc.2/6529-Desktop_0.1.0-rc.2_windows-x64-setup.exe`,
+`releases/0.1.0-rc.2/6529-Desktop_0.1.0-rc.2_macos-arm64.dmg` and
+`releases/0.1.0-rc.2/SHA256SUMS`.
 
 ### The signature
 
@@ -113,7 +120,11 @@ pages show the new release within a minute.
 
 All copy is in the `desktop-download` message namespace
 (`i18n/messages/desktopDownload.en-US.json`), including the guide and the
-known issues, which are Markdown messages. File names, commands, the
+known issues, which are Markdown messages. Only en-US exists; other
+locales fall back to it (fallback debt for `/desktop/*`: all copy). The
+download route's 404 and 503 bodies are messages too, since a person can
+read them in a browser tab; the `releases.json` routes' bodies stay plain
+protocol text for the app, as the validator's and 6529 AI's do. File names, commands, the
 publisher name and the key's address stay as written in every language.
 
 The known issues are the ones verified for the first signed test builds;

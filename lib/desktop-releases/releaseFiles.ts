@@ -53,7 +53,8 @@ export function listDesktopReleaseFiles(
       kind: file.name === "SHA256SUMS" ? "checksums" : "other",
       file,
     }));
-  // SHA256SUMS first, then the rest in name order.
+  // SHA256SUMS first, then the rest in name order. The names are machine
+  // identifiers shown as written, so they sort the same in every locale.
   others.sort(
     (a, b) =>
       Number(a.kind !== "checksums") - Number(b.kind !== "checksums") ||
@@ -62,7 +63,11 @@ export function listDesktopReleaseFiles(
   return [...installers, ...others];
 }
 
-/** The site path that hands out one file of the newest release. */
+/**
+ * The site path that hands out one file of the newest release. Only the
+ * newest release's files are handed out (`findListedFile` takes only its
+ * version), so link only those; older releases show their SHA-256 alone.
+ */
 export function getDesktopDownloadPath(
   release: Pick<DesktopRelease, "version">,
   file: Pick<ValidatorReleaseFile, "name">

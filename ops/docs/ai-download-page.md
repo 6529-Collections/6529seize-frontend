@@ -35,10 +35,7 @@ instance-role credentials (`awsCredentials.ts`), visitor system detection
 (`detectSystem.ts`, `useVisitorPlatform.ts`), version order
 (`releaseFeed.ts`), the feed endpoints' response (`serveSignedFeedObject`
 in `feedResponse.ts`), Markdown and button styles; the validator's pages
-and endpoints answer as before. Its frame, notice, text pages, file table,
-command list, build line and empty state are shared with the 6529 Desktop
-pages in `components/release-section/`, and its download route's path rules
-and answer in `lib/release-section/download.ts`.
+and endpoints answer as before.
 
 ## Releases
 
