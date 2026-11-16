@@ -1,9 +1,8 @@
+import { getScaledImageUri, type ImageScale } from "@/helpers/image.helpers";
 import {
-  getScaledImageUri,
   IMAGE_RESIZE_CDN_ORIGIN,
   SCALABLE_IMAGE_PREFIXES,
-  type ImageScale,
-} from "@/helpers/image.helpers";
+} from "@/helpers/image-resize-cdn";
 
 /** Match the pathname, never a query parameter that happens to end in .gif. */
 export function isGifImageUrl(url: string): boolean {

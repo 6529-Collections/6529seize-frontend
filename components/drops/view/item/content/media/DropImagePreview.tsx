@@ -4,11 +4,8 @@ import { useLocalImagePreviewSource } from "./LocalImagePreviewContext";
 import { getGiphyVideoRendition } from "@/app/api/og-metadata/_lib/giphyRenditions";
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import {
-  getScaledImageUri,
-  IMAGE_RESIZE_CDN_ORIGIN,
-  ImageScale,
-} from "@/helpers/image.helpers";
+import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import { IMAGE_RESIZE_CDN_ORIGIN } from "@/helpers/image-resize-cdn";
 import {
   getAnimatedImagePreviewUri,
   isGifImageUrl,

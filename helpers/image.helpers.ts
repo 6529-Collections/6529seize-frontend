@@ -1,4 +1,5 @@
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { SCALABLE_IMAGE_PREFIXES } from "@/helpers/image-resize-cdn";
 
 export enum ImageScale {
   W_AUTO_H_50 = "AUTOx50",
@@ -8,15 +9,6 @@ export enum ImageScale {
   AUTOx800 = "AUTOx800",
   AUTOx1080 = "AUTOx1080",
 }
-
-export const IMAGE_RESIZE_CDN_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
-export const SCALABLE_IMAGE_PREFIXES = [
-  "pfp",
-  "rememes",
-  "drops",
-  "waves",
-  "images",
-].map((folder) => `${IMAGE_RESIZE_CDN_ORIGIN}/${folder}/`);
 
 export function getScaledResolvedImageUri(
   resolvedUrl: string,
