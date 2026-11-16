@@ -6,6 +6,8 @@ import userEvent from "@testing-library/user-event";
 import { useMemo, useState } from "react";
 
 let mockPreparationEnabled = false;
+let mockSavedPreparationMode: "MANUAL" | "BACKGROUND" | undefined;
+const mockRefreshPreparation = jest.fn().mockResolvedValue(undefined);
 const mockDownload = jest.fn();
 const mockUseDownloader = jest.fn();
 const mockGetStagingAuth = jest.fn();
@@ -13,9 +15,13 @@ const mockGetAuthJwt = jest.fn();
 const mockFetchAllPages = jest.fn();
 const mockDistributionAdminWallets = ["0x1"];
 
-jest.mock("@/hooks/useDropForgeSettings", () => ({
-  useDropForgeSettings: () => ({
-    data: { preparation_enabled: mockPreparationEnabled },
+jest.mock("@/hooks/useEmmaPreparationMode", () => ({
+  useEmmaPreparationMode: () => ({
+    mode:
+      mockSavedPreparationMode ??
+      (mockPreparationEnabled ? "BACKGROUND" : "MANUAL"),
+    isError: false,
+    refresh: mockRefreshPreparation,
   }),
 }));
 
@@ -156,6 +162,7 @@ function createOverview(overrides?: Record<string, unknown>) {
 beforeEach(() => {
   jest.clearAllMocks();
   mockPreparationEnabled = false;
+  mockSavedPreparationMode = undefined;
   authCtx.setToast.mockClear();
   mockDownload.mockReset();
   mockUseDownloader.mockReset();
@@ -799,4 +806,27 @@ test("shows an admin-facing error when the downloader reports one", async () => 
       details: "wallet is not authorized",
     });
   });
+});
+
+test("keeps manual finalization when preparation is turned on for a started plan", async () => {
+  mockPreparationEnabled = true;
+  mockSavedPreparationMode = "MANUAL";
+  render(<TestWrapper initialTokenId="123" />);
+  expect(
+    await screen.findByRole("button", { name: /Finalize Distribution/i })
+  ).toBeEnabled();
+  expect(
+    screen.queryByRole("button", { name: "Process and Finalize" })
+  ).toBeNull();
+});
+
+test("keeps the background job controls visible after preparation is turned off", async () => {
+  mockSavedPreparationMode = "BACKGROUND";
+  render(<TestWrapper initialTokenId="123" />);
+  expect(
+    await screen.findByRole("button", { name: "Process and Finalize" })
+  ).toBeVisible();
+  expect(
+    screen.queryByRole("button", { name: /Finalize Distribution/i })
+  ).toBeNull();
 });

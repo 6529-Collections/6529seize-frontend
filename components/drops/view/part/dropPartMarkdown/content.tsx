@@ -296,6 +296,19 @@ const containsOnlyNativeEmojis = (str: string): boolean => {
   return textWithoutEmojis.trim() === "";
 };
 
+function isEmojiOnlyContent(content: ReactNode | undefined): boolean {
+  const text = getTextFromChildren(content);
+  return (
+    text !== null &&
+    text.trim().length > 0 &&
+    text
+      .split(customEmojiRegex)
+      .every(
+        (part) => isCustomEmojiToken(part) || containsOnlyNativeEmojis(part)
+      )
+  );
+}
+
 const CustomEmojiImage = ({ alt, bigEmoji, src }: CustomEmojiImageProps) => (
   <img
     src={src}
@@ -344,7 +357,8 @@ export const createMarkdownContentRenderers = ({
   };
 
   const customPartRenderer = (
-    content: string
+    content: string,
+    enlargeEmojis: boolean
   ): Array<ReactNode> | ReactNode => {
     const splitter = getRandomObjectId();
 
@@ -398,13 +412,6 @@ export const createMarkdownContentRenderers = ({
       ),
     };
 
-    const areAllPartsEmojis = content
-      .split(customEmojiRegex)
-      .filter((part) => part.length > 0)
-      .every(
-        (part) => isCustomEmojiToken(part) || containsOnlyNativeEmojis(part)
-      );
-
     let currentContent = content;
 
     for (const token of Object.values(values)) {
@@ -451,12 +458,12 @@ export const createMarkdownContentRenderers = ({
           (segment, segmentIndex): ReactNode =>
             isCustomEmojiToken(segment) ? (
               <Fragment key={`emoji-${partIndex}-${segmentIndex}-${segment}`}>
-                {renderEmoji(segment, areAllPartsEmojis)}
+                {renderEmoji(segment, enlargeEmojis)}
               </Fragment>
             ) : (
               <span
                 key={`text-${partIndex}-${segmentIndex}`}
-                className={areAllPartsEmojis ? "emoji-text-node" : undefined}
+                className={enlargeEmojis ? "emoji-text-node" : undefined}
               >
                 {segment}
               </span>
@@ -465,15 +472,18 @@ export const createMarkdownContentRenderers = ({
       });
   };
 
-  const customRenderer = (content: ReactNode | undefined): ReactNode => {
+  const customRenderer = (
+    content: ReactNode | undefined,
+    enlargeEmojis = isEmojiOnlyContent(content)
+  ): ReactNode => {
     if (typeof content === "string") {
-      return customPartRenderer(content);
+      return customPartRenderer(content, enlargeEmojis);
     }
 
     if (isReactNodeArray(content)) {
       return content.map((child): ReactNode => {
         if (typeof child === "string") {
-          return customPartRenderer(child);
+          return customPartRenderer(child, enlargeEmojis);
         }
         return child;
       });
@@ -487,6 +497,8 @@ export const createMarkdownContentRenderers = ({
       HTMLAttributes<HTMLParagraphElement> &
       ExtraProps
   ) => {
+    const { children } = params;
+    const enlargeEmojis = isEmojiOnlyContent(children);
     const renderP = (
       paragraphParams: ClassAttributes<HTMLParagraphElement> &
         HTMLAttributes<HTMLParagraphElement> &
@@ -497,14 +509,13 @@ export const createMarkdownContentRenderers = ({
         <MarkdownParagraph
           key={paragraphKey}
           textSizeClassName={textSizeClass}
-          renderText={customRenderer}
+          renderText={(content) => customRenderer(content, enlargeEmojis)}
         >
           {paragraphParams.children}
         </MarkdownParagraph>
       );
     };
 
-    const { children } = params;
     const isBlockElement = (node: ReactNode): boolean =>
       isMarkdownImageElement(node) || isSmartLinkElement(node, isSmartLink);
     const flattened = Children.toArray(children).flatMap((node, index) =>

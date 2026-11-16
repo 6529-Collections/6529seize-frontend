@@ -398,6 +398,7 @@ export * from '../models/ApiDropForgeManualResponse';
 export * from '../models/ApiDropForgePhase';
 export * from '../models/ApiDropForgePhaseInput';
 export * from '../models/ApiDropForgePlanRequest';
+export * from '../models/ApiDropForgePreparation';
 export * from '../models/ApiDropForgeRecovery';
 export * from '../models/ApiDropForgeRecoveryAllocation';
 export * from '../models/ApiDropForgeRecoveryAttempt';
@@ -1416,6 +1417,7 @@ import { ApiDropForgeManualResponse } from '../models/ApiDropForgeManualResponse
 import { ApiDropForgePhase } from '../models/ApiDropForgePhase';
 import { ApiDropForgePhaseInput } from '../models/ApiDropForgePhaseInput';
 import { ApiDropForgePlanRequest } from '../models/ApiDropForgePlanRequest';
+import { ApiDropForgePreparation, ApiDropForgePreparationModeEnum   } from '../models/ApiDropForgePreparation';
 import { ApiDropForgeRecovery    , ApiDropForgeRecoveryOutcomeEnum      } from '../models/ApiDropForgeRecovery';
 import { ApiDropForgeRecoveryAllocation } from '../models/ApiDropForgeRecoveryAllocation';
 import { ApiDropForgeRecoveryAttempt , ApiDropForgeRecoveryAttemptOperationEnum      } from '../models/ApiDropForgeRecoveryAttempt';
@@ -2166,6 +2168,7 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiDropForgeLaunchStateEnum",
     "ApiDropForgeManualRequestActionEnum",
     "ApiDropForgeManualRequestOperationEnum",
+    "ApiDropForgePreparationModeEnum",
     "ApiDropForgeRecoveryOutcomeEnum",
     "ApiDropForgeRecoveryAttemptOperationEnum",
     "ApiDropForgeRecoveryRequestOperationEnum",
@@ -2725,6 +2728,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropForgePhase": ApiDropForgePhase,
     "ApiDropForgePhaseInput": ApiDropForgePhaseInput,
     "ApiDropForgePlanRequest": ApiDropForgePlanRequest,
+    "ApiDropForgePreparation": ApiDropForgePreparation,
     "ApiDropForgeRecovery": ApiDropForgeRecovery,
     "ApiDropForgeRecoveryAllocation": ApiDropForgeRecoveryAllocation,
     "ApiDropForgeRecoveryAttempt": ApiDropForgeRecoveryAttempt,

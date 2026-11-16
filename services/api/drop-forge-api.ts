@@ -1,3 +1,7 @@
+import {
+  ApiDropForgePreparationModeEnum,
+  type ApiDropForgePreparation,
+} from "@/generated/models/ApiDropForgePreparation";
 import type { ApiDropForgeRecoveryRequest } from "@/generated/models/ApiDropForgeRecoveryRequest";
 import {
   commonApiFetch,
@@ -41,6 +45,21 @@ export function requestForgeLaunch(
     endpoint: `${claimPath(contract, claim)}/${metadata ? "metadata" : "ready"}`,
     body: {},
   });
+}
+export async function getForgePreparation(
+  contract: string,
+  claim: number
+): Promise<ApiDropForgePreparation> {
+  try {
+    return await commonApiFetch<ApiDropForgePreparation>({
+      endpoint: `drop-forge/distribution-preparation/${contract}/${claim}`,
+    });
+  } catch (error) {
+    if (getStructuredApiErrorStatus(error) === 404) {
+      return { mode: ApiDropForgePreparationModeEnum.Unstarted };
+    }
+    throw error;
+  }
 }
 export async function latestForgeProcess(
   contract: string,

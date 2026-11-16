@@ -1,10 +1,12 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ApiDropForgePreparationModeEnum as Mode } from "@/generated/models/ApiDropForgePreparation";
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { SubscriptionLinks } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
 import { useDropForgeProcess } from "@/hooks/useDropForgeProcess";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "@/components/distribution-plan-tool/review-distribution-plan/table/constants";
-import { forgeList } from "@/services/api/drop-forge-api";
+import { forgeList, getForgePreparation } from "@/services/api/drop-forge-api";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import {
   ReviewDistributionPlanTableItemType,
@@ -16,8 +18,12 @@ jest.mock("@/hooks/useDropForgeSettings", () => ({
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/hooks/useDropForgeProcess", () => ({
   useDropForgeProcess: jest.fn(),
+  forgeProcessKey: () => ["job"],
 }));
-jest.mock("@/services/api/drop-forge-api", () => ({ forgeList: jest.fn() }));
+jest.mock("@/services/api/drop-forge-api", () => ({
+  forgeList: jest.fn(),
+  getForgePreparation: jest.fn(),
+}));
 jest.mock("@/components/auth/Auth", () => ({
   AuthContext: require("react").createContext({
     connectedProfile: null,
@@ -59,8 +65,17 @@ const phase: ReviewDistributionPlanTableItem = {
   walletsCount: 1,
   spotsCount: 1,
 };
+let client: QueryClient;
+function renderLinks(element: React.ReactNode) {
+  return render(
+    <QueryClientProvider client={client}>{element}</QueryClientProvider>
+  );
+}
+afterEach(() => client.clear());
 beforeEach(() => {
   jest.clearAllMocks();
+  client = new QueryClient();
+  jest.mocked(getForgePreparation).mockResolvedValue({ mode: Mode.Unstarted });
   jest.mocked(useDropForgeSettings).mockReturnValue({
     data: { preparation_enabled: true },
   } as ReturnType<typeof useDropForgeSettings>);
@@ -90,7 +105,7 @@ it.each([
       revokeObjectURL: { configurable: true, value: jest.fn() },
     });
     try {
-      render(
+      renderLinks(
         <SubscriptionLinks
           plan={{ id: "plan" } as AllowlistDescription}
           phase={
@@ -100,7 +115,7 @@ it.each([
           }
         />
       );
-      fireEvent.click(screen.getByRole("button", { name: label }));
+      fireEvent.click(await screen.findByRole("button", { name: label }));
       await waitFor(() => expect(click).toHaveBeenCalledTimes(expectedFiles));
       expect(commonApiFetch).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -116,19 +131,52 @@ it.each([
 
 it.each([undefined, ["old0", "old1", "old2"]])(
   "never downloads a completed job with missing or stale phase evidence",
-  (phase_ids) => {
+  async (phase_ids) => {
     jest.mocked(useDropForgeProcess).mockReturnValue({
       data: { id: "job", status: "COMPLETED", phase_ids },
     } as ReturnType<typeof useDropForgeProcess>);
-    render(
+    renderLinks(
       <SubscriptionLinks
         plan={{ id: "plan" } as AllowlistDescription}
         phase={phase}
       />
     );
-    const button = screen.getByRole("button");
+    const button = await screen.findByRole("button");
     expect(button).toBeDisabled();
     fireEvent.click(button);
     expect(forgeList).not.toHaveBeenCalled();
   }
 );
+
+it("keeps the manual subscription download when a started plan has preparation enabled", async () => {
+  jest.mocked(getForgePreparation).mockResolvedValue({ mode: Mode.Manual });
+  renderLinks(
+    <SubscriptionLinks
+      plan={{ id: "plan" } as AllowlistDescription}
+      phase={phase}
+    />
+  );
+  expect(
+    await screen.findByRole("button", { name: "Subscription Lists" })
+  ).toBeEnabled();
+  expect(useDropForgeProcess).not.toHaveBeenCalled();
+});
+
+it("keeps downloads available for a completed background job after preparation is turned off", async () => {
+  jest.mocked(useDropForgeSettings).mockReturnValue({
+    data: { preparation_enabled: false },
+  } as ReturnType<typeof useDropForgeSettings>);
+  jest.mocked(getForgePreparation).mockResolvedValue({ mode: Mode.Background });
+  jest.mocked(useDropForgeProcess).mockReturnValue({
+    data: { id: "job", status: "COMPLETED", phase_ids: ["p0", "p1", "p2"] },
+  } as ReturnType<typeof useDropForgeProcess>);
+  renderLinks(
+    <SubscriptionLinks
+      plan={{ id: "plan" } as AllowlistDescription}
+      phase={phase}
+    />
+  );
+  expect(
+    await screen.findByRole("button", { name: "Download lists" })
+  ).toBeEnabled();
+});

@@ -1,4 +1,5 @@
 import {
+  act,
   fireEvent,
   render,
   screen,
@@ -11,7 +12,9 @@ import {
   getForgeSettings,
   saveForgeSettings,
 } from "@/services/api/drop-forge-settings";
+import { useWaveById } from "@/hooks/useWaveById";
 import type { ApiDropForgeSettings } from "@/generated/models/ApiDropForgeSettings";
+jest.mock("@/hooks/useWaveById");
 jest.mock("@/services/api/drop-forge-settings", () => ({
   getForgeSettings: jest.fn(),
   saveForgeSettings: jest.fn(),
@@ -19,8 +22,12 @@ jest.mock("@/services/api/drop-forge-settings", () => ({
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ address: "0x" + "11".repeat(20) }),
 }));
+const mockSetToast = jest.fn();
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ requestAuth: async () => ({ success: true }) }),
+  useAuth: () => ({
+    requestAuth: async () => ({ success: true }),
+    setToast: mockSetToast,
+  }),
 }));
 jest.mock("@/components/drop-forge/automation/WalletFunding", () => ({
   __esModule: true,
@@ -61,6 +68,9 @@ function show(expand = true) {
 beforeEach(() => {
   jest.clearAllMocks();
   jest.mocked(getForgeSettings).mockResolvedValue(settings);
+  jest.mocked(useWaveById).mockReturnValue({
+    wave: undefined,
+  } as ReturnType<typeof useWaveById>);
 });
 
 it("opens and closes help without expanding the settings", async () => {
@@ -73,7 +83,9 @@ it("opens and closes help without expanding the settings", async () => {
     within(dialog).getByText(/Off pauses new automated actions/)
   ).toBeVisible();
   expect(
-    within(dialog).getByText(/Off restores the original EMMA flow/)
+    within(dialog).getByText(
+      /Distributions already using manual preparation keep their controls/
+    )
   ).toBeVisible();
   fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
 
@@ -97,6 +109,7 @@ it("starts collapsed, then shows the settings and operational wallet", async () 
     name: "Automatic artist payment",
   });
   expect(within(payment).getByRole("status")).toHaveTextContent("Disabled");
+  expect(within(payment).getByRole("status")).toHaveClass("tw-text-rose-300");
   expect(within(payment).getByText("0 ETH")).toBeVisible();
   expect(
     screen.getByRole("switch", { name: /EMMA preparation/ })
@@ -107,27 +120,74 @@ it("starts collapsed, then shows the settings and operational wallet", async () 
     "href",
     `https://etherscan.io/address/${settings.signer_address}`
   );
+  expect(
+    screen.queryByRole("link", { name: "Drop Forge Ops" })
+  ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Top Up ETH" })).toBeEnabled();
 });
-it("saves the existing revision and the changed switch, then displays the server result", async () => {
-  jest
-    .mocked(saveForgeSettings)
-    .mockResolvedValue({ ...settings, revision: 1, automation_enabled: true });
-  show();
-  fireEvent.click(
-    await screen.findByRole("switch", { name: /Automatic launch/ })
+it("links to the configured wave before the info button and shows the wave name on hover", async () => {
+  const waveId = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
+  const waveName = "Configured Drop Forge Ops";
+  jest.mocked(getForgeSettings).mockResolvedValue({
+    ...settings,
+    operations_wave_id: waveId,
+  });
+  jest.mocked(useWaveById).mockReturnValue({
+    wave: { id: waveId, name: waveName },
+  } as ReturnType<typeof useWaveById>);
+
+  show(false);
+  const link = await screen.findByRole("link", { name: waveName });
+  expect(useWaveById).toHaveBeenCalledWith(waveId);
+  expect(link).toHaveAttribute("href", `/waves/${waveId}`);
+  const info = screen.getByRole("button", {
+    name: "How Launch Automation works",
+  });
+  expect(link.compareDocumentPosition(info)).toBe(
+    Node.DOCUMENT_POSITION_FOLLOWING
   );
-  await waitFor(() =>
-    expect(saveForgeSettings).toHaveBeenCalledWith({
-      revision: 0,
-      automation_enabled: true,
+  fireEvent.mouseEnter(link);
+  expect(await screen.findByRole("tooltip")).toHaveTextContent(waveName);
+});
+
+it("shows the info tooltip when the button receives keyboard focus", async () => {
+  show(false);
+  const title = "How Launch Automation works";
+  fireEvent.focus(screen.getByRole("button", { name: title }));
+  expect(await screen.findByRole("tooltip")).toHaveTextContent(title);
+});
+it("shows saving in the changed switch row and confirms the saved setting", async () => {
+  let finishSave!: (saved: ApiDropForgeSettings) => void;
+  jest.mocked(saveForgeSettings).mockReturnValue(
+    new Promise((resolve) => {
+      finishSave = resolve;
     })
   );
-  await waitFor(() =>
-    expect(
-      screen.getByRole("switch", { name: /Automatic launch/ })
-    ).toBeChecked()
-  );
+  show();
+  const control = await screen.findByRole("switch", {
+    name: /Automatic launch/,
+  });
+  const row = control.closest("label");
+  if (!row) throw new Error("Expected the switch to have a label");
+
+  fireEvent.click(control);
+  expect(await within(row).findByText("Saving…")).toBeVisible();
+  expect(control).toHaveAttribute("aria-busy", "true");
+  expect(saveForgeSettings).toHaveBeenCalledWith({
+    revision: 0,
+    automation_enabled: true,
+  });
+  expect(mockSetToast).not.toHaveBeenCalled();
+
+  await act(async () => {
+    finishSave({ ...settings, revision: 1, automation_enabled: true });
+  });
+  expect(control).toBeChecked();
+  expect(within(row).getByText("On")).toBeVisible();
+  expect(mockSetToast).toHaveBeenCalledWith({
+    type: "success",
+    message: "Automatic launch enabled.",
+  });
 });
 it("keeps all controls read-only for other authorized Drop Forge users", async () => {
   jest.mocked(getForgeSettings).mockResolvedValue({
@@ -187,6 +247,15 @@ it("saves a positive limit and enables payments in one request", async () => {
   fireEvent.change(input, { target: { value: ".25" } });
   fireEvent.click(save);
   expect(await screen.findByRole("button", { name: "Disable" })).toBeEnabled();
+  expect(
+    within(
+      screen.getByRole("region", { name: "Automatic artist payment" })
+    ).getByRole("status")
+  ).toHaveClass("tw-text-emerald-300");
+  expect(mockSetToast).toHaveBeenCalledWith({
+    type: "success",
+    message: "Artist payment limit saved and automatic payments enabled.",
+  });
   expect(screen.getByText("0.25 ETH")).toBeVisible();
   expect(saveForgeSettings).toHaveBeenCalledTimes(1);
   expect(saveForgeSettings).toHaveBeenCalledWith({
