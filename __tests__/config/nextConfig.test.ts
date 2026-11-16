@@ -10,6 +10,18 @@ const publicEnv = {
 } as PublicEnv;
 
 describe("shared Next config", () => {
+  it("limits staging CDN optimization to uploaded drop images", () => {
+    const patterns = sharedConfig(publicEnv, "").images?.remotePatterns ?? [];
+    const accepts = (path: string) =>
+      hasRemoteMatch(
+        [],
+        patterns,
+        new URL(`https://media.staging.6529.io${path}`)
+      );
+    expect(accepts("/drops/upload/art.png")).toBe(true);
+    expect(accepts("/waves/upload/art.png")).toBe(false);
+  });
+
   it("permanently redirects the former Delegation Center to Safe Collecting", async () => {
     expect(await sharedConfig(publicEnv, "").redirects?.()).toContainEqual({
       source: "/delegation/delegation-center",

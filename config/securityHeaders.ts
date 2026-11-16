@@ -4,6 +4,7 @@ import {
   getMediaResolverSource,
 } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_CSP_SOURCES } from "../lib/media/ipfs-gateways";
+import { STAGING_DROP_MEDIA_ORIGIN } from "../helpers/image-resize-cdn";
 import { PRODUCTION_ASSET_PREFIX } from "./assetPrefix";
 import { SENTRY_INGEST_HOSTNAME_PATTERN } from "./sentryIngest";
 
@@ -209,6 +210,8 @@ export function createSecurityHeaders(
     "https://6529-artwork-documentation-987989283142-eu-west-1.s3.eu-west-1.amazonaws.com",
     "https://6529-artwork-documentation-987989283142-us-east-1.s3.us-east-1.amazonaws.com",
     "https://*.cloudfront.net",
+    `${STAGING_DROP_MEDIA_ORIGIN}/drops/`,
+    `${STAGING_DROP_MEDIA_ORIGIN}/renditions/drops/`,
     "https://videos.files.wordpress.com",
     // OpenSea NFT previews use the original video while processing is pending.
     "https://i2c.seadn.io",

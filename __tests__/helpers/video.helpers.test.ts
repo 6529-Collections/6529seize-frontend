@@ -52,6 +52,16 @@ describe("video helpers", () => {
     expect(ok).toBe(true);
   });
 
+  it("looks up staging drop renditions on the staging CDN", async () => {
+    const { getVideoConversions } = await import("@/helpers/video.helpers");
+    expect(
+      getVideoConversions("https://media.staging.6529.io/drops/foo/bar.mp4")
+        ?.HLS
+    ).toBe(
+      "https://media.staging.6529.io/renditions/drops/foo/bar/hls/bar.m3u8"
+    );
+  });
+
   it("deduplicates in-flight availability checks", async () => {
     const { checkVideoAvailability } = await import("@/helpers/video.helpers");
     const fetchMock = jest.fn().mockResolvedValue({ ok: true });

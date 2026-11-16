@@ -22,6 +22,7 @@ import {
 } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
 import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "../lib/media/static-image-hosts";
+import { STAGING_DROP_MEDIA_HOSTNAME } from "../helpers/image-resize-cdn";
 
 // A custom htmlLimitedBots value replaces Next's default list, so extend the
 // default (Google, Bing, Apple, Yandex, Baidu, social crawlers) with only the
@@ -76,6 +77,11 @@ function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
   ]);
 
   return [
+    {
+      ...HTTPS_DEFAULT_PORT,
+      hostname: STAGING_DROP_MEDIA_HOSTNAME,
+      pathname: "/drops/**",
+    },
     ...STATIC_ALLOWED_IMAGE_HOSTNAMES.filter(
       (hostname) => !IPFS_PATH_GATEWAY_HOSTNAMES.has(hostname)
     ).map((hostname) => ({

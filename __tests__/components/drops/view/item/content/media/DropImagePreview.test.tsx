@@ -403,6 +403,18 @@ describe("guarded proxy preview URLs", () => {
   const proxy = (params: Record<string, string>) =>
     `/api/og-metadata/image?${new URLSearchParams(params).toString()}`;
 
+  it("builds a native resize URL for a staging submission image", () => {
+    expect(
+      getDropImagePreviewSources(
+        "https://media.staging.6529.io/drops/upload/art.png",
+        ImageScale.AUTOx600
+      )
+    ).toEqual([
+      "https://media.staging.6529.io/drops/upload/AUTOx600/art.png",
+      "https://media.staging.6529.io/drops/upload/AUTOx450/art.png",
+    ]);
+  });
+
   it("keeps an external source URL byte-for-byte when there is no retry", () => {
     const src = "https://cdn.example.com/a.gif?v=1";
     expect(getDropImagePreviewSources(src, ImageScale.AUTOx450)).toEqual([

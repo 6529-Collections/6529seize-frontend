@@ -118,6 +118,21 @@ const getWaveIdFromWavesUrl = (
   };
 };
 
+function getDecisionWaveId(url: URL): string | null {
+  const segments = trimTrailingSlashes(url.pathname).split("/");
+  const [, waveSegment, waveId, collection, decisionId] = segments;
+  if (
+    segments.length !== 5 ||
+    waveSegment !== "waves" ||
+    !waveId ||
+    (collection !== "decisions" && collection !== "competitions") ||
+    !UUID_REGEX.test(decisionId ?? "")
+  ) {
+    return null;
+  }
+  return sanitizePathSegmentValue(waveId);
+}
+
 const hasOnlyQueryKeys = (url: URL, allowedKeys: string[]): boolean => {
   const allowedSet = new Set(allowedKeys);
   return Array.from(url.searchParams.keys()).every((key) =>
@@ -230,8 +245,9 @@ export function parseSeizeDropLink(href: string): SeizeDropLinkInfo | null {
     return null;
   }
 
-  const { waveId, isLegacyPath } = getWaveIdFromWavesUrl(url);
-  if (!waveId || isLegacyPath || !UUID_REGEX.test(waveId)) {
+  const wave = getWaveIdFromWavesUrl(url);
+  const waveId = wave.waveId ?? getDecisionWaveId(url);
+  if (!waveId || wave.isLegacyPath || !UUID_REGEX.test(waveId)) {
     return null;
   }
 

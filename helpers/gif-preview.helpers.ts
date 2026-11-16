@@ -1,6 +1,6 @@
 import { getScaledImageUri, type ImageScale } from "@/helpers/image.helpers";
 import {
-  IMAGE_RESIZE_CDN_ORIGIN,
+  isDropMediaCdnUrl,
   SCALABLE_IMAGE_PREFIXES,
 } from "@/helpers/image-resize-cdn";
 
@@ -16,13 +16,10 @@ export function isGifImageUrl(url: string): boolean {
 /** Only uploads on the first-party drop CDN may load the original automatically. */
 export function isUploadedDropGif(url: string): boolean {
   try {
-    const { origin, pathname, username, password } = new URL(url);
+    const parsed = new URL(url);
     return (
-      origin === IMAGE_RESIZE_CDN_ORIGIN &&
-      !username &&
-      !password &&
-      pathname.startsWith("/drops/") &&
-      pathname.toLowerCase().endsWith(".gif")
+      isDropMediaCdnUrl(parsed) &&
+      parsed.pathname.toLowerCase().endsWith(".gif")
     );
   } catch {
     return false;

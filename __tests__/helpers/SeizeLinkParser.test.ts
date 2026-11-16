@@ -148,12 +148,37 @@ describe("SeizeLinkParser with mocked BASE_ENDPOINT", () => {
 
   describe("parseSeizeDropLink", () => {
     const uuid = "123e4567-e89b-12d3-a456-426614174000";
+    const decision = "b0ee5262-1221-566e-b48d-b9ed5ed7ee81";
 
     it("parses canonical wave drop links", () => {
       expect(parseSeizeDropLink(`/waves/${uuid}?drop=drop-1`)).toEqual({
         waveId: uuid,
         dropId: "drop-1",
       });
+    });
+
+    it.each(["decisions", "competitions"])(
+      "parses drop links within the %s detail view",
+      (collection) => {
+        const drop = "f2243654-ef70-4cb8-bec7-f5eafe4e3113";
+        const href = `/waves/${uuid}/${collection}/${decision}?divider=85184&tab=leaderboard&drop=${drop}`;
+        expect(parseSeizeDropLink(href)).toEqual({
+          waveId: uuid,
+          dropId: drop,
+        });
+        expect(parseSeizeWaveLink(href)).toBeNull();
+      }
+    );
+
+    it.each([
+      "decisions",
+      "decisions/new",
+      `decisions/${decision}/extra`,
+      `other/${decision}`,
+    ])("returns null for non-detail paths (%s)", (path) => {
+      expect(
+        parseSeizeDropLink(`/waves/${uuid}/${path}?drop=drop-1`)
+      ).toBeNull();
     });
 
     it("returns null for legacy query-based wave drop links", () => {

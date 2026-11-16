@@ -1,4 +1,5 @@
 import { publicEnv } from "@/config/env";
+import { STAGING_DROP_MEDIA_ORIGIN } from "@/helpers/image-resize-cdn";
 
 const CLOUDFRONT_DOMAIN =
   publicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ??
@@ -14,26 +15,22 @@ interface VideoConversions {
 }
 
 /**
- * Build the "renditions/drops/..." path from the relative path
- */
-function buildRenditionUrl(path: string): string {
-  return `${CLOUDFRONT_DOMAIN}/renditions/drops/${path}`;
-}
-
-/**
  * From an original "drops/..." CloudFront URL, derive HLS / MP4 renditions.
  */
 export function getVideoConversions(
   originalUrl: string
 ): VideoConversions | null {
   // Must start with "/drops/"
-  const prefix = `${CLOUDFRONT_DOMAIN}/drops/`;
+  const origin = originalUrl.startsWith(`${STAGING_DROP_MEDIA_ORIGIN}/drops/`)
+    ? STAGING_DROP_MEDIA_ORIGIN
+    : CLOUDFRONT_DOMAIN;
+  const prefix = `${origin}/drops/`;
   if (!originalUrl.startsWith(prefix)) {
     return null;
   }
 
   // Isolate everything after "/drops/"
-  const [_, afterDrops] = originalUrl.split("/drops/");
+  const afterDrops = originalUrl.slice(prefix.length);
   if (!afterDrops) {
     return null;
   }
@@ -50,22 +47,16 @@ export function getVideoConversions(
   // Separate the parent folders from final filename
   const lastSlashIndex = pathWithoutExtension.lastIndexOf("/");
   const fileName = pathWithoutExtension.substring(lastSlashIndex + 1);
-  const beforeFileName = pathWithoutExtension.substring(0, lastSlashIndex + 1);
+  const rendition = `${origin}/renditions/drops/${pathWithoutExtension}`;
 
   return {
-    MP4_1080P: `${buildRenditionUrl(
-      `${beforeFileName}${fileName}`
-    )}/mp4/${fileName}_1080p.mp4`,
-    MP4_720P: `${buildRenditionUrl(
-      `${beforeFileName}${fileName}`
-    )}/mp4/${fileName}_720p.mp4`,
-    HLS: `${buildRenditionUrl(
-      `${beforeFileName}${fileName}`
-    )}/hls/${fileName}.m3u8`,
+    MP4_1080P: `${rendition}/mp4/${fileName}_1080p.mp4`,
+    MP4_720P: `${rendition}/mp4/${fileName}_720p.mp4`,
+    HLS: `${rendition}/hls/${fileName}.m3u8`,
     // Prefer the one-second capture; retain the first for older/short clips.
-    POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_poster.0000001.jpg`,
-    FIRST_FRAME_POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_poster.0000000.jpg`,
-    DEVICE_POSTER: `${buildRenditionUrl(pathWithoutExtension)}/poster/${fileName}_device.jpg`,
+    POSTER: `${rendition}/poster/${fileName}_poster.0000001.jpg`,
+    FIRST_FRAME_POSTER: `${rendition}/poster/${fileName}_poster.0000000.jpg`,
+    DEVICE_POSTER: `${rendition}/poster/${fileName}_device.jpg`,
   };
 }
 

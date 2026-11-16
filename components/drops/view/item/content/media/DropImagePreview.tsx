@@ -5,7 +5,7 @@ import { getGiphyVideoRendition } from "@/app/api/og-metadata/_lib/giphyRenditio
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { IMAGE_RESIZE_CDN_ORIGIN } from "@/helpers/image-resize-cdn";
+import { isDropMediaCdnUrl } from "@/helpers/image-resize-cdn";
 import {
   getAnimatedImagePreviewUri,
   isGifImageUrl,
@@ -125,8 +125,7 @@ function getHighQualityArtworkImageSrc(src: string): string | null {
   try {
     const url = new URL(original);
     if (
-      url.origin === IMAGE_RESIZE_CDN_ORIGIN &&
-      url.pathname.startsWith("/drops/") &&
+      isDropMediaCdnUrl(url) &&
       /\.(jpe?g|png|webp|avif)$/i.test(url.pathname)
     )
       return original;
