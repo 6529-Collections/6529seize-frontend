@@ -589,8 +589,16 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       "background-color",
       "rgba(255, 255, 255, 0.1)"
     );
+    await amount.click();
+    await amount.fill("-15");
+    await expect(
+      grant.getByRole("status").getByText("-15", { exact: true })
+    ).toHaveCSS("color", "rgb(52, 211, 153)");
     await amount.fill("-35");
     await expect(grant.getByRole("status")).toHaveText("-25 → -35");
+    await expect(
+      grant.getByRole("status").getByText("-35", { exact: true })
+    ).toHaveCSS("color", "rgb(251, 113, 133)");
     await expect(
       grant.getByRole("button", { name: "Save", exact: true })
     ).toBeEnabled();
@@ -1364,13 +1372,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
     await expect(
       panel.getByRole("status").getByText("30", { exact: true })
-    ).toHaveCSS("color", "rgb(239, 239, 241)");
+    ).toHaveCSS("color", "rgb(52, 211, 153)");
     await input.fill("10");
     await expect(panel.getByRole("status")).toHaveText("20 → 10");
     await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
     await expect(
       panel.getByRole("status").getByText("10", { exact: true })
-    ).toHaveCSS("color", "rgb(239, 239, 241)");
+    ).toHaveCSS("color", "rgb(251, 113, 133)");
     await input.fill("30");
     const originalViewport = page.viewportSize();
     if (originalViewport) {

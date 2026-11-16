@@ -119,6 +119,13 @@ function GrantRepAmountStatus({
   readonly id: string;
 }) {
   const locale = useBrowserLocale();
+  let nextValueClassName = "tw-font-medium tw-text-iron-100";
+  if (isRatingValue(value)) {
+    nextValueClassName =
+      Number(value) > currentRep
+        ? "tw-font-medium tw-text-emerald-400"
+        : "tw-font-medium tw-text-rose-400";
+  }
   return (
     <div className="tw-flex tw-h-[42px] tw-min-w-0 tw-items-center tw-justify-between tw-gap-2">
       <span
@@ -140,7 +147,7 @@ function GrantRepAmountStatus({
             aria-hidden="true"
             className="tw-size-3 tw-shrink-0"
           />
-          <span className="tw-font-medium tw-text-iron-100">
+          <span className={nextValueClassName}>
             {isRatingValue(value) ? formatInteger(locale, Number(value)) : "—"}
           </span>
         </output>

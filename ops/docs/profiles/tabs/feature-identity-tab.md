@@ -239,7 +239,8 @@ show the profile-creation welcome.
   The 42px row below the input shows `Available REP` on the left; its value
   turns rose when over budget and saving stays disabled. When an existing
   amount changes, the right side shows the muted old amount, an arrow and
-  the bright new amount. The helper sentence and `Current Rep` / `Adjustment`
+  the new amount in emerald for an increase or rose for a decrease. The old
+  amount and arrow stay muted. The helper sentence and `Current Rep` / `Adjustment`
   block are omitted from Grant Rep; Rate NIC retains its existing guidance
   and blur behavior. The action says `Save` for an existing contribution and
   `Grant Rep` for a new one. Enter in the amount field submits the same action.
@@ -270,7 +271,8 @@ show the profile-creation welcome.
   Your `Received` input has a subtle fill, neutral border and consistent text
   color; its plus/minus column is separated by a faint divider.
   In `Received`, changing an existing amount reveals a muted old value,
-  arrow and bright new value in the second row, followed by a compact `Save`
+  muted arrow and a new value in emerald for an increase or rose for a decrease
+  in the second row, followed by a compact `Save`
   button. A first contribution shows only `Grant Rep` there. The action is
   about 30px tall; the fixed row keeps the input and list from moving when it
   appears. `Open category` remains in the footer during editing.
