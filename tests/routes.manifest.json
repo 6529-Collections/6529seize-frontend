@@ -181,6 +181,15 @@
       "classification": "crawlable",
       "family": "system"
     },
+    "/ai": {
+      "classification": "crawlable"
+    },
+    "/ai/guide": {
+      "classification": "crawlable"
+    },
+    "/ai/known-issues": {
+      "classification": "crawlable"
+    },
     "/artwork-documentation": {
       "classification": "auth"
     },

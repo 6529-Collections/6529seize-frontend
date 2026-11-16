@@ -55,6 +55,12 @@ describe("classifyPageView", () => {
     });
   });
 
+  it("does not count the 6529 AI pages as a profile", () => {
+    for (const pathname of ["/ai", "/ai/guide", "/ai/known-issues"]) {
+      expect(classifyPageView({ pathname })?.pageGroup).not.toBe("profile");
+    }
+  });
+
   it("does not misclassify reserved roots as profiles", () => {
     expect(classifyPageView({ pathname: "/the-memes" })).toEqual({
       logicalPage: "the_memes",
