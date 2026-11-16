@@ -175,19 +175,22 @@ export default function CommonDropdownItemsDefaultWrapper({
     const actions = Array.from(
       viewport.querySelectorAll<HTMLElement>(MENU_ACTION_SELECTOR)
     );
-    const nextAction =
-      direction === "up"
-        ? actions.findLast(
-            (action) => action.getBoundingClientRect().top < visible.top - 1
-          )
-        : actions.find(
-            (action) =>
-              action.getBoundingClientRect().bottom > visible.bottom + 1
-          );
+    const clippedActions = actions.filter((action) => {
+      const bounds = action.getBoundingClientRect();
+      return direction === "up"
+        ? bounds.top < visible.top - 1
+        : bounds.bottom > visible.bottom + 1;
+    });
+    if (direction === "up") clippedActions.reverse();
+    const focusTarget = clippedActions.find(
+      (action) => !action.matches(":disabled")
+    );
+    const nextAction = focusTarget ?? clippedActions[0];
     if (!nextAction) return;
 
     const next = nextAction.getBoundingClientRect();
-    pendingFocus.current = { from: cue, to: nextAction };
+    cue.focus({ preventScroll: true });
+    pendingFocus.current = focusTarget ? { from: cue, to: focusTarget } : null;
     const top =
       direction === "up"
         ? Math.floor(

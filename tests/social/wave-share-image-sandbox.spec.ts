@@ -106,6 +106,7 @@ test.describe("Share posts as image @auth @local-only", () => {
     await cue.click();
     await expect(upCue).toBeInViewport({ ratio: 1 });
     await expect(cue).toHaveCount(0);
+    await expect(deleteAction).toBeFocused();
 
     await deleteAction.hover();
     await page.mouse.wheel(0, -500);
