@@ -171,9 +171,12 @@ export default function WaveDropActionsMore({
         isOpen={isOpen}
         setOpen={handleOpenChange}
         buttonRef={buttonRef}
-        scrollCueLabel={
+        scrollCue={
           !showOnlyQuickRemove && !isMobileLayoutViewport
-            ? t(locale, "waves.drop.actions.scrollForMore")
+            ? {
+                label: t(locale, "waves.drop.actions.moreActions"),
+                ariaLabel: t(locale, "waves.drop.actions.scrollForMore"),
+              }
             : undefined
         }
       >

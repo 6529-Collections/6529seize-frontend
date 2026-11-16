@@ -20,6 +20,7 @@ const DEFAULT_MENU_MIN_WIDTH = 224;
 const MENU_ACTION_SELECTOR = "button, a[href]";
 const PASSIVE_SCROLL_OPTIONS: AddEventListenerOptions = { passive: true };
 type DropdownHorizontalAlign = "auto" | "left" | "right";
+type DropdownScrollCue = { readonly label: string; readonly ariaLabel: string };
 const unsubscribeFromClientMount = () => undefined;
 const subscribeToClientMount = (onStoreChange: () => void) => {
   onStoreChange();
@@ -39,7 +40,7 @@ export default function CommonDropdownItemsDefaultWrapper({
   portalClassName = "tw-z-[999]",
   menuId,
   menuLabelledBy,
-  scrollCueLabel,
+  scrollCue,
   children,
 }: {
   readonly isOpen: boolean;
@@ -52,7 +53,7 @@ export default function CommonDropdownItemsDefaultWrapper({
   readonly portalClassName?: string | undefined;
   readonly menuId?: string | undefined;
   readonly menuLabelledBy?: string | undefined;
-  readonly scrollCueLabel?: string | undefined;
+  readonly scrollCue?: DropdownScrollCue | undefined;
   readonly children: ReactNode;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
@@ -60,7 +61,8 @@ export default function CommonDropdownItemsDefaultWrapper({
   const itemsRef = useRef<HTMLUListElement>(null);
   const scrollCueRef = useRef<HTMLButtonElement>(null);
   const [hasMoreBelow, setHasMoreBelow] = useState(false);
-  const showScrollCue = Boolean(scrollCueLabel) && hasMoreBelow;
+  const scrollCueEnabled = scrollCue !== undefined;
+  const showScrollCue = scrollCueEnabled && hasMoreBelow;
   const mounted = useSyncExternalStore(
     subscribeToClientMount,
     getClientMountSnapshot,
@@ -84,15 +86,21 @@ export default function CommonDropdownItemsDefaultWrapper({
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const actions = viewport.querySelectorAll(MENU_ACTION_SELECTOR);
+    const actions = viewport.querySelectorAll<HTMLElement>(MENU_ACTION_SELECTOR);
     const lastAction = actions[actions.length - 1];
+    const visibleBottom = viewport.getBoundingClientRect().bottom;
     // Ignore trailing padding and subpixel rounding at the bottom of the list.
     const moreBelow =
       lastAction !== undefined &&
-      lastAction.getBoundingClientRect().bottom >
-        viewport.getBoundingClientRect().bottom + 1;
+      lastAction.getBoundingClientRect().bottom > visibleBottom + 1;
     if (!moreBelow && document.activeElement === scrollCueRef.current) {
-      listRef.current?.focus({ preventScroll: true });
+      const visibleTop = viewport.getBoundingClientRect().top;
+      const lastVisibleAction = Array.from(actions).findLast(
+        (action) =>
+          !action.matches(":disabled") &&
+          action.getBoundingClientRect().top >= visibleTop
+      );
+      (lastVisibleAction ?? listRef.current)?.focus({ preventScroll: true });
     }
     setHasMoreBelow(moreBelow);
   }, []);
@@ -100,27 +108,35 @@ export default function CommonDropdownItemsDefaultWrapper({
   useLayoutEffect(() => {
     const viewport = viewportRef.current;
     const items = itemsRef.current;
-    if (!isOpen || !scrollCueLabel || !viewport || !items) return;
+    if (!isOpen || !scrollCueEnabled || !viewport || !items) return;
     if (typeof ResizeObserver === "undefined") return;
 
     const observer = new ResizeObserver(updateScrollCue);
     observer.observe(viewport);
     observer.observe(items);
     return () => observer.disconnect();
-  }, [isOpen, mounted, scrollCueLabel, updateScrollCue]);
+  }, [isOpen, mounted, scrollCueEnabled, updateScrollCue]);
 
   const scrollToMoreActions = () => {
     const viewport = viewportRef.current;
     if (!viewport) return;
 
-    const visibleBottom = viewport.getBoundingClientRect().bottom;
-    const nextAction = Array.from(
-      viewport.querySelectorAll<HTMLElement>("button:not(:disabled), a[href]")
-    ).find((action) => action.getBoundingClientRect().bottom > visibleBottom);
-    viewport.scrollTop += Math.round(viewport.clientHeight * 0.75);
-    // Keep keyboard focus in the menu when the cue disappears.
-    (nextAction ?? listRef.current)?.focus({ preventScroll: true });
-    updateScrollCue();
+    const visible = viewport.getBoundingClientRect();
+    const actions = viewport.querySelectorAll<HTMLElement>(MENU_ACTION_SELECTOR);
+    const nextAction = Array.from(actions).find(
+      (action) => action.getBoundingClientRect().bottom > visible.bottom + 1
+    );
+    if (!nextAction) return;
+
+    const next = nextAction.getBoundingClientRect();
+    viewport.scrollTop += Math.ceil(
+      Math.max(next.top - visible.top, next.bottom - visible.bottom)
+    );
+    // Disabled rows still count as content. Leave focus on the cue until
+    // scrolling reveals an enabled row or reaches the end.
+    if (!nextAction.matches(":disabled")) {
+      nextAction.focus({ preventScroll: true });
+    }
   };
 
   const position = useCallback(() => {
@@ -241,9 +257,9 @@ export default function CommonDropdownItemsDefaultWrapper({
             >
               <div
                 ref={viewportRef}
-                onScroll={scrollCueLabel ? updateScrollCue : undefined}
+                onScroll={scrollCueEnabled ? updateScrollCue : undefined}
                 className={`${
-                  scrollCueLabel
+                  scrollCueEnabled
                     ? "tw-max-h-[min(20rem,calc(100dvh_-_4.5rem))]"
                     : "tw-max-h-80"
                 } tw-overflow-y-auto tw-overflow-x-hidden [scrollbar-color:#3f3f46_#18181b] [scrollbar-width:thin] [&::-webkit-scrollbar-thumb:hover]:tw-bg-iron-600 [&::-webkit-scrollbar-thumb]:tw-rounded-full [&::-webkit-scrollbar-thumb]:tw-bg-iron-700 [&::-webkit-scrollbar-track]:tw-bg-iron-900 [&::-webkit-scrollbar]:tw-w-2`}
@@ -260,13 +276,15 @@ export default function CommonDropdownItemsDefaultWrapper({
                 <button
                   ref={scrollCueRef}
                   type="button"
+                  role="menuitem"
+                  aria-label={scrollCue.ariaLabel}
                   onClick={(event) => {
                     event.stopPropagation();
                     scrollToMoreActions();
                   }}
                   className="-tw-mb-1 tw-flex tw-min-h-8 tw-w-full tw-cursor-pointer tw-items-center tw-justify-center tw-gap-2 tw-rounded-b-lg tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-3 tw-py-1 tw-text-xs tw-font-medium tw-text-iron-200 hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400"
                 >
-                  {scrollCueLabel}
+                  {scrollCue.label}
                   <ChevronDownIcon
                     aria-hidden="true"
                     className="tw-size-4 tw-shrink-0"

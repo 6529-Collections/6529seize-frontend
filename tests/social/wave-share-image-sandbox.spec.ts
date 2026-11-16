@@ -71,7 +71,7 @@ test.describe("Share posts as image @auth @local-only", () => {
     await trigger.click();
 
     const menu = page.getByRole("menu");
-    const cue = menu.getByRole("button", { name: "More actions", exact: true });
+    const cue = menu.getByRole("menuitem", { name: "More actions, scroll down" });
     const deleteAction = menu.getByRole("button", { name: "Delete", exact: true });
     await expect(cue).toBeInViewport({ ratio: 1 });
     await expect(deleteAction).not.toBeInViewport({ ratio: 1 });
@@ -85,7 +85,7 @@ test.describe("Share posts as image @auth @local-only", () => {
     await expect(deleteAction).toBeInViewport({ ratio: 1 });
     await expect(cue).toHaveCount(0);
     await expect(menu).toBeVisible();
-    await expect(menu.locator("button:focus")).toHaveCount(1);
+    await expect(deleteAction).toBeFocused();
 
     await deleteAction.hover();
     await page.mouse.wheel(0, -500);
@@ -154,7 +154,7 @@ test.describe("Share posts as image @auth @local-only", () => {
     const row = await findTouchMessage(page);
     await longPressTouchMessage(row, DEFAULT_LONG_PRESS_DURATION_MS + 600);
     await expect(
-      page.getByRole("button", { name: "More actions", exact: true })
+      page.getByRole("menuitem", { name: "More actions, scroll down" })
     ).toHaveCount(0);
     await page.getByRole("button", { name: "Share as image" }).click();
     await expect(page.getByText("1 post selected")).toBeVisible();
