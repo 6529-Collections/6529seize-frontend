@@ -32,8 +32,6 @@ test.describe("Submission artwork previews @auth @medium @local-only", () => {
   test("plays the original Preview Image GIF when both animated sizes are rejected", async ({
     page,
     baseURL,
-    isMobile,
-    hasTouch,
   }) => {
     const fixturePath = await installVideoArtworkSandbox(page, baseURL);
     const apiOrigin = getSandboxApiOrigin(baseURL);
@@ -84,26 +82,12 @@ test.describe("Submission artwork previews @auth @medium @local-only", () => {
       .getByRole("heading", { name: "Preview Image", exact: true })
       .locator("..");
     await section.scrollIntoViewIfNeeded();
-    if (isMobile || hasTouch) {
-      const preview = section.getByRole("img", {
-        name: "Preview image",
-        exact: true,
-      });
-      await expect
-        .poll(() =>
-          preview.evaluate((image: HTMLImageElement) => image.naturalWidth)
-        )
-        .toBeGreaterThan(0);
-      expect(originalRequests).toEqual([]);
-      await section.getByRole("button", { name: "View original" }).click();
-    } else {
-      await expect
-        .poll(() => animatedRequests)
-        .toEqual([
-          `${mediaRoot}AUTOx600_gifv2/preview.gif`,
-          `${mediaRoot}AUTOx450_gifv2/preview.gif`,
-        ]);
-    }
+    await expect
+      .poll(() => animatedRequests)
+      .toEqual([
+        `${mediaRoot}AUTOx600_gifv2/preview.gif`,
+        `${mediaRoot}AUTOx450_gifv2/preview.gif`,
+      ]);
     const gif = section.getByRole("img", {
       name: "Original GIF animation",
       exact: true,
@@ -114,6 +98,8 @@ test.describe("Submission artwork previews @auth @medium @local-only", () => {
       .poll(() => gif.evaluate((image: HTMLImageElement) => image.naturalWidth))
       .toBeGreaterThan(0);
     expect(originalRequests).toEqual([original]);
+    const firstFrame = await gif.screenshot();
+    await expect.poll(() => gif.screenshot()).not.toEqual(firstFrame);
   });
 
   for (const posterSource of ["device", "generated", "missing"] as const) {
