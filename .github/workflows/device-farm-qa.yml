@@ -79,6 +79,7 @@ jobs:
       TARGET_INPUT: ${{ inputs.target || 'production' }}
       EVENT_NAME: ${{ github.event_name }}
       SCHEDULE_CRON: ${{ github.event.schedule }}
+      WORKFLOW_REF: ${{ github.ref }}
     steps:
       - name: Decide packs and target
         id: decide
@@ -108,7 +109,11 @@ jobs:
 
           web=false
           native=false
-          if [ "$HAS_DEVICEFARM_CREDENTIALS" = "true" ]; then
+          # The AWS role trusts only main; skip clearly instead of failing at
+          # AWS sign-in when a run is dispatched from another branch.
+          if [ "$HAS_DEVICEFARM_CREDENTIALS" = "true" ] && [ -n "${WORKFLOW_REF:-}" ] && [ "$WORKFLOW_REF" != "refs/heads/main" ]; then
+            echo "::notice::The Device Farm AWS role only accepts runs from main (this run is on ${WORKFLOW_REF}); skipping all Device Farm packs. Dispatch from main instead."
+          elif [ "$HAS_DEVICEFARM_CREDENTIALS" = "true" ]; then
             case "$requested" in
               all) web=true; native=true ;;
               web) web=true ;;
@@ -366,6 +371,8 @@ jobs:
         with:
           role-to-assume: ${{ vars.DEVICEFARM_AWS_ROLE_ARN }}
           role-session-name: device-farm-qa-${{ github.run_id }}
+          # Smoke + fuzz can outlast the default 1 h session; the role allows 2 h.
+          role-duration-seconds: 7200
           aws-region: ${{ env.DEVICEFARM_REGION }}
 
       - name: Run native Appium smoke on Device Farm

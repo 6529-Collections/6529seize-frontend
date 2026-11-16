@@ -110,6 +110,14 @@ describe("Device Farm cadence and pack selection", () => {
     expect(token.log).toContain("::notice::MOBILE_REPO_TOKEN");
   });
 
+  it("skips with a notice when dispatched from a branch the AWS role does not trust", () => {
+    const branch = plan({ WORKFLOW_REF: "refs/heads/feature/x" });
+    expect(branch.output).toMatchObject({ web: "false", native: "false" });
+    expect(branch.log).toContain("only accepts runs from main");
+    const main = plan({ WORKFLOW_REF: "refs/heads/main" });
+    expect(main.output).toMatchObject({ web: "true", native: "true" });
+  });
+
   it("warns visibly and keeps web coverage if a future schedule drifts", () => {
     const result = plan({ EVENT_NAME: "schedule", SCHEDULE_CRON: "0 5 * * 1" });
     expect(result.output).toMatchObject({ web: "true", native: "false" });

@@ -103,7 +103,8 @@ estimating cost rather than treating an old device-count estimate as a budget.
 2. **CI AWS role (GitHub OIDC, no stored keys)** — create an IAM role that
    only this repository's `main` branch can assume through the account's
    existing GitHub OIDC provider (`token.actions.githubusercontent.com`).
-   Production uses `gha-devicefarm-qa` with a 1-hour session limit.
+   Production uses `gha-devicefarm-qa` with a 2-hour session limit
+   (the web jobs use the default 1 hour; the native job requests 2 hours).
 
    Trust policy:
 
@@ -166,8 +167,8 @@ estimating cost rather than treating an old device-count estimate as a budget.
 
    Set the role ARN in the repository variable `DEVICEFARM_AWS_ROLE_ARN`. The
    role is separate from the deploy roles so Device Farm access never widens
-   them. Because only `main` can assume it, a manual dispatch from another
-   branch fails at the AWS sign-in step.
+   them. Because only `main` can assume it, the plan job skips every pack with a
+   notice when the workflow is dispatched from another branch.
 
 3. **Repository secrets** (AWS access comes from the variable above, not a secret):
 
