@@ -18,7 +18,7 @@ import { ApiWavesOverviewType } from "@/generated/models/ApiWavesOverviewType";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { refetchQueryIfStale } from "@/components/react-query-wrapper/utils/refetchQueryIfStale";
 import {
-  fetchWavesV2Page,
+  mapApiWaveOverviewToSidebarWave,
   getWavesV2OverviewQueryKeyParams,
   type WavesV2OverviewQueryKeyParams,
 } from "@/services/api/waves-v2-api";
@@ -36,7 +36,6 @@ const PINNED_WAVES_STALE_TIME = 5 * 60 * 1000; // 5 minutes
 const PINNED_WAVES_GC_TIME = 10 * 60 * 1000; // 10 minutes
 const PINNED_WAVES_REFETCH_INTERVAL = 2 * 60 * 1000; // 2 minutes
 const PINNED_WAVES_QUERY_LIMIT = MAX_PINNED_WAVES;
-const PINNED_WAVES_API_PAGE_SIZE = 20;
 
 type PinnedWavesQueryKey = readonly [
   QueryKey.WAVES_V2,
@@ -55,6 +54,11 @@ interface UsePinnedWavesServerReturn {
   error: Error | null;
   pinWave: (waveId: string) => Promise<void>;
   unpinWave: (waveId: string) => Promise<void>;
+  reorderPinnedWaves: (
+    previousIds: readonly string[],
+    nextIds: readonly string[]
+  ) => Promise<void>;
+  isSavingPinnedWaveOrder: boolean;
   refetch: () => Promise<QueryObserverResult<SidebarWave[], Error>>;
   refetchIfStale: () => void;
   isOperationInProgress: (waveId: string) => boolean;
@@ -84,37 +88,6 @@ function usePinnedWavesQueryKey(
   );
 }
 
-async function fetchPinnedWavesPages(): Promise<SidebarWave[]> {
-  const pinnedWaves: SidebarWave[] = [];
-  let pageNumber = 1;
-
-  while (pinnedWaves.length < MAX_PINNED_WAVES) {
-    const page = await fetchWavesV2Page({
-      page: pageNumber,
-      pageSize: PINNED_WAVES_API_PAGE_SIZE,
-      overviewType: ApiWavesOverviewType.RecentlyDroppedTo,
-      pinned: ApiWavesPinFilter.Pinned,
-    });
-
-    const confirmedPins = page.waves.filter((wave) => wave.pinned === true);
-    pinnedWaves.push(...confirmedPins);
-
-    // An unconfirmed pin means the server ignored the pinned-only filter.
-    // Stop rather than walking the public overview after session expiry.
-    if (
-      !page.next ||
-      page.waves.length === 0 ||
-      confirmedPins.length !== page.waves.length
-    ) {
-      break;
-    }
-
-    pageNumber += 1;
-  }
-
-  return pinnedWaves.slice(0, MAX_PINNED_WAVES);
-}
-
 function usePinnedWavesQuery(
   queryClient: QueryClient,
   queryKey: PinnedWavesQueryKey,
@@ -123,13 +96,16 @@ function usePinnedWavesQuery(
 ) {
   const query = useQuery<SidebarWave[], Error>({
     queryKey,
-    queryFn: fetchPinnedWavesPages,
+    queryFn: async ({ signal }) =>
+      (await pinnedWavesApi.getPinnedWaves(signal)).map((wave) => ({
+        ...mapApiWaveOverviewToSidebarWave(wave),
+        pinned: true,
+      })),
     enabled,
     staleTime: PINNED_WAVES_STALE_TIME,
     gcTime: PINNED_WAVES_GC_TIME,
     refetchInterval: PINNED_WAVES_REFETCH_INTERVAL,
-    // Focus refreshes only pinned data older than PINNED_WAVES_STALE_TIME.
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: "always",
   });
 
   useEffect(() => {
@@ -304,7 +280,7 @@ function createOptimisticPinnedWaves(
     return undefined;
   }
 
-  return [{ ...waveToPin, pinned: true }, ...previousPinnedWaves];
+  return [...previousPinnedWaves, { ...waveToPin, pinned: true }];
 }
 
 async function optimisticallyPinWave(
@@ -453,6 +429,22 @@ function usePinnedWaveMutations(
   return { pinMutation, unpinMutation };
 }
 
+function reorderCachedPins(
+  waves: SidebarWave[],
+  { from, to }: { from: readonly string[]; to: readonly string[] }
+): SidebarWave[] {
+  const byId = new Map(waves.map((wave) => [wave.id, wave]));
+  const affected = new Set(from);
+  const replacements = to.flatMap((id) => {
+    const wave = byId.get(id);
+    return wave ? [wave] : [];
+  });
+  let index = 0;
+  return waves.map((wave) =>
+    affected.has(wave.id) ? (replacements[index++] ?? wave) : wave
+  );
+}
+
 interface UsePinnedWavesServerOptions {
   readonly enabled?: boolean | undefined;
 }
@@ -533,6 +525,82 @@ export function usePinnedWavesServer(
     primaryProfileId
   );
 
+  const { mutateAsync: saveOrder, isPending: isSavingPinnedWaveOrder } =
+    useMutation({
+      mutationFn: async ({
+        previousIds,
+        nextIds,
+      }: {
+        previousIds: readonly string[];
+        nextIds: readonly string[];
+      }) => {
+        const { success } = await requestAuth();
+        if (!success) throw new Error("Could not authenticate");
+        assertCurrentPinViewer(viewerIdentityKey, primaryProfileId);
+        await queryClient.cancelQueries({ queryKey: pinnedWavesQueryKey });
+        assertCurrentPinViewer(viewerIdentityKey, primaryProfileId);
+        const cached =
+          queryClient.getQueryData<SidebarWave[]>(pinnedWavesQueryKey) ?? [];
+        const previous = new Set(previousIds);
+        const currentVisible = cached.filter((wave) => previous.has(wave.id));
+        if (
+          currentVisible.length !== previousIds.length ||
+          currentVisible.some((wave, index) => wave.id !== previousIds[index])
+        ) {
+          throw new Error("Pinned wave order changed");
+        }
+        if (
+          nextIds.length !== previous.size ||
+          new Set(nextIds).size !== previous.size ||
+          nextIds.some((id) => !previous.has(id))
+        ) {
+          throw new Error("Invalid pinned wave order");
+        }
+        const reordered = reorderCachedPins(cached, {
+          from: previousIds,
+          to: nextIds,
+        });
+        queryClient.setQueryData(pinnedWavesQueryKey, reordered);
+        try {
+          await pinnedWavesApi.updateOrder({
+            previous_wave_ids: cached.map((wave) => wave.id),
+            wave_ids: reordered.map((wave) => wave.id),
+          });
+        } catch (saveError) {
+          queryClient.setQueryData<SidebarWave[]>(
+            pinnedWavesQueryKey,
+            (current) => {
+              if (!current) return current;
+              const currentIds = new Set(current.map((wave) => wave.id));
+              const expected = nextIds.filter((id) => currentIds.has(id));
+              const currentOrder = current.filter((wave) =>
+                previous.has(wave.id)
+              );
+              if (
+                currentOrder.some((wave, index) => wave.id !== expected[index])
+              ) {
+                return current;
+              }
+              return reorderCachedPins(current, {
+                from: nextIds,
+                to: previousIds,
+              });
+            }
+          );
+          throw saveError;
+        }
+      },
+      onSettled: () =>
+        queryClient.invalidateQueries({ queryKey: pinnedWavesQueryKey }),
+    });
+
+  const reorderPinnedWaves = useCallback(
+    async (previousIds: readonly string[], nextIds: readonly string[]) => {
+      await saveOrder({ previousIds, nextIds });
+    },
+    [saveOrder]
+  );
+
   const pinWave = useCallback(
     async (waveId: string) => {
       if (ongoingOperations.current.has(waveId)) {
@@ -591,6 +659,8 @@ export function usePinnedWavesServer(
       : null,
     pinWave,
     unpinWave,
+    reorderPinnedWaves,
+    isSavingPinnedWaveOrder,
     refetch,
     refetchIfStale,
     isOperationInProgress: (waveId: string) =>

@@ -24,6 +24,7 @@ import {
 import {
   DocumentationButton,
   inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -112,7 +113,7 @@ function BooleanEditor(
         </label>
         <select
           id={id}
-          className={inputClass}
+          className={selectClass}
           disabled={disabled}
           aria-describedby={describedBy}
           value={typeof value === "boolean" ? String(value) : ""}
@@ -163,7 +164,7 @@ function ChoiceEditor(
       </label>
       <select
         id={id}
-        className={inputClass}
+        className={selectClass}
         value={typeof value === "string" ? value : ""}
         disabled={disabled}
         aria-describedby={describedBy}
@@ -273,7 +274,7 @@ function LocalizedEditor(
             {msg("primaryLanguage")}
             <select
               id={id + "-primary"}
-              className={`${inputClass} tw-mt-2`}
+              className={`${selectClass} tw-mt-2`}
               value={languageTag(current["primary_language"])}
               disabled={disabled}
               onChange={(event) =>
@@ -526,7 +527,7 @@ function ReferenceEditor(
       </label>
       <select
         id={props.id}
-        className={inputClass}
+        className={selectClass}
         value={props.editor.multiple ? selected : (selected[0] ?? "")}
         multiple={props.editor.multiple}
         disabled={props.disabled}

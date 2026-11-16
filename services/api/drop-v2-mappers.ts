@@ -120,6 +120,7 @@ export const mapApiWaveOverviewToApiWaveMin = (
   pinned: wave.context_profile_context?.pinned ?? false,
   identity_wave: false,
   links_disabled: wave.links_disabled,
+  has_competition: wave.has_competition,
   voting_credit_scope: ApiWaveCreditScope.Wave,
 });
 

@@ -27,15 +27,18 @@ export default function UserPageHeaderPfp({
     "tw-relative tw-z-10 tw-inline-flex tw-flex-shrink-0 tw-p-0.5 tw-rounded-xl tw-bg-white/10 tw-backdrop-blur-md tw-ring-1 tw-ring-white/20 tw-shadow-2xl";
 
   if (avatarSrc) {
+    const unoptimized =
+      !parseDecentralizedMediaRef(profile.pfp) ||
+      new URL(avatarSrc).port !== "" ||
+      isGifImageUrl(avatarSrc) ||
+      failedAvatarSrc === avatarSrc;
     return (
       <div className={glassWrapperClass}>
         <Image
-          unoptimized={
-            !parseDecentralizedMediaRef(profile.pfp) ||
-            new URL(avatarSrc).port !== "" ||
-            isGifImageUrl(avatarSrc) ||
-            failedAvatarSrc === avatarSrc
-          }
+          // Replace the responsive image on fallback so Safari cannot request
+          // its old srcset at full viewport width while attributes are removed.
+          key={`${avatarSrc}:${unoptimized}`}
+          unoptimized={unoptimized}
           src={avatarSrc}
           sizes="(min-width: 640px) 112px, 80px"
           onError={() => setFailedAvatarSrc(avatarSrc)}

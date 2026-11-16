@@ -5,6 +5,15 @@ import { amIUser } from "@/helpers/Helpers";
 
 export type RepDirection = "received" | "given";
 
+export function canShowPersonalRepContribution(
+  profile: ApiIdentity,
+  viewer: Pick<ApiIdentity, "id" | "handle"> | null
+): boolean {
+  if (!viewer?.handle) return false;
+  if (profile.id && viewer.id) return profile.id !== viewer.id;
+  return profile.handle !== viewer.handle;
+}
+
 export function getContributorLabel(
   direction: RepDirection,
   count: number

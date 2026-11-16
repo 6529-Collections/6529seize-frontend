@@ -52,7 +52,7 @@ export default function UserRateAdjustmentHelperValue({
       <span className="tw-text-xs tw-text-iron-400 tw-font-normal">
         {title}
       </span>
-      <span className={`${CLASSES[valueState]} tw-text-sm tw-font-medium tw-tabular-nums`}>
+      <span className={`${CLASSES[valueState]} tw-text-sm tw-font-medium`}>
         {valueString}
       </span>
     </div>

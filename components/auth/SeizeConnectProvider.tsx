@@ -34,6 +34,7 @@ import {
   logSecurityEvent,
 } from "@/utils/security-logger";
 import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/appWalletConnectorType";
+import { forgetBrowserWalletProfile } from "@/services/desktop/desktopBrowserWallet";
 import {
   AppKitModalBridge,
   createAppKitModalBridgeStore,
@@ -62,9 +63,11 @@ import { useSignOutAllTransaction } from "./useSignOutAllTransaction";
 import CapacitorConnectFlow from "./CapacitorConnectFlow";
 import type { CapacitorConnectDialogView } from "./CapacitorConnectDialog";
 import {
+  defaultConnectModalView,
   openFreshUserConnection,
   openUserConnectionSurfaceForRuntime,
   useDisconnectExternalWalletBeforeSelection,
+  useSeizeConnect,
 } from "./capacitorConnectController";
 
 export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
@@ -254,10 +257,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     activeConnectorType === APP_WALLET_CONNECTOR_TYPE;
 
   const openConnectModal = useCallback(
-    async (
-      source: string,
-      view: "Connect" | "AllWallets" = "Connect"
-    ): Promise<void> => {
+    async (source: string, view = defaultConnectModalView()): Promise<void> => {
       if (isSigningOutAllRef.current) {
         return;
       }
@@ -357,9 +357,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     [capacitor.isCapacitor, isSigningOutAllRef, seizeConnectOrThrow]
   );
 
-  const seizeConnect = useCallback((): void => {
-    seizeConnectOrThrow("seizeConnect").then(undefined, () => undefined);
-  }, [seizeConnectOrThrow]);
+  const seizeConnect = useSeizeConnect(isSigningOutAllRef, seizeConnectOrThrow);
 
   const seizeConnectFresh = useCallback(
     (): Promise<void> =>
@@ -446,8 +444,9 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     try {
+      const signedOutAddress = getWalletAddress();
       try {
-        await logoutSessionV2({ address: getWalletAddress() });
+        await logoutSessionV2({ address: signedOutAddress });
       } catch (error: unknown) {
         const revokeError =
           error instanceof Error
@@ -458,6 +457,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         if (getSessionClientType() !== "web") throw revokeError;
       }
       await removeAuthJwt();
+      // 6529 Desktop: no browser-wallet forwarding after logout (never throws).
+      if (signedOutAddress) await forgetBrowserWalletProfile(signedOutAddress);
       refreshStoredConnectedAccounts();
 
       const nextActiveAddress = getWalletAddress();

@@ -5,6 +5,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import type { UserPageTabConfig, UserPageTabKey } from "./userTabs.config";
 import { useUserPageNavigation } from "./UserPageNavigation";
+import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
 
 interface UserPageTabProps {
   readonly tab: UserPageTabConfig;
@@ -21,12 +22,7 @@ export default function UserPageTab({ tab, activeTabId }: UserPageTabProps) {
 
   const isActive = tab.id === activeTabId;
 
-  const activeClasses =
-    "tw-flex tw-items-center tw-border-transparent tw-border-solid tw-border-x-0 tw-border-t-0 tw-text-iron-100 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-0";
-  const inActiveClasses =
-    "tw-flex tw-items-center tw-border-transparent tw-text-iron-400 hover:tw-text-iron-50 tw-whitespace-nowrap tw-border-b-2 tw-py-4 tw-px-0 tw-transition tw-duration-300 tw-ease-out";
-
-  const classes = isActive ? activeClasses : inActiveClasses;
+  const classes = `${getUnderlineTabClasses({ active: isActive, externalIndicator: true })} tw-flex tw-items-center tw-py-4 tw-px-0`;
 
   const ref = useRef<HTMLAnchorElement>(null);
   const linkLabel = tab.badge ? `${tab.title} ${tab.badge}` : tab.title;

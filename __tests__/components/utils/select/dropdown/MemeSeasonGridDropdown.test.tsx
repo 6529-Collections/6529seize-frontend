@@ -324,7 +324,7 @@ describe("MemeSeasonGridDropdown", () => {
 
     const button = screen.getByRole("button", { name: /Season: All Seasons/i });
     expect(button).toBeDisabled();
-    expect(button).toHaveClass("tw-opacity-50");
+    expect(button).toHaveClass("disabled:tw-opacity-50");
   });
 
   it("closes dropdown when selecting an item", async () => {

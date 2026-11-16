@@ -45,6 +45,12 @@ export interface GroupRuntime {
    * nothing to do. A stuck commit owns the delayed reason (8.3).
    */
   commitFailing: boolean;
+  /**
+   * The group's `last_seq` when this device last caught up (memory only).
+   * Items outside the device's delivery window never move `cursor`, so a
+   * group is behind only once the server lists a later `last_seq`.
+   */
+  listedThrough?: number;
 }
 
 interface ProfileInfo {

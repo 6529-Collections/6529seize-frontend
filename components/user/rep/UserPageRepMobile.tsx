@@ -23,7 +23,6 @@ import { useParams } from "next/navigation";
 import { useContext, useMemo, useState } from "react";
 import UserPageIdentityHeaderCICRate from "../identity/header/cic-rate/UserPageIdentityHeaderCICRate";
 import UserPageRateWrapper from "../utils/rate/UserPageRateWrapper";
-import UserPageRepModifyModal from "./modify-rep/UserPageRepModifyModal";
 import GrantRepDialog from "./new-rep/GrantRepDialog";
 import type { RepDirection } from "./UserPageRep.helpers";
 import { getCanEditRep, getCanEditNic } from "./UserPageRep.helpers";
@@ -55,7 +54,6 @@ export default function UserPageRepMobile({
   isFetchingNextPage,
   onOpenOverviewContributors,
   onOpenGlobalCategory,
-  onOpenCategoryContributors,
 }: {
   readonly profile: ApiIdentity;
   readonly overview: ApiRepOverview | null;
@@ -71,7 +69,6 @@ export default function UserPageRepMobile({
   readonly isFetchingNextPage: boolean;
   readonly onOpenOverviewContributors: () => void;
   readonly onOpenGlobalCategory: (category: string) => void;
-  readonly onOpenCategoryContributors: (category: ApiRepCategory) => void;
 }) {
   const locale = useBrowserLocale();
   const params = useParams();
@@ -83,7 +80,6 @@ export default function UserPageRepMobile({
   const [activeTab, setActiveTab] = useState<MobileTab>("rep");
   const [isGrantRepOpen, setIsGrantRepOpen] = useState(false);
   const [isNicRateOpen, setIsNicRateOpen] = useState(false);
-  const [editCategory, setEditCategory] = useState<string | null>(null);
 
   const canEditRep = useMemo(
     () =>
@@ -171,9 +167,7 @@ export default function UserPageRepMobile({
               isFetchingNextPage={isFetchingNextPage}
               onGrantRep={() => setIsGrantRepOpen(true)}
               onOpenOverviewContributors={onOpenOverviewContributors}
-              onEditCategory={setEditCategory}
               onOpenGlobalCategory={onOpenGlobalCategory}
-              onOpenCategoryContributors={onOpenCategoryContributors}
             />
           </motion.div>
         )}
@@ -226,6 +220,7 @@ export default function UserPageRepMobile({
         onClose={() => setIsNicRateOpen(false)}
         noPadding
         tabletModal
+        desktopAlign="top"
         maxWidthClass="md:tw-max-w-md"
         headerClassName="tw-pb-5 tw-pt-4"
         headerVariant="minimal"
@@ -241,14 +236,6 @@ export default function UserPageRepMobile({
           </UserPageRateWrapper>
         </div>
       </MobileWrapperDialog>
-
-      {canEditRep && editCategory && (
-        <UserPageRepModifyModal
-          profile={profile}
-          category={editCategory}
-          onClose={() => setEditCategory(null)}
-        />
-      )}
     </div>
   );
 }

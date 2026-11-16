@@ -36,7 +36,7 @@ import DocumentationAuthGate, {
 import {
   DocumentationButton,
   DocumentationNotice,
-  inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 import DocumentationSaveStatus from "./DocumentationSaveStatus";
@@ -371,7 +371,7 @@ export function ArtworkDocumentationRecordView({
           <label className="tw-block tw-text-sm tw-text-iron-400 lg:tw-hidden">
             {msg("chapters.index")}
             <select
-              className={`${inputClass} tw-mt-2`}
+              className={`${selectClass} tw-mt-2`}
               value={section}
               onChange={(event) =>
                 navigateSection(parseSection(event.target.value))

@@ -1,4 +1,5 @@
 import { Spinner } from "@/components/dotLoader/DotLoader";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -17,7 +18,7 @@ interface WaveNotificationPreferenceButtonsProps {
 
 const getButtonStyle = (active: boolean) => {
   return active
-    ? "tw-bg-primary-400/10 tw-border-primary-400/30 tw-text-primary-400 desktop-hover:tw-hover:tw-bg-primary-400/20"
+    ? "tw-bg-primary-400/10 tw-border-primary-400/30 tw-text-primary-400 desktop-hover:hover:tw-bg-primary-400/20"
     : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent tw-border-iron-700";
 };
 
@@ -148,7 +149,7 @@ export default function WaveNotificationPreferenceButtons({
   const triggerActive =
     settings.broadcastMentionsEnabled || settings.allDropsEnabled;
   const triggerSizeClass = compact
-    ? "tw-size-9 tw-p-0"
+    ? `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-8 tw-p-0`
     : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
   const trigger = (
     <button

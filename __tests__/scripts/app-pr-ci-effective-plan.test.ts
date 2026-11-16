@@ -1043,3 +1043,10 @@ it.each([
     ).toBe(true);
   }
 );
+
+it("selects the artwork and viewer lane for image viewer geometry coverage", () => {
+  expect(
+    executePlan(["tests/media/image-viewer-layout-sandbox.spec.ts"]).checks
+      .playwright_submission_artwork.required
+  ).toBe(true);
+});

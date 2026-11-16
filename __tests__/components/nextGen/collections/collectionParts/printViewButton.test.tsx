@@ -49,7 +49,7 @@ describe("printViewButton", () => {
     );
     const button = screen.getByRole("button");
     expect(button).toHaveAttribute("aria-current", "page");
-    expect(button).toHaveClass("tw-border-primary-400", "tw-text-white");
+    expect(button).toHaveClass("tw-border-primary-400", "tw-text-iron-100");
     fireEvent.click(button);
     expect(setView).toHaveBeenCalledWith(NextgenCollectionView.ABOUT);
   });

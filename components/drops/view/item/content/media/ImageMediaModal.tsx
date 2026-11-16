@@ -308,6 +308,7 @@ export function ImageMediaModal({
     <FocusTrap
       focusTrapOptions={{
         escapeDeactivates: false,
+        preventScroll: true,
         initialFocus: () => dialogRef.current ?? document.body,
         fallbackFocus: () => dialogRef.current ?? document.body,
       }}

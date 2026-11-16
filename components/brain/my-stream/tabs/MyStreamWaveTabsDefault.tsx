@@ -10,13 +10,16 @@ import { createBreakpoint } from "react-use";
 import { useContentTab } from "@/components/brain/ContentTabContext";
 import { getBoostedDropsDisplayPreferenceMenuItems } from "@/components/waves/boosted-drops/BoostedDropsDisplayPreference";
 import Button from "@/components/utils/button/Button";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBoostedDropsDisplayPreference } from "@/hooks/useBoostedDropsDisplayPreference";
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
 import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
-import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
+import WaveHeaderRestrictionButton, {
+  WAVE_HEADER_RESTRICTION_BUTTON_CLASS,
+} from "@/components/waves/header/WaveHeaderRestrictionButton";
 import MyStreamWaveTabsHeader, {
   type MyStreamWaveTabsHeaderActionContext,
 } from "./MyStreamWaveTabsHeader";
@@ -56,6 +59,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   const renderHeaderLeadingActions = ({
     activeContentTab: headerActiveContentTab,
     tooltipId,
+    isCondensed,
   }: MyStreamWaveTabsHeaderActionContext) => {
     const action = chatSubmitDropAction;
     const showChatSubmitDropAction =
@@ -75,7 +79,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
             reason={chatSubmitDropTooltip ?? action.label}
             accessWave={action.accessWave}
             onViewRules={action.onViewRules}
-            className="tw-h-8 tw-w-8 tw-min-w-8 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-300 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+            className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
           >
             <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
           </WaveHeaderRestrictionButton>
@@ -93,10 +97,19 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
               size="xs"
               title={chatSubmitDropTitle}
               aria-label={action.label}
-              className="tw-w-8 tw-min-w-8 tw-px-0 sm:tw-w-auto sm:tw-min-w-0 sm:tw-max-w-[10rem] sm:tw-px-2.5"
+              className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${isCondensed ? "tw-size-8 tw-p-0" : "tw-w-8 tw-min-w-8 tw-px-0 sm:tw-w-auto sm:tw-min-w-0 sm:tw-max-w-[10rem] sm:tw-px-2.5"}`}
             >
-              <PlusIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 sm:-tw-ml-1" />
-              <span className="tw-sr-only sm:tw-not-sr-only sm:tw-inline">
+              <PlusIcon
+                className="tw-size-4 tw-flex-shrink-0"
+                strokeWidth={2}
+              />
+              <span
+                className={
+                  isCondensed
+                    ? "tw-sr-only"
+                    : "tw-sr-only sm:tw-not-sr-only sm:tw-inline"
+                }
+              >
                 {action.compactLabel}
               </span>
             </Button>
@@ -106,46 +119,15 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     );
   };
 
-  const renderHeaderTrailingActions = ({
-    isCompact: headerIsCompact,
-    tooltipId,
-  }: MyStreamWaveTabsHeaderActionContext) => {
-    if (headerIsCompact || !showGalleryToggle || activeCurationId) {
-      return null;
-    }
-
-    return (
-      <button
-        type="button"
-        onClick={onToggleViewMode}
-        aria-label={galleryToggleLabel}
-        data-tooltip-id={tooltipId}
-        data-tooltip-content={galleryToggleLabel}
-        className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-200 tw-ring-1 tw-ring-inset tw-ring-white/5 tw-transition tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-ring-white/10"
-      >
-        {viewMode === "chat" ? (
-          <Squares2X2Icon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        ) : (
-          <ChatBubbleLeftIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
-        )}
-      </button>
-    );
-  };
-
   const renderHeaderOverflowMenuItems = ({
     isCompact: headerIsCompact,
   }: MyStreamWaveTabsHeaderActionContext): CompactMenuItem[] => {
-    if (!headerIsCompact) {
-      return [];
-    }
-
-    const items: CompactMenuItem[] = [];
-    items.push(
-      ...getBoostedDropsDisplayPreferenceMenuItems({
-        preference: boostedDropsDisplayPreference,
-        setPreference: setBoostedDropsDisplayPreference,
-      })
-    );
+    const items: CompactMenuItem[] = headerIsCompact
+      ? getBoostedDropsDisplayPreferenceMenuItems({
+          preference: boostedDropsDisplayPreference,
+          setPreference: setBoostedDropsDisplayPreference,
+        })
+      : [];
 
     if (showGalleryToggle && !activeCurationId) {
       items.push({
@@ -172,13 +154,12 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
         isCompact={isCompact}
         showBackButton={showBackButton}
         headerActionsTooltipId={headerActionsTooltipId}
-        headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-2 tw-py-3 md:tw-py-2.5 sm:tw-gap-x-4 sm:tw-px-4"
+        headerClassName="tw-flex tw-items-center tw-justify-between tw-gap-x-2 tw-px-2 tw-py-3 md:tw-py-2.5 sm:tw-gap-x-4 sm:tw-px-4"
         actionsClassName="tw-flex tw-flex-shrink-0 tw-self-start tw-items-center tw-gap-x-2 tw-pt-0.5"
         renderLeadingActions={renderHeaderLeadingActions}
-        renderTrailingActions={renderHeaderTrailingActions}
         renderOverflowMenuItems={renderHeaderOverflowMenuItems}
       />
-      <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800">
+      <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06]">
         <MyStreamWaveDesktopTabs
           activeTab={activeContentTab}
           wave={wave}

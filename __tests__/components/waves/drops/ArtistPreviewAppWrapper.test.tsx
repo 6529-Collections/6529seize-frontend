@@ -19,11 +19,6 @@ jest.mock("@headlessui/react", () => ({
   TransitionChild: ({ children }: any) => <>{children}</>,
 }));
 
-// Mock Heroicons
-jest.mock("@heroicons/react/24/outline", () => ({
-  XMarkIcon: (props: any) => <svg data-testid="x-mark-icon" {...props} />,
-}));
-
 describe("ArtistPreviewAppWrapper", () => {
   const defaultProps = {
     isOpen: true,
@@ -53,7 +48,7 @@ describe("ArtistPreviewAppWrapper", () => {
 
     const closeButton = screen.getByLabelText("Close panel");
     expect(closeButton).toBeInTheDocument();
-    expect(screen.getByTestId("x-mark-icon")).toBeInTheDocument();
+    expect(closeButton.querySelector("svg")).toBeInTheDocument();
   });
 
   it("calls onClose when close button is clicked", () => {

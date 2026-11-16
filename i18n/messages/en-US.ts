@@ -253,8 +253,23 @@ const USER_COLLECTED_STATS_BOOST_MESSAGES = objectMessages(
 );
 
 const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
+  "panel.open": "Open REP category {category}",
+  "panel.contributors": "View {count} for {category}",
+  "panel.panel": "{category} REP details",
+  "panel.you": "You",
+  "panel.amountFor": "REP for {name}",
+  "panel.invalidNumber":
+    "Enter a whole number, including a minus sign for negative REP.",
+  "panel.loadingAmount": "Loading…",
+  "panel.openGlobal": "Open category",
+  "panel.yourRep": "Your REP",
+  "panel.total": "Total",
+  "panel.creditLimit":
+    "Available REP: {amount}. Reduce the amount to stay within your credit limit.",
+  "panel.saveRecovery":
+    "Saved changes are kept. Review the remaining values and try again.",
   "loading.details": "Loading REP category details",
-  "pill.openGlobalAriaLabel": "Open global REP category {category}",
+  "pill.openGlobalAriaLabel": "Open category {category}",
   "pill.editAriaLabel": "Edit REP category {category}",
   "sidebar.otherTools": "Other Tools",
   "sidebar.repCategories": "REP Categories",
@@ -296,7 +311,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
-  "grant.actions.grant": "Grant REP",
+  "grant.actions.grant": "Grant Rep",
   "grant.actions.cancel": "Cancel",
   "grant.toast.updated": "REP updated.",
   "grant.toast.updateFailed": "Couldn't update this REP rating.",
@@ -1451,6 +1466,15 @@ const WAVES_SIDEBAR_MESSAGES = objectMessages("waves.sidebar", {
   "pinControl.limitTooltip":
     "Max {count} pinned waves. Unpin another wave first.",
   "pinControl.viewerChanged": "The active profile changed. Please try again.",
+  dragInstructions:
+    "While focused on the wave, press Space to pick it up. Use the arrow keys to move it, Space to drop, or Escape to cancel.",
+  dragStarted: "Picked up wave.",
+  dragPosition: "Position {position}.",
+  dragCancelled: "Reordering cancelled.",
+  pinsRetryLabel: "Retry loading pinned waves",
+  pinOrderSaved: "Pinned wave order saved.",
+  pinOrderSaveError: "Couldn’t save the pinned wave order. Please try again.",
+  pinsLoadError: "Couldn’t load pinned waves.",
   highlyRated: "Worth Checking Out",
   highlyRatedInfoTooltip: "Highly rated waves you don’t follow yet.",
   "highlyRatedPreviewOpenAriaLabel.none": "Open {waveName}",
@@ -1605,6 +1629,8 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
   actionTooltip: "Add this wave to your Joined list",
   joined: "Joined",
   joinedAnnouncement: "You joined {waveName}.",
+  listFollow: "Follow",
+  listFollowing: "Following",
   signInTooltip: "Connect a wallet to join this wave",
   joinErrorTitle: "Couldn't join this wave.",
   leaveErrorTitle: "Couldn't leave this wave.",
@@ -2733,6 +2759,7 @@ const WAVE_REP_DETAILS_MESSAGES = objectMessages("waves.rep.details", {
 } as const);
 
 const PROFILE_ACTIVITY_RATE_MESSAGES = objectMessages("profileActivity.rate", {
+  runningTotal: "(total {total})",
   "matter.waveRep": "Wave REP",
 } as const);
 
@@ -2744,15 +2771,19 @@ const USER_RATE_MESSAGES = objectMessages("user.rate", {
   given: "Given",
   direction: "{matter} direction",
   listTitle: "{matter} {direction}",
-  manageGiven: "Manage given",
-  manageGivenMatter: "Manage given {matter}",
-  manageRatingContributors: "Manage given {matter}: {contributors}",
+  manageGiven: "All receivers",
+  manageGivenMatter: "All {matter} receivers",
+  manageRatingContributors: "All {matter} receivers: {count}",
   viewRatingContributors: "View {matter} {direction}: {contributors}",
   highestFirst: "Highest total first",
   recentFirst: "Most recently adjusted",
   sortBy: "Sort by",
   sortGiven: "Sort given {matter}",
+  sortReceived: "Sort received {matter}",
   ratingAmount: "{value} {matter}",
+  amountFor: "{matter} amount for {name}",
+  available: "Available {matter}",
+  creditLimit: "These changes exceed your available {matter} ({amount}).",
   adjust: "Adjust",
   adjustFor: "Adjust {matter} for {name}",
   categoriesFor: "REP given to {name}",
@@ -3313,19 +3344,14 @@ export const EN_US_ROOT_MESSAGES = {
   "emoji.picker.closeLabel": "Close emoji picker",
   "emoji.picker.loading": "Loading emoji picker...",
   "emoji.picker.unavailable": "Emoji picker is unavailable.",
-  "waves.historyGap.load": "Load missed messages",
-  "waves.historyGap.loaded": "Missed messages loaded",
-  "waves.historyGap.loading": "Loading missed messages…",
-  "waves.historyGap.retry": "Could not load missed messages. Try again",
+  "waves.historyGap.load": "Load more messages",
+  "waves.historyGap.loaded": "More messages loaded",
+  "waves.historyGap.loading": "Loading more messages…",
+  "waves.historyGap.retry": "Could not load messages. Try again",
 
   ...NOTIFICATIONS_INBOX_MESSAGES,
   ...MEME_COLLABORATION_MESSAGES,
   ...VOTING_CREDIT_RETURN_MESSAGES,
-  "network.prenodes.title": "Prenodes",
-  "network.prenodes.pageTitle": "Prenodes | Network",
-  "network.prenodes.deprecation":
-    "6529 Prenodes have been deprecated. Use the 6529 Desktop app to calculate TDH.",
-  "network.prenodes.desktopLink": "Explore 6529 Desktop",
   "tokenList.thumbnail.loading": "Loading thumbnail",
   "tokenList.thumbnail.failed": "Failed to load thumbnail",
   "tokenList.thumbnail.error": "Load Error",
@@ -3877,6 +3903,216 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.menu.app": "App",
   "headerShare.menu.mobile": "6529 Mobile",
   "headerShare.menu.desktop": "6529 Desktop",
+  "desktop.profiles.restoreError":
+    "Your saved profiles could not be opened. You can browse signed out, or restart 6529 Desktop and allow access to the system keychain to restore them.",
+  "desktop.profiles.restart": "Restart to restore profiles",
+  "desktop.profiles.restartError":
+    "Could not restart 6529 Desktop. Quit and reopen it to try again.",
+  "desktop.profiles.saveError":
+    "Could not save your profiles. Retry before quitting to keep your changes.",
+  "desktop.profiles.saveRetrying": "Retrying profile save…",
+  "desktop.profiles.retry": "Retry",
+  "desktopNotifications.someone": "Someone",
+  "desktopNotifications.followed": "{handle} is now following you",
+  "desktopNotifications.viewProfile": "View profile",
+  "desktopNotifications.viewDrop": "View drop",
+  "desktopNotifications.mentioned": "{handle} mentioned you",
+  "desktopNotifications.nicTitle": "Updated NIC rating",
+  "desktopNotifications.nicBody":
+    "{handle} updated your NIC by {amount}\nNew total: {total}",
+  "desktopNotifications.repTitle": "Updated REP",
+  "desktopNotifications.repTitleCategory": "Updated REP for “{category}”",
+  "desktopNotifications.repBody":
+    "{handle} updated your REP by {amount}\nNew total: {total}",
+  "desktopNotifications.quoted": "{handle} quoted you",
+  "desktopNotifications.replied": "{handle} replied",
+  "desktopNotifications.rated": "{handle} rated {vote}",
+  "desktopNotifications.reacted": "{handle} reacted {reaction}",
+  "desktopNotifications.reactedWithImage": "{handle} reacted",
+  "desktopNotifications.reactedNamed": "{handle} reacted “{reaction}”",
+  "desktopNotifications.boosted": "{handle} boosted your drop 🔥",
+  "desktopNotifications.waveInvite": "{handle} invited you to a wave: {wave}",
+  "desktopNotifications.viewWave": "View wave",
+  "desktopNotifications.someWave": "a wave",
+  "desktopNotifications.waveDrop": "{handle} in {wave}",
+  "desktopNotifications.waveDropRated":
+    "{handle} rated a drop {vote} in {wave}",
+  "desktopNotifications.generic": "You have a new notification from {handle}",
+  "desktopNotifications.viewNotification": "View notification",
+  "desktopNotifications.mediaAttachment": "Media attachment",
+  "desktopUpdate.available": "A new version of 6529 Desktop is available.",
+  "desktopUpdate.availableVersion": "6529 Desktop {version} is available.",
+  "desktopUpdate.download": "Download update",
+  "desktopUpdate.downloading": "Downloading the update…",
+  "desktopUpdate.downloadingPercent": "Downloading the update… {percent}",
+  "desktopUpdate.ready": "The update is ready. Restart 6529 Desktop to finish.",
+  "desktopUpdate.restart": "Restart to update",
+  "desktopUpdate.failed": "The update could not be downloaded.",
+  "desktopUpdate.retry": "Try again",
+  "desktopUpdate.later": "Not now",
+  "desktop.titleStrip.label": "6529 Desktop window title",
+  "desktop.titleStrip.back": "Back",
+  "desktop.titleStrip.forward": "Forward",
+  "desktop.titleStrip.refresh": "Refresh",
+  "desktop.titleStrip.copyLink": "Copy link",
+  "desktop.titleStrip.linkCopied": "Link copied",
+  "desktop.titleStrip.copyFailed": "Could not copy the link",
+  "desktop.titleStrip.appInfo": "App info",
+  "desktop.titleStrip.appInfoUpdate": "App info (update available)",
+  "desktop.appInfo.title": "About 6529 Desktop",
+  "desktop.appInfo.version": "Version",
+  "desktop.appInfo.environment": "Environment",
+  "desktop.appInfo.checkUpdates": "Check for updates",
+  "desktopConnect.title": "Connect a wallet",
+  "desktopConnect.intro":
+    "6529 Desktop cannot use browser extensions directly. Choose how to connect:",
+  "desktopConnect.walletConnect": "Scan with a phone wallet",
+  "desktopConnect.walletConnectDescription":
+    "WalletConnect: scan a QR code with the wallet app on your phone.",
+  "desktopConnect.browserWallet": "Use a browser wallet",
+  "desktopConnect.browserWalletDescription":
+    "MetaMask, Rabby and other browser extensions. Opens your web browser.",
+  "desktopConnect.status.waiting":
+    "Finish signing in in your browser. This waits for two minutes.",
+  "desktopConnect.status.signingIn": "Signing in…",
+  "desktopConnect.status.failed": "Signing in did not work. Try again.",
+  "desktopConnect.status.expired": "The browser sign-in timed out. Try again.",
+  "desktopConnect.status.startFailed":
+    "Could not open your browser. Try again.",
+  "desktopConnect.cancel": "Cancel",
+  "desktopConnect.status.walletConnectFailed":
+    "Could not open WalletConnect. Try again.",
+  "desktopWalletRequest.title": "Signature request",
+  "desktopWalletRequest.waiting":
+    "Your browser opened a page to sign with your wallet. Finish there; this waits for two minutes.",
+  "desktopWalletRequest.code":
+    "Request code {code}. The browser page shows the same code.",
+  "desktopWalletRequest.fingerprint":
+    "Content fingerprint {fingerprint}. The browser page shows the same fingerprint.",
+  "desktopWalletRequest.reopen": "Open the page again",
+  "desktopWalletRequest.close": "Close",
+  "desktopWalletRequest.cancel": "Cancel",
+  "desktopWalletRequest.openFailed":
+    "Your browser did not open. Open {site} in your browser yourself.",
+  "desktopWalletRequest.cancelled": "The signature request was cancelled.",
+  "desktopWalletRequest.expired": "The signature request timed out. Try again.",
+  "desktopWalletRequest.refused":
+    "The browser page would not sign this request. Continue on {site} in your browser instead.",
+  "desktopWalletRequest.failed":
+    "The signature request did not work. Try again.",
+  "desktopWalletRequest.busy":
+    "Another signature request is still open. Finish or cancel it first.",
+  "desktopWalletRequest.unverified":
+    "The signature could not be checked against your account. Smart-contract wallets such as Safe cannot sign here; continue on {site} in your browser instead.",
+  "desktopWalletRequest.reopenWait": "You can open it again in a few seconds.",
+  "desktopWalletRequest.continueInBrowser": "Continue in your browser",
+  "desktopWalletRequest.tradeOnWebsite":
+    "Trading is not available in 6529 Desktop with a browser wallet. Continue on {site} in your browser.",
+  "desktopWalletRequest.notForwarded":
+    "6529 Desktop does not send this kind of signature to your browser wallet. Continue on {site} in your browser, where your wallet signs it directly.",
+  "browserConnector.title": "Sign in to 6529 Desktop",
+  "browserConnector.description":
+    "Sign in to 6529 Desktop with a browser wallet.",
+  "browserConnector.checking": "Checking the sign-in link…",
+  "browserConnector.target.local":
+    "This returns to 6529 Desktop (local build).",
+  "browserConnector.target.staging":
+    "This returns to 6529 Desktop (staging build).",
+  "browserConnector.signing": "Waiting for your wallet to sign…",
+  "browserConnector.connectIntro":
+    "Connect the browser wallet you want to use in 6529 Desktop.",
+  "browserConnector.connect": "Connect wallet",
+  "browserConnector.signIntro":
+    "Sign a message with {address} to sign in to 6529 Desktop. Signing costs nothing.",
+  "browserConnector.sign": "Sign and return to 6529 Desktop",
+  "browserConnector.failed": "The message was not signed. Try again.",
+  "browserConnector.returned":
+    "Signed. Return to 6529 Desktop to finish. You can close this tab.",
+  "browserConnector.openApp": "Open 6529 Desktop",
+  "browserConnector.problem.invalid":
+    "This link is not a valid 6529 Desktop sign-in link. Start again from 6529 Desktop.",
+  "browserConnector.problem.expired":
+    "This sign-in link has expired. Start again from 6529 Desktop.",
+  "browserConnector.wallet.title": "Sign for 6529 Desktop",
+  "browserConnector.wallet.checking": "Checking the request from 6529 Desktop…",
+  "browserConnector.wallet.code":
+    "Request code {code}. Check that 6529 Desktop shows the same code.",
+  "browserConnector.wallet.safety":
+    "6529 never asks for your recovery phrase or password. Signing costs nothing and sends no transaction.",
+  "browserConnector.wallet.messageIntro":
+    "6529 Desktop asks {address} to sign this message:",
+  "browserConnector.wallet.typedIntro": "6529 Desktop asks {address} to sign:",
+  "browserConnector.wallet.schema.encryptedMessagesGrant":
+    "Let 6529 Desktop on this computer send and read your encrypted messages.",
+  "browserConnector.wallet.schema.signedMessagesGrant":
+    "Turn on signed messages for 6529 Desktop on this computer.",
+  "browserConnector.wallet.schema.memesSubmission":
+    "Submit “{artwork}” to {destination}.",
+  "browserConnector.wallet.schema.profileSitePublish":
+    "Publish version {version} of the profile site for {handle}.",
+  "browserConnector.wallet.details": "Everything you sign",
+  "browserConnector.wallet.connectIntro":
+    "Connect the browser wallet for {address} to continue.",
+  "browserConnector.wallet.switchAccount":
+    "Your wallet is connected as {connected}. Switch it to {address} to sign.",
+  "browserConnector.wallet.switchNetwork":
+    "Switch your wallet to the network this request is for.",
+  "browserConnector.wallet.switchNetworkAction": "Switch network",
+  "browserConnector.wallet.sign": "Sign in wallet",
+  "browserConnector.wallet.decline": "Decline",
+  "browserConnector.wallet.signing": "Waiting for your wallet…",
+  "browserConnector.wallet.failed":
+    "Your wallet did not sign. Try again, or decline.",
+  "browserConnector.wallet.returned":
+    "Done. Return to 6529 Desktop. You can close this tab.",
+  "browserConnector.wallet.declined":
+    "Declined. Return to 6529 Desktop. You can close this tab.",
+  "browserConnector.wallet.problem.invalid":
+    "This page did not get a valid request from 6529 Desktop, so there is nothing to sign. Start again from 6529 Desktop.",
+  "browserConnector.wallet.problem.expired":
+    "This request has expired. Nothing was signed. Start again from 6529 Desktop.",
+  "browserConnector.wallet.refusal.unreadable-message":
+    "This page will not ask your wallet to sign this request: the message is not readable text.",
+  "browserConnector.wallet.refusal.sign-in-message":
+    "This page will not ask your wallet to sign this request: it is a sign-in message. Sign in from 6529 Desktop instead.",
+  "browserConnector.wallet.refusal.unknown-message":
+    "This page will not ask your wallet to sign this request: it is not a message 6529 Desktop signs from here. Continue on {site} in your browser instead.",
+  "browserConnector.wallet.format.drop":
+    "Create a 6529 drop. This also covers accepting a wave's terms.",
+  "browserConnector.wallet.format.decisionVote":
+    "Cast your vote in a 6529 decision.",
+  "browserConnector.wallet.format.decisionEntry":
+    "Submit an entry to a 6529 decision.",
+  "browserConnector.wallet.refusal.unknown-typed-data":
+    "This page will not ask your wallet to sign this request: it is a kind of request 6529 Desktop does not send from here. Continue on {site} in your browser instead.",
+  "browserConnector.wallet.refusal.wrong-wallet":
+    "This page will not ask your wallet to sign this request: it names a different wallet than the one asked to sign.",
+  "browserConnector.wallet.refusal.wrong-origin":
+    "This page will not ask your wallet to sign this request: it names a different app than 6529 Desktop.",
+  "browserConnector.wallet.refusal.statement-mismatch":
+    "This page will not ask your wallet to sign this request: its description does not match what it would sign.",
+  "browserConnector.wallet.refusal.context-mismatch":
+    "This page will not ask your wallet to sign this request: the content 6529 Desktop sent does not match what the message commits to. Nothing was signed.",
+  "browserConnector.wallet.fingerprint": "Content fingerprint: {fingerprint}",
+  "browserConnector.wallet.fingerprintOnly":
+    "6529 Desktop did not send the content, so this page cannot show it. The message below identifies the content only by its fingerprint. Check that 6529 Desktop shows the same fingerprint, and sign only if you started this action there.",
+  "browserConnector.wallet.contentVerified":
+    "This page recomputed the fingerprint from this content and it matches the message, so this is exactly what you sign.",
+  "browserConnector.wallet.content.wave": "In wave {waveId}",
+  "browserConnector.wallet.content.replyTo": "In reply to drop {dropId}",
+  "browserConnector.wallet.content.noText": "(no text)",
+  "browserConnector.wallet.content.quote": "Quotes drop {dropId}",
+  "browserConnector.wallet.content.media": "Media ({mimeType}): {url}",
+  "browserConnector.wallet.content.attachments": "Attachments: {count}",
+  "browserConnector.wallet.content.terms": "You also accept the wave's terms:",
+  "browserConnector.wallet.content.vote":
+    "Set your vote to {value} on entry {entryId}.",
+  "browserConnector.wallet.content.decision":
+    "Decision {competitionId} in wave {waveId}",
+  "browserConnector.wallet.content.committed":
+    "Everything this signature commits to",
+  "browserConnector.wallet.content.message": "The message your wallet signs",
+  "browserConnector.wallet.tellApp": "Tell 6529 Desktop and close",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",
@@ -5042,6 +5278,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...WAVE_REP_MODAL_MESSAGES,
   ...WAVE_REP_DETAILS_MESSAGES,
   ...PROFILE_ACTIVITY_RATE_MESSAGES,
+  "profileActivity.heading": "Activity Log",
   "profileActivity.loading": "Loading activity log",
   "profileActivity.loadError": "Unable to load activity log.",
   "profileActivity.retry": "Retry",
@@ -5091,6 +5328,12 @@ export const EN_US_ROOT_MESSAGES = {
   "navigation.nfts.activity": "NFT Activity",
   "navigation.nfts.memesCalendar": "Memes Calendar",
   ...EULA_MESSAGES,
+  "access.codeInput.label": "Team Login",
+  "access.codeInput.placeholder": "Enter password",
+  "access.denied": "Access Denied!",
+  "access.verifyFailed": "Could not verify access. Please try again.",
+  "access.verifying": "Verifying code…",
+  "access.openingPage": "Opening page…",
   ...GLOBAL_ERROR_MESSAGES,
   ...MAPPING_TOOL_MESSAGES,
   ...TITLE_CONTEXT_MESSAGES,
