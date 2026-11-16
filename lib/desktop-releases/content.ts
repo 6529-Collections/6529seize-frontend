@@ -43,6 +43,24 @@ export function getDesktopInstallerName(
   );
 }
 
+/**
+ * How the guide names an installer: its file name in the newest release,
+ * as code, or a description while no release is published.
+ */
+function guideFileRef(
+  release: DesktopRelease | undefined,
+  kind: DesktopInstallerKind
+): string {
+  return release
+    ? `\`${getDesktopInstallerName(release, kind)}\``
+    : t(
+        LOCALE,
+        kind === "windows"
+          ? "desktopPage.guide.file.windows"
+          : "desktopPage.guide.file.macos"
+      );
+}
+
 /** A section of the guide, so the page can put a screenshot after it. */
 export type DesktopGuideSection =
   | "before"
@@ -67,14 +85,14 @@ export function getDesktopGuideSections(
     {
       id: "windows",
       markdown: t(LOCALE, "desktopPage.guide.windows", {
-        setup: getDesktopInstallerName(release, "windows"),
+        setup: guideFileRef(release, "windows"),
         publisher: DESKTOP_WINDOWS_PUBLISHER,
       }),
     },
     {
       id: "mac",
       markdown: t(LOCALE, "desktopPage.guide.mac", {
-        dmg: getDesktopInstallerName(release, "macos"),
+        dmg: guideFileRef(release, "macos"),
       }),
     },
     { id: "signIn", markdown: t(LOCALE, "desktopPage.guide.signIn") },

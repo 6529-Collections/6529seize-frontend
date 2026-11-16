@@ -1,13 +1,10 @@
 import {
   ArrowDownTrayIcon,
   ArrowPathIcon,
-  ArrowRightIcon,
   ChatBubbleLeftRightIcon,
-  KeyIcon,
-  WindowIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import type { ComponentType, ReactNode, SVGProps } from "react";
+import type { ReactNode } from "react";
 
 import { ABOUT_CARD_CLASS_NAME } from "@/components/about/AboutLayout";
 import ReleaseSectionEmpty from "@/components/release-section/ReleaseSectionEmpty";
@@ -39,7 +36,7 @@ import {
   type DesktopReleases,
 } from "@/lib/desktop-releases/releases";
 import type { VisitorPlatform } from "@/lib/validator-page/detectSystem";
-import DesktopAllFiles from "./DesktopAllFiles";
+import DesktopAllFiles, { DesktopCheckDownload } from "./DesktopAllFiles";
 import DesktopPageFrame from "./DesktopPageFrame";
 import { formatDesktopFileSize } from "./desktopFileWords";
 
@@ -74,49 +71,30 @@ const FEEDBACK_HREF = getWaveRoute({
   isApp: false,
 });
 
-type Icon = ComponentType<SVGProps<SVGSVGElement>>;
-
-const ABOUT_POINTS: readonly {
-  readonly icon: Icon;
-  readonly title: MessageKey;
-  readonly body: MessageKey;
+// What 6529 Desktop is, as facts in the style of the download card's.
+const ABOUT_FACTS: readonly {
+  readonly label: MessageKey;
+  readonly value: MessageKey;
 }[] = [
   {
-    icon: WindowIcon,
-    title: "desktopPage.about.points.site.title",
-    body: "desktopPage.about.points.site.body",
+    label: "desktopPage.about.facts.runsOn.label",
+    value: "desktopPage.about.facts.runsOn.value",
   },
   {
-    icon: KeyIcon,
-    title: "desktopPage.about.points.session.title",
-    body: "desktopPage.about.points.session.body",
+    label: "desktopPage.about.facts.shows.label",
+    value: "desktopPage.about.facts.shows.value",
   },
   {
-    icon: ArrowPathIcon,
-    title: "desktopPage.about.points.updates.title",
-    body: "desktopPage.about.points.updates.body",
-  },
-];
-
-const START_STEPS: readonly {
-  readonly href: string;
-  readonly title: MessageKey;
-  readonly body: MessageKey;
-}[] = [
-  {
-    href: "/desktop/guide#before-you-start",
-    title: "desktopPage.start.install.title",
-    body: "desktopPage.start.install.body",
+    label: "desktopPage.about.facts.signIn.label",
+    value: "desktopPage.about.facts.signIn.value",
   },
   {
-    href: "/desktop/guide#sign-in",
-    title: "desktopPage.start.signIn.title",
-    body: "desktopPage.start.signIn.body",
+    label: "desktopPage.about.facts.updates.label",
+    value: "desktopPage.about.facts.updates.value",
   },
   {
-    href: "/desktop/guide#update",
-    title: "desktopPage.start.update.title",
-    body: "desktopPage.start.update.body",
+    label: "desktopPage.about.facts.replaces.label",
+    value: "desktopPage.about.facts.replaces.value",
   },
 ];
 
@@ -278,60 +256,23 @@ function Section({
   );
 }
 
-function AboutPoints() {
+function AboutFacts() {
   return (
-    <ul className="tw-m-0 tw-grid tw-list-none tw-gap-4 tw-p-0 md:tw-grid-cols-3">
-      {ABOUT_POINTS.map(({ icon: PointIcon, title, body }) => (
-        <li key={title} className="tw-flex tw-gap-3 md:tw-flex-col">
-          <span className="tw-flex tw-size-9 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900">
-            <PointIcon
-              aria-hidden="true"
-              className="tw-size-5 tw-text-iron-200"
-            />
-          </span>
-          <div className="tw-min-w-0">
-            <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
-              {t(LOCALE, title)}
-            </h3>
-            <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-6 tw-text-iron-300">
-              {t(LOCALE, body)}
-            </p>
-          </div>
-        </li>
+    <dl className={`${ABOUT_CARD_CLASS_NAME} tw-m-0 tw-divide-y tw-divide-white/[0.06] tw-px-5`}>
+      {ABOUT_FACTS.map((fact) => (
+        <div
+          key={fact.label}
+          className="tw-grid tw-gap-1 tw-py-4 sm:tw-grid-cols-[11rem_minmax(0,1fr)] sm:tw-gap-6"
+        >
+          <dt className="tw-text-sm tw-font-semibold tw-leading-6 tw-text-iron-100">
+            {t(LOCALE, fact.label)}
+          </dt>
+          <dd className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+            {t(LOCALE, fact.value)}
+          </dd>
+        </div>
       ))}
-    </ul>
-  );
-}
-
-function StartSteps() {
-  return (
-    <ol className="tw-m-0 tw-grid tw-list-none tw-gap-3 tw-p-0 md:tw-grid-cols-3">
-      {START_STEPS.map((step, index) => (
-        <li key={step.href}>
-          <Link
-            href={step.href}
-            className="tw-group tw-flex tw-h-full tw-flex-col tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/60 tw-p-4 tw-no-underline tw-transition hover:tw-border-primary-400/50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300"
-          >
-            <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-50">
-              <span
-                aria-hidden="true"
-                className="tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-text-xs tw-text-iron-200"
-              >
-                {index + 1}
-              </span>
-              {t(LOCALE, step.title)}
-              <ArrowRightIcon
-                aria-hidden="true"
-                className="tw-ml-auto tw-size-4 tw-text-iron-500 tw-transition group-hover:tw-text-primary-300"
-              />
-            </span>
-            <span className="tw-text-sm tw-leading-6 tw-text-iron-400">
-              {t(LOCALE, step.body)}
-            </span>
-          </Link>
-        </li>
-      ))}
-    </ol>
+    </dl>
   );
 }
 
@@ -366,33 +307,43 @@ export default function DesktopDownloadPage({
           <DownloadPanel release={release} platform={platform} />
         ) : (
           <ReleaseSectionEmpty
+            tone={releases.state === "error" ? "error" : "info"}
             message={t(
               LOCALE,
               releases.state === "error"
                 ? "desktopPage.download.unavailable"
                 : "desktopPage.download.notOutYet"
             )}
+            action={
+              releases.state === "error" ? (
+                <a href="/desktop" className={SECONDARY_BUTTON}>
+                  <ArrowPathIcon aria-hidden="true" className="tw-size-4" />
+                  {t(LOCALE, "desktopPage.download.reload")}
+                </a>
+              ) : undefined
+            }
           />
         )}
         <PlatformNote platform={platform} />
       </section>
 
-      <Section
-        id="desktop-about"
-        heading={t(LOCALE, "desktopPage.about.heading")}
-      >
-        <AboutPoints />
-        <p className={`tw-mb-0 tw-mt-6 ${BODY}`}>
-          {t(LOCALE, "desktopPage.about.body")}
-        </p>
-      </Section>
+      {release && (
+        <Section
+          id="desktop-check"
+          heading={t(LOCALE, "desktopPage.check.heading")}
+        >
+          <DesktopCheckDownload release={release} />
+        </Section>
+      )}
 
-      <Section
-        id="desktop-start"
-        heading={t(LOCALE, "desktopPage.start.heading")}
-      >
-        <StartSteps />
-      </Section>
+      {release && (
+        <Section
+          id="all-files-title"
+          heading={t(LOCALE, "desktopPage.files.heading")}
+        >
+          <DesktopAllFiles release={release} />
+        </Section>
+      )}
 
       {release?.notes && (
         <Section
@@ -407,14 +358,12 @@ export default function DesktopDownloadPage({
         </Section>
       )}
 
-      {release && (
-        <Section
-          id="all-files-title"
-          heading={t(LOCALE, "desktopPage.files.heading")}
-        >
-          <DesktopAllFiles release={release} />
-        </Section>
-      )}
+      <Section
+        id="desktop-about"
+        heading={t(LOCALE, "desktopPage.about.heading")}
+      >
+        <AboutFacts />
+      </Section>
 
       <Section
         id="desktop-feedback"

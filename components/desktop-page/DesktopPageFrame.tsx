@@ -30,14 +30,19 @@ const SECTIONS: readonly ReleaseSectionLink<DesktopSection>[] = [
   },
 ];
 
-/** Under the title of every page under /desktop: this is a test release. */
-function DesktopNotice() {
+/**
+ * Under the title of every page under /desktop: this is a test release. On
+ * the known issues page itself it does not link there.
+ */
+function DesktopNotice({ onKnownIssues }: { readonly onKnownIssues: boolean }) {
   return (
     <ReleaseSectionNotice
       id="desktop-test-release"
       title={t(LOCALE, "desktopPage.notice.title")}
     >
-      {tRich(LOCALE, "desktopPage.notice.body", {
+      {onKnownIssues
+        ? t(LOCALE, "desktopPage.notice.bodyOnKnownIssues")
+        : tRich(LOCALE, "desktopPage.notice.body", {
         knownIssues: (
           <Link
             key="known-issues"
@@ -64,7 +69,9 @@ export default function DesktopPageFrame(
       {...props}
       navLabel="desktopPage.nav.label"
       links={SECTIONS}
-      notice={<DesktopNotice />}
+      notice={
+        <DesktopNotice onKnownIssues={props.current === "known-issues"} />
+      }
     />
   );
 }

@@ -64,33 +64,17 @@ function ReleaseListCheck() {
 }
 
 /**
- * Every file of the release in one table, with its SHA-256, then how to
- * check a download, who signed it, and where the SHA-256 values come from.
+ * How to check a download: the command for each system, who signed the
+ * installers, and where the SHA-256 values come from.
  */
-export default function DesktopAllFiles({
+export function DesktopCheckDownload({
   release,
 }: {
   readonly release: DesktopRelease;
 }) {
-  const rows = listDesktopReleaseFiles(release).map((entry) =>
-    toDesktopFileRow(entry, getDesktopDownloadPath(release, entry.file))
-  );
   return (
     <div className="tw-flex tw-flex-col tw-gap-6">
-      <ReleaseBuildLine
-        version={release.version}
-        date={release.publishedAt.slice(0, 10)}
-        commit={release.commit}
-        withCommit="desktopPage.files.build.withCommit"
-        withoutCommit="desktopPage.files.build.withoutCommit"
-      />
-      <ReleaseFilesTable
-        rows={rows}
-        columns={desktopFileColumns()}
-        downloadText={t(LOCALE, "desktopPage.files.download.text")}
-      />
       <div className="tw-flex tw-flex-col tw-gap-3">
-        <h3 className={SUBHEADING}>{t(LOCALE, "desktopPage.check.heading")}</h3>
         <p className={`tw-m-0 ${BODY}`}>
           {t(LOCALE, "desktopPage.check.body")}
         </p>
@@ -125,6 +109,33 @@ export default function DesktopAllFiles({
         </p>
       </div>
       <ReleaseListCheck />
+    </div>
+  );
+}
+
+/** Every file of the release in one table, with its size and SHA-256. */
+export default function DesktopAllFiles({
+  release,
+}: {
+  readonly release: DesktopRelease;
+}) {
+  const rows = listDesktopReleaseFiles(release).map((entry) =>
+    toDesktopFileRow(entry, getDesktopDownloadPath(release, entry.file))
+  );
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-6">
+      <ReleaseBuildLine
+        version={release.version}
+        date={release.publishedAt.slice(0, 10)}
+        commit={release.commit}
+        withCommit="desktopPage.files.build.withCommit"
+        withoutCommit="desktopPage.files.build.withoutCommit"
+      />
+      <ReleaseFilesTable
+        rows={rows}
+        columns={desktopFileColumns()}
+        downloadText={t(LOCALE, "desktopPage.files.download.text")}
+      />
     </div>
   );
 }

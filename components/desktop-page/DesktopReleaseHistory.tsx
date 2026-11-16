@@ -104,6 +104,7 @@ export default function DesktopReleaseHistory({
       <div className="tw-flex tw-flex-col tw-gap-10">
         {list.length === 0 ? (
           <ReleaseSectionEmpty
+            tone={releases.state === "error" ? "error" : "info"}
             message={t(
               LOCALE,
               releases.state === "error"

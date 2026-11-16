@@ -228,11 +228,10 @@ describe("the /desktop pages", () => {
     expect(page).not.toContain("All files");
     expect(page).toContain("There is no Linux version yet. It comes later.");
     expect(downloadLinks(page!)).toEqual([]);
-    // The guide still reads, with the names every release gives the files.
-    expect(guide).toContain(
-      "6529-Desktop_&lt;version&gt;_windows-x64-setup.exe"
-    );
-    expect(guide).toContain("6529-Desktop_&lt;version&gt;_macos-arm64.dmg");
+    // The guide still reads, and describes the files instead of naming them.
+    expect(guide).toContain("the Windows installer you downloaded");
+    expect(guide).toContain("the Mac disk image you downloaded");
+    expect(guide).not.toContain("&lt;version&gt;");
     expect(releases).toContain("No release is published yet.");
     expect(mockRead).toHaveBeenCalledWith(
       { bucket: "6529-desktop-releases-06c6aa2e", region: "us-east-1" },
@@ -301,6 +300,8 @@ describe("the /desktop pages", () => {
     setUp();
     const [page, , , releases] = await renderAll();
     expect(page).toContain(UNAVAILABLE);
+    expect(page).toContain('role="alert"');
+    expect(page).toContain("Reload</a>");
     expect(releases).toContain(UNAVAILABLE);
     expect(downloadLinks(page!)).toEqual([]);
     expect(downloadLinks(releases!)).toEqual([]);
@@ -411,6 +412,8 @@ describe("the /desktop pages", () => {
 
   it("list the known issues of the test release", () => {
     const html = renderToStaticMarkup(DesktopKnownIssuesRoute());
+    // The notice does not link to the page it is on.
+    expect(html).not.toContain("Known issues</a> lists");
     for (const text of [
       "The Windows uninstaller is not signed yet",
       "takes over <code",
