@@ -1,9 +1,44 @@
 import IconButton from "@/components/utils/button/IconButton";
+import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { createRef } from "react";
 
 describe("IconButton", () => {
+  it("preserves Headless UI popover state, keyboard navigation and focus return", async () => {
+    const user = userEvent.setup();
+    const ref = createRef<HTMLButtonElement>();
+    render(
+      <Popover>
+        <PopoverButton
+          as={IconButton}
+          ref={ref}
+          layout="toolbar"
+          aria-label="Wave preferences"
+        >
+          <svg aria-hidden="true" />
+        </PopoverButton>
+        <PopoverPanel>
+          <button type="button">Use UTC</button>
+        </PopoverPanel>
+      </Popover>
+    );
+
+    const trigger = screen.getByRole("button", { name: "Wave preferences" });
+    expect(ref.current).toBe(trigger);
+    await user.tab();
+    await user.keyboard("{Enter}");
+    expect(trigger).toHaveAttribute("aria-expanded", "true");
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Use UTC" })).toHaveFocus();
+    await user.keyboard("{Escape}");
+    expect(trigger).toHaveAttribute("aria-expanded", "false");
+    expect(trigger).toHaveFocus();
+    expect(
+      screen.queryByRole("button", { name: "Use UTC" })
+    ).not.toBeInTheDocument();
+  });
+
   it("forwards its button ref, accessible state and pointer handlers", () => {
     const ref = createRef<HTMLButtonElement>();
     const onPointerDown = jest.fn();

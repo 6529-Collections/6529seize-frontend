@@ -1,6 +1,10 @@
 import clsx from "clsx";
 
 import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "./compactActionButtonStyles";
+import {
+  getIconButtonLayoutClasses,
+  type IconButtonLayout,
+} from "./iconButtonLayouts";
 
 export type IconButtonSize = 24 | 32 | 36 | 40 | 44;
 export type IconButtonVariant =
@@ -63,6 +67,7 @@ const INSET_SURFACE_CLASSES = {
 };
 
 export interface IconButtonStyleOptions {
+  readonly layout?: IconButtonLayout | undefined;
   readonly variant?: IconButtonVariant | undefined;
   readonly size?: IconButtonSize | undefined;
   readonly shape?: IconButtonShape | undefined;
@@ -79,6 +84,7 @@ export function getIconButtonShapeClasses(shape: IconButtonShape) {
 }
 
 export function getIconButtonClasses({
+  layout,
   variant = "ghost",
   size = 36,
   shape = "rounded",
@@ -89,6 +95,9 @@ export function getIconButtonClasses({
   className,
   inset = false,
 }: IconButtonStyleOptions & { readonly inset?: boolean }): string {
+  if (layout) {
+    return getIconButtonLayoutClasses({ layout, disabled, className });
+  }
   return clsx(
     "tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-p-0 tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
     SIZE_CLASSES[size],
