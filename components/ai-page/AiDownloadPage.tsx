@@ -1,12 +1,11 @@
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  ExclamationTriangleIcon,
+} from "@heroicons/react/24/outline";
 import Link from "next/link";
 
-import { ABOUT_INSET_CLASS_NAME } from "@/components/about/AboutLayout";
-import {
-  BODY,
-  LINK,
-  SECTION_HEADING,
-} from "@/components/validator-page/validatorStyles";
+import { LINK } from "@/components/validator-page/validatorStyles";
+import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
@@ -22,65 +21,89 @@ import {
   type AiInstallerKind,
 } from "@/lib/ai-page/releaseFiles";
 import type { VisitorPlatform } from "@/lib/validator-page/detectSystem";
-import AiAllFiles from "./AiAllFiles";
-import AiDownloadChooser, {
-  type AiChooserText,
-  type AiDownloadOption,
-} from "./AiDownloadChooser";
-import AiPageFrame from "./AiPageFrame";
+import { shortCommit } from "@/lib/validator-page/releaseFiles";
+import AiDownloadHero, {
+  type AiHeroOption,
+  type AiHeroText,
+} from "./AiDownloadHero";
+import AiDownloads from "./AiDownloads";
+import AiPageFrame, { AI_BODY, AI_CARD, AI_H2, AI_MUTED } from "./AiPageFrame";
+import AiTrustBadges from "./AiTrustBadges";
+import AiVerify from "./AiVerify";
 import { formatAiFileSize } from "./formatAiFileSize";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
-
-const BUTTON_TEXT: Readonly<Record<AiInstallerKind, MessageKey>> = {
-  macos: "ai.download.button.macos",
-  windows: "ai.download.button.windows",
-  "linux-x64": "ai.download.button.linuxX64",
-  "linux-x64-cuda": "ai.download.button.linuxCuda",
-  "linux-arm64": "ai.download.button.linuxArm64",
+// The feed's day, as a calendar date: the same day in every time zone.
+const RELEASE_DATE: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
 };
 
-function toOption(
+const INSTALLER_TEXT: Readonly<
+  Record<AiInstallerKind, { button: MessageKey; system: MessageKey }>
+> = {
+  macos: {
+    button: "ai.download.button.macos",
+    system: "ai.download.system.macos",
+  },
+  windows: {
+    button: "ai.download.button.windows",
+    system: "ai.download.system.windows",
+  },
+  "linux-x64": {
+    button: "ai.download.button.linuxX64",
+    system: "ai.download.system.linuxX64",
+  },
+  "linux-x64-cuda": {
+    button: "ai.download.button.linuxCuda",
+    system: "ai.download.system.linuxCuda",
+  },
+  "linux-arm64": {
+    button: "ai.download.button.linuxArm64",
+    system: "ai.download.system.linuxArm64",
+  },
+};
+
+function toHeroOption(
   release: AiRelease,
   installer: AiInstaller
-): AiDownloadOption {
+): AiHeroOption {
+  const text = INSTALLER_TEXT[installer.kind];
+  const buttonText = t(LOCALE, text.button);
+  const system = t(LOCALE, text.system);
   const size = formatAiFileSize(installer.file.size);
-  const buttonText = t(LOCALE, BUTTON_TEXT[installer.kind]);
-  const summary = size
-    ? t(LOCALE, "ai.download.summaryWithSize", {
-        summary: installer.summary,
-        size,
-      })
-    : installer.summary;
   return {
     kind: installer.kind,
-    title: installer.title,
-    summary,
-    note: t(LOCALE, "ai.download.buttonNote", {
-      version: release.version,
-      summary,
-    }),
     href: getAiDownloadPath(release, installer.file),
-    image: installer.image,
     buttonText,
     buttonLabel: t(LOCALE, "ai.download.button.ariaLabel", {
       button: buttonText,
       file: installer.file.name,
     }),
-    rowLabel: t(LOCALE, "ai.download.row.label", {
+    meta: size
+      ? t(LOCALE, "ai.download.meta", {
+          version: release.version,
+          size,
+          needs: installer.needs,
+        })
+      : `${release.version} · ${installer.needs}`,
+    badges: <AiTrustBadges signed={installer.file.signed} />,
+    system,
+    systemLabel: t(LOCALE, "ai.download.system.label", {
+      system,
       file: installer.file.name,
     }),
   };
 }
 
-function chooserText(): AiChooserText {
+function heroText(): AiHeroText {
   return {
     armNote: t(LOCALE, "ai.download.armNote"),
-    cudaText: t(LOCALE, "ai.download.cuda.text"),
-    cudaButton: t(LOCALE, "ai.download.cuda.button"),
-    otherSystems: t(LOCALE, "ai.download.otherSystems"),
-    rowText: t(LOCALE, "ai.download.row.text"),
+    otherNote: t(LOCALE, "ai.download.otherNote"),
+    alsoFor: t(LOCALE, "ai.download.alsoFor"),
+    allDownloads: t(LOCALE, "ai.download.allDownloads"),
   };
 }
 
@@ -91,14 +114,12 @@ function NoRelease({
   readonly state: AiReleaseFeedSnapshot["state"];
 }) {
   return (
-    <div
-      className={`${ABOUT_INSET_CLASS_NAME} tw-flex tw-items-start tw-gap-3 tw-p-5`}
-    >
+    <div className={`${AI_CARD} tw-flex tw-items-start tw-gap-3 tw-p-5`}>
       <ExclamationTriangleIcon
         aria-hidden="true"
         className="tw-mt-0.5 tw-size-5 tw-flex-none tw-text-iron-400"
       />
-      <p className={`tw-m-0 ${BODY}`}>
+      <p className={`tw-m-0 ${AI_BODY}`}>
         {t(
           LOCALE,
           state === "error"
@@ -107,6 +128,78 @@ function NoRelease({
         )}
       </p>
     </div>
+  );
+}
+
+const HOW: readonly {
+  readonly title: MessageKey;
+  readonly body: MessageKey;
+}[] = [
+  { title: "ai.how.install.title", body: "ai.how.install.body" },
+  { title: "ai.how.model.title", body: "ai.how.model.body" },
+  { title: "ai.how.chat.title", body: "ai.how.chat.body" },
+];
+
+/** Install, pick a model, chat: the whole path, in three lines. */
+function HowItWorks() {
+  return (
+    <section aria-labelledby="how-it-works" className="tw-mt-16">
+      <h2 id="how-it-works" className={AI_H2}>
+        {t(LOCALE, "ai.how.heading")}
+      </h2>
+      <ol
+        role="list"
+        className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3"
+      >
+        {HOW.map((step, index) => (
+          <li key={step.title} className={`${AI_CARD} tw-p-5`}>
+            <span
+              aria-hidden="true"
+              className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/15 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-primary-300"
+            >
+              {index + 1}
+            </span>
+            <h3 className="tw-mb-1 tw-mt-4 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
+              {t(LOCALE, step.title)}
+            </h3>
+            <p className={`tw-m-0 ${AI_MUTED}`}>{t(LOCALE, step.body)}</p>
+            {index === 0 && (
+              <Link
+                href="/ai/guide"
+                className={`tw-mt-3 tw-inline-flex tw-items-center tw-gap-1 tw-text-sm ${LINK}`}
+              >
+                {t(LOCALE, "ai.how.install.link")}
+                <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
+              </Link>
+            )}
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
+function ReleaseLine({ release }: { readonly release: AiRelease }) {
+  const commit = shortCommit(release.commit);
+  const params = {
+    version: release.version,
+    date: formatDate(LOCALE, release.date, RELEASE_DATE),
+    commit: (
+      <span key="commit" className="tw-font-mono">
+        {commit}
+      </span>
+    ),
+  };
+  return (
+    <p className={`tw-m-0 tw-tabular-nums ${AI_MUTED}`}>
+      {tRich(
+        LOCALE,
+        commit
+          ? "ai.files.release.withCommit"
+          : "ai.files.release.withoutCommit",
+        params
+      )}
+    </p>
   );
 }
 
@@ -136,53 +229,44 @@ export default function AiDownloadPage({
       <section
         id="download"
         aria-label={t(LOCALE, "ai.download.section")}
-        className="tw-mb-12 tw-scroll-mt-24"
+        className="tw-mt-10 tw-scroll-mt-24"
       >
         {release ? (
-          <AiDownloadChooser
+          <AiDownloadHero
             options={installers.map((installer) =>
-              toOption(release, installer)
+              toHeroOption(release, installer)
             )}
             initial={platform}
-            text={chooserText()}
+            text={heroText()}
           />
         ) : (
           <NoRelease state={snapshot.state} />
         )}
-        <p className={`tw-mb-0 tw-mt-6 ${BODY}`}>
-          {tRich(LOCALE, "ai.download.next", {
-            guide: (
-              <Link key="guide" href="/ai/guide" className={LINK}>
-                {t(LOCALE, "ai.download.guideLink")}
-              </Link>
-            ),
-          })}
-        </p>
       </section>
 
-      {release?.notes && (
-        <section aria-labelledby="release-notes" className="tw-mb-12">
-          <h2 id="release-notes" className={SECTION_HEADING}>
-            {t(LOCALE, "ai.download.notes.heading", {
-              version: release.version,
-            })}
-          </h2>
-          <p className={`tw-mb-0 tw-mt-4 tw-whitespace-pre-line ${BODY}`}>
-            {release.notes}
-          </p>
-        </section>
-      )}
+      <HowItWorks />
 
       {release && (
         <section
-          id="all-files"
-          aria-labelledby="all-files-title"
-          className="tw-scroll-mt-24"
+          id="downloads"
+          aria-labelledby="downloads-title"
+          className="tw-mt-16 tw-scroll-mt-24"
         >
-          <h2 id="all-files-title" className={`tw-mb-4 ${SECTION_HEADING}`}>
-            {t(LOCALE, "ai.files.heading")}
-          </h2>
-          <AiAllFiles release={release} />
+          <div className="tw-mb-5 tw-flex tw-flex-col tw-gap-1">
+            <h2 id="downloads-title" className={AI_H2}>
+              {t(LOCALE, "ai.files.heading")}
+            </h2>
+            <ReleaseLine release={release} />
+            {release.notes && (
+              <p className={`tw-m-0 tw-whitespace-pre-line ${AI_MUTED}`}>
+                {release.notes}
+              </p>
+            )}
+          </div>
+          <AiDownloads release={release} />
+          <div className="tw-mt-4">
+            <AiVerify release={release} />
+          </div>
         </section>
       )}
     </AiPageFrame>

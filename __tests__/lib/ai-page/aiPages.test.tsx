@@ -48,8 +48,9 @@ const WINDOWS_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
 const MAC_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
+const NOTICE = "Untested test release.";
 const DISCLAIMER =
-  "This is a test release. Expect problems, and don&#x27;t rely on it for anything that matters.";
+  "Expect problems, and don&#x27;t rely on it for anything that matters.";
 
 function storeIsEmpty() {
   mockRead.mockResolvedValue({ state: "missing" });
@@ -95,9 +96,9 @@ describe("the /ai pages", () => {
   it("say on every page, before its text, that 6529 AI is untested", async () => {
     storeHasSignedFeed();
     for (const html of await renderAll()) {
-      expect(html).toContain("6529 AI is untested");
+      expect(html).toContain(NOTICE);
       expect(html).toContain(DISCLAIMER);
-      const notice = html.indexOf("6529 AI is untested");
+      const notice = html.indexOf(NOTICE);
       expect(notice).toBeGreaterThan(html.indexOf("<h1"));
       expect(notice).toBeLessThan(html.indexOf("<h1") + 2_000);
     }
@@ -121,7 +122,7 @@ describe("the /ai pages", () => {
     );
     expect(download).toContain(">Test release<");
     expect(downloadLinks(download!)).toEqual([]);
-    expect(download).not.toContain("All files");
+    expect(download).not.toContain(">Downloads<");
     // The guide still reads, with the file names every release uses.
     expect(guide).toContain("6529-ai-&lt;version&gt;-macos-arm64.dmg");
     expect(mockPresign).not.toHaveBeenCalled();
@@ -148,13 +149,14 @@ describe("the /ai pages", () => {
   it("offers the newest release, Windows first for a Windows visitor", async () => {
     storeHasSignedFeed();
     const html = renderToStaticMarkup(await AiRoute());
-    expect(html).toContain("Test release 0.1.0");
+    expect(html).toContain("Test release · 0.1.0");
     expect(html).toContain(
       'aria-label="Download for Windows: 6529-ai-0.1.0-windows-x64-setup.exe"'
     );
     expect(html.indexOf("Download for Windows")).toBeLessThan(
-      html.indexOf("Other systems")
+      html.indexOf("Also for")
     );
+    expect(html).toContain("0.1.0 · 120.0 MB · Windows 10 or 11, 64-bit");
     // Every link is to the newest release, never the older candidate.
     const links = downloadLinks(html);
     expect(links.length).toBeGreaterThan(10);
@@ -172,10 +174,13 @@ describe("the /ai pages", () => {
       'aria-label="Download for Mac: 6529-ai-0.1.0-macos-arm64.dmg"'
     );
     expect(html.indexOf("Download for Mac")).toBeLessThan(
-      html.indexOf("Other systems")
+      html.indexOf("Also for")
     );
-    // Windows is one row among the other systems, not a big button.
-    expect(html).not.toContain("Download for Windows");
+    // Windows is a quiet link and a row under Downloads, not a big button.
+    expect(html).not.toContain("Download for Windows<");
+    expect(html).toContain(
+      'aria-label="Download for Windows: 6529-ai-0.1.0-windows-x64-setup.exe"'
+    );
     expect(html).toContain(
       'aria-label="Download 6529-ai-0.1.0-windows-x64-setup.exe"'
     );
@@ -188,12 +193,15 @@ describe("the /ai pages", () => {
       expect(html).toContain(
         `href="/ai/download/0.1.0/${encodeURIComponent(file.name)}"`
       );
-      expect(html).toContain(`title="${file.sha256}"`);
+      // Behind a copy button, and whole for screen readers.
+      expect(html).toContain(`>${file.sha256}<`);
+      expect(html).toContain(`aria-label="Copy the SHA-256 of ${file.name}"`);
     }
-    expect(html).toContain(MAC_SIGNER);
-    expect(html).toContain(WINDOWS_SIGNER);
+    expect(html).not.toContain(MAC_SIGNER);
+    expect(html).toContain(`Signed by ${WINDOWS_SIGNER}`);
+    expect(html).toContain("Notarized by Apple");
     expect(html).toMatch(
-      /Release <span[^>]*>0\.1\.0<\/span>, published November 17, 2026, built from commit <span[^>]*>ccccccc<\/span>/
+      /0\.1\.0 · released November 17, 2026 · commit <span[^>]*>ccccccc<\/span>/
     );
   });
 
@@ -227,12 +235,13 @@ describe("the /ai pages", () => {
   it("list what nobody has tried yet", () => {
     const html = renderToStaticMarkup(AiKnownIssuesRoute());
     for (const text of [
-      "Nobody has tried it on a physical Mac.",
-      "nobody has tried it on a macOS before 15.8",
-      "or with a GPU",
-      "Nobody has tried any package on another distribution",
-      "Nobody has clicked through the installer",
-      "answered its question by hand",
+      "never on a Mac on a desk",
+      "Not tried on a macOS before 15.8",
+      "Not tried with a GPU.",
+      "not on another distribution",
+      "nobody has clicked through its screens",
+      "answered the install&#x27;s question in a terminal by hand",
+      "6529-ai/placement select alone",
     ]) {
       expect(html).toContain(text);
     }
@@ -271,7 +280,7 @@ describe("the /ai pages", () => {
       lastModified: null,
     }));
     const html = renderToStaticMarkup(await AiRoute());
-    expect(html).toContain("Test release 0.1.0-rc.1");
+    expect(html).toContain("Test release · 0.1.0-rc.1");
     const links = downloadLinks(html);
     expect(links).toContain(
       "/ai/download/0.1.0-rc.1/6529-ai-0.1.0-rc.1-windows-x64-setup.exe"

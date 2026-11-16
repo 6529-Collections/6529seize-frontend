@@ -1,15 +1,14 @@
-import { ExclamationTriangleIcon } from "@heroicons/react/24/outline";
+import { BeakerIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { ABOUT_PAGE_SURFACE_CLASS_NAME } from "@/components/about/AboutLayout";
-import { ValidatorPageHeader } from "@/components/validator-page/ValidatorPageFrame";
 import { LINK } from "@/components/validator-page/validatorStyles";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 
-export type AiSection = "download" | "guide" | "known-issues";
+type AiSection = "download" | "guide" | "known-issues";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
@@ -28,44 +27,52 @@ const SECTIONS: readonly {
   },
 ];
 
+/** Headings and body text shared by the /ai pages. */
+export const AI_H2 =
+  "tw-m-0 tw-text-xl tw-font-semibold tw-leading-7 tw-tracking-tight tw-text-iron-50";
+export const AI_H3 =
+  "tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50";
+export const AI_BODY = "tw-text-[15px] tw-leading-6 tw-text-iron-300";
+export const AI_MUTED = "tw-text-sm tw-leading-6 tw-text-iron-400";
+export const AI_CARD =
+  "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950/60";
+
 /**
- * The notice under the title of every page under /ai: 6529 AI is
- * untested, and this is a test release.
+ * The notice on every page under /ai: this is an untested test release.
+ * It stays calm: one line, under the title.
  */
-function AiDisclaimer() {
+function AiUntestedNotice({ current }: { readonly current: AiSection }) {
   return (
-    <section
-      aria-labelledby="ai-untested"
-      className="tw-mb-10 tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-amber-400/40 tw-bg-amber-400/10 tw-p-5 sm:tw-p-6"
+    <div
+      role="note"
+      className="tw-flex tw-items-start tw-gap-2.5 tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/25 tw-bg-amber-400/[0.06] tw-px-4 tw-py-3"
     >
-      <ExclamationTriangleIcon
+      <BeakerIcon
         aria-hidden="true"
-        className="tw-mt-0.5 tw-size-6 tw-flex-none tw-text-amber-300"
+        className="tw-mt-0.5 tw-size-5 tw-flex-none tw-text-amber-300"
       />
-      <div className="tw-min-w-0">
-        <h2
-          id="ai-untested"
-          className="tw-m-0 tw-text-lg tw-font-semibold tw-leading-7 tw-text-iron-50"
-        >
-          {t(LOCALE, "ai.disclaimer.title")}
-        </h2>
-        <p className="tw-mb-0 tw-mt-1 tw-text-base tw-leading-7 tw-text-iron-200">
-          {tRich(LOCALE, "ai.disclaimer.body", {
-            knownIssues: (
+      <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-200">
+        <strong className="tw-font-semibold tw-text-iron-50">
+          {t(LOCALE, "ai.notice.title")}
+        </strong>{" "}
+        {tRich(LOCALE, "ai.notice.body", {
+          knownIssues:
+            current === "known-issues" ? (
+              ""
+            ) : (
               <Link key="known-issues" href="/ai/known-issues" className={LINK}>
-                {t(LOCALE, "ai.disclaimer.knownIssuesLink")}
+                {t(LOCALE, "ai.notice.link")}
               </Link>
             ),
-          })}
-        </p>
-      </div>
-    </section>
+        })}
+      </p>
+    </div>
   );
 }
 
 /**
- * The menu of the /ai pages, the page's title, the untested notice, then
- * the page.
+ * The menu of the /ai pages, the page's title and lead, the untested
+ * notice, then the page.
  */
 export default function AiPageFrame({
   current,
@@ -84,12 +91,9 @@ export default function AiPageFrame({
     <main
       className={`tailwind-scope ${ABOUT_PAGE_SURFACE_CLASS_NAME} tw-text-iron-300`}
     >
-      <div className="tw-mx-auto tw-w-full tw-max-w-4xl tw-px-4 tw-pb-20 tw-pt-6 sm:tw-px-6 sm:tw-pt-10 lg:tw-px-8">
-        <nav
-          aria-label={t(LOCALE, "ai.nav.label")}
-          className="tw-mb-8 sm:tw-mb-10"
-        >
-          <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
+      <div className="tw-mx-auto tw-w-full tw-max-w-4xl tw-px-4 tw-pb-24 tw-pt-6 sm:tw-px-6 sm:tw-pt-10 lg:tw-px-8">
+        <nav aria-label={t(LOCALE, "ai.nav.label")} className="tw-mb-10">
+          <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-1.5 tw-p-0">
             {SECTIONS.map((section) => {
               const isCurrent = section.key === current;
               return (
@@ -97,7 +101,7 @@ export default function AiPageFrame({
                   <Link
                     href={section.href}
                     aria-current={isCurrent ? "page" : undefined}
-                    className={`tw-inline-flex tw-min-h-9 tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-3.5 tw-text-sm tw-font-medium tw-no-underline tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
+                    className={`tw-inline-flex tw-min-h-9 tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-3 tw-text-sm tw-font-medium tw-no-underline tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
                       isCurrent
                         ? "tw-border-primary-400/60 tw-bg-primary-500/10 tw-text-iron-50"
                         : "tw-border-white/10 tw-bg-transparent tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-100"
@@ -110,16 +114,20 @@ export default function AiPageFrame({
             })}
           </ul>
         </nav>
-        <div className="[&>header]:tw-mb-6">
-          <ValidatorPageHeader eyebrow={eyebrow} title={title}>
-            {lead && (
-              <p className="tw-mb-0 tw-mt-3 tw-max-w-2xl tw-text-lg tw-leading-8 tw-text-iron-300">
-                {lead}
-              </p>
-            )}
-          </ValidatorPageHeader>
-        </div>
-        <AiDisclaimer />
+        <header className="tw-mb-6">
+          <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wider tw-text-primary-300">
+            {eyebrow}
+          </p>
+          <h1 className="tw-m-0 tw-text-balance tw-text-4xl tw-font-semibold tw-leading-tight tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-5xl">
+            {title}
+          </h1>
+          {lead && (
+            <p className="tw-mb-0 tw-mt-4 tw-max-w-2xl tw-text-pretty tw-text-lg tw-leading-8 tw-text-iron-300">
+              {lead}
+            </p>
+          )}
+        </header>
+        <AiUntestedNotice current={current} />
         {children}
       </div>
     </main>
