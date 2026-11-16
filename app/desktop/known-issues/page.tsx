@@ -14,7 +14,7 @@ export default function DesktopKnownIssuesRoute() {
       eyebrow={t(DEFAULT_LOCALE, "desktopPage.knownIssues.eyebrow")}
       title={t(DEFAULT_LOCALE, "desktopPage.knownIssues.title")}
       lead={t(DEFAULT_LOCALE, "desktopPage.knownIssues.lead")}
-      markdown={getDesktopKnownIssuesMarkdown()}
+      parts={[{ markdown: getDesktopKnownIssuesMarkdown() }]}
     />
   );
 }

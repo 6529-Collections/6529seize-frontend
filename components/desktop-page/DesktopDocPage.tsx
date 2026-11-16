@@ -1,4 +1,6 @@
-import ReleaseSectionDoc from "@/components/release-section/ReleaseSectionDoc";
+import ReleaseSectionDoc, {
+  type ReleaseSectionDocPart,
+} from "@/components/release-section/ReleaseSectionDoc";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/desktop-download";
@@ -13,13 +15,13 @@ export default function DesktopDocPage({
   eyebrow,
   title,
   lead,
-  markdown,
+  parts,
 }: {
   readonly section: DesktopSection;
   readonly eyebrow: string;
   readonly title: string;
   readonly lead: string;
-  readonly markdown: string;
+  readonly parts: readonly ReleaseSectionDocPart[];
 }) {
   return (
     <DesktopPageFrame
@@ -31,7 +33,7 @@ export default function DesktopDocPage({
       <ReleaseSectionDoc
         contentsId="desktop-doc-contents"
         contentsLabel={t(LOCALE, "desktopPage.doc.contents")}
-        markdown={markdown}
+        parts={parts}
       />
     </DesktopPageFrame>
   );

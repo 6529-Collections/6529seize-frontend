@@ -1,11 +1,7 @@
 import type { Metadata } from "next";
 import { connection } from "next/server";
 
-import DesktopDocPage from "@/components/desktop-page/DesktopDocPage";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
-import "@/i18n/namespaces/desktop-download";
-import { getDesktopGuideMarkdown } from "@/lib/desktop-releases/content";
+import DesktopGuide from "@/components/desktop-page/DesktopGuide";
 import { getDesktopPageMetadata } from "@/lib/desktop-releases/pageMetadata";
 import {
   getDesktopReleases,
@@ -15,15 +11,7 @@ import {
 export default async function DesktopGuideRoute() {
   await connection();
   const { releases } = await getDesktopReleases();
-  return (
-    <DesktopDocPage
-      section="guide"
-      eyebrow={t(DEFAULT_LOCALE, "desktopPage.guide.eyebrow")}
-      title={t(DEFAULT_LOCALE, "desktopPage.guide.title")}
-      lead={t(DEFAULT_LOCALE, "desktopPage.guide.lead")}
-      markdown={getDesktopGuideMarkdown(getNewestDesktopRelease(releases))}
-    />
-  );
+  return <DesktopGuide release={getNewestDesktopRelease(releases)} />;
 }
 
 export const metadata: Metadata = getDesktopPageMetadata(

@@ -314,7 +314,7 @@ describe("the /desktop pages", () => {
     expect(html).toContain("Test release 0.1.0-rc.2");
     expect(html).toContain(`aria-label="Download for Windows: ${SETUP}"`);
     expect(html).toContain(
-      "0.1.0-rc.2 · Windows, 64-bit Intel or AMD · 86.0 MB"
+      "Windows, 64-bit Intel or AMD · 86.0 MB"
     );
     expect(html.indexOf("Download for Windows")).toBeLessThan(
       html.indexOf("Also available:")
@@ -332,7 +332,7 @@ describe("the /desktop pages", () => {
     mockUserAgent = MAC_UA;
     storeHasSignedList();
     const html = renderToStaticMarkup(await DesktopRoute());
-    expect(html).toContain("0.1.0-rc.2 · Mac with Apple silicon · 161.2 MB");
+    expect(html).toContain("Mac with Apple silicon · 161.2 MB");
     expect(html.indexOf("Download for Mac")).toBeLessThan(
       html.indexOf("Also available:")
     );
@@ -346,6 +346,26 @@ describe("the /desktop pages", () => {
     expect(html).toContain("Download for Windows");
     expect(html).toContain("Download for Mac");
     expect(html).toContain("There is no Linux version yet. It comes later.");
+  });
+
+  it("tell a phone visitor which computers it runs on", async () => {
+    mockUserAgent =
+      "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
+    storeHasSignedList();
+    const html = renderToStaticMarkup(await DesktopRoute());
+    expect(html).toContain(
+      "On a phone or tablet, use 6529.io in your browser."
+    );
+    expect(html).toContain("Download for Windows");
+    expect(html).toContain("Download for Mac");
+  });
+
+  it("show the release's version, date and signer beside the downloads", async () => {
+    storeHasSignedList();
+    const html = renderToStaticMarkup(await DesktopRoute());
+    expect(html).toMatch(/Version<\/dt><dd[^>]*><span[^>]*>0\.1\.0-rc\.2</);
+    expect(html).toMatch(/Published<\/dt><dd[^>]*>November 16, 2026</);
+    expect(html).toContain("6529 Collection LLC on Windows");
   });
 
   it("list every file with its SHA-256, how to check one, and the list's key", async () => {
@@ -378,21 +398,24 @@ describe("the /desktop pages", () => {
     const html = renderToStaticMarkup(await DesktopGuideRoute());
     expect(html).toContain(SETUP);
     expect(html).toContain(DMG);
+    expect(html).toContain("guide-signature-request.webp");
+    expect(html).toContain("The app&#x27;s signature request.");
+    expect(html).toContain("guide-first-launch-mac.webp");
     expect(html).toContain("Scan with a phone wallet");
     expect(html).toContain("Use a browser wallet");
-    expect(html).toContain("the browser page shows the same code");
+    expect(html).toContain("The browser page shows the same two.");
     expect(html).toContain(
-      "6529 Desktop does not download or install updates by itself yet."
+      "6529 Desktop does not download or install updates by itself yet,"
     );
   });
 
   it("list the known issues of the test release", () => {
     const html = renderToStaticMarkup(DesktopKnownIssuesRoute());
     for (const text of [
-      "The Windows uninstaller is not signed yet.",
+      "The Windows uninstaller is not signed yet",
       "takes over <code",
       "core6529://",
-      "minting, delegation and market trades continue in your browser",
+      "minting, delegation and market trades are not sent to your wallet from the app",
       "There is no Linux version yet. It comes later.",
       "Macs with Apple silicon only",
     ]) {

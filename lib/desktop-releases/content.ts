@@ -43,27 +43,48 @@ export function getDesktopInstallerName(
   );
 }
 
+/** A section of the guide, so the page can put a screenshot after it. */
+export type DesktopGuideSection =
+  | "before"
+  | "windows"
+  | "mac"
+  | "signIn"
+  | "browserSigning"
+  | "update"
+  | "uninstall";
+
 /**
- * The guide: installing on each system, signing in, signing with a browser
- * wallet, updating and uninstalling. File names come from the newest
- * release, or read `<version>` while there is none.
+ * The guide, section by section: what you need, installing on each
+ * system, signing in, signing with a browser wallet, updating and
+ * uninstalling. File names come from the newest release, or read
+ * `<version>` while there is none.
  */
-export function getDesktopGuideMarkdown(
+export function getDesktopGuideSections(
   release: DesktopRelease | undefined
-): string {
+): readonly { readonly id: DesktopGuideSection; readonly markdown: string }[] {
   return [
-    t(LOCALE, "desktopPage.guide.windows", {
-      setup: getDesktopInstallerName(release, "windows"),
-      publisher: DESKTOP_WINDOWS_PUBLISHER,
-    }),
-    t(LOCALE, "desktopPage.guide.mac", {
-      dmg: getDesktopInstallerName(release, "macos"),
-    }),
-    t(LOCALE, "desktopPage.guide.signIn"),
-    t(LOCALE, "desktopPage.guide.browserSigning"),
-    t(LOCALE, "desktopPage.guide.update"),
-    t(LOCALE, "desktopPage.guide.uninstall"),
-  ].join("\n\n");
+    { id: "before", markdown: t(LOCALE, "desktopPage.guide.before") },
+    {
+      id: "windows",
+      markdown: t(LOCALE, "desktopPage.guide.windows", {
+        setup: getDesktopInstallerName(release, "windows"),
+        publisher: DESKTOP_WINDOWS_PUBLISHER,
+      }),
+    },
+    {
+      id: "mac",
+      markdown: t(LOCALE, "desktopPage.guide.mac", {
+        dmg: getDesktopInstallerName(release, "macos"),
+      }),
+    },
+    { id: "signIn", markdown: t(LOCALE, "desktopPage.guide.signIn") },
+    {
+      id: "browserSigning",
+      markdown: t(LOCALE, "desktopPage.guide.browserSigning"),
+    },
+    { id: "update", markdown: t(LOCALE, "desktopPage.guide.update") },
+    { id: "uninstall", markdown: t(LOCALE, "desktopPage.guide.uninstall") },
+  ];
 }
 
 /** The known issues of the test release, as the release notes verify them. */

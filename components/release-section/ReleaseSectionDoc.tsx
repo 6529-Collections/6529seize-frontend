@@ -1,23 +1,33 @@
+import type { ReactNode } from "react";
+
 import ValidatorMarkdown, {
   getMarkdownSections,
 } from "@/components/validator-page/ValidatorMarkdown";
 
+/** One stretch of a text page: Markdown, and what follows it, such as a figure. */
+export type ReleaseSectionDocPart = {
+  readonly markdown: string;
+  readonly after?: ReactNode;
+};
+
 /**
  * The body of a text page in a release section (a guide, the known
  * issues): a table of contents when the page has more than two sections,
- * then the Markdown.
+ * then the Markdown, each part followed by what it carries.
  */
 export default function ReleaseSectionDoc({
   contentsId,
   contentsLabel,
-  markdown,
+  parts,
 }: {
   /** The id of the contents heading. */
   readonly contentsId: string;
   readonly contentsLabel: string;
-  readonly markdown: string;
+  readonly parts: readonly ReleaseSectionDocPart[];
 }) {
-  const sections = getMarkdownSections(markdown);
+  const sections = getMarkdownSections(
+    parts.map((part) => part.markdown).join("\n\n")
+  );
   return (
     <>
       {sections.length > 2 && (
@@ -46,7 +56,12 @@ export default function ReleaseSectionDoc({
         </nav>
       )}
       <article className="tw-max-w-3xl">
-        <ValidatorMarkdown markdown={markdown} />
+        {parts.map((part) => (
+          <div key={part.markdown.slice(0, 80)} className="tw-mt-12 first:tw-mt-0">
+            <ValidatorMarkdown markdown={part.markdown} />
+            {part.after}
+          </div>
+        ))}
       </article>
     </>
   );
