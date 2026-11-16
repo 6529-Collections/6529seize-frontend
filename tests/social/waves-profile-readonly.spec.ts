@@ -26,7 +26,11 @@ import {
   RESPONSE_TIMEOUT_MS,
 } from "../support/routeReadiness";
 
-import { installSubscriptionFixtures } from "../support/subscriptionFixtures";
+import {
+  installSubscriptionFixtures,
+  subscriptionCoverageFixture,
+} from "../support/subscriptionFixtures";
+import { ApiSubscriptionCoverageStatus } from "../../generated/models/ApiSubscriptionCoverageStatus";
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US.complete";
 import {
@@ -680,6 +684,74 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       }
     });
   }
+
+  test("keeps a visitor's Not set up subscription status informational", async ({
+    page,
+  }, testInfo) => {
+    await installSubscriptionFixtures(page);
+    await page.route("**/subscriptions/consolidation/coverage/**", (route) =>
+      route.fulfill({
+        json: subscriptionCoverageFixture({
+          status: ApiSubscriptionCoverageStatus.NotSetUp,
+          mode: null,
+          balance_eth: "0",
+          mint_capacity: 0,
+          allocated_mints: 0,
+          fully_funded_drops: 0,
+          funded_through: null,
+          next_unfunded: null,
+          minimum_top_up: null,
+          recommended_top_up: null,
+        }),
+      })
+    );
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    const overview = page
+      .getByRole("region", { name: "Subscription minting", exact: true })
+      .locator("#profile-subscriptions-overview");
+    await expect(
+      overview.getByRole("heading", { name: "Not set up", exact: true })
+    ).toBeVisible();
+    await expect(
+      overview.getByText("Subscription balance", { exact: true })
+    ).toBeVisible();
+    await expect(
+      overview.getByText("0 mints available", { exact: true })
+    ).toBeVisible();
+    await expect(
+      overview.getByText("0 allocated", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        /Set up subscriptions to receive|Choose a drop to see|Review settings or refresh/
+      )
+    ).toHaveCount(0);
+    await expect(
+      overview.getByRole("button", { name: "Top up", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      overview.getByRole("button", { name: "Refresh balance", exact: true })
+    ).toHaveCount(0);
+    await expect(page.getByRole("switch")).toHaveCount(0);
+    await overview
+      .getByRole("button", { name: "Forecast use", exact: true })
+      .click();
+    await expect(
+      page
+        .getByRole("tooltip")
+        .getByText(
+          "Projected from current eligibility, settings, balance, and the published Meme schedule.",
+          { exact: true }
+        )
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "subscription-visitor-not-set-up.png"
+    );
+  });
 
   test("keeps the full subscription airdrop address available on touch and keyboard", async ({
     page,
