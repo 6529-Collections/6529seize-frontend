@@ -47,9 +47,10 @@ threads.
 
 ### Menus and thread-state actions
 
-On desktop, open a drop's three-dot menu and select **More actions** at the
-bottom to scroll to additional items. Select **Scroll up** to return to the
-earlier items. The menu stays in place as the list scrolls.
+On desktop, open a drop's three-dot menu. Use the down arrow in the lower-right
+corner to reveal more actions and the up arrow in the upper-right corner to
+return to earlier actions. Each arrow appears when there are actions in that
+direction. The menu stays in place as the list scrolls.
 
 - [Wave Drop Touch Menu](feature-touch-drop-menu.md)
 - [Wave Drop Set as Pinned Drop](feature-set-pinned-drop.md)

@@ -284,7 +284,6 @@ export const DE_DE_MESSAGES = {
   "waves.drop.actions.copied": "Kopiert!",
   "waves.drop.actions.copyFailed": "Kopieren fehlgeschlagen",
   "waves.drop.actions.menuLabel": "Drop-Aktionen",
-  "waves.drop.actions.moreActions": "Weitere Aktionen",
   "waves.drop.actions.scrollForMore": "Weitere Aktionen, nach unten scrollen",
   "waves.drop.actions.scrollUp": "Nach oben scrollen",
   "waves.drop.actions.reactionPickerLabel": "Reaktion zum Drop hinzufügen",
