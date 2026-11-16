@@ -912,59 +912,112 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
   });
 
-  test("keeps NIC raters beside the total on desktop and mobile", async ({
-    page,
-    baseURL,
-    isMobile,
-  }) => {
-    const api = getSandboxApiOrigin(baseURL);
-    await page.route(`${api}/api/profiles/*/cic/overview*`, (route) =>
-      route.fulfill({
-        json: {
-          total_cic: 4689,
-          authenticated_user_contribution: 100,
-          contributor_count: 3,
-          contributors: {
-            data: Array.from({ length: 3 }, (_, index) => ({
-              profile: {
-                handle: `nic-rater-${index}`,
-                primary_address: `0x${(index + 1).toString(16).padStart(40, "0")}`,
-                pfp: "/icon-512.png",
-              },
-              contribution: 100,
-            })),
-            page: 1,
-            next: false,
-            count: 3,
+  for (const largeTotals of [false, true]) {
+    test(`keeps NIC raters and receivers right-aligned with ${largeTotals ? "large" : "standard"} totals`, async ({
+      page,
+      baseURL,
+      isMobile,
+    }, testInfo) => {
+      const api = getSandboxApiOrigin(baseURL);
+      const summary = largeTotals
+        ? { received: 2834567, given: 6789123, raters: 146, receivers: 397 }
+        : { received: 4689, given: 4689, raters: 3, receivers: 3 };
+      if (isMobile && largeTotals)
+        await page.setViewportSize({ width: 320, height: 844 });
+      await page.route(`${api}/api/profiles/*/cic/overview*`, (route) => {
+        const given =
+          new URL(route.request().url()).searchParams.get("direction") ===
+          "outgoing";
+        const total = given ? summary.given : summary.received;
+        const count = given ? summary.receivers : summary.raters;
+        return route.fulfill({
+          json: {
+            total_cic: total,
+            authenticated_user_contribution: 100,
+            contributor_count: count,
+            contributors: {
+              data: Array.from({ length: largeTotals ? 5 : 3 }, (_, index) => ({
+                profile: {
+                  handle: `nic-rater-${index}`,
+                  primary_address: `0x${(index + 1).toString(16).padStart(40, "0")}`,
+                  pfp: "/icon-512.png",
+                },
+                contribution: 100,
+              })),
+              page: 1,
+              next: false,
+              count,
+            },
           },
-        },
-      })
-    );
-    await openProfile(page);
-    if (isMobile)
-      await page.getByRole("button", { name: "NIC", exact: true }).click();
-    const nic = page.getByRole("region", { name: "NIC", exact: true });
-    const raters = nic.getByRole("button", {
-      name: "View NIC Received: 3 raters",
+        });
+      });
+      await openProfile(page);
+      if (isMobile)
+        await page.getByRole("button", { name: "NIC", exact: true }).click();
+      const nic = page.getByRole("region", { name: "NIC", exact: true });
+      for (const direction of ["Received", "Given"] as const) {
+        if (direction === "Given")
+          await nic.getByRole("button", { name: "Given", exact: true }).click();
+        const given = direction === "Given";
+        const total = given ? summary.given : summary.received;
+        const count = given ? summary.receivers : summary.raters;
+        const contributors = nic.getByRole("button", {
+          name: `View NIC ${direction}: ${count} ${given ? "receivers" : "raters"}`,
+          exact: true,
+        });
+        await expect(contributors).toBeVisible();
+        const score = nic.getByText(total.toLocaleString("en-US"), {
+          exact: true,
+        });
+        await expect(score).toBeVisible();
+        const scoreBox = await score.boundingBox();
+        const contributorsBox = await contributors.boundingBox();
+        const nicBox = await nic.boundingBox();
+        expect(scoreBox).not.toBeNull();
+        expect(contributorsBox).not.toBeNull();
+        expect(nicBox).not.toBeNull();
+        if (largeTotals) {
+          // A long total may need its own row; contributors must stay on the right.
+          const sameLine =
+            Math.abs(
+              contributorsBox!.y +
+                contributorsBox!.height / 2 -
+                scoreBox!.y -
+                scoreBox!.height / 2
+            ) <= 3;
+          if (isMobile) expect(sameLine).toBe(false);
+          if (sameLine)
+            expect(contributorsBox!.x).toBeGreaterThan(
+              scoreBox!.x + scoreBox!.width
+            );
+          else
+            expect(contributorsBox!.y).toBeGreaterThanOrEqual(
+              scoreBox!.y + scoreBox!.height
+            );
+        } else {
+          expect(contributorsBox!.x).toBeGreaterThan(
+            scoreBox!.x + scoreBox!.width
+          );
+          expect(
+            Math.abs(
+              contributorsBox!.y +
+                contributorsBox!.height / 2 -
+                scoreBox!.y -
+                scoreBox!.height / 2
+            )
+          ).toBeLessThanOrEqual(3);
+        }
+        expect(contributorsBox!.x + contributorsBox!.width).toBeCloseTo(
+          nicBox!.x + nicBox!.width,
+          0
+        );
+        await expectNoHorizontalOverflow(page);
+        await nic.screenshot({
+          path: testInfo.outputPath(`nic-${direction.toLowerCase()}-total.png`),
+        });
+      }
     });
-    await expect(raters).toBeVisible();
-    const score = nic.getByText("4,689", { exact: true });
-    await expect(score).toBeVisible();
-    const scoreBox = await score.boundingBox();
-    const ratersBox = await raters.boundingBox();
-    expect(scoreBox).not.toBeNull();
-    expect(ratersBox).not.toBeNull();
-    expect(ratersBox!.x).toBeGreaterThan(scoreBox!.x + scoreBox!.width);
-    expect(
-      Math.abs(
-        ratersBox!.y +
-          ratersBox!.height / 2 -
-          scoreBox!.y -
-          scoreBox!.height / 2
-      )
-    ).toBeLessThanOrEqual(3);
-    await expectNoHorizontalOverflow(page);
-  });
+  }
 
   test("signed-out viewers do not see personal amounts from stale REP responses", async ({
     page,

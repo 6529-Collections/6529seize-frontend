@@ -124,26 +124,21 @@ export default function NicRatingsOverview({
             </h2>
             {directionToggle}
           </div>
-          {direction === "received" ? (
-            <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
-              {scoreValue}
-              {contributors}
-            </div>
-          ) : (
-            scoreValue
-          )}
+          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+            {scoreValue}
+            <div className="tw-ml-auto tw-min-w-0">{contributors}</div>
+          </div>
           {status}
-          <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-1">
-            {direction === "given" && contributors}
-            {rateButton && (
+          {rateButton && (
+            <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-1">
               <div className="tw-ml-auto tw-min-w-0 tw-flex-1 tw-pt-1">
                 <div className="tw-flex tw-flex-row-reverse tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2">
                   {rateButton}
                   {personalRating}
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </>
       ) : (
         <>
@@ -153,21 +148,10 @@ export default function NicRatingsOverview({
               {t(locale, "user.rate.nicRegion")}
             </p>
             {status}
-            <div
-              className={
-                direction === "received"
-                  ? "tw-col-span-2 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3"
-                  : "tw-col-start-1 tw-row-start-2"
-              }
-            >
+            <div className="tw-col-span-2 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
               {scoreValue}
-              {direction === "received" && contributors}
+              <div className="tw-ml-auto tw-min-w-0">{contributors}</div>
             </div>
-            {direction === "given" && (
-              <div className="tw-col-span-2 tw-row-start-3 tw-mt-3">
-                {contributors}
-              </div>
-            )}
           </div>
         </>
       )}

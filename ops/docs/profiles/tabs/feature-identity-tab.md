@@ -341,8 +341,10 @@ show the profile-creation welcome.
 - Both directions use a compact summary with a score, avatars and a count,
   matching REP. Avatars open individual profiles; the borderless count button
   and chevron open the full list. Owners can adjust their Given ratings there.
-- The NIC total is green. In `Received` on desktop and mobile, contributor avatars, count and
-  chevron are right-aligned on its number row. The received accuracy status
+- The NIC total is green. In both `Received` and `Given` on desktop and mobile,
+  contributor avatars, count and chevron are right-aligned on its number row.
+  When a large total leaves too little room, the contributor group wraps below
+  and stays right-aligned. The received accuracy status
   keeps its existing position.
 - `Received` shows the viewed profile's incoming NIC, status and raters.
   Select the rater count and chevron to inspect the full list.
