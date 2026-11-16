@@ -25,6 +25,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -32,6 +33,7 @@ import {
 import RatingAmountInput from "./RatingAmountInput";
 import RatingEditorFooter from "./RatingEditorFooter";
 import RatingEditorErrors from "./RatingEditorErrors";
+import { getRatingTotalColor } from "./ratingContributorStyles";
 import { useRepRatingSave } from "./modify-rep/useRepRatingSave";
 import {
   canManageGivenRatings,
@@ -203,13 +205,9 @@ function RepContributionActions({
   readonly saved: boolean;
 }) {
   const locale = useBrowserLocale();
-  let nextValueClassName = "tw-font-medium tw-text-iron-100";
-  if (isRatingValue(value)) {
-    nextValueClassName =
-      Number(value) > currentAmount
-        ? "tw-font-medium tw-text-emerald-400"
-        : "tw-font-medium tw-text-rose-400";
-  }
+  const nextValueClassName = `tw-font-medium ${getRatingTotalColor(
+    isRatingValue(value) ? Number(value) : null
+  )}`;
   return (
     <div className="tw-flex tw-h-[42px] tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-pl-2.5 tw-pr-1.5">
       <span
@@ -335,8 +333,12 @@ export default function RepCategoryDetails({
     staleTime: 5 * 60 * 1000,
     getNextPageParam: (page) => (page.next ? page.page + 1 : undefined),
   });
-  const items = (query.data?.pages.flatMap((page) => page.data) ?? []).toSorted(
-    (a, b) => b.contribution - a.contribution
+  const items = useMemo(
+    () =>
+      (query.data?.pages.flatMap((page) => page.data) ?? []).toSorted(
+        (a, b) => b.contribution - a.contribution
+      ),
+    [query.data?.pages]
   );
   // This endpoint's remaining credit is rater-global. For Given we only need
   // that budget, so a stable identity avoids an extra request as rows arrive.

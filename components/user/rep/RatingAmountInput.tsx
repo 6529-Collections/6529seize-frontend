@@ -7,6 +7,7 @@ import { formatInteger } from "@/i18n/format";
 import clsx from "clsx";
 import type { ComponentProps } from "react";
 import { isRatingValue } from "./ratingsManagement";
+import { getRatingTotalColor } from "./ratingContributorStyles";
 
 type Props = ComponentProps<typeof RatingInput> & {
   readonly originalAmount: number;
@@ -69,8 +70,7 @@ export default function RatingAmountInput({
             subtle
               ? "tw-bg-transparent tw-text-iron-100 focus:tw-ring-0"
               : "tw-bg-black/40 tw-ring-1 tw-ring-inset tw-ring-white/[0.08] hover:tw-ring-white/[0.18] focus:tw-shadow-[0_0_0_3px_#528BFF29] focus:tw-ring-primary-400/75",
-            !subtle && negative && "tw-text-rose-400",
-            !subtle && !negative && changed && adjustmentColor,
+            !subtle && (negative || changed) && getRatingTotalColor(amount),
             !subtle && !negative && !changed && "tw-text-iron-100",
             className
           )}

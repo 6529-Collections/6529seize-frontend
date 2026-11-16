@@ -283,7 +283,8 @@ show the profile-creation welcome.
   Your `Received` input has a subtle fill, neutral border and consistent text
   color; its plus/minus column is separated by a faint divider.
   In `Received`, changing an existing amount reveals a muted old value,
-  muted arrow and a new value in emerald for an increase or rose for a decrease
+  muted arrow and a new value in emerald when positive, rose when negative,
+  or neutral iron at zero
   in the second row, followed by a compact `Save`
   button. A first contribution shows only `Grant Rep` there. The action is
   about 30px tall; the fixed row keeps the input and list from moving when it
@@ -301,7 +302,11 @@ show the profile-creation welcome.
   Save applies changes sequentially,
   returning released credit before spending it elsewhere.
   Changed fields keep their signed adjustment beside the input; increases use
-  emerald and decreases use rose, including the proposed footer total.
+  emerald and decreases use rose. Changed Given inputs and proposed totals use
+  their resulting sign: emerald when positive, rose when negative and neutral
+  iron at zero. Reducing a positive total does not turn that total rose; its
+  negative adjustment stays rose. The standalone modal and pinned Received
+  inputs retain their standard neutral text.
 - Fields wait for the allowance to load. On failure, use `Try again`. Save is
   unavailable for invalid amounts or a combined allocation beyond the allowance.
 - After a fully successful save, the mobile and native category sheet closes

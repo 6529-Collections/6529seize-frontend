@@ -7,7 +7,7 @@ import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useContext, type ReactNode } from "react";
 
@@ -213,6 +213,79 @@ it("makes the owner's received categories read-only", async () => {
   expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
   expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
 });
+
+it.each([
+  { current: 20, value: "10", display: "10", color: "tw-text-emerald-400" },
+  { current: -20, value: "-10", display: "-10", color: "tw-text-rose-400" },
+  { current: 20, value: "0", display: "0", color: "tw-text-iron-100" },
+  { current: 20, value: "-", display: "—", color: "tw-text-iron-100" },
+])(
+  "colors a Received total by its sign (%j)",
+  async ({ current, value, display, color }) => {
+    const user = userEvent.setup();
+    ownContribution = current;
+    setup(target, "received");
+    await screen.findByRole("link", { name: "alice" });
+    const input = screen.getByRole("textbox", { name: "You" });
+    const reads = fetchApi.mock.calls.length;
+    await user.clear(input);
+    await user.type(input, value);
+    expect(
+      within(screen.getByRole("status")).getByText(display, { exact: true })
+    ).toHaveClass(color);
+    expect(input).toHaveClass("tw-text-iron-100");
+    expect(fetchApi).toHaveBeenCalledTimes(reads);
+    expect(post).not.toHaveBeenCalled();
+  }
+);
+
+it.each([
+  {
+    value: "10",
+    total: "30",
+    inputColor: "tw-text-emerald-400",
+    totalColor: "tw-text-emerald-400",
+    delta: "−20",
+  },
+  {
+    value: "-10",
+    total: "10",
+    inputColor: "tw-text-rose-400",
+    totalColor: "tw-text-emerald-400",
+    delta: "−40",
+  },
+  {
+    value: "-20",
+    total: "0",
+    inputColor: "tw-text-rose-400",
+    totalColor: "tw-text-iron-100",
+    delta: "−50",
+  },
+  {
+    value: "-60",
+    total: "-40",
+    inputColor: "tw-text-rose-400",
+    totalColor: "tw-text-rose-400",
+    delta: "−90",
+  },
+])(
+  "keeps Given totals distinct from their signed adjustments (%j)",
+  async ({ value, total, inputColor, totalColor, delta }) => {
+    const user = userEvent.setup();
+    setup(owner, "given");
+    const input = await screen.findByRole("textbox", { name: "alice" });
+    const reads = fetchApi.mock.calls.length;
+    await user.clear(input);
+    await user.type(input, value);
+    expect(input).toHaveClass(inputColor);
+    expect(
+      within(screen.getByRole("status")).getByText(total, { exact: true })
+    ).toHaveClass(totalColor);
+    expect(screen.getByTitle(delta)).toHaveClass("tw-text-rose-400");
+    expect(fetchApi).toHaveBeenCalledTimes(reads);
+    expect(post).not.toHaveBeenCalled();
+  }
+);
 
 it("pins an empty You input for a first contribution and grants only on submit", async () => {
   const user = userEvent.setup();

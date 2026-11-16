@@ -1463,7 +1463,18 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
     await expect(
       panel.getByRole("status").getByText("10", { exact: true })
+    ).toHaveCSS("color", "rgb(52, 211, 153)");
+    await panel.screenshot({
+      path: testInfo.outputPath("rep-positive-reduction.png"),
+    });
+    await input.fill("-10");
+    await expect(
+      panel.getByRole("status").getByText("-10", { exact: true })
     ).toHaveCSS("color", "rgb(251, 113, 133)");
+    await input.fill("0");
+    await expect(
+      panel.getByRole("status").getByText("0", { exact: true })
+    ).toHaveCSS("color", "rgb(239, 239, 241)");
     await input.fill("30");
     const originalViewport = page.viewportSize();
     if (originalViewport) {
@@ -2472,6 +2483,16 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(first).toHaveValue("30");
+    await first.fill("20");
+    await expect(first).toHaveCSS("color", "rgb(52, 211, 153)");
+    await expect(panel.getByTitle("−10", { exact: true })).toHaveCSS(
+      "color",
+      "rgb(251, 113, 133)"
+    );
+    await expect(
+      panel.getByRole("status").getByText("10", { exact: true })
+    ).toHaveCSS("color", "rgb(52, 211, 153)");
+    await first.fill("30");
     await first.fill("110");
     await second.fill("0");
     await expect(panel.getByRole("status")).toHaveText("Total 20 → 80");
@@ -3320,6 +3341,25 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       const repReadsBeforeEdit = recipientRepReads;
       const nicReadsBeforeEdit = recipientNicReads;
       await expectAxeClean(page, { include: ['[role="dialog"]'] });
+      await amount().fill("10");
+      await expect(amount()).toHaveCSS("color", "rgb(52, 211, 153)");
+      await expect(list.getByTitle("−10", { exact: true })).toHaveCSS(
+        "color",
+        "rgb(251, 113, 133)"
+      );
+      await expect(
+        list.getByRole("status").getByText("910", { exact: true })
+      ).toHaveCSS("color", "rgb(52, 211, 153)");
+      await list.locator(".mobile-wrapper-dialog").screenshot({
+        path: testInfo.outputPath("NIC-positive-reduction.png"),
+      });
+      await amount().fill("-10");
+      await expect(amount()).toHaveCSS("color", "rgb(251, 113, 133)");
+      await expect(
+        list.getByRole("status").getByText("890", { exact: true })
+      ).toHaveCSS("color", "rgb(52, 211, 153)");
+      await amount().fill("0");
+      await expect(amount()).toHaveCSS("color", "rgb(239, 239, 241)");
       await amount().fill("25");
       if (isMobile && testInfo.project.name === "web-mobile-chromium") {
         try {
@@ -3402,6 +3442,10 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         page.getByText("Please try again.", { exact: true }).first()
       ).toBeVisible();
       await expect(amount()).toHaveValue("30");
+      await expect(list.getByRole("alert")).toBeVisible();
+      await amount().fill("31");
+      await expect(list.getByRole("alert")).toHaveCount(0);
+      await amount().fill("30");
       const pagesBeforeSave = requestedPages.length;
       await save.click();
       await expect(managementDialogs).toHaveCount(1);
