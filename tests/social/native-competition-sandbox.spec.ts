@@ -4,7 +4,9 @@ import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
 import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
+import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
+import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { observeCachedChatResponse } from "../support/cachedChatResponse";
 import { expectCompetitionScroll } from "../support/competitionScroll";
@@ -13270,6 +13272,119 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(sorts).toContain("rating");
     expect(sandbox.requests).toEqual([]);
   });
+
+  for (const surface of ["web", "app"] as const) {
+    test(`animates a video submission's GIF preview image on the Main Stage leaderboard on ${surface}`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "The app simulation uses the mobile viewport."
+      );
+      if (surface === "app") {
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          baseURL
+        );
+      }
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        true,
+        MEMES_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${MEMES_WAVE}/drops`
+      );
+      expect(response.ok()).toBe(true);
+      const fixture = (await response.json()) as {
+        wave: ApiWaveOverview;
+        drops: ApiDropV2[];
+      };
+      const mediaRoot =
+        "https://d3lqz0a4bldqgf.cloudfront.net/drops/leaderboard-gif-fixture/";
+      const original = `${mediaRoot}preview.gif`;
+      const artwork = {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        drop_type: ApiDropMainType.Submission,
+        title: "Leaderboard GIF preview",
+        media: [{ url: `${mediaRoot}artwork.mp4`, mime_type: "video/mp4" }],
+        priority_metadata: [
+          {
+            data_key: "additional_media",
+            data_value: JSON.stringify({ preview_image: original }),
+          },
+        ],
+      };
+      await installArtworkCompetitionResources(
+        page,
+        MEMES_WAVE,
+        { ...fixture.wave, id: MEMES_WAVE },
+        () => [artwork]
+      );
+      await page.route(`${mediaRoot}**/preview.gif`, (route) => {
+        const url = route.request().url();
+        if (url === original) {
+          return route.fulfill({
+            contentType: "image/gif",
+            path: "tests/media/fixtures/animation.gif",
+          });
+        }
+        if (url.includes("_gifv2/")) {
+          return route.fulfill({
+            status: 422,
+            json: { code: "DECODED_IMAGE_TOO_LARGE" },
+          });
+        }
+        return route.fulfill({
+          contentType: "image/png",
+          path: "public/test-wave-icon.png",
+        });
+      });
+      await page.route(`${mediaRoot}artwork.mp4`, (route) =>
+        route.fulfill({
+          contentType: "video/mp4",
+          path: "tests/media/fixtures/portrait.mp4",
+        })
+      );
+      await page.goto(`/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard`);
+      await dismissNextDevTools(page);
+      for (const view of ["Grid view", "List view"]) {
+        await page.getByRole("tab", { name: view, exact: true }).click();
+        await page
+          .getByRole("listitem")
+          .getByText(artwork.title, { exact: true })
+          .scrollIntoViewIfNeeded();
+        if (view === "List view" && surface === "web") {
+          await expect(
+            page
+              .getByRole("listitem")
+              .filter({ hasText: artwork.title })
+              .locator("video")
+          ).toBeVisible();
+          continue;
+        }
+        const image = page
+          .getByRole("listitem")
+          .filter({ hasText: artwork.title })
+          .locator(`img[src="${original}"]`);
+        await expect(image).toBeVisible();
+        await expect
+          .poll(() =>
+            image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+          )
+          .toBeGreaterThan(0);
+        const firstFrame = await image.screenshot();
+        await expect.poll(() => image.screenshot()).not.toEqual(firstFrame);
+      }
+      expect(sandbox.requests).toEqual([]);
+    });
+  }
 
   for (const surface of ["web", "app"] as const) {
     test(`preserves populated legacy Main Stage artwork in ${surface} views`, async ({

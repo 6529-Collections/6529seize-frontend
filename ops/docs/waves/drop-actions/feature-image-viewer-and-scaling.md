@@ -14,11 +14,10 @@ small loader until the original is ready; **View optimized** switches back or
 cancels a pending switch. Moving to another image resets this choice. Thread images have no HD control or GIF badge. In the Memes submission artwork
 view, the HD control is always visible for both still images and GIFs, including
 on touch devices. The initial artwork and popup share the selected quality.
-On desktop, GIF artwork in the single-submission view tries animated previews
-first. If those previews are unavailable, the original animation loads
-automatically; no HD click is needed. Mobile browsers, tablets, and the native
-mobile app keep bounded previews and require HD to load the original. The
-improved artwork loading indicator is shared across all platforms.
+Uploaded GIF artwork in the single-submission view tries animated previews
+first. If those previews fail, the original animation loads automatically on
+desktop, touch devices, and the native app. The artwork loading indicator is
+shared across all platforms.
 HD highlights when the original is selected. Choose
 **View optimized** to return to the preview or cancel the original load.
 
@@ -50,8 +49,7 @@ HD highlights when the original is selected. Choose
    “Loading original GIF” stage. An available fallback preview stays behind it.
    Reduced-motion settings disable the spin; HD remains available during loading.
    These frames are reserved viewing space, not the GIF's measured dimensions.
-   Card previews keep their existing GIF processing limits and do not load the
-   original animation automatically.
+   Cards request GIF previews when they come into view.
 3. Click or tap the image to open the modal viewer.
 4. Zoom the image and use modal controls:
    - `Open in Browser` opens the source URL in a new tab.
@@ -104,8 +102,7 @@ HD highlights when the original is selected. Choose
 ## Failure and Recovery
 
 - If a larger preview fails, the viewer tries the smaller `AUTOx450` preview.
-  Feeds and the viewer never automatically display the full-size original as a
-  fallback. The submission artwork optimizer reads the source on the server to
+  The submission artwork optimizer reads the source on the server to
   generate its responsive preview. Next may pass through source bytes for
   animations in other raster formats or when it cannot re-encode a valid image.
 - If no supported preview is available, the image frame stays in place and shows
@@ -137,20 +134,17 @@ HD highlights when the original is selected. Choose
   names.
 - GIF previews use a versioned animation-preserving resize path. The worker can
   reduce preview resolution to retain every frame within its output budget.
-  GIFs that exceed processing limits fall back to a legacy preview, which may
-  be static. On desktop, submission artwork and uploaded GIFs in the
-  **Preview Image** section automatically load the original when an animated
-  preview is unavailable. The same fallback works in the image viewer. An available legacy
-  preview stays visible until the original is ready. This can use more
-  bandwidth and device memory. Choosing **View optimized** prevents another
-  automatic switch for that image. Mobile browsers, tablets, native mobile apps,
-  feeds, grids, thread images, and images in **Additional Media** start with
-  their optimized previews. Use the HD icon to choose **View original**.
+  For GIFs uploaded to 6529 drops, cards, threads, thumbnails, and the
+  **Preview Image** section try the original animation when the resized copies
+  fail. If the original also fails, an available still preview lets you see
+  the artwork. The original may take longer to load.
+  In views with an HD control, **View optimized** switches back to its preview
+  and prevents another automatic switch for that image.
 - If loading the original fails, the viewer restores its preview, announces the
   failure, and lets you try again. The HD button shows a warning icon and its
   tooltip explains the failure. Selecting it retries and restores the HD icon;
   no playback controls or messages cover the artwork.
-  An automatic desktop submission GIF load is attempted once per artwork view; a failure
+  An automatic submission GIF load is attempted once per artwork view. A failure
   does not repeatedly reload the original when the popup is opened.
 - If a fullscreen request is denied or interrupted, the modal stays open and
   the other image actions continue to work.
