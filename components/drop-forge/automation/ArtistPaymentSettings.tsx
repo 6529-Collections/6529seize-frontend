@@ -29,10 +29,12 @@ function normalizePaymentLimit(draft: string): string | null {
 export default function ArtistPaymentSettings({
   settings,
   saving,
+  savingPayment,
   onChange,
 }: Readonly<{
   settings: ApiDropForgeSettings;
   saving: boolean;
+  savingPayment: boolean;
   onChange: (update: PaymentUpdate) => Promise<boolean>;
 }>) {
   const locale = useBrowserLocale();
@@ -40,6 +42,12 @@ export default function ArtistPaymentSettings({
   const [draft, setDraft] = useState<string | null>(null);
   const enabled = settings.pay_artist_enabled;
   const savedLimit = settings.max_artist_payment_eth;
+  const paymentStatus = enabled
+    ? "dropForge.settings.paymentEnabled"
+    : "dropForge.settings.paymentDisabled";
+  const paymentStatusColor = enabled
+    ? "tw-bg-emerald-500/15 tw-text-emerald-300"
+    : "tw-bg-rose-500/15 tw-text-rose-300";
   const disabled = saving || !settings.can_edit;
 
   async function saveLimit(limit: string) {
@@ -64,13 +72,11 @@ export default function ArtistPaymentSettings({
           {t(locale, "dropForge.settings.artist")}
         </h3>
         <output
-          className={`tw-rounded-full tw-px-2.5 tw-py-1 tw-text-xs tw-font-medium ${enabled ? "tw-bg-emerald-500/15 tw-text-emerald-300" : "tw-bg-iron-800 tw-text-iron-300"}`}
+          className={`tw-inline-flex tw-min-w-24 tw-justify-center tw-whitespace-nowrap tw-rounded-full tw-px-3 tw-py-1 tw-text-sm tw-font-semibold ${paymentStatusColor}`}
         >
           {t(
             locale,
-            enabled
-              ? "dropForge.settings.paymentEnabled"
-              : "dropForge.settings.paymentDisabled"
+            savingPayment ? "dropForge.settings.saving" : paymentStatus
           )}
         </output>
       </div>

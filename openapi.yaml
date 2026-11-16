@@ -34035,6 +34035,10 @@ components:
           type: integer
         contract:
           type: string
+        operations_wave_id:
+          type: string
+          format: uuid
+          description: Wave where Drop Forge posts operational updates.
         signer_address:
           type: string
         ens_name:

@@ -1,6 +1,7 @@
 {
   "dropForge.airdrop.summary": "Copies: {quantity} \u00b7 Recipient wallets: {wallets}",
   "dropForge.settings.title": "Launch Automation",
+  "dropForge.settings.opsWave": "Drop Forge Ops",
   "dropForge.settings.launch": "Automatic launch",
   "dropForge.settings.preparation": "EMMA preparation",
   "dropForge.settings.preparationPaused": "Preparation paused",
@@ -9,6 +10,10 @@
   "dropForge.settings.on": "On",
   "dropForge.settings.off": "Off",
   "dropForge.settings.saving": "Saving\u2026",
+  "dropForge.settings.enabledToast": "{setting} enabled.",
+  "dropForge.settings.disabledToast": "{setting} disabled.",
+  "dropForge.settings.limitSavedToast": "Artist payment limit saved.",
+  "dropForge.settings.limitSavedAndEnabledToast": "Artist payment limit saved and automatic payments enabled.",
   "dropForge.settings.readOnly": "You can view these settings.",
   "dropForge.settings.launchReadOnly": "You can change EMMA preparation. The contract owner and claims administrators can change launch and payment settings.",
   "dropForge.settings.paymentLimit": "Maximum ETH per payout",

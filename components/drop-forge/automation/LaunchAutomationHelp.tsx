@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import Button from "@/components/utils/button/Button";
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { dropForgeIconButtonClassName } from "../drop-forge-section-styles";
@@ -27,15 +28,17 @@ export default function LaunchAutomationHelp() {
 
   return (
     <>
-      <Button
-        variant="secondary"
-        className={dropForgeIconButtonClassName}
-        aria-label={title}
-        aria-haspopup="dialog"
-        onClick={() => setOpen(true)}
-      >
-        <InformationCircleIcon aria-hidden="true" className="tw-size-5" />
-      </Button>
+      <CustomTooltip content={title}>
+        <Button
+          variant="secondary"
+          className={dropForgeIconButtonClassName}
+          aria-label={title}
+          aria-haspopup="dialog"
+          onClick={() => setOpen(true)}
+        >
+          <InformationCircleIcon aria-hidden="true" className="tw-size-5" />
+        </Button>
+      </CustomTooltip>
       <Dialog
         open={open}
         onClose={close}

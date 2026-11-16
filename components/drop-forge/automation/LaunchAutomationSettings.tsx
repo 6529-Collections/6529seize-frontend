@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useId, useState } from "react";
 import { ArrowPathIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,6 +15,9 @@ import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { getAddressEtherscanLink } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import Button from "@/components/utils/button/Button";
+import { getButtonClasses } from "@/components/utils/button/buttonStyles";
+import WavesIcon from "@/components/common/icons/WavesIcon";
+import { useWaveById } from "@/hooks/useWaveById";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
 import {
   dropForgeDisclosureClassName,
@@ -28,35 +32,49 @@ import WalletFunding from "./WalletFunding";
 const switches = [
   {
     field: "automation_enabled",
-    label: "dropForge.settings.launch",
     permission: "can_edit",
   },
   {
     field: "preparation_enabled",
-    label: "dropForge.settings.preparation",
     permission: "can_edit_preparation",
   },
 ] as const;
+
+const settingLabels = {
+  automation_enabled: "dropForge.settings.launch",
+  preparation_enabled: "dropForge.settings.preparation",
+  pay_artist_enabled: "dropForge.settings.artist",
+} as const;
+
+type Setting = keyof typeof settingLabels;
 
 export default function LaunchAutomationSettings() {
   const locale = useBrowserLocale();
   const [expanded, setExpanded] = useState(false);
   const bodyId = useId();
   const { address } = useSeizeConnectContext();
-  const { requestAuth } = useAuth();
+  const { requestAuth, setToast } = useAuth();
   const client = useQueryClient();
   const key = forgeSettingsKey(address);
   const query = useDropForgeSettings();
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [savingSetting, setSavingSetting] = useState<Setting | null>(null);
+  const saving = savingSetting !== null;
   const settings = query.data;
+  const opsWaveId = settings?.operations_wave_id ?? null;
+  const { wave: opsWave } = useWaveById(opsWaveId);
+  const opsWaveLabel =
+    opsWave?.id === opsWaveId
+      ? opsWave.name
+      : t(locale, "dropForge.settings.opsWave");
   async function refresh() {
     if ((await requestAuth()).success) await query.refetch();
   }
-  async function change(input: Omit<ApiDropForgeSettingsRequest, "revision">) {
+  async function change(
+    field: Setting,
+    input: Omit<ApiDropForgeSettingsRequest, "revision">
+  ) {
     if (!settings || saving) return false;
-    setSaving(true);
-    setError(null);
+    setSavingSetting(field);
     try {
       if (!(await requestAuth()).success) return false;
       const updated = await saveForgeSettings({
@@ -64,14 +82,31 @@ export default function LaunchAutomationSettings() {
         ...input,
       });
       client.setQueryData(key, updated);
+      const toggleMessage = updated[field]
+        ? "dropForge.settings.enabledToast"
+        : "dropForge.settings.disabledToast";
+      const limitMessage = settings.pay_artist_enabled
+        ? "dropForge.settings.limitSavedToast"
+        : "dropForge.settings.limitSavedAndEnabledToast";
+      setToast({
+        type: "success",
+        message:
+          input.max_artist_payment_eth === undefined
+            ? t(locale, toggleMessage, {
+                setting: t(locale, settingLabels[field]),
+              })
+            : t(locale, limitMessage),
+      });
       return true;
     } catch (e) {
-      setError(
-        getToastErrorDetails(e) ?? t(locale, "dropForge.settings.saveError")
-      );
+      setToast({
+        type: "error",
+        message:
+          getToastErrorDetails(e) ?? t(locale, "dropForge.settings.saveError"),
+      });
       return false;
     } finally {
-      setSaving(false);
+      setSavingSetting(null);
     }
   }
   const refreshLabel = t(
@@ -102,6 +137,22 @@ export default function LaunchAutomationSettings() {
             {t(locale, "dropForge.settings.title")}
           </button>
         </h2>
+        {opsWaveId && (
+          <CustomTooltip content={opsWaveLabel}>
+            <Link
+              href={`/waves/${encodeURIComponent(opsWaveId)}`}
+              aria-label={opsWaveLabel}
+              className={getButtonClasses({
+                variant: "secondary",
+                className: `${dropForgeIconButtonClassName} tw-no-underline`,
+              })}
+            >
+              <span aria-hidden="true" className="tw-flex">
+                <WavesIcon className="tw-size-5" />
+              </span>
+            </Link>
+          </CustomTooltip>
+        )}
         <LaunchAutomationHelp />
         <CustomTooltip content={refreshLabel}>
           <Button
@@ -127,40 +178,41 @@ export default function LaunchAutomationSettings() {
             {t(locale, "dropForge.settings.loadError")}
           </p>
         )}
-        {error && (
-          <p role="alert" className="tw-mt-4 tw-text-rose-300">
-            {error}
-          </p>
-        )}
         {settings && (
           <div className="tw-mt-5 tw-grid tw-gap-4 lg:tw-grid-cols-2">
             <div className="tw-space-y-4">
-              {switches.map(({ field, label, permission }) => {
+              {switches.map(({ field, permission }) => {
                 const checked = settings[field];
+                const savingThis = savingSetting === field;
+                const toggleState = checked
+                  ? "dropForge.settings.on"
+                  : "dropForge.settings.off";
                 return (
                   <label
                     key={field}
                     className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-3"
                   >
                     <span className="tw-text-sm tw-font-medium tw-text-iron-100">
-                      {t(locale, label)}
+                      {t(locale, settingLabels[field])}
                     </span>
                     <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-300">
-                      <span aria-hidden="true">
+                      <span
+                        aria-hidden="true"
+                        className="tw-min-w-[4.5rem] tw-whitespace-nowrap tw-text-right"
+                      >
                         {t(
                           locale,
-                          checked
-                            ? "dropForge.settings.on"
-                            : "dropForge.settings.off"
+                          savingThis ? "dropForge.settings.saving" : toggleState
                         )}
                       </span>
                       <input
                         type="checkbox"
                         role="switch"
                         checked={checked}
+                        aria-busy={savingThis}
                         disabled={!settings[permission] || saving}
                         onChange={(event) =>
-                          void change({ [field]: event.target.checked })
+                          void change(field, { [field]: event.target.checked })
                         }
                         className="tw-size-5 tw-accent-primary-400"
                       />
@@ -172,7 +224,8 @@ export default function LaunchAutomationSettings() {
                 key={`${address ?? ""}:${settings.revision}`}
                 settings={settings}
                 saving={saving}
-                onChange={change}
+                savingPayment={savingSetting === "pay_artist_enabled"}
+                onChange={(input) => change("pay_artist_enabled", input)}
               />
               {!settings.can_edit && (
                 <p className="tw-text-sm tw-text-iron-400">
@@ -184,16 +237,12 @@ export default function LaunchAutomationSettings() {
                   )}
                 </p>
               )}
-              {settings.updated_by && (
-                <p className="tw-break-all tw-text-xs tw-text-iron-500">
-                  {t(locale, "dropForge.settings.updated", {
+              <p className="tw-min-h-4 tw-break-all tw-text-xs tw-text-iron-500">
+                {settings.updated_by &&
+                  t(locale, "dropForge.settings.updated", {
                     wallet: settings.updated_by,
                   })}
-                </p>
-              )}
-              {saving && (
-                <output>{t(locale, "dropForge.settings.saving")}</output>
-              )}
+              </p>
             </div>
             <div className="tw-min-w-0 tw-rounded-lg tw-bg-iron-900 tw-p-4">
               <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">

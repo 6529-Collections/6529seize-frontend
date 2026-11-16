@@ -1161,6 +1161,24 @@ describe("DropPartMarkdown", () => {
     expect(screen.getByText("✅ done")).not.toHaveClass("tw-align-middle");
   });
 
+  it("keeps the warning beside a bold readiness heading at normal size", () => {
+    render(
+      <DropPartMarkdown
+        mentionedUsers={[]}
+        mentionedWaves={[]}
+        referencedNfts={[]}
+        partContent={
+          "⚠️ **Claim #574 · Phase 2 readiness**\n\n- The claim is missing on-chain."
+        }
+        onQuoteClick={jest.fn()}
+      />
+    );
+
+    expect(screen.getByText("⚠️")).not.toHaveClass("emoji-text-node");
+    expect(screen.getByText(/Claim #574/).tagName).toBe("STRONG");
+    expect(screen.getByText("The claim is missing on-chain.")).toBeVisible();
+  });
+
   it("renders Art Blocks token card when feature enabled", async () => {
     publicEnv.VITE_FEATURE_AB_CARD = "true";
     const content = "https://www.artblocks.io/token/662000";
