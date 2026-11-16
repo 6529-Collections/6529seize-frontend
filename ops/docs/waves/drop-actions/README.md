@@ -47,6 +47,11 @@ threads.
 
 ### Menus and thread-state actions
 
+On desktop, open a drop's three-dot menu. Use the down arrow in the lower-right
+corner to reveal more actions and the up arrow in the upper-right corner to
+return to earlier actions. Each arrow appears when there are actions in that
+direction. The menu stays in place as the list scrolls.
+
 - [Wave Drop Touch Menu](feature-touch-drop-menu.md)
 - [Wave Drop Set as Pinned Drop](feature-set-pinned-drop.md)
 - [Wave Drop Mark as Unread](feature-mark-as-unread.md)
