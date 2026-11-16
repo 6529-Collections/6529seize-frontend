@@ -10,8 +10,10 @@ import type {
 
 export default function ReviewDistributionPlanTableBody({
   rows,
+  showManual = false,
 }: {
   rows: ReviewDistributionPlanTablePhase[];
+  showManual?: boolean;
 }) {
   const [items, setItems] = useState<ReviewDistributionPlanTableItem[]>([]);
 
@@ -26,7 +28,12 @@ export default function ReviewDistributionPlanTableBody({
   return (
     <DistributionPlanTableBodyWrapper>
       {items.map((item) => (
-        <ReviewDistributionPlanTableRow key={item.id} item={item} rows={rows} />
+        <ReviewDistributionPlanTableRow
+          key={item.id}
+          item={item}
+          rows={rows}
+          showManual={showManual}
+        />
       ))}
     </DistributionPlanTableBodyWrapper>
   );

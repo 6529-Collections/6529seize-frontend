@@ -26,10 +26,11 @@ The Memes token distribution outputs.
   - can export `JSON`, `CSV`, and `Manifold` for normal phase/component rows.
 - Subscriptions admins:
   - get an extra synthetic `Public` phase row.
-  - get phase-level `Subscription Lists` / `Public Subscriptions` downloads.
+  - get phase-level `Subscription Lists` / `Public Subscriptions` downloads
+    after choosing manual preparation or completing a background job.
   - get footer controls: `Change Token ID`, `Reset Subscriptions`,
     `Artist Airdrops`, `Team Airdrops`, `Distribution Photos`,
-    `Finalize Distribution` or `Process and Finalize`, and `Publish to GitHub`.
+    the preparation controls, and `Publish to GitHub`.
 - Admin users must confirm token ID before footer actions and subscription
   downloads unlock.
 - `Confirm Token ID` is blocking (`backdrop="static"` and `keyboard={false}`).
@@ -41,14 +42,15 @@ The Memes token distribution outputs.
 2. Export baseline results (`JSON` / `CSV` / `Manifold`) for normal rows.
 3. If you are a subscriptions admin, confirm token ID.
 4. Use the footer controls to upload artist/team allocations and distribution photos.
-5. With **EMMA preparation** Off, download `Subscription Lists` for Phase 0,
-   Phase 1, and Phase 2 in order. Then download `Public Subscriptions` and
-   click `Finalize Distribution`.
-6. With **EMMA preparation** On, click `Process and Finalize` and wait for the
-   job to complete. Refresh restores saved progress. If authorization expires
-   before input capture, click `Sign in to resume`. The phase downloads then
-   read the saved CSV lists.
-7. Click `Publish to GitHub` when it becomes enabled and follow its modal.
+5. Choose a preparation mode for the confirmed token.
+   - **Prepare manually** opens the phase controls. Download `Subscription Lists`
+     for Phase 0, Phase 1 and Phase 2 in order. Download `Public Subscriptions`,
+     then click `Finalize Distribution`. You can still select **Process and
+     Finalize** before the first manual write succeeds.
+   - **Process and Finalize** starts a background job. Refresh restores progress.
+     If authorization expires before input capture, click `Sign in to resume`.
+     Phase downloads are available once processing finishes.
+6. Click `Publish to GitHub` when it becomes enabled and follow its modal.
 
 ## Subscriptions Action Rules
 
@@ -57,8 +59,9 @@ The Memes token distribution outputs.
   - non-`Public` phase downloads: `airdrops`, `airdrops_unconsolidated`,
     `allowlists`.
   - `Public` phase downloads: `airdrops` only.
-- `Reset Subscriptions` resets current `contract + token + plan` data. With
-  EMMA preparation Off, it can also clear a paused job once its current step ends.
+- `Reset Subscriptions` clears subscriber work for the confirmed token and
+  restores both preparation choices. Artist and team uploads are kept. If a
+  background step is still running, retry the reset once the step finishes.
 - `Artist Airdrops` and `Team Airdrops`:
   - each footer group provides upload, view, and CSV download controls for one
     airdrop phase.
@@ -86,16 +89,16 @@ The Memes token distribution outputs.
   - `Sign in to resume` renews the current admin's authorization for the same job.
     Captured inputs and completed checkpoints are preserved. Once inputs are
     saved, later processing and finalization continue without the login token.
-  - snapshot inputs remain consistent across the operation; conflicting uploads
-    and reset requests are rejected while it runs.
+  - snapshot inputs remain consistent across the operation. Conflicting uploads
+    are rejected while the job is active. Reset clears the job between steps.
   - changed phase selections or distribution inputs require explicit reset and
     processing again. Subscription downloads unlock only for completed matching
     jobs; baseline plan exports retain their existing behavior.
   - if a saved active or completed job has different phase selections, processing
     stays disabled. Progress takes priority while the job runs. If a reset is
     still required after it stops, the panel shows reset guidance. A reset
-    invalidates the old job and allows a new operation. Restore the original
-    selections to resume an authentication-paused job first.
+    invalidates the old job and allows a new operation. To resume the existing
+    job, restore the original phase selections and sign in.
 - `Publish to GitHub`:
   - enabled only when all are true: normalized, photos count > 0, combined
     artist/team airdrops count > 0.

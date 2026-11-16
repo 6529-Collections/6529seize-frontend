@@ -5,8 +5,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useMemo, useState } from "react";
 
-let mockPreparationEnabled = false;
-let mockSavedPreparationMode: "MANUAL" | "BACKGROUND" | undefined;
+let mockSavedPreparationMode: "UNSTARTED" | "MANUAL" | "BACKGROUND";
 const mockRefreshPreparation = jest.fn().mockResolvedValue(undefined);
 const mockDownload = jest.fn();
 const mockUseDownloader = jest.fn();
@@ -17,9 +16,7 @@ const mockDistributionAdminWallets = ["0x1"];
 
 jest.mock("@/hooks/useEmmaPreparationMode", () => ({
   useEmmaPreparationMode: () => ({
-    mode:
-      mockSavedPreparationMode ??
-      (mockPreparationEnabled ? "BACKGROUND" : "MANUAL"),
+    mode: mockSavedPreparationMode,
     isError: false,
     refresh: mockRefreshPreparation,
   }),
@@ -161,8 +158,7 @@ function createOverview(overrides?: Record<string, unknown>) {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockPreparationEnabled = false;
-  mockSavedPreparationMode = undefined;
+  mockSavedPreparationMode = "UNSTARTED";
   authCtx.setToast.mockClear();
   mockDownload.mockReset();
   mockUseDownloader.mockReset();
@@ -191,6 +187,7 @@ function TestWrapper({
 }: {
   readonly initialTokenId?: string | null | undefined;
 }) {
+  const [showManual, setShowManual] = useState(false);
   const [confirmedTokenId, setConfirmedTokenId] = useState<string | null>(
     initialTokenId
   );
@@ -211,7 +208,11 @@ function TestWrapper({
   return (
     <DistributionPlanToolContext.Provider value={distCtx}>
       <AuthContext.Provider value={authCtx}>
-        <ReviewDistributionPlanTableSubscriptionFooter />
+        <ReviewDistributionPlanTableSubscriptionFooter
+          showManual={showManual}
+          onChooseManual={() => setShowManual(true)}
+          onClearManualChoice={() => setShowManual(false)}
+        />
       </AuthContext.Provider>
     </DistributionPlanToolContext.Provider>
   );
@@ -257,7 +258,9 @@ test("renders split admin controls after token id is confirmed", async () => {
     expect(
       screen.getByRole("button", { name: /distribution photos \(0\)/i })
     ).toBeInTheDocument();
-    expect(screen.getByText("Finalize Distribution")).toBeInTheDocument();
+    expect(screen.getByText("Prepare manually")).toBeInTheDocument();
+    expect(screen.getByText("Process and Finalize")).toBeInTheDocument();
+    expect(screen.queryByText("Finalize Distribution")).not.toBeInTheDocument();
     expect(screen.getByText("Publish to GitHub")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /download artist airdrops csv/i })
@@ -436,26 +439,27 @@ test("resetSubscriptions posts data and shows toast directly", async () => {
   });
 });
 
-test("uses the original normalize request while EMMA preparation is off", async () => {
+test("uses the original normalize request after choosing manual preparation", async () => {
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
   const post = jest
     .spyOn(require("@/services/api/common-api"), "commonApiPost")
     .mockResolvedValue({});
   render(<TestWrapper initialTokenId="123" />);
+  await user.click(screen.getByRole("button", { name: "Prepare manually" }));
+  expect(post).not.toHaveBeenCalled();
+  expect(screen.getByText("Process and Finalize")).toBeEnabled();
   await user.click(
-    screen.getByRole("button", { name: "Finalize Distribution" })
+    screen.getByRole("button", { name: /Finalize Distribution/ })
   );
   expect(post).toHaveBeenCalledWith(
     expect.objectContaining({
       endpoint: expect.stringMatching(/\/123\/normalize$/),
     })
   );
-  expect(screen.queryByText("Process and Finalize")).not.toBeInTheDocument();
 });
 
 test("uses Process and Finalize instead of the synchronous normalize request", async () => {
-  mockPreparationEnabled = true;
   const user = userEvent.setup();
   (isSubscriptionsAdmin as jest.Mock).mockReturnValue(true);
   render(<TestWrapper initialTokenId="123" />);
@@ -808,8 +812,7 @@ test("shows an admin-facing error when the downloader reports one", async () => 
   });
 });
 
-test("keeps manual finalization when preparation is turned on for a started plan", async () => {
-  mockPreparationEnabled = true;
+test("keeps manual finalization for a plan with saved manual work", async () => {
   mockSavedPreparationMode = "MANUAL";
   render(<TestWrapper initialTokenId="123" />);
   expect(
@@ -820,7 +823,7 @@ test("keeps manual finalization when preparation is turned on for a started plan
   ).toBeNull();
 });
 
-test("keeps the background job controls visible after preparation is turned off", async () => {
+test("keeps the background job controls visible for a plan with a saved job", async () => {
   mockSavedPreparationMode = "BACKGROUND";
   render(<TestWrapper initialTokenId="123" />);
   expect(
@@ -829,4 +832,25 @@ test("keeps the background job controls visible after preparation is turned off"
   expect(
     screen.queryByRole("button", { name: /Finalize Distribution/i })
   ).toBeNull();
+});
+
+test("shows both choices after resetting subscriptions", async () => {
+  const user = userEvent.setup();
+  const post = jest
+    .spyOn(require("@/services/api/common-api"), "commonApiPost")
+    .mockResolvedValue({});
+  render(<TestWrapper initialTokenId="123" />);
+
+  await user.click(screen.getByRole("button", { name: "Prepare manually" }));
+  expect(screen.getByText("Finalize Distribution")).toBeVisible();
+  await user.click(screen.getByText("Reset Subscriptions"));
+
+  expect(
+    await screen.findByRole("button", { name: "Prepare manually" })
+  ).toBeEnabled();
+  expect(
+    screen.getByRole("button", { name: "Process and Finalize" })
+  ).toBeEnabled();
+  expect(screen.queryByText("Finalize Distribution")).not.toBeInTheDocument();
+  expect(post).toHaveBeenCalledTimes(1);
 });

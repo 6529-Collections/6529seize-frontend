@@ -1,23 +1,19 @@
 # Launch Automation and Wallet Funding
 
 The `/drop-forge` hub shows Launch Automation to everyone with Drop Forge access.
-The section starts collapsed and has a help dialog accessible from the info icon beside refresh. All three
-automation settings default to Off. The creator contract owner and configured claims
-administrators can change all four settings. Configured distribution administrators
-can also change **EMMA preparation**. Every authorized Drop Forge user sees the
-current values, with controls disabled when they lack edit access.
+The section starts collapsed, with a help dialog beside Refresh. Automatic launch
+and automatic artist payment default Off. The creator contract owner and configured
+claims administrators can change these settings and the payout limit. Every
+authorized Drop Forge user can view the current values.
 
 Automatic launch controls new initialization, claim updates and airdrops for
 tracked launches. Turning it Off retains the scheduled reports: due actions are
 reported as skipped because automation is disabled, without marking them completed.
 Submitted transactions continue confirmation tracking. Turning it back On resumes
 eligible work within its window; missed phases are not replayed automatically.
-EMMA preparation controls how distributions are prepared. Off shows the original
-subscription downloads and **Finalize Distribution**. On shows **Process and
-Finalize**. Turning it Off pauses pending jobs after their current step. Turn it
-back On to continue from the saved checkpoint, or reset subscriptions after the
-current step ends to restart that claim manually. Automatic launch can use
-a finalized distribution from either mode.
+Distribution administrators choose how to prepare each claim in
+[EMMA Review](../emma/feature-subscriptions-distribution-review.md). Automatic
+launch can use a finalized distribution from either mode.
 
 Automatic artist payment is a separate opt-in. Research and optional artist payment
 become eligible at 18:00 Europe/Athens the day after minting, one hour after Public

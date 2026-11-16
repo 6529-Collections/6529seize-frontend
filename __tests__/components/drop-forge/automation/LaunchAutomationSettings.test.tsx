@@ -37,12 +37,10 @@ const settings: ApiDropForgeSettings = {
   revision: 0,
   automation_enabled: false,
   pay_artist_enabled: false,
-  preparation_enabled: false,
   max_artist_payment_eth: null,
   updated_by: null,
   updated_at: 0,
   can_edit: true,
-  can_edit_preparation: true,
   can_top_up: true,
   chain_id: 1,
   contract: "0x" + "22".repeat(20),
@@ -77,15 +75,12 @@ it("opens and closes help without expanding the settings", async () => {
   show(false);
   const title = "How Launch Automation works";
   fireEvent.click(screen.getByRole("button", { name: title }));
-
   const dialog = await screen.findByRole("dialog", { name: title });
   expect(
     within(dialog).getByText(/Off pauses new automated actions/)
   ).toBeVisible();
   expect(
-    within(dialog).getByText(
-      /Distributions already using manual preparation keep their controls/
-    )
+    within(dialog).getByText(/choose Prepare manually or Process and Finalize/)
   ).toBeVisible();
   fireEvent.click(within(dialog).getByRole("button", { name: "Close" }));
 
@@ -112,8 +107,8 @@ it("starts collapsed, then shows the settings and operational wallet", async () 
   expect(within(payment).getByRole("status")).toHaveClass("tw-text-rose-300");
   expect(within(payment).getByText("0 ETH")).toBeVisible();
   expect(
-    screen.getByRole("switch", { name: /EMMA preparation/ })
-  ).not.toBeChecked();
+    screen.queryByRole("switch", { name: /EMMA preparation/ })
+  ).not.toBeInTheDocument();
   expect(
     screen.getByRole("link", { name: settings.signer_address })
   ).toHaveAttribute(
@@ -193,42 +188,12 @@ it("keeps all controls read-only for other authorized Drop Forge users", async (
   jest.mocked(getForgeSettings).mockResolvedValue({
     ...settings,
     can_edit: false,
-    can_edit_preparation: false,
   });
   show();
   for (const control of await screen.findAllByRole("switch"))
     expect(control).toBeDisabled();
   expect(screen.getByRole("button", { name: "Top Up ETH" })).toBeEnabled();
 });
-it("lets a distribution administrator change EMMA preparation only", async () => {
-  const limitedSettings = { ...settings, can_edit: false };
-  jest.mocked(getForgeSettings).mockResolvedValue(limitedSettings);
-  jest.mocked(saveForgeSettings).mockResolvedValue({
-    ...limitedSettings,
-    revision: 1,
-    preparation_enabled: true,
-  });
-  show();
-  const preparation = await screen.findByRole("switch", {
-    name: /EMMA preparation/,
-  });
-  expect(preparation).toBeEnabled();
-  expect(
-    screen.getByRole("switch", { name: /Automatic launch/ })
-  ).toBeDisabled();
-  expect(screen.getByRole("button", { name: "Set limit" })).toBeDisabled();
-  expect(
-    screen.queryByRole("textbox", { name: "Maximum ETH per payout" })
-  ).not.toBeInTheDocument();
-  fireEvent.click(preparation);
-  await waitFor(() =>
-    expect(saveForgeSettings).toHaveBeenCalledWith({
-      revision: 0,
-      preparation_enabled: true,
-    })
-  );
-});
-
 it("saves a positive limit and enables payments in one request", async () => {
   jest.mocked(saveForgeSettings).mockResolvedValue({
     ...settings,

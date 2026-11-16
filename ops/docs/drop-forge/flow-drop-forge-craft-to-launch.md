@@ -52,8 +52,8 @@ group. Passing checks stay quiet.
 Craft and contract-admin access remain distinct. Admin grants/revocations remain owner-only on chain. Automatic artist payment is
 separately opt-in and defaults Off. The hub's **Automatic launch** switch also
 defaults Off. Accepted plans keep their timed reports while execution is disabled.
-**EMMA preparation** switches between the original EMMA preparation controls
-and Process and Finalize. Manual Launch uses the standard mint calendar and the
+Distribution administrators choose manual or background preparation in EMMA
+after confirming the token ID. Manual Launch uses the standard mint calendar and the
 connected wallet for claims without an accepted plan when Automatic launch is Off.
 Claims with a saved launch plan use its schedule and coordinate manual writes.
 

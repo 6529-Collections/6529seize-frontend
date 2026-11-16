@@ -31,7 +31,11 @@ type SubscriptionLinksProps = Readonly<{
   phase: ReviewDistributionPlanTableItem;
 }>;
 
-export function SubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
+export function SubscriptionLinks({
+  plan,
+  phase,
+  showManual = false,
+}: SubscriptionLinksProps & Readonly<{ showManual?: boolean }>) {
   const { connectedProfile } = useContext(AuthContext);
   const { confirmedTokenId } = useContext(DistributionPlanToolContext);
   const { seizeSettings } = useSeizeSettings();
@@ -46,7 +50,12 @@ export function SubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
     plan.id,
     canPrepare
   );
-  if (!canPrepare || !confirmedTokenId || preparation.mode === undefined)
+  if (
+    !canPrepare ||
+    !confirmedTokenId ||
+    preparation.mode === undefined ||
+    (preparation.mode === PreparationMode.Unstarted && !showManual)
+  )
     return null;
   return preparation.mode === PreparationMode.Background ? (
     <PreparedSubscriptionLinks plan={plan} phase={phase} />

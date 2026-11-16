@@ -27,9 +27,11 @@ import type {
 export default function ReviewDistributionPlanTableRow({
   item,
   rows,
+  showManual = false,
 }: {
   readonly item: ReviewDistributionPlanTableItem;
   readonly rows: ReviewDistributionPlanTablePhase[];
+  readonly showManual?: boolean;
 }) {
   const { distributionPlan } = useContext(DistributionPlanToolContext);
 
@@ -209,7 +211,11 @@ export default function ReviewDistributionPlanTableRow({
           disabled={isPublic}
         />
         {distributionPlan && (
-          <SubscriptionLinks plan={distributionPlan} phase={item} />
+          <SubscriptionLinks
+            plan={distributionPlan}
+            phase={item}
+            showManual={showManual}
+          />
         )}
       </td>
     </DistributionPlanTableRowWrapper>

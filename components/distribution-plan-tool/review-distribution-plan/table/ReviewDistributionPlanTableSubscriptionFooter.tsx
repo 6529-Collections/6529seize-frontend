@@ -36,6 +36,9 @@ import { getForgePhaseIds } from "@/services/api/drop-forge-process-inputs";
 import { useEmmaPreparationMode } from "@/hooks/useEmmaPreparationMode";
 import { ApiDropForgePreparationModeEnum as PreparationMode } from "@/generated/models/ApiDropForgePreparation";
 import ProcessAndFinalize from "../ProcessAndFinalize";
+import Button from "@/components/utils/button/Button";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
 function getErrorMessage(error: unknown): string {
@@ -48,7 +51,16 @@ function getErrorMessage(error: unknown): string {
   return "Couldn't complete this request. Please try again.";
 }
 
-export function ReviewDistributionPlanTableSubscriptionFooter() {
+export function ReviewDistributionPlanTableSubscriptionFooter({
+  showManual = false,
+  onChooseManual,
+  onClearManualChoice,
+}: Readonly<{
+  showManual?: boolean;
+  onChooseManual?: () => void;
+  onClearManualChoice?: () => void;
+}> = {}) {
+  const locale = useBrowserLocale();
   const { distributionPlan, phases, confirmedTokenId, setConfirmedTokenId } =
     useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
@@ -80,6 +92,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     useState<DistributionAirdropsPhase | null>(null);
   const [showConfirmTokenId, setShowConfirmTokenId] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [resetCount, setResetCount] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadingAirdropsPhase, setUploadingAirdropsPhase] =
     useState<DistributionAirdropsPhase | null>(null);
@@ -214,6 +227,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
 
   const handleChangeTokenId = () => {
     clearOverviewState();
+    onClearManualChoice?.();
     setConfirmedTokenId(null);
     setShowConfirmTokenId(true);
   };
@@ -229,6 +243,8 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         endpoint: `subscriptions/allowlists/${contract}/${tokenId}/${planId}/reset`,
         body: {},
       });
+      onClearManualChoice?.();
+      setResetCount((count) => count + 1);
       setToast({
         type: "success",
         message: "Subscriptions reset.",
@@ -534,15 +550,19 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     }
   };
 
+  const canChooseMode = preparation.mode === PreparationMode.Unstarted;
   let processingControl: React.ReactNode;
-  if (preparation.mode === PreparationMode.Background) {
+  if (canChooseMode || preparation.mode === PreparationMode.Background) {
+    const planId = distributionPlan?.id ?? "";
     processingControl = (
       <ProcessAndFinalize
+        key={`${planId}:${confirmedTokenId}:${resetCount}`}
         contract={contract}
         claim={Number(confirmedTokenId)}
-        plan={distributionPlan?.id ?? ""}
+        plan={planId}
         phaseIds={getForgePhaseIds(phases)}
         onStarted={preparation.refresh}
+        disabled={isResetting || isFinalizing}
         onCompleted={() => {
           void refreshOverview(contract, confirmedTokenId);
         }}
@@ -605,7 +625,23 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       onDownloadAirdrops={(phase) =>
         handleDownloadAirdrops(contract, confirmedTokenId, phase)
       }
+      preparationChoice={
+        canChooseMode &&
+        !showManual && (
+          <Button
+            variant="secondary"
+            disabled={isResetting}
+            onClick={onChooseManual}
+          >
+            {t(locale, "dropForge.prepareManually")}
+          </Button>
+        )
+      }
       processingControl={processingControl}
+      showManualFinalize={
+        preparation.mode === PreparationMode.Manual ||
+        (canChooseMode && showManual)
+      }
       onFinalize={() => finalizeDistribution(contract, confirmedTokenId)}
       onUploadToGithub={() => uploadToGithub(contract, confirmedTokenId)}
       onCloseGithubModal={() => setShowGithubModal(false)}

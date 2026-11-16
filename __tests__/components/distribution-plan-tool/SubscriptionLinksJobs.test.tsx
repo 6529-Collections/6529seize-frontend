@@ -4,7 +4,6 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { SubscriptionLinks } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscription";
 import { useDropForgeProcess } from "@/hooks/useDropForgeProcess";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "@/components/distribution-plan-tool/review-distribution-plan/table/constants";
 import { forgeList, getForgePreparation } from "@/services/api/drop-forge-api";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
@@ -12,9 +11,6 @@ import {
   ReviewDistributionPlanTableItemType,
   type ReviewDistributionPlanTableItem,
 } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTable.types";
-jest.mock("@/hooks/useDropForgeSettings", () => ({
-  useDropForgeSettings: jest.fn(),
-}));
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/hooks/useDropForgeProcess", () => ({
   useDropForgeProcess: jest.fn(),
@@ -76,20 +72,14 @@ beforeEach(() => {
   jest.clearAllMocks();
   client = new QueryClient();
   jest.mocked(getForgePreparation).mockResolvedValue({ mode: Mode.Unstarted });
-  jest.mocked(useDropForgeSettings).mockReturnValue({
-    data: { preparation_enabled: true },
-  } as ReturnType<typeof useDropForgeSettings>);
 });
 
 it.each([
   [false, "Subscription Lists", "p0", 3],
   [true, "Public Subscriptions", "public", 1],
 ])(
-  "uses the legacy CSV download when EMMA preparation is off (public: %s)",
+  "uses the original CSV download after choosing manual preparation (public: %s)",
   async (isPublic, label, phaseId, expectedFiles) => {
-    jest.mocked(useDropForgeSettings).mockReturnValue({
-      data: { preparation_enabled: false },
-    } as ReturnType<typeof useDropForgeSettings>);
     jest.mocked(commonApiFetch).mockResolvedValue({
       airdrops: [],
       ...(isPublic ? {} : { airdrops_unconsolidated: [], allowlists: [] }),
@@ -107,6 +97,7 @@ it.each([
     try {
       renderLinks(
         <SubscriptionLinks
+          showManual
           plan={{ id: "plan" } as AllowlistDescription}
           phase={
             isPublic
@@ -132,6 +123,9 @@ it.each([
 it.each([undefined, ["old0", "old1", "old2"]])(
   "never downloads a completed job with missing or stale phase evidence",
   async (phase_ids) => {
+    jest
+      .mocked(getForgePreparation)
+      .mockResolvedValue({ mode: Mode.Background });
     jest.mocked(useDropForgeProcess).mockReturnValue({
       data: { id: "job", status: "COMPLETED", phase_ids },
     } as ReturnType<typeof useDropForgeProcess>);
@@ -148,7 +142,7 @@ it.each([undefined, ["old0", "old1", "old2"]])(
   }
 );
 
-it("keeps the manual subscription download when a started plan has preparation enabled", async () => {
+it("keeps the manual subscription download for a plan with saved manual work", async () => {
   jest.mocked(getForgePreparation).mockResolvedValue({ mode: Mode.Manual });
   renderLinks(
     <SubscriptionLinks
@@ -162,10 +156,7 @@ it("keeps the manual subscription download when a started plan has preparation e
   expect(useDropForgeProcess).not.toHaveBeenCalled();
 });
 
-it("keeps downloads available for a completed background job after preparation is turned off", async () => {
-  jest.mocked(useDropForgeSettings).mockReturnValue({
-    data: { preparation_enabled: false },
-  } as ReturnType<typeof useDropForgeSettings>);
+it("keeps downloads available for a completed background job ", async () => {
   jest.mocked(getForgePreparation).mockResolvedValue({ mode: Mode.Background });
   jest.mocked(useDropForgeProcess).mockReturnValue({
     data: { id: "job", status: "COMPLETED", phase_ids: ["p0", "p1", "p2"] },
