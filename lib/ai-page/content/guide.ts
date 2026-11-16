@@ -22,6 +22,10 @@ export type AiGuideStep = {
   readonly code?: readonly AiCode[] | undefined;
   /** What the person sees once it is done. */
   readonly result?: string | undefined;
+  /** An example of what it prints, shown as code with no copy button. */
+  readonly example?: string | undefined;
+  /** A screenshot of what the person sees, by its slot name. */
+  readonly screenshot?: "placement" | undefined;
 };
 
 export type AiGuideSystem = {
@@ -104,7 +108,8 @@ function macGuide(dmg: string): AiGuideSystem {
           "macOS asks whether you're sure you want to open an app from the internet. Choose **Open**.",
       },
       {
-        text: "Choose **Alone**, or **Beside a validator** if a 6529 validator runs on this Mac.",
+        text: "Choose **Alone**. Pick *Beside a validator* only if this Mac runs a 6529 validator.",
+        screenshot: "placement",
         result:
           "macOS says 6529 AI added a background item. Your browser opens the 6529 AI page, signed in.",
       },
@@ -144,7 +149,7 @@ function windowsGuide(
         result: "`C:\\Program Files\\6529 AI`",
       },
       {
-        text: "Answer whether a 6529 validator runs on this computer too.",
+        text: "Choose **No: 6529 AI alone on this computer**. Pick *Yes* only if this computer runs a 6529 validator.",
       },
       {
         text: "Keep its choice of where models run.",
@@ -185,12 +190,13 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
           code: `sudo apt install ./${row.deb}`,
         })),
         result:
-          "apt asks whether a 6529 validator runs on this computer. Answer **alone** unless one does.",
+          "apt asks whether a 6529 validator runs on this computer. Choose **alone**. Pick *validator* only if this computer runs one.",
       },
       {
         text: "Wait for the sign-in link.",
         result:
-          "The install starts the service and prints a link: `http://127.0.0.1:<port>/login?token=…`",
+          "The install starts the service and prints a sign-in link, like this:",
+        example: "http://127.0.0.1:<port>/login?token=…",
       },
       {
         text: "Open the link in a browser on this computer.",
@@ -305,7 +311,7 @@ export const AI_FIRST_CHAT: readonly AiGuideStep[] = [
   {
     text: "On the 6529 AI page, press **Get started**.",
     result:
-      "**Start** shows how big a model this computer can run, and models that fit.",
+      "The **Start** page shows how big a model this computer can run, and models that fit.",
   },
   {
     text: "Press **Fetch and serve** on a model.",

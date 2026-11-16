@@ -1,57 +1,36 @@
 import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import Image from "next/image";
+import type { ReactNode } from "react";
 
-import { SECONDARY_BUTTON } from "@/components/validator-page/validatorStyles";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
-import type { AiRelease } from "@/lib/ai-page/releaseFeed";
+import type { AiRelease, AiSystem } from "@/lib/ai-page/releaseFeed";
 import {
   getAiDownloadPath,
   groupAiReleaseFiles,
   type AiFileEntry,
-  type AiFileFamily,
 } from "@/lib/ai-page/releaseFiles";
 import AiCopyButton from "./AiCopyButton";
-import { AI_CARD } from "./AiPageFrame";
+import { AI_BUTTON, AI_CARD } from "./AiPageFrame";
+import AiSystemLogo from "./AiSystemLogo";
+import AiTabs from "./AiTabs";
 import AiTrustBadges from "./AiTrustBadges";
 import { formatAiFileSize } from "./formatAiFileSize";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
 
-const FAMILY: Readonly<
-  Record<
-    AiFileFamily,
-    {
-      readonly title: MessageKey;
-      readonly needs: MessageKey;
-      readonly image: string | null;
-    }
-  >
-> = {
-  mac: {
-    title: "ai.files.family.mac",
-    needs: "ai.files.needs.mac",
-    image: "/macos.png",
-  },
-  windows: {
-    title: "ai.files.family.windows",
-    needs: "ai.files.needs.windows",
-    image: "/windows.png",
-  },
-  linux: {
-    title: "ai.files.family.linux",
-    needs: "ai.files.needs.linux",
-    image: "/linux.png",
-  },
-  checks: {
-    title: "ai.files.family.checks",
-    needs: "ai.files.needs.checks",
-    image: null,
-  },
-};
+const LINUX_VARIANTS: readonly {
+  readonly key: string;
+  readonly system: AiSystem;
+  readonly label: MessageKey;
+}[] = [
+  { key: "x64", system: "linux-x86_64-cpu", label: "ai.files.linux.x64" },
+  { key: "cuda", system: "linux-x86_64-cuda", label: "ai.files.linux.cuda" },
+  { key: "arm64", system: "linux-arm64-cpu", label: "ai.files.linux.arm64" },
+];
 
+/** One file: what it is, its name and size, who signed it, its actions. */
 function FileRow({
   release,
   entry,
@@ -68,12 +47,16 @@ function FileRow({
           <span className="tw-font-semibold tw-text-iron-50">
             {entry.label}
           </span>
-          <span className="tw-text-iron-400">{entry.detail}</span>
+          <span className="tw-text-[13px] tw-text-iron-400">
+            {entry.detail}
+          </span>
         </p>
-        <p className="tw-m-0 tw-mt-0.5 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-text-xs tw-leading-5 tw-text-iron-500">
-          <span className="tw-break-all tw-font-mono">{file.name}</span>
+        <p className="tw-m-0 tw-mt-0.5 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-text-[13px] tw-leading-5">
+          <span className="tw-break-all tw-font-mono tw-text-iron-400">
+            {file.name}
+          </span>
           {size && (
-            <span className="tw-whitespace-nowrap tw-tabular-nums tw-text-iron-400">
+            <span className="tw-whitespace-nowrap tw-tabular-nums tw-text-iron-300">
               {size}
             </span>
           )}
@@ -93,7 +76,7 @@ function FileRow({
         <span className="tw-sr-only">{file.sha256}</span>
         <a
           href={getAiDownloadPath(release, file)}
-          className={`${SECONDARY_BUTTON} max-sm:tw-flex-1`}
+          className={`${AI_BUTTON} max-sm:tw-flex-1`}
           aria-label={t(LOCALE, "ai.files.download.label", {
             file: file.name,
           })}
@@ -106,54 +89,81 @@ function FileRow({
   );
 }
 
+function SystemCard({
+  id,
+  title,
+  needs,
+  image,
+  children,
+}: {
+  readonly id: string;
+  readonly title: string;
+  readonly needs: string;
+  readonly image: string;
+  readonly children: ReactNode;
+}) {
+  return (
+    <section
+      id={id}
+      aria-labelledby={`${id}-title`}
+      className={`${AI_CARD} tw-scroll-mt-24`}
+    >
+      <div className="tw-flex tw-flex-col tw-gap-3 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between sm:tw-px-5">
+        <div className="tw-flex tw-items-center tw-gap-3">
+          <AiSystemLogo src={image} />
+          <div className="tw-min-w-0">
+            <h3
+              id={`${id}-title`}
+              className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50"
+            >
+              {title}
+            </h3>
+            <p className="tw-m-0 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+              {needs}
+            </p>
+          </div>
+        </div>
+      </div>
+      {children}
+    </section>
+  );
+}
+
 /**
- * Every file of the release, by system, each with who signed it, its
- * SHA-256 behind a copy button, and its download.
+ * The downloads by system: the Mac app, the Windows installer, and for
+ * Linux the .deb and the .tar.gz of the CPU chosen in a switch. Each row
+ * has its signature badges and its SHA-256 behind a copy button.
  */
 export default function AiDownloads({
   release,
+  linuxCpu,
 }: {
   readonly release: AiRelease;
+  /** The visitor's Linux CPU when the page knows it, for the switch. */
+  readonly linuxCpu: "x64" | "arm64" | null;
 }) {
   const { groups } = groupAiReleaseFiles(release);
+  const entries = (family: string) =>
+    groups.find((group) => group.family === family)?.entries ?? [];
+  const linux = entries("linux");
+  const variants = LINUX_VARIANTS.map((variant) => ({
+    ...variant,
+    files: linux.filter((entry) => entry.file.system === variant.system),
+  })).filter((variant) => variant.files.length > 0);
+
   return (
     <div className="tw-flex tw-flex-col tw-gap-4">
-      {groups.map((group) => {
-        const family = FAMILY[group.family];
-        const headingId = `downloads-${group.family}`;
-        return (
-          <section
-            key={group.family}
-            aria-labelledby={headingId}
-            className={AI_CARD}
+      {(["mac", "windows"] as const).map((family) =>
+        entries(family).length > 0 ? (
+          <SystemCard
+            key={family}
+            id={`downloads-${family}`}
+            title={t(LOCALE, `ai.files.family.${family}`)}
+            needs={t(LOCALE, `ai.files.needs.${family}`)}
+            image={family === "mac" ? "/macos.png" : "/windows.png"}
           >
-            <div className="tw-flex tw-items-center tw-gap-3 tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 sm:tw-px-5">
-              {family.image && (
-                <span className="tw-flex tw-size-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-bg-white">
-                  <Image
-                    unoptimized
-                    src={family.image}
-                    alt=""
-                    width={18}
-                    height={18}
-                    className="tw-size-[18px] tw-object-contain"
-                  />
-                </span>
-              )}
-              <div className="tw-min-w-0">
-                <h3
-                  id={headingId}
-                  className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50"
-                >
-                  {t(LOCALE, family.title)}
-                </h3>
-                <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-                  {t(LOCALE, family.needs)}
-                </p>
-              </div>
-            </div>
             <ul className="tw-m-0 tw-list-none tw-p-0">
-              {group.entries.map((entry) => (
+              {entries(family).map((entry) => (
                 <FileRow
                   key={entry.file.name}
                   release={release}
@@ -161,9 +171,39 @@ export default function AiDownloads({
                 />
               ))}
             </ul>
-          </section>
-        );
-      })}
+          </SystemCard>
+        ) : null
+      )}
+      {variants.length > 0 && (
+        <SystemCard
+          id="downloads-linux"
+          title={t(LOCALE, "ai.files.family.linux")}
+          needs={t(LOCALE, "ai.files.needs.linux")}
+          image="/linux.png"
+        >
+          <AiTabs
+            label={t(LOCALE, "ai.files.linux.switch")}
+            initial={linuxCpu === "arm64" ? "arm64" : "x64"}
+            listClassName="tw-mx-4 tw-mt-3 sm:tw-mx-5"
+            panelClassName="tw-mt-1"
+            tabs={variants.map((variant) => ({
+              key: variant.key,
+              label: t(LOCALE, variant.label),
+              panel: (
+                <ul className="tw-m-0 tw-list-none tw-p-0">
+                  {variant.files.map((entry) => (
+                    <FileRow
+                      key={entry.file.name}
+                      release={release}
+                      entry={entry}
+                    />
+                  ))}
+                </ul>
+              ),
+            }))}
+          />
+        </SystemCard>
+      )}
     </div>
   );
 }

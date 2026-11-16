@@ -1,19 +1,22 @@
+import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
 import type { ReactNode } from "react";
 
 import ValidatorFold from "@/components/validator-page/ValidatorFold";
 import { CODE } from "@/components/validator-page/validatorStyles";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t, tRich } from "@/i18n/messages";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 import { ed25519PublicKeyPem } from "@/lib/ai-page/feedSignature";
 import { AI_FEED_SIGNING_KEYS } from "@/lib/ai-page/feedSigningKeys";
 import type { AiRelease } from "@/lib/ai-page/releaseFeed";
 import {
   describeCodeSignature,
+  getAiDownloadPath,
   groupAiReleaseFiles,
 } from "@/lib/ai-page/releaseFiles";
 import AiCodeBlock from "./AiCodeBlock";
-import { AI_BODY, AI_H3, AI_MUTED } from "./AiPageFrame";
+import { formatAiFileSize } from "./formatAiFileSize";
+import { AI_BODY, AI_BUTTON, AI_H3, AI_MUTED } from "./AiPageFrame";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
@@ -22,6 +25,15 @@ const SHA256SUMS = "SHA256SUMS";
 const SHA256SUMS_SIG = "SHA256SUMS.sig";
 const OPENSSL_OK = "Signature Verified Successfully";
 const RELEASE_PY_VERIFY = "release.py verify";
+// The release list's own files, for checking the others.
+const CHECK_FILES: readonly {
+  readonly name: string;
+  readonly what: MessageKey;
+}[] = [
+  { name: SHA256SUMS, what: "ai.verify.sumsFile" },
+  { name: SHA256SUMS_SIG, what: "ai.verify.sigFile" },
+  { name: "manifest.json", what: "ai.verify.manifest" },
+];
 
 function code(key: string, value: string) {
   return (
@@ -41,15 +53,18 @@ function Step({
   readonly children: ReactNode;
 }) {
   return (
-    <li className="tw-flex tw-gap-4">
-      <span
-        aria-hidden="true"
-        className="tw-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-200"
-      >
-        {index}
-      </span>
-      <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-gap-3 tw-pt-0.5">
+    <li className="tw-flex tw-flex-col tw-gap-3">
+      <div className="tw-flex tw-items-center tw-gap-3">
+        <span
+          aria-hidden="true"
+          className="tw-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-iron-200"
+        >
+          {index}
+        </span>
         <h3 className={AI_H3}>{title}</h3>
+      </div>
+      {/* Indented under the title from 640 px; full width on a phone. */}
+      <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3 sm:tw-pl-10">
         {children}
       </div>
     </li>
@@ -73,6 +88,10 @@ export default function AiVerify({ release }: { readonly release: AiRelease }) {
   const releaseKey = AI_FEED_SIGNING_KEYS[0];
   const pem = releaseKey ? ed25519PublicKeyPem(releaseKey) : null;
   const keyFile = t(LOCALE, "ai.verify.sums.key");
+  const checkFiles = CHECK_FILES.flatMap(({ name, what }) => {
+    const file = release.files.find((entry) => entry.name === name);
+    return file ? [{ file, what: t(LOCALE, what) }] : [];
+  });
   return (
     <ValidatorFold id="verify" title={t(LOCALE, "ai.verify.title")}>
       <p className={`tw-mb-6 tw-mt-0 ${AI_BODY}`}>
@@ -141,6 +160,47 @@ export default function AiVerify({ release }: { readonly release: AiRelease }) {
           </Step>
         )}
       </ol>
+      {checkFiles.length > 0 && (
+        <section aria-labelledby="release-files" className="tw-mt-8">
+          <h3 id="release-files" className={AI_H3}>
+            {t(LOCALE, "ai.verify.files")}
+          </h3>
+          <ul className="tw-m-0 tw-mt-3 tw-list-none tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-p-0">
+            {checkFiles.map(({ file, what }) => {
+              const size = formatAiFileSize(file.size);
+              return (
+                <li
+                  key={file.name}
+                  className="tw-flex tw-items-center tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 first:tw-border-t-0"
+                >
+                  <div className="tw-min-w-0 tw-flex-1">
+                    <p className="tw-m-0 tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-100">
+                      {file.name}
+                    </p>
+                    <p className="tw-m-0 tw-text-[13px] tw-leading-5 tw-text-iron-400">
+                      {what}
+                      {size && ` · ${size}`}
+                    </p>
+                  </div>
+                  <a
+                    href={getAiDownloadPath(release, file)}
+                    className={AI_BUTTON}
+                    aria-label={t(LOCALE, "ai.files.download.label", {
+                      file: file.name,
+                    })}
+                  >
+                    <ArrowDownTrayIcon
+                      aria-hidden="true"
+                      className="tw-size-4"
+                    />
+                    {t(LOCALE, "ai.files.download.text")}
+                  </a>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
     </ValidatorFold>
   );
 }

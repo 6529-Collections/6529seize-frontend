@@ -20,14 +20,17 @@ import {
   type AiInstaller,
   type AiInstallerKind,
 } from "@/lib/ai-page/releaseFiles";
+import { AI_SCREENSHOTS } from "@/lib/ai-page/screenshots";
 import type { VisitorPlatform } from "@/lib/validator-page/detectSystem";
 import { shortCommit } from "@/lib/validator-page/releaseFiles";
 import AiDownloadHero, {
   type AiHeroOption,
+  type AiHeroSystem,
   type AiHeroText,
 } from "./AiDownloadHero";
 import AiDownloads from "./AiDownloads";
 import AiPageFrame, { AI_BODY, AI_CARD, AI_H2, AI_MUTED } from "./AiPageFrame";
+import AiScreenshot from "./AiScreenshot";
 import AiTrustBadges from "./AiTrustBadges";
 import AiVerify from "./AiVerify";
 import { formatAiFileSize } from "./formatAiFileSize";
@@ -41,38 +44,19 @@ const RELEASE_DATE: Intl.DateTimeFormatOptions = {
   day: "numeric",
 };
 
-const INSTALLER_TEXT: Readonly<
-  Record<AiInstallerKind, { button: MessageKey; system: MessageKey }>
-> = {
-  macos: {
-    button: "ai.download.button.macos",
-    system: "ai.download.system.macos",
-  },
-  windows: {
-    button: "ai.download.button.windows",
-    system: "ai.download.system.windows",
-  },
-  "linux-x64": {
-    button: "ai.download.button.linuxX64",
-    system: "ai.download.system.linuxX64",
-  },
-  "linux-x64-cuda": {
-    button: "ai.download.button.linuxCuda",
-    system: "ai.download.system.linuxCuda",
-  },
-  "linux-arm64": {
-    button: "ai.download.button.linuxArm64",
-    system: "ai.download.system.linuxArm64",
-  },
+const BUTTON_TEXT: Readonly<Record<AiInstallerKind, MessageKey>> = {
+  macos: "ai.download.button.macos",
+  windows: "ai.download.button.windows",
+  "linux-x64": "ai.download.button.linuxX64",
+  "linux-x64-cuda": "ai.download.button.linuxCuda",
+  "linux-arm64": "ai.download.button.linuxArm64",
 };
 
 function toHeroOption(
   release: AiRelease,
   installer: AiInstaller
 ): AiHeroOption {
-  const text = INSTALLER_TEXT[installer.kind];
-  const buttonText = t(LOCALE, text.button);
-  const system = t(LOCALE, text.system);
+  const buttonText = t(LOCALE, BUTTON_TEXT[installer.kind]);
   const size = formatAiFileSize(installer.file.size);
   return {
     kind: installer.kind,
@@ -90,20 +74,59 @@ function toHeroOption(
         })
       : `${release.version} · ${installer.needs}`,
     badges: <AiTrustBadges signed={installer.file.signed} />,
-    system,
-    systemLabel: t(LOCALE, "ai.download.system.label", {
-      system,
-      file: installer.file.name,
-    }),
   };
+}
+
+/**
+ * Mac, Windows and Linux for "Also for" and a phone's row of buttons: the
+ * Mac and Windows downloads, and the Linux card, which has a choice.
+ */
+function heroSystems(
+  release: AiRelease,
+  installers: readonly AiInstaller[]
+): AiHeroSystem[] {
+  const systems: AiHeroSystem[] = [];
+  for (const [key, kind, message] of [
+    ["mac", "macos", "ai.download.system.macos"],
+    ["windows", "windows", "ai.download.system.windows"],
+  ] as const) {
+    const installer = installers.find((item) => item.kind === kind);
+    if (installer) {
+      const label = t(LOCALE, message);
+      systems.push({
+        key,
+        label,
+        href: getAiDownloadPath(release, installer.file),
+        ariaLabel: t(LOCALE, "ai.download.system.label", {
+          system: label,
+          file: installer.file.name,
+        }),
+      });
+    }
+  }
+  if (installers.some((item) => item.family === "linux")) {
+    const label = t(LOCALE, "ai.download.system.linux");
+    systems.push({
+      key: "linux",
+      label,
+      href: "#downloads-linux",
+      ariaLabel: label,
+    });
+  }
+  return systems;
 }
 
 function heroText(): AiHeroText {
   return {
     armNote: t(LOCALE, "ai.download.armNote"),
-    otherNote: t(LOCALE, "ai.download.otherNote"),
     alsoFor: t(LOCALE, "ai.download.alsoFor"),
     allDownloads: t(LOCALE, "ai.download.allDownloads"),
+    phoneTitle: t(LOCALE, "ai.download.phone.title"),
+    phoneBody: t(LOCALE, "ai.download.phone.body"),
+    copyLink: t(LOCALE, "ai.download.phone.copy"),
+    linkCopied: t(LOCALE, "ai.download.phone.copied"),
+    shareLink: t(LOCALE, "ai.download.phone.share"),
+    phonePlatforms: t(LOCALE, "ai.download.phone.platforms"),
   };
 }
 
@@ -152,26 +175,31 @@ function HowItWorks() {
         className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3"
       >
         {HOW.map((step, index) => (
-          <li key={step.title} className={`${AI_CARD} tw-p-5`}>
+          <li
+            key={step.title}
+            className={`${AI_CARD} tw-flex tw-gap-4 tw-p-4 sm:tw-block sm:tw-p-5`}
+          >
             <span
               aria-hidden="true"
-              className="tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/15 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-primary-300"
+              className="tw-flex tw-size-7 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/15 tw-text-sm tw-font-semibold tw-tabular-nums tw-text-primary-300"
             >
               {index + 1}
             </span>
-            <h3 className="tw-mb-1 tw-mt-4 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
-              {t(LOCALE, step.title)}
-            </h3>
-            <p className={`tw-m-0 ${AI_MUTED}`}>{t(LOCALE, step.body)}</p>
-            {index === 0 && (
-              <Link
-                href="/ai/guide"
-                className={`tw-mt-3 tw-inline-flex tw-items-center tw-gap-1 tw-text-sm ${LINK}`}
-              >
-                {t(LOCALE, "ai.how.install.link")}
-                <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
-              </Link>
-            )}
+            <div className="tw-min-w-0">
+              <h3 className="tw-mb-1 tw-mt-0.5 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50 sm:tw-mt-4">
+                {t(LOCALE, step.title)}
+              </h3>
+              <p className={`tw-m-0 ${AI_MUTED}`}>{t(LOCALE, step.body)}</p>
+              {index === 0 && (
+                <Link
+                  href="/ai/guide"
+                  className={`tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-text-sm sm:tw-min-h-0 ${LINK}`}
+                >
+                  {t(LOCALE, "ai.how.install.link")}
+                  <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
+                </Link>
+              )}
+            </div>
           </li>
         ))}
       </ol>
@@ -216,26 +244,22 @@ export default function AiDownloadPage({
   return (
     <AiPageFrame
       current="download"
-      eyebrow={
-        release
-          ? t(LOCALE, "ai.download.eyebrow.release", {
-              version: release.version,
-            })
-          : t(LOCALE, "ai.download.eyebrow.none")
-      }
+      eyebrow={t(LOCALE, "ai.download.eyebrow")}
+      version={release?.version}
       title={t(LOCALE, "ai.download.title")}
       lead={t(LOCALE, "ai.download.lead")}
     >
       <section
         id="download"
         aria-label={t(LOCALE, "ai.download.section")}
-        className="tw-mt-10 tw-scroll-mt-24"
+        className="tw-mt-8 tw-scroll-mt-24"
       >
         {release ? (
           <AiDownloadHero
             options={installers.map((installer) =>
               toHeroOption(release, installer)
             )}
+            systems={heroSystems(release, installers)}
             initial={platform}
             text={heroText()}
           />
@@ -243,6 +267,14 @@ export default function AiDownloadPage({
           <NoRelease state={snapshot.state} />
         )}
       </section>
+
+      <div className="tw-mt-10">
+        <AiScreenshot
+          slot={AI_SCREENSHOTS.chat}
+          alt={t(LOCALE, "ai.download.screenshot")}
+          priority
+        />
+      </div>
 
       <HowItWorks />
 
@@ -257,13 +289,11 @@ export default function AiDownloadPage({
               {t(LOCALE, "ai.files.heading")}
             </h2>
             <ReleaseLine release={release} />
-            {release.notes && (
-              <p className={`tw-m-0 tw-whitespace-pre-line ${AI_MUTED}`}>
-                {release.notes}
-              </p>
-            )}
           </div>
-          <AiDownloads release={release} />
+          <AiDownloads
+            release={release}
+            linuxCpu={platform.system === "linux" ? platform.cpu : null}
+          />
           <div className="tw-mt-4">
             <AiVerify release={release} />
           </div>

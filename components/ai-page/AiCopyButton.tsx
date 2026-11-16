@@ -3,8 +3,12 @@
 import { CheckIcon, ClipboardDocumentIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 
+// 44 px tall on a phone, the size of a fingertip; 32 px with a mouse.
 const BASE =
-  "tw-inline-flex tw-flex-none tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition hover:tw-border-white/25 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+  "tw-inline-flex tw-flex-none tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-md tw-px-2.5 tw-text-xs tw-font-medium tw-text-iron-300 tw-transition tw-min-h-11 sm:tw-min-h-8 hover:tw-text-iron-50 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+const CHIP =
+  "tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 hover:tw-border-white/25";
+const PLAIN = "tw-border-0 tw-bg-transparent hover:tw-bg-white/[0.06]";
 
 /**
  * Copies a value, such as a SHA-256 or a command, and says so for two
@@ -16,14 +20,17 @@ export default function AiCopyButton({
   copiedText,
   label,
   copiedLabel,
+  plain = false,
 }: {
   readonly value: string;
-  /** The visible word: "Copy", or "SHA-256". */
+  /** The visible words: "Copy", or "Copy SHA-256". */
   readonly text: string;
   readonly copiedText: string;
   /** What it copies, for screen readers: "Copy the SHA-256 of …". */
   readonly label: string;
   readonly copiedLabel: string;
+  /** Without a border, as in a code block's header. */
+  readonly plain?: boolean | undefined;
 }) {
   const [copied, setCopied] = useState(false);
 
@@ -49,7 +56,7 @@ export default function AiCopyButton({
       type="button"
       onClick={copy}
       aria-label={copied ? copiedLabel : label}
-      className={`${BASE} tw-min-h-8 tw-px-2.5`}
+      className={`${BASE} ${plain ? PLAIN : CHIP}`}
     >
       {copied ? (
         <CheckIcon aria-hidden="true" className="tw-size-4 tw-text-success" />

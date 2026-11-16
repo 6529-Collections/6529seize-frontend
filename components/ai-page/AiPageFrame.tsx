@@ -34,6 +34,9 @@ export const AI_H3 =
   "tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50";
 export const AI_BODY = "tw-text-[15px] tw-leading-6 tw-text-iron-300";
 export const AI_MUTED = "tw-text-sm tw-leading-6 tw-text-iron-400";
+/** A secondary button: 44 px tall on a phone, 36 px from 640 px up. */
+export const AI_BUTTON =
+  "tw-inline-flex tw-min-h-11 tw-flex-none tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-iron-900 tw-px-3.5 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline tw-transition hover:tw-border-primary-400/60 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 sm:tw-min-h-9";
 export const AI_CARD =
   "tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950/60";
 
@@ -77,12 +80,21 @@ function AiUntestedNotice({ current }: { readonly current: AiSection }) {
 export default function AiPageFrame({
   current,
   eyebrow,
+  version,
+  notice = true,
   title,
   lead,
   children,
 }: {
   readonly current: AiSection;
   readonly eyebrow: string;
+  /** The release, after the eyebrow, as written: 0.1.0-rc.1. */
+  readonly version?: string | undefined;
+  /**
+   * False where the page itself says the release is untested, as the known
+   * issues do in their lead.
+   */
+  readonly notice?: boolean | undefined;
   readonly title: string;
   readonly lead?: string | undefined;
   readonly children: ReactNode;
@@ -117,6 +129,16 @@ export default function AiPageFrame({
         <header className="tw-mb-6">
           <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wider tw-text-primary-300">
             {eyebrow}
+            {version && (
+              <>
+                <span aria-hidden="true" className="tw-mx-1.5 tw-text-iron-600">
+                  ·
+                </span>
+                <span className="tw-font-mono tw-normal-case tw-tracking-normal tw-text-iron-300">
+                  {version}
+                </span>
+              </>
+            )}
           </p>
           <h1 className="tw-m-0 tw-text-balance tw-text-4xl tw-font-semibold tw-leading-tight tw-tracking-[-0.03em] tw-text-iron-50 md:tw-text-5xl">
             {title}
@@ -127,7 +149,7 @@ export default function AiPageFrame({
             </p>
           )}
         </header>
-        <AiUntestedNotice current={current} />
+        {notice && <AiUntestedNotice current={current} />}
         {children}
       </div>
     </main>

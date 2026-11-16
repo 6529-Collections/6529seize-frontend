@@ -1,14 +1,9 @@
 import { ArrowDownTrayIcon, CheckIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
 
 import ValidatorFold from "@/components/validator-page/ValidatorFold";
-import {
-  CODE,
-  LINK,
-  SECONDARY_BUTTON,
-} from "@/components/validator-page/validatorStyles";
+import { CODE } from "@/components/validator-page/validatorStyles";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t, tRich } from "@/i18n/messages";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 import {
   AI_FIRST_CHAT,
@@ -22,11 +17,22 @@ import {
   groupAiReleaseFiles,
   type AiInstallerKind,
 } from "@/lib/ai-page/releaseFiles";
+import { AI_SCREENSHOTS } from "@/lib/ai-page/screenshots";
 import type { VisitorPlatform } from "@/lib/validator-page/detectSystem";
 import AiCodeBlock from "./AiCodeBlock";
 import AiGuideSteps, { AiStepBody } from "./AiGuideSteps";
-import AiPageFrame, { AI_CARD, AI_H2, AI_H3, AI_MUTED } from "./AiPageFrame";
-import AiSystemTabs from "./AiSystemTabs";
+import AiPageFrame, {
+  AI_BODY,
+  AI_BUTTON,
+  AI_CARD,
+  AI_H2,
+  AI_H3,
+  AI_MUTED,
+} from "./AiPageFrame";
+import AiReportProblem from "./AiReportProblem";
+import AiScreenshot from "./AiScreenshot";
+import AiSystemLogo from "./AiSystemLogo";
+import AiTabs from "./AiTabs";
 import { formatAiFileSize } from "./formatAiFileSize";
 
 // Rendered on the server, in the locale the server renders.
@@ -42,11 +48,20 @@ const IMAGES: Readonly<Record<AiGuideSystemKey, string>> = {
   linux: "/linux.png",
 };
 
-const INSTALLER_OF: Readonly<
-  Partial<Record<AiGuideSystemKey, AiInstallerKind>>
+/** The downloads each system's "What you need" offers. */
+const DOWNLOADS: Readonly<
+  Record<
+    AiGuideSystemKey,
+    readonly { readonly kind: AiInstallerKind; readonly label?: MessageKey }[]
+  >
 > = {
-  mac: "macos",
-  windows: "windows",
+  mac: [{ kind: "macos" }],
+  windows: [{ kind: "windows" }],
+  linux: [
+    { kind: "linux-x64", label: "ai.files.linux.x64" },
+    { kind: "linux-x64-cuda", label: "ai.files.linux.cuda" },
+    { kind: "linux-arm64", label: "ai.files.linux.arm64" },
+  ],
 };
 
 /** The visitor's system, or the Mac for a phone or anything else. */
@@ -54,44 +69,55 @@ function initialSystem(platform: VisitorPlatform): AiGuideSystemKey {
   return platform.system === "other" ? "mac" : platform.system;
 }
 
-function DownloadLink({
+function DownloadButtons({
   release,
   system,
 }: {
   readonly release: AiRelease | undefined;
   readonly system: AiGuideSystem;
 }) {
-  const kind = INSTALLER_OF[system.key];
-  const installer =
-    release && kind
-      ? groupAiReleaseFiles(release).installers.find(
-          (item) => item.kind === kind
-        )
-      : undefined;
-  if (!release || !installer) {
-    return (
-      <Link href="/ai#downloads" className={`tw-text-sm ${LINK}`}>
-        {t(LOCALE, "ai.guide.downloads")}
-      </Link>
-    );
+  if (!release) {
+    return null;
   }
-  const size = formatAiFileSize(installer.file.size);
+  const { installers } = groupAiReleaseFiles(release);
+  const buttons = DOWNLOADS[system.key].flatMap(({ kind, label }) => {
+    const installer = installers.find((item) => item.kind === kind);
+    return installer ? [{ installer, label }] : [];
+  });
+  if (buttons.length === 0) {
+    return null;
+  }
   return (
-    <a
-      href={getAiDownloadPath(release, installer.file)}
-      className={SECONDARY_BUTTON}
-      aria-label={t(LOCALE, "ai.files.download.label", {
-        file: installer.file.name,
-      })}
-    >
-      <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
-      {t(LOCALE, "ai.guide.download", { system: system.label })}
-      {size && (
-        <span className="tw-font-normal tw-tabular-nums tw-text-iron-400">
-          {size}
+    <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+      {buttons.some((button) => button.label) && (
+        <span className="tw-mr-1 tw-w-full tw-text-sm tw-text-iron-400 sm:tw-w-auto">
+          {t(LOCALE, "ai.guide.downloadDeb")}
         </span>
       )}
-    </a>
+      {buttons.map(({ installer, label }) => {
+        const size = formatAiFileSize(installer.file.size);
+        return (
+          <a
+            key={installer.kind}
+            href={getAiDownloadPath(release, installer.file)}
+            className={`${AI_BUTTON} max-sm:tw-flex-1`}
+            aria-label={t(LOCALE, "ai.files.download.label", {
+              file: installer.file.name,
+            })}
+          >
+            <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
+            {label
+              ? t(LOCALE, label)
+              : t(LOCALE, "ai.guide.download", { system: system.label })}
+            {size && !label && (
+              <span className="tw-font-normal tw-tabular-nums tw-text-iron-400">
+                {size}
+              </span>
+            )}
+          </a>
+        );
+      })}
+    </div>
   );
 }
 
@@ -113,44 +139,43 @@ function SystemPanel({
         </h2>
         <ul className="tw-m-0 tw-mt-3 tw-flex tw-list-none tw-flex-col tw-gap-2 tw-p-0">
           {system.needs.map((need) => (
-            <li key={need} className={`tw-flex tw-gap-2.5 ${AI_MUTED}`}>
+            <li
+              key={need}
+              className="tw-flex tw-gap-2.5 tw-text-sm tw-leading-6 tw-text-iron-300"
+            >
               <CheckIcon
                 aria-hidden="true"
                 className="tw-mt-1 tw-size-4 tw-flex-none tw-text-iron-500"
               />
-              <span className="tw-text-iron-300">{need}</span>
+              <span>{need}</span>
             </li>
           ))}
         </ul>
-        <div className="tw-mt-4">
-          <DownloadLink release={release} system={system} />
-        </div>
+        <DownloadButtons release={release} system={system} />
       </section>
 
       <section aria-labelledby={`install-${system.key}`}>
         <h2 id={`install-${system.key}`} className={`tw-mb-5 ${AI_H2}`}>
           {t(LOCALE, "ai.guide.install")}
         </h2>
-        <AiGuideSteps steps={system.steps} />
-      </section>
-
-      <div className="tw-grid tw-gap-6 sm:tw-grid-cols-2">
-        <section aria-labelledby={`again-${system.key}`}>
-          <h3 id={`again-${system.key}`} className={`tw-mb-2 ${AI_H3}`}>
+        <AiGuideSteps
+          steps={system.steps}
+          screenshots={{
+            placement: (
+              <AiScreenshot
+                slot={AI_SCREENSHOTS.placement}
+                alt={t(LOCALE, "ai.guide.placementShot")}
+              />
+            ),
+          }}
+        />
+        <div className="tw-mt-8">
+          <h3 className={`tw-mb-2 ${AI_H3}`}>
             {t(LOCALE, "ai.guide.openAgain")}
           </h3>
           <AiStepBody step={system.openAgain} />
-        </section>
-        <section aria-labelledby={`log-${system.key}`}>
-          <h3 id={`log-${system.key}`} className={`tw-mb-2 ${AI_H3}`}>
-            {t(LOCALE, "ai.guide.log")}
-          </h3>
-          <AiCodeBlock
-            code={system.log.code}
-            what={t(LOCALE, "ai.guide.log")}
-          />
-        </section>
-      </div>
+        </div>
+      </section>
 
       <div className="tw-flex tw-flex-col tw-gap-3">
         {system.more && (
@@ -158,6 +183,14 @@ function SystemPanel({
             <AiStepBody step={system.more.step} />
           </ValidatorFold>
         )}
+        <ValidatorFold small title={t(LOCALE, "ai.guide.troubleshooting")}>
+          <div className="tw-flex tw-flex-col tw-gap-3">
+            <p className={`tw-m-0 ${AI_BODY}`}>
+              {t(LOCALE, "ai.guide.troubleshooting.body")}
+            </p>
+            <AiCodeBlock code={system.log.code} what={system.log.code} />
+          </div>
+        </ValidatorFold>
         <ValidatorFold small title={t(LOCALE, "ai.guide.uninstall")}>
           <AiStepBody step={system.uninstall} />
         </ValidatorFold>
@@ -168,7 +201,8 @@ function SystemPanel({
 
 /**
  * The install guide: a tab per system, opening on the visitor's, with
- * numbered steps and what each one shows; then the first chat.
+ * numbered steps and what each one shows; then the first chat, and where
+ * to report a problem.
  */
 export default function AiGuidePage({
   release,
@@ -182,17 +216,20 @@ export default function AiGuidePage({
     <AiPageFrame
       current="guide"
       eyebrow={t(LOCALE, "ai.guide.eyebrow")}
+      version={release?.version}
       title={t(LOCALE, "ai.guide.title")}
       lead={t(LOCALE, "ai.guide.lead")}
     >
       <div className="tw-mt-10">
-        <AiSystemTabs
+        <AiTabs
           label={t(LOCALE, "ai.guide.tabs")}
           initial={initialSystem(platform)}
+          listClassName="tw-w-full sm:tw-w-auto"
+          panelClassName="tw-mt-8"
           tabs={systems.map((system) => ({
             key: system.key,
             label: system.label,
-            image: IMAGES[system.key],
+            icon: <AiSystemLogo src={IMAGES[system.key]} size="sm" />,
             panel: <SystemPanel release={release} system={system} />,
           }))}
         />
@@ -216,25 +253,28 @@ export default function AiGuidePage({
             {t(LOCALE, "ai.guide.tryFirst.body", { size: FIRST_MODEL_SIZE })}
           </span>
         </div>
+        <div className="tw-mt-6">
+          <AiScreenshot
+            slot={AI_SCREENSHOTS.firstChat}
+            alt={t(LOCALE, "ai.guide.chatShot")}
+          />
+        </div>
       </section>
 
-      <div className="tw-mt-16 tw-grid tw-gap-3 sm:tw-grid-cols-2">
-        <section aria-labelledby="validator" className={`${AI_CARD} tw-p-5`}>
-          <h2 id="validator" className={`tw-mb-2 ${AI_H3}`}>
+      <div className="tw-mt-16 tw-flex tw-flex-col tw-gap-6 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-8">
+        <section aria-labelledby="validator">
+          <h2 id="validator" className={`tw-mb-1 ${AI_H3}`}>
             {t(LOCALE, "ai.guide.validator.title")}
           </h2>
-          <p className={`tw-m-0 ${AI_MUTED}`}>
+          <p className={`tw-m-0 tw-max-w-2xl ${AI_MUTED}`}>
             {t(LOCALE, "ai.guide.validator.body")}
           </p>
         </section>
-        <section
-          aria-labelledby="other-programs"
-          className={`${AI_CARD} tw-p-5`}
-        >
-          <h2 id="other-programs" className={`tw-mb-2 ${AI_H3}`}>
+        <section aria-labelledby="other-programs">
+          <h2 id="other-programs" className={`tw-mb-1 ${AI_H3}`}>
             {t(LOCALE, "ai.guide.api.title")}
           </h2>
-          <p className={`tw-m-0 ${AI_MUTED}`}>
+          <p className={`tw-m-0 tw-max-w-2xl ${AI_MUTED}`}>
             {tRich(LOCALE, "ai.guide.api.body", {
               path: (
                 <code key="path" className={CODE}>
@@ -252,6 +292,10 @@ export default function AiGuidePage({
             })}
           </p>
         </section>
+      </div>
+
+      <div className={`${AI_CARD} tw-mt-10 tw-p-5`}>
+        <AiReportProblem title={t(LOCALE, "ai.guide.stuck")} />
       </div>
     </AiPageFrame>
   );

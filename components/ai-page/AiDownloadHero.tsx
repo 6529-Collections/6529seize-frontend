@@ -1,7 +1,17 @@
 "use client";
 
-import { ArrowDownTrayIcon } from "@heroicons/react/24/outline";
-import type { ReactNode } from "react";
+import {
+  ArrowDownTrayIcon,
+  CheckIcon,
+  LinkIcon,
+  ShareIcon,
+} from "@heroicons/react/24/outline";
+import {
+  useEffect,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 import { useVisitorPlatform } from "@/components/validator-page/useVisitorPlatform";
 import { PRIMARY_BUTTON } from "@/components/validator-page/validatorStyles";
@@ -20,19 +30,45 @@ export type AiHeroOption = {
   readonly meta: string;
   /** Who signed it, as badges; null for a file with no code signature. */
   readonly badges: ReactNode;
-  /** The short name in "Also for": "Windows". */
-  readonly system: string;
-  /** That link's accessible name, with the file name. */
-  readonly systemLabel: string;
+};
+
+/** A system in "Also for", and on a phone's row of buttons. */
+export type AiHeroSystem = {
+  readonly key: "mac" | "windows" | "linux";
+  readonly label: string;
+  readonly href: string;
+  readonly ariaLabel: string;
 };
 
 export type AiHeroText = {
   readonly armNote: string;
-  /** For a phone or another computer it can't tell: what 6529 AI runs on. */
-  readonly otherNote: string;
   readonly alsoFor: string;
   readonly allDownloads: string;
+  readonly phoneTitle: string;
+  readonly phoneBody: string;
+  readonly copyLink: string;
+  readonly linkCopied: string;
+  readonly shareLink: string;
+  readonly phonePlatforms: string;
 };
+
+const SYSTEM_OF: Readonly<Record<AiInstallerKind, AiHeroSystem["key"]>> = {
+  macos: "mac",
+  windows: "windows",
+  "linux-x64": "linux",
+  "linux-x64-cuda": "linux",
+  "linux-arm64": "linux",
+};
+
+const QUIET_LINK =
+  "tw-inline-flex tw-min-h-11 tw-items-center tw-rounded tw-font-medium tw-text-iron-200 tw-underline tw-decoration-white/25 tw-underline-offset-4 hover:tw-text-white hover:tw-decoration-white/60 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-min-h-0";
+const ROW_BUTTON =
+  "tw-inline-flex tw-min-h-11 tw-flex-1 tw-items-center tw-justify-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 tw-no-underline hover:tw-border-primary-400/60 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+
+/** The share sheet's support never changes while the page is open. */
+function noSubscription(): () => void {
+  return () => undefined;
+}
 
 function kindsFor(platform: VisitorPlatform): AiInstallerKind[] {
   switch (platform.system) {
@@ -48,22 +84,115 @@ function kindsFor(platform: VisitorPlatform): AiInstallerKind[] {
         ? ["linux-x64"]
         : ["linux-x64", "linux-arm64"];
     case "other":
-      return ["macos", "windows"];
+      return [];
   }
 }
 
 /**
+ * On a phone, or a computer the page can't tell: 6529 AI runs on a
+ * computer, so the first action passes this page to one.
+ */
+function PhoneFirst({
+  systems,
+  text,
+}: {
+  readonly systems: readonly AiHeroSystem[];
+  readonly text: AiHeroText;
+}) {
+  // The share sheet exists only in the browser, and only on some; the
+  // server and the first paint offer Copy link.
+  const canShare = useSyncExternalStore(
+    noSubscription,
+    () => typeof navigator.share === "function",
+    () => false
+  );
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) {
+      return undefined;
+    }
+    const timer = setTimeout(() => setCopied(false), 2000);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
+  const pass = async () => {
+    const url = `${globalThis.location.origin}/ai`;
+    try {
+      if (canShare) {
+        await navigator.share({ url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+    } catch {
+      // A dismissed share sheet or a refused clipboard changes nothing.
+    }
+  };
+
+  let passText = text.copyLink;
+  let PassIcon = LinkIcon;
+  if (copied) {
+    passText = text.linkCopied;
+    PassIcon = CheckIcon;
+  } else if (canShare) {
+    passText = text.shareLink;
+    PassIcon = ShareIcon;
+  }
+
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-4">
+      <div>
+        <p className="tw-m-0 tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-50">
+          {text.phoneTitle}
+        </p>
+        <p className="tw-m-0 tw-mt-1 tw-text-[15px] tw-leading-6 tw-text-iron-300">
+          {text.phoneBody}
+        </p>
+      </div>
+      <button
+        type="button"
+        onClick={pass}
+        className={`${PRIMARY_BUTTON} tw-border-0 sm:tw-w-auto sm:tw-self-start sm:tw-px-8`}
+      >
+        <PassIcon aria-hidden="true" className="tw-size-6" />
+        <span aria-live="polite">{passText}</span>
+      </button>
+      <div>
+        <p className="tw-m-0 tw-mb-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+          {text.phonePlatforms}
+        </p>
+        <div className="tw-flex tw-gap-2">
+          {systems.map((system) => (
+            <a
+              key={system.key}
+              href={system.href}
+              aria-label={system.ariaLabel}
+              className={ROW_BUTTON}
+            >
+              {system.label}
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
  * The big button for this computer, what it needs under it, who signed
- * it, and quiet links to every other system. The server picks the button
+ * it, and quiet links to the other systems. The server picks the button
  * from the User-Agent header; Chromium's client hints then pick the Linux
- * package for this CPU.
+ * package for this CPU. A phone gets a way to pass the page on instead.
  */
 export default function AiDownloadHero({
   options,
+  systems,
   initial,
   text,
 }: {
   readonly options: readonly AiHeroOption[];
+  readonly systems: readonly AiHeroSystem[];
   readonly initial: VisitorPlatform;
   readonly text: AiHeroText;
 }) {
@@ -71,15 +200,17 @@ export default function AiDownloadHero({
   const primary = kindsFor(platform)
     .map((kind) => options.find((option) => option.kind === kind))
     .filter((option): option is AiHeroOption => !!option);
-  const others = options.filter((option) => !primary.includes(option));
-  const bothLinux =
-    primary.length === 2 &&
-    primary.every((option) => option.kind.startsWith("linux"));
+  if (primary.length === 0) {
+    return <PhoneFirst systems={systems} text={text} />;
+  }
+  const shown = new Set(primary.map((option) => SYSTEM_OF[option.kind]));
+  const others = systems.filter((system) => !shown.has(system.key));
+  const bothLinux = primary.length === 2;
 
   return (
     <div>
       <div
-        className={`tw-grid tw-gap-6 ${primary.length > 1 ? "sm:tw-grid-cols-2" : ""}`}
+        className={`tw-grid tw-gap-6 ${bothLinux ? "sm:tw-grid-cols-2" : ""}`}
       >
         {primary.map((option) => (
           <div key={option.kind} className="tw-flex tw-flex-col tw-gap-3">
@@ -98,34 +229,31 @@ export default function AiDownloadHero({
           </div>
         ))}
       </div>
-      {platform.system === "other" && (
-        <p className="tw-mb-0 tw-mt-4 tw-text-sm tw-leading-6 tw-text-iron-400">
-          {text.otherNote}
-        </p>
-      )}
       {bothLinux && (
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-400">
           {text.armNote}
         </p>
       )}
-      <p className="tw-mb-0 tw-mt-6 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-4 tw-gap-y-1 tw-text-sm tw-leading-6">
-        {others.length > 0 && (
-          <span className="tw-text-iron-500">{text.alsoFor}</span>
-        )}
-        {others.map((option) => (
-          <a
-            key={option.kind}
-            href={option.href}
-            aria-label={option.systemLabel}
-            className="tw-rounded tw-font-medium tw-text-iron-200 tw-underline tw-decoration-white/20 tw-underline-offset-4 hover:tw-text-white hover:tw-decoration-white/60 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      <p className="tw-mb-0 tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-text-sm tw-leading-6">
+        <span className="tw-mr-1 tw-text-iron-500">{text.alsoFor}</span>
+        {others.map((system) => (
+          <span
+            key={system.key}
+            className="tw-inline-flex tw-items-center tw-gap-2"
           >
-            {option.system}
-          </a>
+            <a
+              href={system.href}
+              aria-label={system.ariaLabel}
+              className={QUIET_LINK}
+            >
+              {system.label}
+            </a>
+            <span aria-hidden="true" className="tw-text-iron-600">
+              ·
+            </span>
+          </span>
         ))}
-        <a
-          href="#downloads"
-          className="tw-rounded tw-font-medium tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-4 hover:tw-decoration-primary-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        >
+        <a href="#downloads" className={QUIET_LINK}>
           {text.allDownloads}
         </a>
       </p>

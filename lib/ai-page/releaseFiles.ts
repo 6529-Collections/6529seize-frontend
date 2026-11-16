@@ -62,7 +62,7 @@ const INSTALLERS: readonly InstallerRule[] = [
     system: "linux-x86_64-cpu",
     pattern: /_amd64\.deb$/,
     label: DEB,
-    detail: "x86-64",
+    detail: DEB_NEEDS,
     needs: `${DEB_NEEDS}, x86-64`,
   },
   {
@@ -71,7 +71,7 @@ const INSTALLERS: readonly InstallerRule[] = [
     system: "linux-x86_64-cuda",
     pattern: /_amd64\.deb$/,
     label: DEB,
-    detail: "x86-64 · NVIDIA GPU (CUDA)",
+    detail: DEB_NEEDS,
     needs: `${DEB_NEEDS}, NVIDIA driver 575 or later`,
   },
   {
@@ -80,7 +80,7 @@ const INSTALLERS: readonly InstallerRule[] = [
     system: "linux-arm64-cpu",
     pattern: /_arm64\.deb$/,
     label: DEB,
-    detail: "64-bit ARM",
+    detail: DEB_NEEDS,
     needs: `${DEB_NEEDS}, 64-bit ARM`,
   },
 ];
@@ -88,9 +88,9 @@ const INSTALLERS: readonly InstallerRule[] = [
 const ARCHIVE_DETAILS: Readonly<Record<AiSystem, string>> = {
   "macos-arm64": "Apple silicon",
   "windows-x64": "64-bit Intel or AMD",
-  "linux-x86_64-cpu": "x86-64 · any Linux with systemd",
-  "linux-x86_64-cuda": "x86-64 · NVIDIA GPU (CUDA) · any Linux with systemd",
-  "linux-arm64-cpu": "64-bit ARM · any Linux with systemd",
+  "linux-x86_64-cpu": "Any Linux with systemd",
+  "linux-x86_64-cuda": "Any Linux with systemd",
+  "linux-arm64-cpu": "Any Linux with systemd",
 };
 
 const FAMILY_OF_SYSTEM: Readonly<Record<AiSystem, AiFileFamily>> = {

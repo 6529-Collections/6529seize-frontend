@@ -1,10 +1,13 @@
-// What nobody has tried yet in release candidate 1, from 6529 AI's install
-// guides and their notes on what was tested. It runs models on the
+// What hasn't been tested yet in release candidate 1, from 6529 AI's
+// install guides and their notes on what was tested. It runs models on the
 // person's own computer only and hides the network, so nothing here is
-// about the network. Text may hold **bold** and `code`. en-US only for now;
-// see ops/docs/ai-download-page.md.
+// about the network. Text may hold **bold**, *italic* and `code`. en-US
+// only for now; see ops/docs/ai-download-page.md.
 
 import type { AiCode } from "./guide";
+
+/** The day this list last changed, `YYYY-MM-DD`. */
+export const AI_KNOWN_ISSUES_UPDATED = "2026-11-16";
 
 export type AiKnownIssue = {
   /** The issue, in a line. */
@@ -26,17 +29,14 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
     key: "mac",
     title: "Mac",
     issues: [
+      { issue: "Tested only on a cloud Mac (M2, macOS 15.8.2)." },
       {
         issue:
-          "Tried only on a cloud Mac, an Apple M2 with macOS 15.8.2; never on a Mac on a desk.",
+          "Not tested on macOS before 15.8; it is built for 13.3 and later.",
       },
       {
         issue:
-          "Not tried on a macOS before 15.8, although it is built for 13.3 and later.",
-      },
-      {
-        issue:
-          "The release's app was set up from Terminal; nobody has opened it by hand yet.",
+          "Opening the app by double-click hasn't been tested; it was set up from Terminal.",
       },
     ],
   },
@@ -44,18 +44,16 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
     key: "windows",
     title: "Windows",
     issues: [
+      { issue: "Tested only on Windows Server 2025, not on Windows 10 or 11." },
       {
-        issue: "Tried only on Windows Server 2025, not on Windows 10 or 11.",
-      },
-      {
-        issue: "Not tried with a GPU.",
+        issue: "Not tested with a GPU.",
         workaround:
           "If models don't start, reinstall and choose **On the CPU only**. If the uninstall leaves the config behind, delete it first:",
         code: [{ code: "C:\\Program Files\\6529 AI\\6529-ai.toml" }],
       },
       {
         issue:
-          "The installer ran silently; nobody has clicked through its screens.",
+          "Clicking through the installer's screens hasn't been tested; it was installed silently.",
       },
     ],
   },
@@ -64,14 +62,13 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
     title: "Linux",
     issues: [
       {
-        issue:
-          "Tried only on Ubuntu 22.04 and 24.04, not on another distribution.",
+        issue: "Tested only on Ubuntu 22.04 and 24.04.",
         workaround:
           "On another distribution, the `.tar.gz` installs the same files.",
       },
       {
         issue:
-          "Nobody has answered the install's question in a terminal by hand.",
+          "Answering the install's question in a terminal hasn't been tested.",
         workaround: "Answer it before you install:",
         code: [
           {
@@ -87,7 +84,7 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
     issues: [
       {
         issue:
-          "The page doesn't open within 60 seconds of installing: the service didn't start.",
+          "If the page doesn't open within 60 seconds of installing, the service didn't start.",
         workaround: "Its log says why:",
         code: [
           { label: "Mac", code: "~/Library/Logs/6529-ai.log" },

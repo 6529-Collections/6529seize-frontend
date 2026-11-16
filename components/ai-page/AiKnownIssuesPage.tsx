@@ -1,19 +1,27 @@
 import { GlobeAltIcon, WrenchIcon } from "@heroicons/react/24/outline";
-import Image from "next/image";
 
+import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 import {
   AI_KNOWN_ISSUES,
+  AI_KNOWN_ISSUES_UPDATED,
   type AiKnownIssueGroup,
 } from "@/lib/ai-page/content/knownIssues";
 import AiCodeBlock from "./AiCodeBlock";
 import AiPageFrame, { AI_CARD } from "./AiPageFrame";
+import AiReportProblem from "./AiReportProblem";
+import AiSystemLogo from "./AiSystemLogo";
 import InlineText from "./InlineText";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
+const UPDATED_DATE: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
 
 const IMAGES: Readonly<Partial<Record<AiKnownIssueGroup["key"], string>>> = {
   mac: "/macos.png",
@@ -23,40 +31,46 @@ const IMAGES: Readonly<Partial<Record<AiKnownIssueGroup["key"], string>>> = {
 
 function GroupIcon({ group }: { readonly group: AiKnownIssueGroup }) {
   const image = IMAGES[group.key];
+  if (image) {
+    return <AiSystemLogo src={image} />;
+  }
   return (
     <span className="tw-flex tw-size-8 tw-flex-none tw-items-center tw-justify-center tw-rounded-lg tw-bg-white">
-      {image ? (
-        <Image
-          unoptimized
-          src={image}
-          alt=""
-          width={18}
-          height={18}
-          className="tw-size-[18px] tw-object-contain"
-        />
-      ) : (
-        <GlobeAltIcon
-          aria-hidden="true"
-          className="tw-size-5 tw-text-iron-900"
-        />
-      )}
+      <GlobeAltIcon aria-hidden="true" className="tw-size-5 tw-text-iron-900" />
     </span>
   );
 }
 
 /**
- * What nobody has tried yet, by system: each issue in a line, with its
- * workaround under it when there is one.
+ * What hasn't been tested yet, by system: each issue in a line, with its
+ * workaround and its commands under it when there is one. The lead says
+ * the release is untested, so the page shows no separate notice.
  */
-export default function AiKnownIssuesPage() {
+export default function AiKnownIssuesPage({
+  version,
+}: {
+  /** The newest release's version, for the eyebrow. */
+  readonly version: string | undefined;
+}) {
   const workaround = t(LOCALE, "ai.knownIssues.workaround");
   return (
     <AiPageFrame
       current="known-issues"
       eyebrow={t(LOCALE, "ai.knownIssues.eyebrow")}
+      version={version}
       title={t(LOCALE, "ai.knownIssues.title")}
       lead={t(LOCALE, "ai.knownIssues.lead")}
+      notice={false}
     >
+      <div className="tw-flex tw-flex-col tw-gap-6">
+        <p className="tw-m-0 tw-text-sm tw-tabular-nums tw-text-iron-500">
+          {t(LOCALE, "ai.knownIssues.updated", {
+            date: formatDate(LOCALE, AI_KNOWN_ISSUES_UPDATED, UPDATED_DATE),
+          })}
+        </p>
+        <AiReportProblem />
+      </div>
+
       <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-4">
         {AI_KNOWN_ISSUES.map((group) => (
           <section
@@ -88,7 +102,7 @@ export default function AiKnownIssuesPage() {
                         aria-hidden="true"
                         className="tw-mt-1 tw-size-4 tw-flex-none tw-text-iron-500"
                       />
-                      <span className="tw-min-w-0 tw-break-words">
+                      <span className="tw-min-w-0">
                         <span className="tw-font-medium tw-text-iron-300">
                           {workaround}:{" "}
                         </span>
@@ -112,6 +126,10 @@ export default function AiKnownIssuesPage() {
             </ul>
           </section>
         ))}
+      </div>
+
+      <div className={`${AI_CARD} tw-mt-10 tw-p-5`}>
+        <AiReportProblem />
       </div>
     </AiPageFrame>
   );

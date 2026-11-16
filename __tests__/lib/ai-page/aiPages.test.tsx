@@ -46,6 +46,8 @@ import { resetAiReleaseFeedCacheForTests } from "@/lib/ai-page/releaseFeed";
 
 const WINDOWS_UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36";
+const IPHONE_UA =
+  "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
 const MAC_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15";
 const NOTICE = "Untested test release.";
@@ -81,7 +83,7 @@ async function renderAll(): Promise<string[]> {
   return [
     renderToStaticMarkup(await AiRoute()),
     renderToStaticMarkup(await AiGuideRoute()),
-    renderToStaticMarkup(AiKnownIssuesRoute()),
+    renderToStaticMarkup(await AiKnownIssuesRoute()),
   ];
 }
 
@@ -95,13 +97,21 @@ describe("the /ai pages", () => {
 
   it("say on every page, before its text, that 6529 AI is untested", async () => {
     storeHasSignedFeed();
-    for (const html of await renderAll()) {
+    const [download, guide, knownIssues] = await renderAll();
+    for (const html of [download!, guide!]) {
       expect(html).toContain(NOTICE);
       expect(html).toContain(DISCLAIMER);
       const notice = html.indexOf(NOTICE);
       expect(notice).toBeGreaterThan(html.indexOf("<h1"));
       expect(notice).toBeLessThan(html.indexOf("<h1") + 2_000);
     }
+    // The known issues say it in their lead, right under the title.
+    const lead = knownIssues!.indexOf("6529 AI is untested");
+    expect(lead).toBeGreaterThan(knownIssues!.indexOf("<h1"));
+    expect(lead).toBeLessThan(knownIssues!.indexOf("<h1") + 500);
+    expect(knownIssues).toContain(
+      "expect problems, and don&#x27;t rely on it for anything that matters."
+    );
   });
 
   it("stay out of search engines", () => {
@@ -149,7 +159,7 @@ describe("the /ai pages", () => {
   it("offers the newest release, Windows first for a Windows visitor", async () => {
     storeHasSignedFeed();
     const html = renderToStaticMarkup(await AiRoute());
-    expect(html).toContain("Test release · 0.1.0");
+    expect(html).toContain(">0.1.0</span>");
     expect(html).toContain(
       'aria-label="Download for Windows: 6529-ai-0.1.0-windows-x64-setup.exe"'
     );
@@ -193,9 +203,11 @@ describe("the /ai pages", () => {
       expect(html).toContain(
         `href="/ai/download/0.1.0/${encodeURIComponent(file.name)}"`
       );
-      // Behind a copy button, and whole for screen readers.
-      expect(html).toContain(`>${file.sha256}<`);
-      expect(html).toContain(`aria-label="Copy the SHA-256 of ${file.name}"`);
+      if (file.system !== null) {
+        // Behind a copy button, and whole for screen readers.
+        expect(html).toContain(`>${file.sha256}<`);
+        expect(html).toContain(`aria-label="Copy the SHA-256 of ${file.name}"`);
+      }
     }
     expect(html).not.toContain(MAC_SIGNER);
     expect(html).toContain(`Signed by ${WINDOWS_SIGNER}`);
@@ -232,25 +244,48 @@ describe("the /ai pages", () => {
     );
   });
 
-  it("list what nobody has tried yet", () => {
-    const html = renderToStaticMarkup(AiKnownIssuesRoute());
+  it("list what hasn't been tested, with the day the list changed", async () => {
+    storeHasSignedFeed();
+    const html = renderToStaticMarkup(await AiKnownIssuesRoute());
+    expect(html).toContain(">Known issues</h1>");
+    expect(html).toContain("Updated November 16, 2026");
     for (const text of [
-      "never on a Mac on a desk",
-      "Not tried on a macOS before 15.8",
-      "Not tried with a GPU.",
-      "not on another distribution",
-      "nobody has clicked through its screens",
-      "answered the install&#x27;s question in a terminal by hand",
+      "Tested only on a cloud Mac (M2, macOS 15.8.2).",
+      "Opening the app by double-click hasn&#x27;t been tested",
+      "Not tested with a GPU.",
+      "Tested only on Ubuntu 22.04 and 24.04.",
+      "Clicking through the installer&#x27;s screens hasn&#x27;t been tested",
       "6529-ai/placement select alone",
     ]) {
       expect(html).toContain(text);
     }
   });
 
+  it("send a problem report to the 6529 AI wave", async () => {
+    storeHasSignedFeed();
+    const [, guide, knownIssues] = await renderAll();
+    const reportLinks = (html: string) =>
+      html.match(/href="\/waves\/46f873a7-6d5c-4dd0-b094-95fddca391b3"/g) ?? [];
+    expect(reportLinks(knownIssues!)).toHaveLength(2);
+    expect(reportLinks(guide!)).toHaveLength(1);
+    expect(knownIssues).toContain("add a screenshot and the log");
+  });
+
+  it("ask a phone to open the page on a computer", async () => {
+    mockUserAgent = IPHONE_UA;
+    storeHasSignedFeed();
+    const html = renderToStaticMarkup(await AiRoute());
+    expect(html).toContain("Open this page on your computer to download it.");
+    expect(html).toContain("Copy link");
+    expect(html).not.toContain("Download for Mac<");
+    expect(html).toContain(
+      'aria-label="Download for Mac: 6529-ai-0.1.0-macos-arm64.dmg"'
+    );
+  });
+
   // Release candidate 1 runs models on the person's own computer only, and
-  // the app hides the network: the pages explain none of it, beyond one
-  // line on the download page that it comes later.
-  it("leave the network out, but for one line on the download page", async () => {
+  // the app hides the network: the pages name it at most once.
+  it("leave the network out", async () => {
     storeHasSignedFeed();
     const [download, guide, knownIssues] = await renderAll();
     const textOf = (html: string) =>
@@ -261,10 +296,7 @@ describe("the /ai pages", () => {
       );
     }
     const mentions = textOf(download!).match(/network/gi) ?? [];
-    expect(mentions).toHaveLength(1);
-    expect(download).toContain(
-      "the 6529 AI network comes later, with the chain integration."
-    );
+    expect(mentions.length).toBeLessThanOrEqual(1);
     expect(textOf(download!)).not.toMatch(/provider|\bTor\b/i);
   });
 
@@ -280,7 +312,7 @@ describe("the /ai pages", () => {
       lastModified: null,
     }));
     const html = renderToStaticMarkup(await AiRoute());
-    expect(html).toContain("Test release · 0.1.0-rc.1");
+    expect(html).toContain(">0.1.0-rc.1</span>");
     const links = downloadLinks(html);
     expect(links).toContain(
       "/ai/download/0.1.0-rc.1/6529-ai-0.1.0-rc.1-windows-x64-setup.exe"
