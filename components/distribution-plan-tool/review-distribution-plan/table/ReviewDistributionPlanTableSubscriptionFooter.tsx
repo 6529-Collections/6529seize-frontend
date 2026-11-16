@@ -558,9 +558,9 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         Couldn’t load preparation mode. Retry
       </button>
     ) : (
-      <span role="status" className="tw-text-sm tw-text-iron-300">
+      <output className="tw-text-sm tw-text-iron-300">
         Loading preparation mode…
-      </span>
+      </output>
     );
   }
 

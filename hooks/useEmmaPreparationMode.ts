@@ -21,12 +21,10 @@ export function useEmmaPreparationMode(
     retry: false,
   });
   const savedMode = query.data?.mode;
-  const mode =
-    savedMode === Mode.Unstarted
-      ? settings.data?.preparation_enabled
-        ? Mode.Background
-        : Mode.Manual
-      : savedMode;
+  const defaultMode = settings.data?.preparation_enabled
+    ? Mode.Background
+    : Mode.Manual;
+  const mode = savedMode === Mode.Unstarted ? defaultMode : savedMode;
   return {
     mode,
     isError: query.isError,

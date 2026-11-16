@@ -46,7 +46,8 @@ export function SubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
     plan.id,
     canPrepare
   );
-  if (!canPrepare || !confirmedTokenId || !preparation.mode) return null;
+  if (!canPrepare || !confirmedTokenId || preparation.mode === undefined)
+    return null;
   return preparation.mode === PreparationMode.Background ? (
     <PreparedSubscriptionLinks plan={plan} phase={phase} />
   ) : (
