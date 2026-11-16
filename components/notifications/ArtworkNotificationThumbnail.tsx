@@ -1,6 +1,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { BellIcon } from "@heroicons/react/24/outline";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import { isUploadedDropGif } from "@/helpers/gif-preview.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getDropPreviewImageUrl } from "@/helpers/waves/drop.helpers";
 import type { INotificationArtistArtwork } from "@/types/feed.types";
@@ -20,24 +22,44 @@ export default function ArtworkNotificationThumbnail({
       .flatMap((part) => part.media)
       .find((media) => media.mime_type.startsWith("image/"))?.url;
   const src = image ? getScaledImageUri(image, ImageScale.W_AUTO_H_50) : null;
+  const fallback = (
+    <BellIcon aria-hidden="true" className="tw-size-5 tw-text-iron-400" />
+  );
+
+  let thumbnail = fallback;
+  if (image && isUploadedDropGif(image)) {
+    thumbnail = (
+      <DropImagePreview
+        originalSrc={image}
+        imageScale={ImageScale.W_AUTO_H_50}
+        alt=""
+        width={40}
+        height={40}
+        loading="lazy"
+        decoding="async"
+        className="tw-size-full tw-object-contain"
+        fallback={fallback}
+      />
+    );
+  } else if (src && src !== failedSrc) {
+    thumbnail = (
+      <Image
+        src={src}
+        alt=""
+        width={40}
+        height={40}
+        loading="lazy"
+        decoding="async"
+        unoptimized
+        className="tw-size-full tw-object-contain"
+        onError={() => setFailedSrc(src)}
+      />
+    );
+  }
 
   return (
     <div className="tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-white/10">
-      {src && src !== failedSrc ? (
-        <Image
-          src={src}
-          alt=""
-          width={40}
-          height={40}
-          loading="lazy"
-          decoding="async"
-          unoptimized
-          className="tw-size-full tw-object-contain"
-          onError={() => setFailedSrc(src)}
-        />
-      ) : (
-        <BellIcon aria-hidden="true" className="tw-size-5 tw-text-iron-400" />
-      )}
+      {thumbnail}
     </div>
   );
 }
