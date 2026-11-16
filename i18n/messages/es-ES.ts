@@ -254,6 +254,7 @@ export const ES_ES_MESSAGES = {
   "waves.drop.actions.menuLabel": "Acciones del drop",
   "waves.drop.actions.moreActions": "Más acciones",
   "waves.drop.actions.scrollForMore": "Más acciones, desplazar hacia abajo",
+  "waves.drop.actions.scrollUp": "Desplazar hacia arriba",
   "waves.drop.actions.reactionPickerLabel": "Añadir una reacción al drop",
   "waves.drop.actions.showMore": "Mostrar más",
   "waves.drop.actions.showLess": "Mostrar menos",
