@@ -24,19 +24,21 @@ export default function ProcessAndFinalize({
   plan,
   phaseIds,
   onCompleted,
+  onStarted,
 }: Readonly<{
   contract: string;
   claim: number;
   plan: string;
   phaseIds: string[];
   onCompleted?: () => void;
+  onStarted?: () => Promise<void>;
 }>) {
   const locale = useBrowserLocale();
   const { requestAuth } = useAuth();
   const queryClient = useQueryClient();
   const operation = useDropForgeProcess(contract, claim, plan);
   const preparationOff =
-    useDropForgeSettings().data?.preparation_enabled === false;
+    useDropForgeSettings().data?.preparation_enabled !== true;
   const request = useRef<{ key: string; id: string } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -85,9 +87,11 @@ export default function ProcessAndFinalize({
         request.current.id
       );
       queryClient.setQueryData(forgeProcessKey(contract, claim, plan), saved);
+      void onStarted?.();
     } catch (e) {
       setError(getToastErrorDetails(e) ?? t(locale, "dropForge.processError"));
       await operation.refetch();
+      void onStarted?.();
     } finally {
       setSubmitting(false);
     }
@@ -103,11 +107,12 @@ export default function ProcessAndFinalize({
   if (awaitingAuth && !pending) label = "dropForge.resumeAuth";
   if (preparationOff && job?.status === JobStatus.Pending)
     label = "dropForge.settings.preparationPaused";
+  const checkpoint = `${Math.min((job?.step ?? 0) + 1, 5)} / 5`;
   let statusMessage = "";
   if (preparationOff && !completed) {
     statusMessage = t(locale, "dropForge.settings.preparationOff");
   } else if (pending) {
-    statusMessage = `${Math.min((job?.step ?? 0) + 1, 5)} / 5`;
+    statusMessage = checkpoint;
   } else if (!hasRequiredInputs) {
     statusMessage = t(locale, "dropForge.inputsMissing");
   } else if (requiresReset) {
@@ -142,6 +147,9 @@ export default function ProcessAndFinalize({
         aria-live="polite"
         className="tw-text-sm tw-text-iron-300"
       >
+        {preparationOff && job?.status === JobStatus.Pending && (
+          <span className="tw-block">{checkpoint}</span>
+        )}
         {statusMessage}
       </div>
       {failure && (

@@ -8829,6 +8829,43 @@ paths:
           description: Launch or distribution job not found
         "409":
           description: Revision or existing launch conflict
+  /drop-forge/distribution-preparation/{contract}/{claim_id}:
+    get:
+      tags:
+        - Drop Forge
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/drop-forge/drop-forge-operations.handlers"
+          name: getDropForgePreparation
+      operationId: getDropForgePreparation
+      summary: Get the preparation mode for a distribution
+      parameters:
+        - name: contract
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: claim_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        "200":
+          description: Distribution preparation mode
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropForgePreparation"
+        "401":
+          description: Authentication required
+        "403":
+          description: Distribution administrator permission required
   /drop-forge/distribution-jobs/{contract}/{claim_id}:
     get:
       tags:
@@ -33842,6 +33879,17 @@ components:
           type: boolean
         include_team_airdrops:
           type: boolean
+    ApiDropForgePreparation:
+      type: object
+      required:
+        - mode
+      properties:
+        mode:
+          type: string
+          enum:
+            - UNSTARTED
+            - MANUAL
+            - BACKGROUND
     ApiDropForgeRecovery:
       type: object
       required:

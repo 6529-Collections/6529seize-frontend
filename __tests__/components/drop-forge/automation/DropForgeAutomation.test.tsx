@@ -251,6 +251,7 @@ it("shows a paused checkpoint while EMMA preparation is Off", async () => {
   expect(screen.getByRole("status")).toHaveTextContent(
     "EMMA preparation is Off"
   );
+  expect(screen.getByText("3 / 5")).toBeVisible();
   expect(startForgeProcess).not.toHaveBeenCalled();
 });
 

@@ -33,7 +33,8 @@ import {
   SubscriptionFooterMain,
 } from "./ReviewDistributionPlanTableSubscriptionFooterMain";
 import { getForgePhaseIds } from "@/services/api/drop-forge-process-inputs";
-import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
+import { useEmmaPreparationMode } from "@/hooks/useEmmaPreparationMode";
+import { ApiDropForgePreparationModeEnum as PreparationMode } from "@/generated/models/ApiDropForgePreparation";
 import ProcessAndFinalize from "../ProcessAndFinalize";
 import { isSubscriptionsAdmin } from "./ReviewDistributionPlanTableSubscription.utils";
 
@@ -52,13 +53,23 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     useContext(DistributionPlanToolContext);
   const { connectedProfile, setToast } = useContext(AuthContext);
   const { seizeSettings } = useSeizeSettings();
-  const { data: dropForgeSettings } = useDropForgeSettings();
   const distributionAdminWallets = useMemo(
     () =>
       Array.isArray(seizeSettings.distribution_admin_wallets)
         ? seizeSettings.distribution_admin_wallets
         : [],
     [seizeSettings.distribution_admin_wallets]
+  );
+
+  const canPrepare = isSubscriptionsAdmin(
+    connectedProfile,
+    distributionAdminWallets
+  );
+  const preparation = useEmmaPreparationMode(
+    MEMES_CONTRACT,
+    confirmedTokenId,
+    distributionPlan?.id,
+    canPrepare
   );
 
   const [showUploadPhotos, setShowUploadPhotos] = useState(false);
@@ -222,7 +233,10 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         type: "success",
         message: "Subscriptions reset.",
       });
-      await refreshOverview(contract, tokenId);
+      await Promise.all([
+        preparation.refresh(),
+        refreshOverview(contract, tokenId),
+      ]);
     } catch (error: unknown) {
       setToast({
         type: "error",
@@ -256,7 +270,10 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
           title: "Distribution normalized.",
           description: response.message,
         });
-        await refreshOverview(contract, tokenId);
+        await Promise.all([
+          preparation.refresh(),
+          refreshOverview(contract, tokenId),
+        ]);
       } else {
         setToast({
           type: "error",
@@ -266,6 +283,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         });
       }
     } catch (error: unknown) {
+      void preparation.refresh();
       setToast({
         type: "error",
         title: "Couldn't normalize this distribution.",
@@ -492,7 +510,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
     setViewedAirdropsError(null);
   }, []);
 
-  if (!isSubscriptionsAdmin(connectedProfile, distributionAdminWallets)) {
+  if (!canPrepare) {
     return <></>;
   }
 
@@ -515,6 +533,36 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       resetSubscriptions(contract, confirmedTokenId, distributionPlan.id);
     }
   };
+
+  let processingControl: React.ReactNode;
+  if (preparation.mode === PreparationMode.Background) {
+    processingControl = (
+      <ProcessAndFinalize
+        contract={contract}
+        claim={Number(confirmedTokenId)}
+        plan={distributionPlan?.id ?? ""}
+        phaseIds={getForgePhaseIds(phases)}
+        onStarted={preparation.refresh}
+        onCompleted={() => {
+          void refreshOverview(contract, confirmedTokenId);
+        }}
+      />
+    );
+  } else if (preparation.mode === undefined) {
+    processingControl = preparation.isError ? (
+      <button
+        type="button"
+        className="tw-text-sm tw-text-error"
+        onClick={() => void preparation.refresh()}
+      >
+        Couldn’t load preparation mode. Retry
+      </button>
+    ) : (
+      <span role="status" className="tw-text-sm tw-text-iron-300">
+        Loading preparation mode…
+      </span>
+    );
+  }
 
   return (
     <SubscriptionFooterMain
@@ -557,19 +605,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       onDownloadAirdrops={(phase) =>
         handleDownloadAirdrops(contract, confirmedTokenId, phase)
       }
-      processingControl={
-        dropForgeSettings?.preparation_enabled === true ? (
-          <ProcessAndFinalize
-            contract={contract}
-            claim={Number(confirmedTokenId)}
-            plan={distributionPlan?.id ?? ""}
-            phaseIds={getForgePhaseIds(phases)}
-            onCompleted={() => {
-              void refreshOverview(contract, confirmedTokenId);
-            }}
-          />
-        ) : undefined
-      }
+      processingControl={processingControl}
       onFinalize={() => finalizeDistribution(contract, confirmedTokenId)}
       onUploadToGithub={() => uploadToGithub(contract, confirmedTokenId)}
       onCloseGithubModal={() => setShowGithubModal(false)}

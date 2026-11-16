@@ -9,7 +9,8 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { buildCsv } from "@/helpers/csv-export.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
-import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
+import { useEmmaPreparationMode } from "@/hooks/useEmmaPreparationMode";
+import { ApiDropForgePreparationModeEnum as PreparationMode } from "@/generated/models/ApiDropForgePreparation";
 import { useDropForgeProcess } from "@/hooks/useDropForgeProcess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -34,23 +35,26 @@ export function SubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
   const { connectedProfile } = useContext(AuthContext);
   const { confirmedTokenId } = useContext(DistributionPlanToolContext);
   const { seizeSettings } = useSeizeSettings();
-  const { data: settings } = useDropForgeSettings();
-  if (
-    !isSubscriptionsAdmin(
+  const canPrepare =
+    isSubscriptionsAdmin(
       connectedProfile,
       seizeSettings.distribution_admin_wallets
-    ) ||
-    phase.type !== ReviewDistributionPlanTableItemType.PHASE ||
-    !confirmedTokenId
-  )
-    return null;
-  return settings?.preparation_enabled === true ? (
+    ) && phase.type === ReviewDistributionPlanTableItemType.PHASE;
+  const preparation = useEmmaPreparationMode(
+    MEMES_CONTRACT,
+    confirmedTokenId,
+    plan.id,
+    canPrepare
+  );
+  if (!canPrepare || !confirmedTokenId || !preparation.mode) return null;
+  return preparation.mode === PreparationMode.Background ? (
     <PreparedSubscriptionLinks plan={plan} phase={phase} />
   ) : (
     <ManualSubscriptionLinks
       plan={plan}
       phase={phase}
       tokenId={confirmedTokenId}
+      onDownload={preparation.refresh}
     />
   );
 }
@@ -135,7 +139,12 @@ function ManualSubscriptionLinks({
   plan,
   phase,
   tokenId,
-}: SubscriptionLinksProps & { tokenId: string }) {
+  onDownload,
+}: SubscriptionLinksProps &
+  Readonly<{
+    tokenId: string;
+    onDownload: () => Promise<void>;
+  }>) {
   const { setToast } = useContext(AuthContext);
   const [downloading, setDownloading] = useState(false);
   const isPublic = phase.phaseId === PUBLIC_SUBSCRIPTIONS_PHASE_ID;
@@ -172,6 +181,7 @@ function ManualSubscriptionLinks({
         details: getToastErrorDetails(error),
       });
     } finally {
+      await onDownload();
       setDownloading(false);
     }
   };

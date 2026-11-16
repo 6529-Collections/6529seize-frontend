@@ -56,7 +56,7 @@
   "dropForge.settings.copied": "Copied",
   "dropForge.settings.helpTitle": "How Launch Automation works",
   "dropForge.settings.helpLaunch": "On makes Launch available in Craft. Click it to start automation for that card. Off pauses new automated actions. Manual Launch remains available.",
-  "dropForge.settings.helpPreparation": "On shows Process and Finalize in EMMA. Click it to run preparation and finalization in the background. Off restores the original EMMA flow and pauses jobs after their current step. Turn it back on to resume. This works independently of Automatic launch.",
+  "dropForge.settings.helpPreparation": "On offers Process and Finalize for distributions that haven’t started. Distributions already using manual preparation keep their controls. Off pauses background jobs after their current step. Turn it back on to resume. This setting is independent of Automatic launch.",
   "dropForge.settings.helpPayment": "Save & Enable stores your ETH limit and enables payments. Disable keeps the limit so you can use it again with Enable.",
   "dropForge.settings.helpTimingTitle": "Post-mint timing",
   "dropForge.settings.helpTiming": "Research and enabled artist payments become eligible at 18:00 Athens time the day after minting opens.",
