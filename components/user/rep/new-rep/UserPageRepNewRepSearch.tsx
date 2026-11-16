@@ -5,7 +5,11 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useContext, useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowRightIcon,
+  InformationCircleIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "./rep-search-types";
@@ -23,7 +27,6 @@ import {
   getStringAsNumberOrZero,
 } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import {
@@ -33,6 +36,7 @@ import {
 import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { formatInteger } from "@/i18n/format";
 import {
   isMemesNomineeLookalike,
   MEMES_NOMINEE_CATEGORY,
@@ -99,6 +103,109 @@ function getSubmissionGuidanceContent(
   return submissionHint;
 }
 
+function GrantRepAmountStatus({
+  currentRep,
+  value,
+  available,
+  overAllowance,
+  changed,
+  id,
+}: {
+  readonly currentRep: number;
+  readonly value: string;
+  readonly available: number;
+  readonly overAllowance: boolean;
+  readonly changed: boolean;
+  readonly id: string;
+}) {
+  const locale = useBrowserLocale();
+  return (
+    <div className="tw-flex tw-h-[42px] tw-min-w-0 tw-items-center tw-justify-between tw-gap-2">
+      <span
+        id={id}
+        className={`tw-whitespace-nowrap tw-text-xs ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-500"}`}
+      >
+        {t(locale, "user.rate.available", { matter: "REP" })}{" "}
+        <span
+          className={`tw-font-medium ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-100"}`}
+        >
+          {formatInteger(locale, available)}
+        </span>
+      </span>
+      {currentRep !== 0 && changed && (
+        <output className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-text-iron-500">
+          {formatInteger(locale, currentRep)}
+          <span className="tw-sr-only">{" → "}</span>
+          <ArrowRightIcon
+            aria-hidden="true"
+            className="tw-size-3 tw-shrink-0"
+          />
+          <span className="tw-font-medium tw-text-iron-100">
+            {isRatingValue(value) ? formatInteger(locale, Number(value)) : "—"}
+          </span>
+        </output>
+      )}
+    </div>
+  );
+}
+
+function GrantRepSubmissionGuidance({
+  selectedCategory,
+  categoriesToDisplay,
+}: {
+  readonly selectedCategory: string | null;
+  readonly categoriesToDisplay: readonly string[];
+}) {
+  const locale = useBrowserLocale();
+  const hasSelectedSubmissionCategory =
+    selectedCategory === MEMES_NOMINEE_CATEGORY;
+  const selectedNonQualifyingLookalike =
+    selectedCategory && isMemesNomineeLookalike(selectedCategory)
+      ? selectedCategory
+      : null;
+  const showSubmissionSearchHint =
+    !selectedCategory && categoriesToDisplay.includes(MEMES_NOMINEE_CATEGORY);
+  const showSubmissionGuidance =
+    hasSelectedSubmissionCategory ||
+    !!selectedNonQualifyingLookalike ||
+    showSubmissionSearchHint;
+  const submissionHint = t(locale, "rep.categories.grant.submissionHint", {
+    category: MEMES_NOMINEE_CATEGORY,
+    amount: formatNumberWithCommas(MEMES_NOMINEE_REQUIRED_REP),
+  });
+  const submissionLookalikeInfo = selectedNonQualifyingLookalike
+    ? t(locale, "rep.categories.grant.submissionLookalikeInfo", {
+        category: selectedNonQualifyingLookalike,
+        submissionCategory: MEMES_NOMINEE_CATEGORY,
+      })
+    : null;
+  const submissionGuidanceContent = getSubmissionGuidanceContent(
+    submissionHint,
+    submissionLookalikeInfo,
+    hasSelectedSubmissionCategory
+  );
+
+  return (
+    <output
+      id={SUBMISSION_GUIDANCE_ID}
+      hidden={!showSubmissionGuidance}
+      className={`tw-mb-0 tw-mt-2 tw-items-start tw-gap-1.5 tw-text-xs tw-font-normal tw-leading-5 ${showSubmissionGuidance ? "tw-flex" : "tw-hidden"} ${
+        selectedNonQualifyingLookalike
+          ? "tw-text-amber-300"
+          : "tw-text-iron-400"
+      }`}
+    >
+      {selectedNonQualifyingLookalike && (
+        <InformationCircleIcon
+          aria-hidden="true"
+          className="tw-mt-0.5 tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
+        />
+      )}
+      <span>{showSubmissionGuidance ? submissionGuidanceContent : null}</span>
+    </output>
+  );
+}
+
 export default function UserPageRepNewRepSearch({
   overview,
   profile,
@@ -113,6 +220,7 @@ export default function UserPageRepNewRepSearch({
   const locale = useBrowserLocale();
   const amountInputId = useId();
   const amountFormId = useId();
+  const availableRepId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
@@ -195,9 +303,10 @@ export default function UserPageRepNewRepSearch({
     (!!activeProfileProxy ||
       (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max));
 
-  const newRating = getStringAsNumberOrZero(amountStr);
   const currentRep = repState?.rater_contribution ?? 0;
-  const haveChanged = newRating !== currentRep;
+  const haveChanged = amountNum !== currentRep;
+  const overAllowance =
+    selectedCategory !== null && isRatingValue(amountStr) && !isValidValue;
   const isGrantDisabled =
     !selectedCategory ||
     isError ||
@@ -370,34 +479,6 @@ export default function UserPageRepNewRepSearch({
     });
   }, [debouncedValue, categories, matchingSearchLength]);
 
-  const hasSelectedSubmissionCategory =
-    selectedCategory === MEMES_NOMINEE_CATEGORY;
-  const selectedNonQualifyingLookalike =
-    selectedCategory && isMemesNomineeLookalike(selectedCategory)
-      ? selectedCategory
-      : null;
-  const showSubmissionSearchHint =
-    !selectedCategory && categoriesToDisplay.includes(MEMES_NOMINEE_CATEGORY);
-  const showSubmissionGuidance =
-    hasSelectedSubmissionCategory ||
-    !!selectedNonQualifyingLookalike ||
-    showSubmissionSearchHint;
-  const submissionHint = t(locale, "rep.categories.grant.submissionHint", {
-    category: MEMES_NOMINEE_CATEGORY,
-    amount: formatNumberWithCommas(MEMES_NOMINEE_REQUIRED_REP),
-  });
-  const submissionLookalikeInfo = selectedNonQualifyingLookalike
-    ? t(locale, "rep.categories.grant.submissionLookalikeInfo", {
-        category: selectedNonQualifyingLookalike,
-        submissionCategory: MEMES_NOMINEE_CATEGORY,
-      })
-    : null;
-  const submissionGuidanceContent = getSubmissionGuidanceContent(
-    submissionHint,
-    submissionLookalikeInfo,
-    hasSelectedSubmissionCategory
-  );
-
   const repSearchState = useMemo(() => {
     const searchLength = getSearchLength(repSearch);
     if (searchLength < SEARCH_LENGTH.MIN)
@@ -424,259 +505,199 @@ export default function UserPageRepNewRepSearch({
   };
 
   return (
-    <div className="tw-relative tw-max-w-full">
-      <div className="tw-w-full">
-        <div className="tw-w-full">
-          <div ref={listRef} className="tw-w-full">
-            <div className="tw-relative tw-w-full tw-bg-iron-950">
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-1.5 tw-px-4 sm:tw-px-6">
-                <dl className="tw-m-0 tw-flex tw-w-full tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
-                  <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-baseline tw-gap-x-4">
-                    <dt className="tw-min-w-0 tw-break-words">
-                      {t(locale, "rep.categories.grant.availableRepLabel")}
-                    </dt>
-                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-text-iron-300">
-                      {formatNumberWithCommas(heroAvailableRep)}
-                    </dd>
-                  </div>
-                  <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-baseline tw-gap-x-4">
-                    <dt className="tw-min-w-0 tw-break-words">
-                      {t(locale, "rep.categories.grant.assignedRepLabel", {
-                        name: profile.query ?? "",
-                      })}
-                    </dt>
-                    <dd className="tw-m-0 tw-whitespace-nowrap tw-text-right tw-font-medium tw-text-iron-300">
-                      {formatNumberWithCommas(
-                        overview?.authenticated_user_contribution ?? 0
-                      )}
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-              <div className="tw-mt-6 tw-flex tw-flex-col tw-items-stretch tw-gap-6 tw-px-4 sm:tw-px-6">
-                <form
-                  onSubmit={onSearchSubmit}
-                  className="tw-relative tw-w-full"
-                >
-                  <label htmlFor="search-rep" className="tw-sr-only">
-                    {t(locale, "rep.categories.grant.searchPlaceholder")}
-                  </label>
-                  <div className="tw-relative tw-w-full">
-                    <svg
-                      className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-1/2 tw-h-4 tw-w-4 -tw-translate-y-1/2 tw-text-iron-500"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      aria-hidden="true"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    <input
-                      ref={searchInputRef}
-                      id="search-rep"
-                      name="search-rep"
-                      type="text"
-                      required
-                      autoComplete="off"
-                      autoCapitalize="none"
-                      autoCorrect="off"
-                      spellCheck={false}
-                      value={repSearch}
-                      readOnly={!!selectedCategory}
-                      disabled={mutating}
-                      onChange={handleRepSearchChange}
-                      onFocus={() => {
-                        if (!selectedCategory) setIsOpen(true);
-                      }}
-                      aria-describedby={
-                        showSubmissionGuidance
-                          ? SUBMISSION_GUIDANCE_ID
-                          : undefined
-                      }
-                      className="tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none"
-                      placeholder={t(
-                        locale,
-                        "rep.categories.grant.searchPlaceholder"
-                      )}
-                    />
-                    {selectedCategory ? (
-                      <button
-                        type="button"
-                        disabled={mutating}
-                        aria-label={t(
-                          locale,
-                          "rep.categories.grant.changeCategory"
-                        )}
-                        onClick={() => {
-                          selectionRequest.current++;
-                          setSelectedCategory(null);
-                          setRepSearch("");
-                          setAmountDraft(null);
-                          setErrorMsg(null);
-                          setIsOpen(false);
-                          searchInputRef.current?.focus();
-                        }}
-                        className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                      >
-                        <XMarkIcon aria-hidden="true" className="tw-size-4" />
-                      </button>
-                    ) : (
-                      checkingAvailability && (
-                        <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
-                          <CircleLoader />
-                        </div>
-                      )
-                    )}
-                  </div>
-                  {!selectedCategory && !isError && (
-                    <GrantRepCategorySuggestions
-                      ratings={ratingStats}
-                      search={repSearch}
-                      disabled={mutating}
-                      onSelect={(category) => {
-                        void onRepSelect(category, true);
-                      }}
-                    />
-                  )}
-                  {showSubmissionGuidance && (
-                    <output
-                      id={SUBMISSION_GUIDANCE_ID}
-                      className={`tw-mb-0 tw-mt-2 tw-flex tw-items-start tw-gap-1.5 tw-text-xs tw-font-normal tw-leading-5 ${
-                        selectedNonQualifyingLookalike
-                          ? "tw-text-amber-300"
-                          : "tw-text-iron-400"
-                      }`}
-                    >
-                      {selectedNonQualifyingLookalike && (
-                        <InformationCircleIcon
-                          aria-hidden="true"
-                          className="tw-mt-0.5 tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
-                        />
-                      )}
-                      <span>{submissionGuidanceContent}</span>
-                    </output>
-                  )}
-                  <AnimatePresence initial={false}>
-                    {isOpen && repSearch.length > 0 && !selectedCategory && (
-                      <motion.div
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="tw-mt-2 tw-will-change-transform"
-                      >
-                        <div className="tw-rounded-lg tw-bg-iron-900/40 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
-                          <UserPageRepNewRepSearchDropdown
-                            categories={categoriesToDisplay}
-                            state={repSearchState}
-                            minSearchLength={SEARCH_LENGTH.MIN}
-                            maxSearchLength={SEARCH_LENGTH.MAX}
-                            onRepSelect={onRepSelect}
-                          />
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </form>
-                {isError && (
-                  <div role="alert" className="tw-text-xs tw-text-iron-400">
-                    {t(locale, "rep.categories.edit.loadError")}{" "}
-                    <Button variant="ghost" size="sm" onClick={retry}>
-                      {t(locale, "rep.categories.edit.retry")}
-                    </Button>
-                  </div>
-                )}
-                {selectedCategory && (
-                  <form
-                    id={amountFormId}
-                    onSubmit={(event) => {
-                      event.preventDefault();
-                      void onGrantRep();
-                    }}
-                  >
-                    <label
-                      htmlFor={amountInputId}
-                      className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
-                    >
-                      {t(locale, "rep.categories.grant.amountLabel")}
-                    </label>
-                    <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-text-iron-400">
-                      {t(locale, "user.rate.totalHelp")}
-                    </p>
-                    <div className="tw-relative tw-flex tw-w-full">
-                      <UserPageRateInput
-                        value={amountStr}
-                        onChange={setAmountStr}
-                        minMax={minMaxValues}
-                        isProxy={!!activeProfileProxy}
-                        clampOnBlur={!!repState}
-                        variant="form"
-                        inputId={amountInputId}
-                      />
-                    </div>
-                    {currentRep !== 0 && (
-                      <UserRateAdjustmentHelper
-                        inLineValues={true}
-                        valueLayout="inline"
-                        originalValue={currentRep}
-                        adjustedValue={newRating}
-                        adjustmentType="Rep"
-                      />
-                    )}
-                  </form>
-                )}
-              </div>
-              <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-1 tw-px-4 sm:tw-px-6">
-                {selectedCategory && (
-                  <Button
-                    disabled={isGrantDisabled}
-                    type="submit"
-                    form={amountFormId}
-                    loading={mutating}
-                    variant="action"
-                    size="xl"
-                    fullWidth
-                  >
-                    {t(
-                      locale,
-                      currentRep !== 0
-                        ? "rep.categories.edit.save"
-                        : "rep.categories.grant.actions.grant"
-                    )}
-                  </Button>
-                )}
-                {onCancel && (
-                  <Button
-                    onClick={onCancel}
-                    disabled={mutating}
-                    variant="ghost"
-                    size="lg"
-                    fullWidth
-                  >
-                    {t(locale, "rep.categories.grant.actions.cancel")}
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-        <AnimatePresence mode="wait" initial={false}>
-          {!!errorMsg && (
-            <div className="tw-mt-3 tw-px-4 tw-pb-4 sm:tw-px-6">
-              <UserPageRepNewRepError
-                msg={errorMsg}
-                showDetails={showErrorDetails}
-                closeError={() => {
-                  setErrorMsg(null);
-                  setShowErrorDetails(true);
-                }}
+    <div className="tw-flex tw-h-[440px] tw-max-h-[calc(100dvh-12rem)] tw-min-h-0 tw-max-w-full tw-flex-col">
+      <div
+        ref={listRef}
+        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 sm:tw-px-6"
+      >
+        <form onSubmit={onSearchSubmit} className="tw-relative tw-w-full">
+          <label htmlFor="search-rep" className="tw-sr-only">
+            {t(locale, "rep.categories.grant.searchPlaceholder")}
+          </label>
+          <div className="tw-relative tw-w-full">
+            <svg
+              className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-1/2 tw-h-4 tw-w-4 -tw-translate-y-1/2 tw-text-iron-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                clipRule="evenodd"
               />
-            </div>
+            </svg>
+            <input
+              ref={searchInputRef}
+              id="search-rep"
+              name="search-rep"
+              type="text"
+              required
+              autoComplete="off"
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              value={repSearch}
+              readOnly={!!selectedCategory}
+              disabled={mutating}
+              onChange={handleRepSearchChange}
+              onFocus={() => {
+                if (!selectedCategory) setIsOpen(true);
+              }}
+              aria-describedby={SUBMISSION_GUIDANCE_ID}
+              className="tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none"
+              placeholder={t(locale, "rep.categories.grant.searchPlaceholder")}
+            />
+            {selectedCategory ? (
+              <button
+                type="button"
+                disabled={mutating}
+                aria-label={t(locale, "rep.categories.grant.changeCategory")}
+                onClick={() => {
+                  selectionRequest.current++;
+                  setSelectedCategory(null);
+                  setRepSearch("");
+                  setAmountDraft(null);
+                  setErrorMsg(null);
+                  setIsOpen(false);
+                  searchInputRef.current?.focus();
+                }}
+                className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              >
+                <XMarkIcon aria-hidden="true" className="tw-size-4" />
+              </button>
+            ) : (
+              checkingAvailability && (
+                <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
+                  <CircleLoader />
+                </div>
+              )
+            )}
+          </div>
+          <AnimatePresence initial={false}>
+            {isOpen && repSearch.length > 0 && !selectedCategory && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-will-change-transform"
+              >
+                <div className="tw-max-h-48 tw-overflow-y-auto tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
+                  <UserPageRepNewRepSearchDropdown
+                    categories={categoriesToDisplay}
+                    state={repSearchState}
+                    minSearchLength={SEARCH_LENGTH.MIN}
+                    maxSearchLength={SEARCH_LENGTH.MAX}
+                    onRepSelect={onRepSelect}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </form>
+        {!isError && (
+          <GrantRepCategorySuggestions
+            ratings={ratingStats}
+            search={repSearch}
+            selectedCategory={selectedCategory}
+            total={overview?.authenticated_user_contribution ?? 0}
+            disabled={mutating}
+            onSelect={(category) => {
+              void onRepSelect(category, true);
+            }}
+          />
+        )}
+        <form
+          id={amountFormId}
+          className="tw-mt-5"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void onGrantRep();
+          }}
+        >
+          <label
+            htmlFor={amountInputId}
+            className="tw-mb-2 tw-block tw-text-sm tw-font-normal tw-text-iron-400"
+          >
+            {t(locale, "rep.categories.grant.amountLabel")}
+          </label>
+          <UserPageRateInput
+            value={selectedCategory ? amountStr : ""}
+            onChange={setAmountStr}
+            minMax={minMaxValues}
+            isProxy={!!activeProfileProxy}
+            clampOnBlur={false}
+            variant="form"
+            inputId={amountInputId}
+            disabled={!selectedCategory || mutating}
+            placeholder="0"
+            descriptionId={availableRepId}
+            invalid={selectedCategory !== null && !isValidValue}
+          />
+          <GrantRepAmountStatus
+            currentRep={currentRep}
+            value={amountStr}
+            available={heroAvailableRep}
+            overAllowance={overAllowance}
+            changed={haveChanged}
+            id={availableRepId}
+          />
+        </form>
+        <GrantRepSubmissionGuidance
+          selectedCategory={selectedCategory}
+          categoriesToDisplay={categoriesToDisplay}
+        />
+
+        {isError && (
+          <div role="alert" className="tw-mt-3 tw-text-xs tw-text-iron-400">
+            {t(locale, "rep.categories.edit.loadError")}{" "}
+            <Button variant="ghost" size="sm" onClick={retry}>
+              {t(locale, "rep.categories.edit.retry")}
+            </Button>
+          </div>
+        )}
+        {!!errorMsg && (
+          <div className="tw-mt-3 tw-pb-2">
+            <UserPageRepNewRepError
+              msg={errorMsg}
+              showDetails={showErrorDetails}
+              closeError={() => {
+                setErrorMsg(null);
+                setShowErrorDetails(true);
+              }}
+            />
+          </div>
+        )}
+      </div>
+      <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-1 tw-px-4 tw-pt-4 sm:tw-px-6">
+        <Button
+          disabled={isGrantDisabled}
+          type="submit"
+          form={amountFormId}
+          loading={mutating}
+          variant="action"
+          size="xl"
+          fullWidth
+        >
+          {t(
+            locale,
+            currentRep !== 0
+              ? "rep.categories.edit.save"
+              : "rep.categories.grant.actions.grant"
           )}
-        </AnimatePresence>
+        </Button>
+        {onCancel && (
+          <Button
+            onClick={onCancel}
+            disabled={mutating}
+            variant="ghost"
+            size="lg"
+            fullWidth
+          >
+            {t(locale, "rep.categories.grant.actions.cancel")}
+          </Button>
+        )}
       </div>
     </div>
   );

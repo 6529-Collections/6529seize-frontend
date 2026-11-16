@@ -34,6 +34,10 @@ export default function UserPageRateInput({
   readOnly = false,
   autoFocus = false,
   clampOnBlur = true,
+  disabled = false,
+  placeholder,
+  descriptionId,
+  invalid,
 }: {
   readonly value: string;
   readonly onChange: (value: string) => void;
@@ -47,6 +51,10 @@ export default function UserPageRateInput({
   readonly readOnly?: boolean;
   readonly autoFocus?: boolean;
   readonly clampOnBlur?: boolean;
+  readonly disabled?: boolean;
+  readonly placeholder?: string;
+  readonly descriptionId?: string;
+  readonly invalid?: boolean;
 }) {
   const valueAsNumber = getStringAsNumberOrZero(value);
   const isValidValue =
@@ -74,7 +82,9 @@ export default function UserPageRateInput({
   };
 
   return (
-    <div className="tw-relative tw-w-full tw-min-w-0">
+    <div
+      className={`tw-relative tw-w-full tw-min-w-0 ${disabled ? "tw-opacity-40" : ""}`}
+    >
       <span
         aria-hidden="true"
         className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-flex tw-items-center tw-gap-3 tw-text-iron-500"
@@ -94,6 +104,10 @@ export default function UserPageRateInput({
         autoComplete="off"
         required={required}
         readOnly={readOnly}
+        disabled={disabled}
+        placeholder={placeholder}
+        aria-describedby={descriptionId}
+        aria-invalid={invalid}
         value={value}
         onChange={handleChange}
         onBlur={handleBlur}

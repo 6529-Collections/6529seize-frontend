@@ -192,15 +192,19 @@ show the profile-creation welcome.
 ### Grant Rep Dialog
 
 - On desktop, Grant Rep and Rate NIC keep their top edge at about 14% of the
-  viewport height while content grows downward. The rater and receiver lists
-  for REP keep that positioning. NIC rater and receiver lists start about 10%
+  viewport height. Grant Rep keeps a fixed content height as categories and
+  amounts change; short viewports scroll inside. Rate NIC grows downward. The
+  rater and receiver lists for REP keep that positioning. NIC rater and receiver lists start about 10%
   down and grow to at most 80% of the viewport height. Long content scrolls
   inside. Mobile keeps the bottom sheet.
-- First choose a category. The search field is followed by `You assigned`
-  chips showing your existing contributions and amounts, including negative REP.
-  This group is hidden when you have not assigned REP to this profile; the
-  modal then starts with search, the summary rows and `Cancel`. Typing
-  filters your assigned categories. Long personal lists scroll within their group.
+- The fixed layout keeps search, your assigned categories, the amount label and
+  field, a small credit row, the primary action and `Cancel` in place.
+  `You assigned` shows its total beside an 11px uppercase label. Its category
+  pills use the profile tag style: 38px height, 8px corners, subtle fill and
+  border, and 14px medium text. The selected pill stays visible with a neutral
+  highlight. The group is omitted when you have no existing contributions.
+  Typing filters your assigned categories; after selection, all assigned pills
+  remain available. Long personal lists scroll within their fixed area.
 - Category search accepts 3-100 characters for searching all categories;
   existing assigned-category chips can be selected without typing.
 - Results appear after a short debounce as compact category pills, including the
@@ -218,8 +222,9 @@ show the profile-creation welcome.
 - Selecting a search result validates availability; assigned chips use their
   known category names. After choosing, the category stays in the search field.
   Select its `×` (`Change category`) to choose another category and clear the draft.
-- The amount field and primary action appear only after a category is selected.
-  You can type an amount while
+- Before selection, the amount field is dimmed and disabled with placeholder
+  `0`, and the visible `Grant Rep` action is disabled. Selecting a category
+  prefills your saved total, or zero for a new rating. You can type an amount while
   rating data loads; submitting stays disabled until the current contribution
   and allowance are available.
 - If availability fails, inline error is shown.
@@ -230,11 +235,14 @@ show the profile-creation welcome.
   Focusing an amount shows plain digits for editing; the saved value is unchanged.
 - The saved contribution prefills an untouched amount. Once you type, your
   draft stays in place through delayed responses and background refreshes.
-- In non-proxy mode, amount clamps to allowed min/max on blur.
-- The helper says `Enter the total you want to give, including any existing rating.`
-  `Current Rep` and `Adjustment` appear only for an existing nonzero contribution.
-  The primary action is `Save` for an existing contribution and `Grant Rep` for
-  a new one. `Cancel` remains available in both steps.
+- Grant Rep keeps an over-budget draft on blur so it can be corrected.
+  The 42px row below the input shows `Available REP` on the left; its value
+  turns rose when over budget and saving stays disabled. When an existing
+  amount changes, the right side shows the muted old amount, an arrow and
+  the bright new amount. The helper sentence and `Current Rep` / `Adjustment`
+  block are omitted from Grant Rep; Rate NIC retains its existing guidance
+  and blur behavior. The action says `Save` for an existing contribution and
+  `Grant Rep` for a new one. Enter in the amount field submits the same action.
 - The primary action stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
 

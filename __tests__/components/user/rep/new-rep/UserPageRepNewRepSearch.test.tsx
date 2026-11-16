@@ -124,16 +124,19 @@ describe("UserPageRepNewRepSearch", () => {
     ).toHaveValue("1,000");
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(
-      screen.getByText(
+      screen.queryByText(
         "Enter the total you want to give, including any existing rating."
       )
-    ).toBeInTheDocument();
+    ).not.toBeInTheDocument();
+    expect(
+      within(own).getByRole("button", { name: "AI 1,000" })
+    ).toHaveAttribute("aria-pressed", "true");
     await user.click(screen.getByRole("button", { name: "Change category" }));
     await user.click(screen.getByRole("button", { name: "Research -25" }));
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
     ).toHaveValue("-25");
-    expect(screen.getByText("Current Rep:")).toBeInTheDocument();
+    expect(screen.queryByText("Current Rep:")).not.toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "Change category" }));
     await user.type(
       screen.getByRole("textbox", { name: "Category to grant REP for" }),
@@ -184,15 +187,55 @@ describe("UserPageRepNewRepSearch", () => {
         screen.queryByText("No REP assigned yet.")
       ).not.toBeInTheDocument();
       expect(
-        screen.queryByRole("textbox", {
+        screen.getByRole("textbox", {
           name: "Your total REP for this category",
         })
-      ).not.toBeInTheDocument();
+      ).toBeDisabled();
       expect(
-        screen.queryByRole("button", { name: "Grant Rep", exact: true })
-      ).not.toBeInTheDocument();
+        screen.getByRole("button", { name: "Grant Rep", exact: true })
+      ).toBeDisabled();
     }
   );
+
+  it("retains an over-budget draft on blur and enables Save only after a valid change", async () => {
+    const user = userEvent.setup();
+    const rating = {
+      category: "Art",
+      rating: 20,
+      contributor_count: 1,
+      rater_contribution: 20,
+    };
+    mockAllocation.mockImplementation(({ category }) => ({
+      ...allocation,
+      ratingStats: [rating],
+      repState: category === "Art" ? rating : null,
+    }));
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    await user.click(screen.getByRole("button", { name: "Art 20" }));
+    const input = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.clear(input);
+    await user.type(input, "101");
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    expect(input).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByText("Available REP", { exact: true })).toHaveClass(
+      "tw-text-rose-400"
+    );
+    await user.tab();
+    expect(input).toHaveValue("101");
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    await user.clear(input);
+    await user.type(input, "30");
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+    expect(screen.getByRole("status")).toHaveTextContent("20 → 30");
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
 
   it("ignores a delayed search choice after the user picks a known category", async () => {
     const user = userEvent.setup();
@@ -289,7 +332,7 @@ describe("UserPageRepNewRepSearch", () => {
     const grant = screen.getByRole("button", {
       name: "Grant Rep",
     });
-    await user.click(grant);
+    await user.keyboard("{Enter}");
     await waitFor(() => expect(onProfileRepModify).toHaveBeenCalledTimes(1));
     expect(grant).toBeDisabled();
     expect(amount).toHaveValue("25");
@@ -484,7 +527,7 @@ describe("UserPageRepNewRepSearch", () => {
     );
   });
 
-  it("hides the amount and grant action until a category is picked and keeps Cancel", () => {
+  it("keeps the amount and grant action disabled until a category is picked and keeps Cancel", () => {
     render(
       <UserPageRepNewRepSearch
         overview={null}
@@ -493,13 +536,14 @@ describe("UserPageRepNewRepSearch", () => {
       />
     );
     expect(
-      screen.queryByRole("textbox", {
+      screen.getByRole("textbox", {
         name: "Your total REP for this category",
       })
-    ).not.toBeInTheDocument();
+    ).toBeDisabled();
     expect(
-      screen.queryByRole("button", { name: "Grant Rep" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("textbox", { name: "Your total REP for this category" })
+    ).toHaveAttribute("placeholder", "0");
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeEnabled();
   });
 

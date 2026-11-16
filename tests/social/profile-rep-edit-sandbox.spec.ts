@@ -376,7 +376,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await installCategories(page, getSandboxApiOrigin(baseURL));
   });
 
-  test("opens two-step Grant Rep from You assigned and prefills filtered category choices without saving", async ({
+  test("keeps Grant Rep fixed while selecting assigned chips and searching without saving", async ({
     page,
     baseURL,
   }, testInfo) => {
@@ -444,9 +444,19 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         json: { message: "Unexpected save while choosing categories" },
       });
     });
+    await page.route(`${api}/api/profiles/${TARGET}/rep/overview*`, (route) =>
+      route.fulfill({
+        json: {
+          total_rep: stats.reduce((sum, item) => sum + item.rating, 0),
+          authenticated_user_contribution: 975,
+          contributor_count: 3,
+          contributors: { data: [], page: 1, next: false, count: 0 },
+        },
+      })
+    );
     await openProfile(page);
     await page
-      .getByRole("button", { name: "You assigned: 20", exact: true })
+      .getByRole("button", { name: "You assigned: 975", exact: true })
       .click();
     const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
     const search = grant.getByRole("textbox", {
@@ -459,10 +469,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         name: "Your total REP for this category",
         exact: true,
       })
-    ).toHaveCount(0);
+    ).toBeDisabled();
     await expect(
       grant.getByRole("button", { name: "Grant Rep", exact: true })
-    ).toHaveCount(0);
+    ).toBeDisabled();
     await expect(
       grant.getByRole("button", { name: "Cancel", exact: true })
     ).toBeVisible();
@@ -473,6 +483,35 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
     await expect(own.getByRole("button")).toHaveCount(2);
     await expect(profile).toHaveCount(0);
+    await expect(own.getByText("975", { exact: true })).toBeVisible();
+    const surface = grant.locator(".mobile-wrapper-dialog");
+    await expect
+      .poll(() =>
+        surface.evaluate((panel) => {
+          let element: Element | null = panel;
+          while (element) {
+            if (
+              element
+                .getAnimations()
+                .some((animation) => animation.playState === "running")
+            )
+              return true;
+            element = element.parentElement;
+          }
+          return false;
+        })
+      )
+      .toBe(false);
+    const initialBox = await surface.boundingBox();
+    expect(initialBox).not.toBeNull();
+    const expectFixedLayout = async () => {
+      const box = await surface.boundingBox();
+      expect(box).not.toBeNull();
+      if (initialBox && box) {
+        expect(box.height).toBeCloseTo(initialBox.height, 0);
+        expect(box.y).toBeCloseTo(initialBox.y, 0);
+      }
+    };
     expect(searches).toBe(0);
     await page
       .getByRole("dialog", { name: "Grant Rep", exact: true })
@@ -480,6 +519,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .screenshot({ path: testInfo.outputPath("grant-rep-category-step.png") });
     await search.fill("mus");
     await expect(own.getByRole("button")).toHaveCount(0);
+    await expect(
+      grant.getByRole("button", { name: "Music", exact: true })
+    ).toBeVisible();
+    await expectFixedLayout();
     await grant.getByRole("button", { name: "Music", exact: true }).click();
     const amount = grant.getByRole("textbox", {
       name: "Your total REP for this category",
@@ -492,7 +535,21 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeDisabled();
+    await amount.fill("5001");
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeDisabled();
+    await expect(
+      grant.getByText("Available REP 5,000", { exact: true })
+    ).toHaveCSS("color", "rgb(251, 113, 133)");
+    await amount.blur();
+    await expect(amount).toHaveValue("5,001");
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeDisabled();
+    await amount.click();
     await amount.fill("35");
+    await expect(amount).toHaveValue("35");
     await expect(
       grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeEnabled();
@@ -505,18 +562,39 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(search).toHaveValue("Research");
     await expect(search).toHaveAttribute("readonly");
     await expect(amount).toHaveValue("-25");
-    await expect(
-      grant.getByText("Current Rep:", { exact: true })
-    ).toBeVisible();
+    await expect(grant.getByText("Current Rep:", { exact: true })).toHaveCount(
+      0
+    );
     await expect(
       grant.getByText(
         "Enter the total you want to give, including any existing rating.",
         { exact: true }
       )
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       grant.getByRole("button", { name: "Save", exact: true })
     ).toBeDisabled();
+    const selectedPill = own.getByRole("button", {
+      name: "Research -25",
+      exact: true,
+    });
+    await expect(selectedPill).toHaveAttribute("aria-pressed", "true");
+    await expect(selectedPill).toHaveCSS("height", "38px");
+    await expect(selectedPill).toHaveCSS("border-radius", "8px");
+    await expect(selectedPill).toHaveCSS(
+      "border-top-color",
+      "rgba(255, 255, 255, 0.3)"
+    );
+    await expect(selectedPill).toHaveCSS(
+      "background-color",
+      "rgba(255, 255, 255, 0.1)"
+    );
+    await amount.fill("-35");
+    await expect(grant.getByRole("status")).toHaveText("-25 → -35");
+    await expect(
+      grant.getByRole("button", { name: "Save", exact: true })
+    ).toBeEnabled();
+    await expectFixedLayout();
     expect(allocationReads).toBe(1);
     expect(searches).toBe(2);
     expect(writes).toBe(0);
@@ -571,20 +649,27 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     ).toHaveValue("");
     await expect(
       grant.getByText("Your available REP:", { exact: true })
-    ).toBeVisible();
+    ).toHaveCount(0);
     await expect(
       grant.getByText(`Your REP assigned to ${TARGET}:`, { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      grant.getByText("Available REP 80", { exact: true })
     ).toBeVisible();
-    await expect(grant.getByText("80", { exact: true })).toBeVisible();
-    await expect(grant.getByText("0", { exact: true })).toBeVisible();
     await expect(grant.getByRole("group")).toHaveCount(0);
     await expect(
       grant.getByText("No REP assigned yet.", { exact: true })
     ).toHaveCount(0);
-    await expect(grant.getByRole("textbox")).toHaveCount(1);
+    await expect(grant.getByRole("textbox")).toHaveCount(2);
+    await expect(
+      grant.getByRole("textbox", {
+        name: "Your total REP for this category",
+        exact: true,
+      })
+    ).toBeDisabled();
     await expect(
       grant.getByRole("button", { name: "Grant Rep", exact: true })
-    ).toHaveCount(0);
+    ).toBeDisabled();
     await expect(
       grant.getByRole("button", { name: "Cancel", exact: true })
     ).toBeVisible();
