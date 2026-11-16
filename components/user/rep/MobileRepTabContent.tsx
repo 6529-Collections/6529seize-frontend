@@ -100,7 +100,7 @@ export default function MobileRepTabContent({
             onRepDirectionChange={onRepDirectionChange}
           />
         </div>
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-justify-between tw-gap-3">
+        <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
           <div className="tw-min-w-0 tw-text-3xl tw-font-semibold tw-leading-none tw-tracking-tight tw-text-primary-400">
             {overview ? formatInteger(locale, overview.total_rep) : "—"}
           </div>
@@ -108,7 +108,6 @@ export default function MobileRepTabContent({
             overview={overview}
             direction={repDirection}
             matter="REP"
-            compact
             onClick={onOpenOverviewContributors}
             canManage={canManage}
           />

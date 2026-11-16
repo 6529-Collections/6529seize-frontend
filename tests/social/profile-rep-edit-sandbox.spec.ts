@@ -913,7 +913,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
   });
 
   for (const largeTotals of [false, true]) {
-    test(`keeps NIC raters and receivers right-aligned with ${largeTotals ? "large" : "standard"} totals`, async ({
+    test(`keeps NIC contributors aligned with ${largeTotals ? "large" : "standard"} totals`, async ({
       page,
       baseURL,
       isMobile,
@@ -936,7 +936,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
             authenticated_user_contribution: 100,
             contributor_count: count,
             contributors: {
-              data: Array.from({ length: largeTotals ? 5 : 3 }, (_, index) => ({
+              data: Array.from({ length: largeTotals ? 6 : 3 }, (_, index) => ({
                 profile: {
                   handle: `nic-rater-${index}`,
                   primary_address: `0x${(index + 1).toString(16).padStart(40, "0")}`,
@@ -966,6 +966,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
           exact: true,
         });
         await expect(contributors).toBeVisible();
+        await expect(nic.getByRole("link")).toHaveCount(largeTotals ? 5 : 3);
         const score = nic.getByText(total.toLocaleString("en-US"), {
           exact: true,
         });
@@ -976,41 +977,34 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         expect(scoreBox).not.toBeNull();
         expect(contributorsBox).not.toBeNull();
         expect(nicBox).not.toBeNull();
-        if (largeTotals) {
-          // A long total may need its own row; contributors must stay on the right.
-          const sameLine =
-            Math.abs(
-              contributorsBox!.y +
-                contributorsBox!.height / 2 -
-                scoreBox!.y -
-                scoreBox!.height / 2
-            ) <= 3;
-          if (isMobile) expect(sameLine).toBe(false);
-          if (sameLine)
-            expect(contributorsBox!.x).toBeGreaterThan(
-              scoreBox!.x + scoreBox!.width
-            );
-          else
-            expect(contributorsBox!.y).toBeGreaterThanOrEqual(
-              scoreBox!.y + scoreBox!.height
-            );
-        } else {
+        const sameLine =
+          Math.abs(
+            contributorsBox!.y +
+              contributorsBox!.height / 2 -
+              scoreBox!.y -
+              scoreBox!.height / 2
+          ) <= 3;
+        if (largeTotals && isMobile) expect(sameLine).toBe(false);
+        if (!largeTotals) expect(sameLine).toBe(true);
+        if (sameLine) {
           expect(contributorsBox!.x).toBeGreaterThan(
             scoreBox!.x + scoreBox!.width
           );
-          expect(
-            Math.abs(
-              contributorsBox!.y +
-                contributorsBox!.height / 2 -
-                scoreBox!.y -
-                scoreBox!.height / 2
-            )
-          ).toBeLessThanOrEqual(3);
+          expect(contributorsBox!.x + contributorsBox!.width).toBeCloseTo(
+            nicBox!.x + nicBox!.width,
+            0
+          );
+        } else {
+          const groupBox = await contributors.locator("..").boundingBox();
+          expect(groupBox).not.toBeNull();
+          expect(groupBox!.x).toBeCloseTo(nicBox!.x, 0);
+          expect(groupBox!.y).toBeGreaterThanOrEqual(
+            scoreBox!.y + scoreBox!.height
+          );
+          expect(groupBox!.x + groupBox!.width).toBeLessThanOrEqual(
+            nicBox!.x + nicBox!.width + 1
+          );
         }
-        expect(contributorsBox!.x + contributorsBox!.width).toBeCloseTo(
-          nicBox!.x + nicBox!.width,
-          0
-        );
         await expectNoHorizontalOverflow(page);
         await nic.screenshot({
           path: testInfo.outputPath(`nic-${direction.toLowerCase()}-total.png`),

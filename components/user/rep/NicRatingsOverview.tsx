@@ -82,7 +82,6 @@ export default function NicRatingsOverview({
       matter="NIC"
       canManage={direction === "given" && canManage}
       onClick={() => setListOpen(true)}
-      compact={compact}
     />
   );
   const scoreValue = (
@@ -126,7 +125,7 @@ export default function NicRatingsOverview({
           </div>
           <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
             {scoreValue}
-            <div className="tw-ml-auto tw-min-w-0">{contributors}</div>
+            {contributors}
           </div>
           {status}
           {rateButton && (
@@ -150,7 +149,7 @@ export default function NicRatingsOverview({
             {status}
             <div className="tw-col-span-2 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
               {scoreValue}
-              <div className="tw-ml-auto tw-min-w-0">{contributors}</div>
+              {contributors}
             </div>
           </div>
         </>
