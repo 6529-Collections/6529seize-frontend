@@ -6,7 +6,7 @@ import {
   type IconButtonLayout,
 } from "./iconButtonLayouts";
 
-export type IconButtonSize = 24 | 32 | 36 | 40 | 44;
+export type IconButtonSize = 24 | 28 | 32 | 36 | 40 | 44;
 export type IconButtonVariant =
   | "ghost"
   | "muted"
@@ -14,6 +14,7 @@ export type IconButtonVariant =
   | "secondary"
   | "outline"
   | "contrast"
+  | "surface"
   | "action"
   | "selected"
   | "destructive";
@@ -21,6 +22,7 @@ export type IconButtonShape = "rounded" | "compact" | "circle";
 
 const SIZE_CLASSES: Record<IconButtonSize, string> = {
   24: "tw-size-6",
+  28: "tw-size-7",
   32: "tw-size-8",
   36: "tw-size-9",
   40: "tw-size-10",
@@ -34,6 +36,7 @@ const TEXT_CLASSES: Record<IconButtonVariant, string> = {
   secondary: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50",
   outline: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-100",
   contrast: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50",
+  surface: "tw-text-iron-300 desktop-hover:hover:tw-text-white",
   action: "tw-text-white",
   selected: "tw-text-primary-300",
   destructive: "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300",
@@ -51,6 +54,8 @@ const SURFACE_CLASSES: Record<IconButtonVariant, string> = {
   outline:
     "tw-border-0 tw-bg-transparent tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-bg-iron-900",
   contrast: "tw-border-0 tw-bg-black tw-shadow-sm active:tw-bg-iron-800",
+  surface:
+    "tw-border-0 tw-bg-iron-900/95 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 tw-backdrop-blur-sm desktop-hover:hover:tw-bg-iron-800 active:tw-bg-iron-900",
   action:
     "tw-border-0 tw-bg-primary-500 desktop-hover:hover:tw-bg-primary-600 active:tw-bg-primary-700",
   selected:
