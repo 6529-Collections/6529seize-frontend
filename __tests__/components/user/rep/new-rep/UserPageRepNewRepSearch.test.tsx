@@ -183,6 +183,11 @@ describe("UserPageRepNewRepSearch", () => {
         screen.getByRole("textbox", { name: "Category to grant REP for" })
       ).toHaveValue("");
       expect(screen.queryByRole("group")).not.toBeInTheDocument();
+      expect(screen.getByText("Your available REP:")).toBeVisible();
+      expect(screen.getByText("Your REP assigned to recipient:")).toBeVisible();
+      expect(
+        screen.getByText("Your REP assigned to recipient:").parentElement
+      ).toHaveTextContent("Your REP assigned to recipient:0");
       expect(
         screen.queryByText("No REP assigned yet.")
       ).not.toBeInTheDocument();
@@ -224,9 +229,9 @@ describe("UserPageRepNewRepSearch", () => {
     await user.type(input, "101");
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(input).toHaveAttribute("aria-invalid", "true");
-    expect(screen.getByText("Available REP", { exact: true })).toHaveClass(
-      "tw-text-rose-400"
-    );
+    expect(
+      screen.getByText("Your available REP:", { exact: true }).parentElement
+    ).toHaveClass("tw-text-rose-400");
     await user.tab();
     expect(input).toHaveValue("101");
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();

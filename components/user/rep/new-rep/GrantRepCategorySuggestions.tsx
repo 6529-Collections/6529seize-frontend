@@ -11,14 +11,12 @@ export default function GrantRepCategorySuggestions({
   disabled,
   onSelect,
   selectedCategory,
-  total,
 }: {
   readonly ratings: readonly RatingStats[] | undefined;
   readonly search: string;
   readonly disabled: boolean;
   readonly onSelect: (category: string) => void;
   readonly selectedCategory: string | null;
-  readonly total: number;
 }) {
   const locale = useBrowserLocale();
   const assigned = useMemo(
@@ -51,9 +49,6 @@ export default function GrantRepCategorySuggestions({
       <legend className="tw-mb-2 tw-p-0">
         <span className="tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-wider tw-text-iron-500">
           {t(locale, "rep.categories.grant.youAssigned")}
-        </span>
-        <span className="tw-ml-2 tw-text-sm tw-font-medium tw-text-iron-300">
-          {formatInteger(locale, total)}
         </span>
       </legend>
       <div className="tw-flex tw-max-h-[88px] tw-min-h-[42px] tw-flex-wrap tw-content-start tw-gap-2 tw-overflow-y-auto tw-p-0.5">

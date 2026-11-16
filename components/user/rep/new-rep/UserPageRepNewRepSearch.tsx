@@ -103,20 +103,57 @@ function getSubmissionGuidanceContent(
   return submissionHint;
 }
 
+function GrantRepStats({
+  available,
+  assigned,
+  profileName,
+  overAllowance,
+  id,
+}: {
+  readonly available: number;
+  readonly assigned: number;
+  readonly profileName: string;
+  readonly overAllowance: boolean;
+  readonly id: string;
+}) {
+  const locale = useBrowserLocale();
+  return (
+    <dl className="tw-m-0 tw-mb-4 tw-space-y-2 tw-rounded-lg tw-bg-white/[0.03] tw-px-3.5 tw-py-3 tw-text-xs">
+      <div
+        id={id}
+        className={`tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1 ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-400"}`}
+      >
+        <dt className="tw-font-normal">
+          {t(locale, "rep.categories.grant.availableRepLabel")}
+        </dt>
+        <dd
+          className={`tw-m-0 tw-ml-auto tw-whitespace-nowrap tw-font-medium ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-100"}`}
+        >
+          {formatInteger(locale, available)}
+        </dd>
+      </div>
+      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1">
+        <dt className="tw-min-w-0 tw-break-words tw-font-normal tw-text-iron-400">
+          {t(locale, "rep.categories.grant.assignedRepLabel", {
+            name: profileName,
+          })}
+        </dt>
+        <dd className="tw-m-0 tw-ml-auto tw-whitespace-nowrap tw-font-medium tw-text-iron-100">
+          {formatInteger(locale, assigned)}
+        </dd>
+      </div>
+    </dl>
+  );
+}
+
 function GrantRepAmountStatus({
   currentRep,
   value,
-  available,
-  overAllowance,
   changed,
-  id,
 }: {
   readonly currentRep: number;
   readonly value: string;
-  readonly available: number;
-  readonly overAllowance: boolean;
   readonly changed: boolean;
-  readonly id: string;
 }) {
   const locale = useBrowserLocale();
   let nextValueClassName = "tw-font-medium tw-text-iron-100";
@@ -127,18 +164,7 @@ function GrantRepAmountStatus({
         : "tw-font-medium tw-text-rose-400";
   }
   return (
-    <div className="tw-mt-2 tw-flex tw-h-[42px] tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-bg-white/[0.03] tw-px-3.5 tw-py-3">
-      <span
-        id={id}
-        className={`tw-whitespace-nowrap tw-text-xs ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-500"}`}
-      >
-        {t(locale, "user.rate.available", { matter: "REP" })}{" "}
-        <span
-          className={`tw-font-medium ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-100"}`}
-        >
-          {formatInteger(locale, available)}
-        </span>
-      </span>
+    <div className="tw-mt-2 tw-flex tw-h-5 tw-min-w-0 tw-items-center tw-justify-end">
       {currentRep !== 0 && changed && (
         <output className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-text-iron-500">
           {formatInteger(locale, currentRep)}
@@ -517,6 +543,13 @@ export default function UserPageRepNewRepSearch({
         ref={listRef}
         className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 sm:tw-px-6"
       >
+        <GrantRepStats
+          available={heroAvailableRep}
+          assigned={overview?.authenticated_user_contribution ?? 0}
+          profileName={profile.query ?? profile.handle ?? profile.display}
+          overAllowance={overAllowance}
+          id={availableRepId}
+        />
         <form onSubmit={onSearchSubmit} className="tw-relative tw-w-full">
           <label htmlFor="search-rep" className="tw-sr-only">
             {t(locale, "rep.categories.grant.searchPlaceholder")}
@@ -608,7 +641,6 @@ export default function UserPageRepNewRepSearch({
             ratings={ratingStats}
             search={repSearch}
             selectedCategory={selectedCategory}
-            total={overview?.authenticated_user_contribution ?? 0}
             disabled={mutating}
             onSelect={(category) => {
               void onRepSelect(category, true);
@@ -617,7 +649,7 @@ export default function UserPageRepNewRepSearch({
         )}
         <form
           id={amountFormId}
-          className="tw-mt-5"
+          className="tw-mt-4"
           onSubmit={(event) => {
             event.preventDefault();
             void onGrantRep();
@@ -645,10 +677,7 @@ export default function UserPageRepNewRepSearch({
           <GrantRepAmountStatus
             currentRep={currentRep}
             value={amountStr}
-            available={heroAvailableRep}
-            overAllowance={overAllowance}
             changed={haveChanged}
-            id={availableRepId}
           />
         </form>
         <GrantRepSubmissionGuidance

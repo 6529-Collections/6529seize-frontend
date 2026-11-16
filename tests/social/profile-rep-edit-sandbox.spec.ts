@@ -481,7 +481,12 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
     await expect(own.getByRole("button")).toHaveCount(2);
     await expect(profile).toHaveCount(0);
-    await expect(own.getByText("975", { exact: true })).toBeVisible();
+    await expect(
+      grant
+        .getByText(`Your REP assigned to ${TARGET}:`, { exact: true })
+        .locator("..")
+        .getByText("975", { exact: true })
+    ).toBeVisible();
     const surface = grant.locator(".mobile-wrapper-dialog");
     await expect
       .poll(() =>
@@ -538,7 +543,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeDisabled();
     await expect(
-      grant.getByText("Available REP 5,000", { exact: true })
+      grant.getByText("Your available REP:", { exact: true }).locator("..")
     ).toHaveCSS("color", "rgb(251, 113, 133)");
     await amount.blur();
     await expect(amount).toHaveValue("5,001");
@@ -655,12 +660,21 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     ).toHaveValue("");
     await expect(
       grant.getByText("Your available REP:", { exact: true })
-    ).toHaveCount(0);
+    ).toBeVisible();
     await expect(
       grant.getByText(`Your REP assigned to ${TARGET}:`, { exact: true })
-    ).toHaveCount(0);
+    ).toBeVisible();
     await expect(
-      grant.getByText("Available REP 80", { exact: true })
+      grant
+        .getByText("Your available REP:", { exact: true })
+        .locator("..")
+        .getByText("80", { exact: true })
+    ).toBeVisible();
+    await expect(
+      grant
+        .getByText(`Your REP assigned to ${TARGET}:`, { exact: true })
+        .locator("..")
+        .getByText("0", { exact: true })
     ).toBeVisible();
     await expect(grant.getByRole("group")).toHaveCount(0);
     await expect(

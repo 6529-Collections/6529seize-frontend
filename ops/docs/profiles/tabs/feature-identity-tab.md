@@ -200,9 +200,12 @@ show the profile-creation welcome.
   rater and receiver lists for REP keep that positioning. NIC rater and receiver lists start about 10%
   down and grow to at most 80% of the viewport height. Long content scrolls
   inside. Mobile keeps the bottom sheet.
-- The fixed layout keeps search, your assigned categories, the amount label and
-  field, a small credit row, the primary action and `Cancel` in place.
-  `You assigned` shows its total beside an 11px uppercase label. Its category
+- The fixed layout starts with an always-visible quiet summary block above
+  category search: `Your available REP:` and `Your REP assigned to [profile]:`.
+  Both use grouped numbers and remain visible when your assigned total is zero.
+  Search, your assigned categories, the amount label and field, a small
+  comparison row, the primary action and `Cancel` stay in place.
+  `You assigned` uses an 11px uppercase label. Its category
   pills use the profile tag style: 38px height, 8px corners, subtle fill and
   border, and 14px medium text. The selected pill stays visible with a neutral
   highlight. The group is omitted when you have no existing contributions.
@@ -240,9 +243,9 @@ show the profile-creation welcome.
 - The saved contribution prefills an untouched amount. Once you type, your
   draft stays in place through delayed responses and background refreshes.
 - Grant Rep keeps an over-budget draft on blur so it can be corrected.
-  The 42px row below the input shows `Available REP` on the left; its value
-  turns rose when over budget and saving stays disabled. When an existing
-  amount changes, the right side shows the muted old amount, an arrow and
+  `Your available REP:` and its value in the top summary turn rose when over
+  budget and saving stays disabled. When an existing amount changes, the
+  row below the input shows the muted old amount, an arrow and
   the new amount in emerald for an increase or rose for a decrease. The old
   amount and arrow stay muted. The helper sentence and `Current Rep` / `Adjustment`
   block are omitted from Grant Rep; Rate NIC retains its existing guidance
@@ -250,7 +253,7 @@ show the profile-creation welcome.
   `Grant Rep` for a new one. Enter in the amount field submits the same action.
 - The primary action stays disabled until category is selected, amount changed, amount
   is valid, and submit is idle.
-- The amount label is medium iron text and the available-credit row has a quiet
+- The amount label is medium iron text and the summary block has a quiet
   filled background. Desktop actions sit at the bottom right, `Cancel` then
   `Save` or `Grant Rep`, at matching heights. On mobile, the buttons form a
   full-width column in the same order.
