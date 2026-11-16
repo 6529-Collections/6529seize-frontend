@@ -244,6 +244,11 @@ show the profile-creation welcome.
   including negative contributions; a new contribution starts empty with a
   `0` placeholder. Authorized proxies use their
   grantor's contribution and allowance.
+- Your two-row block stays above the scrolling raters list with a thin divider.
+  The first row keeps your avatar and `You` beside the amount input, aligned
+  with the rater amounts. The second row always reserves space for
+  `Available REP` on the left and an action beneath the input on the right.
+  Exceeding your allowance turns the available-credit line red and disables saving.
 - On desktop, opening a category focuses your amount without
   selecting the digits. Mobile opens with the sheet title focused and does not open the
   keyboard automatically.
@@ -252,14 +257,14 @@ show the profile-creation welcome.
 - Editable amounts use the Grant REP input's plus/minus symbols. Numbers are
   grouped while unfocused; focusing shows plain digits without selecting them. Read-only amounts
   are plain numbers.
-  A changed field shows its signed adjustment beside the input. Increases use
-  emerald and decreases use rose, including the proposed total in the footer.
-  In `Received`, a changed amount reveals a primary action beside the input:
-  `Grant Rep` for a first contribution, or `Save` to change an existing amount.
-  The footer compares the current and proposed category totals.
-  With no changes, it shows `Open category` and the available REP allowance
-  for an eligible editor. Nothing saves while typing. Enter saves and a short
-  `Saved` confirmation follows. Escape discards the draft;
+  In `Received`, changing an existing amount reveals a muted old value,
+  arrow and bright new value in the second row, followed by a compact `Save`
+  button. A first contribution shows only `Grant Rep` there. The action is
+  about 30px tall; the fixed row keeps the input and list from moving when it
+  appears. `Open category` remains in the footer during editing.
+  Nothing saves while typing. Enter saves and a short `✓ Saved` confirmation
+  replaces the action for about 1.5 seconds. Available REP and the profile's
+  assigned and total REP refresh. Escape discards the draft;
   Escape again closes the list. On desktop, saving keeps the same category open
   and updates its amounts immediately. Category tags keep their order while a
   panel or sheet is open; closing it restores the current ranking by total.
@@ -269,9 +274,12 @@ show the profile-creation welcome.
   list and footer appear in the full-width panel joined below the category tag.
   Save applies changes sequentially,
   returning released credit before spending it elsewhere.
+  Changed fields keep their signed adjustment beside the input; increases use
+  emerald and decreases use rose, including the proposed footer total.
 - Fields wait for the allowance to load. On failure, use `Try again`. Save is
   unavailable for invalid amounts or a combined allocation beyond the allowance.
-- After a fully successful save, the mobile and native category sheet closes,
+- After a fully successful save, the mobile and native category sheet closes
+  (after the brief confirmation in `Received`),
   dismissing the keyboard and returning focus to the category tag. Updated totals
   and the success message confirm the change. The desktop expandable stays open.
   During saving, the sheet header and drag handle stay in place; Back, Close,

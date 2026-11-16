@@ -400,6 +400,7 @@ export default function UserPageRepNewRepSearch({
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
     const newValue = event.target.value;
+    setIsOpen(true);
     selectionRequest.current++;
     setCheckingAvailability(false);
     setRepSearch(newValue);

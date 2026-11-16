@@ -519,7 +519,8 @@ describe("UserPageRepNewRepSearch", () => {
     ).toHaveClass("tw-text-emerald-400");
 
     await user.click(screen.getByRole("button", { name: "Change category" }));
-    await user.type(input, "meme");
+    expect(input).toHaveFocus();
+    await user.keyboard("meme");
 
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "MemesNominee" })).toBeVisible()

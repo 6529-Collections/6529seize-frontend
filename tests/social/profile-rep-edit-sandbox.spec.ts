@@ -545,7 +545,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
               {
                 category: CATEGORY,
                 rating: 20 + rating,
-                contributor_count: rating === 0 ? 1 : 2,
+                contributor_count: rating === 0 ? 20 : 21,
                 rater_contribution: rating,
               },
             ],
@@ -561,7 +561,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
               {
                 category: CATEGORY,
                 total_rep: 20 + rating,
-                contributor_count: rating === 0 ? 1 : 2,
+                contributor_count: rating === 0 ? 20 : 21,
                 authenticated_user_contribution: rating,
                 top_contributors: [],
               },
@@ -577,7 +577,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         json: {
           total_rep: 20 + rating,
           authenticated_user_contribution: rating,
-          contributor_count: rating === 0 ? 1 : 2,
+          contributor_count: rating === 0 ? 20 : 21,
           contributors: { data: [], page: 1, next: false, count: 0 },
         },
       })
@@ -587,17 +587,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       (route) =>
         route.fulfill({
           json: {
-            data: [
-              {
-                profile: {
-                  id: "other",
-                  handle: "other-rater",
-                  primary_address: "0x0000000000000000000000000000000000000530",
-                  pfp: "/icon-512.png",
-                },
-                contribution: 20,
+            data: Array.from({ length: 20 }, (_, index) => ({
+              profile: {
+                id: `other-${index}`,
+                handle: `other-rater-${index}`,
+                primary_address: `0x${(index + 1).toString(16).padStart(40, "0")}`,
+                pfp: "/icon-512.png",
               },
-            ],
+              contribution: 1,
+            })),
             page: 1,
             next: false,
           },
@@ -632,18 +630,75 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     const amount = panel.getByRole("textbox", { name: "You", exact: true });
     await expect(amount).toHaveValue("");
     await expect(amount).toHaveAttribute("placeholder", "0");
+    await expect(amount).toHaveAttribute("aria-invalid", "false");
     if (isMobile) await expect(amount).not.toBeFocused();
     else await expect(amount).toBeFocused();
     await expect(panel.getByRole("link").first()).toHaveAccessibleName("You");
+    await amount.scrollIntoViewIfNeeded();
+    const inputOffset = await amount.evaluate((field) => {
+      const form = field.closest("form");
+      if (!form) throw new Error("Missing category form");
+      return (
+        field.getBoundingClientRect().top - form.getBoundingClientRect().top
+      );
+    });
+    await panel
+      .getByRole("link", { name: "other-rater-0", exact: true })
+      .hover();
+    await page.mouse.wheel(0, 1000);
+    await expect
+      .poll(() =>
+        panel
+          .getByRole("link", { name: "other-rater-0", exact: true })
+          .locator("..")
+          .locator("..")
+          .evaluate((list) => list.scrollTop)
+      )
+      .toBeGreaterThan(0);
+    await expect(amount).toBeInViewport();
+    expect(
+      await amount.evaluate((field) => {
+        const form = field.closest("form");
+        if (!form) throw new Error("Missing category form");
+        return (
+          field.getBoundingClientRect().top - form.getBoundingClientRect().top
+        );
+      })
+    ).toBeCloseTo(inputOffset, 0);
+    await amount.fill("81");
+    await expect(
+      panel.getByText("Available REP 80", { exact: true })
+    ).toHaveCSS("color", "rgb(251, 113, 133)");
+    await expect(
+      panel.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeDisabled();
+    await amount.press("Escape");
     await amount.fill("15");
     const grant = panel.getByRole("button", { name: "Grant Rep", exact: true });
     await expect(grant).toBeEnabled();
+    await expect(grant).toHaveCSS("height", "30px");
+    await expect(grant).toHaveCSS("font-size", "12px");
+    await expect(grant).toHaveCSS("border-radius", "8px");
+    await expect(
+      panel.getByRole("button", {
+        name: `Open category ${CATEGORY}`,
+        exact: true,
+      })
+    ).toBeVisible();
+    await panel.screenshot({
+      path: testInfo.outputPath("rep-pinned-grant.png"),
+    });
     expect(saved).toHaveLength(0);
     await amount.press("Escape");
     await expect(amount).toHaveValue("");
     await amount.fill("15");
     if (isMobile) await grant.click();
     else await amount.press("Enter");
+    await expect(panel.getByText("Saved", { exact: true })).toBeVisible();
+    await expect(
+      panel.getByText("Available REP 65", { exact: true })
+    ).toBeVisible();
+    if (isMobile) await expect(panel).toBeHidden();
     await expect(tag).toHaveAccessibleDescription("You assigned: 15");
     expect(saved).toEqual([{ amount: 15, category: CATEGORY }]);
     const rep = page
@@ -653,10 +708,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       rep.getByRole("button", { name: "You assigned: 15", exact: true })
     ).toBeVisible();
     await expect(rep.getByText("35", { exact: true }).first()).toBeVisible();
-    if (isMobile) await expect(panel).toBeHidden();
-    else {
+    if (!isMobile) {
       await expect(panel).toBeVisible();
-      await expect(panel.getByText("Saved", { exact: true })).toBeVisible();
     }
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
@@ -941,6 +994,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
     await expect(assigned).toHaveText("You assigned: 20");
     if (isMobile) {
+      await repSummary
+        .getByRole("button", { name: "Grant Rep", exact: true })
+        .focus();
+      await page.keyboard.press("Tab");
+      await expect(assigned).toBeFocused();
+    }
+    if (isMobile) {
       await expect(assigned).toHaveCSS("white-space", "nowrap");
       for (const width of [320, 768]) {
         await page.setViewportSize({ width, height: 844 });
@@ -970,8 +1030,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
               0
             );
           } else {
-            expect(assignedBox.x + assignedBox.width).toBeLessThanOrEqual(
-              grantBox.x
+            expect(grantBox.x + grantBox.width).toBeLessThanOrEqual(
+              assignedBox.x
             );
             expect(assignedBox.y + assignedBox.height / 2).toBeCloseTo(
               grantBox.y + grantBox.height / 2,
@@ -980,10 +1040,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
           }
         }
         if (width === 768 && assignedBox && grantBox) {
-          expect(grantBox.x - assignedBox.x - assignedBox.width).toBeCloseTo(
-            8,
-            0
-          );
+          expect(assignedBox.x - grantBox.x - grantBox.width).toBeCloseTo(8, 0);
           expect(assignedBox.y + assignedBox.height / 2).toBeCloseTo(
             grantBox.y + grantBox.height / 2,
             0
@@ -1141,24 +1198,17 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await categoryToggle.click();
     await expect(input).toHaveValue("20");
     await input.fill("30");
-    await expect(panel.getByRole("status")).toHaveText("Total 20 → 30");
-    await expect(panel.getByText("+10", { exact: true })).toHaveCSS(
-      "color",
-      "rgb(52, 211, 153)"
-    );
+    await expect(panel.getByRole("status")).toHaveText("20 → 30");
     await expect(input).toHaveCSS("color", "rgb(52, 211, 153)");
     await expect(
       panel.getByRole("status").getByText("30", { exact: true })
-    ).toHaveCSS("color", "rgb(52, 211, 153)");
+    ).toHaveCSS("color", "rgb(239, 239, 241)");
     await input.fill("10");
-    await expect(panel.getByText("−10", { exact: true })).toHaveCSS(
-      "color",
-      "rgb(251, 113, 133)"
-    );
+    await expect(panel.getByRole("status")).toHaveText("20 → 10");
     await expect(input).toHaveCSS("color", "rgb(251, 113, 133)");
     await expect(
       panel.getByRole("status").getByText("10", { exact: true })
-    ).toHaveCSS("color", "rgb(251, 113, 133)");
+    ).toHaveCSS("color", "rgb(239, 239, 241)");
     await input.fill("30");
     const originalViewport = page.viewportSize();
     if (originalViewport) {

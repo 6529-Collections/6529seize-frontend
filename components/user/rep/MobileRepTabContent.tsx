@@ -154,7 +154,7 @@ export default function MobileRepTabContent({
               type={RateMatter.REP}
               hideOwnProfileMessage
             >
-              <div className="tw-flex tw-flex-row-reverse tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-2 max-[360px]:tw-gap-x-0.5">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-2 tw-gap-y-2 max-[360px]:tw-gap-x-0.5">
                 <Button
                   variant="action"
                   size="sm"

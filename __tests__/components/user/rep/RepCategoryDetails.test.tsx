@@ -201,7 +201,9 @@ it("pins only your editable contribution, accepts negative values, and saves the
   expect(onProfileRepModify).toHaveBeenCalledWith(
     expect.objectContaining({ targetProfiles: [target] })
   );
-  await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1), {
+    timeout: 2000,
+  });
 });
 
 it("makes the owner's received categories read-only", async () => {
@@ -231,7 +233,14 @@ it("pins an empty You input for a first contribution and grants only on submit",
   const input = screen.getByRole("textbox", { name: "You" });
   expect(input).toHaveValue("");
   expect(input).toHaveAttribute("placeholder", "0");
+  expect(input).toHaveAttribute("aria-invalid", "false");
   expect(input).toHaveFocus();
+  await user.type(input, "81");
+  expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
+  expect(screen.getByText("Available REP", { exact: true })).toHaveClass(
+    "tw-text-rose-400"
+  );
+  await user.keyboard("{Escape}");
   await user.type(input, "15");
   expect(post).not.toHaveBeenCalled();
   expect(screen.getByRole("button", { name: "Grant Rep" })).toBeEnabled();

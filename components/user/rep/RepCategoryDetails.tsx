@@ -16,6 +16,7 @@ import { t, tRich } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
 import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
+import { CheckIcon } from "@heroicons/react/24/solid";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -231,9 +232,12 @@ export default function RepCategoryDetails({
   const [saved, setSaved] = useState(false);
   useEffect(() => {
     if (!saved) return;
-    const timeout = setTimeout(() => setSaved(false), 2000);
+    const timeout = setTimeout(() => {
+      setSaved(false);
+      onSuccess?.();
+    }, 1500);
     return () => clearTimeout(timeout);
-  }, [saved]);
+  }, [saved, onSuccess]);
   const busy = externalBusy || preparing || isSaving;
   const ready = !!repState && !isError;
   const ownContribution =
@@ -381,7 +385,7 @@ export default function RepCategoryDetails({
     }
     if (succeeded) {
       if (direction === "received") setSaved(true);
-      onSuccess?.();
+      else onSuccess?.();
     }
   };
   const openCategory = (
@@ -403,8 +407,8 @@ export default function RepCategoryDetails({
     <RatingEditorFooter
       matter="REP"
       formId={formId}
-      editable
-      changed={changes.length > 0}
+      editable={direction === "given"}
+      changed={direction === "given" && changes.length > 0}
       before={before}
       after={validNumbers ? after : null}
       available={ready ? heroAvailableRep : null}
@@ -412,7 +416,6 @@ export default function RepCategoryDetails({
       canSave={canSave}
       onCancel={reset}
       idleAction={openCategory}
-      showActions={direction === "given"}
     >
       <RatingEditorErrors
         formId={formId}
@@ -428,6 +431,130 @@ export default function RepCategoryDetails({
   ) : (
     <div className="tw-min-h-[50px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-2.5 tw-py-2">
       {openCategory}
+    </div>
+  );
+  const ownRow = direction === "received" ? ownContributor : null;
+  const listRows = ownRow ? rows.filter((row) => row !== ownRow) : rows;
+  const renderRow = (row: Contributor) => {
+    const you = row === ownRow;
+    const editable = canEdit && (direction === "given" || you);
+    const draft = drafts[row.profile.id];
+    const value =
+      draft ?? (you && row.contribution === 0 ? "" : String(row.contribution));
+    const descriptionId = `${formId}-${row.profile.id}-description`;
+    const validation = getAmountValidation({
+      value: draft ?? String(row.contribution),
+      current: row.contribution,
+      withinAllowance,
+      validNumbers,
+      descriptionId,
+      formId,
+    });
+    return (
+      <div
+        key={row.profile.id}
+        data-rating-row
+        className="tw-flex tw-min-h-[50px] tw-min-w-0 tw-items-center tw-gap-2 tw-pb-[5px] tw-pl-2.5 tw-pr-1.5 tw-pt-[5px]"
+      >
+        <ContributorIdentity
+          row={row}
+          you={you}
+          labelId={`${formId}-${row.profile.id}-name`}
+        />
+        {editable ? (
+          <>
+            <span id={descriptionId} className="tw-sr-only">
+              {t(locale, "rep.categories.panel.amountFor", {
+                name: you
+                  ? t(locale, "rep.categories.panel.you")
+                  : (row.profile.handle ?? row.profile.primary_address),
+              })}
+            </span>
+            <RatingAmountInput
+              ref={you ? ownAmountRef : undefined}
+              originalAmount={row.contribution}
+              showAdjustment={!you}
+              value={ready ? value : ""}
+              aria-labelledby={`${formId}-${row.profile.id}-name`}
+              aria-describedby={validation.describedBy}
+              aria-invalid={validation.invalid}
+              readOnly={!ready || busy}
+              placeholder={
+                ready ? "0" : t(locale, "rep.categories.panel.loadingAmount")
+              }
+              onChange={(event) =>
+                updateDraft(row.profile.id, event.currentTarget.value)
+              }
+            />
+          </>
+        ) : (
+          <span
+            className={`tw-shrink-0 tw-text-right tw-text-sm tw-font-medium ${row.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
+          >
+            {formatInteger(locale, row.contribution)}
+          </span>
+        )}
+      </div>
+    );
+  };
+  const ownDraft = ownRow
+    ? (drafts[ownRow.profile.id] ?? String(ownRow.contribution))
+    : "";
+  const overAllowance = changes.length > 0 && validNumbers && !withinAllowance;
+  const ownBlock = ownRow && (
+    <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5">
+      {renderRow(ownRow)}
+      <div className="tw-flex tw-h-10 tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-pl-2.5 tw-pr-1.5">
+        <span
+          className={`tw-text-xs ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-400"}`}
+        >
+          {t(locale, "user.rate.available", { matter: "REP" })}{" "}
+          <span className="tw-font-medium">
+            {ready ? formatInteger(locale, heroAvailableRep) : "—"}
+          </span>
+        </span>
+        <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2">
+          {changes.length > 0 && (
+            <>
+              {ownRow.contribution !== 0 && (
+                <output className="tw-whitespace-nowrap tw-text-xs tw-text-iron-400">
+                  {formatInteger(locale, ownRow.contribution)}
+                  {" → "}
+                  <span className="tw-font-medium tw-text-iron-100">
+                    {isRatingValue(ownDraft)
+                      ? formatInteger(locale, Number(ownDraft))
+                      : "—"}
+                  </span>
+                </output>
+              )}
+              <Button
+                variant="action"
+                size={null}
+                className="tw-h-[30px] tw-px-2.5 tw-py-0 tw-text-xs tw-font-semibold"
+                type="submit"
+                disabled={!canSave}
+                loading={busy}
+              >
+                {t(
+                  locale,
+                  ownRow.contribution === 0
+                    ? "rep.categories.grant.actions.grant"
+                    : "rep.categories.edit.save"
+                )}
+              </Button>
+            </>
+          )}
+          {saved && changes.length === 0 && (
+            <output className="tw-inline-flex tw-h-[30px] tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-text-iron-300">
+              <CheckIcon
+                aria-hidden="true"
+                className="tw-size-3.5 tw-text-emerald-400"
+              />
+              {t(locale, "rep.categories.edit.saved")}
+            </output>
+          )}
+        </div>
+      </div>
     </div>
   );
   const body = (
@@ -462,6 +589,7 @@ export default function RepCategoryDetails({
           })}
         </p>
       )}
+      {ownBlock}
       {query.isPending && (
         <output className="tw-block tw-px-2.5 tw-py-5 tw-text-sm tw-text-iron-400">
           {t(locale, "user.rate.loading")}
@@ -482,93 +610,7 @@ export default function RepCategoryDetails({
         </p>
       )}
       <div className="tw-max-h-[min(50dvh,24rem)] tw-overflow-y-auto tw-overscroll-contain">
-        {rows.map((row) => {
-          const you = direction === "received" && row === ownContributor;
-          const editable = canEdit && (direction === "given" || you);
-          const value =
-            drafts[row.profile.id] ??
-            (you && row.contribution === 0 ? "" : String(row.contribution));
-          const descriptionId = `${formId}-${row.profile.id}-description`;
-          const validation = getAmountValidation({
-            value,
-            current: row.contribution,
-            withinAllowance,
-            validNumbers,
-            descriptionId,
-            formId,
-          });
-          return (
-            <div
-              key={row.profile.id}
-              data-rating-row
-              className={`tw-flex tw-min-h-[50px] tw-min-w-0 tw-items-center tw-gap-2 tw-pb-[5px] tw-pl-2.5 tw-pr-1.5 tw-pt-[5px] ${you ? "tw-sticky tw-top-0 tw-z-10 tw-flex-wrap tw-bg-[#17171B]" : ""}`}
-            >
-              <ContributorIdentity
-                row={row}
-                you={you}
-                labelId={`${formId}-${row.profile.id}-name`}
-              />
-              {editable ? (
-                <>
-                  <span id={descriptionId} className="tw-sr-only">
-                    {t(locale, "rep.categories.panel.amountFor", {
-                      name: you
-                        ? t(locale, "rep.categories.panel.you")
-                        : (row.profile.handle ?? row.profile.primary_address),
-                    })}
-                  </span>
-                  <div className="tw-ml-auto tw-flex tw-max-w-full tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
-                    {you && saved && (
-                      <output className="tw-text-xs tw-text-iron-400">
-                        {t(locale, "rep.categories.edit.saved")}
-                      </output>
-                    )}
-                    <RatingAmountInput
-                      ref={you ? ownAmountRef : undefined}
-                      originalAmount={row.contribution}
-                      value={ready ? value : ""}
-                      aria-labelledby={`${formId}-${row.profile.id}-name`}
-                      aria-describedby={validation.describedBy}
-                      aria-invalid={validation.invalid}
-                      readOnly={!ready || busy}
-                      placeholder={
-                        ready
-                          ? "0"
-                          : t(locale, "rep.categories.panel.loadingAmount")
-                      }
-                      onChange={(event) =>
-                        updateDraft(row.profile.id, event.currentTarget.value)
-                      }
-                    />
-                    {you && changes.length > 0 && (
-                      <Button
-                        variant="action"
-                        size={null}
-                        className="tw-min-h-11 tw-px-3 tw-text-sm lg:tw-min-h-9"
-                        type="submit"
-                        disabled={!canSave}
-                        loading={busy}
-                      >
-                        {t(
-                          locale,
-                          row.contribution === 0
-                            ? "rep.categories.grant.actions.grant"
-                            : "rep.categories.edit.save"
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                </>
-              ) : (
-                <span
-                  className={`tw-shrink-0 tw-text-right tw-text-sm tw-font-medium ${row.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
-                >
-                  {formatInteger(locale, row.contribution)}
-                </span>
-              )}
-            </div>
-          );
-        })}
+        {listRows.map(renderRow)}
       </div>
       {query.isSuccess && rows.length === 0 && (
         <p className="tw-px-2.5 tw-text-sm tw-text-iron-400">

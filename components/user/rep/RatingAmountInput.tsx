@@ -10,11 +10,13 @@ import { isRatingValue } from "./ratingsManagement";
 
 type Props = ComponentProps<typeof RatingInput> & {
   readonly originalAmount: number;
+  readonly showAdjustment?: boolean;
 };
 
 /** The same editable amount in category panels and full contributor lists. */
 export default function RatingAmountInput({
   originalAmount,
+  showAdjustment = true,
   value,
   onFocus,
   className,
@@ -35,7 +37,7 @@ export default function RatingAmountInput({
 
   return (
     <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2">
-      {changeLabel && (
+      {showAdjustment && changeLabel && (
         <span
           title={changeLabel}
           className={clsx(

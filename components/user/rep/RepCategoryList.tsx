@@ -10,6 +10,7 @@ import { t } from "@/i18n/messages";
 import clsx from "clsx";
 import {
   useContext,
+  useCallback,
   useEffect,
   useId,
   useLayoutEffect,
@@ -187,16 +188,16 @@ export default function RepCategoryList({
     observer.observe(list);
     return () => observer.disconnect();
   }, []);
-  const dismiss = () => {
+  const dismiss = useCallback(() => {
     setSelection(null);
     trigger.current?.focus({ preventScroll: true });
-  };
+  }, []);
   const close = () => {
     if (!busy) dismiss();
   };
-  const handleSaveSuccess = () => {
+  const handleSaveSuccess = useCallback(() => {
     if (mobile) dismiss();
-  };
+  }, [dismiss, mobile]);
   useEffect(() => {
     if (!open || mobile || !active) return;
     const escape = (event: KeyboardEvent) => {

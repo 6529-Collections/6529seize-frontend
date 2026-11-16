@@ -18,7 +18,6 @@ export default function RatingEditorFooter({
   canSave,
   onCancel,
   idleAction,
-  showActions = true,
   children,
 }: {
   readonly matter: "REP" | "NIC";
@@ -32,7 +31,6 @@ export default function RatingEditorFooter({
   readonly canSave: boolean;
   readonly onCancel: () => void;
   readonly idleAction?: ReactNode;
-  readonly showActions?: boolean;
   readonly children?: ReactNode;
 }) {
   const locale = useBrowserLocale();
@@ -64,40 +62,40 @@ export default function RatingEditorFooter({
         ) : (
           idleAction
         )}
-        {editable && changed && showActions && (
-          <div className="tw-ml-auto tw-flex tw-gap-2">
-            <Button
-              variant="ghost"
-              size={null}
-              className="tw-min-h-11 tw-px-3 tw-text-sm lg:tw-min-h-[34px]"
-              onClick={onCancel}
-              onKeyDownCapture={onKeyDownCapture}
-              disabled={busy}
-            >
-              {t(locale, "rep.categories.edit.cancel")}
-            </Button>
-            <Button
-              variant={matter === "NIC" ? "success" : "action"}
-              size={null}
-              className="tw-min-h-11 tw-px-4 tw-text-sm lg:tw-min-h-[34px]"
-              type="submit"
-              onKeyDownCapture={onKeyDownCapture}
-              form={formId}
-              loading={busy}
-              disabled={!canSave}
-            >
-              {t(locale, "rep.categories.edit.save")}
-            </Button>
-          </div>
-        )}
-        {editable && !changed && (
-          <span className="tw-ml-auto tw-text-xs tw-text-iron-500">
-            {t(locale, "user.rate.available", { matter })}{" "}
-            <span className="tw-font-medium tw-text-iron-300">
-              {available === null ? "—" : formatInteger(locale, available)}
+        {editable &&
+          (changed ? (
+            <div className="tw-ml-auto tw-flex tw-gap-2">
+              <Button
+                variant="ghost"
+                size={null}
+                className="tw-min-h-11 tw-px-3 tw-text-sm lg:tw-min-h-[34px]"
+                onClick={onCancel}
+                onKeyDownCapture={onKeyDownCapture}
+                disabled={busy}
+              >
+                {t(locale, "rep.categories.edit.cancel")}
+              </Button>
+              <Button
+                variant={matter === "NIC" ? "success" : "action"}
+                size={null}
+                className="tw-min-h-11 tw-px-4 tw-text-sm lg:tw-min-h-[34px]"
+                type="submit"
+                onKeyDownCapture={onKeyDownCapture}
+                form={formId}
+                loading={busy}
+                disabled={!canSave}
+              >
+                {t(locale, "rep.categories.edit.save")}
+              </Button>
+            </div>
+          ) : (
+            <span className="tw-ml-auto tw-text-xs tw-text-iron-500">
+              {t(locale, "user.rate.available", { matter })}{" "}
+              <span className="tw-font-medium tw-text-iron-300">
+                {available === null ? "—" : formatInteger(locale, available)}
+              </span>
             </span>
-          </span>
-        )}
+          ))}
       </div>
       {children}
     </div>
