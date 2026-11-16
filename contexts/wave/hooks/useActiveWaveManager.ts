@@ -22,9 +22,11 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useShellSearchParams } from "@/contexts/ShellSearchParamsContext";
 import { usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
+import { PROFILE_WAVES_FEED_HREF } from "@/helpers/waves/profile-feed-navigation";
 
 interface WaveNavigationOptions {
   isDirectMessage?: boolean | undefined;
+  profileFeed?: boolean | undefined;
   serialNo?: number | string | null | undefined;
   divider?: number | null | undefined;
 }
@@ -85,6 +87,9 @@ export function useActiveWaveManager() {
   const buildUrl = useCallback(
     (waveId: string | null, options?: WaveNavigationOptions) => {
       const isDirectMessage = options?.isDirectMessage ?? false;
+      if (!waveId && isApp && !isDirectMessage && options?.profileFeed) {
+        return PROFILE_WAVES_FEED_HREF;
+      }
       const serialNo = options?.serialNo ?? undefined;
       const divider = options?.divider;
       const remembered = waveId ? tabsRef.current[waveId] : undefined;
@@ -158,7 +163,9 @@ export function useActiveWaveManager() {
         !options?.isDirectMessage &&
         canUsePushState(buildUrl(waveId, options), options)
       ) {
-        runWaveNavigationTransition(waveId ? "wave" : "list", navigateToWave);
+        const rootScreen = options?.profileFeed ? "feed" : "list";
+        const screen = waveId ? "wave" : rootScreen;
+        runWaveNavigationTransition(screen, navigateToWave);
       } else {
         navigateToWave();
       }

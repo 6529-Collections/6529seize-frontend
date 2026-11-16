@@ -9,6 +9,10 @@ import { WaveDropQuoteDisplayProvider } from "@/components/waves/drops/WaveDropQ
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
+import {
+  commitWaveNavigationContent,
+  isWaveNavigationContentPending,
+} from "@/helpers/waves/wave-navigation-transition";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 import {
   type RenderComponentProps,
@@ -19,6 +23,7 @@ import {
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -58,6 +63,22 @@ const EMPTY_VIEWPORT: PanelViewport = {
 };
 
 const noop = () => {};
+
+function hasVisibleFeedCard(
+  grid: HTMLElement | null,
+  scroll: HTMLElement | null
+) {
+  if (!grid || !scroll) return false;
+  const viewport = scroll.getBoundingClientRect();
+  return Array.from(grid.children).some((cell) => {
+    const rect = cell.getBoundingClientRect();
+    return (
+      rect.bottom > viewport.top &&
+      rect.top < viewport.bottom &&
+      getComputedStyle(cell).visibility !== "hidden"
+    );
+  });
+}
 
 const getDropKey = (drop: ExtendedDrop) => drop.stableKey;
 
@@ -157,6 +178,21 @@ function usePanelViewport(
   gridElement: HTMLElement | null
 ) {
   const [viewport, setViewport] = useState<PanelViewport>(EMPTY_VIEWPORT);
+  const measureViewport = useCallback(
+    (previous: PanelViewport) => {
+      if (!scrollContainer) return false;
+      const measured = readPanelViewport(scrollContainer, gridElement, false);
+      setPanelViewport(setViewport, measured);
+      return areViewportsEqual(previous, measured);
+    },
+    [gridElement, scrollContainer]
+  );
+
+  // Cached Feed returns need their visible range before the first paint, not
+  // an empty viewport followed by a passive effect and another animation frame.
+  useLayoutEffect(() => {
+    measureViewport(EMPTY_VIEWPORT);
+  }, [measureViewport]);
 
   useEffect(() => {
     if (!scrollContainer) {
@@ -214,7 +250,10 @@ function usePanelViewport(
     };
   }, [gridElement, scrollContainer]);
 
-  return scrollContainer ? viewport : EMPTY_VIEWPORT;
+  return {
+    viewport: scrollContainer ? viewport : EMPTY_VIEWPORT,
+    measureViewport,
+  };
 }
 
 function CommunityCurationsInfiniteScrollTrigger({
@@ -293,7 +332,21 @@ function CommunityCurationsVirtualMasonry({
 }): ReactElement {
   const [gridElement, setGridElement] = useState<HTMLElement | null>(null);
   const { setWidth, width } = useElementWidth(gridElement);
-  const viewport = usePanelViewport(scrollContainer, gridElement);
+  const { viewport, measureViewport } = usePanelViewport(
+    scrollContainer,
+    gridElement
+  );
+  const acknowledgeVisibleFeed = useCallback(() => {
+    if (!isWaveNavigationContentPending("feed")) return;
+    // Layout heights can settle after the first measurement. A view transition
+    // pauses animation frames, so refresh this range before acknowledging it.
+    if (
+      measureViewport(viewport) &&
+      hasVisibleFeedCard(gridElement, scrollContainer)
+    )
+      commitWaveNavigationContent("feed");
+  }, [gridElement, measureViewport, scrollContainer, viewport]);
+  useLayoutEffect(() => acknowledgeVisibleFeed());
   const items = useMemo(() => [...drops], [drops]);
   const resetKey = useMemo(
     () => items.slice(0, 8).map(getDropKey).join("|"),
@@ -317,7 +370,8 @@ function CommunityCurationsVirtualMasonry({
     [setWidth]
   );
 
-  return useMasonry<ExtendedDrop>({
+  const [measuredCount, setMeasuredCount] = useState(0);
+  const masonry = useMasonry<ExtendedDrop>({
     containerRef: setContainerRef,
     height: Math.max(viewport.height, 1),
     isScrolling: viewport.isScrolling,
@@ -330,6 +384,15 @@ function CommunityCurationsVirtualMasonry({
     resizeObserver,
     scrollTop: viewport.scrollTop,
   }) as ReactElement;
+  useLayoutEffect(() => {
+    // Masonic measures new cells in their refs, then normally positions them
+    // in a passive effect. Promote those DOM measurements before the browser
+    // captures a navigation frame; otherwise it captures hidden measuring cells.
+    const count = positioner.size();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM-ref measurements must reach positioned cells before a navigation snapshot.
+    if (count !== measuredCount) setMeasuredCount(count);
+  }, [positioner, measuredCount]);
+  return masonry;
 }
 
 export default function CommunityCurationsMasonry({

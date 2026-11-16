@@ -3,13 +3,19 @@
 import { useCallback, useLayoutEffect, useRef } from "react";
 import type { TouchEvent } from "react";
 import { useHorizontalSwipe } from "@/hooks/useHorizontalSwipe";
-import { navigateAfterWaveSwipe } from "@/helpers/waves/wave-navigation-transition";
+import {
+  navigateAfterWaveSwipe,
+  runWaveNavigationTransition,
+  skipWaveNavigationTransition,
+  type WaveScreen,
+} from "@/helpers/waves/wave-navigation-transition";
 
 interface UseWaveListSwipeBackArgs {
   readonly enabled: boolean;
   readonly scope?: string;
   readonly onIntentStart?: (() => void) | undefined;
   readonly onSwipeBack: () => void;
+  readonly targetScreen?: WaveScreen | undefined;
 }
 
 export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
@@ -17,11 +23,13 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
   scope = "wave",
   onIntentStart,
   onSwipeBack,
+  targetScreen,
 }: UseWaveListSwipeBackArgs) {
   const ref = useRef<T>(null);
   const width = useRef(0);
   const animation = useRef<Animation | null>(null);
   const settling = useRef(false);
+  const generation = useRef(0);
   const navigate = useRef(onSwipeBack);
   useLayoutEffect(() => {
     navigate.current = onSwipeBack;
@@ -73,6 +81,31 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
           return;
         }
         settling.current = committed;
+        const releasedGeneration = generation.current;
+        if (
+          committed &&
+          targetScreen &&
+          runWaveNavigationTransition(
+            targetScreen,
+            () => {
+              if (generation.current !== releasedGeneration) {
+                skipWaveNavigationTransition();
+                return;
+              }
+              navigate.current();
+            },
+            {
+              surface: element,
+              distance: Math.min(distance, width.current),
+              width: width.current,
+              onFinish: () => {
+                if (generation.current === releasedGeneration) cleanup();
+              },
+            }
+          )
+        ) {
+          return;
+        }
         const destination = committed ? width.current : 0;
         element.style.transform = `translate3d(${destination}px, 0, 0)`;
         const settle = element.animate(
@@ -110,6 +143,7 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
   useLayoutEffect(() => {
     const element = ref.current;
     return () => {
+      generation.current += 1;
       // The recognizer cancels its active touch first; clear any resulting settle.
       const previousAnimation = animation.current;
       animation.current = null;

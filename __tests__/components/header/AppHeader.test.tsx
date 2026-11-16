@@ -25,14 +25,31 @@ const mockCopyToClipboard = jest.fn();
 const mockCapacitorIsNativePlatform = jest.fn();
 let mockWaveDropAction: any = null;
 
+jest.mock("@/contexts/ScrollPositionContext", () => ({
+  useScrollPositionContext: () => ({ setPosition: jest.fn() }),
+}));
+
 jest.mock("@/components/header/AppSidebar", () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="sidebar" {...props} />,
 }));
 jest.mock("@/components/header/header-search/HeaderSearchButton", () => ({
   __esModule: true,
-  default: ({ wave }: { wave: { id: string } | null }) => (
-    <div data-testid="search" data-wave-id={wave?.id ?? ""} />
+  default: ({
+    wave,
+    additionalMenuItems,
+  }: {
+    wave: { id: string } | null;
+    additionalMenuItems?: { id: string; href?: string }[];
+  }) => (
+    <div
+      data-testid="search"
+      data-wave-id={wave?.id ?? ""}
+      data-menu-items={additionalMenuItems?.map((item) => item.id).join(",")}
+      data-profile-feed-href={
+        additionalMenuItems?.find((item) => item.id === "profile-feed")?.href
+      }
+    />
   ),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
@@ -446,6 +463,51 @@ describe("AppHeader", () => {
     expect(
       screen.getByRole("button", { name: "Open menu" })
     ).toBeInTheDocument();
+  });
+
+  it.each([false, true])(
+    "shows feed Back on native Discovery with history=%s",
+    (canGoBack) => {
+      setup({
+        asPath: "/discover",
+        query: { returnTo: "/waves?view=profile-feed" },
+        canGoBack,
+      });
+      expect(screen.getByTestId("back")).toHaveAttribute(
+        "data-return-to",
+        "/waves?view=profile-feed"
+      );
+    }
+  );
+
+  it.each([
+    undefined,
+    "https://example.com",
+    "/waves",
+    "/waves?view=profile-feed&other=1",
+  ])(
+    "keeps the native Discovery menu without a feed origin: %s",
+    (returnTo) => {
+      setup({
+        asPath: "/discover",
+        query: returnTo ? { returnTo } : {},
+        canGoBack: true,
+      });
+      expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Open menu" })
+      ).toBeInTheDocument();
+    }
+  );
+
+  it("preserves the web Discovery header with a feed origin", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({
+      asPath: "/discover",
+      query: { returnTo: "/waves?view=profile-feed" },
+      canGoBack: true,
+    });
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
   });
 
   it("returns from the score page to the exact Discover view in the app", () => {
@@ -1222,7 +1284,22 @@ describe("AppHeader", () => {
     ).not.toBeInTheDocument();
   });
 
-  it.each(["/waves", "/waves/w1"])(
+  it("moves directory share and profile feed into More in the native app", () => {
+    setup({ asPath: "/waves" });
+    expect(
+      screen.queryByRole("button", { name: "Share page" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId("search")).toHaveAttribute(
+      "data-menu-items",
+      "profile-feed,share-page"
+    );
+    expect(screen.getByTestId("search")).toHaveAttribute(
+      "data-profile-feed-href",
+      "/waves?view=profile-feed"
+    );
+  });
+
+  it.each(["/waves/w1"])(
     "shows page share on supported wave route %s",
     (asPath) => {
       setup({ asPath });

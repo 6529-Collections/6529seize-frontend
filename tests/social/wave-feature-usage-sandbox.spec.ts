@@ -925,6 +925,8 @@ for (const width of [320, 430]) {
     const canHover = await page.evaluate(
       () => matchMedia("(any-hover: hover)").matches
     );
+    // Keep the original section boundary in the quieter touch presentation.
+    await expect(recommendations).toHaveCSS("border-bottom-width", "1px");
     for (const name of names) {
       const link = recommendations.getByRole("link", {
         name: `Open ${name}`,
@@ -936,13 +938,14 @@ for (const width of [320, 430]) {
         await expect(caption).toBeHidden();
       } else {
         await expect(caption).toBeVisible();
-        await expect(caption).toHaveCSS("-webkit-line-clamp", "2");
+        await expect(caption).toHaveCSS("white-space", "nowrap");
+        await expect(caption).toHaveCSS("text-overflow", "ellipsis");
         const bounds = await caption.boundingBox();
         expect(bounds).not.toBeNull();
-        expect(bounds!.height).toBeLessThanOrEqual(28);
+        expect(bounds!.height).toBeLessThanOrEqual(14);
         expect(
-          await caption.evaluate((element) => element.scrollHeight)
-        ).toBeGreaterThan(bounds!.height);
+          await caption.evaluate((element) => element.scrollWidth)
+        ).toBeGreaterThan(bounds!.width);
         const sectionBounds = await recommendations.boundingBox();
         expect(sectionBounds).not.toBeNull();
         expect(bounds!.x).toBeGreaterThanOrEqual(sectionBounds!.x);

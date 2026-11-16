@@ -1,10 +1,25 @@
 // The app shell acknowledges the committed screen before the browser captures it.
 // This keeps the outgoing list (including its scroll position) visible during the handoff.
-type WaveScreen = "list" | "wave";
+export type WaveScreen = "list" | "feed" | "wave";
+
+interface SwipeHandoff {
+  readonly surface: HTMLElement;
+  readonly distance: number;
+  readonly width: number;
+  readonly onFinish?: () => void;
+}
+
+export function isForwardWaveNavigation(
+  screen: WaveScreen,
+  previous: string | null | undefined
+) {
+  return screen === "wave" || (screen === "feed" && previous === "list");
+}
 let activeTransition: {
   readonly screen: WaveScreen;
   readonly committed: () => void;
   readonly skip: () => void;
+  readonly contentPending: boolean;
 } | null = null;
 let navigatingFromSwipe = false;
 let swipeHandoffUntil = 0;
@@ -12,6 +27,10 @@ let swipeHandoffUntil = 0;
 /** The interactive gesture already animated the outgoing screen. */
 export function navigateAfterWaveSwipe(navigate: () => void) {
   skipWaveNavigationTransition();
+  navigateFromSwipe(navigate);
+}
+
+function navigateFromSwipe(navigate: () => void) {
   swipeHandoffUntil = performance.now() + 1000;
   navigatingFromSwipe = true;
   try {
@@ -31,9 +50,18 @@ export function commitWaveNavigationTransition(
   screen: WaveScreen | null
 ): boolean {
   if (!activeTransition) return false;
-  if (screen === activeTransition.screen) activeTransition.committed();
-  else activeTransition.skip();
+  if (screen !== activeTransition.screen) activeTransition.skip();
+  else if (!activeTransition.contentPending) activeTransition.committed();
   return true;
+}
+
+/** Virtualized content acknowledges its measured visible rows, not just its shell. */
+export function commitWaveNavigationContent(screen: WaveScreen) {
+  if (activeTransition?.screen === screen) activeTransition.committed();
+}
+
+export function isWaveNavigationContentPending(screen: WaveScreen) {
+  return activeTransition?.screen === screen && activeTransition.contentPending;
 }
 
 export function skipWaveNavigationTransition() {
@@ -42,11 +70,12 @@ export function skipWaveNavigationTransition() {
 
 export function runWaveNavigationTransition(
   screen: WaveScreen,
-  navigate: () => void
+  navigate: () => void,
+  swipe?: SwipeHandoff
 ) {
   if (navigatingFromSwipe) {
     navigate();
-    return;
+    return false;
   }
   const surface = document.querySelector<HTMLElement>(
     "[data-wave-navigation-screen]"
@@ -58,8 +87,8 @@ export function runWaveNavigationTransition(
     typeof document.startViewTransition !== "function" ||
     reducedMotion.matches
   ) {
-    navigate();
-    return;
+    if (!swipe) navigate();
+    return false;
   }
 
   activeTransition?.skip();
@@ -73,26 +102,44 @@ export function runWaveNavigationTransition(
     `${surface.getBoundingClientRect().height}px`
   );
   surface.style.viewTransitionName = "wave-navigation";
-  root.dataset["waveNavigationTransition"] =
-    screen === "wave" ? "forward" : "back";
+  root.dataset["waveNavigationTransition"] = isForwardWaveNavigation(
+    screen,
+    surface.dataset["waveNavigationScreen"]
+  )
+    ? "forward"
+    : "back";
+  if (swipe) {
+    root.dataset["waveNavigationTransition"] = "swipe-back";
+    root.style.setProperty(
+      "--wave-swipe-remainder",
+      `${Math.max(0, swipe.width - swipe.distance)}px`
+    );
+  }
   const clearSurface = () => {
     delete root.dataset["waveNavigationTransition"];
     surface.style.removeProperty("view-transition-name");
     root.style.removeProperty("--wave-transition-height");
+    root.style.removeProperty("--wave-swipe-remainder");
   };
   let transition: ViewTransition;
+  let stopped = false;
   try {
     transition = document.startViewTransition(async () => {
-      navigate();
+      if (stopped) return;
+      // The browser has captured the finger's final position. Prepare the new
+      // screen underneath that snapshot, rather than sliding into an empty shell.
+      swipe?.surface.style.removeProperty("transform");
+      swipe?.surface.style.removeProperty("will-change");
+      if (swipe) navigateFromSwipe(navigate);
+      else navigate();
       await committed;
     });
   } catch {
     // Motion is optional: an engine failure must not prevent navigation.
     clearSurface();
-    navigate();
-    return;
+    if (!swipe) navigate();
+    return false;
   }
-  let stopped = false;
   const skip = () => {
     if (stopped) return;
     stopped = true;
@@ -103,6 +150,7 @@ export function runWaveNavigationTransition(
   const timeout = window.setTimeout(skip, 500);
   const pending = {
     screen,
+    contentPending: screen === "feed",
     committed: () => {
       window.clearTimeout(timeout);
       commit();
@@ -115,6 +163,7 @@ export function runWaveNavigationTransition(
     stopped = true;
     window.clearTimeout(timeout);
     reducedMotion.removeEventListener("change", skip);
+    swipe?.onFinish?.();
     if (activeTransition !== pending) return;
     activeTransition = null;
     clearSurface();
@@ -122,4 +171,5 @@ export function runWaveNavigationTransition(
   // Skipping a transition rejects ready but still runs the navigation callback.
   void transition.ready.catch(() => {});
   void transition.finished.then(cleanup, cleanup);
+  return true;
 }

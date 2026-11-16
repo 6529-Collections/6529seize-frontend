@@ -75,6 +75,11 @@ import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/com
 import WaveJoinCta from "@/components/waves/header/WaveJoinCta";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
+import WavesHeaderMoreMenu from "./WavesHeaderMoreMenu";
+import {
+  PROFILE_WAVES_FEED_HREF,
+  returnsToProfileWavesFeed,
+} from "@/helpers/waves/profile-feed-navigation";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -494,6 +499,12 @@ export default function AppHeader() {
     pathname === "/waves" &&
     !waveParam &&
     searchParams.get("view") === "profile-feed";
+  const isWavesDirectory =
+    isCapacitor &&
+    pathname === "/waves" &&
+    !waveParam &&
+    activeView !== "messages" &&
+    searchParams.get("view") !== "profile-feed";
   const showPageShareAction =
     isCapacitor &&
     !isInsideWave &&
@@ -528,12 +539,19 @@ export default function AppHeader() {
   const waveScoreReturnTo = isWaveScorePage
     ? (sanitizeReturnTo(searchParams.get("returnTo")) ?? waveScoreFallbackHref)
     : undefined;
+  const discoveryFeedReturnTo =
+    isCapacitor &&
+    pathname === "/discover" &&
+    returnsToProfileWavesFeed(searchParams)
+      ? PROFILE_WAVES_FEED_HREF
+      : undefined;
 
   const showBackButton =
     Boolean(information?.returnFromNavigation) ||
     isInsideWave ||
     isCreateRoute ||
     isProfileWavesFeedView ||
+    discoveryFeedReturnTo !== undefined ||
     isWaveScorePage ||
     preferencesProfileReturnTo !== null ||
     profileCollectedReturnContext !== null ||
@@ -631,6 +649,7 @@ export default function AppHeader() {
                 profileCollectedReturnContext?.href ??
                 collectProfileReturnContext?.href ??
                 waveScoreReturnTo ??
+                discoveryFeedReturnTo ??
                 (isProfileWavesFeedView ? "/waves" : undefined)
               }
             />
@@ -653,6 +672,7 @@ export default function AppHeader() {
         <div
           className={clsx(
             "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2",
+            isWavesDirectory && "min-[360px]:tw-pl-[88px]",
             isInsideWave ? "tw-justify-start" : "tw-justify-center"
           )}
         >
@@ -700,12 +720,12 @@ export default function AppHeader() {
             >
               <HeaderActionButtons />
             </div>
-            {showPageShareAction && (
+            {!isWavesDirectory && showPageShareAction && (
               <div className="tw-flex-shrink-0">
                 <HeaderPageShareButton isCapacitor={isCapacitor} />
               </div>
             )}
-            {!isCreateRoute && (
+            {!isCreateRoute && !isWavesDirectory && (
               <div className="tw-flex-shrink-0">
                 <HeaderSearchButton
                   wave={
@@ -716,7 +736,14 @@ export default function AppHeader() {
                 />
               </div>
             )}
-            <HeaderMoreMenu items={appHeaderMoreMenuItems} />
+            {isWavesDirectory ? (
+              <WavesHeaderMoreMenu
+                isCapacitor={isCapacitor}
+                showPageShareAction={showPageShareAction}
+              />
+            ) : (
+              <HeaderMoreMenu items={appHeaderMoreMenuItems} />
+            )}
           </div>
         )}
       </div>

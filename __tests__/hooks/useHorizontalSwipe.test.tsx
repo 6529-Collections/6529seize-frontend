@@ -19,12 +19,14 @@ function Harness({
   onReply,
   onBack,
   onRender,
+  includePostBody = false,
 }: {
   readonly replyEnabled?: boolean;
   readonly onMove: jest.Mock;
   readonly onReply: jest.Mock;
   readonly onBack: jest.Mock;
   readonly onRender: jest.Mock;
+  readonly includePostBody?: boolean;
 }) {
   onRender();
   const back = useHorizontalSwipe(
@@ -55,6 +57,13 @@ function Harness({
         <span data-testid="text">Message</span>
         <button type="button">Control</button>
         <input aria-label="Vote" type="range" />
+        {includePostBody && (
+          <div role="button" data-horizontal-swipe-content="true" tabIndex={0}>
+            <span data-testid="post-body">Post body</span>
+            <a href="/waves">Embedded link</a>
+            <button type="button">Embedded control</button>
+          </div>
+        )}
         <div style={{ overflowX: "auto" }} data-testid="scroll">
           <span data-testid="scroll-child">Carousel</span>
         </div>
@@ -63,14 +72,20 @@ function Harness({
   );
 }
 
-function setup(replyEnabled = true) {
+function setup(replyEnabled = true, includePostBody = false) {
   const callbacks = {
     onMove: jest.fn(),
     onReply: jest.fn(),
     onBack: jest.fn(),
     onRender: jest.fn(),
   };
-  const view = render(<Harness {...callbacks} replyEnabled={replyEnabled} />);
+  const view = render(
+    <Harness
+      {...callbacks}
+      replyEnabled={replyEnabled}
+      includePostBody={includePostBody}
+    />
+  );
   return { ...callbacks, ...view, target: screen.getByTestId("text") };
 }
 
@@ -93,6 +108,26 @@ it("gives a left drag to the message and a right drag to its containing wave, ex
   end(target, 300);
   expect(onBack).toHaveBeenCalledWith(true, 120);
   expect(onReply).toHaveBeenCalledTimes(1);
+});
+
+it("accepts a post body that opens its chat but leaves embedded links and controls alone", () => {
+  const { onBack, onReply } = setup(true, true);
+  for (const target of [
+    screen.getByRole("link", { name: "Embedded link" }),
+    screen.getByRole("button", { name: "Embedded control" }),
+  ]) {
+    start(target);
+    move(target, 300);
+    end(target, 300);
+  }
+  expect(onBack).not.toHaveBeenCalled();
+  expect(onReply).not.toHaveBeenCalled();
+  const body = screen.getByTestId("post-body");
+  start(body);
+  move(body, 300);
+  end(body, 300);
+  expect(onBack).toHaveBeenCalledWith(true, 120);
+  expect(onReply).not.toHaveBeenCalled();
 });
 
 it("coalesces move events into one frame without re-rendering the React tree", () => {

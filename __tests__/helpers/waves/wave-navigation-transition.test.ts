@@ -1,5 +1,6 @@
 import {
   commitWaveNavigationTransition,
+  commitWaveNavigationContent,
   navigateAfterWaveSwipe,
   consumeWaveSwipeHandoff,
   runWaveNavigationTransition,
@@ -157,4 +158,59 @@ it("hands an already animated swipe directly to navigation without a second tran
   expect(start).not.toHaveBeenCalled();
   expect(consumeWaveSwipeHandoff()).toBe(true);
   expect(consumeWaveSwipeHandoff()).toBe(false);
+});
+
+it("captures a released swipe before navigation and reveals the destination during its settle", async () => {
+  document.body.innerHTML =
+    '<div data-wave-navigation-screen="wave"><div id="swipe"></div></div>';
+  const surface = document.getElementById("swipe")!;
+  surface.style.transform = "translate3d(140px, 0, 0)";
+  const navigate = jest.fn(() =>
+    runWaveNavigationTransition("feed", jest.fn())
+  );
+  expect(
+    runWaveNavigationTransition("feed", navigate, {
+      surface,
+      distance: 140,
+      width: 400,
+    })
+  ).toBe(true);
+  expect(surface.style.transform).not.toBe("");
+  expect(navigate).not.toHaveBeenCalled();
+  expect(document.documentElement.dataset["waveNavigationTransition"]).toBe(
+    "swipe-back"
+  );
+  await Promise.resolve();
+  expect(navigate).toHaveBeenCalledTimes(1);
+  expect(start).toHaveBeenCalledTimes(1);
+  expect(surface.style.transform).toBe("");
+  let ready = false;
+  void updateDone.then(() => {
+    ready = true;
+  });
+  expect(commitWaveNavigationTransition("feed")).toBe(true);
+  await Promise.resolve();
+  expect(ready).toBe(false);
+  commitWaveNavigationContent("feed");
+  await updateDone;
+  expect(ready).toBe(true);
+  expect(skip).not.toHaveBeenCalled();
+  finish();
+  await Promise.resolve();
+  expect(
+    document.documentElement.style.getPropertyValue("--wave-swipe-remainder")
+  ).toBe("");
+});
+
+it("lets the swipe's existing fallback own navigation when capture is unavailable", () => {
+  Object.defineProperty(document, "startViewTransition", { value: undefined });
+  const navigate = jest.fn();
+  expect(
+    runWaveNavigationTransition("feed", navigate, {
+      surface: document.body,
+      distance: 140,
+      width: 400,
+    })
+  ).toBe(false);
+  expect(navigate).not.toHaveBeenCalled();
 });

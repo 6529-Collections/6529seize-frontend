@@ -1,4 +1,5 @@
 import { expect, test } from "../testHelpers";
+import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 import { expectUrlState } from "../support/urlState";
 import {
@@ -188,4 +189,69 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
   await expect
     .poll(() => page.evaluate(() => globalThis.scrollY))
     .toBe(originalScroll);
+});
+
+test("Network profile Back restores page, sorting and reading position without hidden desktop rows", async ({
+  page,
+  context,
+  baseURL,
+  isMobile,
+}, testInfo) => {
+  test.skip(
+    !isMobile,
+    "The app-header Back return is exercised at phone width."
+  );
+  await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+  const source = "/network?page=2&sort-by=rep&sort-direction=asc";
+  await gotoReady(page, source);
+  const members = page
+    .getByRole("main")
+    .getByRole("link")
+    .filter({ hasText: /^\s*#/ });
+  const member = members.nth(12);
+  await expect(member).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  await member.scrollIntoViewIfNeeded();
+  const position = () =>
+    page.evaluate(() => ({
+      windowTop: scrollY,
+      containers: Array.from(
+        document.querySelectorAll(
+          '[data-mobile-bottom-nav-scroll-target="true"]'
+        )
+      ).map((element) => element.scrollTop),
+    }));
+  const before = await position();
+  expect(Math.max(before.windowTop, ...before.containers)).toBeGreaterThan(200);
+  await expect(
+    page.getByRole("main").getByRole("row", { includeHidden: true })
+  ).toHaveCount(0);
+  await member.click();
+  await expect(
+    page.getByRole("navigation", { name: "Profile sections" })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  // Clicking Back would scroll it into view and hide an incorrect entry offset.
+  await expect.poll(() => page.evaluate(() => scrollY)).toBe(0);
+  await expect(
+    page.getByRole("button", { name: "Back", exact: true })
+  ).toBeInViewport();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await expectUrlState(page, (url) => url.pathname + url.search === source);
+  await expect(member).toBeInViewport();
+  await expect
+    .poll(async () => {
+      const after = await position();
+      return Math.max(
+        Math.abs(after.windowTop - before.windowTop),
+        ...before.containers.map((top, index) =>
+          Math.abs(top - (after.containers[index] ?? 0))
+        )
+      );
+    })
+    .toBeLessThanOrEqual(2);
+  await expect(
+    page.getByRole("main").getByRole("row", { includeHidden: true })
+  ).toHaveCount(0);
+  await page.screenshot({
+    path: testInfo.outputPath("network-back-restored.png"),
+  });
 });

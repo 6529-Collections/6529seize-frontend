@@ -276,11 +276,14 @@ export default function CommunityMembers() {
     (updateItems: QueryUpdateInput[], lowerCase: boolean = true): void => {
       const queryString = createQueryString(updateItems, lowerCase);
       const path = queryString ? `${pathname}?${queryString}` : pathname;
-      if (path) {
+      const currentPath = searchParams.toString()
+        ? `${pathname}?${searchParams}`
+        : pathname;
+      if (path && path !== currentPath) {
         router.replace(path);
       }
     },
-    [createQueryString, pathname, router]
+    [createQueryString, pathname, router, searchParams]
   );
 
   const setSortBy = async (
@@ -326,14 +329,14 @@ export default function CommunityMembers() {
   }, [activeGroupId, params.group_id, updateFields]);
 
   const setPage = useCallback(
-    async (page: number): Promise<void> => {
+    (page: number): void => {
       const items: QueryUpdateInput[] = [
         {
           name: "page",
           value: page.toString(),
         },
       ];
-      await updateFields(items);
+      updateFields(items);
     },
     [updateFields]
   );

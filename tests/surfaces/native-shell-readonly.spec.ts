@@ -240,6 +240,91 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("Waves directory keeps secondary actions reachable through More", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native Waves header"
+    );
+    await gotoReady(page, "/waves");
+    const more = page.getByRole("button", { name: "More", exact: true });
+    const searchButton = page.getByRole("button", {
+      name: "Search 6529",
+      exact: true,
+    });
+    await expect(more).toBeEnabled();
+    await expect(searchButton).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Create Wave", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Share page", exact: true })
+    ).toHaveCount(0);
+    await more.click();
+    const menu = page.getByRole("menu");
+    await expect(
+      page.getByRole("menuitem", { name: "Search 6529", exact: true })
+    ).toHaveCount(0);
+    const feedItem = page.getByRole("menuitem", {
+      name: "Profile Waves Feed",
+      exact: true,
+    });
+    const shareItem = page.getByRole("menuitem", {
+      name: "Share page",
+      exact: true,
+    });
+    for (const width of [320, 430]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(menu).toHaveCSS("width", "224px");
+      for (const item of [feedItem, shareItem]) {
+        await expect(item).toHaveCSS("font-size", "14px");
+        await expect(item).toHaveCSS("font-weight", "500");
+        await expect(item).toHaveCSS("text-decoration-line", "none");
+      }
+      const label = feedItem.getByText("Profile Waves Feed", { exact: true });
+      await expect(label).toHaveCSS("line-height", "20px");
+      await expect
+        .poll(async () => (await label.boundingBox())?.height)
+        .toBe(20);
+      const bounds = await menu.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds!.x).toBeGreaterThanOrEqual(0);
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+      await more.click();
+      await expect(searchButton).toBeVisible();
+      const titleBounds = await page
+        .getByText("Waves", { exact: true })
+        .boundingBox();
+      const searchBounds = await searchButton.boundingBox();
+      expect(titleBounds).not.toBeNull();
+      expect(searchBounds).not.toBeNull();
+      expect(titleBounds!.x + titleBounds!.width).toBeLessThanOrEqual(
+        searchBounds!.x
+      );
+      await more.click();
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("waves-visible-search.png"),
+    });
+    await expect(
+      page.getByRole("menuitem", { name: "Profile Waves Feed", exact: true })
+    ).toHaveAttribute("href", "/waves?view=profile-feed");
+    await expect(
+      page.getByRole("menuitem", { name: "Share page", exact: true })
+    ).toBeVisible();
+    await more.click();
+    await searchButton.click();
+    await expect(
+      page.getByRole("combobox", { name: "Search 6529", exact: true })
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Go back", exact: true }).click();
+    await expect(more).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: "Search 6529", exact: true })
+    ).toHaveCount(0);
+  });
+
   test("calendar invites omit the mint URL only on iOS", async ({
     page,
   }, testInfo) => {

@@ -2,6 +2,12 @@ import { render, screen } from "@testing-library/react";
 import CommunityCurations from "@/components/community-curations/CommunityCurations";
 
 const mockUseCommunityCurationsDrops = jest.fn();
+let mockIsApp = false;
+
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({ isApp: mockIsApp }),
+}));
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ waveViewStyle: { height: "600px" } }),
@@ -46,6 +52,7 @@ describe("CommunityCurations", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsApp = false;
     mockUseCommunityCurationsDrops.mockReturnValue(loadingState);
   });
 
@@ -72,5 +79,18 @@ describe("CommunityCurations", () => {
 
     expect(screen.getByTestId("profile-feed-masonry")).toBeInTheDocument();
     expect(scrollTo).toHaveBeenCalledWith({ top: 240 });
+  });
+
+  it("keeps a native feed return destination on Discover Waves", () => {
+    mockIsApp = true;
+    render(<CommunityCurations />);
+    const href = screen
+      .getByRole("link", { name: "Discover Waves" })
+      .getAttribute("href");
+    const destination = new URL(href!, "http://localhost");
+    expect(destination.pathname).toBe("/discover");
+    expect(destination.searchParams.get("returnTo")).toBe(
+      "/waves?view=profile-feed"
+    );
   });
 });

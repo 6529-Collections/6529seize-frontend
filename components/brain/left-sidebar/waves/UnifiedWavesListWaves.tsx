@@ -465,7 +465,7 @@ const UnifiedWavesListWaves = forwardRef<
 
     return (
       <div className="tw-flex tw-flex-col">
-        {!hideHeaders && !isDirectMessage && (
+        {!hideHeaders && !isDirectMessage && !isApp && (
           <div className="tw-flex tw-items-center tw-justify-between tw-px-4">
             <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-tracking-tight tw-text-iron-50">
               {t(locale, "navigation.primary.waves")}

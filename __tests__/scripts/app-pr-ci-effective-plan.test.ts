@@ -231,6 +231,10 @@ describe("effective App PR CI plan", () => {
     "components/navigation/AndroidBackNavigation.tsx",
     "services/capacitor/android-back-layers.ts",
     "components/brain/mobile/useWaveListSwipeBack.ts",
+    "components/brain/mobile/useWaveNavigationTransition.ts",
+    "helpers/waves/wave-navigation-transition.ts",
+    "styles/wave-navigation-transition.css",
+    "components/community-curations/CommunityCurationsMasonry.tsx",
     "components/brain/my-stream/MyStreamWaveChat.tsx",
     "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
     "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
@@ -1043,6 +1047,21 @@ it.each([
     ).toBe(true);
   }
 );
+
+it.each([
+  "contexts/NavigationHistoryContext.tsx",
+  "helpers/navigation-scroll-restoration.ts",
+  "components/navigation/BackButton.tsx",
+  "components/community/CommunityMembers.tsx",
+  "components/community/members-table/CommunityMembersTable.tsx",
+  "tests/critical-shell/profile-navigation-readonly.spec.ts",
+])("selects Back navigation browser coverage for %s", (file) => {
+  const input = plan([file]);
+  input.checks.playwright_critical_shell.required = false;
+  expect(executeRawPlan(input).checks.playwright_critical_shell?.required).toBe(
+    true
+  );
+});
 
 it("selects the artwork and viewer lane for image viewer geometry coverage", () => {
   expect(

@@ -91,6 +91,10 @@ context-aware `Back`).
   before starting a swipe back.
 - Encrypted conversations support the same rightward return to the encrypted
   messages list. The visible Back control remains available.
+- In Profile Waves Feed, swipe right to return to Waves. Open a feed post to
+  enter its chat; a right swipe or the visible Back button then returns to the
+  feed at the same reading position. A chat opened directly still returns to
+  Waves.
 - Inputs, links, buttons, voting sliders, media controls, selected text and
   horizontal carousels keep their own interactions. Vertical scrolling and
   multi-touch do not trigger conversation navigation. Screen edges remain

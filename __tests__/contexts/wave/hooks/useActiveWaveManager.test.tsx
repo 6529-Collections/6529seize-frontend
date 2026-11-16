@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { defaultCompetitionQueryKey } from "@/services/api/competitions-api";
 
 const mockQueryData = jest.fn();
+let mockIsApp = false;
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ getQueryData: mockQueryData }),
 }));
@@ -18,7 +19,7 @@ jest.mock("@/helpers/competition.helpers", () => ({
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => ({
-    isApp: false,
+    isApp: mockIsApp,
     isMobileDevice: false,
     hasTouchScreen: false,
     isAppleMobile: false,
@@ -39,7 +40,35 @@ describe("useActiveWaveManager", () => {
     jest.restoreAllMocks();
     localStorage.clear();
     mockQueryData.mockReset();
+    mockIsApp = false;
     globalThis.history.replaceState(null, "", "http://localhost/");
+  });
+
+  it("returns to the native feed and Waves through client state without fetching a route", () => {
+    mockIsApp = true;
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/waves/abc?returnTo=%2Fwaves%3Fview%3Dprofile-feed"
+    );
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc");
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams(globalThis.location.search)
+    );
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
+    const pushState = jest.spyOn(globalThis.history, "pushState");
+    const { result } = renderHook(useActiveWaveManager);
+    act(() => result.current.setActiveWave(null, { profileFeed: true }));
+    expect(pushState).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/waves?view=profile-feed"
+    );
+    expect(result.current.activeWaveId).toBeNull();
+    act(() => result.current.setActiveWave(null));
+    expect(pushState).toHaveBeenLastCalledWith(null, "", "/waves");
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("reads wave from pathname and updates via setActiveWave", async () => {

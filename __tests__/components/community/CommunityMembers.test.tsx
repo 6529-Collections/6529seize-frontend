@@ -141,6 +141,7 @@ describe("CommunityMembers", () => {
     (usePathname as jest.Mock).mockReturnValue("/network");
     (useSearchParams as jest.Mock).mockReturnValue({
       get: (key: string) => searchParamsMock.get(key) ?? null,
+      toString: () => new URLSearchParams([...searchParamsMock]).toString(),
     });
     (useRouter as jest.Mock).mockReturnValue({ push, replace });
     (useActiveGroup as unknown as jest.Mock).mockReturnValue({
@@ -162,6 +163,26 @@ describe("CommunityMembers", () => {
     });
     renderComponent();
     expect(screen.getByTestId("skeleton")).toBeInTheDocument();
+  });
+
+  it("does not navigate again for an empty first page", () => {
+    (useActiveGroup as jest.Mock).mockReturnValue({
+      activeGroupId: null,
+      setActiveGroupId,
+    });
+    searchParamsMock.set("page", "1");
+    (useQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      data: { page: 1, count: 0, data: [] },
+    });
+    const { rerender } = renderComponent();
+    rerender(
+      <TitleProvider>
+        <CommunityMembers />
+      </TitleProvider>
+    );
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("renders table and pagination when members loaded", () => {

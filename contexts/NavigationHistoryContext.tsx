@@ -29,6 +29,7 @@ import {
   mainSegment,
   sameMainPath,
 } from "@/helpers/navigation.helpers";
+import { createNavigationScrollRestoration } from "@/helpers/navigation-scroll-restoration";
 
 interface WaveViewSelection {
   readonly waveId: string;
@@ -78,21 +79,27 @@ function canReturnToRoute(
   return !sameMainPath(targetPath, currentPath);
 }
 
-function hasBackDestination(history: readonly StackEntry[], index: number) {
+function getBackDestinationIndex(
+  history: readonly StackEntry[],
+  index: number
+) {
   const current = history[index];
   for (let i = index - 1; i >= 0; i--) {
     const entry = history[i];
-    if (entry?.type === "view") return true;
+    if (entry?.type === "view") return i;
     if (
       entry?.type === "route" &&
       (current?.type !== "route" ||
         canReturnToRoute(current.path, entry.path, entry.href))
     ) {
-      return true;
+      return i;
     }
   }
-  return false;
+  return -1;
 }
+
+const hasBackDestination = (history: readonly StackEntry[], index: number) =>
+  getBackDestinationIndex(history, index) >= 0;
 
 function getHistoryRoutePath(url: string, pathname: string): string {
   if (pathname.startsWith("/[user]")) return mainSegment(url);
@@ -116,6 +123,21 @@ function getHistoryRoutePath(url: string, pathname: string): string {
   return url.split(/[?#]/)[0]!;
 }
 
+function getHistoryHref(url: string, path: string) {
+  const [pathname = "", query = ""] = url.split("?");
+  const params = new URLSearchParams(query);
+  if (
+    (pathname === "/" || pathname === "/waves" || pathname === "/messages") &&
+    params.has("wave") &&
+    path !== pathname
+  ) {
+    params.delete("wave");
+    const search = params.toString();
+    return path + (search ? `?${search}` : "") + globalThis.location.hash;
+  }
+  return url + globalThis.location.hash;
+}
+
 export const NavigationHistoryProvider: React.FC<{
   readonly children: ReactNode;
 }> = ({ children }) => {
@@ -123,6 +145,12 @@ export const NavigationHistoryProvider: React.FC<{
   const information = useWaveInformation();
   const pathname = usePathname();
   const router = useRouter();
+  const [scrollRestoration] = useState(() =>
+    createNavigationScrollRestoration({
+      isNative: () => Capacitor.isNativePlatform(),
+    })
+  );
+  useEffect(() => scrollRestoration.listen(), [scrollRestoration]);
 
   // The first entry never carries the query (mainSegment drops it).
   const historyRef = useRef<StackEntry[]>([
@@ -134,6 +162,15 @@ export const NavigationHistoryProvider: React.FC<{
   });
   const skipNext = useRef(false);
   const prevPathRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const target =
+      historyRef.current[getBackDestinationIndex(historyRef.current, index)];
+    // Warm only the actual visited Back destination. Keep data freshness and
+    // viewer-scoped query caches unchanged; this prepares the route shell.
+    if (target?.type === "route" && target.href) router.prefetch(target.href);
+  }, [index, router]);
 
   const [currentWaveView, setCurrentWaveView] =
     useState<WaveViewSelection | null>(null);
@@ -184,11 +221,12 @@ export const NavigationHistoryProvider: React.FC<{
   // ancestor's, in the same commit: where this provider's effect used to run.
   const observeUrl = useCallback(
     (url: string, currentPathname: string) => {
+      scrollRestoration.committed(url + globalThis.location.hash);
       if (skipNext.current) {
         skipNext.current = false;
         prevPathRef.current = url;
         const current = historyRef.current.at(-1);
-        if (current?.type === "route" && Capacitor.isNativePlatform()) {
+        if (current?.type === "route") {
           current.href = url + globalThis.location.hash;
         }
         return;
@@ -203,16 +241,15 @@ export const NavigationHistoryProvider: React.FC<{
       const lastRoute = i >= 0 ? historyRef.current[i] : null;
       const isDuplicate =
         lastRoute?.type === "route" && lastRoute.path === pathKey;
-      const href = Capacitor.isNativePlatform()
-        ? url + globalThis.location.hash
-        : undefined;
+      // Keep the full destination without adding a Back step per filter change.
+      const href = getHistoryHref(url, pathKey);
       if (isDuplicate) {
         if (href) historyRef.current[i] = { ...lastRoute, href };
       } else {
         pushStack({ type: "route", path: pathKey, ...(href && { href }) });
       }
     },
-    [pushStack]
+    [pushStack, scrollRestoration]
   );
 
   const pushView = useCallback(
@@ -232,20 +269,7 @@ export const NavigationHistoryProvider: React.FC<{
       return;
     }
     if (!canGoBack) return;
-    let targetIndex = index - 1;
-    const current = historyRef.current[index];
-    while (targetIndex >= 0) {
-      const entry = historyRef.current[targetIndex];
-      if (
-        entry?.type === "route" &&
-        current?.type === "route" &&
-        !canReturnToRoute(current.path, entry.path, entry.href)
-      ) {
-        targetIndex -= 1;
-        continue;
-      }
-      break;
-    }
+    const targetIndex = getBackDestinationIndex(historyRef.current, index);
 
     if (targetIndex < 0) {
       window.history.back();
@@ -259,16 +283,22 @@ export const NavigationHistoryProvider: React.FC<{
     );
     if (target?.type === "route") {
       skipNext.current = true;
-      const collectBack =
-        Capacitor.isNativePlatform() &&
-        current?.type === "route" &&
-        isCollectPath(current.path);
-      router.push(collectBack ? (target.href ?? target.path) : target.path);
+      const href = target.href ?? target.path;
+      if (scrollRestoration.prepare(href)) router.push(href, { scroll: false });
+      else router.push(href);
     } else {
       hardBack(target!.view);
     }
     updatePosition(targetIndex);
-  }, [canGoBack, index, router, hardBack, information, updatePosition]);
+  }, [
+    canGoBack,
+    index,
+    router,
+    hardBack,
+    information,
+    updatePosition,
+    scrollRestoration,
+  ]);
 
   const goBackTo = useCallback(
     (path: string) => {
@@ -297,11 +327,12 @@ export const NavigationHistoryProvider: React.FC<{
       setCurrentWaveView(
         target?.type === "route" ? (target.waveView ?? null) : null
       );
-      router.push(path);
+      if (scrollRestoration.prepare(path)) router.push(path, { scroll: false });
+      else router.push(path);
       historyRef.current = historyRef.current.slice(0, targetIndex + 1);
       updatePosition(targetIndex);
     },
-    [index, router, updatePosition]
+    [index, router, updatePosition, scrollRestoration]
   );
 
   const value = useMemo(
