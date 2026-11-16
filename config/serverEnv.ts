@@ -86,9 +86,10 @@ export const getValidatorPageServerEnv = (): ValidatorPageServerEnv => ({
 });
 
 /**
- * Where 6529 Desktop's signed release list is stored, served at
- * `/desktop/releases.json`. Unset bucket: no list is published yet, and the
- * site answers 404 without reading anything.
+ * Where 6529 Desktop's signed release list and release files are stored,
+ * served at `/desktop/releases.json` and `/desktop/download`. Unset bucket:
+ * no list is published yet, and the site answers 404 without reading
+ * anything.
  */
 type DesktopReleasesServerEnv = {
   readonly releasesBucket: string | undefined;

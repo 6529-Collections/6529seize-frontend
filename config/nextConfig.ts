@@ -288,6 +288,11 @@ export function sharedConfig(
           source: "/ai/:path*",
           headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
         },
+        {
+          // And the 6529 Desktop download pages, also linked from no menu.
+          source: "/desktop/:path*",
+          headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        },
       ];
     },
     turbopack: {

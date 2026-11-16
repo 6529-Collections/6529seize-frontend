@@ -48,7 +48,8 @@ type PresignOptions = {
   readonly responseParams?: Readonly<Record<string, string>> | undefined;
 };
 
-async function presignObject(
+/** Presigns a short-lived GET for one object in a private bucket. */
+export async function presignBucketObject(
   { bucket, region }: BucketLocation,
   key: string,
   options: PresignOptions
@@ -68,7 +69,7 @@ export function presignReleaseObject(
   key: string,
   options: PresignOptions
 ): Promise<string> {
-  return presignObject(getBucketLocation(), key, options);
+  return presignBucketObject(getBucketLocation(), key, options);
 }
 
 /**
@@ -80,7 +81,9 @@ export async function readBucketObject(
   key: string
 ): Promise<BucketObject> {
   try {
-    const url = await presignObject(location, key, { expiresInSeconds: 60 });
+    const url = await presignBucketObject(location, key, {
+      expiresInSeconds: 60,
+    });
     const response = await fetch(url, {
       cache: "no-store",
       signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),

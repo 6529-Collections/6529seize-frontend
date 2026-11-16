@@ -347,6 +347,18 @@
         "production": "/delegation/wallet-architecture"
       }
     },
+    "/desktop": {
+      "classification": "crawlable"
+    },
+    "/desktop/guide": {
+      "classification": "crawlable"
+    },
+    "/desktop/known-issues": {
+      "classification": "crawlable"
+    },
+    "/desktop/releases": {
+      "classification": "crawlable"
+    },
     "/discover": {
       "classification": "crawlable",
       "family": "social"

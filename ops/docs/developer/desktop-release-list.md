@@ -14,8 +14,10 @@ from a private S3 bucket, read through the servers' instance role.
 | `/desktop/releases.json` | The signed release list, byte for byte | Public |
 | `/desktop/releases.json.sig` | The list's signature, byte for byte | Public |
 
-The site does not check the signature: the app does, with the key built into
-it. The site never serves a list without a signature.
+These routes do not check the signature: the app does, with the key built
+into it. They never serve a list without a signature. The `/desktop` pages
+and downloads ([6529 Desktop download page](../desktop-download-page.md))
+check the signature before they read anything from the list.
 
 ## The bundle
 
@@ -134,7 +136,8 @@ Server environment, read at request time:
 
 The servers' instance role needs `s3:GetObject` on
 `feed/releases.bundle.json` and `s3:ListBucket` on the bucket, so that a
-missing bundle reads as 404 rather than 403.
+missing bundle reads as 404 rather than 403. The `/desktop/download` route
+also needs `s3:GetObject` on `releases/*`, where the release files are.
 
 Code: `app/desktop/releases.json/route.ts`,
 `app/desktop/releases.json.sig/route.ts` and

@@ -13,9 +13,10 @@ import {
 
 /**
  * 6529 Desktop's signed release list, served at `/desktop/releases.json` and
- * `/desktop/releases.json.sig` the way the validator's feed is. The site does
- * not check the signature (the app does, with its built-in key), but it never
- * serves a list without one.
+ * `/desktop/releases.json.sig` the way the validator's feed is. These routes
+ * do not check the signature (the app does, with its built-in key), but they
+ * never serve a list without one. The /desktop pages and downloads check it
+ * before they read anything from the list (`releases.ts`).
  *
  * The publisher uploads the list and its signature together as ONE object,
  * `feed/releases.bundle.json`:
@@ -146,7 +147,11 @@ function part(
   };
 }
 
-function getLocation(): BucketLocation | null {
+/**
+ * The private bucket that holds the list and the release files, or null
+ * while `DESKTOP_RELEASES_BUCKET` is unset.
+ */
+export function getDesktopReleasesLocation(): BucketLocation | null {
   const env = getDesktopReleasesServerEnv();
   if (!env.releasesBucket) {
     return null;
@@ -223,9 +228,13 @@ function startRead(location: BucketLocation | null): PendingRead {
   return read;
 }
 
-/** The pair, from one read of the bundle, reused for a minute. */
-async function getSnapshot(): Promise<SignedFeedSnapshot> {
-  const location = getLocation();
+/**
+ * The pair, from one read of the bundle, reused for a minute. The routes
+ * serve it as stored; the /desktop pages read releases out of it only after
+ * checking its signature (`releases.ts`).
+ */
+export async function getDesktopReleaseListSnapshot(): Promise<SignedFeedSnapshot> {
+  const location = getDesktopReleasesLocation();
   const source = location ? `${location.region}/${location.bucket}` : "";
   if (source !== latestSource) {
     latestSource = source;
@@ -267,7 +276,12 @@ export async function serveDesktopReleaseObject(
   request: Request,
   which: "feed" | "signature"
 ): Promise<Response> {
-  return serveSignedFeedObject(request, await getSnapshot(), which, TEXT);
+  return serveSignedFeedObject(
+    request,
+    await getDesktopReleaseListSnapshot(),
+    which,
+    TEXT
+  );
 }
 
 /** Test hook: forget the cached list. */
