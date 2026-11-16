@@ -33,8 +33,9 @@ The code is in `app/ai/`, `components/ai-page/` and `lib/ai-page/`. It uses
 the validator page's AWS request signing (`lib/validator-page/sigv4.ts`),
 instance-role credentials (`awsCredentials.ts`), visitor system detection
 (`detectSystem.ts`, `useVisitorPlatform.ts`), version order
-(`releaseFeed.ts`), Markdown and button styles; the validator's pages are
-unchanged.
+(`releaseFeed.ts`), the feed endpoints' response (`serveSignedFeedObject`
+in `feedResponse.ts`), Markdown and button styles; the validator's pages
+and endpoints answer as before.
 
 ## Releases
 
