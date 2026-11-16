@@ -38,6 +38,7 @@ export default function UserPageRateInput({
   placeholder,
   descriptionId,
   invalid,
+  selectOnFocus = false,
 }: {
   readonly value: string;
   readonly onChange: (value: string) => void;
@@ -55,6 +56,7 @@ export default function UserPageRateInput({
   readonly placeholder?: string;
   readonly descriptionId?: string;
   readonly invalid?: boolean;
+  readonly selectOnFocus?: boolean;
 }) {
   const valueAsNumber = getStringAsNumberOrZero(value);
   const isValidValue =
@@ -97,6 +99,7 @@ export default function UserPageRateInput({
         )}
       </span>
       <RatingInput
+        selectOnFocus={selectOnFocus}
         ref={inputRef}
         data-rating-input="true"
         data-autofocus={autoFocus || undefined}

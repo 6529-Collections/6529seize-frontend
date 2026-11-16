@@ -47,6 +47,8 @@ function UserPageIdentityHeaderCICRateForm({
 }) {
   const { address } = useSeizeConnectContext();
   const inputId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
+  const didFocusAmount = useRef(false);
   const mounted = useRef(false);
   useEffect(() => {
     mounted.current = true;
@@ -172,6 +174,19 @@ function UserPageIdentityHeaderCICRateForm({
   const [draftRating, setDraftRating] = useState<string | null>(null);
   const adjustedRatingStr = draftRating ?? String(originalRating);
   const isUnavailable = !currentCICState || isError;
+  useEffect(() => {
+    if (
+      isTooltip ||
+      isUnavailable ||
+      didFocusAmount.current ||
+      !globalThis.matchMedia?.(
+        "(min-width: 768px) and (hover: hover) and (pointer: fine)"
+      ).matches
+    )
+      return;
+    inputRef.current?.focus({ preventScroll: true });
+    didFocusAmount.current = true;
+  }, [isTooltip, isUnavailable]);
 
   const newRating = getStringAsNumberOrZero(adjustedRatingStr);
   const haveChanged = newRating !== originalRating;
@@ -216,6 +231,7 @@ function UserPageIdentityHeaderCICRateForm({
       }`}
     >
       <UserPageRateInput
+        inputRef={inputRef}
         value={currentCICState ? adjustedRatingStr : ""}
         onChange={setDraftRating}
         minMax={minMaxValues}

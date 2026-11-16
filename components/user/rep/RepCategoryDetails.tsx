@@ -589,11 +589,11 @@ export default function RepCategoryDetails({
         {editable ? (
           <>
             <span id={descriptionId} className="tw-sr-only">
-              {t(locale, "rep.categories.panel.amountFor", {
-                name: you
-                  ? t(locale, "rep.categories.panel.you")
-                  : (row.profile.handle ?? row.profile.primary_address),
-              })}
+              {you
+                ? t(locale, "user.rate.totalHelp")
+                : t(locale, "rep.categories.panel.amountFor", {
+                    name: row.profile.handle ?? row.profile.primary_address,
+                  })}
             </span>
             <RatingAmountInput
               ref={you ? ownAmountRef : undefined}
@@ -601,7 +601,16 @@ export default function RepCategoryDetails({
               showAdjustment={!you}
               subtle={you}
               value={ready ? value : ""}
-              aria-labelledby={`${formId}-${row.profile.id}-name`}
+              aria-label={
+                you
+                  ? t(locale, "rep.categories.panel.yourAmount", {
+                      category: category.category,
+                    })
+                  : undefined
+              }
+              aria-labelledby={
+                you ? undefined : `${formId}-${row.profile.id}-name`
+              }
               aria-describedby={validation.describedBy}
               aria-invalid={validation.invalid}
               readOnly={!ready || busy}

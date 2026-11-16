@@ -129,11 +129,12 @@ show the profile-creation welcome.
 - `You assigned` is plain information without a chevron or hover state.
   Select `Grant Rep` to open the modal and choose a category to grant or edit.
 - Category headers show the name, total, up to three top-contributor avatars and
-  rater/receiver count. Long names truncate. The tag opens the contributor
+  rater/receiver count. Long names truncate on desktop; phone tags let names wrap
+  beside the total, with avatars, contributor count and your amount below. The tag opens the contributor
   panel, with separate desktop profile links on its avatars. Tags have no separate edit
   pencil; editing is available inside the panel when permitted.
 - When signed in and viewing another profile, a nonzero personal amount is visible on each category tag, after a
-  subtle dot separator: `You assigned:` in Received and `Assigned to you:` in
+  subtle dot separator on wider tags: `You assigned:` in Received and `Assigned to you:` in
   Given. Your own profile omits these personal labels in both directions; each
   category total appears once. In your own Given view it is the total you
   assigned across that category’s receivers. Values use grouped integers, with a
@@ -141,8 +142,8 @@ show the profile-creation welcome.
   In Received, your assigned amount is blue while `You assigned:` stays gray.
   This accent applies only to the tag amount; the expandable's `You` label
   keeps its standard styling.
-  Narrow tags place this on a second line with vertical padding and a gap below
-  the title. Wider full-row tags place it beside the category name and total,
+  Narrow tags place this beside the contributor details below the title, without
+  a leading dot. Wider full-row tags place it beside the category name and total,
   with contributor avatars and count kept at the right. Tags grow to fit the
   personal amount comfortably.
 - Category avatars are 24px. On desktop, hovering an avatar enlarges it and
@@ -205,6 +206,8 @@ show the profile-creation welcome.
   Both use grouped numbers and remain visible when your assigned total is zero.
   Search, your assigned categories, the amount label and field, a small
   `Current Rep` / `Adjustment` row, the primary action and `Cancel` stay in place.
+  The adjustment row reserves its space but stays hidden until a category is selected.
+  The amount label includes the same total-rating hint as Rate NIC.
   `You assigned` uses an 11px uppercase label. Its category
   pills use the profile tag style: 38px height, 8px corners, subtle fill and
   border, and 14px medium text. The selected pill stays visible with a neutral
@@ -213,7 +216,9 @@ show the profile-creation welcome.
   remain available. Short lists fit their content without reserving an empty
   second row; longer personal lists scroll within a capped area.
 - Category search accepts 3-100 characters for searching all categories;
-  existing assigned-category chips can be selected without typing.
+  existing assigned-category chips can be selected without typing. Focusing an
+  empty search or selecting `Change category` opens the
+  `Type at least 3 characters.` prompt without searching the network.
 - Results appear after a short debounce as compact category pills, including the
   typed category and matching categories returned by the existing search.
 - Similar categories remain independent and selectable. The exact
@@ -228,6 +233,9 @@ show the profile-creation welcome.
   other category pills keep their existing behavior.
 - Selecting a search result validates availability; assigned chips use their
   known category names. After choosing, the category stays in the search field.
+  Its amount is focused and selected once the current rating has loaded, ready
+  for typing. Rate NIC focuses its amount on desktop only; opening it on a phone
+  does not summon the keyboard.
   Select its `×` (`Change category`) to choose another category and clear the draft.
 - Before selection, the amount field is dimmed and disabled with placeholder
   `0`, and the visible `Grant Rep` action is disabled. Selecting a category

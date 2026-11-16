@@ -177,7 +177,9 @@ it("reuses the contributor cache when a category is reopened within five minutes
 it("pins only your editable contribution, accepts negative values, and saves the desired total", async () => {
   const user = userEvent.setup();
   setup(target, "received");
-  const amount = await screen.findByRole("textbox", { name: "You" });
+  const amount = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   await waitFor(() => expect(amount).toHaveValue("20"));
   expect(amount).toHaveAttribute("inputmode", "text");
   expect(screen.getAllByRole("textbox")).toHaveLength(1);
@@ -226,7 +228,7 @@ it.each([
     ownContribution = current;
     setup(target, "received");
     await screen.findByRole("link", { name: "alice" });
-    const input = screen.getByRole("textbox", { name: "You" });
+    const input = screen.getByRole("textbox", { name: "Your REP in Artist" });
     const reads = fetchApi.mock.calls.length;
     await user.clear(input);
     await user.type(input, value);
@@ -304,7 +306,7 @@ it("pins an empty You input for a first contribution and grants only on submit",
   setup(target, "received", owner, true);
   await screen.findByRole("link", { name: "repqa-dana" });
   expect(screen.getAllByRole("link")[0]).toHaveTextContent("You");
-  const input = screen.getByRole("textbox", { name: "You" });
+  const input = screen.getByRole("textbox", { name: "Your REP in Artist" });
   expect(input).toHaveValue("");
   expect(input).toHaveAttribute("placeholder", "0");
   expect(input).toHaveAttribute("aria-invalid", "false");
@@ -335,7 +337,9 @@ it("pins an empty You input for a first contribution and grants only on submit",
 it("keeps an existing negative contribution first and editable", async () => {
   ownContribution = -20;
   setup(target, "received");
-  const input = await screen.findByRole("textbox", { name: "You" });
+  const input = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   expect(input).toHaveValue("-20");
   expect(screen.getAllByRole("link")[0]).toHaveTextContent("You");
 });
@@ -344,7 +348,9 @@ it("focuses the existing desktop amount without selecting its digits", async () 
   ownContribution = 12345;
   const user = userEvent.setup();
   setup(target, "received", owner, true);
-  const input = await screen.findByRole("textbox", { name: "You" });
+  const input = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   await waitFor(() => {
     expect(input).toHaveFocus();
     expect(input).toHaveValue("12345");
@@ -360,7 +366,9 @@ it("focuses the existing desktop amount without selecting its digits", async () 
 it("does not autofocus the mobile amount", async () => {
   ownContribution = 12345;
   setup(target, "received");
-  const input = await screen.findByRole("textbox", { name: "You" });
+  const input = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   expect(input).toHaveValue("12,345");
   expect(input).not.toHaveFocus();
 });
@@ -376,7 +384,9 @@ it("keeps the You input empty after removing a contribution", async () => {
   );
   expect(announcement).toBeInTheDocument();
   expect(announcement).toBeEmptyDOMElement();
-  const input = await screen.findByRole("textbox", { name: "You" });
+  const input = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   await user.clear(input);
   await user.type(input, "0");
   await user.click(screen.getByRole("button", { name: "Save" }));
@@ -481,7 +491,9 @@ it.each([
 it("explains an invalid amount on the field", async () => {
   const user = userEvent.setup();
   setup(target, "received");
-  const amount = await screen.findByRole("textbox", { name: "You" });
+  const amount = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   await user.clear(amount);
   await user.type(amount, "-");
   expect(amount).toHaveAttribute("aria-invalid", "true");

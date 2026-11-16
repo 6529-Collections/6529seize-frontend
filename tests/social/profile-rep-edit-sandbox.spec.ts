@@ -262,6 +262,9 @@ async function expectPersonalTagSpacing(
     const titleBox = title.getBoundingClientRect();
     return {
       height: box.height,
+      titleHeight: titleBox.height,
+      detailsHeight: amount.parentElement?.getBoundingClientRect().height ?? 0,
+      titleClipped: title.scrollWidth > title.clientWidth + 1,
       gap: amountBox.top - titleBox.bottom,
       bottom: box.bottom - amountBox.bottom,
       horizontalGap: amountBox.left - titleBox.right,
@@ -278,7 +281,11 @@ async function expectPersonalTagSpacing(
     expect(spacing.horizontalGap).toBeCloseTo(6, 0);
   } else if (isMobile) {
     expect(spacing.height).toBeGreaterThan(46);
-    expect(spacing.height).toBeLessThanOrEqual(64);
+    // Full phone names may wrap; constrain chrome around the actual content.
+    expect(spacing.height).toBeLessThanOrEqual(
+      spacing.titleHeight + spacing.detailsHeight + 22
+    );
+    expect(spacing.titleClipped).toBe(false);
     expect(spacing.gap).toBeGreaterThanOrEqual(4);
     expect(spacing.bottom).toBeGreaterThanOrEqual(8);
   } else expect(spacing.height).toBe(38);
@@ -477,6 +484,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("button", { name: "Cancel", exact: true })
     ).toBeVisible();
     const own = grant.getByRole("group", { name: "You assigned", exact: true });
+    await expect(grant.getByText("Current Rep:", { exact: true })).toBeHidden();
+    await expect(grant.getByText("Adjustment:", { exact: true })).toBeHidden();
     const profile = grant.getByRole("group", {
       name: "On this profile",
       exact: true,
@@ -520,6 +529,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       }
     };
     expect(searches).toBe(0);
+    await search.click();
+    await expect(
+      grant.getByText("Type at least 3 characters.", { exact: true })
+    ).toBeVisible();
+    expect(searches).toBe(0);
     await page
       .getByRole("dialog", { name: "Grant Rep", exact: true })
       .locator(".mobile-wrapper-dialog")
@@ -536,6 +550,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(amount).toHaveValue("0");
+    await expect(amount).toBeFocused();
+    await expect
+      .poll(() =>
+        amount.evaluate((input: HTMLInputElement) => [
+          input.selectionStart,
+          input.selectionEnd,
+        ])
+      )
+      .toEqual([0, 1]);
     await expect(
       grant.getByText("Current Rep:", { exact: true }).locator("..")
     ).toHaveText("Current Rep:0");
@@ -566,6 +589,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await grant
       .getByRole("button", { name: "Change category", exact: true })
       .click();
+    await expect(
+      grant.getByText("Type at least 3 characters.", { exact: true })
+    ).toBeVisible();
     await own
       .getByRole("button", { name: "Research -25", exact: true })
       .click();
@@ -583,7 +609,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         "Enter the total you want to give, including any existing rating.",
         { exact: true }
       )
-    ).toHaveCount(0);
+    ).toBeVisible();
     await expect(
       grant.getByRole("button", { name: "Save", exact: true })
     ).toBeDisabled();
@@ -820,7 +846,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
     await tag.click();
     const panel = categoryPanel(page);
-    const amount = panel.getByRole("textbox", { name: "You", exact: true });
+    const amount = panel.getByRole("textbox", {
+      name: `Your REP in ${CATEGORY}`,
+      exact: true,
+    });
     await expect(amount).toHaveValue("");
     await expect(amount).toHaveAttribute("placeholder", "0");
     await expect(amount).toHaveAttribute("aria-invalid", "false");
@@ -870,7 +899,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(grant).toHaveCSS("border-radius", "8px");
     const grantBox = await grant.boundingBox();
     const amountBox = await panel
-      .getByRole("textbox", { name: "You", exact: true })
+      .getByRole("textbox", { name: `Your REP in ${CATEGORY}`, exact: true })
       .locator("..")
       .boundingBox();
     expect(grantBox).not.toBeNull();
@@ -1374,7 +1403,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       await expect(overlay).toHaveCSS("opacity", "1");
     }
     const input = panel.getByRole("textbox", {
-      name: "You",
+      name: `Your REP in ${CATEGORY}`,
       exact: true,
     });
     await expect(input).toHaveAttribute("readonly");
@@ -1447,7 +1476,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     expect(inputSpacing.bottom).toBeGreaterThanOrEqual(5);
     const otherAmount = panel.getByText("10", { exact: true });
     const inputBox = await panel
-      .getByRole("textbox", { name: "You", exact: true })
+      .getByRole("textbox", { name: `Your REP in ${CATEGORY}`, exact: true })
       .locator("..")
       .boundingBox();
     const otherAmountBox = await otherAmount.boundingBox();
@@ -1618,7 +1647,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
     await editedTag.click();
     const panel = categoryPanel(page);
-    const input = panel.getByRole("textbox", { name: "You", exact: true });
+    const input = panel.getByRole("textbox", {
+      name: `Your REP in ${CATEGORY}`,
+      exact: true,
+    });
     const categoryTags = rep.getByRole("button", {
       name: /^Open REP category /,
       includeHidden: true,
@@ -1698,7 +1730,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       })
       .click();
     const panel = categoryPanel(page);
-    const input = panel.getByRole("textbox", { name: "You", exact: true });
+    const input = panel.getByRole("textbox", {
+      name: `Your REP in ${CATEGORY}`,
+      exact: true,
+    });
     const blurKey = browserName === "webkit" ? "Alt+Tab" : "Tab";
     await expect(input).toHaveValue(isMobile ? "12,345" : "12345");
     await input.press(blurKey);
@@ -1766,10 +1801,16 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     ).toBeVisible();
     // The authoritative rating state also overrides stale contributor summaries.
     await expect(
-      panel.getByRole("textbox", { name: "You", exact: true })
+      panel.getByRole("textbox", {
+        name: `Your REP in ${CATEGORY}`,
+        exact: true,
+      })
     ).toHaveValue("");
     await expect(
-      panel.getByRole("textbox", { name: "You", exact: true })
+      panel.getByRole("textbox", {
+        name: `Your REP in ${CATEGORY}`,
+        exact: true,
+      })
     ).toHaveAttribute("placeholder", "0");
     await expect(
       panel.getByRole("link", { name: "You", exact: true })
@@ -1954,7 +1995,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("reaches all sixty categories across server pages without wrapping tags", async ({
+  test("reaches all sixty categories across server pages with readable tags", async ({
     page,
     baseURL,
     isMobile,
@@ -2074,14 +2115,21 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .evaluateAll((tags) =>
         tags.map((tag) => ({
           height: tag.getBoundingClientRect().height,
-          personal: tag.hasAttribute("aria-describedby"),
+          nameClipped: (() => {
+            const name = tag.nextElementSibling?.firstElementChild;
+            return (
+              !name ||
+              name.scrollWidth > name.clientWidth + 1 ||
+              getComputedStyle(name).textOverflow === "ellipsis"
+            );
+          })(),
         }))
       );
-    for (const { height, personal } of tagSizes) {
-      if (isMobile && personal) {
-        expect(height).toBeGreaterThan(46);
-        expect(height).toBeLessThanOrEqual(64);
-      } else expect(height).toBe(isMobile ? 46 : 38);
+    for (const { height, nameClipped } of tagSizes) {
+      if (isMobile) {
+        expect(height).toBeGreaterThanOrEqual(46);
+        expect(nameClipped).toBe(false);
+      } else expect(height).toBe(38);
     }
     if (isMobile) {
       const targetHeights = await rep
@@ -2167,9 +2215,14 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     const totalBox = await totalLabel.boundingBox();
     expect(totalBox).not.toBeNull();
     if (avatarBox && totalBox) {
-      expect(avatarBox.x - totalBox.x - totalBox.width).toBeGreaterThanOrEqual(
-        isMobile ? 6 : 14
-      );
+      if (isMobile) {
+        expect(avatarBox.y).toBeGreaterThanOrEqual(
+          totalBox.y + totalBox.height + 4
+        );
+      } else
+        expect(
+          avatarBox.x - totalBox.x - totalBox.width
+        ).toBeGreaterThanOrEqual(14);
     }
     if (!isMobile) {
       const restingTagBox = await longTag.boundingBox();
@@ -4216,6 +4269,8 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           exact: true,
         });
         await expectDesktopRatingPosition(page, "Rate NIC");
+        if (isMobile) await expect(rate.getByRole("textbox")).not.toBeFocused();
+        else await expect(rate.getByRole("textbox")).toBeFocused();
         await rate.getByRole("button", { name: "Cancel", exact: true }).click();
         await expect(rate).toBeHidden();
       }
@@ -4232,18 +4287,11 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         expect(scoreBox).not.toBeNull();
         expect(contributorsBox).not.toBeNull();
         expect(avatarBox).not.toBeNull();
-        if (direction === "Received") {
-          expect(avatarBox!.x).toBeGreaterThan(scoreBox!.x + scoreBox!.width);
-          expect(contributorsBox!.y + contributorsBox!.height / 2).toBeCloseTo(
-            scoreBox!.y + scoreBox!.height / 2,
-            0
-          );
-        } else {
-          expect(contributorsBox!.y).toBeGreaterThanOrEqual(
-            scoreBox!.y + scoreBox!.height
-          );
-          expect(avatarBox!.x).toBeCloseTo(scoreBox!.x, 0);
-        }
+        expect(avatarBox!.x).toBeGreaterThan(scoreBox!.x + scoreBox!.width);
+        expect(contributorsBox!.y + contributorsBox!.height / 2).toBeCloseTo(
+          scoreBox!.y + scoreBox!.height / 2,
+          0
+        );
         expect(contributorsBox!.x).toBeGreaterThan(
           avatarBox!.x + avatarBox!.width
         );

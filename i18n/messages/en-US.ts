@@ -299,6 +299,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "edit.tryAgain": "Please try again.",
   "edit.loginRequired": "Log in to continue.",
   "grant.searchPlaceholder": "Category to grant REP for",
+  "panel.yourAmount": "Your REP in {category}",
   "grant.minimumCharacters": "Type at least {min} characters.",
   "grant.maximumCharacters": "Type at most {max} characters.",
   "grant.searching": "Finding existing categories...",

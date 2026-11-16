@@ -121,13 +121,21 @@ describe("UserPageRepNewRepSearch", () => {
     await user.click(within(own).getByRole("button", { name: "AI 1,000" }));
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
-    ).toHaveValue("1,000");
+    ).toHaveValue("1000");
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    expect(amount).toHaveFocus();
+    await waitFor(() => {
+      expect((amount as HTMLInputElement).selectionStart).toBe(0);
+      expect((amount as HTMLInputElement).selectionEnd).toBe(4);
+    });
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(
       screen.queryByText(
         "Enter the total you want to give, including any existing rating."
       )
-    ).not.toBeInTheDocument();
+    ).toBeVisible();
     expect(
       within(own).getByRole("button", { name: "AI 1,000" })
     ).toHaveAttribute("aria-pressed", "true");
@@ -151,7 +159,7 @@ describe("UserPageRepNewRepSearch", () => {
       screen.queryByRole("button", { name: "AI 1,000" })
     ).not.toBeInTheDocument();
     await user.click(
-      await screen.findByRole("button", { name: "Music", exact: true })
+      await screen.findByRole("button", { name: "Music" })
     );
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
@@ -204,7 +212,7 @@ describe("UserPageRepNewRepSearch", () => {
         })
       ).toBeDisabled();
       expect(
-        screen.getByRole("button", { name: "Grant Rep", exact: true })
+      screen.getByRole("button", { name: "Grant Rep" })
       ).toBeDisabled();
     }
   );
@@ -558,9 +566,14 @@ describe("UserPageRepNewRepSearch", () => {
     ).toHaveAttribute("placeholder", "0");
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeEnabled();
+    const adjustment = screen
+      .getByText("Current Rep:")
+      .closest('[role="status"]');
+    expect(adjustment).toHaveAttribute("aria-hidden", "true");
+    expect(adjustment).toHaveClass("tw-invisible");
   });
 
-  it("shows loading instead of the minimum-length prompt once three characters are entered", async () => {
+  it("shows the minimum-length prompt on empty focus and loading after three characters", async () => {
     const user = userEvent.setup();
     render(
       <UserPageRepNewRepSearch
@@ -569,10 +582,14 @@ describe("UserPageRepNewRepSearch", () => {
       />
     );
 
-    await user.type(
-      screen.getByPlaceholderText("Category to grant REP for"),
-      "art"
-    );
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    await user.click(search);
+    expect(screen.getByText("MIN_LENGTH_ERROR")).toBeInTheDocument();
+    await user.type(search, "ar");
+    expect(screen.getByText("MIN_LENGTH_ERROR")).toBeInTheDocument();
+    await user.type(search, "t");
 
     expect(screen.getByText("LOADING")).toBeInTheDocument();
   });

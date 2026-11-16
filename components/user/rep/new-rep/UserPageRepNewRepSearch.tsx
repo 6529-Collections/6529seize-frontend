@@ -2,7 +2,7 @@
 
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
-import { useContext, useId, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
 import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -216,6 +216,7 @@ export default function UserPageRepNewRepSearch({
   const amountFormId = useId();
   const availableRepId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const amountInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
@@ -298,6 +299,12 @@ export default function UserPageRepNewRepSearch({
       (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max));
 
   const currentRep = repState?.rater_contribution ?? 0;
+  const amountReady = selectedCategory !== null && repState !== null;
+  const hasAmountDraft = amountDraft?.scope === amountScope;
+  useEffect(() => {
+    if (!amountReady || hasAmountDraft) return;
+    amountInputRef.current?.focus({ preventScroll: true });
+  }, [selectedCategory, amountReady, hasAmountDraft]);
   const haveChanged = amountNum !== currentRep;
   const overAllowance =
     selectedCategory !== null && isRatingValue(amountStr) && !isValidValue;
@@ -560,7 +567,7 @@ export default function UserPageRepNewRepSearch({
                   setRepSearch("");
                   setAmountDraft(null);
                   setErrorMsg(null);
-                  setIsOpen(false);
+                  setIsOpen(true);
                   searchInputRef.current?.focus();
                 }}
                 className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
@@ -576,7 +583,7 @@ export default function UserPageRepNewRepSearch({
             )}
           </div>
           <AnimatePresence initial={false}>
-            {isOpen && repSearch.length > 0 && !selectedCategory && (
+            {isOpen && !selectedCategory && (
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -618,11 +625,19 @@ export default function UserPageRepNewRepSearch({
         >
           <label
             htmlFor={amountInputId}
-            className="tw-mb-2 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+            className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
           >
             {t(locale, "rep.categories.grant.amountLabel")}
           </label>
+          <p
+            id={`${amountInputId}-hint`}
+            className="tw-mb-2 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-500"
+          >
+            {t(locale, "user.rate.totalHelp")}
+          </p>
           <UserPageRateInput
+            inputRef={amountInputRef}
+            selectOnFocus
             value={selectedCategory ? amountStr : ""}
             onChange={setAmountStr}
             minMax={minMaxValues}
@@ -632,10 +647,14 @@ export default function UserPageRepNewRepSearch({
             inputId={amountInputId}
             disabled={!selectedCategory || mutating}
             placeholder="0"
-            descriptionId={availableRepId}
+            descriptionId={`${availableRepId} ${amountInputId}-hint`}
             invalid={selectedCategory !== null && !isValidValue}
           />
-          <div role="status">
+          <div
+            role="status"
+            aria-hidden={!selectedCategory}
+            className={!selectedCategory ? "tw-invisible" : undefined}
+          >
             <UserRateAdjustmentHelper
               inLineValues
               originalValue={currentRep}
