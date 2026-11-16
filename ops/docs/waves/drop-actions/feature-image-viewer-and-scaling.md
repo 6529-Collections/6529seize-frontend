@@ -138,14 +138,14 @@ HD highlights when the original is selected. Choose
 - GIF previews use a versioned animation-preserving resize path. The worker can
   reduce preview resolution to retain every frame within its output budget.
   GIFs that exceed processing limits fall back to a legacy preview, which may
-  be static. In the desktop single-submission artwork view and its popup, unavailable
-  animated previews automatically load the original GIF. An available legacy
+  be static. On desktop, submission artwork and uploaded GIFs in the
+  **Preview Image** section automatically load the original when an animated
+  preview is unavailable. The same fallback works in the image viewer. An available legacy
   preview stays visible until the original is ready. This can use more
   bandwidth and device memory. Choosing **View optimized** prevents another
-  automatic switch for that artwork. Mobile browsers, tablets, native mobile apps,
-  feeds, grids, thread images, and supplemental
-  images keep their optimized previews; choose **View original** with the popup
-  toolbar's HD icon to load their original GIF deliberately.
+  automatic switch for that image. Mobile browsers, tablets, native mobile apps,
+  feeds, grids, thread images, and images in **Additional Media** start with
+  their optimized previews. Use the HD icon to choose **View original**.
 - If loading the original fails, the viewer restores its preview, announces the
   failure, and lets you try again. The HD button shows a warning icon and its
   tooltip explains the failure. Selecting it retries and restores the HD icon;

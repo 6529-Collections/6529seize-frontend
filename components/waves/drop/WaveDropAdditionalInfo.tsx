@@ -8,15 +8,21 @@ import DropListItemContentMediaImage from "@/components/drops/view/item/content/
 import { WaveDropAdditionalInfoVideo } from "./WaveDropAdditionalInfoVideo";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
+import {
+  getAnimatedImagePreviewUri,
+  isGifImageUrl,
+} from "@/helpers/gif-preview.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useMemo } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { AdditionalActionSummary } from "@/components/waves/memes/submission/components/AdditionalActionSummary";
+import { useAutomaticSubmissionGifOriginal } from "./useAutomaticSubmissionGifOriginal";
 import type { DropMetadataState } from "./useDropDetailMetadata";
 
 const MAX_MEDIA = 4;
+const PREVIEW_IMAGE_SCALE = ImageScale.AUTOx600;
 const VIDEO_EXTENSIONS = new Set(["mp4", "mov", "m4v", "webm", "ogv"]);
 
 const emptyAdditionalMedia: AdditionalMedia = {
@@ -73,6 +79,7 @@ export const WaveDropAdditionalInfo = ({
   metadataState,
 }: WaveDropAdditionalInfoProps) => {
   const locale = useBrowserLocale();
+  const allowAutomaticOriginal = useAutomaticSubmissionGifOriginal();
   const { commentary, aboutArtist, previewImage, promoVideo, mediaItems } =
     useMemo(() => {
       const metadata = drop.metadata ?? [];
@@ -126,6 +133,10 @@ export const WaveDropAdditionalInfo = ({
       };
     }, [drop.metadata]);
 
+  const hasCdnGifPreview =
+    isGifImageUrl(previewImage) &&
+    getAnimatedImagePreviewUri(previewImage, PREVIEW_IMAGE_SCALE) !==
+      previewImage;
   const displayedMedia = mediaItems.slice(0, MAX_MEDIA);
   const hasAdditionalAction = drop.is_additional_action_promised === true;
   const additionalActionPlan = drop.metadata.find(
@@ -169,8 +180,10 @@ export const WaveDropAdditionalInfo = ({
                   locale,
                   "drop.additionalInfo.openPreviewImage"
                 )}
-                imageScale={ImageScale.AUTOx600}
+                imageScale={PREVIEW_IMAGE_SCALE}
                 imageObjectPosition="center"
+                showOriginalQualityToggle={hasCdnGifPreview}
+                autoAnimateGif={hasCdnGifPreview && allowAutomaticOriginal}
               />
             </div>
           </div>
