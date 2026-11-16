@@ -259,7 +259,7 @@ export default function AiGuidePage({
             {t(LOCALE, "ai.guide.tryFirst.body", { size: FIRST_MODEL_SIZE })}
           </span>
         </div>
-        <div className="tw-mt-6">
+        <div className="tw-mt-6 empty:tw-hidden">
           <AiScreenshot
             slot={AI_SCREENSHOTS.firstChat}
             alt={t(LOCALE, "ai.guide.chatShot")}

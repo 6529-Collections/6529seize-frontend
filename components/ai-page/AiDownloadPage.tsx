@@ -270,7 +270,7 @@ export default function AiDownloadPage({
         )}
       </section>
 
-      <div className="tw-mt-10">
+      <div className="tw-mt-10 empty:tw-hidden">
         <AiScreenshot
           slot={AI_SCREENSHOTS.chat}
           alt={t(LOCALE, "ai.download.screenshot")}

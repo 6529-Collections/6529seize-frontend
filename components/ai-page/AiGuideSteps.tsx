@@ -35,12 +35,12 @@ function AiStepDetails({
       {step.code?.map((block) => (
         <AiCodeBlock key={block.code} code={block.code} label={block.label} />
       ))}
-      {screenshot}
       {step.result && (
         <p className={RESULT}>
           <InlineText text={step.result} />
         </p>
       )}
+      {screenshot}
       {step.example && (
         <AiCodeBlock
           code={step.example}

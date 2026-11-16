@@ -62,13 +62,13 @@ export default function AiKnownIssuesPage({
       lead={t(LOCALE, "ai.knownIssues.lead")}
       notice={false}
     >
-      <div className="tw-flex tw-flex-col tw-gap-6">
+      <div className="tw-flex tw-flex-col tw-gap-2">
         <p className="tw-m-0 tw-text-sm tw-tabular-nums tw-text-iron-500">
           {t(LOCALE, "ai.knownIssues.updated", {
             date: formatDate(LOCALE, AI_KNOWN_ISSUES_UPDATED, UPDATED_DATE),
           })}
         </p>
-        <AiReportProblem />
+        <AiReportProblem compact />
       </div>
 
       <div className="tw-mt-10 tw-flex tw-flex-col tw-gap-4">

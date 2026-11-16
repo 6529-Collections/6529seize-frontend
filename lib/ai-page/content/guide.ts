@@ -79,6 +79,17 @@ function windowsOpenStep(
   };
 }
 
+/** "amd64.deb", or "cuda_amd64.deb": what tells the .deb files apart. */
+function debTail(name: string): string {
+  const tail = name.slice(name.lastIndexOf("_") + 1);
+  return name.includes("-cuda_") ? `cuda_${tail}` : tail;
+}
+
+/** "x86_64-cpu.tar.gz": what tells the archives apart. */
+function tarballTail(name: string): string {
+  return name.split("-").slice(-2).join("-");
+}
+
 type AiLinuxPackage = {
   readonly label: string;
   readonly deb: string;
@@ -190,7 +201,7 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
       {
         text: "In the folder you saved it to, install the package for your computer. `uname -m` prints `x86_64` or `aarch64`.",
         code: linux.map((row) => ({
-          label: row.label,
+          label: `${row.label} · ${debTail(row.deb)}`,
           code: `sudo apt install ./${row.deb}`,
         })),
         result:
@@ -230,7 +241,7 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
       step: {
         text: "The `.tar.gz` installs the same files on any Linux with systemd. Download it from **Downloads**, then:",
         code: linux.map((row) => ({
-          label: row.label,
+          label: `${row.label} · ${tarballTail(row.tarball)}`,
           code: `tar -xzf ${row.tarball}\nsudo ./${row.tarball.replace(/\.tar\.gz$/, "")}/install.sh`,
         })),
         result:
@@ -277,7 +288,7 @@ export function getAiGuideSystems(
       ),
     },
     {
-      label: "x86-64 with an NVIDIA GPU",
+      label: "x86-64, NVIDIA GPU",
       deb: fileName(
         release,
         "linux-x86_64-cuda",
@@ -292,7 +303,7 @@ export function getAiGuideSystems(
       ),
     },
     {
-      label: "64-bit ARM",
+      label: "ARM64",
       deb: fileName(
         release,
         "linux-arm64-cpu",
