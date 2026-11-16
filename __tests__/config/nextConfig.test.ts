@@ -11,15 +11,34 @@ const publicEnv = {
 
 describe("shared Next config", () => {
   it("limits staging CDN optimization to uploaded drop images", () => {
-    const patterns = sharedConfig(publicEnv, "").images?.remotePatterns ?? [];
-    const accepts = (path: string) =>
+    const staging = { ...publicEnv, BASE_ENDPOINT: "https://staging.6529.io" };
+    const accepts = (env: PublicEnv, path: string) =>
       hasRemoteMatch(
         [],
-        patterns,
+        sharedConfig(env, "").images?.remotePatterns ?? [],
         new URL(`https://media.staging.6529.io${path}`)
       );
-    expect(accepts("/drops/upload/art.png")).toBe(true);
-    expect(accepts("/waves/upload/art.png")).toBe(false);
+    expect(accepts(staging, "/drops/real-upload-id/AUTOx450/art.png")).toBe(
+      true
+    );
+    expect(accepts(staging, "/waves/upload/art.png")).toBe(false);
+    expect(accepts(publicEnv, "/drops/upload/art.png")).toBe(false);
+  });
+
+  it("permits stage media playback only on shared staging", async () => {
+    const getMediaSrc = async (env: PublicEnv) => {
+      const headers = await sharedConfig(env, "").headers?.();
+      return headers
+        ?.find((entry) => entry.source === "/:path*")
+        ?.headers.find((header) => header.key === "Content-Security-Policy")
+        ?.value.split(";")
+        .find((directive) => directive.trim().startsWith("media-src "));
+    };
+    const staging = { ...publicEnv, BASE_ENDPOINT: "https://staging.6529.io" };
+    expect(await getMediaSrc(staging)).toContain(
+      "https://media.staging.6529.io/renditions/drops/"
+    );
+    expect(await getMediaSrc(publicEnv)).not.toContain("media.staging.6529.io");
   });
 
   it("permanently redirects the former Delegation Center to Safe Collecting", async () => {

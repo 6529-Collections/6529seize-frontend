@@ -1,4 +1,5 @@
 import { createSecurityHeaders } from "./securityHeaders";
+import { getAppEnvironment } from "./appEnvironment";
 import { e2eeAssetCacheHeaders } from "./e2eeAssetCacheHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
@@ -63,7 +64,10 @@ const FIRST_PARTY_IMAGE_HOSTNAMES = new Set<string>([
   "staging.6529.io",
 ]);
 
-function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
+function getImageRemotePatterns(
+  publicEnv: PublicEnv,
+  allowStagingDropMedia: boolean
+): RemotePattern[] {
   // Both media resolver hosts (6529.io and the separate content domain) stay
   // allowed whichever one the endpoint selects, so stored URLs keep working.
   const resolverHostnames = new Set([
@@ -77,11 +81,15 @@ function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
   ]);
 
   return [
-    {
-      ...HTTPS_DEFAULT_PORT,
-      hostname: STAGING_DROP_MEDIA_HOSTNAME,
-      pathname: "/drops/**",
-    },
+    ...(allowStagingDropMedia
+      ? [
+          {
+            ...HTTPS_DEFAULT_PORT,
+            hostname: STAGING_DROP_MEDIA_HOSTNAME,
+            pathname: "/drops/**",
+          },
+        ]
+      : []),
     ...STATIC_ALLOWED_IMAGE_HOSTNAMES.filter(
       (hostname) => !IPFS_PATH_GATEWAY_HOSTNAMES.has(hostname)
     ).map((hostname) => ({
@@ -130,6 +138,8 @@ export function sharedConfig(
   publicEnv: PublicEnv,
   assetPrefix: string
 ): NextConfig {
+  const allowStagingDropMedia =
+    getAppEnvironment(publicEnv.BASE_ENDPOINT).hostname === "staging.6529.io";
   return {
     assetPrefix,
     reactCompiler: true,
@@ -150,7 +160,7 @@ export function sharedConfig(
           pathname: "/cdn-cgi/image/*/eth-mainnet/*",
           search: "",
         },
-        ...getImageRemotePatterns(publicEnv),
+        ...getImageRemotePatterns(publicEnv, allowStagingDropMedia),
         // Only meaningful against a local backend; never part of a production
         // build.
         ...(publicEnv.NODE_ENV === "development" ||
@@ -258,6 +268,7 @@ export function sharedConfig(
                 ),
                 webSocketEndpoint: publicEnv["WS_ENDPOINT"],
                 allowDesktopIpc: isDesktopAppBuild(),
+                allowStagingDropMedia,
                 // Local development violations are expected noise; only
                 // deployed builds report CSP violations to Sentry.
                 sentryDsn: isLocalTooling ? undefined : publicEnv.SENTRY_DSN,

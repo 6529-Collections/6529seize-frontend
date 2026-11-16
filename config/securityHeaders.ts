@@ -118,6 +118,7 @@ function cspDirective(
 }
 
 interface SecurityHeaderOptions {
+  readonly allowStagingDropMedia?: boolean | undefined;
   readonly allowInsecureLocalhostConnectSrc?: boolean | undefined;
   readonly allowUnsafeEval?: boolean | undefined;
   /**
@@ -210,8 +211,12 @@ export function createSecurityHeaders(
     "https://6529-artwork-documentation-987989283142-eu-west-1.s3.eu-west-1.amazonaws.com",
     "https://6529-artwork-documentation-987989283142-us-east-1.s3.us-east-1.amazonaws.com",
     "https://*.cloudfront.net",
-    `${STAGING_DROP_MEDIA_ORIGIN}/drops/`,
-    `${STAGING_DROP_MEDIA_ORIGIN}/renditions/drops/`,
+    ...(options.allowStagingDropMedia
+      ? [
+          `${STAGING_DROP_MEDIA_ORIGIN}/drops/`,
+          `${STAGING_DROP_MEDIA_ORIGIN}/renditions/drops/`,
+        ]
+      : []),
     "https://videos.files.wordpress.com",
     // OpenSea NFT previews use the original video while processing is pending.
     "https://i2c.seadn.io",

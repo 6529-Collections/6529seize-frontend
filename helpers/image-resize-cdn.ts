@@ -1,4 +1,4 @@
-export const IMAGE_RESIZE_CDN_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
+const IMAGE_RESIZE_CDN_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 export const STAGING_DROP_MEDIA_HOSTNAME = "media.staging.6529.io";
 export const STAGING_DROP_MEDIA_ORIGIN = `https://${STAGING_DROP_MEDIA_HOSTNAME}`;
 const DROP_MEDIA_PATH = "/drops/";
