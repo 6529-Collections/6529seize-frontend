@@ -2,6 +2,7 @@ import { sha256 } from "js-sha256";
 
 import type { ApiCompleteMultipartUploadResponse } from "@/generated/models/ApiCompleteMultipartUploadResponse";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
+import { getMediaOrigin } from "@/lib/media/first-party-media";
 import { assetSchema, type CmsAssetV1 } from "@/lib/profile-cms/protocol/v1";
 import { commonApiFetch } from "@/services/api/common-api";
 import {
@@ -16,7 +17,6 @@ const IMAGE_TYPES = new Set([
   "image/webp",
   "image/gif",
 ]);
-const MEDIA_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 
 export type CmsStudioImageUploadErrorCode =
   | "invalid_file"
@@ -119,7 +119,7 @@ function mediaUrl(value: string): string {
     return uploadError("invalid_response");
   }
   if (
-    url.origin !== MEDIA_ORIGIN ||
+    url.origin !== getMediaOrigin() ||
     url.username ||
     url.password ||
     url.search ||

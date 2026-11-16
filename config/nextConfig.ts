@@ -62,7 +62,22 @@ const FIRST_PARTY_IMAGE_HOSTNAMES = new Set<string>([
   "staging.6529.io",
 ]);
 
+/** The configured user-media CDN host (staging sets its own), if https. */
+function getConfiguredMediaHostname(publicEnv: PublicEnv): string | null {
+  const value = publicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
+  if (!value) {
+    return null;
+  }
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" && url.port === "" ? url.hostname : null;
+  } catch {
+    return null;
+  }
+}
+
 function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
+  const configuredMediaHostname = getConfiguredMediaHostname(publicEnv);
   // Both media resolver hosts (6529.io and the separate content domain) stay
   // allowed whichever one the endpoint selects, so stored URLs keep working.
   const resolverHostnames = new Set([
@@ -76,6 +91,12 @@ function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
   ]);
 
   return [
+    ...(configuredMediaHostname &&
+    !(STATIC_ALLOWED_IMAGE_HOSTNAMES as readonly string[]).includes(
+      configuredMediaHostname
+    )
+      ? [{ ...HTTPS_DEFAULT_PORT, hostname: configuredMediaHostname }]
+      : []),
     ...STATIC_ALLOWED_IMAGE_HOSTNAMES.filter(
       (hostname) => !IPFS_PATH_GATEWAY_HOSTNAMES.has(hostname)
     ).map((hostname) => ({
@@ -251,6 +272,7 @@ export function sharedConfig(
                   publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED
                 ),
                 webSocketEndpoint: publicEnv["WS_ENDPOINT"],
+                userMediaEndpoint: publicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN,
                 allowDesktopIpc: isDesktopAppBuild(),
                 // Local development violations are expected noise; only
                 // deployed builds report CSP violations to Sentry.
