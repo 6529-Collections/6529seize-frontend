@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import Button from "@/components/utils/button/Button";
 import { faSignature } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -219,14 +221,16 @@ function SignedMessagesNoticeContent({
           {copy.action}
         </Button>
         {!isAlert && (
-          <button
+          <IconButton
             type="button"
             onClick={dismiss}
             aria-label={t(locale, "signedMessages.notice.dismiss")}
-            className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+            size={32}
+            variant="ghost"
+            shape="circle"
           >
             <XMarkIcon aria-hidden="true" className="tw-size-5" />
-          </button>
+          </IconButton>
         )}
       </div>
     </section>

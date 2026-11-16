@@ -300,9 +300,9 @@ export function CollectionDelegationLocks(
               icon={faInfoCircle}
               tooltipText={t(locale, "delegation.collection.locks.tooltip")}
               tooltipWidth="tw-w-64"
-              buttonSizeClassName="tw-size-8"
-              buttonShapeClassName="tw-rounded-lg"
-              className="tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
+              size={32}
+              shape="rounded"
+              variant="ghost"
               iconClassName="tw-size-4 tw-text-current"
             />
           </div>

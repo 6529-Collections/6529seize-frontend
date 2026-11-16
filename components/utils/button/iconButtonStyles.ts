@@ -2,21 +2,25 @@ import clsx from "clsx";
 
 import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "./compactActionButtonStyles";
 
-export type IconButtonSize = 32 | 36 | 40;
+export type IconButtonSize = 24 | 32 | 36 | 40 | 44;
 export type IconButtonVariant =
   | "ghost"
   | "muted"
   | "subtle"
   | "secondary"
+  | "outline"
   | "contrast"
+  | "action"
   | "selected"
   | "destructive";
-export type IconButtonShape = "rounded" | "circle";
+export type IconButtonShape = "rounded" | "compact" | "circle";
 
 const SIZE_CLASSES: Record<IconButtonSize, string> = {
+  24: "tw-size-6",
   32: "tw-size-8",
   36: "tw-size-9",
   40: "tw-size-10",
+  44: "tw-size-11",
 };
 
 const TEXT_CLASSES: Record<IconButtonVariant, string> = {
@@ -24,7 +28,9 @@ const TEXT_CLASSES: Record<IconButtonVariant, string> = {
   muted: "tw-text-iron-500 desktop-hover:hover:tw-text-white",
   subtle: "tw-text-iron-300 desktop-hover:hover:tw-text-white",
   secondary: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50",
+  outline: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-100",
   contrast: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50",
+  action: "tw-text-white",
   selected: "tw-text-primary-300",
   destructive: "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300",
 };
@@ -38,7 +44,11 @@ const SURFACE_CLASSES: Record<IconButtonVariant, string> = {
     "tw-border tw-border-solid tw-border-iron-800 tw-bg-white/[0.04] desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-white/[0.08] active:tw-bg-white/10",
   secondary:
     "tw-border-0 tw-bg-iron-800 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-bg-iron-700",
+  outline:
+    "tw-border-0 tw-bg-transparent tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-bg-iron-900",
   contrast: "tw-border-0 tw-bg-black tw-shadow-sm active:tw-bg-iron-800",
+  action:
+    "tw-border-0 tw-bg-primary-500 desktop-hover:hover:tw-bg-primary-600 active:tw-bg-primary-700",
   selected:
     "tw-border-0 tw-bg-primary-500/15 tw-ring-1 tw-ring-inset tw-ring-primary-400/25",
   destructive:
@@ -64,7 +74,8 @@ export interface IconButtonStyleOptions {
 }
 
 export function getIconButtonShapeClasses(shape: IconButtonShape) {
-  return shape === "circle" ? "tw-rounded-full" : "tw-rounded-lg";
+  if (shape === "circle") return "tw-rounded-full";
+  return shape === "compact" ? "tw-rounded-md" : "tw-rounded-lg";
 }
 
 export function getIconButtonClasses({
@@ -90,7 +101,8 @@ export function getIconButtonClasses({
     expandTouchTarget && COMPACT_ACTION_TOUCH_TARGET_CLASS,
     pressEffect && "active:tw-scale-95",
     disabled ? "tw-cursor-not-allowed tw-opacity-50" : "tw-cursor-pointer",
-    pending && "disabled:tw-cursor-wait disabled:tw-opacity-70",
+    pending &&
+      "aria-disabled:tw-cursor-wait aria-disabled:tw-opacity-50 disabled:tw-cursor-wait disabled:tw-opacity-70",
     className
   );
 }

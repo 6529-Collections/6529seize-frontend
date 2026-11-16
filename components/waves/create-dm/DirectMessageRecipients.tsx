@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -180,7 +182,7 @@ export default function DirectMessageRecipients({
             <span className="tw-min-w-0 tw-max-w-[140px] tw-truncate">
               {recipientName(person)}
             </span>
-            <button
+            <IconButton
               type="button"
               disabled={disabled}
               onClick={() => {
@@ -190,14 +192,16 @@ export default function DirectMessageRecipients({
               aria-label={t(locale, "quickDm.recipientRemove", {
                 name: recipientName(person),
               })}
-              className="tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-iron-50"
+              size={32}
+              variant="ghost"
+              shape="circle"
             >
               <XMarkIcon
                 aria-hidden="true"
                 className="tw-size-3.5"
                 strokeWidth={2.5}
               />
-            </button>
+            </IconButton>
           </span>
         ))}
         <input

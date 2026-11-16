@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import Button from "@/components/utils/button/Button";
 import type { RefObject } from "react";
 import { useCallback, useId, useRef, useState } from "react";
@@ -300,7 +302,7 @@ export function CreateAppWalletModal(
                 }
               }}
             />
-            <button
+            <IconButton
               type="button"
               onClick={() => setPassHidden((current) => !current)}
               aria-label={t(
@@ -309,14 +311,16 @@ export function CreateAppWalletModal(
                   ? "appWallet.modal.showPassword"
                   : "appWallet.modal.hidePassword"
               )}
-              className="tw-absolute tw-right-1 tw-top-1/2 tw-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/5 active:tw-text-iron-100 desktop-hover:hover:tw-text-iron-100"
+              size={40}
+              variant="ghost"
+              className="tw-absolute tw-right-1 tw-top-1/2 -tw-translate-y-1/2"
             >
               {passHidden ? (
                 <EyeSlashIcon className="tw-size-5" aria-hidden="true" />
               ) : (
                 <EyeIcon className="tw-size-5" aria-hidden="true" />
               )}
-            </button>
+            </IconButton>
           </div>
         </div>
         <p
@@ -521,7 +525,7 @@ export function UnlockAppWalletModal(
                 }
               }}
             />
-            <button
+            <IconButton
               type="button"
               onClick={() => setPassHidden((current) => !current)}
               aria-label={t(
@@ -530,14 +534,16 @@ export function UnlockAppWalletModal(
                   ? "appWallet.modal.showPassword"
                   : "appWallet.modal.hidePassword"
               )}
-              className="tw-absolute tw-right-1 tw-top-1/2 tw-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/5 active:tw-text-iron-100 desktop-hover:hover:tw-text-iron-100"
+              size={40}
+              variant="ghost"
+              className="tw-absolute tw-right-1 tw-top-1/2 -tw-translate-y-1/2"
             >
               {passHidden ? (
                 <EyeSlashIcon className="tw-size-5" aria-hidden="true" />
               ) : (
                 <EyeIcon className="tw-size-5" aria-hidden="true" />
               )}
-            </button>
+            </IconButton>
           </div>
         </div>
         {sensitiveAction && (

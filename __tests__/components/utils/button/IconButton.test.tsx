@@ -90,4 +90,27 @@ describe("IconButton", () => {
     await user.keyboard("{Enter}");
     expect(onClick).toHaveBeenCalledTimes(1);
   });
+
+  it("keeps an aria-disabled pending action focusable and leaves its click guard to the caller", async () => {
+    const user = userEvent.setup();
+    const onClick = jest.fn();
+    render(
+      <IconButton
+        aria-label="Refresh link"
+        aria-disabled="true"
+        aria-busy="true"
+        pending
+        onClick={onClick}
+      >
+        <svg aria-hidden="true" />
+      </IconButton>
+    );
+
+    const button = screen.getByRole("button", { name: "Refresh link" });
+    expect(button).toBeEnabled();
+    await user.tab();
+    expect(button).toHaveFocus();
+    await user.keyboard("{Enter}");
+    expect(onClick).toHaveBeenCalledTimes(1);
+  });
 });

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   MagnifyingGlassIcon,
@@ -360,7 +362,7 @@ export default function GroupMembersPreviewDialog({
               className="tw-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-py-2 tw-pl-9 tw-pr-10 tw-text-sm tw-text-iron-100 tw-outline-none placeholder:tw-text-iron-500 focus:tw-border-primary-500 focus:tw-ring-1 focus:tw-ring-primary-500"
             />
             {search.length > 0 ? (
-              <button
+              <IconButton
                 type="button"
                 onClick={() => {
                   setSearch("");
@@ -371,10 +373,13 @@ export default function GroupMembersPreviewDialog({
                   locale,
                   "waves.create.groups.members.clearSearch"
                 )}
-                className="tw-absolute tw-right-1.5 tw-top-1/2 tw-flex tw-size-8 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
+                size={32}
+                variant="muted"
+                shape="compact"
+                className="tw-absolute tw-right-1.5 tw-top-1/2 -tw-translate-y-1/2"
               >
                 <XMarkIcon aria-hidden="true" className="tw-size-4" />
-              </button>
+              </IconButton>
             ) : null}
           </div>
           <p
