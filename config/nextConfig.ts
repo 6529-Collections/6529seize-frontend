@@ -62,7 +62,10 @@ const FIRST_PARTY_IMAGE_HOSTNAMES = new Set<string>([
   "staging.6529.io",
 ]);
 
-/** The configured user-media CDN host (staging sets its own), if https. */
+/**
+ * The configured user-media CDN host (staging sets its own), if https on the
+ * default port. Keep in step with lib/media/first-party-media.ts.
+ */
 function getConfiguredMediaHostname(publicEnv: PublicEnv): string | null {
   const value = publicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
   if (!value) {
@@ -95,7 +98,13 @@ function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
     !(STATIC_ALLOWED_IMAGE_HOSTNAMES as readonly string[]).includes(
       configuredMediaHostname
     )
-      ? [{ ...HTTPS_DEFAULT_PORT, hostname: configuredMediaHostname }]
+      ? [
+          {
+            ...HTTPS_DEFAULT_PORT,
+            hostname: configuredMediaHostname,
+            search: "",
+          },
+        ]
       : []),
     ...STATIC_ALLOWED_IMAGE_HOSTNAMES.filter(
       (hostname) => !IPFS_PATH_GATEWAY_HOSTNAMES.has(hostname)

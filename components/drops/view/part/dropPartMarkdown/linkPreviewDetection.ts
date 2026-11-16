@@ -57,7 +57,7 @@ const parseUrl = (href: string): URL | null => {
 const getUrlOrigin = (href: string): string | null =>
   parseUrl(href)?.origin ?? null;
 
-const isAllowedCloudfrontHref = (href: string): boolean => {
+const isFirstPartyMediaHref = (href: string): boolean => {
   const hrefOrigin = getUrlOrigin(href);
   return hrefOrigin !== null && isFirstPartyMediaOrigin(hrefOrigin);
 };
@@ -103,7 +103,7 @@ const isDisallowedLinkHref = (href: string): boolean => {
   }
 
   return (
-    !isAllowedCloudfrontHref(stableHref) &&
+    !isFirstPartyMediaHref(stableHref) &&
     !isAllowedGifProviderHref(stableHref)
   );
 };
