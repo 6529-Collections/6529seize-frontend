@@ -106,7 +106,7 @@ const DIGITS = /^\d+$/;
 // The validator reads each number as a 64-bit unsigned integer.
 const MAX_VERSION_NUMBER = "18446744073709551615";
 
-type Version = {
+export type Version = {
   readonly core: readonly string[];
   readonly preRelease: readonly string[];
 };
@@ -126,7 +126,7 @@ function isPreReleasePart(part: string): boolean {
 }
 
 /** `0.1.0` or `0.1.0-rc.7`; null for anything the validator refuses. */
-function parseVersion(text: string): Version | null {
+export function parseVersion(text: string): Version | null {
   if (text.length > MAX_VERSION_LENGTH || text.includes("+")) {
     return null;
   }
@@ -179,7 +179,7 @@ function compareParts(a: readonly string[], b: readonly string[]): number {
 }
 
 /** Below zero when `a` is the lower version. */
-function compareVersions(a: Version, b: Version): number {
+export function compareVersions(a: Version, b: Version): number {
   const core = compareParts(a.core, b.core);
   if (core !== 0) {
     return core;
