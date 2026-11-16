@@ -253,6 +253,17 @@ it("keeps non-upload GIFs on bounded preview URLs", () => {
     gif.replace("file.gif", "AUTOx450_gifv2/file.gif"),
     gif.replace("file.gif", "AUTOx450/file.gif"),
   ]);
+  expect(
+    getDropImagePreviewSources(gif, ImageScale.AUTOx1080, {
+      preferAnimation: true,
+      allowOriginalGif: false,
+    })
+  ).toEqual([
+    gif.replace("file.gif", "AUTOx1080_gifv2/file.gif"),
+    gif.replace("file.gif", "AUTOx450_gifv2/file.gif"),
+    gif.replace("file.gif", "AUTOx1080/file.gif"),
+    gif.replace("file.gif", "AUTOx450/file.gif"),
+  ]);
 });
 
 it("reports unavailable animated previews once across legacy load and error events", () => {
