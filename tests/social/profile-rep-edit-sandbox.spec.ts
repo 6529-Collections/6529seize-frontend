@@ -1687,7 +1687,32 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("rep-personal-amount-tags.png"),
     });
-    for (let step = 0; step < 6; step += 1) {
+    const more = rep.getByRole("button", { name: /^\+\d+ more$|^Load more$/ });
+    await expect(more).toHaveText("+20 more");
+    await expect(more).toHaveCSS("height", isMobile ? "44px" : "38px");
+    await expect(more).toHaveCSS("border-radius", "8px");
+    await expect(more).toHaveCSS("border-top-width", "1px");
+    await expect(more).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(more).toHaveCSS("font-weight", "500");
+    await expect(more).toHaveCSS("color", "rgb(206, 207, 212)");
+    if (!isMobile) {
+      await more.hover();
+      await expect(more).toHaveCSS("color", "rgb(239, 239, 241)");
+      await expect(more).toHaveCSS("border-top-color", "rgb(96, 96, 108)");
+      await expect(more).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    }
+    await expect(
+      rep.getByRole("button", { name: /^Open REP category / })
+    ).toHaveCount(5);
+    await more.click();
+    await expect(
+      rep.getByRole("button", { name: /^Open REP category / })
+    ).toHaveCount(15);
+    await expect(more).toHaveText("+10 more");
+    await page.screenshot({
+      path: testInfo.outputPath("rep-more-control.png"),
+    });
+    for (let step = 0; step < 5; step += 1) {
       await rep
         .getByRole("button", { name: /^\+\d+ more$|^Load more$/ })
         .click();

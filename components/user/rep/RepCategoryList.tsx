@@ -328,7 +328,7 @@ export default function RepCategoryList({
             type="button"
             onClick={onShowMore}
             disabled={isFetchingNextPage && hidden === 0}
-            className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-sm tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50 lg:tw-min-h-9"
+            className="tw-inline-flex tw-h-11 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700/60 tw-bg-transparent tw-px-3 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-150 hover:tw-border-iron-600 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50 motion-reduce:tw-transition-none lg:tw-h-[38px]"
           >
             {moreLabel}
           </button>

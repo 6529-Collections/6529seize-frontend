@@ -163,6 +163,8 @@ show the profile-creation welcome.
   when there are no unsaved changes, on desktop and mobile.
 - Category list starts at 5 items.
 - `+N more` reveals 10 additional already-loaded categories at a time.
+  It uses a bordered, unfilled chip with medium-weight text and a hover state:
+  38px high on desktop and a 44px tap target on mobile.
 - When the visible list reaches the end of the categories already loaded in the
   current direction but more server pages exist, the same control changes to
   `Load more`, requests the next categories page, shows `Loading...` while that
