@@ -85,6 +85,9 @@ export async function resolveAiReleaseDownload(
         "response-content-disposition": "inline",
       }
     : {
+        // The feed parser lets a name hold only letters, digits and ._+~-,
+        // so it needs no quoting here; loosen FILE_NAME_PATTERN only with
+        // RFC 6266 encoding of this header.
         "response-content-disposition": `attachment; filename="${fileName}"`,
       };
   try {

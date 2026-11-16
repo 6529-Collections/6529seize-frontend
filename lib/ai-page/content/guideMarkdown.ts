@@ -76,13 +76,38 @@ export function getAiGuideMarkdown(release: AiRelease | undefined): string {
     "_arm64.deb",
     `6529-ai_${version}_arm64.deb`
   );
-  const tarball = fileName(
-    release,
-    "linux-x86_64-cpu",
-    ".tar.gz",
-    `6529-ai-${version}-linux-x86_64-cpu.tar.gz`
-  );
-  const tarballFolder = tarball.replace(/\.tar\.gz$/, "");
+  const tarball = (system: AiSystem) =>
+    fileName(release, system, ".tar.gz", `6529-ai-${version}-${system}.tar.gz`);
+  // Each Linux package, with the commands that install it.
+  const linux = [
+    {
+      computer: "x86-64 with an NVIDIA GPU",
+      deb: cudaDeb,
+      tarball: tarball("linux-x86_64-cuda"),
+    },
+    {
+      computer: "x86-64 without one",
+      deb,
+      tarball: tarball("linux-x86_64-cpu"),
+    },
+    {
+      computer: "64-bit ARM",
+      deb: armDeb,
+      tarball: tarball("linux-arm64-cpu"),
+    },
+  ];
+  const table = linux
+    .map((row) => `| ${row.computer} | \`${row.deb}\` | \`${row.tarball}\` |`)
+    .join("\n");
+  const aptCommands = linux
+    .map((row) => `# ${row.computer}\nsudo apt install ./${row.deb}`)
+    .join("\n");
+  const tarballCommands = linux
+    .map((row) => {
+      const folder = row.tarball.replace(/\.tar\.gz$/, "");
+      return `# ${row.computer}\ntar -xzf ${row.tarball}\nsudo ./${folder}/install.sh`;
+    })
+    .join("\n");
 
   return `## What you need
 
@@ -127,23 +152,20 @@ To uninstall, open Settings, Apps, choose **6529 AI** and **Uninstall**. It asks
 
 Choose the package for your computer. \`uname -m\` prints \`x86_64\` or \`aarch64\`.
 
-| Your computer | Package |
-| --- | --- |
-| x86-64 with an NVIDIA GPU | \`${cudaDeb}\` |
-| x86-64 without one | \`${deb}\` |
-| 64-bit ARM | \`${armDeb}\` |
+| Your computer | .deb | .tar.gz |
+| --- | --- | --- |
+${table}
 
-The \`.deb\` is for Debian, Ubuntu and the systems built on them. Install it with apt, in the folder you saved it to:
+The \`.deb\` is for Debian, Ubuntu and the systems built on them. In the folder you saved it to, run the one line for your package:
 
 \`\`\`bash
-sudo apt install ./${deb}
+${aptCommands}
 \`\`\`
 
-On another system with systemd, take the \`.tar.gz\` of the same kind from **All files** on the download page:
+On another system with systemd, take the \`.tar.gz\` from **All files** on the download page, and run the two lines for it:
 
 \`\`\`bash
-tar -xzf ${tarball}
-sudo ./${tarballFolder}/install.sh
+${tarballCommands}
 \`\`\`
 
 Either asks whether a 6529 validator runs on this computer too, then starts the service and prints a sign-in link. Open it in a browser on the same computer. A link works once; for a new one:
@@ -152,7 +174,7 @@ Either asks whether a 6529 validator runs on this computer too, then starts the 
 sudo -u ai6529 6529-ai-cli --data /var/lib/6529-ai open --print
 \`\`\`
 
-The service starts with the computer. To uninstall, \`sudo apt remove 6529-ai\` (or \`6529-ai-cuda\`) keeps your models and settings, and \`sudo apt purge 6529-ai\` deletes them too. For the \`.tar.gz\`, run \`sudo /opt/6529-ai/share/uninstall.sh\`, with \`--purge\` to delete them.
+The service starts with the computer. To uninstall the \`.deb\`, \`sudo apt remove 6529-ai\` (\`6529-ai-cuda\` for the CUDA package) keeps your models and settings, and \`sudo apt purge\` with the same name deletes them too. For the \`.tar.gz\`, run \`sudo /opt/6529-ai/share/uninstall.sh\`, with \`--purge\` to delete them.
 
 ## A validator on the same computer
 

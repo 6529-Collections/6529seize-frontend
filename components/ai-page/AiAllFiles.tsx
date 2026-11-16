@@ -7,6 +7,7 @@ import {
   CODE,
   SECONDARY_BUTTON,
 } from "@/components/validator-page/validatorStyles";
+import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, tRich } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
@@ -14,13 +15,13 @@ import { ed25519PublicKeyPem } from "@/lib/ai-page/feedSignature";
 import { AI_FEED_SIGNING_KEYS } from "@/lib/ai-page/feedSigningKeys";
 import type { AiRelease } from "@/lib/ai-page/releaseFeed";
 import {
-  formatAiFileSize,
   getAiDownloadPath,
   groupAiReleaseFiles,
   listAiReleaseFiles,
   type AiInstallerKind,
 } from "@/lib/ai-page/releaseFiles";
 import { shortCommit } from "@/lib/validator-page/releaseFiles";
+import { formatAiFileSize } from "./formatAiFileSize";
 
 const CELL =
   "tw-border-0 tw-border-solid tw-border-white/[0.06] tw-align-middle lg:tw-border-b lg:tw-px-3 lg:tw-py-3";
@@ -42,6 +43,12 @@ const KEY_FILE = "release-key.pub";
 const OPENSSL_VERIFY = `openssl pkeyutl -verify -pubin -inkey ${KEY_FILE} -rawin -in ${SHA256SUMS} -sigfile ${SHA256SUMS_SIG}`;
 const OPENSSL_OK = "Signature Verified Successfully";
 const RELEASE_PY_VERIFY = "release.py verify";
+// The feed's day, as a calendar date: the same day in every time zone.
+const PUBLISHED_DATE: Intl.DateTimeFormatOptions = {
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+};
 
 function Cell({
   label,
@@ -179,7 +186,7 @@ export default function AiAllFiles({
         {release.version}
       </span>
     ),
-    date: release.date,
+    date: formatDate(LOCALE, release.date, PUBLISHED_DATE),
     commit: (
       <span key="commit" className="tw-font-mono">
         {commit}
@@ -236,16 +243,19 @@ export default function AiAllFiles({
                 label={sizeLabel}
                 className="tw-whitespace-nowrap tw-text-iron-300"
               >
-                {formatAiFileSize(entry.file.size) ?? "–"}
+                {formatAiFileSize(entry.file.size) ??
+                  t(LOCALE, "ai.files.size.unknown")}
               </Cell>
               <Cell label={sha256Label}>
                 <span className="tw-inline-flex tw-items-center tw-gap-2">
                   <code
+                    aria-hidden="true"
                     title={entry.file.sha256}
                     className="tw-font-mono tw-text-xs tw-text-iron-200"
                   >
                     {entry.file.sha256.slice(0, 12)}…
                   </code>
+                  <span className="tw-sr-only">{entry.file.sha256}</span>
                   <CopyChecksumButton
                     value={entry.file.sha256}
                     label={t(LOCALE, "ai.files.sha256.copyLabel", {

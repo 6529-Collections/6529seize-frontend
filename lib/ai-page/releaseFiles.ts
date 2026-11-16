@@ -1,5 +1,3 @@
-import { formatFileSize } from "@/lib/validator-page/releaseFiles";
-
 import type { AiRelease, AiReleaseFile, AiSystem } from "./releaseFeed";
 
 /** The packages the page offers as a button, one per system. */
@@ -159,17 +157,6 @@ export function groupAiReleaseFiles(release: AiRelease): AiReleaseDownloads {
 export function listAiReleaseFiles(release: AiRelease): readonly AiFileEntry[] {
   const { installers, others } = groupAiReleaseFiles(release);
   return [...installers, ...others];
-}
-
-/**
- * "95.5 MB", as the validator page writes sizes, and "1.2 GB" from a
- * gigabyte up: the CUDA packages are over a gigabyte.
- */
-export function formatAiFileSize(bytes: number | null): string | null {
-  if (bytes !== null && bytes >= 1_000_000_000) {
-    return `${(bytes / 1_000_000_000).toFixed(1)} GB`;
-  }
-  return formatFileSize(bytes);
 }
 
 /** The site path that hands out one file of the newest release. */

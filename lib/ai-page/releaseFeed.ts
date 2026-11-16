@@ -347,7 +347,15 @@ export async function getAiReleaseFeedSnapshot(): Promise<AiReleaseFeedSnapshot>
   });
   const snapshot = await inFlight;
   const loaded = { snapshot, loadedAt: Date.now() };
-  if (snapshot.state !== "error") {
+  // S3 answers a key the role may not read as it answers one that isn't
+  // there, so a feed that reads as missing after a verified one was served
+  // counts as a failed read: the verified feed stays for up to an hour.
+  const lostVerifiedFeed =
+    snapshot.state === "missing" && lastGoodSnapshot?.snapshot.state === "ok";
+  if (lostVerifiedFeed) {
+    console.warn("[ai-page] release feed reads as missing after a good one");
+  }
+  if (snapshot.state !== "error" && !lostVerifiedFeed) {
     cachedSnapshot = loaded;
     lastGoodSnapshot = loaded;
     return snapshot;

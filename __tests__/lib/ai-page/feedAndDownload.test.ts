@@ -169,6 +169,29 @@ describe("6529 AI's release feed endpoints", () => {
     nowSpy.mockRestore();
   });
 
+  it("keeps a verified feed for an hour when it then reads as missing", async () => {
+    // The role can't list the bucket, so a read it is refused looks like a
+    // key that isn't there.
+    storeHasSigned();
+    const nowSpy = jest.spyOn(Date, "now");
+    nowSpy.mockReturnValue(1_000_000);
+    expect((await feedRoute(new Request("https://6529.io/x"))).status).toBe(
+      200
+    );
+    storeHas({});
+    nowSpy.mockReturnValue(1_000_000 + 2 * 60 * 1000);
+    expect((await feedRoute(new Request("https://6529.io/x"))).status).toBe(
+      200
+    );
+    expect((await download(DMG)).status).toBe(302);
+    nowSpy.mockReturnValue(1_000_000 + 61 * 60 * 1000);
+    expect((await feedRoute(new Request("https://6529.io/x"))).status).toBe(
+      404
+    );
+    expect((await download(DMG)).status).toBe(404);
+    nowSpy.mockRestore();
+  });
+
   it("keeps serving the last good feed when S3 fails later", async () => {
     storeHasSigned();
     const nowSpy = jest.spyOn(Date, "now");

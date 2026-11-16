@@ -56,8 +56,10 @@ The role may not list the bucket, so S3 answers a key that isn't there
 with 403 `AccessDenied`, not 404. The site reads that answer, like a 404,
 as no feed: the download page then says there is no release yet and
 offers no download, `releases.json` answers 404, and every download
-answers 404. A role that loses its read permission looks the same. Any
-other S3 failure is an error, as below.
+answers 404. A role that loses its read permission looks the same, so a
+feed that reads as missing after a verified one was served counts as a
+failed read, as below, and reads as no feed only once the verified copy is
+an hour old. Any other S3 failure is an error, as below.
 
 The site reads the feed once a minute and keeps the last good copy for an
 hour if S3 fails. It serves the two feed files unchanged, five minutes in
@@ -80,7 +82,8 @@ is lower than one the server has already served counts as a failed read:
 the last good copy stays for up to an hour, then the download page says
 the release list could not be loaded, offers no download, and
 `releases.json` answers 503. Each server instance keeps its own `sequence`
-floor in memory; it starts again when the instance restarts.
+floor and last good copy in memory, so during an S3 failure two instances
+can answer differently; both start again when the instance restarts.
 
 The SHA-256 on the pages therefore comes from the signed feed. The
 Publisher column shows each file's `signed` field: the name the visitor's

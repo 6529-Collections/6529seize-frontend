@@ -193,7 +193,7 @@ describe("the /ai pages", () => {
     expect(html).toContain(MAC_SIGNER);
     expect(html).toContain(WINDOWS_SIGNER);
     expect(html).toMatch(
-      /Release <span[^>]*>0\.1\.0<\/span>, published 2026-11-17, built from commit <span[^>]*>ccccccc<\/span>/
+      /Release <span[^>]*>0\.1\.0<\/span>, published November 17, 2026, built from commit <span[^>]*>ccccccc<\/span>/
     );
   });
 
@@ -245,16 +245,18 @@ describe("the /ai pages", () => {
     storeHasSignedFeed();
     const [download, guide, knownIssues] = await renderAll();
     const textOf = (html: string) =>
-      html.replaceAll(/<[^>]+>/g, " ").replaceAll(/s+/g, " ");
+      html.replaceAll(/<[^>]+>/g, " ").replaceAll(/\s+/g, " ");
     for (const html of [guide!, knownIssues!]) {
-      expect(textOf(html)).not.toMatch(/network|provider|Tor|link.*account/i);
+      expect(textOf(html)).not.toMatch(
+        /network|provider|\bTor\b|link.{0,20}account/i
+      );
     }
     const mentions = textOf(download!).match(/network/gi) ?? [];
     expect(mentions).toHaveLength(1);
     expect(download).toContain(
       "the 6529 AI network comes later, with the chain integration."
     );
-    expect(textOf(download!)).not.toMatch(/provider|Tor/i);
+    expect(textOf(download!)).not.toMatch(/provider|\bTor\b/i);
   });
 
   it("offer release candidate 1 under its own version", async () => {

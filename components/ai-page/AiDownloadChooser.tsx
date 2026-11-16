@@ -22,6 +22,8 @@ export type AiDownloadOption = {
   readonly title: string;
   /** One short line: the systems and CPUs it is for, and its size. */
   readonly summary: string;
+  /** Under the big button: the release's full version and the summary. */
+  readonly note: string;
   readonly href: string;
   readonly image: string;
   /** "Download for Mac". */
@@ -104,12 +106,10 @@ function DownloadRow({
  * the full version, its systems and its size.
  */
 export default function AiDownloadChooser({
-  version,
   options,
   initial,
   text,
 }: {
-  readonly version: string;
   readonly options: readonly AiDownloadOption[];
   readonly initial: VisitorPlatform;
   readonly text: AiChooserText;
@@ -146,9 +146,7 @@ export default function AiDownloadChooser({
                 {option.buttonText}
               </a>
               <p className="tw-m-0 tw-text-center tw-text-sm tw-leading-6 tw-text-iron-400">
-                <span className="tw-font-mono tw-text-iron-200">{version}</span>
-                {" · "}
-                {option.summary}
+                {option.note}
               </p>
             </div>
           ))}

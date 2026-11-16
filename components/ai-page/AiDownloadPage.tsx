@@ -16,7 +16,6 @@ import {
   type AiReleaseFeedSnapshot,
 } from "@/lib/ai-page/releaseFeed";
 import {
-  formatAiFileSize,
   getAiDownloadPath,
   groupAiReleaseFiles,
   type AiInstaller,
@@ -29,6 +28,7 @@ import AiDownloadChooser, {
   type AiDownloadOption,
 } from "./AiDownloadChooser";
 import AiPageFrame from "./AiPageFrame";
+import { formatAiFileSize } from "./formatAiFileSize";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
@@ -47,10 +47,20 @@ function toOption(
 ): AiDownloadOption {
   const size = formatAiFileSize(installer.file.size);
   const buttonText = t(LOCALE, BUTTON_TEXT[installer.kind]);
+  const summary = size
+    ? t(LOCALE, "ai.download.summaryWithSize", {
+        summary: installer.summary,
+        size,
+      })
+    : installer.summary;
   return {
     kind: installer.kind,
     title: installer.title,
-    summary: size ? `${installer.summary} · ${size}` : installer.summary,
+    summary,
+    note: t(LOCALE, "ai.download.buttonNote", {
+      version: release.version,
+      summary,
+    }),
     href: getAiDownloadPath(release, installer.file),
     image: installer.image,
     buttonText,
@@ -130,7 +140,6 @@ export default function AiDownloadPage({
       >
         {release ? (
           <AiDownloadChooser
-            version={release.version}
             options={installers.map((installer) =>
               toOption(release, installer)
             )}
