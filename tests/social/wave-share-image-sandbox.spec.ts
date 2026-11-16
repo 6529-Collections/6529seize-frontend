@@ -43,6 +43,31 @@ async function expectPreviewFits(dialog: Locator) {
     )
     .toBeLessThanOrEqual(1);
 }
+
+async function expectScrollArrowInCorner(
+  arrow: Locator,
+  menu: Locator,
+  edge: "top" | "bottom"
+) {
+  await expect(arrow).toHaveText("");
+  const bounds = await menu.boundingBox();
+  const arrowBounds = await arrow.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(arrowBounds).not.toBeNull();
+  if (!bounds || !arrowBounds) return;
+
+  const rightInset =
+    bounds.x + bounds.width - arrowBounds.x - arrowBounds.width;
+  const verticalInset =
+    edge === "top"
+      ? arrowBounds.y - bounds.y
+      : bounds.y + bounds.height - arrowBounds.y - arrowBounds.height;
+  expect(rightInset).toBeGreaterThanOrEqual(0);
+  expect(rightInset).toBeLessThanOrEqual(8);
+  expect(verticalInset).toBeGreaterThanOrEqual(0);
+  expect(verticalInset).toBeLessThanOrEqual(8);
+}
+
 test.describe("Share posts as image @auth @local-only", () => {
   useLocalSandboxMutationGuard(
     test,
@@ -50,6 +75,75 @@ test.describe("Share posts as image @auth @local-only", () => {
     "Share as image uses the isolated local mock API."
   );
   test.use({ timezoneId: "America/New_York", locale: "en-US" });
+
+  test("reveals additional desktop drop actions inside the menu", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Only the desktop context menu has a scroll cue."
+    );
+    await mockSandboxGaps(page);
+    await page.setViewportSize({ width: 1280, height: 348 });
+    await page.goto(`/waves/${WAVE}`);
+
+    const row = page.getByRole("main").locator("[data-wave-drop-id]").last();
+    await row.hover();
+    const trigger = row.getByRole("button", {
+      name: "More actions",
+      exact: true,
+    });
+    await trigger.click();
+
+    const menu = page.getByRole("menu");
+    const cue = menu.getByRole("menuitem", {
+      name: "More actions, scroll down",
+    });
+    const upCue = menu.getByRole("menuitem", { name: "Scroll up" });
+    const deleteAction = menu.getByRole("button", {
+      name: "Delete",
+      exact: true,
+    });
+    await expect(cue).toBeInViewport({ ratio: 1 });
+    await expect(upCue).toHaveCount(0);
+    await expect(deleteAction).not.toBeInViewport({ ratio: 1 });
+    await expectScrollArrowInCorner(cue, menu, "bottom");
+    await testInfo.attach("desktop drop menu down arrow", {
+      body: await menu.screenshot(),
+      contentType: "image/png",
+    });
+    const initialMenuBounds = await menu.boundingBox();
+    expect(initialMenuBounds).not.toBeNull();
+
+    await cue.focus();
+    await cue.press("Enter");
+    await expect(deleteAction).toBeInViewport({ ratio: 1 });
+    await expect(cue).toHaveCount(0);
+    await expect(deleteAction).toBeFocused();
+    await expect(upCue).toBeInViewport({ ratio: 1 });
+    await expect.poll(() => menu.boundingBox()).toEqual(initialMenuBounds);
+    await expectScrollArrowInCorner(upCue, menu, "top");
+
+    await upCue.click();
+    await expect(cue).toBeInViewport({ ratio: 1 });
+    await expect(upCue).toHaveCount(0);
+    await expect(deleteAction).not.toBeInViewport({ ratio: 1 });
+    await expect.poll(() => menu.boundingBox()).toEqual(initialMenuBounds);
+
+    await cue.click();
+    await expect(upCue).toBeInViewport({ ratio: 1 });
+    await expect(cue).toHaveCount(0);
+    await expect(deleteAction).toBeFocused();
+
+    await deleteAction.hover();
+    await page.mouse.wheel(0, -500);
+    await expect(cue).toBeInViewport({ ratio: 1 });
+    await expect(deleteAction).not.toBeInViewport({ ratio: 1 });
+    await cue.click();
+    await expect(deleteAction).toBeInViewport({ ratio: 1 });
+    await expect(cue).toHaveCount(0);
+    await expect.poll(() => menu.boundingBox()).toEqual(initialMenuBounds);
+  });
 
   test("selects a post, previews UTC times and downloads a PNG", async ({
     page,
@@ -108,6 +202,12 @@ test.describe("Share posts as image @auth @local-only", () => {
 
     const row = await findTouchMessage(page);
     await longPressTouchMessage(row, DEFAULT_LONG_PRESS_DURATION_MS + 600);
+    await expect(
+      page.getByRole("menuitem", { name: "More actions, scroll down" })
+    ).toHaveCount(0);
+    await expect(page.getByRole("menuitem", { name: "Scroll up" })).toHaveCount(
+      0
+    );
     await page.getByRole("button", { name: "Share as image" }).click();
     await expect(page.getByText("1 post selected")).toBeVisible();
 
