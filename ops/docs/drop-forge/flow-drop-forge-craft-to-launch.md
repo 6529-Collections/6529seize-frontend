@@ -43,7 +43,7 @@ Reports link to the Launch card and to the transaction when available. Mined
 transactions show the gas fee. Airdrop reports show wallet and token counts,
 and artist payment reports show the amount in ETH.
 
-Drop Forge checks mint readiness at 17:30, 18:28, 18:58 and 19:22 Athens time
+Drop Forge checks mint readiness at 17:20, 18:28, 18:58 and 19:22 Athens time
 on scheduled mint days, including manual launches. The first three checks
 verify the next mint window and the required airdrops. The last verifies
 that public minting is active. Problems alert the configured `@dropforgeops`
