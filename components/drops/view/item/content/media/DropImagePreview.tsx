@@ -4,7 +4,11 @@ import { useLocalImagePreviewSource } from "./LocalImagePreviewContext";
 import { getGiphyVideoRendition } from "@/app/api/og-metadata/_lib/giphyRenditions";
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
-import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
+import {
+  getScaledImageUri,
+  IMAGE_RESIZE_CDN_ORIGIN,
+  ImageScale,
+} from "@/helpers/image.helpers";
 import {
   getAnimatedImagePreviewUri,
   isGifImageUrl,
@@ -124,7 +128,7 @@ function getHighQualityArtworkImageSrc(src: string): string | null {
   try {
     const url = new URL(original);
     if (
-      url.origin === "https://d3lqz0a4bldqgf.cloudfront.net" &&
+      url.origin === IMAGE_RESIZE_CDN_ORIGIN &&
       url.pathname.startsWith("/drops/") &&
       /\.(jpe?g|png|webp|avif)$/i.test(url.pathname)
     )

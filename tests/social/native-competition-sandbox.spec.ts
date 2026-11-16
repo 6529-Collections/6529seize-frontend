@@ -13217,7 +13217,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
   });
 
   for (const surface of ["web", "app"] as const) {
-    test(`animates an uploaded video preview in the Main Stage leaderboard on ${surface}`, async ({
+    test(`animates a video submission's GIF preview image on the Main Stage leaderboard on ${surface}`, async ({
       page,
       baseURL,
     }, testInfo) => {
@@ -13297,17 +13297,25 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       );
       await page.goto(`/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard`);
       await dismissNextDevTools(page);
-      const card = page.locator(`[data-leaderboard-drop-id="${artwork.id}"]`);
       for (const view of ["Grid view", "List view"]) {
         await page.getByRole("tab", { name: view, exact: true }).click();
-        await card
+        await page
+          .getByRole("listitem")
           .getByText(artwork.title, { exact: true })
           .scrollIntoViewIfNeeded();
         if (view === "List view" && surface === "web") {
-          await expect(card.locator("video")).toBeVisible();
+          await expect(
+            page
+              .getByRole("listitem")
+              .filter({ hasText: artwork.title })
+              .locator("video")
+          ).toBeVisible();
           continue;
         }
-        const image = card.locator(`img[src="${original}"]`);
+        const image = page
+          .getByRole("listitem")
+          .filter({ hasText: artwork.title })
+          .locator(`img[src="${original}"]`);
         await expect(image).toBeVisible();
         await expect
           .poll(() =>

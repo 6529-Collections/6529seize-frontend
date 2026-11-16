@@ -9,19 +9,20 @@ export enum ImageScale {
   AUTOx1080 = "AUTOx1080",
 }
 
-const SCALABLE_PREFIXES = [
-  "https://d3lqz0a4bldqgf.cloudfront.net/pfp/",
-  "https://d3lqz0a4bldqgf.cloudfront.net/rememes/",
-  "https://d3lqz0a4bldqgf.cloudfront.net/drops/",
-  "https://d3lqz0a4bldqgf.cloudfront.net/waves/",
-  "https://d3lqz0a4bldqgf.cloudfront.net/images/",
-];
+export const IMAGE_RESIZE_CDN_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
+export const SCALABLE_IMAGE_PREFIXES = [
+  "pfp",
+  "rememes",
+  "drops",
+  "waves",
+  "images",
+].map((folder) => `${IMAGE_RESIZE_CDN_ORIGIN}/${folder}/`);
 
 export function getScaledResolvedImageUri(
   resolvedUrl: string,
   scale: ImageScale
 ): string {
-  const scalableUrl = SCALABLE_PREFIXES.find((prefix) =>
+  const scalableUrl = SCALABLE_IMAGE_PREFIXES.find((prefix) =>
     resolvedUrl.startsWith(prefix)
   );
   if (!scalableUrl) {
@@ -42,7 +43,11 @@ export function getScaledResolvedImageUri(
   if (extension.includes("?")) {
     extension = extension.slice(0, extension.indexOf("?"));
   }
-  if (["gif", "webp", "jpg", "jpeg", "png", "avif"].includes(extension.toLowerCase())) {
+  if (
+    ["gif", "webp", "jpg", "jpeg", "png", "avif"].includes(
+      extension.toLowerCase()
+    )
+  ) {
     return `${scalableUrl}${
       folder.length ? folder + "/" : ""
     }${scale}/${fileName}`;

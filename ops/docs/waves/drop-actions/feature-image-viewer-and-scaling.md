@@ -134,7 +134,7 @@ HD highlights when the original is selected. Choose
   names.
 - GIF previews use a versioned animation-preserving resize path. The worker can
   reduce preview resolution to retain every frame within its output budget.
-  For uploaded drop GIFs, cards, threads, thumbnails, and the
+  For GIFs uploaded to 6529 drops, cards, threads, thumbnails, and the
   **Preview Image** section try the original animation when the resized copies
   fail. If the original also fails, an available still preview lets you see
   the artwork. The original may take longer to load.

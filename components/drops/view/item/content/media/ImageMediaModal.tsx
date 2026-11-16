@@ -447,7 +447,7 @@ export function ImageMediaModal({
             />
           </output>
         )}
-        {!playingOriginal && previewUnavailable && (
+        {!playingOriginal && !quality.loading && previewUnavailable && (
           <div className="tw-fixed tw-bottom-20 tw-left-1/2 tw-z-[1102] -tw-translate-x-1/2">
             <Button
               type="button"

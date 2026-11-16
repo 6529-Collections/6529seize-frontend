@@ -1,13 +1,9 @@
-import { getScaledImageUri, type ImageScale } from "@/helpers/image.helpers";
-
-// GIF versioning is restricted to the existing first-party resize routes.
-const SCALABLE_PREFIXES = [
-  "https://d3lqz0a4bldqgf.cloudfront.net/pfp/",
-  "https://d3lqz0a4bldqgf.cloudfront.net/rememes/",
-  "https://d3lqz0a4bldqgf.cloudfront.net/drops/",
-  "https://d3lqz0a4bldqgf.cloudfront.net/waves/",
-  "https://d3lqz0a4bldqgf.cloudfront.net/images/",
-];
+import {
+  getScaledImageUri,
+  IMAGE_RESIZE_CDN_ORIGIN,
+  SCALABLE_IMAGE_PREFIXES,
+  type ImageScale,
+} from "@/helpers/image.helpers";
 
 /** Match the pathname, never a query parameter that happens to end in .gif. */
 export function isGifImageUrl(url: string): boolean {
@@ -23,7 +19,7 @@ export function isUploadedDropGif(url: string): boolean {
   try {
     const { origin, pathname, username, password } = new URL(url);
     return (
-      origin === "https://d3lqz0a4bldqgf.cloudfront.net" &&
+      origin === IMAGE_RESIZE_CDN_ORIGIN &&
       !username &&
       !password &&
       pathname.startsWith("/drops/") &&
@@ -43,7 +39,8 @@ function splitUrlSuffix(url: string) {
 
 /** Compatibility preview while the GIF worker rolls out or rejects an input. */
 export function getLegacyGifPreviewUri(url: string): string {
-  if (!SCALABLE_PREFIXES.some((prefix) => url.startsWith(prefix))) return url;
+  if (!SCALABLE_IMAGE_PREFIXES.some((prefix) => url.startsWith(prefix)))
+    return url;
   const { path, suffix } = splitUrlSuffix(url);
   return (
     path.replace(/(\/(?:AUTO|\d+)x(?:AUTO|\d+))_gifv2(\/[^/]+)$/, "$1$2") +
@@ -59,7 +56,7 @@ export function getAnimatedImagePreviewUri(
   if (!isGifImageUrl(url)) return getScaledImageUri(url, scale);
   const { path, suffix } = splitUrlSuffix(url);
   const scaled = getScaledImageUri(path, scale);
-  if (!SCALABLE_PREFIXES.some((prefix) => scaled.startsWith(prefix)))
+  if (!SCALABLE_IMAGE_PREFIXES.some((prefix) => scaled.startsWith(prefix)))
     return getScaledImageUri(url, scale);
   // Only version the resize segment immediately before the filename.
   const filenameIndex = scaled.lastIndexOf("/");
