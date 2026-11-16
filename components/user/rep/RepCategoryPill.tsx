@@ -109,7 +109,10 @@ export default function RepCategoryPill({
                 : "user.profile.rep.rep.youAssigned",
               {
                 value: (
-                  <span key="value" className="tw-font-medium tw-text-iron-100">
+                  <span
+                    key="value"
+                    className={`tw-font-medium ${direction === "received" ? "tw-text-primary-400" : "tw-text-iron-100"}`}
+                  >
                     {formatInteger(locale, contribution)}
                   </span>
                 ),

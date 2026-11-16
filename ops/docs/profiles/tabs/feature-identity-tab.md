@@ -138,6 +138,9 @@ show the profile-creation welcome.
   category total appears once. In your own Given view it is the total you
   assigned across that category’s receivers. Values use grouped integers, with a
   minus sign for negative amounts.
+  In Received, your assigned amount is blue while `You assigned:` stays gray.
+  This accent applies only to the tag amount; the expandable's `You` label
+  keeps its standard styling.
   Narrow tags place this on a second line with vertical padding and a gap below
   the title. Wider full-row tags place it beside the category name and total,
   with contributor avatars and count kept at the right. Tags grow to fit the
