@@ -113,19 +113,19 @@ const GRANT_LIFETIME_SECONDS = 15_552_000; // 180 days
 const GRANT_MAX_LIFETIME_SECONDS = 181 * 86_400;
 const CREDENTIAL_PREFIX = "6529-e2ee-v1";
 
-const GRANT_DOMAIN = {
+export const GRANT_DOMAIN = {
   name: "6529 Encrypted Messages",
   version: "1",
   salt: E2EE_SALT,
 } as const;
 
-const GRANT_DOMAIN_V2 = {
+export const GRANT_DOMAIN_V2 = {
   name: "6529 Encrypted Messages",
   version: "2",
   salt: E2EE_SALT,
 } as const;
 
-const GRANT_TYPES = {
+export const GRANT_TYPES = {
   MlsDeviceGrant: [
     { name: "statement", type: "string" },
     { name: "wallet", type: "address" },
@@ -137,7 +137,7 @@ const GRANT_TYPES = {
   ],
 } as const;
 
-const GRANT_TYPES_V2 = {
+export const GRANT_TYPES_V2 = {
   MlsDeviceGrant: [
     { name: "statement", type: "string" },
     { name: "wallet", type: "address" },
@@ -149,7 +149,7 @@ const GRANT_TYPES_V2 = {
   ],
 } as const;
 
-const GRANT_PRIMARY_TYPE = "MlsDeviceGrant";
+export const GRANT_PRIMARY_TYPE = "MlsDeviceGrant";
 
 /**
  * Sign-in grants count only when signed on the app itself: exactly 6529.io

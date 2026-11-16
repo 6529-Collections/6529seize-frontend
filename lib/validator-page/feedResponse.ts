@@ -1,5 +1,4 @@
 import { getReleaseFeedSnapshot } from "./releaseFeed";
-import type { BucketObject } from "./releasesBucket";
 
 const FEED_CACHE_CONTROL = "public, max-age=300";
 const MISSING_CACHE_CONTROL = "public, max-age=60";
@@ -27,62 +26,68 @@ function etagMatches(header: string | null, etag: string | null): boolean {
   );
 }
 
-type StoredObject = Extract<BucketObject, { state: "found" }>;
+type StoredFeedObject = {
+  readonly body: Uint8Array<ArrayBuffer>;
+  readonly etag: string | null;
+  readonly lastModified: string | null;
+};
 
-/**
- * A signed list and its signature, read together so they match within one
- * snapshot. Two requests can still span a snapshot change.
- */
-export type SignedListSnapshot = {
+/** A signed feed and its signature as last read, or why there is none. */
+export type SignedFeedSnapshot = {
   readonly state: "ok" | "missing" | "error";
-  readonly feed: StoredObject | null;
-  readonly signature: StoredObject | null;
+  readonly feed: StoredFeedObject | null;
+  readonly signature: StoredFeedObject | null;
   /**
    * Sent on both answers as `X-Release-List-Pair`, so a client can tell a
-   * list and a signature from different snapshots apart. Absent: no header.
+   * feed and a signature from different snapshots apart. Absent: no header
+   * (the validator's and 6529 AI's feeds).
    */
   readonly pairId?: string | undefined;
 };
 
-/** The header that names the list-and-signature pair an answer belongs to. */
+/** The header that names the feed-and-signature pair an answer belongs to. */
 export const RELEASE_LIST_PAIR_HEADER = "X-Release-List-Pair";
 
-/** The plain-text answers when there is nothing to serve. */
-export type SignedListMessages = {
-  readonly missing: string;
+/** What a feed's endpoints answer besides the files themselves. */
+export type SignedFeedText = {
+  /** The body of the 503 when the feed could not be read. */
   readonly unavailable: string;
+  /** The body of the 404 before the first feed. */
+  readonly missing: string;
+  readonly signatureContentType: string;
 };
 
-const VALIDATOR_FEED_MESSAGES: SignedListMessages = {
-  missing: "No release feed yet.\n",
+const VALIDATOR_FEED_TEXT: SignedFeedText = {
   unavailable: "The release feed is unavailable.\n",
+  missing: "No release feed yet.\n",
+  signatureContentType: "application/octet-stream",
 };
 
 /**
- * Serves a signed list or its signature byte for byte, as stored, so the
- * signature verifies against what clients download. Public, with no
- * redirect and a five-minute cache; 404 before the first list, 503 when the
- * bucket fails.
+ * Serves a signed feed or its signature byte for byte, as stored, so the
+ * signature verifies against what anyone downloads. Public, with no
+ * redirect and a five-minute cache. The 6529 AI pages and 6529 Desktop's
+ * release list serve their own feeds with it too.
  */
-export function serveSignedListObject(
+export function serveSignedFeedObject(
   request: Request,
-  snapshot: SignedListSnapshot,
+  snapshot: SignedFeedSnapshot,
   which: "feed" | "signature",
-  messages: SignedListMessages
+  text: SignedFeedText
 ): Response {
   if (snapshot.state === "error") {
-    return plain(503, messages.unavailable, "no-store");
+    return plain(503, text.unavailable, "no-store");
   }
   const object = which === "feed" ? snapshot.feed : snapshot.signature;
   if (!object) {
-    return plain(404, messages.missing, MISSING_CACHE_CONTROL);
+    return plain(404, text.missing, MISSING_CACHE_CONTROL);
   }
   const headers = new Headers({
     "Cache-Control": FEED_CACHE_CONTROL,
     "Content-Type":
       which === "feed"
         ? "application/json; charset=utf-8"
-        : "application/octet-stream",
+        : text.signatureContentType,
     "X-Content-Type-Options": "nosniff",
     "X-Robots-Tag": "noindex, nofollow",
     "Access-Control-Allow-Origin": "*",
@@ -104,17 +109,17 @@ export function serveSignedListObject(
 }
 
 /**
- * Serves the validator's signed feed or its signature, so the signature
- * verifies against what validators download.
+ * Serves the validator's signed feed or its signature, which validators
+ * download to find updates.
  */
 export async function serveFeedObject(
   request: Request,
   which: "feed" | "signature"
 ): Promise<Response> {
-  return serveSignedListObject(
+  return serveSignedFeedObject(
     request,
     await getReleaseFeedSnapshot(),
     which,
-    VALIDATOR_FEED_MESSAGES
+    VALIDATOR_FEED_TEXT
   );
 }

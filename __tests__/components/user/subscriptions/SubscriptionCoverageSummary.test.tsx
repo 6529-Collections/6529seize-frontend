@@ -493,24 +493,94 @@ describe("SubscriptionCoverageSummary", () => {
   });
 
   it.each([
-    ApiSubscriptionCoverageStatus.NotSetUp,
-    ApiSubscriptionCoverageStatus.NoUpcomingSelections,
-    ApiSubscriptionCoverageStatus.NoCurrentEligibility,
-    ApiSubscriptionCoverageStatus.Unknown,
-  ])(
-    "keeps each no-status explanation available to a visitor in %s",
-    (status) => {
+    [ApiSubscriptionCoverageStatus.NotSetUp, "Not set up", null],
+    [
+      ApiSubscriptionCoverageStatus.NoUpcomingSelections,
+      "No upcoming drops selected",
+      "No drops are selected in Manual mode.",
+    ],
+    [
+      ApiSubscriptionCoverageStatus.NoCurrentEligibility,
+      "No current eligibility",
+      "This profile is not currently eligible for an upcoming Meme mint.",
+    ],
+    [
+      ApiSubscriptionCoverageStatus.Unknown,
+      "Coverage unavailable",
+      "Some forecast information is missing.",
+    ],
+  ] as const)(
+    "keeps %s informative without giving visitors owner instructions",
+    async (status, label, description) => {
       renderSummary(
         createCoverage({ status, funded_through: null, next_unfunded: null }),
-        { isOwner: false }
+        { isOwner: false, topUpAction: <button>Top up</button> }
       );
-      expect(screen.getByRole("heading", { level: 2 })).toBeVisible();
+      expect(screen.getByRole("heading", { name: label })).toBeVisible();
       expect(screen.getByText("2 allocated")).toBeVisible();
+      if (description) expect(screen.getByText(description)).toBeVisible();
       expect(
-        screen.getByText(
-          /Choose a drop|Set up subscriptions|Review settings or refresh|Adding funds does not change eligibility/
+        screen.queryByText(
+          /Set up subscriptions to receive|Choose a drop to see|Review settings or refresh|Adding funds does not change eligibility/
+        )
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Top up" })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: "Choose drops" })
+      ).not.toBeInTheDocument();
+      await userEvent
+        .setup()
+        .click(screen.getByRole("button", { name: "Forecast use" }));
+      expect(
+        within(await screen.findByRole("tooltip")).getByText(
+          "Projected from current eligibility, settings, balance, and the published Meme schedule."
         )
       ).toBeVisible();
+    }
+  );
+
+  it.each([true, false])(
+    "uses the correct audience for unavailable coverage and its tooltip (owner: %s)",
+    async (isOwner) => {
+      renderSummary(undefined, { coverage: undefined, isOwner });
+      const explanation = isOwner
+        ? "Coverage is temporarily unavailable. Your subscription settings have not changed."
+        : "Coverage is temporarily unavailable.";
+      expect(screen.getByText(explanation)).toBeVisible();
+      await userEvent
+        .setup()
+        .click(screen.getByRole("button", { name: "Forecast use" }));
+      expect(
+        within(await screen.findByRole("tooltip")).getByText(explanation)
+      ).toBeVisible();
+      if (!isOwner) {
+        expect(
+          screen.queryByText(/Your subscription settings have not changed/)
+        ).not.toBeInTheDocument();
+      }
+    }
+  );
+
+  it.each([true, false])(
+    "preserves hidden purchasing explanations for owner: %s",
+    (isOwner) => {
+      renderSummary(
+        createCoverage({
+          status: ApiSubscriptionCoverageStatus.NoCurrentEligibility,
+          funded_through: null,
+          next_unfunded: null,
+        }),
+        { isOwner, showFundingPrompt: false }
+      );
+      expect(
+        screen.getByRole("heading", { name: "No current eligibility" })
+      ).toBeVisible();
+      expect(
+        screen.queryByText(/This profile is not currently eligible/)
+      ).not.toBeInTheDocument();
+      expect(screen.getByText("2 allocated")).toBeVisible();
     }
   );
 

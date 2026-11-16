@@ -3,8 +3,10 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
+import { isHelpBotCreditRepCategory } from "@/components/utils/input/rep-category/repCategoryConstants";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiRepContributorsPage } from "@/generated/models/ApiRepContributorsPage";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -14,7 +16,8 @@ import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
-import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, ArrowUpRightIcon } from "@heroicons/react/24/outline";
+import { CheckIcon } from "@heroicons/react/24/solid";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,6 +25,7 @@ import {
   useContext,
   useEffect,
   useId,
+  useMemo,
   useRef,
   useState,
   type ReactNode,
@@ -29,6 +33,7 @@ import {
 import RatingAmountInput from "./RatingAmountInput";
 import RatingEditorFooter from "./RatingEditorFooter";
 import RatingEditorErrors from "./RatingEditorErrors";
+import { getRatingTotalColor } from "./ratingContributorStyles";
 import { useRepRatingSave } from "./modify-rep/useRepRatingSave";
 import {
   canManageGivenRatings,
@@ -47,6 +52,43 @@ type Contributor = {
   };
   readonly contribution: number;
 };
+
+function canEditCategory(
+  direction: RepDirection,
+  category: string,
+  profile: ApiIdentity,
+  viewer: ApiIdentity | null,
+  proxy: ApiProfileProxy | null
+) {
+  if (direction === "given")
+    return canManageGivenRatings(profile, viewer, proxy);
+  return (
+    !isHelpBotCreditRepCategory(category) &&
+    getCanEditRep({
+      myProfile: viewer,
+      targetProfile: profile,
+      activeProfileProxy: proxy,
+    })
+  );
+}
+
+function getOwnContributor(
+  canEdit: boolean,
+  rater: Pick<ApiIdentity, "id" | "handle" | "pfp"> | null,
+  primaryAddress: string,
+  contribution: number
+): Contributor | null {
+  if (!canEdit || !rater?.id) return null;
+  return {
+    profile: {
+      id: rater.id,
+      handle: rater.handle,
+      pfp: rater.pfp,
+      primary_address: primaryAddress,
+    },
+    contribution,
+  };
+}
 type CategoryContentLayout = (
   body: ReactNode,
   footer: ReactNode,
@@ -143,6 +185,93 @@ function getAmountValidation({
   };
 }
 
+function RepContributionActions({
+  currentAmount,
+  value,
+  available,
+  overAllowance,
+  changed,
+  canSave,
+  busy,
+  saved,
+}: {
+  readonly currentAmount: number;
+  readonly value: string;
+  readonly available: number | null;
+  readonly overAllowance: boolean;
+  readonly changed: boolean;
+  readonly canSave: boolean;
+  readonly busy: boolean;
+  readonly saved: boolean;
+}) {
+  const locale = useBrowserLocale();
+  const nextValueClassName = `tw-font-medium ${getRatingTotalColor(
+    isRatingValue(value) ? Number(value) : null
+  )}`;
+  return (
+    <div className="tw-flex tw-min-h-[42px] tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-2 tw-gap-y-1 tw-py-1.5 tw-pl-2.5 tw-pr-1.5">
+      <span
+        className={`tw-whitespace-nowrap tw-text-xs ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-500"}`}
+      >
+        {t(locale, "user.rate.available", { matter: "REP" })}{" "}
+        <span
+          className={`tw-font-medium ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-100"}`}
+        >
+          {available === null ? "—" : formatInteger(locale, available)}
+        </span>
+      </span>
+      <div className="tw-relative tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-2.5 tw-gap-y-1">
+        {changed && (
+          <>
+            {currentAmount !== 0 && (
+              <output className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-text-iron-500">
+                {formatInteger(locale, currentAmount)}
+                <span className="tw-sr-only">{" → "}</span>
+                <ArrowRightIcon
+                  aria-hidden="true"
+                  className="tw-size-3 tw-shrink-0"
+                />
+                <span className={nextValueClassName}>
+                  {isRatingValue(value)
+                    ? formatInteger(locale, Number(value))
+                    : "—"}
+                </span>
+              </output>
+            )}
+            <Button
+              variant="action"
+              size={null}
+              className="tw-h-[30px] tw-px-3 tw-py-0 tw-text-xs tw-font-semibold"
+              type="submit"
+              disabled={!canSave}
+              loading={busy}
+            >
+              {t(
+                locale,
+                currentAmount === 0
+                  ? "rep.categories.grant.actions.grant"
+                  : "rep.categories.edit.save"
+              )}
+            </Button>
+          </>
+        )}
+        <span
+          aria-live="polite"
+          aria-atomic="true"
+          className={changed ? "tw-absolute tw-right-0" : undefined}
+        >
+          {saved && !changed && (
+            <span className="tw-inline-flex tw-h-[30px] tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
+              <CheckIcon aria-hidden="true" className="tw-size-3" />
+              {t(locale, "rep.categories.edit.saved")}
+            </span>
+          )}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function RepCategoryDetails({
   profile,
   category,
@@ -177,14 +306,13 @@ export default function RepCategoryDetails({
   const proxyIdentity =
     activeProfileProxy?.created_by.handle ??
     activeProfileProxy?.created_by.primary_address;
-  const canEdit =
-    direction === "given"
-      ? canManageGivenRatings(profile, connectedProfile, activeProfileProxy)
-      : getCanEditRep({
-          myProfile: connectedProfile,
-          targetProfile: profile,
-          activeProfileProxy,
-        });
+  const canEdit = canEditCategory(
+    direction,
+    category.category,
+    profile,
+    connectedProfile,
+    activeProfileProxy
+  );
   const identity = profile.query ?? profile.handle ?? profile.display;
   const query = useInfiniteQuery({
     queryKey: [
@@ -205,8 +333,12 @@ export default function RepCategoryDetails({
     staleTime: 5 * 60 * 1000,
     getNextPageParam: (page) => (page.next ? page.page + 1 : undefined),
   });
-  const items = (query.data?.pages.flatMap((page) => page.data) ?? []).toSorted(
-    (a, b) => b.contribution - a.contribution
+  const items = useMemo(
+    () =>
+      (query.data?.pages.flatMap((page) => page.data) ?? []).toSorted(
+        (a, b) => b.contribution - a.contribution
+      ),
+    [query.data?.pages]
   );
   // This endpoint's remaining credit is rater-global. For Given we only need
   // that budget, so a stable identity avoids an extra request as rows arrive.
@@ -226,28 +358,30 @@ export default function RepCategoryDetails({
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [preparing, setPreparing] = useState(false);
   const [prepareError, setPrepareError] = useState(false);
+  const [saved, setSaved] = useState(false);
+  useEffect(() => {
+    if (!saved) return;
+    const timeout = setTimeout(() => {
+      setSaved(false);
+      onSuccess?.();
+    }, 1500);
+    return () => clearTimeout(timeout);
+  }, [saved, onSuccess]);
   const busy = externalBusy || preparing || isSaving;
   const ready = !!repState && !isError;
   const ownContribution =
     repState?.rater_contribution ??
     items.find((row) => row.profile.id === rater?.id)?.contribution ??
     0;
-  const ownContributor: Contributor | null =
-    canEdit && rater?.id && ownContribution !== 0
-      ? {
-          profile: {
-            id: rater.id,
-            handle: rater.handle,
-            pfp: rater.pfp,
-            primary_address:
-              activeProfileProxy?.created_by.primary_address ??
-              connectedProfile?.primary_wallet ??
-              connectedProfile?.wallets?.[0]?.wallet ??
-              "",
-          },
-          contribution: ownContribution,
-        }
-      : null;
+  const ownContributor = getOwnContributor(
+    canEdit,
+    rater,
+    activeProfileProxy?.created_by.primary_address ??
+      connectedProfile?.primary_wallet ??
+      connectedProfile?.wallets?.[0]?.wallet ??
+      "",
+    ownContribution
+  );
   const rows = getCategoryRows(
     items,
     direction === "received" && canEdit,
@@ -305,6 +439,7 @@ export default function RepCategoryDetails({
       0
     );
   const reset = () => {
+    setSaved(false);
     setDrafts({});
     setPrepareError(false);
     clearError();
@@ -319,6 +454,7 @@ export default function RepCategoryDetails({
     let value = raw === "0-" || raw === "-0" ? "-" : raw;
     if (value.length > 1 && value.startsWith("0")) value = value.slice(1);
     if (/^-?\d*$/.test(value)) {
+      setSaved(false);
       clearError();
       setPrepareError(false);
       setDrafts((previous) => ({ ...previous, [id]: value }));
@@ -369,7 +505,10 @@ export default function RepCategoryDetails({
       submitting.current = false;
       onBusyChange(false);
     }
-    if (succeeded) onSuccess?.();
+    if (succeeded) {
+      if (direction === "received") setSaved(true);
+      else onSuccess?.();
+    }
   };
   const openCategory = (
     <Button
@@ -386,15 +525,18 @@ export default function RepCategoryDetails({
       <ArrowUpRightIcon className="tw-size-3.5" aria-hidden="true" />
     </Button>
   );
+  const givenChanges = direction === "given" && changes.length > 0;
+  const available = ready ? heroAvailableRep : null;
+  const proposedTotal = validNumbers ? after : null;
   const footer = canEdit ? (
     <RatingEditorFooter
       matter="REP"
       formId={formId}
-      editable
-      changed={changes.length > 0}
+      editable={direction === "given"}
+      changed={givenChanges}
       before={before}
-      after={validNumbers ? after : null}
-      available={ready ? heroAvailableRep : null}
+      after={proposedTotal}
+      available={available}
       busy={busy}
       canSave={canSave}
       onCancel={reset}
@@ -414,6 +556,101 @@ export default function RepCategoryDetails({
   ) : (
     <div className="tw-min-h-[50px] tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-px-2.5 tw-py-2">
       {openCategory}
+    </div>
+  );
+  const ownRow = direction === "received" ? ownContributor : null;
+  const listRows = ownRow ? rows.filter((row) => row !== ownRow) : rows;
+  const renderRow = (row: Contributor) => {
+    const you = row === ownRow;
+    const editable = canEdit && (direction === "given" || you);
+    const draft = drafts[row.profile.id];
+    const value =
+      draft ?? (you && row.contribution === 0 ? "" : String(row.contribution));
+    const descriptionId = `${formId}-${row.profile.id}-description`;
+    const amountLabel = you
+      ? {
+          "aria-label": t(locale, "rep.categories.panel.yourAmount", {
+            category: category.category,
+          }),
+        }
+      : { "aria-labelledby": `${formId}-${row.profile.id}-name` };
+    const amountDescription = you
+      ? t(locale, "user.rate.totalHelp")
+      : t(locale, "rep.categories.panel.amountFor", {
+          name: row.profile.handle ?? row.profile.primary_address,
+        });
+    const validation = getAmountValidation({
+      value: draft ?? String(row.contribution),
+      current: row.contribution,
+      withinAllowance,
+      validNumbers,
+      descriptionId,
+      formId,
+    });
+    return (
+      <div
+        key={row.profile.id}
+        data-rating-row
+        className="tw-flex tw-min-h-[50px] tw-min-w-0 tw-items-center tw-gap-2 tw-pb-[5px] tw-pl-2.5 tw-pr-1.5 tw-pt-[5px]"
+      >
+        <ContributorIdentity
+          row={row}
+          you={you}
+          labelId={`${formId}-${row.profile.id}-name`}
+        />
+        {editable ? (
+          <>
+            <span id={descriptionId} className="tw-sr-only">
+              {amountDescription}
+            </span>
+            <RatingAmountInput
+              ref={you ? ownAmountRef : undefined}
+              originalAmount={row.contribution}
+              showAdjustment={!you}
+              subtle={you}
+              value={ready ? value : ""}
+              {...amountLabel}
+              aria-describedby={validation.describedBy}
+              aria-invalid={validation.invalid}
+              readOnly={!ready || busy}
+              placeholder={
+                ready ? "0" : t(locale, "rep.categories.panel.loadingAmount")
+              }
+              onChange={(event) =>
+                updateDraft(row.profile.id, event.currentTarget.value)
+              }
+            />
+          </>
+        ) : (
+          <span
+            className={`tw-shrink-0 tw-text-right tw-text-sm tw-font-medium ${row.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
+          >
+            {formatInteger(locale, row.contribution)}
+          </span>
+        )}
+      </div>
+    );
+  };
+  const ownDraft = ownRow
+    ? (drafts[ownRow.profile.id] ?? String(ownRow.contribution))
+    : "";
+  const overAllowance = changes.length > 0 && validNumbers && !withinAllowance;
+  const ownBlock = ownRow && (
+    <div
+      data-has-raters={listRows.length > 0}
+      className="tw-mb-1 tw-border-x-0 tw-border-b-0 tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-1 data-[has-raters=true]:tw-border-b"
+    >
+      {renderRow(ownRow)}
+      <RepContributionActions
+        currentAmount={ownRow.contribution}
+        value={ownDraft}
+        available={available}
+        overAllowance={overAllowance}
+        changed={changes.length > 0}
+        canSave={canSave}
+        busy={busy}
+        saved={saved}
+      />
     </div>
   );
   const body = (
@@ -448,6 +685,7 @@ export default function RepCategoryDetails({
           })}
         </p>
       )}
+      {ownBlock}
       {query.isPending && (
         <output className="tw-block tw-px-2.5 tw-py-5 tw-text-sm tw-text-iron-400">
           {t(locale, "user.rate.loading")}
@@ -468,66 +706,7 @@ export default function RepCategoryDetails({
         </p>
       )}
       <div className="tw-max-h-[min(50dvh,24rem)] tw-overflow-y-auto tw-overscroll-contain">
-        {rows.map((row) => {
-          const you = direction === "received" && row === ownContributor;
-          const editable = canEdit && (direction === "given" || you);
-          const value = drafts[row.profile.id] ?? String(row.contribution);
-          const descriptionId = `${formId}-${row.profile.id}-description`;
-          const validation = getAmountValidation({
-            value,
-            current: row.contribution,
-            withinAllowance,
-            validNumbers,
-            descriptionId,
-            formId,
-          });
-          return (
-            <div
-              key={row.profile.id}
-              data-rating-row
-              className={`tw-flex tw-min-h-[50px] tw-min-w-0 tw-items-center tw-gap-2 tw-pb-[5px] tw-pl-2.5 tw-pr-1.5 tw-pt-[5px] ${you ? "tw-sticky tw-top-0 tw-z-10 tw-bg-[#17171B]" : ""}`}
-            >
-              <ContributorIdentity
-                row={row}
-                you={you}
-                labelId={`${formId}-${row.profile.id}-name`}
-              />
-              {editable ? (
-                <>
-                  <span id={descriptionId} className="tw-sr-only">
-                    {t(locale, "rep.categories.panel.amountFor", {
-                      name: you
-                        ? t(locale, "rep.categories.panel.you")
-                        : (row.profile.handle ?? row.profile.primary_address),
-                    })}
-                  </span>
-                  <RatingAmountInput
-                    ref={you ? ownAmountRef : undefined}
-                    originalAmount={row.contribution}
-                    value={ready ? value : ""}
-                    aria-labelledby={`${formId}-${row.profile.id}-name`}
-                    aria-describedby={validation.describedBy}
-                    aria-invalid={validation.invalid}
-                    readOnly={!ready || busy}
-                    placeholder={t(
-                      locale,
-                      "rep.categories.panel.loadingAmount"
-                    )}
-                    onChange={(event) =>
-                      updateDraft(row.profile.id, event.currentTarget.value)
-                    }
-                  />
-                </>
-              ) : (
-                <span
-                  className={`tw-shrink-0 tw-text-right tw-text-sm tw-font-medium ${row.contribution < 0 ? "tw-text-rose-400" : "tw-text-iron-300"}`}
-                >
-                  {formatInteger(locale, row.contribution)}
-                </span>
-              )}
-            </div>
-          );
-        })}
+        {listRows.map(renderRow)}
       </div>
       {query.isSuccess && rows.length === 0 && (
         <p className="tw-px-2.5 tw-text-sm tw-text-iron-400">

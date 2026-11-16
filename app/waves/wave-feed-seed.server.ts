@@ -51,6 +51,7 @@ export async function fetchServerWaveFeedSeed({
           waveId,
           drops: seedDrops.map(stripRepeatedWave),
           hasNextPage: feed.drops.length > SERVER_WAVE_FEED_SEED_LIMIT,
+          hasCompetition: feed.wave.has_competition,
         };
       }
     );

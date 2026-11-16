@@ -47,7 +47,28 @@ function navigateToUpcomingDrops(event: { preventDefault(): void }) {
   globalThis.location.hash = hash;
 }
 
-function getDescriptionKey(status: Status, fundedDrops: number): MessageKey {
+function getDescriptionKey(
+  coverage: ApiSubscriptionCoverage | undefined,
+  isOwner: boolean
+): MessageKey | undefined {
+  if (!coverage) {
+    return isOwner
+      ? "subscriptions.coverage.unavailable"
+      : "subscriptions.coverage.visitor.unavailable";
+  }
+  const { status, fully_funded_drops: fundedDrops } = coverage;
+  if (!isOwner) {
+    switch (status) {
+      case Status.NoCurrentEligibility:
+        return "subscriptions.coverage.visitor.noEligibility";
+      case Status.NoUpcomingSelections:
+        return "subscriptions.coverage.visitor.noSelections";
+      case Status.Unknown:
+        return "subscriptions.coverage.visitor.unknown";
+      default:
+        return undefined;
+    }
+  }
   switch (status) {
     case Status.Covered:
       return "subscriptions.coverage.covered.description";
@@ -117,10 +138,8 @@ export default function SubscriptionCoverageSummary({
   const locale = useBrowserLocale();
   const status = coverage?.status ?? Status.Unknown;
   const presentation = getSubscriptionCoveragePresentation(locale, status);
-  const description = t(
-    locale,
-    getDescriptionKey(status, coverage?.fully_funded_drops ?? 0)
-  );
+  const descriptionKey = getDescriptionKey(coverage, isOwner);
+  const description = descriptionKey ? t(locale, descriptionKey) : undefined;
   const pending = isLoading && !coverage;
   const showFundedCount = !!coverage && FUNDED_COUNT_STATUSES.includes(status);
   const fundedThrough =
@@ -197,11 +216,9 @@ export default function SubscriptionCoverageSummary({
               })}
             </p>
           )}
-          {showFundingPrompt && !showFundedCount && !pending && (
+          {showFundingPrompt && !showFundedCount && !pending && description && (
             <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
-              {coverage
-                ? description
-                : t(locale, "subscriptions.coverage.unavailable")}
+              {description}
             </p>
           )}
         </div>
@@ -237,7 +254,9 @@ export default function SubscriptionCoverageSummary({
           coverage={coverage}
           isLoading={pending}
           description={
-            isOwner && status === Status.Covered ? description : undefined
+            !coverage || (isOwner && status === Status.Covered)
+              ? description
+              : undefined
           }
         />
         {showNextUnfunded && coverage?.next_unfunded && (
@@ -313,17 +332,15 @@ function SubscriptionCoverageForecast({
             <p className="tw-mb-1 tw-mt-0 tw-font-normal">
               {t(locale, "subscriptions.coverage.title")}
             </p>
-            {description && <p className="tw-mb-1 tw-mt-0">{description}</p>}
+            {coverage && description && (
+              <p className="tw-mb-1 tw-mt-0">{description}</p>
+            )}
             {coverage && (
               <p className="tw-m-0">
                 {t(locale, "subscriptions.coverage.basis")}
               </p>
             )}
-            {!coverage && (
-              <p className="tw-m-0">
-                {t(locale, "subscriptions.coverage.unavailable")}
-              </p>
-            )}
+            {!coverage && <p className="tw-m-0">{description}</p>}
           </div>
         </BodyPortalTooltip>
       )}

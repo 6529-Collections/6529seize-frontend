@@ -104,6 +104,7 @@ const NEXTGEN_COLLECTION_SUBPAGES = [
 const EXACT_EXCLUDED_PATHS = new Set([
   "/accept-connection-sharing",
   "/access",
+  "/ai",
   "/artwork-documentation",
   "/buidl",
   "/cdn-cgi/l/email-protection",
@@ -126,6 +127,7 @@ const EXACT_EXCLUDED_PATHS = new Set([
 
 const PREFIX_EXCLUDED_PATHS = [
   "/reviews/",
+  "/ai/",
   "/artwork-documentation/",
   "/messages/",
   "/notifications/",

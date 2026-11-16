@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
 import { getDesktopReleasesServerEnv } from "@/config/serverEnv";
 import {
-  serveSignedListObject,
-  type SignedListMessages,
-  type SignedListSnapshot,
+  serveSignedFeedObject,
+  type SignedFeedSnapshot,
+  type SignedFeedText,
 } from "@/lib/validator-page/feedResponse";
 import {
   readBucketObject,
@@ -47,18 +47,19 @@ const SNAPSHOT_TTL_MS = 60 * 1000;
 const STALE_IF_ERROR_MS = 60 * 60 * 1000;
 const ERROR_RETRY_MS = 10 * 1000;
 
-const MESSAGES: SignedListMessages = {
+const TEXT: SignedFeedText = {
   missing: "No release list yet.\n",
   unavailable: "The release list is unavailable.\n",
+  signatureContentType: "application/octet-stream",
 };
 
-const MISSING: SignedListSnapshot = {
+const MISSING: SignedFeedSnapshot = {
   state: "missing",
   feed: null,
   signature: null,
 };
 
-function failed(reason: string): SignedListSnapshot {
+function failed(reason: string): SignedFeedSnapshot {
   console.warn("[desktop-releases] release list unavailable", reason);
   return { state: "error", feed: null, signature: null };
 }
@@ -158,7 +159,7 @@ function getLocation(): BucketLocation | null {
 
 async function readPair(
   location: BucketLocation | null
-): Promise<SignedListSnapshot> {
+): Promise<SignedFeedSnapshot> {
   if (!location) {
     return MISSING;
   }
@@ -183,7 +184,7 @@ async function readPair(
 }
 
 type Entry = {
-  readonly snapshot: SignedListSnapshot;
+  readonly snapshot: SignedFeedSnapshot;
   readonly at: number;
   /** The bucket it was read from; another bucket starts afresh. */
   readonly source: string;
@@ -191,10 +192,10 @@ type Entry = {
 
 let current: Entry | null = null;
 let lastGood: Entry | null = null;
-let pending: Promise<SignedListSnapshot> | null = null;
+let pending: Promise<SignedFeedSnapshot> | null = null;
 
 /** The pair, from one read of the bundle, reused for a minute. */
-async function getSnapshot(): Promise<SignedListSnapshot> {
+async function getSnapshot(): Promise<SignedFeedSnapshot> {
   const location = getLocation();
   const source = location ? `${location.region}/${location.bucket}` : "";
   if (current?.source !== source) {
@@ -234,7 +235,7 @@ export async function serveDesktopReleaseObject(
   request: Request,
   which: "feed" | "signature"
 ): Promise<Response> {
-  return serveSignedListObject(request, await getSnapshot(), which, MESSAGES);
+  return serveSignedFeedObject(request, await getSnapshot(), which, TEXT);
 }
 
 /** Test hook: forget the cached list. */

@@ -9,3 +9,10 @@ export const RATING_CONTRIBUTOR_NAME_CLASS =
 
 export const RATING_CONTRIBUTOR_AMOUNT_CLASS =
   "tw-shrink-0 tw-text-right tw-text-sm tw-font-medium";
+
+/** Totals use their own sign; signed adjustments describe the change separately. */
+export function getRatingTotalColor(amount: number | null): string {
+  if (amount === null || !Number.isFinite(amount) || amount === 0)
+    return "tw-text-iron-100";
+  return amount < 0 ? "tw-text-rose-400" : "tw-text-emerald-400";
+}

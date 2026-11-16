@@ -181,6 +181,15 @@
       "classification": "crawlable",
       "family": "system"
     },
+    "/ai": {
+      "classification": "crawlable"
+    },
+    "/ai/guide": {
+      "classification": "crawlable"
+    },
+    "/ai/known-issues": {
+      "classification": "crawlable"
+    },
     "/artwork-documentation": {
       "classification": "auth"
     },
@@ -250,7 +259,7 @@
     },
     "/browser-connector": {
       "classification": "exempt",
-      "exemptReason": "6529 Desktop sign-in bridge opened in the browser by the app; meaningless without the app's one-time link parameters."
+      "exemptReason": "6529 Desktop sign-in and wallet-request bridge opened in the browser by the app; meaningless without the app's one-time link parameters or signed request."
     },
     "/buidl": {
       "classification": "crawlable",

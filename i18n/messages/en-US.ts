@@ -289,6 +289,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "edit.title": "Add Rep to {name}",
   "edit.totalLabel": "Your total Rep for {category}:",
   "edit.save": "Save",
+  "edit.saved": "Saved",
   "edit.cancel": "Cancel",
   "edit.availableRep": "Your available Rep:",
   "edit.ratingLimit": "Your max/min Rep Rating to {category}:",
@@ -298,6 +299,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "edit.tryAgain": "Please try again.",
   "edit.loginRequired": "Log in to continue.",
   "grant.searchPlaceholder": "Category to grant REP for",
+  "panel.yourAmount": "Your REP in {category}",
   "grant.minimumCharacters": "Type at least {min} characters.",
   "grant.maximumCharacters": "Type at most {max} characters.",
   "grant.searching": "Finding existing categories...",
@@ -308,6 +310,9 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
     '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
   "grant.amountLabel": "Your total REP for this category",
   "grant.availableRepLabel": "Your available REP:",
+  "grant.youAssigned": "You assigned",
+  "grant.noMatchingChoices": "No matching categories.",
+  "grant.changeCategory": "Change category",
   "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
@@ -593,6 +598,14 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "signing.rabbyDescription":
     "May show the message as raw data with “Unknown Signature Type”. Review the message details before signing.",
   "signing.mismatch": "Cancel if the details do not match your submission.",
+  "traits.useNo": "Leave blank to use No",
+  "traits.checking": "Checking traits…",
+  "traits.checkFailed": "Couldn’t check artwork traits. Try again.",
+  "traits.required": "This field is required.",
+  "traits.duplicate": "Use a single value for this field.",
+  "traits.invalidChoice": "Select one of the available choices.",
+  "traits.invalidPoints": "Enter a nonzero number from {min} to {max}.",
+  "traits.invalidBoolean": "Choose Yes or No.",
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
   "identity.connectPrompt":
@@ -792,6 +805,8 @@ const WAVE_VOTE_DETAILS_MESSAGES = objectMessages("waves.voteDetails", {
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   menuLabel: "Drop actions",
+  scrollForMore: "More actions, scroll down",
+  scrollUp: "Scroll up",
   reply: "Reply",
   replyToDrop: "Reply to drop",
   replyUnavailable: "You are not eligible to chat in this wave",
@@ -3982,6 +3997,34 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopConnect.cancel": "Cancel",
   "desktopConnect.status.walletConnectFailed":
     "Could not open WalletConnect. Try again.",
+  "desktopWalletRequest.title": "Signature request",
+  "desktopWalletRequest.waiting":
+    "Your browser opened a page to sign with your wallet. Finish there; this waits for two minutes.",
+  "desktopWalletRequest.code":
+    "Request code {code}. The browser page shows the same code.",
+  "desktopWalletRequest.fingerprint":
+    "Content fingerprint {fingerprint}. The browser page shows the same fingerprint.",
+  "desktopWalletRequest.reopen": "Open the page again",
+  "desktopWalletRequest.close": "Close",
+  "desktopWalletRequest.cancel": "Cancel",
+  "desktopWalletRequest.openFailed":
+    "Your browser did not open. Open {site} in your browser yourself.",
+  "desktopWalletRequest.cancelled": "The signature request was cancelled.",
+  "desktopWalletRequest.expired": "The signature request timed out. Try again.",
+  "desktopWalletRequest.refused":
+    "The browser page would not sign this request. Continue on {site} in your browser instead.",
+  "desktopWalletRequest.failed":
+    "The signature request did not work. Try again.",
+  "desktopWalletRequest.busy":
+    "Another signature request is still open. Finish or cancel it first.",
+  "desktopWalletRequest.unverified":
+    "The signature could not be checked against your account. Smart-contract wallets such as Safe cannot sign here; continue on {site} in your browser instead.",
+  "desktopWalletRequest.reopenWait": "You can open it again in a few seconds.",
+  "desktopWalletRequest.continueInBrowser": "Continue in your browser",
+  "desktopWalletRequest.tradeOnWebsite":
+    "Trading is not available in 6529 Desktop with a browser wallet. Continue on {site} in your browser.",
+  "desktopWalletRequest.notForwarded":
+    "6529 Desktop does not send this kind of signature to your browser wallet. Continue on {site} in your browser, where your wallet signs it directly.",
   "browserConnector.title": "Sign in to 6529 Desktop",
   "browserConnector.description":
     "Sign in to 6529 Desktop with a browser wallet.",
@@ -4005,6 +4048,86 @@ export const EN_US_ROOT_MESSAGES = {
     "This link is not a valid 6529 Desktop sign-in link. Start again from 6529 Desktop.",
   "browserConnector.problem.expired":
     "This sign-in link has expired. Start again from 6529 Desktop.",
+  "browserConnector.wallet.title": "Sign for 6529 Desktop",
+  "browserConnector.wallet.checking": "Checking the request from 6529 Desktop…",
+  "browserConnector.wallet.code":
+    "Request code {code}. Check that 6529 Desktop shows the same code.",
+  "browserConnector.wallet.safety":
+    "6529 never asks for your recovery phrase or password. Signing costs nothing and sends no transaction.",
+  "browserConnector.wallet.messageIntro":
+    "6529 Desktop asks {address} to sign this message:",
+  "browserConnector.wallet.typedIntro": "6529 Desktop asks {address} to sign:",
+  "browserConnector.wallet.schema.encryptedMessagesGrant":
+    "Let 6529 Desktop on this computer send and read your encrypted messages.",
+  "browserConnector.wallet.schema.signedMessagesGrant":
+    "Turn on signed messages for 6529 Desktop on this computer.",
+  "browserConnector.wallet.schema.memesSubmission":
+    "Submit “{artwork}” to {destination}.",
+  "browserConnector.wallet.schema.profileSitePublish":
+    "Publish version {version} of the profile site for {handle}.",
+  "browserConnector.wallet.details": "Everything you sign",
+  "browserConnector.wallet.connectIntro":
+    "Connect the browser wallet for {address} to continue.",
+  "browserConnector.wallet.switchAccount":
+    "Your wallet is connected as {connected}. Switch it to {address} to sign.",
+  "browserConnector.wallet.switchNetwork":
+    "Switch your wallet to the network this request is for.",
+  "browserConnector.wallet.switchNetworkAction": "Switch network",
+  "browserConnector.wallet.sign": "Sign in wallet",
+  "browserConnector.wallet.decline": "Decline",
+  "browserConnector.wallet.signing": "Waiting for your wallet…",
+  "browserConnector.wallet.failed":
+    "Your wallet did not sign. Try again, or decline.",
+  "browserConnector.wallet.returned":
+    "Done. Return to 6529 Desktop. You can close this tab.",
+  "browserConnector.wallet.declined":
+    "Declined. Return to 6529 Desktop. You can close this tab.",
+  "browserConnector.wallet.problem.invalid":
+    "This page did not get a valid request from 6529 Desktop, so there is nothing to sign. Start again from 6529 Desktop.",
+  "browserConnector.wallet.problem.expired":
+    "This request has expired. Nothing was signed. Start again from 6529 Desktop.",
+  "browserConnector.wallet.refusal.unreadable-message":
+    "This page will not ask your wallet to sign this request: the message is not readable text.",
+  "browserConnector.wallet.refusal.sign-in-message":
+    "This page will not ask your wallet to sign this request: it is a sign-in message. Sign in from 6529 Desktop instead.",
+  "browserConnector.wallet.refusal.unknown-message":
+    "This page will not ask your wallet to sign this request: it is not a message 6529 Desktop signs from here. Continue on {site} in your browser instead.",
+  "browserConnector.wallet.format.drop":
+    "Create a 6529 drop. This also covers accepting a wave's terms.",
+  "browserConnector.wallet.format.decisionVote":
+    "Cast your vote in a 6529 decision.",
+  "browserConnector.wallet.format.decisionEntry":
+    "Submit an entry to a 6529 decision.",
+  "browserConnector.wallet.refusal.unknown-typed-data":
+    "This page will not ask your wallet to sign this request: it is a kind of request 6529 Desktop does not send from here. Continue on {site} in your browser instead.",
+  "browserConnector.wallet.refusal.wrong-wallet":
+    "This page will not ask your wallet to sign this request: it names a different wallet than the one asked to sign.",
+  "browserConnector.wallet.refusal.wrong-origin":
+    "This page will not ask your wallet to sign this request: it names a different app than 6529 Desktop.",
+  "browserConnector.wallet.refusal.statement-mismatch":
+    "This page will not ask your wallet to sign this request: its description does not match what it would sign.",
+  "browserConnector.wallet.refusal.context-mismatch":
+    "This page will not ask your wallet to sign this request: the content 6529 Desktop sent does not match what the message commits to. Nothing was signed.",
+  "browserConnector.wallet.fingerprint": "Content fingerprint: {fingerprint}",
+  "browserConnector.wallet.fingerprintOnly":
+    "6529 Desktop did not send the content, so this page cannot show it. The message below identifies the content only by its fingerprint. Check that 6529 Desktop shows the same fingerprint, and sign only if you started this action there.",
+  "browserConnector.wallet.contentVerified":
+    "This page recomputed the fingerprint from this content and it matches the message, so this is exactly what you sign.",
+  "browserConnector.wallet.content.wave": "In wave {waveId}",
+  "browserConnector.wallet.content.replyTo": "In reply to drop {dropId}",
+  "browserConnector.wallet.content.noText": "(no text)",
+  "browserConnector.wallet.content.quote": "Quotes drop {dropId}",
+  "browserConnector.wallet.content.media": "Media ({mimeType}): {url}",
+  "browserConnector.wallet.content.attachments": "Attachments: {count}",
+  "browserConnector.wallet.content.terms": "You also accept the wave's terms:",
+  "browserConnector.wallet.content.vote":
+    "Set your vote to {value} on entry {entryId}.",
+  "browserConnector.wallet.content.decision":
+    "Decision {competitionId} in wave {waveId}",
+  "browserConnector.wallet.content.committed":
+    "Everything this signature commits to",
+  "browserConnector.wallet.content.message": "The message your wallet signs",
+  "browserConnector.wallet.tellApp": "Tell 6529 Desktop and close",
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",
@@ -4247,6 +4370,14 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
     "Coverage is temporarily unavailable. Your subscription settings have not changed.",
+  "subscriptions.coverage.visitor.unavailable":
+    "Coverage is temporarily unavailable.",
+  "subscriptions.coverage.visitor.noEligibility":
+    "This profile is not currently eligible for an upcoming Meme mint.",
+  "subscriptions.coverage.visitor.noSelections":
+    "No drops are selected in Manual mode.",
+  "subscriptions.coverage.visitor.unknown":
+    "Some forecast information is missing.",
   "subscriptions.coverage.stale":
     "Last known coverage is shown and may be out of date.",
   "subscriptions.coverage.refresh": "Refresh coverage",

@@ -19,6 +19,7 @@ const RESERVED_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "about",
   "accept-connection-sharing",
   "access",
+  "ai",
   "api",
   "author",
   "blog",

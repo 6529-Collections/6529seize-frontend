@@ -283,6 +283,11 @@ export function sharedConfig(
           source: "/validator/:path*",
           headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
         },
+        {
+          // So do the 6529 AI download pages, which no menu links yet.
+          source: "/ai/:path*",
+          headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        },
       ];
     },
     turbopack: {
