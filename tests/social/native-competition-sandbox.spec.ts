@@ -1516,7 +1516,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     const bonus = dialog.getByRole("textbox", { name: "Bonus", exact: true });
     await expect(bonus).toHaveAttribute("placeholder", "Leave blank to use No");
     await dialog
-      .locator('input[type="file"]')
+      .getByTestId("artwork-file-input")
       .setInputFiles("public/artwork-documentation/examples/an-alteration.png");
     await dialog
       .getByRole("textbox", { name: "Artwork Title", exact: true })
