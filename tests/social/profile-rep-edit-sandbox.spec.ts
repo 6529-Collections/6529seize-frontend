@@ -179,8 +179,11 @@ function categoryPanel(page: Page) {
 }
 
 async function getContributorRowPresentation(list: Locator) {
-  // Measure after the sheet's entrance has settled.
-  await list.getByRole("link").first().click({ trial: true });
+  // The header stays clear of development-only badges over the bottom row.
+  // Wait for its entrance without scrolling a contributor just to measure it.
+  await list
+    .getByRole("button", { name: "Close", exact: true })
+    .click({ trial: true });
   return list
     .getByRole("link")
     .first()
@@ -501,6 +504,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     const surface = page
       .getByRole("dialog", { name: "Grant Rep", exact: true })
       .locator(".mobile-wrapper-dialog");
+    // Focus the category field after the sheet is actionable, before measuring.
+    await search.click();
+    await expect(
+      grant.getByText("Type at least 3 characters.", { exact: true })
+    ).toBeVisible();
     await expect
       .poll(() =>
         surface.evaluate((panel) => {
@@ -528,11 +536,6 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         expect(box.y).toBeCloseTo(initialBox.y, 0);
       }
     };
-    expect(searches).toBe(0);
-    await search.click();
-    await expect(
-      grant.getByText("Type at least 3 characters.", { exact: true })
-    ).toBeVisible();
     expect(searches).toBe(0);
     await page
       .getByRole("dialog", { name: "Grant Rep", exact: true })
