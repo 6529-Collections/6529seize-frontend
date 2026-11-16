@@ -222,6 +222,7 @@ export default function UserPageRepNewRepSearch({
   const amountInputId = useId();
   const amountFormId = useId();
   const availableRepId = useId();
+  const categoryErrorId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
@@ -241,15 +242,17 @@ export default function UserPageRepNewRepSearch({
   } | null>(null);
   const [mutating, setMutating] = useState<boolean>(false);
 
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [showErrorDetails, setShowErrorDetails] = useState<boolean>(true);
+  const [formError, setError] = useState<{
+    readonly message: string;
+    readonly field: "category" | "save";
+    readonly showDetails: boolean;
+  } | null>(null);
+  const categoryInvalid = formError?.field === "category";
 
   const [debouncedValue, setDebouncedValue] = useState<string>("");
   useDebounce(
     () => {
       setDebouncedValue(repSearch);
-      setErrorMsg(null);
-      setShowErrorDetails(true);
     },
     500,
     [repSearch]
@@ -337,8 +340,11 @@ export default function UserPageRepNewRepSearch({
   const [checkingAvailability, setCheckingAvailability] = useState(false);
 
   const showHelpBotCreditRepCategoryError = () => {
-    setErrorMsg(helpBotCreditRepCategoryError);
-    setShowErrorDetails(false);
+    setError({
+      message: helpBotCreditRepCategoryError,
+      field: "category",
+      showDetails: false,
+    });
   };
 
   const onRepSelect = async (rep: string, knownCategory = false) => {
@@ -354,20 +360,24 @@ export default function UserPageRepNewRepSearch({
     // leading-dash messages actually reach the user.
     const violation = getRepCategoryViolation(rep);
     if (violation) {
-      setErrorMsg(t(locale, violation.key, { ...violation.params }));
-      setShowErrorDetails(false);
+      setError({
+        message: t(locale, violation.key, { ...violation.params }),
+        field: "category",
+        showDetails: false,
+      });
       return;
     }
     // Search-specific minimum (below the server's 1-char floor): surface it
     // instead of silently dropping the input. Count code points to stay
     // consistent with the validator's length semantics.
     if (!knownCategory && getSearchLength(rep) < SEARCH_LENGTH.MIN) {
-      setErrorMsg(
-        t(locale, "rep.categories.validation.tooShort", {
+      setError({
+        message: t(locale, "rep.categories.validation.tooShort", {
           min: SEARCH_LENGTH.MIN,
-        })
-      );
-      setShowErrorDetails(false);
+        }),
+        field: "category",
+        showDetails: false,
+      });
       return;
     }
     setCheckingAvailability(!knownCategory);
@@ -383,15 +393,18 @@ export default function UserPageRepNewRepSearch({
       setSelectedCategory(rep);
       setRepSearch(rep);
       setAmountDraft(null);
-      setErrorMsg(null);
-      setShowErrorDetails(true);
+      setError(null);
       setIsOpen(false);
     } catch (error: unknown) {
       if (request !== selectionRequest.current) return;
-      setErrorMsg(
-        getErrorMessage(error, t(locale, "rep.categories.grant.errors.generic"))
-      );
-      setShowErrorDetails(true);
+      setError({
+        message: getErrorMessage(
+          error,
+          t(locale, "rep.categories.grant.errors.generic")
+        ),
+        field: "category",
+        showDetails: true,
+      });
     } finally {
       if (request === selectionRequest.current) setCheckingAvailability(false);
     }
@@ -422,6 +435,7 @@ export default function UserPageRepNewRepSearch({
       setSelectedCategory(null);
       setRepSearch("");
       setAmountDraft(null);
+      setError(null);
       setIsOpen(false);
       onSuccess?.();
     },
@@ -461,10 +475,14 @@ export default function UserPageRepNewRepSearch({
       }
       await addRepMutation.mutateAsync({ amount, category: selectedCategory });
     } catch (error: unknown) {
-      setErrorMsg(
-        getErrorMessage(error, t(locale, "rep.categories.grant.errors.generic"))
-      );
-      setShowErrorDetails(true);
+      setError({
+        message: getErrorMessage(
+          error,
+          t(locale, "rep.categories.grant.errors.generic")
+        ),
+        field: "save",
+        showDetails: true,
+      });
     } finally {
       setMutating(false);
     }
@@ -508,6 +526,7 @@ export default function UserPageRepNewRepSearch({
     selectionRequest.current++;
     setCheckingAvailability(false);
     setRepSearch(newValue);
+    setError(null);
     if (selectedCategory && newValue !== selectedCategory) {
       setSelectedCategory(null);
       setAmountDraft(null);
@@ -561,7 +580,12 @@ export default function UserPageRepNewRepSearch({
               onFocus={() => {
                 if (!selectedCategory) setIsOpen(true);
               }}
-              aria-describedby={SUBMISSION_GUIDANCE_ID}
+              aria-invalid={categoryInvalid}
+              aria-describedby={
+                categoryInvalid
+                  ? `${SUBMISSION_GUIDANCE_ID} ${categoryErrorId}`
+                  : SUBMISSION_GUIDANCE_ID
+              }
               className="tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none"
               placeholder={t(locale, "rep.categories.grant.searchPlaceholder")}
             />
@@ -575,7 +599,7 @@ export default function UserPageRepNewRepSearch({
                   setSelectedCategory(null);
                   setRepSearch("");
                   setAmountDraft(null);
-                  setErrorMsg(null);
+                  setError(null);
                   setIsOpen(true);
                   searchInputRef.current?.focus();
                 }}
@@ -687,15 +711,12 @@ export default function UserPageRepNewRepSearch({
             </Button>
           </div>
         )}
-        {!!errorMsg && (
-          <div className="tw-mt-3 tw-pb-2">
+        {formError && (
+          <div id={categoryErrorId} className="tw-mt-3 tw-pb-2">
             <UserPageRepNewRepError
-              msg={errorMsg}
-              showDetails={showErrorDetails}
-              closeError={() => {
-                setErrorMsg(null);
-                setShowErrorDetails(true);
-              }}
+              msg={formError.message}
+              showDetails={formError.showDetails}
+              closeError={() => setError(null)}
             />
           </div>
         )}

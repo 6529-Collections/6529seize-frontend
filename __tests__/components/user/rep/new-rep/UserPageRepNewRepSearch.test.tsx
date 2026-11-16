@@ -39,9 +39,11 @@ jest.mock(
       </div>
     )
 );
-jest.mock("@/components/user/rep/new-rep/UserPageRepNewRepError", () => () => (
-  <div data-testid="error" />
-));
+jest.mock(
+  "@/components/user/rep/new-rep/UserPageRepNewRepError",
+  () =>
+    ({ msg }: { readonly msg: string }) => <div data-testid="error">{msg}</div>
+);
 jest.mock(
   "@/components/distribution-plan-tool/common/CircleLoader",
   () => () => <div data-testid="loader" />
@@ -407,10 +409,14 @@ describe("UserPageRepNewRepSearch", () => {
     await user.type(amount, "35");
     await user.click(screen.getByRole("button", { name: "Save" }));
     expect(await screen.findByTestId("error")).toBeInTheDocument();
+    expect(
+      screen.getByRole("textbox", { name: "Category to grant REP for" })
+    ).toHaveAttribute("aria-invalid", "false");
     expect(amount).toHaveValue("35");
     expect(onSuccess).not.toHaveBeenCalled();
     await user.click(screen.getByRole("button", { name: "Save" }));
     await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+    expect(screen.queryByTestId("error")).not.toBeInTheDocument();
     expect(commonApiPost).toHaveBeenCalledTimes(2);
   });
 
@@ -588,6 +594,31 @@ describe("UserPageRepNewRepSearch", () => {
     await user.type(search, "t");
 
     expect(screen.getByText("LOADING")).toBeInTheDocument();
+  });
+
+  it("associates category validation with the search and clears it on edit", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    expect(search).toHaveAttribute("aria-invalid", "false");
+    await user.type(search, "ar{Enter}");
+    const error = await screen.findByTestId("error");
+    expect(search).toHaveAttribute("aria-invalid", "true");
+    expect(search).toHaveAccessibleDescription(/Use at least 3 characters\./);
+    expect(search.getAttribute("aria-describedby")?.split(" ")).toContain(
+      error.parentElement?.id
+    );
+    expect(commonApiFetch).not.toHaveBeenCalled();
+    await user.type(search, "t");
+    expect(search).toHaveAttribute("aria-invalid", "false");
+    expect(screen.queryByTestId("error")).not.toBeInTheDocument();
   });
 
   it("counts Unicode characters consistently for the search minimum", async () => {
