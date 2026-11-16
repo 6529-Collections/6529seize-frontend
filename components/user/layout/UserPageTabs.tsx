@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useAuth } from "@/components/auth/Auth";
 import { UNDERLINE_TAB_INDICATOR_CLASSES } from "@/components/common/underlineTabStyles";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -306,35 +308,39 @@ export default function UserPageTabs({
       {canScrollLeft && (
         <>
           <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-16 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
-          <button
+          <IconButton
             onClick={scrollLeft}
             aria-label={getUserProfileTabsMessage(
               "user.profile.tabs.scrollLeft"
             )}
-            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-8 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+            type="submit"
+            layout="scroll-profile"
+            className="tw-left-0"
           >
             <FontAwesomeIcon
               icon={faChevronLeft}
               className="tw-h-3.5 tw-w-3.5 tw-text-iron-400 tw-transition-colors tw-duration-150 tw-ease-out group-hover:tw-text-iron-200"
             />
-          </button>
+          </IconButton>
         </>
       )}
       {canScrollRight && (
         <>
           <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-16 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
-          <button
+          <IconButton
             onClick={scrollRight}
             aria-label={getUserProfileTabsMessage(
               "user.profile.tabs.scrollRight"
             )}
-            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-8 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+            type="submit"
+            layout="scroll-profile"
+            className="tw-right-0"
           >
             <FontAwesomeIcon
               icon={faChevronRight}
               className="tw-h-3.5 tw-w-3.5 tw-text-iron-400 tw-transition-colors tw-duration-150 tw-ease-out group-hover:tw-text-iron-200"
             />
-          </button>
+          </IconButton>
         </>
       )}
     </nav>

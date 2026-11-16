@@ -4,6 +4,7 @@ import WaveNotificationSettings from "@/components/waves/specs/WaveNotificationS
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
+import type { ContextType } from "react";
 
 jest.mock("@/hooks/useWaveNotificationSubscription", () => ({
   useWaveNotificationSubscription: jest.fn(),
@@ -633,6 +634,27 @@ describe("WaveNotificationSettings", () => {
 
     const muteButton = screen.getByLabelText("Mute wave");
     expect(muteButton).not.toBeDisabled();
+  });
+
+  it("keeps keyboard focus on mute when switching between compact and full controls", () => {
+    const view = (compact: boolean) => (
+      <AuthContext.Provider
+        value={mockAuthContext as ContextType<typeof AuthContext>}
+      >
+        <WaveNotificationSettings wave={mockWave} compact={compact} />
+      </AuthContext.Provider>
+    );
+    const { rerender } = render(view(false));
+    const muteButton = screen.getByRole("button", { name: "Mute wave" });
+    muteButton.focus();
+
+    for (const compact of [true, false]) {
+      rerender(view(compact));
+      expect(screen.getByRole("button", { name: "Mute wave" })).toBe(
+        muteButton
+      );
+      expect(muteButton).toHaveFocus();
+    }
   });
 
   it("renders muted button when wave is muted", () => {

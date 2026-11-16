@@ -96,7 +96,12 @@ export function getIconButtonClasses({
   inset = false,
 }: IconButtonStyleOptions & { readonly inset?: boolean }): string {
   if (layout) {
-    return getIconButtonLayoutClasses({ layout, disabled, className });
+    return getIconButtonLayoutClasses({
+      layout,
+      disabled,
+      selected: variant === "selected",
+      className,
+    });
   }
   return clsx(
     "tw-group tw-inline-flex tw-shrink-0 tw-items-center tw-justify-center tw-p-0 tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 motion-reduce:tw-transform-none motion-reduce:tw-transition-none",
