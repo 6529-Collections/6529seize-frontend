@@ -1,6 +1,8 @@
 "use client";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import { isUploadedDropGif } from "@/helpers/gif-preview.helpers";
 import {
   ExtendedDrop,
   getDropPreviewImageUrl,
@@ -69,13 +71,24 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         {previewImageUrl ? (
           <div className="tw-flex tw-w-full tw-justify-center">
             <div className="tw-relative tw-aspect-[4/3] tw-max-h-48 tw-w-full tw-max-w-[264px] tw-overflow-hidden tw-rounded-lg">
-              <Image
-                src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
-                alt="Preview image"
-                fill
-                sizes="264px"
-                className="tw-object-contain"
-              />
+              {isUploadedDropGif(previewImageUrl) ? (
+                <DropImagePreview
+                  originalSrc={previewImageUrl}
+                  imageScale={ImageScale.AUTOx450}
+                  alt="Preview image"
+                  fill
+                  sizes="264px"
+                  className="tw-object-contain"
+                />
+              ) : (
+                <Image
+                  src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
+                  alt="Preview image"
+                  fill
+                  sizes="264px"
+                  className="tw-object-contain"
+                />
+              )}
             </div>
           </div>
         ) : (

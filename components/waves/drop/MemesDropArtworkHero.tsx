@@ -3,6 +3,7 @@
 import artworkStyles from "@/components/drops/view/item/content/media/ArtworkFrame.module.css";
 import DropListItemContentMedia from "@/components/drops/view/item/content/media/DropListItemContentMedia";
 import videoFrameStyles from "@/components/drops/view/item/content/media/SeizeVideoFrame.module.css";
+import { isUploadedDropGif } from "@/helpers/gif-preview.helpers";
 import { ImageScale } from "@/helpers/image.helpers";
 import clsx from "clsx";
 import type { MemesDropMedia } from "./memesDropPanelTypes";
@@ -59,8 +60,9 @@ export function MemesDropArtworkHero({
                 showOriginalQualityToggle={isImage}
                 preferHighQualityImage={isImage}
                 autoAnimateGif={
-                  allowAutomaticOriginal &&
-                  artworkMedia.mime_type === "image/gif"
+                  artworkMedia.mime_type === "image/gif" &&
+                  (allowAutomaticOriginal ||
+                    isUploadedDropGif(artworkMedia.url))
                 }
                 imageLoadingLayout="artwork"
                 loadStrategy={loadStrategy}

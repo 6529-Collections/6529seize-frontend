@@ -80,41 +80,6 @@ async function expectSubmissionGifLoadingLayout(
   ).toBeEnabled();
 }
 
-async function selectSubmissionOriginal(
-  hero: Locator,
-  {
-    automaticOriginal,
-    animationUnavailable,
-    directOriginalRequests,
-    releaseOriginal,
-  }: {
-    automaticOriginal: boolean;
-    animationUnavailable: boolean;
-    directOriginalRequests: readonly string[];
-    releaseOriginal: () => void;
-  }
-) {
-  if (automaticOriginal) return;
-
-  await hero
-    .getByRole("button", { name: "View original", exact: true })
-    .click();
-  if (!animationUnavailable) return;
-
-  try {
-    await expect.poll(() => directOriginalRequests.length).toBeGreaterThan(0);
-    await expectSubmissionGifLoadingLayout(hero, "View optimized");
-    await expect(
-      hero.getByRole("status", {
-        name: "Loading original GIF",
-        exact: true,
-      })
-    ).toHaveCount(0);
-  } finally {
-    releaseOriginal();
-  }
-}
-
 // Parent suites supply the local-only mutation guard and desktop/touch projects.
 // Pixel-budget arithmetic belongs in the resizer tests.
 export function defineSubmissionArtworkPreviewTests() {
@@ -127,11 +92,8 @@ export function defineSubmissionArtworkPreviewTests() {
     test(`shows artwork HD in both views and preserves description lines for ${extension}${animationUnavailable ? " with unavailable animated previews" : ""}${nativeApp ? " in the native mobile app" : ""}`, async ({
       page,
       baseURL,
-      isMobile,
-      hasTouch,
     }) => {
-      const automaticOriginal =
-        animationUnavailable && !nativeApp && !isMobile && !hasTouch;
+      const automaticOriginal = animationUnavailable;
       if (nativeApp)
         await installSurfaceSimulation(
           page.context(),
@@ -346,12 +308,11 @@ export function defineSubmissionArtworkPreviewTests() {
           .getByRole("button")
           .first()
       ).toHaveAccessibleName(qualityLabel);
-      await selectSubmissionOriginal(hero, {
-        automaticOriginal,
-        animationUnavailable,
-        directOriginalRequests,
-        releaseOriginal,
-      });
+      if (!automaticOriginal) {
+        await hero
+          .getByRole("button", { name: "View original", exact: true })
+          .click();
+      }
       const originalAlt =
         extension === "gif" ? "Original GIF animation" : "Original image";
       const inlineOriginal = hero.getByRole("img", {
@@ -485,17 +446,21 @@ export function defineWaveImagePreviewTests() {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("keeps failed drop previews and gallery navigation off original files", async ({
+  test("keeps failed still and non-upload GIF previews off original files until requested", async ({
     page,
     baseURL,
   }) => {
     const { apiOrigin, feed, source } = await fetchSandboxDrop(page, baseURL);
-    const originals = [`${MEDIA_ROOT}large.jpg`, `${MEDIA_ROOT}long.gif`];
+    const nonDropGifRoot = MEDIA_ROOT.replace("/drops/", "/images/");
+    const originals = [`${MEDIA_ROOT}large.jpg`, `${nonDropGifRoot}long.gif`];
+    const matchesPreview = (url: URL) =>
+      url.href.startsWith(MEDIA_ROOT) || url.href.startsWith(nonDropGifRoot);
     const drop: ApiDropV2 = {
       ...source,
       title: "Preview safety fixture",
       content: "",
       drop_type: ApiDropMainType.Submission,
+      wave: feed.wave,
       media: originals.map((url, index) => ({
         url,
         mime_type: index === 0 ? "image/jpeg" : "image/gif",
@@ -506,23 +471,44 @@ export function defineWaveImagePreviewTests() {
       route.fulfill({ headers, json: { results: {} } })
     );
     await page.route(`${apiOrigin}/api/settings`, (route) =>
-      route.fulfill({ headers, json: { memes_wave_id: WAVE_ID } })
+      route.fulfill({
+        headers,
+        json: { memes_wave_id: composerSandboxConstants.linkedDropMemesWaveId },
+      })
     );
+    await page.route(`${apiOrigin}/api/v2/drops?**`, (route) => {
+      const ids = new URL(route.request().url()).searchParams
+        .get("ids")
+        ?.split(",");
+      if (!ids?.includes(DROP_ID)) return route.fallback();
+      return route.fulfill({
+        headers,
+        json: { data: [drop], page: 1, next: false },
+      });
+    });
     await page.route(`${apiOrigin}/api/v2/drops/${DROP_ID}`, (route) =>
       route.fulfill({ headers, json: { drop, wave: feed.wave } })
+    );
+    await page.route(
+      `${apiOrigin}/api/v3/waves/${WAVE_ID}/drops/${DROP_ID}/competition-context`,
+      (route) =>
+        route.fulfill({ headers, json: { competition: null, entry: null } })
+    );
+    await page.route(`${apiOrigin}/api/v2/drops/${DROP_ID}/metadata`, (route) =>
+      route.fulfill({ headers, json: [] })
     );
     await page.route(`${apiOrigin}/api/v2/waves/${WAVE_ID}/drops*`, (route) =>
       route.fulfill({ headers, json: { ...feed, drops: [drop] } })
     );
     const requests: string[] = [];
     page.on("request", (request) => {
-      if (request.url().startsWith(MEDIA_ROOT)) requests.push(request.url());
+      if (matchesPreview(new URL(request.url()))) requests.push(request.url());
     });
     let releasePreviews = () => {};
     const previewResponseGate = new Promise<void>((resolve) => {
       releasePreviews = resolve;
     });
-    await page.route(`${MEDIA_ROOT}**`, async (route) => {
+    await page.route(matchesPreview, async (route) => {
       await previewResponseGate;
       await route.fulfill({ status: 422, body: "Preview unavailable" });
     });
@@ -608,7 +594,7 @@ export function defineWaveImagePreviewTests() {
     expect(requests.some((url) => url.includes("AUTOx1080"))).toBe(true);
     expect(requests.some((url) => url.includes("AUTOx450"))).toBe(true);
     expect(requests.filter((url) => originals.includes(url))).toEqual([]);
-    // Originals remain opt-in even when every generated preview fails.
+    // This GIF is outside the uploaded drop media path.
     await page.route(originals[1]!, (route) =>
       route.fulfill({
         status: 200,
@@ -656,7 +642,7 @@ export function defineWaveImagePreviewTests() {
     );
     // A recovered preview must replace the error state without closing the
     // viewer, and navigation must reset the previous item's failed state.
-    await page.route(`${MEDIA_ROOT}**`, (route) =>
+    await page.route(matchesPreview, (route) =>
       route.fulfill({
         status: 200,
         contentType: "image/png",

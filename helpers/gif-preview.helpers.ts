@@ -18,6 +18,22 @@ export function isGifImageUrl(url: string): boolean {
   }
 }
 
+/** Only uploads on the first-party drop CDN may load the original automatically. */
+export function isUploadedDropGif(url: string): boolean {
+  try {
+    const { origin, pathname, username, password } = new URL(url);
+    return (
+      origin === "https://d3lqz0a4bldqgf.cloudfront.net" &&
+      !username &&
+      !password &&
+      pathname.startsWith("/drops/") &&
+      pathname.toLowerCase().endsWith(".gif")
+    );
+  } catch {
+    return false;
+  }
+}
+
 function splitUrlSuffix(url: string) {
   const index = url.search(/[?#]/);
   return index < 0
