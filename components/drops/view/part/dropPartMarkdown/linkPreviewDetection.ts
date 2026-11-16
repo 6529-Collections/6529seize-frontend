@@ -1,7 +1,6 @@
 import { ensureStableSeizeLink } from "@/helpers/SeizeLinkParser";
-import { publicEnv } from "@/config/env";
+import { isFirstPartyMediaOrigin } from "@/lib/media/first-party-media";
 
-const DEFAULT_CLOUDFRONT_DOMAIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 const TENOR_DOMAIN = "tenor.com";
 const GIPHY_MEDIA_HOST_REGEX = /^media\d*\.giphy\.com$/;
 const ALLOWED_MEDIA_PATH_EXTENSIONS = [
@@ -58,13 +57,9 @@ const parseUrl = (href: string): URL | null => {
 const getUrlOrigin = (href: string): string | null =>
   parseUrl(href)?.origin ?? null;
 
-const getAllowedCloudfrontOrigin = (): string =>
-  getUrlOrigin(publicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ?? "") ??
-  DEFAULT_CLOUDFRONT_DOMAIN;
-
-const isAllowedCloudfrontHref = (href: string): boolean => {
+const isFirstPartyMediaHref = (href: string): boolean => {
   const hrefOrigin = getUrlOrigin(href);
-  return hrefOrigin !== null && hrefOrigin === getAllowedCloudfrontOrigin();
+  return hrefOrigin !== null && isFirstPartyMediaOrigin(hrefOrigin);
 };
 
 const isDomainOrSubdomain = (hostname: string, domain: string): boolean =>
@@ -108,7 +103,7 @@ const isDisallowedLinkHref = (href: string): boolean => {
   }
 
   return (
-    !isAllowedCloudfrontHref(stableHref) &&
+    !isFirstPartyMediaHref(stableHref) &&
     !isAllowedGifProviderHref(stableHref)
   );
 };
