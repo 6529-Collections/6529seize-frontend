@@ -810,6 +810,8 @@ const WAVE_VOTE_DETAILS_MESSAGES = objectMessages("waves.voteDetails", {
 
 const WAVE_DROP_ACTIONS_MESSAGES = objectMessages("waves.drop.actions", {
   menuLabel: "Drop actions",
+  moreActions: "More actions",
+  scrollForMore: "More actions, scroll down",
   reply: "Reply",
   replyToDrop: "Reply to drop",
   replyUnavailable: "You are not eligible to chat in this wave",

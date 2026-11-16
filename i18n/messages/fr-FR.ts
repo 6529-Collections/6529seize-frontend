@@ -283,6 +283,8 @@ export const FR_FR_MESSAGES = {
   "waves.drop.actions.copied": "Copie !",
   "waves.drop.actions.copyFailed": "Echec de la copie",
   "waves.drop.actions.menuLabel": "Actions du drop",
+  "waves.drop.actions.moreActions": "Plus d’actions",
+  "waves.drop.actions.scrollForMore": "Plus d’actions, faire défiler vers le bas",
   "waves.drop.actions.reactionPickerLabel": "Ajouter une réaction au drop",
   "waves.drop.actions.showMore": "Afficher plus",
   "waves.drop.actions.showLess": "Afficher moins",
