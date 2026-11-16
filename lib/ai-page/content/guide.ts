@@ -10,8 +10,8 @@ import type { AiRelease, AiSystem } from "../releaseFeed";
 export type AiGuideSystemKey = "mac" | "windows" | "linux";
 
 export type AiCode = {
-  /** What the block is for, when there are several: "x86-64". */
-  readonly label?: string | undefined;
+  /** Where it goes, or which computer it is for: "Terminal", "x86-64". */
+  readonly label: string;
   readonly code: string;
 };
 
@@ -117,11 +117,12 @@ function macGuide(dmg: string): AiGuideSystem {
     openAgain: {
       text: "Open **6529 AI** from Applications. It runs while you're logged in.",
     },
-    log: { code: "~/Library/Logs/6529-ai.log" },
+    log: { label: "Log file", code: "~/Library/Logs/6529-ai.log" },
     uninstall: {
       text: "Run this in Terminal, then drag 6529 AI to the Trash. Add `--data` to delete your models too.",
       code: [
         {
+          label: "Terminal",
           code: '"/Applications/6529 AI.app/Contents/Resources/uninstall.sh"',
         },
       ],
@@ -165,7 +166,10 @@ function windowsGuide(
     openAgain: {
       text: "Choose **6529 AI** in the Start menu. It runs whenever the computer is on.",
     },
-    log: { code: "%LOCALAPPDATA%\\6529-ai\\logs\\6529-ai.log" },
+    log: {
+      label: "Log file",
+      code: "%LOCALAPPDATA%\\6529-ai\\logs\\6529-ai.log",
+    },
     uninstall: {
       text: "Open **Settings**, **Apps**, choose **6529 AI** and **Uninstall**. It asks whether to delete your models too.",
     },
@@ -208,11 +212,12 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
       text: "For a new sign-in link:",
       code: [
         {
+          label: "Terminal",
           code: "sudo -u ai6529 6529-ai-cli --data /var/lib/6529-ai open --print",
         },
       ],
     },
-    log: { code: "journalctl -u 6529-ai" },
+    log: { label: "Terminal", code: "journalctl -u 6529-ai" },
     uninstall: {
       text: "Remove keeps your models and settings; purge deletes them. Use `6529-ai-cuda` for the CUDA package.",
       code: [

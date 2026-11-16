@@ -88,9 +88,9 @@ function DownloadButtons({
     return null;
   }
   return (
-    <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-center tw-gap-2">
+    <div className="tw-mt-5 tw-grid tw-gap-2 sm:tw-flex sm:tw-flex-wrap sm:tw-items-center">
       {buttons.some((button) => button.label) && (
-        <span className="tw-mr-1 tw-w-full tw-text-sm tw-text-iron-400 sm:tw-w-auto">
+        <span className="tw-text-sm tw-text-iron-400 sm:tw-mr-1">
           {t(LOCALE, "ai.guide.downloadDeb")}
         </span>
       )}
@@ -100,7 +100,7 @@ function DownloadButtons({
           <a
             key={installer.kind}
             href={getAiDownloadPath(release, installer.file)}
-            className={`${AI_BUTTON} max-sm:tw-flex-1`}
+            className={AI_BUTTON}
             aria-label={t(LOCALE, "ai.files.download.label", {
               file: installer.file.name,
             })}
@@ -129,7 +129,7 @@ function SystemPanel({
   readonly system: AiGuideSystem;
 }) {
   return (
-    <div className="tw-flex tw-flex-col tw-gap-10">
+    <div className="tw-flex tw-flex-col tw-gap-14">
       <section
         aria-labelledby={`needs-${system.key}`}
         className={`${AI_CARD} tw-p-5`}
@@ -165,11 +165,13 @@ function SystemPanel({
               <AiScreenshot
                 slot={AI_SCREENSHOTS.placement}
                 alt={t(LOCALE, "ai.guide.placementShot")}
+                caption={t(LOCALE, "ai.guide.placementCaption")}
+                narrow
               />
             ),
           }}
         />
-        <div className="tw-mt-8">
+        <div className="tw-mt-14">
           <h3 className={`tw-mb-2 ${AI_H3}`}>
             {t(LOCALE, "ai.guide.openAgain")}
           </h3>
@@ -188,7 +190,11 @@ function SystemPanel({
             <p className={`tw-m-0 ${AI_BODY}`}>
               {t(LOCALE, "ai.guide.troubleshooting.body")}
             </p>
-            <AiCodeBlock code={system.log.code} what={system.log.code} />
+            <AiCodeBlock
+              code={system.log.code}
+              label={system.log.label}
+              what={system.log.code}
+            />
           </div>
         </ValidatorFold>
         <ValidatorFold small title={t(LOCALE, "ai.guide.uninstall")}>
@@ -257,6 +263,7 @@ export default function AiGuidePage({
           <AiScreenshot
             slot={AI_SCREENSHOTS.firstChat}
             alt={t(LOCALE, "ai.guide.chatShot")}
+            caption={t(LOCALE, "ai.guide.chatCaption")}
           />
         </div>
       </section>
@@ -294,8 +301,8 @@ export default function AiGuidePage({
         </section>
       </div>
 
-      <div className={`${AI_CARD} tw-mt-10 tw-p-5`}>
-        <AiReportProblem title={t(LOCALE, "ai.guide.stuck")} />
+      <div className="tw-mt-10">
+        <AiReportProblem />
       </div>
     </AiPageFrame>
   );

@@ -49,7 +49,12 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
         issue: "Not tested with a GPU.",
         workaround:
           "If models don't start, reinstall and choose **On the CPU only**. If the uninstall leaves the config behind, delete it first:",
-        code: [{ code: "C:\\Program Files\\6529 AI\\6529-ai.toml" }],
+        code: [
+          {
+            label: "File to delete",
+            code: "C:\\Program Files\\6529 AI\\6529-ai.toml",
+          },
+        ],
       },
       {
         issue:
@@ -72,6 +77,7 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
         workaround: "Answer it before you install:",
         code: [
           {
+            label: "Terminal",
             code: 'echo "6529-ai 6529-ai/placement select alone" | sudo debconf-set-selections',
           },
         ],
@@ -87,12 +93,12 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
           "If the page doesn't open within 60 seconds of installing, the service didn't start.",
         workaround: "Its log says why:",
         code: [
-          { label: "Mac", code: "~/Library/Logs/6529-ai.log" },
+          { label: "Mac, log file", code: "~/Library/Logs/6529-ai.log" },
           {
-            label: "Windows",
+            label: "Windows, log file",
             code: "%LOCALAPPDATA%\\6529-ai\\logs\\6529-ai.log",
           },
-          { label: "Linux", code: "journalctl -u 6529-ai" },
+          { label: "Linux, Terminal", code: "journalctl -u 6529-ai" },
         ],
       },
     ],

@@ -133,6 +133,7 @@ export default function AiVerify({ release }: { readonly release: AiRelease }) {
             </p>
             <AiCodeBlock label={keyFile} code={pem.trim()} what={keyFile} />
             <AiCodeBlock
+              label={t(LOCALE, "ai.code.terminal")}
               code={`openssl pkeyutl -verify -pubin -inkey ${keyFile} -rawin -in ${SHA256SUMS} -sigfile ${SHA256SUMS_SIG}`}
             />
             <p className={`tw-m-0 ${AI_MUTED}`}>
@@ -171,7 +172,7 @@ export default function AiVerify({ release }: { readonly release: AiRelease }) {
               return (
                 <li
                   key={file.name}
-                  className="tw-flex tw-items-center tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 first:tw-border-t-0"
+                  className="tw-flex tw-flex-col tw-items-start tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3 first:tw-border-t-0 sm:tw-flex-row sm:tw-items-center"
                 >
                   <div className="tw-min-w-0 tw-flex-1">
                     <p className="tw-m-0 tw-font-mono tw-text-[13px] tw-leading-5 tw-text-iron-100">

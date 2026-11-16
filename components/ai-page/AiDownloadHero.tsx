@@ -16,6 +16,7 @@ import {
 import { useVisitorPlatform } from "@/components/validator-page/useVisitorPlatform";
 import { PRIMARY_BUTTON } from "@/components/validator-page/validatorStyles";
 import type { AiInstallerKind } from "@/lib/ai-page/releaseFiles";
+import AiSystemLogo from "./AiSystemLogo";
 import type { VisitorPlatform } from "@/lib/validator-page/detectSystem";
 
 /** One package, with its words already in the page's language. */
@@ -36,6 +37,8 @@ export type AiHeroOption = {
 export type AiHeroSystem = {
   readonly key: "mac" | "windows" | "linux";
   readonly label: string;
+  /** The system's logo, from /public. */
+  readonly image: string;
   readonly href: string;
   readonly ariaLabel: string;
 };
@@ -170,6 +173,7 @@ function PhoneFirst({
               aria-label={system.ariaLabel}
               className={ROW_BUTTON}
             >
+              <AiSystemLogo src={system.image} size="sm" />
               {system.label}
             </a>
           ))}

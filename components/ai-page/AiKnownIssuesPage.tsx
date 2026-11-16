@@ -128,7 +128,7 @@ export default function AiKnownIssuesPage({
         ))}
       </div>
 
-      <div className={`${AI_CARD} tw-mt-10 tw-p-5`}>
+      <div className="tw-mt-10">
         <AiReportProblem />
       </div>
     </AiPageFrame>

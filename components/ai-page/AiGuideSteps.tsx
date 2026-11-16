@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
 
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/ai-download";
 import type { AiGuideStep } from "@/lib/ai-page/content/guide";
 import AiCodeBlock from "./AiCodeBlock";
 import { AI_BODY } from "./AiPageFrame";
@@ -32,13 +35,19 @@ function AiStepDetails({
       {step.code?.map((block) => (
         <AiCodeBlock key={block.code} code={block.code} label={block.label} />
       ))}
+      {screenshot}
       {step.result && (
         <p className={RESULT}>
           <InlineText text={step.result} />
         </p>
       )}
-      {step.example && <AiCodeBlock code={step.example} copy={false} />}
-      {screenshot}
+      {step.example && (
+        <AiCodeBlock
+          code={step.example}
+          label={t(DEFAULT_LOCALE, "ai.code.example")}
+          copy={false}
+        />
+      )}
     </div>
   );
 }

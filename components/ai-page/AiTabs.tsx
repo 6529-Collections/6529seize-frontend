@@ -23,7 +23,7 @@ const TAB =
 const SELECTED =
   "tw-bg-iron-100 tw-font-semibold tw-text-iron-950 tw-shadow-sm";
 const UNSELECTED =
-  "tw-bg-transparent tw-font-medium tw-text-iron-400 hover:tw-bg-white/[0.06] hover:tw-text-iron-100";
+  "tw-bg-transparent tw-font-medium tw-text-iron-400 hover:tw-text-iron-100";
 
 /**
  * Tabs as a segmented control: every panel is rendered on the server and

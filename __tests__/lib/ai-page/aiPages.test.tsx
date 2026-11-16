@@ -106,7 +106,7 @@ describe("the /ai pages", () => {
       expect(notice).toBeLessThan(html.indexOf("<h1") + 2_000);
     }
     // The known issues say it in their lead, right under the title.
-    const lead = knownIssues!.indexOf("6529 AI is untested");
+    const lead = knownIssues!.indexOf("This is an untested test release");
     expect(lead).toBeGreaterThan(knownIssues!.indexOf("<h1"));
     expect(lead).toBeLessThan(knownIssues!.indexOf("<h1") + 500);
     expect(knownIssues).toContain(
@@ -166,7 +166,8 @@ describe("the /ai pages", () => {
     expect(html.indexOf("Download for Windows")).toBeLessThan(
       html.indexOf("Also for")
     );
-    expect(html).toContain("0.1.0 · 120.0 MB · Windows 10 or 11, 64-bit");
+    // A no-break space joins the size and its unit.
+    expect(html).toContain("0.1.0 · 120.0 MB · Windows 10 or 11, 64-bit");
     // Every link is to the newest release, never the older candidate.
     const links = downloadLinks(html);
     expect(links.length).toBeGreaterThan(10);

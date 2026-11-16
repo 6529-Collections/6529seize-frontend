@@ -86,9 +86,9 @@ function heroSystems(
   installers: readonly AiInstaller[]
 ): AiHeroSystem[] {
   const systems: AiHeroSystem[] = [];
-  for (const [key, kind, message] of [
-    ["mac", "macos", "ai.download.system.macos"],
-    ["windows", "windows", "ai.download.system.windows"],
+  for (const [key, kind, message, image] of [
+    ["mac", "macos", "ai.download.system.macos", "/macos.png"],
+    ["windows", "windows", "ai.download.system.windows", "/windows.png"],
   ] as const) {
     const installer = installers.find((item) => item.kind === kind);
     if (installer) {
@@ -96,6 +96,7 @@ function heroSystems(
       systems.push({
         key,
         label,
+        image,
         href: getAiDownloadPath(release, installer.file),
         ariaLabel: t(LOCALE, "ai.download.system.label", {
           system: label,
@@ -109,6 +110,7 @@ function heroSystems(
     systems.push({
       key: "linux",
       label,
+      image: "/linux.png",
       href: "#downloads-linux",
       ariaLabel: label,
     });
@@ -272,6 +274,7 @@ export default function AiDownloadPage({
         <AiScreenshot
           slot={AI_SCREENSHOTS.chat}
           alt={t(LOCALE, "ai.download.screenshot")}
+          caption={t(LOCALE, "ai.download.screenshotCaption")}
           priority
         />
       </div>
