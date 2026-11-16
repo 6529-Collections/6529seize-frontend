@@ -153,8 +153,16 @@ On the web and Android, the tab appears after the page loads.
    Escape or Show Less returns to the three-row preview and restores focus.
    Phone rows keep the date first and the title beneath it. The quantity selector
    and toggle stay together beside the title when there is room, or below it
-   together on narrower rows. Minting Today artwork aligns with the top of the
-   text on phones, and the Meme name stays on one line. Visitors keep static quantity
+   together on narrower rows. Minting Today artwork sits above the full-width
+   text on phones, and the Meme name stays on one line.
+   Each Meme title links to its `/the-memes/{id}` page, including before minting,
+   with keyboard focus and the tab's existing link styling. On mint days, the row
+   uses the matching minted thumbnail or, before indexing, a Main Stage winner
+   explicitly mapped to that Meme number. Winner artwork uses a small resized
+   image or preview. Unmatched, unavailable or failed artwork leaves no image
+   slot. Artwork data is requested only when a Minting Today row is present,
+   reusing the shared cache; title links do not prefetch Meme pages.
+   Visitors keep static quantity
    and subscription status. One amber boundary follows the last funded drop,
    using the existing Funded through wording. If no funded-through point is
    supplied, Next unfunded appears before the next unfunded drop instead.
