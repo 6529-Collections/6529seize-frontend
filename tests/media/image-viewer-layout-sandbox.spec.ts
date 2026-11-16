@@ -199,6 +199,19 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
             exact: true,
           });
           await expect(close).toBeVisible();
+          const viewer = page.getByRole("dialog", {
+            name: "Expanded image preview",
+            exact: true,
+          });
+          for (const label of ["Download media", "Close media"]) {
+            const control = viewer.getByRole("button", {
+              name: label,
+              exact: true,
+            });
+            await expect(control).toHaveCSS("width", "36px");
+            await expect(control).toHaveCSS("height", "36px");
+            await expect(control).toHaveCSS("border-radius", "8px");
+          }
           await expect
             .poll(() =>
               page.evaluate(() =>
@@ -222,6 +235,16 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
             .toBe(true);
           expect(await readBackground(page)).toEqual(before);
           if (entry === "gallery") {
+            for (const label of ["Previous image", "Next image"]) {
+              const control = viewer.getByRole("button", {
+                name: label,
+                exact: true,
+              });
+              const size = page.viewportSize()!.width < 640 ? "40px" : "48px";
+              await expect(control).toHaveCSS("width", size);
+              await expect(control).toHaveCSS("height", size);
+              await expect(control).toHaveCSS("border-radius", "8px");
+            }
             await page
               .getByRole("button", { name: "Next image", exact: true })
               .click();
