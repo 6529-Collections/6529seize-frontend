@@ -532,9 +532,12 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(amount).toHaveValue("0");
-    await expect(grant.getByText("Current Rep:", { exact: true })).toHaveCount(
-      0
-    );
+    await expect(
+      grant.getByText("Current Rep:", { exact: true }).locator("..")
+    ).toHaveText("Current Rep:0");
+    await expect(
+      grant.getByText("Adjustment:", { exact: true }).locator("..")
+    ).toHaveText("Adjustment:0");
     await expect(
       grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeDisabled();
@@ -565,9 +568,12 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(search).toHaveValue("Research");
     await expect(search).toHaveAttribute("readonly");
     await expect(amount).toHaveValue("-25");
-    await expect(grant.getByText("Current Rep:", { exact: true })).toHaveCount(
-      0
-    );
+    await expect(
+      grant.getByText("Current Rep:", { exact: true }).locator("..")
+    ).toHaveText("Current Rep:-25");
+    await expect(
+      grant.getByText("Adjustment:", { exact: true }).locator("..")
+    ).toHaveText("Adjustment:0");
     await expect(
       grant.getByText(
         "Enter the total you want to give, including any existing rating.",
@@ -595,12 +601,17 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await amount.click();
     await amount.fill("-15");
     await expect(
-      grant.getByRole("status").getByText("-15", { exact: true })
+      grant.getByRole("status").getByText("+10", { exact: true })
     ).toHaveCSS("color", "rgb(52, 211, 153)");
     await amount.fill("-35");
-    await expect(grant.getByRole("status")).toHaveText("-25 → -35");
     await expect(
-      grant.getByRole("status").getByText("-35", { exact: true })
+      grant.getByText("Current Rep:", { exact: true }).locator("..")
+    ).toHaveText("Current Rep:-25");
+    await expect(
+      grant.getByText("Adjustment:", { exact: true }).locator("..")
+    ).toHaveText("Adjustment:-10");
+    await expect(
+      grant.getByRole("status").getByText("-10", { exact: true })
     ).toHaveCSS("color", "rgb(251, 113, 133)");
     await expect(
       grant.getByRole("button", { name: "Save", exact: true })

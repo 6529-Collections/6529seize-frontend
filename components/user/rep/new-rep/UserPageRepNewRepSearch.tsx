@@ -5,11 +5,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useContext, useId, useMemo, useRef, useState } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  ArrowRightIcon,
-  InformationCircleIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "./rep-search-types";
@@ -28,6 +24,7 @@ import {
 } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
+import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import {
   HELP_BOT_CREDIT_REP_CATEGORY,
@@ -143,42 +140,6 @@ function GrantRepStats({
         </dd>
       </div>
     </dl>
-  );
-}
-
-function GrantRepAmountStatus({
-  currentRep,
-  value,
-  changed,
-}: {
-  readonly currentRep: number;
-  readonly value: string;
-  readonly changed: boolean;
-}) {
-  const locale = useBrowserLocale();
-  let nextValueClassName = "tw-font-medium tw-text-iron-100";
-  if (isRatingValue(value)) {
-    nextValueClassName =
-      Number(value) > currentRep
-        ? "tw-font-medium tw-text-emerald-400"
-        : "tw-font-medium tw-text-rose-400";
-  }
-  return (
-    <div className="tw-mt-2 tw-flex tw-h-5 tw-min-w-0 tw-items-center tw-justify-end">
-      {currentRep !== 0 && changed && (
-        <output className="tw-inline-flex tw-min-w-0 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-text-iron-500">
-          {formatInteger(locale, currentRep)}
-          <span className="tw-sr-only">{" → "}</span>
-          <ArrowRightIcon
-            aria-hidden="true"
-            className="tw-size-3 tw-shrink-0"
-          />
-          <span className={nextValueClassName}>
-            {isRatingValue(value) ? formatInteger(locale, Number(value)) : "—"}
-          </span>
-        </output>
-      )}
-    </div>
   );
 }
 
@@ -674,11 +635,16 @@ export default function UserPageRepNewRepSearch({
             descriptionId={availableRepId}
             invalid={selectedCategory !== null && !isValidValue}
           />
-          <GrantRepAmountStatus
-            currentRep={currentRep}
-            value={amountStr}
-            changed={haveChanged}
-          />
+          <div role="status">
+            <UserRateAdjustmentHelper
+              inLineValues
+              originalValue={currentRep}
+              adjustedValue={isRatingValue(amountStr) ? amountNum : currentRep}
+              adjustmentType="Rep"
+              valueLayout="inline"
+              variant="summary"
+            />
+          </div>
         </form>
         <GrantRepSubmissionGuidance
           selectedCategory={selectedCategory}

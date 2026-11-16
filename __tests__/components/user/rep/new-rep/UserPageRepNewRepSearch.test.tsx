@@ -136,7 +136,12 @@ describe("UserPageRepNewRepSearch", () => {
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
     ).toHaveValue("-25");
-    expect(screen.queryByText("Current Rep:")).not.toBeInTheDocument();
+    expect(screen.getByText("Current Rep:").parentElement).toHaveTextContent(
+      "Current Rep:-25"
+    );
+    expect(screen.getByText("Adjustment:").parentElement).toHaveTextContent(
+      "Adjustment:0"
+    );
     await user.click(screen.getByRole("button", { name: "Change category" }));
     await user.type(
       screen.getByRole("textbox", { name: "Category to grant REP for" }),
@@ -152,7 +157,9 @@ describe("UserPageRepNewRepSearch", () => {
       screen.getByRole("textbox", { name: "Your total REP for this category" })
     ).toHaveValue("0");
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
-    expect(screen.queryByText("Current Rep:")).not.toBeInTheDocument();
+    expect(screen.getByText("Current Rep:").parentElement).toHaveTextContent(
+      "Current Rep:0"
+    );
     expect(commonApiFetch).toHaveBeenCalledTimes(1);
     expect(commonApiPost).not.toHaveBeenCalled();
   });
@@ -238,7 +245,8 @@ describe("UserPageRepNewRepSearch", () => {
     await user.clear(input);
     await user.type(input, "30");
     expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
-    expect(screen.getByRole("status")).toHaveTextContent("20 → 30");
+    expect(screen.getByRole("status")).toHaveTextContent("Current Rep:+20");
+    expect(screen.getByRole("status")).toHaveTextContent("Adjustment:+10");
     expect(commonApiPost).not.toHaveBeenCalled();
   });
 
@@ -603,7 +611,9 @@ describe("UserPageRepNewRepSearch", () => {
     await user.click(screen.getByRole("button", { name: "MemesNominee" }));
     await waitFor(() => expect(input).toHaveValue("MemesNominee"));
     expect(
-      within(screen.getByRole("status")).getByText("MemesNominee")
+      within(screen.getByText(/Memes submissions require/)).getByText(
+        "MemesNominee"
+      )
     ).toHaveClass("tw-text-emerald-400");
 
     await user.click(screen.getByRole("button", { name: "Change category" }));
