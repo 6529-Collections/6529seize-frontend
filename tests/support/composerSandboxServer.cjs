@@ -2870,6 +2870,26 @@ const mockApiPatternReadRoutes = [
   },
   { pattern: /^\/api\/identities\/[^/]+$/, response: () => localProfile },
   { pattern: /^\/api\/profiles\/[^/]+\/proxies$/, response: () => [] },
+  {
+    pattern: /^\/api\/drops\/[^/]+\/curations$/,
+    response: () =>
+      process.env.PLAYWRIGHT_DROP_MENU_PREVIEW === "1"
+        ? [
+            {
+              id: "00000000-0000-4000-8000-000000000590",
+              name: "Demo curation",
+              wave_id: SANDBOX_WAVE_ID,
+              group_id: SANDBOX_ADMIN_GROUP_ID,
+              created_at: CREATED_AT,
+              updated_at: CREATED_AT,
+              priority_order: 0,
+              drop_included: false,
+              authenticated_user_can_curate: true,
+            },
+          ]
+        : [],
+  },
+  { pattern: /^\/api\/waves\/[^/]+\/curations$/, response: () => [] },
 ];
 
 function handleCommunityMemberRead(pathname, url, res) {

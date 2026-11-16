@@ -21,9 +21,14 @@ import { ApiCompetitionType } from '../models/ApiCompetitionType';
 import { ApiCompetitionVotingConfig } from '../models/ApiCompetitionVotingConfig';
 import { ApiCompetitionWinnerConfig } from '../models/ApiCompetitionWinnerConfig';
 import { ApiCreateWaveMetadataRequest } from '../models/ApiCreateWaveMetadataRequest';
+import { ApiMainStageTraitRule } from '../models/ApiMainStageTraitRule';
 import { HttpFile } from '../http/http';
 
 export class ApiCompetition {
+    /**
+    * Artwork trait rules for an enabled Main Stage decision. Points must be finite and nonzero.
+    */
+    'main_stage_trait_rules'?: Array<ApiMainStageTraitRule>;
     /**
     * Number of ACTIVE entries submitted by the authenticated acting profile in this competition. Winning, withdrawn and deleted entries do not consume submission capacity. Null for anonymous readers.
     */
@@ -56,6 +61,12 @@ export class ApiCompetition {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "main_stage_trait_rules",
+            "baseName": "main_stage_trait_rules",
+            "type": "Array<ApiMainStageTraitRule>",
+            "format": ""
+        },
         {
             "name": "your_active_entries_count",
             "baseName": "your_active_entries_count",

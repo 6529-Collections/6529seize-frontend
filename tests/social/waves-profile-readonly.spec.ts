@@ -753,15 +753,18 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     });
     let failImage = false;
     let imageRequests = 0;
+    const artworkRequests: string[] = [];
     await page.route(
       (url) =>
-        url.pathname.endsWith("/_next/image") &&
-        url.searchParams.get("url") === thumbnail,
+        url.origin === new URL(thumbnail).origin &&
+        url.pathname.includes("/subscription-artwork/"),
       async (route) => {
         imageRequests += 1;
-        expect(
-          Number(new URL(route.request().url()).searchParams.get("w"))
-        ).toBeLessThanOrEqual(256);
+        const url = route.request().url();
+        artworkRequests.push(url);
+        expect([thumbnail, thumbnail.replace("200x200", "AUTOx450")]).toContain(
+          url
+        );
         await imageReady;
         if (failImage) await route.fulfill({ status: 404, body: "" });
         else
@@ -830,6 +833,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       await waitForRouteReady(page);
       await expect.poll(() => imageRequests).toBeGreaterThan(1);
       await expect(image).toHaveCount(0);
+      expect(artworkRequests).not.toContain(
+        thumbnail.replace("/200x200/", "/")
+      );
       await expect(
         upcoming.getByRole("button", { name: "Minting Today", exact: true })
       ).toBeVisible();
