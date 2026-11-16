@@ -100,12 +100,15 @@ describe("parseAiReleaseFeed", () => {
             { ...file, name: "short-hash.dmg", sha256: "abc" },
             { ...file, name: "ok.dmg", sha256: "A".repeat(64) },
             { ...file, name: "ok.dmg", sha256: "d".repeat(64) },
+            // Debian writes a pre-release version with a tilde.
+            { ...file, name: "6529-ai_0.1.0~rc.1_amd64.deb" },
           ],
         },
       ],
     });
     expect(releases?.[0]?.files).toEqual([
       { ...file, name: "ok.dmg", sha256: "a".repeat(64) },
+      { ...file, name: "6529-ai_0.1.0~rc.1_amd64.deb" },
     ]);
   });
 

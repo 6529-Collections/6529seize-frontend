@@ -73,7 +73,7 @@ const FEED_FORMAT = "6529-ai-releases/1";
 // A file name becomes one S3 key segment and a download path segment, so
 // it may not hold a slash, a backslash, `..` or a control character, or
 // start with a dot.
-const FILE_NAME_PATTERN = /^[0-9A-Za-z][0-9A-Za-z._+-]{0,127}$/;
+const FILE_NAME_PATTERN = /^[0-9A-Za-z][0-9A-Za-z._+~-]{0,127}$/;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
 const COMMIT_PATTERN = /^[0-9a-f]{7,64}$/;
 // The format's `date` is `YYYY-MM-DD`; an ISO 8601 time after it is read
