@@ -5801,6 +5801,8 @@ paths:
           required: true
           schema:
             type: string
+            minLength: 1
+            maxLength: 100
         - name: competition_id
           in: path
           required: true
@@ -5830,6 +5832,12 @@ paths:
                 $ref: "#/components/schemas/ApiMainStageTraitValidation"
         "400":
           description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
           content:
             application/json:
               schema:

@@ -392,7 +392,7 @@ const ArtworkStep: React.FC<ArtworkStepProps> = ({
             </div>
           )}
 
-          {serverValidation.requestFailed && (
+          {serverValidation.rules && serverValidation.requestFailed && (
             <p role="alert" className="tw-text-red-400 tw-mb-2 tw-text-sm">
               {t(locale, "memes.submission.traits.checkFailed")}
             </p>

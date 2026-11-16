@@ -1445,6 +1445,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
   test("validates Main Stage traits through the API and leaves skipped values out of the request", async ({
     page,
   }) => {
+    test.setTimeout(120000);
+    page.setDefaultTimeout(15000);
     const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
     sandbox.onlyCompetition("alpha");
     await sandbox.legacyPrimary("alpha");
@@ -1466,7 +1468,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       ],
     });
     const observed: Record<string, string>[] = [];
+    let disablePolicyOnNextCheck = false;
     await page.route("**/main-stage-traits/validate", async (route) => {
+      if (disablePolicyOnNextCheck) {
+        sandbox.setCompetition("alpha", { main_stage_trait_rules: undefined });
+        await route.fulfill({
+          status: 404,
+          json: { error: "Policy unavailable" },
+        });
+        return;
+      }
       const request = route.request().postDataJSON() as {
         metadata: { data_key: string; data_value: string }[];
       };
@@ -1486,7 +1497,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         },
       });
     });
-    await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`);
+    await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`),
+      { timeout: 30000 }
+    );
     await page.addStyleTag({
       content: "nextjs-portal { display: none !important; }",
     });
@@ -1498,11 +1515,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await dialog.getByRole("button", { name: "I Agree & Continue" }).click();
     const bonus = dialog.getByRole("textbox", { name: "Bonus", exact: true });
     await expect(bonus).toHaveAttribute("placeholder", "Leave blank to use No");
-    const chooser = page.waitForEvent("filechooser");
-    await dialog.getByRole("button", { name: "Upload artwork" }).click();
-    await (
-      await chooser
-    ).setFiles("public/artwork-documentation/examples/an-alteration.png");
+    await dialog
+      .locator('input[type="file"]')
+      .setInputFiles("public/artwork-documentation/examples/an-alteration.png");
     await dialog
       .getByRole("textbox", { name: "Artwork Title", exact: true })
       .fill("Trait validation check");
@@ -1524,6 +1539,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     expect(observed).toHaveLength(2);
     expect(observed[1]).toMatchObject({ pointsSpeed: "1.5" });
     expect(observed[1]).not.toHaveProperty("bonus");
+    await dialog.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(bonus).toHaveAttribute("placeholder", "Leave blank to use No");
+    disablePolicyOnNextCheck = true;
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(bonus).not.toHaveAttribute(
+      "placeholder",
+      "Leave blank to use No"
+    );
+    await expect(
+      dialog.getByRole("textbox", { name: "Artwork Title", exact: true })
+    ).toHaveValue("Trait validation check");
     expect(sandbox.requests).toEqual([]);
   });
 

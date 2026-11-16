@@ -17,7 +17,7 @@ interface MemesArtSubmissionTraitsProps {
   readonly setTraits: (traits: Partial<TraitsData>) => void;
   readonly showTitle?: boolean | undefined;
   readonly validationErrors?:
-    | Record<keyof TraitsData, string | null>
+    | Partial<Record<keyof TraitsData, string | null>>
     | undefined;
   readonly onFieldBlur?: ((field: keyof TraitsData) => void) | undefined;
   readonly readOnlyOverrides?: Partial<Record<keyof TraitsData, boolean>>;

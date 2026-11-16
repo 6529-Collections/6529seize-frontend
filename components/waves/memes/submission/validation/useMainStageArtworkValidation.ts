@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import {
   type ApiMainStageTraitIssue,
   ApiMainStageTraitIssueCodeEnum as IssueCode,
 } from "@/generated/models/ApiMainStageTraitIssue";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import { validateMainStageTraits } from "@/services/api/competitions-api";
+import { getStructuredApiErrorStatus } from "@/services/api/common-api";
+import {
+  invalidateCompetition,
+  validateMainStageTraits,
+} from "@/services/api/competitions-api";
 import type { TraitsData } from "../types/TraitsData";
 import { buildSubmissionMetadata } from "../utils/submissionMetadata";
 
@@ -18,6 +24,7 @@ export function useMainStageArtworkValidation(
 ) {
   const rules = competition?.main_stage_trait_rules;
   const locale = useBrowserLocale();
+  const queryClient = useQueryClient();
   const [result, setResult] = useState<{
     traits: TraitsData;
     issues: ApiMainStageTraitIssue[];
@@ -28,7 +35,7 @@ export function useMainStageArtworkValidation(
 
   useEffect(() => () => request.current?.abort(), [traits, rules]);
 
-  const errors = {} as Record<keyof TraitsData, string | null>;
+  const errors: Partial<Record<keyof TraitsData, string | null>> = {};
   for (const issue of result?.issues ?? []) {
     if (!Object.hasOwn(traits, issue.key)) continue;
     const key = issue.key as keyof TraitsData;
@@ -46,8 +53,8 @@ export function useMainStageArtworkValidation(
         break;
       case IssueCode.InvalidPoints:
         errors[key] = t(locale, "memes.submission.traits.invalidPoints", {
-          min: rule?.minimum ?? 0,
-          max: rule?.maximum ?? 0,
+          min: formatInteger(locale, rule?.minimum),
+          max: formatInteger(locale, rule?.maximum),
         });
         break;
       case IssueCode.InvalidBoolean:
@@ -62,21 +69,34 @@ export function useMainStageArtworkValidation(
     request.current = controller;
     setPending(true);
     setRequestFailed(false);
+    const identity = {
+      waveId: competition.wave_id,
+      competitionId: competition.id,
+    };
     try {
       const response = await validateMainStageTraits(
-        { waveId: competition.wave_id, competitionId: competition.id },
+        identity,
         { metadata: buildSubmissionMetadata({ traits }) },
         controller.signal
       );
-      if (controller.signal.aborted) return null;
+      if (request.current !== controller || controller.signal.aborted)
+        return null;
       setResult({ traits, issues: response.issues });
       return response.issues;
-    } catch {
-      if (!controller.signal.aborted) setRequestFailed(true);
+    } catch (error) {
+      if (request.current === controller && !controller.signal.aborted) {
+        setRequestFailed(true);
+        // An open draft may still advertise the policy after an API rollback.
+        if (getStructuredApiErrorStatus(error) === 404) {
+          void invalidateCompetition(queryClient, identity);
+        }
+      }
       return null;
     } finally {
-      request.current = null;
-      setPending(false);
+      if (request.current === controller) {
+        request.current = null;
+        setPending(false);
+      }
     }
   }
 
