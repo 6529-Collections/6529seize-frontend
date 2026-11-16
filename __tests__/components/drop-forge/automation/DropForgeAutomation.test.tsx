@@ -22,6 +22,7 @@ import {
 import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
 import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
+import { forgeProcessKey } from "@/hooks/useDropForgeProcess";
 import {
   ApiDropForgeJobKindEnum as JobKind,
   ApiDropForgeJobStatusEnum as JobStatus,
@@ -91,7 +92,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockRequestAuth.mockResolvedValue({ success: true });
   jest.mocked(useDropForgeSettings).mockReturnValue({
-    data: { preparation_enabled: true, automation_enabled: true },
+    data: { automation_enabled: true },
   } as ReturnType<typeof useDropForgeSettings>);
 });
 it.each([
@@ -224,10 +225,7 @@ it.each<[number, string]>([
   expect(startForgeProcess).not.toHaveBeenCalled();
 });
 
-it("shows a paused checkpoint while EMMA preparation is Off", async () => {
-  jest.mocked(useDropForgeSettings).mockReturnValue({
-    data: { preparation_enabled: false },
-  } as ReturnType<typeof useDropForgeSettings>);
+it("shows the saved checkpoint while a background job is pending", async () => {
   jest.mocked(latestForgeProcess).mockResolvedValue({
     id: "job",
     contract: "0xcreator",
@@ -246,11 +244,8 @@ it("shows a paused checkpoint while EMMA preparation is Off", async () => {
     />
   );
   expect(
-    await screen.findByRole("button", { name: "Preparation paused" })
+    await screen.findByRole("button", { name: "Processing and finalizing…" })
   ).toBeDisabled();
-  expect(screen.getByRole("status")).toHaveTextContent(
-    "EMMA preparation is Off"
-  );
   expect(screen.getByText("3 / 5")).toBeVisible();
   expect(startForgeProcess).not.toHaveBeenCalled();
 });
@@ -306,6 +301,50 @@ it("runs one Process and Finalize operation and restores its completed state on 
     })
   ).toBeDisabled();
   expect(startForgeProcess).toHaveBeenCalledTimes(1);
+});
+
+it("uses a fresh request ID when processing again after a reset", async () => {
+  jest.mocked(latestForgeProcess).mockResolvedValue(null);
+  jest
+    .mocked(startForgeProcess)
+    .mockImplementation(async (_contract, _claim, _plan, phaseIds, id) => ({
+      id,
+      contract: "0xcreator",
+      claim_id: 123,
+      kind: JobKind.ProcessAll,
+      status: JobStatus.Pending,
+      phase_ids: phaseIds,
+      step: 0,
+      result_json: null,
+      error: null,
+      updated_at: 1,
+    }));
+  const { client } = renderUI(
+    <ProcessAndFinalize
+      contract="0xcreator"
+      claim={123}
+      plan="plan"
+      phaseIds={["p0", "p1", "p2"]}
+    />
+  );
+  const readyButton = () =>
+    screen.getByRole("button", { name: "Process and Finalize" });
+  await waitFor(() => expect(readyButton()).toBeEnabled());
+  fireEvent.click(readyButton());
+  await screen.findByRole("button", { name: "Processing and finalizing…" });
+  await waitFor(() => expect(startForgeProcess).toHaveBeenCalledTimes(1));
+
+  await act(async () => {
+    await client.refetchQueries({
+      queryKey: forgeProcessKey("0xcreator", 123, "plan"),
+    });
+  });
+  await waitFor(() => expect(readyButton()).toBeEnabled());
+  fireEvent.click(readyButton());
+  await waitFor(() => expect(startForgeProcess).toHaveBeenCalledTimes(2));
+  const [[, , , , firstId], [, , , , secondId]] =
+    jest.mocked(startForgeProcess).mock.calls;
+  expect(secondId).not.toEqual(firstId);
 });
 
 it("refreshes the existing manual view only when another action confirms", async () => {

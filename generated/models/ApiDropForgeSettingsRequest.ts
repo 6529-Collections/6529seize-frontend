@@ -16,7 +16,6 @@ import { HttpFile } from '../http/http';
 export class ApiDropForgeSettingsRequest {
     'revision': number;
     'automation_enabled'?: boolean;
-    'preparation_enabled'?: boolean;
     'max_artist_payment_eth'?: string | null;
     'pay_artist_enabled'?: boolean;
 
@@ -34,12 +33,6 @@ export class ApiDropForgeSettingsRequest {
         {
             "name": "automation_enabled",
             "baseName": "automation_enabled",
-            "type": "boolean",
-            "format": ""
-        },
-        {
-            "name": "preparation_enabled",
-            "baseName": "preparation_enabled",
             "type": "boolean",
             "format": ""
         },

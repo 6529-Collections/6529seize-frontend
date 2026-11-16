@@ -3369,6 +3369,7 @@ export const EN_US_ROOT_MESSAGES = {
   "dropForge.retry": "Retry",
   "dropForge.processing": "Processing and finalizing…",
   "dropForge.process": "Process and Finalize",
+  "dropForge.prepareManually": "Prepare manually",
   "dropForge.resumeAuth": "Sign in to resume",
   "dropForge.authRequired":
     "EMMA access expired or was denied. Sign in to resume the same job; saved progress is preserved.",

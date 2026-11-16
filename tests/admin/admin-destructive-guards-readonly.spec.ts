@@ -47,6 +47,7 @@ const DROP_FORGE_WRITE_ACTIONS: readonly RegExp[] = [
   /^Launch$/,
   /^Update Claim$/,
   /^Process and Finalize$/,
+  /^Prepare manually$/,
   /^Resume automatic execution$/,
   /^Pause automatic execution$/,
   /^Record transaction$/,
@@ -142,7 +143,7 @@ async function expectDropForgeDenied(
   await expectNoMainButtons(page, DROP_FORGE_WRITE_ACTIONS);
   await expect(
     page.getByRole("switch", {
-      name: /Automatic launch|EMMA preparation/,
+      name: /Automatic launch/,
     })
   ).toHaveCount(0);
   await expect(

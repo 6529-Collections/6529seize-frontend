@@ -116,7 +116,9 @@ export function SubscriptionFooterMain({
   onShowUploadPhotos,
   onShowViewPhotos,
   onDownloadAirdrops,
+  preparationChoice,
   processingControl,
+  showManualFinalize,
   onFinalize,
   onUploadToGithub,
   onCloseGithubModal,
@@ -162,7 +164,9 @@ export function SubscriptionFooterMain({
   onShowUploadPhotos: () => void;
   onShowViewPhotos: () => void;
   onDownloadAirdrops: (phase: DistributionAirdropsPhase) => void;
+  preparationChoice?: ReactNode;
   processingControl?: ReactNode;
+  showManualFinalize: boolean;
   onFinalize: () => void;
   onUploadToGithub: () => void;
   onCloseGithubModal: () => void;
@@ -375,10 +379,12 @@ export function SubscriptionFooterMain({
         </div>
       </div>
       <div className="tw-mt-2 tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
-        {processingControl ?? (
+        {preparationChoice}
+        {processingControl}
+        {showManualFinalize && (
           <button
             onClick={onFinalize}
-            disabled={isFinalizing}
+            disabled={isFinalizing || isResetting}
             type="button"
             className="tw-group tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-[#86efac] tw-px-3 tw-text-sm tw-font-medium tw-text-iron-900 tw-ring-1 tw-ring-inset tw-ring-[#86efac]/20 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-[#14532d] hover:tw-text-iron-100"
           >

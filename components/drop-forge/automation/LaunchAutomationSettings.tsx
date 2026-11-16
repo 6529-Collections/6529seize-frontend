@@ -29,20 +29,8 @@ import CopyWalletAddressButton from "./CopyWalletAddressButton";
 import LaunchAutomationHelp from "./LaunchAutomationHelp";
 import WalletFunding from "./WalletFunding";
 
-const switches = [
-  {
-    field: "automation_enabled",
-    permission: "can_edit",
-  },
-  {
-    field: "preparation_enabled",
-    permission: "can_edit_preparation",
-  },
-] as const;
-
 const settingLabels = {
   automation_enabled: "dropForge.settings.launch",
-  preparation_enabled: "dropForge.settings.preparation",
   pay_artist_enabled: "dropForge.settings.artist",
 } as const;
 
@@ -60,6 +48,7 @@ export default function LaunchAutomationSettings() {
   const [savingSetting, setSavingSetting] = useState<Setting | null>(null);
   const saving = savingSetting !== null;
   const settings = query.data;
+  const savingLaunch = savingSetting === "automation_enabled";
   const opsWaveId = settings?.operations_wave_id ?? null;
   const { wave: opsWave } = useWaveById(opsWaveId);
   const opsWaveLabel =
@@ -113,6 +102,13 @@ export default function LaunchAutomationSettings() {
     locale,
     settings ? "dropForge.settings.refresh" : "dropForge.settings.signIn"
   );
+  let launchSwitchLabel:
+    | "dropForge.settings.on"
+    | "dropForge.settings.off"
+    | "dropForge.settings.saving" = settings?.automation_enabled
+    ? "dropForge.settings.on"
+    : "dropForge.settings.off";
+  if (savingLaunch) launchSwitchLabel = "dropForge.settings.saving";
   return (
     <section
       aria-labelledby="launch-automation-heading"
@@ -181,45 +177,32 @@ export default function LaunchAutomationSettings() {
         {settings && (
           <div className="tw-mt-5 tw-grid tw-gap-4 lg:tw-grid-cols-2">
             <div className="tw-space-y-4">
-              {switches.map(({ field, permission }) => {
-                const checked = settings[field];
-                const savingThis = savingSetting === field;
-                const toggleState = checked
-                  ? "dropForge.settings.on"
-                  : "dropForge.settings.off";
-                return (
-                  <label
-                    key={field}
-                    className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-3"
+              <label className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-3">
+                <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+                  {t(locale, settingLabels.automation_enabled)}
+                </span>
+                <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-300">
+                  <span
+                    aria-hidden="true"
+                    className="tw-min-w-[4.5rem] tw-whitespace-nowrap tw-text-right"
                   >
-                    <span className="tw-text-sm tw-font-medium tw-text-iron-100">
-                      {t(locale, settingLabels[field])}
-                    </span>
-                    <span className="tw-flex tw-items-center tw-gap-2 tw-text-sm tw-text-iron-300">
-                      <span
-                        aria-hidden="true"
-                        className="tw-min-w-[4.5rem] tw-whitespace-nowrap tw-text-right"
-                      >
-                        {t(
-                          locale,
-                          savingThis ? "dropForge.settings.saving" : toggleState
-                        )}
-                      </span>
-                      <input
-                        type="checkbox"
-                        role="switch"
-                        checked={checked}
-                        aria-busy={savingThis}
-                        disabled={!settings[permission] || saving}
-                        onChange={(event) =>
-                          void change(field, { [field]: event.target.checked })
-                        }
-                        className="tw-size-5 tw-accent-primary-400"
-                      />
-                    </span>
-                  </label>
-                );
-              })}
+                    {t(locale, launchSwitchLabel)}
+                  </span>
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={settings.automation_enabled}
+                    aria-busy={savingLaunch}
+                    disabled={!settings.can_edit || saving}
+                    onChange={(event) =>
+                      void change("automation_enabled", {
+                        automation_enabled: event.target.checked,
+                      })
+                    }
+                    className="tw-size-5 tw-accent-primary-400"
+                  />
+                </span>
+              </label>
               <ArtistPaymentSettings
                 key={`${address ?? ""}:${settings.revision}`}
                 settings={settings}
@@ -229,12 +212,7 @@ export default function LaunchAutomationSettings() {
               />
               {!settings.can_edit && (
                 <p className="tw-text-sm tw-text-iron-400">
-                  {t(
-                    locale,
-                    settings.can_edit_preparation
-                      ? "dropForge.settings.launchReadOnly"
-                      : "dropForge.settings.readOnly"
-                  )}
+                  {t(locale, "dropForge.settings.readOnly")}
                 </p>
               )}
               <p className="tw-min-h-4 tw-break-all tw-text-xs tw-text-iron-500">
