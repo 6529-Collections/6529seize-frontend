@@ -230,9 +230,8 @@ export function parseAiReleaseFeed(json: unknown): AiRelease[] | null {
       parsed.push(entry);
     }
   }
-  return parsed
-    .sort((a, b) => compareVersions(b.order, a.order))
-    .map(({ release }) => release);
+  parsed.sort((a, b) => compareVersions(b.order, a.order));
+  return parsed.map(({ release }) => release);
 }
 
 /** The release the pages offer and hand out: the newest. */
