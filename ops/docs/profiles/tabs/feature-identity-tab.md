@@ -385,6 +385,12 @@ show the profile-creation welcome.
    and scroll position; Cancel closes management without saving. New REP
    categories stay with `Grant Rep`. The expandable category tags remain the
    main way to adjust multiple receiver amounts together.
+   The category editor matches the main rating forms: a quiet filled allowance
+   block, brighter values and amount label, a subdued helper sentence, and
+   `Current Rep` on the left with `Adjustment` on the right. Increases use
+   emerald and decreases rose. `Cancel` then `Save` sit at the bottom right on
+   desktop and stack at full width on mobile. Amounts, limits and saving behavior
+   stay the same.
 4. In NIC, edit the amount directly beside each person. A fixed footer shows
    available credit, or the current and proposed totals with `Cancel` and a
    green `Save` after an edit. Save applies all changed rows and stays in the

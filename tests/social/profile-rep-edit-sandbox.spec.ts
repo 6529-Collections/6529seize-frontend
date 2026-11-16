@@ -179,6 +179,8 @@ function categoryPanel(page: Page) {
 }
 
 async function getContributorRowPresentation(list: Locator) {
+  // Measure after the sheet's entrance has settled.
+  await list.getByRole("link").first().click({ trial: true });
   return list
     .getByRole("link")
     .first()
@@ -3046,10 +3048,6 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           expect(saveBox).not.toBeNull();
           expect(cancelBox!.height).toBe(44);
           expect(saveBox!.height).toBe(44);
-          expect(Math.abs(cancelBox!.y - saveBox!.y)).toBeLessThanOrEqual(1);
-          expect(cancelBox!.x + cancelBox!.width).toBeLessThanOrEqual(
-            saveBox!.x
-          );
           const inputBox = await editor.getByRole("textbox").boundingBox();
           expect(inputBox).not.toBeNull();
           expect(
@@ -3057,8 +3055,20 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
               saveBox!.x + saveBox!.width - inputBox!.x - inputBox!.width
             )
           ).toBeLessThanOrEqual(1);
-          expect(saveBox!.width).toBeLessThan(inputBox!.width / 2);
-          expect(cancelBox!.width).toBeLessThan(inputBox!.width / 2);
+          if (isMobile) {
+            expect(cancelBox!.x).toBeCloseTo(inputBox!.x, 0);
+            expect(saveBox!.x).toBeCloseTo(inputBox!.x, 0);
+            expect(cancelBox!.width).toBeCloseTo(inputBox!.width, 0);
+            expect(saveBox!.width).toBeCloseTo(inputBox!.width, 0);
+            expect(saveBox!.y - cancelBox!.y - cancelBox!.height).toBe(8);
+          } else {
+            expect(Math.abs(cancelBox!.y - saveBox!.y)).toBeLessThanOrEqual(1);
+            expect(cancelBox!.x + cancelBox!.width).toBeLessThanOrEqual(
+              saveBox!.x
+            );
+            expect(saveBox!.width).toBeLessThan(inputBox!.width / 2);
+            expect(cancelBox!.width).toBeLessThan(inputBox!.width / 2);
+          }
           const bottomGap = await editor
             .getByRole("button", { name: "Save", exact: true })
             .evaluate((button) => {
@@ -3078,6 +3088,9 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         };
         let editor = await openEditor();
         await expectAxeClean(page, { include: ['[role="dialog"]'] });
+        await editor.locator(".mobile-wrapper-dialog").screenshot({
+          path: testInfo.outputPath("REP-receiver-adjust.png"),
+        });
         await editor.getByRole("textbox").fill("25");
         await editor.getByRole("button", { name: "Back", exact: true }).click();
         if (matter === "REP") {
