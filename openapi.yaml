@@ -5789,6 +5789,65 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/main-stage-traits/validate:
+    post:
+      tags:
+        - Competitions
+      summary: Validate Main Stage artwork traits without creating an entry
+      operationId: validateMainStageTraitsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleValidateMainStageTraitsV3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiValidateMainStageTraitsRequest"
+      responses:
+        "200":
+          description: Field validation issues. An empty array means validation passed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMainStageTraitValidation"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Competition is unavailable or does not use this policy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
   /v3/waves/{wave_id}/competitions/{competition_id}/entries:
     post:
       tags:
@@ -28983,6 +29042,13 @@ components:
         - cancelled_at
         - archived_at
       properties:
+        main_stage_trait_rules:
+          type: array
+          description: >-
+            Artwork trait rules for an enabled Main Stage decision. Points must
+            be finite and nonzero.
+          items:
+            $ref: "#/components/schemas/ApiMainStageTraitRule"
         your_active_entries_count:
           type: integer
           format: int64
@@ -36003,6 +36069,60 @@ components:
           type: string
         refresh_token:
           type: string
+    ApiMainStageTraitIssue:
+      type: object
+      required:
+        - key
+        - code
+      properties:
+        key:
+          type: string
+        code:
+          type: string
+          enum:
+            - REQUIRED
+            - DUPLICATE
+            - INVALID_CHOICE
+            - INVALID_POINTS
+            - INVALID_BOOLEAN
+    ApiMainStageTraitRule:
+      type: object
+      required:
+        - key
+        - type
+        - required
+      properties:
+        key:
+          type: string
+        type:
+          type: string
+          enum:
+            - TEXT
+            - CHOICE
+            - POINTS
+            - BOOLEAN
+        required:
+          type: boolean
+        default_value:
+          type: string
+          description: Value applied when the metadata key is omitted.
+        choices:
+          type: array
+          items:
+            type: string
+        minimum:
+          type: number
+        maximum:
+          type: number
+    ApiMainStageTraitValidation:
+      type: object
+      required:
+        - issues
+      properties:
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMainStageTraitIssue"
     ApiMarkDropUnreadResponse:
       type: object
       required:
@@ -43753,6 +43873,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiUploadItem"
+    ApiValidateMainStageTraitsRequest:
+      type: object
+      required:
+        - metadata
+      properties:
+        metadata:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/ApiDropMetadata"
     ApiValidateProfileCmsAgentCandidateRequest:
       type: object
       additionalProperties: false

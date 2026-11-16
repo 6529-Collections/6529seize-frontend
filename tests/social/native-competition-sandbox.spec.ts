@@ -1,10 +1,16 @@
+import {
+  type ApiMainStageTraitRule,
+  ApiMainStageTraitRuleTypeEnum,
+} from "@/generated/models/ApiMainStageTraitRule";
 import competitionRuleDefaults from "../support/competitionRuleDefaults.json";
 import { writeFile } from "node:fs/promises";
 import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import type { Frame, Locator, Page, WebSocketRoute } from "@playwright/test";
 import type { ApiDropAndWave } from "@/generated/models/ApiDropAndWave";
+import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiDropV2PageWithoutCount } from "@/generated/models/ApiDropV2PageWithoutCount";
+import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import { ApiDropMainType } from "@/generated/models/ApiDropMainType";
 import { observeCachedChatResponse } from "../support/cachedChatResponse";
 import { expectCompetitionScroll } from "../support/competitionScroll";
@@ -333,6 +339,7 @@ const competition = (id: string, title: string) => ({
         ]
       : [],
   capabilities: [] as string[],
+  main_stage_trait_rules: undefined as ApiMainStageTraitRule[] | undefined,
   permissions: {
     view: true,
     submit: true,
@@ -1434,6 +1441,117 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("heading", { name: "Shared wave renamed", exact: true })
     ).toBeVisible();
+    expect(sandbox.requests).toEqual([]);
+  });
+
+  test("validates Main Stage traits through the API and leaves skipped values out of the request", async ({
+    page,
+  }) => {
+    test.setTimeout(120000);
+    page.setDefaultTimeout(15000);
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    sandbox.setCompetition("alpha", {
+      main_stage_trait_rules: [
+        {
+          key: "bonus",
+          type: ApiMainStageTraitRuleTypeEnum.Text,
+          required: false,
+          default_value: "No",
+        },
+        {
+          key: "pointsSpeed",
+          type: ApiMainStageTraitRuleTypeEnum.Points,
+          required: true,
+          minimum: -10000000000,
+          maximum: 10000000000,
+        },
+      ],
+    });
+    const observed: Record<string, string>[] = [];
+    let disablePolicyOnNextCheck = false;
+    await page.route("**/main-stage-traits/validate", async (route) => {
+      if (disablePolicyOnNextCheck) {
+        sandbox.setCompetition("alpha", { main_stage_trait_rules: undefined });
+        await route.fulfill({
+          status: 404,
+          json: { error: "Policy unavailable" },
+        });
+        return;
+      }
+      const request = route.request().postDataJSON() as {
+        metadata: { data_key: string; data_value: string }[];
+      };
+      const byKey = Object.fromEntries(
+        request.metadata.map(({ data_key, data_value }) => [
+          data_key,
+          data_value,
+        ])
+      );
+      observed.push(byKey);
+      await route.fulfill({
+        json: {
+          issues:
+            byKey["pointsSpeed"] === "0"
+              ? [{ key: "pointsSpeed", code: "INVALID_POINTS" }]
+              : [],
+        },
+      });
+    });
+    await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`, {
+      waitUntil: "domcontentloaded",
+    });
+    await expect(page).toHaveURL(
+      new RegExp(`/waves/${MEMES_WAVE}/decisions/alpha\\?tab=leaderboard`),
+      { timeout: 30000 }
+    );
+    await page.addStyleTag({
+      content: "nextjs-portal { display: none !important; }",
+    });
+    await page.getByRole("button", { name: /^Submit (Work|Meme)/ }).click();
+    const dialog = page.getByRole("dialog", {
+      name: "Submit Work to The Memes",
+    });
+    await dialog.getByRole("button", { name: "Check terms agreement" }).click();
+    await dialog.getByRole("button", { name: "I Agree & Continue" }).click();
+    const bonus = dialog.getByRole("textbox", { name: "Bonus", exact: true });
+    await expect(bonus).toHaveAttribute("placeholder", "Leave blank to use No");
+    await dialog
+      .getByTestId("artwork-file-input")
+      .setInputFiles("public/artwork-documentation/examples/an-alteration.png");
+    await dialog
+      .getByRole("textbox", { name: "Artwork Title", exact: true })
+      .fill("Trait validation check");
+    await dialog
+      .getByRole("textbox", { name: "Description", exact: true })
+      .fill("Local staging contract check");
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(dialog.getByText(/Enter a nonzero number/)).toBeVisible();
+    const speed = dialog.getByRole("spinbutton", {
+      name: "Points - Speed",
+      exact: true,
+    });
+    await expect(speed).toBeFocused();
+    await speed.fill("1.5");
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(
+      dialog.getByRole("textbox", { name: "About the Artist", exact: true })
+    ).toBeVisible();
+    expect(observed).toHaveLength(2);
+    expect(observed[1]).toMatchObject({ pointsSpeed: "1.5" });
+    expect(observed[1]).not.toHaveProperty("bonus");
+    await dialog.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(bonus).toHaveAttribute("placeholder", "Leave blank to use No");
+    disablePolicyOnNextCheck = true;
+    await dialog.getByRole("button", { name: "Continue", exact: true }).click();
+    await expect(bonus).not.toHaveAttribute(
+      "placeholder",
+      "Leave blank to use No"
+    );
+    await expect(
+      dialog.getByRole("textbox", { name: "Artwork Title", exact: true })
+    ).toHaveValue("Trait validation check");
     expect(sandbox.requests).toEqual([]);
   });
 
@@ -13213,6 +13331,119 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(sorts).toContain("rating");
     expect(sandbox.requests).toEqual([]);
   });
+
+  for (const surface of ["web", "app"] as const) {
+    test(`animates a video submission's GIF preview image on the Main Stage leaderboard on ${surface}`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        surface === "app" && testInfo.project.name !== "web-mobile-chromium",
+        "The app simulation uses the mobile viewport."
+      );
+      if (surface === "app") {
+        await installSurfaceSimulation(
+          page.context(),
+          "capacitor-ios-sim",
+          baseURL
+        );
+      }
+      const sandbox = await installCompetitionApi(
+        page,
+        false,
+        true,
+        MEMES_WAVE
+      );
+      sandbox.onlyCompetition("alpha");
+      await sandbox.legacyPrimary("alpha");
+      const response = await page.request.get(
+        `${getSandboxApiOrigin(baseURL)}/api/v2/waves/${MEMES_WAVE}/drops`
+      );
+      expect(response.ok()).toBe(true);
+      const fixture = (await response.json()) as {
+        wave: ApiWaveOverview;
+        drops: ApiDropV2[];
+      };
+      const mediaRoot =
+        "https://d3lqz0a4bldqgf.cloudfront.net/drops/leaderboard-gif-fixture/";
+      const original = `${mediaRoot}preview.gif`;
+      const artwork = {
+        ...fixture.drops[0],
+        id: entryDropId("alpha"),
+        drop_type: ApiDropMainType.Submission,
+        title: "Leaderboard GIF preview",
+        media: [{ url: `${mediaRoot}artwork.mp4`, mime_type: "video/mp4" }],
+        priority_metadata: [
+          {
+            data_key: "additional_media",
+            data_value: JSON.stringify({ preview_image: original }),
+          },
+        ],
+      };
+      await installArtworkCompetitionResources(
+        page,
+        MEMES_WAVE,
+        { ...fixture.wave, id: MEMES_WAVE },
+        () => [artwork]
+      );
+      await page.route(`${mediaRoot}**/preview.gif`, (route) => {
+        const url = route.request().url();
+        if (url === original) {
+          return route.fulfill({
+            contentType: "image/gif",
+            path: "tests/media/fixtures/animation.gif",
+          });
+        }
+        if (url.includes("_gifv2/")) {
+          return route.fulfill({
+            status: 422,
+            json: { code: "DECODED_IMAGE_TOO_LARGE" },
+          });
+        }
+        return route.fulfill({
+          contentType: "image/png",
+          path: "public/test-wave-icon.png",
+        });
+      });
+      await page.route(`${mediaRoot}artwork.mp4`, (route) =>
+        route.fulfill({
+          contentType: "video/mp4",
+          path: "tests/media/fixtures/portrait.mp4",
+        })
+      );
+      await page.goto(`/waves/${MEMES_WAVE}/decisions/alpha?tab=leaderboard`);
+      await dismissNextDevTools(page);
+      for (const view of ["Grid view", "List view"]) {
+        await page.getByRole("tab", { name: view, exact: true }).click();
+        await page
+          .getByRole("listitem")
+          .getByText(artwork.title, { exact: true })
+          .scrollIntoViewIfNeeded();
+        if (view === "List view" && surface === "web") {
+          await expect(
+            page
+              .getByRole("listitem")
+              .filter({ hasText: artwork.title })
+              .locator("video")
+          ).toBeVisible();
+          continue;
+        }
+        const image = page
+          .getByRole("listitem")
+          .filter({ hasText: artwork.title })
+          .locator(`img[src="${original}"]`);
+        await expect(image).toBeVisible();
+        await expect
+          .poll(() =>
+            image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+          )
+          .toBeGreaterThan(0);
+        const firstFrame = await image.screenshot();
+        await expect.poll(() => image.screenshot()).not.toEqual(firstFrame);
+      }
+      expect(sandbox.requests).toEqual([]);
+    });
+  }
 
   for (const surface of ["web", "app"] as const) {
     test(`preserves populated legacy Main Stage artwork in ${surface} views`, async ({

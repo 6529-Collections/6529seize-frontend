@@ -4316,6 +4316,7 @@
       ],
       "facts": [
         "Memes wave docs cover submission, preview/submit states, additional info fields, and quick voting.",
+        "When the Main Stage artwork form shows Leave blank to use No, that trait is optional. Leaving it blank uses No in the preview and saved entry. Artist, Meme Name, Palette, and Card Points still require valid values. The same trait rules apply to direct API submissions.",
         "A Memes submission is a decision entry, so uploaded artwork, supporting media, preview images and promo videos keep the artist's original files, including embedded details such as location, camera details and capture time.",
         "In Artwork Details, checking Additional Action opens Your plan (optional). Describe what you will do if selected, who receives it, timing, and any costs or conditions. The plan is public with the submission and supports up to 5000 characters; a blank plan is allowed.",
         "Unchecking Additional Action keeps the plan draft during the current modal session but excludes it from the submitted metadata. Rechecking restores it. Closing the modal discards the unsaved draft.",
