@@ -706,7 +706,9 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       })
     );
     await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
-    const overview = page.locator("#profile-subscriptions-overview");
+    const overview = page
+      .getByRole("region", { name: "Subscription minting", exact: true })
+      .locator("#profile-subscriptions-overview");
     await expect(
       overview.getByRole("heading", { name: "Not set up", exact: true })
     ).toBeVisible();
