@@ -18,6 +18,33 @@ import ProfileRatingsDialog from "./ProfileRatingsDialog";
 import { canManageGivenRatings } from "./ratingsManagement";
 import RepDirectionToggle from "./RepDirectionToggle";
 
+function NicStatus({
+  profile,
+  score,
+  compact,
+}: {
+  readonly profile: ApiIdentity;
+  readonly score: number | undefined;
+  readonly compact: boolean;
+}) {
+  return (
+    <div
+      className={`tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-uppercase ${compact ? "tw-mt-2" : "tw-col-start-2 tw-row-start-1 tw-justify-self-end"}`}
+    >
+      <span
+        className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center ${compact ? "tw-h-4 tw-w-4" : "tw-h-5 tw-w-5"}`}
+      >
+        {compact ? (
+          <UserCICTypeIcon cic={score ?? profile.cic} />
+        ) : (
+          <UserCICTypeIconWrapper profile={profile} />
+        )}
+      </span>
+      <UserCICStatus cic={score ?? profile.cic} />
+    </div>
+  );
+}
+
 export default function NicRatingsOverview({
   profile,
   ratings,
@@ -39,20 +66,7 @@ export default function NicRatingsOverview({
     activeProfileProxy
   );
   const status = direction === "received" && (
-    <div
-      className={`tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-semibold tw-uppercase ${compact ? "tw-mt-2" : "tw-col-start-2 tw-row-start-1 tw-justify-self-end"}`}
-    >
-      <span
-        className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center ${compact ? "tw-h-4 tw-w-4" : "tw-h-5 tw-w-5"}`}
-      >
-        {compact ? (
-          <UserCICTypeIcon cic={score ?? profile.cic} />
-        ) : (
-          <UserCICTypeIconWrapper profile={profile} />
-        )}
-      </span>
-      <UserCICStatus cic={score ?? profile.cic} />
-    </div>
+    <NicStatus profile={profile} score={score} compact={compact} />
   );
   const directionToggle = (
     <RepDirectionToggle

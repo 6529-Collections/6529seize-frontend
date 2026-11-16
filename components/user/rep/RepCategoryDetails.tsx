@@ -6,6 +6,7 @@ import Button from "@/components/utils/button/Button";
 import { isHelpBotCreditRepCategory } from "@/components/utils/input/rep-category/repCategoryConstants";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiRepContributorsPage } from "@/generated/models/ApiRepContributorsPage";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -15,7 +16,7 @@ import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { getIdentityQueryOptions } from "@/services/api/identity-query";
-import { ArrowUpRightIcon } from "@heroicons/react/24/outline";
+import { ArrowRightIcon, ArrowUpRightIcon } from "@heroicons/react/24/outline";
 import { CheckIcon } from "@heroicons/react/24/solid";
 import { useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
@@ -49,6 +50,43 @@ type Contributor = {
   };
   readonly contribution: number;
 };
+
+function canEditCategory(
+  direction: RepDirection,
+  category: string,
+  profile: ApiIdentity,
+  viewer: ApiIdentity | null,
+  proxy: ApiProfileProxy | null
+) {
+  if (direction === "given")
+    return canManageGivenRatings(profile, viewer, proxy);
+  return (
+    !isHelpBotCreditRepCategory(category) &&
+    getCanEditRep({
+      myProfile: viewer,
+      targetProfile: profile,
+      activeProfileProxy: proxy,
+    })
+  );
+}
+
+function getOwnContributor(
+  canEdit: boolean,
+  rater: Pick<ApiIdentity, "id" | "handle" | "pfp"> | null,
+  primaryAddress: string,
+  contribution: number
+): Contributor | null {
+  if (!canEdit || !rater?.id) return null;
+  return {
+    profile: {
+      id: rater.id,
+      handle: rater.handle,
+      pfp: rater.pfp,
+      primary_address: primaryAddress,
+    },
+    contribution,
+  };
+}
 type CategoryContentLayout = (
   body: ReactNode,
   footer: ReactNode,
@@ -145,6 +183,90 @@ function getAmountValidation({
   };
 }
 
+function RepContributionActions({
+  currentAmount,
+  value,
+  available,
+  overAllowance,
+  changed,
+  canSave,
+  busy,
+  saved,
+}: {
+  readonly currentAmount: number;
+  readonly value: string;
+  readonly available: number | null;
+  readonly overAllowance: boolean;
+  readonly changed: boolean;
+  readonly canSave: boolean;
+  readonly busy: boolean;
+  readonly saved: boolean;
+}) {
+  const locale = useBrowserLocale();
+  return (
+    <div className="tw-flex tw-h-[42px] tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-pl-2.5 tw-pr-1.5">
+      <span
+        className={`tw-whitespace-nowrap tw-text-xs ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-500"}`}
+      >
+        {t(locale, "user.rate.available", { matter: "REP" })}{" "}
+        <span
+          className={`tw-font-medium ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-100"}`}
+        >
+          {available === null ? "—" : formatInteger(locale, available)}
+        </span>
+      </span>
+      <div className="tw-relative tw-flex tw-shrink-0 tw-items-center tw-gap-2.5">
+        {changed && (
+          <>
+            {currentAmount !== 0 && (
+              <output className="tw-inline-flex tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-text-iron-500">
+                {formatInteger(locale, currentAmount)}
+                <span className="tw-sr-only">{" → "}</span>
+                <ArrowRightIcon
+                  aria-hidden="true"
+                  className="tw-size-3 tw-shrink-0"
+                />
+                <span className="tw-font-medium tw-text-iron-100">
+                  {isRatingValue(value)
+                    ? formatInteger(locale, Number(value))
+                    : "—"}
+                </span>
+              </output>
+            )}
+            <Button
+              variant="action"
+              size={null}
+              className="tw-h-[30px] tw-px-3 tw-py-0 tw-text-xs tw-font-semibold"
+              type="submit"
+              disabled={!canSave}
+              loading={busy}
+            >
+              {t(
+                locale,
+                currentAmount === 0
+                  ? "rep.categories.grant.actions.grant"
+                  : "rep.categories.edit.save"
+              )}
+            </Button>
+          </>
+        )}
+        <span
+          aria-live="polite"
+          aria-atomic="true"
+          className={changed ? "tw-absolute tw-right-0" : undefined}
+        >
+          {saved && !changed && (
+            <span className="tw-inline-flex tw-h-[30px] tw-items-center tw-gap-1 tw-whitespace-nowrap tw-text-xs tw-font-medium tw-text-iron-400">
+              <CheckIcon aria-hidden="true" className="tw-size-3" />
+              {t(locale, "rep.categories.edit.saved")}
+            </span>
+          )}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function RepCategoryDetails({
   profile,
   category,
@@ -179,15 +301,13 @@ export default function RepCategoryDetails({
   const proxyIdentity =
     activeProfileProxy?.created_by.handle ??
     activeProfileProxy?.created_by.primary_address;
-  const canEdit =
-    direction === "given"
-      ? canManageGivenRatings(profile, connectedProfile, activeProfileProxy)
-      : !isHelpBotCreditRepCategory(category.category) &&
-        getCanEditRep({
-          myProfile: connectedProfile,
-          targetProfile: profile,
-          activeProfileProxy,
-        });
+  const canEdit = canEditCategory(
+    direction,
+    category.category,
+    profile,
+    connectedProfile,
+    activeProfileProxy
+  );
   const identity = profile.query ?? profile.handle ?? profile.display;
   const query = useInfiniteQuery({
     queryKey: [
@@ -244,22 +364,15 @@ export default function RepCategoryDetails({
     repState?.rater_contribution ??
     items.find((row) => row.profile.id === rater?.id)?.contribution ??
     0;
-  const ownContributor: Contributor | null =
-    canEdit && rater?.id
-      ? {
-          profile: {
-            id: rater.id,
-            handle: rater.handle,
-            pfp: rater.pfp,
-            primary_address:
-              activeProfileProxy?.created_by.primary_address ??
-              connectedProfile?.primary_wallet ??
-              connectedProfile?.wallets?.[0]?.wallet ??
-              "",
-          },
-          contribution: ownContribution,
-        }
-      : null;
+  const ownContributor = getOwnContributor(
+    canEdit,
+    rater,
+    activeProfileProxy?.created_by.primary_address ??
+      connectedProfile?.primary_wallet ??
+      connectedProfile?.wallets?.[0]?.wallet ??
+      "",
+    ownContribution
+  );
   const rows = getCategoryRows(
     items,
     direction === "received" && canEdit,
@@ -403,15 +516,18 @@ export default function RepCategoryDetails({
       <ArrowUpRightIcon className="tw-size-3.5" aria-hidden="true" />
     </Button>
   );
+  const givenChanges = direction === "given" && changes.length > 0;
+  const available = ready ? heroAvailableRep : null;
+  const proposedTotal = validNumbers ? after : null;
   const footer = canEdit ? (
     <RatingEditorFooter
       matter="REP"
       formId={formId}
       editable={direction === "given"}
-      changed={direction === "given" && changes.length > 0}
+      changed={givenChanges}
       before={before}
-      after={validNumbers ? after : null}
-      available={ready ? heroAvailableRep : null}
+      after={proposedTotal}
+      available={available}
       busy={busy}
       canSave={canSave}
       onCancel={reset}
@@ -474,6 +590,7 @@ export default function RepCategoryDetails({
               ref={you ? ownAmountRef : undefined}
               originalAmount={row.contribution}
               showAdjustment={!you}
+              subtle={you}
               value={ready ? value : ""}
               aria-labelledby={`${formId}-${row.profile.id}-name`}
               aria-describedby={validation.describedBy}
@@ -502,59 +619,18 @@ export default function RepCategoryDetails({
     : "";
   const overAllowance = changes.length > 0 && validNumbers && !withinAllowance;
   const ownBlock = ownRow && (
-    <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5">
+    <div className="tw-mb-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-1">
       {renderRow(ownRow)}
-      <div className="tw-flex tw-h-10 tw-min-w-0 tw-items-center tw-justify-between tw-gap-2 tw-pl-2.5 tw-pr-1.5">
-        <span
-          className={`tw-text-xs ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-400"}`}
-        >
-          {t(locale, "user.rate.available", { matter: "REP" })}{" "}
-          <span className="tw-font-medium">
-            {ready ? formatInteger(locale, heroAvailableRep) : "—"}
-          </span>
-        </span>
-        <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-2">
-          {changes.length > 0 && (
-            <>
-              {ownRow.contribution !== 0 && (
-                <output className="tw-whitespace-nowrap tw-text-xs tw-text-iron-400">
-                  {formatInteger(locale, ownRow.contribution)}
-                  {" → "}
-                  <span className="tw-font-medium tw-text-iron-100">
-                    {isRatingValue(ownDraft)
-                      ? formatInteger(locale, Number(ownDraft))
-                      : "—"}
-                  </span>
-                </output>
-              )}
-              <Button
-                variant="action"
-                size={null}
-                className="tw-h-[30px] tw-px-2.5 tw-py-0 tw-text-xs tw-font-semibold"
-                type="submit"
-                disabled={!canSave}
-                loading={busy}
-              >
-                {t(
-                  locale,
-                  ownRow.contribution === 0
-                    ? "rep.categories.grant.actions.grant"
-                    : "rep.categories.edit.save"
-                )}
-              </Button>
-            </>
-          )}
-          {saved && changes.length === 0 && (
-            <output className="tw-inline-flex tw-h-[30px] tw-items-center tw-gap-1 tw-text-xs tw-font-medium tw-text-iron-300">
-              <CheckIcon
-                aria-hidden="true"
-                className="tw-size-3.5 tw-text-emerald-400"
-              />
-              {t(locale, "rep.categories.edit.saved")}
-            </output>
-          )}
-        </div>
-      </div>
+      <RepContributionActions
+        currentAmount={ownRow.contribution}
+        value={ownDraft}
+        available={available}
+        overAllowance={overAllowance}
+        changed={changes.length > 0}
+        canSave={canSave}
+        busy={busy}
+        saved={saved}
+      />
     </div>
   );
   const body = (

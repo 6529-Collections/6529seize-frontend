@@ -66,6 +66,39 @@ const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
   return fallbackMessage;
 };
 
+function getSubmissionGuidanceContent(
+  submissionHint: string,
+  submissionLookalikeInfo: string | null,
+  hasSelectedSubmissionCategory: boolean
+): React.ReactNode {
+  const submissionCategoryStart = submissionHint.indexOf(
+    MEMES_NOMINEE_CATEGORY
+  );
+  if (submissionLookalikeInfo) {
+    return submissionLookalikeInfo;
+  }
+  if (submissionCategoryStart >= 0) {
+    return (
+      <>
+        {submissionHint.slice(0, submissionCategoryStart)}
+        <span
+          className={`tw-font-medium ${
+            hasSelectedSubmissionCategory
+              ? "tw-text-emerald-400"
+              : "tw-text-iron-200"
+          }`}
+        >
+          {MEMES_NOMINEE_CATEGORY}
+        </span>
+        {submissionHint.slice(
+          submissionCategoryStart + MEMES_NOMINEE_CATEGORY.length
+        )}
+      </>
+    );
+  }
+  return submissionHint;
+}
+
 export default function UserPageRepNewRepSearch({
   overview,
   profile,
@@ -359,31 +392,11 @@ export default function UserPageRepNewRepSearch({
         submissionCategory: MEMES_NOMINEE_CATEGORY,
       })
     : null;
-  const submissionCategoryStart = submissionHint.indexOf(
-    MEMES_NOMINEE_CATEGORY
+  const submissionGuidanceContent = getSubmissionGuidanceContent(
+    submissionHint,
+    submissionLookalikeInfo,
+    hasSelectedSubmissionCategory
   );
-  let submissionGuidanceContent: React.ReactNode = submissionHint;
-  if (submissionLookalikeInfo) {
-    submissionGuidanceContent = submissionLookalikeInfo;
-  } else if (submissionCategoryStart >= 0) {
-    submissionGuidanceContent = (
-      <>
-        {submissionHint.slice(0, submissionCategoryStart)}
-        <span
-          className={`tw-font-medium ${
-            hasSelectedSubmissionCategory
-              ? "tw-text-emerald-400"
-              : "tw-text-iron-200"
-          }`}
-        >
-          {MEMES_NOMINEE_CATEGORY}
-        </span>
-        {submissionHint.slice(
-          submissionCategoryStart + MEMES_NOMINEE_CATEGORY.length
-        )}
-      </>
-    );
-  }
 
   const repSearchState = useMemo(() => {
     const searchLength = getSearchLength(repSearch);

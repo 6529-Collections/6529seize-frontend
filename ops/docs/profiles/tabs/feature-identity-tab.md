@@ -165,6 +165,7 @@ show the profile-creation welcome.
 - `+N more` reveals 10 additional already-loaded categories at a time.
   It uses a bordered, unfilled chip with medium-weight text and a hover state:
   38px high on desktop and a 44px tap target on mobile.
+  Hovering strengthens its outline and adds a faint fill.
 - When the visible list reaches the end of the categories already loaded in the
   current direction but more server pages exist, the same control changes to
   `Load more`, requests the next categories page, shows `Loading...` while that
@@ -246,7 +247,7 @@ show the profile-creation welcome.
   grantor's contribution and allowance.
 - Your two-row block stays above the scrolling raters list with a thin divider.
   The first row keeps your avatar and `You` beside the amount input, aligned
-  with the rater amounts. The second row always reserves space for
+  with the rater amounts. The fixed 42px second row always reserves space for
   `Available REP` on the left and an action beneath the input on the right.
   Exceeding your allowance turns the available-credit line red and disables saving.
 - On desktop, opening a category focuses your amount without
@@ -257,6 +258,8 @@ show the profile-creation welcome.
 - Editable amounts use the Grant REP input's plus/minus symbols. Numbers are
   grouped while unfocused; focusing shows plain digits without selecting them. Read-only amounts
   are plain numbers.
+  Your `Received` input has a subtle fill, neutral border and consistent text
+  color; its plus/minus column is separated by a faint divider.
   In `Received`, changing an existing amount reveals a muted old value,
   arrow and bright new value in the second row, followed by a compact `Save`
   button. A first contribution shows only `Grant Rep` there. The action is

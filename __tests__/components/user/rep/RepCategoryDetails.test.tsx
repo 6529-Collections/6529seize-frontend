@@ -190,7 +190,8 @@ it("pins only your editable contribution, accepts negative values, and saves the
   await user.type(amount, "-15");
   expect(fetchApi).toHaveBeenCalledTimes(readsBeforeTyping);
   expect(post).not.toHaveBeenCalled();
-  expect(amount).toHaveClass("tw-text-rose-400");
+  expect(amount).toHaveClass("tw-text-iron-100");
+  expect(screen.getByRole("status")).toHaveTextContent("20 → -15");
   await user.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() =>
     expect(post).toHaveBeenCalledWith({
@@ -296,7 +297,12 @@ it("keeps the You input empty after removing a contribution", async () => {
   post.mockImplementation(async () => {
     ownContribution = 0;
   });
-  setup(target, "received");
+  const { container } = setup(target, "received");
+  const announcement = container.querySelector(
+    '[aria-live="polite"][aria-atomic="true"]'
+  );
+  expect(announcement).toBeInTheDocument();
+  expect(announcement).toBeEmptyDOMElement();
   const input = await screen.findByRole("textbox", { name: "You" });
   await user.clear(input);
   await user.type(input, "0");
@@ -304,6 +310,7 @@ it("keeps the You input empty after removing a contribution", async () => {
   await waitFor(() => expect(input).toHaveValue(""));
   expect(screen.getByRole("link", { name: "You" })).toBeInTheDocument();
   expect(screen.getByText("Saved")).toBeInTheDocument();
+  expect(announcement).toHaveTextContent("Saved");
   expect(screen.getAllByRole("link")).toHaveLength(3);
   expect(post).toHaveBeenCalledWith({
     endpoint: "profiles/target/rep/rating",

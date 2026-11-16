@@ -642,18 +642,14 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         field.getBoundingClientRect().top - form.getBoundingClientRect().top
       );
     });
-    await panel
+    const raters = panel
       .getByRole("link", { name: "other-rater-0", exact: true })
-      .hover();
-    await page.mouse.wheel(0, 1000);
+      .locator("..")
+      .locator("..");
+    // Mobile WebKit does not support mouse.wheel; scroll the same container.
+    await raters.evaluate((list) => list.scrollTo(0, list.scrollHeight));
     await expect
-      .poll(() =>
-        panel
-          .getByRole("link", { name: "other-rater-0", exact: true })
-          .locator("..")
-          .locator("..")
-          .evaluate((list) => list.scrollTop)
-      )
+      .poll(() => raters.evaluate((list) => list.scrollTop))
       .toBeGreaterThan(0);
     await expect(amount).toBeInViewport();
     expect(
@@ -679,6 +675,16 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(grant).toHaveCSS("height", "30px");
     await expect(grant).toHaveCSS("font-size", "12px");
     await expect(grant).toHaveCSS("border-radius", "8px");
+    const grantBox = await grant.boundingBox();
+    const amountBox = await amount.locator("..").boundingBox();
+    expect(grantBox).not.toBeNull();
+    expect(amountBox).not.toBeNull();
+    if (grantBox && amountBox) {
+      expect(grantBox.x + grantBox.width).toBeCloseTo(
+        amountBox.x + amountBox.width,
+        1
+      );
+    }
     await expect(
       panel.getByRole("button", {
         name: `Open category ${CATEGORY}`,
@@ -938,6 +944,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     page,
     baseURL,
     isMobile,
+    browserName,
   }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
     let release: () => void = () => undefined;
@@ -997,7 +1004,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       await repSummary
         .getByRole("button", { name: "Grant Rep", exact: true })
         .focus();
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
       await expect(assigned).toBeFocused();
     }
     if (isMobile) {
@@ -1171,7 +1178,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     expect(inputSpacing.top).toBeGreaterThanOrEqual(5);
     expect(inputSpacing.bottom).toBeGreaterThanOrEqual(5);
     const otherAmount = panel.getByText("10", { exact: true });
-    const inputBox = await input.boundingBox();
+    const inputBox = await input.locator("..").boundingBox();
     const otherAmountBox = await otherAmount.boundingBox();
     expect(inputBox).not.toBeNull();
     expect(otherAmountBox).not.toBeNull();
@@ -1199,13 +1206,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(input).toHaveValue("20");
     await input.fill("30");
     await expect(panel.getByRole("status")).toHaveText("20 → 30");
-    await expect(input).toHaveCSS("color", "rgb(52, 211, 153)");
+    await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
     await expect(
       panel.getByRole("status").getByText("30", { exact: true })
     ).toHaveCSS("color", "rgb(239, 239, 241)");
     await input.fill("10");
     await expect(panel.getByRole("status")).toHaveText("20 → 10");
-    await expect(input).toHaveCSS("color", "rgb(251, 113, 133)");
+    await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
     await expect(
       panel.getByRole("status").getByText("10", { exact: true })
     ).toHaveCSS("color", "rgb(239, 239, 241)");
@@ -1747,9 +1754,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(more).toHaveCSS("color", "rgb(206, 207, 212)");
     if (!isMobile) {
       await more.hover();
-      await expect(more).toHaveCSS("color", "rgb(239, 239, 241)");
-      await expect(more).toHaveCSS("border-top-color", "rgb(96, 96, 108)");
-      await expect(more).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(more).toHaveCSS("color", "rgb(245, 245, 245)");
+      await expect(more).toHaveCSS(
+        "border-top-color",
+        "rgba(255, 255, 255, 0.25)"
+      );
+      await expect(more).toHaveCSS(
+        "background-color",
+        "rgba(255, 255, 255, 0.03)"
+      );
     }
     await expect(
       rep.getByRole("button", { name: /^Open REP category / })
@@ -2321,6 +2334,12 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(category).toHaveAccessibleDescription("Assigned to you: 20");
+    await expect(
+      page.getByRole("button", { name: /^You assigned:/ })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toHaveCount(0);
     await expectPersonalTagSpacing(category, isMobile);
     if (isMobile) {
       await page.setViewportSize({ width: 768, height: 844 });

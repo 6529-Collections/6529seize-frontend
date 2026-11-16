@@ -49,14 +49,10 @@ export default function GrantRepCategorySuggestions({
   return (
     <div className="tw-mt-4 tw-space-y-4">
       {groups.map(({ key, items }) => (
-        <div
-          key={key}
-          role="group"
-          aria-label={t(locale, `rep.categories.grant.${key}`)}
-        >
-          <h3 className="tw-mb-2 tw-mt-0 tw-text-xs tw-font-medium tw-text-iron-400">
+        <fieldset key={key} className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0">
+          <legend className="tw-mb-2 tw-p-0 tw-text-xs tw-font-medium tw-text-iron-400">
             {t(locale, `rep.categories.grant.${key}`)}
-          </h3>
+          </legend>
           <div className="tw-flex tw-max-h-32 tw-flex-wrap tw-gap-2 tw-overflow-y-auto tw-p-0.5">
             {items?.map((item) => (
               <button
@@ -87,7 +83,7 @@ export default function GrantRepCategorySuggestions({
               </p>
             )}
           </div>
-        </div>
+        </fieldset>
       ))}
     </div>
   );
