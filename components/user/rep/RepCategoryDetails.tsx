@@ -619,7 +619,10 @@ export default function RepCategoryDetails({
     : "";
   const overAllowance = changes.length > 0 && validNumbers && !withinAllowance;
   const ownBlock = ownRow && (
-    <div className="tw-mb-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-1">
+    <div
+      data-has-raters={listRows.length > 0}
+      className="tw-mb-1 tw-border-x-0 tw-border-b-0 tw-border-t-0 tw-border-solid tw-border-white/5 tw-pb-1 data-[has-raters=true]:tw-border-b"
+    >
       {renderRow(ownRow)}
       <RepContributionActions
         currentAmount={ownRow.contribution}
