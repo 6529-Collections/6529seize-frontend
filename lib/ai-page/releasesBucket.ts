@@ -1,16 +1,12 @@
 import { getAwsCredentials } from "@/lib/validator-page/awsCredentials";
 import { presignS3GetUrl } from "@/lib/validator-page/sigv4";
 
-/**
- * The private bucket that holds 6529 AI's release feed and release files.
- * The production instance role may read `feed/*` and `releases/*` and
- * nothing else; nothing in the bucket is public.
- */
-const AI_RELEASES_BUCKET = "6529-ai-releases-4d7e988d";
-const AI_RELEASES_REGION = "us-east-1";
+import { AI_RELEASES_LOCATION } from "./releasesLocation";
+
 const FETCH_TIMEOUT_MS = 5_000;
-// The feed is at most 64 KiB and its signature under 1 KiB; refuse
-// anything far larger before reading it into memory.
+// The Ed25519 feed is at most 64 KiB and its signature under 1 KiB, and
+// the bundle under 80 KiB; refuse anything far larger before reading it
+// into memory.
 const MAX_OBJECT_BYTES = 256 * 1024;
 
 export const AI_FEED_OBJECT_KEY = "feed/releases.json";
@@ -42,8 +38,8 @@ export async function presignAiReleaseObject(
   }
 ): Promise<string> {
   return presignS3GetUrl({
-    bucket: AI_RELEASES_BUCKET,
-    region: AI_RELEASES_REGION,
+    bucket: AI_RELEASES_LOCATION.bucket,
+    region: AI_RELEASES_LOCATION.region,
     key,
     credentials: await getAwsCredentials(),
     expiresInSeconds: options.expiresInSeconds,

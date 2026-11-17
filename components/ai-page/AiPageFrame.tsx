@@ -9,7 +9,13 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 
-type AiSection = "download" | "guide" | "use" | "models" | "known-issues";
+type AiSection =
+  | "download"
+  | "guide"
+  | "known-issues"
+  | "releases"
+  | "models"
+  | "use";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
@@ -23,14 +29,15 @@ const SECTIONS: readonly {
 }[] = [
   { key: "download", href: "/ai", label: "ai.nav.download" },
   { key: "guide", href: "/ai/guide", label: "ai.nav.guide" },
-  { key: "use", href: "/ai/use", label: "ai.nav.use" },
-  { key: "models", href: "/ai/models", label: "ai.nav.models" },
   {
     key: "known-issues",
     href: "/ai/known-issues",
     label: "ai.nav.knownIssues",
     short: "ai.nav.knownIssuesShort",
   },
+  { key: "releases", href: "/ai/releases", label: "ai.nav.releases" },
+  { key: "models", href: "/ai/models", label: "ai.nav.models" },
+  { key: "use", href: "/ai/use", label: "ai.nav.use" },
 ];
 
 /** Headings and body text shared by the /ai pages. */
@@ -80,14 +87,17 @@ function AiUntestedNotice({ current }: { readonly current: AiSection }) {
 }
 
 /**
- * The menu of the /ai pages, the page's title and lead, the untested
- * notice, then the page.
+ * The menu of the /ai pages (the release standard's order: Download,
+ * Guide, Known issues, Releases, then the extras), the page's title and
+ * lead, the release list's urgent or unsafe notice, the untested notice,
+ * then the page.
  */
 export default function AiPageFrame({
   current,
   eyebrow,
   version,
   notice = true,
+  alert,
   wide = false,
   title,
   lead,
@@ -102,6 +112,8 @@ export default function AiPageFrame({
    * issues do in their lead.
    */
   readonly notice?: boolean | undefined;
+  /** What the release list says the visitor must know first. */
+  readonly alert?: ReactNode;
   /** A wider page, for the models and the walk-through with its contents. */
   readonly wide?: boolean | undefined;
   readonly title: string;
@@ -171,6 +183,7 @@ export default function AiPageFrame({
             </p>
           )}
         </header>
+        {alert}
         {notice && <AiUntestedNotice current={current} />}
         {children}
       </div>

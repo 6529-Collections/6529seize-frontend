@@ -97,7 +97,7 @@ function FileRow({
             )}
           </p>
           <div className="tw-mt-2 empty:tw-hidden">
-            <AiTrustBadges signed={file.signed} />
+            <AiTrustBadges file={file} />
           </div>
         </div>
       </div>
