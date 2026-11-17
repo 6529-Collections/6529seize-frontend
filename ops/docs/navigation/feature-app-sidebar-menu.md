@@ -19,12 +19,18 @@ reserves its space without showing either action. The same rule applies to the
 collapsed and expanded web sidebar, mobile web menu, native app drawer, and
 page search. Public navigation never adds a Validator link.
 
+After that slot, `6529 AI` links to `/ai`, 6529 AI's download page, for
+everyone, signed in or not. It sits beside the validator because both are
+6529 software that people run on their own computers, and it is public
+because the `/ai` pages are. It uses the same styling as the other rows, is
+active on every `/ai` page, and is under `Pages` in page search.
+
 ## Location in the Site
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
-- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members), and
-  `About`.
+- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members),
+  `6529 AI`, and `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Drawer header: connected profile avatar shortcut to
@@ -57,6 +63,7 @@ page search. Public navigation never adds a Validator link.
    - `Waves`
    - `DMs`
    - `Join 6529` for newcomers, or `Validator` for signed-in members
+   - `6529 AI`
    - `About`
 5. Tap the connected profile avatar to open your own profile route
    (`/{normalized-handle}` with `/{walletAddress}` fallback), tap `Museum` for
