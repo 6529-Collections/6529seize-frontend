@@ -1,5 +1,5 @@
 "use client";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { usePathname, useRouter } from "next/navigation";
 import {
   useCallback,
@@ -17,12 +17,11 @@ import {
 } from "@/components/utils/toast/AppToast";
 import { useSeizeSettingsOptional } from "@/contexts/SeizeSettingsContext";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
-import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { useContentModerationStateScope } from "@/hooks/content-moderation/useContentModerationStateScope";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useSecureSign } from "@/hooks/useSecureSign";
 import { useDeviceGrantChangeInvalidation } from "@/hooks/device-signing/useDeviceGrantChangeInvalidation";
-import { commonApiFetch } from "@/services/api/common-api";
+import { useLostDeviceGrantCleanup } from "@/hooks/device-signing/useLostDeviceGrantCleanup";
 import {
   getAuthJwt,
   getWalletAddress,
@@ -36,10 +35,7 @@ import {
   verifyActiveSessionV2WebSession,
 } from "@/services/auth/session-v2.utils";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
-import {
-  QueryKey,
-  ReactQueryWrapperContext,
-} from "../react-query-wrapper/ReactQueryWrapper";
+import { ReactQueryWrapperContext } from "../react-query-wrapper/ReactQueryWrapper";
 import { AuthSignModal } from "./AuthSignModal";
 import { useAuthRequestActions } from "./useAuthRequestActions";
 import { AuthContext } from "./authContext";
@@ -81,6 +77,7 @@ import { useSeizeConnectContext } from "./SeizeConnectContext";
 import { DesktopProfileRecoveryContext } from "@/contexts/DesktopProfileRecoveryContext";
 import { useAuthChainGuard } from "./useAuthChainGuard";
 import { useAuthContextValue } from "./useAuthContextValue";
+import { useReceivedProfileProxies } from "./useReceivedProfileProxies";
 import { useSessionRecovery } from "./useSessionRecovery";
 import { useShownWalletForWrites } from "./useShownWalletForWrites";
 
@@ -238,25 +235,7 @@ export default function Auth({
     };
   }, [abortCurrentAuthOperation]);
 
-  const { data: profileProxies } = useQuery<ApiProfileProxy[]>({
-    queryKey: [
-      QueryKey.PROFILE_PROFILE_PROXIES,
-      { handleOrWallet: connectedProfile?.query },
-    ],
-    queryFn: async () =>
-      await commonApiFetch<ApiProfileProxy[]>({
-        endpoint: `profiles/${connectedProfile?.query}/proxies/`,
-      }),
-    enabled: !!connectedProfile?.query,
-  });
-
-  const receivedProfileProxies = useMemo(() => {
-    return groupProfileProxies({
-      profileProxies: profileProxies ?? [],
-      onlyActive: true,
-      profileId: connectedProfile?.id ?? null,
-    }).received;
-  }, [profileProxies, connectedProfile?.id]);
+  const receivedProfileProxies = useReceivedProfileProxies(connectedProfile);
 
   const [activeProfileProxy, setActiveProfileProxy] =
     useState<ApiProfileProxy | null>(null);
@@ -271,6 +250,9 @@ export default function Auth({
     activeProfileProxy?.id,
     isDirectProfileSession
   );
+  const cleanupWallet =
+    isDirectProfileSession && isAddressAuthorized ? address : null;
+  useLostDeviceGrantCleanup(queryClient, cleanupWallet, connectedProfile?.id);
 
   useEffect(() => {
     const activeProxy = resolveActiveProfileProxy({
