@@ -2578,6 +2578,94 @@ test("homepage tracking follows nested scrolling and loaded sections @smoke @med
   await expect(seen).toHaveText(["Introduction", "Explore waves"]);
 });
 
+test("collapsed sidebar fits full rows when a desktop update appears @smoke @medium @large", async ({
+  page,
+}, testInfo) => {
+  // Mobile and native projects use different navigation shells.
+  test.skip(
+    !isDesktopWebProject(testInfo.project.name),
+    "Desktop collapsed sidebar geometry"
+  );
+  await page.setViewportSize({ width: 1440, height: 600 });
+  await page.addInitScript(() => {
+    globalThis.sessionStorage.setItem("sidebarCollapsed", "true");
+  });
+  let releaseVersion!: () => void;
+  const versionReady = new Promise<void>((resolve) => {
+    releaseVersion = resolve;
+  });
+  await page.route("**/api/version", async (route) => {
+    await versionReady;
+    const currentOrder = Number(
+      route.request().headers()["x-6529-client-release-order"] ?? "0"
+    );
+    await route.fulfill({
+      json: { stale: true, announced_release_order: currentOrder + 1 },
+    });
+  });
+  try {
+    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+    const navigation = page
+      .getByLabel("Primary sidebar", { exact: true })
+      .locator("[data-sidebar-scroll]");
+    const about = navigation.getByRole("button", {
+      name: "About",
+      exact: true,
+    });
+    const search = sidebar.getByRole("button", { name: "Search", exact: true });
+    const share = sidebar.getByRole("button", { name: "Share this page" });
+    const update = sidebar.getByRole("button", { name: "Update", exact: true });
+    const account = page
+      .getByLabel("Primary sidebar", { exact: true })
+      .locator("[data-sidebar-account]");
+    await expect(share).toBeVisible();
+    await expect(account).toHaveAttribute("data-sidebar-account", "signed-out");
+    await expect(
+      page
+        .getByLabel("Primary sidebar", { exact: true })
+        .locator("[data-sidebar-version-slot]")
+    ).toBeHidden();
+    await expect(about).toHaveCSS("height", "46px");
+    const accountBeforeUpdate = await account.boundingBox();
+
+    releaseVersion();
+    await expect(update).toBeVisible();
+    await expect
+      .poll(async () => (await about.boundingBox())!.height)
+      .toBeLessThan(46);
+    const rowHeight = await about.evaluate(
+      (node) => getComputedStyle(node).height
+    );
+    for (const control of [update, search, share]) {
+      await expect(control).toHaveCSS("height", rowHeight);
+    }
+    const navBox = await navigation.boundingBox();
+    const aboutBox = await about.boundingBox();
+    expect(aboutBox!.y + aboutBox!.height).toBeLessThanOrEqual(
+      navBox!.y + navBox!.height + 1
+    );
+    expect(await account.boundingBox()).toEqual(accountBeforeUpdate);
+
+    await page.setViewportSize({ width: 1440, height: 460 });
+    await expect(about).toHaveCSS("height", "42px");
+    await expect(update).toBeInViewport({ ratio: 1 });
+    await expect(
+      account.getByRole("button", { name: "Connect Wallet", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await about.focus();
+    await expect(about).toBeInViewport({ ratio: 1 });
+
+    await page.setViewportSize({ width: 1440, height: 600 });
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await expect(share).toHaveCount(0);
+    await expect(update).toBeVisible();
+    await expect(about).toHaveCSS("height", "46px");
+  } finally {
+    releaseVersion();
+  }
+});
+
 test("desktop account updates do not move utilities, including in short expanded sidebars @smoke @medium @large", async ({
   page,
 }, testInfo) => {
