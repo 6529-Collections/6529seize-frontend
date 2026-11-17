@@ -2581,6 +2581,7 @@ test("homepage tracking follows nested scrolling and loaded sections @smoke @med
 test("collapsed sidebar fits full rows when a desktop update appears @smoke @medium @large", async ({
   page,
 }, testInfo) => {
+  // Mobile and native projects use different navigation shells.
   test.skip(
     !isDesktopWebProject(testInfo.project.name),
     "Desktop collapsed sidebar geometry"
@@ -2648,8 +2649,10 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
 
     await page.setViewportSize({ width: 1440, height: 460 });
     await expect(about).toHaveCSS("height", "42px");
-    await expect(update).toBeInViewport();
-    await expect(account).toBeInViewport();
+    await expect(update).toBeInViewport({ ratio: 1 });
+    await expect(
+      account.getByRole("button", { name: "Connect Wallet", exact: true })
+    ).toBeInViewport({ ratio: 1 });
     await about.focus();
     await expect(about).toBeInViewport({ ratio: 1 });
 
