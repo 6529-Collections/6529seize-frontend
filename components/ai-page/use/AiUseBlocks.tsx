@@ -1,3 +1,4 @@
+import { ClockIcon } from "@heroicons/react/20/solid";
 import type { ReactNode } from "react";
 
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -128,6 +129,21 @@ function Block({ block }: { readonly block: AiUseBlock }): ReactNode {
           <InlineText text={block.text} />
         </p>
       );
+    case "note":
+      return (
+        <p className="tw-m-0 tw-flex tw-gap-2.5 tw-rounded-lg tw-border-0 tw-border-l-2 tw-border-solid tw-border-primary-400/50 tw-bg-primary-500/[0.06] tw-py-2.5 tw-pl-3.5 tw-pr-4 tw-text-sm tw-leading-6 tw-text-iron-300">
+          <ClockIcon
+            aria-hidden="true"
+            className="tw-mt-1 tw-size-4 tw-flex-none tw-text-primary-300"
+          />
+          <span>
+            <span className="tw-font-semibold tw-text-iron-100">
+              {t(LOCALE, "ai.use.expect")}:{" "}
+            </span>
+            <InlineText text={block.text} />
+          </span>
+        </p>
+      );
     case "h3":
       return (
         <h3 id={block.id} className={`tw-mt-4 tw-scroll-mt-24 ${AI_H3}`}>
@@ -160,7 +176,8 @@ function Block({ block }: { readonly block: AiUseBlock }): ReactNode {
 function blockKey(block: AiUseBlock): string {
   switch (block.kind) {
     case "p":
-      return `p:${block.text}`;
+    case "note":
+      return `${block.kind}:${block.text}`;
     case "h3":
       return `h3:${block.id}`;
     case "steps":

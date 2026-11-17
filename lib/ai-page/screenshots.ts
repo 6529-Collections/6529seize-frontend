@@ -19,5 +19,5 @@ export const AI_SCREENSHOTS = {
   /** The app's question on a Mac: alone, or beside a validator. */
   placement: { image: "14-mac-first-run" },
   /** A chat reply: the first chat, at the end of the guide. */
-  firstChat: { image: "40-chat", phone: "98-phone-chat-reply" },
+  firstChat: { image: "40-chat" },
 } as const satisfies Record<string, AiScreenshotSlot>;

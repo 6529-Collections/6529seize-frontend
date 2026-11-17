@@ -68,14 +68,10 @@ describe("the /ai/models filter", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: /Table/ }));
     expect(document.querySelectorAll("article")).toHaveLength(0);
-    const speech = document
-      .getElementById("speech-to-text")!
-      .closest("section")!;
-    const table = within(speech).getByRole("table");
+    const refusals = document.getElementById("uncensored")!.closest("section")!;
+    const table = within(refusals).getByRole("table");
     expect(
-      within(table).getByRole("columnheader", {
-        name: "LibriSpeech test-clean WER lower is better",
-      })
+      within(table).getByRole("columnheader", { name: "LiveCodeBench v6" })
     ).toBeInTheDocument();
     const names = within(table)
       .getAllByRole("button", { name: /^Show the card: / })
@@ -84,11 +80,9 @@ describe("the /ai/models filter", () => {
 
     fireEvent.click(
       within(table).getByRole("button", {
-        name: "Show the card: Whisper large-v3 turbo",
+        name: "Show the card: gemma-4-31B-it-uncensored-heretic",
       })
     );
-    expect(
-      document.getElementById("model-whisper-large-v3-turbo")
-    ).not.toBeNull();
+    expect(document.getElementById("model-gemma-4-31b-heretic")).not.toBeNull();
   });
 });

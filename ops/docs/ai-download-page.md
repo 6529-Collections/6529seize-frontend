@@ -62,29 +62,39 @@ own lead.
   at phone width and uninstalling, then a line to Known issues and a
   footnote on the three computers the pictures come from. Its contents
   sit beside it from 1024 px and mark the section in view; on a phone a
-  slim bar at the top says which section you are in and opens the list,
-  and a button goes back to the top. Output a command printed is quieter
+  slim bar holds to the top, says which section you are in, opens the
+  whole list over a dimmed page, and has a button back to the top. Output a command printed is quieter
   than the command, with no bar, and folds behind "Show output" past ten
-  lines.
+  lines. A step says what to expect in a short note (how long a download
+  or a first image takes) rather than what one test machine measured, and
+  a cross-reference is a link that names its section's number.
 - **Models** (`/ai/models`): every model in the 6529 AI registry, by
   section. A bar, held at the top from 1024 px, has a search (name,
-  publisher or family: "qwen 8b"), an order (smallest memory first, newest
-  first, by name), cards or a table, and filters for what runs in the app
-  today, what a model reads and makes, and the memory it needs, with
-  "Not sure what fits? The app's Start page tells you." A card has the
-  name, the publisher linked to its files on Hugging Face at the pinned
+  publisher or family: "qwen 8b"), cards or a table, and filters for what
+  runs in the app today, what a model reads and makes and the memory it
+  needs, an order (smallest memory first, newest first, by name), and "Not
+  sure what fits? The app's Start page tells you." On a phone the bar
+  keeps the search and the Cards / Table switch, and "Filters (N)" opens
+  the rest in a sheet; a phone opens on the table, and the visitor's own
+  choice of cards or table is kept in the browser. A card has the name,
+  the publisher linked to its files on Hugging Face at the pinned
   revision, one line on what it is, whether the app runs it (and why
   not), its facts, its versions and up to five scores, and 6529's own
   measured runs with the hardware. The table has a row a model (maker,
-  smallest files and memory, whether the app runs it, and the section's
-  common score where at least half its models report one) and a row
-  opens its card. On a phone a card's versions and scores fold behind a
-  button.
+  smallest files, GPU memory needed, whether the app runs it, and the
+  section's common score where two thirds of its models report the same
+  benchmark), and a row opens its card. On a phone a card's versions and
+  scores fold behind a button, and "How to read this page" sits under the
+  list.
 - **Known issues** (`/ai/known-issues`): the untested statement as the
   lead, the day the list last changed, a one-line "Found a problem? Report
   it" link, then **Known bugs** (each a card: what you see, the fix and
-  its commands, and why in a line) and **Not tested yet** by system, and
-  the full "Report a problem" card at the end.
+  its commands, and why in a line), what the newest release fixed
+  (`AI_FIXED_BUGS` and `AI_FIXED_IN` in `knownIssues.ts`, with a link to
+  download it), **Not tested yet** by system, and the full "Report a
+  problem" card at the end. When a release fixes a bug, move it from
+  `AI_KNOWN_BUGS` to `AI_FIXED_BUGS` and set `AI_FIXED_IN`; take out any
+  line on the other pages that describes it.
 
 "Report a problem" opens the 6529 AI wave, where testers and the support
 bot answer, and says what to include: the system, the steps, what
@@ -97,10 +107,11 @@ targets are 44 px on a phone. The pages are dark-only, as the site is.
 
 Three places on the first pages show a screenshot of the app, from the
 walk-through's pictures: the download page's first screen shows Start's
-model list, the guide's Mac step 4 the question whether a validator runs
-on the same computer, and its first chat a chat reply. On a phone the
-download page and the first chat show the app's own phone-width capture
-instead. `lib/ai-page/screenshots.ts` names them.
+model list, in a window frame with a shadow so it reads as the app and
+not as part of the page; the guide's Mac step 4 the question whether a
+validator runs on the same computer; and its first chat a chat reply.
+On a phone the download page shows the app's own phone-width capture,
+cut at a row's edge. `lib/ai-page/screenshots.ts` names them.
 
 ## The pictures
 
@@ -120,7 +131,11 @@ for the 1x Windows dialogs; 30 files, about 1.8 MB).
 its step is about (the row, the button, the dialog). `AiZoomPicture`
 shows the crop at its real size, or the column's width when that is less,
 in the cards' 1 px border and radius, and a click opens the whole capture
-at its real size in a dialog. Phone-width captures sit two to a row from
+at its real size in a dialog that scrolls both ways and takes pinch zoom.
+A phone shows `phone` instead where an entry has one: a narrower crop of
+the same capture (the reply, the rows that matter), faded at the right
+where it cuts text, or the app's own phone-width capture of the same
+moment. Phone-width captures sit two to a row from
 640 px and in a row that scrolls sideways on a phone. To change a
 picture, put the new file in `public/ai/use/` and set its size and crop
 in `useImages.ts`; a test reads each file's size and checks each crop
@@ -332,12 +347,15 @@ feed says it is unsigned. The known issues come from those guides' notes
 on what was tested; update them, and `AI_KNOWN_ISSUES_UPDATED`, as 6529
 AI is tested further.
 
-The first release, release candidate 1 (`0.1.0-rc.1`), runs models on the
-person's own computer only, and its app hides the 6529 AI network. So the
-guide leaves out every network step (models from other providers, serving
-to others, linking an account), and no page mentions the network. When a
-release turns the network
-on, add its steps from 6529 AI's `use-the-network.md`,
+The test releases so far (`0.1.0-rc.1` and `0.1.0-rc.2`) run models on
+the person's own computer only, and their app hides the 6529 AI network.
+So the guide leaves out every network step (models from other providers,
+serving to others, linking an account), and no page mentions the network.
+The pages name no release in their text: the eyebrows, the downloads and
+the guide's commands take the newest version from the feed, and the
+walk-through's commands and output write `<version>` where a version
+goes. Its pictures come from release candidate 1, and no caption says so.
+When a release turns the network on, add its steps from 6529 AI's `use-the-network.md`,
 `serve-and-offer.md` and `link-account.md`, and its known issues.
 
 ## Link it from the site

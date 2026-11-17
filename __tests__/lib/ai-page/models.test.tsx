@@ -97,7 +97,7 @@ describe("the models data", () => {
       "256 tokens at temperature 0 after a warm-up."
     );
     const [smoke] = model("qwen3-0.6b").measured;
-    expect(getMeasuredNote(smoke!)).toBe("Served chat in the smoke test.");
+    expect(getMeasuredNote(smoke!)).toBe("Ran a test chat.");
   });
 
   it("describes each model in one sentence", () => {
@@ -131,15 +131,16 @@ describe("scores", () => {
     expect(score("BEIR", "55.33")).toBe("55.3");
   });
 
-  it("gives a section a column for the benchmark most of its models report", () => {
+  it("gives a section a column for a benchmark two thirds of its models report", () => {
     const sections = getAiModelSections();
-    const speech = getSectionScore(
-      sections.find((section) => section.id === "speech-to-text")!
+    const section = (id: string) =>
+      sections.find((candidate) => candidate.id === id)!;
+    expect(getSectionScore(section("uncensored"))?.name).toBe(
+      "LiveCodeBench v6"
     );
-    expect(speech?.name).toBe("LibriSpeech test-clean WER");
-    expect(
-      getSectionScore(sections.find((section) => section.id === "robotics")!)
-    ).toBeNull();
+    // 8 of 14 report LibriSpeech: not enough for a column.
+    expect(getSectionScore(section("speech-to-text"))).toBeNull();
+    expect(getSectionScore(section("robotics"))).toBeNull();
   });
 });
 

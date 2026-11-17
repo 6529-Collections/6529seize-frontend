@@ -264,11 +264,9 @@ describe("the /ai pages", () => {
       "Tested only on Ubuntu 22.04 and 24.04.",
       ">Known bugs</h2>",
       ">Not tested yet</h2>",
-      "fails for every model with &quot;error sending request for url&quot;",
-      "On a computer with no GPU, the installer picks",
-      "signs the page out, though its dialog says the sign-in lasts 7 days",
-      "Invoke-WebRequest https://valid-isrgrootx1.letsencrypt.org -UseBasicParsing | Out-Null",
-      "Start-ScheduledTask -TaskName &#x27;6529 AI&#x27;",
+      "A model about as big as the computer&#x27;s memory can take many minutes",
+      "Fixed in 0.1.0-rc.2",
+      "The sign-in to the page lasts through a restart of the service.",
     ]) {
       expect(html).toContain(text);
     }
@@ -310,8 +308,6 @@ describe("the /ai pages", () => {
     expect(guide).toContain(
       "A first chat. Whichever model you pick, Chat looks the same."
     );
-    // A phone shows the app's own phone-width capture instead.
-    expect(guide).toContain("%2Fai%2Fuse%2F98-phone-chat.webp");
     expect(download).toContain("%2Fai%2Fuse%2F98c-phone-start.webp");
     // The Mac's question shows at its real size: half the 2x file.
     expect(guide).toContain("max-width:432px");

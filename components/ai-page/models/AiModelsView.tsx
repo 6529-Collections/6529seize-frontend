@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  AdjustmentsHorizontalIcon,
   CheckCircleIcon,
   ChevronDownIcon,
   MagnifyingGlassIcon,
@@ -8,7 +9,13 @@ import {
   TableCellsIcon,
   XMarkIcon,
 } from "@heroicons/react/20/solid";
-import { Fragment, useMemo, useState, type ReactNode } from "react";
+import {
+  Fragment,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 import type { AiMedium, AiModelFacets } from "@/lib/ai-page/models";
 
@@ -87,6 +94,11 @@ export type AiModelsText = {
   readonly count: string;
   readonly clear: string;
   readonly none: string;
+  /** "Filters", the phone sheet's title, and "Filters ({count})". */
+  readonly filters: string;
+  readonly filtersCount: string;
+  /** "Show {shown} models", the sheet's closing button. */
+  readonly showCount: string;
   /** What the mark on a score means, said once. */
   readonly legend: string;
   readonly table: {
@@ -95,6 +107,8 @@ export type AiModelsText = {
     readonly size: string;
     readonly memory: string;
     readonly inApp: string;
+    /** "App", the same column's heading on a phone. */
+    readonly inAppShort: string;
     readonly yes: string;
     readonly open: string;
   };
@@ -107,6 +121,54 @@ export type AiModelsText = {
 function found(facets: AiModelFacets, words: readonly string[]): boolean {
   const own = facets.search.split(/[\s/_-]+/);
   return words.every((word) => own.some((part) => part.startsWith(word)));
+}
+
+const VIEW_KEY = "6529-ai-models-view";
+const PHONE = "(max-width: 639px)";
+
+function noSubscription(): () => void {
+  return () => undefined;
+}
+
+function readStoredView(): View | null {
+  try {
+    const value = globalThis.localStorage.getItem(VIEW_KEY);
+    return value === "cards" || value === "table" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+function noView(): View | null {
+  return null;
+}
+
+function storeView(view: View): void {
+  try {
+    globalThis.localStorage.setItem(VIEW_KEY, view);
+  } catch {
+    // The choice holds for this visit only.
+  }
+}
+
+function subscribePhone(change: () => void): () => void {
+  if (typeof globalThis.matchMedia !== "function") {
+    return () => undefined;
+  }
+  const query = globalThis.matchMedia(PHONE);
+  query.addEventListener("change", change);
+  return () => query.removeEventListener("change", change);
+}
+
+function isPhone(): boolean {
+  return (
+    typeof globalThis.matchMedia === "function" &&
+    globalThis.matchMedia(PHONE).matches
+  );
+}
+
+function notPhone(): boolean {
+  return false;
 }
 
 function matches(
@@ -183,6 +245,16 @@ function MediaSelect({
   );
 }
 
+/** How many filters are on, for the phone's Filters button. */
+function filterCount(filter: Filter): number {
+  return [
+    filter.runs,
+    filter.reads !== "any",
+    filter.makes !== "any",
+    filter.memory !== null,
+  ].filter(Boolean).length;
+}
+
 function Bar({
   text,
   filter,
@@ -192,6 +264,9 @@ function Bar({
   view,
   setView,
   sections,
+  sheet,
+  setSheet,
+  count,
 }: {
   readonly text: AiModelsText;
   readonly filter: Filter;
@@ -201,15 +276,19 @@ function Bar({
   readonly view: View;
   readonly setView: (view: View) => void;
   readonly sections: readonly { id: string; title: string; shown: number }[];
+  /** Whether a phone shows the filters, in a sheet over the page. */
+  readonly sheet: boolean;
+  readonly setSheet: (open: boolean) => void;
+  readonly count: string;
 }) {
   return (
     <div
       role="group"
       aria-label={text.label}
-      className="tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950/90 tw-p-3 tw-backdrop-blur-md lg:tw-sticky lg:tw-top-3 lg:tw-z-20 lg:tw-shadow-[0_12px_32px_-16px_rgba(0,0,0,0.9)]"
+      className="tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950/90 tw-p-3 lg:tw-sticky lg:tw-top-3 lg:tw-z-20 lg:tw-shadow-[0_12px_32px_-16px_rgba(0,0,0,0.9)] lg:tw-backdrop-blur-md"
     >
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-        <label className="tw-relative tw-min-w-0 tw-flex-1 tw-basis-full sm:tw-basis-56">
+      <div className="tw-flex tw-items-center tw-gap-2">
+        <label className="tw-relative tw-min-w-0 tw-flex-1">
           <span className="tw-sr-only">{text.search}</span>
           <MagnifyingGlassIcon
             aria-hidden="true"
@@ -225,19 +304,6 @@ function Bar({
             className="tw-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-pl-9 tw-pr-3 tw-text-[15px] tw-text-iron-50 tw-transition placeholder:tw-text-iron-500 hover:tw-border-white/20 focus:tw-border-primary-400/60 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-h-9 sm:tw-text-sm"
           />
         </label>
-        <select
-          aria-label={text.sort}
-          value={sort}
-          onChange={(event) => setSort(event.target.value as Sort)}
-          className={`${SELECT} tw-flex-none`}
-          style={CHEVRON}
-        >
-          {(["memory", "newest", "name"] as const).map((key) => (
-            <option key={key} value={key}>
-              {text.sorts[key]}
-            </option>
-          ))}
-        </select>
         <div
           role="group"
           aria-label={text.view}
@@ -283,8 +349,23 @@ function Bar({
           ))}
         </select>
       </div>
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2">
-        <label className="tw-flex tw-min-h-11 tw-w-full tw-flex-none tw-cursor-pointer tw-items-center tw-gap-2.5 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100 sm:tw-min-h-9 sm:tw-w-auto">
+      {sheet && (
+        <button
+          type="button"
+          tabIndex={-1}
+          aria-hidden="true"
+          onClick={() => setSheet(false)}
+          className="tw-fixed tw-inset-0 tw-z-40 tw-cursor-default tw-border-0 tw-bg-black/70 tw-p-0 sm:tw-hidden"
+        />
+      )}
+      <div
+        id="ai-model-filters"
+        className={`tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 sm:tw-flex ${sheet ? "max-sm:tw-fixed max-sm:tw-inset-x-0 max-sm:tw-bottom-0 max-sm:tw-z-50 max-sm:tw-flex max-sm:tw-max-h-[85dvh] max-sm:tw-flex-col max-sm:tw-items-stretch max-sm:tw-gap-3 max-sm:tw-overflow-y-auto max-sm:tw-rounded-t-2xl max-sm:tw-border-0 max-sm:tw-border-t max-sm:tw-border-solid max-sm:tw-border-white/10 max-sm:tw-bg-iron-950 max-sm:tw-px-4 max-sm:tw-pb-6 max-sm:tw-pt-4 max-sm:tw-shadow-[0_-16px_48px_-12px_rgba(0,0,0,0.9)]" : "max-sm:tw-hidden"}`}
+      >
+        <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-hidden">
+          {text.filters}
+        </p>
+        <label className="tw-flex tw-min-h-11 tw-flex-none tw-cursor-pointer tw-items-center tw-gap-2.5 tw-whitespace-nowrap tw-text-sm tw-font-medium tw-text-iron-100 sm:tw-min-h-9">
           <input
             type="checkbox"
             checked={filter.runs}
@@ -329,9 +410,29 @@ function Bar({
             </option>
           ))}
         </select>
+        <select
+          aria-label={text.sort}
+          value={sort}
+          onChange={(event) => setSort(event.target.value as Sort)}
+          className={`${SELECT} tw-flex-none`}
+          style={CHEVRON}
+        >
+          {(["memory", "newest", "name"] as const).map((key) => (
+            <option key={key} value={key}>
+              {text.sorts[key]}
+            </option>
+          ))}
+        </select>
         <p className="tw-m-0 tw-text-[13px] tw-leading-5 tw-text-iron-500">
           {text.memoryHint}
         </p>
+        <button
+          type="button"
+          onClick={() => setSheet(false)}
+          className="tw-inline-flex tw-min-h-12 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-text-[15px] tw-font-semibold tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-300 sm:tw-hidden"
+        >
+          {count}
+        </button>
       </div>
     </div>
   );
@@ -377,7 +478,8 @@ function Table({
               {text.memory}
             </th>
             <th scope="col" className={`${head} tw-text-center`}>
-              {text.inApp}
+              <span className="sm:tw-hidden">{text.inAppShort}</span>
+              <span className="max-sm:tw-hidden">{text.inApp}</span>
             </th>
             {section.scoreName && (
               <th
@@ -496,7 +598,17 @@ export default function AiModelsView({
 }) {
   const [filter, setFilter] = useState<Filter>(NO_FILTER);
   const [sort, setSort] = useState<Sort>("memory");
-  const [view, setView] = useState<View>("cards");
+  const [chosen, setChosen] = useState<View | null>(null);
+  const stored = useSyncExternalStore(noSubscription, readStoredView, noView);
+  const phone = useSyncExternalStore(subscribePhone, isPhone, notPhone);
+  // A phone opens on the table, the shorter page; a visitor's own choice,
+  // kept in this browser, wins.
+  const view: View = chosen ?? stored ?? (phone ? "table" : "cards");
+  const setView = (next: View) => {
+    setChosen(next);
+    storeView(next);
+  };
+  const [sheet, setSheet] = useState(false);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
   const shown = useMemo(() => {
@@ -544,8 +656,21 @@ export default function AiModelsView({
         view={view}
         setView={setView}
         sections={jump}
+        sheet={sheet}
+        setSheet={setSheet}
+        count={text.showCount.replace("{shown}", String(count))}
       />
       <div className="tw-mt-3 tw-flex tw-min-h-9 tw-flex-wrap tw-items-center tw-gap-x-3 tw-px-1">
+        <button
+          type="button"
+          aria-expanded={sheet}
+          aria-controls="ai-model-filters"
+          onClick={() => setSheet(true)}
+          className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-hidden"
+        >
+          <AdjustmentsHorizontalIcon aria-hidden="true" className="tw-size-4" />
+          {text.filtersCount.replace("{count}", String(filterCount(filter)))}
+        </button>
         <p
           aria-live="polite"
           className="tw-m-0 tw-text-sm tw-tabular-nums tw-text-iron-400"
@@ -564,13 +689,15 @@ export default function AiModelsView({
             {text.clear}
           </button>
         )}
-        <p className="tw-m-0 tw-ml-auto tw-text-[13px] tw-text-iron-500">
+        <p
+          className={`tw-m-0 tw-ml-auto tw-text-[13px] tw-text-iron-500 ${view === "table" ? "max-sm:tw-hidden" : ""}`}
+        >
           {text.legend}
         </p>
       </div>
       <nav
         aria-label={text.sections}
-        className="-tw-mx-4 tw-mt-2 tw-overflow-x-auto tw-px-4 xl:tw-hidden"
+        className="-tw-mx-4 tw-mt-2 tw-overflow-x-auto tw-px-4 max-sm:tw-hidden xl:tw-hidden"
       >
         <ul className="tw-m-0 tw-flex tw-w-max tw-list-none tw-gap-2 tw-p-0 tw-pb-1">
           {jump
@@ -616,7 +743,7 @@ export default function AiModelsView({
               >
                 {section.title}
               </h2>
-              <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+              <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400 max-sm:tw-line-clamp-2 max-sm:tw-text-[13px] max-sm:tw-leading-5">
                 {section.line}{" "}
                 <span className="tw-text-iron-500">{section.count}</span>
               </p>

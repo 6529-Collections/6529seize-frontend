@@ -2,6 +2,8 @@ import type { AiUseImageKey } from "../useImages";
 
 export type AiUseBlock =
   | { readonly kind: "p"; readonly text: string }
+  /** What to expect from a step: how long it takes, how big it gets. */
+  | { readonly kind: "note"; readonly text: string }
   | { readonly kind: "h3"; readonly id: string; readonly title: string }
   | {
       readonly kind: "steps";

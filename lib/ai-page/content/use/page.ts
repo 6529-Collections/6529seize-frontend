@@ -42,10 +42,6 @@ Open it in the browser you use, on this computer.`,
         image: "44-browser-and-theme",
         alt: "The Sign-in and app key dialog: signed in, an app key field, the theme choice, and the models on this server.",
       },
-      {
-        kind: "p",
-        text: "A restart of the service signs the browser out, though the dialog says the sign-in lasts 7 days. Make a new link then.",
-      },
     ],
   },
   {
@@ -54,7 +50,11 @@ Open it in the browser you use, on this computer.`,
     blocks: [
       {
         kind: "p",
-        text: 'Start says how big a model this computer can run, and lists up to five general chat models that fit, biggest first. On the L4 it said "NVIDIA L4, 24.2 GB: models up to about 20.5 GB". On the Mac it said "25.8 GB shared with the GPU: models up to about 16.4 GB".',
+        text: "Start says how big a model this computer can run, and lists up to five general chat models that fit, biggest first.",
+      },
+      {
+        kind: "note",
+        text: "A computer with a 24 GB graphics card gets models up to about 20 GB; a Mac with 24 GB of memory, up to about 16 GB.",
       },
       {
         kind: "image",
@@ -63,7 +63,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "p",
-        text: "We chose `gemma-4-26b-a4b`: 15.6 GB, it reads images, and on the L4 it answered at about 73 tokens a second.",
+        text: "The pictures here follow `gemma-4-26b-a4b`, a 15.6 GB model that reads images.",
       },
     ],
   },
@@ -90,8 +90,8 @@ Open it in the browser you use, on this computer.`,
         alt: "Start: gemma-4-26b-a4b is ready. Chat with it now. Open chat.",
       },
       {
-        kind: "p",
-        text: "On the L4, the 15.6 GB of files came and were checked in 3 minutes 18 seconds, and the engine loaded in 70 seconds from a local NVMe disk. A model close to the computer's memory in size can load much more slowly: see [Known issues](/ai/known-issues).",
+        kind: "note",
+        text: "A 16 GB model takes a few minutes to download and about a minute to load from a fast disk. A model about as big as the computer's memory can load much more slowly: see [Known issues](/ai/known-issues).",
       },
       {
         kind: "p",
@@ -126,8 +126,8 @@ Open it in the browser you use, on this computer.`,
         text: "Chats are kept in this browser only. **New chat** starts another, and **System prompt** sets one for this chat.",
       },
       {
-        kind: "p",
-        text: "On the Mac, the same model answered at 26.4 tokens a second on the M2.",
+        kind: "note",
+        text: "On a 24 GB graphics card this model writes a few paragraphs in a few seconds; on an M2 Mac it takes about three times as long.",
       },
     ],
   },
@@ -156,7 +156,7 @@ Open it in the browser you use, on this computer.`,
     blocks: [
       {
         kind: "p",
-        text: "Image needs an image model. We served `z-image-turbo`, 20.7 GB, from **Models** (section 9). Its size is over the L4's estimate of 20.5 GB, and Models says so; it ran on the L4 with nothing else on the GPU but the speech model.",
+        text: "Image needs an image model, such as `z-image-turbo` (20.7 GB), which you serve from **Models** on the Provider screen ([section 8](#see-what-runs-the-provider-screen)).",
       },
       {
         kind: "p",
@@ -174,7 +174,11 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "p",
-        text: "The first image took 72 seconds, 32 of them to load the model. The next took 15 seconds. **Download** saves it, and **Send to chat** attaches it to a chat. Images stay until you leave the page.",
+        text: "**Download** saves it, and **Send to chat** attaches it to a chat. Images stay until you leave the page.",
+      },
+      {
+        kind: "note",
+        text: "The first image waits while the model loads, about a minute in all; each one after it takes about 15 seconds.",
       },
     ],
   },
@@ -184,7 +188,7 @@ Open it in the browser you use, on this computer.`,
     blocks: [
       {
         kind: "p",
-        text: "Speech needs a speech model; we served `whisper-large-v3-turbo`, 0.6 GB. **Record** records from your microphone, and **Choose a file** takes an audio or video file. Then press **Transcribe**.",
+        text: "Speech needs a speech model, such as `whisper-large-v3-turbo` (0.6 GB). **Record** records from your microphone, and **Choose a file** takes an audio or video file. Then press **Transcribe**.",
       },
       {
         kind: "image",

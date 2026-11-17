@@ -336,7 +336,7 @@ b9eede3 (HEAD -> master) feat: add average function
       {
         kind: "code",
         label: "Output",
-        code: `6529-ai 0.1.0-rc.1, local mode, pid 11658, up 0 h 56 min
+        code: `6529-ai <version>, local mode, pid 11658, up 0 h 56 min
 
 MODEL                   MODALITY        ENGINE                STATE  RESTARTS  DETAIL
 whisper-large-v3-turbo  speech-to-text  whisper-cpp           ready  0         -

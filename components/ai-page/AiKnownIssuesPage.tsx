@@ -1,10 +1,16 @@
-import { GlobeAltIcon, WrenchIcon } from "@heroicons/react/24/outline";
+import {
+  CheckCircleIcon,
+  GlobeAltIcon,
+  WrenchIcon,
+} from "@heroicons/react/24/outline";
 
 import { formatDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 import {
+  AI_FIXED_BUGS,
+  AI_FIXED_IN,
   AI_KNOWN_BUGS,
   AI_KNOWN_ISSUES,
   AI_KNOWN_ISSUES_UPDATED,
@@ -123,6 +129,35 @@ export default function AiKnownIssuesPage({
             </li>
           ))}
         </ul>
+      </section>
+
+      <section
+        aria-labelledby="fixed"
+        className={`${AI_CARD} tw-mt-4 tw-px-4 tw-py-4 sm:tw-px-5`}
+      >
+        <h3
+          id="fixed"
+          className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-[15px] tw-font-semibold tw-leading-6 tw-text-iron-50"
+        >
+          <CheckCircleIcon
+            aria-hidden="true"
+            className="tw-size-5 tw-flex-none tw-text-emerald-400"
+          />
+          {t(LOCALE, "ai.knownIssues.fixed", { version: AI_FIXED_IN })}
+        </h3>
+        <ul className="tw-mb-0 tw-mt-2 tw-flex tw-flex-col tw-gap-1.5 tw-pl-12">
+          {AI_FIXED_BUGS.map((fixed) => (
+            <li
+              key={fixed}
+              className="tw-text-sm tw-leading-6 tw-text-iron-300 marker:tw-text-iron-600"
+            >
+              <InlineText text={fixed} />
+            </li>
+          ))}
+        </ul>
+        <p className="tw-mb-0 tw-mt-2 tw-pl-7 tw-text-[13px] tw-leading-5 tw-text-iron-500">
+          <InlineText text={t(LOCALE, "ai.knownIssues.fixedUpdate")} />
+        </p>
       </section>
 
       <h2 id="not-tested" className={`tw-mb-1 tw-mt-14 ${AI_H2}`}>

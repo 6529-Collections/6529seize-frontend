@@ -67,12 +67,16 @@ function viewText(): AiModelsText {
     clear: t(LOCALE, "ai.models.filter.clear"),
     none: t(LOCALE, "ai.models.filter.none"),
     legend: t(LOCALE, "ai.models.legend"),
+    filters: t(LOCALE, "ai.models.filter.title"),
+    filtersCount: t(LOCALE, "ai.models.filter.button", { count: "{count}" }),
+    showCount: t(LOCALE, "ai.models.filter.show", { shown: "{shown}" }),
     table: {
       model: t(LOCALE, "ai.models.table.model"),
       maker: t(LOCALE, "ai.models.table.maker"),
       size: t(LOCALE, "ai.models.table.size"),
       memory: t(LOCALE, "ai.models.table.memory"),
       inApp: t(LOCALE, "ai.models.table.inApp"),
+      inAppShort: t(LOCALE, "ai.models.table.inAppShort"),
       yes: t(LOCALE, "ai.models.card.inApp"),
       open: t(LOCALE, "ai.models.table.open"),
     },
@@ -151,7 +155,7 @@ export default function AiModelsPage({
         runnable: formatNumber(LOCALE, counts.modelsRunnableToday),
       })}
     >
-      <div className="tw-mt-6">
+      <div className="tw-mt-6 max-sm:tw-hidden">
         <ValidatorFold
           id="how-to-read"
           title={t(LOCALE, "ai.models.howToRead")}
@@ -180,6 +184,29 @@ export default function AiModelsPage({
           cards={cards}
           text={viewText()}
         />
+      </div>
+      <div className="tw-mt-12 sm:tw-hidden">
+        <ValidatorFold
+          id="how-to-read-phone"
+          title={t(LOCALE, "ai.models.howToRead")}
+          small
+        >
+          <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-pl-5">
+            {(
+              [
+                "ai.models.howToRead.today",
+                "ai.models.howToRead.memory",
+                "ai.models.howToRead.scores",
+                "ai.models.howToRead.measured",
+                "ai.models.howToRead.order",
+              ] as const
+            ).map((key) => (
+              <li key={key} className={`${AI_MUTED} marker:tw-text-iron-600`}>
+                <InlineText text={t(LOCALE, key)} />
+              </li>
+            ))}
+          </ul>
+        </ValidatorFold>
       </div>
     </AiPageFrame>
   );

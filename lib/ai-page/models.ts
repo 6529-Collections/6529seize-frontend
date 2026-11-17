@@ -221,7 +221,8 @@ export function getAiModelLine(model: AiModel): string {
 /**
  * A measured run's note without the sentences about the 6529 AI network,
  * which this release leaves out of its pages, about the demo catalog the
- * run came from, and "No speed recorded.".
+ * run came from or the engine's own report, and "No speed recorded.";
+ * "Served chat in the smoke test." reads "Ran a test chat."
  */
 export function getMeasuredNote(measured: AiModelMeasured): string | null {
   const sentences = (measured.note ?? "")
@@ -231,7 +232,14 @@ export function getMeasuredNote(measured: AiModelMeasured): string | null {
         sentence !== "" &&
         !/\bnetwork\b/i.test(sentence) &&
         !sentence.startsWith("From the demo catalog's entry") &&
+        !sentence.includes("llama-server") &&
         !/^no speed recorded\.$/i.test(sentence)
+    )
+    .map((sentence) =>
+      sentence
+        .replace(/^Served chat\b/, "Ran a test chat")
+        .replace(/^Served /, "Ran a test of ")
+        .replace(" in the smoke test.", ".")
     );
   return sentences.length === 0 ? null : sentences.join(" ");
 }
@@ -310,8 +318,8 @@ export function getAiScore(
 
 /**
  * The benchmark most of a section's models report, for its column in the
- * table, with each model's score; null when fewer than half of them report
- * any one benchmark.
+ * table, with each model's score; null when fewer than two thirds of them
+ * report any one benchmark.
  */
 export function getSectionScore(section: AiModelSection): {
   readonly name: string;
@@ -325,7 +333,7 @@ export function getSectionScore(section: AiModelSection): {
     }
   }
   const [best] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-  if (!best || best[1] * 2 < section.models.length) {
+  if (!best || best[1] * 3 < section.models.length * 2) {
     return null;
   }
   const [name] = best;

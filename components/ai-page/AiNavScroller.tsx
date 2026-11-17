@@ -28,7 +28,7 @@ export default function AiNavScroller({
     <nav
       ref={ref}
       aria-label={label}
-      className="-tw-mx-4 tw-mb-10 tw-overflow-x-auto tw-px-4 [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-24px),transparent)] sm:tw-mx-0 sm:tw-overflow-visible sm:tw-px-0 [&::-webkit-scrollbar]:tw-hidden"
+      className="-tw-mx-4 tw-mb-10 tw-overflow-x-auto tw-px-4 [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,transparent,black_24px,black_calc(100%-24px),transparent)] sm:tw-mx-0 sm:tw-overflow-visible sm:tw-px-0 [&::-webkit-scrollbar]:tw-hidden"
     >
       {children}
     </nav>

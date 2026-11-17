@@ -29,7 +29,7 @@ export const AI_USE_INTRO: readonly AiUseBlock[] = [
 
 /** Where the pictures and output come from, under the last section. */
 export const AI_USE_FOOTNOTE =
-  "The pictures and output are from `0.1.0-rc.1`, with the config it installs, on three computers: the page, the models and the API on Ubuntu 24.04 with an NVIDIA L4 (24 GB) and 16 GB of memory; the Mac's chat on an Apple M2 with 24 GB; the Windows uninstall on Windows Server 2025 with no GPU.";
+  "The pictures and output come from three computers, each with the config its install writes: the page, the models and the API on Ubuntu 24.04 with an NVIDIA L4 (24 GB) and 16 GB of memory; the Mac's chat on an Apple M2 with 24 GB; the Windows uninstall on Windows Server 2025 with no GPU.";
 
 export const AI_USE_SECTIONS: readonly AiUseSection[] = [
   ...AI_USE_PAGE,

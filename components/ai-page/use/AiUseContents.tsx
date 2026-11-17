@@ -115,38 +115,61 @@ export default function AiUseContents({
   const held = current >= 0;
   return (
     <div className="tw-min-h-11 lg:tw-hidden">
-      <nav
-        aria-label={label}
-        className={`tw-border-0 tw-border-b tw-border-solid tw-border-white/[0.08] tw-bg-iron-950/95 tw-px-4 tw-backdrop-blur-md ${held ? "tw-fixed tw-inset-x-0 tw-top-0 tw-z-40 tw-shadow-[0_8px_24px_-12px_rgba(0,0,0,0.9)]" : "-tw-mx-4"}`}
-      >
+      {open && (
         <button
           type="button"
-          aria-expanded={open}
-          onClick={() => setOpen(!open)}
-          className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        >
-          <span className="tw-min-w-0 tw-truncate">
-            {here ? (
-              <>
-                <span className="tw-tabular-nums tw-text-iron-500">
-                  {current + 1}
-                </span>
-                <span aria-hidden="true" className="tw-mx-1.5 tw-text-iron-600">
-                  ·
-                </span>
-                {here.title}
-              </>
-            ) : (
-              label
-            )}
-          </span>
-          <ChevronDownIcon
-            aria-hidden="true"
-            className={`tw-size-5 tw-flex-none tw-text-iron-400 tw-transition ${open ? "tw-rotate-180" : ""}`}
-          />
-        </button>
+          aria-label={label}
+          tabIndex={-1}
+          onClick={() => setOpen(false)}
+          className="tw-fixed tw-inset-0 tw-z-40 tw-cursor-default tw-border-0 tw-bg-black/70 tw-p-0"
+        />
+      )}
+      <nav
+        aria-label={label}
+        className={`tw-z-50 tw-border-0 tw-border-b tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-px-4 ${held || open ? "tw-fixed tw-inset-x-0 tw-top-0 tw-shadow-[0_8px_24px_-12px_rgba(0,0,0,0.9)]" : "tw-relative -tw-mx-4"}`}
+      >
+        <div className="tw-flex tw-items-center tw-gap-2">
+          <button
+            type="button"
+            aria-expanded={open}
+            onClick={() => setOpen(!open)}
+            className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-justify-between tw-gap-3 tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          >
+            <span className="tw-min-w-0 tw-truncate">
+              {here ? (
+                <>
+                  <span className="tw-tabular-nums tw-text-iron-500">
+                    {current + 1}
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    className="tw-mx-1.5 tw-text-iron-600"
+                  >
+                    ·
+                  </span>
+                  {here.title}
+                </>
+              ) : (
+                label
+              )}
+            </span>
+            <ChevronDownIcon
+              aria-hidden="true"
+              className={`tw-size-5 tw-flex-none tw-text-iron-400 tw-transition ${open ? "tw-rotate-180" : ""}`}
+            />
+          </button>
+          {held && (
+            <a
+              href="#top"
+              aria-label={backToTop}
+              className="tw-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-border-0 tw-border-l tw-border-solid tw-border-white/10 tw-text-iron-300 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            >
+              <ArrowUpIcon aria-hidden="true" className="tw-size-5" />
+            </a>
+          )}
+        </div>
         {open && (
-          <div className="tw-max-h-[60vh] tw-overflow-y-auto tw-pb-3">
+          <div className="tw-max-h-[calc(100dvh-3rem)] tw-overflow-y-auto tw-overscroll-contain tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-2">
             <List
               sections={sections}
               current={current}
@@ -155,15 +178,6 @@ export default function AiUseContents({
           </div>
         )}
       </nav>
-      {current >= 0 && (
-        <a
-          href="#top"
-          aria-label={backToTop}
-          className="tw-fixed tw-bottom-5 tw-right-4 tw-z-30 tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/15 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-backdrop-blur focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
-        >
-          <ArrowUpIcon aria-hidden="true" className="tw-size-5" />
-        </a>
-      )}
     </div>
   );
 }

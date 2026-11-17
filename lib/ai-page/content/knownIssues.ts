@@ -1,4 +1,4 @@
-// What is known about release candidate 1: the bugs found while using it,
+// What is known about the test release: the bugs found while using it,
 // each with its fix and its cause, and what hasn't been tested yet, by
 // system. From 6529 AI's install guides, their notes on what was tested,
 // and its walk-through of real use. It runs models on the person's own
@@ -25,31 +25,6 @@ type AiKnownBug = {
 
 export const AI_KNOWN_BUGS: readonly AiKnownBug[] = [
   {
-    system: "windows",
-    symptom:
-      'On a fresh Windows, **Fetch and serve** fails for every model with "error sending request for url".',
-    fix: "Open PowerShell as administrator and reach the two Let's Encrypt test sites, then restart the scheduled task **6529 AI**, or the computer. The next build fixes it.",
-    code: [
-      {
-        label: "PowerShell, as administrator",
-        code: `Invoke-WebRequest https://valid-isrgrootx1.letsencrypt.org -UseBasicParsing | Out-Null
-Invoke-WebRequest https://valid-isrgrootx2.letsencrypt.org -UseBasicParsing | Out-Null
-Stop-ScheduledTask -TaskName '6529 AI'
-Start-ScheduledTask -TaskName '6529 AI'`,
-      },
-    ],
-    cause:
-      "Windows adds the root certificate of the model registry's address only when its own TLS first needs it, and 6529 AI reads the roots once, when it starts.",
-  },
-  {
-    system: "windows",
-    symptom:
-      "On a computer with no GPU, the installer picks **On the GPU, through Vulkan**.",
-    fix: "Nothing to do: the models still run, on the processor. To use the CPU engines instead, reinstall and choose **On the CPU only**.",
-    cause:
-      "The installer picks Vulkan whenever Windows has the Vulkan loader, which Windows Server 2025 has even without a GPU.",
-  },
-  {
     system: "everywhere",
     symptom:
       "A model about as big as the computer's memory can take many minutes to load from a slow disk.",
@@ -57,28 +32,18 @@ Start-ScheduledTask -TaskName '6529 AI'`,
     cause:
       "The engine maps the model's files into memory, and when the memory can't hold them all it reads the same parts from the disk again and again.",
   },
-  {
-    system: "everywhere",
-    symptom:
-      "A restart of the service, or of the computer, signs the page out, though its dialog says the sign-in lasts 7 days.",
-    fix: "Make a new sign-in link: open **6529 AI** from Applications on a Mac or from the Start menu on Windows. On Linux:",
-    code: [
-      {
-        label: "Linux, Terminal",
-        code: "sudo -u ai6529 6529-ai-cli --data /var/lib/6529-ai open --print",
-      },
-    ],
-    cause:
-      "The sign-in lasts only as long as the running service, which the dialog doesn't say.",
-  },
-  {
-    system: "everywhere",
-    symptom:
-      "In Chat, a long first message hides that chat's rename and delete buttons.",
-    fix: "Start a chat with a short first message: it becomes the chat's name.",
-    cause:
-      "The chat list doesn't shorten a long name, so the name pushes the buttons out of sight.",
-  },
+];
+
+/** The release that fixed the bugs below, and what it fixed. */
+export const AI_FIXED_IN = "0.1.0-rc.2";
+
+export const AI_FIXED_BUGS: readonly string[] = [
+  'On a fresh Windows, **Fetch and serve** no longer fails with "error sending request for url".',
+  "The Windows installer picks the GPU engines only when the computer has a graphics card.",
+  "The sign-in to the page lasts through a restart of the service.",
+  "A long chat title no longer hides **Rename** and **Delete**.",
+  "A model's attempt to call a tool shows as a plain note in the chat.",
+  "Chat models on a Mac start with a 16K context.",
 ];
 
 export type AiKnownIssue = {

@@ -5,9 +5,14 @@ import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import AiUsePage from "@/components/ai-page/use/AiUsePage";
-import { AI_KNOWN_BUGS } from "@/lib/ai-page/content/knownIssues";
 import {
+  AI_FIXED_BUGS,
+  AI_KNOWN_BUGS,
+} from "@/lib/ai-page/content/knownIssues";
+import {
+  AI_USE_FOOTNOTE,
   AI_USE_INTRO,
+  AI_USE_LEAD,
   AI_USE_SECTIONS,
   type AiUseBlock,
 } from "@/lib/ai-page/content/use";
@@ -31,6 +36,7 @@ function texts(): string[] {
   return BLOCKS.flatMap((block) => {
     switch (block.kind) {
       case "p":
+      case "note":
         return [block.text];
       case "steps":
         return block.items.map((item) => item.text);
@@ -90,6 +96,12 @@ describe("the /ai/use walk-through", () => {
         used.add(block.image);
       }
     }
+    // A phone's own capture, which stands in for a step's picture there.
+    for (const image of Object.values(AI_USE_IMAGES)) {
+      if ("phone" in image && "image" in image.phone) {
+        used.add(image.phone.image);
+      }
+    }
     for (const slot of Object.values(AI_SCREENSHOTS)) {
       used.add(slot.image);
       if ("phone" in slot) {
@@ -97,6 +109,18 @@ describe("the /ai/use walk-through", () => {
       }
     }
     expect([...used].sort()).toEqual(Object.keys(AI_USE_IMAGES).sort());
+  });
+
+  it("numbers each section it points to as the page does", () => {
+    for (const text of texts()) {
+      for (const [, number, id] of text.matchAll(
+        /\[section (\d+)\]\(#([^)]+)\)/g
+      )) {
+        const index = AI_USE_SECTIONS.findIndex((section) => section.id === id);
+        expect(index + 1).toBe(Number(number));
+      }
+    }
+    expect(texts().join(" ")).not.toMatch(/\(section \d+\)/);
   });
 
   it("links only to sections and pages that exist", () => {
@@ -122,9 +146,24 @@ describe("the /ai/use walk-through", () => {
     expect(all).not.toMatch(
       /we went no further|only such tool we ran|openai 3\.52/
     );
-    expect(JSON.stringify(AI_KNOWN_BUGS)).toContain(
-      "Invoke-WebRequest https://valid-isrgrootx2.letsencrypt.org -UseBasicParsing | Out-Null"
+  });
+
+  it("names no release, so it holds for the newest one", () => {
+    const text = JSON.stringify([
+      AI_USE_LEAD,
+      AI_USE_INTRO,
+      AI_USE_SECTIONS,
+      AI_USE_FOOTNOTE,
+    ]);
+    expect(text).not.toMatch(/0\.1\.0|rc\.1|release candidate/i);
+  });
+
+  it("leaves out the bugs the newest release fixed", () => {
+    expect(JSON.stringify(AI_KNOWN_BUGS)).not.toMatch(
+      /Fetch and serve|sign-in|chat title|Vulkan/i
     );
+    expect(AI_FIXED_BUGS.join(" ")).toContain("Fetch and serve");
+    expect(JSON.stringify(AI_USE_SECTIONS)).not.toContain("7 days");
   });
 
   it("puts the contents first, and the sections in order", () => {

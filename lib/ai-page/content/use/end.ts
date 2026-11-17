@@ -110,7 +110,7 @@ export const AI_USE_END: readonly AiUseSection[] = [
       },
       {
         kind: "p",
-        text: "In Settings, Apps, choose **6529 AI 0.1.0-rc.1** and **Uninstall**. It asks to confirm, removes the programs, the scheduled task and the Start menu entry, then asks whether to delete the data folder. **No** keeps your models for a later install.",
+        text: "In Settings, Apps, choose **6529 AI** and **Uninstall**. It asks to confirm, removes the programs, the scheduled task and the Start menu entry, then asks whether to delete the data folder. **No** keeps your models for a later install.",
       },
       {
         kind: "image",
@@ -150,7 +150,7 @@ export const AI_USE_END: readonly AiUseSection[] = [
 After this operation, 1719 MB disk space will be freed.
 Do you want to continue? [Y/n] Y
 (Reading database ... 165219 files and directories currently installed.)
-Removing 6529-ai-cuda (0.1.0~rc.1) ...`,
+Removing 6529-ai-cuda (<version>) ...`,
         output: true,
       },
       {
@@ -171,7 +171,7 @@ Removing 6529-ai-cuda (0.1.0~rc.1) ...`,
 After this operation, 0 B of additional disk space will be used.
 Do you want to continue? [Y/n] Y
 (Reading database ... 165176 files and directories currently installed.)
-Purging configuration files for 6529-ai-cuda (0.1.0~rc.1) ...`,
+Purging configuration files for 6529-ai-cuda (<version>) ...`,
         output: true,
       },
       {

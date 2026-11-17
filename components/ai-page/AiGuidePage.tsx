@@ -269,7 +269,6 @@ export default function AiGuidePage({
           <AiScreenshot
             slot={AI_SCREENSHOTS.firstChat}
             alt={t(LOCALE, "ai.guide.chatShot")}
-            phoneAlt={t(LOCALE, "ai.guide.chatShotPhone")}
             caption={t(LOCALE, "ai.guide.chatCaption")}
           />
         </div>
