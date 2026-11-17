@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import type { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { DesktopUpdateState } from "@/lib/desktop/updateState";
@@ -37,63 +37,71 @@ export function useDesktopUpdateActions(locale: Locale, stateKey: string) {
   // its state says more.
   const [progress, setProgress] = useState<string | null>(null);
   // Feedback belongs to one state: a new state clears it, and an answer to
-  // an action from an earlier state is dropped.
-  const currentKey = useRef(stateKey);
+  // an action taken before any state change is dropped, even if the same
+  // state comes back (each change starts a new generation).
+  const generation = useRef(0);
   const [seenKey, setSeenKey] = useState(stateKey);
   if (seenKey !== stateKey) {
     setSeenKey(stateKey);
     setProblem(null);
     setProgress(null);
   }
-  useEffect(() => {
-    currentKey.current = stateKey;
+  useLayoutEffect(() => {
+    generation.current += 1;
   }, [stateKey]);
-  const still = (key: string) => currentKey.current === key;
-  const show = (key: string, text: string) => {
-    if (still(key)) setProblem({ key, text });
+  const still = (taken: number) => generation.current === taken;
+  const show = (taken: number, key: string, text: string) => {
+    if (still(taken)) setProblem({ key, text });
   };
 
   const update = () => {
     const key = stateKey;
+    const taken = generation.current;
     setProblem(null);
     setProgress(null);
     startDesktopUpdate()
       .then((reason) => {
         if (reason === null) {
-          if (still(key)) setProgress(key);
+          if (still(taken)) setProgress(key);
           return;
         }
         // Refused: no download started from here after all.
         noteDesktopUpdateStartedHere(null);
-        show(key, reason || t(locale, "desktop.update.updateNotStarted"));
+        show(
+          taken,
+          key,
+          reason || t(locale, "desktop.update.updateNotStarted")
+        );
       })
       .catch(() => {
         noteDesktopUpdateStartedHere(null);
-        show(key, t(locale, "desktop.update.updateNotStarted"));
+        show(taken, key, t(locale, "desktop.update.updateNotStarted"));
       });
   };
 
   const restart = () => {
     const key = stateKey;
+    const taken = generation.current;
     setProblem(null);
     restartDesktopToUpdate()
       .then((reason) => {
         if (reason === null) return;
         show(
+          taken,
           key,
           reason
             ? t(locale, "desktop.update.restartFailedReason", { reason })
             : t(locale, "desktop.update.restartFailed")
         );
       })
-      .catch(() => show(key, t(locale, "desktop.update.restartFailed")));
+      .catch(() => show(taken, key, t(locale, "desktop.update.restartFailed")));
   };
 
   return {
     problem: problem?.key === stateKey ? problem.text : null,
     progress:
       progress === stateKey ? t(locale, "desktop.update.requested") : null,
-    showProblem: (text: string) => show(stateKey, text),
+    showProblem: (text: string) => setProblem({ key: stateKey, text }),
     clearProblem: () => setProblem(null),
     update,
     restart,

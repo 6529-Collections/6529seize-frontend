@@ -4009,6 +4009,9 @@ export const EN_US_ROOT_MESSAGES = {
     "6529 Desktop can't restart to update now. {reason}",
   "desktop.update.updateNotStarted":
     "6529 Desktop didn't start the update. Try again in a moment.",
+  "desktop.appInfo.checkingUpdates": "Checking for updates…",
+  "desktop.appInfo.noUpdates": "No updates found.",
+  "desktop.appInfo.checkFailed": "Couldn’t check for updates. Try again.",
   "desktopConnect.title": "Connect a wallet",
   "desktopConnect.intro":
     "6529 Desktop cannot use browser extensions directly. Choose how to connect:",
@@ -4205,6 +4208,16 @@ export const EN_US_ROOT_MESSAGES = {
     "Failed to switch connected account. Please try again.",
   "appSidebar.accountConnectionFailed":
     "Failed to open the account connection. Please try again.",
+  "appSidebar.connect": "Connect",
+  "appSidebar.connectWallet": "Connect Wallet",
+  "appSidebar.connectFailed": "Failed to open wallet connection",
+  "appSidebar.disconnectWallet": "Disconnect Wallet",
+  "appSidebar.disconnectWalletFailed": "Failed to disconnect wallet",
+  "appSidebar.disconnectAndLogout": "Disconnect & Logout",
+  "appSidebar.signOutAllProfiles": "Sign Out All Profiles",
+  "appSidebar.pushNotifications": "Push Notifications",
+  "appSidebar.network": "Network: {chain}",
+  "appSidebar.switchChain": "Switch to {chain}",
   "headerUserMenu.switchToProfile": "Switch to {profile} ({wallet})",
   "headerUserMenu.signOutAll": "Sign out all",
   "headerUserMenu.logout": "Logout",

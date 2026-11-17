@@ -12,6 +12,7 @@ import clsx from "clsx";
 import {
   type KeyboardEvent,
   useEffect,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -28,6 +29,10 @@ import {
   getServerDesktopAutoUpdate,
   subscribeDesktopAutoUpdate,
 } from "@/services/desktop/desktopUpdateState";
+import {
+  checkDesktopUpdates,
+  type DesktopUpdateCheckResult,
+} from "@/lib/desktop/checkDesktopUpdates";
 import styles from "./DesktopTitleStrip.module.css";
 
 interface AppInfo {
@@ -38,6 +43,17 @@ interface AppInfo {
 }
 
 type CopyStatus = "idle" | "copied" | "failed";
+
+const UPDATE_CHECK_MESSAGES = {
+  checking: "desktop.appInfo.checkingUpdates",
+  current: "desktop.appInfo.noUpdates",
+  available: "desktopUpdate.available",
+  failed: "desktop.appInfo.checkFailed",
+} as const;
+
+type UpdateCheckStatus = "idle" | keyof typeof UPDATE_CHECK_MESSAGES;
+
+const UPDATE_CHECK_MIN_VISIBLE_MS = 350;
 
 /** The page's public address (the app itself runs on a local server). */
 const getPublicLink = (): string => {
@@ -151,6 +167,67 @@ function nextToolbarItem(
 const PLAIN = /^[\w.+-]{1,64}$/;
 const readText = (value: unknown): string | null =>
   typeof value === "string" && PLAIN.test(value) ? value : null;
+
+function DesktopUpdateCheck() {
+  const locale = useBrowserLocale();
+  const updater = getDesktopUpdater();
+  const [updateCheckStatus, setUpdateCheckStatus] =
+    useState<UpdateCheckStatus>("idle");
+  const pendingCheck = useRef<Promise<[DesktopUpdateCheckResult, void]> | null>(
+    null
+  );
+  const checkingForUpdates = updateCheckStatus === "checking";
+
+  useEffect(
+    () => () => {
+      pendingCheck.current = null;
+    },
+    []
+  );
+
+  const checkForUpdates = () => {
+    if (!updater || pendingCheck.current) return;
+    setUpdateCheckStatus("checking");
+
+    // Cached replies can arrive before the checking state has painted.
+    const visible = new Promise<void>((resolve) => {
+      setTimeout(resolve, UPDATE_CHECK_MIN_VISIBLE_MS);
+    });
+    const check = Promise.all([checkDesktopUpdates(updater), visible]);
+    pendingCheck.current = check;
+    void check.then(([result]) => {
+      if (pendingCheck.current !== check) return;
+      pendingCheck.current = null;
+      setUpdateCheckStatus(result);
+    });
+  };
+
+  if (!updater) return null;
+
+  return (
+    <>
+      <button
+        type="button"
+        className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black aria-disabled:tw-cursor-wait aria-disabled:tw-opacity-70 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        aria-disabled={checkingForUpdates || undefined}
+        onClick={checkForUpdates}
+      >
+        {t(locale, "desktop.appInfo.checkUpdates")}
+      </button>
+      <output
+        aria-live="polite"
+        aria-atomic="true"
+        className="tw-block tw-px-4 tw-text-center tw-text-sm tw-text-iron-200"
+      >
+        {updateCheckStatus !== "idle" && (
+          <span className="tw-block tw-pt-3">
+            {t(locale, UPDATE_CHECK_MESSAGES[updateCheckStatus])}
+          </span>
+        )}
+      </output>
+    </>
+  );
+}
 
 /**
  * The info button's name and mark. Builds that install their own updates:
@@ -284,7 +361,6 @@ export default function DesktopTitleStrip() {
     autoUpdate,
     updateAvailable
   );
-  const updater = getDesktopUpdater();
   const backLabel = t(locale, "desktop.titleStrip.back");
   const forwardLabel = t(locale, "desktop.titleStrip.forward");
   const refreshLabel = t(locale, "desktop.titleStrip.refresh");
@@ -429,7 +505,10 @@ export default function DesktopTitleStrip() {
         onClose={() => setShowInfo(false)}
       >
         {/* The same side padding as the dialog's header (design system). */}
-        <div className="tw-px-4 sm:tw-px-6" data-testid="desktop-app-info-body">
+        <div
+          className="tw-flex tw-flex-col tw-px-4 tw-pt-3 sm:tw-px-6"
+          data-testid="desktop-app-info-body"
+        >
           <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_1fr] tw-gap-x-4 tw-gap-y-2 tw-pb-4 tw-text-sm">
             <dt className="tw-text-iron-400">
               {t(locale, "desktop.appInfo.version")}
@@ -444,17 +523,10 @@ export default function DesktopTitleStrip() {
               {info.environment ?? "-"}
             </dd>
           </dl>
-          {updateState && (
+          {updateState ? (
             <DesktopUpdatePanel state={updateState} locale={locale} />
-          )}
-          {updater && updateState === null && (
-            <button
-              type="button"
-              className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-              onClick={() => updater.checkUpdates()}
-            >
-              {t(locale, "desktop.appInfo.checkUpdates")}
-            </button>
+          ) : (
+            <DesktopUpdateCheck />
           )}
         </div>
       </MobileWrapperDialog>

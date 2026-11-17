@@ -1,7 +1,14 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import DesktopUpdateNotice from "@/components/desktop/DesktopUpdateNotice";
 import DesktopTitleStrip from "@/components/header/titlebar/DesktopTitleStrip";
 
 const globalRefresh = jest.fn();
@@ -24,9 +31,13 @@ const createBridges = (
 ) => {
   const navListeners = new Set<Listener>();
   const updateListeners = new Set<Listener>();
+  const noUpdateListeners = new Set<Listener>();
+  const updateErrorListeners = new Set<Listener>();
   return {
     navListeners,
     updateListeners,
+    noUpdateListeners,
+    updateErrorListeners,
     navigation,
     api: {
       openExternal: jest.fn(),
@@ -45,14 +56,29 @@ const createBridges = (
     },
     updater: {
       checkUpdates: jest.fn(),
+      downloadUpdate: jest.fn(),
+      onUpdateProgress: jest.fn(),
+      offUpdateProgress: jest.fn(),
+      onUpdateDownloaded: jest.fn(),
+      offUpdateDownloaded: jest.fn(),
       onUpdateAvailable: jest.fn((listener: Listener) =>
         updateListeners.add(listener)
       ),
       offUpdateAvailable: jest.fn((listener: Listener) =>
         updateListeners.delete(listener)
       ),
-      onUpdateNotAvailable: jest.fn(),
-      offUpdateNotAvailable: jest.fn(),
+      onUpdateNotAvailable: jest.fn((listener: Listener) =>
+        noUpdateListeners.add(listener)
+      ),
+      offUpdateNotAvailable: jest.fn((listener: Listener) =>
+        noUpdateListeners.delete(listener)
+      ),
+      onUpdateError: jest.fn((listener: Listener) =>
+        updateErrorListeners.add(listener)
+      ),
+      offUpdateError: jest.fn((listener: Listener) =>
+        updateErrorListeners.delete(listener)
+      ),
     },
   };
 };
@@ -321,8 +347,152 @@ describe("DesktopTitleStrip", () => {
     );
 
     expect(await screen.findByText("About 6529 Desktop")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Check for updates" }));
+    const check = screen.getByRole("button", { name: "Check for updates" });
+    await user.click(check);
     expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(1);
+    act(() => {
+      for (const listener of bridges.updateListeners) {
+        listener({}, { version: "1.3.0" });
+      }
+    });
+    expect(
+      await screen.findByText("A new version of 6529 Desktop is available.")
+    ).toBeVisible();
+  });
+
+  it("shows a manual update check and its result, then allows a retry", async () => {
+    const user = userEvent.setup();
+    installDesktopShell();
+    render(<DesktopTitleStrip />);
+    await user.click(screen.getByRole("button", { name: "App info" }));
+    const check = await screen.findByRole("button", {
+      name: "Check for updates",
+    });
+
+    act(() => {
+      for (const listener of bridges.noUpdateListeners) listener({});
+    });
+    expect(screen.queryByText("No updates found.")).not.toBeInTheDocument();
+
+    bridges.updater.checkUpdates.mockImplementationOnce(() => {
+      for (const listener of bridges.noUpdateListeners) listener({});
+    });
+    await user.click(check);
+    expect(screen.getByText("Checking for updates…")).toBeVisible();
+    expect(check).toHaveAttribute("aria-disabled", "true");
+    await user.click(check);
+    expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText("No updates found.")).toBeVisible();
+    expect(check).toHaveFocus();
+    expect(check).not.toHaveAttribute("aria-disabled");
+
+    await user.click(check);
+    act(() => {
+      for (const listener of bridges.updateErrorListeners) listener({});
+    });
+    expect(
+      await screen.findByText("Couldn’t check for updates. Try again.")
+    ).toBeVisible();
+    expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(2);
+    expect(check).not.toHaveAttribute("aria-disabled");
+  });
+
+  it("shares the startup check and clears the result when About closes", async () => {
+    const user = userEvent.setup();
+    installDesktopShell();
+    render(
+      <>
+        <DesktopUpdateNotice />
+        <DesktopTitleStrip />
+      </>
+    );
+    const info = screen.getByRole("button", { name: "App info" });
+    await user.click(info);
+    await user.click(
+      await screen.findByRole("button", { name: "Check for updates" })
+    );
+    expect(screen.getByText("Checking for updates…")).toBeVisible();
+    expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      for (const listener of bridges.noUpdateListeners) listener({});
+    });
+    expect(await screen.findByText("No updates found.")).toBeVisible();
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+    await user.click(info);
+    expect(await screen.findByRole("dialog")).toBeVisible();
+    expect(screen.queryByText("No updates found.")).not.toBeInTheDocument();
+  });
+
+  it("starts a fresh check immediately after receiving the startup result", async () => {
+    const user = userEvent.setup();
+    installDesktopShell();
+    render(
+      <>
+        <DesktopUpdateNotice />
+        <DesktopTitleStrip />
+      </>
+    );
+    await user.click(screen.getByRole("button", { name: "App info" }));
+    const check = await screen.findByRole("button", {
+      name: "Check for updates",
+    });
+
+    act(() => {
+      for (const listener of bridges.noUpdateListeners) listener({});
+      fireEvent.click(check);
+    });
+    expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(2);
+    expect(screen.getByText("Checking for updates…")).toBeVisible();
+
+    act(() => {
+      for (const listener of bridges.updateErrorListeners) listener({});
+    });
+    expect(
+      await screen.findByText("Couldn’t check for updates. Try again.")
+    ).toBeVisible();
+  });
+
+  it("lets the user retry when the host never replies", async () => {
+    jest.useFakeTimers();
+    try {
+      const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+      installDesktopShell();
+      render(<DesktopTitleStrip />);
+      await user.click(screen.getByRole("button", { name: "App info" }));
+      const check = await screen.findByRole("button", {
+        name: "Check for updates",
+      });
+      await user.click(check);
+      expect(check).toHaveAttribute("aria-disabled", "true");
+
+      await act(() => jest.advanceTimersByTimeAsync(125_000));
+      expect(
+        screen.getByText("Couldn’t check for updates. Try again.")
+      ).toBeVisible();
+      expect(check).not.toHaveAttribute("aria-disabled");
+      expect(bridges.updateErrorListeners.size).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("reports an error when the bridge cannot start a check", async () => {
+    const user = userEvent.setup();
+    installDesktopShell();
+    bridges.updater.checkUpdates.mockImplementationOnce(() => {
+      throw new Error("Desktop updater unavailable");
+    });
+    render(<DesktopTitleStrip />);
+    await user.click(screen.getByRole("button", { name: "App info" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Check for updates" })
+    );
+    expect(
+      await screen.findByText("Couldn’t check for updates. Try again.")
+    ).toBeVisible();
+    expect(bridges.updateErrorListeners.size).toBe(0);
   });
 
   it("marks the update state and shows the update view in a build that installs its own updates", async () => {

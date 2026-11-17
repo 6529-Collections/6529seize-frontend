@@ -11,6 +11,7 @@ import { getDesktopShellApi, getDesktopUpdater } from "@/helpers/desktop-shell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { checkDesktopUpdates } from "@/lib/desktop/checkDesktopUpdates";
 import {
   DEFAULT_DESKTOP_DOWNLOAD_PAGE,
   readDesktopDownloadPage,
@@ -146,7 +147,7 @@ function EventUpdateNotice() {
     updater.onUpdateProgress(onProgress);
     updater.onUpdateDownloaded(onDownloaded);
     updater.onUpdateError(onError);
-    updater.checkUpdates();
+    void checkDesktopUpdates(updater);
     return () => {
       active = false;
       updater.offUpdateAvailable(onAvailable);

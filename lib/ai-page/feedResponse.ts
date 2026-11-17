@@ -1,17 +1,14 @@
 import { serveSignedFeedObject } from "@/lib/validator-page/feedResponse";
 
 import { getAiReleaseFeedSnapshot } from "./releaseFeed";
-
-const AI_FEED_TEXT = {
-  unavailable: "The release list is unavailable.\n",
-  missing: "No release yet.\n",
-  signatureContentType: "application/json; charset=utf-8",
-};
+import { AI_RELEASE_LIST_TEXT } from "./releaseList";
 
 /**
- * Serves 6529 AI's signed feed or its signature byte for byte, as stored,
- * so the signature verifies against what anyone downloads. Only a feed
- * whose signature this server has checked is served.
+ * Serves 6529 AI's signed release list or its signature byte for byte, as
+ * stored, so the signature verifies against what anyone downloads: the
+ * bundle's two parts, both named by `X-Release-List-Pair`, or else the
+ * Ed25519 feed and its signature. Only a list whose signature this server
+ * has checked is served.
  */
 export async function serveAiFeedObject(
   request: Request,
@@ -21,6 +18,6 @@ export async function serveAiFeedObject(
     request,
     await getAiReleaseFeedSnapshot(),
     which,
-    AI_FEED_TEXT
+    AI_RELEASE_LIST_TEXT
   );
 }

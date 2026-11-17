@@ -12,7 +12,10 @@ Open `/discover?view=active-votes`, or select `View all` in the Active Votes
 sidebar heading. The page shows the total accessible count and compact discovery
 cards with cover artwork on the left, single-line ellipsized
 titles and single-line description previews. Tight padding keeps more cards visible. A prominent line beneath each wave name
-shows the voting end or next result when available, otherwise `Voting open`. Votes closing soonest appear first; open-ended votes appear last.
+shows the voting end or next result when available, otherwise `Voting open`.
+Waves with proposals open for voting appear above waves with zero open proposals.
+Within each group, the earliest voting close or next result comes first, and
+open-ended votes come last.
 Use `Load more` to browse additional results.
 
 This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of
