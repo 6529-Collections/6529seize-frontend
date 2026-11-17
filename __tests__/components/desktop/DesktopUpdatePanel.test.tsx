@@ -379,6 +379,23 @@ describe("DesktopUpdateNotice in a build that installs its own updates", () => {
     expect(screen.getByRole("status")).toHaveFocus();
   });
 
+  it("leaves focus where the person moved it before the state changed", async () => {
+    installAutoHost(STATES.U4);
+    render(
+      <>
+        <button type="button">Elsewhere</button>
+        <DesktopUpdateNotice />
+      </>
+    );
+    const button = await screen.findByRole("button", { name: "Update now" });
+    button.focus();
+    await userEvent.keyboard("{Enter}");
+    const elsewhere = screen.getByRole("button", { name: "Elsewhere" });
+    elsewhere.focus();
+    emitState(STATES.U7);
+    expect(elsewhere).toHaveFocus();
+  });
+
   it("keeps following a download started here across a remount", async () => {
     installAutoHost(STATES.U4);
     const first = render(<DesktopUpdateNotice />);

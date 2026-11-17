@@ -153,6 +153,36 @@ const readText = (value: unknown): string | null =>
   typeof value === "string" && PLAIN.test(value) ? value : null;
 
 /**
+ * The info button's name and mark. Builds that install their own updates:
+ * the state's short label (release standard R55), a mark when there is
+ * something to do, red for urgent or unsafe; others keep the dot for an
+ * available update.
+ */
+function getUpdateMark(
+  locale: ReturnType<typeof useBrowserLocale>,
+  autoUpdate: ReturnType<typeof getDesktopAutoUpdate>,
+  updateAvailable: boolean
+) {
+  if (autoUpdate.support !== "supported") {
+    return {
+      infoLabel: updateAvailable
+        ? t(locale, "desktop.titleStrip.appInfoUpdate")
+        : t(locale, "desktop.titleStrip.appInfo"),
+      showUpdateMark: updateAvailable,
+      alertMark: false,
+    };
+  }
+  const state = autoUpdate.state;
+  return {
+    infoLabel: state?.label
+      ? t(locale, "desktop.titleStrip.appInfoState", { label: state.label })
+      : t(locale, "desktop.titleStrip.appInfo"),
+    showUpdateMark: state !== null && state.label !== null && state.id !== "U1",
+    alertMark: state !== null && desktopUpdateTone(state.id) === "alert",
+  };
+}
+
+/**
  * The 6529 Desktop title strip: the window's draggable top bar. The page
  * asks for it with `<meta name="6529-desktop-titlebar">` (app/layout.tsx);
  * the host then draws the window controls (macOS traffic lights, Windows
@@ -249,25 +279,11 @@ export default function DesktopTitleStrip() {
     info.environment && info.environment !== "production"
       ? info.environment
       : null;
-  // Builds that install their own updates: the state's short label is the
-  // title strip mark (release standard R55); others keep the dot.
-  let infoLabel = updateAvailable
-    ? t(locale, "desktop.titleStrip.appInfoUpdate")
-    : t(locale, "desktop.titleStrip.appInfo");
-  let showUpdateMark = updateAvailable;
-  if (autoUpdate.support === "supported") {
-    infoLabel = updateState?.label
-      ? t(locale, "desktop.titleStrip.appInfoState", {
-          label: updateState.label,
-        })
-      : t(locale, "desktop.titleStrip.appInfo");
-    showUpdateMark =
-      updateState !== null &&
-      updateState.label !== null &&
-      updateState.id !== "U1";
-  }
-  const alertMark =
-    updateState !== null && desktopUpdateTone(updateState.id) === "alert";
+  const { infoLabel, showUpdateMark, alertMark } = getUpdateMark(
+    locale,
+    autoUpdate,
+    updateAvailable
+  );
   const updater = getDesktopUpdater();
   const backLabel = t(locale, "desktop.titleStrip.back");
   const forwardLabel = t(locale, "desktop.titleStrip.forward");

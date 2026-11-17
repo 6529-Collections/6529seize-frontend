@@ -61,7 +61,14 @@ export default function DesktopAutoUpdateNotice({
   useEffect(() => {
     if (!focusMessageNext.current) return;
     focusMessageNext.current = false;
-    messageRef.current?.focus();
+    // Only when focus went with the button: never pull it back from
+    // wherever the person moved it in the meantime.
+    const active = document.activeElement;
+    const lost =
+      active === null ||
+      active === document.body ||
+      sectionRef.current?.contains(active) === true;
+    if (lost) messageRef.current?.focus();
   }, [key]);
 
   if (!state) return null;
