@@ -37,6 +37,10 @@ const DETECTING: DesktopAutoUpdateSnapshot = { support: "detecting" };
 const UNSUPPORTED: DesktopAutoUpdateSnapshot = { support: "unsupported" };
 
 let snapshot: DesktopAutoUpdateSnapshot = DETECTING;
+/** Counts monitor sessions, so a late answer from an old one is ignored. */
+let session = 0;
+/** The release whose download the person started from the notice. */
+let startedHere: string | null = null;
 const listeners = new Set<() => void>();
 let stop: (() => void) | null = null;
 
@@ -62,6 +66,7 @@ function applyState(value: unknown): void {
 }
 
 function start(): () => void {
+  session += 1;
   let active = true;
   // Read through a function: a value narrowed before an await may change.
   const isActive = () => active;
@@ -69,7 +74,9 @@ function start(): () => void {
   const api = getDesktopShellApi();
   if (!updater || !api) {
     setSnapshot(UNSUPPORTED);
-    return () => undefined;
+    return () => {
+      session += 1;
+    };
   }
   const onState = (_event: unknown, value?: unknown) => {
     if (active && snapshot.support === "supported") applyState(value);
@@ -92,6 +99,7 @@ function start(): () => void {
     });
   return () => {
     active = false;
+    session += 1;
     updater.offUpdateState(onState);
   };
 }
@@ -161,8 +169,10 @@ export async function restartDesktopToUpdate(): Promise<string | null> {
 
 /**
  * Changes "Check for new releases" or "Install updates automatically".
- * Resolves null when the app applied it; otherwise the app's reason (for
- * example "Please wait a moment and try again."), or "" when it gave none.
+ * Resolves null when the app took it (even if its answer could not be read:
+ * the state is then read again); otherwise the app's reason (for example
+ * "Please wait a moment and try again."), or "" when it gave none. An
+ * answer that arrives after the monitor stopped is not applied.
  */
 export async function setDesktopUpdateSettings(settings: {
   readonly check?: boolean;
@@ -170,19 +180,35 @@ export async function setDesktopUpdateSettings(settings: {
 }): Promise<string | null> {
   const updater = asAutoUpdater(getDesktopUpdater());
   if (!updater) return "";
+  const asked = session;
+  const current = () => asked === session && snapshot.support === "supported";
   try {
     const value = await updater.setSettings(settings);
-    applyState(value);
-    return parseDesktopUpdateState(value) === null ? "" : null;
+    if (!current()) return null;
+    if (parseDesktopUpdateState(value)) {
+      applyState(value);
+    } else {
+      const fresh = await updater.getState();
+      if (current()) applyState(fresh);
+    }
+    return null;
   } catch (error) {
     return refusalText(error);
   }
 }
+
+/** Remembers that the person started this release's download here. */
+export function noteDesktopUpdateStartedHere(version: string | null): void {
+  startedHere = version;
+}
+
+export const getDesktopUpdateStartedHere = (): string | null => startedHere;
 
 /** @api Resets the module state between tests. */
 export function __resetDesktopAutoUpdateForTests(): void {
   stop?.();
   stop = null;
   snapshot = DETECTING;
+  startedHere = null;
   listeners.clear();
 }

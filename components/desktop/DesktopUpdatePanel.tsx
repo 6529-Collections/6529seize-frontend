@@ -12,17 +12,17 @@ import {
 } from "@/lib/desktop/updateState";
 import {
   checkDesktopUpdateNow,
-  restartDesktopToUpdate,
   setDesktopUpdateSettings,
-  startDesktopUpdate,
 } from "@/services/desktop/desktopUpdateState";
+import {
+  DesktopUpdatePrimaryButtons,
+  desktopUpdateStateKey,
+  UPDATE_SECONDARY_CLASS,
+  useDesktopUpdateActions,
+} from "./desktopUpdateActions";
 
 type Locale = ReturnType<typeof useBrowserLocale>;
 
-export const UPDATE_PRIMARY_CLASS =
-  "tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
-export const UPDATE_SECONDARY_CLASS =
-  "tw-min-h-11 tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-transparent tw-px-4 tw-py-2 tw-font-semibold tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50";
 const LINK_CLASS =
   "tw-cursor-pointer tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-medium tw-text-primary-300 tw-underline tw-underline-offset-4 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
 
@@ -154,47 +154,26 @@ export default function DesktopUpdatePanel({
   readonly locale: Locale;
 }) {
   const headingId = useId();
-  const [problem, setProblem] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const actions = useDesktopUpdateActions(locale, desktopUpdateStateKey(state));
 
   const changeSetting = (settings: {
     readonly check?: boolean;
     readonly auto?: boolean;
   }) => {
     setSaving(true);
-    setProblem(null);
+    actions.clearProblem();
     setDesktopUpdateSettings(settings)
       .then((reason) => {
         if (reason === null) return;
-        setProblem(reason || t(locale, "desktop.update.settingsFailed"));
-      })
-      .catch(() => setProblem(t(locale, "desktop.update.settingsFailed")))
-      .finally(() => setSaving(false));
-  };
-
-  // A refused download ("Please wait a moment…") is said as the app says
-  // it, never shown as a failed update, and never retried by itself.
-  const update = () => {
-    setProblem(null);
-    startDesktopUpdate()
-      .then((reason) => {
-        if (reason) setProblem(reason);
-      })
-      .catch(() => undefined);
-  };
-
-  const restart = () => {
-    setProblem(null);
-    restartDesktopToUpdate()
-      .then((reason) => {
-        if (reason === null) return;
-        setProblem(
-          reason === ""
-            ? t(locale, "desktop.update.restartFailed")
-            : `${t(locale, "desktop.update.restartFailed")} ${reason}`
+        actions.showProblem(
+          reason || t(locale, "desktop.update.settingsFailed")
         );
       })
-      .catch(() => setProblem(t(locale, "desktop.update.restartFailed")));
+      .catch(() =>
+        actions.showProblem(t(locale, "desktop.update.settingsFailed"))
+      )
+      .finally(() => setSaving(false));
   };
 
   const offerUpdate = OFFERS_UPDATE.has(state.id) && state.version !== null;
@@ -234,36 +213,16 @@ export default function DesktopUpdatePanel({
         role="alert"
         className="tw-text-sm tw-text-amber-100 empty:tw-hidden"
       >
-        {problem}
+        {actions.problem}
       </div>
       <div className="tw-flex tw-flex-wrap tw-gap-2">
-        {offerUpdate && (
-          <button
-            type="button"
-            className={UPDATE_PRIMARY_CLASS}
-            onClick={update}
-          >
-            {t(locale, "desktop.update.updateNow")}
-          </button>
-        )}
-        {state.id === "U8" && (
-          <button
-            type="button"
-            className={UPDATE_PRIMARY_CLASS}
-            onClick={restart}
-          >
-            {t(locale, "desktop.update.restart")}
-          </button>
-        )}
-        {state.id === "U11" && (
-          <button
-            type="button"
-            className={UPDATE_PRIMARY_CLASS}
-            onClick={update}
-          >
-            {t(locale, "desktop.update.tryAgain")}
-          </button>
-        )}
+        <DesktopUpdatePrimaryButtons
+          state={state}
+          offerUpdate={offerUpdate}
+          locale={locale}
+          onUpdate={actions.update}
+          onRestart={actions.restart}
+        />
         <button
           type="button"
           className={UPDATE_SECONDARY_CLASS}

@@ -4001,6 +4001,10 @@ export const EN_US_ROOT_MESSAGES = {
   "desktop.update.settingsFailed":
     "The setting could not be changed. Try again.",
   "desktop.update.restartFailed": "6529 Desktop can't restart to update now.",
+  "desktop.update.restartFailedReason":
+    "6529 Desktop can't restart to update now. {reason}",
+  "desktop.update.updateNotStarted":
+    "6529 Desktop didn't start the update. Try again in a moment.",
   "desktopConnect.title": "Connect a wallet",
   "desktopConnect.intro":
     "6529 Desktop cannot use browser extensions directly. Choose how to connect:",

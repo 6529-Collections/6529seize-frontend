@@ -261,6 +261,16 @@ describe("DesktopUpdatePanel", () => {
     expect(updater.downloadUpdate).toHaveBeenCalledTimes(1);
   });
 
+  it("says the update did not start when the app refuses with no usable reason", async () => {
+    installAutoHost(STATES.U4);
+    updater.downloadUpdate.mockRejectedValueOnce({});
+    render(<DesktopUpdatePanel state={parsed("U4")} locale="en-US" />);
+    await userEvent.click(screen.getByRole("button", { name: "Update now" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "6529 Desktop didn't start the update. Try again in a moment."
+    );
+  });
+
   it("offers Update now when checks are off and a newer release exists (U13)", async () => {
     installAutoHost(STATES.U1);
     const u13 = parseDesktopUpdateState({
@@ -342,6 +352,44 @@ describe("DesktopUpdateNotice in a build that installs its own updates", () => {
     emitState(STATES.U8);
     expect(await screen.findByRole("region")).toHaveTextContent(
       "ready to install"
+    );
+  });
+
+  it("shows a state again when it comes back after a change", async () => {
+    installAutoHost(STATES.U4);
+    render(<DesktopUpdateNotice />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Not now" })
+    );
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    emitState(STATES.U1);
+    emitState(STATES.U4);
+    expect(await screen.findByRole("region")).toHaveTextContent(
+      "0.1.0-rc.4 is available."
+    );
+  });
+
+  it("keeps keyboard focus in the notice when its button goes away", async () => {
+    installAutoHost(STATES.U4);
+    render(<DesktopUpdateNotice />);
+    const button = await screen.findByRole("button", { name: "Update now" });
+    button.focus();
+    await userEvent.keyboard("{Enter}");
+    emitState(STATES.U7);
+    expect(screen.getByRole("status")).toHaveFocus();
+  });
+
+  it("keeps following a download started here across a remount", async () => {
+    installAutoHost(STATES.U4);
+    const first = render(<DesktopUpdateNotice />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Update now" })
+    );
+    first.unmount();
+    updater.getState.mockResolvedValue(STATES.U7);
+    render(<DesktopUpdateNotice />);
+    expect(await screen.findByRole("region")).toHaveTextContent(
+      "Downloading 0.1.0-rc.4"
     );
   });
 

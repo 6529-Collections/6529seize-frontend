@@ -376,6 +376,28 @@ describe("DesktopTitleStrip", () => {
     expect(installUpdate).toHaveBeenCalledTimes(1);
   });
 
+  it("keeps Check for updates while a build that installs its own updates has no state yet", async () => {
+    const user = userEvent.setup();
+    bridges.api.getInfo.mockResolvedValue({
+      app_version: "1.2.3",
+      environment: "production",
+      supportsInAppUpdates: true,
+    });
+    Object.assign(bridges.updater, {
+      getState: jest.fn(() => Promise.resolve(null)),
+      onUpdateState: jest.fn(),
+      offUpdateState: jest.fn(),
+      setSettings: jest.fn(),
+    });
+    installDesktopShell();
+    render(<DesktopTitleStrip />);
+    await user.click(await screen.findByRole("button", { name: "App info" }));
+    await user.click(
+      await screen.findByRole("button", { name: "Check for updates" })
+    );
+    expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(1);
+  });
+
   it("shares one history subscription and starts fresh after unmount", async () => {
     installDesktopShell();
     const first = render(<DesktopTitleStrip />);

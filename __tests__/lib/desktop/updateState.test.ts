@@ -72,6 +72,15 @@ describe("parseDesktopUpdateState", () => {
     expect(parseDesktopUpdateState(value)).toBeNull();
   });
 
+  it("drops a check time a Date cannot hold, so formatting never throws", () => {
+    expect(
+      parseDesktopUpdateState({ ...U4, checkedAt: Number.MAX_SAFE_INTEGER })
+    ).toMatchObject({ checkedAt: null });
+    expect(
+      parseDesktopUpdateState({ ...U4, checkedAt: 8_640_000_000_000 })
+    ).toMatchObject({ checkedAt: 8_640_000_000_000 });
+  });
+
   it("drops a version or time that does not look like one", () => {
     expect(
       parseDesktopUpdateState({

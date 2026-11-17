@@ -27,13 +27,14 @@ function install(info: Record<string, unknown>, methods = true) {
   const setSettings = jest.fn((s: Record<string, boolean>) =>
     Promise.resolve({ ...U1, ...s })
   );
+  const getState = jest.fn(() => Promise.resolve(U1));
   const updater = {
     checkUpdates: jest.fn(),
     downloadUpdate: jest.fn(() => Promise.resolve()),
     installUpdate: jest.fn(() => Promise.resolve()),
     ...(methods
       ? {
-          getState: jest.fn(() => Promise.resolve(U1)),
+          getState,
           onUpdateState: jest.fn((cb: Listener) => stateListeners.add(cb)),
           offUpdateState: jest.fn((cb: Listener) => stateListeners.delete(cb)),
           setSettings,
@@ -54,7 +55,7 @@ function install(info: Record<string, unknown>, methods = true) {
   });
   const emit = (value: unknown) =>
     stateListeners.forEach((cb) => cb({ channel: "update-state" }, value));
-  return { updater, stateListeners, emit, setSettings };
+  return { updater, stateListeners, emit, setSettings, getState };
 }
 
 const flush = async () => {
@@ -113,18 +114,41 @@ describe("desktopUpdateState", () => {
   });
 
   it("applies the state setSettings returns", async () => {
-    const { setSettings } = install({ supportsInAppUpdates: true });
+    const { setSettings, getState } = install({ supportsInAppUpdates: true });
     const stop = subscribeDesktopAutoUpdate(() => undefined);
     await flush();
     await expect(setDesktopUpdateSettings({ auto: false })).resolves.toBeNull();
     expect(setSettings).toHaveBeenCalledWith({ auto: false });
     expect(getDesktopAutoUpdate()).toMatchObject({ state: { auto: false } });
 
+    // Taken but answered with a state the website cannot read: no failure,
+    // and the state is read again.
+    setSettings.mockResolvedValueOnce({ id: "U99" } as never);
+    await expect(setDesktopUpdateSettings({ auto: true })).resolves.toBeNull();
+    expect(getState).toHaveBeenCalledTimes(2);
+
     setSettings.mockRejectedValueOnce("Please wait a moment and try again.");
     await expect(setDesktopUpdateSettings({ check: false })).resolves.toBe(
       "Please wait a moment and try again."
     );
     stop();
+  });
+
+  it("does not apply a settings answer that arrives after the monitor stopped", async () => {
+    const { setSettings } = install({ supportsInAppUpdates: true });
+    const stop = subscribeDesktopAutoUpdate(() => undefined);
+    await flush();
+    let answer: (value: unknown) => void = () => undefined;
+    setSettings.mockReturnValueOnce(
+      new Promise((resolve) => {
+        answer = resolve;
+      }) as never
+    );
+    const pending = setDesktopUpdateSettings({ auto: false });
+    stop();
+    answer({ ...U1, auto: false });
+    await expect(pending).resolves.toBeNull();
+    expect(getDesktopAutoUpdate()).toEqual({ support: "detecting" });
   });
 
   it("reports why the app cannot restart to update", async () => {

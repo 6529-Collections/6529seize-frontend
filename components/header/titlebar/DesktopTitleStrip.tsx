@@ -15,13 +15,13 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import DesktopUpdatePanel from "@/components/desktop/DesktopUpdatePanel";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { publicEnv } from "@/config/env";
 import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import { getDesktopShellApi, getDesktopUpdater } from "@/helpers/desktop-shell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import DesktopUpdatePanel from "@/components/desktop/DesktopUpdatePanel";
 import { desktopUpdateTone } from "@/lib/desktop/updateState";
 import {
   getDesktopAutoUpdate,
@@ -427,7 +427,7 @@ export default function DesktopTitleStrip() {
         {updateState && (
           <DesktopUpdatePanel state={updateState} locale={locale} />
         )}
-        {updater && autoUpdate.support !== "supported" && (
+        {updater && updateState === null && (
           <button
             type="button"
             className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"

@@ -81,8 +81,14 @@ export function readDesktopUpdateText(
 const readVersion = (value: unknown): string | null =>
   typeof value === "string" && VERSION.test(value) ? value : null;
 
+/** The last second a JavaScript Date can hold (8.64e15 ms). */
+const MAX_DATE_SECONDS = 8_640_000_000_000;
+
 const readSeconds = (value: unknown): number | null =>
-  typeof value === "number" && Number.isSafeInteger(value) && value > 0
+  typeof value === "number" &&
+  Number.isSafeInteger(value) &&
+  value > 0 &&
+  value <= MAX_DATE_SECONDS
     ? value
     : null;
 
@@ -137,7 +143,11 @@ export function desktopUpdateTone(id: DesktopUpdateStateId): DesktopUpdateTone {
   return "quiet";
 }
 
-/** A time as the standard writes it: `YYYY-MM-DD HH:MM UTC` (R58). */
+/**
+ * A time as the release standard writes it: `YYYY-MM-DD HH:MM UTC` (R58),
+ * the same in every locale on purpose, so the app and the website say the
+ * same time in the same words.
+ */
 export function formatDesktopUpdateTime(unixSeconds: number): string {
   const iso = new Date(unixSeconds * 1000).toISOString();
   return `${iso.slice(0, 10)} ${iso.slice(11, 16)} UTC`;

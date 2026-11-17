@@ -108,6 +108,16 @@ node, confirm a repair remotely, decrypt wallets, or promise a sync duration.
 Never provide it passwords, private keys, recovery phrases, or credential-bearing
 RPC URLs. Use the installed app's confirmation text before a recovery action.
 
+## Localization fallback debt
+
+| Field                     | Current exception                                                                                                                                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | The **Updates** section of About 6529 Desktop (`DesktopUpdatePanel`), the update notice (`DesktopAutoUpdateNotice`) and the title strip's info button label                                          |
+| Untranslated surface      | Text the app reports: the state's `headline`, `note`, `label` and `cannotInstallWhy`, and the reasons it gives when it refuses an action; plus the website's `desktop.update.*` copy outside `en-US` |
+| Current fallback behavior | The app's text is shown as it comes, in English (the release standard's words); the website's own copy falls back to `en-US`                                                                         |
+| User impact               | 6529 Desktop users with another locale see the update states in English                                                                                                                              |
+| Owner or follow-up        | 6529 Desktop (localized state text from the app) and frontend localization maintainers (`desktop.update.*` entries)                                                                                  |
+
 ## Related Pages
 
 - [Desktop index](README.md)
