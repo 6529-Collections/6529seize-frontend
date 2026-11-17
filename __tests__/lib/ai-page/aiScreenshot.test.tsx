@@ -21,11 +21,7 @@ describe("AiScreenshot", () => {
 
   it("shows the part of the capture its place is about", () => {
     const html = renderToStaticMarkup(
-      <AiScreenshot
-        slot={{ image: "31-start" }}
-        alt="Start"
-        caption="Start."
-      />
+      <AiScreenshot slot={{ image: "31-start" }} alt="Start" caption="Start." />
     );
     expect(html).toContain("aspect-ratio:1670 / 1085");
     expect(html).toContain("max-width:835px");

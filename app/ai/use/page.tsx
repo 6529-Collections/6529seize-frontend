@@ -11,9 +11,7 @@ import {
 export default async function AiUseRoute() {
   await connection();
   const snapshot = await getAiReleaseFeedSnapshot();
-  return (
-    <AiUsePage version={getNewestAiRelease(snapshot.releases)?.version} />
-  );
+  return <AiUsePage version={getNewestAiRelease(snapshot.releases)?.version} />;
 }
 
 export const metadata: Metadata = getAiPageMetadata(
