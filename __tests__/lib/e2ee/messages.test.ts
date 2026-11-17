@@ -1,3 +1,4 @@
+import { pollRosterHash } from "@/lib/e2ee/engine/poll-roster";
 import { newRuntime } from "@/lib/e2ee/engine/groups";
 import {
   applyPayload,
@@ -26,6 +27,56 @@ const meta = (profile: string, seq: number, sigOk = true): PayloadMeta => ({
 const id = (n: number) => n.toString(16).padStart(32, "0");
 
 describe("message rules (contract 6)", () => {
+  it("uses the poll epoch roster and rejects older or ineligible ballots", () => {
+    const creator = `0x${"a".repeat(64)}`;
+    const voter = `0x${"b".repeat(64)}`;
+    const lateDevice = `0x${"c".repeat(64)}`;
+    const roster = [creator, voter];
+    const rt = newRuntime({
+      g: "g",
+      epoch: 2,
+      metadata: { kind: "group" },
+      previousPollRosters: { 1: roster },
+    } as StoredGroup);
+    expect(
+      applyPayload(
+        rt,
+        {
+          t: "poll",
+          v: 1,
+          id: ID,
+          ts: 1,
+          rosterHash: pollRosterHash(roster),
+          poll: {
+            question: "Drink?",
+            options: ["Tea", "Coffee"],
+            multi: false,
+          },
+        },
+        { ...meta("alice", 1), senderDeviceKey: creator }
+      )
+    ).toBe(true);
+
+    const vote = (
+      profile: string,
+      deviceKey: string,
+      seq: number,
+      options: number[]
+    ) =>
+      applyPayload(
+        rt,
+        { t: "poll-vote", v: 1, id: id(seq), ts: seq, target: ID, options },
+        { ...meta(profile, seq), epoch: 2, senderDeviceKey: deviceKey }
+      );
+    expect(vote("dave", lateDevice, 2, [1])).toBe(false);
+    expect(vote("bob", voter, 3, [1])).toBe(true);
+    expect(vote("bob", voter, 5, [])).toBe(true);
+    expect(vote("bob", voter, 4, [0])).toBe(false);
+    expect(rt.messages.get(ID)?.poll?.ballots).toEqual({
+      bob: { seq: 5, options: [] },
+    });
+  });
+
   it("keeps the latest edit's own signed copy for reports", () => {
     const rt = runtime();
     applyPayload(

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChartBarIcon } from "@heroicons/react/24/outline";
 import { useId, useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -12,12 +13,48 @@ import {
   parsePollDefinition,
   type PollDefinition,
 } from "@/lib/e2ee/payload";
+import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
+import {
+  COMPOSER_ACTION_BUTTON_CLASS_NAME,
+  COMPOSER_ACTION_ICON_CLASS_NAME,
+  COMPOSER_ACTION_IDLE_CLASS_NAME,
+} from "@/components/waves/composerPresentation";
 import { E2eeDialog } from "../ui/E2eeDialog";
 
 const inputClass =
   "tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-base tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400";
 
-export function E2eePollComposer({
+export function E2eePollComposerAction({
+  onCreate,
+}: {
+  readonly onCreate: (poll: PollDefinition) => Promise<void>;
+}) {
+  const locale = useBrowserLocale();
+  const [open, setOpen] = useState(false);
+  const label = t(locale, "e2ee.poll.create");
+  return (
+    <>
+      <DropActionTooltip content={label}>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-label={label}
+          className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME}`}
+        >
+          <ChartBarIcon
+            aria-hidden="true"
+            className={COMPOSER_ACTION_ICON_CLASS_NAME}
+          />
+        </button>
+      </DropActionTooltip>
+      {open && (
+        <E2eePollComposer onCreate={onCreate} onClose={() => setOpen(false)} />
+      )}
+    </>
+  );
+}
+
+function E2eePollComposer({
   onClose,
   onCreate,
 }: {

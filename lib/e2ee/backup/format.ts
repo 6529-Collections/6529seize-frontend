@@ -1,5 +1,6 @@
 import { utf8Decode, utf8Encode } from "../bytes";
 import {
+  isPollRoster,
   isValidPollBallot,
   parsePollDefinition,
   type PayloadAttachment,
@@ -228,10 +229,15 @@ function isPollRecord(value: unknown): boolean {
   return (
     definition !== null &&
     typeof value["closed"] === "boolean" &&
-    isStringArray(value["eligibleDeviceKeys"]) &&
+    isPollRoster(value["eligibleDeviceKeys"]) &&
     isObject(value["ballots"]) &&
-    Object.values(value["ballots"]).every((selection) =>
-      isValidPollBallot(definition, selection)
+    Object.values(value["ballots"]).every(
+      (ballot) =>
+        isObject(ballot) &&
+        isNumber(ballot["seq"]) &&
+        Number.isSafeInteger(ballot["seq"]) &&
+        ballot["seq"] > 0 &&
+        isValidPollBallot(definition, ballot["options"])
     )
   );
 }

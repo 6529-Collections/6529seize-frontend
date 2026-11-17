@@ -18,7 +18,7 @@ import {
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ComposerSendButton } from "@/components/waves/ComposerSendButton";
 import { isE2eePollCreationEnabled } from "@/config/e2eeEnv";
-import { E2eePollComposer } from "./E2eePollComposer";
+import { E2eePollComposerAction } from "./E2eePollComposer";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
@@ -462,7 +462,6 @@ export function E2eeComposer({
   // Files of the message being encrypted and uploaded right now.
   const [uploading, setUploading] = useState<readonly File[]>([]);
   const [gifPending, setGifPending] = useState(false);
-  const [pollOpen, setPollOpen] = useState(false);
   const mentions = useMentionPicker(conversation.members, selfProfileId);
 
   // Attachments switched off server-side drop anything already picked.
@@ -695,27 +694,11 @@ export function E2eeComposer({
             {isE2eePollCreationEnabled() &&
               conversation.kind === "group" &&
               engine.createPoll && (
-                <DropActionTooltip content={t(locale, "e2ee.poll.create")}>
-                  <button
-                    type="button"
-                    onClick={() => setPollOpen(true)}
-                    aria-label={t(locale, "e2ee.poll.create")}
-                    className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME}`}
-                  >
-                    <ChartBarIcon
-                      aria-hidden="true"
-                      className={COMPOSER_ACTION_ICON_CLASS_NAME}
-                    />
-                  </button>
-                </DropActionTooltip>
+                <E2eePollComposerAction
+                  key={`poll-${conversation.g}`}
+                  onCreate={engine.createPoll.bind(engine, conversation.g)}
+                />
               )}
-            {pollOpen && engine.createPoll && (
-              <E2eePollComposer
-                key={`poll-${conversation.g}`}
-                onClose={() => setPollOpen(false)}
-                onCreate={engine.createPoll.bind(engine, conversation.g)}
-              />
-            )}
             {canAttach && !isUploading && (
               <E2eeGifAttachmentPicker
                 key={conversation.g}

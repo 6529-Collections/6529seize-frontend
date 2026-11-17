@@ -29,6 +29,7 @@ import {
 import { E2eeError, RetryableError } from "./errors";
 import { importedText, isValidImported, toImportedPayload } from "./imported";
 import { applyPayload } from "./messages";
+import { pollRoster, pollRosterHash } from "./poll-roster";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
 
@@ -332,8 +333,9 @@ export async function queueTargeted(
 type SendStep = "sent" | "empty" | "stale" | "failed" | "dropped" | "inactive";
 
 const oldestOutbox = (runtime: GroupRuntime): StoredOutboxItem | null =>
-  [...runtime.outbox.values()].sort((a, b) => a.createdAt - b.createdAt)[0] ??
-  null;
+  [...runtime.outbox.values()]
+    .filter((entry) => entry.acceptedSeq === undefined)
+    .sort((a, b) => a.createdAt - b.createdAt)[0] ?? null;
 
 async function markSent(
   ctx: EngineContext,
@@ -409,19 +411,26 @@ export async function sendNext(
     }
     throw error;
   }
-  const item = oldestOutbox(runtime);
-  if (!isActive(runtime)) {
-    return "inactive";
+  if (!isActive(runtime)) return "inactive";
+  const expiredAck = [...runtime.outbox.values()].find(
+    (entry) =>
+      entry.acceptedSeq !== undefined &&
+      entry.acceptedSeq <= (runtime.listedThrough ?? 0)
+  );
+  if (expiredAck) {
+    // A listed log page covered the sequence, but its message is unavailable.
+    await dropItem(ctx, runtime, expiredAck, null);
+    return "dropped";
   }
+  const item = oldestOutbox(runtime);
   if (!item) {
     return "empty";
   }
-  if (item.acceptedSeq !== undefined) {
-    if (item.acceptedSeq > (runtime.listedThrough ?? 0)) return "failed";
-    // The settled page already covered this sequence, but the event is no
-    // longer deliverable (for example, it expired during a long absence).
-    await dropItem(ctx, runtime, item, null);
-    return "dropped";
+  if (item.payload.t === "poll") {
+    item.payload = {
+      ...item.payload,
+      rosterHash: pollRosterHash(pollRoster(runtime.record)),
+    };
   }
   const sealed = requireMls(ctx).encryptMessage(
     runtime.record.g,

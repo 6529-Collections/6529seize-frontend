@@ -35,9 +35,11 @@ export async function checkEncryptedPoll(
   const recipient = pollCard(voter, question);
   await expect(recipient).toBeVisible({ timeout: 45_000 });
   const role = multi ? "checkbox" : "radio";
-  await recipient.getByRole(role, { name: /Tea/ }).check();
-  await recipient.getByRole(role, { name: /Coffee/ }).check();
-  await expect(recipient.getByRole(role, { name: /Tea/ })).toBeChecked({
+  await recipient.getByRole(role, { name: "Tea", exact: true }).check();
+  await recipient.getByRole(role, { name: "Coffee", exact: true }).check();
+  await expect(
+    recipient.getByRole(role, { name: "Tea", exact: true })
+  ).toBeChecked({
     checked: multi,
   });
   await recipient.getByRole("button", { name: "Vote", exact: true }).click();

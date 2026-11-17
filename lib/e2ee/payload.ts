@@ -78,15 +78,16 @@ export interface PollDefinition {
 export interface PollPayload extends PayloadBase {
   t: "poll";
   poll: PollDefinition;
+  rosterHash: string;
 }
 
-export interface PollVotePayload extends PayloadBase {
+interface PollVotePayload extends PayloadBase {
   t: "poll-vote";
   target: string;
   options: number[];
 }
 
-export interface PollClosePayload extends PayloadBase {
+interface PollClosePayload extends PayloadBase {
   t: "poll-close";
   target: string;
 }
@@ -271,7 +272,16 @@ export function parsePollDefinition(value: unknown): PollDefinition | null {
   return { question: question.trim(), options: labels, multi };
 }
 
-export function isPollSelection(value: unknown): value is number[] {
+export function isPollRoster(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.length <= 2048 &&
+    value.every((key) => isHex(key, 32) && key === key.toLowerCase()) &&
+    new Set(value).size === value.length
+  );
+}
+
+function isPollSelection(value: unknown): value is number[] {
   return (
     Array.isArray(value) &&
     value.length <= MAX_POLL_OPTIONS &&
@@ -348,7 +358,10 @@ export function parsePayload(value: unknown): Payload | null {
   }
   if (t === "poll") {
     const poll = parsePollDefinition(value["poll"]);
-    return poll ? { ...base, t, poll } : null;
+    const rosterHash = value["rosterHash"];
+    return poll && isHex(rosterHash, 32)
+      ? { ...base, t, poll, rosterHash }
+      : null;
   }
   return parseTargeted(base, t, value);
 }

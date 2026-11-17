@@ -6,6 +6,7 @@ import {
   type PollPayload,
 } from "../payload";
 import type { SignedVersion, StoredMessage } from "../records";
+import { verifiedPollRoster } from "./poll-roster";
 import type { GroupRuntime } from "./store";
 
 /** Contract section 6 receiver rules applied to the local timeline. */
@@ -76,6 +77,11 @@ function applyMsg(
     isDuplicateImport(runtime, payload.id, payload.imp)
   )
     return false;
+  const eligibleDeviceKeys =
+    payload.t === "poll"
+      ? verifiedPollRoster(runtime.record, meta.epoch, payload.rosterHash)
+      : null;
+  if (payload.t === "poll" && !eligibleDeviceKeys) return false;
   put(runtime, {
     id: payload.id,
     g: meta.g,
@@ -105,16 +111,15 @@ function applyMsg(
     body: meta.body,
     sig: meta.sig,
     ...(payload.t === "msg" && payload.imp ? { imported: payload.imp } : {}),
-    ...(payload.t === "poll" && {
-      poll: {
-        ...payload.poll,
-        eligibleDeviceKeys: runtime.record.members.map((member) =>
-          member.deviceKey.toLowerCase()
-        ),
-        ballots: {},
-        closed: false,
-      },
-    }),
+    ...(payload.t === "poll" &&
+      eligibleDeviceKeys && {
+        poll: {
+          ...payload.poll,
+          eligibleDeviceKeys,
+          ballots: {},
+          closed: false,
+        },
+      }),
   });
   return true;
 }
@@ -199,10 +204,17 @@ function applyPollUpdate(
   )
     return false;
 
-  const ballots = { ...poll.ballots };
-  if (payload.options.length) ballots[voter] = payload.options;
-  else delete ballots[voter];
-  target.poll = { ...poll, ballots };
+  const previous = Object.hasOwn(poll.ballots, voter)
+    ? poll.ballots[voter]
+    : undefined;
+  if (previous && meta.seq <= previous.seq) return false;
+  target.poll = {
+    ...poll,
+    ballots: {
+      ...poll.ballots,
+      [voter]: { seq: meta.seq, options: payload.options },
+    },
+  };
   return true;
 }
 

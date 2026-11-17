@@ -55,6 +55,7 @@ describe("payload codec (contract 6)", () => {
       {
         v: 1,
         t: "poll",
+        rosterHash: `0x${"a".repeat(64)}`,
         id: ID,
         ts: 6,
         poll: { question: "Drink?", options: ["Tea", "Coffee"], multi: true },

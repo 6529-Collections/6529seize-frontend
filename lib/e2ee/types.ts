@@ -94,7 +94,7 @@ export type E2eeUnsentReason = "suite_upgrade";
 
 export interface E2eePoll extends PollDefinition {
   eligibleDeviceKeys: string[];
-  ballots: Record<string, number[]>;
+  ballots: Record<string, { seq: number; options: number[] }>;
   closed: boolean;
 }
 

@@ -129,6 +129,8 @@ export interface StoredGroup {
   epochFp: string;
   /** Recent epoch -> epoch_fp (split-view detection, 8.1.3). */
   epochFps: Record<string, string>;
+  /** MLS membership snapshots for application messages that arrive after an own commit. */
+  previousPollRosters?: Record<string, string[]>;
   commitKey: string;
   members: StoredMember[];
   splitView: boolean;

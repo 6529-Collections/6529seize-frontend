@@ -1,7 +1,7 @@
 import { publicEnv } from "@/config/env";
 import { isE2eeFlagEnabled } from "@/config/e2eeFlag";
 
-/** Poll creation is enabled for the staging rollout. All builds can read polls. */
+/** Enables the create control for the staging rollout. */
 export function isE2eePollCreationEnabled(): boolean {
   return isE2eeFlagEnabled(publicEnv.NEXT_PUBLIC_E2EE_POLLS_ENABLED);
 }

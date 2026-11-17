@@ -7,7 +7,7 @@ import {
 } from "./history-read";
 import type { HistoryPageOptions } from "../history-order";
 import { downloadMedia, localBlobType } from "../media";
-import { isValidPollBallot, type PollDefinition } from "../payload";
+import type { PollDefinition } from "../payload";
 import { getDefaultBackupStateStore } from "../backup/state";
 import type { BackupHistory } from "../backup/format";
 import type {
@@ -52,6 +52,7 @@ import {
 } from "./membership";
 import { searchHistory } from "./history-search";
 import { latestReadSeq } from "./history";
+import { queuePoll, queuePollUpdate } from "./polls";
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
@@ -454,49 +455,16 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  async createPoll(g: string, poll: PollDefinition): Promise<void> {
-    this.requireReady();
-    const group = g.toLowerCase();
-    if (requireGroup(this.ctx, group).record.metadata.kind !== "group") {
-      throw new E2eeError("E2EE_INVALID_INPUT");
-    }
-    await queueTargeted(this.ctx, group, (base) => ({
-      ...base,
-      t: "poll",
-      poll,
-    }));
-    this.background(() => this.controller.flush(group));
-  }
+  createPoll = (g: string, poll: PollDefinition) =>
+    this.queuePoll(g, () => queuePoll(this.ctx, g, poll));
 
-  async updatePoll(
-    g: string,
-    id: string,
-    options: number[] | null
-  ): Promise<void> {
+  updatePoll = (g: string, id: string, options: number[] | null) =>
+    this.queuePoll(g, () => queuePollUpdate(this.ctx, g, id, options));
+
+  private async queuePoll(g: string, enqueue: () => Promise<void>) {
     this.requireReady();
-    const group = g.toLowerCase();
-    const message = await this.ctx.queue.run(() => this.ownMessage(group, id));
-    if (!message.poll || message.deleted || message.poll.closed) {
-      throw new E2eeError("E2EE_INVALID_INPUT");
-    }
-    if (options === null && message.senderProfileId !== this.ctx.profileId) {
-      throw new E2eeError("E2EE_NOT_SENDER");
-    }
-    if (
-      options !== null &&
-      (!message.poll.eligibleDeviceKeys.includes(
-        this.getLocalDeviceKey() ?? ""
-      ) ||
-        !isValidPollBallot(message.poll, options))
-    ) {
-      throw new E2eeError("E2EE_INVALID_INPUT");
-    }
-    await queueTargeted(this.ctx, group, (base) =>
-      options === null
-        ? { ...base, t: "poll-close", target: id }
-        : { ...base, t: "poll-vote", target: id, options }
-    );
-    this.background(() => this.controller.flush(group));
+    await enqueue();
+    this.background(() => this.controller.flush(g.toLowerCase()));
   }
 
   private ownMessage = (g: string, id: string) =>

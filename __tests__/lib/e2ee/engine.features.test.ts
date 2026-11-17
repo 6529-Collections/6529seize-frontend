@@ -85,7 +85,7 @@ describe("E2EE engine: features", () => {
     await settle(world);
     expect(
       a.getMessages(g).find((message) => message.id === id)?.poll?.ballots
-    ).toEqual({ bob: [0, 1] });
+    ).toEqual({ bob: { seq: expect.any(Number), options: [0, 1] } });
     await bobPhone.engine.updatePoll!(g, id, [1]);
     await settle(world);
     await expect(b.updatePoll!(g, id, null)).rejects.toMatchObject({
@@ -98,7 +98,7 @@ describe("E2EE engine: features", () => {
         engine.getMessages(g).find((message) => message.id === id)?.poll
       ).toMatchObject({
         closed: true,
-        ballots: { bob: [1] },
+        ballots: { bob: { seq: expect.any(Number), options: [1] } },
       });
     }
     await expect(b.updatePoll!(g, id, [0])).rejects.toMatchObject({
