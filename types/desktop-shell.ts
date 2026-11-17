@@ -46,6 +46,11 @@ export interface DesktopShellInfo {
   readonly environment?: string | undefined;
   /** True in a shell that defines `window.desktopWallet`. */
   readonly supportsWalletForwarding?: boolean | undefined;
+  /**
+   * False in a shell that never downloads or installs updates itself (the
+   * new 6529 Desktop); absent in the older app, which does.
+   */
+  readonly supportsInAppUpdates?: boolean | undefined;
   readonly [key: string]: unknown;
 }
 
