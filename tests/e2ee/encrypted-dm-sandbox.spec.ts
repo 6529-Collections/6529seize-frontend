@@ -227,6 +227,11 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       await expect(
         page.getByRole("heading", { name: "Couldn’t load encrypted chats." })
       ).toBeVisible();
+      await expect(
+        page
+          .getByRole("status")
+          .filter({ hasText: "Couldn’t load encrypted chats." })
+      ).toHaveCount(1);
       await expect(empty).toHaveCount(0);
       await page
         .getByRole("button", { name: "Try again", exact: true })

@@ -6,6 +6,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Button from "@/components/utils/button/Button";
 import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import {
@@ -17,7 +18,7 @@ import useCreateModalState from "@/hooks/useCreateModalState";
 import { t } from "@/i18n/messages";
 import { E2eeNewDeviceNotice } from "../devices/E2eeNewDeviceNotice";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
-import { E2eeLoadingState, E2eeRouteGate } from "../gate/E2eeRouteGate";
+import { E2eeRouteGate } from "../gate/E2eeRouteGate";
 import { E2eeBadge } from "../ui/E2eeBadge";
 import { E2eeCenteredMessage, E2eePageShell } from "../ui/E2eePageShell";
 import { E2eeConversationList } from "./E2eeConversationList";
@@ -45,37 +46,52 @@ function DevicesLink() {
 function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
   const locale = useBrowserLocale();
   const { conversations, profileId, initialSyncStatus, engine } = e2ee;
-  if (conversations.length > 0) {
-    return (
-      <E2eeConversationList
-        conversations={conversations}
-        selfProfileId={profileId}
-        label={t(locale, "e2ee.list.label")}
-      />
-    );
-  }
-  if (initialSyncStatus === "pending") {
-    return <E2eeLoadingState label={t(locale, "e2ee.list.loading")} />;
-  }
-  if (initialSyncStatus === "failed") {
-    return (
-      <E2eeCenteredMessage title={t(locale, "e2ee.list.error")}>
-        <Button
-          variant="secondary"
-          size="md"
-          onClick={() => void engine?.sync().catch(() => undefined)}
-        >
-          {t(locale, "e2ee.action.retry")}
-        </Button>
-      </E2eeCenteredMessage>
-    );
-  }
+  const hasChats = conversations.length > 0;
+  const loading = !hasChats && initialSyncStatus === "pending";
+  const loadFailed = !hasChats && initialSyncStatus === "failed";
+  const loadError = t(locale, "e2ee.list.error");
+  let status = "";
+  if (loading) status = t(locale, "e2ee.list.loading");
+  if (loadFailed) status = loadError;
+
   return (
-    <E2eeCenteredMessage
-      icon={<LockClosedIcon className="tw-size-6" />}
-      title={t(locale, "e2ee.list.empty.title")}
-      body={t(locale, "e2ee.list.empty.body")}
-    />
+    <>
+      <output
+        className={
+          loading
+            ? "tw-flex tw-items-center tw-justify-center tw-gap-3 tw-px-6 tw-py-12 tw-text-sm tw-text-iron-400 motion-reduce:[&>svg]:tw-animate-none"
+            : "tw-sr-only"
+        }
+      >
+        {loading && <CircleLoader />}
+        {status}
+      </output>
+      {hasChats && (
+        <E2eeConversationList
+          conversations={conversations}
+          selfProfileId={profileId}
+          label={t(locale, "e2ee.list.label")}
+        />
+      )}
+      {loadFailed && (
+        <E2eeCenteredMessage title={loadError}>
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={() => void engine?.sync().catch(() => undefined)}
+          >
+            {t(locale, "e2ee.action.retry")}
+          </Button>
+        </E2eeCenteredMessage>
+      )}
+      {!hasChats && initialSyncStatus === "complete" && (
+        <E2eeCenteredMessage
+          icon={<LockClosedIcon className="tw-size-6" />}
+          title={t(locale, "e2ee.list.empty.title")}
+          body={t(locale, "e2ee.list.empty.body")}
+        />
+      )}
+    </>
   );
 }
 

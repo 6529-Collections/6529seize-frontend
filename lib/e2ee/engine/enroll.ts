@@ -453,10 +453,17 @@ const isLoginGrantRejection = (error: unknown): boolean =>
 async function registerPending(
   ctx: EngineContext,
   device: StoredDevice,
-  allowPrompt: boolean
+  allowPrompt: boolean,
+  onProvisioning: (() => void) | undefined
 ): Promise<StoredDevice | null> {
-  try {
+  if (!hasLoginGrant(device)) {
+    onProvisioning?.();
     return (await register(ctx, device)) ? device : null;
+  }
+  try {
+    if (!(await register(ctx, device))) return null;
+    onProvisioning?.();
+    return device;
   } catch (error) {
     if (!isLoginGrantRejection(error)) {
       throw error;
@@ -466,6 +473,7 @@ async function registerPending(
       throw error;
     }
     const fresh = await createDevice(ctx);
+    onProvisioning?.();
     return (await register(ctx, fresh)) ? fresh : null;
   }
 }
@@ -506,13 +514,19 @@ export async function enrollDevice(
   } else {
     return false;
   }
-  onProvisioning?.();
   if (!device.registered) {
-    const registered = await registerPending(ctx, device, allowPrompt);
+    const registered = await registerPending(
+      ctx,
+      device,
+      allowPrompt,
+      onProvisioning
+    );
     if (!registered) {
       return false;
     }
     device = registered;
+  } else if (!device.provisioned) {
+    onProvisioning?.();
   }
   if (!device.provisioned) {
     await provision(ctx, device);
