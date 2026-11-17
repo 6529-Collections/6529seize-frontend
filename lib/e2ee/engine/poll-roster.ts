@@ -6,7 +6,11 @@ export const pollRoster = (record: StoredGroup): string[] =>
   record.members.map((member) => member.deviceKey.toLowerCase());
 
 export function pollRosterHash(roster: readonly string[]): string {
-  return keccak256(utf8Encode([...roster].sort().join(",")));
+  // Device keys are canonical ASCII hex. Use byte order on every device.
+  const sorted = [...roster].sort((left, right) =>
+    left < right ? -1 : Number(left > right)
+  );
+  return keccak256(utf8Encode(sorted.join(",")));
 }
 
 export function verifiedPollRoster(

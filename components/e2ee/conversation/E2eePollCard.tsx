@@ -125,7 +125,7 @@ export function E2eePollCard({
               : "e2ee.poll.voteCount.other";
           return (
             <label
-              key={index}
+              key={label}
               className="tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100"
             >
               {canVote && (
@@ -215,9 +215,9 @@ export function E2eePollCard({
         )}
       </div>
       {queued && !poll.closed && (
-        <p role="status" className="tw-mt-2 tw-text-sm tw-text-iron-400">
+        <output className="tw-mt-2 tw-block tw-text-sm tw-text-iron-400">
           {t(locale, "e2ee.poll.voteQueued")}
-        </p>
+        </output>
       )}
       {failed && (
         <p role="alert" className="tw-mt-2 tw-text-sm tw-text-rose-300">
@@ -231,7 +231,7 @@ export function E2eePollCard({
           </summary>
           <dl className="tw-mb-1 tw-space-y-2 tw-break-words">
             {poll.options.map((label, index) => (
-              <div key={index}>
+              <div key={label}>
                 <dt className="tw-font-medium">{label}</dt>
                 <dd className="tw-m-0 tw-text-iron-400">
                   {(voters[index]?.length ?? 0) > 0

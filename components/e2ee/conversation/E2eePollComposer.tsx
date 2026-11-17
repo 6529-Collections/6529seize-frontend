@@ -1,7 +1,7 @@
 "use client";
 
 import { ChartBarIcon } from "@heroicons/react/24/outline";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
@@ -64,11 +64,25 @@ function E2eePollComposer({
   const locale = useBrowserLocale();
   const formId = useId();
   const [question, setQuestion] = useState("");
-  const [options, setOptions] = useState(["", ""]);
+  const [options, setOptions] = useState([
+    { id: 0, label: "" },
+    { id: 1, label: "" },
+  ]);
+  const nextOptionId = useRef(2);
   const [multi, setMulti] = useState(false);
   const [sending, setSending] = useState(false);
   const [failed, setFailed] = useState(false);
-  const poll = parsePollDefinition({ question, options, multi });
+  const poll = parsePollDefinition({
+    question,
+    options: options.map((option) => option.label),
+    multi,
+  });
+
+  function addOption() {
+    const id = nextOptionId.current;
+    nextOptionId.current += 1;
+    setOptions((current) => [...current, { id, label: "" }]);
+  }
 
   async function submit() {
     if (!poll || sending) return;
@@ -126,7 +140,7 @@ function E2eePollComposer({
           </label>
           {options.map((option, index) => (
             <label
-              key={index}
+              key={option.id}
               className="tw-block tw-space-y-1 tw-text-sm tw-text-iron-200"
             >
               <span>
@@ -137,11 +151,13 @@ function E2eePollComposer({
               <input
                 autoComplete="off"
                 maxLength={MAX_POLL_OPTION}
-                value={option}
+                value={option.label}
                 onChange={(event) =>
                   setOptions(
-                    options.map((label, i) =>
-                      i === index ? event.target.value : label
+                    options.map((choice) =>
+                      choice.id === option.id
+                        ? { ...choice, label: event.target.value }
+                        : choice
                     )
                   )
                 }
@@ -151,11 +167,7 @@ function E2eePollComposer({
           ))}
           <div className="tw-flex tw-flex-wrap tw-gap-2">
             {options.length < MAX_POLL_OPTIONS && (
-              <Button
-                size="sm"
-                variant="secondary"
-                onClick={() => setOptions([...options, ""])}
-              >
+              <Button size="sm" variant="secondary" onClick={addOption}>
                 {t(locale, "e2ee.poll.addOption")}
               </Button>
             )}

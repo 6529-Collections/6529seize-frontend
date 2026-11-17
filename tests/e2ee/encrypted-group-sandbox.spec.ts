@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test";
 import { checkEncryptedPoll, pollCard } from "../support/e2ee/polls";
 import { expect, test } from "../testHelpers";
 import {
@@ -186,21 +187,11 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
       timeout: E2EE_UI_TIMEOUT_MS,
     });
     await closeChatInfo(alice.page);
-    await expect(notice(alice.page, "You removed carol")).toBeVisible();
+    await expectLatestNotice(alice.page, "You removed carol");
     await expect(
       carol.page.getByText("You were removed from this chat.")
     ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
-    const removalNotice = notice(bob.page, "alice removed carol");
-    const newMessages = bob.page.getByRole("button", {
-      name: "New messages",
-      exact: true,
-    });
-    // The poll cards can leave the reader above the latest timeline row.
-    await expect(removalNotice.or(newMessages).first()).toBeVisible({
-      timeout: E2EE_SYNC_TIMEOUT_MS,
-    });
-    if (await newMessages.isVisible()) await newMessages.click();
-    await expect(removalNotice).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+    await expectLatestNotice(bob.page, "alice removed carol");
 
     // Story 3: a removed member gets no later messages, on screen or wire.
     await sendMessage(alice.page, afterCarol);
@@ -233,6 +224,20 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
     }
   });
 });
+
+async function expectLatestNotice(page: Page, text: string) {
+  const row = notice(page, text);
+  const newMessages = page.getByRole("button", {
+    name: "New messages",
+    exact: true,
+  });
+  // Taller poll cards can leave the reader above the latest timeline row.
+  await expect(row.or(newMessages).first()).toBeVisible({
+    timeout: E2EE_SYNC_TIMEOUT_MS,
+  });
+  if (await newMessages.isVisible()) await newMessages.click();
+  await expect(row).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+}
 
 /**
  * Asks the delivery service, as carol's device, for the group log: it must

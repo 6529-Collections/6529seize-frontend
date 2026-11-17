@@ -5,7 +5,7 @@ import {
   type Payload,
   type PollPayload,
 } from "../payload";
-import type { SignedVersion, StoredMessage } from "../records";
+import type { SignedVersion, StoredGroup, StoredMessage } from "../records";
 import { verifiedPollRoster } from "./poll-roster";
 import type { GroupRuntime } from "./store";
 
@@ -62,6 +62,38 @@ export function placeholderMessage(meta: {
   };
 }
 
+function messageContent(
+  record: StoredGroup,
+  payload: MsgPayload | PollPayload,
+  epoch: number | null
+): Pick<
+  StoredMessage,
+  "text" | "mentions" | "reply" | "attachments" | "poll" | "imported"
+> | null {
+  if (payload.t === "poll") {
+    const eligibleDeviceKeys = verifiedPollRoster(
+      record,
+      epoch,
+      payload.rosterHash
+    );
+    if (!eligibleDeviceKeys) return null;
+    return {
+      text: payload.poll.question,
+      mentions: [],
+      reply: null,
+      attachments: [],
+      poll: { ...payload.poll, eligibleDeviceKeys, ballots: {}, closed: false },
+    };
+  }
+  return {
+    text: payload.text,
+    mentions: [...payload.mentions],
+    reply: payload.reply ?? null,
+    attachments: payload.att?.map((attachment) => ({ ...attachment })) ?? [],
+    ...(payload.imp ? { imported: payload.imp } : {}),
+  };
+}
+
 function applyMsg(
   runtime: GroupRuntime,
   payload: MsgPayload | PollPayload,
@@ -77,11 +109,8 @@ function applyMsg(
     isDuplicateImport(runtime, payload.id, payload.imp)
   )
     return false;
-  const eligibleDeviceKeys =
-    payload.t === "poll"
-      ? verifiedPollRoster(runtime.record, meta.epoch, payload.rosterHash)
-      : null;
-  if (payload.t === "poll" && !eligibleDeviceKeys) return false;
+  const content = messageContent(runtime.record, payload, meta.epoch);
+  if (!content) return false;
   put(runtime, {
     id: payload.id,
     g: meta.g,
@@ -91,13 +120,7 @@ function applyMsg(
     senderDeviceKey: meta.senderDeviceKey,
     ts: payload.ts,
     serverTs: meta.serverTs,
-    text: payload.t === "msg" ? payload.text : payload.poll.question,
-    mentions: payload.t === "msg" ? [...payload.mentions] : [],
-    reply: payload.t === "msg" ? (payload.reply ?? null) : null,
-    attachments:
-      payload.t === "msg" && payload.att
-        ? payload.att.map((att) => ({ ...att }))
-        : [],
+    ...content,
     editedAt: existing?.editedAt ?? null,
     ...(existing?.latestEdit === undefined
       ? {}
@@ -110,16 +133,6 @@ function applyMsg(
     epoch: meta.epoch,
     body: meta.body,
     sig: meta.sig,
-    ...(payload.t === "msg" && payload.imp ? { imported: payload.imp } : {}),
-    ...(payload.t === "poll" &&
-      eligibleDeviceKeys && {
-        poll: {
-          ...payload.poll,
-          eligibleDeviceKeys,
-          ballots: {},
-          closed: false,
-        },
-      }),
   });
   return true;
 }
