@@ -5,7 +5,9 @@ import HeaderPageShareButton from "@/components/header/share/HeaderPageShareButt
 import {
   getCurrentPageLocation,
   getCurrentPublicUrl,
+  getDesktopConnectionShareScheme,
 } from "@/components/header/share/header-share/shareUtils";
+import { publicEnv } from "@/config/env";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useCapacitor from "@/hooks/useCapacitor";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -2096,6 +2098,22 @@ describe("HeaderShare", () => {
         screen.getByText("Preparing Device Connection")
       ).toBeInTheDocument();
     });
+
+    it.each(["stagingcore6529", "localcore6529"])(
+      "uses the configured %s scheme for the desktop connection",
+      (scheme) => {
+        const configuredScheme = jest.replaceProperty(
+          publicEnv,
+          "CORE_SCHEME",
+          scheme
+        );
+        try {
+          expect(getDesktopConnectionShareScheme()).toBe(scheme);
+        } finally {
+          configuredScheme.restore();
+        }
+      }
+    );
 
     it("opens Desktop with an encoded one-time code and omits legacy credentials", async () => {
       mockAuthUtils.getRefreshToken.mockReturnValue(
