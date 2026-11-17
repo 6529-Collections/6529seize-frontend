@@ -270,9 +270,9 @@ export function E2eeRecoveryCodeDialog({
           </label>
         </div>
         {waiting && !runFailed ? (
-          <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-300">
+          <output className="tw-m-0 tw-block tw-text-sm tw-text-iron-300">
             {t(locale, "e2ee.backup.status.uploading")}
-          </p>
+          </output>
         ) : null}
         {shownErrorKey ? (
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
