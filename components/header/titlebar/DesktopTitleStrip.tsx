@@ -8,6 +8,7 @@ import {
   InformationCircleIcon,
   LinkIcon,
 } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import {
   type KeyboardEvent,
   useEffect,
@@ -20,6 +21,13 @@ import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import { getDesktopShellApi, getDesktopUpdater } from "@/helpers/desktop-shell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import DesktopUpdatePanel from "@/components/desktop/DesktopUpdatePanel";
+import { desktopUpdateTone } from "@/lib/desktop/updateState";
+import {
+  getDesktopAutoUpdate,
+  getServerDesktopAutoUpdate,
+  subscribeDesktopAutoUpdate,
+} from "@/services/desktop/desktopUpdateState";
 import styles from "./DesktopTitleStrip.module.css";
 
 interface AppInfo {
@@ -171,6 +179,13 @@ export default function DesktopTitleStrip() {
     getServerNavigation
   );
   const [updateAvailable, setUpdateAvailable] = useState(false);
+  const autoUpdate = useSyncExternalStore(
+    subscribeDesktopAutoUpdate,
+    getDesktopAutoUpdate,
+    getServerDesktopAutoUpdate
+  );
+  const updateState =
+    autoUpdate.support === "supported" ? autoUpdate.state : null;
   const [showInfo, setShowInfo] = useState(false);
   const [activeItem, setActiveItem] = useState(0);
 
@@ -234,9 +249,25 @@ export default function DesktopTitleStrip() {
     info.environment && info.environment !== "production"
       ? info.environment
       : null;
-  const infoLabel = updateAvailable
+  // Builds that install their own updates: the state's short label is the
+  // title strip mark (release standard R55); others keep the dot.
+  let infoLabel = updateAvailable
     ? t(locale, "desktop.titleStrip.appInfoUpdate")
     : t(locale, "desktop.titleStrip.appInfo");
+  let showUpdateMark = updateAvailable;
+  if (autoUpdate.support === "supported") {
+    infoLabel = updateState?.label
+      ? t(locale, "desktop.titleStrip.appInfoState", {
+          label: updateState.label,
+        })
+      : t(locale, "desktop.titleStrip.appInfo");
+    showUpdateMark =
+      updateState !== null &&
+      updateState.label !== null &&
+      updateState.id !== "U1";
+  }
+  const alertMark =
+    updateState !== null && desktopUpdateTone(updateState.id) === "alert";
   const updater = getDesktopUpdater();
   const backLabel = t(locale, "desktop.titleStrip.back");
   const forwardLabel = t(locale, "desktop.titleStrip.forward");
@@ -350,8 +381,14 @@ export default function DesktopTitleStrip() {
           onClick={() => setShowInfo(true)}
         >
           <InformationCircleIcon aria-hidden="true" width={16} height={16} />
-          {updateAvailable && (
-            <span className={styles["updateDot"]} aria-hidden="true" />
+          {showUpdateMark && (
+            <span
+              className={clsx(
+                styles["updateDot"],
+                alertMark && styles["updateDotAlert"]
+              )}
+              aria-hidden="true"
+            />
           )}
         </button>
         {/* Always in the strip: the host can draw the version into it before
@@ -379,13 +416,18 @@ export default function DesktopTitleStrip() {
           <dt className="tw-text-iron-400">
             {t(locale, "desktop.appInfo.version")}
           </dt>
-          <dd className="tw-m-0 tw-text-iron-50">{info.version ?? "-"}</dd>
+          <dd className="tw-m-0 tw-text-iron-50">
+            {updateState?.running ?? info.version ?? "-"}
+          </dd>
           <dt className="tw-text-iron-400">
             {t(locale, "desktop.appInfo.environment")}
           </dt>
           <dd className="tw-m-0 tw-text-iron-50">{info.environment ?? "-"}</dd>
         </dl>
-        {updater && (
+        {updateState && (
+          <DesktopUpdatePanel state={updateState} locale={locale} />
+        )}
+        {updater && autoUpdate.support !== "supported" && (
           <button
             type="button"
             className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"

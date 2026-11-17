@@ -3984,6 +3984,23 @@ export const EN_US_ROOT_MESSAGES = {
   "desktop.appInfo.version": "Version",
   "desktop.appInfo.environment": "Environment",
   "desktop.appInfo.checkUpdates": "Check for updates",
+  "desktop.titleStrip.appInfoState": "App info ({label})",
+  "desktop.update.heading": "Updates",
+  "desktop.update.lastChecked": "Last checked {time}.",
+  "desktop.update.checkNow": "Check now",
+  "desktop.update.updateNow": "Update now",
+  "desktop.update.restart": "Restart to update",
+  "desktop.update.tryAgain": "Try again",
+  "desktop.update.notNow": "Not now",
+  "desktop.update.releaseNotes": "Release notes for {version}",
+  "desktop.update.downloadPage": "Download page on 6529.io",
+  "desktop.update.settingCheck": "Check for new releases",
+  "desktop.update.settingAuto": "Install updates automatically",
+  "desktop.update.settingAutoNeedsCheck":
+    "Turn on Check for new releases first.",
+  "desktop.update.settingsFailed":
+    "The setting could not be changed. Try again.",
+  "desktop.update.restartFailed": "6529 Desktop can't restart to update now.",
   "desktopConnect.title": "Connect a wallet",
   "desktopConnect.intro":
     "6529 Desktop cannot use browser extensions directly. Choose how to connect:",

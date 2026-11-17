@@ -325,6 +325,57 @@ describe("DesktopTitleStrip", () => {
     expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(1);
   });
 
+  it("marks the update state and shows the update view in a build that installs its own updates", async () => {
+    const user = userEvent.setup();
+    const ready = {
+      id: "U8",
+      state: "ready",
+      label: "Restart to update",
+      headline: "1.3.0 is ready to install. Restart 6529 Desktop to finish.",
+      running: "1.2.3",
+      version: "1.3.0",
+      check: true,
+      auto: true,
+      canInstall: true,
+      cannotInstallWhy: null,
+      checkedAt: 1_800_000_000,
+    };
+    bridges.api.getInfo.mockResolvedValue({
+      app_version: "1.2.3",
+      environment: "production",
+      supportsInAppUpdates: true,
+    });
+    const installUpdate = jest.fn(() => Promise.resolve());
+    Object.assign(bridges.updater, {
+      getState: jest.fn(() => Promise.resolve(ready)),
+      onUpdateState: jest.fn(),
+      offUpdateState: jest.fn(),
+      setSettings: jest.fn(() => Promise.resolve(ready)),
+      installUpdate,
+    });
+    installDesktopShell();
+    render(<DesktopTitleStrip />);
+
+    await user.click(
+      await screen.findByRole("button", {
+        name: "App info (Restart to update)",
+      })
+    );
+    expect(
+      await screen.findByText(
+        "1.3.0 is ready to install. Restart 6529 Desktop to finish."
+      )
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("switch", { name: "Install updates automatically" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Check for updates" })
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Restart to update" }));
+    expect(installUpdate).toHaveBeenCalledTimes(1);
+  });
+
   it("shares one history subscription and starts fresh after unmount", async () => {
     installDesktopShell();
     const first = render(<DesktopTitleStrip />);

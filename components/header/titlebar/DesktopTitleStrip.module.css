@@ -80,6 +80,11 @@
   background: #31cd69;
 }
 
+/* An update state the person must act on (release standard R54). */
+.updateDotAlert {
+  background: #f97066;
+}
+
 .version {
   white-space: nowrap;
 }

@@ -71,6 +71,8 @@ Open 6529 Desktop > About for the installed version, OS/architecture, app scheme
 
 The update area shows checking, available, downloading progress, downloaded, no-update, or error states. Use the action offered for that state; the bot does not know the latest available build unless it has current release evidence.
 
+In builds that install their own updates (after 0.1.0-rc.2), the info button in the title strip opens **About 6529 Desktop** with an **Updates** section: the running version, the update state in the app's own words (release standard states U1-U14), **Last checked**, and the buttons that apply: **Check now**, **Update now**, **Restart to update** or **Try again**. Two switches, **Check for new releases** and **Install updates automatically**, change at once; automatic installs need the first, and both are on by default. An install that cannot update by itself shows no switches and links the download page. The title strip's info button carries the state's short label, with a mark when there is something to do (red for an urgent or unsafe release).
+
 The update notice in the app window, by build:
 
 - **0.1.0-rc.2:** 0.1.0-rc.2 runs the copy of 6529.io that was built into it, with the old update notice. When a newer version is published, that notice shows a **Download** button that does not work, and nothing published on 6529.io changes that for 0.1.0-rc.2. If you use 0.1.0-rc.2, open [https://6529.io/desktop](https://6529.io/desktop) in your browser and download the next version by hand, once.
