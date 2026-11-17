@@ -205,6 +205,20 @@ and the known issues, which are structured content in
 `*italic*` and `code` marked inline. File names, commands and the key stay
 as written in every language.
 
+Localization debt, en-US only today:
+
+| Route              | Component and source                                           | What stays English                                                                     |
+| ------------------ | -------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `/ai`              | `AiDownloads`, `AiDownloadPage`; `lib/ai-page/releaseFiles.ts` | Each file's kind and system needs ("Disk image", "macOS 13.3 or later, Apple silicon") |
+| `/ai/guide`        | `AiGuidePage`, `AiGuideSteps`; `lib/ai-page/content/guide.ts`  | Every step, result, need, code-block label and fold title                              |
+| `/ai/known-issues` | `AiKnownIssuesPage`; `lib/ai-page/content/knownIssues.ts`      | Every issue, workaround and code-block label                                           |
+
+These strings don't go through `t()`, so another locale sees them in
+English beside its own interface copy, with no per-key fallback. To
+localize them, move each string into the `ai-download` namespace under a
+key and render it with `t()` or `tRich()`; the content files then hold keys
+and the pages read the same as today in en-US.
+
 The guide is built from 6529 AI's own install guides
 (`docs/install/macos.md`, `windows.md`, `linux.md` and
 `getting-started.md`) and fills in the newest release's file names, or

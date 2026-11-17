@@ -72,7 +72,10 @@ function toHeroOption(
           size,
           needs: installer.needs,
         })
-      : `${release.version} · ${installer.needs}`,
+      : t(LOCALE, "ai.download.metaWithoutSize", {
+          version: release.version,
+          needs: installer.needs,
+        }),
     badges: <AiTrustBadges signed={installer.file.signed} />,
   };
 }
@@ -172,10 +175,7 @@ function HowItWorks() {
       <h2 id="how-it-works" className={AI_H2}>
         {t(LOCALE, "ai.how.heading")}
       </h2>
-      <ol
-        role="list"
-        className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3"
-      >
+      <ol className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-3 tw-p-0 sm:tw-grid-cols-3">
         {HOW.map((step, index) => (
           <li
             key={step.title}

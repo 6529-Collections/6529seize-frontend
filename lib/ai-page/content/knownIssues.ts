@@ -52,7 +52,7 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
         code: [
           {
             label: "File to delete",
-            code: "C:\\Program Files\\6529 AI\\6529-ai.toml",
+            code: String.raw`C:\Program Files\6529 AI\6529-ai.toml`,
           },
         ],
       },
@@ -96,7 +96,7 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
           { label: "Mac, log file", code: "~/Library/Logs/6529-ai.log" },
           {
             label: "Windows, log file",
-            code: "%LOCALAPPDATA%\\6529-ai\\logs\\6529-ai.log",
+            code: String.raw`%LOCALAPPDATA%\6529-ai\logs\6529-ai.log`,
           },
           { label: "Linux, Terminal", code: "journalctl -u 6529-ai" },
         ],

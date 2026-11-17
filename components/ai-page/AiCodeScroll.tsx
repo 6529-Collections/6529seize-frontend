@@ -26,10 +26,15 @@ export default function AiCodeScroll({
         element.scrollLeft + element.clientWidth < element.scrollWidth - 1;
       element.style.maskImage = more ? FADE : "";
       element.style.setProperty("-webkit-mask-image", more ? FADE : "");
+      element.tabIndex = element.scrollWidth > element.clientWidth + 1 ? 0 : -1;
     };
+    element.addEventListener("scroll", measure, { passive: true });
+    if (typeof ResizeObserver === "undefined") {
+      measure();
+      return () => element.removeEventListener("scroll", measure);
+    }
     const observer = new ResizeObserver(measure);
     observer.observe(element);
-    element.addEventListener("scroll", measure, { passive: true });
     return () => {
       observer.disconnect();
       element.removeEventListener("scroll", measure);
@@ -39,7 +44,8 @@ export default function AiCodeScroll({
   return (
     <pre
       ref={pre}
-      className="tw-m-0 tw-overflow-x-auto tw-whitespace-pre tw-px-3.5 tw-py-3 tw-font-mono tw-text-[13px] tw-leading-6 tw-text-iron-100"
+      tabIndex={-1}
+      className="tw-m-0 tw-overflow-x-auto tw-whitespace-pre tw-px-3.5 tw-py-3 tw-font-mono tw-text-[13px] tw-leading-6 tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
     >
       {children}
     </pre>

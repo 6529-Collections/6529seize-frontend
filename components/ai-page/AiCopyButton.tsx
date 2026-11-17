@@ -19,7 +19,7 @@ export default function AiCopyButton({
   text,
   copiedText,
   label,
-  copiedLabel,
+  failedText,
   plain = false,
 }: {
   readonly value: string;
@@ -28,26 +28,29 @@ export default function AiCopyButton({
   readonly copiedText: string;
   /** What it copies, for screen readers: "Copy the SHA-256 of …". */
   readonly label: string;
-  readonly copiedLabel: string;
+  /** Said when the browser refuses the clipboard: "Couldn't copy". */
+  readonly failedText: string;
   /** Without a border, as in a code block's header. */
   readonly plain?: boolean | undefined;
 }) {
-  const [copied, setCopied] = useState(false);
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
 
   useEffect(() => {
-    if (!copied) {
+    if (state === "idle") {
       return undefined;
     }
-    const timer = setTimeout(() => setCopied(false), 2000);
+    const timer = setTimeout(() => setState("idle"), 2000);
     return () => clearTimeout(timer);
-  }, [copied]);
+  }, [state]);
+
+  const stateText = { idle: text, copied: copiedText, failed: failedText };
 
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(value);
-      setCopied(true);
+      setState("copied");
     } catch {
-      setCopied(false);
+      setState("failed");
     }
   };
 
@@ -55,15 +58,15 @@ export default function AiCopyButton({
     <button
       type="button"
       onClick={copy}
-      aria-label={copied ? copiedLabel : label}
+      aria-label={label}
       className={`${BASE} ${plain ? PLAIN : CHIP}`}
     >
-      {copied ? (
+      {state === "copied" ? (
         <CheckIcon aria-hidden="true" className="tw-size-4 tw-text-success" />
       ) : (
         <ClipboardDocumentIcon aria-hidden="true" className="tw-size-4" />
       )}
-      <span aria-live="polite">{copied ? copiedText : text}</span>
+      <span aria-live="polite">{stateText[state]}</span>
     </button>
   );
 }

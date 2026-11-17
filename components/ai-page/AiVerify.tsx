@@ -97,10 +97,7 @@ export default function AiVerify({ release }: { readonly release: AiRelease }) {
       <p className={`tw-mb-6 tw-mt-0 ${AI_BODY}`}>
         {t(LOCALE, "ai.verify.intro")}
       </p>
-      <ol
-        role="list"
-        className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-8 tw-p-0"
-      >
+      <ol className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-8 tw-p-0">
         <Step index={1} title={t(LOCALE, "ai.verify.file.title")}>
           <p className={`tw-m-0 ${AI_BODY}`}>
             {tRich(LOCALE, "ai.verify.file.body", {
@@ -179,8 +176,9 @@ export default function AiVerify({ release }: { readonly release: AiRelease }) {
                       {file.name}
                     </p>
                     <p className="tw-m-0 tw-text-[13px] tw-leading-5 tw-text-iron-400">
-                      {what}
-                      {size && ` · ${size}`}
+                      {size
+                        ? t(LOCALE, "ai.verify.fileMeta", { what, size })
+                        : what}
                     </p>
                   </div>
                   <a

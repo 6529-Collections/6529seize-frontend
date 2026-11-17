@@ -105,7 +105,7 @@ function FileRow({
           text={t(LOCALE, "ai.files.sha256")}
           copiedText={t(LOCALE, "ai.code.copied")}
           label={t(LOCALE, "ai.files.sha256.label", { file: file.name })}
-          copiedLabel={t(LOCALE, "ai.code.copied")}
+          failedText={t(LOCALE, "ai.code.copyFailed")}
         />
         <span className="tw-sr-only">{file.sha256}</span>
         <a

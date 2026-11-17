@@ -272,6 +272,27 @@ describe("the /ai pages", () => {
     expect(knownIssues).toContain("add a screenshot and the log");
   });
 
+  it("open the Linux downloads on an ARM64 visitor's CPU", async () => {
+    mockUserAgent =
+      "Mozilla/5.0 (X11; Linux aarch64; rv:131.0) Gecko/20100101 Firefox/131.0";
+    storeHasSignedFeed();
+    const html = renderToStaticMarkup(await AiRoute());
+    expect(html).toContain(
+      'aria-label="Download for Linux, ARM64: 6529-ai_0.1.0_arm64.deb"'
+    );
+    // The switch opens on ARM64: its tab is the selected one.
+    expect(html).toMatch(/aria-selected="true"[^>]*>ARM64</);
+    expect(html).toMatch(/aria-selected="false"[^>]*>x86-64</);
+  });
+
+  it("show no stand-in where the app's screenshots will go", async () => {
+    storeHasSignedFeed();
+    for (const html of await renderAll()) {
+      expect(html).not.toContain("<figure");
+      expect(html).not.toMatch(/<img(?![^>]*\/(macos|windows|linux)\.png)/);
+    }
+  });
+
   it("ask a phone to open the page on a computer", async () => {
     mockUserAgent = IPHONE_UA;
     storeHasSignedFeed();

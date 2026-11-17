@@ -180,7 +180,7 @@ describe("groupAiReleaseFiles", () => {
           "6529-ai-0.1.0-linux-arm64-cpu.tar.gz",
         ],
       ],
-      ["checks", ["manifest.json", "SHA256SUMS", "SHA256SUMS.sig"]],
+      ["checks", ["SHA256SUMS", "SHA256SUMS.sig", "manifest.json"]],
     ]);
   });
 });
@@ -192,6 +192,9 @@ describe("describeCodeSignature", () => {
         "Developer ID Application: 6529 Collection LLC, notarized by Apple"
       )
     ).toEqual({ signer: "6529 Collection LLC", notarized: true });
+    expect(
+      describeCodeSignature("Developer ID Application: 6529 Collection LLC")
+    ).toEqual({ signer: "6529 Collection LLC", notarized: false });
     expect(describeCodeSignature("6529 Collection LLC")).toEqual({
       signer: "6529 Collection LLC",
       notarized: false,

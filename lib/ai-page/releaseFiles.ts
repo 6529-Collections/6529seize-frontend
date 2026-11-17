@@ -11,6 +11,14 @@ export type AiInstallerKind =
   | "linux-x64-cuda"
   | "linux-arm64";
 
+/** File names in code-unit order: technical names, not words to collate. */
+function compareNames(a: string, b: string): number {
+  if (a === b) {
+    return 0;
+  }
+  return a < b ? -1 : 1;
+}
+
 /** The groups of the downloads list. */
 export type AiFileFamily = "mac" | "windows" | "linux" | "checks";
 
@@ -178,7 +186,7 @@ export function groupAiReleaseFiles(release: AiRelease): AiReleaseDownloads {
     return index === -1 ? systemOrder.length : index;
   };
   others.sort(
-    (a, b) => rank(a) - rank(b) || a.file.name.localeCompare(b.file.name, "en")
+    (a, b) => rank(a) - rank(b) || compareNames(a.file.name, b.file.name)
   );
   const groups = FAMILY_ORDER.map((family) => ({
     family,
@@ -189,6 +197,10 @@ export function groupAiReleaseFiles(release: AiRelease): AiReleaseDownloads {
   })).filter((group) => group.entries.length > 0);
   return { installers, groups };
 }
+
+// How a Mac file's `signed` text begins and ends, in lower case.
+const DEVELOPER_ID = "developer id application:";
+const NOTARIZED = "notarized by apple";
 
 /**
  * The feed's `signed` text as the badges show it: who signed the file, and
@@ -202,11 +214,18 @@ export function describeCodeSignature(signed: string | null): {
   if (!signed) {
     return { signer: null, notarized: false };
   }
-  const notarized = /,?\s*notarized by Apple$/i.test(signed);
-  const signer = signed
-    .replace(/,?\s*notarized by Apple$/i, "")
-    .replace(/^Developer ID Application:\s*/i, "")
-    .trim();
+  let signer = signed.trim();
+  const notarized = signer.toLowerCase().endsWith(NOTARIZED);
+  if (notarized) {
+    signer = signer.slice(0, -NOTARIZED.length).trimEnd();
+    if (signer.endsWith(",")) {
+      signer = signer.slice(0, -1);
+    }
+  }
+  if (signer.toLowerCase().startsWith(DEVELOPER_ID)) {
+    signer = signer.slice(DEVELOPER_ID.length);
+  }
+  signer = signer.trim();
   return { signer: signer || null, notarized };
 }
 

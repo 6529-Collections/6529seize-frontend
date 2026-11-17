@@ -158,7 +158,7 @@ function windowsGuide(
       windowsOpenStep(release, setup),
       {
         text: "Keep the folder it suggests.",
-        result: "`C:\\Program Files\\6529 AI`",
+        result: "`" + String.raw`C:\Program Files\6529 AI` + "`",
       },
       {
         text: "Choose **No: 6529 AI alone on this computer**. Pick *Yes* only if this computer runs a 6529 validator.",
@@ -179,7 +179,7 @@ function windowsGuide(
     },
     log: {
       label: "Log file",
-      code: "%LOCALAPPDATA%\\6529-ai\\logs\\6529-ai.log",
+      code: String.raw`%LOCALAPPDATA%\6529-ai\logs\6529-ai.log`,
     },
     uninstall: {
       text: "Open **Settings**, **Apps**, choose **6529 AI** and **Uninstall**. It asks whether to delete your models too.",

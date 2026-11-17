@@ -40,7 +40,7 @@ export default function AiCodeBlock({
             text={t(LOCALE, "ai.code.copy")}
             copiedText={t(LOCALE, "ai.code.copied")}
             label={t(LOCALE, "ai.code.copyLabel", { what: copied })}
-            copiedLabel={t(LOCALE, "ai.code.copied")}
+            failedText={t(LOCALE, "ai.code.copyFailed")}
             plain
           />
         )}

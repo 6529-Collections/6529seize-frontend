@@ -78,10 +78,7 @@ export default function AiGuideSteps({
   readonly screenshots?: Readonly<Record<string, ReactNode>>;
 }) {
   return (
-    <ol
-      role="list"
-      className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-6 tw-p-0"
-    >
+    <ol className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-6 tw-p-0">
       {steps.map((step, index) => (
         <li key={step.text} className="tw-flex tw-flex-col tw-gap-3">
           <div className="tw-flex tw-gap-3 sm:tw-gap-4">
