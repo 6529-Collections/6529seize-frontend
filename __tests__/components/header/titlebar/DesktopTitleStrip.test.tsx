@@ -24,9 +24,13 @@ const createBridges = (
 ) => {
   const navListeners = new Set<Listener>();
   const updateListeners = new Set<Listener>();
+  const noUpdateListeners = new Set<Listener>();
+  const updateErrorListeners = new Set<Listener>();
   return {
     navListeners,
     updateListeners,
+    noUpdateListeners,
+    updateErrorListeners,
     navigation,
     api: {
       openExternal: jest.fn(),
@@ -51,8 +55,18 @@ const createBridges = (
       offUpdateAvailable: jest.fn((listener: Listener) =>
         updateListeners.delete(listener)
       ),
-      onUpdateNotAvailable: jest.fn(),
-      offUpdateNotAvailable: jest.fn(),
+      onUpdateNotAvailable: jest.fn((listener: Listener) =>
+        noUpdateListeners.add(listener)
+      ),
+      offUpdateNotAvailable: jest.fn((listener: Listener) =>
+        noUpdateListeners.delete(listener)
+      ),
+      onUpdateError: jest.fn((listener: Listener) =>
+        updateErrorListeners.add(listener)
+      ),
+      offUpdateError: jest.fn((listener: Listener) =>
+        updateErrorListeners.delete(listener)
+      ),
     },
   };
 };
@@ -321,8 +335,54 @@ describe("DesktopTitleStrip", () => {
     );
 
     expect(await screen.findByText("About 6529 Desktop")).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Check for updates" }));
+    const check = screen.getByRole("button", { name: "Check for updates" });
+    await user.click(check);
     expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(1);
+    act(() => {
+      for (const listener of bridges.updateListeners) {
+        listener({}, { version: "1.3.0" });
+      }
+    });
+    expect(
+      await screen.findByText("A new version of 6529 Desktop is available.")
+    ).toBeVisible();
+  });
+
+  it("shows a manual update check and its result, then allows a retry", async () => {
+    const user = userEvent.setup();
+    installDesktopShell();
+    render(<DesktopTitleStrip />);
+    await user.click(screen.getByRole("button", { name: "App info" }));
+    const check = await screen.findByRole("button", {
+      name: "Check for updates",
+    });
+
+    act(() => {
+      for (const listener of bridges.noUpdateListeners) listener({});
+    });
+    expect(screen.queryByText("No updates found.")).not.toBeInTheDocument();
+
+    bridges.updater.checkUpdates.mockImplementationOnce(() => {
+      for (const listener of bridges.noUpdateListeners) listener({});
+    });
+    await user.click(check);
+    expect(screen.getByText("Checking for updates…")).toBeVisible();
+    expect(check).toHaveAttribute("aria-disabled", "true");
+    await user.click(check);
+    expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(1);
+    expect(await screen.findByText("No updates found.")).toBeVisible();
+    expect(check).toHaveFocus();
+    expect(check).not.toHaveAttribute("aria-disabled");
+
+    await user.click(check);
+    act(() => {
+      for (const listener of bridges.updateErrorListeners) listener({});
+    });
+    expect(
+      await screen.findByText("Couldn’t check for updates. Try again.")
+    ).toBeVisible();
+    expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(2);
+    expect(check).not.toHaveAttribute("aria-disabled");
   });
 
   it("shares one history subscription and starts fresh after unmount", async () => {

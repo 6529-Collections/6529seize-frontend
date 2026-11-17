@@ -11,6 +11,7 @@ import {
 import {
   type KeyboardEvent,
   useEffect,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -30,6 +31,19 @@ interface AppInfo {
 }
 
 type CopyStatus = "idle" | "copied" | "failed";
+
+const UPDATE_CHECK_MESSAGES = {
+  checking: "desktop.appInfo.checkingUpdates",
+  current: "desktop.appInfo.noUpdates",
+  available: "desktopUpdate.available",
+  failed: "desktop.appInfo.checkFailed",
+} as const;
+
+type UpdateCheckStatus = "idle" | keyof typeof UPDATE_CHECK_MESSAGES;
+
+// The desktop host allows up to two minutes for release-feed requests.
+const UPDATE_CHECK_TIMEOUT_MS = 125_000;
+const UPDATE_CHECK_MIN_VISIBLE_MS = 350;
 
 /** The page's public address (the app itself runs on a local server). */
 const getPublicLink = (): string => {
@@ -144,6 +158,86 @@ const PLAIN = /^[\w.+-]{1,64}$/;
 const readText = (value: unknown): string | null =>
   typeof value === "string" && PLAIN.test(value) ? value : null;
 
+function DesktopUpdateCheck() {
+  const locale = useBrowserLocale();
+  const updater = getDesktopUpdater();
+  const [updateCheckStatus, setUpdateCheckStatus] =
+    useState<UpdateCheckStatus>("idle");
+  const stopCheck = useRef<(() => void) | null>(null);
+  const checkingForUpdates = updateCheckStatus === "checking";
+
+  useEffect(() => () => stopCheck.current?.(), []);
+
+  const checkForUpdates = () => {
+    if (!updater || stopCheck.current) return;
+    setUpdateCheckStatus("checking");
+
+    const startedAt = performance.now();
+    let resultTimer: ReturnType<typeof setTimeout> | undefined;
+    function finish(status: "current" | "available" | "failed") {
+      if (resultTimer !== undefined) return;
+      // A cached host reply can arrive before the checking state has painted.
+      const remaining =
+        UPDATE_CHECK_MIN_VISIBLE_MS - (performance.now() - startedAt);
+      resultTimer = setTimeout(
+        () => {
+          stopCheck.current?.();
+          setUpdateCheckStatus(status);
+        },
+        Math.max(0, remaining)
+      );
+    }
+    const onAvailable = () => finish("available");
+    const onNotAvailable = () => finish("current");
+    const onError = () => finish("failed");
+    const timeout = setTimeout(onError, UPDATE_CHECK_TIMEOUT_MS);
+
+    stopCheck.current = () => {
+      clearTimeout(timeout);
+      clearTimeout(resultTimer);
+      updater.offUpdateAvailable(onAvailable);
+      updater.offUpdateNotAvailable(onNotAvailable);
+      updater.offUpdateError(onError);
+      stopCheck.current = null;
+    };
+
+    updater.onUpdateAvailable(onAvailable);
+    updater.onUpdateNotAvailable(onNotAvailable);
+    updater.onUpdateError(onError);
+    try {
+      updater.checkUpdates();
+    } catch {
+      onError();
+    }
+  };
+
+  if (!updater) return null;
+
+  return (
+    <>
+      <button
+        type="button"
+        className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black aria-disabled:tw-cursor-wait aria-disabled:tw-opacity-70 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        aria-disabled={checkingForUpdates || undefined}
+        onClick={checkForUpdates}
+      >
+        {t(locale, "desktop.appInfo.checkUpdates")}
+      </button>
+      <output
+        aria-live="polite"
+        aria-atomic="true"
+        className="tw-block tw-px-4 tw-text-center tw-text-sm tw-text-iron-200"
+      >
+        {updateCheckStatus !== "idle" && (
+          <span className="tw-block tw-pt-3">
+            {t(locale, UPDATE_CHECK_MESSAGES[updateCheckStatus])}
+          </span>
+        )}
+      </output>
+    </>
+  );
+}
+
 /**
  * The 6529 Desktop title strip: the window's draggable top bar. The page
  * asks for it with `<meta name="6529-desktop-titlebar">` (app/layout.tsx);
@@ -237,7 +331,6 @@ export default function DesktopTitleStrip() {
   const infoLabel = updateAvailable
     ? t(locale, "desktop.titleStrip.appInfoUpdate")
     : t(locale, "desktop.titleStrip.appInfo");
-  const updater = getDesktopUpdater();
   const backLabel = t(locale, "desktop.titleStrip.back");
   const forwardLabel = t(locale, "desktop.titleStrip.forward");
   const refreshLabel = t(locale, "desktop.titleStrip.refresh");
@@ -375,25 +468,21 @@ export default function DesktopTitleStrip() {
         title={t(locale, "desktop.appInfo.title")}
         onClose={() => setShowInfo(false)}
       >
-        <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_1fr] tw-gap-x-4 tw-gap-y-2 tw-pb-4 tw-text-sm">
-          <dt className="tw-text-iron-400">
-            {t(locale, "desktop.appInfo.version")}
-          </dt>
-          <dd className="tw-m-0 tw-text-iron-50">{info.version ?? "-"}</dd>
-          <dt className="tw-text-iron-400">
-            {t(locale, "desktop.appInfo.environment")}
-          </dt>
-          <dd className="tw-m-0 tw-text-iron-50">{info.environment ?? "-"}</dd>
-        </dl>
-        {updater && (
-          <button
-            type="button"
-            className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            onClick={() => updater.checkUpdates()}
-          >
-            {t(locale, "desktop.appInfo.checkUpdates")}
-          </button>
-        )}
+        <div className="tw-flex tw-flex-col tw-px-4 tw-pt-3 sm:tw-px-6">
+          <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_1fr] tw-gap-x-4 tw-gap-y-2 tw-pb-4 tw-text-sm">
+            <dt className="tw-text-iron-400">
+              {t(locale, "desktop.appInfo.version")}
+            </dt>
+            <dd className="tw-m-0 tw-text-iron-50">{info.version ?? "-"}</dd>
+            <dt className="tw-text-iron-400">
+              {t(locale, "desktop.appInfo.environment")}
+            </dt>
+            <dd className="tw-m-0 tw-text-iron-50">
+              {info.environment ?? "-"}
+            </dd>
+          </dl>
+          <DesktopUpdateCheck />
+        </div>
       </MobileWrapperDialog>
     </>
   );
