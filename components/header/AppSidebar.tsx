@@ -83,7 +83,26 @@ export default function AppSidebar({
   const sections = useSidebarSections(appWalletsSupported, hideNftPurchasing);
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const pendingSignOut = useRef<(() => void) | null>(null);
   useAndroidBackLayer(open, dialogRef, handleClose);
+
+  const handleSignOut = (signOut: () => void) => {
+    // Keep the first request until the drawer releases its backdrop and focus trap.
+    pendingSignOut.current ??= signOut;
+    handleClose();
+  };
+
+  const finishClosing = () => {
+    const signOut = pendingSignOut.current;
+    pendingSignOut.current = null;
+    if (!open) {
+      signOut?.();
+    }
+  };
+
+  const clearPendingSignOut = () => {
+    pendingSignOut.current = null;
+  };
 
   const menu = useMemo(() => {
     const sectionMap = new Map(
@@ -187,7 +206,13 @@ export default function AppSidebar({
   }, [open, handleClose]);
 
   return (
-    <Transition appear show={open} as={Fragment}>
+    <Transition
+      appear
+      show={open}
+      as={Fragment}
+      beforeEnter={clearPendingSignOut}
+      afterLeave={finishClosing}
+    >
       <Dialog
         ref={dialogRef}
         as="div"
@@ -227,7 +252,10 @@ export default function AppSidebar({
                     <AppSidebarMenuItems menu={menu} onNavigate={handleClose} />
                   </div>
                   <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-2 tw-pt-6">
-                    <AppUserConnect onNavigate={handleClose} />
+                    <AppUserConnect
+                      onNavigate={handleClose}
+                      onSignOut={handleSignOut}
+                    />
                   </div>
                 </div>
               </nav>
