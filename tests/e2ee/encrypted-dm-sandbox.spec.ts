@@ -172,7 +172,11 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     baseURL,
     browser,
   }, testInfo) => {
-    test.skip(testInfo.project.name !== "web-mobile-chromium");
+    test.skip(
+      // NOSONAR -- This shared spec runs the iPhone setup regression in its mobile project.
+      testInfo.project.name !== "web-mobile-chromium",
+      "The test uses a simulated iPhone bridge and the mobile viewport."
+    );
     const users = await resetE2eeSandbox(baseURL);
     const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
     sessions.push(alice);

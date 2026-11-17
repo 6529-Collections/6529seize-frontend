@@ -383,7 +383,9 @@ export async function processInbox(ctx: EngineContext): Promise<boolean> {
   const welcomes = await ctx.api.getWelcomes(ownDeviceKey(ctx));
   let complete = true;
   for (const welcome of welcomes) {
-    if (!(await handleWelcome(ctx, welcome))) complete = false;
+    // Each Welcome may change the shared MLS state before the next one.
+    const resolved = await handleWelcome(ctx, welcome); // NOSONAR
+    if (!resolved) complete = false;
   }
   return complete;
 }
