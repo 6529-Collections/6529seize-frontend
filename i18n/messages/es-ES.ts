@@ -38,6 +38,8 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.jso
 
 export const ES_ES_MESSAGES = {
   "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
+  "waves.discovery.activeSubmissions.one": "{count} propuesta activa",
+  "waves.discovery.activeSubmissions.other": "{count} propuestas activas",
   "waves.historyGap.load": "Cargar más mensajes",
   "waves.historyGap.loaded": "Más mensajes cargados",
   "waves.historyGap.loading": "Cargando más mensajes…",

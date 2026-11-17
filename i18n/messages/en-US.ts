@@ -5608,6 +5608,8 @@ export const EN_US_ROOT_MESSAGES = {
   "waves.discovery.votingOpen": "Voting open",
   "waves.discovery.votingEnds": "Voting ends {date}",
   "waves.discovery.nextDecision": "Next result {date}",
+  "waves.discovery.activeSubmissions.one": "{count} active submission",
+  "waves.discovery.activeSubmissions.other": "{count} active submissions",
   "waves.discovery.emptyVotes": "No active TDH votes right now.",
   "waves.discovery.emptyRecommendations": "No recommendations right now.",
   "waves.discovery.loadingRecommendations": "Loading recommendations…",

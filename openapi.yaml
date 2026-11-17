@@ -22251,12 +22251,11 @@ paths:
       description: >-
         Lists readable, non-DM voting waves using TDH, TDH_PLUS_XTDH or
         CARD_SET_TDH, regardless of follow or pin status. Excludes upcoming,
-        ended and completed voting and unresolved decisions. Waves with
-        proposals open for voting come first. Within each group, orders by the
-        nearest voting end or next decision, then open-ended waves, with a
-        stable wave ID tie-breaker. Wave and parent visibility apply before
-        counting and pagination. Personal voting eligibility depends on each
-        wave's voting rules.
+        ended and completed voting and unresolved decisions. Main Stage comes
+        first when eligible, followed by descending total Wave REP with a stable
+        wave ID tie-breaker. Approval waves include their active submission
+        count. Wave and parent visibility apply before counting and pagination.
+        Personal voting eligibility depends on each wave's voting rules.
       operationId: getActiveWaveVotes
       x-6529-router:
         enabled: true
@@ -23730,6 +23729,13 @@ components:
           type: integer
           format: int64
           nullable: true
+        active_submission_count:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Number of submissions open for voting, present only for approval
+            waves.
     ApiActiveWaveVotesPage:
       type: object
       required:

@@ -1,4 +1,4 @@
-import { getActiveWaveVoteDeadlineLabel } from "@/components/waves/discovery/active-wave-vote.helpers";
+import { getActiveWaveVoteLabel } from "@/components/waves/discovery/active-wave-vote.helpers";
 import type { ApiActiveWaveVote } from "@/generated/models/ApiActiveWaveVote";
 import { LOCAL_DISPLAY_TIME_ZONE } from "@/lib/display-time-zone/displayTimeZone";
 import { mockDefaultTimeZone } from "../../../utils/timeZoneHydration";
@@ -13,15 +13,31 @@ const vote = (end: number | null, decision: number | null): ApiActiveWaveVote =>
     next_decision_at: decision,
   }) as ApiActiveWaveVote;
 
-describe("getActiveWaveVoteDeadlineLabel", () => {
+describe("getActiveWaveVoteLabel", () => {
+  it.each([
+    [0, "0 active submissions"],
+    [1, "1 active submission"],
+    [1234, "1,234 active submissions"],
+  ] as const)(
+    "formats %i active submissions instead of a deadline",
+    (count, label) => {
+      expect(
+        getActiveWaveVoteLabel(
+          { ...vote(DEADLINE, null), active_submission_count: count },
+          "en-US"
+        )
+      ).toBe(label);
+    }
+  );
+
   it("keeps the device-zone label unchanged when the zone is local", () => {
     const restoreUtc = mockDefaultTimeZone("UTC");
     try {
+      expect(getActiveWaveVoteLabel(vote(DEADLINE, null), "en-US")).toMatch(
+        /^Voting ends Jan 1, 11:59\sPM$/
+      );
       expect(
-        getActiveWaveVoteDeadlineLabel(vote(DEADLINE, null), "en-US")
-      ).toMatch(/^Voting ends Jan 1, 11:59\sPM$/);
-      expect(
-        getActiveWaveVoteDeadlineLabel(
+        getActiveWaveVoteLabel(
           vote(DEADLINE, null),
           "en-US",
           LOCAL_DISPLAY_TIME_ZONE
@@ -34,7 +50,7 @@ describe("getActiveWaveVoteDeadlineLabel", () => {
     const restore = mockDefaultTimeZone("America/Los_Angeles");
     try {
       expect(
-        getActiveWaveVoteDeadlineLabel(
+        getActiveWaveVoteLabel(
           vote(null, DEADLINE),
           "en-US",
           LOCAL_DISPLAY_TIME_ZONE
@@ -49,7 +65,7 @@ describe("getActiveWaveVoteDeadlineLabel", () => {
     const restore = mockDefaultTimeZone("Asia/Dubai");
     try {
       expect(
-        getActiveWaveVoteDeadlineLabel(vote(DEADLINE, null), "en-US", {
+        getActiveWaveVoteLabel(vote(DEADLINE, null), "en-US", {
           timeZone: "UTC",
           isLocal: false,
         })
@@ -61,7 +77,7 @@ describe("getActiveWaveVoteDeadlineLabel", () => {
 
   it("flips the day at the display zone's midnight", () => {
     expect(
-      getActiveWaveVoteDeadlineLabel(vote(null, DEADLINE), "en-US", {
+      getActiveWaveVoteLabel(vote(null, DEADLINE), "en-US", {
         timeZone: "Asia/Dubai",
         isLocal: false,
       })
@@ -70,7 +86,7 @@ describe("getActiveWaveVoteDeadlineLabel", () => {
 
   it("still reports an open vote without a deadline", () => {
     expect(
-      getActiveWaveVoteDeadlineLabel(vote(null, null), "en-US", {
+      getActiveWaveVoteLabel(vote(null, null), "en-US", {
         timeZone: "UTC",
         isLocal: false,
       })
