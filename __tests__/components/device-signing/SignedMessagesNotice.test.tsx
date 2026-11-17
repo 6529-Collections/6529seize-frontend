@@ -224,7 +224,7 @@ describe("SignedMessagesNotice", () => {
 
       expect(
         screen.getByRole("region", {
-          name: "Turn on Signed Posts (one signature)",
+          name: "Turn on signed posts",
         })
       ).toBeVisible();
       expect(screen.queryByRole("button", { name: "Turn on again" })).toBeNull();
