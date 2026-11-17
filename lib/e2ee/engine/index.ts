@@ -92,6 +92,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
       createSelfGroup: () =>
         createConversation(ctx, { profileIds: [], kind: "self" }, () => {}),
       leaveThisDevice: (g) => leaveThisDevice(ctx, g),
+      maintain: (g) => {
+        this.background(() => this.controller.maintain(g));
+      },
     });
     ctx.readSync = this.readSync;
     this.controller = new EngineController(ctx, {
@@ -206,10 +209,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (!this.ctx.device?.registered || this.ctx.disposed) {
       return;
     }
+    const listed = new Map(this.ctx.ownKeyPackages);
     const result = await refreshMe(this.ctx);
     if (this.isDisposed()) {
       return;
     }
+    this.readSync.siblingKeyPackagesChanged(listed);
     if (result.ownRevocation === "verified") {
       await this.wipe();
     } else if (result.ownRevocation === "unverified") {

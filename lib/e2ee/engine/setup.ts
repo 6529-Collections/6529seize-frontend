@@ -77,6 +77,7 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
     persistChain: Promise.resolve(),
     disposed: false,
     lastMeAt: 0,
+    ownKeyPackages: new Map(),
     lastWakeAt: 0,
     openConversation: null,
     openUntil: 0,

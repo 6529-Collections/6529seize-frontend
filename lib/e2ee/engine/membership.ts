@@ -359,7 +359,7 @@ export async function createConversation(
     input.kind === "dm" || input.requireAllRecipients === true
   );
   const packages =
-    input.kind === "self" ? selfGroupPackages(ctx, claimed) : claimed;
+    input.kind === "self" ? await selfGroupPackages(ctx, claimed) : claimed;
   const runtime = await createLocalGroup(ctx, metadata, predecessorG);
   const failure = await commitAdds(ctx, g, packages, () => {
     onDelayed(g);

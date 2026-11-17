@@ -120,6 +120,8 @@ interface ReadSyncDeps {
   createSelfGroup: () => Promise<string>;
   /** Removes only this device from a group (an older self group). */
   leaveThisDevice: (g: string) => Promise<void>;
+  /** Runs a group's maintenance now, in the background. */
+  maintain: (g: string) => void;
 }
 
 export class ReadSync implements ReadSyncHooks {
@@ -454,6 +456,34 @@ export class ReadSync implements ReadSyncHooks {
     runtime.record.readSeq = seq;
     this.recount.add(runtime.record.g);
     this.scheduleApply();
+  }
+
+  /**
+   * P60 §2 rule 6: a sibling replaced its last-resort KeyPackage, as a
+   * client updated to self groups does at once. While it is not in the
+   * canonical self group, maintain that group now rather than at its next
+   * pass: the claim-through there can add it.
+   */
+  siblingKeyPackagesChanged(
+    previous: ReadonlyMap<string, number | null>
+  ): void {
+    const own = this.ctx.device?.deviceKey;
+    const canonical = canonicalSelfGroup(this.ctx);
+    if (!own || !canonical) {
+      return;
+    }
+    const isMember = (key: string) =>
+      canonical.record.members.some((member) => member.deviceKey === key);
+    const changed = [...this.ctx.ownKeyPackages].some(
+      ([key, expiry]) =>
+        key !== own &&
+        previous.has(key) &&
+        previous.get(key) !== expiry &&
+        !isMember(key)
+    );
+    if (changed && isMember(own)) {
+      this.deps.maintain(canonical.record.g);
+    }
   }
 
   devicesAdded(g: string): void {
