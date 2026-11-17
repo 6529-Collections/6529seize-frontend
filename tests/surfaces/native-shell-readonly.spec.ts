@@ -342,6 +342,54 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     }
   });
 
+  test("NextGen order links keep the active tab in sync with the URL", async ({
+    page,
+  }, testInfo) => {
+    const path = "/nextgen/token/10000000315";
+    const provenancePath = path + "/provenance";
+    const order = "0x" + "1".repeat(64);
+    await gotoReady(page, provenancePath + "?order=" + order + "&locale=en-US");
+    const tokenTabs = page
+      .getByRole("main")
+      .getByRole("navigation", { name: / sections$/ })
+      .filter({
+        has: page.getByRole("button", { name: "Provenance", exact: true }),
+      });
+    const about = tokenTabs.getByRole("button", { name: "About", exact: true });
+    const provenance = tokenTabs.getByRole("button", {
+      name: "Provenance",
+      exact: true,
+    });
+
+    if (testInfo.project.name !== "capacitor-ios-sim") {
+      await expectUrlState(
+        page,
+        (url) =>
+          url.pathname === provenancePath &&
+          url.searchParams.get("order") === order
+      );
+      await expect(provenance).toHaveAttribute("aria-current", "page");
+      return;
+    }
+
+    await expectUrlState(
+      page,
+      (url) =>
+        url.pathname === path &&
+        !url.searchParams.has("order") &&
+        url.searchParams.get("locale") === "en-US"
+    );
+    await expect(about).toHaveAttribute("aria-current", "page");
+
+    await provenance.click();
+    await expectUrlState(page, (url) => url.pathname === provenancePath);
+    await expect(provenance).toHaveAttribute("aria-current", "page");
+
+    await page.goBack();
+    await expectUrlState(page, (url) => url.pathname === path);
+    await expect(about).toHaveAttribute("aria-current", "page");
+  });
+
   test("Collect Back restores the Collected filters and source action", async ({
     page,
   }, testInfo) => {

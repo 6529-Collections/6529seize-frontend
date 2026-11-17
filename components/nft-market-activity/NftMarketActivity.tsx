@@ -540,13 +540,15 @@ export default function NftMarketActivity({
   const historyStartedAt = query.data?.pages[0]?.market_history_started_at;
 
   const hasEvents = events.length > 0;
-  const initialError = query.isLoadingError;
+  const showRetry =
+    query.isLoadingError ||
+    (query.isRefetchError && !hasEvents && !query.hasNextPage);
   const isEmpty =
-    !query.isPending && !initialError && !hasEvents && !query.hasNextPage;
+    !query.isPending && !showRetry && !hasEvents && !query.hasNextPage;
   let statusMessage = "";
   if (query.isPending) {
     statusMessage = t(locale, "nftActivity.loading");
-  } else if (initialError) {
+  } else if (showRetry) {
     statusMessage = t(locale, "nftActivity.error");
   } else if (isEmpty) {
     statusMessage = t(locale, "nftActivity.empty");
@@ -567,7 +569,7 @@ export default function NftMarketActivity({
           {t(locale, "nftActivity.loading")}
         </p>
       )}
-      {initialError && (
+      {showRetry && (
         <div
           role="alert"
           className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-py-5 tw-text-error"

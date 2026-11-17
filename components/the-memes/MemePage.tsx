@@ -8,12 +8,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { mainnet } from "viem/chains";
 
-import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
-import { MemeSubscriptionAwarenessRowSpace } from "@/components/home/now-minting/MemeSubscriptionAwarenessRow";
-import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
-import NowMintingCountdownLoading from "@/components/home/now-minting/NowMintingCountdownLoading";
 import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import Button from "@/components/utils/button/Button";
@@ -41,6 +36,7 @@ import NftNavigation from "../nft-navigation/NftNavigation";
 import NftDetailTabSection from "../nft-navigation/NftDetailTabSection";
 import MemeCalendarPeriods from "./MemeCalendarPeriods";
 import { MemePageArtViewer } from "./MemePageArtViewer";
+import MemePageMintSlot from "./MemePageMintSlot";
 import { MemePageTabButton } from "./MemePageTabButton";
 import NftArtworkShareButton from "@/components/artwork-share/NftArtworkShareButton";
 import { MemePageLiveRightMenu, MemePageLiveSubMenu } from "./MemePageLive";
@@ -483,28 +479,11 @@ export default function MemePage({
           )}
         </div>
         <div className={detailsColumnClassName}>
-          {reserveMintingBox && (
-            <div
-              aria-hidden="true"
-              className="tw-invisible tw-w-full tw-space-y-3"
-            >
-              <NowMintingCountdownLoading />
-              <MemeSubscriptionAwarenessRowSpace />
-            </div>
-          )}
-          {showMintingBox && (
-            <div className="tw-w-full tw-space-y-3">
-              <NowMintingCountdown
-                nftId={nft.id}
-                contract={MEMES_CONTRACT}
-                chainId={mainnet.id}
-                fullWidth
-              />
-              <LatestDropNextMintSubscribe
-                tokenId={nft.id}
-                statusSource="none"
-              />
-            </div>
+          {hasMintingBox && (
+            <MemePageMintSlot
+              tokenId={nft.id}
+              reserveSpace={reserveMintingBox}
+            />
           )}
           <MemePageLiveRightMenu
             show={true}

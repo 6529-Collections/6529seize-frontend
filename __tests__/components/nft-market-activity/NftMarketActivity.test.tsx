@@ -5,7 +5,13 @@ import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useNFTCollections } from "@/hooks/useNFTCollections";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type React from "react";
 
@@ -39,11 +45,14 @@ function renderFeed(
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return render(
-    <QueryClientProvider client={client}>
-      <NftMarketActivity {...props} />
-    </QueryClientProvider>
-  );
+  return {
+    ...render(
+      <QueryClientProvider client={client}>
+        <NftMarketActivity {...props} />
+      </QueryClientProvider>
+    ),
+    client,
+  };
 }
 
 function marketEvent(overrides: Record<string, unknown> = {}) {
@@ -138,6 +147,33 @@ describe("NftMarketActivity", () => {
     expect(
       screen.queryByText("Offer", { exact: true })
     ).not.toBeInTheDocument();
+  });
+
+  it("can retry when refreshing an empty feed fails", async () => {
+    mockFetch
+      .mockResolvedValueOnce({ data: [], next: null })
+      .mockRejectedValueOnce(new Error("Unavailable"))
+      .mockResolvedValueOnce({
+        data: [marketEvent({ kind: "transaction", action: "sale" })],
+        next: null,
+      });
+
+    const { client } = renderFeed();
+    await screen.findByText("No NFT activity found.", { selector: "p" });
+
+    await act(() => client.refetchQueries());
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Could not load NFT activity."
+    );
+    expect(
+      screen.queryByText("No NFT activity found.", { selector: "p" })
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(
+      await screen.findByText("Sold", { exact: true })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("renders an off-chain cancellation with linked NFT metadata", async () => {
