@@ -101,7 +101,11 @@ async function post(
   }
   await input.press("Enter");
   const message = mentionHandle
-    ? page.locator("[data-drop-serial-no]").filter({ hasText: text }).last()
+    ? page
+        .getByRole("main")
+        .locator("[data-drop-serial-no]")
+        .filter({ hasText: text })
+        .last()
     : page.getByText(text, { exact: true }).last();
   const signedPosts = page.getByRole("dialog", { name: "Enable Signed Posts" });
   await expect(message.or(signedPosts).first()).toBeVisible({
@@ -344,6 +348,7 @@ test.describe("Live wave unread state between real users on staging @large", () 
     await expect(inbox).toBeHidden();
     await expect(
       b.page
+        .getByRole("main")
         .locator(
           `[data-wave-drops-scroll-container] [data-drop-serial-no="${serialNo}"]`
         )

@@ -10,8 +10,8 @@ If not, chat loads history around that serial and retries.
 The target drop gets a temporary highlight.
 When `serialNo` parses as a valid number, chat treats `serialNo` and `divider`
 as one-time setup values and removes them from the URL without reopening chat.
-The selected post stays in view as loading finishes or new messages arrive.
-Scroll or use the bottom arrow to leave that position.
+The selected post stays mounted and in view as loading finishes or new messages arrive.
+Scrolling, interacting with chat, or starting another jump releases that position.
 
 ## Location in the Site
 

@@ -24,6 +24,7 @@ const SCROLL_OPERATION_TIMEOUT = 30000;
 const TARGET_RENDER_TIMEOUT = 15000;
 const TARGET_RENDER_POLL_MS = 100;
 const INSTANT_SCROLL_RETRY_MS = 450;
+const CACHED_JUMP_OVERLAY_DELAY_MS = 250;
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -178,6 +179,7 @@ export const useWaveDropsSerialScroll = ({
         },
       });
       scrollAnchorRef.current = anchor;
+      // Keep this single row mounted while the anchor is responsible for it.
       setAnchoredSerialNo(serialNo);
       return anchor;
     },
@@ -272,7 +274,7 @@ export const useWaveDropsSerialScroll = ({
       if (
         !(row instanceof HTMLDivElement) ||
         !container.contains(row) ||
-        !row.firstElementChild?.hasAttribute("data-wave-drop-content")
+        !row.querySelector("[data-wave-drop-content]")
       ) {
         return null;
       }
@@ -336,11 +338,9 @@ export const useWaveDropsSerialScroll = ({
               target,
             });
           }
-          if (
-            !anchor?.isActive() ||
-            isElementVisibleInContainer({ container, target })
-          )
-            return;
+          // Reader input releases the anchor and cancels any remaining retries.
+          if (!anchor?.isActive()) return;
+          if (isElementVisibleInContainer({ container, target })) return;
 
           const elapsed = Date.now() - scrollStartedAt;
           if (elapsed >= INSTANT_SCROLL_RETRY_MS && !retriedInstantly) {
@@ -397,9 +397,18 @@ export const useWaveDropsSerialScroll = ({
       (drop) => drop.serial_no === serialTarget && drop.type === DropSize.FULL
     );
     setIsScrolling(needsHistory);
+    const overlayTimeoutId = needsHistory
+      ? undefined
+      : globalThis.setTimeout(() => {
+          if (!signal.aborted) setIsScrolling(true);
+        }, CACHED_JUMP_OVERLAY_DELAY_MS);
 
-    const finish = () => {
+    const clearTimers = () => {
       globalThis.clearTimeout(timeoutId);
+      globalThis.clearTimeout(overlayTimeoutId);
+    };
+    const finish = () => {
+      clearTimers();
       if (pendingScrollRef.current !== requestedScroll) return;
       pendingScrollRef.current = null;
       setSerialTarget((current) => (current === serialTarget ? null : current));
@@ -435,9 +444,7 @@ export const useWaveDropsSerialScroll = ({
         finish();
       }
     };
-    signal.addEventListener("abort", () => globalThis.clearTimeout(timeoutId), {
-      once: true,
-    });
+    signal.addEventListener("abort", clearTimers, { once: true });
     void scroll();
   }, [
     init,

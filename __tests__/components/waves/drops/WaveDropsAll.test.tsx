@@ -1556,6 +1556,30 @@ describe("WaveDropsAll", () => {
       });
     });
 
+    it("shows progress when a cached target takes time to come into view", async () => {
+      setupMocks({
+        waveMessages: { drops: [createMockDrop({ serial_no: 10 })] },
+      });
+      renderComponent({ initialDrop: 10 });
+      expect(screen.getByTestId("scrolling-overlay")).not.toBeVisible();
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(300);
+      });
+      expect(screen.getByTestId("scrolling-overlay")).toBeVisible();
+      expect(mockFetchNextPage).not.toHaveBeenCalled();
+
+      const container = mockScrollContainerRef.current;
+      const target = createRenderedTarget();
+      container.getBoundingClientRect = () => new DOMRect(0, 0, 300, 400);
+      target.getBoundingClientRect = () => new DOMRect(0, 120, 300, 60);
+      container.appendChild(target);
+      dropsProps.targetDropRef.current = target;
+      await waitFor(() =>
+        expect(screen.getByTestId("scrolling-overlay")).not.toBeVisible()
+      );
+      expect(dropsProps.pinnedSerialNo).toBe(10);
+    });
+
     it.each([true, false])(
       "keeps hydration suspended until scrolling settles (smooth reaches target: %s)",
       async (smoothReachesTarget) => {

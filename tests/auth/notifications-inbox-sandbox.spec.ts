@@ -263,8 +263,12 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     const mention = inbox
       .getByRole("link")
       .filter({ hasText: "sandbox-alice mentioned you" });
-    const chat = page.locator("[data-wave-drops-scroll-container]");
-    const jumpLoader = chat
+    const chat = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]");
+    const jumpLoader = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]")
       .locator("..")
       .locator(':scope > div > div > svg[role="status"].tw-w-10');
     try {
