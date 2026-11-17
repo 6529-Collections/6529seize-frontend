@@ -1,3 +1,5 @@
+import { readDesktopSiteUrl } from "@/lib/desktop/updateDownloadPage";
+
 /**
  * 6529 Desktop's update state, as the app reports it (`updater.getState()`
  * and the `update-state` event, from auto-installing builds). The app owns
@@ -48,9 +50,21 @@ export interface DesktopUpdateState {
   readonly checkedAt: number | null;
   /** Extra sentence after the headline (U4: automatic updates are off). */
   readonly note: string | null;
+  /** The offered release's notes (plain text, may span lines), or null. */
+  readonly releaseNotes: string | null;
+  /** Where the offered release's notes are on 6529.io (https), or null. */
+  readonly notesUrl: string | null;
+  /**
+   * Whether the person must update (the running build is listed unsafe or
+   * below the minimum). Null from builds that do not report it.
+   */
+  readonly mustUpdate: boolean | null;
+  readonly mustUpdateWhy: "unsafe" | "below_minimum" | null;
 }
 
 const MAX_TEXT = 400;
+/** The release list caps notes at 1,000 bytes. */
+const MAX_NOTES_BYTES = 1000;
 const MAX_LABEL = 40;
 const VERSION = /^[\w.+-]{1,64}$/;
 /** Words from the app are drawn as text; controls and line breaks are refused. */
@@ -77,6 +91,21 @@ export function readDesktopUpdateText(
     ? text
     : null;
 }
+
+/** Notes from the list: plain text, line breaks allowed, other controls not. */
+function readNotes(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const text = value.trim();
+  if (
+    text.length === 0 ||
+    new TextEncoder().encode(text).length > MAX_NOTES_BYTES
+  ) {
+    return null;
+  }
+  return text.split("\n").every((line) => !hasControl(line)) ? text : null;
+}
+
+const MUST_UPDATE_WHY = ["unsafe", "below_minimum"] as const;
 
 const readVersion = (value: unknown): string | null =>
   typeof value === "string" && VERSION.test(value) ? value : null;
@@ -131,15 +160,31 @@ export function parseDesktopUpdateState(
     ),
     checkedAt: readSeconds(value["checkedAt"]),
     note: readDesktopUpdateText(value["note"], MAX_TEXT),
+    releaseNotes: readNotes(value["releaseNotes"]),
+    notesUrl: readDesktopSiteUrl(value["notesUrl"]),
+    mustUpdate:
+      typeof value["mustUpdate"] === "boolean" ? value["mustUpdate"] : null,
+    mustUpdateWhy: (MUST_UPDATE_WHY as readonly unknown[]).includes(
+      value["mustUpdateWhy"]
+    )
+      ? (value["mustUpdateWhy"] as "unsafe" | "below_minimum")
+      : null,
   };
 }
 
 /** How a state looks (release standard R54). */
 type DesktopUpdateTone = "quiet" | "warning" | "alert";
 
-export function desktopUpdateTone(id: DesktopUpdateStateId): DesktopUpdateTone {
-  if (id === "U5" || id === "U12") return "alert";
-  if (id === "U11" || id === "U14") return "warning";
+export function desktopUpdateTone(
+  state: Pick<DesktopUpdateState, "id" | "mustUpdate">
+): DesktopUpdateTone {
+  // Builds that report it: red only when the person must act (R54).
+  if (state.mustUpdate !== null) {
+    if (state.mustUpdate) return "alert";
+  } else if (state.id === "U5" || state.id === "U12") {
+    return "alert";
+  }
+  if (state.id === "U11" || state.id === "U14") return "warning";
   return "quiet";
 }
 

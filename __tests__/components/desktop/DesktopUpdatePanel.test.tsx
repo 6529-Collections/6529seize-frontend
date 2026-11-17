@@ -175,7 +175,9 @@ describe("DesktopUpdatePanel", () => {
     await userEvent.click(screen.getByRole("button", { name: "Update now" }));
     expect(updater.downloadUpdate).toHaveBeenCalledTimes(1);
     await userEvent.click(
-      screen.getByRole("button", { name: "Release notes for 0.1.0-rc.4" })
+      screen.getByRole("button", {
+        name: "Release notes for 0.1.0-rc.4 on 6529.io",
+      })
     );
     expect(openExternal).toHaveBeenCalledWith(
       "https://6529.io/desktop/releases#0.1.0-rc.4"
@@ -311,6 +313,60 @@ describe("DesktopUpdatePanel", () => {
     );
   });
 
+  it("shows the release notes before installing, linked to their page", async () => {
+    installAutoHost(STATES.U4);
+    const withNotes = parseDesktopUpdateState({
+      ...STATES.U4,
+      releaseNotes: "Faster waves.\nFixes the update notice.",
+      notesUrl: "https://6529.io/desktop/releases#0.1.0-rc.4-notes",
+    });
+    render(<DesktopUpdatePanel state={withNotes!} locale="en-US" />);
+    expect(
+      screen.getByRole("heading", { name: "What's in 0.1.0-rc.4" })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Faster waves\./)).toBeInTheDocument();
+    await userEvent.click(
+      screen.getByRole("button", {
+        name: "Release notes for 0.1.0-rc.4 on 6529.io",
+      })
+    );
+    expect(openExternal).toHaveBeenCalledWith(
+      "https://6529.io/desktop/releases#0.1.0-rc.4-notes"
+    );
+  });
+
+  it("does not offer Try again after a release went back", () => {
+    installAutoHost(STATES.U11);
+    const wentBack = parseDesktopUpdateState({
+      ...STATES.U11,
+      state: "went_back",
+      headline:
+        "0.1.0-rc.4 didn't run properly, so 6529 Desktop went back to 0.1.0-rc.3.",
+    });
+    render(<DesktopUpdatePanel state={wentBack!} locale="en-US" />);
+    expect(
+      screen.queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Check now" })).toBeVisible();
+  });
+
+  it("says the app took Try again, and shows its wait as a refusal", async () => {
+    installAutoHost(STATES.U11);
+    render(<DesktopUpdatePanel state={parsed("U11")} locale="en-US" />);
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "6529 Desktop is checking the release list."
+    );
+    updater.downloadUpdate.mockRejectedValueOnce(
+      "The last download failed. Try again after 2027-01-15 08:11 UTC."
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The last download failed. Try again after 2027-01-15 08:11 UTC."
+    );
+    expect(updater.downloadUpdate).toHaveBeenCalledTimes(2);
+  });
+
   it("offers Try again after a failed update", async () => {
     installAutoHost(STATES.U11);
     render(<DesktopUpdatePanel state={parsed("U11")} locale="en-US" />);
@@ -426,6 +482,28 @@ describe("DesktopUpdateNotice in a build that installs its own updates", () => {
     expect(await screen.findByRole("region")).toHaveTextContent(
       "Downloading 0.1.0-rc.4"
     );
+  });
+
+  it("offers Not now on a plain urgent update, not on one the person must install", async () => {
+    installAutoHost({ ...STATES.U5, mustUpdate: false, mustUpdateWhy: null });
+    const { unmount } = render(<DesktopUpdateNotice />);
+    expect(
+      await screen.findByRole("button", { name: "Not now" })
+    ).toBeInTheDocument();
+    unmount();
+    __resetDesktopAutoUpdateForTests();
+    installAutoHost({
+      ...STATES.U5,
+      mustUpdate: true,
+      mustUpdateWhy: "below_minimum",
+    });
+    render(<DesktopUpdateNotice />);
+    expect(await screen.findByRole("region")).toHaveTextContent(
+      "is an urgent update"
+    );
+    expect(
+      screen.queryByRole("button", { name: "Not now" })
+    ).not.toBeInTheDocument();
   });
 
   it("keeps an urgent update on screen (no Not now)", async () => {

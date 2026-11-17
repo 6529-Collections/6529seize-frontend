@@ -32,13 +32,20 @@ export function useDesktopUpdateActions(locale: Locale, stateKey: string) {
     readonly key: string;
     readonly text: string;
   } | null>(null);
+  // What the app is doing after it took "Update now" / "Try again", until
+  // its state says more.
+  const [progress, setProgress] = useState<string | null>(null);
   const show = (text: string) => setProblem({ key: stateKey, text });
 
   const update = () => {
     setProblem(null);
+    setProgress(null);
     startDesktopUpdate()
       .then((reason) => {
-        if (reason === null) return;
+        if (reason === null) {
+          setProgress(stateKey);
+          return;
+        }
         show(reason || t(locale, "desktop.update.updateNotStarted"));
       })
       .catch(() => show(t(locale, "desktop.update.updateNotStarted")));
@@ -60,6 +67,8 @@ export function useDesktopUpdateActions(locale: Locale, stateKey: string) {
 
   return {
     problem: problem?.key === stateKey ? problem.text : null,
+    progress:
+      progress === stateKey ? t(locale, "desktop.update.requested") : null,
     showProblem: show,
     clearProblem: () => setProblem(null),
     update,
@@ -87,7 +96,9 @@ export function DesktopUpdatePrimaryButtons({
     action = { label: t(locale, "desktop.update.updateNow"), run: onUpdate };
   } else if (state.id === "U8") {
     action = { label: t(locale, "desktop.update.restart"), run: onRestart };
-  } else if (state.id === "U11") {
+  } else if (state.id === "U11" && state.state !== "went_back") {
+    // After a release went back, the app does not try the same release
+    // again (R49): "Try again" would do nothing, so it is not offered.
     action = { label: t(locale, "desktop.update.tryAgain"), run: onUpdate };
   }
   if (!action) return null;

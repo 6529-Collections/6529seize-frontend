@@ -81,7 +81,7 @@ export default function DesktopAutoUpdateNotice({
   if ((!NOTICE_STATES.has(state.id) && !followingDownload) || dismissed === key)
     return null;
 
-  const red = desktopUpdateTone(state.id) === "alert";
+  const red = desktopUpdateTone(state) === "alert";
   const offerUpdate = OFFERS_UPDATE.has(state.id) && state.version !== null;
   const rememberFocus = () => {
     focusMessageNext.current =
@@ -103,6 +103,11 @@ export default function DesktopAutoUpdateNotice({
         className="tw-mb-3 tw-block"
       >
         <DesktopUpdateHeadline state={state} locale={locale} />
+        {actions.progress && (
+          <span className="tw-mt-2 tw-block tw-text-sm tw-text-iron-300">
+            {actions.progress}
+          </span>
+        )}
       </output>
       <div role="alert" className="tw-mb-3 tw-text-sm empty:tw-hidden">
         {actions.problem}

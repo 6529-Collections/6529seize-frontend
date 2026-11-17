@@ -266,6 +266,13 @@ export interface DesktopUpdater {
   readonly offUpdateState?:
     | ((callback: DesktopShellListener<[unknown?]>) => void)
     | undefined;
+  /**
+   * Work in this window would be lost by a restart: "Restart to update" is
+   * refused with `reason` until it is cleared. Auto-installing builds only.
+   */
+  readonly setBusy?:
+    | ((busy: boolean, reason?: string) => Promise<void>)
+    | undefined;
   readonly setSettings?:
     | ((settings: {
         readonly check?: boolean;

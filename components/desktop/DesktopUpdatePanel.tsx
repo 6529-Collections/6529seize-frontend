@@ -57,7 +57,7 @@ export function DesktopUpdateHeadline({
   readonly state: DesktopUpdateState;
   readonly locale: Locale;
 }) {
-  const tone = desktopUpdateTone(state.id);
+  const tone = desktopUpdateTone(state);
   const lastChecked =
     state.checkedAt !== null && state.id !== "U1"
       ? t(locale, "desktop.update.lastChecked", {
@@ -154,6 +154,7 @@ export default function DesktopUpdatePanel({
   readonly locale: Locale;
 }) {
   const headingId = useId();
+  const notesHeadingId = useId();
   const [saving, setSaving] = useState(false);
   const actions = useDesktopUpdateActions(locale, desktopUpdateStateKey(state));
 
@@ -190,12 +191,38 @@ export default function DesktopUpdatePanel({
       </h3>
       <output aria-live="polite" aria-atomic="true" className="tw-block">
         <DesktopUpdateHeadline state={state} locale={locale} />
+        {actions.progress && (
+          <span className="tw-mt-2 tw-block tw-text-sm tw-text-iron-300">
+            {actions.progress}
+          </span>
+        )}
       </output>
+      {notesVersion && state.releaseNotes && (
+        <section aria-labelledby={notesHeadingId}>
+          <h4
+            id={notesHeadingId}
+            className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100"
+          >
+            {t(locale, "desktop.update.notesHeading", {
+              version: notesVersion,
+            })}
+          </h4>
+          <p
+            // Scrollable by keyboard when the notes are long.
+            tabIndex={0}
+            className="tw-m-0 tw-mt-1 tw-max-h-40 tw-overflow-y-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-bg-iron-900 tw-p-3 tw-text-sm tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {state.releaseNotes}
+          </p>
+        </section>
+      )}
       {notesVersion && (
         <button
           type="button"
           className={LINK_CLASS}
-          onClick={() => openOnWebsite(releaseNotesUrl(notesVersion))}
+          onClick={() =>
+            openOnWebsite(state.notesUrl ?? releaseNotesUrl(notesVersion))
+          }
         >
           {t(locale, "desktop.update.releaseNotes", { version: notesVersion })}
         </button>

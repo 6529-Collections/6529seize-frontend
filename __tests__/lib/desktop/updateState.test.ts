@@ -35,7 +35,42 @@ describe("parseDesktopUpdateState", () => {
       cannotInstallWhy: null,
       checkedAt: 1_800_000_000,
       note: "Automatic updates are off (Settings).",
+      releaseNotes: null,
+      notesUrl: null,
+      mustUpdate: null,
+      mustUpdateWhy: null,
     });
+  });
+
+  it("reads the offered release's notes and their page", () => {
+    expect(
+      parseDesktopUpdateState({
+        ...U4,
+        releaseNotes: "Faster waves.\nFixes the update notice.",
+        notesUrl: "https://6529.io/desktop/releases#0.1.0-rc.4",
+        mustUpdate: false,
+        mustUpdateWhy: null,
+      })
+    ).toMatchObject({
+      releaseNotes: "Faster waves.\nFixes the update notice.",
+      notesUrl: "https://6529.io/desktop/releases#0.1.0-rc.4",
+      mustUpdate: false,
+    });
+    for (const [releaseNotes, notesUrl] of [
+      ["a\u0007b", "http://6529.io/desktop/releases"],
+      ["é".repeat(501), "https://evil.example/desktop/releases"],
+    ]) {
+      expect(
+        parseDesktopUpdateState({ ...U4, releaseNotes, notesUrl })
+      ).toMatchObject({ releaseNotes: null, notesUrl: null });
+    }
+    expect(
+      parseDesktopUpdateState({
+        ...U4,
+        mustUpdate: "yes",
+        mustUpdateWhy: "other",
+      })
+    ).toMatchObject({ mustUpdate: null, mustUpdateWhy: null });
   });
 
   it("reads absent optional fields as null", () => {
@@ -94,13 +129,24 @@ describe("parseDesktopUpdateState", () => {
 });
 
 describe("desktopUpdateTone", () => {
-  it("follows the release standard's colours", () => {
-    expect(desktopUpdateTone("U5")).toBe("alert");
-    expect(desktopUpdateTone("U12")).toBe("alert");
-    expect(desktopUpdateTone("U11")).toBe("warning");
-    expect(desktopUpdateTone("U14")).toBe("warning");
-    for (const id of ["U1", "U3", "U4", "U6", "U8", "U10"] as const) {
-      expect(desktopUpdateTone(id)).toBe("quiet");
+  const tone = (id: string, mustUpdate: boolean | null = null) =>
+    desktopUpdateTone({ id: id as never, mustUpdate });
+
+  it("is red only when the person must update, in builds that say so", () => {
+    expect(tone("U5", false)).toBe("quiet");
+    expect(tone("U5", true)).toBe("alert");
+    expect(tone("U12", true)).toBe("alert");
+    expect(tone("U11", false)).toBe("warning");
+    expect(tone("U14", false)).toBe("warning");
+  });
+
+  it("follows the release standard's colours for builds that do not say", () => {
+    expect(tone("U5")).toBe("alert");
+    expect(tone("U12")).toBe("alert");
+    expect(tone("U11")).toBe("warning");
+    expect(tone("U14")).toBe("warning");
+    for (const id of ["U1", "U3", "U4", "U6", "U8", "U10"]) {
+      expect(tone(id)).toBe("quiet");
     }
   });
 });

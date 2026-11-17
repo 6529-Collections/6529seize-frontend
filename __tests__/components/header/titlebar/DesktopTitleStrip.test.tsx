@@ -369,6 +369,11 @@ describe("DesktopTitleStrip", () => {
     expect(
       screen.getByRole("switch", { name: "Install updates automatically" })
     ).toBeInTheDocument();
+    // The body has the same side padding as the dialog's header.
+    expect(screen.getByTestId("desktop-app-info-body")).toHaveClass(
+      "tw-px-4",
+      "sm:tw-px-6"
+    );
     expect(
       screen.queryByRole("button", { name: "Check for updates" })
     ).not.toBeInTheDocument();

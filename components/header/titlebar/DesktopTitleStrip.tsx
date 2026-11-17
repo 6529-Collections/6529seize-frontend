@@ -178,7 +178,7 @@ function getUpdateMark(
       ? t(locale, "desktop.titleStrip.appInfoState", { label: state.label })
       : t(locale, "desktop.titleStrip.appInfo"),
     showUpdateMark: state !== null && state.label !== null && state.id !== "U1",
-    alertMark: state !== null && desktopUpdateTone(state.id) === "alert",
+    alertMark: state !== null && desktopUpdateTone(state) === "alert",
   };
 }
 
@@ -428,30 +428,35 @@ export default function DesktopTitleStrip() {
         title={t(locale, "desktop.appInfo.title")}
         onClose={() => setShowInfo(false)}
       >
-        <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_1fr] tw-gap-x-4 tw-gap-y-2 tw-pb-4 tw-text-sm">
-          <dt className="tw-text-iron-400">
-            {t(locale, "desktop.appInfo.version")}
-          </dt>
-          <dd className="tw-m-0 tw-text-iron-50">
-            {updateState?.running ?? info.version ?? "-"}
-          </dd>
-          <dt className="tw-text-iron-400">
-            {t(locale, "desktop.appInfo.environment")}
-          </dt>
-          <dd className="tw-m-0 tw-text-iron-50">{info.environment ?? "-"}</dd>
-        </dl>
-        {updateState && (
-          <DesktopUpdatePanel state={updateState} locale={locale} />
-        )}
-        {updater && updateState === null && (
-          <button
-            type="button"
-            className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
-            onClick={() => updater.checkUpdates()}
-          >
-            {t(locale, "desktop.appInfo.checkUpdates")}
-          </button>
-        )}
+        {/* The same side padding as the dialog's header (design system). */}
+        <div className="tw-px-4 sm:tw-px-6" data-testid="desktop-app-info-body">
+          <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_1fr] tw-gap-x-4 tw-gap-y-2 tw-pb-4 tw-text-sm">
+            <dt className="tw-text-iron-400">
+              {t(locale, "desktop.appInfo.version")}
+            </dt>
+            <dd className="tw-m-0 tw-text-iron-50">
+              {updateState?.running ?? info.version ?? "-"}
+            </dd>
+            <dt className="tw-text-iron-400">
+              {t(locale, "desktop.appInfo.environment")}
+            </dt>
+            <dd className="tw-m-0 tw-text-iron-50">
+              {info.environment ?? "-"}
+            </dd>
+          </dl>
+          {updateState && (
+            <DesktopUpdatePanel state={updateState} locale={locale} />
+          )}
+          {updater && updateState === null && (
+            <button
+              type="button"
+              className="tw-min-h-11 tw-rounded-lg tw-border-0 tw-bg-white tw-px-4 tw-py-2 tw-font-semibold tw-text-black focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+              onClick={() => updater.checkUpdates()}
+            >
+              {t(locale, "desktop.appInfo.checkUpdates")}
+            </button>
+          )}
+        </div>
       </MobileWrapperDialog>
     </>
   );
