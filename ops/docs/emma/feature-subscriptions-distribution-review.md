@@ -47,11 +47,15 @@ The Memes token distribution outputs.
      for Phase 0, Phase 1 and Phase 2 in order. Download `Public Subscriptions`,
      then click `Finalize Distribution`. You can still select **Process and
      Finalize** before the first manual write succeeds.
-   - **Process and Finalize** starts a background job. Refresh restores progress.
+   - **Process and Finalize** starts a background job. The preparation row shows
+     the current step out of five, and refreshing restores progress.
      If authorization expires before input capture, click `Sign in to resume`.
-     Phase downloads are available once processing finishes.
+     When the row says **Completed · Lists ready to download**, use
+     `Download lists` in the phase or Public row.
 6. In manual mode, `Finalize Distribution` and `Publish to GitHub` share
-   the finishing row. In background mode, finalization is part of processing.
+   the finishing row. A red × beside `Finalize Distribution` indicates that
+   the distribution still needs finalization, and a green check shows it is
+   finalized. In background mode, finalization is part of processing.
    Click `Publish to GitHub` when it becomes enabled and follow its modal.
    The information button next to **Prepare distribution** explains both
    methods and the effects of resetting.

@@ -3,7 +3,9 @@ import { ApiDropForgeJobStatusEnum as JobStatus } from "@/generated/models/ApiDr
 import { useContext, useState } from "react";
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
 import { AuthContext } from "@/components/auth/Auth";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
@@ -127,9 +129,9 @@ function PreparedSubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
       }}
       title={!completed ? t(locale, "dropForge.pendingLists") : undefined}
       aria-busy={downloading}
-      className="tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white disabled:tw-opacity-50"
+      className="tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white disabled:tw-opacity-50"
     >
-      {downloading && <CircleLoader />}
+      {downloading && <CircleLoader size={CircleLoaderSize.SMALL} />}
       {t(locale, downloading ? "dropForge.downloading" : "dropForge.download")}
     </button>
   );
@@ -201,11 +203,11 @@ function ManualSubscriptionLinks({
       onClick={handleDownload}
       disabled={downloading}
       type="button"
-      className="tw-group tw-flex tw-h-8 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-blue-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-500/50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-blue-500/50"
+      className="tw-group tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-blue-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white tw-ring-1 tw-ring-inset tw-ring-iron-500/50 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-blue-500/50"
     >
       {downloading ? (
         <span className="tw-flex tw-items-center tw-gap-2">
-          <CircleLoader />
+          <CircleLoader size={CircleLoaderSize.SMALL} />
           <span>Downloading</span>
         </span>
       ) : (

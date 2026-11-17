@@ -49,6 +49,7 @@
   "emma.review.finalize": "Finalize Distribution",
   "emma.review.finalizing": "Finalizing…",
   "emma.review.finalized": "Finalized",
+  "emma.review.notFinalized": "Not finalized",
   "emma.review.publishToGithub": "Publish to GitHub",
   "emma.review.publishing": "Publishing…",
   "emma.review.checkingDistribution": "Checking distribution…",

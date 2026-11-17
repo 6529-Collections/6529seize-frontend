@@ -829,12 +829,29 @@ test("keeps manual finalization for a plan with saved manual work", async () => 
       "Finalize and normalize the distribution first"
     )
   );
+  expect(finalize).toHaveAccessibleDescription("Not finalized");
   expect(
     screen.getByText(/Manual work is saved. Use Reset Subscriptions/)
   ).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Process and Finalize" })
   ).toBeNull();
+});
+
+test("describes a finalized manual distribution without changing the button name", async () => {
+  mockSavedPreparationMode = "MANUAL";
+  jest
+    .spyOn(require("@/services/api/common-api"), "commonApiFetch")
+    .mockResolvedValue(createOverview({ is_normalized: true }));
+
+  render(<TestWrapper initialTokenId="123" />);
+
+  const finalize = screen.getByRole("button", {
+    name: "Finalize Distribution",
+  });
+  await waitFor(() =>
+    expect(finalize).toHaveAccessibleDescription("Finalized")
+  );
 });
 
 test("keeps the background job controls visible for a plan with a saved job", async () => {
