@@ -45,15 +45,19 @@ function Cell({
   label,
   children,
   className = "",
+  stacked = false,
 }: {
   readonly label: string;
   readonly children: ReactNode;
   readonly className?: string;
+  /** Below 1024 px, the label over the value rather than beside it. */
+  readonly stacked?: boolean;
 }) {
+  const layout = stacked
+    ? "max-lg:tw-flex max-lg:tw-flex-col max-lg:tw-gap-1.5"
+    : "max-lg:tw-flex max-lg:tw-items-center max-lg:tw-justify-between max-lg:tw-gap-3";
   return (
-    <td
-      className={`${CELL} max-lg:tw-flex max-lg:tw-items-center max-lg:tw-justify-between max-lg:tw-gap-3 ${className}`}
-    >
+    <td className={`${CELL} ${layout} ${className}`}>
       {/* The header row is hidden below 1024 px, so this label names the
           cell there; it is hidden from 1024 px, where the header does. */}
       <span className={MOBILE_LABEL}>{label}</span>
@@ -126,9 +130,9 @@ export default function ReleaseFilesTable({
             >
               {row.size}
             </Cell>
-            <Cell label={columns.sha256}>
+            <Cell label={columns.sha256} stacked={fullHash}>
               {fullHash ? (
-                <span className="tw-flex tw-min-w-0 tw-items-start tw-gap-2 max-lg:tw-w-full max-lg:tw-flex-col">
+                <span className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
                   <code className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-200 lg:tw-max-w-[16rem]">
                     {row.sha256}
                   </code>
