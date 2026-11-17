@@ -7194,6 +7194,83 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   }
 
+  test("batches visible chat feed entries and skips ordinary chat context reads", async ({
+    page,
+    baseURL,
+  }) => {
+    await installCompetitionApi(page);
+    const feedUrl = `/api/v2/waves/${WAVE}/drops`;
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}${feedUrl}`
+    );
+    expect(response.ok()).toBe(true);
+    const feed = await response.json();
+    const first = feed.drops[0];
+    const artworks = [entryDropId("alpha"), entryDropId("beta")].map(
+      (id, index) => ({
+        ...first,
+        id,
+        serial_no: first.serial_no + index + 1,
+        content: `Feed entry ${index + 1}`,
+        drop_type: "CHAT",
+        submission_context: {
+          voting: { current_calculated_vote: 12345 + index },
+        },
+      })
+    );
+    await installArtworkCompetitionResources(
+      page,
+      WAVE,
+      feed.wave,
+      () => artworks
+    );
+    const entryIds = ["entry-alpha", `entry-${entryDropId("beta")}`];
+    await page.route(`**${feedUrl}?**`, (route) =>
+      route.fulfill({
+        json: {
+          wave: { ...feed.wave, has_competition: true },
+          drops: [
+            ...artworks
+              .map((drop, index) => ({
+                ...drop,
+                submission_context: undefined,
+                competition_entry: {
+                  competition_id: "alpha",
+                  entry_id: entryIds[index],
+                },
+              }))
+              .reverse(),
+            {
+              ...first,
+              content: "Ordinary feed message",
+              competition_entry: null,
+            },
+          ],
+        },
+      })
+    );
+    const batches: string[] = [];
+    const perDrop: string[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (url.pathname.endsWith("/alpha/entry-contexts")) {
+        batches.push(url.searchParams.get("entry_ids") ?? "");
+      }
+      if (url.pathname.endsWith("/competition-context")) {
+        perDrop.push(url.pathname);
+      }
+    });
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    await expect(
+      page.getByText("Ordinary feed message", { exact: true })
+    ).toBeVisible();
+    await expect(page.getByText("12,345", { exact: true })).toBeVisible();
+    await expect(page.getByText("12,346", { exact: true })).toBeVisible();
+    expect(batches).toHaveLength(1);
+    expect(batches[0]?.split(",")).toEqual(expect.arrayContaining(entryIds));
+    expect(perDrop).toEqual([]);
+  });
+
   test("renders frozen CHAT deep links with submission voting controls", async ({
     page,
   }, testInfo) => {

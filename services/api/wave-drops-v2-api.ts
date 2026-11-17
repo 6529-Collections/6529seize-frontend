@@ -212,6 +212,9 @@ const hydrateDropV2 = async ({
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: dropType,
+    ...(drop.competition_entry !== undefined
+      ? { competition_entry: drop.competition_entry }
+      : {}),
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
     ...(drop.submission_context

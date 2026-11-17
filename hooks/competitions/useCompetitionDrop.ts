@@ -9,6 +9,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
+import { fetchCompetitionEntryDrop } from "@/services/api/competition-entry-drops-api";
 import { useWaveMayHaveCompetitionEntries } from "./useWaveMayHaveCompetitionEntries";
 import { useCompetitionViewer } from "./useCompetitionQueries";
 
@@ -88,6 +89,7 @@ export function useCompetitionDrop(
   drop: ExtendedDrop,
   {
     skipInWavesWithoutCompetition = false,
+    loadDetail = false,
   }: {
     /**
      * Lists mount one of these per row; in a wave known to have no competition
@@ -95,33 +97,58 @@ export function useCompetitionDrop(
      * and they show the voting controls.
      */
     readonly skipInWavesWithoutCompetition?: boolean;
+    readonly loadDetail?: boolean;
   } = {}
 ) {
   const viewer = useCompetitionViewer();
   const waveMayHaveEntries = useWaveMayHaveCompetitionEntries(drop.wave.id);
-  const mayBeEntry = !skipInWavesWithoutCompetition || waveMayHaveEntries;
+  const reference = loadDetail ? undefined : drop.competition_entry;
+  const mayBeEntry =
+    reference !== null &&
+    (reference !== undefined ||
+      !skipInWavesWithoutCompetition ||
+      waveMayHaveEntries);
   const context = useQuery({
     queryKey: [
       QueryKey.COMPETITION_DROP_CONTEXT,
       { wave_id: drop.wave.id, drop_id: drop.id, viewer },
     ],
-    queryFn: ({ signal }) =>
-      fetchDropCompetitionContext(drop.wave.id, drop.id, signal),
+    queryFn: async ({ signal }): Promise<ApiDropCompetitionContext | null> => {
+      if (!reference) {
+        return fetchDropCompetitionContext(drop.wave.id, drop.id, signal);
+      }
+      const entry = await fetchCompetitionEntryDrop(
+        { waveId: drop.wave.id, competitionId: reference.competition_id },
+        viewer,
+        reference.entry_id,
+        drop.id,
+        signal,
+        { wave: drop.wave, original: drop }
+      );
+      return entry
+        ? {
+            competition: entry.competition,
+            entry: entry.entry,
+            vote_summary: entry.vote_summary,
+          }
+        : null;
+    },
     enabled: mayBeEntry && !drop.id.startsWith("temp-"),
     retry: false,
     staleTime: 15_000,
     refetchInterval: (query) =>
       query.state.data?.competition ? 15_000 : false,
   });
-  const resolvedDrop = applyCompetitionDropSummary(drop, context.data);
-  return context.data
+  const data = reference === null ? undefined : (context.data ?? undefined);
+  const resolvedDrop = applyCompetitionDropSummary(drop, data);
+  return data
     ? {
         ...resolvedDrop,
         competition_context: {
           viewer,
           waveId: drop.wave.id,
           dropId: drop.id,
-          data: context.data,
+          data,
         },
       }
     : resolvedDrop;

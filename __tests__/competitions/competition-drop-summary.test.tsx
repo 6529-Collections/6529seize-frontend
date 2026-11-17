@@ -14,6 +14,7 @@ import {
   fetchDropCompetitionContext,
   invalidateCompetition,
 } from "@/services/api/competitions-api";
+import { fetchCompetitionEntryDrop } from "@/services/api/competition-entry-drops-api";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompetitionContext";
 import type { ReactNode } from "react";
@@ -41,6 +42,7 @@ jest.mock("@/services/api/competitions-api", () => ({
   ...jest.requireActual("@/services/api/competitions-api"),
   fetchDropCompetitionContext: jest.fn(),
 }));
+jest.mock("@/services/api/competition-entry-drops-api");
 const drop = {
   id: "drop",
   drop_type: "CHAT",
@@ -169,6 +171,42 @@ it("never promotes CHAT from another competition, wave, drop or an absent entry"
     expect(applyCompetitionDropSummary(drop, { ...context, entry })).toBe(drop);
   }
 });
+it("skips ordinary feed drops and batches a feed entry projected as chat", async () => {
+  jest.mocked(fetchDropCompetitionContext).mockClear();
+  jest.mocked(fetchCompetitionEntryDrop).mockResolvedValue({
+    competition: context.competition!,
+    entry: context.entry!,
+    vote_summary: context.vote_summary!,
+    awards: [],
+    original: drop,
+  });
+  const client = new QueryClient();
+  const wrapper = ({ children }: { children: ReactNode }) => (
+    <QueryClientProvider client={client}>{children}</QueryClientProvider>
+  );
+  const ordinary = { ...drop, id: "ordinary", competition_entry: null };
+  const submission = {
+    ...drop,
+    competition_entry: { competition_id: "competition", entry_id: "entry" },
+  };
+  const { result } = renderHook(
+    () => [useCompetitionDrop(ordinary), useCompetitionDrop(submission)],
+    { wrapper }
+  );
+  await waitFor(() => expect(result.current[1]?.rating).toBe(120));
+  expect(result.current[0]).toBe(ordinary);
+  expect(result.current[1]?.drop_type).toBe("PARTICIPATORY");
+  expect(fetchDropCompetitionContext).not.toHaveBeenCalled();
+  expect(fetchCompetitionEntryDrop).toHaveBeenCalledWith(
+    { waveId: "wave", competitionId: "competition" },
+    "viewer:self",
+    "entry",
+    "drop",
+    expect.any(AbortSignal),
+    { wave: drop.wave, original: submission }
+  );
+});
+
 it("refreshes the card when competition votes are invalidated", async () => {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
@@ -300,7 +338,10 @@ it("resolves scoped submission data before rendering a drop deep link", async ()
   jest.mocked(fetchDropCompetitionContext).mockResolvedValue(context);
   render(
     <QueryClientProvider client={client}>
-      <SingleWaveDrop drop={drop} onClose={jest.fn()} />
+      <SingleWaveDrop
+        drop={{ ...drop, competition_entry: null }}
+        onClose={jest.fn()}
+      />
     </QueryClientProvider>
   );
   expect(await screen.findByText("PARTICIPATORY 120")).toBeInTheDocument();
