@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import {
   __resetDesktopBusyForTests,
   useDropComposerDesktopBusy,
@@ -69,6 +69,24 @@ describe("useDropComposerDesktopBusy", () => {
       "A drop is still being sent"
     );
     second.unmount();
+    expect(setBusy).toHaveBeenLastCalledWith(false, undefined);
+  });
+
+  it("still clears the app after a refused call (never stays busy by mistake)", async () => {
+    install();
+    setBusy
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("ipc"));
+    const { rerender } = render(<Composer uploading sending />);
+    expect(setBusy).toHaveBeenLastCalledWith(true, "A file is still uploading");
+    // The upload ends; telling the app about the send is refused.
+    rerender(<Composer uploading={false} sending />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    // The send ends: "not busy" is still sent, since what the app holds is
+    // unknown after the refusal.
+    rerender(<Composer uploading={false} sending={false} />);
     expect(setBusy).toHaveBeenLastCalledWith(false, undefined);
   });
 

@@ -151,6 +151,38 @@ describe("desktopUpdateState", () => {
     expect(getDesktopAutoUpdate()).toEqual({ support: "detecting" });
   });
 
+  it("does not report a failed refresh after an accepted setting as a refusal", async () => {
+    const { setSettings, getState } = install({ supportsInAppUpdates: true });
+    const stop = subscribeDesktopAutoUpdate(() => undefined);
+    await flush();
+    setSettings.mockResolvedValueOnce({ id: "U99" } as never);
+    getState.mockRejectedValueOnce(new Error("ipc"));
+    await expect(setDesktopUpdateSettings({ auto: true })).resolves.toBeNull();
+    stop();
+  });
+
+  it("drops the refresh read when a newer state arrived meanwhile", async () => {
+    const { setSettings, getState, emit } = install({
+      supportsInAppUpdates: true,
+    });
+    const stop = subscribeDesktopAutoUpdate(() => undefined);
+    await flush();
+    let answer: (value: unknown) => void = () => undefined;
+    setSettings.mockResolvedValueOnce({ id: "U99" } as never);
+    getState.mockReturnValueOnce(
+      new Promise((resolve) => {
+        answer = resolve;
+      }) as never
+    );
+    const pending = setDesktopUpdateSettings({ auto: true });
+    await flush();
+    emit({ ...U1, id: "U8", state: "ready", version: "0.1.0-rc.4" });
+    answer(U1);
+    await expect(pending).resolves.toBeNull();
+    expect(getDesktopAutoUpdate()).toMatchObject({ state: { id: "U8" } });
+    stop();
+  });
+
   it("reports why the app cannot restart to update", async () => {
     const { updater } = install({ supportsInAppUpdates: true });
     await expect(restartDesktopToUpdate()).resolves.toBeNull();

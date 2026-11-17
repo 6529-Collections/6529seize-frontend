@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { DesktopUpdateState } from "@/lib/desktop/updateState";
 import {
+  noteDesktopUpdateStartedHere,
   restartDesktopToUpdate,
   startDesktopUpdate,
 } from "@/services/desktop/desktopUpdateState";
@@ -18,7 +19,7 @@ export const UPDATE_SECONDARY_CLASS =
 
 /** Identifies a state for "until the state changes" (dismissal, problems). */
 export const desktopUpdateStateKey = (state: DesktopUpdateState): string =>
-  `${state.id}:${state.version ?? ""}`;
+  `${state.id}:${state.version ?? ""}:${state.mustUpdate === true ? "must" : ""}`;
 
 /**
  * "Update now", "Try again" and "Restart to update", with what to say when
@@ -35,41 +36,64 @@ export function useDesktopUpdateActions(locale: Locale, stateKey: string) {
   // What the app is doing after it took "Update now" / "Try again", until
   // its state says more.
   const [progress, setProgress] = useState<string | null>(null);
-  const show = (text: string) => setProblem({ key: stateKey, text });
+  // Feedback belongs to one state: a new state clears it, and an answer to
+  // an action from an earlier state is dropped.
+  const currentKey = useRef(stateKey);
+  const [seenKey, setSeenKey] = useState(stateKey);
+  if (seenKey !== stateKey) {
+    setSeenKey(stateKey);
+    setProblem(null);
+    setProgress(null);
+  }
+  useEffect(() => {
+    currentKey.current = stateKey;
+  }, [stateKey]);
+  const still = (key: string) => currentKey.current === key;
+  const show = (key: string, text: string) => {
+    if (still(key)) setProblem({ key, text });
+  };
 
   const update = () => {
+    const key = stateKey;
     setProblem(null);
     setProgress(null);
     startDesktopUpdate()
       .then((reason) => {
         if (reason === null) {
-          setProgress(stateKey);
+          if (still(key)) setProgress(key);
           return;
         }
-        show(reason || t(locale, "desktop.update.updateNotStarted"));
+        // Refused: no download started from here after all.
+        noteDesktopUpdateStartedHere(null);
+        show(key, reason || t(locale, "desktop.update.updateNotStarted"));
       })
-      .catch(() => show(t(locale, "desktop.update.updateNotStarted")));
+      .catch(() => {
+        noteDesktopUpdateStartedHere(null);
+        show(key, t(locale, "desktop.update.updateNotStarted"));
+      });
   };
 
   const restart = () => {
+    const key = stateKey;
     setProblem(null);
     restartDesktopToUpdate()
       .then((reason) => {
         if (reason === null) return;
         show(
+          key,
           reason
             ? t(locale, "desktop.update.restartFailedReason", { reason })
             : t(locale, "desktop.update.restartFailed")
         );
       })
-      .catch(() => show(t(locale, "desktop.update.restartFailed")));
+      .catch(() => show(key, t(locale, "desktop.update.restartFailed")));
   };
 
   return {
     problem: problem?.key === stateKey ? problem.text : null,
     progress:
       progress === stateKey ? t(locale, "desktop.update.requested") : null,
-    showProblem: show,
+    showProblem: (text: string) => show(stateKey, text),
     clearProblem: () => setProblem(null),
     update,
     restart,

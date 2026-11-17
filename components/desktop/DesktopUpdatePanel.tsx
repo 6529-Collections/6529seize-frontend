@@ -208,9 +208,8 @@ export default function DesktopUpdatePanel({
             })}
           </h4>
           <p
-            // Scrollable by keyboard when the notes are long.
-            tabIndex={0}
-            className="tw-m-0 tw-mt-1 tw-max-h-40 tw-overflow-y-auto tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-bg-iron-900 tw-p-3 tw-text-sm tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            // Notes are at most 1,000 bytes: shown in full, no scrolling.
+            className="tw-m-0 tw-mt-1 tw-whitespace-pre-wrap tw-break-words tw-rounded-lg tw-bg-iron-900 tw-p-3 tw-text-sm tw-text-iron-200"
           >
             {state.releaseNotes}
           </p>

@@ -367,6 +367,43 @@ describe("DesktopUpdatePanel", () => {
     expect(updater.downloadUpdate).toHaveBeenCalledTimes(2);
   });
 
+  it("clears a refusal once the state changes, even if the state comes back", async () => {
+    installAutoHost(STATES.U4);
+    updater.downloadUpdate.mockRejectedValueOnce(
+      "Please wait a moment and try again."
+    );
+    const { rerender } = render(
+      <DesktopUpdatePanel state={parsed("U4")} locale="en-US" />
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Update now" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Please wait a moment and try again."
+    );
+    rerender(<DesktopUpdatePanel state={parsed("U7")} locale="en-US" />);
+    rerender(<DesktopUpdatePanel state={parsed("U4")} locale="en-US" />);
+    expect(screen.getByRole("alert")).toBeEmptyDOMElement();
+  });
+
+  it("drops an answer to an action taken in an earlier state", async () => {
+    installAutoHost(STATES.U4);
+    let refuse: (reason: unknown) => void = () => undefined;
+    updater.downloadUpdate.mockReturnValueOnce(
+      new Promise((_resolve, reject) => {
+        refuse = reject;
+      })
+    );
+    const { rerender } = render(
+      <DesktopUpdatePanel state={parsed("U4")} locale="en-US" />
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Update now" }));
+    rerender(<DesktopUpdatePanel state={parsed("U8")} locale="en-US" />);
+    await act(async () => {
+      refuse("Please wait a moment and try again.");
+      await Promise.resolve();
+    });
+    expect(screen.getByRole("alert")).toBeEmptyDOMElement();
+  });
+
   it("offers Try again after a failed update", async () => {
     installAutoHost(STATES.U11);
     render(<DesktopUpdatePanel state={parsed("U11")} locale="en-US" />);
@@ -504,6 +541,35 @@ describe("DesktopUpdateNotice in a build that installs its own updates", () => {
     expect(
       screen.queryByRole("button", { name: "Not now" })
     ).not.toBeInTheDocument();
+  });
+
+  it("shows a state again when it becomes one the person must act on", async () => {
+    installAutoHost({ ...STATES.U5, mustUpdate: false, mustUpdateWhy: null });
+    render(<DesktopUpdateNotice />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Not now" })
+    );
+    expect(screen.queryByRole("region")).not.toBeInTheDocument();
+    emitState({ ...STATES.U5, mustUpdate: true, mustUpdateWhy: "unsafe" });
+    expect(await screen.findByRole("region")).toHaveTextContent(
+      "is an urgent update"
+    );
+  });
+
+  it("does not follow an app-started download after its own request was refused", async () => {
+    installAutoHost(STATES.U4);
+    updater.downloadUpdate.mockRejectedValueOnce(
+      "Please wait a moment and try again."
+    );
+    const { container } = render(<DesktopUpdateNotice />);
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Update now" })
+    );
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Please wait a moment and try again."
+    );
+    emitState(STATES.U7);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it("keeps an urgent update on screen (no Not now)", async () => {

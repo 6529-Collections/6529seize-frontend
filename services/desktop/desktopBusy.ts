@@ -14,8 +14,14 @@ import { t } from "@/i18n/messages";
  */
 
 const work = new Map<symbol, string>();
-/** What the app was last told: a reason, or null for "not busy". */
-let told: string | null = null;
+/**
+ * What the app was last told: a reason, null for "not busy", or undefined
+ * when unknown (a call was refused), so the next call is always sent.
+ */
+let told: string | null | undefined = null;
+const MAX_RETRIES = 3;
+const RETRY_MS = 1000;
+let retries = 0;
 
 function tell(): void {
   const updater = getDesktopUpdater();
@@ -23,10 +29,19 @@ function tell(): void {
   const reason: string | null = work.values().next().value ?? null;
   if (reason === told) return;
   told = reason;
-  updater.setBusy(reason !== null, reason ?? undefined).catch(() => {
-    // Not taken: tell again on the next change.
-    told = null;
-  });
+  updater
+    .setBusy(reason !== null, reason ?? undefined)
+    .then(() => {
+      retries = 0;
+    })
+    .catch(() => {
+      // Not taken: the app keeps what it had before, so what it holds is
+      // unknown. Try again a few times so it never stays busy by mistake.
+      told = undefined;
+      if (retries >= MAX_RETRIES) return;
+      retries += 1;
+      setTimeout(tell, RETRY_MS);
+    });
 }
 
 /** Registers `reason` as work in progress while `busy` is true. */
@@ -62,4 +77,5 @@ export function useDropComposerDesktopBusy(
 export function __resetDesktopBusyForTests(): void {
   work.clear();
   told = null;
+  retries = 0;
 }

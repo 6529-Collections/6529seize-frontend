@@ -59,10 +59,15 @@ function asAutoUpdater(updater: DesktopUpdater | null): AutoUpdater | null {
     : null;
 }
 
+/** Counts applied states, so a read that a newer state overtook is dropped. */
+let applied = 0;
+
 /** Applies a state from the app; one that does not parse changes nothing. */
 function applyState(value: unknown): void {
   const state = parseDesktopUpdateState(value);
-  if (state) setSnapshot({ support: "supported", state });
+  if (!state) return;
+  applied += 1;
+  setSnapshot({ support: "supported", state });
 }
 
 function start(): () => void {
@@ -182,19 +187,27 @@ export async function setDesktopUpdateSettings(settings: {
   if (!updater) return "";
   const asked = session;
   const current = () => asked === session && snapshot.support === "supported";
+  let value: unknown;
   try {
-    const value = await updater.setSettings(settings);
-    if (!current()) return null;
-    if (parseDesktopUpdateState(value)) {
-      applyState(value);
-    } else {
-      const fresh = await updater.getState();
-      if (current()) applyState(fresh);
-    }
-    return null;
+    value = await updater.setSettings(settings);
   } catch (error) {
     return refusalText(error);
   }
+  // Taken: whatever happens below, the setting changed.
+  if (!current()) return null;
+  if (parseDesktopUpdateState(value)) {
+    applyState(value);
+    return null;
+  }
+  const before = applied;
+  try {
+    const fresh = await updater.getState();
+    // Not over a newer state that arrived meanwhile.
+    if (current() && applied === before) applyState(fresh);
+  } catch {
+    // The next state event brings the change.
+  }
+  return null;
 }
 
 /** Remembers that the person started this release's download here. */
