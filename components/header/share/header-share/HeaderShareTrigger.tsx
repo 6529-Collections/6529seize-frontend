@@ -58,7 +58,7 @@ function HeaderShareContent({
           setHasRequestedModal(true);
           setShowQRModal(true);
         }}
-        className={`tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
+        className={`tw-block tw-h-[var(--sidebar-row-height,2.875rem)] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 ${
           isCollapsed
             ? "desktop-hover:hover:tw-text-white"
             : "desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white"
@@ -99,7 +99,7 @@ function HeaderShareContent({
 
 // Shown only when the boundary below renders without the query: in a
 // prerendered page's HTML, until the browser renders the button. It holds the
-// button's 46px row (tw-h-[2.875rem]) so the sidebar utilities below it do
+// button's row so the sidebar utilities below it do
 // not move, and is left out wherever the button itself would be.
 function HeaderShareSpace() {
   const capacitor = useCapacitor();
@@ -124,7 +124,7 @@ function HeaderShareSpace() {
       data-testid="header-share-space"
       className="tw-px-3"
     >
-      <div className="tw-h-[2.875rem]" />
+      <div className="tw-h-[var(--sidebar-row-height,2.875rem)]" />
     </div>
   );
 }
