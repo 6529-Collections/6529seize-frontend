@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { ABOUT_PAGE_SURFACE_CLASS_NAME } from "@/components/about/AboutLayout";
 import { LINK } from "@/components/validator-page/validatorStyles";
+import AiNavScroller from "./AiNavScroller";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
@@ -17,6 +18,8 @@ const SECTIONS: readonly {
   readonly key: AiSection;
   readonly href: string;
   readonly label: MessageKey;
+  /** A shorter label for a phone. */
+  readonly short?: MessageKey;
 }[] = [
   { key: "download", href: "/ai", label: "ai.nav.download" },
   { key: "guide", href: "/ai/guide", label: "ai.nav.guide" },
@@ -26,6 +29,7 @@ const SECTIONS: readonly {
     key: "known-issues",
     href: "/ai/known-issues",
     label: "ai.nav.knownIssues",
+    short: "ai.nav.knownIssuesShort",
   },
 ];
 
@@ -111,10 +115,7 @@ export default function AiPageFrame({
       <div
         className={`tw-mx-auto tw-w-full ${wide ? "tw-max-w-6xl" : "tw-max-w-4xl"} tw-px-4 tw-pb-24 tw-pt-6 sm:tw-px-6 sm:tw-pt-10 lg:tw-px-8`}
       >
-        <nav
-          aria-label={t(LOCALE, "ai.nav.label")}
-          className="-tw-mx-4 tw-mb-10 tw-overflow-x-auto tw-px-4 sm:tw-mx-0 sm:tw-overflow-visible sm:tw-px-0"
-        >
+        <AiNavScroller label={t(LOCALE, "ai.nav.label")}>
           <ul className="tw-m-0 tw-flex tw-w-max tw-list-none tw-gap-1.5 tw-p-0 sm:tw-w-auto sm:tw-flex-wrap">
             {SECTIONS.map((section) => {
               const isCurrent = section.key === current;
@@ -129,13 +130,24 @@ export default function AiPageFrame({
                         : "tw-border-white/10 tw-bg-transparent tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-100"
                     }`}
                   >
-                    {t(LOCALE, section.label)}
+                    {section.short ? (
+                      <>
+                        <span className="sm:tw-hidden">
+                          {t(LOCALE, section.short)}
+                        </span>
+                        <span className="max-sm:tw-hidden">
+                          {t(LOCALE, section.label)}
+                        </span>
+                      </>
+                    ) : (
+                      t(LOCALE, section.label)
+                    )}
                   </Link>
                 </li>
               );
             })}
           </ul>
-        </nav>
+        </AiNavScroller>
         <header className="tw-mb-6">
           <p className="tw-mb-3 tw-mt-0 tw-text-xs tw-font-semibold tw-uppercase tw-leading-4 tw-tracking-wider tw-text-primary-300">
             {eyebrow}

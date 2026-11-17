@@ -291,8 +291,8 @@ export default function AiDownloadPage({
         <AiScreenshot
           slot={AI_SCREENSHOTS.models}
           alt={t(LOCALE, "ai.download.screenshot")}
+          phoneAlt={t(LOCALE, "ai.download.screenshotPhone")}
           caption={t(LOCALE, "ai.download.screenshotCaption")}
-          priority
         />
       </div>
 

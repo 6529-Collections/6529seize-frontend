@@ -2,40 +2,46 @@ import { renderToStaticMarkup } from "react-dom/server";
 
 import AiScreenshot from "@/components/ai-page/AiScreenshot";
 
-const SLOT = { src: "/ai/placement.png", width: 1040, height: 640 };
-
 describe("AiScreenshot", () => {
-  it("renders nothing while the slot has no file", () => {
+  it("shows a 2x dialog at its real size, with its caption", () => {
     const html = renderToStaticMarkup(
       <AiScreenshot
-        slot={{ ...SLOT, src: null }}
+        slot={{ image: "14-mac-first-run" }}
         alt="The question"
         caption="The question."
       />
     );
-    expect(html).toBe("");
+    // Half the crop's 864 file pixels.
+    expect(html).toContain("max-width:432px");
+    expect(html).toContain('alt="The question"');
+    expect(html).toContain("The question.</figcaption>");
+    // A click shows the whole capture.
+    expect(html).toContain("See the whole picture: The question");
   });
 
-  it("shows a 2x dialog at its real size, centred", () => {
+  it("shows the part of the capture its place is about", () => {
     const html = renderToStaticMarkup(
       <AiScreenshot
-        slot={SLOT}
-        alt="The question"
-        caption="The question."
-        realSize
+        slot={{ image: "31-start" }}
+        alt="Start"
+        caption="Start."
       />
     );
-    expect(html).toContain("max-width:520px");
-    expect(html).toContain("tw-mx-auto");
-    expect(html).toContain('sizes="520px"');
-    expect(html).toContain("<figcaption");
+    expect(html).toContain("aspect-ratio:1670 / 1085");
+    expect(html).toContain("max-width:835px");
   });
 
-  it("fills the column otherwise", () => {
+  it("gives a phone the app's own phone-width capture", () => {
     const html = renderToStaticMarkup(
-      <AiScreenshot slot={SLOT} alt="The models" caption="The models." />
+      <AiScreenshot
+        slot={{ image: "40-chat", phone: "98-phone-chat-reply" }}
+        alt="A chat"
+        phoneAlt="A chat on a phone"
+        caption="A first chat."
+      />
     );
-    expect(html).not.toContain("max-width");
-    expect(html).toContain('alt="The models"');
+    expect(html).toContain('class="max-sm:tw-hidden"');
+    expect(html).toContain('class="sm:tw-hidden"');
+    expect(html).toContain('alt="A chat on a phone"');
   });
 });

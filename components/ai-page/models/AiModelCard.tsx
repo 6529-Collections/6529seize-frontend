@@ -11,6 +11,8 @@ import { t, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 import {
   getAiModelLine,
+  getAiScore,
+  getMeasuredHardware,
   getMeasuredNote,
   isOriginalModelScore,
   type AiModel,
@@ -18,6 +20,7 @@ import {
 } from "@/lib/ai-page/models";
 import { AI_CARD } from "../AiPageFrame";
 import AiModelFold from "./AiModelFold";
+import { formatAiScore } from "./formatAiScore";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
@@ -291,24 +294,16 @@ function Scores({ model }: { readonly model: AiModel }) {
   if (model.benchmarks.length === 0) {
     return null;
   }
-  const originals = model.benchmarks.filter(isOriginalModelScore).length;
-  const allOriginal = originals === model.benchmarks.length;
   return (
     <div className="tw-min-w-0">
       <h4 className={`${SUBHEAD} tw-pb-1.5`}>
         {t(LOCALE, "ai.models.card.scores")}
-        {allOriginal && (
-          <span className="tw-font-medium tw-normal-case tw-tracking-normal tw-text-iron-500">
-            {" "}
-            · {t(LOCALE, "ai.models.card.originalScores")}
-          </span>
-        )}
       </h4>
       <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-p-0">
         {model.benchmarks.map((benchmark) => (
           <li
             key={benchmark.name}
-            className="tw-flex tw-items-baseline tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-1.5 tw-text-[13px] tw-leading-5"
+            className="tw-flex tw-items-start tw-justify-between tw-gap-3 tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-py-1.5 tw-text-[13px] tw-leading-5"
           >
             <a
               href={benchmark.source}
@@ -316,21 +311,31 @@ function Scores({ model }: { readonly model: AiModel }) {
               title={benchmark.note ?? undefined}
               className={`tw-min-w-0 ${QUIET_LINK}`}
             >
-              <span className="tw-truncate">{benchmark.name}</span>
-              <ArrowUpRightIcon
-                aria-hidden="true"
-                className="tw-size-3 tw-flex-none tw-text-iron-600"
-              />
+              <span className="tw-line-clamp-2">
+                {benchmark.name}
+                <ArrowUpRightIcon
+                  aria-hidden="true"
+                  className="tw-ml-0.5 tw-inline tw-size-3 tw-text-iron-600"
+                />
+              </span>
             </a>
-            <span className="tw-flex tw-flex-none tw-items-baseline tw-gap-1.5 tw-tabular-nums">
-              {!allOriginal && isOriginalModelScore(benchmark) && (
-                <span className="tw-text-[11px] tw-text-iron-500">
-                  {t(LOCALE, "ai.models.card.original")}
-                </span>
-              )}
+            <span className="tw-flex tw-flex-none tw-items-baseline tw-gap-1.5 tw-whitespace-nowrap tw-tabular-nums">
               <span className="tw-font-semibold tw-text-iron-50">
-                {benchmark.score}
-                {benchmark.unit === "%" ? "%" : ""}
+                {formatAiScore(LOCALE, getAiScore(benchmark))}
+                {isOriginalModelScore(benchmark) && (
+                  <>
+                    <span
+                      aria-hidden="true"
+                      className="tw-ml-0.5 tw-font-normal tw-text-iron-500"
+                    >
+                      {t(LOCALE, "ai.models.card.original")}
+                    </span>
+                    <span className="tw-sr-only">
+                      {" "}
+                      ({t(LOCALE, "ai.models.card.originalLabel")})
+                    </span>
+                  </>
+                )}
               </span>
               {benchmark.lowerIsBetter && (
                 <span className="tw-text-[11px] tw-text-iron-500">
@@ -345,7 +350,8 @@ function Scores({ model }: { readonly model: AiModel }) {
   );
 }
 
-function speed(run: AiModelMeasured): string {
+/** What a run measured: its speed, or else what it did. */
+function measuredText(run: AiModelMeasured): string | null {
   if (run.tokensPerSecond !== undefined) {
     return t(LOCALE, "ai.models.card.tokensPerSecond", {
       speed: formatNumber(LOCALE, run.tokensPerSecond),
@@ -360,7 +366,7 @@ function speed(run: AiModelMeasured): string {
       max: formatNumber(LOCALE, run.tokensPerSecondMax),
     });
   }
-  return run.result ?? t(LOCALE, "ai.models.card.ranNoSpeed");
+  return run.result ?? null;
 }
 
 function Measured({ model }: { readonly model: AiModel }) {
@@ -374,16 +380,20 @@ function Measured({ model }: { readonly model: AiModel }) {
       </h4>
       <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-1.5 tw-p-0">
         {model.measured.map((run) => {
+          const result = measuredText(run);
           const note = getMeasuredNote(run);
           return (
             <li
-              key={`${run.machine}-${run.date}-${speed(run)}`}
+              key={`${run.machine}-${run.date}-${result ?? note ?? ""}`}
               className="tw-text-[13px] tw-leading-5"
             >
               <span className="tw-font-semibold tw-text-iron-50">
-                {speed(run)}
+                {result ?? note}
               </span>
-              <span className="tw-text-iron-300"> · {run.machine}</span>
+              <span className="tw-text-iron-300">
+                {" "}
+                · {getMeasuredHardware(run)}
+              </span>
               <span className="tw-text-iron-500">
                 {" "}
                 ·{" "}
@@ -392,7 +402,7 @@ function Measured({ model }: { readonly model: AiModel }) {
                   timeZone: "UTC",
                 })}
               </span>
-              {note && (
+              {result && note && (
                 <span className="tw-block tw-text-xs tw-text-iron-500">
                   {note}
                 </span>
@@ -410,7 +420,6 @@ function Measured({ model }: { readonly model: AiModel }) {
  * scores beside it; on a phone a card with the versions and scores folded.
  */
 export default function AiModelCard({ model }: { readonly model: AiModel }) {
-  const hasScores = model.benchmarks.length > 0;
   return (
     <article
       id={`model-${model.id}`}
@@ -474,9 +483,7 @@ export default function AiModelCard({ model }: { readonly model: AiModel }) {
         hide={t(LOCALE, "ai.models.card.hideDetails")}
         className="tw-flex tw-min-w-0 tw-flex-col tw-gap-4 max-lg:tw-mt-2 max-lg:tw-border-0 max-lg:tw-border-t max-lg:tw-border-solid max-lg:tw-border-white/[0.06] max-lg:tw-pt-4 lg:tw-col-span-2"
       >
-        <div
-          className={`tw-grid tw-gap-x-8 tw-gap-y-4 ${hasScores ? "md:tw-grid-cols-2" : ""}`}
-        >
+        <div className="tw-grid tw-gap-x-8 tw-gap-y-4 md:tw-grid-cols-2">
           <Versions model={model} />
           <Scores model={model} />
         </div>

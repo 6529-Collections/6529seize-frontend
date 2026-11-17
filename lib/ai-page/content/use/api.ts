@@ -250,17 +250,13 @@ Saved ramen.png`,
         alt: "ramen.png, the image media.py saved: a bowl of ramen on a wooden table.",
       },
       {
-        kind: "p",
-        text: "The library was openai 3.52.0, on Python 3.12.",
-      },
-      {
         kind: "h3",
         id: "use-the-api-with-a-coding-tool",
         title: "With a coding tool",
       },
       {
         kind: "p",
-        text: "A tool that takes an OpenAI-compatible endpoint works the same way: give it the base URL, the key and the model's name. We ran [aider](https://aider.chat), a coding assistant for the terminal, version 0.86.2, in a git repository holding `prices.py`:",
+        text: "A tool that takes an OpenAI-compatible endpoint works the same way: give it the base URL, the key and the model's name. Here [aider](https://aider.chat), a coding assistant for the terminal, works in a git repository holding `prices.py`:",
       },
       {
         kind: "code",
@@ -321,10 +317,6 @@ def average(prices):
 b9eede3 (HEAD -> master) feat: add average function
 22968b8 start`,
         output: true,
-      },
-      {
-        kind: "p",
-        text: "aider is the only such tool we ran.",
       },
     ],
   },

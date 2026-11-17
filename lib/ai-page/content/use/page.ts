@@ -9,7 +9,7 @@ export const AI_USE_PAGE: readonly AiUseSection[] = [
     blocks: [
       {
         kind: "p",
-        text: "The page answers on 127.0.0.1 only, and signs a browser in with a one-time link. On a Mac, opening **6529 AI** from Applications makes a new link and opens it. The Windows guide says the Start menu's **6529 AI** does the same; we didn't try it. On Linux:",
+        text: "The page answers on 127.0.0.1 only, and signs a browser in with a one-time link. On a Mac, opening **6529 AI** from Applications makes a new link and opens it. On Windows, the Start menu's **6529 AI** does the same. On Linux:",
       },
       {
         kind: "code",
@@ -30,7 +30,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "30-signed-in-dark",
+        image: "30-signed-in",
         alt: "The Chat screen, signed in: No model to chat with yet. Run one on this computer. A Get started button.",
       },
       {
@@ -39,7 +39,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "44-browser-and-theme-dark",
+        image: "44-browser-and-theme",
         alt: "The Sign-in and app key dialog: signed in, an app key field, the theme choice, and the models on this server.",
       },
       {
@@ -58,13 +58,8 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "31-start-dark",
+        image: "31-start",
         alt: "Start: Choose a model to run here. NVIDIA L4, 24.2 GB: models up to about 20.5 GB. clef, gemma-4-31b, glm-4.7-flash, gemma-4-26b-a4b and devstral-small-2-24b, each with Fetch and serve.",
-      },
-      {
-        kind: "image",
-        image: "17-mac-start",
-        alt: "Start on the Mac: 25.8 GB shared with the GPU, models up to about 16.4 GB.",
       },
       {
         kind: "p",
@@ -82,13 +77,8 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "32-fetching-dark",
+        image: "32-fetching",
         alt: "Start while fetching: gemma-4-26b-a4b is getting ready. Downloading: 2.5 GB of 15.6 GB.",
-      },
-      {
-        kind: "image",
-        image: "33-starting-dark",
-        alt: "Start while the engine loads: gemma-4-26b-a4b is getting ready. Its files are checked, then its engine starts.",
       },
       {
         kind: "p",
@@ -96,12 +86,12 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "34-ready-dark",
+        image: "34-ready",
         alt: "Start: gemma-4-26b-a4b is ready. Chat with it now. Open chat.",
       },
       {
         kind: "p",
-        text: "On the L4, the 15.6 GB of files came and were checked in 3 minutes 18 seconds, and the engine loaded in 70 seconds from a local NVMe disk. A model close to the computer's memory in size can load much more slowly: see [Known problems](#known-problems).",
+        text: "On the L4, the 15.6 GB of files came and were checked in 3 minutes 18 seconds, and the engine loaded in 70 seconds from a local NVMe disk. A model close to the computer's memory in size can load much more slowly: see [Known issues](/ai/known-issues).",
       },
       {
         kind: "p",
@@ -119,7 +109,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "40-chat-dark",
+        image: "40-chat",
         alt: "A chat with gemma-4-26b-a4b: a two-day plan for a weekend in Lisbon, as a list, at 73.1 tokens/s.",
       },
       {
@@ -128,7 +118,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "41-chat-follow-up-dark",
+        image: "41-chat-follow-up",
         alt: "The same chat, asked to make day two free: no tickets, no paid food. The model rewrites day two.",
       },
       {
@@ -137,12 +127,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "p",
-        text: "On the Mac, the same model answered at 26.4 tokens a second on the M2:",
-      },
-      {
-        kind: "image",
-        image: "18-mac-chat",
-        alt: "Safari on the Mac: a four-line poem from gemma-4-26b-a4b at 26.4 tokens/s.",
+        text: "On the Mac, the same model answered at 26.4 tokens a second on the M2.",
       },
     ],
   },
@@ -156,12 +141,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "42-vision-attached-dark",
-        alt: "A picture of the Earth rising over the Moon attached in chat, with the question: What is in this picture, and where was it taken from?",
-      },
-      {
-        kind: "image",
-        image: "43-vision-answer-dark",
+        image: "43-vision-answer",
         alt: "The answer: the Earth as a blue marble against space, the gray cratered surface of the Moon in front, taken from the Moon looking back.",
       },
       {
@@ -184,12 +164,12 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "50-image-empty-dark",
+        image: "50-image-empty",
         alt: "The Image screen: Make an image from words. The z-image-turbo model, a description, and the size Square, 1024 x 1024.",
       },
       {
         kind: "image",
-        image: "52-image-result-dark",
+        image: "52-image-result",
         alt: "A 1024 by 1024 photograph of a red fox asleep in fresh snow, with Download and Send to chat.",
       },
       {
@@ -208,12 +188,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "55-speech-file-dark",
-        alt: "The Speech screen with whisper-large-v3-turbo, an 11-second file loaded in the player, and Transcribe.",
-      },
-      {
-        kind: "image",
-        image: "56-speech-text-dark",
+        image: "56-speech-text",
         alt: 'The text: "And so, my fellow Americans, ask not what your country can do for you, ask what you can do for your country."',
       },
       {
@@ -232,12 +207,12 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "62-provider-engines-dark",
+        image: "62-provider-engines",
         alt: "Engines: whisper-large-v3-turbo and z-image-turbo, both Ready.",
       },
       {
         kind: "image",
-        image: "63-provider-this-computer-dark",
+        image: "63-provider-this-computer",
         alt: "This computer: Linux, x86_64, an AMD EPYC processor, 16.1 GB of memory, an NVIDIA L4 with 24.2 GB.",
       },
       {
@@ -246,17 +221,12 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "64-models-dark",
+        image: "64-models",
         alt: "Models in the registry, showing Runs here, with Fetch and Serve here on each model.",
       },
       {
         kind: "image",
-        image: "65-models-images-dark",
-        alt: "Models showing Images: models that run on pytorch say they can't run here.",
-      },
-      {
-        kind: "image",
-        image: "66-models-serve-here-dark",
+        image: "66-models-serve-here",
         alt: "z-image-turbo fetching from Models, with Stop serving, and z-image below it marked bigger than this computer's estimate of 20.5 GB.",
       },
     ],
@@ -271,12 +241,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "70-keys-dark",
-        alt: "Keys: No app keys yet. The Make a key form: Name, Models, Days, Web origins.",
-      },
-      {
-        kind: "image",
-        image: "71-key-form-dark",
+        image: "71-key-form",
         alt: "The form filled in: Scripts on this computer, every model, 30 days.",
       },
       {
@@ -285,7 +250,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "72-key-made-dark",
+        image: "72-key-made",
         alt: 'Your new key, "Scripts on this computer", with Copy. The key is blurred here after its first characters.',
       },
       {
@@ -294,7 +259,7 @@ Open it in the browser you use, on this computer.`,
       },
       {
         kind: "image",
-        image: "73-key-revoked-dark",
+        image: "73-key-revoked",
         alt: "Keys: No key can use this server. The key Scripts on this computer, revoked.",
       },
     ],

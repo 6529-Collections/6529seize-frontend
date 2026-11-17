@@ -1,4 +1,5 @@
 import modelsFile from "./content/models/models.json";
+import publishedFile from "./content/models/published.json";
 import sectionsFile from "./content/models/sections.json";
 
 /**
@@ -86,7 +87,7 @@ export type AiModel = {
   readonly measured: readonly AiModelMeasured[];
 };
 
-type AiModelSection = {
+export type AiModelSection = {
   readonly id: string;
   readonly title: string;
   readonly line: string;
@@ -116,6 +117,13 @@ type SectionsFile = {
 
 const MODELS = modelsFile as unknown as ModelsFile;
 const SECTIONS = sectionsFile as unknown as SectionsFile;
+// When each model's repository was made on Hugging Face, for "Newest":
+// written by scripts/ai-models-published.cjs from the same models.json.
+const PUBLISHED = (
+  publishedFile as unknown as {
+    readonly models: Readonly<Record<string, { readonly date: string }>>;
+  }
+).models;
 
 /** The registry's counts, as the build wrote them. */
 export function getAiModelCounts() {
@@ -161,6 +169,10 @@ function media(values: readonly string[]): AiMedium[] {
 
 /** What the page's filter knows about a model; small, for the browser. */
 export type AiModelFacets = {
+  /** Its name, publisher, packager and id, in lower case, for the search. */
+  readonly search: string;
+  /** The day its repository was made on Hugging Face, YYYY-MM-DD, or "". */
+  readonly published: string;
   readonly runs: boolean;
   readonly reads: readonly AiMedium[];
   readonly makes: readonly AiMedium[];
@@ -176,6 +188,10 @@ function smallest(values: readonly number[]): number | null {
 
 export function getAiModelFacets(model: AiModel): AiModelFacets {
   return {
+    search: [model.name, model.publisher, model.packagedBy ?? "", model.id]
+      .join(" ")
+      .toLowerCase(),
+    published: PUBLISHED[model.id]?.date ?? "",
     runs: model.runsToday,
     reads: media(model.inputs),
     makes: media(model.outputs),
@@ -204,8 +220,8 @@ export function getAiModelLine(model: AiModel): string {
 
 /**
  * A measured run's note without the sentences about the 6529 AI network,
- * which this release leaves out of its pages, and without "No speed
- * recorded.", which the card says already.
+ * which this release leaves out of its pages, about the demo catalog the
+ * run came from, and "No speed recorded.".
  */
 export function getMeasuredNote(measured: AiModelMeasured): string | null {
   const sentences = (measured.note ?? "")
@@ -214,7 +230,117 @@ export function getMeasuredNote(measured: AiModelMeasured): string | null {
       (sentence) =>
         sentence !== "" &&
         !/\bnetwork\b/i.test(sentence) &&
+        !sentence.startsWith("From the demo catalog's entry") &&
         !/^no speed recorded\.$/i.test(sentence)
     );
   return sentences.length === 0 ? null : sentences.join(" ");
+}
+
+/**
+ * The hardware of a measured run, without the cloud instance's name:
+ * "AWS p5en.48xlarge, spot, 8 H200 GPUs of 141 GB" reads "8 × H200, 141 GB
+ * each".
+ */
+export function getMeasuredHardware(measured: AiModelMeasured): string {
+  const text = measured.machine
+    .replace(/^AWS [^,]+,\s*/, "")
+    .replace(/^spot,\s*/, "")
+    .replace(/^Apple M2 with 24 GB, on its GPU with Metal$/, "Apple M2, 24 GB")
+    .replace(/^on one of its eight (\w+) GPUs of (\d+) GB/, "one $1, $2 GB")
+    .replace(/^on one (\w+) of (\d+) GB/, "one $1, $2 GB")
+    .replace(/^one (\w+) GPU of (\d+) GB/, "one $1, $2 GB")
+    .replace(/^(\d+) (\w+) GPUs of (\d+) GB/, "$1 × $2, $3 GB each")
+    .replace(/^([\w ]+) with (\d+) vCPUs/, "$1, $2 vCPUs")
+    .replace(
+      ", with its expert weights in system memory",
+      ", experts in system memory"
+    );
+  return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+// Scores that are a share of a whole, printed as 0 to 1 by their cards:
+// accuracies and win rates. Any other score without a unit is shown as
+// its card prints it, rounded, since its scale isn't the page's to guess.
+const SHARE_OF_ONE =
+  /^(?:Arena Hard|MATH Maj@1|GenEval|AA LCR|CTI-MCQA|CTI-RCM|CTI-Reasoning)$|\(accuracy\)|^MMLU/;
+// Scores out of a fixed maximum.
+const OUT_OF: readonly (readonly [RegExp, number])[] = [
+  [/MT-?Bench/i, 10],
+  [/^OCRBench$/, 1000],
+];
+
+/** How a score reads on the page. */
+export type AiScore =
+  | { readonly kind: "percent"; readonly value: number }
+  | { readonly kind: "outOf"; readonly value: number; readonly max: number }
+  | { readonly kind: "number"; readonly value: number; readonly digits: number }
+  | { readonly kind: "text"; readonly text: string };
+
+/**
+ * A score in one scale: percentages, and shares of one that are
+ * accuracies or win rates, as a percent; scores out of a fixed maximum
+ * with it ("8.49 /10"); anything else as its card prints it. asPercent
+ * turns any value from 0 to 1 into a percent, for a column in which other
+ * cards give the same benchmark in percent.
+ */
+export function getAiScore(
+  benchmark: AiModelBenchmark,
+  asPercent = false
+): AiScore {
+  const value = Number(benchmark.score);
+  if (!Number.isFinite(value)) {
+    return { kind: "text", text: benchmark.score };
+  }
+  if (benchmark.unit === "%") {
+    return { kind: "percent", value };
+  }
+  const outOf = OUT_OF.find(([name]) => name.test(benchmark.name));
+  if (outOf) {
+    return { kind: "outOf", value, max: outOf[1] };
+  }
+  if (
+    value >= 0 &&
+    value <= 1 &&
+    (asPercent || SHARE_OF_ONE.test(benchmark.name))
+  ) {
+    return { kind: "percent", value: value * 100 };
+  }
+  return { kind: "number", value, digits: Math.abs(value) < 1 ? 3 : 1 };
+}
+
+/**
+ * The benchmark most of a section's models report, for its column in the
+ * table, with each model's score; null when fewer than half of them report
+ * any one benchmark.
+ */
+export function getSectionScore(section: AiModelSection): {
+  readonly name: string;
+  readonly lowerIsBetter: boolean;
+  readonly scores: Readonly<Record<string, AiScore>>;
+} | null {
+  const counts = new Map<string, number>();
+  for (const model of section.models) {
+    for (const name of new Set(model.benchmarks.map((b) => b.name))) {
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+  }
+  const [best] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
+  if (!best || best[1] * 2 < section.models.length) {
+    return null;
+  }
+  const [name] = best;
+  const found = section.models.flatMap((model) =>
+    model.benchmarks
+      .filter((b) => b.name === name)
+      .slice(0, 1)
+      .map((b) => [model.id, b] as const)
+  );
+  const anyPercent = found.some(([, b]) => b.unit === "%");
+  return {
+    name,
+    lowerIsBetter: found.some(([, b]) => b.lowerIsBetter),
+    scores: Object.fromEntries(
+      found.map(([id, b]) => [id, getAiScore(b, anyPercent)])
+    ),
+  };
 }

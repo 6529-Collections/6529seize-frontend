@@ -6,94 +6,149 @@ import {
   getAiModelCounts,
   getAiModelFacets,
   getAiModelSections,
-  type AiModelFacets,
+  getSectionScore,
+  type AiModelSection,
 } from "@/lib/ai-page/models";
 import ValidatorFold from "@/components/validator-page/ValidatorFold";
-import AiPageFrame, { AI_H2, AI_MUTED } from "../AiPageFrame";
+import AiPageFrame, { AI_MUTED } from "../AiPageFrame";
 import InlineText from "../InlineText";
 import AiModelCard, { formatGB } from "./AiModelCard";
-import {
-  AiModelFilterBar,
-  AiModelFilterItem,
-  AiModelFilterProvider,
-  AiModelJumpList,
-  AiModelNoMatch,
-  AiModelSectionFilter,
-  type AiModelFilterText,
-} from "./AiModelFilters";
+import AiModelsView, {
+  type AiModelsSection,
+  type AiModelsText,
+} from "./AiModelsView";
+import { formatAiScore } from "./formatAiScore";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
 
-function filterText(): AiModelFilterText {
+function choices(which: "reads" | "makes") {
+  return {
+    label: t(LOCALE, `ai.models.filter.${which}`),
+    choices: {
+      any: t(LOCALE, `ai.models.filter.${which}.any`),
+      text: t(LOCALE, `ai.models.filter.${which}.text`),
+      image: t(LOCALE, `ai.models.filter.${which}.image`),
+      audio: t(LOCALE, `ai.models.filter.${which}.audio`),
+    },
+  };
+}
+
+function viewText(): AiModelsText {
   return {
     label: t(LOCALE, "ai.models.filter.label"),
+    search: t(LOCALE, "ai.models.filter.search"),
     runs: t(LOCALE, "ai.models.filter.runs"),
-    reads: {
-      label: t(LOCALE, "ai.models.filter.reads"),
-      choices: {
-        any: t(LOCALE, "ai.models.filter.reads.any"),
-        text: t(LOCALE, "ai.models.filter.reads.text"),
-        image: t(LOCALE, "ai.models.filter.reads.image"),
-        audio: t(LOCALE, "ai.models.filter.reads.audio"),
-      },
-    },
-    makes: {
-      label: t(LOCALE, "ai.models.filter.makes"),
-      choices: {
-        any: t(LOCALE, "ai.models.filter.makes.any"),
-        text: t(LOCALE, "ai.models.filter.makes.text"),
-        image: t(LOCALE, "ai.models.filter.makes.image"),
-        audio: t(LOCALE, "ai.models.filter.makes.audio"),
-      },
-    },
+    reads: choices("reads"),
+    makes: choices("makes"),
     memory: t(LOCALE, "ai.models.filter.memory"),
     anySize: t(LOCALE, "ai.models.filter.anySize"),
     upTo: [8, 16, 24, 48, 80].map((size) =>
       t(LOCALE, "ai.models.filter.upTo", { size: formatGB(size) })
     ),
+    memoryHint: t(LOCALE, "ai.models.filter.memoryHint"),
+    sort: t(LOCALE, "ai.models.sort.label"),
+    sorts: {
+      memory: t(LOCALE, "ai.models.sort.memory"),
+      newest: t(LOCALE, "ai.models.sort.newest"),
+      name: t(LOCALE, "ai.models.sort.name"),
+    },
+    view: t(LOCALE, "ai.models.view.label"),
+    views: {
+      cards: t(LOCALE, "ai.models.view.cards"),
+      table: t(LOCALE, "ai.models.view.table"),
+    },
+    section: t(LOCALE, "ai.models.filter.section"),
+    sections: t(LOCALE, "ai.models.jump"),
     count: t(LOCALE, "ai.models.filter.count", {
       shown: "{shown}",
       total: "{total}",
     }),
     clear: t(LOCALE, "ai.models.filter.clear"),
     none: t(LOCALE, "ai.models.filter.none"),
-    section: t(LOCALE, "ai.models.filter.section"),
-    allSections: t(LOCALE, "ai.models.filter.allSections"),
+    legend: t(LOCALE, "ai.models.legend"),
+    table: {
+      model: t(LOCALE, "ai.models.table.model"),
+      maker: t(LOCALE, "ai.models.table.maker"),
+      size: t(LOCALE, "ai.models.table.size"),
+      memory: t(LOCALE, "ai.models.table.memory"),
+      inApp: t(LOCALE, "ai.models.table.inApp"),
+      yes: t(LOCALE, "ai.models.card.inApp"),
+      open: t(LOCALE, "ai.models.table.open"),
+    },
+  };
+}
+
+function sectionCount(section: AiModelSection): string {
+  return section.runnable > 0
+    ? t(LOCALE, "ai.models.section.count", {
+        models: formatNumber(LOCALE, section.models.length),
+        runnable: formatNumber(LOCALE, section.runnable),
+      })
+    : t(LOCALE, "ai.models.section.countNone", {
+        models: formatNumber(LOCALE, section.models.length),
+      });
+}
+
+function viewSection(section: AiModelSection): AiModelsSection {
+  const score = getSectionScore(section);
+  return {
+    id: section.id,
+    title: section.title,
+    line: section.line,
+    count: sectionCount(section),
+    scoreName: score?.name ?? null,
+    scoreNote: score?.lowerIsBetter
+      ? t(LOCALE, "ai.models.card.lowerIsBetter")
+      : null,
+    rows: section.models.map((model) => {
+      const smallest = model.variants.reduce((a, b) =>
+        b.memoryGB < a.memoryGB ? b : a
+      );
+      const scored = score?.scores[model.id];
+      return {
+        id: model.id,
+        name: model.name,
+        maker: model.publisher,
+        size: formatGB(smallest.sizeGB),
+        memory: formatGB(smallest.memoryGB),
+        score: scored ? formatAiScore(LOCALE, scored) : null,
+        facets: getAiModelFacets(model),
+      };
+    }),
   };
 }
 
 /**
  * /ai/models: every model in the 6529 AI registry by section, with a
- * filter for what the app runs today, what a model reads and makes, and
- * how much memory it needs.
+ * search, filters, an order, and a table to compare them.
  */
-export default function AiModelsPage() {
+export default function AiModelsPage({
+  version,
+}: {
+  /** The newest release's version, for the eyebrow. */
+  readonly version: string | undefined;
+}) {
   const counts = getAiModelCounts();
   const sections = getAiModelSections();
-  const facets: Record<string, AiModelFacets> = {};
-  for (const section of sections) {
-    for (const model of section.models) {
-      facets[model.id] = getAiModelFacets(model);
-    }
-  }
-  const jump = sections.map((section) => ({
-    id: section.id,
-    title: section.title,
-    ids: section.models.map((model) => model.id),
-  }));
-  const jumpLabel = t(LOCALE, "ai.models.jump");
+  const cards = Object.fromEntries(
+    sections.flatMap((section) =>
+      section.models.map((model) => [
+        model.id,
+        <AiModelCard key={model.id} model={model} />,
+      ])
+    )
+  );
   return (
     <AiPageFrame
       current="models"
       wide
       eyebrow={t(LOCALE, "ai.models.eyebrow")}
+      version={version}
       title={t(LOCALE, "ai.models.title")}
       lead={t(LOCALE, "ai.models.lead", {
         models: formatNumber(LOCALE, counts.models),
-        entries: formatNumber(LOCALE, counts.entries),
-        runnableEntries: formatNumber(LOCALE, counts.entriesRunnableToday),
-        runnableModels: formatNumber(LOCALE, counts.modelsRunnableToday),
+        runnable: formatNumber(LOCALE, counts.modelsRunnableToday),
       })}
     >
       <div className="tw-mt-6">
@@ -109,6 +164,7 @@ export default function AiModelsPage() {
                 "ai.models.howToRead.memory",
                 "ai.models.howToRead.scores",
                 "ai.models.howToRead.measured",
+                "ai.models.howToRead.order",
               ] as const
             ).map((key) => (
               <li key={key} className={`${AI_MUTED} marker:tw-text-iron-600`}>
@@ -118,60 +174,13 @@ export default function AiModelsPage() {
           </ul>
         </ValidatorFold>
       </div>
-      <AiModelFilterProvider facets={facets}>
-        <div className="tw-mt-8">
-          <div className="tw-min-w-0">
-            <AiModelFilterBar text={filterText()} sections={jump} />
-            <div className="tw-mt-4 xl:tw-hidden">
-              <AiModelJumpList sections={jump} label={jumpLabel} />
-            </div>
-            <AiModelNoMatch text={filterText()} />
-            {sections.map((section) => (
-              <AiModelSectionFilter
-                key={section.id}
-                ids={section.models.map((model) => model.id)}
-              >
-                <section
-                  aria-labelledby={section.id}
-                  className="tw-mt-12 tw-flex tw-flex-col tw-gap-4"
-                >
-                  <header className="tw-flex tw-flex-col tw-gap-1">
-                    <h2 id={section.id} className={`tw-scroll-mt-24 ${AI_H2}`}>
-                      {section.title}
-                    </h2>
-                    <p className={`tw-m-0 tw-max-w-3xl ${AI_MUTED}`}>
-                      {section.line}{" "}
-                      <span className="tw-text-iron-500">
-                        {section.runnable > 0
-                          ? t(LOCALE, "ai.models.section.count", {
-                              models: formatNumber(
-                                LOCALE,
-                                section.models.length
-                              ),
-                              runnable: formatNumber(LOCALE, section.runnable),
-                            })
-                          : t(LOCALE, "ai.models.section.countNone", {
-                              models: formatNumber(
-                                LOCALE,
-                                section.models.length
-                              ),
-                            })}
-                      </span>
-                    </p>
-                  </header>
-                  <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-p-0">
-                    {section.models.map((model) => (
-                      <AiModelFilterItem key={model.id} id={model.id}>
-                        <AiModelCard model={model} />
-                      </AiModelFilterItem>
-                    ))}
-                  </ul>
-                </section>
-              </AiModelSectionFilter>
-            ))}
-          </div>
-        </div>
-      </AiModelFilterProvider>
+      <div className="tw-mt-8 tw-min-w-0">
+        <AiModelsView
+          sections={sections.map(viewSection)}
+          cards={cards}
+          text={viewText()}
+        />
+      </div>
     </AiPageFrame>
   );
 }

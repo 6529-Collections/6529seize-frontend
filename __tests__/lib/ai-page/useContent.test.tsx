@@ -5,12 +5,14 @@ import path from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 
 import AiUsePage from "@/components/ai-page/use/AiUsePage";
+import { AI_KNOWN_BUGS } from "@/lib/ai-page/content/knownIssues";
 import {
   AI_USE_INTRO,
   AI_USE_SECTIONS,
   type AiUseBlock,
 } from "@/lib/ai-page/content/use";
 import { AI_USE_IMAGES } from "@/lib/ai-page/content/useImages";
+import { AI_SCREENSHOTS } from "@/lib/ai-page/screenshots";
 
 function allBlocks(blocks: readonly AiUseBlock[]): AiUseBlock[] {
   return blocks.flatMap((block) =>
@@ -34,8 +36,6 @@ function texts(): string[] {
         return block.items.map((item) => item.text);
       case "list":
         return [...block.items];
-      case "table":
-        return [...block.head, ...block.rows.flat()];
       default:
         return [];
     }
@@ -63,7 +63,7 @@ function webpSize(file: string): { width: number; height: number } {
 }
 
 describe("the /ai/use walk-through", () => {
-  it("has a picture file of the listed size for every picture", () => {
+  it("has each picture's file at its listed size, and crops inside it", () => {
     for (const image of Object.values(AI_USE_IMAGES)) {
       const file = path.join(process.cwd(), "public", image.src);
       expect(existsSync(file)).toBe(true);
@@ -71,6 +71,14 @@ describe("the /ai/use walk-through", () => {
         width: image.width,
         height: image.height,
       });
+      if (image.crop) {
+        expect(image.crop.x + image.crop.width).toBeLessThanOrEqual(
+          image.width
+        );
+        expect(image.crop.y + image.crop.height).toBeLessThanOrEqual(
+          image.height
+        );
+      }
     }
   });
 
@@ -82,18 +90,20 @@ describe("the /ai/use walk-through", () => {
         used.add(block.image);
       }
     }
+    for (const slot of Object.values(AI_SCREENSHOTS)) {
+      used.add(slot.image);
+      if ("phone" in slot) {
+        used.add(slot.phone);
+      }
+    }
     expect([...used].sort()).toEqual(Object.keys(AI_USE_IMAGES).sort());
   });
 
-  it("links only to sections that exist", () => {
+  it("links only to sections and pages that exist", () => {
     const ids = new Set([
       ...AI_USE_SECTIONS.map((section) => section.id),
       ...BLOCKS.flatMap((block) => (block.kind === "h3" ? [block.id] : [])),
     ]);
-    expect(ids.size).toBe(
-      AI_USE_SECTIONS.length +
-        BLOCKS.filter((block) => block.kind === "h3").length
-    );
     for (const text of texts()) {
       for (const [, anchor] of text.matchAll(/\]\(#([^)]+)\)/g)) {
         expect(ids).toContain(anchor);
@@ -101,19 +111,24 @@ describe("the /ai/use walk-through", () => {
     }
   });
 
-  it("leaves the network out, and keeps the Windows workaround", () => {
+  it("leaves the network, the install and the known problems to their pages", () => {
+    const all = texts().join(" ");
     // "the computer's network disk" is about a disk, not the 6529 AI network.
-    expect(texts().join(" ")).not.toMatch(/AI network|the network\b|\bTor\b/i);
-    const known = AI_USE_SECTIONS.find(
-      (section) => section.id === "known-problems"
+    expect(all).not.toMatch(/AI network|the network\b|\bTor\b/i);
+    const ids = AI_USE_SECTIONS.map((section) => section.id);
+    expect(ids).not.toContain("download-and-install");
+    expect(ids).not.toContain("known-problems");
+    expect(all).toContain("[Guide](/ai/guide)");
+    expect(all).not.toMatch(
+      /we went no further|only such tool we ran|openai 3\.52/
     );
-    expect(JSON.stringify(known)).toContain(
+    expect(JSON.stringify(AI_KNOWN_BUGS)).toContain(
       "Invoke-WebRequest https://valid-isrgrootx2.letsencrypt.org -UseBasicParsing | Out-Null"
     );
   });
 
   it("puts the contents first, and the sections in order", () => {
-    const html = renderToStaticMarkup(<AiUsePage />);
+    const html = renderToStaticMarkup(<AiUsePage version="0.1.0-rc.1" />);
     expect(html).toContain("On this page");
     let last = -1;
     for (const section of AI_USE_SECTIONS) {
@@ -122,6 +137,9 @@ describe("the /ai/use walk-through", () => {
       last = at;
       expect(html).toContain(`href="#${section.id}"`);
     }
+    expect(html).toContain("Known issues</a> lists the bugs we know");
+    // Long output folds behind a summary that says how long it is.
+    expect(html).toMatch(/Show output \(\d+ lines\)/);
     // The pictures are the dark ones, as the site is dark.
     expect(html).not.toMatch(/-light\.(png|webp)/);
   });

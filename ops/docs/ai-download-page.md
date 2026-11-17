@@ -54,27 +54,37 @@ own lead.
   Then the first chat, with `qwen3-4b-gguf` to try first, two short notes
   (running a validator on the same computer, and the OpenAI-compatible
   API), "Next: use it for real" to `/ai/use`, and "Report a problem".
-- **Use it** (`/ai/use`): the walk-through from the download to real use,
-  with real pictures: the install on each system, signing in, choosing,
-  fetching and serving a model, chat, a question about a picture, images,
-  speech, the Provider screen, app keys, the API (curl, Python and a
-  coding tool), the command line, stopping a model, the page at phone
-  width, uninstalling, and the known problems with their workarounds. Its
-  contents sit beside it from 1024 px and fold above it on a phone.
+- **Use it** (`/ai/use`): real use once 6529 AI is installed (one line
+  sends anyone who hasn't installed it to the Guide): signing in,
+  choosing, fetching and serving a model, chat, a question about a
+  picture, images, speech, the Provider screen, app keys, the API (curl,
+  Python and a coding tool), the command line, stopping a model, the page
+  at phone width and uninstalling, then a line to Known issues and a
+  footnote on the three computers the pictures come from. Its contents
+  sit beside it from 1024 px and mark the section in view; on a phone a
+  slim bar at the top says which section you are in and opens the list,
+  and a button goes back to the top. Output a command printed is quieter
+  than the command, with no bar, and folds behind "Show output" past ten
+  lines.
 - **Models** (`/ai/models`): every model in the 6529 AI registry, by
-  section, with a filter for what runs in the app today, what a model
-  reads and makes, and how much memory it needs, and a way to go to a
-  section (a row of sections on a phone). Each model is a card: its name,
-  its publisher linked to its files on Hugging Face at the pinned
-  revision, one line on what it is, whether the app runs it (and why not),
-  its parameters, context, memory and license, then its versions and its
-  scores, with 6529's own measured runs. From 1024 px a card is a row; on
-  a phone the versions and scores fold behind a button.
+  section. A bar, held at the top from 1024 px, has a search (name,
+  publisher or family: "qwen 8b"), an order (smallest memory first, newest
+  first, by name), cards or a table, and filters for what runs in the app
+  today, what a model reads and makes, and the memory it needs, with
+  "Not sure what fits? The app's Start page tells you." A card has the
+  name, the publisher linked to its files on Hugging Face at the pinned
+  revision, one line on what it is, whether the app runs it (and why
+  not), its facts, its versions and up to five scores, and 6529's own
+  measured runs with the hardware. The table has a row a model (maker,
+  smallest files and memory, whether the app runs it, and the section's
+  common score where at least half its models report one) and a row
+  opens its card. On a phone a card's versions and scores fold behind a
+  button.
 - **Known issues** (`/ai/known-issues`): the untested statement as the
   lead, the day the list last changed, a one-line "Found a problem? Report
-  it" link, the issues grouped by system (each a line, with its workaround
-  and any command under it), and the full "Report a problem" card at the
-  end.
+  it" link, then **Known bugs** (each a card: what you see, the fix and
+  its commands, and why in a line) and **Not tested yet** by system, and
+  the full "Report a problem" card at the end.
 
 "Report a problem" opens the 6529 AI wave, where testers and the support
 bot answer, and says what to include: the system, the steps, what
@@ -85,60 +95,74 @@ PowerShell, the CPU) and a Copy button; a long line scrolls rather than
 breaking, and fades at the right edge while more of it is hidden. Touch
 targets are 44 px on a phone. The pages are dark-only, as the site is.
 
-Three places on the first pages show a screenshot of the app, each from
-the walk-through's pictures: the download page's first screen shows
-Start's model list, the Mac step where the app asks whether a validator
-runs on the same computer shows that question, and the first chat shows a
-chat reply. `lib/ai-page/screenshots.ts` names them; a slot with no file
-renders nothing, no box and no caption, so the pages never show a
-stand-in. Each picture is the app in its dark theme, with no browser
-frame, at twice the size it shows at. The page draws the cards' 1 px
-border and radius around it, and shows the Mac question at its real size
-(half the file's width), centred; the other two fill the column.
+Three places on the first pages show a screenshot of the app, from the
+walk-through's pictures: the download page's first screen shows Start's
+model list, the guide's Mac step 4 the question whether a validator runs
+on the same computer, and its first chat a chat reply. On a phone the
+download page and the first chat show the app's own phone-width capture
+instead. `lib/ai-page/screenshots.ts` names them.
 
-## The walk-through's pictures
+## The pictures
 
 The text of `/ai/use` is structured content in
-`lib/ai-page/content/use.ts`, from 6529 AI's walk-through of release
+`lib/ai-page/content/use/`, from 6529 AI's walk-through of release
 candidate 1 (its `use.md` and the pictures beside it, taken on 16 and 17
-November 2026), with the parts about the network left out. The pictures
-are in `public/ai/use/` (`ai` is in `PUBLIC_IMAGE_DIRECTORIES` in
-`lib/proxy/publicPaths.ts`, as the public path contract asks), and
-`lib/ai-page/content/useImages.ts` lists each one's pixels, how it lays
-out and the width it shows at:
+November 2026), without the install, which the Guide has, the known
+problems, which Known issues has, and the parts about the network. One
+picture shows each state.
 
-- A page fills the column: the dark page shots, from 2560 px (1280 CSS
-  px at 2x) down to 1640 px, 820 CSS px at 2x.
-- A dialog shows at its real size, centred: the Mac's at half their
-  pixels, the Windows ones (taken at 1x) at theirs.
-- A phone screen sits in a row of them, two on a phone and three from
-  640 px, at 560 px wide.
-
-Each is WebP: quality 82 for 2x pictures, lossless for the 1x Windows
-ones; 55 files, about 2 MB in all. `next/image` serves them at the size
-the layout needs. To change a picture, make the new one the same way,
-from the dark version, and set its size in `useImages.ts`; a test reads
-each file's size and fails when the two differ.
+The pictures are in `public/ai/use/` (`ai` is in `PUBLIC_IMAGE_DIRECTORIES`
+in `lib/proxy/publicPaths.ts`, as the public path contract asks): the dark
+captures, each whole, as WebP (quality 80 for the 2x captures, lossless
+for the 1x Windows dialogs; 30 files, about 1.8 MB).
+`lib/ai-page/content/useImages.ts` gives each one's pixels, its `scale`
+(file pixels to a CSS pixel) and its `crop`: the part a page shows, what
+its step is about (the row, the button, the dialog). `AiZoomPicture`
+shows the crop at its real size, or the column's width when that is less,
+in the cards' 1 px border and radius, and a click opens the whole capture
+at its real size in a dialog. Phone-width captures sit two to a row from
+640 px and in a row that scrolls sideways on a phone. To change a
+picture, put the new file in `public/ai/use/` and set its size and crop
+in `useImages.ts`; a test reads each file's size and checks each crop
+lies inside it.
 
 ## The models data
 
 `lib/ai-page/content/models/models.json` and `sections.json` are written
-by 6529 AI's `build_models_page.py` (format `6529.io.ai-models.v1` and
-`6529.io.ai-model-sections.v1`) from the registry at a given commit, and
-are replaced as a whole when the registry changes: run the script's
-`fetch` and `build` steps and copy the two files here. Prettier leaves
-them as the script writes them. `lib/ai-page/models.ts` reads them and
-gives the filter what each model reads and makes and the memory its
-smallest version needs.
+by `build_models_page.py` in 6529 AI's `deploy/ai-page/` (format
+`6529.io.ai-models.v1` and `6529.io.ai-model-sections.v1`), from the
+registry at a given commit and the hand-written `curated.json` beside
+it. When the registry changes, run the script's `fetch` and `build` steps
+and copy the two files here, then run `node scripts/ai-models-published.cjs
+lib/ai-page/content/models/models.json
+lib/ai-page/content/models/published.json`, which reads, for each model,
+the day its repository was made on Hugging Face (the original model's,
+for a quantization, conversion or repackaging) for "Newest first".
+Prettier leaves the three files as they are written.
+`lib/ai-page/models.ts` reads them and gives the page each model's
+facets for the search and the filter, its scores in one scale and the
+section's common score.
 
-The page shows the data as the build wrote it, with three rules of its
-own. A measured run's note loses its sentences about the network. A
-score whose note calls it the original model's is marked so. A model
-with no scores shows none: gpt-oss, whose publisher prints its scores
-only in a PDF, has no Scores list rather than an empty one. Publishers
-are credited by their name in the data, which for some models is a
-personal Hugging Face account, each linked to the model's files at the
-pinned revision.
+The page shows the data as the build wrote it, with these rules of its
+own:
+
+- A percent is rounded to one decimal. A score out of a fixed maximum
+  says so ("8.49 /10" for MT-Bench, "/1000" for OCRBench). A share of one
+  that is an accuracy or a win rate (Arena Hard, MATH Maj@1, GenEval and
+  the like) shows as a percent; any other score without a unit shows as
+  its card gives it, rounded, since its scale isn't the page's to guess.
+  In the table, a section's column shows a share of one as a percent when
+  other cards give the same benchmark in percent.
+- **orig.** marks a score whose note calls it the original model's, and
+  "How to read this page" says so once.
+- A model with no scores shows none: gpt-oss, whose publisher prints its
+  scores only in a PDF, has no Scores list rather than an empty one.
+- A measured run names its hardware ("8 × H200, 141 GB each"), not the
+  cloud instance, and its note loses the sentences about the network, the
+  demo catalog it came from and "No speed recorded."
+- Publishers are credited by their name in the data, which for some
+  models is a personal Hugging Face account, each linked to the model's
+  files at the pinned revision.
 
 The pages send `noindex, nofollow` (their metadata, and the
 `X-Robots-Tag` header that `config/nextConfig.ts` sets on `/ai/:path*`),
@@ -290,7 +314,7 @@ Localization debt, en-US only today:
 | `/ai`              | `AiDownloads`, `AiDownloadPage`; `lib/ai-page/releaseFiles.ts` | Each file's kind and system needs ("Disk image", "macOS 13.3 or later, Apple silicon") |
 | `/ai/guide`        | `AiGuidePage`, `AiGuideSteps`; `lib/ai-page/content/guide.ts`  | Every step, result, need, code-block label and fold title                              |
 | `/ai/known-issues` | `AiKnownIssuesPage`; `lib/ai-page/content/knownIssues.ts`      | Every issue, workaround and code-block label                                           |
-| `/ai/use`          | `AiUsePage`, `AiUseBlocks`; `lib/ai-page/content/use.ts`       | The whole walk-through, its pictures' alt text and its code-block labels               |
+| `/ai/use`          | `AiUsePage`, `AiUseBlocks`; `lib/ai-page/content/use/`         | The whole walk-through, its pictures' alt text and its code-block labels               |
 | `/ai/models`       | `AiModelCard`; `lib/ai-page/content/models/*.json`             | Section titles and lines, model descriptions, notes and license summaries              |
 
 These strings don't go through `t()`, so another locale sees them in

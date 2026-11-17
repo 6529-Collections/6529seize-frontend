@@ -1,16 +1,34 @@
 import type { ReactNode } from "react";
 
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
+import "@/i18n/namespaces/ai-download";
 import type { AiUseBlock } from "@/lib/ai-page/content/use";
+import { AI_USE_IMAGES } from "@/lib/ai-page/content/useImages";
 import AiCodeBlock from "../AiCodeBlock";
 import { AI_BODY, AI_H3 } from "../AiPageFrame";
+import type { AiZoomText } from "../AiZoomPicture";
 import InlineText from "../InlineText";
 import AiUseFigure, { AiUsePhoneRow } from "./AiUseFigure";
-import { AI_USE_IMAGES } from "@/lib/ai-page/content/useImages";
+
+// Rendered on the server, in the locale the server renders.
+const LOCALE = DEFAULT_LOCALE;
+const ZOOM: AiZoomText = {
+  open: t(LOCALE, "ai.use.zoom"),
+  close: t(LOCALE, "ai.use.zoomClose"),
+};
+/** Output longer than this folds behind "Show output". */
+const OUTPUT_LINES = 10;
 
 type ImageBlock = Extract<AiUseBlock, { kind: "image" }>;
 
+/** A whole phone-width screen, which sits in a row of them. */
 function isPhone(block: AiUseBlock): block is ImageBlock {
-  return block.kind === "image" && AI_USE_IMAGES[block.image].kind === "phone";
+  if (block.kind !== "image") {
+    return false;
+  }
+  const picture = AI_USE_IMAGES[block.image];
+  return picture.crop === null && picture.height > picture.width;
 }
 
 type Entry =
@@ -64,46 +82,41 @@ function Steps({
   );
 }
 
-function Table({
-  block,
-}: {
-  readonly block: Extract<AiUseBlock, { kind: "table" }>;
-}) {
+/**
+ * What a command printed: quieter than a command, with no bar and no Copy
+ * button, and folded behind "Show output" when it runs long.
+ */
+function Output({ code }: { readonly code: string }) {
+  const lines = code.split("\n").length;
+  const pre = (
+    <pre className="tw-m-0 tw-overflow-x-auto tw-whitespace-pre tw-px-4 tw-py-3 tw-font-mono tw-text-[13px] tw-leading-6 tw-text-iron-400">
+      <span className="tw-sr-only">{t(LOCALE, "ai.use.output")}: </span>
+      {code}
+    </pre>
+  );
+  const frame =
+    "tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.04] tw-bg-white/[0.02]";
+  if (lines <= OUTPUT_LINES) {
+    return <div className={frame}>{pre}</div>;
+  }
   return (
-    <div className="tw-overflow-x-auto tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08]">
-      <table className="tw-w-full tw-border-collapse tw-text-left tw-text-sm tw-leading-6">
-        <thead>
-          <tr className="tw-bg-white/[0.03]">
-            {block.head.map((cell) => (
-              <th
-                key={cell}
-                scope="col"
-                className="tw-px-4 tw-py-2 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-wide tw-text-iron-400"
-              >
-                {cell}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {block.rows.map((row) => (
-            <tr
-              key={row.join("|")}
-              className="tw-border-0 tw-border-t tw-border-solid tw-border-white/[0.06]"
-            >
-              {row.map((cell, index) => (
-                <td
-                  key={cell}
-                  className={`tw-px-4 tw-py-2.5 tw-align-top ${index === 0 ? "tw-font-medium tw-text-iron-100" : "tw-text-iron-300"}`}
-                >
-                  <InlineText text={cell} />
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <details className={`${frame} tw-group`}>
+      <summary className="tw-flex tw-min-h-11 tw-cursor-pointer tw-list-none tw-items-center tw-gap-2 tw-px-4 tw-text-sm tw-text-iron-400 hover:tw-text-iron-100 sm:tw-min-h-10 [&::-webkit-details-marker]:tw-hidden">
+        <span
+          aria-hidden="true"
+          className="tw-text-iron-600 tw-transition group-open:tw-rotate-90"
+        >
+          ›
+        </span>
+        <span className="group-open:tw-hidden">
+          {t(LOCALE, "ai.use.showOutput", { lines: String(lines) })}
+        </span>
+        <span className="tw-hidden group-open:tw-inline">
+          {t(LOCALE, "ai.use.hideOutput")}
+        </span>
+      </summary>
+      {pre}
+    </details>
   );
 }
 
@@ -124,17 +137,13 @@ function Block({ block }: { readonly block: AiUseBlock }): ReactNode {
     case "steps":
       return <Steps items={block.items} />;
     case "code":
-      return (
-        <AiCodeBlock
-          code={block.code}
-          label={block.label}
-          copy={!block.output}
-        />
+      return block.output ? (
+        <Output code={block.code} />
+      ) : (
+        <AiCodeBlock code={block.code} label={block.label} />
       );
     case "image":
-      return <AiUseFigure image={block.image} alt={block.alt} />;
-    case "table":
-      return <Table block={block} />;
+      return <AiUseFigure image={block.image} alt={block.alt} text={ZOOM} />;
     case "list":
       return (
         <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-2 tw-pl-5">
@@ -145,6 +154,23 @@ function Block({ block }: { readonly block: AiUseBlock }): ReactNode {
           ))}
         </ul>
       );
+  }
+}
+
+function blockKey(block: AiUseBlock): string {
+  switch (block.kind) {
+    case "p":
+      return `p:${block.text}`;
+    case "h3":
+      return `h3:${block.id}`;
+    case "steps":
+      return `steps:${block.items[0]?.text ?? ""}`;
+    case "code":
+      return `code:${block.label}:${block.code}`;
+    case "image":
+      return `image:${block.image}`;
+    case "list":
+      return `list:${block.items[0] ?? ""}`;
   }
 }
 
@@ -161,6 +187,7 @@ export default function AiUseBlocks({
           <AiUsePhoneRow
             key={entry.images.map((image) => image.image).join(",")}
             images={entry.images}
+            text={ZOOM}
           />
         ) : (
           <Block key={blockKey(entry.block)} block={entry.block} />
@@ -168,23 +195,4 @@ export default function AiUseBlocks({
       )}
     </>
   );
-}
-
-function blockKey(block: AiUseBlock): string {
-  switch (block.kind) {
-    case "p":
-      return `p:${block.text}`;
-    case "h3":
-      return `h3:${block.id}`;
-    case "steps":
-      return `steps:${block.items[0]?.text ?? ""}`;
-    case "code":
-      return `code:${block.label}:${block.code}`;
-    case "image":
-      return `image:${block.image}`;
-    case "table":
-      return `table:${block.head.join("|")}`;
-    case "list":
-      return `list:${block.items[0] ?? ""}`;
-  }
 }

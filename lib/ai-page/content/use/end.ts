@@ -13,13 +13,8 @@ export const AI_USE_END: readonly AiUseSection[] = [
       },
       {
         kind: "image",
-        image: "80-stop-ask-dark",
+        image: "80-stop-ask",
         alt: "Stop serving gemma-4-26b-a4b? Its engine stops, and requests for gemma-4-26b-a4b fail at once. Its files stay on this computer. Keep serving or Stop serving.",
-      },
-      {
-        kind: "image",
-        image: "81-stopped-dark",
-        alt: "gemma-4-26b-a4b after it stopped: On disk, with Serve here.",
       },
       {
         kind: "p",
@@ -48,32 +43,32 @@ export const AI_USE_END: readonly AiUseSection[] = [
       },
       {
         kind: "image",
-        image: "98-phone-chat-dark",
+        image: "98-phone-chat",
         alt: "Chat at phone width: the picture, the question and the answer, with the screens in a bar at the bottom.",
       },
       {
         kind: "image",
-        image: "98b-phone-chat-list-dark",
+        image: "98b-phone-chat-list",
         alt: "The chat list open at phone width.",
       },
       {
         kind: "image",
-        image: "98c-phone-start-dark",
+        image: "98c-phone-start",
         alt: "Start at phone width: gemma-4-26b-a4b is ready.",
       },
       {
         kind: "image",
-        image: "98d-phone-image-dark",
+        image: "98d-phone-image",
         alt: "Image at phone width.",
       },
       {
         kind: "image",
-        image: "98e-phone-speech-dark",
+        image: "98e-phone-speech",
         alt: "Speech at phone width, with the text and Send to chat.",
       },
       {
         kind: "image",
-        image: "98f-phone-keys-dark",
+        image: "98f-phone-keys",
         alt: "Keys at phone width.",
       },
       {
@@ -115,7 +110,7 @@ export const AI_USE_END: readonly AiUseSection[] = [
       },
       {
         kind: "p",
-        text: "In Settings, Apps, choose **6529 AI 0.1.0-rc.1** and **Uninstall**. It asks to confirm, removes the programs, the scheduled task and the Start menu entry, then asks whether to delete the data folder. **No** keeps your models for a later install. We ran the same uninstaller, `unins000.exe` in `C:\\Program Files\\6529 AI`, directly.",
+        text: "In Settings, Apps, choose **6529 AI 0.1.0-rc.1** and **Uninstall**. It asks to confirm, removes the programs, the scheduled task and the Start menu entry, then asks whether to delete the data folder. **No** keeps your models for a later install.",
       },
       {
         kind: "image",
@@ -182,93 +177,6 @@ Purging configuration files for 6529-ai-cuda (0.1.0~rc.1) ...`,
       {
         kind: "p",
         text: "The package is `6529-ai` for the CPU `.deb`. apt leaves ffmpeg and the other packages it installed with 6529 AI; `sudo apt autoremove` removes them.",
-      },
-    ],
-  },
-  {
-    id: "known-problems",
-    title: "Known problems",
-    blocks: [
-      {
-        kind: "p",
-        text: "These came up while we made this page, on `0.1.0-rc.1`.",
-      },
-      {
-        kind: "h3",
-        id: "known-problems-windows-fetch-and-serve-can-fail-on-a-fresh-windows",
-        title: "Windows: Fetch and serve can fail on a fresh Windows",
-      },
-      {
-        kind: "p",
-        text: "On two fresh Windows Server 2025 computers, every model failed right after the install with \"error sending request for url\", and the API answered HTTP 502. The registry's address has a Let's Encrypt certificate, and those computers didn't have its root, ISRG Root X1, yet. Windows adds a root only when its own TLS first needs it. The service reads the roots once, when it starts.",
-      },
-      {
-        kind: "p",
-        text: "A restart of the service alone didn't help. After PowerShell had reached the registry's address, which made Windows add the root, and the service had restarted, models fetched and served.",
-      },
-      {
-        kind: "p",
-        text: "**Workaround.** Open PowerShell as administrator and reach the two Let's Encrypt test sites, which makes Windows add their roots. Then restart the scheduled task **6529 AI**, or the computer. The next build fixes it.",
-      },
-      {
-        kind: "code",
-        label: "PowerShell, as administrator",
-        code: `Invoke-WebRequest https://valid-isrgrootx1.letsencrypt.org -UseBasicParsing | Out-Null
-Invoke-WebRequest https://valid-isrgrootx2.letsencrypt.org -UseBasicParsing | Out-Null
-Stop-ScheduledTask -TaskName '6529 AI'
-Start-ScheduledTask -TaskName '6529 AI'`,
-      },
-      {
-        kind: "h3",
-        id: "known-problems-windows-the-installer-picked-vulkan-on-a-computer-with-no-gpu",
-        title: "Windows: the installer picked Vulkan on a computer with no GPU",
-      },
-      {
-        kind: "p",
-        text: "The installer picks Vulkan whenever Windows has the Vulkan loader, and Windows Server 2025 has it without a GPU. The models still ran, on the processor: `qwen3-0.6b` answered at 11 tokens a second on a computer with 2 processors.",
-      },
-      {
-        kind: "h3",
-        id: "known-problems-linux-a-model-near-the-memory-s-size-loaded-slowly",
-        title: "Linux: a model near the memory's size loaded slowly",
-      },
-      {
-        kind: "p",
-        text: "The g6.xlarge has 16 GB of memory. There, `gemma-4-26b-a4b`, 15.6 GB, had not loaded after 13 minutes from the computer's network disk, which it read at 7 to 10 MB a second. From a local NVMe disk it loaded in 70 seconds.",
-      },
-      {
-        kind: "h3",
-        id: "known-problems-chat-a-long-title-hides-a-chat-s-buttons",
-        title: "Chat: a long title hides a chat's buttons",
-      },
-      {
-        kind: "p",
-        text: "The first message names the chat. A name wider than the chat list pushes the chat's rename and delete buttons out of sight.",
-      },
-      {
-        kind: "h3",
-        id: "known-problems-the-sign-in-ends-when-the-service-restarts",
-        title: "The sign-in ends when the service restarts",
-      },
-      {
-        kind: "p",
-        text: "The page's dialog says the sign-in lasts 7 days, or until you sign out. A restart of the service, or of the computer, also ends it.",
-      },
-    ],
-  },
-  {
-    id: "what-nobody-has-tested-yet",
-    title: "What nobody has tested yet",
-    blocks: [
-      {
-        kind: "list",
-        items: [
-          "The Windows installer on Windows 10 or 11, or on a computer with a GPU.",
-          "The page on a phone; it answers on 127.0.0.1 only. The phone-width pictures are a desktop browser made narrow.",
-          "The Mac on any macOS but 15.8.2, or on any Mac but an M2.",
-          "The CUDA packages on any GPU but an NVIDIA L4, and on any Linux but Ubuntu 22.04 and 24.04.",
-          "Record, on the Speech screen; we used a file.",
-        ],
       },
     ],
   },

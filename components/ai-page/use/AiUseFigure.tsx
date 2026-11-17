@@ -1,83 +1,43 @@
-import Image from "next/image";
+import type { AiUseImageKey } from "@/lib/ai-page/content/useImages";
+import AiZoomPicture, { type AiZoomText } from "../AiZoomPicture";
 
-import {
-  AI_USE_IMAGES,
-  type AiUseImageKey,
-} from "@/lib/ai-page/content/useImages";
-
-const FRAME =
-  "tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950";
-
-/**
- * A picture from the walk-through, in the cards' 1 px border and radius. A
- * page fills the column; a dialog shows at its real size, centred; a phone
- * screen sits in a row of them (see AiUsePhoneRow).
- */
+/** A picture from the walk-through: its step's part, and the whole on a click. */
 export default function AiUseFigure({
   image,
   alt,
+  text,
 }: {
   readonly image: AiUseImageKey;
   readonly alt: string;
+  readonly text: AiZoomText;
 }) {
-  const picture = AI_USE_IMAGES[image];
-  if (picture.kind === "page") {
-    return (
-      <div className={FRAME}>
-        <Image
-          src={picture.src}
-          alt={alt}
-          width={picture.width}
-          height={picture.height}
-          sizes="(min-width: 1152px) 820px, (min-width: 1024px) 70vw, 100vw"
-          className="tw-block tw-h-auto tw-w-full"
-        />
-      </div>
-    );
-  }
-  return (
-    <div
-      className={`${FRAME} tw-mx-auto tw-w-full`}
-      style={{ maxWidth: picture.cssWidth }}
-    >
-      <Image
-        src={picture.src}
-        alt={alt}
-        width={picture.width}
-        height={picture.height}
-        sizes={`${picture.cssWidth}px`}
-        className="tw-block tw-h-auto tw-w-full"
-      />
-    </div>
-  );
+  return <AiZoomPicture image={image} alt={alt} text={text} />;
 }
 
-/** Phone-width screens side by side: two on a phone, three from 640 px. */
+/**
+ * Phone-width screens: two side by side from 640 px, at their real size;
+ * on a phone, a row that scrolls sideways, one screen at a time.
+ */
 export function AiUsePhoneRow({
   images,
+  text,
 }: {
   readonly images: readonly {
     readonly image: AiUseImageKey;
     readonly alt: string;
   }[];
+  readonly text: AiZoomText;
 }) {
   return (
-    <ul className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-3 tw-p-0 sm:tw-grid-cols-3 sm:tw-gap-4">
-      {images.map(({ image, alt }) => {
-        const picture = AI_USE_IMAGES[image];
-        return (
-          <li key={image} className={FRAME}>
-            <Image
-              src={picture.src}
-              alt={alt}
-              width={picture.width}
-              height={picture.height}
-              sizes="(min-width: 640px) 260px, 45vw"
-              className="tw-block tw-h-auto tw-w-full"
-            />
-          </li>
-        );
-      })}
+    <ul className="tw-m-0 -tw-mx-4 tw-flex tw-snap-x tw-snap-mandatory tw-list-none tw-gap-3 tw-overflow-x-auto tw-px-4 tw-pb-2 sm:tw-mx-0 sm:tw-grid sm:tw-grid-cols-2 sm:tw-gap-4 sm:tw-overflow-visible sm:tw-px-0 sm:tw-pb-0">
+      {images.map(({ image, alt }) => (
+        <li
+          key={image}
+          className="tw-w-[78vw] tw-max-w-[390px] tw-flex-none tw-snap-center sm:tw-w-auto"
+        >
+          <AiZoomPicture image={image} alt={alt} text={text} fill />
+        </li>
+      ))}
     </ul>
   );
 }

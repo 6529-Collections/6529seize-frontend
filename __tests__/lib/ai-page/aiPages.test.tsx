@@ -102,8 +102,8 @@ describe("the /ai pages", () => {
   it("say on every page, before its text, that 6529 AI is untested", async () => {
     storeHasSignedFeed();
     const [download, guide, knownIssues] = await renderAll();
-    const models = renderToStaticMarkup(AiModelsRoute());
-    const use = renderToStaticMarkup(AiUseRoute());
+    const models = renderToStaticMarkup(await AiModelsRoute());
+    const use = renderToStaticMarkup(await AiUseRoute());
     for (const html of [download!, guide!, models, use]) {
       expect(html).toContain(NOTICE);
       expect(html).toContain(DISCLAIMER);
@@ -260,12 +260,13 @@ describe("the /ai pages", () => {
     expect(html).toContain("Updated November 17, 2026");
     for (const text of [
       "Tested only on a cloud Mac (M2, macOS 15.8.2).",
-      "Opening the app by double-click hasn&#x27;t been tested",
       "Not tested with a GPU.",
       "Tested only on Ubuntu 22.04 and 24.04.",
-      "Clicking through the installer&#x27;s screens hasn&#x27;t been tested",
-      "6529-ai/placement select alone",
-      "can fail with &quot;error sending request for url&quot;",
+      ">Known bugs</h2>",
+      ">Not tested yet</h2>",
+      "fails for every model with &quot;error sending request for url&quot;",
+      "On a computer with no GPU, the installer picks",
+      "signs the page out, though its dialog says the sign-in lasts 7 days",
       "Invoke-WebRequest https://valid-isrgrootx1.letsencrypt.org -UseBasicParsing | Out-Null",
       "Start-ScheduledTask -TaskName &#x27;6529 AI&#x27;",
     ]) {
@@ -306,7 +307,12 @@ describe("the /ai pages", () => {
     );
     expect(guide).toContain("%2Fai%2Fuse%2F14-mac-first-run.webp");
     expect(guide).toContain("%2Fai%2Fuse%2F40-chat.webp");
-    expect(guide).toContain("A chat reply from gemma-4-26b-a4b");
+    expect(guide).toContain(
+      "A first chat. Whichever model you pick, Chat looks the same."
+    );
+    // A phone shows the app's own phone-width capture instead.
+    expect(guide).toContain("%2Fai%2Fuse%2F98-phone-chat.webp");
+    expect(download).toContain("%2Fai%2Fuse%2F98c-phone-start.webp");
     // The Mac's question shows at its real size: half the 2x file.
     expect(guide).toContain("max-width:432px");
     expect(knownIssues).not.toContain("<figure");
@@ -346,10 +352,10 @@ describe("the /ai pages", () => {
       );
     }
     for (const html of [
-      renderToStaticMarkup(AiModelsRoute()),
-      renderToStaticMarkup(AiUseRoute()),
+      renderToStaticMarkup(await AiModelsRoute()),
+      renderToStaticMarkup(await AiUseRoute()),
     ]) {
-      expect(textOf(html)).not.toMatch(/the network|AI network|Tor/i);
+      expect(textOf(html)).not.toMatch(/the network|AI network|\bTor\b/i);
     }
     const mentions = textOf(download!).match(/network/gi) ?? [];
     expect(mentions.length).toBeLessThanOrEqual(1);

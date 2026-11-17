@@ -1,6 +1,5 @@
 import { AI_USE_API } from "./api";
 import { AI_USE_END } from "./end";
-import { AI_USE_INSTALL } from "./install";
 import { AI_USE_PAGE } from "./page";
 import type { AiUseBlock, AiUseSection } from "./types";
 
@@ -15,40 +14,24 @@ export type { AiUseBlock } from "./types";
 // ops/docs/ai-download-page.md.
 
 export const AI_USE_LEAD =
-  "6529 AI runs open-weights AI models on your computer. This page takes you from the download to real use, one step at a time, with pictures of each step.";
+  "6529 AI runs open-weights AI models on your computer. Once it is installed, this page takes you through real use, one step at a time, with a picture of each step.";
 
 export const AI_USE_INTRO: readonly AiUseBlock[] = [
   {
     kind: "p",
-    text: "You chat with them, make images and turn speech into text in a page in your browser, and your own programs reach the same models through an OpenAI-compatible API on 127.0.0.1.",
+    text: "You chat with the models, make images and turn speech into text in a page in your browser, and your own programs reach the same models through an OpenAI-compatible API on 127.0.0.1. Not installed yet? The [Guide](/ai/guide) installs it on a Mac, Windows or Linux.",
   },
   {
     kind: "p",
-    text: "Everything here is from `0.1.0-rc.1`, the first release candidate, with the config it installs. The pictures come from three computers:",
-  },
-  {
-    kind: "table",
-    head: ["Steps", "Computer"],
-    rows: [
-      [
-        "The page, the models, the API",
-        "Ubuntu 24.04 with an NVIDIA L4 GPU (24 GB) and 16 GB of memory, an AWS g6.xlarge",
-      ],
-      [
-        "Installing on a Mac",
-        "A Mac mini with an Apple M2 and 24 GB of memory, macOS 15.8.2, on AWS",
-      ],
-      ["Installing on Windows", "Windows Server 2025 on AWS, with no GPU"],
-    ],
-  },
-  {
-    kind: "p",
-    text: "Your port, sizes and timings differ from these. Where a step shows a port, ours was 43188; use the one your install prints.",
+    text: "Your port, sizes and timings will differ from the ones here. Where a step shows a port, ours was 43188; use the one your install prints.",
   },
 ];
 
+/** Where the pictures and output come from, under the last section. */
+export const AI_USE_FOOTNOTE =
+  "The pictures and output are from `0.1.0-rc.1`, with the config it installs, on three computers: the page, the models and the API on Ubuntu 24.04 with an NVIDIA L4 (24 GB) and 16 GB of memory; the Mac's chat on an Apple M2 with 24 GB; the Windows uninstall on Windows Server 2025 with no GPU.";
+
 export const AI_USE_SECTIONS: readonly AiUseSection[] = [
-  ...AI_USE_INSTALL,
   ...AI_USE_PAGE,
   ...AI_USE_API,
   ...AI_USE_END,

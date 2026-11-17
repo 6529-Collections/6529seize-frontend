@@ -4,8 +4,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import AiModelsPage from "@/components/ai-page/models/AiModelsPage";
 import modelsFile from "@/lib/ai-page/content/models/models.json";
 import sectionsFile from "@/lib/ai-page/content/models/sections.json";
+import { formatAiScore } from "@/components/ai-page/models/formatAiScore";
 import {
   getAiModelCounts,
+  getAiScore,
+  getMeasuredHardware,
+  getSectionScore,
   getAiModelFacets,
   getAiModelLine,
   getAiModelSections,
@@ -25,6 +29,18 @@ function model(id: string): AiModel {
 }
 
 describe("the models data", () => {
+  it("names the hardware of a measured run, not the cloud instance", () => {
+    expect(
+      getMeasuredHardware({
+        date: "2026-11-14",
+        machine:
+          "AWS p5.48xlarge, on one H100 of 80 GB, with its expert weights in system memory",
+        engine: "llama.cpp",
+        note: null,
+      })
+    ).toBe("One H100, 80 GB, experts in system memory");
+  });
+
   it("is in the format the page reads", () => {
     expect(modelsFile.schema).toBe("6529.io.ai-models.v1");
     expect(sectionsFile.schema).toBe("6529.io.ai-model-sections.v1");
@@ -49,6 +65,8 @@ describe("the models data", () => {
 
   it("gives the filter what a model reads and makes, and its memory", () => {
     expect(getAiModelFacets(model("gemma-4-26b-a4b"))).toEqual({
+      search: "gemma 4 26b a4b google  gemma-4-26b-a4b",
+      published: "2026-03-11",
       runs: true,
       reads: ["text", "image"],
       makes: ["text"],
@@ -89,12 +107,55 @@ describe("the models data", () => {
   });
 });
 
+describe("scores", () => {
+  const score = (name: string, value: string, unit: string | null = null) =>
+    formatAiScore(
+      "en-US",
+      getAiScore({
+        name,
+        score: value,
+        unit,
+        lowerIsBetter: false,
+        source: "",
+        note: null,
+      })
+    );
+
+  it("prints one scale, rounded, and guesses no other", () => {
+    expect(score("IFEval", "5.008769117619326", "%")).toBe("5.0%");
+    expect(score("Arena Hard", "0.551")).toBe("55.1%");
+    expect(score("MM MTBench", "8.49")).toBe("8.49 /10");
+    expect(score("OCRBench", "880")).toBe("880 /1,000");
+    // A share of one whose scale its card leaves open stays as printed.
+    expect(score("Seed-TTS test-en speaker similarity", "0.633")).toBe("0.633");
+    expect(score("BEIR", "55.33")).toBe("55.3");
+  });
+
+  it("gives a section a column for the benchmark most of its models report", () => {
+    const sections = getAiModelSections();
+    const speech = getSectionScore(
+      sections.find((section) => section.id === "speech-to-text")!
+    );
+    expect(speech?.name).toBe("LibriSpeech test-clean WER");
+    expect(
+      getSectionScore(sections.find((section) => section.id === "robotics")!)
+    ).toBeNull();
+  });
+});
+
 describe("/ai/models", () => {
-  const html = renderToStaticMarkup(<AiModelsPage />);
+  const html = renderToStaticMarkup(<AiModelsPage version="0.1.0-rc.1" />);
   const card = (id: string) => {
     const start = html.indexOf(`id="model-${id}"`);
     return html.slice(start, html.indexOf("</article>", start));
   };
+
+  it("leads with the count the app runs, under the release", () => {
+    expect(html).toContain(
+      "227 open-weights models. 139 run in the app today."
+    );
+    expect(html).toContain(">0.1.0-rc.1</span>");
+  });
 
   it("shows every model as a card, by section", () => {
     expect(html.match(/<article/g)).toHaveLength(models.length);
@@ -124,15 +185,23 @@ describe("/ai/models", () => {
     expect(card("gemma-4-26b-a4b")).toContain(
       'href="https://huggingface.co/google/gemma-4-26B-A4B-it/blob/4d7ae4984b7db7de8f8457170b3f1a419ee76d52/README.md"'
     );
-    expect(card("gemma-4-26b-a4b")).toContain("the original model&#x27;s");
+    expect(card("gemma-4-26b-a4b")).toContain("†");
+    expect(card("gemma-4-26b-a4b")).toContain(
+      "(the original model&#x27;s score)"
+    );
+    expect(html).not.toMatch(/\d\.\d{4,}%/);
   });
 
-  it("labels 6529's own runs, with the machine", () => {
+  it("labels 6529's own runs, with the hardware", () => {
     expect(card("qwen3-4b-gguf")).toContain("Measured by 6529 AI");
     expect(card("qwen3-4b-gguf")).toContain("56.2 tokens a second");
-    expect(card("qwen3-4b-gguf")).toContain(
-      "AWS c7i.metal-24xl, Intel Xeon with 96 vCPUs, no GPU"
+    expect(card("qwen3-4b-gguf")).toContain("Intel Xeon, 96 vCPUs, no GPU");
+    expect(card("qwen3-4b-gguf")).not.toContain("no speed recorded");
+    expect(card("deepseek-v4.1-flash-q6k-engram")).toContain(
+      "8 × H200, 141 GB each"
     );
+    expect(html).not.toContain("demo catalog");
+    expect(html).not.toContain("c7i.metal");
   });
 
   it("says why the app doesn't run a model yet", () => {

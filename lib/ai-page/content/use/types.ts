@@ -23,11 +23,6 @@ export type AiUseBlock =
       readonly image: AiUseImageKey;
       readonly alt: string;
     }
-  | {
-      readonly kind: "table";
-      readonly head: readonly string[];
-      readonly rows: readonly (readonly string[])[];
-    }
   | { readonly kind: "list"; readonly items: readonly string[] };
 
 export type AiUseSection = {
