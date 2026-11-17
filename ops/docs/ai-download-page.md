@@ -33,8 +33,9 @@ own lead.
   the page can't tell is a computer, gets "Open this page on your computer"
   with a Copy link (or Share link) button and a row of Mac, Windows and
   Linux buttons instead. Then "How it works" in three steps, and
-  Downloads: one card each for the Mac and Windows file, and a Linux card
-  with an x86-64 / NVIDIA GPU / ARM64 switch over its `.deb` and
+  Downloads. The Mac and Windows cards are one row each, with the system
+  needs in the row's grey line; only the Linux card has a header, over
+  its x86-64 / NVIDIA GPU / ARM64 switch for the `.deb` and
   `.tar.gz`. Each file has its badges, size, a "Copy SHA-256" button (the
   hash is never printed on the page, but screen readers get it whole) and
   its download. "Verify your download" is one closed section: checking a
@@ -43,10 +44,13 @@ own lead.
   `SHA256SUMS.sig` and `manifest.json`.
 - **Guide** (`/ai/guide`): a Mac / Windows / Linux tab control that opens
   on the visitor's system (the Mac for a phone). Each tab has what the
-  computer needs with its download buttons, numbered install steps that say
-  what the person sees after each and which choice is the default, how to
-  open the page again, and closed Troubleshooting (where the log is) and
-  Uninstall sections; Linux adds the `.tar.gz` for other distributions.
+  computer needs with its download buttons, then numbered install steps.
+  A step reads in order: what to do (with the default choice named), its
+  command, what the person sees then, and the screenshot. On Linux each
+  `apt install` label leads with the CPU ("x86-64 · amd64.deb"). Then how
+  to open the page again, and closed Troubleshooting (where the log is)
+  and Uninstall sections; Linux adds the `.tar.gz` for other
+  distributions.
   Then the first chat, with `qwen3-4b-gguf` to try first, two short notes
   (running a validator on the same computer, and the OpenAI-compatible
   API), and "Report a problem".
@@ -66,13 +70,19 @@ breaking, and fades at the right edge while more of it is hidden. Touch
 targets are 44 px on a phone. The pages are dark-only, as the site is.
 
 Three places take a screenshot of the app: the download page's first
-screen, the Mac step where the app asks whether a validator runs on the
-same computer, and the first chat. `lib/ai-page/screenshots.ts` lists
-them; a slot with no file renders nothing, so the pages never show a
-stand-in. Put each screenshot under `public/ai/`, add `ai` to
-`PUBLIC_IMAGE_DIRECTORIES` in `lib/proxy/publicPaths.ts` (the public
-path contract asks every top-level folder to be classified), and set its
-`src`, `width` and `height` there; each shows with its caption.
+screen (the model list), the Mac step where the app asks whether a
+validator runs on the same computer, and the first chat (a chat reply).
+`lib/ai-page/screenshots.ts` lists them; a slot with no file renders
+nothing, no box and no caption, so the pages never show a stand-in. Take
+each in the app's dark theme, with no browser frame, at twice the size
+it shows at. The page draws the cards' 1 px border and radius around
+it, and shows the Mac question at its real size (half the file's
+width), centred; the other two fill the column. Put each file under
+`public/ai/`, add `ai` to `PUBLIC_IMAGE_DIRECTORIES` in
+`lib/proxy/publicPaths.ts` (the public path contract asks every
+top-level folder to be classified), and in `screenshots.ts` set its
+`src`, and its `width` and `height` in the file's own pixels. Each
+shows with its caption.
 
 The pages send `noindex, nofollow` (their metadata, and the
 `X-Robots-Tag` header that `config/nextConfig.ts` sets on `/ai/:path*`),
@@ -80,6 +90,18 @@ and `next-sitemap.config.ts` leaves them out of the sitemap. `robots.txt`
 does not name them. The 6529 Help Bot corpus (`ops/help/help-index.json`)
 and the header search leave them out too, until the owner links the
 section.
+
+`/ai` is a site route, not a profile handle, in the lists that tell them
+apart: page classification for analytics
+(`services/analytics/pageClassification.ts`), the default page title
+(`contexts/TitleContext.tsx`) and the monitoring route names
+(`utils/monitoring/mobileLaunchTimingSanitizers.ts`). A link to
+`https://6529.io/ai` in a drop opens the page in place, without a page
+load, on the site, and so it does in the Playwright projects that stand
+in for 6529 Mobile and 6529 Desktop. The 6529 Core desktop app runs its
+own older copy of the site, which has no `/ai` (nor `/validator`): it
+turns the same link into its own `/ai`, which its profile catch-all
+answers with "not found". Only a 6529 Core release can change that.
 
 The code is in `app/ai/`, `components/ai-page/` and `lib/ai-page/`. It uses
 the validator page's AWS request signing (`lib/validator-page/sigv4.ts`),

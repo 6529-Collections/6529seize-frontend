@@ -273,7 +273,7 @@ export default function AiDownloadPage({
 
       <div className="tw-mt-10 empty:tw-hidden">
         <AiScreenshot
-          slot={AI_SCREENSHOTS.chat}
+          slot={AI_SCREENSHOTS.models}
           alt={t(LOCALE, "ai.download.screenshot")}
           caption={t(LOCALE, "ai.download.screenshotCaption")}
           priority

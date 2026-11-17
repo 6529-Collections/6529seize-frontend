@@ -168,7 +168,7 @@ function SystemPanel({
                 slot={AI_SCREENSHOTS.placement}
                 alt={t(LOCALE, "ai.guide.placementShot")}
                 caption={t(LOCALE, "ai.guide.placementCaption")}
-                narrow
+                realSize
               />
             ),
           }}
