@@ -13,6 +13,7 @@
 
 import { ApiAttachment } from '../models/ApiAttachment';
 import { ApiCollapsedReplyThread } from '../models/ApiCollapsedReplyThread';
+import { ApiDropCompetitionEntryReference } from '../models/ApiDropCompetitionEntryReference';
 import { ApiDropGroupMention } from '../models/ApiDropGroupMention';
 import { ApiDropMainType } from '../models/ApiDropMainType';
 import { ApiDropMedia } from '../models/ApiDropMedia';
@@ -34,6 +35,10 @@ import { ApiWaveOverview } from '../models/ApiWaveOverview';
 import { HttpFile } from '../http/http';
 
 export class ApiDropV2 {
+    /**
+    * Visible competition entry for this drop in a Wave timeline or reply feed. Null means there is no visible entry. Omitted when membership was not evaluated.
+    */
+    'competition_entry'?: ApiDropCompetitionEntryReference | null;
     /**
     * Original submitter artist credit before accepted collaborator credits are appended.
     */
@@ -89,6 +94,12 @@ export class ApiDropV2 {
     static readonly mapping: {[index: string]: string} | undefined = undefined;
 
     static readonly attributeTypeMap: Array<{name: string, baseName: string, type: string, format: string}> = [
+        {
+            "name": "competition_entry",
+            "baseName": "competition_entry",
+            "type": "ApiDropCompetitionEntryReference",
+            "format": ""
+        },
         {
             "name": "submission_artist",
             "baseName": "submission_artist",

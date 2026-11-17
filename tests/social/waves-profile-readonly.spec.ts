@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
 import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
+import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
 import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage";
 import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
@@ -2062,6 +2063,37 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const settings = await response.json();
     expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
 
+    const ordinaryFeedIds = new Set<string>();
+    if (process.env["PLAYWRIGHT_ENV"] === "staging") {
+      const feedUrl = new URL(response.url());
+      feedUrl.pathname = `/api/v2/waves/${settings.memes_wave_id}/drops`;
+      feedUrl.searchParams.set("limit", "50");
+      feedUrl.searchParams.set("respect_drop_reply_collapse", "true");
+      const access = await response.request().headerValue("x-6529-auth");
+      const feedResponse = await page.request.get(feedUrl.href, {
+        headers: access ? { "x-6529-auth": access } : {},
+      });
+      expect(feedResponse.ok()).toBe(true);
+      const feed: ApiWaveDropsFeedV2 = await feedResponse.json();
+      expect(feed.wave.has_competition).toBe(true);
+      expect(feed.drops.length).toBeGreaterThan(0);
+      for (const drop of feed.drops) {
+        expect(drop.competition_entry).toBeDefined();
+        if (drop.competition_entry === null) ordinaryFeedIds.add(drop.id);
+      }
+    }
+    const ordinaryContextRequests: string[] = [];
+    page.on("request", (request) => {
+      const parts = new URL(request.url()).pathname.split("/");
+      const dropId = parts.at(-2);
+      if (
+        parts.at(-1) === "competition-context" &&
+        dropId &&
+        ordinaryFeedIds.has(dropId)
+      ) {
+        ordinaryContextRequests.push(dropId);
+      }
+    });
     await gotoReady(page, `/waves/${settings.memes_wave_id}`);
     await expect(
       page.getByRole("heading", { level: 1, name: "The Memes - Main Stage" })
@@ -2098,6 +2130,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       body: await page.screenshot(),
       contentType: "image/png",
     });
+    expect(ordinaryContextRequests).toEqual([]);
     // This pack runs signed out; personal voting controls remain authenticated.
     await expect(
       page.getByRole("tab", { name: "My Votes", exact: true })
@@ -2739,19 +2772,43 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("keeps profile statistics natural and activity loading compact", async ({
     page,
   }) => {
-    let releaseLogs: () => void = () => {};
-    const logsReady = new Promise<void>((resolve) => {
-      releaseLogs = resolve;
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
     });
-    await page.route("**/api/profile-logs?**", async (route) => {
-      await logsReady;
+    const browserReads: string[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      const defaultLog =
+        url.pathname === "/api/profile-logs" &&
+        url.searchParams.get("profile") === PROFILE_HANDLE &&
+        url.searchParams.get("page") === "1" &&
+        url.searchParams.get("include_incoming") === "true";
+      const initialRatingsOrStatements = [
+        "rep/overview",
+        "rep/categories",
+        "cic/overview",
+        "cic/statements",
+      ].some(
+        (suffix) => url.pathname === `/api/profiles/${PROFILE_HANDLE}/${suffix}`
+      );
+      if (
+        request.method() === "GET" &&
+        (defaultLog || initialRatingsOrStatements)
+      ) {
+        browserReads.push(url.pathname);
+      }
+    });
+    await page.route("**/_next/static/chunks/**", async (route) => {
+      if (new URL(route.request().url()).pathname.endsWith(".js")) {
+        await scriptsReady;
+      }
       await route.continue();
     });
+
+    const loading = page.getByRole("status", { name: "Loading activity log" });
     try {
-      await gotoReady(page, `/${PROFILE_HANDLE}`);
-      const loading = page.getByRole("status", {
-        name: "Loading activity log",
-      });
+      await page.goto(`/${PROFILE_HANDLE}`, { waitUntil: "commit" });
       await expect(loading).toBeVisible();
       const loadingBox = await loading.boundingBox();
       expect(loadingBox).not.toBeNull();
@@ -2770,54 +2827,18 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       expect(numericStyles.variant).toBe("normal");
       await expectNoHorizontalOverflow(page);
       await loading.scrollIntoViewIfNeeded();
-      await expect
-        .poll(() =>
-          loading.evaluate((element) => {
-            let ancestor: Element | null = element;
-            while (ancestor) {
-              if (Number(getComputedStyle(ancestor).opacity) < 1) return false;
-              ancestor = ancestor.parentElement;
-            }
-            return true;
-          })
-        )
-        .toBe(true);
       await captureSafeScreenshot(
         page,
         test.info(),
         "profile-activity-loading"
       );
-
-      // Releasing the held request starts the network round trip; it does not
-      // mean the activity data has arrived. Keep network and render readiness
-      // separate, and fail explicitly if the activity endpoint returns an error.
-      const activityResponse = page.waitForResponse(
-        (response) => {
-          const url = new URL(response.url());
-          return (
-            response.request().method() === "GET" &&
-            url.pathname === "/api/profile-logs" &&
-            url.searchParams.get("profile") === PROFILE_HANDLE
-          );
-        },
-        { timeout: RESPONSE_TIMEOUT_MS }
-      );
-      releaseLogs();
-      const response = await activityResponse;
-      expect(
-        response.ok(),
-        `Profile activity request returned HTTP ${response.status()}`
-      ).toBe(true);
-      await expect(
-        response.finished(),
-        "Profile activity response must complete successfully"
-      ).resolves.toBeNull();
-      await expect(
-        page.getByRole("status", { name: "Loading activity log" })
-      ).toHaveCount(0);
     } finally {
-      releaseLogs();
+      releaseScripts();
     }
+    const rep = page.getByRole("region", { name: "REP", exact: true });
+    await expect(rep.getByText(/^[\d,]+ raters?$/).first()).toBeVisible();
+    await expect(loading).toHaveCount(0);
+    expect(browserReads).toEqual([]);
   });
 
   test("waits for identity guidance hydration before accepting activation", async ({

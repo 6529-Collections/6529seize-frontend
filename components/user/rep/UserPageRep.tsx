@@ -1,15 +1,19 @@
 "use client";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import {
+  PENDING_PROFILE_QUERY_VIEWER,
+  useProfileQueryViewer,
+} from "@/hooks/useProfileQueryViewer";
+import {
+  nicOverviewQueryOptions,
+  repCategoriesQueryOptions,
+  repOverviewQueryOptions,
+} from "@/services/api/profile-page-queries";
 import { t } from "@/i18n/messages";
 
 import type { ActivityLogParams } from "@/components/profile-activity/ProfileActivityLogs";
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
-import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPage";
-import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
-import { commonApiFetch } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
@@ -41,9 +45,6 @@ import UserPageRepMobile from "./UserPageRepMobile";
 
 const INITIAL_VISIBLE_CATEGORY_COUNT = 5;
 const VISIBLE_CATEGORY_LOAD_STEP = 10;
-const REP_CATEGORIES_PAGE_SIZE = 25;
-const TOP_CONTRIBUTORS_LIMIT = 5;
-const FIRST_REP_CATEGORIES_PAGE = 1;
 
 const getDefaultVisibleCounts = (): Record<RepDirection, number> => ({
   received: INITIAL_VISIBLE_CATEGORY_COUNT,
@@ -54,39 +55,6 @@ const getDefaultFetchStates = (): Record<RepDirection, boolean> => ({
   received: false,
   given: false,
 });
-
-function useRepCategories({
-  user,
-  queryDirection,
-  apiDirection,
-  enabled,
-}: {
-  readonly user: string;
-  readonly queryDirection: "incoming" | "outgoing";
-  readonly apiDirection?: "outgoing";
-  readonly enabled: boolean;
-}) {
-  return useInfiniteQuery({
-    queryKey: [
-      QueryKey.REP_CATEGORIES,
-      { handleOrWallet: user, direction: queryDirection },
-    ],
-    queryFn: async ({ pageParam }: { pageParam: number }) =>
-      await commonApiFetch<ApiRepCategoriesPage>({
-        endpoint: `profiles/${user}/rep/categories`,
-        params: {
-          ...(apiDirection ? { direction: apiDirection } : {}),
-          page: pageParam.toString(),
-          page_size: REP_CATEGORIES_PAGE_SIZE.toString(),
-          top_contributors_limit: TOP_CONTRIBUTORS_LIMIT.toString(),
-        },
-      }),
-    initialPageParam: FIRST_REP_CATEGORIES_PAGE,
-    getNextPageParam: (lastPage: ApiRepCategoriesPage | undefined) =>
-      lastPage?.next ? lastPage.page + 1 : undefined,
-    enabled,
-  });
-}
 
 export default function UserPageRep({
   profile,
@@ -123,56 +91,32 @@ export default function UserPageRep({
     [connectedProfile, profile, activeProfileProxy, address]
   );
 
-  // --- Incoming (received) rep ---
-  const { data: repOverview, isFetching: isFetchingOverview } =
-    useQuery<ApiRepOverview>({
-      queryKey: [
-        QueryKey.REP_OVERVIEW,
-        { handleOrWallet: user, direction: "incoming" },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ApiRepOverview>({
-          endpoint: `profiles/${user}/rep/overview`,
-        }),
-      enabled: !!user,
-    });
+  const viewer = useProfileQueryViewer();
+  const canLoadRatings = !!user && viewer !== PENDING_PROFILE_QUERY_VIEWER;
+  const canLoadGivenRep = canLoadRatings && repDirection === "given";
 
-  const repCategoriesQuery = useRepCategories({
-    user,
-    queryDirection: "incoming",
-    enabled: !!user,
+  const { data: repOverview, isFetching: isFetchingOverview } = useQuery({
+    ...repOverviewQueryOptions(user, "incoming", viewer),
+    enabled: canLoadRatings,
+  });
+  const repCategoriesQuery = useInfiniteQuery({
+    ...repCategoriesQueryOptions(user, "incoming", viewer),
+    enabled: canLoadRatings,
   });
 
-  // --- Outgoing (given) rep --- only fetch when active
   const { data: repOverviewGiven, isFetching: isFetchingOverviewGiven } =
-    useQuery<ApiRepOverview>({
-      queryKey: [
-        QueryKey.REP_OVERVIEW,
-        { handleOrWallet: user, direction: "outgoing" },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<ApiRepOverview>({
-          endpoint: `profiles/${user}/rep/overview`,
-          params: { direction: "outgoing" },
-        }),
-      enabled: !!user && repDirection === "given",
+    useQuery({
+      ...repOverviewQueryOptions(user, "outgoing", viewer),
+      enabled: canLoadGivenRep,
     });
-
-  const repCategoriesGivenQuery = useRepCategories({
-    user,
-    queryDirection: "outgoing",
-    apiDirection: "outgoing",
-    enabled: !!user && repDirection === "given",
+  const repCategoriesGivenQuery = useInfiniteQuery({
+    ...repCategoriesQueryOptions(user, "outgoing", viewer),
+    enabled: canLoadGivenRep,
   });
 
-  // --- CIC overview ---
-  const { data: cicOverview } = useQuery<ApiCicOverview>({
-    queryKey: [QueryKey.CIC_OVERVIEW, { handleOrWallet: user }],
-    queryFn: async () =>
-      await commonApiFetch<ApiCicOverview>({
-        endpoint: `profiles/${user}/cic/overview`,
-      }),
-    enabled: !!user,
+  const { data: cicOverview } = useQuery({
+    ...nicOverviewQueryOptions(user, "incoming", viewer),
+    enabled: canLoadRatings,
   });
 
   const repCategories = useMemo(
@@ -202,9 +146,10 @@ export default function UserPageRep({
       : repCategoriesGivenQuery.isFetchingNextPage;
   const activeVisibleCount = visibleCounts[repDirection];
   const activeLoading =
-    repDirection === "received"
+    viewer === PENDING_PROFILE_QUERY_VIEWER ||
+    (repDirection === "received"
       ? isFetchingOverview || repCategoriesQuery.isFetching
-      : isFetchingOverviewGiven || repCategoriesGivenQuery.isFetching;
+      : isFetchingOverviewGiven || repCategoriesGivenQuery.isFetching);
 
   const handleShowMore = useCallback(() => {
     const nextVisibleCounts = {
