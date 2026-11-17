@@ -3,6 +3,8 @@ import { requestPersistentStorage } from "@/lib/storage/persistent-storage";
 import { generateDeviceKeyPair } from "./ed25519";
 import { deviceKeyStorage, type StoredDeviceKey } from "./device-key-storage";
 import { writeDeviceGrantHint } from "./grant-hint";
+import { recordMissingDeviceKey } from "./key-loss";
+import { reportDeviceKeyLoss } from "./key-loss-report";
 
 const DEVICE_GRANT_CHANGED_EVENT = "6529-device-grant-changed";
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -94,10 +96,33 @@ function getUsableGrant(
   return matchesKey ? grant : null;
 }
 
+/**
+ * Called after every read of a wallet's record. With no record at all, a
+ * grant note this browser kept means the browser dropped its key store: that
+ * is recorded (before the note is cleared) and reported once. With a record,
+ * the browser is asked to keep this site's storage.
+ */
+function afterRecordRead(
+  address: string,
+  record: StoredDeviceKey | undefined
+): void {
+  if (record) {
+    void requestPersistentStorage();
+    return;
+  }
+  const loss = recordMissingDeviceKey(address, Date.now());
+  if (loss) {
+    void reportDeviceKeyLoss(loss);
+  }
+}
+
 export async function readDeviceKey(
   address: string
 ): Promise<StoredDeviceKey | null> {
-  return (await deviceKeyStorage.read(normalizeAddress(address))) ?? null;
+  const normalized = normalizeAddress(address);
+  const record = await deviceKeyStorage.read(normalized);
+  afterRecordRead(normalized, record);
+  return record ?? null;
 }
 
 /**
@@ -114,6 +139,7 @@ export async function readUsableDeviceGrant(
 } | null> {
   const normalized = normalizeAddress(address);
   const record = await deviceKeyStorage.read(normalized);
+  afterRecordRead(normalized, record);
   const grant = record ? getUsableGrant(record, nowMs) : null;
   writeDeviceGrantHint(normalized, grant, record?.ownProfileId);
   return record && grant ? { record, grant } : null;
@@ -126,6 +152,7 @@ export async function ensureDeviceKey(
   const normalized = normalizeAddress(address);
   return await withDeviceKeyLock(normalized, async () => {
     const existing = await deviceKeyStorage.read(normalized);
+    afterRecordRead(normalized, existing);
     if (existing) {
       return existing;
     }

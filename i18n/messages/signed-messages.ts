@@ -50,6 +50,13 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.notice.enable.body":
     "Your wallet signs once. This browser then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
   "signedMessages.notice.enable.action": "Turn on",
+  "signedMessages.notice.restore.title":
+    "Your browser cleared this site's saved keys",
+  "signedMessages.notice.restore.body":
+    "This browser can no longer sign your posts. Turn Signed Posts on again with one signature.",
+  "signedMessages.notice.restore.action": "Turn on again",
+  "signedMessages.notice.restore.replaced":
+    "Signed Posts are on again. This browser's earlier permission was removed.",
   "signedMessages.notice.renew.title": "Signed posts end on {date}",
   "signedMessages.notice.renew.body":
     "Renew with one signature to keep signing your messages in this browser.",
