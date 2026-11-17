@@ -240,7 +240,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
         content: `Newer message ${index + 1}`,
       })).reverse();
       const cursor = Number(request.searchParams.get("serial_no_limit"));
-      let drops = newer.slice(0, 50);
+      let drops: ApiWaveDropsFeedV2["drops"] = newer.slice(0, 50);
       if (strategy === "FIND_BOTH") {
         drops = [mention];
       } else if (strategy === "FIND_OLDER") {

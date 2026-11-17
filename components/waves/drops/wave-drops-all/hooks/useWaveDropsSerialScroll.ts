@@ -443,9 +443,9 @@ export const useWaveDropsSerialScroll = ({
   useEffect(() => {
     // The target request is synchronized with the committed chat DOM. The
     // scroll operation, progress state and refs all belong to this hook.
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-live-state-to-parent, react-you-might-not-need-an-effect/no-pass-ref-to-parent
+    // A completed DOM jump consumes the queued target.
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-live-state-to-parent, react-you-might-not-need-an-effect/no-pass-ref-to-parent, react-you-might-not-need-an-effect/no-derived-state
     if (hasDrops) syncSerialScroll();
-    // eslint-disable-next-line react-you-might-not-need-an-effect/no-derived-state -- A completed DOM jump consumes the queued target.
   }, [hasDrops, serialTarget]);
 
   return {
