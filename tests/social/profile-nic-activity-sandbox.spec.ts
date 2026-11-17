@@ -169,6 +169,18 @@ async function selectNic(page: Page, width: number) {
       .click();
 }
 
+// These flows supply activity rows through browser request interception.
+// Enter through the hydrated app so the browser owns the first read as
+// well as the later reads for filters, pagination, and viewport changes.
+async function openProfileInApp(page: Page) {
+  await page.goto("/playwright/curations", { waitUntil: "domcontentloaded" });
+  await page
+    .getByRole("navigation", { name: "Profile sections" })
+    .getByRole("link", { name: "Identity", exact: true })
+    .click();
+  await page.waitForURL(/\/playwright$/, { timeout: 20000 });
+}
+
 test.describe("Profile NIC activity @local-only", () => {
   useLocalSandboxMutationGuard(
     test,
@@ -196,7 +208,7 @@ test.describe("Profile NIC activity @local-only", () => {
     }, testInfo) => {
       await page.setViewportSize({ width, height: 1000 });
       const requests = await installLogs(page, getSandboxApiOrigin(baseURL));
-      await page.goto("/playwright");
+      await openProfileInApp(page);
       await expect(
         page
           .getByText("rep-leak-marker", { exact: true })
@@ -303,7 +315,7 @@ test.describe("Profile NIC activity @local-only", () => {
       const api = getSandboxApiOrigin(baseURL);
       const requests = await installLogs(page, api);
       await page.setViewportSize({ width: startWidth, height: 1000 });
-      await page.goto("/playwright");
+      await openProfileInApp(page);
       await expect(
         page
           .getByText("rep-leak-marker", { exact: true })
@@ -473,7 +485,7 @@ test.describe("Profile NIC activity @local-only", () => {
             body: optimizerFails ? "" : png,
           });
         });
-        await page.goto("/playwright");
+        await openProfileInApp(page);
         const avatar = page
           .getByRole("img", { name: "avatar-user", exact: true })
           .filter({ visible: true })
@@ -534,18 +546,7 @@ test.describe("Profile NIC activity @local-only", () => {
         const api = getSandboxApiOrigin(baseURL);
         await seedViewer(page, api, viewer);
         const requests = await installLogs(page, api);
-        if (viewer === "logged-out") {
-          await page.goto("/playwright");
-        } else {
-          // Hydrate the saved session before navigating to the profile, as in
-          // the existing authenticated profile sandbox coverage.
-          await page.goto("/waves/00000000-0000-4000-8000-000000000529");
-          await page
-            .getByRole("link", { name: "playwright", exact: true })
-            .first()
-            .click();
-          await page.waitForURL(/\/playwright$/, { timeout: 20000 });
-        }
+        await openProfileInApp(page);
         if (viewer === "visitor") {
           await expect(
             page.getByRole("button", { name: "Follow", exact: true })
@@ -653,7 +654,7 @@ test.describe("Profile NIC activity @local-only", () => {
   test("REP-only profile has an empty NIC log", async ({ page, baseURL }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await installLogs(page, getSandboxApiOrigin(baseURL), true);
-    await page.goto("/playwright");
+    await openProfileInApp(page);
     await selectNic(page, 1440);
     await expect(
       page.getByText("No Activity Log", { exact: true })
@@ -687,7 +688,7 @@ test.describe("Profile NIC activity @local-only", () => {
           await route.fallback();
         }
       });
-      await page.goto("/playwright");
+      await openProfileInApp(page);
       await selectNic(page, width);
       const alert = page.getByRole("alert").filter({
         hasText: "Unable to load activity log.",
