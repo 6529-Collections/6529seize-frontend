@@ -408,6 +408,44 @@ describe("the /desktop pages", () => {
     );
   });
 
+  it.each([
+    ["only a Windows installer", [SETUP], true, false],
+    ["no installer", [], false, false],
+  ])(
+    "never name a file the release does not list, for a release with %s",
+    async (_name, keep, hasWindows, hasMac) => {
+      const newest = TEST_LIST.releases[1]!;
+      storeHasSignedList({
+        ...TEST_LIST,
+        releases: [
+          TEST_LIST.releases[0],
+          {
+            ...newest,
+            files: newest.files.filter(
+              (file) =>
+                (keep as string[]).includes(file.name) ||
+                file.name === "SHA256SUMS"
+            ),
+          },
+        ],
+      });
+      const guide = renderToStaticMarkup(await DesktopGuideRoute());
+      const page = renderToStaticMarkup(await DesktopRoute());
+      expect(guide).not.toContain(DMG);
+      expect(page).not.toContain(DMG);
+      expect(guide).toContain("the Mac disk image you downloaded");
+      expect(guide.includes(SETUP)).toBe(hasWindows);
+      expect(page.includes(`Get-FileHash .\\${SETUP}`)).toBe(hasWindows);
+      expect(page.includes("shasum -a 256")).toBe(hasMac);
+      if (!hasWindows) {
+        expect(guide).toContain("the Windows installer you downloaded");
+        expect(page).toContain(
+          "This release has no installer for Windows or macOS."
+        );
+      }
+    }
+  );
+
   it("list the known issues of the test release", () => {
     const html = renderToStaticMarkup(DesktopKnownIssuesRoute());
     // The notice does not link to the page it is on.

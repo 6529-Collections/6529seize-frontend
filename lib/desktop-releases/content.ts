@@ -20,39 +20,32 @@ export const DESKTOP_WINDOWS_PUBLISHER = "6529 Collection LLC";
 /** The public wave where people report problems with 6529 apps. */
 export const DESKTOP_FEEDBACK_WAVE_ID = "e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc";
 
-// The names 6529 Desktop's release tool gives the installers, used while no
-// release is published.
-const FALLBACK_NAMES: Readonly<
-  Record<DesktopInstallerKind, (version: string) => string>
-> = {
-  windows: (version) => `6529-Desktop_${version}_windows-x64-setup.exe`,
-  macos: (version) => `6529-Desktop_${version}_macos-arm64.dmg`,
-};
-
-/** An installer's name in the release, or the name every release gives it. */
-export function getDesktopInstallerName(
+/**
+ * An installer's file name as the verified list gives it for the release,
+ * or undefined when the release offers none for that system (or there is
+ * no release). A name is never made up.
+ */
+function getDesktopInstallerName(
   release: DesktopRelease | undefined,
   kind: DesktopInstallerKind
-): string {
-  const installer = release
-    ? getDesktopInstallers(release).find((entry) => entry.kind === kind)
+): string | undefined {
+  return release
+    ? getDesktopInstallers(release).find((entry) => entry.kind === kind)?.file
+        .name
     : undefined;
-  return (
-    installer?.file.name ??
-    FALLBACK_NAMES[kind](release?.version ?? "<version>")
-  );
 }
 
 /**
- * How the guide names an installer: its file name in the newest release,
- * as code, or a description while no release is published.
+ * How the guide names an installer: its file name from the verified list,
+ * as code, or a description in words when the list names none.
  */
 function guideFileRef(
   release: DesktopRelease | undefined,
   kind: DesktopInstallerKind
 ): string {
-  if (release) {
-    return `\`${getDesktopInstallerName(release, kind)}\``;
+  const name = getDesktopInstallerName(release, kind);
+  if (name !== undefined) {
+    return `\`${name}\``;
   }
   const description: MessageKey =
     kind === "windows"

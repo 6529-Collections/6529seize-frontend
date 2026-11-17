@@ -6,12 +6,10 @@ import { BODY, CODE, LINK } from "@/components/validator-page/validatorStyles";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, tRich } from "@/i18n/messages";
 import "@/i18n/namespaces/desktop-download";
-import {
-  DESKTOP_WINDOWS_PUBLISHER,
-  getDesktopInstallerName,
-} from "@/lib/desktop-releases/content";
+import { DESKTOP_WINDOWS_PUBLISHER } from "@/lib/desktop-releases/content";
 import {
   getDesktopDownloadPath,
+  getDesktopInstallers,
   listDesktopReleaseFiles,
 } from "@/lib/desktop-releases/releaseFiles";
 import type { DesktopRelease } from "@/lib/desktop-releases/releases";
@@ -79,20 +77,17 @@ export function DesktopCheckDownload({
           {t(LOCALE, "desktopPage.check.body")}
         </p>
         <ReleaseCommandList
-          rows={[
-            {
-              system: t(LOCALE, "desktopPage.check.system.windows"),
-              commands: [
-                `Get-FileHash .\\${getDesktopInstallerName(release, "windows")}`,
-              ],
-            },
-            {
-              system: t(LOCALE, "desktopPage.check.system.mac"),
-              commands: [
-                `shasum -a 256 ${getDesktopInstallerName(release, "macos")}`,
-              ],
-            },
-          ]}
+          rows={getDesktopInstallers(release).map(({ kind, file }) =>
+            kind === "windows"
+              ? {
+                  system: t(LOCALE, "desktopPage.check.system.windows"),
+                  commands: [`Get-FileHash .\\${file.name}`],
+                }
+              : {
+                  system: t(LOCALE, "desktopPage.check.system.mac"),
+                  commands: [`shasum -a 256 ${file.name}`],
+                }
+          )}
         />
       </div>
       <div className="tw-flex tw-flex-col tw-gap-3">
