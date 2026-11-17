@@ -1,10 +1,20 @@
 "use client";
 
-import { useId, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import type { E2eeBackupManager, PreparedBackup } from "@/lib/e2ee/backup";
+import type {
+  E2eeBackupManager,
+  E2eeBackupSnapshot,
+  PreparedBackup,
+} from "@/lib/e2ee/backup";
 import { E2eeDialog } from "../ui/E2eeDialog";
 import { getBackupErrorKey } from "./e2eeBackupErrors";
 
@@ -39,10 +49,20 @@ function downloadCode(
   URL.revokeObjectURL(url);
 }
 
+/** The new backup is active and everything is uploaded. */
+const isUploaded = (snapshot: E2eeBackupSnapshot): boolean =>
+  snapshot.phase === "on" &&
+  !snapshot.uploading &&
+  !snapshot.busy &&
+  snapshot.lastError === null;
+
 /**
  * Shows a new recovery code once, with copy and download, and turns the
  * backup on only after the user confirms they saved it. The code is never
- * stored; closing the dialog discards it.
+ * stored; closing the dialog discards it. It reports done only once the new
+ * backup is active and fully uploaded: while a queued run (a conflict or
+ * fork repair) finishes it, the dialog says it is backing up, and a failed
+ * run shows its error with Try again.
  */
 export function E2eeRecoveryCodeDialog({
   manager,
@@ -55,9 +75,49 @@ export function E2eeRecoveryCodeDialog({
   const codeId = useId();
   const savedId = useId();
   const [saved, setSaved] = useState(false);
-  const [pending, setPending] = useState(false);
+  // "waiting": the backup exists and a queued run still has to finish its
+  // upload; "retrying": Try again is running on that same backup.
+  const [stage, setStage] = useState<
+    "code" | "confirming" | "waiting" | "retrying"
+  >("code");
   const [copyKey, setCopyKey] = useState<MessageKey | null>(null);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
+  const pending = stage === "confirming" || stage === "retrying";
+  const waiting = stage === "waiting" || stage === "retrying";
+  const snapshot = useSyncExternalStore(
+    manager.subscribe,
+    manager.getSnapshot,
+    manager.getSnapshot
+  );
+  const runFailed =
+    waiting && !snapshot.busy && snapshot.lastError !== null;
+  const shownErrorKey =
+    errorKey ??
+    (runFailed ? getBackupErrorKey(snapshot.lastError) : null);
+
+  // Done is reported once, whichever path gets there first.
+  const reported = useRef(false);
+  const finish = () => {
+    if (!reported.current) {
+      reported.current = true;
+      onDone();
+    }
+  };
+
+  // Done once the queued run has finished the upload.
+  useEffect(() => {
+    if (!waiting) {
+      return;
+    }
+    const check = () => {
+      if (!reported.current && isUploaded(manager.getSnapshot())) {
+        reported.current = true;
+        onDone();
+      }
+    };
+    check();
+    return manager.subscribe(check);
+  }, [manager, onDone, waiting]);
 
   const close = () => {
     if (!pending) {
@@ -77,14 +137,32 @@ export function E2eeRecoveryCodeDialog({
   };
 
   const confirm = async () => {
-    setPending(true);
+    setStage("confirming");
     setErrorKey(null);
     try {
-      await manager.confirmBackup(prepared);
-      setPending(false);
-      onDone();
+      const uploaded = await manager.confirmBackup(prepared);
+      setStage(uploaded ? "code" : "waiting");
+      if (uploaded) {
+        finish();
+      }
     } catch (error) {
-      setPending(false);
+      setStage("code");
+      setErrorKey(getBackupErrorKey(error));
+    }
+  };
+
+  /** Carries on with the same backup and code after a failed run. */
+  const retry = async () => {
+    setStage("retrying");
+    setErrorKey(null);
+    try {
+      const uploaded = await manager.backupNow();
+      setStage("waiting");
+      if (uploaded) {
+        finish();
+      }
+    } catch (error) {
+      setStage("waiting");
       setErrorKey(getBackupErrorKey(error));
     }
   };
@@ -117,22 +195,34 @@ export function E2eeRecoveryCodeDialog({
             onClick={close}
             disabled={pending}
           >
-            {t(locale, "e2ee.action.cancel")}
+            {/* Once the backup exists, closing doesn't stop its upload. */}
+            {t(locale, waiting ? "e2ee.action.close" : "e2ee.action.cancel")}
           </Button>
-          <Button
-            variant="action"
-            size="md"
-            onClick={() => void confirm()}
-            loading={pending}
-            disabled={!saved}
-          >
-            {t(
-              locale,
-              replacing
-                ? "e2ee.backup.code.confirmNew"
-                : "e2ee.backup.code.confirm"
-            )}
-          </Button>
+          {runFailed ? (
+            <Button
+              variant="action"
+              size="md"
+              onClick={() => void retry()}
+              loading={pending}
+            >
+              {t(locale, "e2ee.action.retry")}
+            </Button>
+          ) : (
+            <Button
+              variant="action"
+              size="md"
+              onClick={() => void confirm()}
+              loading={pending || waiting}
+              disabled={!saved}
+            >
+              {t(
+                locale,
+                replacing
+                  ? "e2ee.backup.code.confirmNew"
+                  : "e2ee.backup.code.confirm"
+              )}
+            </Button>
+          )}
         </>
       }
     >
@@ -179,9 +269,14 @@ export function E2eeRecoveryCodeDialog({
             {t(locale, "e2ee.backup.code.saved")}
           </label>
         </div>
-        {errorKey ? (
+        {waiting && !runFailed ? (
+          <p role="status" className="tw-m-0 tw-text-sm tw-text-iron-300">
+            {t(locale, "e2ee.backup.status.uploading")}
+          </p>
+        ) : null}
+        {shownErrorKey ? (
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
-            {t(locale, errorKey)}
+            {t(locale, shownErrorKey)}
           </p>
         ) : null}
       </div>

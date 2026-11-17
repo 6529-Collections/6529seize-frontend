@@ -608,7 +608,12 @@ encrypted copy of your message history so you can restore it on a new device.
   numbers. Select **Copy code** or **Download as text file**, store it
   somewhere safe (for example a password manager), tick **I saved my recovery
   code somewhere safe**, then select **Turn on backup**. Closing the dialog
-  before that turns nothing on and discards the code.
+  before that turns nothing on and discards the code. The dialog (and the
+  one for **Replace recovery code**) finishes only once the new backup is
+  active and fully uploaded: if the upload needs another run, it says
+  "Backing up your history…" until that run succeeds, and a failed run
+  shows its error with **Try again**, which keeps the same code. Closing it
+  then doesn't stop the upload.
 - What is backed up: messages you have on this device (text, edits,
   deletions, reactions, notices), the chat names and members needed to show
   them, and references to attachments with their keys. Never the device's

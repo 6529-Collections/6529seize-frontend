@@ -273,9 +273,12 @@ export class E2eeBackupManager {
   /**
    * Starts a new generation wrapped by the prepared code and uploads the
    * whole history. It replaces any existing backup (and its code) once the
-   * upload completes.
+   * upload completes. Resolves true once the new generation is active and
+   * everything is uploaded; false while a queued run (a conflict or fork
+   * repair) still has to finish it, with the snapshot reading as uploading
+   * until it does, so callers never report the backup as on before that.
    */
-  confirmBackup(prepared: PreparedBackup): Promise<void> {
+  confirmBackup(prepared: PreparedBackup): Promise<boolean> {
     return this.serial(async () => {
       const deviceKey = this.deviceKey();
       const backupId = randomHex(16);
@@ -309,7 +312,7 @@ export class E2eeBackupManager {
       await this.deps.state.put(local);
       this.local = local;
       this.update({ phase: "on", uploading: true, lastError: null });
-      await this.runIncremental();
+      return await this.runIncremental();
     });
   }
 
@@ -355,8 +358,9 @@ export class E2eeBackupManager {
           // The chain forked (a server without the append precondition) or
           // other devices kept appending first: the next run starts a new
           // chain with a full snapshot and compacts everything before it.
-          // Until it succeeds, the backup is still being written.
-          this.update({ uploading: true });
+          // Until it succeeds, the backup is still being written; this
+          // isn't a failure.
+          this.update({ uploading: true, lastError: null });
           this.schedule(0);
           return false;
         }

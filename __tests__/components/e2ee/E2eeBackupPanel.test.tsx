@@ -59,8 +59,9 @@ function fakeManager(initial: E2eeBackupSnapshot) {
       code: CODE,
       secret: new Uint8Array(32),
     })),
-    confirmBackup: jest.fn(async () => {
+    confirmBackup: jest.fn(async (): Promise<boolean> => {
       manager.set(snapshot({ phase: "on", lastBackupAt: Date.now() }));
+      return true;
     }),
     restore: jest.fn(async (code: string) => {
       if (code.trim() !== CODE) {
@@ -135,6 +136,98 @@ describe("E2eeBackupPanel", () => {
     );
     expect(screen.getByText("Backup is on.")).toBeInTheDocument();
     expect(screen.queryByText(CODE)).not.toBeInTheDocument();
+  });
+
+  /** Saves the code in the open code dialog and confirms it. */
+  async function confirmCode(dialogName: string, confirmName: string) {
+    const dialog = await screen.findByRole("dialog", { name: dialogName });
+    fireEvent.click(
+      within(dialog).getByRole("checkbox", {
+        name: "I saved my recovery code somewhere safe",
+      })
+    );
+    fireEvent.click(within(dialog).getByRole("button", { name: confirmName }));
+    return dialog;
+  }
+
+  /** The upload needs another run (a conflict or fork repair). */
+  const queueRepair = (manager: ReturnType<typeof fakeManager>) =>
+    manager.confirmBackup.mockImplementationOnce(async () => {
+      manager.set(
+        snapshot({ phase: "on", uploading: true, lastBackupAt: null })
+      );
+      return false;
+    });
+
+  it("keeps a new backup's dialog uploading until a queued repair run finishes it", async () => {
+    const manager = fakeManager(snapshot());
+    queueRepair(manager);
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Turn on backup" }));
+    const dialog = await confirmCode(
+      "Save your recovery code",
+      "Turn on backup"
+    );
+    await waitFor(() => expect(manager.confirmBackup).toHaveBeenCalledTimes(1));
+    expect(
+      await within(dialog).findByText("Backing up your history…")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBe(dialog);
+    expect(screen.queryByText("Backup is up to date.")).not.toBeInTheDocument();
+
+    // The queued run activates the backup and finishes the upload.
+    act(() => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+    });
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(screen.getByText("Backup is up to date.")).toBeInTheDocument();
+  });
+
+  it("shows a replacement's failed queued run with Try again, then finishes", async () => {
+    const manager = fakeManager(
+      snapshot({ phase: "on", lastBackupAt: 2000 })
+    );
+    queueRepair(manager);
+    renderPanel(manager);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Replace recovery code" })
+    );
+    const dialog = await confirmCode(
+      "Save your new recovery code",
+      "Use the new code"
+    );
+    expect(
+      await within(dialog).findByText("Backing up your history…")
+    ).toBeInTheDocument();
+
+    // The queued run fails: its error, and Try again on the same backup.
+    act(() => {
+      manager.set(
+        snapshot({
+          phase: "on",
+          uploading: true,
+          lastBackupAt: null,
+          lastError: "E2EE_RATE_LIMITED",
+        })
+      );
+    });
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "Too many backup requests"
+    );
+    expect(screen.queryByText("Backup is up to date.")).not.toBeInTheDocument();
+    manager.backupNow.mockImplementationOnce(async () => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+      return true;
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Try again" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(manager.backupNow).toHaveBeenCalledTimes(1);
+    expect(manager.confirmBackup).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Backup is up to date.")).toBeInTheDocument();
   });
 
   it("restores with the code and explains a wrong code", async () => {
