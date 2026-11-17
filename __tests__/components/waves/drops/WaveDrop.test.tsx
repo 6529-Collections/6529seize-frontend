@@ -88,6 +88,11 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
   return <div data-testid="mobile" data-open={String(props.isOpen)} />;
 });
 
+let mockIsMdViewport: boolean | null = null;
+jest.mock("@/hooks/useIsMdViewportOrUnknown", () => ({
+  __esModule: true,
+  default: () => mockIsMdViewport,
+}));
 jest.mock("@/hooks/isMobileDevice");
 jest.mock("@/lib/device-signing/feature", () => ({
   isSignedMessagesEnabled: () => true,
@@ -234,6 +239,7 @@ describe("WaveDrop", () => {
     mockWaveDropHeader.mockClear();
     mockMutate.mockClear();
     mockEditMentionedGroups = [];
+    mockIsMdViewport = null;
     mobileMenuProps = undefined;
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(false);
@@ -282,6 +288,58 @@ describe("WaveDrop", () => {
       expect(headerProps.showActionsButton).toBe(isMobile && canRemove);
       expect(Boolean(headerProps.desktopActions)).toBe(!isMobile && canRemove);
       expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    { isMdViewport: true, headers: 1 },
+    { isMdViewport: false, headers: 1 },
+    // Unknown (server render, hydration): both slots mount and CSS hides one.
+    { isMdViewport: null, headers: 2 },
+  ])(
+    "mounts $headers author header(s) when the md viewport is $isMdViewport",
+    ({ isMdViewport, headers }) => {
+      mockIsMdViewport = isMdViewport;
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+        />
+      );
+      expect(screen.getAllByTestId("header")).toHaveLength(headers);
+    }
+  );
+
+  it.each([true, false])(
+    "keeps the inline author header when the md viewport is %s",
+    (isMdViewport) => {
+      mockIsMdViewport = isMdViewport;
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+          inlineAuthorOnDesktop
+        />
+      );
+      expect(screen.getAllByTestId("header")).toHaveLength(1);
     }
   );
 

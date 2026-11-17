@@ -7,10 +7,9 @@ import {
   invalidateCompetitionAuthors,
   invalidateCompetitionWave,
 } from "@/services/api/competitions-api";
+import { recordWaveCompetitionPresence } from "@/helpers/waves/wave-competition-presence";
 
-function parseCompetitionEvent(
-  value: unknown
-): {
+function parseCompetitionEvent(value: unknown): {
   event_id: string;
   wave_id: string;
   competition_id: string;
@@ -49,6 +48,8 @@ export function useCompetitionEvents(waveId: string, enabled = true) {
         if (event?.wave_id !== waveId || seen.current.has(event.event_id))
           return;
         seen.current.add(event.event_id);
+        // The wave may have gained its first competition since its feed loaded.
+        recordWaveCompetitionPresence(waveId, true);
         revealAuthors ||= event.event_type === "COMPETITION_DECISION_COMPLETED";
         if (seen.current.size > 500)
           seen.current.delete(seen.current.values().next().value!);

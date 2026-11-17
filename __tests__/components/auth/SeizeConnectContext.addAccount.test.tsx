@@ -118,6 +118,15 @@ jest.mock("@/services/auth/auth.utils", () => ({
   setActiveWalletAccount: jest.fn(() => true),
 }));
 
+const mockForgetBrowserWalletProfile = jest.fn((_address: string) =>
+  Promise.resolve()
+);
+jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
+  forgetBrowserWalletProfile: (address: string) =>
+    mockForgetBrowserWalletProfile(address),
+  forgetAllBrowserWalletProfiles: jest.fn(() => Promise.resolve()),
+}));
+
 jest.mock("@/services/auth/session-v2.utils", () => ({
   getSessionClientType: jest.fn(() => "web"),
   logoutSessionV2: jest.fn(() => Promise.resolve()),
@@ -613,6 +622,33 @@ describe("SeizeConnectProvider add-account flow", () => {
       expect(mockOpen).toHaveBeenCalledTimes(1);
       expect(mockOpen).toHaveBeenLastCalledWith({ view: "Connect" });
     });
+  });
+
+  it("forgets the signed-out profile's 6529 Desktop browser-wallet marker", async () => {
+    const authUtils = require("@/services/auth/auth.utils");
+    const onError = jest.fn();
+    mockForgetBrowserWalletProfile.mockClear();
+
+    render(
+      <SeizeConnectProvider>
+        <LogoutButton onError={onError} />
+      </SeizeConnectProvider>
+    );
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Logout" }));
+    });
+
+    await waitFor(() =>
+      expect(mockForgetBrowserWalletProfile).toHaveBeenCalledWith(
+        ACTIVE_ADDRESS
+      )
+    );
+    // Only after the session itself is gone.
+    expect(
+      jest.mocked(authUtils.removeAuthJwt).mock.invocationCallOrder[0]
+    ).toBeLessThan(mockForgetBrowserWalletProfile.mock.invocationCallOrder[0]!);
+    expect(onError).not.toHaveBeenCalled();
   });
 
   it("continues web single logout cleanup when session revocation fails", async () => {

@@ -17,12 +17,10 @@ jest.mock('@/contexts/wave/hooks/useWaveAbortController', () => ({
 
 // Mock network utilities
 export const fetchWaveMessages = jest.fn();
-export const fetchLightWaveMessages = jest.fn();
 export const fetchAroundSerialNoWaveMessages = jest.fn();
 
 jest.mock('@/contexts/wave/utils/wave-messages-utils', () => ({
   fetchWaveMessages: (...args: unknown[]) => fetchWaveMessages(...args),
-  fetchLightWaveMessages: (...args: unknown[]) => fetchLightWaveMessages(...args),
   fetchAroundSerialNoWaveMessages: (...args: unknown[]) =>
     fetchAroundSerialNoWaveMessages(...args),
 }));

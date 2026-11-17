@@ -136,6 +136,18 @@ const arePropsEqual = (
     (definition as { readOnly?: boolean }).readOnly ===
       (nextDefinition as { readOnly?: boolean }).readOnly;
 
+  const validationDefinitionMatches =
+    (definition.type !== FieldType.TEXT ||
+      nextDefinition.type !== FieldType.TEXT ||
+      definition.placeholder === nextDefinition.placeholder) &&
+    (definition.type !== FieldType.DROPDOWN ||
+      nextDefinition.type !== FieldType.DROPDOWN ||
+      definition.options === nextDefinition.options) &&
+    (definition.type !== FieldType.NUMBER ||
+      nextDefinition.type !== FieldType.NUMBER ||
+      (definition.min === nextDefinition.min &&
+        definition.max === nextDefinition.max));
+
   const readOnlyOverrideMatches =
     prevProps.readOnlyOverride === nextProps.readOnlyOverride;
 
@@ -159,6 +171,7 @@ const arePropsEqual = (
   return (
     fieldMatches &&
     definitionMatches &&
+    validationDefinitionMatches &&
     readOnlyOverrideMatches &&
     errorMatches &&
     requiredMarkerMatches &&
