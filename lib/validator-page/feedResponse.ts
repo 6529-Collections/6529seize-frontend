@@ -33,14 +33,23 @@ type StoredFeedObject = {
 };
 
 /** A signed feed and its signature as last read, or why there is none. */
-type SignedFeedSnapshot = {
+export type SignedFeedSnapshot = {
   readonly state: "ok" | "missing" | "error";
   readonly feed: StoredFeedObject | null;
   readonly signature: StoredFeedObject | null;
+  /**
+   * Sent on both answers as `X-Release-List-Pair`, so a client can tell a
+   * feed and a signature from different snapshots apart. Absent: no header
+   * (the validator's and 6529 AI's feeds).
+   */
+  readonly pairId?: string | undefined;
 };
 
+/** The header that names the feed-and-signature pair an answer belongs to. */
+export const RELEASE_LIST_PAIR_HEADER = "X-Release-List-Pair";
+
 /** What a feed's endpoints answer besides the files themselves. */
-type SignedFeedText = {
+export type SignedFeedText = {
   /** The body of the 503 when the feed could not be read. */
   readonly unavailable: string;
   /** The body of the 404 before the first feed. */
@@ -57,8 +66,8 @@ const VALIDATOR_FEED_TEXT: SignedFeedText = {
 /**
  * Serves a signed feed or its signature byte for byte, as stored, so the
  * signature verifies against what anyone downloads. Public, with no
- * redirect and a five-minute cache. The 6529 AI pages serve their own
- * feed with it too.
+ * redirect and a five-minute cache. The 6529 AI pages and 6529 Desktop's
+ * release list serve their own feeds with it too.
  */
 export function serveSignedFeedObject(
   request: Request,
@@ -88,6 +97,10 @@ export function serveSignedFeedObject(
   }
   if (object.lastModified) {
     headers.set("Last-Modified", object.lastModified);
+  }
+  if (snapshot.pairId) {
+    headers.set(RELEASE_LIST_PAIR_HEADER, snapshot.pairId);
+    headers.set("Access-Control-Expose-Headers", RELEASE_LIST_PAIR_HEADER);
   }
   if (etagMatches(request.headers.get("if-none-match"), object.etag)) {
     return new Response(null, { status: 304, headers });

@@ -85,6 +85,9 @@ March 19, 2026.
   `/validator/releases.json.sig`
 - [6529 AI Download Page](ai-download-page.md): unlinked `/ai`, `/ai/guide`,
   `/ai/known-issues`; public `/ai/releases.json` and `/ai/releases.json.sig`
+- [6529 Desktop Download Page](desktop-download-page.md): unlinked
+  `/desktop`, `/desktop/guide`, `/desktop/known-issues`, `/desktop/releases`;
+  public `/desktop/releases.json` and `/desktop/releases.json.sig`
 - [Network](network/README.md): `/network/*`, `/network/xtdh`, `/xtdh`
 - [Safe Collecting](delegation/README.md): `/safe-collecting` and `/safe-collecting/{param+}`
 - [NextGen](nextgen/README.md): `/nextgen` and `/nextgen/{param*}`

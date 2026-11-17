@@ -86,6 +86,25 @@ export const getValidatorPageServerEnv = (): ValidatorPageServerEnv => ({
 });
 
 /**
+ * Where 6529 Desktop's signed release list and release files are stored,
+ * served at `/desktop/releases.json` and `/desktop/download`. Unset: the
+ * production bucket and region built into `lib/desktop-releases/releaseList.ts`.
+ */
+type DesktopReleasesServerEnv = {
+  readonly releasesBucket: string | undefined;
+  readonly releasesRegion: string | undefined;
+};
+
+export const getDesktopReleasesServerEnv = (): DesktopReleasesServerEnv => ({
+  releasesBucket: getOptionalServerValue(
+    process.env["DESKTOP_RELEASES_BUCKET"]
+  ),
+  releasesRegion: getOptionalServerValue(
+    process.env["DESKTOP_RELEASES_REGION"]
+  ),
+});
+
+/**
  * Static AWS credentials from the standard variables, for local development
  * only. Deployed servers set none of them and use their instance role.
  */

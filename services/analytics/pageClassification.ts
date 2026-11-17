@@ -32,6 +32,7 @@ const RESERVED_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "consolidation-mapping-tool",
   "delegation",
   "delegation-mapping-tool",
+  "desktop",
   "discover",
   "dispute-resolution",
   "drop-forge",

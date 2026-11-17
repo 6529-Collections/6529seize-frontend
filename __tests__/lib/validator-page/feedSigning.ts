@@ -26,14 +26,17 @@ export const TEST_FEED_SIGNING_KEY: FeedSigningKey = {
   publicKey: point.toString("hex"),
 };
 
-const DOMAIN = Buffer.from("6529 Validator releases v1\0", "ascii");
-
-/** `releases.json.sig` for `feed`, signed as 6529's producer signs it. */
+/**
+ * `releases.json.sig` for `feed`, signed as 6529's producer signs it, under
+ * the validator's domain or another product's (6529 Desktop's).
+ */
 export function signFeed(
   feed: Uint8Array,
-  key: string = TEST_FEED_SIGNING_KEY.address
+  key: string = TEST_FEED_SIGNING_KEY.address,
+  domain = "6529 Validator releases v1"
 ): Uint8Array<ArrayBuffer> {
-  const signature = sign("sha256", Buffer.concat([DOMAIN, feed]), {
+  const prefix = Buffer.from(`${domain}\0`, "ascii");
+  const signature = sign("sha256", Buffer.concat([prefix, feed]), {
     key: PRIVATE_KEY,
     dsaEncoding: "ieee-p1363",
   });

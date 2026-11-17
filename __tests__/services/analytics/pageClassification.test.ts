@@ -61,6 +61,17 @@ describe("classifyPageView", () => {
     }
   });
 
+  it("does not count the 6529 Desktop pages as a profile", () => {
+    for (const pathname of [
+      "/desktop",
+      "/desktop/guide",
+      "/desktop/known-issues",
+      "/desktop/releases",
+    ]) {
+      expect(classifyPageView({ pathname })?.pageGroup).not.toBe("profile");
+    }
+  });
+
   it("does not misclassify reserved roots as profiles", () => {
     expect(classifyPageView({ pathname: "/the-memes" })).toEqual({
       logicalPage: "the_memes",
