@@ -4,6 +4,7 @@ import React from "react";
 import { useAuthenticatedContent } from "@/hooks/useAuthenticatedContent";
 import WavesRouteLoading from "./WavesRouteLoading";
 import CommunityCurations from "@/components/community-curations/CommunityCurations";
+import { DiscoverWavesLink } from "@/components/waves/discovery/DiscoverWavesLink";
 import WaveRouteShell from "./WaveRouteShell";
 import BrainContent from "../brain/content/BrainContent";
 import useDeviceInfo from "../../hooks/useDeviceInfo";
@@ -42,7 +43,7 @@ const WavesView: React.FC = () => {
         topContent={
           <nav
             aria-label={t(locale, "wave.navigation.appSections")}
-            className="tw-mb-5 lg:tw-hidden"
+            className="tw-mb-5 tw-flex tw-items-center tw-justify-between tw-gap-4 lg:tw-hidden"
           >
             <Link
               href="/waves"
@@ -55,6 +56,7 @@ const WavesView: React.FC = () => {
               />
               {t(locale, "navigation.primary.waves")}
             </Link>
+            <DiscoverWavesLink />
           </nav>
         }
       />

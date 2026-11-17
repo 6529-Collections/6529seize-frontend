@@ -11,6 +11,7 @@ const preview = {
   name: "Next Wave",
   picture: null,
   contributors: [],
+  reserveDescriptionRow: true,
 };
 
 jest.mock("@/components/auth/Auth", () => ({

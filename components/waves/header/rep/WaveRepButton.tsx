@@ -2,6 +2,7 @@
 
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import Button from "@/components/utils/button/Button";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { formatNumber } from "@/i18n/format";
@@ -9,6 +10,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { ScaleIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
+import clsx from "clsx";
 import WaveRepRatingModal from "./WaveRepRatingModal";
 
 const WAVE_REP_ACTION_LOCALE = DEFAULT_LOCALE;
@@ -24,9 +26,11 @@ type WaveRepButtonVariant = "default" | "compact";
 export default function WaveRepButton({
   wave,
   variant = "default",
+  iconOnly = false,
 }: {
   readonly wave: ApiWave;
   readonly variant?: WaveRepButtonVariant | undefined;
+  readonly iconOnly?: boolean;
 }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isTouchDevice = useIsTouchDevice();
@@ -57,20 +61,19 @@ export default function WaveRepButton({
           : {})}
         onClick={() => setIsModalOpen(true)}
         variant="tertiary"
-        size={variant === "compact" ? null : "sm"}
-        className={
-          variant === "compact"
-            ? `${WAVE_REP_BUTTON_BORDER_CLASSES} tw-h-8 tw-rounded-md tw-px-2 tw-text-[11px] tw-leading-4`
-            : WAVE_REP_BUTTON_BORDER_CLASSES
-        }
+        size={iconOnly ? null : "xs"}
+        className={clsx(
+          WAVE_REP_BUTTON_BORDER_CLASSES,
+          COMPACT_ACTION_TOUCH_TARGET_CLASS,
+          iconOnly && "tw-size-8 tw-p-0 tw-text-xs",
+          variant === "compact" &&
+            "!tw-bg-transparent !tw-text-iron-200 active:!tw-bg-black desktop-hover:hover:!tw-border-iron-600 desktop-hover:hover:!tw-bg-iron-900 desktop-hover:hover:!tw-text-white"
+        )}
       >
-        <ScaleIcon
-          className={`${
-            variant === "compact" ? "tw-size-3.5" : "tw-size-4"
-          } tw-flex-shrink-0`}
-          aria-hidden="true"
-        />
-        <span>{actionText}</span>
+        <ScaleIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+        <span className={iconOnly ? "tw-sr-only" : undefined}>
+          {actionText}
+        </span>
       </Button>
       {showTooltip && (
         <MyStreamActionTooltip id={tooltipId} place="bottom-end" />

@@ -109,6 +109,31 @@ it("resets playback on gallery navigation, including when returning to the same 
   expect(screen.getByRole("img")).not.toHaveAttribute("src", source);
 });
 
+it("shows the loading status while the uploaded original replaces failed previews", () => {
+  render(<ImageMediaModal {...props} />);
+  for (const size of [
+    "AUTOx1080_gifv2",
+    "AUTOx450_gifv2",
+    "AUTOx1080",
+    "AUTOx450",
+  ]) {
+    const preview = screen.getByAltText("Expanded image preview");
+    expect(preview).toHaveAttribute(
+      "src",
+      source.replace("large.gif", `${size}/large.gif`)
+    );
+    fireEvent.error(preview);
+  }
+  expect(
+    screen.getByRole("status", { name: "Loading original GIF" })
+  ).toBeVisible();
+  expect(screen.queryByRole("button", { name: "Retry preview" })).toBeNull();
+  const original = screen.getByAltText("Original GIF animation");
+  fireEvent.load(original);
+  expect(original).toBeVisible();
+  expect(screen.queryByRole("button", { name: "Retry preview" })).toBeNull();
+});
+
 it("announces original-load failure and restores the preview with a retryable HD action", () => {
   render(<ImageMediaModal {...props} />);
   const preview = screen.getByAltText("Expanded image preview");

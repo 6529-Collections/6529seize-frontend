@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  DROPDOWN_TRIGGER_SURFACE_CLASSES,
+  DROPDOWN_TRIGGER_FRAME_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useRef } from "react";
 import type { TraitsData } from "../submission/types/TraitsData";
@@ -20,7 +24,10 @@ interface DropdownTraitProps {
 
 const SELECT_PLACEHOLDER_COLOR = "#848490";
 const SELECT_VALUE_COLOR = "#EFEFF1";
-const EMPTY_RING_CLASSES = ["tw-ring-iron-700", "desktop-hover:hover:tw-ring-iron-650"];
+const EMPTY_RING_CLASSES = [
+  "tw-ring-white/10",
+  "desktop-hover:hover:tw-ring-white/15",
+];
 const FILLED_RING_CLASSES = [
   "tw-ring-emerald-600/45",
   "desktop-hover:hover:tw-ring-emerald-600/55",
@@ -136,13 +143,14 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
           defaultValue={currentValue}
           onChange={handleChange}
           onBlur={handleBlur}
-          className={`tw-form-select tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-outline-none ${paddingClass} tw-cursor-pointer tw-text-base sm:tw-text-sm tw-ring-1 tw-transition-all tw-duration-500 tw-ease-in-out focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:hover:tw-ring-primary-400 tw-appearance-none [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100`}
+          className={`${DROPDOWN_TRIGGER_SURFACE_CLASSES} ${DROPDOWN_TRIGGER_FRAME_CLASSES} tw-form-select tw-w-full tw-rounded-lg ${paddingClass} tw-appearance-none tw-text-base focus-visible:tw-outline-primary-400 sm:tw-text-sm [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100`}
           style={{ color: getSelectTextColor(currentValue) }}
         >
           <option
             value=""
             className="tw-bg-iron-950"
-            style={{ color: SELECT_PLACEHOLDER_COLOR }}>
+            style={{ color: SELECT_PLACEHOLDER_COLOR }}
+          >
             Select {label}
           </option>
           {options.map((option) => (
@@ -150,7 +158,8 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
               key={option}
               value={option}
               className="tw-bg-iron-950"
-              style={{ color: SELECT_VALUE_COLOR }}>
+              style={{ color: SELECT_VALUE_COLOR }}
+            >
               {option}
             </option>
           ))}

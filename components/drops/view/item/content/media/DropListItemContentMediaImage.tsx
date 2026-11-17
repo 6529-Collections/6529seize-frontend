@@ -138,6 +138,7 @@ function DropImageContent({
   handleIntrinsicImageError,
   handleError,
   preferHighQualityImage,
+  allowOriginalGif,
   onAnimatedPreviewUnavailable,
 }: {
   readonly src: string;
@@ -153,6 +154,7 @@ function DropImageContent({
   readonly handleIntrinsicImageError: () => void;
   readonly handleError: () => void;
   readonly preferHighQualityImage: boolean;
+  readonly allowOriginalGif: boolean;
   readonly onAnimatedPreviewUnavailable?: (() => void) | undefined;
 }) {
   const [aspectRatio, setAspectRatio] = useState<string | undefined>();
@@ -190,6 +192,7 @@ function DropImageContent({
         originalSrc={src}
         imageScale={imageScale}
         preferHighQuality={preferHighQualityImage}
+        allowOriginalGif={allowOriginalGif}
         onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
         alt={alt}
         fill
@@ -208,6 +211,7 @@ function DropImageContent({
       originalSrc={src}
       imageScale={imageScale}
       preferHighQuality={preferHighQualityImage}
+      allowOriginalGif={allowOriginalGif}
       onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
       alt={alt}
       fill
@@ -548,6 +552,7 @@ function DropListItemContentMediaImageContent({
                   handleIntrinsicImageError={handleIntrinsicImageError}
                   handleError={handleError}
                   preferHighQualityImage={preferHighQualityImage}
+                  allowOriginalGif={!canToggleOriginal}
                   onAnimatedPreviewUnavailable={onAnimatedPreviewUnavailable}
                 />
               )}

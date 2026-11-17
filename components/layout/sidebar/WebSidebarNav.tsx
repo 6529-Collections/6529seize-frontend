@@ -1,8 +1,5 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
   SIDEBAR_HOVER_CLOSE_DELAY_MS,
@@ -12,7 +9,11 @@ import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
-import Join6529Icon from "@/components/common/icons/Join6529Icon";
+import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
+import {
+  AI_NAVIGATION,
+  isAiNavigationActive,
+} from "@/components/navigation/aiNavigation";
 import WatchTowerIcon from "@/components/common/icons/WatchTowerIcon";
 import {
   DROP_FORGE_PATH,
@@ -56,6 +57,7 @@ const WebSidebarNav = React.forwardRef<
   { closeSubmenu: () => void },
   WebSidebarNavProps
 >(({ isCollapsed = false }, ref) => {
+  const membershipNavigation = useMembershipNavigation();
   const pathname = usePathname();
   const safePathname = getSafePathname(pathname);
   const { connectedProfile } = useAuth();
@@ -90,16 +92,7 @@ const WebSidebarNav = React.forwardRef<
   );
 
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const capacitor = useCapacitor();
-  const consent = useCookieConsent();
-  const sections = useSidebarSections(
-    appWalletsSupported,
-    hideNftPurchasing,
-    shouldHideSubscriptions({
-      capacitorIsIos: capacitor.isIos,
-      country: consent.country,
-    })
-  );
+  const sections = useSidebarSections(appWalletsSupported, hideNftPurchasing);
   const sectionMap = useSectionMap(sections);
   const nftsSection = sectionMap.get("nfts");
   const wavesSection = sectionMap.get("waves");
@@ -448,16 +441,31 @@ const WebSidebarNav = React.forwardRef<
           />
         </li>
 
-        <li>
+        <li
+          className={
+            membershipNavigation.isPending
+              ? "tw-invisible [@media(scripting:none)]:tw-visible"
+              : undefined
+          }
+        >
           <WebSidebarNavItem
-            href="/join-6529"
-            icon={Join6529Icon}
+            href={membershipNavigation.href}
+            icon={membershipNavigation.icon}
             active={
-              safePathname === "/join-6529" ||
-              safePathname.startsWith("/join-6529/")
+              safePathname === membershipNavigation.href ||
+              safePathname.startsWith(`${membershipNavigation.href}/`)
             }
             collapsed={isCollapsed}
-            label={t(DEFAULT_LOCALE, "navigation.primary.join6529")}
+            label={membershipNavigation.label}
+          />
+        </li>
+        <li>
+          <WebSidebarNavItem
+            href={AI_NAVIGATION.href}
+            icon={AI_NAVIGATION.icon}
+            active={isAiNavigationActive(safePathname)}
+            collapsed={isCollapsed}
+            label={AI_NAVIGATION.label}
           />
         </li>
 

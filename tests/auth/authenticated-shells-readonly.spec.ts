@@ -1921,7 +1921,7 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
               );
               return (
                 style.outlineStyle !== "none" &&
-                extent > 0 &&
+                parseFloat(style.outlineWidth) > 0 &&
                 rect.left - extent >= clip.left &&
                 rect.top - extent >= clip.top &&
                 rect.right + extent <= clip.right &&

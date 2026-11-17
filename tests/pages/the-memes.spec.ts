@@ -52,8 +52,56 @@ test.describe("The Memes Page @smoke @medium @large", () => {
 
     for (const width of [390, 1023, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
+      await page.mouse.move(0, 0);
       const editorial = width >= 1024 && !isNative;
+      for (const name of ["Year: All Years", "Season: All Seasons"]) {
+        const filter = page.getByRole("button", { name, exact: true });
+        await expect(filter).toHaveCSS("height", "40px");
+        await expect(filter).toHaveCSS("font-size", "12px");
+        await expect(filter).toHaveCSS("font-weight", "500");
+        await expect(filter).toHaveCSS("border-radius", "8px");
+        await expect(filter).toHaveCSS("background-color", "rgb(28, 28, 33)");
+        expect(
+          await filter.evaluate((element) => {
+            const text = Array.from(element.childNodes).find(
+              (node) =>
+                node.nodeType === Node.TEXT_NODE && node.textContent?.trim()
+            );
+            const chevron = element.querySelector("svg");
+            if (!text || !chevron) return 0;
+            const range = document.createRange();
+            range.selectNodeContents(text);
+            return (
+              chevron.getBoundingClientRect().left -
+              range.getBoundingClientRect().right
+            );
+          })
+        ).toBeGreaterThanOrEqual(8);
+      }
+      for (const name of ["Sort ascending", "Sort descending"]) {
+        const direction = page.getByRole("button", { name, exact: true });
+        await expect(direction).toHaveCSS("height", "28px");
+        await expect(direction).toHaveCSS("width", "28px");
+        await expect(direction).toHaveCSS("border-radius", "6px");
+        if (editorial) {
+          await expect(
+            page.getByRole("button", { name, exact: true }).locator("svg")
+          ).toHaveCSS("stroke-width", "1.5px");
+        }
+      }
+      const directionGroup = page.getByRole("group", {
+        name: "Sort direction",
+        exact: true,
+      });
+      await expect(directionGroup).toHaveCSS(
+        "background-color",
+        "rgba(0, 0, 0, 0)"
+      );
+      await expect(directionGroup).toHaveCSS("box-shadow", "none");
       await expect(age).toHaveAttribute("aria-pressed", "true");
+      await expect(age).toHaveCSS("font-weight", "500");
+      await expect(age).toHaveCSS("font-size", editorial ? "14px" : "12px");
+      await expect(age).toHaveCSS("height", editorial ? "28px" : "32px");
       await expect(age).toHaveCSS(
         "background-color",
         editorial ? "rgba(0, 0, 0, 0)" : "rgb(236, 236, 238)"
@@ -62,8 +110,14 @@ test.describe("The Memes Page @smoke @medium @large", () => {
         "color",
         editorial ? "rgb(255, 255, 255)" : "rgb(19, 19, 22)"
       );
-      await expect(edition).toHaveCSS("color", "rgb(147, 147, 159)");
-      await expect(volume).toHaveCSS("color", "rgb(147, 147, 159)");
+      await expect(edition).toHaveCSS(
+        "color",
+        editorial ? "rgb(147, 147, 159)" : "rgb(206, 207, 212)"
+      );
+      await expect(volume).toHaveCSS(
+        "color",
+        editorial ? "rgb(147, 147, 159)" : "rgb(206, 207, 212)"
+      );
       await expect(volume).toHaveCSS(
         "background-color",
         editorial ? "rgba(0, 0, 0, 0)" : "rgb(28, 28, 33)"
@@ -89,6 +143,22 @@ test.describe("The Memes Page @smoke @medium @large", () => {
       }
       await expectNoHorizontalOverflow(page);
     }
+
+    const descending = page.getByRole("button", {
+      name: "Sort descending",
+      exact: true,
+    });
+    const ascending = page.getByRole("button", {
+      name: "Sort ascending",
+      exact: true,
+    });
+    await descending.click();
+    await expect(descending).toHaveAttribute("aria-pressed", "true");
+    await expect(ascending).toHaveAttribute("aria-pressed", "false");
+    await expect(page).toHaveURL(/sort_dir=desc/);
+    await ascending.click();
+    await expect(ascending).toHaveAttribute("aria-pressed", "true");
+    await expect(page).toHaveURL(/sort_dir=asc/);
 
     await edition.press("Enter");
     await expect(edition).toHaveAttribute("aria-pressed", "true");

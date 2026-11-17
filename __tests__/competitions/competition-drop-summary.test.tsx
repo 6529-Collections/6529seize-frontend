@@ -1,4 +1,10 @@
-import { render, renderHook, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   useCompetitionDrop,
@@ -13,6 +19,7 @@ import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompet
 import type { ReactNode } from "react";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { SingleWaveDrop } from "@/components/waves/drop/SingleWaveDrop";
+import { recordWaveCompetitionPresence } from "@/helpers/waves/wave-competition-presence";
 
 jest.mock("@/helpers/competition.helpers", () => ({
   isMultiCompetitionEnabled: () => true,
@@ -192,6 +199,100 @@ it("refreshes the card when competition votes are invalidated", async () => {
     100
   );
 });
+describe("waves without a competition", () => {
+  // The presence store lives for the page session, so each case uses its own wave.
+  const dropIn = (waveId: string) =>
+    ({ ...drop, wave: { ...drop.wave, id: waveId } }) as ExtendedDrop;
+  const contextIn = (waveId: string) =>
+    ({
+      ...context,
+      competition: { ...context.competition!, wave_id: waveId },
+      entry: { ...context.entry!, wave_id: waveId },
+    }) as ApiDropCompetitionContext;
+
+  beforeEach(() => {
+    jest.mocked(fetchDropCompetitionContext).mockReset();
+  });
+
+  const renderDropIn = (waveId: string, inList = true) => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    const wrapper = ({ children }: { children: ReactNode }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+    const waveDrop = dropIn(waveId);
+    return {
+      waveDrop,
+      ...renderHook(
+        () =>
+          useCompetitionDrop(waveDrop, {
+            skipInWavesWithoutCompetition: inList,
+          }),
+        { wrapper }
+      ),
+    };
+  };
+
+  it("makes no per-drop lookup once the wave is known to have none", () => {
+    recordWaveCompetitionPresence("wave-without", false);
+    const { result, waveDrop } = renderDropIn("wave-without");
+    expect(fetchDropCompetitionContext).not.toHaveBeenCalled();
+    expect(result.current).toBe(waveDrop);
+  });
+
+  it("still looks up drops when the wave is unknown or has a competition", async () => {
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockImplementation((waveId) => Promise.resolve(contextIn(waveId)));
+    const unknown = renderDropIn("wave-unknown");
+    await waitFor(() => expect(unknown.result.current.rating).toBe(120));
+
+    recordWaveCompetitionPresence("wave-with", true);
+    const known = renderDropIn("wave-with");
+    await waitFor(() => expect(known.result.current.rating).toBe(120));
+    expect(fetchDropCompetitionContext).toHaveBeenCalledTimes(2);
+  });
+
+  it("starts looking up a mounted drop when its wave gains a competition", async () => {
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockImplementation((waveId) => Promise.resolve(contextIn(waveId)));
+    recordWaveCompetitionPresence("wave-gains", false);
+    const { result } = renderDropIn("wave-gains");
+    expect(fetchDropCompetitionContext).not.toHaveBeenCalled();
+    act(() => recordWaveCompetitionPresence("wave-gains", true));
+    await waitFor(() => expect(result.current.rating).toBe(120));
+  });
+
+  it("always looks up a drop outside a list", async () => {
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockImplementation((waveId) => Promise.resolve(contextIn(waveId)));
+    recordWaveCompetitionPresence("wave-single", false);
+    const { result } = renderDropIn("wave-single", false);
+    await waitFor(() => expect(result.current.rating).toBe(120));
+  });
+
+  it("keeps looking up after a late report that the wave has none", async () => {
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockImplementation((waveId) => Promise.resolve(contextIn(waveId)));
+    recordWaveCompetitionPresence("wave-late", true);
+    // A feed page requested before the competition existed resolves afterwards.
+    recordWaveCompetitionPresence("wave-late", false);
+    const { result } = renderDropIn("wave-late");
+    await waitFor(() => expect(result.current.rating).toBe(120));
+  });
+
+  it("ignores a report that omits the flag", () => {
+    recordWaveCompetitionPresence("wave-omitted", false);
+    recordWaveCompetitionPresence("wave-omitted", undefined);
+    renderDropIn("wave-omitted");
+    expect(fetchDropCompetitionContext).not.toHaveBeenCalled();
+  });
+});
+
 it("resolves scoped submission data before rendering a drop deep link", async () => {
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },

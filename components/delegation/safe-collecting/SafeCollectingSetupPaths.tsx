@@ -3,6 +3,11 @@
 import { getSafeCollectingSectionPath } from "@/components/delegation/safe-collecting-routes";
 
 import ButtonLink from "@/components/utils/button/ButtonLink";
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -131,7 +136,7 @@ export default function SafeCollectingSetupPaths({
       <div
         role="tablist"
         aria-label={t(locale, "safeCollecting.setup.pathsLabel")}
-        className="tw-inline-flex tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-1"
+        className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-inline-flex tw-border tw-border-solid tw-p-1`}
       >
         {PATHS.map((value) => {
           const selected = value === path;
@@ -149,11 +154,7 @@ export default function SafeCollectingSetupPaths({
               tabIndex={selected ? 0 : -1}
               onClick={() => setPath(value)}
               onKeyDown={onKeyDown}
-              className={`tw-min-h-10 tw-rounded-md tw-border-0 tw-px-4 tw-text-sm tw-font-medium tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
-                selected
-                  ? "tw-bg-iron-100 tw-text-iron-950"
-                  : "tw-bg-transparent tw-text-iron-300 hover:tw-text-iron-50"
-              }`}
+              className={`tw-min-h-10 tw-rounded-md tw-border-0 tw-px-4 tw-text-sm tw-font-medium ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: selected })}`}
             >
               {t(locale, `safeCollecting.setup.${value}`)}
             </button>

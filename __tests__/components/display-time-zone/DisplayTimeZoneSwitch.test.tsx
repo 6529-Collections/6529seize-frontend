@@ -103,6 +103,30 @@ describe("DisplayTimeZoneSwitch", () => {
       screen.getByRole("button", { name: "Time display: UTC" })
     ).toHaveTextContent("UTC");
   });
+
+  it("shares the More preferences with the visible override indicator and undo", async () => {
+    const user = userEvent.setup();
+    render(
+      <>
+        <DisplayTimeZoneSwitch variant="settings" />
+        <DisplayTimeZoneSwitch variant="indicator" />
+      </>
+    );
+    expect(screen.getByRole("radio", { name: /^Local time/ })).toBeChecked();
+    expect(
+      screen.queryByRole("button", { name: /^Time display:/ })
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("radio", { name: /^UTC/ }));
+    expect(
+      screen.getByRole("button", { name: "Time display: UTC" })
+    ).toHaveTextContent("Times in UTC");
+    await user.click(
+      screen.getByRole("button", { name: "Show times in local time again" })
+    );
+    expect(getDisplayTimeZoneSnapshot().override).toBeNull();
+    expect(screen.getByRole("radio", { name: /^Local time/ })).toBeChecked();
+    expect(screen.queryByText("Times in UTC")).not.toBeInTheDocument();
+  });
 });
 
 describe("useDisplayTimeZoneMenuItem", () => {

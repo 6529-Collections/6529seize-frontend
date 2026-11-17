@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  DROPDOWN_CHEVRON_CLASSES,
+  getDropdownTriggerClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 import { useId, useLayoutEffect, useRef, useState } from "react";
@@ -185,14 +190,9 @@ export default function CreateWaveDropdown<TValue extends string>({
   // A disabled form must not reopen a previously open picker when it unlocks.
   if (disabled && isOpen) setIsOpen(false);
 
-  const stateClasses = hasError
-    ? "tw-ring-error focus:tw-ring-error"
-    : "tw-ring-white/10 desktop-hover:hover:tw-ring-white/15 desktop-hover:hover:focus:tw-ring-primary-400 focus:tw-ring-primary-400";
   const valueClasses = accentValue
-    ? "tw-text-primary-400 focus:tw-text-white"
-    : "tw-text-iron-300";
-  const roundingClasses =
-    rounding === "right" ? "tw-rounded-r-lg" : "tw-rounded-lg";
+    ? "tw-text-primary-400 group-focus:tw-text-white"
+    : undefined;
   const placementClasses =
     menuPlacement === "top" ? "tw-bottom-full tw-mb-1" : "tw-top-full tw-mt-1";
   const menuClasses = useMobileSheet
@@ -269,13 +269,13 @@ export default function CreateWaveDropdown<TValue extends string>({
         data-testid={dataTestId}
         onClick={() => setIsOpen((current) => !current)}
         onKeyDown={onTriggerKeyDown}
-        className={`${stateClasses} ${valueClasses} ${roundingClasses} tw-flex tw-h-11 tw-w-full tw-items-center tw-justify-between tw-border-0 tw-bg-iron-950 tw-px-3 tw-text-base tw-font-medium tw-shadow-inner tw-ring-1 tw-ring-inset tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-inset disabled:tw-cursor-not-allowed disabled:tw-opacity-50 motion-reduce:tw-transition-none sm:tw-text-sm`}
+        className={`${getDropdownTriggerClasses({ invalid: hasError, rounding })} tw-group tw-flex tw-h-11 tw-w-full tw-items-center tw-justify-between tw-px-3 tw-text-base sm:tw-text-sm`}
       >
-        <span>{selectedOption?.label}</span>
+        <span className={valueClasses}>{selectedOption?.label}</span>
         <FontAwesomeIcon
           icon={faChevronDown}
           aria-hidden="true"
-          className={`tw-ml-2 tw-size-4 tw-flex-shrink-0 tw-text-primary-400 tw-transition-transform tw-duration-300 motion-reduce:tw-transition-none ${
+          className={`${DROPDOWN_CHEVRON_CLASSES} tw-ml-2 tw-transition-transform tw-duration-150 motion-reduce:tw-transition-none ${
             isOpen ? "tw-rotate-180" : ""
           }`}
         />

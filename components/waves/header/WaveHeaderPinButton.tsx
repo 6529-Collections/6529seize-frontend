@@ -5,6 +5,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useAuth } from "@/components/auth/Auth";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import {
   usePinnedWavesServer,
   MAX_PINNED_WAVES,
@@ -50,9 +51,9 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   const buttonStyles = useMemo(() => {
     if (isPinned) {
-      return "tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white active:tw-bg-transparent";
+      return "tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-iron-900";
     }
-    return "tw-border-0 tw-text-iron-500 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-bg-iron-700 tw-bg-transparent active:tw-bg-iron-700";
+    return "tw-border-0 tw-text-iron-500 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-900 tw-bg-transparent active:tw-bg-iron-900";
   }, [isPinned]);
 
   const ariaLabel = isPinned ? PIN_ACTIONS.UNPIN : PIN_ACTIONS.PIN;
@@ -119,7 +120,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
       <button
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-transition-all tw-duration-200 ${buttonStyles} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
+        className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer motion-reduce:tw-transition-none ${buttonStyles} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
         aria-label={ariaLabel}
         data-tooltip-id={`wave-header-pin-${waveId}`}
         data-tooltip-content={tooltipContent}

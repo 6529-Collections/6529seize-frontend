@@ -15,6 +15,7 @@ import { useConfirmedMarketPurchases } from "@/components/collect/market-activit
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowPathIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import type { ReactNode } from "react";
 import {
   useCallback,
@@ -609,12 +610,14 @@ export default function MarketDepthPanel({
                           resolvedLocale,
                           "marketDepth.orders.requestedNotShown"
                         )}{" "}
-                        <Link
-                          href="/collect/orders"
-                          className="hover:tw-text-primary-200 tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-                        >
-                          {t(resolvedLocale, "collect.receipt.viewOrders")}
-                        </Link>
+                        <NftPurchasingGate>
+                          <Link
+                            href="/collect/orders"
+                            className="hover:tw-text-primary-200 tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                          >
+                            {t(resolvedLocale, "collect.receipt.viewOrders")}
+                          </Link>
+                        </NftPurchasingGate>
                       </p>
                     )}
                 </div>

@@ -111,7 +111,9 @@ Only `https://` URLs match. Host must be apex or `www`.
 ## Common Scenarios
 
 - ENS cards show name/address context, records, ownership, and ENS/Etherscan links.
-- Marketplace cards show title/media/price.
+- Marketplace previews open the original link and offer a copy action. Full-size
+  cards show the artwork and title. If a preview is unavailable, its fallback
+  opens the original link. The iOS app omits the price button.
 - Marketplace cards can also show a data-health status badge when metadata is
   stale, errored, or unavailable.
 - On live `MEDIA_LINK_UPDATED` patches, marketplace cards prefer preview-image

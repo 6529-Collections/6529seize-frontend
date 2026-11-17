@@ -26,6 +26,7 @@ import { isSafeMarkdownImageSrc } from "@/components/drops/view/part/dropPartMar
 import { normalizeDropMarkdownContent } from "@/components/drops/view/part/dropPartMarkdown/normalizeContent";
 import { rehypePreserveOrderedListDelimiter } from "@/components/drops/view/part/dropPartMarkdown/orderedListDelimiter";
 import { rehypeDropPreview } from "@/components/drops/view/part/dropPartMarkdown/preview";
+import { getInternalPageLinkPath } from "@/helpers/internalLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { rehypeScopeFootnoteLabel } from "./footnotes";
@@ -53,7 +54,10 @@ const PUBLIC_LINK_PLUGINS: PluggableList = [
   ],
 ];
 const identity = (children: ReactNode) => children;
-const RenderingContext = createContext({ renderText: identity });
+const RenderingContext = createContext({
+  renderText: identity,
+  openPageLinksInPlace: false,
+});
 const MarkdownLinkContext = createContext(false);
 
 /** Shared paragraph typography, including authored empty lines. */
@@ -171,13 +175,19 @@ export function MarkdownLink({
   children,
   ...props
 }: ComponentPropsWithoutRef<"a"> & ExtraProps) {
+  const { openPageLinksInPlace } = useContext(RenderingContext);
   const safeHref = href ? defaultUrlTransform(href) : undefined;
   if (!safeHref) return <span>{children}</span>;
+  const internalPath = openPageLinksInPlace
+    ? getInternalPageLinkPath(safeHref)
+    : null;
+  const opensHere = internalPath !== null || safeHref.startsWith("#");
+  // A plain anchor keeps private destinations out of framework prefetching.
   return (
     <a
       {...props}
-      href={safeHref}
-      target={safeHref.startsWith("#") ? undefined : "_blank"}
+      href={internalPath ?? safeHref}
+      target={opensHere ? undefined : "_blank"}
       rel="noopener noreferrer nofollow ugc"
       className="tw-break-all tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-2 hover:tw-decoration-primary-300 focus-visible:tw-rounded focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
     >
@@ -321,7 +331,10 @@ export const MessageMarkdown = memo(
     const locale = useBrowserLocale();
     const renderId = useId();
     const idPrefix = `${privacy === "private" ? "e2ee" : "user-content"}-${messageId}-${renderId}-`;
-    const context = useMemo(() => ({ renderText }), [renderText]);
+    const context = useMemo(
+      () => ({ renderText, openPageLinksInPlace: privacy === "private" }),
+      [privacy, renderText]
+    );
     const content = useMemo(
       () =>
         preview || inlinePreview ? text : normalizeDropMarkdownContent(text),

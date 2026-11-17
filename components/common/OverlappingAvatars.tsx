@@ -26,6 +26,7 @@ interface OverlappingAvatarsProps {
   readonly maxCount?: number;
   readonly size?: "xs" | "sm" | "md";
   readonly overlapClass?: string;
+  readonly ringClassName?: string;
   readonly onItemClick?: (
     e: MouseEvent<HTMLAnchorElement>,
     item: OverlappingAvatarItem
@@ -54,11 +55,15 @@ function AvatarContent({
 
   if (isPlaceholder || activeSrc === null) {
     return (
-      <div className="tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black">
+      <span
+        role="img"
+        aria-label={ariaLabel ?? "Profile"}
+        className={`tw-flex tw-h-full tw-w-full tw-items-center tw-justify-center ${avatarRing}`}
+      >
         <span className="tw-text-[0.625rem] tw-font-semibold tw-text-iron-300">
           {fallback ?? "?"}
         </span>
-      </div>
+      </span>
     );
   }
 
@@ -81,6 +86,7 @@ export default function OverlappingAvatars({
   maxCount = 5,
   size = "md",
   overlapClass = "-tw-space-x-2",
+  ringClassName = "tw-ring-black",
   onItemClick,
 }: OverlappingAvatarsProps) {
   const baseId = useId();
@@ -92,13 +98,12 @@ export default function OverlappingAvatars({
   );
   const slice = items.slice(0, maxCount);
   const sizeClass = SIZE_CLASS[size];
-  const avatarRing =
-    "tw-rounded-full tw-bg-iron-700 tw-ring-[1.5px] tw-ring-black tw-object-cover";
+  const avatarRing = `tw-rounded-full tw-bg-iron-700 tw-ring-[1.5px] ${ringClassName} tw-object-cover`;
   const wrapperHover =
     "tw-transition-transform tw-duration-200 tw-ease-out hover:tw-scale-110 hover:!tw-z-[100]";
 
   return (
-    <div
+    <span
       className={`tw-flex tw-items-center tw-overflow-visible ${overlapClass}`}
     >
       {slice.map((item, index) => {
@@ -120,7 +125,7 @@ export default function OverlappingAvatars({
           !isTouchDevice && item.title !== undefined && item.title !== "";
         const tooltipId = showTooltip ? `${baseId}-${index}` : undefined;
         const wrapper = (
-          <div
+          <span
             key={item.key}
             className={`tw-relative tw-flex-shrink-0 tw-overflow-visible ${sizeClass} ${wrapperHover}`}
             style={{
@@ -130,14 +135,14 @@ export default function OverlappingAvatars({
             {...(tooltipId !== undefined && { "data-tooltip-id": tooltipId })}
           >
             {content}
-          </div>
+          </span>
         );
 
         const anchor = item.href ? (
           <Link
             key={item.key}
             href={item.href}
-            className="tw-m-0 tw-inline-flex tw-border-none tw-bg-transparent tw-p-0"
+            className="tw-m-0 tw-inline-flex tw-border-none tw-bg-transparent tw-p-0 tw-no-underline"
             aria-label={item.ariaLabel}
             onClick={(e) => onItemClick?.(e, item)}
           >
@@ -169,6 +174,6 @@ export default function OverlappingAvatars({
         }
         return anchor;
       })}
-    </div>
+    </span>
   );
 }

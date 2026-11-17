@@ -13,9 +13,12 @@
   below the description. Existing `focus=the-art` links open Overview.
 - `Listings & offers`, immediately after Overview, shows the market summary and
   price levels directly. Switching tabs retains the market selection and review.
-- If a numeric `{id}` does not resolve to a published card, the route shows
-  the shared next-mint fallback panel plus subscription awareness for that
-  upcoming card.
+- Before a card is published, the canonical next Meme and scheduled cards in
+  the upcoming subscription season open the existing upcoming-card view with
+  subscription awareness and calendar details. Today remains reachable through
+  its full UTC mint day. Later scheduled placeholders and their distribution
+  pages stay out of search indexing until publication. Unknown IDs outside
+  this scheduled window keep the normal not-found response.
 
 ## Location in the Site
 
@@ -100,8 +103,9 @@
 - Load error state: if both the server seed and client fallback request fail,
   the route replaces the loading skeleton with an inline `Try again` action.
 - Resolved card state: tab row and tab content render.
-- Unresolved numeric id state: route shows the shared next-mint fallback panel
-  and subscription awareness widget for that numeric id.
+- Scheduled unpublished id state: route shows the existing upcoming panel and
+  subscription awareness widget for that card. The canonical next Meme can
+  show a Main Stage winner only when its Meme number matches.
 - Non-integer id state: route shows the `MEME` not-found screen.
 
 ## Common Scenarios

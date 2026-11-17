@@ -122,7 +122,8 @@ async function installLoadingTestArtwork(page: Page) {
 
 async function installCompletedMintStatus(
   page: Page,
-  ready: Promise<void> = Promise.resolve()
+  ready: Promise<void> = Promise.resolve(),
+  tokenId = loadingTestArtwork.id
 ) {
   const claimResult = encodeFunctionResult({
     abi: MEMES_MANIFOLD_PROXY_ABI,
@@ -138,7 +139,7 @@ async function installCompletedMintStatus(
         storageProtocol: 0,
         merkleRoot: zeroHash,
         location: "",
-        tokenId: 536n,
+        tokenId: BigInt(tokenId),
         cost: 0n,
         paymentReceiver: zeroAddress,
         erc20: zeroAddress,
@@ -560,6 +561,80 @@ for (const cardCount of [1, 3]) {
   });
 }
 
+test.describe("Coming up avatar density", () => {
+  test.use({ deviceScaleFactor: 3 });
+
+  test("requests enough avatar pixels for the screen density @smoke @medium @large", async ({
+    page,
+  }, testInfo) => {
+    await installComingUpFixture(page);
+    const avatar =
+      "https://media.6529usercontent.com/ipfs/coming-up-avatar-fixture";
+    const optimizedWidths: number[] = [];
+    await page.route(avatar, (route) =>
+      route.fulfill({
+        status: 206,
+        contentType: "image/jpeg",
+        headers: { "access-control-allow-origin": "*" },
+        body: Buffer.from([0xff, 0xd8, 0xff]),
+      })
+    );
+    await page.route("**/_next/image?*", (route) => {
+      const url = new URL(route.request().url());
+      if (url.searchParams.get("url") !== avatar) return route.fallback();
+      const width = Number(url.searchParams.get("w"));
+      optimizedWidths.push(width);
+      return route.fulfill({
+        contentType: "image/svg+xml",
+        body: `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${width}"><rect width="100%" height="100%" fill="#5689bd"/></svg>`,
+      });
+    });
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({
+        json: {
+          ...comingUpLeaderboard,
+          drops: comingUpLeaderboard.drops.map((drop) => ({
+            ...drop,
+            author: { ...drop.author, pfp: avatar },
+          })),
+        },
+      })
+    );
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const section = page.getByRole("region", {
+      name: "Coming up",
+      exact: true,
+    });
+    const artist = section
+      .getByRole("link", { name: "coming-up-artist", exact: true })
+      .first();
+    const image = section
+      .getByRole("link", { name: "coming-up-artist", exact: true })
+      .first()
+      .locator("img");
+    await expect(image).toHaveJSProperty("complete", true);
+    await expect.poll(() => optimizedWidths.length).toBeGreaterThan(0);
+    for (const width of optimizedWidths) {
+      expect(width).toBeGreaterThanOrEqual(84);
+      expect(width).toBeLessThanOrEqual(128);
+    }
+    await expect
+      .poll(() => image.evaluate((img: HTMLImageElement) => img.naturalWidth))
+      .toBeGreaterThan(0);
+    await expect(image).toHaveCSS("width", "28px");
+    await expect(image).toHaveCSS("height", "28px");
+    await expect(image).toHaveCSS("object-fit", "cover");
+    await expect(image).toHaveAttribute("alt", "");
+    await expect(artist).toHaveAttribute("href", "/coming-up-artist");
+    await artist.focus();
+    await expect(artist).toBeFocused();
+    await expectNoHorizontalOverflow(page);
+    await image.screenshot({
+      path: testInfo.outputPath("coming-up-avatar-dpr3.png"),
+    });
+  });
+});
+
 test("Coming Up keeps collaborator credits compact and accessible @smoke @medium @large", async ({
   page,
 }, testInfo) => {
@@ -586,7 +661,21 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
       },
     })
   );
+  // A late discovery failure can shorten the page and clamp its scroll
+  // position while the cursor is over a credit. Keep this fixture local.
+  await page.route("**/api/v2/waves?*", (route) =>
+    route.fulfill({
+      json: { data: [], page: 1, count: 0, next: false },
+    })
+  );
+  const discoveryReady = page.waitForResponse(
+    (response) => new URL(response.url()).pathname === "/api/v2/waves"
+  );
   await page.goto("/", { waitUntil: "domcontentloaded" });
+  await discoveryReady;
+  await expect(
+    page.getByRole("heading", { name: "Tired of bot replies?", exact: true })
+  ).toHaveCount(0);
   const section = page.getByRole("region", { name: "Coming up", exact: true });
   const more = section.getByRole("link", {
     name: "+3 more View all collaborators on this drop",
@@ -596,6 +685,12 @@ test("Coming Up keeps collaborator credits compact and accessible @smoke @medium
     "href",
     `/waves/${comingUpWave.id}?drop=coming-up-1`
   );
+  // Auth restoration adds the signed-out sections above these cards. Wait
+  // before measuring or hovering so that insertion cannot move the target.
+  await expect(
+    page.getByRole("region", { name: "How to start", exact: true })
+  ).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
   await more.scrollIntoViewIfNeeded();
   const layout = await more.evaluate((link) => {
     const credit = link.parentElement!.parentElement!.parentElement!;
@@ -909,6 +1004,275 @@ test("homepage waits for initial settings and recovers from failed mint status @
     await expectNoHorizontalOverflow(page);
   } finally {
     releaseSettings();
+  }
+});
+
+test("homepage reuses fast roots after mint details mount @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  let releaseClaim!: () => void;
+  const claimReady = new Promise<void>((resolve) => {
+    releaseClaim = resolve;
+  });
+  await installCompletedMintStatus(page, claimReady);
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({ json: comingUpLeaderboard })
+  );
+  let rootsRequests = 0;
+  await page.route("**/api/minting-claims/*/*/roots", (route) => {
+    rootsRequests += 1;
+    return route.fulfill({ json: [] });
+  });
+  try {
+    const rootsResponse = page.waitForResponse(
+      "**/api/minting-claims/*/*/roots"
+    );
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await (await rootsResponse).finished();
+    await expect(
+      page
+        .getByRole("main")
+        .first()
+        .locator('[data-home-section="Latest drop"]')
+    ).toHaveCount(0);
+    expect(rootsRequests).toBe(1);
+    releaseClaim();
+    const latest = page
+      .getByRole("main")
+      .first()
+      .locator('[data-home-section="Latest drop"]');
+    const image = latest.getByRole("img", {
+      name: loadingTestArtwork.name,
+      exact: true,
+    });
+    await expect(image).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect
+      .poll(() => image.evaluate((el: HTMLImageElement) => el.naturalWidth))
+      .toBeGreaterThan(0);
+    await expect(
+      latest.getByText("All editions have been minted!", { exact: true })
+    ).toBeVisible();
+    expect(rootsRequests).toBe(1);
+  } finally {
+    releaseClaim();
+  }
+});
+
+test("homepage reads fresh roots on same-card SPA return @smoke @medium @large", async ({
+  page,
+}) => {
+  await installComingUpFixture(page);
+  await installCompletedMintStatus(page);
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({ json: comingUpLeaderboard })
+  );
+  let rootsRequests = 0;
+  await page.route("**/api/minting-claims/*/*/roots", (route) => {
+    rootsRequests += 1;
+    return route.fulfill({ json: [] });
+  });
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  const latest = page
+    .getByRole("main")
+    .first()
+    .locator('[data-home-section="Latest drop"]');
+  await expect(
+    latest.getByText("All editions have been minted!", { exact: true })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  expect(rootsRequests).toBe(1);
+  const documentStart = await page.evaluate(() => performance.timeOrigin);
+  await page.getByRole("link", { name: "Start here", exact: true }).click();
+  await page.waitForURL(/\/join-6529$/);
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(documentStart);
+  await page.goBack();
+  expect(await page.evaluate(() => performance.timeOrigin)).toBe(documentStart);
+  await expect(
+    latest.getByRole("img", { name: loadingTestArtwork.name, exact: true })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  await expect.poll(() => rootsRequests).toBe(2);
+  await expect(
+    latest.getByText("All editions have been minted!", { exact: true })
+  ).toBeVisible();
+  expect(rootsRequests).toBe(2);
+});
+
+for (const rootsStatus of [200, 503]) {
+  test(`homepage shares pending roots without delaying or replacing artwork (${rootsStatus}) @smoke @medium @large`, async ({
+    page,
+  }, testInfo) => {
+    await installComingUpFixture(page);
+    await installCompletedMintStatus(page);
+    await page.route(comingUpLeaderboardPattern, (route) =>
+      route.fulfill({ json: comingUpLeaderboard })
+    );
+    let releaseRoots!: () => void;
+    const rootsReady = new Promise<void>((resolve) => {
+      releaseRoots = resolve;
+    });
+    let rootsRequests = 0;
+    await page.route("**/api/minting-claims/*/*/roots", async (route) => {
+      rootsRequests += 1;
+      await rootsReady;
+      await route.fulfill({
+        status: rootsStatus,
+        json: rootsStatus === 200 ? [] : { error: "Fixture roots unavailable" },
+      });
+    });
+    const started = Date.now();
+    try {
+      await page.goto("/", { waitUntil: "domcontentloaded" });
+      const latest = page
+        .getByRole("main")
+        .first()
+        .locator('[data-home-section="Latest drop"]');
+      const image = latest.getByRole("img", {
+        name: loadingTestArtwork.name,
+        exact: true,
+      });
+      await expect(image).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+      await expect
+        .poll(() =>
+          image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+        )
+        .toBeGreaterThan(0);
+      await expect
+        .poll(() =>
+          image.evaluate((element: HTMLImageElement) => element.currentSrc)
+        )
+        .toContain("home-loading-fixture.png");
+      await expect(
+        latest.getByText("All editions have been minted!", { exact: true })
+      ).toBeVisible();
+      await expect(
+        latest.getByRole("link", { name: loadingTestArtwork.name, exact: true })
+      ).toHaveAttribute("href", `/the-memes/${loadingTestArtwork.id}`);
+      expect(rootsRequests).toBe(1);
+
+      const artworkVisibleMs = Date.now() - started;
+      const completed = page.waitForResponse((response) =>
+        /\/api\/minting-claims\/[^/]+\/\d+\/roots$/.test(
+          new URL(response.url()).pathname
+        )
+      );
+      releaseRoots();
+      await completed;
+      await expect(image).toBeVisible();
+      await expect(
+        latest.getByText("All editions have been minted!", { exact: true })
+      ).toBeVisible();
+      expect(rootsRequests).toBe(1);
+      await testInfo.attach("roots-request-evidence", {
+        contentType: "application/json",
+        body: JSON.stringify({
+          rootsStatus,
+          rootsRequests,
+          artworkVisibleMs,
+          artworkVisibleBeforeRootsResponse: true,
+        }),
+      });
+    } finally {
+      releaseRoots();
+    }
+  });
+}
+
+test("homepage keeps newer artwork when old roots finish after back navigation @smoke @medium @large", async ({
+  page,
+}) => {
+  const initialTime = new Date("2026-11-13T12:00:00Z");
+  await page.clock.setFixedTime(initialTime);
+  await installComingUpFixture(page);
+  await installCompletedMintStatus(page);
+  await page.route(comingUpLeaderboardPattern, (route) =>
+    route.fulfill({ json: comingUpLeaderboard })
+  );
+  const newerArtwork = {
+    ...loadingTestArtwork,
+    id: loadingTestArtwork.id + 1,
+    name: "Newer homepage artwork",
+    image: "https://6529.io/home-rollover-fixture.png",
+    scaled: "https://6529.io/home-rollover-fixture.png",
+  };
+  await page.route("**/home-rollover-fixture.png", (route) =>
+    route.fulfill({
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="#579"/></svg>',
+    })
+  );
+  let showNewCard = false;
+  await page.route("**/api/memes_latest", (route) =>
+    route.fulfill({ json: showNewCard ? newerArtwork : loadingTestArtwork })
+  );
+  let releaseOldRoots!: () => void;
+  const oldRootsReady = new Promise<void>((resolve) => {
+    releaseOldRoots = resolve;
+  });
+  await page.route("**/api/minting-claims/*/*/roots", async (route) => {
+    if (
+      new URL(route.request().url()).pathname.endsWith(
+        `/${loadingTestArtwork.id}/roots`
+      )
+    ) {
+      await oldRootsReady;
+    }
+    await route.fulfill({ json: [] });
+  });
+  try {
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    const latest = page
+      .getByRole("main")
+      .first()
+      .locator('[data-home-section="Latest drop"]');
+    await expect(
+      latest.getByRole("img", { name: loadingTestArtwork.name, exact: true })
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    const initialDocument = await page.evaluate(() => performance.timeOrigin);
+    await page.getByRole("link", { name: "Start here", exact: true }).click();
+    await page.waitForURL(/\/join-6529$/);
+    expect(await page.evaluate(() => performance.timeOrigin)).toBe(
+      initialDocument
+    );
+    showNewCard = true;
+    await installCompletedMintStatus(page, Promise.resolve(), newerArtwork.id);
+    await page.clock.setFixedTime(new Date(initialTime.getTime() + 11_000));
+    await page.goBack();
+    const image = latest.getByRole("img", {
+      name: newerArtwork.name,
+      exact: true,
+    });
+    await expect(image).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect
+      .poll(() =>
+        image.evaluate((element: HTMLImageElement) => element.naturalWidth)
+      )
+      .toBeGreaterThan(0);
+    await expect
+      .poll(() =>
+        image.evaluate((element: HTMLImageElement) => element.currentSrc)
+      )
+      .toContain("home-rollover-fixture.png");
+    const oldResponse = page.waitForResponse((response) =>
+      new URL(response.url()).pathname.endsWith(
+        `/${loadingTestArtwork.id}/roots`
+      )
+    );
+    releaseOldRoots();
+    await oldResponse;
+    await expect(image).toBeVisible();
+    await expect
+      .poll(() =>
+        image.evaluate((element: HTMLImageElement) => element.currentSrc)
+      )
+      .toContain("home-rollover-fixture.png");
+    await expect(
+      latest.getByRole("img", { name: loadingTestArtwork.name, exact: true })
+    ).toHaveCount(0);
+    await expect(
+      latest.getByRole("link", { name: newerArtwork.name, exact: true })
+    ).toHaveAttribute("href", `/the-memes/${newerArtwork.id}`);
+  } finally {
+    releaseOldRoots();
   }
 });
 

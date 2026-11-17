@@ -671,9 +671,26 @@ describe("HeaderSearchModal", () => {
     ).toHaveAttribute("href", "/about/6529-apps");
   });
 
+  it("keeps Validator out of newcomer search navigation", () => {
+    autoFlushDebounce = false;
+    setup({ selectedCategory: "PAGES" });
+    fireEvent.change(getSearchInput(), { target: { value: "validator" } });
+    expect(screen.getByText('Searching for "validator"')).toBeInTheDocument();
+    act(() => pendingDebounce?.());
+    expect(
+      screen.getByText('No matches in Pages for "validator"')
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Validator" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "6529 Validator" })).toBeNull();
+  });
+
   it.each(["validator", "6529 Validator", "/validator"])(
-    "finds the search-only Validator page for %s without a sidebar entry",
+    "finds the member Validator page for %s",
     async (query) => {
+      useAuthMock.mockReturnValue({
+        connectedProfile: profile,
+        isAuthenticated: true,
+      });
       setup({
         selectedCategory: "PAGES",
         queryImpl: () => ({
@@ -687,7 +704,7 @@ describe("HeaderSearchModal", () => {
       fireEvent.change(getSearchInput(), { target: { value: query } });
 
       expect(
-        await screen.findByRole("link", { name: "6529 Validator" })
+        await screen.findByRole("link", { name: "Validator" })
       ).toHaveAttribute("href", "/validator");
     }
   );

@@ -80,8 +80,9 @@ notification overview and on the notifications page. Previews stay compact;
 message links and images appear as labels, and selecting the notification opens
 the encrypted chat.
 
-Links open only when you select them. Encrypted messages do not automatically
-load link previews, embeds or images from Markdown URLs. A Markdown image is
+Links to 6529 pages open in the current tab on the web or stay inside the app
+when you select them. External links open separately. Links stay as text in
+the chat, with preview cards and embeds disabled. A Markdown image is
 shown as a link using its alternative text (or a label identifying the image host); select the link to
 open it. To show an image privately inside the chat, attach or paste the image
 so it is encrypted on your device.

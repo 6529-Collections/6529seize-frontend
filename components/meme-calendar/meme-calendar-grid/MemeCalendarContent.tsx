@@ -311,13 +311,14 @@ export default function MemeCalendar({
           <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
             <div className="tw-min-w-0 tw-flex-1">
               <CommonTabs<ZoomLevel>
+                variant="connected"
+                connectedSize="sm"
                 items={zoomItems}
                 activeItem={zoomLevel}
                 filterLabel={t(locale, "memeCalendar.grid.zoomGroup")}
                 setSelected={setZoomLevel}
                 size="sm"
                 fill
-                activeTone="primary"
               />
             </div>
             <button

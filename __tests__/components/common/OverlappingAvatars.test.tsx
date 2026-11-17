@@ -107,8 +107,8 @@ describe("OverlappingAvatars", () => {
 
     expect(screen.getByText("GP")).toBeInTheDocument();
     expect(
-      screen.queryByRole("img", { name: "View @gpebbles" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("img", { name: "View @gpebbles" })
+    ).not.toHaveAttribute("src");
   });
 
   it("falls back from the 6529 resolver to ipfs.io", () => {

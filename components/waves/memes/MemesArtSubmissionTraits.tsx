@@ -3,17 +3,21 @@
 import React, { useCallback } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { Section, TraitField } from "./traits";
-import { getFormSections } from "./traits/schema";
+import { FieldType, getFormSections } from "./traits/schema";
+import type { ApiMainStageTraitRule } from "@/generated/models/ApiMainStageTraitRule";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import type { TraitsData } from "./submission/types/TraitsData";
 
 interface MemesArtSubmissionTraitsProps {
   readonly hideCollab?: boolean;
+  readonly traitRules?: readonly ApiMainStageTraitRule[] | undefined;
   readonly collaboratorPicker?: React.ReactNode;
   readonly traits: TraitsData;
   readonly setTraits: (traits: Partial<TraitsData>) => void;
   readonly showTitle?: boolean | undefined;
   readonly validationErrors?:
-    | Record<keyof TraitsData, string | null>
+    | Partial<Record<keyof TraitsData, string | null>>
     | undefined;
   readonly onFieldBlur?: ((field: keyof TraitsData) => void) | undefined;
   readonly readOnlyOverrides?: Partial<Record<keyof TraitsData, boolean>>;
@@ -28,6 +32,7 @@ interface MemesArtSubmissionTraitsProps {
  */
 const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   hideCollab = false,
+  traitRules,
   collaboratorPicker,
   traits,
   setTraits,
@@ -39,6 +44,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
   size,
 }) => {
   const { connectedProfile } = useAuth();
+  const locale = useBrowserLocale();
 
   // Get the user profile from connected account
   const userProfile = connectedProfile?.handle;
@@ -91,7 +97,23 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
             section.fields.map((field) => field.field).join("|");
 
           const renderField = (field: (typeof section.fields)[number]) => {
+            const rule = traitRules?.find(({ key }) => key === field.field);
             const readOnlyOverride = readOnlyOverrides?.[field.field];
+            let definition = field;
+            if (field.type === FieldType.TEXT && rule?.default_value === "No") {
+              definition = {
+                ...field,
+                placeholder: t(locale, "memes.submission.traits.useNo"),
+              };
+            } else if (field.type === FieldType.DROPDOWN && rule?.choices) {
+              definition = { ...field, options: rule.choices };
+            } else if (field.type === FieldType.NUMBER && rule) {
+              definition = {
+                ...field,
+                min: rule.minimum ?? field.min,
+                max: rule.maximum ?? field.max,
+              };
+            }
             const traitFieldOverrideProps =
               readOnlyOverride === undefined
                 ? {}
@@ -99,7 +121,7 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
             return (
               <TraitField
                 key={field.field}
-                definition={field}
+                definition={definition}
                 {...traitFieldOverrideProps}
                 traits={traits}
                 updateText={updateText}
@@ -109,7 +131,9 @@ const MemesArtSubmissionTraits: React.FC<MemesArtSubmissionTraitsProps> = ({
                 onBlur={
                   onFieldBlur ? () => onFieldBlur(field.field) : undefined
                 }
-                showRequiredMarkers={showRequiredMarkers}
+                showRequiredMarkers={
+                  showRequiredMarkers && (rule?.required ?? true)
+                }
                 size={size}
               />
             );

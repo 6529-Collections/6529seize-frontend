@@ -393,6 +393,8 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
               </span>
               <div className="tw-w-fit tw-max-w-full">
                 <CommonTabs
+                  variant="connected"
+                  connectedSize="sm"
                   items={providerOptions}
                   activeItem={externalProvider}
                   filterLabel="Select hosting network"

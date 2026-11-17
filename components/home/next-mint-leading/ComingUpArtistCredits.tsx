@@ -1,8 +1,6 @@
 "use client";
 
-import ProfileAvatar, {
-  ProfileBadgeSize,
-} from "@/components/common/profile/ProfileAvatar";
+import ComingUpAvatar from "./ComingUpAvatar";
 import ProfileNameWithAiMarker from "@/components/common/profile/ProfileNameWithAiMarker";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -21,9 +19,8 @@ const CREDIT_AVATAR_CLASS =
 // Credits are optional while API environments roll out collaboration support.
 export type ComingUpCreditSource = Pick<ApiDrop, "collaborators">;
 
-const EMPTY_COLLABORATORS: NonNullable<
-  ComingUpCreditSource["collaborators"]
-> = [];
+const EMPTY_COLLABORATORS: NonNullable<ComingUpCreditSource["collaborators"]> =
+  [];
 
 export function ComingUpArtistCredits({
   author,
@@ -70,11 +67,7 @@ export function ComingUpArtistCredits({
         href={artistHref}
         className={`tw-group/artist tw-flex tw-min-h-6 tw-items-center tw-gap-2 desktop-hover:hover:tw-text-white ${CREDIT_LINK_CLASS}`}
       >
-        <ProfileAvatar
-          pfpUrl={author.pfp}
-          alt=""
-          size={ProfileBadgeSize.SMALL}
-        />
+        <ComingUpAvatar pfpUrl={author.pfp} />
         <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out group-focus-visible/artist:tw-text-white desktop-hover:group-hover/artist:tw-text-white motion-reduce:tw-transition-none">
           {artistName}
         </span>
@@ -92,22 +85,14 @@ export function ComingUpArtistCredits({
         className="tw-group/stack tw-isolate tw-flex tw-shrink-0 tw-items-center"
       >
         <div className={`tw-z-30 ${CREDIT_AVATAR_CLASS}`}>
-          <ProfileAvatar
-            pfpUrl={author.pfp}
-            alt=""
-            size={ProfileBadgeSize.SMALL}
-          />
+          <ComingUpAvatar pfpUrl={author.pfp} />
         </div>
         {credits.map((credit, index) => (
           <div
             key={credit.id}
             className={`-tw-ml-1.5 motion-safe:desktop-hover:group-hover/stack:-tw-ml-1 ${CREDIT_AVATAR_CLASS} ${["tw-z-20", "tw-z-10", "tw-z-0"][index] ?? "tw-z-0"}`}
           >
-            <ProfileAvatar
-              pfpUrl={credit.pfp}
-              alt=""
-              size={ProfileBadgeSize.SMALL}
-            />
+            <ComingUpAvatar pfpUrl={credit.pfp} />
           </div>
         ))}
         {extraAvatars > 0 && (

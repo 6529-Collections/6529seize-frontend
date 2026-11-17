@@ -23,7 +23,8 @@ local notification previews without an in-app cooldown. Composer help describes
 the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
 clearance, while encrypted GIF/Poll/Storm remain unavailable. Notification help
 keeps new-device history limitations explicit and names the environment-specific
-Mobile/Staging push body.
+Mobile/Staging push body. Encrypted-messages help describes how the app sidebar
+closes before the sign-out dialog opens.
 
 The `media.video-player` record covers preview frames and the video-icon fallback
 for Additional Media and Promo Video in submission details. Additional Media
@@ -40,7 +41,11 @@ until that entry wins. Explicit drop hiding, platform moderation, and ordinary
 notification filters remain effective.
 
 The `profiles.identity-tab` record covers the existing-category Rep editor,
-its permission rules, stable allowance loading, retry action, and dismissal.
+its desktop inline panel and mobile sheet, pinned You contribution, owner Given
+category editing, permission rules, allowance loading, retry action and dismissal.
+Grant Rep uses one label across layouts. Category saves keep the category open;
+partial failures retain only unsaved drafts for retry. The Identity log names
+NIC explicitly and puts neutral running totals after each change.
 It also covers desktop/mobile NIC Received/Given, owner Given management with
 highest totals first by default and optional most-recently-adjusted ordering,
 REP category selection, total replacement, manually entered zero removal and
@@ -49,6 +54,21 @@ shows additional recipients; failed saves retain the draft and loaded pages.
 Back returns one step; Cancel discards the unsaved draft and closes management.
 Received and Given lists fit their content, share a height cap and scroll when needed.
 Visitor inspection and existing proxy allocation permissions remain distinct.
+
+The `profiles.getting-started` record covers the first-profile welcome in the
+Identity tab: `Find a Wave` opens Discovery, Main Stage opens its configured
+Wave, and `Before you submit art` opens the existing `Unlock submissions`
+nomination popover on desktop, with hover, click and keyboard access. Touch-first
+devices and the native app keep the dialog or sheet. `How 6529 works` opens
+Join 6529. About statements are edited through the profile editor.
+Its facts keep creation-session visibility, owner/proxy restrictions, the
+`Getting started` header and visible `Dismiss` control, and the welcome's availability without Main Stage details
+explicit.
+It also explains the one-time arrival scroll after profile content becomes
+visible following successful setup on Identity, reduced-motion support, unchanged
+keyboard focus, and no
+repeated scroll on ordinary return or reload. Setup entered from Wave creation
+returns to that flow instead.
 
 The search record covers punctuation-tolerant Wave names across site search,
 sidebar search, composer mentions and the message-search Wave picker. It explains
@@ -1067,3 +1087,7 @@ Gradient, Meme Lab and ReMemes browse records describe responsive card
 placeholders that match loaded results, with loading statuses for screen
 readers. Meme Lab includes its individual collection route; ReMemes preserves
 its existing filter visibility while fetching.
+
+Primary navigation knowledge includes the shared Join 6529 / Validator slot: newcomers
+see Join, signed-in profiles see Validator, and unresolved sessions reserve the
+slot across desktop, mobile web, native menus, and page search.

@@ -1,7 +1,7 @@
 "use client";
 import type { DocumentationValueEditorProps } from "./DocumentationValueEditor";
 import type { ValueEditor } from "@/lib/artwork-documentation/registry";
-import { inputClass, useDocumentationMessages } from "./DocumentationControls";
+import { selectClass, useDocumentationMessages } from "./DocumentationControls";
 export default function AssetEditor(
   props: DocumentationValueEditorProps & {
     readonly editor: Extract<ValueEditor, { kind: "asset" }>;
@@ -41,7 +41,7 @@ export default function AssetEditor(
       </label>
       <select
         id={id}
-        className={inputClass}
+        className={selectClass}
         disabled={disabled}
         aria-describedby={descriptions || undefined}
         multiple={editor.multiple}

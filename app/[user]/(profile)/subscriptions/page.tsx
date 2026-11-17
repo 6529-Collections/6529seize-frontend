@@ -1,6 +1,6 @@
 import { createUserTabPage } from "@/app/[user]/_lib/userTabPageFactory";
 import UserPageSubscriptions from "@/components/user/subscriptions/UserPageSubscriptions";
-import { SubscriptionPageGate } from "@/components/common/NftPurchasingGate";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import {
   USER_PAGE_TAB_IDS,
@@ -12,13 +12,13 @@ function SubscriptionsTab({ profile }: { readonly profile: ApiIdentity }) {
   // The tab mounts after hydration; a viewport-tall blank space keeps the
   // footer out of view until then.
   return (
-    <SubscriptionPageGate
+    <NftPurchasingGate
       placeholder={
         <div aria-hidden="true" className="tw-min-h-[calc(100dvh-100px)]" />
       }
     >
       <UserPageSubscriptions profile={profile} />
-    </SubscriptionPageGate>
+    </NftPurchasingGate>
   );
 }
 

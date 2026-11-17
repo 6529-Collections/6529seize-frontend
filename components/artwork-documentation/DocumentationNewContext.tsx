@@ -20,7 +20,7 @@ import { documentationOptionLabel } from "@/i18n/messages/artwork-documentation-
 import {
   DocumentationButton,
   DocumentationNotice,
-  inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -89,7 +89,7 @@ export default function DocumentationNewContext({
       <label className="tw-block tw-text-sm tw-text-iron-300">
         {msg("profile")}
         <select
-          className={`${inputClass} tw-my-3`}
+          className={`${selectClass} tw-my-3`}
           disabled={busy}
           value={profile ? documentationProfileKey(profile) : ""}
           onChange={(event) => {
