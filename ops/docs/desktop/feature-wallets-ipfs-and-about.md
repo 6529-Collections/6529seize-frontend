@@ -74,7 +74,7 @@ The update area shows checking, available, downloading progress, downloaded, no-
 The update notice in the app window, by build:
 
 - **0.1.0-rc.2:** 0.1.0-rc.2 runs the copy of 6529.io that was built into it, with the old update notice. When a newer version is published, that notice shows a **Download** button that does not work, and nothing published on 6529.io changes that for 0.1.0-rc.2. If you use 0.1.0-rc.2, open [https://6529.io/desktop](https://6529.io/desktop) in your browser and download the next version by hand, once.
-- **Later releases:** Later releases install updates themselves. If a later release cannot install an update, its notice offers **Open download page** instead, which opens the download page in your browser; download and install the new version from there. An app that installs updates shows **Download update**, the progress, then **Restart to update**.
+- **Later releases:** Later releases install updates themselves: the notice offers **Download update**, shows the progress, then **Restart to update**, and offers **Try again** if a download fails. Only an app that cannot install updates itself (or cannot tell whether it can) offers **Open download page** instead, which opens the download page in your browser. You can always download a release by hand from the [download page](https://6529.io/desktop).
 
 Use ETH Transactions > the affected worker > Logs for a worker-specific failure. Expand Advanced Options for recovery controls. Logs > Locate opens the log file location; selecting log text enables Copy Selection.
 
