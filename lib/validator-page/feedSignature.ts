@@ -6,7 +6,7 @@ import { FEED_SIGNING_KEYS, type FeedSigningKey } from "./feedSigningKeys";
 // sig.rs, and docs/releases-feed.md, "The signature"): ECDSA over
 // secp256k1 of SHA-256("6529 Validator releases v1" || 0x00 || the feed's
 // bytes as received), `r || s` in hex, by a key the file names by address.
-const DOMAIN = Buffer.from("6529 Validator releases v1\0", "ascii");
+const VALIDATOR_DOMAIN = "6529 Validator releases v1";
 const ALGORITHM = "ecdsa-secp256k1-sha256";
 // The validator's own limit: the feed and its signature fit one gossip
 // message. The live feed is about 30 KiB and grows with each release; the
@@ -80,12 +80,14 @@ function readSignatureFile(bytes: Uint8Array): SignatureFile | null {
 /**
  * True when `signatureFile` (the bytes of `releases.json.sig`) is a valid
  * signature over `feed` (the bytes of `releases.json`) by one of `keys`,
- * checked as a validator checks it before it reads the feed.
+ * checked as a validator checks it before it reads the feed. 6529 Desktop's
+ * release list has the same format under its own `domain` and keys.
  */
 export function isFeedSignatureValid(
   feed: Uint8Array,
   signatureFile: Uint8Array,
-  keys: readonly FeedSigningKey[] = FEED_SIGNING_KEYS
+  keys: readonly FeedSigningKey[] = FEED_SIGNING_KEYS,
+  domain: string = VALIDATOR_DOMAIN
 ): boolean {
   if (feed.byteLength > MAX_FEED_BYTES) {
     return false;
@@ -101,7 +103,7 @@ export function isFeedSignatureValid(
   try {
     return verify(
       "sha256",
-      Buffer.concat([DOMAIN, feed]),
+      Buffer.concat([Buffer.from(`${domain}\0`, "ascii"), feed]),
       { key: publicKey, dsaEncoding: "ieee-p1363" },
       file.signature
     );
