@@ -2650,7 +2650,9 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
     await page.setViewportSize({ width: 1440, height: 460 });
     await expect(about).toHaveCSS("height", "42px");
     await expect(update).toBeInViewport({ ratio: 1 });
-    await expect(account).toBeInViewport({ ratio: 1 });
+    await expect(
+      account.getByRole("button", { name: "Connect Wallet", exact: true })
+    ).toBeInViewport({ ratio: 1 });
     await about.focus();
     await expect(about).toBeInViewport({ ratio: 1 });
 
