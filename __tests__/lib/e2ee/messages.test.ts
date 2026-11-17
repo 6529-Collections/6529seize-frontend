@@ -32,12 +32,18 @@ describe("message rules (contract 6)", () => {
     const voter = `0x${"b".repeat(64)}`;
     const lateDevice = `0x${"c".repeat(64)}`;
     const roster = [creator, voter];
-    const rt = newRuntime({
+    const rt = runtime();
+    rt.record.epoch = 2;
+    rt.record.metadata = {
+      v: 1,
       g: "g",
-      epoch: 2,
-      metadata: { kind: "group" },
-      previousPollRosters: { 1: roster },
-    } as StoredGroup);
+      kind: "group",
+      name: null,
+      admins: [],
+      created_by: "alice",
+      history: "from_join",
+    };
+    rt.record.previousPollRosters = { 1: roster };
     expect(
       applyPayload(
         rt,
