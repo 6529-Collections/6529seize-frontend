@@ -45,7 +45,7 @@ export default function StreamRouteLoadingShell({
       style={routeLoadingMinHeightStyle}
       data-testid="stream-route-loading-shell"
     >
-      {variant !== "wave" && (
+      {variant === "waves" && (
         <output className="tw-sr-only" aria-label={ariaLabel}>
           {ariaLabel}
         </output>
@@ -114,6 +114,14 @@ export default function StreamRouteLoadingShell({
                 </div>
               </div>
 
+              {variant === "messages" && (
+                <output
+                  aria-label={ariaLabel}
+                  className="tw-px-4 tw-pt-4 tw-text-sm tw-text-iron-300"
+                >
+                  {ariaLabel}
+                </output>
+              )}
               <div className="tw-flex tw-flex-1 tw-flex-col tw-gap-4 tw-overflow-hidden tw-px-4 tw-py-4 md:tw-px-6">
                 {contentRows.map((width, index) => (
                   <div

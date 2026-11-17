@@ -3,6 +3,7 @@ import type {
   E2eeDeviceInfo,
   E2eeEngine,
   E2eeEngineStatus,
+  E2eeInitialSyncStatus,
   E2eeMessage,
 } from "@/lib/e2ee/types";
 
@@ -11,6 +12,7 @@ export interface E2eeEngineSnapshot {
   readonly version: number;
   readonly status: E2eeEngineStatus;
   readonly error: string | null;
+  readonly initialSyncStatus: E2eeInitialSyncStatus;
   readonly localDeviceKey: string | null;
   readonly thisDevice: E2eeDeviceInfo | null;
   readonly devices: readonly E2eeDeviceInfo[];
@@ -44,6 +46,7 @@ const readSnapshot = (
   version,
   status: engine.getStatus(),
   error: engine.getError(),
+  initialSyncStatus: engine.getInitialSyncStatus(),
   localDeviceKey: engine.getLocalDeviceKey(),
   thisDevice: engine.getThisDevice(),
   devices: engine.getDevices(),

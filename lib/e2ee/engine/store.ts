@@ -10,6 +10,7 @@ import type {
   E2eeDelayedReason,
   E2eeDeviceInfo,
   E2eeEngineStatus,
+  E2eeInitialSyncStatus,
   E2eeMember,
   E2eeMessage,
   E2eeUntrustedDevice,
@@ -142,6 +143,7 @@ const isCountable = (message: StoredMessage, own: string): boolean =>
 
 export class EngineStore {
   status: E2eeEngineStatus = "loading";
+  initialSyncStatus: E2eeInitialSyncStatus = "pending";
   error: string | null = null;
   /** Set while this device has moved off an earlier suite (getUpgrade). */
   upgrade: { superseded: number } | null = null;

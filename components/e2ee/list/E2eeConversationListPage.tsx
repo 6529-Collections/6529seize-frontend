@@ -6,7 +6,8 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useE2ee } from "@/hooks/e2ee/useE2ee";
+import Button from "@/components/utils/button/Button";
+import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import {
   getEncryptedDevicesRoute,
   getMessagesBaseRoute,
@@ -16,7 +17,7 @@ import useCreateModalState from "@/hooks/useCreateModalState";
 import { t } from "@/i18n/messages";
 import { E2eeNewDeviceNotice } from "../devices/E2eeNewDeviceNotice";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
-import { E2eeRouteGate } from "../gate/E2eeRouteGate";
+import { E2eeLoadingState, E2eeRouteGate } from "../gate/E2eeRouteGate";
 import { E2eeBadge } from "../ui/E2eeBadge";
 import { E2eeCenteredMessage, E2eePageShell } from "../ui/E2eePageShell";
 import { E2eeConversationList } from "./E2eeConversationList";
@@ -38,6 +39,43 @@ function DevicesLink() {
         {t(locale, "e2ee.action.devices")}
       </span>
     </Link>
+  );
+}
+
+function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
+  const locale = useBrowserLocale();
+  const { conversations, profileId, initialSyncStatus, engine } = e2ee;
+  if (conversations.length > 0) {
+    return (
+      <E2eeConversationList
+        conversations={conversations}
+        selfProfileId={profileId}
+        label={t(locale, "e2ee.list.label")}
+      />
+    );
+  }
+  if (initialSyncStatus === "pending") {
+    return <E2eeLoadingState label={t(locale, "e2ee.list.loading")} />;
+  }
+  if (initialSyncStatus === "failed") {
+    return (
+      <E2eeCenteredMessage title={t(locale, "e2ee.list.error")}>
+        <Button
+          variant="secondary"
+          size="md"
+          onClick={() => void engine?.sync().catch(() => undefined)}
+        >
+          {t(locale, "e2ee.action.retry")}
+        </Button>
+      </E2eeCenteredMessage>
+    );
+  }
+  return (
+    <E2eeCenteredMessage
+      icon={<LockClosedIcon className="tw-size-6" />}
+      title={t(locale, "e2ee.list.empty.title")}
+      body={t(locale, "e2ee.list.empty.body")}
+    />
   );
 }
 
@@ -84,23 +122,11 @@ export function E2eeConversationListPage() {
       }
     >
       <E2eeRouteGate>
-        {({ conversations, profileId }) => (
+        {(e2ee) => (
           <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-px-2 tw-py-4 sm:tw-px-4">
             <E2eeNewDeviceNotice className="tw-px-2" />
             <E2eeRenewalBanner className="tw-mx-2" />
-            {conversations.length === 0 ? (
-              <E2eeCenteredMessage
-                icon={<LockClosedIcon className="tw-size-6" />}
-                title={t(locale, "e2ee.list.empty.title")}
-                body={t(locale, "e2ee.list.empty.body")}
-              />
-            ) : (
-              <E2eeConversationList
-                conversations={conversations}
-                selfProfileId={profileId}
-                label={t(locale, "e2ee.list.label")}
-              />
-            )}
+            <EncryptedChats e2ee={e2ee} />
           </div>
         )}
       </E2eeRouteGate>

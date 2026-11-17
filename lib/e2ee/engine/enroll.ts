@@ -351,6 +351,23 @@ async function provision(
     mls.setCredential(credentialIdentity(device.wallet, device.grantId));
     await checkpoint(ctx);
   }
+  // Let setup progress paint before synchronous key generation. The timer
+  // also releases the wait if the app moves to the background mid-frame.
+  if (
+    typeof document !== "undefined" &&
+    document.visibilityState === "visible"
+  ) {
+    await new Promise<void>((resolve) => {
+      const timeout = globalThis.setTimeout(() => {
+        globalThis.cancelAnimationFrame(frame);
+        resolve();
+      }, 100);
+      const frame = globalThis.requestAnimationFrame(() => {
+        globalThis.clearTimeout(timeout);
+        globalThis.setTimeout(resolve, 0);
+      });
+    });
+  }
   await ensureKeyPackages(ctx, null);
   device.provisioned = true;
   await checkpoint(ctx, { device, skipWasm: true });
@@ -460,7 +477,13 @@ async function registerPending(
  */
 export async function enrollDevice(
   ctx: EngineContext,
-  { allowPrompt = true }: { readonly allowPrompt?: boolean } = {}
+  {
+    allowPrompt = true,
+    onProvisioning,
+  }: {
+    readonly allowPrompt?: boolean;
+    readonly onProvisioning?: (() => void) | undefined;
+  } = {}
 ): Promise<boolean> {
   await ensureWasm(ctx);
   const stored = await loadCurrentSuiteDevice(ctx);
@@ -481,6 +504,7 @@ export async function enrollDevice(
   } else {
     return false;
   }
+  onProvisioning?.();
   if (!device.registered) {
     const registered = await registerPending(ctx, device, allowPrompt);
     if (!registered) {
