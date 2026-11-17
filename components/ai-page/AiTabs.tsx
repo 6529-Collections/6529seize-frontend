@@ -45,7 +45,7 @@ export default function AiTabs({
   readonly listClassName?: string | undefined;
   readonly panelClassName?: string | undefined;
 }) {
-  const [chosen, setSelected] = useState<string | null>(null);
+  const [chosen, setChosen] = useState<string | null>(null);
   const selected =
     chosen ??
     (tabs.some((tab) => tab.key === initial) ? initial : tabs[0]?.key);
@@ -67,7 +67,7 @@ export default function AiTabs({
     const target = (next + tabs.length) % tabs.length;
     const tab = tabs[target];
     if (tab) {
-      setSelected(tab.key);
+      setChosen(tab.key);
       buttons.current[target]?.focus();
     }
   };
@@ -94,7 +94,7 @@ export default function AiTabs({
               aria-controls={`${id}-panel-${tab.key}`}
               tabIndex={active ? 0 : -1}
               className={`${TAB} ${active ? SELECTED : UNSELECTED}`}
-              onClick={() => setSelected(tab.key)}
+              onClick={() => setChosen(tab.key)}
               onKeyDown={(event) => onKeyDown(event, index)}
             >
               {tab.icon}
