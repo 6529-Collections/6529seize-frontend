@@ -4075,6 +4075,11 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopUpdate.failed": "The update could not be downloaded.",
   "desktopUpdate.retry": "Try again",
   "desktopUpdate.later": "Not now",
+  "desktopUpdate.openPage": "Open download page",
+  "desktopUpdate.pageOpened":
+    "The download page is open in your browser. Download and install the new version from there.",
+  "desktopUpdate.pageFailed":
+    "The download page did not open. Open {url} in your browser.",
   "desktop.titleStrip.label": "6529 Desktop window title",
   "desktop.titleStrip.back": "Back",
   "desktop.titleStrip.forward": "Forward",
@@ -4284,6 +4289,16 @@ export const EN_US_ROOT_MESSAGES = {
     "Failed to switch connected account. Please try again.",
   "appSidebar.accountConnectionFailed":
     "Failed to open the account connection. Please try again.",
+  "appSidebar.connect": "Connect",
+  "appSidebar.connectWallet": "Connect Wallet",
+  "appSidebar.connectFailed": "Failed to open wallet connection",
+  "appSidebar.disconnectWallet": "Disconnect Wallet",
+  "appSidebar.disconnectWalletFailed": "Failed to disconnect wallet",
+  "appSidebar.disconnectAndLogout": "Disconnect & Logout",
+  "appSidebar.signOutAllProfiles": "Sign Out All Profiles",
+  "appSidebar.pushNotifications": "Push Notifications",
+  "appSidebar.network": "Network: {chain}",
+  "appSidebar.switchChain": "Switch to {chain}",
   "headerUserMenu.switchToProfile": "Switch to {profile} ({wallet})",
   "headerUserMenu.signOutAll": "Sign out all",
   "headerUserMenu.logout": "Logout",

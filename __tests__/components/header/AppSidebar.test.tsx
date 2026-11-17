@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import AppSidebar from "@/components/header/AppSidebar";
 import type AppSidebarMenuItems from "@/components/header/AppSidebarMenuItems";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
@@ -318,6 +318,47 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       expect(onClose).toHaveBeenCalled();
       connectProps.onNavigate();
       expect(onClose).toHaveBeenCalledTimes(2);
+    });
+
+    it("starts sign-out only after the sidebar closes", async () => {
+      const onClose = jest.fn();
+      const signOut = jest.fn();
+      const { rerender } = render(<AppSidebar open onClose={onClose} />);
+
+      await waitFor(() => {
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+      connectProps.onSignOut(signOut);
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(signOut).not.toHaveBeenCalled();
+
+      rerender(<AppSidebar open={false} onClose={onClose} />);
+      await waitFor(() => {
+        expect(screen.queryByTestId("connect")).not.toBeInTheDocument();
+        expect(signOut).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("discards a queued sign-out if the sidebar reopens during the close", async () => {
+      const onClose = jest.fn();
+      const signOut = jest.fn();
+      const { rerender } = render(<AppSidebar open onClose={onClose} />);
+
+      await waitFor(() => {
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+      connectProps.onSignOut(signOut);
+      rerender(<AppSidebar open={false} onClose={onClose} />);
+      rerender(<AppSidebar open onClose={onClose} />);
+
+      await waitFor(() => {
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+      rerender(<AppSidebar open={false} onClose={onClose} />);
+      await waitFor(() => {
+        expect(screen.queryByTestId("connect")).not.toBeInTheDocument();
+      });
+      expect(signOut).not.toHaveBeenCalled();
     });
 
     it("adds Drop Forge as a gated top-level row after About", () => {
