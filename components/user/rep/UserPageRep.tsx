@@ -11,7 +11,6 @@ import type { ApiRepCategoriesPage } from "@/generated/models/ApiRepCategoriesPa
 import type { ApiCicOverview } from "@/generated/models/ApiCicOverview";
 import { commonApiFetch } from "@/services/api/common-api";
 import { AuthContext } from "@/components/auth/Auth";
-import Button from "@/components/utils/button/Button";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import GlobalRepCategoryDialog from "@/components/rep/categories/GlobalRepCategoryDialog";
@@ -381,18 +380,9 @@ export default function UserPageRep({
               profile={profile}
               isTooltip={false}
               onSuccess={() => setIsNicRateOpen(false)}
+              onCancel={() => setIsNicRateOpen(false)}
             />
           </UserPageRateWrapper>
-          <div className="tw-mt-1">
-            <Button
-              variant="ghost"
-              size="lg"
-              fullWidth
-              onClick={() => setIsNicRateOpen(false)}
-            >
-              Cancel
-            </Button>
-          </div>
         </div>
       </MobileWrapperDialog>
     </div>

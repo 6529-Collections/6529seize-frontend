@@ -14,7 +14,6 @@ export default function RatingContributorsControl({
   matter,
   canManage,
   onClick,
-  compact = false,
 }: {
   readonly overview: {
     readonly contributor_count: number;
@@ -24,10 +23,9 @@ export default function RatingContributorsControl({
   readonly matter: "REP" | "NIC";
   readonly canManage: boolean;
   readonly onClick: () => void;
-  readonly compact?: boolean;
 }) {
   const locale = useBrowserLocale();
-  const maxCount = compact ? 3 : 5;
+  const maxCount = 5;
   const avatars = useMemo(
     () => buildRepAvatarItems(overview?.contributors.data ?? [], maxCount),
     [overview?.contributors.data, maxCount]

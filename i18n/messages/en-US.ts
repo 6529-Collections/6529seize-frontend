@@ -290,6 +290,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "edit.title": "Add Rep to {name}",
   "edit.totalLabel": "Your total Rep for {category}:",
   "edit.save": "Save",
+  "edit.saved": "Saved",
   "edit.cancel": "Cancel",
   "edit.availableRep": "Your available Rep:",
   "edit.ratingLimit": "Your max/min Rep Rating to {category}:",
@@ -299,6 +300,7 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "edit.tryAgain": "Please try again.",
   "edit.loginRequired": "Log in to continue.",
   "grant.searchPlaceholder": "Category to grant REP for",
+  "panel.yourAmount": "Your REP in {category}",
   "grant.minimumCharacters": "Type at least {min} characters.",
   "grant.maximumCharacters": "Type at most {max} characters.",
   "grant.searching": "Finding existing categories...",
@@ -309,6 +311,9 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
     '"{category}" is a separate category. Only {submissionCategory} counts for submissions.',
   "grant.amountLabel": "Your total REP for this category",
   "grant.availableRepLabel": "Your available REP:",
+  "grant.youAssigned": "You assigned",
+  "grant.noMatchingChoices": "No matching categories.",
+  "grant.changeCategory": "Change category",
   "grant.assignedRepLabel": "Your REP assigned to {name}:",
   "grant.availableRep": "Your available REP: {amount}",
   "grant.assignedRep": "Your REP assigned to {name}: {amount}",
@@ -4469,6 +4474,14 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
     "Coverage is temporarily unavailable. Your subscription settings have not changed.",
+  "subscriptions.coverage.visitor.unavailable":
+    "Coverage is temporarily unavailable.",
+  "subscriptions.coverage.visitor.noEligibility":
+    "This profile is not currently eligible for an upcoming Meme mint.",
+  "subscriptions.coverage.visitor.noSelections":
+    "No drops are selected in Manual mode.",
+  "subscriptions.coverage.visitor.unknown":
+    "Some forecast information is missing.",
   "subscriptions.coverage.stale":
     "Last known coverage is shown and may be out of date.",
   "subscriptions.coverage.refresh": "Refresh coverage",

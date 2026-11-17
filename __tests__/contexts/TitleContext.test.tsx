@@ -292,6 +292,23 @@ describe("TitleContext", () => {
     });
   });
 
+  it("does not read the 6529 AI page as a profile", async () => {
+    mockPathname = "/ai";
+    mockSearchParams = new URLSearchParams();
+    mockActiveWaveId = null;
+
+    render(
+      <TitleProvider>
+        <TitleHarness waveData={null} />
+      </TitleProvider>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText("6529.io")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("Profile")).not.toBeInTheDocument();
+  });
+
   it("restores the default home title after leaving messages", async () => {
     mockPathname = "/messages";
     mockSearchParams = new URLSearchParams("wave=wave-1");
