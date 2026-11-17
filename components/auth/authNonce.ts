@@ -5,11 +5,13 @@ import {
   getSessionClientType,
   getSessionNonce,
 } from "@/services/auth/session-v2.utils";
+import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import { getWalletSignatureAudience } from "@/services/wallet-signatures/structured-wallet-signatures";
 import {
   AuthenticationNonceError,
   InvalidSignerAddressError,
   NonceResponseValidationError,
+  SignInRateLimitedError,
 } from "./authErrors";
 
 const SIWE_HEADER_SUFFIX = " wants you to sign in with your Ethereum account:";
@@ -398,6 +400,9 @@ export const getAuthNonce = async ({
       error instanceof InvalidSignerAddressError
     ) {
       throw error;
+    }
+    if (getStructuredApiErrorStatus(error) === 429) {
+      throw new SignInRateLimitedError();
     }
 
     throw new AuthenticationNonceError(

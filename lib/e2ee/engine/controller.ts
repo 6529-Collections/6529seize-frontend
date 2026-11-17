@@ -15,7 +15,9 @@ import {
   STALL_RETRY_MS,
 } from "./maintenance";
 import { sleep } from "./runtime";
+import { hasOverdueChanges } from "./required-changes";
 import { sendNext } from "./send";
+import type { GroupRuntime } from "./store";
 import { processInbox, tryCatchUp } from "./sync";
 
 /** Orchestration: sync passes, maintenance, outbox flushing, timers, wakes. */
@@ -36,6 +38,20 @@ const isNetworkish = (error: unknown): boolean => {
     (apiError.status === 0 || apiError.status >= 500 || apiError.status === 429)
   );
 };
+
+const lastSeqByGroup = (
+  serverGroups: readonly ApiE2eeDeviceGroup[] | null
+): Map<string, number> =>
+  new Map(
+    (serverGroups ?? []).map((item) => [
+      item.group.toLowerCase(),
+      item.last_seq,
+    ])
+  );
+
+/** The server lists items this device has not caught up with. */
+const isBehind = (runtime: GroupRuntime, lastSeq: number): boolean =>
+  lastSeq > Math.max(runtime.record.cursor, runtime.listedThrough ?? 0);
 
 const swallowNetwork = async (task: Promise<unknown>): Promise<void> => {
   try {
@@ -151,18 +167,13 @@ export class EngineController {
     if (!this.isReady()) {
       return;
     }
-    const lastSeq = new Map(
-      (serverGroups ?? []).map((item) => [
-        item.group.toLowerCase(),
-        item.last_seq,
-      ])
-    );
+    const lastSeq = lastSeqByGroup(serverGroups);
     for (const [g, runtime] of [...this.ctx.store.groups]) {
       if (!isActive(runtime)) {
         continue;
       }
       const known = lastSeq.get(g);
-      const behind = known === undefined || known > runtime.record.cursor;
+      const behind = known === undefined || isBehind(runtime, known);
       await this.guard(
         this.syncGroup(g, { fetch: behind || serverGroups === null })
       );
@@ -171,6 +182,56 @@ export class EngineController {
       await this.guard(this.hooks.refreshMe());
     }
     await this.guard(this.hooks.afterSync());
+  }
+
+  /**
+   * Catches up only the groups the server lists as having new items, and
+   * flushes every group with sends still waiting. The open conversation's
+   * fast poll and its catch-up on open use this, so their requests are the
+   * same whichever chat is on screen and never name it: the server already
+   * knows which groups gained items (D175, P60 §1).
+   */
+  async syncChanged(): Promise<void> {
+    if (!this.isReady()) {
+      return;
+    }
+    const serverGroups = await this.deviceGroups();
+    if (!serverGroups || !this.isReady()) {
+      return;
+    }
+    const behind = [...lastSeqByGroup(serverGroups)]
+      .filter(([g, known]) => {
+        const runtime = this.ctx.store.groups.get(g);
+        return isActive(runtime) && isBehind(runtime, known);
+      })
+      .map(([g]) => g);
+    await this.inOrder(behind, (g) => this.syncGroup(g));
+    // Sends still waiting from an earlier failed or delayed attempt go out
+    // on this pass too, in every group, whichever chat is open: a send is
+    // never tied to a chat being opened. (Catching up flushes those above.)
+    const caughtUp = new Set(behind);
+    const pending = [...this.ctx.store.groups]
+      .filter(
+        ([g, runtime]) =>
+          !caughtUp.has(g) && isActive(runtime) && runtime.outbox.size > 0
+      )
+      .map(([g]) => g);
+    await this.inOrder(pending, (g) => this.flush(g));
+  }
+
+  /**
+   * Runs a group task one group after another, as the full pass does: every
+   * step runs in the engine's serial queue anyway, and running them in
+   * parallel would only burst requests against the per-device rate limits.
+   */
+  private inOrder(
+    groups: readonly string[],
+    step: (g: string) => Promise<unknown>
+  ): Promise<void> {
+    return groups.reduce<Promise<void>>(
+      (previous, g) => previous.then(() => this.guard(step(g))),
+      Promise.resolve()
+    );
   }
 
   /** One group's (or the pool's) failure must not stop the whole pass. */
@@ -242,12 +303,24 @@ export class EngineController {
     });
   }
 
-  async maintain(g: string): Promise<void> {
+  /**
+   * `onlyIfDue`: commit (and catch up first, as every commit does) only
+   * when local state shows a required change. Opening a chat uses it, so
+   * opening one does not fetch that chat's log unless it has news (P60 §1).
+   */
+  async maintain(
+    g: string,
+    options: { onlyIfDue?: boolean } = {}
+  ): Promise<void> {
     const runtime = this.ctx.store.groups.get(g);
     if (!this.isReady() || !isActive(runtime)) {
       return;
     }
     this.maintainedAt.set(g, this.ctx.now());
+    if (options.onlyIfDue === true && !(await this.commitDue(runtime))) {
+      await this.scheduleFollowUps(g);
+      return;
+    }
     await runGroupCommit(
       this.ctx,
       g,
@@ -261,6 +334,27 @@ export class EngineController {
       }
     );
     await this.scheduleFollowUps(g);
+  }
+
+  /** Whether the required-changes planner would commit anything now. */
+  private async commitDue(runtime: GroupRuntime): Promise<boolean> {
+    if (
+      runtime.record.pendingCommit !== null ||
+      runtime.record.leaving.length > 0
+    ) {
+      return true;
+    }
+    try {
+      const changes = await this.ctx.queue.run(() =>
+        groupChanges(this.ctx, runtime, { onlyOwnAdds: true })
+      );
+      return hasOverdueChanges(changes) || changes.selfUpdateDue;
+    } catch (error) {
+      if (!isNetworkish(error)) {
+        throw error;
+      }
+      return true;
+    }
   }
 
   private async scheduleFollowUps(g: string): Promise<void> {
@@ -465,7 +559,7 @@ export class EngineController {
       return;
     }
     if (open && this.ctx.now() - this.lastFullSyncAt < POLL_IDLE_MS) {
-      await this.syncGroup(open);
+      await this.syncChanged();
       return;
     }
     await this.syncAll();

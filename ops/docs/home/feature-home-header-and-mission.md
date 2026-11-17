@@ -61,7 +61,7 @@ sections:
    - `Read the full guide` opens `/join-6529`.
    - Desktop shows four numbered columns. Mobile shows a vertical timeline.
    - The collection/submission description is omitted during server rendering
-     and on restricted native iOS (outside the US or unknown country). Those
+     and in the iOS app. Those
      visitors see a browsing/community description without the two inline links.
 7. The mission block shows `6529 is a network society` beside the Bitcoin and
    Ethereum sentence, with `human coordination itself,` emphasized. On mobile

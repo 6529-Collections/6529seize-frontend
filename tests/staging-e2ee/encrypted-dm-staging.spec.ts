@@ -21,6 +21,8 @@ import {
   markdownBody,
   markdownSnapshot,
   revealNewestMessage,
+  CONVERSATION_PREVIEW_MARKDOWN,
+  checkConversationPreviews,
 } from "../support/markdownParity";
 
 import { expect, test } from "../testHelpers";
@@ -351,7 +353,21 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expectPrivateAndClean([a, b], needles({ hello, reply }));
   });
 
-  test("ordinary and encrypted chats render identical Markdown without fetching encrypted URLs", async ({ browser }, testInfo) => {
+  test("formats conversation-list Markdown previews on desktop and mobile", async ({}, testInfo) => {
+    const { a } = requireWorld();
+    await openChat(a, await ensureDm(requireWorld()));
+    await composer(a.page).fill(CONVERSATION_PREVIEW_MARKDOWN);
+    await a.page.getByRole("button", { name: "Send", exact: true }).click();
+    await expect(messageRow(a.page, "console.log('hi gelato3');")).toBeVisible({
+      timeout: SYNC_TIMEOUT_MS,
+    });
+    await checkConversationPreviews(a.page, testInfo);
+    await a.page.setViewportSize({ width: 1440, height: 1000 });
+  });
+
+  test("ordinary and encrypted chats render identical Markdown without fetching encrypted URLs", async ({
+    browser,
+  }, testInfo) => {
     const { a, b, runId } = requireWorld();
     const dm = await ensureDm(requireWorld());
     await openChat(a, dm);
@@ -375,7 +391,10 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     );
     const ordinary = regularSession.page;
     try {
-      const waveId = await createChatWave(regularSession, `Markdown QA ${runId}`);
+      const waveId = await createChatWave(
+        regularSession,
+        `Markdown QA ${runId}`
+      );
       await gotoStaging(ordinary, `/waves/${waveId}`);
       for (const sample of MARKDOWN_PARITY_CASES) {
         const marker = `Markdown ${sample.name} ${runId}`;

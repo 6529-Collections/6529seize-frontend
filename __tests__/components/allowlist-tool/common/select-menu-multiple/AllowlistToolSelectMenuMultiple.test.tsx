@@ -56,7 +56,7 @@ describe('AllowlistToolSelectMenuMultiple', () => {
     expect(screen.getByText('Label')).toBeInTheDocument();
     expect(screen.getByText('Choose')).toBeInTheDocument();
     expect(animateMock).toHaveBeenCalled();
-    expect(animateMock.mock.calls[0][1]).toEqual({ rotate: -90 });
+    expect(animateMock.mock.calls[0][1]).toEqual({ rotate: 0 });
   });
 
   it('opens and closes dropdown via click and clickAway', async () => {
@@ -64,7 +64,7 @@ describe('AllowlistToolSelectMenuMultiple', () => {
     renderComponent();
     await user.click(screen.getByRole('button'));
     expect(screen.getByRole('listbox')).toBeInTheDocument();
-    expect(animateMock).toHaveBeenLastCalledWith(iconScope.current, { rotate: 0 });
+    expect(animateMock).toHaveBeenLastCalledWith(iconScope.current, { rotate: 180 });
 
     act(() => {
       clickAwayCb();

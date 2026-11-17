@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 import { useReadContract } from "wagmi";
 import { mintPhaseWindowsForDay } from "../shared/memes-calendar/phases";
@@ -14,6 +14,7 @@ import { areEqualAddresses } from "@/helpers/Helpers";
 import { Time } from "@/helpers/time";
 import { getMemesMintingRoots } from "@/services/api/memes-minting-claims-api";
 import { usePageVisible } from "@/hooks/usePageVisibility";
+import { MemesMintingRootsContext } from "@/contexts/MemesMintingRootsContext";
 import { isAddress, type Abi } from "viem";
 
 export enum ManifoldClaimStatus {
@@ -309,6 +310,7 @@ export function useManifoldClaim({
   identifier,
   onError,
 }: UseManifoldClaimParams): UseManifoldClaimResult {
+  const rootsScope = useContext(MemesMintingRootsContext);
   const readMethod: ManifoldClaimReadMethod =
     chainId === mainnet.id ? "getClaimForToken" : "getClaim";
   const [claim, setClaim] = useState<ManifoldClaim | undefined>();
@@ -449,7 +451,9 @@ export function useManifoldClaim({
       roots: null,
     });
 
-    getMemesMintingRoots(identifier)
+    const sharedRead = rootsScope?.read(identifier);
+    const request = sharedRead?.promise ?? getMemesMintingRoots(identifier);
+    request
       .then((roots) => {
         if (!isMounted) {
           return;
@@ -473,8 +477,9 @@ export function useManifoldClaim({
 
     return () => {
       isMounted = false;
+      sharedRead?.release();
     };
-  }, [contract, identifier]);
+  }, [contract, identifier, rootsScope]);
 
   useEffect(() => {
     if (!readContract.data) {

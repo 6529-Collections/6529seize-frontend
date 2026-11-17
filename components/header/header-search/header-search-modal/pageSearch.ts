@@ -1,3 +1,5 @@
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import {
   DROP_FORGE_PATH,
   DROP_FORGE_SECTIONS,
@@ -13,6 +15,7 @@ export interface RankedPageMatch {
 }
 
 export const PAGE_SEARCH_ALIASES_BY_HREF: Record<string, string[]> = {
+  "/validator": [t(DEFAULT_LOCALE, "apps.validator.title")],
   "/safe-collecting": ["delegation", "delegations", "Delegation Center"],
   "/safe-collecting/tap-guide": [
     "delegation",

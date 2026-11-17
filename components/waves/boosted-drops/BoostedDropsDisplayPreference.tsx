@@ -138,7 +138,7 @@ export default function BoostedDropsDisplayPreference({
   return (
     <fieldset
       className={clsx(
-        "tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-white/5 tw-bg-white/[0.015] tw-p-3",
+        "tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-border-0 tw-bg-transparent tw-p-0",
         className
       )}
       aria-describedby={descriptionId}
@@ -176,7 +176,7 @@ export default function BoostedDropsDisplayPreference({
                   "tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border tw-border-solid tw-px-2 tw-py-2.5 tw-text-center tw-transition-colors tw-duration-200 peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 peer-focus-visible:tw-ring-offset-2 peer-focus-visible:tw-ring-offset-iron-950",
                   selected
                     ? "tw-border-primary-400 tw-bg-primary-500/[0.08] tw-text-primary-300"
-                    : "tw-border-white/10 tw-bg-white/[0.015] tw-text-iron-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
+                    : "tw-border-transparent tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-iron-200"
                 )}
               >
                 <Preview />

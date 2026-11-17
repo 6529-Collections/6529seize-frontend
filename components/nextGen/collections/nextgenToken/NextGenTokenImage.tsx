@@ -22,6 +22,8 @@ import Link from "next/link";
 import { Tooltip } from "react-tooltip";
 import { TraitScore } from "./NextGenTokenAbout";
 
+const NOT_LISTED = "Not Listed";
+
 export function NextGenTokenImage(
   props: Readonly<{
     token: NextGenToken;
@@ -34,6 +36,7 @@ export function NextGenTokenImage(
     is_fullscreen?: boolean | undefined;
     rarity_type?: NextGenTokenRarityType | undefined;
     show_listing?: boolean | undefined;
+    hideMarketListings?: boolean;
     show_max_sale?: boolean | undefined;
     show_last_sale?: boolean | undefined;
     show_owner_info?: boolean | undefined;
@@ -42,6 +45,7 @@ export function NextGenTokenImage(
 ) {
   const isMobileScreen = useIsMobileScreen();
   const locale = useBrowserLocale();
+  const showListing = props.show_listing && !props.hideMarketListings;
   function getImageUrl() {
     if (props.show_original) {
       return props.token.image_url;
@@ -108,29 +112,37 @@ export function NextGenTokenImage(
             className="!tw-max-w-[min(280px,calc(100vw-24px))] !tw-rounded-lg !tw-border !tw-border-solid !tw-border-white/15 !tw-bg-iron-800 !tw-px-3 !tw-py-2.5 !tw-text-sm !tw-leading-[1.5] !tw-text-iron-50 !tw-shadow-lg"
           >
             <div className="tw-flex tw-flex-col tw-gap-1.5 tw-text-left">
-              <div className="tw-border-b tw-border-white/10 tw-pb-1.5">
+              <div
+                className={
+                  props.hideMarketListings
+                    ? undefined
+                    : "tw-border-b tw-border-white/10 tw-pb-1.5"
+                }
+              >
                 {ownerInfo}
               </div>
-              <div className="tw-flex tw-flex-col tw-gap-1 tw-font-semibold">
-                <span>
-                  Opensea:{" "}
-                  {props.token.opensea_price > 0
-                    ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
-                    : "Not Listed"}
-                </span>
-                <span>
-                  Blur:{" "}
-                  {props.token.blur_price > 0
-                    ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
-                    : "Not Listed"}
-                </span>
-                <span>
-                  Magic Eden:{" "}
-                  {props.token.me_price > 0
-                    ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
-                    : "Not Listed"}
-                </span>
-              </div>
+              {!props.hideMarketListings && (
+                <div className="tw-flex tw-flex-col tw-gap-1 tw-font-semibold">
+                  <span>
+                    Opensea:{" "}
+                    {props.token.opensea_price > 0
+                      ? `${props.token.opensea_price} ${ETHEREUM_ICON_TEXT}`
+                      : NOT_LISTED}
+                  </span>
+                  <span>
+                    Blur:{" "}
+                    {props.token.blur_price > 0
+                      ? `${props.token.blur_price} ${ETHEREUM_ICON_TEXT}`
+                      : NOT_LISTED}
+                  </span>
+                  <span>
+                    Magic Eden:{" "}
+                    {props.token.me_price > 0
+                      ? `${props.token.me_price} ${ETHEREUM_ICON_TEXT}`
+                      : NOT_LISTED}
+                  </span>
+                </div>
+              )}
             </div>
           </Tooltip>
         </button>
@@ -156,7 +168,7 @@ export function NextGenTokenImage(
     }
 
     let listingDisplay;
-    if (props.show_listing) {
+    if (showListing) {
       listingDisplay = (
         <span className="tw-flex tw-items-center tw-gap-2">
           <span className="tw-flex tw-items-center">
@@ -167,7 +179,7 @@ export function NextGenTokenImage(
                 {props.token.price} {ETHEREUM_ICON_TEXT}
               </>
             ) : (
-              "Not Listed"
+              NOT_LISTED
             )}
           </span>
           {props.token.opensea_price == props.token.price &&
@@ -269,7 +281,7 @@ export function NextGenTokenImage(
           <span
             className={`tw-flex tw-w-full tw-items-center tw-pt-1 ${
               props.rarity_type ||
-              props.show_listing ||
+              showListing ||
               props.show_max_sale ||
               props.show_last_sale ||
               props.show_owner_info

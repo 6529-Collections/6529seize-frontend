@@ -104,9 +104,9 @@ stored. If you used non-default names, set these repository variables:
   DEVICEFARM_IOS_POOL_NAME=${IOS_POOL_NAME}
 
 Remaining setup (see ops/docs/developer/device-farm-qa.md):
-  1. Create the CI IAM user/role with the documented Device Farm policy.
-  2. Add repository secrets DEVICEFARM_AWS_ACCESS_KEY_ID and
-     DEVICEFARM_AWS_SECRET_ACCESS_KEY.
+  1. Create the GitHub OIDC CI role with the documented trust and Device
+     Farm policy (no access keys).
+  2. Set repository variable DEVICEFARM_AWS_ROLE_ARN to that role's ARN.
   3. Add repository secret MOBILE_REPO_TOKEN (read access to
      6529-Collections/6529-core-mobile) for the native Android pack.
   4. Optionally add MOBILE_GOOGLE_SERVICES_JSON for Firebase push in QA builds.

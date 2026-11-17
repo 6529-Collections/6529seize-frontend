@@ -1,5 +1,7 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
 import {
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
@@ -122,7 +124,7 @@ export default function DelegationMappingTool() {
         <div className="tw-w-full tw-px-3">
           <select
             id="delegation-collection"
-            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
+            className={`${DROPDOWN_FIELD_CLASSES} tw-form-select tw-block tw-w-full`}
             value={collection}
             onChange={(e) => {
               setCollection(e.target.value);
@@ -153,7 +155,7 @@ export default function DelegationMappingTool() {
         <div className="tw-w-full tw-px-3">
           <select
             id="delegation-use-case"
-            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
+            className={`${DROPDOWN_FIELD_CLASSES} tw-form-select tw-block tw-w-full`}
             value={useCase}
             onChange={(e) => {
               const newCase = Number.parseInt(e.target.value);

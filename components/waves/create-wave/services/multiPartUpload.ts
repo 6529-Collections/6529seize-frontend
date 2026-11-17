@@ -123,6 +123,7 @@ export async function multiPartAttachmentUpload({
   file,
   onProgress,
   signal,
+  locale,
 }: Omit<MultiPartUploadParams, "path" | "purpose">): Promise<ApiAttachment> {
   if (!isAttachmentUploadFile(file)) {
     throw new Error("File type not supported.");
@@ -141,5 +142,6 @@ export async function multiPartAttachmentUpload({
     },
     onProgress: createProgressHandler(file, onProgress),
     signal,
+    locale,
   });
 }

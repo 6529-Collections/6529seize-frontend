@@ -93,6 +93,27 @@ describe("EULAModal", () => {
     );
   });
 
+  it("opens the minting terms inside the agreement", async () => {
+    const user = userEvent.setup();
+    render(<EULAModal />);
+
+    const terms = screen.getByText("Read the minting terms");
+    const disclosure = terms.closest("details");
+    expect(disclosure).not.toHaveAttribute("open");
+
+    await user.click(terms);
+
+    expect(disclosure).toHaveAttribute("open");
+    expect(
+      screen.getByText(/Holding a Meme Card does not guarantee/)
+    ).toBeVisible();
+    expect(screen.getByText("Phase 0 — Allowlist")).toBeVisible();
+    expect(disclosure?.querySelector("a")).toBeNull();
+    expect(
+      screen.queryByRole("link", { name: "6529.io/about/minting" })
+    ).toBeNull();
+  });
+
   it("keeps keyboard tab focus inside the modal", async () => {
     const user = userEvent.setup();
     render(

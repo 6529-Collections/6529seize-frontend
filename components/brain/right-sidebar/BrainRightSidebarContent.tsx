@@ -32,6 +32,7 @@ const BrainRightSidebarContent: React.FC<BrainRightSidebarContentProps> = ({
           stableHash: pinnedDrop.id,
         }}
         showWaveInfo={false}
+        timestampLayout="stacked-compact"
         activeDrop={null}
         dropViewDropId={null}
         onReplyClick={() => {}}
@@ -41,6 +42,13 @@ const BrainRightSidebarContent: React.FC<BrainRightSidebarContentProps> = ({
         previousDrop={null}
         nextDrop={null}
         onQuoteClick={() => {}}
+        wrapContentOnly={(content) =>
+          pinnedDrop.parts.length > 1 ? (
+            <div className="tw-pb-2">{content}</div>
+          ) : (
+            content
+          )
+        }
       />
     </section>
   );

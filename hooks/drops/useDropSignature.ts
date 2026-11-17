@@ -11,6 +11,8 @@ import {
   buildDropSignatureMessage,
   isStructuredSignaturesEnabled,
 } from "@/services/wallet-signatures/structured-wallet-signatures";
+import { buildDropSignatureContext } from "@/lib/desktop/walletRequestContext";
+import { rememberWalletRequestContext } from "@/services/desktop/walletRequestContexts";
 import {
   buildMemesSubmissionTypedData,
   type MemesSigningWave,
@@ -79,6 +81,10 @@ export const useDropSignature = () => {
           drop,
           termsOfService,
         }).message;
+        // 6529 Desktop: lets the browser page show what the hash covers.
+        rememberWalletRequestContext(structuredMessage, () =>
+          buildDropSignatureContext({ drop, termsOfService })
+        );
       }
 
       const clientSignature = await getSignature({

@@ -18,7 +18,10 @@ it("reads no request data in the root layout", () => {
 // also starts the EULA check. Native detection must stay synchronous, with
 // only the legacy-browser checks ahead of it.
 it("starts native detection synchronously after the legacy-browser checks", () => {
-  const head = layout.slice(layout.indexOf("<head>"), layout.indexOf("</head>"));
+  const head = layout.slice(
+    layout.indexOf("<head>"),
+    layout.indexOf("</head>")
+  );
   const stylesIndex = head.indexOf("__html: NATIVE_STARTUP_STYLES");
   const scriptIdIndex = head.indexOf('id="native-startup-bootstrap"');
   expect(stylesIndex).toBeGreaterThan(-1);
@@ -73,4 +76,15 @@ it("keeps no reader of a native-ios cookie", () => {
     .filter((file) => /["'`]native-ios["'`=]/.test(readFileSync(file, "utf8")))
     .map((file) => path.relative(process.cwd(), file));
   expect(readers).toEqual([]);
+});
+
+// 6529 Desktop draws its integrated title bar only for pages that ask for it;
+// the page draws the strip (hidden by CSS unless the host is overlaying).
+// Browsers ignore the meta.
+it("asks 6529 Desktop for its integrated title bar in the server-rendered head", () => {
+  const head = layout.slice(
+    layout.indexOf("<head>"),
+    layout.indexOf("</head>")
+  );
+  expect(head).toContain('<meta name="6529-desktop-titlebar" content="1" />');
 });

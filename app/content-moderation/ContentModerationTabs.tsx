@@ -1,5 +1,8 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
+
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
@@ -65,7 +68,7 @@ export default function ContentModerationTabs({
         <select
           value={activeTab}
           onChange={(event) => selectTab(event.target.value as ModerationTab)}
-          className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+          className={`${DROPDOWN_FIELD_CLASSES} tw-min-h-11 tw-w-full tw-px-3 tw-py-2 tw-text-sm`}
         >
           {tabs.map((tab) => (
             <option key={tab.id} value={tab.id}>
@@ -106,11 +109,7 @@ export default function ContentModerationTabs({
               }
               onClick={() => selectTab(tab.id)}
               onKeyDown={(event) => focusTab(event, index)}
-              className={`tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-whitespace-nowrap tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-1 tw-py-3 tw-text-sm tw-font-semibold focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 sm:tw-flex-none sm:tw-px-3 ${
-                activeTab === tab.id
-                  ? "tw-border-primary-400 tw-text-iron-50"
-                  : "tw-border-transparent tw-text-iron-400 hover:tw-text-iron-100"
-              }`}
+              className={`${getUnderlineTabClasses({ active: activeTab === tab.id, size: "sm" })} tw-min-w-0 tw-flex-1 tw-cursor-pointer tw-px-1 tw-py-3 sm:tw-flex-none sm:tw-px-3`}
             >
               <span aria-hidden="true" className="sm:tw-hidden">
                 {t(

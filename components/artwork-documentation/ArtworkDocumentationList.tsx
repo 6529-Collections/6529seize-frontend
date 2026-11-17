@@ -32,6 +32,7 @@ import {
   DocumentationButton,
   DocumentationNotice,
   inputClass,
+  selectClass,
   panelClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
@@ -301,7 +302,7 @@ function DocumentationListContent({
                   <label key={key} className="tw-text-sm tw-text-iron-300">
                     {msg(`filter.${key}`)}
                     <select
-                      className={`${inputClass} tw-mt-2`}
+                      className={`${selectClass} tw-mt-2`}
                       value={queueFilters[key] ?? ""}
                       onChange={(event) =>
                         setQueueFilters({
@@ -322,7 +323,7 @@ function DocumentationListContent({
                 <label className="tw-text-sm tw-text-iron-300">
                   {msg("profile")}
                   <select
-                    className={`${inputClass} tw-mt-2`}
+                    className={`${selectClass} tw-mt-2`}
                     value={queueFilters.profile_id ?? ""}
                     onChange={(event) =>
                       setQueueFilters({
@@ -376,7 +377,7 @@ function DocumentationListContent({
             <label className="tw-block tw-text-sm tw-text-iron-300">
               {msg("program")}
               <select
-                className={`${inputClass} tw-mt-2`}
+                className={`${selectClass} tw-mt-2`}
                 value={filter}
                 onChange={(event) => setFilter(event.target.value)}
               >
@@ -462,7 +463,7 @@ function DocumentationListContent({
                 <label className="tw-grow tw-text-sm tw-text-iron-300">
                   {msg("editorial.recordFor")}
                   <select
-                    className={`${inputClass} tw-mt-2`}
+                    className={`${selectClass} tw-mt-2`}
                     disabled={starting}
                     value={selected ? documentationProfileKey(selected) : ""}
                     onChange={(event) => {

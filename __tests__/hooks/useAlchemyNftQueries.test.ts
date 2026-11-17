@@ -70,6 +70,33 @@ describe("useAlchemyNftQueries", () => {
       }
     });
 
+    it("calls the backend proxy directly in the bridge-based desktop app", async () => {
+      Object.defineProperty(window, "api", {
+        configurable: true,
+        value: { openExternal: jest.fn() },
+      });
+      Object.defineProperty(window, "nativeAuth", {
+        configurable: true,
+        value: { sessionLogin: jest.fn() },
+      });
+      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+        ok: true,
+        json: () => Promise.resolve(mockAlchemyResponse),
+      });
+
+      try {
+        await fetchOwnerNfts(1, "0x123", "0xowner");
+
+        expect(globalThis.fetch).toHaveBeenCalledWith(
+          `${MOCK_API_ENDPOINT}/alchemy-proxy/owner-nfts?chainId=1&contract=0x123&owner=0xowner`,
+          { signal: undefined }
+        );
+      } finally {
+        Reflect.deleteProperty(window, "api");
+        Reflect.deleteProperty(window, "nativeAuth");
+      }
+    });
+
     it("should return processed data from primary endpoint when successful", async () => {
       globalThis.fetch = jest.fn().mockResolvedValueOnce({
         ok: true,

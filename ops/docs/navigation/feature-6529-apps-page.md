@@ -5,8 +5,10 @@ Parent: [Navigation Index](README.md)
 ## Overview
 
 The `6529 Apps` page presents official mobile and desktop downloads in one
-place. Mobile and desktop options remain visible together rather than being
-hidden behind tabs.
+place, followed by a third section for `6529 Validator`. The whole Validator
+section links to `/validator`, with the description `Read more about 6529
+validator`. Mobile and desktop options remain visible together rather than
+being hidden behind tabs.
 
 Ask `@help6529` "is there an app?" or "is there a 6529 app?" to find both
 6529 Mobile and 6529 Desktop and the official download page. You do not need to
@@ -40,6 +42,11 @@ choose a platform before asking.
    format. `Download` opens the installer directly. Each installer shows
    `Arweave mirror · Coming soon` until its mirror is published, then shows a
    clickable `Arweave mirror` link.
+5. Select anywhere in the `6529 Validator` section to read more and download
+   the validator from `/validator`. Signed-in members with a profile also get
+   a direct `Validator` row in the primary navigation and can search `Pages`
+   for `validator`, `6529 Validator`, or `/validator`. Newcomers see `Join 6529`
+   in navigation and search instead.
 
 ## Common Scenarios
 

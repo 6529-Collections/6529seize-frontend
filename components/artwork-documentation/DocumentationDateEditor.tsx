@@ -10,7 +10,11 @@ import {
   documentationFieldLabel,
   documentationOptionLabel,
 } from "@/i18n/messages/artwork-documentation-fields";
-import { inputClass, useDocumentationMessages } from "./DocumentationControls";
+import {
+  inputClass,
+  selectClass,
+  useDocumentationMessages,
+} from "./DocumentationControls";
 export default function DateEditor(props: Props) {
   const { msg } = useDocumentationMessages();
   const formatHintId = useId();
@@ -45,7 +49,7 @@ export default function DateEditor(props: Props) {
         <label className="tw-block tw-text-sm tw-text-iron-300">
           {msg("editorial.datePrecision")}
           <select
-            className={inputClass + " tw-mt-2"}
+            className={selectClass + " tw-mt-2"}
             value={precision}
             disabled={props.disabled}
             onChange={(event) => update("precision", event.target.value)}
@@ -61,7 +65,7 @@ export default function DateEditor(props: Props) {
           <label className="tw-block tw-text-sm tw-text-iron-300">
             {documentationFieldLabel("endpoint_precision")}
             <select
-              className={inputClass + " tw-mt-2"}
+              className={selectClass + " tw-mt-2"}
               value={
                 typeof current["endpoint_precision"] === "string"
                   ? current["endpoint_precision"]

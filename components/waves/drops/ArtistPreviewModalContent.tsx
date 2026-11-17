@@ -43,6 +43,7 @@ export const ArtistPreviewModalContent: React.FC<
 }) => {
   const locale = useBrowserLocale();
   const panelId = React.useId();
+  const panelRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -94,6 +95,17 @@ export const ArtistPreviewModalContent: React.FC<
     currentContentType = "active";
   }
 
+  const handleTabChange = (tab: ModalTab) => {
+    const panel = panelRef.current;
+    if (panel) {
+      const height = panel.getBoundingClientRect().height;
+      if (height > 0) {
+        panel.style.setProperty("--artist-preview-panel-height", `${height}px`);
+      }
+    }
+    onTabChange(tab);
+  };
+
   const handleDropClick = (drop: ExtendedDrop) => {
     if (searchParams) {
       const params = new URLSearchParams(searchParams.toString());
@@ -125,15 +137,17 @@ export const ArtistPreviewModalContent: React.FC<
         {showTabs && (
           <ArtistPreviewModalTabs
             activeTab={activeTab}
-            onTabChange={onTabChange}
+            onTabChange={handleTabChange}
             panelId={panelId}
           />
         )}
 
         <div
+          ref={panelRef}
           id={panelId}
           role={showTabs ? "tabpanel" : undefined}
           aria-label={showTabs ? activeTabLabel : undefined}
+          className="[&:has([data-artist-preview-loading])]:tw-min-h-[var(--artist-preview-panel-height,0px)]"
         >
           {(() => {
             if (isHydratingArtistActivity) {
@@ -202,7 +216,10 @@ const mergeArtistActivity = (
 };
 
 const ArtistActivityLoadingState = () => (
-  <div className="tw-flex tw-h-96 tw-items-center tw-justify-center">
+  <div
+    data-artist-preview-loading="true"
+    className="tw-flex tw-h-[var(--artist-preview-panel-height,24rem)] tw-min-h-24 tw-items-center tw-justify-center"
+  >
     <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
       <div className="tw-h-8 tw-w-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-400"></div>
       <span className="tw-animate-fade-in-out tw-text-sm tw-text-iron-400">

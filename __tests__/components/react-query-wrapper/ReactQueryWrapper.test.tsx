@@ -15,11 +15,17 @@ jest.mock("@/helpers/Helpers", () => ({
 const wait = require("@/helpers/Helpers").wait as jest.Mock;
 
 type ContextType = {
-  onProfileRepModify: (params: {
-    targetProfile: ApiIdentity;
+  onProfileCICModify: (params: {
+    targetProfiles: readonly ApiIdentity[];
     connectedProfile: ApiIdentity | null;
     profileProxy: null;
-  }) => void;
+    rater: string | null;
+  }) => Promise<void>;
+  onProfileRepModify: (params: {
+    targetProfiles: readonly ApiIdentity[];
+    connectedProfile: ApiIdentity | null;
+    profileProxy: null;
+  }) => Promise<void>;
   setProfile: (profile: any) => void;
   setWaveDrops: (params: { waveDrops: any; waveId: string }) => void;
   waitAndInvalidateDrops: () => Promise<void>;
@@ -63,21 +69,66 @@ const createTestSetup = () => {
 };
 
 describe("ReactQueryWrapper context", () => {
-  it("invalidates REP allowances for a target without a handle", () => {
+  it("refreshes NIC lists and shared credit once for a multi-recipient batch", async () => {
+    const { client, ctx } = createTestSetup();
+    const keys = ["alice", "bob"].map((handle) => [
+      QueryKey.PROFILE_RATER_CIC_STATE,
+      { handle, rater: "viewer" },
+    ]);
+    keys.forEach((key) =>
+      client.setQueryData(key, { cic_ratings_left_to_give_by_rater: 80 })
+    );
+    await act(async () => {
+      await ctx.onProfileCICModify({
+        targetProfiles: ["alice", "bob"].map(
+          (handle) => ({ handle, wallets: [] }) as unknown as ApiIdentity
+        ),
+        connectedProfile: { handle: "viewer" } as ApiIdentity,
+        profileProxy: null,
+        rater: "viewer",
+      });
+    });
+    keys.forEach((key) =>
+      expect(client.getQueryState(key)?.isInvalidated).toBe(true)
+    );
+    expect(client.resetQueries).toHaveBeenCalledTimes(1);
+    expect(client.resetQueries).toHaveBeenCalledWith({
+      predicate: expect.any(Function),
+      queryKey: [
+        QueryKey.PROFILE_RATING_LIST,
+        { matter: "NIC", direction: "given" },
+      ],
+    });
+    const sharedCreditRefreshes = jest
+      .mocked(client.invalidateQueries)
+      .mock.calls.filter(
+        ([filters]) =>
+          filters?.queryKey?.[0] === QueryKey.PROFILE_RATER_CIC_STATE
+      );
+    expect(sharedCreditRefreshes).toHaveLength(1);
+  });
+
+  it("invalidates shared REP credit across recipients, including a target without a handle", async () => {
     const { client, ctx } = createTestSetup();
     const key = [
       QueryKey.PROFILE_REP_RATINGS,
       { handleOrWallet: "0xabc", rater: "viewer" },
     ];
+    const otherRecipientKey = [
+      QueryKey.PROFILE_REP_RATINGS,
+      { handleOrWallet: "other-recipient", rater: "viewer" },
+    ];
     client.setQueryData(key, { rep_rates_left_for_rater: 80 });
-    act(() =>
-      ctx.onProfileRepModify({
-        targetProfile: { handle: null, query: "0xAbC" } as ApiIdentity,
+    client.setQueryData(otherRecipientKey, { rep_rates_left_for_rater: 80 });
+    await act(async () => {
+      await ctx.onProfileRepModify({
+        targetProfiles: [{ handle: null, query: "0xAbC" } as ApiIdentity],
         connectedProfile: { handle: "viewer" } as ApiIdentity,
         profileProxy: null,
-      })
-    );
+      });
+    });
     expect(client.getQueryState(key)?.isInvalidated).toBe(true);
+    expect(client.getQueryState(otherRecipientKey)?.isInvalidated).toBe(true);
     expect(client.resetQueries).toHaveBeenCalledWith({
       predicate: expect.any(Function),
       queryKey: [
@@ -94,6 +145,12 @@ describe("ReactQueryWrapper context", () => {
     });
     expect(client.invalidateQueries).toHaveBeenCalledWith({
       queryKey: [QueryKey.GLOBAL_REP_CATEGORY_OVERVIEW],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: [QueryKey.PROFILE_REP_CATEGORY_CONTRIBUTORS],
+    });
+    expect(client.invalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["REP_CONTRIBUTORS"],
     });
   });
 

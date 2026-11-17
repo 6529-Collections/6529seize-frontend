@@ -191,6 +191,7 @@ describe("start request purpose", () => {
         content_type: "image/jpeg",
         purpose: "decision_entry",
       },
+      errorMode: "structured",
     });
   });
 
@@ -201,6 +202,7 @@ describe("start request purpose", () => {
       expect(commonApiPostMock).toHaveBeenNthCalledWith(1, {
         endpoint: endpoints.start,
         body: { file_name: "IMG_0001.jpg", content_type: "image/jpeg" },
+        errorMode: "structured",
       });
     }
   );
@@ -302,6 +304,7 @@ describe("multipartUploadCore MIME helpers", () => {
         key: "drops/img.jpg",
         parts: [{ part_no: 1, etag: "part-etag" }],
       },
+      errorMode: "structured",
     });
     expect(onCompleting).toHaveBeenCalledTimes(1);
     expect(commonApiFetchMock).not.toHaveBeenCalled();

@@ -195,6 +195,7 @@ describe("session-v2.utils", () => {
         client_type: "web",
         chain_id: "1",
       },
+      errorMode: "structured",
     });
   });
 
@@ -218,6 +219,7 @@ describe("session-v2.utils", () => {
         chain_id: "1",
         ...deviceGrant,
       },
+      errorMode: "structured",
     });
 
     (Capacitor.isNativePlatform as jest.Mock).mockReturnValue(true);
@@ -229,6 +231,7 @@ describe("session-v2.utils", () => {
         client_type: "native",
         chain_id: "1",
       },
+      errorMode: "structured",
     });
   });
 
@@ -259,6 +262,7 @@ describe("session-v2.utils", () => {
         device_label: "Chrome on macOS",
       },
       credentials: "include",
+      errorMode: "structured",
     });
   });
 
@@ -281,6 +285,7 @@ describe("session-v2.utils", () => {
         client_type: "native",
         chain_id: "1",
       },
+      errorMode: "structured",
     });
   });
 
@@ -422,6 +427,7 @@ describe("session-v2.utils", () => {
         client_address: "0xabc",
       },
       credentials: "include",
+      errorMode: "structured",
     });
   });
 
@@ -456,6 +462,7 @@ describe("session-v2.utils", () => {
         client_address: "0xabc",
       },
       credentials: "include",
+      errorMode: "structured",
     });
   });
 

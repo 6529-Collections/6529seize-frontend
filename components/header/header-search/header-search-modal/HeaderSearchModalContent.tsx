@@ -1,8 +1,5 @@
 "use client";
 
-import { useCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
@@ -11,6 +8,7 @@ import { usePathname, useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useMessageSearch } from "@/hooks/useMessageSearch";
+import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
 import AdvancedWaveSearchInput from "@/components/waves/drops/search/AdvancedWaveSearchInput";
 import HeaderSearchInput from "./HeaderSearchInput";
 import {
@@ -302,16 +300,7 @@ function ScopedHeaderSearchModal({
     !isMessagesCategory && isLiveSearchEligible && !isQuerySettled;
   const { appWalletsSupported } = useAppWallets();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const capacitor = useCapacitor();
-  const consent = useCookieConsent();
-  const sections = useSidebarSections(
-    appWalletsSupported,
-    hideNftPurchasing,
-    shouldHideSubscriptions({
-      capacitorIsIos: capacitor.isIos,
-      country: consent.country,
-    })
-  );
+  const sections = useSidebarSections(appWalletsSupported, hideNftPurchasing);
   const sidebarPages = useMemo(
     () => mapSidebarSectionsToPages(sections),
     [sections]
@@ -350,14 +339,26 @@ function ScopedHeaderSearchModal({
     return pages;
   }, [canAccessCraft, canAccessLanding, canAccessLaunch]);
 
+  const membershipNavigation = useMembershipNavigation();
   const pageCatalog = useMemo<PageSearchResult[]>(() => {
     const seen = new Set<string>();
-    return [
+    const pages: SidebarPageEntry[] = [
       ...DIRECT_NAVIGATION_PAGES,
+      ...(!membershipNavigation.isPending
+        ? [
+            {
+              name: membershipNavigation.label,
+              href: membershipNavigation.href,
+              icon: membershipNavigation.icon,
+              section: HEADER_SEARCH_LABELS.main,
+            },
+          ]
+        : []),
       ...SEARCH_ONLY_PAGES,
       ...sidebarPages,
       ...dropForgePages,
-    ]
+    ];
+    return pages
       .filter((entry) => {
         if (seen.has(entry.href)) return false;
         seen.add(entry.href);
@@ -376,7 +377,7 @@ function ScopedHeaderSearchModal({
           ...iconProps,
         };
       });
-  }, [dropForgePages, sidebarPages]);
+  }, [dropForgePages, membershipNavigation, sidebarPages]);
 
   useEffect(() => {
     inputRef.current?.focus();

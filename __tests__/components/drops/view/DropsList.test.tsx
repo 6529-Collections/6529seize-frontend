@@ -265,35 +265,54 @@ describe("DropsList", () => {
     });
   });
 
-  it("hydrates historical light drops after serial scrolling settles", () => {
-    const props = {
+  it("re-renders only the target row when a jump starts and ends", () => {
+    const makeDrop = (index: number) =>
+      ({
+        id: `drop-${index}`,
+        stableKey: `drop-${index}`,
+        stableHash: `drop-${index}`,
+        serial_no: index + 1,
+        type: DropSize.FULL,
+        wave: { id: "w" },
+      }) as ExtendedDrop;
+    const drops = Array.from({ length: 40 }, (_, index) =>
+      makeDrop(39 - index)
+    );
+    const props: ComponentProps<typeof DropsList> = {
       scrollContainerRef: { current: null },
-      drops: [
-        {
-          stableKey: "historical-light",
-          serial_no: 2,
-          type: DropSize.LIGHT,
-          waveId: "w",
-        },
-      ] as any,
+      drops,
       showWaveInfo: false,
       activeDrop: null,
-      showReplyAndQuote: false,
+      showReplyAndQuote: true,
       onReply: jest.fn(),
       onReplyClick: jest.fn(),
       serialNo: null,
       targetDropRef: null,
-      parentContainerRef: undefined,
       onQuoteClick: jest.fn(),
-      onDropContentClick: jest.fn(),
       dropViewDropId: null,
       suspendLightDropHydration: false,
     };
+    const { rerender } = render(<DropsList {...props} />);
+    expect(wrapperProps).toHaveLength(40);
 
-    render(<DropsList {...props} />);
-
+    // A jump sets the target and suspends gap loading while it scrolls.
+    dropProps = [];
+    wrapperProps = [];
+    highlightProps = [];
+    rerender(<DropsList {...props} serialNo={6} suspendLightDropHydration />);
+    expect(highlightProps.map((item) => item.serialNo)).toEqual([6]);
     expect(wrapperProps).toHaveLength(1);
-    expect(wrapperProps[0].suspendLightDropHydration).toBe(false);
+    // The row's content is unchanged, so the drop itself is not rendered again.
+    expect(dropProps).toHaveLength(0);
+
+    // The jump settles: only the former target row renders again.
+    dropProps = [];
+    wrapperProps = [];
+    highlightProps = [];
+    rerender(<DropsList {...props} />);
+    expect(highlightProps.map((item) => item.serialNo)).toEqual([6]);
+    expect(wrapperProps).toHaveLength(1);
+    expect(dropProps).toHaveLength(0);
   });
 
   it("re-renders only the new row and its neighbour when a message arrives", () => {

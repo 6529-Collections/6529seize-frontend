@@ -1,10 +1,9 @@
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
-import { rememberCountryHint } from "@/components/cookies/usCountryHint";
 import { act } from "@testing-library/react";
 import { hydrateRoot, type Root } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 
-// Real gate, visibility hook, platform hook and US country hint (localStorage).
+// Real gate, visibility hook and platform hook.
 // Only the native bridge, the country check and the router are replaced.
 type Platform = "ios" | "android" | "web";
 let mockNativePlatform: Platform = "web";
@@ -106,24 +105,14 @@ afterEach(() => {
   container.remove();
 });
 
-it.each([
-  ["with", true],
-  ["without", false],
-] as const)(
-  "renders the same server HTML %s a stored US hint and reads it only after hydration",
-  (_label, hasHint) => {
-    if (hasHint) rememberCountryHint("US");
-    mockNativePlatform = "ios";
-    const getItem = jest.spyOn(Storage.prototype, "getItem");
+it("reserves only blank space in the server HTML", () => {
+  mockNativePlatform = "ios";
 
-    expect(serverHtml()).toBe(
-      '<main><div data-testid="purchasing-space"></div></main>'
-    );
-    expect(getItem).not.toHaveBeenCalled();
-    expect(mockMount).not.toHaveBeenCalled();
-    getItem.mockRestore();
-  }
-);
+  expect(serverHtml()).toBe(
+    '<main><div data-testid="purchasing-space"></div></main>'
+  );
+  expect(mockMount).not.toHaveBeenCalled();
+});
 
 describe("in the iOS app while the country check is pending", () => {
   beforeEach(() => {
@@ -133,7 +122,6 @@ describe("in the iOS app while the country check is pending", () => {
   it.each(["US", "FR", ""])(
     "redirects through hydration even if the country later resolves to %s",
     async (country) => {
-      rememberCountryHint("US");
       await hydrate();
 
       expect(recoverableErrors).toEqual([]);
@@ -154,9 +142,8 @@ it.each([
   ["web", "web"],
   ["Android", "android"],
 ] as const)(
-  "mounts the content right after hydration on %s, ignoring a stale hint and the pending country",
+  "mounts the content right after hydration on %s, while the country lookup is pending",
   async (_label, platform) => {
-    rememberCountryHint("FR");
     mockNativePlatform = platform;
 
     await hydrate();

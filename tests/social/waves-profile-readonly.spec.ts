@@ -26,7 +26,11 @@ import {
   RESPONSE_TIMEOUT_MS,
 } from "../support/routeReadiness";
 
-import { installSubscriptionFixtures } from "../support/subscriptionFixtures";
+import {
+  installSubscriptionFixtures,
+  subscriptionCoverageFixture,
+} from "../support/subscriptionFixtures";
+import { ApiSubscriptionCoverageStatus } from "../../generated/models/ApiSubscriptionCoverageStatus";
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US.complete";
 import {
@@ -221,6 +225,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         .or(controls.getByRole("tab", { name: "xTDH", exact: true }));
       await expect(sortControl).toHaveCount(1);
       await expect(sortControl).toBeDisabled();
+      await expect(sortControl).toHaveCSS("font-size", "14px");
+      await expect(sortControl).toHaveCSS(
+        "height",
+        (page.viewportSize()?.width ?? 1280) >= 1024 ? "32px" : "44px"
+      );
       loadingLayout = await skeleton.evaluate(measureCard);
       await expectNoHorizontalOverflow(page);
       await captureSafeScreenshot(
@@ -675,6 +684,269 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       }
     });
   }
+
+  test("shows verified pre-mint artwork without image-load movement and links upcoming drops", async ({
+    page,
+  }, testInfo) => {
+    await page.clock.setFixedTime(new Date("2026-10-30T00:01:00Z"));
+    await installSubscriptionFixtures(page);
+    await page.route(
+      (url) => url.pathname.endsWith("/memes_latest"),
+      (route) => route.fulfill({ json: { id: 567 } })
+    );
+    const thumbnail =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/subscription-artwork/200x200/artwork.png";
+    let decisionRequests = 0;
+    await page.route(
+      (url) => /\/v2\/waves\/[^/]+\/decisions$/.test(url.pathname),
+      (route) => {
+        decisionRequests += 1;
+        return route.fulfill({
+          json: {
+            count: 1,
+            page: 1,
+            next: false,
+            data: [
+              {
+                decision_time: 1,
+                winners: [
+                  {
+                    place: 1,
+                    awards: [],
+                    drop: {
+                      id: "subscription-artwork-winner",
+                      serial_no: 1,
+                      created_at: 1,
+                      drop_type: "SUBMISSION",
+                      is_signed: false,
+                      hide_link_preview: false,
+                      parts_count: 1,
+                      boosts: 0,
+                      author: {
+                        id: "subscription-artist",
+                        handle: "subscription-artist",
+                        level: 1,
+                        primary_address:
+                          "0x0000000000000000000000000000000000000529",
+                        classification: "PSEUDONYM",
+                        badges: {},
+                      },
+                      submission_context: { meme_card_id: 568, voting: {} },
+                      media: [
+                        {
+                          url: thumbnail.replace("/200x200/", "/"),
+                          mime_type: "image/png",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        });
+      }
+    );
+    let releaseImage!: () => void;
+    const imageReady = new Promise<void>((resolve) => {
+      releaseImage = resolve;
+    });
+    let failImage = false;
+    let imageRequests = 0;
+    const artworkRequests: string[] = [];
+    await page.route(
+      (url) =>
+        url.origin === new URL(thumbnail).origin &&
+        url.pathname.includes("/subscription-artwork/"),
+      async (route) => {
+        imageRequests += 1;
+        const url = route.request().url();
+        artworkRequests.push(url);
+        expect([thumbnail, thumbnail.replace("200x200", "AUTOx450")]).toContain(
+          url
+        );
+        await imageReady;
+        if (failImage) await route.fulfill({ status: 404, body: "" });
+        else
+          await route.fulfill({
+            path: "public/profile-cms/templates/memes/1.webp",
+          });
+      }
+    );
+    try {
+      await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+      const upcoming = page.getByRole("region", {
+        name: "Upcoming Drops",
+        exact: true,
+      });
+      const image = page
+        .getByRole("region", { name: "Upcoming Drops", exact: true })
+        .locator("img");
+      await expect(
+        upcoming.getByRole("button", { name: "Minting Today", exact: true })
+      ).toBeVisible();
+      await expect
+        .poll(() => decisionRequests, { timeout: RESPONSE_TIMEOUT_MS })
+        .toBe(1);
+      await expect(image).toBeVisible();
+      await image.scrollIntoViewIfNeeded();
+      await expect.poll(() => imageRequests).toBe(1);
+      const before = await image.boundingBox();
+      const sectionBefore = await upcoming.boundingBox();
+      releaseImage();
+      await expect
+        .poll(() =>
+          image.evaluate(
+            (element) => (element as HTMLImageElement).naturalWidth
+          )
+        )
+        .toBeGreaterThan(0);
+      expect(await image.boundingBox()).toEqual(before);
+      expect((await upcoming.boundingBox())!.height).toBe(
+        sectionBefore!.height
+      );
+      for (const token of [568, 569, 570]) {
+        await expect(
+          upcoming
+            .getByRole("link", { name: `The Memes #${token}`, exact: true })
+            .first()
+        ).toHaveAttribute("href", `/the-memes/${token}`);
+      }
+      const title = upcoming.getByRole("link", {
+        name: "The Memes #568",
+        exact: true,
+      });
+      await title.focus();
+      await expect(title).toBeFocused();
+      await expect(title).toHaveCSS("outline-style", "solid");
+      await expect(title).toHaveCSS("outline-width", "2px");
+      await expect(upcoming.getByRole("switch")).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+      await captureSafeScreenshot(
+        page,
+        testInfo,
+        "subscription-pre-mint-artwork"
+      );
+
+      failImage = true;
+      await page.reload();
+      await waitForRouteReady(page);
+      await expect.poll(() => imageRequests).toBeGreaterThan(1);
+      await expect(image).toHaveCount(0);
+      expect(artworkRequests).not.toContain(
+        thumbnail.replace("/200x200/", "/")
+      );
+      await expect(
+        upcoming.getByRole("button", { name: "Minting Today", exact: true })
+      ).toBeVisible();
+      await title.focus();
+      await title.press("Enter");
+      await expect(page).toHaveURL(/\/the-memes\/568(?:[?#].*)?$/, {
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+    } finally {
+      releaseImage();
+    }
+  });
+
+  test("does not fetch mint-day artwork on a day without a mint", async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date("2026-10-31T00:01:00Z"));
+    await installSubscriptionFixtures(page);
+    const artworkRequests: string[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (
+        url.pathname.endsWith("/memes_latest") ||
+        /\/v2\/waves\/[^/]+\/decisions$/.test(url.pathname)
+      )
+        artworkRequests.push(url.pathname);
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    const upcoming = page.getByRole("region", {
+      name: "Upcoming Drops",
+      exact: true,
+    });
+    await expect(
+      upcoming.getByRole("link", { name: "The Memes #568", exact: true })
+    ).toBeVisible();
+    await upcoming
+      .getByRole("button", { name: "Show More", exact: true })
+      .click();
+    await expect(
+      page.getByRole("link", { name: "The Memes #572", exact: true })
+    ).toBeVisible();
+    expect(artworkRequests).toEqual([]);
+  });
+
+  test("keeps a visitor's Not set up subscription status informational", async ({
+    page,
+  }, testInfo) => {
+    await installSubscriptionFixtures(page);
+    await page.route("**/subscriptions/consolidation/coverage/**", (route) =>
+      route.fulfill({
+        json: subscriptionCoverageFixture({
+          status: ApiSubscriptionCoverageStatus.NotSetUp,
+          mode: null,
+          balance_eth: "0",
+          mint_capacity: 0,
+          allocated_mints: 0,
+          fully_funded_drops: 0,
+          funded_through: null,
+          next_unfunded: null,
+          minimum_top_up: null,
+          recommended_top_up: null,
+        }),
+      })
+    );
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    const overview = page
+      .getByRole("region", { name: "Subscription minting", exact: true })
+      .locator("#profile-subscriptions-overview");
+    await expect(
+      overview.getByRole("heading", { name: "Not set up", exact: true })
+    ).toBeVisible();
+    await expect(
+      overview.getByText("Subscription balance", { exact: true })
+    ).toBeVisible();
+    await expect(
+      overview.getByText("0 mints available", { exact: true })
+    ).toBeVisible();
+    await expect(
+      overview.getByText("0 allocated", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        /Set up subscriptions to receive|Choose a drop to see|Review settings or refresh/
+      )
+    ).toHaveCount(0);
+    await expect(
+      overview.getByRole("button", { name: "Top up", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      overview.getByRole("button", { name: "Refresh balance", exact: true })
+    ).toHaveCount(0);
+    await expect(page.getByRole("switch")).toHaveCount(0);
+    await overview
+      .getByRole("button", { name: "Forecast use", exact: true })
+      .click();
+    await expect(
+      page
+        .getByRole("tooltip")
+        .getByText(
+          "Projected from current eligibility, settings, balance, and the published Meme schedule.",
+          { exact: true }
+        )
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "subscription-visitor-not-set-up.png"
+    );
+  });
 
   test("keeps the full subscription airdrop address available on touch and keyboard", async ({
     page,
@@ -1830,11 +2102,30 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("tab", { name: "My Votes", exact: true })
     ).toHaveCount(0);
-    await expect(
-      page.getByRole("button", {
-        name: /^(How to Submit|Submit Work|Submit Work to The Memes)$/,
-      })
-    ).toBeVisible();
+    const submissionAction = page.getByRole("button", {
+      name: /^(How to Submit|Submit Work|Submit Work to The Memes)$/,
+    });
+    if (
+      testInfo.project.name === "web-mobile-chromium" &&
+      !(await submissionAction.isVisible())
+    ) {
+      // Narrow headers keep ineligible submission help in More. Preserve the
+      // same availability check without changing eligible submission behavior.
+      await page
+        .getByRole("button", { name: "More wave actions", exact: true })
+        .click();
+      const more = page.getByRole("dialog", {
+        name: "More wave actions",
+        exact: true,
+      });
+      await expect(
+        more.getByRole("button", { name: "How to Submit", exact: true })
+      ).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(more).toHaveCount(0);
+    } else {
+      await expect(submissionAction).toBeVisible();
+    }
 
     await waveTabs
       .getByRole("tab", { name: "Leaderboard", exact: true })
@@ -1983,8 +2274,33 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       name: APP_SECTIONS_LABEL,
     });
     await expect(
-      feedNavigation.getByRole("link", { name: "Waves" })
+      feedNavigation.getByRole("link", { name: "Waves", exact: true })
     ).toHaveAttribute("href", "/waves");
+    const discoverLink = feedNavigation.getByRole("link", {
+      name: "Discover Waves",
+      exact: true,
+    });
+    await expect(discoverLink).toHaveAttribute("href", "/discover");
+    const backLinkBounds = await feedNavigation
+      .getByRole("link", { name: "Waves", exact: true })
+      .boundingBox();
+    const discoverLinkBounds = await discoverLink.boundingBox();
+    const navigationBounds = await feedNavigation.boundingBox();
+    expect(backLinkBounds).not.toBeNull();
+    expect(discoverLinkBounds).not.toBeNull();
+    expect(navigationBounds).not.toBeNull();
+    expect(
+      Math.abs(
+        backLinkBounds!.y +
+          backLinkBounds!.height / 2 -
+          (discoverLinkBounds!.y + discoverLinkBounds!.height / 2)
+      )
+    ).toBeLessThanOrEqual(1);
+    expect(
+      navigationBounds!.x +
+        navigationBounds!.width -
+        (discoverLinkBounds!.x + discoverLinkBounds!.width)
+    ).toBeLessThanOrEqual(1);
 
     const profileFeed = getProfileFeed(page);
     const feedPostButtons = profileFeed
@@ -2155,7 +2471,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       })
     ).toBeVisible();
     await expect(
-      feedNavigation.getByRole("link", { name: "Waves" })
+      feedNavigation.getByRole("link", { name: "Waves", exact: true })
     ).toBeVisible();
   });
 
@@ -2166,17 +2482,21 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await gotoReady(page, `/waves/${waveId}`);
 
     const compact = (page.viewportSize()?.width ?? 1280) < 768;
-    const details = page.getByRole("button", {
+    const header = page
+      .getByRole("main")
+      .locator("header")
+      .filter({ has: page.getByRole("heading", { level: 1 }) });
+    const utilityTrigger = header.getByRole("button", {
       name: compact ? "Wave details" : "Show right sidebar",
       exact: true,
     });
-    await expect(details).toBeVisible();
-    const header = page
-      .getByRole("button", {
-        name: compact ? "Wave details" : "Show right sidebar",
-        exact: true,
-      })
-      .locator("../..");
+    await expect(utilityTrigger).toBeVisible();
+    await expect(utilityTrigger).toHaveCSS(
+      "background-color",
+      "rgba(0, 0, 0, 0)"
+    );
+    await expect(utilityTrigger).toHaveCSS("border-top-width", "0px");
+    await expect(utilityTrigger).toHaveCSS("box-shadow", "none");
     await expect(header.getByRole("heading", { level: 1 })).toBeVisible();
     const headerRep = header.getByRole("button", {
       name: /Add Wave REP|Edit your Wave REP/,
@@ -2188,7 +2508,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const score = header.getByRole("button", { name: /^Wave score / });
     if (compact) {
       await expect(headerRep).toHaveCount(0);
-      await expect(score).toHaveCount(0);
+      if (await score.count()) await expect(score).toBeVisible();
       await header.getByRole("button", { name: "More wave actions" }).click();
       await expect(
         page
@@ -2197,7 +2517,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       ).toBeVisible();
       await page.keyboard.press("Escape");
     } else {
-      await expect(details).toHaveText("");
+      await expect(utilityTrigger).toHaveText("");
+      const join = header.getByRole("button", { name: /^Join / });
+      if (await join.count()) {
+        await expect(join).toHaveCSS("background-color", "rgb(236, 236, 238)");
+        await expect(join).toHaveCSS("border-top-width", "1px");
+      }
       if (await headerRep.count()) {
         await expect(headerRep).toBeVisible();
       }
@@ -2262,9 +2587,73 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         expect(scoreBox?.height).toBeGreaterThanOrEqual(24);
         expect(scoreBox?.width).toBeGreaterThanOrEqual(24);
       }
+
+      const feedShortcut = page.getByRole("link", {
+        name: "Profile Waves Feed",
+        exact: true,
+      });
+      await feedShortcut.hover();
+      const feedTooltip = page.getByRole("tooltip").filter({
+        hasText: "Profile Waves Feed",
+      });
+      await expect(feedTooltip).toBeVisible();
+      const tooltipAppearance = await feedTooltip.evaluate((tooltip) => {
+        const style = getComputedStyle(tooltip);
+        return Object.fromEntries(
+          [
+            "background-color",
+            "border-top-color",
+            "border-top-style",
+            "border-top-width",
+            "border-radius",
+            "box-shadow",
+            "color",
+            "font-size",
+            "font-weight",
+            "padding",
+          ].map((property) => [property, style.getPropertyValue(property)])
+        );
+      });
+      const utilityControls = [
+        header.getByRole("button", {
+          name: "Search messages in this wave",
+          exact: true,
+        }),
+        header.getByRole("button", { name: "More wave actions", exact: true }),
+        utilityTrigger,
+      ];
+      for (const control of utilityControls) {
+        const label = await control.getAttribute("data-tooltip-content");
+        expect(label).not.toBeNull();
+        await control.hover();
+        const tooltip = page.getByRole("tooltip").filter({ hasText: label! });
+        await expect(tooltip).toHaveText(label!);
+        for (const [property, value] of Object.entries(tooltipAppearance)) {
+          await expect(tooltip).toHaveCSS(property, value);
+        }
+      }
     }
 
-    await details.click();
+    await utilityTrigger.click();
+    if (!compact) {
+      await page.mouse.move(0, 0);
+      const openToggle = page.getByRole("button", {
+        name: "Hide right sidebar",
+        exact: true,
+      });
+      await expect(openToggle).toHaveAttribute("aria-pressed", "true");
+      await expect(openToggle).toHaveCSS("color", "rgb(82, 139, 255)");
+      await expect(
+        page
+          .getByRole("link", { name: "Profile Waves Feed", exact: true })
+          .locator(":scope > span")
+      ).toHaveCSS("background-color", "rgb(28, 28, 33)");
+      await expect(
+        page
+          .getByRole("link", { name: "Profile Waves Feed", exact: true })
+          .locator(":scope > span")
+      ).toHaveCSS("border-top-width", "0px");
+    }
     const aboutPanel = page
       .getByRole("complementary", { name: "Wave details" })
       .or(page.getByRole("dialog", { name: "Wave details" }));
@@ -2290,6 +2679,11 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("button", { name: /^(Share wave|Copy wave link)$/ })
     ).toBeVisible();
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "wave-utility-controls-hierarchy"
+    );
   });
 
   test("handles legacy wave query links without mutation", async ({ page }) => {

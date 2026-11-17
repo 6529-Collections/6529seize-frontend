@@ -4,9 +4,23 @@ import AppSidebar from "@/components/header/AppSidebar";
 import type AppSidebarMenuItems from "@/components/header/AppSidebarMenuItems";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
 
+let mockPathname = "/about";
+jest.mock("next/navigation", () => ({ usePathname: () => mockPathname }));
+
 let headerProps: any = null;
 let connectProps: any = null;
 let mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
+
+let mockMembershipAuth = {
+  connectedProfile: null,
+  isAuthenticated: false,
+  fetchingProfile: false,
+};
+let mockConnectionState = "disconnected";
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ connectionState: mockConnectionState }),
+}));
+
 let mockModeratorAccess = {
   data: { moderator: false, has_open_reports: false, needs_review_count: 0 },
 };
@@ -35,6 +49,9 @@ jest.mock("@/components/header/AppUserConnect", () => (props: any) => {
 });
 
 jest.mock("@/components/app-wallets/AppWalletsContext");
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => mockMembershipAuth,
+}));
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => mockDropForgePermissions,
 }));
@@ -113,6 +130,16 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     };
 
     beforeEach(() => {
+      mockMembershipAuth = {
+        connectedProfile: null,
+        isAuthenticated: false,
+        fetchingProfile: false,
+      };
+      mockConnectionState = "disconnected";
+      mockPathname = "/about";
+      (useAppWallets as jest.Mock).mockReturnValue({
+        appWalletsSupported: false,
+      });
       headerProps = menuProps = connectProps = null;
       mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
       mockModeratorAccess = {
@@ -124,6 +151,37 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       };
       mockIsIos = false;
       setCookieCountry("US");
+    });
+
+    it.each([false, true])(
+      "uses the same membership slot in native iOS and Android menus (iOS=%s)",
+      (isIos) => {
+        mockIsIos = isIos;
+        mockConnectionState = "connected";
+        mockMembershipAuth.isAuthenticated = true;
+        mockPathname = "/validator/status";
+        render(<AppSidebar open onClose={jest.fn()} />);
+        expect(
+          getMenu()
+            .slice(0, 6)
+            .map((item) => item.label)
+        ).toEqual(["NFTs", "Museum", "Waves", "DMs", "Validator", "About"]);
+        expect(getMenuItem("Validator")).toMatchObject({
+          path: "/validator",
+          pending: false,
+          active: true,
+        });
+      }
+    );
+
+    it("keeps a pending menu row during profile restoration", () => {
+      mockConnectionState = "connected";
+      mockMembershipAuth.fetchingProfile = true;
+      render(<AppSidebar open onClose={jest.fn()} />);
+      expect(getMenuItem("Join 6529")).toMatchObject({
+        path: "/join-6529",
+        pending: true,
+      });
     });
 
     it("renders the menu IA with App Wallets under About when supported and handles close", () => {

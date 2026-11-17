@@ -101,6 +101,12 @@ draft.
 - **Upload or processing failure:** a failed inline placeholder or pending tray
   image is removed. Other text and files remain. Retry a valid file when the
   connection or service recovers.
+- **Upload limit reached:** each profile can upload up to 500 files or 20 GiB
+  of media and attachments in any 24 hours. The message says the limit is
+  reached; nothing is retried automatically. Try again later; your text and
+  other files stay in the composer.
+- **Media too large at completion:** media over 500 MiB is refused when its
+  upload finishes, with the size limit in the message. Choose a smaller file.
 - **No upload control:** sign in with a profile and check that the wave allows
   you to post. Uploading media does not override wave access rules.
 

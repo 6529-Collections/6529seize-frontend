@@ -193,7 +193,7 @@ test.describe("Profile NIC activity @local-only", () => {
     test(`${width}px fetches only the visible activity log`, async ({
       page,
       baseURL,
-    }) => {
+    }, testInfo) => {
       await page.setViewportSize({ width, height: 1000 });
       const requests = await installLogs(page, getSandboxApiOrigin(baseURL));
       await page.goto("/playwright");
@@ -207,6 +207,19 @@ test.describe("Profile NIC activity @local-only", () => {
       expect(requests[0]?.get("rating_matter")).toBe(
         width >= 1024 ? null : "REP"
       );
+      const direction = page
+        .getByRole("tablist", { name: "Filter direction" })
+        .filter({ visible: true });
+      const heights = await direction
+        .getByRole("tab")
+        .evaluateAll((tabs) =>
+          tabs.map((tab) => tab.getBoundingClientRect().height)
+        );
+      expect(heights).toEqual([32, 32, 32]);
+      await page.screenshot({
+        path: testInfo.outputPath("compact-profile-activity-controls.png"),
+        fullPage: true,
+      });
     });
 
     for (const optimizerFails of [false, true]) {
@@ -223,12 +236,25 @@ test.describe("Profile NIC activity @local-only", () => {
           "base64"
         );
         const widths: number[] = [];
+        let imageCandidates: number[] = [];
+        const image = page.getByRole("img", {
+          name: "profile-picture's profile picture",
+          exact: true,
+        });
         await page.route(source, (route) =>
           route.fulfill({ contentType: "image/png", body: png })
         );
         await page.route("**/_next/image?**", async (route) => {
           const params = new URL(route.request().url()).searchParams;
           if (params.get("url") !== source) return route.continue();
+          // Capture candidates before a failed optimizer removes srcset.
+          const srcset = await image.getAttribute("srcset");
+          if (srcset)
+            imageCandidates = srcset
+              .split(",")
+              .map((candidate) =>
+                Number(candidate.trim().split(/\s+/).at(-1)?.replace(/w$/, ""))
+              );
           widths.push(Number(params.get("w")));
           await route.fulfill({
             status: optimizerFails ? 503 : 200,
@@ -237,17 +263,23 @@ test.describe("Profile NIC activity @local-only", () => {
           });
         });
         await page.goto("/profile-picture");
-        const image = page.getByRole("img", {
-          name: "profile-picture's profile picture",
-          exact: true,
-        });
         await expect
           .poll(() =>
             image.evaluate((img: HTMLImageElement) => img.naturalWidth)
           )
           .toBeGreaterThan(0);
         expect(widths.length).toBeGreaterThan(0);
-        expect(widths.every((value) => value > 0 && value <= 256)).toBe(true);
+        const displaySize = width < 640 ? 80 : 112;
+        const density = await page.evaluate(() => globalThis.devicePixelRatio);
+        const smallestSuitableWidth = imageCandidates
+          .filter((candidate) => candidate >= displaySize * density)
+          .toSorted((a, b) => a - b)[0];
+        if (smallestSuitableWidth === undefined)
+          throw new Error("Missing suitable responsive profile image size");
+        expect(
+          widths.every((value) => value === smallestSuitableWidth),
+          `Requested widths: ${widths.join(", ")}; expected ${smallestSuitableWidth}`
+        ).toBe(true);
         if (optimizerFails) await expect(image).toHaveAttribute("src", source);
         else await expect(image).toHaveAttribute("src", /\/_next\/image\?/);
         const box = await image.boundingBox();
@@ -446,16 +478,22 @@ test.describe("Profile NIC activity @local-only", () => {
           .getByRole("img", { name: "avatar-user", exact: true })
           .filter({ visible: true })
           .first();
-        await avatar.scrollIntoViewIfNeeded();
+        // The fallback replaces the image, so scroll its stable neighboring link.
+        await page
+          .getByRole("link", { name: "avatar-user", exact: true })
+          .filter({ visible: true })
+          .first()
+          .scrollIntoViewIfNeeded();
         await expect
           .poll(() =>
             avatar.evaluate((img: HTMLImageElement) => img.naturalWidth)
           )
           .toBeGreaterThan(0);
         expect(optimizerWidths.length).toBeGreaterThan(0);
-        expect(optimizerWidths.every((value) => value > 0 && value <= 96)).toBe(
-          true
-        );
+        expect(
+          optimizerWidths.every((value) => value > 0 && value <= 96),
+          `Requested avatar widths: ${optimizerWidths.join(", ")}`
+        ).toBe(true);
         if (optimizerFails) await expect(avatar).toHaveAttribute("src", source);
         else await expect(avatar).toHaveAttribute("src", /\/_next\/image\?/);
         const box = await avatar.boundingBox();

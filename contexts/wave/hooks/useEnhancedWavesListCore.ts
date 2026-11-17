@@ -11,6 +11,7 @@ import useNewDropCounter, { getNewestTimestamp } from "./useNewDropCounter";
 import type { ApiDmUnreadConversationState } from "@/generated/models/ApiDmUnreadConversationState";
 import type { WaveUnreadSource } from "../WaveUnreadContext";
 import { createWaveUnreadStore, type WaveUnreadEntry } from "./waveUnreadStore";
+import { getDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 
 const UNREAD_CLEAR_DELAY_MS = 1000;
 
@@ -28,6 +29,7 @@ export interface MinimalWave {
   isMuted: boolean;
   parentWaveId: string | null;
   hasSubwaves: boolean;
+  readonly reserveDescriptionRow?: boolean;
   followedSubwavesCount: number;
   latestFollowedSubwaveDropTimestamp: number | null;
   unreadSubwaveDrops: number;
@@ -203,6 +205,9 @@ function toMinimalWave({
     isMuted: wave.muted,
     parentWaveId: wave.parentWaveId,
     hasSubwaves: wave.hasSubwaves,
+    reserveDescriptionRow:
+      wave.descriptionDrop.contents === null ||
+      Boolean(getDescriptionPreviewText(wave.descriptionDrop.contents)),
     followedSubwavesCount: wave.followedSubwavesCount,
     latestFollowedSubwaveDropTimestamp: wave.latestFollowedSubwaveDropTimestamp,
     unreadSubwaveDrops: wave.unreadSubwaveDrops,

@@ -1,26 +1,19 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import Button from "@/components/utils/button/Button";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { t, tRich } from "@/i18n/messages";
-import { commonApiPost } from "@/services/api/common-api";
-import { useMutation } from "@tanstack/react-query";
-import { useContext, useEffect, useId, useRef, useState } from "react";
+import { useContext, useEffect, useId, useState } from "react";
 import UserPageRepModifyModalRaterStats from "./UserPageRepModifyModalRaterStats";
 import { isRatingValue } from "../ratingsManagement";
 
-interface ApiAddRepRatingToProfileRequest {
-  readonly amount: number;
-  readonly category: string;
-}
+import { useRepRatingSave } from "./useRepRatingSave";
 
 export default function UserPageRepModifyForm({
   onCancel,
@@ -37,17 +30,12 @@ export default function UserPageRepModifyForm({
 }) {
   const locale = useBrowserLocale();
   const inputId = useId();
-  const mounted = useRef(false);
+  const { activeProfileProxy } = useContext(AuthContext);
+  const { save, isSaving: mutating } = useRepRatingSave();
   useEffect(() => {
-    mounted.current = true;
-    return () => {
-      mounted.current = false;
-      onBusyChange?.(false);
-    };
-  }, [onBusyChange]);
-  const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
-  const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
-    useContext(AuthContext);
+    onBusyChange?.(mutating);
+    return () => onBusyChange?.(false);
+  }, [mutating, onBusyChange]);
   const {
     repState,
     heroAvailableRep,
@@ -68,71 +56,15 @@ export default function UserPageRepModifyForm({
       (newRating >= minMaxValues.min && newRating <= minMaxValues.max));
   const isUnavailable = !repState || isError;
   const isSaveDisabled = isUnavailable || !haveChanged || !isValidValue;
-  const [mutating, setMutating] = useState(false);
-  const setBusy = (busy: boolean) => {
-    setMutating(busy);
-    onBusyChange?.(busy);
-  };
-
-  const addRepMutation = useMutation({
-    mutationFn: async (body: ApiAddRepRatingToProfileRequest) =>
-      await commonApiPost<ApiAddRepRatingToProfileRequest, void>({
-        endpoint: `profiles/${profile.query ?? profile.handle ?? profile.display}/rep/rating`,
-        body,
-      }),
-    onSuccess: () => {
-      setToast({
-        message: t(locale, "rep.categories.edit.updated"),
-        type: "success",
-      });
-      onProfileRepModify({
-        targetProfile: profile,
-        connectedProfile,
-        profileProxy: activeProfileProxy ?? null,
-      });
-      onSuccess();
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: t(locale, "rep.categories.edit.updateError"),
-        description: t(locale, "rep.categories.edit.tryAgain"),
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => setBusy(false),
-  });
-
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (mutating || isSaveDisabled) return;
-    setBusy(true);
-    try {
-      const { success } = await requestAuth();
-      if (!mounted.current) return;
-      if (!success) {
-        setToast({
-          message: t(locale, "rep.categories.edit.loginRequired"),
-          type: "error",
-        });
-        setBusy(false);
-        return;
-      }
-      addRepMutation.mutate({ amount: newRating, category });
-    } catch (error) {
-      setToast({
-        type: "error",
-        title: t(locale, "rep.categories.edit.updateError"),
-        description: t(locale, "rep.categories.edit.tryAgain"),
-        details: getToastErrorDetails(error),
-      });
-      setBusy(false);
-    }
+    if (await save([{ profile, amount: newRating, category }])) onSuccess();
   };
 
   return (
     <div className="tw-px-4 sm:tw-px-6">
-      <div className="tw-relative tw-mt-5 tw-grid tw-min-h-10">
+      <div className="tw-relative tw-mt-3 tw-grid tw-min-h-10 md:tw-mt-5">
         <div
           className={isError ? "tw-invisible" : undefined}
           aria-hidden={isError}
@@ -175,23 +107,16 @@ export default function UserPageRepModifyForm({
       >
         <label
           htmlFor={inputId}
-          className="tw-block tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
+          className="tw-mb-1 tw-block tw-break-words tw-text-sm tw-font-medium tw-text-iron-200"
         >
           {tRich(locale, "rep.categories.edit.totalLabel", {
-            category: (
-              <span
-                key="category"
-                className="tw-font-semibold tw-text-iron-300"
-              >
-                {category}
-              </span>
-            ),
+            category: <span key="category">{category}</span>,
           })}
         </label>
-        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
+        <p className="tw-mb-2 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-500">
           {t(locale, "user.rate.totalHelp")}
         </p>
-        <div className="tw-relative tw-mt-2 tw-flex">
+        <div className="tw-relative tw-flex">
           <UserPageRateInput
             value={repState ? adjustedRatingStr : ""}
             onChange={setDraftRating}
@@ -214,14 +139,16 @@ export default function UserPageRepModifyForm({
             originalValue={repState?.rater_contribution ?? 0}
             adjustedValue={newRating}
             adjustmentType="Rep"
+            variant="summary"
           />
         </div>
-        <div className="tw-mt-7 tw-flex tw-justify-end tw-gap-3">
+        <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-justify-end md:tw-gap-3">
           <Button
             onClick={onCancel}
             disabled={mutating}
             variant="ghost"
             size="lg"
+            className="tw-w-full md:tw-w-auto"
           >
             {t(locale, "rep.categories.edit.cancel")}
           </Button>
@@ -231,6 +158,7 @@ export default function UserPageRepModifyForm({
             loading={mutating}
             variant="action"
             size="lg"
+            className="tw-w-full md:tw-w-auto"
           >
             {t(locale, "rep.categories.edit.save")}
           </Button>

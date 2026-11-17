@@ -1,5 +1,5 @@
 import Pagination from "@/components/pagination/Pagination";
-import { getButtonClasses } from "@/components/utils/button/buttonStyles";
+import { getPillTabClasses } from "@/components/common/pillTabStyles";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { RedeemedSubscription } from "@/generated/models/RedeemedSubscription";
@@ -135,11 +135,7 @@ export default function UserPageSubscriptionsHistory(
             key={tab.id}
             onFocus={(event) => revealHistoryTab(event.currentTarget)}
             className={({ selected }) =>
-              getButtonClasses({
-                variant: selected ? "filterSelected" : "filter",
-                size: null,
-                className: `tw-h-8 tw-scroll-mx-1 !tw-rounded-full tw-px-3 tw-text-sm motion-reduce:tw-transition-none ${selected ? "" : "!tw-border-iron-800 !tw-bg-transparent !tw-font-normal desktop-hover:hover:!tw-bg-white/[0.04]"}`,
-              })
+              `${getPillTabClasses({ active: selected, size: "md" })} tw-scroll-mx-1`
             }
           >
             {({ selected }) => (

@@ -358,6 +358,40 @@ export function toIsolatedHtmlUrlFromInput(
   return toIsolatedHtmlUrl(ref, resolverEndpoint, `${url.search}${url.hash}`);
 }
 
+/**
+ * Rewrites a stored first-party gateway URL (a path host of either domain, an
+ * older 6529.io gateway name, or a per-CID host) to the configured resolver's
+ * path URL, keeping its query and hash, so audio and video play from the
+ * configured endpoint. Returns `input` unchanged when the configured resolver
+ * has no per-CID hosts, when the URL is already on the configured path host,
+ * and for every other URL (uploads, other gateways, native URIs).
+ */
+export function toConfiguredMediaPlaybackUrl(
+  input: string,
+  resolverEndpoint: string | undefined
+): string {
+  if (!hasIsolatedHtmlHosts(resolverEndpoint)) {
+    return input;
+  }
+
+  const trimmed = input.trim();
+  const url = parseHttpUrl(trimmed);
+  if (url?.protocol !== "https:" || !isFirstPartyMediaHostname(url.hostname)) {
+    return input;
+  }
+  if (
+    canonicalizeGatewayHostname(url.hostname) ===
+    getMediaResolverHostname(resolverEndpoint)
+  ) {
+    return input;
+  }
+
+  const ref = parseDecentralizedMediaRef(trimmed);
+  return ref
+    ? `${to6529ResolverUrl(ref, resolverEndpoint)}${url.search}${url.hash}`
+    : input;
+}
+
 function isUserContentIpfsHostname(normalizedHostname: string): boolean {
   return (
     normalizedHostname.endsWith(USER_CONTENT_IPFS_HOST_SUFFIX) &&
