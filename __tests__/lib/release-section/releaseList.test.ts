@@ -4,6 +4,7 @@ import {
   type ReleaseListConfig,
   type ReleaseListReader,
 } from "@/lib/release-section/releaseList";
+import { DESKTOP_RELEASE_LIST_KEYS } from "@/lib/desktop-releases/signingKeys";
 import { RELEASE_LIST_PAIR_HEADER } from "@/lib/validator-page/feedResponse";
 import type {
   BucketLocation,
@@ -22,6 +23,7 @@ import {
   TEST_FEED_SIGNING_KEY,
   VALIDATOR_DOMAIN,
 } from "./listSigning";
+import { DESKTOP_LIVE_LIST, DESKTOP_LIVE_SIGNATURE } from "./desktopLiveList";
 
 const mockRead = jest.fn<Promise<BucketObject>, [BucketLocation, string]>();
 const LOCATION = { bucket: "releases.example", region: "us-east-1" };
@@ -432,6 +434,54 @@ describe("a product's signed release list", () => {
     for (const response of await fetchBoth(reader)) {
       expect(response.status).toBe(404);
     }
+  });
+
+  describe("6529 Desktop's live list, as its producer wrote and signed it", () => {
+    const bundle = bundleBytes(DESKTOP_LIVE_LIST, DESKTOP_LIVE_SIGNATURE);
+
+    it("verifies with Desktop's domain and key, and serves the pair 6529.io names", async () => {
+      const reader = createReleaseListReader(
+        config(DESKTOP_DOMAIN, { signers: DESKTOP_RELEASE_LIST_KEYS })
+      );
+      storeHas(bundle);
+
+      const [list, signature] = await fetchBoth(reader);
+      const snapshot = await reader.snapshot();
+
+      expect(new Uint8Array(await list.arrayBuffer())).toEqual(
+        new Uint8Array(DESKTOP_LIVE_LIST)
+      );
+      expect(new Uint8Array(await signature.arrayBuffer())).toEqual(
+        new Uint8Array(DESKTOP_LIVE_SIGNATURE)
+      );
+      // The pair name /desktop/releases.json answered with that day.
+      expect(list.headers.get(RELEASE_LIST_PAIR_HEADER)).toBe(
+        "baf13c38a864565929caa53c274c37a6"
+      );
+      expect(snapshot.list?.sequence).toBe(1_794_885_329);
+      expect(snapshot.list?.releases.map((release) => release.version)).toEqual(
+        ["0.1.0-rc.2"]
+      );
+    });
+
+    it.each([AI_DOMAIN, VALIDATOR_DOMAIN])(
+      "fails under %s, even with Desktop's key trusted",
+      async (domain) => {
+        const reader = createReleaseListReader(
+          config(domain, { signers: DESKTOP_RELEASE_LIST_KEYS })
+        );
+        storeHas(bundle);
+
+        expect((await reader.snapshot()).state).toBe("error");
+      }
+    );
+
+    it("fails under Desktop's domain with only another key trusted", async () => {
+      const reader = createReleaseListReader(config(DESKTOP_DOMAIN));
+      storeHas(bundle);
+
+      expect((await reader.snapshot()).state).toBe("error");
+    });
   });
 
   describe("reads what the list gives and ignores the rest", () => {
