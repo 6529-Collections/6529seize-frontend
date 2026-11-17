@@ -120,6 +120,13 @@ async function installCategories(
   );
 }
 
+async function setSandboxProfileRep(api: string, rating: number) {
+  const url = new URL("/__composer-sandbox/profile-rep", api);
+  url.searchParams.set("rating", rating.toString());
+  const response = await fetch(url, { method: "POST" });
+  expect(response.ok).toBe(true);
+}
+
 async function openProfile(page: Page, role: string | null = null) {
   await seedSession(page, role);
   await page.goto(`/${TARGET}`, { waitUntil: "domcontentloaded" });
@@ -1061,10 +1068,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
 
   test("signed-out viewers do not see personal amounts from stale REP responses", async ({
     page,
+    baseURL,
     isMobile,
   }, testInfo) => {
-    // installCategories deliberately includes a nonzero authenticated contribution.
-    // The local preview can also return these stale fields without a login.
+    // Give both the server and browser reads a stale personal contribution.
+    await setSandboxProfileRep(getSandboxApiOrigin(baseURL), 20);
     if (isMobile) await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/${TARGET}`, { waitUntil: "domcontentloaded" });
     if (isMobile)
@@ -1919,6 +1927,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
   }) => {
     const api = getSandboxApiOrigin(baseURL);
     let rating = 20;
+    await setSandboxProfileRep(api, rating);
     let releaseAllowance: () => void = () => undefined;
     const allowanceReady = new Promise<void>((resolve) => {
       releaseAllowance = resolve;
@@ -1991,6 +2000,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
           throw new Error("Unexpected local Grant REP payload");
         saved.push(body);
         rating = body.amount;
+        await setSandboxProfileRep(api, rating);
         await route.fulfill({ json: {} });
       }
     );
