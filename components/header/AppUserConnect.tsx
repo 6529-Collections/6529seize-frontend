@@ -28,8 +28,10 @@ import Link from "next/link";
 
 export default function AppUserConnect({
   onNavigate,
+  onSignOut,
 }: {
   readonly onNavigate: () => void;
+  readonly onSignOut: (signOut: () => void) => void;
 }) {
   const {
     address,
@@ -49,12 +51,14 @@ export default function AppUserConnect({
     useChainSwitcher();
   const availableConnectedAccounts = connectedAccounts ?? [];
 
-  const runAsyncAndNavigate = async ({
+  const runAsyncAction = async ({
     action,
     errorMessage,
+    onSettled,
   }: {
     readonly action: () => void | Promise<void>;
     readonly errorMessage: string;
+    readonly onSettled?: () => void;
   }) => {
     try {
       await Promise.resolve(action());
@@ -74,7 +78,7 @@ export default function AppUserConnect({
       }
       setToast({ message: toastMessage, type: "error" });
     } finally {
-      onNavigate();
+      onSettled?.();
     }
   };
 
@@ -91,9 +95,10 @@ export default function AppUserConnect({
       onClick={() => {
         // The first click can still be loading the wallet connection services.
         setIsOpeningConnection(true);
-        void runAsyncAndNavigate({
+        void runAsyncAction({
           action: seizeConnectFresh,
           errorMessage: "Failed to open wallet connection",
+          onSettled: onNavigate,
         }).finally(() => setIsOpeningConnection(false));
       }}
       type="button"
@@ -109,9 +114,10 @@ export default function AppUserConnect({
   const walletConnectionButton = isConnected ? (
     <button
       onClick={() => {
-        void runAsyncAndNavigate({
+        void runAsyncAction({
           action: seizeDisconnect,
           errorMessage: "Failed to disconnect wallet",
+          onSettled: onNavigate,
         });
       }}
       className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
@@ -126,9 +132,10 @@ export default function AppUserConnect({
   ) : (
     <button
       onClick={() => {
-        void runAsyncAndNavigate({
+        void runAsyncAction({
           action: seizeConnectFresh,
           errorMessage: "Failed to open wallet connection",
+          onSettled: onNavigate,
         });
       }}
       className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
@@ -191,10 +198,12 @@ export default function AppUserConnect({
       )}
       <button
         onClick={() => {
-          void runAsyncAndNavigate({
-            action: () =>
-              signOutAndRemoveLocalData("profile", seizeDisconnectAndLogout),
-            errorMessage: t(locale, "auth.signOut.error.disconnectAndLogout"),
+          onSignOut(() => {
+            void runAsyncAction({
+              action: () =>
+                signOutAndRemoveLocalData("profile", seizeDisconnectAndLogout),
+              errorMessage: t(locale, "auth.signOut.error.disconnectAndLogout"),
+            });
           });
         }}
         className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
@@ -206,10 +215,12 @@ export default function AppUserConnect({
       {availableConnectedAccounts.length > 1 && (
         <button
           onClick={() => {
-            void runAsyncAndNavigate({
-              action: () =>
-                signOutAndRemoveLocalData("all", seizeDisconnectAndLogoutAll),
-              errorMessage: t(locale, "auth.signOut.error.allProfiles"),
+            onSignOut(() => {
+              void runAsyncAction({
+                action: () =>
+                  signOutAndRemoveLocalData("all", seizeDisconnectAndLogoutAll),
+                errorMessage: t(locale, "auth.signOut.error.allProfiles"),
+              });
             });
           }}
           className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"

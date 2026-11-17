@@ -49,7 +49,8 @@ function setup(address: string | undefined, isConnected: boolean) {
     switchToNextChain: jest.fn(),
   });
   const onNavigate = jest.fn();
-  render(<AppUserConnect onNavigate={onNavigate} />);
+  const onSignOut = jest.fn((signOut: () => void) => signOut());
+  render(<AppUserConnect onNavigate={onNavigate} onSignOut={onSignOut} />);
   return {
     seizeConnect,
     seizeConnectFresh,
@@ -57,6 +58,7 @@ function setup(address: string | undefined, isConnected: boolean) {
     seizeDisconnectAndLogout,
     seizeDisconnectAndLogoutAll,
     onNavigate,
+    onSignOut,
   };
 }
 
@@ -91,11 +93,11 @@ function setupWithAccounts(options: {
     nextChainName: "Polygon",
     switchToNextChain: jest.fn(),
   });
-  const onNavigate = jest.fn();
-  render(<AppUserConnect onNavigate={onNavigate} />);
+  const onSignOut = jest.fn((signOut: () => void) => signOut());
+  render(<AppUserConnect onNavigate={jest.fn()} onSignOut={onSignOut} />);
   return {
     seizeDisconnectAndLogoutAll,
-    onNavigate,
+    onSignOut,
   };
 }
 
@@ -135,10 +137,8 @@ describe("AppUserConnect", () => {
   });
 
   it("renders disconnect options when wallet is connected", async () => {
-    const { seizeDisconnect, seizeDisconnectAndLogout, onNavigate } = setup(
-      "0xabc",
-      true
-    );
+    const { seizeDisconnect, seizeDisconnectAndLogout, onNavigate, onSignOut } =
+      setup("0xabc", true);
     const disconnectWalletBtn = screen.getByRole("button", {
       name: "Disconnect Wallet",
     });
@@ -161,21 +161,24 @@ describe("AppUserConnect", () => {
     fireEvent.click(disconnectWalletBtn);
     expect(seizeDisconnect).toHaveBeenCalled();
     await waitFor(() => {
-      expect(onNavigate).toHaveBeenCalled();
+      expect(onNavigate).toHaveBeenCalledTimes(2);
     });
 
     fireEvent.click(disconnectBtn);
     await waitFor(() => {
       expect(seizeDisconnectAndLogout).toHaveBeenCalledWith();
-      expect(onNavigate).toHaveBeenCalledTimes(3);
+      expect(onSignOut).toHaveBeenCalledTimes(1);
+      expect(onNavigate).toHaveBeenCalledTimes(2);
     });
   });
 
   it("renders connect wallet + logout when authorized-only", async () => {
-    const { seizeConnectFresh, seizeDisconnectAndLogout, onNavigate } = setup(
-      "0xabc",
-      false
-    );
+    const {
+      seizeConnectFresh,
+      seizeDisconnectAndLogout,
+      onNavigate,
+      onSignOut,
+    } = setup("0xabc", false);
     const connectWalletBtn = screen.getByRole("button", {
       name: "Connect Wallet",
     });
@@ -192,7 +195,8 @@ describe("AppUserConnect", () => {
     fireEvent.click(logoutBtn);
     await waitFor(() => {
       expect(seizeDisconnectAndLogout).toHaveBeenCalledWith();
-      expect(onNavigate).toHaveBeenCalledTimes(2);
+      expect(onSignOut).toHaveBeenCalledTimes(1);
+      expect(onNavigate).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -221,7 +225,7 @@ describe("AppUserConnect", () => {
     });
 
     const onNavigate = jest.fn();
-    render(<AppUserConnect onNavigate={onNavigate} />);
+    render(<AppUserConnect onNavigate={onNavigate} onSignOut={jest.fn()} />);
 
     expect(screen.getByText("Network: Ethereum")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Switch Chain" }));
@@ -244,7 +248,7 @@ describe("AppUserConnect", () => {
   });
 
   it("runs sign out all profiles action", async () => {
-    const { seizeDisconnectAndLogoutAll, onNavigate } = setupWithAccounts({
+    const { seizeDisconnectAndLogoutAll, onSignOut } = setupWithAccounts({
       address: "0xabc",
       isConnected: true,
       connectedAccounts: [
@@ -259,7 +263,7 @@ describe("AppUserConnect", () => {
 
     await waitFor(() => {
       expect(seizeDisconnectAndLogoutAll).toHaveBeenCalledWith();
-      expect(onNavigate).toHaveBeenCalled();
+      expect(onSignOut).toHaveBeenCalledTimes(1);
     });
   });
 });

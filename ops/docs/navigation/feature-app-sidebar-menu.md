@@ -122,6 +122,9 @@ active on every `/ai` page, and is under `Pages` in page search.
 - Use `Scan QR Code` for `https://6529.io/*` links and `mobile6529://` deep
   links (`navigate/*` and `share-connection` scopes).
 - Open `Push Notifications`, review per-device toggles, then save changes.
+- Tap `Disconnect & Logout` (or `Logout` when the wallet is disconnected).
+  The drawer closes automatically. If encrypted messages are saved on this
+  device, the sign-out dialog lets you keep or remove them, or cancel.
 - Review `Network: {currentChain}` and use `Switch to {nextChain}` when the
   current wallet exposes more than one supported chain.
 - Use unread count badges in connected account avatars to pick the account with
