@@ -190,9 +190,17 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
     await expect(
       carol.page.getByText("You were removed from this chat.")
     ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
-    await expect(notice(bob.page, "alice removed carol")).toBeVisible({
+    const removalNotice = notice(bob.page, "alice removed carol");
+    const newMessages = bob.page.getByRole("button", {
+      name: "New messages",
+      exact: true,
+    });
+    // The poll cards can leave the reader above the latest timeline row.
+    await expect(removalNotice.or(newMessages).first()).toBeVisible({
       timeout: E2EE_SYNC_TIMEOUT_MS,
     });
+    if (await newMessages.isVisible()) await newMessages.click();
+    await expect(removalNotice).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
 
     // Story 3: a removed member gets no later messages, on screen or wire.
     await sendMessage(alice.page, afterCarol);
