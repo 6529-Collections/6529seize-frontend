@@ -23,7 +23,8 @@ local notification previews without an in-app cooldown. Composer help describes
 the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
 clearance, while encrypted GIF/Poll/Storm remain unavailable. Notification help
 keeps new-device history limitations explicit and names the environment-specific
-Mobile/Staging push body.
+Mobile/Staging push body. Encrypted-messages help describes how the app sidebar
+closes before the sign-out dialog opens.
 
 The `media.video-player` record covers preview frames and the video-icon fallback
 for Additional Media and Promo Video in submission details. Additional Media
