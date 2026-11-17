@@ -46,7 +46,9 @@ export default function ReleaseSectionEmpty({
         />
         <p className={`tw-m-0 ${BODY}`}>{message}</p>
       </div>
-      {action && <div className="tw-flex-none">{action}</div>}
+      {action === undefined ? null : (
+        <div className="tw-flex-none">{action}</div>
+      )}
     </div>
   );
 }

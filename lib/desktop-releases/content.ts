@@ -1,5 +1,5 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/desktop-download";
 
 import {
@@ -51,14 +51,14 @@ function guideFileRef(
   release: DesktopRelease | undefined,
   kind: DesktopInstallerKind
 ): string {
-  return release
-    ? `\`${getDesktopInstallerName(release, kind)}\``
-    : t(
-        LOCALE,
-        kind === "windows"
-          ? "desktopPage.guide.file.windows"
-          : "desktopPage.guide.file.macos"
-      );
+  if (release) {
+    return `\`${getDesktopInstallerName(release, kind)}\``;
+  }
+  const description: MessageKey =
+    kind === "windows"
+      ? "desktopPage.guide.file.windows"
+      : "desktopPage.guide.file.macos";
+  return t(LOCALE, description);
 }
 
 /** A section of the guide, so the page can put a screenshot after it. */

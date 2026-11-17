@@ -23,7 +23,7 @@ export default function ReleaseFigure({
   return (
     <figure
       className="tw-mx-0 tw-mb-8 tw-mt-2"
-      style={maxWidth ? { maxWidth } : undefined}
+      style={maxWidth === undefined ? undefined : { maxWidth }}
     >
       <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-black">
         <Image
@@ -31,7 +31,11 @@ export default function ReleaseFigure({
           width={width}
           height={height}
           alt={alt}
-          sizes={maxWidth ? `${maxWidth}px` : "(min-width: 768px) 720px, 100vw"}
+          sizes={
+            maxWidth === undefined
+              ? "(min-width: 768px) 720px, 100vw"
+              : `${maxWidth}px`
+          }
           className="tw-block tw-h-auto tw-w-full"
         />
       </div>

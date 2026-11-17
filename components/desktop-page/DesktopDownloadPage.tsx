@@ -318,10 +318,10 @@ export default function DesktopDownloadPage({
             )}
             action={
               releases.state === "error" ? (
-                <a href="/desktop" className={SECONDARY_BUTTON}>
+                <Link href="/desktop" className={SECONDARY_BUTTON}>
                   <ArrowPathIcon aria-hidden="true" className="tw-size-4" />
                   {t(LOCALE, "desktopPage.download.reload")}
-                </a>
+                </Link>
               ) : undefined
             }
           />
