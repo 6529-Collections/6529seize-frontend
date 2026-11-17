@@ -362,7 +362,7 @@ describe("AcceptConnectionSharing page", () => {
 
       expect(
         screen.getByText(
-          "This connection link can only be accepted in the 6529 Desktop app."
+          "This connection link can only be accepted in the 6529 Desktop Classic app."
         )
       ).toBeInTheDocument();
       expect(
@@ -392,7 +392,7 @@ describe("AcceptConnectionSharing page", () => {
 
     expect(
       screen.getByText(
-        "This connection link can only be accepted in the 6529 Desktop app."
+        "This connection link can only be accepted in the 6529 Desktop Classic app."
       )
     ).toBeInTheDocument();
     expect(screen.queryByText("Accept connection")).not.toBeInTheDocument();

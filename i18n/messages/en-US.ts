@@ -3789,7 +3789,7 @@ export const EN_US_ROOT_MESSAGES = {
   "acceptConnection.unsupportedWeb":
     "Open this connection link in the 6529 mobile app.",
   "acceptConnection.unsupportedLegacyDesktop":
-    "This connection link can only be accepted in the 6529 Desktop app.",
+    "This connection link can only be accepted in the 6529 Desktop Classic app.",
   "acceptConnection.missingParameters": "Missing required parameters",
   "acceptConnection.toast.maxProfiles": "Maximum connected profiles reached",
   "acceptConnection.toast.invalidResponse": "Invalid connection response",

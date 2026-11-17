@@ -5,7 +5,6 @@ import HeaderPageShareButton from "@/components/header/share/HeaderPageShareButt
 import {
   getCurrentPageLocation,
   getCurrentPublicUrl,
-  getDesktopConnectionShareScheme,
 } from "@/components/header/share/header-share/shareUtils";
 import { publicEnv } from "@/config/env";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -987,10 +986,21 @@ describe("HeaderShare", () => {
       });
     });
 
-    it.each(["native", "desktop"] as const)(
-      "offers combined %s setup with the appropriate availability",
+    it.each([
+      ["native", undefined],
+      ["desktop", undefined],
+      ["desktop", "stagingclassiccore6529"],
+      ["desktop", "localclassiccore6529"],
+    ] as const)(
+      "offers combined %s setup with Classic scheme %s",
       /** Desktop gets a private app link and version notice. Mobile gets a QR code. */
-      async (target) => {
+      async (target, configuredScheme) => {
+        const schemeOverride = jest.replaceProperty(
+          publicEnv,
+          "DESKTOP_CLASSIC_SCHEME",
+          configuredScheme
+        );
+        const expectedScheme = configuredScheme ?? "classiccore6529";
         const flags = require("@/lib/device-signing/feature");
         const e2ee = require("@/config/e2eeEnv");
         const signing = jest
@@ -1115,7 +1125,7 @@ describe("HeaderShare", () => {
               screen.getByTestId("desktop-connection-panel")
             ).toHaveAttribute(
               "href",
-              `classiccore6529://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret-1`
+              `${expectedScheme}://navigate/accept-connection-sharing?connection_share_code=combined-1&address=${address}#device_setup_key=setup-secret-1`
             );
             const version = within(
               screen.getByTestId("desktop-connection-panel")
@@ -1141,7 +1151,7 @@ describe("HeaderShare", () => {
                 screen.getByTestId("desktop-connection-panel")
               ).toHaveAttribute(
                 "href",
-                `classiccore6529://navigate/accept-connection-sharing?${refreshedLink}`
+                `${expectedScheme}://navigate/accept-connection-sharing?${refreshedLink}`
               )
             );
           } else {
@@ -1180,6 +1190,7 @@ describe("HeaderShare", () => {
             })
           ).toHaveAttribute("aria-pressed", "true");
         } finally {
+          schemeOverride.restore();
           signing.mockRestore();
           grants.mockRestore();
           encryption.mockRestore();
@@ -2103,71 +2114,76 @@ describe("HeaderShare", () => {
       ).toBeInTheDocument();
     });
 
-    it.each(["stagingclassiccore6529", "localclassiccore6529"] as const)(
-      "uses the configured %s scheme for the desktop connection",
-      (scheme) => {
-        const configuredScheme = jest.replaceProperty(
+    it.each([
+      undefined,
+      "stagingclassiccore6529",
+      "localclassiccore6529",
+    ] as const)(
+      "opens Connect only with Classic scheme %s and a one-time code",
+      async (configuredScheme) => {
+        const schemeOverride = jest.replaceProperty(
           publicEnv,
           "DESKTOP_CLASSIC_SCHEME",
-          scheme
+          configuredScheme
         );
+        const expectedScheme = configuredScheme ?? "classiccore6529";
         try {
-          expect(getDesktopConnectionShareScheme()).toBe(scheme);
+          mockAuthUtils.getRefreshToken.mockReturnValue(
+            "local-legacy-refresh-token"
+          );
+          mockDesktopConnectionShare.mockResolvedValue({
+            connection_share_code: "desktop&code=value%",
+            expires_at: new Date(Date.now() + 60_000).toISOString(),
+            address: "0x1234567890123456789012345678901234567890",
+            role: "role+admin&test",
+            target_client_type: "desktop",
+          });
+
+          renderWithProviders(<HeaderShare />);
+          await userEvent.click(
+            screen.getByRole("button", { name: "QR Code" })
+          );
+          await userEvent.click(
+            screen.getByRole("button", { name: "6529 Desktop Classic" })
+          );
+          await chooseConnectOnly();
+
+          const desktopPanel = await screen.findByTestId(
+            "desktop-connection-panel"
+          );
+          expect(desktopPanel).toHaveClass(
+            "tw-h-full",
+            "tw-w-full",
+            "tw-rounded-lg",
+            "tw-border-iron-700",
+            "tw-bg-iron-900/50"
+          );
+          expect(desktopPanel.tagName).toBe("A");
+          expect(desktopPanel).toHaveAttribute(
+            "href",
+            `${expectedScheme}://navigate/accept-connection-sharing?connection_share_code=desktop%26code%3Dvalue%25&address=0x1234567890123456789012345678901234567890`
+          );
+          expect(screen.getByAltText("6529 Desktop Classic")).toHaveAttribute(
+            "width",
+            "124"
+          );
+          expect(
+            screen.queryByText("Continue in the 6529 Desktop app.")
+          ).not.toBeInTheDocument();
+          expect(desktopPanel).toHaveTextContent(
+            "Open in 6529 Desktop Classic"
+          );
+          expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
+          expect(mockDesktopConnectionShare).toHaveBeenCalledWith({
+            targetClientType: "desktop",
+            signal: expect.objectContaining({ aborted: false }),
+          });
+          expect(mockAuthUtils.getRefreshToken).not.toHaveBeenCalled();
         } finally {
-          configuredScheme.restore();
+          schemeOverride.restore();
         }
       }
     );
-
-    it("opens Desktop with an encoded one-time code and omits legacy credentials", async () => {
-      mockAuthUtils.getRefreshToken.mockReturnValue(
-        "local-legacy-refresh-token"
-      );
-      mockDesktopConnectionShare.mockResolvedValue({
-        connection_share_code: "desktop&code=value%",
-        expires_at: new Date(Date.now() + 60_000).toISOString(),
-        address: "0x1234567890123456789012345678901234567890",
-        role: "role+admin&test",
-        target_client_type: "desktop",
-      });
-
-      renderWithProviders(<HeaderShare />);
-      await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
-      await userEvent.click(
-        screen.getByRole("button", { name: "6529 Desktop Classic" })
-      );
-      await chooseConnectOnly();
-
-      const desktopPanel = await screen.findByTestId(
-        "desktop-connection-panel"
-      );
-      expect(desktopPanel).toHaveClass(
-        "tw-h-full",
-        "tw-w-full",
-        "tw-rounded-lg",
-        "tw-border-iron-700",
-        "tw-bg-iron-900/50"
-      );
-      expect(desktopPanel.tagName).toBe("A");
-      expect(desktopPanel).toHaveAttribute(
-        "href",
-        "classiccore6529://navigate/accept-connection-sharing?connection_share_code=desktop%26code%3Dvalue%25&address=0x1234567890123456789012345678901234567890"
-      );
-      expect(screen.getByAltText("6529 Desktop Classic")).toHaveAttribute(
-        "width",
-        "124"
-      );
-      expect(
-        screen.queryByText("Continue in the 6529 Desktop app.")
-      ).not.toBeInTheDocument();
-      expect(desktopPanel).toHaveTextContent("Open in 6529 Desktop Classic");
-      expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
-      expect(mockDesktopConnectionShare).toHaveBeenCalledWith({
-        targetClientType: "desktop",
-        signal: expect.objectContaining({ aborted: false }),
-      });
-      expect(mockAuthUtils.getRefreshToken).not.toHaveBeenCalled();
-    });
 
     it("does not publish a Desktop URL from a stale generation", async () => {
       const firstAddress = "0x1111111111111111111111111111111111111111";
