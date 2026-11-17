@@ -5,6 +5,7 @@
  * polling fallback, stale-epoch re-encryption, roster repair and snapshots.
  */
 import { E2eeApiError } from "@/lib/e2ee/api-errors";
+import type { ApiE2eeDeviceGroup } from "@/lib/e2ee/api-types";
 import type { EngineContext } from "@/lib/e2ee/engine/context";
 import {
   type EngineController,
@@ -46,7 +47,7 @@ async function waitFor(check: () => boolean, ms = 5_000): Promise<void> {
 describe("E2EE engine: sync paths", () => {
   it("only completes initial chat discovery after the inbox and device group checks succeed", async () => {
     const world = await createWorld();
-    const groups = Promise.withResolvers<[]>();
+    const groups = Promise.withResolvers<ApiE2eeDeviceGroup[]>();
     const reachedGroups = Promise.withResolvers<void>();
     let inboxFailed = true;
     let delayGroups = false;

@@ -355,7 +355,9 @@ async function provision(
   // also releases the wait if the app moves to the background mid-frame.
   if (
     typeof document !== "undefined" &&
-    document.visibilityState === "visible"
+    document.visibilityState === "visible" &&
+    typeof globalThis.requestAnimationFrame === "function" &&
+    typeof globalThis.cancelAnimationFrame === "function"
   ) {
     await new Promise<void>((resolve) => {
       const timeout = globalThis.setTimeout(() => {
