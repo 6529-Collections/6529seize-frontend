@@ -14,6 +14,8 @@ native/mls-wasm/target
 lib/museum/generative-studies/minted-indexes/*.json
 # byte-exact copies of published files, checked by SHA-256
 lib/explained/fixtures
+# Written by 6529 AI's build_models_page.py and replaced as a whole.
+lib/ai-page/content/models/*.json
 coverage
 content/delegation
 public/delegation-content

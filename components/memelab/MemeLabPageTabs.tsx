@@ -1,7 +1,7 @@
 "use client";
 
 import { useUserPageTabIndicator } from "@/components/user/layout/useUserPageTabIndicator";
-import type { MEME_FOCUS } from "@/components/the-memes/MemeShared";
+import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import { UNDERLINE_TAB_INDICATOR_CLASSES } from "@/components/common/underlineTabStyles";
 import type { LabNFT } from "@/entities/INFT";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -18,10 +18,12 @@ export function MemeLabPageTabs({
   activeTab,
   locale,
   onSelectTab,
+  showMarketTab = true,
 }: {
   readonly nft: Pick<LabNFT, "id" | "contract">;
   readonly activeTab: MEME_FOCUS;
   readonly locale: SupportedLocale;
+  readonly showMarketTab?: boolean;
   readonly onSelectTab: (tab: MEME_FOCUS) => void;
 }) {
   const contentRef = useRef<HTMLDivElement>(null);
@@ -71,7 +73,9 @@ export function MemeLabPageTabs({
           ref={contentRef}
           className="tw-relative -tw-mb-px tw-flex tw-min-w-max tw-gap-x-3 lg:tw-gap-x-4"
         >
-          {MEME_LAB_TABS.map((tab) => (
+          {MEME_LAB_TABS.filter(
+            (tab) => showMarketTab || tab.focus !== MEME_FOCUS.MARKET
+          ).map((tab) => (
             <MemeLabPageTabButton
               key={`${nft.id}-${nft.contract}-${tab.focus}-tab`}
               title={getMemeLabDetailTabLabel(tab.focus, locale)}

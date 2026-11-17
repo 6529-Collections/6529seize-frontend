@@ -419,7 +419,7 @@
         "quantity"
       ],
       "facts": [
-        "The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea quotes in the Listings & offers tab. Opening the tab immediately shows the lowest ETH listing, highest WETH offer and price levels without another accordion. View listings & offers beside Collect selects the exact card’s market tab and focuses the market section. On Memes and Meme Lab, traits, metadata and original files follow the description in Overview; existing focus=the-art links open Overview. focus=listings-and-offers opens the market tab. Primary and History tab switches keep the tab row visible with the selected section at its top. Switching tabs retains market selection and active review state.",
+        "The iOS app opens the artwork overview for links to Listings & offers or a specific order. The Memes, Meme Lab, Gradients and NextGen card pages on web and Android show captured OpenSea quotes in the Listings & offers tab. Opening the tab immediately shows the lowest ETH listing, highest WETH offer and price levels without another accordion. View listings & offers beside Collect selects the exact card’s market tab and focuses the market section. On Memes and Meme Lab, traits, metadata and original files follow the description in Overview; existing focus=the-art links open Overview. focus=listings-and-offers opens the market tab. Primary and History tab switches keep the tab row visible with the selected section at its top. Switching tabs retains market selection and active review state.",
         "Each price list starts with up to ten levels; Show all levels reveals the complete list and Show fewer levels restores the short view. The summaries show the lowest captured ETH listing and highest captured WETH offer. When only one list has quotes, it fills the available width with both summaries above it; the empty side keeps its unavailable value. Currencies stay separate; a unit price applies to one edition and partially filled orders contribute only their remaining quantity. On narrow screens, quantity and cumulative total appear below the exact price, with a separate Collect or Sell button. First price levels and expanded orders use filled blue actions; other price levels use outlined actions that fill on hover or keyboard focus. Busy checks disable the action while keeping its accessible name.",
         "On Memes, Meme Lab and Gradient cards, artwork details retain mint, edition, collector and TDH information where applicable. Prices appear in Listings & offers, without another price summary or market-cap estimate in artwork details. Memes supply shows Edition size, Ex. research, Ex. museum & research, and Holding wallets. Excluded counts remove burned editions and the named reserve holdings; the combined count excludes each reserve once. These are supply counts, not listed inventory. Supply details & rankings shows exclusions and ranks Ex. research and Ex. museum & research: smallest first, equal supplies share a rank and subsequent ranks skip ties. A card without a recorded ranking shows Unranked.",
         "Expand a price row to inspect quoted remaining quantity, expiry, scope and applicability. Order information reveals the wallet, order reference and currency contract. Up to ten orders appear initially; Show all orders reveals the rest. Orders requiring verification are separate because they do not contribute to displayed price levels. Order details load a complete snapshot; a changed snapshot triggers one automatic refresh before offering Retry details.",
@@ -1066,7 +1066,7 @@
         "expand"
       ],
       "facts": [
-        "The sidebar orders primary navigation as NFTs, Museum, Waves, DMs, Join 6529 (Validator for signed-in members with a profile), and About, with gated Drop Forge after About. The same slot and membership rule apply to desktop collapsed and expanded rails, mobile web, native app menus, and page search. The slot uses the existing navigation styling without a special highlight. While wallet/profile restoration is unresolved, the slot reserves space without showing the wrong action. Validator links to /validator and is not added to public navigation.",
+        "The sidebar orders primary navigation as NFTs, Museum, Waves, DMs, Join 6529 (Validator for signed-in members with a profile), 6529 AI, and About, with gated Drop Forge after About. The same slot and membership rule apply to desktop collapsed and expanded rails, mobile web, native app menus, and page search. The slot uses the existing navigation styling without a special highlight. While wallet/profile restoration is unresolved, the slot reserves space without showing the wrong action. Validator links to /validator and is not added to public navigation. 6529 AI links to /ai for everyone, signed in or not, in the same styling, is active on every /ai page, and is under Pages in page search.",
         "Museum is a standalone web and app sidebar row linking to /museum/network; historical /museum gallery routes remain available from the Museum entry point.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
@@ -1086,6 +1086,7 @@
         "/museum/network",
         "/messages",
         "/join-6529",
+        "/ai",
         "/about",
         "/drop-forge",
         "/discover",
@@ -1252,13 +1253,15 @@
         "mobile app",
         "desktop app",
         "6529 app",
-        "6529 validator"
+        "6529 validator",
+        "6529 ai"
       ],
       "keywords": [
         "apps",
         "mobile",
         "desktop",
         "validator",
+        "ai",
         "ios",
         "android",
         "windows",
@@ -1273,7 +1276,8 @@
         "The footer link is labeled 6529 Apps, appears between License and API, and opens the internal route in the same tab.",
         "The page keeps 6529 Mobile iOS and Android store links together with versioned 6529 Desktop downloads for Windows, macOS, and Linux.",
         "A third full-width section, 6529 Validator, says Read more about 6529 validator. The entire section opens /validator in the same tab.",
-        "Signed-in members with a profile see Validator in the primary navigation slot between DMs and About and can find it under Pages for validator, 6529 Validator, or /validator. Newcomers see Join 6529 in navigation and search instead.",
+        "A fourth full-width section, 6529 AI, says Run open-weights AI models on your own computer, and chat with them in your browser. The entire section opens /ai in the same tab.",
+        "Signed-in members with a profile see Validator in the primary navigation slot between DMs and 6529 AI and can find it under Pages for validator, 6529 Validator, or /validator. Newcomers see Join 6529 in navigation and search instead.",
         "The matching desktop OS expands automatically when detected; phones, tablets and unknown devices start collapsed. Expand Windows, macOS or Linux to see versions and download installers directly. Windows has x64/ARM64 EXEs; Linux has x64 AppImage, DEB and RPM installers.",
         "Download opens the installer directly. Each installer shows Arweave mirror · Coming soon until its mirror is published, then shows a clickable Arweave mirror link.",
         "Current Desktop releases require macOS 13+. macOS 12 Monterey has a separate last-compatible release feed, currently 0.3.15, for Intel and Apple silicon. If an update stops opening on macOS 12, reinstall that compatible app and keep existing application data.",
@@ -1281,7 +1285,7 @@
         "Use this page to find official app downloads; the footer does not link directly to a platform download."
       ],
       "canonical_path": "/about/6529-apps",
-      "related_paths": ["/about"],
+      "related_paths": ["/about", "/ai"],
       "tags": ["about", "apps", "navigation", "mobile", "desktop"],
       "source_refs": [
         "app/about/6529-apps/page.tsx",
@@ -1292,6 +1296,54 @@
       "brief_answer": "Yes—**6529 Mobile** is available for iOS and Android, and **6529 Desktop** for Windows, macOS, and Linux. Find both downloads on the official Apps page.",
       "answer_links": [
         { "label": "6529 Apps", "url": "https://6529.io/about/6529-apps" }
+      ]
+    },
+    {
+      "id": "ai.download",
+      "kind": "route",
+      "title": "6529 AI",
+      "aliases": [
+        "6529 ai",
+        "6529 ai download",
+        "local ai",
+        "run ai models",
+        "open-weights models",
+        "ai models",
+        "chat with a local model"
+      ],
+      "keywords": [
+        "ai",
+        "models",
+        "download",
+        "install",
+        "chat",
+        "gpu",
+        "mac",
+        "windows",
+        "linux",
+        "api"
+      ],
+      "facts": [
+        "6529 AI runs open-weights AI models on the person's own computer, and they chat with them in their browser. Its download page is /ai.",
+        "Its pages: /ai/guide installs it on a Mac, Windows or Linux and starts a first chat; /ai/models lists every model it knows by section, with what runs in the app today and the GPU memory each needs; /ai/use walks through real use (chat, pictures, images, speech to text, app keys, the API and the command line); /ai/known-issues lists the known bugs and what isn't tested yet.",
+        "It is an untested test release: every /ai page says so, with a link to Known issues.",
+        "Open it from 6529 AI in the primary navigation, after Join 6529 or Validator, from the 6529 AI section of /about/6529-apps, or from page search.",
+        "Search engines don't index the /ai pages."
+      ],
+      "canonical_path": "/ai",
+      "related_paths": [
+        "/ai/guide",
+        "/ai/models",
+        "/ai/use",
+        "/ai/known-issues",
+        "/about/6529-apps"
+      ],
+      "tags": ["ai", "apps", "download", "navigation"],
+      "source_refs": [
+        "app/ai/page.tsx",
+        "components/ai-page/AiDownloadPage.tsx",
+        "components/navigation/aiNavigation.ts",
+        "ops/docs/ai-download-page.md"
       ]
     },
     {
@@ -4545,10 +4597,10 @@
       ],
       "facts": [
         "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, price filters, results timelines, and drop eligibility states.",
-        "Leaderboard availability depends on the wave type and configuration.",
+        "Leaderboard availability depends on the wave type and configuration. Curation price sorting and ETH bounds are available on the web and in the Android app.",
         "Use the selected decision’s main Leaderboard tab to inspect its entries and ranking.",
         "Decision leaderboard cards appear with each page. Background score refreshes keep loaded artwork visible; opening a card loads its full drop.",
-        "Non-Memes Grid view and Content only cards show previews for supported NFT marketplace links when no media is uploaded. Content only hides the text summary for those previews. Unsupported links stay readable as text, and unavailable NFT previews link to the original destination. Shared marketplace previews open and copy the original link. The iOS app hides the price button.",
+        "Non-Memes Grid view and Content only cards show previews for supported NFT marketplace links when no media is uploaded. Content only hides the text summary for those previews. Unsupported links stay readable as text, and unavailable NFT previews link to the original destination. Shared marketplace previews open and copy the original link. The iOS app hides the price button, also omits Pepe listing and floor prices, and shows 6529 collection previews without live mint progress.",
         "Full wave leaderboard list, grid, and Memes gallery views update scores and ranks live while preserving the visible artwork's position. During touch or momentum scrolling, scores keep updating and card reordering waits until scrolling settles."
       ],
       "canonical_path": "/waves",
@@ -6704,6 +6756,7 @@
       "facts": [
         "The NFT activity feed lives at /nft-activity.",
         "Activity appears in columns on wide screens and stacked rows on phones or narrow panels. Each row retains its action, item, sender, recipient, total, date and available transaction link; sideways scrolling is not needed.",
+        "In the iOS app, the feed and card activity keep completed sales, mints and transfers and omit listing, offer and other open-order events.",
         "The feed combines indexed sales, mints, airdrops, transfers and burns with recorded OpenSea listings, offers, cancellations, expirations and order validity changes for The Memes, Meme Lab, Gradients and NextGen.",
         "Choose collection and action filters and use Load more to see older activity. Changing filters starts a new result list. Empty and failed requests have clear states and a retry control.",
         "Off-chain market actions may have no transaction hash. Market history begins with captured provider events and status observations; best-effort delivery does not guarantee every historical off-chain action.",
@@ -8815,7 +8868,7 @@
       "facts": [
         "Latest drop stats grid behavior is documented under media memes docs.",
         "It surfaces stats for the current or latest Meme Card drop.",
-        "The home page and The Memes areas can both surface current drop context."
+        "The home page and The Memes areas can both surface current drop context. The iOS app shows artwork and edition details. Mint panels, wallet allowances and current mint prices appear on the web and in the Android app."
       ],
       "canonical_path": "/the-memes",
       "related_paths": ["/", "/the-memes/mint"],
@@ -9033,7 +9086,7 @@
       "keywords": ["nextgen", "mint", "distribution", "plan", "collection"],
       "facts": [
         "NextGen mint and distribution-plan behavior is documented under NextGen docs.",
-        "In the iOS app, direct NextGen mint links return to the collection. Countdown and distribution information stay available.",
+        "In the iOS app, direct NextGen mint links return to the collection. Distribution information remains available. Countdown and phase badges appear on the web and in the Android app.",
         "Mint routes live under /nextgen/collection/{collection}/mint.",
         "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan.",
         "The distribution-plan allowlist shows a loading state while entries are fetched and a no-match state when active filters return no entries."

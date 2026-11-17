@@ -1,5 +1,6 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import React, {
   useContext,
   useMemo,
@@ -251,6 +252,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   onDropClick,
 }) => {
   const leaderboardContainerRef = useRef<HTMLDivElement | null>(null);
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const {
     isApproveWave,
@@ -279,14 +281,20 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     return "tw-w-full tw-min-w-0 tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow tw-px-2 sm:tw-px-4 tw-@container/leaderboard";
   }, []);
 
-  const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
+  const [selectedMinPrice, setSelectedMinPrice] = useState<number | undefined>(
+    undefined
+  );
   const [additionalActionWaveId, setAdditionalActionWaveId] = useState<
     string | null
   >(null);
   const additionalActionOnly =
     isMemesWave && additionalActionWaveId === wave.id;
   const [receiptDrop, setReceiptDrop] = useState<ApiDrop | null>(null);
-  const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
+  const [selectedMaxPrice, setSelectedMaxPrice] = useState<number | undefined>(
+    undefined
+  );
+  const minPrice = hideNftPurchasing ? undefined : selectedMinPrice;
+  const maxPrice = hideNftPurchasing ? undefined : selectedMaxPrice;
 
   const isLoggedIn = Boolean(connectedProfile?.handle);
   const { canCreateDrop } = useMemo(
@@ -325,10 +333,13 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     () =>
       normalizeWaveLeaderboardSort({
         isApproveWave,
-        sort,
+        sort:
+          hideNftPurchasing && sort === WaveDropsLeaderboardSort.PRICE
+            ? WaveDropsLeaderboardSort.RANK
+            : sort,
         timeLockMs: wave.wave.time_lock_ms,
       }),
-    [isApproveWave, sort, wave.wave.time_lock_ms]
+    [hideNftPurchasing, isApproveWave, sort, wave.wave.time_lock_ms]
   );
   const handleSortChange = useCallback(
     (nextSort: WaveDropsLeaderboardSort) => {
@@ -478,8 +489,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       readonly minPrice: number | undefined;
       readonly maxPrice: number | undefined;
     }) => {
-      setMinPrice(nextMinPrice);
-      setMaxPrice(nextMaxPrice);
+      setSelectedMinPrice(nextMinPrice);
+      setSelectedMaxPrice(nextMaxPrice);
     },
     []
   );
@@ -513,7 +524,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       onSortChange={handleSortChange}
       minPrice={minPrice}
       maxPrice={maxPrice}
-      onPriceRangeChange={isCurationWave ? updatePriceRange : undefined}
+      onPriceRangeChange={
+        isCurationWave && !hideNftPurchasing ? updatePriceRange : undefined
+      }
       additionalActions={additionalActions}
     />
   );

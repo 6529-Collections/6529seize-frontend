@@ -1,6 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { WaveLeaderboardHeader } from "@/components/waves/leaderboard/header/WaveleaderboardHeader";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import {
   act,
@@ -10,6 +11,8 @@ import {
   waitFor,
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
+jest.mock("@/hooks/useNftPurchasingVisibility");
 
 const useWave = jest.fn();
 let mockSubmissionButtonLabel = "Drop";
@@ -83,6 +86,11 @@ const getLatestSortLabels = (): string[] => {
 };
 
 beforeEach(() => {
+  jest.mocked(useNftPurchasingVisibility).mockReturnValue({
+    hideNftPurchasing: false,
+    shouldRedirect: false,
+    reservesNftPurchasingSpace: false,
+  });
   mockSubmissionButtonLabel = "Drop";
   sortComponentMock.mockClear();
   resolveHeaderLayoutMock.mockReset();
@@ -326,40 +334,54 @@ it("keeps approve labels but hides realtime vote without a time lock", () => {
   ]);
 });
 
-it("keeps curation price sort but hides projected vote without a time lock", () => {
-  useWave.mockReturnValue({
-    isMemesWave: false,
-    isCurationWave: true,
-    participation: { isEligible: true },
-  });
+it.each([
+  { surface: "web", hideNftPurchasing: false, extraSorts: ["Price"] },
+  { surface: "iOS", hideNftPurchasing: true, extraSorts: [] },
+])(
+  "shows the supported curation sorts on $surface without a time lock",
+  ({ hideNftPurchasing, extraSorts }) => {
+    jest.mocked(useNftPurchasingVisibility).mockReturnValue({
+      hideNftPurchasing,
+      shouldRedirect: hideNftPurchasing,
+      reservesNftPurchasingSpace: false,
+    });
+    useWave.mockReturnValue({
+      isMemesWave: false,
+      isCurationWave: true,
+      participation: { isEligible: true },
+    });
 
-  render(
-    <AuthContext.Provider
-      value={
-        {
-          connectedProfile: { handle: "tester" },
-          activeProfileProxy: null,
-        } as any
-      }
-    >
-      <WaveLeaderboardHeader
-        wave={{ ...wave, wave: { type: ApiWaveType.Rank, time_lock_ms: null } }}
-        onCreateDrop={jest.fn()}
-        viewMode="list"
-        onViewModeChange={jest.fn()}
-        sort={WaveDropsLeaderboardSort.RANK}
-        onSortChange={jest.fn()}
-      />
-    </AuthContext.Provider>
-  );
+    render(
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { handle: "tester" },
+            activeProfileProxy: null,
+          } as any
+        }
+      >
+        <WaveLeaderboardHeader
+          wave={{
+            ...wave,
+            wave: { type: ApiWaveType.Rank, time_lock_ms: null },
+          }}
+          onCreateDrop={jest.fn()}
+          viewMode="list"
+          onViewModeChange={jest.fn()}
+          sort={WaveDropsLeaderboardSort.RANK}
+          onSortChange={jest.fn()}
+        />
+      </AuthContext.Provider>
+    );
 
-  expect(getLatestSortLabels()).toEqual([
-    "Current Vote",
-    "Hot",
-    "Newest",
-    "Price",
-  ]);
-});
+    expect(getLatestSortLabels()).toEqual([
+      "Current Vote",
+      "Hot",
+      "Newest",
+      ...extraSorts,
+    ]);
+  }
+);
 
 it("renders curation price controls and commits range updates", async () => {
   const user = userEvent.setup();

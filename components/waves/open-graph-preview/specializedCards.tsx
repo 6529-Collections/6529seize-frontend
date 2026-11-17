@@ -3,6 +3,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -177,7 +178,8 @@ export function SeizeCollectionPreviewCard({
     : [];
   const resolvedVariant = variant ?? "chat";
   const isHome = resolvedVariant === "home";
-  const liveMint: SeizeCollectionLiveMint | null = preview.liveMint ?? null;
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const liveMint = hideNftPurchasing ? null : (preview.liveMint ?? null);
   const liveMintFact = createLiveMintFact(liveMint, locale);
   const displayFacts = liveMintFact ? [liveMintFact, ...facts] : facts;
 

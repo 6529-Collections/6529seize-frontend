@@ -6,6 +6,7 @@ import {
   useDeviceGrants,
   useRevokeDeviceGrant,
 } from "@/hooks/device-signing/useDeviceGrants";
+import { useDeviceKeyLoss } from "@/hooks/device-signing/useDeviceKeyLoss";
 import { useEnableSignedMessages } from "@/hooks/device-signing/useEnableSignedMessages";
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
@@ -20,7 +21,7 @@ import {
 
 export type SignedMessagesNoticeModel =
   | { readonly kind: "new-device"; readonly grant: ApiDeviceGrant }
-  | { readonly kind: "enable" | "expired" }
+  | { readonly kind: "enable" | "expired" | "restore" }
   | { readonly kind: "renew"; readonly expiresAt: number };
 
 interface UnseenGrantInput {
@@ -58,11 +59,13 @@ function findUnseenGrant({
 
 function getLocalNotice(
   grant: ApiDeviceGrant | null,
-  nowMs: number
+  nowMs: number,
+  keysLost: boolean
 ): SignedMessagesNoticeModel | null {
   switch (getDeviceGrantStatus(grant, nowMs)) {
     case "none":
-      return { kind: "enable" };
+      // The browser dropped the key it held: say so instead of a first turn-on.
+      return { kind: keysLost ? "restore" : "enable" };
     case "renewal":
       return grant ? { kind: "renew", expiresAt: grant.expires_at } : null;
     case "expired":
@@ -88,6 +91,7 @@ export function useSignedMessagesNotice({
 }) {
   const nowMs = useMinuteClock();
   const local = useLocalDeviceKeys(address);
+  const keyLoss = useDeviceKeyLoss(address);
   const { data: grants } = useDeviceGrants(address);
   const { dismissedUntil, seenGrantIds, localGrantIds } =
     useSignedMessagesNoticeState(address);
@@ -145,12 +149,23 @@ export function useSignedMessagesNotice({
     if (!composerEmpty || (dismissedUntil ?? 0) > nowMs) {
       return null;
     }
-    return getLocalNotice(local.grant, nowMs);
+    // Either sign is enough that this browser held a key for the wallet that
+    // is now gone. keyLoss: its own grant note named a grant when the key
+    // record was found missing; it also drives the telemetry and the revoke
+    // on re-enable. The fallback: #4747's remembered local grants with no key
+    // left at all; copy only, as there is no note naming a grant to revoke.
+    // Either way it only changes the "none" case: an expired or renewable
+    // grant on a record that still exists keeps its own notice.
+    const keysLost =
+      keyLoss !== null ||
+      (local.publicKeys.length === 0 && (localGrantIds?.length ?? 0) > 0);
+    return getLocalNotice(local.grant, nowMs, keysLost);
   }, [
     address,
     composerEmpty,
     dismissedUntil,
     grants,
+    keyLoss,
     legacyNewDeviceAlerts,
     local,
     localGrantIds,

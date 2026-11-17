@@ -11,8 +11,8 @@ jest.mock("next/navigation", () => ({
     push: jest.fn(),
     replace: jest.fn(),
   }),
-  useSearchParams: () => new URLSearchParams(),
-  usePathname: () => "/nextgen/token/123",
+  useSearchParams: () => new URLSearchParams(window.location.search),
+  usePathname: () => window.location.pathname,
   notFound: jest.fn(),
 }));
 
@@ -112,11 +112,13 @@ const mockAuthContext = {
 } as any;
 
 function renderWithAuth(component: React.ReactElement) {
-  return render(
-    <AuthContext.Provider value={mockAuthContext}>
-      {component}
-    </AuthContext.Provider>
-  );
+  return render(component, {
+    wrapper: ({ children }) => (
+      <AuthContext.Provider value={mockAuthContext}>
+        {children}
+      </AuthContext.Provider>
+    ),
+  });
 }
 
 const mockTokenPageClientProps = {
@@ -211,7 +213,6 @@ const mockTokenPageClientProps = {
     merkle_root: "0x123456789",
     opensea_link: "https://opensea.io/collection/test",
   },
-  view: NextgenCollectionView.ABOUT,
 };
 
 const mockCollectionComponentProps = {
@@ -256,7 +257,10 @@ describe("NextGen Client Components", () => {
   describe("NextGenTokenPageClient", () => {
     it("keeps market navigation and browser history aligned while preserving return context", () => {
       window.history.replaceState({}, "", "/nextgen/token/123?returnTo=owner");
-      renderWithAuth(<NextGenTokenPageClient {...mockTokenPageClientProps} />);
+      const tokenPage = () => (
+        <NextGenTokenPageClient {...mockTokenPageClientProps} />
+      );
+      const { rerender } = renderWithAuth(tokenPage());
       const tokenView = screen.getByTestId("token-component");
       fireEvent.click(
         screen.getByRole("button", { name: "Listings & offers" })
@@ -265,6 +269,9 @@ describe("NextGen Client Components", () => {
         "/nextgen/token/123/listings-and-offers"
       );
       expect(window.location.search).toBe("?returnTo=owner");
+
+      // The App Router publishes the new pathname after history changes.
+      rerender(tokenPage());
       expect(tokenView).toHaveAttribute(
         "data-view",
         NextgenCollectionView.LISTINGS_AND_OFFERS
@@ -274,7 +281,7 @@ describe("NextGen Client Components", () => {
         "",
         "/nextgen/token/123/provenance?returnTo=owner"
       );
-      fireEvent(window, new PopStateEvent("popstate"));
+      rerender(tokenPage());
       expect(screen.getByTestId("token-component")).toBe(tokenView);
       expect(tokenView).toHaveAttribute(
         "data-view",
@@ -285,7 +292,7 @@ describe("NextGen Client Components", () => {
         "",
         "/nextgen/token/123/listings-and-offers?returnTo=owner"
       );
-      fireEvent(window, new PopStateEvent("popstate"));
+      rerender(tokenPage());
       expect(tokenView).toHaveAttribute(
         "data-view",
         NextgenCollectionView.LISTINGS_AND_OFFERS

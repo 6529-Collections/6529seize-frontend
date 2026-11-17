@@ -1,4 +1,9 @@
-import { ArrowDownTrayIcon, CheckIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowDownTrayIcon,
+  ArrowRightIcon,
+  CheckIcon,
+} from "@heroicons/react/24/outline";
+import Link from "next/link";
 
 import ValidatorFold from "@/components/validator-page/ValidatorFold";
 import { CODE } from "@/components/validator-page/validatorStyles";
@@ -168,7 +173,6 @@ function SystemPanel({
                 slot={AI_SCREENSHOTS.placement}
                 alt={t(LOCALE, "ai.guide.placementShot")}
                 caption={t(LOCALE, "ai.guide.placementCaption")}
-                realSize
               />
             ),
           }}
@@ -302,6 +306,22 @@ export default function AiGuidePage({
           </p>
         </section>
       </div>
+
+      <Link
+        href="/ai/use"
+        className={`${AI_CARD} tw-group tw-mt-10 tw-flex tw-items-center tw-justify-between tw-gap-4 tw-p-5 tw-no-underline tw-transition hover:tw-border-primary-400/40 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400`}
+      >
+        <span className="tw-flex tw-min-w-0 tw-flex-col tw-gap-1">
+          <span className="tw-text-base tw-font-semibold tw-text-iron-50">
+            {t(LOCALE, "ai.guide.next")}
+          </span>
+          <span className={AI_MUTED}>{t(LOCALE, "ai.guide.nextBody")}</span>
+        </span>
+        <ArrowRightIcon
+          aria-hidden="true"
+          className="tw-size-5 tw-flex-none tw-text-primary-300 tw-transition group-hover:tw-translate-x-0.5"
+        />
+      </Link>
 
       <div className="tw-mt-10">
         <AiReportProblem />

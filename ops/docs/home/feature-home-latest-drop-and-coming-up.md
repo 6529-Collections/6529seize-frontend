@@ -90,6 +90,10 @@ Use this page for visibility rules, state switches, and route targets.
    `Next Drop` shows accepted collaborators below the artist with a separate
    `Collaborators` label and one compact profile per row, including available
    levels and badges.
+   In the iOS app, Latest Drop keeps the artwork, artist and edition
+   details. Open Edition Details for the date and distribution plan.
+   Latest and Next Drop omit the allowance, and Latest Drop omits the
+   mint controls and market quotes.
 5. `Coming up` resolves after app settings load and `memes_wave_id` is
    available.
 6. `Coming up` then shows:

@@ -1,6 +1,6 @@
 "use client";
 
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import { useNftMarketRoute } from "@/hooks/useNftMarketRoute";
 import Address from "@/components/address/Address";
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -385,7 +385,9 @@ export default function GradientPageComponent({
   const locale = useBrowserLocale();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const marketActive = searchParams.get("focus") === MARKET_TAB_FOCUS;
+  const { hideNftPurchasing } = useNftMarketRoute(pathname, searchParams);
+  const marketActive =
+    !hideNftPurchasing && searchParams.get("focus") === MARKET_TAB_FOCUS;
   const selectMarketTab = (market: boolean) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("focus", market ? MARKET_TAB_FOCUS : "live");
@@ -413,7 +415,6 @@ export default function GradientPageComponent({
     if (marketActive) params.set("focus", MARKET_TAB_FOCUS);
     return params;
   }, [returnContext, marketActive]);
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { address: connectedAddress } = useSeizeConnectContext();
   const { connectedProfile } = useContext(AuthContext);
 
@@ -645,11 +646,13 @@ export default function GradientPageComponent({
                     isActive={!marketActive}
                     onClick={() => selectMarketTab(false)}
                   />
-                  <MemePageTabButton
-                    title={t(locale, "marketDepth.disclosure")}
-                    isActive={marketActive}
-                    onClick={() => selectMarketTab(true)}
-                  />
+                  {!hideNftPurchasing && (
+                    <MemePageTabButton
+                      title={t(locale, "marketDepth.disclosure")}
+                      isActive={marketActive}
+                      onClick={() => selectMarketTab(true)}
+                    />
+                  )}
                 </nav>
               }
             >
@@ -668,16 +671,18 @@ export default function GradientPageComponent({
                   )}
                 </div>
               </div>
-              <MarketDepthPanel
-                focusedOrderHash={searchParams.get("order")}
-                contract={GRADIENT_CONTRACT}
-                tokenId={nft.id}
-                refreshKey={marketRefreshVersion}
-                locale={locale}
-                embedded
-                active={marketActive}
-                onReveal={() => selectMarketTab(true)}
-              />
+              {!hideNftPurchasing && (
+                <MarketDepthPanel
+                  focusedOrderHash={searchParams.get("order")}
+                  contract={GRADIENT_CONTRACT}
+                  tokenId={nft.id}
+                  refreshKey={marketRefreshVersion}
+                  locale={locale}
+                  embedded
+                  active={marketActive}
+                  onReveal={() => selectMarketTab(true)}
+                />
+              )}
             </NftDetailTabSection>
           </>
         ) : (

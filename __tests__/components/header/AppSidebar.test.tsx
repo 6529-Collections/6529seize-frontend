@@ -163,9 +163,17 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         render(<AppSidebar open onClose={jest.fn()} />);
         expect(
           getMenu()
-            .slice(0, 6)
+            .slice(0, 7)
             .map((item) => item.label)
-        ).toEqual(["NFTs", "Museum", "Waves", "DMs", "Validator", "About"]);
+        ).toEqual([
+          "NFTs",
+          "Museum",
+          "Waves",
+          "DMs",
+          "Validator",
+          "6529 AI",
+          "About",
+        ]);
         expect(getMenuItem("Validator")).toMatchObject({
           path: "/validator",
           pending: false,
@@ -196,6 +204,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         "Waves",
         "DMs",
         "Join 6529",
+        "6529 AI",
         "About",
       ]);
       expect(getMenu()).toEqual(
@@ -209,6 +218,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
             label: "Join 6529",
             path: "/join-6529",
           }),
+          expect.objectContaining({ label: "6529 AI", path: "/ai" }),
         ])
       );
       expect(getMenuItem("Museum").children).toBeUndefined();
@@ -329,6 +339,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         "Waves",
         "DMs",
         "Join 6529",
+        "6529 AI",
         "About",
         "Drop Forge",
       ]);

@@ -501,6 +501,7 @@ const NAVIGATION_MESSAGES = objectMessages("navigation", {
   "primary.dms": "DMs",
   "primary.join6529": "Join 6529",
   "primary.validator": "Validator",
+  "primary.ai": "6529 AI",
   "primary.about": "About",
   "primary.museum": "Museum",
   "about.overview": "Overview",

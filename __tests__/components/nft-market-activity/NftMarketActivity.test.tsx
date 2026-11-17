@@ -1,15 +1,23 @@
 import NftMarketActivity from "@/components/nft-market-activity/NftMarketActivity";
 import { getNextGenImageUrl } from "@/components/nextGen/collections/nextgenToken/NextGenTokenImage";
 import { MEMES_CONTRACT, NEXTGEN_CONTRACT } from "@/constants/constants";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useNFTCollections } from "@/hooks/useNFTCollections";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type React from "react";
 
 jest.mock("@/services/api/common-api");
 jest.mock("@/hooks/useNFTCollections");
+jest.mock("@/hooks/useNftPurchasingVisibility");
 jest.mock("@/components/address/Address", () => ({
   __esModule: true,
   default: ({ wallets, display }: { wallets: string[]; display?: string }) => (
@@ -37,11 +45,14 @@ function renderFeed(
   const client = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
-  return render(
-    <QueryClientProvider client={client}>
-      <NftMarketActivity {...props} />
-    </QueryClientProvider>
-  );
+  return {
+    ...render(
+      <QueryClientProvider client={client}>
+        <NftMarketActivity {...props} />
+      </QueryClientProvider>
+    ),
+    client,
+  };
 }
 
 function marketEvent(overrides: Record<string, unknown> = {}) {
@@ -69,6 +80,11 @@ function marketEvent(overrides: Record<string, unknown> = {}) {
 describe("NftMarketActivity", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useNftPurchasingVisibility).mockReturnValue({
+      hideNftPurchasing: false,
+      shouldRedirect: false,
+      reservesNftPurchasingSpace: false,
+    });
     mockCollections.mockReturnValue({
       nfts: [
         {
@@ -81,6 +97,83 @@ describe("NftMarketActivity", () => {
       nextgenCollections: [],
       loading: false,
     });
+  });
+
+  it("skips marketplace quotes on iOS and can page through to completed sales", async () => {
+    jest.mocked(useNftPurchasingVisibility).mockReturnValue({
+      hideNftPurchasing: true,
+      shouldRedirect: true,
+      reservesNftPurchasingSpace: false,
+    });
+    mockFetch
+      .mockResolvedValueOnce({
+        data: [
+          marketEvent({ action: "listing" }),
+          marketEvent({ event_id: "order-2", action: "offer" }),
+        ],
+        next: "next-page",
+      })
+      .mockResolvedValueOnce({
+        data: [
+          marketEvent({
+            event_id: "sale-1",
+            kind: "transaction",
+            action: "sale",
+          }),
+        ],
+        next: null,
+      });
+
+    renderFeed();
+
+    const loadMore = await screen.findByRole("button", { name: "Load more" });
+    const activityRegion = {
+      name: "Scrollable NFT activity table",
+    };
+    expect(
+      screen.queryByRole("region", { hidden: true })
+    ).not.toBeInTheDocument();
+    await userEvent.click(loadMore);
+    expect(await screen.findByRole("region", activityRegion)).toHaveAttribute(
+      "tabindex",
+      "0"
+    );
+    expect(
+      await screen.findByText("Sold", { exact: true })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText("Listed", { exact: true })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Offer", { exact: true })
+    ).not.toBeInTheDocument();
+  });
+
+  it("can retry when refreshing an empty feed fails", async () => {
+    mockFetch
+      .mockResolvedValueOnce({ data: [], next: null })
+      .mockRejectedValueOnce(new Error("Unavailable"))
+      .mockResolvedValueOnce({
+        data: [marketEvent({ kind: "transaction", action: "sale" })],
+        next: null,
+      });
+
+    const { client } = renderFeed();
+    await screen.findByText("No NFT activity found.", { selector: "p" });
+
+    await act(() => client.refetchQueries());
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Could not load NFT activity."
+    );
+    expect(
+      screen.queryByText("No NFT activity found.", { selector: "p" })
+    ).not.toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(
+      await screen.findByText("Sold", { exact: true })
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
   });
 
   it("renders an off-chain cancellation with linked NFT metadata", async () => {

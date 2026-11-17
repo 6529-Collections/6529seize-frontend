@@ -7,6 +7,7 @@ import {
   formatEditionSize,
 } from "@/helpers/manifold-display-helpers";
 import { useDropForgeManifoldClaim } from "@/hooks/useDropForgeManifoldClaim";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useNftBalance } from "@/hooks/useNftBalance";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -25,6 +26,8 @@ export default function NowMintingStatsGrid({
   floorPrice,
 }: NowMintingStatsGridProps) {
   const locale = useBrowserLocale();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  // The claim's edition size and the owned count are also used on iOS.
   const { claim: manifoldClaim, isError } = useDropForgeManifoldClaim(nftId);
   const { contract } = useDropForgeMintingConfig();
   const status = manifoldClaim?.status;
@@ -45,8 +48,7 @@ export default function NowMintingStatsGrid({
 
   const editionSize = isError
     ? t(locale, "home.nowMinting.stats.unavailable")
-    : manifoldClaim &&
-      formatEditionSize(manifoldClaim).replace(" / ", "/");
+    : manifoldClaim && formatEditionSize(manifoldClaim).replace(" / ", "/");
   const mintPrice = isError
     ? t(locale, "home.nowMinting.stats.unavailable")
     : manifoldClaim && formatClaimCost(manifoldClaim);
@@ -102,33 +104,37 @@ export default function NowMintingStatsGrid({
         label={t(locale, "home.nowMinting.stats.edition")}
         value={editionValue}
       />
-      <NowMintingStatsItem
-        appearance="compact"
-        compactLabelSize="large"
-        label={t(locale, "home.nowMinting.stats.status")}
-        value={statusLabel}
-        status={statusTone}
-        isLoading={isStatusLoading}
-      />
-      <NowMintingStatsItem
-        appearance="compact"
-        compactLabelSize="large"
-        label={t(locale, "home.nowMinting.stats.mintPrice")}
-        value={<span className="sm:tw-whitespace-normal">{mintPrice}</span>}
-        isLoading={isStatusLoading}
-      />
-      <NowMintingStatsItem
-        appearance="compact"
-        compactLabelSize="large"
-        label={t(locale, "home.nowMinting.stats.floor")}
-        value={
-          <span
-            className={`sm:tw-whitespace-normal ${floorPrice === "N/A" ? "tw-text-iron-500" : ""}`}
-          >
-            {floorPrice}
-          </span>
-        }
-      />
+      {!hideNftPurchasing && (
+        <>
+          <NowMintingStatsItem
+            appearance="compact"
+            compactLabelSize="large"
+            label={t(locale, "home.nowMinting.stats.status")}
+            value={statusLabel}
+            status={statusTone}
+            isLoading={isStatusLoading}
+          />
+          <NowMintingStatsItem
+            appearance="compact"
+            compactLabelSize="large"
+            label={t(locale, "home.nowMinting.stats.mintPrice")}
+            value={<span className="sm:tw-whitespace-normal">{mintPrice}</span>}
+            isLoading={isStatusLoading}
+          />
+          <NowMintingStatsItem
+            appearance="compact"
+            compactLabelSize="large"
+            label={t(locale, "home.nowMinting.stats.floor")}
+            value={
+              <span
+                className={`sm:tw-whitespace-normal ${floorPrice === "N/A" ? "tw-text-iron-500" : ""}`}
+              >
+                {floorPrice}
+              </span>
+            }
+          />
+        </>
+      )}
     </div>
   );
 }
