@@ -396,6 +396,24 @@ describe("DesktopUpdateNotice in a build that installs its own updates", () => {
     expect(elsewhere).toHaveFocus();
   });
 
+  it("keeps focus on Not now after a refused update and a state change", async () => {
+    installAutoHost(STATES.U4);
+    updater.downloadUpdate.mockRejectedValueOnce(
+      "Please wait a moment and try again."
+    );
+    render(<DesktopUpdateNotice />);
+    const button = await screen.findByRole("button", { name: "Update now" });
+    button.focus();
+    await userEvent.keyboard("{Enter}");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Please wait a moment and try again."
+    );
+    const notNow = screen.getByRole("button", { name: "Not now" });
+    notNow.focus();
+    emitState(STATES.U8);
+    expect(screen.getByRole("button", { name: "Not now" })).toHaveFocus();
+  });
+
   it("keeps following a download started here across a remount", async () => {
     installAutoHost(STATES.U4);
     const first = render(<DesktopUpdateNotice />);

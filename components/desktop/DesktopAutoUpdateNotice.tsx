@@ -61,15 +61,17 @@ export default function DesktopAutoUpdateNotice({
   useEffect(() => {
     if (!focusMessageNext.current) return;
     focusMessageNext.current = false;
-    // Only when focus went with the button: never pull it back from
-    // wherever the person moved it in the meantime.
+    // Only when focus went with the button (it is back on the page body):
+    // never pull it from wherever the person moved it, in the notice or not.
     const active = document.activeElement;
-    const lost =
-      active === null ||
-      active === document.body ||
-      sectionRef.current?.contains(active) === true;
+    const lost = active === null || active === document.body;
     if (lost) messageRef.current?.focus();
   }, [key]);
+
+  // A refused action keeps its button: nothing to move focus from later.
+  useEffect(() => {
+    if (actions.problem !== null) focusMessageNext.current = false;
+  }, [actions.problem]);
 
   if (!state) return null;
   const followingDownload =
