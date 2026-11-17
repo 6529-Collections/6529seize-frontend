@@ -13,6 +13,8 @@ import {
 } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ComposerSendButton } from "@/components/waves/ComposerSendButton";
+import { isE2eePollCreationEnabled } from "@/config/e2eeEnv";
+import { E2eePollComposerAction } from "./E2eePollComposer";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
@@ -685,6 +687,14 @@ export function E2eeComposer({
                 />
               </button>
             </DropActionTooltip>
+            {isE2eePollCreationEnabled() &&
+              conversation.kind === "group" &&
+              engine.createPoll && (
+                <E2eePollComposerAction
+                  key={`poll-${conversation.g}`}
+                  onCreate={engine.createPoll.bind(engine, conversation.g)}
+                />
+              )}
             {canAttach && !isUploading && (
               <E2eeGifAttachmentPicker
                 key={conversation.g}

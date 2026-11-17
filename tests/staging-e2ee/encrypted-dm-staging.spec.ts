@@ -29,6 +29,7 @@ import {
   checkConversationPreviews,
 } from "../support/markdownParity";
 
+import { checkEncryptedPoll } from "../support/e2ee/polls";
 import { expect, test } from "../testHelpers";
 import {
   plaintextEncodings,
@@ -838,6 +839,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await openChatFromList(c, group, groupName);
     await expectDecrypted(c, fromA);
 
+    const singlePoll = qaMessage(runId, "Which drink?");
+    const multiPoll = qaMessage(runId, "Which drinks?");
+    await checkEncryptedPoll(a.page, b.page, b.user.handle, singlePoll, false);
+    await checkEncryptedPoll(a.page, c.page, c.user.handle, multiPoll, true);
+
     await sendEncrypted(c, fromC);
     await expectDecrypted(a, fromC);
     await expectDecrypted(b, fromC);
@@ -845,7 +851,10 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       await expectNothingUndecryptable(session);
     }
 
-    expectPrivateAndClean([a, b, c], needles({ groupName, fromA, fromC }));
+    expectPrivateAndClean(
+      [a, b, c],
+      needles({ groupName, fromA, fromC, singlePoll, multiPoll })
+    );
   });
 
   test("a revoked device can no longer read new messages", async ({

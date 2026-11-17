@@ -1,12 +1,12 @@
 import { publicEnv } from "@/config/env";
 import { isE2eeFlagEnabled } from "@/config/e2eeFlag";
 
-/**
- * Whether end-to-end encrypted DMs and groups are enabled in this build.
- * The value is baked at build time (staging sets it; production leaves it
- * unset). When off, encrypted routes 404 and every E2EE surface renders
- * nothing.
- */
+/** Enables the create control for the staging rollout. */
+export function isE2eePollCreationEnabled(): boolean {
+  return isE2eeFlagEnabled(publicEnv.NEXT_PUBLIC_E2EE_POLLS_ENABLED);
+}
+
+/** Whether end-to-end encrypted DMs and groups are enabled in this build. */
 export function isE2eeEnabled(): boolean {
   return isE2eeFlagEnabled(publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED);
 }

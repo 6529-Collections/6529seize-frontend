@@ -246,14 +246,19 @@ export function E2eeMessageActionsMenu({
           ) : null}
           {isOwn && canAct ? (
             <>
-              <ActionMenuItem
-                onClick={() => actions.onEdit(message)}
-                icon={
-                  <PencilSquareIcon aria-hidden="true" className={iconClass} />
-                }
-              >
-                {t(locale, "e2ee.message.edit")}
-              </ActionMenuItem>
+              {!message.poll && (
+                <ActionMenuItem
+                  onClick={() => actions.onEdit(message)}
+                  icon={
+                    <PencilSquareIcon
+                      aria-hidden="true"
+                      className={iconClass}
+                    />
+                  }
+                >
+                  {t(locale, "e2ee.message.edit")}
+                </ActionMenuItem>
+              )}
               <ActionMenuItem
                 tone="danger"
                 onClick={() => actions.onDelete(message)}
