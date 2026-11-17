@@ -127,7 +127,7 @@ async function getFirstWaveId(page: Page) {
   return match?.[1] ?? "";
 }
 
-async function findPublicChatWaveId(page: Page) {
+async function findPublicChatWave(page: Page) {
   const response = await gotoReadyWithApiResponse(
     page,
     "/waves",
@@ -163,11 +163,11 @@ async function findPublicChatWaveId(page: Page) {
   ).toBeDefined();
   const waveId = wave!.id;
   expect(waveId).toMatch(/^[0-9a-f-]{36}$/i);
-  return waveId;
+  return wave!;
 }
 
 async function getPublicChatMessageTarget(page: Page) {
-  const waveId = await findPublicChatWaveId(page);
+  const { id: waveId } = await findPublicChatWave(page);
   await gotoReady(page, `/waves/${waveId}`);
   const message = page
     .getByRole("region", {
@@ -2787,7 +2787,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     baseURL,
     page,
   }) => {
-    const waveId = await findPublicChatWaveId(page);
+    const { id: waveId, name: waveName } = await findPublicChatWave(page);
     const viewport = page.viewportSize();
     const context = await browser.newContext({
       javaScriptEnabled: false,
@@ -2802,13 +2802,12 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
         `/waves/${waveId}`
       );
       expect(response?.ok()).toBe(true);
-      const preview = previewPage.locator(
-        `[data-public-wave-feed="${waveId}"]`
-      );
-      const messageLink = preview
-        .getByRole("article")
-        .last()
-        .getByRole("link");
+      const preview = previewPage.getByRole("region", {
+        name: waveName,
+        exact: true,
+      });
+      await expect(preview).toHaveAttribute("data-public-wave-feed", waveId);
+      const messageLink = preview.getByRole("article").last().getByRole("link");
       await expect(messageLink).toBeVisible();
       await expect(messageLink).toBeInViewport();
       await messageLink.focus();
@@ -2817,13 +2816,14 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       if (!href) throw new Error("Public Wave preview link is missing its URL");
       const target = new URL(href, previewPage.url());
       const dropId = target.searchParams.get("drop");
+      if (!dropId)
+        throw new Error("Public Wave preview link is missing its message ID");
       expect(dropId).toMatch(/^[0-9a-f-]{36}$/i);
 
       await messageLink.press("Enter");
       await expect(previewPage).toHaveURL(target.href);
-      await expect(
-        previewPage.locator(`[data-public-wave-drop="${dropId}"]`)
-      ).toBeVisible();
+      await expect(preview).toHaveAttribute("data-public-wave-drop", dropId);
+      await expect(preview.getByRole("article")).toBeVisible();
       await expectNoHorizontalOverflow(previewPage);
     } finally {
       await context.close();
