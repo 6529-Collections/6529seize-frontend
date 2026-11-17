@@ -32,6 +32,7 @@ import {
   buildRouterPath,
   createReadyQrCodeSource,
   getCurrentPageLocation,
+  getDesktopConnectionShareScheme,
   type CachedConnectionShare,
   type ConnectionShareSessionVerificationStatus,
   type ConnectionShareStatus,
@@ -259,7 +260,7 @@ function HeaderQRModal({
         signal,
       }),
       generateDesktopConnectionShareUrl({
-        coreScheme,
+        coreScheme: getDesktopConnectionShareScheme(),
         isStaleGeneration,
         signal,
         walletAddress,

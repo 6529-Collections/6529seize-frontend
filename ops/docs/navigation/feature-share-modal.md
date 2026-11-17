@@ -99,14 +99,14 @@ the `More` menu.
 
 1. Open the desktop-web account menu, then **Connect Device**.
 2. Confirm the avatar, handle and full wallet address. Under **Which app are you
-   connecting?**, select **6529 Mobile** or **6529 Desktop**.
+   connecting?**, select **6529 Mobile** or **6529 Desktop Classic**.
 3. Choose **Connect only**, or **Connect with Post Signing & DM Encryption**.
-   The modal title changes to **Connect 6529 Mobile** or **Connect 6529 Desktop**.
+   The modal title changes to **Connect 6529 Mobile** or **Connect 6529 Desktop Classic**.
    Secure Desktop setup shows the v0.4.0 minimum under the secure action, during
-   wallet signing, and below **Open in 6529 Desktop**. **Connect only** signs in
+   wallet signing, and below **Open in 6529 Desktop Classic**. **Connect only** signs in
    the receiving app with a short-lived, one-time code.
 4. Mobile shows a full-width QR. Desktop shows the 6529 logo and **Open in 6529
-   Desktop** launch control, rather than a QR. The heading reads **Connect as
+   Desktop Classic** launch control, rather than a QR. The heading reads **Connect as
    {handle}**, with **with Post Signing & DM Encryption** for secure setup.
 5. Copy with the icon inside the link field. The adjacent refresh icon generates
    a new Connect-only code directly. For secure setup, refresh clears the displayed
@@ -168,7 +168,7 @@ No page-copy, social, or current-page Share actions appear in this dialog.
 - Desktop is hidden as a connection target when already running in Electron.
 - Connection links open `Accept Connection Sharing`. Mobile connection links
   are accepted only in 6529 Mobile, and Desktop connection links only in 6529
-  Desktop. Opened anywhere else, the page shows a message and a home link
+  Desktop Classic. Opened anywhere else, the page shows a message and a home link
   instead of `Accept connection`. The page removes the link's one-time
   credential from the address bar as soon as it loads, so reloading it does not
   reopen the connection; open the original link or QR code again instead. The

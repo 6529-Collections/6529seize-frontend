@@ -245,6 +245,11 @@ export function buildNativeConnectionShareUrls({
   };
 }
 
+export function getDesktopConnectionShareScheme(): string {
+  const scheme = publicEnv.CORE_SCHEME ?? "core6529";
+  return scheme === "core6529" ? "classiccore6529" : scheme;
+}
+
 export function buildDesktopConnectionShareLink(
   share: NativeConnectionShare,
   addressKey: string,
