@@ -288,12 +288,9 @@ function PreparationSection({
           )}
         </div>
         {status && (
-          <p
-            role="status"
-            className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300"
-          >
+          <output className="tw-mt-2 tw-block tw-text-sm tw-text-iron-300">
             {status}
-          </p>
+          </output>
         )}
       </section>
       <Dialog
