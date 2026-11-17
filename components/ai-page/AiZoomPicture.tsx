@@ -163,11 +163,9 @@ function Variant({
       <dialog
         ref={dialog}
         aria-label={alt}
-        onClick={(event) => {
-          if (event.target === event.currentTarget) {
-            event.currentTarget.close();
-          }
-        }}
+        // A click outside it closes it, where the browser supports that;
+        // Close and Escape close it everywhere.
+        closedby="any"
         className="tw-m-auto tw-max-h-[96dvh] tw-max-w-[96vw] tw-overflow-auto tw-overscroll-contain tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-0 backdrop:tw-bg-black/85"
       >
         <div className="tw-flex tw-h-14 tw-items-center tw-justify-between tw-gap-3 tw-px-3">

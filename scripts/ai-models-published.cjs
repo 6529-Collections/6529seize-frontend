@@ -1,10 +1,14 @@
 // Writes published.json: for each model, the day its repository was made
 // on Hugging Face (the original model's, for a quantization, conversion or
 // repackaging), for the models page's "Newest" order.
-// node published.cjs <models.json> <published.json>
+// node scripts/ai-models-published.cjs <models.json> <published.json>
+// It sends Hugging Face only each model's public repository name.
 const fs = require("fs");
+const path = require("path");
 const [, , modelsPath, outPath] = process.argv;
-const { models } = JSON.parse(fs.readFileSync(modelsPath, "utf8"));
+const { models } = require(path.resolve(modelsPath));
+// "owner/name", as Hugging Face names a repository.
+const REPO = /^[\w.-]+\/[\w.-]+$/;
 const SAME_MODEL = new Set([
   "quantization",
   "GGUF conversion",
@@ -19,9 +23,16 @@ const SAME_MODEL = new Set([
         model.original && SAME_MODEL.has(model.original.relation)
           ? model.original.repo
           : model.source.repo;
+      if (!REPO.test(repo)) {
+        continue;
+      }
+      const url = new URL(
+        `/api/models/${repo.split("/").map(encodeURIComponent).join("/")}`,
+        "https://huggingface.co"
+      );
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
-          const res = await fetch(`https://huggingface.co/api/models/${repo}`, {
+          const res = await fetch(url, {
             headers: { "user-agent": "6529-ai-models-page/1 (metadata only)" },
           });
           if (res.ok) {

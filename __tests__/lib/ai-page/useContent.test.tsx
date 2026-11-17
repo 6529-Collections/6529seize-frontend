@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { renderToStaticMarkup } from "react-dom/server";
 
+import InlineText from "@/components/ai-page/InlineText";
 import AiUsePage from "@/components/ai-page/use/AiUsePage";
 import {
   AI_FIXED_BUGS,
@@ -181,6 +182,17 @@ describe("the /ai/use walk-through", () => {
     expect(html).toMatch(/Show output \(\d+ lines\)/);
     // The pictures are the dark ones, as the site is dark.
     expect(html).not.toMatch(/-light\.(png|webp)/);
+  });
+
+  it("renders the content's marks, and leaves an unclosed one as text", () => {
+    const html = renderToStaticMarkup(
+      <InlineText text="Press **Send**, *or* run `jq`; see [Known issues](/ai/known-issues). 2 * 3, [x" />
+    );
+    expect(html).toContain(">Send</strong>");
+    expect(html).toContain(">or</em>");
+    expect(html).toContain(">jq</code>");
+    expect(html).toContain('href="/ai/known-issues"');
+    expect(html).toContain(". 2 * 3, [x");
   });
 
   it("prints the newest release's version in what the commands print", () => {

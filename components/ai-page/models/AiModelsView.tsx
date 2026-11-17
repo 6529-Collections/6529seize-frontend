@@ -280,10 +280,9 @@ function Bar({
   readonly count: string;
 }) {
   return (
-    <div
-      role="group"
+    <fieldset
       aria-label={text.label}
-      className="tw-flex tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950/90 tw-p-3 lg:tw-sticky lg:tw-top-3 lg:tw-z-20 lg:tw-shadow-[0_12px_32px_-16px_rgba(0,0,0,0.9)] lg:tw-backdrop-blur-md"
+      className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-950/90 tw-p-3 lg:tw-sticky lg:tw-top-3 lg:tw-z-20 lg:tw-shadow-[0_12px_32px_-16px_rgba(0,0,0,0.9)] lg:tw-backdrop-blur-md"
     >
       <div className="tw-flex tw-items-center tw-gap-2">
         <label className="tw-relative tw-min-w-0 tw-flex-1">
@@ -302,10 +301,9 @@ function Bar({
             className="tw-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-pl-9 tw-pr-3 tw-text-[15px] tw-text-iron-50 tw-transition placeholder:tw-text-iron-500 hover:tw-border-white/20 focus:tw-border-primary-400/60 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-h-9 sm:tw-text-sm"
           />
         </label>
-        <div
-          role="group"
+        <fieldset
           aria-label={text.view}
-          className="tw-flex tw-flex-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-0.5"
+          className="tw-m-0 tw-flex tw-flex-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-p-0.5"
         >
           {(["cards", "table"] as const).map((key) => (
             <button
@@ -323,7 +321,7 @@ function Bar({
               <span className="max-sm:tw-sr-only">{text.views[key]}</span>
             </button>
           ))}
-        </div>
+        </fieldset>
         <select
           aria-label={text.section}
           value=""
@@ -432,7 +430,7 @@ function Bar({
           {count}
         </button>
       </div>
-    </div>
+    </fieldset>
   );
 }
 
