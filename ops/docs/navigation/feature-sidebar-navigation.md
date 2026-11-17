@@ -74,12 +74,14 @@ active on every `/ai` page, and is under `Pages` in page search.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Three separate sections keep controls stable: scrollable primary navigation,
-  desktop utilities in a fixed-height middle section, and the bottom account area.
-  Utilities stack as `Search`, `Share` (on supported routes), then optional `Update`.
-  Without Share, Update sits directly below Search; unused space stays below them.
-- The bottom section contains connected-only `Notifications` above the account
-  control. `Update` stays below Share in the middle section even as Notifications
-  appears or disappears.
+  desktop utilities, and the bottom account area.
+- Desktop utilities appear in the order `Update` (when available), `Search`,
+  and `Share` (on supported routes). In the collapsed rail, absent controls
+  free up space for primary navigation.
+- On short windows the collapsed rail tightens the spacing around the icons
+  as needed. The primary navigation scrolls when the rows still exceed the
+  available height. The account stays at the bottom, with connected-only
+  `Notifications` directly above it.
 - Newly appearing sidebar controls and labels fade in with a subtle scale over
   125ms, including gated Drop Forge and WatchTower. Account pictures and fallback
   icons use a simple fade. Reduced motion shows controls immediately.
