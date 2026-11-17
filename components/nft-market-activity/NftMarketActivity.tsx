@@ -539,12 +539,10 @@ export default function NftMarketActivity({
   }, [hideNftPurchasing, query.data?.pages]);
   const historyStartedAt = query.data?.pages[0]?.market_history_started_at;
 
+  const hasEvents = events.length > 0;
   const initialError = query.isLoadingError;
   const isEmpty =
-    !query.isPending &&
-    !initialError &&
-    events.length === 0 &&
-    !query.hasNextPage;
+    !query.isPending && !initialError && !hasEvents && !query.hasNextPage;
   let statusMessage = "";
   if (query.isPending) {
     statusMessage = t(locale, "nftActivity.loading");
@@ -590,15 +588,15 @@ export default function NftMarketActivity({
           {t(locale, "nftActivity.empty")}
         </p>
       )}
-      {(events.length > 0 ||
-        query.hasNextPage ||
-        query.isFetchNextPageError) && (
+      {(hasEvents || query.hasNextPage || query.isFetchNextPageError) && (
         <div className={compact ? "tw-min-w-0" : "tw-min-w-0 tw-pt-3"}>
           <div
-            hidden={events.length === 0}
-            role="region"
-            aria-label={t(locale, "nftActivity.scrollRegion")}
-            tabIndex={0}
+            hidden={!hasEvents}
+            role={hasEvents ? "region" : undefined}
+            aria-label={
+              hasEvents ? t(locale, "nftActivity.scrollRegion") : undefined
+            }
+            tabIndex={hasEvents ? 0 : undefined}
             className="tw-relative tw-overflow-x-auto before:tw-content-none after:tw-content-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 [&_*]:before:tw-content-none [&_*]:after:tw-content-none"
           >
             {/* Explicit roles preserve table semantics when narrow layouts use block/grid display. */}

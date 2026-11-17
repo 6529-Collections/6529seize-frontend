@@ -281,7 +281,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     return "tw-w-full tw-min-w-0 tw-flex tw-flex-col tw-rounded-t-xl tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-thumb-iron-500 tw-scrollbar-track-iron-800 desktop-hover:hover:tw-scrollbar-thumb-iron-300 tw-overflow-x-hidden tw-flex-grow tw-px-2 sm:tw-px-4 tw-@container/leaderboard";
   }, []);
 
-  const [selectedMinPrice, setMinPrice] = useState<number | undefined>(
+  const [selectedMinPrice, setSelectedMinPrice] = useState<number | undefined>(
     undefined
   );
   const [additionalActionWaveId, setAdditionalActionWaveId] = useState<
@@ -290,7 +290,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const additionalActionOnly =
     isMemesWave && additionalActionWaveId === wave.id;
   const [receiptDrop, setReceiptDrop] = useState<ApiDrop | null>(null);
-  const [selectedMaxPrice, setMaxPrice] = useState<number | undefined>(
+  const [selectedMaxPrice, setSelectedMaxPrice] = useState<number | undefined>(
     undefined
   );
   const minPrice = hideNftPurchasing ? undefined : selectedMinPrice;
@@ -489,8 +489,8 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       readonly minPrice: number | undefined;
       readonly maxPrice: number | undefined;
     }) => {
-      setMinPrice(nextMinPrice);
-      setMaxPrice(nextMaxPrice);
+      setSelectedMinPrice(nextMinPrice);
+      setSelectedMaxPrice(nextMaxPrice);
     },
     []
   );

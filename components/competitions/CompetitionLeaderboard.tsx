@@ -155,7 +155,7 @@ export default function CompetitionLeaderboard({
   const scrollContainerRef = providedScrollContainer ?? localScrollContainer;
   const identity = { waveId: wave.id, competitionId: competition.id };
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const [selectedPriceRange, setPriceRange] = useState<{
+  const [selectedPriceRange, setSelectedPriceRange] = useState<{
     minPrice: number | undefined;
     maxPrice: number | undefined;
   }>({ minPrice: undefined, maxPrice: undefined });
@@ -354,7 +354,9 @@ export default function CompetitionLeaderboard({
         additionalActions={<CompetitionMySubmissions />}
         minPrice={priceRange.minPrice}
         maxPrice={priceRange.maxPrice}
-        onPriceRangeChange={showMarketPrices ? setPriceRange : undefined}
+        onPriceRangeChange={
+          showMarketPrices ? setSelectedPriceRange : undefined
+        }
       />
       {content}
     </div>

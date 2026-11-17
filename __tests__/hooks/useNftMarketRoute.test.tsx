@@ -36,6 +36,45 @@ describe("useNftMarketRoute", () => {
     expect(pathname + search + hash).toBe(expected);
   });
 
+  it("holds an order-only URL during hydration and cleans it once on iOS", () => {
+    const url = "/nextgen/token/10000000000?order=id&locale=fr-FR";
+    globalThis.history.replaceState(null, "", url);
+    const reading = jest.mocked(useNftPurchasingVisibility);
+    reading.mockReturnValue({
+      hideNftPurchasing: true,
+      shouldRedirect: false,
+      reservesNftPurchasingSpace: true,
+    });
+    const replaceState = jest.spyOn(globalThis.history, "replaceState");
+    try {
+      const { result, rerender } = renderHook(() => {
+        const { pathname, searchParams } = new URL(globalThis.location.href);
+        return useNftMarketRoute(
+          pathname,
+          searchParams,
+          searchParams.has("order") ? pathname : undefined
+        );
+      });
+
+      expect(result.current.redirectToArtwork).toBe(true);
+      expect(replaceState).not.toHaveBeenCalled();
+
+      reading.mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
+      rerender();
+      expect(globalThis.location.search).toBe("?locale=fr-FR");
+
+      rerender();
+      expect(result.current.redirectToArtwork).toBe(false);
+      expect(replaceState).toHaveBeenCalledTimes(1);
+    } finally {
+      replaceState.mockRestore();
+    }
+  });
+
   it("keeps web market links and their order IDs", () => {
     jest.mocked(useNftPurchasingVisibility).mockReturnValue({
       hideNftPurchasing: false,

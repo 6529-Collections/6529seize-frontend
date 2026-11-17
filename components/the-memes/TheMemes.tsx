@@ -221,7 +221,7 @@ export default function TheMemesComponent({
   const [routerLoaded, setRouterLoaded] = useState(false);
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const [requestedSort, setSort] = useState<MemesSort>(MemesSort.AGE);
+  const [requestedSort, setRequestedSort] = useState<MemesSort>(MemesSort.AGE);
   const sort =
     hideNftPurchasing && isMarketQuoteSort(requestedSort)
       ? MemesSort.AGE
@@ -249,7 +249,7 @@ export default function TheMemesComponent({
       initialDataRef.current = undefined;
     }
 
-    setSort(initialSort);
+    setRequestedSort(initialSort);
     setSortDir(initialSortDir);
     setSeasonId(initialSznId);
     setYearId(initialYearId);
@@ -732,7 +732,7 @@ export default function TheMemesComponent({
                       locale={locale}
                       select={() => {
                         initialDataRef.current = undefined;
-                        setSort(v);
+                        setRequestedSort(v);
                       }}
                     />
                   ))}
@@ -746,7 +746,7 @@ export default function TheMemesComponent({
                     }}
                     setVolumeSort={() => {
                       initialDataRef.current = undefined;
-                      setSort(MemesSort.VOLUME);
+                      setRequestedSort(MemesSort.VOLUME);
                     }}
                     locale={locale}
                   />

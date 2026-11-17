@@ -226,7 +226,7 @@ export default function MemeLabComponent({
     initialRouterValues.initialSortDir
   );
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const [requestedSort, setSort] = useState<MemeLabSort>(
+  const [requestedSort, setRequestedSort] = useState<MemeLabSort>(
     initialRouterValues.initialSort
   );
   const sort =
@@ -244,11 +244,11 @@ export default function MemeLabComponent({
     const { initialSortDir, initialSort: parsedInitialSort } =
       getInitialRouterValues(initialSortDirection, initialSort);
     setSortDir(initialSortDir);
-    setSort(parsedInitialSort);
+    setRequestedSort(parsedInitialSort);
   }, [initialSort, initialSortDirection]);
 
   const selectSort = (nextSort: MemeLabSort) => {
-    setSort(nextSort);
+    setRequestedSort(nextSort);
     router.replace(getMemeLabSortQuery(nextSort, sortDir, locale));
   };
 

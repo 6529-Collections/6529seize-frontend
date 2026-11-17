@@ -8,11 +8,14 @@ export function useNftMarketRoute(
   searchParams: Pick<URLSearchParams, "get" | "toString">,
   marketPathDestination?: string
 ) {
-  const { hideNftPurchasing, shouldRedirect } = useNftPurchasingVisibility();
+  const { hideNftPurchasing, shouldRedirect, reservesNftPurchasingSpace } =
+    useNftPurchasingVisibility();
   const requestedMarket =
     marketPathDestination !== undefined ||
     searchParams.get("focus") === "listings-and-offers" ||
     Boolean(searchParams.get("order"));
+  // Render artwork while the platform is unknown. Rewrite the URL only once
+  // iOS is confirmed, so web market links retain their target during hydration.
   const redirectToArtwork = hideNftPurchasing && requestedMarket;
 
   useEffect(() => {
@@ -37,5 +40,5 @@ export function useNftMarketRoute(
     shouldRedirect,
   ]);
 
-  return { hideNftPurchasing, redirectToArtwork };
+  return { hideNftPurchasing, redirectToArtwork, reservesNftPurchasingSpace };
 }

@@ -45,7 +45,7 @@ export default function NextGenTokenPageClient({
   const { setTitle } = useTitle();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [requestedView, setTokenView] =
+  const [requestedView, setRequestedView] =
     useState<NextgenCollectionView>(initialView);
   const isMarketPath =
     getTokenViewFromPathname(pathname) ===
@@ -65,7 +65,7 @@ export default function NextGenTokenPageClient({
 
   useEffect(() => {
     const handlePopState = () => {
-      setTokenView(getTokenViewFromPathname(globalThis.location.pathname));
+      setRequestedView(getTokenViewFromPathname(globalThis.location.pathname));
     };
 
     globalThis.addEventListener("popstate", handlePopState);
@@ -90,7 +90,7 @@ export default function NextGenTokenPageClient({
       newPath += `/${getNextgenTokenViewSegment(nextView)}`;
     }
     newPath += globalThis.location.search;
-    setTokenView(nextView);
+    setRequestedView(nextView);
     globalThis.history.pushState({ view: nextView }, "", newPath);
   };
 

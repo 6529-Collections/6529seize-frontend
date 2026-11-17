@@ -27,6 +27,7 @@ export default function NowMintingStatsGrid({
 }: NowMintingStatsGridProps) {
   const locale = useBrowserLocale();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
+  // The claim's edition size and the owned count are also used on iOS.
   const { claim: manifoldClaim, isError } = useDropForgeManifoldClaim(nftId);
   const { contract } = useDropForgeMintingConfig();
   const status = manifoldClaim?.status;

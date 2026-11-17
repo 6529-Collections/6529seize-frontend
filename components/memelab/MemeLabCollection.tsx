@@ -80,7 +80,9 @@ export default function LabCollection({
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const [requestedSort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
+  const [requestedSort, setRequestedSort] = useState<MemeLabSort>(
+    MemeLabSort.AGE
+  );
   const sort =
     hideNftPurchasing && isMemeLabMarketQuoteSort(requestedSort)
       ? MemeLabSort.AGE
@@ -91,7 +93,7 @@ export default function LabCollection({
     const { initialSortDir, initialSort: parsedInitialSort } =
       getInitialRouterValues(initialSortDirection, initialSort);
     setSortDir(initialSortDir);
-    setSort(parsedInitialSort);
+    setRequestedSort(parsedInitialSort);
     setVolumeType(VolumeType.HOURS_24);
   }, [initialSort, initialSortDirection]);
 
@@ -282,7 +284,7 @@ export default function LabCollection({
               (option) =>
                 !hideNftPurchasing || !isMemeLabMarketQuoteSort(option)
             )}
-            setSort={setSort}
+            setSort={setRequestedSort}
             setVolumeType={setVolumeType}
             volumeType={volumeType}
             locale={locale}

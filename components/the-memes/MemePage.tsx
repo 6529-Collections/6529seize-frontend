@@ -11,7 +11,9 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { mainnet } from "viem/chains";
 
 import LatestDropNextMintSubscribe from "@/components/home/now-minting/LatestDropNextMintSubscribe";
+import { MemeSubscriptionAwarenessRowSpace } from "@/components/home/now-minting/MemeSubscriptionAwarenessRow";
 import NowMintingCountdown from "@/components/home/now-minting/NowMintingCountdown";
+import NowMintingCountdownLoading from "@/components/home/now-minting/NowMintingCountdownLoading";
 import { getMemeYearFromMintNumber } from "@/components/the-memes/theMemesFilters";
 import { getTheMemesRouteHrefWithLocale } from "@/components/the-memes/theMemesRouteParams";
 import Button from "@/components/utils/button/Button";
@@ -181,10 +183,8 @@ export default function MemePage({
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { hideNftPurchasing, redirectToArtwork } = useNftMarketRoute(
-    pathname,
-    searchParams
-  );
+  const { hideNftPurchasing, redirectToArtwork, reservesNftPurchasingSpace } =
+    useNftMarketRoute(pathname, searchParams);
   const { isCapacitor } = useCapacitor();
   const locale = normalizeLocale(searchParams.get("locale"));
   const returnContext = getProfileCollectedReturnContext(
@@ -434,7 +434,9 @@ export default function MemePage({
       return null;
     }
 
-    const hasMintingBox = isLastCard && !hideNftPurchasing;
+    const showMintingBox = isLastCard && !hideNftPurchasing;
+    const reserveMintingBox = isLastCard && reservesNftPurchasingSpace;
+    const hasMintingBox = showMintingBox || reserveMintingBox;
     const artworkColumnBaseClassName =
       "tw-relative lg:tw-sticky lg:tw-top-6 lg:tw-flex lg:tw-flex-col lg:tw-self-start";
     const cardHeaderClassName = hasMintingBox
@@ -481,7 +483,16 @@ export default function MemePage({
           )}
         </div>
         <div className={detailsColumnClassName}>
-          {hasMintingBox && (
+          {reserveMintingBox && (
+            <div
+              aria-hidden="true"
+              className="tw-invisible tw-w-full tw-space-y-3"
+            >
+              <NowMintingCountdownLoading />
+              <MemeSubscriptionAwarenessRowSpace />
+            </div>
+          )}
+          {showMintingBox && (
             <div className="tw-w-full tw-space-y-3">
               <NowMintingCountdown
                 nftId={nft.id}

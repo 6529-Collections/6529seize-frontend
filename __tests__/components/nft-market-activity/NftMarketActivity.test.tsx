@@ -117,8 +117,17 @@ describe("NftMarketActivity", () => {
 
     renderFeed();
 
-    await userEvent.click(
-      await screen.findByRole("button", { name: "Load more" })
+    const loadMore = await screen.findByRole("button", { name: "Load more" });
+    const activityRegion = {
+      name: "Scrollable NFT activity table",
+    };
+    expect(
+      screen.queryByRole("region", { hidden: true })
+    ).not.toBeInTheDocument();
+    await userEvent.click(loadMore);
+    expect(await screen.findByRole("region", activityRegion)).toHaveAttribute(
+      "tabindex",
+      "0"
     );
     expect(
       await screen.findByText("Sold", { exact: true })
