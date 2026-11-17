@@ -1,27 +1,62 @@
 "use client";
 import { v4 as uuidv4 } from "uuid";
 import { ApiDropForgeJobStatusEnum as JobStatus } from "@/generated/models/ApiDropForgeJob";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
 import {
   forgeProcessKey,
   useDropForgeProcess,
 } from "@/hooks/useDropForgeProcess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatList } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   forgeProcessInputsMatch,
   isForgeProcessTargetValid,
+  type ForgePhaseInputs,
 } from "@/services/api/drop-forge-process-inputs";
 import { startForgeProcess } from "@/services/api/drop-forge-api";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+type PhaseIssues = Pick<ForgePhaseInputs, "missing" | "duplicates">;
+
+function getProcessInputMessage(
+  locale: SupportedLocale,
+  claim: number,
+  plan: string,
+  phaseIssues?: PhaseIssues
+): string {
+  if (!plan.trim()) return t(locale, "dropForge.planMissing");
+  if (!isForgeProcessTargetValid(claim, plan))
+    return t(locale, "dropForge.tokenMissing");
+
+  const { missing = [], duplicates = [] } = phaseIssues ?? {};
+  const messages = [];
+  if (missing.length) {
+    messages.push(
+      t(locale, "dropForge.phasesMissing", {
+        phases: formatList(locale, missing),
+      })
+    );
+  }
+  if (duplicates.length) {
+    messages.push(
+      t(locale, "dropForge.phasesDuplicated", {
+        phases: formatList(locale, duplicates),
+      })
+    );
+  }
+  return messages.join(" ") || t(locale, "dropForge.inputsMissing");
+}
+
 export default function ProcessAndFinalize({
   contract,
   claim,
   plan,
   phaseIds,
+  phaseIssues,
   onCompleted,
   onStarted,
   disabled = false,
@@ -30,11 +65,13 @@ export default function ProcessAndFinalize({
   claim: number;
   plan: string;
   phaseIds: string[];
+  phaseIssues?: PhaseIssues;
   onCompleted?: () => void;
   onStarted?: () => Promise<void>;
   disabled?: boolean;
 }>) {
   const locale = useBrowserLocale();
+  const statusId = useId();
   const { requestAuth } = useAuth();
   const queryClient = useQueryClient();
   const operation = useDropForgeProcess(contract, claim, plan);
@@ -103,7 +140,7 @@ export default function ProcessAndFinalize({
   if (pending) {
     statusMessage = checkpoint;
   } else if (!hasRequiredInputs) {
-    statusMessage = t(locale, "dropForge.inputsMissing");
+    statusMessage = getProcessInputMessage(locale, claim, plan, phaseIssues);
   } else if (requiresReset) {
     statusMessage = t(locale, "dropForge.inputsChanged");
   } else if (awaitingAuth) {
@@ -111,8 +148,12 @@ export default function ProcessAndFinalize({
   }
   const failure = error ?? job?.error ?? getToastErrorDetails(operation.error);
   return (
-    <div className="tw-flex tw-flex-col tw-items-end tw-gap-2">
-      <button
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2">
+      <Button
+        variant="action"
+        size="lg"
+        fullWidth
+        loading={pending}
         type="button"
         onClick={() => {
           void run();
@@ -125,14 +166,14 @@ export default function ProcessAndFinalize({
           !hasRequiredInputs ||
           operation.isLoading
         }
-        aria-busy={pending}
-        className="tw-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-4 tw-py-2 tw-font-medium tw-text-white disabled:tw-opacity-50"
+        aria-describedby={statusMessage ? statusId : undefined}
+        className="!tw-whitespace-normal"
       >
-        {pending && <CircleLoader />}
         {t(locale, label)}
-      </button>
+      </Button>
       {statusMessage && (
         <div
+          id={statusId}
           role="status"
           aria-live="polite"
           className="tw-text-sm tw-text-iron-300"
