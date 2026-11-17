@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
 import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
+import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
 import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage";
 import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
@@ -2062,6 +2063,37 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const settings = await response.json();
     expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
 
+    const ordinaryFeedIds = new Set<string>();
+    if (process.env["PLAYWRIGHT_ENV"] === "staging") {
+      const feedUrl = new URL(response.url());
+      feedUrl.pathname = `/api/v2/waves/${settings.memes_wave_id}/drops`;
+      feedUrl.searchParams.set("limit", "50");
+      feedUrl.searchParams.set("respect_drop_reply_collapse", "true");
+      const access = await response.request().headerValue("x-6529-auth");
+      const feedResponse = await page.request.get(feedUrl.href, {
+        headers: access ? { "x-6529-auth": access } : {},
+      });
+      expect(feedResponse.ok()).toBe(true);
+      const feed: ApiWaveDropsFeedV2 = await feedResponse.json();
+      expect(feed.wave.has_competition).toBe(true);
+      expect(feed.drops.length).toBeGreaterThan(0);
+      for (const drop of feed.drops) {
+        expect(drop.competition_entry).toBeDefined();
+        if (drop.competition_entry === null) ordinaryFeedIds.add(drop.id);
+      }
+    }
+    const ordinaryContextRequests: string[] = [];
+    page.on("request", (request) => {
+      const parts = new URL(request.url()).pathname.split("/");
+      const dropId = parts.at(-2);
+      if (
+        parts.at(-1) === "competition-context" &&
+        dropId &&
+        ordinaryFeedIds.has(dropId)
+      ) {
+        ordinaryContextRequests.push(dropId);
+      }
+    });
     await gotoReady(page, `/waves/${settings.memes_wave_id}`);
     await expect(
       page.getByRole("heading", { level: 1, name: "The Memes - Main Stage" })
@@ -2098,6 +2130,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       body: await page.screenshot(),
       contentType: "image/png",
     });
+    expect(ordinaryContextRequests).toEqual([]);
     // This pack runs signed out; personal voting controls remain authenticated.
     await expect(
       page.getByRole("tab", { name: "My Votes", exact: true })
