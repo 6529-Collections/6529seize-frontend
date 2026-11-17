@@ -18,6 +18,10 @@ export class ApiActiveWaveVote {
     'wave': ApiWaveOverview;
     'voting_ends_at': number | null;
     'next_decision_at': number | null;
+    /**
+    * Number of submissions open for voting, present only for approval waves.
+    */
+    'active_submission_count'?: number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -39,6 +43,12 @@ export class ApiActiveWaveVote {
         {
             "name": "next_decision_at",
             "baseName": "next_decision_at",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "active_submission_count",
+            "baseName": "active_submission_count",
             "type": "number",
             "format": "int64"
         }    ];
