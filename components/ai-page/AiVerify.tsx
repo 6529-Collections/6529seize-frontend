@@ -73,8 +73,8 @@ function Step({
 
 /**
  * How to check a download, closed by default: its SHA-256 against
- * SHA256SUMS, SHA256SUMS against 6529 AI's signature, and the code
- * signature the system shows.
+ * SHA256SUMS, SHA256SUMS against 6529 AI's signature when the release has
+ * one, and the code signature the system shows.
  */
 export default function AiVerify({ release }: { readonly release: AiRelease }) {
   const { installers } = groupAiReleaseFiles(release);
@@ -85,7 +85,11 @@ export default function AiVerify({ release }: { readonly release: AiRelease }) {
     installers
       .map((installer) => describeCodeSignature(installer.file.signed).signer)
       .find((name) => name !== null) ?? null;
-  const releaseKey = AI_FEED_SIGNING_KEYS[0];
+  // Releases from 0.1.0-rc.3 on publish SHA256SUMS without an Ed25519
+  // signature; their hashes are vouched for by the signed release list.
+  const releaseKey = release.files.some((file) => file.name === SHA256SUMS_SIG)
+    ? AI_FEED_SIGNING_KEYS[0]
+    : undefined;
   const pem = releaseKey ? ed25519PublicKeyPem(releaseKey) : null;
   const keyFile = t(LOCALE, "ai.verify.sums.key");
   const checkFiles = CHECK_FILES.flatMap(({ name, what }) => {
