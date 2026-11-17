@@ -16,6 +16,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
 import {
+  type ReactElement,
   useCallback,
   useContext,
   useEffect,
@@ -27,12 +28,8 @@ import useDownloader from "@/hooks/useDownloader";
 import { DistributionAirdropsPhase } from "./ReviewDistributionPlanTableSubscriptionFooterPhaseAirdrops";
 import { ConfirmTokenIdModal } from "./ReviewDistributionPlanTableSubscriptionFooterConfirmTokenId";
 import type { GithubUploadResult } from "./ReviewDistributionPlanTableSubscriptionFooterGithubUploadModal";
-import {
-  canPublishToGithub,
-  getGithubUploadTooltip,
-  SubscriptionFooterMain,
-} from "./ReviewDistributionPlanTableSubscriptionFooterMain";
-import { getForgePhaseIds } from "@/services/api/drop-forge-process-inputs";
+import { SubscriptionFooterMain } from "./ReviewDistributionPlanTableSubscriptionFooterMain";
+import { resolveForgePhaseInputs } from "@/services/api/drop-forge-process-inputs";
 import { useEmmaPreparationMode } from "@/hooks/useEmmaPreparationMode";
 import { ApiDropForgePreparationModeEnum as PreparationMode } from "@/generated/models/ApiDropForgePreparation";
 import ProcessAndFinalize from "../ProcessAndFinalize";
@@ -146,7 +143,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
   const overviewRequestIdRef = useRef(0);
   const photosViewerRequestIdRef = useRef(0);
   const airdropsViewerRequestIdRef = useRef(0);
-  const githubUploadTooltip = getGithubUploadTooltip(overview);
 
   const clearOverviewState = useCallback(() => {
     overviewRequestIdRef.current += 1;
@@ -551,16 +547,18 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
   };
 
   const canChooseMode = preparation.mode === PreparationMode.Unstarted;
-  let processingControl: React.ReactNode;
+  let processingControl: ReactElement | undefined;
   if (canChooseMode || preparation.mode === PreparationMode.Background) {
     const planId = distributionPlan?.id ?? "";
+    const phaseInputs = resolveForgePhaseInputs(phases);
     processingControl = (
       <ProcessAndFinalize
         key={`${planId}:${confirmedTokenId}:${resetCount}`}
         contract={contract}
         claim={Number(confirmedTokenId)}
         plan={planId}
-        phaseIds={getForgePhaseIds(phases)}
+        phaseIds={phaseInputs.phaseIds}
+        phaseIssues={phaseInputs}
         onStarted={preparation.refresh}
         disabled={isResetting || isFinalizing}
         onCompleted={() => {
@@ -575,13 +573,20 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
         className="tw-text-sm tw-text-error"
         onClick={() => void preparation.refresh()}
       >
-        Couldn’t load preparation mode. Retry
+        {t(locale, "emma.review.preparationLoadError")}
       </button>
     ) : (
       <output className="tw-text-sm tw-text-iron-300">
-        Loading preparation mode…
+        {t(locale, "emma.review.preparationLoading")}
       </output>
     );
+  }
+
+  let preparationStatus: string | undefined;
+  if (preparation.mode === PreparationMode.Manual) {
+    preparationStatus = t(locale, "emma.review.manualLocked");
+  } else if (canChooseMode && showManual) {
+    preparationStatus = t(locale, "emma.review.manualOpen");
   }
 
   return (
@@ -611,8 +616,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
       viewedAirdropsError={viewedAirdropsError}
       viewingPhotos={viewingPhotos}
       viewingAirdropsPhase={viewingAirdropsPhase}
-      canPublish={canPublishToGithub(overview)}
-      githubUploadTooltip={githubUploadTooltip}
       onConfirmTokenId={handleConfirmTokenId}
       onChangeTokenId={handleChangeTokenId}
       onResetSubscriptions={handleResetSubscriptions}
@@ -626,18 +629,20 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
         handleDownloadAirdrops(contract, confirmedTokenId, phase)
       }
       preparationChoice={
-        canChooseMode &&
-        !showManual && (
+        canChooseMode && !showManual ? (
           <Button
             variant="secondary"
+            size="lg"
+            fullWidth
             disabled={isResetting}
             onClick={onChooseManual}
           >
             {t(locale, "dropForge.prepareManually")}
           </Button>
-        )
+        ) : undefined
       }
       processingControl={processingControl}
+      preparationStatus={preparationStatus}
       showManualFinalize={
         preparation.mode === PreparationMode.Manual ||
         (canChooseMode && showManual)

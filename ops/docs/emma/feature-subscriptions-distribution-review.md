@@ -50,7 +50,11 @@ The Memes token distribution outputs.
    - **Process and Finalize** starts a background job. Refresh restores progress.
      If authorization expires before input capture, click `Sign in to resume`.
      Phase downloads are available once processing finishes.
-6. Click `Publish to GitHub` when it becomes enabled and follow its modal.
+6. In manual mode, `Finalize Distribution` and `Publish to GitHub` share
+   the finishing row. In background mode, finalization is part of processing.
+   Click `Publish to GitHub` when it becomes enabled and follow its modal.
+   The information button next to **Prepare distribution** explains both
+   methods and the effects of resetting.
 
 ## Subscriptions Action Rules
 
@@ -65,8 +69,7 @@ The Memes token distribution outputs.
 - `Artist Airdrops` and `Team Airdrops`:
   - each footer group provides upload, view, and CSV download controls for one
     airdrop phase.
-  - the visible label shows `addresses/total` from the current distribution
-    overview.
+  - the row shows wallet and token counts from the current distribution overview.
   - uploads accept pasted CSV text or `.csv`, `text/csv`, `text/plain` files up
     to `10MB`.
   - CSV must use raw `address,count` lines only; header rows are rejected.
@@ -84,7 +87,11 @@ The Memes token distribution outputs.
   - clicking a thumbnail opens a full-size lightbox; a separate icon opens the
     source image in a new tab.
 - `Process and Finalize`:
-  - requires a distribution plan, a confirmed claim ID, and three ordered phase IDs.
+  - requires a distribution plan, a confirmed token ID, and one phase each
+    for 0, 1, and 2. Names like `Phase 1`, `Phase1`, `P 1`, `P1`, and `1`
+    are equivalent, regardless of case. Missing or duplicate phases are shown
+    beside the action. A phase can have zero wallets. Public is generated
+    automatically.
   - shows processing, completed, failed or sign-in-required status from a durable backend job.
   - `Sign in to resume` renews the current admin's authorization for the same job.
     Captured inputs and completed checkpoints are preserved. Once inputs are
@@ -102,7 +109,7 @@ The Memes token distribution outputs.
 - `Publish to GitHub`:
   - enabled only when all are true: normalized, photos count > 0, combined
     artist/team airdrops count > 0.
-  - disabled state explains the missing requirement via tooltip.
+  - the finishing row explains the current publishing requirement when disabled.
   - while publishing, modal close is blocked.
   - success modal can show message, GitHub folder link, deleted files, uploaded
     files.

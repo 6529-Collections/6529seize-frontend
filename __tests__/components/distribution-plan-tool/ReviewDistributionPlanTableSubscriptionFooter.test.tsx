@@ -1,7 +1,7 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { ReviewDistributionPlanTableSubscriptionFooter } from "@/components/distribution-plan-tool/review-distribution-plan/table/ReviewDistributionPlanTableSubscriptionFooter";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useMemo, useState } from "react";
 
@@ -247,16 +247,16 @@ test("renders split admin controls after token id is confirmed", async () => {
       screen.getByRole("button", { name: /upload team airdrops/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /^artist airdrops$/i })
+      screen.getByRole("button", { name: /^view artist airdrops$/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /^team airdrops$/i })
+      screen.getByRole("button", { name: /^view team airdrops$/i })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /upload distribution photos/i })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /distribution photos \(0\)/i })
+      screen.getByRole("button", { name: /^view distribution photos$/i })
     ).toBeInTheDocument();
     expect(screen.getByText("Prepare manually")).toBeInTheDocument();
     expect(screen.getByText("Process and Finalize")).toBeInTheDocument();
@@ -332,7 +332,7 @@ test("loads distribution photos into a viewer modal from the photos endpoint", a
   render(<TestWrapper initialTokenId="123" />);
 
   await user.click(
-    screen.getByRole("button", { name: /distribution photos \(0\)/i })
+    screen.getByRole("button", { name: /^view distribution photos$/i })
   );
 
   await waitFor(() => {
@@ -370,7 +370,9 @@ test("loads artist airdrops into a viewer modal from the get endpoint", async ()
 
   render(<TestWrapper initialTokenId="123" />);
 
-  await user.click(screen.getByRole("button", { name: /^artist airdrops$/i }));
+  await user.click(
+    screen.getByRole("button", { name: /^view artist airdrops$/i })
+  );
 
   await waitFor(() => {
     expect(commonApiFetch).toHaveBeenCalledWith(
@@ -815,9 +817,21 @@ test("shows an admin-facing error when the downloader reports one", async () => 
 test("keeps manual finalization for a plan with saved manual work", async () => {
   mockSavedPreparationMode = "MANUAL";
   render(<TestWrapper initialTokenId="123" />);
+  const finishing = within(
+    screen.getByRole("region", { name: "Finish distribution" })
+  );
+  const [finalize, publish] = finishing.getAllByRole("button");
+  expect(finalize).toHaveAccessibleName("Finalize Distribution");
+  expect(finalize).toBeEnabled();
+  expect(publish).toHaveAccessibleName("Publish to GitHub");
+  await waitFor(() =>
+    expect(publish).toHaveAccessibleDescription(
+      "Finalize and normalize the distribution first"
+    )
+  );
   expect(
-    await screen.findByRole("button", { name: /Finalize Distribution/i })
-  ).toBeEnabled();
+    screen.getByText(/Manual work is saved. Use Reset Subscriptions/)
+  ).toBeVisible();
   expect(
     screen.queryByRole("button", { name: "Process and Finalize" })
   ).toBeNull();
@@ -832,6 +846,31 @@ test("keeps the background job controls visible for a plan with a saved job", as
   expect(
     screen.queryByRole("button", { name: /Finalize Distribution/i })
   ).toBeNull();
+});
+
+test("explains preparation choices and resetting in the information dialog", async () => {
+  const user = userEvent.setup();
+  render(<TestWrapper initialTokenId="123" />);
+  const info = screen.getByRole("button", {
+    name: "About distribution preparation",
+  });
+  await user.click(info);
+
+  const dialog = within(
+    screen.getByRole("dialog", { name: "Prepare distribution" })
+  );
+  expect(dialog.getByText("Prepare manually")).toBeVisible();
+  expect(dialog.getByText("Process and Finalize")).toBeVisible();
+  expect(
+    dialog.getByText(/Artist and team airdrop uploads are kept/)
+  ).toBeVisible();
+  await user.keyboard("{Escape}");
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("dialog", { name: "Prepare distribution" })
+    ).toBeNull()
+  );
+  await waitFor(() => expect(info).toHaveFocus());
 });
 
 test("shows both choices after resetting subscriptions", async () => {

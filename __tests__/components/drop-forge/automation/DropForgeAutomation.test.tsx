@@ -23,6 +23,7 @@ import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
 import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
 import { forgeProcessKey } from "@/hooks/useDropForgeProcess";
+import { resolveForgePhaseInputs } from "@/services/api/drop-forge-process-inputs";
 import {
   ApiDropForgeJobKindEnum as JobKind,
   ApiDropForgeJobStatusEnum as JobStatus,
@@ -222,6 +223,51 @@ it.each<[number, string]>([
   fireEvent.click(button);
   expect(latestForgeProcess).not.toHaveBeenCalled();
   expect(mockRequestAuth).not.toHaveBeenCalled();
+  expect(startForgeProcess).not.toHaveBeenCalled();
+});
+
+it.each(["Phase 1", "phase1", "P 1", "p1", " 1 "])(
+  "accepts the phase alias %s and keeps numeric phase order",
+  (name) => {
+    expect(
+      resolveForgePhaseInputs([
+        { id: "third", name: "P2" },
+        { id: "second", name },
+        { id: "first", name: "0" },
+        { id: "public", name: "Public" },
+      ])
+    ).toEqual({
+      phaseIds: ["first", "second", "third"],
+      missing: [],
+      duplicates: [],
+    });
+  }
+);
+
+it("explains missing and duplicate phases without submitting a job", async () => {
+  jest.mocked(latestForgeProcess).mockResolvedValue(null);
+  const phases = resolveForgePhaseInputs([
+    { id: "second", name: "P1" },
+    { id: "duplicate", name: "1" },
+    { id: "unrelated", name: "Phase 20" },
+    { id: "first", name: "0" },
+  ]);
+  renderUI(
+    <ProcessAndFinalize
+      contract="0xcreator"
+      claim={123}
+      plan="plan"
+      phaseIds={phases.phaseIds}
+      phaseIssues={phases}
+    />
+  );
+
+  const button = screen.getByRole("button", { name: "Process and Finalize" });
+  expect(button).toBeDisabled();
+  expect(button).toHaveAccessibleDescription(
+    "Missing from this plan: Phase 2. Multiple phases match Phase 1. Rename the duplicates in EMMA."
+  );
+  fireEvent.click(button);
   expect(startForgeProcess).not.toHaveBeenCalled();
 });
 

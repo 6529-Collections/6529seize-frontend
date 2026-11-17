@@ -1161,23 +1161,34 @@ describe("DropPartMarkdown", () => {
     expect(screen.getByText("✅ done")).not.toHaveClass("tw-align-middle");
   });
 
-  it("keeps the warning beside a bold readiness heading at normal size", () => {
-    render(
-      <DropPartMarkdown
-        mentionedUsers={[]}
-        mentionedWaves={[]}
-        referencedNfts={[]}
-        partContent={
-          "⚠️ **Claim #574 · Phase 2 readiness**\n\n- The claim is missing on-chain."
-        }
-        onQuoteClick={jest.fn()}
-      />
-    );
+  it.each([false, true])(
+    "keeps the warning beside a bold readiness heading at normal size (linked: %s)",
+    (linked) => {
+      const memeUrl = "https://staging.6529.io/the-memes/574";
+      const claimLabel = linked ? `[Claim #574](${memeUrl})` : "Claim #574";
+      render(
+        <DropPartMarkdown
+          mentionedUsers={[]}
+          mentionedWaves={[]}
+          referencedNfts={[]}
+          partContent={`⚠️ **${claimLabel} · Phase 2 readiness**\n\n- The claim is missing on-chain.`}
+          onQuoteClick={jest.fn()}
+          hideLinkPreviews
+        />
+      );
 
-    expect(screen.getByText("⚠️")).not.toHaveClass("emoji-text-node");
-    expect(screen.getByText(/Claim #574/).tagName).toBe("STRONG");
-    expect(screen.getByText("The claim is missing on-chain.")).toBeVisible();
-  });
+      expect(screen.getByText("⚠️")).not.toHaveClass("emoji-text-node");
+      expect(
+        screen.getByText(/Phase 2 readiness/).closest("strong")
+      ).toBeVisible();
+      expect(screen.getByText("The claim is missing on-chain.")).toBeVisible();
+      if (linked) {
+        expect(
+          screen.getByRole("link", { name: "Claim #574" })
+        ).toHaveAttribute("href", memeUrl);
+      }
+    }
+  );
 
   it("renders Art Blocks token card when feature enabled", async () => {
     publicEnv.VITE_FEATURE_AB_CARD = "true";

@@ -3365,7 +3365,8 @@ export const EN_US_ROOT_MESSAGES = {
   "dropForge.actionSkipped": "Skipped — already completed on-chain",
   "dropForge.actionSoldOut": "Skipped · sold out",
   "dropForge.actionPartiallyFulfilled": "Partially fulfilled",
-  "dropForge.actionUnfilledCards": "{count} of the requested cards went unfilled",
+  "dropForge.actionUnfilledCards":
+    "{count} of the requested cards went unfilled",
   "dropForge.actionReadinessFailed": "Readiness check failed",
   "dropForge.actionRetryWindow":
     "Retries automatically while its execution window remains open. Later groups check their own readiness.",
@@ -3407,8 +3408,12 @@ export const EN_US_ROOT_MESSAGES = {
   "dropForge.authRequired":
     "EMMA access expired or was denied. Sign in to resume the same job; saved progress is preserved.",
   "dropForge.completed": "Completed — lists are ready to download.",
-  "dropForge.inputsMissing":
-    "Select a distribution plan, confirm the claim ID, and complete Phase 0, Phase 1 and Phase 2 in EMMA.",
+  "dropForge.inputsMissing": "This plan needs Phase 0, Phase 1, and Phase 2.",
+  "dropForge.planMissing": "Select a distribution plan to continue.",
+  "dropForge.tokenMissing": "Confirm a valid token ID to continue.",
+  "dropForge.phasesMissing": "Missing from this plan: {phases}.",
+  "dropForge.phasesDuplicated":
+    "Multiple phases match {phases}. Rename the duplicates in EMMA.",
   "dropForge.download": "Download lists",
   "dropForge.downloading": "Downloading…",
   "dropForge.pendingLists": "Process and finalize to make lists available.",
