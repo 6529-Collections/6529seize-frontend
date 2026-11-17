@@ -113,6 +113,7 @@ const CHECK_FILES: Readonly<Record<string, string>> = {
   SHA256SUMS: "The SHA-256 of every file",
   "SHA256SUMS.sig": "6529 AI's signature of SHA256SUMS",
   "manifest.json": "What each file holds, and the commit it came from",
+  "NOTES.md": "The release notes in full",
 };
 
 function describeOther(file: AiReleaseFile): AiFileEntry {
