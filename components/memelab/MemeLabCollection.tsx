@@ -80,20 +80,18 @@ export default function LabCollection({
 
   const [sortDir, setSortDir] = useState<SortDirection>();
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const [requestedSort, setRequestedSort] = useState<MemeLabSort>(
-    MemeLabSort.AGE
-  );
-  const sort =
-    hideNftPurchasing && isMemeLabMarketQuoteSort(requestedSort)
+  const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
+  const effectiveSort =
+    hideNftPurchasing && isMemeLabMarketQuoteSort(sort)
       ? MemeLabSort.AGE
-      : requestedSort;
+      : sort;
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
     const { initialSortDir, initialSort: parsedInitialSort } =
       getInitialRouterValues(initialSortDirection, initialSort);
     setSortDir(initialSortDir);
-    setRequestedSort(parsedInitialSort);
+    setSort(parsedInitialSort);
     setVolumeType(VolumeType.HOURS_24);
   }, [initialSort, initialSortDirection]);
 
@@ -146,10 +144,10 @@ export default function LabCollection({
   }, [collectionName, loadAttempt]);
 
   useEffect(() => {
-    if (sort && sortDir && nftsLoaded) {
+    if (sortDir && nftsLoaded) {
       sortChanged(
         router,
-        sort,
+        effectiveSort,
         sortDir,
         volumeType,
         nfts,
@@ -162,14 +160,14 @@ export default function LabCollection({
         locale
       );
     }
-  }, [sort, sortDir, nftsLoaded, volumeType, locale]);
+  }, [effectiveSort, sortDir, nftsLoaded, volumeType, locale]);
 
   function printNft(nft: LabNFT) {
     return (
       <li key={`${nft.contract}-${nft.id}`} className="tw-min-w-0">
         <MemeLabNftCard
           nft={nft}
-          sort={sort}
+          sort={effectiveSort}
           nftMetas={nftMetas}
           volumeType={volumeType}
           hasConnectedProfile={connectedProfile !== null}
@@ -279,12 +277,12 @@ export default function LabCollection({
             ariaLabel={t(locale, "memeLab.sorting.collectionRegionLabel")}
             sortDirection={sortDir}
             setSortDirection={setSortDir}
-            currentSort={sort}
+            currentSort={effectiveSort}
             sortOptions={MEME_LAB_COLLECTION_SORT_OPTIONS.filter(
               (option) =>
                 !hideNftPurchasing || !isMemeLabMarketQuoteSort(option)
             )}
-            setSort={setRequestedSort}
+            setSort={setSort}
             setVolumeType={setVolumeType}
             volumeType={volumeType}
             locale={locale}
