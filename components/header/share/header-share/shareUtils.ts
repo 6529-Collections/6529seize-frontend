@@ -246,9 +246,7 @@ export function buildNativeConnectionShareUrls({
 }
 
 export function getDesktopConnectionShareScheme(): string {
-  // Connect Device targets Classic. Preserve explicit local and staging schemes.
-  const scheme = publicEnv.CORE_SCHEME ?? "core6529";
-  return scheme === "core6529" ? "classiccore6529" : scheme;
+  return publicEnv.DESKTOP_CLASSIC_SCHEME ?? "classiccore6529";
 }
 
 export function buildDesktopConnectionShareLink(

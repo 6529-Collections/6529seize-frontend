@@ -31,7 +31,11 @@ jest.mock("@/config/env", () => {
   const actual = jest.requireActual("@/config/env");
   return {
     ...actual,
-    publicEnv: { ...actual.publicEnv, CORE_SCHEME: "core6529" },
+    publicEnv: {
+      ...actual.publicEnv,
+      CORE_SCHEME: "core6529",
+      DESKTOP_CLASSIC_SCHEME: undefined,
+    },
   };
 });
 
@@ -1064,7 +1068,7 @@ describe("HeaderShare", () => {
           expect(
             screen.getByRole("dialog", { name: "Connect Device" })
           ).toBeVisible();
-          expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+          expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
           const secureButton = screen.getByRole("button", {
             name: "Connect with Post Signing & DM Encryption",
           });
@@ -1072,12 +1076,12 @@ describe("HeaderShare", () => {
             await userEvent.click(
               screen.getByRole("button", { name: "6529 Desktop Classic" })
             );
-            const version = screen.getByText("v0.4.0");
+            const version = screen.getByText("v0.4.1");
             expect(version).toHaveClass("tw-font-semibold");
             expect(version.parentElement).toHaveClass("tw-text-xs");
             expect(secureButton.nextElementSibling).toContainElement(version);
             expect(secureButton).toHaveAccessibleDescription(
-              "Requires 6529 Desktop Classic v0.4.0 or later."
+              "Requires 6529 Desktop Classic v0.4.1 or later."
             );
           }
           expect(setup.prepareConnectionDeviceSetup).not.toHaveBeenCalled();
@@ -1093,11 +1097,11 @@ describe("HeaderShare", () => {
             screen.getByRole("dialog", { name: targetTitle })
           ).toBeVisible();
           if (target === "desktop") {
-            expect(screen.getByText("v0.4.0").parentElement).toHaveClass(
+            expect(screen.getByText("v0.4.1").parentElement).toHaveClass(
               "tw-text-sm"
             );
           } else {
-            expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+            expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
           }
           finishSigning();
           expect(
@@ -1115,13 +1119,13 @@ describe("HeaderShare", () => {
             );
             const version = within(
               screen.getByTestId("desktop-connection-panel")
-            ).getByText("v0.4.0");
+            ).getByText("v0.4.1");
             expect(version).toBeVisible();
             expect(version.parentElement).toHaveTextContent(
-              "Requires 6529 Desktop Classic v0.4.0 or later."
+              "Requires 6529 Desktop Classic v0.4.1 or later."
             );
           } else {
-            expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+            expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
             expect(
               screen.getByAltText("Private device setup QR code")
             ).toBeVisible();
@@ -2099,12 +2103,12 @@ describe("HeaderShare", () => {
       ).toBeInTheDocument();
     });
 
-    it.each(["stagingcore6529", "localcore6529"])(
+    it.each(["stagingclassiccore6529", "localclassiccore6529"] as const)(
       "uses the configured %s scheme for the desktop connection",
       (scheme) => {
         const configuredScheme = jest.replaceProperty(
           publicEnv,
-          "CORE_SCHEME",
+          "DESKTOP_CLASSIC_SCHEME",
           scheme
         );
         try {
@@ -2157,7 +2161,7 @@ describe("HeaderShare", () => {
         screen.queryByText("Continue in the 6529 Desktop app.")
       ).not.toBeInTheDocument();
       expect(desktopPanel).toHaveTextContent("Open in 6529 Desktop Classic");
-      expect(screen.queryByText("v0.4.0")).not.toBeInTheDocument();
+      expect(screen.queryByText("v0.4.1")).not.toBeInTheDocument();
       expect(mockDesktopConnectionShare).toHaveBeenCalledWith({
         targetClientType: "desktop",
         signal: expect.objectContaining({ aborted: false }),
