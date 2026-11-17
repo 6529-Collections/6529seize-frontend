@@ -56,6 +56,9 @@ export const getStagingApiKey = (): string | undefined =>
 export const getFarcasterWarpcastApiKey = (): string | undefined =>
   getOptionalServerValue(process.env["FARCASTER_WARPCAST_API_KEY"]);
 
+export const getDesktopWalletRequestSignerEnv = (): string | undefined =>
+  process.env["DESKTOP_WALLET_REQUEST_SIGNER"];
+
 /**
  * Settings of the validator download page under `/validator`. The deploy
  * workflow sets them from the production environment's GitHub secret and
