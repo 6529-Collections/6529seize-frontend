@@ -54,35 +54,56 @@ it("uses a pending server page as the first infinite-query page", async () => {
   );
 });
 
-it("keeps a proxy's prefetched contribution out of another viewer's query", async () => {
+it("does not use a pending server snapshot for a different browser viewer", async () => {
   const server = new QueryClient();
-  const browser = new QueryClient();
+  const browser = new QueryClient({
+    defaultOptions: { queries: { staleTime: 10000 } },
+  });
   const proxyToken = "proxy-session-token";
   const proxyViewer = profileQueryViewer(proxyToken);
-  const proxyQuery = repOverviewQueryOptions(
-    "profile",
-    "incoming",
-    proxyViewer,
-    {
-      Authorization: `Bearer ${proxyToken}`,
-    }
-  );
-  const anonymousQuery = repOverviewQueryOptions("profile", "incoming", null);
+  const directToken = "direct-session-token";
+  const directViewer = profileQueryViewer(directToken);
+  let completeProxyRequest: (value: unknown) => void = () => undefined;
   const proxyResponse = { authenticated_user_contribution: 45 };
-  const anonymousResponse = { authenticated_user_contribution: null };
+  const directResponse = { authenticated_user_contribution: 7 };
   fetchApi
-    .mockResolvedValueOnce(proxyResponse)
-    .mockResolvedValueOnce(anonymousResponse);
-
-  await server.prefetchQuery(proxyQuery);
-  const snapshot = dehydrate(server);
+    .mockReturnValueOnce(
+      new Promise((resolve) => {
+        completeProxyRequest = resolve;
+      })
+    )
+    .mockResolvedValueOnce(directResponse);
+  void server.prefetchQuery(
+    repOverviewQueryOptions("profile", "incoming", proxyViewer, {
+      Authorization: `Bearer ${proxyToken}`,
+    })
+  );
+  const snapshot = dehydrate(server, { shouldDehydrateQuery: () => true });
   expect(JSON.stringify(snapshot)).not.toContain(proxyToken);
   hydrate(browser, snapshot);
 
-  await expect(browser.fetchQuery(anonymousQuery)).resolves.toEqual(
-    anonymousResponse
+  walletToken.mockReturnValue(directToken);
+  const directQuery = repOverviewQueryOptions(
+    "profile",
+    "incoming",
+    directViewer
   );
-  expect(browser.getQueryData(proxyQuery.queryKey)).toEqual(proxyResponse);
+  await expect(browser.fetchQuery(directQuery)).resolves.toEqual(
+    directResponse
+  );
+
+  const proxyQuery = repOverviewQueryOptions(
+    "profile",
+    "incoming",
+    proxyViewer
+  );
+  expect(browser.getQueryState(proxyQuery.queryKey)?.fetchStatus).toBe(
+    "fetching"
+  );
+  completeProxyRequest(proxyResponse);
+  walletToken.mockReturnValue(proxyToken);
+  await expect(browser.fetchQuery(proxyQuery)).resolves.toEqual(proxyResponse);
+  expect(browser.getQueryData(directQuery.queryKey)).toEqual(directResponse);
   expect(fetchApi).toHaveBeenCalledTimes(2);
 });
 

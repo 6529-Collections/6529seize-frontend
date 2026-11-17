@@ -91,18 +91,19 @@ export function nicOverviewQueryOptions(
   viewer: Viewer,
   headers?: Headers
 ) {
+  const handleOrWallet = user.toLowerCase();
   return {
     queryKey: [
       QueryKey.CIC_OVERVIEW,
       {
-        handleOrWallet: user.toLowerCase(),
+        handleOrWallet,
         ...(direction === "outgoing" ? { direction } : {}),
       },
       viewer,
     ],
     queryFn: () =>
       fetchForViewer<ApiCicOverview>(
-        `profiles/${encodeURIComponent(user)}/cic/overview`,
+        `profiles/${encodeURIComponent(handleOrWallet)}/cic/overview`,
         direction === "outgoing" ? { direction } : undefined,
         viewer,
         headers

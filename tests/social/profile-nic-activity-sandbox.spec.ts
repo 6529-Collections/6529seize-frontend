@@ -174,8 +174,14 @@ async function selectNic(page: Page, width: number) {
 // well as the later reads for filters, pagination, and viewport changes.
 async function openProfileInApp(page: Page) {
   await page.goto("/playwright/curations", { waitUntil: "domcontentloaded" });
-  await page
-    .getByRole("navigation", { name: "Profile sections" })
+  const profileTabs = page.getByRole("navigation", {
+    name: "Profile sections",
+  });
+  // This web-only tab appears after the client has hydrated the profile nav.
+  await expect(
+    profileTabs.getByRole("link", { name: "Subscriptions" })
+  ).toBeAttached();
+  await profileTabs
     .getByRole("link", { name: "Identity", exact: true })
     .click();
   await page.waitForURL(/\/playwright$/, { timeout: 20000 });

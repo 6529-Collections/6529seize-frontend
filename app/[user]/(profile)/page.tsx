@@ -88,11 +88,15 @@ async function prepareRepTab({
   ]);
   // A document load has an empty browser query cache. In-app navigation
   // can reuse that cache and should also stay cheap when a link is prefetched.
-  if (requestHeaders.get("sec-fetch-dest") === "empty") {
+  const fetchMode = requestHeaders.get("sec-fetch-mode");
+  if (fetchMode && fetchMode !== "navigate") {
     return { initialActivityLogParams, initialQueries: undefined };
   }
+  const authorization = apiHeaders["Authorization"];
   const viewer = profileQueryViewer(
-    apiHeaders["Authorization"]?.slice(7) ?? null
+    authorization?.startsWith("Bearer ")
+      ? authorization.slice("Bearer ".length)
+      : null
   );
   const queryClient = new QueryClient();
 
