@@ -50,8 +50,9 @@ The Memes token distribution outputs.
    - **Process and Finalize** starts a background job. The preparation row shows
      the current step out of five, and refreshing restores progress.
      If authorization expires before input capture, click `Sign in to resume`.
-     When the row says **Completed · Lists ready to download**, use
-     `Download lists` in the phase or Public row.
+     `Download lists` appears in each phase and Public row once the job
+     completes with matching phase inputs. The preparation row then says
+     **Completed · Lists ready to download**.
 6. In manual mode, `Finalize Distribution` and `Publish to GitHub` share
    the finishing row. A red × beside `Finalize Distribution` indicates that
    the distribution still needs finalization, and a green check shows it is

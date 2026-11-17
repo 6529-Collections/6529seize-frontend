@@ -135,10 +135,80 @@ it.each([undefined, ["old0", "old1", "old2"]])(
         phase={phase}
       />
     );
-    const button = await screen.findByRole("button");
-    expect(button).toBeDisabled();
-    fireEvent.click(button);
+    await waitFor(() => expect(useDropForgeProcess).toHaveBeenCalled());
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(forgeList).not.toHaveBeenCalled();
+  }
+);
+
+it.each([undefined, "PENDING", "AWAITING_AUTH", "FAILED"])(
+  "hides background downloads until the job completes (status: %s)",
+  async (status) => {
+    jest
+      .mocked(getForgePreparation)
+      .mockResolvedValue({ mode: Mode.Background });
+    jest.mocked(useDropForgeProcess).mockReturnValue({
+      data: status
+        ? { id: "job", status, phase_ids: ["p0", "p1", "p2"] }
+        : null,
+    } as ReturnType<typeof useDropForgeProcess>);
+
+    renderLinks(
+      <SubscriptionLinks
+        showManual
+        plan={{ id: "plan" } as AllowlistDescription}
+        phase={phase}
+      />
+    );
+
+    await waitFor(() => expect(useDropForgeProcess).toHaveBeenCalled());
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(forgeList).not.toHaveBeenCalled();
+    expect(commonApiFetch).not.toHaveBeenCalled();
+  }
+);
+
+it.each([false, true])(
+  "shows background downloads when processing completes (public: %s)",
+  async (isPublic) => {
+    jest
+      .mocked(getForgePreparation)
+      .mockResolvedValue({ mode: Mode.Background });
+    jest.mocked(useDropForgeProcess).mockReturnValue({
+      data: { id: "job", status: "PENDING", phase_ids: ["p0", "p1", "p2"] },
+    } as ReturnType<typeof useDropForgeProcess>);
+    const links = () => (
+      <SubscriptionLinks
+        showManual
+        plan={{ id: "plan" } as AllowlistDescription}
+        phase={
+          isPublic
+            ? { ...phase, phaseId: PUBLIC_SUBSCRIPTIONS_PHASE_ID }
+            : phase
+        }
+      />
+    );
+    const view = renderLinks(links());
+
+    await waitFor(() => expect(useDropForgeProcess).toHaveBeenCalled());
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+
+    jest.mocked(useDropForgeProcess).mockReturnValue({
+      data: { id: "job", status: "COMPLETED", phase_ids: ["p0", "p1", "p2"] },
+    } as ReturnType<typeof useDropForgeProcess>);
+    view.rerender(
+      <QueryClientProvider client={client}>{links()}</QueryClientProvider>
+    );
+
+    expect(
+      await screen.findByRole("button", { name: "Download lists" })
+    ).toBeEnabled();
+    expect(
+      screen.queryByRole("button", { name: "Subscription Lists" })
+    ).toBeNull();
+    expect(
+      screen.queryByRole("button", { name: "Public Subscriptions" })
+    ).toBeNull();
   }
 );
 

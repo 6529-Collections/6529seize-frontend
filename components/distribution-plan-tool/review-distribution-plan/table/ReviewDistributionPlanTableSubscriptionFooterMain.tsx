@@ -4,7 +4,6 @@ import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
-import { dropForgeIconButtonClassName } from "@/components/drop-forge/drop-forge-section-styles";
 import Button from "@/components/utils/button/Button";
 import type { DistributionOverview } from "@/generated/models/DistributionOverview";
 import type { DistributionPhoto } from "@/generated/models/DistributionPhoto";
@@ -122,11 +121,14 @@ function ManualFinalizeButton({
           busyLabel={t(locale, "emma.review.finalizing")}
         >
           {t(locale, "emma.review.finalize")}
-          <span className="tw-size-4 tw-shrink-0" aria-hidden="true">
+          <span
+            className="tw-inline-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center"
+            aria-hidden="true"
+          >
             {loadingOverview && <CircleLoader size={CircleLoaderSize.SMALL} />}
             {hasStatus && (
               <StatusIcon
-                className={`tw-size-4 ${normalized ? "tw-text-emerald-400" : "tw-text-error"}`}
+                className={`tw-size-6 ${normalized ? "tw-text-emerald-400" : "tw-text-error"}`}
               />
             )}
           </span>
@@ -323,14 +325,18 @@ function PreparationSection({
               {t(locale, "emma.review.prepare")}
             </h3>
             <Button
-              variant="secondary"
-              className={dropForgeIconButtonClassName}
+              variant="ghost"
+              size="xs"
+              className="tw-w-8 !tw-px-0"
               aria-label={t(locale, "emma.review.preparationHelp")}
               aria-haspopup="dialog"
               title={t(locale, "emma.review.preparationHelp")}
               onClick={() => setShowPreparationHelp(true)}
             >
-              <InformationCircleIcon className="tw-size-6" aria-hidden="true" />
+              <InformationCircleIcon
+                className="tw-size-[18px]"
+                aria-hidden="true"
+              />
             </Button>
           </div>
           {(choice !== undefined || processingControl !== undefined) && (

@@ -120,14 +120,15 @@ function PreparedSubscriptionLinks({ plan, phase }: SubscriptionLinksProps) {
       setDownloading(false);
     }
   }
+  if (!completed) return null;
+
   return (
     <button
       type="button"
-      disabled={!completed || downloading}
+      disabled={downloading}
       onClick={() => {
         void download();
       }}
-      title={!completed ? t(locale, "dropForge.pendingLists") : undefined}
       aria-busy={downloading}
       className="tw-flex tw-h-8 tw-shrink-0 tw-items-center tw-justify-center tw-gap-2 tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-px-3 tw-text-xs tw-font-medium tw-text-white disabled:tw-opacity-50"
     >
