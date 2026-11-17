@@ -108,6 +108,7 @@ const getDefaultTitleForRoute = (
     const firstSegment = segments[1];
     // Check if it's not one of the known routes
     const knownRoutes = [
+      "ai",
       "waves",
       "the-memes",
       "meme-lab",
