@@ -89,10 +89,12 @@ async function prepareRepTab({
   // Reserve the initial reads for document navigation. Fetch requests can
   // reuse the browser cache, and speculative document loads may go unused.
   const fetchMode = requestHeaders.get("sec-fetch-mode");
-  const isPrefetch =
-    requestHeaders.get("sec-purpose")?.startsWith("prefetch") ||
-    requestHeaders.get("purpose") === "prefetch";
-  if (isPrefetch || (fetchMode && fetchMode !== "navigate")) {
+  const purpose =
+    requestHeaders.get("sec-purpose") ?? requestHeaders.get("purpose") ?? "";
+  if (
+    purpose.startsWith("prefetch") ||
+    (fetchMode && fetchMode !== "navigate")
+  ) {
     return { initialActivityLogParams, initialQueries: undefined };
   }
   const authorization = apiHeaders["Authorization"];
