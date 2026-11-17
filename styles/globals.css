@@ -53,6 +53,11 @@
     );
     --left-rail: calc(var(--layout-margin) + var(--sidebar-width));
   }
+  :root[data-desktop-titlebar="overlay"] .layout-root {
+    /* The body already reserves the inset. A full viewport here overflows
+       the document and lets Waves scroll under the fixed strip. */
+    min-height: var(--layout-viewport-height);
+  }
   .layout-root:not([data-mobile="true"]) {
     max-width: var(--layout-max);
     margin-inline: auto;
