@@ -5,6 +5,7 @@ import type { useVirtualizedWaveDrops } from "@/hooks/useVirtualizedWaveDrops";
 import {
   useCallback,
   useEffect,
+  useEffectEvent,
   useRef,
   useState,
   type RefObject,
@@ -321,39 +322,41 @@ export const useWaveDropsSerialScroll = ({
       while (!signal.aborted && Date.now() < deadline) {
         const container = scrollContainerRef.current;
         const target = container && getReadyScrollTarget(container, serialNo);
-        if (container && target) {
-          if (target !== scrolledTarget) {
-            scrolledTarget = target;
-            scrollStartedAt = Date.now();
-            retriedInstantly = false;
-            anchor = holdScrollTarget(container, target);
-            scrollElementIntoContainerCenter({
-              behavior: "smooth",
-              container,
-              target,
-            });
-          }
-          // Reader input releases the anchor and cancels any remaining retries.
-          if (!anchor?.isActive()) return;
-          if (isElementVisibleInContainer({ container, target })) return;
-
-          const elapsed = Date.now() - scrollStartedAt;
-          if (elapsed >= INSTANT_SCROLL_RETRY_MS && !retriedInstantly) {
-            // Some engines do not finish smooth scrolling in reverse flex lists.
-            retriedInstantly = true;
-            scrollElementIntoContainerCenter({
-              behavior: "instant",
-              container,
-              target,
-            });
-          }
-        } else {
+        if (!container || !target) {
           // The local reveal is idempotent as new batches shift the target's index.
           await waitAndRevealDrop(
             serialNo,
             TARGET_RENDER_POLL_MS,
             TARGET_RENDER_POLL_MS
           );
+          await delay(TARGET_RENDER_POLL_MS);
+          continue;
+        }
+
+        if (target !== scrolledTarget) {
+          scrolledTarget = target;
+          scrollStartedAt = Date.now();
+          retriedInstantly = false;
+          anchor = holdScrollTarget(container, target);
+          scrollElementIntoContainerCenter({
+            behavior: "smooth",
+            container,
+            target,
+          });
+        }
+        // Reader input releases the anchor and cancels any remaining retries.
+        if (!anchor?.isActive()) return;
+        if (isElementVisibleInContainer({ container, target })) return;
+
+        const elapsed = Date.now() - scrollStartedAt;
+        if (elapsed >= INSTANT_SCROLL_RETRY_MS && !retriedInstantly) {
+          // Some engines do not finish smooth scrolling in reverse flex lists.
+          retriedInstantly = true;
+          scrollElementIntoContainerCenter({
+            behavior: "instant",
+            container,
+            target,
+          });
         }
         await delay(TARGET_RENDER_POLL_MS);
       }
@@ -371,26 +374,19 @@ export const useWaveDropsSerialScroll = ({
     ]
   );
 
-  useEffect(() => {
-    if (
-      !init ||
-      serialTarget === null ||
-      pendingScrollRef.current?.serialNo === serialTarget
-    ) {
-      return;
-    }
+  const syncSerialScroll = useEffectEvent(() => {
+    if (!init || serialTarget === null) return;
+    const serialNo = serialTarget;
+    if (pendingScrollRef.current?.serialNo === serialNo) return;
 
+    const needsHistory = !waveMessages?.drops.some(
+      (drop) => drop.serial_no === serialNo && drop.type === DropSize.FULL
+    );
     pendingScrollRef.current?.controller.abort();
     scrollAnchorRef.current?.release();
-    const requestedScroll = {
-      serialNo: serialTarget,
-      controller: new AbortController(),
-    };
+    const requestedScroll = { serialNo, controller: new AbortController() };
     pendingScrollRef.current = requestedScroll;
     const { signal } = requestedScroll.controller;
-    const needsHistory = !waveMessages?.drops.some(
-      (drop) => drop.serial_no === serialTarget && drop.type === DropSize.FULL
-    );
     setIsScrolling(needsHistory);
     const overlayTimeoutId = needsHistory
       ? undefined
@@ -406,12 +402,12 @@ export const useWaveDropsSerialScroll = ({
       clearTimers();
       if (pendingScrollRef.current !== requestedScroll) return;
       pendingScrollRef.current = null;
-      setSerialTarget((current) => (current === serialTarget ? null : current));
+      setSerialTarget((current) => (current === serialNo ? null : current));
       setIsScrolling(false);
     };
     const timeoutId = globalThis.setTimeout(() => {
       if (signal.aborted) return;
-      console.warn(`Timed out jumping to wave drop ${serialTarget}.`);
+      console.warn(`Timed out jumping to wave drop ${serialNo}.`);
       requestedScroll.controller.abort();
       finish();
     }, SCROLL_OPERATION_TIMEOUT);
@@ -420,18 +416,18 @@ export const useWaveDropsSerialScroll = ({
       try {
         if (needsHistory) {
           await fetchNextPage(
-            { waveId, type: DropSize.LIGHT, targetSerialNo: serialTarget },
+            { waveId, type: DropSize.LIGHT, targetSerialNo: serialNo },
             dropId
           );
           if (
             signal.aborted ||
-            !(await waitAndRevealDrop(serialTarget, TARGET_RENDER_TIMEOUT))
+            !(await waitAndRevealDrop(serialNo, TARGET_RENDER_TIMEOUT))
           ) {
             return;
           }
         }
         if (!signal.aborted) {
-          await waitForVisibleDrop(serialTarget, signal);
+          await waitForVisibleDrop(serialNo, signal);
         }
       } catch (error) {
         if (!signal.aborted) console.warn("Scroll operation failed:", error);
@@ -441,16 +437,12 @@ export const useWaveDropsSerialScroll = ({
     };
     signal.addEventListener("abort", clearTimers, { once: true });
     void scroll();
-  }, [
-    init,
-    serialTarget,
-    waveMessages,
-    fetchNextPage,
-    waveId,
-    dropId,
-    waitForVisibleDrop,
-    waitAndRevealDrop,
-  ]);
+  });
+
+  // Link navigation and local jumps converge here after chat has mounted.
+  useEffect(() => {
+    syncSerialScroll();
+  }, [init, serialTarget]);
 
   return {
     cancelSerialScroll,

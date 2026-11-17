@@ -1567,11 +1567,17 @@ describe("WaveDropsAll", () => {
       };
       setupMocks({ waveMessages: { drops: [cachedDrop] } });
       renderComponent({ initialDrop: 10 });
-      expect(screen.getByTestId("scrolling-overlay")).not.toBeVisible();
+      expect(screen.getByTestId("scrolling-overlay")).toHaveProperty(
+        "style.display",
+        "none"
+      );
       await act(async () => {
         await jest.advanceTimersByTimeAsync(300);
       });
-      expect(screen.getByTestId("scrolling-overlay")).toBeVisible();
+      expect(screen.getByTestId("scrolling-overlay")).toHaveProperty(
+        "style.display",
+        "block"
+      );
       expect(mockFetchNextPage).not.toHaveBeenCalled();
 
       const container = mockScrollContainerRef.current;
@@ -1581,7 +1587,10 @@ describe("WaveDropsAll", () => {
       container.appendChild(target);
       dropsProps.targetDropRef.current = target;
       await waitFor(() =>
-        expect(screen.getByTestId("scrolling-overlay")).not.toBeVisible()
+        expect(screen.getByTestId("scrolling-overlay")).toHaveProperty(
+          "style.display",
+          "none"
+        )
       );
       expect(dropsProps.serialNo).toBeNull();
     });
