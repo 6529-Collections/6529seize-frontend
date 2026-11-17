@@ -8,7 +8,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, tRich, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 
-type AiSection = "download" | "guide" | "known-issues";
+type AiSection = "download" | "guide" | "use" | "models" | "known-issues";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
@@ -20,6 +20,8 @@ const SECTIONS: readonly {
 }[] = [
   { key: "download", href: "/ai", label: "ai.nav.download" },
   { key: "guide", href: "/ai/guide", label: "ai.nav.guide" },
+  { key: "use", href: "/ai/use", label: "ai.nav.use" },
+  { key: "models", href: "/ai/models", label: "ai.nav.models" },
   {
     key: "known-issues",
     href: "/ai/known-issues",
@@ -82,6 +84,7 @@ export default function AiPageFrame({
   eyebrow,
   version,
   notice = true,
+  wide = false,
   title,
   lead,
   children,
@@ -95,6 +98,8 @@ export default function AiPageFrame({
    * issues do in their lead.
    */
   readonly notice?: boolean | undefined;
+  /** A wider page, for the models and the walk-through with its contents. */
+  readonly wide?: boolean | undefined;
   readonly title: string;
   readonly lead?: string | undefined;
   readonly children: ReactNode;
@@ -103,9 +108,14 @@ export default function AiPageFrame({
     <main
       className={`tailwind-scope ${ABOUT_PAGE_SURFACE_CLASS_NAME} tw-text-iron-300`}
     >
-      <div className="tw-mx-auto tw-w-full tw-max-w-4xl tw-px-4 tw-pb-24 tw-pt-6 sm:tw-px-6 sm:tw-pt-10 lg:tw-px-8">
-        <nav aria-label={t(LOCALE, "ai.nav.label")} className="tw-mb-10">
-          <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-1.5 tw-p-0">
+      <div
+        className={`tw-mx-auto tw-w-full ${wide ? "tw-max-w-6xl" : "tw-max-w-4xl"} tw-px-4 tw-pb-24 tw-pt-6 sm:tw-px-6 sm:tw-pt-10 lg:tw-px-8`}
+      >
+        <nav
+          aria-label={t(LOCALE, "ai.nav.label")}
+          className="-tw-mx-4 tw-mb-10 tw-overflow-x-auto tw-px-4 sm:tw-mx-0 sm:tw-overflow-visible sm:tw-px-0"
+        >
+          <ul className="tw-m-0 tw-flex tw-w-max tw-list-none tw-gap-1.5 tw-p-0 sm:tw-w-auto sm:tw-flex-wrap">
             {SECTIONS.map((section) => {
               const isCurrent = section.key === current;
               return (
@@ -113,7 +123,7 @@ export default function AiPageFrame({
                   <Link
                     href={section.href}
                     aria-current={isCurrent ? "page" : undefined}
-                    className={`tw-inline-flex tw-min-h-9 tw-items-center tw-rounded-full tw-border tw-border-solid tw-px-3 tw-text-sm tw-font-medium tw-no-underline tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
+                    className={`tw-inline-flex tw-min-h-9 tw-items-center tw-whitespace-nowrap tw-rounded-full tw-border tw-border-solid tw-px-3 tw-text-sm tw-font-medium tw-no-underline tw-transition tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 ${
                       isCurrent
                         ? "tw-border-primary-400/60 tw-bg-primary-500/10 tw-text-iron-50"
                         : "tw-border-white/10 tw-bg-transparent tw-text-iron-400 hover:tw-border-white/20 hover:tw-text-iron-100"

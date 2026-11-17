@@ -53,7 +53,23 @@ own lead.
   distributions.
   Then the first chat, with `qwen3-4b-gguf` to try first, two short notes
   (running a validator on the same computer, and the OpenAI-compatible
-  API), and "Report a problem".
+  API), "Next: use it for real" to `/ai/use`, and "Report a problem".
+- **Use it** (`/ai/use`): the walk-through from the download to real use,
+  with real pictures: the install on each system, signing in, choosing,
+  fetching and serving a model, chat, a question about a picture, images,
+  speech, the Provider screen, app keys, the API (curl, Python and a
+  coding tool), the command line, stopping a model, the page at phone
+  width, uninstalling, and the known problems with their workarounds. Its
+  contents sit beside it from 1024 px and fold above it on a phone.
+- **Models** (`/ai/models`): every model in the 6529 AI registry, by
+  section, with a filter for what runs in the app today, what a model
+  reads and makes, and how much memory it needs, and a way to go to a
+  section (a row of sections on a phone). Each model is a card: its name,
+  its publisher linked to its files on Hugging Face at the pinned
+  revision, one line on what it is, whether the app runs it (and why not),
+  its parameters, context, memory and license, then its versions and its
+  scores, with 6529's own measured runs. From 1024 px a card is a row; on
+  a phone the versions and scores fold behind a button.
 - **Known issues** (`/ai/known-issues`): the untested statement as the
   lead, the day the list last changed, a one-line "Found a problem? Report
   it" link, the issues grouped by system (each a line, with its workaround
@@ -69,20 +85,60 @@ PowerShell, the CPU) and a Copy button; a long line scrolls rather than
 breaking, and fades at the right edge while more of it is hidden. Touch
 targets are 44 px on a phone. The pages are dark-only, as the site is.
 
-Three places take a screenshot of the app: the download page's first
-screen (the model list), the Mac step where the app asks whether a
-validator runs on the same computer, and the first chat (a chat reply).
-`lib/ai-page/screenshots.ts` lists them; a slot with no file renders
-nothing, no box and no caption, so the pages never show a stand-in. Take
-each in the app's dark theme, with no browser frame, at twice the size
-it shows at. The page draws the cards' 1 px border and radius around
-it, and shows the Mac question at its real size (half the file's
-width), centred; the other two fill the column. Put each file under
-`public/ai/`, add `ai` to `PUBLIC_IMAGE_DIRECTORIES` in
-`lib/proxy/publicPaths.ts` (the public path contract asks every
-top-level folder to be classified), and in `screenshots.ts` set its
-`src`, and its `width` and `height` in the file's own pixels. Each
-shows with its caption.
+Three places on the first pages show a screenshot of the app, each from
+the walk-through's pictures: the download page's first screen shows
+Start's model list, the Mac step where the app asks whether a validator
+runs on the same computer shows that question, and the first chat shows a
+chat reply. `lib/ai-page/screenshots.ts` names them; a slot with no file
+renders nothing, no box and no caption, so the pages never show a
+stand-in. Each picture is the app in its dark theme, with no browser
+frame, at twice the size it shows at. The page draws the cards' 1 px
+border and radius around it, and shows the Mac question at its real size
+(half the file's width), centred; the other two fill the column.
+
+## The walk-through's pictures
+
+The text of `/ai/use` is structured content in
+`lib/ai-page/content/use.ts`, from 6529 AI's walk-through of release
+candidate 1 (its `use.md` and the pictures beside it, taken on 16 and 17
+November 2026), with the parts about the network left out. The pictures
+are in `public/ai/use/` (`ai` is in `PUBLIC_IMAGE_DIRECTORIES` in
+`lib/proxy/publicPaths.ts`, as the public path contract asks), and
+`lib/ai-page/content/useImages.ts` lists each one's pixels, how it lays
+out and the width it shows at:
+
+- A page fills the column: the dark page shots, from 2560 px (1280 CSS
+  px at 2x) down to 1640 px, 820 CSS px at 2x.
+- A dialog shows at its real size, centred: the Mac's at half their
+  pixels, the Windows ones (taken at 1x) at theirs.
+- A phone screen sits in a row of them, two on a phone and three from
+  640 px, at 560 px wide.
+
+Each is WebP: quality 82 for 2x pictures, lossless for the 1x Windows
+ones; 55 files, about 2 MB in all. `next/image` serves them at the size
+the layout needs. To change a picture, make the new one the same way,
+from the dark version, and set its size in `useImages.ts`; a test reads
+each file's size and fails when the two differ.
+
+## The models data
+
+`lib/ai-page/content/models/models.json` and `sections.json` are written
+by 6529 AI's `build_models_page.py` (format `6529.io.ai-models.v1` and
+`6529.io.ai-model-sections.v1`) from the registry at a given commit, and
+are replaced as a whole when the registry changes: run the script's
+`fetch` and `build` steps and copy the two files here. Prettier leaves
+them as the script writes them. `lib/ai-page/models.ts` reads them and
+gives the filter what each model reads and makes and the memory its
+smallest version needs.
+
+The page shows the data as the build wrote it, with three rules of its
+own. A measured run's note loses its sentences about the network. A
+score whose note calls it the original model's is marked so. A model
+with no scores shows none: gpt-oss, whose publisher prints its scores
+only in a PDF, has no Scores list rather than an empty one. Publishers
+are credited by their name in the data, which for some models is a
+personal Hugging Face account, each linked to the model's files at the
+pinned revision.
 
 The pages send `noindex, nofollow` (their metadata, and the
 `X-Robots-Tag` header that `config/nextConfig.ts` sets on `/ai/:path*`),
@@ -234,6 +290,8 @@ Localization debt, en-US only today:
 | `/ai`              | `AiDownloads`, `AiDownloadPage`; `lib/ai-page/releaseFiles.ts` | Each file's kind and system needs ("Disk image", "macOS 13.3 or later, Apple silicon") |
 | `/ai/guide`        | `AiGuidePage`, `AiGuideSteps`; `lib/ai-page/content/guide.ts`  | Every step, result, need, code-block label and fold title                              |
 | `/ai/known-issues` | `AiKnownIssuesPage`; `lib/ai-page/content/knownIssues.ts`      | Every issue, workaround and code-block label                                           |
+| `/ai/use`          | `AiUsePage`, `AiUseBlocks`; `lib/ai-page/content/use.ts`       | The whole walk-through, its pictures' alt text and its code-block labels               |
+| `/ai/models`       | `AiModelCard`; `lib/ai-page/content/models/*.json`             | Section titles and lines, model descriptions, notes and license summaries              |
 
 These strings don't go through `t()`, so another locale sees them in
 English beside its own interface copy, with no per-key fallback. To

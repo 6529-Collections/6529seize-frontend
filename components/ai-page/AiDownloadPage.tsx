@@ -163,10 +163,28 @@ function NoRelease({
 const HOW: readonly {
   readonly title: MessageKey;
   readonly body: MessageKey;
+  /** Where to read more, and the link's words. */
+  readonly href: string;
+  readonly link: MessageKey;
 }[] = [
-  { title: "ai.how.install.title", body: "ai.how.install.body" },
-  { title: "ai.how.model.title", body: "ai.how.model.body" },
-  { title: "ai.how.chat.title", body: "ai.how.chat.body" },
+  {
+    title: "ai.how.install.title",
+    body: "ai.how.install.body",
+    href: "/ai/guide",
+    link: "ai.how.install.link",
+  },
+  {
+    title: "ai.how.model.title",
+    body: "ai.how.model.body",
+    href: "/ai/models",
+    link: "ai.download.more.models",
+  },
+  {
+    title: "ai.how.chat.title",
+    body: "ai.how.chat.body",
+    href: "/ai/use",
+    link: "ai.download.more.use",
+  },
 ];
 
 /** Install, pick a model, chat: the whole path, in three lines. */
@@ -193,15 +211,13 @@ function HowItWorks() {
                 {t(LOCALE, step.title)}
               </h3>
               <p className={`tw-m-0 ${AI_MUTED}`}>{t(LOCALE, step.body)}</p>
-              {index === 0 && (
-                <Link
-                  href="/ai/guide"
-                  className={`tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-text-sm sm:tw-min-h-0 ${LINK}`}
-                >
-                  {t(LOCALE, "ai.how.install.link")}
-                  <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
-                </Link>
-              )}
+              <Link
+                href={step.href}
+                className={`tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-text-sm sm:tw-min-h-0 ${LINK}`}
+              >
+                {t(LOCALE, step.link)}
+                <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
+              </Link>
             </div>
           </li>
         ))}

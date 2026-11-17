@@ -7,7 +7,7 @@
 import type { AiCode } from "./guide";
 
 /** The day this list last changed, `YYYY-MM-DD`. */
-export const AI_KNOWN_ISSUES_UPDATED = "2026-11-16";
+export const AI_KNOWN_ISSUES_UPDATED = "2026-11-17";
 
 export type AiKnownIssue = {
   /** The issue, in a line. */
@@ -44,6 +44,21 @@ export const AI_KNOWN_ISSUES: readonly AiKnownIssueGroup[] = [
     key: "windows",
     title: "Windows",
     issues: [
+      {
+        issue:
+          "On a fresh Windows, **Fetch and serve** can fail with \"error sending request for url\": Windows hasn't yet added the root certificate the model registry's address uses, and 6529 AI reads the roots only when it starts.",
+        workaround:
+          "Open PowerShell as administrator and reach the two Let's Encrypt test sites, which makes Windows add their roots. Then restart the scheduled task **6529 AI**, or the computer. The next build fixes it.",
+        code: [
+          {
+            label: "PowerShell, as administrator",
+            code: `Invoke-WebRequest https://valid-isrgrootx1.letsencrypt.org -UseBasicParsing | Out-Null
+Invoke-WebRequest https://valid-isrgrootx2.letsencrypt.org -UseBasicParsing | Out-Null
+Stop-ScheduledTask -TaskName '6529 AI'
+Start-ScheduledTask -TaskName '6529 AI'`,
+          },
+        ],
+      },
       { issue: "Tested only on Windows Server 2025, not on Windows 10 or 11." },
       {
         issue: "Not tested with a GPU.",

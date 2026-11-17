@@ -1,12 +1,41 @@
+import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { CODE } from "@/components/validator-page/validatorStyles";
+import { CODE, LINK } from "@/components/validator-page/validatorStyles";
 
 // **bold** for what to choose or press, *italic* for the other choice,
-// `code` for names and commands.
-const MARKUP = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`)/g;
+// `code` for names and commands, [text](/path) for a link.
+const MARKUP = /(\*\*[^*]+\*\*|\*[^*]+\*|`[^`]+`|\[[^\]]+\]\([^)\s]+\))/g;
+
+function renderLink(token: string, key: number): ReactNode {
+  const split = token.indexOf("](");
+  const text = token.slice(1, split);
+  const href = token.slice(split + 2, -1);
+  if (href.startsWith("/")) {
+    return (
+      <Link key={key} href={href} className={LINK}>
+        {text}
+      </Link>
+    );
+  }
+  if (href.startsWith("#")) {
+    return (
+      <a key={key} href={href} className={LINK}>
+        {text}
+      </a>
+    );
+  }
+  return (
+    <a key={key} href={href} rel="noopener noreferrer" className={LINK}>
+      {text}
+    </a>
+  );
+}
 
 function render(token: string, key: number): ReactNode {
+  if (token.startsWith("[")) {
+    return renderLink(token, key);
+  }
   if (token.startsWith("**")) {
     return (
       <strong key={key} className="tw-font-semibold tw-text-iron-100">
@@ -28,7 +57,7 @@ function render(token: string, key: number): ReactNode {
   );
 }
 
-/** Text from the pages' content, with its bold, italic and code marked up. */
+/** Text from the pages' content, with its bold, italic, code and links. */
 export default function InlineText({ text }: { readonly text: string }) {
   const parts: ReactNode[] = [];
   let cursor = 0;
