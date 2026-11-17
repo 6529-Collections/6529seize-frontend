@@ -20,6 +20,7 @@ import { multipartUploadCore } from "@/services/uploads/multipartUploadCore";
 
 const MINTING_CLAIMS_BASE = `minting-claims/${encodeURIComponent(MEMES_CONTRACT)}`;
 const MINTING_CLAIMS_BASE_CLAIMS = `${MINTING_CLAIMS_BASE}/claims`;
+const pendingMemesRoots = new Map<number, Promise<MintingClaimsRootItem[]>>();
 const GENERATED_STORAGE_FIELDS = new Set<string>([
   "metadata_location",
   "image_location",
@@ -117,9 +118,24 @@ export async function upsertMemesMintingClaimAction(
 export async function getMemesMintingRoots(
   cardId: number
 ): Promise<MintingClaimsRootItem[]> {
-  return commonApiFetch<MintingClaimsRootItem[]>({
+  // Roots are public contract/card data. Share only overlapping browser reads;
+  // server requests stay isolated and completed results are never retained.
+  const pending =
+    typeof window === "undefined" ? undefined : pendingMemesRoots.get(cardId);
+  if (pending) {
+    return pending;
+  }
+
+  const request = commonApiFetch<MintingClaimsRootItem[]>({
     endpoint: `${MINTING_CLAIMS_BASE}/${cardId}/roots`,
   });
+  if (typeof window === "undefined") {
+    return request;
+  }
+
+  const sharedRequest = request.finally(() => pendingMemesRoots.delete(cardId));
+  pendingMemesRoots.set(cardId, sharedRequest);
+  return sharedRequest;
 }
 
 export interface MemesMintingAirdropSummaryItem {

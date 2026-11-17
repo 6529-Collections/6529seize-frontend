@@ -78,6 +78,7 @@ beforeEach(() => {
   requestAuth.mockResolvedValue({ success: true });
   post.mockResolvedValue(undefined);
   allocation.mockReturnValue({
+    ratingStats: [],
     repState: {
       category: "Artist",
       rating: 50,

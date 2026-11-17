@@ -9,6 +9,10 @@ import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { type CSSProperties } from "react";
+import {
+  getDesktopAuthorHeader,
+  getMobileAuthorHeader,
+} from "./WaveDropAuthorHeaderSlots";
 import type { DropIdentityMode, DropTimestampLayout } from "./drop.types";
 import { DropLocation } from "./drop.types";
 import { getRankHoverRingClass } from "./dropRankStyles";
@@ -566,26 +570,6 @@ const getAuthorHeader = ({
   );
 };
 
-const getDesktopAuthorHeader = ({
-  showAuthorInfo,
-  inlineAuthorOnDesktop,
-  authorHeader,
-}: {
-  readonly showAuthorInfo: boolean;
-  readonly inlineAuthorOnDesktop: boolean;
-  readonly authorHeader: React.ReactNode;
-}): React.ReactNode => {
-  if (showAuthorInfo && !inlineAuthorOnDesktop) {
-    return <div className="tw-hidden md:tw-block">{authorHeader}</div>;
-  }
-
-  if (showAuthorInfo) {
-    return null;
-  }
-
-  return authorHeader;
-};
-
 const getContentBlock = ({
   shouldShowReplyHeader,
   onReplyClick,
@@ -609,6 +593,7 @@ const getContentBlock = ({
   allowLongPress,
   handleLinkCardActionsActiveChange,
   inlineAuthorOnDesktop,
+  isMdViewport,
   mediaImageScale,
   fullWidthMedia,
   fullWidthLinkPreviews,
@@ -648,6 +633,8 @@ const getContentBlock = ({
     active: boolean
   ) => void;
   readonly inlineAuthorOnDesktop: boolean;
+  /** See `WaveDropAuthorHeaderSlots`. */
+  readonly isMdViewport: boolean | null;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia: boolean;
   readonly fullWidthLinkPreviews: boolean;
@@ -685,7 +672,11 @@ const getContentBlock = ({
               inlineAuthorOnDesktop ? "" : "md:tw-hidden"
             }`}
           >
-            {authorHeader}
+            {getMobileAuthorHeader({
+              inlineAuthorOnDesktop,
+              authorHeader,
+              isMdViewport,
+            })}
           </div>
           {showStormPartIndicator && (
             <WaveDropStormIndicator
@@ -707,6 +698,7 @@ const getContentBlock = ({
           showAuthorInfo,
           inlineAuthorOnDesktop,
           authorHeader,
+          isMdViewport,
         })}
         {showStormPartIndicator && !inlineAuthorOnDesktop && (
           <WaveDropStormIndicator

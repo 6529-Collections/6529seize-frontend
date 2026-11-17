@@ -31,9 +31,9 @@ const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
   "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
-  "waves.historyGap.load": "Verpasste Nachrichten laden",
-  "waves.historyGap.loaded": "Verpasste Nachrichten geladen",
-  "waves.historyGap.loading": "Verpasste Nachrichten werden geladen…",
+  "waves.historyGap.load": "Weitere Nachrichten laden",
+  "waves.historyGap.loaded": "Weitere Nachrichten geladen",
+  "waves.historyGap.loading": "Weitere Nachrichten werden geladen…",
   "waves.historyGap.retry":
     "Nachrichten konnten nicht geladen werden. Erneut versuchen",
 
@@ -259,6 +259,8 @@ export const DE_DE_MESSAGES = {
   "waves.drop.actions.copied": "Kopiert!",
   "waves.drop.actions.copyFailed": "Kopieren fehlgeschlagen",
   "waves.drop.actions.menuLabel": "Drop-Aktionen",
+  "waves.drop.actions.scrollForMore": "Weitere Aktionen, nach unten scrollen",
+  "waves.drop.actions.scrollUp": "Nach oben scrollen",
   "waves.drop.actions.reactionPickerLabel": "Reaktion zum Drop hinzufügen",
   "waves.drop.actions.showMore": "Mehr anzeigen",
   "waves.drop.actions.showLess": "Weniger anzeigen",

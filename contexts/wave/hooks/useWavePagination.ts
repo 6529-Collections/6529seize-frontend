@@ -3,14 +3,18 @@
 import { useCallback, useRef } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useWaveAbortController } from "./useWaveAbortController";
-import type { WaveDataStoreUpdater, WaveHistoryGap } from "./types";
+import type {
+  WaveDataStoreUpdater,
+  WaveHistoryGap,
+  WaveHistoryGapDirection,
+} from "./types";
 import { useWaveHistoryGap } from "./useWaveHistoryGap";
 import {
-  fetchLightWaveMessages,
   fetchWaveMessages,
   fetchAroundSerialNoWaveMessages,
 } from "../utils/wave-messages-utils";
 import { DropSize } from "@/helpers/waves/drop.helpers";
+import { getTargetWindowHistoryGaps } from "../utils/wave-resume";
 import type { ApiDropId } from "@/generated/models/ApiDropId";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 
@@ -26,6 +30,8 @@ interface NextPageFullProps {
   readonly waveId: string;
   readonly type: DropSize.FULL;
   readonly gap?: WaveHistoryGap | undefined;
+  /** Which edge of the gap to fill from; defaults to its newest edge. */
+  readonly direction?: WaveHistoryGapDirection | undefined;
 }
 
 interface NextPageLightProps {
@@ -223,6 +229,81 @@ export function useWavePagination({
   );
 
   /**
+   * Stores a window of drops fetched around a target serial and marks the
+   * unloaded ranges between it and the loaded drops as history gaps. The
+   * store merges `drops` into the ones it holds; it does not replace them.
+   */
+  const storeTargetWindow = useCallback(
+    (waveId: string, windowDrops: ApiDrop[]) => {
+      const currentData = getData(waveId);
+      if (!currentData) {
+        return;
+      }
+      updateData({
+        key: waveId,
+        historyGaps: getTargetWindowHistoryGaps({
+          currentDrops: currentData.drops,
+          currentGaps: currentData.historyGaps ?? [],
+          windowDrops,
+        }),
+        drops: windowDrops.map((drop) => ({
+          ...drop,
+          type: DropSize.FULL,
+          stableKey: drop.id,
+          stableHash: drop.id,
+        })),
+      });
+    },
+    [getData, updateData]
+  );
+
+  /**
+   * Loads one window of drops around a target serial for a jump (a shared
+   * link, a quoted drop). It does not page through the drops between the
+   * target and the loaded ones, however many there are: that range becomes a
+   * history gap. A newer jump supersedes one still in flight.
+   */
+  const fetchTargetWindow = useCallback(
+    async (
+      waveId: string,
+      targetSerialNo: number
+    ): Promise<ApiDrop[] | null> => {
+      if (!getData(waveId)) {
+        return null;
+      }
+      const abortKey = `${waveId}-target`;
+      const controller = createController(abortKey);
+      try {
+        const windowDrops = await fetchAroundSerialNoWaveMessages(
+          waveId,
+          targetSerialNo,
+          controller.signal
+        );
+        if (
+          controller.signal.aborted ||
+          windowDrops === null ||
+          windowDrops.length === 0
+        ) {
+          return null;
+        }
+        storeTargetWindow(waveId, windowDrops);
+        return windowDrops;
+      } catch (error) {
+        if (!(error instanceof DOMException && error.name === "AbortError")) {
+          console.error(
+            `[WavePagination] Error fetching target window ${targetSerialNo} for wave ${waveId}:`,
+            error
+          );
+        }
+        return null;
+      } finally {
+        cleanupController(abortKey, controller);
+      }
+    },
+    [cleanupController, createController, getData, storeTargetWindow]
+  );
+
+  /**
    * Handles errors during pagination
    */
   const handlePaginationError = useCallback(
@@ -261,7 +342,10 @@ export function useWavePagination({
   const fetchNextPage = useCallback(
     async (props: NextPageProps): Promise<(ApiDrop | ApiDropId)[] | null> => {
       if (props.type === DropSize.FULL && props.gap) {
-        return fetchHistoryGap(props.waveId, props.gap);
+        return fetchHistoryGap(props.waveId, props.gap, props.direction);
+      }
+      if (props.type === DropSize.LIGHT) {
+        return fetchTargetWindow(props.waveId, props.targetSerialNo);
       }
       // Get current state
       const currentData = getData(props.waveId);
@@ -304,16 +388,11 @@ export function useWavePagination({
       // Setup abort controller
       const controller = createController(props.waveId);
 
-      // Create promise for the request
-      const rawPromise =
-        props.type === DropSize.FULL
-          ? fetchWaveMessages(props.waveId, oldestSerialNo, controller.signal)
-          : fetchLightWaveMessages(
-              props.waveId,
-              oldestSerialNo,
-              props.targetSerialNo,
-              controller.signal
-            );
+      const rawPromise = fetchWaveMessages(
+        props.waveId,
+        oldestSerialNo,
+        controller.signal
+      );
 
       const handledPromise = rawPromise
         .then((drops) => {
@@ -339,6 +418,7 @@ export function useWavePagination({
       getOldestMessageSerialNo,
       createController,
       updateWithPaginatedData,
+      fetchTargetWindow,
       handlePaginationError,
       cleanupController,
       fetchHistoryGap,
@@ -353,6 +433,7 @@ export function useWavePagination({
       // Cancel the abort controller
       cancelAbort(waveId, "pagination_cancelled");
       cancelAbort(`${waveId}-around`, "pagination_cancelled");
+      cancelAbort(`${waveId}-target`, "pagination_cancelled");
       cancelHistoryGaps(waveId);
       delete aroundSerialNoStates.current[waveId];
 
@@ -411,17 +492,7 @@ export function useWavePagination({
 
         if (controller.signal.aborted) return;
         if (result) {
-          updateData({
-            key: waveId,
-            drops: result.map((drop) => {
-              return {
-                ...drop,
-                type: DropSize.FULL,
-                stableKey: drop.id,
-                stableHash: drop.id,
-              };
-            }),
-          });
+          storeTargetWindow(waveId, result);
 
           if (result.length > 0) {
             const serials = result.map((drop) => drop.serial_no);
@@ -463,7 +534,12 @@ export function useWavePagination({
         _processAroundSerialNoQueue(waveId).catch(() => undefined);
       }
     },
-    [createController, cleanupController, updateData, determineSerialToFetch]
+    [
+      createController,
+      cleanupController,
+      storeTargetWindow,
+      determineSerialToFetch,
+    ]
   );
 
   /**

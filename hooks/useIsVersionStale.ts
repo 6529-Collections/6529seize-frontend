@@ -1,6 +1,7 @@
 "use client";
 
 import { publicEnv } from "@/config/env";
+import { isDesktopApp } from "@/helpers/desktop-shell";
 import { applyDelayJitter } from "@/helpers/jitter.helpers";
 import {
   getVersionPollHeaders,
@@ -8,13 +9,15 @@ import {
   parseReleaseOrder,
 } from "@/lib/version/versionPoll";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { subscribeNativeAppActivity } from "@/services/app-activity/native-app-activity";
 
 const CURRENT = publicEnv.VERSION ?? "unknown";
 const CURRENT_RELEASE_ORDER = parseReleaseOrder(
   publicEnv.VERSION_RELEASE_ORDER
 );
+const subscribeToNothing = () => () => undefined;
+const getServerIsDesktopApp = () => false;
 const SHOW_NEW_VERSION_TOAST_PARAM = "showNewVersionToast";
 const VERSION_ENDPOINT = "/api/version";
 // Showing a tab fires visibilitychange and focus together; check only once.
@@ -52,9 +55,19 @@ export function useIsVersionStale(
   shouldForceShowNewVersionToast: boolean | null = false
 ) {
   const [stale, setStale] = useState(shouldForceShowNewVersionToast === true);
+  const isDesktop = useSyncExternalStore(
+    subscribeToNothing,
+    isDesktopApp,
+    getServerIsDesktopApp
+  );
 
   useEffect(() => {
     if (!enabled || shouldForceShowNewVersionToast === null) {
+      return;
+    }
+    // 6529 Desktop gets updates from its own updater; reloading the page
+    // would only reload the bundled copy, so the website check stays off.
+    if (isDesktopApp()) {
       return;
     }
 
@@ -193,5 +206,5 @@ export function useIsVersionStale(
     };
   }, [interval, enabled, shouldForceShowNewVersionToast]);
 
-  return enabled && stale;
+  return enabled && stale && !isDesktop;
 }

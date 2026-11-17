@@ -13,7 +13,7 @@ import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { faBellSlash } from "@fortawesome/free-solid-svg-icons";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import Link from "next/link";
-import React, { memo, useCallback, useMemo } from "react";
+import React, { memo, useCallback, useContext, useMemo } from "react";
 import {
   getWaveHomeRoute,
   getWaveRoute,
@@ -21,6 +21,7 @@ import {
 import useDeviceInfo from "../../../../hooks/useDeviceInfo";
 import BrainLeftSidebarWaveDropTime from "./BrainLeftSidebarWaveDropTime";
 import BrainLeftSidebarWavePin from "./BrainLeftSidebarWavePin";
+import { PinnedWaveLinkContext } from "./PinnedWaveLinkContext";
 import { AnnouncementWaveIcon } from "./SidebarIconTile";
 import {
   SidebarParentSubwaveConnector,
@@ -114,6 +115,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   showSubwaveConnector = false,
   onPrefetchSubwaves,
 }) => {
+  const pinnedLinkProps = useContext(PinnedWaveLinkContext);
   const { activeWave } = useMyStream();
   const { id: activeWaveId, set: setActiveWave } = activeWave;
   const prefetchWaveData = usePrefetchWaveData();
@@ -332,6 +334,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             >
               <div className="-tw-mt-0.5 tw-flex tw-min-w-0 tw-items-center tw-gap-1.5">
                 <Link
+                  {...pinnedLinkProps}
                   href={href}
                   prefetch={false}
                   onClick={handleWaveClick}

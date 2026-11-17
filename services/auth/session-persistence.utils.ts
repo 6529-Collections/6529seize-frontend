@@ -1,4 +1,5 @@
 import { TokenRefreshCancelledError } from "@/errors/authentication";
+import { isDesktopShell } from "@/helpers/desktop-shell";
 import {
   isNativeSecureStorageAvailable,
   setNativeRefreshToken,
@@ -38,6 +39,11 @@ export const persistNativeRefreshTokenIfNeeded = async (
   }
 
   assertSessionPersistenceIsCurrent(options);
+  if (response.client_type === "desktop" && isDesktopShell()) {
+    // The desktop shell already stored the refresh token while it handled
+    // sign-in, refresh or redemption. The page never receives it.
+    return "persisted";
+  }
   await setNativeRefreshToken({
     address: response.address,
     refreshToken: response.native_refresh_token,

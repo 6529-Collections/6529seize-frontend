@@ -4,6 +4,7 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { isDesktopApp } from "@/helpers/desktop-shell";
 import { apiUrl } from "@/services/api/api-endpoints";
 import type {
   AlchemyContractMetadataResponse,
@@ -65,9 +66,7 @@ async function fetchJson<T>(
  * always fail; it calls the backend proxy directly instead.
  */
 function usesBackendProxyOnly(): boolean {
-  return (
-    typeof navigator !== "undefined" && navigator.userAgent.includes("Electron")
-  );
+  return isDesktopApp();
 }
 
 async function fetchJsonWithFailover<T>(

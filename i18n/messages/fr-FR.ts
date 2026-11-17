@@ -31,11 +31,10 @@ const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
   "waves.drops.searchModal.result.emoji": "Émoji {shortcode}",
-  "waves.historyGap.load": "Charger les messages manqués",
-  "waves.historyGap.loaded": "Messages manqués chargés",
-  "waves.historyGap.loading": "Chargement des messages manqués…",
-  "waves.historyGap.retry":
-    "Impossible de charger les messages manqués. Réessayer",
+  "waves.historyGap.load": "Charger d’autres messages",
+  "waves.historyGap.loaded": "Autres messages chargés",
+  "waves.historyGap.loading": "Chargement d’autres messages…",
+  "waves.historyGap.retry": "Impossible de charger les messages. Réessayer",
 
   "waves.myVotes.sort": "Trier par",
   "waves.myVotes.sort.voteAmount": "Votre nombre de votes",
@@ -259,6 +258,8 @@ export const FR_FR_MESSAGES = {
   "waves.drop.actions.copied": "Copie !",
   "waves.drop.actions.copyFailed": "Echec de la copie",
   "waves.drop.actions.menuLabel": "Actions du drop",
+  "waves.drop.actions.scrollForMore": "Plus d’actions, faire défiler vers le bas",
+  "waves.drop.actions.scrollUp": "Faire défiler vers le haut",
   "waves.drop.actions.reactionPickerLabel": "Ajouter une réaction au drop",
   "waves.drop.actions.showMore": "Afficher plus",
   "waves.drop.actions.showLess": "Afficher moins",
