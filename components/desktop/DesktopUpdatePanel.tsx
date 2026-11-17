@@ -246,7 +246,7 @@ export default function DesktopUpdatePanel({
           state={state}
           offerUpdate={offerUpdate}
           locale={locale}
-          onUpdate={actions.update}
+          onUpdate={() => actions.update()}
           onRestart={actions.restart}
         />
         <button

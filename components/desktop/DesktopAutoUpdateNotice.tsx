@@ -7,10 +7,7 @@ import {
   type DesktopUpdateState,
   desktopUpdateTone,
 } from "@/lib/desktop/updateState";
-import {
-  getDesktopUpdateStartedHere,
-  noteDesktopUpdateStartedHere,
-} from "@/services/desktop/desktopUpdateState";
+import { getDesktopUpdateStartedHere } from "@/services/desktop/desktopUpdateState";
 import { DesktopUpdateHeadline } from "./DesktopUpdatePanel";
 import {
   DesktopUpdatePrimaryButtons,
@@ -119,8 +116,7 @@ export default function DesktopAutoUpdateNotice({
           locale={locale}
           onUpdate={() => {
             rememberFocus();
-            noteDesktopUpdateStartedHere(state.version);
-            actions.update();
+            actions.update(state.version);
           }}
           onRestart={() => {
             rememberFocus();

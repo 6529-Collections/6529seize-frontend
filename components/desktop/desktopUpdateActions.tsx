@@ -5,6 +5,7 @@ import type { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { DesktopUpdateState } from "@/lib/desktop/updateState";
 import {
+  forgetDesktopUpdateStartedHere,
   noteDesktopUpdateStartedHere,
   restartDesktopToUpdate,
   startDesktopUpdate,
@@ -54,9 +55,19 @@ export function useDesktopUpdateActions(locale: Locale, stateKey: string) {
     if (still(taken)) setProblem({ key, text });
   };
 
-  const update = () => {
+  /**
+   * `followVersion`: the notice follows this release's download as started
+   * here; a refusal forgets that, but only this request's own record.
+   */
+  const update = (followVersion?: string | null) => {
     const key = stateKey;
     const taken = generation.current;
+    const mark = followVersion
+      ? noteDesktopUpdateStartedHere(followVersion)
+      : null;
+    const forget = () => {
+      if (mark) forgetDesktopUpdateStartedHere(mark);
+    };
     setProblem(null);
     setProgress(null);
     startDesktopUpdate()
@@ -66,7 +77,7 @@ export function useDesktopUpdateActions(locale: Locale, stateKey: string) {
           return;
         }
         // Refused: no download started from here after all.
-        noteDesktopUpdateStartedHere(null);
+        forget();
         show(
           taken,
           key,
@@ -74,7 +85,7 @@ export function useDesktopUpdateActions(locale: Locale, stateKey: string) {
         );
       })
       .catch(() => {
-        noteDesktopUpdateStartedHere(null);
+        forget();
         show(taken, key, t(locale, "desktop.update.updateNotStarted"));
       });
   };

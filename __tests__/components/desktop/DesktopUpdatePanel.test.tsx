@@ -593,6 +593,30 @@ describe("DesktopUpdateNotice in a build that installs its own updates", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
+  it("keeps following a download when an earlier request is refused later", async () => {
+    installAutoHost(STATES.U4);
+    let refuseFirst: (reason: unknown) => void = () => undefined;
+    updater.downloadUpdate
+      .mockReturnValueOnce(
+        new Promise((_resolve, reject) => {
+          refuseFirst = reject;
+        })
+      )
+      .mockResolvedValueOnce(undefined);
+    render(<DesktopUpdateNotice />);
+    const button = await screen.findByRole("button", { name: "Update now" });
+    await userEvent.click(button);
+    await userEvent.click(screen.getByRole("button", { name: "Update now" }));
+    await act(async () => {
+      refuseFirst("Please wait a moment and try again.");
+      await Promise.resolve();
+    });
+    emitState(STATES.U7);
+    expect(screen.getByRole("region")).toHaveTextContent(
+      "Downloading 0.1.0-rc.4"
+    );
+  });
+
   it("keeps an urgent update on screen (no Not now)", async () => {
     installAutoHost(STATES.U5);
     render(<DesktopUpdateNotice />);

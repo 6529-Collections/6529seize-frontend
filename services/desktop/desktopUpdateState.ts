@@ -40,7 +40,8 @@ let snapshot: DesktopAutoUpdateSnapshot = DETECTING;
 /** Counts monitor sessions, so a late answer from an old one is ignored. */
 let session = 0;
 /** The release whose download the person started from the notice. */
-let startedHere: string | null = null;
+let startedHere: { readonly version: string; readonly mark: symbol } | null =
+  null;
 const listeners = new Set<() => void>();
 let stop: (() => void) | null = null;
 
@@ -211,11 +212,19 @@ export async function setDesktopUpdateSettings(settings: {
 }
 
 /** Remembers that the person started this release's download here. */
-export function noteDesktopUpdateStartedHere(version: string | null): void {
-  startedHere = version;
+export function noteDesktopUpdateStartedHere(version: string): symbol {
+  const mark = Symbol(version);
+  startedHere = { version, mark };
+  return mark;
 }
 
-export const getDesktopUpdateStartedHere = (): string | null => startedHere;
+/** Forgets the record, only if it is still the one `mark` made. */
+export function forgetDesktopUpdateStartedHere(mark: symbol): void {
+  if (startedHere?.mark === mark) startedHere = null;
+}
+
+export const getDesktopUpdateStartedHere = (): string | null =>
+  startedHere?.version ?? null;
 
 /** @api Resets the module state between tests. */
 export function __resetDesktopAutoUpdateForTests(): void {
