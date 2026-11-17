@@ -552,7 +552,17 @@ test.describe("Profile NIC activity @local-only", () => {
         const api = getSandboxApiOrigin(baseURL);
         await seedViewer(page, api, viewer);
         const requests = await installLogs(page, api);
-        await openProfileInApp(page);
+        if (viewer === "logged-out") {
+          await openProfileInApp(page);
+        } else {
+          // Restore the saved session on the wave before opening the profile.
+          await page.goto("/waves/00000000-0000-4000-8000-000000000529");
+          await page
+            .getByRole("link", { name: "playwright", exact: true })
+            .first()
+            .click();
+          await page.waitForURL(/\/playwright$/, { timeout: 20000 });
+        }
         if (viewer === "visitor") {
           await expect(
             page.getByRole("button", { name: "Follow", exact: true })
