@@ -2508,6 +2508,63 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBeVisible();
   });
 
+  test("keeps Wave details clear of the Desktop title strip", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The integrated title strip case uses the desktop Waves layout."
+    );
+
+    await page.addInitScript(() => {
+      const applyTitleStrip = () => {
+        const root = document.documentElement;
+        if (!root) return false;
+        root.dataset["desktopTitlebar"] = "overlay";
+        root.style.setProperty("--desktop-titlebar-height", "34px");
+        return true;
+      };
+      if (applyTitleStrip()) return;
+      const observer = new MutationObserver(() => {
+        if (applyTitleStrip()) observer.disconnect();
+      });
+      observer.observe(document, { childList: true });
+    });
+
+    const waveId = await getFirstWaveId(page);
+    await gotoReady(page, `/waves/${waveId}`);
+    const strip = page.getByRole("toolbar", {
+      name: "6529 Desktop window title",
+    });
+    const header = page
+      .getByRole("main")
+      .locator("header")
+      .filter({ has: page.getByRole("heading", { level: 1 }) });
+    await expect(strip).toBeVisible();
+    await expect(header).toBeVisible();
+    await expect(page.locator("body")).toHaveAttribute(
+      "data-seize-body-scroll-locked",
+      "true"
+    );
+
+    // A scroll-locked Wave has its own scroll regions. The document must not
+    // have spare space that a programmatic scroll can move under the strip.
+    await page.evaluate(() =>
+      window.scrollTo({ top: 12, behavior: "instant" })
+    );
+    await expect
+      .poll(async () => {
+        const [stripBox, headerBox] = await Promise.all([
+          strip.boundingBox(),
+          header.boundingBox(),
+        ]);
+        return stripBox && headerBox
+          ? headerBox.y - stripBox.y - stripBox.height
+          : null;
+      })
+      .toBe(8);
+  });
+
   test("keeps wave identity compact and sharing reachable through details", async ({
     page,
   }, testInfo) => {
