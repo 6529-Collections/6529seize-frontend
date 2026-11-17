@@ -51,8 +51,6 @@ export type AiModelRow = {
   /** The smallest version's files and memory, as the page prints them. */
   readonly size: string;
   readonly memory: string;
-  /** The section's common score for this model, as printed, or null. */
-  readonly score: string | null;
   readonly facets: AiModelFacets;
 };
 
@@ -61,10 +59,6 @@ export type AiModelsSection = {
   readonly title: string;
   readonly line: string;
   readonly count: string;
-  /** The benchmark most of its models report, for the table, or null. */
-  readonly scoreName: string | null;
-  /** "lower is better", when the common score is one, else null. */
-  readonly scoreNote: string | null;
   readonly rows: readonly AiModelRow[];
 };
 
@@ -106,6 +100,10 @@ export type AiModelsText = {
     readonly maker: string;
     readonly size: string;
     readonly memory: string;
+    /** "GPU", the memory column's heading on a phone. */
+    readonly memoryShort: string;
+    /** "GPU: GPU memory needed", the phone's note on that heading. */
+    readonly memoryNote: string;
     readonly inApp: string;
     /** "App", the same column's heading on a phone. */
     readonly inAppShort: string;
@@ -439,14 +437,12 @@ function Bar({
 }
 
 function Table({
-  section,
   rows,
   cards,
   open,
   toggle,
   text,
 }: {
-  readonly section: AiModelsSection;
   readonly rows: readonly AiModelRow[];
   readonly cards: Readonly<Record<string, ReactNode>>;
   readonly open: ReadonlySet<string>;
@@ -454,9 +450,9 @@ function Table({
   readonly text: AiModelsText["table"];
 }) {
   const head =
-    "tw-px-3 tw-py-2 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500";
-  const cell = "tw-px-3 tw-py-2.5 tw-align-top";
-  const columns = section.scoreName ? 6 : 5;
+    "tw-px-2 tw-py-2 tw-text-[11px] tw-font-semibold tw-uppercase tw-tracking-wider tw-text-iron-500 sm:tw-px-3";
+  const cell = "tw-px-2 tw-py-2.5 tw-align-top sm:tw-px-3";
+  const columns = 5;
   return (
     <div className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.08]">
       <table className="tw-w-full tw-border-collapse tw-text-left tw-text-sm tw-leading-5">
@@ -475,25 +471,15 @@ function Table({
               {text.size}
             </th>
             <th scope="col" className={`${head} tw-text-right`}>
-              {text.memory}
+              <span aria-hidden="true" className="sm:tw-hidden">
+                {text.memoryShort}
+              </span>
+              <span className="max-sm:tw-sr-only">{text.memory}</span>
             </th>
             <th scope="col" className={`${head} tw-text-center`}>
               <span className="sm:tw-hidden">{text.inAppShort}</span>
               <span className="max-sm:tw-hidden">{text.inApp}</span>
             </th>
-            {section.scoreName && (
-              <th
-                scope="col"
-                className={`${head} tw-text-right tw-normal-case tw-tracking-normal max-sm:tw-hidden`}
-              >
-                {section.scoreName}
-                {section.scoreNote && (
-                  <span className="tw-block tw-font-normal tw-text-iron-600">
-                    {section.scoreNote}
-                  </span>
-                )}
-              </th>
-            )}
           </tr>
         </thead>
         <tbody>
@@ -521,7 +507,9 @@ function Table({
                         aria-hidden="true"
                         className={`tw-mt-0.5 tw-size-4 tw-flex-none tw-text-iron-500 tw-transition ${expanded ? "" : "-tw-rotate-90"}`}
                       />
-                      <span>{row.name}</span>
+                      <span className="tw-min-w-0 tw-break-words">
+                        {row.name}
+                      </span>
                     </button>
                     <span className="tw-block tw-pl-[1.375rem] tw-text-xs tw-text-iron-500 md:tw-hidden">
                       {row.maker}
@@ -555,13 +543,6 @@ function Table({
                       </span>
                     )}
                   </td>
-                  {section.scoreName && (
-                    <td
-                      className={`${cell} tw-whitespace-nowrap tw-text-right tw-tabular-nums tw-text-iron-100 max-sm:tw-hidden`}
-                    >
-                      {row.score}
-                    </td>
-                  )}
                 </tr>
                 {expanded && (
                   <tr id={`row-${row.id}`}>
@@ -694,6 +675,11 @@ export default function AiModelsView({
         >
           {text.legend}
         </p>
+        {view === "table" && (
+          <p className="tw-m-0 tw-basis-full tw-pt-1 tw-text-[13px] tw-text-iron-500 sm:tw-hidden">
+            {text.table.memoryNote}
+          </p>
+        )}
       </div>
       <nav
         aria-label={text.sections}
@@ -743,14 +729,15 @@ export default function AiModelsView({
               >
                 {section.title}
               </h2>
+              <p className="tw-m-0 tw-text-[13px] tw-tabular-nums tw-leading-5 tw-text-iron-500">
+                {section.count}
+              </p>
               <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400 max-sm:tw-line-clamp-2 max-sm:tw-text-[13px] max-sm:tw-leading-5">
-                {section.line}{" "}
-                <span className="tw-text-iron-500">{section.count}</span>
+                {section.line}
               </p>
             </header>
             {view === "table" ? (
               <Table
-                section={section}
                 rows={rows}
                 cards={cards}
                 open={open}

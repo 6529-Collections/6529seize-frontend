@@ -304,13 +304,15 @@ describe("the /ai pages", () => {
       "Start lists the models that fit this computer."
     );
     expect(guide).toContain("%2Fai%2Fuse%2F14-mac-first-run.webp");
-    expect(guide).toContain("%2Fai%2Fuse%2F40-chat.webp");
+    expect(guide).toContain("%2Fai%2Fuse%2F43-vision-answer.webp");
+    // The same chat on a phone.
+    expect(guide).toContain("%2Fai%2Fuse%2F98-phone-chat.webp");
     expect(guide).toContain(
       "A first chat. Whichever model you pick, Chat looks the same."
     );
     expect(download).toContain("%2Fai%2Fuse%2F98c-phone-start.webp");
     // The Mac's question shows at its real size: half the 2x file.
-    expect(guide).toContain("max-width:432px");
+    expect(guide).toContain("max-width:434px");
     expect(knownIssues).not.toContain("<figure");
   });
 

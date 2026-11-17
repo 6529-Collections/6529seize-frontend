@@ -81,11 +81,14 @@ own lead.
   revision, one line on what it is, whether the app runs it (and why
   not), its facts, its versions and up to five scores, and 6529's own
   measured runs with the hardware. The table has a row a model (maker,
-  smallest files, GPU memory needed, whether the app runs it, and the
-  section's common score where two thirds of its models report the same
-  benchmark), and a row opens its card. On a phone a card's versions and
-  scores fold behind a button, and "How to read this page" sits under the
-  list.
+  smallest files, GPU memory needed and whether the app runs it), and a
+  row opens its card. It has no score column: cards give different
+  benchmarks with different settings, so the scores stay on the cards. A
+  file under 0.1 GB is in MB ("25 MB"). Each section's heading has its
+  count on a line of its own under it. On a phone the memory column is
+  headed "GPU", with a note under the count line, so the names have the
+  room, and a card's versions and scores fold behind a button. "How to
+  read this page" sits under the notice, folded, at every width.
 - **Known issues** (`/ai/known-issues`): the untested statement as the
   lead, the day the list last changed, a one-line "Found a problem? Report
   it" link, then **Known bugs** (each a card: what you see, the fix and
@@ -107,11 +110,11 @@ targets are 44 px on a phone. The pages are dark-only, as the site is.
 
 Three places on the first pages show a screenshot of the app, from the
 walk-through's pictures: the download page's first screen shows Start's
-model list, in a window frame with a shadow so it reads as the app and
-not as part of the page; the guide's Mac step 4 the question whether a
-validator runs on the same computer; and its first chat a chat reply.
-On a phone the download page shows the app's own phone-width capture,
-cut at a row's edge. `lib/ai-page/screenshots.ts` names them.
+model list; the guide's Mac step 4 the question whether a validator runs
+on the same computer; and its first chat a reply about a photo, the one
+chat the walk-through has at phone width too, so a phone shows the same
+chat. On a phone the download page shows the app's own phone-width
+capture, cut at a row's edge. `lib/ai-page/screenshots.ts` names them.
 
 ## The pictures
 
@@ -130,13 +133,24 @@ for the 1x Windows dialogs; 30 files, about 1.8 MB).
 (file pixels to a CSS pixel) and its `crop`: the part a page shows, what
 its step is about (the row, the button, the dialog). `AiZoomPicture`
 shows the crop at its real size, or the column's width when that is less,
-in the cards' 1 px border and radius, and a click opens the whole capture
-at its real size in a dialog that scrolls both ways and takes pinch zoom.
+in a window frame on every page: a title bar with three dots and "6529
+AI", a 1 px border and a slight shadow, so the app's own headings never
+read as the page's. The zoom's icon sits in the title bar, over no part
+of the picture, and a click anywhere on the frame opens the whole capture
+fitted to the screen; a touch screen zooms it in with a pinch. A system
+dialog (`frame: "dialog"`: the Mac's question, the Windows uninstaller)
+has its own title bar, and the API's picture (`frame: "plain"`) is no
+screenshot: both show whole in a border, with no zoom.
+
 A phone shows `phone` instead where an entry has one: a narrower crop of
-the same capture (the reply, the rows that matter), faded at the right
-where it cuts text, or the app's own phone-width capture of the same
-moment. Phone-width captures sit two to a row from
-640 px and in a row that scrolls sideways on a phone. To change a
+the same capture that cuts no line of text (faded at the right only
+where it cuts a field or a box), the app's own phone-width capture, or
+nothing (`hidden`) where neither reads, as for the chat's follow-up,
+whose lines are too long for a phone and which the walk-through has at
+desktop width only. A phone's chat picture is the answer from the
+phone-width capture, with its own alt text (`phoneAlt`). Never crop a
+line of text mid-word. Phone-width captures sit two to a row from 640 px
+and in a row that scrolls sideways on a phone. To change a
 picture, put the new file in `public/ai/use/` and set its size and crop
 in `useImages.ts`; a test reads each file's size and checks each crop
 lies inside it.
@@ -155,8 +169,7 @@ the day its repository was made on Hugging Face (the original model's,
 for a quantization, conversion or repackaging) for "Newest first".
 Prettier leaves the three files as they are written.
 `lib/ai-page/models.ts` reads them and gives the page each model's
-facets for the search and the filter, its scores in one scale and the
-section's common score.
+facets for the search and the filter, and its scores in one scale.
 
 The page shows the data as the build wrote it, with these rules of its
 own:
@@ -166,10 +179,8 @@ own:
   that is an accuracy or a win rate (Arena Hard, MATH Maj@1, GenEval and
   the like) shows as a percent; any other score without a unit shows as
   its card gives it, rounded, since its scale isn't the page's to guess.
-  In the table, a section's column shows a share of one as a percent when
-  other cards give the same benchmark in percent.
-- **orig.** marks a score whose note calls it the original model's, and
-  "How to read this page" says so once.
+- **†** marks a score whose note calls it the original model's, and a
+  line over the cards and "How to read this page" say so.
 - A model with no scores shows none: gpt-oss, whose publisher prints its
   scores only in a PDF, has no Scores list rather than an empty one.
 - A measured run names its hardware ("8 × H200, 141 GB each"), not the
@@ -352,9 +363,11 @@ the person's own computer only, and their app hides the 6529 AI network.
 So the guide leaves out every network step (models from other providers,
 serving to others, linking an account), and no page mentions the network.
 The pages name no release in their text: the eyebrows, the downloads and
-the guide's commands take the newest version from the feed, and the
-walk-through's commands and output write `<version>` where a version
-goes. Its pictures come from release candidate 1, and no caption says so.
+the guide's commands take the newest version from the feed, and so does
+what the walk-through's commands print: its content writes `<version>`,
+or `<deb-version>` where Debian writes a pre-release with a tilde
+(0.1.0~rc.2), and `AiUsePage` fills them in. Its pictures come from
+release candidate 1, and no caption says so.
 When a release turns the network on, add its steps from 6529 AI's `use-the-network.md`,
 `serve-and-offer.md` and `link-account.md`, and its known issues.
 

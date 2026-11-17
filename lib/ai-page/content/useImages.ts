@@ -18,12 +18,21 @@ export type AiUseImage = {
   readonly scale: 1 | 2;
   readonly crop: AiCrop | null;
   /**
-   * What a phone shows instead: a narrower crop of the same file, faded at
-   * the right where it cuts text, or the app's own phone-width capture.
+   * What a phone shows instead: a narrower crop of the same file that cuts
+   * no line of text, faded at the right where it cuts a field or a box;
+   * the app's own phone-width capture; or nothing, where neither reads.
    */
   readonly phone?:
     | { readonly crop: AiCrop; readonly fade: boolean }
-    | { readonly image: string };
+    | { readonly image: string }
+    | { readonly hidden: true };
+  /**
+   * Unset for a capture of the app's page, which the page draws in a
+   * window frame with a title bar and a zoom. "dialog" is a system dialog
+   * with a title bar of its own, and "plain" a picture the app made: both
+   * show whole, in a border, with no zoom.
+   */
+  readonly frame?: "dialog" | "plain";
 };
 
 export const AI_USE_IMAGES = {
@@ -56,8 +65,8 @@ export const AI_USE_IMAGES = {
     scale: 2,
     crop: { x: 713, y: 515, width: 1670, height: 1085 },
     phone: {
-      crop: { x: 745, y: 800, width: 1000, height: 400 },
-      fade: true,
+      crop: { x: 745, y: 800, width: 1040, height: 400 },
+      fade: false,
     },
   },
   "32-fetching": {
@@ -67,8 +76,8 @@ export const AI_USE_IMAGES = {
     scale: 2,
     crop: { x: 150, y: 190, width: 1650, height: 840 },
     phone: {
-      crop: { x: 740, y: 800, width: 1000, height: 220 },
-      fade: true,
+      crop: { x: 740, y: 800, width: 1040, height: 220 },
+      fade: false,
     },
   },
   "34-ready": {
@@ -87,29 +96,23 @@ export const AI_USE_IMAGES = {
     width: 2560,
     height: 1600,
     scale: 2,
-    crop: { x: 760, y: 250, width: 1570, height: 1080 },
-    phone: {
-      crop: { x: 775, y: 560, width: 1000, height: 560 },
-      fade: true,
-    },
+    crop: { x: 760, y: 262, width: 1570, height: 1068 },
+    phone: { image: "98-phone-chat-answer" },
   },
   "41-chat-follow-up": {
     src: "/ai/use/41-chat-follow-up.webp",
     width: 2560,
     height: 1600,
     scale: 2,
-    crop: { x: 755, y: 243, width: 1562, height: 1075 },
-    phone: {
-      crop: { x: 775, y: 780, width: 1000, height: 460 },
-      fade: true,
-    },
+    crop: { x: 755, y: 243, width: 1562, height: 1100 },
+    phone: { hidden: true },
   },
   "43-vision-answer": {
     src: "/ai/use/43-vision-answer.webp",
     width: 2560,
     height: 1600,
     scale: 2,
-    crop: { x: 742, y: 294, width: 1550, height: 1000 },
+    crop: { x: 742, y: 280, width: 1600, height: 1050 },
     phone: { image: "98-phone-chat-reply" },
   },
   "50-image-empty": {
@@ -117,11 +120,8 @@ export const AI_USE_IMAGES = {
     width: 2560,
     height: 1600,
     scale: 2,
-    crop: { x: 174, y: 205, width: 1516, height: 1165 },
-    phone: {
-      crop: { x: 200, y: 580, width: 1000, height: 760 },
-      fade: true,
-    },
+    crop: { x: 136, y: 176, width: 1600, height: 1236 },
+    phone: { image: "98d-phone-image-form" },
   },
   "52-image-result": {
     src: "/ai/use/52-image-result.webp",
@@ -135,7 +135,7 @@ export const AI_USE_IMAGES = {
     width: 2560,
     height: 1600,
     scale: 2,
-    crop: { x: 161, y: 589, width: 1516, height: 1011 },
+    crop: { x: 136, y: 528, width: 1600, height: 1072 },
     phone: { image: "98e-phone-speech-text" },
   },
   "62-provider-engines": {
@@ -168,10 +168,10 @@ export const AI_USE_IMAGES = {
     width: 2560,
     height: 1600,
     scale: 2,
-    crop: { x: 742, y: 627, width: 1588, height: 640 },
+    crop: { x: 742, y: 627, width: 1620, height: 640 },
     phone: {
-      crop: { x: 742, y: 627, width: 1000, height: 330 },
-      fade: true,
+      crop: { x: 742, y: 627, width: 1080, height: 330 },
+      fade: false,
     },
   },
   "71-key-form": {
@@ -181,7 +181,7 @@ export const AI_USE_IMAGES = {
     scale: 2,
     crop: { x: 161, y: 896, width: 1388, height: 704 },
     phone: {
-      crop: { x: 161, y: 896, width: 1000, height: 704 },
+      crop: { x: 161, y: 896, width: 1000, height: 460 },
       fade: true,
     },
   },
@@ -192,8 +192,8 @@ export const AI_USE_IMAGES = {
     scale: 2,
     crop: { x: 174, y: 545, width: 1388, height: 492 },
     phone: {
-      crop: { x: 174, y: 545, width: 1000, height: 492 },
-      fade: true,
+      crop: { x: 174, y: 545, width: 1140, height: 492 },
+      fade: false,
     },
   },
   "73-key-revoked": {
@@ -201,7 +201,7 @@ export const AI_USE_IMAGES = {
     width: 2560,
     height: 1600,
     scale: 2,
-    crop: { x: 161, y: 384, width: 1388, height: 896 },
+    crop: { x: 140, y: 300, width: 1470, height: 1000 },
     phone: {
       crop: { x: 161, y: 640, width: 1000, height: 640 },
       fade: true,
@@ -212,10 +212,10 @@ export const AI_USE_IMAGES = {
     width: 2560,
     height: 1600,
     scale: 2,
-    crop: { x: 742, y: 358, width: 1588, height: 615 },
+    crop: { x: 742, y: 358, width: 1620, height: 615 },
     phone: {
-      crop: { x: 930, y: 640, width: 1000, height: 330 },
-      fade: true,
+      crop: { x: 900, y: 650, width: 1200, height: 320 },
+      fade: false,
     },
   },
   "93b-api-python-image-output": {
@@ -224,6 +224,7 @@ export const AI_USE_IMAGES = {
     height: 1024,
     scale: 2,
     crop: null,
+    frame: "plain",
   },
   "98-phone-chat": {
     src: "/ai/use/98-phone-chat.webp",
@@ -273,6 +274,7 @@ export const AI_USE_IMAGES = {
     height: 162,
     scale: 1,
     crop: null,
+    frame: "dialog",
   },
   "29-win-uninstall-data": {
     src: "/ai/use/29-win-uninstall-data.webp",
@@ -280,6 +282,7 @@ export const AI_USE_IMAGES = {
     height: 196,
     scale: 1,
     crop: null,
+    frame: "dialog",
   },
   "29b-win-uninstall-done": {
     src: "/ai/use/29b-win-uninstall-done.webp",
@@ -287,6 +290,7 @@ export const AI_USE_IMAGES = {
     height: 162,
     scale: 1,
     crop: null,
+    frame: "dialog",
   },
   "14-mac-first-run": {
     src: "/ai/use/14-mac-first-run.webp",
@@ -294,6 +298,7 @@ export const AI_USE_IMAGES = {
     height: 864,
     scale: 2,
     crop: { x: 20, y: 20, width: 864, height: 824 },
+    frame: "dialog",
   },
   "98c-phone-start-models": {
     src: "/ai/use/98c-phone-start.webp",
@@ -307,7 +312,7 @@ export const AI_USE_IMAGES = {
     width: 780,
     height: 1688,
     scale: 2,
-    crop: { x: 0, y: 230, width: 780, height: 1110 },
+    crop: { x: 0, y: 270, width: 780, height: 1080 },
   },
   "98e-phone-speech-text": {
     src: "/ai/use/98e-phone-speech.webp",
@@ -315,6 +320,20 @@ export const AI_USE_IMAGES = {
     height: 1688,
     scale: 2,
     crop: { x: 0, y: 430, width: 780, height: 550 },
+  },
+  "98-phone-chat-answer": {
+    src: "/ai/use/98-phone-chat.webp",
+    width: 780,
+    height: 1688,
+    scale: 2,
+    crop: { x: 0, y: 840, width: 780, height: 520 },
+  },
+  "98d-phone-image-form": {
+    src: "/ai/use/98d-phone-image.webp",
+    width: 780,
+    height: 1688,
+    scale: 2,
+    crop: { x: 0, y: 590, width: 780, height: 840 },
   },
 } as const satisfies Record<string, AiUseImage>;
 

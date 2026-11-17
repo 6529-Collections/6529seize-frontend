@@ -293,7 +293,6 @@ export default function AiDownloadPage({
           alt={t(LOCALE, "ai.download.screenshot")}
           phoneAlt={t(LOCALE, "ai.download.screenshotPhone")}
           caption={t(LOCALE, "ai.download.screenshotCaption")}
-          framed
         />
       </div>
 

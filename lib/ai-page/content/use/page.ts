@@ -111,10 +111,12 @@ Open it in the browser you use, on this computer.`,
         kind: "image",
         image: "40-chat",
         alt: "A chat with gemma-4-26b-a4b: a two-day plan for a weekend in Lisbon, as a list, at 73.1 tokens/s.",
+        phoneAlt:
+          "An answer at phone width: Thinking, folded, then three sentences about a photo of the Earth from the Moon, and under them gemma-4-26b-a4b, 70.7 tokens/s and Copy.",
       },
       {
         kind: "p",
-        text: "The chat keeps its history, so a follow-up works:",
+        text: "The chat keeps its history, so a follow-up works.",
       },
       {
         kind: "image",

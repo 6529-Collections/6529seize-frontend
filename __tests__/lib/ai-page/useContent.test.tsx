@@ -182,4 +182,26 @@ describe("the /ai/use walk-through", () => {
     // The pictures are the dark ones, as the site is dark.
     expect(html).not.toMatch(/-light\.(png|webp)/);
   });
+
+  it("prints the newest release's version in what the commands print", () => {
+    const html = renderToStaticMarkup(<AiUsePage version="0.1.0-rc.2" />);
+    expect(html).toContain("6529-ai 0.1.0-rc.2, local mode");
+    // Debian writes a pre-release with a tilde.
+    expect(html).toContain("Removing 6529-ai-cuda (0.1.0~rc.2) ...");
+    expect(html).not.toMatch(/&lt;(deb-)?version&gt;/);
+  });
+
+  it("cuts no line of a chat on a phone, and frames every capture of the app", () => {
+    expect(AI_USE_IMAGES["40-chat"].phone).toEqual({
+      image: "98-phone-chat-answer",
+    });
+    expect(AI_USE_IMAGES["41-chat-follow-up"].phone).toEqual({ hidden: true });
+    const html = renderToStaticMarkup(<AiUsePage version="0.1.0-rc.2" />);
+    // Each zoom button holds the window's title bar.
+    const buttons =
+      html.match(/aria-label="See the whole picture: [^"]*"/g) ?? [];
+    expect(buttons.length).toBeGreaterThan(20);
+    const bars = html.match(/>6529 AI<\/span>/g) ?? [];
+    expect(bars).toHaveLength(buttons.length);
+  });
 });

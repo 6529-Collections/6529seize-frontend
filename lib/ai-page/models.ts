@@ -17,6 +17,8 @@ export type AiModelVariant = {
   readonly quantization: Nullable<string>;
   readonly engine: string;
   readonly sizeGB: number;
+  /** The files' exact size, in bytes. */
+  readonly bytes: number;
   readonly memoryGB: number;
   readonly withinCpuLimit: boolean;
   readonly runsToday: boolean;
@@ -287,14 +289,9 @@ export type AiScore =
 /**
  * A score in one scale: percentages, and shares of one that are
  * accuracies or win rates, as a percent; scores out of a fixed maximum
- * with it ("8.49 /10"); anything else as its card prints it. asPercent
- * turns any value from 0 to 1 into a percent, for a column in which other
- * cards give the same benchmark in percent.
+ * with it ("8.49 /10"); anything else as its card prints it.
  */
-export function getAiScore(
-  benchmark: AiModelBenchmark,
-  asPercent = false
-): AiScore {
+export function getAiScore(benchmark: AiModelBenchmark): AiScore {
   const value = Number(benchmark.score);
   if (!Number.isFinite(value)) {
     return { kind: "text", text: benchmark.score };
@@ -306,49 +303,8 @@ export function getAiScore(
   if (outOf) {
     return { kind: "outOf", value, max: outOf[1] };
   }
-  if (
-    value >= 0 &&
-    value <= 1 &&
-    (asPercent || SHARE_OF_ONE.test(benchmark.name))
-  ) {
+  if (value >= 0 && value <= 1 && SHARE_OF_ONE.test(benchmark.name)) {
     return { kind: "percent", value: value * 100 };
   }
   return { kind: "number", value, digits: Math.abs(value) < 1 ? 3 : 1 };
-}
-
-/**
- * The benchmark most of a section's models report, for its column in the
- * table, with each model's score; null when fewer than two thirds of them
- * report any one benchmark.
- */
-export function getSectionScore(section: AiModelSection): {
-  readonly name: string;
-  readonly lowerIsBetter: boolean;
-  readonly scores: Readonly<Record<string, AiScore>>;
-} | null {
-  const counts = new Map<string, number>();
-  for (const model of section.models) {
-    for (const name of new Set(model.benchmarks.map((b) => b.name))) {
-      counts.set(name, (counts.get(name) ?? 0) + 1);
-    }
-  }
-  const [best] = [...counts.entries()].sort((a, b) => b[1] - a[1]);
-  if (!best || best[1] * 3 < section.models.length * 2) {
-    return null;
-  }
-  const [name] = best;
-  const found = section.models.flatMap((model) =>
-    model.benchmarks
-      .filter((b) => b.name === name)
-      .slice(0, 1)
-      .map((b) => [model.id, b] as const)
-  );
-  const anyPercent = found.some(([, b]) => b.unit === "%");
-  return {
-    name,
-    lowerIsBetter: found.some(([, b]) => b.lowerIsBetter),
-    scores: Object.fromEntries(
-      found.map(([id, b]) => [id, getAiScore(b, anyPercent)])
-    ),
-  };
 }

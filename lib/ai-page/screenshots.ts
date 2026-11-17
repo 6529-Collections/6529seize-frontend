@@ -18,6 +18,9 @@ export const AI_SCREENSHOTS = {
   models: { image: "31-start", phone: "98c-phone-start-models" },
   /** The app's question on a Mac: alone, or beside a validator. */
   placement: { image: "14-mac-first-run" },
-  /** A chat reply: the first chat, at the end of the guide. */
-  firstChat: { image: "40-chat" },
+  /**
+   * A chat reply, the first chat at the end of the guide: the same chat at
+   * both widths, since the walk-through has it at phone width too.
+   */
+  firstChat: { image: "43-vision-answer" },
 } as const satisfies Record<string, AiScreenshotSlot>;

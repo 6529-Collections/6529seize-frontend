@@ -70,9 +70,13 @@ describe("the /ai/models filter", () => {
     expect(document.querySelectorAll("article")).toHaveLength(0);
     const refusals = document.getElementById("uncensored")!.closest("section")!;
     const table = within(refusals).getByRole("table");
+    // No score column: the cards' scores aren't comparable across a section.
+    expect(within(table).getAllByRole("columnheader")).toHaveLength(5);
     expect(
-      within(table).getByRole("columnheader", { name: "LiveCodeBench v6" })
+      within(table).getByRole("columnheader", { name: "GPU memory needed" })
     ).toBeInTheDocument();
+    // A model under 0.1 GB says megabytes, not "0.0 GB".
+    expect(document.body.textContent).not.toContain("0.0 GB");
     const names = within(table)
       .getAllByRole("button", { name: /^Show the card: / })
       .map((button) => button.textContent ?? "");

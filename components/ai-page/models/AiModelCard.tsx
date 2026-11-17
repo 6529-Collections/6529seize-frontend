@@ -31,7 +31,17 @@ const SUBHEAD =
 const QUIET_LINK =
   "tw-inline-flex tw-items-center tw-gap-0.5 tw-text-iron-300 tw-no-underline tw-decoration-iron-500 tw-underline-offset-2 hover:tw-text-iron-50 hover:tw-underline focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
 
-export function formatGB(size: number): string {
+/**
+ * A size in GB, with one decimal; below 0.1 GB, where that would say
+ * "0.0 GB", in MB, from the exact bytes where the caller has them.
+ */
+export function formatGB(size: number, bytes?: number): string {
+  if (size < 0.1) {
+    const mb = Math.round((bytes ?? size * 1e9) / 1e6);
+    return t(LOCALE, "ai.files.size.mb", {
+      size: formatNumber(LOCALE, Math.max(1, mb)),
+    });
+  }
   return t(LOCALE, "ai.files.size.gb", {
     size: formatNumber(LOCALE, size, ONE_DECIMAL),
   });
@@ -244,7 +254,7 @@ function Versions({ model }: { readonly model: AiModel }) {
                   <td
                     className={`${cell} tw-whitespace-nowrap tw-tabular-nums tw-text-iron-300`}
                   >
-                    {formatGB(variant.sizeGB)}
+                    {formatGB(variant.sizeGB, variant.bytes)}
                   </td>
                   <td
                     className={`${cell} tw-whitespace-nowrap tw-tabular-nums tw-text-iron-500`}

@@ -8,16 +8,13 @@ import type { AiUseBlock } from "@/lib/ai-page/content/use";
 import { AI_USE_IMAGES } from "@/lib/ai-page/content/useImages";
 import AiCodeBlock from "../AiCodeBlock";
 import { AI_BODY, AI_H3 } from "../AiPageFrame";
-import type { AiZoomText } from "../AiZoomPicture";
+import { aiZoomText } from "../AiScreenshot";
 import InlineText from "../InlineText";
 import AiUseFigure, { AiUsePhoneRow } from "./AiUseFigure";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
-const ZOOM: AiZoomText = {
-  open: t(LOCALE, "ai.use.zoom"),
-  close: t(LOCALE, "ai.use.zoomClose"),
-};
+const ZOOM = aiZoomText();
 /** Output longer than this folds behind "Show output". */
 const OUTPUT_LINES = 10;
 
@@ -159,7 +156,14 @@ function Block({ block }: { readonly block: AiUseBlock }): ReactNode {
         <AiCodeBlock code={block.code} label={block.label} />
       );
     case "image":
-      return <AiUseFigure image={block.image} alt={block.alt} text={ZOOM} />;
+      return (
+        <AiUseFigure
+          image={block.image}
+          alt={block.alt}
+          phoneAlt={block.phoneAlt}
+          text={ZOOM}
+        />
+      );
     case "list":
       return (
         <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-2 tw-pl-5">

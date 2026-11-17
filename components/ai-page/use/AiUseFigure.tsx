@@ -5,13 +5,17 @@ import AiZoomPicture, { type AiZoomText } from "../AiZoomPicture";
 export default function AiUseFigure({
   image,
   alt,
+  phoneAlt,
   text,
 }: {
   readonly image: AiUseImageKey;
   readonly alt: string;
+  readonly phoneAlt?: string | undefined;
   readonly text: AiZoomText;
 }) {
-  return <AiZoomPicture image={image} alt={alt} text={text} />;
+  return (
+    <AiZoomPicture image={image} alt={alt} phoneAlt={phoneAlt} text={text} />
+  );
 }
 
 /**

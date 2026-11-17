@@ -6,6 +6,7 @@ import {
   AI_USE_INTRO,
   AI_USE_LEAD,
   AI_USE_SECTIONS,
+  type AiUseBlock,
 } from "@/lib/ai-page/content/use";
 import AiPageFrame, { AI_BODY, AI_H2 } from "../AiPageFrame";
 import AiReportProblem from "../AiReportProblem";
@@ -15,6 +16,42 @@ import AiUseContents from "./AiUseContents";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
+
+/**
+ * The newest release's version in what the commands print, where the
+ * walk-through writes `<version>`; Debian writes a pre-release with "~".
+ * Without a feed, the placeholders stay.
+ */
+function withVersion(
+  blocks: readonly AiUseBlock[],
+  version: string | undefined
+): readonly AiUseBlock[] {
+  if (!version) {
+    return blocks;
+  }
+  const deb = version.replace(/-(?=[a-z])/, "~");
+  return blocks.map((block) => {
+    if (block.kind === "code") {
+      return {
+        ...block,
+        code: block.code
+          .replaceAll("<deb-version>", deb)
+          .replaceAll("<version>", version),
+      };
+    }
+    if (block.kind === "steps") {
+      return {
+        ...block,
+        items: block.items.map((item) =>
+          item.blocks
+            ? { ...item, blocks: withVersion(item.blocks, version) }
+            : item
+        ),
+      };
+    }
+    return block;
+  });
+}
 
 /**
  * /ai/use: real use of 6529 AI once it is installed, section by section,
@@ -75,7 +112,7 @@ export default function AiUsePage({
                 </span>
                 {section.title}
               </h2>
-              <AiUseBlocks blocks={section.blocks} />
+              <AiUseBlocks blocks={withVersion(section.blocks, version)} />
             </section>
           ))}
           <p

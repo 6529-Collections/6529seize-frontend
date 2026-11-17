@@ -6,7 +6,6 @@ import {
   getAiModelCounts,
   getAiModelFacets,
   getAiModelSections,
-  getSectionScore,
   type AiModelSection,
 } from "@/lib/ai-page/models";
 import ValidatorFold from "@/components/validator-page/ValidatorFold";
@@ -17,7 +16,6 @@ import AiModelsView, {
   type AiModelsSection,
   type AiModelsText,
 } from "./AiModelsView";
-import { formatAiScore } from "./formatAiScore";
 
 // Rendered on the server, in the locale the server renders.
 const LOCALE = DEFAULT_LOCALE;
@@ -75,6 +73,8 @@ function viewText(): AiModelsText {
       maker: t(LOCALE, "ai.models.table.maker"),
       size: t(LOCALE, "ai.models.table.size"),
       memory: t(LOCALE, "ai.models.table.memory"),
+      memoryShort: t(LOCALE, "ai.models.table.memoryShort"),
+      memoryNote: t(LOCALE, "ai.models.table.memoryNote"),
       inApp: t(LOCALE, "ai.models.table.inApp"),
       inAppShort: t(LOCALE, "ai.models.table.inAppShort"),
       yes: t(LOCALE, "ai.models.card.inApp"),
@@ -95,28 +95,21 @@ function sectionCount(section: AiModelSection): string {
 }
 
 function viewSection(section: AiModelSection): AiModelsSection {
-  const score = getSectionScore(section);
   return {
     id: section.id,
     title: section.title,
     line: section.line,
     count: sectionCount(section),
-    scoreName: score?.name ?? null,
-    scoreNote: score?.lowerIsBetter
-      ? t(LOCALE, "ai.models.card.lowerIsBetter")
-      : null,
     rows: section.models.map((model) => {
       const smallest = model.variants.reduce((a, b) =>
         b.memoryGB < a.memoryGB ? b : a
       );
-      const scored = score?.scores[model.id];
       return {
         id: model.id,
         name: model.name,
         maker: model.publisher,
-        size: formatGB(smallest.sizeGB),
+        size: formatGB(smallest.sizeGB, smallest.bytes),
         memory: formatGB(smallest.memoryGB),
-        score: scored ? formatAiScore(LOCALE, scored) : null,
         facets: getAiModelFacets(model),
       };
     }),
@@ -155,7 +148,7 @@ export default function AiModelsPage({
         runnable: formatNumber(LOCALE, counts.modelsRunnableToday),
       })}
     >
-      <div className="tw-mt-6 max-sm:tw-hidden">
+      <div className="tw-mt-6">
         <ValidatorFold
           id="how-to-read"
           title={t(LOCALE, "ai.models.howToRead")}
@@ -184,29 +177,6 @@ export default function AiModelsPage({
           cards={cards}
           text={viewText()}
         />
-      </div>
-      <div className="tw-mt-12 sm:tw-hidden">
-        <ValidatorFold
-          id="how-to-read-phone"
-          title={t(LOCALE, "ai.models.howToRead")}
-          small
-        >
-          <ul className="tw-m-0 tw-flex tw-flex-col tw-gap-3 tw-pl-5">
-            {(
-              [
-                "ai.models.howToRead.today",
-                "ai.models.howToRead.memory",
-                "ai.models.howToRead.scores",
-                "ai.models.howToRead.measured",
-                "ai.models.howToRead.order",
-              ] as const
-            ).map((key) => (
-              <li key={key} className={`${AI_MUTED} marker:tw-text-iron-600`}>
-                <InlineText text={t(LOCALE, key)} />
-              </li>
-            ))}
-          </ul>
-        </ValidatorFold>
       </div>
     </AiPageFrame>
   );

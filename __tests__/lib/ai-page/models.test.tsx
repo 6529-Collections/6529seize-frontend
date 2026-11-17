@@ -9,7 +9,6 @@ import {
   getAiModelCounts,
   getAiScore,
   getMeasuredHardware,
-  getSectionScore,
   getAiModelFacets,
   getAiModelLine,
   getAiModelSections,
@@ -129,18 +128,6 @@ describe("scores", () => {
     // A share of one whose scale its card leaves open stays as printed.
     expect(score("Seed-TTS test-en speaker similarity", "0.633")).toBe("0.633");
     expect(score("BEIR", "55.33")).toBe("55.3");
-  });
-
-  it("gives a section a column for a benchmark two thirds of its models report", () => {
-    const sections = getAiModelSections();
-    const section = (id: string) =>
-      sections.find((candidate) => candidate.id === id)!;
-    expect(getSectionScore(section("uncensored"))?.name).toBe(
-      "LiveCodeBench v6"
-    );
-    // 8 of 14 report LibriSpeech: not enough for a column.
-    expect(getSectionScore(section("speech-to-text"))).toBeNull();
-    expect(getSectionScore(section("robotics"))).toBeNull();
   });
 });
 

@@ -150,7 +150,7 @@ export const AI_USE_END: readonly AiUseSection[] = [
 After this operation, 1719 MB disk space will be freed.
 Do you want to continue? [Y/n] Y
 (Reading database ... 165219 files and directories currently installed.)
-Removing 6529-ai-cuda (<version>) ...`,
+Removing 6529-ai-cuda (<deb-version>) ...`,
         output: true,
       },
       {
@@ -171,7 +171,7 @@ Removing 6529-ai-cuda (<version>) ...`,
 After this operation, 0 B of additional disk space will be used.
 Do you want to continue? [Y/n] Y
 (Reading database ... 165176 files and directories currently installed.)
-Purging configuration files for 6529-ai-cuda (<version>) ...`,
+Purging configuration files for 6529-ai-cuda (<deb-version>) ...`,
         output: true,
       },
       {
