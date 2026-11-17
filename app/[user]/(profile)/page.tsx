@@ -86,10 +86,13 @@ async function prepareRepTab({
     getAppCommonHeaders(),
     headers(),
   ]);
-  // A document load has an empty browser query cache. In-app navigation
-  // can reuse that cache and should also stay cheap when a link is prefetched.
+  // Reserve the initial reads for document navigation. Fetch requests can
+  // reuse the browser cache, and speculative document loads may go unused.
   const fetchMode = requestHeaders.get("sec-fetch-mode");
-  if (fetchMode && fetchMode !== "navigate") {
+  const isPrefetch =
+    requestHeaders.get("sec-purpose")?.startsWith("prefetch") ||
+    requestHeaders.get("purpose") === "prefetch";
+  if (isPrefetch || (fetchMode && fetchMode !== "navigate")) {
     return { initialActivityLogParams, initialQueries: undefined };
   }
   const authorization = apiHeaders["Authorization"];
@@ -111,6 +114,8 @@ async function prepareRepTab({
   void queryClient.prefetchQuery(
     nicOverviewQueryOptions(user, "incoming", viewer, apiHeaders)
   );
+  // The statements endpoint returns the same moderated list to every viewer.
+  // Reuse the public key and the request already shared by metadata and header.
   void queryClient.prefetchQuery({
     queryKey: [QueryKey.PROFILE_CIC_STATEMENTS, user],
     queryFn: () => loadProfileStatements(user),
