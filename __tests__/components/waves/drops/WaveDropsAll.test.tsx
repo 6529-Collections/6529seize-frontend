@@ -42,6 +42,7 @@ import {
   type DropReplyThreadTarget,
 } from "@/services/api/drop-reply-thread-target-api";
 import type { ActiveDropState } from "@/types/dropInteractionTypes";
+import { DropSize } from "@/helpers/waves/drop.helpers";
 
 const BOOSTED_DROPS_DISPLAY_PREFERENCE_KEY =
   "waveChatBoostedDropsDisplayPreference";
@@ -1557,9 +1558,14 @@ describe("WaveDropsAll", () => {
     });
 
     it("shows progress when a cached target takes time to come into view", async () => {
-      setupMocks({
-        waveMessages: { drops: [createMockDrop({ serial_no: 10 })] },
-      });
+      const drop = createMockDrop({ serial_no: 10 });
+      const cachedDrop = {
+        ...drop,
+        type: DropSize.FULL,
+        stableKey: drop.id,
+        stableHash: drop.id,
+      };
+      setupMocks({ waveMessages: { drops: [cachedDrop] } });
       renderComponent({ initialDrop: 10 });
       expect(screen.getByTestId("scrolling-overlay")).not.toBeVisible();
       await act(async () => {
