@@ -57,7 +57,10 @@ export default function ReleaseSectionDoc({
       )}
       <article className="tw-max-w-3xl">
         {parts.map((part) => (
-          <div key={part.markdown.slice(0, 80)} className="tw-mt-12 first:tw-mt-0">
+          <div
+            key={part.markdown.slice(0, 80)}
+            className="tw-mt-12 first:tw-mt-0"
+          >
             <ValidatorMarkdown markdown={part.markdown} />
             {part.after}
           </div>

@@ -258,7 +258,9 @@ function Section({
 
 function AboutFacts() {
   return (
-    <dl className={`${ABOUT_CARD_CLASS_NAME} tw-m-0 tw-divide-y tw-divide-white/[0.06] tw-px-5`}>
+    <dl
+      className={`${ABOUT_CARD_CLASS_NAME} tw-m-0 tw-divide-y tw-divide-white/[0.06] tw-px-5`}
+    >
       {ABOUT_FACTS.map((fact) => (
         <div
           key={fact.label}

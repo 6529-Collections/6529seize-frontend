@@ -43,16 +43,16 @@ function DesktopNotice({ onKnownIssues }: { readonly onKnownIssues: boolean }) {
       {onKnownIssues
         ? t(LOCALE, "desktopPage.notice.bodyOnKnownIssues")
         : tRich(LOCALE, "desktopPage.notice.body", {
-        knownIssues: (
-          <Link
-            key="known-issues"
-            href="/desktop/known-issues"
-            className={LINK}
-          >
-            {t(LOCALE, "desktopPage.notice.knownIssuesLink")}
-          </Link>
-        ),
-      })}
+            knownIssues: (
+              <Link
+                key="known-issues"
+                href="/desktop/known-issues"
+                className={LINK}
+              >
+                {t(LOCALE, "desktopPage.notice.knownIssuesLink")}
+              </Link>
+            ),
+          })}
     </ReleaseSectionNotice>
   );
 }

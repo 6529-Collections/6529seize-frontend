@@ -314,9 +314,7 @@ describe("the /desktop pages", () => {
     const html = renderToStaticMarkup(await DesktopRoute());
     expect(html).toContain("Test release 0.1.0-rc.2");
     expect(html).toContain(`aria-label="Download for Windows: ${SETUP}"`);
-    expect(html).toContain(
-      "Windows, 64-bit Intel or AMD · 86.0 MB"
-    );
+    expect(html).toContain("Windows, 64-bit Intel or AMD · 86.0 MB");
     expect(html.indexOf("Download for Windows")).toBeLessThan(
       html.indexOf("Also available:")
     );
