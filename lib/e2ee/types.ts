@@ -24,6 +24,9 @@ export type E2eeEngineStatus =
   | "device-limit" // 10 active devices: user must revoke one
   | "error";
 
+/** Whether this engine has successfully checked for chats on this device. */
+export type E2eeInitialSyncStatus = "pending" | "failed" | "complete";
+
 export interface E2eeDeviceInfo {
   linkedAuthorProof?: boolean;
   authorProofGrantId?: string;
@@ -237,6 +240,7 @@ export interface E2eeEngine {
   // state (synchronous snapshots) + change subscription
   getStatus(): E2eeEngineStatus;
   getError(): string | null;
+  getInitialSyncStatus(): E2eeInitialSyncStatus;
   /** Locally held device key, available before the server device list loads. */
   getLocalDeviceKey(): string | null;
   getThisDevice(): E2eeDeviceInfo | null;
@@ -249,7 +253,7 @@ export interface E2eeEngine {
   subscribe(listener: () => void): () => void; // any state change
 
   // lifecycle
-  enroll(): Promise<void>; // the single wallet prompt
+  enroll(onProvisioning?: () => void): Promise<void>; // the single wallet prompt
   /**
    * Whether turning on needs a brand-new device key: no stored device that
    * enroll() would resume, register or renew. A combined sign-in (NC8) can

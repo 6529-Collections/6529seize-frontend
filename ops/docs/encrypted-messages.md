@@ -162,7 +162,8 @@ Open the setup action in the account menu, Preferences → **Device Permissions*
 or the composer notice. Each opens the same permission dialog. The initial
 `/messages/encrypted` page presents the same explanation inline, without the
 **Encrypted messages / End-to-end encrypted** header until encryption is ready.
-Setup does not open automatically after sign-in.
+Setup does not open automatically after sign-in. Once you sign for setup, the
+app shows **Finishing encrypted message setup…** while it turns encryption on.
 
 The explanation and signature button name the permissions this device needs:
 
@@ -770,6 +771,10 @@ without images**. Images and files too large for one encrypted attachment
 
 ## Troubleshooting
 
+- **Loading encrypted chats…** appears while this device first checks for
+  chats. Chats already available on this device can open while that check runs.
+  **No encrypted chats yet** appears after the check succeeds and the list is
+  empty. If the check fails, select **Try again** in the inbox.
 - **Encrypted messages couldn’t start**: select **Try again**. The error code
   under the message helps the team diagnose staging issues.
 - **Chat not found on this device**: devices only receive chats they were

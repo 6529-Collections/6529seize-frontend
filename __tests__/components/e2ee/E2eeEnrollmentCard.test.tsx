@@ -193,8 +193,7 @@ describe("E2eeEnrollmentCard turn-on", () => {
   describe("when encryption is still registering after the sign-in", () => {
     const FINISHING =
       "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves. You can close this window.";
-    const FINISHING_INLINE =
-      "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves.";
+    const FINISHING_INLINE = "Finishing encrypted message setup…";
     const PARTIAL =
       "Signed posts are on. Encrypted DMs could not finish setup. You can try enabling them separately.";
 
