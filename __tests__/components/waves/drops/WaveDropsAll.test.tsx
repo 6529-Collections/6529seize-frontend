@@ -1577,7 +1577,7 @@ describe("WaveDropsAll", () => {
       await waitFor(() =>
         expect(screen.getByTestId("scrolling-overlay")).not.toBeVisible()
       );
-      expect(dropsProps.pinnedSerialNo).toBe(10);
+      expect(dropsProps.serialNo).toBeNull();
     });
 
     it.each([true, false])(

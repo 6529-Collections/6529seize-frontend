@@ -1,7 +1,13 @@
 "use client";
 
 import type { ReactNode } from "react";
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useLayoutEffect,
+  useCallback,
+} from "react";
 import { observeHeight } from "@/helpers/observeHeight";
 import { DropSize } from "@/helpers/waves/drop.helpers";
 import { useMyStreamActions } from "@/contexts/wave/MyStreamContext";
@@ -96,6 +102,23 @@ export default function VirtualScrollWrapper({
    * to measure size, observe media, and attach an IntersectionObserver.
    */
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const wasPinned = useRef(keepContentMounted);
+
+  useLayoutEffect(() => {
+    const justUnpinned = wasPinned.current && !keepContentMounted;
+    wasPinned.current = keepContentMounted;
+    const row = containerRef.current;
+    const viewport = scrollContainerRef.current;
+    if (!justUnpinned || !row || !viewport) return;
+
+    // The observer may still report the pre-jump position. Read the row once
+    // before paint so releasing the jump cannot restore that old placeholder.
+    const bounds = row.getBoundingClientRect();
+    const view = viewport.getBoundingClientRect();
+    if (bounds.bottom > view.top && bounds.top < view.bottom) {
+      setIsInView(true);
+    }
+  }, [keepContentMounted, scrollContainerRef]);
 
   /**
    * measureHeight: Uses getBoundingClientRect to measure the

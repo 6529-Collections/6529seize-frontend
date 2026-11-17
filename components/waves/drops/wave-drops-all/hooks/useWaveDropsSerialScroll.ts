@@ -116,7 +116,6 @@ interface UseWaveDropsSerialScrollParams {
 interface UseWaveDropsSerialScrollResult {
   readonly cancelSerialScroll: () => void;
   readonly serialTarget: number | null;
-  readonly pinnedSerialNo: number | null;
   readonly queueSerialTarget: (serialNo: number) => void;
   readonly targetDropRef: RefObject<HTMLDivElement | null>;
   readonly isScrolling: boolean;
@@ -135,7 +134,6 @@ export const useWaveDropsSerialScroll = ({
   scrollToVisualBottom,
 }: UseWaveDropsSerialScrollParams): UseWaveDropsSerialScrollResult => {
   const [serialTarget, setSerialTarget] = useState<number | null>(initialDrop);
-  const [anchoredSerialNo, setAnchoredSerialNo] = useState<number | null>(null);
   const [previousInitialDrop, setPreviousInitialDrop] = useState(initialDrop);
 
   if (previousInitialDrop !== initialDrop) {
@@ -151,7 +149,7 @@ export const useWaveDropsSerialScroll = ({
   const revealedLinkedReplyRef = useRef<DropReplyThreadTarget | null>(null);
 
   const holdScrollTarget = useCallback(
-    (container: HTMLDivElement, target: HTMLDivElement, serialNo: number) => {
+    (container: HTMLDivElement, target: HTMLDivElement) => {
       if (scrollAnchorRef.current?.target === target)
         return scrollAnchorRef.current;
       scrollAnchorRef.current?.release();
@@ -174,13 +172,10 @@ export const useWaveDropsSerialScroll = ({
         onRelease: () => {
           if (scrollAnchorRef.current === anchor) {
             scrollAnchorRef.current = null;
-            setAnchoredSerialNo(null);
           }
         },
       });
       scrollAnchorRef.current = anchor;
-      // Keep this single row mounted while the anchor is responsible for it.
-      setAnchoredSerialNo(serialNo);
       return anchor;
     },
     []
@@ -298,7 +293,7 @@ export const useWaveDropsSerialScroll = ({
 
       // The reply may mount after the parent was already revealed.
       revealedLinkedReplyRef.current = linkedReply;
-      holdScrollTarget(container, reply, linkedReply.parentSerialNo);
+      holdScrollTarget(container, reply);
       scrollElementIntoContainerCenter({
         behavior: "auto",
         container,
@@ -331,7 +326,7 @@ export const useWaveDropsSerialScroll = ({
             scrolledTarget = target;
             scrollStartedAt = Date.now();
             retriedInstantly = false;
-            anchor = holdScrollTarget(container, target, serialNo);
+            anchor = holdScrollTarget(container, target);
             scrollElementIntoContainerCenter({
               behavior: "smooth",
               container,
@@ -460,7 +455,6 @@ export const useWaveDropsSerialScroll = ({
   return {
     cancelSerialScroll,
     serialTarget,
-    pinnedSerialNo: serialTarget ?? anchoredSerialNo,
     queueSerialTarget,
     targetDropRef,
     isScrolling,
