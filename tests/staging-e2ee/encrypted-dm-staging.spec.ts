@@ -979,8 +979,15 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     // A caught-up group skips its log. Leave a real server entry for the
     // returning device so this test can verify the incremental cursor.
     const missedMessage = qaMessage(current.runId, "history catch-up");
-    const sent = await sendEncrypted(b, missedMessage);
-    expect((await sent.response())?.ok()).toBe(true);
+    const delivered = b.page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        new URL(response.url()).pathname ===
+          `/api/e2ee/groups/${dm}/messages` &&
+        response.ok(),
+      { timeout: SYNC_TIMEOUT_MS }
+    );
+    await Promise.all([delivered, sendEncrypted(b, missedMessage)]);
     const opened = performance.now();
     await openChat(a, dm);
     await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
