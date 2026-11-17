@@ -33495,6 +33495,18 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/ApiCompetitionEntry"
+    ApiDropCompetitionEntryReference:
+      type: object
+      required:
+        - competition_id
+        - entry_id
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
     ApiDropContextProfileContext:
       type: object
       required:
@@ -34743,6 +34755,14 @@ components:
         - drop_type
         - hide_link_preview
       properties:
+        competition_entry:
+          description: >-
+            Visible competition entry for this drop in a Wave timeline or reply
+            feed. Null means there is no visible entry. Omitted when membership
+            was not evaluated.
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDropCompetitionEntryReference"
         submission_artist:
           type: string
           description: >-
