@@ -403,9 +403,7 @@ describe("the /desktop pages", () => {
     expect(html).toContain("Scan with a phone wallet");
     expect(html).toContain("Use a browser wallet");
     expect(html).toContain("The browser page shows the same two.");
-    expect(html).toContain(
-      "6529 Desktop does not download or install updates by itself yet,"
-    );
+    expect(html).toContain("download the next version once by hand from the");
   });
 
   it.each([

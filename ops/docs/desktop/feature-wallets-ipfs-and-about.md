@@ -71,6 +71,15 @@ Open 6529 Desktop > About for the installed version, OS/architecture, app scheme
 
 The update area shows checking, available, downloading progress, downloaded, no-update, or error states. Use the action offered for that state; the bot does not know the latest available build unless it has current release evidence.
 
+The update notice in the app window follows what the app can do. An app that
+downloads and installs updates itself offers **Download update**, shows the
+progress, then **Restart to update**. An app that only announces a new version
+(6529 Desktop 0.1.0-rc.2 hosts) offers **Open download page**, which opens the
+6529.io download page in your browser; it never starts a download in the app.
+In 0.1.0-rc.2 itself the notice's **Download** button does not work: download
+the next version once by hand from the
+[download page](https://6529.io/desktop).
+
 Use ETH Transactions > the affected worker > Logs for a worker-specific failure. Expand Advanced Options for recovery controls. Logs > Locate opens the log file location; selecting log text enables Copy Selection.
 
 For a TDH issue include both Last Block values, the mismatched field, last calculation time, and the failing worker message. For a missing transfer include a public transaction hash and the expected block; distinguish a local-node mismatch from personal website TDH.
