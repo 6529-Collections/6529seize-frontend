@@ -11,13 +11,16 @@ import {
 } from "@heroicons/react/20/solid";
 import {
   Fragment,
+  useCallback,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
   type ReactNode,
 } from "react";
 
 import type { AiMedium, AiModelFacets } from "@/lib/ai-page/models";
+import { SHEET_ID, useSheetFocus } from "./useSheetFocus";
 
 type Media = AiMedium | "any";
 type Sort = "memory" | "newest" | "name";
@@ -113,11 +116,23 @@ export type AiModelsText = {
 };
 
 /**
+ * What splits a name into words, on both sides of the search: spaces and
+ * the marks between a name's parts, not the dot in "0.8B".
+ */
+const WORD_BREAK = /[\s/_(),-]+/;
+
+/** The search's words, as the names are split. */
+function searchWords(query: string): string[] {
+  return query.toLowerCase().split(WORD_BREAK).filter(Boolean);
+}
+
+/**
  * Whether each word of the search starts a word of the model's name,
- * publisher, packager or id: "qwen 8b" finds Qwen3-8B, not Qwen3.5-0.8B.
+ * publisher, packager or id: "qwen 8b" finds Qwen3-8B, not Qwen3.5-0.8B,
+ * and a pasted id ("qwen3-4b-mlx-4bit") finds its model.
  */
 function found(facets: AiModelFacets, words: readonly string[]): boolean {
-  const own = facets.search.split(/[\s/_-]+/);
+  const own = facets.search.split(WORD_BREAK);
   return words.every((word) => own.some((part) => part.startsWith(word)));
 }
 
@@ -355,7 +370,7 @@ function Bar({
         />
       )}
       <div
-        id="ai-model-filters"
+        id={SHEET_ID}
         className={`tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 sm:tw-flex ${sheet ? "max-sm:tw-fixed max-sm:tw-inset-x-0 max-sm:tw-bottom-0 max-sm:tw-z-50 max-sm:tw-flex max-sm:tw-max-h-[85dvh] max-sm:tw-flex-col max-sm:tw-items-stretch max-sm:tw-gap-3 max-sm:tw-overflow-y-auto max-sm:tw-rounded-t-2xl max-sm:tw-border-0 max-sm:tw-border-t max-sm:tw-border-solid max-sm:tw-border-white/10 max-sm:tw-bg-iron-950 max-sm:tw-px-4 max-sm:tw-pb-6 max-sm:tw-pt-4 max-sm:tw-shadow-[0_-16px_48px_-12px_rgba(0,0,0,0.9)]" : "max-sm:tw-hidden"}`}
       >
         <p className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-hidden">
@@ -588,10 +603,13 @@ export default function AiModelsView({
     storeView(next);
   };
   const [sheet, setSheet] = useState(false);
+  const filtersButton = useRef<HTMLButtonElement>(null);
+  const closeSheet = useCallback(() => setSheet(false), []);
+  useSheetFocus(sheet, closeSheet, filtersButton);
   const [open, setOpen] = useState<ReadonlySet<string>>(new Set());
 
   const shown = useMemo(() => {
-    const words = filter.query.toLowerCase().split(/\s+/).filter(Boolean);
+    const words = searchWords(filter.query);
     const order = compare(sort, filter.runs);
     return sections.map((section) => ({
       section,
@@ -643,7 +661,8 @@ export default function AiModelsView({
         <button
           type="button"
           aria-expanded={sheet}
-          aria-controls="ai-model-filters"
+          ref={filtersButton}
+          aria-controls={SHEET_ID}
           onClick={() => setSheet(true)}
           className="tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-border-white/15 tw-bg-iron-900 tw-px-3 tw-text-sm tw-font-semibold tw-text-iron-100 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-hidden"
         >

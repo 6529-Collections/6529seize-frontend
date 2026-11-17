@@ -208,10 +208,16 @@ export function getAiModelFacets(model: AiModel): AiModelFacets {
 
 /**
  * The scores the original model's publisher reports, rather than this
- * model's own: the build's note says so for each one.
+ * model's own: the build's note says so for each one. A note that gives
+ * the score "for this model" is this model's own, even where it then
+ * compares it with the original's.
  */
 export function isOriginalModelScore(benchmark: AiModelBenchmark): boolean {
-  return /\boriginal\b/i.test(benchmark.note ?? "");
+  const note = benchmark.note ?? "";
+  if (/\bfor this (?:model|encoder)\b/i.test(note)) {
+    return false;
+  }
+  return /\boriginal\b/i.test(note);
 }
 
 /** The first sentence of a model's description, for its card's one line. */

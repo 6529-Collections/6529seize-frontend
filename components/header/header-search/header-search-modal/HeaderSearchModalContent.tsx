@@ -9,6 +9,7 @@ import dynamic from "next/dynamic";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useMessageSearch } from "@/hooks/useMessageSearch";
 import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
+import { AI_NAVIGATION } from "@/components/navigation/aiNavigation";
 import AdvancedWaveSearchInput from "@/components/waves/drops/search/AdvancedWaveSearchInput";
 import HeaderSearchInput from "./HeaderSearchInput";
 import {
@@ -354,6 +355,12 @@ function ScopedHeaderSearchModal({
             },
           ]
         : []),
+      {
+        name: AI_NAVIGATION.label,
+        href: AI_NAVIGATION.href,
+        icon: AI_NAVIGATION.icon,
+        section: HEADER_SEARCH_LABELS.main,
+      },
       ...SEARCH_ONLY_PAGES,
       ...sidebarPages,
       ...dropForgePages,

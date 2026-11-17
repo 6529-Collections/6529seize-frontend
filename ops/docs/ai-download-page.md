@@ -4,9 +4,9 @@ Parent: [Documentation](README.md)
 
 ## Overview
 
-`/ai` is where people download 6529 AI's test release. No menu, header,
-footer, search result or other page links it yet: the owner looks at it
-first, then adds the link. It has no password.
+`/ai` is where people download 6529 AI's test release. It has no
+password. The site links it from the primary navigation and the 6529 Apps
+page (see [Where the site links it](#where-the-site-links-it)).
 
 | Route                           | What it serves                                                                                     |
 | ------------------------------- | -------------------------------------------------------------------------------------------------- |
@@ -193,9 +193,7 @@ own:
 The pages send `noindex, nofollow` (their metadata, and the
 `X-Robots-Tag` header that `config/nextConfig.ts` sets on `/ai/:path*`),
 and `next-sitemap.config.ts` leaves them out of the sitemap. `robots.txt`
-does not name them. The 6529 Help Bot corpus (`ops/help/help-index.json`)
-and the header search leave them out too, until the owner links the
-section.
+does not name them.
 
 `/ai` is a site route, not a profile handle, in the lists that tell them
 apart: page classification for analytics
@@ -371,9 +369,22 @@ release candidate 1, and no caption says so.
 When a release turns the network on, add its steps from 6529 AI's `use-the-network.md`,
 `serve-and-offer.md` and `link-account.md`, and its known issues.
 
-## Link it from the site
+## Where the site links it
 
-When the owner has seen it: add the menu or page link, add the section to
-the Help Bot corpus and the header search, and decide whether the pages
-should be found by search engines (the `X-Robots-Tag` rule in
-`config/nextConfig.ts`, the sitemap exclusions and each page's metadata).
+- **The primary navigation**: a `6529 AI` row with the chip icon, right
+  after the `Join 6529` / `Validator` slot and before `About`, in the
+  desktop sidebar (collapsed and expanded), the phone and app menu, and the
+  header search's `Pages` (`components/navigation/aiNavigation.ts`). The
+  validator's slot is where 6529's own software sits in the menu, and 6529
+  AI is the other program 6529 ships for people to run on their own
+  computers; unlike the validator's, its row shows for everyone, as its
+  pages are public. It is active on every `/ai` page.
+- **The 6529 Apps page** (`/about/6529-apps`): a fourth section, `6529 AI`,
+  after `6529 Validator`, linking the whole section to `/ai`.
+- **Page search** finds it as `6529 AI`, `AI`, `local AI`, `open-weights
+models` and the like (`pageSearch.ts`), and the Help Bot corpus has an
+  `ai.download` record and mentions it in the sidebar and 6529 Apps records.
+
+The pages stay out of search engines (the `X-Robots-Tag` rule in
+`config/nextConfig.ts`, the sitemap exclusions and each page's metadata),
+as the validator's do, until the owner decides otherwise.

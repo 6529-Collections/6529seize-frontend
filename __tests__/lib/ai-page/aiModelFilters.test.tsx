@@ -47,6 +47,42 @@ describe("the /ai/models filter", () => {
     }
   });
 
+  it("finds a model by its pasted id", () => {
+    render(<AiModelsPage version="0.1.0-rc.1" />);
+    fireEvent.change(screen.getByRole("searchbox", { name: "Search models" }), {
+      target: { value: "qwen3-4b-mlx-4bit" },
+    });
+    expect(document.getElementById("model-qwen3-4b-mlx-4bit")).not.toBeNull();
+    // "0.8b" stays one word: "8b" doesn't find it.
+    fireEvent.change(screen.getByRole("searchbox", { name: "Search models" }), {
+      target: { value: "qwen3.5 8b" },
+    });
+    for (const name of screen
+      .queryAllByRole("heading", { level: 3 })
+      .map((heading) => heading.textContent ?? "")) {
+      expect(name.toLowerCase()).not.toMatch(/0\.8b/);
+    }
+  });
+
+  it("keeps the keyboard in the phone's Filters sheet while it is open", () => {
+    render(<AiModelsPage version="0.1.0-rc.1" />);
+    const open = screen.getByRole("button", { name: /^Filters/ });
+    fireEvent.click(open);
+    const sheet = document.getElementById("ai-model-filters")!;
+    expect(sheet.contains(document.activeElement)).toBe(true);
+    // Tab from the last control comes back to the first.
+    const controls = sheet.querySelectorAll<HTMLElement>(
+      "input, select, button"
+    );
+    controls[controls.length - 1]!.focus();
+    fireEvent.keyDown(document, { key: "Tab" });
+    expect(document.activeElement).toBe(controls[0]);
+    // Escape closes it, and the focus goes back to the Filters button.
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(open).toHaveAttribute("aria-expanded", "false");
+    expect(document.activeElement).toBe(open);
+  });
+
   it("says so when nothing matches, with a way back", () => {
     render(<AiModelsPage version="0.1.0-rc.1" />);
     fireEvent.change(screen.getByLabelText("Reads"), {

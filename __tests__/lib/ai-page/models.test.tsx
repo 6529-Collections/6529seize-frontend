@@ -87,6 +87,13 @@ describe("the models data", () => {
     expect(
       isOriginalModelScore({ ...score!, note: "OpenDataLab's score." })
     ).toBe(false);
+    // Its own score, compared with the original's: not the original's.
+    const heretic = model("gemma-4-31b-heretic").benchmarks;
+    const mmlu = heretic.find((benchmark) => benchmark.name === "MMLU");
+    expect(mmlu?.note).toMatch(/The original scored/);
+    expect(isOriginalModelScore(mmlu!)).toBe(false);
+    const gpqa = heretic.find((benchmark) => benchmark.name === "GPQA Diamond");
+    expect(isOriginalModelScore(gpqa!)).toBe(true);
   });
 
   it("leaves the network and repeated words out of a measured run's note", () => {

@@ -50,6 +50,17 @@ const SAME_MODEL = new Set([
     }
   }
   await Promise.all([worker(), worker(), worker(), worker()]);
+  // A model whose requests failed keeps the date the last run found for
+  // the same repository, so a refresh never loses one.
+  const known = fs.existsSync(outPath)
+    ? JSON.parse(fs.readFileSync(outPath, "utf8")).models
+    : {};
+  const missing = models.filter((m) => !out[m.id]);
+  for (const m of missing) {
+    if (known[m.id]) {
+      out[m.id] = known[m.id];
+    }
+  }
   const sorted = Object.fromEntries(
     models.filter((m) => out[m.id]).map((m) => [m.id, out[m.id]])
   );
@@ -72,10 +83,15 @@ const SAME_MODEL = new Set([
     Object.keys(sorted).length,
     "of",
     models.length,
+    "kept from the last run:",
+    missing
+      .filter((m) => out[m.id])
+      .map((m) => m.id)
+      .join(" ") || "none",
     "missing:",
     models
       .filter((m) => !out[m.id])
       .map((m) => m.id)
-      .join(" ")
+      .join(" ") || "none"
   );
 })();
