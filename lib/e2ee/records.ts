@@ -7,6 +7,7 @@ import type {
 import type { ImportedPayload } from "./imported-payload";
 import type { Payload, PayloadAttachment } from "./payload";
 import type { E2eeNoticeType } from "./notice-types";
+import type { E2eePoll } from "./types";
 import type { GroupMetadata, WasmLeaf } from "./wasm-types";
 
 /** Records the engine persists per profile (contract 8.7). */
@@ -186,6 +187,7 @@ export interface SignedVersion {
 }
 
 export interface StoredMessage {
+  poll?: E2eePoll;
   id: string;
   g: string;
   seq: number;
@@ -245,4 +247,6 @@ export interface StoredOutboxItem {
   createdAt: number;
   /** The ciphertext last submitted (lets a crashed send be recognized). */
   sealed: SealedOutboxMessage | null;
+  /** A confirmed poll event still awaiting ordered application from the log. */
+  acceptedSeq?: number;
 }

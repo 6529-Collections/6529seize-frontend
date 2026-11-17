@@ -4,6 +4,7 @@ import type { E2eeApiClient } from "./api";
 import type { BackupHistory } from "./backup/format";
 import type { BackupStateStore } from "./backup/state";
 import type { E2eeNoticeType } from "./notice-types";
+import type { PollDefinition } from "./payload";
 import type { E2eeStorage } from "./storage";
 import type { WasmModule } from "./wasm-types";
 
@@ -91,6 +92,12 @@ export interface E2eeAttachment {
 /** Why an own message stayed unsent (E2eeMessage.unsent). */
 export type E2eeUnsentReason = "suite_upgrade";
 
+export interface E2eePoll extends PollDefinition {
+  eligibleDeviceKeys: string[];
+  ballots: Record<string, number[]>;
+  closed: boolean;
+}
+
 export interface E2eeMessage {
   id: string;
   g: string;
@@ -128,6 +135,7 @@ export interface E2eeMessage {
   };
   /** Moved from an unencrypted 6529.io DM: not verified (D146). */
   imported?: E2eeImported;
+  poll?: E2eePoll;
 }
 
 /**
@@ -297,6 +305,8 @@ export interface E2eeEngine {
       files?: File[];
     }
   ): Promise<void>;
+  createPoll?(g: string, poll: PollDefinition): Promise<void>;
+  updatePoll?(g: string, id: string, options: number[] | null): Promise<void>;
   edit(g: string, id: string, text: string): Promise<void>;
   remove(g: string, id: string): Promise<void>; // delete own message
   react(g: string, id: string, reaction: string, on: boolean): Promise<void>;

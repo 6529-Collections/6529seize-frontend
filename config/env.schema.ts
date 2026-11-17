@@ -133,6 +133,7 @@ export const publicEnvSchema = z.object({
   // End-to-end encrypted DMs and groups (D109). On only when exactly "true";
   // staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),
+  NEXT_PUBLIC_E2EE_POLLS_ENABLED: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),

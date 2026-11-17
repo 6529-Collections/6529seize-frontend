@@ -65,6 +65,56 @@ async function trio() {
 }
 
 describe("E2EE engine: features", () => {
+  it("replays polls and named votes in chat order, one ballot per profile", async () => {
+    const { world, a, b, c, bob, carol, g } = await trio();
+    const bobPhone = await startDevice(world, "bob", bob.account);
+    const oldClient = (
+      await startDevice(world, "carol", carol.account, { withoutPolls: true })
+    ).engine;
+    await settle(world);
+    await a.createPoll!(g, {
+      question: "Which drinks?",
+      options: ["Tea", "Coffee"],
+      multi: true,
+    });
+    await settle(world);
+    const poll = b.getMessages(g).find((message) => message.poll);
+    expect(poll?.text).toBe("Which drinks?");
+    const id = poll!.id;
+    await b.updatePoll!(g, id, [0, 1]);
+    await settle(world);
+    expect(
+      a.getMessages(g).find((message) => message.id === id)?.poll?.ballots
+    ).toEqual({ bob: [0, 1] });
+    await bobPhone.engine.updatePoll!(g, id, [1]);
+    await settle(world);
+    await expect(b.updatePoll!(g, id, null)).rejects.toMatchObject({
+      code: "E2EE_NOT_SENDER",
+    });
+    await a.updatePoll!(g, id, null);
+    await settle(world);
+    for (const engine of [a, b, c, bobPhone.engine]) {
+      expect(
+        engine.getMessages(g).find((message) => message.id === id)?.poll
+      ).toMatchObject({
+        closed: true,
+        ballots: { bob: [1] },
+      });
+    }
+    await expect(b.updatePoll!(g, id, [0])).rejects.toMatchObject({
+      code: "E2EE_INVALID_INPUT",
+    });
+    await b.send(g, { text: "The chat still works." });
+    await settle(world);
+    expect(
+      oldClient.getMessages(g).filter((message) => message.undecryptable)
+    ).toHaveLength(4);
+    expect(texts(oldClient.getMessages(g))).toContain("The chat still works.");
+    await oldClient.send(g, { text: "Even from the old client." });
+    await settle(world);
+    expect(texts(a.getMessages(g))).toContain("Even from the old client.");
+  });
+
   it("sends content-free notify hints with mention and reply kinds", async () => {
     const { world, a, b, g } = await trio();
     await a.send(g, { text: "plain secret words" });

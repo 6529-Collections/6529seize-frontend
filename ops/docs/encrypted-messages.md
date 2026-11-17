@@ -64,9 +64,19 @@ continue to appear as Unknown member.
 
 Encrypted and ordinary messages use the same rich-text editor. Custom emoji
 shortcodes render as inline images while composing and editing; encrypted drafts
-keep their shortcode representation for encryption and sending. Encrypted chat
-does not offer Poll or Storm actions. GIFs can be sent as encrypted attachments;
-their search and previews connect publicly to GIPHY.
+keep their shortcode representation for encryption and sending. GIFs can be
+sent as encrypted attachments. Their search and previews connect publicly to GIPHY.
+
+### Group polls
+
+In supported builds, select **Create poll** in an encrypted group chat. Enter a
+question and two to ten choices. Turn on **Allow multiple choices** if people
+can pick more than one answer, then select **Post poll**.
+
+Select your choices and choose **Vote** or **Update vote**. Use **View votes**
+to see who chose each option. The creator can select **End poll** to stop voting.
+People who join after the poll was posted receive new messages from the chat.
+They need a new poll to participate.
 
 Messages support the same Markdown formatting as ordinary chats: headings,
 **bold** and italic text, strikethrough, lists and task lists, quotes,

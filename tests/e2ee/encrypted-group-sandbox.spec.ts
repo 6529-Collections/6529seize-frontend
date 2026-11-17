@@ -1,3 +1,4 @@
+import { checkEncryptedPoll, pollCard } from "../support/e2ee/polls";
 import { expect, test } from "../testHelpers";
 import {
   buildSyntheticJwt,
@@ -110,6 +111,14 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
       notice(bob.page, "alice renamed the chat to “Planning v2”")
     ).toBeVisible();
 
+    await checkEncryptedPoll(
+      alice.page,
+      bob.page,
+      "bob",
+      "Which drink?",
+      false
+    );
+
     // Add dave (story 2) and the joined notice (story 12).
     info = await openChatInfo(alice.page);
     await pickPerson(info, "dave", {
@@ -132,6 +141,14 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
     await sendMessage(alice.page, afterDave);
     await expectMessage(dave.page, afterDave);
     await expect(messageRow(dave.page, beforeDave)).toHaveCount(0);
+    await expect(pollCard(dave.page, "Which drink?")).toHaveCount(0);
+    await checkEncryptedPoll(
+      alice.page,
+      dave.page,
+      "dave",
+      "Which drinks should we bring?",
+      true
+    );
 
     // Story 8: a mention while dave is on the list raises his badges.
     await gotoPath(dave.page, ENCRYPTED_ROUTE);

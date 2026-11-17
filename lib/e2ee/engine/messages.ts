@@ -1,5 +1,10 @@
 import { isDuplicateImport } from "./imported";
-import type { Payload } from "../payload";
+import {
+  isValidPollBallot,
+  type MsgPayload,
+  type Payload,
+  type PollPayload,
+} from "../payload";
 import type { SignedVersion, StoredMessage } from "../records";
 import type { GroupRuntime } from "./store";
 
@@ -58,14 +63,18 @@ export function placeholderMessage(meta: {
 
 function applyMsg(
   runtime: GroupRuntime,
-  payload: Extract<Payload, { t: "msg" }>,
+  payload: MsgPayload | PollPayload,
   meta: PayloadMeta
 ): boolean {
   const existing = runtime.messages.get(payload.id);
   if (existing && !existing.pending) {
     return false;
   }
-  if (payload.imp && isDuplicateImport(runtime, payload.id, payload.imp))
+  if (
+    payload.t === "msg" &&
+    payload.imp &&
+    isDuplicateImport(runtime, payload.id, payload.imp)
+  )
     return false;
   put(runtime, {
     id: payload.id,
@@ -76,10 +85,13 @@ function applyMsg(
     senderDeviceKey: meta.senderDeviceKey,
     ts: payload.ts,
     serverTs: meta.serverTs,
-    text: payload.text,
-    mentions: [...payload.mentions],
-    reply: payload.reply ?? null,
-    attachments: payload.att ? payload.att.map((att) => ({ ...att })) : [],
+    text: payload.t === "msg" ? payload.text : payload.poll.question,
+    mentions: payload.t === "msg" ? [...payload.mentions] : [],
+    reply: payload.t === "msg" ? (payload.reply ?? null) : null,
+    attachments:
+      payload.t === "msg" && payload.att
+        ? payload.att.map((att) => ({ ...att }))
+        : [],
     editedAt: existing?.editedAt ?? null,
     ...(existing?.latestEdit === undefined
       ? {}
@@ -92,7 +104,17 @@ function applyMsg(
     epoch: meta.epoch,
     body: meta.body,
     sig: meta.sig,
-    ...(payload.imp ? { imported: payload.imp } : {}),
+    ...(payload.t === "msg" && payload.imp ? { imported: payload.imp } : {}),
+    ...(payload.t === "poll" && {
+      poll: {
+        ...payload.poll,
+        eligibleDeviceKeys: runtime.record.members.map((member) =>
+          member.deviceKey.toLowerCase()
+        ),
+        ballots: {},
+        closed: false,
+      },
+    }),
   });
   return true;
 }
@@ -149,9 +171,44 @@ function applyReaction(
   return true;
 }
 
+function applyPollUpdate(
+  target: StoredMessage,
+  payload: Extract<Payload, { t: "poll-vote" | "poll-close" }>,
+  meta: PayloadMeta
+): boolean {
+  const poll = target.poll;
+  const voter = meta.senderProfileId;
+  if (
+    !poll ||
+    target.deleted ||
+    poll.closed ||
+    meta.seq <= target.seq ||
+    voter === null
+  ) {
+    return false;
+  }
+  if (payload.t === "poll-close") {
+    if (!sameAuthor(target, meta)) return false;
+    target.poll = { ...poll, closed: true };
+    return true;
+  }
+  if (
+    !meta.senderDeviceKey ||
+    !poll.eligibleDeviceKeys.includes(meta.senderDeviceKey) ||
+    !isValidPollBallot(poll, payload.options)
+  )
+    return false;
+
+  const ballots = { ...poll.ballots };
+  if (payload.options.length) ballots[voter] = payload.options;
+  else delete ballots[voter];
+  target.poll = { ...poll, ballots };
+  return true;
+}
+
 function applyTargeted(
   runtime: GroupRuntime,
-  payload: Exclude<Payload, { t: "msg" }>,
+  payload: Exclude<Payload, MsgPayload | PollPayload>,
   meta: PayloadMeta
 ): boolean {
   const target = runtime.messages.get(payload.target);
@@ -164,6 +221,7 @@ function applyTargeted(
       return false;
     }
     if (payload.t === "edit") {
+      if (target.poll) return false;
       target.text = payload.text;
       target.mentions = [...payload.mentions];
       target.editedAt = payload.ts;
@@ -174,8 +232,11 @@ function applyTargeted(
       target.attachments = [];
       target.mentions = [];
       target.latestEdit = null;
+      delete target.poll;
     }
     changed = true;
+  } else if (payload.t === "poll-vote" || payload.t === "poll-close") {
+    changed = applyPollUpdate(target, payload, meta);
   } else if (meta.senderProfileId !== null) {
     changed = applyReaction(
       target,
@@ -205,6 +266,13 @@ export function applyPayload(
   }
   if (!meta.sigOk) {
     return false;
+  }
+  if (payload.t === "poll") {
+    return (
+      meta.senderProfileId !== null &&
+      runtime.record.metadata.kind === "group" &&
+      applyMsg(runtime, payload, meta)
+    );
   }
   return applyTargeted(runtime, payload, meta);
 }

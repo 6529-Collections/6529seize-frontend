@@ -65,7 +65,47 @@ export interface ReactPayload extends PayloadBase {
   r: string;
 }
 
-export type Payload = MsgPayload | EditPayload | DelPayload | ReactPayload;
+export const MAX_POLL_OPTIONS = 10;
+export const MAX_POLL_QUESTION = 280;
+export const MAX_POLL_OPTION = 120;
+
+export interface PollDefinition {
+  question: string;
+  options: string[];
+  multi: boolean;
+}
+
+export interface PollPayload extends PayloadBase {
+  t: "poll";
+  poll: PollDefinition;
+}
+
+export interface PollVotePayload extends PayloadBase {
+  t: "poll-vote";
+  target: string;
+  options: number[];
+}
+
+export interface PollClosePayload extends PayloadBase {
+  t: "poll-close";
+  target: string;
+}
+
+export type PollEvent = PollPayload | PollVotePayload | PollClosePayload;
+export type Payload =
+  | MsgPayload
+  | EditPayload
+  | DelPayload
+  | ReactPayload
+  | PollEvent;
+
+export function isPollEvent(payload: Payload): payload is PollEvent {
+  return (
+    payload.t === "poll" ||
+    payload.t === "poll-vote" ||
+    payload.t === "poll-close"
+  );
+}
 
 export const newMessageId = (): string =>
   Array.from(randomBytes(16), (byte) =>
@@ -203,6 +243,56 @@ function parseMsg(base: PayloadBase, json: Json): MsgPayload | null {
   return out;
 }
 
+export function parsePollDefinition(value: unknown): PollDefinition | null {
+  if (!isRecord(value)) return null;
+  const { question, options, multi } = value;
+  if (
+    typeof question !== "string" ||
+    !question.trim() ||
+    charLength(question.trim()) > MAX_POLL_QUESTION ||
+    !Array.isArray(options) ||
+    options.length < 2 ||
+    options.length > MAX_POLL_OPTIONS ||
+    typeof multi !== "boolean"
+  ) {
+    return null;
+  }
+  const labels: string[] = [];
+  for (const option of options) {
+    if (
+      typeof option !== "string" ||
+      !option.trim() ||
+      charLength(option.trim()) > MAX_POLL_OPTION
+    )
+      return null;
+    labels.push(option.trim());
+  }
+  if (new Set(labels).size !== labels.length) return null;
+  return { question: question.trim(), options: labels, multi };
+}
+
+export function isPollSelection(value: unknown): value is number[] {
+  return (
+    Array.isArray(value) &&
+    value.length <= MAX_POLL_OPTIONS &&
+    value.every(
+      (option) => isNonNegativeInt(option) && option < MAX_POLL_OPTIONS
+    ) &&
+    new Set(value).size === value.length
+  );
+}
+
+export function isValidPollBallot(
+  poll: PollDefinition,
+  value: unknown
+): value is number[] {
+  return (
+    isPollSelection(value) &&
+    (poll.multi || value.length <= 1) &&
+    value.every((option) => option < poll.options.length)
+  );
+}
+
 function parseTargeted(
   base: PayloadBase,
   t: string,
@@ -211,6 +301,11 @@ function parseTargeted(
   const target = json["target"];
   if (!isMessageId(target)) {
     return null;
+  }
+  if (t === "poll-close") return { ...base, t, target };
+  if (t === "poll-vote") {
+    const options = json["options"];
+    return isPollSelection(options) ? { ...base, t, target, options } : null;
   }
   if (t === "del") {
     return { ...base, t: "del", target };
@@ -250,6 +345,10 @@ export function parsePayload(value: unknown): Payload | null {
   const base: PayloadBase = { v: 1, id, ts };
   if (t === "msg") {
     return parseMsg(base, value);
+  }
+  if (t === "poll") {
+    const poll = parsePollDefinition(value["poll"]);
+    return poll ? { ...base, t, poll } : null;
   }
   return parseTargeted(base, t, value);
 }

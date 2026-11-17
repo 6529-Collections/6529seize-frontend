@@ -3,10 +3,15 @@ import type { ApiE2eeLogItem } from "../api-types";
 import { base64ToBytes } from "../bytes";
 import { parseCredentialIdentity } from "../grant";
 import { MlsError } from "../mls-adapter";
-import { decodePayload } from "../payload";
+import { decodePayload, isPollEvent } from "../payload";
 import type { WasmProposalSummary, WasmStagedSummary } from "../wasm-types";
 import { finalizeOwnCommit } from "./commit";
-import { ownDeviceKey, requireMls, type EngineContext } from "./context";
+import {
+  checkpoint,
+  ownDeviceKey,
+  requireMls,
+  type EngineContext,
+} from "./context";
 import { RetryableError } from "./errors";
 import {
   addNotices,
@@ -422,6 +427,28 @@ async function markOutboxSent(
   for (const entry of runtime.outbox.values()) {
     if (entry.sealed?.data === item.data) {
       runtime.outbox.delete(entry.id);
+      if (isPollEvent(entry.payload)) {
+        await preparePayload(ctx, runtime, entry.payload);
+        applyPayload(runtime, entry.payload, {
+          g: runtime.record.g,
+          seq: item.seq,
+          serverTs: item.created_at,
+          senderProfileId: ctx.profileId,
+          senderDeviceKey: ownDeviceKey(ctx),
+          sigOk: true,
+          epoch: item.epoch,
+          body: null,
+          sig: null,
+          pending: false,
+        });
+        runtime.record.cursor = item.seq;
+        runtime.record.updatedAt = Math.max(
+          runtime.record.updatedAt,
+          item.created_at
+        );
+        await checkpoint(ctx, { groups: [runtime], deleteOutbox: [entry.id] });
+        return true;
+      }
       const message = await loadMessage(ctx, runtime, entry.id);
       if (message && entry.payload.t === "msg") {
         message.pending = false;

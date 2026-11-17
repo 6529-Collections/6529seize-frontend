@@ -52,6 +52,15 @@ describe("payload codec (contract 6)", () => {
       { v: 1, t: "del", id: ID, ts: 3, target: ID2 },
       { v: 1, t: "react", id: ID, ts: 4, target: ID2, r: ":fire:" },
       { v: 1, t: "unreact", id: ID, ts: 5, target: ID2, r: "🔥" },
+      {
+        v: 1,
+        t: "poll",
+        id: ID,
+        ts: 6,
+        poll: { question: "Drink?", options: ["Tea", "Coffee"], multi: true },
+      },
+      { v: 1, t: "poll-vote", id: ID, ts: 7, target: ID2, options: [0, 1] },
+      { v: 1, t: "poll-close", id: ID, ts: 8, target: ID2 },
     ];
     for (const payload of payloads) {
       expect(decodePayload(encodePayload(payload))).toEqual(payload);

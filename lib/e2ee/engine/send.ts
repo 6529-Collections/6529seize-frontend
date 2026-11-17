@@ -9,6 +9,7 @@ import type { ApiE2eeNotifyHint, ApiE2eeNotifyKind } from "../api-types";
 import { mediaFromFile, uploadMedia } from "../media";
 import {
   encodePayload,
+  isPollEvent,
   newMessageId,
   PayloadError,
   type MsgPayload,
@@ -64,7 +65,7 @@ function computeNotify(
   payload: Payload
 ): ApiE2eeNotifyHint[] {
   // Imported history is old news: it never wakes anyone.
-  if (payload.t !== "msg" || payload.imp) {
+  if (payload.t !== "poll" && (payload.t !== "msg" || payload.imp)) {
     return [];
   }
   const recipients = new Set<string>();
@@ -73,10 +74,11 @@ function computeNotify(
       recipients.add(member.profileId);
     }
   }
-  const mentions = new Set(payload.mentions);
-  const replyAuthor = payload.reply
-    ? (runtime.messages.get(payload.reply)?.senderProfileId ?? null)
-    : null;
+  const mentions = new Set(payload.t === "msg" ? payload.mentions : []);
+  const replyAuthor =
+    payload.t === "msg" && payload.reply
+      ? (runtime.messages.get(payload.reply)?.senderProfileId ?? null)
+      : null;
   return [...recipients]
     .map((profileId) => ({
       profile_id: profileId,
@@ -156,7 +158,7 @@ async function enqueue(
       const echo = localEcho(ctx, runtime.record.g, payload);
       runtime.messages.set(echo.id, echo);
       runtime.dirty.add(echo.id);
-    } else {
+    } else if (!isPollEvent(payload)) {
       applyPayload(runtime, payload, {
         g: runtime.record.g,
         seq: 0,
@@ -339,6 +341,15 @@ async function markSent(
   item: StoredOutboxItem,
   sent: { seq: number; created_at: number }
 ): Promise<void> {
+  if (isPollEvent(item.payload)) {
+    item.acceptedSeq = sent.seq;
+    await checkpoint(ctx, {
+      groups: [runtime],
+      outbox: [item],
+      skipWasm: true,
+    });
+    return;
+  }
   runtime.outbox.delete(item.id);
   runtime.record.sentSeqs.push(sent.seq);
   const echo = await loadMessage(ctx, runtime, item.id);
@@ -404,6 +415,13 @@ export async function sendNext(
   }
   if (!item) {
     return "empty";
+  }
+  if (item.acceptedSeq !== undefined) {
+    if (item.acceptedSeq > (runtime.listedThrough ?? 0)) return "failed";
+    // The settled page already covered this sequence, but the event is no
+    // longer deliverable (for example, it expired during a long absence).
+    await dropItem(ctx, runtime, item, null);
+    return "dropped";
   }
   const sealed = requireMls(ctx).encryptMessage(
     runtime.record.g,
