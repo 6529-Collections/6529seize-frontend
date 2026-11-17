@@ -207,6 +207,7 @@ export function E2eePollCard({
               body={t(locale, "e2ee.poll.endConfirm")}
               confirmLabel={t(locale, "e2ee.poll.end")}
               destructive={false}
+              errorFallbackKey="e2ee.message.actionFailed"
               onClose={() => setEnding(false)}
               onConfirm={() => updatePoll(message.g, message.id, null)}
             />

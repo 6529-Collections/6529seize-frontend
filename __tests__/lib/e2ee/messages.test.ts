@@ -57,6 +57,10 @@ describe("message rules (contract 6)", () => {
       )
     ).toBe(true);
 
+    // The creation roster lives on the poll even after its epoch expires.
+    rt.record.epoch = 5;
+    rt.record.previousPollRosters = {};
+
     const vote = (
       profile: string,
       deviceKey: string,
@@ -66,7 +70,11 @@ describe("message rules (contract 6)", () => {
       applyPayload(
         rt,
         { t: "poll-vote", v: 1, id: id(seq), ts: seq, target: ID, options },
-        { ...meta(profile, seq), epoch: 2, senderDeviceKey: deviceKey }
+        {
+          ...meta(profile, seq),
+          epoch: rt.record.epoch,
+          senderDeviceKey: deviceKey,
+        }
       );
     expect(vote("dave", lateDevice, 2, [1])).toBe(false);
     expect(vote("bob", voter, 3, [1])).toBe(true);

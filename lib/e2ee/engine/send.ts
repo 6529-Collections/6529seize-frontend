@@ -418,8 +418,10 @@ export async function sendNext(
       entry.acceptedSeq <= (runtime.listedThrough ?? 0)
   );
   if (expiredAck) {
-    // A listed log page covered the sequence, but its message is unavailable.
-    await dropItem(ctx, runtime, expiredAck, null);
+    // A confirmed send is inserted atomically with the group head. Reaching
+    // its sequence without the ciphertext means the log item is unavailable
+    // (for example, after retention expiry). Report the normal send error.
+    await dropItem(ctx, runtime, expiredAck, "E2EE_SEND_FAILED");
     return "dropped";
   }
   const item = oldestOutbox(runtime);
