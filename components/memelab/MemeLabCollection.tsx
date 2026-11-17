@@ -79,11 +79,12 @@ export default function LabCollection({
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
-  const { sort, setSort, hideNftPurchasing } = useNftCollectionSort(
-    MemeLabSort.AGE,
-    MemeLabSort.AGE,
-    isMemeLabMarketQuoteSort
-  );
+  const { sort, setSort, hideNftPurchasing } =
+    useNftCollectionSort<MemeLabSort>(
+      MemeLabSort.AGE,
+      MemeLabSort.AGE,
+      isMemeLabMarketQuoteSort
+    );
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {

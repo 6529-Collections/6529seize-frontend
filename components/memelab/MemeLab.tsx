@@ -225,11 +225,12 @@ export default function MemeLabComponent({
   const [sortDir, setSortDir] = useState<SortDirection>(
     initialRouterValues.initialSortDir
   );
-  const { sort, setSort, hideNftPurchasing } = useNftCollectionSort(
-    initialRouterValues.initialSort,
-    MemeLabSort.AGE,
-    isMemeLabMarketQuoteSort
-  );
+  const { sort, setSort, hideNftPurchasing } =
+    useNftCollectionSort<MemeLabSort>(
+      initialRouterValues.initialSort,
+      MemeLabSort.AGE,
+      isMemeLabMarketQuoteSort
+    );
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
   const pageViewKey = `${sort}-${sortDir}-${volumeType}`;
   const [pageState, setPageState] = useState({ viewKey: "", page: 1 });

@@ -220,7 +220,7 @@ export default function TheMemesComponent({
 
   const [routerLoaded, setRouterLoaded] = useState(false);
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
-  const { sort, setSort, hideNftPurchasing } = useNftCollectionSort(
+  const { sort, setSort, hideNftPurchasing } = useNftCollectionSort<MemesSort>(
     MemesSort.AGE,
     MemesSort.AGE,
     isMarketQuoteSort
