@@ -102,7 +102,7 @@ the `More` menu.
    connecting?**, select **6529 Mobile** or **6529 Desktop Classic**.
 3. Choose **Connect only**, or **Connect with Post Signing & DM Encryption**.
    The modal title changes to **Connect 6529 Mobile** or **Connect 6529 Desktop Classic**.
-   Secure Desktop setup shows the v0.4.0 minimum under the secure action, during
+   Secure Desktop setup shows the v0.4.1 minimum under the secure action, during
    wallet signing, and below **Open in 6529 Desktop Classic**. **Connect only** signs in
    the receiving app with a short-lived, one-time code.
 4. Mobile shows a full-width QR. Desktop shows the 6529 logo and **Open in 6529
@@ -117,7 +117,8 @@ the `More` menu.
 6. **Back** returns to the app and connection choices. The same row reminds you:
    **Use only on a device you own. This code works once.**
 
-The muted **Download apps** link beside the title opens the Apps page. Copy and
+The muted **Download apps** link beside the title opens the Apps page, where the
+**6529 Desktop Classic** card provides the Classic installers. Copy and
 refresh are disabled during preparation; a failed preparation can be retried.
 The modal transitions smoothly between screen heights and scrolls on short
 screens without clipping the QR, controls or focus rings.

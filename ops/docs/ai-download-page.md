@@ -13,16 +13,20 @@ page (see [Where the site links it](#where-the-site-links-it)).
 | `/ai`                           | The newest release's downloads, every file with its SHA-256 and publisher, and how to check a file |
 | `/ai/guide`                     | Installing on a Mac, Windows and Linux, and the first chat                                         |
 | `/ai/known-issues`              | What hasn't been tested yet, with workarounds                                                      |
+| `/ai/releases`                  | Every release in the signed list, newest first, each under its version as anchor                   |
 | `/ai/download/<file>`           | For the newest release only, a 302 to a presigned S3 URL that works for 5 minutes                  |
 | `/ai/download/<version>/<file>` | The same, with the newest release's version                                                        |
-| `/ai/releases.json`             | The signed release feed, byte for byte                                                             |
-| `/ai/releases.json.sig`         | The feed's signature, byte for byte                                                                |
+| `/ai/releases.json`             | The signed release list, byte for byte                                                             |
+| `/ai/releases.json.sig`         | The list's signature, byte for byte                                                                |
+
+The menu over every page reads Download, Guide, Known issues, Releases,
+Models, Use it: the release standard's order, then the extras.
 
 Every page says, right under its title, that 6529 AI is untested, that
 this is a test release, and that people should expect problems and not
-rely on it for anything that matters: the download page and the guide in a
-one-line notice that links the known issues, and the known issues in their
-own lead.
+rely on it for anything that matters: the download page, the guide and the
+releases in a one-line notice that links the known issues, and the known
+issues in their own lead.
 
 ## The pages
 
@@ -89,6 +93,17 @@ own lead.
   headed "GPU", with a note under the count line, so the names have the
   room, and a card's versions and scores fold behind a button. "How to
   read this page" sits under the notice, folded, at every width.
+- **Releases** (`/ai/releases`): every release in the signed list, newest
+  first, each a section whose `id` is its version, so
+  `/ai/releases#0.1.0-rc.3` lands on it. Each has its version with a
+  Latest badge (the release the download page offers) or an Unsafe badge
+  and the list's reason, the day it was published, its channel, its full
+  commit, its notes as plain text with their line breaks (never read as
+  HTML), and a table of its files: what each is, its size, its full
+  SHA-256 with a copy button, its signer, and a download for the newest
+  release's files only. An entry the list gives without notes or files
+  shows what it has and no table; nothing on the page says a file is
+  missing. Under the list, links to `/ai/releases.json` and its signature.
 - **Known issues** (`/ai/known-issues`): the untested statement as the
   lead, the day the list last changed, a one-line "Found a problem? Report
   it" link, then **Known bugs** (each a card: what you see, the fix and
@@ -224,11 +239,12 @@ role reads it with its own short-lived credentials; its inline policy
 `ai-releases-read` allows `s3:GetObject` on `feed/*` and `releases/*` only.
 No AWS keys are configured.
 
-| Key                         | Content                                    |
-| --------------------------- | ------------------------------------------ |
-| `feed/releases.json`        | The signed release feed                    |
-| `feed/releases.json.sig`    | Its signature                              |
-| `releases/<version>/<file>` | Every file the feed lists for that release |
+| Key                         | Content                                                        |
+| --------------------------- | -------------------------------------------------------------- |
+| `feed/releases.bundle.json` | The release list in the validator's format 1 and its signature |
+| `feed/releases.json`        | The Ed25519 feed, 6529 AI's first format                       |
+| `feed/releases.json.sig`    | Its signature                                                  |
+| `releases/<version>/<file>` | Every file the list names for that release                     |
 
 The role may not list the bucket, so S3 answers a key that isn't there
 with 403 `AccessDenied`, not 404. The site reads that answer, like a 404,
@@ -242,6 +258,57 @@ an hour old. Any other S3 failure is an error, as below.
 The site reads the feed once a minute and keeps the last good copy for an
 hour if S3 fails. It serves the two feed files unchanged, five minutes in
 caches, so the signature verifies against what anyone downloads.
+
+### Which list the pages read
+
+From 0.1.0-rc.3, 6529 AI publishes its release list in the validator's
+format 1, as 6529 Desktop does: the bundle `feed/releases.bundle.json`.
+The pages, the downloads, `/ai/releases.json` and `.sig` read the bundle
+when it is there and verifies, and the Ed25519 feed otherwise. So the
+first bundle needs no site deploy, and nothing changes while there is
+none.
+
+Once a server has served the bundle, it doesn't go back to the Ed25519
+feed, which stops at the last release before the bundle: a bundle that
+then fails keeps its last good list for an hour, and after that the pages
+offer nothing, as for the Ed25519 feed. A server that restarts reads both
+again.
+
+**The key.** The bundle's signature must be by a key that
+`lib/ai-page/releaseListKeys.ts` lists. That list is empty: 6529 AI's
+release-list key (secp256k1, in the release-signing account) waits for the
+owner's approval. Until its address and public key are added there, no
+bundle verifies, and `/ai` stays on the Ed25519 feed. The tests sign
+bundles with a test key instead.
+
+### The bundle
+
+`lib/release-section/releaseList.ts` reads it, for any product: 6529 AI
+gives it its domain, keys, bundle key and routes in
+`lib/ai-page/releaseList.ts`. The bundle is
+`{"version":1,"list":"<base64>","signature":"<base64>"}`, exactly as 6529
+Desktop's `packaging/releases-feed.sh` writes it, with standard padded
+base64 of the exact bytes `/ai/releases.json` and `.sig` serve. The site
+checks, in this order:
+
+1. the bundle holds exactly those three fields, version 1, and canonical
+   base64 of a list of at most 56 KiB and a signature of at most 1 KiB;
+2. the signature: ECDSA over secp256k1 of SHA-256(`6529 AI releases v1`, a
+   zero byte, the list's bytes as stored), `r || s` in hex, by a key
+   `releaseListKeys.ts` lists, named by its address (the validator's
+   `releases.json.sig`, format 1). A list signed under 6529 Desktop's or
+   the validator's domain fails, and the reverse;
+3. only then the list: JSON, `format` 1, a `sequence` and a `releases`
+   array;
+4. a `sequence` no lower than one the server has served: a lower one is
+   refused, and the last good list stays for an hour.
+
+Fields it doesn't know are ignored, at the top, in a release and in a
+file. The two routes serve the list and the signature byte for byte, with
+the same `X-Release-List-Pair` header (the first 32 hex digits of SHA-256
+of the list's length, a line break, the list and the signature), so a
+client can tell a list and a signature from two bundles apart. The
+Ed25519 feed's answers carry no such header.
 
 ### The signature
 
@@ -270,12 +337,41 @@ LLC" and "Notarized by Apple", the name the visitor's system should show
 for the file's code signature. The site does not check code signatures.
 
 The download page shows how to check `SHA256SUMS.sig`, the release key's
-Ed25519 signature of `SHA256SUMS`, with OpenSSL 3, and the key as PEM. It
-derives the PEM from the first key in `feedSigningKeys.ts`, so it assumes
-the key that signs the feed also signs `SHA256SUMS`, as 6529 AI's release
-tool does today.
+Ed25519 signature of `SHA256SUMS`, with OpenSSL 3, and the key as PEM,
+when the newest release has a `SHA256SUMS.sig`; from 0.1.0-rc.3 it has
+none. It derives the PEM from the first key in `feedSigningKeys.ts`, so it
+assumes the key that signs the feed also signs `SHA256SUMS`, as 6529 AI's
+release tool did for 0.1.0-rc.1 and rc.2.
 
-### The feed fields the site reads
+### The fields the site reads
+
+From the bundle, the validator's parser reads each release's `version`,
+`channel`, `date`, `commit`, `notes`, `severity`, `reason` and `files`
+(`name`, `size`, `sha256`), and the list's `unsafe_versions`,
+`min_supported`, `deadline` and `deadline_reason`. Its files have no
+`system` or `signed`:
+
+- the system comes from the file name, as 6529 AI's release tool writes
+  it: `-macos-arm64.dmg`, `-windows-x64-setup.exe`, `6529-ai_*_amd64.deb`,
+  `6529-ai-cuda_*_amd64.deb`, `6529-ai_*_arm64.deb` and the three
+  `-linux-*.tar.gz`. A file it can't place, such as `NOTES.md` or
+  `SHA256SUMS`, gets no button and no card on `/ai`, and is listed on
+  `/ai/releases`;
+- the signer comes from the type, in the release standard's words (R62):
+  "Signed by 6529 Collection LLC" for the Windows installer, "Apple
+  Developer ID, notarized" for the disk image, and "SHA-256 in the signed
+  list" for the Linux packages and every other file.
+
+When the list marks the newest release `urgent` (or gives a severity the
+site doesn't know), `/ai` shows, under its title and before the untested
+notice, "{version} is an urgent update." with the list's reason, the
+deadline in UTC when `min_supported` and `deadline` give one, and a link
+to its release notes on `/ai/releases`. When `unsafe_versions` lists the
+newest release, it shows "{version} is listed as unsafe." with the
+reason, offers no download, and its files answer 404. The Ed25519 feed has
+none of these fields.
+
+From the Ed25519 feed, the site reads:
 
 The feed is `{format, sequence, published, releases}`. Each release needs
 `version` (Semantic Versioning, such as `0.1.0` or `0.1.0-rc.2`), `date`
@@ -312,10 +408,11 @@ No site deploy is needed.
 
 1. Upload the release's files to `releases/<version>/`, and check each
    object's SHA-256 against `SHA256SUMS`.
-2. Upload the new `feed/releases.json.sig` and `feed/releases.json`, the
-   feed last, with a `sequence` higher than the last feed's. Until both
-   are in place the pair does not verify, and the site keeps the last good
-   feed.
+2. Upload the new `feed/releases.bundle.json`, with a `sequence` higher
+   than the last list's. For the Ed25519 feed, upload
+   `feed/releases.json.sig` and `feed/releases.json`, the feed last; until
+   both are in place the pair does not verify, and the site keeps the last
+   good feed.
 
 The pages show the new release within a minute.
 

@@ -40,6 +40,7 @@ jobs:
       VERSION: ${{ github.sha }}
       MOBILE_APP_SCHEME: mobileStaging6529
       CORE_SCHEME: core6529
+      DESKTOP_CLASSIC_SCHEME: stagingclassiccore6529
       IPFS_GATEWAY_ENDPOINT: https://ipfs.6529.io
       # User-provided media is served from the separate content domain, as
       # in production.

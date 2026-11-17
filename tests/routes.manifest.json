@@ -193,6 +193,9 @@
     "/ai/models": {
       "classification": "crawlable"
     },
+    "/ai/releases": {
+      "classification": "crawlable"
+    },
     "/ai/use": {
       "classification": "crawlable"
     },

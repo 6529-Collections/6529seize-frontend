@@ -45,15 +45,19 @@ function Cell({
   label,
   children,
   className = "",
+  stacked = false,
 }: {
   readonly label: string;
   readonly children: ReactNode;
   readonly className?: string;
+  /** Below 1024 px, the label over the value rather than beside it. */
+  readonly stacked?: boolean;
 }) {
+  const layout = stacked
+    ? "max-lg:tw-flex max-lg:tw-flex-col max-lg:tw-gap-1.5"
+    : "max-lg:tw-flex max-lg:tw-items-center max-lg:tw-justify-between max-lg:tw-gap-3";
   return (
-    <td
-      className={`${CELL} max-lg:tw-flex max-lg:tw-items-center max-lg:tw-justify-between max-lg:tw-gap-3 ${className}`}
-    >
+    <td className={`${CELL} ${layout} ${className}`}>
       {/* The header row is hidden below 1024 px, so this label names the
           cell there; it is hidden from 1024 px, where the header does. */}
       <span className={MOBILE_LABEL}>{label}</span>
@@ -70,10 +74,16 @@ export default function ReleaseFilesTable({
   rows,
   columns,
   downloadText,
+  fullHash = false,
 }: {
   readonly rows: readonly ReleaseFileRow[];
   readonly columns: ReleaseFileColumns;
   readonly downloadText: string;
+  /**
+   * Print each SHA-256 whole, as a page of releases does, rather than its
+   * first 12 digits.
+   */
+  readonly fullHash?: boolean | undefined;
 }) {
   const { publisher } = columns;
   return (
@@ -120,18 +130,33 @@ export default function ReleaseFilesTable({
             >
               {row.size}
             </Cell>
-            <Cell label={columns.sha256}>
-              <span className="tw-inline-flex tw-items-center tw-gap-2">
-                <code
-                  aria-hidden="true"
-                  title={row.sha256}
-                  className="tw-font-mono tw-text-xs tw-text-iron-200"
-                >
-                  {row.sha256.slice(0, 12)}…
-                </code>
-                <span className="tw-sr-only">{row.sha256}</span>
-                <CopyChecksumButton value={row.sha256} label={row.copyLabel} />
-              </span>
+            <Cell label={columns.sha256} stacked={fullHash}>
+              {fullHash ? (
+                <span className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
+                  <code className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-200 lg:tw-max-w-[16rem]">
+                    {row.sha256}
+                  </code>
+                  <CopyChecksumButton
+                    value={row.sha256}
+                    label={row.copyLabel}
+                  />
+                </span>
+              ) : (
+                <span className="tw-inline-flex tw-items-center tw-gap-2">
+                  <code
+                    aria-hidden="true"
+                    title={row.sha256}
+                    className="tw-font-mono tw-text-xs tw-text-iron-200"
+                  >
+                    {row.sha256.slice(0, 12)}…
+                  </code>
+                  <span className="tw-sr-only">{row.sha256}</span>
+                  <CopyChecksumButton
+                    value={row.sha256}
+                    label={row.copyLabel}
+                  />
+                </span>
+              )}
             </Cell>
             {publisher && (
               <Cell label={publisher} className="tw-text-iron-300">
