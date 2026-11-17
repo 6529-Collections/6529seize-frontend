@@ -248,3 +248,42 @@ it.each(["https://6529.io", "https://www.6529.io", "not a url"])(
     expect(renderToString(<EnvironmentBadge />)).toBe("");
   }
 );
+
+describe("inside 6529 Desktop", () => {
+  const installDesktopShell = () => {
+    Object.defineProperty(window, "api", {
+      configurable: true,
+      value: { openExternal: jest.fn() },
+    });
+    Object.defineProperty(window, "nativeAuth", {
+      configurable: true,
+      value: { sessionLogin: jest.fn() },
+    });
+  };
+
+  afterEach(() => {
+    Reflect.deleteProperty(window, "api");
+    Reflect.deleteProperty(window, "nativeAuth");
+  });
+
+  it("shows no local-port badge in a production build", () => {
+    installDesktopShell();
+    mockBrowserOrigin = "http://localhost:6529";
+
+    const { container } = render(<EnvironmentBadge logoOverlay />);
+
+    expect(container).toBeEmptyDOMElement();
+  });
+
+  it("shows the build's own environment in a staging build", () => {
+    installDesktopShell();
+    mockBrowserOrigin = "http://localhost:6529";
+    mockPublicEnv.BASE_ENDPOINT = "https://staging.6529.io";
+
+    render(<EnvironmentBadge logoOverlay />);
+
+    expect(
+      screen.getByRole("img", { name: "Environment: STG (staging.6529.io)" })
+    ).toBeInTheDocument();
+  });
+});

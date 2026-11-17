@@ -9,6 +9,7 @@ import { ApiDropType } from "@/generated/models/ApiDropType";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
+import { useWaveMayHaveCompetitionEntries } from "./useWaveMayHaveCompetitionEntries";
 import { useCompetitionViewer } from "./useCompetitionQueries";
 
 function winnerContext(
@@ -83,8 +84,22 @@ export function applyCompetitionDropSummary(
   return result;
 }
 
-export function useCompetitionDrop(drop: ExtendedDrop) {
+export function useCompetitionDrop(
+  drop: ExtendedDrop,
+  {
+    skipInWavesWithoutCompetition = false,
+  }: {
+    /**
+     * Lists mount one of these per row; in a wave known to have no competition
+     * they skip the lookup. Single-drop views always look up: it is one request
+     * and they show the voting controls.
+     */
+    readonly skipInWavesWithoutCompetition?: boolean;
+  } = {}
+) {
   const viewer = useCompetitionViewer();
+  const waveMayHaveEntries = useWaveMayHaveCompetitionEntries(drop.wave.id);
+  const mayBeEntry = !skipInWavesWithoutCompetition || waveMayHaveEntries;
   const context = useQuery({
     queryKey: [
       QueryKey.COMPETITION_DROP_CONTEXT,
@@ -92,7 +107,7 @@ export function useCompetitionDrop(drop: ExtendedDrop) {
     ],
     queryFn: ({ signal }) =>
       fetchDropCompetitionContext(drop.wave.id, drop.id, signal),
-    enabled: !drop.id.startsWith("temp-"),
+    enabled: mayBeEntry && !drop.id.startsWith("temp-"),
     retry: false,
     staleTime: 15_000,
     refetchInterval: (query) =>

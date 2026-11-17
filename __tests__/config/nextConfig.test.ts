@@ -46,6 +46,14 @@ describe("shared Next config", () => {
     });
   });
 
+  it("sends the retired Prenodes page to the validator", async () => {
+    expect(await sharedConfig(publicEnv, "").redirects?.()).toContainEqual({
+      source: "/network/prenodes",
+      destination: "/validator",
+      permanent: true,
+    });
+  });
+
   it("sets no trace exclusions", () => {
     expect(
       sharedConfig(publicEnv, "").outputFileTracingExcludes
@@ -83,6 +91,37 @@ describe("shared Next config", () => {
     expect(
       await scriptSrcFor({ ...publicEnv, NEXT_PUBLIC_E2EE_DM_ENABLED: "true" })
     ).toContain("'wasm-unsafe-eval'");
+  });
+
+  it("allows the Tauri IPC channel only in 6529 Desktop's own build", async () => {
+    const connectSrc = async (): Promise<string> => {
+      const headers = await sharedConfig(publicEnv, "").headers?.();
+      // The site-wide rule, not a route-specific policy.
+      const csp = headers
+        ?.find((entry) => entry.source === "/:path*")
+        ?.headers.find(
+          (header) => header.key === "Content-Security-Policy"
+        )?.value;
+      return (
+        csp
+          ?.split(";")
+          .map((directive) => directive.trim())
+          .find((directive) => directive.startsWith("connect-src ")) ?? ""
+      );
+    };
+    const previous = process.env["DESKTOP_APP_BUILD"];
+    try {
+      delete process.env["DESKTOP_APP_BUILD"];
+      expect(await connectSrc()).not.toContain("ipc");
+      process.env["DESKTOP_APP_BUILD"] = "1";
+      expect(await connectSrc()).not.toContain("ipc");
+      process.env["DESKTOP_APP_BUILD"] = "true";
+      expect(await connectSrc()).toContain("http://ipc.localhost");
+      expect(await connectSrc()).toContain("ipc://localhost");
+    } finally {
+      if (previous === undefined) delete process.env["DESKTOP_APP_BUILD"];
+      else process.env["DESKTOP_APP_BUILD"] = previous;
+    }
   });
 
   describe("security headers", () => {

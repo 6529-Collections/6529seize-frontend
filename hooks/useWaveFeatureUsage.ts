@@ -3,6 +3,7 @@
 import { useCallback, useContext } from "react";
 import { AuthContext } from "@/components/auth/authContext";
 import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
+import { isDesktopApp } from "@/helpers/desktop-shell";
 import useDeviceInfo from "./useDeviceInfo";
 import { isAnalyticsTrackingAllowed } from "@/services/analytics/mixpanel";
 import {
@@ -37,7 +38,7 @@ export function useWaveFeatureUsage(
     const params = new URLSearchParams(search);
     let platform: WaveFeatureContext["platform"] = "desktop_web";
     if (isApp) platform = "native";
-    else if (navigator.userAgent.includes("Electron")) platform = "desktop_app";
+    else if (isDesktopApp()) platform = "desktop_app";
     else if (window.matchMedia("(max-width: 767px)").matches)
       platform = "mobile_web";
     return {

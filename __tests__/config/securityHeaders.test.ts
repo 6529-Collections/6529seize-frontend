@@ -124,6 +124,23 @@ describe("createSecurityHeaders CSP", () => {
     );
   });
 
+  it("adds the Tauri IPC origins to connect-src only when asked", () => {
+    const sourcesFor = (allowDesktopIpc?: boolean) =>
+      getDirectiveSources(
+        getHeaderValue("Content-Security-Policy", { allowDesktopIpc }) ?? "",
+        "connect-src"
+      );
+
+    expect(sourcesFor()).not.toContain("http://ipc.localhost");
+    expect(sourcesFor(false)).not.toContain("ipc://localhost");
+    expect(sourcesFor(true)).toEqual(
+      expect.arrayContaining(["http://ipc.localhost", "ipc://localhost"])
+    );
+    // Nothing else changes, and no plain-HTTP wildcard appears.
+    expect(sourcesFor(true)).not.toContain("http:");
+    expect(sourcesFor(true).length).toBe(sourcesFor().length + 2);
+  });
+
   it("uses scheme-limited image sources instead of a wildcard host source", () => {
     const imgSrc = getDirectiveSources(getContentSecurityPolicy(), "img-src");
 

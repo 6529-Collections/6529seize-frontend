@@ -25,7 +25,7 @@ import {
   type InfiniteData,
 } from "@tanstack/react-query";
 import Link from "next/link";
-import { useContext, useId, useRef, useState } from "react";
+import { useContext, useId, useMemo, useRef, useState } from "react";
 import { useNicRatingState } from "../identity/header/cic-rate/useNicRatingState";
 import RatingAmountInput from "./RatingAmountInput";
 import RatingEditorFooter from "./RatingEditorFooter";
@@ -172,7 +172,10 @@ function RatingsList({
     initialPageParam: 1,
     getNextPageParam: (page) => (page.next ? page.page + 1 : undefined),
   });
-  const items = query.data?.pages.flatMap((page) => page.data) ?? [];
+  const items = useMemo(
+    () => query.data?.pages.flatMap((page) => page.data) ?? [],
+    [query.data?.pages]
+  );
   const targets = items.map(getRatingRecipient);
   // Profile pictures share the identity cache with profile previews.
   const identities = useQueries({
@@ -255,6 +258,8 @@ function RatingsList({
     let value = raw === "0-" || raw === "-0" ? "-" : raw;
     if (value.length > 1 && value.startsWith("0")) value = value.slice(1);
     if (!/^-?\d*$/.test(value)) return;
+    clearError();
+    setPrepareError(false);
     setDrafts((previous) => {
       const next = { ...previous };
       if (isRatingValue(value) && Number(value) === draft.original)

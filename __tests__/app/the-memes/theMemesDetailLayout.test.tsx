@@ -7,6 +7,7 @@ jest.mock("@/services/6529api", () => ({
 }));
 
 jest.mock("@/components/meme-calendar/meme-calendar.helpers", () => ({
+  ...jest.requireActual("@/components/meme-calendar/meme-calendar.helpers"),
   getCanonicalNextMintNumber: () => 123,
 }));
 
