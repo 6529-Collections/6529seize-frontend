@@ -19,6 +19,10 @@ import type {
 import { useApprovalWaveStatus } from "@/hooks/waves/useApprovalWaveStatus";
 import { useLayout } from "./layout/LayoutContext";
 import Button from "@/components/utils/button/Button";
+import {
+  CONNECTED_TAB_LIST_CLASSES,
+  getConnectedTabButtonClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 
 interface MyStreamWavePollsProps {
   readonly wave: ApiWave;
@@ -120,17 +124,6 @@ const getStateFilterItem = (
 
 const getSortItem = (value: WavePollsSortOption): WavePollsSortItem =>
   SORT_ITEMS.find((item) => item.value === value) ?? DEFAULT_SORT_ITEM;
-
-const getStateFilterClassName = (active: boolean): string => {
-  const baseClass =
-    "tw-flex tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-3 tw-py-1.5 tw-text-xs tw-font-medium tw-leading-5 tw-transition-all tw-duration-300 tw-ease-out";
-
-  if (active) {
-    return `${baseClass} tw-bg-iron-800 tw-text-iron-100`;
-  }
-
-  return `${baseClass} tw-bg-iron-950 tw-text-iron-500 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-100`;
-};
 
 const noop = () => {};
 
@@ -244,7 +237,7 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
         <div
           role="tablist"
           aria-label="Poll state"
-          className="tw-flex tw-items-center tw-gap-x-1 tw-rounded-lg tw-bg-iron-950 tw-p-1 tw-ring-1 tw-ring-inset tw-ring-iron-800"
+          className={`tw-flex tw-items-center ${CONNECTED_TAB_LIST_CLASSES}`}
         >
           {STATE_FILTER_ITEMS.map((item) => (
             <button
@@ -254,7 +247,9 @@ const MyStreamWavePolls: React.FC<MyStreamWavePollsProps> = ({
               aria-label={item.label}
               aria-selected={stateFilter === item.value}
               tabIndex={stateFilter === item.value ? 0 : -1}
-              className={getStateFilterClassName(stateFilter === item.value)}
+              className={getConnectedTabButtonClasses({
+                isActive: stateFilter === item.value,
+              })}
               onClick={() => setStateFilter(item.value)}
             >
               {item.label}

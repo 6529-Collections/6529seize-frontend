@@ -1,8 +1,7 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import useCapacitor from "@/hooks/useCapacitor";
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
@@ -63,15 +62,8 @@ export function AboutContentsDropdown({
     "--about-contents-sticky-top": `${stickyTop}px`,
   };
   const { hideNftPurchasing: hideSubscriptions } = useNftPurchasingVisibility();
-  const consent = useOptionalCookieConsent();
   const groups = getVisibleAboutNavGroups({
     hideSubscriptions,
-    hideSubscriptionReports:
-      consent !== undefined &&
-      shouldHideSubscriptions({
-        capacitorIsIos: capacitor.isIos,
-        country: consent.country,
-      }),
     appWalletsSupported,
   });
   const normalizedCurrentHref = normalizeAboutHref(currentHref);
@@ -158,7 +150,7 @@ export function AboutContentsDropdown({
             page: currentLabel,
           })}
           unstyledTrigger
-          triggerClassName="tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-px-3 tw-py-2 tw-text-left tw-shadow-sm tw-transition tw-duration-200 tw-ease-out hover:tw-border-primary-400/60 hover:tw-bg-iron-900 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-black"
+          triggerClassName={`${DROPDOWN_FIELD_CLASSES} tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-left hover:tw-border-primary-400/60`}
           trigger={<AboutContentsDropdownTrigger currentLabel={currentLabel} />}
           items={items}
           activeItemId={activeItemId}
@@ -232,7 +224,7 @@ function AboutContentsDropdownTrigger({
 }) {
   return (
     <>
-      <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-50">
+      <span className="tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-300">
         {currentLabel}
       </span>
       <ChevronDownIcon

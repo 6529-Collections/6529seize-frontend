@@ -127,7 +127,16 @@ interface SecurityHeaderOptions {
   readonly allowWasmUnsafeEval?: boolean | undefined;
   readonly webSocketEndpoint?: string | undefined;
   readonly sentryDsn?: string | undefined;
+  /**
+   * The bundle 6529 Desktop builds for its own local server: allow the Tauri
+   * host's IPC channel (`http://ipc.localhost`, `ipc://localhost`), which
+   * the desktop bridge uses. Never set for 6529.io.
+   */
+  readonly allowDesktopIpc?: boolean | undefined;
 }
+
+/** The Tauri IPC origins, on Windows (WebView2) and macOS/Linux. */
+const DESKTOP_IPC_CSP_SOURCES = ["http://ipc.localhost", "ipc://localhost"];
 
 export function createSecurityHeaders(
   apiEndpoint: string | undefined = "",
@@ -180,6 +189,7 @@ export function createSecurityHeaders(
     "https://rpc.walletconnect.com/v1/",
     "https://sts.us-east-1.amazonaws.com",
     "https://sts.us-west-2.amazonaws.com",
+    ...(options.allowDesktopIpc ? DESKTOP_IPC_CSP_SOURCES : []),
   ];
   const imgSrc = [
     "'self'",

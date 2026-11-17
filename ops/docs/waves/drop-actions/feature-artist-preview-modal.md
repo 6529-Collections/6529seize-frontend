@@ -59,12 +59,17 @@ Badge state decides which section opens first.
   touch screens.
 - In the native app, the focused vote field stays visible as the keyboard opens,
   and the close button remains above the submission panel.
+- Close buttons use a 36px rounded-square surface with a 16px X across both
+  sections on web and in the native app, retaining a 44px touch target. They use
+  the shared modal's muted, borderless style with a dark hover background.
 - The active card's top row shows the media-format indicator and optional
   `Additional Action` badge on the left, with the leaderboard-style position
   badge on the right. The title appears below this row. Hover or focus the
   media indicator to see its format.
 - The category tabs fill the available width below 640px. They stay above the
   scrolling cards with a small clear edge beneath them.
+- When switching sections, the loading placeholder keeps the previous section's
+  height. Once results arrive, the modal fits the new content.
 - Both sections use one column on small screens, two on medium screens, and
   three on large screens.
 - Cards marked `Additional Action` indicate that the artist promised something

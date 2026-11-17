@@ -4,6 +4,7 @@
 
 import { CURRENT_EULA_VERSION } from "@/constants/constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import FontAwesomeSvgIcon from "@/components/common/icons/FontAwesomeSvgIcon";
 import { useEULAConsent } from "./useEULAConsent";
@@ -266,21 +267,52 @@ export default function EULAModal() {
                         (allowlist) a future 6529 NFT based on owning one or
                         more current 6529 NFTs.
                       </p>
-                      <p>
-                        You acknowledge that you have read and accept the
-                        information on this webpage that explains this topic in
-                        more detail and that is incorporated by reference into
-                        these Terms.
-                      </p>
-                      <p>
-                        <a
-                          href="https://6529.io/about/minting"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          6529.io/about/minting
-                        </a>
-                      </p>
+                      <p>{t(DEFAULT_LOCALE, "eula.modal.mintingReference")}</p>
+                      <details>
+                        <summary className="tw-cursor-pointer tw-underline">
+                          {t(locale, "eula.modal.readMintingTerms")}
+                        </summary>
+                        <div lang={DEFAULT_LOCALE}>
+                          <p>
+                            {t(
+                              DEFAULT_LOCALE,
+                              "about.minting.eligibility.intro"
+                            )}
+                          </p>
+                          <dl>
+                            {(
+                              ["phase0", "phase1", "phase2", "public"] as const
+                            ).map((phase) => (
+                              <div key={phase}>
+                                <dt>
+                                  {t(
+                                    DEFAULT_LOCALE,
+                                    `about.minting.phases.${phase}.title`
+                                  )}
+                                </dt>
+                                <dd>
+                                  {t(
+                                    DEFAULT_LOCALE,
+                                    `about.minting.phases.${phase}.description`
+                                  )}
+                                </dd>
+                              </div>
+                            ))}
+                          </dl>
+                          <p>
+                            {t(
+                              DEFAULT_LOCALE,
+                              "about.minting.eligibility.distribution.description"
+                            )}
+                          </p>
+                          <p>
+                            {t(
+                              DEFAULT_LOCALE,
+                              "about.minting.eligibility.subscriptionNote"
+                            )}
+                          </p>
+                        </div>
+                      </details>
                     </li>
                     <li>
                       <p>

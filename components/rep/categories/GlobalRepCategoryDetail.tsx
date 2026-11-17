@@ -1,5 +1,7 @@
 "use client";
 
+import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
+
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -87,13 +89,9 @@ const PRESENTATION_CLASSNAME = `
   [&_.rep-category-preview-list]:!tw-gap-1.5 [&_.rep-category-preview-row]:!tw-gap-2 [&_.rep-category-preview-row]:!tw-rounded-lg [&_.rep-category-preview-row]:!tw-border [&_.rep-category-preview-row]:!tw-border-solid [&_.rep-category-preview-row]:!tw-border-white/[0.08] [&_.rep-category-preview-row]:!tw-bg-white/[0.04] [&_.rep-category-preview-row]:tw-transition-colors hover:[&_.rep-category-preview-row]:!tw-border-white/[0.12] hover:[&_.rep-category-preview-row]:!tw-bg-white/[0.06]
   [&_.rep-category-activity-row]:!tw-py-3
   [&_.rep-category-preview-section]:tw-px-0 sm:[&_.rep-category-preview-section]:tw-px-1 lg:[&_.rep-category-preview-section]:tw-px-2 [&_.rep-category-preview-title]:!tw-mb-3 [&_.rep-category-preview-title]:!tw-mt-0 [&_.rep-category-preview-title]:!tw-text-xs [&_.rep-category-preview-title]:!tw-font-semibold [&_.rep-category-preview-title]:!tw-uppercase [&_.rep-category-preview-title]:!tw-tracking-wider [&_.rep-category-preview-title]:!tw-text-iron-500
-  [&_.rep-category-preview-value]:!tw-font-normal [&_.rep-category-preview-value]:!tw-tracking-tight [&_.rep-category-preview-value]:!tw-text-iron-400 [&_.rep-category-profile-avatar]:!tw-h-7 [&_.rep-category-profile-avatar]:!tw-w-7 sm:[&_.rep-category-profile-avatar]:!tw-h-8 sm:[&_.rep-category-profile-avatar]:!tw-w-8 [&_.rep-category-profile-name]:!tw-text-iron-200
+  [&_.rep-category-preview-value]:!tw-font-normal [&_.rep-category-preview-value]:!tw-tracking-tight [&_.rep-category-preview-value]:!tw-text-iron-400 [&_.rep-category-profile-avatar]:!tw-h-7 [&_.rep-category-profile-avatar]:!tw-w-7 sm:[&_.rep-category-profile-avatar]:!tw-h-8 sm:[&_.rep-category-profile-avatar]:!tw-w-8
   md:[&_.rep-category-activity-grid]:!tw-gap-4
   [&_.rep-category-scope]:tw-w-fit [&_.rep-category-scope]:tw-max-w-full
-  [&_.rep-category-section-tab]:!tw-rounded-none [&_.rep-category-section-tab]:!tw-border-x-0 [&_.rep-category-section-tab]:!tw-border-b-2 [&_.rep-category-section-tab]:!tw-border-t-0 [&_.rep-category-section-tab]:!tw-border-solid [&_.rep-category-section-tab]:!tw-border-transparent [&_.rep-category-section-tab]:!tw-bg-transparent [&_.rep-category-section-tab]:!tw-px-3 [&_.rep-category-section-tab]:!tw-py-3 [&_.rep-category-section-tab]:!tw-text-sm [&_.rep-category-section-tab]:!tw-font-medium [&_.rep-category-section-tab]:!tw-text-iron-500
-  [&_.rep-category-section-tab[aria-pressed=true]]:!tw-border-primary-300 [&_.rep-category-section-tab[aria-pressed=true]]:!tw-bg-transparent [&_.rep-category-section-tab[aria-pressed=true]]:!tw-text-white [&_.rep-category-section-tab[aria-pressed=true]]:!tw-shadow-none
-  [&_.rep-category-section-tab[aria-selected=true]]:!tw-border-primary-300 [&_.rep-category-section-tab[aria-selected=true]]:!tw-bg-transparent [&_.rep-category-section-tab[aria-selected=true]]:!tw-text-white [&_.rep-category-section-tab[aria-selected=true]]:!tw-shadow-none hover:[&_.rep-category-section-tab]:!tw-text-iron-200
-  [&_.rep-category-section-tabs]:!tw-gap-x-1 [&_.rep-category-section-tabs]:!tw-border-b [&_.rep-category-section-tabs]:!tw-border-iron-800 [&_.rep-category-section-tabs]:!tw-bg-transparent [&_.rep-category-section-tabs]:!tw-px-0 [&_.rep-category-section-tabs]:!tw-pb-0
   [&_.rep-category-sort-row]:!tw-justify-start [&_.rep-category-sort]:tw-w-full sm:[&_.rep-category-sort]:tw-w-fit
   [&_.rep-category-state]:!tw-rounded-xl [&_.rep-category-state]:!tw-border-iron-800/50 [&_.rep-category-state]:!tw-bg-iron-900/20
   [&_.rep-category-table-frame]:!tw-rounded-xl [&_.rep-category-table-frame]:!tw-border-0 [&_.rep-category-table-frame]:!tw-bg-iron-950 [&_.rep-category-table-frame]:tw-ring-1 [&_.rep-category-table-frame]:tw-ring-inset [&_.rep-category-table-frame]:tw-ring-iron-900
@@ -115,7 +113,7 @@ function ProfileCell({
       <Link
         href={getProfileHref(profile)}
         prefetch={false}
-        className={`rep-category-profile tw-flex tw-min-w-0 tw-items-center tw-text-left tw-no-underline tw-decoration-iron-400/80 tw-underline-offset-2 hover:tw-underline focus-visible:tw-underline ${
+        className={`rep-category-profile tw-group/rep-category-profile tw-flex tw-min-w-0 tw-items-center tw-text-left tw-no-underline focus-visible:tw-rounded-lg focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
           compact ? "tw-gap-2" : "tw-gap-3"
         }`}
       >
@@ -135,7 +133,7 @@ function ProfileCell({
             </span>
           )}
         </span>
-        <span className="rep-category-profile-name tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
+        <span className="rep-category-profile-name tw-min-w-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100 tw-transition-colors group-hover/rep-category-profile:tw-text-iron-400 group-focus-visible/rep-category-profile:tw-text-iron-400">
           {display}
         </span>
       </Link>
@@ -510,6 +508,8 @@ function PaginatedTable({
       <div className="rep-category-sort-row tw-flex tw-flex-wrap tw-justify-end tw-gap-3">
         <div className="rep-category-sort tw-min-w-0 tw-max-w-full">
           <CommonTabs<GlobalRepCategorySort>
+            variant="connected"
+            connectedSize="sm"
             items={SORTS}
             activeItem={effectiveSort}
             filterLabel="Sort category rows"
@@ -631,6 +631,8 @@ export default function GlobalRepCategoryDetail({
         <div className="rep-category-scope-row tw-flex tw-items-center tw-justify-between tw-gap-3">
           <div className="rep-category-scope tw-min-w-0 tw-max-w-full">
             <CommonTabs<RepCategoryScope>
+              variant="connected"
+              connectedSize="sm"
               items={SCOPES}
               activeItem={activeScope}
               filterLabel="REP category scope"
@@ -659,7 +661,7 @@ export default function GlobalRepCategoryDetail({
             <div
               role="tablist"
               aria-label="Global REP category sections"
-              className="rep-category-section-tabs tw-flex tw-gap-2 tw-overflow-x-auto tw-border-b tw-border-l-0 tw-border-r-0 tw-border-t-0 tw-border-solid tw-border-white/10 tw-pb-2"
+              className="rep-category-section-tabs tw-flex tw-gap-x-1 tw-overflow-x-auto tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800"
             >
               {TABS.map((tab) => (
                 <button
@@ -670,11 +672,7 @@ export default function GlobalRepCategoryDetail({
                   aria-controls={`global-rep-category-${tab.id}`}
                   id={`global-rep-category-tab-${tab.id}`}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`rep-category-section-tab tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-py-2 tw-text-sm tw-font-semibold tw-transition-colors ${
-                    activeTab === tab.id
-                      ? "tw-border-white/20 tw-bg-white/10 tw-text-white"
-                      : "tw-border-transparent tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/[0.05] hover:tw-text-iron-200"
-                  }`}
+                  className={`${getUnderlineTabClasses({ active: activeTab === tab.id, size: "sm" })} rep-category-section-tab tw-px-3 tw-py-3`}
                 >
                   {tab.label}
                 </button>

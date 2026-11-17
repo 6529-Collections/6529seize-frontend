@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  useNftPurchasingVisibility,
-  useSubscriptionPageVisibility,
-} from "@/hooks/useNftPurchasingVisibility";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 
@@ -28,19 +25,6 @@ export default function NftPurchasingGate({
     return reservesNftPurchasingSpace ? placeholder : null;
   }
   return children;
-}
-
-export function SubscriptionPageGate({
-  children,
-  placeholder,
-}: {
-  readonly children: ReactNode;
-  readonly placeholder: ReactNode;
-}) {
-  const { hideNftPurchasing, reservesNftPurchasingSpace } =
-    useSubscriptionPageVisibility();
-  if (!hideNftPurchasing) return children;
-  return reservesNftPurchasingSpace ? placeholder : null;
 }
 
 function PurchasingRedirect({ href }: { readonly href: string }) {

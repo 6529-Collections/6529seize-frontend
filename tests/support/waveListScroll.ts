@@ -1,5 +1,6 @@
 import type { Locator, Page, WebSocketRoute } from "@playwright/test";
 import type { ApiWave } from "../../generated/models/ApiWave";
+import type { ApiUpdatePinnedWaveOrder } from "../../generated/models/ApiUpdatePinnedWaveOrder";
 import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
 import { expect } from "../testHelpers";
 import { getSandboxApiOrigin } from "./localSandbox";
@@ -27,6 +28,24 @@ export async function installWaveListScrollFixture(
       subscribed: true,
     },
   }));
+  let savedPins = waves;
+  await page.route("**/api/v2/waves/pinned", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({ json: savedPins });
+      return;
+    }
+    const { previous_wave_ids, wave_ids } = route
+      .request()
+      .postDataJSON() as ApiUpdatePinnedWaveOrder;
+    expect(previous_wave_ids).toEqual(savedPins.map((wave) => wave.id));
+    const byId = new Map(savedPins.map((wave) => [wave.id, wave]));
+    savedPins = wave_ids.map((id) => {
+      const wave = byId.get(id);
+      if (!wave) throw new Error(`Unknown pinned wave ${id}`);
+      return wave;
+    });
+    await route.fulfill({ json: { wave_ids } });
+  });
   await page.route("**/api/v2/waves?**", (route) =>
     route.fulfill({ json: { data: waves, page: 1, next: false } })
   );

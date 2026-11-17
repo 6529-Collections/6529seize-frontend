@@ -19,6 +19,14 @@ export interface WavesContextData {
   readonly hasLoadingError?: boolean | undefined;
   readonly retryLoading?: (() => void) | undefined;
   readonly isPinnedWavesLoading?: boolean;
+  readonly hasPinnedWavesError?: boolean;
+  readonly retryPinnedWaves?: () => Promise<unknown>;
+  readonly pinnedWaveOrder?: readonly string[];
+  readonly reorderPinnedWaves?: (
+    previousIds: readonly string[],
+    nextIds: readonly string[]
+  ) => Promise<void>;
+  readonly isSavingPinnedWaveOrder?: boolean;
   /**
    * The waves with the server's unread values. They keep their identity while
    * messages arrive; read live unread counts, dividers and activity order with

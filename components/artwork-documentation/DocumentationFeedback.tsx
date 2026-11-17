@@ -29,6 +29,7 @@ import {
   DocumentationButton,
   DocumentationNotice,
   inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -150,7 +151,7 @@ export default function DocumentationFeedback({
             <label className="tw-block tw-text-sm tw-text-iron-300">
               {msg("audience")}
               <select
-                className={`${inputClass} tw-mt-2`}
+                className={`${selectClass} tw-mt-2`}
                 value={audience}
                 onChange={(event) => setAudience(event.target.value)}
               >
@@ -170,7 +171,7 @@ export default function DocumentationFeedback({
             <label className="tw-block tw-text-sm tw-text-iron-300">
               {msg("visibility")}
               <select
-                className={`${inputClass} tw-mt-2`}
+                className={`${selectClass} tw-mt-2`}
                 value={restrictedClass}
                 onChange={(event) => setRestrictedClass(event.target.value)}
               >

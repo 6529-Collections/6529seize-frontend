@@ -88,13 +88,20 @@ export const E2eeMarkdown = memo(
     mentions,
     selfProfileId,
     preview = false,
+    inlinePreview = false,
   }: PrivateTextContext & {
     readonly text: string;
     readonly messageId: string;
+    readonly inlinePreview?: boolean;
   }) => {
     const context = useMemo(
-      () => ({ members, mentions, selfProfileId, preview }),
-      [members, mentions, selfProfileId, preview]
+      () => ({
+        members,
+        mentions,
+        selfProfileId,
+        preview: preview || inlinePreview,
+      }),
+      [members, mentions, selfProfileId, preview, inlinePreview]
     );
     return (
       <TextContext.Provider value={context}>
@@ -103,6 +110,7 @@ export const E2eeMarkdown = memo(
           messageId={messageId}
           privacy="private"
           preview={preview}
+          inlinePreview={inlinePreview}
           components={COMPONENTS}
           textPlugins={TEXT_PLUGINS}
         />

@@ -162,7 +162,7 @@ test("opens and closes options", async () => {
     }
   );
   const btn = screen.getByRole("button");
-  expect(btn).toHaveClass("tw-size-11", "desktop-hover:tw-size-8");
+  expect(btn).toHaveClass("tw-size-8", "touch-only:tw-size-11");
   await user.click(btn);
   expect(screen.getByTestId("delete")).toHaveAttribute("data-mobile", "false");
   expect(screen.getByTestId("profile-wave")).toHaveAttribute("data-wave", "w1");

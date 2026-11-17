@@ -37,7 +37,7 @@ function MobileTabButton({
       disabled={disabled}
       aria-pressed={isSelected}
       onClick={() => onTabChange(tab)}
-      className={`tw-flex tw-min-h-11 tw-min-w-0 tw-flex-auto tw-cursor-pointer tw-touch-manipulation tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-px-1.5 tw-py-2 tw-text-center tw-transition-[background-color,box-shadow] tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-300 @[340px]:tw-px-2.5 motion-reduce:tw-transition-none ${buttonStateClasses}`}
+      className={`tw-flex tw-min-h-11 tw-min-w-0 tw-flex-auto tw-cursor-pointer tw-touch-manipulation tw-flex-col tw-items-center tw-justify-center tw-gap-1 tw-rounded-lg tw-border-0 tw-px-1.5 tw-py-2 tw-text-center tw-transition-[background-color,box-shadow] tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-300 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 @[340px]:tw-px-2.5 motion-reduce:tw-transition-none ${buttonStateClasses}`}
     >
       <span
         className={`tw-block tw-max-w-full tw-truncate tw-text-[11px] tw-font-medium tw-uppercase tw-leading-[15px] tw-tracking-[0.03em] tw-transition-colors tw-duration-200 @[340px]:tw-leading-4 @[340px]:tw-tracking-[0.04em] motion-reduce:tw-transition-none ${labelColorClasses}`}

@@ -438,6 +438,9 @@ export default function MemeLabPageComponent({
       >
         <div className="tw-w-fit tw-max-w-full">
           <CommonTabs<MEME_LAB_HISTORY_TAB>
+            variant="connected"
+            connectedSize="sm"
+            connectedTypography="body"
             items={visibleHistoryTabItems}
             activeItem={activeHistoryTab}
             filterLabel={t(locale, "memeLab.detail.sections.history")}

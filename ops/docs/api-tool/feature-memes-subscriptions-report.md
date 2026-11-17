@@ -67,7 +67,7 @@ subscription counts.
 ## Visibility and State Rules
 
 - The route itself is not geo-blocked.
-- On iOS outside the US, this route is hidden from web sidebar and search.
+- In the iOS app, the report is hidden from navigation and search.
 - Native app drawer uses the same `Subscriptions Report` label when visible.
 - The profile-subscription action is hidden when subscription controls are
   geo/platform hidden.

@@ -29,11 +29,17 @@ export function XtdhTokenContributorsControls({
   isDisabled = false,
 }: Readonly<XtdhTokenContributorsControlsProps>) {
   return (
-    <section className="tw-flex tw-flex-col tw-gap-4" aria-label="Filter token contributors">
+    <section
+      className="tw-flex tw-flex-col tw-gap-4"
+      aria-label="Filter token contributors"
+    >
       <div className="tw-flex tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between">
         <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 md:tw-flex-row md:tw-items-center md:tw-justify-between">
           <div className="tw-w-full md:tw-w-auto">
             <CommonSelect
+              variant="connected"
+              connectedSize="sm"
+              connectedTypography="body"
               items={TOKENS_SORT_ITEMS}
               activeItem={activeSortField}
               filterLabel="Sort contributors by"
@@ -43,8 +49,8 @@ export function XtdhTokenContributorsControls({
               fill={false}
             />
           </div>
-          <div className="tw-flex tw-items-center tw-gap-3 tw-w-full md:tw-w-auto">
-            <span className="tw-text-sm tw-font-semibold tw-text-iron-400 tw-whitespace-nowrap">
+          <div className="tw-flex tw-w-full tw-items-center tw-gap-3 md:tw-w-auto">
+            <span className="tw-whitespace-nowrap tw-text-sm tw-font-semibold tw-text-iron-400">
               Group by
             </span>
             <div className="tw-w-full md:tw-w-48">
@@ -58,10 +64,7 @@ export function XtdhTokenContributorsControls({
             </div>
           </div>
         </div>
-
       </div>
     </section>
   );
 }
-
-

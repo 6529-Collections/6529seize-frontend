@@ -115,7 +115,7 @@
 - Refresh icon is only available in `Random` sort mode.
 - `Recently Added` maps to descending `created_at` order.
 - Replica chips appear only when the token has more than one replica.
-- `NFT Marketplace Links` are hidden on iOS unless detected country is `US`.
+- `NFT Marketplace Links` are hidden in the iOS app.
 - On mobile/tablet (`< xl`), collection switching appears in a dropdown above
   filters.
 - Valid positive numeric `meme_id` values that are not in the loaded meme list

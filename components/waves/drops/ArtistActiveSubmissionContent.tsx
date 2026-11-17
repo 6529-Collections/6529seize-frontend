@@ -102,7 +102,11 @@ export const ArtistActiveSubmissionContent: React.FC<
       {(() => {
         if (isLoading || dropsLoading) {
           return (
-            <div className="tw-flex tw-h-96 tw-items-center tw-justify-center">
+            <div
+              data-artist-preview-loading="true"
+              // The remembered panel height includes this wrapper's pt-4/pb-6.
+              className="tw-flex tw-h-[max(6rem,calc(var(--artist-preview-panel-height,26.5rem)-2.5rem))] tw-items-center tw-justify-center"
+            >
               <div className="tw-flex tw-flex-col tw-items-center tw-gap-4">
                 <div className="tw-h-8 tw-w-8 tw-animate-spin tw-rounded-full tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-400"></div>
                 <span className="tw-animate-fade-in-out tw-text-sm tw-text-iron-400">

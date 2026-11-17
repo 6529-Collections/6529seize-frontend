@@ -1607,13 +1607,18 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
   test("keeps the poll composer usable and submits its exact shape", async ({
     baseURL,
+    isMobile,
     page,
-  }) => {
+  }, testInfo) => {
     await resetSandboxRequests(baseURL);
     await gotoSandboxWave(page);
     await showDropActionsIfCollapsed(page);
 
-    await page.getByRole("button", { name: "Add poll" }).click();
+    const addPoll = page.getByRole("button", {
+      name: isMobile ? "Poll" : "Add poll",
+      exact: true,
+    });
+    await addPoll.click();
 
     const poll = page.getByTestId("create-drop-poll");
     await expect(poll).toBeVisible();
@@ -1636,7 +1641,8 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
 
     await poll.getByRole("button", { name: "Remove poll" }).click();
     await expect(poll).toBeHidden();
-    await page.getByRole("button", { name: "Add poll" }).click();
+    await showDropActionsIfCollapsed(page);
+    await addPoll.click();
     await expect(poll).toBeVisible();
 
     const firstOption = page.getByRole("textbox", { name: "Poll option 1" });
@@ -1647,6 +1653,13 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     expect((await firstOption.boundingBox())?.width ?? 0).toBeGreaterThan(140);
 
     const multipleButton = page.getByRole("button", { name: "Multiple" });
+    for (const button of [
+      page.getByRole("button", { name: "Single", exact: true }),
+      multipleButton,
+    ]) {
+      await expect(button).toHaveCSS("font-size", "12px");
+      await expect(button).toHaveCSS("height", "24px");
+    }
     await multipleButton.click();
     await expect(multipleButton).toHaveAttribute("aria-pressed", "true");
 
@@ -1677,6 +1690,9 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
       .fill(SANDBOX_POLL_QUESTION);
 
     await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("poll-connected-mode.png"),
+    });
     const postButton = page.getByRole("button", { name: "Post" }).last();
     await expect(postButton).toBeEnabled();
     await postButton.click();

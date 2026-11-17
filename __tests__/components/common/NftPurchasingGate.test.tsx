@@ -6,7 +6,6 @@ import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 let mockIsIos = false;
 let mockCountry: string | undefined = "US";
 let mockIsCountryPending = false;
-let mockUsCountryHint = false;
 const mockReplace = jest.fn();
 const mockRouter = { replace: mockReplace };
 const mockMount = jest.fn();
@@ -20,9 +19,6 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     country: mockCountry,
     isCountryPending: mockIsCountryPending,
   }),
-}));
-jest.mock("@/components/cookies/usCountryHint", () => ({
-  readUsCountryHint: () => mockUsCountryHint,
 }));
 jest.mock("next/navigation", () => ({
   useRouter: () => mockRouter,
@@ -40,7 +36,6 @@ beforeEach(() => {
   mockIsIos = false;
   mockCountry = "US";
   mockIsCountryPending = false;
-  mockUsCountryHint = false;
 });
 
 it.each(["CY", "CA", "", undefined])(
@@ -151,7 +146,9 @@ it("hides an inline purchase link without redirecting the surrounding page on iO
   expect(
     screen.getByRole("heading", { name: "Collection details" })
   ).toBeVisible();
-  expect(screen.queryByRole("link", { name: "Buy NFT" })).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("link", { name: "Buy NFT" })
+  ).not.toBeInTheDocument();
   expect(mockReplace).not.toHaveBeenCalled();
 });
 
@@ -173,7 +170,6 @@ describe("while the iOS country check is pending", () => {
   it.each(["US", "FR", ""])(
     "redirects immediately and ignores the settled country %s",
     (country) => {
-      mockUsCountryHint = true;
       const { container, rerender } = render(gate());
 
       expect(container).toBeEmptyDOMElement();

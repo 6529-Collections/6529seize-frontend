@@ -1,0 +1,134 @@
+.page {
+  --surface: #000;
+  --keyboard-inset: var(--native-keyboard-inset-bottom, 0px);
+  --error-color: #ffaaa4;
+  position: relative;
+  display: grid;
+  height: 100vh;
+  height: 100dvh;
+  place-items: center;
+  overflow: hidden;
+  background: var(--surface);
+  color: #f7f7f7;
+}
+
+.logo {
+  position: absolute;
+  width: min(100%, 100dvh);
+  height: auto;
+  pointer-events: none;
+}
+
+.artwork {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+}
+
+.prompt {
+  --prompt-bottom: calc(
+    env(safe-area-inset-bottom, 0px) + var(--keyboard-inset)
+  );
+  position: absolute;
+  inset-inline: 0;
+  bottom: var(--prompt-bottom);
+  display: grid;
+  box-sizing: border-box;
+  width: min(100%, 25rem);
+  max-height: calc(100% - var(--prompt-bottom));
+  margin-inline: auto;
+  padding: 0.75rem 1rem;
+  place-items: safe center;
+  overflow-y: auto;
+  background: var(--surface);
+  transition: bottom var(--native-keyboard-layout-transition-duration, 0ms)
+    ease-out;
+}
+
+.fields {
+  width: min(100%, 21rem);
+}
+
+.fields label {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: #d1d1d1;
+  font-size: 0.875rem;
+}
+
+.fields input {
+  --field-border: #666;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--field-border);
+  border-radius: 0.375rem;
+  background: #101010;
+  color: inherit;
+  font-size: 1rem;
+}
+
+.fields input::placeholder {
+  color: #d1d1d1;
+}
+
+.fields input:focus {
+  --field-border: #d1d1d1;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: inset 0 0 0 1px var(--field-border);
+}
+
+.fields input[aria-invalid="true"] {
+  --field-border: var(--error-color);
+}
+
+@media (forced-colors: active) {
+  .fields input:focus {
+    outline-color: Highlight;
+  }
+}
+
+.feedback {
+  display: grid;
+  min-height: 2.8em;
+  margin-top: 0.4375rem;
+  color: var(--error-color);
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.feedback p,
+.status {
+  grid-area: 1 / 1;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.feedback p[aria-hidden="true"] {
+  visibility: hidden;
+}
+
+.status {
+  color: #d1d1d1;
+}
+
+@media (orientation: landscape) and (min-aspect-ratio: 3/2) and (min-width: 34rem) {
+  .logo {
+    inset-block: 0;
+    inset-inline: 0 50%;
+    width: min(50%, 100dvh);
+    margin: auto;
+  }
+
+  .logo + .prompt {
+    inset-block-start: 0;
+    inset-inline: 50% 0;
+    width: auto;
+    padding-inline: clamp(1rem, 4vw, 2.25rem);
+    background: transparent;
+  }
+}

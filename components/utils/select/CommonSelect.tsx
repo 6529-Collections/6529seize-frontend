@@ -3,6 +3,11 @@ import type { ReactNode, RefObject } from "react";
 import { createBreakpoint } from "react-use";
 import CommonDropdown from "./dropdown/CommonDropdown";
 import CommonTabs from "./tabs/CommonTabs";
+import type {
+  ConnectedTabSize,
+  ConnectedTabSpacing,
+  ConnectedTabTypography,
+} from "./tabs/connectedTabStyles";
 
 interface ChildComponentProps {
   onCopy?: (() => void) | undefined;
@@ -34,8 +39,12 @@ interface CommonSelectDefaultProps<T, U> {
   readonly disabled?: boolean | undefined;
   readonly theme?: "dark" | "light" | undefined;
   readonly size?: "sm" | "md" | "tabs" | undefined;
+  readonly connectedSize?: ConnectedTabSize | undefined;
+  readonly connectedTypography?: ConnectedTabTypography | undefined;
+  readonly connectedSpacing?: ConnectedTabSpacing | undefined;
   readonly variant?:
     | "default"
+    | "connected"
     | "editorial"
     | "toolbar"
     | "filter"
@@ -79,12 +88,15 @@ export type CommonSelectProps<T, U> =
 
 const useBreakpoint = createBreakpoint({ LG: 1024, S: 0 });
 
-export default function CommonSelect<T, U = unknown>(
-  props: CommonSelectProps<T, U>
-) {
+export default function CommonSelect<T, U = unknown>({
+  tabsVariant,
+  ...props
+}: CommonSelectProps<T, U> & {
+  readonly tabsVariant?: CommonSelectProps<T, U>["variant"];
+}) {
   const breakpoint = useBreakpoint();
   if (breakpoint === "LG") {
-    return <CommonTabs {...props} />;
+    return <CommonTabs {...props} variant={tabsVariant ?? props.variant} />;
   } else {
     return <CommonDropdown {...props} />;
   }

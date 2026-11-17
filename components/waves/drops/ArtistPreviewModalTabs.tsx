@@ -20,6 +20,8 @@ export const ArtistPreviewModalTabs: React.FC<ArtistPreviewModalTabsProps> = ({
   return (
     <div className="tw-relative tw-z-[101] tw-mt-3 tw-px-6 after:tw-pointer-events-none after:tw-absolute after:tw-inset-x-0 after:tw-top-full after:tw-h-3 after:tw-bg-[#0E1012] after:tw-content-[''] max-sm:[&_[role=tab]]:tw-flex-1 max-sm:[&_[role=tab]]:tw-whitespace-normal max-sm:[&_[role=tablist]>div>div]:tw-min-w-0 max-sm:[&_[role=tablist]>div>div]:tw-flex-1 max-sm:[&_[role=tablist]>div]:tw-w-full">
       <CommonTabs<ModalTab>
+        variant="connected"
+        connectedSize="sm"
         items={[
           {
             key: "active",

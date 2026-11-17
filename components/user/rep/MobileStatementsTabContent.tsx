@@ -35,7 +35,7 @@ export default function MobileStatementsTabContent({
         })}
       </h2>
       <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]">
-        <p className="tw-mb-0 tw-mt-4 tw-px-4 tw-text-xs tw-text-iron-400">
+        <p className="tw-mb-0 tw-mt-4 tw-text-xs tw-text-iron-400">
           {countLabel}
         </p>
         <UserPageIdentityStatements

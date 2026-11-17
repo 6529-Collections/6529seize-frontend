@@ -21,10 +21,11 @@ import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.en-GB.json";
 
 export const EN_GB_MESSAGES = {
-  "waves.historyGap.load": "Load missed messages",
-  "waves.historyGap.loaded": "Missed messages loaded",
-  "waves.historyGap.loading": "Loading missed messages…",
-  "waves.historyGap.retry": "Could not load missed messages. Try again",
+  "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
+  "waves.historyGap.load": "Load more messages",
+  "waves.historyGap.loaded": "More messages loaded",
+  "waves.historyGap.loading": "Loading more messages…",
+  "waves.historyGap.retry": "Could not load messages. Try again",
 
   "waves.myVotes.sort": "Sort by",
   "waves.myVotes.sort.voteAmount": "Your vote amount",

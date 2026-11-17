@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_TRIGGER_CLASSES, DROPDOWN_CHEVRON_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useClickAway, useKeyPressEvent } from "react-use";
@@ -34,9 +35,9 @@ export default function AllowlistToolSelectMenuMultiple({
   const toggleOpen = () => setIsOpen(!isOpen);
   useEffect(() => {
     if (isOpen) {
-      animateIcon(iconScope.current, { rotate: 0 });
+      animateIcon(iconScope.current, { rotate: 180 });
     } else {
-      animateIcon(iconScope.current, { rotate: -90 });
+      animateIcon(iconScope.current, { rotate: 0 });
     }
   });
 
@@ -80,7 +81,7 @@ export default function AllowlistToolSelectMenuMultiple({
       <div className="tw-relative tw-mt-1.5">
         <button
           type="button"
-          className="tw-relative tw-flex tw-items-center tw-w-full tw-rounded-lg tw-border-0 tw-py-3 tw-px-3.5 tw-bg-iron-700/40 tw-text-white tw-font-light tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700/40 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-bg-transparent focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 hover:tw-ring-iron-700 tw-text-base sm:tw-leading-6 tw-transition tw-duration-300 tw-ease-out"
+          className={`${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-flex tw-w-full tw-items-center tw-px-3.5 tw-py-3 tw-pr-9 tw-text-base tw-caret-primary-400 sm:tw-leading-6`}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           aria-labelledby="listbox-label"
@@ -92,7 +93,7 @@ export default function AllowlistToolSelectMenuMultiple({
           <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
             <svg
               ref={iconScope}
-              className="tw-h-5 tw-w-5 tw-text-iron-400"
+              className={DROPDOWN_CHEVRON_CLASSES}
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg">

@@ -77,7 +77,7 @@ describe("UserPageActivityTab", () => {
       "fr-FR",
       "user.collected.stats.activityTabs.walletActivity"
     );
-    expect(btn.className).toContain("tw-bg-white/[0.08]");
+    expect(btn).toHaveClass("tw-bg-iron-800");
     expect(btn).toHaveAttribute("aria-selected", "true");
     expect(btn).toHaveAttribute("tabIndex", "0");
   });
