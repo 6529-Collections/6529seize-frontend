@@ -96,19 +96,21 @@ function DownloadButtons({
       )}
       {buttons.map(({ installer, label }) => {
         const size = formatAiFileSize(installer.file.size);
+        const text = label
+          ? t(LOCALE, label)
+          : t(LOCALE, "ai.guide.download", { system: system.label });
         return (
           <a
             key={installer.kind}
             href={getAiDownloadPath(release, installer.file)}
             className={AI_BUTTON}
-            aria-label={t(LOCALE, "ai.files.download.label", {
+            aria-label={t(LOCALE, "ai.download.button.ariaLabel", {
+              button: text,
               file: installer.file.name,
             })}
           >
             <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
-            {label
-              ? t(LOCALE, label)
-              : t(LOCALE, "ai.guide.download", { system: system.label })}
+            {text}
             {size && !label && (
               <span className="tw-font-normal tw-tabular-nums tw-text-iron-400">
                 {size}

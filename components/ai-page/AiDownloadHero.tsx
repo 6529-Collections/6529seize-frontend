@@ -51,6 +51,7 @@ export type AiHeroText = {
   readonly phoneBody: string;
   readonly copyLink: string;
   readonly linkCopied: string;
+  readonly copyFailed: string;
   readonly shareLink: string;
   readonly phonePlatforms: string;
 };
@@ -109,35 +110,41 @@ function PhoneFirst({
     () => typeof navigator.share === "function",
     () => false
   );
-  const [copied, setCopied] = useState(false);
+  const [copy, setCopy] = useState<"idle" | "copied" | "failed">("idle");
 
   useEffect(() => {
-    if (!copied) {
+    if (copy === "idle") {
       return undefined;
     }
-    const timer = setTimeout(() => setCopied(false), 2000);
+    const timer = setTimeout(() => setCopy("idle"), 2000);
     return () => clearTimeout(timer);
-  }, [copied]);
+  }, [copy]);
 
   const pass = async () => {
     const url = `${globalThis.location.origin}/ai`;
-    try {
-      if (canShare) {
+    if (canShare) {
+      try {
         await navigator.share({ url });
-        return;
+      } catch {
+        // A dismissed share sheet is the person's choice: nothing to say.
       }
+      return;
+    }
+    try {
       await navigator.clipboard.writeText(url);
-      setCopied(true);
+      setCopy("copied");
     } catch {
-      // A dismissed share sheet or a refused clipboard changes nothing.
+      setCopy("failed");
     }
   };
 
   let passText = text.copyLink;
   let PassIcon = LinkIcon;
-  if (copied) {
+  if (copy === "copied") {
     passText = text.linkCopied;
     PassIcon = CheckIcon;
+  } else if (copy === "failed") {
+    passText = text.copyFailed;
   } else if (canShare) {
     passText = text.shareLink;
     PassIcon = ShareIcon;

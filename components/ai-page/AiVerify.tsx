@@ -114,7 +114,7 @@ export default function AiVerify({ release }: { readonly release: AiRelease }) {
           />
           <AiCodeBlock
             label={t(LOCALE, "ai.verify.file.windows")}
-            code={`Get-FileHash .\\${windows}\nSelect-String ${windows} ${SHA256SUMS}`}
+            code={`Get-FileHash .\\${windows}\nSelect-String -SimpleMatch ${windows} ${SHA256SUMS}`}
           />
           <p className={`tw-m-0 ${AI_MUTED}`}>
             {t(LOCALE, "ai.verify.file.after")}

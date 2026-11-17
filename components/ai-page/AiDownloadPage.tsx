@@ -130,6 +130,7 @@ function heroText(): AiHeroText {
     phoneBody: t(LOCALE, "ai.download.phone.body"),
     copyLink: t(LOCALE, "ai.download.phone.copy"),
     linkCopied: t(LOCALE, "ai.download.phone.copied"),
+    copyFailed: t(LOCALE, "ai.code.copyFailed"),
     shareLink: t(LOCALE, "ai.download.phone.share"),
     phonePlatforms: t(LOCALE, "ai.download.phone.platforms"),
   };
@@ -293,10 +294,7 @@ export default function AiDownloadPage({
             </h2>
             <ReleaseLine release={release} />
           </div>
-          <AiDownloads
-            release={release}
-            linuxCpu={platform.system === "linux" ? platform.cpu : null}
-          />
+          <AiDownloads release={release} platform={platform} />
           <div className="tw-mt-4">
             <AiVerify release={release} />
           </div>

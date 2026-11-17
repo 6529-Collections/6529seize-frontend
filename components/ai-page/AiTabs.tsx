@@ -45,7 +45,10 @@ export default function AiTabs({
   readonly listClassName?: string | undefined;
   readonly panelClassName?: string | undefined;
 }) {
-  const [selected, setSelected] = useState(initial);
+  const [chosen, setSelected] = useState<string | null>(null);
+  const selected =
+    chosen ??
+    (tabs.some((tab) => tab.key === initial) ? initial : tabs[0]?.key);
   const id = useId();
   const buttons = useRef<(HTMLButtonElement | null)[]>([]);
 

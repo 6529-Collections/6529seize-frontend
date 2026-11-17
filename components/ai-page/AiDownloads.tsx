@@ -5,6 +5,7 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 import type { AiRelease, AiSystem } from "@/lib/ai-page/releaseFeed";
+import type { VisitorPlatform } from "@/lib/validator-page/detectSystem";
 import {
   getAiDownloadPath,
   groupAiReleaseFiles,
@@ -13,7 +14,7 @@ import {
 import AiCopyButton from "./AiCopyButton";
 import { AI_BUTTON, AI_CARD } from "./AiPageFrame";
 import AiSystemLogo from "./AiSystemLogo";
-import AiTabs from "./AiTabs";
+import AiLinuxTabs from "./AiLinuxTabs";
 import AiTrustBadges from "./AiTrustBadges";
 import { formatAiFileSize } from "./formatAiFileSize";
 
@@ -170,11 +171,11 @@ function SystemCard({
  */
 export default function AiDownloads({
   release,
-  linuxCpu,
+  platform,
 }: {
   readonly release: AiRelease;
-  /** The visitor's Linux CPU when the page knows it, for the switch. */
-  readonly linuxCpu: "x64" | "arm64" | null;
+  /** The server's guess at the visitor's system, for the Linux switch. */
+  readonly platform: VisitorPlatform;
 }) {
   const { groups } = groupAiReleaseFiles(release);
   const entries = (family: string) =>
@@ -222,9 +223,9 @@ export default function AiDownloads({
           needs={t(LOCALE, "ai.files.needs.linux")}
           image="/linux.png"
         >
-          <AiTabs
+          <AiLinuxTabs
             label={t(LOCALE, "ai.files.linux.switch")}
-            initial={linuxCpu === "arm64" ? "arm64" : "x64"}
+            platform={platform}
             listClassName="tw-mx-4 tw-mt-3 sm:tw-mx-5"
             panelClassName="tw-mt-1"
             tabs={variants.map((variant) => ({
