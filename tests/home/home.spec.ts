@@ -2605,7 +2605,9 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
   try {
     await page.goto("/about", { waitUntil: "domcontentloaded" });
     const sidebar = page.getByLabel("Primary sidebar", { exact: true });
-    const navigation = sidebar.locator("[data-sidebar-scroll]");
+    const navigation = page
+      .getByLabel("Primary sidebar", { exact: true })
+      .locator("[data-sidebar-scroll]");
     const about = navigation.getByRole("button", {
       name: "About",
       exact: true,
@@ -2613,10 +2615,16 @@ test("collapsed sidebar fits full rows when a desktop update appears @smoke @med
     const search = sidebar.getByRole("button", { name: "Search", exact: true });
     const share = sidebar.getByRole("button", { name: "Share this page" });
     const update = sidebar.getByRole("button", { name: "Update", exact: true });
-    const account = sidebar.locator("[data-sidebar-account]");
+    const account = page
+      .getByLabel("Primary sidebar", { exact: true })
+      .locator("[data-sidebar-account]");
     await expect(share).toBeVisible();
     await expect(account).toHaveAttribute("data-sidebar-account", "signed-out");
-    await expect(sidebar.locator("[data-sidebar-version-slot]")).toBeHidden();
+    await expect(
+      page
+        .getByLabel("Primary sidebar", { exact: true })
+        .locator("[data-sidebar-version-slot]")
+    ).toBeHidden();
     await expect(about).toHaveCSS("height", "46px");
     const accountBeforeUpdate = await account.boundingBox();
 

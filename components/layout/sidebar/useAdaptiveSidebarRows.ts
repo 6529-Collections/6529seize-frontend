@@ -12,11 +12,15 @@ export function useAdaptiveSidebarRows(enabled: boolean) {
       '[data-sidebar-section="utilities"]'
     );
     const account = sections.querySelector('[data-sidebar-section="account"]');
-    const profile = account?.lastElementChild;
-    if (!nav?.firstElementChild || !utilities || !account || !profile) return;
+    if (!nav?.firstElementChild || !utilities || !account) return;
     const navItems = nav.firstElementChild;
 
     const updateRowHeight = () => {
+      // The account control is always last, after optional Notifications.
+      // It can replace its loading element during account restoration.
+      const profile = account.lastElementChild;
+      if (!profile) return;
+
       // Count the rows the controls actually render, including the Share
       // loading placeholder. An empty Update wrapper takes no space.
       const rowCount =
