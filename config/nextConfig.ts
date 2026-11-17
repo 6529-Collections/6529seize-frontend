@@ -1,5 +1,4 @@
 import { createSecurityHeaders } from "./securityHeaders";
-import { getAppEnvironment } from "./appEnvironment";
 import { e2eeAssetCacheHeaders } from "./e2eeAssetCacheHeaders";
 import { isE2eeFlagEnabled } from "./e2eeFlag";
 import { meebits445Headers } from "./meebits445Headers";
@@ -23,7 +22,10 @@ import {
 } from "../lib/media/decentralized-media";
 import { IPFS_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/ipfs-gateways";
 import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "../lib/media/static-image-hosts";
-import { STAGING_DROP_MEDIA_HOSTNAME } from "../helpers/image-resize-cdn";
+import {
+  allowsStagingDropMedia,
+  STAGING_DROP_MEDIA_HOSTNAME,
+} from "../helpers/image-resize-cdn";
 
 // A custom htmlLimitedBots value replaces Next's default list, so extend the
 // default (Google, Bing, Apple, Yandex, Baidu, social crawlers) with only the
@@ -138,8 +140,7 @@ export function sharedConfig(
   publicEnv: PublicEnv,
   assetPrefix: string
 ): NextConfig {
-  const allowStagingDropMedia =
-    getAppEnvironment(publicEnv.BASE_ENDPOINT).hostname === "staging.6529.io";
+  const allowStagingDropMedia = allowsStagingDropMedia(publicEnv.BASE_ENDPOINT);
   return {
     assetPrefix,
     reactCompiler: true,

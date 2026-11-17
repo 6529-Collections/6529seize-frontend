@@ -11,6 +11,7 @@ import {
   getGiphyVideoPreviewSources,
 } from "@/components/drops/view/item/content/media/DropImagePreview";
 import { LocalImagePreviewContext } from "@/components/drops/view/item/content/media/LocalImagePreviewContext";
+import { publicEnv } from "@/config/env";
 import { ImageScale } from "@/helpers/image.helpers";
 
 type MockImageProps = ComponentProps<"img"> & {
@@ -58,6 +59,32 @@ it.each(["JPG", "jpeg", "png", "webp", "avif"])(
     expect(image).toHaveAttribute("src", src);
     expect(image).toHaveAttribute("data-unoptimized", "false");
     expect(image).toHaveAttribute("data-quality", "100");
+  }
+);
+
+it.each([
+  ["https://staging.6529.io", "upload/art.png", "false"],
+  ["https://6529.io", "upload/AUTOx600/art.png", "true"],
+])(
+  "matches the staging optimizer allowlist for %s",
+  (base, path, unoptimized) => {
+    const endpoint = jest.replaceProperty(publicEnv, "BASE_ENDPOINT", base);
+    const dropMedia = "https://media.staging.6529.io/drops/";
+    try {
+      render(
+        <DropImagePreview
+          originalSrc={`${dropMedia}upload/art.png`}
+          imageScale={ImageScale.AUTOx600}
+          alt="Artwork"
+          preferHighQuality
+        />
+      );
+      const image = screen.getByAltText("Artwork");
+      expect(image).toHaveAttribute("src", `${dropMedia}${path}`);
+      expect(image).toHaveAttribute("data-unoptimized", unoptimized);
+    } finally {
+      endpoint.restore();
+    }
   }
 );
 

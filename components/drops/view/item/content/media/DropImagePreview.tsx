@@ -4,8 +4,13 @@ import { useLocalImagePreviewSource } from "./LocalImagePreviewContext";
 import { getGiphyVideoRendition } from "@/app/api/og-metadata/_lib/giphyRenditions";
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
+import { publicEnv } from "@/config/env";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
-import { isDropMediaCdnUrl } from "@/helpers/image-resize-cdn";
+import {
+  allowsStagingDropMedia,
+  isDropMediaCdnUrl,
+  STAGING_DROP_MEDIA_ORIGIN,
+} from "@/helpers/image-resize-cdn";
 import {
   getAnimatedImagePreviewUri,
   isGifImageUrl,
@@ -126,6 +131,8 @@ function getHighQualityArtworkImageSrc(src: string): string | null {
     const url = new URL(original);
     if (
       isDropMediaCdnUrl(url) &&
+      (url.origin !== STAGING_DROP_MEDIA_ORIGIN ||
+        allowsStagingDropMedia(publicEnv.BASE_ENDPOINT)) &&
       /\.(jpe?g|png|webp|avif)$/i.test(url.pathname)
     )
       return original;
