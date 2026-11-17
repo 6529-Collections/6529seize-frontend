@@ -69,7 +69,14 @@ export async function selfGroupPackages(
     if (listed === undefined) {
       continue;
     }
-    const capable = await claimThrough(ctx, item.device, group);
+    let capable: ClaimedPackage | null;
+    try {
+      capable = await claimThrough(ctx, item.device, group);
+    } catch {
+      // Refused (say, past the claim rate limit) or failed: the pass goes on
+      // without this sibling and the next one claims through again.
+      continue;
+    }
     await noteClaimedThrough(ctx, item.device, listed);
     if (capable) {
       out.push(capable);

@@ -320,7 +320,12 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     for (const device of world.devices) device.engine.dispose();
   });
 
-  it("adds the updated phone to the laptop's group as soon as the laptop lists its new KeyPackage", async () => {
+  /**
+   * The laptop has a self group; the phone, on the older client with a full
+   * pool of its KeyPackages queued, updates but makes no self group of its
+   * own (it made one today), so only the laptop can add it.
+   */
+  async function onlyTheLaptopCanAdd() {
     const world = await createWorld();
     const alice = await addUser(world, "alice", { readSync: true });
     const laptop = alice.primary;
@@ -346,27 +351,86 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
       maintained.push(group);
       maintain(group);
     };
-
-    // The phone updates. Having made a self group today, it makes no other,
-    // so only the laptop can add it.
     const updated = await update(world, alice, phone, (record) => {
       record.readSync = { unsent: [], createdAt: world.clock.now() };
     });
     await settle(world);
     expect(laptopGroup.roster.has(phoneKey)).toBe(false);
     expect(claims()).toBe(0);
+    /** The laptop lists its devices (every 10 minutes and on device events). */
+    const listDevices = async () => {
+      await (
+        laptop.engine as unknown as { refreshMe: () => Promise<void> }
+      ).refreshMe();
+      await settle(world);
+    };
+    return {
+      world,
+      laptop,
+      updated,
+      g,
+      phoneKey,
+      laptopGroup,
+      claims,
+      maintained,
+      listDevices,
+    };
+  }
 
-    // The laptop lists its devices (every 10 minutes and on device events):
-    // the phone's last-resort KeyPackage changed, so it maintains its self
-    // group at once and claims through the phone's older KeyPackages.
-    await (
-      laptop.engine as unknown as { refreshMe: () => Promise<void> }
-    ).refreshMe();
-    await settle(world);
+  it("adds the updated phone to the laptop's group as soon as the laptop lists its new KeyPackage", async () => {
+    const {
+      world,
+      updated,
+      g,
+      phoneKey,
+      laptopGroup,
+      claims,
+      maintained,
+      listDevices,
+    } = await onlyTheLaptopCanAdd();
+    // The phone's last-resort KeyPackage changed, so the laptop maintains
+    // its self group at once and claims through the older KeyPackages.
+    await listDevices();
     expect(maintained).toEqual([laptopGroup.g]);
     expect(laptopGroup.roster.has(phoneKey)).toBe(true);
     expect(claims()).toBeGreaterThan(20);
     expect(claims()).toBeLessThanOrEqual(31);
+    expect(updated.engine.getConversation(g)?.unread).toBe(0);
+    for (const device of world.devices) device.engine.dispose();
+  });
+
+  it("claims through again at the next pass when a claim is refused", async () => {
+    const {
+      world,
+      laptop,
+      updated,
+      g,
+      phoneKey,
+      laptopGroup,
+      claims,
+      listDevices,
+    } = await onlyTheLaptopCanAdd();
+    const api = contextOf(laptop).api;
+    const claim = api.claimKeyPackages.bind(api);
+    let refused = 0;
+    api.claimKeyPackages = (body) => {
+      // The first claim of the claim-through, as past the rate limit.
+      if (claims() === 1 && refused === 0) {
+        refused += 1;
+        return Promise.reject(new Error("E2EE_RATE_LIMITED"));
+      }
+      return claim(body);
+    };
+    await listDevices();
+    expect(refused).toBe(1);
+    expect(laptopGroup.roster.has(phoneKey)).toBe(false);
+    // The pass went on without the phone: nothing failed.
+    expect(laptop.engine.getError()).toBeNull();
+
+    // The next maintenance pass claims through again and adds the phone.
+    world.clock.advance(11 * MINUTE);
+    await settle(world);
+    expect(laptopGroup.roster.has(phoneKey)).toBe(true);
     expect(updated.engine.getConversation(g)?.unread).toBe(0);
     for (const device of world.devices) device.engine.dispose();
   });
