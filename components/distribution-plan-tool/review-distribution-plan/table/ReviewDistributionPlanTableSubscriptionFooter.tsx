@@ -16,6 +16,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
 import {
+  type ReactElement,
   useCallback,
   useContext,
   useEffect,
@@ -546,7 +547,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
   };
 
   const canChooseMode = preparation.mode === PreparationMode.Unstarted;
-  let processingControl: React.ReactNode;
+  let processingControl: ReactElement | undefined;
   if (canChooseMode || preparation.mode === PreparationMode.Background) {
     const planId = distributionPlan?.id ?? "";
     const phaseInputs = resolveForgePhaseInputs(phases);
@@ -628,8 +629,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
         handleDownloadAirdrops(contract, confirmedTokenId, phase)
       }
       preparationChoice={
-        canChooseMode &&
-        !showManual && (
+        canChooseMode && !showManual ? (
           <Button
             variant="secondary"
             size="lg"
@@ -639,7 +639,7 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
           >
             {t(locale, "dropForge.prepareManually")}
           </Button>
-        )
+        ) : undefined
       }
       processingControl={processingControl}
       preparationStatus={preparationStatus}

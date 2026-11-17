@@ -24,7 +24,13 @@ import {
   DialogTitle,
 } from "@headlessui/react";
 import Image from "next/image";
-import { type ComponentProps, type ReactNode, useId, useState } from "react";
+import {
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+  useId,
+  useState,
+} from "react";
 import {
   type DistributionAirdropsPhase,
   DistributionPhaseAirdropsModal,
@@ -42,10 +48,9 @@ function getPublishBlockReason(
   overview: DistributionOverview | null
 ): MessageKey | null {
   if (!overview?.is_normalized) return "emma.review.publishNeedsFinalization";
-  if ((overview.photos_count ?? 0) <= 0)
-    return "emma.review.publishNeedsPhotos";
+  if (overview.photos_count <= 0) return "emma.review.publishNeedsPhotos";
   const airdrops =
-    (overview.artist_airdrops_count ?? 0) + (overview.team_airdrops_count ?? 0);
+    overview.artist_airdrops_count + overview.team_airdrops_count;
   if (airdrops <= 0) return "emma.review.publishNeedsAirdrops";
   return null;
 }
@@ -241,8 +246,8 @@ function PreparationSection({
   processingControl,
   status,
 }: Readonly<{
-  choice: ReactNode;
-  processingControl: ReactNode;
+  choice: ReactElement | undefined;
+  processingControl: ReactElement | undefined;
   status: string | undefined;
 }>) {
   const locale = useBrowserLocale();
@@ -271,10 +276,10 @@ function PreparationSection({
               <InformationCircleIcon className="tw-size-5" aria-hidden="true" />
             </Button>
           </div>
-          {(choice || processingControl) && (
+          {(choice !== undefined || processingControl !== undefined) && (
             <div className={footerActionsClass}>
               {choice}
-              {processingControl && (
+              {processingControl !== undefined && (
                 <div className="tw-min-w-0 @[42rem]:tw-col-start-2">
                   {processingControl}
                 </div>
@@ -424,8 +429,8 @@ export function SubscriptionFooterMain({
   onShowUploadPhotos: () => void;
   onShowViewPhotos: () => void;
   onDownloadAirdrops: (phase: DistributionAirdropsPhase) => void;
-  preparationChoice?: ReactNode;
-  processingControl?: ReactNode;
+  preparationChoice?: ReactElement | undefined;
+  processingControl?: ReactElement | undefined;
   preparationStatus?: string | undefined;
   showManualFinalize: boolean;
   onFinalize: () => void;
