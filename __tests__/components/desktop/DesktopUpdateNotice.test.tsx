@@ -284,6 +284,7 @@ describe("DesktopUpdateNotice", () => {
   it("stops listening when unmounted", () => {
     installDesktopShell();
     const { unmount } = render(<DesktopUpdateNotice />);
+    updater.emit("not-available");
 
     unmount();
 

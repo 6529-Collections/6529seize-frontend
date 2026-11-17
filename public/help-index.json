@@ -10609,8 +10609,8 @@
         "os"
       ],
       "facts": [
-        "Open 6529 Desktop > About for the installed version, OS/architecture, app scheme, app port, IPFS ports, updater status, and App Logs. Opening About checks for updates.",
-        "The update area shows checking, available, downloading progress, downloaded, no-update, or error states. Use the action offered for that state; the bot does not know the latest available build unless it has current release evidence.",
+        "In the desktop title bar, select App info, then Check for updates. The dialog shows Checking for updates… followed by No updates found, an available-update message, or a check error. Select Check for updates again to retry a failed check. In 0.1.0-rc.2 the title-bar check runs without these status messages.",
+        "In 6529 Core, open 6529 Desktop > About in the sidebar for the installed version, OS/architecture, app scheme, app port, IPFS ports, updater status, and App Logs. Opening this page checks for updates and shows any download or installation progress.",
         "Use ETH Transactions > the affected worker > Logs for a worker-specific failure. Expand Advanced Options for recovery controls. Logs > Locate opens the log file location; selecting log text enables Copy Selection.",
         "For a TDH issue include both Last Block values, the mismatched field, last calculation time, and the failing worker message. For a missing transfer include a public transaction hash and the expected block; distinguish a local-node mismatch from personal website TDH.",
         "Share only relevant redacted diagnostic lines. Remove RPC API keys/credential URLs, passwords, private keys, and recovery phrases. The bot cannot inspect your filesystem, operate workers, or confirm the node is repaired without observations from you.",
@@ -10627,7 +10627,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/logs-viewer/LogsViewer.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/README.md"
       ],
-      "brief_answer": "Open **6529 Desktop > About** for the app version, local ports, updates, and **App Logs**. For a particular stalled worker, check its own **Logs** tab under ETH Transactions. Share only a redacted error and your version/OS; never include wallet secrets or credential-bearing RPC URLs."
+      "brief_answer": "In the desktop title bar, select **App info**, then **Check for updates**. In 6529 Core, open **6529 Desktop > About** for **App Logs**. For a stalled worker, check its **Logs** tab under ETH Transactions. Share only a redacted error and your version/OS. Keep wallet secrets and credential-bearing RPC URLs private."
     },
     {
       "id": "desktop.local-data",
