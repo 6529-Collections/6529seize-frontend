@@ -34,9 +34,10 @@ counted as profile views (`services/analytics/pageClassification.ts`).
 
 The code is in `app/desktop/`, `components/desktop-page/` and
 `lib/desktop-releases/`. The menu, notice, text-page body, file table,
-command list, build line and empty state are shared with the 6529 AI pages
-in `components/release-section/`; the download route's path rules and
-answer are shared in `lib/release-section/download.ts`.
+command list, build line, figure and empty state live in
+`components/release-section/`, and the download route's path rules and
+answer in `lib/release-section/download.ts`, written so the 6529 AI pages
+can use them too (they do not yet).
 
 ## Before a list is published
 
@@ -45,9 +46,8 @@ Until the bucket holds a list:
 - `/desktop` says no release is published yet, offers no download, and
   still shows what 6529 Desktop is, that Linux comes later, and where to
   give feedback.
-- `/desktop/guide` reads in full, with the installers' names as
-  `6529-Desktop_<version>_windows-x64-setup.exe` and
-  `6529-Desktop_<version>_macos-arm64.dmg`.
+- `/desktop/guide` reads in full, and describes the installers ("the
+  Windows installer you downloaded") instead of naming them.
 - `/desktop/known-issues` reads in full; it needs no list.
 - `/desktop/releases` says no release is published yet.
 - Every `/desktop/download/...` path answers 404, and
@@ -115,6 +115,14 @@ No site deploy is needed. Upload the release's files to
 `releases/<version>/` (check each against `SHA256SUMS`), then publish the
 new bundle with 6529 Desktop's `packaging/releases-feed.sh publish`. The
 pages show the new release within a minute.
+
+## Screenshots
+
+The guide shows two real captures of the app, cropped to its own window or
+dialog, in `public/desktop/`: the first launch on a Mac, and the signature
+request dialog with its request code and content fingerprint. Before adding
+one, check that it shows no other person's handle, wave content, address or
+account detail.
 
 ## Text
 
