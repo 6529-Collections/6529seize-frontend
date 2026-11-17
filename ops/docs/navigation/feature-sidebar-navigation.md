@@ -32,10 +32,10 @@ On web layouts, route switching is sidebar-first.
   reveal it; focus on other sidebar controls does not keep it visible after the
   pointer leaves. Touch layouts keep it visible. Expand and collapse use the same footprint.
 - Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
-  `Join 6529` (or `Validator` for members), and `About` so art destinations stay together while Waves and
-  DMs remain adjacent.
-- `NFTs` and `About` are expandable groups; `Museum`, `Waves`, `DMs`, and
-  the `Join 6529` / `Validator` slot are direct rows.
+  `Join 6529` (or `Validator` for members), `6529 AI`, and `About` so art
+  destinations stay together while Waves and DMs remain adjacent.
+- `NFTs` and `About` are expandable groups; `Museum`, `Waves`, `DMs`, the
+  `Join 6529` / `Validator` slot and `6529 AI` are direct rows.
 - The `Museum` row opens `/museum/network` in one click.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
   remains a secondary Waves experience link and searchable destination.
@@ -59,12 +59,18 @@ reserves its space without showing either action. The same rule applies to the
 collapsed and expanded web sidebar, mobile web menu, native app drawer, and
 page search. Public navigation never adds a Validator link.
 
+After that slot, `6529 AI` links to `/ai`, 6529 AI's download page, for
+everyone, signed in or not. It sits beside the validator because both are
+6529 software that people run on their own computers, and it is public
+because the `/ai` pages are. It uses the same styling as the other rows, is
+active on every `/ai` page, and is under `Pages` in page search.
+
 ## Location in the Site
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
 - Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members),
-  `About`.
+  `6529 AI`, `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Three separate sections keep controls stable: scrollable primary navigation,
