@@ -23,6 +23,10 @@ import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
 import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
+import {
+  AI_NAVIGATION,
+  isAiNavigationActive,
+} from "@/components/navigation/aiNavigation";
 import { usePathname } from "next/navigation";
 import WatchTowerIcon from "../common/icons/WatchTowerIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
@@ -112,6 +116,12 @@ export default function AppSidebar({
         active:
           pathname === membershipNavigation.href ||
           pathname.startsWith(`${membershipNavigation.href}/`),
+      },
+      {
+        label: AI_NAVIGATION.label,
+        path: AI_NAVIGATION.href,
+        icon: AI_NAVIGATION.icon,
+        active: isAiNavigationActive(pathname),
       },
       sectionMap.get("about"),
       ...(showDropForge ? [dropForgeItem] : []),

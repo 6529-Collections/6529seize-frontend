@@ -1066,7 +1066,7 @@
         "expand"
       ],
       "facts": [
-        "The sidebar orders primary navigation as NFTs, Museum, Waves, DMs, Join 6529 (Validator for signed-in members with a profile), and About, with gated Drop Forge after About. The same slot and membership rule apply to desktop collapsed and expanded rails, mobile web, native app menus, and page search. The slot uses the existing navigation styling without a special highlight. While wallet/profile restoration is unresolved, the slot reserves space without showing the wrong action. Validator links to /validator and is not added to public navigation.",
+        "The sidebar orders primary navigation as NFTs, Museum, Waves, DMs, Join 6529 (Validator for signed-in members with a profile), 6529 AI, and About, with gated Drop Forge after About. The same slot and membership rule apply to desktop collapsed and expanded rails, mobile web, native app menus, and page search. The slot uses the existing navigation styling without a special highlight. While wallet/profile restoration is unresolved, the slot reserves space without showing the wrong action. Validator links to /validator and is not added to public navigation. 6529 AI links to /ai for everyone, signed in or not, in the same styling, is active on every /ai page, and is under Pages in page search.",
         "Museum is a standalone web and app sidebar row linking to /museum/network; historical /museum gallery routes remain available from the Museum entry point.",
         "Home remains available through the 6529 logo link to /.",
         "The web sidebar Waves row opens /waves directly; Discover Waves remains secondary inside the Waves experience and searchable, while Network, Delegation, Tools, Open Data, and reference material live under About.",
@@ -1086,6 +1086,7 @@
         "/museum/network",
         "/messages",
         "/join-6529",
+        "/ai",
         "/about",
         "/drop-forge",
         "/discover",
@@ -1252,13 +1253,15 @@
         "mobile app",
         "desktop app",
         "6529 app",
-        "6529 validator"
+        "6529 validator",
+        "6529 ai"
       ],
       "keywords": [
         "apps",
         "mobile",
         "desktop",
         "validator",
+        "ai",
         "ios",
         "android",
         "windows",
@@ -1273,7 +1276,8 @@
         "The footer link is labeled 6529 Apps, appears between License and API, and opens the internal route in the same tab.",
         "The page keeps 6529 Mobile iOS and Android store links together with versioned 6529 Desktop downloads for Windows, macOS, and Linux.",
         "A third full-width section, 6529 Validator, says Read more about 6529 validator. The entire section opens /validator in the same tab.",
-        "Signed-in members with a profile see Validator in the primary navigation slot between DMs and About and can find it under Pages for validator, 6529 Validator, or /validator. Newcomers see Join 6529 in navigation and search instead.",
+        "A fourth full-width section, 6529 AI, says Run open-weights AI models on your own computer, and chat with them in your browser. The entire section opens /ai in the same tab.",
+        "Signed-in members with a profile see Validator in the primary navigation slot between DMs and 6529 AI and can find it under Pages for validator, 6529 Validator, or /validator. Newcomers see Join 6529 in navigation and search instead.",
         "The matching desktop OS expands automatically when detected; phones, tablets and unknown devices start collapsed. Expand Windows, macOS or Linux to see versions and download installers directly. Windows has x64/ARM64 EXEs; Linux has x64 AppImage, DEB and RPM installers.",
         "Download opens the installer directly. Each installer shows Arweave mirror · Coming soon until its mirror is published, then shows a clickable Arweave mirror link.",
         "Current Desktop releases require macOS 13+. macOS 12 Monterey has a separate last-compatible release feed, currently 0.3.15, for Intel and Apple silicon. If an update stops opening on macOS 12, reinstall that compatible app and keep existing application data.",
@@ -1281,7 +1285,7 @@
         "Use this page to find official app downloads; the footer does not link directly to a platform download."
       ],
       "canonical_path": "/about/6529-apps",
-      "related_paths": ["/about"],
+      "related_paths": ["/about", "/ai"],
       "tags": ["about", "apps", "navigation", "mobile", "desktop"],
       "source_refs": [
         "app/about/6529-apps/page.tsx",
@@ -1292,6 +1296,54 @@
       "brief_answer": "Yes—**6529 Mobile** is available for iOS and Android, and **6529 Desktop** for Windows, macOS, and Linux. Find both downloads on the official Apps page.",
       "answer_links": [
         { "label": "6529 Apps", "url": "https://6529.io/about/6529-apps" }
+      ]
+    },
+    {
+      "id": "ai.download",
+      "kind": "route",
+      "title": "6529 AI",
+      "aliases": [
+        "6529 ai",
+        "6529 ai download",
+        "local ai",
+        "run ai models",
+        "open-weights models",
+        "ai models",
+        "chat with a local model"
+      ],
+      "keywords": [
+        "ai",
+        "models",
+        "download",
+        "install",
+        "chat",
+        "gpu",
+        "mac",
+        "windows",
+        "linux",
+        "api"
+      ],
+      "facts": [
+        "6529 AI runs open-weights AI models on the person's own computer, and they chat with them in their browser. Its download page is /ai.",
+        "Its pages: /ai/guide installs it on a Mac, Windows or Linux and starts a first chat; /ai/models lists every model it knows by section, with what runs in the app today and the GPU memory each needs; /ai/use walks through real use (chat, pictures, images, speech to text, app keys, the API and the command line); /ai/known-issues lists the known bugs and what isn't tested yet.",
+        "It is an untested test release: every /ai page says so, with a link to Known issues.",
+        "Open it from 6529 AI in the primary navigation, after Join 6529 or Validator, from the 6529 AI section of /about/6529-apps, or from page search.",
+        "Search engines don't index the /ai pages."
+      ],
+      "canonical_path": "/ai",
+      "related_paths": [
+        "/ai/guide",
+        "/ai/models",
+        "/ai/use",
+        "/ai/known-issues",
+        "/about/6529-apps"
+      ],
+      "tags": ["ai", "apps", "download", "navigation"],
+      "source_refs": [
+        "app/ai/page.tsx",
+        "components/ai-page/AiDownloadPage.tsx",
+        "components/navigation/aiNavigation.ts",
+        "ops/docs/ai-download-page.md"
       ]
     },
     {
