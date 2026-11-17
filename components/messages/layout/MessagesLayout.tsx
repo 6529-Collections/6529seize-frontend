@@ -1,5 +1,6 @@
 "use client";
 
+import StreamRouteLoadingShell from "@/components/brain/my-stream/layout/StreamRouteLoadingShell";
 import MessagesRouteLoading from "../MessagesRouteLoading";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
@@ -91,7 +92,12 @@ function MessagesLayoutContent({ children }: { readonly children: ReactNode }) {
       );
     }
 
-    return <MessagesRouteLoading />;
+    return (
+      <StreamRouteLoadingShell
+        ariaLabel={t(locale, "webSidebar.account.loading")}
+        variant="messages"
+      />
+    );
   }, [
     contentState,
     connectPrompt,

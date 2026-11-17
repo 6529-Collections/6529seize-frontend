@@ -47,7 +47,7 @@ describe("/messages/encrypted routes", () => {
   });
 
   it.each([
-    { Loading: MessagesLoading, label: "Loading messages…" },
+    { Loading: MessagesLoading, label: "Loading messages" },
     { Loading: EncryptedMessagesLoading, label: "Loading encrypted chats…" },
   ])("renders one visible route status for $label", ({ Loading, label }) => {
     render(<Loading />);
