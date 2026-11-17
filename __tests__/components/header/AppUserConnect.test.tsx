@@ -228,7 +228,7 @@ describe("AppUserConnect", () => {
     render(<AppUserConnect onNavigate={onNavigate} onSignOut={jest.fn()} />);
 
     expect(screen.getByText("Network: Ethereum")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "Switch Chain" }));
+    fireEvent.click(screen.getByRole("button", { name: "Switch to Polygon" }));
 
     expect(switchToNextChain).toHaveBeenCalled();
     expect(onNavigate).toHaveBeenCalled();

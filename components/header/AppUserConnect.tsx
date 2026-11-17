@@ -50,6 +50,10 @@ export default function AppUserConnect({
   const { chains, currentChainName, nextChainName, switchToNextChain } =
     useChainSwitcher();
   const availableConnectedAccounts = connectedAccounts ?? [];
+  const logoutLabel = t(
+    locale,
+    isConnected ? "appSidebar.disconnectAndLogout" : "headerUserMenu.logout"
+  );
 
   const runAsyncAction = async ({
     action,
@@ -97,7 +101,7 @@ export default function AppUserConnect({
         setIsOpeningConnection(true);
         void runAsyncAction({
           action: seizeConnectFresh,
-          errorMessage: "Failed to open wallet connection",
+          errorMessage: t(locale, "appSidebar.connectFailed"),
           onSettled: onNavigate,
         }).finally(() => setIsOpeningConnection(false));
       }}
@@ -107,7 +111,7 @@ export default function AppUserConnect({
       loading={isOpeningConnection}
       fullWidth
     >
-      <span>Connect</span>
+      <span>{t(locale, "appSidebar.connect")}</span>
     </Button>
   );
 
@@ -116,36 +120,34 @@ export default function AppUserConnect({
       onClick={() => {
         void runAsyncAction({
           action: seizeDisconnect,
-          errorMessage: "Failed to disconnect wallet",
+          errorMessage: t(locale, "appSidebar.disconnectWalletFailed"),
           onSettled: onNavigate,
         });
       }}
       className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-      aria-label="Disconnect Wallet"
     >
       <FontAwesomeIcon
         icon={faPlugCircleMinus}
         className="tw-h-6 tw-w-6 tw-flex-shrink-0"
       />
-      <span>Disconnect Wallet</span>
+      <span>{t(locale, "appSidebar.disconnectWallet")}</span>
     </button>
   ) : (
     <button
       onClick={() => {
         void runAsyncAction({
           action: seizeConnectFresh,
-          errorMessage: "Failed to open wallet connection",
+          errorMessage: t(locale, "appSidebar.connectFailed"),
           onSettled: onNavigate,
         });
       }}
       className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-      aria-label="Connect Wallet"
     >
       <FontAwesomeIcon
         icon={faPlugCirclePlus}
         className="tw-h-6 tw-w-6 tw-flex-shrink-0"
       />
-      <span>Connect Wallet</span>
+      <span>{t(locale, "appSidebar.connectWallet")}</span>
     </button>
   );
 
@@ -175,24 +177,24 @@ export default function AppUserConnect({
         type="button"
         onClick={() => setIsPushSettingsOpen(true)}
         className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-        aria-label="Push Notifications"
       >
         <BellIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-        <span>Push Notifications</span>
+        <span>{t(locale, "appSidebar.pushNotifications")}</span>
       </button>
       {walletConnectionButton}
       {isConnected && chains.length > 1 && (
         <div>
           <span className="tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-px-4 tw-py-0.5 tw-text-left tw-text-md tw-font-medium tw-text-iron-300 tw-transition tw-duration-300 tw-ease-out">
-            Network: {currentChainName}
+            {t(locale, "appSidebar.network", { chain: currentChainName })}
           </span>
           <button
             onClick={onSwitchChain}
             className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-            aria-label="Switch Chain"
           >
             <ArrowPathRoundedSquareIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-            <span>Switch to {nextChainName}</span>
+            <span>
+              {t(locale, "appSidebar.switchChain", { chain: nextChainName })}
+            </span>
           </button>
         </div>
       )}
@@ -207,10 +209,9 @@ export default function AppUserConnect({
           });
         }}
         className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-        aria-label={isConnected ? "Disconnect & Logout" : "Logout"}
       >
         <ArrowRightEndOnRectangleIcon className="tw-h-6 tw-w-6 tw-flex-shrink-0" />
-        <span>{isConnected ? "Disconnect & Logout" : "Logout"}</span>
+        <span>{logoutLabel}</span>
       </button>
       {availableConnectedAccounts.length > 1 && (
         <button
@@ -224,13 +225,12 @@ export default function AppUserConnect({
             });
           }}
           className="tw-flex tw-w-full tw-items-center tw-space-x-4 tw-rounded-lg tw-border-none tw-bg-transparent tw-px-4 tw-py-3.5 tw-text-base tw-font-semibold tw-text-iron-300 tw-transition-colors tw-duration-200 active:tw-bg-iron-700 active:tw-text-iron-200"
-          aria-label="Sign Out All Profiles"
         >
           <FontAwesomeIcon
             icon={faPlugCircleXmark}
             className="tw-h-6 tw-w-6 tw-flex-shrink-0"
           />
-          <span>Sign Out All Profiles</span>
+          <span>{t(locale, "appSidebar.signOutAllProfiles")}</span>
         </button>
       )}
       <PushNotificationSettings

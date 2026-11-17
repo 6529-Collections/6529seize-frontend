@@ -87,7 +87,7 @@ export default function AppSidebar({
   useAndroidBackLayer(open, dialogRef, handleClose);
 
   const handleSignOut = (signOut: () => void) => {
-    // Release the drawer's backdrop and focus trap before opening confirmation.
+    // Keep the first request until the drawer releases its backdrop and focus trap.
     pendingSignOut.current ??= signOut;
     handleClose();
   };
@@ -95,7 +95,13 @@ export default function AppSidebar({
   const finishClosing = () => {
     const signOut = pendingSignOut.current;
     pendingSignOut.current = null;
-    signOut?.();
+    if (!open) {
+      signOut?.();
+    }
+  };
+
+  const clearPendingSignOut = () => {
+    pendingSignOut.current = null;
   };
 
   const menu = useMemo(() => {
@@ -200,7 +206,13 @@ export default function AppSidebar({
   }, [open, handleClose]);
 
   return (
-    <Transition appear show={open} as={Fragment} afterLeave={finishClosing}>
+    <Transition
+      appear
+      show={open}
+      as={Fragment}
+      beforeEnter={clearPendingSignOut}
+      afterLeave={finishClosing}
+    >
       <Dialog
         ref={dialogRef}
         as="div"
