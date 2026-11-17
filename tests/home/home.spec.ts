@@ -2581,6 +2581,7 @@ test("homepage tracking follows nested scrolling and loaded sections @smoke @med
 test("collapsed sidebar fits full rows when a desktop update appears @smoke @medium @large", async ({
   page,
 }, testInfo) => {
+  // Mobile and native projects use different navigation shells.
   test.skip(
     !isDesktopWebProject(testInfo.project.name),
     "Desktop collapsed sidebar geometry"
