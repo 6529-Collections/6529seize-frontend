@@ -15,6 +15,7 @@ import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { getValuesForVolumeType } from "@/helpers/Helpers";
 import { compareLocalized, formatInteger } from "@/i18n/format";
+import { useNftCollectionSort } from "@/hooks/useNftCollectionSort";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { MemeLabSort } from "@/types/enums";
@@ -23,7 +24,6 @@ import { useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { getMemeLabCollectionHref } from "./memeLabRouteParams";
 import MemeLabNftCard from "./MemeLabNftCard";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import MemeLabSortControls from "./MemeLabSortControls";
 import { MEME_LAB_PAGE_SIZE, useMemeLabCatalog } from "./useMemeLabCatalog";
 
@@ -225,20 +225,17 @@ export default function MemeLabComponent({
   const [sortDir, setSortDir] = useState<SortDirection>(
     initialRouterValues.initialSortDir
   );
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const [sort, setSort] = useState<MemeLabSort>(
-    initialRouterValues.initialSort
+  const { sort, setSort, hideNftPurchasing } = useNftCollectionSort(
+    initialRouterValues.initialSort,
+    MemeLabSort.AGE,
+    isMemeLabMarketQuoteSort
   );
-  const effectiveSort =
-    hideNftPurchasing && isMemeLabMarketQuoteSort(sort)
-      ? MemeLabSort.AGE
-      : sort;
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
-  const pageViewKey = `${effectiveSort}-${sortDir}-${volumeType}`;
+  const pageViewKey = `${sort}-${sortDir}-${volumeType}`;
   const [pageState, setPageState] = useState({ viewKey: "", page: 1 });
   const resultsRef = useRef<HTMLElement>(null);
   const page = pageState.viewKey === pageViewKey ? pageState.page : 1;
-  const catalog = useMemeLabCatalog(effectiveSort, sortDir, page);
+  const catalog = useMemeLabCatalog(sort, sortDir, page);
 
   useEffect(() => {
     const { initialSortDir, initialSort: parsedInitialSort } =
@@ -254,7 +251,7 @@ export default function MemeLabComponent({
 
   const selectSortDirection = (nextSortDir: SortDirection) => {
     setSortDir(nextSortDir);
-    router.replace(getMemeLabSortQuery(effectiveSort, nextSortDir, locale));
+    router.replace(getMemeLabSortQuery(sort, nextSortDir, locale));
   };
 
   const selectVolumeType = (nextVolumeType: VolumeType) => {
@@ -264,13 +261,13 @@ export default function MemeLabComponent({
   const sortedNfts = useMemo(
     () =>
       getSortedMemeLabNfts(
-        effectiveSort,
+        sort,
         sortDir,
         volumeType,
         catalog.nfts,
         catalog.nftMetas
       ),
-    [catalog.nftMetas, catalog.nfts, effectiveSort, sortDir, volumeType]
+    [catalog.nftMetas, catalog.nfts, sort, sortDir, volumeType]
   );
   const labArtists = useMemo(
     () =>
@@ -296,14 +293,14 @@ export default function MemeLabComponent({
   );
 
   const orderedNfts = useMemo(() => {
-    if (effectiveSort === MemeLabSort.ARTISTS) {
+    if (sort === MemeLabSort.ARTISTS) {
       return labArtists.flatMap((artist) =>
         sortedNfts
           .filter((nft) => nft.artist === artist)
           .sort((a, b) => a.id - b.id)
       );
     }
-    if (effectiveSort === MemeLabSort.COLLECTIONS) {
+    if (sort === MemeLabSort.COLLECTIONS) {
       return labCollections.flatMap((collection) => {
         const collectionIds = new Set(
           catalog.nftMetas
@@ -316,24 +313,22 @@ export default function MemeLabComponent({
       });
     }
     return sortedNfts;
-  }, [catalog.nftMetas, labArtists, labCollections, effectiveSort, sortedNfts]);
+  }, [catalog.nftMetas, labArtists, labCollections, sort, sortedNfts]);
   const totalResults =
-    effectiveSort === MemeLabSort.AGE
-      ? catalog.totalResults
-      : orderedNfts.length;
+    sort === MemeLabSort.AGE ? catalog.totalResults : orderedNfts.length;
   const totalPages = Math.max(1, Math.ceil(totalResults / MEME_LAB_PAGE_SIZE));
   const visiblePage =
-    effectiveSort === MemeLabSort.AGE ? page : Math.min(page, totalPages);
+    sort === MemeLabSort.AGE ? page : Math.min(page, totalPages);
   const firstResultIndex = (visiblePage - 1) * MEME_LAB_PAGE_SIZE;
   const visibleNfts = useMemo(
     () =>
-      effectiveSort === MemeLabSort.AGE
+      sort === MemeLabSort.AGE
         ? orderedNfts
         : orderedNfts.slice(
             firstResultIndex,
             firstResultIndex + MEME_LAB_PAGE_SIZE
           ),
-    [firstResultIndex, orderedNfts, effectiveSort]
+    [firstResultIndex, orderedNfts, sort]
   );
   const visibleNftIds = useMemo(
     () => new Set(visibleNfts.map((nft) => nft.id)),
@@ -367,7 +362,7 @@ export default function MemeLabComponent({
       <li key={`${nft.contract}-${nft.id}`} className="tw-min-w-0">
         <MemeLabNftCard
           nft={nft}
-          sort={effectiveSort}
+          sort={sort}
           nftMetas={catalog.nftMetas}
           volumeType={volumeType}
           hasConnectedProfile={isConnected}
@@ -500,9 +495,9 @@ export default function MemeLabComponent({
     }
 
     let results;
-    if (effectiveSort === MemeLabSort.ARTISTS) {
+    if (sort === MemeLabSort.ARTISTS) {
       results = printArtists();
-    } else if (effectiveSort === MemeLabSort.COLLECTIONS) {
+    } else if (sort === MemeLabSort.COLLECTIONS) {
       results = printCollections();
     } else {
       results = printNfts();
@@ -551,7 +546,7 @@ export default function MemeLabComponent({
             ariaLabel={t(locale, "memeLab.sorting.regionLabel")}
             sortDirection={sortDir}
             setSortDirection={selectSortDirection}
-            currentSort={effectiveSort}
+            currentSort={sort}
             sortOptions={getMemeLabSortOptions(hideNftPurchasing)}
             setSort={selectSort}
             setVolumeType={selectVolumeType}

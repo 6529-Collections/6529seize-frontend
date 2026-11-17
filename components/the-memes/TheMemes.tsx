@@ -18,7 +18,6 @@ import {
   THE_MEMES_GRID_CLASS_NAME,
   THE_MEMES_PAGE_CLASS_NAME,
 } from "@/components/the-memes/theMemesLayout";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import useMemesSortVisibility from "@/components/the-memes/useMemesSortVisibility";
 import {
   getAllSeasonsLabel,
@@ -41,6 +40,7 @@ import { VolumeType } from "@/entities/INFT";
 import type { MemeSeason } from "@/entities/ISeason";
 import { SortDirection } from "@/entities/ISort";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
+import { useNftCollectionSort } from "@/hooks/useNftCollectionSort";
 import { formatInteger } from "@/i18n/format";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -220,12 +220,13 @@ export default function TheMemesComponent({
 
   const [routerLoaded, setRouterLoaded] = useState(false);
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const [sort, setSort] = useState<MemesSort>(MemesSort.AGE);
-  const effectiveSort =
-    hideNftPurchasing && isMarketQuoteSort(sort) ? MemesSort.AGE : sort;
+  const { sort, setSort, hideNftPurchasing } = useNftCollectionSort(
+    MemesSort.AGE,
+    MemesSort.AGE,
+    isMarketQuoteSort
+  );
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
-  const sortOptionsRef = useMemesSortVisibility(effectiveSort, volumeType);
+  const sortOptionsRef = useMemesSortVisibility(sort, volumeType);
 
   useSetTitle(t(locale, "theMemes.documentTitle"));
 
@@ -335,7 +336,7 @@ export default function TheMemesComponent({
   const filtersReady = routerLoaded && seasonsLoaded;
 
   const getNftsNextPage = useCallback(() => {
-    const mySort = getApiSort(effectiveSort, volumeType);
+    const mySort = getApiSort(sort, volumeType);
     const apiSeasonIds = getMemeApiSeasonIds({
       seasonId: activeSeasonId,
       seasons,
@@ -352,14 +353,7 @@ export default function TheMemesComponent({
     }
 
     return apiUrl(`/api/memes_extended_data?${query.toString()}`);
-  }, [
-    activeSeasonId,
-    activeYearId,
-    seasons,
-    effectiveSort,
-    sortDir,
-    volumeType,
-  ]);
+  }, [activeSeasonId, activeYearId, seasons, sort, sortDir, volumeType]);
 
   const [fetching, setFetching] = useState(initialData === undefined);
 
@@ -381,7 +375,7 @@ export default function TheMemesComponent({
       getTheMemesBrowseHref({
         locale,
         seasonId: activeSeasonId,
-        sort: getSortQueryParam(effectiveSort, volumeType),
+        sort: getSortQueryParam(sort, volumeType),
         sortDir: sortDir.toLowerCase(),
         yearId: activeYearId,
       })
@@ -392,7 +386,7 @@ export default function TheMemesComponent({
     filtersReady,
     locale,
     router,
-    effectiveSort,
+    sort,
     sortDir,
     volumeType,
   ]);
@@ -494,7 +488,7 @@ export default function TheMemesComponent({
     filtersReady,
     fetchNfts,
     getNftsNextPage,
-    effectiveSort,
+    sort,
     sortDir,
     volumeType,
   ]);
@@ -566,7 +560,7 @@ export default function TheMemesComponent({
       <TheMemesCard
         key={`${nft.contract}-${nft.id}`}
         nft={nft}
-        sort={effectiveSort}
+        sort={sort}
         volumeType={volumeType}
         hasConnectedProfile={connectedProfile !== null}
         locale={locale}
@@ -732,7 +726,7 @@ export default function TheMemesComponent({
                   .map((v) => (
                     <TheMemesSortButton
                       key={v}
-                      currentSort={effectiveSort}
+                      currentSort={sort}
                       sort={v}
                       locale={locale}
                       select={() => {
@@ -743,7 +737,7 @@ export default function TheMemesComponent({
                   ))}
                 <div className="tw-shrink-0">
                   <VolumeTypeDropdown
-                    isVolumeSort={effectiveSort === MemesSort.VOLUME}
+                    isVolumeSort={sort === MemesSort.VOLUME}
                     selectedVolumeSort={volumeType}
                     setVolumeType={(nextVolumeType) => {
                       initialDataRef.current = undefined;
@@ -759,7 +753,7 @@ export default function TheMemesComponent({
               </div>
             </div>
           </section>
-          {nfts.length > 0 && effectiveSort === MemesSort.MEME
+          {nfts.length > 0 && sort === MemesSort.MEME
             ? printMemes()
             : printNfts()}
           {printEmptyState()}
