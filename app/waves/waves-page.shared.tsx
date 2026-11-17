@@ -12,12 +12,10 @@ import {
   getLargeSocialCardMetadata,
 } from "@/components/providers/metadata";
 import { toMetadataExcerpt } from "@/helpers/metadataText";
-import WavesPageClient from "./page.client";
+import WavesPageClient, { type WavesPublicPreview } from "./page.client";
 import { fetchPublicWaveFeed } from "./public-wave-feed.server";
 import { fetchPublicWaveDrop } from "./public-wave-drop.server";
-import PublicWaveDrop from "@/components/waves/PublicWaveDrop";
 import { fetchServerWaveFeedSeed } from "./wave-feed-seed.server";
-import PublicWaveFeed from "@/components/waves/PublicWaveFeed";
 import WaveServerFeedSeed, {
   WaveServerFeedSeedGate,
 } from "@/components/waves/WaveServerFeedSeed";
@@ -314,23 +312,18 @@ export async function renderWavesPageContent({
       : null;
   const publicFeed = publicFeedPromise ? await publicFeedPromise : null;
   const publicDrop = publicDropPromise ? await publicDropPromise : null;
-  let publicFeedFallback = null;
+  let publicPreview: WavesPublicPreview | null = null;
   if (publicDrop) {
-    publicFeedFallback = (
-      <PublicWaveDrop
-        drop={publicDrop}
-        locale={normalizeLocale(
-          getFirstSearchParamValue(searchParams, "locale")
-        )}
-      />
-    );
+    publicPreview = {
+      drop: publicDrop,
+      locale: normalizeLocale(getFirstSearchParamValue(searchParams, "locale")),
+    };
   } else if (publicFeed?.ok && publicFeed.items.length > 0) {
-    publicFeedFallback = <PublicWaveFeed feed={publicFeed} />;
+    publicPreview = { feed: publicFeed };
   }
   const wavesPageClient = (
     <WavesPageClient
-      publicFeedFallback={publicFeedFallback}
-      publicFeedWaveId={publicFeedFallback ? context.waveId : null}
+      publicPreview={publicPreview}
       waveName={context.wave?.name}
     />
   );

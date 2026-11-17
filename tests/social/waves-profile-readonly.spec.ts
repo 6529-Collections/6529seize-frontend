@@ -38,6 +38,7 @@ import {
   captureSafeScreenshot,
   expect,
   expectNoHorizontalOverflow,
+  seedStagingAccessCookie,
   test,
   waitForRouteReady,
 } from "../testHelpers";
@@ -126,7 +127,7 @@ async function getFirstWaveId(page: Page) {
   return match?.[1] ?? "";
 }
 
-async function getPublicChatMessageTarget(page: Page) {
+async function findPublicChatWave(page: Page) {
   const response = await gotoReadyWithApiResponse(
     page,
     "/waves",
@@ -158,10 +159,15 @@ async function getPublicChatMessageTarget(page: Page) {
   }
   expect(
     wave,
-    "Legacy-link fixture unavailable: public discovery must contain a nonempty public chat wave"
+    "Public discovery must contain a nonempty public chat wave"
   ).toBeDefined();
   const waveId = wave!.id;
   expect(waveId).toMatch(/^[0-9a-f-]{36}$/i);
+  return wave!;
+}
+
+async function getPublicChatMessageTarget(page: Page) {
+  const { id: waveId } = await findPublicChatWave(page);
   await gotoReady(page, `/waves/${waveId}`);
   const message = page
     .getByRole("region", {
@@ -2774,6 +2780,54 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       testInfo,
       "wave-utility-controls-hierarchy"
     );
+  });
+
+  test("opens public Wave message links with JavaScript disabled", async ({
+    browser,
+    baseURL,
+    page,
+  }) => {
+    const { id: waveId, name: waveName } = await findPublicChatWave(page);
+    const viewport = page.viewportSize();
+    const context = await browser.newContext({
+      javaScriptEnabled: false,
+      ...(baseURL === undefined ? {} : { baseURL }),
+      ...(viewport === null ? {} : { viewport }),
+    });
+    try {
+      await seedStagingAccessCookie(context, baseURL);
+      const previewPage = await context.newPage();
+      const response = await gotoDocumentWithTransientRetry(
+        previewPage,
+        `/waves/${waveId}`
+      );
+      expect(response?.ok()).toBe(true);
+      const preview = previewPage.getByRole("region", {
+        name: waveName,
+        exact: true,
+      });
+      await expect(preview).toHaveAttribute("data-public-wave-feed", waveId);
+      const messageLink = preview.getByRole("article").last().getByRole("link");
+      await expect(messageLink).toBeVisible();
+      await expect(messageLink).toBeInViewport();
+      await messageLink.focus();
+      await expect(messageLink).toBeFocused();
+      const href = await messageLink.getAttribute("href");
+      if (!href) throw new Error("Public Wave preview link is missing its URL");
+      const target = new URL(href, previewPage.url());
+      const dropId = target.searchParams.get("drop");
+      if (!dropId)
+        throw new Error("Public Wave preview link is missing its message ID");
+      expect(dropId).toMatch(/^[0-9a-f-]{36}$/i);
+
+      await messageLink.press("Enter");
+      await expect(previewPage).toHaveURL(target.href);
+      await expect(preview).toHaveAttribute("data-public-wave-drop", dropId);
+      await expect(preview.getByRole("article")).toBeVisible();
+      await expectNoHorizontalOverflow(previewPage);
+    } finally {
+      await context.close();
+    }
   });
 
   test("handles legacy wave query links without mutation", async ({ page }) => {
