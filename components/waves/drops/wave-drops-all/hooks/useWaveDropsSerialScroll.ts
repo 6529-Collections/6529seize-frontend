@@ -375,7 +375,7 @@ export const useWaveDropsSerialScroll = ({
   );
 
   const syncSerialScroll = useEffectEvent(() => {
-    if (!init || serialTarget === null) return;
+    if (serialTarget === null) return;
     const serialNo = serialTarget;
     if (pendingScrollRef.current?.serialNo === serialNo) return;
 
@@ -439,10 +439,14 @@ export const useWaveDropsSerialScroll = ({
     void scroll();
   });
 
-  // Link navigation and local jumps converge here after chat has mounted.
+  const hasDrops = (waveMessages?.drops.length ?? 0) > 0;
   useEffect(() => {
-    syncSerialScroll();
-  }, [init, serialTarget]);
+    // The target request is synchronized with the committed chat DOM. The
+    // scroll operation, progress state and refs all belong to this hook.
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-live-state-to-parent, react-you-might-not-need-an-effect/no-pass-ref-to-parent
+    if (hasDrops) syncSerialScroll();
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-derived-state -- A completed DOM jump consumes the queued target.
+  }, [hasDrops, serialTarget]);
 
   return {
     cancelSerialScroll,
