@@ -2503,9 +2503,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const strip = page.getByRole("toolbar", {
       name: "6529 Desktop window title",
     });
-    const header = page.locator("main header").filter({
-      has: page.getByRole("heading", { level: 1 }),
-    });
+    const header = page
+      .getByRole("main")
+      .locator("header")
+      .filter({ has: page.getByRole("heading", { level: 1 }) });
     await expect(strip).toBeVisible();
     await expect(header).toBeVisible();
     await expect(page.locator("body")).toHaveAttribute(
