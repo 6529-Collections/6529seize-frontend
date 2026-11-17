@@ -13,7 +13,7 @@ computer, and chat with them in your browser`. Mobile and desktop options remain
 being hidden behind tabs.
 
 Ask `@help6529` "is there an app?" or "is there a 6529 app?" to find both
-6529 Mobile and 6529 Desktop and the official download page. You do not need to
+6529 Mobile and 6529 Desktop Classic and the official Apps page. You do not need to
 choose a platform before asking.
 
 ## Location in the Site
@@ -37,7 +37,7 @@ choose a platform before asking.
 
 1. Open the `6529 Apps` page.
 2. Use `6529 Mobile` to choose the iOS App Store or Android Google Play.
-3. The matching desktop OS expands automatically when detected. Expand Windows,
+3. Under **6529 Desktop Classic**, the matching desktop OS expands automatically when detected. Expand Windows,
    macOS, or Linux yourself to choose another platform; phones, tablets and
    unrecognized devices start with all desktop sections collapsed.
 4. Choose the version appropriate for your OS, then the architecture or package
@@ -57,7 +57,7 @@ choose a platform before asking.
 ## Common Scenarios
 
 - Install 6529 Mobile on an iPhone, iPad, or Android device.
-- Download the latest 6529 Desktop release for Windows, macOS, or Linux.
+- Download the latest 6529 Desktop Classic release for Windows, macOS, or Linux.
 - Find all official app options from one route without opening the Share modal.
 - Search with a broad term such as `apps`, `desktop`, or `mobile`.
 
