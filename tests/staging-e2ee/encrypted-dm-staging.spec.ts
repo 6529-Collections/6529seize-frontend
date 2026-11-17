@@ -976,6 +976,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     });
     const migrationMs = performance.now() - upgrading;
     await a.page.goto("https://staging.6529.io/api/version");
+    // A caught-up group skips its log. Leave a real server entry for the
+    // returning device so this test can verify the incremental cursor.
+    const missedMessage = qaMessage(current.runId, "history catch-up");
+    const sent = await sendEncrypted(b, missedMessage);
+    expect((await sent.response())?.ok()).toBe(true);
     const opened = performance.now();
     await openChat(a, dm);
     await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
@@ -1008,6 +1013,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expect(logCursors.every((cursor) => cursor >= fixture.originalCursor)).toBe(
       true
     );
+    await expectDecrypted(a, missedMessage);
     await testInfo.attach("long-history-opening.json", {
       body: Buffer.from(
         JSON.stringify({
@@ -1108,6 +1114,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       needles({
         historySeed,
         photoCaption,
+        missedMessage,
         imageMarker: image.marker,
         imageBytes: image.buffer,
       })
