@@ -61,7 +61,8 @@ count from NFT/extended API data, and reads the maximum from Manifold
 and the card mirrors the backend calculation edition size:
 `max(actual edition size, edition_size_floor)`. Legacy or unknown TDH state
 also uses that finalized calculation as the safer fallback. Mint-stat totals
-are primary-sale accounting and are not edition-size inputs.
+are primary-sale accounting and are not edition-size inputs. The iOS app
+shows the artwork and link with the other card details throughout the drop.
 
 ### Meme Lab
 

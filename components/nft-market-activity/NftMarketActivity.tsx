@@ -30,6 +30,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "next/link";
@@ -474,6 +475,16 @@ function EventRow({
   );
 }
 
+const MARKET_ORDER_ACTIONS = new Set([
+  "listing",
+  "offer",
+  "cancellation",
+  "expiration",
+  "invalidation",
+  "inactive",
+  "revalidation",
+]);
+
 export default function NftMarketActivity({
   contract,
   tokenId,
@@ -484,6 +495,7 @@ export default function NftMarketActivity({
   locale: localeOverride,
 }: Readonly<Props>) {
   const browserLocale = useBrowserLocale();
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const locale = localeOverride ?? browserLocale;
   const { nfts, nextgenCollections } = useNFTCollections();
   const query = useInfiniteQuery({
@@ -517,16 +529,22 @@ export default function NftMarketActivity({
     const seen = new Set<string>();
     return (query.data?.pages ?? []).flatMap((page) =>
       page.data.filter((event) => {
+        if (hideNftPurchasing && MARKET_ORDER_ACTIONS.has(getAction(event)))
+          return false;
         if (seen.has(event.event_id)) return false;
         seen.add(event.event_id);
         return true;
       })
     );
-  }, [query.data?.pages]);
+  }, [hideNftPurchasing, query.data?.pages]);
   const historyStartedAt = query.data?.pages[0]?.market_history_started_at;
 
-  const initialError = query.isError && events.length === 0;
-  const isEmpty = !query.isPending && !initialError && events.length === 0;
+  const initialError = query.isLoadingError;
+  const isEmpty =
+    !query.isPending &&
+    !initialError &&
+    events.length === 0 &&
+    !query.hasNextPage;
   let statusMessage = "";
   if (query.isPending) {
     statusMessage = t(locale, "nftActivity.loading");
@@ -572,9 +590,12 @@ export default function NftMarketActivity({
           {t(locale, "nftActivity.empty")}
         </p>
       )}
-      {events.length > 0 && (
+      {(events.length > 0 ||
+        query.hasNextPage ||
+        query.isFetchNextPageError) && (
         <div className={compact ? "tw-min-w-0" : "tw-min-w-0 tw-pt-3"}>
           <div
+            hidden={events.length === 0}
             role="region"
             aria-label={t(locale, "nftActivity.scrollRegion")}
             tabIndex={0}
@@ -673,7 +694,7 @@ export default function NftMarketActivity({
               </Button>
             </div>
           )}
-          {historyStartedAt && (
+          {!hideNftPurchasing && historyStartedAt && (
             <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-500">
               {t(locale, "nftActivity.marketHistory", {
                 date: formatDate(locale, historyStartedAt, {

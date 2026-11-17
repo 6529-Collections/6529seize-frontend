@@ -28,6 +28,7 @@ import {
   getProfileCollectedReturnContext,
   PROFILE_COLLECTED_RETURN_PARAM,
 } from "@/helpers/profile-collected-navigation";
+import { useNftMarketRoute } from "@/hooks/useNftMarketRoute";
 import useCapacitor from "@/hooks/useCapacitor";
 import { formatInteger } from "@/i18n/format";
 import { normalizeLocale, type SupportedLocale } from "@/i18n/locales";
@@ -180,6 +181,10 @@ export default function MemePage({
 }) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { hideNftPurchasing, redirectToArtwork } = useNftMarketRoute(
+    pathname,
+    searchParams
+  );
   const { isCapacitor } = useCapacitor();
   const locale = normalizeLocale(searchParams.get("locale"));
   const returnContext = getProfileCollectedReturnContext(
@@ -192,7 +197,9 @@ export default function MemePage({
     [connectedProfile?.wallets]
   );
 
-  const focusParam = parseMemeFocus(searchParams.get("focus"));
+  const focusParam = redirectToArtwork
+    ? MEME_FOCUS.LIVE
+    : parseMemeFocus(searchParams.get("focus"));
   const resolvedRouterFocus = useMemo(() => {
     if (focusParam === undefined) {
       return undefined;
@@ -427,7 +434,7 @@ export default function MemePage({
       return null;
     }
 
-    const hasMintingBox = isLastCard;
+    const hasMintingBox = isLastCard && !hideNftPurchasing;
     const artworkColumnBaseClassName =
       "tw-relative lg:tw-sticky lg:tw-top-6 lg:tw-flex lg:tw-flex-col lg:tw-self-start";
     const cardHeaderClassName = hasMintingBox
@@ -474,7 +481,7 @@ export default function MemePage({
           )}
         </div>
         <div className={detailsColumnClassName}>
-          {isLastCard && (
+          {hasMintingBox && (
             <div className="tw-w-full tw-space-y-3">
               <NowMintingCountdown
                 nftId={nft.id}
@@ -490,6 +497,7 @@ export default function MemePage({
           )}
           <MemePageLiveRightMenu
             show={true}
+            showMintPrice={!isLastCard || !hideNftPurchasing}
             nft={nft}
             nftMeta={nftMeta}
             locale={locale}
@@ -512,7 +520,9 @@ export default function MemePage({
       >
         <div className="tw-w-full tw-overflow-x-auto tw-overflow-y-hidden [-ms-overflow-style:none] [mask-image:linear-gradient(to_right,#000_calc(100%-32px),transparent)] [scrollbar-width:none] sm:[mask-image:none] [&::-webkit-scrollbar]:tw-hidden">
           <div className="-tw-mb-px tw-flex tw-min-w-max tw-gap-x-5 tw-pr-8 sm:tw-pr-0 lg:tw-gap-x-6">
-            {VISIBLE_MEME_TABS.map((tab) => (
+            {VISIBLE_MEME_TABS.filter(
+              (tab) => !hideNftPurchasing || tab.focus !== MEME_FOCUS.MARKET
+            ).map((tab) => (
               <MemePageTabButton
                 key={`${nft.id}-${tab.focus}-tab`}
                 title={getMemeFocusLabel(tab.focus, locale)}
@@ -757,16 +767,18 @@ export default function MemePage({
               activeFocus={routeFocus}
               locale={locale}
               persistentContent={
-                <MarketDepthPanel
-                  focusedOrderHash={searchParams.get("order")}
-                  contract={MEMES_CONTRACT}
-                  tokenId={nft.id}
-                  locale={locale}
-                  refreshKey={marketRefreshVersion}
-                  embedded
-                  active={activeTab === MEME_FOCUS.MARKET}
-                  onReveal={() => setActiveMemeTab(MEME_FOCUS.MARKET)}
-                />
+                !hideNftPurchasing && (
+                  <MarketDepthPanel
+                    focusedOrderHash={searchParams.get("order")}
+                    contract={MEMES_CONTRACT}
+                    tokenId={nft.id}
+                    locale={locale}
+                    refreshKey={marketRefreshVersion}
+                    embedded
+                    active={activeTab === MEME_FOCUS.MARKET}
+                    onReveal={() => setActiveMemeTab(MEME_FOCUS.MARKET)}
+                  />
+                )
               }
               navigation={
                 <>

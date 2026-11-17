@@ -18,6 +18,7 @@ import {
   THE_MEMES_GRID_CLASS_NAME,
   THE_MEMES_PAGE_CLASS_NAME,
 } from "@/components/the-memes/theMemesLayout";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import useMemesSortVisibility from "@/components/the-memes/useMemesSortVisibility";
 import {
   getAllSeasonsLabel,
@@ -63,6 +64,10 @@ interface Meme {
 }
 
 type SearchParamReader = Pick<URLSearchParams, "get">;
+
+function isMarketQuoteSort(sort: MemesSort) {
+  return sort === MemesSort.FLOOR_PRICE || sort === MemesSort.HIGHEST_OFFER;
+}
 
 const MEMES_SORT_TO_API: Record<MemesSort, string> = {
   [MemesSort.AGE]: MEMES_EXTENDED_SORT[0],
@@ -215,7 +220,12 @@ export default function TheMemesComponent({
 
   const [routerLoaded, setRouterLoaded] = useState(false);
   const [sortDir, setSortDir] = useState<SortDirection>(SortDirection.ASC);
-  const [sort, setSort] = useState<MemesSort>(MemesSort.AGE);
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const [requestedSort, setSort] = useState<MemesSort>(MemesSort.AGE);
+  const sort =
+    hideNftPurchasing && isMarketQuoteSort(requestedSort)
+      ? MemesSort.AGE
+      : requestedSort;
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.ALL_TIME);
   const sortOptionsRef = useMemesSortVisibility(sort, volumeType);
 
@@ -709,7 +719,11 @@ export default function TheMemesComponent({
                 className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-nowrap tw-items-center tw-gap-1.5 tw-overflow-x-auto tw-overflow-y-hidden tw-py-1 tw-pl-3 tw-pr-4 [-ms-overflow-style:none] [scrollbar-width:none] max-sm:[mask-image:linear-gradient(to_right,transparent,#000_12px,#000_calc(100%-28px),transparent)] sm:tw-pr-0 sm:[animation-fill-mode:both] sm:[animation-name:scroll-edge-fade] sm:[animation-range-end:calc(100%_+_1px)] sm:[animation-timeline:scroll(self_inline)] sm:[animation-timing-function:linear] sm:[mask-image:linear-gradient(to_right,transparent,#000_var(--fade-l),#000_calc(100%_-_var(--fade-r)),transparent)] [&::-webkit-scrollbar]:tw-hidden lg:[body:not(.capacitor-native)_&]:tw-justify-between lg:[body:not(.capacitor-native)_&]:tw-gap-4 lg:[body:not(.capacitor-native)_&]:tw-pl-0"
               >
                 {Object.values(MemesSort)
-                  .filter((v) => v !== MemesSort.VOLUME)
+                  .filter(
+                    (v) =>
+                      v !== MemesSort.VOLUME &&
+                      (!hideNftPurchasing || !isMarketQuoteSort(v))
+                  )
                   .map((v) => (
                     <TheMemesSortButton
                       key={v}

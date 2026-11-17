@@ -87,25 +87,50 @@ export function NextGenBackToCollectionPageLink(
 }
 
 export function NextGenCountdown(props: Readonly<CountdownProps>) {
-  const { hideNftPurchasing, reservesNftPurchasingSpace } =
-    useNftPurchasingVisibility();
-  const pathname = usePathname() || "";
+  const { hideNftPurchasing, shouldRedirect } = useNftPurchasingVisibility();
+  const { collection } = props;
   const alStatus = getStatusFromDates(
-    props.collection.allowlist_start,
-    props.collection.allowlist_end
+    collection.allowlist_start,
+    collection.allowlist_end
   );
   const publicStatus = getStatusFromDates(
-    props.collection.public_start,
-    props.collection.public_end
+    collection.public_start,
+    collection.public_end
   );
 
+  if (hideNftPurchasing) {
+    const hasMintPhase =
+      alStatus === Status.UPCOMING ||
+      alStatus === Status.LIVE ||
+      publicStatus === Status.UPCOMING ||
+      publicStatus === Status.LIVE;
+    return shouldRedirect && hasMintPhase ? (
+      <DistributionLink collection={collection} />
+    ) : null;
+  }
+
+  return (
+    <NextGenCountdownPanel
+      {...props}
+      alStatus={alStatus}
+      publicStatus={publicStatus}
+    />
+  );
+}
+
+function NextGenCountdownPanel({
+  collection: mintCollection,
+  alStatus,
+  publicStatus,
+}: Readonly<CountdownProps & { alStatus: Status; publicStatus: Status }>) {
+  const pathname = usePathname() || "";
   const [collection, setCollection] = useState<CollectionWithMerkle>();
   const [collectionLoaded, setCollectionLoaded] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
     const url = apiUrl(
-      `/api/nextgen/merkle_roots/${props.collection.merkle_root}`
+      `/api/nextgen/merkle_roots/${mintCollection.merkle_root}`
     );
     fetchUrl<CollectionWithMerkle | null>(url, { signal: controller.signal })
       .then((response) => {
@@ -125,7 +150,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
         }
       });
     return () => controller.abort();
-  }, [props.collection.merkle_root]);
+  }, [mintCollection.merkle_root]);
 
   function getButtonLabel() {
     if (collectionLoaded) {
@@ -144,10 +169,10 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
     return (
       <div className="tw-flex tw-w-full tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/90 tw-px-5 tw-py-4 tw-text-white tw-shadow-lg">
         <DateCountdown title={`${title} in`} date={new Date(date * 1000)} />
-        {!hideMintBtn && !hideNftPurchasing && (
+        {!hideMintBtn && (
           <ButtonLink
             href={`/nextgen/collection/${formatNameForUrl(
-              props.collection.name
+              mintCollection.name
             )}/mint`}
             variant="primary"
             size="lg"
@@ -157,13 +182,7 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
             {getButtonLabel()}
           </ButtonLink>
         )}
-        {/* Blank space with the large button's height (size="lg" is
-            tw-min-h-11 in buttonStyles.ts) while it may still mount, so the
-            countdown card does not grow after hydration. */}
-        {!hideMintBtn && hideNftPurchasing && reservesNftPurchasingSpace && (
-          <div aria-hidden="true" className="tw-h-11" />
-        )}
-        <DistributionLink collection={props.collection} />
+        <DistributionLink collection={mintCollection} />
       </div>
     );
   }
@@ -171,20 +190,23 @@ export function NextGenCountdown(props: Readonly<CountdownProps>) {
   return (
     <>
       {alStatus == Status.UPCOMING &&
-        printCountdown("Allowlist Starting", props.collection.allowlist_start)}
+        printCountdown("Allowlist Starting", mintCollection.allowlist_start)}
       {alStatus == Status.LIVE &&
-        printCountdown("Allowlist Ending", props.collection.allowlist_end)}
+        printCountdown("Allowlist Ending", mintCollection.allowlist_end)}
       {alStatus != Status.LIVE &&
         alStatus != Status.UPCOMING &&
         publicStatus == Status.UPCOMING &&
-        printCountdown("Public Phase Starting", props.collection.public_start)}
+        printCountdown("Public Phase Starting", mintCollection.public_start)}
       {publicStatus == Status.LIVE &&
-        printCountdown("Public Phase Ending", props.collection.public_end)}
+        printCountdown("Public Phase Ending", mintCollection.public_end)}
     </>
   );
 }
 
 export function NextGenPhases(props: Readonly<PhaseProps>) {
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  if (hideNftPurchasing) return null;
+
   const alStatus = getStatusFromDates(
     props.collection.allowlist_start,
     props.collection.allowlist_end
@@ -248,7 +270,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
       : 0;
 
   function showMint() {
-    if (props.collection.mint_count == props.collection.total_supply) {
+    if (props.collection.mint_count === props.collection.total_supply) {
       return false;
     }
 
@@ -351,7 +373,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
 
       <div
         className={`tw-grid ${props.compact ? "tw-gap-4" : "tw-gap-6 tw-pt-4"} ${
-          showMint() ? "md:tw-grid-cols-2" : ""
+          !hideNftPurchasing && showMint() ? "md:tw-grid-cols-2" : ""
         }`}
       >
         {props.compact ? (
@@ -396,7 +418,7 @@ export default function NextGenCollectionHeader(props: Readonly<Props>) {
           </div>
         )}
         {showMint() && (
-          <div className="tw-flex tw-w-full tw-max-w-full tw-flex-col tw-items-center">
+          <div className="tw-flex tw-w-full tw-max-w-full tw-flex-col tw-items-center empty:tw-hidden">
             <NextGenCountdown collection={props.collection} />
           </div>
         )}

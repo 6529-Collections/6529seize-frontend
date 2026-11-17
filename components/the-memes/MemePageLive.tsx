@@ -24,6 +24,7 @@ import {
 
 export function MemePageLiveRightMenu(props: {
   show: boolean;
+  showMintPrice?: boolean;
   nft: NFT | undefined;
   nftMeta?: ApiMemesExtendedData | undefined;
   locale?: SupportedLocale;
@@ -77,7 +78,13 @@ export function MemePageLiveRightMenu(props: {
             )}
           </NftPurchasingGate>
         </div>
-        {isDesktop && <MemeMintDetails nft={props.nft} locale={locale} />}
+        {isDesktop && (
+          <MemeMintDetails
+            nft={props.nft}
+            locale={locale}
+            showMintPrice={props.showMintPrice ?? true}
+          />
+        )}
         {props.nftMeta && (
           <MemeEditionSizeStats nftMeta={props.nftMeta} locale={locale}>
             {isDesktop && (
@@ -121,6 +128,7 @@ export function MemePageLiveRightMenu(props: {
         {!isDesktop && (
           <MemeNftLivePanel
             nft={props.nft}
+            showMintPrice={props.showMintPrice ?? true}
             recordedInTdh={props.nftMeta?.recorded_in_tdh}
             locale={locale}
           />

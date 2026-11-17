@@ -104,7 +104,8 @@ UI state.
   remounts or the page refreshes and does not affect other waves.
 - Price filters are not URL-synced and reset with wave-context remounts
   (for example changing to another wave thread).
-- Curation price filtering uses ETH values.
+- Curation price filtering uses ETH values on the web and in the Android app.
+  In the iOS app, use the other leaderboard sorts and open artwork directly.
 
 ## Related Pages
 

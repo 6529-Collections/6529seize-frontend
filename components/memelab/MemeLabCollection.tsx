@@ -17,7 +17,12 @@ import { fetchAllPages } from "@/services/6529api";
 import { MemeLabSort } from "@/types/enums";
 import { useRouter } from "next/navigation";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
-import { getInitialRouterValues, sortChanged } from "./MemeLab";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import {
+  getInitialRouterValues,
+  isMemeLabMarketQuoteSort,
+  sortChanged,
+} from "./MemeLab";
 import MemeLabNftCard from "./MemeLabNftCard";
 import MemeLabSortControls from "./MemeLabSortControls";
 
@@ -74,7 +79,12 @@ export default function LabCollection({
   const resultsRef = useRef<HTMLDivElement>(null);
 
   const [sortDir, setSortDir] = useState<SortDirection>();
-  const [sort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const [requestedSort, setSort] = useState<MemeLabSort>(MemeLabSort.AGE);
+  const sort =
+    hideNftPurchasing && isMemeLabMarketQuoteSort(requestedSort)
+      ? MemeLabSort.AGE
+      : requestedSort;
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
 
   useEffect(() => {
@@ -268,7 +278,10 @@ export default function LabCollection({
             sortDirection={sortDir}
             setSortDirection={setSortDir}
             currentSort={sort}
-            sortOptions={MEME_LAB_COLLECTION_SORT_OPTIONS}
+            sortOptions={MEME_LAB_COLLECTION_SORT_OPTIONS.filter(
+              (option) =>
+                !hideNftPurchasing || !isMemeLabMarketQuoteSort(option)
+            )}
             setSort={setSort}
             setVolumeType={setVolumeType}
             volumeType={volumeType}

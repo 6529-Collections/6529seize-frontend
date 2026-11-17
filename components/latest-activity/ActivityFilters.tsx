@@ -2,6 +2,7 @@
 
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { ContractFilter, TypeFilter } from "@/hooks/useActivityData";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -38,12 +39,26 @@ const TYPE_FILTER_MESSAGE = {
   [TypeFilter.REVALIDATIONS]: "nftActivity.filters.revalidations",
 } as const;
 
-export function getActivityTypeItems(locale: SupportedLocale) {
-  return Object.values(TypeFilter).map((type) => ({
-    key: type,
-    label: t(locale, TYPE_FILTER_MESSAGE[type]),
-    value: type,
-  }));
+const MARKET_ACTIVITY_TYPES = new Set([
+  TypeFilter.LISTINGS,
+  TypeFilter.OFFERS,
+  TypeFilter.CANCELLATIONS,
+  TypeFilter.EXPIRATIONS,
+  TypeFilter.INVALIDATIONS,
+  TypeFilter.REVALIDATIONS,
+]);
+
+export function getActivityTypeItems(
+  locale: SupportedLocale,
+  hideNftPurchasing = false
+) {
+  return Object.values(TypeFilter)
+    .filter((type) => !hideNftPurchasing || !MARKET_ACTIVITY_TYPES.has(type))
+    .map((type) => ({
+      key: type,
+      label: t(locale, TYPE_FILTER_MESSAGE[type]),
+      value: type,
+    }));
 }
 
 export default function ActivityFilters({
@@ -54,7 +69,8 @@ export default function ActivityFilters({
   isMobile,
 }: ActivityFiltersProps) {
   const locale = useBrowserLocale();
-  const activityTypeItems = getActivityTypeItems(locale);
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const activityTypeItems = getActivityTypeItems(locale, hideNftPurchasing);
   return (
     <div
       className={`tailwind-scope tw-ml-auto tw-flex tw-w-auto tw-items-center tw-gap-4 tw-py-2 ${

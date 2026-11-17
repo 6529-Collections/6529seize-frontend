@@ -34,6 +34,9 @@ and **Ex. museum & research**. Smaller supplies rank first; equal supplies share
 rank and the next rank skips those ties. A card without a recorded ranking shows
 **Unranked**.
 
+**Listings & offers** is available on the web and in the Android app.
+In the iOS app, links to this tab or to a specific order open the artwork view.
+
 ## Read listings and offers
 
 The summaries show the lowest captured listing in ETH and the highest captured

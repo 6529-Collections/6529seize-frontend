@@ -4,6 +4,8 @@ import NextGenNavigationHeader from "@/components/nextGen/collections/NextGenNav
 import { NEXTGEN_PAGE_FRAME_CLASSNAME } from "@/components/nextGen/collections/NextGenPageFrame";
 import NextGenTokenComponent from "@/components/nextGen/collections/nextgenToken/NextGenToken";
 import NextGenTokenOnChain from "@/components/nextGen/collections/NextGenTokenOnChain";
+import { useNftMarketRoute } from "@/hooks/useNftMarketRoute";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTitle } from "@/contexts/TitleContext";
 import type {
   NextGenCollection,
@@ -41,8 +43,25 @@ export default function NextGenTokenPageClient({
   readonly returnTo?: string | null | undefined;
 }) {
   const { setTitle } = useTitle();
-  const [tokenView, setTokenView] =
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const [requestedView, setTokenView] =
     useState<NextgenCollectionView>(initialView);
+  const isMarketPath =
+    getTokenViewFromPathname(pathname) ===
+    NextgenCollectionView.LISTINGS_AND_OFFERS;
+  const artworkPath = "/nextgen/token/" + tokenId;
+  const { hideNftPurchasing, redirectToArtwork } = useNftMarketRoute(
+    pathname,
+    searchParams,
+    isMarketPath || searchParams.get("order") ? artworkPath : undefined
+  );
+  const tokenView =
+    redirectToArtwork ||
+    (hideNftPurchasing &&
+      requestedView === NextgenCollectionView.LISTINGS_AND_OFFERS)
+      ? NextgenCollectionView.ABOUT
+      : requestedView;
 
   useEffect(() => {
     const handlePopState = () => {
@@ -66,7 +85,7 @@ export default function NextGenTokenPageClient({
       return;
     }
 
-    let newPath = `/nextgen/token/${tokenId}`;
+    let newPath = artworkPath;
     if (nextView !== NextgenCollectionView.ABOUT) {
       newPath += `/${getNextgenTokenViewSegment(nextView)}`;
     }

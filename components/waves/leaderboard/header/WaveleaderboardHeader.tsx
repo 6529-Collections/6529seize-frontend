@@ -1,5 +1,6 @@
 "use client";
 
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { AuthContext } from "@/components/auth/Auth";
 import { AdditionalActionFilter } from "./AdditionalActionFilter";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -331,15 +332,23 @@ export const WaveLeaderboardHeader: React.FC<WaveLeaderboardHeaderProps> = ({
     isCurationWave,
     participation,
   });
-  const showPriceControls = Boolean(isCurationWave && onPriceRangeChange);
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
+  const showPriceControls = Boolean(
+    !hideNftPurchasing && isCurationWave && onPriceRangeChange
+  );
   const isApproveWave = wave.wave.type === ApiWaveType.Approve;
   const sortItems = useMemo(() => {
     return getWaveLeaderboardSortItems({
       isApproveWave,
-      isCurationWave,
+      isCurationWave: isCurationWave && !hideNftPurchasing,
       timeLockMs: wave.wave.time_lock_ms,
     });
-  }, [isApproveWave, isCurationWave, wave.wave.time_lock_ms]);
+  }, [
+    hideNftPurchasing,
+    isApproveWave,
+    isCurationWave,
+    wave.wave.time_lock_ms,
+  ]);
   const viewModes = getLeaderboardViewModes(isMemesWave);
   const hasActivePriceFilters =
     typeof minPrice === "number" || typeof maxPrice === "number";

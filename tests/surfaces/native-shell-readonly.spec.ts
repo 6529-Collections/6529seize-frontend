@@ -304,6 +304,44 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     }
   });
 
+  test("card market deep links show the artwork view on iOS", async ({
+    page,
+  }, testInfo) => {
+    const path = "/the-memes/1";
+    const order = "0x" + "1".repeat(64);
+    await gotoReady(
+      page,
+      path + "?focus=listings-and-offers&order=" + order + "&locale=en-US"
+    );
+
+    const tabs = page.getByRole("navigation", { name: "Meme page sections" });
+    const market = tabs.getByRole("button", {
+      name: "Listings & offers",
+      exact: true,
+    });
+    await expect(tabs).toBeVisible();
+    if (testInfo.project.name === "capacitor-ios-sim") {
+      await expectUrlState(
+        page,
+        (url) =>
+          url.pathname === path &&
+          !url.searchParams.has("focus") &&
+          !url.searchParams.has("order") &&
+          url.searchParams.get("locale") === "en-US"
+      );
+      await expect(market).toHaveCount(0);
+      await expect(
+        tabs.getByRole("button", { name: "Overview", exact: true })
+      ).toHaveAttribute("aria-current", "page");
+    } else {
+      await expect(market).toBeVisible();
+      await expectUrlState(
+        page,
+        (url) => url.searchParams.get("focus") === "listings-and-offers"
+      );
+    }
+  });
+
   test("Collect Back restores the Collected filters and source action", async ({
     page,
   }, testInfo) => {
