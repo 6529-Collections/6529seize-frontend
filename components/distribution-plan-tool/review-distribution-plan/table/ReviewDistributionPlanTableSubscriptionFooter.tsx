@@ -632,8 +632,6 @@ export function ReviewDistributionPlanTableSubscriptionFooter({
         canChooseMode && !showManual ? (
           <Button
             variant="secondary"
-            size="lg"
-            fullWidth
             disabled={isResetting}
             onClick={onChooseManual}
           >

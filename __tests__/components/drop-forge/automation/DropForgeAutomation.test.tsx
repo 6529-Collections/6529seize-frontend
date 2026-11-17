@@ -289,10 +289,12 @@ it("shows the saved checkpoint while a background job is pending", async () => {
       phaseIds={["p0", "p1", "p2"]}
     />
   );
-  expect(
-    await screen.findByRole("button", { name: "Processing and finalizing…" })
-  ).toBeDisabled();
-  expect(screen.getByText("3 / 5")).toBeVisible();
+  await waitFor(() =>
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Processing and finalizing… · Step 3 of 5"
+    )
+  );
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
   expect(startForgeProcess).not.toHaveBeenCalled();
 });
 
@@ -322,9 +324,12 @@ it("runs one Process and Finalize operation and restores its completed state on 
     ).toBeEnabled()
   );
   fireEvent.click(screen.getByRole("button", { name: "Process and Finalize" }));
-  expect(
-    await screen.findByRole("button", { name: "Processing and finalizing…" })
-  ).toBeDisabled();
+  await waitFor(() =>
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Processing and finalizing… · Step 1 of 5"
+    )
+  );
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
   expect(startForgeProcess).toHaveBeenCalledTimes(1);
   mounted.unmount();
   jest.mocked(latestForgeProcess).mockResolvedValue({
@@ -341,11 +346,12 @@ it("runs one Process and Finalize operation and restores its completed state on 
       phaseIds={["p0", "p1", "p2"]}
     />
   );
-  expect(
-    await screen.findByRole("button", {
-      name: "Completed — lists are ready to download.",
-    })
-  ).toBeDisabled();
+  await waitFor(() =>
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Completed · Lists ready to download"
+    )
+  );
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
   expect(startForgeProcess).toHaveBeenCalledTimes(1);
 });
 
@@ -377,7 +383,7 @@ it("uses a fresh request ID when processing again after a reset", async () => {
     screen.getByRole("button", { name: "Process and Finalize" });
   await waitFor(() => expect(readyButton()).toBeEnabled());
   fireEvent.click(readyButton());
-  await screen.findByRole("button", { name: "Processing and finalizing…" });
+  expect(await screen.findByText("Processing and finalizing…")).toBeVisible();
   await waitFor(() => expect(startForgeProcess).toHaveBeenCalledTimes(1));
 
   await act(async () => {
@@ -507,10 +513,12 @@ it("shows progress while a job with changed phase inputs is still running", asyn
       phaseIds={["p0", "p1", "p2"]}
     />
   );
-  expect(
-    await screen.findByRole("button", { name: "Processing and finalizing…" })
-  ).toBeDisabled();
-  expect(screen.getByRole("status")).toHaveTextContent(/^2 \/ 5$/);
+  await waitFor(() =>
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Processing and finalizing… · Step 2 of 5"
+    )
+  );
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
 
 it("allows processing changed phases after an explicit reset invalidates the prior job", async () => {
@@ -648,9 +656,8 @@ it("reauthenticates and resumes the existing job after refresh without generatin
     )
   );
   expect(mockRequestAuth).toHaveBeenCalledWith({ serverRejected: true });
-  expect(
-    await screen.findByRole("button", { name: "Processing and finalizing…" })
-  ).toBeDisabled();
+  expect(await screen.findByText("Processing and finalizing…")).toBeVisible();
+  expect(screen.queryByRole("button")).not.toBeInTheDocument();
 });
 it("leaves the waiting job intact when the operator cancels authentication", async () => {
   jest.mocked(latestForgeProcess).mockResolvedValue({

@@ -4,13 +4,16 @@ import { ApiDropForgeJobStatusEnum as JobStatus } from "@/generated/models/ApiDr
 import { useEffect, useId, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
 import Button from "@/components/utils/button/Button";
 import {
   forgeProcessKey,
   useDropForgeProcess,
 } from "@/hooks/useDropForgeProcess";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatList } from "@/i18n/format";
+import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -20,7 +23,74 @@ import {
 } from "@/services/api/drop-forge-process-inputs";
 import { startForgeProcess } from "@/services/api/drop-forge-api";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { CheckCircleIcon } from "@heroicons/react/24/outline";
+
 type PhaseIssues = Pick<ForgePhaseInputs, "missing" | "duplicates">;
+
+const processStepCount = 5;
+
+function PreparationStatus({
+  id,
+  reason,
+  showProgress,
+  completed,
+  step,
+}: Readonly<{
+  id: string;
+  reason: string;
+  showProgress: boolean;
+  completed: boolean;
+  step: number;
+}>) {
+  const locale = useBrowserLocale();
+
+  if (!showProgress) {
+    return (
+      <output
+        id={id}
+        aria-atomic="true"
+        className={
+          reason
+            ? "tw-max-w-sm tw-text-sm tw-text-iron-300 @[36rem]:tw-text-right"
+            : "tw-sr-only"
+        }
+      >
+        {reason}
+      </output>
+    );
+  }
+
+  return (
+    <output
+      id={id}
+      aria-atomic="true"
+      className={`tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-text-sm ${completed ? "tw-text-emerald-400" : "tw-text-iron-200"}`}
+    >
+      {completed ? (
+        <CheckCircleIcon className="tw-size-5 tw-shrink-0" aria-hidden="true" />
+      ) : (
+        <CircleLoader size={CircleLoaderSize.SMALL} />
+      )}
+      <span>
+        <span className="tw-font-medium">
+          {t(
+            locale,
+            completed ? "dropForge.completed" : "dropForge.processing"
+          )}
+        </span>{" "}
+        <span aria-hidden="true">·</span>{" "}
+        <span className="tw-text-iron-300">
+          {completed
+            ? t(locale, "dropForge.listsReady")
+            : t(locale, "dropForge.processingStep", {
+                step: formatInteger(locale, step),
+                total: formatInteger(locale, processStepCount),
+              })}
+        </span>
+      </span>
+    </output>
+  );
+}
 
 function getProcessInputMessage(
   locale: SupportedLocale,
@@ -127,19 +197,10 @@ export default function ProcessAndFinalize({
       setSubmitting(false);
     }
   }
-  let label:
-    | "dropForge.process"
-    | "dropForge.completed"
-    | "dropForge.resumeAuth"
-    | "dropForge.processing" = "dropForge.process";
-  if (pending) label = "dropForge.processing";
-  if (completed) label = "dropForge.completed";
-  if (awaitingAuth && !pending) label = "dropForge.resumeAuth";
-  const checkpoint = `${Math.min((job?.step ?? 0) + 1, 5)} / 5`;
+  const showProgress = pending || completed;
+  const step = Math.min((job?.step ?? 0) + 1, processStepCount);
   let statusMessage = "";
-  if (pending) {
-    statusMessage = checkpoint;
-  } else if (!hasRequiredInputs) {
+  if (!hasRequiredInputs) {
     statusMessage = getProcessInputMessage(locale, claim, plan, phaseIssues);
   } else if (requiresReset) {
     statusMessage = t(locale, "dropForge.inputsChanged");
@@ -148,41 +209,39 @@ export default function ProcessAndFinalize({
   }
   const failure = error ?? job?.error ?? getToastErrorDetails(operation.error);
   return (
-    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2">
-      <Button
-        variant="action"
-        size="lg"
-        fullWidth
-        loading={pending}
-        type="button"
-        onClick={() => {
-          void run();
-        }}
-        disabled={
-          disabled ||
-          pending ||
-          completed ||
-          requiresReset ||
-          !hasRequiredInputs ||
-          operation.isLoading
-        }
-        aria-describedby={statusMessage ? statusId : undefined}
-        className="!tw-whitespace-normal"
-      >
-        {t(locale, label)}
-      </Button>
-      {statusMessage && (
-        <div
-          id={statusId}
-          role="status"
-          aria-live="polite"
-          className="tw-text-sm tw-text-iron-300"
+    <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-2 @[36rem]:tw-items-end">
+      {!showProgress && (
+        <Button
+          variant="action"
+          onClick={() => {
+            void run();
+          }}
+          disabled={
+            disabled ||
+            requiresReset ||
+            !hasRequiredInputs ||
+            operation.isLoading
+          }
+          aria-describedby={statusMessage ? statusId : undefined}
         >
-          {statusMessage}
-        </div>
+          {t(
+            locale,
+            awaitingAuth ? "dropForge.resumeAuth" : "dropForge.process"
+          )}
+        </Button>
       )}
+      <PreparationStatus
+        id={statusId}
+        reason={statusMessage}
+        showProgress={showProgress}
+        completed={completed}
+        step={step}
+      />
       {failure && (
-        <p role="alert" className="tw-max-w-lg tw-text-sm tw-text-error">
+        <p
+          role="alert"
+          className="tw-max-w-sm tw-text-sm tw-text-error @[36rem]:tw-text-right"
+        >
           {failure}
         </p>
       )}

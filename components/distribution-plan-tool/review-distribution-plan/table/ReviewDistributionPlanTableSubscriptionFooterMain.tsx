@@ -1,7 +1,10 @@
 "use client";
 
 import type { AllowlistDescription } from "@/components/allowlist-tool/allowlist-tool.types";
-import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import CircleLoader, {
+  CircleLoaderSize,
+} from "@/components/distribution-plan-tool/common/CircleLoader";
+import { dropForgeIconButtonClassName } from "@/components/drop-forge/drop-forge-section-styles";
 import Button from "@/components/utils/button/Button";
 import type { DistributionOverview } from "@/generated/models/DistributionOverview";
 import type { DistributionPhoto } from "@/generated/models/DistributionPhoto";
@@ -16,6 +19,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   CheckCircleIcon,
   InformationCircleIcon,
+  XCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
   Dialog,
@@ -60,9 +64,9 @@ const footerSectionClass =
 const footerHeadingClass =
   "tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100";
 const footerActionRowClass =
-  "tw-grid tw-gap-x-4 tw-gap-y-2 @[42rem]:tw-grid-cols-[minmax(0,1fr)_minmax(24rem,58%)]";
+  "tw-flex tw-flex-col tw-gap-x-4 tw-gap-y-2 @[36rem]:tw-flex-row @[36rem]:tw-flex-wrap @[36rem]:tw-items-center";
 const footerActionsClass =
-  "tw-grid tw-items-start tw-gap-2 @[42rem]:tw-grid-cols-2";
+  "tw-flex tw-min-w-0 tw-flex-col tw-gap-2 @[36rem]:tw-ml-auto @[36rem]:tw-flex-row @[36rem]:tw-flex-wrap @[36rem]:tw-items-start @[36rem]:tw-justify-end";
 
 function StableLabel({
   busy,
@@ -83,6 +87,60 @@ function StableLabel({
         </span>
       )}
     </span>
+  );
+}
+
+function ManualFinalizeButton({
+  normalized,
+  loadingOverview,
+  finalizing,
+  resetting,
+  onFinalize,
+}: Readonly<{
+  normalized: boolean | undefined;
+  loadingOverview: boolean;
+  finalizing: boolean;
+  resetting: boolean;
+  onFinalize: () => void;
+}>) {
+  const locale = useBrowserLocale();
+  const statusId = useId();
+  const hasStatus = !loadingOverview && normalized !== undefined;
+  const StatusIcon = normalized ? CheckCircleIcon : XCircleIcon;
+
+  return (
+    <>
+      <Button
+        variant="secondary"
+        onClick={onFinalize}
+        disabled={finalizing || resetting}
+        aria-busy={finalizing}
+        aria-describedby={hasStatus ? statusId : undefined}
+      >
+        <StableLabel
+          busy={finalizing}
+          busyLabel={t(locale, "emma.review.finalizing")}
+        >
+          {t(locale, "emma.review.finalize")}
+          <span className="tw-size-4 tw-shrink-0" aria-hidden="true">
+            {loadingOverview && <CircleLoader size={CircleLoaderSize.SMALL} />}
+            {hasStatus && (
+              <StatusIcon
+                className={`tw-size-4 ${normalized ? "tw-text-emerald-400" : "tw-text-error"}`}
+              />
+            )}
+          </span>
+        </StableLabel>
+      </Button>
+      {hasStatus && (
+        <span id={statusId} className="tw-sr-only">
+          {t(
+            locale,
+            normalized ? "emma.review.finalized" : "emma.review.notFinalized"
+          )}
+        </span>
+      )}
+    </>
   );
 }
 
@@ -109,7 +167,7 @@ function AssetRow({
 }>) {
   const locale = useBrowserLocale();
   return (
-    <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-4 tw-gap-y-2 tw-py-2.5 @[36rem]:tw-grid-cols-[minmax(0,1fr)_minmax(9rem,24%)_auto]">
+    <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-items-center tw-gap-x-4 tw-gap-y-2 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-py-2.5 first:tw-border-t-0 @[36rem]:tw-grid-cols-[minmax(0,1fr)_minmax(9rem,24%)_auto]">
       <span className="tw-text-sm tw-font-medium tw-text-iron-100">
         {label}
       </span>
@@ -260,30 +318,25 @@ function PreparationSection({
         className={footerSectionClass}
       >
         <div className={footerActionRowClass}>
-          <div className="tw-flex tw-min-h-11 tw-items-center tw-gap-1">
+          <div className="tw-flex tw-min-h-10 tw-items-center tw-gap-2">
             <h3 className={footerHeadingClass}>
               {t(locale, "emma.review.prepare")}
             </h3>
             <Button
-              variant="ghost"
-              size="xs"
-              className="tw-w-8"
+              variant="secondary"
+              className={dropForgeIconButtonClassName}
               aria-label={t(locale, "emma.review.preparationHelp")}
               aria-haspopup="dialog"
               title={t(locale, "emma.review.preparationHelp")}
               onClick={() => setShowPreparationHelp(true)}
             >
-              <InformationCircleIcon className="tw-size-5" aria-hidden="true" />
+              <InformationCircleIcon className="tw-size-6" aria-hidden="true" />
             </Button>
           </div>
           {(choice !== undefined || processingControl !== undefined) && (
             <div className={footerActionsClass}>
               {choice}
-              {processingControl !== undefined && (
-                <div className="tw-min-w-0 @[42rem]:tw-col-start-2">
-                  {processingControl}
-                </div>
-              )}
+              {processingControl}
             </div>
           )}
         </div>
@@ -493,7 +546,7 @@ export function SubscriptionFooterMain({
         <h3 className={footerHeadingClass}>
           {t(locale, "emma.review.assets")}
         </h3>
-        <div className="tw-mt-2 tw-divide-y tw-divide-solid tw-divide-white/10">
+        <div className="tw-mt-2">
           {(["artist", "team"] as const).map((phase) => (
             <AirdropAssetRow
               key={phase}
@@ -558,32 +611,16 @@ export function SubscriptionFooterMain({
           </div>
           <div className={footerActionsClass}>
             {showManualFinalize && (
-              <Button
-                variant="secondary"
-                size="lg"
-                fullWidth
-                onClick={onFinalize}
-                disabled={isFinalizing || isResetting}
-                aria-busy={isFinalizing}
-              >
-                <StableLabel
-                  busy={isFinalizing}
-                  busyLabel={t(locale, "emma.review.finalizing")}
-                >
-                  {t(locale, "emma.review.finalize")}
-                  {overview?.is_normalized && (
-                    <CheckCircleIcon
-                      className="tw-size-4 tw-text-emerald-400"
-                      aria-label={t(locale, "emma.review.finalized")}
-                    />
-                  )}
-                </StableLabel>
-              </Button>
+              <ManualFinalizeButton
+                normalized={overview?.is_normalized}
+                loadingOverview={isLoadingOverview}
+                finalizing={isFinalizing}
+                resetting={isResetting}
+                onFinalize={onFinalize}
+              />
             )}
             <Button
               variant="secondary"
-              size="lg"
-              fullWidth
               onClick={onUploadToGithub}
               disabled={
                 isUploadingToGithub ||
@@ -593,7 +630,6 @@ export function SubscriptionFooterMain({
               }
               aria-busy={isUploadingToGithub}
               aria-describedby={publishStatusKey ? publishStatusId : undefined}
-              className="@[42rem]:tw-col-start-2"
             >
               <StableLabel
                 busy={isUploadingToGithub}
