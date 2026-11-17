@@ -16,30 +16,33 @@ export function checkDesktopUpdates(
   const pending = pendingChecks.get(updater);
   if (pending) return pending;
 
+  let resolveCheck!: (result: DesktopUpdateCheckResult) => void;
   const check = new Promise<DesktopUpdateCheckResult>((resolve) => {
-    function finish(result: DesktopUpdateCheckResult) {
-      clearTimeout(timeout);
-      updater.offUpdateAvailable(onAvailable);
-      updater.offUpdateNotAvailable(onNotAvailable);
-      updater.offUpdateError(onError);
-      resolve(result);
-    }
-    const onAvailable = () => finish("available");
-    const onNotAvailable = () => finish("current");
-    const onError = () => finish("failed");
-    const timeout = setTimeout(onError, UPDATE_CHECK_TIMEOUT_MS);
-
-    updater.onUpdateAvailable(onAvailable);
-    updater.onUpdateNotAvailable(onNotAvailable);
-    updater.onUpdateError(onError);
-    try {
-      updater.checkUpdates();
-    } catch {
-      onError();
-    }
-  }).finally(() => {
-    pendingChecks.delete(updater);
+    resolveCheck = resolve;
   });
   pendingChecks.set(updater, check);
+
+  function finish(result: DesktopUpdateCheckResult) {
+    if (pendingChecks.get(updater) !== check) return;
+    pendingChecks.delete(updater);
+    clearTimeout(timeout);
+    updater.offUpdateAvailable(onAvailable);
+    updater.offUpdateNotAvailable(onNotAvailable);
+    updater.offUpdateError(onError);
+    resolveCheck(result);
+  }
+  const onAvailable = () => finish("available");
+  const onNotAvailable = () => finish("current");
+  const onError = () => finish("failed");
+  const timeout = setTimeout(onError, UPDATE_CHECK_TIMEOUT_MS);
+
+  updater.onUpdateAvailable(onAvailable);
+  updater.onUpdateNotAvailable(onNotAvailable);
+  updater.onUpdateError(onError);
+  try {
+    updater.checkUpdates();
+  } catch {
+    onError();
+  }
   return check;
 }

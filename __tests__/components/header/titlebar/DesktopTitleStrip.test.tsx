@@ -1,6 +1,12 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DesktopUpdateNotice from "@/components/desktop/DesktopUpdateNotice";
 import DesktopTitleStrip from "@/components/header/titlebar/DesktopTitleStrip";
@@ -417,6 +423,35 @@ describe("DesktopTitleStrip", () => {
     await user.click(info);
     expect(await screen.findByRole("dialog")).toBeVisible();
     expect(screen.queryByText("No updates found.")).not.toBeInTheDocument();
+  });
+
+  it("starts a fresh check immediately after receiving the startup result", async () => {
+    const user = userEvent.setup();
+    installDesktopShell();
+    render(
+      <>
+        <DesktopUpdateNotice />
+        <DesktopTitleStrip />
+      </>
+    );
+    await user.click(screen.getByRole("button", { name: "App info" }));
+    const check = await screen.findByRole("button", {
+      name: "Check for updates",
+    });
+
+    act(() => {
+      for (const listener of bridges.noUpdateListeners) listener({});
+      fireEvent.click(check);
+    });
+    expect(bridges.updater.checkUpdates).toHaveBeenCalledTimes(2);
+    expect(screen.getByText("Checking for updates…")).toBeVisible();
+
+    act(() => {
+      for (const listener of bridges.updateErrorListeners) listener({});
+    });
+    expect(
+      await screen.findByText("Couldn’t check for updates. Try again.")
+    ).toBeVisible();
   });
 
   it("lets the user retry when the host never replies", async () => {
