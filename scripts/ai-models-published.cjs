@@ -14,6 +14,18 @@ const SAME_MODEL = new Set([
   "GGUF conversion",
   "repackaged for ComfyUI",
 ]);
+/** The dates the last run wrote, or none when there is no such file. */
+function readKnown(file) {
+  try {
+    return JSON.parse(fs.readFileSync(file, "utf8")).models ?? {};
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return {};
+    }
+    throw error;
+  }
+}
+
 (async () => {
   const out = {};
   const queue = [...models];
@@ -52,9 +64,7 @@ const SAME_MODEL = new Set([
   await Promise.all([worker(), worker(), worker(), worker()]);
   // A model whose requests failed keeps the date the last run found for
   // the same repository, so a refresh never loses one.
-  const known = fs.existsSync(outPath)
-    ? JSON.parse(fs.readFileSync(outPath, "utf8")).models
-    : {};
+  const known = readKnown(outPath);
   const missing = models.filter((m) => !out[m.id]);
   for (const m of missing) {
     if (known[m.id]) {
