@@ -1,6 +1,9 @@
 /** @jest-environment node */
 import { parseAiReleaseFeed } from "@/lib/ai-page/releaseFeed";
-import { groupAiReleaseFiles } from "@/lib/ai-page/releaseFiles";
+import {
+  describeCodeSignature,
+  groupAiReleaseFiles,
+} from "@/lib/ai-page/releaseFiles";
 
 import { AI_TEST_FEED, aiFeedEntry, MAC_SIGNER } from "./fixtures";
 
@@ -145,9 +148,9 @@ describe("parseAiReleaseFeed", () => {
 });
 
 describe("groupAiReleaseFiles", () => {
-  it("makes one button per package and lists the rest", () => {
+  it("makes one button per package and groups every file by system", () => {
     const [release] = parseAiReleaseFeed(AI_TEST_FEED)!;
-    const { installers, others } = groupAiReleaseFiles(release!);
+    const { installers, groups } = groupAiReleaseFiles(release!);
     expect(
       installers.map((installer) => [installer.kind, installer.file.name])
     ).toEqual([
@@ -157,13 +160,48 @@ describe("groupAiReleaseFiles", () => {
       ["linux-x64-cuda", "6529-ai-cuda_0.1.0_amd64.deb"],
       ["linux-arm64", "6529-ai_0.1.0_arm64.deb"],
     ]);
-    expect(others.map((entry) => entry.file.name)).toEqual([
-      "6529-ai-0.1.0-linux-arm64-cpu.tar.gz",
-      "6529-ai-0.1.0-linux-x86_64-cpu.tar.gz",
-      "6529-ai-0.1.0-linux-x86_64-cuda.tar.gz",
-      "manifest.json",
-      "SHA256SUMS",
-      "SHA256SUMS.sig",
+    expect(
+      groups.map((group) => [
+        group.family,
+        group.entries.map((entry) => entry.file.name),
+      ])
+    ).toEqual([
+      ["mac", ["6529-ai-0.1.0-macos-arm64.dmg"]],
+      ["windows", ["6529-ai-0.1.0-windows-x64-setup.exe"]],
+      [
+        "linux",
+        [
+          "6529-ai_0.1.0_amd64.deb",
+          "6529-ai-cuda_0.1.0_amd64.deb",
+          "6529-ai_0.1.0_arm64.deb",
+          // The archives in the buttons' order: x86-64, CUDA, ARM64.
+          "6529-ai-0.1.0-linux-x86_64-cpu.tar.gz",
+          "6529-ai-0.1.0-linux-x86_64-cuda.tar.gz",
+          "6529-ai-0.1.0-linux-arm64-cpu.tar.gz",
+        ],
+      ],
+      ["checks", ["SHA256SUMS", "SHA256SUMS.sig", "manifest.json"]],
     ]);
+  });
+});
+
+describe("describeCodeSignature", () => {
+  it("reads who signed a file and whether Apple notarized it", () => {
+    expect(
+      describeCodeSignature(
+        "Developer ID Application: 6529 Collection LLC, notarized by Apple"
+      )
+    ).toEqual({ signer: "6529 Collection LLC", notarized: true });
+    expect(
+      describeCodeSignature("Developer ID Application: 6529 Collection LLC")
+    ).toEqual({ signer: "6529 Collection LLC", notarized: false });
+    expect(describeCodeSignature("6529 Collection LLC")).toEqual({
+      signer: "6529 Collection LLC",
+      notarized: false,
+    });
+    expect(describeCodeSignature(null)).toEqual({
+      signer: null,
+      notarized: false,
+    });
   });
 });

@@ -136,8 +136,10 @@ protocol text for the app, as the validator's and 6529 AI's do. File names, comm
 publisher name and the key's address stay as written in every language.
 
 The known issues are the ones verified for the first signed test builds;
-update them with each release. Feedback goes to the public 6529 Tech
-Feedback wave.
+update them with each release. Feedback goes to the public "6529 Desktop"
+wave, a subwave of Ministry of Validation, with a report template: the
+system and its version, the app version shown in the title bar, what you
+did, what happened, and a screenshot.
 
 ## Link it from the site
 
