@@ -43,7 +43,7 @@ Scroll or use the bottom arrow to leave that position.
 4. If the target is loaded, chat scrolls and centers the drop.
 5. If the target is not loaded, chat fetches around the target serial and
    retries.
-6. During long jumps, a temporary loading overlay can appear.
+6. During long jumps, a temporary loading overlay can appear until the target message is rendered in view.
 7. The target drop is highlighted briefly, then thread browsing continues.
 
 ## Common Scenarios

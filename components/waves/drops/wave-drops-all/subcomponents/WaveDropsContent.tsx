@@ -35,6 +35,7 @@ interface WaveDropsContentProps {
   }) => void;
   readonly queueSerialTarget: (serialNo: number) => void;
   readonly activeDrop: ActiveDropState | null;
+  readonly pinnedSerialNo?: number | null | undefined;
   readonly serialTarget: number | null;
   readonly targetDropRef: RefObject<HTMLDivElement | null>;
   readonly onQuoteClick: (drop: ApiDrop) => void;
@@ -73,6 +74,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
   queueSerialTarget,
   activeDrop,
   serialTarget,
+  pinnedSerialNo,
   targetDropRef,
   onQuoteClick,
   isAtBottom,
@@ -161,6 +163,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
         queueSerialTarget={queueSerialTarget}
         activeDrop={activeDrop}
         serialTarget={serialTarget}
+        pinnedSerialNo={pinnedSerialNo}
         targetDropRef={targetDropRef}
         onQuoteClick={onQuoteClick}
         isAtBottom={isAtBottom}

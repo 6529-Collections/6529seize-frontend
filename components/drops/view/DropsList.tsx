@@ -52,6 +52,7 @@ interface DropsListProps {
   readonly onQuoteClick: (drop: ApiDrop) => void;
   readonly onDropContentClick?: ((drop: ExtendedDrop) => void) | undefined;
   readonly serialNo: number | null;
+  readonly pinnedSerialNo?: number | null | undefined;
   readonly targetDropRef: RefObject<HTMLDivElement | null> | null;
   readonly dropViewDropId: string | null;
   readonly parentContainerRef?: React.RefObject<HTMLElement | null> | undefined;
@@ -106,6 +107,7 @@ interface DropsListRowProps {
   readonly virtualScrollRootMargin: string | undefined;
   /** Whether this row is the jump target. */
   readonly isTarget: boolean;
+  readonly keepContentMounted: boolean;
   /** The active reply or quote state, only when it is for this row's drop. */
   readonly activeDrop: ActiveDropState | null;
 }
@@ -127,6 +129,7 @@ const DropsListRow = memo(
     signatureGroup,
     virtualScrollRootMargin,
     isTarget,
+    keepContentMounted,
     activeDrop,
   }: DropsListRowProps) => {
     const highlightMessageOnly =
@@ -190,6 +193,7 @@ const DropsListRow = memo(
           waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
           type={drop.type}
           rootMargin={virtualScrollRootMargin}
+          keepContentMounted={keepContentMounted}
           enableLongContentCollapse={
             location === DropLocation.WAVE && itemData.dropViewDropId === null
           }
@@ -212,6 +216,7 @@ const DropsList = memo(
     onReply,
     onReplyClick,
     serialNo,
+    pinnedSerialNo,
     targetDropRef,
     parentContainerRef,
     onQuoteClick,
@@ -453,6 +458,7 @@ const DropsList = memo(
             signatureGroup={signatureGroups.get(drop.id)}
             virtualScrollRootMargin={virtualScrollRootMargin}
             isTarget={serialNo === drop.serial_no}
+            keepContentMounted={pinnedSerialNo === drop.serial_no}
             activeDrop={activeDrop?.drop.id === drop.id ? activeDrop : null}
           />
         );
@@ -486,6 +492,7 @@ const DropsList = memo(
       suspendLightDropHydration,
       virtualScrollRootMargin,
       serialNo,
+      pinnedSerialNo,
       activeDrop,
       moderationPresentation,
       signatureGroups,

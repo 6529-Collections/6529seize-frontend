@@ -257,6 +257,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
 
   const {
     serialTarget,
+    pinnedSerialNo,
     queueSerialTarget,
     targetDropRef,
     isScrolling,
@@ -422,6 +423,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
           queueSerialTarget={queueVisibleSerialTarget}
           activeDrop={activeDrop}
           serialTarget={serialTarget}
+          pinnedSerialNo={pinnedSerialNo}
           targetDropRef={targetDropRef}
           onQuoteClick={handleQuoteClick}
           isAtBottom={isAtBottom}

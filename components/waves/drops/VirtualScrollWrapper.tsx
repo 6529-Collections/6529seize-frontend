@@ -33,6 +33,7 @@ interface VirtualScrollWrapperProps {
   readonly type: DropSize;
   readonly suspendLightDropHydration?: boolean | undefined;
   readonly rootMargin?: string | undefined;
+  readonly keepContentMounted?: boolean | undefined;
   readonly enableLongContentCollapse?: boolean | undefined;
 
   /**
@@ -72,6 +73,7 @@ export default function VirtualScrollWrapper({
   type,
   suspendLightDropHydration = false,
   rootMargin = "5000px 0px 5000px 0px",
+  keepContentMounted = false,
   enableLongContentCollapse = false,
 }: VirtualScrollWrapperProps) {
   const { fetchAroundSerialNo } = useMyStreamActions();
@@ -240,10 +242,16 @@ export default function VirtualScrollWrapper({
    *    also render children so we can measure them.
    */
   const isServer = typeof window === "undefined";
-  const shouldRenderChildren = isServer || isInView || measuredHeight === null;
+  const shouldRenderChildren =
+    isServer || keepContentMounted || isInView || measuredHeight === null;
 
   return (
-    <div ref={containerRef}>
+    <div
+      ref={containerRef}
+      data-wave-drop-content={
+        shouldRenderChildren && type === DropSize.FULL ? "" : undefined
+      }
+    >
       <WaveDropContentExpansionProvider
         enabled={enableLongContentCollapse}
         scrollContainerRef={scrollContainerRef}
