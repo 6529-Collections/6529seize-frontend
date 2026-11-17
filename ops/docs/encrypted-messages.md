@@ -626,7 +626,9 @@ restore it on a new device.
   4. **Backing up your messages** shows progress. You can close the dialog:
      the upload keeps going while 6529 stays open in that tab, and the card
      shows the same progress. It ends with **Backup is on** and how many chats
-     and messages it holds. If the upload stops, **Backup didn't finish**
+     and messages it holds, only once the new backup is active and fully
+     uploaded; if the upload needs another run, progress stays until that run
+     succeeds. If the upload stops, **Backup didn't finish**
      offers **Try again**; the same code keeps working and the upload carries
      on from where it stopped (it also retries by itself).
 
@@ -645,8 +647,8 @@ restore it on a new device.
   storage is used (in kB below 1 MB). While an upload runs it shows progress
   and asks you to keep 6529 open in that tab. If an upload needs another run
   (another device wrote to the backup at the same moment), it keeps showing
-  progress until that run succeeds, never "up to date"; the setup dialog's
-  **Try again** likewise says **Backup is on** only then. A failed upload
+  progress until that run succeeds, never "up to date"; the setup and
+  replacement dialogs likewise say **Backup is on** only then. A failed upload
   shows its error and is retried about 5 minutes later.
 - Reminders while backup is off (or a backup from another device isn't
   restored here):

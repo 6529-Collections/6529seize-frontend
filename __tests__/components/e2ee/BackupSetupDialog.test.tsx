@@ -33,7 +33,7 @@ function fakeManager() {
     },
     confirmBackup: jest.fn(
       () =>
-        new Promise<void>((resolve, reject) => {
+        new Promise<boolean>((resolve, reject) => {
           manager.set({ phase: "on", uploading: true });
           finishUpload = () => {
             manager.set({
@@ -41,7 +41,7 @@ function fakeManager() {
               lastBackupAt: Date.now(),
               counts: { chats: 38, messages: 1240 },
             });
-            resolve();
+            resolve(true);
           };
           failUpload = reject;
         })
@@ -310,6 +310,71 @@ describe("BackupSetupDialog", () => {
     expect(within(check).getByRole("alert")).toHaveTextContent(
       "Set up encrypted messages on this device first."
     );
+  });
+
+  /** The first upload needs another run (a conflict or fork repair). */
+  const queueRepair = (manager: ReturnType<typeof fakeManager>) =>
+    manager.confirmBackup.mockImplementationOnce(async () => {
+      manager.set({ phase: "on", uploading: true, lastError: null });
+      return false;
+    });
+
+  async function confirmCheckedCode(confirmName: string) {
+    fireEvent.change(screen.getByLabelText("Group 4"), {
+      target: { value: "PQRS" },
+    });
+    fireEvent.change(screen.getByLabelText("Group 11"), {
+      target: { value: "JKMN" },
+    });
+    fireEvent.click(button(confirmName));
+  }
+
+  it("keeps uploading after Turn on backup until a queued repair run finishes", async () => {
+    const manager = fakeManager();
+    queueRepair(manager);
+    renderDialog(manager);
+    await toCheckStep();
+    await confirmCheckedCode("Turn on backup");
+    await waitFor(() => expect(manager.confirmBackup).toHaveBeenCalledTimes(1));
+    const upload = await screen.findByRole("dialog", {
+      name: "Backing up your messages",
+    });
+    expect(within(upload).getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Backup is on" })).toBeNull();
+
+    // The queued run activates the backup and finishes the upload.
+    act(() =>
+      manager.set({
+        uploading: false,
+        lastBackupAt: Date.now(),
+        counts: { chats: 38, messages: 1240 },
+      })
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Backup is on" })
+    ).toHaveTextContent("38 chats, 1,240 messages");
+  });
+
+  it("shows a replacement's failed queued run with Try again on the same code", async () => {
+    const manager = fakeManager();
+    queueRepair(manager);
+    renderDialog(manager, { replacing: true });
+    await toCheckStep();
+    await confirmCheckedCode("Use the new code");
+    await screen.findByRole("dialog", { name: "Backing up your messages" });
+
+    act(() => manager.set({ lastError: "E2EE_RATE_LIMITED" }));
+    const failed = await screen.findByRole("dialog", {
+      name: "Backup didn’t finish",
+    });
+    expect(failed).toHaveTextContent("You keep the same recovery code");
+    expect(within(failed).getByRole("alert")).toHaveTextContent(
+      "Too many backup requests"
+    );
+    fireEvent.click(button("Try again"));
+    await screen.findByRole("dialog", { name: "Backup is on" });
+    expect(manager.backupNow).toHaveBeenCalledTimes(1);
+    expect(manager.confirmBackup).toHaveBeenCalledTimes(1);
   });
 
   it("explains what a new code replaces", () => {

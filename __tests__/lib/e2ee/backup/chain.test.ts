@@ -785,6 +785,50 @@ describe("backup writers keep one chain", () => {
     });
   });
 
+  it("keeps a new backup inactive and uploading until a queued repair run finishes it", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const api = server.clientFor(PROFILE);
+    // The first upload's append is refused with nothing to follow, so the
+    // run queues a repair (a new chain) instead of finishing.
+    let refuse = true;
+    const refusing: E2eeBackupApi = {
+      ...api,
+      appendChunk: async (id, body) => {
+        if (refuse) {
+          refuse = false;
+          throw new E2eeApiError({
+            message: "seq conflict",
+            status: 409,
+            code: "E2EE_BACKUP_SEQ_CONFLICT",
+          });
+        }
+        return api.appendChunk(id, body);
+      },
+    };
+    const writer = deviceWith(refusing);
+    writer.engine.history = {
+      groups: [groupRecord],
+      messages: [message("m1", "one")],
+    };
+    await writer.manager.start();
+    const prepared = await writer.manager.prepareBackup();
+    await expect(writer.manager.confirmBackup(prepared)).resolves.toBe(false);
+    expect(writer.manager.getSnapshot()).toMatchObject({
+      phase: "on",
+      uploading: true,
+      lastError: null,
+    });
+    expect((await api.getStatus()).backup).toBeNull();
+
+    // The queued run: only now is the new backup active and complete.
+    await expect(writer.manager.backupNow()).resolves.toBe(true);
+    expect(writer.manager.getSnapshot().uploading).toBe(false);
+    expect((await api.getStatus()).backup?.active).toBe(true);
+    const restored = await restoreWith(api, prepared);
+    expect(restored.code).toBeNull();
+    expect(texts(restored.engine.imported[0])).toEqual({ m1: "one" });
+  });
+
   it("repairs a concurrent fork on a server without the append precondition", async () => {
     const server = createFakeBackupServer(() => 1);
     server.supportsExpectedSeq = false;

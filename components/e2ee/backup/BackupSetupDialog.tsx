@@ -299,8 +299,9 @@ function SaveBody({
 }
 
 /**
- * Where an upload stands once Try again left it to a queued run (a conflict
- * or fork repair): running until that run ends, then done or failed.
+ * Where an upload stands once it was left to a queued run (a conflict or
+ * fork repair), after Turn on backup or Try again: running until that run
+ * ends, then done or failed.
  */
 function queuedUploadState(snapshot: E2eeBackupSnapshot): UploadState {
   if (snapshot.busy) {
@@ -431,8 +432,8 @@ export function BackupSetupDialog({
     () => checkGroups ?? pickCheckGroups(groups.length)
   );
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
-  // "queued": Try again ended with another run queued; the snapshot tells
-  // the rest.
+  // "queued": the upload (or Try again) ended with another run queued; the
+  // snapshot tells the rest.
   const [upload, setUpload] = useState<UploadState | "queued">("running");
   const [pending, setPending] = useState(false);
   const snapshot = useSyncExternalStore(
@@ -447,8 +448,9 @@ export function BackupSetupDialog({
     setStep("upload");
     setUpload("running");
     try {
-      await manager.confirmBackup(prepared);
-      setUpload("done");
+      // Done only once the new backup is active and fully uploaded, not
+      // while a queued run still has to finish it.
+      setUpload((await manager.confirmBackup(prepared)) ? "done" : "queued");
     } catch (error) {
       setErrorKey(getBackupErrorKey(error));
       if (manager.getSnapshot().phase === "on") {
