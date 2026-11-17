@@ -203,6 +203,12 @@ const hydrateDropV2 = async ({
   const dropType = getDropType(drop);
   const winningContext = getWinningContext(drop);
   const replyTo = mapReplyToDrop(drop);
+  const entry = drop.competition_entry;
+  const hasEntryReference =
+    typeof entry?.competition_id === "string" &&
+    entry.competition_id.length > 0 &&
+    typeof entry.entry_id === "string" &&
+    entry.entry_id.length > 0;
 
   return {
     collaborators: drop.collaborators ?? [],
@@ -212,8 +218,8 @@ const hydrateDropV2 = async ({
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: dropType,
-    ...(drop.competition_entry !== undefined
-      ? { competition_entry: drop.competition_entry }
+    ...(entry === null || hasEntryReference
+      ? { competition_entry: entry }
       : {}),
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),

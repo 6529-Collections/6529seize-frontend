@@ -171,7 +171,7 @@ it("never promotes CHAT from another competition, wave, drop or an absent entry"
     expect(applyCompetitionDropSummary(drop, { ...context, entry })).toBe(drop);
   }
 });
-it("skips ordinary feed drops and batches a feed entry projected as chat", async () => {
+it("skips ordinary chat, batches feed entries, and loads standalone context separately", async () => {
   jest.mocked(fetchDropCompetitionContext).mockClear();
   jest.mocked(fetchCompetitionEntryDrop).mockResolvedValue({
     competition: context.competition!,
@@ -205,6 +205,16 @@ it("skips ordinary feed drops and batches a feed entry projected as chat", async
     expect.any(AbortSignal),
     { wave: drop.wave, original: submission }
   );
+  jest.mocked(fetchDropCompetitionContext).mockResolvedValue({
+    ...context,
+    vote_summary: { ...context.vote_summary!, rating: 250 },
+  });
+  const { result: detail } = renderHook(
+    () => useCompetitionDrop(submission, { loadDetail: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(detail.current.rating).toBe(250));
+  expect(result.current[1]?.rating).toBe(120);
 });
 
 it("refreshes the card when competition votes are invalidated", async () => {

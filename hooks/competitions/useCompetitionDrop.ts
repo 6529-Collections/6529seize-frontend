@@ -111,7 +111,15 @@ export function useCompetitionDrop(
   const context = useQuery({
     queryKey: [
       QueryKey.COMPETITION_DROP_CONTEXT,
-      { wave_id: drop.wave.id, drop_id: drop.id, viewer },
+      {
+        wave_id: drop.wave.id,
+        drop_id: drop.id,
+        viewer,
+        ...(reference && {
+          competition_id: reference.competition_id,
+          entry_id: reference.entry_id,
+        }),
+      },
     ],
     queryFn: async ({ signal }): Promise<ApiDropCompetitionContext | null> => {
       if (!reference) {
