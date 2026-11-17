@@ -70,10 +70,16 @@ export default function ReleaseFilesTable({
   rows,
   columns,
   downloadText,
+  fullHash = false,
 }: {
   readonly rows: readonly ReleaseFileRow[];
   readonly columns: ReleaseFileColumns;
   readonly downloadText: string;
+  /**
+   * Print each SHA-256 whole, as a page of releases does, rather than its
+   * first 12 digits.
+   */
+  readonly fullHash?: boolean | undefined;
 }) {
   const { publisher } = columns;
   return (
@@ -121,17 +127,32 @@ export default function ReleaseFilesTable({
               {row.size}
             </Cell>
             <Cell label={columns.sha256}>
-              <span className="tw-inline-flex tw-items-center tw-gap-2">
-                <code
-                  aria-hidden="true"
-                  title={row.sha256}
-                  className="tw-font-mono tw-text-xs tw-text-iron-200"
-                >
-                  {row.sha256.slice(0, 12)}…
-                </code>
-                <span className="tw-sr-only">{row.sha256}</span>
-                <CopyChecksumButton value={row.sha256} label={row.copyLabel} />
-              </span>
+              {fullHash ? (
+                <span className="tw-flex tw-min-w-0 tw-items-start tw-gap-2 max-lg:tw-w-full max-lg:tw-flex-col">
+                  <code className="tw-min-w-0 tw-break-all tw-font-mono tw-text-xs tw-leading-5 tw-text-iron-200 lg:tw-max-w-[16rem]">
+                    {row.sha256}
+                  </code>
+                  <CopyChecksumButton
+                    value={row.sha256}
+                    label={row.copyLabel}
+                  />
+                </span>
+              ) : (
+                <span className="tw-inline-flex tw-items-center tw-gap-2">
+                  <code
+                    aria-hidden="true"
+                    title={row.sha256}
+                    className="tw-font-mono tw-text-xs tw-text-iron-200"
+                  >
+                    {row.sha256.slice(0, 12)}…
+                  </code>
+                  <span className="tw-sr-only">{row.sha256}</span>
+                  <CopyChecksumButton
+                    value={row.sha256}
+                    label={row.copyLabel}
+                  />
+                </span>
+              )}
             </Cell>
             {publisher && (
               <Cell label={publisher} className="tw-text-iron-300">

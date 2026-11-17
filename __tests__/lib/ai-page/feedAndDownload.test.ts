@@ -99,8 +99,13 @@ describe("6529 AI's release feed endpoints", () => {
       })
     );
     expect(cached.status).toBe(304);
-    // Every answer came from one read of the two objects.
-    expect(mockRead).toHaveBeenCalledTimes(2);
+    // Every answer came from one read of the bundle, which isn't there, and
+    // one of the two objects.
+    expect(mockRead.mock.calls.map(([key]) => key).sort()).toEqual([
+      "feed/releases.bundle.json",
+      "feed/releases.json",
+      "feed/releases.json.sig",
+    ]);
   });
 
   it("answers 404 before the first feed and 503 when S3 fails", async () => {

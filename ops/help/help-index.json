@@ -1328,7 +1328,7 @@
       ],
       "facts": [
         "6529 AI runs open-weights AI models on the person's own computer, and they chat with them in their browser. Its download page is /ai.",
-        "Its pages: /ai/guide installs it on a Mac, Windows or Linux and starts a first chat; /ai/models lists every model it knows by section, with what runs in the app today and the GPU memory each needs; /ai/use walks through real use (chat, pictures, images, speech to text, app keys, the API and the command line); /ai/known-issues lists the known bugs and what isn't tested yet.",
+        "Its pages: /ai/guide installs it on a Mac, Windows or Linux and starts a first chat; /ai/models lists every model it knows by section, with what runs in the app today and the GPU memory each needs; /ai/use walks through real use (chat, pictures, images, speech to text, app keys, the API and the command line); /ai/known-issues lists the known bugs and what isn't tested yet; /ai/releases lists every release in the signed release list, newest first, with each file's SHA-256.",
         "It is an untested test release: every /ai page says so, with a link to Known issues.",
         "Open it from 6529 AI in the primary navigation, after Join 6529 or Validator, from the 6529 AI section of /about/6529-apps, or from page search.",
         "Search engines don't index the /ai pages."
@@ -1339,6 +1339,7 @@
         "/ai/models",
         "/ai/use",
         "/ai/known-issues",
+        "/ai/releases",
         "/about/6529-apps"
       ],
       "tags": ["ai", "apps", "download", "navigation"],
