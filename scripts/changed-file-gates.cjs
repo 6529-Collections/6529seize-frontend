@@ -123,15 +123,27 @@ function main() {
   const mode = MODES[name];
   const env = { ...process.env };
   const files = selectFiles(mode, env);
-  const prefix = toolArguments(mode);
+  // The tight config ignores config/. Use the base rules for its changed lines.
+  const groups = mode.diffEnv
+    ? [
+        { mode, files: files.filter((file) => !file.startsWith("config/")) },
+        {
+          mode: { ...mode, config: "base-diff" },
+          files: files.filter((file) => file.startsWith("config/")),
+        },
+      ]
+    : [{ mode, files }];
   let failed = false;
-  for (const batch of chunks(files, prefix)) {
-    const result = spawnSync(process.execPath, [...prefix, ...batch], {
-      stdio: "inherit",
-      env,
-    });
-    if (result.error) throw result.error;
-    if (result.status !== 0) failed = true;
+  for (const group of groups) {
+    const prefix = toolArguments(group.mode);
+    for (const batch of chunks(group.files, prefix)) {
+      const result = spawnSync(process.execPath, [...prefix, ...batch], {
+        stdio: "inherit",
+        env,
+      });
+      if (result.error) throw result.error;
+      if (result.status !== 0) failed = true;
+    }
   }
   // Preserve the former xargs failure status and report all failing chunks.
   return failed ? 123 : 0;
