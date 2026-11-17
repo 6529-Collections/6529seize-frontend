@@ -27,7 +27,6 @@ import {
   type LeaderboardViewMode,
 } from "@/components/waves/leaderboard/types";
 import useLocalPreference from "@/hooks/useLocalPreference";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { getWaveLeaderboardSortItems } from "@/components/waves/leaderboard/header/WaveleaderboardSort";
 import { WaveDropsLeaderboardSort } from "@/hooks/useWaveDropsLeaderboard";
 import { CompetitionState } from "./CompetitionState";
@@ -154,18 +153,13 @@ export default function CompetitionLeaderboard({
   const localScrollContainer = useRef<HTMLDivElement>(null);
   const scrollContainerRef = providedScrollContainer ?? localScrollContainer;
   const identity = { waveId: wave.id, competitionId: competition.id };
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const [selectedPriceRange, setSelectedPriceRange] = useState<{
+  const [priceRange, setPriceRange] = useState<{
     minPrice: number | undefined;
     maxPrice: number | undefined;
   }>({ minPrice: undefined, maxPrice: undefined });
   const isCuration = competition.capabilities.includes(
     ApiCompetitionCapability.Curation
   );
-  const showMarketPrices = isCuration && !hideNftPurchasing;
-  const priceRange = showMarketPrices
-    ? selectedPriceRange
-    : { minPrice: undefined, maxPrice: undefined };
   const isMainStage = competition.capabilities.includes(
     ApiCompetitionCapability.MainStage
   );
@@ -180,7 +174,7 @@ export default function CompetitionLeaderboard({
     isMainStage ? "grid" : "list",
     isLeaderboardViewMode
   );
-  const [requestedSort, setSort] = useLocalPreference<WaveDropsLeaderboardSort>(
+  const [sort, setSort] = useLocalPreference<WaveDropsLeaderboardSort>(
     `competitionSortMode_${wave.id}_${competition.id}`,
     WaveDropsLeaderboardSort.RANK,
     (value) =>
@@ -190,10 +184,6 @@ export default function CompetitionLeaderboard({
         timeLockMs: competition.decisions.time_lock_ms,
       }).some((item) => item.value === value)
   );
-  const sort =
-    !showMarketPrices && requestedSort === WaveDropsLeaderboardSort.PRICE
-      ? WaveDropsLeaderboardSort.RANK
-      : requestedSort;
   const query = useCompetitionResource(identity, "leaderboard", {
     include: "cards",
     ...(additionalActionOnly ? { is_additional_action_promised: "true" } : {}),
@@ -354,9 +344,7 @@ export default function CompetitionLeaderboard({
         additionalActions={<CompetitionMySubmissions />}
         minPrice={priceRange.minPrice}
         maxPrice={priceRange.maxPrice}
-        onPriceRangeChange={
-          showMarketPrices ? setSelectedPriceRange : undefined
-        }
+        onPriceRangeChange={isCuration ? setPriceRange : undefined}
       />
       {content}
     </div>

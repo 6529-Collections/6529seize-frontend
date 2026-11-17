@@ -12,9 +12,6 @@ Choose a collection and an activity type to narrow the feed. Alongside sales,
 mints, airdrops, transfers and burns, the feed includes recorded listings,
 offers, cancellations, expirations and order validity changes. Changing filters
 starts a fresh result list. Use **Load more** to fetch older activity.
-In the iOS app, the feed and card activity show completed activity such as
-sales, mints and transfers. Listing, offer and other open-order events are
-omitted.
 
 Rows identify the action, artwork or collection, participating wallets, quoted
 payment and time. An offer can apply to a collection rather than one card.

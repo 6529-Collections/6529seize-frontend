@@ -195,20 +195,20 @@ it("scopes Additional Action filtering to Main Stage without changing sorting", 
       sort: "rating",
     })
   );
-  fireEvent.click(screen.getByRole("button", { name: "Raw votes" }));
+  fireEvent.click(screen.getByRole("button", { name: /^Price$/ }));
   expect(mockResource).toHaveBeenCalledWith(
     expect.anything(),
     "leaderboard",
     expect.objectContaining({
       is_additional_action_promised: "true",
-      sort: "real_time_rating",
+      sort: "price",
     })
   );
   fireEvent.click(toggle);
   expect(latestLeaderboardParams()).not.toHaveProperty(
     "is_additional_action_promised"
   );
-  expect(latestLeaderboardParams().sort).toBe("real_time_rating");
+  expect(latestLeaderboardParams().sort).toBe("price");
 });
 it("retains loaded artwork during a temporary refresh failure but hides it when access is revoked", () => {
   const { rerender } = render(<CompetitionLeaderboard />);

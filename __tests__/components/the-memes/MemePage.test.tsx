@@ -1,13 +1,10 @@
 import { AuthContext } from "@/components/auth/Auth";
 import MemePage from "@/components/the-memes/MemePage";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { fetchUrl } from "@/services/6529api";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
-
-jest.mock("@/hooks/useNftPurchasingVisibility");
 
 jest.mock("next/navigation", () => ({
   useSearchParams: jest.fn(),
@@ -204,11 +201,6 @@ const usePathnameMock = require("next/navigation").usePathname;
 usePathnameMock.mockReturnValue("/the-memes/1");
 
 beforeEach(() => {
-  jest.mocked(useNftPurchasingVisibility).mockReturnValue({
-    hideNftPurchasing: false,
-    shouldRedirect: false,
-    reservesNftPurchasingSpace: false,
-  });
   currentFocus = null;
   currentLocale = null;
   currentReturnTo = null;
@@ -607,39 +599,6 @@ describe("MemePage search params handling", () => {
     expect(detailsColumn?.className).toContain("[&>*:nth-child(2)]:tw-order-3");
     expect(artworkColumn).toHaveClass("tw-order-2");
     expect(artworkColumn).toHaveClass("lg:tw-sticky", "lg:tw-self-start");
-  });
-
-  it("reserves the newest card's mint slot during hydration and drops it on iOS", async () => {
-    jest.mocked(useNftPurchasingVisibility).mockReturnValue({
-      hideNftPurchasing: true,
-      shouldRedirect: false,
-      reservesNftPurchasingSpace: true,
-    });
-    const page = renderPage();
-    const artwork = await screen.findByTestId("meme-artwork-column");
-    expect(artwork).toHaveClass("tw-order-2");
-    expect(
-      artwork.parentElement?.querySelector('[aria-hidden="true"].tw-invisible')
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId("mint-countdown")).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("latest-drop-subscribe")
-    ).not.toBeInTheDocument();
-
-    jest.mocked(useNftPurchasingVisibility).mockReturnValue({
-      hideNftPurchasing: true,
-      shouldRedirect: true,
-      reservesNftPurchasingSpace: false,
-    });
-    page.rerenderPage();
-    expect(artwork).not.toHaveClass("tw-order-2");
-    expect(
-      artwork.parentElement?.querySelector('[aria-hidden="true"].tw-invisible')
-    ).toBeNull();
-    expect(screen.queryByTestId("mint-countdown")).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId("latest-drop-subscribe")
-    ).not.toBeInTheDocument();
   });
 
   it("passes active locale into the art viewer", async () => {

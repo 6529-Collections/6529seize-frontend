@@ -1,12 +1,7 @@
 import NowMintingDetails from "@/components/home/now-minting/NowMintingDetails";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-
-jest.mock("@/hooks/useNftPurchasingVisibility", () => ({
-  useNftPurchasingVisibility: jest.fn(),
-}));
 
 type LatestDropNextMintSubscribeMockProps = {
   statusSource?: "none" | "upcoming";
@@ -85,28 +80,8 @@ const baseNft = {
 
 describe("NowMintingDetails", () => {
   beforeEach(() => {
-    jest.mocked(useNftPurchasingVisibility).mockReturnValue({
-      hideNftPurchasing: false,
-      shouldRedirect: false,
-      reservesNftPurchasingSpace: false,
-    });
     mockLatestDropNextMintSubscribe.mockClear();
     mockLatestDropAllowlistStatus.mockClear();
-  });
-
-  it("omits the countdown and wallet allowance on iOS while keeping edition details", () => {
-    jest.mocked(useNftPurchasingVisibility).mockReturnValue({
-      hideNftPurchasing: true,
-      shouldRedirect: true,
-      reservesNftPurchasingSpace: false,
-    });
-
-    render(<NowMintingDetails nft={baseNft as ApiMemesExtendedData} />);
-
-    expect(screen.getByText("Edition Details")).toBeInTheDocument();
-    expect(screen.queryByTestId("countdown")).not.toBeInTheDocument();
-    expect(mockLatestDropAllowlistStatus).not.toHaveBeenCalled();
-    expect(mockLatestDropNextMintSubscribe).not.toHaveBeenCalled();
   });
 
   it("uses a native disclosure and exposes focusable edition links when opened", async () => {

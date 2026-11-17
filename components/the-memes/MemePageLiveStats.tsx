@@ -596,25 +596,21 @@ export function MemeMintDateMetric({
 export function MemeMintDetails({
   nft,
   locale,
-  showMintPrice = true,
 }: {
   readonly nft: NFT;
   readonly locale: SupportedLocale;
-  readonly showMintPrice?: boolean;
 }) {
   return (
     <section className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-8">
       <div className="tw-grid tw-grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1.5fr)] tw-gap-6">
         <MemeMintDateMetric nft={nft} locale={locale} />
-        {showMintPrice && (
-          <MarketMetric
-            label={t(locale, "theMemes.detail.live.market.mintPrice")}
-            value={nft.mint_price}
-            decimals={100000}
-            unit={t(locale, "theMemes.detail.live.market.ethUnit")}
-            locale={locale}
-          />
-        )}
+        <MarketMetric
+          label={t(locale, "theMemes.detail.live.market.mintPrice")}
+          value={nft.mint_price}
+          decimals={100000}
+          unit={t(locale, "theMemes.detail.live.market.ethUnit")}
+          locale={locale}
+        />
       </div>
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-pt-5">
         <MemeDistributionPlanLink nft={nft} locale={locale} />
@@ -656,28 +652,24 @@ export function MemeNftLivePanel({
   recordedInTdh,
   locale = DEFAULT_LOCALE,
   showMarketplaceLinks = true,
-  showMintPrice = true,
 }: {
   readonly nft: NFT;
   readonly recordedInTdh?: boolean | null | undefined;
   readonly locale?: SupportedLocale | undefined;
   readonly showMarketplaceLinks?: boolean;
-  readonly showMintPrice?: boolean;
 }) {
   const ethUnit = t(locale, "theMemes.detail.live.market.ethUnit");
 
   return (
     <section className="tw-pt-4 sm:tw-pt-6 md:tw-pt-8">
       <div className={MARKET_OVERVIEW_ROW_CLASS}>
-        {showMintPrice && (
-          <MarketMetric
-            label={t(locale, "theMemes.detail.live.market.mintPrice")}
-            value={nft.mint_price}
-            decimals={100000}
-            unit={ethUnit}
-            locale={locale}
-          />
-        )}
+        <MarketMetric
+          label={t(locale, "theMemes.detail.live.market.mintPrice")}
+          value={nft.mint_price}
+          decimals={100000}
+          unit={ethUnit}
+          locale={locale}
+        />
         <MemeTdhRate nft={nft} recordedInTdh={recordedInTdh} locale={locale} />
         {showMarketplaceLinks && (
           <MemeMarketplaceLinks nft={nft} locale={locale} />

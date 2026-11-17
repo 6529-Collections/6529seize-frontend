@@ -13,9 +13,6 @@
   below the description. Existing `focus=the-art` links open Overview.
 - `Listings & offers`, immediately after Overview, shows the market summary and
   price levels directly. Switching tabs retains the market selection and review.
-- In the iOS app, links to Listings & offers or a specific order open Overview.
-  The featured card and its Distribution page omit the mint panel. The
-  upcoming card keeps its calendar details.
 - Before a card is published, the canonical next Meme and scheduled cards in
   the upcoming subscription season open the existing upcoming-card view with
   subscription awareness and calendar details. Today remains reachable through

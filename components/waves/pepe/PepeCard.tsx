@@ -1,5 +1,3 @@
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
-import Image from "next/image";
 import { memo, useEffect, useState } from "react";
 
 import LinkHandlerFrame from "../LinkHandlerFrame";
@@ -152,10 +150,7 @@ function renderImage(image: string | null | undefined, alt: string) {
   }
 
   return (
-    <Image
-      unoptimized
-      width={64}
-      height={64}
+    <img
       src={image}
       alt={alt}
       className="tw-aspect-square tw-w-16 tw-rounded-md tw-object-cover"
@@ -164,10 +159,7 @@ function renderImage(image: string | null | undefined, alt: string) {
   );
 }
 
-function renderCollection(
-  preview: PepeCollectionPreview,
-  showMarketPrices: boolean
-) {
+function renderCollection(preview: PepeCollectionPreview) {
   const title = preview.name ?? preview.slug;
 
   return (
@@ -175,25 +167,15 @@ function renderCollection(
       <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
         {renderImage(preview.image, title)}
         <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <p className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
-              {title}
-            </p>
+          <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
+            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{title}</p>
             <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200">
               Collection
             </span>
           </div>
           <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
-            <Stat
-              label="Items"
-              value={formatters.int(preview.stats?.items ?? null)}
-            />
-            {showMarketPrices && (
-              <Stat
-                label="Floor"
-                value={formatters.sats(preview.stats?.floorSats ?? null)}
-              />
-            )}
+            <Stat label="Items" value={formatters.int(preview.stats?.items ?? null)} />
+            <Stat label="Floor" value={formatters.sats(preview.stats?.floorSats ?? null)} />
           </div>
           <div className="tw-mt-2">
             <a
@@ -246,7 +228,7 @@ function renderArtist(preview: PepeArtistPreview) {
   );
 }
 
-function renderSet(preview: PepeSetPreview, showMarketPrices: boolean) {
+function renderSet(preview: PepeSetPreview) {
   const title = preview.name ?? preview.slug;
 
   return (
@@ -254,27 +236,17 @@ function renderSet(preview: PepeSetPreview, showMarketPrices: boolean) {
       <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
         {renderImage(preview.image, title)}
         <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <p className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
-              {title}
-            </p>
+          <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
+            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{title}</p>
             <span className="tw-inline-flex tw-items-center tw-rounded tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[10px] tw-font-medium tw-text-iron-200">
               Set
             </span>
           </div>
           <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
-            <Stat
-              label="Items"
-              value={formatters.int(preview.stats?.items ?? null)}
-            />
-            {showMarketPrices && (
-              <Stat
-                label="Full set floor"
-                value={formatters.sats(preview.stats?.fullSetFloorSats ?? null)}
-              />
-            )}
+            <Stat label="Items" value={formatters.int(preview.stats?.items ?? null)} />
+            <Stat label="Full set floor" value={formatters.sats(preview.stats?.fullSetFloorSats ?? null)} />
           </div>
-          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-3">
+          <div className="tw-mt-2 tw-flex tw-gap-3 tw-flex-wrap">
             <a
               className="tw-text-xs tw-text-primary-300 hover:tw-underline"
               href={preview.href}
@@ -300,31 +272,7 @@ function renderSet(preview: PepeSetPreview, showMarketPrices: boolean) {
   );
 }
 
-function marketAmount(value: number | null | undefined) {
-  return typeof value === "number" && Number.isFinite(value) && value !== 0
-    ? value
-    : null;
-}
-
-function formatMarketValue(
-  satsValue: number | null | undefined,
-  xcpValue: number | null | undefined,
-  market: Market | null | undefined
-) {
-  const sats = marketAmount(satsValue);
-  const xcp = marketAmount(xcpValue);
-  const primary = formatters.sats(sats) ?? formatters.xcp(xcp);
-  const eth =
-    formatters.ethFromSats(sats, market?.approxEthPerBtc) ??
-    formatters.ethFromXcp(xcp, market?.approxEthPerXcp);
-  return [primary, eth].filter(Boolean).join(" ");
-}
-
-function renderAsset(
-  preview: PepeAssetPreview,
-  originalHref: string,
-  showMarketPrices: boolean
-) {
+function renderAsset(preview: PepeAssetPreview, originalHref: string) {
   const name = preview.name ?? preview.asset ?? preview.slug;
   const chips = [preview.collection, preview.asset].filter(Boolean) as string[];
   const seriesCard =
@@ -337,17 +285,35 @@ function renderAsset(
           .join(" · ")
       : null;
 
-  const market = preview.market;
+  const bestAskPrimary =
+    (preview.market?.bestAskSats && formatters.sats(preview.market.bestAskSats)) ||
+    (preview.market?.bestAskXcp && formatters.xcp(preview.market.bestAskXcp)) ||
+    null;
+  const bestAskEth =
+    (preview.market?.bestAskSats &&
+      formatters.ethFromSats(preview.market.bestAskSats, preview.market.approxEthPerBtc)) ||
+    (preview.market?.bestAskXcp &&
+      formatters.ethFromXcp(preview.market.bestAskXcp, preview.market.approxEthPerXcp)) ||
+    null;
+
+  const lastSalePrimary =
+    (preview.market?.lastSaleSats && formatters.sats(preview.market.lastSaleSats)) ||
+    (preview.market?.lastSaleXcp && formatters.xcp(preview.market.lastSaleXcp)) ||
+    null;
+  const lastSaleEth =
+    (preview.market?.lastSaleSats &&
+      formatters.ethFromSats(preview.market.lastSaleSats, preview.market.approxEthPerBtc)) ||
+    (preview.market?.lastSaleXcp &&
+      formatters.ethFromXcp(preview.market.lastSaleXcp, preview.market.approxEthPerXcp)) ||
+    null;
 
   return (
     <LinkHandlerFrame href={originalHref}>
       <div className="tw-flex tw-gap-3 tw-rounded-lg tw-border tw-border-iron-800 tw-bg-iron-900 tw-p-3">
         {renderImage(preview.image, name)}
         <div className="tw-min-w-0 tw-flex-1">
-          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-            <p className="tw-m-0 tw-truncate tw-text-sm tw-font-semibold tw-text-iron-100">
-              {name}
-            </p>
+          <div className="tw-flex tw-items-center tw-gap-2 tw-flex-wrap">
+            <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100 tw-truncate">{name}</p>
             {chips.map((chip) => (
               <span
                 key={chip}
@@ -357,40 +323,16 @@ function renderAsset(
               </span>
             ))}
           </div>
-          <p className="tw-mb-0 tw-mt-0.5 tw-truncate tw-text-xs tw-text-iron-300">
+          <p className="tw-mt-0.5 tw-mb-0 tw-text-xs tw-text-iron-300 tw-truncate">
             {[preview.artist, seriesCard].filter(Boolean).join(" · ")}
           </p>
           <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
-            <Stat
-              label="Supply"
-              value={formatters.int(preview.supply ?? null)}
-            />
-            <Stat
-              label="Holders"
-              value={formatters.int(preview.holders ?? null)}
-            />
-            <Stat
-              label="List"
-              value={
-                showMarketPrices
-                  ? formatMarketValue(
-                      market?.bestAskSats,
-                      market?.bestAskXcp,
-                      market
-                    )
-                  : undefined
-              }
-            />
-            <Stat
-              label="Last sale"
-              value={formatMarketValue(
-                market?.lastSaleSats,
-                market?.lastSaleXcp,
-                market
-              )}
-            />
+            <Stat label="Supply" value={formatters.int(preview.supply ?? null)} />
+            <Stat label="Holders" value={formatters.int(preview.holders ?? null)} />
+            <Stat label="List" value={[bestAskPrimary, bestAskEth].filter(Boolean).join(" ")} />
+            <Stat label="Last sale" value={[lastSalePrimary, lastSaleEth].filter(Boolean).join(" ")} />
           </div>
-          <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-3">
+          <div className="tw-mt-2 tw-flex tw-gap-3 tw-flex-wrap">
             <a
               className="tw-text-xs tw-text-primary-300 hover:tw-underline"
               href={preview.href}
@@ -437,7 +379,6 @@ function renderAsset(
 }
 
 const PepeCard = memo(function PepeCard({ kind, slug, href }: PepeCardProps) {
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const [preview, setPreview] = useState<PepePreview | null>(null);
   const [hasError, setHasError] = useState(false);
 
@@ -446,12 +387,9 @@ const PepeCard = memo(function PepeCard({ kind, slug, href }: PepeCardProps) {
     setPreview(null);
     setHasError(false);
 
-    fetch(
-      `/api/pepe/resolve?kind=${encodeURIComponent(kind)}&slug=${encodeURIComponent(slug)}`,
-      {
-        signal: controller.signal,
-      }
-    )
+    fetch(`/api/pepe/resolve?kind=${encodeURIComponent(kind)}&slug=${encodeURIComponent(slug)}`, {
+      signal: controller.signal,
+    })
       .then((response) => {
         if (!response.ok) {
           throw new Error(`Request failed with status ${response.status}`);
@@ -478,7 +416,7 @@ const PepeCard = memo(function PepeCard({ kind, slug, href }: PepeCardProps) {
   }
 
   if (preview.kind === "asset") {
-    return renderAsset(preview, href, !hideNftPurchasing);
+    return renderAsset(preview, href);
   }
 
   if (preview.kind === "artist") {
@@ -486,10 +424,10 @@ const PepeCard = memo(function PepeCard({ kind, slug, href }: PepeCardProps) {
   }
 
   if (preview.kind === "set") {
-    return renderSet(preview, !hideNftPurchasing);
+    return renderSet(preview);
   }
 
-  return renderCollection(preview, !hideNftPurchasing);
+  return renderCollection(preview);
 });
 
 export default PepeCard;

@@ -169,8 +169,7 @@ Only `https://` URLs match. Host must be apex or `www`.
   with the decoded Compound action; Etherscan URLs are not owned by the
   Compound provider.
 - Compound links render market or account layouts from Compound app URLs.
-- `pepe.wtf` links render asset, collection, artist, or set cards. In the iOS
-  app, the cards retain their links and omit listing and floor prices.
+- `pepe.wtf` links render asset, collection, artist, or set cards.
 
 ## Edge Cases
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useNftMarketRoute } from "@/hooks/useNftMarketRoute";
+import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAuth } from "@/components/auth/Auth";
 import { getActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import { getMemeLabRouteHrefWithLocale } from "@/components/memelab/memeLabRouteParams";
@@ -77,13 +77,10 @@ export default function MemeLabPageComponent({
   const capacitor = useCapacitor();
 
   const { connectedProfile } = useAuth();
-  const { hideNftPurchasing, redirectToArtwork } = useNftMarketRoute(
-    pathname,
-    searchParams
-  );
+  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const { setTitle } = useTitle();
 
-  const focusParam = redirectToArtwork ? null : searchParams.get("focus");
+  const focusParam = searchParams.get("focus");
   const searchParamsString = useMemo(
     () => searchParams.toString(),
     [searchParams]
@@ -523,7 +520,7 @@ export default function MemeLabPageComponent({
             </h3>
             <div className="tw-w-full tw-shrink-0 md:tw-w-72">
               <CommonDropdown
-                items={getActivityTypeItems(locale, hideNftPurchasing)}
+                items={getActivityTypeItems(locale)}
                 activeItem={activityTypeFilter}
                 filterLabel={t(
                   locale,
@@ -656,18 +653,16 @@ export default function MemeLabPageComponent({
               activeFocus={routeFocus}
               locale={locale}
               persistentContent={
-                !hideNftPurchasing && (
-                  <MarketDepthPanel
-                    focusedOrderHash={searchParams.get("order")}
-                    contract={MEMELAB_CONTRACT}
-                    tokenId={nft.id}
-                    locale={locale}
-                    embedded
-                    refreshKey={marketRefreshVersion}
-                    active={activeTab === MEME_FOCUS.MARKET}
-                    onReveal={() => setActiveMemeLabTab(MEME_FOCUS.MARKET)}
-                  />
-                )
+                <MarketDepthPanel
+                  focusedOrderHash={searchParams.get("order")}
+                  contract={MEMELAB_CONTRACT}
+                  tokenId={nft.id}
+                  locale={locale}
+                  embedded
+                  refreshKey={marketRefreshVersion}
+                  active={activeTab === MEME_FOCUS.MARKET}
+                  onReveal={() => setActiveMemeLabTab(MEME_FOCUS.MARKET)}
+                />
               }
               navigation={
                 <>
@@ -676,7 +671,6 @@ export default function MemeLabPageComponent({
                     activeTab={activeTab}
                     locale={locale}
                     onSelectTab={setActiveMemeLabTab}
-                    showMarketTab={!hideNftPurchasing}
                   />
                   {printHistoryTabs()}
                 </>

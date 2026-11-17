@@ -24,7 +24,6 @@ import Link from "next/link";
 import { useSyncExternalStore } from "react";
 import HomeArtworkFrame from "./HomeArtworkFrame";
 import ArtistPill from "./ArtistPill";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import LatestDropAllowlistStatus from "./LatestDropAllowlistStatus";
 import LatestDropNextMintSubscribe from "./LatestDropNextMintSubscribe";
 import NowMintingStatsItem from "./NowMintingStatsItem";
@@ -103,7 +102,6 @@ export default function LatestDropNextMintPanel({
 }: LatestDropNextMintPanelProps) {
   const { hasTouchScreen } = useDeviceInfo();
   const browserLocale = useBrowserLocale();
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const locale = requestedLocale ?? browserLocale;
   const media = drop.parts[0]?.media[0];
   const isImage = media?.mime_type.startsWith("image/") ?? false;
@@ -150,7 +148,7 @@ export default function LatestDropNextMintPanel({
     : "—";
   return (
     <div className="tw-relative tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.03] tw-bg-iron-950 tw-shadow-[0_24px_60px_rgba(0,0,0,0.2)] group-data-[home-next-drop]/home-next-drop:tw-border-white/[0.08] group-data-[home-next-drop]/home-next-drop:tw-shadow-none">
-      <div className="tw-grid tw-grid-cols-1 tw-items-stretch lg:tw-grid-cols-12 group-data-[home-next-drop]/home-next-drop:lg:tw-min-h-[min(clamp(480px,40vw,580px),calc(100svh_-_240px))] xl:tw-grid-cols-9">
+      <div className="tw-grid tw-grid-cols-1 tw-items-stretch group-data-[home-next-drop]/home-next-drop:lg:tw-min-h-[min(clamp(480px,40vw,580px),calc(100svh_-_240px))] lg:tw-grid-cols-12 xl:tw-grid-cols-9">
         <div
           data-home-artwork-column
           data-home-artwork-is-image={isImage}
@@ -290,7 +288,7 @@ export default function LatestDropNextMintPanel({
               </div>
             </div>
 
-            {!hideNftPurchasing && nextMintCardId !== null && (
+            {nextMintCardId !== null && (
               <div className="tw-relative tw-flex tw-flex-col tw-gap-3 group-data-[home-next-drop]/home-next-drop:before:tw-pointer-events-none group-data-[home-next-drop]/home-next-drop:before:tw-absolute group-data-[home-next-drop]/home-next-drop:before:tw-inset-x-0 group-data-[home-next-drop]/home-next-drop:before:-tw-top-4 group-data-[home-next-drop]/home-next-drop:before:tw-h-px group-data-[home-next-drop]/home-next-drop:before:tw-bg-white/[0.06] group-data-[home-next-drop]/home-next-drop:before:tw-content-['']">
                 {hasMappedMemeCard ? (
                   <LatestDropAllowlistStatus tokenId={mappedMemeCardId} />

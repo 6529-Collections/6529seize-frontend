@@ -100,29 +100,26 @@ describe("NextGenCollectionHeader", () => {
     expect(container).not.toHaveTextContent("0 / 10 minted");
   });
   afterEach(() =>
-    jest.mocked(useNftPurchasingVisibility).mockReturnValue({
-      hideNftPurchasing: false,
-      shouldRedirect: false,
-      reservesNftPurchasingSpace: false,
-    })
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({
+        hideNftPurchasing: false,
+        shouldRedirect: false,
+        reservesNftPurchasingSpace: false,
+      })
   );
-  it("omits the entire mint panel and phase badges on restricted iOS", () => {
-    jest.mocked(useNftPurchasingVisibility).mockReturnValue({
-      hideNftPurchasing: true,
-      shouldRedirect: true,
-      reservesNftPurchasingSpace: false,
-    });
+  it("retains countdown information without a mint CTA on restricted iOS", () => {
+    jest
+      .mocked(useNftPurchasingVisibility)
+      .mockReturnValue({
+        hideNftPurchasing: true,
+        shouldRedirect: true,
+        reservesNftPurchasingSpace: false,
+      });
     const { container } = render(
       <NextGenCollectionHeader collection={collection} show_links={false} />
     );
-    expect(screen.queryByText(/Allowlist Starting/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/ALLOWLIST UPCOMING/i)).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/PUBLIC PHASE UPCOMING/i)
-    ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("heading", { name: /My Collection/i })
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Allowlist Starting/)).toBeInTheDocument();
     expect(container.querySelector('a[href$="/mint"]')).toBeNull();
   });
   it("renders back link text depending on path", () => {

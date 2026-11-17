@@ -1,4 +1,3 @@
-import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import {
   type MintCountdownState,
   useMintCountdownState,
@@ -17,15 +16,7 @@ interface NowMintingCountdownProps {
   readonly fullWidth?: boolean;
 }
 
-export default function NowMintingCountdown(props: NowMintingCountdownProps) {
-  return (
-    <NftPurchasingGate>
-      <NowMintingCountdownPanel {...props} />
-    </NftPurchasingGate>
-  );
-}
-
-function NowMintingCountdownPanel({
+export default function NowMintingCountdown({
   variant = "default",
   nftId,
   contract,

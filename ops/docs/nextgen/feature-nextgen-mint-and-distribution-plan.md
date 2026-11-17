@@ -45,9 +45,8 @@ Use these collection routes to mint and review distribution data:
 
 ## Route Behavior
 
-- In the iOS app, direct mint links return to the collection. The collection
-  shows edition details and links to the distribution plan when available.
-  Mint countdowns and phase badges appear on the web and in the Android app.
+- The iOS app shows the countdown and distribution plan. Direct mint links
+  return to the collection without the mint or burn-to-mint controls.
 
 - Public phase `LIVE` always uses the standard mint widget.
 - Outside public phase `LIVE`, mint widget type comes from merkle config.

@@ -264,13 +264,10 @@ export default function AboutFAQ() {
                 <li>
                   The community votes on which artwork is selected using TDH.
                 </li>
-                <NftPurchasingGate>
-                  <li>Mint price is 0.06529 ETH per edition.</li>
-                  <li>
-                    You can mint during the drop or collect on secondary
-                    markets.
-                  </li>
-                </NftPurchasingGate>
+                <li>Mint price is 0.06529 ETH per edition.</li>
+                <li>
+                  You can mint during the drop or collect on secondary markets.
+                </li>
               </ul>
             </FAQQuestion>
 

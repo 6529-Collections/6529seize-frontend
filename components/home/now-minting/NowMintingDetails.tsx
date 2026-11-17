@@ -1,4 +1,3 @@
-import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { mainnet } from "viem/chains";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import type { ApiMemesExtendedData } from "@/generated/models/ApiMemesExtendedData";
@@ -43,20 +42,18 @@ export default function NowMintingDetails({ nft }: NowMintingDetailsProps) {
           season={nft.season}
         />
       </div>
-      <NftPurchasingGate>
-        <div className="tw-flex tw-flex-col tw-gap-4 empty:tw-hidden">
-          <LatestDropAllowlistStatus tokenId={nft.id} />
-        </div>
-        <div className="tw-flex tw-flex-col tw-gap-4">
-          <LatestDropNextMintSubscribe tokenId={nft.id} statusSource="none" />
-          <NowMintingCountdown
-            variant="home"
-            nftId={nft.id}
-            contract={MEMES_CONTRACT}
-            chainId={mainnet.id}
-          />
-        </div>
-      </NftPurchasingGate>
+      <div className="tw-flex tw-flex-col tw-gap-4 empty:tw-hidden">
+        <LatestDropAllowlistStatus tokenId={nft.id} />
+      </div>
+      <div className="tw-flex tw-flex-col tw-gap-4">
+        <LatestDropNextMintSubscribe tokenId={nft.id} statusSource="none" />
+        <NowMintingCountdown
+          variant="home"
+          nftId={nft.id}
+          contract={MEMES_CONTRACT}
+          chainId={mainnet.id}
+        />
+      </div>
     </div>
   );
 }

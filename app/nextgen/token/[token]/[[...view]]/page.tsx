@@ -116,6 +116,7 @@ export default async function NextGenTokenPage({
         traits={data.traits}
         tokenCount={data.tokenCount}
         collection={data.collection}
+        view={resolvedView}
         returnTo={returnTo}
       />
     </>

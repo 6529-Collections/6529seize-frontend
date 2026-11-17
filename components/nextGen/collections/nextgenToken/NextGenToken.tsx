@@ -24,7 +24,6 @@ import { printViewButton } from "../collectionParts/NextGenCollection";
 import NextGenTokenAbout from "./NextGenTokenAbout";
 import MarketDepthPanel from "@/components/nft-market-depth/MarketDepthPanel";
 import CollectDetailActions from "@/components/collect/CollectDetailActions";
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import NextGenTokenArt from "./NextGenTokenArt";
 import NextGenTokenCollectionLinks from "./NextGenTokenCollectionLinks";
@@ -50,7 +49,6 @@ interface Props {
 
 export default function NextGenTokenPage(props: Readonly<Props>) {
   const locale = useBrowserLocale();
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [marketRefreshVersion, setMarketRefreshVersion] = useState(0);
@@ -99,18 +97,16 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
         activeFocus={props.view}
         locale={locale}
         persistentContent={
-          !hideNftPurchasing && (
-            <MarketDepthPanel
-              focusedOrderHash={searchParams.get("order")}
-              contract={NEXTGEN_CONTRACT}
-              tokenId={props.token.id}
-              locale={locale}
-              refreshKey={marketRefreshVersion}
-              embedded
-              active={props.view === NextgenCollectionView.LISTINGS_AND_OFFERS}
-              onReveal={revealMarket}
-            />
-          )
+          <MarketDepthPanel
+            focusedOrderHash={searchParams.get("order")}
+            contract={NEXTGEN_CONTRACT}
+            tokenId={props.token.id}
+            locale={locale}
+            refreshKey={marketRefreshVersion}
+            embedded
+            active={props.view === NextgenCollectionView.LISTINGS_AND_OFFERS}
+            onReveal={revealMarket}
+          />
         }
         navigation={
           <nav
@@ -123,13 +119,12 @@ export default function NextGenTokenPage(props: Readonly<Props>) {
                 NextgenCollectionView.ABOUT,
                 props.setView
               )}
-              {!hideNftPurchasing &&
-                printViewButton(
-                  props.view,
-                  NextgenCollectionView.LISTINGS_AND_OFFERS,
-                  props.setView,
-                  t(locale, "marketDepth.disclosure")
-                )}
+              {printViewButton(
+                props.view,
+                NextgenCollectionView.LISTINGS_AND_OFFERS,
+                props.setView,
+                t(locale, "marketDepth.disclosure")
+              )}
               {printViewButton(
                 props.view,
                 NextgenCollectionView.PROVENANCE,

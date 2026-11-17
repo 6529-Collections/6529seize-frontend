@@ -1,6 +1,5 @@
 "use client";
 
-import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { getActivityTypeItems } from "@/components/latest-activity/ActivityFilters";
 import NftMarketActivity from "@/components/nft-market-activity/NftMarketActivity";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
@@ -43,10 +42,9 @@ export function MemePageActivity(
     TypeFilter.ALL
   );
   const locale = props.locale ?? DEFAULT_LOCALE;
-  const { hideNftPurchasing } = useNftPurchasingVisibility();
   const activityTypeItems = useMemo(
-    () => getActivityTypeItems(locale, hideNftPurchasing),
-    [locale, hideNftPurchasing]
+    () => getActivityTypeItems(locale),
+    [locale]
   );
   const volumeStats = props.nft
     ? [

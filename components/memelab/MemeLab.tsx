@@ -15,7 +15,6 @@ import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { getValuesForVolumeType } from "@/helpers/Helpers";
 import { compareLocalized, formatInteger } from "@/i18n/format";
-import { useNftCollectionSort } from "@/hooks/useNftCollectionSort";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { MemeLabSort } from "@/types/enums";
@@ -76,16 +75,18 @@ export function getInitialRouterValues(
   return { initialSortDir, initialSort };
 }
 
-export function isMemeLabMarketQuoteSort(sort: MemeLabSort) {
-  return sort === MemeLabSort.FLOOR_PRICE || sort === MemeLabSort.HIGHEST_OFFER;
-}
-
-function getMemeLabSortOptions(hideNftPurchasing: boolean) {
-  return Object.values(MemeLabSort).filter(
-    (v) =>
-      v !== MemeLabSort.VOLUME &&
-      (!hideNftPurchasing || !isMemeLabMarketQuoteSort(v))
+function getMemeLabSortOptions(isCollection?: boolean) {
+  let enumValues = Object.values(MemeLabSort).filter(
+    (v) => v != MemeLabSort.VOLUME
   );
+
+  if (isCollection) {
+    enumValues = enumValues.filter(
+      (v) => v != MemeLabSort.ARTISTS && v != MemeLabSort.COLLECTIONS
+    );
+  }
+
+  return enumValues;
 }
 
 function getMemeLabSortQuery(
@@ -225,12 +226,9 @@ export default function MemeLabComponent({
   const [sortDir, setSortDir] = useState<SortDirection>(
     initialRouterValues.initialSortDir
   );
-  const { sort, setSort, hideNftPurchasing } =
-    useNftCollectionSort<MemeLabSort>(
-      initialRouterValues.initialSort,
-      MemeLabSort.AGE,
-      isMemeLabMarketQuoteSort
-    );
+  const [sort, setSort] = useState<MemeLabSort>(
+    initialRouterValues.initialSort
+  );
   const [volumeType, setVolumeType] = useState<VolumeType>(VolumeType.HOURS_24);
   const pageViewKey = `${sort}-${sortDir}-${volumeType}`;
   const [pageState, setPageState] = useState({ viewKey: "", page: 1 });
@@ -548,7 +546,7 @@ export default function MemeLabComponent({
             sortDirection={sortDir}
             setSortDirection={selectSortDirection}
             currentSort={sort}
-            sortOptions={getMemeLabSortOptions(hideNftPurchasing)}
+            sortOptions={getMemeLabSortOptions()}
             setSort={selectSort}
             setVolumeType={selectVolumeType}
             volumeType={volumeType}

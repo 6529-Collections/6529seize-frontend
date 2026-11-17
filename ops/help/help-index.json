@@ -419,7 +419,7 @@
         "quantity"
       ],
       "facts": [
-        "The iOS app opens the artwork overview for links to Listings & offers or a specific order. The Memes, Meme Lab, Gradients and NextGen card pages on web and Android show captured OpenSea quotes in the Listings & offers tab. Opening the tab immediately shows the lowest ETH listing, highest WETH offer and price levels without another accordion. View listings & offers beside Collect selects the exact card’s market tab and focuses the market section. On Memes and Meme Lab, traits, metadata and original files follow the description in Overview; existing focus=the-art links open Overview. focus=listings-and-offers opens the market tab. Primary and History tab switches keep the tab row visible with the selected section at its top. Switching tabs retains market selection and active review state.",
+        "The Memes, Meme Lab, Gradients and NextGen card pages show captured OpenSea quotes in the Listings & offers tab. Opening the tab immediately shows the lowest ETH listing, highest WETH offer and price levels without another accordion. View listings & offers beside Collect selects the exact card’s market tab and focuses the market section. On Memes and Meme Lab, traits, metadata and original files follow the description in Overview; existing focus=the-art links open Overview. focus=listings-and-offers opens the market tab. Primary and History tab switches keep the tab row visible with the selected section at its top. Switching tabs retains market selection and active review state.",
         "Each price list starts with up to ten levels; Show all levels reveals the complete list and Show fewer levels restores the short view. The summaries show the lowest captured ETH listing and highest captured WETH offer. When only one list has quotes, it fills the available width with both summaries above it; the empty side keeps its unavailable value. Currencies stay separate; a unit price applies to one edition and partially filled orders contribute only their remaining quantity. On narrow screens, quantity and cumulative total appear below the exact price, with a separate Collect or Sell button. First price levels and expanded orders use filled blue actions; other price levels use outlined actions that fill on hover or keyboard focus. Busy checks disable the action while keeping its accessible name.",
         "On Memes, Meme Lab and Gradient cards, artwork details retain mint, edition, collector and TDH information where applicable. Prices appear in Listings & offers, without another price summary or market-cap estimate in artwork details. Memes supply shows Edition size, Ex. research, Ex. museum & research, and Holding wallets. Excluded counts remove burned editions and the named reserve holdings; the combined count excludes each reserve once. These are supply counts, not listed inventory. Supply details & rankings shows exclusions and ranks Ex. research and Ex. museum & research: smallest first, equal supplies share a rank and subsequent ranks skip ties. A card without a recorded ranking shows Unranked.",
         "Expand a price row to inspect quoted remaining quantity, expiry, scope and applicability. Order information reveals the wallet, order reference and currency contract. Up to ten orders appear initially; Show all orders reveals the rest. Orders requiring verification are separate because they do not contribute to displayed price levels. Order details load a complete snapshot; a changed snapshot triggers one automatic refresh before offering Retry details.",
@@ -4601,10 +4601,10 @@
       ],
       "facts": [
         "Wave leaderboard docs cover winners, my votes, top voters, sales, sorting, price filters, results timelines, and drop eligibility states.",
-        "Leaderboard availability depends on the wave type and configuration. Curation price sorting and ETH bounds are available on the web and in the Android app.",
+        "Leaderboard availability depends on the wave type and configuration.",
         "Use the selected decision’s main Leaderboard tab to inspect its entries and ranking.",
         "Decision leaderboard cards appear with each page. Background score refreshes keep loaded artwork visible; opening a card loads its full drop.",
-        "Non-Memes Grid view and Content only cards show previews for supported NFT marketplace links when no media is uploaded. Content only hides the text summary for those previews. Unsupported links stay readable as text, and unavailable NFT previews link to the original destination. Shared marketplace previews open and copy the original link. The iOS app hides the price button, also omits Pepe listing and floor prices, and shows 6529 collection previews without live mint progress.",
+        "Non-Memes Grid view and Content only cards show previews for supported NFT marketplace links when no media is uploaded. Content only hides the text summary for those previews. Unsupported links stay readable as text, and unavailable NFT previews link to the original destination. Shared marketplace previews open and copy the original link. The iOS app hides the price button.",
         "Full wave leaderboard list, grid, and Memes gallery views update scores and ranks live while preserving the visible artwork's position. During touch or momentum scrolling, scores keep updating and card reordering waits until scrolling settles."
       ],
       "canonical_path": "/waves",
@@ -6760,7 +6760,6 @@
       "facts": [
         "The NFT activity feed lives at /nft-activity.",
         "Activity appears in columns on wide screens and stacked rows on phones or narrow panels. Each row retains its action, item, sender, recipient, total, date and available transaction link; sideways scrolling is not needed.",
-        "In the iOS app, the feed and card activity keep completed sales, mints and transfers and omit listing, offer and other open-order events.",
         "The feed combines indexed sales, mints, airdrops, transfers and burns with recorded OpenSea listings, offers, cancellations, expirations and order validity changes for The Memes, Meme Lab, Gradients and NextGen.",
         "Choose collection and action filters and use Load more to see older activity. Changing filters starts a new result list. Empty and failed requests have clear states and a retry control.",
         "Off-chain market actions may have no transaction hash. Market history begins with captured provider events and status observations; best-effort delivery does not guarantee every historical off-chain action.",
@@ -8872,7 +8871,7 @@
       "facts": [
         "Latest drop stats grid behavior is documented under media memes docs.",
         "It surfaces stats for the current or latest Meme Card drop.",
-        "The home page and The Memes areas can both surface current drop context. The iOS app shows artwork and edition details. Mint panels, wallet allowances and current mint prices appear on the web and in the Android app."
+        "The home page and The Memes areas can both surface current drop context."
       ],
       "canonical_path": "/the-memes",
       "related_paths": ["/", "/the-memes/mint"],
@@ -9090,7 +9089,7 @@
       "keywords": ["nextgen", "mint", "distribution", "plan", "collection"],
       "facts": [
         "NextGen mint and distribution-plan behavior is documented under NextGen docs.",
-        "In the iOS app, direct NextGen mint links return to the collection. Distribution information remains available. Countdown and phase badges appear on the web and in the Android app.",
+        "In the iOS app, direct NextGen mint links return to the collection. Countdown and distribution information stay available.",
         "Mint routes live under /nextgen/collection/{collection}/mint.",
         "Distribution plan routes live under /nextgen/collection/{collection}/distribution-plan.",
         "The distribution-plan allowlist shows a loading state while entries are fetched and a no-match state when active filters return no entries."
