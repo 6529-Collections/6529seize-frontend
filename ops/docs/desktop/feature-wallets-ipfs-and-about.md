@@ -71,14 +71,10 @@ Open 6529 Desktop > About for the installed version, OS/architecture, app scheme
 
 The update area shows checking, available, downloading progress, downloaded, no-update, or error states. Use the action offered for that state; the bot does not know the latest available build unless it has current release evidence.
 
-The update notice in the app window follows what the app can do. An app that
-downloads and installs updates itself offers **Download update**, shows the
-progress, then **Restart to update**. An app that only announces a new version
-(6529 Desktop 0.1.0-rc.2 hosts) offers **Open download page**, which opens the
-6529.io download page in your browser; it never starts a download in the app.
-In 0.1.0-rc.2 itself the notice's **Download** button does not work: download
-the next version once by hand from the
-[download page](https://6529.io/desktop).
+The update notice in the app window, by build:
+
+- **0.1.0-rc.2:** 0.1.0-rc.2 runs the copy of 6529.io that was built into it, with the old update notice. When a newer version is published, that notice shows a **Download** button that does not work, and nothing published on 6529.io changes that for 0.1.0-rc.2. If you use 0.1.0-rc.2, open [https://6529.io/desktop](https://6529.io/desktop) in your browser and download the next version by hand, once.
+- **Later releases:** Later releases install updates themselves. If a later release cannot install an update, its notice offers **Open download page** instead, which opens the download page in your browser; download and install the new version from there. An app that installs updates shows **Download update**, the progress, then **Restart to update**.
 
 Use ETH Transactions > the affected worker > Logs for a worker-specific failure. Expand Advanced Options for recovery controls. Logs > Locate opens the log file location; selecting log text enables Copy Selection.
 

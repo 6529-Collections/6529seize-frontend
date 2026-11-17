@@ -386,9 +386,10 @@ describe("the /desktop pages", () => {
     expect(html).toContain('href="/desktop/releases.json.sig"');
     // The test pins its own key in place of the Desktop key.
     expect(html).toContain(TEST_FEED_SIGNING_KEY.address);
-    expect(html).toContain("6529 Tech Feedback");
+    expect(html).toContain("Open the 6529 Desktop wave");
+    expect(html).toContain("the app version shown in the title bar");
     expect(html).toContain(
-      'href="/waves/e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc"'
+      'href="/waves/10a98e11-a843-49d4-89c8-892fe8da3185"'
     );
   });
 
@@ -403,7 +404,7 @@ describe("the /desktop pages", () => {
     expect(html).toContain("Scan with a phone wallet");
     expect(html).toContain("Use a browser wallet");
     expect(html).toContain("The browser page shows the same two.");
-    expect(html).toContain("download the next version once by hand from the");
+    expect(html).toContain("download the next version by hand, once.");
   });
 
   it.each([
