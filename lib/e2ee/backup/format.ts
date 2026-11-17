@@ -255,6 +255,9 @@ function isMessageRecord(value: unknown): value is BackupMessageRecord {
     typeof value["undecryptable"] === "boolean" &&
     (value["notice"] === undefined || isNotice(value["notice"])) &&
     (value["poll"] === undefined || isPollRecord(value["poll"])) &&
+    (value["pollVoteIds"] === undefined ||
+      (isObject(value["pollVoteIds"]) &&
+        Object.values(value["pollVoteIds"]).every(isString))) &&
     isNullable(value["epoch"], isNumber) &&
     isNullable(value["body"], isString) &&
     isNullable(value["sig"], isString)

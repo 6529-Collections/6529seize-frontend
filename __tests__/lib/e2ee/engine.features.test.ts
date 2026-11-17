@@ -115,6 +115,82 @@ describe("E2EE engine: features", () => {
     expect(texts(a.getMessages(g))).toContain("Even from the old client.");
   });
 
+  it("counts an intervening ballot after a poll send loses its response", async () => {
+    const { world, a, b, c, g } = await trio();
+    const handle = world.ds.handle;
+    const laggedPage = await handle("GET", `e2ee/groups/${g}/log`, {
+      profileId: "alice",
+      query: {
+        device_key: a.getLocalDeviceKey()!,
+        after_seq: "0",
+        limit: "200",
+      },
+    });
+    expect(laggedPage.status).toBe(200);
+
+    let finishFirstSend: () => void = () => undefined;
+    let firstCommitted: () => void = () => undefined;
+    const waitToLoseReply = new Promise<void>((resolve) => {
+      finishFirstSend = resolve;
+    });
+    const committed = new Promise<void>((resolve) => {
+      firstCommitted = resolve;
+    });
+    let sends = 0;
+    const spy = jest
+      .spyOn(world.ds, "handle")
+      .mockImplementation(async (method, path, input) => {
+        if (input?.profileId !== "alice") return handle(method, path, input);
+        if (method === "GET" && path.endsWith("/log") && sends === 1)
+          return laggedPage;
+        const response = await handle(method, path, input);
+        if (method === "POST" && SEND_PATH.test(path)) {
+          sends += 1;
+          if (sends === 1) {
+            firstCommitted();
+            await waitToLoseReply;
+            return { status: 503, body: { error: "reply lost", code: null } };
+          }
+        }
+        return response;
+      });
+
+    try {
+      await a.createPoll!(g, {
+        question: "Drink?",
+        options: ["Tea", "Coffee"],
+        multi: false,
+      });
+      await committed;
+      await b.sync();
+      const original = b.getMessages(g).find((message) => message.poll);
+      expect(original).toBeDefined();
+      await b.updatePoll!(g, original!.id, [0]);
+      await b.idle();
+      await c.sync();
+      expect(
+        c.getMessages(g).find((message) => message.id === original!.id)?.poll
+          ?.ballots["bob"]?.options
+      ).toEqual([0]);
+      finishFirstSend();
+      await settle(world);
+      expect(sends).toBe(2);
+      expect(
+        a.getMessages(g).find((message) => message.id === original!.id)?.poll
+          ?.ballots["bob"]?.options
+      ).toEqual([0]);
+      expect(
+        a.getMessages(g).filter((message) => message.undecryptable)
+      ).toEqual([]);
+      expect(a.getMessages(g).filter((message) => message.poll)).toHaveLength(
+        1
+      );
+    } finally {
+      finishFirstSend();
+      spy.mockRestore();
+    }
+  });
+
   it("sends content-free notify hints with mention and reply kinds", async () => {
     const { world, a, b, g } = await trio();
     await a.send(g, { text: "plain secret words" });

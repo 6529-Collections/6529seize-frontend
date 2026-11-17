@@ -146,6 +146,8 @@ export interface StoredGroup {
   rosterCheckNeeded: boolean;
   /** Seqs of our own messages (we cannot decrypt our own ciphertext). */
   sentSeqs: number[];
+  /** Other attempts for own poll events already applied from the log. */
+  sentPollAttempts?: string[];
   readSeq: number;
   /** Incremental summary of processed, persisted local history. */
   history?: HistorySummary;
@@ -190,6 +192,8 @@ export interface SignedVersion {
 
 export interface StoredMessage {
   poll?: E2eePoll;
+  /** The last vote event from each device of an enrolled profile. */
+  pollVoteIds?: Record<string, string>;
   id: string;
   g: string;
   seq: number;
@@ -251,4 +255,8 @@ export interface StoredOutboxItem {
   sealed: SealedOutboxMessage | null;
   /** A confirmed poll event still awaiting ordered application from the log. */
   acceptedSeq?: number;
+  /** Ciphertext fingerprints of submitted poll events, keyed to their MLS epoch. */
+  pollAttempts?: Record<string, number>;
+  /** Captured membership for each epoch used to submit an own poll creation. */
+  pollAttemptRosters?: Record<string, string[]>;
 }

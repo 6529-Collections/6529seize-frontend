@@ -31,7 +31,8 @@ describe("message rules (contract 6)", () => {
     const creator = `0x${"a".repeat(64)}`;
     const voter = `0x${"b".repeat(64)}`;
     const lateDevice = `0x${"c".repeat(64)}`;
-    const roster = [creator, voter];
+    const secondVotingDevice = `0x${"d".repeat(64)}`;
+    const roster = [creator, voter, secondVotingDevice];
     const rt = runtime();
     rt.record.epoch = 2;
     rt.record.metadata = {
@@ -71,11 +72,12 @@ describe("message rules (contract 6)", () => {
       profile: string,
       deviceKey: string,
       seq: number,
-      options: number[]
+      options: number[],
+      eventId = id(seq)
     ) =>
       applyPayload(
         rt,
-        { t: "poll-vote", v: 1, id: id(seq), ts: seq, target: ID, options },
+        { t: "poll-vote", v: 1, id: eventId, ts: seq, target: ID, options },
         {
           ...meta(profile, seq),
           epoch: rt.record.epoch,
@@ -84,8 +86,9 @@ describe("message rules (contract 6)", () => {
       );
     expect(vote("dave", lateDevice, 2, [1])).toBe(false);
     expect(vote("bob", voter, 3, [1])).toBe(true);
-    expect(vote("bob", voter, 5, [])).toBe(true);
+    expect(vote("bob", secondVotingDevice, 5, [])).toBe(true);
     expect(vote("bob", voter, 4, [0])).toBe(false);
+    expect(vote("bob", voter, 6, [1], id(3))).toBe(false);
     expect(rt.messages.get(ID)?.poll?.ballots).toEqual({
       bob: { seq: 5, options: [] },
     });

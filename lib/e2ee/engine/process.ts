@@ -24,6 +24,8 @@ import {
   touchActivity,
 } from "./groups";
 import { applyPayload, placeholderMessage, undecryptableId } from "./messages";
+import type { StoredOutboxItem } from "../records";
+import { pollAttemptKey, pollRosterHash } from "./poll-roster";
 import { credentialWallets, deriveCommitNotices } from "./notices";
 import { isStrictRemoval, mayBeIdle, type MemberRef } from "./required-changes";
 import type { GroupRuntime } from "./store";
@@ -419,36 +421,79 @@ async function processEntryItem(
   }
 }
 
+async function applyOwnPoll(
+  ctx: EngineContext,
+  runtime: GroupRuntime,
+  item: ApiE2eeLogItem,
+  entry: StoredOutboxItem,
+  attempt: string
+): Promise<void> {
+  const roster = entry.pollAttemptRosters?.[String(item.epoch)];
+  const payload =
+    entry.payload.t === "poll" && roster
+      ? { ...entry.payload, rosterHash: pollRosterHash(roster) }
+      : entry.payload;
+
+  await preparePayload(ctx, runtime, payload);
+  const applied = applyPayload(runtime, payload, {
+    g: runtime.record.g,
+    seq: item.seq,
+    serverTs: item.created_at,
+    senderProfileId: ctx.profileId,
+    senderDeviceKey: ownDeviceKey(ctx),
+    sigOk: true,
+    epoch: item.epoch,
+    body: null,
+    sig: null,
+    pending: false,
+    ownPollRoster: roster,
+  });
+  if (!applied && payload.t === "poll" && !runtime.messages.has(payload.id)) {
+    ctx.store.error = "E2EE_SEND_FAILED";
+  }
+
+  // If multiple submissions landed, only the earliest log entry applies.
+  const superseded = Object.keys(entry.pollAttempts ?? {}).filter(
+    (hash) => hash !== attempt
+  );
+  if (superseded.length > 0) {
+    runtime.record.sentPollAttempts = [
+      ...(runtime.record.sentPollAttempts ?? []),
+      ...superseded,
+    ].slice(-512);
+  }
+  runtime.outbox.delete(entry.id);
+  runtime.record.cursor = item.seq;
+  runtime.record.updatedAt = Math.max(
+    runtime.record.updatedAt,
+    item.created_at
+  );
+  await checkpoint(ctx, { groups: [runtime], deleteOutbox: [entry.id] });
+}
+
 async function markOutboxSent(
   ctx: EngineContext,
   runtime: GroupRuntime,
   item: ApiE2eeLogItem
 ): Promise<boolean> {
-  for (const entry of runtime.outbox.values()) {
-    if (entry.sealed?.data === item.data) {
+  const sentPollAttempts = runtime.record.sentPollAttempts;
+  const entries = [...runtime.outbox.values()];
+  const hasPollAttempts =
+    (sentPollAttempts?.length ?? 0) > 0 ||
+    entries.some((entry) => entry.pollAttempts !== undefined);
+  const attempt = hasPollAttempts ? pollAttemptKey(item.data) : "";
+  const superseded = sentPollAttempts?.indexOf(attempt) ?? -1;
+  if (sentPollAttempts && superseded >= 0) {
+    sentPollAttempts.splice(superseded, 1);
+    return true;
+  }
+  for (const entry of entries) {
+    if (entry.pollAttempts?.[attempt] === item.epoch) {
+      await applyOwnPoll(ctx, runtime, item, entry, attempt);
+      return true;
+    }
+    if (entry.sealed?.data === item.data && !isPollEvent(entry.payload)) {
       runtime.outbox.delete(entry.id);
-      if (isPollEvent(entry.payload)) {
-        await preparePayload(ctx, runtime, entry.payload);
-        applyPayload(runtime, entry.payload, {
-          g: runtime.record.g,
-          seq: item.seq,
-          serverTs: item.created_at,
-          senderProfileId: ctx.profileId,
-          senderDeviceKey: ownDeviceKey(ctx),
-          sigOk: true,
-          epoch: item.epoch,
-          body: null,
-          sig: null,
-          pending: false,
-        });
-        runtime.record.cursor = item.seq;
-        runtime.record.updatedAt = Math.max(
-          runtime.record.updatedAt,
-          item.created_at
-        );
-        await checkpoint(ctx, { groups: [runtime], deleteOutbox: [entry.id] });
-        return true;
-      }
       const message = await loadMessage(ctx, runtime, entry.id);
       if (message && entry.payload.t === "msg") {
         message.pending = false;

@@ -22,6 +22,7 @@ export interface PayloadMeta {
   body: string | null;
   sig: string | null;
   pending: boolean;
+  ownPollRoster?: string[] | undefined;
 }
 
 export const undecryptableId = (seq: number): string => `undecryptable-${seq}`;
@@ -65,17 +66,15 @@ export function placeholderMessage(meta: {
 function messageContent(
   record: StoredGroup,
   payload: MsgPayload | PollPayload,
-  epoch: number | null
+  meta: PayloadMeta
 ): Pick<
   StoredMessage,
   "text" | "mentions" | "reply" | "attachments" | "poll" | "imported"
 > | null {
   if (payload.t === "poll") {
-    const eligibleDeviceKeys = verifiedPollRoster(
-      record,
-      epoch,
-      payload.rosterHash
-    );
+    const eligibleDeviceKeys =
+      meta.ownPollRoster ??
+      verifiedPollRoster(record, meta.epoch, payload.rosterHash);
     if (!eligibleDeviceKeys) return null;
     return {
       text: payload.poll.question,
@@ -109,7 +108,7 @@ function applyMsg(
     isDuplicateImport(runtime, payload.id, payload.imp)
   )
     return false;
-  const content = messageContent(runtime.record, payload, meta.epoch);
+  const content = messageContent(runtime.record, payload, meta);
   if (!content) return false;
   put(runtime, {
     id: payload.id,
@@ -217,10 +216,15 @@ function applyPollUpdate(
   )
     return false;
 
+  if (target.pollVoteIds?.[meta.senderDeviceKey] === payload.id) return false;
   const previous = Object.hasOwn(poll.ballots, voter)
     ? poll.ballots[voter]
     : undefined;
   if (previous && meta.seq <= previous.seq) return false;
+  target.pollVoteIds = {
+    ...target.pollVoteIds,
+    [meta.senderDeviceKey]: payload.id,
+  };
   target.poll = {
     ...poll,
     ballots: {
@@ -258,6 +262,7 @@ function applyTargeted(
       target.mentions = [];
       target.latestEdit = null;
       delete target.poll;
+      delete target.pollVoteIds;
     }
     changed = true;
   } else if (payload.t === "poll-vote" || payload.t === "poll-close") {

@@ -275,7 +275,7 @@ export function parsePollDefinition(value: unknown): PollDefinition | null {
 export function isPollRoster(value: unknown): value is string[] {
   return (
     Array.isArray(value) &&
-    value.length <= 2048 &&
+    value.length <= 2048 && // Matches E2EE_MAX_ROSTER_DEVICES in the delivery service.
     value.every((key) => isHex(key, 32) && key === key.toLowerCase()) &&
     new Set(value).size === value.length
   );

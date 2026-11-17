@@ -5,6 +5,9 @@ import type { StoredGroup } from "../records";
 export const pollRoster = (record: StoredGroup): string[] =>
   record.members.map((member) => member.deviceKey.toLowerCase());
 
+export const pollAttemptKey = (data: string): string =>
+  keccak256(utf8Encode(data));
+
 export function pollRosterHash(roster: readonly string[]): string {
   // Device keys are canonical ASCII hex. Use byte order on every device.
   const sorted = [...roster].sort((left, right) =>

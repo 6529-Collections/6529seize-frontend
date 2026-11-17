@@ -29,7 +29,7 @@ import {
 import { E2eeError, RetryableError } from "./errors";
 import { importedText, isValidImported, toImportedPayload } from "./imported";
 import { applyPayload } from "./messages";
-import { pollRoster, pollRosterHash } from "./poll-roster";
+import { pollAttemptKey, pollRoster, pollRosterHash } from "./poll-roster";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
 
@@ -428,16 +428,23 @@ export async function sendNext(
   if (!item) {
     return "empty";
   }
-  if (item.payload.t === "poll") {
-    item.payload = {
-      ...item.payload,
-      rosterHash: pollRosterHash(pollRoster(runtime.record)),
-    };
-  }
+  const roster = item.payload.t === "poll" ? pollRoster(runtime.record) : null;
+  const payload =
+    item.payload.t === "poll" && roster
+      ? { ...item.payload, rosterHash: pollRosterHash(roster) }
+      : item.payload;
   const sealed = requireMls(ctx).encryptMessage(
     runtime.record.g,
-    encodePayload(item.payload)
+    encodePayload(payload)
   );
+  const attempt = isPollEvent(payload) ? pollAttemptKey(sealed.data) : null;
+  if (attempt !== null) {
+    item.pollAttempts = { ...item.pollAttempts, [attempt]: sealed.epoch };
+    if (roster) {
+      item.pollAttemptRosters ??= {};
+      item.pollAttemptRosters[String(sealed.epoch)] ??= roster;
+    }
+  }
   item.sealed = {
     epoch: sealed.epoch,
     data: sealed.data,
@@ -461,6 +468,7 @@ export async function sendNext(
     }
     item.sealed = null;
     if (apiError.code === "E2EE_EPOCH_STALE") {
+      if (attempt && item.pollAttempts) delete item.pollAttempts[attempt];
       await checkpoint(ctx, {
         groups: [runtime],
         outbox: [item],
