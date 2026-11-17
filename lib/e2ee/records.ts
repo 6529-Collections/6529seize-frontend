@@ -33,6 +33,13 @@ export interface StoredDevice {
   createdAt: number;
   /** When the current last-resort KeyPackage was uploaded (ms). */
   lastResortAt: number | null;
+  /**
+   * True once the last-resort KeyPackage on the server was made by a client
+   * with self groups (P60 §2 rule 6). A device updated from an older client
+   * replaces it at once: its siblings see the change and may then claim
+   * through its older KeyPackages (engine/claims.ts).
+   */
+  lastResortSelfSync?: boolean;
   /** Which wallets this profile trusts for each person (engine/trust.ts). */
   trust?: StoredTrust;
   /**
@@ -61,6 +68,13 @@ export interface StoredReadSync {
    * be added to theirs (ms; P60 §2 rule 1).
    */
   waitingSince?: number;
+  /**
+   * Siblings whose older KeyPackages this device claimed through, each with
+   * the expiry of that sibling's last-resort KeyPackage at the time (s), so
+   * it claims through again only once the sibling replaced it (P60 §2
+   * rule 6).
+   */
+  claimedThrough?: Record<string, number>;
 }
 
 /**

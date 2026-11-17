@@ -51,6 +51,11 @@ export interface EngineContext {
   persistChain: Promise<void>;
   disposed: boolean;
   lastMeAt: number;
+  /**
+   * Own devices' last-resort KeyPackage expiry (s) as GET /e2ee/me last
+   * listed it: a sibling that replaced it may have updated (P60 §2 rule 6).
+   */
+  ownKeyPackages: Map<string, number | null>;
   lastWakeAt: number;
   openConversation: string | null;
   openUntil: number;

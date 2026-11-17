@@ -4,16 +4,25 @@ import type {
   ApiE2eeDevice,
   ApiE2eePolicyStatus,
 } from "../api-types";
-import { ownDeviceKey, type EngineContext } from "./context";
+import { checkpoint, ownDeviceKey, type EngineContext } from "./context";
 
 /** KeyPackage claims (4.2) with client-side grant checks of every device. */
 
 const MAX_TARGETS_PER_CLAIM = 100;
+/**
+ * Most claims of one sibling's KeyPackages in one claim-through pass (P60
+ * §2 rule 6): a pool holds at most 30 one-time KeyPackages, and past them,
+ * or past the server's limit of 30 claims of a device an hour, the server
+ * hands out the last-resort one.
+ */
+const MAX_CLAIM_THROUGH = 31;
 
 export interface ClaimedPackage {
   /** Base64 KeyPackage. */
   keyPackage: string;
   device: ApiE2eeDevice;
+  /** The device's last-resort KeyPackage (handed out again, not used up). */
+  lastResort?: boolean;
 }
 
 interface ClaimedPackages {
@@ -29,18 +38,115 @@ const emptyClaim = (): ClaimedPackages => ({
 
 /**
  * A self group admits only clients that support self groups, by the
- * capability their KeyPackage lists (P60). A client built before them is
- * skipped and never becomes a member that never acts; once it updates, its
- * new KeyPackages say so and the next maintenance adds it.
+ * capability their KeyPackage lists (P60 §2 rule 6). A client built before
+ * them is skipped and never becomes a member that never acts.
+ *
+ * The server hands out KeyPackages oldest first, so a sibling that updated
+ * may still have older ones queued ahead of its new ones. Once it shows it
+ * updated (it replaced its last-resort KeyPackage since this device last
+ * claimed through its pool), this device claims through that pool in one
+ * pass, until a capable KeyPackage or the last-resort one, which the
+ * updated client replaced at once. A sibling still on an older client is
+ * claimed through at most once per last-resort KeyPackage it uploads.
  */
-export function selfGroupPackages(
+export async function selfGroupPackages(
   ctx: EngineContext,
-  packages: readonly ClaimedPackage[]
-): ClaimedPackage[] {
+  packages: readonly ClaimedPackage[],
+  group?: string
+): Promise<ClaimedPackage[]> {
   const mls = ctx.mls;
-  return mls
-    ? packages.filter((item) => mls.supportsSelfGroups(item.keyPackage))
-    : [];
+  if (!mls) {
+    return [];
+  }
+  const out: ClaimedPackage[] = [];
+  for (const item of packages) {
+    if (mls.supportsSelfGroups(item.keyPackage)) {
+      out.push(item);
+      continue;
+    }
+    const listed =
+      item.lastResort === true ? undefined : claimThroughDue(ctx, item.device);
+    if (listed === undefined) {
+      continue;
+    }
+    const capable = await claimThrough(ctx, item.device, group);
+    await noteClaimedThrough(ctx, item.device, listed);
+    if (capable) {
+      out.push(capable);
+    }
+  }
+  return out;
+}
+
+/**
+ * The expiry of the sibling's last-resort KeyPackage as last listed, when
+ * it replaced that KeyPackage since this device last claimed through its
+ * pool; else undefined.
+ */
+function claimThroughDue(
+  ctx: EngineContext,
+  device: ApiE2eeDevice
+): number | undefined {
+  const key = device.device_key.toLowerCase();
+  const listed = ctx.ownKeyPackages.get(key);
+  const done = ctx.device?.readSync?.claimedThrough?.[key];
+  return device.profile_id === ctx.profileId &&
+    typeof listed === "number" &&
+    done !== listed
+    ? listed
+    : undefined;
+}
+
+async function noteClaimedThrough(
+  ctx: EngineContext,
+  device: ApiE2eeDevice,
+  listed: number
+): Promise<void> {
+  const stored = ctx.device;
+  if (!stored) {
+    return;
+  }
+  // In place: read sync holds this record across its own awaits.
+  stored.readSync ??= { unsent: [] };
+  stored.readSync.claimedThrough = {
+    ...stored.readSync.claimedThrough,
+    [device.device_key.toLowerCase()]: listed,
+  };
+  await checkpoint(ctx, { device: stored, skipWasm: true });
+}
+
+/**
+ * Claims the sibling's next KeyPackages until a capable one, the
+ * last-resort one or none. Returns the capable one, if any.
+ */
+async function claimThrough(
+  ctx: EngineContext,
+  device: ApiE2eeDevice,
+  group: string | undefined
+): Promise<ClaimedPackage | null> {
+  const mls = ctx.mls;
+  const key = device.device_key.toLowerCase();
+  for (let claims = 1; mls && claims < MAX_CLAIM_THROUGH; claims += 1) {
+    const claim = await claimKeyPackages(
+      ctx,
+      [{ profile_id: device.profile_id, device_keys: [key] }],
+      group
+    );
+    const next = claim.packages.find(
+      (item) => item.device.device_key.toLowerCase() === key
+    );
+    if (!next) {
+      return null;
+    }
+    if (mls.supportsSelfGroups(next.keyPackage)) {
+      // The device record this pass already trusted, not the new copy.
+      return { ...next, device };
+    }
+    if (next.lastResort === true) {
+      return null;
+    }
+  }
+  return null;
 }
 
 /** device_key -> device record (leaf verification and roster_add). */
@@ -98,7 +204,11 @@ async function claimBatch(
         );
       ctx.directory.seed([device]);
       if (allowed && (await isUsableDevice(ctx, device))) {
-        out.packages.push({ keyPackage: claimed.key_package, device });
+        out.packages.push({
+          keyPackage: claimed.key_package,
+          device,
+          lastResort: claimed.last_resort,
+        });
       }
     }
   }

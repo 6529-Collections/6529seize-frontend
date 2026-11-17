@@ -247,6 +247,14 @@ export class MlsClient {
     }
   }
 
+  /**
+   * Whether this module's own KeyPackages list the self-group capability:
+   * true for every module that can read the capability (P60 §2 rule 6).
+   */
+  makesSelfGroupKeyPackages(): boolean {
+    return typeof this.module.keyPackageInfo === "function";
+  }
+
   dispose(): void {
     try {
       this.handle.free?.();

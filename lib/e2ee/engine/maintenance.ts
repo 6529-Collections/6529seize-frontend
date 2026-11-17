@@ -251,7 +251,7 @@ export function requiredChangesPlanner(options: {
     const trusted = await onlyTrustedPackages(ctx, claimed?.packages ?? []);
     const packages =
       runtime.record.metadata.kind === "self"
-        ? selfGroupPackages(ctx, trusted)
+        ? await selfGroupPackages(ctx, trusted, runtime.record.g)
         : trusted;
     if (packages.length > 0) {
       ops.add_key_packages = packages.map((item) => item.keyPackage);
