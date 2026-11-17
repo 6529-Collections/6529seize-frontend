@@ -67,9 +67,9 @@ Deleting a wallet or app database is not a TDH repair step. Transaction/NFT work
 
 ### App version, updates, and diagnostics
 
-Open 6529 Desktop > About for the installed version, OS/architecture, app scheme, app port, IPFS ports, updater status, and App Logs. Opening About checks for updates.
+In the desktop title bar, select **App info**, then **Check for updates**. The dialog shows **Checking for updates…** followed by **No updates found** or an available-update message. If the check fails, select **Check for updates** to try again. The app shows the download action in its update notice.
 
-The update area shows checking, available, downloading progress, downloaded, no-update, or error states. Use the action offered for that state; the bot does not know the latest available build unless it has current release evidence.
+In 6529 Core, open **6529 Desktop > About** in the sidebar for the installed version, OS/architecture, app scheme, app port, IPFS ports, updater status, and App Logs. Opening this page checks for updates and shows any download or installation progress.
 
 The update notice in the app window, by build:
 
