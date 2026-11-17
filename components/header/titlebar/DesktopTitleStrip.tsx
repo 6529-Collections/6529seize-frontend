@@ -21,6 +21,10 @@ import { useGlobalRefresh } from "@/contexts/RefreshContext";
 import { getDesktopShellApi, getDesktopUpdater } from "@/helpers/desktop-shell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import {
+  checkDesktopUpdates,
+  type DesktopUpdateCheckResult,
+} from "@/lib/desktop/checkDesktopUpdates";
 import styles from "./DesktopTitleStrip.module.css";
 
 interface AppInfo {
@@ -41,8 +45,6 @@ const UPDATE_CHECK_MESSAGES = {
 
 type UpdateCheckStatus = "idle" | keyof typeof UPDATE_CHECK_MESSAGES;
 
-// The desktop host allows up to two minutes for release-feed requests.
-const UPDATE_CHECK_TIMEOUT_MS = 125_000;
 const UPDATE_CHECK_MIN_VISIBLE_MS = 350;
 
 /** The page's public address (the app itself runs on a local server). */
@@ -163,52 +165,33 @@ function DesktopUpdateCheck() {
   const updater = getDesktopUpdater();
   const [updateCheckStatus, setUpdateCheckStatus] =
     useState<UpdateCheckStatus>("idle");
-  const stopCheck = useRef<(() => void) | null>(null);
+  const pendingCheck = useRef<Promise<[DesktopUpdateCheckResult, void]> | null>(
+    null
+  );
   const checkingForUpdates = updateCheckStatus === "checking";
 
-  useEffect(() => () => stopCheck.current?.(), []);
+  useEffect(
+    () => () => {
+      pendingCheck.current = null;
+    },
+    []
+  );
 
   const checkForUpdates = () => {
-    if (!updater || stopCheck.current) return;
+    if (!updater || pendingCheck.current) return;
     setUpdateCheckStatus("checking");
 
-    const startedAt = performance.now();
-    let resultTimer: ReturnType<typeof setTimeout> | undefined;
-    function finish(status: "current" | "available" | "failed") {
-      if (resultTimer !== undefined) return;
-      // A cached host reply can arrive before the checking state has painted.
-      const remaining =
-        UPDATE_CHECK_MIN_VISIBLE_MS - (performance.now() - startedAt);
-      resultTimer = setTimeout(
-        () => {
-          stopCheck.current?.();
-          setUpdateCheckStatus(status);
-        },
-        Math.max(0, remaining)
-      );
-    }
-    const onAvailable = () => finish("available");
-    const onNotAvailable = () => finish("current");
-    const onError = () => finish("failed");
-    const timeout = setTimeout(onError, UPDATE_CHECK_TIMEOUT_MS);
-
-    stopCheck.current = () => {
-      clearTimeout(timeout);
-      clearTimeout(resultTimer);
-      updater.offUpdateAvailable(onAvailable);
-      updater.offUpdateNotAvailable(onNotAvailable);
-      updater.offUpdateError(onError);
-      stopCheck.current = null;
-    };
-
-    updater.onUpdateAvailable(onAvailable);
-    updater.onUpdateNotAvailable(onNotAvailable);
-    updater.onUpdateError(onError);
-    try {
-      updater.checkUpdates();
-    } catch {
-      onError();
-    }
+    // Cached replies can arrive before the checking state has painted.
+    const visible = new Promise<void>((resolve) => {
+      setTimeout(resolve, UPDATE_CHECK_MIN_VISIBLE_MS);
+    });
+    const check = Promise.all([checkDesktopUpdates(updater), visible]);
+    pendingCheck.current = check;
+    void check.then(([result]) => {
+      if (pendingCheck.current !== check) return;
+      pendingCheck.current = null;
+      setUpdateCheckStatus(result);
+    });
   };
 
   if (!updater) return null;

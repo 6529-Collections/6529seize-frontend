@@ -10626,7 +10626,7 @@
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/renderer/components/core/logs-viewer/LogsViewer.tsx",
         "https://github.com/6529-Collections/6529-core/blob/5d8a06e5ea66835f09ec89db40d4db714759462b/README.md"
       ],
-      "brief_answer": "In the desktop title bar, select **App info**, then **Check for updates**. In 6529 Core, open **6529 Desktop > About** in the sidebar for local ports and **App Logs**. For a stalled worker, check its **Logs** tab under ETH Transactions."
+      "brief_answer": "In the desktop title bar, select **App info**, then **Check for updates**. In 6529 Core, open **6529 Desktop > About** for **App Logs**. For a stalled worker, check its **Logs** tab under ETH Transactions. Share only a redacted error and your version/OS. Keep wallet secrets and credential-bearing RPC URLs private."
     },
     {
       "id": "desktop.local-data",
