@@ -4095,6 +4095,9 @@ export const EN_US_ROOT_MESSAGES = {
   "desktop.appInfo.version": "Version",
   "desktop.appInfo.environment": "Environment",
   "desktop.appInfo.checkUpdates": "Check for updates",
+  "desktop.appInfo.checkingUpdates": "Checking for updates…",
+  "desktop.appInfo.noUpdates": "No updates found.",
+  "desktop.appInfo.checkFailed": "Couldn’t check for updates. Try again.",
   "desktopConnect.title": "Connect a wallet",
   "desktopConnect.intro":
     "6529 Desktop cannot use browser extensions directly. Choose how to connect:",

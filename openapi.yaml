@@ -22251,10 +22251,12 @@ paths:
       description: >-
         Lists readable, non-DM voting waves using TDH, TDH_PLUS_XTDH or
         CARD_SET_TDH, regardless of follow or pin status. Excludes upcoming,
-        ended and completed voting and unresolved decisions. Orders the nearest
-        voting end or next decision first, then open-ended waves, with a stable
-        wave ID tie-breaker. Wave and parent visibility apply before counting
-        and pagination. This is discovery, not personal voting eligibility.
+        ended and completed voting and unresolved decisions. Waves with
+        proposals open for voting come first. Within each group, orders by the
+        nearest voting end or next decision, then open-ended waves, with a
+        stable wave ID tie-breaker. Wave and parent visibility apply before
+        counting and pagination. Personal voting eligibility depends on each
+        wave's voting rules.
       operationId: getActiveWaveVotes
       x-6529-router:
         enabled: true
