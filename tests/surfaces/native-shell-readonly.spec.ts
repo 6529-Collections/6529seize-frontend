@@ -1606,7 +1606,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     ).toBeVisible();
     await expect(modal.getByRole("button", { name: "Browser" })).toBeVisible();
     await expect(
-      modal.getByRole("button", { name: "6529 Desktop" })
+      modal.getByRole("button", { name: /^6529 Desktop(?: Classic)?$/ })
     ).toHaveCount(0);
   });
 });

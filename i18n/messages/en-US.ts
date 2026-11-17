@@ -3789,7 +3789,7 @@ export const EN_US_ROOT_MESSAGES = {
   "acceptConnection.unsupportedWeb":
     "Open this connection link in the 6529 mobile app.",
   "acceptConnection.unsupportedLegacyDesktop":
-    "This connection link can only be accepted in the 6529 Desktop app.",
+    "This connection link can only be accepted in the 6529 Desktop Classic app.",
   "acceptConnection.missingParameters": "Missing required parameters",
   "acceptConnection.toast.maxProfiles": "Maximum connected profiles reached",
   "acceptConnection.toast.invalidResponse": "Invalid connection response",
@@ -3896,7 +3896,7 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
   "headerShare.connectModal.title": "Connect Device",
   "headerShare.connectModal.mobileTitle": "Connect 6529 Mobile",
-  "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop",
+  "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop Classic",
   "headerShare.connectModal.chooseApp": "Which app are you connecting?",
   "headerShare.connectModal.only": "Connect only",
   "headerShare.connectModal.secure":
@@ -3905,7 +3905,7 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.connectModal.asSecure":
     "Connect as {name} with Post Signing & DM Encryption",
   "headerShare.connectModal.desktopMinimumVersion":
-    "Requires 6529 Desktop {version} or later.",
+    "Requires 6529 Desktop Classic {version} or later.",
   "headerShare.connectModal.back": "Back",
   "headerShare.connectModal.oneTime":
     "Use only on a device you own. This code works once.",
@@ -3918,7 +3918,7 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.menu.browser": "Browser",
   "headerShare.menu.app": "App",
   "headerShare.menu.mobile": "6529 Mobile",
-  "headerShare.menu.desktop": "6529 Desktop",
+  "headerShare.menu.desktop": "6529 Desktop Classic",
   "desktop.profiles.restoreError":
     "Your saved profiles could not be opened. You can browse signed out, or restart 6529 Desktop and allow access to the system keychain to restore them.",
   "desktop.profiles.restart": "Restart to restore profiles",
@@ -4140,8 +4140,8 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",
-  "headerShare.core.alt": "6529 Desktop",
-  "headerShare.core.open": "Open in 6529 Desktop",
+  "headerShare.core.alt": "6529 Desktop Classic",
+  "headerShare.core.open": "Open in 6529 Desktop Classic",
   "headerShare.connectionNotice.legacyTitle": "Update Authentication",
   "headerShare.connectionNotice.loadingTitle": "Preparing Device Connection",
   "headerShare.connectionNotice.errorTitle": "Device Connection Unavailable",
@@ -5464,6 +5464,8 @@ export const EN_US_ROOT_MESSAGES = {
   "waves.discovery.votingOpen": "Voting open",
   "waves.discovery.votingEnds": "Voting ends {date}",
   "waves.discovery.nextDecision": "Next result {date}",
+  "waves.discovery.activeSubmissions.one": "{count} active submission",
+  "waves.discovery.activeSubmissions.other": "{count} active submissions",
   "waves.discovery.emptyVotes": "No active TDH votes right now.",
   "waves.discovery.emptyRecommendations": "No recommendations right now.",
   "waves.discovery.loadingRecommendations": "Loading recommendations…",
