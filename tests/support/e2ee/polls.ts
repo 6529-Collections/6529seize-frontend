@@ -7,16 +7,15 @@ export async function postEncryptedPoll(
   multi: boolean
 ) {
   await page.getByRole("button", { name: "Create poll" }).click();
-  const dialog = page.getByRole("dialog", { name: "Create poll" });
-  await dialog.getByLabel("Question", { exact: true }).fill(question);
-  await dialog.getByLabel("Option 1", { exact: true }).fill("Tea");
-  await dialog.getByLabel("Option 2", { exact: true }).fill("Coffee");
-  if (multi)
-    await dialog
-      .getByRole("checkbox", { name: "Allow multiple choices" })
-      .check();
-  await dialog.getByRole("button", { name: "Post poll" }).click();
-  await expect(dialog).toBeHidden();
+  const form = page.getByRole("form", { name: "Create poll" });
+  await form.getByLabel("Question", { exact: true }).fill(question);
+  await form.getByLabel("Poll option 1", { exact: true }).fill("Tea");
+  await form.getByLabel("Poll option 2", { exact: true }).fill("Coffee");
+  if (multi) {
+    await form.getByRole("button", { name: "Multiple", exact: true }).click();
+  }
+  await form.getByRole("button", { name: "Post poll" }).click();
+  await expect(form).toBeHidden();
   await expect(pollCard(page, question)).toBeVisible({ timeout: 45_000 });
 }
 

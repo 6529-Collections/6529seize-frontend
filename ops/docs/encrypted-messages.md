@@ -70,8 +70,8 @@ sent as encrypted attachments. Their search and previews connect publicly to GIP
 ### Group polls
 
 In supported builds, select **Create poll** in an encrypted group chat. Enter a
-question and two to ten choices. Turn on **Allow multiple choices** if people
-can pick more than one answer, then select **Post poll**.
+question and two to ten choices in the inline composer. Choose **Single** or
+**Multiple**, then select **Post poll**.
 
 Select your choices and choose **Vote** or **Update vote**. Use **View votes**
 to see who chose each option. The creator can select **End poll** to stop voting.
