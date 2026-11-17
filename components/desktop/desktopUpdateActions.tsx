@@ -112,8 +112,17 @@ export function useDesktopUpdateActions(locale: Locale, stateKey: string) {
     problem: problem?.key === stateKey ? problem.text : null,
     progress:
       progress === stateKey ? t(locale, "desktop.update.requested") : null,
-    showProblem: (text: string) => setProblem({ key: stateKey, text }),
-    clearProblem: () => setProblem(null),
+    /**
+     * Starts another action (a settings change): clears feedback and
+     * returns how to report its problem, which is dropped if the state has
+     * changed since.
+     */
+    beginAction: () => {
+      setProblem(null);
+      const key = stateKey;
+      const taken = generation.current;
+      return (text: string) => show(taken, key, text);
+    },
     update,
     restart,
   };

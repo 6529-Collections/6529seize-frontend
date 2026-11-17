@@ -183,6 +183,23 @@ describe("desktopUpdateState", () => {
     stop();
   });
 
+  it("does not apply the first read over a state event that arrived while it was pending", async () => {
+    const { getState, emit } = install({ supportsInAppUpdates: true });
+    let answer: (value: unknown) => void = () => undefined;
+    getState.mockReturnValueOnce(
+      new Promise((resolve) => {
+        answer = resolve;
+      }) as never
+    );
+    const stop = subscribeDesktopAutoUpdate(() => undefined);
+    await flush();
+    emit({ ...U1, id: "U8", state: "ready", version: "0.1.0-rc.4" });
+    answer(U1);
+    await flush();
+    expect(getDesktopAutoUpdate()).toMatchObject({ state: { id: "U8" } });
+    stop();
+  });
+
   it("reports why the app cannot restart to update", async () => {
     const { updater } = install({ supportsInAppUpdates: true });
     await expect(restartDesktopToUpdate()).resolves.toBeNull();

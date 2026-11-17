@@ -97,8 +97,10 @@ function start(): () => void {
         return;
       }
       setSnapshot({ support: "supported", state: null });
+      const before = applied;
       const value = await updater.getState();
-      if (isActive()) applyState(value);
+      // Not over a state event that arrived while this read was pending.
+      if (isActive() && applied === before) applyState(value);
     })
     .catch(() => {
       if (active && snapshot.support === "detecting") setSnapshot(UNSUPPORTED);

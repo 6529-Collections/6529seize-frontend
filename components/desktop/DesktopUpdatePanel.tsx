@@ -163,17 +163,13 @@ export default function DesktopUpdatePanel({
     readonly auto?: boolean;
   }) => {
     setSaving(true);
-    actions.clearProblem();
+    const report = actions.beginAction();
     setDesktopUpdateSettings(settings)
       .then((reason) => {
         if (reason === null) return;
-        actions.showProblem(
-          reason || t(locale, "desktop.update.settingsFailed")
-        );
+        report(reason || t(locale, "desktop.update.settingsFailed"));
       })
-      .catch(() =>
-        actions.showProblem(t(locale, "desktop.update.settingsFailed"))
-      )
+      .catch(() => report(t(locale, "desktop.update.settingsFailed")))
       .finally(() => setSaving(false));
   };
 

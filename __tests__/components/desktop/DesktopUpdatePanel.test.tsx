@@ -425,6 +425,28 @@ describe("DesktopUpdatePanel", () => {
     expect(screen.getByRole("alert")).toBeEmptyDOMElement();
   });
 
+  it("drops a settings refusal that arrives after the state changed", async () => {
+    installAutoHost(STATES.U1);
+    let refuse: (reason: unknown) => void = () => undefined;
+    updater.setSettings.mockReturnValueOnce(
+      new Promise((_resolve, reject) => {
+        refuse = reject;
+      })
+    );
+    const { rerender } = render(
+      <DesktopUpdatePanel state={parsed("U1")} locale="en-US" />
+    );
+    await userEvent.click(
+      screen.getByRole("switch", { name: "Check for new releases" })
+    );
+    rerender(<DesktopUpdatePanel state={parsed("U4")} locale="en-US" />);
+    await act(async () => {
+      refuse("Please wait a moment and try again.");
+      await Promise.resolve();
+    });
+    expect(screen.getByRole("alert")).toBeEmptyDOMElement();
+  });
+
   it("offers Try again after a failed update", async () => {
     installAutoHost(STATES.U11);
     render(<DesktopUpdatePanel state={parsed("U11")} locale="en-US" />);
