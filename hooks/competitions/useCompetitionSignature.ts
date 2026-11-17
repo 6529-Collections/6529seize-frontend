@@ -6,6 +6,8 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { buildCompetitionSignatureMessage } from "@/services/wallet-signatures/competition-signature";
 import type { ApiCompetitionSignature } from "@/generated/models/ApiCompetitionSignature";
 import { useCompetition } from "@/contexts/CompetitionContext";
+import { buildDecisionSignatureContext } from "@/lib/desktop/walletRequestContext";
+import { rememberWalletRequestContext } from "@/services/desktop/walletRequestContexts";
 
 export function useCompetitionSignature() {
   const { competition } = useCompetition();
@@ -39,6 +41,10 @@ export function useCompetitionSignatureFor(competition: ApiCompetition | null) {
       nonce: globalThis.crypto.randomUUID(),
       issuedAt: Date.now(),
     });
+    // 6529 Desktop: lets the browser page show what the hash covers.
+    rememberWalletRequestContext(message, () =>
+      buildDecisionSignatureContext(payload)
+    );
     return { message, signature: await signMessageAsync({ message }) };
   };
 }

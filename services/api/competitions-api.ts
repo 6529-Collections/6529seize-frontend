@@ -1,3 +1,5 @@
+import type { ApiMainStageTraitValidation } from "@/generated/models/ApiMainStageTraitValidation";
+import type { ApiValidateMainStageTraitsRequest } from "@/generated/models/ApiValidateMainStageTraitsRequest";
 import type { ApiDropCompetitionContext } from "@/generated/models/ApiDropCompetitionContext";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ApiCompetitionComputedPhase } from "@/generated/models/ApiCompetitionComputedPhase";
@@ -30,6 +32,7 @@ import {
 } from "@/services/api/common-api";
 import type { QueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
+import { recordWaveCompetitionPresence } from "@/helpers/waves/wave-competition-presence";
 import { scheduleDropCompetitionContext } from "./competition-context-scheduler";
 
 export interface CompetitionIdentity {
@@ -53,6 +56,22 @@ export const defaultCompetitionQueryKey = (
   waveId: string,
   viewer: string | null
 ) => [QueryKey.DEFAULT_COMPETITION, { wave_id: waveId, viewer }] as const;
+
+export function validateMainStageTraits(
+  identity: CompetitionIdentity,
+  body: ApiValidateMainStageTraitsRequest,
+  signal: AbortSignal
+) {
+  return commonApiPost<
+    ApiValidateMainStageTraitsRequest,
+    ApiMainStageTraitValidation
+  >({
+    endpoint: `${competitionEndpoint(identity)}/main-stage-traits/validate`,
+    body,
+    signal,
+    errorMode: "structured",
+  });
+}
 
 export async function fetchDropCompetitionContext(
   waveId: string,
@@ -161,6 +180,9 @@ export async function fetchCompetitions(
   });
   if (page.data.some((competition) => competition.wave_id !== waveId))
     throw new Error("Invalid competition parent");
+  // A listed competition proves the wave has one, even if an earlier feed
+  // page said otherwise (for example one created since that page loaded).
+  if (page.data.length > 0) recordWaveCompetitionPresence(waveId, true);
   return page;
 }
 

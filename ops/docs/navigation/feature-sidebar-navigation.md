@@ -150,7 +150,7 @@ page search. Public navigation never adds a Validator link.
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
   `/network/wave-score`, `/rep/categories`, `/network/health`,
   `/network/definitions`, `/network/levels`, `/network/health/network-tdh`,
-  `/network/nerd`, `/network/prenodes`, and
+  `/network/nerd`, and
   `/network/tdh/historic-boosts`.
 - Open `About > About 6529 > 6529 Apps` for the combined 6529 Mobile and 6529
   Desktop download page at `/about/6529-apps`.

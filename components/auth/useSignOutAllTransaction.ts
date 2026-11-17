@@ -1,4 +1,10 @@
 import { useCallback, useRef, useState, type RefObject } from "react";
+import {
+  noteSignOutAllFinished,
+  noteSignOutAllStarted,
+} from "@/services/auth/sign-out-all-state";
+import { cancelBrowserConnectorSignIn } from "@/services/desktop/browserConnectorSignIn";
+import { forgetAllBrowserWalletProfiles } from "@/services/desktop/desktopBrowserWallet";
 import { logError } from "@/utils/security-logger";
 import {
   AuthenticationError,
@@ -39,6 +45,10 @@ export function useSignOutAllTransaction({
     }
     isSigningOutAllRef.current = true;
     signOutAllGenerationRef.current += 1;
+    // A 6529 Desktop browser sign-in still waiting for its link must not
+    // sign in after this sign-out (a no-op outside the desktop app).
+    cancelBrowserConnectorSignIn();
+    noteSignOutAllStarted();
     setIsSigningOutAll(true);
 
     try {
@@ -59,6 +69,8 @@ export function useSignOutAllTransaction({
 
       try {
         await clearAllAuthenticatedProfiles();
+        // 6529 Desktop: no profile keeps browser-wallet forwarding.
+        await forgetAllBrowserWalletProfiles();
         refreshStoredConnectedAccounts();
         setDisconnected();
       } catch (error: unknown) {
@@ -74,6 +86,7 @@ export function useSignOutAllTransaction({
       }
     } finally {
       isSigningOutAllRef.current = false;
+      noteSignOutAllFinished();
       if (isMountedRef.current) {
         setIsSigningOutAll(false);
       }

@@ -21,6 +21,7 @@ import MemesSubmissionDocumentation, {
 } from "./MemesSubmissionDocumentation";
 import { SubmissionStep } from "./types/Steps";
 import { useArtworkSubmissionForm } from "./hooks/useArtworkSubmissionForm";
+import { applyMainStagePreviewDefaults } from "./utils/mainStageTraits";
 import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
 import { useArtworkSubmissionMutation } from "./hooks/useArtworkSubmissionMutation";
 import { useMemesSubmissionIdentity } from "./hooks/useMemesSubmissionIdentity";
@@ -225,7 +226,10 @@ const MemesArtSubmissionContainer: FC<MemesArtSubmissionContainerProps> = ({
       setPreviewDrop(
         buildPreviewDrop({
           wave,
-          traits,
+          traits: applyMainStagePreviewDefaults(
+            traits,
+            presentationCompetition(wave)?.main_stage_trait_rules
+          ),
           operationalData,
           isAdditionalActionPromised,
           mediaSelection: previewMedia,
