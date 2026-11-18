@@ -3,7 +3,6 @@ import {
   useSeizeConnectContext,
 } from "@/components/auth/SeizeConnectContext";
 import type { SeizeConnectContextType } from "@/components/auth/seizeConnectTypes";
-import { APPKIT_MODAL_TRANSITION_TIMEOUT_MS } from "@/components/auth/useOpenConnectModal";
 import * as walletChunkRecovery from "@/components/providers/walletChunkRecovery";
 import {
   closeDesktopConnectDialog,
@@ -265,7 +264,7 @@ describe("connect entry points in 6529 Desktop", () => {
     expect(mockOpen).toHaveBeenCalledTimes(1);
 
     await act(async () => {
-      await jest.advanceTimersByTimeAsync(APPKIT_MODAL_TRANSITION_TIMEOUT_MS);
+      await jest.advanceTimersByTimeAsync(30_000);
     });
     expect(await outcome).toMatchObject({
       message: "Failed to open wallet connection modal",

@@ -13,7 +13,7 @@ import type { AppKitModalBridgeStore } from "./AppKitModalBridge";
 import { defaultConnectModalView } from "./capacitorConnectController";
 import { WalletConnectionError } from "./seizeConnectErrors";
 
-export const APPKIT_MODAL_TRANSITION_TIMEOUT_MS = 30_000;
+const APPKIT_MODAL_TRANSITION_TIMEOUT_MS = 30_000;
 
 async function waitForModalTransition(
   transition: Promise<void>,
