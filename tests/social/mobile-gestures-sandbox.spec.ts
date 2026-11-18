@@ -32,6 +32,7 @@ interface FeedReturnPaint {
   readonly scrollTop: number;
   readonly readableCard: boolean;
   readonly coveredWhilePreparing?: boolean;
+  readonly outgoingChatPreserved?: boolean;
   readonly readingCardTop?: number | undefined;
   readonly error?: string;
 }
@@ -366,9 +367,26 @@ for (const platform of ["ios", "android"] as const) {
             document
               .querySelector("[data-wave-navigation-screen]")
               ?.getAttribute("data-wave-navigation-screen") === "wave";
+          let outgoingChatPreserved = true;
+          const outgoingObserver = new MutationObserver(() => {
+            const surface = document.querySelector(
+              '[data-wave-navigation-screen="wave"]'
+            );
+            if (surface && !surface.querySelector("[data-wave-drop-content]"))
+              outgoingChatPreserved = false;
+          });
+          if (returningToFeed) {
+            outgoingObserver.observe(document.documentElement, {
+              childList: true,
+              subtree: true,
+              attributes: true,
+              attributeFilter: ["data-wave-navigation-screen"],
+            });
+          }
           const transition = start(...args);
           void transition.ready.then(
             async () => {
+              outgoingObserver.disconnect();
               if (
                 !returningToFeed ||
                 document
@@ -420,6 +438,7 @@ for (const platform of ["ios", "android"] as const) {
                 scrollTop: feed?.scrollTop ?? 0,
                 readableCard,
                 coveredWhilePreparing,
+                outgoingChatPreserved,
                 readingCardTop: Array.from(
                   feed?.querySelectorAll("article") ?? []
                 )
@@ -432,6 +451,7 @@ for (const platform of ["ios", "android"] as const) {
               });
             },
             (error: unknown) => {
+              outgoingObserver.disconnect();
               if (returningToFeed)
                 browser.__feedReturnPaints?.push({
                   scrollTop: -1,
@@ -562,6 +582,7 @@ for (const platform of ["ios", "android"] as const) {
           expect(paint, JSON.stringify(paint)).toMatchObject({
             readableCard: true,
             coveredWhilePreparing: true,
+            outgoingChatPreserved: true,
           });
           expect(
             Math.abs(paint!.scrollTop - readingPosition)

@@ -44,7 +44,7 @@ describe("useActiveWaveManager", () => {
     globalThis.history.replaceState(null, "", "http://localhost/");
   });
 
-  it("returns to the native feed and Waves through client state without fetching a route", () => {
+  it("keeps the chat until the native Feed URL commits without fetching a route", () => {
     mockIsApp = true;
     globalThis.history.replaceState(
       null,
@@ -58,13 +58,23 @@ describe("useActiveWaveManager", () => {
     const push = jest.fn();
     (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
     const pushState = jest.spyOn(globalThis.history, "pushState");
-    const { result } = renderHook(useActiveWaveManager);
+    const { result, rerender } = renderHook(useActiveWaveManager);
     act(() => result.current.setActiveWave(null, { profileFeed: true }));
     expect(pushState).toHaveBeenLastCalledWith(
       null,
       "",
       "/waves?view=profile-feed"
     );
+    // Clearing this early leaves an empty chat under the still-current route.
+    expect(result.current.activeWaveId).toBe("abc");
+    act(() => result.current.setActiveWave(null, { profileFeed: true }));
+    expect(result.current.activeWaveId).toBe("abc");
+    expect(pushState).toHaveBeenCalledTimes(1);
+    (usePathname as jest.Mock).mockReturnValue("/waves");
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("view=profile-feed")
+    );
+    rerender();
     expect(result.current.activeWaveId).toBeNull();
     act(() => result.current.setActiveWave(null));
     expect(pushState).toHaveBeenLastCalledWith(null, "", "/waves");

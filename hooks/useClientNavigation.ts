@@ -24,6 +24,7 @@ interface UseClientNavigationOptions<T, TOptions = undefined> {
    * Return true for fast client-side nav, false for router.push
    */
   readonly canUsePushState: (targetUrl: string, options?: TOptions) => boolean;
+  /** Keep source state until the route supplies its committed initialState. */
   readonly deferRouteState?: boolean;
 }
 
@@ -84,14 +85,16 @@ export function useClientNavigation<T, TOptions = undefined>({
         browserWindow.location.pathname + browserWindow.location.search;
 
       if (currentUrl === target) {
-        setState(newState);
+        if (!deferRouteState) setState(newState);
         return;
       }
 
       if (canUsePushState(target, options)) {
         const method = options?.replace ? "replaceState" : "pushState";
         browserWindow.history[method](null, "", target);
-        setState(newState);
+        // Next commits native-history URLs asynchronously too. Route-owned
+        // content must keep its source state until that URL reaches render.
+        if (!deferRouteState) setState(newState);
       } else {
         // Route-owned views must remain on their committed wave until the new
         // URL commits, otherwise destination content renders under the old tabs.
