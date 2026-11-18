@@ -660,6 +660,41 @@ describe("useWaveDataFetching", () => {
     });
   });
 
+  it("keeps the gap boundary from a shared post opened during newest sync", async () => {
+    type Drop = { id: string; serial_no: number };
+    let finish!: (value: { drops: Drop[]; highestSerialNo: number }) => void;
+    fetchNewestWaveMessages.mockReturnValueOnce(
+      new Promise((resolve) => {
+        finish = resolve;
+      })
+    );
+    formatWaveMessages.mockReturnValue({ key: "wave1", drops: [] });
+    const drops = (start: number, count: number): Drop[] =>
+      Array.from({ length: count }, (_, index) => ({
+        id: String(start + index),
+        serial_no: start + index,
+      }));
+    const cached = drops(1, 1);
+    const { result, store } = setup({ wave1: { drops: cached } });
+    let pending!: Promise<unknown>;
+    act(() => {
+      pending = result.current.registerWave("wave1", true);
+    });
+    store["wave1"] = {
+      drops: [...cached, ...drops(2, 38)],
+      historyGaps: [{ newerThan: 1, olderThan: 2 }],
+    };
+    await act(async () => {
+      finish({ drops: drops(102, 50), highestSerialNo: 151 });
+      await pending;
+    });
+
+    expect(store["wave1"].historyGaps).toEqual([
+      { newerThan: 1, olderThan: 2 },
+      { newerThan: 39, olderThan: 102 },
+    ]);
+  });
+
   it("tracks aborted newest syncs without surfacing console errors", async () => {
     const abortError = new DOMException("aborted", "AbortError");
     fetchNewestWaveMessages.mockRejectedValue(abortError);
