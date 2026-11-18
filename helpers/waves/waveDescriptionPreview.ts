@@ -9,7 +9,7 @@ import {
 const DEFAULT_MEDIA_CDN_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 const MEDIA_PATH_EXTENSION_REGEX =
   /\.(?:avif|gif|jpe?g|m4v|mov|mp4|png|svg|webm|webp)$/i;
-const BARE_URL_REGEX = /https?:\/\/[^\s<>"'`\u0000]+/gi;
+const BARE_URL_REGEX = /https?:\/\/[^\s<>"'`\uE000]+/gi;
 // Sentence punctuation and closing markdown delimiters that can follow a URL.
 const URL_TRAILING_CHARACTERS = new Set([
   ".",
@@ -255,15 +255,15 @@ export const markdownToPlainText = (
 ): string => {
   // A prefix absent from the input keeps literal user text distinct from tokens.
   const used = new Set(
-    Array.from(markdown.matchAll(/(?=\u0000(\d+)\u0000)/g), (match) => match[1])
+    Array.from(markdown.matchAll(/(?=\uE000(\d+)\uE000)/g), (match) => match[1])
   );
   let prefixIndex = 0;
   while (used.has(String(prefixIndex))) prefixIndex += 1;
-  const prefix = `\u0000${prefixIndex}\u0000`;
+  const prefix = `\uE000${prefixIndex}\uE000`;
   const literals: string[] = [];
   const protect = (value: string): string => {
     const index = literals.push(value) - 1;
-    return `${prefix}${index}\u0000`;
+    return `${prefix}${index}\uE000`;
   };
   const withoutLinks = replaceMarkdownLinks(markdown, options, protect);
   const protectedText = protectBareUrls(withoutLinks, protect);
@@ -286,7 +286,7 @@ export const markdownToPlainText = (
       index === 0
         ? part
         : part.replace(
-            /^(\d+)\u0000/,
+            /^(\d+)\uE000/,
             (_, literalIndex: string) => literals[Number(literalIndex)] ?? ""
           )
     )

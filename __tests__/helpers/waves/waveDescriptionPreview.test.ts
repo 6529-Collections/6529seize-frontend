@@ -170,6 +170,8 @@ describe("getWaveDescriptionPreviewText", () => {
   it("preserves literal token-like text alongside URLs", () => {
     const text = "\u00000\u0000 https://example.com/a_b_c";
     expect(markdownToPlainText(text)).toBe(text);
+    const privateUseText = "\uE0000\uE0000\uE000 https://example.com/a_b_c";
+    expect(markdownToPlainText(privateUseText)).toBe(privateUseText);
   });
 
   it("removes formatting around images while retaining their markup", () => {
