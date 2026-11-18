@@ -51,7 +51,7 @@ it("does not navigate from a captured release after its surface is disabled", ()
   const onSwipeBack = jest.fn();
   const onIntentStart = jest.fn();
   const { rerender } = render(
-    <SwipeHarness targetScreen="list" {...{ onSwipeBack, onIntentStart }} />
+    <SwipeHarness targetScreen="feed" {...{ onSwipeBack, onIntentStart }} />
   );
   const surface = screen.getByTestId("surface");
   Object.defineProperty(surface, "animate", { value: jest.fn() });
@@ -63,7 +63,7 @@ it("does not navigate from a captured release after its surface is disabled", ()
   rerender(
     <SwipeHarness
       enabled={false}
-      targetScreen="list"
+      targetScreen="feed"
       {...{ onSwipeBack, onIntentStart }}
     />
   );
@@ -75,11 +75,11 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
-function setup(enabled = true) {
+function setup(enabled = true, targetScreen?: waveNavigation.WaveScreen) {
   const onIntentStart = jest.fn();
   const onSwipeBack = jest.fn();
   const result = render(
-    <SwipeHarness {...{ enabled, onIntentStart, onSwipeBack }} />
+    <SwipeHarness {...{ enabled, onIntentStart, onSwipeBack, targetScreen }} />
   );
   return {
     ...result,
@@ -149,7 +149,8 @@ it("ignores disabled gestures, vertical scrolling, sliders and OS edges", () => 
 });
 
 it("settles before navigation and cancels an in-flight animation when unmounted", async () => {
-  const { content, surface, onSwipeBack, unmount } = setup();
+  const capture = jest.spyOn(waveNavigation, "runWaveNavigationTransition");
+  const { content, surface, onSwipeBack, unmount } = setup(true, "list");
   let finish = () => {};
   const finished = new Promise<void>((resolve) => {
     finish = resolve;
@@ -161,6 +162,7 @@ it("settles before navigation and cancels an in-flight animation when unmounted"
   fireEvent.touchMove(content, { touches: [touch(300)] });
   fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(300)] });
   expect(onSwipeBack).not.toHaveBeenCalled();
+  expect(capture).not.toHaveBeenCalled();
   expect(animate).toHaveBeenCalledTimes(1);
   await act(async () => {
     finish();
@@ -169,6 +171,7 @@ it("settles before navigation and cancels an in-flight animation when unmounted"
   expect(onSwipeBack).toHaveBeenCalledTimes(1);
   unmount();
   expect(cancel).toHaveBeenCalled();
+  capture.mockRestore();
 });
 
 it("clears the outgoing transform when navigation reuses the same surface", async () => {

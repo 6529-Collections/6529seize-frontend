@@ -82,9 +82,11 @@ export function useWaveListSwipeBack<T extends HTMLElement = HTMLDivElement>({
         }
         settling.current = committed;
         const releasedGeneration = generation.current;
+        // Only Feed returns need a snapshot while its virtual rows settle.
+        // Waves uses the existing live slide, without a capture at release.
         if (
           committed &&
-          targetScreen &&
+          targetScreen === "feed" &&
           runWaveNavigationTransition(
             targetScreen,
             () => {

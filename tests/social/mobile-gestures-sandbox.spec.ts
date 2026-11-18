@@ -339,6 +339,13 @@ for (const platform of ["ios", "android"] as const) {
       await dragging.reverse();
       await dragging.release();
       await expect(page).toHaveURL(new RegExp(`/waves/${WAVE}`));
+      await page.evaluate(() => {
+        const start = document.startViewTransition.bind(document);
+        document.startViewTransition = (...args) => {
+          document.documentElement.dataset["waveSwipeCaptured"] = "true";
+          return start(...args);
+        };
+      });
       const committed = await touchDrag(page, row, 130);
       await committed.release();
       await expect(page).toHaveURL(/\/waves$/);
@@ -347,6 +354,9 @@ for (const platform of ["ios", "android"] as const) {
       ).toBeVisible();
       await expect(page.locator("html")).not.toHaveAttribute(
         "data-wave-navigation-transition"
+      );
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-wave-swipe-captured"
       );
       await expectNoHorizontalOverflow(page);
       await expectNoUnsafeSandboxMutations(baseURL);
