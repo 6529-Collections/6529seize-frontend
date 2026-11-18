@@ -62,8 +62,8 @@ from home discovery.
   inactive chips have a soft gray fill, transparent border, and no shadow;
   the selected chip stays light. Compact layouts retain the existing sort sheet.
 - Sort and score-filter groups share one row. When the controls do not fit, the
-  row scrolls horizontally with a hidden scrollbar. Dark edge fades indicate
-  offscreen controls.
+  row scrolls horizontally with a hidden scrollbar. Dark edge fades and clickable
+  arrows indicate offscreen controls.
 - Use `/discover` as the larger browse surface when home six-card discovery is
   not enough.
 
@@ -75,6 +75,8 @@ from home discovery.
   chat message.
 - Description previews show plain text without markdown formatting markers.
   Media previews remain available, and preview links are not separately clickable.
+  Bare URL text stays intact, including underscores, and formatting around an
+  inline image does not leave stray markers beside its thumbnail.
 - If a wave description drop is empty, whitespace-only, or media-free, the card
   still opens the target wave route without rendering the compact preview row.
 - Auth/profile requirements still apply after entering `/waves` or `/messages`

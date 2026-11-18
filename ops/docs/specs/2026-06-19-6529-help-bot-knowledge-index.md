@@ -199,7 +199,7 @@ It directs readers to artwork details for the optional plan and distinguishes th
 artist's promise from verification of approval or fulfillment.
 
 The Wave discovery record includes hidden-scrollbar controls with dark edge fades
-for offscreen sort and threshold options. It also describes the independent
+and mouse-accessible arrows for offscreen sort and threshold options. It also describes the independent
 Active Votes and Worth Checking Out sidebar sections, their explanations and
 view-all destinations. It describes
 quiet loading placeholders, explanations that appear with content, empty messages

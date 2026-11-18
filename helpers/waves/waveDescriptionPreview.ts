@@ -9,7 +9,7 @@ import {
 const DEFAULT_MEDIA_CDN_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 const MEDIA_PATH_EXTENSION_REGEX =
   /\.(?:avif|gif|jpe?g|m4v|mov|mp4|png|svg|webm|webp)$/i;
-const BARE_URL_REGEX = /https?:\/\/[^\s<>"'`]+/gi;
+const BARE_URL_REGEX = /https?:\/\/[^\s<>"'`\u0000]+/gi;
 // Sentence punctuation and closing markdown delimiters that can follow a URL.
 const URL_TRAILING_CHARACTERS = new Set([
   ".",
@@ -38,6 +38,8 @@ interface MarkdownLinkMatch {
 interface MarkdownToPlainTextOptions {
   readonly includeImageUrls?: boolean;
   readonly includeLinkDestinations?: boolean;
+  /** Retains inline images for the card's media extraction. */
+  readonly preserveImageMarkdown?: boolean;
   /** Drops matching bare URLs and link destinations from the text. */
   readonly omitUrl?: ((url: string) => boolean) | undefined;
 }
@@ -154,7 +156,8 @@ const omitBareUrls = (
 
 const replaceMarkdownLinks = (
   input: string,
-  options: MarkdownToPlainTextOptions
+  options: MarkdownToPlainTextOptions,
+  protect: (value: string) => string
 ): string => {
   let result = "";
   let cursor = 0;
@@ -176,20 +179,96 @@ const replaceMarkdownLinks = (
     result += omitBareUrls(input.slice(cursor, match.segmentStart), options);
     const label = input.slice(match.labelStart, match.labelEnd);
     const url = input.slice(match.urlStart, match.urlEnd);
-    result += formatMarkdownLink(label, url, match.isImage, options);
+    result +=
+      match.isImage && options.preserveImageMarkdown
+        ? protect(input.slice(match.segmentStart, match.urlEnd + 1))
+        : formatMarkdownLink(label, url, match.isImage, options);
     cursor = match.urlEnd + 1;
   }
 
   return result;
 };
 
+const trackEmphasis = (text: string, open: Map<string, number>): void => {
+  for (const match of text.matchAll(/(?<!\\)(\*+|_+|~+)/g)) {
+    const marker = match[0].charAt(0);
+    const previous = text.charAt(match.index - 1);
+    const next = text.charAt(match.index + match[0].length);
+    const canClose =
+      /\S/.test(previous) && (marker !== "_" || !/[\p{L}\p{N}]/u.test(next));
+    const canOpen =
+      /\S/.test(next) && (marker !== "_" || !/[\p{L}\p{N}]/u.test(previous));
+    const count = open.get(marker) ?? 0;
+    const closed = canClose ? Math.min(count, match[0].length) : 0;
+    open.set(marker, count - closed + (canOpen ? match[0].length - closed : 0));
+  }
+};
+
+const getProtectedUrlEnd = (url: string, open: Map<string, number>): number => {
+  let end = url.length;
+  while (
+    end > 0 &&
+    URL_TRAILING_CHARACTERS.has(url.charAt(end - 1)) &&
+    !open.has(url.charAt(end - 1))
+  ) {
+    end -= 1;
+  }
+
+  while (end > 0) {
+    const marker = url.charAt(end - 1);
+    const available = open.get(marker) ?? 0;
+    if (available === 0) break;
+    let start = end;
+    while (start > 0 && url.charAt(start - 1) === marker) start -= 1;
+    const closed = Math.min(available, end - start);
+    open.set(marker, available - closed);
+    end -= closed;
+    if (end > start) break;
+  }
+  return end;
+};
+
+const protectBareUrls = (
+  text: string,
+  protect: (value: string) => string
+): string => {
+  const open = new Map([
+    ["*", 0],
+    ["_", 0],
+    ["~", 0],
+  ]);
+  let result = "";
+  let cursor = 0;
+  for (const match of text.matchAll(BARE_URL_REGEX)) {
+    const before = text.slice(cursor, match.index);
+    trackEmphasis(before, open);
+    const end = getProtectedUrlEnd(match[0], open);
+    result += before + protect(match[0].slice(0, end)) + match[0].slice(end);
+    cursor = match.index + match[0].length;
+  }
+  return result + text.slice(cursor);
+};
+
 export const markdownToPlainText = (
   markdown: string,
   options: MarkdownToPlainTextOptions = {}
 ): string => {
-  const withoutLinks = replaceMarkdownLinks(markdown, options);
+  // A prefix absent from the input keeps literal user text distinct from tokens.
+  const used = new Set(
+    Array.from(markdown.matchAll(/(?=\u0000(\d+)\u0000)/g), (match) => match[1])
+  );
+  let prefixIndex = 0;
+  while (used.has(String(prefixIndex))) prefixIndex += 1;
+  const prefix = `\u0000${prefixIndex}\u0000`;
+  const literals: string[] = [];
+  const protect = (value: string): string => {
+    const index = literals.push(value) - 1;
+    return `${prefix}${index}\u0000`;
+  };
+  const withoutLinks = replaceMarkdownLinks(markdown, options, protect);
+  const protectedText = protectBareUrls(withoutLinks, protect);
 
-  return withoutLinks
+  const plainText = protectedText
     .replaceAll(/```([\s\S]*?)```/g, "$1")
     .replaceAll(/`([^`]+)`/g, "$1")
     .replaceAll(/(\*\*|__)(.*?)\1/g, "$2")
@@ -201,6 +280,17 @@ export const markdownToPlainText = (
     .replaceAll(/(^|\n)>\s?/g, "$1")
     .replaceAll(/\s+/g, " ")
     .trim();
+  return plainText
+    .split(prefix)
+    .map((part, index) =>
+      index === 0
+        ? part
+        : part.replace(
+            /^(\d+)\u0000/,
+            (_, literalIndex: string) => literals[Number(literalIndex)] ?? ""
+          )
+    )
+    .join("");
 };
 
 const isMediaCdnOrigin = (origin: string): boolean => {

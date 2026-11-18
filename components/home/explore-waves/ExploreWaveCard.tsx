@@ -448,7 +448,7 @@ export function ExploreWaveCard({
       data-home-action="Open wave"
       href={waveHref}
       prefetch={false}
-      className={`${cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} ${!compact && !showArtworkOverlay ? "tw-border tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)]" : ""} tw-overflow-hidden tw-group tw-relative tw-flex tw-h-full tw-border-solid tw-text-left tw-no-underline tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
+      className={`${cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} ${!compact && !showArtworkOverlay ? "tw-border tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)]" : ""} tw-group tw-relative tw-flex tw-h-full tw-overflow-hidden tw-border-solid tw-text-left tw-no-underline tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
       aria-label={cardAriaLabel}
     >
       {compact && (
@@ -662,20 +662,12 @@ function getWavePreviewContent(
     return null;
   }
 
-  const preview = buildProcessedContent(combinedText || null, media);
-  if (!plainText) return preview;
-
-  return {
-    ...preview,
-    segments: preview.segments.map((segment) =>
-      segment.type === "text"
-        ? {
-            ...segment,
-            content: markdownToPlainText(segment.content, {
-              includeLinkDestinations: false,
-            }),
-          }
-        : segment
-    ),
-  };
+  const content = plainText
+    ? markdownToPlainText(combinedText, {
+        includeLinkDestinations: false,
+        preserveImageMarkdown: true,
+      })
+    : combinedText;
+  if (!content && media.length === 0) return null;
+  return buildProcessedContent(content || null, media);
 }
