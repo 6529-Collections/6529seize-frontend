@@ -32,6 +32,7 @@ import {
   buildRouterPath,
   createReadyQrCodeSource,
   getCurrentPageLocation,
+  getDesktopConnectionShareScheme,
   type CachedConnectionShare,
   type ConnectionShareSessionVerificationStatus,
   type ConnectionShareStatus,
@@ -200,7 +201,6 @@ function HeaderQRModal({
     setShareConnectionSrc("");
 
     const appScheme = publicEnv.MOBILE_APP_SCHEME ?? "mobile6529";
-    const coreScheme = publicEnv.CORE_SCHEME ?? "core6529";
 
     if (mode === Mode.PAGE_SHARE) {
       const { fullUrl: browserUrl, routerPath: pageRouterPath } =
@@ -210,7 +210,7 @@ function HeaderQRModal({
         routerPath: pageRouterPath,
       });
       const coreUrl = buildNavigateDeepLinkUrl({
-        scheme: coreScheme,
+        scheme: publicEnv.CORE_SCHEME ?? "core6529",
         routerPath: pageRouterPath,
       });
 
@@ -259,7 +259,7 @@ function HeaderQRModal({
         signal,
       }),
       generateDesktopConnectionShareUrl({
-        coreScheme,
+        coreScheme: getDesktopConnectionShareScheme(),
         isStaleGeneration,
         signal,
         walletAddress,

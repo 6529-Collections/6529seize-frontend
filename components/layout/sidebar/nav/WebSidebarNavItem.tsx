@@ -118,7 +118,7 @@ function WebSidebarNavItem({
     return (
       <Link
         href={href}
-        className={`tw-touch-action-manipulation tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-px-2 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
+        className={`tw-touch-action-manipulation tw-block tw-h-[var(--sidebar-row-height,2.875rem)] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-px-2 tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
           active
             ? "tw-bg-transparent tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
             : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
@@ -140,7 +140,7 @@ function WebSidebarNavItem({
       onPointerLeave={onPointerLeave}
       onKeyDown={onKeyDown}
       onFocus={onFocus}
-      className={`tw-touch-action-manipulation tw-block tw-h-[2.875rem] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
+      className={`tw-touch-action-manipulation tw-block tw-h-[var(--sidebar-row-height,2.875rem)] tw-w-full tw-cursor-pointer tw-rounded-xl tw-border-none tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-no-underline tw-transition-colors tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-iron-500 focus-visible:tw-ring-offset-2 motion-reduce:tw-transition-none ${
         active
           ? "tw-bg-transparent tw-text-white active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"
           : "tw-bg-transparent tw-text-iron-400 active:tw-text-white desktop-hover:hover:tw-bg-transparent desktop-hover:hover:tw-text-white"

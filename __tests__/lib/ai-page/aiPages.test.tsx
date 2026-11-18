@@ -42,6 +42,10 @@ import AiGuideRoute, { metadata as guideMetadata } from "@/app/ai/guide/page";
 import AiKnownIssuesRoute, {
   metadata as knownIssuesMetadata,
 } from "@/app/ai/known-issues/page";
+import AiModelsRoute, {
+  metadata as modelsMetadata,
+} from "@/app/ai/models/page";
+import AiUseRoute, { metadata as useMetadata } from "@/app/ai/use/page";
 import { resetAiReleaseFeedCacheForTests } from "@/lib/ai-page/releaseFeed";
 
 const WINDOWS_UA =
@@ -98,7 +102,9 @@ describe("the /ai pages", () => {
   it("say on every page, before its text, that 6529 AI is untested", async () => {
     storeHasSignedFeed();
     const [download, guide, knownIssues] = await renderAll();
-    for (const html of [download!, guide!]) {
+    const models = renderToStaticMarkup(await AiModelsRoute());
+    const use = renderToStaticMarkup(await AiUseRoute());
+    for (const html of [download!, guide!, models, use]) {
       expect(html).toContain(NOTICE);
       expect(html).toContain(DISCLAIMER);
       const notice = html.indexOf(NOTICE);
@@ -119,6 +125,8 @@ describe("the /ai pages", () => {
       downloadMetadata,
       guideMetadata,
       knownIssuesMetadata,
+      modelsMetadata,
+      useMetadata,
     ]) {
       expect(metadata.robots).toMatchObject({ index: false, follow: false });
     }
@@ -249,14 +257,16 @@ describe("the /ai pages", () => {
     storeHasSignedFeed();
     const html = renderToStaticMarkup(await AiKnownIssuesRoute());
     expect(html).toContain(">Known issues</h1>");
-    expect(html).toContain("Updated November 16, 2026");
+    expect(html).toContain("Updated November 17, 2026");
     for (const text of [
       "Tested only on a cloud Mac (M2, macOS 15.8.2).",
-      "Opening the app by double-click hasn&#x27;t been tested",
       "Not tested with a GPU.",
       "Tested only on Ubuntu 22.04 and 24.04.",
-      "Clicking through the installer&#x27;s screens hasn&#x27;t been tested",
-      "6529-ai/placement select alone",
+      ">Known bugs</h2>",
+      ">Not tested yet</h2>",
+      "A model about as big as the computer&#x27;s memory can take many minutes",
+      "Fixed in 0.1.0-rc.2",
+      "The sign-in to the page lasts through a restart of the service.",
     ]) {
       expect(html).toContain(text);
     }
@@ -285,12 +295,34 @@ describe("the /ai pages", () => {
     expect(html).toMatch(/aria-selected="false"[^>]*>x86-64</);
   });
 
-  it("show no stand-in where the app's screenshots will go", async () => {
+  it("show the app's own screenshots, with what each one shows", async () => {
+    mockUserAgent = MAC_UA;
     storeHasSignedFeed();
-    for (const html of await renderAll()) {
-      expect(html).not.toContain("<figure");
-      expect(html).not.toMatch(/<img(?![^>]*\/(macos|windows|linux)\.png)/);
-    }
+    const [download, guide, knownIssues] = await renderAll();
+    expect(download).toContain("%2Fai%2Fuse%2F31-start.webp");
+    expect(download).toContain(
+      "Start lists the models that fit this computer."
+    );
+    expect(guide).toContain("%2Fai%2Fuse%2F14-mac-first-run.webp");
+    expect(guide).toContain("%2Fai%2Fuse%2F43-vision-answer.webp");
+    // The same chat on a phone.
+    expect(guide).toContain("%2Fai%2Fuse%2F98-phone-chat.webp");
+    expect(guide).toContain(
+      "A first chat. Whichever model you pick, Chat looks the same."
+    );
+    expect(download).toContain("%2Fai%2Fuse%2F98c-phone-start.webp");
+    // The Mac's question shows at its real size: half the 2x file.
+    expect(guide).toContain("max-width:434px");
+    expect(knownIssues).not.toContain("<figure");
+  });
+
+  it("link the models and the walk-through", async () => {
+    storeHasSignedFeed();
+    const [download, guide] = await renderAll();
+    expect(download).toMatch(/href="\/ai\/models"[^>]*>See every model/);
+    expect(download).toMatch(/href="\/ai\/use"[^>]*>Use it for real/);
+    expect(guide).toContain("Next: use it for real");
+    expect(guide).toContain('href="/ai/use"');
   });
 
   it("ask a phone to open the page on a computer", async () => {
@@ -316,6 +348,12 @@ describe("the /ai pages", () => {
       expect(textOf(html)).not.toMatch(
         /network|provider|\bTor\b|link.{0,20}account/i
       );
+    }
+    for (const html of [
+      renderToStaticMarkup(await AiModelsRoute()),
+      renderToStaticMarkup(await AiUseRoute()),
+    ]) {
+      expect(textOf(html)).not.toMatch(/the network|AI network|\bTor\b/i);
     }
     const mentions = textOf(download!).match(/network/gi) ?? [];
     expect(mentions.length).toBeLessThanOrEqual(1);

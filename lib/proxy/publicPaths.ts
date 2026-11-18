@@ -168,9 +168,11 @@ const SITEMAP_SUFFIX_PATTERN = /^-[\w-]+$/;
  * cookies, so gating them would break `next/image` on staging.
  */
 export const PUBLIC_IMAGE_DIRECTORIES: ReadonlySet<string> = new Set([
+  "ai",
   "artwork",
   "artwork-documentation",
   "delegation-content",
+  "desktop",
   "emojis",
   "home",
   "museum",

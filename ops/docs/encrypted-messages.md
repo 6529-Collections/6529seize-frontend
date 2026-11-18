@@ -817,15 +817,16 @@ without images**. Images and files too large for one encrypted attachment
 ## Setup through connection sharing
 
 In the browser account menu, open **Connect Device**. Confirm the avatar,
-handle and full wallet address, then select **6529 Mobile** or **6529 Desktop**.
+handle and full wallet address, then select **6529 Mobile** or **6529 Desktop
+Classic**.
 Choose **Connect only** for an additional signed-in app session, or
 **Connect with Post Signing & DM Encryption** to approve those permissions too.
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-Desktop secure setup requires 6529 Desktop v0.4.0 or later. Approve the wallet
-signature in the browser, then select **Open in 6529 Desktop** to open the
-private link.
+Desktop connection links require 6529 Desktop Classic v0.4.1 or later. For
+secure setup, approve the wallet signature in the browser, then select **Open in
+6529 Desktop Classic** to open the private link.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**
@@ -851,8 +852,8 @@ icon and separate refresh icon. **Back** returns to the app and connection
 choices. Connect-only refresh creates a new code directly; secure refresh clears
 the old displayed link, returns to the signing state and requests a fresh wallet
 signature. The dialog changes height smoothly, with scrolling for short screens.
-The Desktop handoff uses the 6529 logo and **Open in 6529 Desktop**, rather than
-a QR, followed by the same link controls.
+The Desktop handoff uses the 6529 logo and **Open in 6529 Desktop Classic**
+with the same link controls.
 
 Links expire shortly and work once. Use them only on a device you own. Existing
 source keys and history are not copied. Working keys and registered encrypted

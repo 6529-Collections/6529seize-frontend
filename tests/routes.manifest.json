@@ -190,6 +190,15 @@
     "/ai/known-issues": {
       "classification": "crawlable"
     },
+    "/ai/models": {
+      "classification": "crawlable"
+    },
+    "/ai/releases": {
+      "classification": "crawlable"
+    },
+    "/ai/use": {
+      "classification": "crawlable"
+    },
     "/artwork-documentation": {
       "classification": "auth"
     },

@@ -22,6 +22,7 @@ import { publicEnv } from "@/config/env";
 import { t } from "@/i18n/messages";
 import { HEADER_SHARE_LOCALE } from "./constants";
 import { DesktopConnectionVersionNotice } from "./DesktopConnectionLink";
+import { getDesktopConnectionShareScheme } from "./shareUtils";
 
 /** Source-side wallet approval. The receiving app never needs a live wallet. */
 export default function DeviceConnectionShare({
@@ -97,7 +98,7 @@ export default function DeviceConnectionShare({
           throw new Error("Invalid device setup share");
         const scheme =
           target === "desktop"
-            ? (publicEnv.CORE_SCHEME ?? "core6529")
+            ? getDesktopConnectionShareScheme()
             : (publicEnv.MOBILE_APP_SCHEME ?? "mobile6529");
         const route =
           target === "desktop"
