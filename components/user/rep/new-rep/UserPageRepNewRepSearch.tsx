@@ -31,6 +31,7 @@ import {
 } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
+import { RATING_INPUT_SURFACE_CLASS } from "@/components/user/utils/rate/ratingInputStyles";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import {
@@ -122,7 +123,7 @@ function GrantRepStats({
 }) {
   const locale = useBrowserLocale();
   return (
-    <dl className="tw-m-0 tw-mb-4 tw-space-y-2 tw-rounded-lg tw-bg-white/[0.03] tw-px-3.5 tw-py-3 tw-text-xs">
+    <dl className="tw-m-0 tw-mb-4 tw-space-y-2 tw-text-xs">
       <div
         id={id}
         className={`tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1 ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-400"}`}
@@ -288,16 +289,17 @@ export default function UserPageRepNewRepSearch({
     category: selectedCategory,
   });
 
-  const amountScope = [
+  const amountContext = [
     profile.id ?? profile.query ?? profile.display,
     connectedProfile?.id,
     activeProfileProxy?.id,
-    selectedCategory,
   ].join(":");
+  const amountScope = [amountContext, selectedCategory].join(":");
+  const savedAmount = selectedCategory
+    ? String(repState?.rater_contribution ?? 0)
+    : "";
   const amountStr =
-    amountDraft?.scope === amountScope
-      ? amountDraft.value
-      : String(repState?.rater_contribution ?? 0);
+    amountDraft?.scope === amountScope ? amountDraft.value : savedAmount;
   const setAmountStr = (value: string) =>
     setAmountDraft({ scope: amountScope, value });
 
@@ -309,13 +311,12 @@ export default function UserPageRepNewRepSearch({
 
   const currentRep = repState?.rater_contribution ?? 0;
   const amountReady = selectedCategory !== null && repState !== null;
-  const hasAmountDraft = amountDraft?.scope === amountScope;
   const focusSelectedAmount = useCallback(
     (input: HTMLInputElement | null) => {
-      if (selectedCategory && amountReady && !hasAmountDraft)
+      if (selectedCategory && amountReady)
         input?.focus({ preventScroll: true });
     },
-    [selectedCategory, amountReady, hasAmountDraft]
+    [selectedCategory, amountReady]
   );
   const haveChanged = amountNum !== currentRep;
   const overAllowance =
@@ -392,7 +393,11 @@ export default function UserPageRepNewRepSearch({
       if (request !== selectionRequest.current) return;
       setSelectedCategory(rep);
       setRepSearch(rep);
-      setAmountDraft(null);
+      setAmountDraft((draft) =>
+        !selectedCategory && draft?.scope === amountScope && draft.value
+          ? { scope: [amountContext, rep].join(":"), value: draft.value }
+          : null
+      );
       setError(null);
       setIsOpen(false);
     } catch (error: unknown) {
@@ -586,7 +591,7 @@ export default function UserPageRepNewRepSearch({
                   ? `${SUBMISSION_GUIDANCE_ID} ${categoryErrorId}`
                   : SUBMISSION_GUIDANCE_ID
               }
-              className="tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none"
+              className={`${RATING_INPUT_SURFACE_CLASS} tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none`}
               placeholder={t(locale, "rep.categories.grant.searchPlaceholder")}
             />
             {selectedCategory ? (
@@ -670,15 +675,14 @@ export default function UserPageRepNewRepSearch({
           </p>
           <UserPageRateInput
             inputRef={focusSelectedAmount}
-            selectOnFocus
-            value={selectedCategory ? amountStr : ""}
+            value={amountStr}
             onChange={setAmountStr}
             minMax={minMaxValues}
             isProxy={!!activeProfileProxy}
             clampOnBlur={false}
             variant="form"
             inputId={amountInputId}
-            disabled={!selectedCategory || mutating}
+            disabled={mutating}
             placeholder="0"
             descriptionId={`${availableRepId} ${amountInputId}-hint`}
             invalid={selectedCategory !== null && !isValidValue}
@@ -727,8 +731,8 @@ export default function UserPageRepNewRepSearch({
             onClick={onCancel}
             disabled={mutating}
             variant="ghost"
-            size="lg"
-            className="tw-w-full md:tw-w-auto"
+            size="md"
+            className="tw-min-h-11 tw-w-full md:tw-w-auto"
           >
             {t(locale, "rep.categories.grant.actions.cancel")}
           </Button>
@@ -739,8 +743,8 @@ export default function UserPageRepNewRepSearch({
           form={amountFormId}
           loading={mutating}
           variant="action"
-          size="lg"
-          className="tw-w-full md:tw-w-auto"
+          size="md"
+          className="tw-min-h-11 tw-w-full md:tw-w-auto"
         >
           {t(
             locale,

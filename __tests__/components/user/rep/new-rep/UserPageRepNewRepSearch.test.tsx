@@ -129,8 +129,8 @@ describe("UserPageRepNewRepSearch", () => {
     });
     expect(amount).toHaveFocus();
     await waitFor(() => {
-      expect((amount as HTMLInputElement).selectionStart).toBe(0);
-      expect((amount as HTMLInputElement).selectionEnd).toBe(4);
+      const field = amount as HTMLInputElement;
+      expect(field.selectionStart).toBe(field.selectionEnd);
     });
     expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     expect(
@@ -210,7 +210,7 @@ describe("UserPageRepNewRepSearch", () => {
         screen.getByRole("textbox", {
           name: "Your total REP for this category",
         })
-      ).toBeDisabled();
+      ).toBeEnabled();
       expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     }
   );
@@ -338,16 +338,18 @@ describe("UserPageRepNewRepSearch", () => {
       );
     }
     render(<Harness />);
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.type(amount, "25{Enter}");
+    expect(commonApiPost).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     await user.type(
       screen.getByRole("textbox", { name: "Category to grant REP for" }),
       "Art"
     );
     await user.click(await screen.findByRole("button", { name: "Art" }));
-    const amount = screen.getByRole("textbox", {
-      name: "Your total REP for this category",
-    });
-    await user.clear(amount);
-    await user.type(amount, "25");
+    expect(amount).toHaveValue("25");
     const grant = screen.getByRole("button", {
       name: "Grant Rep",
     });
@@ -361,6 +363,10 @@ describe("UserPageRepNewRepSearch", () => {
     });
     await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
     expect(commonApiPost).toHaveBeenCalledTimes(1);
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "profiles/recipient/rep/rating",
+      body: { amount: 25, category: "Art" },
+    });
   });
 
   it("retains an edit after a failed save and lets the user retry", async () => {
@@ -550,7 +556,7 @@ describe("UserPageRepNewRepSearch", () => {
     );
   });
 
-  it("keeps the amount and grant action disabled until a category is picked and keeps Cancel", () => {
+  it("allows entering an amount before choosing a category while keeping Grant Rep disabled", () => {
     render(
       <UserPageRepNewRepSearch
         overview={null}
@@ -562,7 +568,7 @@ describe("UserPageRepNewRepSearch", () => {
       screen.getByRole("textbox", {
         name: "Your total REP for this category",
       })
-    ).toBeDisabled();
+    ).toBeEnabled();
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
     ).toHaveAttribute("placeholder", "0");
@@ -574,6 +580,43 @@ describe("UserPageRepNewRepSearch", () => {
     expect(adjustment).toHaveAttribute("aria-hidden", "true");
     expect(adjustment).toHaveClass("tw-invisible");
   });
+
+  it.each(["25", "0", "-25"])(
+    "keeps a pre-category amount of %s when selecting an assigned chip",
+    async (draft) => {
+      const user = userEvent.setup();
+      const rating = {
+        category: "Art",
+        rating: 20,
+        contributor_count: 1,
+        rater_contribution: 20,
+      };
+      mockAllocation.mockImplementation(({ category }) => ({
+        ...allocation,
+        ratingStats: [rating],
+        repState: category === "Art" ? rating : null,
+      }));
+      render(
+        <UserPageRepNewRepSearch
+          overview={null}
+          profile={{ query: "recipient" } as ApiIdentity}
+        />
+      );
+      const amount = screen.getByRole("textbox", {
+        name: "Your total REP for this category",
+      });
+      await user.type(amount, `${draft}{Enter}`);
+      expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
+      expect(commonApiPost).not.toHaveBeenCalled();
+      await user.click(screen.getByRole("button", { name: "Art 20" }));
+      expect(amount).toHaveValue(draft);
+      expect(amount).toHaveFocus();
+      expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+      expect(screen.getByText("Current Rep:").parentElement).toHaveTextContent(
+        "Current Rep:+20"
+      );
+    }
+  );
 
   it("shows the minimum-length prompt on empty focus and loading after three characters", async () => {
     const user = userEvent.setup();
