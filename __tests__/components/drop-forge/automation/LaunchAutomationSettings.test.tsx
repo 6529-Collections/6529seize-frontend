@@ -120,7 +120,7 @@ it("starts collapsed, then shows the settings and operational wallet", async () 
   ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Top Up ETH" })).toBeEnabled();
 });
-it("links to the configured wave before the info button and shows the wave name on hover", async () => {
+it("keeps info and wave actions available when collapsed and shows refresh first when expanded", async () => {
   const waveId = "eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee";
   const waveName = "Configured Drop Forge Ops";
   jest.mocked(getForgeSettings).mockResolvedValue({
@@ -138,11 +138,31 @@ it("links to the configured wave before the info button and shows the wave name 
   const info = screen.getByRole("button", {
     name: "How Launch Automation works",
   });
-  expect(link.compareDocumentPosition(info)).toBe(
+  expect(info.compareDocumentPosition(link)).toBe(
     Node.DOCUMENT_POSITION_FOLLOWING
   );
   fireEvent.mouseEnter(link);
   expect(await screen.findByRole("tooltip")).toHaveTextContent(waveName);
+  expect(
+    screen.queryByRole("button", {
+      name: "Refresh automation settings and balance",
+    })
+  ).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Launch Automation" }));
+  const refresh = screen.getByRole("button", {
+    name: "Refresh automation settings and balance",
+  });
+  expect(refresh.compareDocumentPosition(info)).toBe(
+    Node.DOCUMENT_POSITION_FOLLOWING
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Launch Automation" }));
+  expect(
+    screen.queryByRole("button", {
+      name: "Refresh automation settings and balance",
+    })
+  ).not.toBeInTheDocument();
+  expect(info).toBeVisible();
+  expect(link).toBeVisible();
 });
 
 it("shows the info tooltip when the button receives keyboard focus", async () => {

@@ -134,3 +134,16 @@ it("does not label a redirected replacement as a successful top-up", async () =>
   );
   expect(mockSend).toHaveBeenCalledTimes(1);
 });
+
+it.each(["words", "1e2", "-1", "0", "1.", "1.0000000000000000001"])(
+  "still validates invalid amount %s before preparing a transfer",
+  async (amount) => {
+    const view = renderHook(() =>
+      useWalletFunding(settings, amount, jest.fn())
+    );
+    await act(() => view.result.current.prepare());
+    expect(view.result.current.error).toContain("positive ETH amount");
+    expect(view.result.current.review).toBeNull();
+    expect(mockSend).not.toHaveBeenCalled();
+  }
+);

@@ -112,10 +112,10 @@ export default function LaunchAutomationSettings() {
       aria-labelledby="launch-automation-heading"
       className={dropForgeSectionClassName}
     >
-      <div className="tw-flex tw-items-center tw-gap-2">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         <h2
           id="launch-automation-heading"
-          className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-xl tw-font-semibold tw-text-iron-50"
+          className="tw-m-0 tw-min-w-40 tw-flex-1 tw-text-xl tw-font-semibold tw-text-iron-50"
         >
           <button
             type="button"
@@ -131,35 +131,41 @@ export default function LaunchAutomationSettings() {
             {t(locale, "dropForge.settings.title")}
           </button>
         </h2>
-        {opsWaveId && (
-          <CustomTooltip content={opsWaveLabel}>
-            <Link
-              href={`/waves/${encodeURIComponent(opsWaveId)}`}
-              aria-label={opsWaveLabel}
-              className={getButtonClasses({
-                variant: "secondary",
-                className: `${dropForgeIconButtonClassName} tw-no-underline`,
-              })}
-            >
-              <span aria-hidden="true" className="tw-flex">
-                <WavesIcon className="tw-size-5" />
-              </span>
-            </Link>
-          </CustomTooltip>
-        )}
-        <LaunchAutomationHelp />
-        <CustomTooltip content={refreshLabel}>
-          <Button
-            variant="secondary"
-            className={dropForgeIconButtonClassName}
-            onClick={() => void refresh()}
-            loading={query.isFetching}
-            hideChildrenWhenLoading
-            aria-label={refreshLabel}
-          >
-            <ArrowPathIcon aria-hidden="true" className="tw-size-5" />
-          </Button>
-        </CustomTooltip>
+        <div className="tw-ml-auto tw-flex tw-shrink-0 tw-items-center tw-gap-2">
+          <div className="tw-size-10 tw-shrink-0">
+            {expanded && (
+              <CustomTooltip content={refreshLabel}>
+                <Button
+                  variant="secondary"
+                  className={dropForgeIconButtonClassName}
+                  onClick={() => void refresh()}
+                  loading={query.isFetching}
+                  hideChildrenWhenLoading
+                  aria-label={refreshLabel}
+                >
+                  <ArrowPathIcon aria-hidden="true" className="tw-size-5" />
+                </Button>
+              </CustomTooltip>
+            )}
+          </div>
+          <LaunchAutomationHelp />
+          {opsWaveId && (
+            <CustomTooltip content={opsWaveLabel}>
+              <Link
+                href={`/waves/${encodeURIComponent(opsWaveId)}`}
+                aria-label={opsWaveLabel}
+                className={getButtonClasses({
+                  variant: "secondary",
+                  className: `${dropForgeIconButtonClassName} tw-no-underline`,
+                })}
+              >
+                <span aria-hidden="true" className="tw-flex">
+                  <WavesIcon className="tw-size-5" />
+                </span>
+              </Link>
+            </CustomTooltip>
+          )}
+        </div>
       </div>
       <div id={bodyId} hidden={!expanded}>
         {query.isFetching && !settings && (

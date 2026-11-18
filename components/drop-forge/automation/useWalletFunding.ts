@@ -15,6 +15,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import type { OnchainTransactionModalStatus } from "@/components/common/OnchainTransactionModal";
 
 import { useFundingReports } from "./useFundingReports";
+import { validFundingAmount } from "./funding-amount";
 
 class WalletFundingError extends Error {
   constructor(message: string) {
@@ -22,16 +23,6 @@ class WalletFundingError extends Error {
     this.name = "WalletFundingError";
   }
 }
-function validFundingAmount(amount: string): boolean {
-  const parts = amount.split(".");
-  return (
-    parts.length <= 2 &&
-    parts.every((part) => part.length > 0 && !/\D/.test(part)) &&
-    (parts[1]?.length ?? 0) <= 18 &&
-    parseEther(amount) > 0n
-  );
-}
-
 type FundingTransaction = {
   status: OnchainTransactionModalStatus;
   hash?: string;

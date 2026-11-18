@@ -8,6 +8,7 @@ import OnchainTransactionModal from "@/components/common/OnchainTransactionModal
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useWalletFunding } from "./useWalletFunding";
+import { isFundingAmountDraft, validFundingAmount } from "./funding-amount";
 
 export default function WalletFunding({
   settings,
@@ -71,9 +72,15 @@ export default function WalletFunding({
                   type="text"
                   inputMode="decimal"
                   autoComplete="off"
+                  spellCheck={false}
                   value={amount}
                   disabled={funding.busy}
-                  onChange={(event) => setAmount(event.target.value)}
+                  onChange={(event) => {
+                    const value = event.target.value.replace(",", ".");
+                    if (isFundingAmountDraft(value)) {
+                      setAmount(value.startsWith(".") ? `0${value}` : value);
+                    }
+                  }}
                   className="tw-mt-2 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-950 tw-p-3 tw-text-iron-50 focus-visible:tw-outline-primary-400"
                 />
               </label>
@@ -107,6 +114,7 @@ export default function WalletFunding({
                 <Button
                   size="sm"
                   loading={funding.busy}
+                  disabled={!validFundingAmount(amount)}
                   onClick={() => void funding.prepare()}
                 >
                   {t(locale, "dropForge.funding.review")}

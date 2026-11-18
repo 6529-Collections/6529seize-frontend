@@ -27,6 +27,11 @@ The wallet needs both payout funds and gas; mint proceeds still go to the config
 payment receiver. Manual Pay Artist remains available and records its transaction
 hash so automation can verify completion instead of sending another payment.
 
+On the Drop Forge hub, Contract Admins appears before Launch Automation. Launch
+Automation’s header actions run left to right as refresh, info, and the operations
+wave. Refresh is shown only while expanded; the info and wave actions remain
+available while collapsed without shifting position.
+
 The wallet panel shows the network beside its title, followed by an optional verified
 ENS name and a shortened address. Hover the address to see it in full. The copy icon
 copies the full address and confirms success; the explorer icon opens the wallet on
@@ -39,7 +44,10 @@ shows a verified ENS name with a shortened address, or the full wallet address w
 neither a profile handle nor verified ENS is available.
 
 Top Up ETH is available to all Drop Forge administrators even while automation is
-Off. Open it, enter the amount, switch to the displayed network if needed and review
+Off. Open it and enter a positive decimal amount with at most 18 fractional digits.
+The input rejects letters, signs and extra decimal points. Incomplete values such as
+`0.` remain editable; **Review top-up** is enabled only for a valid positive amount.
+Switch to the displayed network if needed and review
 the recipient and estimated fee. Confirm through the connected wallet. The transfer
 uses that wallet's ETH and gas, not KMS. Progress and a transaction link appear in the
 standard transaction dialog. Confirmed outcomes are reported in the operations wave.
