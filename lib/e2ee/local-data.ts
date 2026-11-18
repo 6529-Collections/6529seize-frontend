@@ -22,6 +22,12 @@ interface RemoveProfileDeps {
   readonly storage?: E2eeStorage | undefined;
   readonly backupState?: BackupStateStore | undefined;
   readonly locks?: LockManager | null | undefined;
+  /**
+   * Remove only while this browser's stored device is this one (a revoked
+   * device's key): checked under the lock, so a device set up in between
+   * is never removed.
+   */
+  readonly onlyDeviceKey?: string | undefined;
 }
 
 const noop = () => undefined;
@@ -29,12 +35,13 @@ const noop = () => undefined;
 /**
  * Deletes one profile's encrypted-messages data. Takes the profile's engine
  * lock first, so the tab that runs its engine stops before the delete and
- * cannot write the state back afterwards.
+ * cannot write the state back afterwards. With `onlyDeviceKey`, false when
+ * the stored device isn't that one (nothing is removed).
  */
 export async function removeE2eeProfileLocalData(
   profileId: string,
   deps: RemoveProfileDeps = {}
-): Promise<void> {
+): Promise<boolean> {
   const lease = await acquireE2eeEngineLock({
     profileId,
     takeOver: true,
@@ -46,8 +53,15 @@ export async function removeE2eeProfileLocalData(
   try {
     const storage =
       deps.storage ?? (isIndexedDbAvailable() ? getDefaultE2eeStorage() : null);
+    if (deps.onlyDeviceKey !== undefined) {
+      const stored = await storage?.getDevice(profileId);
+      if (stored?.deviceKey.toLowerCase() !== deps.onlyDeviceKey.toLowerCase()) {
+        return false;
+      }
+    }
     await storage?.clearProfile(profileId);
     await (deps.backupState ?? getDefaultBackupStateStore()).delete(profileId);
+    return true;
   } finally {
     lease.release();
   }

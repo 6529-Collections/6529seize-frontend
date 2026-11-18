@@ -45,6 +45,11 @@ export const DEVICES_SECURITY_MESSAGES = {
     "No other devices. To add one, open 6529 there and turn on signed posts and encrypted DMs. It takes one wallet signature.",
   "devicesSecurity.revokeUnavailable":
     "Open encrypted DMs in this browser to revoke this device here.",
+  "devicesSecurity.localCleanup.failed":
+    "{label} was revoked, but this browser’s encrypted data couldn’t be removed.",
+  "devicesSecurity.localCleanup.retryFailed":
+    "{label} was revoked, but this browser’s encrypted data still couldn’t be removed. Close any other 6529 tabs and try again.",
+  "devicesSecurity.localCleanup.retry": "Remove this browser’s data",
   "devicesSecurity.revokeChanged":
     "This device changed while this was open. Check what will stop, then confirm again.",
   "devicesSecurity.blocked.loading":
@@ -91,6 +96,8 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.revoke.posts": "It will stop posting as you.",
   "devicesSecurity.revoke.dms":
     "It will stop receiving encrypted DMs. It deletes the encrypted chats saved on it once it confirms the revocation came from a device of yours.",
+  "devicesSecurity.revoke.otherDeviceChats":
+    "Its encrypted DMs are on another device, not this browser: the encrypted chats saved there stay until they’re removed on that device.",
   "devicesSecurity.revoke.after":
     "Posts it already signed stay verifiable. To use it again, turn it back on there with one wallet signature.",
   "devicesSecurity.revoke.done": "{label} revoked.",
