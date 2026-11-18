@@ -3,6 +3,7 @@ import {
   useSeizeConnectContext,
 } from "@/components/auth/SeizeConnectContext";
 import type { SeizeConnectContextType } from "@/components/auth/seizeConnectTypes";
+import * as walletChunkRecovery from "@/components/providers/walletChunkRecovery";
 import {
   closeDesktopConnectDialog,
   getDesktopConnectDialogOpener,
@@ -10,9 +11,10 @@ import {
 import { act, render, waitFor } from "@testing-library/react";
 
 const mockOpen = jest.fn();
+const mockClose = jest.fn();
 
 jest.mock("@reown/appkit/react", () => ({
-  useAppKit: jest.fn(() => ({ open: mockOpen, close: jest.fn() })),
+  useAppKit: jest.fn(() => ({ open: mockOpen, close: mockClose })),
   useAppKitAccount: jest.fn(() => ({
     address: undefined,
     isConnected: false,
@@ -100,6 +102,17 @@ const renderProvider = () =>
     </SeizeConnectProvider>
   );
 
+const startPhoneWalletHandoff = async (controller: AbortController) => {
+  await context?.seizeConnectFresh({
+    address: `0x${"a".repeat(40)}`,
+    signal: controller.signal,
+    onStatus: jest.fn(),
+  });
+  const open = getDesktopConnectDialogOpener();
+  if (!open) throw new Error("Desktop picker did not open");
+  return { handoff: open() };
+};
+
 const installDesktopShell = () => {
   Object.defineProperty(window, "api", {
     configurable: true,
@@ -114,6 +127,8 @@ const installDesktopShell = () => {
 describe("connect entry points in 6529 Desktop", () => {
   afterEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks();
+    jest.useRealTimers();
     closeDesktopConnectDialog();
     context = null;
     Reflect.deleteProperty(window, "api");
@@ -171,6 +186,95 @@ describe("connect entry points in 6529 Desktop", () => {
         view: "ConnectingWalletConnectBasic",
       })
     );
+  });
+
+  it("does not open AppKit for a cancelled Desktop phone-wallet handoff", async () => {
+    installDesktopShell();
+    renderProvider();
+    const controller = new AbortController();
+    await act(async () => {
+      await context?.seizeConnectFresh({
+        address: `0x${"a".repeat(40)}`,
+        signal: controller.signal,
+        onStatus: jest.fn(),
+      });
+    });
+    const handoff = getDesktopConnectDialogOpener();
+    if (!handoff) throw new Error("Desktop picker did not open");
+
+    await act(async () => {
+      const opening = handoff();
+      controller.abort();
+      await opening;
+    });
+
+    expect(mockOpen).not.toHaveBeenCalled();
+  });
+
+  it("closes a superseded AppKit open before the newer handoff opens its modal", async () => {
+    installDesktopShell();
+    renderProvider();
+    const firstOpen = Promise.withResolvers<void>();
+    const calls: string[] = [];
+    mockOpen
+      .mockReturnValueOnce(firstOpen.promise)
+      .mockImplementationOnce(() => calls.push("open new"));
+    mockClose.mockImplementationOnce(() => calls.push("close old"));
+
+    const first = new AbortController();
+    let earlier: Promise<void> | undefined;
+    let later: Promise<void> | undefined;
+    await act(async () => {
+      earlier = (await startPhoneWalletHandoff(first)).handoff;
+    });
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      first.abort();
+      later = (await startPhoneWalletHandoff(new AbortController())).handoff;
+    });
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      firstOpen.resolve();
+      await Promise.all([earlier, later]);
+    });
+    expect(calls).toEqual(["close old", "open new"]);
+  });
+
+  it("recovers when a superseded AppKit open never settles", async () => {
+    jest.useFakeTimers();
+    installDesktopShell();
+    const reload = jest
+      .spyOn(walletChunkRecovery, "reloadToRetryWalletChunks")
+      .mockReturnValue(true);
+    const firstOpen = Promise.withResolvers<void>();
+    mockOpen.mockReturnValueOnce(firstOpen.promise);
+    renderProvider();
+
+    let outcome: Promise<unknown> | undefined;
+    await act(async () => {
+      await startPhoneWalletHandoff(new AbortController());
+    });
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      const { handoff } = await startPhoneWalletHandoff(new AbortController());
+      outcome = handoff.catch((error: unknown) => error);
+    });
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(30_000);
+    });
+    expect(await outcome).toMatchObject({
+      message: "Failed to open wallet connection modal",
+    });
+    expect(reload).toHaveBeenCalledTimes(1);
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+
+    // If the old call comes back before the retry reloads, retire its modal.
+    await act(async () => firstOpen.resolve());
+    expect(mockClose).toHaveBeenCalledTimes(1);
   });
 
   it("keeps opening the wallet list directly on the web", async () => {
