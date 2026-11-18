@@ -8,7 +8,7 @@ created: 2026-06-19
 # 6529 Help Bot Knowledge Index
 
 The `waves.discovery` record covers plain-text description previews, retained
-media, visible Worth Checking Out edges and minimum artwork tint, inset Active
+media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
 Votes artwork, wrapping metrics and neutral zero-submission status without a
 decorative count marker. Discovery
 links, eligibility and pagination retain their existing behavior.

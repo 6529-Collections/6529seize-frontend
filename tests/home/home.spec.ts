@@ -1504,7 +1504,7 @@ test("homepage artwork request has a visible failure and retry @smoke @medium @l
   await expectNoHorizontalOverflow(page);
 });
 
-test("Active Votes keeps inset artwork and every metric visible at responsive widths @smoke @medium @large", async ({
+test("Active Votes keeps full-height artwork and every metric visible at responsive widths @smoke @medium @large", async ({
   page,
 }, testInfo) => {
   const data = [0, 2, null, 1, null, 3].map((count, index) => ({
@@ -1595,9 +1595,11 @@ test("Active Votes keeps inset artwork and every metric visible at responsive wi
           ),
         };
       });
-      expect(layout.cover.width).toBe(92);
-      expect(layout.cover.height).toBe(92);
-      expect(layout.cover.top - layout.card.top).toBe(12);
+      expect(layout.cover.width).toBe(width < 640 ? 80 : 96);
+      expect(layout.cover.height).toBeCloseTo(layout.card.height, 1);
+      expect(layout.cover.left).toBeCloseTo(layout.card.left, 1);
+      expect(layout.cover.top).toBeCloseTo(layout.card.top, 1);
+      expect(layout.cover.bottom).toBeCloseTo(layout.card.bottom, 1);
       expect(layout.metrics).toHaveLength(3);
       for (const metric of layout.metrics) {
         expect(metric.clipped).toBe(false);

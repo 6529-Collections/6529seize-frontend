@@ -15,9 +15,9 @@ titles and single-line description previews. Approval waves show how many
 submissions are open for voting. Other waves show the voting end or next result
 when available, otherwise `Voting open`. Submission counts appear as text;
 zero submissions use muted text. Score, Hot and REP remain visible beneath the
-plain-text description. Metrics wrap when needed on narrow cards. The inset
-artwork and text align at the top; hovering highlights the card without lifting
-it or zooming the artwork.
+plain-text description. Metrics wrap when needed on narrow cards. Cover artwork
+fills the full card height along the left edge. Hovering highlights the card
+without lifting it or zooming the artwork.
 The Memes - Main Stage appears first whenever it has active voting. The
 remaining waves are ordered by total Wave REP, highest first.
 Use `Load more` to browse additional results.

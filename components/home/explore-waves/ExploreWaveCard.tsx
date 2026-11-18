@@ -257,12 +257,12 @@ function getWaveCardClassNames(
       cardInteractionClassName:
         "tw-transition-[background-color,box-shadow] tw-duration-200 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08)]",
       imageInteractionClassName: "",
-      cardDirectionClassName: "tw-flex-row tw-items-start tw-gap-3 tw-p-3",
+      cardDirectionClassName: "tw-flex-row",
       cardSurfaceClassName: "tw-rounded-xl tw-border-0 tw-bg-iron-950",
       titleClassName:
         "tw-truncate tw-text-[15px] tw-leading-5 tw-tracking-[-0.01em]",
       imageSizeClassName: "",
-      contentPaddingClassName: "",
+      contentPaddingClassName: "tw-p-3",
     };
   }
   const cardInteractionClassName = subtleHover
@@ -447,12 +447,12 @@ export function ExploreWaveCard({
       data-home-action="Open wave"
       href={waveHref}
       prefetch={false}
-      className={`${cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} ${!compact && !showArtworkOverlay ? "tw-border tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)]" : ""} ${compact ? "" : "tw-overflow-hidden"} tw-group tw-relative tw-flex tw-h-full tw-border-solid tw-text-left tw-no-underline tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
+      className={`${cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} ${!compact && !showArtworkOverlay ? "tw-border tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)]" : ""} tw-overflow-hidden tw-group tw-relative tw-flex tw-h-full tw-border-solid tw-text-left tw-no-underline tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
       aria-label={cardAriaLabel}
     >
       {compact && (
         <div
-          className="tw-relative tw-size-[92px] tw-shrink-0 tw-overflow-hidden tw-rounded-lg tw-bg-iron-900"
+          className="tw-relative tw-w-20 tw-shrink-0 tw-self-stretch tw-overflow-hidden tw-bg-iron-900 sm:tw-w-24"
           style={imageAreaStyle}
         >
           {wave.picture && (
@@ -462,13 +462,13 @@ export function ExploreWaveCard({
                 waveName: wave.name,
               })}
               fill
-              sizes="92px"
+              sizes="96px"
               className="tw-object-cover"
             />
           )}
           <div
             aria-hidden="true"
-            className="tw-pointer-events-none tw-absolute tw-inset-0 tw-rounded-lg tw-ring-1 tw-ring-inset tw-ring-white/[0.06]"
+            className="tw-pointer-events-none tw-absolute tw-inset-0 tw-bg-gradient-to-r tw-from-transparent tw-to-iron-950/30"
           />
         </div>
       )}
