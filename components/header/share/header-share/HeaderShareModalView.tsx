@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { ConnectionShareNotice } from "./ConnectionShareNotice";
 import {
   ConnectDeviceChoices,
@@ -305,11 +307,13 @@ export function HeaderShareModalView({
           >
             {urlText}
           </div>
-          <button
+          <IconButton
             type="button"
             aria-label={t(HEADER_SHARE_LOCALE, "headerShare.copy.ariaLabel")}
             disabled={!url || loading}
-            className="tw-inline-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:hover:tw-bg-iron-800 enabled:hover:tw-text-iron-100 disabled:tw-opacity-50"
+            size={32}
+            variant="ghost"
+            shape="compact"
             data-tooltip-id="copy-url-tooltip"
             onClick={() => void copyUrl(url)}
           >
@@ -318,9 +322,9 @@ export function HeaderShareModalView({
               aria-hidden="true"
               className={`tw-size-4 ${urlCopied ? "tw-text-green-500" : ""}`}
             />
-          </button>
+          </IconButton>
         </div>
-        <button
+        <IconButton
           type="button"
           aria-label={refreshLabel}
           title={refreshLabel}
@@ -332,18 +336,16 @@ export function HeaderShareModalView({
               refresh();
             }
           }}
-          className={`tw-inline-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${
-            loading
-              ? "tw-cursor-wait tw-opacity-50"
-              : "hover:tw-bg-iron-800 hover:tw-text-iron-100"
-          }`}
+          size={40}
+          variant="secondary"
+          pending={loading}
         >
           <FontAwesomeSvgIcon
             icon={faRotate}
             aria-hidden="true"
             className={`tw-size-4 ${loading ? "tw-animate-spin motion-reduce:tw-animate-none" : ""}`}
           />
-        </button>
+        </IconButton>
         <Tooltip
           id="copy-url-tooltip"
           place="top-end"
@@ -760,15 +762,16 @@ export function HeaderShareModalView({
               </Link>
             )}
           </div>
-          <button
+          <IconButton
             type="button"
             aria-label={closeAriaLabel}
             title={closeAriaLabel}
             onClick={onClose}
-            className="tw-inline-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            size={36}
+            variant="ghost"
           >
             <XMarkIcon className="tw-size-5" aria-hidden="true" />
-          </button>
+          </IconButton>
         </div>
         <div
           data-testid="header-share-modal-content"

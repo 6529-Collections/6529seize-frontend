@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import React, { useContext } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import DropActionTooltip from "./DropActionTooltip";
@@ -46,10 +48,9 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
       }
       disabled={!canReply}
     >
-      <button
-        className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200 ${
-          !canReply ? "tw-cursor-default tw-opacity-50" : "tw-cursor-pointer"
-        }`}
+      <IconButton
+        type="submit"
+        layout="drop-action"
         onClick={canReply ? handleReplyClick : undefined}
         disabled={!canReply}
         aria-label={t(locale, "waves.drop.actions.replyToDrop")}
@@ -70,7 +71,7 @@ const WaveDropActionsReply: React.FC<WaveDropActionsReplyProps> = ({
             d="M7.49 12 3.74 8.248m0 0 3.75-3.75m-3.75 3.75h16.5V19.5"
           />
         </svg>
-      </button>
+      </IconButton>
     </DropActionTooltip>
   );
 };

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import TransferToggle from "@/components/nft-transfer/TransferToggle";
 import UserAddressesSelectDropdown from "@/components/user/utils/addresses-select/UserAddressesSelectDropdown";
 import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
@@ -229,37 +231,39 @@ export default function UserPageCollectedFilters({
       {canScrollLeft && (
         <>
           <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-top-0 tw-z-10 tw-w-12 tw-bg-gradient-to-r tw-from-black tw-via-black/40 tw-to-black/0" />
-          <button
+          <IconButton
             type="button"
             onClick={scrollLeft}
             aria-label={getCollectedFilterMessage(
               "user.collected.filters.scrollLeft"
             )}
-            className="tw-group tw-absolute tw-left-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-cursor-pointer tw-items-center tw-justify-start tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            layout="scroll-filter-left"
+            className="tw-left-0"
           >
             <FontAwesomeIcon
               icon={faChevronLeft}
               className="tw-h-4 tw-w-4 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
             />
-          </button>
+          </IconButton>
         </>
       )}
       {canScrollRight && (
         <>
           <div className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-right-0 tw-top-0 tw-z-10 tw-w-12 tw-bg-gradient-to-l tw-from-black tw-via-black/40 tw-to-black/0" />
-          <button
+          <IconButton
             type="button"
             onClick={scrollRight}
             aria-label={getCollectedFilterMessage(
               "user.collected.filters.scrollRight"
             )}
-            className="tw-group tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-cursor-pointer tw-items-center tw-justify-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+            layout="scroll-filter-right"
+            className="tw-right-0"
           >
             <FontAwesomeIcon
               icon={faChevronRight}
               className="tw-h-4 tw-w-4 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out group-hover:tw-text-iron-300"
             />
-          </button>
+          </IconButton>
         </>
       )}
     </DropdownToolbar>

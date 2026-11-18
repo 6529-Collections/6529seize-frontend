@@ -3,6 +3,7 @@
 import NetworkHealthCTA from "@/components/header/NetworkHealthCTA";
 import HeaderSearchButton from "@/components/header/header-search/HeaderSearchButton";
 import HeaderPageShareButton from "@/components/header/share/HeaderPageShareButton";
+import IconButton from "@/components/utils/button/IconButton";
 import { isPageShareSupported } from "@/components/header/share/page-share-support";
 import EnvironmentBadge from "@/components/common/EnvironmentBadge";
 import { getActiveViewFromUrl } from "@/components/navigation/ViewContext";
@@ -87,17 +88,19 @@ export default function SmallScreenHeader({
               </span>
             </output>
           )}
-          <button
+          <IconButton
+            type="submit"
+            size={40}
+            variant="secondary"
             disabled={!interactive}
             onClick={onMenuToggle}
-            className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-800 tw-text-iron-300 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-text-iron-50"
             aria-label={t(
               locale,
               isMenuOpen ? "header.menu.close" : "header.menu.open"
             )}
           >
             <Bars3Icon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-iron-300" />
-          </button>
+          </IconButton>
         </div>
       </div>
     </header>

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import {
   useEmoji,
   type Emoji,
@@ -158,16 +160,15 @@ const QuickReactButton: React.FC<{
 
   if (isMobile) {
     return (
-      <button
-        className={`tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-800 tw-transition-colors tw-duration-200 ${
-          canReact ? "active:tw-bg-iron-700" : "tw-cursor-default tw-opacity-50"
-        }`}
+      <IconButton
+        type="submit"
+        layout="drop-reaction-mobile"
         onClick={handleClick}
         disabled={!canReact}
         aria-label={label}
       >
         {emojiNode}
-      </button>
+      </IconButton>
     );
   }
 
@@ -176,10 +177,9 @@ const QuickReactButton: React.FC<{
       content={<span className="tw-text-xs">{label}</span>}
       disabled={!canReact}
     >
-      <button
-        className={`tw-flex tw-h-7 tw-w-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-[#FFCC22] ${
-          canReact ? "tw-cursor-pointer" : "tw-cursor-default tw-opacity-50"
-        }`}
+      <IconButton
+        type="submit"
+        layout="drop-reaction"
         onClick={handleClick}
         disabled={!canReact}
         aria-label={label}
@@ -191,7 +191,7 @@ const QuickReactButton: React.FC<{
         >
           {emojiNode}
         </div>
-      </button>
+      </IconButton>
     </DropActionTooltip>
   );
 };

@@ -2,6 +2,7 @@
 
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import IconButton from "@/components/utils/button/IconButton";
 
 export default function WaveGroupEditButton({
   disabled,
@@ -19,21 +20,21 @@ export default function WaveGroupEditButton({
   readonly controls?: string | undefined;
 }) {
   return (
-    <button
+    <IconButton
       type="button"
+      layout="edit-group"
       aria-label={label}
       title={label}
       disabled={disabled}
       onClick={(event) => onClick(event.currentTarget)}
       aria-expanded={expanded}
       aria-controls={controls}
-      className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-300 sm:tw-size-7"
     >
       {loading ? (
         <CircleLoader />
       ) : (
         <Cog6ToothIcon aria-hidden="true" className="tw-size-5" />
       )}
-    </button>
+    </IconButton>
   );
 }

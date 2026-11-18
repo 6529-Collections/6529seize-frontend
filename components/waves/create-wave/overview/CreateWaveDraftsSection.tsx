@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useState } from "react";
 import CollapsibleCard from "@/components/common/CollapsibleCard";
 import { getTimeAgo } from "@/helpers/Helpers";
@@ -78,13 +80,16 @@ export default function CreateWaveDraftsSection({
                   })}
                 </span>
               </button>
-              <button
+              <IconButton
                 type="button"
                 onClick={() => onDelete(draft.id)}
                 aria-label={t(locale, "wave.create.drafts.deleteLabel", {
                   name: draftName(draft),
                 })}
-                className="tw-relative tw-flex tw-h-8 tw-w-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-error tw-transition tw-duration-300 tw-ease-out after:tw-absolute after:-tw-inset-1.5 after:tw-content-[''] hover:tw-bg-error/10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                size={32}
+                variant="destructive"
+                shape="circle"
+                className="tw-relative after:tw-absolute after:-tw-inset-1.5 after:tw-content-['']"
               >
                 <svg
                   className="tw-h-5 tw-w-5 tw-flex-shrink-0"
@@ -101,7 +106,7 @@ export default function CreateWaveDraftsSection({
                     strokeLinejoin="round"
                   />
                 </svg>
-              </button>
+              </IconButton>
             </li>
           ))}
         </ul>

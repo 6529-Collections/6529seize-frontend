@@ -1,13 +1,11 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import DisplayTimeZoneSwitch from "@/components/display-time-zone/DisplayTimeZoneSwitch";
-import {
-  WAVE_HEADER_ACTION_CLASSES,
-  WAVE_HEADER_ACTION_SURFACE_CLASSES,
-} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 
 /** A non-modal preferences popover: ordinary buttons and radio groups keep Tab navigation. */
 export default function WaveHeaderDisplayMenu({
@@ -24,11 +22,10 @@ export default function WaveHeaderDisplayMenu({
         aria-haspopup="dialog"
         data-tooltip-id={tooltipId}
         data-tooltip-content="More wave actions"
-        className={WAVE_HEADER_ACTION_CLASSES}
+        layout="toolbar"
+        as={IconButton}
       >
-        <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
-          <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
-        </span>
+        <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
       </PopoverButton>
       <PopoverPanel
         anchor={{ to: "bottom end", gap: 8, padding: 16 }}
