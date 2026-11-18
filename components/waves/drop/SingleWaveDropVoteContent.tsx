@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import type { Dispatch, FC, SetStateAction } from "react";
 import { useId, useRef, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -263,10 +265,12 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
           {t(locale, "waves.vote.controlsLegend")}
         </legend>
         <div className="tw-flex tw-items-center tw-gap-x-2">
-          <button
+          <IconButton
             type="button"
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
-            className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white/[0.06] tw-font-medium tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.1] desktop-hover:hover:tw-text-white"
+            size={32}
+            variant="subtle"
+            shape="compact"
             title={switchModeTitle}
             aria-label={switchModeAriaLabel}
           >
@@ -275,7 +279,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
               className="tw-size-3 tw-flex-shrink-0 tw-text-current"
               flip={getExchangeIconFlip(isSliderMode)}
             />
-          </button>
+          </IconButton>
 
           <div className="tw-h-8 tw-min-w-0 tw-flex-1">
             <VoteModeField

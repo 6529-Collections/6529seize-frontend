@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { ConnectedProfileDeviceBadge } from "@/components/device-signing/DeviceSecurityStatus";
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -160,11 +162,13 @@ export default function AppSidebarConnectedAccounts({
         />
       ))}
       {canAddConnectedAccount ? (
-        <button
+        <IconButton
           type="button"
           onClick={handleAddAccount}
           disabled={seizeConnectOpen}
-          className="tw-touch-action-manipulation tw-group tw-flex tw-size-11 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60"
+          size={44}
+          variant="ghost"
+          shape="circle"
           aria-busy={seizeConnectOpen}
           aria-label={seizeConnectOpen ? openingAccountLabel : addAccountLabel}
           title={seizeConnectOpen ? openingAccountLabel : addAccountLabel}
@@ -179,7 +183,7 @@ export default function AppSidebarConnectedAccounts({
               <PlusIcon className="tw-size-6 tw-stroke-2" aria-hidden="true" />
             )}
           </span>
-        </button>
+        </IconButton>
       ) : null}
     </div>
   );

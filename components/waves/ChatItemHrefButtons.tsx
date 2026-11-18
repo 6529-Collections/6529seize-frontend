@@ -18,6 +18,8 @@ import {
 } from "react";
 
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
+import IconButton from "@/components/utils/button/IconButton";
+import { getIconButtonClasses } from "@/components/utils/button/iconButtonStyles";
 import { getInternalLinkPath } from "@/helpers/internalLink";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
@@ -37,14 +39,13 @@ const stopPropagation = (event: StopEvent) => {
   event.nativeEvent.stopImmediatePropagation();
 };
 
-const OVERLAY_TRIGGER_BUTTON_CLASSES =
-  "tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-black/70 tw-text-iron-100 tw-shadow-lg tw-shadow-black/40 tw-backdrop-blur-sm tw-transition tw-duration-200 hover:tw-bg-black/85 hover:tw-text-white focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
-
 const MENU_ITEM_CLASSES =
   "tw-flex tw-w-full tw-items-center tw-gap-x-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-text-iron-100 tw-transition-colors hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-bg-iron-800 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400";
 
-const RAIL_BUTTON_CLASSES =
-  "tw-flex tw-items-center tw-gap-x-2 tw-rounded-xl tw-border-0 tw-bg-iron-900 tw-p-2 hover:tw-text-iron-400";
+const RAIL_BUTTON_CLASSES = getIconButtonClasses({
+  size: 32,
+  variant: "surface",
+});
 
 function PreviewToggleIcon({ isLoading }: { readonly isLoading: boolean }) {
   if (isLoading) {
@@ -375,13 +376,22 @@ export default function ChatItemHrefButtons({
     updateActionSurfaceState({ isFocused: true });
   };
 
+  const disabledMenuItemClasses = isPreviewToggleDisabled
+    ? "tw-cursor-default tw-opacity-60"
+    : "";
+  const previewToggleButtonClasses = isOverlay
+    ? `${MENU_ITEM_CLASSES} ${disabledMenuItemClasses}`
+    : getIconButtonClasses({
+        size: 32,
+        variant: "surface",
+        disabled: isPreviewToggleDisabled,
+      });
+
   const previewToggleButton = showPreviewToggle ? (
     <button
       ref={handlePreviewToggleButtonRef}
       type="button"
-      className={`${isOverlay ? MENU_ITEM_CLASSES : RAIL_BUTTON_CLASSES} ${
-        isPreviewToggleDisabled ? "tw-cursor-default tw-opacity-60" : ""
-      }`}
+      className={previewToggleButtonClasses}
       aria-label={previewToggle?.label}
       disabled={isPreviewToggleDisabled}
       onClick={toggleLinkPreviews}
@@ -434,6 +444,7 @@ export default function ChatItemHrefButtons({
       href={internalHref ?? href}
       target={internalHref ? undefined : "_blank"}
       rel={internalHref ? undefined : "noopener noreferrer nofollow"}
+      aria-label="Open link"
       className={isOverlay ? MENU_ITEM_CLASSES : RAIL_BUTTON_CLASSES}
       onClick={(event) => {
         stopPropagation(event);
@@ -484,10 +495,11 @@ export default function ChatItemHrefButtons({
               : "tw-pointer-events-none tw-opacity-0 group-focus-within/link-card:tw-pointer-events-auto group-focus-within/link-card:tw-opacity-100 desktop-hover:group-hover/link-card:tw-pointer-events-auto desktop-hover:group-hover/link-card:tw-opacity-100 touch-only:tw-pointer-events-auto touch-only:tw-opacity-100"
           }`}
         >
-          <button
+          <IconButton
             ref={buttonRef}
             type="button"
-            className={OVERLAY_TRIGGER_BUTTON_CLASSES}
+            size={32}
+            variant="surface"
             aria-label="Link actions"
             aria-haspopup="true"
             aria-expanded={isMenuOpen}
@@ -502,7 +514,7 @@ export default function ChatItemHrefButtons({
             onTouchStart={handleTriggerPointerStart}
           >
             <EllipsisHorizontalIcon className="tw-h-5 tw-w-5" />
-          </button>
+          </IconButton>
         </div>
         <CommonDropdownItemsDefaultWrapper
           isOpen={isMenuOpen}

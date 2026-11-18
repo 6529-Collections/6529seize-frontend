@@ -5,10 +5,10 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
-import clsx from "clsx";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useKey } from "react-use";
+import IconButton from "@/components/utils/button/IconButton";
 
 import LazyWaveDropsSearchModal, {
   preloadWaveDropsSearchModal,
@@ -106,27 +106,23 @@ export default function HeaderSearchButton({
     : t(locale, "headerSearch.inputLabel");
   return (
     <div className="tailwind-scope tw-flex tw-items-center tw-gap-0.5 tw-self-center">
-      <button
+      <IconButton
         ref={buttonRef}
         type="button"
+        size={40}
+        variant={isApp ? "contrast" : "secondary"}
         disabled={!hasHydrated}
         aria-label={buttonLabel}
         title={buttonLabel}
         onClick={openContextSearch}
         onPointerEnter={preloadContextSearch}
         onFocus={preloadContextSearch}
-        className={clsx(
-          "tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-200 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
-          isApp
-            ? "tw-bg-black"
-            : "tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
-        )}
       >
         <MagnifyingGlassIcon
           className="tw-size-5 tw-flex-shrink-0"
           strokeWidth={isApp ? 2 : 1.5}
         />
-      </button>
+      </IconButton>
       {additionalMenuItems && (
         <CompactMenu
           aria-label={t(locale, "headerShare.social.more")}
