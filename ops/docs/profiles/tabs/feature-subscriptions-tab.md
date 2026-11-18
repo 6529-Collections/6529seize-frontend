@@ -9,8 +9,10 @@ available mints, Forecast use and, when not already named by a deadline, Next
 unfunded. All dates keep their original full-year format and UTC deadline times.
 The original coverage-card gradient is unchanged.
 
-Owners see primary Top up when the immediate selected drop is not fully funded.
-Top up stays available with a transparent outline for future funding and setup. Only No upcoming drops selected
+Owners see primary Top up for Action required and Running low.
+Covered and Plan a top up keep Top up quiet with a transparent outline.
+Not set up keeps its setup explanation and shows Set up, which opens Minting settings.
+Only No upcoming drops selected
 shows primary Choose drops first and secondary Top up second. Actions sit beside
 the message on desktop and beneath it on phones; the two phone actions share a
 row. Visitors have no owner actions, and Loading shows skeletons without actions.
@@ -97,26 +99,36 @@ On the web and Android, the tab appears after the page loads.
 ## User Journey
 
 1. Open `/{user}/subscriptions`. The coverage card has two zones: the status,
-   funded-drop headline, short explanation and owner actions above; balance,
-   available mints and Forecast use below. Every loaded state has a plain reason.
-   At 24 funded drops, the headline is Next 24 drops funded. Counts below 24 and
+   headline and owner actions above; balance, available mints and Forecast use
+   below. Existing counts, funded dates and deadline boxes provide the explanation
+   without a repeated sentence. At 24 funded drops, the headline is Next 24 drops funded. Positive counts below 24 and
    the supplied Funded through line keep their existing wording and date.
    When a selected forecast is fully funded and identifies no unfunded drop, the
    card says Covered, even if only one drop was selected. An identified shortfall
    with funded drops remaining is a calm reminder; the one-funded-drop state says
    Running low. Action required is red only when the immediate selected drop is
    not fully funded. Plan a top up is neutral, and Running low is amber. Visitors
-   see neutral status text except Covered, factual explanations and no owner actions.
+   see factual headings and no owner instructions, deadlines or actions.
    Funded through appears when at least one drop is funded. A supplied top-up
-   deadline is shown once for the owner as an exact date and UTC time, without
-   promising receipt. If a selected drop is not funded and no deadline is known,
-   the owner sees that a deadline is not available yet. The card cannot confirm
+   deadline keeps its highlighted background, bold full date/time and original
+   Top up by wording ending in to receive The Memes #N. When the immediate drop
+   is not covered, the owner's heading says Today's mint isn't covered only on
+   its actual UTC mint day; otherwise it names The Memes #N. Partial coverage
+   says isn't fully covered and the deadline names the remaining unfunded
+   editions. Visitors see the funded edition count without the owner instruction.
+   If no deadline is supplied, Next unfunded keeps the named Meme and full mint
+   date; no unavailable-deadline sentence is added. The card cannot confirm
    mint results from balance alone; the forecast and settings can change after it is calculated.
-   On minting day, an unfunded forecast is checked against the final subscription
+   On or after minting day, or when a supplied cutoff expires, an unfunded forecast is checked against the final subscription
    list before showing an alarm. A confirmed payment for all requested editions
    shows Subscription paid, keeps Top up optional, and preserves the funded-drop
    count as a remaining-balance fact. Checking and failed payment reads stay
    neutral. Payment confirmation does not promise that the airdrop is complete.
+   A passed authoritative cutoff with an unpaid drop shows Deadline passed in
+   grey, the named uncovered Meme and the exact cutoff in the highlighted box.
+   View history opens Subscription History; Top up for future drops remains a
+   separate quiet action. Payment is checked again when the cutoff passes, and
+   an already-paid subscription takes priority over the expired-cutoff warning.
 2. Read Subscription balance, available mints and Forecast use in the quiet facts
    zone. Desktop keeps each fact inline in 14px text. Phones place the two facts
    side by side, with 14px labels above 16px values and `N mints available` below
@@ -127,8 +139,8 @@ On the web and Android, the tab appears after the page loads.
    Hover, focus or tap opens the shared tooltip; Escape or tapping elsewhere
    dismisses it. The settings and upcoming-drop facts remain in their own sections.
 3. Owners open Top up beside the message on desktop or beneath it on phones.
-   It is white and filled when the immediate selected drop is not fully funded,
-   and transparent with a subtle outline for other states. No upcoming drops selected
+   It is white and filled for Action required and Running low, and transparent
+   with a subtle outline for Covered and Plan a top up. No upcoming drops selected
    shows primary Choose drops first and secondary Top up second, under the
    message on desktop and side by side on phones. Choose drops still scrolls to
    and focuses Upcoming Drops. Loading shows no actions, and visitors have no
@@ -400,14 +412,17 @@ processed; they do not automatically recover rows stranded by earlier failures.
   failed request, rather than a zero balance, an empty list or an indefinite
   loading label. A successfully loaded zero balance or empty list keeps its
   normal display.
-- A failed coverage refresh keeps the last known forecast with a visible stale
-  warning in the summary.
+- A failed coverage refresh keeps the last known forecast. Its status becomes
+  grey Last known coverage, with Last updated followed by the calculation's
+  full UTC date/time and May be out of date. Owners retain Refresh coverage.
+  The stale snapshot does not trigger an urgent mint-day or expired-deadline
+  warning; Top up stays quiet.
 - If coverage cannot be calculated or fetched, the page states that settings
   have not changed and owners can retry. It does not guess a funded-through
   date or top-up deadline.
 - If a next intended drop is unfunded but no authoritative cutoff is available,
-  the page says so and shows its projected mint date without presenting that
-  date as a safe deadline.
+  Next unfunded shows the Meme and full mint date. That date is not presented
+  as a top-up deadline, and no extra sentence about a missing deadline is shown.
 - When no airdrop address is available, the page shows
   `No airdrop address found`; owners can use `Set airdrop address` to open the
   existing delegation registration flow.
@@ -464,9 +479,13 @@ processed; they do not automatically recover rows stranded by earlier failures.
 - Untranslated surface: subscription controls, the Phase / Subscription Position /
   Airdrop Address / Subscription Count metadata in both row layouts, plus the
   shared transaction status, transaction-link, close-control, and backdrop
-  accessible names.
+  accessible names. The coverage summary's new uncovered, partial-edition,
+  payment-check, passed-deadline and stale-data messages also await translation
+  in `en-GB`, `fr-FR`, `es-ES` and `de-DE`.
 - Current fallback behavior: these surfaces use hardcoded canonical `en-US`
-  in all supported locales. The `No subscription allocation` status uses
+  in all supported locales except the coverage summary, which uses the existing
+  translation catalog with canonical `en-US` fallback and locale-aware numbers
+  and dates. The `No subscription allocation` status uses
   `profile.subscriptions.noAllocation` and is translated in all five locales.
 - User impact: the English UI remains fully functional, but these controls and
   states are not translated yet.

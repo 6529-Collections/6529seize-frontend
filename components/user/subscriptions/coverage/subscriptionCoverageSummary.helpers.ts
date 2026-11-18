@@ -2,6 +2,7 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import { ApiSubscriptionCoverageStatus as Status } from "@/generated/models/ApiSubscriptionCoverageStatus";
+import { ApiSubscriptionCoverageDeadlineBasis } from "@/generated/models/ApiSubscriptionCoverageDeadlineBasis";
 import type { SupportedLocale } from "@/i18n/locales";
 import { getSubscriptionCoveragePresentation } from "./subscriptionCoverage.helpers";
 
@@ -48,24 +49,91 @@ export type MintDaySubscriptionStatus =
   | "unpaid"
   | "unavailable";
 
-function utcDay(value: Date | string): string | undefined {
-  const date = typeof value === "string" ? new Date(value) : value;
-  return date instanceof Date && Number.isFinite(date.getTime())
-    ? date.toISOString().slice(0, 10)
-    : undefined;
+export function subscriptionCoverageTimestamp(
+  value: Date | string | null | undefined
+): number | undefined {
+  if (!value) return undefined;
+  const timestamp =
+    typeof value === "string" ? Date.parse(value) : value.getTime();
+  return Number.isFinite(timestamp) ? timestamp : undefined;
+}
+
+export function isImmediateSubscriptionShortfall(
+  coverage: ApiSubscriptionCoverage | undefined
+): boolean {
+  return (
+    !!coverage?.next_unfunded &&
+    coverage.fully_funded_drops === 0 &&
+    FUNDED_COUNT_STATUSES.includes(coverage.status)
+  );
 }
 
 export function isMintDayCoverageShortfall(
-  coverage: ApiSubscriptionCoverage | undefined
+  coverage: ApiSubscriptionCoverage | undefined,
+  now = Date.now()
 ): boolean {
-  if (
-    !coverage?.next_unfunded ||
-    coverage.fully_funded_drops !== 0 ||
-    !FUNDED_COUNT_STATUSES.includes(coverage.status)
-  )
-    return false;
-  const mintDay = utcDay(coverage.next_unfunded.mint_at);
-  return mintDay !== undefined && mintDay === utcDay(coverage.calculated_at);
+  const mintAt = subscriptionCoverageTimestamp(
+    coverage?.next_unfunded?.mint_at
+  );
+  return (
+    isImmediateSubscriptionShortfall(coverage) &&
+    mintAt !== undefined &&
+    now > 0 &&
+    Math.floor(mintAt / 86_400_000) === Math.floor(now / 86_400_000)
+  );
+}
+
+export function hasPassedSubscriptionDeadline(
+  coverage: ApiSubscriptionCoverage | undefined,
+  now: number
+): boolean {
+  const deadline = subscriptionCoverageTimestamp(
+    coverage?.next_unfunded?.top_up_deadline
+  );
+  return (
+    isImmediateSubscriptionShortfall(coverage) &&
+    coverage?.forecast.deadline_basis ===
+      ApiSubscriptionCoverageDeadlineBasis.Authoritative &&
+    deadline !== undefined &&
+    now > 0 &&
+    now >= deadline
+  );
+}
+
+export function shouldCheckSubscriptionPayment(
+  coverage: ApiSubscriptionCoverage | undefined,
+  now: number
+): boolean {
+  if (!isImmediateSubscriptionShortfall(coverage) || now <= 0) return false;
+  const mintAt = subscriptionCoverageTimestamp(
+    coverage?.next_unfunded?.mint_at
+  );
+  return (
+    hasPassedSubscriptionDeadline(coverage, now) ||
+    (mintAt !== undefined &&
+      Math.floor(mintAt / 86_400_000) <= Math.floor(now / 86_400_000))
+  );
+}
+
+export function getPartiallyFundedSubscriptionDrop(
+  coverage: ApiSubscriptionCoverage | undefined
+) {
+  const next = coverage?.next_unfunded;
+  if (!isImmediateSubscriptionShortfall(coverage) || !next) return undefined;
+  const {
+    requested_mints: requested,
+    funded_mints: funded,
+    missing_mints: missing,
+  } = next;
+  return Number.isInteger(requested) &&
+    Number.isInteger(funded) &&
+    Number.isInteger(missing) &&
+    requested > 1 &&
+    funded > 0 &&
+    missing > 0 &&
+    funded + missing === requested
+    ? next
+    : undefined;
 }
 
 export function isNextDropSubscriptionPaid(

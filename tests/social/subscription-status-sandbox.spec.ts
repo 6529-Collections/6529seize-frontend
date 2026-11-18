@@ -30,6 +30,9 @@ const unfunded = (
 ) => ({
   ...subscriptionCoverageFixture().next_unfunded!,
   ...point(token_id),
+  requested_mints: 1,
+  funded_mints: 0,
+  missing_mints: 1,
   top_up_deadline: deadline ? new Date(deadline) : null,
 });
 const states: ReadonlyArray<
@@ -153,6 +156,35 @@ const states: ReadonlyArray<
     },
   ],
   [
+    "partial-editions",
+    {
+      status: Status.ActionRequired,
+      fully_funded_drops: 0,
+      funded_through: null,
+      eligibility_count: 3,
+      subscribe_all_editions: true,
+      balance_eth: "0.06529",
+      mint_capacity: 1,
+      allocated_mints: 1,
+      next_unfunded: {
+        ...unfunded(575, "2026-11-16T14:30:00Z"),
+        requested_mints: 3,
+        funded_mints: 1,
+        missing_mints: 2,
+      },
+    },
+  ],
+  [
+    "deadline-passed",
+    {
+      calculated_at: new Date("2026-11-16T14:31:00Z"),
+      status: Status.ActionRequired,
+      fully_funded_drops: 0,
+      funded_through: null,
+      next_unfunded: unfunded(575, "2026-11-16T14:30:00Z"),
+    },
+  ],
+  [
     "mint-paid",
     {
       status: Status.ActionRequired,
@@ -195,8 +227,10 @@ const states: ReadonlyArray<
 function coverageFor(overrides: Partial<ApiSubscriptionCoverage>) {
   const funded = overrides.fully_funded_drops ?? 0;
   const eligibility = overrides.eligibility_count ?? 1;
-  const perDrop = overrides.subscribe_all_editions ? eligibility : 1;
   const next = overrides.next_unfunded ?? null;
+  const perDrop = overrides.subscribe_all_editions
+    ? eligibility
+    : (next?.requested_mints ?? 1);
   return subscriptionCoverageFixture({
     calculated_at: new Date("2026-11-16T10:00:00Z"),
     eligibility_count: eligibility,
@@ -218,10 +252,10 @@ function coverageFor(overrides: Partial<ApiSubscriptionCoverage>) {
       ? {
           ...next,
           requested_mints: perDrop,
-          funded_mints: 0,
-          missing_mints: perDrop,
+          funded_mints: next.funded_mints,
+          missing_mints: perDrop - next.funded_mints,
           required_eth: (perDrop * 0.06529).toFixed(5),
-          shortfall_eth: (perDrop * 0.06529).toFixed(5),
+          shortfall_eth: ((perDrop - next.funded_mints) * 0.06529).toFixed(5),
         }
       : null,
   });
@@ -397,6 +431,12 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
                 "not-set-up",
                 "no-selections",
                 "zero-funded",
+                "one-funded",
+                "plan-top-up",
+                "running-low",
+                "no-deadline",
+                "partial-editions",
+                "deadline-passed",
                 "forecast-cap",
                 "mint-paid",
                 "mint-payment-error",
@@ -409,6 +449,13 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
             );
       for (const [name, data] of cases) {
         current = data;
+        await page.clock.setFixedTime(
+          new Date(
+            name === "deadline-passed"
+              ? "2026-11-16T14:31:00Z"
+              : "2026-11-16T10:00:00Z"
+          )
+        );
         const loading = data === "loading" || name === "mint-payment-loading";
         await page.goto("/playwright/subscriptions", {
           waitUntil: "domcontentloaded",
@@ -445,6 +492,61 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           }
           if (phase !== "before" && name === "mint-paid")
             await expect(headline).toHaveText("Subscription paid");
+          if (
+            phase !== "before" &&
+            ["zero-funded", "no-deadline"].includes(name)
+          ) {
+            await expect(headline).toHaveText(
+              owner
+                ? "Today’s mint isn’t covered"
+                : "The Memes #575 isn’t covered"
+            );
+            await expect(
+              overview.getByText(
+                /deadline is not available|deadline unknown|is not fully funded\./i
+              )
+            ).toHaveCount(0);
+          }
+          if (phase !== "before" && name === "partial-editions") {
+            await expect(headline).toHaveText(
+              owner
+                ? "Today’s mint isn’t fully covered"
+                : "The Memes #575 isn’t fully covered"
+            );
+            await expect(
+              overview.getByText("1 of 3 editions funded", { exact: true })
+            ).toHaveCount(owner ? 0 : 1);
+            if (owner)
+              await expect(overview.getByText(/Top up by/)).toHaveText(
+                "Top up by Nov 16, 2026, 14:30 UTC to receive the remaining 2 editions of The Memes #575."
+              );
+          }
+          if (phase !== "before" && name === "deadline-passed") {
+            await expect(
+              overview.getByText("Deadline passed", { exact: true })
+            ).toBeVisible();
+            if (owner)
+              await expect(overview.getByText(/Top-up deadline:/)).toHaveText(
+                "Top-up deadline: Nov 16, 2026, 14:30 UTC."
+              );
+          }
+          if (
+            phase !== "before" &&
+            [
+              "zoku-manual",
+              "one-funded",
+              "plan-top-up",
+              "running-low",
+            ].includes(name)
+          )
+            await expect(
+              page
+                .getByRole("region", {
+                  name: "Subscription minting",
+                  exact: true,
+                })
+                .locator("#profile-subscriptions-overview-description")
+            ).toHaveCount(0);
           await expect(
             overview.getByText("Forecast use", { exact: true })
           ).toBeVisible();
@@ -452,7 +554,13 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
         if (!loading)
           await expect(
             overview.getByRole("button", { name: "Top up", exact: true })
-          ).toHaveCount(owner ? 1 : 0);
+          ).toHaveCount(
+            owner &&
+              (phase === "before" ||
+                !["not-set-up", "deadline-passed"].includes(name))
+              ? 1
+              : 0
+          );
         if (!loading)
           await expect(
             page
@@ -477,6 +585,70 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
             fullPage: true,
             animations: "disabled",
           });
+        if (phase !== "before" && owner && name === "not-set-up") {
+          await overview
+            .getByRole("link", { name: "Set up", exact: true })
+            .click();
+          const settings = page
+            .getByRole("region", { name: "Minting settings", exact: true })
+            .or(
+              page.getByRole("dialog", {
+                name: "Minting settings",
+                exact: true,
+              })
+            );
+          await expect(
+            settings.getByRole("heading", {
+              name: "Minting settings",
+              exact: true,
+            })
+          ).toBeFocused();
+          await page.keyboard.press("Escape");
+        }
+        if (phase !== "before" && owner && name === "deadline-passed") {
+          await overview
+            .getByRole("link", { name: "View history", exact: true })
+            .click();
+          const history = page
+            .getByRole("region", { name: "Subscription History", exact: true })
+            .or(
+              page.getByRole("dialog", {
+                name: "Subscription History",
+                exact: true,
+              })
+            );
+          await expect(
+            history.getByRole("heading", {
+              name: "Subscription History",
+              exact: true,
+            })
+          ).toBeFocused();
+          await page.keyboard.press("Escape");
+          const future = overview.getByRole("button", {
+            name: "Top up for future drops",
+            exact: true,
+          });
+          await future.click();
+          await expect(
+            page
+              .getByRole("dialog", { name: "Top up", exact: true })
+              .getByRole("heading", { name: "Top up", exact: true })
+          ).toBeVisible();
+          await page.keyboard.press("Escape");
+          await expect(future).toBeFocused();
+        }
+        if (phase !== "before" && owner && name === "zero-funded") {
+          const previousReads = subscriptionReads.filter((url) =>
+            url.includes("/final/")
+          ).length;
+          await page.clock.setFixedTime(new Date("2026-11-16T14:30:01Z"));
+          await expect(
+            overview.getByText("Deadline passed", { exact: true })
+          ).toBeVisible();
+          expect(
+            subscriptionReads.filter((url) => url.includes("/final/")).length
+          ).toBeGreaterThan(previousReads);
+        }
       }
       if (phase === "before") return;
       current = states.find(([name]) => name === "zoku-manual")![1];
@@ -486,6 +658,9 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
         .locator("#profile-subscriptions-overview");
       await expect(
         overview.getByText("All selected drops in this forecast are funded.")
+      ).toHaveCount(0);
+      await expect(
+        overview.getByText("Covered", { exact: true })
       ).toBeVisible();
       const forecast = overview.getByRole("button", {
         name: "Forecast use",
@@ -500,6 +675,8 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
       await page.keyboard.press("Escape");
       await expect(tooltip).toBeHidden();
       if (testInfo.project.use.hasTouch) {
+        // Begin the touch check outside the still-focused keyboard anchor.
+        await overview.getByRole("heading", { name: "1 drop funded" }).tap();
         await forecast.tap();
         await expect(tooltip).toBeVisible();
         await overview.getByRole("heading", { name: "1 drop funded" }).tap();
@@ -558,7 +735,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
       });
       const notice = page
         .getByRole("status")
-        .filter({ hasText: "Last known coverage" });
+        .filter({ hasText: "Last updated" });
       await expect(notice).toBeVisible();
       await expect(
         notice.getByRole("button", { name: "Refresh coverage" })

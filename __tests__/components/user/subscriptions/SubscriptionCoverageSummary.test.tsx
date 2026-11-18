@@ -24,6 +24,10 @@ jest.mock(
   })
 );
 const allocationMock = jest.mocked(useSubscriptionAllocationStatus);
+beforeEach(() =>
+  jest.spyOn(Date, "now").mockReturnValue(Date.parse("2026-11-16T10:00:00Z"))
+);
+afterEach(() => jest.restoreAllMocks());
 
 function createCoverage(
   overrides: Partial<ApiSubscriptionCoverage> = {}
@@ -102,17 +106,17 @@ describe("SubscriptionCoverageSummary", () => {
       />
     );
 
-  it("explains the selected shortfall and gives one factual deadline", () => {
+  it("names the partly covered drop and preserves the highlighted full deadline", () => {
     renderSummary(createCoverage());
     expect(
       screen.getByRole("heading", {
-        name: "0 drops funded",
+        name: "The Memes #561 isn’t fully covered",
       })
     ).toBeVisible();
     expect(screen.queryByText("Status")).not.toBeInTheDocument();
-    expect(screen.getAllByText(/Top-up deadline for/)).toHaveLength(1);
-    expect(screen.getByText(/Top-up deadline for/)).toHaveTextContent(
-      `Top-up deadline for The Memes #561: Oct 12, 2026, 14:30 UTC.`
+    expect(screen.getAllByText(/Top up by/)).toHaveLength(1);
+    expect(screen.getByText(/Top up by/)).toHaveTextContent(
+      `Top up by Oct 12, 2026, 14:30 UTC to receive the remaining 1 edition of The Memes #561.`
     );
     expect(screen.queryByText("Next unfunded")).not.toBeInTheDocument();
     expect(
@@ -151,7 +155,9 @@ describe("SubscriptionCoverageSummary", () => {
       });
       renderSummary(coverage);
       expect(screen.getByRole("heading", { level: 2 })).toHaveTextContent(
-        `${funded} ${funded === 1 ? "drop" : "drops"} funded`
+        funded
+          ? `${funded} ${funded === 1 ? "drop" : "drops"} funded`
+          : `The Memes #${nextToken} isn’t fully covered`
       );
       for (const repeatedExplanation of [
         "You are covered for now. Plan a top up before coverage ends.",
@@ -161,14 +167,16 @@ describe("SubscriptionCoverageSummary", () => {
       }
       const metrics = document.getElementById("subscription-overview-actions")!;
       expect(
-        screen.getByText(`The Memes #${nextToken} is not fully funded.`)
-      ).toBeVisible();
+        screen.queryByText(`The Memes #${nextToken} is not fully funded.`)
+      ).not.toBeInTheDocument();
       expect(
         within(metrics).queryByText("Next unfunded")
       ).not.toBeInTheDocument();
-      expect(screen.getAllByText(/Top-up deadline for/)).toHaveLength(1);
-      expect(screen.getByText(/Top-up deadline for/)).toHaveTextContent(
-        `Top-up deadline for The Memes #${nextToken}: Oct 12, 2026, 14:30 UTC.`
+      expect(screen.getAllByText(/Top up by/)).toHaveLength(1);
+      expect(screen.getByText(/Top up by/)).toHaveTextContent(
+        funded
+          ? `Top up by Oct 12, 2026, 14:30 UTC to receive The Memes #${nextToken}.`
+          : `Top up by Oct 12, 2026, 14:30 UTC to receive the remaining 1 edition of The Memes #${nextToken}.`
       );
       expect(screen.queryByText(/Recommended:/)).not.toBeInTheDocument();
     }
@@ -197,7 +205,7 @@ describe("SubscriptionCoverageSummary", () => {
         expect(
           metrics.getByRole("link", { name: "The Memes #561" })
         ).toHaveAttribute("href", "/the-memes/561");
-      expect(screen.queryAllByText(/Top-up deadline for/)).toHaveLength(
+      expect(screen.queryAllByText(/Top up by/)).toHaveLength(
         hasDeadline ? 1 : 0
       );
     }
@@ -221,7 +229,7 @@ describe("SubscriptionCoverageSummary", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("leads with funded count, status, a visible explanation and full funded-through date", async () => {
+  it("keeps Covered concise with the funded count and full funded-through date", async () => {
     renderSummary(
       createCoverage({
         status: ApiSubscriptionCoverageStatus.Covered,
@@ -249,7 +257,7 @@ describe("SubscriptionCoverageSummary", () => {
       within(summary).getByRole("link", { name: "The Memes #560" })
     ).toHaveAttribute("href", "/the-memes/560");
     const explanation = "All selected drops in this forecast are funded.";
-    expect(screen.getByText(explanation)).toBeVisible();
+    expect(screen.queryByText(explanation)).not.toBeInTheDocument();
     await userEvent
       .setup()
       .click(screen.getByRole("button", { name: "Forecast use" }));
@@ -261,7 +269,7 @@ describe("SubscriptionCoverageSummary", () => {
     expect(screen.getAllByText("Covered", { exact: true })).toHaveLength(1);
     expect(screen.getAllByText("8 drops funded")).toHaveLength(1);
     expect(within(tooltip).queryByText(explanation)).not.toBeInTheDocument();
-    expect(screen.getAllByText(explanation)).toHaveLength(1);
+    expect(screen.queryAllByText(explanation)).toHaveLength(0);
     expect(
       screen.getAllByRole("link", { name: "The Memes #560" })
     ).toHaveLength(1);
@@ -275,7 +283,7 @@ describe("SubscriptionCoverageSummary", () => {
   });
 
   it.each([true, false])(
-    "keeps forecast caveats in the tooltip and the explanation visible without repeating balance capacity (owner: %s)",
+    "keeps forecast caveats in the tooltip without repeating funded coverage (owner: %s)",
     async (isOwner) => {
       renderSummary(
         createCoverage({
@@ -310,8 +318,8 @@ describe("SubscriptionCoverageSummary", () => {
         ).not.toBeInTheDocument();
       }
       expect(
-        screen.getByText("All selected drops in this forecast are funded.")
-      ).toBeVisible();
+        screen.queryByText("All selected drops in this forecast are funded.")
+      ).not.toBeInTheDocument();
       expect(
         within(tooltip).queryByText(
           "All selected drops in this forecast are funded."
@@ -539,7 +547,9 @@ describe("SubscriptionCoverageSummary", () => {
       );
       expect(screen.getByRole("heading", { name: label })).toBeVisible();
       expect(screen.getByText("2 allocated")).toBeVisible();
-      if (description) expect(screen.getByText(description)).toBeVisible();
+      if (status === ApiSubscriptionCoverageStatus.NotSetUp)
+        expect(screen.queryByText(description)).not.toBeInTheDocument();
+      else if (description) expect(screen.getByText(description)).toBeVisible();
       expect(
         screen.queryByText(
           /Set up subscriptions to receive|Choose a drop to see|Review settings or refresh|Adding funds does not change eligibility/
@@ -615,7 +625,7 @@ describe("SubscriptionCoverageSummary", () => {
     }
   );
 
-  it("omits the redundant Set up shortcut without relabeling Not set up", () => {
+  it("keeps Not set up and gives the owner a working setup entry point", () => {
     renderSummary(
       createCoverage({
         status: ApiSubscriptionCoverageStatus.NotSetUp,
@@ -625,21 +635,32 @@ describe("SubscriptionCoverageSummary", () => {
       })
     );
     expect(screen.getByRole("heading", { name: "Not set up" })).toBeVisible();
-    expect(
-      screen.queryByRole("link", { name: "Set up" })
-    ).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Set up" })).toHaveAttribute(
+      "href",
+      "#profile-subscriptions-settings"
+    );
     expect(
       screen.queryByRole("link", { name: "Choose drops" })
     ).not.toBeInTheDocument();
   });
 
   it.each(Object.values(ApiSubscriptionCoverageStatus))(
-    "keeps only the main Top up action in %s",
+    "keeps funding actions except when setup is the next step in %s",
     async (status) => {
       const openTopUp = jest.fn();
       renderSummary(createCoverage({ status }), {
         topUpAction: <button onClick={openTopUp}>Top up</button>,
       });
+      if (status === ApiSubscriptionCoverageStatus.NotSetUp) {
+        expect(
+          screen.queryByRole("button", { name: "Top up" })
+        ).not.toBeInTheDocument();
+        expect(screen.getByRole("link", { name: "Set up" })).toHaveAttribute(
+          "href",
+          "#profile-subscriptions-settings"
+        );
+        return;
+      }
       expect(
         screen.queryByRole("link", { name: "Top up subscriptions" })
       ).not.toBeInTheDocument();
@@ -699,7 +720,7 @@ describe("SubscriptionCoverageSummary", () => {
     expect(document.getElementById("subscription-coverage-details")).toBeNull();
   });
 
-  it("explains when the selected shortfall has no known deadline", () => {
+  it("keeps the named drop and mint date without adding a missing-deadline sentence", () => {
     renderSummary(
       createCoverage({
         next_unfunded: {
@@ -710,8 +731,13 @@ describe("SubscriptionCoverageSummary", () => {
     );
     expect(screen.queryByText(/Top-up deadline for/)).not.toBeInTheDocument();
     expect(
-      screen.getByText("A top-up deadline is not available yet.")
-    ).toBeVisible();
+      screen.queryByText(
+        /deadline is not available|deadline unknown|can.t confirm the top-up deadline/i
+      )
+    ).not.toBeInTheDocument();
+    expect(screen.getByText("Next unfunded")).toBeVisible();
+    expect(screen.getByRole("link", { name: "The Memes #561" })).toBeVisible();
+    expect(screen.getByText("Oct 14, 2026")).toBeVisible();
   });
 
   it("distinguishes funded drops, forecast use and balance capacity without duplicating the capacity", async () => {
@@ -804,7 +830,7 @@ describe("SubscriptionCoverageSummary", () => {
     renderSummary(createCoverage(), { isOwner: false });
     expect(
       screen.getByRole("heading", {
-        name: "0 drops funded",
+        name: "The Memes #561 isn’t fully covered",
       })
     ).toBeVisible();
     expect(
@@ -854,8 +880,8 @@ it.each([true, false])(
       "tw-text-emerald-400"
     );
     expect(
-      screen.getByText("All selected drops in this forecast are funded.")
-    ).toBeVisible();
+      screen.queryByText("All selected drops in this forecast are funded.")
+    ).not.toBeInTheDocument();
     expect(screen.queryByText("Action required")).not.toBeInTheDocument();
     expect(screen.queryAllByRole("button", { name: "Top up" })).toHaveLength(
       isOwner ? 1 : 0
@@ -1027,7 +1053,7 @@ describe("Mint-day subscription payment", () => {
       screen.getByText("Coverage unavailable", { exact: true })
     ).toBeVisible();
     expect(
-      screen.getByText(/Today's subscription could not be checked/)
+      screen.getByText(/This subscription could not be checked/)
     ).toBeVisible();
     expect(screen.queryByText("Action required")).not.toBeInTheDocument();
   });
@@ -1048,14 +1074,14 @@ describe("Mint-day subscription payment", () => {
     );
     expect(screen.getByText("Action required")).toHaveClass("tw-text-error");
     expect(
-      screen.getByText("The Memes #575 is not fully funded.")
+      screen.getByRole("heading", { name: "Today’s mint isn’t covered" })
     ).toBeVisible();
   });
 });
 
 describe("24-drop forecast headline", () => {
   it.each([
-    [0, "0 drops funded"],
+    [0, "The Memes #561 isn’t fully covered"],
     [1, "1 drop funded"],
     [7, "7 drops funded"],
     [23, "23 drops funded"],

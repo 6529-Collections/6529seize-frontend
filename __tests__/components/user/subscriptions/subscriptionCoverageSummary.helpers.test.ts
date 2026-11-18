@@ -2,6 +2,9 @@ import {
   getSubscriptionCoverageSummaryPresentation,
   isMintDayCoverageShortfall,
   isNextDropSubscriptionPaid,
+  hasPassedSubscriptionDeadline,
+  shouldCheckSubscriptionPayment,
+  getPartiallyFundedSubscriptionDrop,
 } from "@/components/user/subscriptions/coverage/subscriptionCoverageSummary.helpers";
 import { getSubscriptionCoveragePresentation } from "@/components/user/subscriptions/coverage/subscriptionCoverage.helpers";
 import { ApiSubscriptionCoverageMode as Mode } from "@/generated/models/ApiSubscriptionCoverageMode";
@@ -95,23 +98,33 @@ describe("Mint-day payment evidence", () => {
     airdrop_address: "0x0000000000000000000000000000000000000529",
   };
   it("checks only the same UTC mint day with no funded drops remaining", () => {
-    expect(isMintDayCoverageShortfall(coverage)).toBe(true);
+    const now = Date.parse("2026-11-16T10:00:00Z");
+    expect(isMintDayCoverageShortfall(coverage, now)).toBe(true);
     expect(
-      isMintDayCoverageShortfall({ ...coverage, fully_funded_drops: 1 })
+      isMintDayCoverageShortfall({ ...coverage, fully_funded_drops: 1 }, now)
     ).toBe(false);
     expect(
-      isMintDayCoverageShortfall({
-        ...coverage,
-        calculated_at: new Date("2026-11-15T23:59:59Z"),
-      })
+      isMintDayCoverageShortfall(coverage, Date.parse("2026-11-15T23:59:59Z"))
     ).toBe(false);
     expect(
-      isMintDayCoverageShortfall({
-        ...coverage,
-        calculated_at: new Date("invalid"),
-      })
+      isMintDayCoverageShortfall(
+        {
+          ...coverage,
+          next_unfunded: {
+            ...coverage.next_unfunded!,
+            mint_at: new Date("invalid"),
+          },
+        },
+        now
+      )
     ).toBe(false);
-    expect(isMintDayCoverageShortfall(undefined)).toBe(false);
+    expect(isMintDayCoverageShortfall(undefined, now)).toBe(false);
+    expect(
+      isMintDayCoverageShortfall(
+        { ...coverage, calculated_at: new Date("2026-11-15T23:59:59Z") },
+        now
+      )
+    ).toBe(true);
   });
   it("requires payment for every requested edition of the exact Meme", () => {
     expect(isNextDropSubscriptionPaid(coverage, final)).toBe(true);
@@ -135,4 +148,48 @@ describe("Mint-day payment evidence", () => {
     ).toBe(false);
     expect(isNextDropSubscriptionPaid(coverage, null)).toBe(false);
   });
+});
+
+it("checks payment when a cutoff expires or the mint day has passed", () => {
+  const coverage = subscriptionCoverageFixture();
+  const deadline = Date.parse("2026-10-12T14:30:00Z");
+  expect(hasPassedSubscriptionDeadline(coverage, deadline - 1)).toBe(false);
+  expect(hasPassedSubscriptionDeadline(coverage, deadline)).toBe(true);
+  expect(shouldCheckSubscriptionPayment(coverage, deadline)).toBe(true);
+  expect(
+    shouldCheckSubscriptionPayment(coverage, Date.parse("2026-10-15T00:00:00Z"))
+  ).toBe(true);
+  expect(
+    shouldCheckSubscriptionPayment(
+      { ...coverage, fully_funded_drops: 1 },
+      deadline
+    )
+  ).toBe(false);
+  expect(
+    hasPassedSubscriptionDeadline(
+      {
+        ...coverage,
+        next_unfunded: { ...coverage.next_unfunded!, top_up_deadline: null },
+      },
+      deadline
+    )
+  ).toBe(false);
+});
+
+it("uses the selected drop's partial edition counts rather than raw mint capacity", () => {
+  const coverage = subscriptionCoverageFixture({ mint_capacity: 100 });
+  expect(getPartiallyFundedSubscriptionDrop(coverage)).toMatchObject({
+    requested_mints: 3,
+    funded_mints: 2,
+    missing_mints: 1,
+  });
+  expect(
+    getPartiallyFundedSubscriptionDrop({ ...coverage, fully_funded_drops: 1 })
+  ).toBeUndefined();
+  expect(
+    getPartiallyFundedSubscriptionDrop({
+      ...coverage,
+      next_unfunded: { ...coverage.next_unfunded!, missing_mints: 2 },
+    })
+  ).toBeUndefined();
 });

@@ -183,7 +183,7 @@ describe("UserPageSubscriptions", () => {
   });
 
   it.each([true, false])(
-    "shows stale coverage above the cards with owner-only retry (owner: %s)",
+    "keeps stale coverage inside the card with owner-only refresh (owner: %s)",
     async (owner) => {
       mockCoverageStatus = Status.Covered;
       mockCoverageIsError = true;
@@ -195,10 +195,8 @@ describe("UserPageSubscriptions", () => {
         "Last known coverage is shown and may be out of date."
       );
       expect(
-        notice.compareDocumentPosition(
-          screen.getByTestId("subscription-coverage-summary")
-        ) & Node.DOCUMENT_POSITION_FOLLOWING
-      ).toBeTruthy();
+        screen.getByTestId("subscription-coverage-summary")
+      ).toContainElement(notice);
       const retry = screen.queryByRole("button", { name: "Refresh coverage" });
       if (owner) {
         expect(retry).toBeVisible();
