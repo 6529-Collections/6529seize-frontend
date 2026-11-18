@@ -348,7 +348,7 @@ function SubscriptionTopUpForm({
   const locale = useBrowserLocale();
   const suppliedDeadline = getAuthoritativeSubscriptionDeadline(sourceCoverage);
   const now = useSubscriptionCoverageClock(
-    expanded && !isCoverageStale && suppliedDeadline !== undefined,
+    !isCoverageStale && suppliedDeadline !== undefined,
     suppliedDeadline
   );
   const coverage =

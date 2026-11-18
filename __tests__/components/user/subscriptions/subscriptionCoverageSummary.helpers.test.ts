@@ -157,6 +157,28 @@ it("checks payment when a cutoff expires or the mint day has passed", () => {
   expect(
     shouldCheckSubscriptionPayment(coverage, Date.parse("2026-10-15T00:00:00Z"))
   ).toBe(true);
+  const withoutCutoff = {
+    ...coverage,
+    next_unfunded: { ...coverage.next_unfunded!, top_up_deadline: null },
+  };
+  expect(
+    shouldCheckSubscriptionPayment(
+      withoutCutoff,
+      Date.parse("2026-10-13T23:59:59Z")
+    )
+  ).toBe(false);
+  expect(
+    shouldCheckSubscriptionPayment(
+      withoutCutoff,
+      Date.parse("2026-10-14T00:00:00Z")
+    )
+  ).toBe(true);
+  expect(
+    shouldCheckSubscriptionPayment(
+      withoutCutoff,
+      Date.parse("2026-10-15T00:00:00Z")
+    )
+  ).toBe(true);
   expect(
     shouldCheckSubscriptionPayment(
       { ...coverage, fully_funded_drops: 1 },

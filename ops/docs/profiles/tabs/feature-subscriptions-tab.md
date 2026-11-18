@@ -119,16 +119,19 @@ On the web and Android, the tab appears after the page loads.
    If no deadline is supplied, Next unfunded keeps the named Meme and full mint
    date; no unavailable-deadline sentence is added. The card cannot confirm
    mint results from balance alone; the forecast and settings can change after it is calculated.
-   On or after minting day, or when a supplied cutoff expires, an unfunded forecast is checked against the final subscription
+   For an immediate shortfall on or after minting day, or when a supplied cutoff expires, the forecast is checked against the final subscription
    list before showing an alarm. A confirmed payment for all requested editions
    shows Subscription paid, keeps Top up optional, and preserves the funded-drop
    count as a last-forecast fact. Checking and failed payment reads stay
    neutral. Payment confirmation does not promise that the airdrop is complete.
-   A passed authoritative cutoff with an unpaid drop shows Deadline passed in
+   A passed authoritative cutoff with a verified unpaid immediate drop shows Deadline passed in
    grey, the named uncovered Meme and the exact cutoff in the highlighted box.
    View history opens Subscription History; Top up for future drops remains a
    separate quiet action. Payment is checked again when the cutoff passes, and
    an already-paid subscription takes priority over the expired-cutoff warning.
+   A future authoritative cutoff keeps its actionable forecast while payment is checked.
+   An expired later cutoff keeps funded counts and the next unfunded Meme/date,
+   with factual Top-up deadline wording and optional Top up for future drops.
 2. Read Subscription balance, available mints and Forecast use in the quiet facts
    zone. Desktop keeps each fact inline in 14px text. Phones place the two facts
    side by side, with 14px labels above 16px values and `N mints available` below
