@@ -18,7 +18,7 @@ const CAN_SCROLL_RIGHT = 2;
 const NO_OVERFLOW = 0;
 
 type ScrollDirection = "left" | "right";
-type FocusTarget = ScrollDirection | "active-tab";
+type FocusTarget = ScrollDirection | "active-control";
 
 const DIRECTION_STYLES: Record<
   ScrollDirection,
@@ -116,10 +116,14 @@ export default function MobileTabsScrollControls({
   scrollerRef,
   showButtons = true,
   fadeColorClassName = "tw-from-iron-950 tw-via-iron-950/80",
+  activeControlSelector = '[role="tab"][aria-selected="true"]',
+  scrollLabels,
 }: {
   readonly scrollerRef: RefObject<HTMLDivElement | null>;
   readonly showButtons?: boolean;
   readonly fadeColorClassName?: string;
+  readonly activeControlSelector?: string;
+  readonly scrollLabels?: Readonly<Record<ScrollDirection, string>>;
 }) {
   const locale = useBrowserLocale();
   const leftButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -149,7 +153,7 @@ export default function MobileTabsScrollControls({
             return "left";
           }
 
-          return "active-tab";
+          return "active-control";
         }
 
         if (
@@ -160,7 +164,7 @@ export default function MobileTabsScrollControls({
             return "right";
           }
 
-          return "active-tab";
+          return "active-control";
         }
 
         return null;
@@ -178,9 +182,13 @@ export default function MobileTabsScrollControls({
             } else if (focusTarget === "right") {
               rightButtonRef.current?.focus();
             } else {
-              scroller
-                .querySelector<HTMLElement>(
-                  '[role="tab"][aria-selected="true"]'
+              Array.from(
+                scroller.querySelectorAll<HTMLElement>(activeControlSelector)
+              )
+                .find(
+                  (element) =>
+                    element.getClientRects().length > 0 &&
+                    !element.matches(":disabled")
                 )
                 ?.focus();
             }
@@ -220,7 +228,7 @@ export default function MobileTabsScrollControls({
         mutationObserver.disconnect();
       };
     },
-    [scrollerRef]
+    [scrollerRef, activeControlSelector]
   );
   const overflowSnapshot = useSyncExternalStore(
     subscribe,
@@ -253,7 +261,7 @@ export default function MobileTabsScrollControls({
         showButton={showButtons}
         fadeColorClassName={fadeColorClassName}
         isAvailable={canScrollLeft}
-        label={getWaveTabsScrollLabel(locale, "left")}
+        label={scrollLabels?.left ?? getWaveTabsScrollLabel(locale, "left")}
         onClick={() => scrollTabs(-1)}
       />
       <ScrollControl
@@ -262,7 +270,7 @@ export default function MobileTabsScrollControls({
         showButton={showButtons}
         fadeColorClassName={fadeColorClassName}
         isAvailable={canScrollRight}
-        label={getWaveTabsScrollLabel(locale, "right")}
+        label={scrollLabels?.right ?? getWaveTabsScrollLabel(locale, "right")}
         onClick={() => scrollTabs(1)}
       />
     </>
