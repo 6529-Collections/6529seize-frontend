@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
+import { useE2eeContext } from "@/components/e2ee/E2eeContext";
 import { setE2eeComposePrefill } from "@/components/e2ee/e2eeComposePrefill";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { NEW_MESSAGE_ROUTE } from "@/helpers/navigation.helpers";
@@ -11,6 +12,7 @@ export function useProfileDirectMessage(
 ) {
   const router = useRouter();
   const { connectedProfile } = useAuth();
+  const { requestEngine } = useE2eeContext();
   const ownerProfileId = connectedProfile?.id;
 
   if (!ownerProfileId || !profile?.id || profile.id === ownerProfileId) {
@@ -21,7 +23,9 @@ export function useProfileDirectMessage(
     profileId: profile.id,
     handle: profile.handle,
     pfp: profile.pfp,
-    wallet: profile.primary_wallet?.toLowerCase() || null,
+    wallet: profile.primary_wallet
+      ? profile.primary_wallet.toLowerCase()
+      : null,
   };
 
   return () => {
@@ -30,6 +34,7 @@ export function useProfileDirectMessage(
       people: [person],
       source: "profile",
     });
+    requestEngine();
     router.push(NEW_MESSAGE_ROUTE);
   };
 }

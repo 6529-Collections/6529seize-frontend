@@ -16,6 +16,11 @@ import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 
+const mockRequestEngine = jest.fn();
+jest.mock("@/components/e2ee/E2eeContext", () => ({
+  useE2eeContext: () => ({ requestEngine: mockRequestEngine }),
+}));
+
 type TooltipProps = ComponentProps<typeof UserProfileTooltip>;
 
 type CapturedDropAuthorBadgesProps = {
@@ -278,6 +283,7 @@ describe("UserProfileTooltip", () => {
     );
 
     expect(createDirectMessageWaveMock).not.toHaveBeenCalled();
+    expect(mockRequestEngine).toHaveBeenCalledTimes(1);
     expect(mockRouter.push).toHaveBeenCalledWith("/messages/new");
     expect(peekE2eeComposePrefill()).toEqual({
       ownerProfileId: "profile-alice",

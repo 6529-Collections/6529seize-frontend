@@ -12,7 +12,6 @@ import {
   setE2eeComposePrefill,
 } from "@/components/e2ee/e2eeComposePrefill";
 import { E2eeNewConversation } from "@/components/e2ee/new/E2eeNewConversation";
-import type { E2eePrefillPerson } from "@/components/e2ee/e2eeComposePrefill";
 import { NewMessageForm } from "@/components/e2ee/new/NewMessageForm";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { LEGACY_DM_DELETION_AT } from "@/components/e2ee/legacy/legacyDmRetention";
@@ -249,18 +248,10 @@ function pick(...handles: string[]) {
 
 function PlaintextCapableForm({
   create,
-  initialPeople,
 }: {
   readonly create: (wallets: string[]) => Promise<string | null>;
-  readonly initialPeople?: readonly E2eePrefillPerson[] | undefined;
 }) {
-  return (
-    <NewMessageForm
-      e2ee={useE2ee()}
-      createUnencrypted={create}
-      initialPeople={initialPeople}
-    />
-  );
+  return <NewMessageForm e2ee={useE2ee()} createUnencrypted={create} />;
 }
 
 describe("unified new message", () => {
@@ -284,25 +275,6 @@ describe("unified new message", () => {
     expect(context.requestEngine).not.toHaveBeenCalled();
     pick("alice");
     expect(context.requestEngine).toHaveBeenCalledTimes(1);
-  });
-
-  it("requests the encryption engine for a preselected recipient", () => {
-    const context = contextFor(null);
-    const create = jest.fn();
-    render(
-      <E2eeTestProvider value={context}>
-        <PlaintextCapableForm
-          create={create}
-          initialPeople={[
-            { profileId: BOB_ID, handle: "bob", pfp: null, wallet: "0xbob" },
-          ]}
-        />
-      </E2eeTestProvider>
-    );
-
-    expect(context.requestEngine).toHaveBeenCalledTimes(1);
-    expect(screen.getByRole("button", { name: "Start chat" })).toBeDisabled();
-    expect(create).not.toHaveBeenCalled();
   });
 
   it("offers one exact active group without including a partial roster or an earlier group", () => {

@@ -28,8 +28,8 @@ export function peekE2eeComposePrefill(): E2eeComposePrefill | null {
   return pendingPrefill;
 }
 
-export function clearE2eeComposePrefill(): void {
-  pendingPrefill = null;
+export function clearE2eeComposePrefill(prefill = pendingPrefill): void {
+  if (pendingPrefill === prefill) pendingPrefill = null;
 }
 
 export function useE2eeComposePrefill(source: E2eeComposePrefill["source"]) {
@@ -39,7 +39,7 @@ export function useE2eeComposePrefill(source: E2eeComposePrefill["source"]) {
   });
 
   useEffect(() => {
-    if (prefill && pendingPrefill === prefill) clearE2eeComposePrefill();
+    clearE2eeComposePrefill(prefill);
   }, [prefill]);
 
   return prefill;
