@@ -115,13 +115,13 @@ export default function LaunchAutomationSettings() {
       <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
         <h2
           id="launch-automation-heading"
-          className="tw-m-0 tw-min-w-40 tw-flex-1 tw-text-xl tw-font-semibold tw-text-iron-50"
+          className="tw-m-0 tw-min-w-0 tw-flex-auto tw-text-iron-50"
         >
           <button
             type="button"
             aria-expanded={expanded}
             aria-controls={bodyId}
-            className={`${dropForgeDisclosureClassName} tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xl tw-font-semibold tw-text-inherit`}
+            className={`${dropForgeDisclosureClassName} tw-w-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-text-inherit sm:tw-text-xl`}
             onClick={() => setExpanded(!expanded)}
           >
             <ChevronRightIcon
