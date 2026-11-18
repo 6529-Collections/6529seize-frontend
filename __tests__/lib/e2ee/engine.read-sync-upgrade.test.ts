@@ -102,6 +102,8 @@ async function olderClientDevice(
   user: TestUser,
   old: Set<string>
 ): Promise<TestDevice> {
+  // Devices are added one after another, never in the same millisecond.
+  world.clock.advance(1000);
   const device = await startDevice(world, user.profileId, user.account, {
     extra: { readSync: false },
   });
@@ -158,6 +160,14 @@ async function fillQueue(world: World, device: TestDevice): Promise<void> {
       expires_at: item.expires_at,
     })),
   });
+}
+
+async function waitUntil(check: () => boolean, ms = 10_000): Promise<void> {
+  const until = Date.now() + ms;
+  while (!check()) {
+    if (Date.now() > until) throw new Error("condition not met in time");
+    await realSleep(5);
+  }
 }
 
 /** Counts this device's claims of `deviceKey`'s KeyPackages from now on. */
@@ -301,6 +311,9 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     await settle(world);
     const phone = await olderClientDevice(world, alice, keyPackages.old);
     const g = await readOnLaptop(world, laptop);
+    // Both devices have been around for over an hour.
+    world.clock.advance(76 * MINUTE);
+    await settle(world);
 
     const timeline = await phoneUpdates(world, alice, laptop, phone, g, 10);
     // The phone replaces its last-resort KeyPackage as it starts, waits
@@ -336,9 +349,9 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     const timeline = await phoneUpdates(world, alice, laptop, phone, g, 150);
     expect(timeline.capableKeyPackages).toBe(0);
     // An older queue holds up to 30 KeyPackages; the device with the
-    // lowest key spends 22 claims an hour on self groups, the other 2, so
-    // one of them reaches a capable KeyPackage within about 70 minutes.
-    expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(80);
+    // lowest key spends 20 claims an hour on self groups, the other 2, so
+    // one of them reaches a capable KeyPackage within about 80 minutes.
+    expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(90);
     expect(timeline.readStateSynced ?? Infinity).toBeLessThanOrEqual(
       (timeline.sharedGroup ?? Infinity) + 1
     );
@@ -448,6 +461,43 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     for (const device of world.devices) device.engine.dispose();
   });
 
+  it("records each claim before sending it, so a reload mid-pass still counts it", async () => {
+    const { world, laptop, claims, listDevices } = await onlyTheLaptopCanAdd();
+    const alice = world.users.get("alice");
+    if (!alice) throw new Error("no alice");
+    // The second claim of the pass (the claim-through) is held at the
+    // server: the first was received and answered, the second received.
+    const api = contextOf(laptop).api;
+    const claim = api.claimKeyPackages.bind(api);
+    let gate: ReturnType<typeof world.ds.hold> | null = null;
+    api.claimKeyPackages = (body) => {
+      if (claims() === 1 && gate === null) {
+        gate = world.ds.hold(/^e2ee\/key-packages\/claim$/u);
+      }
+      return claim(body);
+    };
+    const passStart = world.clock.now();
+    const listing = listDevices();
+    await waitUntil(() => gate?.waiting() === 1);
+
+    // The page reloads now: a new engine on the same storage.
+    const reloaded = await startDevice(world, "alice", alice.account, {
+      storage: laptop.storage,
+      enroll: false,
+      extra: { readSync: true },
+    });
+    const counted = (
+      contextOf(reloaded).device?.readSync?.selfGroupClaims ?? []
+    ).filter((at) => at >= passStart);
+    expect(counted).toHaveLength(2);
+    stopDevice(world, reloaded);
+
+    gate?.release();
+    await listing;
+    expect(claims()).toBe(2);
+    for (const device of world.devices) device.engine.dispose();
+  });
+
   it("stops claiming for self groups until the server's window ends after a 429", async () => {
     const {
       world,
@@ -515,6 +565,9 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     for (let index = 0; index < 4; index += 1) {
       phones.push(await olderClientDevice(world, alice, keyPackages.old));
     }
+    await settle(world);
+    // All five have been around for over an hour.
+    world.clock.advance(76 * MINUTE);
     await settle(world);
     // Their queues are full: each older client uploads more of its own.
     for (const phone of phones) {

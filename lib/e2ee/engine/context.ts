@@ -1,6 +1,7 @@
 import type { LookupReads } from "../lookup-reads";
 import { trimHistory, updateHistorySummary, cacheMessage } from "./history";
 import type { E2eeApiClient } from "../api";
+import type { ApiE2eeDevice } from "../api-types";
 import { MlsClient } from "../mls-adapter";
 import type {
   StoredDevice,
@@ -56,6 +57,12 @@ export interface EngineContext {
    * listed it: a sibling that replaced it may have updated (P60 §2 rule 6).
    */
   ownKeyPackages: Map<string, number | null>;
+  /**
+   * The profile's devices as GET /e2ee/me last listed them (at `lastMeAt`),
+   * revoked ones of the last 90 days included: the self-group claim budget
+   * is shared out from it (self-group-budget.ts).
+   */
+  ownDevices: ApiE2eeDevice[];
   lastWakeAt: number;
   openConversation: string | null;
   openUntil: number;

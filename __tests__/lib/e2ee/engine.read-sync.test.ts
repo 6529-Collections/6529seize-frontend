@@ -53,6 +53,8 @@ async function addSyncDevice(
   user: TestUser,
   extra: { readSync?: boolean } = { readSync: true }
 ): Promise<TestDevice> {
+  // Devices are added one after another, never in the same millisecond.
+  world.clock.advance(1000);
   const device = await startDevice(world, user.profileId, user.account, {
     extra,
   });
@@ -87,7 +89,34 @@ async function aliceWithTwoDevices(world: World) {
     kind: "dm",
   });
   await settle(world);
+  // Both devices have been around for over an hour, so their full shares
+  // of the self-group claim budget apply (self-group-budget.ts).
+  world.clock.advance(76 * 60_000);
+  await settle(world);
   return { alice, bob, laptop, phone, g };
+}
+
+/**
+ * The device loads a client with self groups: it replaces its last-resort
+ * KeyPackage as it starts, which tells its siblings it updated.
+ */
+async function updateClient(
+  world: World,
+  user: TestUser,
+  device: TestDevice
+): Promise<TestDevice> {
+  stopDevice(world, device);
+  const record = await device.storage.getDevice(user.profileId);
+  if (!record) throw new Error("no stored device");
+  delete record.lastResortSelfSync;
+  await device.storage.writeBatch(user.profileId, { device: record });
+  const updated = await startDevice(world, user.profileId, user.account, {
+    storage: device.storage,
+    enroll: false,
+    extra: { readSync: true },
+  });
+  user.devices.push(updated);
+  return updated;
 }
 
 describe("E2EE engine: read-state sync (D175, P60)", () => {
@@ -320,7 +349,7 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
 
   it("never cuts off a device that is not in the canonical self group yet", async () => {
     const world = await createWorld();
-    const { bob, laptop, phone, g } = await aliceWithTwoDevices(world);
+    const { alice, bob, laptop, phone, g } = await aliceWithTwoDevices(world);
     const [old] = selfGroupsOf(world, "alice");
     if (!old) throw new Error("no self group");
     const phoneKey = phone.engine.getThisDevice()?.deviceKey ?? "";
@@ -355,10 +384,12 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     await settle(world);
     expect(unread(phone, g)).toBe(0);
 
-    // Once the phone can be added, it is, at the first pass after the
-    // making of all those groups leaves room in the hour's self-group claim
-    // budget; then both leave the old group.
+    // Once the phone updates (replacing its last-resort KeyPackage), it is
+    // added, at the first pass after the making of all those groups leaves
+    // room in the hour's self-group claim budget; then both leave the old
+    // group.
     capable.mockRestore();
+    await updateClient(world, alice, phone);
     world.clock.advance(61 * 60_000);
     await settle(world);
     const kept = dsGroups(world).find((group) => group.g === canonical);
@@ -392,13 +423,15 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     await settle(world);
     expect(unread(phone, g)).toBe(1);
 
-    // The phone updates: the next maintenance adds it, and the laptop's
-    // snapshot catches it up.
+    // The phone updates and replaces its last-resort KeyPackage; within
+    // the hour's claim budget the laptop adds it, and its snapshot catches
+    // it up.
     capable.mockRestore();
-    world.clock.advance(11 * 60_000);
+    const updated = await updateClient(world, alice, phone);
+    world.clock.advance(61 * 60_000);
     await settle(world);
     expect(self.roster.has(phoneKey)).toBe(true);
-    expect(unread(phone, g)).toBe(0);
+    expect(unread(updated, g)).toBe(0);
   });
 
   it("creates its own self group only when joining stalls, then settles on one", async () => {
@@ -422,8 +455,21 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
       extra: { readSync: true },
     });
     alice.devices.push(laptop);
-    world.clock.advance(11 * 60_000);
-    await settle(world);
+    // The laptop adds the tablet to its group. The tablet, new, makes no
+    // claims of its own for 75 minutes (self-group-budget.ts); if its own
+    // group has the lower handle, it adds the laptop once settled.
+    for (
+      let step = 0;
+      step < 10 &&
+      !(
+        selfGroupsOf(world, "alice").length === 1 &&
+        selfGroupsOf(world, "alice")[0]?.roster.size === 2
+      );
+      step += 1
+    ) {
+      world.clock.advance(11 * 60_000);
+      await settle(world);
+    }
     const [kept, ...others] = selfGroupsOf(world, "alice");
     expect(others).toEqual([]);
     expect(kept?.roster.size).toBe(2);

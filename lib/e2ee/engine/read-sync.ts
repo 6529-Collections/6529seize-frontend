@@ -8,7 +8,7 @@ import {
   type ReadSyncPayload,
   type ReadSyncType,
 } from "../read-sync-payload";
-import type { StoredGroup, StoredReadSync } from "../records";
+import type { StoredReadSync } from "../records";
 import {
   checkpoint,
   DAY_MS,
@@ -23,6 +23,11 @@ import { E2eeError } from "./errors";
 import { sleep } from "./runtime";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
+import {
+  activeSelfGroups,
+  canonicalSelfGroup,
+  isSelfGroup,
+} from "./self-groups";
 
 /**
  * Read-state sync between one user's own devices (D175, design P60).
@@ -61,9 +66,6 @@ const TIMER_ANSWER = "read-sync:answer";
 const TIMER_SNAPSHOT = "read-sync:snapshot";
 const TIMER_HELLO = "read-sync:hello";
 
-const isSelfGroup = (record: StoredGroup): boolean =>
-  record.metadata.kind === "self";
-
 /**
  * Runs `step` for each item, one after another. Sends go out in order on
  * purpose: each runs in the engine's serial queue, and a burst would only
@@ -77,23 +79,6 @@ const inOrder = <T>(
     (previous, item, index) => previous.then(() => step(item, index)),
     Promise.resolve()
   );
-
-const activeSelfGroups = (ctx: EngineContext): GroupRuntime[] =>
-  [...ctx.store.groups.values()].filter(
-    (runtime) => isActive(runtime) && isSelfGroup(runtime.record)
-  );
-
-/**
- * The canonical self group: the active one with the lowest handle. Group
- * handles break creation races, so device clocks never matter (P60 §2).
- */
-function canonicalSelfGroup(ctx: EngineContext): GroupRuntime | null {
-  return activeSelfGroups(ctx).reduce<GroupRuntime | null>(
-    (best, runtime) =>
-      !best || runtime.record.g < best.record.g ? runtime : best,
-    null
-  );
-}
 
 /**
  * The handoff from `group` to `canonical` is verified when every other

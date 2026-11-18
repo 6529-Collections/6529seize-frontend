@@ -4,11 +4,12 @@ import type { ApiE2eeDevice } from "../api-types";
 import type { E2eeUntrustedDevice } from "../types";
 import type { WasmCommitOps } from "../wasm-types";
 import { claimedDevices, claimKeyPackages, isUsableDevice } from "./claims";
+import { canonicalSelfGroup } from "./self-groups";
 import {
   knownOlderClient,
   saveSelfGroupClaims,
   selfGroupPackages,
-  takeSelfGroupClaim,
+  reserveSelfGroupClaim,
 } from "./self-group-claims";
 import { submitCommit, type CommitIntent, type CommitOutcome } from "./commit";
 import {
@@ -218,11 +219,18 @@ export function requiredChangesPlanner(options: {
     });
     const removals = [...changes.strictRemovals, ...changes.idleRemovals];
     const selfGroup = runtime.record.metadata.kind === "self";
+    // Siblings are added to the canonical self group only (the others are
+    // left once it holds everyone), and not while known to run an older
+    // client.
+    const addsHere =
+      !selfGroup || canonicalSelfGroup(ctx)?.record.g === runtime.record.g;
     const addTargets = new Map<string, string[]>();
     const adds = [
       ...changes.ownAdds
-        // A self group skips siblings known to run an older client.
-        .filter((deviceKey) => !selfGroup || !knownOlderClient(ctx, deviceKey))
+        .filter(
+          (deviceKey) =>
+            addsHere && (!selfGroup || !knownOlderClient(ctx, deviceKey))
+        )
         .map((deviceKey) => ({
           profileId: ctx.profileId,
           deviceKey,
@@ -238,7 +246,7 @@ export function requiredChangesPlanner(options: {
     // Self groups claim within their budget (self-group-claims.ts); with it
     // spent, their adds wait for a later pass.
     const mayClaim =
-      addTargets.size > 0 && (!selfGroup || takeSelfGroupClaim(ctx));
+      addTargets.size > 0 && (!selfGroup || (await reserveSelfGroupClaim(ctx)));
     const claimed = mayClaim
       ? await claimKeyPackages(
           ctx,

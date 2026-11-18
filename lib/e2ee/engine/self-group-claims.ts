@@ -5,6 +5,7 @@ import {
   type ClaimedPackage,
 } from "./claims";
 import { checkpoint, type EngineContext } from "./context";
+import { budgetDevice, selfGroupClaimShare } from "./self-group-budget";
 
 /**
  * KeyPackage claims for self groups (P60 §2 rule 6).
@@ -20,8 +21,9 @@ import { checkpoint, type EngineContext } from "./context";
  * starting chats, and all of a profile's devices count against it. Self
  * groups therefore keep to a budget of 24 claims an hour per profile (a
  * fifth), so at least 96 always stay for the user's own chats:
- * - the profile's device with the lowest key may make 24 - 2 per other
- *   device, every other device 2, in any rolling hour;
+ * - each device keeps to its share of the budget (self-group-budget.ts) in
+ *   any rolling hour, and records each claim before sending it, so a
+ *   reload never forgets one the server may have counted;
  * - one sibling is claimed through per pass, and what the budget leaves
  *   is claimed at later passes (claims already made stay used up, so the
  *   queue keeps shrinking);
@@ -32,8 +34,6 @@ import { checkpoint, type EngineContext } from "./context";
  *   window ends (claims.ts).
  */
 
-const SELF_GROUP_CLAIMS_PER_HOUR = 24;
-const CLAIMS_PER_OTHER_DEVICE = 2;
 /**
  * Most claims of one sibling in one claim-through pass: a queue holds at
  * most 30 one-time KeyPackages, and past them, or past the server's limit
@@ -42,24 +42,27 @@ const CLAIMS_PER_OTHER_DEVICE = 2;
 const MAX_CLAIM_THROUGH = 31;
 
 /** This device's share of the profile's self-group claim budget an hour. */
-function claimAllowance(ctx: EngineContext): number {
+function claimShare(ctx: EngineContext): number {
   const own = ctx.device?.deviceKey;
-  const devices = [...ctx.ownKeyPackages.keys()];
-  const lowest = devices.reduce<string | null>(
-    (best, key) => (best === null || key < best ? key : best),
-    null
-  );
-  return own !== undefined && lowest === own
-    ? SELF_GROUP_CLAIMS_PER_HOUR -
-        CLAIMS_PER_OTHER_DEVICE * Math.max(0, devices.length - 1)
-    : CLAIMS_PER_OTHER_DEVICE;
+  return own === undefined
+    ? 0
+    : selfGroupClaimShare({
+        own,
+        devices: ctx.ownDevices.map(budgetDevice),
+        now: ctx.now(),
+        listedAt: ctx.lastMeAt,
+      });
 }
 
 /**
- * Takes one claim from this device's self-group budget; false when it is
- * spent for now. Persisted by `saveSelfGroupClaims`.
+ * Reserves one claim of this device's self-group budget and records it on
+ * the device record before the claim is sent: a claim that never reaches
+ * the server stays counted, and a reload never forgets one that did. False
+ * when the budget is spent for now.
  */
-export function takeSelfGroupClaim(ctx: EngineContext): boolean {
+export async function reserveSelfGroupClaim(
+  ctx: EngineContext
+): Promise<boolean> {
   const stored = ctx.device;
   if (!stored) {
     return false;
@@ -73,12 +76,16 @@ export function takeSelfGroupClaim(ctx: EngineContext): boolean {
   const recent = (state.selfGroupClaims ?? []).filter(
     (at) => now - at < CLAIM_WINDOW_MS
   );
-  const allowed = recent.length < claimAllowance(ctx);
-  state.selfGroupClaims = allowed ? [...recent, now] : recent;
-  return allowed;
+  if (recent.length >= claimShare(ctx)) {
+    state.selfGroupClaims = recent;
+    return false;
+  }
+  state.selfGroupClaims = [...recent, now];
+  await checkpoint(ctx, { device: stored, skipWasm: true });
+  return true;
 }
 
-/** Writes the budget (and claim-through marks) to the device record. */
+/** Writes the claim-through marks to the device record. */
 export async function saveSelfGroupClaims(ctx: EngineContext): Promise<void> {
   if (ctx.device) {
     await checkpoint(ctx, { device: ctx.device, skipWasm: true });
@@ -87,8 +94,8 @@ export async function saveSelfGroupClaims(ctx: EngineContext): Promise<void> {
 
 /**
  * The capable packages among `packages`; claims through one sibling whose
- * queue is due. The caller took its claim with `takeSelfGroupClaim` and
- * saves the budget afterwards.
+ * queue is due. The caller reserved its claim with `reserveSelfGroupClaim`
+ * and saves the record afterwards.
  */
 export async function selfGroupPackages(
   ctx: EngineContext,
@@ -194,7 +201,7 @@ async function claimThrough(
   const mls = ctx.mls;
   const key = device.device_key.toLowerCase();
   for (let claims = 1; mls && claims < MAX_CLAIM_THROUGH; claims += 1) {
-    if (!takeSelfGroupClaim(ctx)) {
+    if (!(await reserveSelfGroupClaim(ctx))) {
       return { capable: null, done: false };
     }
     const claim = await claimKeyPackages(
