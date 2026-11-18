@@ -186,9 +186,7 @@ describe("E2eeBackupPanel", () => {
   });
 
   it("shows a replacement's failed queued run with Try again, then finishes", async () => {
-    const manager = fakeManager(
-      snapshot({ phase: "on", lastBackupAt: 2000 })
-    );
+    const manager = fakeManager(snapshot({ phase: "on", lastBackupAt: 2000 }));
     queueRepair(manager);
     renderPanel(manager);
     fireEvent.click(
@@ -415,7 +413,9 @@ describe("E2eeBackupPanel", () => {
       ]);
       expect(screen.getAllByText("Replace your recovery code")).toHaveLength(1);
       expect(
-        screen.getByText(/^You revoked 3 devices after this backup was set up\./)
+        screen.getByText(
+          /^You revoked 3 devices after this backup was set up\./
+        )
       ).toBeVisible();
       expect(
         screen.getAllByRole("button", { name: "Replace recovery code" })
@@ -485,7 +485,9 @@ describe("E2eeBackupPanel", () => {
     act(() => {
       manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
     });
-    expect(screen.queryByText("Backing up your history…")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("Backing up your history…")
+    ).not.toBeInTheDocument();
     expect(screen.getByText(/^Last backed up /)).toBeInTheDocument();
   });
 
@@ -497,9 +499,9 @@ describe("E2eeBackupPanel", () => {
       );
       renderPanel(manager);
       fireEvent.click(screen.getByRole("button", { name: "Back up now" }));
-      const status = (
-        await screen.findByText("Backup is up to date.")
-      ).closest("output")!;
+      const status = (await screen.findByText("Backup is up to date.")).closest(
+        "output"
+      )!;
       expect(status).toHaveTextContent("Backup is up to date.");
       expect(screen.queryByText("Backed up")).not.toBeInTheDocument();
       act(() => {

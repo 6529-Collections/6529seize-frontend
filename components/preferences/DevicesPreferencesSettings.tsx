@@ -151,7 +151,10 @@ function getRevokeDialogCopy(
         : "signedMessages.devices.revokeProofTitle",
       { label }
     ),
-    message: t(locale, linkedHistoryKey ?? "signedMessages.devices.revokeConfirm"),
+    message: t(
+      locale,
+      linkedHistoryKey ?? "signedMessages.devices.revokeConfirm"
+    ),
     confirmText: t(locale, "signedMessages.devices.revoke"),
   };
 }
@@ -279,6 +282,64 @@ function EnableSignedMessagesButton() {
   );
 }
 
+/**
+ * Encryption devices enrolled by a combined grant (by grant id), and the
+ * ones listed on their own: separate grants, or a grant not listed here.
+ */
+function splitEncryptedDevices(
+  devices: readonly ApiE2eeDevice[],
+  grants: readonly ApiDeviceGrant[]
+) {
+  const combined = (device: ApiE2eeDevice) =>
+    device.grant_message !== null && device.grant_message !== undefined;
+  return {
+    linkedDevices: new Map(
+      devices
+        .filter((device) => combined(device))
+        .map((device) => [device.grant_id, device])
+    ),
+    separateDevices: devices.filter(
+      (device) =>
+        !combined(device) ||
+        !grants.some((grant) => grant.id === device.grant_id)
+    ),
+  };
+}
+
+/**
+ * The grant being revoked: its linked encryption device, whether its
+ * signing key is this browser's (`own`), and whether it is this browser at
+ * all (`thisBrowser`): the same check as the cleanup after the revoke, so
+ * an encryption-device match counts too (also when the keys can't be read).
+ */
+function getPendingRevokeOwnership(
+  pending: ApiDeviceGrant | null,
+  {
+    linkedDevices,
+    ownKeys,
+    isThisBrowser,
+  }: {
+    readonly linkedDevices: ReadonlyMap<string, ApiE2eeDevice>;
+    readonly ownKeys: ReadonlySet<string>;
+    readonly isThisBrowser: (device: ApiE2eeDevice, ownGrant: boolean) => boolean;
+  }
+): {
+  readonly linked: ApiE2eeDevice | undefined;
+  readonly own: boolean;
+  readonly thisBrowser: boolean;
+} {
+  if (pending === null) {
+    return { linked: undefined, own: false, thisBrowser: false };
+  }
+  const linked = linkedDevices.get(pending.id);
+  const own = ownKeys.has(pending.device_key.toLowerCase());
+  return {
+    linked,
+    own,
+    thisBrowser: linked ? isThisBrowser(linked, own) : own,
+  };
+}
+
 export default function DevicesPreferencesSettings() {
   const locale = useBrowserLocale();
   const titleId = useId();
@@ -339,37 +400,25 @@ export default function DevicesPreferencesSettings() {
   const encryptedDevices = encryptionEnabled
     ? (encryptionDevices.data ?? [])
     : [];
-  const linkedDevices = new Map(
-    encryptedDevices
-      .filter(
-        (device) =>
-          device.grant_message !== null && device.grant_message !== undefined
-      )
-      .map((device) => [device.grant_id, device])
-  );
-  const separateDevices = encryptedDevices.filter(
-    (device) =>
-      device.grant_message === null ||
-      device.grant_message === undefined ||
-      !grants.some((grant) => grant.id === device.grant_id)
+  const { linkedDevices, separateDevices } = splitEncryptedDevices(
+    encryptedDevices,
+    grants
   );
   const canVerifyRevocation =
     !encryptionEnabled ||
     (encryptionDevices.isSuccess && !encryptionDevices.isError);
-  const pendingLinkedDevice = pendingRevoke
-    ? linkedDevices.get(pendingRevoke.id)
-    : undefined;
   // Both sides lowercase: missing this browser would skip the stricter
   // "Revoke this browser?" dialog and its encrypted-chats warning.
   const ownKeys = new Set(local.publicKeys.map((key) => key.toLowerCase()));
-  const pendingIsOwn =
-    pendingRevoke !== null &&
-    ownKeys.has(pendingRevoke.device_key.toLowerCase());
-  // The same check as the cleanup after the revoke: this browser's signing
-  // key, or its encrypted-messages device (also when the keys can't be read).
-  const revokingThisBrowser = pendingLinkedDevice
-    ? linkedRevocation.isThisBrowser(pendingLinkedDevice, pendingIsOwn)
-    : pendingIsOwn;
+  const {
+    linked: pendingLinkedDevice,
+    own: pendingIsOwn,
+    thisBrowser: revokingThisBrowser,
+  } = getPendingRevokeOwnership(pendingRevoke, {
+    linkedDevices,
+    ownKeys,
+    isThisBrowser: linkedRevocation.isThisBrowser,
+  });
 
   const confirmRevoke = async () => {
     if (!canVerifyRevocation || !pendingRevoke || revokingRef.current) return;

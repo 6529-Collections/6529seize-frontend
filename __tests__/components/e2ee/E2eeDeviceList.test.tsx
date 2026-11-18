@@ -79,7 +79,9 @@ describe("E2eeDeviceList", () => {
     expect(within(thisRow).getByText("Active now")).toBeInTheDocument();
     const phoneRow = rowOf("6529 app on iPhone");
     expect(within(phoneRow).getByText(/^Last active /)).toBeInTheDocument();
-    expect(within(phoneRow).getByText(/^Expires \w{3} \d{1,2}, 20\d\d$/)).toBeInTheDocument();
+    expect(
+      within(phoneRow).getByText(/^Expires \w{3} \d{1,2}, 20\d\d$/)
+    ).toBeInTheDocument();
     expect(screen.queryByText(/^Last seen/)).not.toBeInTheDocument();
   });
 

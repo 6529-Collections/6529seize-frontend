@@ -99,11 +99,9 @@ export function E2eeRecoveryCodeDialog({
     manager.getSnapshot,
     manager.getSnapshot
   );
-  const runFailed =
-    waiting && !snapshot.busy && snapshot.lastError !== null;
+  const runFailed = waiting && !snapshot.busy && snapshot.lastError !== null;
   const shownErrorKey =
-    errorKey ??
-    (runFailed ? getBackupErrorKey(snapshot.lastError) : null);
+    errorKey ?? (runFailed ? getBackupErrorKey(snapshot.lastError) : null);
   // Gone on the server: retrying can't upload anything.
   const replaced = shownErrorKey === "e2ee.backup.error.replaced";
 
