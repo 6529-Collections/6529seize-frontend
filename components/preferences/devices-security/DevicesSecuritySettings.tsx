@@ -15,7 +15,33 @@ import { DeviceRow, HistoryRow } from "./DeviceRow";
 import { RenameDeviceDialog } from "./RenameDeviceDialog";
 import { RevokeDeviceDialog } from "./RevokeDeviceDialog";
 import { ThisDeviceCard } from "./ThisDeviceCard";
-import { useSecurityDevices } from "./useSecurityDevices";
+import {
+  DeviceChangedError,
+  type SecurityDevicesState,
+  useSecurityDevices,
+} from "./useSecurityDevices";
+
+/** The listed device with this id now (null once it's gone). */
+function findDevice(
+  security: SecurityDevicesState,
+  id: string
+): SecurityDevice | null {
+  return (
+    [
+      security.thisDevice,
+      ...security.otherDevices,
+      ...security.earlierSetups,
+    ].find((device) => device?.id === id) ?? null
+  );
+}
+
+/** What a revoke of this device stops, and whose dialog it gets. */
+const revokeScope = (device: SecurityDevice): string =>
+  [
+    device.signedPosts?.status === "active",
+    device.encryptedDms?.status === "active",
+    device.isThisDevice,
+  ].join(":");
 
 function PermissionsExplainer() {
   const locale = useBrowserLocale();
@@ -66,7 +92,9 @@ export default function DevicesSecuritySettings() {
   const security = useSecurityDevices();
   const [target, setTarget] = useState<SecurityDevice | null>(null);
   const [renaming, setRenaming] = useState<SecurityDevice | null>(null);
-  const [cleaningUp, setCleaningUp] = useState(false);
+  // Each clean-up opening is a new run: it starts from the devices listed
+  // when it opens.
+  const [cleanUp, setCleanUp] = useState({ open: false, run: 0 });
   const [announcement, setAnnouncement] = useState<string | null>(null);
 
   if (security.proxy) {
@@ -79,10 +107,20 @@ export default function DevicesSecuritySettings() {
     );
   }
 
+  // Revoke what the list shows now: the row may have changed while the
+  // dialog was open (for example the engine linked its encrypted device).
   const revoke = async (device: SecurityDevice) => {
-    await security.revoke(device);
+    const current = findDevice(security, device.id);
+    if (!current || revokeScope(current) !== revokeScope(device)) {
+      if (current) {
+        // The dialog now says what this revoke stops.
+        setTarget(current);
+      }
+      throw new DeviceChangedError();
+    }
+    await security.revoke(current);
     setAnnouncement(
-      t(locale, "devicesSecurity.revoke.done", { label: device.label })
+      t(locale, "devicesSecurity.revoke.done", { label: current.label })
     );
   };
 
@@ -190,7 +228,9 @@ export default function DevicesSecuritySettings() {
                     <Button
                       variant="secondary"
                       size="sm"
-                      onClick={() => setCleaningUp(true)}
+                      onClick={() => {
+                        setCleanUp(({ run }) => ({ open: true, run: run + 1 }));
+                      }}
                     >
                       {t(locale, "devicesSecurity.earlier.cleanUp")}
                     </Button>
@@ -253,10 +293,12 @@ export default function DevicesSecuritySettings() {
         onClose={() => setTarget(null)}
       />
       <CleanUpDialog
+        key={cleanUp.run}
+        signed={security.signsRevocations}
         devices={security.earlierSetups.filter(security.canRevoke)}
-        open={cleaningUp}
+        open={cleanUp.open}
         onRevoke={security.revoke}
-        onClose={() => setCleaningUp(false)}
+        onClose={() => setCleanUp(({ run }) => ({ open: false, run }))}
         onDone={(count) =>
           setAnnouncement(
             tCount(

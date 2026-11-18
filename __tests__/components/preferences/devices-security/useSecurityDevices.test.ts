@@ -215,7 +215,12 @@ describe("useSecurityDevices", () => {
     it("removes this browser's encrypted chats after an unsigned revoke of its combined grant", async () => {
       // The engine isn't running, so the server revokes this browser's
       // encrypted device unsigned and nothing here would clear it.
-      mockE2ee = { engine: null, status: "locked", devices: [] };
+      mockE2ee = {
+        engine: null,
+        status: "locked",
+        devices: [],
+        localDeviceKey: "0xABC",
+      };
       mockGrants = [grant("a", { device_key: OWN_KEY })];
       mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
       mockApiQuery = {
@@ -229,6 +234,69 @@ describe("useSecurityDevices", () => {
       await act(() => result.current.revoke(device!));
       expect(mockRevokeGrant).toHaveBeenCalledWith(mockGrants[0]);
       expect(mockRemoveLocal).toHaveBeenCalled();
+    });
+
+    it("keeps this browser's chats when an old grant of its signing key enrolled another device", async () => {
+      // This browser's signing key is the grant's, but the grant's
+      // encrypted device isn't this browser's current one: its data isn't
+      // here, so nothing local is removed.
+      mockE2ee = {
+        engine: null,
+        status: "locked",
+        devices: [],
+        localDeviceKey: "0xdef",
+      };
+      mockGrants = [grant("a", { device_key: OWN_KEY })];
+      mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
+      mockApiQuery = {
+        ...mockApiQuery,
+        isSuccess: true,
+        data: [apiDevice("0xabc", { grant_id: "a", grant_message: "signed" })],
+      };
+      const { result } = renderHook(() => useSecurityDevices());
+      const device = result.current.thisDevice;
+      expect(device?.encryptedDevice?.deviceKey).toBe("0xabc");
+      await act(() => result.current.revoke(device!));
+      expect(mockRevokeGrant).toHaveBeenCalledWith(mockGrants[0]);
+      expect(mockRemoveLocal).not.toHaveBeenCalled();
+    });
+
+    it("shows fresh API data after an unsigned revoke at the device limit", async () => {
+      // At the limit the engine lists devices but can't sign or reload:
+      // its list would keep showing encrypted DMs as on.
+      mockE2ee = {
+        engine,
+        status: "device-limit",
+        devices: [
+          engineDevice("e1", { authorProofGrantId: "a", linkedAuthorProof: true }),
+        ],
+      };
+      mockGrants = [grant("a")];
+      const { result, rerender } = renderHook(() => useSecurityDevices());
+      expect(mockApiQueryEnabled).toBe(false);
+      const [device] = result.current.otherDevices;
+      expect(device?.encryptedDms?.status).toBe("active");
+      await act(() => result.current.revoke(device!));
+      expect(engine.revokeDevice).not.toHaveBeenCalled();
+      expect(mockRevokeGrant).toHaveBeenCalledWith(mockGrants[0]);
+      mockApiQuery = {
+        ...mockApiQuery,
+        isSuccess: true,
+        data: [
+          apiDevice("e1", {
+            grant_id: "a",
+            grant_message: "signed",
+            revoked_at: NOW,
+          }),
+        ],
+      };
+      rerender();
+      expect(mockApiQueryEnabled).toBe(true);
+      // The grant list refetches separately; here only the encrypted
+      // device's state is checked.
+      expect(result.current.otherDevices[0]?.encryptedDms?.status).toBe(
+        "revoked"
+      );
     });
 
     it("leaves local data alone when revoking another device's grant", async () => {

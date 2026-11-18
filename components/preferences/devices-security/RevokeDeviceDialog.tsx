@@ -9,7 +9,10 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { SecurityDevice } from "./classifyDevices";
 import { DeviceMeta } from "./DeviceParts";
-import { DeviceActionUnavailableError } from "./useSecurityDevices";
+import {
+  DeviceActionUnavailableError,
+  DeviceChangedError,
+} from "./useSecurityDevices";
 
 const isOn = (device: SecurityDevice, key: "signedPosts" | "encryptedDms") =>
   device[key]?.status === "active";
@@ -50,10 +53,14 @@ function getCopy(
   };
 }
 
-const getErrorKey = (error: unknown): MessageKey =>
-  error instanceof DeviceActionUnavailableError
+const getErrorKey = (error: unknown): MessageKey => {
+  if (error instanceof DeviceChangedError) {
+    return "devicesSecurity.revokeChanged";
+  }
+  return error instanceof DeviceActionUnavailableError
     ? "devicesSecurity.revokeUnavailable"
     : "e2ee.devices.revokeFailed";
+};
 
 /**
  * Confirms one revoke. The browser in use gets the stricter dialog: it can
