@@ -321,6 +321,8 @@ function createFakeDeliveryService(options = {}) {
     attachmentsEnabled: options.attachmentsEnabled !== false,
     // D172 transition window: v1 grants are honoured while it is open.
     v1GrantsAccepted: options.v1GrantsAccepted !== false,
+    // An API from before replace_one_time refuses the field (unknown key).
+    replaceOneTime: options.replaceOneTime !== false,
   };
 
   const id = (prefix) => `${prefix}${s.nextId++}`;
@@ -662,9 +664,30 @@ function createFakeDeliveryService(options = {}) {
     if (new Set(lastResortSuites).size !== lastResortSuites.length) {
       fail(400, "E2EE_BAD_REQUEST");
     }
+    const replace = body.replace_one_time;
+    if (
+      replace !== undefined &&
+      (!s.replaceOneTime || typeof replace !== "boolean")
+    ) {
+      fail(400, "E2EE_BAD_REQUEST");
+    }
     const pool = s.keyPackages.get(deviceKey);
     // Retention (7.2): KeyPackages are pruned at expiry.
     pool.oneTime = pool.oneTime.filter((kp) => kp.expires_at > now() / 1000);
+    // An updated client replaces its own unclaimed one-time KeyPackages of
+    // the uploaded suites; claimed and last-resort ones are untouched.
+    const uploaded = new Set(parsed.map((item) => item.suite));
+    const kept =
+      replace === true
+        ? pool.oneTime.filter((kp) => !uploaded.has(kp.suite))
+        : pool.oneTime;
+    if (
+      kept.length + parsed.filter((item) => !item.last_resort).length >
+      MAX_ONE_TIME
+    ) {
+      fail(409, "E2EE_TOO_LARGE");
+    }
+    pool.oneTime = kept;
     for (const item of parsed) {
       const kp = {
         data: item.data,
@@ -1730,6 +1753,10 @@ function createFakeDeliveryService(options = {}) {
     /** Applies the server's KeyPackage claim limits (fixed clock windows). */
     limitClaims(limits) {
       s.claimLimits = limits;
+    },
+    /** false: an API from before replace_one_time, which refuses it (400). */
+    setReplaceOneTime(enabled) {
+      s.replaceOneTime = enabled;
     },
     /**
      * Holds matching POSTs until released (FIFO), to force races such as two

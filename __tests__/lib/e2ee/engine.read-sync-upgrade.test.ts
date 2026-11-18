@@ -114,7 +114,7 @@ async function olderClientDevice(
 
 /**
  * The device loads the new client: same storage, read sync on. An older
- * client never wrote `lastResortSelfSync`.
+ * client never wrote `lastResortSelfSync` or `poolSelfSync`.
  */
 async function update(
   world: World,
@@ -129,6 +129,7 @@ async function update(
   const record = await device.storage.getDevice(user.profileId);
   if (!record) throw new Error("no stored device");
   delete record.lastResortSelfSync;
+  delete record.poolSelfSync;
   edit(record);
   await device.storage.writeBatch(user.profileId, { device: record });
   const updated = await startDevice(world, user.profileId, user.account, {
@@ -326,7 +327,7 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     for (const device of world.devices) device.engine.dispose();
   });
 
-  it("shares a self group within the hour's budget when the laptop's KeyPackages are older too", async () => {
+  it("shares a self group within minutes when the laptop's KeyPackages are older too", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice", { readSync: false });
     runsOlderClient(world, alice.primary, keyPackages.old);
@@ -346,13 +347,12 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     expect(claims()).toBeLessThanOrEqual(2 * SELF_GROUP_BUDGET);
 
     const g = await readOnLaptop(world, laptop);
-    const timeline = await phoneUpdates(world, alice, laptop, phone, g, 200);
+    const timeline = await phoneUpdates(world, alice, laptop, phone, g, 30);
     expect(timeline.capableKeyPackages).toBe(0);
-    // An older queue holds up to 30 KeyPackages; the device with the
-    // lowest key spends 20 claims on self groups per 70 minutes (an hour
-    // plus room for clock skew), the other 2, so one of them reaches a
-    // capable KeyPackage within about two hours.
-    expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(150);
+    // The phone replaced its older queue as it started (replace_one_time),
+    // so one claim of it returns a capable KeyPackage: measured 3.6 minutes
+    // (claiming through a full older queue took about two hours).
+    expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(10);
     expect(timeline.readStateSynced ?? Infinity).toBeLessThanOrEqual(
       (timeline.sharedGroup ?? Infinity) + 1
     );
@@ -365,10 +365,13 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
   /**
    * The laptop has a self group; the phone, on the older client with one
    * older KeyPackage left in its queue, updates but makes no self group of
-   * its own (it made one today), so only the laptop can add it.
+   * its own (it made one today), so only the laptop can add it. `olderApi`:
+   * the API predates replace_one_time, so the phone cannot replace that
+   * queue and the laptop claims through it.
    */
-  async function onlyTheLaptopCanAdd() {
+  async function onlyTheLaptopCanAdd({ olderApi }: { olderApi: boolean }) {
     const world = await createWorld();
+    world.ds.setReplaceOneTime(!olderApi);
     const alice = await addUser(world, "alice", { readSync: true });
     const laptop = alice.primary;
     await settle(world);
@@ -440,7 +443,7 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     };
   }
 
-  it("adds the updated phone to the laptop's group as soon as the laptop lists its new KeyPackage", async () => {
+  it("adds the updated phone to the laptop's group with one claim as soon as the laptop lists its new KeyPackages", async () => {
     const {
       world,
       updated,
@@ -450,20 +453,69 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
       claims,
       maintained,
       listDevices,
-    } = await onlyTheLaptopCanAdd();
-    // The phone's last-resort KeyPackage changed, so the laptop maintains
-    // its self group at once and claims through the older KeyPackage: two
-    // claims, within even the smallest share of the budget.
+    } = await onlyTheLaptopCanAdd({ olderApi: false });
+    // The phone replaced its older queue as it started.
+    expect(contextOf(updated).device?.poolSelfSync).toBe(true);
+    const pool = poolOf(world, phoneKey);
+    expect(pool?.oneTime).toHaveLength(30);
+    for (const kp of [
+      ...(pool?.oneTime ?? []),
+      ...(pool?.lastResort.values() ?? []),
+    ]) {
+      expect(keyPackages.old.has(kp.data)).toBe(false);
+    }
+    // Its last-resort KeyPackage changed, so the laptop maintains its self
+    // group at once; the first claim returns a capable KeyPackage.
+    await listDevices();
+    expect(maintained).toEqual([laptopGroup.g]);
+    expect(laptopGroup.roster.has(phoneKey)).toBe(true);
+    expect(claims()).toBe(1);
+    expect(updated.engine.getConversation(g)?.unread).toBe(0);
+    for (const device of world.devices) device.engine.dispose();
+  });
+
+  it("claims through the older queue when the API predates replace_one_time", async () => {
+    const {
+      world,
+      updated,
+      g,
+      phoneKey,
+      laptopGroup,
+      claims,
+      maintained,
+      listDevices,
+    } = await onlyTheLaptopCanAdd({ olderApi: true });
+    // The phone's request to replace its queue was refused (400), as when
+    // it was first set up; it replaced its last-resort KeyPackage as before.
+    const refused = () =>
+      world.ds.state.requests.filter(
+        (r) => r.path.endsWith(`${phoneKey}/key-packages`) && r.status === 400
+      ).length;
+    expect(refused()).toBe(2);
+    expect(contextOf(updated).poolReplaceRefused).toBe(true);
+    expect(contextOf(updated).device?.poolSelfSync).toBeUndefined();
+    expect(contextOf(updated).device?.lastResortSelfSync).toBe(true);
+    // The last-resort KeyPackage changed, so the laptop maintains its self
+    // group at once and claims through the older KeyPackage: two claims,
+    // within even the smallest share of the budget.
     await listDevices();
     expect(maintained).toEqual([laptopGroup.g]);
     expect(laptopGroup.roster.has(phoneKey)).toBe(true);
     expect(claims()).toBe(2);
     expect(updated.engine.getConversation(g)?.unread).toBe(0);
+    // The phone's later upkeep does not ask again.
+    await (
+      updated.engine as unknown as { refreshMe: () => Promise<void> }
+    ).refreshMe();
+    await settle(world);
+    expect(refused()).toBe(2);
     for (const device of world.devices) device.engine.dispose();
   });
 
   it("records each claim before sending it, so a reload mid-pass still counts it", async () => {
-    const { world, laptop, claims, listDevices } = await onlyTheLaptopCanAdd();
+    const { world, laptop, claims, listDevices } = await onlyTheLaptopCanAdd({
+      olderApi: true,
+    });
     const alice = world.users.get("alice");
     if (!alice) throw new Error("no alice");
     // The second claim of the pass (the claim-through) is held at the
@@ -511,7 +563,7 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
       laptopGroup,
       claims,
       listDevices,
-    } = await onlyTheLaptopCanAdd();
+    } = await onlyTheLaptopCanAdd({ olderApi: false });
     world.ds.addFault({
       method: "POST",
       path: /^e2ee\/key-packages\/claim$/u,
@@ -547,6 +599,79 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     expect(laptopGroup.roster.has(phoneKey)).toBe(true);
     expect(world.clock.now()).toBeLessThanOrEqual(windowEnd + 82 * MINUTE);
     expect(updated.engine.getConversation(g)?.unread).toBe(0);
+    for (const device of world.devices) device.engine.dispose();
+  });
+
+  it("joins two Chromes and a phone within minutes while an idle older browser has the lowest key (prxt, staging)", async () => {
+    const world = await createWorld();
+    world.ds.limitClaims({
+      perProfile: 120,
+      perTargetDevice: 30,
+      windowMs: 60 * MINUTE,
+    });
+    // Four devices on the older client, each with a full queue of older
+    // KeyPackages, all settled.
+    const alice = await addUser(world, "alice", { readSync: false });
+    runsOlderClient(world, alice.primary, keyPackages.old);
+    const devices = [alice.primary];
+    for (let index = 0; index < 3; index += 1) {
+      devices.push(await olderClientDevice(world, alice, keyPackages.old));
+    }
+    await settle(world);
+    world.clock.advance(96 * MINUTE);
+    await settle(world);
+    for (const device of devices) {
+      await fillQueue(world, device);
+    }
+    // The browser with the lowest key stays idle on the older client, so
+    // the budget's large share is its own and goes unused; the others get
+    // 2 claims per 70 minutes each. They update a few minutes apart: two
+    // Chromes, then the phone.
+    const [idle, ...active] = [...devices].sort((a, b) =>
+      keyOf(a) < keyOf(b) ? -1 : 1
+    );
+    if (!idle) throw new Error("no idle browser");
+    stopDevice(world, idle);
+    const claimsAtStart = claimsOf(world, "alice");
+    const updated: TestDevice[] = [];
+    for (const device of active) {
+      updated.push(await update(world, alice, device));
+      await settle(world);
+      world.clock.advance(2 * MINUTE);
+    }
+    const phoneUpdatedAt = world.clock.now() - 2 * MINUTE;
+    const [chrome] = updated;
+    if (!chrome) throw new Error("no Chrome");
+    const g = await readOnLaptop(world, chrome);
+    // Each replaced its older queue as it started, so one claim of it
+    // returns a KeyPackage a self group can add.
+    const keys = active.map(keyOf);
+    const together = () =>
+      selfGroupsOf(world, "alice").some((group) =>
+        keys.every((key) => group.roster.has(key))
+      );
+    const synced = () =>
+      updated.every((device) => device.engine.getConversation(g)?.unread === 0);
+    for (let step = 0; step < 30 && !(together() && synced()); step += 1) {
+      await settle(world);
+      world.clock.advance(MINUTE);
+    }
+    // Measured: about 4 minutes after the phone updated, with 6 claims (an
+    // API from before replace_one_time left them in three one-member
+    // groups for over 7 hours).
+    expect(together()).toBe(true);
+    expect(synced()).toBe(true);
+    expect(world.clock.now() - phoneUpdatedAt).toBeLessThanOrEqual(10 * MINUTE);
+    expect(claimsOf(world, "alice") - claimsAtStart).toBeLessThanOrEqual(
+      SELF_GROUP_BUDGET
+    );
+    expect(rateLimited(world, "alice")).toBe(0);
+    // The idle browser, on the older client, is never added.
+    expect(
+      selfGroupsOf(world, "alice").some((group) =>
+        group.roster.has(keyOf(idle))
+      )
+    ).toBe(false);
     for (const device of world.devices) device.engine.dispose();
   });
 
@@ -636,8 +761,9 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     for (const { claims, chats } of hours.values()) {
       expect(claims - chats).toBeLessThanOrEqual(SELF_GROUP_BUDGET);
     }
-    // One self group holds all five within the 12 hours simulated.
-    expect(allTogether).not.toBeNull();
+    // One self group holds all five within minutes (measured 6.6): each
+    // updated device replaced its older queue as it started.
+    expect(allTogether ?? Infinity).toBeLessThanOrEqual(15);
     for (const device of world.devices) device.engine.dispose();
   });
 });

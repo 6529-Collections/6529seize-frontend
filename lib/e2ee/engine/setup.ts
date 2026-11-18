@@ -86,6 +86,7 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
       (options.now
         ? options.now
         : () => globalThis.performance?.now() ?? Date.now()),
+    poolReplaceRefused: false,
     lastWakeAt: 0,
     openConversation: null,
     openUntil: 0,
