@@ -1,8 +1,8 @@
 import { historyKey, type HistoryKey } from "../history-order";
-import { loadMessage, trimHistory } from "./history";
+import { loadMessage, recountUnread, trimHistory } from "./history";
 import type { BackupHistory, BackupMessageRecord } from "../backup/format";
 import type { StoredGroup, StoredMessage } from "../records";
-import { checkpoint, type EngineContext } from "./context";
+import { checkpoint, ownDeviceKey, type EngineContext } from "./context";
 import { newRuntime } from "./groups";
 import type { GroupRuntime } from "./store";
 
@@ -20,11 +20,17 @@ export async function backupHistory(
   ctx: EngineContext
 ): Promise<BackupHistory> {
   const out: BackupHistory = { groups: [], messages: [] };
+  // Read positions go into the backup with read-state sync on (P60 §5).
+  const withReads = ctx.options.readSync === true;
+  const reads: Record<string, number> = {};
   for (const runtime of ctx.store.groups.values()) {
     const record = runtime.record;
     // A self group holds no history, only read-state sync (D175, P60).
     if (record.metadata.kind === "self") {
       continue;
+    }
+    if (withReads && record.readSeq > 0) {
+      reads[record.g] = record.readSeq;
     }
     out.groups.push({
       g: record.g,
@@ -48,6 +54,9 @@ export async function backupHistory(
       );
       after = historyKey(rows.at(-1)!);
     }
+  }
+  if (Object.keys(reads).length > 0) {
+    out.reads = reads;
   }
   return out;
 }
@@ -118,7 +127,14 @@ export async function importBackupHistory(
     history.groups.map((group) => [group.g.toLowerCase(), group])
   );
   const messagesByGroup = groupMessages(history.messages);
+  const reads = new Map(
+    Object.entries(history.reads ?? {}).map(([g, seq]) => [
+      g.toLowerCase(),
+      seq,
+    ])
+  );
   const touched: GroupRuntime[] = [];
+  const restoredHere = new Set<string>();
   let conversations = 0;
   let imported = 0;
   for (const [g, record] of records) {
@@ -129,8 +145,13 @@ export async function importBackupHistory(
     );
     let runtime = ctx.store.groups.get(g);
     if (!runtime) {
-      runtime = newRuntime(restoredGroup(record, maxSeq));
+      // P60 §5: the backed-up read position when there is one, but never
+      // past the chat's latest known message, the last one restored; without
+      // one everything restored counts as read, as before.
+      const read = Math.min(reads.get(g) ?? maxSeq, maxSeq);
+      runtime = newRuntime(restoredGroup(record, read));
       ctx.store.groups.set(g, runtime);
+      restoredHere.add(g);
       conversations += 1;
     }
     for (const message of restored) {
@@ -151,5 +172,74 @@ export async function importBackupHistory(
   if (touched.length > 0) {
     await checkpoint(ctx, { groups: touched, skipWasm: true });
   }
+  await applyBackedUpReads(
+    ctx,
+    new Map([...reads].filter(([g]) => !restoredHere.has(g)))
+  );
   return { conversations, messages: imported };
+}
+
+/**
+ * The latest position each joined chat is known to have: its last_seq as
+ * the server lists it now, else this device's own cursor (P60 §5).
+ */
+async function latestKnown(
+  ctx: EngineContext,
+  runtimes: readonly GroupRuntime[]
+): Promise<Map<string, number>> {
+  const listed = new Map<string, number>();
+  try {
+    for (const item of await ctx.api.getDeviceGroups(ownDeviceKey(ctx))) {
+      listed.set(item.group.toLowerCase(), item.last_seq);
+    }
+  } catch {
+    // Without the list, the device's own cursor is the latest it knows.
+  }
+  return new Map(
+    runtimes.map((runtime) => [
+      runtime.record.g,
+      listed.get(runtime.record.g) ?? runtime.record.cursor,
+    ])
+  );
+}
+
+/**
+ * Moves chats this device already has forward to a backed-up read position
+ * (never back), then recounts their unread messages (D175, P60 §5).
+ */
+async function applyBackedUpReads(
+  ctx: EngineContext,
+  reads: ReadonlyMap<string, number>
+): Promise<void> {
+  const candidates = [...reads].flatMap(([g, seq]) => {
+    const runtime = ctx.store.groups.get(g);
+    return runtime &&
+      runtime.record.metadata.kind !== "self" &&
+      seq > runtime.record.readSeq
+      ? [{ runtime, seq }]
+      : [];
+  });
+  if (candidates.length === 0) {
+    return;
+  }
+  // Never past the chat's latest known position: a backed-up position
+  // beyond it is cut to it, not applied blindly.
+  const latest = await latestKnown(
+    ctx,
+    candidates.map((item) => item.runtime)
+  );
+  const moved: GroupRuntime[] = [];
+  for (const { runtime, seq } of candidates) {
+    const position = Math.min(seq, latest.get(runtime.record.g) ?? 0);
+    if (position > runtime.record.readSeq) {
+      runtime.record.readSeq = position;
+      moved.push(runtime);
+    }
+  }
+  if (moved.length === 0) {
+    return;
+  }
+  await checkpoint(ctx, { groups: moved, skipWasm: true });
+  await Promise.all(moved.map((runtime) => recountUnread(ctx, runtime)));
+  await checkpoint(ctx, { groups: moved, skipWasm: true });
 }
