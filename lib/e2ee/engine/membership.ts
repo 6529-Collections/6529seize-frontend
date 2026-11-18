@@ -13,9 +13,14 @@ import {
   claimedDevices,
   claimKeyPackages,
   isUsableDevice,
-  selfGroupPackages,
   type ClaimedPackage,
 } from "./claims";
+import {
+  knownOlderClient,
+  saveSelfGroupClaims,
+  selfGroupPackages,
+  takeSelfGroupClaim,
+} from "./self-group-claims";
 import {
   checkpoint,
   ownDeviceKey,
@@ -324,6 +329,38 @@ async function claimForCreation(
 }
 
 /**
+ * A new self group's siblings, claimed within the self-group budget
+ * (self-group-claims.ts): past it, or past the server's claim limit, the
+ * group starts with this device alone and maintenance adds them later.
+ */
+async function claimSelfGroupSiblings(
+  ctx: EngineContext
+): Promise<ClaimedPackage[]> {
+  const siblings = (await ownSiblingDevices(ctx)).filter(
+    (key) => !knownOlderClient(ctx, key)
+  );
+  if (siblings.length === 0 || !takeSelfGroupClaim(ctx)) {
+    return [];
+  }
+  try {
+    const claim = await trustedClaim(
+      ctx,
+      await claimKeyPackages(ctx, [
+        { profile_id: ctx.profileId, device_keys: siblings },
+      ])
+    );
+    return await selfGroupPackages(ctx, claim.packages);
+  } catch (error) {
+    if (asE2eeApiError(error)?.code === "E2EE_RATE_LIMITED") {
+      return [];
+    }
+    throw error;
+  } finally {
+    await saveSelfGroupClaims(ctx);
+  }
+}
+
+/**
  * Creates a conversation, or with kind "self" the self group of this
  * profile's own devices (read-state sync, D175): its targets are ignored and
  * only this device's trusted siblings are added.
@@ -353,13 +390,14 @@ export async function createConversation(
   }
   const metadata = creationMetadata(ctx, input, peer);
   const g = metadata.g;
-  const claimed = await claimForCreation(
-    ctx,
-    targets,
-    input.kind === "dm" || input.requireAllRecipients === true
-  );
   const packages =
-    input.kind === "self" ? await selfGroupPackages(ctx, claimed) : claimed;
+    input.kind === "self"
+      ? await claimSelfGroupSiblings(ctx)
+      : await claimForCreation(
+          ctx,
+          targets,
+          input.kind === "dm" || input.requireAllRecipients === true
+        );
   const runtime = await createLocalGroup(ctx, metadata, predecessorG);
   const failure = await commitAdds(ctx, g, packages, () => {
     onDelayed(g);

@@ -69,12 +69,20 @@ export interface StoredReadSync {
    */
   waitingSince?: number;
   /**
-   * Siblings whose older KeyPackages this device claimed through, each with
-   * the expiry of that sibling's last-resort KeyPackage at the time (s), so
-   * it claims through again only once the sibling replaced it (P60 §2
-   * rule 6).
+   * Siblings this device claimed through to a last-resort KeyPackage that
+   * lacked the self-group capability, each with that KeyPackage's expiry
+   * (s): older clients, claimed no more until they replace it, as an
+   * update does (P60 §2 rule 6).
    */
   claimedThrough?: Record<string, number>;
+  /**
+   * When this device claimed KeyPackages for self groups in the last hour
+   * (ms): at most its share of the profile's self-group claim budget
+   * (engine/self-group-claims.ts).
+   */
+  selfGroupClaims?: number[];
+  /** No self-group claims until then (ms): the server refused a claim. */
+  claimsPausedUntil?: number;
 }
 
 /**

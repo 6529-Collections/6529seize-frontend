@@ -309,6 +309,12 @@ function createFakeDeliveryService(options = {}) {
     loginGrants: new Map(),
     subscribers: new Map(),
     faults: [],
+    /**
+     * The server's KeyPackage claim limits, off unless a test sets them:
+     * { perProfile, perTargetDevice, windowMs } (fixed clock windows).
+     */
+    claimLimits: null,
+    claimCounters: new Map(),
     tamper: null,
     requests: [],
     nextId: 1,
@@ -762,6 +768,13 @@ function createFakeDeliveryService(options = {}) {
     return decide(callerProfileId, targetProfileId, suite).status;
   }
 
+  function lastResortKeyPackage(deviceKey, suite) {
+    const lastResort = s.keyPackages.get(deviceKey)?.lastResort.get(suite);
+    return lastResort && lastResort.expires_at > now() / 1000
+      ? { data: lastResort.data, last_resort: true }
+      : null;
+  }
+
   function popKeyPackage(deviceKey, suite) {
     const pool = s.keyPackages.get(deviceKey);
     if (!pool) {
@@ -774,11 +787,17 @@ function createFakeDeliveryService(options = {}) {
       const [oneTime] = pool.oneTime.splice(index, 1);
       return { data: oneTime.data, last_resort: false };
     }
-    const lastResort = pool.lastResort.get(suite);
-    if (lastResort && lastResort.expires_at > t) {
-      return { data: lastResort.data, last_resort: true };
-    }
-    return null;
+    return lastResortKeyPackage(deviceKey, suite);
+  }
+
+  /** Counts one hit in a fixed window; true while within `limit`. */
+  function withinClaimLimit(key, limit) {
+    const windowMs = s.claimLimits.windowMs;
+    const t = now();
+    const counter = `${key}:${t - (t % windowMs)}`;
+    const hits = (s.claimCounters.get(counter) || 0) + 1;
+    s.claimCounters.set(counter, hits);
+    return hits <= limit;
   }
 
   function claim(profileId, body) {
@@ -788,6 +807,13 @@ function createFakeDeliveryService(options = {}) {
     const suite = body.ciphersuite ?? claimerDevice.grant.ciphersuite;
     if (!canJoin(claimerDevice, suite)) {
       fail(400, "E2EE_BAD_REQUEST");
+    }
+    // Like the server: every claim counts against the claimer's profile.
+    if (
+      s.claimLimits &&
+      !withinClaimLimit(`claim:${profileId}`, s.claimLimits.perProfile)
+    ) {
+      fail(429, "E2EE_RATE_LIMITED");
     }
     const group = body.group ? s.groups.get(lower(body.group)) : null;
     const claimerInGroup = group ? group.roster.has(claimer) : false;
@@ -811,7 +837,17 @@ function createFakeDeliveryService(options = {}) {
         if (wanted && !wanted.has(device.device_key)) {
           continue;
         }
-        const kp = popKeyPackage(device.device_key, suite);
+        // Past the per-device claim limit the server hands out the
+        // last-resort KeyPackage instead of a one-time one.
+        const limited =
+          s.claimLimits &&
+          !withinClaimLimit(
+            `claimed:${device.device_key}`,
+            s.claimLimits.perTargetDevice
+          );
+        const kp = limited
+          ? lastResortKeyPackage(device.device_key, suite)
+          : popKeyPackage(device.device_key, suite);
         if (kp) {
           keyPackages.push({
             device,
@@ -1690,6 +1726,10 @@ function createFakeDeliveryService(options = {}) {
     },
     clearFaults() {
       s.faults = [];
+    },
+    /** Applies the server's KeyPackage claim limits (fixed clock windows). */
+    limitClaims(limits) {
+      s.claimLimits = limits;
     },
     /**
      * Holds matching POSTs until released (FIFO), to force races such as two
