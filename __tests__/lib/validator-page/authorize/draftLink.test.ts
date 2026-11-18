@@ -5,6 +5,7 @@ import { decodeDraftLink } from "@/lib/validator-page/authorize/draftLink";
 import {
   checkTypedData,
   grantDigest,
+  MAINNET_SALT,
   toSignableTypedData,
   type GrantTypedData,
 } from "@/lib/validator-page/authorize/typedData";
@@ -98,6 +99,7 @@ describe("decodeDraftLink", () => {
     expect(draft!.typedDataJson).toBe(fixture.typed_data);
     expect(draft).toMatchObject({
       network: "mainnet",
+      salt: MAINNET_SALT,
       account: fixture.account,
       authVersion: 3n,
       keys: [
@@ -135,7 +137,16 @@ describe("decodeDraftLink", () => {
     const salt = `0x${"ab".repeat(32)}`;
     const draft = decodeDraftLink(encode({ network: 1, salt }))!;
     expect(draft.network).toBe("test");
+    expect(draft.salt).toBe(salt);
     expect(JSON.parse(draft.typedDataJson).domain.salt).toBe(salt);
+  });
+
+  it("refuses a test network link that carries the mainnet salt", () => {
+    // The validator writes the mainnet salt only as network 0; signed, such
+    // a link's grant would count on mainnet under a test label.
+    expect(
+      decodeDraftLink(encode({ network: 1, salt: MAINNET_SALT }))
+    ).toBeNull();
   });
 
   it("reads a stop: no keys", () => {

@@ -37,7 +37,11 @@ function getBackupState(snapshot: E2eeBackupSnapshot | null): BackupState {
  * to the page that has it.
  */
 type SetUpBackupAction =
-  | { readonly onClick: () => void }
+  | {
+      readonly onClick: () => void;
+      /** While the revoke runs: leaving would hide its outcome. */
+      readonly disabled?: boolean | undefined;
+    }
   | { readonly href: string };
 
 function SetUpBackupFirst({
@@ -59,7 +63,12 @@ function SetUpBackupFirst({
     );
   }
   return (
-    <Button variant="secondary" size="sm" onClick={action.onClick}>
+    <Button
+      variant="secondary"
+      size="sm"
+      onClick={action.onClick}
+      disabled={action.disabled === true}
+    >
       {t(locale, labelKey)}
     </Button>
   );

@@ -117,6 +117,20 @@ operations can queue unrelated requests. The variable must be present when the
 process starts, so it lives in the launch configuration rather than in
 application code. Keep the three launch paths in step when changing it.
 
+## API access gate
+
+Enter your team code in the **Team Login** field and press Enter. The field
+shows **Enter password** when empty and displays the characters as you type.
+The field stays locked while the page shows **Verifying code…** and then
+**Opening page…**. If verification fails, you can edit the code and retry.
+If the API reports that access is restricted, the browser opens `/restricted`.
+After a successful check, the browser opens the requested page, including its
+query string and fragment. Opening `/access` directly sends you to the home
+page after the code is accepted.
+The access page centers artwork supplied by the API on a black background
+and keeps the login field at the bottom. When the API supplies no artwork,
+the page shows the white 6529 logo on black.
+
 ## Staging crawler cards
 
 Open Graph and crawler cards on staging intentionally require the visitor's
@@ -289,8 +303,9 @@ still use them. Staging serves static files from its own server
 
 The build no longer bakes the Sentry release into the client bundle
 (`config/sentryBuildRelease.ts`), so it no longer creates the release either.
-After Elastic Beanstalk serves the new commit and the version announcement is
-published, `Web Deploy - PROD` records it. `ops/scripts/sentry-release.sh`
+After the deploy job succeeds (Elastic Beanstalk serves the new commit and the
+version announcement is published), the `Record Sentry release` job of
+`Web Deploy - PROD` records it. `ops/scripts/sentry-release.sh`
 makes the same three `sentry-cli` calls the build plugin used to make:
 `releases new <commit>`, `releases set-commits <commit> --auto --ignore-missing`
 and `releases finalize <commit>`, for org `seize-ff`, project `6529-frontend`.
@@ -298,14 +313,23 @@ The release name is the deployed commit, the `VERSION` that pages report to
 Sentry at runtime, so events attach to it. Only versions that went live are
 finalized. Source maps still upload during the build.
 
-The deploy job installs no dependencies. The build job hands it the
+That job installs no dependencies. The build job hands it the
 `sentry-cli` binary its frozen install verified
 (`ops/scripts/resolve-sentry-cli.cjs`, artifact
 `production-sentry-cli-<run ID>`, kept 1 day), with a SHA-256 checksum, so
-nothing is downloaded at deploy time. Every part is best effort: a missing
-hand-off, a Sentry outage or a failed call prints a warning and never fails the
-deploy. Sentry still creates a missing release from the first event that
-carries it.
+nothing is downloaded at release time. The job holds only the Sentry token: no
+AWS credentials, no OIDC token and no deployment environment, so the deploy
+job never runs a binary the build job produced. Every part is best effort: a
+missing hand-off, a Sentry outage or a failed call prints a warning, and the
+job itself cannot fail the workflow run. Sentry still creates a missing
+release from the first event that carries it.
+
+## Release build dependencies
+
+Release builds restore no Actions cache: their only inputs are the commit, the
+lockfile and the registry, through the package policy and Socket Firewall. The
+workflow-security check in `ops/scripts/testing-strategy.cjs` rejects a cache
+action or `cache` input in the production build and deploy workflows.
 
 ## Sitemap generation
 

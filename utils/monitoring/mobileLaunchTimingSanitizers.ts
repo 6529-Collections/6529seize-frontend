@@ -76,6 +76,7 @@ const STATIC_TOP_LEVEL_ROUTE_SEGMENTS = new Set([
   "about",
   "accept-connection-sharing",
   "access",
+  "ai",
   "api",
   "author",
   "blog",
@@ -146,7 +147,7 @@ const STATIC_ABOUT_SECTION_SEGMENTS = new Set([
   "rules",
 ]);
 
-const STATIC_MESSAGES_SEGMENTS = new Set(["create"]);
+const STATIC_MESSAGES_SEGMENTS = new Set(["create", "new"]);
 const STATIC_WAVES_SEGMENTS = new Set(["create"]);
 const STATIC_APP_WALLETS_SEGMENTS = new Set(["import-wallet"]);
 const STATIC_REMEMES_SEGMENTS = new Set(["add"]);
@@ -177,6 +178,10 @@ type RouteFamilyPattern = {
 
 // Keep route_family aligned with App Router templates instead of raw params.
 const ROUTE_FAMILY_PATTERNS: readonly RouteFamilyPattern[] = [
+  {
+    template: "/messages/new",
+    segments: ["messages", "new"],
+  },
   {
     template: "/messages/[wave]",
     segments: ["messages", routeParam(STATIC_MESSAGES_SEGMENTS)],

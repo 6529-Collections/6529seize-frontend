@@ -1,8 +1,11 @@
+import { sanitizeRouteFamily } from "@/utils/monitoring/mobileLaunchTimingSanitizers";
 import { redactSensitiveQueryParams } from "@/utils/monitoring/sensitiveQueryParams";
 
 const GOOGLE_ANALYTICS_ID = "G-71NLVV3KY3";
 const GOOGLE_ANALYTICS_SCRIPT_URL = `https://www.googletagmanager.com/gtag/js?id=${GOOGLE_ANALYTICS_ID}`;
 const GOOGLE_ANALYTICS_COOKIE_EXPIRES_SECONDS = 31_536_000;
+// gtag.js sends nothing for this property while this window flag is true.
+const GOOGLE_ANALYTICS_DISABLE_FLAG = `ga-disable-${GOOGLE_ANALYTICS_ID}`;
 
 // The standard gtag bootstrap. It is constant text: page URLs and titles are
 // passed to gtag() as data and never become part of a script's source.
@@ -86,6 +89,38 @@ const getPageUrl = (): string => {
   return normalizeAnalyticsUrl(redactSensitiveQueryParams(url.href));
 };
 
+/**
+ * Page titles can name a wave or a conversation, so page views carry the
+ * route family ("/waves/[wave]") as their title instead of the document title.
+ */
+function getAnalyticsPageTitle(pageUrl: string): string {
+  try {
+    return sanitizeRouteFamily(new URL(pageUrl).pathname);
+  } catch {
+    return "/";
+  }
+}
+
+const analyticsWindow = (): Record<string, unknown> =>
+  globalThis as unknown as Record<string, unknown>;
+
+/**
+ * Reads the page's disable flag, the one gtag.js reads, so this module and
+ * gtag.js always agree. False where the flag was never set, as on the server.
+ */
+const isAnalyticsDisabled = (): boolean =>
+  analyticsWindow()[GOOGLE_ANALYTICS_DISABLE_FLAG] === true;
+
+/**
+ * Turns page view reporting off or back on for this page. Withdrawing consent
+ * takes effect at once, also after gtag.js has loaded: gtag.js checks the
+ * documented disable flag before every hit, and this module sends nothing
+ * more while it is set.
+ */
+export function setGoogleAnalyticsDisabled(disabled: boolean): void {
+  analyticsWindow()[GOOGLE_ANALYTICS_DISABLE_FLAG] = disabled;
+}
+
 const sanitizeReferrer = (referrer: string): string =>
   normalizeAnalyticsUrl(redactSensitiveQueryParams(referrer));
 
@@ -96,7 +131,9 @@ const sanitizeReferrer = (referrer: string): string =>
  * event reports it. Ordinary URLs keep gtag.js' default page tracking.
  */
 const getCredentialSafeConfig = (): Record<string, string> => {
-  const config: Record<string, string> = {};
+  const config: Record<string, string> = {
+    page_title: getAnalyticsPageTitle(getPageUrl()),
+  };
   const { href, pathname } = globalThis.location;
   if (
     redactSensitiveQueryParams(href) !== href ||
@@ -132,10 +169,14 @@ function pinSanitizedPageOnNavigation(currentUrl: string): void {
     try {
       const gtag = getGtag();
       const url = getPageUrl();
-      if (!gtag || url === pinnedUrl) {
+      if (!gtag || isAnalyticsDisabled() || url === pinnedUrl) {
         return;
       }
-      gtag("set", { page_location: url, page_referrer: pinnedUrl });
+      gtag("set", {
+        page_location: url,
+        page_referrer: pinnedUrl,
+        page_title: getAnalyticsPageTitle(url),
+      });
       pinnedUrl = url;
     } catch {
       // Analytics never breaks navigation.
@@ -155,10 +196,10 @@ function pinSanitizedPageOnNavigation(currentUrl: string): void {
   globalThis.addEventListener("popstate", pin);
 }
 
-const capturePage = (): PageSnapshot => ({
-  url: getPageUrl(),
-  title: globalThis.document.title,
-});
+const capturePage = (): PageSnapshot => {
+  const url = getPageUrl();
+  return { url, title: getAnalyticsPageTitle(url) };
+};
 
 const getGtag = (): Gtag | undefined => {
   const { gtag } = globalThis as typeof globalThis & { gtag?: unknown };
@@ -240,10 +281,6 @@ function runWhenPageSettlesOrVisitorInteracts(task: () => void): () => boolean {
  * of gtag.js would have sent it.
  */
 function loadGoogleAnalytics(landing: PageSnapshot): void {
-  const current = capturePage();
-  const landingTitle =
-    current.url === landing.url ? current.title : landing.title;
-
   const bootstrap = globalThis.document.createElement("script");
   bootstrap.textContent = GTAG_BOOTSTRAP;
   globalThis.document.head.appendChild(bootstrap);
@@ -262,18 +299,19 @@ function loadGoogleAnalytics(landing: PageSnapshot): void {
   });
   gtag("event", "page_view", {
     page_location: landing.url,
-    page_title: landingTitle,
+    page_title: landing.title,
   });
 
   let reportedUrl = landing.url;
   const reportNavigationBeforeReady = () => {
     const currentUrl = getPageUrl();
-    if (currentUrl === reportedUrl) {
+    if (isAnalyticsDisabled() || currentUrl === reportedUrl) {
       return;
     }
     gtag("event", "page_view", {
       page_location: currentUrl,
       page_referrer: reportedUrl,
+      page_title: getAnalyticsPageTitle(currentUrl),
     });
     reportedUrl = currentUrl;
   };

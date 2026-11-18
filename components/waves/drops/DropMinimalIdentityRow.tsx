@@ -27,7 +27,11 @@ export default function DropMinimalIdentityRow({
   const compact = useCompactMode();
   const identityRowHeightClass = compact ? "tw-min-h-8" : "tw-min-h-10";
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
-  const isStackedTimestamp = timestampLayout === "stacked";
+  const isStackedTimestamp = timestampLayout !== "inline";
+  const stackedSpacingClass =
+    timestampLayout === "stacked-compact"
+      ? `${identityRowHeightClass} tw-justify-center tw-gap-y-2`
+      : "tw-gap-y-1";
 
   const handleNavigation = useCallback(
     (event: React.MouseEvent, path: string) => {
@@ -42,12 +46,12 @@ export default function DropMinimalIdentityRow({
     <div
       className={
         isStackedTimestamp
-          ? "tw-flex tw-min-w-0 tw-flex-col tw-items-start tw-gap-y-1"
+          ? `tw-flex tw-min-w-0 tw-flex-col tw-items-start ${stackedSpacingClass}`
           : "tw-flex tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1"
       }
     >
       <div
-        className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${isStackedTimestamp ? identityRowHeightClass : ""}`}
+        className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${timestampLayout === "stacked" ? identityRowHeightClass : ""}`}
       >
         <p className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-sm tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]">
           {isAnonymousAuthor(drop.author) ? (

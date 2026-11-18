@@ -80,14 +80,21 @@ notification overview and on the notifications page. Previews stay compact;
 message links and images appear as labels, and selecting the notification opens
 the encrypted chat.
 
-Links open only when you select them. Encrypted messages do not automatically
-load link previews, embeds or images from Markdown URLs. A Markdown image is
+Links to 6529 pages open in the current tab on the web or stay inside the app
+when you select them. External links open separately. Links stay as text in
+the chat, with preview cards and embeds disabled. A Markdown image is
 shown as a link using its alternative text (or a label identifying the image host); select the link to
 open it. To show an image privately inside the chat, attach or paste the image
 so it is encrypted on your device.
 
-Custom emojis also render inline in the encrypted chat list and sidebar message
-previews, at a compact size that keeps each preview on one line.
+The encrypted chat list and sidebar show a one-line preview of the latest
+message. Bold, italics and strikethrough keep their formatting; inline and fenced
+code use compact monospace text. Paragraphs, headings, quotes, lists and tables
+collapse into one line. Links show their labels and Markdown images show their
+alternative text or **Image link**. Selecting the row opens the chat; preview
+links and images do not open or load separately. Long previews end with an
+ellipsis. Custom emojis render inline at a compact size, while code keeps emoji
+shortcodes literal.
 
 The emoji button sits inside the right edge of the message input, with attachments
 on the left and Send on the right. It uses the regular composer’s desktop emoji
@@ -227,7 +234,10 @@ verify it. Revoking this browser's own grant clears its local encrypted history
 and keys right away. Another device deletes its history once it confirms the
 revocation came from a device of yours it trusts; otherwise (for example when
 encrypted messages are off in the browser you revoke from) it stops and keeps
-that history until it is removed there. The dialog says which applies. Reauthorizing
+that history until it is removed there. The dialog says which applies. If this
+browser cannot sign that revocation (for example the request fails), the grant
+is still revoked and a notice says that device keeps its history until it is
+removed there. Reauthorizing
 later creates a new device; it does not bring that deleted local history back.
 Earlier Signed Posts remain verifiable after revocation.
 
@@ -241,23 +251,26 @@ claiming your permissions are expiring.
 In the 6529 app, the back arrow to the left of the chat avatar returns to the
 encrypted messages list. It stays visible on iPad in portrait and landscape.
 
-1. Open `/messages/encrypted` and select **New encrypted chat**.
-2. Search for people and tap or click a result to add them. The search clears
-   and the person appears in the selected list. Each person shows whether they
-   can receive encrypted messages:
-   - **Can receive encrypted messages**
-   - **Doesn’t accept messages from you**: their direct-message setting does
-     not allow you.
-   - **Blocked**: one of you blocked the other.
-   - **Hasn’t turned on encrypted messages yet**: they have no device yet.
-3. Choose **Direct message** (one other person) or **Group** (several people,
-   optional name that only members can see).
-4. Select **Start encrypted chat**.
+1. Select **+** beside **Messages** to open **New message** at `/messages/new`.
+   On desktop, the chat list stays beside the form.
+2. Search in **To** and select the people you want to chat with. Each person
+   shows whether they can receive encrypted messages. You can retry a failed
+   check or remove someone while keeping the rest of the selection.
+3. Select **Start chat**. One recipient starts a direct message. With two or
+   more, you can enter an optional group name that only members can see. To
+   start a group with one other person and add people later, use **More options**.
+4. If you already have a matching encrypted DM or group on this device, select
+   **Open chat**. For several matching groups, choose one first. A group matches
+   when it has the same current members. If your chosen group stops matching,
+   choose again. **Start a new group** lets you create a separate chat with the
+   same people.
 
-If you already have an encrypted direct message with that person, the page
-offers **Open chat** instead. Your list and sidebar show one direct-message
-entry per person, including when you have left an earlier chat or started a
-replacement. Group chats remain separate.
+If someone cannot receive encrypted messages, the composer shows why and keeps
+the recipients and group name while you adjust the selection. Before the
+unencrypted messaging cutoff, the composer can offer **Continue unencrypted**
+after showing the retention warning. In a group, first choose **Use unencrypted
+chat instead**. If you used **More options** to start a group with one other
+person, **Use unencrypted DM instead** lets you continue as a direct message.
 
 A direct message has exactly two people. A device joins one only when you are
 one of the two people it names, the invitation comes from one of you, and
@@ -278,8 +291,8 @@ Two participants or devices can still start chats at the same time. They share
 one list entry once this device knows both chats, and both histories remain
 selectable. This does not impose a global server-side limit on MLS groups.
 
-From a plaintext direct message, **Start encrypted chat** opens this page with
-the same people already chosen. Earlier messages are not copied.
+From a plaintext direct message, **Start encrypted chat** opens the composer
+with the same people already chosen. A new encrypted chat starts with an empty history.
 
 ## Moving to stronger encryption
 
@@ -552,8 +565,9 @@ browser so backup can show.
   button), **Active now**, the date it expires and its wallet. **Rename**
   changes its name on the server for all your devices.
 - **Other devices** lists the rest, each with its permissions, when it was set
-  up, when it was last active and when it expires, and **Revoke**. A device
-  whose wallet signature couldn't be checked says so.
+  up, when it was last active and when it expires, where its signing
+  permission was authorized (**Authorized from**, for example 6529.io), and
+  **Revoke**. A device whose wallet signature couldn't be checked says so.
 - **Earlier setups of this browser** groups devices with the same name as this
   browser that haven't been active since it was set up, usually this browser
   before it lost its saved keys. **Clean up…** lists them with their dates,
@@ -594,17 +608,15 @@ the same notice with **Add device** and **Ignore**). Adding it trusts that
 wallet for your profile on this device, so other devices signed by it are
 added too.
 
-When another device of yours is turned on, your other devices show one alert
-for it, **New device: {name}**, at the top of **Devices & security**, in the
-encrypted inbox and in open encrypted chats. It says everything the device can
-now do (post as you, read your encrypted DMs, or both) and when it was set up,
-with **Revoke** (confirmed first) and **It was me**. On **Devices & security**
-the same device is marked **New** in the list until it's answered. The signed-posts alert
-above a wave's composer uses the same words for the same device, and answering
-either one clears the other. Devices that already existed when this device
-was set up, such as an earlier setup of this browser found again after its
-data was cleared, are never announced as new. Your own device changes are not repeated in
-each chat's timeline.
+When you authorize another device, the app can show a security alert on your
+other devices. The alert names the new device and the permissions it gained.
+A device set up for both Encrypted DMs and Signed Posts has one alert, which
+can appear in either Encrypted DMs or Waves. Choose **This was me** once to
+clear it across your devices as they refresh, or **Revoke access** if you
+do not recognize it. Your own device changes are not repeated in each chat's
+timeline. On **Devices & security** the alert
+also shows at the top of the tab, and the same device is marked **New** in
+the list until it's answered.
 
 ## Encrypted backup
 
@@ -870,15 +882,16 @@ without images**. Images and files too large for one encrypted attachment
 ## Setup through connection sharing
 
 In the browser account menu, open **Connect Device**. Confirm the avatar,
-handle and full wallet address, then select **6529 Mobile** or **6529 Desktop**.
+handle and full wallet address, then select **6529 Mobile** or **6529 Desktop
+Classic**.
 Choose **Connect only** for an additional signed-in app session, or
 **Connect with Post Signing & DM Encryption** to approve those permissions too.
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-Desktop secure setup requires 6529 Desktop v0.4.0 or later. Approve the wallet
-signature in the browser, then select **Open in 6529 Desktop** to open the
-private link.
+Desktop connection links require 6529 Desktop Classic v0.4.1 or later. For
+secure setup, approve the wallet signature in the browser, then select **Open in
+6529 Desktop Classic** to open the private link.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**
@@ -904,8 +917,8 @@ icon and separate refresh icon. **Back** returns to the app and connection
 choices. Connect-only refresh creates a new code directly; secure refresh clears
 the old displayed link, returns to the signing state and requests a fresh wallet
 signature. The dialog changes height smoothly, with scrolling for short screens.
-The Desktop handoff uses the 6529 logo and **Open in 6529 Desktop**, rather than
-a QR, followed by the same link controls.
+The Desktop handoff uses the 6529 logo and **Open in 6529 Desktop Classic**
+with the same link controls.
 
 Links expire shortly and work once. Use them only on a device you own. Existing
 source keys and history are not copied. Working keys and registered encrypted

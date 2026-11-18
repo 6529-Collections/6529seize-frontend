@@ -1,4 +1,3 @@
-import { DEVICES_SECURITY_MESSAGES } from "../../../i18n/messages/devices-security";
 import { E2EE_MESSAGES } from "../../../i18n/messages/e2ee";
 
 /**
@@ -48,7 +47,5 @@ export const NO_BACKUP_WARNING = E2EE_MESSAGES["e2ee.enroll.point.noBackup"];
 /** The same point in the 6529 app. */
 export const NO_BACKUP_WARNING_APP =
   E2EE_MESSAGES["e2ee.enroll.point.noBackupApp"];
-/** The one new-device alert's title, "New device: {label}". */
-export const NEW_DEVICE_NOTICE = templatePattern(
-  DEVICES_SECURITY_MESSAGES["devicesSecurity.newDevice.title"]
-);
+/** The encrypted inbox's new-device alert (where the server has no notices). */
+export const NEW_DEVICE_NOTICE = e2eeMessagePattern("e2ee.devices.newDevice");

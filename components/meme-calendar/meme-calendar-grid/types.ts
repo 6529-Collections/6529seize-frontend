@@ -9,6 +9,7 @@ export interface MonthProps {
   readonly onSelectDay?: ((date: Date) => void) | undefined;
   readonly autoOpenYmd?: string | undefined;
   readonly displayTz: DisplayTz;
+  readonly includeMintUrl: boolean;
   /** IANA zone whose calendar dates the grid shows ("UTC" in UTC mode). */
   readonly timeZone: string;
   readonly locale: SupportedLocale;
@@ -87,6 +88,7 @@ export interface MonthDayCellProps {
   readonly cellOffset: number;
   readonly day: number;
   readonly displayTz: DisplayTz;
+  readonly includeMintUrl: boolean;
   readonly locale: SupportedLocale;
   readonly month: number;
   readonly onSelectDay?: ((date: Date) => void) | undefined;

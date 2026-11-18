@@ -1,4 +1,5 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { Capacitor } from "@capacitor/core";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 
 import { LinkPreviewProvider } from "@/components/waves/LinkPreviewContext";
 import MarketplaceItemPreviewCard from "@/components/waves/MarketplaceItemPreviewCard";
@@ -535,3 +536,48 @@ describe("MarketplaceItemPreviewCard", () => {
     expect(screen.queryByTestId("marketplace-data-health-icon")).toBeNull();
   });
 });
+
+it.each([false, true])(
+  "opens and copies the shared artwork link without a price action on iOS (compact=%s)",
+  (compact) => {
+    const platform = jest
+      .spyOn(Capacitor, "getPlatform")
+      .mockReturnValue("ios");
+    const open = jest.spyOn(globalThis, "open").mockImplementation(() => null);
+    try {
+      render(
+        <MarketplaceItemPreviewCard
+          href="https://manifold.xyz/@creator/id/123"
+          mediaUrl="https://example.com/art.png"
+          mediaMimeType="image/png"
+          title="Sample artwork"
+          price="1 ETH"
+          priceCurrency="ETH"
+          compact={compact}
+        />
+      );
+      const card = screen.getByTestId("manifold-item-card");
+      expect(screen.getByTestId("manifold-item-media")).toBeVisible();
+      expect(card).toHaveAttribute("tabindex", "0");
+      expect(card).toHaveAccessibleName("Open on Manifold");
+      expect(within(card).getByRole("button", { name: /copy/i })).toBeVisible();
+      expect(
+        within(card).queryByTestId("marketplace-item-cta-link")
+      ).toBeNull();
+      expect(
+        within(card).queryByText(/^(1(?: ETH)?|ETH)$/)
+      ).not.toBeInTheDocument();
+      fireEvent.click(card);
+      fireEvent.keyDown(card, { key: "Enter" });
+      expect(open).toHaveBeenCalledTimes(2);
+      expect(open).toHaveBeenCalledWith(
+        "https://manifold.xyz/@creator/id/123",
+        "_blank",
+        "noopener,noreferrer"
+      );
+    } finally {
+      platform.mockRestore();
+      open.mockRestore();
+    }
+  }
+);

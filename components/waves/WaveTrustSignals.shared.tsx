@@ -12,7 +12,8 @@ export type WaveTrustSignalsVariant =
   | "card"
   | "sidebar"
   | "sidebar-inline"
-  | "header-inline";
+  | "header-inline"
+  | "header-avatar";
 export type WaveTrustSignalsMode = "details" | "summary";
 interface WaveScoreSummaryHeader {
   readonly title: string;
@@ -101,7 +102,7 @@ const isInlineSidebarVariant = (variant: WaveTrustSignalsVariant): boolean =>
   variant === "sidebar-inline";
 
 const isInlineHeaderVariant = (variant: WaveTrustSignalsVariant): boolean =>
-  variant === "header-inline";
+  variant === "header-inline" || variant === "header-avatar";
 
 const isInlineVariant = (variant: WaveTrustSignalsVariant): boolean =>
   isInlineSidebarVariant(variant) || isInlineHeaderVariant(variant);
@@ -110,7 +111,7 @@ const isSidebarVariant = (variant: WaveTrustSignalsVariant): boolean =>
   variant === "sidebar" || isInlineSidebarVariant(variant);
 
 const INLINE_STAT_TONE_CLASSES =
-  "tw-text-[#e2e8f0]/[0.85] desktop-hover:hover:tw-text-[#e2e8f0]/[0.95]";
+  "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
 
 type VisibilityTone = "excellent" | "healthy" | "low" | "default";
 type VisibilityToneContext = "inline-sidebar" | "inline-header" | "default";
@@ -254,7 +255,11 @@ const getChipClasses = (
   let variantClasses = "tw-gap-1 tw-rounded-md tw-ring-1 tw-ring-inset";
   let sizeClasses = "tw-h-6 tw-px-2 tw-text-[11px] sm:tw-text-xs";
 
-  if (isInlineSidebarVariant(variant)) {
+  if (variant === "header-avatar") {
+    variantClasses =
+      "tw-h-5 tw-min-w-[34px] tw-cursor-help tw-gap-0.5 tw-whitespace-nowrap tw-rounded-md tw-bg-iron-950 tw-px-0.5 tw-py-0 tw-text-[11px] tw-font-semibold tw-leading-4 tw-ring-1 tw-ring-inset tw-ring-iron-700";
+    sizeClasses = "";
+  } else if (isInlineSidebarVariant(variant)) {
     variantClasses =
       "tw-cursor-help tw-gap-[3px] tw-whitespace-nowrap tw-text-[11px] tw-font-semibold tw-leading-none";
     sizeClasses = "";
@@ -302,8 +307,11 @@ const getChipLabelClasses = (variant: WaveTrustSignalsVariant): string => {
 };
 
 const getIconClasses = (variant: WaveTrustSignalsVariant): string => {
+  if (variant === "header-avatar") {
+    return "tw-size-2.5 tw-flex-shrink-0";
+  }
   if (isInlineSidebarVariant(variant)) {
-    return "tw-size-[13px] tw-flex-shrink-0 tw-opacity-[0.64]";
+    return "tw-size-[13px] tw-flex-shrink-0";
   }
 
   if (isInlineHeaderVariant(variant)) {

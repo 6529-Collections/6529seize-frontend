@@ -216,6 +216,9 @@ export function E2eeDeviceList({
 }: E2eeDeviceListProps) {
   const locale = useBrowserLocale();
   const [target, setTarget] = useState<E2eeDeviceInfo | null>(null);
+  // The dialog's own pending guard covers Cancel and close; the backup
+  // action inside it needs the same one.
+  const [revoking, setRevoking] = useState(false);
   const active = devices
     .filter((device) => device.revokedAt === null)
     .toSorted(
@@ -268,7 +271,12 @@ export function E2eeDeviceList({
           if (!engine || !target) {
             return;
           }
-          await engine.revokeDevice(target.deviceKey);
+          setRevoking(true);
+          try {
+            await engine.revokeDevice(target.deviceKey);
+          } finally {
+            setRevoking(false);
+          }
           onRevoked?.(target);
         }}
         onClose={() => setTarget(null)}
@@ -284,6 +292,7 @@ export function E2eeDeviceList({
                       setTarget(null);
                       onSetUpBackup();
                     },
+                    disabled: revoking,
                   }
                 : null
             }

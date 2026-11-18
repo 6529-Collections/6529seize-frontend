@@ -59,8 +59,9 @@ function fakeManager(initial: E2eeBackupSnapshot) {
       code: CODE,
       secret: new Uint8Array(32),
     })),
-    confirmBackup: jest.fn(async () => {
+    confirmBackup: jest.fn(async (): Promise<boolean> => {
       manager.set(snapshot({ phase: "on", lastBackupAt: Date.now() }));
+      return true;
     }),
     restore: jest.fn(async (code: string) => {
       if (code.trim() !== CODE) {
@@ -163,6 +164,166 @@ describe("E2eeBackupPanel", () => {
     expect(screen.queryByText("Backup is on.")).not.toBeInTheDocument();
     expect(screen.getByText("On")).toBeInTheDocument();
     expect(screen.queryByText("PQRS")).not.toBeInTheDocument();
+  });
+
+  /**
+   * Goes through the guided setup from the open first step to its last
+   * button (Turn on backup, or Use the new code when replacing).
+   */
+  async function confirmThroughSteps(confirmName: string) {
+    const why = await screen.findByRole("dialog");
+    fireEvent.click(within(why).getByRole("button", { name: "Continue" }));
+    const save = screen.getByRole("dialog");
+    fireEvent.click(
+      within(save).getByRole("checkbox", {
+        name: "I wrote it down on paper instead",
+      })
+    );
+    fireEvent.click(within(save).getByRole("button", { name: "Continue" }));
+    const check = screen.getByRole("dialog", { name: "Check your saved code" });
+    fireEvent.click(
+      within(check).getByRole("button", {
+        name: "Paste the whole code instead",
+      })
+    );
+    fireEvent.change(within(check).getByLabelText("Recovery code"), {
+      target: { value: CODE },
+    });
+    fireEvent.click(within(check).getByRole("button", { name: confirmName }));
+  }
+
+  /** The upload needs another run (a conflict or fork repair). */
+  const queueRepair = (manager: ReturnType<typeof fakeManager>) =>
+    manager.confirmBackup.mockImplementationOnce(async () => {
+      manager.set(
+        snapshot({ phase: "on", uploading: true, lastBackupAt: null })
+      );
+      return false;
+    });
+
+  // #4783's backup contract, through this branch's guided setup: the
+  // dialog says "Backup is on" only once the backup is complete.
+  it("keeps a new backup's dialog uploading until a queued repair run finishes it", async () => {
+    const manager = fakeManager(snapshot());
+    queueRepair(manager);
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Set up backup" }));
+    await confirmThroughSteps("Turn on backup");
+    await waitFor(() => expect(manager.confirmBackup).toHaveBeenCalledTimes(1));
+    const upload = await screen.findByRole("dialog", {
+      name: "Backing up your messages",
+    });
+    expect(within(upload).getByRole("progressbar")).toBeInTheDocument();
+    expect(screen.queryByRole("dialog", { name: "Backup is on" })).toBeNull();
+
+    // The queued run activates the backup and finishes the upload.
+    act(() => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+    });
+    expect(
+      await screen.findByRole("dialog", { name: "Backup is on" })
+    ).toBeInTheDocument();
+  });
+
+  it("shows a replacement's failed queued run with Try again, then finishes", async () => {
+    const manager = fakeManager(snapshot({ phase: "on", lastBackupAt: 2000 }));
+    queueRepair(manager);
+    renderPanel(manager);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Replace recovery code" })
+    );
+    await confirmThroughSteps("Use the new code");
+    await screen.findByRole("dialog", { name: "Backing up your messages" });
+
+    // The queued run fails: its error, and Try again on the same backup.
+    act(() => {
+      manager.set(
+        snapshot({
+          phase: "on",
+          uploading: true,
+          lastBackupAt: null,
+          lastError: "E2EE_RATE_LIMITED",
+        })
+      );
+    });
+    const failed = await screen.findByRole("dialog", {
+      name: "Backup didn’t finish",
+    });
+    expect(within(failed).getByRole("alert")).toHaveTextContent(
+      "Too many backup requests"
+    );
+    manager.backupNow.mockImplementationOnce(async () => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+      return true;
+    });
+    fireEvent.click(within(failed).getByRole("button", { name: "Try again" }));
+    await screen.findByRole("dialog", { name: "Backup is on" });
+    expect(manager.backupNow).toHaveBeenCalledTimes(1);
+    expect(manager.confirmBackup).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers Try again on the same backup when its first upload fails", async () => {
+    const manager = fakeManager(snapshot());
+    // The backup was created; its first upload failed (and is retried).
+    manager.confirmBackup.mockImplementationOnce(async () => {
+      manager.set(
+        snapshot({
+          phase: "on",
+          uploading: true,
+          lastError: "E2EE_RATE_LIMITED",
+        })
+      );
+      return false;
+    });
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Set up backup" }));
+    await confirmThroughSteps("Turn on backup");
+    const failed = await screen.findByRole("dialog", {
+      name: "Backup didn’t finish",
+    });
+    expect(within(failed).getByRole("alert")).toHaveTextContent(
+      "Too many backup requests"
+    );
+    manager.backupNow.mockImplementationOnce(async () => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+      return true;
+    });
+    fireEvent.click(within(failed).getByRole("button", { name: "Try again" }));
+    await screen.findByRole("dialog", { name: "Backup is on" });
+    // Carried on with that backup: no second one was created.
+    expect(manager.confirmBackup).toHaveBeenCalledTimes(1);
+    expect(manager.backupNow).toHaveBeenCalledTimes(1);
+  });
+
+  it("offers restore instead of Try again once the backup was replaced elsewhere", async () => {
+    const manager = fakeManager(snapshot());
+    queueRepair(manager);
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Set up backup" }));
+    await confirmThroughSteps("Turn on backup");
+    await screen.findByRole("dialog", { name: "Backing up your messages" });
+    // Another device replaced the backup: this one's state is gone.
+    act(() => {
+      manager.set(
+        snapshot({ phase: "available", lastError: "E2EE_BACKUP_REPLACED" })
+      );
+    });
+    const failed = await screen.findByRole("dialog", {
+      name: "Backup didn’t finish",
+    });
+    expect(within(failed).getByRole("alert")).toHaveTextContent(
+      "Backup was turned off or replaced on another device"
+    );
+    expect(
+      within(failed).queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      within(failed).getByRole("button", { name: "Restore messages" })
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Restore messages" })
+    ).toBeInTheDocument();
+    expect(manager.backupNow).not.toHaveBeenCalled();
   });
 
   it("shows what the backup holds and the upload's progress", () => {

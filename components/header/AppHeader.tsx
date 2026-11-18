@@ -54,7 +54,10 @@ import {
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getActiveViewFromUrl } from "../navigation/ViewContext";
-import { getActiveWaveIdFromUrl } from "@/helpers/navigation.helpers";
+import {
+  getActiveWaveIdFromUrl,
+  isMessageComposePathname,
+} from "@/helpers/navigation.helpers";
 import {
   isProfilePreferencesEntry,
   PREFERENCES_ENTRY_SOURCE_PARAM,
@@ -65,7 +68,10 @@ import {
 } from "./app-header-more-menu-items";
 import { useHeaderActiveWave } from "./app-header-wave-preview";
 import HeaderTitleContent from "./AppHeaderTitleContent";
-import WaveHeaderRestrictionButton from "@/components/waves/header/WaveHeaderRestrictionButton";
+import WaveHeaderRestrictionButton, {
+  WAVE_HEADER_RESTRICTION_SURFACE_CLASS,
+} from "@/components/waves/header/WaveHeaderRestrictionButton";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import WaveJoinCta from "@/components/waves/header/WaveJoinCta";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
@@ -76,8 +82,7 @@ const COLLECTION_TITLES: Record<string, string> = {
   "meme-lab": "Meme Lab",
   nextgen: "NextGen",
 };
-const HEADER_RESTRICTION_BUTTON_CLASS =
-  "tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-black tw-p-0 tw-text-iron-300 tw-shadow-sm desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50";
+const HEADER_RESTRICTION_BUTTON_CLASS = `${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${WAVE_HEADER_RESTRICTION_SURFACE_CLASS} tw-size-9 tw-min-w-9`;
 
 interface HeaderConnectedAccount {
   readonly address: string;
@@ -238,10 +243,10 @@ const HeaderDropActionButton = ({
             aria-haspopup="dialog"
             className={clsx(
               "tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
-              HEADER_RESTRICTION_BUTTON_CLASS
+              `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 desktop-hover:hover:tw-text-white`
             )}
           >
-            <LockClosedIcon className="tw-size-5 tw-flex-shrink-0" />
+            <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
             <span className="tw-sr-only">{action.compactLabel}</span>
           </button>
         </MainStageNominationPopover>
@@ -256,7 +261,7 @@ const HeaderDropActionButton = ({
         onViewRules={action.onViewRules}
         className={HEADER_RESTRICTION_BUTTON_CLASS}
       >
-        <LockClosedIcon className="tw-size-5 tw-flex-shrink-0" />
+        <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
         <span className="tw-sr-only">{action.compactLabel}</span>
       </WaveHeaderRestrictionButton>
     );
@@ -476,8 +481,8 @@ export default function AppHeader() {
     pathname === "/messages" || pathname.startsWith("/messages/");
   const isHomeRoute = pathname === "/";
 
-  const isCreateRoute =
-    pathname === "/waves/create" || pathname === "/messages/create";
+  const isMessageCompose = isMessageComposePathname(pathname);
+  const isCreateRoute = pathname === "/waves/create" || isMessageCompose;
   const isInsideWave = !!waveId;
   const waveParam = getActiveWaveIdFromUrl({ pathname, searchParams });
   const activeView = getActiveViewFromUrl({
@@ -651,7 +656,7 @@ export default function AppHeader() {
             isInsideWave ? "tw-justify-start" : "tw-justify-center"
           )}
         >
-          {pathname === "/messages/create" ? (
+          {isMessageCompose ? (
             <h1 className="tw-m-0 tw-text-base tw-font-semibold tw-tracking-tight">
               {t(locale, "quickDm.createModalTitle")}
             </h1>
@@ -666,21 +671,20 @@ export default function AppHeader() {
             />
           )}
         </div>
-        {pathname === "/messages/create" ? (
+        {isMessageCompose ? (
           <span aria-hidden="true" className="tw-w-10 tw-flex-shrink-0" />
         ) : (
           <div
             className={clsx(
               "tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end",
-              isMessagesRoute && !isInsideWave ? "tw-gap-x-2" : "tw-gap-x-0.5"
+              (isInsideWave && isWavesRoute) ||
+                (isMessagesRoute && !isInsideWave)
+                ? "tw-gap-x-2"
+                : "tw-gap-x-0.5"
             )}
           >
             {activeWave && isInsideWave && (
-              <WaveJoinCta
-                wave={activeWave}
-                variant="app-header"
-                className="tw-mr-1"
-              />
+              <WaveJoinCta wave={activeWave} variant="app-header" />
             )}
             <HeaderDropActionButton action={headerDropAction} />
             {isHomeRoute && (
@@ -688,7 +692,12 @@ export default function AppHeader() {
                 className={isCapacitor ? undefined : "md:tw-hidden"}
               />
             )}
-            <div className="tw-flex-shrink-0">
+            <div
+              className={clsx(
+                "tw-flex-shrink-0",
+                isInsideWave && isWavesRoute && "empty:tw-hidden"
+              )}
+            >
               <HeaderActionButtons />
             </div>
             {showPageShareAction && (

@@ -39,8 +39,9 @@ export default function ProxyListFilters({
   }));
 
   return (
-    <div className="tw-min-w-0 tw-flex-1 tw-basis-52 [&_[role=tab][aria-selected=false]]:tw-bg-transparent [&_[role=tab][aria-selected=true]]:tw-bg-iron-900 [&_[role=tab]]:tw-min-h-8 [&_[role=tab]]:tw-px-2 [&_[role=tab]]:tw-text-[13px] [&_[role=tablist]]:-tw-m-1 [&_[role=tablist]]:tw-p-1 [&_[role=tablist]>div]:tw-bg-transparent [&_[role=tablist]>div]:tw-p-0 [&_[role=tablist]>div]:tw-ring-0">
+    <div className="tw-min-w-0 tw-flex-1 tw-basis-52">
       <CommonTabs
+        variant="connected"
         items={items}
         activeItem={selected}
         filterLabel="Proxy Type"

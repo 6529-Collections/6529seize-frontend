@@ -30,7 +30,7 @@ import { useDocumentationActor } from "./DocumentationAuthGate";
 import {
   DocumentationButton,
   DocumentationNotice,
-  inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 import DocumentationValueEditor from "./DocumentationValueEditor";
@@ -377,7 +377,7 @@ function MuseumJournalComposer({
         <label className="tw-block tw-text-sm tw-text-iron-300">
           {msg("museum.journalKind")}
           <select
-            className={`${inputClass} tw-mt-2`}
+            className={`${selectClass} tw-mt-2`}
             value={kind}
             disabled={busy}
             onChange={(event) => setKind(event.target.value)}

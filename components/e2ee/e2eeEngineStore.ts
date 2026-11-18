@@ -11,6 +11,7 @@ export interface E2eeEngineSnapshot {
   readonly version: number;
   readonly status: E2eeEngineStatus;
   readonly error: string | null;
+  readonly localDeviceKey: string | null;
   readonly thisDevice: E2eeDeviceInfo | null;
   readonly devices: readonly E2eeDeviceInfo[];
   readonly conversations: readonly E2eeConversation[];
@@ -43,6 +44,7 @@ const readSnapshot = (
   version,
   status: engine.getStatus(),
   error: engine.getError(),
+  localDeviceKey: engine.getLocalDeviceKey(),
   thisDevice: engine.getThisDevice(),
   devices: engine.getDevices(),
   conversations: engine.getConversations(),

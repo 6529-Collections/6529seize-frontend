@@ -2,6 +2,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import YAML from "yaml";
 
 type Pack = {
   scriptKey: string;
@@ -200,9 +201,32 @@ describe("E2E pack manifest", () => {
     expect(workflow).toContain(
       "if: matrix.lane == 'playwright-submission-artwork'"
     );
-    expect(workflow).toContain(
-      "run: ./bin/6529 run test:e2e:submission-artwork-sandbox"
-    );
+    const config = YAML.parse(workflow) as {
+      jobs: Record<string, { steps?: { if?: string; run?: string }[] }>;
+    };
+    const mediaSteps = Object.values(config.jobs)
+      .flatMap((job) => job.steps ?? [])
+      .filter(
+        (step) => step.if === "matrix.lane == 'playwright-submission-artwork'"
+      );
+    expect(mediaSteps.map((step) => step.run?.trim())).toEqual([
+      "./bin/6529 run test:e2e:submission-artwork-sandbox",
+      "./bin/6529 run test:e2e:image-viewer-layout-sandbox",
+    ]);
+    expect(
+      packs.find(
+        (pack) => pack.scriptKey === "test:e2e:image-viewer-layout-sandbox"
+      )
+    ).toMatchObject({
+      safety: "sandbox",
+      specs: ["tests/media/image-viewer-layout-sandbox.spec.ts"],
+      projects: [
+        "web-desktop-chromium",
+        "web-mobile-chromium",
+        "web-desktop-webkit",
+      ],
+      triggers: ["pr-ci", "manual"],
+    });
   });
 
   it("keeps artwork documentation mutations in the local desktop and mobile sandbox", () => {

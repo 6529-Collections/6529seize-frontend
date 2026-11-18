@@ -8,7 +8,7 @@ import { PlusIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { type AirdropEntry, AIRDROP_TOTAL } from "../types/OperationalData";
 import { validateStrictAddress } from "../utils/addressValidation";
 import type { MetadataValueLengthStatus } from "../utils/submissionMetadata";
-import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
+import VerifiedEnsAddressInput from "@/components/utils/input/ens-address/VerifiedEnsAddressInput";
 
 interface AirdropConfigProps {
   readonly entries: AirdropEntry[];
@@ -183,7 +183,7 @@ const AirdropConfig: React.FC<AirdropConfigProps> = ({
                 labelTone="muted"
                 className="tw-flex-1 tw-pb-0"
               >
-                <EnsAddressInput
+                <VerifiedEnsAddressInput
                   variant="dark"
                   value={entry.address}
                   placeholder="0x... or ENS"

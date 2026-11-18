@@ -652,15 +652,16 @@ async function executePlan(
     return cached;
   }
 
-  const { data, ttl } = await withPreviewFetchSlot(signal, () =>
-    plan.execute()
-  );
-  const cacheEntry = copyPreviewCacheEntry(plan.cacheKey, data);
-  if (cacheEntry) {
-    cache.set(cacheEntry.key, cacheEntry.data, ttl);
-  }
-
-  return data;
+  // Cache inside the slot's work, so a result that arrives after the slot's
+  // deadline still warms the cache for the next viewer.
+  return withPreviewFetchSlot(signal, async () => {
+    const { data, ttl } = await plan.execute();
+    const cacheEntry = copyPreviewCacheEntry(plan.cacheKey, data);
+    if (cacheEntry) {
+      cache.set(cacheEntry.key, cacheEntry.data, ttl);
+    }
+    return data;
+  });
 }
 
 async function executeFirstParty6529Plan(

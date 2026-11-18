@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { requestE2eeBackupSetup } from "@/components/e2ee/backup/backupSetupRequest";
 import { RevokeThisBrowserDetails } from "@/components/e2ee/devices/RevokeThisBrowserDetails";
 import { E2eeConfirmDialog } from "@/components/e2ee/ui/E2eeConfirmDialog";
@@ -75,6 +76,10 @@ export function RevokeDeviceDialog({
 }) {
   const locale = useBrowserLocale();
   const copy = getCopy(locale, device, signed);
+  // The dialog's own pending guard covers Cancel and close; Set up backup
+  // first needs the same one, or it would close the dialog mid-revoke and
+  // hide a failure.
+  const [revoking, setRevoking] = useState(false);
   return (
     <E2eeConfirmDialog
       open={device !== null}
@@ -83,8 +88,14 @@ export function RevokeDeviceDialog({
       confirmLabel={copy.confirm}
       errorKeyFor={getErrorKey}
       onConfirm={async () => {
-        if (device) {
+        if (!device) {
+          return;
+        }
+        setRevoking(true);
+        try {
           await onRevoke(device);
+        } finally {
+          setRevoking(false);
         }
       }}
       onClose={onClose}
@@ -101,6 +112,7 @@ export function RevokeDeviceDialog({
                   onClose();
                   requestE2eeBackupSetup();
                 },
+                disabled: revoking,
               }}
             />
           ) : (

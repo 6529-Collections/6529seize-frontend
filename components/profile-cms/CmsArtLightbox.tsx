@@ -18,6 +18,7 @@ import {
   getCmsArtGalleryImageClassName,
   type CmsArtGridMode,
 } from "@/components/profile-cms/cmsArtGalleryClasses";
+import { getSafeCssColor } from "@/helpers/css-color.helpers";
 
 const INHERITED_TEXT_CLASS = "tw-text-inherit";
 
@@ -670,8 +671,12 @@ function getArtworkFrameStyle(item: CmsArtInspectionItem): CSSProperties {
   if (item.width && item.height) {
     style.aspectRatio = `${item.width} / ${item.height}`;
   }
-  if (item.background) {
-    style.background = item.background;
+  // Site content sets a matte colour; anything but a plain colour is ignored.
+  const background = getSafeCssColor(item.background, {
+    allowNamedColors: true,
+  });
+  if (background) {
+    style.background = background;
   }
 
   return style;

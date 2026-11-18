@@ -1,4 +1,5 @@
 import clsx from "clsx";
+import { DROPDOWN_TRIGGER_SURFACE_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
 export type ButtonVariant =
   | "ghost"
@@ -8,6 +9,7 @@ export type ButtonVariant =
   | "tertiary"
   | "filter"
   | "filterSelected"
+  | "dropdown"
   | "success"
   | "positiveToggle"
   | "negativeToggle"
@@ -24,6 +26,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     "tw-bg-transparent tw-text-iron-400 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 enabled:active:tw-bg-iron-900 disabled:tw-opacity-50",
   primary: PRIMARY_CLASSES,
   filterSelected: PRIMARY_CLASSES,
+  dropdown: `${DROPDOWN_TRIGGER_SURFACE_CLASSES} tw-border-white/10`,
   action:
     "tw-border-primary-500 tw-bg-primary-500 tw-text-white tw-ring-1 tw-ring-inset tw-ring-white/10 desktop-hover:hover:tw-border-primary-600 desktop-hover:hover:tw-bg-primary-600 active:tw-border-primary-700 active:tw-bg-primary-700",
   secondary:
@@ -31,7 +34,7 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   tertiary:
     "tw-border-iron-800 tw-bg-iron-950 tw-text-iron-100 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-black",
   filter:
-    "tw-border-transparent tw-bg-iron-900 tw-text-iron-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50 active:tw-bg-iron-800",
+    "tw-border-white/5 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50 active:tw-bg-iron-800",
   success:
     "tw-border-emerald-600 tw-bg-emerald-600 tw-text-white desktop-hover:hover:tw-border-emerald-500 desktop-hover:hover:tw-bg-emerald-500 active:tw-border-emerald-700 active:tw-bg-emerald-700",
   positiveToggle:
@@ -72,14 +75,18 @@ export function getButtonClasses({
   fullWidth = false,
   className,
 }: ButtonStyleOptions = {}): string {
-  const withoutShadow =
-    variant === "ghost" || variant === "filter" || variant === "filterSelected";
+  const isFilter =
+    variant === "filter" ||
+    variant === "filterSelected" ||
+    variant === "dropdown";
+  const withoutShadow = variant === "ghost" || isFilter;
+  const fontWeight = isFilter ? "tw-font-medium" : "tw-font-semibold";
 
   return clsx(
     "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-transition-colors tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 enabled:tw-cursor-pointer disabled:tw-cursor-not-allowed",
     variant === "ghost"
       ? "tw-border-0 tw-font-medium motion-reduce:tw-transition-none"
-      : "tw-border tw-border-solid tw-font-semibold disabled:tw-opacity-50",
+      : clsx("tw-border tw-border-solid disabled:tw-opacity-50", fontWeight),
     withoutShadow ? "tw-shadow-none" : "tw-shadow-sm tw-shadow-black/20",
     FOCUS_CLASSES[variant] ?? "focus-visible:tw-outline-primary-400",
     VARIANT_CLASSES[variant],

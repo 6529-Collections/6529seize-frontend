@@ -17,6 +17,7 @@ import { Tooltip } from "react-tooltip";
 import type { NextGenCollection, NextGenToken } from "@/entities/INextgen";
 import { Spinner } from "@/components/dotLoader/DotLoader";
 import ArtworkShareButton from "@/components/artwork-share/ArtworkShareButton";
+import { openUrlInNewTab } from "@/helpers/open-url.helpers";
 import useIsMobileDevice from "@/hooks/isMobileDevice";
 import useDownloader from "@/hooks/useDownloader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -371,8 +372,7 @@ export default function NextGenTokenArt(props: Readonly<Props>) {
             aria-label="Open token image in new tab"
             className={iconButtonClassName}
             onClick={() => {
-              const href = getCurrentHref();
-              window.open(href, "_blank");
+              openUrlInNewTab(getCurrentHref());
             }}
             data-tooltip-id={`external-tooltip-${props.token.id}`}
           >

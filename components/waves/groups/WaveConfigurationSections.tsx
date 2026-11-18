@@ -43,7 +43,7 @@ export default function WaveConfigurationSections({
         <WavePanelSection
           title={waveRightPanelText("waves.sidebar.rightPanel.settings.chat")}
         >
-          <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/5">
+          <div>
             {showChatStatus && (
               <WaveChatStatus wave={wave} display="configuration" />
             )}

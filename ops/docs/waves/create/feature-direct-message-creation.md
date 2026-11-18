@@ -5,34 +5,34 @@
 Use this flow to start a new direct-message thread by selecting recipient
 identities.
 
-- Web uses URL mode `create=dm`: a bottom sheet below 768px and a centered
-  dialog on larger screens. It opens compactly around the empty recipient field
-  and grows with search results. Resizing preserves the query and selected people.
-- App mode uses `/messages/create`.
-- These direct messages are not end-to-end encrypted. 6529 deletes their
+- The **+** beside **Messages** opens **New message** at `/messages/new`.
+  On desktop, the form opens in the main Messages pane beside the chat list.
+  On small screens, the form fills the Messages view. It checks recipients as
+  you select them. See [Starting a chat](../../encrypted-messages.md#starting-a-chat).
+- On builds without encrypted chats, the paper-plane action opens a web dialog
+  or sheet. The app uses `/messages/create`.
+- 6529 deletes unencrypted direct-message
   content from its servers on 1 December 2026, except anything 6529 is
   legally required to keep
   ([Encrypted Messages](../../encrypted-messages.md#unencrypted-direct-messages)).
-- On builds with encrypted chats, the main action is **Start encrypted chat**,
-  which opens `/messages/encrypted/new` with the selected people. **Send
-  unencrypted instead** creates an unencrypted DM, under a warning that names
-  the deletion date. From 1 December 2026 only the encrypted choice remains.
 
 ## Location in the Site
 
-- Web DM-create mode (`?create=dm`) is supported in these layouts:
+- Unified composer: `/messages/new`.
+- On builds without encrypted chats, web DM-create mode (`?create=dm`)
+  is supported in these layouts:
   - `/messages`
   - `/messages/{waveId}`
-- App create route: `/messages/create`.
-- Success route after submit: `/messages/{waveId}`.
+- Unencrypted chats open at `/messages/{waveId}`.
+- Encrypted chats open at `/messages/encrypted/{group}`.
 
 ## Entry Points
 
-- Click `Create DM` in the desktop `/messages` placeholder panel.
-- Click the paper-plane create action in desktop messages sidebar layouts.
-- Click app-header `Create DM` while in app `/messages` list context.
-- Open a supported web route URL that already includes `?create=dm`.
-- Open `/messages/create`.
+- Select **+** beside **Messages** on web or in the app. On builds without
+  encrypted chats, use the paper-plane action or **Create DM**.
+- Open `/messages/new` directly.
+- Older `?create=dm` links from Messages open `/messages/new` when encrypted
+  chats are available.
 
 ## Access and Availability
 
@@ -55,8 +55,7 @@ identities.
 
 1. Open a supported route with a connected profile.
 2. Start direct-message creation.
-3. Web keeps the current path/query context and opens `create=dm`; app
-   opens `/messages/create`.
+3. With encrypted chats available, **New message** opens at `/messages/new`.
 4. Type a handle in the `To:` field on the **New message** screen.
 5. Search starts at 3+ typed characters.
 6. Exact handle matches appear first, followed by handles that start with the
@@ -64,20 +63,21 @@ identities.
    Results within each match group are ordered by profile level from highest to
    lowest.
 7. While loading, the search list shows skeleton rows; when empty, it shows
-   `No one found for “query”`. Results stay visible when the field loses focus
-   or the keyboard closes.
+   `No one found for “query”`. In the unified composer, selecting a result
+   clears the search, and moving focus away dismisses the results.
 8. Tap a result to toggle that person. Selected recipients have checked circles
    and appear as removable avatar chips inside the `To:` field.
-9. Use the bottom action: `Message handle` for one person or `Message 3 people`
-   for a group. The button switches to `Creating...` while submit runs.
-10. On success, the app opens `/messages/{waveId}`.
+9. On builds without encrypted chats, use **Message** followed by the handle
+   or number of recipients. When encrypted chats are available, choose the
+   action shown for the selected recipients.
+10. The app opens the conversation.
 
 ## Common Scenarios
 
 - Start a DM from `/messages` without leaving the messages layout.
 - Start from `/waves` or `/messages`, then move directly into the created DM
   thread.
-- Open `/messages/create` in app mode, then return to `/messages` with back.
+- Use the back arrow or **Cancel** to return to **Messages**.
 
 ## Edge Cases
 
@@ -98,17 +98,15 @@ identities.
   bottom safe area. Search results scroll independently of the action.
 - Long handles truncate in chips and result rows. People without a profile photo
   have an initial avatar. Each result shows its level, and TDH when above zero.
-- Closing the web create dialog or sheet (close icon, backdrop, or `Escape`,
-  including from the search field) clears only `create` and keeps other query
-  values.
-- In app mode, stale `create=dm` URL state can reopen the same create overlay
-  on the current route; closing it removes `create`.
+- On builds without encrypted chats, closing the web create dialog or sheet
+  clears only `create` and keeps other query values.
 
 ## Failure and Recovery
 
 - If search returns no rows, refine the query and keep typing.
 - If search fails, use `Retry search`. Selected recipients stay in place.
-- Creation failures also keep the selection so it can be adjusted or retried.
+- The unified composer shows creation failures in the form and keeps the
+  selection so it can be adjusted or retried.
 - If a recipient does not accept a new direct message from the creator, the UI
   explains that recipient's policy, for example "@alice only accepts new direct
   messages from members of a group they chose". The group is named only when
@@ -117,8 +115,6 @@ identities.
   disclosed. Change the participant set or use an existing conversation.
 - For other creation failures, the UI shows the server error when available;
   retry from the same flow.
-- If stale `create=dm` opens unexpectedly, close the flow to clear `create`
-  from the URL.
 
 ## Limitations / Notes
 
@@ -130,12 +126,12 @@ identities.
   messages currently fall back to English; levels, counts, and TDH use the
   browser locale. Translation coverage for this screen remains incomplete.
 - Translation follow-up: frontend maintainers own the new `quickDm.*` creation
-  and recipient-search messages on `/messages/create` and `create=dm`.
+  and recipient-search messages for **New message**.
   `en-GB`, `fr-FR`, `es-ES`, and `de-DE` currently show the English fallback for
   this surface. Complete those dictionaries and repeat layout and accessible-name
   checks in each locale; no localized routes are required for this follow-up.
 - This page owns direct-message creation form behavior.
-- Route-shell behavior for `/messages/create` (header and back rules) is
+- Route-shell behavior for `/messages/new` (header and back rules) is
   documented in Navigation docs.
 
 ## Related Pages

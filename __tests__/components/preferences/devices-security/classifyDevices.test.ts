@@ -141,6 +141,18 @@ describe("classifyDevices", () => {
     expect(result.otherDevices).toHaveLength(0);
   });
 
+  it("knows this browser by its encryption device when no signing key matches", () => {
+    // This browser's signing keys can't be read (or aren't its grant's), but
+    // the engine knows the grant's encryption device is this browser's: it
+    // is this device, so revoking it warns about backup and cleans up here.
+    const result = classify({
+      grants: [grant("a")],
+      encryptedDevices: [encrypted("e1", { grantId: "a", isThisDevice: true })],
+      ownSigningKeys: [],
+    });
+    expect(result.thisDevice?.id).toBe("a");
+  });
+
   it("matches own signing keys case-insensitively", () => {
     const result = classify({
       grants: [grant("a", { device_key: `0x${"AB".repeat(32)}` })],

@@ -1,7 +1,6 @@
 import {
   fetchWaveMessages,
   fetchAroundSerialNoWaveMessages,
-  fetchLightWaveMessages,
 } from "@/contexts/wave/utils/wave-messages-utils";
 import {
   WAVE_DROPS_NATIVE_INITIAL_PARAMS,
@@ -64,12 +63,6 @@ const wave = {
 
 const mockFetch = commonApiFetch as jest.Mock;
 const mockFetchRetry = commonApiFetchWithRetry as jest.Mock;
-
-const makeBatch = (start: number, count: number) =>
-  Array.from({ length: count }, (_, index) => {
-    const serialNo = start - index;
-    return { id: `id-${serialNo}`, serial_no: serialNo };
-  });
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -144,63 +137,5 @@ describe("wave-messages-utils additional", () => {
       })
     );
     expect(res?.[0]?.serial_no).toBe(1);
-  });
-
-  it("fetchLightWaveMessages gathers light drops across pages and merges full drops", async () => {
-    const lightBatches = [makeBatch(10000, 5000), makeBatch(5001, 4997)];
-    let lightCallCount = 0;
-    mockFetchRetry.mockImplementation(async (options) => {
-      if (options.endpoint === "drop-ids") {
-        const batch = lightBatches[lightCallCount++] ?? [];
-        return batch;
-      }
-
-      if (options.endpoint === "v2/waves/w/drops") {
-        return {
-          drops: [
-            {
-              ...drop,
-              serial_no: 5,
-              id: "full-5",
-            },
-          ],
-          wave,
-        };
-      }
-
-      throw new Error(`Unexpected endpoint: ${options.endpoint}`);
-    });
-
-    const result = await fetchLightWaveMessages("w", 4005, 5);
-
-    expect(lightCallCount).toBe(2);
-    expect(mockFetchRetry).toHaveBeenCalledTimes(3);
-    expect(mockFetchRetry).toHaveBeenCalledWith(
-      expect.objectContaining({ endpoint: "drop-ids" })
-    );
-    expect(result).toHaveLength(9996);
-    expect(result![0]?.serial_no).toBe(10000);
-    expect(result![result!.length - 1]?.serial_no).toBe(5);
-    expect(result!.find((d) => d.serial_no === 5)).toMatchObject({
-      id: "full-5",
-    });
-  });
-
-  it("fetchLightWaveMessages returns null when target serial is not found", async () => {
-    mockFetchRetry.mockImplementation(async (options) => {
-      if (options.endpoint === "drop-ids") {
-        return [];
-      }
-
-      if (options.endpoint === "v2/waves/w/drops") {
-        return { drops: [], wave };
-      }
-
-      throw new Error(`Unexpected endpoint: ${options.endpoint}`);
-    });
-
-    const result = await fetchLightWaveMessages("w", 10, 5);
-
-    expect(result).toBeNull();
   });
 });

@@ -1,4 +1,5 @@
 import { expect, test } from "../testHelpers";
+import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 import { expectUrlState } from "../support/urlState";
 import {
   expectProfileShell,
@@ -27,6 +28,26 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
     .getByRole("main")
     .last()
     .locator("[data-profile-tab-content]");
+  if (isMobile) {
+    // The tab links are interactive before the mobile REP panel finishes
+    // rendering its overview, category pills, and activity rows.
+    const rep = content.getByRole("region", { name: "REP", exact: true });
+    await expect(
+      rep
+        .getByRole("button", { name: /^View [\d,]+ raters?$/ })
+        .or(rep.getByText("0 raters", { exact: true }))
+        .first()
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(
+      rep
+        .getByRole("button", { name: /^Open REP category / })
+        .or(rep.getByText("No rep received yet.", { exact: true }))
+        .first()
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expect(
+      rep.getByRole("status", { name: "Loading activity log" })
+    ).toBeHidden({ timeout: RESPONSE_TIMEOUT_MS });
+  }
   await page.evaluate(() =>
     globalThis.scrollTo({ top: 200, behavior: "instant" })
   );
@@ -57,6 +78,7 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
         opacity: string;
         inert: boolean;
         height: number;
+        scrollY: number;
         skeletonOpacity: string;
         skeletonDelay: string;
       }>((resolve) => {
@@ -70,6 +92,7 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
               opacity: getComputedStyle(outgoing).opacity,
               inert: outgoing.inert,
               height: outgoing.getBoundingClientRect().height,
+              scrollY: globalThis.scrollY,
               skeletonOpacity: skeleton.opacity,
               skeletonDelay: skeleton.animationDelay,
             });
@@ -89,6 +112,7 @@ test("keeps the profile shell and scroll while the last tab click wins", async (
       opacity: "0",
       inert: true,
       height: outgoingHeight,
+      scrollY: originalScroll,
       skeletonOpacity: "0",
       skeletonDelay: "0.1s",
     });

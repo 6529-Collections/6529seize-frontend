@@ -12,7 +12,9 @@ jest.mock("@sentry/nextjs", () => ({
 }));
 
 type SentryInitConfig = {
-  integrations: (integrations: unknown[]) => Array<{ name: string }>;
+  integrations: (
+    integrations: Array<{ name: string }>
+  ) => Array<{ name: string }>;
   replaysSessionSampleRate: number;
   replaysOnErrorSampleRate: number;
   sendDefaultPii: boolean;
@@ -77,6 +79,24 @@ describe("instrumentation-client Session Replay opt-in", () => {
     expect(config.replaysSessionSampleRate).toBe(0);
     expect(config.replaysOnErrorSampleRate).toBe(0);
     expect(config.sendDefaultPii).toBe(false);
+  });
+
+  it("drops the culture context and keeps the default breadcrumbs", () => {
+    const config = loadConfig({ buildFlag: "false", runtimeFlag: "false" });
+
+    const integrations = config.integrations([
+      { name: "Dedupe" },
+      { name: "Breadcrumbs" },
+      { name: "CultureContext" },
+      { name: "HttpContext" },
+    ]);
+
+    expect(integrations).toEqual([
+      { name: "Dedupe" },
+      { name: "Breadcrumbs" },
+      { name: "HttpContext" },
+      { name: "third-party-errors-filter" },
+    ]);
   });
 
   it("excludes Replay when the flag is unset", () => {

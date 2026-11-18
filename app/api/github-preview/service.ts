@@ -1,6 +1,7 @@
 import LruTtlCache from "@/lib/cache/lruTtl";
 import type { GithubPreviewResponse } from "@/services/api/github-preview-api";
 import { getResourceCacheKey, parseGithubResource } from "./service/resource";
+import { isTransientGithubError } from "./service/fetchers";
 import { resolvePreviewForResource } from "./service/previews";
 
 // Only public metadata passes the fetchers/preview gates. Previously public
@@ -24,7 +25,8 @@ const cache = new LruTtlCache<string, CachedPreview>({
 const inFlight = new Map<string, Promise<GithubPreviewResponse>>();
 
 // A failed load leaves the cache as it was: a refresh that fails keeps the
-// still-valid snapshot, and failures themselves are never cached.
+// still-valid snapshot (and answers with it when the failure is transient),
+// and failures themselves are never cached.
 const loadPreview = async (
   cacheKey: string,
   resource: ReturnType<typeof parseGithubResource>
@@ -59,10 +61,20 @@ export const resolveGithubPreview = async (
     return cached.preview;
   }
 
-  const pending = inFlight.get(cacheKey);
-  if (pending) {
+  const pending = inFlight.get(cacheKey) ?? loadPreview(cacheKey, resource);
+  if (!cached) {
     return pending;
   }
 
-  return loadPreview(cacheKey, resource);
+  // A refresh that fails for a transient reason (timeout, network, rate
+  // limit, GitHub server error) answers with the retained snapshot. Any other
+  // failure, such as a resource that is no longer public, is answered as is.
+  try {
+    return await pending;
+  } catch (error) {
+    if (isTransientGithubError(error)) {
+      return cached.preview;
+    }
+    throw error;
+  }
 };

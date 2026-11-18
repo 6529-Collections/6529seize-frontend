@@ -1,3 +1,11 @@
+jest.mock("@/contexts/EmojiContext", () => ({
+  useEmoji: () => ({
+    findCustomEmoji: () => null,
+    findNativeEmoji: () => null,
+    loadEmojiData: jest.fn(() => Promise.resolve()),
+  }),
+}));
+
 import HeaderSearchModal from "@/components/header/header-search/HeaderSearchModal";
 import type {
   HeaderSearchModalItemType,
@@ -662,6 +670,44 @@ describe("HeaderSearchModal", () => {
       await screen.findByRole("link", { name: "6529 Apps" })
     ).toHaveAttribute("href", "/about/6529-apps");
   });
+
+  it("keeps Validator out of newcomer search navigation", () => {
+    autoFlushDebounce = false;
+    setup({ selectedCategory: "PAGES" });
+    fireEvent.change(getSearchInput(), { target: { value: "validator" } });
+    expect(screen.getByText('Searching for "validator"')).toBeInTheDocument();
+    act(() => pendingDebounce?.());
+    expect(
+      screen.getByText('No matches in Pages for "validator"')
+    ).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "Validator" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "6529 Validator" })).toBeNull();
+  });
+
+  it.each(["validator", "6529 Validator", "/validator"])(
+    "finds the member Validator page for %s",
+    async (query) => {
+      useAuthMock.mockReturnValue({
+        connectedProfile: profile,
+        isAuthenticated: true,
+      });
+      setup({
+        selectedCategory: "PAGES",
+        queryImpl: () => ({
+          isFetching: false,
+          data: [],
+          error: undefined,
+          refetch: jest.fn(() => Promise.resolve()),
+        }),
+      });
+
+      fireEvent.change(getSearchInput(), { target: { value: query } });
+
+      expect(
+        await screen.findByRole("link", { name: "Validator" })
+      ).toHaveAttribute("href", "/validator");
+    }
+  );
 
   it("finds the Network Wave Score page by formula aliases", () => {
     setup();

@@ -15,10 +15,15 @@ type FileFacts = {
   readonly cpu: string;
   /** What kind of file it is: "App (.dmg)", "Terminal archive". */
   readonly what: string;
-  /** Who signed it, or null when nobody did. */
-  readonly signedBy: string | null;
-  /** What else vouches for it, such as Apple's notarization. */
-  readonly signedNote: string | null;
+  /**
+   * The publisher the visitor's system should name when it opens the file,
+   * from its code signature, or null for a file that carries none. It
+   * describes how 6529 builds the file: the site checks the feed's
+   * signature and so the file's SHA-256, never the code signature itself.
+   */
+  readonly publisher: string | null;
+  /** What else the system should show, such as Apple's notarization. */
+  readonly publisherNote: string | null;
 };
 
 export type ValidatorInstaller = FileFacts & {
@@ -58,8 +63,8 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     system: "Mac",
     cpu: "Apple silicon or Intel",
     what: "App (.dmg)",
-    signedBy: SIGNER,
-    signedNote: NOTARIZED,
+    publisher: SIGNER,
+    publisherNote: NOTARIZED,
   },
   {
     kind: "windows",
@@ -69,8 +74,8 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     system: "Windows",
     cpu: "x86-64",
     what: "Installer (Setup.exe)",
-    signedBy: SIGNER,
-    signedNote: null,
+    publisher: SIGNER,
+    publisherNote: null,
   },
   {
     kind: "deb-x64",
@@ -80,8 +85,8 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     system: "Linux",
     cpu: "x86-64",
     what: DEB,
-    signedBy: null,
-    signedNote: null,
+    publisher: null,
+    publisherNote: null,
   },
   {
     kind: "deb-arm64",
@@ -91,8 +96,8 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     system: "Linux",
     cpu: "ARM64",
     what: DEB,
-    signedBy: null,
-    signedNote: null,
+    publisher: null,
+    publisherNote: null,
   },
   {
     kind: "appimage",
@@ -102,8 +107,8 @@ const INSTALLERS: readonly (Omit<ValidatorInstaller, "file"> & {
     system: "Linux",
     cpu: "x86-64",
     what: "AppImage",
-    signedBy: null,
-    signedNote: null,
+    publisher: null,
+    publisherNote: null,
   },
 ];
 
@@ -115,8 +120,8 @@ const WINDOWS_MSI: FileFacts & { readonly title: string } = {
   system: "Windows",
   cpu: "x86-64",
   what: "Installer (.msi), the one inside Setup.exe",
-  signedBy: SIGNER,
-  signedNote: null,
+  publisher: SIGNER,
+  publisherNote: null,
 };
 
 // From rc.8 the validator carries Tor's bridge program, lyrebird, which is
@@ -128,8 +133,8 @@ const LYREBIRD_SOURCE: FileFacts & { readonly title: string } = {
   system: "Any",
   cpu: "",
   what: "Source of lyrebird, Tor's bridge program in the validator (GPL 3.0 or later)",
-  signedBy: null,
-  signedNote: null,
+  publisher: null,
+  publisherNote: null,
 };
 
 const ARCHIVE_TARGETS: readonly (FileFacts & {
@@ -142,8 +147,8 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     system: "Mac",
     cpu: "Apple silicon",
     what: TERMINAL_ARCHIVE,
-    signedBy: SIGNER,
-    signedNote: NOTARIZED,
+    publisher: SIGNER,
+    publisherNote: NOTARIZED,
   },
   {
     target: "x86_64-apple-darwin",
@@ -151,8 +156,8 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     system: "Mac",
     cpu: "Intel",
     what: TERMINAL_ARCHIVE,
-    signedBy: SIGNER,
-    signedNote: NOTARIZED,
+    publisher: SIGNER,
+    publisherNote: NOTARIZED,
   },
   {
     target: "x86_64-pc-windows-msvc",
@@ -160,8 +165,8 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     system: "Windows",
     cpu: "x86-64",
     what: TERMINAL_ARCHIVE,
-    signedBy: SIGNER,
-    signedNote: null,
+    publisher: SIGNER,
+    publisherNote: null,
   },
   {
     target: "x86_64-unknown-linux-gnu",
@@ -169,8 +174,8 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     system: "Linux",
     cpu: "x86-64",
     what: TERMINAL_ARCHIVE,
-    signedBy: null,
-    signedNote: null,
+    publisher: null,
+    publisherNote: null,
   },
   {
     target: "aarch64-unknown-linux-gnu",
@@ -178,8 +183,8 @@ const ARCHIVE_TARGETS: readonly (FileFacts & {
     system: "Linux",
     cpu: "ARM64",
     what: TERMINAL_ARCHIVE,
-    signedBy: null,
-    signedNote: null,
+    publisher: null,
+    publisherNote: null,
   },
 ];
 
@@ -202,8 +207,8 @@ function describeArchive(file: ValidatorReleaseFile): ValidatorFileEntry {
       system: "Any",
       cpu: "",
       what: "Other file",
-      signedBy: null,
-      signedNote: null,
+      publisher: null,
+      publisherNote: null,
       file,
     };
   }
@@ -212,8 +217,8 @@ function describeArchive(file: ValidatorReleaseFile): ValidatorFileEntry {
     system: known.system,
     cpu: known.cpu,
     what: known.what,
-    signedBy: known.signedBy,
-    signedNote: known.signedNote,
+    publisher: known.publisher,
+    publisherNote: known.publisherNote,
     file,
   };
 }
@@ -249,8 +254,8 @@ export function groupReleaseFiles(
         system: installer.system,
         cpu: installer.cpu,
         what: installer.what,
-        signedBy: installer.signedBy,
-        signedNote: installer.signedNote,
+        publisher: installer.publisher,
+        publisherNote: installer.publisherNote,
         file,
       });
       continue;
@@ -308,8 +313,8 @@ export function listReleaseFiles(
     system: installer.system,
     cpu: installer.cpu,
     what: installer.what,
-    signedBy: installer.signedBy,
-    signedNote: installer.signedNote,
+    publisher: installer.publisher,
+    publisherNote: installer.publisherNote,
     file: installer.file,
   }));
   entries.push(...archives);
@@ -319,8 +324,8 @@ export function listReleaseFiles(
       system: "Any",
       cpu: "",
       what: "release.json: its commit and each program's SHA-256",
-      signedBy: null,
-      signedNote: null,
+      publisher: null,
+      publisherNote: null,
       file: releaseJson,
     });
   }

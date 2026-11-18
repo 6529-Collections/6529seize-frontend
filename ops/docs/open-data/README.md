@@ -18,10 +18,7 @@ Open Data docs cover dataset download routes under `/open-data/*`.
   `About -> Data & Developer Tools`.
 - Native app menu also includes direct links to dataset routes under
   `About -> Data & Developer Tools`.
-- Visibility rule: on native iOS, the `Meme Subscriptions` hub card is shown
-  only when cookie-country is `US`.
-- On native iOS, `Meme Subscriptions` can be temporarily hidden while
-  cookie-country is still loading.
+- The iOS app hides the `Meme Subscriptions` hub card and navigation entry.
 - Direct fallback: `/open-data/meme-subscriptions` still opens when the hub card
   is hidden.
 - Route behavior families:

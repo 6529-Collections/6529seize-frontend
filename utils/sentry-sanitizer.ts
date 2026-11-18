@@ -11,6 +11,8 @@ import {
   currentPathname,
   isEncryptedChatUiBreadcrumb,
 } from "./monitoring/sentryEncryptedChatBreadcrumbs";
+import { withoutCultureContext } from "./monitoring/sentryLocaleContext";
+import { withoutUiBreadcrumbLabels } from "./monitoring/sentryUiBreadcrumbs";
 import {
   sanitizeSentryExceptionValue,
   sanitizeSentryText as sanitizeString,
@@ -490,7 +492,9 @@ function sanitizeHeaders(
 
 function sanitizeBreadcrumbTextFields(crumb: Breadcrumb): void {
   if (typeof crumb.message === "string") {
-    crumb.message = sanitizeString(crumb.message);
+    crumb.message = sanitizeString(
+      withoutUiBreadcrumbLabels(crumb.message, crumb.category)
+    );
   }
   if (typeof crumb.category === "string") {
     crumb.category = sanitizeString(crumb.category);
@@ -782,7 +786,8 @@ export function sanitizeSentryEvent<T extends Event>(event: T): T {
     >;
   }
   if (next.contexts) {
-    next.contexts = sanitizeUnknown(next.contexts, 0, seen) as NonNullable<
+    const contexts = withoutCultureContext(next.contexts);
+    next.contexts = sanitizeUnknown(contexts, 0, seen) as NonNullable<
       Event["contexts"]
     >;
   }

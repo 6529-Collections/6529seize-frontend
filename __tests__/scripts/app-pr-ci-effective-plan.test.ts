@@ -107,6 +107,10 @@ it("does not select the NIC pack for unrelated code", () => {
 
 describe("effective App PR CI plan", () => {
   it.each([
+    "components/user/identity/getting-started/IdentityGettingStartedCard.tsx",
+    "components/user/identity/getting-started/identityGettingStartedSession.ts",
+    "components/brain/my-stream/tabs/MainStageNominationPopover.tsx",
+    "i18n/messages/identityGettingStarted.en-US.json",
     "components/user/rep/modify-rep/UserPageRepModifyModal.tsx",
     "components/user/utils/rate/UserPageRateInput.tsx",
     "components/react-query-wrapper/ReactQueryWrapper.tsx",
@@ -148,6 +152,7 @@ describe("effective App PR CI plan", () => {
     "hooks/useChatVideoPoster.ts",
     "public/video-preview-placeholder.svg",
     "components/waves/drop/MemesDropArtworkHero.tsx",
+    "components/waves/drop/useAutomaticSubmissionGifOriginal.ts",
     "components/drops/view/item/content/media/DropImagePreview.tsx",
     "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
     "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
@@ -215,6 +220,7 @@ describe("effective App PR CI plan", () => {
     "components/waves/drops/WaveDropPartContentMedias.tsx",
     "components/react-query-wrapper/utils/updateAttachmentInCachedDrops.ts",
     "tests/social/wave-loading-sandbox.spec.ts",
+    "tests/social/wave-share-image-sandbox.spec.ts",
     "tests/social/android-back-sandbox.spec.ts",
     "tests/social/mobile-gestures-sandbox.spec.ts",
     "hooks/useAndroidBackLayer.ts",
@@ -251,6 +257,9 @@ describe("effective App PR CI plan", () => {
     "tests/support/composerSandboxServer.cjs",
     "components/waves/WavesMobile.tsx",
     "components/brain/BrainMobile.tsx",
+    "components/waves/drops/WaveDropActionsMore.tsx",
+    "components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper.tsx",
+    "components/shared/WavesMessagesWrapper.tsx",
     "components/brain/my-stream/MyStreamWaveContent.tsx",
     "tests/packs.manifest.cjs",
     "openapi.yaml",
@@ -1020,4 +1029,28 @@ it("does not select the live reaction browser lane for unrelated changes", () =>
   expect(
     executePlan(["README.md"]).checks.playwright_drop_reactions.required
   ).toBe(false);
+});
+
+it.each([
+  "hooks/useMembershipNavigation.ts",
+  "components/layout/sidebar/WebSidebarNav.tsx",
+  "components/header/AppSidebar.tsx",
+  "components/header/AppSidebarMenuItems.tsx",
+  "tests/auth/session-recovery-sandbox.spec.ts",
+])(
+  "selects session recovery and membership navigation browser coverage for %s",
+  (file) => {
+    const input = plan([file]);
+    input.checks.playwright_critical_shell.required = false;
+    expect(
+      executeRawPlan(input).checks.playwright_critical_shell?.required
+    ).toBe(true);
+  }
+);
+
+it("selects the artwork and viewer lane for image viewer geometry coverage", () => {
+  expect(
+    executePlan(["tests/media/image-viewer-layout-sandbox.spec.ts"]).checks
+      .playwright_submission_artwork.required
+  ).toBe(true);
 });

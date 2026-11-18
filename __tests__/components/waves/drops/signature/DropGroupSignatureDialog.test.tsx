@@ -25,6 +25,12 @@ jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
     ) : null,
 }));
 
+let mockStates: Record<string, string> = {};
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: { id: string }[]) =>
+    drops.map((drop) => mockStates[drop.id] ?? "verified"),
+}));
+
 const aDrop = (id: string, overrides: Record<string, unknown> = {}) =>
   ({
     id,
@@ -41,6 +47,34 @@ describe("DropGroupSignatureDialog", () => {
   beforeEach(() => {
     mockEnabled = true;
     mockVerification.mockClear();
+    mockStates = {};
+  });
+
+  it("says signed by its author only for posts this browser verified", () => {
+    mockStates = { a: "pending", b: "unverified", c: "failed", e: "unlinked" };
+    render(
+      <DropGroupSignatureDialog
+        group={[aDrop("a"), aDrop("b"), aDrop("c"), aDrop("d"), aDrop("e")]}
+        isOpen
+        onClose={jest.fn()}
+      />
+    );
+    const rows = within(
+      screen.getByRole("list", { name: "Posts in this group" })
+    ).getAllByRole("button");
+    expect(rows[0]).toHaveTextContent("Checking the author's signature");
+    expect(rows[1]).toHaveTextContent("Signed, not yet verified");
+    expect(rows[2]).toHaveTextContent("The signature doesn't match this post");
+    expect(rows[3]).toHaveTextContent("Signed by its author");
+    expect(rows[4]).toHaveTextContent(
+      "Signed by a wallet that is not on this profile"
+    );
+    expect(rows[4]).not.toHaveTextContent("Signed by its author");
+    rows
+      .slice(0, 3)
+      .forEach((row) =>
+        expect(row).not.toHaveTextContent("Signed by its author")
+      );
   });
 
   it("lists every post with its excerpt and status, verifying none up front", () => {

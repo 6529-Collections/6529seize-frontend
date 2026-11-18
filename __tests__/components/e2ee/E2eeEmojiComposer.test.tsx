@@ -53,6 +53,7 @@ jest.mock("@/components/e2ee/conversation/E2eeEmojiProvider", () => ({
       ["gm", "data:image/png;base64,aGVsbG8="],
       ["gm-wave", "data:image/png;base64,aGVsbG8="],
     ]),
+    native: new Map(),
     categories: [],
     failed: false,
     retry: jest.fn(),

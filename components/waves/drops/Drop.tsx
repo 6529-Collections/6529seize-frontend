@@ -81,7 +81,9 @@ interface DropProps {
 }
 
 function CompetitionDrop(props: DropProps) {
-  const drop = useCompetitionDrop(props.drop);
+  const drop = useCompetitionDrop(props.drop, {
+    skipInWavesWithoutCompetition: true,
+  });
   return <DropContent {...props} drop={drop} />;
 }
 

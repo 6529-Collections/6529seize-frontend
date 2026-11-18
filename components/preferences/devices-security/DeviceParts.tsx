@@ -156,6 +156,16 @@ export function DeviceMeta({
       }),
     });
   }
+  if (device.grant?.domain) {
+    // Where the signing permission was authorized, as Device Permissions
+    // showed it: a grant from anywhere unexpected stands out.
+    items.push({
+      key: "origin",
+      text: t(locale, "signedMessages.devices.origin", {
+        origin: device.grant.domain,
+      }),
+    });
+  }
   const wallet = showWallet ? formatE2eeWallet(device.wallet) : "";
   if (wallet) {
     items.push({

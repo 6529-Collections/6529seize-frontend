@@ -31,7 +31,7 @@ export const toSelectedPerson = (
       }
     : null;
 
-function EligibilityStatus({
+export function EligibilityStatus({
   status,
   reason,
   onRetry,

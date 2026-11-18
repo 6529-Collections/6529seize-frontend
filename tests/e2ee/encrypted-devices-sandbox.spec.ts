@@ -27,6 +27,7 @@ import {
   startChat,
 } from "../support/e2ee/e2eeUi";
 import { DEVICES_SECURITY_MESSAGES } from "../../i18n/messages/devices-security";
+import { SIGNED_MESSAGES_MESSAGES } from "../../i18n/messages/signed-messages";
 import {
   e2eeMessage,
   e2eeMessagePattern,
@@ -113,10 +114,12 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     await expect(bobPhone.page.getByText(NEW_DEVICE_NOTICE)).toBeVisible({
       timeout: E2EE_SYNC_TIMEOUT_MS,
     });
-    // "It was me" answers it for good: gone now and after a reload.
+    // "This was me" answers it for good: gone now and after a reload.
     await bobPhone.page
       .getByRole("button", {
-        name: DEVICES_SECURITY_MESSAGES["devicesSecurity.newDevice.itWasMe"],
+        name: SIGNED_MESSAGES_MESSAGES[
+          "signedMessages.notice.newDevice.acknowledge"
+        ],
       })
       .click();
     await expect(bobPhone.page.getByText(NEW_DEVICE_NOTICE)).toHaveCount(0);

@@ -604,6 +604,12 @@ function createE2eeSandboxApi({ corsHeaders }) {
       result = signIn.listGrants(decodeJwtSubject(req.headers.authorization));
     } else {
       result = deviceGrantAction(req, method, pathname);
+    } else if (
+      method === "GET" &&
+      pathname === "/api/device-security-notices"
+    ) {
+      // This delivery fixture models legacy per-device alerts, not unified notices.
+      result = { status: 404, body: { error: "Not found" } };
     }
     if (result === null) {
       return false;

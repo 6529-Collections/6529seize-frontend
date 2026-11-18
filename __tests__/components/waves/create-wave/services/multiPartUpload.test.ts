@@ -111,6 +111,7 @@ describe("multiPartUpload", () => {
           file_name: "small.png",
           content_type: "image/png",
         },
+        errorMode: "structured",
       });
 
       expect(result).toEqual({
@@ -161,6 +162,7 @@ describe("multiPartUpload", () => {
           file_name: "test.png",
           content_type: "image/png",
         },
+        errorMode: "structured",
       });
 
       // Verify part upload call
@@ -191,6 +193,7 @@ describe("multiPartUpload", () => {
           key: "test-key",
           parts: [{ part_no: 1, etag: "test-etag" }],
         },
+        errorMode: "structured",
       });
 
       expect(result).toEqual({
@@ -232,6 +235,7 @@ describe("multiPartUpload", () => {
           file_name: "test.png",
           content_type: "image/png",
         },
+        errorMode: "structured",
       });
     });
 
@@ -275,6 +279,7 @@ describe("multiPartUpload", () => {
           file_name: "test.png",
           content_type: "image/png",
         },
+        errorMode: "structured",
       });
     });
 
@@ -292,6 +297,7 @@ describe("multiPartUpload", () => {
           content_type: "image/png",
           purpose: "decision_entry",
         },
+        errorMode: "structured",
       });
       expect(mockCommonApiPost).toHaveBeenCalledTimes(3);
     });
@@ -331,6 +337,7 @@ describe("multiPartUpload", () => {
           content_type: "image/avif",
           purpose: "decision_entry",
         },
+        errorMode: "structured",
       });
     });
 
@@ -357,6 +364,7 @@ describe("multiPartUpload", () => {
           file_name: "prepared-entry.avif",
           content_type: "image/avif",
         },
+        errorMode: "structured",
       });
     });
   });
@@ -540,6 +548,7 @@ describe("multiPartUpload", () => {
             { part_no: 2, etag: "etag2" },
           ],
         },
+        errorMode: "structured",
       });
 
       expect(result.url).toBe("https://cdn.example.com/final-url");
@@ -601,6 +610,7 @@ describe("multiPartUpload", () => {
           key: "test-key",
           parts: [{ part_no: 1, etag: "quoted-etag" }], // Quotes removed
         },
+        errorMode: "structured",
       });
     });
 
@@ -622,6 +632,7 @@ describe("multiPartUpload", () => {
           key: "test-key",
           parts: [{ part_no: 1, etag: "unquoted-etag" }],
         },
+        errorMode: "structured",
       });
     });
   });

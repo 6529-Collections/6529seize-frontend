@@ -179,10 +179,12 @@ describe("getE2eeDeviceLabel", () => {
 });
 
 describe("shared copy patterns", () => {
-  it("matches the rendered new-device alert", () => {
+  it("matches the rendered new-device notice", () => {
     expect(
-      t("en-US", "devicesSecurity.newDevice.title", {
+      t("en-US", "e2ee.devices.newDevice", {
+        date: "Oct 31, 2026, 12:49 PM",
         label: "Chrome on Windows",
+        platform: "Browser",
       })
     ).toMatch(NEW_DEVICE_NOTICE);
   });

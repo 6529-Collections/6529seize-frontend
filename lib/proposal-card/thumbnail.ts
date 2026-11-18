@@ -3,13 +3,16 @@ import {
   PROPOSAL_CARD_LABELS,
   type ProposalCardLayout,
 } from "./document";
+import { publicEnv } from "@/config/env";
 import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
 
 const loadImage = async (url: string): Promise<HTMLImageElement> => {
   const image = new Image();
   image.crossOrigin = "anonymous";
   image.referrerPolicy = "no-referrer";
-  image.src = normalizeDecentralizedMediaUrl(url) ?? url;
+  image.src =
+    normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
+    url;
   await image.decode();
   return image;
 };

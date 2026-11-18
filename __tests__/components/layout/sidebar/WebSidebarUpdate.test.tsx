@@ -130,14 +130,14 @@ it("reveals the Update label when the sidebar expands", () => {
   );
 });
 
-it("reserves the update slot above Search while availability resolves", () => {
+it("releases the empty Update slot in the collapsed sidebar", () => {
   jest.mocked(useVersionStatus).mockReturnValue(false);
   const { container, rerender } = render(<WebSidebar {...sidebarProps} />);
   expect(
     screen.queryByRole("button", { name: "Update" })
   ).not.toBeInTheDocument();
   const slot = container.querySelector('[data-sidebar-version-slot="true"]');
-  expect(slot).not.toBeNull();
+  expect(slot).toHaveClass("empty:tw-hidden");
   expect(slot?.nextElementSibling).toContainElement(
     screen.getByRole("button", { name: "Search" })
   );

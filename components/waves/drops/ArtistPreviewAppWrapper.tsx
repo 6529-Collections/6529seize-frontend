@@ -7,10 +7,10 @@ import {
   Transition,
   TransitionChild,
 } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { CSSProperties, ReactNode } from "react";
 import { Fragment, useCallback, useRef } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
+import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
 
 const KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const KEYBOARD_TRANSITION =
@@ -95,14 +95,12 @@ export default function ArtistPreviewAppWrapper({
                 leaveTo="tw-opacity-0"
               >
                 <div className="tw-absolute -tw-top-16 tw-right-0 -tw-ml-8 tw-flex tw-pr-2 tw-pt-4 sm:-tw-ml-10 sm:tw-pr-4">
-                  <button
-                    type="button"
-                    aria-label="Close panel"
-                    className="tw-relative tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/90 tw-p-0 tw-text-iron-300 tw-backdrop-blur-sm tw-transition focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-scale-95 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-text-white motion-reduce:tw-transform-none"
+                  <MobileWrapperDialogCloseButton
                     onClick={onClose}
-                  >
-                    <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
-                  </button>
+                    label="Close panel"
+                    variant="minimal"
+                    size="compact"
+                  />
                 </div>
               </TransitionChild>
 

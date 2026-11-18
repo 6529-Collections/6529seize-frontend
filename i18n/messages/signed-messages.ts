@@ -49,6 +49,13 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.notice.enable.body":
     "Your wallet signs once. This browser then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
   "signedMessages.notice.enable.action": "Turn on",
+  "signedMessages.notice.restore.title":
+    "Your browser cleared this site's saved keys",
+  "signedMessages.notice.restore.body":
+    "This browser can no longer sign your posts. Turn Signed Posts on again with one signature.",
+  "signedMessages.notice.restore.action": "Turn on again",
+  "signedMessages.notice.restore.replaced":
+    "Signed Posts are on again. This browser's earlier permission was removed.",
   "signedMessages.notice.renew.title": "Signed posts end on {date}",
   "signedMessages.notice.renew.body":
     "Renew with one signature to keep signing your messages in this browser.",
@@ -57,7 +64,26 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "Signed posts have ended in this browser",
   "signedMessages.notice.expired.body":
     "Your messages are sent unsigned until you renew with one signature.",
-  "signedMessages.notice.newDevice.revoke": "Revoke",
+  "signedMessages.notice.newDevice.message":
+    "{label} is now authorized for Signed Posts. If this wasn’t you, revoke it.",
+  "signedMessages.notice.newDevice.revoke": "Revoke access",
+  "signedMessages.notice.newDevice.acknowledge": "This was me",
+  "deviceSecurity.notice.both":
+    "{label} was authorized to read your encrypted DMs and sign posts as you.",
+  "deviceSecurity.notice.posts": "{label} was authorized to sign posts as you.",
+  "deviceSecurity.notice.encryptedDms":
+    "{label} was authorized to read your encrypted DMs.",
+  "deviceSecurity.notice.acknowledgeLabel": "This was me · {label}",
+  "deviceSecurity.notice.revokeUnavailable":
+    "To revoke access, open Encrypted DMs on a device that can use them.",
+  "deviceSecurity.notice.revokeLabel": "Revoke access for {label}",
+  "deviceSecurity.notice.revokeTitle": "Revoke access for {label}?",
+  "deviceSecurity.notice.revoke.both":
+    "This device will stop signing posts and receiving encrypted DMs. The app clears its local encrypted chat history when it processes the revocation.",
+  "deviceSecurity.notice.revoke.posts":
+    "This device will lose permission to sign posts as you.",
+  "deviceSecurity.notice.revoke.encryptedDms":
+    "This device will stop receiving encrypted DMs. The app clears its local encrypted chat history when it processes the revocation.",
   "signedMessages.notice.newDevice.acknowledgeError":
     "Couldn’t acknowledge this device. Try again.",
   "signedMessages.notice.enabled": "Signed posts are on in this browser.",
@@ -82,6 +108,7 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.scope.react": "react",
   "signedMessages.devices.scope.vote": "vote",
   "signedMessages.devices.wallet": "Wallet {address}",
+  "signedMessages.devices.origin": "Authorized from {origin}",
   "signedMessages.devices.granted": "Added {date}",
   "signedMessages.devices.expires": "Expires {date}",
   "signedMessages.devices.expiredOn": "Expired {date}",
@@ -110,7 +137,18 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.proxy":
     "Switch to your own profile to manage devices.",
   "signedMessages.marker.label": "Signed by its author",
+  "signedMessages.marker.pending": "Checking the author's signature",
+  "signedMessages.marker.unverified": "Signed, not yet verified",
+  "signedMessages.marker.unlinked":
+    "Signed by a wallet that is not on this profile",
+  "signedMessages.marker.failed": "The signature doesn't match this post",
   "signedMessages.marker.withLabel": "{label}, signed by its author",
+  "signedMessages.marker.withLabelUnverified":
+    "{label}, signed, not yet verified",
+  "signedMessages.marker.withLabelUnlinked":
+    "{label}, signed by a wallet that is not on this profile",
+  "signedMessages.marker.withLabelFailed":
+    "{label}, the signature doesn't match this post",
   "signedMessages.signature.menuItem": "Signature",
   "signedMessages.signature.title": "Signature",
   "signedMessages.signature.close": "Close",
@@ -137,6 +175,13 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.signature.walletVerified": "Verified in your browser",
   "signedMessages.signature.contractWalletVerified":
     "Contract wallet: verified on Ethereum in your browser",
+  "signedMessages.signature.origin": "Authorized from",
+  "signedMessages.signature.unrecognizedOriginDescription":
+    "This post's device was authorized from “{origin}”, which isn't a 6529 site or app, so this post isn't shown as signed.",
+  "signedMessages.signature.unlinkedWalletDescription":
+    "This post was signed by the wallet {wallet}, which is not one of its author's wallets now (for example, it was removed from the profile), so the signature can't be attributed to this author.",
+  "signedMessages.signature.unlinked":
+    "Signed by a wallet that is not on this profile",
   "signedMessages.signature.currentContent": "Current content",
   "signedMessages.signature.currentSigned": "The signed version",
   "signedMessages.signature.currentUnsigned": "Changed without a signature",
@@ -146,6 +191,12 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "{signed} of {count} post signed by its author",
   "signedMessages.group.partial.other":
     "{signed} of {count} posts signed by their author",
+  "signedMessages.group.pending": "Checking the signatures in this group",
+  "signedMessages.group.unverified": "Signed posts, not yet verified",
+  "signedMessages.group.unlinked":
+    "A post in this group was signed by a wallet that is not on this profile",
+  "signedMessages.group.failed":
+    "A signature in this group doesn't match its post",
   "signedMessages.group.title": "Signatures in this group",
   "signedMessages.group.description":
     "Select a post to check its signature in your browser.",

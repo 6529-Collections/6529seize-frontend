@@ -1,11 +1,13 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import QuickDirectMessages from "@/components/messages/quick-dms/QuickDirectMessages";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 import {
   LIST_STATE,
   QUICK_DM_STORAGE_KEY,
 } from "@/components/messages/quick-dms/QuickDirectMessagesUtils";
 
 const mockReleaseDirectMessagesList = jest.fn();
+const mockPush = jest.fn();
 const mockRequestDirectMessagesList = jest.fn(
   () => mockReleaseDirectMessagesList
 );
@@ -16,6 +18,9 @@ jest.mock("@/components/auth/Auth", () => ({
     showWaves: true,
   }),
 }));
+
+jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn() }));
+jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -60,10 +65,21 @@ jest.mock("@/components/messages/quick-dms/QuickDmChat", () => ({
 }));
 
 jest.mock("@/components/messages/quick-dms/QuickDmListPanel", () => ({
-  QuickDmListPanel: ({ onClose }: { readonly onClose: () => void }) => (
-    <button type="button" data-testid="quick-dm-list" onClick={onClose}>
-      Close list
-    </button>
+  QuickDmListPanel: ({
+    onClose,
+    onCreateDirectMessage,
+  }: {
+    readonly onClose: () => void;
+    readonly onCreateDirectMessage?: () => void;
+  }) => (
+    <>
+      <button type="button" data-testid="quick-dm-list" onClick={onClose}>
+        Close list
+      </button>
+      <button type="button" onClick={onCreateDirectMessage}>
+        New message
+      </button>
+    </>
   ),
 }));
 
@@ -86,6 +102,7 @@ const setDesktopViewport = (): void => {
 describe("QuickDirectMessages", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(isE2eeEnabled).mockReturnValue(false);
     globalThis.localStorage.clear();
     setDesktopViewport();
   });
@@ -120,6 +137,19 @@ describe("QuickDirectMessages", () => {
     expect(screen.getByText("3")).toBeInTheDocument();
     expect(mockReleaseDirectMessagesList).toHaveBeenCalledTimes(1);
     expect(mockRequestDirectMessagesList).toHaveBeenCalledTimes(1);
+  });
+
+  it("closes the quick DM list and opens the unified composer route", () => {
+    jest.mocked(isE2eeEnabled).mockReturnValue(true);
+    globalThis.localStorage.setItem(
+      QUICK_DM_STORAGE_KEY,
+      JSON.stringify(LIST_STATE)
+    );
+    render(<QuickDirectMessages />);
+
+    fireEvent.click(screen.getByRole("button", { name: "New message" }));
+    expect(mockPush).toHaveBeenCalledWith("/messages/new");
+    expect(screen.queryByTestId("quick-dm-list")).not.toBeInTheDocument();
   });
 
   it("loads the DM list on mount when the panel was left open", () => {

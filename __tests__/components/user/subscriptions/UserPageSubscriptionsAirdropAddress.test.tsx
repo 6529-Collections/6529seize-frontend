@@ -1,13 +1,20 @@
 import { AIRDROPS_USE_CASE } from "@/components/delegation/delegation-constants";
 import UserPageSubscriptionsAirdropAddress from "@/components/user/subscriptions/UserPageSubscriptionsAirdropAddress";
 import { MEMES_CONTRACT } from "@/constants/constants";
-import { fireEvent, render, screen } from "@testing-library/react";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+
+jest.mock("@/hooks/useIsTouchDevice");
 
 describe("UserPageSubscriptionsAirdropAddress", () => {
   const airdrop = {
     airdrop_address: { address: "0x123", ens: "alice.eth" },
     tdh_wallet: { address: "", ens: "" },
   };
+
+  beforeEach(() => {
+    jest.mocked(useIsTouchDevice).mockReturnValue(false);
+  });
 
   it("shows address and edit link when allowed", () => {
     render(<UserPageSubscriptionsAirdropAddress show_edit airdrop={airdrop} />);
@@ -52,5 +59,32 @@ describe("UserPageSubscriptionsAirdropAddress", () => {
     expect(addressButton).toHaveTextContent("0x7d88...e0b6");
     fireEvent.focus(addressButton);
     expect(await screen.findByRole("tooltip")).toHaveTextContent(address);
+  });
+
+  it("keeps a tapped tooltip open through compatibility mouse events until an outside tap", async () => {
+    jest.mocked(useIsTouchDevice).mockReturnValue(true);
+    render(
+      <UserPageSubscriptionsAirdropAddress
+        show_edit={false}
+        layout="inline"
+        airdrop={airdrop}
+      />
+    );
+
+    const address = screen.getByRole("button", { name: "0x123" });
+    const heading = screen.getByRole("heading", { name: "Airdrop Address" });
+    fireEvent.mouseOver(address);
+    fireEvent.click(address);
+    fireEvent.mouseOut(address, { relatedTarget: heading });
+
+    await waitFor(() =>
+      expect(screen.getByRole("tooltip")).toHaveClass("react-tooltip__show")
+    );
+    expect(screen.getByRole("tooltip")).toHaveTextContent("0x123");
+
+    fireEvent.click(heading);
+    await waitFor(() =>
+      expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+    );
   });
 });

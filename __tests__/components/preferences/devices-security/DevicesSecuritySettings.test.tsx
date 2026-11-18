@@ -5,13 +5,15 @@ import {
   type EncryptedDeviceInput,
 } from "@/components/preferences/devices-security/classifyDevices";
 import DevicesSecuritySettings from "@/components/preferences/devices-security/DevicesSecuritySettings";
-import type { SecurityDevicesState } from "@/components/preferences/devices-security/useSecurityDevices";
+import type { useSecurityDevices } from "@/components/preferences/devices-security/useSecurityDevices";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 
 const NOW = Date.UTC(2026, 10, 9, 15, 0);
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 const WALLET = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
+
+type SecurityDevicesState = ReturnType<typeof useSecurityDevices>;
 
 let mockState: SecurityDevicesState;
 jest.mock(
@@ -27,10 +29,24 @@ jest.mock("@/components/preferences/devices-security/BackupCard", () => ({
   BackupCard: () => null,
 }));
 let mockAnnounced = new Set<string>();
+let mockBackupSnapshot: { phase: string } | null = null;
+jest.mock("@/hooks/e2ee/useE2eeBackup", () => ({
+  useE2eeBackup: () => ({ manager: null, snapshot: mockBackupSnapshot }),
+}));
 jest.mock("@/components/e2ee/devices/E2eeNewDeviceNotice", () => ({
   E2eeNewDeviceNotice: () => null,
-  useAnnouncedDeviceKeys: () => mockAnnounced,
 }));
+// The devices the new-device alert announces, by encrypted-DMs device key.
+jest.mock(
+  "@/components/preferences/devices-security/useAnnouncedDevices",
+  () => ({
+    useAnnouncedDevices:
+      () =>
+      (device: { readonly encryptedDevice: { deviceKey: string } | null }) =>
+        device.encryptedDevice !== null &&
+        mockAnnounced.has(device.encryptedDevice.deviceKey),
+  })
+);
 let mockDeviceSecurity = { proof: "on", canEnableEncryption: false };
 jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
   useDeviceSecurityState: () => mockDeviceSecurity,
@@ -189,6 +205,56 @@ describe("DevicesSecuritySettings", () => {
       )
     );
     expect(await screen.findByText("6529 app on iPhone revoked.")).toBeInTheDocument();
+  });
+
+  it("keeps Set up backup first unavailable while this browser's revoke runs", async () => {
+    mockBackupSnapshot = { phase: "off" };
+    try {
+      let failRevoke: (error: unknown) => void = () => undefined;
+      const revoke = jest.fn(
+        () =>
+          new Promise<void>((_, reject) => {
+            failRevoke = reject;
+          })
+      );
+      mockState = state({ revoke });
+      const user = userEvent.setup();
+      render(<DevicesSecuritySettings />);
+      const thisDevice = screen.getByRole("region", {
+        name: "Brave on Windows",
+      });
+      await user.click(
+        within(thisDevice).getByRole("button", {
+          name: "More actions for this browser",
+        })
+      );
+      await user.click(
+        await screen.findByRole("menuitem", { name: "Revoke this browser…" })
+      );
+      const dialog = await screen.findByRole("dialog", {
+        name: "Revoke this browser?",
+      });
+      fireEvent.click(
+        within(dialog).getByRole("button", { name: "Revoke this browser" })
+      );
+      const setUp = within(dialog).getByRole("button", {
+        name: "Set up backup first",
+      });
+      await waitFor(() => expect(setUp).toBeDisabled());
+      fireEvent.click(setUp);
+      expect(screen.getByRole("dialog", { name: "Revoke this browser?" })).toBe(
+        dialog
+      );
+
+      // The revoke fails: the dialog is still open to say so.
+      await act(async () => {
+        failRevoke(new Error("offline"));
+      });
+      expect(await within(dialog).findByRole("alert")).toBeInTheDocument();
+      expect(setUp).toBeEnabled();
+    } finally {
+      mockBackupSnapshot = null;
+    }
   });
 
   it("revokes this browser only through More and the stricter dialog", async () => {

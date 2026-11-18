@@ -236,13 +236,15 @@ const isEmbeddedContentUrl = (href: string): boolean => {
   );
 };
 
-export const getWaveDescriptionPreviewText = (
-  wave: Partial<ApiWave> | null | undefined
-): string | null => {
-  const rawContent = wave?.description_drop?.parts[0]?.content ?? "";
-  const plainText = markdownToPlainText(rawContent, {
+export const getDescriptionPreviewText = (content: string): string | null => {
+  const plainText = markdownToPlainText(content, {
     includeImageUrls: false,
     omitUrl: isEmbeddedContentUrl,
   });
   return plainText.length > 0 ? plainText : null;
 };
+
+export const getWaveDescriptionPreviewText = (
+  wave: Partial<ApiWave> | null | undefined
+): string | null =>
+  getDescriptionPreviewText(wave?.description_drop?.parts[0]?.content ?? "");

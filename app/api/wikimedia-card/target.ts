@@ -112,20 +112,24 @@ export const parseAcceptLanguage = (header: string | null): string[] => {
   return Array.from(preferred);
 };
 
+/** Error answers depend on the request, so no cache keeps them. */
+export const respondWithCardError = (message: string, status: number) =>
+  NextResponse.json(
+    { error: message },
+    { status, headers: { "Cache-Control": "no-store" } }
+  );
+
 export const respondWithGuardError = (
   error: unknown,
   fallbackMessage: string,
   fallbackStatus = 400
 ) => {
   if (error instanceof UrlGuardError) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: error.statusCode }
-    );
+    return respondWithCardError(error.message, error.statusCode);
   }
 
   const message = error instanceof Error ? error.message : fallbackMessage;
-  return NextResponse.json({ error: message }, { status: fallbackStatus });
+  return respondWithCardError(message, fallbackStatus);
 };
 
 const WIKIMEDIA_ALLOWED_HOSTS = new Set([

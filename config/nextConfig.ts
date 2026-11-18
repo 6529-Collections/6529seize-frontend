@@ -16,6 +16,7 @@ import { HTML_LIMITED_BOT_UA_RE } from "next/dist/shared/lib/router/utils/html-b
 import { ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES } from "../lib/media/arweave-gateways";
 import {
   DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
   IPFS_PATH_GATEWAY_HOSTS,
   getMediaResolverHostname,
 } from "../lib/media/decentralized-media";
@@ -62,9 +63,12 @@ const FIRST_PARTY_IMAGE_HOSTNAMES = new Set<string>([
 ]);
 
 function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
+  // Both media resolver hosts (6529.io and the separate content domain) stay
+  // allowed whichever one the endpoint selects, so stored URLs keep working.
   const resolverHostnames = new Set([
     getMediaResolverHostname(DEFAULT_MEDIA_RESOLVER_ENDPOINT),
     getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT),
+    ...FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
   ]);
   const gatewayHostnames = new Set([
     ...ARWEAVE_GATEWAY_REMOTE_PATTERN_HOSTNAMES,
@@ -96,6 +100,15 @@ function getImageRemotePatterns(publicEnv: PublicEnv): RemotePattern[] {
           : {}),
       })),
   ];
+}
+
+/**
+ * Set by 6529 Desktop's web build (`DESKTOP_APP_BUILD=true`) for the bundle
+ * its local server runs. Headers are compiled into the build, so no request
+ * can change this, and the 6529.io build never sets it.
+ */
+function isDesktopAppBuild(): boolean {
+  return process.env["DESKTOP_APP_BUILD"] === "true";
 }
 
 function getAllowedDevOrigins(): string[] {
@@ -207,6 +220,13 @@ export function sharedConfig(
           destination: "/stream",
           permanent: true,
         },
+        // Prenodes were retired and their servers shut down; the 6529
+        // validator replaces them.
+        {
+          source: "/network/prenodes",
+          destination: "/validator",
+          permanent: true,
+        },
       ]);
     },
     logging: {
@@ -240,6 +260,7 @@ export function sharedConfig(
                   publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED
                 ),
                 webSocketEndpoint: publicEnv["WS_ENDPOINT"],
+                allowDesktopIpc: isDesktopAppBuild(),
                 // Local development violations are expected noise; only
                 // deployed builds report CSP violations to Sentry.
                 sentryDsn: isLocalTooling ? undefined : publicEnv.SENTRY_DSN,
@@ -269,6 +290,16 @@ export function sharedConfig(
           // The validator download pages stay out of search engines, the
           // public release feed included.
           source: "/validator/:path*",
+          headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        },
+        {
+          // So do the 6529 AI download pages, which no menu links yet.
+          source: "/ai/:path*",
+          headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+        },
+        {
+          // And the 6529 Desktop download pages, also linked from no menu.
+          source: "/desktop/:path*",
           headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
         },
       ];

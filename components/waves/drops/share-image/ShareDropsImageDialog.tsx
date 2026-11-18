@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import {
   ArrowDownTrayIcon,
   ArrowUpOnSquareIcon,
@@ -394,7 +395,7 @@ export default function ShareDropsImageDialog({
                     onChange={(event) =>
                       setTime({ mode: "zone", timeZone: event.target.value })
                     }
-                    className="tw-min-h-11 tw-w-full tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                    className={`${DROPDOWN_FIELD_CLASSES} tw-min-h-11 tw-w-full tw-appearance-none tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm`}
                   >
                     {deviceTimeZone && (
                       <option value={deviceTimeZone}>

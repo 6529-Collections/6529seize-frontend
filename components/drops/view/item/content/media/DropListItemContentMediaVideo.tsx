@@ -17,6 +17,7 @@ import { useMediaActions } from "./useMediaActions";
 import type { MediaLoadStrategy } from "./mediaLoadStrategy";
 import { useChatVideoPlayback } from "./ChatVideoPlayback";
 import { useRememberedVideoPlayback } from "./VideoPlaybackMemory";
+import { getMediaPlaybackUrl } from "./mediaPlaybackUrl";
 
 interface Props {
   readonly src: string;
@@ -31,7 +32,7 @@ interface Props {
 }
 
 function DropListItemContentMediaVideo({
-  src,
+  src: storedSrc,
   mimeType,
   disableAutoPlay = false,
   allowAutoPlayInApp = false,
@@ -41,6 +42,7 @@ function DropListItemContentMediaVideo({
   showFullscreen = true,
   loadStrategy = "in-view",
 }: Props) {
+  const src = getMediaPlaybackUrl(storedSrc);
   const { isApp } = useDeviceInfo();
   const isMobileEnvironment = useMobileBatterySavings();
   const [wrapperRef, inView] = useInView<HTMLDivElement>({

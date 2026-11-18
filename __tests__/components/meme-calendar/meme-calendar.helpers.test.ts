@@ -155,6 +155,30 @@ describe("formatToFullDivision", () => {
 });
 
 describe("printCalendarInvites", () => {
+  it("omits the mint URL from both formats when the app hides purchase links", () => {
+    const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2024, 6, 3)));
+    const mintInstant = mintStartInstantUtcForMintDay(mintDay);
+    const mintNumber = getMintNumberForMintDate(mintDay);
+    const html = printCalendarInvites(
+      mintInstant,
+      mintNumber,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      { includeMintUrl: false }
+    );
+
+    expect(decodeURIComponent(html)).not.toContain(
+      "https://6529.io/the-memes/mint"
+    );
+    expect(html).toContain("dates=20240703T144000Z%2F20240704T140000Z");
+    expect(html).toContain("DTSTART%3A20240703T144000Z");
+    expect(html).toContain("DTEND%3A20240704T140000Z");
+    expect(html).toContain("SUMMARY%3AMeme");
+    expect(html).toContain("details=Meme");
+  });
+
   it("sets a 14:00 UTC end time for summer mints", () => {
     const mintDay = nextMintDateOnOrAfter(new Date(Date.UTC(2024, 6, 3)));
     const mintInstant = mintStartInstantUtcForMintDay(mintDay);

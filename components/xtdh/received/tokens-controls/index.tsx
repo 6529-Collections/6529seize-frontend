@@ -26,6 +26,9 @@ export function XtdhTokensControls({
     >
       <div className="tw-no-scrollbar tw-w-full tw-overflow-x-auto md:tw-w-auto">
         <CommonSelect
+          variant="connected"
+          connectedSize="sm"
+          connectedTypography="body"
           items={TOKENS_SORT_ITEMS}
           activeItem={activeSortField}
           filterLabel="Sort tokens by"

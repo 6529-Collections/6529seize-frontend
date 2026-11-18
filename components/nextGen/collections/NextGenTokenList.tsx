@@ -27,6 +27,7 @@ interface Props {
   show_normalised?: boolean | undefined;
   show_trait_count?: boolean | undefined;
   listed_type?: NextGenTokenListedType | undefined;
+  hideMarketListings?: boolean;
   setTotalResults?: ((totalResults: number) => void) | undefined;
   setLoadFailed?: ((failed: boolean) => void) | undefined;
   show_pagination?: boolean | undefined;
@@ -203,6 +204,7 @@ export default function NextGenTokenList(props: Readonly<Props>) {
                     }
                     show_last_sale={props.sort === NextGenListFilters.LAST_SALE}
                     show_owner_info={true}
+                    hideMarketListings={props.hideMarketListings ?? false}
                   />
                 </div>
               ));

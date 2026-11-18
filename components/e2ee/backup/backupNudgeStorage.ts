@@ -9,7 +9,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const FIRST_SNOOZE_MS = 7 * DAY_MS;
 const LATER_SNOOZE_MS = 30 * DAY_MS;
 
-export interface BackupNudgeState {
+interface BackupNudgeState {
   /** Hidden until this time (ms); 0 when never snoozed. */
   readonly snoozedUntil: number;
   readonly snoozes: number;
@@ -55,7 +55,7 @@ function parse(raw: string): BackupNudgeState {
 }
 
 /** How long the next "remind me" hides the reminder. */
-export const nextSnoozeMs = (state: BackupNudgeState): number =>
+const nextSnoozeMs = (state: BackupNudgeState): number =>
   state.snoozes === 0 ? FIRST_SNOOZE_MS : LATER_SNOOZE_MS;
 
 /**

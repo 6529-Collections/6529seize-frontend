@@ -46,6 +46,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
       // Keep the override through the hydration defaults, but release it when
       // React takes over or capabilities changed to desktop during loading.
       delete document.documentElement.dataset["smallWebStartup"];
+      delete document.documentElement.dataset["smallWebBanner"];
     }
   }, [isSmall, isMobile, isNarrow, isSidebarReady]);
 

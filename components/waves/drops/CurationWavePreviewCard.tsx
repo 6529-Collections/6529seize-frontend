@@ -11,6 +11,7 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faWater } from "@fortawesome/free-solid-svg-icons";
 import { FallbackImage } from "@/components/common/FallbackImage";
+import { getSafeCssColor } from "@/helpers/css-color.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { getWaveDescriptionPreviewText } from "@/helpers/waves/waveDescriptionPreview";
 import { useProfileWave } from "@/hooks/useProfileWave";
@@ -42,8 +43,8 @@ const getBannerBackground = ({
   readonly banner1?: string | null | undefined;
   readonly banner2?: string | null | undefined;
 }): string | null => {
-  const firstColor = getTrimmedText(banner1);
-  const secondColor = getTrimmedText(banner2);
+  const firstColor = getSafeCssColor(banner1);
+  const secondColor = getSafeCssColor(banner2);
 
   if (firstColor && secondColor) {
     return `linear-gradient(60deg, ${firstColor} 0%, ${secondColor} 100%)`;

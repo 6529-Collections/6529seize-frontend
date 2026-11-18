@@ -118,7 +118,7 @@ function chunkRole(type: string): "render" | "exif" | "drop" {
     return "exif";
   }
   // An unknown critical chunk (upper-case first letter) cannot be dropped.
-  if (type.charAt(0) === type.charAt(0).toUpperCase()) {
+  if (type.startsWith(type.charAt(0).toUpperCase())) {
     throw new StripUnsupported(`Unknown critical PNG chunk ${type}`);
   }
   return "drop";

@@ -11,6 +11,10 @@ import {
 import { usePathname } from "next/navigation";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
+import {
+  WAVE_HEADER_ACTION_CLASSES,
+  WAVE_HEADER_ACTION_SURFACE_CLASSES,
+} from "../waves/WaveHeaderActions";
 
 /**
  * WebLeftSidebar
@@ -82,7 +86,13 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
           className={`tw-z-40 tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-transition-colors tw-duration-500 ${isMessagesView ? "tw-no-scrollbar" : "desktop-hover:tw-scrollbar-thin desktop-hover:tw-scrollbar-track-iron-800 desktop-hover:tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"}`}
         >
           {isCollapsed && (
-            <div className="tw-sticky tw-top-2 tw-z-20 tw-flex tw-justify-center tw-py-2">
+            <div
+              className={`tw-sticky tw-z-20 tw-flex tw-justify-center ${
+                isMessagesView
+                  ? "tw-top-2 tw-py-2"
+                  : "tw-top-0 tw-h-11 tw-shrink-0 tw-items-center"
+              }`}
+            >
               <div
                 aria-hidden="true"
                 className="tw-pointer-events-none tw-absolute tw-inset-x-0 -tw-top-2 tw-h-[76px] tw-bg-[linear-gradient(180deg,rgba(0,0,0,1)_0%,rgba(0,0,0,0.96)_45%,rgba(0,0,0,0)_100%)]"
@@ -93,12 +103,15 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
                 onMouseDown={(event) => event.preventDefault()}
                 aria-label={expandLabel}
                 title={expandLabel}
-                className="tw-relative tw-z-10 tw-flex tw-h-6 tw-w-6 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-shadow-[0_12px_28px_rgba(0,0,0,0.35)] desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-700 desktop-hover:hover:tw-shadow-[0_16px_34px_rgba(0,0,0,0.4)]"
+                className={`tw-relative tw-z-10 ${WAVE_HEADER_ACTION_CLASSES}`}
               >
-                <ChevronDoubleRightIcon
-                  strokeWidth={2}
-                  className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-200 tw-transition-all tw-duration-300 tw-ease-in-out group-hover:desktop-hover:hover:tw-text-white"
-                />
+                <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+                  <ChevronDoubleRightIcon
+                    strokeWidth={2}
+                    aria-hidden="true"
+                    className="tw-size-4 tw-flex-shrink-0"
+                  />
+                </span>
               </button>
             </div>
           )}

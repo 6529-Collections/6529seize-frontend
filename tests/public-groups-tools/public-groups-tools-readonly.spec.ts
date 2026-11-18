@@ -680,7 +680,7 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
       .getByRole("tab", { name: "Failed", exact: true })
       .boundingBox();
     expect(lastStatusBounds!.x + lastStatusBounds!.width).toBeCloseTo(
-      statusBounds!.x + statusBounds!.width - 5,
+      statusBounds!.x + statusBounds!.width - 3,
       0
     );
     await expect(loadMore).not.toBeInViewport();

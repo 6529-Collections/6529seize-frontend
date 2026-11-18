@@ -50,6 +50,9 @@ import CollectTradeSheet, {
 } from "./CollectTradeSheet";
 import CollectTransactionRecovery from "./CollectTransactionRecovery";
 import { useMarketExecution } from "./useMarketExecution";
+import ContinueInBrowserNotice from "@/components/desktop/ContinueInBrowserNotice";
+import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+import { getWebsiteHost } from "@/services/desktop/continueInBrowser";
 import { useMarketSettlement } from "./useMarketSettlement";
 import { marketReceiptRefreshInterval } from "./market-receipt-refresh";
 import { useCollectOfferIntent } from "./useCollectOfferIntent";
@@ -335,6 +338,9 @@ function CollectTradeControllerContent({
   };
   useMarketSettlement(displayedOperation, onSettled, onMarketChange);
   const execution = useMarketExecution(receiveOperation);
+  // 6529 Desktop's browser forwarding signs no market orders or purchases:
+  // trading continues on the website, with the browser wallet.
+  const forwarding = useIsDesktopBrowserWallet();
   const reasonKey = marketConnectionReason({
     capabilityEnabled:
       capability.data?.actions.some(
@@ -363,7 +369,14 @@ function CollectTradeControllerContent({
   const connectionDisabledReason = reasonKey
     ? t(locale, reasonKey)
     : collectOfferLimitReason(expected, offerMaximum, locale, offerQuantity);
+  // In 6529 Desktop's browser forwarding, trading happens on the website:
+  // the sheet cannot be confirmed and says why, beside the notice's button.
   const disabledReason =
+    (forwarding
+      ? t(locale, "desktopWalletRequest.tradeOnWebsite", {
+          site: getWebsiteHost(),
+        })
+      : undefined) ??
     connectionDisabledReason ??
     (pendingPurchase.blocked
       ? t(locale, "collect.trade.purchasePending")
@@ -630,6 +643,7 @@ function CollectTradeControllerContent({
         form={form}
         recoveryAction={
           <>
+            {forwarding && <ContinueInBrowserNotice />}
             {pendingAction}
             {displayedOperation &&
               !execution.busy &&
@@ -681,6 +695,7 @@ function CollectTradeControllerContent({
         }}
         onConfirm={async (id, revision) => {
           if (
+            !forwarding &&
             displayedOperation &&
             execution.ready &&
             expected &&

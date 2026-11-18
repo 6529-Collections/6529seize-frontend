@@ -240,6 +240,46 @@ describe("SeizeConnectContext switch sync guard", () => {
     }
   });
 
+  it("adopts the stored selection from a catch-up event without values", async () => {
+    const { useAppKitAccount } = require("@reown/appkit/react");
+    (useAppKitAccount as jest.Mock).mockReturnValue({
+      isConnected: false,
+      status: "disconnected",
+    });
+    let selectedAddress = addressA;
+    jest
+      .mocked(authUtils.getWalletAddress)
+      .mockImplementation(() => selectedAddress);
+    jest
+      .mocked(authUtils.getConnectedWalletAccounts)
+      .mockReturnValue([
+        buildStoredAccount(addressA),
+        buildStoredAccount(addressB),
+      ]);
+    render(
+      <SeizeConnectProvider>
+        <AddressProbe />
+      </SeizeConnectProvider>
+    );
+    await waitFor(() =>
+      expect(screen.getByTestId("active-address")).toHaveTextContent(addressA)
+    );
+
+    selectedAddress = addressB;
+    // The write check's catch-up carries only the key; storage is re-read.
+    act(() => {
+      globalThis.dispatchEvent(
+        new StorageEvent("storage", {
+          key: authUtils.AUTH_STORAGE_KEYS.activeAddress,
+        })
+      );
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId("active-address")).toHaveTextContent(addressB)
+    );
+  });
+
   it("ignores unrelated and synthetic storage notifications", async () => {
     const { useAppKitAccount } = require("@reown/appkit/react");
     (useAppKitAccount as jest.Mock).mockReturnValue({

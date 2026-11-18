@@ -12,8 +12,22 @@ if (!layoutStyles) throw new Error("Global layout styles are missing");
 // Exercise production startup CSS with React absent. WebLayout.test.tsx covers
 // the markup contract; home.spec.ts withholds real Next bundles on the route.
 // These fixtures need no local server.
-for (const mobile of [true, false]) {
-  test(`${mobile ? "phone" : "touch laptop"} first paint preserves the correct chrome @readonly`, async ({
+for (const { label, ua, mobile, reserveBanner } of [
+  {
+    label: "iPhone Safari",
+    ua: "iPhone Version/26.0 Mobile/15E148 Safari/604.1",
+    mobile: true,
+    reserveBanner: false,
+  },
+  {
+    label: "iPhone Chrome",
+    ua: "iPhone CriOS/140.0 Mobile/15E148 Safari/604.1",
+    mobile: true,
+    reserveBanner: true,
+  },
+  { label: "touch laptop", ua: "Windows", mobile: false, reserveBanner: false },
+]) {
+  test(`${label} first paint preserves the correct chrome @readonly`, async ({
     page,
   }, info) => {
     await page.setViewportSize({ width: 390, height: 844 });
@@ -28,7 +42,7 @@ for (const mobile of [true, false]) {
       </style>
       <style>${SMALL_WEB_STARTUP_STYLES}</style>
       <script>
-        Object.defineProperty(navigator, "userAgent", { value: ${JSON.stringify(mobile ? "iPhone" : "Windows")}, configurable: true });
+        Object.defineProperty(navigator, "userAgent", { value: ${JSON.stringify(ua)}, configurable: true });
         Object.defineProperty(navigator, "maxTouchPoints", { value: 5, configurable: true });
         Object.defineProperty(navigator, "userAgentData", { value: undefined, configurable: true });
         globalThis.matchMedia = query => ({ matches: ${mobile ? "false" : "true"} });
@@ -48,6 +62,9 @@ for (const mobile of [true, false]) {
     });
     const main = page.getByRole("main");
     await expect(main).toBeVisible();
+    expect(
+      await page.locator("html").getAttribute("data-small-web-banner")
+    ).toBe(reserveBanner ? "true" : null);
     if (mobile) {
       await expect(header).toBeVisible();
       await expect(sidebar).toBeHidden();
@@ -68,7 +85,7 @@ for (const mobile of [true, false]) {
     }
     await page.screenshot({
       path: info.outputPath(
-        `${mobile ? "mobile" : "desktop"}-before-hydration.png`
+        `${label.toLowerCase().replaceAll(" ", "-")}-before-hydration.png`
       ),
     });
   });

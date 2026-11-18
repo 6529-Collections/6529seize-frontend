@@ -1,5 +1,7 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
 import {
   DELEGATION_USE_CASES,
   SUPPORTED_COLLECTIONS,
@@ -16,6 +18,7 @@ import {
   MappingToolSubmitButton,
   MappingToolUpload,
 } from "./MappingToolControls";
+import { buildCsv } from "@/helpers/csv-export.helpers";
 import { parseCsvFile } from "./mappingToolCsv";
 import { downloadCsvFile } from "./mappingToolDownload";
 import styles from "./MappingTool.module.css";
@@ -102,7 +105,7 @@ export default function DelegationMappingTool() {
         }
       });
       downloadCsvFile(
-        out.map((address) => address.toLowerCase()).join("\n"),
+        buildCsv(out.map((address) => [address.toLowerCase()])),
         "output.csv"
       );
       setProcessing(false);
@@ -121,7 +124,7 @@ export default function DelegationMappingTool() {
         <div className="tw-w-full tw-px-3">
           <select
             id="delegation-collection"
-            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
+            className={`${DROPDOWN_FIELD_CLASSES} tw-form-select tw-block tw-w-full`}
             value={collection}
             onChange={(e) => {
               setCollection(e.target.value);
@@ -152,7 +155,7 @@ export default function DelegationMappingTool() {
         <div className="tw-w-full tw-px-3">
           <select
             id="delegation-use-case"
-            className={`tw-form-select tw-block tw-w-full ${styles["formInput"]}`}
+            className={`${DROPDOWN_FIELD_CLASSES} tw-form-select tw-block tw-w-full`}
             value={useCase}
             onChange={(e) => {
               const newCase = Number.parseInt(e.target.value);

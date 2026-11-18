@@ -84,6 +84,12 @@ export const TRANSFER_MESSAGES = {
   "recipientSelector.profileStats": "TDH: {tdh} — Level: {level}",
   "recipientSelector.change": "Change",
   "recipientSelector.scrollForMore": "Scroll for more",
+  "recipientSelector.ens.lookupFailed":
+    "{name} could not be checked on Ethereum right now, so nothing was selected. Choose a recipient yourself and check the full wallet address.",
+  "recipientSelector.ens.notResolved":
+    "{name} does not resolve on Ethereum. Choose a recipient yourself and check the full wallet address.",
+  "recipientSelector.ens.resolvesElsewhere":
+    "{name} resolves on Ethereum to {address}, which is not a wallet of the results below. Choose a recipient yourself and check the full wallet address.",
 } as const;
 
 export const FR_FR_TRANSFER_MESSAGES = {

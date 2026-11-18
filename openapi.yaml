@@ -3444,6 +3444,35 @@ paths:
           description: Not available to proxies
         "404":
           description: Grant is missing, revoked or belongs to another profile
+  /device-security-notices:
+    get:
+      tags:
+        - Authentication
+      summary: List pending new-device security notices owned by the caller
+      operationId: getDeviceSecurityNotices
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDeviceSecurityNotices
+      responses:
+        "200":
+          description: Pending notices for the authenticated account
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiDeviceSecurityNotice"
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
   /device-grants/{grantId}/acknowledge:
     post:
       tags:
@@ -5760,6 +5789,65 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/main-stage-traits/validate:
+    post:
+      tags:
+        - Competitions
+      summary: Validate Main Stage artwork traits without creating an entry
+      operationId: validateMainStageTraitsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleValidateMainStageTraitsV3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiValidateMainStageTraitsRequest"
+      responses:
+        "200":
+          description: Field validation issues. An empty array means validation passed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMainStageTraitValidation"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Competition is unavailable or does not use this policy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
   /v3/waves/{wave_id}/competitions/{competition_id}/entries:
     post:
       tags:
@@ -9212,6 +9300,55 @@ paths:
       responses:
         "201":
           description: successful operation
+  /drops/signed-events:
+    get:
+      tags:
+        - Drops
+      summary: Get the device signed events of several drops
+      description: >-
+        Batch form of GET /drops/{dropId}/signed-events for up to 50 drops. Each
+        drop the caller can read is listed in drops, in request order, with the
+        same current_event_id and the same empty result when moderation hides
+        its content from the caller or its author is anonymous to the caller.
+        Two differences: events holds only the drop's content events (post, edit
+        and delete), at most 20 (the first, the current one and the newest;
+        drops with more are listed in truncated_drop_ids, and the single drop
+        route returns all of them); and the grants of every listed event are in
+        the top-level grants, once each, so each drop's own grants array is
+        empty. Ids the caller cannot read, whether or not such a drop exists,
+        are listed in unavailable instead. Duplicate ids are answered once. For
+        a drop listed in truncated_drop_ids, the events left out may reference
+        grants that are not in grants, so the batch cannot verify that drop's
+        whole history: read it through GET /drops/{dropId}/signed-events
+        instead.
+      operationId: getDropsSignedEvents
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        cache: false
+        typeImportGroup: device-signing
+        handler:
+          import: "@/api/device-signing/device-signing.handlers"
+          name: handleGetDropsSignedEvents
+      parameters:
+        - name: drop_ids
+          in: query
+          required: true
+          description: Comma separated drop ids, 1 to 50.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiDropSignedEventsBatch"
+        "400":
+          description: drop_ids is missing, empty or lists more than 50 ids
   /drops/{dropId}/signed-events:
     get:
       tags:
@@ -10751,6 +10888,42 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/acknowledge:
+    post:
+      tags:
+        - Encrypted Messages
+      summary: Acknowledge a standalone Encrypted DM device notice
+      description: For a linked device use the signing grant acknowledgment.
+      operationId: e2eeAcknowledgeDeviceNotice
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeAcknowledgeDeviceNotice
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: Notice acknowledged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeAck"
+        "401":
+          description: Authentication required
+        "403":
+          description: Device is unavailable, linked, or not owned by the caller
+        "404":
+          description: Encrypted messages are disabled
   /e2ee/devices/{device_key}/label:
     post:
       tags:
@@ -15335,11 +15508,19 @@ paths:
       tags:
         - Policies
       summary: Save the current EULA acceptance for a device
+      description: |
+        Works without a token, since consent is recorded before sign-in.
+        When the request carries a valid token for the caller's own profile
+        and the device has no record yet, that profile is recorded as the
+        record's owner. Saving again for an existing device refreshes the
+        acceptance and keeps the existing owner, including no owner.
       operationId: saveEulaConsent
-      security: []
+      security:
+        - bearerAuth: []
+        - {}
       x-6529-router:
         enabled: true
-        auth: none
+        auth: optional
         handler:
           import: "@/api/policies/eula-consent.handlers"
           name: handleSaveEulaConsent
@@ -15362,11 +15543,16 @@ paths:
       tags:
         - Policies
       summary: Delete the EULA acceptance for a device
+      description: |
+        Removes the device's record only when it is owned by the caller's
+        profile. Records that are missing, have no owner or belong to another
+        profile are left in place and get the same response.
       operationId: deleteEulaConsent
-      security: []
+      security:
+        - bearerAuth: []
       x-6529-router:
         enabled: true
-        auth: none
+        auth: required
         handler:
           import: "@/api/policies/eula-consent.handlers"
           name: handleDeleteEulaConsent
@@ -15378,13 +15564,15 @@ paths:
               $ref: "#/components/schemas/ApiDeleteEulaConsentRequest"
       responses:
         "200":
-          description: EULA acceptance deleted
+          description: Request processed; any record owned by the caller is deleted
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiDeleteEulaConsentResponse"
         "400":
           description: Invalid device identifier
+        "401":
+          description: Authentication required
   /policies/eula-consent/{deviceId}:
     get:
       tags:
@@ -21266,6 +21454,64 @@ paths:
                 $ref: "#/components/schemas/ApiWaveOverviewPage"
         "400":
           description: Invalid request
+  /v2/waves/pinned:
+    get:
+      tags:
+        - WavesV2
+      summary: List the current profile's pinned root waves in saved order
+      operationId: getPinnedWaves
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/pinned-waves.handlers"
+          name: handleGetPinnedWaves
+      responses:
+        "200":
+          description: Readable, non-DM root waves in saved pin order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ApiWaveOverview"
+        "401":
+          description: Authentication required
+        "403":
+          description: A non-proxy profile is required
+    put:
+      tags:
+        - WavesV2
+      summary: Save the current profile's pinned wave order
+      description: Reorders the readable pins while preserving the positions of other pins.
+      operationId: updatePinnedWaveOrder
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/waves/pinned-waves.handlers"
+          name: handleUpdatePinnedWaveOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiUpdatePinnedWaveOrder"
+      responses:
+        "200":
+          description: Saved order of the readable pins
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiPinnedWaveOrder"
+        "400":
+          description: Invalid order
+        "401":
+          description: Authentication required
+        "403":
+          description: A non-proxy profile is required
+        "409":
+          description: The pinned waves changed since they were loaded
   /v2/waves/joined:
     get:
       tags:
@@ -21372,10 +21618,11 @@ paths:
       description: >-
         Lists readable, non-DM voting waves using TDH, TDH_PLUS_XTDH or
         CARD_SET_TDH, regardless of follow or pin status. Excludes upcoming,
-        ended and completed voting and unresolved decisions. Orders the nearest
-        voting end or next decision first, then open-ended waves, with a stable
-        wave ID tie-breaker. Wave and parent visibility apply before counting
-        and pagination. This is discovery, not personal voting eligibility.
+        ended and completed voting and unresolved decisions. Main Stage comes
+        first when eligible, followed by descending total Wave REP with a stable
+        wave ID tie-breaker. Approval waves include their active submission
+        count. Wave and parent visibility apply before counting and pagination.
+        Personal voting eligibility depends on each wave's voting rules.
       operationId: getActiveWaveVotes
       x-6529-router:
         enabled: true
@@ -22849,6 +23096,13 @@ components:
           type: integer
           format: int64
           nullable: true
+        active_submission_count:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Number of submissions open for voting, present only for approval
+            waves.
     ApiActiveWaveVotesPage:
       type: object
       required:
@@ -28796,6 +29050,13 @@ components:
         - cancelled_at
         - archived_at
       properties:
+        main_stage_trait_rules:
+          type: array
+          description: >-
+            Artwork trait rules for an enabled Main Stage decision. Points must
+            be finite and nonzero.
+          items:
+            $ref: "#/components/schemas/ApiMainStageTraitRule"
         your_active_entries_count:
           type: integer
           format: int64
@@ -32119,6 +32380,28 @@ components:
           description: >-
             SIWE Chain ID; 1 for app device grants, whose EIP-1271 contract
             wallet signatures are checked on Ethereum mainnet.
+    ApiDeviceSecurityNotice:
+      type: object
+      description: >-
+        An active device authorization awaiting the owner's acknowledgment. A
+        linked signing and encryption grant appears as a single notice.
+      required:
+        - device_label
+        - signing_grant_id
+        - signing_device_key
+        - encrypted_dm_device_key
+      properties:
+        device_label:
+          type: string
+        signing_grant_id:
+          type: string
+          nullable: true
+        signing_device_key:
+          type: string
+          nullable: true
+        encrypted_dm_device_key:
+          type: string
+          nullable: true
     ApiDeviceSignature:
       type: object
       additionalProperties: false
@@ -32585,6 +32868,18 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/ApiCompetitionEntry"
+    ApiDropCompetitionEntryReference:
+      type: object
+      required:
+        - competition_id
+        - entry_id
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
     ApiDropContextProfileContext:
       type: object
       required:
@@ -33120,6 +33415,40 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiDeviceGrantProof"
+    ApiDropSignedEventsBatch:
+      type: object
+      required:
+        - drops
+        - grants
+        - unavailable
+        - truncated_drop_ids
+      properties:
+        drops:
+          type: array
+          description: >-
+            The readable drops, in request order. Each drop's grants array is
+            empty; its events' grants are in the top-level grants.
+          items:
+            $ref: "#/components/schemas/ApiDropSignedEvents"
+        grants:
+          type: array
+          description: The grants referenced by the events of every listed drop, once each.
+          items:
+            $ref: "#/components/schemas/ApiDeviceGrantProof"
+        unavailable:
+          type: array
+          description: >-
+            Requested ids the caller cannot read, whether or not such a drop
+            exists, in request order.
+          items:
+            type: string
+        truncated_drop_ids:
+          type: array
+          description: >-
+            Listed drops that have more content events than were returned; GET
+            /drops/{dropId}/signed-events returns all of them.
+          items:
+            type: string
     ApiDropsLeaderboardPage:
       type: object
       required:
@@ -33202,6 +33531,14 @@ components:
         - drop_type
         - hide_link_preview
       properties:
+        competition_entry:
+          description: >-
+            Visible competition entry for this drop in a Wave timeline or reply
+            feed. Null means there is no visible entry. Omitted when membership
+            was not evaluated.
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDropCompetitionEntryReference"
         submission_artist:
           type: string
           description: >-
@@ -34070,6 +34407,13 @@ components:
             JSON; wallet_signature is its typed-data signature and grant_id its
             EIP-712 digest. Null for direct EIP-712 MlsDeviceGrant
             registrations.
+        counts_toward_limit:
+          type: boolean
+          description: >-
+            Only in GET /e2ee/me. True when the device takes one of max_devices
+            slots of its grant version: not revoked, not expired, and seen
+            (registered, renewed or used) in the last 30 days. Idle active
+            devices stay usable but do not block enrolling another device.
     ApiE2eeDeviceGrant:
       type: object
       description: >-
@@ -34433,6 +34777,10 @@ components:
             $ref: "#/components/schemas/ApiE2eeKeyPackageStatus"
         max_devices:
           type: integer
+          description: >-
+            Devices per grant version that may count toward the limit at once
+            (see counts_toward_limit); enrolling another device beyond it
+            returns E2EE_DEVICE_LIMIT.
         attachments_enabled:
           type: boolean
           description: >-
@@ -35749,6 +36097,60 @@ components:
           type: string
         refresh_token:
           type: string
+    ApiMainStageTraitIssue:
+      type: object
+      required:
+        - key
+        - code
+      properties:
+        key:
+          type: string
+        code:
+          type: string
+          enum:
+            - REQUIRED
+            - DUPLICATE
+            - INVALID_CHOICE
+            - INVALID_POINTS
+            - INVALID_BOOLEAN
+    ApiMainStageTraitRule:
+      type: object
+      required:
+        - key
+        - type
+        - required
+      properties:
+        key:
+          type: string
+        type:
+          type: string
+          enum:
+            - TEXT
+            - CHOICE
+            - POINTS
+            - BOOLEAN
+        required:
+          type: boolean
+        default_value:
+          type: string
+          description: Value applied when the metadata key is omitted.
+        choices:
+          type: array
+          items:
+            type: string
+        minimum:
+          type: number
+        maximum:
+          type: number
+    ApiMainStageTraitValidation:
+      type: object
+      required:
+        - issues
+      properties:
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMainStageTraitIssue"
     ApiMarkDropUnreadResponse:
       type: object
       required:
@@ -39756,6 +40158,15 @@ components:
           type: boolean
         designated_payee_name:
           type: string
+    ApiPinnedWaveOrder:
+      type: object
+      required:
+        - wave_ids
+      properties:
+        wave_ids:
+          type: array
+          items:
+            type: string
     ApiProfileActivityLog:
       type: object
       required:
@@ -43207,6 +43618,24 @@ components:
       properties:
         device_signature:
           $ref: "#/components/schemas/ApiDeviceSignature"
+    ApiUpdatePinnedWaveOrder:
+      type: object
+      required:
+        - previous_wave_ids
+        - wave_ids
+      properties:
+        previous_wave_ids:
+          description: The ordered wave IDs last read by the client.
+          type: array
+          items:
+            type: string
+          maxItems: 1000
+        wave_ids:
+          description: The same IDs in the requested order.
+          type: array
+          items:
+            type: string
+          maxItems: 1000
     ApiUpdateProfileNotificationCategories:
       type: object
       additionalProperties: false
@@ -43472,6 +43901,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiUploadItem"
+    ApiValidateMainStageTraitsRequest:
+      type: object
+      required:
+        - metadata
+      properties:
+        metadata:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/ApiDropMetadata"
     ApiValidateProfileCmsAgentCandidateRequest:
       type: object
       additionalProperties: false

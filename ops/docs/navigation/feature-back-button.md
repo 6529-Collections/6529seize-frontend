@@ -10,7 +10,7 @@ content to return to their matching list.
 ## Location in the Site
 
 - App header in app-layout routes.
-- Create routes: `/waves/create`, `/messages/create`.
+- Create routes: `/waves/create`, `/messages/new`.
 - Active wave routes: `/waves/{waveId}` and `/messages/{waveId}`.
 - Legacy `/waves?wave={waveId}` links are normalized to `/waves/{waveId}`.
 - Preferences at `/preferences?from=profile` when opened from the active
@@ -23,7 +23,7 @@ content to return to their matching list.
 - In the native app, open a wave or DM thread and start a rightward swipe
   across ordinary conversation content.
 - Open a route with `?drop={dropId}`.
-- Open `/waves/create` or `/messages/create`.
+- Open `/waves/create` or `/messages/new`.
 - Open Preferences from the active profile's **Preferences** action.
 - Open a profile route after moving from another app route.
 
@@ -31,14 +31,14 @@ content to return to their matching list.
 
 1. Header shows `Back` only when at least one condition is true:
    - active wave context exists,
-   - route is `/waves/create` or `/messages/create`,
+   - route is `/waves/create` or `/messages/new`,
    - Preferences includes its explicit profile-entry context,
    - route is a profile page and in-app history can go back.
 2. User taps `Back`. In a native-app wave or DM, the user can instead swipe
    right across ordinary conversation content.
 3. The app applies the first match in this order:
    - `/waves/create` -> replace to `/waves`
-   - `/messages/create` -> replace to `/messages`
+   - `/messages/new` -> replace to `/messages`
    - profile-origin Preferences -> return to the active profile
    - `drop` query exists -> remove only `drop`, keep path and other query params
    - active wave context -> clear active wave state and return to `/waves` or
@@ -48,7 +48,7 @@ content to return to their matching list.
 
 ## Common Scenarios
 
-- Leave create flow: `Back` from `/waves/create` or `/messages/create` returns
+- Leave create flow: `Back` from `/waves/create` or `/messages/new` returns
   to the matching list route.
 - Return from Preferences: when it was opened from the active profile, `Back`
   returns to that profile.

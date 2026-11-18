@@ -45,7 +45,7 @@ const recipient = {
   display: "Recipient",
 } as ApiIdentity;
 const scope = {
-  targetProfile: recipient,
+  targetProfiles: [recipient],
   connectedProfile: owner,
   profileProxy: null,
 };

@@ -3,6 +3,7 @@ import {
   isSmallWebStartupExpected,
   SMALL_WEB_STARTUP_SCRIPT,
 } from "@/components/layout/smallWebStartup";
+import { MOBILE_APP_DISMISSAL_KEY } from "@/helpers/mobileAppLinks";
 import * as touchFirst from "@/helpers/touch-first.helpers";
 
 interface Device {
@@ -16,6 +17,8 @@ interface Device {
   readonly savedMouse?: boolean;
   readonly native?: boolean;
   readonly blockedStorage?: boolean;
+  readonly pathname?: string;
+  readonly bannerDismissedUntil?: string;
 }
 
 function mediaMatches(device: Device): Record<string, boolean> {
@@ -33,6 +36,7 @@ function bootstrap(device: Device) {
   const matches = mediaMatches(device);
   runInNewContext(SMALL_WEB_STARTUP_SCRIPT, {
     innerWidth: device.width ?? 390,
+    location: { pathname: device.pathname ?? "/safe-collecting" },
     navigator: {
       userAgent: device.ua ?? "Mozilla/5.0",
       userAgentData: { mobile: device.mobileHint },
@@ -40,8 +44,11 @@ function bootstrap(device: Device) {
     },
     matchMedia: (query: string) => ({ matches: matches[query] ?? false }),
     localStorage: {
-      getItem: () => {
+      getItem: (key: string) => {
         if (device.blockedStorage) throw new Error("Storage blocked");
+        if (key === MOBILE_APP_DISMISSAL_KEY) {
+          return device.bannerDismissedUntil ?? null;
+        }
         return device.savedMouse ? "1" : null;
       },
     },
@@ -90,6 +97,33 @@ it.each(desktopAndNativeDevices)(
   "preserves desktop and native layout choices: %j",
   (device) => {
     expect(bootstrap(device)).not.toHaveBeenCalled();
+  }
+);
+
+it.each([
+  { device: { ua: "Android Mobile" }, reserve: true },
+  { device: { ua: "iPhone", blockedStorage: true }, reserve: true },
+  { device: { ua: "Macintosh", touch: 5 }, reserve: true },
+  { device: { ua: "iPhone", bannerDismissedUntil: "1" }, reserve: true },
+  {
+    device: { ua: "iPhone", bannerDismissedUntil: String(Date.now() + 60_000) },
+    reserve: false,
+  },
+  {
+    device: { ua: "Android Mobile", pathname: "/%61uth/session" },
+    reserve: false,
+  },
+  { device: { ua: "Android Mobile", pathname: "/%invalid" }, reserve: false },
+  { device: { ua: "Android Mobile Electron" }, reserve: false },
+  { device: { ua: "Android Mobile", native: true }, reserve: false },
+  { device: { ua: "Windows", coarse: true }, reserve: false },
+])(
+  "reserves banner space only on eligible mobile pages: %j",
+  ({ device, reserve }) => {
+    const calls = bootstrap(device).mock.calls;
+    expect(calls.some(([name]) => name === "data-small-web-banner")).toBe(
+      reserve
+    );
   }
 );
 

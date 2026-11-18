@@ -23,7 +23,10 @@ export type DraftKey = {
 };
 
 export type Draft = {
+  /** From the salt: only the mainnet salt is mainnet. */
   readonly network: "mainnet" | "test";
+  /** The EIP-712 domain salt the wallet signs. */
+  readonly salt: string;
   readonly account: string;
   readonly authVersion: bigint;
   readonly keys: readonly DraftKey[];
@@ -203,6 +206,11 @@ export function decodeDraftLink(fragment: string): Draft | null {
       salt = MAINNET_SALT;
     } else if (network === NETWORK_TEST) {
       salt = hex(reader.take(32));
+      // The validator writes the mainnet salt only as network 0, so a test
+      // link that carries it would sign for mainnet under a test label.
+      if (salt === MAINNET_SALT) {
+        return null;
+      }
     } else {
       return null;
     }
@@ -216,6 +224,7 @@ export function decodeDraftLink(fragment: string): Draft | null {
     }
     return {
       network: network === NETWORK_MAINNET ? "mainnet" : "test",
+      salt,
       account,
       authVersion,
       keys,

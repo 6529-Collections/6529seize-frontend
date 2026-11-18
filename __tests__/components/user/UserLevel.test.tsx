@@ -13,7 +13,11 @@ describe('UserLevel', () => {
     const open = jest.spyOn(window, 'open').mockImplementation();
     render(<UserLevel level={10} />);
     await userEvent.click(screen.getByRole('button'));
-    expect(open).toHaveBeenCalledWith('/network/levels', '_blank');
+    expect(open).toHaveBeenCalledWith(
+      `${window.location.origin}/network/levels`,
+      '_blank',
+      'noopener,noreferrer'
+    );
     open.mockRestore();
   });
 });

@@ -2,10 +2,13 @@
 
 ## Overview
 
-On supported pages in the small-screen iOS and Android website, a compact
+On supported pages in small-screen browsers, a compact
 `6529 Mobile` banner appears above the site header. It offers `Open`,
 `Get the app`, and a dismiss button. You can keep reading and using the page
 without choosing an action.
+
+On iPhone and iPad, Safari can show its own **Open** prompt for the installed
+app. The website omits its banner in Safari.
 
 The banner is hidden inside 6529 Mobile and 6529 Desktop, in desktop browsers,
 and on app handoff, access, authentication, and app-wallet routes.

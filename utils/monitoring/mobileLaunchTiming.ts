@@ -563,7 +563,8 @@ function isFocusedLaunchRoute(routeFamily: string): boolean {
     routeFamily === "/waves/create" ||
     routeFamily === "/messages" ||
     routeFamily === "/messages/[wave]" ||
-    routeFamily === "/messages/create"
+    routeFamily === "/messages/create" ||
+    routeFamily === "/messages/new"
   );
 }
 

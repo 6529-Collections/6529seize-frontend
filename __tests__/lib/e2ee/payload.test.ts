@@ -111,22 +111,6 @@ describe("payload codec (contract 6)", () => {
         text: "",
         att: [{ ...attachment, w: -1 }],
       },
-      {
-        v: 1,
-        t: "msg",
-        id: ID,
-        ts: 1,
-        text: "",
-        att: [{ ...attachment, chunks: MAX_BLOB_CHUNKS + 1 }],
-      },
-      {
-        v: 1,
-        t: "msg",
-        id: ID,
-        ts: 1,
-        text: "",
-        att: [{ ...attachment, size: MAX_ATTACHMENT_BYTES + 1 }],
-      },
       { v: 1, t: "edit", id: ID, ts: 1, target: ID2 },
       { v: 1, t: "del", id: ID, ts: 1 },
       { v: 1, t: "react", id: ID, ts: 1, target: ID2, r: "" },
@@ -138,16 +122,38 @@ describe("payload codec (contract 6)", () => {
     }
   });
 
+  const declaring = (bounds: { chunks?: number; size?: number }) => {
+    const declared = { ...attachment, ...bounds };
+    return {
+      declared,
+      parsed: parsePayload({
+        v: 1,
+        t: "msg",
+        id: ID,
+        ts: 1,
+        text: "",
+        att: [declared],
+      }),
+    };
+  };
+
   it("accepts attachments at the largest size and chunk count a sender produces", () => {
-    const largest = {
-      ...attachment,
+    const { declared, parsed } = declaring({
       chunks: MAX_BLOB_CHUNKS,
       size: MAX_ATTACHMENT_BYTES,
-    };
-    expect(
-      parsePayload({ v: 1, t: "msg", id: ID, ts: 1, text: "", att: [largest] })
-    ).toMatchObject({ att: [largest] });
+    });
+    expect(parsed).toMatchObject({ att: [declared] });
   });
+
+  it.each([
+    ["one chunk more", { chunks: MAX_BLOB_CHUNKS + 1 }],
+    ["one byte more", { size: MAX_ATTACHMENT_BYTES + 1 }],
+  ])(
+    "rejects an attachment declaring %s than a sender produces",
+    (_, bounds) => {
+      expect(declaring(bounds).parsed).toBeNull();
+    }
+  );
 
   it("counts text and reactions in characters, not UTF-16 units", () => {
     const emoji = "😀".repeat(10_000);

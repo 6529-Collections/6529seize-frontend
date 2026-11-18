@@ -53,8 +53,10 @@ reached), select the header restriction control to see the reason, then use
    `I Agree & Continue`.
 4. In `Artwork`, complete the required metadata fields:
    - `Artwork Details` (`Artwork Title`, `Description`)
-   - all required trait fields grouped under sections such as
-     `Basic Information`, `Card Points`, and `Card Attributes`
+   - required traits such as `Artist`, `Meme Name`, `Palette`, and the four
+     `Card Points` fields
+   - when the form shows `Leave blank to use No`, you can skip that text
+     field. The preview and saved entry use `No` for that trait.
 5. Choose one media source:
    - `Upload File`: drag/drop or use the file picker, review the grouped format
      badges in the drop zone, then preview the selected artwork.
@@ -138,7 +140,9 @@ reached), select the header restriction control to see the reason, then use
   (text/html)` while the provider selector switches between `IPFS` and
   `Arweave`.
 - `Artwork` `Continue` remains available before required fields are complete.
-  Selecting it validates the media and all required metadata together.
+  It validates artwork media and traits before advancing. Where the form offers
+  trait defaults, the same Main Stage validation applies to web and API entries.
+  Use the inline field message to correct an invalid value.
 - While an interactive artwork hash is being verified, `Continue` stays
   disabled until that check finishes.
 - Numeric trait fields reject `0`.

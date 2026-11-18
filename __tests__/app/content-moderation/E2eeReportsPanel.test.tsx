@@ -7,7 +7,13 @@ import {
   setE2eeReportHold,
 } from "@/services/api/e2ee-reports-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import {
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("@/services/api/e2ee-reports-api", () => ({
@@ -199,6 +205,129 @@ describe("E2eeReportsPanel", () => {
     expect(mockFetchReports).toHaveBeenCalledTimes(1);
   });
 
+  it("asks for confirmation before releasing a hold", async () => {
+    const report = aReport({ on_hold: true, expires_at: null });
+    mockFetchReports.mockResolvedValue({
+      items: [report],
+      next_before: null,
+      next_before_id: null,
+    });
+    mockFetchReport.mockResolvedValue(report);
+    mockSetHold.mockResolvedValue({
+      ...report,
+      on_hold: false,
+      expires_at: CREATED + 180 * DAY,
+    });
+    renderPanel();
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: /^Review evidence: / })
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Release hold" })
+    );
+    let dialog = await screen.findByRole("dialog", {
+      name: "Release this hold?",
+    });
+    expect(dialog).toHaveTextContent(
+      /Report: A credible threat of violence, reported .+\. Releasing the hold returns it to its 180-day retention, so the reported message and report details may then be deleted on schedule\./
+    );
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Cancel" })
+    );
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(mockSetHold).not.toHaveBeenCalled();
+
+    await userEvent.click(screen.getByRole("button", { name: "Release hold" }));
+    dialog = await screen.findByRole("dialog", { name: "Release this hold?" });
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: "Release hold" })
+    );
+    expect(mockSetHold).toHaveBeenCalledWith(report.id, false);
+    expect(
+      await screen.findByRole("button", { name: "Place on hold" })
+    ).toBeVisible();
+  });
+
+  async function openReleaseDialog(report: ApiE2eeTrustAndSafetyReport) {
+    mockFetchReports.mockResolvedValue({
+      items: [report],
+      next_before: null,
+      next_before_id: null,
+    });
+    mockFetchReport.mockResolvedValue(report);
+    renderPanel();
+    await userEvent.click(
+      await screen.findByRole("button", { name: /^Review evidence: / })
+    );
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Release hold" })
+    );
+    return screen.findByRole("dialog", { name: "Release this hold?" });
+  }
+
+  it("keeps the release confirmation open with its error and retries from it", async () => {
+    const report = aReport({ on_hold: true, expires_at: null });
+    mockSetHold.mockRejectedValueOnce(new Error("nope")).mockResolvedValueOnce({
+      ...report,
+      on_hold: false,
+      expires_at: CREATED + 180 * DAY,
+    });
+    const dialog = await openReleaseDialog(report);
+    const confirm = within(dialog).getByRole("button", {
+      name: "Release hold",
+    });
+
+    await userEvent.click(confirm);
+
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "Couldn’t change the hold. Please try again."
+    );
+    // Announced once, in the dialog, not also by the panel.
+    expect(
+      screen.getAllByText("Couldn’t change the hold. Please try again.")
+    ).toHaveLength(1);
+    expect(dialog).toBeInTheDocument();
+    expect(confirm).toBeEnabled();
+
+    await userEvent.click(confirm);
+
+    expect(mockSetHold).toHaveBeenCalledTimes(2);
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(
+      await screen.findByRole("button", { name: "Place on hold" })
+    ).toBeVisible();
+  });
+
+  it("sends one release however often confirm is pressed while it is in flight", async () => {
+    const report = aReport({ on_hold: true, expires_at: null });
+    let resolveHold: (value: ApiE2eeTrustAndSafetyReport) => void = () => {};
+    mockSetHold.mockReturnValue(
+      new Promise((resolve) => {
+        resolveHold = resolve;
+      })
+    );
+    const dialog = await openReleaseDialog(report);
+    const confirm = within(dialog).getByRole("button", {
+      name: "Release hold",
+    });
+
+    fireEvent.click(confirm);
+    fireEvent.click(confirm);
+    await userEvent.click(confirm);
+
+    expect(mockSetHold).toHaveBeenCalledTimes(1);
+    resolveHold({ ...report, on_hold: false, expires_at: CREATED + DAY });
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(mockSetHold).toHaveBeenCalledTimes(1);
+  });
+
   it("marks an unverified report and reports a failed hold change", async () => {
     const report = aReport({ verified: false });
     mockFetchReports.mockResolvedValue({
@@ -317,9 +446,11 @@ describe("E2eeReportsPanel", () => {
 
 describe("readE2eeReportEvidence", () => {
   it("refuses a body larger than the server's report cap before decoding", () => {
-    expect(
-      readE2eeReportEvidence("A".repeat(EVIDENCE_CAP + 4))
-    ).toEqual({ readable: false, text: "", attachments: [] });
+    expect(readE2eeReportEvidence("A".repeat(EVIDENCE_CAP + 4))).toEqual({
+      readable: false,
+      text: "",
+      attachments: [],
+    });
   });
 
   it("reads a message payload's text and attachment names, not its keys", () => {
