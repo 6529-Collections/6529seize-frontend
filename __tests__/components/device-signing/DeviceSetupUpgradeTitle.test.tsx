@@ -28,7 +28,7 @@ const engineWith = (upgrade: { superseded: number } | null) =>
   createFakeE2eeEngine({ status: "needs-enrollment", upgrade });
 
 describe("device setup dialog title during the D172 upgrade", () => {
-  it("says Enable Encrypted DMs to a device that never enrolled", () => {
+  it("says Turn on encrypted DMs to a device that never enrolled", () => {
     const engine = engineWith(null);
     render(
       <E2eeTestProvider value={contextFor(engine)}>
