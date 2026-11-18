@@ -3,6 +3,7 @@ import {
   act,
   fireEvent,
   render,
+  renderHook,
   screen,
   waitFor,
   within,
@@ -13,8 +14,8 @@ import type { CicStatement } from "@/entities/IProfile";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
 import {
-  clearE2eeComposePrefill,
-  peekE2eeComposePrefill,
+  PROFILE_MESSAGE_PREFILL_PARAM,
+  useE2eeComposePrefill,
 } from "@/components/e2ee/e2eeComposePrefill";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -229,7 +230,6 @@ const proxiedOwnProfileAuth = {
 
 describe("UserPageHeader", () => {
   beforeEach(() => {
-    clearE2eeComposePrefill();
     mockIsSuspended = false;
     mockIsModerator = false;
     jest.clearAllMocks();
@@ -445,8 +445,18 @@ describe("UserPageHeader", () => {
 
     expect(screen.getByTestId("follow")).toHaveTextContent("Unblock");
     fireEvent.click(screen.getByRole("button", { name: "Direct Message" }));
-    expect(useRouterMock().push).toHaveBeenCalledWith("/messages/new");
-    expect(peekE2eeComposePrefill()).toMatchObject({
+    const href = new URL(
+      useRouterMock().push.mock.calls[0][0],
+      "https://6529.io"
+    );
+    expect(href.pathname).toBe("/messages/new");
+    const { result } = renderHook(() =>
+      useE2eeComposePrefill(
+        "profile",
+        href.searchParams.get(PROFILE_MESSAGE_PREFILL_PARAM)
+      )
+    );
+    expect(result.current).toMatchObject({
       ownerProfileId: "profile-alice",
       people: [{ profileId: "profile-bob", handle: "bob", wallet: "0xbob" }],
       source: "profile",

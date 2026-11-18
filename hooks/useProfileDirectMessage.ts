@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/Auth";
 import { useE2eeContext } from "@/components/e2ee/E2eeContext";
-import { setE2eeComposePrefill } from "@/components/e2ee/e2eeComposePrefill";
+import {
+  PROFILE_MESSAGE_PREFILL_PARAM,
+  setE2eeComposePrefill,
+} from "@/components/e2ee/e2eeComposePrefill";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { NEW_MESSAGE_ROUTE } from "@/helpers/navigation.helpers";
 
@@ -15,7 +19,12 @@ export function useProfileDirectMessage(
   const { requestEngine } = useE2eeContext();
   const ownerProfileId = connectedProfile?.id;
 
-  if (!ownerProfileId || !profile?.id || profile.id === ownerProfileId) {
+  if (
+    !ownerProfileId ||
+    !profile?.id ||
+    profile.id === ownerProfileId ||
+    (!profile.primary_wallet && !isE2eeEnabled())
+  ) {
     return undefined;
   }
 
@@ -29,12 +38,16 @@ export function useProfileDirectMessage(
   };
 
   return () => {
+    const navigationId = globalThis.crypto.randomUUID();
     setE2eeComposePrefill({
       ownerProfileId,
       people: [person],
       source: "profile",
+      navigationId,
     });
     requestEngine();
-    router.push(NEW_MESSAGE_ROUTE);
+    router.push(
+      `${NEW_MESSAGE_ROUTE}?${PROFILE_MESSAGE_PREFILL_PARAM}=${navigationId}`
+    );
   };
 }

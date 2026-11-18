@@ -2,8 +2,7 @@ import { useEffect, useState } from "react";
 
 /**
  * In-memory hand-off of people from a profile or an unencrypted DM.
- * Kept out of the URL so participant ids never land in history, analytics or
- * referrers.
+ * Only an opaque navigation ID goes in the profile composer URL.
  */
 export interface E2eePrefillPerson {
   readonly profileId: string;
@@ -12,11 +11,16 @@ export interface E2eePrefillPerson {
   readonly wallet: string | null;
 }
 
-interface E2eeComposePrefill {
-  readonly ownerProfileId: string;
-  readonly people: readonly E2eePrefillPerson[];
-  readonly source: "dm" | "profile";
-}
+export const PROFILE_MESSAGE_PREFILL_PARAM = "compose";
+
+type E2eeComposePrefill = Readonly<{
+  ownerProfileId: string;
+  people: readonly E2eePrefillPerson[];
+}> &
+  (
+    | { readonly source: "dm" }
+    | { readonly source: "profile"; readonly navigationId: string }
+  );
 
 let pendingPrefill: E2eeComposePrefill | null = null;
 
@@ -24,18 +28,21 @@ export function setE2eeComposePrefill(prefill: E2eeComposePrefill): void {
   pendingPrefill = prefill;
 }
 
-export function peekE2eeComposePrefill(): E2eeComposePrefill | null {
-  return pendingPrefill;
-}
-
-export function clearE2eeComposePrefill(prefill = pendingPrefill): void {
+function clearE2eeComposePrefill(prefill: E2eeComposePrefill | null): void {
   if (pendingPrefill === prefill) pendingPrefill = null;
 }
 
-export function useE2eeComposePrefill(source: E2eeComposePrefill["source"]) {
+export function useE2eeComposePrefill(
+  source: E2eeComposePrefill["source"],
+  navigationId?: string | null
+) {
   const [prefill] = useState(() => {
-    const pending = peekE2eeComposePrefill();
-    return pending?.source === source ? pending : null;
+    const pending = pendingPrefill;
+    if (pending?.source !== source) return null;
+    if (pending.source === "profile" && pending.navigationId !== navigationId) {
+      return null;
+    }
+    return pending;
   });
 
   useEffect(() => {

@@ -183,7 +183,8 @@ also offers a direct shortcut to add or edit an optional About statement.
 - New Following and empty Followers copy falls back to English in locales
   without translations.
 - **Direct Message** requires a signed-in profile and a different recipient
-  profile. Both profiles need a handle.
+  profile. Both profiles need a handle. On builds with encrypted messaging
+  disabled, the recipient also needs a primary wallet.
 - Artist badge and modal tabs depend on loaded
   `active_main_stage_submission_ids` and `winner_main_stage_drop_ids`.
 - `Edit profile`, `Preferences`, and owner subscription coverage are hidden
