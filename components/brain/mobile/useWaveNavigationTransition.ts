@@ -31,8 +31,8 @@ export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
   useLayoutEffect(() => {
     const previousScreen = previousScreenRef.current;
     previousScreenRef.current = screen;
-    if (screen !== previousScreen && consumeWaveSwipeHandoff()) return;
-    if (commitWaveNavigationTransition(screen)) return;
+    const swipeHandoff = screen !== previousScreen && consumeWaveSwipeHandoff();
+    if (commitWaveNavigationTransition(screen) || swipeHandoff) return;
     const container = containerRef.current;
     if (
       !container ||

@@ -9,6 +9,10 @@ import { WaveDropQuoteDisplayProvider } from "@/components/waves/drops/WaveDropQ
 import { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { useNavigateToDropWave } from "@/hooks/useNavigateToDropWave";
+import {
+  commitWaveNavigationContent,
+  isWaveNavigationContentPending,
+} from "@/helpers/waves/wave-navigation-transition";
 import { useIntersectionObserver } from "@/hooks/scroll/useIntersectionObserver";
 import {
   type RenderComponentProps,
@@ -19,6 +23,7 @@ import {
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -58,6 +63,34 @@ const EMPTY_VIEWPORT: PanelViewport = {
 };
 
 const noop = () => {};
+
+function hasVisibleFeedViewport(
+  grid: HTMLElement | null,
+  scroll: HTMLElement | null
+) {
+  if (!grid || !scroll) return false;
+  const viewport = scroll.getBoundingClientRect();
+  const gridBounds = grid.getBoundingClientRect();
+  let firstTop = Number.POSITIVE_INFINITY;
+  let lastBottom = Number.NEGATIVE_INFINITY;
+  for (const cell of grid.children) {
+    const rect = cell.getBoundingClientRect();
+    if (
+      rect.bottom > viewport.top &&
+      rect.top < viewport.bottom &&
+      getComputedStyle(cell).visibility !== "hidden"
+    ) {
+      firstTop = Math.min(firstTop, rect.top);
+      lastBottom = Math.max(lastBottom, rect.bottom);
+    }
+  }
+  // A single measuring batch can leave one card near the bottom while the
+  // saved reading area is still empty. Wait for positioned rows across it.
+  return (
+    firstTop <= Math.max(viewport.top, gridBounds.top) + MASONRY_GUTTER &&
+    lastBottom >= Math.min(viewport.bottom, gridBounds.bottom) - MASONRY_GUTTER
+  );
+}
 
 const getDropKey = (drop: ExtendedDrop) => drop.stableKey;
 
@@ -157,6 +190,17 @@ function usePanelViewport(
   gridElement: HTMLElement | null
 ) {
   const [viewport, setViewport] = useState<PanelViewport>(EMPTY_VIEWPORT);
+
+  // Cached Feed returns need their visible range before the first paint, not
+  // an empty viewport followed by a passive effect and another animation frame.
+  useLayoutEffect(() => {
+    if (scrollContainer) {
+      setPanelViewport(
+        setViewport,
+        readPanelViewport(scrollContainer, gridElement, false)
+      );
+    }
+  }, [gridElement, scrollContainer]);
 
   useEffect(() => {
     if (!scrollContainer) {
@@ -294,6 +338,14 @@ function CommunityCurationsVirtualMasonry({
   const [gridElement, setGridElement] = useState<HTMLElement | null>(null);
   const { setWidth, width } = useElementWidth(gridElement);
   const viewport = usePanelViewport(scrollContainer, gridElement);
+  const acknowledgeVisibleFeed = useCallback(() => {
+    if (
+      isWaveNavigationContentPending("feed") &&
+      hasVisibleFeedViewport(gridElement, scrollContainer)
+    ) {
+      commitWaveNavigationContent("feed");
+    }
+  }, [gridElement, scrollContainer]);
   const items = useMemo(() => [...drops], [drops]);
   const resetKey = useMemo(
     () => items.slice(0, 8).map(getDropKey).join("|"),
@@ -325,6 +377,7 @@ function CommunityCurationsVirtualMasonry({
     itemKey: getDropKey,
     items,
     overscanBy: 2,
+    onRender: acknowledgeVisibleFeed,
     positioner,
     render: CommunityCurationsMasonryItem,
     resizeObserver,

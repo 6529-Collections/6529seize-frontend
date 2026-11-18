@@ -77,7 +77,10 @@ import {
   getDropQueryKey,
 } from "@/services/api/drop-api";
 import { useWaveListSwipeBack } from "./mobile/useWaveListSwipeBack";
-import { isProfileWavesFeed } from "@/helpers/waves/profile-feed-navigation";
+import {
+  isProfileWavesFeed,
+  returnsToProfileWavesFeed,
+} from "@/helpers/waves/profile-feed-navigation";
 import { SidebarTab } from "./right-sidebar/BrainRightSidebarTypes";
 import { WaveContentTabs } from "./right-sidebar/WaveContent";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
@@ -403,11 +406,15 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
       exitActiveWave(isDirectMessage);
     }
   }, [myStream, router, exitActiveWave, isDirectMessage, isProfileFeed]);
+  const swipeRootScreen = returnsToProfileWavesFeed(searchParams)
+    ? "feed"
+    : "list";
   const swipeBackHandlers = useWaveListSwipeBack({
     enabled: canSwipeBackToWaves,
     scope: waveId ?? (isProfileFeed ? "profile-feed" : "root"),
     onIntentStart: handleSwipeBackIntent,
     onSwipeBack: handleSwipeBackToWaves,
+    targetScreen: isDirectMessage ? undefined : swipeRootScreen,
   });
 
   const closeCreateOverlay = useCallback(() => {

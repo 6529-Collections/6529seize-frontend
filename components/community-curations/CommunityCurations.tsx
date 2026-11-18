@@ -10,6 +10,7 @@ import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
 import { t } from "@/i18n/messages";
 import { usePersistentScrollOffset } from "@/components/token-list/hooks/usePersistentScrollOffset";
 import { PROFILE_WAVES_FEED_SCROLL_KEY } from "@/helpers/waves/profile-feed-navigation";
+import { commitWaveNavigationContent } from "@/helpers/waves/wave-navigation-transition";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
 
@@ -186,7 +187,12 @@ export default function CommunityCurations({
   );
 
   useLayoutEffect(() => {
-    if (hasRestoredScrollOffsetRef.current || !shouldShowMasonry) {
+    if (!shouldShowMasonry || drops.length === 0) {
+      // Empty, error and loading states are also complete visible destinations.
+      commitWaveNavigationContent("feed");
+      return;
+    }
+    if (hasRestoredScrollOffsetRef.current) {
       return;
     }
 
@@ -197,7 +203,7 @@ export default function CommunityCurations({
 
     element.scrollTo({ top: initialScrollOffset });
     hasRestoredScrollOffsetRef.current = true;
-  }, [initialScrollOffset, shouldShowMasonry]);
+  }, [drops.length, initialScrollOffset, shouldShowMasonry]);
 
   return (
     <section

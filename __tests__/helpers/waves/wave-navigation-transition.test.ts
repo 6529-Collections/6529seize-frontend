@@ -1,5 +1,6 @@
 import {
   commitWaveNavigationTransition,
+  commitWaveNavigationContent,
   navigateAfterWaveSwipe,
   consumeWaveSwipeHandoff,
   runWaveNavigationTransition,
@@ -157,4 +158,89 @@ it("hands an already animated swipe directly to navigation without a second tran
   expect(start).not.toHaveBeenCalled();
   expect(consumeWaveSwipeHandoff()).toBe(true);
   expect(consumeWaveSwipeHandoff()).toBe(false);
+});
+
+it("captures a released swipe before navigation and reveals the destination during its settle", async () => {
+  document.body.innerHTML =
+    '<div data-wave-navigation-screen="wave"><div id="swipe"></div></div>';
+  const surface = document.getElementById("swipe")!;
+  surface.style.transform = "translate3d(140px, 0, 0)";
+  const navigate = jest.fn(() =>
+    runWaveNavigationTransition("feed", jest.fn())
+  );
+  expect(
+    runWaveNavigationTransition("feed", navigate, {
+      surface,
+      distance: 140,
+      width: 400,
+    })
+  ).toBe(true);
+  expect(surface.style.transform).not.toBe("");
+  expect(navigate).not.toHaveBeenCalled();
+  expect(document.documentElement.dataset["waveNavigationTransition"]).toBe(
+    "swipe-back"
+  );
+  await Promise.resolve();
+  expect(navigate).toHaveBeenCalledTimes(1);
+  expect(start).toHaveBeenCalledTimes(1);
+  expect(surface.style.transform).toBe("");
+  let ready = false;
+  void updateDone.then(() => {
+    ready = true;
+  });
+  expect(commitWaveNavigationTransition("feed")).toBe(true);
+  await updateDone;
+  expect(ready).toBe(true);
+  expect(document.documentElement.dataset["waveNavigationContentPending"]).toBe(
+    "true"
+  );
+  commitWaveNavigationContent("feed");
+  expect(
+    document.documentElement.dataset["waveNavigationContentPending"]
+  ).toBeUndefined();
+  expect(skip).not.toHaveBeenCalled();
+  finish();
+  await Promise.resolve();
+  expect(
+    document.documentElement.style.getPropertyValue("--wave-swipe-remainder")
+  ).toBe("");
+});
+
+it("lets the swipe's existing fallback own navigation when capture is unavailable", () => {
+  Object.defineProperty(document, "startViewTransition", { value: undefined });
+  const navigate = jest.fn();
+  expect(
+    runWaveNavigationTransition("feed", navigate, {
+      surface: document.body,
+      distance: 140,
+      width: 400,
+    })
+  ).toBe(false);
+  expect(navigate).not.toHaveBeenCalled();
+});
+
+it("releases rendering at the Feed shell commit and bounds missing content readiness", async () => {
+  document.body.innerHTML = '<div data-wave-navigation-screen="wave"></div>';
+  runWaveNavigationTransition("feed", jest.fn());
+  await Promise.resolve();
+  commitWaveNavigationTransition("feed");
+  await updateDone;
+  expect(document.documentElement).toHaveAttribute(
+    "data-wave-navigation-content-pending"
+  );
+  jest.advanceTimersByTime(500);
+  await Promise.resolve();
+  expect(skip).toHaveBeenCalledTimes(1);
+  expect(document.documentElement).not.toHaveAttribute(
+    "data-wave-navigation-content-pending"
+  );
+});
+
+it("keeps the interruption deadline until both Feed content and shell commit", async () => {
+  runWaveNavigationTransition("feed", jest.fn());
+  await Promise.resolve();
+  commitWaveNavigationContent("feed");
+  jest.advanceTimersByTime(500);
+  await updateDone;
+  expect(skip).toHaveBeenCalledTimes(1);
 });

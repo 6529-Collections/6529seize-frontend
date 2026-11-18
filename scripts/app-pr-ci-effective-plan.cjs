@@ -214,6 +214,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/brain/mobile/useWaveListSwipeBack.ts",
         "components/brain/mobile/useWaveNavigationTransition.ts",
         "helpers/waves/wave-navigation-transition.ts",
+        "styles/wave-navigation-transition.css",
+        "components/community-curations/CommunityCurationsMasonry.tsx",
         "components/brain/my-stream/MyStreamWaveChat.tsx",
         "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
         "hooks/useNativeKeyboard.ts",

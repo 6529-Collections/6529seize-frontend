@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useWaveListSwipeBack } from "@/components/brain/mobile/useWaveListSwipeBack";
+import * as waveNavigation from "@/helpers/waves/wave-navigation-transition";
 
 const touch = (clientX: number, clientY = 100) => ({
   clientX,
@@ -12,17 +13,20 @@ function SwipeHarness({
   scope = "wave",
   onIntentStart,
   onSwipeBack,
+  targetScreen,
 }: {
   readonly enabled?: boolean;
   readonly scope?: string;
   readonly onIntentStart: () => void;
   readonly onSwipeBack: () => void;
+  readonly targetScreen?: waveNavigation.WaveScreen;
 }) {
   const { ref, onTouchStart } = useWaveListSwipeBack({
     enabled,
     scope,
     onIntentStart,
     onSwipeBack,
+    targetScreen,
   });
   return (
     <div ref={ref} onTouchStart={onTouchStart} data-testid="surface">
@@ -34,6 +38,38 @@ function SwipeHarness({
 
 beforeEach(() => {
   jest.useFakeTimers();
+});
+
+it("does not navigate from a captured release after its surface is disabled", () => {
+  let capturedNavigation = () => {};
+  const capture = jest
+    .spyOn(waveNavigation, "runWaveNavigationTransition")
+    .mockImplementation((_screen, navigate) => {
+      capturedNavigation = navigate;
+      return true;
+    });
+  const onSwipeBack = jest.fn();
+  const onIntentStart = jest.fn();
+  const { rerender } = render(
+    <SwipeHarness targetScreen="list" {...{ onSwipeBack, onIntentStart }} />
+  );
+  const surface = screen.getByTestId("surface");
+  Object.defineProperty(surface, "animate", { value: jest.fn() });
+  const content = screen.getByTestId("content");
+  fireEvent.touchStart(content, { touches: [touch(160)] });
+  fireEvent.touchMove(content, { touches: [touch(300)] });
+  fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(300)] });
+  expect(capture).toHaveBeenCalledTimes(1);
+  rerender(
+    <SwipeHarness
+      enabled={false}
+      targetScreen="list"
+      {...{ onSwipeBack, onIntentStart }}
+    />
+  );
+  capturedNavigation();
+  expect(onSwipeBack).not.toHaveBeenCalled();
+  capture.mockRestore();
 });
 afterEach(() => {
   jest.useRealTimers();

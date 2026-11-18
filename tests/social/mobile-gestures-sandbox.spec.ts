@@ -28,6 +28,14 @@ interface TouchOffset {
   readonly y: number;
 }
 
+interface FeedReturnPaint {
+  readonly scrollTop: number;
+  readonly readableCard: boolean;
+  readonly coveredWhilePreparing?: boolean;
+  readonly readingCardTop?: number | undefined;
+  readonly error?: string;
+}
+
 async function touchDrag(
   page: Page,
   target: Locator,
@@ -347,6 +355,94 @@ for (const platform of ["ios", "android"] as const) {
       page,
       baseURL,
     }) => {
+      await page.addInitScript(() => {
+        const browser = globalThis as typeof globalThis & {
+          __feedReturnPaints?: FeedReturnPaint[];
+        };
+        browser.__feedReturnPaints = [];
+        const start = document.startViewTransition.bind(document);
+        document.startViewTransition = (...args) => {
+          const returningToFeed =
+            document
+              .querySelector("[data-wave-navigation-screen]")
+              ?.getAttribute("data-wave-navigation-screen") === "wave";
+          const transition = start(...args);
+          void transition.ready.then(
+            async () => {
+              if (
+                !returningToFeed ||
+                document
+                  .querySelector("[data-wave-navigation-screen]")
+                  ?.getAttribute("data-wave-navigation-screen") !== "feed"
+              )
+                return;
+              // The new representation stays live while the old snapshot is
+              // paused above it. Check the first exposed frame, and verify that
+              // preparation never exposes the unmeasured Feed underneath.
+              let coveredWhilePreparing = true;
+              while (
+                document.documentElement.hasAttribute(
+                  "data-wave-navigation-content-pending"
+                )
+              ) {
+                const old = getComputedStyle(
+                  document.documentElement,
+                  "::view-transition-old(wave-navigation)"
+                );
+                const incoming = getComputedStyle(
+                  document.documentElement,
+                  "::view-transition-new(wave-navigation)"
+                );
+                coveredWhilePreparing &&=
+                  old.animationPlayState === "paused" &&
+                  old.opacity === "1" &&
+                  incoming.visibility === "hidden";
+                await new Promise<void>((resolve) =>
+                  requestAnimationFrame(() => resolve())
+                );
+              }
+              const feed = document.querySelector(
+                '[data-testid="wave-swipe-surface"] section'
+              );
+              const viewport = feed?.getBoundingClientRect();
+              const readableCard = Array.from(
+                feed?.querySelectorAll("article") ?? []
+              ).some((card) => {
+                const rect = card.getBoundingClientRect();
+                return (
+                  viewport &&
+                  rect.bottom > viewport.top &&
+                  rect.top < viewport.bottom &&
+                  getComputedStyle(card).visibility !== "hidden"
+                );
+              });
+              browser.__feedReturnPaints?.push({
+                scrollTop: feed?.scrollTop ?? 0,
+                readableCard,
+                coveredWhilePreparing,
+                readingCardTop: Array.from(
+                  feed?.querySelectorAll("article") ?? []
+                )
+                  .find((card) =>
+                    card.textContent?.includes(
+                      "Profile feed gesture fixture 6."
+                    )
+                  )
+                  ?.getBoundingClientRect().top,
+              });
+            },
+            (error: unknown) => {
+              if (returningToFeed)
+                browser.__feedReturnPaints?.push({
+                  scrollTop: -1,
+                  readableCard: false,
+                  error: String(error),
+                });
+            }
+          );
+          return transition;
+        };
+      });
       let checkingReturn = false;
       let returnRouteRequests = 0;
       page.on("request", (request) => {
@@ -400,13 +496,16 @@ for (const platform of ["ios", "android"] as const) {
       await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
       await expect(surface).toHaveCSS("transform", "none");
 
-      for (const method of ["swipe", "button"] as const) {
+      for (const [index, method] of (["swipe", "button"] as const).entries()) {
         await expect(page.locator("html")).not.toHaveAttribute(
           "data-wave-navigation-transition"
         );
         await expect(grid).toHaveCSS("pointer-events", "auto");
         const readingPosition = await feed.evaluate(
           (element) => element.scrollTop
+        );
+        const readingCardTop = await post.evaluate(
+          (element) => element.closest("article")!.getBoundingClientRect().top
         );
         await post.tap();
         await expect(page).toHaveURL(
@@ -437,6 +536,41 @@ for (const platform of ["ios", "android"] as const) {
           )
           .toBeLessThanOrEqual(2);
         await expect(surface).toHaveCSS("transform", "none");
+        {
+          // Both Back methods must expose the saved cards on their first frame.
+          await expect
+            .poll(() =>
+              page.evaluate(
+                () =>
+                  (
+                    globalThis as typeof globalThis & {
+                      __feedReturnPaints?: FeedReturnPaint[];
+                    }
+                  ).__feedReturnPaints?.length ?? 0
+              )
+            )
+            .toBeGreaterThan(index);
+          const paint = await page.evaluate(
+            (paintIndex) =>
+              (
+                globalThis as typeof globalThis & {
+                  __feedReturnPaints?: FeedReturnPaint[];
+                }
+              ).__feedReturnPaints?.[paintIndex],
+            index
+          );
+          expect(paint, JSON.stringify(paint)).toMatchObject({
+            readableCard: true,
+            coveredWhilePreparing: true,
+          });
+          expect(
+            Math.abs(paint!.scrollTop - readingPosition)
+          ).toBeLessThanOrEqual(2);
+          expect(paint?.readingCardTop).toBeDefined();
+          expect(
+            Math.abs(paint!.readingCardTop! - readingCardTop)
+          ).toBeLessThanOrEqual(2);
+        }
         await expect(
           page.getByRole("button", { name: "Back", exact: true })
         ).toBeVisible();
