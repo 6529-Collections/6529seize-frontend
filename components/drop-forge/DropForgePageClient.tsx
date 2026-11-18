@@ -102,8 +102,8 @@ export default function DropForgePageClient() {
           </p>
         </Link>
       </div>
-      <LaunchAutomationSettings />
       <DropForgeContractAdmins collapsible />
+      <LaunchAutomationSettings />
     </div>
   );
 }
