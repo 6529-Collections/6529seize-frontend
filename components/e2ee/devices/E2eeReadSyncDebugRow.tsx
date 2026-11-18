@@ -17,6 +17,13 @@ const REFRESH_MS = 15_000;
 const shortGroup = (g: string): string =>
   g.length > 14 ? `${g.slice(0, 8)}…${g.slice(-4)}` : g;
 
+/**
+ * Unique within a status: siblings by device key (two can share a label),
+ * and the budget and maintenance reasons come once each.
+ */
+const reasonKey = (reason: E2eeReadSyncReason): string =>
+  "deviceKey" in reason ? `${reason.kind}:${reason.deviceKey}` : reason.kind;
+
 /*
  * Debug-only copy, in English on purpose: this row is staging QA for read
  * sync (D175) and never ships in a production build, so it is not part of
@@ -114,10 +121,9 @@ export function E2eeReadSyncDebugRow({
       </p>
       {status.reasons.length > 0 && (
         <ul className="tw-m-0 tw-mt-1 tw-list-disc tw-pl-5">
-          {status.reasons.map((reason) => {
-            const text = reasonText(reason, time);
-            return <li key={text}>{text}</li>;
-          })}
+          {status.reasons.map((reason) => (
+            <li key={reasonKey(reason)}>{reasonText(reason, time)}</li>
+          ))}
         </ul>
       )}
     </section>

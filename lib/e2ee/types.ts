@@ -243,10 +243,15 @@ export type E2eeReadSyncReason =
   /** This device's self-group claims are used up; null: when is unknown. */
   | { readonly kind: "claim-budget"; readonly nextAt: number | null }
   /** A sibling claimed through to a last-resort KeyPackage of an older client. */
-  | { readonly kind: "older-key-packages"; readonly device: string }
+  | {
+      readonly kind: "older-key-packages";
+      readonly deviceKey: string;
+      readonly device: string;
+    }
   /** This device added the sibling; nothing heard from it in the group yet. */
   | {
       readonly kind: "invited";
+      readonly deviceKey: string;
       readonly device: string;
       readonly since: number;
     }

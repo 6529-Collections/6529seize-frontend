@@ -45,11 +45,20 @@ export function readSyncStatus(
   const reasons: E2eeReadSyncReason[] = [];
   const older = missing.filter((key) => knownOlderClient(ctx, key));
   for (const key of older) {
-    reasons.push({ kind: "older-key-packages", device: labelOf(key) });
+    reasons.push({
+      kind: "older-key-packages",
+      deviceKey: key,
+      device: labelOf(key),
+    });
   }
   for (const [key, since] of input.invited) {
     if (members.has(key)) {
-      reasons.push({ kind: "invited", device: labelOf(key), since });
+      reasons.push({
+        kind: "invited",
+        deviceKey: key,
+        device: labelOf(key),
+        since,
+      });
     }
   }
   const waiting = missing.length > older.length;

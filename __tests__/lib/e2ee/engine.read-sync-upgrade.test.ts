@@ -569,7 +569,9 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
       group: laptopGroup.g,
       sharedWith: 0,
       olderGroups: 0,
-      reasons: [{ kind: "older-key-packages", device: phoneLabel }],
+      reasons: [
+        { kind: "older-key-packages", deviceKey: phoneKey, device: phoneLabel },
+      ],
     });
     // The phone goes offline; the laptop lists and adds it.
     stopDevice(world, updated);
@@ -581,6 +583,7 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     expect(invited?.reasons).toEqual([
       {
         kind: "invited",
+        deviceKey: phoneKey,
         device: phoneLabel,
         since: expect.any(Number) as number,
       },

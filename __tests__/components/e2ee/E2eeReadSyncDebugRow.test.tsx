@@ -62,10 +62,18 @@ describe("E2eeReadSyncDebugRow (staging only)", () => {
       sharedWith: 2,
       olderGroups: 1,
       reasons: [
-        { kind: "older-key-packages", device: "Old Firefox" },
-        { kind: "invited", device: "Phone", since: at(13, 58) },
+        {
+          kind: "older-key-packages",
+          deviceKey: "0xa1",
+          device: "Old Firefox",
+        },
+        {
+          kind: "invited",
+          deviceKey: "0xb2",
+          device: "Phone",
+          since: at(13, 58),
+        },
         { kind: "claim-budget", nextAt: at(14, 5) },
-        { kind: "claim-budget", nextAt: null },
         { kind: "maintenance", nextAt: at(14, 10) },
       ],
     });
@@ -81,9 +89,44 @@ describe("E2eeReadSyncDebugRow (staging only)", () => {
       "sibling Old Firefox on old KeyPackages",
       "invite sent to Phone at 13:58, waiting for accept",
       "waiting for claim budget (next at 14:05)",
-      "waiting for claim budget",
       "next maintenance at 14:10",
     ]);
+  });
+
+  it("lists siblings that share a label once each", () => {
+    const { engine } = fakeEngine({
+      group: "0x01",
+      sharedWith: 0,
+      olderGroups: 0,
+      reasons: [
+        {
+          kind: "older-key-packages",
+          deviceKey: "0xa1",
+          device: "Chrome on Windows",
+        },
+        {
+          kind: "older-key-packages",
+          deviceKey: "0xb2",
+          device: "Chrome on Windows",
+        },
+        { kind: "claim-budget", nextAt: null },
+      ],
+    });
+    const error = jest.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      render(<E2eeReadSyncDebugRow engine={engine} />);
+      expect(
+        screen.getAllByRole("listitem").map((item) => item.textContent)
+      ).toEqual([
+        "sibling Chrome on Windows on old KeyPackages",
+        "sibling Chrome on Windows on old KeyPackages",
+        "waiting for claim budget",
+      ]);
+      // No duplicate-key warning from React.
+      expect(error).not.toHaveBeenCalled();
+    } finally {
+      error.mockRestore();
+    }
   });
 
   it("follows the engine's changes", () => {
