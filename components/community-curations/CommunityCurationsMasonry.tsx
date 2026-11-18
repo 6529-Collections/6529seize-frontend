@@ -391,6 +391,7 @@ function CommunityCurationsVirtualMasonry({
   // Masonic can keep needing a fresh batch across several sets of short rows.
   // Promote each measured batch before paint, even when that boolean stays true;
   // otherwise a restored viewport can stay empty until another scroll event.
+  // Check the returned grid after cell resizes too, even if the viewport is unchanged.
   useLayoutEffect(() => {
     const count = positioner.size();
     if (
@@ -400,13 +401,7 @@ function CommunityCurationsVirtualMasonry({
       // eslint-disable-next-line react-hooks/set-state-in-effect -- Masonic measures in DOM refs; promote only new measurements before paint.
       setMeasuredBatch({ positioner, count });
     }
-  }, [
-    positioner,
-    measuredBatch,
-    items.length,
-    viewport.height,
-    viewport.scrollTop,
-  ]);
+  }, [grid, positioner, measuredBatch]);
 
   return grid;
 }
