@@ -76,6 +76,7 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
     stateVersion: 0,
     persistChain: Promise.resolve(),
     disposed: false,
+    incomingPaused: false,
     lastMeAt: 0,
     ownKeyPackages: new Map(),
     ownDevices: [],
