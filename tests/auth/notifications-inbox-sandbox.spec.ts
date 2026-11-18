@@ -767,19 +767,14 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
 
   test("desktop load more keeps the inbox open while fetching and after the last page", async ({
     page,
+    baseURL,
   }, testInfo) => {
     test.skip(
       testInfo.project.name !== "web-desktop-chromium",
       "Desktop sidebar inbox"
     );
-    const olderPage = Promise.withResolvers<void>();
     await page.route("**/api/v2/notifications?*", async (route) => {
       const url = new URL(route.request().url());
-      if (url.searchParams.has("id_less_than")) {
-        await olderPage.promise;
-        await route.continue();
-        return;
-      }
       url.searchParams.set("limit", "1");
       await route.fulfill({ response: await route.fetch({ url: url.href }) });
     });
@@ -807,7 +802,15 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await expect(
       inbox.getByRole("button", { name: "Mark all as read" })
     ).toBeEnabled();
+    const olderPage = Promise.withResolvers<void>();
     try {
+      await page.route(
+        "**/api/v2/notifications?*id_less_than=*",
+        async (route) => {
+          await olderPage.promise;
+          await route.continue();
+        }
+      );
       await loadMore.click();
       await expect(
         inbox.getByRole("button", { name: "Loading notifications…" })
@@ -841,6 +844,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.keyboard.press("Escape");
     await expect(inbox).toBeHidden();
     await expect(bell).toBeFocused();
+    await expectNoUnsafeSandboxMutations(baseURL);
   });
 
   test("desktop mark-all retries an automatic read failure and View all opens the full feed", async ({
