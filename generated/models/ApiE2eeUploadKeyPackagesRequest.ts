@@ -17,7 +17,7 @@ import { HttpFile } from '../http/http';
 export class ApiE2eeUploadKeyPackagesRequest {
     'key_packages': Array<ApiE2eeKeyPackageUpload>;
     /**
-    * When true, the device\'s own unclaimed one-time KeyPackages of the uploaded KeyPackages\' suites are deleted, in the same transaction, before these are stored: a client that updated replaces the pool its older version made. Claimed KeyPackages, the last-resort KeyPackage (replaced as before when one is uploaded) and other devices\' KeyPackages are never touched.
+    * When true, the device\'s own unclaimed one-time KeyPackages of the uploaded KeyPackages\' suites are deleted, in the same transaction, before these are stored: a client that updated replaces the pool its older version made. The replacement never touches claimed KeyPackages, last-resort KeyPackages or other devices\' KeyPackages; as on every upload, expired KeyPackages are removed and an uploaded last-resort KeyPackage replaces the current one.
     */
     'replace_one_time'?: boolean;
 
