@@ -115,7 +115,7 @@ const push = jest.fn();
 const replace = jest.fn();
 const setActiveGroupId = jest.fn();
 
-const searchParamsMock = new Map<string, string | null>();
+const searchParamsMock = new Map<string, string>();
 (usePathname as jest.Mock).mockReturnValue("/network");
 (useSearchParams as jest.Mock).mockReturnValue({
   get: (key: string) => searchParamsMock.get(key) ?? null,
