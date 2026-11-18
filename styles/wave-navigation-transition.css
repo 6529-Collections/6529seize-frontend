@@ -53,6 +53,23 @@ html[data-wave-navigation-transition="swipe-back"]::view-transition-new(
   animation: none;
 }
 
+/* The old snapshot covers the handoff while virtualized rows are measured.
+   Rendering stays active; only the snapshot animations wait. */
+html[data-wave-navigation-content-pending]::view-transition-old(
+    wave-navigation
+  ),
+html[data-wave-navigation-content-pending]::view-transition-new(
+    wave-navigation
+  ) {
+  animation-play-state: paused;
+}
+
+html[data-wave-navigation-content-pending]::view-transition-new(
+    wave-navigation
+  ) {
+  visibility: hidden;
+}
+
 @keyframes wave-navigation-swipe-leave {
   to {
     transform: translateX(var(--wave-swipe-remainder));

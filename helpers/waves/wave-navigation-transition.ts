@@ -19,7 +19,7 @@ let activeTransition: {
   readonly screen: WaveScreen;
   readonly committed: () => void;
   readonly skip: () => void;
-  readonly contentPending: boolean;
+  readonly contentReady: () => void;
 } | null = null;
 let navigatingFromSwipe = false;
 let swipeHandoffUntil = 0;
@@ -51,17 +51,22 @@ export function commitWaveNavigationTransition(
 ): boolean {
   if (!activeTransition) return false;
   if (screen !== activeTransition.screen) activeTransition.skip();
-  else if (!activeTransition.contentPending) activeTransition.committed();
+  else activeTransition.committed();
   return true;
 }
 
 /** Virtualized content acknowledges its measured visible rows, not just its shell. */
 export function commitWaveNavigationContent(screen: WaveScreen) {
-  if (activeTransition?.screen === screen) activeTransition.committed();
+  if (activeTransition?.screen === screen) activeTransition.contentReady();
 }
 
 export function isWaveNavigationContentPending(screen: WaveScreen) {
-  return activeTransition?.screen === screen && activeTransition.contentPending;
+  return (
+    activeTransition?.screen === screen &&
+    document.documentElement.hasAttribute(
+      "data-wave-navigation-content-pending"
+    )
+  );
 }
 
 export function skipWaveNavigationTransition() {
@@ -93,6 +98,9 @@ export function runWaveNavigationTransition(
 
   activeTransition?.skip();
   const root = document.documentElement;
+  let contentPending = screen === "feed";
+  let shellCommitted = false;
+  if (contentPending) root.dataset["waveNavigationContentPending"] = "true";
   let commit = () => {};
   const committed = new Promise<void>((resolve) => {
     commit = resolve;
@@ -117,6 +125,7 @@ export function runWaveNavigationTransition(
   }
   const clearSurface = () => {
     delete root.dataset["waveNavigationTransition"];
+    delete root.dataset["waveNavigationContentPending"];
     surface.style.removeProperty("view-transition-name");
     root.style.removeProperty("--wave-transition-height");
     root.style.removeProperty("--wave-swipe-remainder");
@@ -148,13 +157,21 @@ export function runWaveNavigationTransition(
   };
   // A route interruption must never leave the app waiting for a screen that cannot commit.
   const timeout = window.setTimeout(skip, 500);
+  const contentReady = () => {
+    contentPending = false;
+    delete root.dataset["waveNavigationContentPending"];
+    if (shellCommitted) window.clearTimeout(timeout);
+  };
   const pending = {
     screen,
-    contentPending: screen === "feed",
     committed: () => {
-      window.clearTimeout(timeout);
+      // Finish the DOM update so the virtual list can run its normal layout
+      // frames. Keep the opaque old snapshot still until visible cards are ready.
+      shellCommitted = true;
+      if (!contentPending) window.clearTimeout(timeout);
       commit();
     },
+    contentReady,
     skip,
   };
   activeTransition = pending;

@@ -189,11 +189,15 @@ it("captures a released swipe before navigation and reveals the destination duri
     ready = true;
   });
   expect(commitWaveNavigationTransition("feed")).toBe(true);
-  await Promise.resolve();
-  expect(ready).toBe(false);
-  commitWaveNavigationContent("feed");
   await updateDone;
   expect(ready).toBe(true);
+  expect(document.documentElement.dataset["waveNavigationContentPending"]).toBe(
+    "true"
+  );
+  commitWaveNavigationContent("feed");
+  expect(
+    document.documentElement.dataset["waveNavigationContentPending"]
+  ).toBeUndefined();
   expect(skip).not.toHaveBeenCalled();
   finish();
   await Promise.resolve();
@@ -213,4 +217,30 @@ it("lets the swipe's existing fallback own navigation when capture is unavailabl
     })
   ).toBe(false);
   expect(navigate).not.toHaveBeenCalled();
+});
+
+it("releases rendering at the Feed shell commit and bounds missing content readiness", async () => {
+  document.body.innerHTML = '<div data-wave-navigation-screen="wave"></div>';
+  runWaveNavigationTransition("feed", jest.fn());
+  await Promise.resolve();
+  commitWaveNavigationTransition("feed");
+  await updateDone;
+  expect(document.documentElement).toHaveAttribute(
+    "data-wave-navigation-content-pending"
+  );
+  jest.advanceTimersByTime(500);
+  await Promise.resolve();
+  expect(skip).toHaveBeenCalledTimes(1);
+  expect(document.documentElement).not.toHaveAttribute(
+    "data-wave-navigation-content-pending"
+  );
+});
+
+it("keeps the interruption deadline until both Feed content and shell commit", async () => {
+  runWaveNavigationTransition("feed", jest.fn());
+  await Promise.resolve();
+  commitWaveNavigationContent("feed");
+  jest.advanceTimersByTime(500);
+  await updateDone;
+  expect(skip).toHaveBeenCalledTimes(1);
 });

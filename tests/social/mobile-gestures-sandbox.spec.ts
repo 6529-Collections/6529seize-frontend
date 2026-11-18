@@ -28,9 +28,10 @@ interface TouchOffset {
   readonly y: number;
 }
 
-interface SwipePaint {
+interface FeedReturnPaint {
   readonly scrollTop: number;
   readonly readableCard: boolean;
+  readonly coveredWhilePreparing?: boolean;
   readonly error?: string;
 }
 
@@ -355,24 +356,50 @@ for (const platform of ["ios", "android"] as const) {
     }) => {
       await page.addInitScript(() => {
         const browser = globalThis as typeof globalThis & {
-          __waveSwipePaints?: SwipePaint[];
+          __feedReturnPaints?: FeedReturnPaint[];
         };
-        browser.__waveSwipePaints = [];
+        browser.__feedReturnPaints = [];
         const start = document.startViewTransition.bind(document);
         document.startViewTransition = (...args) => {
-          const swipe =
-            document.documentElement.dataset["waveNavigationTransition"] ===
-            "swipe-back";
+          const returningToFeed =
+            document
+              .querySelector("[data-wave-navigation-screen]")
+              ?.getAttribute("data-wave-navigation-screen") === "wave";
           const transition = start(...args);
           void transition.ready.then(
-            () => {
+            async () => {
               if (
-                !swipe ||
+                !returningToFeed ||
                 document
                   .querySelector("[data-wave-navigation-screen]")
                   ?.getAttribute("data-wave-navigation-screen") !== "feed"
               )
                 return;
+              // The new representation stays live while the old snapshot is
+              // paused above it. Check the first exposed frame, and verify that
+              // preparation never exposes the unmeasured Feed underneath.
+              let coveredWhilePreparing = true;
+              while (
+                document.documentElement.hasAttribute(
+                  "data-wave-navigation-content-pending"
+                )
+              ) {
+                const old = getComputedStyle(
+                  document.documentElement,
+                  "::view-transition-old(wave-navigation)"
+                );
+                const incoming = getComputedStyle(
+                  document.documentElement,
+                  "::view-transition-new(wave-navigation)"
+                );
+                coveredWhilePreparing &&=
+                  old.animationPlayState === "paused" &&
+                  old.opacity === "1" &&
+                  incoming.visibility === "hidden";
+                await new Promise<void>((resolve) =>
+                  requestAnimationFrame(() => resolve())
+                );
+              }
               const feed = document.querySelector(
                 '[data-testid="wave-swipe-surface"] section'
               );
@@ -388,14 +415,15 @@ for (const platform of ["ios", "android"] as const) {
                   getComputedStyle(card).visibility !== "hidden"
                 );
               });
-              browser.__waveSwipePaints?.push({
+              browser.__feedReturnPaints?.push({
                 scrollTop: feed?.scrollTop ?? 0,
                 readableCard,
+                coveredWhilePreparing,
               });
             },
             (error: unknown) => {
-              if (swipe)
-                browser.__waveSwipePaints?.push({
+              if (returningToFeed)
+                browser.__feedReturnPaints?.push({
                   scrollTop: -1,
                   readableCard: false,
                   error: String(error),
@@ -458,7 +486,10 @@ for (const platform of ["ios", "android"] as const) {
       await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
       await expect(surface).toHaveCSS("transform", "none");
 
-      for (const method of ["swipe", "button"] as const) {
+      for (const [index, method] of (["swipe", "button"] as const).entries()) {
+        await expect(page.locator("html")).not.toHaveAttribute(
+          "data-wave-navigation-transition"
+        );
         await expect(grid).toHaveCSS("pointer-events", "auto");
         const readingPosition = await feed.evaluate(
           (element) => element.scrollTop
@@ -492,31 +523,32 @@ for (const platform of ["ios", "android"] as const) {
           )
           .toBeLessThanOrEqual(2);
         await expect(surface).toHaveCSS("transform", "none");
-        if (method === "swipe") {
-          // The destination must already contain the saved visible cards when
-          // the captured slide starts, rather than painting an empty Feed first.
+        {
+          // Both Back methods must expose the saved cards on their first frame.
           await expect
             .poll(() =>
               page.evaluate(
                 () =>
                   (
                     globalThis as typeof globalThis & {
-                      __waveSwipePaints?: SwipePaint[];
+                      __feedReturnPaints?: FeedReturnPaint[];
                     }
-                  ).__waveSwipePaints?.length ?? 0
+                  ).__feedReturnPaints?.length ?? 0
               )
             )
-            .toBeGreaterThan(0);
+            .toBeGreaterThan(index);
           const paint = await page.evaluate(
-            () =>
+            (paintIndex) =>
               (
                 globalThis as typeof globalThis & {
-                  __waveSwipePaints?: SwipePaint[];
+                  __feedReturnPaints?: FeedReturnPaint[];
                 }
-              ).__waveSwipePaints?.[0]
+              ).__feedReturnPaints?.[paintIndex],
+            index
           );
           expect(paint, JSON.stringify(paint)).toMatchObject({
             readableCard: true,
+            coveredWhilePreparing: true,
           });
           expect(
             Math.abs(paint!.scrollTop - readingPosition)

@@ -178,21 +178,17 @@ function usePanelViewport(
   gridElement: HTMLElement | null
 ) {
   const [viewport, setViewport] = useState<PanelViewport>(EMPTY_VIEWPORT);
-  const measureViewport = useCallback(
-    (previous: PanelViewport) => {
-      if (!scrollContainer) return false;
-      const measured = readPanelViewport(scrollContainer, gridElement, false);
-      setPanelViewport(setViewport, measured);
-      return areViewportsEqual(previous, measured);
-    },
-    [gridElement, scrollContainer]
-  );
 
   // Cached Feed returns need their visible range before the first paint, not
   // an empty viewport followed by a passive effect and another animation frame.
   useLayoutEffect(() => {
-    measureViewport(EMPTY_VIEWPORT);
-  }, [measureViewport]);
+    if (scrollContainer) {
+      setPanelViewport(
+        setViewport,
+        readPanelViewport(scrollContainer, gridElement, false)
+      );
+    }
+  }, [gridElement, scrollContainer]);
 
   useEffect(() => {
     if (!scrollContainer) {
@@ -250,10 +246,7 @@ function usePanelViewport(
     };
   }, [gridElement, scrollContainer]);
 
-  return {
-    viewport: scrollContainer ? viewport : EMPTY_VIEWPORT,
-    measureViewport,
-  };
+  return scrollContainer ? viewport : EMPTY_VIEWPORT;
 }
 
 function CommunityCurationsInfiniteScrollTrigger({
@@ -332,21 +325,15 @@ function CommunityCurationsVirtualMasonry({
 }): ReactElement {
   const [gridElement, setGridElement] = useState<HTMLElement | null>(null);
   const { setWidth, width } = useElementWidth(gridElement);
-  const { viewport, measureViewport } = usePanelViewport(
-    scrollContainer,
-    gridElement
-  );
+  const viewport = usePanelViewport(scrollContainer, gridElement);
   const acknowledgeVisibleFeed = useCallback(() => {
-    if (!isWaveNavigationContentPending("feed")) return;
-    // Layout heights can settle after the first measurement. A view transition
-    // pauses animation frames, so refresh this range before acknowledging it.
     if (
-      measureViewport(viewport) &&
+      isWaveNavigationContentPending("feed") &&
       hasVisibleFeedCard(gridElement, scrollContainer)
-    )
+    ) {
       commitWaveNavigationContent("feed");
-  }, [gridElement, measureViewport, scrollContainer, viewport]);
-  useLayoutEffect(() => acknowledgeVisibleFeed());
+    }
+  }, [gridElement, scrollContainer]);
   const items = useMemo(() => [...drops], [drops]);
   const resetKey = useMemo(
     () => items.slice(0, 8).map(getDropKey).join("|"),
@@ -370,8 +357,7 @@ function CommunityCurationsVirtualMasonry({
     [setWidth]
   );
 
-  const [measuredCount, setMeasuredCount] = useState(0);
-  const masonry = useMasonry<ExtendedDrop>({
+  return useMasonry<ExtendedDrop>({
     containerRef: setContainerRef,
     height: Math.max(viewport.height, 1),
     isScrolling: viewport.isScrolling,
@@ -379,20 +365,12 @@ function CommunityCurationsVirtualMasonry({
     itemKey: getDropKey,
     items,
     overscanBy: 2,
+    onRender: acknowledgeVisibleFeed,
     positioner,
     render: CommunityCurationsMasonryItem,
     resizeObserver,
     scrollTop: viewport.scrollTop,
   }) as ReactElement;
-  useLayoutEffect(() => {
-    // Masonic measures new cells in their refs, then normally positions them
-    // in a passive effect. Promote those DOM measurements before the browser
-    // captures a navigation frame; otherwise it captures hidden measuring cells.
-    const count = positioner.size();
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- DOM-ref measurements must reach positioned cells before a navigation snapshot.
-    if (count !== measuredCount) setMeasuredCount(count);
-  }, [positioner, measuredCount]);
-  return masonry;
 }
 
 export default function CommunityCurationsMasonry({
