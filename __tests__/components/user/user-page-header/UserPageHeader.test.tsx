@@ -12,6 +12,10 @@ import { renderToString } from "react-dom/server";
 import type { CicStatement } from "@/entities/IProfile";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import UserPageHeaderClient from "@/components/user/user-page-header/UserPageHeaderClient";
+import {
+  clearE2eeComposePrefill,
+  peekE2eeComposePrefill,
+} from "@/components/e2ee/e2eeComposePrefill";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -136,7 +140,11 @@ jest.mock("@/components/user/utils/UserFollowBtn", () => ({
     readonly beforeFollowAction?: React.ReactNode | undefined;
   }) => (
     <div data-testid="profile-actions">
-      {onDirectMessage ? <button type="button">Direct Message</button> : null}
+      {onDirectMessage ? (
+        <button type="button" onClick={onDirectMessage}>
+          Direct Message
+        </button>
+      ) : null}
       {showMuteButton ? <button type="button">Mute</button> : null}
       {beforeFollowAction}
       {showFollowButton ? (
@@ -203,7 +211,7 @@ useRouterMock.mockReturnValue({ push: jest.fn() });
 (useIdentity as jest.Mock).mockReturnValue({ profile });
 
 const auth = {
-  connectedProfile: { handle: "alice" },
+  connectedProfile: { id: "profile-alice", handle: "alice" },
   activeProfileProxy: null,
   requestAuth: jest.fn().mockResolvedValue({ success: true }),
   setToast: jest.fn(),
@@ -221,6 +229,7 @@ const proxiedOwnProfileAuth = {
 
 describe("UserPageHeader", () => {
   beforeEach(() => {
+    clearE2eeComposePrefill();
     mockIsSuspended = false;
     mockIsModerator = false;
     jest.clearAllMocks();
@@ -435,9 +444,13 @@ describe("UserPageHeader", () => {
     );
 
     expect(screen.getByTestId("follow")).toHaveTextContent("Unblock");
-    expect(
-      screen.getByRole("button", { name: "Direct Message" })
-    ).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Direct Message" }));
+    expect(useRouterMock().push).toHaveBeenCalledWith("/messages/new");
+    expect(peekE2eeComposePrefill()).toMatchObject({
+      ownerProfileId: "profile-alice",
+      people: [{ profileId: "profile-bob", handle: "bob", wallet: "0xbob" }],
+      source: "profile",
+    });
     expect(
       screen.queryByRole("button", { name: "Mute" })
     ).not.toBeInTheDocument();

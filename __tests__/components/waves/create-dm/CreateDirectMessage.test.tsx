@@ -1,6 +1,12 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  clearE2eeComposePrefill,
+  setE2eeComposePrefill,
+} from "@/components/e2ee/e2eeComposePrefill";
+import NewMessagePageClient from "@/components/messages/NewMessagePageClient";
+import type { ReactNode } from "react";
 import CreateDirectMessage from "@/components/waves/create-dm/CreateDirectMessage";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -19,7 +25,14 @@ const mockToast = jest.fn();
 jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn(() => false) }));
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ setToast: mockToast }),
+  useAuth: () => ({
+    setToast: mockToast,
+    connectedProfile: { id: "viewer", primary_wallet: "0x111" },
+  }),
+}));
+jest.mock("@/components/messages/layout/MessagesLayout", () => ({
+  __esModule: true,
+  default: ({ children }: { readonly children: ReactNode }) => children,
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -93,6 +106,7 @@ function setup() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  clearE2eeComposePrefill();
   jest.mocked(isE2eeEnabled).mockReturnValue(false);
   jest.mocked(commonApiFetch).mockResolvedValue([alice, bob, self]);
   jest
@@ -100,6 +114,49 @@ beforeEach(() => {
     .mockResolvedValue({ id: "dm-1" } as Awaited<
       ReturnType<typeof createDirectMessageWave>
     >);
+});
+
+function renderProfileMessage(ownerProfileId: string) {
+  setE2eeComposePrefill({
+    ownerProfileId,
+    people: [
+      { profileId: "recipient", handle: "bob", pfp: null, wallet: "0xdef" },
+    ],
+    source: "profile",
+  });
+  const client = new QueryClient();
+  return render(
+    <QueryClientProvider client={client}>
+      <NewMessagePageClient />
+    </QueryClientProvider>
+  );
+}
+
+it("prefills the profile recipient once and requires confirmation on builds without encrypted messaging", async () => {
+  const view = renderProfileMessage("viewer");
+  const submit = screen.getByRole("button", { name: "Message bob" });
+  expect(createDirectMessageWave).not.toHaveBeenCalled();
+  fireEvent.click(submit);
+  await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/messages/dm-1"));
+  expect(createDirectMessageWave).toHaveBeenCalledWith({
+    addresses: ["0xdef"],
+  });
+  view.unmount();
+
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <NewMessagePageClient />
+    </QueryClientProvider>
+  );
+  expect(screen.getByRole("button", { name: "Message" })).toBeDisabled();
+});
+
+it("ignores a profile recipient handoff owned by another profile", () => {
+  renderProfileMessage("other-profile");
+
+  expect(screen.queryByRole("button", { name: "Message bob" })).toBeNull();
+  expect(screen.getByRole("button", { name: "Message" })).toBeDisabled();
+  expect(createDirectMessageWave).not.toHaveBeenCalled();
 });
 
 it("keeps the chosen recipient in the unified composer when they need an unencrypted DM", async () => {

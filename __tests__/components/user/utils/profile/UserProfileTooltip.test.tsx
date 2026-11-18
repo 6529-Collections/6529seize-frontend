@@ -5,11 +5,14 @@ import { useRouter } from "next/navigation";
 import type { ComponentProps, ContextType } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
+import {
+  clearE2eeComposePrefill,
+  peekE2eeComposePrefill,
+} from "@/components/e2ee/e2eeComposePrefill";
 import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
 import type { CicStatement } from "@/entities/IProfile";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
-import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
 
@@ -116,21 +119,12 @@ jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: jest.fn(),
 }));
 
-jest.mock("@/hooks/useDeviceInfo", () => ({
-  __esModule: true,
-  default: jest.fn(() => ({ isApp: false })),
-}));
-
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
 jest.mock("@/helpers/waves/waves.helpers", () => ({
   createDirectMessageWave: jest.fn(),
-}));
-
-jest.mock("@/helpers/navigation.helpers", () => ({
-  navigateToDirectMessage: jest.fn(),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -140,7 +134,6 @@ jest.mock("next/navigation", () => ({
 const useIdentityMock = useIdentity as jest.Mock;
 const commonApiFetchMock = commonApiFetch as jest.Mock;
 const createDirectMessageWaveMock = createDirectMessageWave as jest.Mock;
-const navigateToDirectMessageMock = navigateToDirectMessage as jest.Mock;
 const useRouterMock = useRouter as jest.Mock;
 
 let queryClient: QueryClient;
@@ -170,7 +163,7 @@ const renderTooltip = ({
   readonly tooltipProps?: Omit<Partial<TooltipProps>, "user">;
 } = {}) => {
   const authValue = {
-    connectedProfile: { handle: "alice" },
+    connectedProfile: { id: "profile-alice", handle: "alice" },
     activeProfileProxy: null,
     setToast: jest.fn(),
     ...authOverrides,
@@ -188,6 +181,7 @@ const renderTooltip = ({
 describe("UserProfileTooltip", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    clearE2eeComposePrefill();
 
     capturedDropAuthorBadgesProps = null;
     queryClient = new QueryClient({
@@ -219,7 +213,6 @@ describe("UserProfileTooltip", () => {
 
     useRouterMock.mockReturnValue(mockRouter);
     useIdentityMock.mockReturnValue({ profile: mockProfile });
-    createDirectMessageWaveMock.mockResolvedValue({ id: "wave-1" });
 
     commonApiFetchMock.mockImplementation(
       async ({ endpoint }: { readonly endpoint: string }) => {
@@ -284,16 +277,19 @@ describe("UserProfileTooltip", () => {
       screen.getByRole("button", { name: "Send direct message" })
     );
 
-    await waitFor(() => {
-      expect(createDirectMessageWaveMock).toHaveBeenCalledWith({
-        addresses: ["0xbob"],
-      });
-    });
-
-    expect(navigateToDirectMessageMock).toHaveBeenCalledWith({
-      waveId: "wave-1",
-      router: mockRouter,
-      isApp: false,
+    expect(createDirectMessageWaveMock).not.toHaveBeenCalled();
+    expect(mockRouter.push).toHaveBeenCalledWith("/messages/new");
+    expect(peekE2eeComposePrefill()).toEqual({
+      ownerProfileId: "profile-alice",
+      people: [
+        {
+          profileId: "profile-1",
+          handle: "bob",
+          pfp: "pfp-url",
+          wallet: "0xbob",
+        },
+      ],
+      source: "profile",
     });
   });
 

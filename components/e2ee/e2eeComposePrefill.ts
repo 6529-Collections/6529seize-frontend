@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
+
 /**
- * In-memory hand-off of people for `/messages/encrypted/new` (for example
- * from a plaintext DM's "Start an encrypted chat with the same people").
+ * In-memory hand-off of people from a profile or an unencrypted DM.
  * Kept out of the URL so participant ids never land in history, analytics or
  * referrers.
  */
@@ -14,7 +15,7 @@ export interface E2eePrefillPerson {
 interface E2eeComposePrefill {
   readonly ownerProfileId: string;
   readonly people: readonly E2eePrefillPerson[];
-  readonly source: "dm";
+  readonly source: "dm" | "profile";
 }
 
 let pendingPrefill: E2eeComposePrefill | null = null;
@@ -29,4 +30,17 @@ export function peekE2eeComposePrefill(): E2eeComposePrefill | null {
 
 export function clearE2eeComposePrefill(): void {
   pendingPrefill = null;
+}
+
+export function useE2eeComposePrefill(source: E2eeComposePrefill["source"]) {
+  const [prefill] = useState(() => {
+    const pending = peekE2eeComposePrefill();
+    return pending?.source === source ? pending : null;
+  });
+
+  useEffect(() => {
+    if (prefill && pendingPrefill === prefill) clearE2eeComposePrefill();
+  }, [prefill]);
+
+  return prefill;
 }

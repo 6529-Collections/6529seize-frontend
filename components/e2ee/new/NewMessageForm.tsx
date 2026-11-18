@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { getEncryptedConversationRoute } from "@/helpers/navigation.helpers";
@@ -228,6 +228,9 @@ export function NewMessageForm({
   const [notice, setNotice] = useState<MessageKey | null>(null);
 
   const hasRecipients = selected.length > 0;
+  useEffect(() => {
+    if (hasRecipients && e2ee.status === "idle") requestEngine();
+  }, [e2ee.status, hasRecipients, requestEngine]);
 
   const engine = e2ee.status === "ready" ? e2ee.engine : null;
   const profileIds = selected.map((person) => person.profileId);
@@ -280,7 +283,6 @@ export function NewMessageForm({
       setNotice("e2ee.new.self");
       return;
     }
-    if (e2ee.status === "idle") requestEngine();
     resetAction();
     setSelected((current) =>
       current.some((item) => item.profileId === person.profileId)
