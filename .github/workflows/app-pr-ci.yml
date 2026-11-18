@@ -221,7 +221,7 @@ jobs:
           ];
           const corePlaywrightLanes = [];
           const composerBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:components\/waves\/(?:CreateDrop\.tsx$|drops\/(?:WaveDrop(?:ReplyCollapseAction|ActionsMore|MobileMenu)\.tsx$|reply-threads\/|wave-drops-all\/))|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation|part-builders|useDropFilePreparation|useCreateDropSubmission)\.|components\/waves\/create-wave\/services\/multiPartUpload\.ts$|services\/uploads\/(?:multipartUploadCore|dropUploadValidation|ImageProcessingError)\.ts$|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
+            /^(?:components\/waves\/(?:CreateDrop\.tsx$|ChatItemHrefButtons\.tsx$|drops\/(?:WaveDrop(?:ReplyCollapseAction|ActionsMore|MobileMenu)\.tsx$|reply-threads\/|wave-drops-all\/))|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation|part-builders|useDropFilePreparation|useCreateDropSubmission)\.|components\/waves\/create-wave\/services\/multiPartUpload\.ts$|services\/uploads\/(?:multipartUploadCore|dropUploadValidation|ImageProcessingError)\.ts$|components\/drops\/create\/lexical\/nodes\/ImageComponent\.tsx$|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
           );
           write("composer_browser_required", String(composerBrowserRequired));
           const collectBrowserRequired = plan.changed_files.some((file) =>

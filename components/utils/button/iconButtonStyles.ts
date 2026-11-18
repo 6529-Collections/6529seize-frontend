@@ -37,7 +37,7 @@ const TEXT_CLASSES: Record<IconButtonVariant, string> = {
   outline: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-100",
   contrast: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50",
   surface: "tw-text-iron-300 desktop-hover:hover:tw-text-white",
-  action: "tw-text-white",
+  action: "tw-text-white disabled:tw-text-iron-500",
   selected: "tw-text-primary-300",
   destructive: "tw-text-rose-400 desktop-hover:hover:tw-text-rose-300",
 };
@@ -57,7 +57,7 @@ const SURFACE_CLASSES: Record<IconButtonVariant, string> = {
   surface:
     "tw-border-0 tw-bg-iron-900/95 tw-ring-1 tw-ring-inset tw-ring-iron-800/60 tw-backdrop-blur-sm desktop-hover:hover:tw-bg-iron-800 active:tw-bg-iron-900",
   action:
-    "tw-border-0 tw-bg-primary-500 desktop-hover:hover:tw-bg-primary-600 active:tw-bg-primary-700",
+    "tw-border-0 tw-bg-primary-500 enabled:desktop-hover:hover:tw-bg-primary-600 enabled:active:tw-bg-primary-600 disabled:tw-bg-iron-800",
   selected:
     "tw-border-0 tw-bg-primary-500/15 tw-ring-1 tw-ring-inset tw-ring-primary-400/25",
   destructive:
@@ -119,7 +119,9 @@ export function getIconButtonClasses({
       : "focus-visible:tw-outline-primary-400",
     expandTouchTarget && COMPACT_ACTION_TOUCH_TARGET_CLASS,
     pressEffect && "active:tw-scale-95",
-    disabled ? "tw-cursor-not-allowed tw-opacity-50" : "tw-cursor-pointer",
+    disabled
+      ? clsx("tw-cursor-not-allowed", variant !== "action" && "tw-opacity-50")
+      : "tw-cursor-pointer",
     pending &&
       "aria-disabled:tw-cursor-wait aria-disabled:tw-opacity-50 disabled:tw-cursor-wait disabled:tw-opacity-70",
     className

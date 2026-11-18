@@ -108,10 +108,8 @@ export function WaveDropsScrollControlsUnreadButton({
         <IconButton
           type="button"
           onClick={handleDismiss}
-          size={24}
-          variant="ghost"
-          shape="circle"
-          className="tw-absolute -tw-right-2 -tw-top-2 tw-z-50 tw-hidden lg:tw-flex"
+          layout="unread-dismiss"
+          className="tw-absolute -tw-right-2 -tw-top-2 tw-z-50"
           aria-label="Dismiss"
         >
           <svg

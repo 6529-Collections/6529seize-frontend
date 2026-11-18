@@ -31,6 +31,7 @@ export type IconButtonLayout =
   | "scroll-profile"
   | "scroll-filter-left"
   | "scroll-filter-right"
+  | "unread-dismiss"
   | "edit-profile-name"
   | "edit-profile-classification"
   | "edit-wave-name"
@@ -141,6 +142,8 @@ const ROOT_CLASSES: Record<IconButtonLayout, string> = {
     "tw-group tw-absolute tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-8 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400",
   "scroll-filter-left": SCROLL_FILTER_BASE + " tw-justify-start",
   "scroll-filter-right": SCROLL_FILTER_BASE + " tw-justify-end",
+  "unread-dismiss":
+    "tw-hidden tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-indigo-500 tw-p-0 tw-text-white tw-opacity-0 tw-transition-all tw-duration-200 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-opacity-50 desktop-hover:hover:!tw-opacity-100 touch-only:tw-opacity-100 lg:tw-flex",
   "edit-profile-name":
     EDIT_ICON_COLORS +
     " tw-absolute tw-inset-0 tw-m-0 tw-hidden tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-block",

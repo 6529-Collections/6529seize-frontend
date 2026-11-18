@@ -269,7 +269,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
             type="button"
             onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
             size={32}
-            variant="ghost"
+            variant="subtle"
             shape="compact"
             title={switchModeTitle}
             aria-label={switchModeAriaLabel}
