@@ -31,6 +31,8 @@ const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
   "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
+  "waves.discovery.activeSubmissions.one": "{count} aktive Einreichung",
+  "waves.discovery.activeSubmissions.other": "{count} aktive Einreichungen",
   "waves.historyGap.load": "Weitere Nachrichten laden",
   "waves.historyGap.loaded": "Weitere Nachrichten geladen",
   "waves.historyGap.loading": "Weitere Nachrichten werden geladen…",
