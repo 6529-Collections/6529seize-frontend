@@ -100,14 +100,11 @@ export function useClientNavigation<T, TOptions = undefined>({
         // content must keep its source state until that URL reaches render.
         if (!deferRouteState)
           setNavigation({ route: initialState, value: newState });
+      } else if (options?.replace) {
+        // Router navigation keeps source state until the destination commits.
+        router.replace(target);
       } else {
-        // Route-owned views must remain on their committed wave until the new
-        // URL commits, otherwise destination content renders under the old tabs.
-        if (options?.replace) {
-          router.replace(target);
-        } else {
-          router.push(target);
-        }
+        router.push(target);
       }
     },
     [buildUrl, canUsePushState, deferRouteState, initialState, router]
