@@ -397,6 +397,7 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
   "rep.categories.validation",
   {
     errorTitle: "That category name won't work",
+    unavailable: "This category name is unavailable. Try a different name.",
     required: "Rep category is required.",
     tooShort: "Use at least {min} characters.",
     tooLong: "It's {length} characters long — the maximum is {max}.",
@@ -4496,6 +4497,34 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.history.emptyLogs": "No logs found",
   "subscriptions.history.emptyTopups": "No Top Ups found",
   "subscriptions.history.loading": "Loading {title}",
+  "subscriptions.coverage.summary.nextFundedDrops": "Next {count} drops funded",
+  "subscriptions.coverage.summary.paidTitle": "Subscription paid",
+  "subscriptions.coverage.summary.paid":
+    "The subscription for {meme} is already paid.",
+  "subscriptions.coverage.summary.forecastSnapshot": "Last forecast: {funded}.",
+  "subscriptions.coverage.summary.paymentUnavailable":
+    "This subscription could not be checked. It will be checked again shortly.",
+  "subscriptions.coverage.summary.uncoveredToday": "Today’s mint isn’t covered",
+  "subscriptions.coverage.summary.uncovered":
+    "The Memes #{token} isn’t covered",
+  "subscriptions.coverage.summary.partiallyCoveredToday":
+    "Today’s mint isn’t fully covered",
+  "subscriptions.coverage.summary.partiallyCovered":
+    "The Memes #{token} isn’t fully covered",
+  "subscriptions.coverage.summary.partialEditions":
+    "{funded} of {total} editions funded",
+  "subscriptions.coverage.summary.partialDeadline.one":
+    "Top up by {deadline} to receive the remaining {count} edition of The Memes #{token}.",
+  "subscriptions.coverage.summary.partialDeadline.many":
+    "Top up by {deadline} to receive the remaining {count} editions of The Memes #{token}.",
+  "subscriptions.coverage.summary.deadlinePassed": "Deadline passed",
+  "subscriptions.coverage.summary.expiredDeadline":
+    "Top-up deadline: {deadline}.",
+  "subscriptions.coverage.summary.viewHistory": "View history",
+  "subscriptions.coverage.summary.topUpFutureDrops": "Top up for future drops",
+  "subscriptions.coverage.summary.lastKnown": "Last known coverage",
+  "subscriptions.coverage.summary.lastUpdated":
+    "Last updated {time}. May be out of date.",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
@@ -4544,6 +4573,7 @@ export const EN_US_ROOT_MESSAGES = {
     "Projected from current eligibility, settings, balance, and the published Meme schedule.",
   "subscriptions.coverage.fundedThrough": "Funded through",
   "subscriptions.coverage.nextUnfunded": "Next unfunded",
+  "subscriptions.coverage.summary.nextDrop": "Next drop",
   "subscriptions.coverage.projected": "Projected",
   "subscriptions.coverage.memeToken": "The Memes #{token}",
   "subscriptions.coverage.topUpBy":

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { Combobox } from "@headlessui/react";
 import { useContext, useEffect, useState } from "react";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
@@ -99,11 +101,13 @@ export default function ProxyCreateTargetSearch({
             <span className="tw-text-base tw-font-semibold tw-text-iron-50">
               {profileProxy.granted_to.handle}
             </span>
-            <button
+            <IconButton
               type="button"
               aria-label="Remove selected profile"
               onClick={() => onTargetSelect(null)}
-              className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              size={32}
+              variant="ghost"
+              shape="circle"
             >
               <svg
                 className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-red"
@@ -120,7 +124,7 @@ export default function ProxyCreateTargetSearch({
                   strokeLinejoin="round"
                 />
               </svg>
-            </button>
+            </IconButton>
           </div>
         </div>
       ) : (

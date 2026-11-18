@@ -1,3 +1,4 @@
+import IconButton from "@/components/utils/button/IconButton";
 import { PaperAirplaneIcon } from "@heroicons/react/24/outline";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 
@@ -17,14 +18,15 @@ export function ComposerSendButton({
   "aria-label": ariaLabel,
 }: ComposerSendButtonProps) {
   return (
-    <button
+    <IconButton
       type="button"
       onClick={onClick}
       disabled={disabled || loading}
       aria-busy={loading || undefined}
       aria-label={ariaLabel}
       title={title}
-      className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-primary-500 tw-text-white hover:tw-bg-primary-600 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-iron-800 disabled:tw-text-iron-500"
+      size={40}
+      variant="action"
     >
       {loading ? (
         <CircleLoader />
@@ -34,6 +36,6 @@ export function ComposerSendButton({
           className="tw-size-5 tw-flex-shrink-0"
         />
       )}
-    </button>
+    </IconButton>
   );
 }

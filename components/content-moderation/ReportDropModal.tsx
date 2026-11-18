@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
@@ -562,15 +564,16 @@ export default function ReportDropModal({
                   {t(locale, dialogDescriptionKey)}
                 </p>
               </div>
-              <button
+              <IconButton
                 type="button"
                 onClick={closeModal}
                 disabled={mutation.isPending || withdrawMutation.isPending}
                 aria-label={t(locale, "contentModeration.report.close")}
-                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                size={36}
+                variant="ghost"
               >
                 <XMarkIcon aria-hidden="true" className="tw-size-5" />
-              </button>
+              </IconButton>
             </div>
 
             <ReportDropModalContent

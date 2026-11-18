@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import {
   useCallback,
   useRef,
@@ -16,7 +18,7 @@ const CAN_SCROLL_RIGHT = 2;
 const NO_OVERFLOW = 0;
 
 type ScrollDirection = "left" | "right";
-type FocusTarget = ScrollDirection | "active-tab";
+type FocusTarget = ScrollDirection | "active-control";
 
 const DIRECTION_STYLES: Record<
   ScrollDirection,
@@ -91,23 +93,20 @@ function ScrollControl({
         }`}
       />
       {showButton && (
-        <button
+        <IconButton
           ref={buttonRef}
           type="button"
           aria-label={label}
           tabIndex={isAvailable ? 0 : -1}
           onClick={onClick}
-          className={`tw-group tw-absolute tw-inset-y-0 tw-z-20 tw-flex tw-w-11 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-opacity tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none ${styles.button} ${
-            isAvailable
-              ? "tw-opacity-100"
-              : "tw-pointer-events-none tw-invisible tw-opacity-0"
-          }`}
+          layout="scroll-tabs"
+          className={`${styles.button} ${isAvailable ? "tw-opacity-100" : "tw-pointer-events-none tw-invisible tw-opacity-0"}`}
         >
           <ChevronIcon
             aria-hidden="true"
             className={`tw-size-5 tw-drop-shadow-[0_1px_2px_rgba(0,0,0,0.9)] motion-reduce:tw-transform-none ${styles.icon}`}
           />
-        </button>
+        </IconButton>
       )}
     </>
   );
@@ -117,10 +116,14 @@ export default function MobileTabsScrollControls({
   scrollerRef,
   showButtons = true,
   fadeColorClassName = "tw-from-iron-950 tw-via-iron-950/80",
+  activeControlSelector = '[role="tab"][aria-selected="true"]',
+  scrollLabels,
 }: {
   readonly scrollerRef: RefObject<HTMLDivElement | null>;
   readonly showButtons?: boolean;
   readonly fadeColorClassName?: string;
+  readonly activeControlSelector?: string;
+  readonly scrollLabels?: Readonly<Record<ScrollDirection, string>>;
 }) {
   const locale = useBrowserLocale();
   const leftButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -150,7 +153,7 @@ export default function MobileTabsScrollControls({
             return "left";
           }
 
-          return "active-tab";
+          return "active-control";
         }
 
         if (
@@ -161,7 +164,7 @@ export default function MobileTabsScrollControls({
             return "right";
           }
 
-          return "active-tab";
+          return "active-control";
         }
 
         return null;
@@ -179,9 +182,13 @@ export default function MobileTabsScrollControls({
             } else if (focusTarget === "right") {
               rightButtonRef.current?.focus();
             } else {
-              scroller
-                .querySelector<HTMLElement>(
-                  '[role="tab"][aria-selected="true"]'
+              Array.from(
+                scroller.querySelectorAll<HTMLElement>(activeControlSelector)
+              )
+                .find(
+                  (element) =>
+                    element.getClientRects().length > 0 &&
+                    !element.matches(":disabled")
                 )
                 ?.focus();
             }
@@ -221,7 +228,7 @@ export default function MobileTabsScrollControls({
         mutationObserver.disconnect();
       };
     },
-    [scrollerRef]
+    [scrollerRef, activeControlSelector]
   );
   const overflowSnapshot = useSyncExternalStore(
     subscribe,
@@ -254,7 +261,7 @@ export default function MobileTabsScrollControls({
         showButton={showButtons}
         fadeColorClassName={fadeColorClassName}
         isAvailable={canScrollLeft}
-        label={getWaveTabsScrollLabel(locale, "left")}
+        label={scrollLabels?.left ?? getWaveTabsScrollLabel(locale, "left")}
         onClick={() => scrollTabs(-1)}
       />
       <ScrollControl
@@ -263,7 +270,7 @@ export default function MobileTabsScrollControls({
         showButton={showButtons}
         fadeColorClassName={fadeColorClassName}
         isAvailable={canScrollRight}
-        label={getWaveTabsScrollLabel(locale, "right")}
+        label={scrollLabels?.right ?? getWaveTabsScrollLabel(locale, "right")}
         onClick={() => scrollTabs(1)}
       />
     </>

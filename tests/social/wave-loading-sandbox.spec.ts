@@ -1099,6 +1099,12 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
       content: `Shared link fixture post ${serial}`,
     };
   }).reverse();
+  // Browser routes cannot intercept the server-rendered feed seed. Give the
+  // sandbox server this same history before opening the shared-link page.
+  const serverFixture = await page.request.post(
+    `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/shared-posts`
+  );
+  expect(serverFixture.ok()).toBe(true);
   await page.route("**/api/v2/drops?**", (route) => {
     const ids =
       new URL(route.request().url()).searchParams.get("ids")?.split(",") ?? [];
