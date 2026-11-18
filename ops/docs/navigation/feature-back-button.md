@@ -35,6 +35,7 @@ swipe return to the feed at the saved reading position.
 
 1. Header shows `Back` only when at least one condition is true:
    - active wave context exists,
+   - the native app is showing Profile Waves Feed,
    - route is `/waves/create` or `/messages/new`,
    - native-app Discovery carries a Profile Waves Feed return context,
    - Preferences includes its explicit profile-entry context,
@@ -47,6 +48,7 @@ swipe return to the feed at the saved reading position.
    - profile-origin Preferences -> return to the active profile
    - `drop` query exists -> remove only `drop`, keep path and other query params
    - native-app chat opened from Profile Waves Feed -> return to the feed
+   - native-app Profile Waves Feed -> return to Waves
    - native-app Discovery opened from Profile Waves Feed -> return to the feed
    - active wave context -> clear active wave state and return to `/waves` or
      `/messages`
@@ -120,9 +122,10 @@ swipe return to the feed at the saved reading position.
   indicates pending navigation, not necessarily a fresh download of the list.
 - Native Back prepares the previously visited route ahead of selection. Cached
   content can return while its data refreshes in the background.
-- On supported native app browsers, a committed Waves or Profile Waves Feed
-  swipe reveals the destination during the remaining slide. The saved Feed
-  cards are ready when that slide starts. Reduced Motion still skips the motion.
+- A Waves return completes its outgoing slide before navigation. On supported
+  native app browsers, a Feed return reveals the destination during the remaining
+  slide. Cached cards appear when ready; a cold return can show the loading
+  state while data arrives. Reduced Motion skips the motion.
 
 ## Related Pages
 

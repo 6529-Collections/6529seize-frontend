@@ -4,6 +4,7 @@ import { useCallback, useLayoutEffect, useRef } from "react";
 import type { TouchEvent as ReactTouchEvent } from "react";
 
 const AXIS_SLOP = 8;
+const VERTICAL_SLOP = 12;
 const AXIS_RATIO = 1.5;
 const EDGE_RESERVE = 20;
 const FLICK_DISTANCE = 24;
@@ -33,6 +34,7 @@ interface Gesture {
   readonly candidates: Candidate[];
   owner: Candidate | null;
   distance: number;
+  velocityDistance: number;
   velocity: number;
   movedAt: number;
   frame: number | null;
@@ -139,7 +141,7 @@ function track(current: Gesture, touch: Touch) {
       cancel();
       return;
     }
-    if (deltaY >= AXIS_SLOP && deltaY >= absoluteDeltaX) {
+    if (deltaY >= VERTICAL_SLOP && deltaY >= absoluteDeltaX) {
       cancel();
       return;
     }
@@ -165,11 +167,13 @@ function track(current: Gesture, touch: Touch) {
   if (distance !== current.distance) {
     // Native WebViews interpolate tiny final moves as well as rounding release
     // coordinates. Keep either from replacing the finger's forward velocity.
-    if (Math.abs(distance - current.distance) >= VELOCITY_JITTER_PX) {
+    if (Math.abs(distance - current.velocityDistance) >= VELOCITY_JITTER_PX) {
       const now = performance.now();
       current.velocity =
-        (distance - current.distance) / Math.max(1, now - current.movedAt);
+        (distance - current.velocityDistance) /
+        Math.max(1, now - current.movedAt);
       current.movedAt = now;
+      current.velocityDistance = distance;
     }
     current.distance = distance;
   }
@@ -258,6 +262,7 @@ export function useHorizontalSwipe(
         candidates: [],
         owner: null,
         distance: 0,
+        velocityDistance: 0,
         velocity: 0,
         movedAt: performance.now(),
         frame: null,

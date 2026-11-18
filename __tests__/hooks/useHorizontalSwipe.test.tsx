@@ -384,6 +384,29 @@ it("recognizes a rightward thumb arc without changing reply intent", () => {
   fireEvent.touchCancel(target);
 });
 
+it("lets a small diagonal start become a horizontal Back swipe", () => {
+  const { target, onBack } = setup();
+  start(target);
+  move(target, 188, 109);
+  move(target, 205, 111);
+  move(target, 300, 111);
+  end(target, 300);
+  expect(onBack).toHaveBeenCalledWith(true, 120);
+});
+
+it("accumulates fractional reverse moves without losing reversal intent", () => {
+  const { target, onBack } = setup();
+  start(target);
+  act(() => jest.advanceTimersByTime(100));
+  move(target, 284);
+  for (let index = 1; index <= 4; index++) {
+    act(() => jest.advanceTimersByTime(4));
+    move(target, 284 - index * 0.875);
+  }
+  end(target, 280.5);
+  expect(onBack).toHaveBeenCalledWith(false, 100.5);
+});
+
 it("does not acquire an ambiguous diagonal that never becomes horizontal", () => {
   const { target, onBack, onReply } = setup();
   start(target);

@@ -1,5 +1,8 @@
 import { expect, test } from "../testHelpers";
-import { installSurfaceSimulation } from "../support/surfaceSimulation";
+import {
+  installSurfaceSimulation,
+  isCapacitorSimulationProject,
+} from "../support/surfaceSimulation";
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 import { expectUrlState } from "../support/urlState";
 import {
@@ -201,7 +204,9 @@ test("Network profile Back restores page, sorting and reading position without h
     !isMobile,
     "The app-header Back return is exercised at phone width."
   );
-  await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+  if (!isCapacitorSimulationProject(testInfo.project.name)) {
+    await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+  }
   const source = "/network?page=2&sort-by=rep&sort-direction=asc";
   await gotoReady(page, source);
   const members = page

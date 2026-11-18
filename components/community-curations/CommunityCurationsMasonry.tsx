@@ -54,6 +54,7 @@ interface CommunityCurationsMasonryProps {
   readonly hasNextPage: boolean | undefined;
   readonly isFetchingNextPage: boolean;
   readonly scrollContainer: HTMLElement | null;
+  readonly restoreScrollOffset: (contentMeasured: boolean) => boolean;
 }
 
 const EMPTY_VIEWPORT: PanelViewport = {
@@ -331,21 +332,15 @@ function CommunityCurationsMasonryItem({
 function CommunityCurationsVirtualMasonry({
   drops,
   scrollContainer,
+  restoreScrollOffset,
 }: {
   readonly drops: readonly ExtendedDrop[];
   readonly scrollContainer: HTMLElement | null;
+  readonly restoreScrollOffset: (contentMeasured: boolean) => boolean;
 }): ReactElement {
   const [gridElement, setGridElement] = useState<HTMLElement | null>(null);
   const { setWidth, width } = useElementWidth(gridElement);
   const viewport = usePanelViewport(scrollContainer, gridElement);
-  const acknowledgeVisibleFeed = useCallback(() => {
-    if (
-      isWaveNavigationContentPending("feed") &&
-      hasVisibleFeedViewport(gridElement, scrollContainer)
-    ) {
-      commitWaveNavigationContent("feed");
-    }
-  }, [gridElement, scrollContainer]);
   const items = useMemo(() => [...drops], [drops]);
   const resetKey = useMemo(
     () => items.slice(0, 8).map(getDropKey).join("|"),
@@ -361,6 +356,21 @@ function CommunityCurationsVirtualMasonry({
     [resetKey, items.length]
   );
   const resizeObserver = useResizeObserver(positioner);
+  const acknowledgeVisibleFeed = useCallback(() => {
+    const restored = restoreScrollOffset(positioner.size() === items.length);
+    if (
+      restored &&
+      isWaveNavigationContentPending("feed") &&
+      hasVisibleFeedViewport(gridElement, scrollContainer)
+    )
+      commitWaveNavigationContent("feed");
+  }, [
+    gridElement,
+    scrollContainer,
+    restoreScrollOffset,
+    positioner,
+    items.length,
+  ]);
   const setContainerRef = useCallback(
     (element: HTMLElement | null) => {
       setGridElement(element);
@@ -390,7 +400,8 @@ function CommunityCurationsVirtualMasonry({
   useLayoutEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Commit newly measured rows before exposing a restored viewport.
     setMeasuredCount(positioner.size());
-  }, [grid, positioner]);
+    acknowledgeVisibleFeed();
+  }, [grid, positioner, acknowledgeVisibleFeed, viewport]);
 
   return grid;
 }
@@ -401,6 +412,7 @@ export default function CommunityCurationsMasonry({
   hasNextPage,
   isFetchingNextPage,
   scrollContainer,
+  restoreScrollOffset,
 }: CommunityCurationsMasonryProps) {
   const shouldShowPaginationFooter = Boolean(hasNextPage) || isFetchingNextPage;
   const shouldShowLoader = isFetchingNextPage || drops.length === 0;
@@ -420,6 +432,7 @@ export default function CommunityCurationsMasonry({
       <CommunityCurationsVirtualMasonry
         drops={drops}
         scrollContainer={scrollContainer}
+        restoreScrollOffset={restoreScrollOffset}
       />
 
       {shouldShowPaginationFooter && (

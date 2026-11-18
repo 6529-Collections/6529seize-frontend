@@ -569,24 +569,24 @@ for (const platform of ["ios", "android"] as const) {
           "data-wave-navigation-transition"
         );
         await expect(grid).toHaveCSS("pointer-events", "auto");
+        const tapTarget =
+          method === "wave-link"
+            ? page
+                .getByText("Profile feed gesture fixture 6.", { exact: false })
+                .locator("xpath=ancestor::article[1]")
+                .getByRole("link", {
+                  name: "Gesture profile wave",
+                  exact: true,
+                })
+            : post;
+        await tapTarget.scrollIntoViewIfNeeded();
         const readingPosition = await feed.evaluate(
           (element) => element.scrollTop
         );
         const readingCardTop = await post.evaluate(
           (element) => element.closest("article")!.getBoundingClientRect().top
         );
-        if (method === "wave-link") {
-          await page
-            .getByText("Profile feed gesture fixture 6.", { exact: false })
-            .locator("xpath=ancestor::article[1]")
-            .getByRole("link", {
-              name: "Gesture profile wave",
-              exact: true,
-            })
-            .tap();
-        } else {
-          await post.tap();
-        }
+        await tapTarget.tap();
         // The local mock server compiles the detail route on first entry.
         await expect(page).toHaveURL(
           new RegExp(`/waves/${WAVE}\\?.*returnTo=`),

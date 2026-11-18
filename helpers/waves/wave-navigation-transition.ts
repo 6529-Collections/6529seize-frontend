@@ -70,6 +70,7 @@ export function isWaveNavigationContentPending(screen: WaveScreen) {
 }
 
 export function skipWaveNavigationTransition() {
+  swipeHandoffPending = false;
   activeTransition?.skip();
 }
 
@@ -102,6 +103,7 @@ export function runWaveNavigationTransition(
   let contentPending = screen === "feed";
   let shellCommitted = false;
   if (contentPending) root.dataset["waveNavigationContentPending"] = "true";
+  else delete root.dataset["waveNavigationContentPending"];
   let commit = () => {};
   const committed = new Promise<void>((resolve) => {
     commit = resolve;
@@ -133,9 +135,10 @@ export function runWaveNavigationTransition(
   };
   let transition: ViewTransition;
   let stopped = false;
+  let superseded = false;
   try {
     transition = document.startViewTransition(async () => {
-      if (stopped) return;
+      if (superseded) return;
       // The browser has captured the finger's final position. Prepare the new
       // screen underneath that snapshot, rather than sliding into an empty shell.
       swipe?.surface.style.removeProperty("transform");
@@ -150,14 +153,16 @@ export function runWaveNavigationTransition(
     if (!swipe) navigate();
     return false;
   }
-  const skip = () => {
+  const skip = (cancelNavigation = true) => {
+    superseded ||= cancelNavigation;
     if (stopped) return;
     stopped = true;
     commit();
     transition.skipTransition();
   };
   // A route interruption must never leave the app waiting for a screen that cannot commit.
-  const timeout = window.setTimeout(skip, 500);
+  const skipMotion = () => skip(false);
+  const timeout = window.setTimeout(skipMotion, 500);
   const contentReady = () => {
     contentPending = false;
     delete root.dataset["waveNavigationContentPending"];
@@ -176,11 +181,11 @@ export function runWaveNavigationTransition(
     skip,
   };
   activeTransition = pending;
-  reducedMotion.addEventListener("change", skip, { once: true });
+  reducedMotion.addEventListener("change", skipMotion, { once: true });
   const cleanup = () => {
     stopped = true;
     window.clearTimeout(timeout);
-    reducedMotion.removeEventListener("change", skip);
+    reducedMotion.removeEventListener("change", skipMotion);
     swipe?.onFinish?.();
     if (activeTransition !== pending) return;
     activeTransition = null;

@@ -135,6 +135,60 @@ describe("navigation scroll restoration", () => {
     });
   });
 
+  it("keeps a slow Back eligible and retries when existing content grows", () => {
+    rememberAndLeave();
+    restoration.prepare("/network?page=2");
+    jest.advanceTimersByTime(3000);
+    window.history.replaceState(null, "", "/network?page=2");
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      configurable: true,
+      value: window.innerHeight + 300,
+    });
+    restoration.committed("/network?page=2");
+    jest.advanceTimersByTime(40);
+    expect(window.scrollTo).not.toHaveBeenCalled();
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      configurable: true,
+      value: 5000,
+    });
+    jest.advanceTimersByTime(40);
+    expect(window.scrollTo).toHaveBeenCalledWith({
+      top: 900,
+      behavior: "instant",
+    });
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
+  it("uses the same query encoding for scroll capture, lookup and commit", () => {
+    window.history.replaceState(null, "", "/network?name=two%20words");
+    rememberAndLeave();
+    expect(restoration.prepare("/network?name=two+words")).toBe(true);
+    window.history.replaceState(null, "", "/network?name=two%20words");
+    restoration.committed("/network?name=two+words");
+    jest.advanceTimersByTime(20);
+    expect(window.scrollTo).toHaveBeenCalledWith({
+      top: 900,
+      behavior: "instant",
+    });
+  });
+
+  it("replaces an older offset when a fresh web visit leaves without scrolling", () => {
+    rememberAndLeave();
+    window.history.replaceState(null, "", "/network?page=2");
+    top = 0;
+    clickLink("/Shelby");
+    window.history.replaceState(null, "", "/Shelby");
+    expect(restoration.prepare("/network?page=2")).toBe(true);
+    window.history.replaceState(null, "", "/network?page=2");
+    top = 200;
+    restoration.committed("/network?page=2");
+    jest.advanceTimersByTime(20);
+    expect(window.scrollTo).toHaveBeenCalledWith({
+      top: 0,
+      behavior: "instant",
+    });
+  });
+
   it("does not restore another sort, an explicit anchor or a virtualized stream", () => {
     rememberAndLeave();
     expect(restoration.prepare("/network?page=1")).toBe(false);

@@ -4,6 +4,7 @@ import CommunityCurations from "@/components/community-curations/CommunityCurati
 const mockUseCommunityCurationsDrops = jest.fn();
 const mockCommitWaveNavigationContent = jest.fn();
 let mockIsApp = false;
+let mockRestoreScrollOffset = () => true;
 
 jest.mock("@/helpers/waves/wave-navigation-transition", () => ({
   commitWaveNavigationContent: (...args: unknown[]) =>
@@ -33,7 +34,14 @@ jest.mock("@/components/token-list/hooks/usePersistentScrollOffset", () => ({
 
 jest.mock("@/components/community-curations/CommunityCurationsMasonry", () => ({
   __esModule: true,
-  default: () => <div data-testid="profile-feed-masonry" />,
+  default: ({
+    restoreScrollOffset,
+  }: {
+    restoreScrollOffset: () => boolean;
+  }) => {
+    mockRestoreScrollOffset = restoreScrollOffset;
+    return <div data-testid="profile-feed-masonry" />;
+  },
 }));
 
 const loadingState = {
@@ -98,6 +106,33 @@ describe("CommunityCurations", () => {
     expect(destination.searchParams.get("returnTo")).toBe(
       "/waves?view=profile-feed"
     );
+  });
+
+  it("retries a clamped saved offset as later Feed rows grow, then stops", () => {
+    let availableTop = 100;
+    scrollTo.mockImplementation(function (
+      this: HTMLElement,
+      { top }: ScrollToOptions
+    ) {
+      this.scrollTop = Math.min(top ?? 0, availableTop);
+    });
+    const drop = { stableKey: "drop-1" };
+    mockUseCommunityCurationsDrops.mockReturnValue({
+      ...loadingState,
+      allDrops: [drop],
+      drops: [drop],
+      isLoading: false,
+    });
+    const { container } = render(<CommunityCurations />);
+    expect(mockRestoreScrollOffset()).toBe(false);
+    availableTop = 500;
+    expect(mockRestoreScrollOffset()).toBe(true);
+    const scroll = container.querySelector("section")!;
+    expect(scroll.scrollTop).toBe(240);
+    scroll.scrollTop = 200;
+    expect(mockRestoreScrollOffset()).toBe(true);
+    expect(scroll.scrollTop).toBe(200);
+    scrollTo.mockReset();
   });
 
   it("releases a pagination-only Feed without waiting for absent cards", () => {

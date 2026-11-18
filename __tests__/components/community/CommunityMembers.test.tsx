@@ -204,6 +204,55 @@ describe("CommunityMembers", () => {
     expect(setActiveGroupId).toHaveBeenCalledWith(null);
   });
 
+  it("does not correct a restored page using the previous debounced query", () => {
+    (useActiveGroup as jest.Mock).mockReturnValue({
+      activeGroupId: null,
+      setActiveGroupId,
+    });
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("page=1")
+    );
+    (useQuery as jest.Mock).mockReturnValue({
+      isLoading: false,
+      isFetching: false,
+      data: { page: 1, count: 0, data: [] },
+    });
+    const { rerender } = renderComponent();
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("page=2&sort-by=rep")
+    );
+    rerender(
+      <TitleProvider>
+        <CommunityMembers />
+      </TitleProvider>
+    );
+    expect(replace).not.toHaveBeenCalled();
+  });
+
+  it.each([true, false])(
+    "corrects only a settled current result (placeholder=%s)",
+    (isPlaceholderData) => {
+      (useActiveGroup as jest.Mock).mockReturnValue({
+        activeGroupId: null,
+        setActiveGroupId,
+      });
+      (useSearchParams as jest.Mock).mockReturnValue(
+        new URLSearchParams("page=2")
+      );
+      window.history.replaceState(null, "", "/network?page=2#members");
+      (useQuery as jest.Mock).mockReturnValue({
+        isLoading: false,
+        isFetching: false,
+        isPlaceholderData,
+        data: { page: 2, count: 0, data: [] },
+      });
+      renderComponent();
+      if (isPlaceholderData) expect(replace).not.toHaveBeenCalled();
+      else expect(replace).toHaveBeenCalledWith("/network?page=1#members");
+      window.history.replaceState(null, "", "/");
+    }
+  );
+
   it("does not render cached members when the scoped request fails", () => {
     searchParamsMock.set("group", "1");
     (useQuery as jest.Mock).mockReturnValue({
