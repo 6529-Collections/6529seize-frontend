@@ -632,6 +632,110 @@ for (const platform of ["ios", "android"] as const) {
       await expectNoUnsafeSandboxMutations(baseURL);
     });
 
+    test("cold Feed returns fill the viewport without another scroll", async ({
+      page,
+      baseURL,
+    }) => {
+      const origin = getSandboxApiOrigin(baseURL);
+      const response = await page.request.get(
+        `${origin}/api/v2/waves/${WAVE}/drops?limit=50`
+      );
+      const fixture = (await response.json()) as ApiWaveDropsFeedV2;
+      const template = fixture.drops[0]!;
+      await page.route("**/api/v2/curated-profile-wave-drops?**", (route) =>
+        route.fulfill({
+          json: {
+            page: 1,
+            next: false,
+            data: Array.from({ length: 40 }, (_, index) => ({
+              ...template,
+              id: `00000000-0000-4000-8000-${String(800 + index).padStart(12, "0")}`,
+              serial_no: 1,
+              content: `Compact feed post ${index + 1}.`,
+              author: {
+                ...template.author,
+                badges: {
+                  ...template.author.badges,
+                  profile_wave_id: WAVE,
+                  profile_wave_name: "Gesture profile wave",
+                },
+              },
+            })),
+          },
+        })
+      );
+      await page.goto("/waves?view=profile-feed", {
+        waitUntil: "domcontentloaded",
+      });
+      await waitForRouteReady(page);
+      const feed = page.getByTestId("wave-swipe-surface").locator("section");
+      await expect(page.getByRole("grid")).toBeVisible();
+      await feed.evaluate((element) => element.scrollTo({ top: 1600 }));
+      const post = page.getByText("Compact feed post 10.", { exact: true });
+      await expect(post).toBeVisible();
+      await post.scrollIntoViewIfNeeded();
+      for (let visit = 0; visit < 3; visit += 1) {
+        await expect(page.locator("html")).not.toHaveAttribute(
+          "data-wave-navigation-transition"
+        );
+        await expect(page.getByRole("grid")).toHaveCSS(
+          "pointer-events",
+          "auto"
+        );
+        await post.tap({ trial: true });
+        const readingPosition = await feed.evaluate(
+          (element) => element.scrollTop
+        );
+        await post.tap();
+        await expect(page).toHaveURL(
+          new RegExp(`/waves/${WAVE}\\?.*returnTo=`),
+          {
+            timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+          }
+        );
+        await expect(
+          page.getByRole("textbox", { name: "Write a message" }).last()
+        ).toBeVisible();
+        await page.getByRole("button", { name: "Back", exact: true }).tap();
+        await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
+        // No scroll input on return: compact rows must finish measuring on their own.
+        await expect
+          .poll(() =>
+            feed.evaluate((element) => {
+              const viewport = element.getBoundingClientRect();
+              const visible = Array.from(element.querySelectorAll("article"))
+                .filter(
+                  (card) => getComputedStyle(card).visibility !== "hidden"
+                )
+                .map((card) => card.getBoundingClientRect())
+                .filter(
+                  (rect) =>
+                    rect.bottom > viewport.top && rect.top < viewport.bottom
+                )
+                .sort((left, right) => left.top - right.top);
+              const first = visible[0];
+              const last = visible.at(-1);
+              return Boolean(
+                first &&
+                last &&
+                first.top <= viewport.top + 16 &&
+                last.bottom >= Math.min(viewport.bottom, innerHeight) - 16 &&
+                visible.every(
+                  (rect, index) =>
+                    index === 0 || rect.top <= visible[index - 1]!.bottom + 16
+                )
+              );
+            })
+          )
+          .toBe(true);
+        expect(await feed.evaluate((element) => element.scrollTop)).toBeCloseTo(
+          readingPosition,
+          0
+        );
+      }
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+
     test("Discovery opened from Profile Waves Feed keeps a Back path to the reading position", async ({
       page,
       baseURL,
