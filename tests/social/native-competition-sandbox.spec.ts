@@ -53,7 +53,9 @@ async function expectVoteHeight(
   scope: Locator,
   previous?: { inputArea: number; container: number }
 ) {
-  const area = scope.locator("[data-vote-input-area]");
+  const area = scope
+    .getByRole("group", { name: "Vote controls", exact: true })
+    .locator("[data-vote-input-area]");
   await expect(area).toBeVisible();
   const geometry = await area.evaluate(async (element) => {
     const mini = element.closest(".is-mini");
@@ -93,7 +95,10 @@ async function verifyVoteBreakpoints(
   name: string
 ) {
   const viewport = page.viewportSize()!;
-  const panel = scope.locator("[data-vote-mode]");
+  const panel = scope.getByRole("group", {
+    name: "Vote controls",
+    exact: true,
+  });
   const mode = scope.getByRole("group", { name: "Vote input mode" });
   const originalMode = await panel.getAttribute("data-vote-mode");
   const measurements = [];
@@ -287,9 +292,9 @@ async function verifyNativePreviewKeyboard(
       await expect(field).toBeFocused();
       await expect(field).toBeInViewport({ ratio: 1 });
       await expect(
-        field.locator(
-          'xpath=ancestor::div[contains(@class,"tw-grid-rows-")][1]'
-        )
+        dialog
+          .getByLabel("Optional rationale reply")
+          .locator('xpath=ancestor::div[contains(@class,"tw-grid-rows-")][1]')
       ).toHaveCSS(
         "transition-timing-function",
         await layout.evaluate(
@@ -7031,6 +7036,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       const expectCompactCenteredTabs = async () => {
         const label = dialog
+          .getByRole("group", { name: "Vote controls", exact: true })
           .locator("[data-vote-panel-header]")
           .getByText("Your vote", { exact: true });
         await expect(label).toHaveCSS("font-size", "12px");
@@ -7207,7 +7213,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             belowReply: true,
           });
         if (testInfo.project.use.hasTouch) {
-          const explainLabel = explain.locator("xpath=ancestor::label[1]");
+          const explainLabel = dialog
+            .getByRole("switch", { name: "Explain vote" })
+            .locator("xpath=ancestor::label[1]");
           await expect(explainLabel).toHaveCSS("position", "relative");
           for (const [target, pseudo] of [
             [save, "::after"],
@@ -7297,9 +7305,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.screenshot({
         path: testInfo.outputPath("compact-vote-footer-with-reply.png"),
       });
-      await dialog.locator(".is-mini").screenshot({
-        path: testInfo.outputPath("compact-vote-panel-with-reply.png"),
-      });
+      await dialog
+        .getByRole("group", { name: "Vote controls", exact: true })
+        .screenshot({
+          path: testInfo.outputPath("compact-vote-panel-with-reply.png"),
+        });
       await input.scrollIntoViewIfNeeded();
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
@@ -7506,6 +7516,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const toggle = dialog.getByRole("switch", { name: "Explain vote" });
     await expect(toggle).not.toBeChecked();
     const voteHeading = dialog
+      .getByRole("group", { name: "Vote controls", exact: true })
       .locator("[data-vote-panel-header]")
       .getByText("Your vote", { exact: true });
     const modeTabs = dialog.getByRole("group", { name: "Vote input mode" });
@@ -7554,21 +7565,26 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(creditBoxes[0]!.y).toBeGreaterThan(voteSlider!.y);
     const closedVoteHeight = await expectVoteHeight(dialog);
     const rangeInputs = dialog.getByRole("slider");
-    const thumb = dialog.locator("[data-vote-slider-thumb]");
+    const thumb = dialog
+      .getByRole("group", { name: "Vote controls", exact: true })
+      .locator("[data-vote-slider-thumb]");
     await expect(rangeInputs).toHaveCount(2);
     await modeTabs
       .getByRole("button", { name: "Numeric", exact: true })
       .focus();
     // Both transparent range inputs must expose focus on their shared visible thumb.
-    for (const range of [rangeInputs.nth(0), rangeInputs.nth(1)]) {
+    for (const index of [0, 1]) {
+      const range = rangeInputs.nth(index);
       await page.keyboard.press("Tab");
       await expect(range).toBeFocused();
       await expect(thumb).toHaveCSS("outline-style", "solid");
       await expect(thumb).toHaveCSS("outline-width", "2px");
-      await expect(range.locator("xpath=ancestor::fieldset[1]")).toHaveCSS(
-        "box-shadow",
-        "none"
-      );
+      await expect(
+        dialog
+          .getByRole("slider")
+          .nth(index)
+          .locator("xpath=ancestor::fieldset[1]")
+      ).toHaveCSS("box-shadow", "none");
     }
     await page.keyboard.press("Shift+Tab");
     await expect(rangeInputs.nth(0)).toBeFocused();
@@ -7699,8 +7715,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
     await detail.getByRole("button", { name: "Vote", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
-    const panel = dialog.locator("[data-vote-mode]");
-    const header = panel.locator("[data-vote-panel-header]");
+    const panel = dialog.getByRole("group", {
+      name: "Vote controls",
+      exact: true,
+    });
+    const header = dialog
+      .getByRole("group", { name: "Vote controls", exact: true })
+      .locator("[data-vote-panel-header]");
     await expect(header.getByText("Your vote", { exact: true })).toBeVisible();
     const mode = header.getByRole("group", { name: "Vote input mode" });
     await expect(mode).toHaveCount(1);
