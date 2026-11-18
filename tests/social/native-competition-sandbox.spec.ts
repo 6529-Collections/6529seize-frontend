@@ -2911,6 +2911,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       details.getByRole("button", { name: "Join", exact: true })
     );
     const pin = details.getByRole("button", { name: "Pin wave", exact: true });
+    await expect(pin).toHaveCSS("color", "rgb(132, 132, 144)");
     const mute = details.getByRole("button", {
       name: "Mute wave",
       exact: true,
@@ -2929,7 +2930,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(mute).toHaveCSS("color", "rgb(206, 207, 212)");
       await pin.hover();
       await expect(pin).toHaveCSS("background-color", "rgb(28, 28, 33)");
-      await expect(pin).toHaveCSS("color", "rgb(255, 255, 255)");
+      await expect(pin).toHaveCSS("color", "rgb(147, 147, 159)");
     }
     await pin.press("Tab");
     await page.keyboard.press("Shift+Tab");
