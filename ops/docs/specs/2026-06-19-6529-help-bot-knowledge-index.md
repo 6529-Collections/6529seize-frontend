@@ -7,6 +7,17 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `profiles.collected-tab` record explains that Complete my set and Manage
+orders are personal shortcuts shown only on the signed-in owner's own profile,
+after account loading and outside proxy sessions. Existing platform purchasing
+restrictions still apply.
+
+The `waves.discovery` record covers plain-text description previews, retained
+media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
+Votes artwork, wrapping metrics and neutral zero-submission status without a
+decorative count marker. Discovery
+links, eligibility and pagination retain their existing behavior.
+
 The touch-menu, header-navigation and encrypted-chat records cover touch reply,
 timestamp access, cancellable native conversation return and Android Back layer
 ordering. They retain visible tap alternatives, permission and delivery-state
@@ -192,8 +203,10 @@ filtering including promises without plans, reset behavior, and empty/error reco
 It directs readers to artwork details for the optional plan and distinguishes the
 artist's promise from verification of approval or fulfillment.
 
-The Wave discovery record describes the independent Active Votes and Worth Checking Out
-sidebar sections, their explanations and view-all destinations. It describes
+The Wave discovery record includes hidden-scrollbar controls with dark edge fades
+for offscreen sort and threshold options. It also describes the independent
+Active Votes and Worth Checking Out sidebar sections, their explanations and
+view-all destinations. It describes
 quiet loading placeholders, explanations that appear with content, empty messages
 only after successful empty requests, and retry without discarding loaded votes.
 It covers the scrollable three-row voting window, pagination, compact empty/error states and
@@ -1080,8 +1093,16 @@ and upcoming-drop reads show Unavailable and retain the existing Retry action.
 The subscriptions record also covers the two-zone summary, state-based action
 emphasis, owner-only deadlines, original full-year date display, quiet facts, loading
 skeletons, original emerald switches, one amber funding boundary, compact phone
-history and the content-sized settings sheet. Real deadlines and funding
-calculations remain API-owned; application design-preview data is absent.
+history and the content-sized settings sheet. Every loaded coverage state has a plain explanation. The card can say Covered
+for a fully funded selected forecast even when the raw API status is Action
+required, and uses Running low when one selected drop remains funded before a
+known shortfall. It preserves all counts and controls, shows a factual owner
+cutoff or explicitly states that none is available. At 24 funded drops the
+headline reads Next 24 drops funded; lower counts and Funded through remain
+unchanged, with no extra forecast-limit note. A mint-day shortfall reuses the final-subscription query to distinguish
+confirmed payment from an unpaid balance forecast, keeps loading/error neutral,
+and retains the raw remaining-balance count. Shared header status and push alerts remain API-owned. Real deadlines
+and funding calculations remain API-owned; application design-preview data is absent.
 
 Gradient, Meme Lab and ReMemes browse records describe responsive card
 placeholders that match loaded results, with loading statuses for screen

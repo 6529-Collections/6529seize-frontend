@@ -1,7 +1,11 @@
 import { useSubscriptionAllocationStatus } from "@/components/user/subscriptions/useSubscriptionAllocationStatus";
 import { commonApiFetch } from "@/services/api/common-api";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react";
+import {
+  onlineManager,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 jest.mock("@/services/api/common-api", () => ({
@@ -26,7 +30,65 @@ beforeEach(() => {
   client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   fetchMock.mockReset();
 });
-afterEach(() => client.clear());
+afterEach(() => {
+  client.clear();
+  onlineManager.setOnline(true);
+});
+
+const finalQueryKey = [
+  "consolidation-final-subscription",
+  `${profileKey}-${baseProps.contract}-${baseProps.tokenId}`,
+];
+
+it("waits for one fresh cutoff read, then retains the result during background refreshes", async () => {
+  const cached = { phase: "Phase 1", phase_position: 0 };
+  client.setQueryData(finalQueryKey, cached);
+  let completeRead!: (value: typeof cached) => void;
+  fetchMock.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        completeRead = resolve;
+      })
+  );
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, waitForRefresh: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+  expect(result.current.final).toEqual(cached);
+  expect(result.current.isLoading).toBe(true);
+
+  act(() => completeRead(cached));
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  act(() => {
+    void client.refetchQueries({ queryKey: finalQueryKey });
+  });
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  expect(client.isFetching()).toBe(1);
+  expect(result.current.final).toEqual(cached);
+  expect(result.current.isLoading).toBe(false);
+  act(() => completeRead(cached));
+  await waitFor(() => expect(client.isFetching()).toBe(0));
+});
+
+it("does not treat a paused cutoff refresh as verified cached payment evidence", async () => {
+  const cached = { phase: "Phase 1", phase_position: 0 };
+  client.setQueryData(finalQueryKey, cached);
+  onlineManager.setOnline(false);
+  fetchMock.mockResolvedValue(cached);
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, waitForRefresh: true }),
+    { wrapper }
+  );
+  expect(result.current.final).toEqual(cached);
+  expect(result.current.isLoading).toBe(true);
+  expect(fetchMock).not.toHaveBeenCalled();
+  act(() => onlineManager.setOnline(true));
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});
 
 it("reports absent allocation only after distribution is published", async () => {
   fetchMock.mockImplementation(async ({ endpoint }) => {

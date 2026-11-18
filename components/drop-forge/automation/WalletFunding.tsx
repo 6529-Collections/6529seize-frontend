@@ -33,7 +33,6 @@ export default function WalletFunding({
         </p>
         {settings.can_top_up && (
           <Button
-            size="sm"
             disabled={funding.busy}
             aria-expanded={expanded}
             onClick={() => setExpanded((value) => !value)}
@@ -56,7 +55,6 @@ export default function WalletFunding({
           </p>
           {chainId !== settings.chain_id ? (
             <Button
-              size="sm"
               loading={isPending}
               onClick={() => switchChain({ chainId: settings.chain_id })}
             >
@@ -94,14 +92,12 @@ export default function WalletFunding({
                   </p>
                   <div className="tw-flex tw-flex-wrap tw-gap-2">
                     <Button
-                      size="sm"
                       loading={funding.busy}
                       onClick={() => void funding.submit()}
                     >
                       {t(locale, "dropForge.funding.confirm")}
                     </Button>
                     <Button
-                      size="sm"
                       variant="secondary"
                       disabled={funding.busy}
                       onClick={funding.cancelReview}
@@ -112,7 +108,6 @@ export default function WalletFunding({
                 </div>
               ) : (
                 <Button
-                  size="sm"
                   loading={funding.busy}
                   disabled={!validFundingAmount(amount)}
                   onClick={() => void funding.prepare()}

@@ -13,7 +13,12 @@ sidebar heading. The page shows the total accessible count and compact discovery
 cards with cover artwork on the left, single-line ellipsized
 titles and single-line description previews. Approval waves show how many
 submissions are open for voting. Other waves show the voting end or next result
-when available, otherwise `Voting open`.
+when available, otherwise `Voting open`. Submission counts appear as text;
+zero submissions use muted text. Score, Hot and REP remain visible beneath the
+plain-text description. Metrics wrap when needed on narrow cards. Cover artwork
+fills the full card height along the left edge. A subtle border separates each
+card from the page and brightens on hover without lifting the card or zooming
+the artwork.
 The Memes - Main Stage appears first whenever it has active voting. Remaining
 waves with active leaderboard entries appear above waves with zero. Within
 each group, the waves with the highest total Wave REP appear first.
@@ -46,7 +51,9 @@ the backdrop closes it without changing the sort. Wider content areas show the
 six choices inline.
 
 The same control row includes All, Score 50+, Hot 60+, and REP 60+ threshold
-buttons. Swipe or scroll the row when it does not fit the available width.
+buttons. Swipe or scroll the row when it does not fit the available width. The
+scrollbar is hidden, and dark edge fades indicate which side has more controls
+offscreen. The fades disappear when all controls fit.
 Newest and Latest Posts disable score thresholds and reset them to All.
 Sort and threshold choices remain in the URL when switching between discovery
 tabs. Use `Score formula` beside the heading to open the score explanation; on

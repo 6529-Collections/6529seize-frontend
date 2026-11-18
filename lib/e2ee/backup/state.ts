@@ -22,6 +22,10 @@ export interface BackupLocalState {
   /** Fingerprints of what this device already uploaded. */
   groupPrints: Record<string, string>;
   messagePrints: Record<string, string>;
+  /** Read positions this device already uploaded (D175, P60 §5). */
+  readsSent?: Record<string, number>;
+  /** When read positions last went up (ms). */
+  readsAt?: number;
 }
 
 export interface BackupStateStore {
@@ -42,6 +46,7 @@ class MemoryBackupStateStore implements BackupStateStore {
             chain: { ...state.chain },
             groupPrints: { ...state.groupPrints },
             messagePrints: { ...state.messagePrints },
+            readsSent: { ...state.readsSent },
           }
         : null
     );
@@ -53,6 +58,7 @@ class MemoryBackupStateStore implements BackupStateStore {
       chain: { ...state.chain },
       groupPrints: { ...state.groupPrints },
       messagePrints: { ...state.messagePrints },
+      readsSent: { ...state.readsSent },
     });
     return Promise.resolve();
   }

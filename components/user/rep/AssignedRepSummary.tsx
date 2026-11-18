@@ -15,7 +15,7 @@ export default function AssignedRepSummary({
   const locale = useBrowserLocale();
   return (
     <span
-      className={`tw-inline-flex tw-max-w-full tw-items-center tw-whitespace-nowrap tw-font-normal tw-text-iron-400 ${compact ? "tw-text-xs" : "tw-text-meta/4"}`}
+      className={`tw-inline-flex tw-max-w-full tw-items-center tw-font-normal tw-text-iron-400 ${compact ? "tw-whitespace-normal tw-text-xs" : "tw-whitespace-nowrap tw-text-meta/4"}`}
     >
       <span>
         {tRich(
@@ -25,7 +25,10 @@ export default function AssignedRepSummary({
             : "user.profile.rep.rep.youAssigned",
           {
             value: (
-              <span key="amount" className="tw-font-medium tw-text-iron-100">
+              <span
+                key="amount"
+                className="tw-whitespace-nowrap tw-font-medium tw-text-iron-100"
+              >
                 {formatInteger(locale, amount)}
               </span>
             ),

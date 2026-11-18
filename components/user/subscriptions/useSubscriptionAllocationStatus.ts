@@ -16,12 +16,14 @@ export function useSubscriptionAllocationStatus({
   tokenId,
   first,
   subscribed,
+  waitForRefresh = false,
 }: Readonly<{
   profileKey: string;
   contract: string;
   tokenId: number;
   first: boolean;
   subscribed: boolean;
+  waitForRefresh?: boolean;
 }>) {
   const finalQuery = useQuery<NFTFinalSubscription | null>({
     queryKey: [
@@ -43,6 +45,7 @@ export function useSubscriptionAllocationStatus({
       }
     },
     enabled: first && subscribed,
+    ...(waitForRefresh ? { refetchOnMount: "always" as const } : {}),
     retry: false,
     refetchInterval: ALLOCATION_REFRESH_INTERVAL,
   });
@@ -76,6 +79,10 @@ export function useSubscriptionAllocationStatus({
 
   return {
     final: finalQuery.data,
+    isLoading:
+      finalQuery.isLoading ||
+      (waitForRefresh && !finalQuery.isFetchedAfterMount),
+    isError: finalQuery.isError,
     hasNoAllocation:
       checkPublication &&
       publicationQuery.isSuccess &&

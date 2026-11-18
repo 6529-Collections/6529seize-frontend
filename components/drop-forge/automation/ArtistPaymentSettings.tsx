@@ -207,7 +207,7 @@ function PaymentLimitSummary({
           {savedLimit ?? "0"} ETH
         </p>
       </div>
-      <div className="tw-flex tw-flex-wrap tw-gap-2">
+      <div className="tw-grid tw-auto-cols-fr tw-grid-flow-col tw-gap-2">
         <Button
           variant={!savedLimit && !enabled ? "action" : "secondary"}
           disabled={disabled}
