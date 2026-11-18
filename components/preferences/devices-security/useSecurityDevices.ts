@@ -4,7 +4,6 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import {
@@ -14,7 +13,7 @@ import {
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
-import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
+import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
 import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
 import { useRemoveE2eeLocalData } from "@/components/e2ee/useRemoveE2eeLocalData";
 import { readStoredE2eeDeviceKey } from "@/lib/e2ee/stored-device-key";
@@ -22,7 +21,7 @@ import {
   storedE2eeDeviceKeyQueryKey,
   useStoredE2eeDeviceKey,
 } from "./useStoredE2eeDeviceKey";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { commonApiPost } from "@/services/api/common-api";
 import {
   classifyDevices,
   type ClassifiedDevices,
@@ -30,6 +29,10 @@ import {
   type EncryptedDeviceInput,
   type SecurityDevice,
 } from "./classifyDevices";
+import {
+  fetchOwnE2eeDevices,
+  ownE2eeDevicesQueryKey,
+} from "./ownE2eeDevicesQuery";
 
 const fromEngine = (device: E2eeDeviceInfo): EncryptedDeviceInput => ({
   deviceKey: device.deviceKey,
@@ -121,18 +124,9 @@ function useApiDevices(
   enabled: boolean
 ) {
   return useQuery({
-    queryKey: [QueryKey.E2EE_PROFILE_DEVICES, profileId, listAddress],
+    queryKey: ownE2eeDevicesQueryKey(profileId, listAddress),
     enabled,
-    queryFn: async ({ signal }) => {
-      const data = await commonApiFetch<ApiE2eeMe>({
-        endpoint: "e2ee/me",
-        signal,
-      });
-      if (data.profile_id !== profileId) {
-        throw new Error("Device profile changed");
-      }
-      return data.devices;
-    },
+    queryFn: ({ signal }) => fetchOwnE2eeDevices(profileId, signal),
   });
 }
 

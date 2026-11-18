@@ -10,6 +10,9 @@
  *   challenge, stores a combined grant for `/e2ee/devices/login-grant` and
  *   answers with the web session and the stored device grant.
  * - `GET /api/device-grants` lists the caller's grants.
+ * - `POST /api/device-grants/:id/revoke` ends one (and, like the backend,
+ *   the encrypted-DMs device a combined grant enrolled);
+ *   `POST /api/device-grants/:id/acknowledge` clears its new-device notice.
  *
  * The statement mirrors lib/device-signing/grant-message.ts byte for byte;
  * __tests__/lib/e2ee/sandboxSignIn.test.ts checks every challenge it renders
@@ -271,6 +274,15 @@ function createSandboxSignIn({ walletUser, getDeliveryService, now = Date.now })
     };
   }
 
+  /** The backend revokes a combined grant with the device it enrolled. */
+  function revokedAtOf(grant) {
+    return (
+      grant.revoked_at ??
+      getDeliveryService().loginGrantRevokedAt?.(grant.id) ??
+      null
+    );
+  }
+
   /** Newest first: the grants of the profile that owns `wallet`. */
   function listGrants(wallet) {
     const owner = walletUser(wallet)?.profileId ?? null;
@@ -278,12 +290,8 @@ function createSandboxSignIn({ walletUser, getDeliveryService, now = Date.now })
       owner === null
         ? grant.wallet === String(wallet || "").toLowerCase()
         : walletUser(grant.wallet)?.profileId === owner;
-    // The backend revokes a combined grant with the device it enrolled.
     const withRevocation = (grant) => {
-      const revokedAt =
-        grant.revoked_at ??
-        getDeliveryService().loginGrantRevokedAt?.(grant.id) ??
-        null;
+      const revokedAt = revokedAtOf(grant);
       return revokedAt === null ? grant : { ...grant, revoked_at: revokedAt };
     };
     return {
@@ -292,7 +300,52 @@ function createSandboxSignIn({ walletUser, getDeliveryService, now = Date.now })
     };
   }
 
-  return { issueNonce, login, listGrants, reset };
+  /** The caller's own grant by id, or null. */
+  function ownGrant(wallet, grantId) {
+    const owner = walletUser(wallet)?.profileId ?? null;
+    const id = String(grantId || "").toLowerCase();
+    return (
+      grants.find(
+        (grant) =>
+          grant.id.toLowerCase() === id &&
+          owner !== null &&
+          walletUser(grant.wallet)?.profileId === owner
+      ) ?? null
+    );
+  }
+
+  function revokeGrant(wallet, grantId) {
+    const grant = ownGrant(wallet, grantId);
+    if (!grant) {
+      return { status: 404, body: { error: "Device grant not found." } };
+    }
+    // Idempotent, keeping the first revocation time, like the backend.
+    const revokedAt = revokedAtOf(grant);
+    if (revokedAt === null) {
+      grant.revoked_at = now();
+      getDeliveryService().revokeLoginGrant?.(grant.id);
+    }
+    return { status: 200, body: { ...grant, revoked_at: revokedAtOf(grant) } };
+  }
+
+  function acknowledgeGrant(wallet, grantId) {
+    const grant = ownGrant(wallet, grantId);
+    // Like the backend: 404 for a missing, inactive or foreign grant.
+    if (!grant || revokedAtOf(grant) !== null || grant.expires_at <= now()) {
+      return { status: 404, body: { error: "Device grant not found." } };
+    }
+    grant.notice_acknowledged = true;
+    return { status: 200, body: { ...grant } };
+  }
+
+  return {
+    issueNonce,
+    login,
+    listGrants,
+    revokeGrant,
+    acknowledgeGrant,
+    reset,
+  };
 }
 
 module.exports = {

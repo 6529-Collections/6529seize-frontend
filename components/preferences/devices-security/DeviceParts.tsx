@@ -23,6 +23,13 @@ import {
   type SecurityDevice,
 } from "./classifyDevices";
 
+/**
+ * For a button whose label is a sentence ("Turn on signed posts and
+ * encrypted DMs"): it wraps inside a narrow card instead of widening it.
+ */
+export const WRAPPING_BUTTON =
+  "tw-max-w-full !tw-whitespace-normal tw-text-center";
+
 const PLATFORM_ICONS = {
   web: GlobeAltIcon,
   desktop: ComputerDesktopIcon,

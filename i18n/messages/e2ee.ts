@@ -50,6 +50,7 @@ export const E2EE_MESSAGES = {
   "e2ee.section.plaintext": "Direct messages",
   "e2ee.action.newChat": "New encrypted chat",
   "e2ee.action.devices": "Devices & security",
+  "e2ee.action.devicesShort": "Security",
   "e2ee.action.retry": "Try again",
   "e2ee.action.cancel": "Cancel",
   "e2ee.action.close": "Close",
@@ -107,7 +108,7 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.identityUnknown":
     "You’ll sign with the wallet connected to this profile.",
   "e2ee.enroll.manage":
-    "You can revoke these permissions in Preferences → Devices & security.",
+    "You can revoke these permissions in Preferences → {tab}.",
   "e2ee.gate.noWallet":
     "Connect the wallet for this profile to use encrypted messages.",
 

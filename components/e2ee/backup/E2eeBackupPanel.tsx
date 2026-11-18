@@ -192,8 +192,8 @@ function StatusDetails({
     <div className="tw-flex tw-flex-col tw-gap-2">
       {/* Announced: a queued run's progress, then its new backup time. */}
       <output
-        className={`tw-block tw-text-xs ${
-          running ? "tw-text-iron-300" : "tw-text-iron-400"
+        className={`tw-block tw-text-iron-300 ${
+          running ? "tw-text-xs" : "tw-text-sm"
         }`}
       >
         {running
@@ -210,7 +210,7 @@ function StatusDetails({
           showLabel={false}
         />
       ) : null}
-      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-xs tw-text-iron-400">
+      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-sm tw-text-iron-300">
         {counts ? <li>{counts}</li> : null}
         {snapshot.quotaBytes > 0 ? (
           <li>
@@ -606,7 +606,8 @@ export function E2eeBackupPanel() {
         </p>
       )}
       <div className="tw-flex tw-flex-col tw-gap-1">
-        {snapshot.phase === "off" ? null : (
+        {/* Off has its explainer; On is said by the pill, then the details. */}
+        {snapshot.phase === "off" || snapshot.phase === "on" ? null : (
           <p className="tw-m-0 tw-text-sm tw-font-medium tw-text-iron-100">
             {t(locale, STATUS_KEYS[snapshot.phase])}
           </p>

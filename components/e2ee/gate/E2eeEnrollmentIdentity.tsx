@@ -55,7 +55,11 @@ export function E2eeEnrollmentIdentity() {
           aria-hidden="true"
           className="tw-mt-0.5 tw-size-4 tw-flex-shrink-0 tw-text-iron-400"
         />
-        <span>{t(locale, "e2ee.enroll.manage")}</span>
+        <span>
+          {t(locale, "e2ee.enroll.manage", {
+            tab: t(locale, "preferences.tabs.security"),
+          })}
+        </span>
       </li>
     </ul>
   );

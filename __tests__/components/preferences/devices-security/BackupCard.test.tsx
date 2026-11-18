@@ -3,10 +3,6 @@ import { BackupCard } from "@/components/preferences/devices-security/BackupCard
 
 let mockE2ee: Record<string, unknown>;
 jest.mock("@/hooks/e2ee/useE2ee", () => ({ useE2ee: () => mockE2ee }));
-let mockSecurity = { proof: "on", canEnableEncryption: true };
-jest.mock("@/components/device-signing/DeviceSecurityStatus", () => ({
-  useDeviceSecurityState: () => mockSecurity,
-}));
 jest.mock("@/components/e2ee/backup/E2eeBackupPanel", () => ({
   E2eeBackupPanel: () => <div>Backup panel</div>,
 }));
@@ -21,7 +17,6 @@ const base = () => ({
 describe("BackupCard", () => {
   beforeEach(() => {
     mockE2ee = base();
-    mockSecurity = { proof: "on", canEnableEncryption: true };
   });
 
   it("shows the backup once encrypted messages run here", () => {
@@ -67,18 +62,16 @@ describe("BackupCard", () => {
     expect(mockE2ee["restart"]).toHaveBeenCalled();
   });
 
-  it("asks to turn on encrypted DMs first", () => {
+  it("says to turn on encrypted DMs first, leaving the one button to This device", () => {
     mockE2ee = { ...base(), status: "needs-enrollment" };
-    const setup = jest.fn();
-    window.addEventListener("6529:device-setup", setup, { once: true });
     render(<BackupCard />);
-    expect(screen.getByText("Not available")).toBeVisible();
-    fireEvent.click(
-      screen.getByRole("button", { name: "Turn on encrypted DMs" })
-    );
-    expect(setup).toHaveBeenCalledWith(
-      expect.objectContaining({ detail: "dms" })
-    );
+    expect(
+      screen.getByText(
+        "Backup covers encrypted DMs. Turn them on in this browser first."
+      )
+    ).toBeVisible();
+    expect(screen.queryByRole("button")).not.toBeInTheDocument();
+    expect(screen.queryByText("Not available")).not.toBeInTheDocument();
   });
 
   it("says when this browser can't use encrypted messages", () => {

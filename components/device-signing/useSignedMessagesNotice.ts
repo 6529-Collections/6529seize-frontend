@@ -199,6 +199,7 @@ export function useSignedMessagesNotice({
   );
 
   return {
+    address,
     model,
     canShowDeviceAlerts: address !== null && local.loaded && !local.failed,
     localSigningKeys: local.publicKeys,
