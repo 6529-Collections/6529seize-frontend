@@ -9,6 +9,8 @@ import { ApiSubscriptionCoverageMode } from "@/generated/models/ApiSubscriptionC
 import { ApiSubscriptionCoverageScheduleBasis } from "@/generated/models/ApiSubscriptionCoverageScheduleBasis";
 import { ApiSubscriptionCoverageSource } from "@/generated/models/ApiSubscriptionCoverageSource";
 import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -219,6 +221,9 @@ describe("SubscriptionCoverageSummary", () => {
       )
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/Top-up deadline for/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(t(DEFAULT_LOCALE, "subscriptions.coverage.noDeadline"))
+    ).not.toBeInTheDocument();
     expect(
       screen.queryByText(
         "The immediate next intended drop is not fully funded."
@@ -732,7 +737,7 @@ describe("SubscriptionCoverageSummary", () => {
     expect(screen.queryByText(/Top-up deadline for/)).not.toBeInTheDocument();
     expect(
       screen.queryByText(
-        /deadline is not available|deadline unknown|can.t confirm the top-up deadline/i
+        /No authoritative top-up deadline is available yet\.|deadline is not available|deadline unknown|can.t confirm the top-up deadline/i
       )
     ).not.toBeInTheDocument();
     expect(screen.getByText("Next unfunded")).toBeVisible();

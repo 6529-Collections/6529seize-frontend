@@ -252,7 +252,9 @@ On the web and Android, the tab appears after the page loads.
   left, original labels and counts in the middle, and ETH amounts on the right. Blue radio and selected-row colors transition smoothly while rows
   stay in place; reduced motion disables the transitions. Other has a distinct
   bordered count input and ETH preview.
-  Both presentations retain any supplied funding projections. A full-width confirmation
+  Both presentations retain current funding projections. Stale projections or
+  projections whose authoritative cutoff has passed are omitted; the generic
+  card-count choices remain available. A full-width confirmation
   button and recipient address follow all amount choices.
   During a transaction, the existing transaction-status dialog replaces the
   amount-picker dialog. Dismissing success or error returns
@@ -266,8 +268,9 @@ On the web and Android, the tab appears after the page loads.
   numbers. It says `Covered` when at least one selected drop is funded and no
   unfunded drop is identified. One funded drop before an identified shortfall
   says `Running low`. Every loaded state has an explanation, and only a real
-  immediate selected shortfall gets red owner emphasis. All funding controls
-  remain available to the owner, including optional future top ups.
+  immediate selected shortfall gets red owner emphasis. States that offer funding
+  actions retain owner top-up controls, including optional future top-ups.
+  Owners in Not set up see Set up instead of Top up.
 - Non-runway states distinguish profiles that are `Not set up`, have
   `No current eligibility`, have `No upcoming drops selected` in Manual mode,
   or cannot currently be forecast.

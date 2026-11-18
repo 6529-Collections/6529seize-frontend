@@ -29,6 +29,7 @@ export function useSubscriptionAllocationStatus({
     queryKey: [
       "consolidation-final-subscription",
       `${profileKey}-${contract}-${tokenId}`,
+      ...(waitForRefresh ? ["after-cutoff"] : []),
     ],
     queryFn: async ({ signal }) => {
       try {
@@ -51,8 +52,8 @@ export function useSubscriptionAllocationStatus({
   });
 
   // A final row with no phase is still awaiting allocation processing. Only a
-  // successful 404 proves this subscribed card was omitted from the finalized
-  // subscription list.
+  // successful 404 together with published distribution evidence proves this
+  // subscribed card was omitted from the finalized subscription list.
   const checkPublication =
     first && subscribed && finalQuery.isSuccess && finalQuery.data === null;
   // Publication is card-wide. Use a wallet from the viewed consolidation only
@@ -77,15 +78,21 @@ export function useSubscriptionAllocationStatus({
     refetchInterval: ALLOCATION_REFRESH_INTERVAL,
   });
 
+  const hasNoAllocation =
+    checkPublication &&
+    publicationQuery.isSuccess &&
+    publicationQuery.data.has_distribution;
+
   return {
     final: finalQuery.data,
     isLoading:
       finalQuery.isLoading ||
-      (waitForRefresh && !finalQuery.isFetchedAfterMount),
-    isError: finalQuery.isError,
-    hasNoAllocation:
-      checkPublication &&
-      publicationQuery.isSuccess &&
-      publicationQuery.data.has_distribution,
+      (waitForRefresh &&
+        (!finalQuery.isFetchedAfterMount ||
+          (checkPublication && !hasNoAllocation))),
+    isError:
+      finalQuery.isError ||
+      (waitForRefresh && checkPublication && publicationQuery.isError),
+    hasNoAllocation,
   };
 }

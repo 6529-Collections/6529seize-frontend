@@ -306,10 +306,12 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
       );
       await installSubscriptionFixtures(page);
       let current: (typeof states)[number][1] = states[0]![1];
+      let finalResponse: Promise<void> | undefined;
       await page.route(
         (url) =>
           url.pathname.includes("/subscriptions/consolidation/coverage/"),
         async (route) => {
+          if (route.request().method() !== "GET") return route.fallback();
           if (current === "loading") return;
           if (current === "error") {
             await route.fulfill({
@@ -324,6 +326,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
       await page.route(
         (url) => url.pathname.includes("/subscriptions/consolidation/details/"),
         async (route) => {
+          if (route.request().method() !== "GET") return route.fallback();
           const coverage = coverageFor(
             typeof current === "string" ? {} : current
           );
@@ -342,6 +345,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
         (url) =>
           url.pathname.includes("/subscriptions/consolidation/upcoming-memes/"),
         async (route) => {
+          if (route.request().method() !== "GET") return route.fallback();
           const coverage = coverageFor(
             typeof current === "string" ? {} : current
           );
@@ -362,6 +366,8 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
       await page.route(
         (url) => url.pathname.includes("/subscriptions/consolidation/final/"),
         async (route) => {
+          if (route.request().method() !== "GET") return route.fallback();
+          if (finalResponse) await finalResponse;
           const activeName = states.find(([, data]) => data === current)?.[0];
           if (activeName === "mint-payment-loading") return;
           if (activeName === "mint-payment-error") {
@@ -391,6 +397,16 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           }
         }
       );
+      await page.route(
+        (url) =>
+          /\/distributions\/[^/]+\/\d+\/wallet-allocations$/.test(url.pathname),
+        async (route) => {
+          if (route.request().method() !== "GET") return route.fallback();
+          await route.fulfill({
+            json: { has_distribution: true, allocations: [] },
+          });
+        }
+      );
       const subscriptionReads: string[] = [];
       page.on("request", (request) => {
         if (
@@ -400,6 +416,12 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
         )
           subscriptionReads.push(request.url());
       });
+      const onlyState = process.env["SUBSCRIPTION_AUDIT_STATE"];
+      if (onlyState && !states.some(([name]) => name === onlyState)) {
+        throw new Error(
+          `Unknown subscription audit state ${onlyState}. Valid states: ${states.map(([name]) => name).join(", ")}`
+        );
+      }
       if (testInfo.project.name === "capacitor-ios-sim") {
         await page.goto("/playwright/subscriptions");
         await expect(page).toHaveURL(/\/playwright$/, {
@@ -421,7 +443,6 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           });
         return;
       }
-      const onlyState = process.env["SUBSCRIPTION_AUDIT_STATE"];
       const cases = onlyState
         ? states.filter(([name]) => name === onlyState)
         : fullAudit
@@ -638,13 +659,34 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           await expect(future).toBeFocused();
         }
         if (phase !== "before" && owner && name === "zero-funded") {
+          let releaseFinal!: () => void;
+          finalResponse = new Promise<void>((resolve) => {
+            releaseFinal = resolve;
+          });
           const previousReads = subscriptionReads.filter((url) =>
             url.includes("/final/")
           ).length;
+          const heading = overview.getByRole("heading", { level: 2 });
+          await heading.focus();
           await page.clock.setFixedTime(new Date("2026-11-16T14:30:01Z"));
+          await expect
+            .poll(
+              () =>
+                subscriptionReads.filter((url) => url.includes("/final/"))
+                  .length
+            )
+            .toBeGreaterThan(previousReads);
+          await expect(heading).toHaveText("Loading subscription coverage");
+          await expect(heading).toBeFocused();
+          await expect(
+            overview.getByText("Deadline passed", { exact: true })
+          ).toHaveCount(0);
+          releaseFinal();
+          finalResponse = undefined;
           await expect(
             overview.getByText("Deadline passed", { exact: true })
           ).toBeVisible();
+          await expect(heading).toBeFocused();
           expect(
             subscriptionReads.filter((url) => url.includes("/final/")).length
           ).toBeGreaterThan(previousReads);

@@ -146,19 +146,9 @@ export default function SubscriptionCoverageSummary(
   const now = useSubscriptionCoverageClock(
     isImmediateSubscriptionShortfall(props.coverage) && !props.isStale
   );
-  if (
-    props.profileKey &&
-    props.coverage &&
-    !props.isStale &&
-    shouldCheckSubscriptionPayment(props.coverage, now)
-  ) {
+  if (props.profileKey && props.coverage) {
     return (
       <MintDayCoverageSummary
-        key={
-          hasPassedSubscriptionDeadline(props.coverage, now)
-            ? "after-cutoff"
-            : "before-cutoff"
-        }
         {...props}
         profileKey={props.profileKey}
         coverage={props.coverage}
@@ -176,19 +166,29 @@ function MintDayCoverageSummary(
     readonly now: number;
   }
 ) {
+  const shouldCheck =
+    !props.isStale &&
+    shouldCheckSubscriptionPayment(props.coverage, props.now);
   const { final, isLoading, isError } = useSubscriptionAllocationStatus({
     profileKey: props.profileKey,
     contract: MEMES_CONTRACT.toLowerCase(),
-    tokenId: props.coverage.next_unfunded!.token_id,
+    tokenId: props.coverage.next_unfunded?.token_id ?? 0,
     first: true,
-    subscribed: true,
-    waitForRefresh: hasPassedSubscriptionDeadline(props.coverage, props.now),
+    subscribed: shouldCheck,
+    waitForRefresh:
+      shouldCheck &&
+      hasPassedSubscriptionDeadline(props.coverage, props.now),
   });
   let mintDayStatus: MintDaySubscriptionStatus = "unpaid";
   if (isNextDropSubscriptionPaid(props.coverage, final)) mintDayStatus = "paid";
   else if (isError) mintDayStatus = "unavailable";
   else if (isLoading || final === undefined) mintDayStatus = "checking";
-  return <CoverageSummaryContent {...props} mintDayStatus={mintDayStatus} />;
+  return (
+    <CoverageSummaryContent
+      {...props}
+      {...(shouldCheck ? { mintDayStatus } : {})}
+    />
+  );
 }
 
 function CoverageSummaryContent({

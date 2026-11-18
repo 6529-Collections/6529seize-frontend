@@ -208,6 +208,39 @@ describe("UserPageSubscriptions", () => {
     }
   );
 
+  it("keeps independent history retry available alongside stale coverage", async () => {
+    mockCoverageStatus = Status.Covered;
+    mockCoverageIsError = true;
+    mockCommonApiFetch.mockImplementation(async ({ endpoint }) => {
+      if (endpoint.includes("/redeemed/"))
+        throw new Error("History unavailable");
+      return [];
+    });
+    renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
+      connectedProfile: mockProfile,
+    });
+    const retry = await screen.findByRole("button", { name: "Retry" });
+    expect(
+      screen.getByRole("button", { name: "Refresh coverage" })
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "Some subscription data could not be refreshed. Previously loaded data may be out of date."
+      )
+    ).toBeVisible();
+    const reads = mockCommonApiFetch.mock.calls.filter(([request]) =>
+      request.endpoint.includes("/redeemed/")
+    ).length;
+    await userEvent.setup().click(retry);
+    await waitFor(() =>
+      expect(
+        mockCommonApiFetch.mock.calls.filter(([request]) =>
+          request.endpoint.includes("/redeemed/")
+        ).length
+      ).toBeGreaterThan(reads)
+    );
+  });
+
   describe("Profile Key Generation", () => {
     it("should generate profile key from consolidation_key when available", () => {
       renderWithAuth(<UserPageSubscriptions profile={mockProfile} />, {
