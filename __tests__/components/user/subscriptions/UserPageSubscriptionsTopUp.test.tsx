@@ -353,6 +353,50 @@ describe("UserPageSubscriptionsTopUp", () => {
     }
   });
 
+  it("preserves a valid projected choice on close and rechecks its cutoff on reopen", async () => {
+    const deadline = Date.parse("2026-10-12T14:30:00Z");
+    const clock = jest.spyOn(Date, "now").mockReturnValue(deadline - 60_000);
+    try {
+      const user = userEvent.setup();
+      const coverage = subscriptionCoverageFixture();
+      const { rerender } = render(
+        <UserPageSubscriptionsTopUp coverage={coverage} expanded />
+      );
+      await user.click(
+        screen.getByRole("radio", { name: /^Minimum for next drop/ })
+      );
+      rerender(
+        <UserPageSubscriptionsTopUp coverage={coverage} expanded={false} />
+      );
+      await waitFor(() =>
+        expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+      );
+      rerender(<UserPageSubscriptionsTopUp coverage={coverage} expanded />);
+      expect(
+        screen.getByRole("radio", { name: /^Minimum for next drop/ })
+      ).toBeChecked();
+      expect(
+        screen.getByRole("button", { name: "Top up 0.01587 ETH" })
+      ).toBeEnabled();
+      rerender(
+        <UserPageSubscriptionsTopUp coverage={coverage} expanded={false} />
+      );
+      clock.mockReturnValue(deadline);
+      act(() => globalThis.dispatchEvent(new Event("focus")));
+      rerender(<UserPageSubscriptionsTopUp coverage={coverage} expanded />);
+      expect(
+        screen.queryByRole("radio", { name: /^Minimum for next drop/ })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Choose a top-up amount" })
+      ).toBeDisabled();
+      expect(screen.getByRole("radio", { name: "1 Card" })).toBeVisible();
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
   it("requires a new projected choice after stale coverage recovers", async () => {
     const clock = jest
       .spyOn(Date, "now")
@@ -407,9 +451,15 @@ describe("UserPageSubscriptionsTopUp", () => {
       clock.mockReturnValue(deadline);
       fireEvent.click(submit);
       expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+      expect(screen.getByText("Select a top-up option")).toBeVisible();
+      await user.click(screen.getByRole("button", { name: /^Close modal$/ }));
+      await waitFor(() =>
+        expect(screen.getByRole("heading", { name: "Top up" })).toBeVisible()
+      );
       expect(
         screen.getByRole("button", { name: "Choose a top-up amount" })
       ).toBeDisabled();
+      expect(screen.getByRole("radio", { name: "1 Card" })).toBeVisible();
     } finally {
       clock.mockRestore();
     }

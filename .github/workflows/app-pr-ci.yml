@@ -271,7 +271,7 @@ jobs:
           }
           const subscriptionStatusRequired = plan.changed_files.some((file) =>
             /^(?:components\/user\/subscriptions\/|tests\/social\/subscription-status-sandbox\.spec\.ts$|tests\/support\/subscriptionFixtures\.ts$)/.test(file) ||
-            ["i18n/messages/en-US.ts", "hooks/useNftPurchasingVisibility.ts", "tests/support/localSandbox.ts", "package.json", "tests/support/composerSandboxServer.cjs", "tests/packs.manifest.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
+            ["i18n/messages/en-US.ts", "hooks/useNftPurchasingVisibility.ts", "tests/support/localSandbox.ts", "tests/support/surfaceSimulation.ts", "tests/testHelpers.ts", "package.json", "tests/support/composerSandboxServer.cjs", "tests/packs.manifest.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
           );
           if (subscriptionStatusRequired) {
             corePlaywrightLanes.push({ lane: "playwright-subscription-status", label: "Subscription status and funding", runner: defaultRunner });

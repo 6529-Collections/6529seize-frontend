@@ -224,6 +224,7 @@ describe("SubscriptionCoverageSummary", () => {
       )
     ).not.toBeInTheDocument();
     expect(screen.queryByText(/Top-up deadline for/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Top up by/)).not.toBeInTheDocument();
     expect(
       screen.queryByText(t(DEFAULT_LOCALE, "subscriptions.coverage.noDeadline"))
     ).not.toBeInTheDocument();
