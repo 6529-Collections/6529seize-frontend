@@ -49,3 +49,12 @@ export async function expectProfileTabLinks(page: Page) {
     profileSections.getByRole("link", { name: /xTDH/ })
   ).toHaveAttribute("href", `/${PROFILE_HANDLE}/xtdh?tab=granted`);
 }
+
+export async function expectPersonalCollectedActionsAbsent(page: Page) {
+  await expect(page.getByTestId("collected-purchase-actions")).toHaveCount(0);
+  for (const action of ["Manage orders", "Complete my set"]) {
+    await expect(
+      page.getByRole("link", { name: action, exact: true })
+    ).toHaveCount(0);
+  }
+}

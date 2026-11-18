@@ -122,11 +122,11 @@ function ContributorIdentity({
       href={`/${encodeURIComponent(identity)}`}
       className="tw-flex tw-min-h-11 tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 tw-rounded-lg tw-text-sm tw-font-medium tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-text-iron-400 focus-visible:tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 lg:tw-min-h-0"
     >
-      <span
-        aria-hidden="true"
-        className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-700 tw-text-xs"
-      >
-        {row.profile.pfp ? (
+      {row.profile.pfp && (
+        <span
+          aria-hidden="true"
+          className="tw-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-full tw-bg-iron-700 tw-text-xs"
+        >
           <Image
             unoptimized
             width={24}
@@ -135,10 +135,8 @@ function ContributorIdentity({
             alt=""
             className="tw-size-full tw-object-cover"
           />
-        ) : (
-          identity.charAt(0).toUpperCase()
-        )}
-      </span>
+        </span>
+      )}
       <span id={labelId} className="tw-truncate">
         {you ? t(locale, "rep.categories.panel.you") : identity}
       </span>
