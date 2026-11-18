@@ -143,23 +143,10 @@ test.describe("Live wave unread state @auth @local-only", () => {
       .getByText(perfMessageText(44), { exact: true })
       .last()
       .locator("xpath=ancestor::div[@data-wave-drops-scroll-container='true']");
-    // Preserve the 24px top fade without masking WebKit's scrolling layer.
-    const topFade = page
-      .getByText(perfMessageText(44), { exact: true })
-      .last()
-      .locator("xpath=ancestor::div[@data-wave-drops-scroll-container='true']")
-      .locator("..")
-      .locator(':scope > [aria-hidden="true"]');
-    await expect(topFade).toBeVisible();
-    await expect(topFade).toHaveCSS("height", "24px");
-    await expect(topFade).toHaveCSS("background-image", /^linear-gradient\(/);
-    await expect(topFade).toHaveCSS("pointer-events", "none");
-    const fadeBounds = await topFade.boundingBox();
-    const messageBounds = await messages.boundingBox();
-    expect(fadeBounds).not.toBeNull();
-    expect(messageBounds).not.toBeNull();
-    expect(fadeBounds!.y).toBe(messageBounds!.y);
-    expect(fadeBounds!.width).toBe(messageBounds!.width);
+    await expect(messages).toHaveCSS(
+      "mask-image",
+      /^linear-gradient\(.*24px\)$/
+    );
     await messages.evaluate((element) => {
       element.scrollTop = -120;
     });

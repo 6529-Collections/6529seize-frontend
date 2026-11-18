@@ -65,8 +65,8 @@ swipe return to the feed at the saved reading position.
   including after changing Discovery tabs, sort, or score filters.
 - Close focused drop: if `?drop=` exists, `Back` removes only `drop`.
 - Leave thread: `Back` clears active thread state and returns to section root.
-- Return to reading: after opening a post from Profile Waves Feed in the native
-  app, `Back` or a right swipe returns to the same feed position. The feed's
+- Return to reading: after opening a post or its Wave-name link from Profile
+  Waves Feed in the native app, `Back` or a right swipe returns to the same feed position. The feed's
   own `Back` or right swipe returns to Waves, including after direct entry.
   Opening Profile Waves Feed again from the Waves More menu starts at the top.
 - Android system Back follows the same Feed return: from a feed-origin chat it

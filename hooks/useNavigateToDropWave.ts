@@ -4,11 +4,7 @@ import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useRouter } from "next/navigation";
 import { useCallback } from "react";
 import useDeviceInfo from "./useDeviceInfo";
-import {
-  isProfileWavesFeed,
-  PROFILE_FEED_RETURN_PARAM,
-  PROFILE_WAVES_FEED_HREF,
-} from "@/helpers/waves/profile-feed-navigation";
+import { withProfileFeedReturn } from "@/helpers/waves/profile-feed-navigation";
 
 type DropWaveNavigationTarget = {
   readonly id?: string | null;
@@ -49,12 +45,6 @@ export function useNavigateToDropWave(): (
         wave.chat?.scope?.group?.is_direct_message === true;
       const extraParams: Record<string, string> = {};
       if (options?.edit && drop.id) extraParams["editPost"] = drop.id;
-      if (isApp && !isDirectMessage) {
-        const location = new URL(globalThis.location.href);
-        if (isProfileWavesFeed(location.pathname, location.searchParams)) {
-          extraParams[PROFILE_FEED_RETURN_PARAM] = PROFILE_WAVES_FEED_HREF;
-        }
-      }
       const href = getWaveRoute({
         waveId,
         serialNo,
@@ -63,7 +53,7 @@ export function useNavigateToDropWave(): (
         isApp,
       });
 
-      router.push(href);
+      router.push(withProfileFeedReturn(href, isApp));
     },
     [isApp, router]
   );

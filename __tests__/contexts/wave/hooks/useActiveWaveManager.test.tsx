@@ -2,6 +2,7 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { defaultCompetitionQueryKey } from "@/services/api/competitions-api";
+import { useLayoutEffect } from "react";
 
 const mockQueryData = jest.fn();
 let mockIsApp = false;
@@ -42,6 +43,38 @@ describe("useActiveWaveManager", () => {
     mockQueryData.mockReset();
     mockIsApp = false;
     globalThis.history.replaceState(null, "", "http://localhost/");
+  });
+
+  it("commits the route's wave identity before the destination can paint", () => {
+    mockIsApp = true;
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    const commits: (string | null)[] = [];
+    const { rerender } = renderHook(() => {
+      const manager = useActiveWaveManager();
+      useLayoutEffect(() => {
+        commits.push(manager.activeWaveId);
+      });
+      return manager;
+    });
+    commits.length = 0;
+    (usePathname as jest.Mock).mockReturnValue("/waves/def");
+    rerender();
+    expect(commits).toEqual(["def"]);
+  });
+
+  it("does not reuse an old history selection when a route is revisited", () => {
+    globalThis.history.replaceState(null, "", "/waves/abc");
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    const { result, rerender } = renderHook(useActiveWaveManager);
+    act(() => result.current.setActiveWave("def"));
+    expect(result.current.activeWaveId).toBe("def");
+    (usePathname as jest.Mock).mockReturnValue("/waves/def");
+    rerender();
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc");
+    rerender();
+    expect(result.current.activeWaveId).toBe("abc");
   });
 
   it("keeps the chat until the native Feed URL commits without fetching a route", () => {

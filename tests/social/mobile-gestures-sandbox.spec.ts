@@ -562,7 +562,9 @@ for (const platform of ["ios", "android"] as const) {
       await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
       await expect(surface).toHaveCSS("transform", "none");
 
-      for (const [index, method] of (["swipe", "button"] as const).entries()) {
+      for (const [index, method] of (
+        ["swipe", "button", "wave-link"] as const
+      ).entries()) {
         await expect(page.locator("html")).not.toHaveAttribute(
           "data-wave-navigation-transition"
         );
@@ -573,7 +575,18 @@ for (const platform of ["ios", "android"] as const) {
         const readingCardTop = await post.evaluate(
           (element) => element.closest("article")!.getBoundingClientRect().top
         );
-        await post.tap();
+        if (method === "wave-link") {
+          await page
+            .getByText("Profile feed gesture fixture 6.", { exact: false })
+            .locator("xpath=ancestor::article[1]")
+            .getByRole("link", {
+              name: "Gesture profile wave",
+              exact: true,
+            })
+            .tap();
+        } else {
+          await post.tap();
+        }
         // The local mock server compiles the detail route on first entry.
         await expect(page).toHaveURL(
           new RegExp(`/waves/${WAVE}\\?.*returnTo=`),
@@ -582,6 +595,17 @@ for (const platform of ["ios", "android"] as const) {
         await expect(
           page.getByRole("textbox", { name: "Write a message" }).last()
         ).toBeVisible();
+        const messages = page
+          .getByTestId("wave-swipe-surface")
+          .locator("[data-wave-drops-scroll-container='true']");
+        await expect(messages).toHaveCSS("mask-image", "none");
+        const fade = page
+          .getByTestId("wave-swipe-surface")
+          .locator("[data-wave-drops-scroll-container='true']")
+          .locator("..")
+          .locator(':scope > [aria-hidden="true"]');
+        await expect(fade).toHaveCSS("height", "24px");
+        await expect(fade).toHaveCSS("background-image", /^linear-gradient\(/);
         checkingReturn = true;
         if (method === "swipe") {
           const row = page

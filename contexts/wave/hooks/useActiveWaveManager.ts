@@ -152,7 +152,7 @@ export function useActiveWaveManager() {
     buildUrl,
     parseUrl: getWaveFromWindow,
     canUsePushState,
-    deferRouteState: true,
+    deferRouteState: isApp,
   });
 
   const setActiveWave = useCallback<typeof navigate>(

@@ -13,3 +13,23 @@ export function isProfileWavesFeed(pathname: string, search: SearchParams) {
 export function returnsToProfileWavesFeed(search: SearchParams) {
   return search.get(PROFILE_FEED_RETURN_PARAM) === PROFILE_WAVES_FEED_HREF;
 }
+
+/** Called on navigation so every native Feed → Wave entry keeps its origin. */
+export function withProfileFeedReturn(href: string, isApp: boolean) {
+  if (
+    !isApp ||
+    !href.startsWith("/waves/") ||
+    !isProfileWavesFeed(
+      globalThis.location.pathname,
+      new URLSearchParams(globalThis.location.search)
+    )
+  ) {
+    return href;
+  }
+  const destination = new URL(href, globalThis.location.href);
+  destination.searchParams.set(
+    PROFILE_FEED_RETURN_PARAM,
+    PROFILE_WAVES_FEED_HREF
+  );
+  return destination.pathname + destination.search + destination.hash;
+}

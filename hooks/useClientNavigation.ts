@@ -51,27 +51,32 @@ export function useClientNavigation<T, TOptions = undefined>({
   TOptions
 > {
   const router = useRouter();
-  const [state, setState] = useState<T>(initialState);
-
-  // Sync state when initialState changes (after router.push navigation)
-  useEffect(() => {
-    setState(initialState);
-  }, [initialState]);
+  const [navigation, setNavigation] = useState({
+    route: initialState,
+    value: initialState,
+  });
+  if (!deferRouteState && !Object.is(navigation.route, initialState)) {
+    setNavigation({ route: initialState, value: initialState });
+  }
+  // A history-only update can be immediate. A newly committed route owns its
+  // value directly, without copying it into state after a stale frame paints.
+  const state = deferRouteState ? initialState : navigation.value;
 
   // Sync with back/forward navigation
   useEffect(() => {
+    if (deferRouteState) return;
     if (globalThis.window === undefined) return;
 
     const { window: browserWindow } = globalThis;
     if (!browserWindow) return;
 
     const onPopState = () => {
-      setState(parseUrl());
+      setNavigation({ route: initialState, value: parseUrl() });
     };
 
     browserWindow.addEventListener("popstate", onPopState);
     return () => browserWindow.removeEventListener("popstate", onPopState);
-  }, [parseUrl]);
+  }, [deferRouteState, initialState, parseUrl]);
 
   const navigate = useCallback(
     (newState: T, options?: TOptions & { replace?: boolean | undefined }) => {
@@ -83,7 +88,8 @@ export function useClientNavigation<T, TOptions = undefined>({
         browserWindow.location.pathname + browserWindow.location.search;
 
       if (currentUrl === target) {
-        if (!deferRouteState) setState(newState);
+        if (!deferRouteState)
+          setNavigation({ route: initialState, value: newState });
         return;
       }
 
@@ -92,11 +98,11 @@ export function useClientNavigation<T, TOptions = undefined>({
         browserWindow.history[method](null, "", target);
         // Next commits native-history URLs asynchronously too. Route-owned
         // content must keep its source state until that URL reaches render.
-        if (!deferRouteState) setState(newState);
+        if (!deferRouteState)
+          setNavigation({ route: initialState, value: newState });
       } else {
         // Route-owned views must remain on their committed wave until the new
         // URL commits, otherwise destination content renders under the old tabs.
-        if (!deferRouteState) setState(newState);
         if (options?.replace) {
           router.replace(target);
         } else {
@@ -104,7 +110,7 @@ export function useClientNavigation<T, TOptions = undefined>({
         }
       }
     },
-    [buildUrl, canUsePushState, deferRouteState, router]
+    [buildUrl, canUsePushState, deferRouteState, initialState, router]
   );
 
   return {
