@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { XMarkIcon } from "@heroicons/react/24/outline";
@@ -121,15 +123,17 @@ export function WaveLeaderboardCurationDropModal({
             >
               Drop Artwork
             </h2>
-            <button
+            <IconButton
               ref={closeButtonRef}
               type="button"
               onClick={onClose}
-              className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-100"
+              size={36}
+              variant="outline"
+              shape="circle"
               aria-label="Close modal"
             >
               <XMarkIcon className="tw-size-6 tw-flex-shrink-0" />
-            </button>
+            </IconButton>
           </div>
 
           <div className="tw-max-h-[calc(90vh-88px)] tw-overflow-y-auto tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 hover:tw-scrollbar-thumb-iron-300">

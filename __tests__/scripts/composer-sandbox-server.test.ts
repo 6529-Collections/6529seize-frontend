@@ -52,8 +52,11 @@ function loadSandbox(apiOnly?: string, env: Record<string, string> = {}) {
   const context = {
     readFixture: (_pathname: string): unknown => undefined,
     readPublicRuntime: (): Record<string, unknown> => ({}),
-    readApi: (_pathname: string, _res: unknown): Promise<void> =>
-      Promise.resolve(),
+    readApi: (
+      _pathname: string,
+      _res: unknown,
+      _method?: string
+    ): Promise<void> => Promise.resolve(),
     mutateChat: (_edit: boolean, _res: unknown): unknown => undefined,
     Date,
     require: requireFixture,
@@ -78,7 +81,7 @@ function loadSandbox(apiOnly?: string, env: Record<string, string> = {}) {
     fs.readFileSync(serverPath, "utf8") +
       "\nglobalThis.readFixture = (pathname) => mockApiPatternReadRoutes.find((route) => route.pattern.test(pathname))?.response();" +
       "\nglobalThis.readPublicRuntime = buildPublicRuntime;" +
-      '\nglobalThis.readApi = (pathname, res) => handleRequest({ method: "GET", url: pathname }, res);' +
+      '\nglobalThis.readApi = (pathname, res, method = "GET") => handleRequest({ method, url: pathname }, res);' +
       '\nglobalThis.mutateChat = (edit, res) => edit ? handleAllowedChatDropEditPost("POST", `/api/drops/${SANDBOX_SUBMITTED_CHAT_DROP_ID}`, "allowed-sandbox-mutation", res) : handleAllowedChatDropPost("POST", "/api/drops", {parts: [{content: SANDBOX_CHAT_DROP_CONTENT}]}, "allowed-sandbox-mutation", res);',
     context
   );
@@ -176,6 +179,30 @@ it("returns a terminal NIC activity page without forcing contract retries", asyn
     next: false,
     next_cursor: null,
   });
+});
+
+it("seeds shared-link history consistently and clears it between scenarios", async () => {
+  const { readApi } = loadSandbox("1");
+  const res = { writeHead: jest.fn(), end: jest.fn() };
+  const feedPath =
+    "/api/v2/waves/00000000-0000-4000-8000-000000000529/drops?limit=51";
+  await readApi("/__composer-sandbox/shared-posts", res, "POST");
+  res.end.mockClear();
+  await readApi(feedPath, res);
+  const feed = JSON.parse(res.end.mock.calls[0][0]);
+  expect(feed.drops).toHaveLength(51);
+  expect(feed.drops[0]).toMatchObject({
+    serial_no: 151,
+    content: "Shared link fixture post 151",
+  });
+  expect(feed.drops.at(-1)).toMatchObject({ serial_no: 101 });
+
+  await readApi("/__composer-sandbox/reset", res, "POST");
+  res.end.mockClear();
+  await readApi(feedPath, res);
+  const resetFeed = JSON.parse(res.end.mock.calls[0][0]);
+  expect(resetFeed.drops).toHaveLength(1);
+  expect(resetFeed.drops[0]).toMatchObject({ serial_no: 1 });
 });
 
 it("keeps newly submitted and edited sandbox drops inside the live edit window", () => {

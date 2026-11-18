@@ -221,7 +221,7 @@ jobs:
           ];
           const corePlaywrightLanes = [];
           const composerBrowserRequired = plan.changed_files.some((file) =>
-            /^(?:components\/waves\/(?:CreateDrop\.tsx$|drops\/(?:WaveDrop(?:ReplyCollapseAction|ActionsMore|MobileMenu)\.tsx$|reply-threads\/|wave-drops-all\/))|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation|part-builders|useDropFilePreparation|useCreateDropSubmission)\.|components\/waves\/create-wave\/services\/multiPartUpload\.ts$|services\/uploads\/(?:multipartUploadCore|dropUploadValidation|ImageProcessingError)\.ts$|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
+            /^(?:components\/waves\/(?:CreateDrop\.tsx$|ChatItemHrefButtons\.tsx$|drops\/(?:WaveDrop(?:ReplyCollapseAction|ActionsMore|MobileMenu)\.tsx$|reply-threads\/|wave-drops-all\/))|components\/drops\/create\/lexical\/plugins\/mentions\/MentionsPlugin\.tsx$|components\/waves\/create-drop-content\/(?:AllMentionConfirmationDialog|CreateDropSubmissionDialogs|useAllMentionConfirmation|part-builders|useDropFilePreparation|useCreateDropSubmission)\.|components\/waves\/create-wave\/services\/multiPartUpload\.ts$|services\/uploads\/(?:multipartUploadCore|dropUploadValidation|ImageProcessingError)\.ts$|components\/drops\/create\/lexical\/nodes\/ImageComponent\.tsx$|tests\/social\/waves-composer-sandbox\.spec\.ts$|tests\/support\/composerSandboxServer\.cjs$)/.test(file)
           );
           write("composer_browser_required", String(composerBrowserRequired));
           const collectBrowserRequired = plan.changed_files.some((file) =>
@@ -471,7 +471,7 @@ jobs:
           NEXT_DEV_DIST_DIR: ".next-playwright-all-mention"
           PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/all-mention"
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/all-mention"
-        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape|collapses a single reply thread|opens an older nested reply link|waits for image validation'
+        run: ./bin/6529 run test:e2e:composer-sandbox --grep 'confirms the all mention|keeps desktop keyboard focus|submits one exact-shape|collapses a single reply thread|opens an older nested reply link|waits for image validation|pastes one image when Chrome exposes different timestamp wrappers|renders deterministic link preview and keeps composer usable'
 
       - name: Run Collect public browser pack
         if: matrix.lane == 'playwright-smoke' && needs.plan.outputs.playwright_collect_required == 'true'

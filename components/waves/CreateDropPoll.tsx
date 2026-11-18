@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import type { ApiCreateDropPollRequest } from "@/generated/models/ApiCreateDropPollRequest";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -253,15 +255,18 @@ export default function CreateDropPoll({
               />
             </div>
           </div>
-          <button
+          <IconButton
             type="button"
             aria-label={t(locale, "waves.poll.composer.remove")}
             disabled={disabled}
             onClick={onRemove}
-            className="tw-col-start-2 tw-row-start-1 tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors disabled:tw-cursor-not-allowed disabled:tw-opacity-50 desktop-hover:hover:tw-bg-white/[0.04] desktop-hover:hover:tw-text-white"
+            size={32}
+            variant="ghost"
+            shape="compact"
+            className="tw-col-start-2 tw-row-start-1"
           >
             <XMarkIcon className="tw-size-4" aria-hidden="true" />
-          </button>
+          </IconButton>
         </div>
       )}
 

@@ -672,6 +672,29 @@ describe("WaveNotificationSettings", () => {
     expect(muteButton).not.toBeDisabled();
   });
 
+  it("keeps keyboard focus on mute when switching between compact and full controls", () => {
+    const view = (compact: boolean) => (
+      <AuthContext.Consumer>
+        {(auth) => (
+          <AuthContext.Provider value={{ ...auth, ...mockAuthContext }}>
+            <WaveNotificationSettings wave={mockWave} compact={compact} />
+          </AuthContext.Provider>
+        )}
+      </AuthContext.Consumer>
+    );
+    const { rerender } = render(view(false));
+    const muteButton = screen.getByRole("button", { name: "Mute wave" });
+    muteButton.focus();
+
+    for (const compact of [true, false]) {
+      rerender(view(compact));
+      expect(screen.getByRole("button", { name: "Mute wave" })).toBe(
+        muteButton
+      );
+      expect(muteButton).toHaveFocus();
+    }
+  });
+
   it("renders muted button when wave is muted", () => {
     renderComponent(mockWaveMuted);
 
