@@ -165,6 +165,14 @@ export class EngineController {
     if (!this.isReady()) {
       return;
     }
+    // The device listing comes first: maintenance below works from it (the
+    // self-group claim budget needs one from the last 15 minutes).
+    if (this.ctx.now() - this.ctx.lastMeAt >= MAINTAIN_EVERY_MS) {
+      await this.guard(this.hooks.refreshMe());
+    }
+    if (!this.isReady()) {
+      return;
+    }
     const lastSeq = lastSeqByGroup(serverGroups);
     for (const [g, runtime] of [...this.ctx.store.groups]) {
       if (!isActive(runtime)) {
@@ -175,9 +183,6 @@ export class EngineController {
       await this.guard(
         this.syncGroup(g, { fetch: behind || serverGroups === null })
       );
-    }
-    if (this.ctx.now() - this.ctx.lastMeAt >= MAINTAIN_EVERY_MS) {
-      await this.guard(this.hooks.refreshMe());
     }
     await this.guard(this.hooks.afterSync());
   }
