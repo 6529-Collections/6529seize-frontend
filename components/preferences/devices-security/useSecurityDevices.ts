@@ -17,6 +17,7 @@ import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
 import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
 import { useRemoveE2eeLocalData } from "@/components/e2ee/useRemoveE2eeLocalData";
+import { readStoredE2eeDeviceKey } from "@/lib/e2ee/storage";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   classifyDevices,
@@ -102,8 +103,11 @@ interface RevokeContext {
   readonly engine: E2eeEngine | null;
   readonly engineCanAct: boolean;
   readonly revokeGrant: (grant: ApiDeviceGrant) => Promise<boolean>;
-  /** This browser's own encrypted-DMs device key (lowercase), if any. */
-  readonly localDeviceKey: string | null;
+  /**
+   * This browser's own encrypted-DMs device key (lowercase), if any: the
+   * engine's, or without it the stored device record's.
+   */
+  readonly localDeviceKey: () => Promise<string | null>;
   readonly removeLocal: (() => Promise<void>) | null;
   readonly refetchGrants: () => void;
   /** After a revoke the server made unsigned: refresh what's shown. */
@@ -140,8 +144,7 @@ async function revokeSecurityDevice(
   if (
     dmsActive &&
     encrypted !== null &&
-    ctx.localDeviceKey !== null &&
-    encrypted.deviceKey.toLowerCase() === ctx.localDeviceKey
+    encrypted.deviceKey.toLowerCase() === (await ctx.localDeviceKey())
   ) {
     await ctx.removeLocal?.();
   }
@@ -338,13 +341,19 @@ export function useSecurityDevices(): SecurityDevicesState {
         engine,
         engineCanAct,
         revokeGrant,
-        localDeviceKey: e2ee.localDeviceKey?.toLowerCase() ?? null,
+        localDeviceKey: async () =>
+          e2ee.localDeviceKey?.toLowerCase() ??
+          (profileId === null ? null : readStoredE2eeDeviceKey(profileId)),
         removeLocal,
         refetchGrants: () => void grantsQuery.refetch(),
         afterUnsignedRevoke: () => {
           if (engineListed) {
+            // The engine can't reload its list: the API list stands in.
             setStaleEngineList(engineDevices);
-          } else if (encryptionEnabled) {
+          }
+          if (encryptionEnabled) {
+            // Fetch now: a cached list (still fresh by staleTime) would
+            // show the revoked device as on.
             void apiDevicesQuery.refetch();
           }
         },
