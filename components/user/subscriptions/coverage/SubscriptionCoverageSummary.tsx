@@ -25,9 +25,11 @@ import {
 
 import {
   FUNDED_COUNT_STATUSES,
+  getAuthoritativeSubscriptionDeadline,
   getPartiallyFundedSubscriptionDrop,
   getSubscriptionCoverageSummaryPresentation,
   hasPassedSubscriptionDeadline,
+  hasExpiredSubscriptionFundingDeadline,
   isImmediateSubscriptionShortfall,
   isMintDayCoverageShortfall,
   isNextDropSubscriptionPaid,
@@ -143,8 +145,12 @@ type SubscriptionCoverageSummaryProps = Readonly<{
 export default function SubscriptionCoverageSummary(
   props: SubscriptionCoverageSummaryProps
 ) {
+  const deadline = getAuthoritativeSubscriptionDeadline(props.coverage);
   const now = useSubscriptionCoverageClock(
-    isImmediateSubscriptionShortfall(props.coverage) && !props.isStale
+    (isImmediateSubscriptionShortfall(props.coverage) ||
+      deadline !== undefined) &&
+      !props.isStale,
+    deadline
   );
   if (props.profileKey && props.coverage) {
     return (
@@ -167,22 +173,26 @@ function MintDayCoverageSummary(
   }
 ) {
   const shouldCheck =
-    !props.isStale &&
-    shouldCheckSubscriptionPayment(props.coverage, props.now);
-  const { final, isLoading, isError } = useSubscriptionAllocationStatus({
-    profileKey: props.profileKey,
-    contract: MEMES_CONTRACT.toLowerCase(),
-    tokenId: props.coverage.next_unfunded?.token_id ?? 0,
-    first: true,
-    subscribed: shouldCheck,
-    waitForRefresh:
-      shouldCheck &&
-      hasPassedSubscriptionDeadline(props.coverage, props.now),
-  });
+    !props.isStale && shouldCheckSubscriptionPayment(props.coverage, props.now);
+  const deadline = getAuthoritativeSubscriptionDeadline(props.coverage);
+  const verifyAbsence =
+    shouldCheck && (deadline === undefined || props.now >= deadline);
+  const { final, isLoading, isError, hasNoAllocation } =
+    useSubscriptionAllocationStatus({
+      profileKey: props.profileKey,
+      contract: MEMES_CONTRACT.toLowerCase(),
+      tokenId: props.coverage.next_unfunded?.token_id ?? 0,
+      first: true,
+      subscribed: shouldCheck,
+      verifyAbsence,
+      waitForRefresh:
+        shouldCheck && hasPassedSubscriptionDeadline(props.coverage, props.now),
+    });
   let mintDayStatus: MintDaySubscriptionStatus = "unpaid";
   if (isNextDropSubscriptionPaid(props.coverage, final)) mintDayStatus = "paid";
   else if (isError) mintDayStatus = "unavailable";
   else if (isLoading || final === undefined) mintDayStatus = "checking";
+  else if (verifyAbsence && !hasNoAllocation) mintDayStatus = "checking";
   return (
     <CoverageSummaryContent
       {...props}
@@ -237,6 +247,10 @@ function CoverageSummaryContent({
     !isStale &&
     mintDayStatus === "unpaid" &&
     hasPassedSubscriptionDeadline(coverage, now);
+  const expiredFundingDeadline =
+    !isStale && hasExpiredSubscriptionFundingDeadline(coverage, now);
+  const fundFutureDrops =
+    deadlinePassed || (expiredFundingDeadline && !immediateShortfall);
   const partial = getPartiallyFundedSubscriptionDrop(coverage);
   const showFundedCount = !!coverage && FUNDED_COUNT_STATUSES.includes(status);
   const fundedThrough =
@@ -314,12 +328,12 @@ function CoverageSummaryContent({
   const primaryTopUp =
     !isStale &&
     !paid &&
-    !deadlinePassed &&
+    !expiredFundingDeadline &&
     (presentation.tone === "danger" || presentation.tone === "caution");
   let topUp: ReactNode;
   if (showFundingPrompt && isOwner && !pending && !showSetUp) {
     if (typeof topUpAction === "function") {
-      topUp = deadlinePassed
+      topUp = fundFutureDrops
         ? topUpAction(false, true)
         : topUpAction(primaryTopUp);
     } else topUp = topUpAction;
@@ -330,7 +344,7 @@ function CoverageSummaryContent({
       partial.missing_mints === 1
         ? "subscriptions.coverage.summary.partialDeadline.one"
         : "subscriptions.coverage.summary.partialDeadline.many";
-  if (deadlinePassed || isStale)
+  if (expiredFundingDeadline || isStale)
     deadlineMessage = "subscriptions.coverage.summary.expiredDeadline";
   let sectionAction:
     | { hash: string; label: MessageKey; primary: boolean }
@@ -486,7 +500,7 @@ function CoverageSummaryContent({
         />
         {paid && coverage && (
           <p className="tw-col-span-full tw-m-0 tw-text-sm tw-text-iron-400">
-            {t(locale, "subscriptions.coverage.summary.remainingBalance", {
+            {t(locale, "subscriptions.coverage.summary.forecastSnapshot", {
               funded: getFundedDropsLabel(locale, coverage.fully_funded_drops),
             })}
           </p>
@@ -494,7 +508,12 @@ function CoverageSummaryContent({
         {showNextUnfunded && coverage?.next_unfunded && (
           <dl className="tw-col-span-full tw-m-0 tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-text-sm sm:tw-justify-start sm:tw-gap-2">
             <dt className="tw-shrink-0 tw-text-iron-500">
-              {t(locale, "subscriptions.coverage.nextUnfunded")}
+              {t(
+                locale,
+                paymentUnavailable
+                  ? "subscriptions.coverage.summary.nextDrop"
+                  : "subscriptions.coverage.nextUnfunded"
+              )}
             </dt>
             <dd className="tw-m-0 tw-min-w-0 tw-text-right tw-font-medium tw-text-iron-100 sm:tw-text-left">
               <CoveragePoint point={coverage.next_unfunded} />

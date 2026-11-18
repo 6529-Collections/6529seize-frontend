@@ -11,7 +11,13 @@ import {
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import useCapacitor from "@/hooks/useCapacitor";
 import { subscriptionCoverageFixture } from "@/tests/support/subscriptionFixtures";
-import { act, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { parseEther } from "viem";
 
@@ -313,25 +319,100 @@ describe("UserPageSubscriptionsTopUp", () => {
     }
   );
 
-  it("omits stale projections while retaining generic card-count choices", async () => {
-    const user = userEvent.setup();
-    render(
-      <UserPageSubscriptionsTopUp
-        coverage={subscriptionCoverageFixture()}
-        isCoverageStale
-      />
-    );
-    expect(
-      screen.queryByRole("radio", { name: /^Minimum for next drop/ })
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByRole("radio", { name: /^Recommended/ })
-    ).not.toBeInTheDocument();
-    await user.click(screen.getByRole("radio", { name: "1 Card" }));
-    expect(
-      screen.getByRole("button", { name: "Top up 0.06529 ETH" })
-    ).toBeEnabled();
-    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+  it("omits stale projections while retaining a generic choice", async () => {
+    const clock = jest
+      .spyOn(Date, "now")
+      .mockReturnValue(Date.parse("2026-10-12T14:29:00Z"));
+    try {
+      const user = userEvent.setup();
+      const coverage = subscriptionCoverageFixture();
+      const { rerender } = render(
+        <UserPageSubscriptionsTopUp coverage={coverage} />
+      );
+      expect(
+        screen.getByRole("radio", { name: /^Minimum for next drop/ })
+      ).toBeVisible();
+      expect(screen.getByRole("radio", { name: /^Recommended/ })).toBeVisible();
+      await user.click(screen.getByRole("radio", { name: "1 Card" }));
+      rerender(
+        <UserPageSubscriptionsTopUp coverage={coverage} isCoverageStale />
+      );
+      expect(
+        screen.queryByRole("radio", { name: /^Minimum for next drop/ })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("radio", { name: /^Recommended/ })
+      ).not.toBeInTheDocument();
+      expect(screen.getByRole("radio", { name: "1 Card" })).toBeChecked();
+      expect(
+        screen.getByRole("button", { name: "Top up 0.06529 ETH" })
+      ).toBeEnabled();
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it("requires a new projected choice after stale coverage recovers", async () => {
+    const clock = jest
+      .spyOn(Date, "now")
+      .mockReturnValue(Date.parse("2026-10-12T14:29:00Z"));
+    try {
+      const user = userEvent.setup();
+      const coverage = subscriptionCoverageFixture();
+      const { rerender } = render(
+        <UserPageSubscriptionsTopUp coverage={coverage} />
+      );
+      await user.click(
+        screen.getByRole("radio", { name: /^Minimum for next drop/ })
+      );
+      rerender(
+        <UserPageSubscriptionsTopUp coverage={coverage} isCoverageStale />
+      );
+      const fresh = {
+        ...coverage,
+        minimum_top_up: { ...coverage.minimum_top_up!, amount_eth: "0.02587" },
+      };
+      rerender(<UserPageSubscriptionsTopUp coverage={fresh} />);
+      expect(
+        screen.getByRole("radio", { name: /^Minimum for next drop/ })
+      ).not.toBeChecked();
+      expect(
+        screen.getByRole("button", { name: "Choose a top-up amount" })
+      ).toBeDisabled();
+      await user.click(
+        screen.getByRole("radio", { name: /^Minimum for next drop/ })
+      );
+      expect(
+        screen.getByRole("button", { name: "Top up 0.02587 ETH" })
+      ).toBeEnabled();
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    } finally {
+      clock.mockRestore();
+    }
+  });
+
+  it("rejects a projection whose cutoff passes before the clock notification", async () => {
+    const deadline = Date.parse("2026-10-12T14:30:00Z");
+    const clock = jest.spyOn(Date, "now").mockReturnValue(deadline - 1000);
+    try {
+      const user = userEvent.setup();
+      render(
+        <UserPageSubscriptionsTopUp coverage={subscriptionCoverageFixture()} />
+      );
+      await user.click(
+        screen.getByRole("radio", { name: /^Minimum for next drop/ })
+      );
+      const submit = screen.getByRole("button", { name: "Top up 0.01587 ETH" });
+      clock.mockReturnValue(deadline);
+      fireEvent.click(submit);
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+      expect(
+        screen.getByRole("button", { name: "Choose a top-up amount" })
+      ).toBeDisabled();
+    } finally {
+      clock.mockRestore();
+    }
   });
 
   it("invalidates a selected coverage projection when its cutoff passes", async () => {

@@ -177,6 +177,42 @@ it("reports a failed cutoff publication check as unavailable", async () => {
   await waitFor(() => expect(result.current.isError).toBe(true));
   expect(result.current.hasNoAllocation).toBe(false);
 });
+
+it("reads payment again after publication before proving absence", async () => {
+  let reads = 0;
+  const paid = { phase: "Phase 1", phase_position: 0 };
+  fetchMock.mockImplementation(async ({ endpoint }) => {
+    if (!endpoint.startsWith("subscriptions/"))
+      return { has_distribution: true, allocations: [] };
+    reads += 1;
+    if (reads === 1) throw { status: 404 };
+    return paid;
+  });
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, verifyAbsence: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(result.current.final).toEqual(paid));
+  expect(reads).toBe(2);
+  expect(result.current.hasNoAllocation).toBe(false);
+  expect(result.current.isLoading).toBe(false);
+});
+
+it("keeps missing-cutoff absence pending before publication", async () => {
+  fetchMock.mockImplementation(async ({ endpoint }) => {
+    if (endpoint.startsWith("subscriptions/")) throw { status: 404 };
+    return { has_distribution: false, allocations: [] };
+  });
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, verifyAbsence: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(client.isFetching()).toBe(0));
+  expect(result.current.hasNoAllocation).toBe(false);
+  expect(result.current.isLoading).toBe(true);
+});
 it("keeps a phase-less finalized subscription in the pending state", async () => {
   fetchMock.mockResolvedValue({ phase: null, phase_position: -1 });
   const { result } = renderHook(

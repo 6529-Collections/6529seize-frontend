@@ -17,6 +17,7 @@ export function useSubscriptionAllocationStatus({
   first,
   subscribed,
   waitForRefresh = false,
+  verifyAbsence = false,
 }: Readonly<{
   profileKey: string;
   contract: string;
@@ -24,29 +25,32 @@ export function useSubscriptionAllocationStatus({
   first: boolean;
   subscribed: boolean;
   waitForRefresh?: boolean;
+  verifyAbsence?: boolean;
 }>) {
+  const verification = verifyAbsence || waitForRefresh;
+  const queryKey = [
+    "consolidation-final-subscription",
+    `${profileKey}-${contract}-${tokenId}`,
+    ...(verifyAbsence ? ["coverage-verification"] : []),
+    ...(waitForRefresh ? ["after-cutoff"] : []),
+  ];
+  const fetchFinal = async ({ signal }: { signal: AbortSignal }) => {
+    try {
+      return await commonApiFetch<NFTFinalSubscription>({
+        endpoint: `subscriptions/consolidation/final/${profileKey}/${contract}/${tokenId}`,
+        errorMode: "structured",
+        signal,
+      });
+    } catch (error) {
+      if (getStructuredApiErrorStatus(error) === 404) return null;
+      throw error;
+    }
+  };
   const finalQuery = useQuery<NFTFinalSubscription | null>({
-    queryKey: [
-      "consolidation-final-subscription",
-      `${profileKey}-${contract}-${tokenId}`,
-      ...(waitForRefresh ? ["after-cutoff"] : []),
-    ],
-    queryFn: async ({ signal }) => {
-      try {
-        return await commonApiFetch<NFTFinalSubscription>({
-          endpoint: `subscriptions/consolidation/final/${profileKey}/${contract}/${tokenId}`,
-          errorMode: "structured",
-          signal,
-        });
-      } catch (error) {
-        if (getStructuredApiErrorStatus(error) === 404) {
-          return null;
-        }
-        throw error;
-      }
-    },
+    queryKey,
+    queryFn: fetchFinal,
     enabled: first && subscribed,
-    ...(waitForRefresh ? { refetchOnMount: "always" as const } : {}),
+    ...(verification ? { refetchOnMount: "always" as const } : {}),
     retry: false,
     refetchInterval: ALLOCATION_REFRESH_INTERVAL,
   });
@@ -78,21 +82,43 @@ export function useSubscriptionAllocationStatus({
     refetchInterval: ALLOCATION_REFRESH_INTERVAL,
   });
 
+  const published = publicationQuery.data?.has_distribution === true;
+  const publishedFinalQuery = useQuery<NFTFinalSubscription | null>({
+    queryKey: [...queryKey, "after-publication"],
+    queryFn: fetchFinal,
+    enabled: verification && checkPublication && published,
+    refetchOnMount: "always",
+    retry: false,
+    refetchInterval: ALLOCATION_REFRESH_INTERVAL,
+  });
+  const checkingPublishedFinal =
+    verification && finalQuery.data === null && published;
+  const publishedFinalReady = publishedFinalQuery.isFetchedAfterMount;
   const hasNoAllocation =
     checkPublication &&
     publicationQuery.isSuccess &&
-    publicationQuery.data.has_distribution;
+    published &&
+    (!verification ||
+      (publishedFinalReady &&
+        publishedFinalQuery.isSuccess &&
+        publishedFinalQuery.data === null));
+
+  let final = finalQuery.data;
+  if (checkingPublishedFinal)
+    final = publishedFinalReady ? publishedFinalQuery.data : undefined;
 
   return {
-    final: finalQuery.data,
+    final,
     isLoading:
       finalQuery.isLoading ||
-      (waitForRefresh &&
+      (verification &&
         (!finalQuery.isFetchedAfterMount ||
-          (checkPublication && !hasNoAllocation))),
+          (checkPublication && !published) ||
+          (checkingPublishedFinal && !publishedFinalReady))),
     isError:
       finalQuery.isError ||
-      (waitForRefresh && checkPublication && publicationQuery.isError),
+      (verification && checkPublication && publicationQuery.isError) ||
+      (checkingPublishedFinal && publishedFinalQuery.isError),
     hasNoAllocation,
   };
 }

@@ -4389,8 +4389,7 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.coverage.summary.paidTitle": "Subscription paid",
   "subscriptions.coverage.summary.paid":
     "The subscription for {meme} is already paid.",
-  "subscriptions.coverage.summary.remainingBalance":
-    "From the remaining balance: {funded}.",
+  "subscriptions.coverage.summary.forecastSnapshot": "Last forecast: {funded}.",
   "subscriptions.coverage.summary.paymentUnavailable":
     "This subscription could not be checked. It will be checked again shortly.",
   "subscriptions.coverage.summary.uncoveredToday": "Today’s mint isn’t covered",
@@ -4462,6 +4461,7 @@ export const EN_US_ROOT_MESSAGES = {
     "Projected from current eligibility, settings, balance, and the published Meme schedule.",
   "subscriptions.coverage.fundedThrough": "Funded through",
   "subscriptions.coverage.nextUnfunded": "Next unfunded",
+  "subscriptions.coverage.summary.nextDrop": "Next drop",
   "subscriptions.coverage.projected": "Projected",
   "subscriptions.coverage.memeToken": "The Memes #{token}",
   "subscriptions.coverage.topUpBy":

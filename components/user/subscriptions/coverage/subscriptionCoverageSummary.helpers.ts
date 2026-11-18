@@ -87,17 +87,31 @@ export function hasPassedSubscriptionDeadline(
   coverage: ApiSubscriptionCoverage | undefined,
   now: number
 ): boolean {
+  return (
+    isImmediateSubscriptionShortfall(coverage) &&
+    hasExpiredSubscriptionFundingDeadline(coverage, now)
+  );
+}
+
+export function getAuthoritativeSubscriptionDeadline(
+  coverage: ApiSubscriptionCoverage | undefined
+): number | undefined {
   const deadline = subscriptionCoverageTimestamp(
     coverage?.next_unfunded?.top_up_deadline
   );
-  return (
-    isImmediateSubscriptionShortfall(coverage) &&
+  return deadline !== undefined &&
     coverage?.forecast.deadline_basis ===
-      ApiSubscriptionCoverageDeadlineBasis.Authoritative &&
-    deadline !== undefined &&
-    now > 0 &&
-    now >= deadline
-  );
+      ApiSubscriptionCoverageDeadlineBasis.Authoritative
+    ? deadline
+    : undefined;
+}
+
+export function hasExpiredSubscriptionFundingDeadline(
+  coverage: ApiSubscriptionCoverage | undefined,
+  now: number
+): boolean {
+  const deadline = getAuthoritativeSubscriptionDeadline(coverage);
+  return deadline !== undefined && now > 0 && now >= deadline;
 }
 
 export function shouldCheckSubscriptionPayment(
