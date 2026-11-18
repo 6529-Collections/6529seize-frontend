@@ -255,10 +255,11 @@ function getWaveCardClassNames(
   if (compact) {
     return {
       cardInteractionClassName:
-        "tw-transition-[background-color,box-shadow] tw-duration-200 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08)]",
+        "tw-transition-[background-color,box-shadow] tw-duration-200 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.12)]",
       imageInteractionClassName: "",
       cardDirectionClassName: "tw-flex-row",
-      cardSurfaceClassName: "tw-rounded-xl tw-border-0 tw-bg-iron-950",
+      cardSurfaceClassName:
+        "tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08)]",
       titleClassName:
         "tw-truncate tw-text-[15px] tw-leading-5 tw-tracking-[-0.01em]",
       imageSizeClassName: "",

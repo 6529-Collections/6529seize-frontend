@@ -1626,13 +1626,16 @@ test("Active Votes keeps full-height artwork and every metric visible at respons
       });
     }
   }
+  const restingShadow = await cards
+    .first()
+    .evaluate((element) => getComputedStyle(element).boxShadow);
   await cards.first().focus();
   await expect(cards.first()).toBeFocused();
-  expect(
-    await cards
-      .first()
-      .evaluate((element) => getComputedStyle(element).boxShadow)
-  ).not.toBe("none");
+  await expect
+    .poll(() =>
+      cards.first().evaluate((element) => getComputedStyle(element).boxShadow)
+    )
+    .not.toBe(restingShadow);
   await cards.first().hover();
   await expect(cards.first()).toHaveCSS("transform", "none");
   await expect(cards.first().getByRole("img")).toHaveCSS("transform", "none");

@@ -13,7 +13,7 @@ export function ExploreWaveCardSkeleton({
     return (
       <div
         aria-hidden="true"
-        className="tw-flex tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950"
+        className="tw-flex tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
       >
         <div className="tw-w-20 tw-shrink-0 tw-self-stretch tw-animate-pulse tw-bg-iron-900 motion-reduce:tw-animate-none sm:tw-w-24" />
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-p-3">
