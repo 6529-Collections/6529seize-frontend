@@ -243,6 +243,95 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     }
   });
 
+  test("iPhone shows existing encrypted chats as they join without reporting an empty inbox", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-mobile-chromium",
+      "The test uses a simulated iPhone bridge and the mobile viewport."
+    );
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    const carol = await openE2eeUser(browser, testInfo, baseURL, users.carol);
+    sessions.push(alice, bob, carol);
+    await enroll(alice);
+    await enroll(bob);
+    await enroll(carol);
+    const dm = await startChat(alice, ["bob"]);
+    const secondDm = await startChat(alice, ["carol"]);
+    const allowDm = Promise.withResolvers<void>();
+    const allowSecondDm = Promise.withResolvers<void>();
+
+    try {
+      for (const { context } of [alice, bob, carol]) {
+        for (const [id, allow] of [
+          [dm, allowDm],
+          [secondDm, allowSecondDm],
+        ] as const) {
+          await context.route(
+            `**/api/e2ee/groups/${id}/entries`,
+            async (route) => {
+              await allow.promise;
+              await route.fallback();
+            }
+          );
+        }
+      }
+      const phone = await openE2eeUser(
+        browser,
+        testInfo,
+        baseURL,
+        users.alice,
+        "Alice's iPhone"
+      );
+      sessions.push(phone);
+      await installSurfaceSimulation(
+        phone.context,
+        "capacitor-ios-sim",
+        baseURL
+      );
+      await phone.page.setViewportSize({ width: 412, height: 840 });
+      await phone.context.route("https://rpc.walletconnect.org/**", (route) =>
+        route.fulfill({
+          status: 400,
+          json: { error: "Fixture RPC unavailable" },
+        })
+      );
+      await enroll(phone, { app: true });
+      const waiting = phone.page.getByRole("status").filter({
+        hasText: "Waiting for encrypted chats to sync to this device…",
+      });
+      const empty = phone.page.getByRole("heading", {
+        name: "No encrypted chats yet",
+        exact: true,
+      });
+      await expect(waiting).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+      await expect(empty).toHaveCount(0);
+
+      allowDm.resolve();
+      await expect(conversationListRow(phone.page, "bob")).toBeVisible({
+        timeout: E2EE_SYNC_TIMEOUT_MS,
+      });
+      await expect(conversationListRow(phone.page, "carol")).toHaveCount(0);
+      await expect(waiting).toBeVisible();
+      await phone.page.screenshot({
+        path: testInfo.outputPath("encrypted-inbox-still-syncing.png"),
+      });
+
+      allowSecondDm.resolve();
+      await expect(conversationListRow(phone.page, "carol")).toBeVisible({
+        timeout: E2EE_SYNC_TIMEOUT_MS,
+      });
+      await expect(waiting).toBeHidden();
+      await expect(empty).toHaveCount(0);
+    } finally {
+      allowDm.resolve();
+      allowSecondDm.resolve();
+    }
+  });
+
   test("native encrypted chat gesture replies on release and swipes back to its list", async ({
     baseURL,
     browser,

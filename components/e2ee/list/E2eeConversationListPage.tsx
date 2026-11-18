@@ -6,6 +6,7 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Button from "@/components/utils/button/Button";
 import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
@@ -26,6 +27,7 @@ import { useSyncEncryptedPush } from "./useSyncEncryptedPush";
 
 const ACTION_LINK_CLASS =
   "tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+const SLOW_INBOX_SYNC_MS = 15_000;
 
 function DevicesLink() {
   const locale = useBrowserLocale();
@@ -47,25 +49,28 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
   const locale = useBrowserLocale();
   const { conversations, profileId, initialSyncStatus, engine } = e2ee;
   const hasChats = conversations.length > 0;
-  const loading = !hasChats && initialSyncStatus === "pending";
+  const waiting = initialSyncStatus === "waiting";
+  const [slow, setSlow] = useState(false);
+  useEffect(() => {
+    if (!waiting) return;
+    const timer = globalThis.setTimeout(
+      () => setSlow(true),
+      SLOW_INBOX_SYNC_MS
+    );
+    return () => globalThis.clearTimeout(timer);
+  }, [waiting]);
+  const showWaitHelp = waiting && slow;
+  const loading = waiting || (!hasChats && initialSyncStatus === "pending");
+  const loadingPadding = hasChats ? "tw-py-3" : "tw-py-12";
   const loadFailed = !hasChats && initialSyncStatus === "failed";
   const loadError = t(locale, "e2ee.list.error");
   let status = "";
   if (loading) status = t(locale, "e2ee.list.loading");
+  if (waiting) status = t(locale, "e2ee.list.waiting");
   if (loadFailed) status = loadError;
 
   return (
     <>
-      <output
-        className={
-          loading
-            ? "tw-flex tw-items-center tw-justify-center tw-gap-3 tw-px-6 tw-py-12 tw-text-sm tw-text-iron-400 motion-reduce:[&>svg]:tw-animate-none"
-            : "tw-sr-only"
-        }
-      >
-        {loading && <CircleLoader />}
-        {status}
-      </output>
       {hasChats && (
         <E2eeConversationList
           conversations={conversations}
@@ -73,6 +78,19 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
           label={t(locale, "e2ee.list.label")}
         />
       )}
+      <output
+        className={
+          loading
+            ? `tw-flex tw-items-center tw-justify-center tw-gap-3 tw-px-6 tw-text-center tw-text-sm tw-text-iron-400 motion-reduce:[&>svg]:tw-animate-none ${loadingPadding}`
+            : "tw-sr-only"
+        }
+      >
+        {loading && !showWaitHelp && <CircleLoader />}
+        <span className="tw-flex tw-flex-col tw-gap-1.5">
+          {status}
+          {showWaitHelp && <span>{t(locale, "e2ee.list.waitingHelp")}</span>}
+        </span>
+      </output>
       {loadFailed && (
         <E2eeCenteredMessage title={loadError}>
           <Button

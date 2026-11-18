@@ -1,3 +1,4 @@
+import type { ApiE2eeDeviceInboxStatus } from "@/generated/models/ApiE2eeDeviceInboxStatus";
 import type { E2eeApiClient } from "./api";
 import type { ApiE2eeBlob, ApiE2eeMe } from "./api-types";
 
@@ -63,6 +64,15 @@ export function buildE2eeApiClient({
     },
     getDeviceGroups: (deviceKey) =>
       get(`e2ee/devices/${enc(deviceKey)}/groups`),
+    getDeviceInboxStatus: async (deviceKey) => {
+      const status = await get<Partial<ApiE2eeDeviceInboxStatus> | null>(
+        `e2ee/devices/${enc(deviceKey)}/inbox-status`
+      );
+      if (typeof status?.has_pending_chats !== "boolean") {
+        throw new Error("Invalid encrypted inbox status");
+      }
+      return { has_pending_chats: status.has_pending_chats };
+    },
     createBlob: (body) => post(`e2ee/blobs`, body),
     putBlobChunk: (blobId, index, body) =>
       put(`e2ee/blobs/${enc(blobId)}/chunks/${index}`, body),

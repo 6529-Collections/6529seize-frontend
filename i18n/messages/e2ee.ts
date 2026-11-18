@@ -259,6 +259,9 @@ export const E2EE_MESSAGES = {
 
   "e2ee.list.subtitle": "End-to-end encrypted chats on this device.",
   "e2ee.list.loading": "Loading encrypted chats…",
+  "e2ee.list.waiting": "Waiting for encrypted chats to sync to this device…",
+  "e2ee.list.waitingHelp":
+    "You can open the chat on another device to help it sync.",
   "e2ee.list.error": "Couldn’t load encrypted chats.",
   "e2ee.list.empty.title": "No encrypted chats yet",
   "e2ee.list.empty.body":
