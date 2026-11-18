@@ -19,8 +19,9 @@ plain-text description. Metrics wrap when needed on narrow cards. Cover artwork
 fills the full card height along the left edge. A subtle border separates each
 card from the page and brightens on hover without lifting the card or zooming
 the artwork.
-The Memes - Main Stage appears first whenever it has active voting. The
-remaining waves are ordered by total Wave REP, highest first.
+The Memes - Main Stage appears first whenever it has active voting. Remaining
+waves with active leaderboard entries appear above waves with zero. Within
+each group, the waves with the highest total Wave REP appear first.
 Use `Load more` to browse additional results.
 
 This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of
