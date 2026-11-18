@@ -7,6 +7,12 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `waves.discovery` record covers plain-text description previews, retained
+media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
+Votes artwork, wrapping metrics and neutral zero-submission status without a
+decorative count marker. Discovery
+links, eligibility and pagination retain their existing behavior.
+
 The `profiles.collected-tab` record explains that Complete my set and Manage
 orders are personal shortcuts shown only on the signed-in owner's own profile,
 after account loading and outside proxy sessions. Existing platform purchasing
@@ -200,8 +206,10 @@ filtering including promises without plans, reset behavior, and empty/error reco
 It directs readers to artwork details for the optional plan and distinguishes the
 artist's promise from verification of approval or fulfillment.
 
-The Wave discovery record describes the independent Active Votes and Worth Checking Out
-sidebar sections, their explanations and view-all destinations. It describes
+The Wave discovery record includes hidden-scrollbar controls with dark edge fades
+and mouse-accessible arrows for offscreen sort and threshold options. It also describes the independent
+Active Votes and Worth Checking Out sidebar sections, their explanations and
+view-all destinations. It describes
 quiet loading placeholders, explanations that appear with content, empty messages
 only after successful empty requests, and retry without discarding loaded votes.
 It covers the scrollable three-row voting window, pagination, compact empty/error states and
