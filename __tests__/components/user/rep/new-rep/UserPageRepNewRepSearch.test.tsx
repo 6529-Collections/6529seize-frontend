@@ -298,6 +298,158 @@ describe("UserPageRepNewRepSearch", () => {
     ).toHaveValue("20");
   });
 
+  it("ignores a category check from the previous account", async () => {
+    const user = userEvent.setup();
+    (useQuery as jest.Mock).mockReturnValue({
+      isFetching: false,
+      data: ["Art"],
+    });
+    let finish = (_value: boolean) => {};
+    jest.mocked(commonApiFetch).mockReturnValueOnce(
+      new Promise<boolean>((resolve) => {
+        finish = resolve;
+      })
+    );
+    function Harness({ identity }: { readonly identity: string }) {
+      const auth = useContext(AuthContext);
+      return (
+        <AuthContext.Provider
+          value={{ ...auth, connectedProfile: { id: identity } as ApiIdentity }}
+        >
+          <UserPageRepNewRepSearch
+            overview={null}
+            profile={{ query: "recipient" } as ApiIdentity}
+          />
+        </AuthContext.Provider>
+      );
+    }
+    const { rerender } = render(<Harness identity="first" />);
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    await user.type(search, "Art");
+    await user.click(
+      await screen.findByRole("button", { name: "Art", exact: true })
+    );
+    rerender(<Harness identity="second" />);
+    const nextSearch = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    const nextAmount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.type(nextAmount, "45");
+    await act(async () => {
+      finish(true);
+    });
+    expect(nextSearch).not.toHaveAttribute("readonly");
+    expect(nextAmount).toHaveValue("45");
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
+    expect(commonApiPost).not.toHaveBeenCalled();
+  });
+
+  it.each(["category", "cancel"])(
+    "respects focus on %s when the rating arrives",
+    async (focus) => {
+      const user = userEvent.setup();
+      (useQuery as jest.Mock).mockReturnValue({
+        isFetching: false,
+        data: ["Art"],
+      });
+      const onCancel = jest.fn();
+      const props = {
+        overview: null,
+        profile: { query: "recipient" } as ApiIdentity,
+        onCancel,
+      };
+      const { rerender } = render(<UserPageRepNewRepSearch {...props} />);
+      await user.type(
+        screen.getByRole("textbox", { name: "Category to grant REP for" }),
+        "Art"
+      );
+      await user.click(
+        await screen.findByRole("button", { name: "Art", exact: true })
+      );
+      const amount = screen.getByRole("textbox", {
+        name: "Your total REP for this category",
+      });
+      const cancel = screen.getByRole("button", { name: "Cancel" });
+      if (focus === "cancel") {
+        await user.type(amount, "15");
+        await user.tab();
+        expect(cancel).toHaveFocus();
+      }
+      mockAllocation.mockReturnValue({
+        ...allocation,
+        repState: {
+          category: "Art",
+          rating: 20,
+          contributor_count: 1,
+          rater_contribution: 20,
+        },
+      });
+      rerender(<UserPageRepNewRepSearch {...props} />);
+      if (focus === "cancel") {
+        expect(cancel).toHaveFocus();
+        expect(amount).toHaveValue("15");
+        await user.keyboard("{Enter}");
+        expect(onCancel).toHaveBeenCalledTimes(1);
+      } else {
+        expect(amount).toHaveFocus();
+        expect(amount).toHaveValue("20");
+      }
+      expect(commonApiPost).not.toHaveBeenCalled();
+    }
+  );
+
+  it("keeps the normal focus ring until category bounds are ready", async () => {
+    const user = userEvent.setup();
+    (useQuery as jest.Mock).mockReturnValue({
+      isFetching: false,
+      data: ["Art"],
+    });
+    mockAllocation.mockReturnValue({
+      ...allocation,
+      heroAvailableRep: 0,
+      minMaxValues: { min: 0, max: 0 },
+    });
+    const props = {
+      overview: null,
+      profile: { query: "recipient" } as ApiIdentity,
+    };
+    const { rerender } = render(<UserPageRepNewRepSearch {...props} />);
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.type(amount, "15");
+    expect(amount).toHaveClass("focus:tw-ring-primary-400");
+    expect(amount).toHaveAttribute("aria-invalid", "false");
+    await user.type(
+      screen.getByRole("textbox", { name: "Category to grant REP for" }),
+      "Art"
+    );
+    await user.click(
+      await screen.findByRole("button", { name: "Art", exact: true })
+    );
+    expect(amount).toHaveClass("focus:tw-ring-primary-400");
+    expect(amount).toHaveAttribute("aria-invalid", "false");
+    mockAllocation.mockReturnValue({
+      ...allocation,
+      heroAvailableRep: 0,
+      minMaxValues: { min: -20, max: 20 },
+      repState: {
+        category: "Art",
+        rating: 20,
+        contributor_count: 1,
+        rater_contribution: 20,
+      },
+    });
+    rerender(<UserPageRepNewRepSearch {...props} />);
+    expect(amount).toHaveValue("15");
+    expect(amount).toHaveClass("focus:tw-ring-primary-400");
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
+  });
+
   it("keeps the grant locked and open until the shared rating refresh completes", async () => {
     const user = userEvent.setup();
     let finishRefresh = () => {};
@@ -556,6 +708,17 @@ describe("UserPageRepNewRepSearch", () => {
         })
       ).toHaveValue("7")
     );
+    await user.click(screen.getByRole("button", { name: "Change category" }));
+    await user.type(amount, "40");
+    await user.type(search, "Art");
+    await user.click(
+      await screen.findByRole("button", { name: "Art", exact: true })
+    );
+    expect(amount).toHaveValue("40");
+    expect(screen.getByText("Current Rep:").parentElement).toHaveTextContent(
+      "Current Rep:+20"
+    );
+    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
   });
 
   it("allows entering an amount before choosing a category while keeping Grant Rep disabled", () => {

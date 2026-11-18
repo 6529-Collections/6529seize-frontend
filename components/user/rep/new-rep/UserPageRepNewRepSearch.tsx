@@ -208,16 +208,37 @@ function GrantRepSubmissionGuidance({
   );
 }
 
-export default function UserPageRepNewRepSearch({
-  overview,
-  profile,
-  onSuccess,
-  onCancel,
-}: {
+type Props = {
   readonly overview: ApiRepOverview | null;
   readonly profile: ApiIdentity;
   readonly onSuccess?: (() => void) | undefined;
   readonly onCancel?: (() => void) | undefined;
+};
+
+export default function UserPageRepNewRepSearch(props: Props) {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const amountContext = [
+    props.profile.id ?? props.profile.query ?? props.profile.display,
+    connectedProfile?.id,
+    activeProfileProxy?.id,
+  ].join(":");
+  return (
+    <GrantRepForm
+      key={amountContext}
+      {...props}
+      amountContext={amountContext}
+    />
+  );
+}
+
+function GrantRepForm({
+  overview,
+  profile,
+  onSuccess,
+  onCancel,
+  amountContext,
+}: Props & {
+  readonly amountContext: string;
 }) {
   const locale = useBrowserLocale();
   const amountInputId = useId();
@@ -226,6 +247,7 @@ export default function UserPageRepNewRepSearch({
   const categoryErrorId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
+  const amountFocusSource = useRef<Element | null>(null);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -289,11 +311,6 @@ export default function UserPageRepNewRepSearch({
     category: selectedCategory,
   });
 
-  const amountContext = [
-    profile.id ?? profile.query ?? profile.display,
-    connectedProfile?.id,
-    activeProfileProxy?.id,
-  ].join(":");
   const amountScope = [amountContext, selectedCategory].join(":");
   const savedAmount = selectedCategory
     ? String(repState?.rater_contribution ?? 0)
@@ -313,14 +330,24 @@ export default function UserPageRepNewRepSearch({
   const amountReady = selectedCategory !== null && repState !== null;
   const focusSelectedAmount = useCallback(
     (input: HTMLInputElement | null) => {
-      if (selectedCategory && amountReady)
-        input?.focus({ preventScroll: true });
+      if (!input || !selectedCategory || !amountReady) return;
+      const source = amountFocusSource.current;
+      amountFocusSource.current = null;
+      if (!source) return;
+      const ownerDocument = input.ownerDocument;
+      if (
+        ownerDocument.activeElement === source ||
+        (ownerDocument.activeElement === ownerDocument.body &&
+          !source.isConnected)
+      ) {
+        input.focus({ preventScroll: true });
+      }
     },
     [selectedCategory, amountReady]
   );
   const haveChanged = amountNum !== currentRep;
   const overAllowance =
-    selectedCategory !== null && isRatingValue(amountStr) && !isValidValue;
+    amountReady && isRatingValue(amountStr) && !isValidValue;
   const isGrantDisabled =
     !selectedCategory ||
     isError ||
@@ -381,6 +408,8 @@ export default function UserPageRepNewRepSearch({
       });
       return;
     }
+    const focusSource =
+      searchInputRef.current?.ownerDocument.activeElement ?? null;
     setCheckingAvailability(!knownCategory);
     try {
       if (!knownCategory)
@@ -391,10 +420,11 @@ export default function UserPageRepNewRepSearch({
           },
         });
       if (request !== selectionRequest.current) return;
+      amountFocusSource.current = focusSource;
       setSelectedCategory(rep);
       setRepSearch(rep);
-      // Only a draft entered before the first category choice carries over.
-      // Switching categories must show that category's saved rating.
+      // Carry an amount entered without a selected category, including after
+      // Change category. Switching selected categories shows their saved rating.
       setAmountDraft((draft) =>
         !selectedCategory && draft?.scope === amountScope && draft.value
           ? { scope: [amountContext, rep].join(":"), value: draft.value }
@@ -531,6 +561,7 @@ export default function UserPageRepNewRepSearch({
     const newValue = event.target.value;
     setIsOpen(true);
     selectionRequest.current++;
+    amountFocusSource.current = null;
     setCheckingAvailability(false);
     setRepSearch(newValue);
     setError(null);
@@ -687,7 +718,7 @@ export default function UserPageRepNewRepSearch({
             disabled={mutating}
             placeholder="0"
             descriptionId={`${availableRepId} ${amountInputId}-hint`}
-            invalid={selectedCategory !== null && !isValidValue}
+            invalid={amountReady && !isValidValue}
           />
           <div
             role="status"

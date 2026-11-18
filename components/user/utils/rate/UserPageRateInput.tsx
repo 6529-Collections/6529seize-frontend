@@ -62,6 +62,7 @@ export default function UserPageRateInput({
   const valueAsNumber = getStringAsNumberOrZero(value);
   const isValidValue =
     isProxy || (valueAsNumber >= minMax.min && valueAsNumber <= minMax.max);
+  const showInvalid = invalid ?? !isValidValue;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.currentTarget.value;
@@ -117,7 +118,7 @@ export default function UserPageRateInput({
         onBlur={handleBlur}
         className={`${
           focusRingClassName ??
-          (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
+          (showInvalid ? "focus:tw-ring-red" : "focus:tw-ring-primary-400")
         } ${INPUT_CLASS_NAME} ${RATING_INPUT_SURFACE_CLASS} ${VARIANT_CLASSES[variant]}`}
       />
     </div>

@@ -336,6 +336,7 @@ test.describe("Profile NIC activity @local-only", () => {
     });
     const heading = page.getByRole("heading", { level: 1 });
     let imageWidth = 56;
+    const portraitWidths = new Map<number, number>();
     await page.route("**/_next/image?**", (route) => {
       const source = new URL(route.request().url()).searchParams.get("url");
       if (!source?.includes("QmRT2Ur5E1GooeiCWxqToiQXnnok6drPYxuK8J3RLnaMg8"))
@@ -362,9 +363,21 @@ test.describe("Profile NIC activity @local-only", () => {
         expect(pictureBox).not.toBeNull();
         expect(headingBox).not.toBeNull();
         if (width >= 1024) {
-          const gap = headingBox!.x - pictureBox!.x - pictureBox!.width;
+          await expect(image).toHaveCSS("object-fit", "contain");
+          // object-contain centers the visible image inside the rendered box.
+          const drawnWidth = Math.min(
+            pictureBox!.width,
+            (pictureBox!.height * pictureWidth) / 112
+          );
+          const drawnRight =
+            pictureBox!.x + (pictureBox!.width + drawnWidth) / 2;
+          const gap = headingBox!.x - drawnRight;
           expect(gap).toBeGreaterThanOrEqual(16);
           expect(gap).toBeLessThanOrEqual(24);
+          if (pictureWidth === 56) portraitWidths.set(width, drawnWidth);
+          if (pictureWidth === 112) {
+            expect(drawnWidth).toBeGreaterThan(portraitWidths.get(width)!);
+          }
         } else {
           expect(headingBox!.y).toBeGreaterThanOrEqual(
             pictureBox!.y + pictureBox!.height

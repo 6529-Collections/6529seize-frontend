@@ -675,6 +675,18 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("button", { name: "Save", exact: true })
     ).toBeEnabled();
     await expectFixedLayout();
+    await grant
+      .getByRole("button", { name: "Change category", exact: true })
+      .click();
+    await amount.fill("45");
+    await own
+      .getByRole("button", { name: "Artist 1,000", exact: true })
+      .click();
+    await expect(amount).toHaveValue("45");
+    await expectFocusedAmountWithoutSelection(amount);
+    await expect(
+      grant.getByText("Current Rep:", { exact: true }).locator("..")
+    ).toHaveText("Current Rep:+1,000");
     expect(allocationReads).toBe(1);
     expect(searches).toBe(2);
     expect(writes).toBe(0);
@@ -1131,6 +1143,52 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       ).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
     }
+  });
+
+  test("keeps REP header actions within phone width with enlarged text", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    await page.route(
+      `${getSandboxApiOrigin(baseURL)}/api/profiles/${TARGET}/rep/overview*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            total_rep: 9_000_000,
+            authenticated_user_contribution: 9_000_000,
+            contributor_count: 1,
+            contributors: { data: [], page: 1, next: false },
+          },
+        })
+    );
+    await page.setViewportSize({ width: 320, height: 844 });
+    await openProfile(page);
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "32px";
+    });
+    const rep = page
+      .getByRole("region", { name: "REP", exact: true })
+      .filter({ visible: true });
+    const summary = rep
+      .getByText("You assigned: 9,000,000", { exact: true })
+      .first();
+    const grant = rep.getByRole("button", { name: "Grant Rep", exact: true });
+    await expect(summary).toBeVisible();
+    await expect(grant).toBeVisible();
+    const summaryBox = await summary.boundingBox();
+    const grantBox = await grant.boundingBox();
+    expect(summaryBox).not.toBeNull();
+    expect(grantBox).not.toBeNull();
+    for (const box of [summaryBox!, grantBox!]) {
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(320);
+    }
+    expect(grantBox!.y).toBeGreaterThanOrEqual(
+      summaryBox!.y + summaryBox!.height + 8
+    );
+    await rep.screenshot({
+      path: testInfo.outputPath("rep-header-large-text.png"),
+    });
   });
 
   test("wraps REP contributors only when their content needs more room", async ({
@@ -2065,6 +2123,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
   test("keeps a Grant REP draft through delayed loading and reads its saved total after reload", async ({
     page,
     baseURL,
+    browserName,
   }) => {
     const api = getSandboxApiOrigin(baseURL);
     let rating = 20;
@@ -2162,9 +2221,16 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       name: "Your total REP for this category",
       exact: true,
     });
+    let pendingFocusRing = "";
+    const cancel = grant.getByRole("button", { name: "Cancel", exact: true });
     try {
       await amount.fill("35");
-      await amount.press("Tab");
+      await expect(amount).toHaveAttribute("aria-invalid", "false");
+      pendingFocusRing = await amount.evaluate(
+        (input) => getComputedStyle(input).boxShadow
+      );
+      await amount.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+      await expect(cancel).toBeFocused();
       await expect(amount).toHaveValue("35");
       await expect(
         grant.getByRole("button", { name: "Grant Rep", exact: true })
@@ -2176,6 +2242,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("button", { name: "Save", exact: true })
     ).toBeEnabled();
     await expect(amount).toHaveValue("35");
+    await expect(cancel).toBeFocused();
+    await amount.focus();
+    await expect(amount).toHaveCSS("box-shadow", pendingFocusRing);
     await expectDesktopRatingPosition(page, "Grant Rep");
     await grant.getByRole("button", { name: "Save", exact: true }).click();
     await expect(grant).toBeHidden();
@@ -3042,6 +3111,10 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Given edits require the isolated local API."
   );
+
+  test.beforeEach(async ({ context }) => {
+    await hideNextDevOverlay(context);
+  });
 
   for (const matter of ["REP", "NIC"] as const) {
     test(`${matter}: owner adjusts and removes from Given, then returns to the refreshed list`, async ({

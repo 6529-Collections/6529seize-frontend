@@ -153,7 +153,7 @@ export default function MobileRepTabContent({
               type={RateMatter.REP}
               hideOwnProfileMessage
             >
-              <div className="tw-flex tw-items-center tw-justify-end tw-gap-2">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
                 {overview !== null &&
                   overview.authenticated_user_contribution !== null &&
                   overview.authenticated_user_contribution !== 0 && (

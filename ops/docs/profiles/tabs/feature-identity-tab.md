@@ -242,13 +242,16 @@ show the profile-creation welcome.
 - Selecting a search result validates availability; assigned chips use their
   known category names. After choosing, the category stays in the search field.
   Its amount is focused once the current rating has loaded, with a caret and
-  focus border rather than highlighted text. Rate NIC focuses its amount on desktop only; opening it on a phone
+  focus border rather than highlighted text, provided you stayed on the category
+  selection control. Moving to another control while loading keeps that focus.
+  Rate NIC focuses its amount on desktop only; opening it on a phone
   does not summon the keyboard.
   Select its `×` (`Change category`) to choose another category and clear the draft.
 - The amount field is editable before category selection, with placeholder `0`.
   `Grant Rep` stays disabled until a category and valid changed amount are ready.
-  An amount typed before the first category choice is kept for that selection.
-  Switching to another category replaces the unsaved amount with that category's
+  An amount typed while no category is selected is kept for the next selection,
+  including a new amount entered after `Change category` clears the old draft.
+  Switching directly between selected categories instead loads that category's
   saved total, or zero for a new rating. You can type an amount while
   rating data loads; submitting stays disabled until the current contribution
   and allowance are available.
@@ -362,8 +365,9 @@ show the profile-creation welcome.
 
 - NIC has `Received` and `Given` views on desktop and mobile.
 - Both directions use a compact summary with a score, up to five avatars and a count,
-  matching REP. Avatars open individual profiles; the borderless count button
-  and chevron open the full list. Owners can adjust their Given ratings there.
+  matching REP. Desktop avatars open individual profiles; on touch, they open
+  the full list, where each handle links to its profile. The borderless count
+  button and chevron also open that list. Owners can adjust their Given ratings there.
 - The NIC total is green. In both `Received` and `Given` on desktop and mobile,
   contributor avatars, count and chevron are right-aligned on its number row.
   When a large total leaves too little room, the contributor group wraps below
