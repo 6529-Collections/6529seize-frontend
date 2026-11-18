@@ -177,10 +177,22 @@ async function openProfileInApp(page: Page) {
   const profileTabs = page.getByRole("navigation", {
     name: "Profile sections",
   });
-  // This web-only tab appears after the client has hydrated the profile nav.
-  await expect(
-    profileTabs.getByRole("link", { name: "Subscriptions" })
-  ).toBeAttached();
+  const subscriptions = profileTabs.getByRole("link", {
+    name: "Subscriptions",
+  });
+  if (test.info().project.name === "capacitor-ios-sim") {
+    // iOS intentionally hides Subscriptions. Its active-tab indicator is
+    // positioned after hydration, so it can signal the same ready nav.
+    await expect(
+      page
+        .getByRole("navigation", { name: "Profile sections" })
+        .locator('[data-profile-tabs-scroll] > div > span[aria-hidden="true"]')
+    ).toHaveCSS("opacity", "1");
+    await expect(subscriptions).toHaveCount(0);
+  } else {
+    // This web-only tab appears after the client has hydrated the profile nav.
+    await expect(subscriptions).toBeAttached();
+  }
   await profileTabs
     .getByRole("link", { name: "Identity", exact: true })
     .click();
@@ -312,6 +324,74 @@ test.describe("Profile NIC activity @local-only", () => {
       });
     }
   }
+
+  test("keeps the profile name close to narrow and square pictures", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    await installLogs(page, getSandboxApiOrigin(baseURL));
+    const image = page.getByRole("img", {
+      name: "profile-picture's profile picture",
+      exact: true,
+    });
+    const heading = page.getByRole("heading", { level: 1 });
+    let imageWidth = 56;
+    const portraitWidths = new Map<number, number>();
+    await page.route("**/_next/image?**", (route) => {
+      const source = new URL(route.request().url()).searchParams.get("url");
+      if (!source?.includes("QmRT2Ur5E1GooeiCWxqToiQXnnok6drPYxuK8J3RLnaMg8"))
+        return route.continue();
+      return route.fulfill({
+        contentType: "image/svg+xml",
+        body: `<svg xmlns="http://www.w3.org/2000/svg" width="${imageWidth}" height="112"><rect width="100%" height="100%" fill="#593878"/></svg>`,
+      });
+    });
+    for (const pictureWidth of [56, 112, 224]) {
+      imageWidth = pictureWidth;
+      await page.goto("/profile-picture");
+      await expect
+        .poll(() =>
+          image.evaluate(
+            (img: HTMLImageElement) => img.naturalWidth / img.naturalHeight
+          )
+        )
+        .toBeCloseTo(pictureWidth / 112, 1);
+      for (const width of [1280, 1024, 820, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        const pictureBox = await image.boundingBox();
+        const headingBox = await heading.boundingBox();
+        expect(pictureBox).not.toBeNull();
+        expect(headingBox).not.toBeNull();
+        if (width >= 1024) {
+          await expect(image).toHaveCSS("object-fit", "contain");
+          // object-contain centers the visible image inside the rendered box.
+          const drawnWidth = Math.min(
+            pictureBox!.width,
+            (pictureBox!.height * pictureWidth) / 112
+          );
+          const drawnRight =
+            pictureBox!.x + (pictureBox!.width + drawnWidth) / 2;
+          const gap = headingBox!.x - drawnRight;
+          expect(gap).toBeGreaterThanOrEqual(16);
+          expect(gap).toBeLessThanOrEqual(24);
+          if (pictureWidth === 56) portraitWidths.set(width, drawnWidth);
+          if (pictureWidth === 112) {
+            expect(drawnWidth).toBeGreaterThan(portraitWidths.get(width)!);
+          }
+        } else {
+          expect(headingBox!.y).toBeGreaterThanOrEqual(
+            pictureBox!.y + pictureBox!.height
+          );
+        }
+        await expectNoHorizontalOverflow(page);
+        if (pictureWidth === 56 && (width === 1280 || width === 390)) {
+          await page.screenshot({
+            path: testInfo.outputPath(`portrait-profile-header-${width}.png`),
+          });
+        }
+      }
+    }
+  });
 
   for (const startWidth of [390, 1440]) {
     test(`${startWidth}px retains both layouts' filters and pages across resizing`, async ({

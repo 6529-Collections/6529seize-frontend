@@ -36,6 +36,8 @@ The profile header appears on profile routes under `/{user}` and shows:
    - profile picture (image or gradient fallback)
    - profile picture overlapping the lower banner edge, with the name and
      metadata on the content surface below the banner
+   - desktop name spacing follows the picture's displayed width, so narrow
+     portrait pictures do not leave an empty square-sized gap
    - title row (display name, CIC icon, level, optional artist badge)
    - metadata row (classification and `Profile enabled: <Month Year>` when data
      exists)
