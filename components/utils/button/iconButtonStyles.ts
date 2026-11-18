@@ -31,7 +31,7 @@ const SIZE_CLASSES: Record<IconButtonSize, string> = {
 
 const TEXT_CLASSES: Record<IconButtonVariant, string> = {
   ghost: "tw-text-iron-300 desktop-hover:hover:tw-text-white",
-  muted: "tw-text-iron-500 desktop-hover:hover:tw-text-white",
+  muted: "tw-text-iron-500 desktop-hover:hover:tw-text-iron-400",
   subtle: "tw-text-iron-300 desktop-hover:hover:tw-text-white",
   secondary: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-50",
   outline: "tw-text-iron-300 desktop-hover:hover:tw-text-iron-100",
@@ -48,7 +48,7 @@ const SURFACE_CLASSES: Record<IconButtonVariant, string> = {
   muted:
     "tw-border-0 tw-bg-transparent desktop-hover:hover:tw-bg-iron-900 active:tw-bg-iron-900",
   subtle:
-    "tw-border tw-border-solid tw-border-iron-800 tw-bg-white/[0.04] desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-white/[0.08] active:tw-bg-white/10",
+    "tw-border tw-border-solid tw-border-iron-800/60 tw-bg-white/[0.04] desktop-hover:hover:tw-border-iron-700/60 desktop-hover:hover:tw-bg-white/[0.08] active:tw-bg-white/10",
   secondary:
     "tw-border-0 tw-bg-iron-800 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 desktop-hover:hover:tw-bg-iron-700",
   outline:
@@ -68,7 +68,7 @@ const INSET_SURFACE_CLASSES = {
   ghost:
     "tw-border-0 tw-bg-transparent desktop-hover:group-hover:tw-bg-iron-900 group-active:tw-bg-iron-800",
   subtle:
-    "tw-border tw-border-solid tw-border-iron-800 tw-bg-white/[0.04] desktop-hover:group-hover:tw-border-iron-700 desktop-hover:group-hover:tw-bg-white/[0.08] group-active:tw-bg-white/10",
+    "tw-border tw-border-solid tw-border-iron-800/60 tw-bg-white/[0.04] desktop-hover:group-hover:tw-border-iron-700/60 desktop-hover:group-hover:tw-bg-white/[0.08] group-active:tw-bg-white/10",
 };
 
 export interface IconButtonStyleOptions {

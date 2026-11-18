@@ -30,7 +30,12 @@ export type IconButtonLayout =
   | "scroll-tabs"
   | "scroll-profile"
   | "scroll-filter-left"
-  | "scroll-filter-right";
+  | "scroll-filter-right"
+  | "edit-profile-name"
+  | "edit-profile-classification"
+  | "edit-wave-name"
+  | "edit-setting"
+  | "edit-group";
 
 const TOOLBAR_BASE =
   "tw-group tw-inline-flex tw-cursor-pointer tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-p-0 tw-no-underline tw-transition-colors tw-duration-150 aria-[current=page]:tw-text-primary-400 aria-pressed:tw-text-primary-400 aria-expanded:tw-text-primary-400 desktop-hover:hover:tw-text-white focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none";
@@ -58,6 +63,8 @@ const MUTE_BASE =
   "tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-text-[13px] tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed motion-reduce:tw-transition-none";
 const SCROLL_FILTER_BASE =
   "tw-group tw-absolute tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-10 tw--translate-y-1/2 tw-cursor-pointer tw-items-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
+const EDIT_ICON_COLORS =
+  "tw-text-iron-500 desktop-hover:hover:tw-text-iron-400 focus-visible:tw-text-iron-400";
 
 function getNotificationStateClasses(
   selected: boolean,
@@ -134,6 +141,21 @@ const ROOT_CLASSES: Record<IconButtonLayout, string> = {
     "tw-group tw-absolute tw-top-1/2 tw-z-20 tw-inline-flex tw-h-10 tw-w-8 tw--translate-y-1/2 tw-items-center tw-justify-center tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400",
   "scroll-filter-left": SCROLL_FILTER_BASE + " tw-justify-start",
   "scroll-filter-right": SCROLL_FILTER_BASE + " tw-justify-end",
+  "edit-profile-name":
+    EDIT_ICON_COLORS +
+    " tw-absolute tw-inset-0 tw-m-0 tw-hidden tw-rounded-md tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-block",
+  "edit-profile-classification":
+    EDIT_ICON_COLORS +
+    " tw-absolute tw-inset-x-0 tw-top-1/2 tw-m-0 tw-hidden tw-h-6 -tw-translate-y-1/2 tw-border-none tw-bg-transparent tw-p-0 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 motion-reduce:tw-transition-none sm:tw-block",
+  "edit-wave-name":
+    EDIT_ICON_COLORS +
+    " tw-pointer-events-none tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 tw-opacity-0 tw-transition-all tw-duration-300 tw-ease-out focus:tw-outline-none focus-visible:tw-pointer-events-auto focus-visible:tw-opacity-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 touch-only:tw-pointer-events-auto touch-only:tw-opacity-100",
+  "edit-setting":
+    EDIT_ICON_COLORS +
+    " tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-size-7",
+  "edit-group":
+    EDIT_ICON_COLORS +
+    " tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-transition tw-duration-300 tw-ease-out disabled:tw-cursor-not-allowed disabled:tw-opacity-60 desktop-hover:hover:tw-bg-iron-800 sm:tw-size-7",
 };
 
 const SURFACE_CLASSES: Partial<Record<IconButtonLayout, string>> = {
@@ -159,7 +181,12 @@ export function getIconButtonLayoutClasses({
   const notification = layout.startsWith("notification-");
   const drop = layout.startsWith("drop-");
   let disabledClasses: string | undefined;
-  if (disabled && !notification && layout !== "drop-inline") {
+  if (
+    disabled &&
+    !notification &&
+    layout !== "drop-inline" &&
+    layout !== "edit-group"
+  ) {
     disabledClasses = drop
       ? "tw-cursor-default tw-opacity-50"
       : "tw-cursor-not-allowed tw-opacity-50";

@@ -196,7 +196,7 @@ export function AppWalletModalShell(
               onClick={onHide}
               disabled={dismissDisabled}
               size={44}
-              variant="ghost"
+              variant="muted"
               shape="circle"
               className="tw--mr-2"
             >

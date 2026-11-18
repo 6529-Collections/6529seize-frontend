@@ -312,7 +312,7 @@ export function CreateAppWalletModal(
                   : "appWallet.modal.hidePassword"
               )}
               size={40}
-              variant="ghost"
+              variant="muted"
               className="tw-absolute tw-right-1 tw-top-1/2 -tw-translate-y-1/2"
             >
               {passHidden ? (
@@ -535,7 +535,7 @@ export function UnlockAppWalletModal(
                   : "appWallet.modal.hidePassword"
               )}
               size={40}
-              variant="ghost"
+              variant="muted"
               className="tw-absolute tw-right-1 tw-top-1/2 -tw-translate-y-1/2"
             >
               {passHidden ? (
