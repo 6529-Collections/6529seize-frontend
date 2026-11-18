@@ -424,7 +424,7 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
               id={rationalePanelId}
               aria-hidden={!shouldPostRationale}
               inert={!shouldPostRationale}
-              className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${
+              className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-200 tw-ease-[var(--vote-reply-easing,ease-out)] motion-reduce:tw-transition-none ${
                 shouldPostRationale
                   ? "tw-grid-rows-[1fr] tw-opacity-100"
                   : "tw-grid-rows-[0fr] tw-opacity-0"

@@ -13,6 +13,8 @@ import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
 import { VoteModeControl } from "./VoteModeControl";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 
 interface VotingModalProps {
   readonly drop: ExtendedDrop;
@@ -25,6 +27,8 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const { isApp } = useDeviceInfo();
+  const { isCapacitor, isIos } = useCapacitor();
+  useLayoutViewportLock(isOpen && isCapacitor && isIos);
   const locale = useBrowserLocale();
   const [voteInputMode, setVoteInputMode] =
     useState<SingleWaveDropVoteMode>("slider");

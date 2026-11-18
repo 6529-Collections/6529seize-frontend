@@ -88,6 +88,9 @@ ranking, and voting rules retain their usual meaning.
 - Default single-drop panels use centered modal overlay on all screen sizes.
 - Memes single-drop panels use bottom sheet on small screens and centered modal
   on larger screens.
+- In the iPhone app, the voting sheet follows the keyboard while the wave
+  behind it keeps its position. Opening an optional reply uses the same motion
+  curve. Dismissing the keyboard preserves the vote amount and reply draft.
 - The ribbon and its largest positive and negative votes remain visible
   inside the `Top voters` section. Only the voter list beneath them expands;
   there is no second expandable breakdown.

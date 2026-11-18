@@ -70,7 +70,7 @@ export default function CompetitionVoteWithReply({
       <div
         aria-hidden={!rationale.shouldPostRationale}
         inert={!rationale.shouldPostRationale}
-        className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${
+        className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-200 tw-ease-[var(--vote-reply-easing,ease-out)] motion-reduce:tw-transition-none ${
           rationale.shouldPostRationale
             ? "tw-grid-rows-[1fr] tw-opacity-100"
             : "tw-grid-rows-[0fr] tw-opacity-0"

@@ -11,6 +11,8 @@ import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import { VoteModeControl } from "./VoteModeControl";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 
 interface MobileVotingModalProps {
   readonly drop: ExtendedDrop;
@@ -24,6 +26,9 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
   onClose,
 }) => {
   const locale = useBrowserLocale();
+  const { isCapacitor, isIos } = useCapacitor();
+  const followsIosKeyboard = isCapacitor && isIos;
+  useLayoutViewportLock(isOpen && followsIosKeyboard);
   const [voteInputMode, setVoteInputMode] =
     useState<SingleWaveDropVoteMode>("slider");
 
@@ -45,7 +50,12 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
       isOpen
       onClose={handleClose}
       title={t(locale, "waves.vote.modalTitle")}
-      surfaceClassName="tw-group/voting-dialog tw-bg-iron-950"
+      keyboardTransitionEasing={
+        followsIosKeyboard
+          ? "var(--native-keyboard-layout-transition-easing, ease-out)"
+          : undefined
+      }
+      surfaceClassName={`tw-group/voting-dialog tw-bg-iron-950 ${followsIosKeyboard ? "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]" : ""}`}
       headerClassName="tw-relative group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-absolute group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-right-4 group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-top-[calc(100%+33px)] group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-z-10 group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-mt-0 group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:-tw-translate-y-1/2"
       headerActions={
         <VoteModeControl value={voteInputMode} onChange={setVoteInputMode} />
