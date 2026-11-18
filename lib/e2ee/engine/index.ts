@@ -52,6 +52,7 @@ import {
   setAdmin,
 } from "./membership";
 import { ReadSync } from "./read-sync";
+import { readSyncStatus } from "./read-sync-status";
 import { searchHistory } from "./history-search";
 import { latestReadSeq } from "./history";
 import { previewReport, sendReport } from "./report";
@@ -339,6 +340,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
     this.ctx.store.getConversation(g.toLowerCase());
   getMessages = (g: string) => this.ctx.store.getMessages(g.toLowerCase());
   subscribe = (listener: () => void) => this.ctx.store.subscribe(listener);
+  getReadSyncStatus = () =>
+    readSyncStatus(this.ctx, {
+      invited: this.readSync.invitedSiblings(),
+      createDueAt: this.readSync.createDueAt(),
+      nextMaintenanceAt: (g) => this.controller.nextMaintenanceAt(g),
+    });
 
   // -- lifecycle --------------------------------------------------------------
 
