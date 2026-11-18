@@ -165,6 +165,11 @@ test.describe("About Pages @smoke @medium @large", () => {
       validator.getByRole("region", { name: "6529 Validator" })
     ).toHaveCount(0);
     await expectKeyboardFocusOutline(page, validator);
+    const ai = page.getByRole("main").getByRole("link", { name: "6529 AI" });
+    await expect(ai).toHaveAttribute("href", "/ai");
+    await expect(ai).toHaveAccessibleDescription(
+      "Run open-weights AI models on your own computer, and chat with them in your browser"
+    );
     // Hit the card padding to verify that the entire section is a link.
     await validator.click({ position: { x: 12, y: 12 } });
     await expect(page).toHaveURL(/\/validator$/);

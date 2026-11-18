@@ -355,9 +355,11 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     await settle(world);
     expect(unread(phone, g)).toBe(0);
 
-    // Once the phone can be added, it is; then both leave the old group.
+    // Once the phone can be added, it is, at the first pass after the
+    // making of all those groups leaves room in the hour's self-group claim
+    // budget; then both leave the old group.
     capable.mockRestore();
-    world.clock.advance(11 * 60_000);
+    world.clock.advance(61 * 60_000);
     await settle(world);
     const kept = dsGroups(world).find((group) => group.g === canonical);
     expect(kept?.roster.has(phoneKey)).toBe(true);

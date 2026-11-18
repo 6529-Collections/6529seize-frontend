@@ -259,6 +259,26 @@ const expectNoListEnrichmentCalls = () => {
 };
 
 describe("fetchWaveDropsFeedV2", () => {
+  it("preserves known entry references and treats malformed references as unknown", async () => {
+    const entry = { competition_id: "competition-1", entry_id: "entry-1" };
+    const drop = createDrop(1);
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave: { ...wave, has_competition: true },
+      drops: [
+        { ...drop, competition_entry: entry },
+        { ...drop, competition_entry: null },
+        drop,
+        { ...drop, competition_entry: { entry_id: "incomplete" } },
+      ],
+    });
+
+    const result = await fetchWaveDropsFeedV2({ waveId: wave.id, limit: 4 });
+    expect(result.drops[0]).toMatchObject({ competition_entry: entry });
+    expect(result.drops[1]).toMatchObject({ competition_entry: null });
+    expect(result.drops[2]).not.toHaveProperty("competition_entry");
+    expect(result.drops[3]).not.toHaveProperty("competition_entry");
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });

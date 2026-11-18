@@ -3,10 +3,12 @@
 import ProfileActivityLogsResults from "./ProfileActivityLogsResults";
 import ProfileNicActivityLogs from "./ProfileNicActivityLogs";
 
-import type { ProfileActivityLog } from "@/entities/IProfile";
-import type { CountlessPage } from "@/helpers/Types";
-import { commonApiFetch } from "@/services/api/common-api";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import {
+  PENDING_PROFILE_QUERY_VIEWER,
+  useProfileQueryViewer,
+} from "@/hooks/useProfileQueryViewer";
+import { profileActivityLogsQueryOptions } from "@/services/api/profile-page-queries";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import ProfileActivityLogsFilter from "./filter/ProfileActivityLogsFilter";
 
@@ -17,7 +19,6 @@ import {
   type ProfileActivityLogType,
   RateMatter,
 } from "@/types/enums";
-import { QueryKey } from "../react-query-wrapper/ReactQueryWrapper";
 import type { CommonSelectItem } from "../utils/select/CommonSelect";
 import CommonTabs from "../utils/select/tabs/CommonTabs";
 
@@ -131,33 +132,15 @@ export default function ProfileActivityLogs({
   });
   const isProfileNic = params.activity_scope === "NIC";
 
-  const { isLoading, data: logs } = useQuery<CountlessPage<ProfileActivityLog>>(
-    {
-      queryKey: [
-        QueryKey.PROFILE_LOGS,
-        {
-          ...params,
-        },
-      ],
-      queryFn: async () =>
-        await commonApiFetch<
-          CountlessPage<ProfileActivityLog>,
-          ActivityLogParamsConverted
-        >({
-          endpoint: `profile-logs`,
-          params: params,
-        }),
-      placeholderData: keepPreviousData,
-      enabled: enabled && !isProfileNic,
-    }
-  );
+  const viewer = useProfileQueryViewer();
+  const { data: logs } = useQuery({
+    ...profileActivityLogsQueryOptions(params, viewer),
+    placeholderData: (previousData, previousQuery) =>
+      previousQuery?.queryKey[2] === viewer ? previousData : undefined,
+    enabled:
+      enabled && !isProfileNic && viewer !== PENDING_PROFILE_QUERY_VIEWER,
+  });
 
-  useEffect(() => {
-    if (isLoading) return;
-    if (logs?.page === 1 && !logs.data.length) {
-      setCurrentPage(1);
-    }
-  }, [logs?.page, isLoading]);
   return (
     <div className={`${initialParams.handleOrWallet ? "" : "tw-mt-2"} `}>
       <div

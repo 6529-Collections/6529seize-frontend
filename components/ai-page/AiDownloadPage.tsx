@@ -11,6 +11,7 @@ import { t, tRich, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/ai-download";
 import {
   getNewestAiRelease,
+  getOfferedAiRelease,
   type AiRelease,
   type AiReleaseFeedSnapshot,
 } from "@/lib/ai-page/releaseFeed";
@@ -30,6 +31,7 @@ import AiDownloadHero, {
 } from "./AiDownloadHero";
 import AiDownloads from "./AiDownloads";
 import AiPageFrame, { AI_BODY, AI_CARD, AI_H2, AI_MUTED } from "./AiPageFrame";
+import AiReleaseAlert from "./AiReleaseAlert";
 import AiScreenshot from "./AiScreenshot";
 import AiTrustBadges from "./AiTrustBadges";
 import AiVerify from "./AiVerify";
@@ -76,7 +78,7 @@ function toHeroOption(
           version: release.version,
           needs: installer.needs,
         }),
-    badges: <AiTrustBadges signed={installer.file.signed} />,
+    badges: <AiTrustBadges file={installer.file} />,
   };
 }
 
@@ -136,11 +138,29 @@ function heroText(): AiHeroText {
   };
 }
 
-/** No release to offer: none uploaded yet, or the list failed to load. */
+function noReleaseText(
+  state: AiReleaseFeedSnapshot["state"],
+  newest: AiRelease | undefined
+): string {
+  if (newest?.unsafeReason) {
+    return t(LOCALE, "ai.download.unsafe", { version: newest.version });
+  }
+  return t(
+    LOCALE,
+    state === "error" ? "ai.download.unavailable" : "ai.download.notOutYet"
+  );
+}
+
+/**
+ * No release to offer: none uploaded yet, the list failed to load, or it
+ * calls the newest release unsafe.
+ */
 function NoRelease({
   state,
+  newest,
 }: {
   readonly state: AiReleaseFeedSnapshot["state"];
+  readonly newest: AiRelease | undefined;
 }) {
   return (
     <div className={`${AI_CARD} tw-flex tw-items-start tw-gap-3 tw-p-5`}>
@@ -148,14 +168,7 @@ function NoRelease({
         aria-hidden="true"
         className="tw-mt-0.5 tw-size-5 tw-flex-none tw-text-iron-400"
       />
-      <p className={`tw-m-0 ${AI_BODY}`}>
-        {t(
-          LOCALE,
-          state === "error"
-            ? "ai.download.unavailable"
-            : "ai.download.notOutYet"
-        )}
-      </p>
+      <p className={`tw-m-0 ${AI_BODY}`}>{noReleaseText(state, newest)}</p>
     </div>
   );
 }
@@ -163,10 +176,28 @@ function NoRelease({
 const HOW: readonly {
   readonly title: MessageKey;
   readonly body: MessageKey;
+  /** Where to read more, and the link's words. */
+  readonly href: string;
+  readonly link: MessageKey;
 }[] = [
-  { title: "ai.how.install.title", body: "ai.how.install.body" },
-  { title: "ai.how.model.title", body: "ai.how.model.body" },
-  { title: "ai.how.chat.title", body: "ai.how.chat.body" },
+  {
+    title: "ai.how.install.title",
+    body: "ai.how.install.body",
+    href: "/ai/guide",
+    link: "ai.how.install.link",
+  },
+  {
+    title: "ai.how.model.title",
+    body: "ai.how.model.body",
+    href: "/ai/models",
+    link: "ai.download.more.models",
+  },
+  {
+    title: "ai.how.chat.title",
+    body: "ai.how.chat.body",
+    href: "/ai/use",
+    link: "ai.download.more.use",
+  },
 ];
 
 /** Install, pick a model, chat: the whole path, in three lines. */
@@ -193,15 +224,13 @@ function HowItWorks() {
                 {t(LOCALE, step.title)}
               </h3>
               <p className={`tw-m-0 ${AI_MUTED}`}>{t(LOCALE, step.body)}</p>
-              {index === 0 && (
-                <Link
-                  href="/ai/guide"
-                  className={`tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-text-sm sm:tw-min-h-0 ${LINK}`}
-                >
-                  {t(LOCALE, "ai.how.install.link")}
-                  <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
-                </Link>
-              )}
+              <Link
+                href={step.href}
+                className={`tw-mt-3 tw-inline-flex tw-min-h-11 tw-items-center tw-gap-1 tw-text-sm sm:tw-min-h-0 ${LINK}`}
+              >
+                {t(LOCALE, step.link)}
+                <ArrowRightIcon aria-hidden="true" className="tw-size-4" />
+              </Link>
             </div>
           </li>
         ))}
@@ -242,15 +271,19 @@ export default function AiDownloadPage({
   /** The server's guess at the visitor's system, from the User-Agent. */
   readonly platform: VisitorPlatform;
 }) {
-  const release = getNewestAiRelease(snapshot.releases);
+  const newest = getNewestAiRelease(snapshot.releases);
+  const release = getOfferedAiRelease(snapshot.releases);
   const installers = release ? groupAiReleaseFiles(release).installers : [];
   return (
     <AiPageFrame
       current="download"
       eyebrow={t(LOCALE, "ai.download.eyebrow")}
-      version={release?.version}
+      version={newest?.version}
       title={t(LOCALE, "ai.download.title")}
       lead={t(LOCALE, "ai.download.lead")}
+      alert={
+        newest && <AiReleaseAlert release={newest} support={snapshot.support} />
+      }
     >
       <section
         id="download"
@@ -267,7 +300,7 @@ export default function AiDownloadPage({
             text={heroText()}
           />
         ) : (
-          <NoRelease state={snapshot.state} />
+          <NoRelease state={snapshot.state} newest={newest} />
         )}
       </section>
 
@@ -275,8 +308,8 @@ export default function AiDownloadPage({
         <AiScreenshot
           slot={AI_SCREENSHOTS.models}
           alt={t(LOCALE, "ai.download.screenshot")}
+          phoneAlt={t(LOCALE, "ai.download.screenshotPhone")}
           caption={t(LOCALE, "ai.download.screenshotCaption")}
-          priority
         />
       </div>
 

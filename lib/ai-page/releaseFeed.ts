@@ -1,10 +1,15 @@
+import type { ReleaseListSnapshot } from "@/lib/release-section/releaseList";
 import {
   compareVersions,
   parseVersion,
+  type ValidatorFeedSupport,
+  type ValidatorRelease,
+  type ValidatorReleaseFile,
   type Version,
 } from "@/lib/validator-page/releaseFeed";
 
 import { isAiFeedSignatureValid } from "./feedSignature";
+import { aiReleaseList } from "./releaseList";
 import {
   AI_FEED_OBJECT_KEY,
   AI_FEED_SIGNATURE_OBJECT_KEY,
@@ -23,6 +28,18 @@ const AI_SYSTEMS = [
 
 export type AiSystem = (typeof AI_SYSTEMS)[number];
 
+/**
+ * How the release list vouches for a file, by its type, as the release
+ * standard's R62 words it: `publisher`, a Windows program signed by 6529
+ * Collection LLC; `apple`, a Mac disk image with an Apple Developer ID,
+ * notarized; `list`, any other file, covered by its SHA-256 in the signed
+ * list (the Linux packages carry no signature of their own).
+ */
+export type AiSignedBy = "publisher" | "apple" | "list";
+
+/** The publisher Windows names for a signed 6529 AI program. */
+export const AI_PUBLISHER = "6529 Collection LLC";
+
 export type AiReleaseFile = {
   readonly name: string;
   /**
@@ -37,10 +54,17 @@ export type AiReleaseFile = {
   readonly size: number | null;
   /**
    * The name the visitor's system shows for the file's code signature, as
-   * the feed gives it; null for a file with no code signature. The site
-   * does not check code signatures.
+   * the Ed25519 feed gives it, or the publisher of a Windows program in a
+   * list of format 1; null for a file with no code signature. The site does
+   * not check code signatures.
    */
   readonly signed: string | null;
+  /**
+   * In a list of format 1, which has no `system` or `signed` per file: how
+   * the list vouches for the file, by its type. Absent in the Ed25519
+   * feed, whose `signed` says it.
+   */
+  readonly signedBy?: AiSignedBy | undefined;
 };
 
 export type AiRelease = {
@@ -51,22 +75,40 @@ export type AiRelease = {
   readonly channel: string;
   readonly notes: string | null;
   readonly files: readonly AiReleaseFile[];
+  /**
+   * From a list of format 1 only: the list marks the release urgent (or
+   * gives a severity the site doesn't know, which counts as urgent), and
+   * why, in a line.
+   */
+  readonly urgent?: boolean | undefined;
+  readonly reason?: string | null | undefined;
+  /** From a list of format 1 only: why `unsafe_versions` lists it. */
+  readonly unsafeReason?: string | null | undefined;
 };
 
 type FeedObject = Extract<AiBucketObject, { state: "found" }>;
 
 export type AiReleaseFeedSnapshot = {
   /**
-   * `missing` until the first feed is uploaded. `error` when S3 fails, or
-   * when the feed's signature is missing or does not verify with a key in
-   * `feedSigningKeys.ts`, its format is not one this site reads, or it is
-   * older than one already served: then the pages offer nothing.
+   * `missing` until the first list is uploaded. `error` when S3 fails, or
+   * when the list's signature is missing or does not verify with a trusted
+   * key, its format is not one this site reads, or it is older than one
+   * already served: then the pages offer nothing.
    */
   readonly state: "ok" | "missing" | "error";
   readonly feed: FeedObject | null;
   readonly signature: FeedObject | null;
   /** Highest version first. Entries the site cannot use are left out. */
   readonly releases: readonly AiRelease[];
+  /**
+   * `list` for the bundle in the validator's format 1, `ed25519` for the
+   * feed in 6529 AI's first format; absent without a list.
+   */
+  readonly source?: "list" | "ed25519" | undefined;
+  /** The bundle's pair, sent as `X-Release-List-Pair`; list only. */
+  readonly pairId?: string | undefined;
+  /** `min_supported`, `deadline` and `deadline_reason`; list only. */
+  readonly support?: ValidatorFeedSupport | undefined;
 };
 
 const FEED_FORMAT = "6529-ai-releases/1";
@@ -330,14 +372,20 @@ async function fetchSnapshot(): Promise<AiReleaseFeedSnapshot> {
     }
     highestSequence = decoded.sequence;
   }
-  return { state: "ok", feed, signature, releases: decoded.releases };
+  return {
+    state: "ok",
+    source: "ed25519",
+    feed,
+    signature,
+    releases: decoded.releases,
+  };
 }
 
 /**
- * The feed and its signature, read together so they always match, and
- * reused for a minute. A new release shows within that minute.
+ * The Ed25519 feed and its signature, read together so they always match,
+ * and reused for a minute. A new release shows within that minute.
  */
-export async function getAiReleaseFeedSnapshot(): Promise<AiReleaseFeedSnapshot> {
+async function getEd25519FeedSnapshot(): Promise<AiReleaseFeedSnapshot> {
   const now = Date.now();
   if (cachedSnapshot && now - cachedSnapshot.loadedAt < SNAPSHOT_TTL_MS) {
     return cachedSnapshot.snapshot;
@@ -372,10 +420,137 @@ export async function getAiReleaseFeedSnapshot(): Promise<AiReleaseFeedSnapshot>
   return served;
 }
 
-/** Test hook: forget the cached feed. */
+// The file names 6529 AI's release tool gives each system's downloads
+// (its deploy/release/release.py, feed_files): `<name>-<version>-<system>`
+// for the Mac, Windows and the archives, Debian's own form for the .deb.
+const SYSTEM_BY_NAME: readonly (readonly [RegExp, AiSystem])[] = [
+  [/-macos-arm64\.dmg$/, "macos-arm64"],
+  [/-windows-x64-setup\.exe$/, "windows-x64"],
+  [/^6529-ai-cuda_[^_]+_amd64\.deb$/, "linux-x86_64-cuda"],
+  [/^6529-ai_[^_]+_amd64\.deb$/, "linux-x86_64-cpu"],
+  [/^6529-ai_[^_]+_arm64\.deb$/, "linux-arm64-cpu"],
+  [/-linux-x86_64-cpu\.tar\.gz$/, "linux-x86_64-cpu"],
+  [/-linux-x86_64-cuda\.tar\.gz$/, "linux-x86_64-cuda"],
+  [/-linux-arm64-cpu\.tar\.gz$/, "linux-arm64-cpu"],
+];
+
+/**
+ * The system a file is for, from its name; null for a file that is no
+ * system's download, such as `SHA256SUMS` or `NOTES.md`.
+ */
+function systemOfFileName(name: string): AiSystem | null {
+  return SYSTEM_BY_NAME.find(([pattern]) => pattern.test(name))?.[1] ?? null;
+}
+
+/** How the release list vouches for a file, by its type (R62). */
+export function signedByOf(
+  file: Pick<AiReleaseFile, "name" | "system">
+): AiSignedBy {
+  if (file.system === "windows-x64" && file.name.endsWith(".exe")) {
+    return "publisher";
+  }
+  if (file.system === "macos-arm64" && file.name.endsWith(".dmg")) {
+    return "apple";
+  }
+  return "list";
+}
+
+function fromListFile(file: ValidatorReleaseFile): AiReleaseFile {
+  const system = systemOfFileName(file.name);
+  const signedBy = signedByOf({ name: file.name, system });
+  return {
+    name: file.name,
+    system,
+    sha256: file.sha256,
+    size: file.size,
+    signed: signedBy === "publisher" ? AI_PUBLISHER : null,
+    signedBy,
+  };
+}
+
+function fromListRelease(release: ValidatorRelease): AiRelease {
+  return {
+    version: release.version,
+    date: release.publishedAt.slice(0, 10),
+    commit: release.commit,
+    channel: release.channel,
+    notes: parseNotes(release.notes),
+    files: release.files.map(fromListFile),
+    urgent: release.urgent,
+    reason: release.reason,
+    unsafeReason: release.unsafeReason,
+  };
+}
+
+// One conversion per list read: the snapshot object stays the same while
+// the list does.
+const converted = new WeakMap<ReleaseListSnapshot, AiReleaseFeedSnapshot>();
+
+function fromReleaseList(snapshot: ReleaseListSnapshot): AiReleaseFeedSnapshot {
+  const known = converted.get(snapshot);
+  if (known) {
+    return known;
+  }
+  const { list, feed, signature } = snapshot;
+  const result: AiReleaseFeedSnapshot =
+    snapshot.state === "ok" && list && feed && signature
+      ? {
+          state: "ok",
+          source: "list",
+          feed: { state: "found", ...feed },
+          signature: { state: "found", ...signature },
+          pairId: snapshot.pairId,
+          releases: list.releases.map(fromListRelease),
+          support: list.support,
+        }
+      : {
+          state: snapshot.state === "missing" ? "missing" : "error",
+          feed: null,
+          signature: null,
+          releases: [],
+        };
+  converted.set(snapshot, result);
+  return result;
+}
+
+// Set once this server has served the bundle. From then on the Ed25519
+// feed, which stops at the last release before the bundle, is never served
+// again: a bundle that fails keeps its last good list for an hour, then the
+// pages offer nothing, rather than go back to an older list. It starts
+// again when the server does, as the sequence floors do.
+let servedList = false;
+
+/**
+ * 6529 AI's releases, as /ai, its downloads and /ai/releases.json read
+ * them: the bundle in the validator's format 1 when it is present and
+ * verifies with a key in `releaseListKeys.ts`, and otherwise the Ed25519
+ * feed. Each is reused for a minute, so a new release shows within it.
+ */
+export async function getAiReleaseFeedSnapshot(): Promise<AiReleaseFeedSnapshot> {
+  const list = await aiReleaseList.snapshot();
+  if (list.state === "ok") {
+    servedList = true;
+  }
+  return servedList ? fromReleaseList(list) : getEd25519FeedSnapshot();
+}
+
+/**
+ * The release the pages offer and hand out: the newest, unless the list
+ * says it is unsafe to run. Then none is offered.
+ */
+export function getOfferedAiRelease(
+  releases: readonly AiRelease[]
+): AiRelease | undefined {
+  const newest = releases[0];
+  return newest?.unsafeReason ? undefined : newest;
+}
+
+/** Test hook: forget the cached lists, the floors and which was served. */
 export function resetAiReleaseFeedCacheForTests(): void {
   cachedSnapshot = null;
   lastGoodSnapshot = null;
   inFlight = null;
   highestSequence = -1;
+  servedList = false;
+  aiReleaseList.resetForTests();
 }

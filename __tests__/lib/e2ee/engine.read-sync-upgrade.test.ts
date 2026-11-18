@@ -6,7 +6,8 @@
  * without the self-group capability, are still on the server, handed out
  * oldest first (D175, P60 §2 rule 6).
  */
-import type { EngineContext } from "@/lib/e2ee/engine/context";
+import { checkpoint, type EngineContext } from "@/lib/e2ee/engine/context";
+import { E2EE_CIPHERSUITE } from "@/lib/e2ee/grant";
 import { MlsClient } from "@/lib/e2ee/mls-adapter";
 import type { StoredDevice } from "@/lib/e2ee/records";
 import {
@@ -137,6 +138,28 @@ async function update(
   return updated;
 }
 
+/** The device uploads one-time KeyPackages until 30 are queued. */
+async function fillQueue(world: World, device: TestDevice): Promise<void> {
+  const ctx = contextOf(device);
+  const queued = poolOf(world, keyOf(device))?.oneTime.length ?? 0;
+  if (!ctx.mls || queued >= 30) return;
+  const made = ctx.mls.createKeyPackages(
+    30 - queued,
+    false,
+    30 * 86_400,
+    E2EE_CIPHERSUITE
+  );
+  // Like the client: private halves stored before the public ones leave.
+  await checkpoint(ctx);
+  await ctx.api.uploadKeyPackages(keyOf(device), {
+    key_packages: made.map((item) => ({
+      data: item.data,
+      last_resort: false,
+      expires_at: item.expires_at,
+    })),
+  });
+}
+
 /** Counts this device's claims of `deviceKey`'s KeyPackages from now on. */
 function countClaims(device: TestDevice, deviceKey: string): () => number {
   const api = contextOf(device).api;
@@ -153,26 +176,36 @@ function countClaims(device: TestDevice, deviceKey: string): () => number {
   return () => count;
 }
 
+/** Alice's KeyPackage claims so far (every device counts, as on the server). */
+const claimsOf = (world: World, profileId: string): number =>
+  world.ds.state.requests.filter(
+    (r) =>
+      r.profileId === profileId &&
+      r.method === "POST" &&
+      r.path === "e2ee/key-packages/claim"
+  ).length;
+
+const rateLimited = (world: World, profileId: string): number =>
+  world.ds.state.requests.filter(
+    (r) => r.profileId === profileId && r.status === 429
+  ).length;
+
 interface Timeline {
   /** Minutes after the phone updated. */
   capableKeyPackages: number | null;
   /** A self group holds both devices: read positions flow both ways. */
   sharedGroup: number | null;
-  /** The phone is in the laptop's self group. */
-  inLaptopGroup: number | null;
-  /** One self group is left, holding both. */
-  settled: number | null;
   /** The laptop's read reached the phone. */
   readStateSynced: number | null;
-  /** The laptop maintained its self group at once on seeing the update. */
-  earlyMaintenance: number[];
+  /** Alice's claims in each hour after the update. */
+  claimsPerHour: number[];
 }
 
 /**
  * The laptop already runs the new client and has a self group; the phone
  * updates with its older KeyPackages still queued on the server. Steps the
- * clock a minute at a time; every device syncs each step, about as often as
- * the idle poll (30 s).
+ * clock a minute at a time (every device syncs each step, about as often as
+ * the idle poll) until both share a self group and the phone has the read.
  */
 async function phoneUpdates(
   world: World,
@@ -180,7 +213,7 @@ async function phoneUpdates(
   laptop: TestDevice,
   phone: TestDevice,
   g: string,
-  options: { createdToday?: boolean } = {}
+  maxMinutes: number
 ): Promise<Timeline> {
   const [laptopGroup, ...others] = selfGroupsOf(world, "alice");
   if (!laptopGroup) throw new Error("no self group");
@@ -193,56 +226,39 @@ async function phoneUpdates(
   const timeline: Timeline = {
     capableKeyPackages: null,
     sharedGroup: null,
-    inLaptopGroup: null,
-    settled: null,
     readStateSynced: null,
-    earlyMaintenance: [],
-  };
-  let start = world.clock.now();
-  const minutes = () => (world.clock.now() - start) / MINUTE;
-  const deps = (
-    laptop.engine as unknown as {
-      readSync: { deps: { maintain: (g: string) => void } };
-    }
-  ).readSync.deps;
-  const maintain = deps.maintain;
-  deps.maintain = (group) => {
-    timeline.earlyMaintenance.push(minutes());
-    maintain(group);
+    claimsPerHour: [],
   };
   const uploads = uploadsOf(world, phoneKey);
-  const updated = await update(world, alice, phone, (record) => {
-    if (options.createdToday === true) {
-      // It made a self group today, so it makes no other until tomorrow.
-      record.readSync = { unsent: [], createdAt: world.clock.now() };
-    }
-  });
-  start = world.clock.now();
+  const updated = await update(world, alice, phone);
+  const start = world.clock.now();
+  const claimsAtStart = claimsOf(world, "alice");
+  const minutes = () => (world.clock.now() - start) / MINUTE;
   const first = (value: number | null, now: boolean): number | null =>
     value ?? (now ? minutes() : null);
-  const both = (group: FakeGroup) =>
-    group.roster.has(phoneKey) && group.roster.has(laptopKey);
-  for (let step = 0; step <= 60; step += 1) {
+  for (let step = 0; step <= maxMinutes; step += 1) {
     await settle(world);
-    const groups = selfGroupsOf(world, "alice");
     timeline.capableKeyPackages = first(
       timeline.capableKeyPackages,
       uploadsOf(world, phoneKey) > uploads
     );
-    timeline.sharedGroup = first(timeline.sharedGroup, groups.some(both));
-    timeline.inLaptopGroup = first(
-      timeline.inLaptopGroup,
-      laptopGroup.roster.has(phoneKey)
-    );
-    timeline.settled = first(
-      timeline.settled,
-      groups.length === 1 && groups.every(both)
+    timeline.sharedGroup = first(
+      timeline.sharedGroup,
+      selfGroupsOf(world, "alice").some(
+        (group) => group.roster.has(phoneKey) && group.roster.has(laptopKey)
+      )
     );
     timeline.readStateSynced = first(
       timeline.readStateSynced,
       updated.engine.getConversation(g)?.unread === 0
     );
-    if (timeline.settled !== null && timeline.readStateSynced !== null) {
+    const hour = Math.floor(minutes() / 60);
+    const earlier = timeline.claimsPerHour
+      .slice(0, hour)
+      .reduce((sum, count) => sum + count, 0);
+    timeline.claimsPerHour[hour] =
+      claimsOf(world, "alice") - claimsAtStart - earlier;
+    if (timeline.sharedGroup !== null && timeline.readStateSynced !== null) {
       break;
     }
     world.clock.advance(MINUTE);
@@ -265,14 +281,8 @@ async function readOnLaptop(world: World, laptop: TestDevice): Promise<string> {
   return g;
 }
 
-/** Synced within minutes; one self group left within one listing pass. */
-function expectQuick(timeline: Timeline): void {
-  // The phone replaces its last-resort KeyPackage as it starts.
-  expect(timeline.capableKeyPackages).toBe(0);
-  expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(4);
-  expect(timeline.readStateSynced ?? Infinity).toBeLessThanOrEqual(4);
-  expect(timeline.settled ?? Infinity).toBeLessThanOrEqual(12);
-}
+/** Self-group claims keep to their budget: 24 an hour per profile. */
+const SELF_GROUP_BUDGET = 24;
 
 describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
   let keyPackages: ReturnType<typeof oldKeyPackages>;
@@ -292,11 +302,18 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     const phone = await olderClientDevice(world, alice, keyPackages.old);
     const g = await readOnLaptop(world, laptop);
 
-    expectQuick(await phoneUpdates(world, alice, laptop, phone, g));
+    const timeline = await phoneUpdates(world, alice, laptop, phone, g, 10);
+    // The phone replaces its last-resort KeyPackage as it starts, waits
+    // two minutes to be added, then makes its own self group with the
+    // laptop, whose KeyPackages are capable: one claim.
+    expect(timeline.capableKeyPackages).toBe(0);
+    expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(4);
+    expect(timeline.readStateSynced ?? Infinity).toBeLessThanOrEqual(4);
+    expect(timeline.claimsPerHour[0]).toBeLessThanOrEqual(SELF_GROUP_BUDGET);
     for (const device of world.devices) device.engine.dispose();
   });
 
-  it("does so when the laptop's KeyPackages are older too, and claims through an older client's pool once", async () => {
+  it("shares a self group within the hour's budget when the laptop's KeyPackages are older too", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice", { readSync: false });
     runsOlderClient(world, alice.primary, keyPackages.old);
@@ -305,25 +322,36 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     // The laptop updates first; the phone stays on the older client.
     const laptop = await update(world, alice, alice.primary);
     const claims = countClaims(laptop, keyOf(phone));
-    for (let step = 0; step < 120; step += 1) {
+    for (let step = 0; step < 24; step += 1) {
       await settle(world);
-      world.clock.advance(MINUTE);
+      world.clock.advance(5 * MINUTE);
     }
-    // The laptop made a self group of its own and claimed through the
-    // phone's older KeyPackages once, then one per maintenance pass.
+    // While the phone runs the older client, the laptop claims its
+    // KeyPackages within the budget (about two hours here).
     expect(selfGroupsOf(world, "alice")).toHaveLength(1);
-    expect(claims()).toBeGreaterThan(20);
-    expect(claims()).toBeLessThanOrEqual(31 + 12);
+    expect(claims()).toBeGreaterThan(0);
+    expect(claims()).toBeLessThanOrEqual(2 * SELF_GROUP_BUDGET);
 
     const g = await readOnLaptop(world, laptop);
-    expectQuick(await phoneUpdates(world, alice, laptop, phone, g));
+    const timeline = await phoneUpdates(world, alice, laptop, phone, g, 150);
+    expect(timeline.capableKeyPackages).toBe(0);
+    // An older queue holds up to 30 KeyPackages; the device with the
+    // lowest key spends 22 claims an hour on self groups, the other 2, so
+    // one of them reaches a capable KeyPackage within about 70 minutes.
+    expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(80);
+    expect(timeline.readStateSynced ?? Infinity).toBeLessThanOrEqual(
+      (timeline.sharedGroup ?? Infinity) + 1
+    );
+    for (const claimsInHour of timeline.claimsPerHour) {
+      expect(claimsInHour).toBeLessThanOrEqual(SELF_GROUP_BUDGET);
+    }
     for (const device of world.devices) device.engine.dispose();
   });
 
   /**
-   * The laptop has a self group; the phone, on the older client with a full
-   * pool of its KeyPackages queued, updates but makes no self group of its
-   * own (it made one today), so only the laptop can add it.
+   * The laptop has a self group; the phone, on the older client with one
+   * older KeyPackage left in its queue, updates but makes no self group of
+   * its own (it made one today), so only the laptop can add it.
    */
   async function onlyTheLaptopCanAdd() {
     const world = await createWorld();
@@ -332,11 +360,32 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     await settle(world);
     const phone = await olderClientDevice(world, alice, keyPackages.old);
     const g = await readOnLaptop(world, laptop);
-    // The older client refilled its pool with more of its KeyPackages.
-    world.clock.advance(11 * MINUTE);
-    await settle(world);
     const phoneKey = keyOf(phone);
-    expect(poolOf(world, phoneKey)?.oneTime.length).toBeGreaterThan(20);
+    // The phone goes offline with two older KeyPackages queued; one is
+    // kept back to be queued again before it updates.
+    stopDevice(world, phone);
+    const pool = poolOf(world, phoneKey);
+    if (!pool) throw new Error("no KeyPackages");
+    pool.oneTime.splice(2);
+    const [spare] = pool.oneTime.splice(1);
+    if (!spare) throw new Error("no spare KeyPackage");
+    // The laptop claims through the queue to the phone's last-resort
+    // KeyPackage, which lacks the capability: an older client, which it
+    // then leaves alone.
+    const laptopRecord = () => contextOf(laptop).device?.readSync;
+    for (
+      let step = 0;
+      step < 12 && laptopRecord()?.claimedThrough?.[phoneKey] === undefined;
+      step += 1
+    ) {
+      world.clock.advance(11 * MINUTE);
+      await settle(world);
+    }
+    expect(laptopRecord()?.claimedThrough?.[phoneKey]).toBeDefined();
+    // An hour later the budget is free again; one older KeyPackage queued.
+    world.clock.advance(61 * MINUTE);
+    await settle(world);
+    pool.oneTime.unshift(spare);
     const [laptopGroup] = selfGroupsOf(world, "alice");
     if (!laptopGroup) throw new Error("no self group");
     const claims = countClaims(laptop, phoneKey);
@@ -389,17 +438,17 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
       listDevices,
     } = await onlyTheLaptopCanAdd();
     // The phone's last-resort KeyPackage changed, so the laptop maintains
-    // its self group at once and claims through the older KeyPackages.
+    // its self group at once and claims through the older KeyPackage: two
+    // claims, within even the smallest share of the budget.
     await listDevices();
     expect(maintained).toEqual([laptopGroup.g]);
     expect(laptopGroup.roster.has(phoneKey)).toBe(true);
-    expect(claims()).toBeGreaterThan(20);
-    expect(claims()).toBeLessThanOrEqual(31);
+    expect(claims()).toBe(2);
     expect(updated.engine.getConversation(g)?.unread).toBe(0);
     for (const device of world.devices) device.engine.dispose();
   });
 
-  it("claims through again at the next pass when a claim is refused", async () => {
+  it("stops claiming for self groups until the server's window ends after a 429", async () => {
     const {
       world,
       laptop,
@@ -410,28 +459,129 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
       claims,
       listDevices,
     } = await onlyTheLaptopCanAdd();
-    const api = contextOf(laptop).api;
-    const claim = api.claimKeyPackages.bind(api);
-    let refused = 0;
-    api.claimKeyPackages = (body) => {
-      // The first claim of the claim-through, as past the rate limit.
-      if (claims() === 1 && refused === 0) {
-        refused += 1;
-        return Promise.reject(new Error("E2EE_RATE_LIMITED"));
-      }
-      return claim(body);
-    };
+    world.ds.addFault({
+      method: "POST",
+      path: /^e2ee\/key-packages\/claim$/u,
+      status: 429,
+      code: "E2EE_RATE_LIMITED",
+    });
     await listDevices();
-    expect(refused).toBe(1);
+    expect(rateLimited(world, "alice")).toBe(1);
     expect(laptopGroup.roster.has(phoneKey)).toBe(false);
     // The pass went on without the phone: nothing failed.
     expect(laptop.engine.getError()).toBeNull();
 
-    // The next maintenance pass claims through again and adds the phone.
-    world.clock.advance(11 * MINUTE);
-    await settle(world);
+    // Until the window ends, maintenance claims nothing for the self group.
+    const hour = 60 * MINUTE;
+    const windowEnd = world.clock.now() - (world.clock.now() % hour) + hour;
+    const before = claims();
+    while (world.clock.now() + 11 * MINUTE < windowEnd) {
+      world.clock.advance(11 * MINUTE);
+      await settle(world);
+    }
+    expect(claims()).toBe(before);
+
+    // Then it claims through again and adds the phone, within the hour's
+    // budget (the refused claim counted too).
+    for (
+      let step = 0;
+      step < 7 && !laptopGroup.roster.has(phoneKey);
+      step += 1
+    ) {
+      world.clock.advance(11 * MINUTE);
+      await settle(world);
+    }
     expect(laptopGroup.roster.has(phoneKey)).toBe(true);
+    expect(world.clock.now()).toBeLessThanOrEqual(windowEnd + 72 * MINUTE);
     expect(updated.engine.getConversation(g)?.unread).toBe(0);
+    for (const device of world.devices) device.engine.dispose();
+  });
+
+  it("leaves the hourly claim limit to new chats while four devices catch up (prxt)", async () => {
+    const world = await createWorld();
+    // The server's limits: 120 claims per profile and 30 claims of a
+    // device per clock hour.
+    world.ds.limitClaims({
+      perProfile: 120,
+      perTargetDevice: 30,
+      windowMs: 60 * MINUTE,
+    });
+    const alice = await addUser(world, "alice", { readSync: true });
+    const laptop = alice.primary;
+    await settle(world);
+    // Four devices on the older client, each with a full queue of older
+    // KeyPackages.
+    const phones: TestDevice[] = [];
+    for (let index = 0; index < 4; index += 1) {
+      phones.push(await olderClientDevice(world, alice, keyPackages.old));
+    }
+    await settle(world);
+    // Their queues are full: each older client uploads more of its own.
+    for (const phone of phones) {
+      await fillQueue(world, phone);
+      expect(poolOf(world, keyOf(phone))?.oneTime.length).toBe(30);
+    }
+
+    // All four update at once.
+    const updated: TestDevice[] = [];
+    for (const phone of phones) {
+      updated.push(await update(world, alice, phone));
+    }
+    const start = world.clock.now();
+    // The same devices, by the keys they had before updating.
+    const keys = [laptop, ...phones].map(keyOf);
+    const together = () =>
+      selfGroupsOf(world, "alice").some((group) =>
+        keys.every((key) => group.roster.has(key))
+      );
+    let contacts = 0;
+    let allTogether: number | null = null;
+    /** Per clock hour: Alice's claims, and how many new chats she started. */
+    const hours = new Map<number, { claims: number; chats: number }>();
+    const hourOf = () => Math.floor(world.clock.now() / (60 * MINUTE));
+    const hourEntry = () => {
+      const entry = hours.get(hourOf()) ?? { claims: 0, chats: 0 };
+      hours.set(hourOf(), entry);
+      return entry;
+    };
+    let claimsSoFar = claimsOf(world, "alice");
+    const countHour = () => {
+      const now = claimsOf(world, "alice");
+      hourEntry().claims += now - claimsSoFar;
+      claimsSoFar = now;
+    };
+    for (let step = 0; step < 12 * 12 && allTogether === null; step += 1) {
+      await settle(world);
+      countHour();
+      if (step % 3 === 1) {
+        // A new encrypted chat, from one of Alice's devices in turn: never
+        // rate-limited.
+        contacts += 1;
+        const contact = `contact${contacts}`;
+        await addUser(world, contact);
+        const starter = [laptop, ...updated][contacts % 5] ?? laptop;
+        await expect(
+          starter.engine.createConversation({
+            profileIds: [contact],
+            kind: "dm",
+          })
+        ).resolves.toMatch(/^0x/u);
+        countHour();
+        hourEntry().chats += 1;
+      }
+      if (together()) {
+        allTogether = (world.clock.now() - start) / MINUTE;
+      }
+      world.clock.advance(5 * MINUTE);
+    }
+    expect(rateLimited(world, "alice")).toBe(0);
+    // Each new chat takes one claim; the rest stays within the self-group
+    // budget in every clock hour, leaving at least 96 of the 120.
+    for (const { claims, chats } of hours.values()) {
+      expect(claims - chats).toBeLessThanOrEqual(SELF_GROUP_BUDGET);
+    }
+    // One self group holds all five within the 12 hours simulated.
+    expect(allTogether).not.toBeNull();
     for (const device of world.devices) device.engine.dispose();
   });
 });

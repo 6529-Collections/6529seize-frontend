@@ -36,7 +36,7 @@ describe("6529 Apps page", () => {
       screen.getByRole("heading", { level: 2, name: "6529 Mobile" })
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { level: 2, name: "6529 Desktop" })
+      screen.getByRole("heading", { level: 2, name: "6529 Desktop Classic" })
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", {
@@ -77,6 +77,24 @@ describe("6529 Apps page", () => {
       screen
         .getAllByRole("heading", { level: 2 })
         .map((heading) => heading.textContent)
-    ).toEqual(["6529 Mobile", "6529 Desktop", "6529 Validator"]);
+    ).toEqual([
+      "6529 Mobile",
+      "6529 Desktop Classic",
+      "6529 Validator",
+      "6529 AI",
+    ]);
+  });
+
+  it("links the entire fourth section to 6529 AI", () => {
+    render(<AppsRoute />);
+
+    const aiLink = screen.getByRole("link", { name: "6529 AI" });
+    expect(aiLink).toHaveAttribute("href", "/ai");
+    expect(aiLink).toHaveAccessibleDescription(
+      "Run open-weights AI models on your own computer, and chat with them in your browser"
+    );
+    expect(aiLink).toContainElement(
+      screen.getByRole("heading", { level: 2, name: "6529 AI" })
+    );
   });
 });

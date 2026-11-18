@@ -1,6 +1,6 @@
 import {
   getAiReleaseFeedSnapshot,
-  getNewestAiRelease,
+  getOfferedAiRelease,
   type AiRelease,
 } from "./releaseFeed";
 import {
@@ -62,9 +62,10 @@ function findFile(
 }
 
 /**
- * Finds a file of the newest release in the signed feed and presigns it.
- * A file the feed does not list is never fetched, so the path cannot reach
- * any other object in the bucket.
+ * Finds a file of the newest release in the signed list and presigns it.
+ * A file the list does not name is never fetched, so the path cannot reach
+ * any other object in the bucket. A newest release the list calls unsafe
+ * hands out nothing.
  */
 export async function resolveAiReleaseDownload(
   segments: readonly string[]
@@ -73,7 +74,7 @@ export async function resolveAiReleaseDownload(
   if (snapshot.state === "error") {
     return { state: "unavailable" };
   }
-  const release = getNewestAiRelease(snapshot.releases);
+  const release = getOfferedAiRelease(snapshot.releases);
   const fileName = release ? findFile(release, segments) : null;
   if (!release || !fileName) {
     return { state: "not-found" };

@@ -3,12 +3,13 @@ import { digestBytes, rosterDigest } from "../digests";
 import type { ApiE2eeDevice } from "../api-types";
 import type { E2eeUntrustedDevice } from "../types";
 import type { WasmCommitOps } from "../wasm-types";
+import { claimedDevices, claimKeyPackages, isUsableDevice } from "./claims";
 import {
-  claimedDevices,
-  claimKeyPackages,
-  isUsableDevice,
+  knownOlderClient,
+  saveSelfGroupClaims,
   selfGroupPackages,
-} from "./claims";
+  takeSelfGroupClaim,
+} from "./self-group-claims";
 import { submitCommit, type CommitIntent, type CommitOutcome } from "./commit";
 import {
   isActive,
@@ -216,12 +217,16 @@ export function requiredChangesPlanner(options: {
       onlyOwnAdds: !options.includeOtherAdds,
     });
     const removals = [...changes.strictRemovals, ...changes.idleRemovals];
+    const selfGroup = runtime.record.metadata.kind === "self";
     const addTargets = new Map<string, string[]>();
     const adds = [
-      ...changes.ownAdds.map((deviceKey) => ({
-        profileId: ctx.profileId,
-        deviceKey,
-      })),
+      ...changes.ownAdds
+        // A self group skips siblings known to run an older client.
+        .filter((deviceKey) => !selfGroup || !knownOlderClient(ctx, deviceKey))
+        .map((deviceKey) => ({
+          profileId: ctx.profileId,
+          deviceKey,
+        })),
       ...(options.includeOtherAdds ? changes.otherAdds : []),
     ].slice(0, MAX_LEAVES_PER_COMMIT);
     for (const add of adds) {
@@ -230,17 +235,30 @@ export function requiredChangesPlanner(options: {
         add.deviceKey,
       ]);
     }
-    const claimed =
-      addTargets.size > 0
-        ? await claimKeyPackages(
-            ctx,
-            [...addTargets].map(([profile_id, device_keys]) => ({
-              profile_id,
-              device_keys,
-            })),
-            runtime.record.g
-          )
-        : null;
+    // Self groups claim within their budget (self-group-claims.ts); with it
+    // spent, their adds wait for a later pass.
+    const mayClaim =
+      addTargets.size > 0 && (!selfGroup || takeSelfGroupClaim(ctx));
+    const claimed = mayClaim
+      ? await claimKeyPackages(
+          ctx,
+          [...addTargets].map(([profile_id, device_keys]) => ({
+            profile_id,
+            device_keys,
+          })),
+          runtime.record.g
+        ).catch((error: unknown) => {
+          // Past the claim limit a self group adds nobody this pass (and
+          // claims nothing more until the server's window ends).
+          if (
+            selfGroup &&
+            asE2eeApiError(error)?.code === "E2EE_RATE_LIMITED"
+          ) {
+            return null;
+          }
+          throw error;
+        })
+      : null;
     const ops: WasmCommitOps = {};
     if (removals.length > 0) {
       ops.remove_device_keys = removals;
@@ -249,10 +267,12 @@ export function requiredChangesPlanner(options: {
     }
     // The claimed record must still be trusted, not just the listed one.
     const trusted = await onlyTrustedPackages(ctx, claimed?.packages ?? []);
-    const packages =
-      runtime.record.metadata.kind === "self"
-        ? await selfGroupPackages(ctx, trusted, runtime.record.g)
-        : trusted;
+    const packages = selfGroup
+      ? await selfGroupPackages(ctx, trusted, runtime.record.g)
+      : trusted;
+    if (selfGroup && mayClaim) {
+      await saveSelfGroupClaims(ctx);
+    }
     if (packages.length > 0) {
       ops.add_key_packages = packages.map((item) => item.keyPackage);
     }

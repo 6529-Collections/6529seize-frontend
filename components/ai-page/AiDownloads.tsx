@@ -15,6 +15,7 @@ import AiCopyButton from "./AiCopyButton";
 import { AI_BUTTON, AI_CARD } from "./AiPageFrame";
 import AiSystemLogo from "./AiSystemLogo";
 import AiLinuxTabs from "./AiLinuxTabs";
+import BreakableName from "./BreakableName";
 import AiTrustBadges from "./AiTrustBadges";
 import { formatAiFileSize } from "./formatAiFileSize";
 
@@ -86,8 +87,8 @@ function FileRow({
             </p>
           )}
           <p className="tw-m-0 tw-mt-0.5 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-2 tw-text-[13px] tw-leading-5">
-            <span className="tw-break-all tw-font-mono tw-text-iron-400">
-              {file.name}
+            <span className="tw-break-words tw-font-mono tw-text-iron-400">
+              <BreakableName name={file.name} />
             </span>
             {size && (
               <span className="tw-whitespace-nowrap tw-tabular-nums tw-text-iron-300">
@@ -96,7 +97,7 @@ function FileRow({
             )}
           </p>
           <div className="tw-mt-2 empty:tw-hidden">
-            <AiTrustBadges signed={file.signed} />
+            <AiTrustBadges file={file} />
           </div>
         </div>
       </div>
