@@ -7,13 +7,15 @@ const mockPush = jest.fn();
 const mockSetActiveWave = jest.fn();
 const mockClearLastVisited = jest.fn();
 let mockIsApp = true;
+let mockHasMyStream = true;
 jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => ({ isApp: mockIsApp }),
 }));
 jest.mock("@/contexts/wave/MyStreamContext", () => ({
-  useMyStreamOptional: () => ({ activeWave: { set: mockSetActiveWave } }),
+  useMyStreamOptional: () =>
+    mockHasMyStream ? { activeWave: { set: mockSetActiveWave } } : undefined,
 }));
 jest.mock("@/components/navigation/ViewContext", () => ({
   useViewContext: () => ({ clearLastVisited: mockClearLastVisited }),
@@ -26,6 +28,7 @@ jest.mock("@/helpers/waves/wave-navigation-transition", () => ({
 beforeEach(() => {
   jest.clearAllMocks();
   mockIsApp = true;
+  mockHasMyStream = true;
   window.history.replaceState(null, "", PROFILE_WAVES_FEED_HREF);
 });
 afterEach(() => window.history.replaceState(null, "", "/"));
@@ -88,6 +91,21 @@ it("returns a native feed-origin chat to the feed without resetting scroll", () 
   expect(mockSetActiveWave).toHaveBeenCalledWith(null, { profileFeed: true });
   expect(mockPush).not.toHaveBeenCalled();
   expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
+});
+
+it("returns to the valid feed route when the stream context is unavailable", () => {
+  mockHasMyStream = false;
+  window.history.replaceState(
+    null,
+    "",
+    "/waves/wave-a?returnTo=" + encodeURIComponent(PROFILE_WAVES_FEED_HREF)
+  );
+  const { result } = renderHook(useExitActiveWave);
+  act(() => result.current(false));
+  expect(mockPush).toHaveBeenCalledWith(PROFILE_WAVES_FEED_HREF, {
+    scroll: false,
+  });
+  expect(mockSetActiveWave).not.toHaveBeenCalled();
 });
 
 it.each([
