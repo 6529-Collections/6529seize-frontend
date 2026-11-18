@@ -39,6 +39,8 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "rep.categories.validation.unavailable":
+    "Dieser Kategoriename ist nicht verfügbar. Versuche es mit einem anderen Namen.",
   "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
   "waves.discovery.activeSubmissions.one": "{count} aktive Einreichung",
   "waves.discovery.activeSubmissions.other": "{count} aktive Einreichungen",

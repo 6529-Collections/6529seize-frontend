@@ -130,7 +130,7 @@ show the profile-creation welcome.
   heading. When space is tight, the whole pair moves to the next row, with the
   same order and an 8px gap.
 - `You assigned` is plain information without a chevron or hover state.
-  Select `Grant Rep` to open the modal and choose a category to grant or edit.
+  Select `Grant Rep` to open the modal, then type a category name or pick a suggestion.
 - Category headers show the name, total, up to three top-contributor avatars and
   rater/receiver count. Long names truncate on desktop; phone tags let names wrap
   beside the total. Avatars and the contributor count stay beside the category
@@ -187,7 +187,7 @@ show the profile-creation welcome.
   other direction's list back to 5 immediately.
 - Opening a different profile route resets both directions to that profile's
   own category list, beginning again at 5 visible items.
-- `Grant Rep` opens the existing category selection flow on every layout.
+- `Grant Rep` opens the same category entry dialog on every layout.
 - In `Received`, eligible viewers open a category and edit their own pinned
   `You` row. Your own Received view is read-only.
 - In your own `Given` view outside proxy mode, each receiver's amount is editable
@@ -214,7 +214,7 @@ show the profile-creation welcome.
   They appear as plain aligned info rows, without a separate filled background.
   Search, your assigned categories, the amount label and field, a small
   `Current Rep` / `Adjustment` row, the primary action and `Cancel` stay in place.
-  The adjustment row reserves its space but stays hidden until a category is selected.
+  The adjustment row reserves space until the category and its rating data are ready.
   The amount label includes the same total-rating hint as Rate NIC.
   `You assigned` uses an 11px uppercase label. Its category
   pills use the profile tag style: 38px height, 8px corners, subtle fill and
@@ -227,35 +227,31 @@ show the profile-creation welcome.
   existing assigned-category chips can be selected without typing. Focusing an
   empty search or selecting `Change category` opens the
   `Type at least 3 characters.` prompt without searching the network.
-- Results appear after a short debounce as compact category pills, including the
-  typed category and matching categories returned by the existing search.
+- Pause after typing a category name. Grant Rep checks that exact name. Matching
+  categories appear as optional suggestions above the amount section, which
+  stays visible while you type. Category names are case-sensitive, so `artist`
+  and `Artist` can hold separate ratings.
 - Similar categories remain independent and selectable. The exact
   `MemesNominee` pill is marked as counting toward the 50,000 REP submission
   requirement. When the typed value differs from it only by capitalization,
   spacing, punctuation, or Unicode width, the exact pill is surfaced first; the
   typed value remains available and look-alikes use subdued styling. Search
-  guidance stays neutral until a category is selected. Selecting exact
-  `MemesNominee` confirms the requirement in green; selecting a look-alike
-  instead shows an amber informational note explaining that the categories are
-  separate and only exact `MemesNominee` counts toward the requirement. All
-  other category pills keep their existing behavior.
-- Selecting a search result validates availability; assigned chips use their
-  known category names. After choosing, the category stays in the search field.
-  Its amount is focused once the current rating has loaded, with a caret and
-  focus border rather than highlighted text, provided you stayed on the category
-  selection control. Moving to another control while loading keeps that focus.
-  Rate NIC focuses its amount on desktop only; opening it on a phone
-  does not summon the keyboard.
-  Select its `×` (`Change category`) to choose another category and clear the draft.
-- The amount field is editable before category selection, with placeholder `0`.
-  `Grant Rep` stays disabled until a category and valid changed amount are ready.
-  An amount typed while no category is selected is kept for the next selection,
-  including a new amount entered after `Change category` clears the old draft.
-  Switching directly between selected categories instead loads that category's
-  saved total, or zero for a new rating. You can type an amount while
-  rating data loads; submitting stays disabled until the current contribution
-  and allowance are available.
-- If availability fails, inline error is shown.
+  guidance stays neutral until a category is ready. Using exact `MemesNominee`
+  confirms the requirement in green. Using a look-alike shows an amber note
+  explaining that only exact `MemesNominee` counts toward the requirement.
+- Pick a suggestion to use its exact spelling. After you pick a suggestion or
+  an assigned category, the amount receives focus when the current rating loads,
+  provided focus is still on the category selection control. You can edit the
+  category text or use `×` (`Change category`) to clear it.
+  Rate NIC focuses its amount on desktop only.
+- You can type an amount before the category is ready or while rating data
+  loads. An amount typed before validation is kept when the name passes or you
+  pick a suggestion. Switching between ready categories loads the new category's
+  saved total or zero. `Change category` clears the draft. Submitting requires a
+  ready category, its current contribution and allowance, and a valid changed
+  amount.
+- If the typed category fails validation, the reason appears below the category
+  field.
 - Amount accepts integers. Type the desired amount in Grant REP and Rate NIC.
   The plus/minus symbols indicate signed amounts and are not buttons.
 - Enter the desired total, including any existing contribution.
@@ -273,8 +269,6 @@ show the profile-creation welcome.
   Rate NIC retains its existing guidance and blur behavior. The action says
   `Save` for an existing contribution and
   `Grant Rep` for a new one. Enter in the amount field submits the same action.
-- The primary action stays disabled until category is selected, amount changed, amount
-  is valid, and submit is idle.
 - The amount label is medium iron text and the summary uses plain, aligned
   info rows. Desktop actions sit at the bottom right, `Cancel` then
   `Save` or `Grant Rep`, at matching heights. On mobile, the buttons form a

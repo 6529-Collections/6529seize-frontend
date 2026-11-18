@@ -6,16 +6,10 @@ import userEvent from "@testing-library/user-event";
 import UserPageRepNewRepSearch from "@/components/user/rep/new-rep/UserPageRepNewRepSearch";
 import { getGrantRepCategoriesToDisplay } from "@/components/user/rep/new-rep/grantRepCategoryOptions";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import { useQuery } from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 
-jest.mock("@tanstack/react-query", () => ({
-  useMutation: jest.requireActual<typeof import("@tanstack/react-query")>(
-    "@tanstack/react-query"
-  ).useMutation,
-  useQuery: jest.fn(),
-}));
+jest.unmock("react-use");
 
 jest.mock(
   "@/components/user/rep/new-rep/UserPageRepNewRepSearchDropdown",
@@ -68,23 +62,24 @@ describe("UserPageRepNewRepSearch", () => {
     retry: jest.fn(),
   };
   const mockAllocation = jest.mocked(useRepAllocation);
+  let suggestedCategories: string[];
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockAllocation.mockReturnValue(allocation);
-    (commonApiFetch as jest.Mock).mockResolvedValue(true);
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: ["MemesNominee"],
-    });
+    jest
+      .mocked(commonApiFetch)
+      .mockImplementation(async ({ endpoint }) =>
+        endpoint.startsWith("rep/categories/availability?")
+          ? true
+          : suggestedCategories
+      );
+    suggestedCategories = ["MemesNominee"];
   });
 
   it("prefills known chips, changes categories, and distinguishes editing from a new grant", async () => {
     const user = userEvent.setup();
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: ["Music"],
-    });
+    suggestedCategories = ["Music"];
     const ratings = [
       {
         category: "AI",
@@ -170,7 +165,25 @@ describe("UserPageRepNewRepSearch", () => {
     expect(screen.getByText("Current Rep:").parentElement).toHaveTextContent(
       "Current Rep:0"
     );
-    expect(commonApiFetch).toHaveBeenCalledTimes(1);
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "rep/categories/availability?param=mus",
+      })
+    );
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "rep/categories/availability?param=Music",
+      })
+    );
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    await user.click(search);
+    await user.keyboard("{End}{Backspace}@");
+    expect(search).toHaveValue("Musi@");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "These characters can't be used"
+    );
     expect(commonApiPost).not.toHaveBeenCalled();
   });
 
@@ -300,10 +313,7 @@ describe("UserPageRepNewRepSearch", () => {
 
   it("ignores a category check from the previous account", async () => {
     const user = userEvent.setup();
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: ["Art"],
-    });
+    suggestedCategories = ["Art"];
     let finish = (_value: boolean) => {};
     jest.mocked(commonApiFetch).mockReturnValueOnce(
       new Promise<boolean>((resolve) => {
@@ -327,8 +337,14 @@ describe("UserPageRepNewRepSearch", () => {
     const search = screen.getByRole("textbox", {
       name: "Category to grant REP for",
     });
-    await user.type(search, "Art");
-    await user.click(await screen.findByRole("button", { name: "Art" }));
+    await user.type(search, "Art{Enter}");
+    await waitFor(() =>
+      expect(commonApiFetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "rep/categories/availability?param=Art",
+        })
+      )
+    );
     rerender(<Harness identity="second" />);
     const nextSearch = screen.getByRole("textbox", {
       name: "Category to grant REP for",
@@ -340,7 +356,7 @@ describe("UserPageRepNewRepSearch", () => {
     await act(async () => {
       finish(true);
     });
-    expect(nextSearch).not.toHaveAttribute("readonly");
+    expect(nextSearch).toHaveValue("");
     expect(nextAmount).toHaveValue("45");
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     expect(commonApiPost).not.toHaveBeenCalled();
@@ -350,10 +366,7 @@ describe("UserPageRepNewRepSearch", () => {
     "respects focus on %s when the rating arrives",
     async (focus) => {
       const user = userEvent.setup();
-      (useQuery as jest.Mock).mockReturnValue({
-        isFetching: false,
-        data: ["Art"],
-      });
+      suggestedCategories = ["Art"];
       const onCancel = jest.fn();
       const props = {
         overview: null,
@@ -363,9 +376,9 @@ describe("UserPageRepNewRepSearch", () => {
       const { rerender } = render(<UserPageRepNewRepSearch {...props} />);
       await user.type(
         screen.getByRole("textbox", { name: "Category to grant REP for" }),
-        "Art"
+        "Art{Enter}"
       );
-      await user.click(await screen.findByRole("button", { name: "Art" }));
+      await screen.findByRole("button", { name: "Change category" });
       const amount = screen.getByRole("textbox", {
         name: "Your total REP for this category",
       });
@@ -405,10 +418,7 @@ describe("UserPageRepNewRepSearch", () => {
 
   it("keeps the normal focus ring until category bounds are ready", async () => {
     const user = userEvent.setup();
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: ["Art"],
-    });
+    suggestedCategories = ["Art"];
     mockAllocation.mockReturnValue({
       ...allocation,
       heroAvailableRep: 0,
@@ -427,9 +437,9 @@ describe("UserPageRepNewRepSearch", () => {
     expect(amount).toHaveAttribute("aria-invalid", "false");
     await user.type(
       screen.getByRole("textbox", { name: "Category to grant REP for" }),
-      "Art"
+      "Art{Enter}"
     );
-    await user.click(await screen.findByRole("button", { name: "Art" }));
+    await screen.findByRole("button", { name: "Change category" });
     expect(amount).toHaveClass("focus:tw-ring-primary-400");
     expect(amount).toHaveAttribute("aria-invalid", "false");
     mockAllocation.mockReturnValue({
@@ -467,10 +477,7 @@ describe("UserPageRepNewRepSearch", () => {
         rater_contribution: 0,
       },
     });
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: ["Art"],
-    });
+    suggestedCategories = ["Art"];
     function Harness() {
       const auth = useContext(AuthContext);
       const queries = useContext(ReactQueryWrapperContext);
@@ -499,9 +506,9 @@ describe("UserPageRepNewRepSearch", () => {
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     await user.type(
       screen.getByRole("textbox", { name: "Category to grant REP for" }),
-      "Art"
+      "Art{Enter}"
     );
-    await user.click(await screen.findByRole("button", { name: "Art" }));
+    await screen.findByRole("button", { name: "Change category" });
     expect(amount).toHaveValue("25");
     const grant = screen.getByRole("button", {
       name: "Grant Rep",
@@ -658,10 +665,7 @@ describe("UserPageRepNewRepSearch", () => {
       ...allocation,
       minMaxValues: { min: 0, max: 0 },
     });
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: ["Art"],
-    });
+    suggestedCategories = ["Art"];
     const props = {
       overview: null,
       profile: { query: "recipient" } as ApiIdentity,
@@ -671,10 +675,10 @@ describe("UserPageRepNewRepSearch", () => {
       screen.getByRole("textbox", { name: "Category to grant REP for" }),
       "Art"
     );
-    await user.click(await screen.findByRole("button", { name: "Art" }));
     const amount = screen.getByRole("textbox", {
       name: "Your total REP for this category",
     });
+    await waitFor(() => expect(amount).toHaveValue("0"));
     await user.clear(amount);
     await user.type(amount, "25");
     await user.tab();
@@ -703,15 +707,11 @@ describe("UserPageRepNewRepSearch", () => {
       profile: { query: "recipient" } as ApiIdentity,
     };
     const { rerender } = render(<UserPageRepNewRepSearch {...props} />);
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: ["Art"],
-    });
+    suggestedCategories = ["Art"];
     await user.type(
       screen.getByRole("textbox", { name: "Category to grant REP for" }),
       "Art"
     );
-    await user.click(await screen.findByRole("button", { name: "Art" }));
     const amount = screen.getByRole("textbox", {
       name: "Your total REP for this category",
     });
@@ -721,6 +721,7 @@ describe("UserPageRepNewRepSearch", () => {
       contributor_count: 1,
       rater_contribution: 20,
     };
+    await waitFor(() => expect(amount).toHaveValue("0"));
     mockAllocation.mockReturnValue({ ...allocation, repState });
     rerender(<UserPageRepNewRepSearch {...props} />);
     expect(amount).toHaveValue("20");
@@ -738,10 +739,7 @@ describe("UserPageRepNewRepSearch", () => {
 
   it("clears the previous category draft and prefills the next category", async () => {
     const user = userEvent.setup();
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: ["Art", "Research"],
-    });
+    suggestedCategories = ["Art", "Research"];
     mockAllocation.mockImplementation(({ category }) => ({
       ...allocation,
       repState: category
@@ -763,16 +761,14 @@ describe("UserPageRepNewRepSearch", () => {
       name: "Category to grant REP for",
     });
     await user.type(search, "Art");
-    await user.click(await screen.findByRole("button", { name: "Art" }));
     const amount = screen.getByRole("textbox", {
       name: "Your total REP for this category",
     });
     await waitFor(() => expect(amount).toHaveValue("20"));
     await user.clear(amount);
     await user.type(amount, "30");
-    await user.click(screen.getByRole("button", { name: "Change category" }));
+    await user.clear(search);
     await user.type(search, "Research");
-    await user.click(await screen.findByRole("button", { name: "Research" }));
     await waitFor(() =>
       expect(
         screen.getByRole("textbox", {
@@ -780,15 +776,6 @@ describe("UserPageRepNewRepSearch", () => {
         })
       ).toHaveValue("7")
     );
-    await user.click(screen.getByRole("button", { name: "Change category" }));
-    await user.type(amount, "40");
-    await user.type(search, "Art");
-    await user.click(await screen.findByRole("button", { name: "Art" }));
-    expect(amount).toHaveValue("40");
-    expect(screen.getByText("Current Rep:").parentElement).toHaveTextContent(
-      "Current Rep:+20"
-    );
-    expect(screen.getByRole("button", { name: "Save" })).toBeEnabled();
   });
 
   it("allows entering an amount before choosing a category while keeping Grant Rep disabled", () => {
@@ -899,6 +886,131 @@ describe("UserPageRepNewRepSearch", () => {
     expect(screen.queryByTestId("error")).not.toBeInTheDocument();
   });
 
+  it("checks typed categories after a pause and ignores approval for older text", async () => {
+    const user = userEvent.setup();
+    let approveOldCategory = () => {};
+    const oldApproval = new Promise<boolean>((resolve) => {
+      approveOldCategory = () => resolve(true);
+    });
+    jest.mocked(commonApiFetch).mockImplementation(async ({ endpoint }) => {
+      if (endpoint === "rep/categories/availability?param=Artist")
+        return oldApproval;
+      if (endpoint === "rep/categories/availability?param=artist")
+        throw new Error("Category rejected");
+      return suggestedCategories;
+    });
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.type(search, "Artist");
+    expect(commonApiFetch).not.toHaveBeenCalled();
+    expect(amount).toHaveValue("");
+    await waitFor(() =>
+      expect(commonApiFetch).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: "rep/categories/availability?param=Artist",
+        })
+      )
+    );
+    await user.clear(search);
+    await user.type(search, "artist");
+    await act(async () => {
+      approveOldCategory();
+    });
+    expect(amount).toHaveValue("");
+    expect(
+      screen.queryByRole("button", { name: "Change category" })
+    ).not.toBeInTheDocument();
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Category rejected"
+    );
+    expect(search).toHaveAccessibleDescription(/Category rejected/);
+    expect(amount).toHaveValue("");
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
+  });
+
+  it("explains an unavailable category when the endpoint returns false", async () => {
+    const user = userEvent.setup();
+    jest
+      .mocked(commonApiFetch)
+      .mockImplementation(async ({ endpoint }) =>
+        endpoint.startsWith("rep/categories/availability?")
+          ? false
+          : suggestedCategories
+      );
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    await user.type(search, " Artist ");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This category name is unavailable. Try a different name."
+    );
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "rep/categories/availability?param=Artist",
+      })
+    );
+    expect(search).toHaveAttribute("aria-invalid", "true");
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
+  });
+
+  it("reuses approval when Enter confirms the typed category and preserves the amount", async () => {
+    const user = userEvent.setup();
+    mockAllocation.mockImplementation(({ category }) => ({
+      ...allocation,
+      repState: category
+        ? { category, rating: 0, contributor_count: 0, rater_contribution: 0 }
+        : null,
+    }));
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.type(search, "Art");
+    await waitFor(() => expect(amount).toHaveValue("0"));
+    await user.clear(amount);
+    await user.type(amount, "25");
+    await user.click(search);
+    await user.keyboard("{Enter}");
+
+    expect(
+      await screen.findByRole("button", { name: "Change category" })
+    ).toBeInTheDocument();
+    expect(amount).toHaveValue("25");
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeEnabled();
+    expect(
+      jest
+        .mocked(commonApiFetch)
+        .mock.calls.filter(
+          ([{ endpoint }]) =>
+            endpoint === "rep/categories/availability?param=Art"
+        )
+    ).toHaveLength(1);
+  });
+
   it("counts Unicode characters consistently for the search minimum", async () => {
     const user = userEvent.setup();
     render(
@@ -945,18 +1057,16 @@ describe("UserPageRepNewRepSearch", () => {
     await waitFor(() =>
       expect(screen.getByRole("button", { name: "MemesNominee" })).toBeVisible()
     );
-    expect(commonApiFetch).toHaveBeenCalledWith({
-      endpoint: "/rep/categories/availability",
-      params: { param: "MemesNominee" },
-    });
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "rep/categories/availability?param=MemesNominee",
+      })
+    );
   });
 
-  it("warns after a non-qualifying MemesNominee look-alike is selected", async () => {
+  it("warns when a typed MemesNominee look-alike is ready", async () => {
     const user = userEvent.setup();
-    (useQuery as jest.Mock).mockReturnValue({
-      isFetching: false,
-      data: ["MemesNominee", "Memes nominee"],
-    });
+    suggestedCategories = ["MemesNominee", "Memes nominee"];
     render(
       <UserPageRepNewRepSearch
         overview={null}
@@ -966,14 +1076,10 @@ describe("UserPageRepNewRepSearch", () => {
     const input = screen.getByPlaceholderText("Category to grant REP for");
 
     await user.type(input, "Memes nominee");
-    await waitFor(() =>
-      expect(
-        screen.getByRole("button", { name: "Memes nominee" })
-      ).toBeVisible()
+    await screen.findByText(
+      '"Memes nominee" is a separate category. Only MemesNominee counts for submissions.'
     );
-    await user.click(screen.getByRole("button", { name: "Memes nominee" }));
-
-    await waitFor(() => expect(input).toHaveValue("Memes nominee"));
+    expect(input).toHaveValue("Memes nominee");
     expect(input).toHaveClass("tw-ring-iron-700/60");
     expect(input).not.toHaveClass("tw-border-amber-400/50");
     expect(
@@ -986,7 +1092,7 @@ describe("UserPageRepNewRepSearch", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("requires an explicit choice before selecting a look-alike with Enter", async () => {
+  it("keeps the canonical suggestion available when Enter is pressed on a look-alike", async () => {
     const user = userEvent.setup();
     render(
       <UserPageRepNewRepSearch
@@ -1000,10 +1106,12 @@ describe("UserPageRepNewRepSearch", () => {
 
     expect(input).toHaveValue("memes nominee");
     expect(screen.getByTestId("dropdown")).toBeInTheDocument();
-    expect(commonApiFetch).not.toHaveBeenCalledWith({
-      endpoint: "/rep/categories/availability",
-      params: { param: "memes nominee" },
-    });
+    expect(
+      await screen.findByRole("button", { name: "MemesNominee" })
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Change category" })
+    ).not.toBeInTheDocument();
   });
 
   it("surfaces only the exact submission category ahead of its presentation variant", () => {
@@ -1011,29 +1119,24 @@ describe("UserPageRepNewRepSearch", () => {
       getGrantRepCategoriesToDisplay({
         search: "Memes-Nominee",
         categories: [],
-        includeTypedCategory: true,
+        showSubmissionSuggestion: true,
       })
-    ).toEqual(["MemesNominee", "Memes-Nominee"]);
+    ).toEqual(["MemesNominee"]);
 
     expect(
       getGrantRepCategoriesToDisplay({
         search: "memes nomin",
         categories: ["Memes Nominee", "Memes nominee"],
-        includeTypedCategory: true,
+        showSubmissionSuggestion: true,
       })
-    ).toEqual([
-      "MemesNominee",
-      "memes nomin",
-      "Memes Nominee",
-      "Memes nominee",
-    ]);
+    ).toEqual(["MemesNominee", "Memes Nominee", "Memes nominee"]);
 
     expect(
       getGrantRepCategoriesToDisplay({
         search: "Top Artist",
         categories: ["top artist"],
-        includeTypedCategory: true,
+        showSubmissionSuggestion: true,
       })
-    ).toEqual(["Top Artist", "top artist"]);
+    ).toEqual(["top artist"]);
   });
 });
