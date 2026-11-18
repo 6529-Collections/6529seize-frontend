@@ -12,6 +12,12 @@ orders are personal shortcuts shown only on the signed-in owner's own profile,
 after account loading and outside proxy sessions. Existing platform purchasing
 restrictions still apply.
 
+The `waves.discovery` record covers plain-text description previews, retained
+media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
+Votes artwork, wrapping metrics and neutral zero-submission status without a
+decorative count marker. Discovery
+links, eligibility and pagination retain their existing behavior.
+
 The touch-menu, header-navigation and encrypted-chat records cover touch reply,
 timestamp access, cancellable native conversation return and Android Back layer
 ordering. They retain visible tap alternatives, permission and delivery-state
@@ -197,8 +203,10 @@ filtering including promises without plans, reset behavior, and empty/error reco
 It directs readers to artwork details for the optional plan and distinguishes the
 artist's promise from verification of approval or fulfillment.
 
-The Wave discovery record describes the independent Active Votes and Worth Checking Out
-sidebar sections, their explanations and view-all destinations. It describes
+The Wave discovery record includes hidden-scrollbar controls with dark edge fades
+for offscreen sort and threshold options. It also describes the independent
+Active Votes and Worth Checking Out sidebar sections, their explanations and
+view-all destinations. It describes
 quiet loading placeholders, explanations that appear with content, empty messages
 only after successful empty requests, and retry without discarding loaded votes.
 It covers the scrollable three-row voting window, pagination, compact empty/error states and
