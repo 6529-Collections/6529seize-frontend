@@ -21619,10 +21619,12 @@ paths:
         Lists readable, non-DM voting waves using TDH, TDH_PLUS_XTDH or
         CARD_SET_TDH, regardless of follow or pin status. Excludes upcoming,
         ended and completed voting and unresolved decisions. Main Stage comes
-        first when eligible, followed by descending total Wave REP with a stable
-        wave ID tie-breaker. Approval waves include their active submission
-        count. Wave and parent visibility apply before counting and pagination.
-        Personal voting eligibility depends on each wave's voting rules.
+        first when eligible. Remaining waves with active leaderboard entries
+        precede waves with zero. Within each group, waves are sorted by
+        descending total Wave REP with a stable wave ID tie-breaker. Approval
+        waves include their active submission count. Wave and parent visibility
+        apply before counting and pagination. Personal voting eligibility
+        depends on each wave's voting rules.
       operationId: getActiveWaveVotes
       x-6529-router:
         enabled: true
