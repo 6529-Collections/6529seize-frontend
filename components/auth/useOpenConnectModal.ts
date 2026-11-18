@@ -96,7 +96,8 @@ export function useOpenConnectModal({
         }
         return false;
       };
-      const waitForTransition = async (transition: Promise<void>) => {
+      const waitForTransition = async (transition: Promise<void> | null) => {
+        if (!transition) return true;
         const outcome = await waitForModalTransition(transition, signal);
         if (shouldStop()) return false;
         if (outcome === "timed-out") {
@@ -118,14 +119,12 @@ export function useOpenConnectModal({
         }
         if (shouldStop()) return;
         const openAppKit = await appKitModalBridgeStore.waitForOpen();
-        const previousTransition = modalTransition.current;
         if (
-          previousTransition &&
-          !(await waitForTransition(previousTransition))
+          !(await waitForTransition(modalTransition.current)) ||
+          shouldStop()
         ) {
           return;
         }
-        if (shouldStop()) return;
 
         // Opening and cleanup share one transition. A newer intent waits
         // while this one closes the modal it opened after being superseded.
