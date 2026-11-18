@@ -41,12 +41,15 @@ import {
   SUBSCRIPTIONS_CHAIN,
 } from "@/constants/constants";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
+import { ApiSubscriptionCoverageDeadlineBasis } from "@/generated/models/ApiSubscriptionCoverageDeadlineBasis";
 import { formatAddress } from "@/helpers/Helpers";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDecimalString, formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
+import { subscriptionCoverageTimestamp } from "./coverage/subscriptionCoverageSummary.helpers";
+import { useSubscriptionCoverageClock } from "./coverage/useSubscriptionCoverageClock";
 
 const MEMES_MINT_PRICE_WEI = parseEther(MEMES_MINT_PRICE.toString());
 // Hash target of the notification and header top-up links.
@@ -280,6 +283,7 @@ function CoverageTopUpOptions({
 
 type TopUpProps = Readonly<{
   coverage?: ApiSubscriptionCoverage | undefined;
+  isCoverageStale?: boolean;
   onTransactionConfirmed?: (() => void) | undefined;
   onCancel?: (() => void) | undefined;
   expanded?: boolean;
@@ -294,12 +298,31 @@ export default function UserPageSubscriptionsTopUp(props: TopUpProps) {
 }
 
 function SubscriptionTopUpForm({
-  coverage,
+  coverage: sourceCoverage,
+  isCoverageStale = false,
   onTransactionConfirmed,
   onCancel,
   expanded = true,
 }: TopUpProps) {
   const locale = useBrowserLocale();
+  const suppliedDeadline = subscriptionCoverageTimestamp(
+    sourceCoverage?.next_unfunded?.top_up_deadline
+  );
+  const deadline =
+    suppliedDeadline !== undefined &&
+    sourceCoverage?.forecast.deadline_basis ===
+      ApiSubscriptionCoverageDeadlineBasis.Authoritative
+      ? suppliedDeadline
+      : undefined;
+  const now = useSubscriptionCoverageClock(
+    expanded && !isCoverageStale && deadline !== undefined
+  );
+  const projectionsAvailable =
+    !isCoverageStale && (deadline === undefined || (now > 0 && now < deadline));
+  const coverage =
+    sourceCoverage && !projectionsAvailable
+      ? { ...sourceCoverage, minimum_top_up: null, recommended_top_up: null }
+      : sourceCoverage;
   const selectionDescriptionId = useId();
   const [memeCount, setMemeCount] = useState<string>("");
   const sendTransaction = useSendTransaction();

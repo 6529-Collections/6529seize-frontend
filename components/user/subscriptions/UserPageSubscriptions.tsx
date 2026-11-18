@@ -209,8 +209,7 @@ export default function UserPageSubscriptions(
       <div className="tw-flex tw-min-w-0 tw-flex-col tw-gap-3">
         <SubscriptionCoverageNotice
           hasReadError={
-            !(coverageQuery.isError && !!coverageQuery.data) &&
-            (Object.values(fetchErrors).some(Boolean) || history.isError)
+            Object.values(fetchErrors).some(Boolean) || history.isError
           }
           onRetry={() => {
             fetchSubscriptionData();
@@ -294,6 +293,7 @@ export default function UserPageSubscriptions(
             <UserPageSubscriptionsTopUp
               expanded={topUp.expanded}
               coverage={coverageQuery.data}
+              isCoverageStale={coverageQuery.isError}
               onTransactionConfirmed={refresh}
               onCancel={() => {
                 topUp.setExpanded(false);

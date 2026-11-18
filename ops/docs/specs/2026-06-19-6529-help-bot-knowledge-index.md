@@ -1084,7 +1084,8 @@ history and the content-sized settings sheet. Every loaded coverage state has a 
 for a fully funded selected forecast even when the raw API status is Action
 required, and uses Running low when one selected drop remains funded before a
 known shortfall. It preserves all counts and controls, shows a factual owner
-cutoff or explicitly states that none is available. At 24 funded drops the
+cutoff, or the next unfunded Meme and its full mint date when no cutoff is
+supplied. At 24 funded drops the
 headline reads Next 24 drops funded; lower counts and Funded through remain
 unchanged, with no extra forecast-limit note. A mint-day shortfall reuses the final-subscription query to distinguish
 confirmed payment from an unpaid balance forecast, keeps loading/error neutral,

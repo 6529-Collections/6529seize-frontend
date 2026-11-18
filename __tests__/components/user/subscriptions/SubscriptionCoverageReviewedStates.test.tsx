@@ -107,12 +107,40 @@ it("uses the current UTC day rather than the forecast calculation day", () => {
   expect(
     screen.getByRole("heading", { name: "The Memes #575 isn’t covered" })
   ).toBeVisible();
-  expect(allocation).not.toHaveBeenCalled();
+  expect(allocation).toHaveBeenLastCalledWith(
+    expect.objectContaining({ subscribed: false })
+  );
   act(() => jest.advanceTimersByTime(1000));
   expect(
     screen.getByRole("heading", { name: "Today’s mint isn’t covered" })
   ).toBeVisible();
   expect(allocation).toHaveBeenCalled();
+});
+
+it("keeps the overview heading focused when a day-before cutoff enables payment checking", () => {
+  const data = coverage();
+  data.next_unfunded.mint_at = new Date("2026-11-17T15:40:00Z");
+  render(
+    <SubscriptionCoverageSummary
+      coverage={data}
+      profileKey="profile-key"
+      isOwner
+      isLoading={false}
+    />
+  );
+  const heading = screen.getByRole("heading", {
+    name: "The Memes #575 isn’t covered",
+  });
+  heading.focus();
+  expect(heading).toHaveFocus();
+  act(() => jest.advanceTimersByTime(1000));
+  expect(allocation).toHaveBeenLastCalledWith(
+    expect.objectContaining({ subscribed: true, waitForRefresh: true })
+  );
+  expect(document.getElementById("profile-subscriptions-overview-title")).toBe(
+    heading
+  );
+  expect(heading).toHaveFocus();
 });
 
 it("gives confirmed payment priority after an expired cutoff, including a past mint day", () => {
@@ -199,7 +227,9 @@ it("keeps stale coverage neutral with its calculation timestamp and refresh", ()
       />
     </SubscriptionCoverageSummary>
   );
-  expect(allocation).not.toHaveBeenCalled();
+  expect(allocation).toHaveBeenLastCalledWith(
+    expect.objectContaining({ subscribed: false })
+  );
   expect(screen.getByText("Last known coverage", { exact: true })).toHaveClass(
     "tw-text-iron-400"
   );

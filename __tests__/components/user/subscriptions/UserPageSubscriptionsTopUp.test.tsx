@@ -10,6 +10,7 @@ import {
 } from "@/constants/constants";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import useCapacitor from "@/hooks/useCapacitor";
+import { subscriptionCoverageFixture } from "@/tests/support/subscriptionFixtures";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { parseEther } from "viem";
@@ -300,6 +301,7 @@ describe("UserPageSubscriptionsTopUp", () => {
     "omits the extra deadline paragraph in Top up (deadline: %s)",
     (deadline) => {
       const coverage = {
+        ...subscriptionCoverageFixture(),
         next_unfunded: { token_id: 577, top_up_deadline: deadline },
       } as ApiSubscriptionCoverage;
       render(<UserPageSubscriptionsTopUp coverage={coverage} />);
@@ -310,6 +312,59 @@ describe("UserPageSubscriptionsTopUp", () => {
       expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
     }
   );
+
+  it("omits stale projections while retaining generic card-count choices", async () => {
+    const user = userEvent.setup();
+    render(
+      <UserPageSubscriptionsTopUp
+        coverage={subscriptionCoverageFixture()}
+        isCoverageStale
+      />
+    );
+    expect(
+      screen.queryByRole("radio", { name: /^Minimum for next drop/ })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("radio", { name: /^Recommended/ })
+    ).not.toBeInTheDocument();
+    await user.click(screen.getByRole("radio", { name: "1 Card" }));
+    expect(
+      screen.getByRole("button", { name: "Top up 0.06529 ETH" })
+    ).toBeEnabled();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+  });
+
+  it("invalidates a selected coverage projection when its cutoff passes", async () => {
+    const deadline = Date.parse("2026-10-12T14:30:00Z");
+    const clock = jest.spyOn(Date, "now").mockReturnValue(deadline - 1000);
+    try {
+      const user = userEvent.setup();
+      render(
+        <UserPageSubscriptionsTopUp coverage={subscriptionCoverageFixture()} />
+      );
+      await user.click(
+        screen.getByRole("radio", { name: /^Minimum for next drop/ })
+      );
+      expect(
+        screen.getByRole("button", { name: "Top up 0.01587 ETH" })
+      ).toBeEnabled();
+      clock.mockReturnValue(deadline);
+      act(() => globalThis.dispatchEvent(new Event("focus")));
+      expect(
+        screen.queryByRole("radio", { name: /^Minimum for next drop/ })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("radio", { name: /^Recommended/ })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Choose a top-up amount" })
+      ).toBeDisabled();
+      expect(screen.getByRole("radio", { name: "1 Card" })).toBeVisible();
+      expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
+    } finally {
+      clock.mockRestore();
+    }
+  });
 
   it("uses the exact backend recommendation for the primary top-up", async () => {
     const user = userEvent.setup();
