@@ -1284,19 +1284,41 @@ describe("AppHeader", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("moves directory share and profile feed into More in the native app", () => {
-    setup({ asPath: "/waves" });
+  it.each([null, "waves"])(
+    "moves directory actions into More for view %s",
+    (view) => {
+      setup({ asPath: "/waves", query: { view } });
+      expect(
+        screen.queryByRole("button", { name: "Share page" })
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("search")).toHaveAttribute(
+        "data-menu-items",
+        "profile-feed,share-page"
+      );
+      expect(screen.getByTestId("search")).toHaveAttribute(
+        "data-profile-feed-href",
+        "/waves?view=profile-feed"
+      );
+    }
+  );
+
+  it.each(["notifications", "messages", "profile-feed"])(
+    "keeps directory actions off the native %s view",
+    (view) => {
+      setup({ asPath: "/waves", query: { view } });
+
+      expect(screen.getByTestId("search")).not.toHaveAttribute(
+        "data-menu-items"
+      );
+    }
+  );
+
+  it("preserves standalone page share on the notifications query view", () => {
+    setup({ asPath: "/waves", query: { view: "notifications" } });
+
     expect(
-      screen.queryByRole("button", { name: "Share page" })
-    ).not.toBeInTheDocument();
-    expect(screen.getByTestId("search")).toHaveAttribute(
-      "data-menu-items",
-      "profile-feed,share-page"
-    );
-    expect(screen.getByTestId("search")).toHaveAttribute(
-      "data-profile-feed-href",
-      "/waves?view=profile-feed"
-    );
+      screen.getByRole("button", { name: "Share page" })
+    ).toBeInTheDocument();
   });
 
   it.each(["/waves/w1"])(

@@ -3,7 +3,10 @@ import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
 import { gotoReady, RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
-import { PROFILE_HANDLE } from "../social/profileReadonlyHelpers";
+import {
+  expectPersonalCollectedActionsAbsent,
+  PROFILE_HANDLE,
+} from "../social/profileReadonlyHelpers";
 import { expectUrlState } from "../support/urlState";
 import {
   isCapacitorSimulationProject,
@@ -323,6 +326,13 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(
       page.getByRole("combobox", { name: "Search 6529", exact: true })
     ).toHaveCount(0);
+
+    await gotoReady(page, "/waves?view=notifications");
+    await expect(more).toHaveCount(0);
+    await expect(searchButton).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Share page", exact: true })
+    ).toBeVisible();
   });
 
   test("calendar invites omit the mint URL only on iOS", async ({
@@ -389,58 +399,17 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     }
   });
 
-  test("Collect Back restores the Collected filters and source action", async ({
+  test("public Collected profiles omit personal collecting actions in native shells", async ({
     page,
-  }, testInfo) => {
-    test.skip(
-      !isCapacitorSimulationProject(testInfo.project.name),
-      "Native app Back contract"
+  }) => {
+    await gotoReady(
+      page,
+      `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
     );
-    for (const action of ["Manage orders", "Complete my set"]) {
-      await gotoReady(
-        page,
-        `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
-      );
-      await expect(
-        page.getByRole("main").locator('[data-profile-section="Filters"]')
-      ).toBeVisible({
-        timeout: RESPONSE_TIMEOUT_MS,
-      });
-      const source = new URL(page.url());
-      const link = page.getByRole("link", { name: action, exact: true });
-      const purchaseActions = page.getByTestId("collected-purchase-actions");
-      if (testInfo.project.name === "capacitor-ios-sim") {
-        await expect(link).toHaveCount(0);
-        await expect(purchaseActions).toHaveCount(0);
-        continue;
-      }
-      await expect(purchaseActions).toBeVisible();
-      await link.scrollIntoViewIfNeeded();
-      const destination = new URL(
-        (await link.getAttribute("href"))!,
-        page.url()
-      );
-      expect(destination.searchParams.has("returnTo")).toBe(true);
-      await link.click();
-      await expect(page).toHaveURL(
-        (url) =>
-          url.pathname ===
-          (action === "Manage orders" ? "/collect/orders" : "/collect")
-      );
-      await page.getByRole("button", { name: "Back", exact: true }).click();
-      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
-      await expectUrlState(page, (url) =>
-        ["collection", "szn", "details"].every(
-          (key) => url.searchParams.get(key) === source.searchParams.get(key)
-        )
-      );
-      await expect(
-        page.getByRole("link", { name: action, exact: true })
-      ).toBeFocused();
-      await expect(
-        page.getByRole("link", { name: action, exact: true })
-      ).toBeInViewport();
-    }
+    await expect(
+      page.getByRole("main").locator('[data-profile-section="Filters"]')
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expectPersonalCollectedActionsAbsent(page);
   });
 
   for (const path of ["/collect", "/collect/orders"]) {
@@ -467,53 +436,6 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       ).toHaveCount(0);
     });
   }
-
-  test("Back remains usable after returning from Orders to a profile", async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "capacitor-android-sim",
-      "Orders remains available in the Android app"
-    );
-    await gotoReady(page, "/about");
-    await expect(
-      page.getByRole("navigation", { name: "Primary navigation", exact: true })
-    ).toBeVisible();
-    await page
-      .getByRole("button", { name: "Search 6529", exact: true })
-      .click();
-    await page
-      .getByRole("combobox", { name: "Search 6529", exact: true })
-      .fill(PROFILE_HANDLE);
-    await page
-      .getByRole("option")
-      .filter({ hasText: PROFILE_HANDLE })
-      .first()
-      .click();
-    await page
-      .getByRole("navigation", { name: "Profile sections" })
-      .getByRole("link", { name: "Collected", exact: true })
-      .click();
-    await expect(
-      page.getByRole("main").locator('[data-profile-section="Filters"]')
-    ).toBeVisible({
-      timeout: RESPONSE_TIMEOUT_MS,
-    });
-    await page
-      .getByRole("link", { name: "Manage orders", exact: true })
-      .click();
-    await expectUrlState(page, (url) => url.pathname === "/collect/orders");
-    await page.getByRole("button", { name: "Back", exact: true }).click();
-    await expectUrlState(
-      page,
-      (url) => url.pathname === `/${PROFILE_HANDLE}/collected`
-    );
-    await expect(
-      page.getByRole("button", { name: "Back", exact: true })
-    ).toBeEnabled();
-    await page.getByRole("button", { name: "Back", exact: true }).click();
-    await expectUrlState(page, (url) => url.pathname === "/about");
-  });
 
   test("native profile artwork opens above the app header and closes back to the profile", async ({
     page,

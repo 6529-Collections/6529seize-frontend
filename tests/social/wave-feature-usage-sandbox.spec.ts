@@ -940,6 +940,7 @@ for (const width of [320, 430]) {
         await expect(caption).toBeVisible();
         await expect(caption).toHaveCSS("white-space", "nowrap");
         await expect(caption).toHaveCSS("text-overflow", "ellipsis");
+        await expect(caption).toHaveCSS("overflow-x", "hidden");
         const bounds = await caption.boundingBox();
         expect(bounds).not.toBeNull();
         expect(bounds!.height).toBeLessThanOrEqual(14);

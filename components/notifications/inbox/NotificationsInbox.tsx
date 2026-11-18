@@ -35,6 +35,7 @@ export default function NotificationsInbox({
   const { reconcileProfileDeliveredNotifications } = useNotificationsContext();
   const [readError, setReadError] = useState(false);
   const markedIdentityRef = useRef<string | null>(null);
+  const scrollRegionRef = useRef<HTMLDivElement>(null);
   const handle =
     hasValidWalletAuth && !activeProfileProxy ? connectedProfile?.handle : null;
   const query = useNotificationsQuery({
@@ -136,7 +137,9 @@ export default function NotificationsInbox({
           : ""}
       </output>
       <div
-        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-py-1"
+        ref={scrollRegionRef}
+        tabIndex={-1}
+        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overscroll-contain tw-py-1 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400"
         aria-busy={query.isFetching}
       >
         {readError && (
@@ -179,7 +182,12 @@ export default function NotificationsInbox({
               type="button"
               className={ACTION_CLASS}
               disabled={query.isFetchingNextPage}
-              onClick={() => {
+              onClick={(event) => {
+                const button = event.currentTarget;
+                if (button.ownerDocument.activeElement === button) {
+                  // Keep focus in the inbox when pagination disables or removes the button.
+                  scrollRegionRef.current?.focus({ preventScroll: true });
+                }
                 void query.fetchNextPage();
               }}
             >

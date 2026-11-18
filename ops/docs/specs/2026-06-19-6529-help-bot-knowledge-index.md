@@ -7,6 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `profiles.collected-tab` record explains that Complete my set and Manage
+orders are personal shortcuts shown only on the signed-in owner's own profile,
+after account loading and outside proxy sessions. Existing platform purchasing
+restrictions still apply.
+
 The touch-menu, header-navigation and encrypted-chat records cover touch reply,
 timestamp access, cancellable native conversation return and Android Back layer
 ordering. They retain visible tap alternatives, permission and delivery-state
@@ -44,7 +49,9 @@ notification filters remain effective.
 The `profiles.identity-tab` record covers the existing-category Rep editor,
 its desktop inline panel and mobile sheet, pinned You contribution, owner Given
 category editing, permission rules, allowance loading, retry action and dismissal.
-Grant Rep uses one label across layouts. Category saves keep the category open;
+Grant Rep uses one label across layouts. A typed category is ready after it
+passes validation. Suggestions use the displayed spelling, and the field stays
+editable after a suggestion is picked. Category saves keep the category open;
 partial failures retain only unsaved drafts for retry. The Identity log names
 NIC explicitly and puts neutral running totals after each change.
 It also covers desktop/mobile NIC Received/Given, owner Given management with

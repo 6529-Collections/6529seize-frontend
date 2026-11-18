@@ -152,7 +152,8 @@ on hover and show a dark hover surface; their resting header surface is transpar
   with a larger invisible tap area.
 - In the native app, the Waves directory has one heading in the top bar, with
   Create Wave, Search 6529 and a vertical More icon beside it. Search stays
-  directly visible; More contains Profile Waves Feed and Share page.
+  directly visible; More contains Profile Waves Feed and, when page sharing is
+  enabled, Share page.
   Find a wave stays beside the collection controls. Subwave
   toggles use an indented text control; Pin remains directly available on
   eligible rows.

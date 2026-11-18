@@ -8,8 +8,8 @@ import {
   type ComponentPropsWithoutRef,
 } from "react";
 import type { Components } from "react-markdown";
-import type { Plugin } from "unified";
 import { MessageMarkdown } from "@/components/markdown/MessageMarkdown";
+import { rehypeWrapMarkdownProse } from "@/components/markdown/wrapProse";
 import type { E2eeMember } from "@/lib/e2ee/types";
 import { findMember } from "../e2eeFormat";
 import { E2eeProfileLink } from "../ui/E2eeProfileLink";
@@ -28,34 +28,6 @@ const TextContext = createContext<PrivateTextContext>({
   mentions: [],
   selfProfileId: null,
 });
-
-interface TextTree {
-  type: string;
-  tagName?: string;
-  value?: string;
-  properties?: Record<string, unknown>;
-  children?: TextTree[];
-}
-
-/** Decorate only prose. Code and link labels must never become profile links. */
-function wrapProse(node: TextTree): void {
-  if (!node.children || ["code", "pre", "a"].includes(node.tagName ?? ""))
-    return;
-  node.children = node.children.map((child) => {
-    if (child.type === "text" && child.value?.trim()) {
-      return {
-        type: "element",
-        tagName: "span",
-        properties: {},
-        children: [child],
-      };
-    }
-    wrapProse(child);
-    return child;
-  });
-}
-
-const rehypePrivateText: Plugin = () => (tree) => wrapProse(tree as TextTree);
 
 function Prose({ children }: ComponentPropsWithoutRef<"span">) {
   const { members, mentions, selfProfileId, preview } = useContext(TextContext);
@@ -77,7 +49,7 @@ function Prose({ children }: ComponentPropsWithoutRef<"span">) {
 }
 
 const COMPONENTS: Components = { span: Prose };
-const TEXT_PLUGINS = [rehypePrivateText];
+const TEXT_PLUGINS = [rehypeWrapMarkdownProse];
 
 /** The encrypted adapter supplies only local mentions and catalog emoji. */
 export const E2eeMarkdown = memo(
