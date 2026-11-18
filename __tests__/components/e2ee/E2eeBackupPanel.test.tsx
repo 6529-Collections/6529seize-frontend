@@ -172,7 +172,7 @@ describe("E2eeBackupPanel", () => {
     const manager = fakeManager(snapshot());
     queueRepair(manager);
     renderPanel(manager);
-    fireEvent.click(screen.getByRole("button", { name: "Turn on backup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Set up backup" }));
     const dialog = await confirmCode(
       "Save your recovery code",
       "Turn on backup"
@@ -251,7 +251,7 @@ describe("E2eeBackupPanel", () => {
       return false;
     });
     renderPanel(manager);
-    fireEvent.click(screen.getByRole("button", { name: "Turn on backup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Set up backup" }));
     const dialog = await confirmCode(
       "Save your recovery code",
       "Turn on backup"
@@ -277,7 +277,7 @@ describe("E2eeBackupPanel", () => {
     const manager = fakeManager(snapshot());
     queueRepair(manager);
     renderPanel(manager);
-    fireEvent.click(screen.getByRole("button", { name: "Turn on backup" }));
+    fireEvent.click(screen.getByRole("button", { name: "Set up backup" }));
     const dialog = await confirmCode(
       "Save your recovery code",
       "Turn on backup"
