@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
 import { E2eeDialog } from "@/components/e2ee/ui/E2eeDialog";
 import { tCount } from "@/components/e2ee/e2eeFormat";
 import Button from "@/components/utils/button/Button";
@@ -17,6 +17,8 @@ interface BatchReport {
   readonly failed: readonly string[];
   /** Changed after it was reviewed: not revoked, listed as it is now. */
   readonly changed: readonly string[];
+  /** Left the clean-up while still active (for example now another device): not tried. */
+  readonly notAttempted: readonly string[];
   /** Revokes started or stopped being signed here: the rest weren't tried. */
   readonly stopped: boolean;
 }
@@ -25,12 +27,16 @@ const NO_REPORT: BatchReport = {
   revoked: 0,
   failed: [],
   changed: [],
+  notAttempted: [],
   stopped: false,
 };
 
 /** Anything the user has to review before confirming again. */
 const needsReview = (report: BatchReport) =>
-  report.failed.length > 0 || report.changed.length > 0 || report.stopped;
+  report.failed.length > 0 ||
+  report.changed.length > 0 ||
+  report.notAttempted.length > 0 ||
+  report.stopped;
 
 /** What the last confirm left for review: revoked, failed, changed, stopped. */
 function CleanUpReport({ report }: { readonly report: BatchReport }) {
@@ -69,6 +75,13 @@ function CleanUpReport({ report }: { readonly report: BatchReport }) {
           })}
         </p>
       ) : null}
+      {report.notAttempted.length > 0 ? (
+        <p className="tw-m-0">
+          {t(locale, "devicesSecurity.cleanUp.notAttempted", {
+            labels: formatList(locale, report.notAttempted),
+          })}
+        </p>
+      ) : null}
       {report.stopped ? (
         <p className="tw-m-0">
           {t(locale, "devicesSecurity.cleanUp.modeChanged")}
@@ -88,6 +101,7 @@ function CleanUpReport({ report }: { readonly report: BatchReport }) {
  */
 export function CleanUpDialog({
   devices,
+  findActive,
   open,
   signed,
   onRevoke,
@@ -95,6 +109,8 @@ export function CleanUpDialog({
   onDone,
 }: {
   readonly devices: readonly SecurityDevice[];
+  /** The device with this id while it is still active anywhere in the tab. */
+  readonly findActive: (id: string) => SecurityDevice | null;
   readonly open: boolean;
   /** Revokes are signed here, so a device can delete its saved chats. */
   readonly signed: boolean;
@@ -116,10 +132,11 @@ export function CleanUpDialog({
     selected.some((device) => device.encryptedDms?.status === "active");
   // The list, signing mode and handler of the latest committed render, read
   // together before each revoke of a batch: they can change while earlier
-  // ones run.
-  const latest = useRef({ devices, signed, onRevoke });
-  useEffect(() => {
-    latest.current = { devices, signed, onRevoke };
+  // ones run. Set during the commit (a layout effect), before any revoke's
+  // continuation can read it.
+  const latest = useRef({ devices, findActive, signed, onRevoke });
+  useLayoutEffect(() => {
+    latest.current = { devices, findActive, signed, onRevoke };
   });
 
   const close = () => {
@@ -146,8 +163,15 @@ export function CleanUpDialog({
         }
         const device = now.devices.find((item) => item.id === confirmed.id);
         if (!device) {
-          // No longer eligible: skipped.
-          return progress;
+          // Ended meanwhile: nothing left to revoke. Still active but no
+          // longer an earlier setup: named, so the user can find it.
+          const active = now.findActive(confirmed.id);
+          return active
+            ? {
+                ...progress,
+                notAttempted: [...progress.notAttempted, active.label],
+              }
+            : progress;
         }
         if (revokeScope(device) !== revokeScope(confirmed)) {
           return { ...progress, changed: [...progress.changed, device.label] };
@@ -180,7 +204,12 @@ export function CleanUpDialog({
       scrollBody
       footer={
         <>
-          <Button variant="secondary" size="md" onClick={close} disabled={pending}>
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={close}
+            disabled={pending}
+          >
             {t(locale, "e2ee.action.cancel")}
           </Button>
           <Button
