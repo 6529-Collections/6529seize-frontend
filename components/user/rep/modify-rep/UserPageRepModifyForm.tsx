@@ -147,8 +147,8 @@ export default function UserPageRepModifyForm({
             onClick={onCancel}
             disabled={mutating}
             variant="ghost"
-            size="lg"
-            className="tw-w-full md:tw-w-auto"
+            size="md"
+            className="tw-min-h-11 tw-w-full md:tw-w-auto"
           >
             {t(locale, "rep.categories.edit.cancel")}
           </Button>
@@ -157,8 +157,8 @@ export default function UserPageRepModifyForm({
             disabled={isSaveDisabled}
             loading={mutating}
             variant="action"
-            size="lg"
-            className="tw-w-full md:tw-w-auto"
+            size="md"
+            className="tw-min-h-11 tw-w-full md:tw-w-auto"
           >
             {t(locale, "rep.categories.edit.save")}
           </Button>
