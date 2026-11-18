@@ -1,4 +1,11 @@
-import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import {
   classifyDevices,
@@ -163,8 +170,12 @@ describe("DevicesSecuritySettings", () => {
     expect(within(thisDevice).getByText("Signed posts")).toBeVisible();
     expect(within(thisDevice).getByText("Encrypted DMs")).toBeVisible();
     expect(within(thisDevice).getByText("Active now")).toBeVisible();
-    expect(within(thisDevice).getByText(/^Expires \w{3} \d{1,2}, 2027$/)).toBeVisible();
-    expect(within(thisDevice).getByText(/^Wallet 0x[0-9a-fA-F]{4}…/)).toBeVisible();
+    expect(
+      within(thisDevice).getByText(/^Expires \w{3} \d{1,2}, 2027$/)
+    ).toBeVisible();
+    expect(
+      within(thisDevice).getByText(/^Wallet 0x[0-9a-fA-F]{4}…/)
+    ).toBeVisible();
 
     const others = screen.getByRole("list", { name: "Other devices · 1" });
     expect(within(others).getByText("6529 app on iPhone")).toBeVisible();
@@ -174,7 +185,9 @@ describe("DevicesSecuritySettings", () => {
       name: "Earlier setups of this browser · 1",
     });
     expect(
-      within(earlier).getAllByRole("button", { name: "Revoke Brave on Windows" })
+      within(earlier).getAllByRole("button", {
+        name: "Revoke Brave on Windows",
+      })
     ).toHaveLength(1);
     expect(screen.getByRole("button", { name: "Clean up…" })).toBeVisible();
   });
@@ -201,14 +214,20 @@ describe("DevicesSecuritySettings", () => {
       name: "Revoke 6529 app on iPhone?",
     });
     expect(dialog).toHaveTextContent("It will stop receiving encrypted DMs.");
-    expect(dialog).toHaveTextContent("Posts it already signed stay verifiable.");
-    fireEvent.click(within(dialog).getByRole("button", { name: "Revoke device" }));
+    expect(dialog).toHaveTextContent(
+      "Posts it already signed stay verifiable."
+    );
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Revoke device" })
+    );
     await waitFor(() =>
       expect(mockState.revoke).toHaveBeenCalledWith(
         expect.objectContaining({ id: "phone" })
       )
     );
-    expect(await screen.findByText("6529 app on iPhone revoked.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("6529 app on iPhone revoked.")
+    ).toBeInTheDocument();
   });
 
   describe("revoking this browser without its engine", () => {
@@ -335,7 +354,9 @@ describe("DevicesSecuritySettings", () => {
       );
     });
     // The revoke itself succeeded; the removal is reported on its own.
-    expect(await screen.findByText("6529 app on iPhone revoked.")).toBeInTheDocument();
+    expect(
+      await screen.findByText("6529 app on iPhone revoked.")
+    ).toBeInTheDocument();
     const alert = screen
       .getAllByRole("alert")
       .find((node) => node.textContent?.includes("couldn’t be removed"))!;
@@ -344,7 +365,9 @@ describe("DevicesSecuritySettings", () => {
     );
     await act(async () => {
       fireEvent.click(
-        within(alert).getByRole("button", { name: "Remove this browser’s data" })
+        within(alert).getByRole("button", {
+          name: "Remove this browser’s data",
+        })
       );
     });
     expect(retryLocalCleanup).toHaveBeenCalledWith("phone");
@@ -397,6 +420,31 @@ describe("DevicesSecuritySettings", () => {
         id: "laptop",
         encryptedDms: expect.objectContaining({ status: "active" }),
       })
+    );
+  });
+
+  it("keeps the dialog open when the row stops offering Revoke before confirm", async () => {
+    const revoke = jest.fn(async () => ({ kind: "none" as const }));
+    mockState = state({ revoke });
+    const { rerender } = render(<DevicesSecuritySettings />);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Revoke 6529 app on iPhone" })
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Revoke 6529 app on iPhone?",
+    });
+    // The encrypted-DMs list is unknown again (the engine stopped and the
+    // fallback list is loading): the same row, but Revoke isn't offered.
+    mockState = state({ revoke, canRevoke: () => false });
+    rerender(<DevicesSecuritySettings />);
+    await act(async () => {
+      fireEvent.click(
+        within(dialog).getByRole("button", { name: "Revoke device" })
+      );
+    });
+    expect(revoke).not.toHaveBeenCalled();
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "This device can’t be revoked from here right now"
     );
   });
 
@@ -471,7 +519,9 @@ describe("DevicesSecuritySettings", () => {
     expect(dialog).toHaveTextContent(
       "Brave on Windows is the browser you’re using now."
     );
-    expect(dialog).toHaveTextContent("the encrypted chats saved here are deleted");
+    expect(dialog).toHaveTextContent(
+      "the encrypted chats saved here are deleted"
+    );
     fireEvent.click(
       within(dialog).getByRole("button", { name: "Revoke this browser" })
     );
@@ -495,7 +545,9 @@ describe("DevicesSecuritySettings", () => {
     const dialog = await screen.findByRole("dialog", {
       name: "Revoke 6529 app on iPhone?",
     });
-    fireEvent.click(within(dialog).getByRole("button", { name: "Revoke device" }));
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Revoke device" })
+    );
     expect(await within(dialog).findByRole("alert")).toHaveTextContent(
       "Couldn’t revoke the device. Try again."
     );
@@ -565,7 +617,9 @@ describe("DevicesSecuritySettings", () => {
     mockState = state({ localKeysUnreadable: true });
     render(<DevicesSecuritySettings />);
     expect(
-      screen.getByText(/couldn’t read its own keys, so it can’t tell which device/)
+      screen.getByText(
+        /couldn’t read its own keys, so it can’t tell which device/
+      )
     ).toHaveProperty("tagName", "OUTPUT");
     fireEvent.click(
       screen.getByRole("button", { name: "Revoke 6529 app on iPhone" })
@@ -597,7 +651,9 @@ describe("DevicesSecuritySettings", () => {
     const user = userEvent.setup();
     render(<DevicesSecuritySettings />);
     await user.click(
-      screen.getByRole("button", { name: "More actions for 6529 app on iPhone" })
+      screen.getByRole("button", {
+        name: "More actions for 6529 app on iPhone",
+      })
     );
     await user.click(await screen.findByRole("menuitem", { name: "Rename…" }));
     const dialog = await screen.findByRole("dialog", {
@@ -719,7 +775,9 @@ describe("DevicesSecuritySettings", () => {
     });
     render(<DevicesSecuritySettings />);
     expect(screen.getAllByText("Not added on this device")).toHaveLength(1);
-    await userEvent.click(screen.getByRole("button", { name: /^Add device signed by wallet/ }));
+    await userEvent.click(
+      screen.getByRole("button", { name: /^Add device signed by wallet/ })
+    );
     expect(trustDevice).toHaveBeenCalledWith("phone");
   });
 
@@ -752,8 +810,12 @@ describe("DevicesSecuritySettings", () => {
     mockState = state({ proxy: true });
     rerender(<DevicesSecuritySettings />);
     expect(
-      screen.getByText("Switch to your own profile to manage devices and backup.")
+      screen.getByText(
+        "Switch to your own profile to manage devices and backup."
+      )
     ).toBeVisible();
-    expect(screen.queryByRole("region", { name: "Brave on Windows" })).toBeNull();
+    expect(
+      screen.queryByRole("region", { name: "Brave on Windows" })
+    ).toBeNull();
   });
 });

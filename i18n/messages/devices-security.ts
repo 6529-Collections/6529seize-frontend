@@ -50,6 +50,8 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.localCleanup.retryFailed":
     "{label} was revoked, but this browser’s encrypted data still couldn’t be removed. Close any other 6529 tabs and try again.",
   "devicesSecurity.localCleanup.retry": "Remove this browser’s data",
+  "devicesSecurity.revokeNotNow":
+    "This device can’t be revoked from here right now, for example while the device list reloads. Try again in a moment.",
   "devicesSecurity.revokeChanged":
     "This device changed while this was open. Check what will stop, then confirm again.",
   "devicesSecurity.blocked.loading":
@@ -88,6 +90,8 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.cleanUp.failed": "Couldn’t revoke {labels}. Try again.",
   "devicesSecurity.cleanUp.changed":
     "Not revoked because they changed while this was open: {labels}. Check what each has now, then confirm again.",
+  "devicesSecurity.cleanUp.notAttempted":
+    "Not tried, because they no longer fit this clean-up: {labels}. They still have access. Find them in the device list, usually under Other devices.",
   "devicesSecurity.cleanUp.modeChanged":
     "Encrypted DMs started or stopped in this browser while this ran. That changes what happens to the chats saved on these devices, so the rest weren’t revoked. Check the list, then confirm again.",
 

@@ -113,8 +113,7 @@ function useRevokedUnsigned(engineDevices: readonly E2eeDeviceInfo[]) {
   const [revoked, setRevoked] = useState<ReadonlySet<string>>(NO_KEYS);
   return {
     showsRevoked: engineShowsRevoked(engineDevices, revoked),
-    markRevoked: (key: string) =>
-      setRevoked((keys) => new Set([...keys, key])),
+    markRevoked: (key: string) => setRevoked((keys) => new Set([...keys, key])),
   };
 }
 
@@ -136,6 +135,14 @@ export class DeviceActionUnavailableError extends Error {
   constructor() {
     super("E2EE_NOT_READY");
     this.name = "DeviceActionUnavailableError";
+  }
+}
+
+/** The device's row doesn't offer Revoke now (for example its list reloads). */
+export class DeviceNotRevocableError extends Error {
+  constructor() {
+    super("DEVICE_NOT_REVOCABLE");
+    this.name = "DeviceNotRevocableError";
   }
 }
 
@@ -373,8 +380,7 @@ export function useSecurityDevices(): SecurityDevicesState {
   // combined device never shows as signed posts only.
   const engineDevices = e2ee.devices;
   const { showsRevoked, markRevoked } = useRevokedUnsigned(engineDevices);
-  const engineListed =
-    engineReady && engineDevices.length > 0 && showsRevoked;
+  const engineListed = engineReady && engineDevices.length > 0 && showsRevoked;
   const encryptionEnabled = isE2eeEnabled() && profileId !== null;
   const apiDevicesQuery = useApiDevices(
     profileId,

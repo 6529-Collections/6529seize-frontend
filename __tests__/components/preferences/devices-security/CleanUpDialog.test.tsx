@@ -31,6 +31,7 @@ const device = (
 interface DialogProps {
   readonly signed?: boolean;
   readonly onRevoke?: (device: SecurityDevice) => Promise<void>;
+  readonly findActive?: (id: string) => SecurityDevice | null;
 }
 
 function renderDialog(
@@ -43,6 +44,7 @@ function renderDialog(
   const ui = (list: readonly SecurityDevice[], next: DialogProps) => (
     <CleanUpDialog
       devices={list}
+      findActive={next.findActive ?? props.findActive ?? (() => null)}
       open
       signed={next.signed ?? props.signed ?? false}
       onRevoke={next.onRevoke ?? onRevoke}
@@ -66,9 +68,12 @@ const confirmButton = (count: number) =>
     name: count === 1 ? "Revoke 1 device" : `Revoke ${count} devices`,
   });
 
-const dialog = () => screen.getByRole("dialog", { name: "Clean up earlier setups" });
+const dialog = () =>
+  screen.getByRole("dialog", { name: "Clean up earlier setups" });
 const checkbox = (id: string) =>
-  within(dialog()).getByRole("checkbox", { name: new RegExp(`^Browser ${id}`) });
+  within(dialog()).getByRole("checkbox", {
+    name: new RegExp(`^Browser ${id}`),
+  });
 
 describe("CleanUpDialog", () => {
   it("retries only the confirmed devices still eligible, leaving a newly eligible one unselected", async () => {
@@ -175,6 +180,37 @@ describe("CleanUpDialog", () => {
       expect.objectContaining({ id: "b" })
     );
     expect(rendered.onDone).toHaveBeenCalledWith(1);
+  });
+
+  it("names a device that left the clean-up while still active, apart from ended ones", async () => {
+    let update: (
+      list: readonly SecurityDevice[],
+      next?: DialogProps
+    ) => void = () => undefined;
+    const renamed = { ...device("b"), label: "Work laptop" };
+    const rendered = renderDialog([device("a"), device("b"), device("c")], {
+      onRevoke: async (target) => {
+        if (target.id === "a") {
+          // Meanwhile B is renamed (now another device, still active) and
+          // C's access ends.
+          update([], {
+            findActive: (id) => (id === "b" ? renamed : null),
+          });
+        }
+      },
+    });
+    update = rendered.update;
+    await act(async () => {
+      fireEvent.click(confirmButton(3));
+    });
+    expect(rendered.onRevoke).toHaveBeenCalledTimes(1);
+    expect(rendered.onClose).not.toHaveBeenCalled();
+    const alert = within(dialog()).getByRole("alert");
+    expect(alert).toHaveTextContent(
+      "Not tried, because they no longer fit this clean-up: Work laptop."
+    );
+    expect(alert).toHaveTextContent("usually under Other devices");
+    expect(alert).not.toHaveTextContent("Browser c");
   });
 
   it("stops the batch when revokes start being signed, and doesn't switch handlers mid-batch", async () => {
