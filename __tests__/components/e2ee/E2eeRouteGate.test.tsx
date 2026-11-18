@@ -202,7 +202,7 @@ describe("E2eeRouteGate", () => {
       screen.queryByRole("button", { name: /^Revoke / })
     ).not.toBeInTheDocument();
     expect(
-      screen.getByText(/On a device you already use, open Devices/u)
+      screen.getByText(/On a device you already use, open Preferences → Devices & security/u)
     ).toBeInTheDocument();
   });
 

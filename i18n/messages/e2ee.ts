@@ -107,7 +107,7 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.identityUnknown":
     "You’ll sign with the wallet connected to this profile.",
   "e2ee.enroll.manage":
-    "You can revoke these permissions in Preferences → Device Permissions.",
+    "You can revoke these permissions in Preferences → Devices & security.",
   "e2ee.gate.noWallet":
     "Connect the wallet for this profile to use encrypted messages.",
 
@@ -174,7 +174,7 @@ export const E2EE_MESSAGES = {
 
   "e2ee.deviceLimit.title": "Too many devices",
   "e2ee.deviceLimit.body":
-    "Your profile already has the maximum of {max} devices for encrypted messages. On a device you already use, open Devices and revoke one you no longer need, then turn on this device.",
+    "Your profile already has the maximum of {max} devices for encrypted messages. On a device you already use, open Preferences → Devices & security and revoke one you no longer need, then turn on this device.",
   "e2ee.deviceLimit.listTitle": "Devices on your profile",
   "e2ee.deviceLimit.signature":
     "Turning on this device is one wallet signature. It moves no funds and costs nothing.",
