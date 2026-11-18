@@ -922,6 +922,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     });
     for (const width of [1024, 1440]) {
       await page.setViewportSize({ width, height: 844 });
+      // Resizing the shorter visitor page can leave the pointer over a tab.
+      await page.mouse.move(0, 0);
       await expect(viewTabs).toBeVisible();
       await expect(sortTabs).toBeVisible();
       await expect(viewTabs.getByRole("tab")).toHaveCount(2);
