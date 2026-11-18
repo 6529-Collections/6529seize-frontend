@@ -78,6 +78,7 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
     disposed: false,
     lastMeAt: 0,
     ownKeyPackages: new Map(),
+    ownDevices: [],
     lastWakeAt: 0,
     openConversation: null,
     openUntil: 0,

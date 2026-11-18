@@ -19,7 +19,7 @@ import {
   knownOlderClient,
   saveSelfGroupClaims,
   selfGroupPackages,
-  takeSelfGroupClaim,
+  reserveSelfGroupClaim,
 } from "./self-group-claims";
 import {
   checkpoint,
@@ -339,7 +339,7 @@ async function claimSelfGroupSiblings(
   const siblings = (await ownSiblingDevices(ctx)).filter(
     (key) => !knownOlderClient(ctx, key)
   );
-  if (siblings.length === 0 || !takeSelfGroupClaim(ctx)) {
+  if (siblings.length === 0 || !(await reserveSelfGroupClaim(ctx))) {
     return [];
   }
   try {
