@@ -7056,6 +7056,7 @@
       ],
       "facts": [
         "The Collected tab lives at /{user}/collected.",
+        "Complete my set and Manage orders appear only on your own Collected tab once your account has loaded and you are signed in directly. They are omitted on other profiles, while signed out, and in proxy sessions, subject to existing platform purchasing restrictions.",
         "It shows collected NFT context, owner balances, stats summary, and transfer-mode behavior where available.",
         "On mobile, swipe the headline statistics horizontally; a right-edge fade indicates more statistics, and Details stays visible beside the row.",
         "The expandable Details panel can show holdings totals, wallet activity, distributions, TDH history, and boost breakdown.",
@@ -7082,6 +7083,7 @@
       "source_refs": [
         "app/[user]/(profile)/collected/page.tsx",
         "ops/docs/profiles/tabs/feature-collected-tab.md",
+        "components/user/collected/UserPageCollectedStats.tsx",
         "components/user/collected/stats/useCollectedStatsData.ts",
         "components/user/collected/stats/subcomponents/CollectedStatsHeader.tsx",
         "components/user/stats/UserPageStatsTableShared.tsx"
