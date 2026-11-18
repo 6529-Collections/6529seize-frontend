@@ -14,6 +14,7 @@ import {
 } from "../support/localSandbox";
 import AxeBuilder from "@axe-core/playwright";
 import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
+import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
 import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
 import type { Locator } from "@playwright/test";
 import { ApiVotingCreditReleaseReason } from "../../generated/models/ApiVotingCreditReleaseReason";
@@ -187,6 +188,123 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.keyboard.press("Escape");
     await expect(bell).toBeFocused();
   });
+  test("an older mention notification finishes its jump with the message visible", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop sidebar inbox"
+    );
+    const waveId = "00000000-0000-4000-8000-000000000533";
+    const mentionSerialNo = 2;
+    const mentionText =
+      "Mentioned @playwright inside the sandbox notification flow.";
+    // Keep the virtual row's observer behind the jump, as can happen when
+    // scrolling straight to an old row. Leave every other observer untouched.
+    await page.addInitScript((serialNo) => {
+      const NativeObserver = globalThis.IntersectionObserver;
+      globalThis.IntersectionObserver = class extends NativeObserver {
+        constructor(
+          callback: IntersectionObserverCallback,
+          options?: IntersectionObserverInit
+        ) {
+          super((entries, observer) => {
+            const adjusted = entries.map((entry) =>
+              entry.target.parentElement?.id === `drop-${serialNo}` &&
+              options?.rootMargin?.includes("5000px")
+                ? { ...entry, isIntersecting: false }
+                : entry
+            );
+            callback(adjusted, observer);
+          }, options);
+        }
+      };
+    }, mentionSerialNo);
+    const history = Promise.withResolvers<void>();
+    await page.route(`**/api/v2/waves/${waveId}/drops?*`, async (route) => {
+      const response = await route.fetch();
+      const feed = (await response.json()) as ApiWaveDropsFeedV2;
+      const request = new URL(route.request().url());
+      const mention = feed.drops.find(
+        (drop) => drop.serial_no === mentionSerialNo
+      );
+      if (!mention)
+        throw new Error("Sandbox mention is missing from the fixture");
+      const strategy = request.searchParams.get("search_strategy");
+      if (strategy === "FIND_BOTH") await history.promise;
+      const newer = Array.from({ length: 70 }, (_, index) => ({
+        ...mention,
+        id: `00000000-0000-4000-8000-000000000${700 + index}`,
+        serial_no: 10 + index,
+        created_at: mention.created_at + (index + 1) * 120_000,
+        content: `Newer message ${index + 1}`,
+      })).reverse();
+      const cursor = Number(request.searchParams.get("serial_no_limit"));
+      let drops: ApiWaveDropsFeedV2["drops"] = newer.slice(0, 50);
+      if (strategy === "FIND_BOTH") {
+        drops = [mention];
+      } else if (strategy === "FIND_OLDER") {
+        drops = newer.filter((drop) => drop.serial_no < cursor).slice(0, 50);
+      } else if (strategy === "FIND_NEWER") {
+        drops = newer.filter((drop) => drop.serial_no > cursor).slice(-50);
+      }
+      await route.fulfill({ response, json: { ...feed, drops } });
+    });
+
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const bell = page.getByRole("link", { name: "Notifications", exact: true });
+    await bell.focus();
+    await bell.press("ArrowDown");
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    const mention = inbox
+      .getByRole("link")
+      .filter({ hasText: "sandbox-alice mentioned you" });
+    const chat = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]");
+    const jumpLoader = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]")
+      .locator("..")
+      .locator(':scope > div > div > svg[role="status"].tw-w-10');
+    try {
+      await mention.click();
+      await expect(jumpLoader).toBeVisible({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      await expect(chat.getByText(mentionText, { exact: true })).toHaveCount(0);
+    } finally {
+      history.resolve();
+    }
+
+    await expect(jumpLoader).toBeHidden({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    // Check the first completed state without an assertion retry that could
+    // hide the blank row until a later render.
+    expect(
+      await chat.evaluate(
+        (viewport, { serialNo, text }) => {
+          const row = viewport.querySelector(`#drop-${serialNo}`);
+          if (!row?.textContent?.includes(text)) return false;
+          const bounds = row.getBoundingClientRect();
+          const view = viewport.getBoundingClientRect();
+          return (
+            bounds.height > 0 &&
+            bounds.top >= view.top &&
+            bounds.bottom <= view.bottom
+          );
+        },
+        { serialNo: mentionSerialNo, text: mentionText }
+      )
+    ).toBe(true);
+    await expect(inbox).toBeHidden();
+  });
+
   test("desktop preview marks notifications read, preserves the route, restores focus, and opens a destination", async ({
     page,
     baseURL,
