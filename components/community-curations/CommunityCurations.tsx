@@ -187,7 +187,7 @@ export default function CommunityCurations({
   );
 
   useLayoutEffect(() => {
-    if (!shouldShowMasonry) {
+    if (!shouldShowMasonry || drops.length === 0) {
       // Empty, error and loading states are also complete visible destinations.
       commitWaveNavigationContent("feed");
       return;
@@ -203,7 +203,7 @@ export default function CommunityCurations({
 
     element.scrollTo({ top: initialScrollOffset });
     hasRestoredScrollOffsetRef.current = true;
-  }, [initialScrollOffset, shouldShowMasonry]);
+  }, [drops.length, initialScrollOffset, shouldShowMasonry]);
 
   return (
     <section

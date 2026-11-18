@@ -32,6 +32,7 @@ interface FeedReturnPaint {
   readonly scrollTop: number;
   readonly readableCard: boolean;
   readonly coveredWhilePreparing?: boolean;
+  readonly readingCardTop?: number | undefined;
   readonly error?: string;
 }
 
@@ -419,6 +420,15 @@ for (const platform of ["ios", "android"] as const) {
                 scrollTop: feed?.scrollTop ?? 0,
                 readableCard,
                 coveredWhilePreparing,
+                readingCardTop: Array.from(
+                  feed?.querySelectorAll("article") ?? []
+                )
+                  .find((card) =>
+                    card.textContent?.includes(
+                      "Profile feed gesture fixture 6."
+                    )
+                  )
+                  ?.getBoundingClientRect().top,
               });
             },
             (error: unknown) => {
@@ -494,6 +504,9 @@ for (const platform of ["ios", "android"] as const) {
         const readingPosition = await feed.evaluate(
           (element) => element.scrollTop
         );
+        const readingCardTop = await post.evaluate(
+          (element) => element.closest("article")!.getBoundingClientRect().top
+        );
         await post.tap();
         await expect(page).toHaveURL(
           new RegExp(`/waves/${WAVE}\\?.*returnTo=`)
@@ -552,6 +565,10 @@ for (const platform of ["ios", "android"] as const) {
           });
           expect(
             Math.abs(paint!.scrollTop - readingPosition)
+          ).toBeLessThanOrEqual(2);
+          expect(paint?.readingCardTop).toBeDefined();
+          expect(
+            Math.abs(paint!.readingCardTop! - readingCardTop)
           ).toBeLessThanOrEqual(2);
         }
         await expect(

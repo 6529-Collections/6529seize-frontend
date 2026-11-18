@@ -64,20 +64,32 @@ const EMPTY_VIEWPORT: PanelViewport = {
 
 const noop = () => {};
 
-function hasVisibleFeedCard(
+function hasVisibleFeedViewport(
   grid: HTMLElement | null,
   scroll: HTMLElement | null
 ) {
   if (!grid || !scroll) return false;
   const viewport = scroll.getBoundingClientRect();
-  return Array.from(grid.children).some((cell) => {
+  const gridBounds = grid.getBoundingClientRect();
+  let firstTop = Number.POSITIVE_INFINITY;
+  let lastBottom = Number.NEGATIVE_INFINITY;
+  for (const cell of grid.children) {
     const rect = cell.getBoundingClientRect();
-    return (
+    if (
       rect.bottom > viewport.top &&
       rect.top < viewport.bottom &&
       getComputedStyle(cell).visibility !== "hidden"
-    );
-  });
+    ) {
+      firstTop = Math.min(firstTop, rect.top);
+      lastBottom = Math.max(lastBottom, rect.bottom);
+    }
+  }
+  // A single measuring batch can leave one card near the bottom while the
+  // saved reading area is still empty. Wait for positioned rows across it.
+  return (
+    firstTop <= Math.max(viewport.top, gridBounds.top) + MASONRY_GUTTER &&
+    lastBottom >= Math.min(viewport.bottom, gridBounds.bottom) - MASONRY_GUTTER
+  );
 }
 
 const getDropKey = (drop: ExtendedDrop) => drop.stableKey;
@@ -329,7 +341,7 @@ function CommunityCurationsVirtualMasonry({
   const acknowledgeVisibleFeed = useCallback(() => {
     if (
       isWaveNavigationContentPending("feed") &&
-      hasVisibleFeedCard(gridElement, scrollContainer)
+      hasVisibleFeedViewport(gridElement, scrollContainer)
     ) {
       commitWaveNavigationContent("feed");
     }

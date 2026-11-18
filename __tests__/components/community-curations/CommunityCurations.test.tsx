@@ -2,7 +2,13 @@ import { render, screen } from "@testing-library/react";
 import CommunityCurations from "@/components/community-curations/CommunityCurations";
 
 const mockUseCommunityCurationsDrops = jest.fn();
+const mockCommitWaveNavigationContent = jest.fn();
 let mockIsApp = false;
+
+jest.mock("@/helpers/waves/wave-navigation-transition", () => ({
+  commitWaveNavigationContent: (...args: unknown[]) =>
+    mockCommitWaveNavigationContent(...args),
+}));
 
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -92,5 +98,17 @@ describe("CommunityCurations", () => {
     expect(destination.searchParams.get("returnTo")).toBe(
       "/waves?view=profile-feed"
     );
+  });
+
+  it("releases a pagination-only Feed without waiting for absent cards", () => {
+    mockUseCommunityCurationsDrops.mockReturnValue({
+      ...loadingState,
+      isLoading: false,
+      hasNextPage: true,
+      isFetchingNextPage: true,
+    });
+    render(<CommunityCurations />);
+    expect(screen.getByTestId("profile-feed-masonry")).toBeInTheDocument();
+    expect(mockCommitWaveNavigationContent).toHaveBeenCalledWith("feed");
   });
 });
