@@ -232,6 +232,14 @@ export class MemoryE2eeStorage implements E2eeStorage {
     return Promise.resolve(this.listByPrefix(this.outbox, `${profileId}|`));
   }
 
+  clearProfileIfDevice(profileId: string, deviceKey: string): Promise<boolean> {
+    const stored = this.devices.get(profileId);
+    if (stored?.deviceKey.toLowerCase() !== deviceKey.toLowerCase()) {
+      return Promise.resolve(false);
+    }
+    return this.clearProfile(profileId).then(() => true);
+  }
+
   clearProfile(profileId: string, expectedVersion?: number): Promise<void> {
     try {
       this.versions.set(

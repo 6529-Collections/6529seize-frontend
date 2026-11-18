@@ -85,8 +85,11 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.cleanUp.confirm.other": "Revoke {count} devices",
   "devicesSecurity.cleanUp.done.one": "{count} device revoked.",
   "devicesSecurity.cleanUp.done.other": "{count} devices revoked.",
-  "devicesSecurity.cleanUp.failed":
-    "Couldn’t revoke {labels}. The others were revoked. Try again.",
+  "devicesSecurity.cleanUp.failed": "Couldn’t revoke {labels}. Try again.",
+  "devicesSecurity.cleanUp.changed":
+    "Not revoked because they changed while this was open: {labels}. Check what each has now, then confirm again.",
+  "devicesSecurity.cleanUp.modeChanged":
+    "Encrypted DMs started or stopped in this browser while this ran. That changes what happens to the chats saved on these devices, so the rest weren’t revoked. Check the list, then confirm again.",
 
   "devicesSecurity.revoke.title": "Revoke {label}?",
   "devicesSecurity.revoke.bothSigned":

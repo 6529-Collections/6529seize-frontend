@@ -190,7 +190,7 @@ describe("DevicesSecuritySettings", () => {
   describe("revoking this browser without its engine", () => {
     const openThisBrowserRevoke = async () => {
       const user = userEvent.setup();
-      render(<DevicesSecuritySettings />);
+      const view = render(<DevicesSecuritySettings />);
       const thisDevice = screen.getByRole("region", { name: "Laptop" });
       await user.click(
         within(thisDevice).getByRole("button", {
@@ -200,7 +200,12 @@ describe("DevicesSecuritySettings", () => {
       await user.click(
         await screen.findByRole("menuitem", { name: "Revoke this browser…" })
       );
-      return screen.findByRole("dialog", { name: "Revoke this browser?" });
+      return {
+        dialog: await screen.findByRole("dialog", {
+          name: "Revoke this browser?",
+        }),
+        rerender: () => view.rerender(<DevicesSecuritySettings />),
+      };
     };
 
     it("warns that its chats are deleted when the encrypted device is the one stored here", async () => {
@@ -217,7 +222,7 @@ describe("DevicesSecuritySettings", () => {
           now: NOW,
         })
       );
-      const dialog = await openThisBrowserRevoke();
+      const { dialog } = await openThisBrowserRevoke();
       expect(dialog).toHaveTextContent(
         "the encrypted chats saved here are deleted"
       );
@@ -235,12 +240,51 @@ describe("DevicesSecuritySettings", () => {
           now: NOW,
         })
       );
-      const dialog = await openThisBrowserRevoke();
+      const { dialog } = await openThisBrowserRevoke();
       expect(dialog).not.toHaveTextContent(
         "the encrypted chats saved here are deleted"
       );
       expect(dialog).toHaveTextContent(
         "Its encrypted DMs are on another device, not this browser"
+      );
+    });
+
+    it("asks again when the stored key shows the encrypted device is this browser's after all", async () => {
+      // The signing key pins the row before the stored key loads, so the
+      // dialog first says the chats are on another device.
+      const listed = (ownEncryptedDeviceKey: string | null) =>
+        classifyDevices({
+          grants: [grant("laptop", { device_label: "Laptop" })],
+          encryptedDevices: [
+            encrypted("e-laptop", { grantId: "laptop", label: "Laptop" }),
+          ],
+          ownSigningKeys: [`0x${"laptop".padStart(64, "0")}`],
+          ownEncryptedDeviceKey,
+          now: NOW,
+        });
+      const revoke = jest.fn(async () => ({ kind: "none" as const }));
+      mockState = state({ ...listed(null), revoke, signsRevocations: false });
+      const { dialog, rerender } = await openThisBrowserRevoke();
+      expect(dialog).toHaveTextContent(
+        "Its encrypted DMs are on another device, not this browser"
+      );
+      mockState = state({
+        ...listed("e-laptop"),
+        revoke,
+        signsRevocations: false,
+      });
+      rerender();
+      await act(async () => {
+        fireEvent.click(
+          within(dialog).getByRole("button", { name: "Revoke this browser" })
+        );
+      });
+      expect(revoke).not.toHaveBeenCalled();
+      expect(within(dialog).getByRole("alert")).toHaveTextContent(
+        "This device changed while this was open."
+      );
+      expect(dialog).toHaveTextContent(
+        "the encrypted chats saved here are deleted"
       );
     });
   });

@@ -2,6 +2,7 @@ import {
   classifyDevices,
   type ClassifyDevicesInput,
   type EncryptedDeviceInput,
+  revokeScope,
 } from "@/components/preferences/devices-security/classifyDevices";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 
@@ -239,11 +240,78 @@ describe("classifyDevices", () => {
       ]);
     });
 
+    it("pins this browser's encrypted device over a newer posts-only key, never as an earlier setup", () => {
+      // This browser holds a newer signed-posts-only key with the same name,
+      // and its stored encrypted device has been idle since that key was
+      // set up. The encrypted device is still this browser's: it is the
+      // card, and never pre-selected for clean-up.
+      const result = classify({
+        grants: [grant("posts", { created_at: NOW - HOUR })],
+        encryptedDevices: [
+          encrypted("0xE1", { createdAt: NOW - 8 * DAY, lastSeenAt: null }),
+        ],
+        ownSigningKeys: [`0x${"posts".padStart(64, "0")}`],
+        ownEncryptedDeviceKey: "0xe1",
+      });
+      expect(result.thisDevice?.id).toBe("0xE1");
+      expect(result.earlierSetups).toHaveLength(0);
+      // The posts-only key is this browser's too: listed, not cleaned up.
+      expect(result.otherDevices.map(({ id }) => id)).toEqual(["posts"]);
+    });
+
+    it("never offers another key this browser holds as an earlier setup", () => {
+      const result = classify({
+        grants: [
+          grant("new", { created_at: NOW - HOUR }),
+          grant("old", { created_at: NOW - 8 * DAY }),
+        ],
+        ownSigningKeys: [
+          `0x${"new".padStart(64, "0")}`,
+          `0x${"old".padStart(64, "0")}`,
+        ],
+      });
+      expect(result.thisDevice?.id).toBe("new");
+      expect(result.earlierSetups).toHaveLength(0);
+      expect(result.otherDevices.map(({ id }) => id)).toEqual(["old"]);
+    });
+
     it("has none without a this-device row", () => {
       const result = classify({
         encryptedDevices: [encrypted("idle", { createdAt: NOW - 8 * DAY })],
       });
       expect(result.earlierSetups).toHaveLength(0);
+    });
+  });
+
+  describe("revokeScope", () => {
+    const [row] = classify({
+      grants: [grant("a")],
+      encryptedDevices: [encrypted("0xE1", { grantId: "a" })],
+    }).otherDevices;
+
+    it("changes when the encrypted device is found to be this browser's", () => {
+      const own = classify({
+        grants: [grant("a")],
+        encryptedDevices: [encrypted("0xE1", { grantId: "a" })],
+        ownEncryptedDeviceKey: "0xe1",
+      }).thisDevice;
+      expect(revokeScope(own!)).not.toBe(revokeScope(row!));
+    });
+
+    it("changes when the grant links another encrypted device", () => {
+      const [other] = classify({
+        grants: [grant("a")],
+        encryptedDevices: [encrypted("0xE2", { grantId: "a" })],
+      }).otherDevices;
+      expect(revokeScope(other!)).not.toBe(revokeScope(row!));
+    });
+
+    it("ignores the key's letter case", () => {
+      const [upper] = classify({
+        grants: [grant("a")],
+        encryptedDevices: [encrypted("0xe1", { grantId: "a" })],
+      }).otherDevices;
+      expect(revokeScope(upper!)).toBe(revokeScope(row!));
     });
   });
 
