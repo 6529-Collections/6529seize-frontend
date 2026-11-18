@@ -12,9 +12,6 @@ export async function queuePoll(
 ): Promise<void> {
   const group = g.toLowerCase();
   const { record } = requireGroup(ctx, group);
-  if (record.metadata.kind !== "group") {
-    throw new E2eeError("E2EE_INVALID_INPUT");
-  }
   // The sender sets the exact, ordered MLS roster when encrypting the event.
   await queueTargeted(ctx, group, (base) => ({
     ...base,

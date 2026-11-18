@@ -67,17 +67,16 @@ shortcodes render as inline images while composing and editing; encrypted drafts
 keep their shortcode representation for encryption and sending. GIFs can be
 sent as encrypted attachments. Their search and previews connect publicly to GIPHY.
 
-### Group polls
+### Polls
 
-In supported builds, select **Create poll** in an encrypted group chat. Enter a
-question and two to ten choices in the inline composer. Choose **Single** or
-**Multiple**, then select **Post poll**.
+In supported builds, select **Create poll** in an encrypted DM or group chat.
+Enter a question and two to ten choices in the inline composer. Choose
+**Single** or **Multiple**, then select **Post poll**.
 
 Select your choices and choose **Vote**. Use **View results** to see the tally,
 then select a result row to see who chose it. Use **Change vote** to update or
 clear your vote. The creator can select **End poll** to stop voting.
-People who join after the poll was posted receive new messages from the chat.
-They need a new poll to participate.
+People who join a group after the poll was posted need a new poll to participate.
 
 Messages support the same Markdown formatting as ordinary chats: headings,
 **bold** and italic text, strikethrough, lists and task lists, quotes,

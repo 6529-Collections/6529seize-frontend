@@ -461,7 +461,7 @@ export function E2eeComposer({
   const [pollOpen, setPollOpen] = useState(false);
   const pollButtonRef = useRef<HTMLButtonElement>(null);
   const createPoll =
-    isE2eePollCreationEnabled() && conversation.kind === "group" && !editing
+    isE2eePollCreationEnabled() && !editing
       ? engine.createPoll?.bind(engine, conversation.g)
       : undefined;
   const showPoll = pollOpen && createPoll !== undefined;
