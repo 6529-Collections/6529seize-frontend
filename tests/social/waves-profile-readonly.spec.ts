@@ -1305,6 +1305,15 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     await expect(details).toHaveCount(0);
     await expect(coverage.getByText(/Top up by|Recommended:/)).toHaveCount(0);
     await expect(
+      coverage.getByText("Next unfunded", { exact: true })
+    ).toBeVisible();
+    await expect(
+      coverage.getByRole("link", { name: "The Memes #571", exact: true })
+    ).toHaveAttribute("href", "/the-memes/571");
+    await expect(
+      coverage.getByText("The Memes #571 is not fully funded.", { exact: true })
+    ).toHaveCount(0);
+    await expect(
       coverage.getByText(
         /Choose a drop|Set up subscriptions|Review settings or refresh/
       )

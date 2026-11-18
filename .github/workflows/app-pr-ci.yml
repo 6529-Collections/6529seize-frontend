@@ -269,6 +269,13 @@ jobs:
           if (notificationsInboxRequired) {
             corePlaywrightLanes.push({ lane: "playwright-notifications-inbox", label: "Notifications inbox desktop and mobile", runner: defaultRunner });
           }
+          const subscriptionStatusRequired = plan.changed_files.some((file) =>
+            /^(?:components\/user\/subscriptions\/|tests\/social\/subscription-status-sandbox\.spec\.ts$|tests\/support\/subscriptionFixtures\.ts$)/.test(file) ||
+            ["i18n/messages/en-US.ts", "hooks/useNftPurchasingVisibility.ts", "tests/support/localSandbox.ts", "tests/support/surfaceSimulation.ts", "tests/testHelpers.ts", "package.json", "tests/support/composerSandboxServer.cjs", "tests/packs.manifest.cjs", ".github/workflows/app-pr-ci.yml"].includes(file)
+          );
+          if (subscriptionStatusRequired) {
+            corePlaywrightLanes.push({ lane: "playwright-subscription-status", label: "Subscription status and funding", runner: defaultRunner });
+          }
           const waveLinkPreviewRequired = plan.changed_files.some((file) =>
             /^(?:components\/waves\/list\/WaveItem(?:Wide|Chat|Follow)\.tsx$|tests\/social\/wave-link-preview-sandbox\.spec\.ts$)/.test(file)
           );
@@ -607,6 +614,13 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/profile-following"
           PROFILE_FOLLOWING_SHARD: "${{ matrix.shard }}/2"
         run: ./bin/6529 run test:e2e:profile-following-sandbox --shard="$PROFILE_FOLLOWING_SHARD"
+
+      - name: Run subscription status browser regression pack
+        if: matrix.lane == 'playwright-subscription-status'
+        env:
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/subscription-status"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/subscription-status"
+        run: ./bin/6529 run test:e2e:subscription-status-sandbox
 
       - name: Run profile NIC activity browser regression pack
         if: matrix.lane == 'playwright-profile-nic'

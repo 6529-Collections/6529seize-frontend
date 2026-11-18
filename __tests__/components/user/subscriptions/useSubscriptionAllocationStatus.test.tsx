@@ -1,7 +1,11 @@
 import { useSubscriptionAllocationStatus } from "@/components/user/subscriptions/useSubscriptionAllocationStatus";
 import { commonApiFetch } from "@/services/api/common-api";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { renderHook, waitFor } from "@testing-library/react";
+import {
+  onlineManager,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 
 jest.mock("@/services/api/common-api", () => ({
@@ -26,7 +30,66 @@ beforeEach(() => {
   client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   fetchMock.mockReset();
 });
-afterEach(() => client.clear());
+afterEach(() => {
+  client.clear();
+  onlineManager.setOnline(true);
+});
+
+const finalQueryKey = [
+  "consolidation-final-subscription",
+  `${profileKey}-${baseProps.contract}-${baseProps.tokenId}`,
+];
+const cutoffQueryKey = [...finalQueryKey, "after-cutoff"];
+
+it("waits for one fresh cutoff read, then retains the result during background refreshes", async () => {
+  const cached = { phase: "Phase 1", phase_position: 0 };
+  client.setQueryData(cutoffQueryKey, cached);
+  let completeRead!: (value: typeof cached) => void;
+  fetchMock.mockImplementation(
+    () =>
+      new Promise((resolve) => {
+        completeRead = resolve;
+      })
+  );
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, waitForRefresh: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+  expect(result.current.final).toEqual(cached);
+  expect(result.current.isLoading).toBe(true);
+
+  act(() => completeRead(cached));
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  act(() => {
+    void client.refetchQueries({ queryKey: cutoffQueryKey });
+  });
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  expect(client.isFetching()).toBe(1);
+  expect(result.current.final).toEqual(cached);
+  expect(result.current.isLoading).toBe(false);
+  act(() => completeRead(cached));
+  await waitFor(() => expect(client.isFetching()).toBe(0));
+});
+
+it("does not treat a paused cutoff refresh as verified cached payment evidence", async () => {
+  const cached = { phase: "Phase 1", phase_position: 0 };
+  client.setQueryData(cutoffQueryKey, cached);
+  onlineManager.setOnline(false);
+  fetchMock.mockResolvedValue(cached);
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, waitForRefresh: true }),
+    { wrapper }
+  );
+  expect(result.current.final).toEqual(cached);
+  expect(result.current.isLoading).toBe(true);
+  expect(fetchMock).not.toHaveBeenCalled();
+  act(() => onlineManager.setOnline(true));
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+});
 
 it("reports absent allocation only after distribution is published", async () => {
   fetchMock.mockImplementation(async ({ endpoint }) => {
@@ -44,6 +107,111 @@ it("reports absent allocation only after distribution is published", async () =>
       includeWalletAuth: false,
     })
   );
+});
+
+it("does not reuse an Upcoming Drops request that started before the cutoff", async () => {
+  let rejectBefore!: () => void;
+  let finishAfter!: () => void;
+  let paymentReads = 0;
+  const paid = { phase: "Phase 1", phase_position: 0 };
+  fetchMock.mockImplementation(({ endpoint }) => {
+    if (!endpoint.startsWith("subscriptions/"))
+      return Promise.resolve({ has_distribution: true, allocations: [] });
+    paymentReads += 1;
+    return new Promise((resolve, reject) => {
+      if (paymentReads === 1) rejectBefore = () => reject({ status: 404 });
+      else finishAfter = () => resolve(paid);
+    });
+  });
+  renderHook(() => useSubscriptionAllocationStatus(baseProps), { wrapper });
+  await waitFor(() => expect(paymentReads).toBe(1));
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, waitForRefresh: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(paymentReads).toBe(2));
+  act(() => rejectBefore());
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3));
+  expect(result.current.final).toBeUndefined();
+  expect(result.current.isLoading).toBe(true);
+  act(() => finishAfter());
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  expect(result.current.final).toEqual(paid);
+});
+
+it("keeps a cutoff 404 neutral until the distribution is published", async () => {
+  let published = false;
+  fetchMock.mockImplementation(async ({ endpoint }) => {
+    if (endpoint.startsWith("subscriptions/")) throw { status: 404 };
+    return { has_distribution: published, allocations: [] };
+  });
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, waitForRefresh: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(2));
+  await waitFor(() => expect(client.isFetching()).toBe(0));
+  expect(result.current.hasNoAllocation).toBe(false);
+  expect(result.current.isLoading).toBe(true);
+  published = true;
+  await act(async () => {
+    await client.invalidateQueries({
+      queryKey: ["subscription-distribution-publication"],
+    });
+  });
+  await waitFor(() => expect(result.current.isLoading).toBe(false));
+  expect(result.current.hasNoAllocation).toBe(true);
+});
+
+it("reports a failed cutoff publication check as unavailable", async () => {
+  fetchMock
+    .mockRejectedValueOnce({ status: 404 })
+    .mockRejectedValueOnce({ status: 500 });
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, waitForRefresh: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(result.current.isError).toBe(true));
+  expect(result.current.hasNoAllocation).toBe(false);
+});
+
+it("reads payment again after publication before proving absence", async () => {
+  let reads = 0;
+  const paid = { phase: "Phase 1", phase_position: 0 };
+  fetchMock.mockImplementation(async ({ endpoint }) => {
+    if (!endpoint.startsWith("subscriptions/"))
+      return { has_distribution: true, allocations: [] };
+    reads += 1;
+    if (reads === 1) throw { status: 404 };
+    return paid;
+  });
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, verifyAbsence: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(result.current.final).toEqual(paid));
+  expect(reads).toBe(2);
+  expect(result.current.hasNoAllocation).toBe(false);
+  expect(result.current.isLoading).toBe(false);
+});
+
+it("keeps missing-cutoff absence pending before publication", async () => {
+  fetchMock.mockImplementation(async ({ endpoint }) => {
+    if (endpoint.startsWith("subscriptions/")) throw { status: 404 };
+    return { has_distribution: false, allocations: [] };
+  });
+  const { result } = renderHook(
+    () =>
+      useSubscriptionAllocationStatus({ ...baseProps, verifyAbsence: true }),
+    { wrapper }
+  );
+  await waitFor(() => expect(client.isFetching()).toBe(0));
+  expect(result.current.hasNoAllocation).toBe(false);
+  expect(result.current.isLoading).toBe(true);
 });
 it("keeps a phase-less finalized subscription in the pending state", async () => {
   fetchMock.mockResolvedValue({ phase: null, phase_position: -1 });
