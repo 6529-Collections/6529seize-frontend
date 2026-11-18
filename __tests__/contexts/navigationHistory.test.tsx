@@ -61,6 +61,7 @@ describe("NavigationHistoryContext", () => {
     hardBack.mockClear();
     mockPathname = "/";
     mockSearchParams = new URLSearchParams();
+    window.history.replaceState(null, "", "/");
   });
 
   it.each(["/collect", "/collect/orders"])(
@@ -196,6 +197,66 @@ describe("NavigationHistoryContext", () => {
       expect(result.current.canGoBack).toBe(false);
     }
   );
+
+  it.each([false, true])(
+    "retains the latest fragment without adding a Back step (native=%s)",
+    (native) => {
+      jest.mocked(Capacitor.isNativePlatform).mockReturnValue(native);
+      mockPathname = "/network";
+      mockSearchParams = new URLSearchParams("page=2");
+      window.history.replaceState(null, "", "/network?page=2#first");
+      const { result, rerender } = renderHook(
+        () => useNavigationHistoryContext(),
+        { wrapper }
+      );
+      act(() => {
+        window.history.replaceState(null, "", "/network?page=2#latest");
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+      });
+      expect(result.current.canGoBack).toBe(false);
+      mockPathname = "/Shelby";
+      mockSearchParams = new URLSearchParams();
+      window.history.replaceState(null, "", "/Shelby#profile");
+      rerender();
+      act(() => result.current.goBack());
+      expect(routerMock.push).toHaveBeenLastCalledWith(
+        "/network?page=2#latest"
+      );
+    }
+  );
+
+  it("does not borrow a fragment from a different browser URL", () => {
+    mockPathname = "/network";
+    mockSearchParams = new URLSearchParams("page=2");
+    window.history.replaceState(null, "", "/Shelby#profile");
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+    mockPathname = "/Shelby";
+    mockSearchParams = new URLSearchParams();
+    rerender();
+    act(() => result.current.goBack());
+    expect(routerMock.push).toHaveBeenLastCalledWith("/network?page=2");
+  });
+
+  it("keeps fragments when the browser uses equivalent query encoding", () => {
+    mockPathname = "/network";
+    mockSearchParams = new URLSearchParams("name=two+words");
+    window.history.replaceState(null, "", "/network?name=two%20words#member");
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+    mockPathname = "/Shelby";
+    mockSearchParams = new URLSearchParams();
+    window.history.replaceState(null, "", "/Shelby");
+    rerender();
+    act(() => result.current.goBack());
+    expect(routerMock.push).toHaveBeenLastCalledWith(
+      "/network?name=two+words#member"
+    );
+  });
 
   it("navigates back through stacked views", () => {
     const { result } = renderHook(() => useNavigationHistoryContext(), {

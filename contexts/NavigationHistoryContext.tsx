@@ -123,7 +123,7 @@ function getHistoryRoutePath(url: string, pathname: string): string {
   return url.split(/[?#]/)[0]!;
 }
 
-function getHistoryHref(url: string, path: string) {
+function getHistoryHref(url: string, path: string, hash: string) {
   const [pathname = "", query = ""] = url.split("?");
   const params = new URLSearchParams(query);
   if (
@@ -133,9 +133,9 @@ function getHistoryHref(url: string, path: string) {
   ) {
     params.delete("wave");
     const search = params.toString();
-    return path + (search ? `?${search}` : "") + globalThis.location.hash;
+    return path + (search ? `?${search}` : "") + hash;
   }
-  return url + globalThis.location.hash;
+  return url + hash;
 }
 
 export const NavigationHistoryProvider: React.FC<{
@@ -161,7 +161,6 @@ export const NavigationHistoryProvider: React.FC<{
     canGoBack: false,
   });
   const skipNext = useRef(false);
-  const prevPathRef = useRef<string>("");
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
@@ -221,19 +220,22 @@ export const NavigationHistoryProvider: React.FC<{
   // ancestor's, in the same commit: where this provider's effect used to run.
   const observeUrl = useCallback(
     (url: string, currentPathname: string) => {
-      scrollRestoration.committed(url + globalThis.location.hash);
+      const location = globalThis.location;
+      // A page effect may have already navigated beyond this committed URL.
+      const browserPath = getFullPath(
+        location.pathname,
+        new URLSearchParams(location.search)
+      );
+      const hash = url === browserPath ? location.hash : "";
+      scrollRestoration.committed(url + hash);
       if (skipNext.current) {
         skipNext.current = false;
-        prevPathRef.current = url;
         const current = historyRef.current.at(-1);
         if (current?.type === "route") {
-          current.href = url + globalThis.location.hash;
+          current.href = url + hash;
         }
         return;
       }
-
-      if (url === prevPathRef.current) return;
-      prevPathRef.current = url;
 
       const pathKey = getHistoryRoutePath(url, currentPathname);
       let i = historyRef.current.length - 1;
@@ -242,7 +244,7 @@ export const NavigationHistoryProvider: React.FC<{
       const isDuplicate =
         lastRoute?.type === "route" && lastRoute.path === pathKey;
       // Keep the full destination without adding a Back step per filter change.
-      const href = getHistoryHref(url, pathKey);
+      const href = getHistoryHref(url, pathKey, hash);
       if (isDuplicate) {
         if (href) historyRef.current[i] = { ...lastRoute, href };
       } else {
@@ -371,7 +373,7 @@ export const NavigationHistoryProvider: React.FC<{
 // in component tests), as main's provider allowed for.
 function getFullPath(
   pathname: string,
-  searchParams: ReadonlyURLSearchParams | null
+  searchParams: Pick<ReadonlyURLSearchParams, "toString"> | null
 ): string {
   const query = searchParams?.toString();
   return pathname + (query ? `?${query}` : "");
@@ -389,6 +391,23 @@ function NavigationQuerySync({
   useEffect(() => {
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- This leaf only moves NavigationHistoryProvider's own URL effect inside a Suspense boundary; it must run here, after page effects in the same commit, as the provider's effect did (shellQueryParity.test.tsx).
     observeUrl(fullPath, pathname);
+    // Hash-only navigation does not change usePathname/useSearchParams values.
+    const observeFragment = () => {
+      if (
+        getFullPath(
+          globalThis.location.pathname,
+          new URLSearchParams(globalThis.location.search)
+        ) === fullPath
+      ) {
+        observeUrl(fullPath, pathname);
+      }
+    };
+    globalThis.addEventListener("hashchange", observeFragment);
+    globalThis.addEventListener("popstate", observeFragment);
+    return () => {
+      globalThis.removeEventListener("hashchange", observeFragment);
+      globalThis.removeEventListener("popstate", observeFragment);
+    };
   }, [fullPath, pathname, searchParams, observeUrl]);
 
   return null;

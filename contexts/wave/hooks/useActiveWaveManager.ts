@@ -87,14 +87,16 @@ export function useActiveWaveManager() {
   const buildUrl = useCallback(
     (waveId: string | null, options?: WaveNavigationOptions) => {
       const isDirectMessage = options?.isDirectMessage ?? false;
-      if (!waveId && isApp && !isDirectMessage && options?.profileFeed) {
-        return PROFILE_WAVES_FEED_HREF;
+      if (!waveId) {
+        if (isApp && !isDirectMessage && options?.profileFeed) {
+          return PROFILE_WAVES_FEED_HREF;
+        }
+        return getWaveHomeRoute({ isDirectMessage, isApp });
       }
       const serialNo = options?.serialNo ?? undefined;
       const divider = options?.divider;
-      const remembered = waveId ? tabsRef.current[waveId] : undefined;
+      const remembered = tabsRef.current[waveId];
       if (
-        waveId &&
         !isDirectMessage &&
         serialNo === undefined &&
         typeof remembered === "object"
@@ -110,20 +112,18 @@ export function useActiveWaveManager() {
           return `${getCompetitionRoute(waveId, remembered.competitionId)}?${params}`;
         }
       }
-      return waveId
-        ? getWaveRoute({
-            waveId,
-            serialNo,
-            extraParams: {
-              divider:
-                divider !== null && divider !== undefined
-                  ? String(divider)
-                  : undefined,
-            },
-            isDirectMessage,
-            isApp,
-          })
-        : getWaveHomeRoute({ isDirectMessage, isApp });
+      return getWaveRoute({
+        waveId,
+        serialNo,
+        extraParams: {
+          divider:
+            divider !== null && divider !== undefined
+              ? String(divider)
+              : undefined,
+        },
+        isDirectMessage,
+        isApp,
+      });
     },
     [isApp, tabsRef, queryClient, viewer]
   );

@@ -400,6 +400,7 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
     const input = document.activeElement;
     if (input instanceof HTMLElement) input.blur();
     if (isProfileFeed) {
+      // Leaving Feed returns to Waves; leaving its chat returns to Feed.
       if (myStream) myStream.activeWave.set(null);
       else router.push("/waves", { scroll: false });
     } else {

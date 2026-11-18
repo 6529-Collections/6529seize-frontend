@@ -254,4 +254,20 @@ test("Network profile Back restores page, sorting and reading position without h
   await page.screenshot({
     path: testInfo.outputPath("network-back-restored.png"),
   });
+  // Hash-only updates belong to this visit and must survive leaving the page.
+  await page.evaluate(() => {
+    globalThis.location.hash = "network-reading-position";
+  });
+  await expectUrlState(page, (url) => url.hash === "#network-reading-position");
+  await member.click();
+  await expect(
+    page.getByRole("navigation", { name: "Profile sections" })
+  ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+  await page.getByRole("button", { name: "Back", exact: true }).click();
+  await expectUrlState(
+    page,
+    (url) =>
+      url.pathname + url.search + url.hash ===
+      source + "#network-reading-position"
+  );
 });

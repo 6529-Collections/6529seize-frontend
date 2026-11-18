@@ -8,7 +8,8 @@ interface ScrollPosition {
   containers: Map<number, number>;
 }
 
-const currentHref = () => location.pathname + location.search + location.hash;
+const currentHref = () =>
+  window.location.pathname + window.location.search + window.location.hash;
 
 // Stream lists own their virtualized offsets and must not have two restorers.
 const ownsScrollPosition = (href: string) =>
@@ -31,11 +32,11 @@ function getForwardDestination(event: MouseEvent): string | null {
     (anchor.target && anchor.target !== "_self")
   )
     return null;
-  const destination = new URL(anchor.href, location.href);
+  const destination = new URL(anchor.href, window.location.href);
   if (
-    destination.origin !== location.origin ||
+    destination.origin !== window.location.origin ||
     destination.hash ||
-    sameMainPath(location.pathname, destination.pathname)
+    sameMainPath(window.location.pathname, destination.pathname)
   )
     return null;
   const href = destination.pathname + destination.search;
@@ -44,7 +45,7 @@ function getForwardDestination(event: MouseEvent): string | null {
 
 function restoreScrollPosition(position: ScrollPosition) {
   let ready =
-    Math.max(0, document.documentElement.scrollHeight - innerHeight) >=
+    Math.max(0, document.documentElement.scrollHeight - window.innerHeight) >=
     position.windowTop;
   if (ready && window.scrollY !== position.windowTop)
     window.scrollTo({ top: position.windowTop, behavior: "instant" });
@@ -84,7 +85,7 @@ function createForwardNavigationHandler(
         windowTop: 0,
         containers: new Map(containers.map((_element, index) => [index, 0])),
       },
-      location.pathname
+      window.location.pathname
     );
   };
 }

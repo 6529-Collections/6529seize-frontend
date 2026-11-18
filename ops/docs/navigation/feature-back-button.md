@@ -69,6 +69,9 @@ swipe return to the feed at the saved reading position.
   app, `Back` or a right swipe returns to the same feed position. The feed's
   own `Back` or right swipe returns to Waves, including after direct entry.
   Opening Profile Waves Feed again from the Waves More menu starts at the top.
+- Android system Back follows the same Feed return: from a feed-origin chat it
+  returns to Feed; from Feed itself it returns to Waves before considering
+  another section's history or minimizing the app.
 - Leave a wave or DM in the native app: a completed rightward swipe clears the
   active thread and returns to `/waves` or `/messages`, using the same state
   reset as `Back`.
