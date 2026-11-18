@@ -618,12 +618,17 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
                 exact: true,
               })
             ).toBeVisible();
-            await expect(
-              overview.getByRole("link", {
-                name: "The Memes #576",
-                exact: true,
-              })
-            ).toBeVisible();
+            if (owner)
+              await expect(overview.getByText(/Top up by/)).toHaveText(
+                "Top up by Nov 17, 2026, 14:30 UTC to receive The Memes #576."
+              );
+            else
+              await expect(
+                overview.getByRole("link", {
+                  name: "The Memes #576",
+                  exact: true,
+                })
+              ).toBeVisible();
           }
           if (phase !== "before" && name === "deadline-passed") {
             await expect(
