@@ -1,5 +1,7 @@
 import {
+  formatE2eeDate,
   formatE2eeDateTime,
+  formatE2eeLastActive,
   formatE2eeTimestamp,
   getE2eeDayKey,
   getE2eeDayLabel,
@@ -231,5 +233,26 @@ describe("e2ee times in a chosen display zone", () => {
         zone: UTC_ZONE,
       })
     ).toBe("Dec 31, 2025");
+  });
+});
+
+describe("device dates in the display zone", () => {
+  it("takes a date-only ending's day in the display zone", () => {
+    // 11:30 UTC on Nov 9 is already Nov 10 in Auckland.
+    expect(formatE2eeDate("en-US", NOW, UTC_ZONE)).toBe("Nov 9, 2026");
+    expect(formatE2eeDate("en-US", NOW, AUCKLAND_ZONE)).toBe("Nov 10, 2026");
+  });
+
+  it("names the zone on a last-active time outside the device zone", () => {
+    expect(formatE2eeLastActive("en-US", true, NOW, UTC_ZONE)).toBe(
+      "Active now"
+    );
+    expect(formatE2eeLastActive("en-US", false, null, UTC_ZONE)).toBe(
+      "Not active yet"
+    );
+    expect(formatE2eeLastActive("en-US", false, NOW, UTC_ZONE)).toBe(
+      `Last active ${formatE2eeDateTime("en-US", NOW, UTC_ZONE)}`
+    );
+    expect(formatE2eeDateTime("en-US", NOW, UTC_ZONE)).toContain("UTC");
   });
 });
