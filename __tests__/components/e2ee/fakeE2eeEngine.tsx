@@ -13,7 +13,6 @@ import type {
   E2eeDeviceInfo,
   E2eeEngine,
   E2eeEngineStatus,
-  E2eeInitialSyncStatus,
   E2eeMember,
   E2eeMessage,
 } from "@/lib/e2ee/types";
@@ -112,7 +111,6 @@ export const device = (
 
 export interface FakeEngineState {
   status: E2eeEngineStatus;
-  initialSyncStatus: E2eeInitialSyncStatus;
   error: string | null;
   thisDevice: E2eeDeviceInfo | null;
   devices: E2eeDeviceInfo[];
@@ -141,7 +139,6 @@ export function createFakeE2eeEngine(
   const listeners = new Set<() => void>();
   const state: FakeEngineState = {
     status: "ready",
-    initialSyncStatus: "complete",
     error: null,
     thisDevice: null,
     devices: [],
@@ -172,7 +169,6 @@ export function createFakeE2eeEngine(
     },
     getStatus: () => state.status,
     getError: () => state.error,
-    getInitialSyncStatus: () => state.initialSyncStatus,
     getUpgrade: () => state.upgrade,
     getLocalDeviceKey: () => state.thisDevice?.deviceKey ?? null,
     getThisDevice: () => state.thisDevice,

@@ -288,7 +288,7 @@ async function acceptJoin(
     splitView: boolean;
     senderProfileId: string | null;
   }
-): Promise<void> {
+): Promise<GroupRuntime> {
   const g = welcome.group.toLowerCase();
   const summary = requireMls(ctx).acceptWelcome(g);
   const now = ctx.now();
@@ -333,23 +333,24 @@ async function acceptJoin(
   );
   await checkpoint(ctx, { groups: [runtime] });
   ctx.readSync?.joined(runtime);
+  return runtime;
 }
 
-/** Resolves a Welcome by joining or rejecting it, or leaves it for a retry. */
+/** Validates and joins one Welcome; returns the joined group, if any. */
 async function handleWelcome(
   ctx: EngineContext,
   welcome: ApiE2eeWelcome
-): Promise<boolean> {
+): Promise<GroupRuntime | null> {
   const mls = requireMls(ctx);
   const g = welcome.group.toLowerCase();
   const existing = ctx.store.groups.get(g);
   if (existing?.record.status === "active" && mls.hasGroup(g)) {
     await ack(ctx, welcome);
-    return true;
+    return null;
   }
   if (await senderBlocked(ctx, [welcome.added_by_profile_id])) {
     await ack(ctx, welcome);
-    return true;
+    return null;
   }
   let staged: WasmWelcomeSummary;
   try {
@@ -359,7 +360,7 @@ async function handleWelcome(
       throw error;
     }
     await ack(ctx, welcome);
-    return true;
+    return null;
   }
   try {
     const metadataOk =
@@ -380,36 +381,39 @@ async function handleWelcome(
     // Left unacknowledged (its KeyPackage kept) for a later sync; the
     // Welcomes after it are still handled now.
     if (participants === "unknown" && retryWelcomeLater(ctx, welcome.id)) {
-      return false;
+      return null;
     }
     if (participants !== "ok") {
       mls.rejectWelcome(g);
       await checkpoint(ctx);
       await ack(ctx, welcome);
-      return true;
+      return null;
     }
     const splitView = !(await commitKeyMatches(ctx, staged));
-    await acceptJoin(ctx, welcome, staged, {
+    const runtime = await acceptJoin(ctx, welcome, staged, {
       badGrants: checks.badGrants,
       splitView,
       senderProfileId,
     });
     await ack(ctx, welcome);
-    return true;
+    return runtime;
   } catch (error) {
     await rollback(ctx);
     throw error;
   }
 }
 
-/** Whether all pending Welcomes were resolved. Runs inside the queue. */
-export async function processInbox(ctx: EngineContext): Promise<boolean> {
+/** Pulls pending Welcomes (oldest first). Must run inside the queue. */
+export async function processInbox(
+  ctx: EngineContext
+): Promise<GroupRuntime[]> {
   const welcomes = await ctx.api.getWelcomes(ownDeviceKey(ctx));
-  let complete = true;
+  const joined: GroupRuntime[] = [];
   for (const welcome of welcomes) {
-    // Each Welcome may change the shared MLS state before the next one.
-    const resolved = await handleWelcome(ctx, welcome); // NOSONAR
-    if (!resolved) complete = false;
+    const runtime = await handleWelcome(ctx, welcome);
+    if (runtime) {
+      joined.push(runtime);
+    }
   }
-  return complete;
+  return joined;
 }

@@ -1,5 +1,7 @@
-import MessagesRouteLoading from "@/components/messages/MessagesRouteLoading";
+import StreamRouteLoadingShell from "@/components/brain/my-stream/layout/StreamRouteLoadingShell";
 
 export default function Loading() {
-  return <MessagesRouteLoading />;
+  return (
+    <StreamRouteLoadingShell ariaLabel="Loading messages" variant="messages" />
+  );
 }

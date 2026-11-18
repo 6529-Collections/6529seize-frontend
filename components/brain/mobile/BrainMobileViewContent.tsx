@@ -7,7 +7,6 @@ import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import BrainMobileWaves from "./BrainMobileWaves";
-import MessagesRouteLoading from "@/components/messages/MessagesRouteLoading";
 import { BrainView } from "./brainMobileViews";
 import { useLayout } from "../my-stream/layout/LayoutContext";
 import { SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
@@ -76,7 +75,7 @@ const CompetitionHub = dynamic(
 );
 
 const BrainMobileMessages = dynamic(() => import("./BrainMobileMessages"), {
-  loading: () => <MessagesRouteLoading />,
+  loading: () => <BrainMobileViewLoadingFallback />,
 });
 
 const BrainNotifications = dynamic(
