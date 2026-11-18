@@ -7,16 +7,16 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
-The `profiles.collected-tab` record explains that Complete my set and Manage
-orders are personal shortcuts shown only on the signed-in owner's own profile,
-after account loading and outside proxy sessions. Existing platform purchasing
-restrictions still apply.
-
 The `waves.discovery` record covers plain-text description previews, retained
 media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
 Votes artwork, wrapping metrics and neutral zero-submission status without a
 decorative count marker. Discovery
 links, eligibility and pagination retain their existing behavior.
+
+The `profiles.collected-tab` record explains that Complete my set and Manage
+orders are personal shortcuts shown only on the signed-in owner's own profile,
+after account loading and outside proxy sessions. Existing platform purchasing
+restrictions still apply.
 
 The touch-menu, header-navigation and encrypted-chat records cover touch reply,
 timestamp access, cancellable native conversation return and Android Back layer
@@ -206,7 +206,7 @@ It directs readers to artwork details for the optional plan and distinguishes th
 artist's promise from verification of approval or fulfillment.
 
 The Wave discovery record includes hidden-scrollbar controls with dark edge fades
-for offscreen sort and threshold options. It also describes the independent
+and mouse-accessible arrows for offscreen sort and threshold options. It also describes the independent
 Active Votes and Worth Checking Out sidebar sections, their explanations and
 view-all destinations. It describes
 quiet loading placeholders, explanations that appear with content, empty messages

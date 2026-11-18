@@ -1527,6 +1527,12 @@ test("Discover controls fade offscreen options and hide the scrollbar @smoke @me
   const rightFade = page
     .getByRole("group", { name: "Discovery controls" })
     .locator('[data-wave-tabs-fade="right"]');
+  const leftArrow = controls.getByRole("button", {
+    name: "Scroll filters left",
+  });
+  const rightArrow = controls.getByRole("button", {
+    name: "Scroll filters right",
+  });
   await expect(scroller).toHaveCSS("scrollbar-width", "none");
   if (browserName !== "firefox") {
     expect(
@@ -1542,11 +1548,10 @@ test("Discover controls fade offscreen options and hide the scrollbar @smoke @me
     path: testInfo.outputPath("controls-start.png"),
   });
 
-  await scroller.evaluate((element) => {
-    element.scrollLeft = element.scrollWidth;
-  });
+  await rightArrow.click();
   await expect(leftFade).toHaveCSS("opacity", "1");
   await expect(rightFade).toHaveCSS("opacity", "0");
+  await expect(leftArrow).toBeFocused();
   await controls.getByRole("radio", { name: "REP 60+" }).click();
   await expect(page).toHaveURL(/filter=REP_60/);
   await expect(
@@ -1554,9 +1559,7 @@ test("Discover controls fade offscreen options and hide the scrollbar @smoke @me
   ).toHaveAttribute("aria-checked", "true");
   await controls.screenshot({ path: testInfo.outputPath("controls-end.png") });
 
-  await scroller.evaluate((element) => {
-    element.scrollLeft = 0;
-  });
+  await leftArrow.click();
   await controls
     .getByRole("button", { name: "Wave discovery sort: Balanced" })
     .click();
@@ -1572,12 +1575,22 @@ test("Discover controls fade offscreen options and hide the scrollbar @smoke @me
   ).toBeFocused();
   await expect(
     controls.getByRole("radio", { name: "All", exact: true })
+  ).toHaveAttribute("aria-checked", "true");
+  await expect(page).not.toHaveURL(/filter=REP_60/);
+  await expect(
+    controls.getByRole("radio", { name: "All", exact: true })
   ).toBeInViewport({ ratio: 1 });
   await expectNoHorizontalOverflow(page);
 
+  await leftArrow.focus();
   await page.setViewportSize({ width: 1440, height: 1000 });
   await expect(leftFade).toHaveCSS("opacity", "0");
   await expect(rightFade).toHaveCSS("opacity", "0");
+  await expect(leftArrow).not.toBeVisible();
+  await expect(rightArrow).not.toBeVisible();
+  await expect(
+    controls.getByRole("tab", { name: "Quality", exact: true })
+  ).toBeFocused();
   await expect(scroller).toHaveCSS("scrollbar-width", "none");
   await expectNoHorizontalOverflow(page);
   await controls.screenshot({ path: testInfo.outputPath("controls-wide.png") });

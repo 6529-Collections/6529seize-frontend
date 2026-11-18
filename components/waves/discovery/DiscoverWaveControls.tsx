@@ -177,7 +177,7 @@ export function DiscoverWaveControls({
         <div
           ref={scrollerRef}
           data-discovery-controls-scroll
-          className="tw-no-scrollbar tw-flex tw-scroll-px-10 tw-items-center tw-gap-2 tw-overflow-x-auto tw-p-1 @[56rem]/discovery-controls:tw-justify-between"
+          className="tw-no-scrollbar tw-flex tw-scroll-px-12 tw-items-center tw-gap-2 tw-overflow-x-auto tw-p-1 @[56rem]/discovery-controls:tw-justify-between"
         >
           <Button
             variant="dropdown"
@@ -251,8 +251,14 @@ export function DiscoverWaveControls({
         </div>
         <MobileTabsScrollControls
           scrollerRef={scrollerRef}
-          showButtons={false}
           fadeColorClassName="tw-from-black tw-via-black/40"
+          activeControlSelector={
+            '[role="tab"][aria-selected="true"], [role="radio"][aria-checked="true"], button[aria-haspopup="dialog"]'
+          }
+          scrollLabels={{
+            left: t(locale, "user.collected.filters.scrollLeft"),
+            right: t(locale, "user.collected.filters.scrollRight"),
+          }}
         />
       </div>
       <MobileWrapperDialog

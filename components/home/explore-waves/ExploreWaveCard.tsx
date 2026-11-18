@@ -449,7 +449,7 @@ export function ExploreWaveCard({
       data-home-action="Open wave"
       href={waveHref}
       prefetch={false}
-      className={`${cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} ${!compact && !showArtworkOverlay ? "tw-border tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)]" : ""} tw-overflow-hidden tw-group tw-relative tw-flex tw-h-full tw-border-solid tw-text-left tw-no-underline tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
+      className={`${cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} ${!compact && !showArtworkOverlay ? "tw-border tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)]" : ""} tw-group tw-relative tw-flex tw-h-full tw-overflow-hidden tw-border-solid tw-text-left tw-no-underline tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
       aria-label={cardAriaLabel}
     >
       {compact && (
@@ -657,23 +657,10 @@ function getWavePreviewContent(wave: SidebarWave): ProcessedContent | null {
     return null;
   }
 
-  const preview = buildProcessedContent(combinedText || null, media);
-  const segments = preview.segments.flatMap(toPlainTextSegment);
-
-  return segments.length === 0 && preview.apiMedia.length === 0
-    ? null
-    : { ...preview, segments };
-}
-
-// The preview is clamped plain text, so markdown syntax would show verbatim.
-function toPlainTextSegment(segment: ContentSegment): ContentSegment[] {
-  if (segment.type !== "text") {
-    return [segment];
-  }
-
-  const content = markdownToPlainText(segment.content, {
-    includeImageUrls: false,
+  const content = markdownToPlainText(combinedText, {
     includeLinkDestinations: false,
+    preserveImageMarkdown: true,
   });
-  return content ? [{ ...segment, content }] : [];
+  if (!content && media.length === 0) return null;
+  return buildProcessedContent(content || null, media);
 }

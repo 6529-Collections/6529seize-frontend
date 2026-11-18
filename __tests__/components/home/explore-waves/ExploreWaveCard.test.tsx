@@ -297,6 +297,52 @@ describe("ExploreWaveCard", () => {
     }
   );
 
+  it.each([
+    ["*", "*"],
+    ["_", "_"],
+    ["***", "***"],
+    ["**_", "_**"],
+  ])("keeps image-spanning emphasis out of previews: %s", (open, close) => {
+    render(
+      <ExploreWaveCard
+        compact
+        wave={createWave({
+          descriptionDrop: {
+            contents: `${open}See ![Cover](https://example.com/cover.png) here${close}`,
+            media: [],
+          },
+        })}
+      />
+    );
+    expect(mockContentDisplay.mock.calls.at(-1)![0].content.segments).toEqual([
+      { type: "text", content: "See" },
+      expect.objectContaining({
+        type: "media",
+        mediaInfo: expect.objectContaining({
+          url: "https://example.com/cover.png",
+        }),
+      }),
+      { type: "text", content: "here" },
+    ]);
+  });
+
+  it("preserves bare URLs in compact previews", () => {
+    render(
+      <ExploreWaveCard
+        compact
+        wave={createWave({
+          descriptionDrop: {
+            contents: "Read https://example.com/a_b_c",
+            media: [],
+          },
+        })}
+      />
+    );
+    expect(mockContentDisplay.mock.calls.at(-1)![0].content.segments).toEqual([
+      { type: "text", content: "Read https://example.com/a_b_c" },
+    ]);
+  });
+
   it("shows empty state when latest drop is missing", () => {
     render(
       <ExploreWaveCard

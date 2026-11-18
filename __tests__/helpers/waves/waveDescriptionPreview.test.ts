@@ -157,6 +157,33 @@ describe("getWaveDescriptionPreviewText", () => {
     );
   });
 
+  it.each([
+    "https://example.com/a_b_c",
+    "https://example.com/_a_",
+    "https://example.com/a__b__c__",
+    "https://example.com/path?v=a_b_c",
+  ])("preserves bare URL punctuation: %s", (url) => {
+    expect(markdownToPlainText(`Read ${url}.`)).toBe(`Read ${url}.`);
+    expect(markdownToPlainText(`**Read ${url}**.`)).toBe(`Read ${url}.`);
+  });
+
+  it("preserves literal token-like text alongside URLs", () => {
+    const text = "\u00000\u0000 https://example.com/a_b_c";
+    expect(markdownToPlainText(text)).toBe(text);
+  });
+
+  it("removes formatting around images while retaining their markup", () => {
+    expect(
+      markdownToPlainText(
+        "**_See ![Cover](https://example.com/a_b.png) here_**",
+        {
+          includeLinkDestinations: false,
+          preserveImageMarkdown: true,
+        }
+      )
+    ).toBe("See ![Cover](https://example.com/a_b.png) here");
+  });
+
   it("preserves malformed markdown links without crashing", () => {
     const wave = {
       description_drop: {
