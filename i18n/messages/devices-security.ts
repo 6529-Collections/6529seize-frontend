@@ -45,6 +45,8 @@ export const DEVICES_SECURITY_MESSAGES = {
     "No other devices. To add one, open 6529 there and turn on signed posts and encrypted DMs. It takes one wallet signature.",
   "devicesSecurity.revokeUnavailable":
     "Open encrypted DMs in this browser to revoke this device here.",
+  "devicesSecurity.revokeChanged":
+    "This device changed while this was open. Check what will stop, then confirm again.",
   "devicesSecurity.blocked.loading":
     "Checking encrypted DMs in this browser. Revoke appears in a moment.",
   "devicesSecurity.blocked.elsewhere":
@@ -71,6 +73,8 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.cleanUp.title": "Clean up earlier setups",
   "devicesSecurity.cleanUp.body":
     "Revoked devices can’t post as you or read new encrypted messages. If one is a device you still use, you can turn it back on there with one wallet signature.",
+  "devicesSecurity.cleanUp.deletesChats":
+    "Each selected device with encrypted DMs deletes the encrypted chats saved on it once it confirms the revocation came from a device of yours.",
   "devicesSecurity.cleanUp.listLabel": "Devices to revoke",
   "devicesSecurity.cleanUp.confirm.one": "Revoke {count} device",
   "devicesSecurity.cleanUp.confirm.other": "Revoke {count} devices",

@@ -14,35 +14,45 @@ import type { SecurityDevice } from "./classifyDevices";
 import { DeviceMeta, formatDeviceWithPermissions } from "./DeviceParts";
 
 /**
- * One reviewed revoke for earlier setups of this browser. Every device is
- * listed with its dates and pre-selected; the user can keep any of them.
- * Revokes run one after another and failures are named.
+ * One reviewed revoke for earlier setups of this browser. The devices listed
+ * when it opens are pre-selected (mount it per opening, with a key); the
+ * user can keep any of them, and one that becomes eligible later is listed
+ * unselected. Revokes run one after another, only for devices still
+ * eligible, and failures are named.
  */
 export function CleanUpDialog({
   devices,
   open,
+  signed,
   onRevoke,
   onClose,
   onDone,
 }: {
   readonly devices: readonly SecurityDevice[];
   readonly open: boolean;
+  /** Revokes are signed here, so a device can delete its saved chats. */
+  readonly signed: boolean;
   readonly onRevoke: (device: SecurityDevice) => Promise<void>;
   readonly onClose: () => void;
   readonly onDone: (revoked: number) => void;
 }) {
   const locale = useBrowserLocale();
   const listId = useId();
-  const [skipped, setSkipped] = useState<ReadonlySet<string>>(new Set());
+  const [chosen, setChosen] = useState<ReadonlySet<string>>(
+    () => new Set(devices.map((device) => device.id))
+  );
   const [pending, setPending] = useState(false);
   const [failedLabels, setFailedLabels] = useState<readonly string[]>([]);
-  const selected = devices.filter((device) => !skipped.has(device.id));
+  // The current list: a device no longer eligible drops out.
+  const selected = devices.filter((device) => chosen.has(device.id));
+  const deletesChats =
+    signed &&
+    selected.some((device) => device.encryptedDms?.status === "active");
 
   const close = () => {
     if (pending) {
       return;
     }
-    setSkipped(new Set());
     setFailedLabels([]);
     onClose();
   };
@@ -71,7 +81,6 @@ export function CleanUpDialog({
       setFailedLabels(failed);
       return;
     }
-    setSkipped(new Set());
     onClose();
     onDone(revoked);
   };
@@ -128,13 +137,13 @@ export function CleanUpDialog({
                 <input
                   id={checkboxId}
                   type="checkbox"
-                  checked={!skipped.has(device.id)}
+                  checked={chosen.has(device.id)}
                   disabled={pending}
                   onChange={(event) => {
-                    const keep = !event.target.checked;
-                    setSkipped((current) => {
+                    const revoke = event.target.checked;
+                    setChosen((current) => {
                       const next = new Set(current);
-                      if (keep) {
+                      if (revoke) {
                         next.add(device.id);
                       } else {
                         next.delete(device.id);
@@ -155,6 +164,11 @@ export function CleanUpDialog({
           })}
         </ul>
       </fieldset>
+      {deletesChats ? (
+        <p className="tw-m-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, "devicesSecurity.cleanUp.deletesChats")}
+        </p>
+      ) : null}
       {failedLabels.length > 0 ? (
         <p role="alert" className="tw-m-0 tw-mt-3 tw-text-sm tw-text-rose-300">
           {t(locale, "devicesSecurity.cleanUp.failed", {

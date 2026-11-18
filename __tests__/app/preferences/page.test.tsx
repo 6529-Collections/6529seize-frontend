@@ -12,7 +12,7 @@ jest.mock("@/app/preferences/page.client", () => ({
   default: () => null,
 }));
 
-const activeTabFor = async (tab: string) => {
+const activeTabFor = async (tab: string | string[] | undefined) => {
   const element = await PreferencesPage({
     searchParams: Promise.resolve({ tab }),
   });
@@ -30,6 +30,16 @@ describe("/preferences tab parameter", () => {
       await expect(activeTabFor(tab)).resolves.toBe("security");
     }
   );
+
+  it.each([
+    ["a path-like value", "../security"],
+    ["a different case", "SECURITY"],
+    ["an empty value", ""],
+    ["a repeated parameter", ["security", "reports"]],
+    ["no parameter", undefined],
+  ])("falls back to notifications for %s", async (_, tab) => {
+    await expect(activeTabFor(tab)).resolves.toBe("notifications");
+  });
 
   it("falls back to notifications while neither permission is enabled", async () => {
     mockDevicesSecurityEnabled = false;

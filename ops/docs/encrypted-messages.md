@@ -571,13 +571,20 @@ browser so backup can show.
 - **Earlier setups of this browser** groups devices with the same name as this
   browser that haven't been active since it was set up, usually this browser
   before it lost its saved keys. **Clean up…** lists them with their dates,
-  all selected, and revokes the ones that stay selected.
+  all selected, and revokes the ones that stay selected; one that only
+  becomes eligible while it's open is listed unselected. With encrypted
+  messages on in this browser, it warns that each selected device with
+  encrypted DMs deletes the encrypted chats saved on it once it confirms
+  the revocation.
 - **Revoked or expired in the last 30 days** stays collapsed to one line;
   expanded, each ended device is one row.
 - **What these permissions mean** explains both permissions.
 
 **Revoke** asks first, naming the device, what stops and what happens to the
-encrypted chats saved on it; posts it signed stay verifiable. Revoking this device opens its own
+encrypted chats saved on it; posts it signed stay verifiable. If the device
+changes while the dialog is open (for example its encrypted DMs are linked
+meanwhile), confirming revokes nothing: the dialog shows what will stop now
+and asks you to confirm again. Revoking this device opens its own
 **Revoke this browser?** dialog: it names the browser you're using, says what
 stops, and with backup on says that only messages included in your last
 backup can be restored. With backup off it warns

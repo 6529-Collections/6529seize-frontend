@@ -207,6 +207,54 @@ describe("DevicesSecuritySettings", () => {
     expect(await screen.findByText("6529 app on iPhone revoked.")).toBeInTheDocument();
   });
 
+  it("asks again instead of revoking when the device changed while its dialog was open", async () => {
+    const listed = (linked: boolean) =>
+      classifyDevices({
+        grants: [grant("laptop", { device_label: "Laptop" })],
+        encryptedDevices: linked
+          ? [encrypted("e-laptop", { grantId: "laptop", label: "Laptop" })]
+          : [],
+        ownSigningKeys: [],
+        now: NOW,
+      });
+    const revoke = jest.fn(async () => undefined);
+    mockState = state({ ...listed(false), revoke });
+    const { rerender } = render(<DevicesSecuritySettings />);
+    fireEvent.click(screen.getByRole("button", { name: "Revoke Laptop" }));
+    const dialog = await screen.findByRole("dialog", {
+      name: "Revoke Laptop?",
+    });
+    expect(dialog).toHaveTextContent("It will stop posting as you.");
+    // Meanwhile its encrypted device is linked: revoking only the grant
+    // would leave encrypted DMs on.
+    mockState = state({ ...listed(true), revoke });
+    rerender(<DevicesSecuritySettings />);
+    await act(async () => {
+      fireEvent.click(
+        within(dialog).getByRole("button", { name: "Revoke device" })
+      );
+    });
+    expect(revoke).not.toHaveBeenCalled();
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "This device changed while this was open."
+    );
+    expect(dialog).toHaveTextContent(
+      "It will stop posting as you and stop receiving encrypted DMs."
+    );
+    // Confirmed again with the scope it now shows.
+    await act(async () => {
+      fireEvent.click(
+        within(dialog).getByRole("button", { name: "Revoke device" })
+      );
+    });
+    expect(revoke).toHaveBeenCalledWith(
+      expect.objectContaining({
+        id: "laptop",
+        encryptedDms: expect.objectContaining({ status: "active" }),
+      })
+    );
+  });
+
   it("keeps Set up backup first unavailable while this browser's revoke runs", async () => {
     mockBackupSnapshot = { phase: "off" };
     try {
