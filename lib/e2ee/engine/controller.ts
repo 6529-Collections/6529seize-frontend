@@ -103,6 +103,10 @@ export class EngineController {
     );
   }
 
+  private hasDeviceKey(deviceKey: string): boolean {
+    return this.ctx.device?.deviceKey === deviceKey;
+  }
+
   private syncRepeat(): boolean {
     return this.syncAgain && this.isReady();
   }
@@ -333,15 +337,15 @@ export class EngineController {
       // The first Welcome read can succeed before another device adds this
       // one to existing chats. Check after delivery processing so a newly
       // queued Welcome also keeps discovery open for the next pass.
-      if (this.ctx.device?.deviceKey === deviceKey) {
+      if (this.hasDeviceKey(deviceKey)) {
         this.setInitialSyncStatus(pending ? "waiting" : "complete");
       }
     } catch (error) {
-      if (!this.isReady() || this.ctx.device?.deviceKey !== deviceKey) return;
+      if (!this.isReady() || !this.hasDeviceKey(deviceKey)) return;
       if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
         await this.hooks.onOwnRevoked();
       }
-      if (this.ctx.device?.deviceKey === deviceKey) {
+      if (this.hasDeviceKey(deviceKey)) {
         this.setInitialSyncStatus("failed");
       }
     }
