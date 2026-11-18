@@ -5,13 +5,17 @@
 In the app layout, header `Back` is context-aware. It appears only in supported
 contexts, then runs route rules before history. In the native app, ordinary wave
 and direct-message details also support a rightward swipe across conversation
-content to return to their matching list.
+content to return to their matching list. Profile Waves Feed supports the same
+swipe back to Waves. Opening a chat from that feed makes both `Back` and a right
+swipe return to the feed at the saved reading position.
 
 ## Location in the Site
 
 - App header in app-layout routes.
 - Create routes: `/waves/create`, `/messages/new`.
 - Active wave routes: `/waves/{waveId}` and `/messages/{waveId}`.
+- Profile Waves Feed: `/waves?view=profile-feed`.
+- Discovery at `/discover` when opened from Profile Waves Feed in the native app.
 - Legacy `/waves?wave={waveId}` links are normalized to `/waves/{waveId}`.
 - Preferences at `/preferences?from=profile` when opened from the active
   profile.
@@ -32,6 +36,7 @@ content to return to their matching list.
 1. Header shows `Back` only when at least one condition is true:
    - active wave context exists,
    - route is `/waves/create` or `/messages/new`,
+   - native-app Discovery carries a Profile Waves Feed return context,
    - Preferences includes its explicit profile-entry context,
    - route is a profile page and in-app history can go back.
 2. User taps `Back`. In a native-app wave or DM, the user can instead swipe
@@ -41,10 +46,13 @@ content to return to their matching list.
    - `/messages/new` -> replace to `/messages`
    - profile-origin Preferences -> return to the active profile
    - `drop` query exists -> remove only `drop`, keep path and other query params
+   - native-app chat opened from Profile Waves Feed -> return to the feed
+   - native-app Discovery opened from Profile Waves Feed -> return to the feed
    - active wave context -> clear active wave state and return to `/waves` or
      `/messages`
-4. If no route rule matches, `Back` runs in-app history and shows a spinner
-   while navigation resolves.
+4. If no route rule matches, `Back` returns to the previous app page with its
+   URL settings. Fast returns keep the arrow; longer navigation shows a spinner
+   after a brief delay.
 
 ## Common Scenarios
 
@@ -52,19 +60,32 @@ content to return to their matching list.
   to the matching list route.
 - Return from Preferences: when it was opened from the active profile, `Back`
   returns to that profile.
+- Return from Discover Waves: after opening it from Profile Waves Feed in the
+  native app, header `Back` returns to the feed at its saved reading position,
+  including after changing Discovery tabs, sort, or score filters.
 - Close focused drop: if `?drop=` exists, `Back` removes only `drop`.
 - Leave thread: `Back` clears active thread state and returns to section root.
+- Return to reading: after opening a post or its Wave-name link from Profile
+  Waves Feed in the native app, `Back` or a right swipe returns to the same feed position. The feed's
+  own `Back` or right swipe returns to Waves, including after direct entry.
+  Opening Profile Waves Feed again from the Waves More menu starts at the top.
+- Android system Back follows the same Feed return: from a feed-origin chat it
+  returns to Feed; from Feed itself it returns to Waves before considering
+  another section's history or minimizing the app.
 - Leave a wave or DM in the native app: a completed rightward swipe clears the
   active thread and returns to `/waves` or `/messages`, using the same state
   reset as `Back`.
 - Return from profile: if in-app history has a valid target, `Back` returns to
-  it.
+  it. For example, Network returns to the same page and sorting, with the saved
+  reading position. Opening the profile from another section in the native app
+  starts at the top, keeping its Back control reachable. Changing filters does
+  not add another Back step.
 
 ## Edge Cases
 
 - Repeat taps are ignored while fallback loading is active.
-- The conversation swipe applies to native-app wave and DM details. It does
-  not run on web or list/create routes, or while a focused drop or create overlay
+- The swipe applies to native-app wave and DM details and Profile Waves Feed. It
+  does not run on web or the Waves/Messages lists or create routes, or while a focused drop or create overlay
   is active. Screen edges remain available to the system or browser.
 - Reverse below the gesture threshold before release to cancel. A slow, short
   drag also stays in the conversation; a longer drag or quick flick returns to
@@ -95,7 +116,13 @@ content to return to their matching list.
   control.
 - Leaving a thread with `Back` clears last-visited thread memory for that
   section.
-- Loading spinner appears only during history fallback.
+- Loading spinner appears only during history fallback after a brief delay. It
+  indicates pending navigation, not necessarily a fresh download of the list.
+- Native Back prepares the previously visited route ahead of selection. Cached
+  content can return while its data refreshes in the background.
+- On supported native app browsers, a committed Waves or Profile Waves Feed
+  swipe reveals the destination during the remaining slide. The saved Feed
+  cards are ready when that slide starts. Reduced Motion still skips the motion.
 
 ## Related Pages
 

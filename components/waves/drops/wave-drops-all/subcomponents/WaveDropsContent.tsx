@@ -18,6 +18,7 @@ type WaveMessagesResult = ReturnType<
 >["waveMessages"];
 
 interface WaveDropsContentProps {
+  readonly topFade?: "mask" | "overlay" | undefined;
   readonly waveMessages: WaveMessagesResult;
   readonly dropId: string | null;
   readonly scrollContainerRef: RefObject<HTMLDivElement | null>;
@@ -61,6 +62,7 @@ interface WaveDropsContentProps {
 }
 
 export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
+  topFade,
   waveMessages,
   dropId,
   scrollContainerRef,
@@ -149,6 +151,7 @@ export const WaveDropsContent: React.FC<WaveDropsContentProps> = ({
     <>
       {errorNotice}
       <WaveDropsMessageListSection
+        topFade={topFade}
         waveMessages={waveMessages}
         dropId={dropId}
         scrollContainerRef={scrollContainerRef}
