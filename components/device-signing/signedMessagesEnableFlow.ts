@@ -444,6 +444,9 @@ export class SignedMessagesEnableFlow {
         this.settle({ kind: "error", reason: "connect-failed" });
         return;
       case "walletconnect":
+        // AppKit now owns the connection. The regular close check applies.
+        step.connectAbort?.abort();
+        delete step.connectAbort;
         delete step.desktopStatus;
         step.modalOpened = true;
         break;

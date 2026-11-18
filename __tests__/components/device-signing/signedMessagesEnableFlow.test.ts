@@ -158,6 +158,22 @@ describe("turn on signed messages flow", () => {
     expect(harness.requestGrant).not.toHaveBeenCalled();
   });
 
+  it("ends Desktop setup when the user closes the phone-wallet modal", async () => {
+    const harness = createDesktopHarness();
+    await flush();
+    harness.set({ isConnectOpen: true });
+    harness.setup.onStatus("walletconnect");
+    expect(harness.setup.signal.aborted).toBe(true);
+    expect(harness.isBusy()).toBe(true);
+
+    harness.set({ isConnectOpen: false });
+    jest.advanceTimersByTime(1_000);
+
+    expect(harness.status()).toEqual({ kind: "not-connected" });
+    expect(harness.isBusy()).toBe(false);
+    expect(harness.requestGrant).not.toHaveBeenCalled();
+  });
+
   it.each(["cancelled", "expired", "profile changed"] as const)(
     "ignores a late Desktop return when setup is %s",
     (reason) => {
