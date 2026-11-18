@@ -2,9 +2,10 @@ import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import type { Ref } from "react";
 import RatingInput from "./RatingInput";
 import RatingInputSigns from "./RatingInputSigns";
+import { RATING_INPUT_SURFACE_CLASS } from "./ratingInputStyles";
 
 const INPUT_CLASS_NAME =
-  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
+  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-text-iron-100 tw-caret-primary-400 tw-ring-1 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 const VARIANT_CLASSES = {
   compact:
@@ -61,6 +62,7 @@ export default function UserPageRateInput({
   const valueAsNumber = getStringAsNumberOrZero(value);
   const isValidValue =
     isProxy || (valueAsNumber >= minMax.min && valueAsNumber <= minMax.max);
+  const showInvalid = invalid ?? !isValidValue;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.currentTarget.value;
@@ -116,8 +118,8 @@ export default function UserPageRateInput({
         onBlur={handleBlur}
         className={`${
           focusRingClassName ??
-          (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
-        } ${INPUT_CLASS_NAME} ${VARIANT_CLASSES[variant]}`}
+          (showInvalid ? "focus:tw-ring-red" : "focus:tw-ring-primary-400")
+        } ${INPUT_CLASS_NAME} ${RATING_INPUT_SURFACE_CLASS} ${VARIANT_CLASSES[variant]}`}
       />
     </div>
   );

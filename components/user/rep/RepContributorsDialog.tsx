@@ -144,15 +144,16 @@ function RepContributorRow({
       className={`${RATING_CONTRIBUTOR_ROW_CLASS} tw-group/rating-contributor tw-no-underline`}
     >
       <div className={RATING_CONTRIBUTOR_IDENTITY_CLASS}>
-        <span aria-hidden="true">
-          <ProfileAvatar
-            pfpUrl={contributor.pfpUrl}
-            size={ProfileBadgeSize.SMALL}
-            shape="circle"
-            alt=""
-            fallbackContent={contributor.display.charAt(0).toUpperCase()}
-          />
-        </span>
+        {contributor.pfpUrl && (
+          <span aria-hidden="true">
+            <ProfileAvatar
+              pfpUrl={contributor.pfpUrl}
+              size={ProfileBadgeSize.SMALL}
+              shape="circle"
+              alt=""
+            />
+          </span>
+        )}
         <span className={RATING_CONTRIBUTOR_NAME_CLASS}>
           {contributor.display}
         </span>
