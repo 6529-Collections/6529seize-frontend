@@ -678,7 +678,7 @@ describe("useWaveDataFetching", () => {
     const { result, store } = setup({ wave1: { drops: cached } });
     let pending!: Promise<unknown>;
     act(() => {
-      pending = result.current.registerWave("wave1", true);
+      pending = result.current.activateWave("wave1", true);
     });
     store["wave1"] = {
       drops: [...cached, ...drops(2, 38)],
