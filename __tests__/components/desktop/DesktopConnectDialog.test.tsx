@@ -85,6 +85,32 @@ describe("DesktopConnectDialog", () => {
     );
   });
 
+  it("ignores a phone-wallet handoff that finishes after setup has ended", async () => {
+    const user = userEvent.setup();
+    const controller = new AbortController();
+    const onStatus = jest.fn();
+    let finishHandoff: () => void = () => undefined;
+    const handoff = new Promise<void>((resolve) => {
+      finishHandoff = resolve;
+    });
+    render(<DesktopConnectDialog />);
+    act(() => {
+      openDesktopConnectDialog(() => handoff, {
+        address: `0x${"a".repeat(40)}`,
+        signal: controller.signal,
+        onStatus,
+      });
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: /Scan with a phone wallet/ })
+    );
+    controller.abort();
+    await act(async () => finishHandoff());
+
+    expect(onStatus.mock.calls).toEqual([["picker"]]);
+  });
+
   it("offers WalletConnect and a browser wallet, and no seed wallets", () => {
     render(<DesktopConnectDialog />);
     open();

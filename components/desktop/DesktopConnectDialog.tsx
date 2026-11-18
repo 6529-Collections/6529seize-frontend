@@ -142,9 +142,11 @@ export default function DesktopConnectDialog() {
     setProblem(null);
     closeDesktopConnectDialog("walletconnect");
     open()
-      .then(() => setup?.onStatus("walletconnect"))
+      .then(() => {
+        if (setup && !setup.signal.aborted) setup.onStatus("walletconnect");
+      })
       .catch(() => {
-        setup?.onStatus("failed");
+        if (setup && !setup.signal.aborted) setup.onStatus("failed");
         // Bring the unscoped choice back with the reason.
         if (!setup) {
           openDesktopConnectDialog(open);

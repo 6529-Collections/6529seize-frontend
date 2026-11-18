@@ -4,6 +4,7 @@ import type {
 } from "@/components/auth/authSignedMessagesGrant";
 import {
   isReconnectStatus,
+  DESKTOP_SIGNER_ATTACH_TIMEOUT_MS,
   RECONNECT_WAIT_MS,
   REMOTE_WALLET_STALL_MS,
   SignedMessagesEnableFlow,
@@ -129,7 +130,7 @@ describe("turn on signed messages flow", () => {
     harness.setup.onStatus("browser");
     jest.advanceTimersByTime(30_000);
     harness.setup.onStatus("signed-in");
-    jest.advanceTimersByTime(2_000);
+    jest.advanceTimersByTime(DESKTOP_SIGNER_ATTACH_TIMEOUT_MS - 1);
     expect(harness.isBusy()).toBe(true);
     expect(harness.requestGrant).not.toHaveBeenCalled();
 
@@ -138,6 +139,18 @@ describe("turn on signed messages flow", () => {
     expect(harness.requestGrant).toHaveBeenCalledTimes(1);
     await harness.answer({ success: true });
     expect(harness.onEnabled).toHaveBeenCalledTimes(1);
+  });
+
+  it("ends Desktop setup if the signer never attaches after sign-in", () => {
+    const harness = createDesktopHarness();
+    harness.setup.onStatus("browser");
+    harness.setup.onStatus("signed-in");
+    jest.advanceTimersByTime(DESKTOP_SIGNER_ATTACH_TIMEOUT_MS);
+
+    expect(harness.isBusy()).toBe(false);
+    expect(harness.setup.signal.aborted).toBe(true);
+    harness.set({ canSignActiveWallet: true });
+    expect(harness.requestGrant).not.toHaveBeenCalled();
   });
 
   it.each(["cancelled", "expired", "profile changed"] as const)(

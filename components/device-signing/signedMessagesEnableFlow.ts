@@ -25,6 +25,8 @@ export const SLOW_WALLET_HINT_MS = 8_000;
 export const REMOTE_WALLET_STALL_MS = 20_000;
 /** How long to wait for a wallet that is still reconnecting after a reload. */
 export const RECONNECT_WAIT_MS = 8_000;
+/** Time for the Desktop forwarding connector to attach after browser sign-in. */
+export const DESKTOP_SIGNER_ATTACH_TIMEOUT_MS = 30_000;
 /** How long switching to the right account still continues by itself. */
 export const WRONG_ACCOUNT_RESUME_MS = 120_000;
 
@@ -448,7 +450,7 @@ export class SignedMessagesEnableFlow {
             () => this.onDesktopConnectStatus(step, "failed"),
             status === "browser"
               ? BROWSER_CONNECTOR_TIMEOUT_MS
-              : RECONNECT_WAIT_MS
+              : DESKTOP_SIGNER_ATTACH_TIMEOUT_MS
           );
         }
     }

@@ -65,6 +65,7 @@ import type { CapacitorConnectDialogView } from "./CapacitorConnectDialog";
 import type { DesktopWalletSetup } from "@/services/desktop/desktopConnectDialog";
 import {
   defaultConnectModalView,
+  logWalletConnectionAttempt,
   openFreshUserConnection,
   openUserConnectionSurfaceForRuntime,
   useDisconnectExternalWalletBeforeSelection,
@@ -335,12 +336,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         return;
       }
 
-      // Log connection attempt for security monitoring
-      logSecurityEvent(
-        SecurityEventType.WALLET_CONNECTION_ATTEMPT,
-        createConnectionEventContext(source)
-      );
-
+      logWalletConnectionAttempt(source);
       await openConnectModal(source);
     },
     [isSigningOutAllRef, openConnectModal]

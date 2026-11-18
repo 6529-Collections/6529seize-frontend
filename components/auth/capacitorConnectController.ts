@@ -32,6 +32,13 @@ type ConnectModalView =
 export const defaultConnectModalView = (): ConnectModalView =>
   isDesktopShell() ? "ConnectingWalletConnectBasic" : "Connect";
 
+export function logWalletConnectionAttempt(source: string): void {
+  logSecurityEvent(
+    SecurityEventType.WALLET_CONNECTION_ATTEMPT,
+    createConnectionEventContext(source)
+  );
+}
+
 /**
  * The one way a connect entry point opens a wallet connection. In 6529
  * Desktop every entry point shows the desktop connect choice first
@@ -55,10 +62,7 @@ async function openConnectEntryPoint({
 }): Promise<void> {
   // Like the Capacitor options, this resolves once the choice is shown.
   if (!isSigningOutAll && isDesktopShell()) {
-    logSecurityEvent(
-      SecurityEventType.WALLET_CONNECTION_ATTEMPT,
-      createConnectionEventContext(source)
-    );
+    logWalletConnectionAttempt(source);
     openDesktopConnectDialog(
       () => openWebConnection(source),
       desktopWalletSetup
@@ -121,10 +125,7 @@ async function openWebOrCapacitorConnection({
     return;
   }
 
-  logSecurityEvent(
-    SecurityEventType.WALLET_CONNECTION_ATTEMPT,
-    createConnectionEventContext(source)
-  );
+  logWalletConnectionAttempt(source);
   setCapacitorView("options");
 }
 
