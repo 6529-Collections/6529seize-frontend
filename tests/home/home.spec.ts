@@ -1504,6 +1504,124 @@ test("homepage artwork request has a visible failure and retry @smoke @medium @l
   await expectNoHorizontalOverflow(page);
 });
 
+test("Active Votes keeps inset artwork and every metric visible at responsive widths @smoke @medium @large", async ({
+  page,
+}, testInfo) => {
+  const data = [0, 2, null, 1, null, 3].map((count, index) => ({
+    voting_ends_at: null,
+    next_decision_at: null,
+    active_submission_count: count,
+    wave: {
+      id: `discover-layout-${index}`,
+      name: `Community proposal ${index} with a long wave name`,
+      pfp: "https://6529.io/discover-cover-fixture.png",
+      creator: null,
+      created_at: 0,
+      last_drop_time: 0,
+      has_competition: true,
+      is_dm_wave: false,
+      is_private: false,
+      total_drops_count: 2,
+      description_drop: {
+        contents:
+          "- **QUORUM Proposal Template** and [details](https://example.com)",
+        media: [],
+      },
+      wave_score: { visibility_score: 100, hotness_score: 100 },
+      wave_rep: { total_rep: index % 2 === 0 ? 1250 : -1250 },
+    },
+  }));
+  await page.route("**/api/v2/waves/active-votes?*", (route) =>
+    route.fulfill({
+      headers: { "access-control-allow-origin": "*" },
+      json: { page: 1, next: false, count: data.length, data },
+    })
+  );
+  await page.route("**/_next/image?*", (route) =>
+    route.fulfill({
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="92" height="92"><rect width="92" height="92" fill="#161616"/></svg>',
+    })
+  );
+  await page.goto("/discover?view=active-votes", {
+    waitUntil: "domcontentloaded",
+  });
+  const section = page
+    .getByRole("region", { name: "Active Votes", exact: true })
+    .last();
+  const cards = section.getByRole("link", {
+    name: /^View wave Community proposal/,
+  });
+  await expect(cards).toHaveCount(data.length);
+  await expect(
+    section.getByText("0 active submissions", { exact: true })
+  ).toBeVisible();
+  await expect(
+    section.getByText("2 active submissions", { exact: true })
+  ).toBeVisible();
+  for (const width of [320, 390, 640, 768, 1024, 1280, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expectNoHorizontalOverflow(page);
+    for (const card of await cards.all()) {
+      await expect(
+        card.getByText("QUORUM Proposal Template and details", {
+          exact: true,
+        })
+      ).toBeVisible();
+      const layout = await card.evaluate((element) => {
+        const cover = element.firstElementChild!;
+        const metrics = element.querySelector(".explore-wave-card-metrics")!;
+        return {
+          card: element.getBoundingClientRect().toJSON(),
+          cover: cover.getBoundingClientRect().toJSON(),
+          metrics: Array.from(
+            metrics.querySelectorAll("[aria-label]"),
+            (metric) => ({
+              box: metric.getBoundingClientRect().toJSON(),
+              clipped: metric.scrollWidth > metric.clientWidth,
+            })
+          ),
+        };
+      });
+      expect(layout.cover.width).toBe(92);
+      expect(layout.cover.height).toBe(92);
+      expect(layout.cover.top - layout.card.top).toBe(12);
+      expect(layout.metrics).toHaveLength(3);
+      for (const metric of layout.metrics) {
+        expect(metric.clipped).toBe(false);
+        expect(metric.box.left).toBeGreaterThan(layout.cover.right);
+        expect(metric.box.right).toBeLessThanOrEqual(layout.card.right - 12);
+        expect(metric.box.bottom).toBeLessThanOrEqual(layout.card.bottom - 12);
+      }
+      if (width === 1440) {
+        expect(
+          new Set(layout.metrics.map((metric) => metric.box.top)).size
+        ).toBe(1);
+        expect(layout.card.height).toBe(116);
+      }
+    }
+    if (width === 390 || width === 1440) {
+      await page.screenshot({
+        path: testInfo.outputPath(`active-votes-${width}.png`),
+      });
+    }
+  }
+  await cards.first().focus();
+  await expect(cards.first()).toBeFocused();
+  expect(
+    await cards
+      .first()
+      .evaluate((element) => getComputedStyle(element).boxShadow)
+  ).not.toBe("none");
+  await cards.first().hover();
+  await expect(cards.first()).toHaveCSS("transform", "none");
+  await expect(cards.first().getByRole("img")).toHaveCSS("transform", "none");
+  await expect(cards.first()).toHaveAttribute(
+    "href",
+    "/waves/discover-layout-0"
+  );
+});
+
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
     // Layout and hover assertions must not depend on a live voting round.
@@ -1789,7 +1907,7 @@ test.describe("Home Page @smoke @medium @large", () => {
               .trim()
           )
         )
-        .toBe("7 7 58");
+        .toBe("19 19 58");
       const layout = await firstCard.evaluate((card) => {
         const cover = card.firstElementChild!;
         const details = card.lastElementChild!;
@@ -1813,7 +1931,7 @@ test.describe("Home Page @smoke @medium @large", () => {
       );
       expect(layout.details.top).toBeGreaterThan(layout.card.top);
       expect(layout.metrics.bottom).toBeLessThan(layout.card.bottom);
-      expect(layout.gradient).toContain("rgb(7, 7, 58) calc(100% - 60px)");
+      expect(layout.gradient).toContain("rgb(19, 19, 58) calc(100% - 60px)");
       if (width === 390 || width === 1440) {
         await page.screenshot({
           path: testInfo.outputPath(`discover-cards-${width}.png`),

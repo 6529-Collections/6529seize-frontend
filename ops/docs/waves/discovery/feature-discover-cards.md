@@ -6,7 +6,9 @@
 
 - Cards share the same artwork-led design and wave information as the homepage
   `Tired of bot replies?` section, with artwork that fills rounded cards and fades into a
-  dark image-tinted background behind the text. This layout applies at every
+  dark image-tinted background behind the text. A subtle edge separates dark artwork
+  from the page, and the tint stays at least as light as the dark Iron card surface.
+  This layout applies at every
   breakpoint; the homepage retains horizontal cards below `768px`.
 - The dedicated route expands the list to 20 cards.
 - The route requests discovery data with `exclude_followed=true`.
@@ -70,8 +72,8 @@ from home discovery.
   `Tired of bot replies?` section cards.
 - Preview content comes from the wave description drop rather than the latest
   chat message.
-- Description previews retain their existing text and media handling; markdown
-  markers can remain visible, and preview links are not separately clickable.
+- Description previews show plain text without markdown formatting markers.
+  Media previews remain available, and preview links are not separately clickable.
 - If a wave description drop is empty, whitespace-only, or media-free, the card
   still opens the target wave route without rendering the compact preview row.
 - Auth/profile requirements still apply after entering `/waves` or `/messages`

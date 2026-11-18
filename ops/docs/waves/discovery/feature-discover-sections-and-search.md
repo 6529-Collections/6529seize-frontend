@@ -13,7 +13,11 @@ sidebar heading. The page shows the total accessible count and compact discovery
 cards with cover artwork on the left, single-line ellipsized
 titles and single-line description previews. Approval waves show how many
 submissions are open for voting. Other waves show the voting end or next result
-when available, otherwise `Voting open`.
+when available, otherwise `Voting open`. Submission counts have a small dot;
+zero submissions use muted text. Score, Hot and REP remain visible beneath the
+plain-text description. Metrics wrap when needed on narrow cards. The inset
+artwork and text align at the top; hovering highlights the card without lifting
+it or zooming the artwork.
 The Memes - Main Stage appears first whenever it has active voting. The
 remaining waves are ordered by total Wave REP, highest first.
 Use `Load more` to browse additional results.

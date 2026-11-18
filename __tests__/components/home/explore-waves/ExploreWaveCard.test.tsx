@@ -201,12 +201,51 @@ describe("ExploreWaveCard", () => {
     const card = screen.getByRole("link");
     expect(screen.queryByRole("img")).not.toBeInTheDocument();
     expect(
-      (card.lastElementChild as HTMLElement).style.getPropertyValue("--card-tint")
+      (card.lastElementChild as HTMLElement).style.getPropertyValue(
+        "--card-tint"
+      )
     ).toBe("");
     expect(getWaveCardTint).toHaveBeenCalledTimes(samplingCalls);
     expect(card).toHaveAttribute("href", "/waves/wave-1");
     expect(screen.getByText("Description preview")).toBeInTheDocument();
   });
+
+  it.each([{ compact: true }, { artworkOverlay: true }])(
+    "strips markdown in Discover previews while retaining text, media and the wave link",
+    (variant) => {
+      render(
+        <ExploreWaveCard
+          {...variant}
+          wave={createWave({
+            descriptionDrop: {
+              contents:
+                "- **QUORUM Proposal Template** and [details](https://example.com) ![Cover](https://example.com/cover.png)",
+              media: [
+                {
+                  url: "https://example.com/extra.png",
+                  mime_type: "image/png",
+                },
+              ],
+            },
+          })}
+        />
+      );
+      const props = mockContentDisplay.mock.calls.at(-1)![0];
+      expect(props.content.segments).toEqual([
+        { type: "text", content: "QUORUM Proposal Template and details" },
+        expect.objectContaining({
+          type: "media",
+          mediaInfo: expect.objectContaining({
+            url: "https://example.com/cover.png",
+          }),
+        }),
+      ]);
+      expect(props.content.apiMedia).toEqual([
+        expect.objectContaining({ url: "https://example.com/extra.png" }),
+      ]);
+      expect(screen.getByRole("link")).toHaveAttribute("href", "/waves/wave-1");
+    }
+  );
 
   it("shows empty state when latest drop is missing", () => {
     render(

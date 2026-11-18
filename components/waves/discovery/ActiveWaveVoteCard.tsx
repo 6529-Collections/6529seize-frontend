@@ -16,18 +16,24 @@ export function ActiveWaveVoteCard({
   const locale = useBrowserLocale();
   const zone = useDisplayTimeZone();
   const { isApp } = useDeviceInfo();
+  const hasSubmissionCount = typeof vote.active_submission_count === "number";
+  const hasNoSubmissions = vote.active_submission_count === 0;
   return (
     <ExploreWaveCard
       wave={mapApiWaveOverviewToSidebarWave(vote.wave)}
       isApp={isApp}
       compact
       headingDetails={
-        <span className="tw-mt-1 tw-flex tw-items-start tw-gap-1.5 tw-text-xs tw-font-medium tw-leading-4 tw-text-primary-300">
-          {typeof vote.active_submission_count !== "number" && (
-            <ClockIcon
+        <span
+          className={`tw-mt-1 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-leading-4 ${hasNoSubmissions ? "tw-text-iron-500" : "tw-text-primary-300"}`}
+        >
+          {hasSubmissionCount ? (
+            <span
               aria-hidden="true"
-              className="tw-mt-0.5 tw-size-3 tw-shrink-0"
+              className={`tw-size-[5px] tw-shrink-0 tw-rounded-full ${hasNoSubmissions ? "tw-bg-iron-600" : "tw-bg-current"}`}
             />
+          ) : (
+            <ClockIcon aria-hidden="true" className="tw-size-3 tw-shrink-0" />
           )}
           <span>{getActiveWaveVoteLabel(vote, locale, zone)}</span>
         </span>

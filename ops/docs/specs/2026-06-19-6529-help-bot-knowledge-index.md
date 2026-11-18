@@ -7,6 +7,11 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The `waves.discovery` record covers plain-text description previews, retained
+media, visible Worth Checking Out edges and minimum artwork tint, inset Active
+Votes artwork, wrapping metrics and neutral zero-submission status. Discovery
+links, eligibility and pagination retain their existing behavior.
+
 The touch-menu, header-navigation and encrypted-chat records cover touch reply,
 timestamp access, cancellable native conversation return and Android Back layer
 ordering. They retain visible tap alternatives, permission and delivery-state
