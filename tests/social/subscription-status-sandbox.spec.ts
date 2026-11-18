@@ -666,9 +666,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           const previousReads = subscriptionReads.filter((url) =>
             url.includes("/final/")
           ).length;
-          const heading = overview.locator(
-            "#profile-subscriptions-overview-title"
-          );
+          const heading = overview.getByRole("heading", { level: 2 });
           await heading.focus();
           await page.clock.setFixedTime(new Date("2026-11-16T14:30:01Z"));
           await expect
