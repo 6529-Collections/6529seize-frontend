@@ -86,26 +86,6 @@ describe("E2EE engine: sync paths", () => {
     expect(engine.getInitialSyncStatus()).toBe("complete");
   });
 
-  it("confirms an empty inbox when the server clears pending chats without a new Welcome", async () => {
-    const world = await createWorld();
-    let pending = true;
-    const alice = await addUser(world, "alice", {
-      api: {
-        ...createFakeApiClient(world.ds, "alice"),
-        getDeviceInboxStatus: async () => ({ has_pending_chats: pending }),
-      },
-    });
-    const { engine } = alice.primary;
-    await engine.idle();
-    expect(engine.getInitialSyncStatus()).toBe("waiting");
-    expect(engine.getConversations()).toHaveLength(0);
-
-    pending = false;
-    await engine.sync();
-    expect(engine.getInitialSyncStatus()).toBe("complete");
-    expect(engine.getConversations()).toHaveLength(0);
-  });
-
   it("follows WebSocket hints without explicit syncs", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");

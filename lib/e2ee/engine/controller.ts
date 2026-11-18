@@ -264,20 +264,14 @@ export class EngineController {
 
   /** Check chat discovery independently of maintenance and cosmetic lookups. */
   private async syncInbox(): Promise<ApiE2eeDeviceGroup[] | null> {
-    if (this.ctx.store.initialSyncStatus === "failed") {
-      this.setInitialSyncStatus("pending");
-    }
+    this.setInitialSyncStatus("pending");
     try {
       const inboxComplete = await this.pullInbox();
       if (!this.isReady()) return null;
       const groups = await this.deviceGroups();
-      if (inboxComplete === null || groups === null) {
-        this.setInitialSyncStatus("failed");
-      } else if (inboxComplete) {
-        await this.confirmInitialInbox();
-      } else {
-        this.setInitialSyncStatus("waiting");
-      }
+      this.setInitialSyncStatus(
+        inboxComplete && groups !== null ? "complete" : "failed"
+      );
       return groups;
     } catch (error) {
       this.setInitialSyncStatus("failed");
@@ -285,26 +279,7 @@ export class EngineController {
     }
   }
 
-  private async confirmInitialInbox(): Promise<void> {
-    if (!this.isReady() || this.ctx.store.initialSyncStatus === "complete") {
-      return;
-    }
-    try {
-      const { has_pending_chats: pending } =
-        await this.ctx.api.getDeviceInboxStatus(ownDeviceKey(this.ctx));
-      // The first Welcome read can succeed before another device adds this
-      // one to existing chats. Check after delivery processing so a newly
-      // queued Welcome also keeps discovery open for the next pass.
-      this.setInitialSyncStatus(pending ? "waiting" : "complete");
-    } catch (error) {
-      if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
-        await this.hooks.onOwnRevoked();
-      }
-      this.setInitialSyncStatus("failed");
-    }
-  }
-
-  private async pullInbox(): Promise<boolean | null> {
+  private async pullInbox(): Promise<boolean> {
     try {
       return await this.ctx.queue.run(() => processInbox(this.ctx));
     } catch (error) {
@@ -312,9 +287,9 @@ export class EngineController {
       // here if it arrived before the WebSocket hint.
       if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
         await this.hooks.onOwnRevoked();
-        return null;
+        return false;
       }
-      if (isNetworkish(error)) return null;
+      if (isNetworkish(error)) return false;
       throw error;
     }
   }

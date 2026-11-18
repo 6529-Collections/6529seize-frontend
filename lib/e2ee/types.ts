@@ -25,11 +25,7 @@ export type E2eeEngineStatus =
   | "error";
 
 /** Whether this engine has successfully checked for chats on this device. */
-export type E2eeInitialSyncStatus =
-  | "pending"
-  | "waiting"
-  | "failed"
-  | "complete";
+export type E2eeInitialSyncStatus = "pending" | "failed" | "complete";
 
 export interface E2eeDeviceInfo {
   linkedAuthorProof?: boolean;
