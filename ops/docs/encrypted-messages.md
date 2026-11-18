@@ -575,7 +575,11 @@ browser so backup can show.
   becomes eligible while it's open is listed unselected. With encrypted
   messages on in this browser, it warns that each selected device with
   encrypted DMs deletes the encrypted chats saved on it once it confirms
-  the revocation.
+  the revocation. A selected device that changes while it runs, or stops
+  being an earlier setup while it still has access, isn't revoked: the
+  dialog names it and stays open for a new confirm. If encrypted messages
+  start or stop in this browser meanwhile, the rest wait for a new confirm
+  too.
 - **Revoked or expired in the last 30 days** stays collapsed to one line;
   expanded, each ended device is one row.
 - **What these permissions mean** explains both permissions.
@@ -584,7 +588,9 @@ browser so backup can show.
 encrypted chats saved on it; posts it signed stay verifiable. If the device
 changes while the dialog is open (for example its encrypted DMs are linked
 meanwhile), confirming revokes nothing: the dialog shows what will stop now
-and asks you to confirm again. Whether a revoke deletes this browser's
+and asks you to confirm again. If the device can't be revoked from here when
+you confirm (for example while the device list reloads), the dialog says so
+and stays open. Whether a revoke deletes this browser's
 encrypted chats depends on this browser's own stored device, also while
 encrypted messages aren't running here: a revoke of a device whose
 encrypted DMs are on another device says that device keeps its chats. If a
