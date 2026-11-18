@@ -7,7 +7,7 @@ import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useContext, type ReactNode } from "react";
 
@@ -118,6 +118,7 @@ beforeEach(() => {
   ];
   requestAuth.mockResolvedValue({ success: true });
   allocation.mockImplementation(() => ({
+    ratingStats: [],
     repState: {
       category: "Artist",
       rater_contribution: ownContribution,
@@ -176,7 +177,9 @@ it("reuses the contributor cache when a category is reopened within five minutes
 it("pins only your editable contribution, accepts negative values, and saves the desired total", async () => {
   const user = userEvent.setup();
   setup(target, "received");
-  const amount = await screen.findByRole("textbox", { name: "You" });
+  const amount = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   await waitFor(() => expect(amount).toHaveValue("20"));
   expect(amount).toHaveAttribute("inputmode", "text");
   expect(screen.getAllByRole("textbox")).toHaveLength(1);
@@ -189,7 +192,8 @@ it("pins only your editable contribution, accepts negative values, and saves the
   await user.type(amount, "-15");
   expect(fetchApi).toHaveBeenCalledTimes(readsBeforeTyping);
   expect(post).not.toHaveBeenCalled();
-  expect(amount).toHaveClass("tw-text-rose-400");
+  expect(amount).toHaveClass("tw-text-iron-100");
+  expect(screen.getByRole("status")).toHaveTextContent("20 → -15");
   await user.click(screen.getByRole("button", { name: "Save" }));
   await waitFor(() =>
     expect(post).toHaveBeenCalledWith({
@@ -200,7 +204,9 @@ it("pins only your editable contribution, accepts negative values, and saves the
   expect(onProfileRepModify).toHaveBeenCalledWith(
     expect.objectContaining({ targetProfiles: [target] })
   );
-  await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+  await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1), {
+    timeout: 2000,
+  });
 });
 
 it("makes the owner's received categories read-only", async () => {
@@ -210,7 +216,81 @@ it("makes the owner's received categories read-only", async () => {
   expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
 });
 
-it("does not add a You row when no REP has been given in the category", async () => {
+it.each([
+  { current: 20, value: "10", display: "10", color: "tw-text-emerald-400" },
+  { current: -20, value: "-10", display: "-10", color: "tw-text-rose-400" },
+  { current: 20, value: "0", display: "0", color: "tw-text-iron-100" },
+  { current: 20, value: "-", display: "—", color: "tw-text-iron-100" },
+])(
+  "colors a Received total by its sign (%j)",
+  async ({ current, value, display, color }) => {
+    const user = userEvent.setup();
+    ownContribution = current;
+    setup(target, "received");
+    await screen.findByRole("link", { name: "alice" });
+    const input = screen.getByRole("textbox", { name: "Your REP in Artist" });
+    const reads = fetchApi.mock.calls.length;
+    await user.clear(input);
+    await user.type(input, value);
+    expect(
+      within(screen.getByRole("status")).getByText(display, { exact: true })
+    ).toHaveClass(color);
+    expect(input).toHaveClass("tw-text-iron-100");
+    expect(fetchApi).toHaveBeenCalledTimes(reads);
+    expect(post).not.toHaveBeenCalled();
+  }
+);
+
+it.each([
+  {
+    value: "10",
+    total: "30",
+    inputColor: "tw-text-emerald-400",
+    totalColor: "tw-text-emerald-400",
+    delta: "−20",
+  },
+  {
+    value: "-10",
+    total: "10",
+    inputColor: "tw-text-rose-400",
+    totalColor: "tw-text-emerald-400",
+    delta: "−40",
+  },
+  {
+    value: "-20",
+    total: "0",
+    inputColor: "tw-text-rose-400",
+    totalColor: "tw-text-iron-100",
+    delta: "−50",
+  },
+  {
+    value: "-60",
+    total: "-40",
+    inputColor: "tw-text-rose-400",
+    totalColor: "tw-text-rose-400",
+    delta: "−90",
+  },
+])(
+  "keeps Given totals distinct from their signed adjustments (%j)",
+  async ({ value, total, inputColor, totalColor, delta }) => {
+    const user = userEvent.setup();
+    setup(owner, "given");
+    const input = await screen.findByRole("textbox", { name: "alice" });
+    const reads = fetchApi.mock.calls.length;
+    await user.clear(input);
+    await user.type(input, value);
+    expect(input).toHaveClass(inputColor);
+    expect(
+      within(screen.getByRole("status")).getByText(total, { exact: true })
+    ).toHaveClass(totalColor);
+    expect(screen.getByTitle(delta)).toHaveClass("tw-text-rose-400");
+    expect(fetchApi).toHaveBeenCalledTimes(reads);
+    expect(post).not.toHaveBeenCalled();
+  }
+);
+
+it("pins an empty You input for a first contribution and grants only on submit", async () => {
+  const user = userEvent.setup();
   ownContribution = 0;
   rows = [
     {
@@ -225,18 +305,41 @@ it("does not add a You row when no REP has been given in the category", async ()
   ];
   setup(target, "received", owner, true);
   await screen.findByRole("link", { name: "repqa-dana" });
-  expect(screen.getAllByRole("link")).toHaveLength(1);
-  expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
-  expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
+  expect(screen.getAllByRole("link")[0]).toHaveTextContent("You");
+  const input = screen.getByRole("textbox", { name: "Your REP in Artist" });
+  expect(input).toHaveValue("");
+  expect(input).toHaveAttribute("placeholder", "0");
+  expect(input).toHaveAttribute("aria-invalid", "false");
+  expect(input).toHaveFocus();
+  await user.type(input, "81");
+  expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
+  expect(screen.getByText("Available REP", { exact: true })).toHaveClass(
+    "tw-text-rose-400"
+  );
+  await user.keyboard("{Escape}");
+  await user.type(input, "15");
+  expect(post).not.toHaveBeenCalled();
+  expect(screen.getByRole("button", { name: "Grant Rep" })).toBeEnabled();
+  await user.keyboard("{Escape}");
+  expect(input).toHaveValue("");
   expect(
-    screen.queryByRole("button", { name: "Save" })
+    screen.queryByRole("button", { name: "Grant Rep" })
   ).not.toBeInTheDocument();
+  await user.type(input, "15{Enter}");
+  await waitFor(() =>
+    expect(post).toHaveBeenCalledWith({
+      endpoint: "profiles/target/rep/rating",
+      body: { amount: 15, category: "Artist" },
+    })
+  );
 });
 
 it("keeps an existing negative contribution first and editable", async () => {
   ownContribution = -20;
   setup(target, "received");
-  const input = await screen.findByRole("textbox", { name: "You" });
+  const input = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   expect(input).toHaveValue("-20");
   expect(screen.getAllByRole("link")[0]).toHaveTextContent("You");
 });
@@ -245,7 +348,9 @@ it("focuses the existing desktop amount without selecting its digits", async () 
   ownContribution = 12345;
   const user = userEvent.setup();
   setup(target, "received", owner, true);
-  const input = await screen.findByRole("textbox", { name: "You" });
+  const input = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   await waitFor(() => {
     expect(input).toHaveFocus();
     expect(input).toHaveValue("12345");
@@ -261,26 +366,35 @@ it("focuses the existing desktop amount without selecting its digits", async () 
 it("does not autofocus the mobile amount", async () => {
   ownContribution = 12345;
   setup(target, "received");
-  const input = await screen.findByRole("textbox", { name: "You" });
+  const input = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   expect(input).toHaveValue("12,345");
   expect(input).not.toHaveFocus();
 });
 
-it("removes the You row after saving zero", async () => {
+it("keeps the You input empty after removing a contribution", async () => {
   const user = userEvent.setup();
   post.mockImplementation(async () => {
     ownContribution = 0;
   });
-  setup(target, "received");
-  const input = await screen.findByRole("textbox", { name: "You" });
+  const { container } = setup(target, "received");
+  const announcement = container.querySelector(
+    '[aria-live="polite"][aria-atomic="true"]'
+  );
+  expect(announcement).toBeInTheDocument();
+  expect(announcement).toBeEmptyDOMElement();
+  const input = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   await user.clear(input);
   await user.type(input, "0");
   await user.click(screen.getByRole("button", { name: "Save" }));
-  await waitFor(() =>
-    expect(screen.queryByRole("textbox")).not.toBeInTheDocument()
-  );
-  expect(screen.queryByRole("link", { name: "You" })).not.toBeInTheDocument();
-  expect(screen.getAllByRole("link")).toHaveLength(2);
+  await waitFor(() => expect(input).toHaveValue(""));
+  expect(screen.getByRole("link", { name: "You" })).toBeInTheDocument();
+  expect(screen.getByText("Saved")).toBeInTheDocument();
+  expect(announcement).toHaveTextContent("Saved");
+  expect(screen.getAllByRole("link")).toHaveLength(3);
   expect(post).toHaveBeenCalledWith({
     endpoint: "profiles/target/rep/rating",
     body: { amount: 0, category: "Artist" },
@@ -377,7 +491,9 @@ it.each([
 it("explains an invalid amount on the field", async () => {
   const user = userEvent.setup();
   setup(target, "received");
-  const amount = await screen.findByRole("textbox", { name: "You" });
+  const amount = await screen.findByRole("textbox", {
+    name: "Your REP in Artist",
+  });
   await user.clear(amount);
   await user.type(amount, "-");
   expect(amount).toHaveAttribute("aria-invalid", "true");
@@ -388,6 +504,7 @@ it("explains an invalid amount on the field", async () => {
 it("blocks a batch whose first write cannot clear a negative remaining allowance", async () => {
   const user = userEvent.setup();
   allocation.mockReturnValue({
+    ratingStats: [],
     repState: {
       category: "Artist",
       rater_contribution: 30,

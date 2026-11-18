@@ -671,8 +671,11 @@ const PACKS = [
   },
   sandboxPack(
     "test:e2e:e2ee-picker-sandbox",
-    "Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.",
-    ["tests/e2ee/encrypted-people-picker-sandbox.spec.ts"],
+    "Encrypted chat recipient selection and the iPhone sign-out dialog.",
+    [
+      "tests/e2ee/encrypted-people-picker-sandbox.spec.ts",
+      "tests/e2ee/encrypted-sign-out-sandbox.spec.ts",
+    ],
     E2EE_SANDBOX_ENV,
     [DESKTOP, "capacitor-ios-sim"]
   ),

@@ -150,7 +150,7 @@ export function SidebarDiscovery({
       >
         {previewItems.length > 0 && (
           <>
-            <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-500">
+            <p className="tw-m-0 tw-mb-2 tw-text-[11px] tw-leading-4 tw-text-iron-500 [@media(any-hover:none)]:tw-sr-only">
               {t(
                 locale,
                 canUseCollections

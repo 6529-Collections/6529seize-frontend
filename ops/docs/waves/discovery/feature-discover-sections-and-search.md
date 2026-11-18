@@ -11,8 +11,11 @@ subject to wave visibility rules.
 Open `/discover?view=active-votes`, or select `View all` in the Active Votes
 sidebar heading. The page shows the total accessible count and compact discovery
 cards with cover artwork on the left, single-line ellipsized
-titles and single-line description previews. Tight padding keeps more cards visible. A prominent line beneath each wave name
-shows the voting end or next result when available, otherwise `Voting open`. Votes closing soonest appear first; open-ended votes appear last.
+titles and single-line description previews. Approval waves show how many
+submissions are open for voting. Other waves show the voting end or next result
+when available, otherwise `Voting open`.
+The Memes - Main Stage appears first whenever it has active voting. The
+remaining waves are ordered by total Wave REP, highest first.
 Use `Load more` to browse additional results.
 
 This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of

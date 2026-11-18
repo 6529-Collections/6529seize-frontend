@@ -1,8 +1,10 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiDropWithoutWave } from "@/generated/models/ApiDropWithoutWave";
+import type { ApiDropV2 } from "@/generated/models/ApiDropV2";
 import type { ApiSubmissionDropContext } from "@/generated/models/ApiSubmissionDropContext";
 
 export interface ApiDropV2View extends ApiDrop {
+  readonly competition_entry?: ApiDropV2["competition_entry"];
   readonly submission_context?: ApiSubmissionDropContext | undefined;
   /** Thread size for a drop with collapsed replies. */
   readonly replies_count?: number | undefined;

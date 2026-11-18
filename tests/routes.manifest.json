@@ -181,6 +181,24 @@
       "classification": "crawlable",
       "family": "system"
     },
+    "/ai": {
+      "classification": "crawlable"
+    },
+    "/ai/guide": {
+      "classification": "crawlable"
+    },
+    "/ai/known-issues": {
+      "classification": "crawlable"
+    },
+    "/ai/models": {
+      "classification": "crawlable"
+    },
+    "/ai/releases": {
+      "classification": "crawlable"
+    },
+    "/ai/use": {
+      "classification": "crawlable"
+    },
     "/artwork-documentation": {
       "classification": "auth"
     },
@@ -337,6 +355,18 @@
         "staging": "/delegation/wallet-architecture",
         "production": "/delegation/wallet-architecture"
       }
+    },
+    "/desktop": {
+      "classification": "crawlable"
+    },
+    "/desktop/guide": {
+      "classification": "crawlable"
+    },
+    "/desktop/known-issues": {
+      "classification": "crawlable"
+    },
+    "/desktop/releases": {
+      "classification": "crawlable"
     },
     "/discover": {
       "classification": "crawlable",

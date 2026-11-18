@@ -2,6 +2,7 @@
 
 import {
   ComputerDesktopIcon,
+  CpuChipIcon,
   DevicePhoneMobileIcon,
   ServerStackIcon,
 } from "@heroicons/react/24/outline";
@@ -79,6 +80,21 @@ export default function AppsPage() {
               icon={ServerStackIcon}
               title={t(APPS_LOCALE, "apps.validator.title")}
               description={t(APPS_LOCALE, "apps.validator.description")}
+              linked
+            />
+          </Link>
+
+          <Link
+            href="/ai"
+            aria-labelledby="6529-ai-heading"
+            aria-describedby="6529-ai-description"
+            className="tw-block tw-rounded-xl tw-no-underline tw-transition-colors hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400"
+          >
+            <AppPanel
+              id="6529-ai"
+              icon={CpuChipIcon}
+              title={t(APPS_LOCALE, "apps.ai.title")}
+              description={t(APPS_LOCALE, "apps.ai.description")}
               linked
             />
           </Link>

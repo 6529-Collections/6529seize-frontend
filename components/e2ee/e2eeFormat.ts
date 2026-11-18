@@ -171,6 +171,35 @@ export function formatE2eeDateTime(
   );
 }
 
+/**
+ * The one "last active" line of every device list: "Active now" for the
+ * browser in use, else the latest activity of either permission.
+ */
+export function formatE2eeLastActive(
+  locale: SupportedLocale,
+  activeNow: boolean,
+  lastActiveAt: number | null,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
+): string {
+  if (activeNow) {
+    return t(locale, "e2ee.devices.activeNow");
+  }
+  return lastActiveAt === null
+    ? t(locale, "e2ee.devices.lastActiveNever")
+    : t(locale, "e2ee.devices.lastActive", {
+        date: formatE2eeDateTime(locale, lastActiveAt, zone),
+      });
+}
+
+/** A date without a time ("Nov 9, 2026"), its day taken in the display zone. */
+export function formatE2eeDate(
+  locale: SupportedLocale,
+  ms: number,
+  zone: DisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE
+): string {
+  return formatDate(locale, ms, withDisplayTimeZoneDate(zone, FULL_DATE));
+}
+
 export function findMember(
   members: readonly E2eeMember[],
   profileId: string | null

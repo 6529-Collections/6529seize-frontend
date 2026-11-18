@@ -667,6 +667,7 @@ test("discovery reserves space while loading and retains its controls", async ({
           },
           voting_ends_at: null,
           next_decision_at: null,
+          ...(index === 0 ? { active_submission_count: 2 } : {}),
         })),
         page: 1,
         next: false,
@@ -733,6 +734,7 @@ test("discovery reserves space while loading and retains its controls", async ({
     await expect(
       discovery.getByText("Community decisions powered by TDH.")
     ).toBeVisible();
+    await expect(discovery.getByText("2 active submissions")).toBeVisible();
     await expect(
       discovery.getByRole("status").filter({ hasText: /Loading/ })
     ).toHaveCount(0);
