@@ -17,7 +17,7 @@ import {
 } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "./rep-search-types";
@@ -30,10 +30,7 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  formatNumberWithCommas,
-  getStringAsNumberOrZero,
-} from "@/helpers/Helpers";
+import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
@@ -46,13 +43,10 @@ import { getRepCategoryViolation } from "@/components/utils/input/rep-category/r
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
-import {
-  isMemesNomineeLookalike,
-  MEMES_NOMINEE_CATEGORY,
-  MEMES_NOMINEE_REQUIRED_REP,
-} from "@/helpers/waves/memes-nomination";
+import { isMemesNomineeLookalike } from "@/helpers/waves/memes-nomination";
 import { getGrantRepCategoriesToDisplay } from "./grantRepCategoryOptions";
 import GrantRepCategorySuggestions from "./GrantRepCategorySuggestions";
+import GrantRepSubmissionGuidance from "./GrantRepSubmissionGuidance";
 
 import { isRatingValue } from "../ratingsManagement";
 
@@ -60,7 +54,6 @@ const SEARCH_LENGTH = {
   MIN: 3,
   MAX: 100,
 };
-const SUBMISSION_GUIDANCE_ID = "grant-rep-submission-guidance";
 const GENERIC_ERROR_KEY = "rep.categories.grant.errors.generic";
 const getSearchLength = (value: string): number => Array.from(value).length;
 
@@ -71,7 +64,7 @@ function categoryAvailabilityOptions(category: string) {
     queryKey: [QueryKey.REP_CATEGORY_AVAILABILITY, name],
     queryFn: ({ signal }) =>
       commonApiFetch<boolean>({
-        endpoint: `rep/categories/availability?${params}`,
+        endpoint: `rep/categories/availability?${params.toString()}`,
         signal,
       }),
     staleTime: 60_000,
@@ -94,39 +87,6 @@ const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
   }
   return fallbackMessage;
 };
-
-function getSubmissionGuidanceContent(
-  submissionHint: string,
-  submissionLookalikeInfo: string | null,
-  hasSelectedSubmissionCategory: boolean
-): React.ReactNode {
-  const submissionCategoryStart = submissionHint.indexOf(
-    MEMES_NOMINEE_CATEGORY
-  );
-  if (submissionLookalikeInfo) {
-    return submissionLookalikeInfo;
-  }
-  if (submissionCategoryStart >= 0) {
-    return (
-      <>
-        {submissionHint.slice(0, submissionCategoryStart)}
-        <span
-          className={`tw-font-medium ${
-            hasSelectedSubmissionCategory
-              ? "tw-text-emerald-400"
-              : "tw-text-iron-200"
-          }`}
-        >
-          {MEMES_NOMINEE_CATEGORY}
-        </span>
-        {submissionHint.slice(
-          submissionCategoryStart + MEMES_NOMINEE_CATEGORY.length
-        )}
-      </>
-    );
-  }
-  return submissionHint;
-}
 
 function GrantRepStats({
   available,
@@ -171,63 +131,6 @@ function GrantRepStats({
   );
 }
 
-function GrantRepSubmissionGuidance({
-  selectedCategory,
-  categoriesToDisplay,
-}: {
-  readonly selectedCategory: string | null;
-  readonly categoriesToDisplay: readonly string[];
-}) {
-  const locale = useBrowserLocale();
-  const hasSelectedSubmissionCategory =
-    selectedCategory === MEMES_NOMINEE_CATEGORY;
-  const selectedNonQualifyingLookalike =
-    selectedCategory && isMemesNomineeLookalike(selectedCategory)
-      ? selectedCategory
-      : null;
-  const showSubmissionSearchHint =
-    !selectedCategory && categoriesToDisplay.includes(MEMES_NOMINEE_CATEGORY);
-  const showSubmissionGuidance =
-    hasSelectedSubmissionCategory ||
-    !!selectedNonQualifyingLookalike ||
-    showSubmissionSearchHint;
-  const submissionHint = t(locale, "rep.categories.grant.submissionHint", {
-    category: MEMES_NOMINEE_CATEGORY,
-    amount: formatNumberWithCommas(MEMES_NOMINEE_REQUIRED_REP),
-  });
-  const submissionLookalikeInfo = selectedNonQualifyingLookalike
-    ? t(locale, "rep.categories.grant.submissionLookalikeInfo", {
-        category: selectedNonQualifyingLookalike,
-        submissionCategory: MEMES_NOMINEE_CATEGORY,
-      })
-    : null;
-  const submissionGuidanceContent = getSubmissionGuidanceContent(
-    submissionHint,
-    submissionLookalikeInfo,
-    hasSelectedSubmissionCategory
-  );
-
-  return (
-    <output
-      id={SUBMISSION_GUIDANCE_ID}
-      hidden={!showSubmissionGuidance}
-      className={`tw-mb-0 tw-mt-2 tw-items-start tw-gap-1.5 tw-text-xs tw-font-normal tw-leading-5 ${showSubmissionGuidance ? "tw-flex" : "tw-hidden"} ${
-        selectedNonQualifyingLookalike
-          ? "tw-text-amber-300"
-          : "tw-text-iron-400"
-      }`}
-    >
-      {selectedNonQualifyingLookalike && (
-        <InformationCircleIcon
-          aria-hidden="true"
-          className="tw-mt-0.5 tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
-        />
-      )}
-      <span>{showSubmissionGuidance ? submissionGuidanceContent : null}</span>
-    </output>
-  );
-}
-
 export default function UserPageRepNewRepSearch({
   overview,
   profile,
@@ -245,6 +148,7 @@ export default function UserPageRepNewRepSearch({
   const availableRepId = useId();
   const categoryErrorId = useId();
   const typedCategoryErrorId = useId();
+  const submissionGuidanceId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
   const queryClient = useQueryClient();
@@ -280,18 +184,19 @@ export default function UserPageRepNewRepSearch({
     [repSearch]
   );
 
-  const debouncedSearchLength = getSearchLength(debouncedValue);
+  const typedCategory = repSearch.trim();
+  const debouncedCategory = debouncedValue.trim();
+  const debouncedSearchLength = getSearchLength(debouncedCategory);
   const matchingSearchLength =
     debouncedSearchLength >= SEARCH_LENGTH.MIN &&
     debouncedSearchLength <= SEARCH_LENGTH.MAX;
 
-  const typedCategory = repSearch.trim();
-  const typedCategoryViolation = getRepCategoryViolation(repSearch);
+  const typedCategoryViolation = getRepCategoryViolation(typedCategory);
   const typedCategoryReserved = isHelpBotCreditRepCategory(typedCategory);
-  const isDebouncedCategory = !selectedCategory && repSearch === debouncedValue;
+  const isDebouncedCategory =
+    !selectedCategory && typedCategory === debouncedCategory;
   const shouldCheckAvailability =
     isDebouncedCategory &&
-    getSearchLength(typedCategory) >= SEARCH_LENGTH.MIN &&
     matchingSearchLength &&
     !typedCategoryReserved &&
     !typedCategoryViolation;
@@ -308,6 +213,10 @@ export default function UserPageRepNewRepSearch({
       : null);
   const hasActiveCategory = activeCategory !== null;
   const categorySelectionInvalid = formError?.field === "category";
+  const unavailableCategoryMessage = t(
+    locale,
+    "rep.categories.validation.errorTitle"
+  );
   let typedCategoryError: string | null = null;
   if (isDebouncedCategory && !categorySelectionInvalid) {
     if (typedCategoryReserved) {
@@ -321,18 +230,25 @@ export default function UserPageRepNewRepSearch({
         availability.error,
         t(locale, GENERIC_ERROR_KEY)
       );
+    } else if (
+      shouldCheckAvailability &&
+      availability.isSuccess &&
+      availability.data === false
+    ) {
+      typedCategoryError = unavailableCategoryMessage;
     }
   }
 
   const { isFetching, data: categories } = useQuery<string[]>({
-    queryKey: [QueryKey.REP_CATEGORIES_SEARCH, debouncedValue],
-    queryFn: ({ signal }) =>
-      commonApiFetch<string[]>({
-        endpoint: `rep/categories?${new URLSearchParams({ param: debouncedValue })}`,
+    queryKey: [QueryKey.REP_CATEGORIES_SEARCH, debouncedCategory],
+    queryFn: ({ signal }) => {
+      const params = new URLSearchParams({ param: debouncedCategory });
+      return commonApiFetch<string[]>({
+        endpoint: `rep/categories?${params.toString()}`,
         signal,
-      }),
-    enabled:
-      matchingSearchLength && repSearch === debouncedValue && !selectedCategory,
+      });
+    },
+    enabled: matchingSearchLength && isDebouncedCategory,
   });
 
   const {
@@ -408,7 +324,7 @@ export default function UserPageRepNewRepSearch({
     const category = rep.trim();
     if (mutating || selectedCategory === category) return;
     const request = ++selectionRequest.current;
-    if (isHelpBotCreditRepCategory(rep)) {
+    if (isHelpBotCreditRepCategory(category)) {
       showHelpBotCreditRepCategoryError();
       return;
     }
@@ -416,7 +332,7 @@ export default function UserPageRepNewRepSearch({
     // broken rule, localized and instantly, instead of a server error blob.
     // Runs before the search-length guard below so the over-length and
     // leading-dash messages actually reach the user.
-    const violation = getRepCategoryViolation(rep);
+    const violation = getRepCategoryViolation(category);
     if (violation) {
       setError({
         message: t(locale, violation.key, { ...violation.params }),
@@ -440,8 +356,12 @@ export default function UserPageRepNewRepSearch({
     }
     setCheckingAvailability(!knownCategory);
     try {
-      if (!knownCategory)
-        await queryClient.fetchQuery(categoryAvailabilityOptions(category));
+      if (!knownCategory) {
+        const isAvailable = await queryClient.fetchQuery(
+          categoryAvailabilityOptions(category)
+        );
+        if (!isAvailable) throw new Error(unavailableCategoryMessage);
+      }
       if (request !== selectionRequest.current) return;
       setSelectedCategory(category);
       setRepSearch(category);
@@ -545,22 +465,22 @@ export default function UserPageRepNewRepSearch({
 
   const categoriesToDisplay = useMemo(() => {
     return getGrantRepCategoriesToDisplay({
-      search: debouncedValue.trim(),
+      search: debouncedCategory,
       categories: categories ?? [],
       showSubmissionSuggestion: matchingSearchLength,
     });
-  }, [debouncedValue, categories, matchingSearchLength]);
+  }, [debouncedCategory, categories, matchingSearchLength]);
 
   const repSearchState = useMemo(() => {
-    const searchLength = getSearchLength(repSearch);
-    if (getSearchLength(repSearch.trim()) < SEARCH_LENGTH.MIN)
+    const searchLength = getSearchLength(typedCategory);
+    if (searchLength < SEARCH_LENGTH.MIN)
       return RepSearchState.MIN_LENGTH_ERROR;
     if (searchLength > SEARCH_LENGTH.MAX)
       return RepSearchState.MAX_LENGTH_ERROR;
-    if (repSearch !== debouncedValue || isFetching)
+    if (typedCategory !== debouncedCategory || isFetching)
       return RepSearchState.LOADING;
     return RepSearchState.HAVE_RESULTS;
-  }, [debouncedValue, isFetching, repSearch]);
+  }, [debouncedCategory, isFetching, typedCategory]);
   const showSearchDropdown =
     isOpen &&
     !selectedCategory &&
@@ -630,7 +550,7 @@ export default function UserPageRepNewRepSearch({
               }}
               aria-invalid={categorySelectionInvalid || !!typedCategoryError}
               aria-describedby={[
-                SUBMISSION_GUIDANCE_ID,
+                submissionGuidanceId,
                 categorySelectionInvalid && categoryErrorId,
                 typedCategoryError && typedCategoryErrorId,
               ]
@@ -759,6 +679,7 @@ export default function UserPageRepNewRepSearch({
           </div>
         </form>
         <GrantRepSubmissionGuidance
+          id={submissionGuidanceId}
           selectedCategory={activeCategory}
           categoriesToDisplay={categoriesToDisplay}
         />

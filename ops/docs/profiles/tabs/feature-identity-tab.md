@@ -223,6 +223,7 @@ show the profile-creation welcome.
   amount field when it passes. Matching categories appear as optional suggestions
   above the amount section, which stays visible while you type. Category names
   are case-sensitive, so `artist` and `Artist` can hold separate ratings.
+  Editing the name pauses amount entry until the new name passes validation.
 - Similar categories remain independent and selectable. The exact
   `MemesNominee` pill is marked as counting toward the 50,000 REP submission
   requirement. When the typed value differs from it only by capitalization,

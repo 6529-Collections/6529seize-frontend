@@ -180,6 +180,13 @@ describe("UserPageRepNewRepSearch", () => {
     await user.click(search);
     await user.keyboard("{End}{Backspace}");
     expect(search).toHaveValue("Musi");
+    expect(
+      screen.getByRole("textbox", { name: "Your total REP for this category" })
+    ).toBeDisabled();
+    await user.keyboard("@");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "These characters can't be used"
+    );
   });
 
   it.each([
@@ -658,12 +665,48 @@ describe("UserPageRepNewRepSearch", () => {
       approveOldCategory();
     });
     expect(amount).toBeDisabled();
+    expect(
+      screen.queryByRole("button", { name: "Change category" })
+    ).not.toBeInTheDocument();
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "Category rejected"
     );
     expect(search).toHaveAccessibleDescription(/Category rejected/);
     expect(amount).toBeDisabled();
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
+  });
+
+  it("explains an unavailable category when the endpoint returns false", async () => {
+    const user = userEvent.setup();
+    jest
+      .mocked(commonApiFetch)
+      .mockImplementation(async ({ endpoint }) =>
+        endpoint.startsWith("rep/categories/availability?")
+          ? false
+          : suggestedCategories
+      );
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    await user.type(search, " Artist ");
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "That category name won't work"
+    );
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "rep/categories/availability?param=Artist",
+      })
+    );
+    expect(search).toHaveAttribute("aria-invalid", "true");
+    expect(
+      screen.getByRole("textbox", { name: "Your total REP for this category" })
+    ).toBeDisabled();
   });
 
   it("counts Unicode characters consistently for the search minimum", async () => {
