@@ -33,6 +33,20 @@ export interface StoredDevice {
   createdAt: number;
   /** When the current last-resort KeyPackage was uploaded (ms). */
   lastResortAt: number | null;
+  /**
+   * True once the last-resort KeyPackage on the server was made by a client
+   * with self groups (P60 §2 rule 6). A device updated from an older client
+   * replaces it at once: its siblings see the change and may then claim
+   * through its older KeyPackages (engine/claims.ts).
+   */
+  lastResortSelfSync?: boolean;
+  /**
+   * True once the one-time KeyPackages on the server were made by a client
+   * with self groups: a device updated from an older client replaces its
+   * pool at once (`replace_one_time`), so the next claim of it returns a
+   * KeyPackage a self group can add (P60 §2 rule 6).
+   */
+  poolSelfSync?: boolean;
   /** Which wallets this profile trusts for each person (engine/trust.ts). */
   trust?: StoredTrust;
   /**
@@ -46,6 +60,36 @@ export interface StoredDevice {
    * kept only for its trust pins until the next device replaces it.
    */
   retired?: boolean;
+  /** Read-state sync bookkeeping of this device (D175, P60). */
+  readSync?: StoredReadSync;
+}
+
+/** What this device still owes its siblings in read-state sync (P60 §4). */
+export interface StoredReadSync {
+  /** Chats read here whose position has not been sent yet. */
+  unsent: string[];
+  /** When this device last created a self group (ms; once a day at most). */
+  createdAt?: number;
+  /**
+   * Since when this device, with siblings but no self group, has waited to
+   * be added to theirs (ms; P60 §2 rule 1).
+   */
+  waitingSince?: number;
+  /**
+   * Siblings this device claimed through to a last-resort KeyPackage that
+   * lacked the self-group capability, each with that KeyPackage's expiry
+   * (s): older clients, claimed no more until they replace it, as an
+   * update does (P60 §2 rule 6).
+   */
+  claimedThrough?: Record<string, number>;
+  /**
+   * When this device claimed KeyPackages for self groups in the last hour
+   * (ms): at most its share of the profile's self-group claim budget
+   * (engine/self-group-claims.ts).
+   */
+  selfGroupClaims?: number[];
+  /** No self-group claims until then (ms): the server refused a claim. */
+  claimsPausedUntil?: number;
 }
 
 /**
@@ -162,6 +206,11 @@ export interface StoredGroup {
   successorPending?: boolean;
   /** The superseded conversation this one continues (this device). */
   predecessor?: string | null;
+  /**
+   * Self groups only (D175, P60): read positions received from this
+   * profile's other devices, kept until they apply. Chat handle -> seq.
+   */
+  readSync?: { received: Record<string, number> };
 }
 
 export interface StoredNotice {

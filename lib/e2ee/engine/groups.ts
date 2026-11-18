@@ -160,6 +160,10 @@ export function addNotices(
   seq: number,
   serverTs: number
 ): void {
+  // A self group has no timeline (D175, P60).
+  if (runtime.record.metadata.kind === "self") {
+    return;
+  }
   const onlySafety =
     notices.length === 1 && notices[0]?.type === "safety_code_changed";
   if (onlySafety) {

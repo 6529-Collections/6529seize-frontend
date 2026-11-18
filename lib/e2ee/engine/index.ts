@@ -43,12 +43,15 @@ import { E2EE_REVOCATION_UNVERIFIED, E2eeError, errorMessage } from "./errors";
 import {
   addMembers,
   checkEligibility,
+  createConversation,
   findDm,
   leave,
+  leaveThisDevice,
   removeMember,
   rename,
   setAdmin,
 } from "./membership";
+import { ReadSync } from "./read-sync";
 import { searchHistory } from "./history-search";
 import { latestReadSeq } from "./history";
 import { previewReport, sendReport } from "./report";
@@ -80,10 +83,20 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private readonly restarter: ConversationRestarter;
   private readonly unsent: UnsentMessages;
   private readonly enrollment: EnrollmentFlight;
+  private readonly readSync: ReadSync;
 
   constructor(ctx: EngineContext) {
     this.ctx = ctx;
     ctx.store.memberTrust = (member) => isTrustedMemberDevice(ctx, member);
+    this.readSync = new ReadSync(ctx, {
+      createSelfGroup: () =>
+        createConversation(ctx, { profileIds: [], kind: "self" }, () => {}),
+      leaveThisDevice: (g) => leaveThisDevice(ctx, g),
+      maintain: (g) => {
+        this.background(() => this.controller.maintain(g));
+      },
+    });
+    ctx.readSync = this.readSync;
     this.controller = new EngineController(ctx, {
       refreshMe: () => this.refreshMe(),
       onOwnRevoked: () => this.onOwnRejected(),
@@ -95,6 +108,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
       afterSync: async () => {
         await this.ctx.queue.run(() => recoverLoadedIdentities(this.ctx));
         await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
+        await this.readSync.afterSync();
       },
     });
     this.conversationCreator = new ConversationCreator(
@@ -195,10 +209,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
     if (!this.ctx.device?.registered || this.ctx.disposed) {
       return;
     }
+    const listed = new Map(this.ctx.ownKeyPackages);
     const result = await refreshMe(this.ctx);
     if (this.isDisposed()) {
       return;
     }
+    this.readSync.siblingKeyPackagesChanged(listed);
     if (result.ownRevocation === "verified") {
       await this.wipe();
     } else if (result.ownRevocation === "unverified") {
@@ -398,6 +414,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
+  flushReadSync(): Promise<void> {
+    return this.readSync.flushNow();
+  }
+
   async idle(): Promise<void> {
     for (let round = 0; round < 50; round += 1) {
       await this.ctx.tasks.drain();
@@ -532,6 +552,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
       runtime.record.history.mentions = 0;
     }
     this.ctx.store.touch(runtime.record.g);
+    // Your other devices clear this chat too (D175, P60 §4).
+    this.readSync.noteRead(runtime.record.g);
     this.background(() =>
       this.ctx.queue.run(() =>
         checkpoint(this.ctx, { groups: [runtime], skipWasm: true })

@@ -195,4 +195,36 @@ describe("commit validation (contract 8.1)", () => {
     expect(isValidMetadata({ ...meta(), history: "all" })).toBe(false);
     expect(isValidMetadata(null)).toBe(false);
   });
+
+  it("accepts self groups and checks their creation time (P60)", () => {
+    const self = meta({ kind: "self", created: 1_762_790_400_000 });
+    expect(isValidMetadata(self)).toBe(true);
+    expect(isValidMetadata({ ...self, created: undefined })).toBe(true);
+    expect(isValidMetadata({ ...self, created: -1 })).toBe(false);
+    expect(isValidMetadata({ ...self, created: 1.5 })).toBe(false);
+    expect(isValidMetadata({ ...self, created: "1" })).toBe(false);
+    expect(isValidMetadata({ ...self, kind: "channel" })).toBe(false);
+  });
+
+  it("a self group holds only its creator's devices (P60 §2)", () => {
+    const selfGroup = meta({ kind: "self", admins: ["alice"] });
+    const own = (overrides: Partial<CommitValidationInput> = {}) =>
+      input({
+        metadataBefore: selfGroup,
+        metadataAfter: selfGroup,
+        membersBefore: [{ deviceKey: "a1", profileId: "alice" }],
+        ...overrides,
+      });
+    const aliceTablet = { deviceKey: "a2", profileId: "alice", ok: true };
+    expect(validateCommit(own({ added: [aliceTablet] }))).toEqual({ ok: true });
+    expect(
+      validateCommit(own({ added: [{ ...bob, ok: true }] }))
+    ).toMatchObject({ ok: false, reason: "self-outsider" });
+    expect(
+      validateCommit(own({ added: [{ ...aliceTablet, ok: false }] }))
+    ).toMatchObject({ ok: false, reason: "self-outsider" });
+    expect(
+      validateCommit(own({ committer: { deviceKey: "b1", profileId: "bob" } }))
+    ).toMatchObject({ ok: false, reason: "self-outsider" });
+  });
 });

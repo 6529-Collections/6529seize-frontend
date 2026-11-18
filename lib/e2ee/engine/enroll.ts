@@ -222,55 +222,126 @@ async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
   return device;
 }
 
-async function uploadKeyPackages(
-  ctx: EngineContext,
-  count: number,
-  lastResort: boolean
-): Promise<ApiE2eeKeyPackageStatus> {
-  const mls = requireMls(ctx);
-  const device = requireDevice(ctx);
-  const packages = mls.createKeyPackages(
-    count,
-    lastResort,
-    lastResort ? LAST_RESORT_LIFETIME_S : ONE_TIME_LIFETIME_S,
-    E2EE_CIPHERSUITE
-  );
-  // Persist the private halves BEFORE the public halves leave the device.
-  await checkpoint(ctx);
-  const status = await ctx.api.uploadKeyPackages(device.deviceKey, {
-    key_packages: packages.map((item) => ({
-      data: item.data,
-      last_resort: lastResort,
-      expires_at: item.expires_at,
-    })),
-  });
-  if (lastResort) {
-    device.lastResortAt = ctx.now();
-    await checkpoint(ctx, { device, skipWasm: true });
-  }
-  return status;
+/** What one upload carries. */
+interface KeyPackageUpload {
+  readonly oneTime: number;
+  readonly lastResort: boolean;
 }
 
-/** Refills one-time KeyPackages below 10 and rotates the last-resort one. */
+/**
+ * Uploads `upload` in one request. With `replace` the request also replaces
+ * this device's one-time pool (`replace_one_time`). An API from before that
+ * field refuses it with a 400: then only `replace.fallback`, the usual
+ * upkeep, goes up without it, taken from the KeyPackages already made.
+ */
+async function uploadKeyPackages(
+  ctx: EngineContext,
+  upload: KeyPackageUpload,
+  replace?: { readonly fallback: KeyPackageUpload }
+): Promise<void> {
+  const mls = requireMls(ctx);
+  const device = requireDevice(ctx);
+  const make = (count: number, lastResort: boolean) =>
+    count > 0
+      ? mls
+          .createKeyPackages(
+            count,
+            lastResort,
+            lastResort ? LAST_RESORT_LIFETIME_S : ONE_TIME_LIFETIME_S,
+            E2EE_CIPHERSUITE
+          )
+          .map((item) => ({
+            data: item.data,
+            last_resort: lastResort,
+            expires_at: item.expires_at,
+          }))
+      : [];
+  const oneTime = make(upload.oneTime, false);
+  const lastResort = make(upload.lastResort ? 1 : 0, true);
+  // Persist the private halves BEFORE the public halves leave the device.
+  await checkpoint(ctx);
+  let sent = upload;
+  try {
+    await ctx.api.uploadKeyPackages(device.deviceKey, {
+      key_packages: [...oneTime, ...lastResort],
+      ...(replace ? { replace_one_time: true } : {}),
+    });
+  } catch (error) {
+    if (replace === undefined || asE2eeApiError(error)?.status !== 400) {
+      throw error;
+    }
+    ctx.poolReplaceRefused = true;
+    sent = replace.fallback;
+    const fallback = [
+      ...oneTime.slice(0, sent.oneTime),
+      ...(sent.lastResort ? lastResort : []),
+    ];
+    if (fallback.length === 0) {
+      return;
+    }
+    await ctx.api.uploadKeyPackages(device.deviceKey, {
+      key_packages: fallback,
+    });
+  }
+  const replaced = replace !== undefined && sent === upload;
+  if (sent.lastResort) {
+    device.lastResortAt = ctx.now();
+    device.lastResortSelfSync = mls.makesSelfGroupKeyPackages();
+  }
+  if (replaced) {
+    device.poolSelfSync = true;
+  }
+  if (sent.lastResort || replaced) {
+    await checkpoint(ctx, { device, skipWasm: true });
+  }
+}
+
+/**
+ * Refills one-time KeyPackages below 10 and rotates the last-resort one.
+ * A client with self groups first replaces the pool an older client left.
+ */
 async function ensureKeyPackages(
   ctx: EngineContext,
   status: ApiE2eeKeyPackageStatus | null
 ): Promise<void> {
   const device = requireDevice(ctx);
+  const selfGroups = requireMls(ctx).makesSelfGroupKeyPackages();
   const available = status?.one_time_available ?? 0;
-  if (available < ONE_TIME_REFILL_BELOW) {
-    const count = Math.min(ONE_TIME_POOL - available, MAX_ONE_TIME - available);
-    if (count > 0) {
-      await uploadKeyPackages(ctx, count, false);
-    }
-  }
+  const refill =
+    available < ONE_TIME_REFILL_BELOW
+      ? Math.max(
+          0,
+          Math.min(ONE_TIME_POOL - available, MAX_ONE_TIME - available)
+        )
+      : 0;
   const lastResortMissing =
     status?.last_resort_expires_at === null || status === null;
   const lastResortStale =
     device.lastResortAt === null ||
     ctx.now() - device.lastResortAt >= LAST_RESORT_ROTATE_MS;
-  if (lastResortMissing || lastResortStale) {
-    await uploadKeyPackages(ctx, 1, true);
+  // P60 §2 rule 6: updated from a client without self groups, replace the
+  // last-resort KeyPackage at once; the change tells its siblings it
+  // updated.
+  const lastResortBeforeSelfGroups =
+    device.lastResortSelfSync !== true && selfGroups;
+  const lastResort =
+    lastResortMissing || lastResortStale || lastResortBeforeSelfGroups;
+  // The one-time pool goes with it, in the same request: the server hands a
+  // device's one-time KeyPackages out oldest first, so until then every
+  // claim of it would return one its older client made.
+  if (device.poolSelfSync !== true && selfGroups && !ctx.poolReplaceRefused) {
+    await uploadKeyPackages(
+      ctx,
+      { oneTime: ONE_TIME_POOL, lastResort: true },
+      { fallback: { oneTime: refill, lastResort } }
+    );
+    return;
+  }
+  if (refill > 0) {
+    await uploadKeyPackages(ctx, { oneTime: refill, lastResort: false });
+  }
+  if (lastResort) {
+    await uploadKeyPackages(ctx, { oneTime: 0, lastResort: true });
   }
 }
 
@@ -383,8 +454,8 @@ export async function renewGrant(ctx: EngineContext): Promise<void> {
   delete device.loginGrantId;
   mls.setCredential(credentialIdentity(device.wallet, device.grantId));
   await checkpoint(ctx, { device });
-  await uploadKeyPackages(ctx, ONE_TIME_POOL, false);
-  await uploadKeyPackages(ctx, 1, true);
+  await uploadKeyPackages(ctx, { oneTime: ONE_TIME_POOL, lastResort: false });
+  await uploadKeyPackages(ctx, { oneTime: 0, lastResort: true });
 }
 
 /**
@@ -671,6 +742,14 @@ export async function refreshMe(
         : "unverified",
     };
   }
+  ctx.ownDevices = me.devices;
+  ctx.listedAt = { wall: ctx.now(), mono: ctx.monotonic() };
+  ctx.ownKeyPackages = new Map(
+    me.key_packages.map((item) => [
+      item.device_key.toLowerCase(),
+      item.last_resort_expires_at,
+    ])
+  );
   if (ctx.device?.provisioned) {
     const status = me.key_packages.find(
       (item) => item.device_key.toLowerCase() === ownKey
