@@ -139,7 +139,7 @@ export function SidebarSubwavesToggle({
         aria-label={ariaLabel}
         disabled={isLoading}
         onClick={onClick}
-        className={BUTTON_CLASSES}
+        className={`${BUTTON_CLASSES} ${layoutVariant === "app" ? "[@media(any-hover:none)]:tw-justify-start [@media(any-hover:none)]:tw-rounded-none [@media(any-hover:none)]:tw-border-0 [@media(any-hover:none)]:tw-bg-transparent [@media(any-hover:none)]:tw-px-0 [@media(any-hover:none)]:tw-shadow-none" : ""}`}
       >
         <span className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">
           {isLoading && (
