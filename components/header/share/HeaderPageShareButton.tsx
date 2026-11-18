@@ -18,11 +18,7 @@ const CAPACITOR_PAGE_SHARE_ADAPTER: PageShareSystemShareAdapter = {
   },
 };
 
-export default function HeaderPageShareButton({
-  isCapacitor,
-}: {
-  readonly isCapacitor: boolean;
-}) {
+export function useHeaderPageShare(isCapacitor: boolean) {
   const locale = useBrowserLocale();
   const { isPending, shareCurrentPage } = useSystemShare({
     enabled: true,
@@ -39,6 +35,17 @@ export default function HeaderPageShareButton({
       });
     }
   };
+
+  return { isPending, sharePage };
+}
+
+export default function HeaderPageShareButton({
+  isCapacitor,
+}: {
+  readonly isCapacitor: boolean;
+}) {
+  const locale = useBrowserLocale();
+  const { isPending, sharePage } = useHeaderPageShare(isCapacitor);
 
   return (
     <button
