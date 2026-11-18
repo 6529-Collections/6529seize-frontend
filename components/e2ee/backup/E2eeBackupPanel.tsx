@@ -110,11 +110,14 @@ function StatusDetails({
   return (
     <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0 tw-text-xs tw-text-iron-400">
       <li>
-        {snapshot.uploading || snapshot.lastBackupAt === null
-          ? t(locale, "e2ee.backup.status.uploading")
-          : t(locale, "e2ee.backup.status.lastBackup", {
-              time: formatE2eeDateTime(locale, snapshot.lastBackupAt, zone),
-            })}
+        {/* Announced: a queued run's progress, then its new backup time. */}
+        <output>
+          {snapshot.uploading || snapshot.lastBackupAt === null
+            ? t(locale, "e2ee.backup.status.uploading")
+            : t(locale, "e2ee.backup.status.lastBackup", {
+                time: formatE2eeDateTime(locale, snapshot.lastBackupAt, zone),
+              })}
+        </output>
       </li>
       {snapshot.quotaBytes > 0 ? (
         <li>
@@ -301,17 +304,23 @@ function BackupDialogs({
   onClose,
   onStartOver,
   onResult,
+  onRestore,
+  onTurnOn,
 }: {
   readonly dialog: Dialog;
   readonly manager: E2eeBackupManager;
   readonly onClose: (kind: DialogKind) => void;
   readonly onStartOver: () => Promise<void>;
   readonly onResult: (message: string) => void;
+  readonly onRestore: () => void;
+  readonly onTurnOn: () => void;
 }) {
   const locale = useBrowserLocale();
   if (dialog?.kind === "code") {
     return (
       <E2eeRecoveryCodeDialog
+        // A new code starts a fresh dialog.
+        key={dialog.prepared.code}
         manager={manager}
         prepared={dialog.prepared}
         replacing={dialog.replacing}
@@ -320,6 +329,8 @@ function BackupDialogs({
           onClose("code");
           onResult(t(locale, "e2ee.backup.upToDate"));
         }}
+        onRestore={onRestore}
+        onTurnOn={onTurnOn}
       />
     );
   }
@@ -542,6 +553,8 @@ export function E2eeBackupPanel() {
           setDialog({ kind: "code", prepared, replacing: true });
         }}
         onResult={showResult}
+        onRestore={() => setDialog({ kind: "restore" })}
+        onTurnOn={turnOn}
       />
     </section>
   );

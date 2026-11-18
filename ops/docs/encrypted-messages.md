@@ -611,9 +611,13 @@ encrypted copy of your message history so you can restore it on a new device.
   before that turns nothing on and discards the code. The dialog (and the
   one for **Replace recovery code**) finishes only once the new backup is
   active and fully uploaded: if the upload needs another run, it says
-  "Backing up your history…" until that run succeeds, and a failed run
-  shows its error with **Try again**, which keeps the same code. Closing it
-  then doesn't stop the upload.
+  "Backing up your history…" until that run succeeds. If the upload fails
+  (the first one or a later run), it shows the error with **Try again**,
+  which carries on with the same backup and code instead of creating
+  another one; it is also retried by itself about 5 minutes later. If the
+  backup was replaced or turned off on another device meanwhile, the dialog
+  offers **Restore messages** or **Turn on backup** instead. Once the backup
+  exists, closing the dialog doesn't stop the upload.
 - What is backed up: messages you have on this device (text, edits,
   deletions, reactions, notices), the chat names and members needed to show
   them, and references to attachments with their keys. Never the device's
@@ -622,9 +626,13 @@ encrypted copy of your message history so you can restore it on a new device.
   changed, about 30 seconds later. **Back up now** uploads immediately and
   then shows "Backup is up to date." in the status line for a few seconds.
   If the upload needs another run (another device wrote to the backup at the
-  same moment), the status says "Backing up your history…" until that run
-  succeeds, never "up to date". A failed upload shows its error and is
-  retried about 5 minutes later. The section shows when the device last backed up and how much of the
+  same moment, or messages arrived while it uploaded and keep arriving), the
+  status says "Backing up your history…" until that run succeeds, never
+  "up to date"; messages that arrive during an upload are included before
+  it reports up to date. A failed upload shows its error and is retried
+  about 5 minutes later. Removing encrypted messages at sign-out first stops
+  new messages coming in, then updates the backup, so everything removed is
+  in it. The section shows when the device last backed up and how much of the
   256 MB backup storage is used (in kB below 1 MB).
 - 6529 stores only encrypted data. It cannot read your messages, contact
   list or chat names, and cannot recover your recovery code. It can see that

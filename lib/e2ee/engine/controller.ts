@@ -92,6 +92,7 @@ export class EngineController {
   private isReady(): boolean {
     return (
       !this.ctx.disposed &&
+      !this.ctx.incomingPaused &&
       this.ctx.store.status === "ready" &&
       this.ctx.mls !== null
     );

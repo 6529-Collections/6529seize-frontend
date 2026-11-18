@@ -89,6 +89,17 @@ const DEFAULT_COMPACT_AT = 1000;
 const LIST_PAGE = 500;
 /** Appends retried after a 409 before falling back to the fork repair. */
 const APPEND_CONFLICT_RETRIES = 3;
+/**
+ * Runs one backupNow() makes while history keeps changing under it, before
+ * it leaves the rest to the next scheduled run.
+ */
+const MAX_DRAIN_RUNS = 3;
+
+/**
+ * How a run ended: everything in the backup; a repair run queued; or
+ * uploaded, but history changed while it ran (so another run is needed).
+ */
+type RunOutcome = "complete" | "queued" | "changed";
 
 const defaultScheduler: BackupScheduler = {
   setTimeout: (callback, ms) => globalThis.setTimeout(callback, ms),
@@ -134,6 +145,8 @@ export class E2eeBackupManager {
   private timer: unknown = null;
   private unsubscribe: (() => void) | null = null;
   private disposed = false;
+  /** Engine changes seen; a run compares it to tell history changed meanwhile. */
+  private engineChanges = 0;
 
   constructor(deps: E2eeBackupManagerDeps) {
     this.deps = deps;
@@ -183,6 +196,7 @@ export class E2eeBackupManager {
   /** Loads local and server state and starts incremental backups. */
   async start(): Promise<void> {
     this.unsubscribe = this.deps.engine.subscribe(() => {
+      this.engineChanges += 1;
       this.schedule(this.deps.debounceMs ?? DEFAULT_DEBOUNCE_MS);
     });
     await this.refresh();
@@ -312,18 +326,62 @@ export class E2eeBackupManager {
       await this.deps.state.put(local);
       this.local = local;
       this.update({ phase: "on", uploading: true, lastError: null });
-      return await this.runIncremental();
+      try {
+        return await this.drain();
+      } catch (error) {
+        if (!this.isCurrentGeneration(backupId)) {
+          // Gone (replaced or turned off meanwhile): nothing to carry on.
+          throw error;
+        }
+        // The generation exists: like a failed queued run, record the
+        // failure and retry. The same recovery code keeps working, and
+        // backupNow() carries on with this generation instead of creating
+        // another one.
+        this.recordFailure(toBackupError(error));
+        return false;
+      }
     });
+  }
+
+  /** Read afresh: a run that finds the generation gone clears it. */
+  private isCurrentGeneration(backupId: string): boolean {
+    return this.local?.backupId === backupId;
+  }
+
+  /** A failed run: shown in the snapshot, retried later unless replaced. */
+  private recordFailure(failure: BackupError): void {
+    this.update({ lastError: failure.code });
+    if (failure.code !== "E2EE_BACKUP_REPLACED") {
+      this.schedule(RETRY_MS);
+    }
+  }
+
+  /**
+   * Runs until everything is in the backup: again while history changed
+   * during a run, up to MAX_DRAIN_RUNS. False when a run is still needed
+   * (a queued repair, or history that keeps changing); the snapshot then
+   * reads as uploading.
+   */
+  private async drain(): Promise<boolean> {
+    for (let run = 0; run < MAX_DRAIN_RUNS; run += 1) {
+      const outcome = await this.runIncremental();
+      if (outcome !== "changed") {
+        return outcome === "complete";
+      }
+    }
+    // Still changing: the run the engine's changes scheduled carries on.
+    return false;
   }
 
   // -- incremental backup ---------------------------------------------------------
 
   /**
    * Uploads what changed since the last run (no-op when backup is off).
-   * Resolves true once everything is in the backup; false when nothing ran
-   * (backup off, device not ready) or another run is still needed (a
-   * conflict or fork repair, queued at once), so callers never report the
-   * backup as up to date before that run succeeds.
+   * Resolves true once everything is in the backup, including history that
+   * changed while it ran; false when nothing ran (backup off, device not
+   * ready) or another run is still needed (a conflict or fork repair, or
+   * history that keeps changing), so callers never report the backup as up
+   * to date before that run succeeds.
    */
   backupNow(): Promise<boolean> {
     return this.serial(async () => {
@@ -331,25 +389,45 @@ export class E2eeBackupManager {
         return false;
       }
       try {
-        return await this.runIncremental();
+        return await this.drain();
       } catch (error) {
         const failure = toBackupError(error);
-        this.update({ lastError: failure.code });
-        if (failure.code !== "E2EE_BACKUP_REPLACED") {
-          this.schedule(RETRY_MS);
-        }
+        this.recordFailure(failure);
         throw failure;
       }
     });
   }
 
-  /** True when the run left everything in the backup (see backupNow). */
-  private async runIncremental(): Promise<boolean> {
+  /**
+   * Stops the engine taking in new history (where it can), so that a
+   * following backupNow() holds everything: sign-out calls this before its
+   * final backup and removing local data. resumeIncoming() undoes it when
+   * the data stays.
+   */
+  async pauseIncoming(): Promise<void> {
+    await this.deps.engine.pauseIncoming?.();
+  }
+
+  resumeIncoming(): void {
+    this.deps.engine.resumeIncoming?.();
+  }
+
+  /** True when the engine holds history this generation doesn't have yet. */
+  private async hasUnbackedHistory(local: BackupLocalState): Promise<boolean> {
+    const history = await this.deps.engine.backupHistory();
+    const changed = changedHistory(history, local);
+    return changed.groups.length > 0 || changed.messages.length > 0;
+  }
+
+  /** How the run ended (see RunOutcome); null when it couldn't run. */
+  private async runIncremental(): Promise<RunOutcome | null> {
     const local = this.local;
     if (!local || this.deps.engine.getStatus() !== "ready") {
-      return false;
+      return null;
     }
     const deviceKey = this.deviceKey();
+    // History is read below; engine changes after this may not be in it.
+    const seenChanges = this.engineChanges;
     this.update({ busy: true });
     try {
       const segments = await this.pendingSegments(local);
@@ -362,7 +440,7 @@ export class E2eeBackupManager {
           // isn't a failure.
           this.update({ uploading: true, lastError: null });
           this.schedule(0);
-          return false;
+          return "queued";
         }
       }
       let backup: ApiE2eeBackup | null = null;
@@ -383,6 +461,11 @@ export class E2eeBackupManager {
       }
       local.lastBackupAt = this.now();
       await this.deps.state.put(local);
+      // A message that arrived while this run uploaded isn't in the backup
+      // yet. Only an engine change prompts the (full) history check.
+      const changed =
+        this.engineChanges !== seenChanges &&
+        (await this.hasUnbackedHistory(local));
       backup ??=
         segments.length > 0
           ? await this.withBackup(() => this.deps.api.getBackup(local.backupId))
@@ -408,7 +491,7 @@ export class E2eeBackupManager {
       }
       this.update({
         phase: "on",
-        uploading: false,
+        uploading: changed,
         lastBackupAt: local.lastBackupAt,
         lastError: null,
         usedBytes: status.used_bytes,
@@ -416,7 +499,7 @@ export class E2eeBackupManager {
         backupCreatedAt: active.created_at,
         backupUpdatedAt: active.updated_at,
       });
-      return true;
+      return changed ? "changed" : "complete";
     } finally {
       this.update({ busy: false });
     }

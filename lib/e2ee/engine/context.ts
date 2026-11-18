@@ -50,6 +50,11 @@ export interface EngineContext {
   /** Serialises storage writes so each one sees the previous version. */
   persistChain: Promise<void>;
   disposed: boolean;
+  /**
+   * No new history comes in (sync, polling, wake events) while true: a
+   * final backup before local data is removed then holds everything.
+   */
+  incomingPaused: boolean;
   lastMeAt: number;
   lastWakeAt: number;
   openConversation: string | null;

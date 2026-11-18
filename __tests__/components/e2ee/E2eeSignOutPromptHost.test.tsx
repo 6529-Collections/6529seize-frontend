@@ -192,9 +192,17 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
         order.push("backup");
         return true;
       });
+    const pauseIncoming = jest.fn(async () => {
+      order.push("pause");
+    });
+    const resumeIncoming = jest.fn(() => {
+      order.push("resume");
+    });
     const backup = {
       getSnapshot: () => options.snapshot ?? snapshot(),
       backupNow,
+      pauseIncoming,
+      resumeIncoming,
     } as unknown as E2eeBackupManager;
     const value: E2eeContextValue = {
       availability: "loaded",
@@ -228,7 +236,14 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     act(() => {
       done = signOutWithE2eeChoice("profile", signOut);
     });
-    return { order, backupNow, signOut, done: () => done };
+    return {
+      order,
+      backupNow,
+      pauseIncoming,
+      resumeIncoming,
+      signOut,
+      done: () => done,
+    };
   }
 
   const removeBox = () =>
@@ -251,7 +266,41 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     await userEvent.click(await removeBox());
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
     await act(run.done);
-    expect(run.order).toEqual(["backup", "release", "remove", "signOut"]);
+    expect(run.order).toEqual([
+      "pause",
+      "backup",
+      "release",
+      "remove",
+      "signOut",
+    ]);
+    expect(run.resumeIncoming).not.toHaveBeenCalled();
+  });
+
+  it("stops new messages before the final backup, so one arriving then isn't lost", async () => {
+    // A message the engine would take in during the final backup: allowed
+    // only before incoming history is paused.
+    let paused = false;
+    const received: string[] = [];
+    const receive = (id: string) => {
+      if (!paused) {
+        received.push(id);
+      }
+    };
+    const run = renderWithEngine({
+      backupNow: jest.fn(async () => {
+        receive("during-backup");
+        return true;
+      }),
+    });
+    run.pauseIncoming.mockImplementation(async () => {
+      paused = true;
+    });
+    receive("before");
+    await userEvent.click(await removeBox());
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await act(run.done);
+    expect(received).toEqual(["before"]);
+    expect(removeProfile).toHaveBeenCalledWith(SELF_ID);
   });
 
   it.each([
@@ -282,6 +331,8 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     expect(await removeBox()).not.toBeChecked();
     expect(removeProfile).not.toHaveBeenCalled();
     expect(run.signOut).not.toHaveBeenCalled();
+    // The messages stay, so they keep arriving.
+    expect(run.resumeIncoming).toHaveBeenCalledTimes(1);
 
     await userEvent.click(await removeBox());
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
