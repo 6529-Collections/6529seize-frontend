@@ -144,7 +144,10 @@ test.describe("Live wave unread state @auth @local-only", () => {
       .last()
       .locator("xpath=ancestor::div[@data-wave-drops-scroll-container='true']");
     // Preserve the 24px top fade without masking WebKit's scrolling layer.
-    const topFade = messages
+    const topFade = page
+      .getByText(perfMessageText(44), { exact: true })
+      .last()
+      .locator("xpath=ancestor::div[@data-wave-drops-scroll-container='true']")
       .locator("..")
       .locator(':scope > [aria-hidden="true"]');
     await expect(topFade).toBeVisible();
