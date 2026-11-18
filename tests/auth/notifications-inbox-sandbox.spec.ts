@@ -765,6 +765,84 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     });
   }
 
+  test("desktop load more keeps the inbox open while fetching and after the last page", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop sidebar inbox"
+    );
+    const olderPage = Promise.withResolvers<void>();
+    await page.route("**/api/v2/notifications?*", async (route) => {
+      const url = new URL(route.request().url());
+      if (url.searchParams.has("id_less_than")) {
+        await olderPage.promise;
+        await route.continue();
+        return;
+      }
+      url.searchParams.set("limit", "1");
+      await route.fulfill({ response: await route.fetch({ url: url.href }) });
+    });
+
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const currentUrl = page.url();
+    const bell = page.getByRole("link", { name: "Notifications", exact: true });
+    await bell.hover();
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    const loadMore = inbox.getByRole("button", { name: "Load more" });
+    const newest = inbox.getByRole("link", {
+      name: /^sandbox-alice submitted Sandbox artwork/,
+    });
+    const older = inbox.getByText("sandbox-alice mentioned you", {
+      exact: true,
+    });
+    await expect(newest).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(older).toHaveCount(0);
+    await expect(
+      inbox.getByRole("button", { name: "Mark all as read" })
+    ).toBeEnabled();
+    try {
+      await loadMore.click();
+      await expect(
+        inbox.getByRole("button", { name: "Loading notifications…" })
+      ).toBeDisabled();
+      await expect(newest).toBeVisible();
+      expect(
+        await inbox.evaluate((panel) => panel.contains(document.activeElement))
+      ).toBe(true);
+    } finally {
+      olderPage.resolve();
+    }
+    await expect(older).toBeVisible();
+    await expect(newest).toBeVisible();
+
+    await loadMore.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      inbox.getByRole("button", {
+        name: /^(Load more|Loading notifications…)$/,
+      })
+    ).toHaveCount(0);
+    await expect(inbox).toBeVisible();
+    await expect(older).toBeVisible();
+    await expect
+      .poll(() =>
+        inbox.evaluate((panel) => panel.contains(document.activeElement))
+      )
+      .toBe(true);
+    await expect(page).toHaveURL(currentUrl);
+
+    await page.keyboard.press("Escape");
+    await expect(inbox).toBeHidden();
+    await expect(bell).toBeFocused();
+  });
+
   test("desktop mark-all retries an automatic read failure and View all opens the full feed", async ({
     page,
     baseURL,
