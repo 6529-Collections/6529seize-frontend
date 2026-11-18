@@ -1802,15 +1802,15 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       await page.evaluate(() =>
         globalThis.scrollTo({ top: 100, behavior: "instant" })
       );
-      await expect
-        .poll(() => page.evaluate(() => globalThis.scrollY))
-        .toBeGreaterThan(0);
-      await expect(link).toBeInViewport();
-      const sourceScroll = await page.evaluate(() => globalThis.scrollY);
-      expect(sourceScroll).toBeGreaterThan(0);
-      const sourceTop = await link.evaluate(
-        (element) => element.getBoundingClientRect().top
-      );
+      await link.scrollIntoViewIfNeeded();
+      await expect(link).toBeInViewport({ ratio: 1 });
+      const readPosition = () =>
+        link.evaluate((element) => ({
+          scrollY: globalThis.scrollY,
+          linkTop: element.getBoundingClientRect().top,
+        }));
+      const source = await readPosition();
+      expect(source.scrollY).toBeGreaterThan(0);
       const evidenceName = action.toLowerCase().replaceAll(" ", "-");
       await page.screenshot({
         path: testInfo.outputPath(
@@ -1872,32 +1872,23 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       if (isNative) {
         await expect(link).toBeFocused();
         await expect(link).toBeInViewport();
-      } else {
+      }
+      let restored = await readPosition();
+      if (!isNative) {
         await expect
-          .poll(() =>
-            page.evaluate(
-              (scroll) => Math.abs(globalThis.scrollY - scroll),
-              sourceScroll
-            )
-          )
-          .toBeLessThanOrEqual(2);
-        await expect
-          .poll(() =>
-            link.evaluate(
-              (element, top) =>
-                Math.abs(element.getBoundingClientRect().top - top),
-              sourceTop
-            )
-          )
+          .poll(async () => {
+            restored = await readPosition();
+            return Math.max(
+              Math.abs(restored.scrollY - source.scrollY),
+              Math.abs(restored.linkTop - source.linkTop)
+            );
+          })
           .toBeLessThanOrEqual(2);
       }
       await testInfo.attach(`collected-${evidenceName}-scroll`, {
         body: JSON.stringify({
-          source: { scrollY: sourceScroll, linkTop: sourceTop },
-          restored: await link.evaluate((element) => ({
-            scrollY: globalThis.scrollY,
-            linkTop: element.getBoundingClientRect().top,
-          })),
+          source,
+          restored,
           nativeFocusRestoration: isNative,
         }),
         contentType: "application/json",
