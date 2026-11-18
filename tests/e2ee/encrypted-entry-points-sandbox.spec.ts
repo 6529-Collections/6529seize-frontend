@@ -173,6 +173,14 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await page.getByRole("button", { name: "Start chat" }).click();
     await expect(composer(page)).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
     const existingChat = conversationIdFromUrl(page);
+    const { groups } = await e2eeSandboxControls.state(baseURL);
+    const chat = groups.find(({ group }) => group === existingChat);
+    const memberProfiles = [
+      ...new Set(chat?.roster.map(({ profile_id }) => profile_id)),
+    ];
+    expect(memberProfiles.sort()).toEqual(
+      [users.alice.profileId, users.bob.profileId].sort()
+    );
 
     await openFromProfile("bob");
     await expect(bobRow).toBeVisible();

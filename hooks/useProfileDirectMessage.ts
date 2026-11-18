@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { v4 as createUuid } from "uuid";
 import { useAuth } from "@/components/auth/Auth";
 import { useE2eeContext } from "@/components/e2ee/E2eeContext";
 import {
@@ -15,7 +16,7 @@ export function useProfileDirectMessage(
   profile: ApiIdentity | null | undefined
 ) {
   const router = useRouter();
-  const { connectedProfile } = useAuth();
+  const { connectedProfile, activeProfileProxy } = useAuth();
   const { requestEngine } = useE2eeContext();
   const ownerProfileId = connectedProfile?.id;
 
@@ -23,7 +24,7 @@ export function useProfileDirectMessage(
     !ownerProfileId ||
     !profile?.id ||
     profile.id === ownerProfileId ||
-    (!profile.primary_wallet && !isE2eeEnabled())
+    (!profile.primary_wallet && (activeProfileProxy || !isE2eeEnabled()))
   ) {
     return undefined;
   }
@@ -38,7 +39,7 @@ export function useProfileDirectMessage(
   };
 
   return () => {
-    const navigationId = globalThis.crypto.randomUUID();
+    const navigationId = createUuid();
     setE2eeComposePrefill({
       ownerProfileId,
       people: [person],

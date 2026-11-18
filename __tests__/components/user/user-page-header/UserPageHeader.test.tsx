@@ -17,6 +17,7 @@ import {
   PROFILE_MESSAGE_PREFILL_PARAM,
   useE2eeComposePrefill,
 } from "@/components/e2ee/e2eeComposePrefill";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { AuthContext } from "@/components/auth/Auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
@@ -29,6 +30,7 @@ import { useContentModeratorAccess } from "@/hooks/content-moderation/useContent
 let mockIsSuspended = false;
 let mockIsModerator = false;
 
+jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn() }));
 jest.mock("next/dynamic", () => () => () => <div />);
 jest.mock(
   "@/components/user/user-page-header/banner/UserPageHeaderBanner",
@@ -233,6 +235,7 @@ describe("UserPageHeader", () => {
     mockIsSuspended = false;
     mockIsModerator = false;
     jest.clearAllMocks();
+    jest.mocked(isE2eeEnabled).mockReturnValue(false);
     (useContentModeratorAccess as jest.Mock).mockImplementation(() => ({
       data: { moderator: mockIsModerator },
     }));
@@ -403,6 +406,48 @@ describe("UserPageHeader", () => {
     expect(screen.getByTestId("about")).toBeInTheDocument();
     expect(screen.queryByTestId("subscription-status")).not.toBeInTheDocument();
   });
+
+  it.each([
+    { proxy: true, wallet: "", showsMessage: false },
+    { proxy: false, wallet: "", showsMessage: true },
+    { proxy: true, wallet: "0xbob", showsMessage: true },
+  ])(
+    "checks whether a proxy can message this recipient (proxy: $proxy, wallet: $wallet)",
+    ({ proxy, wallet, showsMessage }) => {
+      jest.mocked(isE2eeEnabled).mockReturnValue(true);
+      const recipient = {
+        ...profile,
+        id: "profile-bob",
+        primary_wallet: wallet,
+      };
+      (useIdentity as jest.Mock).mockReturnValue({ profile: recipient });
+
+      render(
+        <AuthContext.Provider
+          value={{
+            ...auth,
+            activeProfileProxy: proxy ? { id: "proxy-1" } : null,
+          }}
+        >
+          <UserPageHeaderClient
+            profile={recipient}
+            handleOrWallet="bob"
+            fallbackMainAddress="0x1"
+            defaultBanner1="#000000"
+            defaultBanner2="#111111"
+            initialStatements={[]}
+            profileEnabledAt={null}
+            followersCount={5}
+            cmsWebsiteHref={null}
+          />
+        </AuthContext.Provider>
+      );
+
+      expect(
+        screen.queryAllByRole("button", { name: "Direct Message" })
+      ).toHaveLength(showsMessage ? 1 : 0);
+    }
+  );
 
   it("keeps DM available, moves Unblock into the action row, and confirms it", async () => {
     const unblock = jest.fn().mockResolvedValue(undefined);

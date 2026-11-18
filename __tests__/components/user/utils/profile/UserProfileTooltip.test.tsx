@@ -308,6 +308,44 @@ describe("UserProfileTooltip", () => {
     });
   });
 
+  it("opens the profile composer when randomUUID is unavailable", async () => {
+    const originalCrypto = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "crypto"
+    );
+    const getRandomValues = globalThis.crypto.getRandomValues.bind(
+      globalThis.crypto
+    );
+    Object.defineProperty(globalThis, "crypto", {
+      configurable: true,
+      value: { getRandomValues },
+    });
+
+    try {
+      renderTooltip();
+      await userEvent.click(
+        screen.getByRole("button", { name: "Send direct message" })
+      );
+
+      const href = new URL(mockRouter.push.mock.calls[0][0], "https://6529.io");
+      expect(href.pathname).toBe("/messages/new");
+      const navigationId = href.searchParams.get(PROFILE_MESSAGE_PREFILL_PARAM);
+      const { result } = renderHook(() =>
+        useE2eeComposePrefill("profile", navigationId)
+      );
+      expect(result.current).toMatchObject({
+        ownerProfileId: "profile-alice",
+        people: [{ profileId: "profile-1" }],
+      });
+    } finally {
+      if (originalCrypto) {
+        Object.defineProperty(globalThis, "crypto", originalCrypto);
+      } else {
+        Reflect.deleteProperty(globalThis, "crypto");
+      }
+    }
+  });
+
   it("renders the about statement when the bio statement is present", async () => {
     mockStatements = [
       createStatement({ statement_value: "About Bob from CIC" }),
