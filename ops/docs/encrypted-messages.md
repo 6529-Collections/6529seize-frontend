@@ -257,6 +257,11 @@ claiming your permissions are expiring.
 
 ## Starting a chat
 
+Select **Direct Message** on someone’s profile or profile card to open
+**New message** with that person already selected. From there, use **Open
+chat** for an existing encrypted conversation or **Start chat** for a new one.
+Opening the composer creates no conversation.
+
 In the 6529 app, the back arrow to the left of the chat avatar returns to the
 encrypted messages list. It stays visible on iPad in portrait and landscape.
 
