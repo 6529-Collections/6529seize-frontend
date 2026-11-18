@@ -80,7 +80,8 @@ export function useSubscriptionAllocationStatus({
   return {
     final: finalQuery.data,
     isLoading:
-      finalQuery.isLoading || (waitForRefresh && finalQuery.isFetching),
+      finalQuery.isLoading ||
+      (waitForRefresh && !finalQuery.isFetchedAfterMount),
     isError: finalQuery.isError,
     hasNoAllocation:
       checkPublication &&

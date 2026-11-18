@@ -56,7 +56,9 @@ hide and redirect the complete tab. Android and web retain their controls.
   waits for a fresh final-subscription read after crossing that cutoff.
 - A matching collection/token payment covering every requested edition takes
   priority over expiry, including after the mint day. A partial or unrelated
-  payment does not mark the whole request paid.
+  payment does not mark the whole request paid. The first cutoff read must finish
+  before trusting cached unpaid data; later background reads keep the resolved
+  card visible, and an offline-paused first read remains neutral.
 - Failed/paused payment reads remain neutral. Failed coverage refreshes retain
   dated facts and suppress urgent time-based conclusions from that snapshot.
 - The visible card clock updates date/cutoff presentation without polling coverage.
@@ -82,7 +84,7 @@ the final approved copy and must not be treated as the final result.
 
 ## Validation
 
-- 383 focused subscription/profile Jest tests across 24 suites passed.
+- 385 focused subscription/profile Jest tests across 24 suites passed.
 - 100 translation, dictionary and calendar-date tests across five suites passed.
 - Changed-source lint, explicit coverage-source lint, application and Playwright
   type checks, selector policy, manifest consistency, debt ratchet, Help Bot sync and
