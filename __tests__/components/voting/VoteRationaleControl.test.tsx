@@ -91,7 +91,7 @@ describe("VoteRationaleControl", () => {
         generated
         invalid={false}
         placeholder="Vote summary placeholder"
-        compact
+        variant="compact"
       />
     );
 
