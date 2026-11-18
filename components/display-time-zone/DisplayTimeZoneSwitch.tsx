@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { Popover, PopoverButton, PopoverPanel } from "@headlessui/react";
 import { ChevronRightIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { XMarkIcon } from "@heroicons/react/20/solid";
@@ -20,10 +22,6 @@ import {
 } from "@/hooks/useDisplayTimeZone";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import {
-  WAVE_HEADER_ACTION_CLASSES,
-  WAVE_HEADER_ACTION_SURFACE_CLASSES,
-} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 import {
   getTimeZoneCityName,
   LOCAL_TIME_ZONE_PREFERENCE,
@@ -273,14 +271,13 @@ export default function DisplayTimeZoneSwitch({
           <PopoverButton
             aria-label={switchLabel}
             {...tooltipProps}
-            className={WAVE_HEADER_ACTION_CLASSES}
+            layout="toolbar"
+            as={IconButton}
           >
-            <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
-              <ClockIcon
-                aria-hidden="true"
-                className="tw-size-4 tw-flex-shrink-0"
-              />
-            </span>
+            <ClockIcon
+              aria-hidden="true"
+              className="tw-size-4 tw-flex-shrink-0"
+            />
           </PopoverButton>
         )}
         <PopoverPanel

@@ -1,3 +1,4 @@
+import IconButton from "@/components/utils/button/IconButton";
 import type { ConsolidatedTDH, TDH, TDHBoostBreakdown } from "@/entities/ITDH";
 import { buildTooltipId } from "@/helpers/tooltip.helpers";
 import { formatNumber, roundTo } from "@/i18n/format";
@@ -349,9 +350,10 @@ function BoostBreakdownInfo({
 
   return (
     <>
-      <button
+      <IconButton
         type="button"
-        className="tw-inline-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        size={24}
+        variant="ghost"
         aria-label={boostMessage(
           locale,
           "user.collected.stats.boostBreakdown.info.ariaLabel"
@@ -359,7 +361,7 @@ function BoostBreakdownInfo({
         data-tooltip-id={tooltipId}
       >
         <FontAwesomeIcon icon={faInfoCircle} height={16} aria-hidden="true" />
-      </button>
+      </IconButton>
       <Tooltip
         id={tooltipId}
         place="top"

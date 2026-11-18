@@ -19,6 +19,7 @@ import { createPortal } from "react-dom";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { WaveSettingEditorContext } from "./WaveSettingEditorContext";
+import IconButton from "@/components/utils/button/IconButton";
 
 interface WaveSettingRowProps {
   readonly canEdit: boolean;
@@ -301,23 +302,19 @@ export default function WaveSettingRow({
       <PencilIcon size={PencilIconSize.SMALL} />
     );
   const editButton = canEdit ? (
-    <button
+    <IconButton
       ref={editButtonRef}
       type="button"
+      layout="edit-setting"
       aria-label={editLabel}
       aria-controls={panel.isInSheet ? panel.contentId : editorId}
       aria-expanded={isEditorOpen}
       aria-haspopup={panel.isInSheet ? undefined : "dialog"}
       title={editLabel}
       onClick={toggleEditor}
-      className={`tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-justify-self-end tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-all tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-size-7 ${
-        editIcon === "gear"
-          ? "tw-text-iron-500/70 desktop-hover:hover:tw-text-iron-200"
-          : "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300"
-      }`}
     >
       {editIconContent}
-    </button>
+    </IconButton>
   ) : null;
 
   if (variant === "content") {

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { ShareIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -22,10 +24,12 @@ export default function ArtworkShareButton({
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="tailwind-scope tw-inline-flex tw-shrink-0">
-      <button
+      <IconButton
         type="button"
         disabled={!hasHydrated}
-        className="tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-100 tw-transition focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-700 motion-reduce:tw-transition-none"
+        size={36}
+        variant="ghost"
+        shape="compact"
         onClick={(event) => {
           event.stopPropagation();
           setIsOpen(true);
@@ -36,7 +40,7 @@ export default function ArtworkShareButton({
         data-testid="artwork-share-trigger"
       >
         <ShareIcon className="tw-size-4" aria-hidden="true" />
-      </button>
+      </IconButton>
       {isOpen && (
         <ArtworkShareDialog
           key={`${artwork.kind}-${artwork.tokenId}`}

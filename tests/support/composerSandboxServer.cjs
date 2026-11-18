@@ -86,6 +86,7 @@ let publicWavePreviewReads = 0;
 let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
 let sandboxArtistActivityEnabled = false;
+let sandboxSharedPostsEnabled = false;
 let sandboxSharedPostFeedEnabled = false;
 let sandboxProfileRepRating = null;
 let sandboxCreatedWaveType = "CHAT";
@@ -133,7 +134,8 @@ const localProfile = {
   query: SANDBOX_HANDLE,
   handle: SANDBOX_HANDLE,
   normalised_handle: SANDBOX_HANDLE,
-  consolidation_key: "",
+  consolidation_key:
+    process.env.PLAYWRIGHT_SUBSCRIPTIONS_SANDBOX === "1" ? SANDBOX_WALLET : "",
   display: SANDBOX_HANDLE,
   banner1: null,
   banner2: null,
@@ -2589,6 +2591,10 @@ function requestLog() {
 }
 
 function handleDiagnostics(method, pathname, url, res) {
+  if (pathname === "/__composer-sandbox/shared-posts" && method === "POST") {
+    sandboxSharedPostsEnabled = true;
+    return writeJsonResponse(res, { ok: true });
+  }
   if (pathname === "/__composer-sandbox/profile-rep" && method === "POST") {
     const rating = Number(url.searchParams.get("rating") ?? Number.NaN);
     if (!Number.isSafeInteger(rating)) {
@@ -2632,6 +2638,7 @@ function handleDiagnostics(method, pathname, url, res) {
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
     sandboxArtistActivityEnabled = false;
+    sandboxSharedPostsEnabled = false;
     sandboxSharedPostFeedEnabled = false;
     sandboxProfileRepRating = null;
     sandboxCreatedWaveType = "CHAT";
@@ -3141,12 +3148,39 @@ function handleProfileRepFixture(pathname, res) {
   return false;
 }
 
+function handleSharedPostFeedRead(pathname, url, res) {
+  if (
+    !sandboxSharedPostsEnabled ||
+    pathname !== `/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+  ) {
+    return false;
+  }
+  // Server rendering must see the same history as the shared-link browser
+  // fixture, rather than seeding its unrelated default post into that history.
+  const template = currentLocalDrop();
+  const drops = Array.from({ length: 150 }, (_, index) => {
+    const serial = index + 2;
+    return {
+      ...template,
+      id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+      serial_no: serial,
+      created_at: 1714000000000 + serial * 60000,
+      content: `Shared link fixture post ${serial}`,
+    };
+  }).reverse();
+  return writeJsonResponse(res, {
+    wave: localWaveOverview,
+    drops: drops.slice(0, Number(url.searchParams.get("limit")) || 50),
+  });
+}
+
 function handleMockApiRead(method, pathname, url, res) {
   if (!isSafeReadMethod(method)) {
     return false;
   }
 
   return (
+    handleSharedPostFeedRead(pathname, url, res) ||
     handleCommunityMemberRead(pathname, url, res) ||
     handleTopCommunityMembersRead(pathname, url, res) ||
     handleGroupIdentityWalletsRead(pathname, res) ||

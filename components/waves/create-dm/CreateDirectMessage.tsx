@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
@@ -42,14 +44,16 @@ function DirectMessagePageHeader({ onBack }: { readonly onBack: () => void }) {
   const locale = useBrowserLocale();
   return (
     <header className="tw-grid tw-h-14 tw-flex-shrink-0 tw-grid-cols-[2.75rem_1fr_2.75rem] tw-items-center tw-px-2">
-      <button
+      <IconButton
         type="button"
         onClick={onBack}
         aria-label={t(locale, "quickDm.backAriaLabel")}
-        className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        size={44}
+        variant="ghost"
+        shape="circle"
       >
         <ChevronLeftIcon aria-hidden="true" className="tw-size-5" />
-      </button>
+      </IconButton>
       <h1 className="tw-m-0 tw-text-center tw-text-base tw-font-semibold">
         {t(locale, "quickDm.createModalTitle")}
       </h1>
