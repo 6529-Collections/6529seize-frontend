@@ -20,6 +20,7 @@ import {
 import {
   closeDesktopConnectDialog,
   getDesktopConnectDialogOpener,
+  getDesktopWalletSetup,
   openDesktopConnectDialog,
   getServerDesktopConnectDialogOpener,
   subscribeDesktopConnectDialog,
@@ -112,7 +113,8 @@ export default function DesktopConnectDialog() {
 
   // A finished browser sign-in closes the choice.
   useEffect(() => {
-    if (isOpen && status === "signed-in") closeDesktopConnectDialog();
+    if (isOpen && status === "signed-in")
+      closeDesktopConnectDialog("signed-in");
   }, [isOpen, status]);
 
   // Waiting for the browser can be cancelled. Once the app is signing in
@@ -121,7 +123,10 @@ export default function DesktopConnectDialog() {
   const close = () => {
     // Also while the start is still asking the shell for its scheme (the
     // status is idle then), so the browser does not open after closing.
-    if (status === "waiting" || startAttempt.current !== null) {
+    if (
+      !getDesktopWalletSetup() &&
+      (status === "waiting" || startAttempt.current !== null)
+    ) {
       cancelBrowserConnectorSignIn();
     }
     startAttempt.current = null;
@@ -133,13 +138,19 @@ export default function DesktopConnectDialog() {
   const chooseWalletConnect = () => {
     const open = openWalletConnect;
     if (!open) return;
+    const setup = getDesktopWalletSetup();
     setProblem(null);
-    closeDesktopConnectDialog();
-    open().catch(() => {
-      // Bring the choice back with the reason, instead of failing silently.
-      openDesktopConnectDialog(open);
-      setProblem("walletconnect-failed");
-    });
+    closeDesktopConnectDialog("walletconnect");
+    open()
+      .then(() => setup?.onStatus("walletconnect"))
+      .catch(() => {
+        setup?.onStatus("failed");
+        // Bring the unscoped choice back with the reason.
+        if (!setup) {
+          openDesktopConnectDialog(open);
+          setProblem("walletconnect-failed");
+        }
+      });
   };
 
   const chooseBrowserWallet = () => {
@@ -149,9 +160,12 @@ export default function DesktopConnectDialog() {
     startAttempt.current = attempt;
     setIsStarting(true);
     setProblem(null);
-    startBrowserConnectorSignIn()
+    const setup = getDesktopWalletSetup();
+    startBrowserConnectorSignIn(setup)
       .catch(() => {
-        if (startAttempt.current === attempt) setProblem("start-failed");
+        if (startAttempt.current !== attempt) return;
+        if (setup) setup.onStatus("failed");
+        else setProblem("start-failed");
       })
       .finally(() => {
         if (startAttempt.current !== attempt) return;
@@ -216,7 +230,10 @@ export default function DesktopConnectDialog() {
           <button
             type="button"
             className={SECONDARY_CLASS}
-            onClick={cancelBrowserConnectorSignIn}
+            onClick={() => {
+              if (getDesktopWalletSetup()) close();
+              else cancelBrowserConnectorSignIn();
+            }}
           >
             {t(locale, "desktopConnect.cancel")}
           </button>

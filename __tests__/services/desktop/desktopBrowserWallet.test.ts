@@ -13,6 +13,7 @@ import {
   reopenDesktopWalletRequest,
   runDesktopWalletRequest,
   showDesktopWalletRefusal,
+  subscribeBrowserWalletProfiles,
   watchDesktopWalletStatus,
 } from "@/services/desktop/desktopBrowserWallet";
 import {
@@ -83,6 +84,19 @@ describe("desktopBrowserWallet", () => {
       ).toBe(true);
       expect(isBrowserWalletProfile("nope")).toBe(false);
       expect(isBrowserWalletProfile(null)).toBe(false);
+    });
+
+    it("publishes eligibility changes for an already mounted connector", async () => {
+      const changes: boolean[] = [];
+      const unsubscribe = subscribeBrowserWalletProfiles(() => {
+        changes.push(isBrowserWalletProfile(ADDRESS));
+      });
+      await loadBrowserWalletProfiles();
+      await markBrowserWalletProfile(ADDRESS);
+      await forgetBrowserWalletProfile(ADDRESS);
+      unsubscribe();
+      await markBrowserWalletProfile(ADDRESS);
+      expect(changes).toEqual([false, true, false]);
     });
 
     it("remembers and forgets a profile and never throws", async () => {

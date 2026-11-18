@@ -1,5 +1,8 @@
 import { isDesktopShell } from "@/helpers/desktop-shell";
-import { openDesktopConnectDialog } from "@/services/desktop/desktopConnectDialog";
+import {
+  openDesktopConnectDialog,
+  type DesktopWalletSetup,
+} from "@/services/desktop/desktopConnectDialog";
 import { useCallback } from "react";
 import { getAddress, isAddress } from "viem";
 import { SecurityEventType } from "@/types/security";
@@ -42,11 +45,13 @@ async function openConnectEntryPoint({
   isSigningOutAll,
   openWebConnection,
   openDefault,
+  desktopWalletSetup,
 }: {
   readonly source: string;
   readonly isSigningOutAll: boolean;
   readonly openWebConnection: (source: string) => Promise<void>;
   readonly openDefault: (source: string) => Promise<void>;
+  readonly desktopWalletSetup?: DesktopWalletSetup | undefined;
 }): Promise<void> {
   // Like the Capacitor options, this resolves once the choice is shown.
   if (!isSigningOutAll && isDesktopShell()) {
@@ -54,7 +59,10 @@ async function openConnectEntryPoint({
       SecurityEventType.WALLET_CONNECTION_ATTEMPT,
       createConnectionEventContext(source)
     );
-    openDesktopConnectDialog(() => openWebConnection(source));
+    openDesktopConnectDialog(
+      () => openWebConnection(source),
+      desktopWalletSetup
+    );
     return;
   }
   await openDefault(source);
@@ -66,17 +74,20 @@ export function openUserConnectionSurfaceForRuntime({
   isSigningOutAll,
   openWebConnection,
   setCapacitorView,
+  desktopWalletSetup,
 }: {
   readonly source: string;
   readonly isCapacitor: boolean;
   readonly isSigningOutAll: boolean;
   readonly openWebConnection: (source: string) => Promise<void>;
   readonly setCapacitorView: (view: CapacitorConnectDialogView) => void;
+  readonly desktopWalletSetup?: DesktopWalletSetup | undefined;
 }): Promise<void> {
   return openConnectEntryPoint({
     source,
     isSigningOutAll,
     openWebConnection,
+    desktopWalletSetup,
     openDefault: (entrySource) =>
       openWebOrCapacitorConnection({
         source: entrySource,

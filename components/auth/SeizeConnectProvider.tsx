@@ -62,6 +62,7 @@ import { useAddConnectedAccount } from "./useAddConnectedAccount";
 import { useSignOutAllTransaction } from "./useSignOutAllTransaction";
 import CapacitorConnectFlow from "./CapacitorConnectFlow";
 import type { CapacitorConnectDialogView } from "./CapacitorConnectDialog";
+import type { DesktopWalletSetup } from "@/services/desktop/desktopConnectDialog";
 import {
   defaultConnectModalView,
   openFreshUserConnection,
@@ -346,13 +347,14 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const openUserConnectionSurface = useCallback(
-    (source: string): Promise<void> =>
+    (source: string, desktopWalletSetup?: DesktopWalletSetup): Promise<void> =>
       openUserConnectionSurfaceForRuntime({
         source,
         isCapacitor: capacitor.isCapacitor,
         isSigningOutAll: isSigningOutAllRef.current,
         openWebConnection: seizeConnectOrThrow,
         setCapacitorView: setCapacitorConnectView,
+        desktopWalletSetup,
       }),
     [capacitor.isCapacitor, isSigningOutAllRef, seizeConnectOrThrow]
   );
@@ -360,7 +362,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const seizeConnect = useSeizeConnect(isSigningOutAllRef, seizeConnectOrThrow);
 
   const seizeConnectFresh = useCallback(
-    (): Promise<void> =>
+    (desktopWalletSetup?: DesktopWalletSetup): Promise<void> =>
       openFreshUserConnection({
         address: account.address,
         isConnected: account.isConnected,
@@ -371,7 +373,8 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         getSignOutAllGeneration,
         hasSignOutAllGenerationChanged,
         isMounted: () => isMountedRef.current,
-        openUserConnectionSurface,
+        openUserConnectionSurface: (source) =>
+          openUserConnectionSurface(source, desktopWalletSetup),
       }),
     [
       account.address,

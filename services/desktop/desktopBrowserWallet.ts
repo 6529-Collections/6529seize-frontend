@@ -25,6 +25,22 @@ const PROFILES_KEY = "desktop-browser-wallet-profiles";
 const ADDRESS = /^0x[0-9a-f]{40}$/;
 
 let profiles: ReadonlySet<string> = new Set();
+const profileListeners = new Set<() => void>();
+
+const setProfiles = (next: ReadonlySet<string>) => {
+  profiles = next;
+  profileListeners.forEach((listener) => listener());
+};
+
+export function subscribeBrowserWalletProfiles(
+  listener: () => void
+): () => void {
+  profileListeners.add(listener);
+  return () => {
+    profileListeners.delete(listener);
+  };
+}
+
 /** True once the list was read from the store (not merely defaulted). */
 let profilesRead = false;
 let profilesLoading: Promise<boolean> | null = null;
@@ -114,7 +130,7 @@ function readStoredProfiles(): Promise<boolean> {
     try {
       const store = getDesktopStore();
       if (!store) return false;
-      profiles = readProfiles(await store.get(PROFILES_KEY));
+      setProfiles(readProfiles(await store.get(PROFILES_KEY)));
       profilesRead = true;
       return true;
     } catch {
@@ -148,7 +164,7 @@ async function updateProfiles(
   if (!read) return;
   const next = change(profiles);
   if (next === null) return;
-  profiles = next;
+  setProfiles(next);
   await getDesktopStore()?.set(PROFILES_KEY, [...next]);
 }
 
@@ -194,7 +210,7 @@ export async function forgetBrowserWalletProfile(
  * kept. Never throws.
  */
 export async function forgetAllBrowserWalletProfiles(): Promise<void> {
-  profiles = new Set();
+  setProfiles(new Set());
   try {
     const store = getDesktopStore();
     if (!store) return;

@@ -58,6 +58,33 @@ describe("DesktopConnectDialog", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("starts browser sign-in for the setup that opened the picker and cancels it on close", async () => {
+    const user = userEvent.setup();
+    const controller = new AbortController();
+    const setup = {
+      address: `0x${"a".repeat(40)}`,
+      signal: controller.signal,
+      onStatus: jest.fn(),
+    };
+    render(<DesktopConnectDialog />);
+    act(() => {
+      openDesktopConnectDialog(openWalletConnect, setup);
+    });
+    expect(setup.onStatus).toHaveBeenLastCalledWith("picker");
+
+    await user.click(
+      screen.getByRole("button", { name: /Use a browser wallet/ })
+    );
+    expect(startBrowserConnectorSignIn).toHaveBeenCalledWith(setup);
+    setStatus("waiting");
+
+    await user.click(screen.getByRole("button", { name: /Cancel/ }));
+    expect(setup.onStatus).toHaveBeenLastCalledWith("cancelled");
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+  });
+
   it("offers WalletConnect and a browser wallet, and no seed wallets", () => {
     render(<DesktopConnectDialog />);
     open();

@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import DesktopBrowserWalletBridge from "@/components/desktop/DesktopBrowserWalletBridge";
 
 const ACTIVE = "0x1111111111111111111111111111111111111111";
@@ -13,6 +13,7 @@ let account: {
 } = { status: "disconnected" };
 let connectors: { id: string }[] = [forwarding];
 let flagged = new Set([ACTIVE]);
+const profileListeners = new Set<() => void>();
 let requestKind = "idle";
 const connectAsync = jest.fn(async () => undefined);
 const disconnectAsync = jest.fn(async () => undefined);
@@ -31,6 +32,10 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
   isBrowserWalletProfile: (address: string | null) =>
     address !== null && flagged.has(address),
+  subscribeBrowserWalletProfiles: (listener: () => void) => {
+    profileListeners.add(listener);
+    return () => profileListeners.delete(listener);
+  },
   getDesktopWalletRequestStatus: () => ({ kind: requestKind }),
   cancelDesktopWalletRequest: () => cancel(),
   forgetBrowserWalletProfile: (address: string) => forget(address),
@@ -62,6 +67,20 @@ describe("DesktopBrowserWalletBridge", () => {
     flagged = new Set();
     render(<DesktopBrowserWalletBridge />);
     expect(connectAsync).not.toHaveBeenCalled();
+  });
+
+  it("attaches when the same signed-in profile becomes eligible", () => {
+    flagged = new Set();
+    render(<DesktopBrowserWalletBridge />);
+    expect(connectAsync).not.toHaveBeenCalled();
+
+    act(() => {
+      flagged.add(ACTIVE);
+      profileListeners.forEach((listener) => listener());
+    });
+
+    expect(connectAsync).toHaveBeenCalledTimes(1);
+    expect(connectAsync).toHaveBeenCalledWith({ connector: forwarding });
   });
 
   it("leaves a WalletConnect connection alone and stops offering forwarding", () => {

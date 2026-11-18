@@ -5,6 +5,11 @@ import type {
 } from "@/components/auth/authSignedMessagesGrant";
 import { CONNECTED_ACTION_CLOSE_GRACE_MS } from "@/components/auth/useConnectedAction";
 import type { NetworkSwitchOutcome } from "@/hooks/device-signing/useSignedMessagesWallet";
+import { BROWSER_CONNECTOR_TIMEOUT_MS } from "@/lib/desktop/browserConnector";
+import type {
+  DesktopWalletSetup,
+  DesktopWalletSetupStatus,
+} from "@/services/desktop/desktopConnectDialog";
 import type {
   SignedMessagesEnableEvent,
   SignedMessagesEnableSource,
@@ -79,7 +84,9 @@ export interface SignedMessagesEnableSnapshot {
   readonly isRemoteWallet: boolean;
   readonly requestGrant: RequestSignedMessagesGrant | undefined;
   /** Disconnects any live wallet and opens the connection surface. */
-  readonly connectWallet: () => Promise<void>;
+  readonly connectWallet: (
+    desktopWalletSetup?: DesktopWalletSetup
+  ) => Promise<void>;
   readonly networkName: string;
   readonly isNetworkSupported: () => boolean;
   readonly switchNetwork: () => Promise<NetworkSwitchOutcome>;
@@ -103,6 +110,8 @@ interface PendingStep {
   readonly source: SignedMessagesEnableSource;
   readonly resumeUntil: number;
   modalOpened: boolean;
+  connectAbort?: AbortController;
+  desktopStatus?: "picker" | "browser" | "signed-in";
 }
 
 interface SignatureAttempt {
@@ -170,6 +179,7 @@ export class SignedMessagesEnableFlow {
   private stallTimer: Timer = null;
   private closeTimer: Timer = null;
   private reconnectTimer: Timer = null;
+  private desktopTimer: Timer = null;
   private readonly deps: SignedMessagesEnableFlowDeps;
 
   constructor(deps: SignedMessagesEnableFlowDeps) {
@@ -190,7 +200,7 @@ export class SignedMessagesEnableFlow {
       return;
     }
     this.lastSource = source;
-    this.pending = null;
+    this.dropPending();
     this.clearTimers();
     this.deps.report(source, "start");
     this.deps.setStatus(null);
@@ -218,7 +228,7 @@ export class SignedMessagesEnableFlow {
 
   /** Drops pending steps; a signature already requested still finishes. */
   readonly dispose = (): void => {
-    this.pending = null;
+    this.dropPending();
     this.clearTimers();
   };
 
@@ -231,10 +241,17 @@ export class SignedMessagesEnableFlow {
     this.clearSignatureTimers();
     this.closeTimer = clearTimer(this.closeTimer);
     this.reconnectTimer = clearTimer(this.reconnectTimer);
+    this.desktopTimer = clearTimer(this.desktopTimer);
+  }
+
+  private dropPending() {
+    const step = this.pending;
+    this.pending = null;
+    step?.connectAbort?.abort();
   }
 
   private settle(status: SignedMessagesEnableStatus | null) {
-    this.pending = null;
+    this.dropPending();
     this.clearTimers();
     this.deps.setStatus(status);
     this.deps.setBusy(false);
@@ -246,6 +263,7 @@ export class SignedMessagesEnableFlow {
     source: SignedMessagesEnableSource,
     resumeUntil = 0
   ): PendingStep {
+    this.dropPending();
     const step: PendingStep = {
       stage,
       address: address.toLowerCase(),
@@ -256,6 +274,7 @@ export class SignedMessagesEnableFlow {
     this.pending = step;
     this.closeTimer = clearTimer(this.closeTimer);
     this.reconnectTimer = clearTimer(this.reconnectTimer);
+    this.desktopTimer = clearTimer(this.desktopTimer);
     return step;
   }
 
@@ -277,6 +296,9 @@ export class SignedMessagesEnableFlow {
       }
       return;
     }
+    if (step.desktopStatus === "browser") {
+      return;
+    }
     if (current.canSignActiveWallet) {
       if (step.stage === WRONG_ACCOUNT && Date.now() > step.resumeUntil) {
         this.settle(null);
@@ -285,7 +307,7 @@ export class SignedMessagesEnableFlow {
       void this.sign(step.source);
       return;
     }
-    if (step.stage !== "connecting") {
+    if (step.stage !== "connecting" || step.desktopStatus) {
       return;
     }
     if (current.isConnectOpen) {
@@ -371,10 +393,16 @@ export class SignedMessagesEnableFlow {
 
   private async openConnection(
     step: PendingStep,
-    connectWallet: () => Promise<void>
+    connectWallet: SignedMessagesEnableSnapshot["connectWallet"]
   ) {
+    const controller = new AbortController();
+    step.connectAbort = controller;
     try {
-      await connectWallet();
+      await connectWallet({
+        address: step.address,
+        signal: controller.signal,
+        onStatus: (status) => this.onDesktopConnectStatus(step, status),
+      });
     } catch {
       if (this.pending === step) {
         this.deps.report(step.source, "connect-failed");
@@ -382,12 +410,49 @@ export class SignedMessagesEnableFlow {
       }
       return;
     }
-    if (this.pending === step) {
+    if (this.pending === step && !step.desktopStatus) {
       step.modalOpened = true;
       if (!this.snapshot?.isConnectOpen) {
         this.scheduleCloseCheck(step);
       }
     }
+  }
+
+  private onDesktopConnectStatus(
+    step: PendingStep,
+    status: DesktopWalletSetupStatus
+  ) {
+    if (this.pending !== step) return;
+    this.desktopTimer = clearTimer(this.desktopTimer);
+    switch (status) {
+      case "cancelled":
+        this.deps.report(step.source, "connect-cancelled");
+        this.settle({ kind: "not-connected" });
+        return;
+      case "failed":
+        this.deps.report(step.source, "connect-failed");
+        this.settle({ kind: "error", reason: "connect-failed" });
+        return;
+      case "walletconnect":
+        delete step.desktopStatus;
+        step.modalOpened = true;
+        break;
+      case "picker":
+      case "browser":
+      case "signed-in":
+        step.desktopStatus = status;
+        this.closeTimer = clearTimer(this.closeTimer);
+        if (status !== "picker") {
+          // Allow the browser to return, then give wagmi time to attach.
+          this.desktopTimer = setTimeout(
+            () => this.onDesktopConnectStatus(step, "failed"),
+            status === "browser"
+              ? BROWSER_CONNECTOR_TIMEOUT_MS
+              : RECONNECT_WAIT_MS
+          );
+        }
+    }
+    this.sync();
   }
 
   private scheduleCloseCheck(step: PendingStep) {
@@ -417,7 +482,7 @@ export class SignedMessagesEnableFlow {
     if (this.signing || !current) {
       return;
     }
-    this.pending = null;
+    this.dropPending();
     this.clearTimers();
     const { requestGrant } = current;
     if (!requestGrant) {
