@@ -150,7 +150,6 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.unavailable":
     "Open Encrypted messages to check whether this device can be set up.",
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
-  "e2ee.enroll.finishing": "Finishing encrypted message setup…",
   "e2ee.enroll.rejected": "Signature cancelled.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
   "e2ee.enroll.revocationUnverified":
@@ -258,11 +257,6 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.open": "Devices for encrypted messages",
 
   "e2ee.list.subtitle": "End-to-end encrypted chats on this device.",
-  "e2ee.list.loading": "Loading encrypted chats…",
-  "e2ee.list.waiting": "Waiting for encrypted chats to sync to this device…",
-  "e2ee.list.waitingHelp":
-    "You can open the chat on another device to help it sync.",
-  "e2ee.list.error": "Couldn’t load encrypted chats.",
   "e2ee.list.empty.title": "No encrypted chats yet",
   "e2ee.list.empty.body":
     "Start an encrypted chat with one person or a group. Only the people in the chat can read it.",

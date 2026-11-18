@@ -1,3 +1,4 @@
+import { LEGACY_DM_DELETION_AT } from "@/components/e2ee/legacy/legacyDmRetention";
 import { expect, test } from "../testHelpers";
 import {
   closeE2eeUsers,
@@ -9,7 +10,10 @@ import {
 } from "../support/e2ee/e2eeSandboxSession";
 import {
   composer,
+  conversationIdFromUrl,
   enroll,
+  enrollButton,
+  enrollmentHeading,
   ENCRYPTED_ROUTE,
   gotoPath,
   pickPerson,
@@ -115,6 +119,108 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await expect(
       alice.page.getByRole("heading", { level: 1, name: "bob" })
     ).toBeVisible();
+  });
+
+  test("a profile opens the encrypted-first composer with its recipient selected", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions = [alice, bob];
+    await enroll(bob);
+
+    const { page } = alice;
+    const creationRequests: string[] = [];
+    page.on("request", (request) => {
+      if (request.method() !== "POST") return;
+      const { pathname } = new URL(request.url());
+      if (
+        pathname.endsWith("/e2ee/groups") ||
+        pathname.endsWith("/waves/direct-message/new")
+      ) {
+        creationRequests.push(pathname);
+      }
+    });
+    const openFromProfile = async (handle: string) => {
+      await gotoPath(page, `/${handle}`);
+      await page.getByRole("button", { name: "Send direct message" }).click({
+        timeout: 60_000,
+      });
+      await expectUrlState(
+        page,
+        (url) =>
+          url.pathname === "/messages/new" &&
+          /^[a-f0-9-]{36}$/u.test(url.searchParams.get("compose") ?? "")
+      );
+    };
+
+    await openFromProfile("bob");
+    await expect(
+      page.getByRole("button", { name: "Remove bob" })
+    ).toBeVisible();
+    await expect(enrollmentHeading(page)).toBeVisible({
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    await enrollButton(page).click();
+    const bobRow = selectedPerson(page, "bob");
+    await expect(
+      bobRow.getByText("Can receive encrypted messages")
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    expect(creationRequests).toEqual([]);
+    expect((await e2eeSandboxControls.state(baseURL)).groups).toHaveLength(0);
+
+    await page.getByRole("button", { name: "Start chat" }).click();
+    await expect(composer(page)).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    const existingChat = conversationIdFromUrl(page);
+    const { groups } = await e2eeSandboxControls.state(baseURL);
+    const chat = groups.find(({ group }) => group === existingChat);
+    const memberProfiles = [
+      ...new Set(chat?.roster.map(({ profile_id }) => profile_id)),
+    ];
+    expect(memberProfiles.sort()).toEqual(
+      [users.alice.profileId, users.bob.profileId].sort()
+    );
+
+    await openFromProfile("bob");
+    await expect(bobRow).toBeVisible();
+    await page.getByRole("button", { name: "Open chat" }).click({
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    await expectUrlState(
+      page,
+      (url) => url.pathname === `${ENCRYPTED_ROUTE}/${existingChat}`
+    );
+    const beforeCutoff = new Date(Date.parse(LEGACY_DM_DELETION_AT) - 60_000);
+    await page.clock.setFixedTime(beforeCutoff);
+    const continueUnencrypted = page.getByRole("button", {
+      name: "Continue unencrypted",
+    });
+
+    await e2eeSandboxControls.setDmPolicy(baseURL, "carol", "EVERYONE");
+    await openFromProfile("carol");
+    await expect(
+      selectedPerson(page, "carol").getByText(
+        "Hasn’t turned on encrypted messages yet"
+      )
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expect(continueUnencrypted).toBeEnabled();
+
+    await e2eeSandboxControls.setDmPolicy(baseURL, "carol", "NOBODY");
+    await openFromProfile("carol");
+    await expect(
+      selectedPerson(page, "carol").getByText(
+        "Doesn’t accept messages from you"
+      )
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expect(
+      page.getByRole("button", { name: "Start chat" })
+    ).toBeDisabled();
+    await expect(continueUnencrypted).toHaveCount(0);
+    expect(creationRequests).toHaveLength(1);
+    expect(creationRequests[0]).toMatch(/\/e2ee\/groups$/u);
+    expect((await e2eeSandboxControls.state(baseURL)).groups).toHaveLength(1);
   });
 
   test("DM policy and blocks are shown before creation and enforced at creation", async ({

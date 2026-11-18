@@ -130,7 +130,6 @@ function httpClient(token: string): E2eeApiClient {
       await post(`e2ee/devices/${enc(key)}/welcomes/${enc(id)}/ack`, {});
     },
     getDeviceGroups: (key) => get(`e2ee/devices/${enc(key)}/groups`),
-    getDeviceInboxStatus: (key) => get(`e2ee/devices/${enc(key)}/inbox-status`),
     createBlob: (body) => post("e2ee/blobs", body),
     putBlobChunk: (id, index, body) =>
       request("PUT", `e2ee/blobs/${enc(id)}/chunks/${index}`, body),

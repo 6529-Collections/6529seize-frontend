@@ -89,7 +89,6 @@ import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
 
 interface Props {
   readonly children: ReactNode;
-  readonly fallback?: ReactNode;
 }
 
 interface MobileAboutTabState {
@@ -586,9 +585,9 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   );
 };
 
-const BrainMobile: React.FC<Props> = ({ children, fallback }) => (
-  <Suspense fallback={fallback}>
-    <BrainMobileContent>{children}</BrainMobileContent>
+const BrainMobile: React.FC<Props> = (props) => (
+  <Suspense fallback={null}>
+    <BrainMobileContent {...props} />
   </Suspense>
 );
 

@@ -1,6 +1,5 @@
 import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eeDeviceGroup } from "../api-types";
-import type { E2eeInitialSyncStatus } from "../types";
 import { type EngineContext, isActive, ownDeviceKey } from "./context";
 import { RetryableError } from "./errors";
 import {
@@ -160,7 +159,11 @@ export class EngineController {
       return;
     }
     this.lastFullSyncAt = this.ctx.now();
-    const serverGroups = await this.syncInbox();
+    await this.pullInbox();
+    if (!this.isReady()) {
+      return;
+    }
+    const serverGroups = await this.deviceGroups();
     if (!this.isReady()) {
       return;
     }
@@ -250,71 +253,19 @@ export class EngineController {
     }
   }
 
-  private setInitialSyncStatus(status: E2eeInitialSyncStatus): void {
-    const store = this.ctx.store;
-    if (
-      this.isReady() &&
-      store.initialSyncStatus !== "complete" &&
-      store.initialSyncStatus !== status
-    ) {
-      store.initialSyncStatus = status;
-      store.touch();
-    }
-  }
-
-  /** Check chat discovery independently of maintenance and cosmetic lookups. */
-  private async syncInbox(): Promise<ApiE2eeDeviceGroup[] | null> {
-    if (this.ctx.store.initialSyncStatus === "failed") {
-      this.setInitialSyncStatus("pending");
-    }
-    try {
-      const inboxComplete = await this.pullInbox();
-      if (!this.isReady()) return null;
-      const groups = await this.deviceGroups();
-      if (inboxComplete === null || groups === null) {
-        this.setInitialSyncStatus("failed");
-      } else if (inboxComplete) {
-        await this.confirmInitialInbox();
-      } else {
-        this.setInitialSyncStatus("waiting");
-      }
-      return groups;
-    } catch (error) {
-      this.setInitialSyncStatus("failed");
-      throw error;
-    }
-  }
-
-  private async confirmInitialInbox(): Promise<void> {
-    if (!this.isReady() || this.ctx.store.initialSyncStatus === "complete") {
+  private async pullInbox(): Promise<void> {
+    if (!this.isReady()) {
       return;
     }
     try {
-      const { has_pending_chats: pending } =
-        await this.ctx.api.getDeviceInboxStatus(ownDeviceKey(this.ctx));
-      // The first Welcome read can succeed before another device adds this
-      // one to existing chats. Check after delivery processing so a newly
-      // queued Welcome also keeps discovery open for the next pass.
-      this.setInitialSyncStatus(pending ? "waiting" : "complete");
+      await swallowNetwork(this.ctx.queue.run(() => processInbox(this.ctx)));
     } catch (error) {
+      // Revoked from another device before its WS hint arrived: the inbox is
+      // the first own-device call of a pass, so handle it here, not as an error.
       if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
         await this.hooks.onOwnRevoked();
+        return;
       }
-      this.setInitialSyncStatus("failed");
-    }
-  }
-
-  private async pullInbox(): Promise<boolean | null> {
-    try {
-      return await this.ctx.queue.run(() => processInbox(this.ctx));
-    } catch (error) {
-      // The inbox is the first own-device call of a pass. Check a revocation
-      // here if it arrived before the WebSocket hint.
-      if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
-        await this.hooks.onOwnRevoked();
-        return null;
-      }
-      if (isNetworkish(error)) return null;
       throw error;
     }
   }
