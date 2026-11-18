@@ -4,7 +4,6 @@ import { useTimeAgoShort } from "@/hooks/useDisplayTimeZone";
 import ContentDisplay from "@/components/waves/drops/ContentDisplay";
 import {
   buildProcessedContent,
-  type ContentSegment,
   type ProcessedContent,
 } from "@/components/waves/drops/media-utils";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
