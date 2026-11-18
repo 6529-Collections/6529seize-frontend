@@ -25,14 +25,31 @@ const mockCopyToClipboard = jest.fn();
 const mockCapacitorIsNativePlatform = jest.fn();
 let mockWaveDropAction: any = null;
 
+jest.mock("@/contexts/ScrollPositionContext", () => ({
+  useScrollPositionContext: () => ({ setPosition: jest.fn() }),
+}));
+
 jest.mock("@/components/header/AppSidebar", () => ({
   __esModule: true,
   default: (props: any) => <div data-testid="sidebar" {...props} />,
 }));
 jest.mock("@/components/header/header-search/HeaderSearchButton", () => ({
   __esModule: true,
-  default: ({ wave }: { wave: { id: string } | null }) => (
-    <div data-testid="search" data-wave-id={wave?.id ?? ""} />
+  default: ({
+    wave,
+    additionalMenuItems,
+  }: {
+    wave: { id: string } | null;
+    additionalMenuItems?: { id: string; href?: string }[];
+  }) => (
+    <div
+      data-testid="search"
+      data-wave-id={wave?.id ?? ""}
+      data-menu-items={additionalMenuItems?.map((item) => item.id).join(",")}
+      data-profile-feed-href={
+        additionalMenuItems?.find((item) => item.id === "profile-feed")?.href
+      }
+    />
   ),
 }));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
@@ -1222,7 +1239,44 @@ describe("AppHeader", () => {
     ).not.toBeInTheDocument();
   });
 
-  it.each(["/waves", "/waves/w1"])(
+  it.each([null, "waves"])(
+    "moves directory actions into More for view %s",
+    (view) => {
+      setup({ asPath: "/waves", query: { view } });
+      expect(
+        screen.queryByRole("button", { name: "Share page" })
+      ).not.toBeInTheDocument();
+      expect(screen.getByTestId("search")).toHaveAttribute(
+        "data-menu-items",
+        "profile-feed,share-page"
+      );
+      expect(screen.getByTestId("search")).toHaveAttribute(
+        "data-profile-feed-href",
+        "/waves?view=profile-feed"
+      );
+    }
+  );
+
+  it.each(["notifications", "messages", "profile-feed"])(
+    "keeps directory actions off the native %s view",
+    (view) => {
+      setup({ asPath: "/waves", query: { view } });
+
+      expect(screen.getByTestId("search")).not.toHaveAttribute(
+        "data-menu-items"
+      );
+    }
+  );
+
+  it("preserves standalone page share on the notifications query view", () => {
+    setup({ asPath: "/waves", query: { view: "notifications" } });
+
+    expect(
+      screen.getByRole("button", { name: "Share page" })
+    ).toBeInTheDocument();
+  });
+
+  it.each(["/waves/w1"])(
     "shows page share on supported wave route %s",
     (asPath) => {
       setup({ asPath });
