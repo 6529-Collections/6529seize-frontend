@@ -308,6 +308,11 @@ export class EngineController {
     });
   }
 
+  /** When group `g`'s periodic maintenance is next due (debug status). */
+  nextMaintenanceAt(g: string): number {
+    return (this.maintainedAt.get(g) ?? 0) + MAINTAIN_EVERY_MS;
+  }
+
   async maintain(g: string): Promise<void> {
     const runtime = this.ctx.store.groups.get(g);
     if (!this.isReady() || !isActive(runtime)) {
