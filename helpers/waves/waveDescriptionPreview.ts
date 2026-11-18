@@ -9,7 +9,7 @@ import {
 const DEFAULT_MEDIA_CDN_ORIGIN = "https://d3lqz0a4bldqgf.cloudfront.net";
 const MEDIA_PATH_EXTENSION_REGEX =
   /\.(?:avif|gif|jpe?g|m4v|mov|mp4|png|svg|webm|webp)$/i;
-const BARE_URL_REGEX = /https?:\/\/[^\s<>"'`\uE000]+/gi;
+const BARE_URL_REGEX = /https?:\/\/[^\s<>"'`]+/gi;
 // Sentence punctuation and closing markdown delimiters that can follow a URL.
 const URL_TRAILING_CHARACTERS = new Set([
   ".",
@@ -228,45 +228,76 @@ const getProtectedUrlEnd = (url: string, open: Map<string, number>): number => {
   return end;
 };
 
+const protectUrlText = (
+  text: string,
+  protect: (value: string) => string,
+  open: Map<string, number>,
+  beforeBoundary: string,
+  afterBoundary: string
+): string => {
+  let result = "";
+  let cursor = 0;
+  for (const match of text.matchAll(BARE_URL_REGEX)) {
+    const before = text.slice(cursor, match.index);
+    trackEmphasis((cursor === 0 ? beforeBoundary : "") + before, open);
+    const end = getProtectedUrlEnd(match[0], open);
+    result += before + protect(match[0].slice(0, end)) + match[0].slice(end);
+    cursor = match.index + match[0].length;
+  }
+  const tail = text.slice(cursor);
+  trackEmphasis(
+    (cursor === 0 ? beforeBoundary : "") + tail + afterBoundary,
+    open
+  );
+  return result + tail;
+};
+
 const protectBareUrls = (
   text: string,
-  protect: (value: string) => string
+  protect: (value: string) => string,
+  marker: string
 ): string => {
   const open = new Map([
     ["*", 0],
     ["_", 0],
     ["~", 0],
   ]);
-  let result = "";
-  let cursor = 0;
-  for (const match of text.matchAll(BARE_URL_REGEX)) {
-    const before = text.slice(cursor, match.index);
-    trackEmphasis(before, open);
-    const end = getProtectedUrlEnd(match[0], open);
-    result += before + protect(match[0].slice(0, end)) + match[0].slice(end);
-    cursor = match.index + match[0].length;
+  return text
+    .split(marker)
+    .map((part, index, parts) => {
+      if (index % 2 === 1) return part;
+      const beforeBoundary = index > 0 ? marker : "";
+      const afterBoundary = index < parts.length - 1 ? marker : "";
+      return protectUrlText(part, protect, open, beforeBoundary, afterBoundary);
+    })
+    .join(marker);
+};
+
+const findLiteralMarker = (markdown: string): string | null => {
+  const characters = new Set(markdown);
+  // A single BMP character cannot form by joining surrogate halves either.
+  for (let point = 0xe000; point <= 0xf8ff; point += 1) {
+    const marker = String.fromCharCode(point);
+    if (!characters.has(marker)) return marker;
   }
-  return result + text.slice(cursor);
+  return null;
 };
 
 export const markdownToPlainText = (
   markdown: string,
   options: MarkdownToPlainTextOptions = {}
 ): string => {
-  // A prefix absent from the input keeps literal user text distinct from tokens.
-  const used = new Set(
-    Array.from(markdown.matchAll(/(?=\uE000(\d+)\uE000)/g), (match) => match[1])
-  );
-  let prefixIndex = 0;
-  while (used.has(String(prefixIndex))) prefixIndex += 1;
-  const prefix = `\uE000${prefixIndex}\uE000`;
+  // An absent character cannot be introduced by stripping markdown formatting.
+  const marker = findLiteralMarker(markdown);
+  // Preserve content if an exceptional input exhausts every available marker.
+  if (!marker) return markdown;
   const literals: string[] = [];
   const protect = (value: string): string => {
     const index = literals.push(value) - 1;
-    return `${prefix}${index}\uE000`;
+    return `${marker}${index}${marker}`;
   };
   const withoutLinks = replaceMarkdownLinks(markdown, options, protect);
-  const protectedText = protectBareUrls(withoutLinks, protect);
+  const protectedText = protectBareUrls(withoutLinks, protect, marker);
 
   const plainText = protectedText
     .replaceAll(/```([\s\S]*?)```/g, "$1")
@@ -281,14 +312,11 @@ export const markdownToPlainText = (
     .replaceAll(/\s+/g, " ")
     .trim();
   return plainText
-    .split(prefix)
+    .split(marker)
     .map((part, index) =>
-      index === 0
+      index % 2 === 0
         ? part
-        : part.replace(
-            /^(\d+)\uE000/,
-            (_, literalIndex: string) => literals[Number(literalIndex)] ?? ""
-          )
+        : (literals[Number(part)] ?? `${marker}${part}${marker}`)
     )
     .join("");
 };
