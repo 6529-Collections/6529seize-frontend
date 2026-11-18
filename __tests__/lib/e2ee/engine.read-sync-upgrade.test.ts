@@ -469,16 +469,18 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     // server: the first was received and answered, the second received.
     const api = contextOf(laptop).api;
     const claim = api.claimKeyPackages.bind(api);
-    let gate: ReturnType<typeof world.ds.hold> | null = null;
+    const held: { gate: ReturnType<typeof world.ds.hold> | null } = {
+      gate: null,
+    };
     api.claimKeyPackages = (body) => {
-      if (claims() === 1 && gate === null) {
-        gate = world.ds.hold(/^e2ee\/key-packages\/claim$/u);
+      if (claims() === 1 && held.gate === null) {
+        held.gate = world.ds.hold(/^e2ee\/key-packages\/claim$/u);
       }
       return claim(body);
     };
     const passStart = world.clock.now();
     const listing = listDevices();
-    await waitUntil(() => gate?.waiting() === 1);
+    await waitUntil(() => held.gate?.waiting() === 1);
 
     // The page reloads now: a new engine on the same storage.
     const reloaded = await startDevice(world, "alice", alice.account, {
@@ -492,7 +494,7 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     expect(counted).toHaveLength(2);
     stopDevice(world, reloaded);
 
-    gate?.release();
+    held.gate?.release();
     await listing;
     expect(claims()).toBe(2);
     for (const device of world.devices) device.engine.dispose();
