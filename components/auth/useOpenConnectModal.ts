@@ -38,6 +38,7 @@ export function useOpenConnectModal({
   waitForAppKitReady,
 }: OpenConnectModalOptions) {
   const latestIntent = useRef<symbol | null>(null);
+  const modalTransition = useRef<Promise<void> | null>(null);
 
   return useCallback(
     async (
@@ -72,13 +73,23 @@ export function useOpenConnectModal({
         }
         if (shouldStop()) return;
         const openAppKit = await appKitModalBridgeStore.waitForOpen();
+        await modalTransition.current;
         if (shouldStop()) return;
 
-        await openAppKit({ view });
-        if (shouldStop()) {
-          if (ownsModal()) await appKitModalBridgeStore.close();
-          return;
-        }
+        // Opening and cleanup share one transition. A newer intent waits
+        // while this one closes the modal it opened after being superseded.
+        const transition = (async () => {
+          try {
+            await openAppKit({ view });
+          } finally {
+            if (shouldStop() && isMountedRef.current) {
+              await appKitModalBridgeStore.close();
+            }
+          }
+        })();
+        modalTransition.current = transition.catch(() => undefined);
+        await transition;
+        if (shouldStop()) return;
 
         logSecurityEvent(
           SecurityEventType.WALLET_MODAL_OPENED,

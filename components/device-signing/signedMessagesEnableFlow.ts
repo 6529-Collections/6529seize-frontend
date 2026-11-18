@@ -27,7 +27,7 @@ export const RECONNECT_WAIT_MS = 8_000;
 /** Time for the Desktop forwarding connector to attach after browser sign-in. */
 export const DESKTOP_SIGNER_ATTACH_TIMEOUT_MS = 30_000;
 /** Bound Desktop shell startup and session login independently of the browser link. */
-const DESKTOP_SHELL_STEP_TIMEOUT_MS = 30_000;
+export const DESKTOP_SHELL_STEP_TIMEOUT_MS = 30_000;
 /** How long switching to the right account still continues by itself. */
 export const WRONG_ACCOUNT_RESUME_MS = 120_000;
 

@@ -10,9 +10,10 @@ import {
 import { act, render, waitFor } from "@testing-library/react";
 
 const mockOpen = jest.fn();
+const mockClose = jest.fn();
 
 jest.mock("@reown/appkit/react", () => ({
-  useAppKit: jest.fn(() => ({ open: mockOpen, close: jest.fn() })),
+  useAppKit: jest.fn(() => ({ open: mockOpen, close: mockClose })),
   useAppKitAccount: jest.fn(() => ({
     address: undefined,
     isConnected: false,
@@ -194,6 +195,48 @@ describe("connect entry points in 6529 Desktop", () => {
     });
 
     expect(mockOpen).not.toHaveBeenCalled();
+  });
+
+  it("closes a superseded AppKit open before the newer handoff opens its modal", async () => {
+    installDesktopShell();
+    renderProvider();
+    const firstOpen = Promise.withResolvers<void>();
+    const calls: string[] = [];
+    mockOpen
+      .mockReturnValueOnce(firstOpen.promise)
+      .mockImplementationOnce(() => calls.push("open new"));
+    mockClose.mockImplementationOnce(() => calls.push("close old"));
+
+    const startHandoff = async (controller: AbortController) => {
+      await context?.seizeConnectFresh({
+        address: `0x${"a".repeat(40)}`,
+        signal: controller.signal,
+        onStatus: jest.fn(),
+      });
+      const open = getDesktopConnectDialogOpener();
+      if (!open) throw new Error("Desktop picker did not open");
+      return { handoff: open() };
+    };
+
+    const first = new AbortController();
+    let earlier: Promise<void> | undefined;
+    let later: Promise<void> | undefined;
+    await act(async () => {
+      earlier = (await startHandoff(first)).handoff;
+    });
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      first.abort();
+      later = (await startHandoff(new AbortController())).handoff;
+    });
+    expect(mockOpen).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      firstOpen.resolve();
+      await Promise.all([earlier, later]);
+    });
+    expect(calls).toEqual(["close old", "open new"]);
   });
 
   it("keeps opening the wallet list directly on the web", async () => {
