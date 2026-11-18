@@ -363,7 +363,7 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     let canonical = "";
     for (
       let tries = 0;
-      tries < 20 && !(canonical && canonical < old.g);
+      tries < 60 && !(canonical && canonical < old.g);
       tries += 1
     ) {
       canonical = await createConversation(
