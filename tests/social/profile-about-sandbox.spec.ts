@@ -1,4 +1,8 @@
 import type { Page } from "@playwright/test";
+import {
+  CollectedCollectionType,
+  type CollectedCard,
+} from "@/entities/IProfile";
 import { expectPersonalCollectedActionsAbsent } from "./profileReadonlyHelpers";
 import { expectUrlState } from "../support/urlState";
 import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
@@ -1530,6 +1534,9 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           page.getByRole("main").locator('[data-profile-section="Filters"]')
         ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
         await expectPersonalCollectedActionsAbsent(page);
+        // The profile shell can render before the saved proxy has been restored.
+        await expectResolvedProxy(page);
+        await expectPersonalCollectedActionsAbsent(page);
         await expect(page.locator("html")).not.toHaveAttribute(
           "data-collected-actions-flashed"
         );
@@ -1541,6 +1548,46 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     });
   }
 });
+
+async function expectResolvedProxy(page: Page) {
+  const needsMenu = (page.viewportSize()?.width ?? 0) < 1024;
+  if (needsMenu) {
+    await page.getByRole("button", { name: "Open menu", exact: true }).click();
+  }
+  const grantorProfile = page.getByRole("link", {
+    name: "Open grantor profile",
+    exact: true,
+  });
+  const accountMenu = page.getByRole("button", {
+    name: "Open account and profiles menu",
+    exact: true,
+  });
+  await expect(grantorProfile.or(accountMenu)).toBeVisible();
+  if (await accountMenu.isVisible()) {
+    await accountMenu.press("Enter");
+    await expect(
+      page.getByRole("button", { name: "grantor Proxy", exact: true })
+    ).toHaveAttribute("aria-pressed", "true");
+    await accountMenu.press("Enter");
+  } else {
+    await expect(grantorProfile).toBeVisible();
+  }
+  if (needsMenu) {
+    const overlay = page.getByRole("button", {
+      name: "Close menu overlay",
+      exact: true,
+    });
+    // The drawer covers the overlay's center; activate its keyboard control.
+    if (await overlay.isVisible()) await overlay.press("Enter");
+    else
+      await page
+        .getByRole("button", { name: "Close menu", exact: true })
+        .click();
+    await expect(
+      page.getByRole("button", { name: "Open menu", exact: true })
+    ).toBeVisible();
+  }
+}
 
 async function expectCollectedActionAlignment(page: Page) {
   const viewport = page.viewportSize();
@@ -1556,10 +1603,25 @@ async function expectCollectedActionAlignment(page: Page) {
         const style = getComputedStyle(row);
         const left = rowBounds.left + Number.parseFloat(style.paddingLeft);
         const right = rowBounds.right - Number.parseFloat(style.paddingRight);
+        const naturalWidth = (element: Element) => {
+          const measurement = element.cloneNode(true) as HTMLElement;
+          measurement.style.position = "fixed";
+          measurement.style.visibility = "hidden";
+          measurement.style.setProperty("width", "max-content", "important");
+          measurement.style.setProperty("min-width", "0", "important");
+          measurement.style.setProperty("max-width", "none", "important");
+          row.appendChild(measurement);
+          const width = measurement.getBoundingClientRect().width;
+          measurement.remove();
+          return width;
+        };
         return {
+          // Intrinsic sizes cannot inherit a full-width flex-item regression.
           fits:
             right - left >=
-            complete.width + manage.width + Number.parseFloat(style.columnGap),
+            naturalWidth(row.querySelector("a")!) +
+              naturalWidth(orders) +
+              Number.parseFloat(style.columnGap),
           centers: Math.abs(
             complete.y + complete.height / 2 - manage.y - manage.height / 2
           ),
@@ -1630,6 +1692,25 @@ async function expectSeasonOneCollectedSource(page: Page) {
   ).toBeVisible();
 }
 
+async function installCollectedArtwork(page: Page) {
+  // Real card rows keep the source scrollable at the full geometry-test height.
+  const cards: CollectedCard[] = Array.from({ length: 12 }, (_, index) => ({
+    collection: CollectedCollectionType.MEMES,
+    token_id: index + 1,
+    token_name: `Season 1 artwork ${index + 1}`,
+    img: "/artwork-documentation/examples/an-alteration.png",
+    tdh: 1,
+    rank: index + 1,
+    seized_count: 1,
+    szn: 1,
+  }));
+  await page.route(/\/api\/+profiles\/[^/]+\/collected(?:\?|$)/, (route) =>
+    route.fulfill({
+      json: { data: cards, count: cards.length, page: 1, next: false },
+    })
+  );
+}
+
 async function openOwnCollected(page: Page) {
   await openOwnProfile(page);
   await page
@@ -1693,6 +1774,7 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
     // Two initially cold destination routes compile in this local dev-server pack.
     test.setTimeout(90_000);
     await seedSession(page);
+    await installCollectedArtwork(page);
     await openOwnCollected(page);
     await page.screenshot({
       path: testInfo.outputPath("collected-owner.png"),
@@ -1711,10 +1793,31 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       );
       await expectSeasonOneCollectedSource(page);
       const link = page.getByRole("link", { name: action, exact: true });
+      await expect(
+        page
+          .getByRole("list", { name: "Collected cards", exact: true })
+          .getByRole("listitem")
+      ).toHaveCount(12);
       await link.click({ trial: true });
+      await page.evaluate(() =>
+        globalThis.scrollTo({ top: 100, behavior: "instant" })
+      );
+      await expect
+        .poll(() => page.evaluate(() => globalThis.scrollY))
+        .toBeGreaterThan(0);
+      await expect(link).toBeInViewport();
+      const sourceScroll = await page.evaluate(() => globalThis.scrollY);
+      expect(sourceScroll).toBeGreaterThan(0);
       const sourceTop = await link.evaluate(
         (element) => element.getBoundingClientRect().top
       );
+      const evidenceName = action.toLowerCase().replaceAll(" ", "-");
+      await page.screenshot({
+        path: testInfo.outputPath(
+          `collected-${evidenceName}-scrolled-source.png`
+        ),
+        scale: "css",
+      });
       const destination = new URL(
         (await link.getAttribute("href"))!,
         page.url()
@@ -1772,6 +1875,14 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       } else {
         await expect
           .poll(() =>
+            page.evaluate(
+              (scroll) => Math.abs(globalThis.scrollY - scroll),
+              sourceScroll
+            )
+          )
+          .toBeLessThanOrEqual(2);
+        await expect
+          .poll(() =>
             link.evaluate(
               (element, top) =>
                 Math.abs(element.getBoundingClientRect().top - top),
@@ -1780,6 +1891,21 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
           )
           .toBeLessThanOrEqual(2);
       }
+      await testInfo.attach(`collected-${evidenceName}-scroll`, {
+        body: JSON.stringify({
+          source: { scrollY: sourceScroll, linkTop: sourceTop },
+          restored: await link.evaluate((element) => ({
+            scrollY: globalThis.scrollY,
+            linkTop: element.getBoundingClientRect().top,
+          })),
+          nativeFocusRestoration: isNative,
+        }),
+        contentType: "application/json",
+      });
+      await page.screenshot({
+        path: testInfo.outputPath(`collected-${evidenceName}-returned.png`),
+        scale: "css",
+      });
     }
   });
 

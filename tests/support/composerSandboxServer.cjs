@@ -2661,24 +2661,6 @@ function writeEmptyResponse(res, status) {
 
 const mockApiExactReadRoutes = new Map([
   [
-    `/api/v2/waves/${SANDBOX_WAVE_ID}/drops`,
-    () => ({
-      wave: localWaveOverview,
-      drops: sandboxSharedPostFeedEnabled
-        ? Array.from({ length: 50 }, (_, index) => {
-            const serial = 151 - index;
-            return {
-              ...currentLocalDrop(),
-              id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
-              serial_no: serial,
-              created_at: 1714000000000 + serial * 60000,
-              content: `Shared link fixture post ${serial}`,
-            };
-          })
-        : [currentLocalDrop()],
-    }),
-  ],
-  [
     `/api/v3/waves/${SANDBOX_NOTIFICATION_WAVE_ID}`,
     () => ({
       id: SANDBOX_NOTIFICATION_WAVE_ID,
@@ -3115,6 +3097,29 @@ function handlePatternMockApiRead(pathname, res) {
   return writeJsonResponse(res, route.response());
 }
 
+function handleSharedPostFeedFixture(pathname, url, res) {
+  if (
+    !sandboxSharedPostFeedEnabled ||
+    pathname !== `/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+  ) {
+    return false;
+  }
+  const limit = Math.min(Number(url.searchParams.get("limit")) || 50, 150);
+  return writeJsonResponse(res, {
+    wave: localWaveOverview,
+    drops: Array.from({ length: limit }, (_, index) => {
+      const serial = 151 - index;
+      return {
+        ...currentLocalDrop(),
+        id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+        serial_no: serial,
+        created_at: 1714000000000 + serial * 60000,
+        content: `Shared link fixture post ${serial}`,
+      };
+    }),
+  });
+}
+
 // The profile document and the browser can read the same saved fixture.
 function handleProfileRepFixture(pathname, res) {
   if (sandboxProfileRepRating === null) return false;
@@ -3148,6 +3153,7 @@ function handleMockApiRead(method, pathname, url, res) {
     handleGroupRead(pathname, res) ||
     handleNotificationRead(pathname, url, res) ||
     handleProfileRepFixture(pathname, res) ||
+    handleSharedPostFeedFixture(pathname, url, res) ||
     handleExactMockApiRead(pathname, res) ||
     handlePatternMockApiRead(pathname, res)
   );
