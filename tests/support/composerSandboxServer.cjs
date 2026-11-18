@@ -2841,7 +2841,18 @@ const mockApiPatternReadRoutes = [
     response: () => ({
       version: "collected-actions",
       chain_id: 1,
-      seasons: [],
+      seasons: [
+        {
+          id: 1,
+          name: "Season 1",
+          asset_keys: Array.from(
+            { length: 47 },
+            (_, index) =>
+              `1:0x33fd426905f149f8376e227d0c9d3340aad17af1:${index + 1}`
+          ),
+          current: false,
+        },
+      ],
       artists: [],
       pebbles_traits: [],
       tdh_snapshot: null,

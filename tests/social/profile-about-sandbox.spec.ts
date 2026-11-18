@@ -1582,6 +1582,54 @@ async function expectCollectedActionAlignment(page: Page) {
   if (viewport) await page.setViewportSize(viewport);
 }
 
+async function holdConnectedIdentity(page: Page) {
+  let release!: () => void;
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const identityResponse = page.waitForResponse((response) =>
+    new URL(response.url()).pathname
+      .toLowerCase()
+      .endsWith(`/identities/${WALLET.toLowerCase()}`)
+  );
+  // This query is enabled only after AuthProvider has accepted the connected identity.
+  const connectedProfileRead = page.waitForResponse((response) =>
+    /\/profiles\/playwright\/proxies\/?$/.test(new URL(response.url()).pathname)
+  );
+  await page.route(
+    new RegExp(`/identities/${WALLET}/?$`, "i"),
+    async (route) => {
+      await held;
+      await route.continue();
+    }
+  );
+  return async () => {
+    release();
+    const response = await identityResponse;
+    expect(response.status()).toBe(200);
+    expect(await response.json()).toMatchObject({
+      id: PROFILE_ID,
+      handle: "playwright",
+    });
+    await response.finished();
+    expect((await connectedProfileRead).status()).toBe(200);
+  };
+}
+
+async function expectSeasonOneCollectedSource(page: Page) {
+  await expectUrlState(
+    page,
+    (url) =>
+      url.pathname === "/playwright/collected" &&
+      url.searchParams.get("collection") === "memes" &&
+      url.searchParams.get("szn") === "1" &&
+      url.searchParams.get("details") === "closed"
+  );
+  await expect(
+    page.getByRole("button", { name: "Season: SZN1", exact: true })
+  ).toBeVisible();
+}
+
 async function openOwnCollected(page: Page) {
   await openOwnProfile(page);
   await page
@@ -1612,11 +1660,19 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       page,
     }, testInfo) => {
       if (viewer === "visitor") await seedSession(page);
+      const finishIdentityRestore =
+        viewer === "visitor" ? await holdConnectedIdentity(page) : null;
       const handle = viewer === "visitor" ? "following-artist-0" : "playwright";
-      await page.goto(`/${handle}/collected?collection=memes&details=closed`);
-      await expect(
-        page.getByRole("main").locator('[data-profile-section="Filters"]')
-      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      try {
+        await page.goto(`/${handle}/collected?collection=memes&details=closed`);
+        await expect(
+          page.getByRole("main").locator('[data-profile-section="Filters"]')
+        ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+        await expectPersonalCollectedActionsAbsent(page);
+      } finally {
+        await finishIdentityRestore?.();
+      }
+      // Repeat after the connected profile has resolved, rather than only during loading.
       await expectPersonalCollectedActionsAbsent(page);
       await page.getByRole("button", { name: "Details", exact: true }).click();
       await expect(
@@ -1653,9 +1709,9 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
       await page.goto(
         "/playwright/collected?collection=memes&szn=1&details=closed"
       );
+      await expectSeasonOneCollectedSource(page);
       const link = page.getByRole("link", { name: action, exact: true });
       await link.click({ trial: true });
-      const source = new URL(page.url());
       const sourceTop = await link.evaluate(
         (element) => element.getBoundingClientRect().top
       );
@@ -1677,6 +1733,30 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
           exact: true,
         })
       ).toBeVisible();
+      if (action === "Complete my set") {
+        await expectUrlState(
+          page,
+          (url) =>
+            url.searchParams.get("collection") === "memes" &&
+            url.searchParams.get("intent") === "season" &&
+            url.searchParams.get("definition") === "1"
+        );
+        await expect(
+          page.getByRole("form", { name: "Complete a season", exact: true })
+        ).toBeVisible();
+        if ((page.viewportSize()?.width ?? 0) < 1024) {
+          await expect(
+            page.getByRole("button", { name: "Season Season 1", exact: true })
+          ).toBeEnabled();
+        } else {
+          const season = page.getByRole("combobox", {
+            name: "Season",
+            exact: true,
+          });
+          await expect(season).toBeEnabled();
+          await expect(season).toHaveValue("Season 1");
+        }
+      }
       if (isNative) {
         await page.getByRole("button", { name: "Back", exact: true }).click();
       } else {
@@ -1685,12 +1765,7 @@ test.describe("Collected personal actions @auth @medium @local-only", () => {
         ).toHaveCount(0);
         await page.goBack();
       }
-      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
-      await expectUrlState(page, (url) =>
-        ["collection", "szn", "details"].every(
-          (key) => url.searchParams.get(key) === source.searchParams.get(key)
-        )
-      );
+      await expectSeasonOneCollectedSource(page);
       if (isNative) {
         await expect(link).toBeFocused();
         await expect(link).toBeInViewport();
