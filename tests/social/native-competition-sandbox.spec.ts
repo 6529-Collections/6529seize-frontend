@@ -7613,22 +7613,27 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         },
         { eventName, background }
       );
+    const expectAlignedMotion = (
+      motion: Awaited<ReturnType<typeof sampleMotion>>
+    ) => {
+      expect(motion.delivered).toBe(true);
+      expect(motion.frames.length).toBeGreaterThan(2);
+      expect(
+        Math.max(...motion.frames.map((frame) => Math.abs(frame.drift)))
+      ).toBeLessThan(2);
+      expect(
+        Math.max(...motion.frames.map((frame) => frame.backgroundMovement))
+      ).toBeLessThan(1);
+      expect(
+        Math.min(...motion.frames.map((frame) => frame.top))
+      ).toBeGreaterThanOrEqual(40);
+    };
     const motion = await sampleMotion("keyboardWillShow");
     await testInfo.attach("iPhone-voting-keyboard-frames", {
       body: JSON.stringify(motion),
       contentType: "application/json",
     });
-    expect(motion.delivered).toBe(true);
-    expect(motion.frames.length).toBeGreaterThan(2);
-    expect(
-      Math.max(...motion.frames.map((frame) => Math.abs(frame.drift)))
-    ).toBeLessThan(2);
-    expect(
-      Math.max(...motion.frames.map((frame) => frame.backgroundMovement))
-    ).toBeLessThan(1);
-    expect(
-      Math.min(...motion.frames.map((frame) => frame.top))
-    ).toBeGreaterThanOrEqual(40);
+    expectAlignedMotion(motion);
     expect(
       await background.evaluate(
         (element) => element.getBoundingClientRect().height
@@ -7649,13 +7654,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       path: testInfo.outputPath("iphone-voting-keyboard.png"),
     });
     const closingMotion = await sampleMotion("keyboardWillHide");
-    expect(closingMotion.delivered).toBe(true);
-    expect(
-      Math.max(...closingMotion.frames.map((frame) => Math.abs(frame.drift)))
-    ).toBeLessThan(2);
-    expect(
-      Math.max(...closingMotion.frames.map((frame) => frame.backgroundMovement))
-    ).toBeLessThan(1);
+    expectAlignedMotion(closingMotion);
     await emitKeyboard("keyboardDidHide");
     await expect(rationale).toHaveValue(
       "A reply preserved through keyboard dismissal"
@@ -7663,7 +7662,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(input).toHaveValue("25");
     // Closing a focused sheet must not unlock/reflow the wave until the
     // keyboard has finished. The next keyboard cycle proves the lock released.
-    await sampleMotion("keyboardWillShow");
+    expectAlignedMotion(await sampleMotion("keyboardWillShow"));
     await emitKeyboard("keyboardDidShow", 300);
     await dialog.getByRole("button", { name: /^Close(?: modal)?$/ }).click();
     await expect(dialog).toHaveCount(0);
@@ -7686,9 +7685,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
     await input.fill("15");
     const reducedMotion = await sampleMotion("keyboardWillShow");
-    expect(
-      Math.max(...reducedMotion.frames.map((frame) => Math.abs(frame.drift)))
-    ).toBeLessThan(2);
+    expectAlignedMotion(reducedMotion);
     await expect(input).toBeFocused();
     await expect(input).toBeInViewport({ ratio: 1 });
     await expect(page.locator("html")).toHaveCSS(
