@@ -13,6 +13,11 @@ Votes artwork, wrapping metrics and neutral zero-submission status without a
 decorative count marker. Discovery
 links, eligibility and pagination retain their existing behavior.
 
+The `profiles.collected-tab` record explains that Complete my set and Manage
+orders are personal shortcuts shown only on the signed-in owner's own profile,
+after account loading and outside proxy sessions. Existing platform purchasing
+restrictions still apply.
+
 The touch-menu, header-navigation and encrypted-chat records cover touch reply,
 timestamp access, cancellable native conversation return and Android Back layer
 ordering. They retain visible tap alternatives, permission and delivery-state
