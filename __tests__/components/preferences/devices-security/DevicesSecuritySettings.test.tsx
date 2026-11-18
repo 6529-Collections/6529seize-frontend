@@ -5,13 +5,15 @@ import {
   type EncryptedDeviceInput,
 } from "@/components/preferences/devices-security/classifyDevices";
 import DevicesSecuritySettings from "@/components/preferences/devices-security/DevicesSecuritySettings";
-import type { SecurityDevicesState } from "@/components/preferences/devices-security/useSecurityDevices";
+import type { useSecurityDevices } from "@/components/preferences/devices-security/useSecurityDevices";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 
 const NOW = Date.UTC(2026, 10, 9, 15, 0);
 const HOUR = 60 * 60 * 1000;
 const DAY = 24 * HOUR;
 const WALLET = "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd";
+
+type SecurityDevicesState = ReturnType<typeof useSecurityDevices>;
 
 let mockState: SecurityDevicesState;
 jest.mock(
