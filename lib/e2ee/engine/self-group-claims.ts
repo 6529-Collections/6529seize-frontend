@@ -1,11 +1,11 @@
 import type { ApiE2eeDevice } from "../api-types";
-import {
-  CLAIM_WINDOW_MS,
-  claimKeyPackages,
-  type ClaimedPackage,
-} from "./claims";
+import { claimKeyPackages, type ClaimedPackage } from "./claims";
 import { checkpoint, type EngineContext } from "./context";
-import { budgetDevice, selfGroupClaimShare } from "./self-group-budget";
+import {
+  budgetDevice,
+  CLAIM_LOG_WINDOW_MS,
+  selfGroupClaimShare,
+} from "./self-group-budget";
 
 /**
  * KeyPackage claims for self groups (P60 §2 rule 6).
@@ -41,16 +41,33 @@ import { budgetDevice, selfGroupClaimShare } from "./self-group-budget";
  */
 const MAX_CLAIM_THROUGH = 31;
 
-/** This device's share of the profile's self-group claim budget an hour. */
-function claimShare(ctx: EngineContext): number {
+/**
+ * The budget's clock: this device's clock as read at its last listing, plus
+ * monotonic time since, so later changes to the device clock do not count.
+ */
+function budgetClock(
+  ctx: EngineContext
+): { now: number; listingAge: number } | null {
+  const listed = ctx.listedAt;
+  if (!listed) {
+    return null;
+  }
+  const listingAge = ctx.monotonic() - listed.mono;
+  return { now: listed.wall + listingAge, listingAge };
+}
+
+/** This device's share of the profile's self-group claim budget. */
+function claimShare(
+  ctx: EngineContext,
+  clock: { now: number; listingAge: number }
+): number {
   const own = ctx.device?.deviceKey;
   return own === undefined
     ? 0
     : selfGroupClaimShare({
         own,
         devices: ctx.ownDevices.map(budgetDevice),
-        now: ctx.now(),
-        listedAt: ctx.lastMeAt,
+        ...clock,
       });
 }
 
@@ -67,16 +84,18 @@ export async function reserveSelfGroupClaim(
   if (!stored) {
     return false;
   }
+  const clock = budgetClock(ctx);
   stored.readSync ??= { unsent: [] };
   const state = stored.readSync;
-  const now = ctx.now();
-  if ((state.claimsPausedUntil ?? 0) > now) {
+  if (!clock || (state.claimsPausedUntil ?? 0) > ctx.now()) {
     return false;
   }
-  const recent = (state.selfGroupClaims ?? []).filter(
-    (at) => now - at < CLAIM_WINDOW_MS
-  );
-  if (recent.length >= claimShare(ctx)) {
+  const { now } = clock;
+  // Stamps from a later clock reading (a clock set back) count as now.
+  const recent = (state.selfGroupClaims ?? [])
+    .map((at) => Math.min(at, now))
+    .filter((at) => now - at < CLAIM_LOG_WINDOW_MS);
+  if (recent.length >= claimShare(ctx, clock)) {
     state.selfGroupClaims = recent;
     return false;
   }

@@ -89,9 +89,10 @@ async function aliceWithTwoDevices(world: World) {
     kind: "dm",
   });
   await settle(world);
-  // Both devices have been around for over an hour, so their full shares
-  // of the self-group claim budget apply (self-group-budget.ts).
-  world.clock.advance(76 * 60_000);
+  // Both devices have been around for over an hour and a half (settled), so
+  // their full shares of the self-group claim budget apply
+  // (self-group-budget.ts).
+  world.clock.advance(96 * 60_000);
   await settle(world);
   return { alice, bob, laptop, phone, g };
 }
@@ -390,7 +391,7 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     // group.
     capable.mockRestore();
     await updateClient(world, alice, phone);
-    world.clock.advance(61 * 60_000);
+    world.clock.advance(71 * 60_000);
     await settle(world);
     const kept = dsGroups(world).find((group) => group.g === canonical);
     expect(kept?.roster.has(phoneKey)).toBe(true);
@@ -428,7 +429,7 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     // it up.
     capable.mockRestore();
     const updated = await updateClient(world, alice, phone);
-    world.clock.advance(61 * 60_000);
+    world.clock.advance(71 * 60_000);
     await settle(world);
     expect(self.roster.has(phoneKey)).toBe(true);
     expect(unread(updated, g)).toBe(0);
@@ -456,11 +457,11 @@ describe("E2EE engine: read-state sync (D175, P60)", () => {
     });
     alice.devices.push(laptop);
     // The laptop adds the tablet to its group. The tablet, new, makes no
-    // claims of its own for 75 minutes (self-group-budget.ts); if its own
+    // claims of its own for 95 minutes (self-group-budget.ts); if its own
     // group has the lower handle, it adds the laptop once settled.
     for (
       let step = 0;
-      step < 10 &&
+      step < 14 &&
       !(
         selfGroupsOf(world, "alice").length === 1 &&
         selfGroupsOf(world, "alice")[0]?.roster.size === 2

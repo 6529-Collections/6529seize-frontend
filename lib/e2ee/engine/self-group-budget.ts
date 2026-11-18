@@ -11,20 +11,28 @@ import type { ApiE2eeDevice } from "../api-types";
  * at 24 or less in every rolling hour on their own, whatever devices are
  * added or removed meanwhile; P60 has the argument. Every device works
  * from the profile's device listing (GET /e2ee/me), which shows every
- * device of the last 90 days with when it was added, revoked and expires.
+ * device of the last 90 days with when it was added (server time), its
+ * grant's issue and expiry, and when it was revoked (server time).
  *
- * - No claim without a listing from the last 15 minutes.
- * - "Recent" devices: those active at any time in the last 75 minutes.
- * - A settled device (added, or its grant issued, 75 minutes ago or more)
- *   may make 2, or 22 divided by the recent devices if smaller.
- * - The settled device with the lowest key among the recent devices may
- *   instead make 24 - 2 x the recent devices (20 with two of them). A
- *   device that becomes lowest by a removal waits until the removed one is
- *   75 minutes gone; one that becomes lowest by being added is new for 75
- *   minutes first.
- * - A new device may make 2 only if no other device was added in the 150
- *   minutes before it, else none. It joins its siblings' self group either
- *   way: they claim its KeyPackages.
+ * Time: the server's API gives no time of its own that a page can read, so
+ * each device reads its own clock once per listing and counts monotonic
+ * time from there. The argument assumes that clock is within SKEW_MS of
+ * the server's; a listing that shows a server time later than that is
+ * refused. Listing staleness is measured on the monotonic clock.
+ *
+ * - No claim without a listing at most LISTING_FRESH_MS old.
+ * - "Recent" devices: those active at any time in the last RECENT_MS
+ *   (widened by SKEW_MS on both sides).
+ * - A device is new until SETTLE_MS (plus SKEW_MS) after the server added
+ *   it. A new device may make 2 only if no other device was added (by the
+ *   server's times) in the SPACING_MS before it, else none. It joins its
+ *   siblings' self group either way: they claim its KeyPackages.
+ * - Any other device may make 2, or 22 divided by the recent devices if
+ *   smaller.
+ * - The device with the lowest key among the recent devices may instead
+ *   make 24 - 2 x the recent devices (20 with two of them), once SETTLE_MS
+ *   (plus SKEW_MS) have passed since the later of its addition and its
+ *   grant's issue.
  */
 
 export const SELF_GROUP_CLAIMS_PER_HOUR = 24;
@@ -33,19 +41,31 @@ const SMALL_SHARE = 2;
 /** Room kept for one new device's share. */
 const NEW_DEVICE_ROOM = SMALL_SHARE;
 const MINUTE = 60_000;
-/** Claims need a device listing at most this old. */
+const HOUR = 60 * MINUTE;
+/** Assumed bound on any device clock's offset from the server's. */
+export const SKEW_MS = 5 * MINUTE;
+/** Claims need a device listing at most this old (monotonic). */
 export const LISTING_FRESH_MS = 15 * MINUTE;
-/** A device is new for this long after it is added or its grant issued. */
-const SETTLE_MS = 75 * MINUTE;
-/** A new device claims only if no other device was added this shortly before. */
-const NEW_DEVICE_SPACING_MS = 2 * SETTLE_MS;
+/** At least an hour plus the listing staleness plus the skew margin. */
+const SETTLE_MS = 90 * MINUTE;
+/** Devices active this recently count; a removed lowest key keeps counting. */
+const RECENT_MS = 90 * MINUTE;
+/** At least the settle period plus an hour plus two skew margins. */
+const SPACING_MS = 3 * HOUR;
+/**
+ * The window a device counts its own claims over: an hour, plus room for
+ * its clock reading at two listings to differ by twice the skew bound.
+ */
+export const CLAIM_LOG_WINDOW_MS = HOUR + 2 * SKEW_MS;
 
 /** A device as the profile's listing shows it (times in ms). */
 export interface BudgetDevice {
   key: string;
+  /** Server time. */
   addedAt: number;
-  /** When its current grant was issued. */
+  /** When its current grant was issued (by its own clock). */
   issuedAt: number;
+  /** Server time. */
   revokedAt: number | null;
   expiresAt: number;
 }
@@ -58,7 +78,7 @@ export const budgetDevice = (device: ApiE2eeDevice): BudgetDevice => ({
   expiresAt: device.grant.expires_at * 1000,
 });
 
-/** Added (or its grant issued) at this time: new until SETTLE_MS later. */
+/** Not the lowest key's share until SETTLE_MS after the later of these. */
 const since = (device: BudgetDevice): number =>
   Math.max(device.addedAt, device.issuedAt);
 
@@ -68,27 +88,36 @@ const activeDuring = (device: BudgetDevice, from: number, to: number) =>
   device.expiresAt > from;
 
 /**
- * This device's self-group claims allowed in any rolling hour, from the
- * profile's device listing made at `listedAt`.
+ * This device's self-group claims allowed in any window of
+ * CLAIM_LOG_WINDOW_MS, by its clock as read at its last listing plus the
+ * monotonic time since (`now`), `listingAge` after that listing.
  */
 export function selfGroupClaimShare(input: {
   own: string;
   devices: readonly BudgetDevice[];
   now: number;
-  listedAt: number;
+  listingAge: number;
 }): number {
-  const { now } = input;
+  const { now, listingAge } = input;
   const own = input.own.toLowerCase();
   const me = input.devices.find((device) => device.key === own);
+  const listedAt = now - listingAge;
+  const clockBehind = input.devices.some(
+    (device) =>
+      device.addedAt > listedAt + SKEW_MS ||
+      (device.revokedAt !== null && device.revokedAt > listedAt + SKEW_MS)
+  );
   if (
     !me ||
-    now - input.listedAt > LISTING_FRESH_MS ||
+    listingAge < 0 ||
+    listingAge > LISTING_FRESH_MS ||
+    clockBehind ||
     !activeDuring(me, now, now)
   ) {
     return 0;
   }
   const recent = input.devices.filter((device) =>
-    activeDuring(device, now - SETTLE_MS, now)
+    activeDuring(device, now - RECENT_MS - SKEW_MS, now + SKEW_MS)
   );
   const settledShare = Math.min(
     SMALL_SHARE,
@@ -97,15 +126,22 @@ export function selfGroupClaimShare(input: {
         Math.max(1, recent.length)
     )
   );
-  if (now - since(me) < SETTLE_MS) {
+  if (now - me.addedAt < SETTLE_MS + SKEW_MS) {
+    // A new device, unseen by listings made before it was added: one share
+    // at most per SPACING_MS of additions, ordered by the server's times.
     const crowded = input.devices.some(
       (device) =>
         device.key !== own &&
-        since(me) - since(device) < NEW_DEVICE_SPACING_MS &&
-        (since(device) < since(me) ||
-          (since(device) === since(me) && device.key < own))
+        me.addedAt - device.addedAt < SPACING_MS &&
+        (device.addedAt < me.addedAt ||
+          (device.addedAt === me.addedAt && device.key < own))
     );
     return crowded ? 0 : settledShare;
+  }
+  if (now - since(me) < SETTLE_MS + SKEW_MS) {
+    // A renewed grant: listed all along, so a settled share, but not yet
+    // the lowest key's.
+    return settledShare;
   }
   const lowest = recent.every((device) => device.key >= own);
   const lowestShare = SELF_GROUP_CLAIMS_PER_HOUR - SMALL_SHARE * recent.length;

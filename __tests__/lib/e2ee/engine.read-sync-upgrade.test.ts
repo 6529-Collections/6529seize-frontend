@@ -311,8 +311,8 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     await settle(world);
     const phone = await olderClientDevice(world, alice, keyPackages.old);
     const g = await readOnLaptop(world, laptop);
-    // Both devices have been around for over an hour.
-    world.clock.advance(76 * MINUTE);
+    // Both devices have been around for over an hour and a half (settled).
+    world.clock.advance(96 * MINUTE);
     await settle(world);
 
     const timeline = await phoneUpdates(world, alice, laptop, phone, g, 10);
@@ -346,12 +346,13 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     expect(claims()).toBeLessThanOrEqual(2 * SELF_GROUP_BUDGET);
 
     const g = await readOnLaptop(world, laptop);
-    const timeline = await phoneUpdates(world, alice, laptop, phone, g, 150);
+    const timeline = await phoneUpdates(world, alice, laptop, phone, g, 200);
     expect(timeline.capableKeyPackages).toBe(0);
     // An older queue holds up to 30 KeyPackages; the device with the
-    // lowest key spends 20 claims an hour on self groups, the other 2, so
-    // one of them reaches a capable KeyPackage within about 80 minutes.
-    expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(90);
+    // lowest key spends 20 claims on self groups per 70 minutes (an hour
+    // plus room for clock skew), the other 2, so one of them reaches a
+    // capable KeyPackage within about two hours.
+    expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(150);
     expect(timeline.readStateSynced ?? Infinity).toBeLessThanOrEqual(
       (timeline.sharedGroup ?? Infinity) + 1
     );
@@ -395,8 +396,8 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
       await settle(world);
     }
     expect(laptopRecord()?.claimedThrough?.[phoneKey]).toBeDefined();
-    // An hour later the budget is free again; one older KeyPackage queued.
-    world.clock.advance(61 * MINUTE);
+    // 70 minutes later the budget is free again; one older KeyPackage queued.
+    world.clock.advance(71 * MINUTE);
     await settle(world);
     pool.oneTime.unshift(spare);
     const [laptopGroup] = selfGroupsOf(world, "alice");
@@ -544,7 +545,7 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
       await settle(world);
     }
     expect(laptopGroup.roster.has(phoneKey)).toBe(true);
-    expect(world.clock.now()).toBeLessThanOrEqual(windowEnd + 72 * MINUTE);
+    expect(world.clock.now()).toBeLessThanOrEqual(windowEnd + 82 * MINUTE);
     expect(updated.engine.getConversation(g)?.unread).toBe(0);
     for (const device of world.devices) device.engine.dispose();
   });
@@ -568,8 +569,8 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
       phones.push(await olderClientDevice(world, alice, keyPackages.old));
     }
     await settle(world);
-    // All five have been around for over an hour.
-    world.clock.advance(76 * MINUTE);
+    // All five have been around for over an hour and a half (settled).
+    world.clock.advance(96 * MINUTE);
     await settle(world);
     // Their queues are full: each older client uploads more of its own.
     for (const phone of phones) {

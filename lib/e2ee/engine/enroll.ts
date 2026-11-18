@@ -679,6 +679,7 @@ export async function refreshMe(
     };
   }
   ctx.ownDevices = me.devices;
+  ctx.listedAt = { wall: ctx.now(), mono: ctx.monotonic() };
   ctx.ownKeyPackages = new Map(
     me.key_packages.map((item) => [
       item.device_key.toLowerCase(),

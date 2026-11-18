@@ -406,6 +406,12 @@ export interface E2eeEngineDeps {
     listener: (event: { type: string; data: unknown }) => void
   ) => () => void; // WS events
   now?: () => number;
+  /**
+   * Monotonic milliseconds for durations that must not follow changes to
+   * the device clock (the self-group claim budget). Defaults to `now` when
+   * that is given (tests), else performance.now().
+   */
+  monotonic?: () => number;
   storage?: E2eeStorage; // default IndexedDB; tests inject memory
   loadWasm?: () => Promise<WasmModule>; // default fetch public/e2ee wasm
 }

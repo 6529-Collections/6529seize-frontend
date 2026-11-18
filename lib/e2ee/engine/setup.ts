@@ -80,6 +80,12 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
     lastMeAt: 0,
     ownKeyPackages: new Map(),
     ownDevices: [],
+    listedAt: null,
+    monotonic:
+      options.monotonic ??
+      (options.now
+        ? options.now
+        : () => globalThis.performance?.now() ?? Date.now()),
     lastWakeAt: 0,
     openConversation: null,
     openUntil: 0,
