@@ -240,6 +240,36 @@ describe("NavigationHistoryContext", () => {
     expect(routerMock.push).toHaveBeenLastCalledWith("/network?page=2");
   });
 
+  it("does not let an outgoing fragment consume the pending Back commit", () => {
+    mockPathname = "/network";
+    mockSearchParams = new URLSearchParams("page=2");
+    window.history.replaceState(null, "", "/network?page=2");
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+    mockPathname = "/Shelby";
+    mockSearchParams = new URLSearchParams();
+    window.history.replaceState(null, "", "/Shelby");
+    rerender();
+    act(() => result.current.goBack());
+    act(() => {
+      window.history.replaceState(null, "", "/Shelby#late");
+      window.dispatchEvent(new HashChangeEvent("hashchange"));
+    });
+    mockPathname = "/network";
+    mockSearchParams = new URLSearchParams("page=2");
+    window.history.replaceState(null, "", "/network?page=2");
+    rerender();
+    expect(result.current.canGoBack).toBe(false);
+    mockPathname = "/other-profile";
+    mockSearchParams = new URLSearchParams();
+    window.history.replaceState(null, "", "/other-profile");
+    rerender();
+    act(() => result.current.goBack());
+    expect(routerMock.push).toHaveBeenLastCalledWith("/network?page=2");
+  });
+
   it("keeps fragments when the browser uses equivalent query encoding", () => {
     mockPathname = "/network";
     mockSearchParams = new URLSearchParams("name=two+words");

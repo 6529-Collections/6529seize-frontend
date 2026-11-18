@@ -43,6 +43,45 @@ describe("useWaveTabNavigation", () => {
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
+  it.each([
+    "/waves/wave?tab=chat&competition=rank",
+    "/waves/wave/decisions/rank?tab=decisions",
+  ])(
+    "preserves the validated Feed origin through same-Wave tabs: %s",
+    (href) => {
+      globalThis.history.replaceState(
+        null,
+        "",
+        "/waves/wave/decisions/rank?tab=leaderboard&returnTo=%2Fwaves%3Fview%3Dprofile-feed"
+      );
+      const unregister = registerWaveTabShell("wave");
+      const { result } = renderHook(useWaveTabNavigation);
+      try {
+        act(() => result.current(href));
+        expect(
+          new URL(globalThis.location.href).searchParams.get("returnTo")
+        ).toBe("/waves?view=profile-feed");
+        expect(mockPush).not.toHaveBeenCalled();
+      } finally {
+        unregister();
+      }
+    }
+  );
+
+  it.each([
+    "/waves/another?tab=chat",
+    "https://example.org/waves/wave?tab=chat",
+  ])("does not carry the Feed origin outside the same Wave: %s", (href) => {
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/waves/wave?returnTo=%2Fwaves%3Fview%3Dprofile-feed"
+    );
+    const { result } = renderHook(useWaveTabNavigation);
+    act(() => result.current(href));
+    expect(mockPush).toHaveBeenCalledWith(href, { scroll: false });
+  });
+
   it("preserves replace semantics for wave tabs", () => {
     globalThis.history.replaceState(
       null,
@@ -102,12 +141,8 @@ describe("useWaveTabNavigation", () => {
     try {
       act(() => result.current("/waves/wave?tab=chat&competition=rank"));
       expect(globalThis.location.pathname).toBe("/waves/wave");
-      act(() =>
-        result.current("/waves/wave/decisions/rank?tab=leaderboard")
-      );
-      expect(globalThis.location.pathname).toBe(
-        "/waves/wave/decisions/rank"
-      );
+      act(() => result.current("/waves/wave/decisions/rank?tab=leaderboard"));
+      expect(globalThis.location.pathname).toBe("/waves/wave/decisions/rank");
       expect(mockPush).not.toHaveBeenCalled();
     } finally {
       unregister();

@@ -83,6 +83,50 @@ it("keeps navigation immediate with reduced motion or no browser support", () =>
   expect(start).not.toHaveBeenCalled();
 });
 
+it("clears pending Feed content when a Waves return takes ownership", async () => {
+  runWaveNavigationTransition("feed", jest.fn());
+  await Promise.resolve();
+  commitWaveNavigationTransition("feed");
+  await updateDone;
+  document.body.innerHTML = '<div data-wave-navigation-screen="feed"></div>';
+  const navigate = jest.fn();
+  runWaveNavigationTransition("list", navigate);
+  expect(document.documentElement).not.toHaveAttribute(
+    "data-wave-navigation-content-pending"
+  );
+  await Promise.resolve();
+  commitWaveNavigationTransition("list");
+  await updateDone;
+  expect(navigate).toHaveBeenCalledTimes(1);
+  finish();
+  await Promise.resolve();
+});
+
+it.each(["motion", "deadline"])(
+  "keeps navigation when %s cancels motion before the capture callback",
+  async (reason) => {
+    const navigate = jest.fn();
+    runWaveNavigationTransition("wave", navigate);
+    if (reason === "motion") media.addEventListener.mock.calls[0]?.[1]();
+    else jest.advanceTimersByTime(500);
+    await updateDone;
+    expect(navigate).toHaveBeenCalledTimes(1);
+  }
+);
+
+it("does not run a superseded capture callback", async () => {
+  const navigate = jest.fn();
+  runWaveNavigationTransition("wave", navigate);
+  skipWaveNavigationTransition();
+  await updateDone;
+  expect(navigate).not.toHaveBeenCalled();
+});
+
+it("drops the pending swipe handoff when its navigation is superseded", () => {
+  navigateAfterWaveSwipe(skipWaveNavigationTransition);
+  expect(consumeWaveSwipeHandoff()).toBe(false);
+});
+
 it("does not capture unrelated layouts or same-screen navigation", () => {
   const navigate = jest.fn();
   runWaveNavigationTransition("list", navigate);

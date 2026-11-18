@@ -69,10 +69,10 @@ it("does not navigate from a captured release after its surface is disabled", ()
   );
   capturedNavigation();
   expect(onSwipeBack).not.toHaveBeenCalled();
-  capture.mockRestore();
 });
 afterEach(() => {
   jest.useRealTimers();
+  jest.restoreAllMocks();
 });
 
 function setup(enabled = true, targetScreen?: waveNavigation.WaveScreen) {
@@ -171,7 +171,6 @@ it("settles before navigation and cancels an in-flight animation when unmounted"
   expect(onSwipeBack).toHaveBeenCalledTimes(1);
   unmount();
   expect(cancel).toHaveBeenCalled();
-  capture.mockRestore();
 });
 
 it("clears the outgoing transform when navigation reuses the same surface", async () => {

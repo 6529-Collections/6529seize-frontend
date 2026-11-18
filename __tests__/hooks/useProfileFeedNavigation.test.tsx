@@ -93,6 +93,21 @@ it("returns a native feed-origin chat to the feed without resetting scroll", () 
   expect(mockClearLastVisited).toHaveBeenCalledWith("wave");
 });
 
+it("leaves the Feed for Waves even if its URL contains a Feed return marker", () => {
+  window.history.replaceState(
+    null,
+    "",
+    PROFILE_WAVES_FEED_HREF +
+      "&returnTo=" +
+      encodeURIComponent(PROFILE_WAVES_FEED_HREF)
+  );
+  const { result } = renderHook(useExitActiveWave);
+  act(() => result.current(false));
+  expect(mockSetActiveWave).toHaveBeenCalledWith(null, {
+    isDirectMessage: false,
+  });
+});
+
 it("returns to the valid feed route when the stream context is unavailable", () => {
   mockHasMyStream = false;
   window.history.replaceState(

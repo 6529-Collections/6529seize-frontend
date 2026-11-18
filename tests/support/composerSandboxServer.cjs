@@ -268,6 +268,17 @@ const sandboxGroupMembers = Array.from({ length: 25 }, (_, index) => {
   };
 });
 
+// Network Back coverage needs a real second page; group previews keep 25 members.
+const sandboxNetworkMembers = Array.from({ length: 100 }, (_, index) => {
+  const suffix = String(index + 1).padStart(2, "0");
+  return {
+    ...sandboxGroupMembers[index % sandboxGroupMembers.length],
+    display: `collector-${suffix}`,
+    detail_view_key: `collector-${suffix}`,
+    wallet: `0x${(index + 1).toString(16).padStart(40, "0")}`,
+  };
+});
+
 function identityOverview({
   id,
   handle,
@@ -1132,7 +1143,7 @@ function emptyPage() {
   return { data: [], count: 0, page: 1, next: false };
 }
 
-function sandboxGroupMembersPage(searchParams) {
+function sandboxGroupMembersPage(searchParams, members = sandboxGroupMembers) {
   const query = (searchParams.get("param") ?? "").trim().toLowerCase();
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
   const pageSize = Math.max(
@@ -1140,12 +1151,12 @@ function sandboxGroupMembersPage(searchParams) {
     Number(searchParams.get("page_size") ?? "20") || 20
   );
   const filteredMembers = query
-    ? sandboxGroupMembers.filter(
+    ? members.filter(
         (member) =>
           member.display.toLowerCase().includes(query) ||
           member.wallet.toLowerCase().includes(query)
       )
-    : sandboxGroupMembers;
+    : members;
   const pageStart = (page - 1) * pageSize;
 
   return {
@@ -3008,7 +3019,10 @@ function handleTopCommunityMembersRead(pathname, url, res) {
     return false;
   }
 
-  return writeJsonResponse(res, sandboxGroupMembersPage(url.searchParams));
+  return writeJsonResponse(
+    res,
+    sandboxGroupMembersPage(url.searchParams, sandboxNetworkMembers)
+  );
 }
 
 function handleGroupIdentityWalletsRead(pathname, res) {

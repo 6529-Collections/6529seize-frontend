@@ -102,7 +102,8 @@ context-aware `Back`).
 - Android system Back first dismisses an open keyboard, then the topmost
   dismissible sheet, menu or dialog. A reaction picker returns to its action
   sheet before the sheet closes. Single-drop details close before the wave;
-  a wave returns to Waves, and a direct message returns to Messages.
+  a chat opened from Profile Waves Feed returns to the Feed. Other waves return
+  to Waves, and direct messages return to Messages.
 - Deeper pages return through app history or to an in-app destination. Only
   a main-section root with no earlier app destination can minimize the app.
   A dialog awaiting a required decision keeps its visible actions and does not

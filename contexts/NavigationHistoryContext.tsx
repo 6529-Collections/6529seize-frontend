@@ -219,7 +219,9 @@ export const NavigationHistoryProvider: React.FC<{
   // provider's children, so it runs after page effects and before any
   // ancestor's, in the same commit: where this provider's effect used to run.
   const observeUrl = useCallback(
-    (url: string, currentPathname: string) => {
+    (url: string, currentPathname: string, fragmentOnly = false) => {
+      // The outgoing page can still emit a hash event while Back is routing.
+      if (fragmentOnly && skipNext.current) return;
       const location = globalThis.location;
       // A page effect may have already navigated beyond this committed URL.
       const browserPath = getFullPath(
@@ -382,7 +384,11 @@ function getFullPath(
 function NavigationQuerySync({
   observeUrl,
 }: {
-  readonly observeUrl: (url: string, pathname: string) => void;
+  readonly observeUrl: (
+    url: string,
+    pathname: string,
+    fragmentOnly?: boolean
+  ) => void;
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -399,7 +405,7 @@ function NavigationQuerySync({
           new URLSearchParams(globalThis.location.search)
         ) === fullPath
       ) {
-        observeUrl(fullPath, pathname);
+        observeUrl(fullPath, pathname, true);
       }
     };
     globalThis.addEventListener("hashchange", observeFragment);

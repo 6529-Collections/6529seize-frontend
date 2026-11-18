@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
   PROFILE_WAVES_FEED_HREF,
+  isProfileWavesFeed,
   returnsToProfileWavesFeed,
 } from "@/helpers/waves/profile-feed-navigation";
 import { runWaveNavigationTransition } from "@/helpers/waves/wave-navigation-transition";
@@ -21,12 +22,12 @@ export function useExitActiveWave() {
   return useCallback(
     (isDirectMessage: boolean) => {
       clearLastVisited(isDirectMessage ? "dm" : "wave");
+      const search = new URLSearchParams(globalThis.location.search);
       if (
         isApp &&
         !isDirectMessage &&
-        returnsToProfileWavesFeed(
-          new URLSearchParams(globalThis.location.search)
-        )
+        !isProfileWavesFeed(globalThis.location.pathname, search) &&
+        returnsToProfileWavesFeed(search)
       ) {
         if (setActiveWave) {
           setActiveWave(null, { profileFeed: true });

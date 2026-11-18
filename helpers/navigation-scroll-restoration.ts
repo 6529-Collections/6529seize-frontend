@@ -8,8 +8,12 @@ interface ScrollPosition {
   containers: Map<number, number>;
 }
 
-const currentHref = () =>
-  window.location.pathname + window.location.search + window.location.hash;
+const normalizeHref = (href: string) => {
+  const url = new URL(href, window.location.href);
+  const query = url.searchParams.toString();
+  return url.pathname + (query ? `?${query}` : "") + url.hash;
+};
+const currentHref = () => normalizeHref(window.location.href);
 
 // Stream lists own their virtualized offsets and must not have two restorers.
 const ownsScrollPosition = (href: string) =>
@@ -66,7 +70,6 @@ function createForwardNavigationHandler(
   prepare: (href: string, position: ScrollPosition, from: string) => boolean
 ) {
   return (event: MouseEvent) => {
-    if (!isNative()) return;
     const href = getForwardDestination(event);
     if (!href) return;
     const containers = Array.from(
@@ -79,6 +82,7 @@ function createForwardNavigationHandler(
         containers.map((element, index) => [index, element.scrollTop])
       ),
     });
+    if (!isNative()) return;
     prepare(
       href,
       {
@@ -102,7 +106,8 @@ export function createNavigationScrollRestoration({
   } | null = null;
   let stopRestoring = () => {};
 
-  const save = (href: string, position: ScrollPosition) => {
+  const save = (rawHref: string, position: ScrollPosition) => {
+    const href = normalizeHref(rawHref);
     positions.delete(href);
     positions.set(href, position);
     if (positions.size > MAX_POSITIONS)
@@ -135,10 +140,12 @@ export function createNavigationScrollRestoration({
   };
 
   const prepare = (
-    href: string,
-    position = positions.get(href),
+    rawHref: string,
+    savedPosition?: ScrollPosition,
     from?: string
   ) => {
+    const href = normalizeHref(rawHref);
+    const position = savedPosition ?? positions.get(href);
     stopRestoring();
     stopRestoring = () => {};
     pending = null;
@@ -150,12 +157,12 @@ export function createNavigationScrollRestoration({
       from,
       position: { ...position, containers: new Map(position.containers) },
     };
-    const expiry = window.setTimeout(
-      () => {
-        pending = null;
-      },
-      from === undefined ? 2000 : 10000
-    );
+    const expiry =
+      from === undefined
+        ? undefined
+        : window.setTimeout(() => {
+            pending = null;
+          }, 10000);
     stopRestoring = () => {
       clearTimeout(expiry);
       pending = null;
@@ -169,7 +176,8 @@ export function createNavigationScrollRestoration({
     prepare
   );
 
-  const committed = (href: string) => {
+  const committed = (rawHref: string) => {
+    const href = normalizeHref(rawHref);
     if (!pending) return;
     const returning = pending;
     stopRestoring();
@@ -194,7 +202,6 @@ export function createNavigationScrollRestoration({
       pending = null;
       cancelAnimationFrame(frame);
       clearTimeout(timeout);
-      observer.disconnect();
       for (const type of ["wheel", "touchstart", "keydown"]) {
         document.removeEventListener(type, stop, true);
       }
@@ -206,12 +213,11 @@ export function createNavigationScrollRestoration({
         return;
       }
       if (restoreScrollPosition(position)) stop();
+      else frame = requestAnimationFrame(restore);
     };
     const schedule = () => {
       frame ||= requestAnimationFrame(restore);
     };
-    const observer = new MutationObserver(schedule);
-    observer.observe(document.body, { childList: true, subtree: true });
     for (const type of ["wheel", "touchstart", "keydown"]) {
       document.addEventListener(type, stop, { capture: true, passive: true });
     }

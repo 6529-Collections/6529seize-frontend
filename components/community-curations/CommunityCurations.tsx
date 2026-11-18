@@ -186,24 +186,28 @@ export default function CommunityCurations({
     []
   );
 
+  const restoreScrollOffset = useCallback(
+    (contentMeasured = false) => {
+      if (hasRestoredScrollOffsetRef.current) return true;
+      const element = scrollContainerRef.current;
+      if (!element) return false;
+      element.scrollTo({ top: initialScrollOffset });
+      hasRestoredScrollOffsetRef.current =
+        Math.abs(element.scrollTop - initialScrollOffset) <= 1 ||
+        (contentMeasured && !hasMorePages);
+      return hasRestoredScrollOffsetRef.current;
+    },
+    [hasMorePages, initialScrollOffset]
+  );
+
   useLayoutEffect(() => {
     if (!shouldShowMasonry || drops.length === 0) {
       // Empty, error and loading states are also complete visible destinations.
       commitWaveNavigationContent("feed");
       return;
     }
-    if (hasRestoredScrollOffsetRef.current) {
-      return;
-    }
-
-    const element = scrollContainerRef.current;
-    if (!element) {
-      return;
-    }
-
-    element.scrollTo({ top: initialScrollOffset });
-    hasRestoredScrollOffsetRef.current = true;
-  }, [drops.length, initialScrollOffset, shouldShowMasonry]);
+    restoreScrollOffset();
+  }, [drops.length, restoreScrollOffset, shouldShowMasonry]);
 
   return (
     <section
@@ -251,6 +255,7 @@ export default function CommunityCurations({
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
               scrollContainer={scrollContainer}
+              restoreScrollOffset={restoreScrollOffset}
             />
           )}
         </div>
