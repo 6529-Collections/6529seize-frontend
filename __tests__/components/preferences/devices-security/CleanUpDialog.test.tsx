@@ -102,6 +102,50 @@ describe("CleanUpDialog", () => {
     expect(onRevoke).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
   });
 
+  it("re-checks each device right before its revoke, skipping one no longer eligible", async () => {
+    const a = device("a");
+    const b = device("b");
+    let update: (list: readonly SecurityDevice[]) => void = () => undefined;
+    const rendered = renderDialog([a, b], {
+      onRevoke: async (target) => {
+        if (target.id === "a") {
+          // While A is revoked, B stops being an earlier setup.
+          update([]);
+        }
+      },
+    });
+    update = rendered.update;
+    await act(async () => {
+      fireEvent.click(
+        within(dialog()).getByRole("button", { name: "Revoke 2 devices" })
+      );
+    });
+    expect(rendered.onRevoke).toHaveBeenCalledTimes(1);
+    expect(rendered.onRevoke).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "a" })
+    );
+  });
+
+  it("skips a device whose permissions changed after it was reviewed", async () => {
+    const a = device("a");
+    let update: (list: readonly SecurityDevice[]) => void = () => undefined;
+    const rendered = renderDialog([a, device("b")], {
+      onRevoke: async (target) => {
+        if (target.id === "a") {
+          // B gains encrypted DMs meanwhile: not what was reviewed.
+          update([device("b", { dms: true })]);
+        }
+      },
+    });
+    update = rendered.update;
+    await act(async () => {
+      fireEvent.click(
+        within(dialog()).getByRole("button", { name: "Revoke 2 devices" })
+      );
+    });
+    expect(rendered.onRevoke).toHaveBeenCalledTimes(1);
+  });
+
   it("warns that signed revokes delete saved chats when encrypted DMs are selected", () => {
     renderDialog([device("a", { dms: true })], { signed: true });
     expect(dialog()).toHaveTextContent(

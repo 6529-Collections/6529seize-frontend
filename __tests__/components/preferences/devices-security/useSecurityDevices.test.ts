@@ -46,17 +46,26 @@ jest.mock("@/hooks/device-signing/useDeviceGrants", () => ({
 }));
 let mockE2ee: Record<string, unknown>;
 jest.mock("@/hooks/e2ee/useE2ee", () => ({ useE2ee: () => mockE2ee }));
-const mockRemoveLocal = jest.fn(async () => undefined);
+const mockRemoveLocal = jest.fn(async (_key?: string) => true);
 jest.mock("@/components/e2ee/useRemoveE2eeLocalData", () => ({
   useRemoveE2eeLocalData: () => mockRemoveLocal,
 }));
 let mockApiQuery: Record<string, unknown>;
 let mockApiQueryEnabled: boolean | undefined;
+// This browser's stored encrypted device (the one identity source).
+let mockStoredKey: string | null = null;
+jest.mock("@/lib/e2ee/storage", () => ({
+  readStoredE2eeDeviceKey: async () => mockStoredKey,
+}));
 jest.mock("@tanstack/react-query", () => ({
-  useQuery: (options: { enabled?: boolean }) => {
+  useQuery: (options: { enabled?: boolean; queryKey: readonly unknown[] }) => {
+    if (options.queryKey[0] === "E2EE_STORED_DEVICE_KEY") {
+      return { data: mockStoredKey };
+    }
     mockApiQueryEnabled = options.enabled;
     return mockApiQuery;
   },
+  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
 }));
 const mockApiPost = jest.fn();
 jest.mock("@/services/api/common-api", () => ({
@@ -121,6 +130,7 @@ const engine = {
 describe("useSecurityDevices", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockStoredKey = null;
     mockAuth = {
       activeProfileProxy: null,
       isAuthenticated: true,
@@ -215,12 +225,8 @@ describe("useSecurityDevices", () => {
     it("removes this browser's encrypted chats after an unsigned revoke of its combined grant", async () => {
       // The engine isn't running, so the server revokes this browser's
       // encrypted device unsigned and nothing here would clear it.
-      mockE2ee = {
-        engine: null,
-        status: "locked",
-        devices: [],
-        localDeviceKey: "0xABC",
-      };
+      mockE2ee = { engine: null, status: "locked", devices: [] };
+      mockStoredKey = "0xabc";
       mockGrants = [grant("a", { device_key: OWN_KEY })];
       mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
       mockApiQuery = {
@@ -240,12 +246,8 @@ describe("useSecurityDevices", () => {
       // This browser's signing key is the grant's, but the grant's
       // encrypted device isn't this browser's current one: its data isn't
       // here, so nothing local is removed.
-      mockE2ee = {
-        engine: null,
-        status: "locked",
-        devices: [],
-        localDeviceKey: "0xdef",
-      };
+      mockE2ee = { engine: null, status: "locked", devices: [] };
+      mockStoredKey = "0xdef";
       mockGrants = [grant("a", { device_key: OWN_KEY })];
       mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
       mockApiQuery = {
@@ -297,6 +299,72 @@ describe("useSecurityDevices", () => {
       expect(result.current.otherDevices[0]?.encryptedDms?.status).toBe(
         "revoked"
       );
+    });
+
+    it("reports a failed local removal apart from the revoke, and retries only the removal", async () => {
+      mockE2ee = { engine: null, status: "locked", devices: [] };
+      mockStoredKey = "0xabc";
+      mockGrants = [grant("a", { device_key: OWN_KEY })];
+      mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
+      mockApiQuery = {
+        ...mockApiQuery,
+        isSuccess: true,
+        data: [apiDevice("0xabc", { grant_id: "a", grant_message: "signed" })],
+      };
+      mockRemoveLocal.mockRejectedValueOnce(new Error("locked"));
+      const { result } = renderHook(() => useSecurityDevices());
+      const outcome = await act(() =>
+        result.current.revoke(result.current.thisDevice!)
+      );
+      // The revoke went through: the lists refresh, nothing is thrown.
+      expect(outcome).toEqual({ kind: "failed", deviceKey: "0xabc" });
+      expect(mockRevokeGrant).toHaveBeenCalledTimes(1);
+      expect(mockGrantsRefetch).toHaveBeenCalled();
+      expect(mockApiQuery["refetch"]).toHaveBeenCalled();
+      // Retrying removes the data without revoking again.
+      await act(() => result.current.retryLocalCleanup("0xabc"));
+      expect(mockRemoveLocal).toHaveBeenLastCalledWith("0xabc");
+      expect(mockRevokeGrant).toHaveBeenCalledTimes(1);
+    });
+
+    it("keeps the API list until the engine's list shows a device revoked unsigned as ended", async () => {
+      const linked = { authorProofGrantId: "a", linkedAuthorProof: true };
+      mockE2ee = {
+        engine,
+        status: "device-limit",
+        devices: [engineDevice("e1", linked)],
+      };
+      mockGrants = [grant("a")];
+      mockApiQuery = {
+        ...mockApiQuery,
+        isSuccess: true,
+        data: [
+          apiDevice("e1", {
+            grant_id: "a",
+            grant_message: "signed",
+            revoked_at: NOW,
+          }),
+        ],
+      };
+      const { result, rerender } = renderHook(() => useSecurityDevices());
+      await act(() => result.current.revoke(result.current.otherDevices[0]!));
+      // The engine publishes a list read before the revoke: still active.
+      mockE2ee = {
+        ...mockE2ee,
+        devices: [engineDevice("e1", linked)],
+      };
+      rerender();
+      expect(mockApiQueryEnabled).toBe(true);
+      expect(result.current.otherDevices[0]?.encryptedDms?.status).toBe(
+        "revoked"
+      );
+      // Its list catches up: the engine's list is shown again.
+      mockE2ee = {
+        ...mockE2ee,
+        devices: [engineDevice("e1", { ...linked, revokedAt: NOW })],
+      };
+      rerender();
+      expect(mockApiQueryEnabled).toBe(false);
     });
 
     it("leaves local data alone when revoking another device's grant", async () => {
