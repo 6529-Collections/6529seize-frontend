@@ -9,6 +9,7 @@ jest.mock('@/components/waves/memes/traits/TraitField', () => ({ TraitField: ({ 
 )}));
 
 jest.mock('@/components/waves/memes/traits/schema', () => ({
+  ...jest.requireActual('@/components/waves/memes/traits/schema'),
   getFormSections: () => [{ title: 'T', layout: 'single', fields: [{ field: 'artist', label: 'Artist', type: 'text' }] }],
 }));
 

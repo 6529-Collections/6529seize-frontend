@@ -3,7 +3,7 @@ import {
   BTN_SUBSCRIPTIONS_AIRDROP,
   DropForgeSectionTitleWithToggle,
 } from "@/components/drop-forge/launch/view/common";
-import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
+import VerifiedEnsAddressInput from "@/components/utils/input/ens-address/VerifiedEnsAddressInput";
 import type { ApiMemesMintStat } from "@/generated/models/ApiMemesMintStat";
 import type { ApiMintingClaimAction } from "@/generated/models/ApiMintingClaimAction";
 
@@ -217,7 +217,7 @@ function DropForgePayArtistAddressField({
         {isMintStatPending ? (
           MINT_STAT_LOADING_LABEL
         ) : (
-          <EnsAddressInput
+          <VerifiedEnsAddressInput
             value={payArtistAddressInput}
             placeholder="0x... or ENS"
             onAddressChange={onPayArtistResolvedAddressChange}

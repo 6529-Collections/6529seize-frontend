@@ -10,9 +10,8 @@ import { render, screen } from "@testing-library/react";
 const mockSetTitle = jest.fn();
 const domain = new URL(publicEnv.BASE_ENDPOINT).hostname;
 
-let country = "US";
 let appWalletsSupported = true;
-let isIos = true;
+let isIos = false;
 
 jest.mock("@/contexts/TitleContext", () => ({
   useSetTitle: () => mockSetTitle,
@@ -23,19 +22,14 @@ jest.mock("@/hooks/useCapacitor", () => ({
   default: () => ({ isIos }),
 }));
 
-jest.mock("@/components/cookies/CookieConsentContext", () => ({
-  useCookieConsent: () => ({ country }),
-}));
-
 jest.mock("@/components/app-wallets/AppWalletsContext", () => ({
   useAppWallets: () => ({ appWalletsSupported }),
 }));
 
 describe("Tools index page", () => {
   beforeEach(() => {
-    country = "US";
     appWalletsSupported = true;
-    isIos = true;
+    isIos = false;
     mockSetTitle.mockClear();
   });
 
@@ -86,8 +80,7 @@ describe("Tools index page", () => {
     expect(publicToolHrefs).not.toContain("/tools/agent-login");
   });
 
-  it("hides subscription-only links for restricted iOS users", () => {
-    country = "DE";
+  it("hides subscription-only links in the iOS app", () => {
     isIos = true;
 
     render(<ToolsIndexPage />);
@@ -101,8 +94,7 @@ describe("Tools index page", () => {
     expect(screen.getByText("Meme Accounting")).toBeInTheDocument();
   });
 
-  it("keeps subscription links visible for non-iOS users in restricted countries", () => {
-    country = "DE";
+  it("keeps subscription links visible outside the iOS app", () => {
     isIos = false;
 
     render(<ToolsIndexPage />);

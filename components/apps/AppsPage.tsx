@@ -2,8 +2,11 @@
 
 import {
   ComputerDesktopIcon,
+  CpuChipIcon,
   DevicePhoneMobileIcon,
+  ServerStackIcon,
 } from "@heroicons/react/24/outline";
+import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
@@ -65,6 +68,36 @@ export default function AppsPage() {
           >
             <DesktopAppDownloads />
           </AppPanel>
+
+          <Link
+            href="/validator"
+            aria-labelledby="6529-validator-heading"
+            aria-describedby="6529-validator-description"
+            className="tw-block tw-rounded-xl tw-no-underline tw-transition-colors hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400"
+          >
+            <AppPanel
+              id="6529-validator"
+              icon={ServerStackIcon}
+              title={t(APPS_LOCALE, "apps.validator.title")}
+              description={t(APPS_LOCALE, "apps.validator.description")}
+              linked
+            />
+          </Link>
+
+          <Link
+            href="/ai"
+            aria-labelledby="6529-ai-heading"
+            aria-describedby="6529-ai-description"
+            className="tw-block tw-rounded-xl tw-no-underline tw-transition-colors hover:tw-bg-iron-900 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-4 focus-visible:tw-outline-primary-400"
+          >
+            <AppPanel
+              id="6529-ai"
+              icon={CpuChipIcon}
+              title={t(APPS_LOCALE, "apps.ai.title")}
+              description={t(APPS_LOCALE, "apps.ai.description")}
+              linked
+            />
+          </Link>
         </div>
       </div>
     </main>
@@ -78,20 +111,23 @@ function AppPanel({
   description,
   children,
   mobile = false,
+  linked = false,
 }: {
   readonly id: string;
   readonly icon: typeof DevicePhoneMobileIcon;
   readonly title: string;
   readonly description: string;
-  readonly children: ReactNode;
+  readonly children?: ReactNode;
   readonly mobile?: boolean;
+  readonly linked?: boolean;
 }) {
   const headingId = `${id}-heading`;
+  const Panel = linked ? "div" : "section";
 
   return (
-    <section
+    <Panel
       id={id}
-      aria-labelledby={headingId}
+      aria-labelledby={linked ? undefined : headingId}
       className={`${ABOUT_CARD_CLASS_NAME} ${mobile ? "tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-5 tw-p-5 sm:tw-p-6" : "tw-overflow-hidden"}`}
     >
       <div
@@ -104,7 +140,10 @@ function AppPanel({
           <h2 id={headingId} className={ABOUT_SECTION_HEADING_CLASS_NAME}>
             {title}
           </h2>
-          <p className={`tw-m-0 ${ABOUT_SUPPORTING_TEXT_CLASS_NAME}`}>
+          <p
+            id={linked ? `${id}-description` : undefined}
+            className={`tw-m-0 ${ABOUT_SUPPORTING_TEXT_CLASS_NAME}`}
+          >
             {description}
           </p>
         </div>
@@ -112,6 +151,6 @@ function AppPanel({
       <div className={mobile ? "tw-min-w-0 tw-max-w-full" : undefined}>
         {children}
       </div>
-    </section>
+    </Panel>
   );
 }

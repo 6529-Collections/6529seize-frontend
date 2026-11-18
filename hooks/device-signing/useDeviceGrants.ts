@@ -11,11 +11,16 @@ import {
   fetchDeviceGrants,
   revokeDeviceGrant,
 } from "@/services/api/device-grants-api";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  type QueryClient,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
 
 /** Refreshes while visible and immediately when the client returns to focus. */
-const DEVICE_GRANTS_REFRESH_MS = 10 * 60 * 1000;
+export const DEVICE_GRANTS_REFRESH_MS = 10 * 60 * 1000;
 
 const forgetRevokedLocalGrants = async (
   grants: readonly ApiDeviceGrant[]
@@ -29,11 +34,15 @@ const forgetRevokedLocalGrants = async (
 };
 
 /** The device grants of the signed-in profile (null address: disabled). */
-export function useDeviceGrants(address: string | null) {
+export function useDeviceGrants(
+  address: string | null,
+  mode: "active" | "cache-only" = "active"
+) {
+  const active = mode === "active" && address !== null;
   const query = useQuery({
     queryKey: [QueryKey.DEVICE_GRANTS, address],
     queryFn: ({ signal }) => fetchDeviceGrants(signal),
-    enabled: address !== null,
+    enabled: active,
     staleTime: DEVICE_GRANTS_REFRESH_MS,
     refetchOnWindowFocus: "always",
     refetchInterval: DEVICE_GRANTS_REFRESH_MS,
@@ -43,12 +52,34 @@ export function useDeviceGrants(address: string | null) {
 
   const grants = query.data;
   useEffect(() => {
-    if (grants) {
+    if (active && grants) {
       forgetRevokedLocalGrants(grants).catch(() => undefined);
     }
-  }, [grants]);
+  }, [active, grants]);
 
   return query;
+}
+
+function updateCachedDeviceGrant(
+  queryClient: QueryClient,
+  grantId: string,
+  update: (grant: ApiDeviceGrant) => ApiDeviceGrant
+) {
+  const cachedLists = queryClient.getQueriesData<ApiDeviceGrant[]>({
+    queryKey: [QueryKey.DEVICE_GRANTS],
+  });
+
+  for (const [queryKey] of cachedLists) {
+    const cached = queryClient.getQueryState<ApiDeviceGrant[]>(queryKey);
+    if (!cached?.data?.some((grant) => grant.id === grantId)) continue;
+
+    // Updating one grant does not verify the permissions of the entire list.
+    queryClient.setQueryData(
+      queryKey,
+      cached.data.map((grant) => (grant.id === grantId ? update(grant) : grant)),
+      { updatedAt: cached.dataUpdatedAt }
+    );
+  }
 }
 
 /** Acknowledges a device notice without changing the grant's permissions. */
@@ -59,15 +90,10 @@ export function useAcknowledgeDeviceGrant() {
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (grantId: string) => acknowledgeDeviceGrant(grantId),
     onSuccess: (acknowledged) => {
-      queryClient.setQueriesData<ApiDeviceGrant[]>(
-        { queryKey: [QueryKey.DEVICE_GRANTS] },
-        (grants) =>
-          grants?.map((grant) =>
-            grant.id === acknowledged.id
-              ? { ...grant, notice_acknowledged: true }
-              : grant
-          )
-      );
+      updateCachedDeviceGrant(queryClient, acknowledged.id, (grant) => ({
+        ...grant,
+        notice_acknowledged: true,
+      }));
     },
   });
 
@@ -101,11 +127,7 @@ export function useRevokeDeviceGrant() {
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (grant: ApiDeviceGrant) => revokeDeviceGrant(grant.id),
     onSuccess: async (revoked) => {
-      queryClient.setQueriesData<ApiDeviceGrant[]>(
-        { queryKey: [QueryKey.DEVICE_GRANTS] },
-        (grants) =>
-          grants?.map((grant) => (grant.id === revoked.id ? revoked : grant))
-      );
+      updateCachedDeviceGrant(queryClient, revoked.id, () => revoked);
       await forgetRevokedLocalGrants([revoked]).catch(() => undefined);
     },
   });

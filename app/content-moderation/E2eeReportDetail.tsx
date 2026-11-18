@@ -1,5 +1,6 @@
 "use client";
 
+import { E2eeConfirmDialog } from "@/components/e2ee/ui/E2eeConfirmDialog";
 import { ApiE2eeReportCategory } from "@/generated/models/ApiE2eeReportCategory";
 import type { ApiE2eeTrustAndSafetyReport } from "@/generated/models/ApiE2eeTrustAndSafetyReport";
 import type { ApiE2eeTrustAndSafetyReportPage } from "@/generated/models/ApiE2eeTrustAndSafetyReportPage";
@@ -20,7 +21,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { formatTimestamp } from "./content-moderation-page.helpers";
 import { readE2eeReportEvidence } from "./e2eeReportEvidence";
 
@@ -141,6 +142,10 @@ export default function E2eeReportDetail({
   const locale = useBrowserLocale();
   const queryClient = useQueryClient();
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const [confirmRelease, setConfirmRelease] = useState(false);
+  // Set synchronously, so a second click before the next render joins the
+  // release in flight instead of sending another.
+  const releaseRef = useRef<Promise<unknown> | null>(null);
   const detailKey = [
     ...ENCRYPTED_REPORTS_QUERY_KEY,
     "detail",
@@ -176,7 +181,8 @@ export default function E2eeReportDetail({
     loading: query.isLoading,
     onHold: hold.isSuccess ? query.data?.on_hold : undefined,
     loadFailed: query.isError && !query.isFetching,
-    holdFailed: hold.isError && !hold.isPending,
+    // A failed release is shown in its confirmation, which stays open.
+    holdFailed: hold.isError && !confirmRelease,
   });
   useEffect(() => {
     // eslint-disable-next-line react-you-might-not-need-an-effect/no-pass-data-to-parent -- The live regions stay mounted in the panel so screen readers keep hearing them while this view mounts and unmounts; this only hands them the derived text.
@@ -364,7 +370,13 @@ export default function E2eeReportDetail({
               type="button"
               aria-describedby="e2ee-report-hold-help"
               disabled={hold.isPending}
-              onClick={() => hold.mutate(!report.on_hold)}
+              onClick={() => {
+                if (report.on_hold) {
+                  setConfirmRelease(true);
+                } else {
+                  hold.mutate(true);
+                }
+              }}
               className="tw-inline-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-2 tw-text-sm tw-font-semibold tw-text-iron-100 hover:tw-bg-iron-800 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-default disabled:tw-opacity-50"
             >
               {t(
@@ -384,6 +396,34 @@ export default function E2eeReportDetail({
               )}
             </p>
           </div>
+          <E2eeConfirmDialog
+            open={confirmRelease}
+            title={t(
+              locale,
+              "contentModeration.moderator.encryptedReports.releaseConfirmTitle"
+            )}
+            body={t(
+              locale,
+              "contentModeration.moderator.encryptedReports.releaseConfirmBody",
+              {
+                category,
+                date: formatTimestamp(report.created_at, locale) ?? "",
+              }
+            )}
+            confirmLabel={t(
+              locale,
+              "contentModeration.moderator.encryptedReports.release"
+            )}
+            errorFallbackKey="contentModeration.moderator.encryptedReports.holdFailed"
+            onConfirm={async () => {
+              // A failure keeps the dialog open with its error and retry.
+              releaseRef.current ??= hold.mutateAsync(false).finally(() => {
+                releaseRef.current = null;
+              });
+              await releaseRef.current;
+            }}
+            onClose={() => setConfirmRelease(false)}
+          />
         </>
       )}
     </section>

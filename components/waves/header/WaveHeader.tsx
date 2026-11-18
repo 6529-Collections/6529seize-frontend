@@ -14,6 +14,7 @@ import { ApiWaveType } from "@/generated/models/ApiWaveType";
 import WavePicture from "../WavePicture";
 import WaveNotificationSettings from "../specs/WaveNotificationSettings";
 import WaveAuthor from "../specs/WaveAuthor";
+import { getSafeCssColor } from "@/helpers/css-color.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import WaveHeaderPictureEdit from "./picture/WaveHeaderPictureEdit";
 import WaveRepButton from "./rep/WaveRepButton";
@@ -25,6 +26,13 @@ import { formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 
 const WAVE_HEADER_LOCALE = DEFAULT_LOCALE;
+
+/** A plain banner colour of the author, if there is an author. */
+const getAuthorBannerColor = (
+  author: ApiWave["author"] | undefined,
+  field: "banner1_color" | "banner2_color",
+  fallback: string
+): string => getSafeCssColor(author?.[field]) ?? fallback;
 
 const getPostLabelMessageKey = (count: number): MessageKey => {
   const pluralCategory = new Intl.PluralRules(WAVE_HEADER_LOCALE).select(count);
@@ -109,7 +117,7 @@ export default function WaveHeader({
         <div
           className="tw-relative tw-h-16 tw-w-full tw-object-cover"
           style={{
-            background: `linear-gradient(135deg, ${wave.author?.banner1_color ?? "#1f2937"} 0%, ${wave.author?.banner2_color ?? "#0f172a"} 58%, #050505 100%)`,
+            background: `linear-gradient(135deg, ${getAuthorBannerColor(wave.author, "banner1_color", "#1f2937")} 0%, ${getAuthorBannerColor(wave.author, "banner2_color", "#0f172a")} 58%, #050505 100%)`,
             boxShadow: "inset 0 -22px 34px rgba(0,0,0,0.42)",
           }}
         >

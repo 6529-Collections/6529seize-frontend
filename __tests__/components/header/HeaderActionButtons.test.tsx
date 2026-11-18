@@ -3,6 +3,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Link from "next/link";
 import type { ComponentProps } from "react";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+
+jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn() }));
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -43,6 +46,7 @@ describe("HeaderActionButtons", () => {
     (usePn as jest.Mock).mockReturnValue("/waves");
     (useSp as jest.Mock).mockReturnValue(new URLSearchParams());
     (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
+    jest.mocked(isE2eeEnabled).mockReturnValue(false);
   });
 
   it("creates new wave on the waves route with native history", async () => {
@@ -101,7 +105,33 @@ describe("HeaderActionButtons", () => {
     expect(push).not.toHaveBeenCalled();
   });
 
-  it.each(["/waves", "/waves/create", "/messages/create", "/other"])(
+  it("prefetches the unified composer from the native header", () => {
+    jest.mocked(isE2eeEnabled).mockReturnValue(true);
+    (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: true });
+    (usePn as jest.Mock).mockReturnValue("/messages");
+    (useRt as jest.Mock).mockReturnValue({
+      push: jest.fn(),
+      replace: jest.fn(),
+    });
+    render(<HeaderActionButtons />);
+
+    expect(screen.getByRole("link", { name: "New message" })).toHaveAttribute(
+      "href",
+      "/messages/new"
+    );
+    expect(Link).toHaveBeenCalledWith(
+      expect.objectContaining({ href: "/messages/new", prefetch: true }),
+      undefined
+    );
+  });
+
+  it.each([
+    "/waves",
+    "/waves/create",
+    "/messages/create",
+    "/messages/new",
+    "/other",
+  ])(
     "does not mount a prefetching dm link outside messages on %s",
     (pathname) => {
       (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: true });

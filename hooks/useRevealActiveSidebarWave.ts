@@ -18,8 +18,11 @@ interface UseRevealActiveSidebarWaveOptions {
   readonly scrollContainerRef: RefObject<HTMLElement | null>;
   readonly scrollToVirtualIndex: (index: number) => boolean;
   readonly staticRows: readonly (readonly SidebarWaveTreeRow[])[];
+  readonly fixedRows?: readonly SidebarWaveTreeRow[];
   readonly virtualRows: readonly SidebarWaveTreeRow[];
 }
+
+const EMPTY_ROWS: readonly SidebarWaveTreeRow[] = [];
 
 const hasWaveRow = (
   rows: readonly SidebarWaveTreeRow[],
@@ -53,6 +56,7 @@ export function useRevealActiveSidebarWave({
   scrollToVirtualIndex,
   staticRows,
   virtualRows,
+  fixedRows = EMPTY_ROWS,
 }: UseRevealActiveSidebarWaveOptions) {
   const lastRevealKeyRef = useRef<string | null>(null);
   const revealContextRef = useRef({
@@ -80,11 +84,11 @@ export function useRevealActiveSidebarWave({
   const staticWaveIds = useMemo(
     () =>
       new Set(
-        staticRows.flatMap((rows) =>
+        [...staticRows, fixedRows].flatMap((rows) =>
           rows.filter((row) => row.rowType === "wave").map((row) => row.wave.id)
         )
       ),
-    [staticRows]
+    [fixedRows, staticRows]
   );
   const revealWaveId = useMemo(() => {
     if (hasWaveRow(virtualRows, activeWaveId)) {

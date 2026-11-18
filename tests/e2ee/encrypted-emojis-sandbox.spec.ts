@@ -1,4 +1,6 @@
 import type { BrowserContext, Page } from "@playwright/test";
+import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
+import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
 import { expect, test } from "../testHelpers";
 import {
   closeE2eeUsers,
@@ -75,7 +77,7 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
       });
     await enroll(alice);
     await enroll(bob);
-    await startChat(alice, ["bob"]);
+    const groupId = await startChat(alice, ["bob"]);
     // The development-only Next indicator overlaps the phone composer.
     // Page errors remain captured by the session diagnostics.
     await alice.page.addStyleTag({
@@ -275,6 +277,80 @@ test.describe("Encrypted emoji picker @medium @local-only @e2ee", () => {
       await expect(row).toContainText("😀");
       await expect(image).toHaveCSS("width", "16px");
       await expect(image).toHaveCSS("height", "16px");
+    }
+    const notificationSeq = (await e2eeSandboxControls.state(baseURL)).groups
+      .find((group) => group.group === groupId)
+      ?.items.find((item) => item.type === "message")?.seq;
+    if (notificationSeq === undefined) {
+      throw new Error("The notification must reference the received message.");
+    }
+    await bob.page.route("**/api/v2/notifications?*", async (route) => {
+      const older = new URL(route.request().url()).searchParams.has(
+        "id_less_than"
+      );
+      const data: ApiNotificationsResponseV2 = {
+        unread_count: 0,
+        notifications: older
+          ? []
+          : [
+              {
+                id: 529,
+                cause: ApiNotificationCause.E2EeMessage,
+                created_at: Date.now(),
+                read_at: Date.now(),
+                related_identity: null,
+                related_drops: [],
+                additional_context: {
+                  encrypted_group: groupId,
+                  encrypted_message_seq: notificationSeq,
+                },
+              },
+            ],
+      };
+      await route.fulfill({ json: data });
+    });
+    // A fresh notifications visit must load emoji without the chat provider.
+    await gotoPath(bob.page, "/notifications");
+    await bob.page.reload({ waitUntil: "domcontentloaded" });
+    const notice = bob.page
+      .getByRole("article")
+      .filter({ hasText: "Edited secret" });
+    const notificationEmoji = notice.getByRole("img", {
+      name: ":gm:",
+      exact: true,
+    });
+    await expect(notificationEmoji).toBeVisible({
+      timeout: E2EE_SYNC_TIMEOUT_MS,
+    });
+    await expect(notificationEmoji).toHaveAttribute("src", INLINE_EMOJI);
+    await expect(notificationEmoji).toHaveCSS("width", "16px");
+    await expect(notificationEmoji).toHaveCSS("height", "16px");
+    await expect(notice).toContainText("😀");
+    await testInfo.attach("encrypted-notification-emoji", {
+      body: await notice.screenshot(),
+      contentType: "image/png",
+    });
+    if (!testInfo.project.use.isMobile) {
+      const bell = bob.page.getByRole("link", {
+        name: "Notifications",
+        exact: true,
+      });
+      await bell.focus();
+      await bell.press("ArrowDown");
+      const inbox = bob.page.getByRole("region", {
+        name: "Notifications",
+        exact: true,
+      });
+      const compactEmoji = inbox.getByRole("img", {
+        name: ":gm:",
+        exact: true,
+      });
+      await expect(compactEmoji).toBeVisible();
+      await expect(compactEmoji).toHaveCSS("width", "16px");
+      await testInfo.attach("encrypted-inbox-emoji", {
+        body: await inbox.screenshot(),
+        contentType: "image/png",
+      });
     }
     expect(assets).toEqual([]);
     for (const session of sessions)

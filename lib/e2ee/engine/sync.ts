@@ -17,7 +17,12 @@ import {
   rollback,
   type EngineContext,
 } from "./context";
-import { dmParticipants, retryWelcomeLater, type LeafOwner } from "./dm-join";
+import {
+  dmParticipants,
+  releaseHeldWelcome,
+  retryWelcomeLater,
+  type LeafOwner,
+} from "./dm-join";
 import { RetryableError } from "./errors";
 import {
   addNotices,
@@ -140,6 +145,12 @@ export async function catchUpGroup(
     }
     await afterPage(ctx, runtime, page.group, next === null);
     if (next === null) {
+      // The server read the group row before the page, so every item this
+      // device may see up to its last_seq is in what was just processed.
+      runtime.listedThrough = Math.max(
+        runtime.listedThrough ?? 0,
+        page.group.last_seq
+      );
       break;
     }
   }
@@ -165,12 +176,19 @@ export async function tryCatchUp(
 // Welcomes
 // ---------------------------------------------------------------------------
 
+/**
+ * Resolves a Welcome (joined or refused): acknowledged, then no longer held.
+ * When the acknowledgement fails the entry stays, so a redelivered Welcome
+ * keeps the time left in its window.
+ */
 async function ack(ctx: EngineContext, welcome: ApiE2eeWelcome): Promise<void> {
   try {
     await ctx.api.ackWelcome(ownDeviceKey(ctx), welcome.id);
   } catch {
     // Retried with the next inbox pull.
+    return;
   }
+  releaseHeldWelcome(ctx, welcome.id);
 }
 
 async function senderBlocked(
@@ -266,6 +284,8 @@ async function acceptJoin(
   record.splitView = checks.splitView;
   const runtime = existing ?? newRuntime(record);
   runtime.record = record;
+  // A rejoin opens a new delivery window: catch up afresh.
+  delete runtime.listedThrough;
   ctx.store.groups.set(g, runtime);
   await applySummary(ctx, runtime, summary);
   for (const member of record.members) {

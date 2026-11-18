@@ -11,6 +11,7 @@ import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
 import {
   getActiveWaveIdFromUrl,
   getMessagesBaseRoute,
+  isMessageComposePathname,
   getWavesBaseRoute,
   getWaveHomeRoute,
 } from "@/helpers/navigation.helpers";
@@ -92,7 +93,7 @@ export default function BackButton({
       return;
     }
 
-    if (pathname === "/messages/create") {
+    if (isMessageComposePathname(pathname)) {
       router.replace(getMessagesBaseRoute(isApp));
       return;
     }

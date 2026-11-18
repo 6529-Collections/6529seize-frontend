@@ -29,6 +29,8 @@ jest.mock("@/lib/device-signing/device-key-store", () => ({
 }));
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
+const OTHER_ADDRESS = "0x2222222222222222222222222222222222222222";
+const SERVER_FETCHED_AT = 1234;
 const grant = (overrides: Partial<ApiDeviceGrant> = {}): ApiDeviceGrant =>
   ({
     id: `0x${"1".repeat(64)}`,
@@ -88,9 +90,15 @@ describe("device grant hooks", () => {
 
   it("updates only the acknowledgment after the server accepts it", async () => {
     const active = grant({ notice_acknowledged: false });
-    const unrelated = grant({ id: `0x${"2".repeat(64)}` });
+    const unrelated = grant({ id: `0x${"2".repeat(64)}`, wallet: OTHER_ADDRESS });
     const queryKey = [QueryKey.DEVICE_GRANTS, ADDRESS];
-    client.setQueryData(queryKey, [active, unrelated]);
+    const otherQueryKey = [QueryKey.DEVICE_GRANTS, OTHER_ADDRESS];
+    client.setQueryData(queryKey, [active, unrelated], {
+      updatedAt: SERVER_FETCHED_AT,
+    });
+    client.setQueryData(otherQueryKey, [unrelated], {
+      updatedAt: SERVER_FETCHED_AT,
+    });
     mockAcknowledgeGrant.mockResolvedValue({
       ...active,
       notice_acknowledged: true,
@@ -108,6 +116,10 @@ describe("device grant hooks", () => {
       { ...active, notice_acknowledged: true },
       unrelated,
     ]);
+    expect(client.getQueryState(queryKey)?.dataUpdatedAt).toBe(SERVER_FETCHED_AT);
+    expect(client.getQueryState(otherQueryKey)?.dataUpdatedAt).toBe(
+      SERVER_FETCHED_AT
+    );
     expect(mockRevokeGrant).not.toHaveBeenCalled();
     expect(mockForget).not.toHaveBeenCalled();
   });
@@ -115,7 +127,8 @@ describe("device grant hooks", () => {
   it("revokes, updates the cached list and confirms", async () => {
     const active = grant();
     const revoked = { ...active, revoked_at: 9 };
-    client.setQueryData([QueryKey.DEVICE_GRANTS, ADDRESS], [active]);
+    const queryKey = [QueryKey.DEVICE_GRANTS, ADDRESS];
+    client.setQueryData(queryKey, [active], { updatedAt: SERVER_FETCHED_AT });
     mockRevokeGrant.mockResolvedValue(revoked);
 
     const { result } = renderHook(() => useRevokeDeviceGrant(), {
@@ -128,9 +141,8 @@ describe("device grant hooks", () => {
 
     expect(outcome).toBe(true);
     expect(mockRevokeGrant).toHaveBeenCalledWith(active.id);
-    expect(client.getQueryData([QueryKey.DEVICE_GRANTS, ADDRESS])).toEqual([
-      revoked,
-    ]);
+    expect(client.getQueryData(queryKey)).toEqual([revoked]);
+    expect(client.getQueryState(queryKey)?.dataUpdatedAt).toBe(SERVER_FETCHED_AT);
     expect(mockForget).toHaveBeenCalledWith(ADDRESS, active.id);
     expect(mockSetToast).toHaveBeenCalledWith({
       message: "Safari on iPhone can no longer post as you.",

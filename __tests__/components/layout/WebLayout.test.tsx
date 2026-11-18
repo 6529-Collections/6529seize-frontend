@@ -142,6 +142,7 @@ beforeEach(() => {
   mockTouchFirst = true;
   mockSmallWebStartupExpected = true;
   delete document.documentElement.dataset["smallWebStartup"];
+  delete document.documentElement.dataset["smallWebBanner"];
   window.matchMedia = jest.fn((query: string) => ({
     get matches() {
       return matches(query);
@@ -231,6 +232,7 @@ it("releases startup chrome if a tablet gains a mouse before mobile hydration", 
 
 it("clears a stale mobile startup marker when React mounts on desktop", () => {
   document.documentElement.dataset["smallWebStartup"] = "true";
+  document.documentElement.dataset["smallWebBanner"] = "true";
   mockSmallWebStartupExpected = false;
   render(
     <WebLayout>
@@ -240,6 +242,7 @@ it("clears a stale mobile startup marker when React mounts on desktop", () => {
   expect(document.documentElement).not.toHaveAttribute(
     "data-small-web-startup"
   );
+  expect(document.documentElement).not.toHaveAttribute("data-small-web-banner");
 });
 
 it("adapts chrome and clears its overlay without remounting the editor or SidebarProvider", async () => {

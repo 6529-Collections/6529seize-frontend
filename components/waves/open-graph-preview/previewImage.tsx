@@ -7,7 +7,10 @@ import Image, { type ImageProps } from "next/image";
 import { isAllowedOgImageSourceUrl } from "@/app/api/og-metadata/_lib/imageProxyPolicy";
 import { publicEnv } from "@/config/env";
 import { getInternalLinkPath } from "@/helpers/internalLink";
-import { getMediaResolverHostname } from "@/lib/media/decentralized-media";
+import {
+  getMediaResolverHostname,
+  isFirstPartyMediaResolverHostname,
+} from "@/lib/media/decentralized-media";
 import { STATIC_ALLOWED_IMAGE_HOSTNAMES } from "@/lib/media/static-image-hosts";
 
 const IMAGE_PROXY_PATH = "/api/og-metadata/image";
@@ -26,6 +29,23 @@ const DIRECT_IMAGE_HOSTNAMES: ReadonlySet<string> = new Set(
 
 const RASTER_ICON_EXTENSION = /\.(?:png|jpe?g|webp|gif)$/i;
 
+let mediaResolverHost: {
+  readonly endpoint: string | undefined;
+  readonly hostname: string;
+} | null = null;
+
+/** The media resolver's hostname, parsed once per configured endpoint. */
+function getDirectMediaResolverHostname(): string {
+  const endpoint = publicEnv.MEDIA_RESOLVER_ENDPOINT;
+  if (mediaResolverHost?.endpoint !== endpoint) {
+    mediaResolverHost = {
+      endpoint,
+      hostname: getMediaResolverHostname(endpoint),
+    };
+  }
+  return mediaResolverHost.hostname;
+}
+
 /** Hosts the app already loads images from directly: its own and its CDNs. */
 function isDirectImageUrl(value: string): boolean {
   try {
@@ -37,8 +57,8 @@ function isDirectImageUrl(value: string): boolean {
       !url.username &&
       !url.password &&
       (DIRECT_IMAGE_HOSTNAMES.has(hostname) ||
-        hostname ===
-          getMediaResolverHostname(publicEnv.MEDIA_RESOLVER_ENDPOINT))
+        isFirstPartyMediaResolverHostname(hostname) ||
+        hostname === getDirectMediaResolverHostname())
     );
   } catch {
     return false;

@@ -1,6 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useAuth } from "@/components/auth/Auth";
+import { DeviceSecurityNotice } from "@/components/device-signing/DeviceSecurityNotice";
+import {
+  deviceSecurityNoticeKey,
+  useDeviceSecurityNotices,
+} from "@/hooks/device-signing/useDeviceSecurityNotices";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
@@ -18,24 +24,61 @@ const PLATFORM_KEYS: Record<E2eeDeviceInfo["platform"], MessageKey> = {
   phone: "e2ee.devices.platform.phone",
 };
 
-/**
- * "{label} can now read your encrypted messages. Not you? Revoke." for each
- * device of this profile that appeared since the user last saw the list.
- */
+/** Mount account-scoped queries only while this surface has an owner session. */
 export function E2eeNewDeviceNotice({
   className = "",
 }: {
   readonly className?: string | undefined;
 }) {
+  const { activeProfileProxy, isAuthenticated } = useAuth();
+  return isAuthenticated === true && !activeProfileProxy ? (
+    <AuthenticatedE2eeDeviceNotice className={className} />
+  ) : null;
+}
+
+function AuthenticatedE2eeDeviceNotice({
+  className,
+}: {
+  readonly className: string;
+}) {
   const locale = useBrowserLocale();
   const zone = useDisplayTimeZone();
-  const { engine, devices, profileId, status } = useE2ee();
+  const { engine, devices, profileId, status, localDeviceKey } = useE2ee();
+  const ownDeviceKey = localDeviceKey?.toLowerCase();
+  const canShowNotices =
+    (status === "ready" && !!ownDeviceKey) || status === "device-limit";
+  const { notices, removeNotice } = useDeviceSecurityNotices(canShowNotices);
   const { newDevices, acknowledge } = useE2eeNewDevices(
     profileId,
     devices,
-    status === "ready" || status === "device-limit"
+    canShowNotices && notices === null
   );
   const [target, setTarget] = useState<E2eeDeviceInfo | null>(null);
+
+  if (notices) {
+    const pending = notices.filter(
+      (notice) =>
+        notice.encrypted_dm_device_key !== null &&
+        notice.encrypted_dm_device_key.toLowerCase() !== ownDeviceKey
+    );
+    if (!pending.length) {
+      return null;
+    }
+    return (
+      <div className={`tw-flex tw-flex-col tw-gap-2 ${className}`}>
+        {pending.map((notice) => (
+          <DeviceSecurityNotice
+            key={deviceSecurityNoticeKey(notice)}
+            notice={notice}
+            onHandled={removeNotice}
+            {...(engine
+              ? { revokeEncryptedDevice: (key) => engine.revokeDevice(key) }
+              : {})}
+          />
+        ))}
+      </div>
+    );
+  }
 
   if (newDevices.length === 0) {
     return null;
@@ -57,14 +100,14 @@ export function E2eeNewDeviceNotice({
                   label: device.label,
                 })}
               >
-                {t(locale, "e2ee.devices.revoke")}
+                {t(locale, "signedMessages.notice.newDevice.revoke")}
               </Button>
               <Button
                 variant="secondary"
                 size="xs"
                 onClick={() => acknowledge(device.deviceKey)}
               >
-                {t(locale, "e2ee.devices.newDeviceConfirm")}
+                {t(locale, "signedMessages.notice.newDevice.acknowledge")}
               </Button>
             </>
           }

@@ -2,6 +2,10 @@
 
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
 import { shareFetchedBlobInNativeApp } from "@/helpers/capacitorBlobDownload.helpers";
+import {
+  getDownloadFileDecision,
+  prepareBlobForDownload,
+} from "@/helpers/download-file-type.helpers";
 import { t } from "@/i18n/messages";
 import { formatFileSizeLabel } from "@/lib/link-preview/filePreviewI18n";
 import {
@@ -19,6 +23,7 @@ import {
   AnimatedAttachmentPanel,
   AttachmentMoreMenu,
   ATTACHMENT_DOWNLOAD_FETCH_TIMEOUT_MS,
+  canPreviewAttachmentInline,
   ATTACHMENT_LOCALE,
   CsvAttachmentPreview,
   getAttachmentLabel,
@@ -82,7 +87,9 @@ export default function DropAttachmentDisplay({
     const nextLabel = getAttachmentLabel(nextRenderType);
     const nextCanRender =
       safeAttachmentUrl !== null &&
-      (nextRenderType === "pdf" || nextRenderType === "csv");
+      ((nextRenderType === "pdf" &&
+        canPreviewAttachmentInline(safeAttachmentUrl)) ||
+        nextRenderType === "csv");
     const NextIcon = nextRenderType === "csv" ? TableCellsIcon : DocumentIcon;
     return {
       renderType: nextRenderType,
@@ -134,14 +141,18 @@ export default function DropAttachmentDisplay({
         throw new Error("Unable to download attachment.");
       }
 
-      const blob = await response.blob();
+      const download = await prepareBlobForDownload({
+        blob: await response.blob(),
+        fileName,
+        declaredType: mimeType,
+      });
       if (isCapacitor) {
-        await shareFetchedBlobInNativeApp(blob, fileName);
+        await shareFetchedBlobInNativeApp(download.blob, download.fileName);
       } else {
-        const objectUrl = URL.createObjectURL(blob);
+        const objectUrl = URL.createObjectURL(download.blob);
         const anchor = document.createElement("a");
         anchor.href = objectUrl;
-        anchor.download = fileName;
+        anchor.download = download.fileName;
         document.body.append(anchor);
         anchor.click();
         anchor.remove();
@@ -164,7 +175,10 @@ export default function DropAttachmentDisplay({
 
       const anchor = document.createElement("a");
       anchor.href = safeAttachmentUrl;
-      anchor.download = fileName;
+      anchor.download = getDownloadFileDecision({
+        fileName,
+        declaredTypes: [mimeType],
+      }).fileName;
       anchor.target = "_blank";
       anchor.rel = "noopener noreferrer";
       document.body.append(anchor);
@@ -325,6 +339,7 @@ export default function DropAttachmentDisplay({
         }
       >
         {renderType === "pdf" &&
+          canRender &&
           safeAttachmentUrl &&
           !disableMediaInteraction &&
           (isAppleMobile ? (

@@ -102,6 +102,29 @@ function getEnrollmentFailure(
   };
 }
 
+/**
+ * Feedback for a failed turn-on. Still listed as revoked: a neutral notice
+ * says what to do instead of a failure alert.
+ */
+function getEnrollmentFeedback(
+  error: unknown,
+  upgrading: boolean
+): {
+  reason: SignedMessagesGrantFailure;
+  errorKey: MessageKey | null;
+  noticeKey: MessageKey | null;
+} {
+  const failure = getEnrollmentFailure(error, upgrading);
+  if (getE2eeErrorCode(error) === E2EE_REVOCATION_UNVERIFIED) {
+    return {
+      reason: failure.reason,
+      errorKey: null,
+      noticeKey: REVOCATION_UNVERIFIED_KEY,
+    };
+  }
+  return { ...failure, noticeKey: null };
+}
+
 const subscribeNever = () => () => undefined;
 
 /** Upgrade copy (D172) replaces first-time copy for encrypted DMs alone. */
@@ -381,13 +404,10 @@ export function E2eeEnrollmentCard({
             return { success: true };
         }
       } catch (error) {
-        // Still listed as revoked: a neutral notice says what to do instead
-        // of a failure alert.
-        const stopped = getE2eeErrorCode(error) === E2EE_REVOCATION_UNVERIFIED;
-        setNoticeKey(stopped ? REVOCATION_UNVERIFIED_KEY : null);
-        const failure = getEnrollmentFailure(error, upgrading);
-        setErrorKey(stopped ? null : failure.errorKey);
-        return { success: false, reason: failure.reason };
+        const feedback = getEnrollmentFeedback(error, upgrading);
+        setNoticeKey(feedback.noticeKey);
+        setErrorKey(feedback.errorKey);
+        return { success: false, reason: feedback.reason };
       } finally {
         setPending(false);
       }

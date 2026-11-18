@@ -25,6 +25,8 @@ const SEEKING_NOMINATION_ROUTE = getWavePathRoute(
 
 interface MainStageNominationPopoverProps {
   readonly children: ReactElement;
+  readonly disabled?: boolean | undefined;
+  readonly focusOnKeyboardActivation?: boolean | undefined;
 }
 
 function RepStatusCard({
@@ -178,12 +180,16 @@ function RepProgressSection({
   );
 }
 
-function MainStageNominationPopoverContent() {
+export function MainStageNominationPopoverContent({
+  className = "tw-w-[min(88vw,20rem)]",
+}: {
+  readonly className?: string;
+} = {}) {
   const { hasProfile, isError, isLoading, progress } =
     useMemesNomineeProgress();
 
   return (
-    <div className="tw-w-[min(88vw,20rem)] tw-pt-1">
+    <div className={`${className} tw-pt-1`}>
       <div className="tw-mb-5 tw-flex tw-flex-col tw-items-start">
         <div className="tw-mb-2 tw-flex tw-items-center tw-gap-2">
           <PermissionIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0 tw-text-iron-400" />
@@ -223,6 +229,8 @@ function MainStageNominationPopoverContent() {
 
 export default function MainStageNominationPopover({
   children,
+  disabled,
+  focusOnKeyboardActivation,
 }: MainStageNominationPopoverProps) {
   return (
     <HoverCard
@@ -233,6 +241,8 @@ export default function MainStageNominationPopover({
       delayHide={0}
       offset={12}
       openOnClick={true}
+      disabled={disabled}
+      focusOnKeyboardActivation={focusOnKeyboardActivation}
       triggerDisplay="inline-flex"
     >
       {children}

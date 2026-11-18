@@ -1,3 +1,4 @@
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type {
@@ -248,7 +249,7 @@ function FormSelect({
     <select
       {...props}
       className={adminClassName(
-        "tw-block tw-w-full tw-rounded-none tw-border tw-border-iron-200 tw-bg-white tw-px-3 tw-py-1.5 tw-text-base tw-text-iron-800 focus:tw-border-iron-700 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400",
+        `${DROPDOWN_FIELD_CLASSES} tw-block tw-w-full tw-px-3 tw-py-1.5 tw-text-base`,
         className
       )}
     >

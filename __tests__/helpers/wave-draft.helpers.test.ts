@@ -1,4 +1,5 @@
 import {
+  clearAllWaveDrafts,
   clearWaveDraft,
   getWaveDraftStorageKey,
   isRestorableDraftJson,
@@ -122,5 +123,17 @@ describe("sessionStorage round-trip", () => {
     writeWaveDraft("wave-b", textState("bbb"));
     expect(readRestorableWaveDraft("wave-a")).toBe(textState("aaa"));
     expect(readRestorableWaveDraft("wave-b")).toBe(textState("bbb"));
+  });
+
+  it("clears every chat draft in this tab and nothing else", () => {
+    writeWaveDraft("wave-a", textState("aaa"));
+    writeWaveDraft("wave-b", textState("bbb"));
+    sessionStorage.setItem("unrelated", "kept");
+
+    clearAllWaveDrafts();
+
+    expect(readRestorableWaveDraft("wave-a")).toBeNull();
+    expect(readRestorableWaveDraft("wave-b")).toBeNull();
+    expect(sessionStorage.getItem("unrelated")).toBe("kept");
   });
 });

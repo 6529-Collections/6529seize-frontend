@@ -39,6 +39,8 @@ interface MinimalWaveLike {
 export interface ApiWaveMinWithChatLinkSettings extends ApiWaveMin {
   readonly links_disabled?: boolean | undefined;
   readonly wave_author_handle?: string | null | undefined;
+  /** Whether the wave has any competition; absent when the source omits it. */
+  readonly has_competition?: boolean | undefined;
 }
 
 export const normalizeOptionalWaveId = (

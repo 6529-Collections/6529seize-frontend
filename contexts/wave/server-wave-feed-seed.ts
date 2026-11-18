@@ -1,11 +1,11 @@
-import type { ApiDrop } from "@/generated/models/ApiDrop";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { WAVE_DROPS_PARAMS } from "@/components/react-query-wrapper/utils/query-utils";
 
 export const SERVER_WAVE_FEED_SEED_LIMIT = WAVE_DROPS_PARAMS.limit;
 export const SERVER_WAVE_FEED_SEED_REQUEST_LIMIT =
   SERVER_WAVE_FEED_SEED_LIMIT + 1;
 
-export type ServerWaveFeedSeedDrop = Omit<ApiDrop, "wave">;
+export type ServerWaveFeedSeedDrop = Omit<ApiDropV2View, "wave">;
 
 export type ServerWaveFeedSeedResult =
   | {
@@ -13,6 +13,8 @@ export type ServerWaveFeedSeedResult =
       readonly waveId: string;
       readonly drops: readonly ServerWaveFeedSeedDrop[];
       readonly hasNextPage: boolean;
+      /** Whether the wave has any competition, when the feed reported it. */
+      readonly hasCompetition?: boolean | undefined;
     }
   | {
       readonly ok: false;

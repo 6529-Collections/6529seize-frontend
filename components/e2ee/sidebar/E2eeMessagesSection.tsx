@@ -13,7 +13,6 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { E2eeConversation } from "@/lib/e2ee/types";
 import { E2eeConversationList } from "../list/E2eeConversationList";
-import { E2eeNewChatLink } from "../list/E2eeConversationListPage";
 
 const SIDEBAR_LIMIT = 8;
 const HEADING_CLASS =
@@ -113,7 +112,6 @@ function ExpandedSection({
             />
             {t(locale, "e2ee.section.encrypted")}
           </h2>
-          <E2eeNewChatLink compact />
         </div>
         {data.hasList ? (
           <div className={inset}>

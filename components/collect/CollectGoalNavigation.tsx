@@ -1,3 +1,4 @@
+import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
@@ -63,11 +64,7 @@ export default function CollectGoalNavigation({
           key={id}
           type="button"
           aria-pressed={selected}
-          className={`tw-inline-flex tw-min-h-11 tw-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-border-0 tw-border-b-2 tw-border-solid tw-bg-transparent tw-px-2 tw-py-2 tw-text-xs tw-font-semibold tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-px-3 ${
-            selected
-              ? "tw-border-iron-300 tw-text-iron-100"
-              : "tw-border-transparent tw-text-iron-400 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-text-iron-100"
-          }`}
+          className={`${getUnderlineTabClasses({ active: selected })} tw-inline-flex tw-min-h-11 tw-shrink-0 tw-cursor-pointer tw-items-center tw-gap-1.5 tw-px-2 tw-py-2 tw-text-xs sm:tw-px-3`}
           onClick={() => {
             if (!selected) onIntentChange(defaultIntent);
           }}

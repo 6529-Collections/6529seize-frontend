@@ -5,11 +5,13 @@ import {
   getSessionClientType,
   getSessionNonce,
 } from "@/services/auth/session-v2.utils";
+import { getStructuredApiErrorStatus } from "@/services/api/common-api";
 import { getWalletSignatureAudience } from "@/services/wallet-signatures/structured-wallet-signatures";
 import {
   AuthenticationNonceError,
   InvalidSignerAddressError,
   NonceResponseValidationError,
+  SignInRateLimitedError,
 } from "./authErrors";
 
 const SIWE_HEADER_SUFFIX = " wants you to sign in with your Ethereum account:";
@@ -17,7 +19,8 @@ const RESOURCES_LINE = "Resources:";
 const MAINNET_CHAIN_ID = "1";
 // The server issues challenges valid for five minutes; allow for change.
 const MAX_CHALLENGE_LIFETIME_MS = 60 * 60 * 1000;
-// The longest statement today (a combined grant) is about 500 characters.
+// 2,000 characters per line leaves headroom above the longest structured
+// challenge statement issued today.
 const MAX_TEXT_LENGTH = 2000;
 const MAX_TOKEN_LENGTH = 200;
 // Printable text on one line: no control characters (line breaks included).
@@ -397,6 +400,9 @@ export const getAuthNonce = async ({
       error instanceof InvalidSignerAddressError
     ) {
       throw error;
+    }
+    if (getStructuredApiErrorStatus(error) === 429) {
+      throw new SignInRateLimitedError();
     }
 
     throw new AuthenticationNonceError(

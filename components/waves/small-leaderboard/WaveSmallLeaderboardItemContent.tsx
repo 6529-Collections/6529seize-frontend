@@ -1,6 +1,10 @@
 "use client";
 
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
+import { isUploadedDropGif } from "@/helpers/gif-preview.helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import {
   ExtendedDrop,
   getDropPreviewImageUrl,
@@ -24,6 +28,7 @@ interface WaveSmallLeaderboardItemContentProps {
 export const WaveSmallLeaderboardItemContent: React.FC<
   WaveSmallLeaderboardItemContentProps
 > = ({ drop, onDropClick, contentPresentation = "default" }) => {
+  const locale = useBrowserLocale();
   const contentRef = useRef<HTMLDivElement>(null);
   const [showGradient, setShowGradient] = useState(false);
 
@@ -37,6 +42,7 @@ export const WaveSmallLeaderboardItemContent: React.FC<
     () => getDropPreviewImageUrl(drop.metadata),
     [drop.metadata]
   );
+  const previewAlt = t(locale, "drop.additionalInfo.previewImageAlt");
 
   const isStorm = drop.parts.length > 1;
   const haveMetadata = !!drop.metadata.length;
@@ -69,13 +75,24 @@ export const WaveSmallLeaderboardItemContent: React.FC<
         {previewImageUrl ? (
           <div className="tw-flex tw-w-full tw-justify-center">
             <div className="tw-relative tw-aspect-[4/3] tw-max-h-48 tw-w-full tw-max-w-[264px] tw-overflow-hidden tw-rounded-lg">
-              <Image
-                src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
-                alt="Preview image"
-                fill
-                sizes="264px"
-                className="tw-object-contain"
-              />
+              {isUploadedDropGif(previewImageUrl) ? (
+                <DropImagePreview
+                  originalSrc={previewImageUrl}
+                  imageScale={ImageScale.AUTOx450}
+                  alt={previewAlt}
+                  fill
+                  sizes="264px"
+                  className="tw-object-contain"
+                />
+              ) : (
+                <Image
+                  src={getScaledImageUri(previewImageUrl, ImageScale.AUTOx450)}
+                  alt={previewAlt}
+                  fill
+                  sizes="264px"
+                  className="tw-object-contain"
+                />
+              )}
             </div>
           </div>
         ) : (

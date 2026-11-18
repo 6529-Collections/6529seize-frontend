@@ -11,6 +11,12 @@ import { useVisibleInterval } from "@/hooks/usePageVisibility";
 import { formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import WaveSubmissionAccessDetails from "../WaveSubmissionAccessDetails";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+
+export const WAVE_HEADER_RESTRICTION_SURFACE_CLASS =
+  "tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-p-0 tw-text-iron-200 tw-shadow-sm tw-shadow-black/20 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-black motion-reduce:tw-transition-none";
+
+export const WAVE_HEADER_RESTRICTION_BUTTON_CLASS = `${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${WAVE_HEADER_RESTRICTION_SURFACE_CLASS} tw-h-8 tw-w-8 tw-min-w-8`;
 
 interface WaveHeaderRestrictionButtonProps {
   readonly label: string;

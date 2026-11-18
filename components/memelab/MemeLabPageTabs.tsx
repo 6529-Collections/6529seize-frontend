@@ -2,6 +2,7 @@
 
 import { useUserPageTabIndicator } from "@/components/user/layout/useUserPageTabIndicator";
 import type { MEME_FOCUS } from "@/components/the-memes/MemeShared";
+import { UNDERLINE_TAB_INDICATOR_CLASSES } from "@/components/common/underlineTabStyles";
 import type { LabNFT } from "@/entities/INFT";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -80,7 +81,7 @@ export function MemeLabPageTabs({
           ))}
           <span
             aria-hidden="true"
-            className="tw-pointer-events-none tw-absolute tw-bottom-0 tw-left-0 tw-h-0.5 tw-w-px tw-origin-left tw-bg-primary-400 tw-transition-[transform,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
+            className={UNDERLINE_TAB_INDICATOR_CLASSES}
             style={{
               opacity: activeIndicator.visible ? 1 : 0,
               transform: `translate3d(${activeIndicator.left}px, 0, 0) scaleX(${activeIndicator.width})`,

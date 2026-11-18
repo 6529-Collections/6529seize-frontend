@@ -117,6 +117,49 @@ describe("verifyGrant: app grants (6529 Mobile and Desktop)", () => {
     expect(result.ok).toBe(false);
   });
 
+  const recordAuthorizedFrom = async (origin: string) => {
+    const base = await recordFor(appGrant({ origin }));
+    return { ...base, grant: { ...base.grant, origin } };
+  };
+
+  it.each(["6529 Desktop", "6529.io", "staging.6529.io"])(
+    "verifies an app grant authorized from %s",
+    async (origin) => {
+      await expect(
+        verifyGrant(await recordAuthorizedFrom(origin), { atMs })
+      ).resolves.toEqual({
+        ok: true,
+        verified: true,
+        via: "eoa",
+        reason: null,
+      });
+    }
+  );
+
+  it.each(["evil.example", "6529 Mobile", "media.6529.io"])(
+    "keeps an app grant authorized from %s acceptable but never verified",
+    async (origin) => {
+      await expect(
+        verifyGrant(await recordAuthorizedFrom(origin), { atMs })
+      ).resolves.toEqual({
+        ok: true,
+        verified: false,
+        via: "eoa",
+        reason: "unrecognized-origin",
+      });
+    }
+  );
+
+  it("still rejects a bad signature under an unrecognized origin", async () => {
+    const base = await recordAuthorizedFrom("evil.example");
+    const result = await verifyGrant(
+      { ...base, wallet_signature: `0x${"11".repeat(65)}` },
+      { atMs }
+    );
+    expect(result.verified).toBe(false);
+    expect(result.reason).not.toBe("unrecognized-origin");
+  });
+
   it("still verifies a v1 app grant for 0x004F (D172 transition)", async () => {
     const v1 = appGrant({
       version: 1,

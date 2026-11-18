@@ -50,6 +50,13 @@ let mockSignedMessagesEnabled = false;
 jest.mock("@/lib/device-signing/feature", () => ({
   isSignedMessagesEnabled: () => mockSignedMessagesEnabled,
 }));
+// Placement only: this browser's own check is covered in
+// dropSignatureVerdicts.test.tsx, so every seal here reads as verified.
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: readonly unknown[]) => drops.map(() => "verified"),
+  readSealState: () => "verified",
+}));
+
 jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
   __esModule: true,
   default: (props: any) =>

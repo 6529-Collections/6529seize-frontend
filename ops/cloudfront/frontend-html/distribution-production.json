@@ -1,4 +1,5 @@
 {
+  "_DoNotApplyAsWritten": "Record of the live E3KTTDJUNHRYW9 config, not an input. The AWS CLI rejects this key, so the file cannot be applied as it is. Start every change from a fresh get-distribution-config and its ETag, and keep WebACLId and the X-Origin-Verify origin header from it. The header value lives only in SSM; the placeholder below is not it. See ops/docs/developer/cloudfront-page-cache.md#origin-lockdown.",
   "CallerReference": "frontend-html-production",
   "Comment": "6529.io frontend pages (Elastic Beanstalk load balancer, Node on port 3001)",
   "Enabled": true,
@@ -22,7 +23,13 @@
         "DomainName": "seizeapp-env-node22.eba-dg2ywmgz.us-east-1.elasticbeanstalk.com",
         "OriginPath": "",
         "CustomHeaders": {
-          "Quantity": 0
+          "Quantity": 1,
+          "Items": [
+            {
+              "HeaderName": "X-Origin-Verify",
+              "HeaderValue": "UNRESOLVED_PLACEHOLDER_read_from_SSM_/6529/frontend/production/origin-verify-header"
+            }
+          ]
         },
         "CustomOriginConfig": {
           "HTTPPort": 80,
@@ -258,6 +265,6 @@
       "Quantity": 0
     }
   },
-  "WebACLId": "",
+  "WebACLId": "arn:aws:wafv2:us-east-1:987989283142:global/webacl/seize-web-sanctions/5fcb32bd-7a1d-4718-88ed-5281335eaed6",
   "DefaultRootObject": ""
 }

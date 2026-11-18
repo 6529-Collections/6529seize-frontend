@@ -871,6 +871,7 @@ describe("next-sitemap config", () => {
     expect(shouldExcludeSitemapPath("/buidl")).toBe(true);
     expect(shouldExcludeSitemapPath("/punk6529/subscriptions")).toBe(true);
     expect(shouldExcludeSitemapPath("/messages/create?wave=abc")).toBe(true);
+    expect(shouldExcludeSitemapPath("/messages/new")).toBe(true);
     expect(shouldExcludeSitemapPath("/tools/app-wallets")).toBe(true);
     expect(shouldExcludeSitemapPath("/stream")).toBe(true);
     expect(shouldExcludeSitemapPath("/museum/network/collections")).toBe(true);

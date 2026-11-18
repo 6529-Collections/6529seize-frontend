@@ -9,13 +9,13 @@ import { getWalletSignatureAudience } from "./structured-wallet-signatures";
 
 // These English labels and statements are part of the versioned signing
 // protocol. Keep them identical to the backend verifier and its test vector.
-const MEMES_SUBMISSION_DOMAIN = {
+export const MEMES_SUBMISSION_DOMAIN = {
   name: "The Memes",
   version: "1",
   chainId: 1,
 } as const;
 
-const MEMES_SUBMISSION_TYPES = {
+export const MEMES_SUBMISSION_TYPES = {
   EIP712Domain: [
     { name: "name", type: "string" },
     { name: "version", type: "string" },

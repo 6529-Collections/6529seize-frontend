@@ -11,12 +11,26 @@ art destinations together while leaving `Waves` adjacent to `DMs`.
 When the connected wallet can access Drop Forge, the drawer lists it as a
 standalone row after `About`.
 
+The slot between `DMs` and `About` shows `Join 6529`
+link to `/join-6529` for signed-out visitors and wallets without a profile.
+Signed-in members with a profile see `Validator`, linking to `/validator`, in
+that same slot. While wallet or profile restoration is unresolved, the slot
+reserves its space without showing either action. The same rule applies to the
+collapsed and expanded web sidebar, mobile web menu, native app drawer, and
+page search. Public navigation never adds a Validator link.
+
+After that slot, `6529 AI` links to `/ai`, 6529 AI's download page, for
+everyone, signed in or not. It sits beside the validator because both are
+6529 software that people run on their own computers, and it is public
+because the `/ai` pages are. It uses the same styling as the other rows, is
+active on every `/ai` page, and is under `Pages` in page search.
+
 ## Location in the Site
 
 - App routes rendered with `AppLayout`, when header left control is menu/avatar
   (not `Back`).
-- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529`, and
-  `About`.
+- Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members),
+  `6529 AI`, and `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Drawer header: connected profile avatar shortcut to
@@ -48,12 +62,14 @@ standalone row after `About`.
    - `Museum`
    - `Waves`
    - `DMs`
-   - `Join 6529`
+   - `Join 6529` for newcomers, or `Validator` for signed-in members
+   - `6529 AI`
    - `About`
 5. Tap the connected profile avatar to open your own profile route
    (`/{normalized-handle}` with `/{walletAddress}` fallback), tap `Museum` for
-   `/museum/network`, tap `DMs` for `/messages`, tap `Join 6529` for
-   `/join-6529`, use the standalone `Drop Forge` row when present, or expand
+   `/museum/network`, tap `DMs` for `/messages`, or use the membership row:
+   `Join 6529` opens `/join-6529` for newcomers; `Validator` opens `/validator`
+   for signed-in members with a profile. Use `Drop Forge` when present, or expand
    grouped sections for nested routes. About opens to group headings first,
    then each group expands to its links.
 6. Drawer closes and route navigation runs.
@@ -71,14 +87,15 @@ standalone row after `About`.
   `/waves` and `Discover Waves` at `/discover`.
 - Open `Museum`:
   `/museum/network`.
-- Open `Join 6529`:
-  `/join-6529`.
+- Open the membership row:
+  `Join 6529` opens `/join-6529` for newcomers; `Validator` opens `/validator`
+  for signed-in members with a profile.
 - Open `About > Network & Reputation`:
   `/network`, `/network/activity`, `/network/tdh`,
   `/network/xtdh` (`xTDH Overview`), `/xtdh` (`xTDH Allocations Dashboard`),
   `/network/wave-score`, `/rep/categories`, `/network/health`,
   `/network/definitions`, `/network/levels`, `/network/health/network-tdh`,
-  `/network/nerd`, `/network/prenodes`, and
+  `/network/nerd`, and
   `/network/tdh/historic-boosts`.
 - Open `Drop Forge`:
   use the standalone row after `About` when the current wallet can access the
@@ -105,6 +122,9 @@ standalone row after `About`.
 - Use `Scan QR Code` for `https://6529.io/*` links and `mobile6529://` deep
   links (`navigate/*` and `share-connection` scopes).
 - Open `Push Notifications`, review per-device toggles, then save changes.
+- Tap `Disconnect & Logout` (or `Logout` when the wallet is disconnected).
+  The drawer closes automatically. If encrypted messages are saved on this
+  device, the sign-out dialog lets you keep or remove them, or cancel.
 - Review `Network: {currentChain}` and use `Switch to {nextChain}` when the
   current wallet exposes more than one supported chain.
 - Use unread count badges in connected account avatars to pick the account with

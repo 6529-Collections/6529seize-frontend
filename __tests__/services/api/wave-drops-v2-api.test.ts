@@ -259,6 +259,26 @@ const expectNoListEnrichmentCalls = () => {
 };
 
 describe("fetchWaveDropsFeedV2", () => {
+  it("preserves known entry references and treats malformed references as unknown", async () => {
+    const entry = { competition_id: "competition-1", entry_id: "entry-1" };
+    const drop = createDrop(1);
+    commonApiFetchMock.mockResolvedValueOnce({
+      wave: { ...wave, has_competition: true },
+      drops: [
+        { ...drop, competition_entry: entry },
+        { ...drop, competition_entry: null },
+        drop,
+        { ...drop, competition_entry: { entry_id: "incomplete" } },
+      ],
+    });
+
+    const result = await fetchWaveDropsFeedV2({ waveId: wave.id, limit: 4 });
+    expect(result.drops[0]).toMatchObject({ competition_entry: entry });
+    expect(result.drops[1]).toMatchObject({ competition_entry: null });
+    expect(result.drops[2]).not.toHaveProperty("competition_entry");
+    expect(result.drops[3]).not.toHaveProperty("competition_entry");
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -618,6 +638,15 @@ describe("fetchWaveDropsFeedV2", () => {
       voters_count_available: false,
       rating: 10,
     });
+  });
+
+  it("keeps a leaderboard drop's real part count while loading only its first part", () => {
+    const drop = mapLeaderboardDropV2({
+      drop: { ...createDrop(1), parts_count: 3 } as unknown as ApiDropV2,
+      wave: waveMin,
+    });
+    expect(drop.parts).toHaveLength(1);
+    expect(drop.parts_count).toBe(3);
   });
 
   it("maps V2 priority metadata into leaderboard legacy drops", () => {

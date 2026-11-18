@@ -53,6 +53,11 @@
     );
     --left-rail: calc(var(--layout-margin) + var(--sidebar-width));
   }
+  :root[data-desktop-titlebar="overlay"] .layout-root {
+    /* The body already reserves the inset. A full viewport here overflows
+       the document and lets Waves scroll under the fixed strip. */
+    min-height: var(--layout-viewport-height);
+  }
   .layout-root:not([data-mobile="true"]) {
     max-width: var(--layout-max);
     margin-inline: auto;
@@ -118,6 +123,17 @@
     );
     --pull-to-refresh-fixed-overlay-offset: 0px;
     --pull-to-refresh-fixed-overlay-transition-duration: 0ms;
+    /* Space above the page for the 6529 Desktop title strip (0 elsewhere). */
+    --desktop-top-inset: 0px;
+  }
+  /* 6529 Desktop supplies the strip height before first paint. Reserve the
+     strip and a small gap in the shared offset for page content and navigation. */
+  :root[data-desktop-titlebar="overlay"] {
+    --desktop-top-inset: calc(var(--desktop-titlebar-height, 0px) + 8px);
+    --layout-viewport-height: calc(100svh - var(--desktop-top-inset));
+  }
+  :root[data-desktop-titlebar="overlay"] body {
+    padding-top: var(--desktop-top-inset);
   }
   :root[data-native-keyboard-visible="true"]:not(
       [data-layout-viewport-locked="true"]

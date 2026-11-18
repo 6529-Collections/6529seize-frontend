@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveJoin } from "@/hooks/waves/useWaveJoin";
@@ -32,6 +33,7 @@ interface WaveJoinCtaProps {
   /** Shared header tooltip id; omit on touch-first headers. */
   readonly tooltipId?: string | undefined;
   readonly className?: string | undefined;
+  readonly compact?: boolean | undefined;
 }
 
 type RuntimeChatWave = Omit<ApiWave, "chat"> & {
@@ -69,6 +71,7 @@ export default function WaveJoinCta({
   variant = "header",
   tooltipId,
   className,
+  compact = false,
 }: WaveJoinCtaProps) {
   const { connectedProfile, activeProfileProxy } = useAuth();
   const {
@@ -162,8 +165,9 @@ export default function WaveJoinCta({
           }}
           data-testid="wave-join-confirmation"
           className={clsx(
-            "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-px-2.5 tw-text-xs tw-font-semibold tw-text-iron-200 focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
-            sizeClasses
+            "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-text-xs tw-font-semibold tw-text-iron-200 focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
+            sizeClasses,
+            compact ? "tw-w-8 tw-p-0" : "tw-px-2.5"
           )}
         >
           <CheckIcon
@@ -171,7 +175,9 @@ export default function WaveJoinCta({
             strokeWidth={2}
             aria-hidden="true"
           />
-          <span>{t(locale, "waves.join.joined")}</span>
+          <span className={compact ? "tw-sr-only" : undefined}>
+            {t(locale, "waves.join.joined")}
+          </span>
         </span>
       );
     }
@@ -204,11 +210,15 @@ export default function WaveJoinCta({
           }
           void handleJoin(isKeyboardActivation(event.currentTarget));
         }}
-        className={clsx("tw-px-2.5 tw-text-xs", sizeClasses)}
+        className={clsx(
+          "tw-px-2.5 tw-text-xs",
+          sizeClasses,
+          COMPACT_ACTION_TOUCH_TARGET_CLASS
+        )}
       >
         {!isPending && (
           <PlusIcon
-            className="-tw-ml-0.5 tw-size-4 tw-flex-shrink-0"
+            className="tw-size-4 tw-flex-shrink-0"
             strokeWidth={2}
             aria-hidden="true"
           />

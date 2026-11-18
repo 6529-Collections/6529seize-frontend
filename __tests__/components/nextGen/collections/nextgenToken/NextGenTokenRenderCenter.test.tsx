@@ -43,7 +43,8 @@ describe("NextGenTokenRenderCenter", () => {
     await userEvent.click(screen.getByRole("button", { name: "Open Render" }));
     expect(open).toHaveBeenCalledWith(
       "https://generator.6529.io/mainnet/html/42",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
     window.open = orig;
   });
@@ -66,7 +67,8 @@ describe("NextGenTokenRenderCenter", () => {
     await userEvent.click(screen.getByRole("button", { name: "Open Render" }));
     expect(open).toHaveBeenCalledWith(
       "https://generator.6529.io/mainnet/html/42?render_static=true&render_og=true&height=400",
-      "_blank"
+      "_blank",
+      "noopener,noreferrer"
     );
     window.open = undefined as any;
   });

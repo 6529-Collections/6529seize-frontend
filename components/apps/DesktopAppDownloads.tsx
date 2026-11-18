@@ -243,12 +243,12 @@ function DownloadRow({
             version: release.version,
             file: label,
           })}
-          className={`tw-inline-flex tw-min-h-[30px] tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-100 tw-bg-iron-100 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-leading-[18px] tw-text-iron-950 tw-no-underline hover:tw-bg-white touch-only:tw-min-h-11 ${FOCUS}`}
+          className={`tw-inline-flex tw-min-h-[30px] tw-items-center tw-gap-1.5 tw-rounded-md tw-border tw-border-solid tw-border-iron-100 tw-bg-iron-100 tw-px-2 tw-py-1 tw-text-xs tw-font-semibold tw-leading-[18px] tw-text-iron-950 tw-no-underline hover:tw-border-iron-400 hover:tw-bg-iron-300 hover:tw-text-iron-950 touch-only:tw-min-h-11 ${FOCUS}`}
         >
           <ArrowDownTrayIcon aria-hidden="true" className="tw-size-3" />
           {t(APPS_LOCALE, "apps.desktop.download")}
         </a>
-        {file.arweaveUrl && (
+        {file.arweaveUrl ? (
           <a
             href={file.arweaveUrl}
             target="_blank"
@@ -262,6 +262,10 @@ function DownloadRow({
           >
             {t(APPS_LOCALE, "apps.desktop.mirror")}
           </a>
+        ) : (
+          <span className="tw-text-[11px] tw-leading-4 tw-text-iron-400">
+            {t(APPS_LOCALE, "apps.desktop.mirrorPending")}
+          </span>
         )}
       </div>
     </div>

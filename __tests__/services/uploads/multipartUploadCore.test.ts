@@ -13,6 +13,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import axios, { CanceledError } from "axios";
 import { ApiDropMediaStatus } from "@/generated/models/ApiDropMediaStatus";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
+import { loadLocaleMessages } from "@/i18n/messages";
 
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
@@ -39,6 +40,39 @@ beforeEach(() => {
   axiosPutMock.mockReset();
   jest.mocked(captureVideoPoster).mockReset().mockResolvedValue(undefined);
 });
+
+it.each([ApiDropMediaStatus.Failed, ApiDropMediaStatus.Processing])(
+  "uses the active locale for image failure at %s",
+  async (status) => {
+    await loadLocaleMessages("fr-FR");
+    commonApiPostMock
+      .mockResolvedValueOnce({ upload_id: "upload-1", key: "drops/img.jpg" })
+      .mockResolvedValueOnce({ upload_url: "https://s3.example/upload" })
+      .mockResolvedValueOnce({
+        media_url: "https://cdn.example/drops/img.jpg",
+        media_upload_id: "media-upload-1",
+        media_status: status,
+      });
+    commonApiFetchMock.mockResolvedValue({
+      media_url: "https://cdn.example/drops/img.jpg",
+      media_upload_id: "media-upload-1",
+      media_status: ApiDropMediaStatus.Failed,
+    });
+    axiosPutMock.mockResolvedValue({ headers: { etag: '"part-etag"' } });
+    await expect(
+      multipartUploadCore({
+        file: new File(["image"], "img.jpg", { type: "image/jpeg" }),
+        endpoints: {
+          start: "drop-media/multipart-upload",
+          part: "drop-media/multipart-upload/part",
+          complete: "drop-media/multipart-upload/completion",
+        },
+        waitForReady: true,
+        locale: "fr-FR",
+      })
+    ).rejects.toThrow("Le traitement de l'image a echoue.");
+  }
+);
 
 describe("device video poster upload", () => {
   const endpoints = {
@@ -157,6 +191,7 @@ describe("start request purpose", () => {
         content_type: "image/jpeg",
         purpose: "decision_entry",
       },
+      errorMode: "structured",
     });
   });
 
@@ -167,6 +202,7 @@ describe("start request purpose", () => {
       expect(commonApiPostMock).toHaveBeenNthCalledWith(1, {
         endpoint: endpoints.start,
         body: { file_name: "IMG_0001.jpg", content_type: "image/jpeg" },
+        errorMode: "structured",
       });
     }
   );
@@ -268,6 +304,7 @@ describe("multipartUploadCore MIME helpers", () => {
         key: "drops/img.jpg",
         parts: [{ part_no: 1, etag: "part-etag" }],
       },
+      errorMode: "structured",
     });
     expect(onCompleting).toHaveBeenCalledTimes(1);
     expect(commonApiFetchMock).not.toHaveBeenCalled();

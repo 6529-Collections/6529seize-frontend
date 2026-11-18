@@ -1,6 +1,7 @@
 "use client";
 
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
+import { getSafeCssColor } from "@/helpers/css-color.helpers";
 import { getRandomColorWithSeed, getTimeAgo } from "@/helpers/Helpers";
 import { ImageScale, getScaledImageUri } from "@/helpers/image.helpers";
 import clsx from "clsx";
@@ -25,10 +26,10 @@ export default function CurationGroupRow({
 }) {
   const isInteractive = onSelect !== undefined;
   const avatarAccentStart =
-    group.created_by.banner1_color ??
+    getSafeCssColor(group.created_by.banner1_color) ??
     getRandomColorWithSeed(group.created_by.handle ?? "");
   const avatarAccentEnd =
-    group.created_by.banner2_color ??
+    getSafeCssColor(group.created_by.banner2_color) ??
     getRandomColorWithSeed(group.created_by.handle ?? "");
   const timeAgo = getTimeAgo(new Date(group.created_at).getTime());
   const avatarFallbackLabel = getGroupCreatorLabel(group)

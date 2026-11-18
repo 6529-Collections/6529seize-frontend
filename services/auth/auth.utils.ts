@@ -5,6 +5,7 @@ import { publicEnv } from "@/config/env";
 import { API_AUTH_COOKIE, MAX_CONNECTED_PROFILES } from "@/constants/constants";
 import { safeLocalStorage } from "@/helpers/safeLocalStorage";
 import { getDevAuthTestOverride } from "./devAuthTestOverride";
+import { persistDesktopProfileAccounts } from "./desktop-profile-storage";
 import { removeNativeRefreshToken } from "./native-refresh-token-storage";
 import {
   getWalletAuthCookieFor,
@@ -340,7 +341,7 @@ const getStoredAccounts = (): ConnectedWalletAccount[] => {
   return readAccountsFromStorage();
 };
 
-const persistAccountsWithActive = (
+export const persistAccountsWithActive = (
   accounts: readonly ConnectedWalletAccount[],
   activeAddress: string | null
 ): void => {
@@ -359,6 +360,7 @@ const persistAccountsWithActive = (
 
   synchronizeLegacyStorage(activeAccount);
   setWalletAuthCookie(activeAccount?.jwt ?? null);
+  persistDesktopProfileAccounts(accounts, activeAddress);
 };
 
 export const getConnectedWalletAccounts = (): ConnectedWalletAccount[] => {
@@ -602,11 +604,13 @@ const getNativeRefreshTokenCleanupAddresses = (
 export const clearAllWalletAuth = async (): Promise<void> => {
   const accounts = getStoredAccounts();
   const previousActiveAddress = getActiveAddressFromStorage();
+  const signedOutAddresses = getNativeRefreshTokenCleanupAddresses(accounts);
   await Promise.all(
-    getNativeRefreshTokenCleanupAddresses(accounts).map((address) =>
-      removeNativeRefreshToken(address)
-    )
+    signedOutAddresses.map((address) => removeNativeRefreshToken(address))
   );
+  for (const address of signedOutAddresses) {
+    safeLocalStorage.removeItem(getAddressRoleStorageKey(address));
+  }
   persistAccountsWithActive([], null);
   emitWalletAccountsUpdated();
   if (previousActiveAddress) {

@@ -11,6 +11,7 @@ import { ShellSearchParamsProvider } from "@/contexts/ShellSearchParamsContext";
 import { VersionStatusProvider } from "@/contexts/VersionStatusContext";
 import { AppWalletsProvider } from "@/components/app-wallets/AppWalletsContext";
 import Auth from "@/components/auth/Auth";
+import DesktopProfileStorageGate from "@/components/desktop/DesktopProfileStorageGate";
 import AuthLaunchTimingReporter from "@/components/auth/AuthLaunchTimingReporter";
 import MarketActivityTracker from "@/components/collect/MarketActivityTracker";
 import DeviceSetupHost from "@/components/device-signing/DeviceSetupHost";
@@ -22,6 +23,7 @@ import QuickDirectMessagesGate from "@/components/messages/quick-dms/QuickDirect
 import { NotificationsProvider } from "@/components/notifications/NotificationsContext";
 import ReactQueryWrapper from "@/components/react-query-wrapper/ReactQueryWrapper";
 import NewVersionToast from "@/components/utils/NewVersionToast";
+import DesktopUpdateNotice from "@/components/desktop/DesktopUpdateNotice";
 import { ActiveGroupProvider } from "@/contexts/ActiveGroupContext";
 import { EditingDropProvider } from "@/contexts/EditingDropContext";
 import { EmojiProvider } from "@/contexts/EmojiContext";
@@ -36,6 +38,7 @@ import { WaveEligibilityProvider } from "@/contexts/wave/WaveEligibilityContext"
 import { AppWebSocketProvider } from "@/services/websocket/AppWebSocketProvider";
 import { isSignedMessagesEnabled } from "@/lib/device-signing/feature";
 import { isValidatorAuthorizePath } from "@/lib/validator-page/authorize/paths";
+import { isBrowserConnectorPath } from "@/lib/desktop/browserConnector";
 import { SeizeSettingsMode } from "@/types/enums";
 import { LayoutProvider } from "../brain/my-stream/layout/LayoutContext";
 import { ViewProvider } from "../navigation/ViewContext";
@@ -49,6 +52,13 @@ import QueryClientSetup from "./QueryClientSetup";
 import WagmiSetup from "./WagmiSetup";
 import DocumentLanguage from "./DocumentLanguage";
 import AndroidBackNavigation from "@/components/navigation/AndroidBackNavigation";
+import DesktopNavigationBridge from "@/components/desktop/DesktopNavigationBridge";
+import DesktopNotificationsBridge from "@/components/desktop/DesktopNotificationsBridge";
+import DesktopBrowserConnectorBridge from "@/components/desktop/DesktopBrowserConnectorBridge";
+import DesktopConnectDialog from "@/components/desktop/DesktopConnectDialog";
+import DesktopBrowserWalletBridge from "@/components/desktop/DesktopBrowserWalletBridge";
+import DesktopWalletRequestDialog from "@/components/desktop/DesktopWalletRequestDialog";
+import DesktopTitleStrip from "@/components/header/titlebar/DesktopTitleStrip";
 
 export default function Providers({
   children,
@@ -69,7 +79,10 @@ export default function Providers({
   // validator's grant; it doesn't sign in to 6529.io.
   const pathname = usePathname();
   const enableWalletAuthentication =
-    walletAuthenticationProp && !isValidatorAuthorizePath(pathname);
+    walletAuthenticationProp &&
+    !isValidatorAuthorizePath(pathname) &&
+    // The browser connector signs a 6529 Desktop challenge only.
+    !isBrowserConnectorPath(pathname);
 
   const sharedProviders = (
     <TitleProvider>
@@ -79,6 +92,13 @@ export default function Providers({
             <WaveInformationProvider>
               <NavigationHistoryProvider>
                 <AndroidBackNavigation />
+                <DesktopNavigationBridge />
+                <DesktopNotificationsBridge />
+                <DesktopBrowserConnectorBridge />
+                <DesktopConnectDialog />
+                <DesktopBrowserWalletBridge />
+                <DesktopWalletRequestDialog />
+                <DesktopTitleStrip />
                 <LocaleMessagesGate>{children}</LocaleMessagesGate>
               </NavigationHistoryProvider>
             </WaveInformationProvider>
@@ -141,6 +161,7 @@ export default function Providers({
                                   </LayoutProvider>
                                 </E2eeProvider>
                                 {enableVersionCheck && <NewVersionToast />}
+                                {enableVersionCheck && <DesktopUpdateNotice />}
                               </AppWebSocketProvider>
                             </CookieConsentProvider>
                           </NotificationsProvider>
@@ -163,7 +184,13 @@ export default function Providers({
       <CapacitorSetup />
       <EULAConsentStartup>
         <EditingDropProvider>
-          <ActiveGroupProvider>{appProviders}</ActiveGroupProvider>
+          <ActiveGroupProvider>
+            {/* Inert on the web. Inside 6529 Desktop it restores and saves
+                the signed-in profiles kept by the shell. */}
+            <DesktopProfileStorageGate enabled={enableWalletAuthentication}>
+              {appProviders}
+            </DesktopProfileStorageGate>
+          </ActiveGroupProvider>
         </EditingDropProvider>
       </EULAConsentStartup>
     </>

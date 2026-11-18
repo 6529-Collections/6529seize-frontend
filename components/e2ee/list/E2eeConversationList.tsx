@@ -2,6 +2,7 @@
 
 import { BellSlashIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import {
   getEncryptedConversationRoute,
   getEncryptedMessagesRoute,
@@ -10,12 +11,13 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t, type MessageKey } from "@/i18n/messages";
+import { t, tRich, type MessageKey } from "@/i18n/messages";
 import type { DisplayTimeZone } from "@/lib/display-time-zone/displayTimeZone";
 import { groupConversationThreads } from "@/lib/e2ee/dm-conversations";
 import type { E2eeConversation } from "@/lib/e2ee/types";
 import { E2eeEmojiProvider } from "../conversation/E2eeEmojiProvider";
 import { E2eeEmojiText } from "../conversation/E2eeEmojiText";
+import { E2eeMarkdown } from "../conversation/E2eeMarkdown";
 import {
   formatE2eeTimestamp,
   getConversationTitle,
@@ -96,14 +98,34 @@ function getRowPreview(
   locale: SupportedLocale,
   conversation: E2eeConversation,
   selfProfileId: string | null
-): string {
+): ReactNode {
   const message = conversation.lastMessage;
-  const preview = getMessagePreview(
-    locale,
-    message,
-    conversation.members,
-    selfProfileId
-  );
+  const preview =
+    message?.kind === "message" &&
+    !message.deleted &&
+    !message.undecryptable &&
+    message.text.trim() ? (
+      <E2eeMarkdown
+        key="preview"
+        text={message.text}
+        messageId={message.id}
+        members={conversation.members}
+        mentions={message.mentions}
+        selfProfileId={selfProfileId}
+        inlinePreview
+      />
+    ) : (
+      <E2eeEmojiText
+        key="preview"
+        text={getMessagePreview(
+          locale,
+          message,
+          conversation.members,
+          selfProfileId
+        )}
+        size="sm"
+      />
+    );
   if (
     message?.kind !== "message" ||
     message.deleted ||
@@ -114,7 +136,7 @@ function getRowPreview(
   ) {
     return preview;
   }
-  return t(locale, "e2ee.list.preview.from", {
+  return tRich<ReactNode>(locale, "e2ee.list.preview.from", {
     name: getMemberName(
       locale,
       conversation.members,
@@ -273,10 +295,7 @@ function E2eeConversationRow({
                 hasUnread ? "tw-text-iron-200" : "tw-text-iron-400"
               }`}
             >
-              <E2eeEmojiText
-                text={getRowPreview(locale, conversation, selfProfileId)}
-                size="sm"
-              />
+              {getRowPreview(locale, conversation, selfProfileId)}
             </span>
             {statusKey ? (
               <span className="tw-flex-shrink-0 tw-rounded-full tw-bg-iron-800 tw-px-2 tw-py-0.5 tw-text-[11px] tw-text-iron-300">

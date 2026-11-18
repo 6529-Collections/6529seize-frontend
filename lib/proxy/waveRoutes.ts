@@ -1,3 +1,5 @@
+import { NEW_MESSAGE_ROUTE } from "@/helpers/navigation.helpers";
+
 /**
  * Wave-id policy for `proxy.ts`.
  *
@@ -66,6 +68,8 @@ function isWaveId(segment: string): boolean {
 }
 
 function waveSegmentOf(pathname: string): string | undefined {
+  if (pathname === NEW_MESSAGE_ROUTE) return undefined;
+
   const thread = THREAD_ROUTE_PATTERN.exec(pathname)?.[1];
   if (thread !== undefined) {
     return STATIC_THREAD_SEGMENTS.has(thread) ? undefined : thread;

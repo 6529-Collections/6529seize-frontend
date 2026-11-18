@@ -64,6 +64,13 @@ jest.mock("@/lib/device-signing/feature", () => ({
   isSignedMessagesEnabled: () => mockSignedMessagesEnabled,
 }));
 
+// Placement only: this browser's own check is covered in
+// dropSignatureVerdicts.test.tsx, so every seal here reads as verified.
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: readonly unknown[]) => drops.map(() => "verified"),
+  readSealState: () => "verified",
+}));
+
 jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
   __esModule: true,
   default: () => null,
@@ -232,7 +239,7 @@ describe("WaveDropHeader", () => {
       mockSignedMessagesEnabled = true;
     });
 
-    it.each(["inline", "stacked"] as const)(
+    it.each(["inline", "stacked", "stacked-compact"] as const)(
       "sits beside the %s timestamp of an author signed drop",
       (timestampLayout) => {
         render(

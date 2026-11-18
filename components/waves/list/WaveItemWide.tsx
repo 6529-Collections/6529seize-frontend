@@ -10,6 +10,7 @@ import {
   UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import { getSafeCssColor } from "@/helpers/css-color.helpers";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
@@ -126,11 +127,11 @@ export default function WaveItemWide({
   const authorLevel = author?.level ?? 0;
 
   const banner1 =
-    author?.banner1_color ??
+    getSafeCssColor(author?.banner1_color) ??
     getRandomColorWithSeed(author?.handle ?? userPlaceholder ?? "");
 
   const banner2 =
-    author?.banner2_color ??
+    getSafeCssColor(author?.banner2_color) ??
     getRandomColorWithSeed(author?.handle ?? userPlaceholder ?? "");
 
   const isDirectMessage = wave?.chat.scope.group?.is_direct_message ?? false;

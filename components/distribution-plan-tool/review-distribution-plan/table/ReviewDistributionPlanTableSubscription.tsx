@@ -7,6 +7,7 @@ import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoade
 import { DistributionPlanToolContext } from "@/components/distribution-plan-tool/DistributionPlanToolContext";
 import { MEMES_CONTRACT } from "@/constants/constants";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
+import { buildCsv } from "@/helpers/csv-export.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
@@ -147,13 +148,10 @@ const processResults = (phaseName: string, results: SubscriptionResult) => {
 };
 
 function convertToCSV(arr: WalletResult[]): string {
-  const headers = "address,value";
-
-  if (arr.length === 0) {
-    return headers;
-  }
-  const rows = arr.map(({ wallet, amount }) => `${wallet},${amount}`);
-  return [headers, ...rows].join("\n");
+  return buildCsv([
+    ["address", "value"],
+    ...arr.map(({ wallet, amount }) => [wallet, amount]),
+  ]);
 }
 
 function downloadCSV(

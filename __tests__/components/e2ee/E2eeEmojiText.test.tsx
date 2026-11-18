@@ -27,7 +27,7 @@ it("recovers from HTTP failure and an empty successful response, using only inli
     <E2eeEmojiProvider>
       <Retry />
       <p>
-        <E2eeEmojiText text="Hi :gm: :unknown: 😀" />
+        <E2eeEmojiText text="Hi :gm: :unknown: :fire: :+1: 😀" />
       </p>
       <p data-testid="wrong-delimiter">
         <E2eeEmojiText text=":gm." />
@@ -52,7 +52,7 @@ it("recovers from HTTP failure and an empty successful response, using only inli
   const compactImage = screen.getByRole("img", { name: ":g:" });
   expect(compactImage).toHaveAttribute("width", "16");
   expect(compactImage).toHaveAttribute("height", "16");
-  expect(image.parentElement).toHaveTextContent("Hi :unknown: 😀");
+  expect(image.parentElement).toHaveTextContent("Hi :unknown: 🔥 👍 😀");
   expect(screen.getByTestId("wrong-delimiter")).toHaveTextContent(":gm.");
   expect(screen.getByTestId("missing-delimiter")).toHaveTextContent(":gm");
   expect(screen.getAllByRole("img")).toHaveLength(2);

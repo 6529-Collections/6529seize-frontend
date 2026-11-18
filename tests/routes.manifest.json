@@ -181,6 +181,24 @@
       "classification": "crawlable",
       "family": "system"
     },
+    "/ai": {
+      "classification": "crawlable"
+    },
+    "/ai/guide": {
+      "classification": "crawlable"
+    },
+    "/ai/known-issues": {
+      "classification": "crawlable"
+    },
+    "/ai/models": {
+      "classification": "crawlable"
+    },
+    "/ai/releases": {
+      "classification": "crawlable"
+    },
+    "/ai/use": {
+      "classification": "crawlable"
+    },
     "/artwork-documentation": {
       "classification": "auth"
     },
@@ -247,6 +265,10 @@
     },
     "/bookmarks": {
       "classification": "auth"
+    },
+    "/browser-connector": {
+      "classification": "exempt",
+      "exemptReason": "6529 Desktop sign-in and wallet-request bridge opened in the browser by the app; meaningless without the app's one-time link parameters or signed request."
     },
     "/buidl": {
       "classification": "crawlable",
@@ -333,6 +355,18 @@
         "staging": "/delegation/wallet-architecture",
         "production": "/delegation/wallet-architecture"
       }
+    },
+    "/desktop": {
+      "classification": "crawlable"
+    },
+    "/desktop/guide": {
+      "classification": "crawlable"
+    },
+    "/desktop/known-issues": {
+      "classification": "crawlable"
+    },
+    "/desktop/releases": {
+      "classification": "crawlable"
     },
     "/discover": {
       "classification": "crawlable",
@@ -491,6 +525,9 @@
       "classification": "auth"
     },
     "/messages/encrypted/new": {
+      "classification": "auth"
+    },
+    "/messages/new": {
       "classification": "auth"
     },
     "/museum": {
@@ -1833,10 +1870,6 @@
         "staging": "/network/nerd",
         "production": "/network/nerd"
       }
-    },
-    "/network/prenodes": {
-      "classification": "crawlable",
-      "family": "network"
     },
     "/network/tdh": {
       "classification": "crawlable",

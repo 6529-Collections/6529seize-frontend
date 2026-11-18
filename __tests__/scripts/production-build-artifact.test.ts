@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { spawnSync } from "node:child_process";
+import os from "node:os";
 import path from "node:path";
 import YAML from "yaml";
 import {
@@ -249,19 +250,34 @@ describe("production exact-artifact deployment contract", () => {
       "production-sentry-cli-${{ github.run_id }}"
     );
 
-    // Deploy: after Elastic Beanstalk serves the commit, never blocking.
-    const steps: Step[] = deploy.jobs["build-upload-deploy"].steps;
+    // Release job: only after the deploy job succeeded, never blocking, and
+    // with the Sentry token as its only credential.
+    const releaseJob = deploy.jobs["record-sentry-release"];
+    const steps: Step[] = releaseJob.steps;
+    expect(releaseJob.needs).toBe("build-upload-deploy");
+    expect(releaseJob.if).toBeUndefined();
+    expect(releaseJob["continue-on-error"]).toBe(true);
+    expect(releaseJob.environment).toBeUndefined();
+    expect(releaseJob.permissions).toEqual({
+      actions: "read",
+      contents: "read",
+    });
+    const releaseJobSource = JSON.stringify(releaseJob);
+    expect(releaseJobSource).not.toContain("configure-aws-credentials");
+    expect(releaseJobSource).not.toContain("id-token");
+    expect(releaseJobSource.match(/secrets\.[A-Z_]+/g)).toEqual([
+      "secrets.SENTRY_AUTH_TOKEN",
+    ]);
+    const deployJobSource = JSON.stringify(deploy.jobs["build-upload-deploy"]);
+    expect(deployJobSource).not.toContain("sentry-cli");
+    expect(deployJobSource).not.toContain("SENTRY_AUTH_TOKEN");
     const download =
       steps[indexIn(steps, "Download sentry-cli for the Sentry release")]!;
     const recordIndex = indexIn(steps, "Record the Sentry release");
     const record = steps[recordIndex]!;
-    for (const earlier of [
-      "Check Elastic Beanstalk health and readiness",
-      "Verify exact deployed version",
-      "Download sentry-cli for the Sentry release",
-    ]) {
-      expect(recordIndex).toBeGreaterThan(indexIn(steps, earlier));
-    }
+    expect(recordIndex).toBeGreaterThan(
+      indexIn(steps, "Download sentry-cli for the Sentry release")
+    );
     expect(download["continue-on-error"]).toBe(true);
     expect(download.with?.["name"]).toBe(upload.with?.["name"]);
     expect(record["continue-on-error"]).toBe(true);
@@ -292,10 +308,223 @@ describe("production exact-artifact deployment contract", () => {
     const checkout = steps.find(
       (step) => step.name === "Checkout exact production SHA"
     );
+    expect(checkout?.with?.["ref"]).toBe("${{ github.sha }}");
     expect(checkout?.with?.["fetch-depth"]).toBe(0);
+    expect(checkout?.with?.["persist-credentials"]).toBe(false);
     // Nothing is downloaded at deploy time.
     expect(JSON.stringify([stage, download, record])).not.toMatch(
       /\bnpx\b|\bcurl\b|\bwget\b|npm (i|install)\b|pnpm (add|dlx)\b/
+    );
+  });
+
+  it("installs release dependencies cold, with no Actions cache", () => {
+    type Step = {
+      name?: string;
+      uses?: string;
+      with?: Record<string, unknown>;
+    };
+    // Every workflow the production deploy runs, including reusable ones.
+    const releaseFiles = new Set(["build-upload-deploy-prod.yml"]);
+    for (const job of Object.values(deploy.jobs) as { uses?: string }[]) {
+      const local = /^\.\/\.github\/workflows\/([^/]+\.ya?ml)$/u.exec(
+        job.uses ?? ""
+      );
+      if (local?.[1]) releaseFiles.add(local[1]);
+    }
+    expect(releaseFiles).toEqual(
+      new Set([
+        "build-upload-deploy-prod.yml",
+        "production-build-artifact.yml",
+        "production-artifact-metadata.yml",
+        "production-artifact-verifier.yml",
+      ])
+    );
+    for (const file of releaseFiles) {
+      const source = read(file);
+      const workflow = YAML.parse(source) as {
+        jobs: Record<string, { steps?: Step[] }>;
+      };
+      expect(source).not.toContain("actions/cache");
+      expect(source).not.toContain("restore-keys");
+      expect(source).not.toContain("npm_config_store_dir");
+      for (const job of Object.values(workflow.jobs)) {
+        for (const step of job.steps ?? []) {
+          expect(step.with ?? {}).not.toHaveProperty("cache");
+          if (step.uses?.startsWith("actions/setup-node@")) {
+            expect(step.with?.["package-manager-cache"]).not.toBe(true);
+          }
+        }
+      }
+    }
+    const buildSteps: Step[] = build.jobs["build-production-artifact"].steps;
+    const setupNode = buildSteps.find((step) =>
+      step.uses?.startsWith("actions/setup-node@")
+    );
+    expect(setupNode?.with?.["package-manager-cache"]).toBe(false);
+    expect(
+      buildSteps.findIndex(
+        (step) => step.name === "Install frozen dependencies"
+      )
+    ).toBeGreaterThan(buildSteps.indexOf(setupNode!));
+  });
+
+  describe("Elastic Beanstalk application version description", () => {
+    const step = deploy.jobs["build-upload-deploy"].steps.find(
+      (candidate: { name?: string }) =>
+        candidate.name === "Ensure Elastic Beanstalk application version"
+    ) as { run: string };
+    const mockAws = `
+aws() {
+  case "$1:$2" in
+    elasticbeanstalk:describe-application-versions)
+      printf '{"ApplicationVersions":[]}\\n' ;;
+    elasticbeanstalk:create-application-version)
+      shift 2
+      while [ "$#" -gt 0 ]; do
+        if [ "$1" = --description ]; then printf '%s' "$2" > "$TEST_DESCRIPTION"; fi
+        shift
+      done ;;
+    *) return 99 ;;
+  esac
+}
+`;
+    const describeAs = (commitMessage: string) => {
+      const directory = fs.mkdtempSync(path.join(os.tmpdir(), "eb-version-"));
+      const output = path.join(directory, "description");
+      try {
+        const result = spawnSync("bash", ["-c", `${mockAws}\n${step.run}`], {
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            AWS_BUCKET: "test-bucket",
+            BEANSTALK_APP_NAME: "test app",
+            COMMIT_SHA: "a".repeat(40),
+            COMMIT_MESSAGE: commitMessage,
+            TEST_DESCRIPTION: output,
+          },
+        });
+        expect(result.status).toBe(0);
+        return fs.readFileSync(output, "utf8");
+      } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+      }
+    };
+
+    it.each([
+      "Merge pull request #4806 from 6529-Collections/claude/share-image",
+      "Fix file:// links in the docs",
+      "Use https://6529.io in examples",
+    ])("keeps an ordinary commit subject as is: %s", (subject) => {
+      expect(describeAs(subject)).toBe(subject);
+    });
+
+    it.each(["file:///etc/hostname", "fileb://package.zip", "FILE://x"])(
+      "keeps a subject that names a local file literal: %s",
+      (subject) => {
+        expect(describeAs(subject)).toBe(`Commit: ${subject}`);
+      }
+    );
+  });
+
+  describe("validator page access on deploy", () => {
+    const step = deploy.jobs["build-upload-deploy"].steps.find(
+      (candidate: { name?: string }) =>
+        candidate.name === "Deploy new version to Elastic Beanstalk"
+    ) as { run: string };
+    const mockAws = `
+aws() {
+  if [ "$1:$2" != elasticbeanstalk:update-environment ]; then return 99; fi
+  while [ "$#" -gt 0 ]; do
+    if [ "$1" = --option-settings ]; then printf '%s' "$2" > "$TEST_SETTINGS"; fi
+    shift
+  done
+}
+`;
+    const deployWith = (password: string, publicFlag: string) => {
+      const directory = fs.mkdtempSync(path.join(os.tmpdir(), "eb-deploy-"));
+      const settingsFile = path.join(directory, "settings.json");
+      try {
+        const result = spawnSync("bash", ["-c", `${mockAws}\n${step.run}`], {
+          cwd: process.cwd(),
+          encoding: "utf8",
+          env: {
+            ...process.env,
+            ETHEREUM_RPC_URL: "https://rpc.example.test/",
+            SSR_CLIENT_ID: "client",
+            SSR_CLIENT_SECRET: "secret",
+            ALCHEMY_API_KEY: "alchemy",
+            GITHUB_LINK_STATUS_PREVIEW_TOKEN: "preview",
+            VALIDATOR_PAGE_PASSWORD: password,
+            VALIDATOR_PAGE_PUBLIC: publicFlag,
+            BEANSTALK_APP_NAME: "test app",
+            BEANSTALK_ENV_NAME: "test-env",
+            COMMIT_SHA: "a".repeat(40),
+            TEST_SETTINGS: settingsFile,
+          },
+        });
+        const settings = fs.existsSync(settingsFile)
+          ? (JSON.parse(fs.readFileSync(settingsFile, "utf8")) as Array<{
+              OptionName: string;
+              Value: string;
+            }>)
+          : null;
+        return { result, settings };
+      } finally {
+        fs.rmSync(directory, { recursive: true, force: true });
+      }
+    };
+    const option = (
+      settings: Array<{ OptionName: string; Value: string }> | null,
+      name: string
+    ) => settings?.find((entry) => entry.OptionName === name)?.Value;
+
+    it.each([
+      [
+        "the variable is true and a password is set",
+        "pw",
+        "true",
+        "true",
+        "pw",
+      ],
+      [
+        "the variable is true and no password is set",
+        "",
+        "true",
+        "true",
+        undefined,
+      ],
+      ["a password is set and the variable is unset", "pw", "", "false", "pw"],
+      [
+        "a password is set and the variable is false",
+        "pw",
+        "false",
+        "false",
+        "pw",
+      ],
+    ])(
+      "deploys when %s",
+      (_label, password, publicFlag, expectedPublic, expectedPassword) => {
+        const { result, settings } = deployWith(password, publicFlag);
+
+        expect(result.status).toBe(0);
+        expect(option(settings, "VALIDATOR_PAGE_PUBLIC")).toBe(expectedPublic);
+        expect(option(settings, "VALIDATOR_PAGE_PASSWORD")).toBe(
+          expectedPassword
+        );
+      }
+    );
+
+    it.each(["", "false", "TRUE"])(
+      "stops before updating the environment when the password is missing and the variable is %j",
+      (publicFlag) => {
+        const { result, settings } = deployWith("", publicFlag);
+
+        expect(result.status).not.toBe(0);
+        expect(result.stdout).toContain(
+          "::error::VALIDATOR_PAGE_PASSWORD is empty and VALIDATOR_PAGE_PUBLIC is not true."
+        );
+        expect(settings).toBeNull();
+      }
     );
   });
 

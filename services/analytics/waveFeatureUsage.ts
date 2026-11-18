@@ -232,7 +232,8 @@ export function waveFeatureRouteFamily(
     routePath === "/waves/create" ||
     routePath.startsWith("/waves/create/") ||
     routePath === "/messages/create" ||
-    routePath.startsWith("/messages/create/")
+    routePath.startsWith("/messages/create/") ||
+    routePath === "/messages/new"
   )
     return "/other";
   if (routePath === "/waves") return "/waves";

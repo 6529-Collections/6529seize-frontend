@@ -64,7 +64,7 @@ March 19, 2026.
 
 - [Home](home/README.md): `/`
 - [Waves](waves/README.md): `/discover`, `/waves`, `/waves/{waveId}`,
-  `/waves/create`, `/messages`, `/messages/create`
+  `/waves/create`, `/messages`, `/messages/new`
 - [Profiles](profiles/README.md): `/{user}`, tab routes under `/{user}/*`, and
   `/about/primary-address`
 - [Media](media/README.md): `/the-memes`, `/the-memes/{param*}`,
@@ -84,6 +84,11 @@ March 19, 2026.
   `/validator`, `/validator/guide`, `/validator/known-issues`,
   `/validator/releases`; public `/validator/releases.json` and
   `/validator/releases.json.sig`
+- [6529 AI Download Page](ai-download-page.md): unlinked `/ai`, `/ai/guide`,
+  `/ai/known-issues`; public `/ai/releases.json` and `/ai/releases.json.sig`
+- [6529 Desktop Download Page](desktop-download-page.md): unlinked
+  `/desktop`, `/desktop/guide`, `/desktop/known-issues`, `/desktop/releases`;
+  public `/desktop/releases.json` and `/desktop/releases.json.sig`
 - [Network](network/README.md): `/network/*`, `/network/xtdh`, `/xtdh`
 - [Safe Collecting](delegation/README.md): `/safe-collecting` and `/safe-collecting/{param+}`
 - [NextGen](nextgen/README.md): `/nextgen` and `/nextgen/{param*}`
@@ -114,7 +119,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 
 - Home and waves:
   `/`, `/discover`, `/waves`, `/waves/{waveId}`, `/waves/create`,
-  `/messages`, `/messages/create` (thread can also be selected with
+  `/messages`, `/messages/new` (thread can also be selected with
   `wave={waveId}` query param on `/messages`)
 - Profiles:
   `/{user}`, `/{user}/brain`, `/{user}/collected`, `/{user}/followers`,
@@ -144,7 +149,7 @@ Route patterns use normalized placeholders: `{param}` for one segment,
 - Network:
   `/network`, `/network/activity`, `/network/definitions`,
   `/network/health`, `/network/health/network-tdh`, `/network/levels`,
-  `/network/nerd/{param*}`, `/network/prenodes`, `/network/tdh`,
+  `/network/nerd/{param*}`, `/network/tdh`,
   `/network/tdh/historic-boosts`, `/network/xtdh`, `/xtdh`
 - Safe Collecting:
   `/safe-collecting` and `/safe-collecting/{param+}`

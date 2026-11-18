@@ -194,6 +194,8 @@ async function uploadFiles(
   const attachments: PayloadAttachment[] = [];
   let images = 0;
   for (const file of files) {
+    // In order, one at a time: each image's number depends on the files
+    // before it, and attachments keep the order the files were picked in.
     const media = await mediaFromFile(file, {
       imageNumber: images + 1,
       keepName: keepNames,

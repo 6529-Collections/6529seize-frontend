@@ -1,5 +1,7 @@
+import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 import { getMobileDestination } from "@/helpers/mobileAppDestination";
+import { isUniversalLinkPath } from "@/helpers/mobileAppLinks";
 
 const hasRawUnsafeCharacters = (value: string): boolean =>
   value.includes("\\") || /[\u0000-\u001f\u007f]/.test(value);
@@ -55,4 +57,32 @@ export function getInternalLinkPath(
     `${url.pathname}${url.search}${url.hash}`,
     origin
   );
+}
+
+/** Resolve a page inside the running app, including legacy production URLs. */
+export function getInternalPageLinkPath(
+  href: string,
+  siteUrl: string | undefined = publicEnv.BASE_ENDPOINT
+): string | null {
+  const origin = getOrigin(siteUrl);
+  if (!origin) return null;
+
+  let path = getInternalLinkPath(href, origin);
+  if (path === null && getAppEnvironment(origin).isProduction) {
+    try {
+      const url = new URL(href);
+      if (
+        (url.protocol === "http:" || url.protocol === "https:") &&
+        !url.port &&
+        getAppEnvironment(url.origin).isProduction
+      ) {
+        path = getInternalLinkPath(href, url.origin);
+      }
+    } catch {
+      return null;
+    }
+  }
+
+  const pathname = path?.split(/[?#]/, 1)[0];
+  return pathname && isUniversalLinkPath(pathname) ? path : null;
 }

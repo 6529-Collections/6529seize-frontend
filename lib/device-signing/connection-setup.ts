@@ -27,6 +27,7 @@ import { appGrantToRequest } from "./app-grant-request";
 import {
   installSharedDeviceKey,
   readUsableDeviceGrant,
+  SIGNING_EXPIRY_MARGIN_MS,
 } from "./device-key-store";
 import { isEd25519Supported } from "./ed25519";
 import { DEFAULT_DEVICE_SCOPES } from "./grant-message";
@@ -193,6 +194,35 @@ function reusedDeviceOutcome(stored: StoredDevice | null) {
   return isOldSuiteDevice(stored) ? "legacy-device" : "reused";
 }
 
+/** Verify with the redeemed session before changing either local key store. */
+async function checkExistingSigningGrant(
+  wallet: string,
+  accessToken: string,
+  signingSupported: boolean
+) {
+  if (!signingSupported) return { canReuse: true, staleGrantId: undefined };
+  const local = await readUsableDeviceGrant(wallet, Date.now());
+  if (!local) return { canReuse: false, staleGrantId: undefined };
+
+  const { grant } = local;
+  const grants = await commonApiFetch<ApiDeviceGrant[]>({
+    endpoint: "device-grants",
+    includeWalletAuth: false,
+    headers: { Authorization: `Bearer ${accessToken}` },
+    cache: "no-store",
+  });
+  const minExpiry = Date.now() + SIGNING_EXPIRY_MARGIN_MS;
+  const canReuse = grants.some(
+    (remote) =>
+      remote.id === grant.id &&
+      remote.wallet.toLowerCase() === grant.wallet.toLowerCase() &&
+      remote.device_key.toLowerCase() === grant.device_key.toLowerCase() &&
+      remote.revoked_at === null &&
+      remote.expires_at > minExpiry
+  );
+  return { canReuse, staleGrantId: canReuse ? undefined : grant.id };
+}
+
 /** Imports target-bound keys and registers the grant from the receiving app. */
 export async function acceptConnectionDeviceSetup(input: {
   readonly envelope: string;
@@ -242,10 +272,12 @@ export async function acceptConnectionDeviceSetup(input: {
     input.onStage?.("read-local-device");
     const storage = getDefaultE2eeStorage();
     const existing = await storage.getDevice(identity.id);
-    if (
-      canReuseDevice(existing) &&
-      (!pair || (await readUsableDeviceGrant(input.wallet, Date.now())))
-    )
+    const signing = await checkExistingSigningGrant(
+      input.wallet,
+      input.accessToken,
+      pair !== null
+    );
+    if (canReuseDevice(existing) && signing.canReuse)
       return reusedDeviceOutcome(existing);
 
     input.onStage?.("register-grant");
@@ -260,7 +292,7 @@ export async function acceptConnectionDeviceSetup(input: {
       grant.wallet.toLowerCase() !== terms.wallet ||
       grant.device_key !== terms.device_key ||
       grant.revoked_at !== null ||
-      grant.expires_at <= Date.now() + 60000
+      grant.expires_at <= Date.now() + SIGNING_EXPIRY_MARGIN_MS
     )
       throw new Error("Device setup grant mismatch");
     let outcome: ConnectionDeviceSetupOutcome = "pending-enrollment";
@@ -284,14 +316,17 @@ export async function acceptConnectionDeviceSetup(input: {
       }
       if (pair) {
         input.onStage?.("save-signing-key");
-        await installSharedDeviceKey({
-          address: input.wallet.toLowerCase(),
-          publicKeyHex: grant.device_key,
-          keyPair: pair,
-          grant,
-          ownProfileId: identity.id,
-          lastSeq: 0,
-        });
+        await installSharedDeviceKey(
+          {
+            address: input.wallet.toLowerCase(),
+            publicKeyHex: grant.device_key,
+            keyPair: pair,
+            grant,
+            ownProfileId: identity.id,
+            lastSeq: 0,
+          },
+          signing.staleGrantId
+        );
       }
     } catch (error) {
       await commonApiPost({

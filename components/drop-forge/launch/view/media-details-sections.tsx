@@ -34,6 +34,11 @@ import type {
 } from "@/components/drop-forge/launch/view/types";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
+import {
+  CONNECTED_TAB_INTERACTION_CLASSES,
+  CONNECTED_TAB_SURFACE_CLASSES,
+  getConnectedTabStateClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 
 export function DropForgeLaunchClaimArweaveSection({
   claim,
@@ -197,26 +202,20 @@ export function DropForgeLaunchClaimMediaSection({
       defaultOpen={false}
       headerRight={
         hasAnimation ? (
-          <div className="tw-inline-flex tw-overflow-hidden tw-rounded-lg tw-bg-iron-900 tw-ring-1 tw-ring-inset tw-ring-iron-700">
+          <div
+            className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-inline-flex tw-overflow-hidden tw-ring-1 tw-ring-inset`}
+          >
             <button
               type="button"
               onClick={() => setActiveMediaTab("image")}
-              className={`tw-border-0 tw-px-3 tw-py-1.5 tw-text-sm tw-transition-colors ${
-                activeMediaTab === "image"
-                  ? "tw-bg-primary-500 tw-text-white"
-                  : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
-              }`}
+              className={`tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-sm ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: activeMediaTab === "image" })}`}
             >
               Image
             </button>
             <button
               type="button"
               onClick={() => setActiveMediaTab("animation")}
-              className={`tw-border-0 tw-px-3 tw-py-1.5 tw-text-sm tw-transition-colors ${
-                activeMediaTab === "animation"
-                  ? "tw-bg-primary-500 tw-text-white"
-                  : "tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-200"
-              }`}
+              className={`tw-rounded-md tw-border-0 tw-px-3 tw-py-1.5 tw-text-sm ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: activeMediaTab === "animation" })}`}
             >
               Animation
             </button>
