@@ -34,8 +34,11 @@ export async function checkEncryptedPoll(
   const recipient = pollCard(voter, question);
   await expect(recipient).toBeVisible({ timeout: 45_000 });
   const role = multi ? "checkbox" : "radio";
-  await recipient.getByRole(role, { name: "Tea", exact: true }).check();
-  await recipient.getByRole(role, { name: "Coffee", exact: true }).check();
+  await recipient.getByText("Tea", { exact: true }).click();
+  await recipient.getByText("Coffee", { exact: true }).click();
+  await expect(
+    recipient.getByRole(role, { name: "Coffee", exact: true })
+  ).toBeChecked();
   await expect(
     recipient.getByRole(role, { name: "Tea", exact: true })
   ).toBeChecked({
@@ -45,21 +48,36 @@ export async function checkEncryptedPoll(
 
   const creator = pollCard(author, question);
   await creator
-    .getByText("View votes", { exact: true })
-    .click({ timeout: 45_000 });
-  await expect(creator.getByText(voterHandle, { exact: true })).toHaveCount(
-    multi ? 2 : 1
-  );
+    .getByRole("button", { name: "View results", exact: true })
+    .click();
+  const coffee = creator.getByRole("button", {
+    name: /^View voters for Coffee\./u,
+  });
+  await coffee.click({ timeout: 45_000 });
+  await expect(creator.getByText(voterHandle, { exact: true })).toBeVisible();
+  const tea = creator.getByRole("button", { name: /^View voters for Tea\./u });
+  if (multi) {
+    await tea.click();
+    await expect(creator.getByText(voterHandle, { exact: true })).toBeVisible();
+  } else {
+    await expect(tea).toHaveCount(0);
+  }
   await expect(recipient.getByRole("button", { name: "End poll" })).toHaveCount(
     0
   );
-  await creator.getByRole("button", { name: "End poll" }).click();
-  await author
-    .getByRole("dialog", { name: "End poll" })
-    .getByRole("button", { name: "End poll" })
-    .click();
+  await endEncryptedPoll(author, question);
   await expect(recipient.getByText("Poll ended", { exact: true })).toBeVisible({
     timeout: 45_000,
   });
   await expect(recipient.getByRole(role)).toHaveCount(0);
+}
+
+export async function endEncryptedPoll(author: Page, question: string) {
+  await pollCard(author, question)
+    .getByRole("button", { name: "End poll" })
+    .click();
+  await author
+    .getByRole("dialog", { name: "End poll" })
+    .getByRole("button", { name: "End poll" })
+    .click();
 }

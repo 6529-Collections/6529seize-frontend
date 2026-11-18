@@ -73,8 +73,9 @@ In supported builds, select **Create poll** in an encrypted group chat. Enter a
 question and two to ten choices in the inline composer. Choose **Single** or
 **Multiple**, then select **Post poll**.
 
-Select your choices and choose **Vote** or **Update vote**. Use **View votes**
-to see who chose each option. The creator can select **End poll** to stop voting.
+Select your choices and choose **Vote**. Use **View results** to see the tally,
+then select a result row to see who chose it. Use **Change vote** to update or
+clear your vote. The creator can select **End poll** to stop voting.
 People who join after the poll was posted receive new messages from the chat.
 They need a new poll to participate.
 

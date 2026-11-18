@@ -2,8 +2,16 @@
 
 import { useId, useState } from "react";
 import Button from "@/components/utils/button/Button";
+import {
+  POLL_CARD_CLASS_NAME,
+  POLL_FOOTER_CLASS_NAME,
+  PollCardHeader,
+  PollVotedStatus,
+} from "@/components/waves/drops/poll/PollCardPresentation";
+import { PollResultOption } from "@/components/waves/drops/poll/PollResultOption";
+import { PollVoteOption } from "@/components/waves/drops/poll/PollVoteOption";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger, formatList, selectPluralCategory } from "@/i18n/format";
+import { formatList } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type {
   E2eeConversation,
@@ -13,6 +21,143 @@ import type {
 } from "@/lib/e2ee/types";
 import { getMemberName } from "../e2eeFormat";
 import { E2eeConfirmDialog } from "../ui/E2eeConfirmDialog";
+
+type PollView = "vote" | "results";
+type Selection = { readonly base: number; readonly options: number[] };
+type VoteStatus = "idle" | "sending" | "failed";
+
+const sameSelection = (a: readonly number[], b: readonly number[]) =>
+  a.length === b.length && a.every((option) => b.includes(option));
+
+function getProfileBallot(
+  ballots: E2eePoll["ballots"],
+  profileId: string | null
+) {
+  return profileId && Object.hasOwn(ballots, profileId)
+    ? ballots[profileId]
+    : undefined;
+}
+
+function E2eePollResults({
+  poll,
+  members,
+  selfProfileId,
+  ballot,
+}: {
+  readonly poll: E2eePoll;
+  readonly members: E2eeConversation["members"];
+  readonly selfProfileId: string | null;
+  readonly ballot: readonly number[];
+}) {
+  const locale = useBrowserLocale();
+  const [expanded, setExpanded] = useState<number | null>(null);
+  const voters: string[][] = poll.options.map(() => []);
+  for (const [profile, selection] of Object.entries(poll.ballots)) {
+    const name = getMemberName(locale, members, profile, selfProfileId);
+    for (const index of selection.options) {
+      voters[index]?.push(name);
+    }
+  }
+  const totalVotes = voters.reduce((total, names) => total + names.length, 0);
+
+  return (
+    <div className="tw-flex tw-flex-col tw-gap-2">
+      {poll.options.map((label, index) => {
+        const names = voters[index] ?? [];
+        const isSelected = ballot.includes(index);
+        const isExpanded = expanded === index && names.length > 0;
+        return (
+          <div key={label}>
+            <PollResultOption
+              label={label}
+              votes={names.length}
+              totalVotes={totalVotes}
+              canShowVoters={names.length > 0}
+              isSelected={isSelected}
+              isDimmed={ballot.length > 0 && !isSelected}
+              isExpanded={isExpanded}
+              showSelectionIndicator={ballot.length > 0}
+              onToggle={() => setExpanded(isExpanded ? null : index)}
+            />
+            {isExpanded && (
+              <p className="tw-mb-1 tw-mt-1 tw-break-words tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-xs tw-text-iron-200">
+                {formatList(locale, names)}
+              </p>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function PollBallotActions({
+  hasVoted,
+  canSubmit,
+  busy,
+  onVote,
+  onClear,
+}: {
+  readonly hasVoted: boolean;
+  readonly canSubmit: boolean;
+  readonly busy: boolean;
+  readonly onVote: () => void;
+  readonly onClear: (() => void) | undefined;
+}) {
+  const locale = useBrowserLocale();
+  return (
+    <>
+      <Button
+        variant="action"
+        size="xs"
+        loading={busy}
+        disabled={!canSubmit}
+        onClick={onVote}
+      >
+        {t(locale, hasVoted ? "e2ee.poll.updateVote" : "e2ee.poll.vote")}
+      </Button>
+      {onClear && (
+        <Button variant="secondary" size="xs" disabled={busy} onClick={onClear}>
+          {t(locale, "e2ee.poll.clearSelection")}
+        </Button>
+      )}
+    </>
+  );
+}
+
+function EndPollAction({
+  busy,
+  onEnd,
+}: {
+  readonly busy: boolean;
+  readonly onEnd: () => Promise<void>;
+}) {
+  const locale = useBrowserLocale();
+  const [ending, setEnding] = useState(false);
+  const label = t(locale, "e2ee.poll.end");
+  return (
+    <>
+      <Button
+        variant="secondary"
+        size="xs"
+        disabled={busy}
+        onClick={() => setEnding(true)}
+      >
+        {label}
+      </Button>
+      <E2eeConfirmDialog
+        open={ending}
+        title={label}
+        body={t(locale, "e2ee.poll.endConfirm")}
+        confirmLabel={label}
+        destructive={false}
+        errorFallbackKey="e2ee.message.actionFailed"
+        onClose={() => setEnding(false)}
+        onConfirm={onEnd}
+      />
+    </>
+  );
+}
 
 export function E2eePollCard({
   message,
@@ -31,29 +176,19 @@ export function E2eePollCard({
 }) {
   const locale = useBrowserLocale();
   const labelId = useId();
-  const ownBallot =
-    selfProfileId && Object.hasOwn(poll.ballots, selfProfileId)
-      ? poll.ballots[selfProfileId]
-      : undefined;
+  const ownBallot = getProfileBallot(poll.ballots, selfProfileId);
   const ballot = ownBallot?.options ?? [];
   const ballotKey = ownBallot?.seq ?? 0;
-  const [draft, setDraft] = useState<{
-    base: number;
-    options: number[];
-  } | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [submitted, setSubmitted] = useState<{
-    base: number;
-    options: number[];
-  } | null>(null);
-  const [failed, setFailed] = useState(false);
-  const [ending, setEnding] = useState(false);
+  const [view, setView] = useState<PollView | null>(null);
+  const [draft, setDraft] = useState<Selection | null>(null);
+  const [submitted, setSubmitted] = useState<Selection | null>(null);
+  const [status, setStatus] = useState<VoteStatus>("idle");
+
+  const busy = status === "sending";
   const options = draft?.base === ballotKey ? draft.options : ballot;
   const queued = submitted?.base === ballotKey;
-  const selectionIsQueued =
-    queued &&
-    options.length === submitted.options.length &&
-    options.every((option) => submitted.options.includes(option));
+  const selectionIsQueued = queued && sameSelection(options, submitted.options);
+  const canSubmit = !selectionIsQueued && !sameSelection(options, ballot);
   const updatePoll = engine.updatePoll?.bind(engine);
   const canUpdate = canAct && updatePoll !== undefined && !poll.closed;
   const canVote =
@@ -62,15 +197,11 @@ export function E2eePollCard({
       engine.getLocalDeviceKey()?.toLowerCase() ?? ""
     );
   const canEnd = canUpdate && selfProfileId === message.senderProfileId;
-  const openMode = poll.multi ? "e2ee.poll.multiple" : "e2ee.poll.single";
-  const statusLabel = poll.closed ? "e2ee.poll.closed" : openMode;
-  const voters = poll.options.map((_, index) =>
-    Object.entries(poll.ballots)
-      .filter(([, selection]) => selection.options.includes(index))
-      .map(([profile]) =>
-        getMemberName(locale, conversation.members, profile, selfProfileId)
-      )
-  );
+  const hasVoted = ballot.length > 0;
+  const showResults =
+    !canVote || (view === null ? hasVoted : view === "results");
+  const hasSelection = options.length > 0;
+  const showBallotActions = !showResults && (hasSelection || hasVoted);
 
   function select(index: number) {
     let nextOptions = [index];
@@ -82,167 +213,133 @@ export function E2eePollCard({
     setDraft({ base: ballotKey, options: nextOptions });
   }
 
+  function toggleView() {
+    if (!showResults && hasVoted) {
+      setDraft(null);
+    }
+    setStatus("idle");
+    setView(showResults ? "vote" : "results");
+  }
+
   async function vote() {
-    if (!updatePoll || busy) return;
-    setBusy(true);
-    setFailed(false);
+    if (!updatePoll || !canVote || !canSubmit || busy) return;
+    setStatus("sending");
     try {
       await updatePoll(message.g, message.id, options);
       setSubmitted({ base: ballotKey, options });
+      setView("results");
+      setStatus("idle");
     } catch {
-      setFailed(true);
-    } finally {
-      setBusy(false);
+      setStatus("failed");
     }
   }
 
+  const returnToVote = hasVoted
+    ? "waves.poll.actions.changeVote"
+    : "waves.poll.actions.vote";
+  const switchToResults = hasVoted
+    ? "e2ee.action.cancel"
+    : "waves.poll.actions.viewResults";
+
   return (
-    <section
-      aria-labelledby={labelId}
-      className="tw-my-1 tw-w-full tw-max-w-lg tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3"
-    >
+    <section aria-labelledby={labelId} className="tw-min-w-0">
       <h3
         id={labelId}
-        className="tw-mb-1 tw-break-words tw-text-base tw-font-semibold tw-text-iron-50"
+        className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-mt-1 tw-text-sm tw-font-medium tw-leading-5 tw-text-iron-50"
       >
         {poll.question}
       </h3>
-      <p className="tw-mb-2 tw-text-sm tw-text-iron-400">
-        {t(locale, statusLabel)}
-      </p>
-      <fieldset
-        aria-labelledby={labelId}
-        disabled={busy}
-        className="tw-space-y-1"
-      >
-        {poll.options.map((label, index) => {
-          const optionId = `${labelId}-option-${index}`;
-          const count = voters[index]?.length ?? 0;
-          const formattedCount = formatInteger(locale, count);
-          const countKey =
-            selectPluralCategory(locale, count) === "one"
-              ? "e2ee.poll.voteCount.one"
-              : "e2ee.poll.voteCount.other";
-          return (
-            <label
-              key={label}
-              className="tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-rounded-lg tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100"
-            >
+      <div className={POLL_CARD_CLASS_NAME}>
+        <PollCardHeader
+          title={t(locale, "e2ee.poll.title")}
+          status={t(
+            locale,
+            poll.closed ? "e2ee.poll.closed" : "e2ee.poll.open"
+          )}
+          open={!poll.closed}
+        />
+        {showResults ? (
+          <E2eePollResults
+            poll={poll}
+            members={conversation.members}
+            selfProfileId={selfProfileId}
+            ballot={ballot}
+          />
+        ) : (
+          <fieldset
+            aria-labelledby={labelId}
+            disabled={busy}
+            className="tw-m-0 tw-flex tw-min-w-0 tw-flex-col tw-gap-2 tw-border-0 tw-p-0"
+          >
+            {poll.options.map((label, index) => (
+              <PollVoteOption
+                key={label}
+                label={label}
+                checked={options.includes(index)}
+                multichoice={poll.multi}
+                groupName={labelId}
+                disabled={busy}
+                onChange={() => select(index)}
+              />
+            ))}
+          </fieldset>
+        )}
+        {(canVote || canEnd) && (
+          <div className={POLL_FOOTER_CLASS_NAME}>
+            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
               {canVote && (
-                <input
-                  type={poll.multi ? "checkbox" : "radio"}
-                  name={labelId}
-                  aria-labelledby={optionId}
-                  checked={options.includes(index)}
-                  onChange={() => select(index)}
+                <Button
+                  variant="secondary"
+                  size="xs"
+                  disabled={busy}
+                  onClick={toggleView}
+                >
+                  {t(locale, showResults ? returnToVote : switchToResults)}
+                </Button>
+              )}
+              {showBallotActions && (
+                <PollBallotActions
+                  hasVoted={hasVoted}
+                  canSubmit={canSubmit}
+                  busy={busy}
+                  onVote={() => void vote()}
+                  onClear={
+                    hasSelection
+                      ? () => setDraft({ base: ballotKey, options: [] })
+                      : undefined
+                  }
                 />
               )}
-              <span
-                id={optionId}
-                className="tw-min-w-0 tw-flex-1 tw-break-words"
-              >
-                {label}
-              </span>
-              <span
-                className="tw-shrink-0 tw-text-iron-400"
-                aria-live="polite"
-                aria-atomic="true"
-              >
-                <span aria-hidden="true">{formattedCount}</span>
-                <span className="tw-sr-only">
-                  {t(locale, countKey, {
-                    option: label,
-                    count: formattedCount,
-                  })}
-                </span>
-              </span>
-            </label>
-          );
-        })}
-      </fieldset>
-      <div className="tw-mt-2 tw-flex tw-flex-wrap tw-gap-2">
-        {canVote && (
-          <>
-            <Button
-              variant="action"
-              size="sm"
-              loading={busy}
-              disabled={
-                selectionIsQueued ||
-                (options.length === ballot.length &&
-                  options.every((option) => ballot.includes(option)))
-              }
-              onClick={() => void vote()}
-            >
-              {t(
-                locale,
-                ballot.length ? "e2ee.poll.updateVote" : "e2ee.poll.vote"
-              )}
-            </Button>
-            {options.length > 0 && (
-              <Button
-                variant="secondary"
-                size="sm"
-                disabled={busy}
-                onClick={() => setDraft({ base: ballotKey, options: [] })}
-              >
-                {t(locale, "e2ee.poll.clearSelection")}
-              </Button>
-            )}
-          </>
+              <div className="tw-ml-auto tw-flex tw-flex-wrap tw-items-center tw-gap-2 empty:tw-hidden">
+                {showResults && hasVoted && (
+                  <PollVotedStatus
+                    label={t(locale, "waves.poll.status.voted")}
+                  />
+                )}
+                {canEnd && (
+                  <EndPollAction
+                    busy={busy}
+                    onEnd={() => updatePoll(message.g, message.id, null)}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
         )}
-        {canEnd && (
-          <>
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={busy}
-              onClick={() => setEnding(true)}
-            >
-              {t(locale, "e2ee.poll.end")}
-            </Button>
-            <E2eeConfirmDialog
-              open={ending}
-              title={t(locale, "e2ee.poll.end")}
-              body={t(locale, "e2ee.poll.endConfirm")}
-              confirmLabel={t(locale, "e2ee.poll.end")}
-              destructive={false}
-              errorFallbackKey="e2ee.message.actionFailed"
-              onClose={() => setEnding(false)}
-              onConfirm={() => updatePoll(message.g, message.id, null)}
-            />
-          </>
+        {queued && !poll.closed && (
+          <output className="tw-mt-2 tw-block tw-text-xs tw-text-iron-400">
+            {t(locale, "e2ee.poll.voteQueued")}
+          </output>
+        )}
+        {status === "failed" && (
+          <p
+            role="alert"
+            className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-rose-300"
+          >
+            {t(locale, "e2ee.message.actionFailed")}
+          </p>
         )}
       </div>
-      {queued && !poll.closed && (
-        <output className="tw-mt-2 tw-block tw-text-sm tw-text-iron-400">
-          {t(locale, "e2ee.poll.voteQueued")}
-        </output>
-      )}
-      {failed && (
-        <p role="alert" className="tw-mt-2 tw-text-sm tw-text-rose-300">
-          {t(locale, "e2ee.message.actionFailed")}
-        </p>
-      )}
-      {voters.some((names) => names.length > 0) && (
-        <details className="tw-mt-2 tw-text-sm tw-text-iron-300">
-          <summary className="tw-min-h-8 tw-cursor-pointer tw-py-1 focus-visible:tw-outline focus-visible:tw-outline-primary-400">
-            {t(locale, "e2ee.poll.viewVotes")}
-          </summary>
-          <dl className="tw-mb-1 tw-space-y-2 tw-break-words">
-            {poll.options.map((label, index) => (
-              <div key={label}>
-                <dt className="tw-font-medium">{label}</dt>
-                <dd className="tw-m-0 tw-text-iron-400">
-                  {(voters[index]?.length ?? 0) > 0
-                    ? formatList(locale, voters[index] ?? [])
-                    : t(locale, "e2ee.poll.noVotes")}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </details>
-      )}
     </section>
   );
 }
