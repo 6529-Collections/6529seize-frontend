@@ -84,6 +84,8 @@ type BackupLineState = "on" | "off" | "elsewhere";
  * The status line's backup state. It only matters where encrypted DMs are
  * on, and is unknown (null) until backup has loaded. "elsewhere": a backup
  * exists, but this browser isn't in it yet.
+ *
+ * @api Exported for its table of focused tests.
  */
 export function getBackupLineState(
   encrypted: string,
