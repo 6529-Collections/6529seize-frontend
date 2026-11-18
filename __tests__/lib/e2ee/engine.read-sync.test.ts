@@ -110,6 +110,7 @@ async function updateClient(
   const record = await device.storage.getDevice(user.profileId);
   if (!record) throw new Error("no stored device");
   delete record.lastResortSelfSync;
+  delete record.poolSelfSync;
   await device.storage.writeBatch(user.profileId, { device: record });
   const updated = await startDevice(world, user.profileId, user.account, {
     storage: device.storage,

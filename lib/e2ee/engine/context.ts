@@ -75,6 +75,11 @@ export interface EngineContext {
   listedAt: { wall: number; mono: number } | null;
   /** Monotonic milliseconds (EngineOptions.monotonic). */
   readonly monotonic: () => number;
+  /**
+   * The API refused `replace_one_time` (it predates the field): this run
+   * keeps the usual upkeep and does not ask again.
+   */
+  poolReplaceRefused: boolean;
   lastWakeAt: number;
   openConversation: string | null;
   openUntil: number;

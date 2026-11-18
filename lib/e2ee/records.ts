@@ -40,6 +40,13 @@ export interface StoredDevice {
    * through its older KeyPackages (engine/claims.ts).
    */
   lastResortSelfSync?: boolean;
+  /**
+   * True once the one-time KeyPackages on the server were made by a client
+   * with self groups: a device updated from an older client replaces its
+   * pool at once (`replace_one_time`), so the next claim of it returns a
+   * KeyPackage a self group can add (P60 §2 rule 6).
+   */
+  poolSelfSync?: boolean;
   /** Which wallets this profile trusts for each person (engine/trust.ts). */
   trust?: StoredTrust;
   /**
