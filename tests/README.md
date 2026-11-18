@@ -69,6 +69,13 @@ exclude Validator after results settle and still navigate through Join 6529.
 Member search results are covered by the focused search unit tests, alongside
 the member navigation scenarios in the session recovery sandbox.
 
+The profile pages sandbox also checks Collected personal actions against its
+isolated API. Anonymous and visitor profiles omit the entire action row. Owners
+retain action alignment, browser/native Back, filter and focus restoration;
+iOS owners retain the existing purchasing restriction. These owner-only cases
+replace the old anonymous action-navigation assumptions in the public read-only
+profile and native-shell packs.
+
 ## Pack registry
 
 The reaction sandbox covers live count and profile-list updates, desktop tooltip
