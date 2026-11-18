@@ -356,6 +356,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
     await this.controller.syncAll();
   }
 
+  async pauseIncoming(): Promise<void> {
+    this.controller.pauseIncoming();
+    await this.idle();
+  }
+
+  resumeIncoming(): void {
+    this.controller.resumeIncoming();
+  }
+
   dispose(): void {
     this.ctx.disposed = true;
     this.controller.stopBackground();
