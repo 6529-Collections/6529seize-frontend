@@ -198,8 +198,10 @@ filtering including promises without plans, reset behavior, and empty/error reco
 It directs readers to artwork details for the optional plan and distinguishes the
 artist's promise from verification of approval or fulfillment.
 
-The Wave discovery record describes the independent Active Votes and Worth Checking Out
-sidebar sections, their explanations and view-all destinations. It describes
+The Wave discovery record includes hidden-scrollbar controls with dark edge fades
+for offscreen sort and threshold options. It also describes the independent
+Active Votes and Worth Checking Out sidebar sections, their explanations and
+view-all destinations. It describes
 quiet loading placeholders, explanations that appear with content, empty messages
 only after successful empty requests, and retry without discarding loaded votes.
 It covers the scrollable three-row voting window, pagination, compact empty/error states and

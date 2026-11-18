@@ -50,7 +50,9 @@ the backdrop closes it without changing the sort. Wider content areas show the
 six choices inline.
 
 The same control row includes All, Score 50+, Hot 60+, and REP 60+ threshold
-buttons. Swipe or scroll the row when it does not fit the available width.
+buttons. Swipe or scroll the row when it does not fit the available width. The
+scrollbar is hidden, and dark edge fades indicate which side has more controls
+offscreen. The fades disappear when all controls fit.
 Newest and Latest Posts disable score thresholds and reset them to All.
 Sort and threshold choices remain in the URL when switching between discovery
 tabs. Use `Score formula` beside the heading to open the score explanation; on

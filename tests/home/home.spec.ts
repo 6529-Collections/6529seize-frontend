@@ -1504,6 +1504,85 @@ test("homepage artwork request has a visible failure and retry @smoke @medium @l
   await expectNoHorizontalOverflow(page);
 });
 
+test("Discover controls fade offscreen options and hide the scrollbar @smoke @medium @large", async ({
+  page,
+  browserName,
+}, testInfo) => {
+  await page.route("**/api/v2/waves?*", (route) =>
+    route.fulfill({
+      headers: { "access-control-allow-origin": "*" },
+      json: { data: [], page: 1, count: 0, next: false },
+    })
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await page.goto("/discover", { waitUntil: "domcontentloaded" });
+  const controls = page.getByRole("group", { name: "Discovery controls" });
+  const scroller = page
+    .getByRole("group", { name: "Discovery controls" })
+    .locator("[data-discovery-controls-scroll]");
+  const leftFade = page
+    .getByRole("group", { name: "Discovery controls" })
+    .locator('[data-wave-tabs-fade="left"]');
+  const rightFade = page
+    .getByRole("group", { name: "Discovery controls" })
+    .locator('[data-wave-tabs-fade="right"]');
+  await expect(scroller).toHaveCSS("scrollbar-width", "none");
+  if (browserName !== "firefox") {
+    expect(
+      await scroller.evaluate(
+        (element) => getComputedStyle(element, "::-webkit-scrollbar").display
+      )
+    ).toBe("none");
+  }
+  await expect(leftFade).toHaveCSS("opacity", "0");
+  await expect(rightFade).toHaveCSS("opacity", "1");
+  await expect(rightFade).toHaveCSS("pointer-events", "none");
+  await controls.screenshot({
+    path: testInfo.outputPath("controls-start.png"),
+  });
+
+  await scroller.evaluate((element) => {
+    element.scrollLeft = element.scrollWidth;
+  });
+  await expect(leftFade).toHaveCSS("opacity", "1");
+  await expect(rightFade).toHaveCSS("opacity", "0");
+  await controls.getByRole("radio", { name: "REP 60+" }).click();
+  await expect(page).toHaveURL(/filter=REP_60/);
+  await expect(
+    controls.getByRole("radio", { name: "REP 60+" })
+  ).toHaveAttribute("aria-checked", "true");
+  await controls.screenshot({ path: testInfo.outputPath("controls-end.png") });
+
+  await scroller.evaluate((element) => {
+    element.scrollLeft = 0;
+  });
+  await controls
+    .getByRole("button", { name: "Wave discovery sort: Balanced" })
+    .click();
+  const sortSheet = page.getByRole("dialog", { name: "Wave discovery sort" });
+  await sortSheet.getByRole("button", { name: "Quality", exact: true }).click();
+  await expect(sortSheet).not.toBeVisible();
+  await expect(page).toHaveURL(/sort=QUALITY/);
+  const selectedFilter = controls.getByRole("radio", { name: "REP 60+" });
+  await selectedFilter.focus();
+  await selectedFilter.press("Home");
+  await expect(
+    controls.getByRole("radio", { name: "All", exact: true })
+  ).toBeFocused();
+  await expect(
+    controls.getByRole("radio", { name: "All", exact: true })
+  ).toBeInViewport({ ratio: 1 });
+  await expectNoHorizontalOverflow(page);
+
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await expect(leftFade).toHaveCSS("opacity", "0");
+  await expect(rightFade).toHaveCSS("opacity", "0");
+  await expect(scroller).toHaveCSS("scrollbar-width", "none");
+  await expectNoHorizontalOverflow(page);
+  await controls.screenshot({ path: testInfo.outputPath("controls-wide.png") });
+});
+
 test("Active Votes keeps full-height artwork and every metric visible at responsive widths @smoke @medium @large", async ({
   page,
 }, testInfo) => {
