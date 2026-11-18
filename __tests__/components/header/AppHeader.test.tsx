@@ -465,6 +465,51 @@ describe("AppHeader", () => {
     ).toBeInTheDocument();
   });
 
+  it.each([false, true])(
+    "shows feed Back on native Discovery with history=%s",
+    (canGoBack) => {
+      setup({
+        asPath: "/discover",
+        query: { returnTo: "/waves?view=profile-feed" },
+        canGoBack,
+      });
+      expect(screen.getByTestId("back")).toHaveAttribute(
+        "data-return-to",
+        "/waves?view=profile-feed"
+      );
+    }
+  );
+
+  it.each([
+    undefined,
+    "https://example.com",
+    "/waves",
+    "/waves?view=profile-feed&other=1",
+  ])(
+    "keeps the native Discovery menu without a feed origin: %s",
+    (returnTo) => {
+      setup({
+        asPath: "/discover",
+        query: returnTo ? { returnTo } : {},
+        canGoBack: true,
+      });
+      expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Open menu" })
+      ).toBeInTheDocument();
+    }
+  );
+
+  it("preserves the web Discovery header with a feed origin", () => {
+    useCapacitor.mockReturnValue({ isCapacitor: false });
+    setup({
+      asPath: "/discover",
+      query: { returnTo: "/waves?view=profile-feed" },
+      canGoBack: true,
+    });
+    expect(screen.queryByTestId("back")).not.toBeInTheDocument();
+  });
+
   it("returns from the score page to the exact Discover view in the app", () => {
     const returnTo = "/discover?sort=QUALITY&filter=REP_60";
     setup({

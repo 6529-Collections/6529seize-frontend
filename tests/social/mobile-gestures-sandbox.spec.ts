@@ -46,9 +46,6 @@ async function touchDrag(
   });
   // Deliver input at frame cadence, as a real finger does, instead of sending
   // the entire drag before the page has processed the initial touch.
-  await page.evaluate(
-    () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-  );
   const path =
     typeof movement === "number"
       ? Array.from({ length: 8 }, (_, index) => ({
@@ -149,6 +146,28 @@ async function installMessageFixture(page: Page, baseURL: string | undefined) {
   ].reverse();
   await page.route(`**/api/v2/waves/${WAVE}/drops?**`, (route) =>
     route.fulfill({ json: { ...feed, drops } })
+  );
+  await page.route("**/api/v2/curated-profile-wave-drops?**", (route) =>
+    route.fulfill({
+      json: {
+        page: 1,
+        next: false,
+        data: Array.from({ length: 8 }, (_, index) => ({
+          ...template,
+          id: `00000000-0000-4000-8000-${String(700 + index).padStart(12, "0")}`,
+          serial_no: 1,
+          content: `Profile feed gesture fixture ${index + 1}. A longer post gives the feed a real reading position to restore after opening its chat. Keep reading here after returning.`,
+          author: {
+            ...template.author,
+            badges: {
+              ...template.author.badges,
+              profile_wave_id: WAVE,
+              profile_wave_name: "Gesture profile wave",
+            },
+          },
+        })),
+      },
+    })
   );
   await page.routeWebSocket(
     (url) => url.port === new URL(origin).port,
@@ -321,6 +340,207 @@ for (const platform of ["ios", "android"] as const) {
         "data-wave-navigation-transition"
       );
       await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+
+    test("profile feed swipes back to Waves and chat returns to the same reading position", async ({
+      page,
+      baseURL,
+    }) => {
+      let checkingReturn = false;
+      let returnRouteRequests = 0;
+      page.on("request", (request) => {
+        const url = new URL(request.url());
+        if (
+          checkingReturn &&
+          url.pathname === "/waves" &&
+          url.searchParams.has("_rsc") &&
+          request.headers()["next-router-prefetch"] !== "1"
+        )
+          returnRouteRequests += 1;
+      });
+      await page.goto("/waves?view=profile-feed", {
+        waitUntil: "domcontentloaded",
+      });
+      await waitForRouteReady(page);
+      const feedHeading = page.getByRole("heading", {
+        name: "Latest From Profile Waves",
+        exact: true,
+      });
+      const feed = page
+        .getByTestId("wave-swipe-surface")
+        .locator("section")
+        .filter({ has: feedHeading });
+      const post = page.getByText("Profile feed gesture fixture 6.", {
+        exact: false,
+      });
+      const surface = page.getByTestId("wave-swipe-surface");
+      const grid = page.getByRole("grid");
+      await expect(grid).toBeVisible();
+      await feed.evaluate((element) => element.scrollTo({ top: 800 }));
+      await expect(post).toBeVisible();
+      await post.scrollIntoViewIfNeeded();
+      await expect(post).toBeInViewport();
+      await expect(grid).toHaveCSS("pointer-events", "auto");
+      await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
+      await expect
+        .poll(() => feed.evaluate((element) => element.scrollTop))
+        .toBeGreaterThan(100);
+      const cancelled = await touchDrag(page, post, 115);
+      await expect
+        .poll(() =>
+          surface.evaluate(
+            (element) =>
+              new DOMMatrixReadOnly(getComputedStyle(element).transform).m41
+          )
+        )
+        .toBeGreaterThan(80);
+      await cancelled.reverse();
+      await cancelled.release();
+      await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
+      await expect(surface).toHaveCSS("transform", "none");
+
+      for (const method of ["swipe", "button"] as const) {
+        await expect(page.locator("html")).not.toHaveAttribute(
+          "data-wave-navigation-transition"
+        );
+        await expect(grid).toHaveCSS("pointer-events", "auto");
+        const readingPosition = await feed.evaluate(
+          (element) => element.scrollTop
+        );
+        await post.tap();
+        await expect(page).toHaveURL(
+          new RegExp(`/waves/${WAVE}\\?.*returnTo=`)
+        );
+        await expect(
+          page.getByRole("textbox", { name: "Write a message" }).last()
+        ).toBeVisible();
+        checkingReturn = true;
+        if (method === "swipe") {
+          const row = page
+            .getByTestId("wave-swipe-surface")
+            .locator("[data-wave-drop-id][data-reply-enabled=true]")
+            .first();
+          const back = await touchDrag(page, row, 130);
+          await back.release();
+        } else {
+          await page.getByRole("button", { name: "Back", exact: true }).tap();
+        }
+        await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
+        await expect(post).toBeVisible();
+        await expect
+          .poll(async () =>
+            Math.abs(
+              (await feed.evaluate((element) => element.scrollTop)) -
+                readingPosition
+            )
+          )
+          .toBeLessThanOrEqual(2);
+        await expect(surface).toHaveCSS("transform", "none");
+        await expect(
+          page.getByRole("button", { name: "Back", exact: true })
+        ).toBeVisible();
+        checkingReturn = false;
+        expect(returnRouteRequests).toBe(0);
+      }
+
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      checkingReturn = true;
+      const exit = await touchDrag(page, post, 130);
+      await exit.release();
+      await expect(page).toHaveURL(/\/waves$/);
+      await expect(
+        page.getByRole("button", { name: "Find a wave…", exact: true })
+      ).toBeVisible();
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-wave-navigation-transition"
+      );
+      await expectNoHorizontalOverflow(page);
+      checkingReturn = false;
+      expect(returnRouteRequests).toBe(0);
+      await page.getByLabel("More", { exact: true }).tap();
+      await page.getByRole("menuitem", { name: "Profile Waves Feed" }).tap();
+      await expect(feedHeading).toBeVisible();
+      await expect
+        .poll(() => feed.evaluate((element) => element.scrollTop))
+        .toBe(0);
+      checkingReturn = true;
+      await page.getByRole("button", { name: "Back", exact: true }).tap();
+      await expect(page).toHaveURL(/\/waves$/);
+      await expect(
+        page.getByRole("button", { name: "Find a wave…", exact: true })
+      ).toBeVisible();
+      checkingReturn = false;
+      expect(returnRouteRequests).toBe(0);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+
+    test("Discovery opened from Profile Waves Feed keeps a Back path to the reading position", async ({
+      page,
+      baseURL,
+    }) => {
+      await page.goto("/waves?view=profile-feed", {
+        waitUntil: "domcontentloaded",
+      });
+      await waitForRouteReady(page);
+      const feed = page
+        .getByTestId("wave-swipe-surface")
+        .locator("section")
+        .filter({
+          has: page.getByRole("heading", {
+            name: "Latest From Profile Waves",
+            exact: true,
+          }),
+        });
+      await expect(page.getByRole("grid")).toBeVisible();
+      await expect(
+        page.getByText("Profile feed gesture fixture 1.", { exact: false })
+      ).toBeVisible();
+      await expect
+        .poll(() =>
+          feed.evaluate(
+            (element) => element.scrollHeight - element.clientHeight
+          )
+        )
+        .toBeGreaterThan(64);
+      await feed.evaluate((element) => element.scrollTo({ top: 64 }));
+      const discover = page.getByRole("link", {
+        name: "Discover Waves",
+        exact: true,
+      });
+      await discover.click({ trial: true });
+      const readingPosition = await feed.evaluate(
+        (element) => element.scrollTop
+      );
+      expect(readingPosition).toBeGreaterThan(0);
+      await discover.tap();
+      await expect(page).toHaveURL(/\/discover\?returnTo=/, {
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      const back = page.getByRole("button", { name: "Back", exact: true });
+      await expect(back).toBeVisible();
+      await page.getByRole("tab", { name: "Active Votes", exact: true }).tap();
+      await expect(page).toHaveURL(
+        /\/discover\?.*returnTo=.*view=active-votes/
+      );
+      await back.focus();
+      await back.press("Enter");
+      await expect(page).toHaveURL(/\/waves\?view=profile-feed$/);
+      await expect(discover).toBeVisible();
+      await expect
+        .poll(async () =>
+          Math.abs(
+            (await feed.evaluate((element) => element.scrollTop)) -
+              readingPosition
+          )
+        )
+        .toBeLessThanOrEqual(2);
+
+      await page.goto("/discover", { waitUntil: "domcontentloaded" });
+      await expect(
+        page.getByRole("button", { name: "Open menu", exact: true })
+      ).toBeVisible();
+      await expect(back).toBeHidden();
       await expectNoUnsafeSandboxMutations(baseURL);
     });
 

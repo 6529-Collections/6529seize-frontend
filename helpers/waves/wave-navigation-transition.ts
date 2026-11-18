@@ -1,6 +1,13 @@
 // The app shell acknowledges the committed screen before the browser captures it.
 // This keeps the outgoing list (including its scroll position) visible during the handoff.
-type WaveScreen = "list" | "wave";
+export type WaveScreen = "list" | "feed" | "wave";
+
+export function isForwardWaveNavigation(
+  screen: WaveScreen,
+  previous: string | null | undefined
+) {
+  return screen === "wave" || (screen === "feed" && previous === "list");
+}
 let activeTransition: {
   readonly screen: WaveScreen;
   readonly committed: () => void;
@@ -73,8 +80,12 @@ export function runWaveNavigationTransition(
     `${surface.getBoundingClientRect().height}px`
   );
   surface.style.viewTransitionName = "wave-navigation";
-  root.dataset["waveNavigationTransition"] =
-    screen === "wave" ? "forward" : "back";
+  root.dataset["waveNavigationTransition"] = isForwardWaveNavigation(
+    screen,
+    surface.dataset["waveNavigationScreen"]
+  )
+    ? "forward"
+    : "back";
   const clearSurface = () => {
     delete root.dataset["waveNavigationTransition"];
     surface.style.removeProperty("view-transition-name");

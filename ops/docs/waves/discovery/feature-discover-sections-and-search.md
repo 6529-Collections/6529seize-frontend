@@ -64,6 +64,11 @@ mobile navigation and header search Pages results. The Profile Waves Feed conten
 with a compass, aligned right on desktop and below the description on smaller
 screens. The sidebar uses each section’s `View all` link.
 
+In the native app, opening `Discover Waves` from Profile Waves Feed shows a
+header `Back` button that returns to the feed at its saved reading position.
+Switching Discover tabs, sort, or score filters keeps this return path. Opening
+Discovery directly or from main navigation keeps its usual menu control.
+
 The sidebar's `Find a wave…` searches accessible waves across collections;
 there is no new relevance algorithm or route-local search on `/discover`.
 

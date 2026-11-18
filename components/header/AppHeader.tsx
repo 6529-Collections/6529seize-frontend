@@ -76,6 +76,10 @@ import WaveJoinCta from "@/components/waves/header/WaveJoinCta";
 import MainStageNominationPopover from "@/components/brain/my-stream/tabs/MainStageNominationPopover";
 import { useProfileDoubleActivate } from "./useProfileDoubleActivate";
 import WavesHeaderMoreMenu from "./WavesHeaderMoreMenu";
+import {
+  PROFILE_WAVES_FEED_HREF,
+  returnsToProfileWavesFeed,
+} from "@/helpers/waves/profile-feed-navigation";
 
 const COLLECTION_TITLES: Record<string, string> = {
   "the-memes": "The Memes",
@@ -535,12 +539,19 @@ export default function AppHeader() {
   const waveScoreReturnTo = isWaveScorePage
     ? (sanitizeReturnTo(searchParams.get("returnTo")) ?? waveScoreFallbackHref)
     : undefined;
+  const discoveryFeedReturnTo =
+    isCapacitor &&
+    pathname === "/discover" &&
+    returnsToProfileWavesFeed(searchParams)
+      ? PROFILE_WAVES_FEED_HREF
+      : undefined;
 
   const showBackButton =
     Boolean(information?.returnFromNavigation) ||
     isInsideWave ||
     isCreateRoute ||
     isProfileWavesFeedView ||
+    discoveryFeedReturnTo !== undefined ||
     isWaveScorePage ||
     preferencesProfileReturnTo !== null ||
     profileCollectedReturnContext !== null ||
@@ -638,6 +649,7 @@ export default function AppHeader() {
                 profileCollectedReturnContext?.href ??
                 collectProfileReturnContext?.href ??
                 waveScoreReturnTo ??
+                discoveryFeedReturnTo ??
                 (isProfileWavesFeedView ? "/waves" : undefined)
               }
             />

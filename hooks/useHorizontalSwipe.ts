@@ -49,7 +49,7 @@ function ignoreTarget(element: HTMLElement, target: EventTarget | null) {
   if (!(target instanceof Element) || !element.contains(target)) return true;
   if (
     target.closest(
-      "a, button, input, textarea, select, summary, iframe, video, audio, canvas, [contenteditable]:not([contenteditable='false']), [role='slider'], [role='button'], [data-wave-swipe-back-ignore='true'], [data-horizontal-swipe-ignore], .swiper"
+      "a, button, input, textarea, select, summary, iframe, video, audio, canvas, [contenteditable]:not([contenteditable='false']), [role='slider'], [role='button']:not([data-horizontal-swipe-content='true']), [data-wave-swipe-back-ignore='true'], [data-horizontal-swipe-ignore], .swiper"
     ) ||
     globalThis.getSelection()?.isCollapsed === false
   ) {

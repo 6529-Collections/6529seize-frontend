@@ -90,6 +90,10 @@ Wave and DM rows in the left list control which thread is open.
   without mixing its old and new batches. Newly joined waves appear on refresh.
 - In the native app, swipe right across ordinary wave or direct-message content
   to return to its list. See [Touch Navigation in the Native App](../../navigation/flow-navigation-entry-and-switching.md#touch-navigation-in-the-native-app).
+- Profile Waves Feed also supports a right swipe to Waves in the native app.
+  Opening a feed post enters its chat; swiping right or tapping Back then
+  returns to the feed at the same reading position. A fresh opening from the
+  Waves More menu starts at the top.
 
 ## Discovery and wave search
 
@@ -230,6 +234,8 @@ on hover and show a dark hover surface; their resting header surface is transpar
 - Active-row re-click returns to `/waves` or `/messages`.
 - Native-app right swipe across conversation content returns from
   `/waves/{waveId}` to `/waves`, or `/messages/{waveId}` to `/messages`.
+  A chat opened from Profile Waves Feed returns to that feed instead, restoring
+  the reading position. The feed's right swipe returns to `/waves`.
 - Inside the `/waves` or `/messages` shell, row changes update URL/history in
   place and keep row highlight aligned.
 - Opening `/waves/{waveId}` directly keeps that wave visible and highlighted

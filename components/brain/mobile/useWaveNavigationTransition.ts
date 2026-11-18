@@ -5,16 +5,20 @@ import {
   commitWaveNavigationTransition,
   skipWaveNavigationTransition,
   consumeWaveSwipeHandoff,
+  isForwardWaveNavigation,
+  type WaveScreen,
 } from "@/helpers/waves/wave-navigation-transition";
 
-type WaveNavigationScreen = "list" | "wave" | null;
+type WaveNavigationScreen = WaveScreen | null;
 
 export function getWaveNavigationScreen(
   pathname: string,
-  waveId: string | null
+  waveId: string | null,
+  profileFeed = false
 ): WaveNavigationScreen {
   if (pathname !== "/waves" && !pathname.startsWith("/waves/")) return null;
-  return waveId ? "wave" : "list";
+  if (waveId) return "wave";
+  return profileFeed ? "feed" : "list";
 }
 
 /** Animate a committed list/detail change without remounting its content. */
@@ -47,7 +51,7 @@ export function useWaveNavigationTransition(screen: WaveNavigationScreen) {
       [
         {
           opacity: 0.75,
-          transform: `scale(${screen === "wave" ? 0.98 : 1.02})`,
+          transform: `scale(${isForwardWaveNavigation(screen, previousScreen) ? 0.98 : 1.02})`,
         },
         { opacity: 1, transform: "none" },
       ],

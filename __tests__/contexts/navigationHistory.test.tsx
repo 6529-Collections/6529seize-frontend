@@ -30,6 +30,7 @@ const routerMock = {
   push: jest.fn(),
   replace: jest.fn(),
   back: jest.fn(),
+  prefetch: jest.fn(),
   events: { on: jest.fn(), off: jest.fn() },
 };
 const hardBack = jest.fn();
@@ -56,6 +57,7 @@ describe("NavigationHistoryContext", () => {
     jest.mocked(Capacitor.isNativePlatform).mockReturnValue(false);
     routerMock.push.mockClear();
     routerMock.replace.mockClear();
+    routerMock.prefetch.mockClear();
     hardBack.mockClear();
     mockPathname = "/";
     mockSearchParams = new URLSearchParams();
@@ -158,6 +160,42 @@ describe("NavigationHistoryContext", () => {
     });
     expect(routerMock.push).toHaveBeenCalledWith("/");
   });
+
+  it.each([false, true])(
+    "restores the latest Network page and sort without adding Back steps (native=%s)",
+    (native) => {
+      jest.mocked(Capacitor.isNativePlatform).mockReturnValue(native);
+      mockPathname = "/network";
+      const { result, rerender } = renderHook(
+        () => useNavigationHistoryContext(),
+        { wrapper }
+      );
+      mockSearchParams = new URLSearchParams(
+        "page=2&sort-by=rep&sort-direction=asc"
+      );
+      rerender();
+      mockPathname = "/Shelby";
+      mockSearchParams = new URLSearchParams();
+      rerender();
+      if (native) {
+        expect(routerMock.prefetch).toHaveBeenCalledWith(
+          "/network?page=2&sort-by=rep&sort-direction=asc"
+        );
+      } else {
+        expect(routerMock.prefetch).not.toHaveBeenCalled();
+      }
+      act(() => result.current.goBack());
+      expect(routerMock.push).toHaveBeenLastCalledWith(
+        "/network?page=2&sort-by=rep&sort-direction=asc"
+      );
+      mockPathname = "/network";
+      mockSearchParams = new URLSearchParams(
+        "page=2&sort-by=rep&sort-direction=asc"
+      );
+      rerender();
+      expect(result.current.canGoBack).toBe(false);
+    }
+  );
 
   it("navigates back through stacked views", () => {
     const { result } = renderHook(() => useNavigationHistoryContext(), {
