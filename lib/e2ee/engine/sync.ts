@@ -6,6 +6,7 @@ import type {
   ApiE2eeWelcome,
 } from "../api-types";
 import { MlsError } from "../mls-adapter";
+import { E2EE_INITIAL_INBOX_WAIT_MS } from "../types";
 import type { WasmWelcomeSummary } from "../wasm-types";
 import { discardPendingCommit } from "./commit";
 import {
@@ -24,6 +25,7 @@ import {
   type LeafOwner,
 } from "./dm-join";
 import { RetryableError } from "./errors";
+import { readWithDeadline } from "./runtime";
 import {
   addNotices,
   applySummary,
@@ -380,7 +382,11 @@ async function handleWelcome(
 
 /** Whether all pending Welcomes were resolved. Runs inside the queue. */
 export async function processInbox(ctx: EngineContext): Promise<boolean> {
-  const welcomes = await ctx.api.getWelcomes(ownDeviceKey(ctx));
+  const welcomes = await readWithDeadline(
+    ctx.scheduler,
+    E2EE_INITIAL_INBOX_WAIT_MS,
+    (signal) => ctx.api.getWelcomes(ownDeviceKey(ctx), signal)
+  );
   let complete = true;
   for (const welcome of welcomes) {
     // Each Welcome may change the shared MLS state before the next one.

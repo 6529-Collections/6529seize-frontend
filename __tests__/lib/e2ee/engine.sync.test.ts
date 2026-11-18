@@ -5,13 +5,14 @@
  * polling fallback, stale-epoch re-encryption, roster repair and snapshots.
  */
 import { E2eeApiError } from "@/lib/e2ee/api-errors";
-import type { ApiE2eeDeviceGroup } from "@/lib/e2ee/api-types";
+import type { ApiE2eeDeviceGroup, ApiE2eeWelcome } from "@/lib/e2ee/api-types";
 import type { EngineContext } from "@/lib/e2ee/engine/context";
 import {
   type EngineController,
   POLL_OPEN_MS,
 } from "@/lib/e2ee/engine/controller";
 import { newRuntime } from "@/lib/e2ee/engine/groups";
+import { createDefaultScheduler } from "@/lib/e2ee/engine/runtime";
 import { queueMessage } from "@/lib/e2ee/engine/send";
 import { createFakeApiClient } from "../../../tests/support/e2ee/fakeDeliveryService.cjs";
 import {
@@ -89,10 +90,16 @@ describe("E2EE engine: sync paths", () => {
   it("stops waiting without confirming an empty inbox while chat discovery remains unresolved", async () => {
     const world = await createWorld();
     let pending = true;
+    let failed = false;
     const alice = await addUser(world, "alice", {
       api: {
         ...createFakeApiClient(world.ds, "alice"),
-        getDeviceInboxStatus: async () => ({ has_pending_chats: pending }),
+        getDeviceInboxStatus: async () => {
+          if (failed) {
+            throw new E2eeApiError({ status: 503, message: "Unavailable" });
+          }
+          return { has_pending_chats: pending };
+        },
       },
     });
     const { engine } = alice.primary;
@@ -103,10 +110,85 @@ describe("E2EE engine: sync paths", () => {
     expect(engine.getInitialSyncStatus()).toBe("delayed");
     expect(engine.getConversations()).toHaveLength(0);
 
+    failed = true;
+    await engine.sync();
+    expect(engine.getInitialSyncStatus()).toBe("failed");
+
+    failed = false;
     pending = false;
     await engine.sync();
     expect(engine.getInitialSyncStatus()).toBe("complete");
     expect(engine.getConversations()).toHaveLength(0);
+  });
+
+  it("lets a new attempt retry an inbox read that did not respond", async () => {
+    const world = await createWorld();
+    const stalled = Promise.withResolvers<ApiE2eeWelcome[]>();
+    const read = Promise.withResolvers<AbortSignal | undefined>();
+    let blocked = true;
+    const alice = await addUser(world, "alice", {
+      api: {
+        ...createFakeApiClient(world.ds, "alice"),
+        getWelcomes: async (_key, signal) => {
+          if (!blocked) return [];
+          read.resolve(signal);
+          return stalled.promise;
+        },
+      },
+    });
+    const { engine } = alice.primary;
+    await engine.idle();
+    expect((await read.promise)?.aborted).toBe(true);
+    expect(engine.getInitialSyncStatus()).toBe("failed");
+
+    blocked = false;
+    await engine.sync();
+    expect(engine.getInitialSyncStatus()).toBe("complete");
+  });
+
+  it("catches up available chats while the first inbox confirmation is pending", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const group = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await waitFor(
+      () => bob.primary.engine.getConversation(group)?.status === "active"
+    );
+    stopDevice(world, bob.primary);
+    const text = "Arrived while Bob's device was closed";
+    await alice.primary.engine.send(group, { text });
+    await alice.primary.engine.idle();
+
+    const confirming = Promise.withResolvers<void>();
+    const inbox = Promise.withResolvers<{ has_pending_chats: boolean }>();
+    const bobAgain = await startDevice(world, "bob", bob.account, {
+      storage: bob.primary.storage,
+      enroll: false,
+      extra: {
+        scheduler: createDefaultScheduler(),
+        api: {
+          ...createFakeApiClient(world.ds, "bob"),
+          getDeviceInboxStatus: async () => {
+            confirming.resolve();
+            return inbox.promise;
+          },
+        },
+      },
+    });
+    try {
+      await confirming.promise;
+      await waitFor(() =>
+        texts(bobAgain.engine.getMessages(group)).includes(text)
+      );
+    } finally {
+      inbox.resolve({ has_pending_chats: false });
+    }
+    await bobAgain.engine.idle();
+    expect(bobAgain.engine.getInitialSyncStatus()).toBe("complete");
+    stopDevice(world, bobAgain);
   });
 
   it("follows WebSocket hints without explicit syncs", async () => {

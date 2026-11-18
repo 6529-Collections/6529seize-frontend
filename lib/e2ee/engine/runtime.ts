@@ -1,4 +1,5 @@
 import type { E2eeScheduler, E2eeTimerHandle } from "../types";
+import { RetryableError } from "./errors";
 
 /**
  * Serial operation queue: every WASM call and state mutation runs inside one
@@ -147,3 +148,24 @@ export const sleep = (scheduler: E2eeScheduler, ms: number): Promise<void> =>
   new Promise<void>((resolve) => {
     scheduler.setTimeout(resolve, ms);
   });
+
+export async function readWithDeadline<T>(
+  scheduler: E2eeScheduler,
+  ms: number,
+  read: (signal: AbortSignal) => Promise<T>
+): Promise<T> {
+  const abort = new AbortController();
+  let timer: E2eeTimerHandle | undefined;
+  const deadline = new Promise<never>((_resolve, reject) => {
+    timer = scheduler.setTimeout(() => {
+      const error = new RetryableError("E2EE_INBOX_READ_TIMEOUT");
+      reject(error);
+      abort.abort(error);
+    }, ms);
+  });
+  try {
+    return await Promise.race([read(abort.signal), deadline]);
+  } finally {
+    if (timer) scheduler.clearTimeout(timer);
+  }
+}

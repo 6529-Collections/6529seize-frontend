@@ -55,18 +55,21 @@ export function buildE2eeApiClient({
       post(`e2ee/groups/${enc(group)}/messages`, body),
     repairRoster: (group, body) =>
       post(`e2ee/groups/${enc(group)}/roster`, body),
-    getWelcomes: (deviceKey) => get(`e2ee/devices/${enc(deviceKey)}/welcomes`),
+    getWelcomes: (deviceKey, signal) =>
+      get(`e2ee/devices/${enc(deviceKey)}/welcomes`, undefined, signal),
     ackWelcome: async (deviceKey, welcomeId) => {
       await post<unknown>(
         `e2ee/devices/${enc(deviceKey)}/welcomes/${enc(welcomeId)}/ack`,
         {}
       );
     },
-    getDeviceGroups: (deviceKey) =>
-      get(`e2ee/devices/${enc(deviceKey)}/groups`),
-    getDeviceInboxStatus: async (deviceKey) => {
+    getDeviceGroups: (deviceKey, signal) =>
+      get(`e2ee/devices/${enc(deviceKey)}/groups`, undefined, signal),
+    getDeviceInboxStatus: async (deviceKey, signal) => {
       const status = await get<Partial<ApiE2eeDeviceInboxStatus> | null>(
-        `e2ee/devices/${enc(deviceKey)}/inbox-status`
+        `e2ee/devices/${enc(deviceKey)}/inbox-status`,
+        undefined,
+        signal
       );
       // A successful HTTP response confirms discovery only with an explicit flag.
       if (typeof status?.has_pending_chats !== "boolean") {

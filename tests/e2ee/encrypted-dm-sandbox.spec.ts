@@ -323,9 +323,11 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       });
       await expect(retry).toBeEnabled({ timeout: E2EE_UI_TIMEOUT_MS });
       const allowCheck = Promise.withResolvers<void>();
+      const checkStarted = Promise.withResolvers<void>();
       await phone.page.route(
         "**/api/e2ee/devices/*/inbox-status",
         async (route) => {
+          checkStarted.resolve();
           await allowCheck.promise;
           await route.fulfill({ json: { has_pending_chats: true } });
         },
@@ -333,6 +335,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       );
       try {
         await retry.click();
+        await checkStarted.promise;
         await expect(
           phone.page
             .getByRole("status")

@@ -14,7 +14,7 @@ import {
   seedProcessedHistory,
   browserPerformanceSnapshot,
 } from "../support/staging-e2ee/performance";
-import type { Browser, TestInfo } from "@playwright/test";
+import type { Browser, Route, TestInfo } from "@playwright/test";
 import { createChatWave } from "../support/staging-e2ee/chat-wave";
 import {
   MARKDOWN_PARITY_CASES,
@@ -857,31 +857,30 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     // inbox. Its successful first lookup must show progress during that gap.
     const entries = `**/api/e2ee/groups/${dm}/entries`;
     const allowAddition = Promise.withResolvers<void>();
-    for (const { context } of [a, b]) {
-      await context.route(entries, async (route) => {
-        await allowAddition.promise;
-        await route.fallback();
-      });
+    const holdAddition = async (route: Route) => {
+      await allowAddition.promise;
+      await route.fallback();
+    };
+    let b2: StagingE2eeSession;
+    try {
+      await a.context.route(entries, holdAddition);
+      await b.context.route(entries, holdAddition);
+      b2 = await addSession(browser, testInfo, b.user, "B (second device)");
+      await expect(
+        b2.page.getByRole("status").filter({
+          hasText: "Waiting for encrypted chats to sync to this device…",
+        })
+      ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+      await expect(
+        b2.page.getByRole("heading", { name: "No encrypted chats yet" })
+      ).toHaveCount(0);
+    } finally {
+      allowAddition.resolve();
+      await Promise.all([
+        a.context.unroute(entries, holdAddition),
+        b.context.unroute(entries, holdAddition),
+      ]);
     }
-    const b2 = await addSession(browser, testInfo, b.user, "B (second device)")
-      .then(async (device) => {
-        await expect(
-          device.page.getByText(
-            "Waiting for encrypted chats to sync to this device…",
-            {
-              exact: true,
-            }
-          )
-        ).toBeVisible({ timeout: UI_TIMEOUT_MS });
-        await expect(
-          device.page.getByRole("heading", { name: "No encrypted chats yet" })
-        ).toHaveCount(0);
-        return device;
-      })
-      .finally(() => {
-        allowAddition.resolve();
-      });
-    await Promise.all([a.context.unroute(entries), b.context.unroute(entries)]);
     await openChat(a, dm);
     await openChat(b, dm);
     await expect(

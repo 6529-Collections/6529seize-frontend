@@ -18,7 +18,7 @@ import {
   runGroupCommit,
   STALL_RETRY_MS,
 } from "./maintenance";
-import { sleep } from "./runtime";
+import { readWithDeadline, sleep } from "./runtime";
 import { hasOverdueChanges } from "./required-changes";
 import { sendNext } from "./send";
 import type { GroupRuntime } from "./store";
@@ -146,7 +146,11 @@ export class EngineController {
 
   private async deviceGroups(): Promise<ApiE2eeDeviceGroup[] | null> {
     try {
-      return await this.ctx.api.getDeviceGroups(ownDeviceKey(this.ctx));
+      return await readWithDeadline(
+        this.ctx.scheduler,
+        E2EE_INITIAL_INBOX_WAIT_MS,
+        (signal) => this.ctx.api.getDeviceGroups(ownDeviceKey(this.ctx), signal)
+      );
     } catch (error) {
       const apiError = asE2eeApiError(error);
       if (apiError?.code === "E2EE_NOT_YOUR_DEVICE") {
@@ -165,10 +169,19 @@ export class EngineController {
       return;
     }
     this.lastFullSyncAt = this.ctx.now();
-    const serverGroups = await this.syncInbox();
+    const { groups, confirm } = await this.syncInbox();
     if (!this.isReady()) {
       return;
     }
+    await Promise.all([
+      this.syncKnownGroups(groups),
+      confirm ? this.confirmInitialInbox() : undefined,
+    ]);
+  }
+
+  private async syncKnownGroups(
+    serverGroups: ApiE2eeDeviceGroup[] | null
+  ): Promise<void> {
     const lastSeq = lastSeqByGroup(serverGroups);
     for (const [g, runtime] of [...this.ctx.store.groups]) {
       if (!isActive(runtime)) {
@@ -256,11 +269,11 @@ export class EngineController {
     if (
       !this.isReady() ||
       current === "complete" ||
-      (current === "delayed" && status !== "complete")
+      (current === "delayed" && status === "waiting")
     ) {
       return;
     }
-    if (status === "waiting") {
+    if (status === "pending" || status === "waiting") {
       this.ctx.timers.arm(
         INITIAL_INBOX_WAIT_TIMER,
         E2EE_INITIAL_INBOX_WAIT_MS,
@@ -275,22 +288,24 @@ export class EngineController {
   }
 
   /** Check chat discovery independently of maintenance and cosmetic lookups. */
-  private async syncInbox(): Promise<ApiE2eeDeviceGroup[] | null> {
-    if (this.ctx.store.initialSyncStatus === "failed") {
+  private async syncInbox(): Promise<{
+    groups: ApiE2eeDeviceGroup[] | null;
+    confirm: boolean;
+  }> {
+    const status = this.ctx.store.initialSyncStatus;
+    if (status === "failed" || status === "pending") {
       this.setInitialSyncStatus("pending");
     }
     try {
       const inboxComplete = await this.pullInbox();
-      if (!this.isReady()) return null;
+      if (!this.isReady()) return { groups: null, confirm: false };
       const groups = await this.deviceGroups();
       if (inboxComplete === null || groups === null) {
         this.setInitialSyncStatus("failed");
-      } else if (inboxComplete) {
-        await this.confirmInitialInbox();
-      } else {
+      } else if (!inboxComplete) {
         this.setInitialSyncStatus("waiting");
       }
-      return groups;
+      return { groups, confirm: inboxComplete === true && groups !== null };
     } catch (error) {
       this.setInitialSyncStatus("failed");
       throw error;
@@ -308,18 +323,27 @@ export class EngineController {
     if (status === "delayed" && store.getConversations().length > 0) {
       return;
     }
+    const deviceKey = ownDeviceKey(this.ctx);
     try {
-      const { has_pending_chats: pending } =
-        await this.ctx.api.getDeviceInboxStatus(ownDeviceKey(this.ctx));
+      const { has_pending_chats: pending } = await readWithDeadline(
+        this.ctx.scheduler,
+        E2EE_INITIAL_INBOX_WAIT_MS,
+        (signal) => this.ctx.api.getDeviceInboxStatus(deviceKey, signal)
+      );
       // The first Welcome read can succeed before another device adds this
       // one to existing chats. Check after delivery processing so a newly
       // queued Welcome also keeps discovery open for the next pass.
-      this.setInitialSyncStatus(pending ? "waiting" : "complete");
+      if (this.ctx.device?.deviceKey === deviceKey) {
+        this.setInitialSyncStatus(pending ? "waiting" : "complete");
+      }
     } catch (error) {
+      if (!this.isReady() || this.ctx.device?.deviceKey !== deviceKey) return;
       if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
         await this.hooks.onOwnRevoked();
       }
-      this.setInitialSyncStatus("failed");
+      if (this.ctx.device?.deviceKey === deviceKey) {
+        this.setInitialSyncStatus("failed");
+      }
     }
   }
 

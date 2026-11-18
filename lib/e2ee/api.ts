@@ -87,10 +87,19 @@ export interface E2eeApiClient {
     group: string,
     body: ApiE2eeRosterRepairRequest
   ): Promise<ApiE2eeGroup>;
-  getWelcomes(deviceKey: string): Promise<ApiE2eeWelcome[]>;
+  getWelcomes(
+    deviceKey: string,
+    signal?: AbortSignal
+  ): Promise<ApiE2eeWelcome[]>;
   ackWelcome(deviceKey: string, welcomeId: string): Promise<void>;
-  getDeviceGroups(deviceKey: string): Promise<ApiE2eeDeviceGroup[]>;
-  getDeviceInboxStatus(deviceKey: string): Promise<ApiE2eeDeviceInboxStatus>;
+  getDeviceGroups(
+    deviceKey: string,
+    signal?: AbortSignal
+  ): Promise<ApiE2eeDeviceGroup[]>;
+  getDeviceInboxStatus(
+    deviceKey: string,
+    signal?: AbortSignal
+  ): Promise<ApiE2eeDeviceInboxStatus>;
   createBlob(body: ApiE2eeCreateBlobRequest): Promise<ApiE2eeBlob>;
   putBlobChunk(
     blobId: string,
