@@ -1,7 +1,7 @@
 import type { ExtraProps } from "react-markdown";
 import type { Plugin } from "unified";
 import { parseUrl } from "@/components/drops/view/part/dropPartMarkdown/linkUtils";
-import { IMAGE_RESIZE_CDN_ORIGIN } from "@/helpers/image-resize-cdn";
+import { SCALABLE_IMAGE_PREFIXES } from "@/helpers/image-resize-cdn";
 
 type Element = NonNullable<ExtraProps["node"]>;
 type Content = Element["children"][number];
@@ -14,7 +14,8 @@ export function isDropNotificationImage(src: unknown): src is string {
   if (typeof src !== "string") return false;
   const url = parseUrl(src);
   return (
-    url?.origin === IMAGE_RESIZE_CDN_ORIGIN &&
+    url !== null &&
+    SCALABLE_IMAGE_PREFIXES.includes(`${url.origin}/drops/`) &&
     src === `${url.origin}${url.pathname}` &&
     /^\/drops\/[\w-]+\/[\w.-]+\.(?:png|jpe?g|webp|gif|avif)$/i.test(
       url.pathname
