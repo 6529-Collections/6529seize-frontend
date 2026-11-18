@@ -321,7 +321,10 @@ function getPendingRevokeOwnership(
   }: {
     readonly linkedDevices: ReadonlyMap<string, ApiE2eeDevice>;
     readonly ownKeys: ReadonlySet<string>;
-    readonly isThisBrowser: (device: ApiE2eeDevice, ownGrant: boolean) => boolean;
+    readonly isThisBrowser: (
+      device: ApiE2eeDevice,
+      ownGrant: boolean
+    ) => boolean;
   }
 ): {
   readonly linked: ApiE2eeDevice | undefined;

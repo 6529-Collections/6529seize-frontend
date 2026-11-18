@@ -61,17 +61,8 @@ export async function catchUp(
   for (;;) {
     const page = await io.api.listChunks(local.backupId, after, LIST_PAGE);
     const items = page.items.filter((item) => item.seq > after);
-    for (const item of items) {
-      const linked = await linkListed(
-        io.api,
-        local,
-        tipOf(local.chain),
-        item.seq,
-        "adopt"
-      );
-      forked = linked === null;
-      followChunk(local, item.seq, linked);
-      after = item.seq;
+    if (items.length > 0) {
+      ({ forked, after } = await followChunks(io, local, items));
     }
     if (page.next_after_seq === null || items.length === 0) {
       break;
@@ -79,6 +70,35 @@ export async function catchUp(
   }
   await io.state.put(local);
   return forked;
+}
+
+/**
+ * Follows the listed chunks in order, each linked after the one before (so
+ * one at a time). `forked`: the last one doesn't continue this device's
+ * chain; `after`: the last seq followed.
+ */
+async function followChunks(
+  io: ChainWriterIo,
+  local: BackupLocalState,
+  items: readonly { readonly seq: number }[],
+  index = 0
+): Promise<{ forked: boolean; after: number }> {
+  const item = items[index];
+  if (!item) {
+    return { forked: false, after: local.chain.seq };
+  }
+  const linked = await linkListed(
+    io.api,
+    local,
+    tipOf(local.chain),
+    item.seq,
+    "adopt"
+  );
+  followChunk(local, item.seq, linked);
+  if (index + 1 < items.length) {
+    return followChunks(io, local, items, index + 1);
+  }
+  return { forked: linked === null, after: item.seq };
 }
 
 /** Fetches the listed chunk `seq` and links it after `tip` (or null). */

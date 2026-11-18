@@ -94,6 +94,13 @@ const MAX_DRAIN_RUNS = 3;
  */
 type RunOutcome = "complete" | "queued" | "changed";
 
+/** A restore's chain read so far: its segments, tip and last seq. */
+interface ChainRead {
+  segments: BackupSegment[];
+  tip: ChainTip | null;
+  after: number;
+}
+
 const defaultScheduler: BackupScheduler = {
   setTimeout: (callback, ms) => globalThis.setTimeout(callback, ms),
   clearTimeout: (handle) => {
@@ -634,30 +641,14 @@ export class E2eeBackupManager {
     backupId: string,
     chunkKey: CryptoKey
   ): Promise<{ segments: BackupSegment[]; chain: BackupChainState }> {
-    const segments: BackupSegment[] = [];
-    let tip: ChainTip | null = null;
-    let after = 0;
+    const read: ChainRead = { segments: [], tip: null, after: 0 };
     for (;;) {
-      const page = await this.deps.api.listChunks(backupId, after, LIST_PAGE);
-      for (const item of page.items) {
-        // Seqs must strictly increase; then the chunk must link.
-        const linked: LinkedChunk | null =
-          item.seq > after
-            ? await linkListed(
-                this.deps.api,
-                { backupId, chunkKey },
-                tip,
-                item.seq,
-                "restore"
-              )
-            : null;
-        if (!linked) {
-          throw new BackupError("E2EE_BACKUP_CORRUPT");
-        }
-        tip = linked.tip;
-        after = item.seq;
-        segments.push(decodeSegment(linked.json));
-      }
+      const page = await this.deps.api.listChunks(
+        backupId,
+        read.after,
+        LIST_PAGE
+      );
+      await this.readChunks({ backupId, chunkKey }, page.items, read);
       if (page.next_after_seq === null) {
         break;
       }
@@ -665,10 +656,45 @@ export class E2eeBackupManager {
         throw new BackupError("E2EE_BACKUP_CORRUPT");
       }
     }
+    const { segments, tip, after } = read;
     return {
       segments,
       chain: tip ? chainAt(tip, after) : { ...newChainState(), seq: after },
     };
+  }
+
+  /**
+   * Reads the listed chunks in order into `read`, each linked after the one
+   * before (so one at a time). Seqs must strictly increase; then the chunk
+   * must link.
+   */
+  private async readChunks(
+    generation: { readonly backupId: string; readonly chunkKey: CryptoKey },
+    items: readonly { readonly seq: number }[],
+    read: ChainRead,
+    index = 0
+  ): Promise<void> {
+    const item = items[index];
+    if (!item) {
+      return;
+    }
+    const linked: LinkedChunk | null =
+      item.seq > read.after
+        ? await linkListed(
+            this.deps.api,
+            generation,
+            read.tip,
+            item.seq,
+            "restore"
+          )
+        : null;
+    if (!linked) {
+      throw new BackupError("E2EE_BACKUP_CORRUPT");
+    }
+    read.tip = linked.tip;
+    read.after = item.seq;
+    read.segments.push(decodeSegment(linked.json));
+    await this.readChunks(generation, items, read, index + 1);
   }
 
   // -- turn off -------------------------------------------------------------------
