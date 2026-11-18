@@ -1114,9 +1114,7 @@ describe("24-drop forecast headline", () => {
           isOwner
         />
       );
-      expect(
-        screen.getByRole("heading", { name: headline, exact: true })
-      ).toBeVisible();
+      expect(screen.getByRole("heading", { name: headline })).toBeVisible();
       if (count)
         expect(screen.getByText(/Funded through/)).toHaveTextContent(
           "Funded through The Memes #598 · Jan 1, 2027"
