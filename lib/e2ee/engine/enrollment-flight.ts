@@ -69,11 +69,11 @@ export class EnrollmentFlight {
   }
 
   /** Enrolls this device; `allowPrompt` permits the separate grant prompt. */
-  run(allowPrompt: boolean, onProvisioning?: () => void): Promise<void> {
+  run(allowPrompt: boolean): Promise<void> {
     if (this.current) {
       return this.current.catch(() => undefined);
     }
-    const run = this.enrollOnce(allowPrompt, onProvisioning).finally(() => {
+    const run = this.enrollOnce(allowPrompt).finally(() => {
       this.current = null;
     });
     this.current = run;
@@ -114,10 +114,7 @@ export class EnrollmentFlight {
     }
   }
 
-  private async enrollOnce(
-    allowPrompt: boolean,
-    onProvisioning: (() => void) | undefined
-  ): Promise<void> {
+  private async enrollOnce(allowPrompt: boolean): Promise<void> {
     const status = this.ctx.store.status;
     if (status === "ready") {
       if (allowPrompt) {
@@ -134,7 +131,7 @@ export class EnrollmentFlight {
       // earlier-suite device (D172): inside this single flight and the
       // queue, so concurrent callers never retire or enroll twice.
       const ready = await this.ctx.queue.run(() =>
-        enrollDevice(this.ctx, { allowPrompt, onProvisioning })
+        enrollDevice(this.ctx, { allowPrompt })
       );
       if (!ready) {
         if (this.ctx.store.status === "enrolling") {

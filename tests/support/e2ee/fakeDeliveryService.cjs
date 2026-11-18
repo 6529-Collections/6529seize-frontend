@@ -1325,17 +1325,6 @@ function createFakeDeliveryService(options = {}) {
       }));
   }
 
-  function deviceInboxStatus(profileId, deviceKey) {
-    requireOwnDevice(profileId, deviceKey);
-    const hasDelivery = (s.deliveries.get(deviceKey)?.length ?? 0) > 0;
-    const hasUnjoinedChat = [...s.groups.values()].some(
-      (group) =>
-        !group.roster.has(deviceKey) &&
-        [...group.roster.values()].some((row) => row.profile_id === profileId)
-    );
-    return { has_pending_chats: hasDelivery || hasUnjoinedChat };
-  }
-
   // -- blobs --------------------------------------------------------------------
 
   function createBlob(profileId, body) {
@@ -1562,11 +1551,6 @@ function createFakeDeliveryService(options = {}) {
       "GET",
       /^e2ee\/devices\/(0x[0-9a-f]+)\/groups$/,
       (c, [key]) => deviceGroups(c.profileId, key),
-    ],
-    [
-      "GET",
-      /^e2ee\/devices\/(0x[0-9a-f]+)\/inbox-status$/,
-      (c, [key]) => deviceInboxStatus(c.profileId, key),
     ],
     ["POST", /^e2ee\/blobs$/, (c) => createBlob(c.profileId, c.body)],
     [
@@ -1901,8 +1885,6 @@ function createFakeApiClient(ds, profileId) {
       );
     },
     getDeviceGroups: (key) => call("GET", `e2ee/devices/${enc(key)}/groups`),
-    getDeviceInboxStatus: (key) =>
-      call("GET", `e2ee/devices/${enc(key)}/inbox-status`),
     createBlob: (body) => call("POST", "e2ee/blobs", body),
     putBlobChunk: (blob, index, body) =>
       call("PUT", `e2ee/blobs/${enc(blob)}/chunks/${index}`, body),

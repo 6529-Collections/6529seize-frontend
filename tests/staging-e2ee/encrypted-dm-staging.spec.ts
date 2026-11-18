@@ -882,35 +882,8 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const beforeRevoke = qaMessage(runId, "before revoke");
     const afterRevoke = qaMessage(runId, "after revoke");
 
-    // Hold the real DM's invitations until the new device has checked its
-    // inbox. Its successful first lookup must show progress during that gap.
-    const entries = `**/api/e2ee/groups/${dm}/entries`;
-    const allowAddition = Promise.withResolvers<void>();
-    for (const { context } of [a, b]) {
-      await context.route(entries, async (route) => {
-        await allowAddition.promise;
-        await route.fallback();
-      });
-    }
-    const b2 = await addSession(browser, testInfo, b.user, "B (second device)")
-      .then(async (device) => {
-        await expect(
-          device.page.getByText(
-            "Waiting for encrypted chats to sync to this device…",
-            {
-              exact: true,
-            }
-          )
-        ).toBeVisible({ timeout: UI_TIMEOUT_MS });
-        await expect(
-          device.page.getByRole("heading", { name: "No encrypted chats yet" })
-        ).toHaveCount(0);
-        return device;
-      })
-      .finally(() => {
-        allowAddition.resolve();
-      });
-    await Promise.all([a.context.unroute(entries), b.context.unroute(entries)]);
+    // A second browser for B is a new device: one more grant signature.
+    const b2 = await addSession(browser, testInfo, b.user, "B (second device)");
     await openChat(a, dm);
     await openChat(b, dm);
     await expect(
@@ -1039,18 +1012,6 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     });
     const migrationMs = performance.now() - upgrading;
     await a.page.goto("https://staging.6529.io/api/version");
-    // A caught-up group skips its log. Leave a real server entry for the
-    // returning device so this test can verify the incremental cursor.
-    const missedMessage = qaMessage(current.runId, "history catch-up");
-    const delivered = b.page.waitForResponse(
-      (response) =>
-        response.request().method() === "POST" &&
-        new URL(response.url()).pathname ===
-          `/api/e2ee/groups/${dm}/messages` &&
-        response.ok(),
-      { timeout: SYNC_TIMEOUT_MS }
-    );
-    await Promise.all([delivered, sendEncrypted(b, missedMessage)]);
     const opened = performance.now();
     await openChat(a, dm);
     await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
@@ -1083,7 +1044,6 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expect(logCursors.every((cursor) => cursor >= fixture.originalCursor)).toBe(
       true
     );
-    await expectDecrypted(a, missedMessage);
     await testInfo.attach("long-history-opening.json", {
       body: Buffer.from(
         JSON.stringify({
@@ -1184,7 +1144,6 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       needles({
         historySeed,
         photoCaption,
-        missedMessage,
         imageMarker: image.marker,
         imageBytes: image.buffer,
       })

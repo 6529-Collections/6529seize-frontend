@@ -437,17 +437,6 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     expect(alice.signCalls).toBe(0);
   });
 
-  it("reports provisioning after the fallback wallet signature", async () => {
-    const { world, alice, signIn } = await signedInWaitingEngine();
-    world.ds.revokeLoginGrant(signIn.grantId);
-    const onProvisioning = jest.fn();
-
-    await alice.engine.enroll(() => onProvisioning(alice.signCalls));
-
-    expect(onProvisioning.mock.calls).toEqual([[1]]);
-    expect(alice.engine.getStatus()).toBe("ready");
-  });
-
   it("shares one registration between a sign-in enrollment and an explicit enroll()", async () => {
     const { world, alice, signIn } = await signedInWaitingEngine();
     const engine = alice.engine;

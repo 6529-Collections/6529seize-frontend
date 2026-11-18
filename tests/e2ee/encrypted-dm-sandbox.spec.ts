@@ -20,9 +20,7 @@ import {
   composer,
   conversationListRow,
   enroll,
-  enrollButton,
   ENCRYPTED_ROUTE,
-  expectEnrollmentCard,
   expectMessage,
   gotoPath,
   messageRow,
@@ -194,198 +192,6 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     expect(scan.found).toEqual([]);
   });
 
-  test("iPhone enrollment shows progress and the inbox waits for a successful first sync", async ({
-    baseURL,
-    browser,
-  }, testInfo) => {
-    test.skip(
-      // NOSONAR -- This shared spec runs the iPhone setup regression in its mobile project.
-      testInfo.project.name !== "web-mobile-chromium",
-      "The test uses a simulated iPhone bridge and the mobile viewport."
-    );
-    const users = await resetE2eeSandbox(baseURL);
-    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
-    sessions.push(alice);
-    const { page, context } = alice;
-    await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
-    await page.setViewportSize({ width: 412, height: 840 });
-    await context.route("https://rpc.walletconnect.org/**", (route) =>
-      route.fulfill({ status: 400, json: { error: "Fixture RPC unavailable" } })
-    );
-    await expectEnrollmentCard(page, { app: true });
-
-    const keyPackages = Promise.withResolvers<void>();
-    const firstInbox = Promise.withResolvers<void>();
-    await page.route("**/api/e2ee/devices/*/key-packages", async (route) => {
-      await keyPackages.promise;
-      await route.continue();
-    });
-    await page.route(
-      "**/api/e2ee/devices/*/welcomes",
-      async (route) => {
-        await firstInbox.promise;
-        await route.fulfill({ status: 503, json: { error: "Unavailable" } });
-      },
-      { times: 1 }
-    );
-    const empty = page.getByRole("heading", {
-      name: "No encrypted chats yet",
-      exact: true,
-    });
-    const before = alice.signatureCount();
-    try {
-      await enrollButton(page).click();
-      await expect(
-        page.getByText("Finishing encrypted message setup…", { exact: true })
-      ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
-      expect(alice.signatureCount()).toBe(before + 1);
-      keyPackages.resolve();
-
-      await expect(
-        page.getByText("Loading encrypted chats…", { exact: true })
-      ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
-      await expect(empty).toHaveCount(0);
-      await page.screenshot({
-        path: testInfo.outputPath("encrypted-inbox-loading.png"),
-      });
-
-      firstInbox.resolve();
-      await expect(
-        page.getByRole("heading", { name: "Couldn’t load encrypted chats." })
-      ).toBeVisible();
-      await expect(
-        page
-          .getByRole("status")
-          .filter({ hasText: "Couldn’t load encrypted chats." })
-      ).toHaveCount(1);
-      await expect(empty).toHaveCount(0);
-      await page
-        .getByRole("button", { name: "Try again", exact: true })
-        .click();
-      await expect(empty).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
-    } finally {
-      keyPackages.resolve();
-      firstInbox.resolve();
-    }
-  });
-
-  test("iPhone shows existing encrypted chats as they join without reporting an empty inbox", async ({
-    baseURL,
-    browser,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "web-mobile-chromium",
-      "The test uses a simulated iPhone bridge and the mobile viewport."
-    );
-    const users = await resetE2eeSandbox(baseURL);
-    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
-    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
-    const carol = await openE2eeUser(browser, testInfo, baseURL, users.carol);
-    sessions.push(alice, bob, carol);
-    await enroll(alice);
-    await enroll(bob);
-    await enroll(carol);
-    const dm = await startChat(alice, ["bob"]);
-    const secondDm = await startChat(alice, ["carol"]);
-    const allowDm = Promise.withResolvers<void>();
-    const allowSecondDm = Promise.withResolvers<void>();
-
-    try {
-      for (const { context } of [alice, bob, carol]) {
-        for (const [id, allow] of [
-          [dm, allowDm],
-          [secondDm, allowSecondDm],
-        ] as const) {
-          await context.route(
-            `**/api/e2ee/groups/${id}/entries`,
-            async (route) => {
-              await allow.promise;
-              await route.fallback();
-            }
-          );
-        }
-      }
-      const phone = await openE2eeUser(
-        browser,
-        testInfo,
-        baseURL,
-        users.alice,
-        "Alice's iPhone"
-      );
-      sessions.push(phone);
-      await installSurfaceSimulation(
-        phone.context,
-        "capacitor-ios-sim",
-        baseURL
-      );
-      await phone.page.setViewportSize({ width: 412, height: 840 });
-      await phone.context.route("https://rpc.walletconnect.org/**", (route) =>
-        route.fulfill({
-          status: 400,
-          json: { error: "Fixture RPC unavailable" },
-        })
-      );
-      await enroll(phone, { app: true });
-      const waiting = phone.page.getByRole("status").filter({
-        hasText: "Waiting for encrypted chats to sync to this device…",
-      });
-      const empty = phone.page.getByRole("heading", {
-        name: "No encrypted chats yet",
-        exact: true,
-      });
-      await expect(waiting).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
-      await expect(empty).toHaveCount(0);
-
-      const retry = phone.page.getByRole("button", {
-        name: "Try again",
-        exact: true,
-      });
-      await expect(retry).toBeEnabled({ timeout: E2EE_UI_TIMEOUT_MS });
-      const allowCheck = Promise.withResolvers<void>();
-      await phone.page.route(
-        "**/api/e2ee/devices/*/inbox-status",
-        async (route) => {
-          await allowCheck.promise;
-          await route.fulfill({ json: { has_pending_chats: true } });
-        },
-        { times: 1 }
-      );
-      try {
-        await retry.click();
-        await expect(
-          phone.page
-            .getByRole("status")
-            .filter({ hasText: "Loading encrypted chats…" })
-        ).toBeVisible();
-        await expect(retry).toBeDisabled();
-      } finally {
-        allowCheck.resolve();
-      }
-      await expect(waiting).toBeVisible();
-      await expect(empty).toHaveCount(0);
-
-      allowDm.resolve();
-      await expect(conversationListRow(phone.page, "bob")).toBeVisible({
-        timeout: E2EE_SYNC_TIMEOUT_MS,
-      });
-      await expect(conversationListRow(phone.page, "carol")).toHaveCount(0);
-      await expect(waiting).toBeVisible();
-      await phone.page.screenshot({
-        path: testInfo.outputPath("encrypted-inbox-still-syncing.png"),
-      });
-
-      allowSecondDm.resolve();
-      await expect(conversationListRow(phone.page, "carol")).toBeVisible({
-        timeout: E2EE_SYNC_TIMEOUT_MS,
-      });
-      await expect(waiting).toBeHidden();
-      await expect(empty).toHaveCount(0);
-    } finally {
-      allowDm.resolve();
-      allowSecondDm.resolve();
-    }
-  });
-
   test("native encrypted chat gesture replies on release and swipes back to its list", async ({
     baseURL,
     browser,
@@ -486,14 +292,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     const releaseBack = await dragEncryptedMessage(alice.page, body, 130);
     await releaseBack();
     await expect(alice.page).toHaveURL(new RegExp(`${ENCRYPTED_ROUTE}$`, "u"));
-    const bobRow = conversationListRow(alice.page, "bob");
-    await expect(bobRow).toBeVisible();
-    await bobRow.click();
-    await expectMessage(alice.page, incoming);
-    await alice.page
-      .getByRole("link", { name: "Back to encrypted messages" })
-      .click();
-    await expect(bobRow).toBeVisible();
+    await expect(conversationListRow(alice.page, "bob")).toBeVisible();
     expect(
       await alice.page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth

@@ -4,8 +4,6 @@
  * Integration: real OpenMLS WASM + fake delivery service. WebSocket hints,
  * polling fallback, stale-epoch re-encryption, roster repair and snapshots.
  */
-import { E2eeApiError } from "@/lib/e2ee/api-errors";
-import type { ApiE2eeDeviceGroup } from "@/lib/e2ee/api-types";
 import type { EngineContext } from "@/lib/e2ee/engine/context";
 import {
   type EngineController,
@@ -13,7 +11,6 @@ import {
 } from "@/lib/e2ee/engine/controller";
 import { newRuntime } from "@/lib/e2ee/engine/groups";
 import { queueMessage } from "@/lib/e2ee/engine/send";
-import { createFakeApiClient } from "../../../tests/support/e2ee/fakeDeliveryService.cjs";
 import {
   addUser,
   createWorld,
@@ -45,67 +42,6 @@ async function waitFor(check: () => boolean, ms = 5_000): Promise<void> {
 }
 
 describe("E2EE engine: sync paths", () => {
-  it("only completes initial chat discovery after the inbox and device group checks succeed", async () => {
-    const world = await createWorld();
-    const groups = Promise.withResolvers<ApiE2eeDeviceGroup[]>();
-    const reachedGroups = Promise.withResolvers<void>();
-    let inboxFailed = true;
-    let delayGroups = false;
-    const alice = await addUser(world, "alice", {
-      api: {
-        ...createFakeApiClient(world.ds, "alice"),
-        getWelcomes: async () => {
-          if (inboxFailed) {
-            throw new E2eeApiError({ status: 503, message: "Unavailable" });
-          }
-          return [];
-        },
-        getDeviceGroups: async () => {
-          if (!delayGroups) return [];
-          reachedGroups.resolve();
-          return groups.promise;
-        },
-      },
-    });
-    const { engine } = alice.primary;
-    await engine.idle();
-    expect(engine.getStatus()).toBe("ready");
-    expect(engine.getInitialSyncStatus()).toBe("failed");
-
-    delayGroups = true;
-    inboxFailed = false;
-    const retry = engine.sync();
-    await reachedGroups.promise;
-    expect(engine.getInitialSyncStatus()).toBe("pending");
-    groups.resolve([]);
-    await retry;
-    expect(engine.getInitialSyncStatus()).toBe("complete");
-
-    inboxFailed = true;
-    await engine.sync();
-    expect(engine.getInitialSyncStatus()).toBe("complete");
-  });
-
-  it("confirms an empty inbox when the server clears pending chats without a new Welcome", async () => {
-    const world = await createWorld();
-    let pending = true;
-    const alice = await addUser(world, "alice", {
-      api: {
-        ...createFakeApiClient(world.ds, "alice"),
-        getDeviceInboxStatus: async () => ({ has_pending_chats: pending }),
-      },
-    });
-    const { engine } = alice.primary;
-    await engine.idle();
-    expect(engine.getInitialSyncStatus()).toBe("waiting");
-    expect(engine.getConversations()).toHaveLength(0);
-
-    pending = false;
-    await engine.sync();
-    expect(engine.getInitialSyncStatus()).toBe("complete");
-    expect(engine.getConversations()).toHaveLength(0);
-  });
-
   it("follows WebSocket hints without explicit syncs", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");

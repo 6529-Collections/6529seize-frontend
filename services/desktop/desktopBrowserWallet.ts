@@ -25,9 +25,32 @@ const PROFILES_KEY = "desktop-browser-wallet-profiles";
 const ADDRESS = /^0x[0-9a-f]{40}$/;
 
 let profiles: ReadonlySet<string> = new Set();
+const profileListeners = new Set<() => void>();
+
+const setProfiles = (next: ReadonlySet<string>) => {
+  profiles = next;
+  for (const listener of profileListeners) {
+    try {
+      listener();
+    } catch {
+      // A renderer must not interrupt profile cleanup or other subscribers.
+    }
+  }
+};
+
+export function subscribeBrowserWalletProfiles(
+  listener: () => void
+): () => void {
+  profileListeners.add(listener);
+  return () => {
+    profileListeners.delete(listener);
+  };
+}
+
 /** True once the list was read from the store (not merely defaulted). */
 let profilesRead = false;
 let profilesLoading: Promise<boolean> | null = null;
+let profilesGeneration = 0;
 
 /** What the waiting dialog shows. */
 type DesktopWalletRequestStatus =
@@ -110,19 +133,22 @@ const readProfiles = (value: unknown): ReadonlySet<string> =>
  */
 function readStoredProfiles(): Promise<boolean> {
   if (profilesRead) return Promise.resolve(true);
-  profilesLoading ??= (async () => {
+  const store = getDesktopStore();
+  if (!store) return Promise.resolve(false);
+  const generation = profilesGeneration;
+  profilesLoading ??= Promise.resolve().then(async () => {
     try {
-      const store = getDesktopStore();
-      if (!store) return false;
-      profiles = readProfiles(await store.get(PROFILES_KEY));
+      const storedProfiles = await store.get(PROFILES_KEY);
+      if (generation !== profilesGeneration) return false;
       profilesRead = true;
+      setProfiles(readProfiles(storedProfiles));
       return true;
     } catch {
       return false;
     } finally {
       profilesLoading = null;
     }
-  })();
+  });
   return profilesLoading;
 }
 
@@ -142,13 +168,14 @@ export const isBrowserWalletProfile = (address: string | null | undefined) =>
 async function updateProfiles(
   change: (current: ReadonlySet<string>) => ReadonlySet<string> | null
 ): Promise<void> {
+  const generation = profilesGeneration;
   let read = await readStoredProfiles();
   // One retry: a store that was briefly busy should not lose the change.
   if (!read) read = await readStoredProfiles();
-  if (!read) return;
+  if (!read || generation !== profilesGeneration) return;
   const next = change(profiles);
   if (next === null) return;
-  profiles = next;
+  setProfiles(next);
   await getDesktopStore()?.set(PROFILES_KEY, [...next]);
 }
 
@@ -194,12 +221,13 @@ export async function forgetBrowserWalletProfile(
  * kept. Never throws.
  */
 export async function forgetAllBrowserWalletProfiles(): Promise<void> {
-  profiles = new Set();
+  profilesGeneration += 1;
+  profilesRead = true;
+  setProfiles(new Set());
   try {
     const store = getDesktopStore();
     if (!store) return;
     await store.set(PROFILES_KEY, []);
-    profilesRead = true;
   } catch {
     // The connector still signs only for a profile with a desktop session.
   }
@@ -338,7 +366,9 @@ export function reopenDesktopWalletRequest(): void {
 
 /** @api Resets the module state between tests. */
 export function __resetDesktopBrowserWalletForTests(): void {
+  profilesGeneration += 1;
   profiles = new Set();
+  profileListeners.clear();
   profilesRead = false;
   profilesLoading = null;
   statusEventSeen = false;
