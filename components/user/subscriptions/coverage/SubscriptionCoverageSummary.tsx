@@ -223,7 +223,9 @@ function CoverageSummaryContent({
     coverage,
     mintDayStatus
   );
-  const descriptionKey = getDescriptionKey(coverage, isOwner, mintDayStatus);
+  const descriptionKey = isStale
+    ? undefined
+    : getDescriptionKey(coverage, isOwner, mintDayStatus);
   const description = descriptionKey
     ? t(locale, descriptionKey, {
         token: coverage?.next_unfunded
@@ -262,7 +264,11 @@ function CoverageSummaryContent({
       ? coverage?.next_unfunded?.top_up_deadline
       : null;
   const showNextUnfunded =
-    !!coverage?.next_unfunded && !deadline && !paid && !pending;
+    !!coverage?.next_unfunded &&
+    (!deadline ||
+      ((expiredFundingDeadline || isStale) && !immediateShortfall)) &&
+    !paid &&
+    !pending;
   const showChooseDrops =
     showFundingPrompt &&
     isOwner &&
@@ -290,7 +296,7 @@ function CoverageSummaryContent({
     statusLabel = t(locale, "subscriptions.coverage.summary.deadlinePassed");
   }
   const showStatus =
-    showFundedCount &&
+    (showFundedCount || isStale) &&
     !pending &&
     !paymentUnavailable &&
     (isOwner ||

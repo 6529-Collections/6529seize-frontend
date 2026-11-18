@@ -25,8 +25,8 @@ export function useSubscriptionCoverageClock(
       };
       const update = () => {
         globalThis.clearTimeout(timer);
-        onChange();
         schedule();
+        onChange();
       };
       schedule();
       globalThis.addEventListener("focus", update);

@@ -50,6 +50,89 @@ beforeEach(() => {
 });
 afterEach(() => jest.useRealTimers());
 
+it.each([true, false])(
+  "qualifies stale eligibility for owner=%s",
+  (isOwner) => {
+    const data = {
+      ...coverage(),
+      status: Status.NoCurrentEligibility,
+      next_unfunded: null,
+    };
+    const { rerender } = render(
+      <SubscriptionCoverageSummary
+        coverage={data}
+        isOwner={isOwner}
+        isLoading={false}
+        isStale
+      />
+    );
+    expect(screen.getByText("Last known coverage")).toBeVisible();
+    expect(
+      document.getElementById("profile-subscriptions-overview-description")
+    ).toBeNull();
+    rerender(
+      <SubscriptionCoverageSummary
+        coverage={data}
+        isOwner={isOwner}
+        isLoading={false}
+      />
+    );
+    expect(screen.queryByText("Last known coverage")).not.toBeInTheDocument();
+    expect(
+      document.getElementById("profile-subscriptions-overview-description")
+    ).toBeVisible();
+  }
+);
+
+it("keeps a future authoritative funding deadline actionable before publication", () => {
+  allocation.mockReturnValue({ ...emptyAllocation, hasNoAllocation: false });
+  render(
+    <SubscriptionCoverageSummary
+      coverage={coverage()}
+      profileKey="profile-key"
+      isOwner
+      isLoading={false}
+      topUpAction={topUp}
+    />
+  );
+  expect(allocation).toHaveBeenLastCalledWith(
+    expect.objectContaining({
+      subscribed: true,
+      verifyAbsence: false,
+      waitForRefresh: false,
+    })
+  );
+  expect(screen.getByText("Action required")).toBeVisible();
+  expect(screen.getByText(/Top up by/)).toHaveTextContent(
+    "Nov 16, 2026, 14:30 UTC"
+  );
+  expect(screen.getByRole("button", { name: "Top up" })).toHaveAttribute(
+    "data-primary",
+    "true"
+  );
+});
+
+it("keeps the cutoff observed when focus returns across its rounded boundary", () => {
+  render(
+    <SubscriptionCoverageSummary
+      coverage={coverage()}
+      profileKey="profile-key"
+      isOwner
+      isLoading={false}
+    />
+  );
+  const clock = jest
+    .spyOn(Date, "now")
+    .mockReturnValueOnce(beforeDeadline + 999)
+    .mockReturnValue(beforeDeadline + 1000);
+  try {
+    act(() => globalThis.dispatchEvent(new Event("focus")));
+    expect(screen.getByText("Deadline passed")).toBeVisible();
+  } finally {
+    clock.mockRestore();
+  }
+});
+
 it("keeps an unfinished final record neutral after the cutoff", () => {
   jest.setSystemTime(beforeDeadline + 2000);
   allocation.mockReturnValue({
@@ -128,6 +211,12 @@ it("keeps an elapsed later cutoff factual without changing funded counts", () =>
     "Nov 16, 2026, 14:30 UTC"
   );
   expect(screen.getByRole("heading", { name: "1 drop funded" })).toBeVisible();
+  expect(screen.getByText("Next unfunded")).toBeVisible();
+  expect(screen.getByRole("link", { name: "The Memes #575" })).toHaveAttribute(
+    "href",
+    "/the-memes/575"
+  );
+  expect(screen.getByText("Nov 16, 2026")).toBeVisible();
   expect(screen.queryByText("Deadline passed")).not.toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: "Top up for future drops" })

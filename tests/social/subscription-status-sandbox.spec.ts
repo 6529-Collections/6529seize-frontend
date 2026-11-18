@@ -277,6 +277,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
     }, testInfo) => {
       test.setTimeout(240000);
       await hideNextDevOverlay(context);
+      await page.clock.install({ time: new Date("2026-11-16T10:00:00Z") });
       await page.clock.setFixedTime(new Date("2026-11-16T10:00:00Z"));
       await page.addInitScript(
         ({ owner }) => {
@@ -435,7 +436,12 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
             return;
           }
           await route.fulfill({
-            json: { has_distribution: true, allocations: [] },
+            json: {
+              has_distribution: url.pathname.endsWith(
+                "/575/wallet-allocations"
+              ),
+              allocations: [],
+            },
           });
         }
       );
@@ -510,21 +516,36 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           )
         );
         const loading = data === "loading" || name === "mint-payment-loading";
+        const paymentRequest =
+          name === "mint-payment-loading"
+            ? page.waitForRequest((request) =>
+                new URL(request.url()).pathname.endsWith(
+                  `/subscriptions/consolidation/final/${SUBSCRIPTION_PROFILE_KEY}/${SUBSCRIPTION_CONTRACT}/575`
+                )
+              )
+            : undefined;
         await page.goto("/playwright/subscriptions", {
           waitUntil: "domcontentloaded",
           timeout: 120000,
         });
+        if (paymentRequest) await paymentRequest;
         const overview = page
           .getByRole("region", { name: "Subscription minting", exact: true })
           .locator("#profile-subscriptions-overview");
         await expect(overview).toBeVisible({ timeout: 60000 });
-        if (loading)
+        if (loading) {
           await expect(
             overview.getByRole("heading", {
               name: "Loading subscription coverage",
             })
           ).toBeVisible();
-        else if (data === "error")
+          await expect(
+            overview.getByText("Action required", { exact: true })
+          ).toHaveCount(0);
+          await expect(
+            overview.getByRole("button", { name: "Top up", exact: true })
+          ).toHaveCount(0);
+        } else if (data === "error")
           await expect(
             overview.getByRole("heading", { name: "Coverage unavailable" })
           ).toBeVisible();
@@ -583,6 +604,31 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
               await expect(overview.getByText(/Top up by/)).toHaveText(
                 "Top up by Nov 16, 2026, 14:30 UTC to receive the remaining 2 editions of The Memes #575."
               );
+          }
+          if (phase !== "before" && name === "one-funded") {
+            await expect(
+              overview.getByText("Running low", { exact: true })
+            ).toBeVisible();
+            await expect(
+              overview.getByText("Action required", { exact: true })
+            ).toHaveCount(0);
+            await expect(
+              overview.getByRole("link", {
+                name: "The Memes #575",
+                exact: true,
+              })
+            ).toBeVisible();
+            if (owner)
+              await expect(overview.getByText(/Top up by/)).toHaveText(
+                "Top up by Nov 17, 2026, 14:30 UTC to receive The Memes #576."
+              );
+            else
+              await expect(
+                overview.getByRole("link", {
+                  name: "The Memes #576",
+                  exact: true,
+                })
+              ).toBeVisible();
           }
           if (phase !== "before" && name === "deadline-passed") {
             await expect(
@@ -711,6 +757,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           const heading = overview.getByRole("heading", { level: 2 });
           await heading.focus();
           await page.clock.setFixedTime(new Date("2026-11-16T14:30:01Z"));
+          await page.clock.fastForward("04:31:00");
           await expect
             .poll(
               () =>

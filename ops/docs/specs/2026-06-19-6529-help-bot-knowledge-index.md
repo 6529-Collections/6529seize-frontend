@@ -1105,7 +1105,7 @@ supplied. At 24 funded drops the
 headline reads Next 24 drops funded; lower counts and Funded through remain
 unchanged, with no extra forecast-limit note. A mint-day shortfall reuses the final-subscription query to distinguish
 confirmed payment from an unpaid balance forecast, keeps loading/error neutral,
-and retains the raw remaining-balance count. Shared header status and push alerts remain API-owned. Real deadlines
+and retains the last forecast’s funded-drop count. Shared header status and push alerts remain API-owned. Real deadlines
 and funding calculations remain API-owned; application design-preview data is absent.
 
 Gradient, Meme Lab and ReMemes browse records describe responsive card
