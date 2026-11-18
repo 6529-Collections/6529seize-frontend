@@ -43,6 +43,32 @@ describe("E2EE engine: sync paths", () => {
     );
   });
 
+  it("takes in no new messages while incoming history is paused", async () => {
+    // Sign-out pauses incoming history before its final backup, so nothing
+    // arrives between that backup and removing local data.
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    const g = await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    await waitFor(
+      () => bob.primary.engine.getConversation(g)?.status === "active"
+    );
+    await bob.primary.engine.pauseIncoming();
+    await alice.primary.engine.send(g, { text: "held" });
+    // Hints and polls arrive meanwhile; none is followed.
+    await realSleep(300);
+    await bob.primary.engine.sync();
+    expect(texts(bob.primary.engine.getMessages(g))).not.toContain("held");
+
+    bob.primary.engine.resumeIncoming();
+    await waitFor(() =>
+      texts(bob.primary.engine.getMessages(g)).includes("held")
+    );
+  });
+
   it("falls back to polling when no hints arrive", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");

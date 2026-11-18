@@ -104,19 +104,24 @@ export function BackupProgressBar({
   locale,
   percent,
   label,
+  showLabel = true,
 }: {
   readonly locale: SupportedLocale;
   readonly percent: number | null;
   readonly label: string;
+  /** False where the label is already shown (and announced) beside it. */
+  readonly showLabel?: boolean;
 }) {
   return (
     <div className="tw-flex tw-flex-col tw-gap-1.5">
-      <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xs tw-text-iron-300">
-        <span>{label}</span>
-        {percent === null ? null : (
-          <span>{formatNumber(locale, percent, { style: "percent" })}</span>
-        )}
-      </div>
+      {showLabel || percent !== null ? (
+        <div className="tw-flex tw-items-center tw-justify-between tw-gap-3 tw-text-xs tw-text-iron-300">
+          {showLabel ? <span>{label}</span> : <span aria-hidden="true" />}
+          {percent === null ? null : (
+            <span>{formatNumber(locale, percent, { style: "percent" })}</span>
+          )}
+        </div>
+      ) : null}
       {/* The native element carries the semantics; the bar below is visual. */}
       <progress
         aria-label={label}
@@ -291,7 +296,27 @@ function SaveBody({
   );
 }
 
-/** Step 4: the upload, then done (with counts) or failed (with Try again). */
+/**
+ * Where an upload stands once it was left to a queued run (a conflict or
+ * fork repair), after Turn on backup or Try again: running until that run
+ * ends, then done or failed.
+ */
+function queuedUploadState(snapshot: E2eeBackupSnapshot): UploadState {
+  if (snapshot.busy) {
+    return "running";
+  }
+  if (snapshot.lastError !== null) {
+    return "failed";
+  }
+  return snapshot.uploading ? "running" : "done";
+}
+
+/**
+ * Step 4: the upload, then done (with counts) or failed (with Try again).
+ * A backup replaced or turned off on another device meanwhile can't be
+ * retried: `replacedNext` (restore, or turn on again) takes Try again's
+ * place.
+ */
 function uploadContent(
   locale: SupportedLocale,
   {
@@ -299,6 +324,7 @@ function uploadContent(
     snapshot,
     errorKey,
     pending,
+    replacedNext,
     onClose,
     onRetry,
   }: {
@@ -306,6 +332,8 @@ function uploadContent(
     readonly snapshot: E2eeBackupSnapshot;
     readonly errorKey: MessageKey | null;
     readonly pending: boolean;
+    /** Set (possibly to null) once the backup was replaced elsewhere. */
+    readonly replacedNext: ReactNode | undefined;
     readonly onClose: () => void;
     readonly onRetry: () => void;
   }
@@ -354,11 +382,14 @@ function uploadContent(
       ),
     };
   }
+  const replaced = replacedNext !== undefined;
   return {
     title: t(locale, "e2ee.backup.setup.failed.title"),
     body: (
       <div className="tw-flex tw-flex-col tw-gap-2 tw-text-sm tw-leading-6 tw-text-iron-300">
-        <p className="tw-m-0">{t(locale, "e2ee.backup.setup.failed.body")}</p>
+        {replaced ? null : (
+          <p className="tw-m-0">{t(locale, "e2ee.backup.setup.failed.body")}</p>
+        )}
         {errorKey ? (
           <p role="alert" className="tw-m-0 tw-text-rose-300">
             {t(locale, errorKey)}
@@ -369,9 +400,18 @@ function uploadContent(
     footer: (
       <>
         {close}
-        <Button variant="action" size="md" loading={pending} onClick={onRetry}>
-          {t(locale, "e2ee.action.retry")}
-        </Button>
+        {replaced ? (
+          replacedNext
+        ) : (
+          <Button
+            variant="action"
+            size="md"
+            loading={pending}
+            onClick={onRetry}
+          >
+            {t(locale, "e2ee.action.retry")}
+          </Button>
+        )}
       </>
     ),
   };
@@ -388,6 +428,8 @@ export function BackupSetupDialog({
   prepared,
   replacing,
   onClose,
+  onRestore,
+  onTurnOn,
   checkGroups,
 }: {
   readonly manager: E2eeBackupManager;
@@ -395,6 +437,12 @@ export function BackupSetupDialog({
   /** Replacing an existing backup (a new recovery code). */
   readonly replacing: boolean;
   readonly onClose: () => void;
+  /**
+   * The next step once the backup was replaced or turned off on another
+   * device meanwhile (nothing left to retry): restore it, or start again.
+   */
+  readonly onRestore?: (() => void) | undefined;
+  readonly onTurnOn?: (() => void) | undefined;
   /** Fixed groups to check, for tests; random otherwise. */
   readonly checkGroups?: readonly [number, number];
 }) {
@@ -411,7 +459,9 @@ export function BackupSetupDialog({
     () => checkGroups ?? pickCheckGroups(groups.length)
   );
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
-  const [upload, setUpload] = useState<UploadState>("running");
+  // "queued": the upload (or Try again) ended with another run queued; the
+  // snapshot tells the rest.
+  const [upload, setUpload] = useState<UploadState | "queued">("running");
   const [pending, setPending] = useState(false);
   const snapshot = useSyncExternalStore(
     manager.subscribe,
@@ -425,12 +475,16 @@ export function BackupSetupDialog({
     setStep("upload");
     setUpload("running");
     try {
-      await manager.confirmBackup(prepared);
-      setUpload("done");
+      // Done only once the new backup is active and fully uploaded, not
+      // while a queued run still has to finish it.
+      setUpload((await manager.confirmBackup(prepared)) ? "done" : "queued");
     } catch (error) {
-      setErrorKey(getBackupErrorKey(error));
-      if (manager.getSnapshot().phase === "on") {
-        // The backup exists; its first upload stopped and will carry on.
+      // A failed first upload of a created backup resolves false (above,
+      // with the error in the snapshot). Rejected: nothing was created, so
+      // Turn on backup starts afresh; or it was replaced elsewhere meanwhile.
+      const key = getBackupErrorKey(error);
+      setErrorKey(key);
+      if (key === "e2ee.backup.error.replaced") {
         setUpload("failed");
       } else {
         setStep("check");
@@ -443,8 +497,8 @@ export function BackupSetupDialog({
     setErrorKey(null);
     setUpload("running");
     try {
-      await manager.backupNow();
-      setUpload("done");
+      // Done only once everything is uploaded, not while a run is queued.
+      setUpload((await manager.backupNow()) ? "done" : "queued");
     } catch (error) {
       setUpload("failed");
       setErrorKey(getBackupErrorKey(error));
@@ -467,6 +521,31 @@ export function BackupSetupDialog({
       {t(locale, "e2ee.backup.setup.continue")}
     </Button>
   );
+
+  const shownUpload =
+    upload === "queued" ? queuedUploadState(snapshot) : upload;
+  const shownErrorKey =
+    errorKey ??
+    (shownUpload === "failed" && snapshot.lastError !== null
+      ? getBackupErrorKey(snapshot.lastError)
+      : null);
+  const nextStep = () => {
+    if (snapshot.phase === "available" && onRestore) {
+      return (
+        <Button variant="action" size="md" onClick={onRestore}>
+          {t(locale, "e2ee.backup.action.restore")}
+        </Button>
+      );
+    }
+    if (snapshot.phase === "off" && onTurnOn) {
+      return (
+        <Button variant="action" size="md" onClick={onTurnOn}>
+          {t(locale, "e2ee.backup.action.turnOn")}
+        </Button>
+      );
+    }
+    return null;
+  };
 
   const contents: Record<Step, () => StepContent> = {
     why: () => ({
@@ -556,16 +635,20 @@ export function BackupSetupDialog({
     }),
     upload: () =>
       uploadContent(locale, {
-        upload,
+        upload: shownUpload,
         snapshot,
-        errorKey,
+        errorKey: shownErrorKey,
+        replacedNext:
+          shownErrorKey === "e2ee.backup.error.replaced"
+            ? nextStep()
+            : undefined,
         pending,
         onClose,
         onRetry: () => void retry(),
       }),
   };
   const content = contents[step]();
-  const showStep = step !== "upload" || upload === "running";
+  const showStep = step !== "upload" || shownUpload === "running";
 
   return (
     <E2eeDialog

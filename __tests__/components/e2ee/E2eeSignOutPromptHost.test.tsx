@@ -49,9 +49,7 @@ function renderHost(
     subscribe: () => () => undefined,
   } as unknown as E2eeBackupManager;
   render(
-    <E2eeTestProvider
-      value={contextFor(createFakeE2eeEngine(), { backup })}
-    >
+    <E2eeTestProvider value={contextFor(createFakeE2eeEngine(), { backup })}>
       {host}
     </E2eeTestProvider>
   );
@@ -135,7 +133,10 @@ describe("E2eeSignOutPromptHost", () => {
     setE2eeEnrollmentMarker(SELF_ID, true);
     renderHost(undefined, "on");
     act(() => {
-      void signOutWithE2eeChoice("profile", jest.fn(async () => undefined));
+      void signOutWithE2eeChoice(
+        "profile",
+        jest.fn(async () => undefined)
+      );
     });
     await screen.findByRole("checkbox", {
       name: "Remove encrypted messages from this browser",
@@ -251,13 +252,22 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
       options.backupNow ??
       jest.fn(async () => {
         order.push("backup");
+        return true;
       });
     // Stable, as the real manager's snapshot is.
     const current = options.snapshot ?? snapshot();
+    const pauseIncoming = jest.fn(async () => {
+      order.push("pause");
+    });
+    const resumeIncoming = jest.fn(() => {
+      order.push("resume");
+    });
     const backup = {
       getSnapshot: () => current,
       subscribe: () => () => undefined,
       backupNow,
+      pauseIncoming,
+      resumeIncoming,
     } as unknown as E2eeBackupManager;
     const value: E2eeContextValue = {
       availability: "loaded",
@@ -290,7 +300,14 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     act(() => {
       done = signOutWithE2eeChoice("profile", signOut);
     });
-    return { order, backupNow, signOut, done: () => done };
+    return {
+      order,
+      backupNow,
+      pauseIncoming,
+      resumeIncoming,
+      signOut,
+      done: () => done,
+    };
   }
 
   const removeBox = () =>
@@ -313,7 +330,41 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     await userEvent.click(await removeBox());
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
     await act(run.done);
-    expect(run.order).toEqual(["backup", "release", "remove", "signOut"]);
+    expect(run.order).toEqual([
+      "pause",
+      "backup",
+      "release",
+      "remove",
+      "signOut",
+    ]);
+    expect(run.resumeIncoming).not.toHaveBeenCalled();
+  });
+
+  it("stops new messages before the final backup, so one arriving then isn't lost", async () => {
+    // A message the engine would take in during the final backup: allowed
+    // only before incoming history is paused.
+    let paused = false;
+    const received: string[] = [];
+    const receive = (id: string) => {
+      if (!paused) {
+        received.push(id);
+      }
+    };
+    const run = renderWithEngine({
+      backupNow: jest.fn(async () => {
+        receive("during-backup");
+        return true;
+      }),
+    });
+    run.pauseIncoming.mockImplementation(async () => {
+      paused = true;
+    });
+    receive("before");
+    await userEvent.click(await removeBox());
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    await act(run.done);
+    expect(received).toEqual(["before"]);
+    expect(removeProfile).toHaveBeenCalledWith(SELF_ID);
   });
 
   it.each([
@@ -344,6 +395,8 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     expect(await removeBox()).not.toBeChecked();
     expect(removeProfile).not.toHaveBeenCalled();
     expect(run.signOut).not.toHaveBeenCalled();
+    // The messages stay, so they keep arriving.
+    expect(run.resumeIncoming).toHaveBeenCalledTimes(1);
 
     await userEvent.click(await removeBox());
     await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
@@ -351,6 +404,19 @@ describe("E2eeSignOutPromptHost with a loaded engine", () => {
     expect(backupNow).toHaveBeenCalledTimes(1);
     expect(removeProfile).toHaveBeenCalledWith(SELF_ID);
     expect(run.signOut).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the messages while the backup update still needs another run", async () => {
+    // A conflict or fork repair is queued: the backup isn't complete yet.
+    const backupNow = jest.fn(async () => false);
+    const run = renderWithEngine({ backupNow });
+    await userEvent.click(await removeBox());
+    await userEvent.click(screen.getByRole("button", { name: "Sign out" }));
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Couldn’t update your encrypted backup"
+    );
+    expect(removeProfile).not.toHaveBeenCalled();
+    expect(run.signOut).not.toHaveBeenCalled();
   });
 
   it("leaves the backup and local data alone when removal is not chosen", async () => {
