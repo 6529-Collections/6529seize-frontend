@@ -96,8 +96,9 @@ const getRowPresentationClasses = (
       "tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg",
     rowVerticalPaddingClasses: isAnnouncement ? "tw-py-1" : "tw-py-2",
     contentGapClasses: "tw-gap-y-1",
-    titleTextClasses: "tw-text-sm tw-font-medium",
-    timestampTextClasses: "tw-text-xs",
+    titleTextClasses:
+      "tw-text-sm tw-font-medium [@media(any-hover:none)]:tw-text-[13px] [@media(any-hover:none)]:tw-font-normal",
+    timestampTextClasses: "tw-text-xs [@media(any-hover:none)]:tw-text-[11px]",
   };
 };
 

@@ -52,11 +52,12 @@ Wave and DM rows in the left list control which thread is open.
   active-row reveal again. Signed-out visitors see an `All Waves` label on the
   left and the same search icon on the right, without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:
-  feed, then create on desktop and mobile web. The native app's list shows
-  feed only and keeps create in its top bar.
+  feed, then create on desktop and mobile web. The native app keeps its heading,
+  Create Wave, Search 6529 and More in the top bar.
 - Select the feed icon to open Profile Waves Feed. On desktop, it clears the
-  selected wave; on mobile web and in the native app, it opens
-  `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
+  selected wave; on mobile web, it opens `/waves?view=profile-feed`.
+  In the native app, select `More` then `Profile Waves Feed` to open that feed.
+  The feed's `Waves` link returns to the list.
 - The feed tooltip reads `Profile Waves Feed`. Its header shortcut uses the same
   transparent resting surface, rounded corners and dark hover surface on desktop
   and smaller screens. Touch devices keep a larger target. Create uses a solid white
@@ -110,7 +111,9 @@ on hover and show a dark hover surface; their resting header surface is transpar
 - Each expanded section shows its short explanation together with loaded content, available to
   signed-in and signed-out visitors. Active Votes says “Community decisions
   powered by TDH.” Worth Checking Out says “Highly rated waves you don’t follow.”
-  The same wording appears for signed-out visitors.
+  The same wording appears for signed-out visitors. On devices without hover,
+  these explanations stay available to screen readers without adding visible
+  paragraphs above the previews. The section dividers remain visible.
 - While content first loads, each expanded section shows quiet placeholders shaped
   like its avatars or three vote rows. Descriptions, loading sentences and empty
   messages stay hidden; screen readers receive a loading announcement. Titles,
@@ -131,6 +134,11 @@ on hover and show a dark hover surface; their resting header surface is transpar
   remains visible, and hover brightens the score.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
+  When no input device supports hover, a small wave name appears below each
+  avatar, limited to one line with an ellipsis for longer names. The name is
+  part of the same link, so tapping it opens the wave directly. Devices with
+  hover keep the avatar-only strip and existing name and score details on hover
+  or keyboard focus.
   The section keeps its own compact height independently of the vote list.
 - Create wave uses a solid white button in both desktop sidebar modes, including
   signed-out visits. The expanded panel shows a plus icon and `Create wave` label;
@@ -138,6 +146,12 @@ on hover and show a dark hover surface; their resting header surface is transpar
   tooltip read `Create wave`. The mobile Waves list keeps its visible label.
   Desktop sidebar buttons keep a compact visible surface on touch screens,
   with a larger invisible tap area.
+- In the native app, the Waves directory has one heading in the top bar, with
+  Create Wave, Search 6529 and a vertical More icon beside it. Search stays
+  directly visible; More contains Profile Waves Feed and Share page.
+  Find a wave stays beside the collection controls. Subwave
+  toggles use an indented text control; Pin remains directly available on
+  eligible rows.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
