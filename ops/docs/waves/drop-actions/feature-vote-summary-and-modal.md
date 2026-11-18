@@ -89,7 +89,9 @@ ranking, and voting rules retain their usual meaning.
 - `Your votes` appears only when voting ended or the drop is a winner, and only
   when the viewer vote is non-zero.
 - Negative `Your votes` values display with a leading `-`.
-- Default single-drop panels use centered modal overlay on all screen sizes.
+- Default single-drop panels use a centered modal overlay, except in compact
+  iPhone app layouts, where they use the same keyboard-aware voting sheet as
+  leaderboard cards, including in landscape.
 - Memes single-drop panels use bottom sheet on small screens and centered modal
   on larger screens.
 - Voting forms share the same header, reply control, and signed-amount action.

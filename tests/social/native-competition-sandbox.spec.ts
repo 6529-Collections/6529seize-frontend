@@ -8166,288 +8166,330 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
-  test("keeps iPhone voting aligned with the keyboard and the background still", async ({
-    page,
-    context,
-    baseURL,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "web-mobile-chromium",
-      "Exercises the iOS keyboard bridge at the mobile viewport."
-    );
-    await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
-    await installCompetitionApi(page);
-    await page.goto(`${ROOT}/alpha`);
-    const card = page
-      .getByRole("main")
-      .locator('[data-competition-entry="entry-alpha"]');
-    const background = await card.evaluateHandle((element) => {
-      let parent = element.parentElement;
-      while (
-        parent &&
-        !parent.style.height.includes("--layout-viewport-height")
-      ) {
-        parent = parent.parentElement;
-      }
-      if (!parent) throw new Error("Wave layout container missing");
-      return parent;
-    });
-    await card.getByRole("button", { name: "Vote", exact: true }).click();
-    const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
-    const closedVoteHeight = await expectVoteHeight(dialog);
-    await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
-    await expectVoteHeight(dialog, closedVoteHeight);
-    const input = dialog.getByRole("spinbutton", { name: "Your vote" });
-    await input.fill("25");
-    const backgroundHeight = await background.evaluate(
-      (element) => element.getBoundingClientRect().height
-    );
-    const emitKeyboard = (eventName: string, keyboardHeight = 0) =>
-      emitNativeKeyboard(page, eventName, keyboardHeight);
-    const hideKeyboard = async () => {
-      await emitKeyboard("keyboardWillHide");
-      await emitKeyboard("keyboardDidHide");
-    };
-    await page.waitForFunction(() => {
-      const runtime = globalThis as typeof globalThis & {
-        __playwrightKeyboardListeners?: string[];
-      };
-      return runtime.__playwrightKeyboardListeners?.includes(
-        "keyboardWillShow"
+  for (const entryPoint of ["leaderboard", "single submission"] as const) {
+    test(`keeps iPhone voting aligned with the keyboard and the background still from ${entryPoint}`, async ({
+      page,
+      context,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Exercises the iOS keyboard bridge at the mobile viewport."
       );
-    });
-    const sampleMotion = (
-      eventName: "keyboardWillShow" | "keyboardWillHide",
-      keyboardHeight = 300
-    ) =>
-      dialog.evaluate(
-        async (element, { eventName, background, keyboardHeight }) => {
-          const panel = element.querySelector<HTMLElement>(
-            ".mobile-wrapper-dialog"
-          );
-          if (!panel) throw new Error("Voting sheet missing");
-          const surface = panel.querySelector<HTMLElement>(".tw-rounded-t-2xl");
-          if (!surface) throw new Error("Voting surface missing");
-          // This reference follows the app's keyboard curve. It verifies frame
-          // alignment, rather than merely checking the final keyboard clearance.
-          const reference = document.createElement("div");
-          reference.style.cssText =
-            "position:fixed;left:-10px;width:1px;" +
-            "bottom:var(--native-keyboard-inset-bottom,0px);" +
-            "transition:bottom var(--native-keyboard-layout-transition-duration,0ms) var(--native-keyboard-layout-transition-easing,ease-out),max-height var(--native-keyboard-layout-transition-duration,0ms) var(--native-keyboard-layout-transition-easing,ease-out)";
-          reference.style.height = `${surface.firstElementChild?.scrollHeight ?? surface.scrollHeight}px`;
-          reference.style.maxHeight = surface.style.maxHeight;
-          reference.style.setProperty(
-            "--mobile-wrapper-dialog-keyboard-inset",
-            "var(--native-keyboard-inset-bottom,0px)"
-          );
-          document.body.append(reference);
-          await new Promise<void>((resolve) =>
-            requestAnimationFrame(() => resolve())
-          );
-          reference.getBoundingClientRect();
-          const starting = {
-            bottom: panel.getBoundingClientRect().bottom,
-            height: surface.getBoundingClientRect().height,
-          };
-          const expectedBottom =
-            innerHeight -
-            (eventName === "keyboardWillShow" ? keyboardHeight : 0);
-          const reducedMotion = matchMedia(
-            "(prefers-reduced-motion: reduce)"
-          ).matches;
-          const backgroundBefore = {
-            height: background.getBoundingClientRect().height,
-            scroll: background.scrollTop,
-          };
-          const delivered = !globalThis.dispatchEvent(
-            new CustomEvent(`playwright:${eventName}`, {
-              detail: { keyboardHeight },
-              cancelable: true,
-            })
-          );
-          const frames: {
-            elapsed: number;
-            drift: number;
-            top: number;
-            backgroundMovement: number;
-            bottom: number;
-            heightDrift: number;
-          }[] = [];
-          const start = performance.now();
-          try {
-            while (performance.now() - start < 350) {
-              await new Promise<void>((resolve) =>
-                requestAnimationFrame(() => resolve())
-              );
-              const box = panel.getBoundingClientRect();
-              frames.push({
-                elapsed: performance.now() - start,
-                drift: box.bottom - reference.getBoundingClientRect().bottom,
-                top: box.top,
-                bottom: box.bottom,
-                heightDrift:
-                  surface.getBoundingClientRect().height -
-                  reference.getBoundingClientRect().height,
-                backgroundMovement: Math.max(
-                  Math.abs(
-                    background.getBoundingClientRect().height -
-                      backgroundBefore.height
-                  ),
-                  Math.abs(background.scrollTop - backgroundBefore.scroll)
-                ),
-              });
-            }
-          } finally {
-            reference.remove();
-          }
-          return {
-            delivered,
-            frames,
-            starting,
-            expectedBottom,
-            keyboardHeight,
-            reducedMotion,
-            settled: {
+      await installSurfaceSimulation(context, "capacitor-ios-sim", baseURL);
+      await installCompetitionApi(page);
+      await page.goto(
+        entryPoint === "single submission"
+          ? `${ROOT}/alpha?drop=${entryDropId("alpha")}`
+          : `${ROOT}/alpha`
+      );
+      const leaderboardCard = page
+        .getByRole("main")
+        .locator('[data-competition-entry="entry-alpha"]');
+      const voteSource =
+        entryPoint === "single submission"
+          ? page
+              .getByRole("main")
+              .locator("[data-video-viewport]")
+              .filter({
+                has: page.getByRole("button", {
+                  name: "Close panel",
+                  exact: true,
+                }),
+              })
+          : leaderboardCard;
+      // Single detail is portaled outside the wave layout. Measure the wave
+      // behind it through its leaderboard card for either voting entry point.
+      const background = await leaderboardCard.evaluateHandle((element) => {
+        let parent = element.parentElement;
+        while (
+          parent &&
+          !parent.style.height.includes("--layout-viewport-height")
+        ) {
+          parent = parent.parentElement;
+        }
+        if (!parent) throw new Error("Wave layout container missing");
+        return parent;
+      });
+      await voteSource
+        .getByRole("button", { name: "Vote", exact: true })
+        .click();
+      const dialog = page.getByRole("dialog", {
+        name: "Vote for this artwork",
+      });
+      const closedVoteHeight = await expectVoteHeight(dialog);
+      await dialog
+        .getByRole("button", { name: "Numeric", exact: true })
+        .click();
+      await expectVoteHeight(dialog, closedVoteHeight);
+      const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+      await input.fill("25");
+      const backgroundHeight = await background.evaluate(
+        (element) => element.getBoundingClientRect().height
+      );
+      const emitKeyboard = (eventName: string, keyboardHeight = 0) =>
+        emitNativeKeyboard(page, eventName, keyboardHeight);
+      const hideKeyboard = async () => {
+        await emitKeyboard("keyboardWillHide");
+        await emitKeyboard("keyboardDidHide");
+      };
+      await page.waitForFunction(() => {
+        const runtime = globalThis as typeof globalThis & {
+          __playwrightKeyboardListeners?: string[];
+        };
+        return runtime.__playwrightKeyboardListeners?.includes(
+          "keyboardWillShow"
+        );
+      });
+      const sampleMotion = (
+        eventName: "keyboardWillShow" | "keyboardWillHide",
+        keyboardHeight = 300
+      ) =>
+        dialog.evaluate(
+          async (element, { eventName, background, keyboardHeight }) => {
+            const panel = element.querySelector<HTMLElement>(
+              ".mobile-wrapper-dialog"
+            );
+            if (!panel) throw new Error("Voting sheet missing");
+            const surface =
+              panel.querySelector<HTMLElement>(".tw-rounded-t-2xl");
+            if (!surface) throw new Error("Voting surface missing");
+            // This reference follows the app's keyboard curve. It verifies frame
+            // alignment, rather than merely checking the final keyboard clearance.
+            const reference = document.createElement("div");
+            reference.style.cssText =
+              "position:fixed;left:-10px;width:1px;" +
+              "bottom:var(--native-keyboard-inset-bottom,0px);" +
+              "transition:bottom var(--native-keyboard-layout-transition-duration,0ms) var(--native-keyboard-layout-transition-easing,ease-out),max-height var(--native-keyboard-layout-transition-duration,0ms) var(--native-keyboard-layout-transition-easing,ease-out)";
+            reference.style.height = `${surface.firstElementChild?.scrollHeight ?? surface.scrollHeight}px`;
+            reference.style.maxHeight = surface.style.maxHeight;
+            reference.style.setProperty(
+              "--mobile-wrapper-dialog-keyboard-inset",
+              "var(--native-keyboard-inset-bottom,0px)"
+            );
+            document.body.append(reference);
+            await new Promise<void>((resolve) =>
+              requestAnimationFrame(() => resolve())
+            );
+            reference.getBoundingClientRect();
+            const starting = {
               bottom: panel.getBoundingClientRect().bottom,
               height: surface.getBoundingClientRect().height,
-            },
-          };
-        },
-        { eventName, background, keyboardHeight }
-      );
-    const expectAlignedMotion = (
-      motion: Awaited<ReturnType<typeof sampleMotion>>
-    ) => {
-      expect(motion.delivered).toBe(true);
-      expect(motion.frames.length).toBeGreaterThan(2);
-      expect(motion.settled.bottom).toBeCloseTo(motion.expectedBottom, 0);
-      expect(
-        Math.abs(motion.settled.bottom - motion.starting.bottom)
-      ).toBeCloseTo(motion.keyboardHeight, 0);
-      if (!motion.reducedMotion) {
-        const minimum = Math.min(motion.starting.bottom, motion.settled.bottom);
-        const maximum = Math.max(motion.starting.bottom, motion.settled.bottom);
+            };
+            const expectedBottom =
+              innerHeight -
+              (eventName === "keyboardWillShow" ? keyboardHeight : 0);
+            const reducedMotion = matchMedia(
+              "(prefers-reduced-motion: reduce)"
+            ).matches;
+            const backgroundBefore = {
+              height: background.getBoundingClientRect().height,
+              scroll: background.scrollTop,
+            };
+            const delivered = !globalThis.dispatchEvent(
+              new CustomEvent(`playwright:${eventName}`, {
+                detail: { keyboardHeight },
+                cancelable: true,
+              })
+            );
+            const frames: {
+              elapsed: number;
+              drift: number;
+              top: number;
+              backgroundMovement: number;
+              bottom: number;
+              heightDrift: number;
+            }[] = [];
+            const start = performance.now();
+            try {
+              while (performance.now() - start < 350) {
+                await new Promise<void>((resolve) =>
+                  requestAnimationFrame(() => resolve())
+                );
+                const box = panel.getBoundingClientRect();
+                frames.push({
+                  elapsed: performance.now() - start,
+                  drift: box.bottom - reference.getBoundingClientRect().bottom,
+                  top: box.top,
+                  bottom: box.bottom,
+                  heightDrift:
+                    surface.getBoundingClientRect().height -
+                    reference.getBoundingClientRect().height,
+                  backgroundMovement: Math.max(
+                    Math.abs(
+                      background.getBoundingClientRect().height -
+                        backgroundBefore.height
+                    ),
+                    Math.abs(background.scrollTop - backgroundBefore.scroll)
+                  ),
+                });
+              }
+            } finally {
+              reference.remove();
+            }
+            return {
+              delivered,
+              frames,
+              starting,
+              expectedBottom,
+              keyboardHeight,
+              reducedMotion,
+              settled: {
+                bottom: panel.getBoundingClientRect().bottom,
+                height: surface.getBoundingClientRect().height,
+              },
+            };
+          },
+          { eventName, background, keyboardHeight }
+        );
+      const expectAlignedMotion = (
+        motion: Awaited<ReturnType<typeof sampleMotion>>
+      ) => {
+        expect(motion.delivered).toBe(true);
+        expect(motion.frames.length).toBeGreaterThan(2);
+        expect(motion.settled.bottom).toBeCloseTo(motion.expectedBottom, 0);
         expect(
-          motion.frames.some(
-            (frame) => frame.bottom > minimum + 1 && frame.bottom < maximum - 1
+          Math.abs(motion.settled.bottom - motion.starting.bottom)
+        ).toBeCloseTo(motion.keyboardHeight, 0);
+        if (!motion.reducedMotion) {
+          const minimum = Math.min(
+            motion.starting.bottom,
+            motion.settled.bottom
+          );
+          const maximum = Math.max(
+            motion.starting.bottom,
+            motion.settled.bottom
+          );
+          expect(
+            motion.frames.some(
+              (frame) =>
+                frame.bottom > minimum + 1 && frame.bottom < maximum - 1
+            )
+          ).toBe(true);
+        }
+        expect(
+          Math.max(...motion.frames.map((frame) => Math.abs(frame.drift)))
+        ).toBeLessThan(2);
+        expect(
+          Math.max(...motion.frames.map((frame) => Math.abs(frame.heightDrift)))
+        ).toBeLessThan(2);
+        expect(
+          Math.max(...motion.frames.map((frame) => frame.backgroundMovement))
+        ).toBeLessThan(1);
+        expect(
+          Math.min(...motion.frames.map((frame) => frame.top))
+        ).toBeGreaterThanOrEqual(40);
+      };
+      const motion = await sampleMotion("keyboardWillShow");
+      await testInfo.attach("iPhone-voting-keyboard-frames", {
+        body: JSON.stringify(motion),
+        contentType: "application/json",
+      });
+      expectAlignedMotion(motion);
+      expect(
+        await background.evaluate(
+          (element) => element.getBoundingClientRect().height
+        )
+      ).toBeCloseTo(backgroundHeight, 0);
+      await expect(input).toBeFocused();
+      await emitKeyboard("keyboardDidShow", 300);
+      await dialog.getByRole("switch", { name: "Explain vote" }).check();
+      const rationale = dialog.getByLabel("Optional rationale reply");
+      await rationale.fill("A reply preserved through keyboard dismissal");
+      await expect(rationale).toBeFocused();
+      await expect(rationale).toBeInViewport({ ratio: 1 });
+      await expect(
+        dialog.getByRole("button", { name: "Vote +25 TDH", exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      const expandedVoteHeight = await expectVoteHeight(dialog);
+      await dialog.getByRole("button", { name: "Slider", exact: true }).click();
+      await expectVoteHeight(dialog, expandedVoteHeight);
+      await dialog
+        .getByRole("button", { name: "Numeric", exact: true })
+        .click();
+      await expectVoteHeight(dialog, expandedVoteHeight);
+      await expect(input).toHaveValue("25");
+      await expect(rationale).toHaveValue(
+        "A reply preserved through keyboard dismissal"
+      );
+      await rationale.focus();
+      await expect(
+        dialog.getByRole("button", { name: "Vote +25 TDH", exact: true })
+      ).toBeInViewport({ ratio: 1 });
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("iphone-voting-keyboard.png"),
+      });
+      const closingMotion = await sampleMotion("keyboardWillHide");
+      expectAlignedMotion(closingMotion);
+      await emitKeyboard("keyboardDidHide");
+      await expect(rationale).toHaveValue(
+        "A reply preserved through keyboard dismissal"
+      );
+      await expect(input).toHaveValue("25");
+      // Closing a focused sheet must not unlock/reflow the wave until the
+      // keyboard has finished. The next keyboard cycle proves the lock released.
+      const replyMotion = await sampleMotion("keyboardWillShow", 400);
+      expectAlignedMotion(replyMotion);
+      expect(replyMotion.settled.height).toBeLessThan(
+        replyMotion.starting.height - 20
+      );
+      await emitKeyboard("keyboardDidShow", 400);
+      await dialog.getByRole("button", { name: /^Close(?: modal)?$/ }).click();
+      await expect(dialog).toHaveCount(0);
+      expect(
+        await background.evaluate(
+          (element) => element.getBoundingClientRect().height
+        )
+      ).toBeCloseTo(backgroundHeight, 0);
+      await emitKeyboard("keyboardWillHide");
+      await expect(page.locator("html")).toHaveCSS(
+        "--native-keyboard-inset-bottom",
+        "0px"
+      );
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-layout-viewport-locked",
+        "true"
+      );
+      await emitKeyboard("keyboardDidHide");
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-layout-viewport-locked"
+      );
+      await emitKeyboard("keyboardWillShow", 300);
+      await expect
+        .poll(() =>
+          background.evaluate(
+            (element) => element.getBoundingClientRect().height
           )
-        ).toBe(true);
-      }
-      expect(
-        Math.max(...motion.frames.map((frame) => Math.abs(frame.drift)))
-      ).toBeLessThan(2);
-      expect(
-        Math.max(...motion.frames.map((frame) => Math.abs(frame.heightDrift)))
-      ).toBeLessThan(2);
-      expect(
-        Math.max(...motion.frames.map((frame) => frame.backgroundMovement))
-      ).toBeLessThan(1);
-      expect(
-        Math.min(...motion.frames.map((frame) => frame.top))
-      ).toBeGreaterThanOrEqual(40);
-    };
-    const motion = await sampleMotion("keyboardWillShow");
-    await testInfo.attach("iPhone-voting-keyboard-frames", {
-      body: JSON.stringify(motion),
-      contentType: "application/json",
+        )
+        .toBeLessThan(backgroundHeight - 200);
+      await hideKeyboard();
+      await page.emulateMedia({ reducedMotion: "reduce" });
+      await page.setViewportSize({ width: 320, height: 568 });
+      await voteSource
+        .getByRole("button", { name: "Vote", exact: true })
+        .click();
+      await dialog
+        .getByRole("button", { name: "Numeric", exact: true })
+        .click();
+      await input.fill("15");
+      const reducedMotion = await sampleMotion("keyboardWillShow");
+      expectAlignedMotion(reducedMotion);
+      await expect(input).toBeFocused();
+      await expect(input).toBeInViewport({ ratio: 1 });
+      await expect(page.locator("html")).toHaveCSS(
+        "--native-keyboard-layout-transition-duration",
+        "0ms"
+      );
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("iphone-voting-small-reduced-motion.png"),
+      });
+      await dialog.getByRole("button", { name: /^Close(?: modal)?$/ }).click();
+      await hideKeyboard();
+      await background.dispose();
     });
-    expectAlignedMotion(motion);
-    expect(
-      await background.evaluate(
-        (element) => element.getBoundingClientRect().height
-      )
-    ).toBeCloseTo(backgroundHeight, 0);
-    await expect(input).toBeFocused();
-    await emitKeyboard("keyboardDidShow", 300);
-    await dialog.getByRole("switch", { name: "Explain vote" }).check();
-    const rationale = dialog.getByLabel("Optional rationale reply");
-    await rationale.fill("A reply preserved through keyboard dismissal");
-    await expect(rationale).toBeFocused();
-    await expect(rationale).toBeInViewport({ ratio: 1 });
-    await expect(
-      dialog.getByRole("button", { name: "Vote +25 TDH", exact: true })
-    ).toBeInViewport({ ratio: 1 });
-    const expandedVoteHeight = await expectVoteHeight(dialog);
-    await dialog.getByRole("button", { name: "Slider", exact: true }).click();
-    await expectVoteHeight(dialog, expandedVoteHeight);
-    await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
-    await expectVoteHeight(dialog, expandedVoteHeight);
-    await expect(input).toHaveValue("25");
-    await expect(rationale).toHaveValue(
-      "A reply preserved through keyboard dismissal"
-    );
-    await rationale.focus();
-    await expect(
-      dialog.getByRole("button", { name: "Vote +25 TDH", exact: true })
-    ).toBeInViewport({ ratio: 1 });
-    await expectNoHorizontalOverflow(page);
-    await page.screenshot({
-      path: testInfo.outputPath("iphone-voting-keyboard.png"),
-    });
-    const closingMotion = await sampleMotion("keyboardWillHide");
-    expectAlignedMotion(closingMotion);
-    await emitKeyboard("keyboardDidHide");
-    await expect(rationale).toHaveValue(
-      "A reply preserved through keyboard dismissal"
-    );
-    await expect(input).toHaveValue("25");
-    // Closing a focused sheet must not unlock/reflow the wave until the
-    // keyboard has finished. The next keyboard cycle proves the lock released.
-    const replyMotion = await sampleMotion("keyboardWillShow", 400);
-    expectAlignedMotion(replyMotion);
-    expect(replyMotion.settled.height).toBeLessThan(
-      replyMotion.starting.height - 20
-    );
-    await emitKeyboard("keyboardDidShow", 400);
-    await dialog.getByRole("button", { name: /^Close(?: modal)?$/ }).click();
-    await expect(dialog).toHaveCount(0);
-    expect(
-      await background.evaluate(
-        (element) => element.getBoundingClientRect().height
-      )
-    ).toBeCloseTo(backgroundHeight, 0);
-    await emitKeyboard("keyboardWillHide");
-    await expect(page.locator("html")).toHaveCSS(
-      "--native-keyboard-inset-bottom",
-      "0px"
-    );
-    await expect(page.locator("html")).toHaveAttribute(
-      "data-layout-viewport-locked",
-      "true"
-    );
-    await emitKeyboard("keyboardDidHide");
-    await expect(page.locator("html")).not.toHaveAttribute(
-      "data-layout-viewport-locked"
-    );
-    await emitKeyboard("keyboardWillShow", 300);
-    await expect
-      .poll(() =>
-        background.evaluate((element) => element.getBoundingClientRect().height)
-      )
-      .toBeLessThan(backgroundHeight - 200);
-    await hideKeyboard();
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    await page.setViewportSize({ width: 320, height: 568 });
-    await card.getByRole("button", { name: "Vote", exact: true }).click();
-    await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
-    await input.fill("15");
-    const reducedMotion = await sampleMotion("keyboardWillShow");
-    expectAlignedMotion(reducedMotion);
-    await expect(input).toBeFocused();
-    await expect(input).toBeInViewport({ ratio: 1 });
-    await expect(page.locator("html")).toHaveCSS(
-      "--native-keyboard-layout-transition-duration",
-      "0ms"
-    );
-    await expectNoHorizontalOverflow(page);
-    await page.screenshot({
-      path: testInfo.outputPath("iphone-voting-small-reduced-motion.png"),
-    });
-    await dialog.getByRole("button", { name: /^Close(?: modal)?$/ }).click();
-    await hideKeyboard();
-    await background.dispose();
-  });
+  }
 
   test("reuses competition entry context when voting from list and grid cards", async ({
     page,

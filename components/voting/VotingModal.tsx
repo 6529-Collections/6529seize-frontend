@@ -11,6 +11,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import MobileVotingModal from "./MobileVotingModal";
 
 interface VotingModalProps {
   readonly drop: ExtendedDrop;
@@ -18,7 +20,11 @@ interface VotingModalProps {
   readonly onClose: () => void;
 }
 
-const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
+const CenteredVotingModal: React.FC<VotingModalProps> = ({
+  drop,
+  isOpen,
+  onClose,
+}) => {
   const titleId = useId();
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
@@ -112,6 +118,19 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
   }
 
   return createPortal(modalContent, document.body);
+};
+
+const VotingModal: React.FC<VotingModalProps> = (props) => {
+  const { isCapacitor, isIos } = useCapacitor();
+  const isCompactLayout = useIsMobileLayoutViewport();
+
+  // Some detail and landscape callers request this dialog directly.
+  // Keep every iPhone entry on the same keyboard-aware sheet.
+  if (isCapacitor && isIos && isCompactLayout) {
+    return <MobileVotingModal {...props} />;
+  }
+
+  return <CenteredVotingModal {...props} />;
 };
 
 export default VotingModal;
