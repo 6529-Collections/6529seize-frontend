@@ -1,4 +1,6 @@
 import type { Page } from "@playwright/test";
+import { expectUrlState } from "../support/urlState";
+import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
 import {
   expect,
   expectAxeClean,
@@ -1448,7 +1450,7 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     test(`never flashes owner actions for ${viewer}`, async ({
       page,
       baseURL,
-    }) => {
+    }, testInfo) => {
       if (viewer !== "logged out")
         await seedSession(page, viewer === "proxy" ? "grantor" : null);
       if (viewer === "visitor") {
@@ -1490,6 +1492,12 @@ test.describe("Profile editing @auth @medium @local-only", () => {
           if (document.querySelector('[aria-label="Edit profile"]')) {
             document.documentElement.dataset["aboutControlFlashed"] = "true";
           }
+          if (
+            document.querySelector('[data-testid="collected-purchase-actions"]')
+          ) {
+            document.documentElement.dataset["collectedActionsFlashed"] =
+              "true";
+          }
         });
         observer.observe(document, { childList: true, subtree: true });
       });
@@ -1514,6 +1522,222 @@ test.describe("Profile editing @auth @medium @local-only", () => {
       await expect(page.locator("html")).not.toHaveAttribute(
         "data-about-control-flashed"
       );
+      if (viewer === "proxy") {
+        // A new document restores the saved proxy token before proxy details arrive.
+        await page.goto("/playwright/collected?details=closed");
+        await expect(
+          page.getByRole("main").locator('[data-profile-section="Filters"]')
+        ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+        await expectPersonalCollectedActionsAbsent(page);
+        await expect(page.locator("html")).not.toHaveAttribute(
+          "data-collected-actions-flashed"
+        );
+        await page.screenshot({
+          path: testInfo.outputPath("collected-proxy.png"),
+          fullPage: true,
+        });
+      }
     });
   }
+});
+
+async function expectPersonalCollectedActionsAbsent(page: Page) {
+  await expect(page.getByTestId("collected-purchase-actions")).toHaveCount(0);
+  for (const action of ["Manage orders", "Complete my set"]) {
+    await expect(
+      page.getByRole("link", { name: action, exact: true })
+    ).toHaveCount(0);
+  }
+}
+
+async function expectCollectedActionAlignment(page: Page) {
+  const viewport = page.viewportSize();
+  for (const width of [360, 390, 430, 520, 639, 1280]) {
+    await page.setViewportSize({ width, height: 844 });
+    const actions = await page
+      .getByRole("link", { name: "Manage orders", exact: true })
+      .evaluate((orders) => {
+        const row = orders.parentElement!;
+        const rowBounds = row.getBoundingClientRect();
+        const complete = row.querySelector("a")!.getBoundingClientRect();
+        const manage = orders.getBoundingClientRect();
+        const style = getComputedStyle(row);
+        const left = rowBounds.left + Number.parseFloat(style.paddingLeft);
+        const right = rowBounds.right - Number.parseFloat(style.paddingRight);
+        return {
+          fits:
+            right - left >=
+            complete.width + manage.width + Number.parseFloat(style.columnGap),
+          centers: Math.abs(
+            complete.y + complete.height / 2 - manage.y - manage.height / 2
+          ),
+          leftInset: Math.abs(complete.left - left),
+          rightInset: Math.abs(manage.right - right),
+          stackedLeftInset: Math.abs(manage.left - left),
+          stackedGap: manage.top - complete.bottom,
+        };
+      });
+    expect(actions.leftInset).toBeLessThanOrEqual(1);
+    if (actions.fits) {
+      expect(actions.centers).toBeLessThanOrEqual(1);
+      expect(actions.rightInset).toBeLessThanOrEqual(1);
+    } else {
+      expect(actions.stackedLeftInset).toBeLessThanOrEqual(1);
+      expect(actions.stackedGap).toBeGreaterThanOrEqual(8);
+    }
+    await expectNoHorizontalOverflow(page);
+  }
+  if (viewport) await page.setViewportSize(viewport);
+}
+
+async function openOwnCollected(page: Page) {
+  await openOwnProfile(page);
+  await page
+    .getByRole("navigation", { name: "Profile sections" })
+    .getByRole("link", { name: "Collected", exact: true })
+    .click();
+  await expect(
+    page.getByRole("main").locator('[data-profile-section="Filters"]')
+  ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+}
+
+test.describe("Collected personal actions @auth @medium @local-only", () => {
+  useLocalSandboxMutationGuard(
+    test,
+    "PLAYWRIGHT_AUTH_SANDBOX",
+    "Collected owner actions require the isolated mock API."
+  );
+  test.beforeEach(async ({ page, baseURL }) => {
+    await installHostedWalletReads(page);
+    await page.route(
+      `${getSandboxApiOrigin(baseURL)}/api/**identities/*/subscriptions`,
+      (route) => route.fulfill({ json: { actions: [] } })
+    );
+  });
+
+  for (const viewer of ["anonymous", "visitor"] as const) {
+    test(`omits the actions and their row for the ${viewer} view`, async ({
+      page,
+    }, testInfo) => {
+      if (viewer === "visitor") await seedSession(page);
+      const handle = viewer === "visitor" ? "following-artist-0" : "playwright";
+      await page.goto(`/${handle}/collected?collection=memes&details=closed`);
+      await expect(
+        page.getByRole("main").locator('[data-profile-section="Filters"]')
+      ).toBeVisible({ timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS });
+      await expectPersonalCollectedActionsAbsent(page);
+      await page.getByRole("button", { name: "Details", exact: true }).click();
+      await expect(
+        page.getByRole("button", { name: "Hide Details", exact: true })
+      ).toBeVisible();
+      await expectPersonalCollectedActionsAbsent(page);
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath(`collected-${viewer}.png`),
+        fullPage: true,
+      });
+    });
+  }
+
+  test("keeps owner action alignment, filters and Back restoration", async ({
+    page,
+  }, testInfo) => {
+    // Two initially cold destination routes compile in this local dev-server pack.
+    test.setTimeout(90_000);
+    await seedSession(page);
+    await openOwnCollected(page);
+    await page.screenshot({
+      path: testInfo.outputPath("collected-owner.png"),
+      fullPage: true,
+    });
+    if (testInfo.project.name === "capacitor-ios-sim") {
+      await expectPersonalCollectedActionsAbsent(page);
+      return;
+    }
+    await expect(page.getByTestId("collected-purchase-actions")).toBeVisible();
+    await expectCollectedActionAlignment(page);
+    const isNative = isCapacitorSimulationProject(testInfo.project.name);
+    for (const action of ["Manage orders", "Complete my set"]) {
+      await page.goto(
+        "/playwright/collected?collection=memes&szn=1&details=closed"
+      );
+      const link = page.getByRole("link", { name: action, exact: true });
+      await link.click({ trial: true });
+      const source = new URL(page.url());
+      const sourceTop = await link.evaluate(
+        (element) => element.getBoundingClientRect().top
+      );
+      const destination = new URL(
+        (await link.getAttribute("href"))!,
+        page.url()
+      );
+      expect(destination.searchParams.has("returnTo")).toBe(isNative);
+      await link.click();
+      await expect(page).toHaveURL(
+        (url) =>
+          url.pathname ===
+          (action === "Manage orders" ? "/collect/orders" : "/collect"),
+        { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
+      );
+      await expect(
+        page.getByRole("heading", {
+          name: action === "Manage orders" ? "Orders" : "Build your collection",
+          exact: true,
+        })
+      ).toBeVisible();
+      if (isNative) {
+        await page.getByRole("button", { name: "Back", exact: true }).click();
+      } else {
+        await expect(
+          page.getByRole("button", { name: "Back", exact: true })
+        ).toHaveCount(0);
+        await page.goBack();
+      }
+      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
+      await expectUrlState(page, (url) =>
+        ["collection", "szn", "details"].every(
+          (key) => url.searchParams.get(key) === source.searchParams.get(key)
+        )
+      );
+      if (isNative) {
+        await expect(link).toBeFocused();
+        await expect(link).toBeInViewport();
+      } else {
+        await expect
+          .poll(() =>
+            link.evaluate(
+              (element, top) =>
+                Math.abs(element.getBoundingClientRect().top - top),
+              sourceTop
+            )
+          )
+          .toBeLessThanOrEqual(2);
+      }
+    }
+  });
+
+  test("Android Back remains usable after returning from Orders to the owner profile", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "capacitor-android-sim",
+      "Android app Back contract"
+    );
+    await seedSession(page);
+    await openOwnCollected(page);
+    await page
+      .getByRole("link", { name: "Manage orders", exact: true })
+      .click();
+    await expectUrlState(page, (url) => url.pathname === "/collect/orders");
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(
+      page,
+      (url) => url.pathname === "/playwright/collected"
+    );
+    await expect(
+      page.getByRole("button", { name: "Back", exact: true })
+    ).toBeEnabled();
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expectUrlState(page, (url) => url.pathname === "/about");
+  });
 });

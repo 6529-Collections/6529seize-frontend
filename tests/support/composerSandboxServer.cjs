@@ -2806,6 +2806,68 @@ const mockApiExactReadRoutes = new Map([
 ]);
 
 const mockApiPatternReadRoutes = [
+  // Empty, deterministic holdings keep owner/visitor Collected QA local.
+  {
+    pattern: /^\/api\/collected-stats\/[^/]+$/,
+    response: () => ({
+      boost: 1,
+      nextgen_balance: 0,
+      gradients_balance: 0,
+      memes_balance: 0,
+      unique_memes: 0,
+      seasons: [],
+    }),
+  },
+  {
+    pattern: /^\/api\/profiles\/[^/]+\/collected$/,
+    response: emptyPage,
+  },
+  {
+    pattern: /^\/api\/new_memes_seasons$/,
+    response: () => [
+      {
+        id: 1,
+        start_index: 1,
+        end_index: 47,
+        count: 47,
+        name: "Season 1",
+        display: "SZN1",
+        boost: 1,
+      },
+    ],
+  },
+  {
+    pattern: /^\/api\/collect\/catalog$/,
+    response: () => ({
+      version: "collected-actions",
+      chain_id: 1,
+      seasons: [],
+      artists: [],
+      pebbles_traits: [],
+      tdh_snapshot: null,
+    }),
+  },
+  {
+    pattern: /^\/api\/collect\/capabilities$/,
+    response: () => ({
+      version: "collected-actions",
+      chain_id: 1,
+      profile_scope: "confirmed_consolidation",
+      families: ["memes"],
+      actions: [],
+      provider: "sandbox",
+      creator_fees: "SIGNED_ORDER_TERMS",
+      platform_fee_bps: 0,
+    }),
+  },
+  {
+    pattern: /^\/api\/market\/me\/operations$/,
+    response: () => ({ operations: [], next: null }),
+  },
+  {
+    pattern: /^\/api\/collect\/rules$/,
+    response: () => ({ rules: [], complete: true }),
+  },
   // Current sandbox artworks have no managed collaboration record.
   {
     pattern: /^\/api\/drops\/[^/]+\/collaborations$/,
