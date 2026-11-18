@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   useCallback,
@@ -56,7 +61,23 @@ const SEARCH_LENGTH = {
   MAX: 100,
 };
 const SUBMISSION_GUIDANCE_ID = "grant-rep-submission-guidance";
+const GENERIC_ERROR_KEY = "rep.categories.grant.errors.generic";
 const getSearchLength = (value: string): number => Array.from(value).length;
+
+function categoryAvailabilityOptions(category: string) {
+  const name = category.trim();
+  const params = new URLSearchParams({ param: name });
+  return queryOptions({
+    queryKey: [QueryKey.REP_CATEGORY_AVAILABILITY, name],
+    queryFn: ({ signal }) =>
+      commonApiFetch<boolean>({
+        endpoint: `rep/categories/availability?${params}`,
+        signal,
+      }),
+    staleTime: 60_000,
+    retry: false,
+  });
+}
 
 const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
   if (error instanceof Error && error.message.trim()) {
@@ -223,8 +244,10 @@ export default function UserPageRepNewRepSearch({
   const amountFormId = useId();
   const availableRepId = useId();
   const categoryErrorId = useId();
+  const typedCategoryErrorId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
+  const queryClient = useQueryClient();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -241,14 +264,13 @@ export default function UserPageRepNewRepSearch({
     readonly value: string;
   } | null>(null);
   const [mutating, setMutating] = useState<boolean>(false);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
 
   const [formError, setError] = useState<{
     readonly message: string;
     readonly field: "category" | "save";
     readonly showDetails: boolean;
   } | null>(null);
-  const categoryInvalid = formError?.field === "category";
-
   const [debouncedValue, setDebouncedValue] = useState<string>("");
   useDebounce(
     () => {
@@ -263,14 +285,51 @@ export default function UserPageRepNewRepSearch({
     debouncedSearchLength >= SEARCH_LENGTH.MIN &&
     debouncedSearchLength <= SEARCH_LENGTH.MAX;
 
+  const typedCategory = repSearch.trim();
+  const typedCategoryViolation = getRepCategoryViolation(repSearch);
+  const typedCategoryReserved = isHelpBotCreditRepCategory(typedCategory);
+  const isDebouncedCategory = !selectedCategory && repSearch === debouncedValue;
+  const shouldCheckAvailability =
+    isDebouncedCategory &&
+    getSearchLength(typedCategory) >= SEARCH_LENGTH.MIN &&
+    matchingSearchLength &&
+    !typedCategoryReserved &&
+    !typedCategoryViolation;
+  const availability = useQuery({
+    ...categoryAvailabilityOptions(typedCategory),
+    enabled: shouldCheckAvailability,
+  });
+  const activeCategory =
+    selectedCategory ??
+    (shouldCheckAvailability &&
+    availability.isSuccess &&
+    availability.data === true
+      ? typedCategory
+      : null);
+  const hasActiveCategory = activeCategory !== null;
+  const categorySelectionInvalid = formError?.field === "category";
+  let typedCategoryError: string | null = null;
+  if (isDebouncedCategory && !categorySelectionInvalid) {
+    if (typedCategoryReserved) {
+      typedCategoryError = helpBotCreditRepCategoryError;
+    } else if (typedCategoryViolation) {
+      typedCategoryError = t(locale, typedCategoryViolation.key, {
+        ...typedCategoryViolation.params,
+      });
+    } else if (shouldCheckAvailability && availability.isError) {
+      typedCategoryError = getErrorMessage(
+        availability.error,
+        t(locale, GENERIC_ERROR_KEY)
+      );
+    }
+  }
+
   const { isFetching, data: categories } = useQuery<string[]>({
     queryKey: [QueryKey.REP_CATEGORIES_SEARCH, debouncedValue],
-    queryFn: async () =>
-      await commonApiFetch<string[]>({
-        endpoint: "/rep/categories",
-        params: {
-          param: debouncedValue,
-        },
+    queryFn: ({ signal }) =>
+      commonApiFetch<string[]>({
+        endpoint: `rep/categories?${new URLSearchParams({ param: debouncedValue })}`,
+        signal,
       }),
     enabled:
       matchingSearchLength && repSearch === debouncedValue && !selectedCategory,
@@ -285,14 +344,14 @@ export default function UserPageRepNewRepSearch({
     retry,
   } = useRepAllocation({
     profile,
-    category: selectedCategory,
+    category: activeCategory,
   });
 
   const amountScope = [
     profile.id ?? profile.query ?? profile.display,
     connectedProfile?.id,
     activeProfileProxy?.id,
-    selectedCategory,
+    activeCategory,
   ].join(":");
   const amountStr =
     amountDraft?.scope === amountScope
@@ -308,7 +367,7 @@ export default function UserPageRepNewRepSearch({
       (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max));
 
   const currentRep = repState?.rater_contribution ?? 0;
-  const amountReady = selectedCategory !== null && repState !== null;
+  const amountReady = hasActiveCategory && repState !== null;
   const hasAmountDraft = amountDraft?.scope === amountScope;
   const focusSelectedAmount = useCallback(
     (input: HTMLInputElement | null) => {
@@ -319,14 +378,14 @@ export default function UserPageRepNewRepSearch({
   );
   const haveChanged = amountNum !== currentRep;
   const overAllowance =
-    selectedCategory !== null && isRatingValue(amountStr) && !isValidValue;
+    amountReady && isRatingValue(amountStr) && !isValidValue;
   const isGrantDisabled =
-    !selectedCategory ||
+    !amountReady ||
     isError ||
-    !repState ||
     !amountStr ||
     !haveChanged ||
     !isValidValue ||
+    checkingAvailability ||
     mutating;
 
   // --- End derived rep state ---
@@ -337,8 +396,6 @@ export default function UserPageRepNewRepSearch({
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
-  const [checkingAvailability, setCheckingAvailability] = useState(false);
-
   const showHelpBotCreditRepCategoryError = () => {
     setError({
       message: helpBotCreditRepCategoryError,
@@ -348,7 +405,8 @@ export default function UserPageRepNewRepSearch({
   };
 
   const onRepSelect = async (rep: string, knownCategory = false) => {
-    if (mutating || selectedCategory === rep) return;
+    const category = rep.trim();
+    if (mutating || selectedCategory === category) return;
     const request = ++selectionRequest.current;
     if (isHelpBotCreditRepCategory(rep)) {
       showHelpBotCreditRepCategoryError();
@@ -370,7 +428,7 @@ export default function UserPageRepNewRepSearch({
     // Search-specific minimum (below the server's 1-char floor): surface it
     // instead of silently dropping the input. Count code points to stay
     // consistent with the validator's length semantics.
-    if (!knownCategory && getSearchLength(rep) < SEARCH_LENGTH.MIN) {
+    if (!knownCategory && getSearchLength(category) < SEARCH_LENGTH.MIN) {
       setError({
         message: t(locale, "rep.categories.validation.tooShort", {
           min: SEARCH_LENGTH.MIN,
@@ -383,25 +441,17 @@ export default function UserPageRepNewRepSearch({
     setCheckingAvailability(!knownCategory);
     try {
       if (!knownCategory)
-        await commonApiFetch<boolean>({
-          endpoint: "/rep/categories/availability",
-          params: {
-            param: rep,
-          },
-        });
+        await queryClient.fetchQuery(categoryAvailabilityOptions(category));
       if (request !== selectionRequest.current) return;
-      setSelectedCategory(rep);
-      setRepSearch(rep);
-      setAmountDraft(null);
+      setSelectedCategory(category);
+      setRepSearch(category);
+      if (activeCategory !== category) setAmountDraft(null);
       setError(null);
       setIsOpen(false);
     } catch (error: unknown) {
       if (request !== selectionRequest.current) return;
       setError({
-        message: getErrorMessage(
-          error,
-          t(locale, "rep.categories.grant.errors.generic")
-        ),
+        message: getErrorMessage(error, t(locale, GENERIC_ERROR_KEY)),
         field: "category",
         showDetails: true,
       });
@@ -446,18 +496,15 @@ export default function UserPageRepNewRepSearch({
         description: t(locale, "rep.categories.grant.toast.tryAgain"),
         details: getToastErrorDetails(
           error,
-          getErrorMessage(
-            error,
-            t(locale, "rep.categories.grant.errors.generic")
-          )
+          getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
         ),
       });
     },
   });
 
   const onGrantRep = async () => {
-    if (isGrantDisabled || !selectedCategory || !profile.query) return;
-    if (isHelpBotCreditRepCategory(selectedCategory)) {
+    if (isGrantDisabled || !activeCategory || !profile.query) return;
+    if (isHelpBotCreditRepCategory(activeCategory)) {
       showHelpBotCreditRepCategoryError();
       return;
     }
@@ -473,13 +520,10 @@ export default function UserPageRepNewRepSearch({
         });
         return;
       }
-      await addRepMutation.mutateAsync({ amount, category: selectedCategory });
+      await addRepMutation.mutateAsync({ amount, category: activeCategory });
     } catch (error: unknown) {
       setError({
-        message: getErrorMessage(
-          error,
-          t(locale, "rep.categories.grant.errors.generic")
-        ),
+        message: getErrorMessage(error, t(locale, GENERIC_ERROR_KEY)),
         field: "save",
         showDetails: true,
       });
@@ -501,15 +545,15 @@ export default function UserPageRepNewRepSearch({
 
   const categoriesToDisplay = useMemo(() => {
     return getGrantRepCategoriesToDisplay({
-      search: debouncedValue,
+      search: debouncedValue.trim(),
       categories: categories ?? [],
-      includeTypedCategory: matchingSearchLength,
+      showSubmissionSuggestion: matchingSearchLength,
     });
   }, [debouncedValue, categories, matchingSearchLength]);
 
   const repSearchState = useMemo(() => {
     const searchLength = getSearchLength(repSearch);
-    if (searchLength < SEARCH_LENGTH.MIN)
+    if (getSearchLength(repSearch.trim()) < SEARCH_LENGTH.MIN)
       return RepSearchState.MIN_LENGTH_ERROR;
     if (searchLength > SEARCH_LENGTH.MAX)
       return RepSearchState.MAX_LENGTH_ERROR;
@@ -517,6 +561,11 @@ export default function UserPageRepNewRepSearch({
       return RepSearchState.LOADING;
     return RepSearchState.HAVE_RESULTS;
   }, [debouncedValue, isFetching, repSearch]);
+  const showSearchDropdown =
+    isOpen &&
+    !selectedCategory &&
+    (repSearchState !== RepSearchState.HAVE_RESULTS ||
+      categoriesToDisplay.length > 0);
 
   const handleRepSearchChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -574,18 +623,19 @@ export default function UserPageRepNewRepSearch({
               autoCorrect="off"
               spellCheck={false}
               value={repSearch}
-              readOnly={!!selectedCategory}
               disabled={mutating}
               onChange={handleRepSearchChange}
               onFocus={() => {
                 if (!selectedCategory) setIsOpen(true);
               }}
-              aria-invalid={categoryInvalid}
-              aria-describedby={
-                categoryInvalid
-                  ? `${SUBMISSION_GUIDANCE_ID} ${categoryErrorId}`
-                  : SUBMISSION_GUIDANCE_ID
-              }
+              aria-invalid={categorySelectionInvalid || !!typedCategoryError}
+              aria-describedby={[
+                SUBMISSION_GUIDANCE_ID,
+                categorySelectionInvalid && categoryErrorId,
+                typedCategoryError && typedCategoryErrorId,
+              ]
+                .filter(Boolean)
+                .join(" ")}
               className="tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none"
               placeholder={t(locale, "rep.categories.grant.searchPlaceholder")}
             />
@@ -608,23 +658,33 @@ export default function UserPageRepNewRepSearch({
                 <XMarkIcon aria-hidden="true" className="tw-size-4" />
               </button>
             ) : (
-              checkingAvailability && (
+              (checkingAvailability ||
+                (shouldCheckAvailability && availability.isFetching)) && (
                 <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
                   <CircleLoader />
                 </div>
               )
             )}
           </div>
+          {typedCategoryError && (
+            <p
+              id={typedCategoryErrorId}
+              role="alert"
+              className="tw-mb-0 tw-mt-2 tw-break-words tw-text-xs tw-leading-5 tw-text-error"
+            >
+              {typedCategoryError}
+            </p>
+          )}
           <AnimatePresence initial={false}>
-            {isOpen && !selectedCategory && (
+            {showSearchDropdown && (
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
-                className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-will-change-transform"
+                className="tw-mt-2 tw-will-change-transform"
               >
-                <div className="tw-max-h-48 tw-overflow-y-auto tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
+                <div className="tw-max-h-20 tw-overflow-y-auto tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
                   <UserPageRepNewRepSearchDropdown
                     categories={categoriesToDisplay}
                     state={repSearchState}
@@ -671,22 +731,22 @@ export default function UserPageRepNewRepSearch({
           <UserPageRateInput
             inputRef={focusSelectedAmount}
             selectOnFocus
-            value={selectedCategory ? amountStr : ""}
+            value={hasActiveCategory ? amountStr : ""}
             onChange={setAmountStr}
             minMax={minMaxValues}
             isProxy={!!activeProfileProxy}
             clampOnBlur={false}
             variant="form"
             inputId={amountInputId}
-            disabled={!selectedCategory || mutating}
+            disabled={!hasActiveCategory || checkingAvailability || mutating}
             placeholder="0"
             descriptionId={`${availableRepId} ${amountInputId}-hint`}
-            invalid={selectedCategory !== null && !isValidValue}
+            invalid={amountReady && !isValidValue}
           />
           <div
             role="status"
-            aria-hidden={!selectedCategory}
-            className={!selectedCategory ? "tw-invisible" : undefined}
+            aria-hidden={!hasActiveCategory}
+            className={!hasActiveCategory ? "tw-invisible" : undefined}
           >
             <UserRateAdjustmentHelper
               inLineValues
@@ -699,7 +759,7 @@ export default function UserPageRepNewRepSearch({
           </div>
         </form>
         <GrantRepSubmissionGuidance
-          selectedCategory={selectedCategory}
+          selectedCategory={activeCategory}
           categoriesToDisplay={categoriesToDisplay}
         />
 
