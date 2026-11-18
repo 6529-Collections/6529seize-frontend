@@ -68,6 +68,7 @@ export function buildE2eeApiClient({
       const status = await get<Partial<ApiE2eeDeviceInboxStatus> | null>(
         `e2ee/devices/${enc(deviceKey)}/inbox-status`
       );
+      // A successful HTTP response confirms discovery only with an explicit flag.
       if (typeof status?.has_pending_chats !== "boolean") {
         throw new Error("Invalid encrypted inbox status");
       }

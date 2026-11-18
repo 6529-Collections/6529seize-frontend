@@ -51,6 +51,7 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
   const hasChats = conversations.length > 0;
   const waiting = initialSyncStatus === "waiting";
   const [slow, setSlow] = useState(false);
+  const [checking, setChecking] = useState(false);
   useEffect(() => {
     if (!waiting) return;
     const timer = globalThis.setTimeout(
@@ -60,14 +61,33 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
     return () => globalThis.clearTimeout(timer);
   }, [waiting]);
   const showWaitHelp = waiting && slow;
-  const loading = waiting || (!hasChats && initialSyncStatus === "pending");
+  const loading =
+    checking || waiting || (!hasChats && initialSyncStatus === "pending");
   const loadingPadding = hasChats ? "tw-py-3" : "tw-py-12";
-  const loadFailed = !hasChats && initialSyncStatus === "failed";
+  const loadFailed = !checking && !hasChats && initialSyncStatus === "failed";
   const loadError = t(locale, "e2ee.list.error");
   let status = "";
   if (loading) status = t(locale, "e2ee.list.loading");
-  if (waiting) status = t(locale, "e2ee.list.waiting");
+  if (waiting && !checking) status = t(locale, "e2ee.list.waiting");
   if (loadFailed) status = loadError;
+
+  const retryButton = (
+    <Button
+      variant="secondary"
+      size="md"
+      disabled={checking}
+      onClick={() => {
+        if (!engine) return;
+        setChecking(true);
+        void engine
+          .sync()
+          .catch(() => undefined)
+          .finally(() => setChecking(false));
+      }}
+    >
+      {t(locale, "e2ee.action.retry")}
+    </Button>
+  );
 
   return (
     <>
@@ -85,24 +105,23 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
             : "tw-sr-only"
         }
       >
-        {loading && !showWaitHelp && <CircleLoader />}
+        {loading && (checking || !showWaitHelp) && <CircleLoader />}
         <span className="tw-flex tw-flex-col tw-gap-1.5">
           {status}
-          {showWaitHelp && <span>{t(locale, "e2ee.list.waitingHelp")}</span>}
+          {showWaitHelp && !checking && (
+            <span>{t(locale, "e2ee.list.waitingHelp")}</span>
+          )}
         </span>
       </output>
+      {showWaitHelp && (
+        <div className="tw-flex tw-justify-center">{retryButton}</div>
+      )}
       {loadFailed && (
         <E2eeCenteredMessage title={loadError}>
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={() => void engine?.sync().catch(() => undefined)}
-          >
-            {t(locale, "e2ee.action.retry")}
-          </Button>
+          {retryButton}
         </E2eeCenteredMessage>
       )}
-      {!hasChats && initialSyncStatus === "complete" && (
+      {!checking && !hasChats && initialSyncStatus === "complete" && (
         <E2eeCenteredMessage
           icon={<LockClosedIcon className="tw-size-6" />}
           title={t(locale, "e2ee.list.empty.title")}

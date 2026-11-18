@@ -310,6 +310,34 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       await expect(waiting).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
       await expect(empty).toHaveCount(0);
 
+      const retry = phone.page.getByRole("button", {
+        name: "Try again",
+        exact: true,
+      });
+      await expect(retry).toBeEnabled({ timeout: E2EE_UI_TIMEOUT_MS });
+      const allowCheck = Promise.withResolvers<void>();
+      await phone.page.route(
+        "**/api/e2ee/devices/*/inbox-status",
+        async (route) => {
+          await allowCheck.promise;
+          await route.fulfill({ json: { has_pending_chats: true } });
+        },
+        { times: 1 }
+      );
+      try {
+        await retry.click();
+        await expect(
+          phone.page
+            .getByRole("status")
+            .filter({ hasText: "Loading encrypted chats…" })
+        ).toBeVisible();
+        await expect(retry).toBeDisabled();
+      } finally {
+        allowCheck.resolve();
+      }
+      await expect(waiting).toBeVisible();
+      await expect(empty).toHaveCount(0);
+
       allowDm.resolve();
       await expect(conversationListRow(phone.page, "bob")).toBeVisible({
         timeout: E2EE_SYNC_TIMEOUT_MS,
