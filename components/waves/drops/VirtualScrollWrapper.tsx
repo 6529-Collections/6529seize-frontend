@@ -165,6 +165,16 @@ export default function VirtualScrollWrapper({
     const observer = new IntersectionObserver(
       ([entry]) => {
         const inView = !!entry?.isIntersecting;
+        // A navigation snapshot still needs the outgoing rows. WebKit can
+        // report them outside the viewport while preparing that snapshot.
+        if (
+          !inView &&
+          document.documentElement.hasAttribute(
+            "data-wave-navigation-transition"
+          )
+        ) {
+          return;
+        }
         if (dropId) {
           setWaveDropNearViewport({
             waveId,

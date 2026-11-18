@@ -76,6 +76,7 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  document.documentElement.removeAttribute("data-wave-navigation-transition");
   observe.mockClear();
   unobserve.mockClear();
   disconnect.mockClear();
@@ -136,6 +137,27 @@ test("renders placeholder when out of view", () => {
   expect(placeholder.getAttribute("style")).toContain("height: 123px");
   expect(placeholder.tagName).toBe("DIV");
   expect(placeholder.children).toHaveLength(0);
+});
+
+test("keeps outgoing messages available while a navigation snapshot is being prepared", () => {
+  const { container } = setup(DropSize.FULL, "drop-1");
+  const wrapper = container.firstChild as HTMLElement;
+  act(() => {
+    emitResize(wrapper, 123);
+    intersectionCb([{ isIntersecting: true }]);
+  });
+  document.documentElement.setAttribute(
+    "data-wave-navigation-transition",
+    "back"
+  );
+  act(() => intersectionCb([{ isIntersecting: false }]));
+  expect(screen.getByTestId("child")).toBeInTheDocument();
+  expect(isWaveDropNearViewport("wave", "drop-1")).toBe(true);
+
+  document.documentElement.removeAttribute("data-wave-navigation-transition");
+  act(() => intersectionCb([{ isIntersecting: false }]));
+  expect(screen.queryByTestId("child")).not.toBeInTheDocument();
+  expect(isWaveDropNearViewport("wave", "drop-1")).toBe(false);
 });
 
 test("preserves long-content expansion while children are virtualized", () => {
