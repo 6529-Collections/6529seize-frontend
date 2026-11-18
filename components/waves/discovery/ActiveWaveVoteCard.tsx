@@ -25,7 +25,7 @@ export function ActiveWaveVoteCard({
       compact
       headingDetails={
         <span
-          className={`tw-mt-1 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-medium tw-leading-4 ${hasNoSubmissions ? "tw-text-iron-500" : "tw-text-primary-300"}`}
+          className={`tw-mt-1 tw-flex tw-items-center tw-gap-1.5 tw-text-xs tw-font-normal tw-leading-4 ${hasNoSubmissions ? "tw-text-iron-500" : "tw-text-primary-300"}`}
         >
           {!hasSubmissionCount && (
             <ClockIcon aria-hidden="true" className="tw-size-3 tw-shrink-0" />
