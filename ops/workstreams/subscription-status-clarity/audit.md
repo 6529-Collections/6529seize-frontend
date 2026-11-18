@@ -84,13 +84,16 @@ the final approved copy and must not be treated as the final result.
 
 - 383 focused subscription/profile Jest tests across 24 suites passed.
 - 100 translation, dictionary and calendar-date tests across five suites passed.
-- Changed-source lint, application and Playwright type checks, Help Bot sync and
+- Changed-source lint, explicit coverage-source lint, application and Playwright
+  type checks, selector policy, manifest consistency, debt ratchet, Help Bot sync and
   documentation links passed. React Doctor scored 99/100, with structural
   warnings for the existing state-heavy subscriptions page and its component size.
 - The updated browser audit checks all 19 fixture states plus stale/recovery,
   payment reads, cutoff transitions, setup/history navigation, dialog focus,
   top-up option selection without submitting, tooltips, responsive overflow and
-  scoped axe checks. Final browser results are recorded in the PR.
+  scoped axe checks. All eight owner/visitor project cases passed across the
+  focused runs. The Android trace identified a fixed bottom-navigation overlap
+  in the test; the card is now scrolled into view before input checks.
 - Browser maintenance follows the approved changes: remove duplicated explanation
   assertions, retain the named Next unfunded fact, require Set up navigation,
   preserve primary Running low funding, and verify neutral expiry/payment handling.

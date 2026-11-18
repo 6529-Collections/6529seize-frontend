@@ -662,30 +662,39 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
       await expect(
         overview.getByText("Covered", { exact: true })
       ).toBeVisible();
+      // Bring the complete card above the native bottom navigation before input.
+      await overview.scrollIntoViewIfNeeded();
       const forecast = overview.getByRole("button", {
         name: "Forecast use",
         exact: true,
       });
-      await forecast.focus();
-      await forecast.press("Enter");
       const tooltip = page
         .getByRole("tooltip")
         .filter({ hasText: "Projected from current eligibility" });
-      await expect(tooltip).toBeVisible();
-      await page.keyboard.press("Escape");
-      await expect(tooltip).toBeHidden();
-      if (testInfo.project.use.hasTouch) {
-        // Begin the touch check outside the still-focused keyboard anchor.
-        await overview.getByRole("heading", { name: "1 drop funded" }).tap();
-        await forecast.tap();
+      await test.step("open forecast by keyboard and dismiss with Escape", async () => {
+        await forecast.focus();
+        await expect(forecast).toBeFocused();
+        await forecast.press("Enter");
         await expect(tooltip).toBeVisible();
-        await overview.getByRole("heading", { name: "1 drop funded" }).tap();
+        await page.keyboard.press("Escape");
         await expect(tooltip).toBeHidden();
+      });
+      if (testInfo.project.use.hasTouch) {
+        await test.step("open forecast by touch and dismiss outside", async () => {
+          // Begin the touch check outside the still-focused keyboard anchor.
+          await overview.getByRole("heading", { name: "1 drop funded" }).tap();
+          await forecast.tap();
+          await expect(tooltip).toBeVisible();
+          await overview.getByRole("heading", { name: "1 drop funded" }).tap();
+          await expect(tooltip).toBeHidden();
+        });
       }
-      await forecast.hover();
-      await expect(tooltip).toBeVisible();
-      await tooltip.screenshot({
-        path: testInfo.outputPath("forecast-tooltip.png"),
+      await test.step("open forecast by hover", async () => {
+        await forecast.hover();
+        await expect(tooltip).toBeVisible();
+        await tooltip.screenshot({
+          path: testInfo.outputPath("forecast-tooltip.png"),
+        });
       });
       await page.keyboard.press("Escape");
       if (owner) {
