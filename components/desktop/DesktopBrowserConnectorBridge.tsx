@@ -73,6 +73,7 @@ export default function DesktopBrowserConnectorBridge() {
         return;
       }
       setBrowserConnectorStatus("signing-in");
+      setup?.onStatus("signing-in");
       try {
         if (!canStoreAnotherWalletAccount(result.address)) {
           fail();

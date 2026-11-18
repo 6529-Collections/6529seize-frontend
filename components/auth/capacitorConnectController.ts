@@ -23,6 +23,11 @@ type ConnectModalView =
   | "AllWallets"
   | "ConnectingWalletConnectBasic";
 
+type OpenWebConnection = (
+  source: string,
+  signal?: AbortSignal
+) => Promise<void>;
+
 /**
  * The wallet modal's first view. 6529 Desktop has no browser extensions, so
  * its WalletConnect choice opens straight on the WalletConnect QR code ("Scan
@@ -56,7 +61,7 @@ async function openConnectEntryPoint({
 }: {
   readonly source: string;
   readonly isSigningOutAll: boolean;
-  readonly openWebConnection: (source: string) => Promise<void>;
+  readonly openWebConnection: OpenWebConnection;
   readonly openDefault: (source: string) => Promise<void>;
   readonly desktopWalletSetup?: DesktopWalletSetup | undefined;
 }): Promise<void> {
@@ -64,7 +69,10 @@ async function openConnectEntryPoint({
   if (!isSigningOutAll && isDesktopShell()) {
     logWalletConnectionAttempt(source);
     openDesktopConnectDialog(
-      () => openWebConnection(source),
+      () =>
+        desktopWalletSetup
+          ? openWebConnection(source, desktopWalletSetup.signal)
+          : openWebConnection(source),
       desktopWalletSetup
     );
     return;
@@ -83,7 +91,7 @@ export function openUserConnectionSurfaceForRuntime({
   readonly source: string;
   readonly isCapacitor: boolean;
   readonly isSigningOutAll: boolean;
-  readonly openWebConnection: (source: string) => Promise<void>;
+  readonly openWebConnection: OpenWebConnection;
   readonly setCapacitorView: (view: CapacitorConnectDialogView) => void;
   readonly desktopWalletSetup?: DesktopWalletSetup | undefined;
 }): Promise<void> {

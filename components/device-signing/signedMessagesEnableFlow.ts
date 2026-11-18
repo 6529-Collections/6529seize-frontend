@@ -5,7 +5,6 @@ import type {
 } from "@/components/auth/authSignedMessagesGrant";
 import { CONNECTED_ACTION_CLOSE_GRACE_MS } from "@/components/auth/useConnectedAction";
 import type { NetworkSwitchOutcome } from "@/hooks/device-signing/useSignedMessagesWallet";
-import { BROWSER_CONNECTOR_TIMEOUT_MS } from "@/lib/desktop/browserConnector";
 import type {
   DesktopWalletSetup,
   DesktopWalletSetupStatus,
@@ -27,6 +26,8 @@ export const REMOTE_WALLET_STALL_MS = 20_000;
 export const RECONNECT_WAIT_MS = 8_000;
 /** Time for the Desktop forwarding connector to attach after browser sign-in. */
 export const DESKTOP_SIGNER_ATTACH_TIMEOUT_MS = 30_000;
+/** Bound Desktop shell startup and session login independently of the browser link. */
+const DESKTOP_SHELL_STEP_TIMEOUT_MS = 30_000;
 /** How long switching to the right account still continues by itself. */
 export const WRONG_ACCOUNT_RESUME_MS = 120_000;
 
@@ -113,7 +114,10 @@ interface PendingStep {
   readonly resumeUntil: number;
   modalOpened: boolean;
   connectAbort?: AbortController;
-  desktopStatus?: "picker" | "browser" | "signed-in";
+  desktopStatus?: Exclude<
+    DesktopWalletSetupStatus,
+    "walletconnect" | "cancelled" | "failed"
+  >;
 }
 
 interface SignatureAttempt {
@@ -298,7 +302,11 @@ export class SignedMessagesEnableFlow {
       }
       return;
     }
-    if (step.desktopStatus === "browser") {
+    if (
+      step.desktopStatus &&
+      step.desktopStatus !== "picker" &&
+      step.desktopStatus !== "signed-in"
+    ) {
       return;
     }
     if (current.canSignActiveWallet) {
@@ -439,18 +447,20 @@ export class SignedMessagesEnableFlow {
         delete step.desktopStatus;
         step.modalOpened = true;
         break;
-      case "picker":
-      case "browser":
       case "signed-in":
+      case "signing-in":
+      case "opening-browser":
+      case "browser":
+      case "picker":
         step.desktopStatus = status;
         this.closeTimer = clearTimer(this.closeTimer);
-        if (status !== "picker") {
-          // Allow the browser to return, then give wagmi time to attach.
+        // The browser connector owns the expiry while waiting for the link.
+        if (status !== "picker" && status !== "browser") {
           this.desktopTimer = setTimeout(
             () => this.onDesktopConnectStatus(step, "failed"),
-            status === "browser"
-              ? BROWSER_CONNECTOR_TIMEOUT_MS
-              : DESKTOP_SIGNER_ATTACH_TIMEOUT_MS
+            status === "signed-in"
+              ? DESKTOP_SIGNER_ATTACH_TIMEOUT_MS
+              : DESKTOP_SHELL_STEP_TIMEOUT_MS
           );
         }
     }
@@ -590,7 +600,7 @@ export class SignedMessagesEnableFlow {
       // An abandoned attempt only matters if the wallet still approved it.
       if (result.success) {
         this.deps.report(source, "enabled");
-        if (!this.signing) {
+        if (!this.signing && !this.pending) {
           this.settle(null);
         }
         snapshot.onEnabled();

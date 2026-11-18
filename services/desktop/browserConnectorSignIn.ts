@@ -91,7 +91,7 @@ export async function startBrowserConnectorSignIn(
   const current = operation;
   const isCurrent = () => current === operation && !setup?.signal.aborted;
   if (!isCurrent()) return;
-  setup?.onStatus("browser");
+  setup?.onStatus("opening-browser");
   const info = await api.getInfo();
   // Cancelled, or replaced by a newer start, while the shell answered.
   // Everything below runs without another await, so this one check covers
@@ -117,6 +117,8 @@ export async function startBrowserConnectorSignIn(
     }, BROWSER_CONNECTOR_TIMEOUT_MS),
   };
   setBrowserConnectorStatus("waiting");
+  setup?.onStatus("browser");
+  if (!isCurrent()) return;
   try {
     api.openExternal(
       buildBrowserConnectorUrl({

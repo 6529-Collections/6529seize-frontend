@@ -83,6 +83,21 @@ describe("DesktopBrowserWalletBridge", () => {
     expect(connectAsync).toHaveBeenCalledWith({ connector: forwarding });
   });
 
+  it("attaches for the new active profile when a previous connection finishes", async () => {
+    flagged.add(OTHER);
+    const connection = Promise.withResolvers<undefined>();
+    connectAsync.mockReturnValueOnce(connection.promise);
+    const { rerender } = render(<DesktopBrowserWalletBridge />);
+    expect(connectAsync).toHaveBeenCalledTimes(1);
+
+    activeAddress = OTHER;
+    rerender(<DesktopBrowserWalletBridge />);
+    expect(connectAsync).toHaveBeenCalledTimes(1);
+    await act(async () => connection.reject(new Error("profile changed")));
+
+    expect(connectAsync).toHaveBeenCalledTimes(2);
+  });
+
   it("leaves a WalletConnect connection alone and stops offering forwarding", () => {
     account = {
       status: "connected",

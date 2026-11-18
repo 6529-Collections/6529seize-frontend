@@ -13,7 +13,9 @@ type OpenWalletConnect = () => Promise<void>;
 
 export type DesktopWalletSetupStatus =
   | "picker"
+  | "opening-browser"
   | "browser"
+  | "signing-in"
   | "signed-in"
   | "walletconnect"
   | "cancelled"
@@ -27,6 +29,7 @@ export interface DesktopWalletSetup {
 }
 
 let openWalletConnect: OpenWalletConnect | null = null;
+let pickerVersion = 0;
 let walletSetup: DesktopWalletSetup | undefined;
 let stopWatchingAbort: (() => void) | undefined;
 const listeners = new Set<() => void>();
@@ -45,6 +48,7 @@ export function openDesktopConnectDialog(
   else if (setup) cancelBrowserConnectorSignIn();
   // A finished or failed earlier browser sign-in must not show again.
   resetFinishedBrowserConnectorStatus();
+  pickerVersion += 1;
   openWalletConnect = open;
   walletSetup = setup;
   if (setup) {
@@ -74,6 +78,9 @@ export function closeDesktopConnectDialog(
 
 export const getDesktopWalletSetup = (): DesktopWalletSetup | undefined =>
   walletSetup;
+
+/** Keep async callbacks scoped to the picker that started them. */
+export const getDesktopConnectPickerVersion = (): number => pickerVersion;
 
 export const getDesktopConnectDialogOpener = (): OpenWalletConnect | null =>
   openWalletConnect;

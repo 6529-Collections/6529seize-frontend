@@ -127,8 +127,13 @@ describe("turn on signed messages flow", () => {
     jest.advanceTimersByTime(10_000);
     expect(harness.isBusy()).toBe(true);
 
+    harness.setup.onStatus("opening-browser");
+    jest.advanceTimersByTime(20_000);
     harness.setup.onStatus("browser");
-    jest.advanceTimersByTime(30_000);
+    jest.advanceTimersByTime(BROWSER_CONNECTOR_TIMEOUT_MS - 1);
+    harness.setup.onStatus("signing-in");
+    jest.advanceTimersByTime(10_000);
+    expect(harness.requestGrant).not.toHaveBeenCalled();
     harness.setup.onStatus("signed-in");
     jest.advanceTimersByTime(DESKTOP_SIGNER_ATTACH_TIMEOUT_MS - 1);
     expect(harness.isBusy()).toBe(true);
@@ -159,9 +164,7 @@ describe("turn on signed messages flow", () => {
       const harness = createDesktopHarness();
       harness.setup.onStatus("browser");
       if (reason === "cancelled") harness.setup.onStatus("cancelled");
-      if (reason === "expired") {
-        jest.advanceTimersByTime(BROWSER_CONNECTOR_TIMEOUT_MS);
-      }
+      if (reason === "expired") harness.setup.onStatus("failed");
       if (reason === "profile changed") harness.set({ address: undefined });
 
       expect(harness.setup.signal.aborted).toBe(true);
@@ -564,6 +567,22 @@ describe("turn on signed messages flow", () => {
       harness.set({ isConnectOpen: false, canSignActiveWallet: true });
       await flush();
       expect(harness.requestGrant).toHaveBeenCalledTimes(2);
+    });
+
+    it("keeps a newer pairing pending when an earlier signature succeeds late", async () => {
+      const harness = createHarness({ isRemoteWallet: true });
+      harness.flow.enable("notice");
+      await flush();
+      harness.askWallet();
+      jest.advanceTimersByTime(REMOTE_WALLET_STALL_MS);
+      harness.flow.reconnect();
+      harness.set({ canSignActiveWallet: false, isConnectOpen: true });
+
+      await harness.answer({ success: true });
+
+      expect(harness.onEnabled).toHaveBeenCalledTimes(1);
+      expect(harness.isBusy()).toBe(true);
+      expect(harness.status()).toEqual({ kind: "connecting" });
     });
 
     it("treats a failed phone signature as a pairing problem, not a locked wallet", async () => {

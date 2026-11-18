@@ -173,6 +173,29 @@ describe("connect entry points in 6529 Desktop", () => {
     );
   });
 
+  it("does not open AppKit for a cancelled Desktop phone-wallet handoff", async () => {
+    installDesktopShell();
+    renderProvider();
+    const controller = new AbortController();
+    await act(async () => {
+      await context?.seizeConnectFresh({
+        address: `0x${"a".repeat(40)}`,
+        signal: controller.signal,
+        onStatus: jest.fn(),
+      });
+    });
+    const handoff = getDesktopConnectDialogOpener();
+    if (!handoff) throw new Error("Desktop picker did not open");
+
+    await act(async () => {
+      const opening = handoff();
+      controller.abort();
+      await opening;
+    });
+
+    expect(mockOpen).not.toHaveBeenCalled();
+  });
+
   it("keeps opening the wallet list directly on the web", async () => {
     renderProvider();
 

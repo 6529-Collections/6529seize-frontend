@@ -28,7 +28,6 @@ import {
 } from "@/components/providers/walletChunkRecovery";
 import { SecurityEventType } from "@/types/security";
 import {
-  createConnectionEventContext,
   createValidationEventContext,
   logError,
   logSecurityEvent,
@@ -47,7 +46,6 @@ import { SeizeConnectContext } from "./seizeConnectContextValue";
 import {
   AuthenticationError,
   createWalletError,
-  WalletConnectionError,
   WalletDisconnectionError,
 } from "./seizeConnectErrors";
 import { useSeizeConnectProviderEffects } from "./seizeConnectEffects";
@@ -59,12 +57,12 @@ import {
 } from "./seizeConnectWalletState";
 import { getSeizeConnectImpersonation } from "./seizeConnectImpersonation";
 import { useAddConnectedAccount } from "./useAddConnectedAccount";
+import { useOpenConnectModal } from "./useOpenConnectModal";
 import { useSignOutAllTransaction } from "./useSignOutAllTransaction";
 import CapacitorConnectFlow from "./CapacitorConnectFlow";
 import type { CapacitorConnectDialogView } from "./CapacitorConnectDialog";
 import type { DesktopWalletSetup } from "@/services/desktop/desktopConnectDialog";
 import {
-  defaultConnectModalView,
   logWalletConnectionAttempt,
   openFreshUserConnection,
   openUserConnectionSurfaceForRuntime,
@@ -258,72 +256,19 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   const isActiveAppWalletConnector =
     activeConnectorType === APP_WALLET_CONNECTOR_TYPE;
 
-  const openConnectModal = useCallback(
-    async (source: string, view = defaultConnectModalView()): Promise<void> => {
-      if (isSigningOutAllRef.current) {
-        return;
-      }
-      const signOutGeneration = getSignOutAllGeneration();
-
-      try {
-        clearConnectIntentHandoffTimeout();
-        setIsConnectIntentWaitingForAppKit(true);
-        // After a failed wallet chunk the stack can look ready while the
-        // modal cannot open; waitForAppKitReady reloads the page then.
-        if (!isAppKitReady || hasWalletChunkLoadFailed()) {
-          await waitForAppKitReady();
-        }
-
-        if (!isMountedRef.current) {
-          return;
-        }
-        if (hasSignOutAllGenerationChanged(signOutGeneration)) {
-          clearConnectIntentWaitingForAppKit();
-          return;
-        }
-
-        const openAppKit = await appKitModalBridgeStore.waitForOpen();
-
-        if (hasSignOutAllGenerationChanged(signOutGeneration)) {
-          clearConnectIntentWaitingForAppKit();
-          return;
-        }
-
-        await openAppKit({ view });
-
-        if (hasSignOutAllGenerationChanged(signOutGeneration)) {
-          clearConnectIntentWaitingForAppKit();
-          await appKitModalBridgeStore.close();
-          return;
-        }
-
-        logSecurityEvent(
-          SecurityEventType.WALLET_MODAL_OPENED,
-          createConnectionEventContext(source)
-        );
-        scheduleConnectIntentHandoffFallback();
-      } catch (error) {
-        clearConnectIntentWaitingForAppKit();
-        const connectionError = new WalletConnectionError(
-          "Failed to open wallet connection modal",
-          error
-        );
-        logError(source, connectionError);
-        throw connectionError;
-      }
-    },
-    [
-      clearConnectIntentHandoffTimeout,
-      clearConnectIntentWaitingForAppKit,
-      getSignOutAllGeneration,
-      hasSignOutAllGenerationChanged,
-      appKitModalBridgeStore,
-      isAppKitReady,
-      isSigningOutAllRef,
-      scheduleConnectIntentHandoffFallback,
-      waitForAppKitReady,
-    ]
-  );
+  const openConnectModal = useOpenConnectModal({
+    appKitModalBridgeStore,
+    clearConnectIntentHandoffTimeout,
+    clearConnectIntentWaitingForAppKit,
+    getSignOutAllGeneration,
+    hasSignOutAllGenerationChanged,
+    isAppKitReady,
+    isMountedRef,
+    isSigningOutAllRef,
+    scheduleConnectIntentHandoffFallback,
+    setIsConnectIntentWaitingForAppKit,
+    waitForAppKitReady,
+  });
 
   const openExternalWallets = useCallback(
     () => openConnectModal("capacitorExternalWallets", "AllWallets"),
@@ -331,13 +276,13 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const seizeConnectOrThrow = useCallback(
-    async (source: string): Promise<void> => {
-      if (isSigningOutAllRef.current) {
+    async (source: string, signal?: AbortSignal): Promise<void> => {
+      if (isSigningOutAllRef.current || signal?.aborted) {
         return;
       }
 
       logWalletConnectionAttempt(source);
-      await openConnectModal(source);
+      await openConnectModal(source, undefined, signal);
     },
     [isSigningOutAllRef, openConnectModal]
   );
