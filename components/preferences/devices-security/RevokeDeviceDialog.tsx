@@ -122,10 +122,12 @@ export function RevokeDeviceDialog({
             <>
               <RevokeThisBrowserDetails
                 signedPosts={isOn(device, "signedPosts")}
-                // Deleted here only when the encrypted device is this
-                // browser's own (its stored device).
+                // Deleted here only by a signed revoke of this browser's
+                // own encrypted device; an unsigned one deletes nothing.
                 encryptedDms={
-                  isOn(device, "encryptedDms") && ownsEncryptedDevice(device)
+                  signed &&
+                  isOn(device, "encryptedDms") &&
+                  ownsEncryptedDevice(device)
                 }
                 setUpBackup={{
                   onClick: () => {
@@ -135,9 +137,15 @@ export function RevokeDeviceDialog({
                   disabled: revoking,
                 }}
               />
-              {isOn(device, "encryptedDms") && !ownsEncryptedDevice(device) ? (
+              {isOn(device, "encryptedDms") &&
+              !(signed && ownsEncryptedDevice(device)) ? (
                 <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-                  {t(locale, "devicesSecurity.revoke.otherDeviceChats")}
+                  {t(
+                    locale,
+                    ownsEncryptedDevice(device)
+                      ? "devicesSecurity.revoke.keepsHere"
+                      : "devicesSecurity.revoke.otherDeviceChats"
+                  )}
                 </p>
               ) : null}
             </>

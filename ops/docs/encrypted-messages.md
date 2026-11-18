@@ -583,20 +583,22 @@ opening the tab starts encrypted messages in that browser so backup can show.
 encrypted chats saved on it; posts it signed stay verifiable. If the device
 changes while the dialog is open (for example its encrypted DMs are linked
 meanwhile), confirming revokes nothing: the dialog shows what will stop now
-and asks you to confirm again. Whether a revoke deletes this browser's
-encrypted chats depends on this browser's own stored device, also while
-encrypted messages aren't running here: a revoke of a device whose
-encrypted DMs are on another device says that device keeps its chats. If a
-revoke goes through but this browser's encrypted data can't be removed, a
-notice says so with **Remove this browser’s data**, which tries the removal
-again without revoking again. Revoking this device opens its own
+and asks you to confirm again. A revoke deletes encrypted chats only when
+encrypted messages run in the browser you revoke from, which signs it: a
+revoke of a device whose encrypted DMs are on another device says that
+device keeps its chats, and one this browser can't sign never deletes
+anything here. When this browser's own encrypted device was revoked that
+way, a notice says its encrypted chats are still saved in this browser and
+offers **Remove this browser’s encrypted data**, which asks first and removes
+them only while that device is still the one saved here. Revoking this device opens its own
 **Revoke this browser?** dialog: it names the browser you're using, says what
 stops, and with backup on says that only messages included in your last
 backup can be restored. With backup off it warns
 that the encrypted chats in this browser can't be restored afterwards and
-offers **Set up backup first**. Revoking it removes its encrypted messages and
-keys from this browser right away and shows the card to turn encrypted
-messages on again. Your device's data is removed only when
+offers **Set up backup first**. Revoked with encrypted messages running here,
+it removes its encrypted messages and keys from this browser right away and
+shows the card to turn encrypted messages on again; revoked without them, it
+says the chats stay and offers their removal afterwards. Your device's data is removed only when
 the revocation verifies on it (it came from that device, or from a device of
 yours this device trusts). If 6529.io lists this device as revoked but the
 revocation can't be confirmed, the device stops sending and receiving
