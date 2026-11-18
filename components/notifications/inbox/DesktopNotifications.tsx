@@ -210,7 +210,7 @@ export default function DesktopNotifications({
             setPreview({ pathname, open: true });
           }
         }}
-        className="tw-flex tw-h-[2.875rem] tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white"
+        className="tw-flex tw-h-[var(--sidebar-row-height,2.875rem)] tw-w-full tw-items-center tw-gap-2 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-2 tw-text-left tw-text-base tw-font-medium tw-text-iron-400 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white"
       >
         <span className="tw-flex tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center">
           <span className="tw-relative">

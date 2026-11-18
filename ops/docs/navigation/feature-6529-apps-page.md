@@ -5,13 +5,15 @@ Parent: [Navigation Index](README.md)
 ## Overview
 
 The `6529 Apps` page presents official mobile and desktop downloads in one
-place, followed by a third section for `6529 Validator`. The whole Validator
-section links to `/validator`, with the description `Read more about 6529
-validator`. Mobile and desktop options remain visible together rather than
+place, followed by a third section for `6529 Validator` and a fourth for
+`6529 AI`. The whole Validator section links to `/validator`, with the
+description `Read more about 6529 validator`; the whole 6529 AI section links
+to `/ai`, with the description `Run open-weights AI models on your own
+computer, and chat with them in your browser`. Mobile and desktop options remain visible together rather than
 being hidden behind tabs.
 
 Ask `@help6529` "is there an app?" or "is there a 6529 app?" to find both
-6529 Mobile and 6529 Desktop and the official download page. You do not need to
+6529 Mobile and 6529 Desktop Classic and the official Apps page. You do not need to
 choose a platform before asking.
 
 ## Location in the Site
@@ -35,7 +37,7 @@ choose a platform before asking.
 
 1. Open the `6529 Apps` page.
 2. Use `6529 Mobile` to choose the iOS App Store or Android Google Play.
-3. The matching desktop OS expands automatically when detected. Expand Windows,
+3. Under **6529 Desktop Classic**, the matching desktop OS expands automatically when detected. Expand Windows,
    macOS, or Linux yourself to choose another platform; phones, tablets and
    unrecognized devices start with all desktop sections collapsed.
 4. Choose the version appropriate for your OS, then the architecture or package
@@ -47,11 +49,15 @@ choose a platform before asking.
    a direct `Validator` row in the primary navigation and can search `Pages`
    for `validator`, `6529 Validator`, or `/validator`. Newcomers see `Join 6529`
    in navigation and search instead.
+6. Select anywhere in the `6529 AI` section to download 6529 AI from `/ai`.
+   Everyone also gets a `6529 AI` row in the primary navigation, after the
+   `Join 6529` / `Validator` slot, and can search `Pages` for `6529 AI` or
+   `AI`.
 
 ## Common Scenarios
 
 - Install 6529 Mobile on an iPhone, iPad, or Android device.
-- Download the latest 6529 Desktop release for Windows, macOS, or Linux.
+- Download the latest 6529 Desktop Classic release for Windows, macOS, or Linux.
 - Find all official app options from one route without opening the Share modal.
 - Search with a broad term such as `apps`, `desktop`, or `mobile`.
 

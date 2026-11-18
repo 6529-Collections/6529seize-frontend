@@ -48,13 +48,16 @@ jest.mock("@/components/waves/WaveServerFeedSeed", () => ({
   WaveServerFeedSeedGate: ({ children }: any) => children,
 }));
 
-jest.mock("@/app/waves/page.client", () => ({
+jest.mock("@/components/waves/WavesView", () => ({
   __esModule: true,
-  default: ({
-    publicFeedFallback,
-  }: {
-    readonly publicFeedFallback?: ReactNode;
-  }) => <div data-testid="waves-page-client">{publicFeedFallback}</div>,
+  default: () => null,
+}));
+
+jest.mock("@/components/waves/PublicWaveFeedGate", () => ({
+  __esModule: true,
+  default: ({ fallback }: { readonly fallback?: ReactNode }) => (
+    <div data-testid="waves-page-client">{fallback}</div>
+  ),
 }));
 
 const makeWave = (

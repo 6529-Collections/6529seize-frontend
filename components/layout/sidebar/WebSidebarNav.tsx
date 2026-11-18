@@ -10,6 +10,10 @@ import { useAuth } from "@/components/auth/Auth";
 import ChatBubbleIcon from "@/components/common/icons/ChatBubbleIcon";
 import DropForgeIcon from "@/components/common/icons/DropForgeIcon";
 import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
+import {
+  AI_NAVIGATION,
+  isAiNavigationActive,
+} from "@/components/navigation/aiNavigation";
 import WatchTowerIcon from "@/components/common/icons/WatchTowerIcon";
 import {
   DROP_FORGE_PATH,
@@ -307,12 +311,21 @@ const WebSidebarNav = React.forwardRef<
         "[data-sidebar-scroll='true']"
       );
 
+      // Row density can change when a control appears while a flyout is open.
+      const observer =
+        typeof ResizeObserver === "undefined"
+          ? undefined
+          : new ResizeObserver(updateAnchor);
+      // eslint-disable-next-line react-you-might-not-need-an-effect/no-adjust-state-on-prop-change -- Observing the trigger schedules a browser geometry callback.
+      observer?.observe(submenuTrigger);
+
       browserWindow.addEventListener("resize", updateAnchor);
       scrollContainer?.addEventListener("scroll", updateAnchor, {
         passive: true,
       });
 
       return () => {
+        observer?.disconnect();
         browserWindow.removeEventListener("resize", updateAnchor);
         scrollContainer?.removeEventListener("scroll", updateAnchor);
       };
@@ -416,7 +429,11 @@ const WebSidebarNav = React.forwardRef<
 
   return (
     <nav
-      className="tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-px-3 tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+      className={`tw-px-3 ${
+        isCollapsed
+          ? "tw-pt-4"
+          : "tw-mt-4 tw-flex tw-h-full tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 desktop-hover:hover:tw-scrollbar-thumb-iron-300"
+      }`}
       aria-label="Desktop navigation"
     >
       <ul className="tw-m-0 tw-list-none tw-p-0">
@@ -453,6 +470,15 @@ const WebSidebarNav = React.forwardRef<
             }
             collapsed={isCollapsed}
             label={membershipNavigation.label}
+          />
+        </li>
+        <li>
+          <WebSidebarNavItem
+            href={AI_NAVIGATION.href}
+            icon={AI_NAVIGATION.icon}
+            active={isAiNavigationActive(safePathname)}
+            collapsed={isCollapsed}
+            label={AI_NAVIGATION.label}
           />
         </li>
 

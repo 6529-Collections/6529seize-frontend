@@ -66,6 +66,12 @@ function getNoticeCopy(
         body: t(locale, "signedMessages.notice.enable.body"),
         action: t(locale, "signedMessages.notice.enable.action"),
       };
+    case "restore":
+      return {
+        title: t(locale, "signedMessages.notice.restore.title"),
+        body: t(locale, "signedMessages.notice.restore.body"),
+        action: t(locale, "signedMessages.notice.restore.action"),
+      };
   }
 }
 
@@ -140,7 +146,11 @@ function SignedMessagesNoticeContent({
       void revoke(model.grant);
       return;
     }
-    if (model.kind === "enable" || model.kind === "expired") {
+    if (
+      model.kind === "enable" ||
+      model.kind === "expired" ||
+      model.kind === "restore"
+    ) {
       openDeviceSetup(canEnableEncryption ? "both" : "posts");
       return;
     }
