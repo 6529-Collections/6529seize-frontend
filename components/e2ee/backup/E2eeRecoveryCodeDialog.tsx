@@ -1,10 +1,20 @@
 "use client";
 
-import { useId, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
-import type { E2eeBackupManager, PreparedBackup } from "@/lib/e2ee/backup";
+import type {
+  E2eeBackupManager,
+  E2eeBackupSnapshot,
+  PreparedBackup,
+} from "@/lib/e2ee/backup";
 import { E2eeDialog } from "../ui/E2eeDialog";
 import { getBackupErrorKey } from "./e2eeBackupErrors";
 
@@ -15,6 +25,12 @@ interface E2eeRecoveryCodeDialogProps {
   readonly replacing: boolean;
   readonly onClose: () => void;
   readonly onDone: () => void;
+  /**
+   * The next step once the backup was replaced or turned off on another
+   * device meanwhile (nothing left to retry): restore it, or start again.
+   */
+  readonly onRestore?: (() => void) | undefined;
+  readonly onTurnOn?: (() => void) | undefined;
 }
 
 function downloadCode(
@@ -39,10 +55,22 @@ function downloadCode(
   URL.revokeObjectURL(url);
 }
 
+/** The new backup is active and everything is uploaded. */
+const isUploaded = (snapshot: E2eeBackupSnapshot): boolean =>
+  snapshot.phase === "on" &&
+  !snapshot.uploading &&
+  !snapshot.busy &&
+  snapshot.lastError === null;
+
 /**
  * Shows a new recovery code once, with copy and download, and turns the
  * backup on only after the user confirms they saved it. The code is never
- * stored; closing the dialog discards it.
+ * stored; closing the dialog discards it. It reports done only once the new
+ * backup is active and fully uploaded: while a queued run (a conflict or
+ * fork repair) finishes it, the dialog says it is backing up, and a failed
+ * run (also a failed first upload) shows its error with Try again, which
+ * carries on with the same backup. A backup replaced or turned off on
+ * another device meanwhile offers restore or turning on again instead.
  */
 export function E2eeRecoveryCodeDialog({
   manager,
@@ -50,14 +78,56 @@ export function E2eeRecoveryCodeDialog({
   replacing,
   onClose,
   onDone,
+  onRestore,
+  onTurnOn,
 }: E2eeRecoveryCodeDialogProps) {
   const locale = useBrowserLocale();
   const codeId = useId();
   const savedId = useId();
   const [saved, setSaved] = useState(false);
-  const [pending, setPending] = useState(false);
+  // "waiting": the backup exists and a queued run still has to finish its
+  // upload; "retrying": Try again is running on that same backup.
+  const [stage, setStage] = useState<
+    "code" | "confirming" | "waiting" | "retrying"
+  >("code");
   const [copyKey, setCopyKey] = useState<MessageKey | null>(null);
   const [errorKey, setErrorKey] = useState<MessageKey | null>(null);
+  const pending = stage === "confirming" || stage === "retrying";
+  const waiting = stage === "waiting" || stage === "retrying";
+  const snapshot = useSyncExternalStore(
+    manager.subscribe,
+    manager.getSnapshot,
+    manager.getSnapshot
+  );
+  const runFailed = waiting && !snapshot.busy && snapshot.lastError !== null;
+  const shownErrorKey =
+    errorKey ?? (runFailed ? getBackupErrorKey(snapshot.lastError) : null);
+  // Gone on the server: retrying can't upload anything.
+  const replaced = shownErrorKey === "e2ee.backup.error.replaced";
+
+  // Done is reported once, whichever path gets there first.
+  const reported = useRef(false);
+  const finish = () => {
+    if (!reported.current) {
+      reported.current = true;
+      onDone();
+    }
+  };
+
+  // Done once the queued run has finished the upload.
+  useEffect(() => {
+    if (!waiting) {
+      return;
+    }
+    const check = () => {
+      if (!reported.current && isUploaded(manager.getSnapshot())) {
+        reported.current = true;
+        onDone();
+      }
+    };
+    check();
+    return manager.subscribe(check);
+  }, [manager, onDone, waiting]);
 
   const close = () => {
     if (!pending) {
@@ -77,14 +147,85 @@ export function E2eeRecoveryCodeDialog({
   };
 
   const confirm = async () => {
-    setPending(true);
+    setStage("confirming");
     setErrorKey(null);
     try {
-      await manager.confirmBackup(prepared);
-      setPending(false);
-      onDone();
+      // False once the backup exists but isn't complete: a queued run or a
+      // failed upload (its error is in the snapshot) finishes it.
+      const uploaded = await manager.confirmBackup(prepared);
+      setStage(uploaded ? "code" : "waiting");
+      if (uploaded) {
+        finish();
+      }
     } catch (error) {
-      setPending(false);
+      // Nothing was created: confirming again starts the backup afresh.
+      setStage("code");
+      setErrorKey(getBackupErrorKey(error));
+    }
+  };
+
+  const nextStep = () => {
+    if (snapshot.phase === "available" && onRestore) {
+      return (
+        <Button variant="action" size="md" onClick={onRestore}>
+          {t(locale, "e2ee.backup.action.restore")}
+        </Button>
+      );
+    }
+    if (snapshot.phase === "off" && onTurnOn) {
+      return (
+        <Button variant="action" size="md" onClick={onTurnOn}>
+          {t(locale, "e2ee.backup.action.turnOn")}
+        </Button>
+      );
+    }
+    return null;
+  };
+
+  const primaryAction = () => {
+    if (replaced) {
+      return nextStep();
+    }
+    if (runFailed) {
+      return (
+        <Button
+          variant="action"
+          size="md"
+          onClick={() => void retry()}
+          loading={pending}
+        >
+          {t(locale, "e2ee.action.retry")}
+        </Button>
+      );
+    }
+    return (
+      <Button
+        variant="action"
+        size="md"
+        onClick={() => void confirm()}
+        loading={pending || waiting}
+        disabled={!saved}
+      >
+        {t(
+          locale,
+          replacing ? "e2ee.backup.code.confirmNew" : "e2ee.backup.code.confirm"
+        )}
+      </Button>
+    );
+  };
+
+  /** Carries on with the same backup and code after a failed run. */
+  const retry = async () => {
+    setStage("retrying");
+    setErrorKey(null);
+    try {
+      const uploaded = await manager.backupNow();
+      setStage("waiting");
+      if (uploaded) {
+        finish();
+      }
+    } catch (error) {
+      setStage("waiting");
       setErrorKey(getBackupErrorKey(error));
     }
   };
@@ -117,22 +258,13 @@ export function E2eeRecoveryCodeDialog({
             onClick={close}
             disabled={pending}
           >
-            {t(locale, "e2ee.action.cancel")}
-          </Button>
-          <Button
-            variant="action"
-            size="md"
-            onClick={() => void confirm()}
-            loading={pending}
-            disabled={!saved}
-          >
+            {/* Once the backup exists, closing doesn't stop its upload. */}
             {t(
               locale,
-              replacing
-                ? "e2ee.backup.code.confirmNew"
-                : "e2ee.backup.code.confirm"
+              waiting || replaced ? "e2ee.action.close" : "e2ee.action.cancel"
             )}
           </Button>
+          {primaryAction()}
         </>
       }
     >
@@ -179,9 +311,14 @@ export function E2eeRecoveryCodeDialog({
             {t(locale, "e2ee.backup.code.saved")}
           </label>
         </div>
-        {errorKey ? (
+        {waiting && !runFailed ? (
+          <output className="tw-m-0 tw-block tw-text-sm tw-text-iron-300">
+            {t(locale, "e2ee.backup.status.uploading")}
+          </output>
+        ) : null}
+        {shownErrorKey ? (
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-rose-300">
-            {t(locale, errorKey)}
+            {t(locale, shownErrorKey)}
           </p>
         ) : null}
       </div>
