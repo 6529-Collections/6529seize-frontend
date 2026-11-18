@@ -14,8 +14,9 @@ cards with cover artwork on the left, single-line ellipsized
 titles and single-line description previews. Approval waves show how many
 submissions are open for voting. Other waves show the voting end or next result
 when available, otherwise `Voting open`.
-The Memes - Main Stage appears first whenever it has active voting. The
-remaining waves are ordered by total Wave REP, highest first.
+The Memes - Main Stage appears first whenever it has active voting. Remaining
+waves with active leaderboard entries appear above waves with zero. Within
+each group, the waves with the highest total Wave REP appear first.
 Use `Load more` to browse additional results.
 
 This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of
