@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { E2eeDialog } from "@/components/e2ee/ui/E2eeDialog";
 import { tCount } from "@/components/e2ee/e2eeFormat";
 import Button from "@/components/utils/button/Button";
@@ -9,6 +9,13 @@ import { formatList } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { SecurityDevice } from "./classifyDevices";
 import { DeviceMeta, formatDeviceWithPermissions } from "./DeviceParts";
+
+/** What a revoke of the device stops: it must match what was reviewed. */
+const scopeOf = (device: SecurityDevice): string =>
+  [
+    device.signedPosts?.status === "active",
+    device.encryptedDms?.status === "active",
+  ].join(":");
 
 /**
  * One reviewed revoke for earlier setups of this browser. The devices listed
@@ -45,6 +52,12 @@ export function CleanUpDialog({
   const deletesChats =
     signed &&
     selected.some((device) => device.encryptedDms?.status === "active");
+  // The latest eligible list, read before each revoke of the batch: a
+  // device may change or stop being eligible while earlier ones run.
+  const latest = useRef(devices);
+  useEffect(() => {
+    latest.current = devices;
+  });
 
   const close = () => {
     if (pending) {
@@ -62,8 +75,13 @@ export function CleanUpDialog({
     const { revoked, failed } = await selected.reduce<
       Promise<{ readonly revoked: number; readonly failed: readonly string[] }>
     >(
-      async (previous, device) => {
+      async (previous, confirmed) => {
         const outcome = await previous;
+        const device = latest.current.find((item) => item.id === confirmed.id);
+        if (!device || scopeOf(device) !== scopeOf(confirmed)) {
+          // No longer eligible, or not what was reviewed: skipped.
+          return outcome;
+        }
         try {
           await onRevoke(device);
           return { ...outcome, revoked: outcome.revoked + 1 };

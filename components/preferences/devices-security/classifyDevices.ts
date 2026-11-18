@@ -71,6 +71,11 @@ export interface ClassifyDevicesInput {
   readonly encryptedDevices: readonly EncryptedDeviceInput[];
   /** Lowercase public keys this browser holds for signed posts. */
   readonly ownSigningKeys: readonly string[];
+  /**
+   * This browser's encrypted-DMs device key from its own storage (with or
+   * without a running engine); its device is this browser's.
+   */
+  readonly ownEncryptedDeviceKey?: string | null | undefined;
   readonly now: number;
 }
 
@@ -146,11 +151,20 @@ function buildDevice(
 /** Merges each grant with the encrypted-DMs device that shares it. */
 function mergeDevices({
   grants,
-  encryptedDevices,
+  encryptedDevices: listed,
   ownSigningKeys,
+  ownEncryptedDeviceKey,
   now,
 }: ClassifyDevicesInput): SecurityDevice[] {
   const ownKeys = new Set(ownSigningKeys.map((key) => key.toLowerCase()));
+  const ownDevice = ownEncryptedDeviceKey?.toLowerCase() ?? null;
+  // The API list can't tell which device is this browser: the stored key
+  // can, engine or not.
+  const encryptedDevices = listed.map((device) =>
+    !device.isThisDevice && device.deviceKey.toLowerCase() === ownDevice
+      ? { ...device, isThisDevice: true }
+      : device
+  );
   const grantIds = new Set(grants.map((grant) => grant.id));
   // One device per grant; a second device claiming the same grant (which
   // shouldn't happen) is still listed on its own rather than lost.

@@ -17,6 +17,10 @@ import {
 const isOn = (device: SecurityDevice, key: "signedPosts" | "encryptedDms") =>
   device[key]?.status === "active";
 
+/** The device's encrypted DMs are this browser's own stored device. */
+const ownsEncryptedDevice = (device: SecurityDevice) =>
+  device.encryptedDevice?.isThisDevice === true;
+
 /**
  * What stops, and what happens to its encrypted history: a revoke signed
  * here lets that device verify it and delete its chats; an unsigned one
@@ -111,17 +115,28 @@ export function RevokeDeviceDialog({
         <>
           <DeviceMeta locale={locale} device={device} />
           {device.isThisDevice ? (
-            <RevokeThisBrowserDetails
-              signedPosts={isOn(device, "signedPosts")}
-              encryptedDms={isOn(device, "encryptedDms")}
-              setUpBackup={{
-                onClick: () => {
-                  onClose();
-                  requestE2eeBackupSetup();
-                },
-                disabled: revoking,
-              }}
-            />
+            <>
+              <RevokeThisBrowserDetails
+                signedPosts={isOn(device, "signedPosts")}
+                // Deleted here only when the encrypted device is this
+                // browser's own (its stored device).
+                encryptedDms={
+                  isOn(device, "encryptedDms") && ownsEncryptedDevice(device)
+                }
+                setUpBackup={{
+                  onClick: () => {
+                    onClose();
+                    requestE2eeBackupSetup();
+                  },
+                  disabled: revoking,
+                }}
+              />
+              {isOn(device, "encryptedDms") && !ownsEncryptedDevice(device) ? (
+                <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+                  {t(locale, "devicesSecurity.revoke.otherDeviceChats")}
+                </p>
+              ) : null}
+            </>
           ) : (
             <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
               {t(locale, "devicesSecurity.revoke.after")}

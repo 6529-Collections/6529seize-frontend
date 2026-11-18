@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -18,6 +18,10 @@ import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
 import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
 import { useRemoveE2eeLocalData } from "@/components/e2ee/useRemoveE2eeLocalData";
 import { readStoredE2eeDeviceKey } from "@/lib/e2ee/storage";
+import {
+  storedE2eeDeviceKeyQueryKey,
+  useStoredE2eeDeviceKey,
+} from "./useStoredE2eeDeviceKey";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   classifyDevices,
@@ -83,6 +87,56 @@ const fromApi = (device: ApiE2eeDevice): EncryptedDeviceInput => ({
 const EMPTY_GRANTS: readonly ApiDeviceGrant[] = [];
 const EMPTY_API_DEVICES: readonly ApiE2eeDevice[] = [];
 
+const NO_KEYS: ReadonlySet<string> = new Set();
+
+/** Whether the engine's list shows every device revoked unsigned here ended. */
+const engineShowsRevoked = (
+  devices: readonly E2eeDeviceInfo[],
+  revoked: ReadonlySet<string>
+): boolean =>
+  [...revoked].every((key) => {
+    const listed = devices.find(
+      (device) => device.deviceKey.toLowerCase() === key
+    );
+    return listed?.revokedAt !== null;
+  });
+
+/**
+ * Devices revoked unsigned here. The API list stays authoritative until the
+ * engine's own list shows each of them inactive: it may have read its list
+ * before the revoke, or can't reload at the device limit.
+ */
+function useRevokedUnsigned(engineDevices: readonly E2eeDeviceInfo[]) {
+  const [revoked, setRevoked] = useState<ReadonlySet<string>>(NO_KEYS);
+  return {
+    showsRevoked: engineShowsRevoked(engineDevices, revoked),
+    markRevoked: (key: string) =>
+      setRevoked((keys) => new Set([...keys, key])),
+  };
+}
+
+/** The profile's encrypted-DMs devices from `e2ee/me`, while the engine's list isn't shown. */
+function useApiDevices(
+  profileId: string | null,
+  listAddress: string | null,
+  enabled: boolean
+) {
+  return useQuery({
+    queryKey: [QueryKey.E2EE_PROFILE_DEVICES, profileId, listAddress],
+    enabled,
+    queryFn: async ({ signal }) => {
+      const data = await commonApiFetch<ApiE2eeMe>({
+        endpoint: "e2ee/me",
+        signal,
+      });
+      if (data.profile_id !== profileId) {
+        throw new Error("Device profile changed");
+      }
+      return data.devices;
+    },
+  });
+}
+
 /** Thrown when a revoke needs the encrypted-messages engine and it isn't ready. */
 export class DeviceActionUnavailableError extends Error {
   constructor() {
@@ -99,38 +153,48 @@ export class DeviceChangedError extends Error {
   }
 }
 
+/**
+ * How a revoke ended for this browser's own data: nothing to remove here;
+ * removed; or the revoke went through but removing this browser's
+ * encrypted data failed (retried with retryLocalCleanup, without revoking
+ * again).
+ */
+export type LocalCleanup =
+  | { readonly kind: "none" }
+  | { readonly kind: "removed" }
+  | { readonly kind: "failed"; readonly deviceKey: string };
+
 interface RevokeContext {
   readonly engine: E2eeEngine | null;
   readonly engineCanAct: boolean;
   readonly revokeGrant: (grant: ApiDeviceGrant) => Promise<boolean>;
-  /**
-   * This browser's own encrypted-DMs device key (lowercase), if any: the
-   * engine's, or without it the stored device record's.
-   */
-  readonly localDeviceKey: () => Promise<string | null>;
-  readonly removeLocal: (() => Promise<void>) | null;
-  readonly refetchGrants: () => void;
-  /** After a revoke the server made unsigned: refresh what's shown. */
-  readonly afterUnsignedRevoke: () => void;
+  /** This browser's encrypted device key from its storage (lowercase). */
+  readonly storedDeviceKey: () => Promise<string | null>;
+  /** Removes local data only while that device is still stored here. */
+  readonly removeLocal: (deviceKey: string) => Promise<boolean>;
+  /** After any successful revoke: refresh the lists. */
+  readonly afterRevoke: (unsignedDeviceKey: string | null) => void;
 }
 
 /**
  * Revokes one device. With encrypted messages running here the engine
- * signs the encrypted device's revocation (a combined grant ends with it).
- * Otherwise the grant is revoked and the server revokes its encrypted
- * device unsigned; if that device is this browser's own, nothing here would
- * clear it, so its local data is removed.
+ * signs the encrypted device's revocation (a combined grant ends with it;
+ * the engine clears this browser itself). Otherwise the grant is revoked
+ * and the server revokes its encrypted device unsigned; if that device is
+ * this browser's stored one, its local data is removed (checked again under
+ * the engine lock). The revoke and the local removal are reported apart: a
+ * failed removal doesn't fail the revoke.
  */
 async function revokeSecurityDevice(
   ctx: RevokeContext,
   device: SecurityDevice
-): Promise<void> {
+): Promise<LocalCleanup> {
   const encrypted = device.encryptedDevice;
   const dmsActive = device.encryptedDms?.status === "active";
   if (encrypted && dmsActive && ctx.engine && ctx.engineCanAct) {
     await ctx.engine.revokeDevice(encrypted.deviceKey);
-    ctx.refetchGrants();
-    return;
+    ctx.afterRevoke(null);
+    return { kind: "none" };
   }
   if (!device.grant || device.signedPosts?.status !== "active") {
     throw new DeviceActionUnavailableError();
@@ -138,17 +202,56 @@ async function revokeSecurityDevice(
   if (!(await ctx.revokeGrant(device.grant))) {
     throw new Error("Device grant revoke failed");
   }
+  const unsignedKey =
+    dmsActive && encrypted ? encrypted.deviceKey.toLowerCase() : null;
+  ctx.afterRevoke(unsignedKey);
   // Only this browser's own encrypted device, not any device whose grant
-  // used an old signing key of this browser: that one may be another
-  // browser's (or an earlier setup's), and its data isn't here.
-  if (
-    dmsActive &&
-    encrypted !== null &&
-    encrypted.deviceKey.toLowerCase() === (await ctx.localDeviceKey())
-  ) {
-    await ctx.removeLocal?.();
+  // used an old signing key of this browser: its data isn't here.
+  if (unsignedKey === null || unsignedKey !== (await ctx.storedDeviceKey())) {
+    return { kind: "none" };
   }
-  ctx.afterUnsignedRevoke();
+  try {
+    return (await ctx.removeLocal(unsignedKey))
+      ? { kind: "removed" }
+      : { kind: "none" };
+  } catch {
+    return { kind: "failed", deviceKey: unsignedKey };
+  }
+}
+
+interface RenameContext {
+  /** The engine when it can act (it renames and reloads its list). */
+  readonly engine: E2eeEngine | null;
+  readonly afterEncryptedRename: (key: string, label: string) => Promise<void>;
+  readonly afterGrantRename: () => Promise<void>;
+}
+
+/** Renames one device: through the engine, or the encrypted device or grant's API. */
+async function renameSecurityDevice(
+  ctx: RenameContext,
+  device: SecurityDevice,
+  name: string
+): Promise<void> {
+  const encrypted = device.encryptedDevice;
+  if (encrypted && ctx.engine) {
+    await ctx.engine.renameDevice(encrypted.deviceKey, name);
+    return;
+  }
+  if (encrypted) {
+    await commonApiPost<{ label: string }, ApiE2eeDevice>({
+      endpoint: `e2ee/devices/${encodeURIComponent(encrypted.deviceKey)}/label`,
+      body: { label: name },
+    });
+    await ctx.afterEncryptedRename(encrypted.deviceKey, name);
+    return;
+  }
+  if (device.grant) {
+    await commonApiPost<{ label: string }, ApiDeviceGrant>({
+      endpoint: `device-grants/${encodeURIComponent(device.grant.id)}/label`,
+      body: { label: name },
+    });
+    await ctx.afterGrantRename();
+  }
 }
 
 /**
@@ -226,7 +329,9 @@ export interface SecurityDevicesState extends ClassifiedDevices {
   readonly canRevoke: (device: SecurityDevice) => boolean;
   /** Why an active device can't be revoked here yet, if that's the reason. */
   readonly revokeBlocker: (device: SecurityDevice) => RevokeBlocker | null;
-  readonly revoke: (device: SecurityDevice) => Promise<void>;
+  readonly revoke: (device: SecurityDevice) => Promise<LocalCleanup>;
+  /** Removes this browser's data after a revoke whose removal failed. */
+  readonly retryLocalCleanup: (deviceKey: string) => Promise<boolean>;
   /** Whether a device can be renamed from here right now. */
   readonly canRename: (device: SecurityDevice) => boolean;
   readonly rename: (device: SecurityDevice, name: string) => Promise<void>;
@@ -273,31 +378,18 @@ export function useSecurityDevices(): SecurityDevicesState {
   // empty list hasn't loaded yet: the API list stands in until it has, so a
   // combined device never shows as signed posts only.
   const engineDevices = e2ee.devices;
-  // The engine list as of an unsigned revoke it can't reload after (the
-  // device limit): fresh API data stands in until the engine's list moves.
-  const [staleEngineList, setStaleEngineList] = useState<
-    readonly E2eeDeviceInfo[] | null
-  >(null);
+  const { showsRevoked, markRevoked } = useRevokedUnsigned(engineDevices);
   const engineListed =
-    engineReady &&
-    engineDevices.length > 0 &&
-    engineDevices !== staleEngineList;
+    engineReady && engineDevices.length > 0 && showsRevoked;
   const encryptionEnabled = isE2eeEnabled() && profileId !== null;
-  const apiDevicesQuery = useQuery({
-    queryKey: [QueryKey.E2EE_PROFILE_DEVICES, profileId, listAddress],
-    enabled: encryptionEnabled && listAddress !== null && !engineListed,
-    queryFn: async ({ signal }) => {
-      const data = await commonApiFetch<ApiE2eeMe>({
-        endpoint: "e2ee/me",
-        signal,
-      });
-      if (data.profile_id !== profileId) {
-        throw new Error("Device profile changed");
-      }
-      return data.devices;
-    },
-  });
+  const apiDevicesQuery = useApiDevices(
+    profileId,
+    listAddress,
+    encryptionEnabled && listAddress !== null && !engineListed
+  );
   const local = useLocalDeviceKeys(listAddress);
+  const storedDeviceKey = useStoredE2eeDeviceKey(profileId, encryptionEnabled);
+  const queryClient = useQueryClient();
   const now = useMinuteClock();
   const labels = useLabelOverrides(engineDevices);
 
@@ -311,9 +403,18 @@ export function useSecurityDevices(): SecurityDevicesState {
           ? labels.engineInputs
           : apiDevices.map(fromApi),
         ownSigningKeys: local.publicKeys,
+        ownEncryptedDeviceKey: storedDeviceKey,
         now,
       }),
-    [apiDevices, engineListed, grants, labels.engineInputs, local.publicKeys, now]
+    [
+      apiDevices,
+      engineListed,
+      grants,
+      labels.engineInputs,
+      local.publicKeys,
+      now,
+      storedDeviceKey,
+    ]
   );
 
   // Without the encrypted-DMs list a grant can't be told apart from a
@@ -335,61 +436,58 @@ export function useSecurityDevices(): SecurityDevicesState {
     (device.signedPosts?.status === "active" ||
       device.encryptedDms?.status === "active");
 
+  const removeLocalFor = async (deviceKey: string) =>
+    (await removeLocal?.(deviceKey)) === true;
   const revoke = (device: SecurityDevice) =>
     revokeSecurityDevice(
       {
         engine,
         engineCanAct,
         revokeGrant,
-        localDeviceKey: async () =>
-          e2ee.localDeviceKey?.toLowerCase() ??
-          (profileId === null ? null : readStoredE2eeDeviceKey(profileId)),
-        removeLocal,
-        refetchGrants: () => void grantsQuery.refetch(),
-        afterUnsignedRevoke: () => {
-          if (engineListed) {
-            // The engine can't reload its list: the API list stands in.
-            setStaleEngineList(engineDevices);
+        storedDeviceKey: () =>
+          profileId === null
+            ? Promise.resolve(null)
+            : readStoredE2eeDeviceKey(profileId),
+        removeLocal: removeLocalFor,
+        afterRevoke: (unsignedDeviceKey) => {
+          void grantsQuery.refetch();
+          if (unsignedDeviceKey !== null) {
+            markRevoked(unsignedDeviceKey);
           }
           if (encryptionEnabled) {
-            // Fetch now: a cached list (still fresh by staleTime) would
-            // show the revoked device as on.
+            // Fetch now: a cached list still fresh by staleTime would show
+            // the revoked device as on.
             void apiDevicesQuery.refetch();
+            void queryClient.invalidateQueries({
+              queryKey: storedE2eeDeviceKeyQueryKey(profileId),
+            });
           }
         },
       },
       device
     );
 
-  const rename = async (device: SecurityDevice, name: string) => {
-    const encrypted = device.encryptedDevice;
-    if (encrypted && engineCanAct) {
-      // The engine renames and reloads its list, so the row updates at once.
-      await engine.renameDevice(encrypted.deviceKey, name);
-      return;
-    }
-    if (encrypted) {
-      await commonApiPost<{ label: string }, ApiE2eeDevice>({
-        endpoint: `e2ee/devices/${encodeURIComponent(encrypted.deviceKey)}/label`,
-        body: { label: name },
-      });
-      if (engineListed) {
+  const rename = (device: SecurityDevice, name: string) =>
+    renameSecurityDevice(
+      {
+        engine: engineCanAct ? engine : null,
         // The engine's list is shown but can't reload now: show the new
         // name until its next sync brings it.
-        labels.remember(encrypted.deviceKey, name);
-      } else {
-        await apiDevicesQuery.refetch();
-      }
-      return;
-    }
-    if (device.grant) {
-      await commonApiPost<{ label: string }, ApiDeviceGrant>({
-        endpoint: `device-grants/${encodeURIComponent(device.grant.id)}/label`,
-        body: { label: name },
-      });
-      await grantsQuery.refetch();
-    }
-  };
+        afterEncryptedRename: engineListed
+          ? (key, label) => {
+              labels.remember(key, label);
+              return Promise.resolve();
+            }
+          : async () => {
+              await apiDevicesQuery.refetch();
+            },
+        afterGrantRename: async () => {
+          await grantsQuery.refetch();
+        },
+      },
+      device,
+      name
+    );
 
   return {
     ...classified,
@@ -408,6 +506,7 @@ export function useSecurityDevices(): SecurityDevicesState {
     canRevoke,
     revokeBlocker,
     revoke,
+    retryLocalCleanup: removeLocalFor,
     canRename,
     rename,
     signsRevocations: engineCanAct,

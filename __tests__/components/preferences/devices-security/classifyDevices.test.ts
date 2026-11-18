@@ -153,6 +153,19 @@ describe("classifyDevices", () => {
     expect(result.thisDevice?.id).toBe("a");
   });
 
+  it("knows this browser's encrypted device by its stored key on the API list", () => {
+    // No engine: the API list marks no device as this browser, and this
+    // browser's signing keys can't be read. Its stored device key can.
+    const result = classify({
+      grants: [grant("a")],
+      encryptedDevices: [encrypted("0xE1", { grantId: "a" })],
+      ownSigningKeys: [],
+      ownEncryptedDeviceKey: "0xe1",
+    });
+    expect(result.thisDevice?.id).toBe("a");
+    expect(result.thisDevice?.encryptedDevice?.isThisDevice).toBe(true);
+  });
+
   it("matches own signing keys case-insensitively", () => {
     const result = classify({
       grants: [grant("a", { device_key: `0x${"AB".repeat(32)}` })],
