@@ -119,7 +119,7 @@ export default function UserPageIdentityHeaderCICRateStats({
   }
 
   return (
-    <div className="tw-space-y-2 tw-rounded-lg tw-bg-white/[0.03] tw-px-3.5 tw-py-3">
+    <div className="tw-space-y-2">
       {items.map((item) => (
         <div
           key={item.label}
