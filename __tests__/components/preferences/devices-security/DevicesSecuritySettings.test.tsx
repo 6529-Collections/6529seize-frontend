@@ -26,6 +26,10 @@ jest.mock(
 jest.mock("@/components/preferences/devices-security/BackupCard", () => ({
   BackupCard: () => null,
 }));
+let mockBackupSnapshot: { phase: string } | null = null;
+jest.mock("@/hooks/e2ee/useE2eeBackup", () => ({
+  useE2eeBackup: () => ({ manager: null, snapshot: mockBackupSnapshot }),
+}));
 jest.mock("@/components/e2ee/devices/E2eeNewDeviceNotice", () => ({
   E2eeNewDeviceNotice: () => null,
 }));
@@ -175,6 +179,56 @@ describe("DevicesSecuritySettings", () => {
       )
     );
     expect(await screen.findByText("6529 app on iPhone revoked.")).toBeInTheDocument();
+  });
+
+  it("keeps Set up backup first unavailable while this browser's revoke runs", async () => {
+    mockBackupSnapshot = { phase: "off" };
+    try {
+      let failRevoke: (error: unknown) => void = () => undefined;
+      const revoke = jest.fn(
+        () =>
+          new Promise<void>((_, reject) => {
+            failRevoke = reject;
+          })
+      );
+      mockState = state({ revoke });
+      const user = userEvent.setup();
+      render(<DevicesSecuritySettings />);
+      const thisDevice = screen.getByRole("region", {
+        name: "Brave on Windows",
+      });
+      await user.click(
+        within(thisDevice).getByRole("button", {
+          name: "More actions for this browser",
+        })
+      );
+      await user.click(
+        await screen.findByRole("menuitem", { name: "Revoke this browser…" })
+      );
+      const dialog = await screen.findByRole("dialog", {
+        name: "Revoke this browser?",
+      });
+      fireEvent.click(
+        within(dialog).getByRole("button", { name: "Revoke this browser" })
+      );
+      const setUp = within(dialog).getByRole("button", {
+        name: "Set up backup first",
+      });
+      await waitFor(() => expect(setUp).toBeDisabled());
+      fireEvent.click(setUp);
+      expect(screen.getByRole("dialog", { name: "Revoke this browser?" })).toBe(
+        dialog
+      );
+
+      // The revoke fails: the dialog is still open to say so.
+      await act(async () => {
+        failRevoke(new Error("offline"));
+      });
+      expect(await within(dialog).findByRole("alert")).toBeInTheDocument();
+      expect(setUp).toBeEnabled();
+    } finally {
+      mockBackupSnapshot = null;
+    }
   });
 
   it("revokes this browser only through More and the stricter dialog", async () => {
