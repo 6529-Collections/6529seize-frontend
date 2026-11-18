@@ -12,7 +12,8 @@ timestamp access, cancellable native conversation return and Android Back layer
 ordering. They retain visible tap alternatives, permission and delivery-state
 restrictions, system-edge gestures and reduced-motion behavior. Reversal
 instructions require moving below the commit threshold before release. The shared
-Back record includes wave and direct-message detail routes. The mobile
+Back record includes wave and direct-message detail routes and Android's return
+from Profile Waves Feed to Waves. The mobile
 bottom-navigation record covers temporary section-tab hiding while composing in
 short landscape iPhone chat viewports.
 
