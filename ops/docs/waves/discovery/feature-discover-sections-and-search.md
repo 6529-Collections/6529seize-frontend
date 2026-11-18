@@ -13,7 +13,7 @@ sidebar heading. The page shows the total accessible count and compact discovery
 cards with cover artwork on the left, single-line ellipsized
 titles and single-line description previews. Approval waves show how many
 submissions are open for voting. Other waves show the voting end or next result
-when available, otherwise `Voting open`. Submission counts have a small dot;
+when available, otherwise `Voting open`. Submission counts appear as text;
 zero submissions use muted text. Score, Hot and REP remain visible beneath the
 plain-text description. Metrics wrap when needed on narrow cards. The inset
 artwork and text align at the top; hovering highlights the card without lifting

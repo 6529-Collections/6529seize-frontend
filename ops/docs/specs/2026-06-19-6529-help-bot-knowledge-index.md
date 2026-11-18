@@ -9,7 +9,8 @@ created: 2026-06-19
 
 The `waves.discovery` record covers plain-text description previews, retained
 media, visible Worth Checking Out edges and minimum artwork tint, inset Active
-Votes artwork, wrapping metrics and neutral zero-submission status. Discovery
+Votes artwork, wrapping metrics and neutral zero-submission status without a
+decorative count marker. Discovery
 links, eligibility and pagination retain their existing behavior.
 
 The touch-menu, header-navigation and encrypted-chat records cover touch reply,
