@@ -5,8 +5,7 @@ import clsx from "clsx";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { SingleWaveDropVoteMode } from "@/components/waves/drop/SingleWaveDropVote.types";
-
-export type VoteControlVariant = "default" | "compact";
+import type { VoteControlVariant } from "./VoteControl.styles";
 
 interface VotePanelProps {
   readonly children: ReactNode;

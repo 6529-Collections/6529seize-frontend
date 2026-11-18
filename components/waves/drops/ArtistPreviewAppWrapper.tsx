@@ -11,6 +11,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { Fragment, useCallback, useRef } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 
 const KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const KEYBOARD_TRANSITION =
@@ -31,6 +33,9 @@ export default function ArtistPreviewAppWrapper({
   readonly onClose: () => void;
   readonly children: ReactNode;
 }) {
+  const { isCapacitor, isIos } = useCapacitor();
+  const followsIosKeyboard = isCapacitor && isIos;
+  useLayoutViewportLock(isOpen && followsIosKeyboard);
   const dialogRef = useRef<HTMLDivElement>(null);
   useAndroidBackLayer(isOpen, dialogRef, onClose);
   const contentRef = useCallback((container: HTMLDivElement | null) => {
@@ -53,7 +58,7 @@ export default function ArtistPreviewAppWrapper({
       <Dialog
         ref={dialogRef}
         as="div"
-        className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden"
+        className={`tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden ${followsIosKeyboard ? "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]" : ""}`}
         onClose={onClose}
       >
         <TransitionChild

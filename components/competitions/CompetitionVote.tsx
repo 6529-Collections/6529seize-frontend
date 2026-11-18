@@ -32,14 +32,16 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
-import {
-  CompetitionState,
-  COMPETITION_BUTTON,
-  COMPETITION_INPUT,
-} from "./CompetitionState";
+import { CompetitionState } from "./CompetitionState";
 import CompetitionCredits from "./CompetitionCredits";
 import { VotePanel } from "@/components/voting/VotePanel";
 import { VoteActionButton } from "@/components/voting/VoteActionButton";
+import {
+  VOTE_INPUT_AREA_CLASSES,
+  VOTE_NUMERIC_INPUT_BASE_CLASS,
+  VOTE_NUMERIC_INPUT_CLASSES,
+  VOTE_NUMERIC_UNIT_CLASS,
+} from "@/components/voting/VoteControl.styles";
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import {
@@ -128,6 +130,8 @@ export function CompetitionVoteForm({
     | ((voteTotal: number, voteChange: number) => void)
     | undefined;
 }) {
+  const controlVariant =
+    size === SingleWaveDropVoteSize.MINI ? "compact" : "default";
   const identity = {
     waveId: competition.wave_id,
     competitionId: competition.id,
@@ -273,7 +277,7 @@ export function CompetitionVoteForm({
       <VotePanel
         mode={voteMode}
         modeControl={modeControl}
-        variant={size === SingleWaveDropVoteSize.MINI ? "compact" : "default"}
+        variant={controlVariant}
         hidden={hidden}
       >
         {content}
@@ -451,7 +455,7 @@ export function CompetitionVoteForm({
         type="submit"
         amount={numeric}
         unit={creditLabel}
-        variant={size === SingleWaveDropVoteSize.MINI ? "compact" : "default"}
+        variant={controlVariant}
         disabled={
           busy ||
           disabled ||
@@ -470,56 +474,62 @@ export function CompetitionVoteForm({
         event.preventDefault();
         void submit();
       }}
-      className="tw-space-y-4"
+      className={controlVariant === "compact" ? "tw-space-y-4" : "tw-space-y-3"}
     >
-      {voteMode === "slider" ? (
-        <fieldset
-          className={`tw-m-0 tw-min-w-0 tw-border-0 tw-px-2 tw-pb-2 ${size === SingleWaveDropVoteSize.MINI ? "tw-pt-8" : "tw-pt-0"}`}
-          disabled={busy || disabled || !competition.permissions.vote}
-        >
-          <legend className="tw-sr-only">
-            {t(locale, "competitions.voteValue")}
-          </legend>
-          <SingleWaveDropVoteSlider
-            voteValue={Number.isFinite(numeric) ? numeric : 0}
-            minValue={min ?? 0}
-            maxValue={max ?? 0}
-            size={size}
-            label={creditLabel}
-            setVoteValue={(next) => {
-              setVoteDraft(
-                String(typeof next === "function" ? next(numeric) : next)
-              );
-              setSaved(false);
-            }}
-          />
-        </fieldset>
-      ) : (
-        <div className="tw-relative">
-          <label htmlFor={`competition-vote-${entryId}`} className="tw-sr-only">
-            {t(locale, "competitions.voteValue")}
-          </label>
-          <input
-            id={`competition-vote-${entryId}`}
-            type="number"
-            step="1"
-            min={min ?? undefined}
-            max={max ?? undefined}
-            className="tw-block tw-h-11 tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-py-0 tw-pl-3 tw-pr-28 tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-100 [appearance:textfield] focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 sm:desktop-hover:tw-text-sm [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
-            value={value}
+      <div
+        data-vote-input-area
+        className={`tw-flex tw-min-w-0 tw-flex-col tw-justify-center ${VOTE_INPUT_AREA_CLASSES[controlVariant]}`}
+      >
+        {voteMode === "slider" ? (
+          <fieldset
+            className={`tw-m-0 tw-min-w-0 tw-border-0 tw-px-2 ${controlVariant === "compact" ? "tw-pb-0 tw-pt-8" : "tw-pb-2 tw-pt-0"}`}
             disabled={busy || disabled || !competition.permissions.vote}
-            aria-invalid={!valid}
-            aria-describedby={errorDescriptionId}
-            onChange={(event) => {
-              setVoteDraft(event.target.value);
-              setSaved(false);
-            }}
-          />
-          <span className="tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-xs tw-text-iron-500">
-            {creditLabel}
-          </span>
-        </div>
-      )}
+          >
+            <legend className="tw-sr-only">
+              {t(locale, "competitions.voteValue")}
+            </legend>
+            <SingleWaveDropVoteSlider
+              voteValue={Number.isFinite(numeric) ? numeric : 0}
+              minValue={min ?? 0}
+              maxValue={max ?? 0}
+              size={size}
+              label={creditLabel}
+              setVoteValue={(next) => {
+                setVoteDraft(
+                  String(typeof next === "function" ? next(numeric) : next)
+                );
+                setSaved(false);
+              }}
+            />
+          </fieldset>
+        ) : (
+          <div className="tw-relative">
+            <label
+              htmlFor={`competition-vote-${entryId}`}
+              className="tw-sr-only"
+            >
+              {t(locale, "competitions.voteValue")}
+            </label>
+            <input
+              id={`competition-vote-${entryId}`}
+              type="number"
+              step="1"
+              min={min ?? undefined}
+              max={max ?? undefined}
+              className={`${VOTE_NUMERIC_INPUT_BASE_CLASS} ${VOTE_NUMERIC_INPUT_CLASSES[controlVariant]}`}
+              value={value}
+              disabled={busy || disabled || !competition.permissions.vote}
+              aria-invalid={!valid}
+              aria-describedby={errorDescriptionId}
+              onChange={(event) => {
+                setVoteDraft(event.target.value);
+                setSaved(false);
+              }}
+            />
+            <span className={VOTE_NUMERIC_UNIT_CLASS}>{creditLabel}</span>
+          </div>
+        )}
+      </div>
       <CompetitionCredits budget={credit.data} />
       {reply ? reply.renderContent(voteAction) : voteAction}
       {(disabled || !competition.permissions.vote) && (

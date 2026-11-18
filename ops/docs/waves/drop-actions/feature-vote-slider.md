@@ -48,7 +48,10 @@ current voting budget; other drops use their own allowed range.
   cards also open in slider mode; mini cards outside decisions open in numeric
   mode and do not offer a rationale reply.
 - Both voting forms use a `Your vote` header with compact `Slider` / `Numeric`
-  tabs. Switching modes keeps the entered amount and does not submit a vote.
+  tabs. Switching modes keeps the entered amount and the panel's height without
+  submitting a vote.
+- Compact submission cards use a smaller numeric field on desktop. Phones and
+  touch devices keep a larger field and text for entry.
 - In full-size dialogs and sheets, `Explain vote` uses a chat icon on its own
   row. Its reply field opens below that row, followed by a full-width `Vote`
   button, including on desktop. Compact submission cards keep `Explain vote`
@@ -94,10 +97,11 @@ as `Vote rationale (0 at time of posting):` appears as a placeholder, so typing
 starts in an empty field. Opening `Explain vote` does not show an empty-field
 warning. Leaving the field untouched preserves the existing generated reply;
 entering text replaces it. Clearing an edited field while `Explain vote` is on
-blocks `Vote` until you enter text or turn the control off. The compact reply
-field does not scroll internally; drag its resize handle to enlarge it for longer explanations. Vote amounts,
-limits, eligibility, and saving work
-the same in both input modes.
+blocks `Vote` until you enter text or turn the control off. Reply fields start
+at three rows in compact submission cards and four rows in full dialogs and
+sheets. They retain their resize control. The card reply does not scroll
+internally; drag its resize handle to enlarge it for longer explanations.
+Vote amounts, limits, eligibility, and saving work the same in both input modes.
 
 The full decision voting modal and mobile sheet use the same header, reply
 control, and compact remaining/spent credit line beneath the input. Their

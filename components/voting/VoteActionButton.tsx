@@ -6,7 +6,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
-import type { VoteControlVariant } from "./VotePanel";
+import type { VoteControlVariant } from "./VoteControl.styles";
 
 export function getVoteActionLabel(
   locale: SupportedLocale,

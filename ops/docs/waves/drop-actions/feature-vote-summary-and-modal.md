@@ -96,9 +96,10 @@ ranking, and voting rules retain their usual meaning.
   The action fills the dialog or sheet's available width, including on desktop,
   and uses green for a positive amount, red for a negative amount, and a neutral
   style for zero.
-- In the iPhone app, the voting sheet follows the keyboard while the wave
-  behind it keeps its position. Opening an optional reply uses the same motion
-  curve. Dismissing the keyboard preserves the vote amount and reply draft.
+- In the iPhone app, voting sheets and compact submission galleries (artist,
+  participant, and `My submissions`) follow the keyboard while the wave behind
+  them keeps its position. Opening an optional reply uses the same motion curve.
+  Dismissing the keyboard preserves the vote amount and reply draft.
 - The ribbon and its largest positive and negative votes remain visible
   inside the `Top voters` section. Only the voter list beneath them expands;
   there is no second expandable breakdown.

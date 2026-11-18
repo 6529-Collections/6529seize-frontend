@@ -22,6 +22,7 @@ import { t } from "@/i18n/messages";
 import { VotePanel } from "@/components/voting/VotePanel";
 import { VoteModeControl } from "@/components/voting/VoteModeControl";
 import { VoteRationaleControl } from "@/components/voting/VoteRationaleControl";
+import { VOTE_INPUT_AREA_CLASSES } from "@/components/voting/VoteControl.styles";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
@@ -208,10 +209,11 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   };
 
   const isMini = size === SingleWaveDropVoteSize.MINI;
+  const controlVariant = isMini ? "compact" : "default";
   return (
     <VotePanel
       mode={currentVoteMode}
-      variant={isMini ? "compact" : "default"}
+      variant={controlVariant}
       modeControl={
         showInternalVoteModeControl ? (
           <VoteModeControl
@@ -221,18 +223,23 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
         ) : undefined
       }
     >
-      <div className={isSliderMode && isMini ? "tw-pt-8" : undefined}>
-        <VoteModeField
-          isSliderMode={isSliderMode}
-          voteValue={voteValue}
-          minRating={minRating}
-          maxRating={maxRating}
-          setVoteValue={setVoteValue}
-          onValueAccepted={handleSliderValueAccepted}
-          onSubmit={handleSubmit}
-          label={voteLabel}
-          size={size}
-        />
+      <div
+        data-vote-input-area
+        className={`tw-flex tw-min-w-0 tw-flex-col tw-justify-center ${VOTE_INPUT_AREA_CLASSES[controlVariant]}`}
+      >
+        <div className={isSliderMode && isMini ? "tw-pt-8" : undefined}>
+          <VoteModeField
+            isSliderMode={isSliderMode}
+            voteValue={voteValue}
+            minRating={minRating}
+            maxRating={maxRating}
+            setVoteValue={setVoteValue}
+            onValueAccepted={handleSliderValueAccepted}
+            onSubmit={handleSubmit}
+            label={voteLabel}
+            size={size}
+          />
+        </div>
       </div>
       <SingleWaveDropVoteStats
         currentRating={currentVoteValue}
