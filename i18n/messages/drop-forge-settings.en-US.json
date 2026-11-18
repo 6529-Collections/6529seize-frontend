@@ -22,6 +22,7 @@
   "dropForge.settings.signIn": "Sign in and refresh",
   "dropForge.settings.wallet": "Operational wallet",
   "dropForge.settings.balance": "ETH balance",
+  "dropForge.settings.explorer": "View wallet on Etherscan",
   "dropForge.settings.copy": "Copy wallet address",
   "dropForge.settings.unavailableBalance": "Unavailable",
   "dropForge.funding.topUp": "Top Up ETH",

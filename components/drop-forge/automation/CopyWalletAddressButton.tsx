@@ -1,5 +1,7 @@
-import { CheckIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, DocumentDuplicateIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
+import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
+import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -8,6 +10,7 @@ export default function CopyWalletAddressButton({
   address,
 }: Readonly<{ address: string }>) {
   const locale = useBrowserLocale();
+  const { setToast } = useAuth();
   const [status, setStatus] = useState<"idle" | "copied" | "error">("idle");
   const request = useRef(0);
   const reset = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
@@ -29,54 +32,44 @@ export default function CopyWalletAddressButton({
       setStatus("copied");
       reset.current = setTimeout(() => setStatus("idle"), 2000);
     } catch {
-      if (current === request.current) setStatus("error");
+      if (current === request.current) {
+        setStatus("error");
+        setToast({
+          type: "error",
+          message: t(locale, "dropForge.settings.copyError"),
+        });
+      }
     }
   }
 
+  const label = t(locale, "dropForge.settings.copy");
+  let feedback = label;
+  if (status === "copied") feedback = t(locale, "dropForge.settings.copied");
+  if (status === "error") feedback = t(locale, "dropForge.settings.copyError");
+
   return (
-    <div className="tw-mt-3">
-      <Button
-        variant="secondary"
-        size="sm"
-        onClick={() => void copyAddress()}
-        aria-label={t(locale, "dropForge.settings.copy")}
-      >
-        <span
-          aria-hidden="true"
-          className="tw-inline-grid tw-place-items-center"
+    <>
+      <CustomTooltip content={feedback} placement="top">
+        <Button
+          variant="ghost"
+          size={null}
+          className="tw-size-8"
+          onClick={() => void copyAddress()}
+          aria-label={label}
         >
-          <span
-            className={`tw-col-start-1 tw-row-start-1 ${status === "copied" ? "tw-invisible" : ""}`}
-          >
-            {t(locale, "dropForge.settings.copy")}
-          </span>
-          <span
-            className={`tw-col-start-1 tw-row-start-1 tw-inline-flex tw-items-center tw-gap-1.5 ${status === "copied" ? "" : "tw-invisible"}`}
-          >
-            <CheckIcon className="tw-size-4" />
-            {t(locale, "dropForge.settings.copied")}
-          </span>
-        </span>
-      </Button>
+          {status === "copied" ? (
+            <CheckIcon
+              aria-hidden="true"
+              className="tw-size-4 tw-text-emerald-300"
+            />
+          ) : (
+            <DocumentDuplicateIcon aria-hidden="true" className="tw-size-4" />
+          )}
+        </Button>
+      </CustomTooltip>
       <output className="tw-sr-only">
-        {status === "copied" ? t(locale, "dropForge.settings.copied") : ""}
+        {status === "idle" ? "" : feedback}
       </output>
-      <p
-        aria-live="polite"
-        className="tw-mb-0 tw-mt-1 tw-grid tw-text-xs tw-text-rose-300"
-      >
-        <span
-          aria-hidden="true"
-          className="tw-invisible tw-col-start-1 tw-row-start-1"
-        >
-          {t(locale, "dropForge.settings.copyError")}
-        </span>
-        {status === "error" && (
-          <span className="tw-col-start-1 tw-row-start-1">
-            {t(locale, "dropForge.settings.copyError")}
-          </span>
-        )}
-      </p>
-    </div>
+    </>
   );
 }
