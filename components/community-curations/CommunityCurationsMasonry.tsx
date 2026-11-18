@@ -368,10 +368,7 @@ function CommunityCurationsVirtualMasonry({
     },
     [setWidth]
   );
-  const [measuredBatch, setMeasuredBatch] = useState(() => ({
-    positioner,
-    count: 0,
-  }));
+  const [, setMeasuredCount] = useState(0);
 
   const grid = useMasonry<ExtendedDrop>({
     containerRef: setContainerRef,
@@ -388,20 +385,12 @@ function CommunityCurationsVirtualMasonry({
     scrollTop: viewport.scrollTop,
   }) as ReactElement;
 
-  // Masonic can keep needing a fresh batch across several sets of short rows.
-  // Promote each measured batch before paint, even when that boolean stays true;
-  // otherwise a restored viewport can stay empty until another scroll event.
-  // Check the returned grid after cell resizes too, even if the viewport is unchanged.
+  // Masonic measures in DOM refs. Finish short-row batches before paint;
+  // React skips the update once the measured count stops changing.
   useLayoutEffect(() => {
-    const count = positioner.size();
-    if (
-      measuredBatch.positioner !== positioner ||
-      measuredBatch.count !== count
-    ) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- Masonic measures in DOM refs; promote only new measurements before paint.
-      setMeasuredBatch({ positioner, count });
-    }
-  }, [grid, positioner, measuredBatch]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Commit newly measured rows before exposing a restored viewport.
+    setMeasuredCount(positioner.size());
+  }, [grid, positioner]);
 
   return grid;
 }
