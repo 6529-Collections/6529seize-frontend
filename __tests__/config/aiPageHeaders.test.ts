@@ -25,6 +25,7 @@ describe("the 6529 AI pages stay out of search engines", () => {
     "/ai",
     "/ai/guide",
     "/ai/known-issues",
+    "/ai/releases",
     "/ai/releases.json",
     "/ai/releases.json.sig",
     "/ai/download/0.1.0/SHA256SUMS",
@@ -39,7 +40,7 @@ describe("the 6529 AI pages stay out of search engines", () => {
     expect(response.headers.get("x-robots-tag")).toBeNull();
   });
 
-  it.each(["/ai", "/ai/guide", "/ai/known-issues"])(
+  it.each(["/ai", "/ai/guide", "/ai/known-issues", "/ai/releases"])(
     "keeps %s out of the sitemap",
     (path) => {
       expect(shouldExcludeSitemapPath(path)).toBe(true);

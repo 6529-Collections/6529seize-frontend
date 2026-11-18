@@ -112,19 +112,24 @@ describe("device grant hint", () => {
   const ADDRESS = "0xAbC0000000000000000000000000000000000001";
   const grant = {
     id: "grant-1",
+    device_key: `0x${"AB".repeat(32)}`,
     expires_at: 1_900_000_000_000,
     scopes: ["post", "react"],
   } as unknown as ApiDeviceGrant;
 
   beforeEach(() => globalThis.localStorage.clear());
 
-  it("stores only the grant id, expiry, scopes and own profile id per wallet", () => {
+  it("stores only the grant id, expiry, scopes, own profile id, write time and public key per wallet", () => {
+    const clock = jest.spyOn(Date, "now").mockReturnValue(1_800_000_000_000);
     writeDeviceGrantHint(ADDRESS, grant, "profile-1");
+    clock.mockRestore();
     expect(readDeviceGrantHint(ADDRESS.toLowerCase())).toEqual({
       grantId: "grant-1",
       expiresAt: 1_900_000_000_000,
       scopes: ["post", "react"],
       ownProfileId: "profile-1",
+      writtenAt: 1_800_000_000_000,
+      deviceKey: `0x${"ab".repeat(32)}`,
     });
     writeDeviceGrantHint(ADDRESS, null, null);
     expect(readDeviceGrantHint(ADDRESS)).toBeNull();

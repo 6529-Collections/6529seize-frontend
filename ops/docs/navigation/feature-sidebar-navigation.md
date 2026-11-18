@@ -32,10 +32,10 @@ On web layouts, route switching is sidebar-first.
   reveal it; focus on other sidebar controls does not keep it visible after the
   pointer leaves. Touch layouts keep it visible. Expand and collapse use the same footprint.
 - Primary menu concepts are ordered `NFTs`, `Museum`, `Waves`, `DMs`,
-  `Join 6529` (or `Validator` for members), and `About` so art destinations stay together while Waves and
-  DMs remain adjacent.
-- `NFTs` and `About` are expandable groups; `Museum`, `Waves`, `DMs`, and
-  the `Join 6529` / `Validator` slot are direct rows.
+  `Join 6529` (or `Validator` for members), `6529 AI`, and `About` so art
+  destinations stay together while Waves and DMs remain adjacent.
+- `NFTs` and `About` are expandable groups; `Museum`, `Waves`, `DMs`, the
+  `Join 6529` / `Validator` slot and `6529 AI` are direct rows.
 - The `Museum` row opens `/museum/network` in one click.
 - The `Waves` sidebar row opens `/waves` in one click. `Discover Waves`
   remains a secondary Waves experience link and searchable destination.
@@ -59,21 +59,29 @@ reserves its space without showing either action. The same rule applies to the
 collapsed and expanded web sidebar, mobile web menu, native app drawer, and
 page search. Public navigation never adds a Validator link.
 
+After that slot, `6529 AI` links to `/ai`, 6529 AI's download page, for
+everyone, signed in or not. It sits beside the validator because both are
+6529 software that people run on their own computers, and it is public
+because the `/ai` pages are. It uses the same styling as the other rows, is
+active on every `/ai` page, and is under `Pages` in page search.
+
 ## Location in the Site
 
 - Web routes rendered with `WebLayout` or `SmallScreenLayout` (non-app).
 - Home entry: 6529 logo link to `/`.
 - Primary rows/groups: `NFTs`, `Museum`, `Waves`, `DMs`, `Join 6529` (or `Validator` for members),
-  `About`.
+  `6529 AI`, `About`.
 - Gated primary row: `Drop Forge`, after `About`, only when the connected
   wallet can access it.
 - Three separate sections keep controls stable: scrollable primary navigation,
-  desktop utilities in a fixed-height middle section, and the bottom account area.
-  Utilities stack as `Search`, `Share` (on supported routes), then optional `Update`.
-  Without Share, Update sits directly below Search; unused space stays below them.
-- The bottom section contains connected-only `Notifications` above the account
-  control. `Update` stays below Share in the middle section even as Notifications
-  appears or disappears.
+  desktop utilities, and the bottom account area.
+- Desktop utilities appear in the order `Update` (when available), `Search`,
+  and `Share` (on supported routes). In the collapsed rail, absent controls
+  free up space for primary navigation.
+- On short windows the collapsed rail tightens the spacing around the icons
+  as needed. The primary navigation scrolls when the rows still exceed the
+  available height. The account stays at the bottom, with connected-only
+  `Notifications` directly above it.
 - Newly appearing sidebar controls and labels fade in with a subtle scale over
   125ms, including gated Drop Forge and WatchTower. Account pictures and fallback
   icons use a simple fade. Reduced motion shows controls immediately.

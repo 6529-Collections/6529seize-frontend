@@ -2,8 +2,8 @@ import type { AiRelease, AiSystem } from "../releaseFeed";
 
 // The install guide, from 6529 AI's own guides (its docs/install/macos.md,
 // windows.md, linux.md and getting-started.md), cut to what a person needs
-// to install it and chat. Release candidate 1 runs models on the person's
-// own computer only and hides the network, so the guide leaves it out.
+// to install it and chat. The test releases run models on the person's
+// own computer only and hide the network, so the guide leaves it out.
 // Text may hold **bold** for what the screen shows and `code`. en-US only
 // for now; see ops/docs/ai-download-page.md.
 
