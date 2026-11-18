@@ -22,7 +22,7 @@ export default function UserPageRepModifyModalRaterStats({
   const { activeProfileProxy } = useContext(AuthContext);
   if (activeProfileProxy) {
     return (
-      <p className="tw-m-0 tw-break-words tw-rounded-lg tw-bg-white/[0.03] tw-px-3.5 tw-py-3 tw-text-xs tw-font-normal tw-text-iron-400">
+      <p className="tw-m-0 tw-break-words tw-text-xs tw-font-normal tw-text-iron-400">
         {tRich(locale, "rep.categories.edit.proxy", {
           name: (
             <Link
@@ -39,7 +39,7 @@ export default function UserPageRepModifyModalRaterStats({
   }
 
   return (
-    <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-bg-white/[0.03] tw-px-3.5 tw-py-3 tw-text-xs tw-font-normal tw-text-iron-400">
+    <div className="tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
       <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1">
         <span className="tw-min-w-0 tw-break-words">
           {t(locale, "rep.categories.edit.availableRep")}
