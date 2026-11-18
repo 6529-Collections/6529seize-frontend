@@ -190,6 +190,7 @@ const DropsListRow = memo(
           waveId={drop.type === DropSize.FULL ? drop.wave.id : drop.waveId}
           type={drop.type}
           rootMargin={virtualScrollRootMargin}
+          keepContentMounted={isTarget}
           enableLongContentCollapse={
             location === DropLocation.WAVE && itemData.dropViewDropId === null
           }

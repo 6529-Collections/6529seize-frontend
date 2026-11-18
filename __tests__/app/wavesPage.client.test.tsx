@@ -57,8 +57,25 @@ describe("WavesPageClient", () => {
   it("layers a matching public fallback alongside the interactive view", () => {
     render(
       <WavesPageClient
-        publicFeedFallback={<div>Public server content</div>}
-        publicFeedWaveId="wave-1"
+        publicPreview={{
+          feed: {
+            ok: true,
+            waveId: "wave-1",
+            waveName: "Public Wave",
+            hasMore: false,
+            items: [
+              {
+                id: "drop-1",
+                serialNo: 1,
+                createdAt: 0,
+                authorLabel: "Reader",
+                title: null,
+                excerpt: "Public server content",
+                href: "/waves/wave-1?drop=drop-1",
+              },
+            ],
+          },
+        }}
       />
     );
 

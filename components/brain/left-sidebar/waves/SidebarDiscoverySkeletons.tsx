@@ -18,9 +18,9 @@ export function SidebarRecommendationsSkeleton({
         aria-hidden="true"
         className="tw-animate-pulse motion-reduce:tw-animate-none"
       >
-        <div className="tw-mb-2 tw-h-4 tw-w-3/4 tw-rounded-md tw-bg-iron-800/60" />
+        <div className="tw-mb-2 tw-h-4 tw-w-3/4 tw-rounded-md tw-bg-iron-800/60 [@media(any-hover:none)]:tw-hidden" />
         <div
-          className={`tw-flex tw-overflow-hidden tw-py-1 ${isTouchPreview ? "tw-gap-4" : "tw-gap-3"}`}
+          className={`tw-flex tw-overflow-hidden tw-py-1 [@media(any-hover:none)]:tw-pb-7 ${isTouchPreview ? "tw-gap-4" : "tw-gap-3"}`}
         >
           {[0, 1, 2, 3, 4, 5].map((item) => (
             <div
@@ -45,7 +45,7 @@ export function SidebarVotesSkeleton() {
         aria-hidden="true"
         className="tw-animate-pulse motion-reduce:tw-animate-none"
       >
-        <div className="tw-mb-2 tw-h-4 tw-w-3/4 tw-rounded-md tw-bg-iron-800/60" />
+        <div className="tw-mb-2 tw-h-4 tw-w-3/4 tw-rounded-md tw-bg-iron-800/60 [@media(any-hover:none)]:tw-hidden" />
         {[0, 1, 2].map((item) => (
           <div
             key={item}

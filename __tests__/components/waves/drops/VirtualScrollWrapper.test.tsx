@@ -138,6 +138,38 @@ test("renders placeholder when out of view", () => {
   expect(placeholder.children).toHaveLength(0);
 });
 
+test("hands an in-view jump target back to virtualization without hiding its content", () => {
+  const viewport = document.createElement("div");
+  const scrollContainerRef = { current: viewport };
+  viewport.getBoundingClientRect = () => new DOMRect(0, 0, 400, 600);
+  const row = (keepContentMounted: boolean) => (
+    <VirtualScrollWrapper
+      scrollContainerRef={scrollContainerRef}
+      dropSerialNo={1}
+      waveId="wave"
+      type={DropSize.FULL}
+      keepContentMounted={keepContentMounted}
+    >
+      Jump target
+    </VirtualScrollWrapper>
+  );
+  const { container, rerender } = render(row(true));
+  const wrapper = container.firstElementChild as HTMLElement;
+  let top = -8_000;
+  wrapper.getBoundingClientRect = () => new DOMRect(0, top, 400, 80);
+  act(() => intersectionCb([{ isIntersecting: false }]));
+  expect(screen.getByText("Jump target")).toBeVisible();
+
+  // The jump reaches the viewport before the observer delivers an entry.
+  top = 250;
+  rerender(row(false));
+  expect(screen.getByText("Jump target")).toBeVisible();
+
+  top = -8_000;
+  act(() => intersectionCb([{ isIntersecting: false }]));
+  expect(screen.queryByText("Jump target")).not.toBeInTheDocument();
+});
+
 test("preserves long-content expansion while children are virtualized", () => {
   const scrollRef = { current: document.createElement("div") };
   const { container } = render(
