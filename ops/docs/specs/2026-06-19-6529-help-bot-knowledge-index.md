@@ -1093,8 +1093,16 @@ and upcoming-drop reads show Unavailable and retain the existing Retry action.
 The subscriptions record also covers the two-zone summary, state-based action
 emphasis, owner-only deadlines, original full-year date display, quiet facts, loading
 skeletons, original emerald switches, one amber funding boundary, compact phone
-history and the content-sized settings sheet. Real deadlines and funding
-calculations remain API-owned; application design-preview data is absent.
+history and the content-sized settings sheet. Every loaded coverage state has a plain explanation. The card can say Covered
+for a fully funded selected forecast even when the raw API status is Action
+required, and uses Running low when one selected drop remains funded before a
+known shortfall. It preserves all counts and controls, shows a factual owner
+cutoff or explicitly states that none is available. At 24 funded drops the
+headline reads Next 24 drops funded; lower counts and Funded through remain
+unchanged, with no extra forecast-limit note. A mint-day shortfall reuses the final-subscription query to distinguish
+confirmed payment from an unpaid balance forecast, keeps loading/error neutral,
+and retains the raw remaining-balance count. Shared header status and push alerts remain API-owned. Real deadlines
+and funding calculations remain API-owned; application design-preview data is absent.
 
 Gradient, Meme Lab and ReMemes browse records describe responsive card
 placeholders that match loaded results, with loading statuses for screen

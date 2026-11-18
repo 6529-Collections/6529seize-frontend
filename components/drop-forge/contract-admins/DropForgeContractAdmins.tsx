@@ -60,7 +60,7 @@ export default function DropForgeContractAdmins({
               aria-hidden="true"
               className="tw-size-5 tw-shrink-0 tw-text-iron-400 group-open:tw-rotate-90 motion-safe:tw-transition-transform"
             />
-            <h2 className="tw-m-0 tw-text-xl tw-font-semibold tw-text-iron-50">
+            <h2 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-50 sm:tw-text-xl">
               {t(locale, "dropForge.admins.heading")}
             </h2>
           </summary>

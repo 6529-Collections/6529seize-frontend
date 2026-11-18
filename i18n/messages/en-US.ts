@@ -4514,6 +4514,35 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.history.emptyLogs": "No logs found",
   "subscriptions.history.emptyTopups": "No Top Ups found",
   "subscriptions.history.loading": "Loading {title}",
+  "subscriptions.coverage.summary.nextFundedDrops": "Next {count} drops funded",
+  "subscriptions.coverage.summary.paidTitle": "Subscription paid",
+  "subscriptions.coverage.summary.paid":
+    "The subscription for {meme} is already paid.",
+  "subscriptions.coverage.summary.remainingBalance":
+    "From the remaining balance: {funded}.",
+  "subscriptions.coverage.summary.paymentUnavailable":
+    "This subscription could not be checked. It will be checked again shortly.",
+  "subscriptions.coverage.summary.uncoveredToday": "Today’s mint isn’t covered",
+  "subscriptions.coverage.summary.uncovered":
+    "The Memes #{token} isn’t covered",
+  "subscriptions.coverage.summary.partiallyCoveredToday":
+    "Today’s mint isn’t fully covered",
+  "subscriptions.coverage.summary.partiallyCovered":
+    "The Memes #{token} isn’t fully covered",
+  "subscriptions.coverage.summary.partialEditions":
+    "{funded} of {total} editions funded",
+  "subscriptions.coverage.summary.partialDeadline.one":
+    "Top up by {deadline} to receive the remaining {count} edition of The Memes #{token}.",
+  "subscriptions.coverage.summary.partialDeadline.many":
+    "Top up by {deadline} to receive the remaining {count} editions of The Memes #{token}.",
+  "subscriptions.coverage.summary.deadlinePassed": "Deadline passed",
+  "subscriptions.coverage.summary.expiredDeadline":
+    "Top-up deadline: {deadline}.",
+  "subscriptions.coverage.summary.viewHistory": "View history",
+  "subscriptions.coverage.summary.topUpFutureDrops": "Top up for future drops",
+  "subscriptions.coverage.summary.lastKnown": "Last known coverage",
+  "subscriptions.coverage.summary.lastUpdated":
+    "Last updated {time}. May be out of date.",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
