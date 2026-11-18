@@ -80,6 +80,12 @@ export interface ApiE2eeKeyPackageUpload {
 
 export interface ApiE2eeUploadKeyPackagesRequest {
   key_packages: ApiE2eeKeyPackageUpload[];
+  /**
+   * Deletes the device's own unclaimed one-time KeyPackages of the uploaded
+   * suites in the same transaction (P60 §2 rule 6). An API from before the
+   * field refuses it with a 400.
+   */
+  replace_one_time?: boolean;
 }
 
 export interface ApiE2eeKeyPackageStatus {

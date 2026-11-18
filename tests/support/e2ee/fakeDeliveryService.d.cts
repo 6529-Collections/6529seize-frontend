@@ -88,6 +88,8 @@ export interface FakeDeliveryService {
       windowMs: number;
     } | null
   ): void;
+  /** false: an API from before replace_one_time, which refuses it (400). */
+  setReplaceOneTime(enabled: boolean): void;
   hold(path: RegExp): {
     waiting(): number;
     /** Resolves once a matching POST is being held. */
@@ -111,6 +113,8 @@ export function createFakeDeliveryService(options?: {
   attachmentsEnabled?: boolean;
   /** D172: false starts with the v1-grant transition window closed. */
   v1GrantsAccepted?: boolean;
+  /** false: an API from before replace_one_time, which refuses it (400). */
+  replaceOneTime?: boolean;
 }): FakeDeliveryService;
 export function createFakeApiClient(
   ds: FakeDeliveryService,
