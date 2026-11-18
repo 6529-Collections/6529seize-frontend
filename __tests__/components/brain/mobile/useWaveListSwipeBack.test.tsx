@@ -19,7 +19,7 @@ function SwipeHarness({
   readonly scope?: string;
   readonly onIntentStart: () => void;
   readonly onSwipeBack: () => void;
-  readonly targetScreen?: waveNavigation.WaveScreen;
+  readonly targetScreen?: waveNavigation.WaveScreen | undefined;
 }) {
   const { ref, onTouchStart } = useWaveListSwipeBack({
     enabled,
