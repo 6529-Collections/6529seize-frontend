@@ -1,3 +1,4 @@
+import { LEGACY_DM_DELETION_AT } from "@/components/e2ee/legacy/legacyDmRetention";
 import { expect, test } from "../testHelpers";
 import {
   closeE2eeUsers,
@@ -191,6 +192,21 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
       page,
       (url) => url.pathname === `${ENCRYPTED_ROUTE}/${existingChat}`
     );
+    const beforeCutoff = new Date(Date.parse(LEGACY_DM_DELETION_AT) - 60_000);
+    await page.clock.setFixedTime(beforeCutoff);
+    const continueUnencrypted = page.getByRole("button", {
+      name: "Continue unencrypted",
+    });
+
+    await e2eeSandboxControls.setDmPolicy(baseURL, "carol", "EVERYONE");
+    await openFromProfile("carol");
+    await expect(
+      selectedPerson(page, "carol").getByText(
+        "Hasn’t turned on encrypted messages yet"
+      )
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expect(continueUnencrypted).toBeEnabled();
+
     await e2eeSandboxControls.setDmPolicy(baseURL, "carol", "NOBODY");
     await openFromProfile("carol");
     await expect(
@@ -201,9 +217,7 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await expect(
       page.getByRole("button", { name: "Start chat" })
     ).toBeDisabled();
-    await expect(
-      page.getByRole("button", { name: "Continue unencrypted" })
-    ).toHaveCount(0);
+    await expect(continueUnencrypted).toHaveCount(0);
     expect(creationRequests).toHaveLength(1);
     expect(creationRequests[0]).toMatch(/\/e2ee\/groups$/u);
     expect((await e2eeSandboxControls.state(baseURL)).groups).toHaveLength(1);
