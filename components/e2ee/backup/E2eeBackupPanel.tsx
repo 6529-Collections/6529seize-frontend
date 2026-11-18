@@ -187,23 +187,30 @@ function StatusDetails({
   const lastBackupAt = snapshot.uploading ? null : snapshot.lastBackupAt;
   const running = lastBackupAt === null;
   const counts = formatBackupCounts(locale, snapshot);
+  const uploadingLabel = t(locale, "e2ee.backup.status.uploading");
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
+      {/* Announced: a queued run's progress, then its new backup time. */}
+      <output
+        className={`tw-block tw-text-xs ${
+          running ? "tw-text-iron-300" : "tw-text-iron-400"
+        }`}
+      >
+        {running
+          ? uploadingLabel
+          : t(locale, "e2ee.backup.status.lastBackup", {
+              time: formatE2eeDateTime(locale, lastBackupAt, zone),
+            })}
+      </output>
       {running ? (
         <BackupProgressBar
           locale={locale}
           percent={getBackupPercent(snapshot)}
-          label={t(locale, "e2ee.backup.status.uploading")}
+          label={uploadingLabel}
+          showLabel={false}
         />
       ) : null}
       <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-x-3 tw-gap-y-1 tw-p-0 tw-text-xs tw-text-iron-400">
-        {lastBackupAt === null ? null : (
-          <li>
-            {t(locale, "e2ee.backup.status.lastBackup", {
-              time: formatE2eeDateTime(locale, lastBackupAt, zone),
-            })}
-          </li>
-        )}
         {counts ? <li>{counts}</li> : null}
         {snapshot.quotaBytes > 0 ? (
           <li>
@@ -396,21 +403,29 @@ function BackupDialogs({
   onClose,
   onStartOver,
   onResult,
+  onRestore,
+  onTurnOn,
 }: {
   readonly dialog: Dialog;
   readonly manager: E2eeBackupManager;
   readonly onClose: (kind: DialogKind) => void;
   readonly onStartOver: () => Promise<void>;
   readonly onResult: (message: string) => void;
+  readonly onRestore: () => void;
+  readonly onTurnOn: () => void;
 }) {
   const locale = useBrowserLocale();
   if (dialog?.kind === "code") {
     return (
       <BackupSetupDialog
+        // A new code starts a fresh dialog.
+        key={dialog.prepared.code}
         manager={manager}
         prepared={dialog.prepared}
         replacing={dialog.replacing}
         onClose={() => onClose("code")}
+        onRestore={onRestore}
+        onTurnOn={onTurnOn}
       />
     );
   }
@@ -662,6 +677,8 @@ export function E2eeBackupPanel() {
           setDialog({ kind: "code", prepared, replacing: true });
         }}
         onResult={showResult}
+        onRestore={() => setDialog({ kind: "restore" })}
+        onTurnOn={turnOn}
       />
     </section>
   );
