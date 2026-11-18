@@ -62,6 +62,23 @@ export async function checkEncryptedPoll(
   } else {
     await expect(tea).toHaveCount(0);
   }
+
+  await recipient.getByRole("button", { name: "Change vote" }).click();
+  await recipient.getByText(multi ? "Coffee" : "Tea", { exact: true }).click();
+  await expect(
+    recipient.getByRole(role, { name: "Tea", exact: true })
+  ).toBeChecked();
+  await expect(
+    recipient.getByRole(role, { name: "Coffee", exact: true })
+  ).not.toBeChecked();
+  await recipient.getByRole("button", { name: "Update vote" }).click();
+  await expect(
+    creator.getByRole("button", { name: /^(?:View|Hide) voters for Coffee\./u })
+  ).toHaveCount(0, { timeout: 45_000 });
+  await expect(
+    creator.getByRole("button", { name: /^(?:View|Hide) voters for Tea\./u })
+  ).toHaveAccessibleName(/1 vote, 100 percent/u);
+
   await expect(recipient.getByRole("button", { name: "End poll" })).toHaveCount(
     0
   );

@@ -298,11 +298,7 @@ export function applyPayload(
     return false;
   }
   if (payload.t === "poll") {
-    return (
-      meta.senderProfileId !== null &&
-      runtime.record.metadata.kind === "group" &&
-      applyMsg(runtime, payload, meta)
-    );
+    return meta.senderProfileId !== null && applyMsg(runtime, payload, meta);
   }
   return applyTargeted(runtime, payload, meta);
 }

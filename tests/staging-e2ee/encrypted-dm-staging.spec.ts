@@ -358,6 +358,22 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expectPrivateAndClean([a, b], needles({ hello, reply }));
   });
 
+  test("both participants can create and vote in encrypted DM polls", async () => {
+    const current = requireWorld();
+    const { a, b, runId } = current;
+    const dm = await ensureDm(current);
+    await openChat(a, dm);
+    await openChat(b, dm);
+
+    const singlePoll = qaMessage(runId, "Which drink do you prefer?");
+    const multiPoll = qaMessage(runId, "Which drinks work for you?");
+    await checkEncryptedPoll(a.page, b.page, b.user.handle, singlePoll, false);
+    await checkEncryptedPoll(b.page, a.page, a.user.handle, multiPoll, true);
+    await expectNothingUndecryptable(a);
+    await expectNothingUndecryptable(b);
+    expectPrivateAndClean([a, b], needles({ singlePoll, multiPoll }));
+  });
+
   test("formats conversation-list Markdown previews on desktop and mobile", async ({}, testInfo) => {
     const { a } = requireWorld();
     await openChat(a, await ensureDm(requireWorld()));
