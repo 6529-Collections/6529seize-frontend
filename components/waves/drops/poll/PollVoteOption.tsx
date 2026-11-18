@@ -1,20 +1,19 @@
-import type { ApiDropPollOption } from "@/generated/models/ApiDropPollOption";
 import { CheckIcon } from "@heroicons/react/24/outline";
 
 export function PollVoteOption({
-  option,
+  label,
   checked,
   multichoice,
   groupName,
   disabled,
   onChange,
 }: {
-  readonly option: ApiDropPollOption;
+  readonly label: string;
   readonly checked: boolean;
   readonly multichoice: boolean;
   readonly groupName: string;
   readonly disabled: boolean;
-  readonly onChange: (optionNo: number) => void;
+  readonly onChange: () => void;
 }) {
   const indicatorShapeClass = multichoice ? "tw-rounded" : "tw-rounded-full";
   const rowStateClass = checked
@@ -44,9 +43,9 @@ export function PollVoteOption({
         name={groupName}
         checked={checked}
         disabled={disabled}
-        aria-label={option.option_string}
+        aria-label={label}
         onClick={(event) => event.stopPropagation()}
-        onChange={() => onChange(option.option_no)}
+        onChange={onChange}
         className="tw-peer tw-sr-only"
       />
       <span
@@ -79,7 +78,7 @@ export function PollVoteOption({
             : "tw-font-medium tw-text-iron-100 desktop-hover:group-hover/vote:tw-text-iron-50"
         }`}
       >
-        {option.option_string}
+        {label}
       </span>
     </label>
   );
