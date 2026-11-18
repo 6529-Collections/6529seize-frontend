@@ -174,6 +174,52 @@ describe("getWaveDescriptionPreviewText", () => {
     expect(markdownToPlainText(privateUseText)).toBe(privateUseText);
   });
 
+  it.each(["\uE0005\uE000", "\uE000abc\uE000", "\uE0000\uE000"])(
+    "preserves private-use characters in prose: %s",
+    (literal) => {
+      const text = `Before ${literal} after`;
+      expect(markdownToPlainText(text)).toBe(text);
+    }
+  );
+
+  it("preserves marker-like text formed by removing emphasis", () => {
+    expect(
+      markdownToPlainText("\uE000**0**\uE0000\uE000 https://example.com/a_b_c")
+    ).toBe("\uE0000\uE0000\uE000 https://example.com/a_b_c");
+  });
+
+  it("preserves private-use characters inside bare URLs", () => {
+    const text = "https://example.com/a\uE000_b_c";
+    expect(markdownToPlainText(text)).toBe(text);
+  });
+
+  it.each(["", "0", "1", "10"])(
+    "preserves inline images separated by %j",
+    (separator) => {
+      const text = `![First](https://example.com/first.png)${separator}![Second](https://example.com/second.png)`;
+      expect(markdownToPlainText(text, { preserveImageMarkdown: true })).toBe(
+        text
+      );
+    }
+  );
+
+  it("pairs emphasis around an image and a bare URL", () => {
+    expect(
+      markdownToPlainText(
+        "*![Cover](https://example.com/cover.png) https://example.com/a_b_c*",
+        { preserveImageMarkdown: true }
+      )
+    ).toBe("![Cover](https://example.com/cover.png) https://example.com/a_b_c");
+  });
+
+  it("preserves content when no private-use marker is available", () => {
+    const characters = Array.from({ length: 0x1900 }, (_, index) =>
+      String.fromCodePoint(0xe000 + index)
+    ).join("");
+    const text = `${characters} **text** https://example.com/a_b_c`;
+    expect(markdownToPlainText(text)).toBe(text);
+  });
+
   it("removes formatting around images while retaining their markup", () => {
     expect(
       markdownToPlainText(
