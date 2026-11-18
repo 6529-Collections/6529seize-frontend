@@ -9,6 +9,7 @@ import {
   getStructuredApiErrorStatus,
 } from "@/services/api/common-api";
 import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
+import type { ApiE2eeDeviceInboxStatus } from "@/generated/models/ApiE2eeDeviceInboxStatus";
 import type {
   ApiE2eeBlob,
   ApiE2eeBlobChunk,
@@ -89,6 +90,7 @@ export interface E2eeApiClient {
   getWelcomes(deviceKey: string): Promise<ApiE2eeWelcome[]>;
   ackWelcome(deviceKey: string, welcomeId: string): Promise<void>;
   getDeviceGroups(deviceKey: string): Promise<ApiE2eeDeviceGroup[]>;
+  getDeviceInboxStatus(deviceKey: string): Promise<ApiE2eeDeviceInboxStatus>;
   createBlob(body: ApiE2eeCreateBlobRequest): Promise<ApiE2eeBlob>;
   putBlobChunk(
     blobId: string,
