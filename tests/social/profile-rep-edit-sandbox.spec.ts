@@ -430,6 +430,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     let allocationReads = 0;
     let writes = 0;
     let searches = 0;
+    const checkedCategories: string[] = [];
     const stats = [
       {
         category: CATEGORY,
@@ -475,12 +476,13 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       (url) =>
         /^\/api\/+rep\/categories(?:\/availability)?$/.test(url.pathname),
       (route) => {
+        const url = new URL(route.request().url());
+        if (url.pathname.endsWith("/availability")) {
+          checkedCategories.push(url.searchParams.get("param") ?? "");
+          return route.fulfill({ json: true });
+        }
         searches++;
-        return route.fulfill({
-          json: route.request().url().includes("/availability")
-            ? true
-            : ["Music"],
-        });
+        return route.fulfill({ json: ["Music"] });
       }
     );
     await page.route(`${api}/api/profiles/${TARGET}/rep/rating`, (route) => {
@@ -583,7 +585,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("button", { name: "Music", exact: true })
     ).toBeVisible();
     await expectFixedLayout();
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeEnabled();
+    await expect(search).toBeFocused();
+    await expect(
+      grant.getByRole("button", { name: "mus", exact: true })
+    ).toHaveCount(0);
     await grant.getByRole("button", { name: "Music", exact: true }).click();
+    await expect(search).toBeEditable();
     await expect(amount).toHaveValue("35");
     await expectFocusedAmountWithoutSelection(amount);
     await expect(
@@ -623,7 +633,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .getByRole("button", { name: "Research -25", exact: true })
       .click();
     await expect(search).toHaveValue("Research");
-    await expect(search).toHaveAttribute("readonly");
+    await expect(search).toBeEditable();
     await expect(amount).toHaveValue("-25");
     await expectFocusedAmountWithoutSelection(amount);
     await expect(
@@ -688,7 +698,8 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByText("Current Rep:", { exact: true }).locator("..")
     ).toHaveText("Current Rep:+1,000");
     expect(allocationReads).toBe(1);
-    expect(searches).toBe(2);
+    expect(searches).toBe(1);
+    expect(checkedCategories).toEqual(["mus", "Music"]);
     expect(writes).toBe(0);
     await expectNoHorizontalOverflow(page);
     await expectAxeClean(page);
@@ -2219,7 +2230,6 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await grant
       .getByRole("textbox", { name: "Category to grant REP for", exact: true })
       .fill(CATEGORY);
-    await grant.getByRole("button", { name: CATEGORY, exact: true }).click();
     const amount = grant.getByRole("textbox", {
       name: "Your total REP for this category",
       exact: true,
