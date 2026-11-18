@@ -54,7 +54,7 @@ let mockApiQuery: Record<string, unknown>;
 let mockApiQueryEnabled: boolean | undefined;
 // This browser's stored encrypted device (the one identity source).
 let mockStoredKey: string | null = null;
-jest.mock("@/lib/e2ee/storage", () => ({
+jest.mock("@/lib/e2ee/stored-device-key", () => ({
   readStoredE2eeDeviceKey: async () => mockStoredKey,
 }));
 jest.mock("@tanstack/react-query", () => ({

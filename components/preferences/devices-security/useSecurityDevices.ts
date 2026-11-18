@@ -17,7 +17,7 @@ import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
 import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
 import { useRemoveE2eeLocalData } from "@/components/e2ee/useRemoveE2eeLocalData";
-import { readStoredE2eeDeviceKey } from "@/lib/e2ee/storage";
+import { readStoredE2eeDeviceKey } from "@/lib/e2ee/stored-device-key";
 import {
   storedE2eeDeviceKeyQueryKey,
   useStoredE2eeDeviceKey,

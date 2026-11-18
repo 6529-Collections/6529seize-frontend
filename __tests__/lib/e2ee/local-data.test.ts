@@ -92,6 +92,48 @@ describe("removing a revoked device's data", () => {
     expect(await storage.getWasmState("p1")).toBeNull();
   });
 
+  it("checks the device in the same IndexedDB write as the clear, also without Web Locks", async () => {
+    const fake = createFakeIndexedDb();
+    const uninstall = fake.install();
+    try {
+      const storage = createIndexedDbE2eeStorage(fake.factory);
+      const backupState = createMemoryBackupStateStore();
+      // A replacement device (and its backup state) was stored after the
+      // revoked device's key was read.
+      await storage.writeBatch("p1", {
+        expectedVersion: 0,
+        device: storedDevice("0xbb"),
+        wasmState: new Uint8Array([3]),
+      });
+      await backupState.put({ profileId: "p1" } as BackupLocalState);
+      await expect(
+        removeE2eeProfileLocalData("p1", {
+          storage,
+          backupState,
+          locks: null,
+          onlyDeviceKey: "0xaa",
+        })
+      ).resolves.toBe(false);
+      expect((await storage.getDevice("p1"))?.deviceKey).toBe("0xbb");
+      expect(await storage.getWasmState("p1")).toEqual(new Uint8Array([3]));
+      expect(await backupState.get("p1")).not.toBeNull();
+
+      // The revoked device itself is cleared, with its backup state.
+      await expect(
+        removeE2eeProfileLocalData("p1", {
+          storage,
+          backupState,
+          locks: null,
+          onlyDeviceKey: "0xBB",
+        })
+      ).resolves.toBe(true);
+      expect(await storage.getDevice("p1")).toBeNull();
+      expect(await backupState.get("p1")).toBeNull();
+    } finally {
+      uninstall();
+    }
+  });
+
   it("keeps a device set up after the key was checked, under the lock", async () => {
     // Checked against 0xaa, but before the lock is held this browser set
     // up a new device: its data must not be removed.
