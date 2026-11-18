@@ -22,6 +22,15 @@ export default function SubscriptionCoverageNotice({
   const action = show ? onRefresh : onRetry;
   const hasTimestamp =
     subscriptionCoverageTimestamp(calculatedAt) !== undefined;
+  let message = t(
+    locale,
+    show ? "subscriptions.coverage.stale" : "subscriptions.page.refreshError"
+  );
+  if (show && hasTimestamp && calculatedAt) {
+    message = t(locale, "subscriptions.coverage.summary.lastUpdated", {
+      time: formatSubscriptionCoverageDeadline(locale, calculatedAt),
+    });
+  }
 
   return (
     <div
@@ -35,16 +44,7 @@ export default function SubscriptionCoverageNotice({
       <p
         className={`tw-m-0 tw-text-pretty tw-leading-5 ${show ? "tw-text-xs tw-text-iron-400" : "tw-text-sm tw-text-amber-300"}`}
       >
-        {show && hasTimestamp && calculatedAt
-          ? t(locale, "subscriptions.coverage.summary.lastUpdated", {
-              time: formatSubscriptionCoverageDeadline(locale, calculatedAt),
-            })
-          : t(
-              locale,
-              show
-                ? "subscriptions.coverage.stale"
-                : "subscriptions.page.refreshError"
-            )}
+        {message}
       </p>
       {action && (
         <Button
