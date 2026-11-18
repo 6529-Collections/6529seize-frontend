@@ -94,6 +94,7 @@ export function runWaveNavigationTransition(
     typeof document.startViewTransition !== "function" ||
     reducedMotion.matches
   ) {
+    activeTransition?.skip();
     if (!swipe) navigate();
     return false;
   }

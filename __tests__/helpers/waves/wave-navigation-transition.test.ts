@@ -122,6 +122,17 @@ it("does not run a superseded capture callback", async () => {
   expect(navigate).not.toHaveBeenCalled();
 });
 
+it("lets a same-screen selection supersede a pending Feed capture", async () => {
+  document.body.innerHTML = '<div data-wave-navigation-screen="wave"></div>';
+  const oldNavigation = jest.fn();
+  const selection = jest.fn();
+  runWaveNavigationTransition("feed", oldNavigation);
+  runWaveNavigationTransition("wave", selection);
+  await updateDone;
+  expect(selection).toHaveBeenCalledTimes(1);
+  expect(oldNavigation).not.toHaveBeenCalled();
+});
+
 it("drops the pending swipe handoff when its navigation is superseded", () => {
   navigateAfterWaveSwipe(skipWaveNavigationTransition);
   expect(consumeWaveSwipeHandoff()).toBe(false);

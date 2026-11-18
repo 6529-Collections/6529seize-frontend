@@ -209,6 +209,10 @@ test("Network profile Back restores page, sorting and reading position without h
   }
   const source = "/network?page=2&sort-by=rep&sort-direction=asc";
   await gotoReady(page, source);
+  // Exercise client navigation after hydration, rather than a server-HTML link.
+  await expect(
+    page.getByRole("button", { name: /^Open sort options/ })
+  ).toBeEnabled({ timeout: RESPONSE_TIMEOUT_MS });
   const members = page
     .getByRole("main")
     .getByRole("link")

@@ -47,15 +47,27 @@ function getForwardDestination(event: MouseEvent): string | null {
   return ownsScrollPosition(href) ? null : href;
 }
 
-function restoreScrollPosition(position: ScrollPosition) {
-  let ready =
-    Math.max(0, document.documentElement.scrollHeight - window.innerHeight) >=
-    position.windowTop;
-  if (ready && window.scrollY !== position.windowTop)
-    window.scrollTo({ top: position.windowTop, behavior: "instant" });
+function restoreScrollPosition(position: ScrollPosition, clamp = false) {
+  const maximum = Math.max(
+    0,
+    document.documentElement.scrollHeight - window.innerHeight
+  );
+  const windowTop = clamp
+    ? Math.min(position.windowTop, maximum)
+    : position.windowTop;
+  let ready = maximum >= windowTop;
+  if (ready && window.scrollY !== windowTop)
+    window.scrollTo({ top: windowTop, behavior: "instant" });
   const containers = document.querySelectorAll<HTMLElement>(SCROLL_TARGET);
-  for (const [index, top] of position.containers) {
+  for (const [index, savedTop] of position.containers) {
     const container = containers[index];
+    const top =
+      clamp && container
+        ? Math.min(
+            savedTop,
+            Math.max(0, container.scrollHeight - container.clientHeight)
+          )
+        : savedTop;
     if (!container || container.scrollHeight - container.clientHeight < top)
       ready = false;
     else if (container.scrollTop !== top)
@@ -222,7 +234,10 @@ export function createNavigationScrollRestoration({
       document.addEventListener(type, stop, { capture: true, passive: true });
     }
     stopRestoring = stop;
-    timeout = window.setTimeout(stop, 1500);
+    timeout = window.setTimeout(() => {
+      if (currentHref() === href) restoreScrollPosition(position, true);
+      stop();
+    }, 1500);
     schedule();
   };
 
