@@ -63,9 +63,8 @@ export function commitWaveNavigationContent(screen: WaveScreen) {
 export function isWaveNavigationContentPending(screen: WaveScreen) {
   return (
     activeTransition?.screen === screen &&
-    document.documentElement.hasAttribute(
-      "data-wave-navigation-content-pending"
-    )
+    document.documentElement.dataset["waveNavigationContentPending"] !==
+      undefined
   );
 }
 

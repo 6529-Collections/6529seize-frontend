@@ -75,8 +75,6 @@ export function useClientNavigation<T, TOptions = undefined>({
 
   const navigate = useCallback(
     (newState: T, options?: TOptions & { replace?: boolean | undefined }) => {
-      if (globalThis.window === undefined) return;
-
       const { window: browserWindow } = globalThis;
       if (!browserWindow) return;
 

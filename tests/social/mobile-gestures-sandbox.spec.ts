@@ -528,8 +528,10 @@ for (const platform of ["ios", "android"] as const) {
           (element) => element.closest("article")!.getBoundingClientRect().top
         );
         await post.tap();
+        // The local mock server compiles the detail route on first entry.
         await expect(page).toHaveURL(
-          new RegExp(`/waves/${WAVE}\\?.*returnTo=`)
+          new RegExp(`/waves/${WAVE}\\?.*returnTo=`),
+          { timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS }
         );
         await expect(
           page.getByRole("textbox", { name: "Write a message" }).last()
