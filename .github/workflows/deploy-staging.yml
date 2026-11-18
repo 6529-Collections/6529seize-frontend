@@ -63,6 +63,10 @@ jobs:
       NEXT_PUBLIC_FEATURE_DIAGNOSTICS: "true"
       NEXT_PUBLIC_E2EE_DM_ENABLED: "true"
       NEXT_PUBLIC_E2EE_POLLS_ENABLED: "true"
+      # Encrypted read-state sync between own devices (D175, read-sync stack
+      # #4808/#4811/#4812/#4892): on for staging QA only. Turn off by setting
+      # "false" and rebuilding; do not revert the code.
+      NEXT_PUBLIC_E2EE_READ_SYNC: "true"
       # Gap-only chat sync (WAVES-PLAN 0.7/0.8): on in staging, off in production.
       NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC: "true"
       # App-socket PING keepalive (needs API #2354): on in staging, off in production.
