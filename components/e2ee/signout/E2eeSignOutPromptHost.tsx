@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useState } from "react";
 import Button from "@/components/utils/button/Button";
+import { useE2eeBackup } from "@/hooks/e2ee/useE2eeBackup";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t, type MessageKey } from "@/i18n/messages";
 import type { E2eeBackupManager, E2eeBackupSnapshot } from "@/lib/e2ee/backup";
@@ -15,6 +16,7 @@ import {
   hasAnyE2eeEnrollmentMarker,
   hasE2eeEnrollmentMarker,
 } from "../e2eeLocalState";
+import { BackupSetupLink } from "../backup/BackupSetupLink";
 import { E2eeDialog } from "../ui/E2eeDialog";
 import { type E2eeSignOutScope, registerE2eeSignOutHost } from "./e2eeSignOut";
 
@@ -137,6 +139,11 @@ export function E2eeSignOutPromptHost({
   const context = useE2eeContext();
   const backup: E2eeBackupManager | null =
     context.profileId === profileId ? context.backup : null;
+  const { snapshot } = useE2eeBackup();
+  // Removing chats here with no backup loses them; offer backup first.
+  const backupOff =
+    backup !== null &&
+    (snapshot?.phase === "off" || snapshot?.phase === "available");
 
   useEffect(
     () =>
@@ -261,6 +268,16 @@ export function E2eeSignOutPromptHost({
             </p>
           </div>
         </div>
+        {backupOff ? (
+          <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-p-3 sm:tw-flex-row sm:tw-items-center">
+            <p className="tw-m-0 tw-flex-1 tw-text-xs tw-leading-5 tw-text-iron-300">
+              {t(locale, "e2ee.signOut.backupOff")}
+            </p>
+            <BackupSetupLink variant="secondary" onNavigate={cancel}>
+              {t(locale, "e2ee.signOut.setUpBackup")}
+            </BackupSetupLink>
+          </div>
+        ) : null}
         {backupFailed ? (
           <p role="alert" className="tw-m-0 tw-text-sm tw-text-amber-300">
             {t(locale, "e2ee.signOut.backupFailed")}

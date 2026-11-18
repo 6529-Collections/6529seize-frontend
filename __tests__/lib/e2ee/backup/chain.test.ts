@@ -245,7 +245,7 @@ class FakeEngine implements BackupEngine {
   private readonly listeners = new Set<() => void>();
 
   getStatus = () => "ready" as const;
-  getThisDevice = () =>
+  getThisDevice = (): E2eeDeviceInfo | null =>
     ({ deviceKey: this.deviceKey }) as unknown as E2eeDeviceInfo;
   subscribe = (listener: () => void) => {
     this.listeners.add(listener);
@@ -529,6 +529,27 @@ describe("backup writers keep one chain", () => {
     const { code, engine } = await restoreWith(api, prepared);
     expect(code).toBeNull();
     expect(texts(engine.imported[0])).toEqual({ ...FINAL, m4: "four" });
+  });
+
+  it("waits without an error while the engine hasn't named this device", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const { api, writer, backupId } = await backupWithHistory(server);
+    const reloaded = deviceWith(api, {
+      engine: writer.engine,
+      state: writer.state,
+    });
+    const named = writer.engine.getThisDevice;
+    // Ready comes before GET /e2ee/me lists this device.
+    writer.engine.getThisDevice = () => null;
+    await reloaded.manager.start();
+    writer.engine.put(message("m4", "four"));
+    await reloaded.manager.backupNow();
+    expect(reloaded.manager.getSnapshot().lastError).toBeNull();
+    expect(await allSeqs(api, backupId)).toEqual([1, 2, 3, 4]);
+
+    writer.engine.getThisDevice = named;
+    await reloaded.manager.backupNow();
+    expect(await allSeqs(api, backupId)).toEqual([1, 2, 3, 4, 5]);
   });
 
   it("follows its own append whose response was lost", async () => {
