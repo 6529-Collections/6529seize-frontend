@@ -247,8 +247,9 @@ show the profile-creation welcome.
   Select its `×` (`Change category`) to choose another category and clear the draft.
 - The amount field is editable before category selection, with placeholder `0`.
   `Grant Rep` stays disabled until a category and valid changed amount are ready.
-  An amount typed first is kept when you choose a category. Otherwise, selection
-  prefills your saved total, or zero for a new rating. You can type an amount while
+  An amount typed before the first category choice is kept for that selection.
+  Switching to another category replaces the unsaved amount with that category's
+  saved total, or zero for a new rating. You can type an amount while
   rating data loads; submitting stays disabled until the current contribution
   and allowance are available.
 - If availability fails, inline error is shown.

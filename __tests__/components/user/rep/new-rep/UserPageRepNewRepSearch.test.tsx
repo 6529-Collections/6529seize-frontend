@@ -141,7 +141,8 @@ describe("UserPageRepNewRepSearch", () => {
     expect(
       within(own).getByRole("button", { name: "AI 1,000" })
     ).toHaveAttribute("aria-pressed", "true");
-    await user.click(screen.getByRole("button", { name: "Change category" }));
+    await user.clear(amount);
+    await user.type(amount, "1200");
     await user.click(screen.getByRole("button", { name: "Research -25" }));
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
@@ -152,6 +153,7 @@ describe("UserPageRepNewRepSearch", () => {
     expect(screen.getByText("Adjustment:").parentElement).toHaveTextContent(
       "Adjustment:0"
     );
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
     await user.click(screen.getByRole("button", { name: "Change category" }));
     await user.type(
       screen.getByRole("textbox", { name: "Category to grant REP for" }),

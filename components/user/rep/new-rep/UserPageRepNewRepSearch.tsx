@@ -393,6 +393,8 @@ export default function UserPageRepNewRepSearch({
       if (request !== selectionRequest.current) return;
       setSelectedCategory(rep);
       setRepSearch(rep);
+      // Only a draft entered before the first category choice carries over.
+      // Switching categories must show that category's saved rating.
       setAmountDraft((draft) =>
         !selectedCategory && draft?.scope === amountScope && draft.value
           ? { scope: [amountContext, rep].join(":"), value: draft.value }
