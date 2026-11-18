@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import { formatEther } from "viem";
 import { useChainId, useSwitchChain } from "wagmi";
 import type { ApiDropForgeSettings } from "@/generated/models/ApiDropForgeSettings";
 import Button from "@/components/utils/button/Button";
@@ -19,17 +20,27 @@ export default function WalletFunding({
   const { switchChain, isPending } = useSwitchChain();
   const funding = useWalletFunding(settings, amount, onConfirmed);
   return (
-    <div className="tw-mt-4 tw-space-y-3">
-      {settings.can_top_up && (
-        <Button
-          size="sm"
-          disabled={funding.busy}
-          aria-expanded={expanded}
-          onClick={() => setExpanded((value) => !value)}
-        >
-          {t(locale, "dropForge.funding.topUp")}
-        </Button>
-      )}
+    <div className="tw-mt-3 tw-space-y-3">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
+        <p className="tw-m-0 tw-min-w-0 tw-break-all tw-text-sm tw-text-iron-300">
+          {t(locale, "dropForge.settings.balance")}:{" "}
+          <strong>
+            {settings.balance_wei === null
+              ? t(locale, "dropForge.settings.unavailableBalance")
+              : formatEther(BigInt(settings.balance_wei))}
+          </strong>
+        </p>
+        {settings.can_top_up && (
+          <Button
+            size="sm"
+            disabled={funding.busy}
+            aria-expanded={expanded}
+            onClick={() => setExpanded((value) => !value)}
+          >
+            {t(locale, "dropForge.funding.topUp")}
+          </Button>
+        )}
+      </div>
       {expanded && settings.can_top_up && (
         <div className="tw-space-y-3 tw-border-0 tw-border-t tw-border-solid tw-border-iron-700 tw-pt-4">
           <p className="tw-m-0 tw-break-all tw-text-xs tw-text-iron-400">

@@ -96,7 +96,7 @@ it("starts collapsed, then shows the settings and operational wallet", async () 
   expect(disclosure).toHaveAttribute("aria-expanded", "false");
   expect(screen.queryByRole("switch")).not.toBeInTheDocument();
   fireEvent.click(disclosure);
-  await screen.findByText("drops6529.eth");
+  await screen.findByText(/drops6529.eth/);
   expect(
     screen.getByRole("switch", { name: /Automatic launch/ })
   ).not.toBeChecked();
@@ -110,7 +110,7 @@ it("starts collapsed, then shows the settings and operational wallet", async () 
     screen.queryByRole("switch", { name: /EMMA preparation/ })
   ).not.toBeInTheDocument();
   expect(
-    screen.getByRole("link", { name: settings.signer_address })
+    screen.getByRole("link", { name: "View wallet on Etherscan" })
   ).toHaveAttribute(
     "href",
     `https://etherscan.io/address/${settings.signer_address}`
@@ -289,6 +289,8 @@ it("confirms clipboard success and reports a clipboard rejection in the wallet p
       ).toBeInTheDocument()
     );
     expect(writeText).toHaveBeenCalledWith(settings.signer_address);
+    fireEvent.focus(copy);
+    expect(await screen.findByRole("tooltip")).toHaveTextContent("Copied");
     fireEvent.click(copy);
     await waitFor(() =>
       expect(
@@ -297,6 +299,10 @@ it("confirms clipboard success and reports a clipboard rejection in the wallet p
           .some((message) => !message.hasAttribute("aria-hidden"))
       ).toBe(true)
     );
+    expect(mockSetToast).toHaveBeenCalledWith({
+      type: "error",
+      message: "Couldn’t copy address.",
+    });
     expect(screen.getByRole("button", { name: "Copy wallet address" })).toBe(
       copy
     );
@@ -305,4 +311,36 @@ it("confirms clipboard success and reports a clipboard rejection in the wallet p
       Object.defineProperty(navigator, "clipboard", previousClipboard);
     else Reflect.deleteProperty(navigator, "clipboard");
   }
+});
+
+it.each([1, 11155111])(
+  "shows the compact operational wallet with the correct explorer for chain %s",
+  async (chainId) => {
+    jest
+      .mocked(getForgeSettings)
+      .mockResolvedValue({ ...settings, chain_id: chainId });
+    show();
+    expect(await screen.findByText("0x3333...3333")).toHaveAttribute(
+      "title",
+      settings.signer_address
+    );
+    expect(screen.getByText(/drops6529.eth/).textContent).toContain(
+      "drops6529.eth"
+    );
+    expect(
+      screen.getByRole("link", { name: "View wallet on Etherscan" })
+    ).toHaveAttribute(
+      "href",
+      `https://${chainId === 1 ? "" : "sepolia."}etherscan.io/address/${settings.signer_address}`
+    );
+  }
+);
+
+it("omits the ENS prefix when none is available", async () => {
+  jest
+    .mocked(getForgeSettings)
+    .mockResolvedValue({ ...settings, ens_name: null });
+  show();
+  expect(await screen.findByText("0x3333...3333")).toBeVisible();
+  expect(screen.queryByText(/drops6529.eth/)).not.toBeInTheDocument();
 });

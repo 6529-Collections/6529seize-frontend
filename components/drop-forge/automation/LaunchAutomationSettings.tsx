@@ -3,7 +3,6 @@ import Link from "next/link";
 import { useId, useState } from "react";
 import { ArrowPathIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useQueryClient } from "@tanstack/react-query";
-import { formatEther } from "viem";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { useAuth } from "@/components/auth/Auth";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -12,7 +11,6 @@ import { saveForgeSettings } from "@/services/api/drop-forge-settings";
 import type { ApiDropForgeSettingsRequest } from "@/generated/models/ApiDropForgeSettingsRequest";
 import { forgeSettingsKey } from "@/hooks/drop-forge-query-keys";
 import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
-import { getAddressEtherscanLink } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import Button from "@/components/utils/button/Button";
 import { getButtonClasses } from "@/components/utils/button/buttonStyles";
@@ -25,9 +23,9 @@ import {
   dropForgeSectionClassName,
 } from "../drop-forge-section-styles";
 import ArtistPaymentSettings from "./ArtistPaymentSettings";
-import CopyWalletAddressButton from "./CopyWalletAddressButton";
+import OperationalWallet from "./OperationalWallet";
+import SettingsUpdatedBy from "./SettingsUpdatedBy";
 import LaunchAutomationHelp from "./LaunchAutomationHelp";
-import WalletFunding from "./WalletFunding";
 
 const settingLabels = {
   automation_enabled: "dropForge.settings.launch",
@@ -215,58 +213,20 @@ export default function LaunchAutomationSettings() {
                   {t(locale, "dropForge.settings.readOnly")}
                 </p>
               )}
-              <p className="tw-min-h-4 tw-break-all tw-text-xs tw-text-iron-500">
-                {settings.updated_by &&
-                  t(locale, "dropForge.settings.updated", {
-                    wallet: settings.updated_by,
-                  })}
-              </p>
-            </div>
-            <div className="tw-min-w-0 tw-rounded-lg tw-bg-iron-900 tw-p-4">
-              <h3 className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-100">
-                {t(locale, "dropForge.settings.wallet")}
-              </h3>
-              <p className="tw-mt-3 tw-text-sm tw-text-iron-400">
-                {t(locale, "dropForge.funding.network", {
-                  network: settings.chain_id === 1 ? "Ethereum" : "Sepolia",
-                })}
-              </p>
-              {settings.ens_name && (
-                <p className="tw-mt-3 tw-break-words tw-text-iron-100">
-                  {settings.ens_name}
-                </p>
+              {settings.updated_by && (
+                <SettingsUpdatedBy
+                  key={settings.updated_by}
+                  address={settings.updated_by}
+                />
               )}
-              <a
-                href={getAddressEtherscanLink(
-                  settings.chain_id,
-                  settings.signer_address
-                )}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="tw-mt-3 tw-block tw-break-all tw-text-sm tw-text-primary-300"
-              >
-                {settings.signer_address}
-              </a>
-              <CopyWalletAddressButton
-                key={settings.signer_address}
-                address={settings.signer_address}
-              />
-              <p className="tw-mt-4 tw-text-sm tw-text-iron-300">
-                {t(locale, "dropForge.settings.balance")}:{" "}
-                <strong>
-                  {settings.balance_wei === null
-                    ? t(locale, "dropForge.settings.unavailableBalance")
-                    : formatEther(BigInt(settings.balance_wei))}
-                </strong>
-              </p>
-              <WalletFunding
-                key={`${address ?? ""}:${settings.chain_id}:${settings.signer_address}`}
-                settings={settings}
-                onConfirmed={() => {
-                  void query.refetch();
-                }}
-              />
             </div>
+            <OperationalWallet
+              key={`${address ?? ""}:${settings.chain_id}:${settings.signer_address}`}
+              settings={settings}
+              onConfirmed={() => {
+                void query.refetch();
+              }}
+            />
           </div>
         )}
       </div>

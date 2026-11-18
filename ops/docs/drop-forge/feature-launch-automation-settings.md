@@ -27,10 +27,16 @@ The wallet needs both payout funds and gas; mint proceeds still go to the config
 payment receiver. Manual Pay Artist remains available and records its transaction
 hash so automation can verify completion instead of sending another payment.
 
-The wallet panel shows the configured address, a verified ENS name when available,
-an explorer link and ETH balance. Refresh updates those details.
-**Copy wallet address** confirms when the address has been copied. ENS is informational;
-the underlying configured address is always the destination.
+The wallet panel shows the network beside its title, followed by an optional verified
+ENS name and a shortened address. Hover the address to see it in full. The copy icon
+copies the full address and confirms success; the explorer icon opens the wallet on
+the displayed network’s Etherscan. ETH balance and **Top Up ETH** share a row.
+Refresh updates those details. ENS is informational; the underlying configured
+address is always the destination.
+
+**Last changed by** shows the linked profile handle when available. Otherwise it
+shows a verified ENS name with a shortened address, or the full wallet address when
+neither a profile handle nor verified ENS is available.
 
 Top Up ETH is available to all Drop Forge administrators even while automation is
 Off. Open it, enter the amount, switch to the displayed network if needed and review
