@@ -101,7 +101,7 @@ export interface ReadSyncHooks {
   /** This profile's own message, sent from another device, at `seq`. */
   ownMessage(runtime: GroupRuntime, seq: number): void;
   /** This device committed adds of own devices to a self group. */
-  devicesAdded(g: string): void;
+  devicesAdded(g: string, deviceKeys: readonly string[]): void;
   /** This device joined a group through a Welcome. */
   joined(runtime: GroupRuntime): void;
 }

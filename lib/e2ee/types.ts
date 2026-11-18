@@ -225,6 +225,39 @@ export interface E2eeEligibility {
   reason?: E2eeEligibilityReason | null;
 }
 
+/**
+ * Debug view of read-state sync (D175, P60), shown in Devices on staging
+ * builds only. Times are this device's clock (ms).
+ */
+export interface E2eeReadSyncStatus {
+  /** The canonical self group's handle; null while this device has none. */
+  readonly group: string | null;
+  /** This profile's other devices in that group with this device. */
+  readonly sharedWith: number;
+  /** Older self groups this device is still in (it leaves once handed over). */
+  readonly olderGroups: number;
+  readonly reasons: readonly E2eeReadSyncReason[];
+}
+
+export type E2eeReadSyncReason =
+  /** This device's self-group claims are used up; null: when is unknown. */
+  | { readonly kind: "claim-budget"; readonly nextAt: number | null }
+  /** A sibling claimed through to a last-resort KeyPackage of an older client. */
+  | {
+      readonly kind: "older-key-packages";
+      readonly deviceKey: string;
+      readonly device: string;
+    }
+  /** This device added the sibling; nothing heard from it in the group yet. */
+  | {
+      readonly kind: "invited";
+      readonly deviceKey: string;
+      readonly device: string;
+      readonly since: number;
+    }
+  /** Missing siblings are looked at again at the first sync pass after this. */
+  | { readonly kind: "maintenance"; readonly nextAt: number };
+
 export interface E2eeEngine {
   // state (synchronous snapshots) + change subscription
   getStatus(): E2eeEngineStatus;
@@ -239,6 +272,8 @@ export interface E2eeEngine {
   getConversation(g: string): E2eeConversation | null;
   getMessages(g: string): E2eeMessage[]; // ascending seq, notices interleaved
   subscribe(listener: () => void): () => void; // any state change
+  /** Debug only (staging builds show it); null before the device is set up. */
+  getReadSyncStatus?(): E2eeReadSyncStatus | null;
 
   // lifecycle
   enroll(): Promise<void>; // the single wallet prompt

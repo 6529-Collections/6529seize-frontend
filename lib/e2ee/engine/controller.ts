@@ -309,6 +309,11 @@ export class EngineController {
     });
   }
 
+  /** When group `g`'s periodic maintenance is next due (debug status). */
+  nextMaintenanceAt(g: string): number {
+    return (this.maintainedAt.get(g) ?? 0) + MAINTAIN_EVERY_MS;
+  }
+
   /**
    * `onlyIfDue`: commit (and catch up first, as every commit does) only
    * when local state shows a required change. Opening a chat uses it, so

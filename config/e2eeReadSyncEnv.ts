@@ -1,3 +1,4 @@
+import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 import { isE2eeFlagEnabled } from "@/config/e2eeFlag";
 
@@ -11,5 +12,17 @@ export function isE2eeReadSyncEnabled(): boolean {
   return (
     isE2eeFlagEnabled(publicEnv.NEXT_PUBLIC_E2EE_DM_ENABLED) &&
     isE2eeFlagEnabled(publicEnv.NEXT_PUBLIC_E2EE_READ_SYNC)
+  );
+}
+
+/**
+ * Whether Devices shows the read-sync debug row (prxt's staging QA): only
+ * with read sync on and never on a production build (6529.io, or an
+ * endpoint that does not parse, which counts as production).
+ */
+export function isE2eeReadSyncDebugShown(): boolean {
+  return (
+    isE2eeReadSyncEnabled() &&
+    !getAppEnvironment(publicEnv.BASE_ENDPOINT).isProduction
   );
 }
