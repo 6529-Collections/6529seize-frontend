@@ -365,7 +365,11 @@ export default function DevicesPreferencesSettings() {
   const pendingIsOwn =
     pendingRevoke !== null &&
     ownKeys.has(pendingRevoke.device_key.toLowerCase());
-  const revokingThisBrowser = pendingIsOwn;
+  // The same check as the cleanup after the revoke: this browser's signing
+  // key, or its encrypted-messages device (also when the keys can't be read).
+  const revokingThisBrowser = pendingLinkedDevice
+    ? linkedRevocation.isThisBrowser(pendingLinkedDevice, pendingIsOwn)
+    : pendingIsOwn;
 
   const confirmRevoke = async () => {
     if (!canVerifyRevocation || !pendingRevoke || revokingRef.current) return;

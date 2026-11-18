@@ -573,6 +573,29 @@ describe("DevicesPreferencesSettings", () => {
       expect(mockRemoveLocal).not.toHaveBeenCalled();
     });
 
+    it("knows this browser by its encryption device when its signing keys can't be read", async () => {
+      // No signing key to match, but the grant's encryption device is this
+      // browser's: the revoke deletes its chats, so it gets this browser's
+      // dialog and backup warning.
+      mockLocalState = { loaded: true, failed: true };
+      setUp(true);
+      fireEvent.click(
+        screen.getByRole("button", { name: "Revoke Chrome on macOS" })
+      );
+      const dialog = screen.getByRole("dialog", {
+        name: "Revoke this browser?",
+      });
+      expect(dialog).toHaveTextContent(
+        "the encrypted chats saved here are deleted"
+      );
+      expect(dialog).toHaveTextContent(
+        "the encrypted chats saved here can’t be restored after this"
+      );
+      expect(
+        within(dialog).getByRole("link", { name: "Check backup first" })
+      ).toBeInTheDocument();
+    });
+
     it("clears this browser's encrypted data itself when the engine is not ready", async () => {
       const order = setUp(false);
       await confirm("Chrome on macOS", "Revoke this browser");
