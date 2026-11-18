@@ -5,6 +5,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   useCallback,
   useContext,
+  useEffect,
   useId,
   useMemo,
   useRef,
@@ -248,6 +249,13 @@ function GrantRepForm({
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
   const amountFocusSource = useRef<Element | null>(null);
+  const isCurrentForm = useRef(false);
+  useEffect(() => {
+    isCurrentForm.current = true;
+    return () => {
+      isCurrentForm.current = false;
+    };
+  }, []);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -469,6 +477,7 @@ function GrantRepForm({
         connectedProfile,
         profileProxy: activeProfileProxy ?? null,
       });
+      if (!isCurrentForm.current) return;
       setSelectedCategory(null);
       setRepSearch("");
       setAmountDraft(null);
@@ -722,8 +731,8 @@ function GrantRepForm({
           />
           <div
             role="status"
-            aria-hidden={!selectedCategory}
-            className={!selectedCategory ? "tw-invisible" : undefined}
+            aria-hidden={!amountReady}
+            className={!amountReady ? "tw-invisible" : undefined}
           >
             <UserRateAdjustmentHelper
               inLineValues

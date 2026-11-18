@@ -1526,7 +1526,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         })
       ).toBeFocused();
     }
-    await expect(assigned).toHaveCSS("white-space", "nowrap");
+    await expect(assigned.getByText("20", { exact: true })).toHaveCSS(
+      "white-space",
+      "nowrap"
+    );
     for (const width of isMobile ? [320, 390, 540, 768] : [1280]) {
       await page.setViewportSize({ width, height: 844 });
       const assignedBox = await assigned.boundingBox();
@@ -2226,6 +2229,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     try {
       await amount.fill("35");
       await expect(amount).toHaveAttribute("aria-invalid", "false");
+      await expect(
+        grant.getByText("Current Rep:", { exact: true })
+      ).toBeHidden();
       pendingFocusRing = await amount.evaluate(
         (input) => getComputedStyle(input).boxShadow
       );
@@ -2243,6 +2249,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     ).toBeEnabled();
     await expect(amount).toHaveValue("35");
     await expect(cancel).toBeFocused();
+    await expect(
+      grant.getByText("Current Rep:", { exact: true })
+    ).toBeVisible();
     await amount.focus();
     await expect(amount).toHaveCSS("box-shadow", pendingFocusRing);
     await expectDesktopRatingPosition(page, "Grant Rep");
