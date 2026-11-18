@@ -20,7 +20,7 @@ export function ActiveWaveVotes() {
       <h1 className="tw-m-0 tw-mb-1.5 tw-flex tw-items-center tw-gap-3 tw-text-2xl tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-white">
         {t(locale, "waves.discovery.activeVotes")}
         {count !== undefined && (
-          <span className="tw-inline-flex tw-h-[22px] tw-shrink-0 tw-items-center tw-rounded-full tw-bg-primary-500/20 tw-px-2 tw-text-[13px] tw-font-medium tw-leading-4 tw-text-primary-300">
+          <span className="tw-inline-flex tw-aspect-square tw-min-w-[22px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-primary-500/20 tw-px-1 tw-text-[13px] tw-font-medium tw-leading-4 tw-text-primary-300">
             {formatInteger(locale, count)}
           </span>
         )}

@@ -1559,9 +1559,15 @@ test("Active Votes keeps inset artwork and every metric visible at responsive wi
   await expect(
     section.getByText("2 active submissions", { exact: true })
   ).toBeVisible();
+  const countBadge = section
+    .getByRole("heading", { name: /^Active Votes/ })
+    .locator("span");
   for (const width of [320, 390, 640, 768, 1024, 1280, 1440]) {
     await page.setViewportSize({ width, height: 1000 });
     await expectNoHorizontalOverflow(page);
+    const badgeBox = (await countBadge.boundingBox())!;
+    expect(Math.abs(badgeBox.width - badgeBox.height)).toBeLessThanOrEqual(0.5);
+
     for (const card of await cards.all()) {
       await expect(
         card.getByText("QUORUM Proposal Template and details", {
