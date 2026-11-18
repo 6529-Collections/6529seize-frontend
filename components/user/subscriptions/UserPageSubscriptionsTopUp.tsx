@@ -173,6 +173,24 @@ interface TopUpSelectionInput {
   readonly optionCounts: Readonly<Record<string, number>>;
 }
 
+function hasCurrentCoverageProjections(
+  coverage: ApiSubscriptionCoverage | undefined,
+  isStale: boolean,
+  now: number
+): boolean {
+  if (isStale) return false;
+  const deadline = subscriptionCoverageTimestamp(
+    coverage?.next_unfunded?.top_up_deadline
+  );
+  if (
+    deadline === undefined ||
+    coverage?.forecast.deadline_basis !==
+      ApiSubscriptionCoverageDeadlineBasis.Authoritative
+  )
+    return true;
+  return now > 0 && now < deadline;
+}
+
 function getTopUpSelection({
   coverage,
   customCount,
@@ -308,19 +326,12 @@ function SubscriptionTopUpForm({
   const suppliedDeadline = subscriptionCoverageTimestamp(
     sourceCoverage?.next_unfunded?.top_up_deadline
   );
-  const deadline =
-    suppliedDeadline !== undefined &&
-    sourceCoverage?.forecast.deadline_basis ===
-      ApiSubscriptionCoverageDeadlineBasis.Authoritative
-      ? suppliedDeadline
-      : undefined;
   const now = useSubscriptionCoverageClock(
-    expanded && !isCoverageStale && deadline !== undefined
+    expanded && !isCoverageStale && suppliedDeadline !== undefined
   );
-  const projectionsAvailable =
-    !isCoverageStale && (deadline === undefined || (now > 0 && now < deadline));
   const coverage =
-    sourceCoverage && !projectionsAvailable
+    sourceCoverage &&
+    !hasCurrentCoverageProjections(sourceCoverage, isCoverageStale, now)
       ? { ...sourceCoverage, minimum_top_up: null, recommended_top_up: null }
       : sourceCoverage;
   const selectionDescriptionId = useId();
