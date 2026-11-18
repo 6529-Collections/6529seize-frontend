@@ -1578,6 +1578,12 @@ test("Active Votes keeps inset artwork and every metric visible at responsive wi
             metrics.querySelectorAll("[aria-label]"),
             (metric) => ({
               box: metric.getBoundingClientRect().toJSON(),
+              icon: metric
+                .querySelector("svg")!
+                .getBoundingClientRect()
+                .toJSON(),
+              label: metric.children[1]!.getBoundingClientRect().toJSON(),
+              value: metric.children[2]!.getBoundingClientRect().toJSON(),
               clipped: metric.scrollWidth > metric.clientWidth,
             })
           ),
@@ -1589,6 +1595,12 @@ test("Active Votes keeps inset artwork and every metric visible at responsive wi
       expect(layout.metrics).toHaveLength(3);
       for (const metric of layout.metrics) {
         expect(metric.clipped).toBe(false);
+        const iconCenter = metric.icon.top + metric.icon.height / 2;
+        for (const text of [metric.label, metric.value]) {
+          expect(
+            Math.abs(iconCenter - (text.top + text.height / 2))
+          ).toBeLessThanOrEqual(0.5);
+        }
         expect(metric.box.left).toBeGreaterThan(layout.cover.right);
         expect(metric.box.right).toBeLessThanOrEqual(layout.card.right - 12);
         expect(metric.box.bottom).toBeLessThanOrEqual(layout.card.bottom - 12);

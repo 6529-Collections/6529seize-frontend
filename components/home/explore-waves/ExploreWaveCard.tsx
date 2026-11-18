@@ -592,7 +592,7 @@ function ExploreWaveCompactMetrics({
             aria-label={metric.ariaLabel}
           >
             <span
-              className={`${compact && metric.kind === "hot" ? "tw-text-iron-600" : metric.iconToneClasses} ${compact && metric.kind !== "hot" ? "tw-opacity-75" : ""} ${horizontalOnMobile ? "md:tw-opacity-70" : metricIconClassName}`}
+              className={`${compact ? "tw-flex tw-items-center" : ""} ${compact && metric.kind === "hot" ? "tw-text-iron-600" : metric.iconToneClasses} ${compact && metric.kind !== "hot" ? "tw-opacity-75" : ""} ${horizontalOnMobile ? "md:tw-opacity-70" : metricIconClassName}`}
             >
               {metric.icon}
             </span>
