@@ -22,7 +22,7 @@ let activeTransition: {
   readonly contentReady: () => void;
 } | null = null;
 let navigatingFromSwipe = false;
-let swipeHandoffUntil = 0;
+let swipeHandoffPending = false;
 
 /** The interactive gesture already animated the outgoing screen. */
 export function navigateAfterWaveSwipe(navigate: () => void) {
@@ -31,7 +31,7 @@ export function navigateAfterWaveSwipe(navigate: () => void) {
 }
 
 function navigateFromSwipe(navigate: () => void) {
-  swipeHandoffUntil = performance.now() + 1000;
+  swipeHandoffPending = true;
   navigatingFromSwipe = true;
   try {
     navigate();
@@ -41,8 +41,9 @@ function navigateFromSwipe(navigate: () => void) {
 }
 
 export function consumeWaveSwipeHandoff() {
-  const pending = performance.now() < swipeHandoffUntil;
-  swipeHandoffUntil = 0;
+  // The destination consumes the handoff when it commits, however long routing takes.
+  const pending = swipeHandoffPending;
+  swipeHandoffPending = false;
   return pending;
 }
 
@@ -81,6 +82,7 @@ export function runWaveNavigationTransition(
     navigate();
     return false;
   }
+  swipeHandoffPending = false;
   const surface = document.querySelector<HTMLElement>(
     "[data-wave-navigation-screen]"
   );

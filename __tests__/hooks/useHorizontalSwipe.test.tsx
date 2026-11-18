@@ -189,6 +189,33 @@ it("commits a short quick back flick, but not the same distance held still", () 
   expect(onBack).toHaveBeenLastCalledWith(false, 35);
 });
 
+it("claims the first clear Android movement before scrolling takes ownership", () => {
+  const { target, onBack } = setup();
+  start(target);
+  expect(move(target, 188.8125, 97.8125)).toBe(false);
+  move(target, 300);
+  end(target, 300);
+  expect(onBack).toHaveBeenCalledWith(true, 120);
+});
+
+it("keeps a quick flick when Android interpolates a tiny final move", () => {
+  const { target, onBack } = setup();
+  start(target, 53.34375);
+  for (const [elapsed, x] of [
+    [80, 69.98125],
+    [17, 80.51528],
+    [41, 120.66737],
+    [9, 129.66008],
+    [5, 129.75],
+  ] as const) {
+    act(() => jest.advanceTimersByTime(elapsed));
+    move(target, x);
+  }
+  act(() => jest.advanceTimersByTime(2));
+  end(target, 129.75);
+  expect(onBack).toHaveBeenCalledWith(true, expect.closeTo(76.40625));
+});
+
 it("cancels a back gesture when released while reversing even beyond the distance threshold", () => {
   const { target, onBack } = setup();
   start(target);

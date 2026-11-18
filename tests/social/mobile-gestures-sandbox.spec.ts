@@ -41,7 +41,12 @@ async function touchDrag(
   page: Page,
   target: Locator,
   movement: number | readonly TouchOffset[],
-  dy = 0
+  dy = 0,
+  advanceFrame: () => Promise<void> = () =>
+    page.evaluate(
+      () =>
+        new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
+    )
 ) {
   await target.click({ trial: true });
   const box = await target.boundingBox();
@@ -67,10 +72,7 @@ async function touchDrag(
       type: "touchMove",
       touchPoints: [{ x: x + offset.x, y: y + offset.y }],
     });
-    await page.evaluate(
-      () =>
-        new Promise<void>((resolve) => requestAnimationFrame(() => resolve()))
-    );
+    await advanceFrame();
   }
   return {
     release: async () => {
@@ -359,6 +361,40 @@ for (const platform of ["ios", "android"] as const) {
         "data-wave-swipe-captured"
       );
       await expectNoHorizontalOverflow(page);
+      await expectNoUnsafeSandboxMutations(baseURL);
+    });
+
+    test("quick back flick keeps ownership through a small first move and release jitter", async ({
+      page,
+      baseURL,
+    }) => {
+      await openWave(page);
+      const row = page
+        .getByRole("tabpanel")
+        .locator("[data-wave-drop-id][data-reply-enabled=true]")
+        .first();
+      await page.clock.install();
+      await page.clock.pauseAt(Date.now() + 10_000);
+      const flick = await touchDrag(
+        page,
+        row,
+        [
+          { x: 9, y: -2 },
+          { x: 20, y: -2 },
+          { x: 35, y: -1 },
+          { x: 52, y: 2 },
+          { x: 76.3, y: 7 },
+          { x: 76.4, y: 7 },
+        ],
+        0,
+        () => page.clock.runFor(16)
+      );
+      await flick.release();
+      await page.clock.resume();
+      await expect(page).toHaveURL(/\/waves$/);
+      await expect(
+        page.getByRole("button", { name: "Find a wave…", exact: true })
+      ).toBeVisible();
       await expectNoUnsafeSandboxMutations(baseURL);
     });
 
