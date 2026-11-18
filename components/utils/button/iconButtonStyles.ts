@@ -83,7 +83,7 @@ export interface IconButtonStyleOptions {
   readonly className?: string | undefined;
 }
 
-export function getIconButtonShapeClasses(shape: IconButtonShape) {
+function getIconButtonShapeClasses(shape: IconButtonShape) {
   if (shape === "circle") return "tw-rounded-full";
   return shape === "compact" ? "tw-rounded-md" : "tw-rounded-lg";
 }
