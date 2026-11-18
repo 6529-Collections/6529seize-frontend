@@ -153,7 +153,7 @@ function useLabelOverrides(engineDevices: readonly E2eeDeviceInfo[]) {
   return { engineInputs, remember };
 }
 
-export interface SecurityDevicesState extends ClassifiedDevices {
+interface SecurityDevicesState extends ClassifiedDevices {
   /** Acting as a proxy: devices belong to the profile's own sessions. */
   readonly proxy: boolean;
   readonly loading: boolean;

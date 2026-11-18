@@ -2,7 +2,7 @@ import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 /** Ended permissions stay listed this long, collapsed. */
-export const DEVICE_HISTORY_WINDOW_MS = 30 * DAY_MS;
+const DEVICE_HISTORY_WINDOW_MS = 30 * DAY_MS;
 
 export type DevicePlatform = "web" | "desktop" | "phone";
 
