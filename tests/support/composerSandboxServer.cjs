@@ -86,6 +86,7 @@ let publicWavePreviewReads = 0;
 let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
 let sandboxArtistActivityEnabled = false;
+let sandboxSharedPostFeedEnabled = false;
 let sandboxProfileRepRating = null;
 let sandboxCreatedWaveType = "CHAT";
 let sandboxRuleGroupSequence = 0;
@@ -2617,12 +2618,21 @@ function handleDiagnostics(method, pathname, url, res) {
     writeJson(res, 200, { requests: requestLog() });
     return true;
   }
+  if (
+    pathname === "/__composer-sandbox/shared-post-feed" &&
+    method === "POST"
+  ) {
+    sandboxSharedPostFeedEnabled = true;
+    writeJson(res, 200, { ok: true });
+    return true;
+  }
   if (pathname === "/__composer-sandbox/reset" && method === "POST") {
     requests.length = 0;
     publicWavePreviewReads = 0;
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
     sandboxArtistActivityEnabled = false;
+    sandboxSharedPostFeedEnabled = false;
     sandboxProfileRepRating = null;
     sandboxCreatedWaveType = "CHAT";
     for (const notification of sandboxNotifications) {
@@ -2650,6 +2660,24 @@ function writeEmptyResponse(res, status) {
 }
 
 const mockApiExactReadRoutes = new Map([
+  [
+    `/api/v2/waves/${SANDBOX_WAVE_ID}/drops`,
+    () => ({
+      wave: localWaveOverview,
+      drops: sandboxSharedPostFeedEnabled
+        ? Array.from({ length: 50 }, (_, index) => {
+            const serial = 151 - index;
+            return {
+              ...currentLocalDrop(),
+              id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+              serial_no: serial,
+              created_at: 1714000000000 + serial * 60000,
+              content: `Shared link fixture post ${serial}`,
+            };
+          })
+        : [currentLocalDrop()],
+    }),
+  ],
   [
     `/api/v3/waves/${SANDBOX_NOTIFICATION_WAVE_ID}`,
     () => ({
