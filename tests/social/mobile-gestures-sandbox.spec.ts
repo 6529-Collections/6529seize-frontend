@@ -414,14 +414,23 @@ for (const platform of ["ios", "android"] as const) {
               .querySelector("[data-wave-navigation-screen]")
               ?.getAttribute("data-wave-navigation-screen") === "wave";
           let outgoingChatPreserved = true;
-          const outgoingObserver = new MutationObserver(() => {
+          const checkOutgoingChat = () => {
             const surface = document.querySelector(
               '[data-wave-navigation-screen="wave"]'
             );
             if (surface && !surface.querySelector("[data-wave-drop-content]"))
               outgoingChatPreserved = false;
-          });
+          };
+          const outgoingObserver = new MutationObserver(checkOutgoingChat);
           if (returningToFeed) {
+            checkOutgoingChat();
+            const update = args[0];
+            if (typeof update === "function") {
+              args[0] = () => {
+                checkOutgoingChat();
+                return update();
+              };
+            }
             outgoingObserver.observe(document.documentElement, {
               childList: true,
               subtree: true,
@@ -516,8 +525,10 @@ for (const platform of ["ios", "android"] as const) {
         if (
           checkingReturn &&
           url.pathname === "/waves" &&
-          url.searchParams.has("_rsc") &&
-          request.headers()["next-router-prefetch"] !== "1"
+          ((request.isNavigationRequest() &&
+            request.frame() === page.mainFrame()) ||
+            (url.searchParams.has("_rsc") &&
+              request.headers()["next-router-prefetch"] !== "1"))
         )
           returnRouteRequests += 1;
       });

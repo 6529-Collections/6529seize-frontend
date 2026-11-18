@@ -394,6 +394,15 @@ it("lets a small diagonal start become a horizontal Back swipe", () => {
   expect(onBack).toHaveBeenCalledWith(true, 120);
 });
 
+it("keeps an ambiguous unsupported direction pending before Back intent", () => {
+  const { target, onBack } = setup(false);
+  start(target);
+  move(target, 171, 111);
+  move(target, 300, 111);
+  end(target, 300);
+  expect(onBack).toHaveBeenCalledWith(true, 120);
+});
+
 it("accumulates fractional reverse moves without losing reversal intent", () => {
   const { target, onBack } = setup();
   start(target);
@@ -405,6 +414,19 @@ it("accumulates fractional reverse moves without losing reversal intent", () => 
   }
   end(target, 280.5);
   expect(onBack).toHaveBeenCalledWith(false, 100.5);
+});
+
+it("measures a retreat from a fractional peak instead of stale forward speed", () => {
+  const { target, onBack } = setup();
+  start(target);
+  act(() => jest.advanceTimersByTime(100));
+  move(target, 281);
+  act(() => jest.advanceTimersByTime(4));
+  move(target, 281.875);
+  act(() => jest.advanceTimersByTime(4));
+  move(target, 280.625);
+  end(target, 280.625);
+  expect(onBack).toHaveBeenCalledWith(false, 100.625);
 });
 
 it("does not acquire an ambiguous diagonal that never becomes horizontal", () => {

@@ -160,7 +160,7 @@ export const NavigationHistoryProvider: React.FC<{
     index: 0,
     canGoBack: false,
   });
-  const skipNext = useRef(false);
+  const skipNext = useRef<string | null>(null);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
@@ -230,8 +230,9 @@ export const NavigationHistoryProvider: React.FC<{
       );
       const hash = url === browserPath ? location.hash : "";
       scrollRestoration.committed(url + hash);
-      if (skipNext.current) {
-        skipNext.current = false;
+      const backDestination = skipNext.current;
+      skipNext.current = null;
+      if (backDestination === url) {
         const current = historyRef.current.at(-1);
         if (current?.type === "route") {
           current.href = url + hash;
@@ -286,8 +287,8 @@ export const NavigationHistoryProvider: React.FC<{
       target?.type === "route" ? (target.waveView ?? null) : null
     );
     if (target?.type === "route") {
-      skipNext.current = true;
       const href = target.href ?? target.path;
+      skipNext.current = href.split("#")[0]!;
       if (scrollRestoration.prepare(href)) router.push(href, { scroll: false });
       else router.push(href);
     } else {
@@ -315,7 +316,7 @@ export const NavigationHistoryProvider: React.FC<{
         targetIndex -= 1;
       }
 
-      skipNext.current = true;
+      skipNext.current = path.split("#")[0]!;
       if (targetIndex < 0) {
         historyRef.current = [
           ...historyRef.current.slice(0, index),

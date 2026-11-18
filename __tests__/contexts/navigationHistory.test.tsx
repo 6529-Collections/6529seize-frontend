@@ -240,6 +240,24 @@ describe("NavigationHistoryContext", () => {
     expect(routerMock.push).toHaveBeenLastCalledWith("/network?page=2");
   });
 
+  it("records a new visit that supersedes Back without overwriting its target", () => {
+    mockPathname = "/network";
+    mockSearchParams = new URLSearchParams("page=2");
+    const { result, rerender } = renderHook(
+      () => useNavigationHistoryContext(),
+      { wrapper }
+    );
+    mockPathname = "/Shelby";
+    mockSearchParams = new URLSearchParams();
+    rerender();
+    act(() => result.current.goBack());
+    mockPathname = "/another-profile";
+    rerender();
+    expect(result.current.canGoBack).toBe(true);
+    act(() => result.current.goBack());
+    expect(routerMock.push).toHaveBeenLastCalledWith("/network?page=2");
+  });
+
   it("does not let an outgoing fragment consume the pending Back commit", () => {
     mockPathname = "/network";
     mockSearchParams = new URLSearchParams("page=2");

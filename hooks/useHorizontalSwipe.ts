@@ -35,6 +35,8 @@ interface Gesture {
   owner: Candidate | null;
   distance: number;
   velocityDistance: number;
+  velocityPeak: number;
+  velocityPeakAt: number;
   velocity: number;
   movedAt: number;
   frame: number | null;
@@ -132,6 +134,32 @@ function additionalTouch(event: TouchEvent) {
   if (event.touches.length !== 1) cancel();
 }
 
+function trackVelocity(current: Gesture, distance: number) {
+  if (distance !== current.distance) {
+    const now = performance.now();
+    if (distance > current.velocityPeak) {
+      current.velocityPeak = distance;
+      current.velocityPeakAt = now;
+    }
+    const reversing = current.velocityPeak - distance >= VELOCITY_JITTER_PX;
+    const referenceDistance = reversing
+      ? current.velocityPeak
+      : current.velocityDistance;
+    const referenceTime = reversing ? current.velocityPeakAt : current.movedAt;
+    // Native WebViews interpolate tiny final moves as well as rounding release
+    // coordinates. Keep either from replacing the finger's forward velocity.
+    if (Math.abs(distance - referenceDistance) >= VELOCITY_JITTER_PX) {
+      current.velocity =
+        (distance - referenceDistance) / Math.max(1, now - referenceTime);
+      current.movedAt = now;
+      current.velocityDistance = distance;
+      current.velocityPeak = distance;
+      current.velocityPeakAt = now;
+    }
+    current.distance = distance;
+  }
+}
+
 function track(current: Gesture, touch: Touch) {
   const deltaX = touch.clientX - current.x;
   const absoluteDeltaX = Math.abs(deltaX);
@@ -151,7 +179,7 @@ function track(current: Gesture, touch: Touch) {
         options.current.enabled && deltaX * options.current.direction > 0
     );
     if (!candidate) {
-      cancel();
+      if (absoluteDeltaX >= deltaY * AXIS_RATIO) cancel();
       return;
     }
     const intentRatio = candidate.options.current.intentRatio ?? AXIS_RATIO;
@@ -164,19 +192,7 @@ function track(current: Gesture, touch: Touch) {
     0,
     deltaX * current.owner.options.current.direction
   );
-  if (distance !== current.distance) {
-    // Native WebViews interpolate tiny final moves as well as rounding release
-    // coordinates. Keep either from replacing the finger's forward velocity.
-    if (Math.abs(distance - current.velocityDistance) >= VELOCITY_JITTER_PX) {
-      const now = performance.now();
-      current.velocity =
-        (distance - current.velocityDistance) /
-        Math.max(1, now - current.movedAt);
-      current.movedAt = now;
-      current.velocityDistance = distance;
-    }
-    current.distance = distance;
-  }
+  trackVelocity(current, distance);
 }
 
 /** A long press/menu owns the remainder of its original touch sequence. */
@@ -263,6 +279,8 @@ export function useHorizontalSwipe(
         owner: null,
         distance: 0,
         velocityDistance: 0,
+        velocityPeak: 0,
+        velocityPeakAt: 0,
         velocity: 0,
         movedAt: performance.now(),
         frame: null,

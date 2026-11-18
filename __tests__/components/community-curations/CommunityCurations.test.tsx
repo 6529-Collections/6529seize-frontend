@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import CommunityCurations from "@/components/community-curations/CommunityCurations";
 
 const mockUseCommunityCurationsDrops = jest.fn();
@@ -134,6 +134,26 @@ describe("CommunityCurations", () => {
     expect(scroll.scrollTop).toBe(200);
     scrollTo.mockReset();
   });
+
+  it.each(["pointerDown", "wheel", "keyDown"] as const)(
+    "gives a pending Feed restore to the reader on %s",
+    (input) => {
+      const drop = { stableKey: "drop-1" };
+      mockUseCommunityCurationsDrops.mockReturnValue({
+        ...loadingState,
+        allDrops: [drop],
+        drops: [drop],
+        isLoading: false,
+      });
+      const { container } = render(<CommunityCurations />);
+      const scroll = container.querySelector("section")!;
+      expect(mockRestoreScrollOffset()).toBe(false);
+      fireEvent[input](scroll);
+      scrollTo.mockClear();
+      expect(mockRestoreScrollOffset()).toBe(true);
+      expect(scrollTo).not.toHaveBeenCalled();
+    }
+  );
 
   it("releases a pagination-only Feed without waiting for absent cards", () => {
     mockUseCommunityCurationsDrops.mockReturnValue({

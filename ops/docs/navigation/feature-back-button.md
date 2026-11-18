@@ -122,7 +122,7 @@ swipe return to the feed at the saved reading position.
   indicates pending navigation, not necessarily a fresh download of the list.
 - Native Back prepares the previously visited route ahead of selection. Cached
   content can return while its data refreshes in the background.
-- A Waves return completes its outgoing slide before navigation. On supported
+- When motion and browser support allow, a right swipe to Waves completes its outgoing slide before navigation. On supported
   native app browsers, a Feed return reveals the destination during the remaining
   slide. Cached cards appear when ready; a cold return can show the loading
   state while data arrives. Reduced Motion skips the motion.

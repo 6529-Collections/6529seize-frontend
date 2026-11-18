@@ -57,7 +57,12 @@ describe("useWaveTabNavigation", () => {
       const unregister = registerWaveTabShell("wave");
       const { result } = renderHook(useWaveTabNavigation);
       try {
+        const requested = new URL(href, globalThis.location.href);
         act(() => result.current(href));
+        expect(globalThis.location.pathname).toBe(requested.pathname);
+        expect(new URL(globalThis.location.href).searchParams.get("tab")).toBe(
+          requested.searchParams.get("tab")
+        );
         expect(
           new URL(globalThis.location.href).searchParams.get("returnTo")
         ).toBe("/waves?view=profile-feed");

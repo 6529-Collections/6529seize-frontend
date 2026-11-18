@@ -157,6 +157,9 @@ export default function CommunityCurations({
     scrollContainerRef
   );
   const hasRestoredScrollOffsetRef = useRef(initialScrollOffset === 0);
+  const cancelScrollRestore = () => {
+    hasRestoredScrollOffsetRef.current = true;
+  };
   const {
     allDrops,
     drops,
@@ -212,6 +215,9 @@ export default function CommunityCurations({
   return (
     <section
       ref={setScrollContainerElement}
+      onPointerDownCapture={cancelScrollRestore}
+      onWheelCapture={cancelScrollRestore}
+      onKeyDownCapture={cancelScrollRestore}
       className="tw-flex tw-min-h-0 tw-w-full tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-contain tw-px-4 tw-py-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-4"
       style={heightStyle ?? waveViewStyle}
     >

@@ -159,6 +159,25 @@ describe("navigation scroll restoration", () => {
     expect(jest.getTimerCount()).toBe(0);
   });
 
+  it("clamps an unreachable saved position only at the restore deadline", () => {
+    rememberAndLeave();
+    restoration.prepare("/network?page=2");
+    window.history.replaceState(null, "", "/network?page=2");
+    Object.defineProperty(document.documentElement, "scrollHeight", {
+      configurable: true,
+      value: window.innerHeight + 300,
+    });
+    restoration.committed("/network?page=2");
+    jest.advanceTimersByTime(1400);
+    expect(window.scrollTo).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(100);
+    expect(window.scrollTo).toHaveBeenCalledWith({
+      top: 300,
+      behavior: "instant",
+    });
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
   it("uses the same query encoding for scroll capture, lookup and commit", () => {
     window.history.replaceState(null, "", "/network?name=two%20words");
     rememberAndLeave();

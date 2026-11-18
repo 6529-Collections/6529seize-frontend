@@ -356,21 +356,17 @@ function CommunityCurationsVirtualMasonry({
     [resetKey, items.length]
   );
   const resizeObserver = useResizeObserver(positioner);
+  // Ref measurements belong to the next render's container height.
+  const contentMeasured = positioner.size() === items.length;
   const acknowledgeVisibleFeed = useCallback(() => {
-    const restored = restoreScrollOffset(positioner.size() === items.length);
+    const restored = restoreScrollOffset(contentMeasured);
     if (
       restored &&
       isWaveNavigationContentPending("feed") &&
       hasVisibleFeedViewport(gridElement, scrollContainer)
     )
       commitWaveNavigationContent("feed");
-  }, [
-    gridElement,
-    scrollContainer,
-    restoreScrollOffset,
-    positioner,
-    items.length,
-  ]);
+  }, [gridElement, scrollContainer, restoreScrollOffset, contentMeasured]);
   const setContainerRef = useCallback(
     (element: HTMLElement | null) => {
       setGridElement(element);
