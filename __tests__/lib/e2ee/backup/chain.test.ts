@@ -242,11 +242,25 @@ class FakeEngine implements BackupEngine {
   history: BackupHistory = { groups: [], messages: [] };
   readonly imported: BackupHistory[] = [];
   private readonly deviceKey = randomHex(32);
+  private readonly listeners = new Set<() => void>();
 
   getStatus = () => "ready" as const;
   getThisDevice = (): E2eeDeviceInfo | null =>
     ({ deviceKey: this.deviceKey }) as unknown as E2eeDeviceInfo;
-  subscribe = () => () => undefined;
+  subscribe = (listener: () => void) => {
+    this.listeners.add(listener);
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
+
+  /** A message received now: stored, and the engine reports a change. */
+  arrive(record: BackupMessageRecord): void {
+    this.put(record);
+    for (const listener of this.listeners) {
+      listener();
+    }
+  }
   backupHistory = () => structuredClone(this.history);
   importBackupHistory = (history: BackupHistory) => {
     this.imported.push(structuredClone(history));
@@ -867,5 +881,196 @@ describe("backup writers keep one chain", () => {
     restored = await restoreWith(api, prepared);
     expect(restored.code).toBeNull();
     expect(texts(restored.engine.imported[0])).toEqual({ ...all, m8: "eight" });
+  });
+});
+
+describe("backup completion", () => {
+  /** Runs `during` once, when the next chunk upload starts. */
+  function duringUpload(api: E2eeBackupApi, during: () => void): E2eeBackupApi {
+    let fired = false;
+    return {
+      ...api,
+      appendChunk: async (id, body) => {
+        if (!fired) {
+          fired = true;
+          during();
+        }
+        return api.appendChunk(id, body);
+      },
+    };
+  }
+
+  it("uploads a message that arrives mid-upload before reporting up to date", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const { api, writer, prepared } = await backupWithHistory(server);
+    // The history read for this run happened just before the upload: m5
+    // arrives after it and must still be in the backup when it resolves.
+    const device = deviceWith(
+      duringUpload(api, () => writer.engine.arrive(message("m5", "five"))),
+      { engine: writer.engine, state: writer.state }
+    );
+    await device.manager.start();
+    writer.engine.put(message("m4", "four"));
+    await expect(device.manager.backupNow()).resolves.toBe(true);
+    expect(device.manager.getSnapshot().uploading).toBe(false);
+    const restored = await restoreWith(api, prepared);
+    expect(restored.code).toBeNull();
+    expect(texts(restored.engine.imported[0])).toEqual({
+      ...FINAL,
+      m4: "four",
+      m5: "five",
+    });
+  });
+
+  it("uploads a message that arrives during the run's last request", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const { api, writer, prepared } = await backupWithHistory(server);
+    // m5 arrives while the run waits for its final status, after the
+    // upload itself.
+    let armed = false;
+    const late: E2eeBackupApi = {
+      ...api,
+      getStatus: async () => {
+        const status = await api.getStatus();
+        if (armed) {
+          armed = false;
+          writer.engine.arrive(message("m5", "five"));
+        }
+        return status;
+      },
+    };
+    const device = deviceWith(late, {
+      engine: writer.engine,
+      state: writer.state,
+    });
+    await device.manager.start();
+    armed = true;
+    writer.engine.put(message("m4", "four"));
+    await expect(device.manager.backupNow()).resolves.toBe(true);
+    const restored = await restoreWith(api, prepared);
+    expect(texts(restored.engine.imported[0])).toEqual({
+      ...FINAL,
+      m4: "four",
+      m5: "five",
+    });
+  });
+
+  it("reports up to date at once when nothing changed during the upload", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const { api, writer } = await backupWithHistory(server);
+    const device = deviceWith(api, {
+      engine: writer.engine,
+      state: writer.state,
+    });
+    await device.manager.start();
+    const reads = jest.spyOn(writer.engine, "backupHistory");
+    writer.engine.put(message("m4", "four"));
+    await expect(device.manager.backupNow()).resolves.toBe(true);
+    // One history read: no second check without an engine change.
+    expect(reads).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps reporting uploading while messages keep arriving", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const { api, writer } = await backupWithHistory(server);
+    let count = 10;
+    const busy: E2eeBackupApi = {
+      ...api,
+      appendChunk: async (id, body) => {
+        count += 1;
+        writer.engine.arrive(message(`m${count}`, `message ${count}`));
+        return api.appendChunk(id, body);
+      },
+    };
+    const device = deviceWith(busy, {
+      engine: writer.engine,
+      state: writer.state,
+    });
+    await device.manager.start();
+    writer.engine.put(message("m4", "four"));
+    await expect(device.manager.backupNow()).resolves.toBe(false);
+    expect(device.manager.getSnapshot()).toMatchObject({
+      uploading: true,
+      lastError: null,
+    });
+  });
+
+  it("carries on with a failed first upload instead of creating another backup", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const api = server.clientFor(PROFILE);
+    let fail = true;
+    const limited: E2eeBackupApi = {
+      ...api,
+      appendChunk: async (id, body) => {
+        if (fail) {
+          fail = false;
+          throw new E2eeApiError({
+            message: "rate limited",
+            status: 429,
+            code: "E2EE_RATE_LIMITED",
+          });
+        }
+        return api.appendChunk(id, body);
+      },
+    };
+    const writer = deviceWith(limited);
+    writer.engine.history = {
+      groups: [groupRecord],
+      messages: [message("m1", "one")],
+    };
+    await writer.manager.start();
+    const prepared = await writer.manager.prepareBackup();
+    // The backup exists, so the failure is recorded (and retried) like a
+    // failed queued run instead of rejecting.
+    await expect(writer.manager.confirmBackup(prepared)).resolves.toBe(false);
+    expect(writer.manager.getSnapshot()).toMatchObject({
+      phase: "on",
+      uploading: true,
+      lastError: "E2EE_RATE_LIMITED",
+    });
+    expect(server.generations(PROFILE)).toHaveLength(1);
+
+    // Try again carries on with that generation and its code.
+    await expect(writer.manager.backupNow()).resolves.toBe(true);
+    expect(server.generations(PROFILE)).toHaveLength(1);
+    expect((await api.getStatus()).backup?.active).toBe(true);
+    const restored = await restoreWith(api, prepared);
+    expect(restored.code).toBeNull();
+    expect(texts(restored.engine.imported[0])).toEqual({ m1: "one" });
+  });
+
+  it("rejects when the backup couldn't be created, so confirming again starts afresh", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const api = server.clientFor(PROFILE);
+    const refusing: E2eeBackupApi = {
+      ...api,
+      createBackup: async () => {
+        throw new E2eeApiError({
+          message: "rate limited",
+          status: 429,
+          code: "E2EE_RATE_LIMITED",
+        });
+      },
+    };
+    const writer = deviceWith(refusing);
+    await writer.manager.start();
+    const prepared = await writer.manager.prepareBackup();
+    await expect(
+      errorCode(writer.manager.confirmBackup(prepared))
+    ).resolves.toBe("E2EE_RATE_LIMITED");
+    expect(server.generations(PROFILE)).toHaveLength(0);
+  });
+
+  it("pauses and resumes the engine's incoming history around a final backup", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const engine = Object.assign(new FakeEngine(), {
+      pauseIncoming: jest.fn(async () => undefined),
+      resumeIncoming: jest.fn(),
+    });
+    const device = deviceWith(server.clientFor(PROFILE), { engine });
+    await device.manager.pauseIncoming();
+    expect(engine.pauseIncoming).toHaveBeenCalledTimes(1);
+    device.manager.resumeIncoming();
+    expect(engine.resumeIncoming).toHaveBeenCalledTimes(1);
   });
 });

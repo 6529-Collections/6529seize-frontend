@@ -15,6 +15,9 @@ export interface BackupEngine {
   importBackupHistory(
     history: BackupHistory
   ): Promise<{ conversations: number; messages: number }>;
+  /** Stops new history coming in until resumeIncoming() (see the engine). */
+  pauseIncoming?(): Promise<void>;
+  resumeIncoming?(): void;
 }
 
 export type E2eeBackupPhase =

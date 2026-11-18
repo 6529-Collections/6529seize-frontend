@@ -630,7 +630,9 @@ restore it on a new device.
      uploaded; if the upload needs another run, progress stays until that run
      succeeds. If the upload stops, **Backup didn't finish**
      offers **Try again**; the same code keeps working and the upload carries
-     on from where it stopped (it also retries by itself).
+     on from where it stopped with the same backup (it also retries by
+     itself). If the backup was replaced or turned off on another device
+     meanwhile, it offers **Restore messages** or **Turn on backup** instead.
 
   Closing the dialog before step 3 turns nothing on and discards the code.
   **Replace recovery code** uses the same steps, starting with **Replace your
@@ -646,10 +648,14 @@ restore it on a new device.
   messages this device has in the backup, and how much of the 256 MB backup
   storage is used (in kB below 1 MB). While an upload runs it shows progress
   and asks you to keep 6529 open in that tab. If an upload needs another run
-  (another device wrote to the backup at the same moment), it keeps showing
-  progress until that run succeeds, never "up to date"; the setup and
-  replacement dialogs likewise say **Backup is on** only then. A failed upload
-  shows its error and is retried about 5 minutes later.
+  (another device wrote to the backup at the same moment, or messages
+  arrived while it uploaded and keep arriving), it keeps showing progress
+  until that run succeeds, never "up to date"; the setup and replacement
+  dialogs likewise say **Backup is on** only then. Messages that arrive
+  during an upload are included before it reports up to date. A failed
+  upload shows its error and is retried about 5 minutes later. Removing
+  encrypted messages at sign-out first stops new messages coming in, then
+  updates the backup, so everything removed is in it.
 - Reminders while backup is off (or a backup from another device isn't
   restored here):
   - turning on encrypted DMs ends with **One more step: back up your

@@ -293,11 +293,10 @@ describe("E2EE encrypted history backup", () => {
     const backup = managerFor(world, server, alice.primary);
     await backup.start();
     const prepared = await backup.prepareBackup();
-    // The generation is created, then the first upload fails.
+    // The generation is created, then the first upload fails: recorded and
+    // retried like a failed queued run, not rejected.
     server.quotaBytes = 1;
-    expect(await errorCode(backup.confirmBackup(prepared))).toBe(
-      "E2EE_BACKUP_QUOTA"
-    );
+    await expect(backup.confirmBackup(prepared)).resolves.toBe(false);
     expect(backup.getSnapshot()).toMatchObject({
       phase: "on",
       uploading: true,
