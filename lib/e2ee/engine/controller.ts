@@ -16,7 +16,6 @@ import {
   STALL_RETRY_MS,
 } from "./maintenance";
 import { sleep } from "./runtime";
-import { hasOverdueChanges } from "./required-changes";
 import { sendNext } from "./send";
 import type { GroupRuntime } from "./store";
 import { processInbox, tryCatchUp } from "./sync";
@@ -165,6 +164,14 @@ export class EngineController {
     if (!this.isReady()) {
       return;
     }
+    // The device listing comes first: maintenance below works from it (the
+    // self-group claim budget needs one from the last 15 minutes).
+    if (this.ctx.now() - this.ctx.lastMeAt >= MAINTAIN_EVERY_MS) {
+      await this.guard(this.hooks.refreshMe());
+    }
+    if (!this.isReady()) {
+      return;
+    }
     const lastSeq = lastSeqByGroup(serverGroups);
     for (const [g, runtime] of [...this.ctx.store.groups]) {
       if (!isActive(runtime)) {
@@ -175,9 +182,6 @@ export class EngineController {
       await this.guard(
         this.syncGroup(g, { fetch: behind || serverGroups === null })
       );
-    }
-    if (this.ctx.now() - this.ctx.lastMeAt >= MAINTAIN_EVERY_MS) {
-      await this.guard(this.hooks.refreshMe());
     }
     await this.guard(this.hooks.afterSync());
   }
@@ -328,24 +332,12 @@ export class EngineController {
     });
   }
 
-  /**
-   * `onlyIfDue`: commit (and catch up first, as every commit does) only
-   * when local state shows a required change. Opening a chat uses it, so
-   * opening one does not fetch that chat's log unless it has news (P60 §1).
-   */
-  async maintain(
-    g: string,
-    options: { onlyIfDue?: boolean } = {}
-  ): Promise<void> {
+  async maintain(g: string): Promise<void> {
     const runtime = this.ctx.store.groups.get(g);
     if (!this.isReady() || !isActive(runtime)) {
       return;
     }
     this.maintainedAt.set(g, this.ctx.now());
-    if (options.onlyIfDue === true && !(await this.commitDue(runtime))) {
-      await this.scheduleFollowUps(g);
-      return;
-    }
     await runGroupCommit(
       this.ctx,
       g,
@@ -359,27 +351,6 @@ export class EngineController {
       }
     );
     await this.scheduleFollowUps(g);
-  }
-
-  /** Whether the required-changes planner would commit anything now. */
-  private async commitDue(runtime: GroupRuntime): Promise<boolean> {
-    if (
-      runtime.record.pendingCommit !== null ||
-      runtime.record.leaving.length > 0
-    ) {
-      return true;
-    }
-    try {
-      const changes = await this.ctx.queue.run(() =>
-        groupChanges(this.ctx, runtime, { onlyOwnAdds: true })
-      );
-      return hasOverdueChanges(changes) || changes.selfUpdateDue;
-    } catch (error) {
-      if (!isNetworkish(error)) {
-        throw error;
-      }
-      return true;
-    }
   }
 
   private async scheduleFollowUps(g: string): Promise<void> {

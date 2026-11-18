@@ -246,6 +246,7 @@ async function uploadKeyPackages(
   });
   if (lastResort) {
     device.lastResortAt = ctx.now();
+    device.lastResortSelfSync = mls.makesSelfGroupKeyPackages();
     await checkpoint(ctx, { device, skipWasm: true });
   }
   return status;
@@ -269,7 +270,13 @@ async function ensureKeyPackages(
   const lastResortStale =
     device.lastResortAt === null ||
     ctx.now() - device.lastResortAt >= LAST_RESORT_ROTATE_MS;
-  if (lastResortMissing || lastResortStale) {
+  // P60 §2 rule 6: updated from a client without self groups, replace the
+  // last-resort KeyPackage at once. It is the only one a device can replace,
+  // and the change tells its siblings it updated.
+  const lastResortBeforeSelfGroups =
+    device.lastResortSelfSync !== true &&
+    requireMls(ctx).makesSelfGroupKeyPackages();
+  if (lastResortMissing || lastResortStale || lastResortBeforeSelfGroups) {
     await uploadKeyPackages(ctx, 1, true);
   }
 }
@@ -711,6 +718,14 @@ export async function refreshMe(
         : "unverified",
     };
   }
+  ctx.ownDevices = me.devices;
+  ctx.listedAt = { wall: ctx.now(), mono: ctx.monotonic() };
+  ctx.ownKeyPackages = new Map(
+    me.key_packages.map((item) => [
+      item.device_key.toLowerCase(),
+      item.last_resort_expires_at,
+    ])
+  );
   if (ctx.device?.provisioned) {
     const status = me.key_packages.find(
       (item) => item.device_key.toLowerCase() === ownKey

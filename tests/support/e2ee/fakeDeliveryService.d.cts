@@ -80,6 +80,14 @@ export interface FakeDeliveryService {
   ): () => void;
   addFault(fault: FakeFault): () => void;
   clearFaults(): void;
+  /** Applies the server's KeyPackage claim limits (fixed clock windows). */
+  limitClaims(
+    limits: {
+      perProfile: number;
+      perTargetDevice: number;
+      windowMs: number;
+    } | null
+  ): void;
   hold(path: RegExp): {
     waiting(): number;
     /** Resolves once a matching POST is being held. */
