@@ -68,6 +68,13 @@ export interface EngineContext {
    * is shared out from it (self-group-budget.ts).
    */
   ownDevices: ApiE2eeDevice[];
+  /**
+   * When `ownDevices` was listed: this device's clock then, and monotonic
+   * time then (self-group-budget.ts).
+   */
+  listedAt: { wall: number; mono: number } | null;
+  /** Monotonic milliseconds (EngineOptions.monotonic). */
+  readonly monotonic: () => number;
   lastWakeAt: number;
   openConversation: string | null;
   openUntil: number;

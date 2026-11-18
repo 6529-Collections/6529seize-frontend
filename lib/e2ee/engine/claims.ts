@@ -12,7 +12,7 @@ import { checkpoint, ownDeviceKey, type EngineContext } from "./context";
 const MAX_TARGETS_PER_CLAIM = 100;
 const CLAIMS_RATE_LIMITED = "E2EE_RATE_LIMITED";
 /** The server counts claims per profile in fixed clock hours. */
-export const CLAIM_WINDOW_MS = 60 * 60_000;
+const CLAIM_WINDOW_MS = 60 * 60_000;
 
 /**
  * Past the server's claim limit, self groups make no claims until its
