@@ -105,6 +105,7 @@ export const WaveDropsMessageListSection: React.FC<
     <>
       <WaveDropsReverseContainer
         ref={containerRef}
+        topFade="overlay"
         isFetchingNextPage={!!waveMessages?.isLoadingNextPage}
         hasNextPage={hasNextPage}
         onTopIntersection={onTopIntersection}
