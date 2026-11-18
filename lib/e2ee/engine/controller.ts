@@ -1,6 +1,9 @@
 import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eeDeviceGroup } from "../api-types";
-import type { E2eeInitialSyncStatus } from "../types";
+import {
+  E2EE_INITIAL_INBOX_WAIT_MS,
+  type E2eeInitialSyncStatus,
+} from "../types";
 import { type EngineContext, isActive, ownDeviceKey } from "./context";
 import { RetryableError } from "./errors";
 import {
@@ -28,6 +31,7 @@ const POLL_IDLE_MS = 30_000;
 const MAINTAIN_EVERY_MS = 10 * 60_000;
 const WAKE_DEBOUNCE_MS = 50;
 const WS_QUIET_MS = 60_000;
+const INITIAL_INBOX_WAIT_TIMER = "initial-inbox-wait";
 
 const isNetworkish = (error: unknown): boolean => {
   if (error instanceof RetryableError) {
@@ -248,14 +252,26 @@ export class EngineController {
 
   private setInitialSyncStatus(status: E2eeInitialSyncStatus): void {
     const store = this.ctx.store;
+    const current = store.initialSyncStatus;
     if (
-      this.isReady() &&
-      store.initialSyncStatus !== "complete" &&
-      store.initialSyncStatus !== status
+      !this.isReady() ||
+      current === "complete" ||
+      (current === "delayed" && status !== "complete")
     ) {
-      store.initialSyncStatus = status;
-      store.touch();
+      return;
     }
+    if (status === "waiting") {
+      this.ctx.timers.arm(
+        INITIAL_INBOX_WAIT_TIMER,
+        E2EE_INITIAL_INBOX_WAIT_MS,
+        () => this.setInitialSyncStatus("delayed")
+      );
+    } else {
+      this.ctx.timers.cancel(INITIAL_INBOX_WAIT_TIMER);
+    }
+    if (current === status) return;
+    store.initialSyncStatus = status;
+    store.touch();
   }
 
   /** Check chat discovery independently of maintenance and cosmetic lookups. */
@@ -282,7 +298,14 @@ export class EngineController {
   }
 
   private async confirmInitialInbox(): Promise<void> {
-    if (!this.isReady() || this.ctx.store.initialSyncStatus === "complete") {
+    const { store } = this.ctx;
+    const status = store.initialSyncStatus;
+    if (!this.isReady() || status === "complete") {
+      return;
+    }
+    // After a longer wait, a usable inbox does not need an empty-state check.
+    // Normal Welcome reads still run and publish any chats that arrive.
+    if (status === "delayed" && store.getConversations().length > 0) {
       return;
     }
     try {
@@ -583,6 +606,7 @@ export class EngineController {
     this.unsubscribeWake?.();
     this.unsubscribeWake = null;
     this.ctx.timers.cancel("poll");
+    this.ctx.timers.cancel(INITIAL_INBOX_WAIT_TIMER);
   }
 
   /**

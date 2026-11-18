@@ -23,12 +23,15 @@ export type E2eeEngineStatus =
   | "device-limit" // 10 active devices: user must revoke one
   | "error";
 
-/** Whether this engine has successfully checked for chats on this device. */
+/** How far the first chat discovery has got on this device. */
 export type E2eeInitialSyncStatus =
   | "pending"
   | "waiting"
+  | "delayed"
   | "failed"
   | "complete";
+
+export const E2EE_INITIAL_INBOX_WAIT_MS = 15_000;
 
 export interface E2eeDeviceInfo {
   linkedAuthorProof?: boolean;

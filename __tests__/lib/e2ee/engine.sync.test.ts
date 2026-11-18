@@ -86,7 +86,7 @@ describe("E2EE engine: sync paths", () => {
     expect(engine.getInitialSyncStatus()).toBe("complete");
   });
 
-  it("confirms an empty inbox when the server clears pending chats without a new Welcome", async () => {
+  it("stops waiting without confirming an empty inbox while chat discovery remains unresolved", async () => {
     const world = await createWorld();
     let pending = true;
     const alice = await addUser(world, "alice", {
@@ -97,7 +97,10 @@ describe("E2EE engine: sync paths", () => {
     });
     const { engine } = alice.primary;
     await engine.idle();
-    expect(engine.getInitialSyncStatus()).toBe("waiting");
+    await waitFor(() => engine.getInitialSyncStatus() === "delayed");
+    expect(engine.getConversations()).toHaveLength(0);
+    await engine.sync();
+    expect(engine.getInitialSyncStatus()).toBe("delayed");
     expect(engine.getConversations()).toHaveLength(0);
 
     pending = false;

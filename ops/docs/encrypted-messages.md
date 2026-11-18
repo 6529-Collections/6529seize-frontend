@@ -801,12 +801,11 @@ without images**. Images and files too large for one encrypted attachment
 ## Troubleshooting
 
 - **Loading encrypted chats…** appears while this device first checks for
-  chats. If existing chats still need to add this device, the inbox shows
-  **Waiting for encrypted chats to sync to this device…** and lists each chat
-  as it arrives. If syncing takes longer, open the chat on a device that
-  already has it or select **Try again** to check for chats. **No encrypted
-  chats yet** appears when the check confirms an empty inbox. If the check
-  fails, select **Try again** in the inbox.
+  chats. The inbox lists each chat as it arrives. During a longer wait,
+  available chats stay visible and the loading message clears. If no chats
+  are available yet, the inbox says syncing is taking longer and offers
+  **Try again**. **No encrypted chats yet** appears when the check confirms
+  an empty inbox.
 - **Encrypted messages couldn’t start**: select **Try again**. The error code
   under the message helps the team diagnose staging issues.
 - **Chat not found on this device**: devices only receive chats they were

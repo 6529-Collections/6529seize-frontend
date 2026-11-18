@@ -310,6 +310,13 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       await expect(waiting).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
       await expect(empty).toHaveCount(0);
 
+      const delayed = phone.page.getByRole("heading", {
+        name: "Encrypted chats are taking longer to sync",
+        exact: true,
+      });
+      await expect(delayed).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+      await expect(waiting).toBeHidden();
+      await expect(empty).toHaveCount(0);
       const retry = phone.page.getByRole("button", {
         name: "Try again",
         exact: true,
@@ -331,11 +338,11 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
             .getByRole("status")
             .filter({ hasText: "Loading encrypted chats…" })
         ).toBeVisible();
-        await expect(retry).toBeDisabled();
+        await expect(retry).toBeHidden();
       } finally {
         allowCheck.resolve();
       }
-      await expect(waiting).toBeVisible();
+      await expect(delayed).toBeVisible();
       await expect(empty).toHaveCount(0);
 
       allowDm.resolve();
@@ -343,9 +350,11 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
         timeout: E2EE_SYNC_TIMEOUT_MS,
       });
       await expect(conversationListRow(phone.page, "carol")).toHaveCount(0);
-      await expect(waiting).toBeVisible();
+      await expect(waiting).toBeHidden();
+      await expect(delayed).toHaveCount(0);
+      await expect(retry).toHaveCount(0);
       await phone.page.screenshot({
-        path: testInfo.outputPath("encrypted-inbox-still-syncing.png"),
+        path: testInfo.outputPath("encrypted-inbox-available-chats.png"),
       });
 
       allowSecondDm.resolve();
