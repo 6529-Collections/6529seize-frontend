@@ -28,6 +28,8 @@ import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "rep.categories.validation.unavailable":
+    "Este nombre de categoría no está disponible. Prueba con otro nombre.",
   "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
   "waves.discovery.activeSubmissions.one": "{count} propuesta activa",
   "waves.discovery.activeSubmissions.other": "{count} propuestas activas",
