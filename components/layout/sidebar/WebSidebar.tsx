@@ -20,6 +20,7 @@ import HeaderShare from "../../header/share/HeaderShare";
 import WebSidebarNavItem from "./nav/WebSidebarNavItem";
 import WebSidebarHeader from "./WebSidebarHeader";
 import WebSidebarNav from "./WebSidebarNav";
+import { useAdaptiveSidebarRows } from "./useAdaptiveSidebarRows";
 import WebSidebarUser from "./WebSidebarUser";
 import WebSidebarVersionUpdate from "./WebSidebarVersionUpdate";
 import DesktopNotifications from "@/components/notifications/inbox/DesktopNotifications";
@@ -124,6 +125,14 @@ function WebSidebar({
   // Sidebar is expanded when offcanvas is open (mobile or narrow desktop)
   const shouldShowCollapsed = isMobile && isOffcanvasOpen ? false : isCollapsed;
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const hasAdaptiveRows = !isMobile && shouldShowCollapsed;
+  const sectionsRef = useAdaptiveSidebarRows(hasAdaptiveRows);
+  const desktopGridRows = hasAdaptiveRows
+    ? "tw-grid-rows-[minmax(var(--sidebar-row-height,2.875rem),1fr)_auto_auto]"
+    : "tw-grid-rows-[minmax(2.875rem,1fr)_8.625rem_7.625rem]";
+  const sidebarGridRows = isMobile
+    ? "tw-grid-rows-[minmax(2.875rem,1fr)_auto_7.625rem]"
+    : desktopGridRows;
 
   const handleToggle = () => {
     // Close submenu immediately before toggling
@@ -176,7 +185,8 @@ function WebSidebar({
 
             <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-overflow-x-hidden">
               <div
-                className={`tw-grid tw-h-full ${isMobile ? "tw-grid-rows-[minmax(2.875rem,1fr)_auto_7.625rem]" : "tw-grid-rows-[minmax(2.875rem,1fr)_8.625rem_7.625rem]"}`}
+                className={`tw-grid tw-h-full ${sidebarGridRows}`}
+                ref={sectionsRef}
                 data-sidebar-sections="true"
               >
                 <div
@@ -195,7 +205,9 @@ function WebSidebar({
                 >
                   {showDesktopSearch && (
                     <div
-                      className="tw-h-[2.875rem] tw-flex-none tw-px-3"
+                      className={`tw-h-[var(--sidebar-row-height,2.875rem)] tw-flex-none tw-px-3 ${
+                        hasAdaptiveRows ? "empty:tw-hidden" : ""
+                      }`}
                       data-sidebar-version-slot="true"
                     >
                       <WebSidebarVersionUpdate
@@ -224,7 +236,9 @@ function WebSidebar({
 
                 {/* Notifications grow upward without moving the utility rows. */}
                 <div
-                  className="tw-flex tw-flex-col tw-justify-end"
+                  className={`tw-flex tw-flex-col tw-justify-end ${
+                    hasAdaptiveRows ? "tw-pt-3" : ""
+                  }`}
                   data-sidebar-section="account"
                 >
                   {hasHydrated && address && (

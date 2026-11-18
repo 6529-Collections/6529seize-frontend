@@ -17,8 +17,11 @@ const LOCALE = DEFAULT_LOCALE;
  */
 export const DESKTOP_WINDOWS_PUBLISHER = "6529 Collection LLC";
 
-/** The public wave where people report problems with 6529 apps. */
-export const DESKTOP_FEEDBACK_WAVE_ID = "e933d8d6-0c78-4e8f-aa12-f67d8c11b4dc";
+/**
+ * The public "6529 Desktop" wave (a subwave of Ministry of Validation),
+ * where testers report problems with 6529 Desktop.
+ */
+export const DESKTOP_FEEDBACK_WAVE_ID = "10a98e11-a843-49d4-89c8-892fe8da3185";
 
 /**
  * An installer's file name as the verified list gives it for the release,

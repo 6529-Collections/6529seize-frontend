@@ -1,0 +1,915 @@
+{
+ "schema": "6529.io.ai-model-published.v1",
+ "source": "Hugging Face's createdAt for each model's repository, or the original model's for a quantization, conversion or repackaging",
+ "fetched": "2026-11-17",
+ "models": {
+  "smollm2-360m": {
+   "repo": "HuggingFaceTB/SmolLM2-360M-Instruct",
+   "date": "2024-10-31"
+  },
+  "qwen3-0.6b": {
+   "repo": "Qwen/Qwen3-0.6B",
+   "date": "2025-04-27"
+  },
+  "qwen3.5-0.8b": {
+   "repo": "Qwen/Qwen3.5-0.8B",
+   "date": "2026-02-28"
+  },
+  "olmo-2-1b": {
+   "repo": "allenai/OLMo-2-0425-1B-Instruct",
+   "date": "2025-04-29"
+  },
+  "lfm3-1.7b": {
+   "repo": "LiquidAI/LFM3-1.7B",
+   "date": "2026-10-23"
+  },
+  "ministral-3-3b-gguf": {
+   "repo": "mistralai/Ministral-3-3B-Instruct-2512",
+   "date": "2025-10-31"
+  },
+  "qwen3-4b-gguf": {
+   "repo": "Qwen/Qwen3-4B",
+   "date": "2025-04-27"
+  },
+  "minicpm5-2b": {
+   "repo": "openbmb/MiniCPM5-2B",
+   "date": "2026-09-06"
+  },
+  "smollm3-3b": {
+   "repo": "HuggingFaceTB/SmolLM3-3B",
+   "date": "2025-07-08"
+  },
+  "phi-4-mini": {
+   "repo": "microsoft/Phi-4-mini-instruct",
+   "date": "2025-02-19"
+  },
+  "qwen3.5-4b": {
+   "repo": "Qwen/Qwen3.5-4B",
+   "date": "2026-02-27"
+  },
+  "gemma-4-e2b": {
+   "repo": "google/gemma-4-E2B-it",
+   "date": "2026-03-02"
+  },
+  "qwen3.5-9b": {
+   "repo": "Qwen/Qwen3.5-9B",
+   "date": "2026-02-27"
+  },
+  "nemotron-3.5-bolt-e4b": {
+   "repo": "nvidia/NVIDIA-Nemotron-3.5-Bolt-E4B-4GB-BF16",
+   "date": "2026-10-05"
+  },
+  "gemma-4-e4b": {
+   "repo": "google/gemma-4-E4B-it",
+   "date": "2026-03-02"
+  },
+  "granite-4.2-8b": {
+   "repo": "ibm-granite/granite-4.2-8b",
+   "date": "2026-08-07"
+  },
+  "ministral-3-8b": {
+   "repo": "mistralai/Ministral-3-8B-Instruct-2512",
+   "date": "2025-10-31"
+  },
+  "mimo-v2.6-distill-qwen-9b": {
+   "repo": "XiaomiMiMo/MiMo-V2.6-Distill-Qwen-9B",
+   "date": "2026-09-21"
+  },
+  "qwen3-4b-mlx-4bit": {
+   "repo": "Qwen/Qwen3-4B",
+   "date": "2025-04-27"
+  },
+  "gemma-4-12b": {
+   "repo": "google/gemma-4-12B-it",
+   "date": "2026-05-23"
+  },
+  "ministral-3-14b": {
+   "repo": "mistralai/Ministral-3-14B-Instruct-2512",
+   "date": "2025-10-31"
+  },
+  "gpt-oss-20b": {
+   "repo": "openai/gpt-oss-20b",
+   "date": "2025-08-04"
+  },
+  "gemma-4-26b-a4b": {
+   "repo": "google/gemma-4-26B-A4B-it",
+   "date": "2026-03-11"
+  },
+  "glm-4.7-flash": {
+   "repo": "zai-org/GLM-4.7-Flash",
+   "date": "2026-01-19"
+  },
+  "gemma-4-31b": {
+   "repo": "google/gemma-4-31B-it",
+   "date": "2026-03-11"
+  },
+  "qwen3.6-35b-a3b": {
+   "repo": "Qwen/Qwen3.6-35B-A3B",
+   "date": "2026-04-15"
+  },
+  "muse-glimmer-30b": {
+   "repo": "meta-models/Muse-Glimmer-30B",
+   "date": "2026-08-09"
+  },
+  "nemotron-3.5-lightning-30b-a3b": {
+   "repo": "nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B-BF16",
+   "date": "2026-08-01"
+  },
+  "qwen3.8-27b": {
+   "repo": "Qwen/Qwen3.8-27B",
+   "date": "2026-08-05"
+  },
+  "gpt-oss-120b": {
+   "repo": "openai/gpt-oss-120b",
+   "date": "2025-08-04"
+  },
+  "nemotron-3.5-super-vl-120b": {
+   "repo": "nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-BF16",
+   "date": "2026-10-12"
+  },
+  "mistral-small-4-119b": {
+   "repo": "mistralai/Mistral-Small-4-119B-2603",
+   "date": "2026-01-23"
+  },
+  "mistral-medium-3.5-128b": {
+   "repo": "mistralai/Mistral-Medium-3.5-128B",
+   "date": "2026-03-31"
+  },
+  "qwen3.8-flash-next": {
+   "repo": "Qwen/Qwen3.8-Flash-Next",
+   "date": "2026-08-24"
+  },
+  "step-3.7-flash": {
+   "repo": "stepfun-ai/Step-3.7-Flash",
+   "date": "2026-05-23"
+  },
+  "mimo-v2.6-flash": {
+   "repo": "XiaomiMiMo/MiMo-V2.6-Flash-RL",
+   "date": "2026-09-21"
+  },
+  "glm-5.3-flash": {
+   "repo": "zai-org/GLM-5.3-Flash-BF16",
+   "date": "2026-08-25"
+  },
+  "minimax-m3": {
+   "repo": "MiniMaxAI/MiniMax-M3",
+   "date": "2026-06-02"
+  },
+  "deepseek-v4.1-flash-q6k-engram": {
+   "repo": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+   "date": "2026-10-17"
+  },
+  "glm-5.3": {
+   "repo": "zai-org/GLM-5.3",
+   "date": "2026-08-25"
+  },
+  "mimo-v2.6-pro": {
+   "repo": "XiaomiMiMo/MiMo-V2.6-Pro-RL",
+   "date": "2026-09-21"
+  },
+  "mistral-large-4": {
+   "repo": "mistralai/Mistral-Large-4-1T-A52B",
+   "date": "2026-09-30"
+  },
+  "deepseek-v4-pro": {
+   "repo": "deepseek-ai/DeepSeek-V4-Pro-0813",
+   "date": "2026-08-13"
+  },
+  "kimi-k3": {
+   "repo": "moonshotai/Kimi-K3",
+   "date": "2026-06-13"
+  },
+  "qwen2.5-math-1.5b": {
+   "repo": "Qwen/Qwen2.5-Math-1.5B-Instruct",
+   "date": "2024-09-16"
+  },
+  "qwen2.5-coder-1.5b": {
+   "repo": "Qwen/Qwen2.5-Coder-1.5B-Instruct",
+   "date": "2024-09-18"
+  },
+  "devstral-small-2-24b": {
+   "repo": "mistralai/Devstral-Small-2-24B-Instruct-2512",
+   "date": "2025-11-28"
+  },
+  "qwen3-coder-30b-a3b": {
+   "repo": "Qwen/Qwen3-Coder-30B-A3B-Instruct",
+   "date": "2025-07-31"
+  },
+  "qwen3-coder-next": {
+   "repo": "Qwen/Qwen3-Coder-Next",
+   "date": "2026-01-30"
+  },
+  "smolvlm2-500m-video": {
+   "repo": "HuggingFaceTB/SmolVLM2-500M-Video-Instruct",
+   "date": "2025-02-11"
+  },
+  "minicpm-v-4.7-1b": {
+   "repo": "openbmb/MiniCPM-V-4.7-1B",
+   "date": "2026-10-06"
+  },
+  "lfm3-omni-2b": {
+   "repo": "LiquidAI/LFM3-Omni-2B",
+   "date": "2026-10-21"
+  },
+  "qwen3-vl-4b": {
+   "repo": "Qwen/Qwen3-VL-4B-Instruct",
+   "date": "2025-10-11"
+  },
+  "qwen3-vl-8b": {
+   "repo": "Qwen/Qwen3-VL-8B-Instruct",
+   "date": "2025-10-11"
+  },
+  "qwen3-omni-30b-a3b-thinking": {
+   "repo": "Qwen/Qwen3-Omni-30B-A3B-Thinking",
+   "date": "2025-09-15"
+  },
+  "qwen3-omni-30b-a3b-instruct": {
+   "repo": "Qwen/Qwen3-Omni-30B-A3B-Instruct",
+   "date": "2025-09-20"
+  },
+  "qwen3-vl-32b": {
+   "repo": "Qwen/Qwen3-VL-32B-Instruct",
+   "date": "2025-10-19"
+  },
+  "minicpm-v-4.7-35b-a3b": {
+   "repo": "openbmb/MiniCPM-V-4.7-35B-A3B",
+   "date": "2026-10-07"
+  },
+  "nemotron-3-nano-omni-30b": {
+   "repo": "nvidia/Nemotron-3-Nano-Omni-30B-A3B-Reasoning-BF16",
+   "date": "2026-04-20"
+  },
+  "granite-docling-258m": {
+   "repo": "ibm-granite/granite-docling-258M",
+   "date": "2025-05-19"
+  },
+  "ovisocr2": {
+   "repo": "ATH-MaaS/OvisOCR2",
+   "date": "2026-07-13"
+  },
+  "glm-ocr": {
+   "repo": "zai-org/GLM-OCR",
+   "date": "2026-01-30"
+  },
+  "lightonocr-2-1b": {
+   "repo": "lightonai/LightOnOCR-2-1B",
+   "date": "2026-01-16"
+  },
+  "hunyuanocr": {
+   "repo": "tencent/HunyuanOCR",
+   "date": "2025-11-18"
+  },
+  "minicpm-ocr-1.0": {
+   "repo": "openbmb/MiniCPM-OCR-1.0",
+   "date": "2026-10-21"
+  },
+  "paddleocr-vl-1.6": {
+   "repo": "PaddlePaddle/PaddleOCR-VL-1.6",
+   "date": "2026-05-27"
+  },
+  "mineru2.5-pro-1.2b": {
+   "repo": "opendatalab/MinerU2.5-Pro-2605-1.2B",
+   "date": "2026-05-20"
+  },
+  "deepseek-ocr": {
+   "repo": "deepseek-ai/DeepSeek-OCR",
+   "date": "2025-10-17"
+  },
+  "unlimited-ocr": {
+   "repo": "baidu/Unlimited-OCR",
+   "date": "2026-06-19"
+  },
+  "dots.mocr": {
+   "repo": "dots-studio/dots.mocr",
+   "date": "2026-03-19"
+  },
+  "dots.ocr": {
+   "repo": "rednote-hilab/dots.ocr",
+   "date": "2025-07-30"
+  },
+  "nuextract3": {
+   "repo": "numind/NuExtract3",
+   "date": "2026-04-29"
+  },
+  "qianfan-ocr": {
+   "repo": "baidu/Qianfan-OCR",
+   "date": "2026-03-18"
+  },
+  "olmocr-2-7b": {
+   "repo": "allenai/olmOCR-2-7B-1025",
+   "date": "2025-10-06"
+  },
+  "table-transformer-detection": {
+   "repo": "microsoft/table-transformer-detection",
+   "date": "2022-10-14"
+  },
+  "table-transformer-structure": {
+   "repo": "microsoft/table-transformer-structure-recognition",
+   "date": "2022-10-14"
+  },
+  "deplot": {
+   "repo": "google/deplot",
+   "date": "2023-04-03"
+  },
+  "got-ocr-2.0": {
+   "repo": "stepfun-ai/GOT-OCR-2.0-hf",
+   "date": "2024-11-22"
+  },
+  "teleocr": {
+   "repo": "XingChen-AGI/TeleOCR",
+   "date": "2026-08-14"
+  },
+  "nemotron-parse-2.0": {
+   "repo": "nvidia/NVIDIA-Nemotron-Parse-2.0",
+   "date": "2026-06-30"
+  },
+  "deepseek-ocr-2": {
+   "repo": "deepseek-ai/DeepSeek-OCR-2",
+   "date": "2026-01-27"
+  },
+  "lightonocr-3-4b": {
+   "repo": "lightonai/LightOnOCR-3-4B",
+   "date": "2026-10-06"
+  },
+  "chandra-ocr-2": {
+   "repo": "datalab-to/chandra-ocr-2",
+   "date": "2026-03-16"
+  },
+  "foundation-sec-8b-reasoning": {
+   "repo": "fdtn-ai/Foundation-Sec-8B-Reasoning",
+   "date": "2025-11-06"
+  },
+  "qwen3.8-27b-uncensored-cyber": {
+   "repo": "philbert440/Qwen3.8-27B-Uncensored-Cyber-GGUF",
+   "date": "2026-08-17"
+  },
+  "huihui-cyberstrike-offsec-35b-abliterated": {
+   "repo": "huihui-ai/Huihui-CyberStrike-OffSec-35B-abliterated-GGUF",
+   "date": "2026-08-11"
+  },
+  "cyber-tiel-coder-35b-a3b": {
+   "repo": "peculiar-ragdoll/Cyber-Tiel-Coder-35B-A3B-GGUF",
+   "date": "2026-09-08"
+  },
+  "glm-5.3-flash-cybersecurity": {
+   "repo": "SyndicateLabs/GLM-5.3-Flash-CYBERSECURITY-GGUF",
+   "date": "2026-09-13"
+  },
+  "prompt-injection-deberta-v3": {
+   "repo": "ProtectAI/deberta-v3-base-prompt-injection-v2",
+   "date": "2024-04-20"
+  },
+  "deephat-v1-7b": {
+   "repo": "DeepHat/DeepHat-V1-7B",
+   "date": "2025-04-25"
+  },
+  "qwen3.8-flash-next-cybersecurity-nvfp4": {
+   "repo": "dealignai/Qwen3.8-Flash-Next-CYBERSECURITY-NVFP4",
+   "date": "2026-08-28"
+  },
+  "glm-5.3-cybersecurity": {
+   "repo": "dealignai/GLM-5.3-CYBERSECURITY-FP8",
+   "date": "2026-08-30"
+  },
+  "gemma-4-e4b-uncensored-aggressive": {
+   "repo": "HauhauCS/Gemma-4-E4B-Uncensored-HauhauCS-Aggressive",
+   "date": "2026-04-02"
+  },
+  "qwen3.5-9b-uncensored-aggressive": {
+   "repo": "HauhauCS/Qwen3.5-9B-Uncensored-HauhauCS-Aggressive",
+   "date": "2026-03-04"
+  },
+  "qwen-image-2.1-turbo-uncensored-encoder": {
+   "repo": "AtomicChat/Qwen-Image-2.1-Turbo-Uncensored-GGUF",
+   "date": "2026-10-09"
+  },
+  "huihui-gpt-oss-20b-abliterated-v2": {
+   "repo": "huihui-ai/Huihui-gpt-oss-20b-mxfp4-abliterated-v2",
+   "date": "2025-09-27"
+  },
+  "huihui-qwen3.8-27b-abliterated": {
+   "repo": "huihui-ai/Huihui-Qwen3.8-27B-abliterated",
+   "date": "2026-08-16"
+  },
+  "qwen3.8-27b-uncensored-aggressive": {
+   "repo": "HauhauCS/Qwen3.8-27B-Uncensored-HauhauCS-Aggressive-MTP-GGUF",
+   "date": "2026-08-17"
+  },
+  "gemma-4-31b-heretic": {
+   "repo": "llmfan46/gemma-4-31B-it-uncensored-heretic-GGUF",
+   "date": "2026-04-03"
+  },
+  "qwen3.6-35b-a3b-uncensored-aggressive": {
+   "repo": "HauhauCS/Qwen3.6-35B-A3B-Uncensored-HauhauCS-Aggressive",
+   "date": "2026-04-17"
+  },
+  "gpt-oss-120b-uncensored-aggressive": {
+   "repo": "HauhauCS/GPTOSS-120B-Uncensored-HauhauCS-Aggressive",
+   "date": "2026-02-13"
+  },
+  "qwen3.5-122b-a10b-uncensored-aggressive": {
+   "repo": "HauhauCS/Qwen3.5-122B-A10B-Uncensored-HauhauCS-Aggressive",
+   "date": "2026-03-22"
+  },
+  "huihui-qwen3.8-flash-next-abliterated-v2": {
+   "repo": "huihui-ai/Huihui-Qwen3.8-Flash-Next-abliterated-v2-GGUF",
+   "date": "2026-10-11"
+  },
+  "deepseek-v4.1-flash-uncensored": {
+   "repo": "dealignai/DeepSeek-V4.1-Flash-1017-UNCENSORED-FP8",
+   "date": "2026-10-18"
+  },
+  "whisper-tiny": {
+   "repo": "openai/whisper-tiny",
+   "date": "2022-09-26"
+  },
+  "whisper-ggml": {
+   "repo": "openai/whisper-base",
+   "date": "2022-09-26"
+  },
+  "whisper-large-v3-turbo": {
+   "repo": "openai/whisper-large-v3-turbo",
+   "date": "2024-10-01"
+  },
+  "parakeet-tdt-0.6b-v3": {
+   "repo": "nvidia/parakeet-tdt-0.6b-v3",
+   "date": "2025-08-04"
+  },
+  "qwen3-asr-0.6b": {
+   "repo": "Qwen/Qwen3-ASR-0.6B",
+   "date": "2026-01-28"
+  },
+  "qwen3-asr-1.7b": {
+   "repo": "Qwen/Qwen3-ASR-1.7B",
+   "date": "2026-01-28"
+  },
+  "granite-speech-4.1-2b-plus": {
+   "repo": "ibm-granite/granite-speech-4.1-2b-plus",
+   "date": "2026-04-16"
+  },
+  "whisper-large-v3": {
+   "repo": "openai/whisper-large-v3",
+   "date": "2023-11-07"
+  },
+  "voxtral-mini-4b-realtime": {
+   "repo": "mistralai/Voxtral-Mini-4B-Realtime-2602",
+   "date": "2026-01-21"
+  },
+  "wav2vec2-base-960h": {
+   "repo": "facebook/wav2vec2-base-960h",
+   "date": "2022-03-02"
+  },
+  "moss-transcribe-diarize": {
+   "repo": "OpenMOSS-Team/MOSS-Transcribe-Diarize",
+   "date": "2026-05-19"
+  },
+  "nemotron-3.5-asr-streaming-0.6b": {
+   "repo": "nvidia/nemotron-3.5-asr-streaming-0.6b",
+   "date": "2026-05-15"
+  },
+  "ark-asr-3b": {
+   "repo": "Edge0/ARK-ASR-3B",
+   "date": "2026-06-22"
+  },
+  "vibevoice-asr": {
+   "repo": "microsoft/VibeVoice-ASR",
+   "date": "2026-01-21"
+  },
+  "chatterbox-turbo": {
+   "repo": "ResembleAI/chatterbox-turbo",
+   "date": "2025-12-02"
+  },
+  "chatterbox": {
+   "repo": "ResembleAI/chatterbox",
+   "date": "2025-04-24"
+  },
+  "vibevoice-realtime-0.5b": {
+   "repo": "microsoft/VibeVoice-Realtime-0.5B",
+   "date": "2025-12-04"
+  },
+  "qwen3-tts-1.7b-base": {
+   "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-Base",
+   "date": "2026-01-21"
+  },
+  "ming-3.0-tts-0.5b": {
+   "repo": "inclusionAI/Ming-3.0-tts-0.5B",
+   "date": "2026-09-22"
+  },
+  "qwen3-tts-1.7b-voicedesign": {
+   "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
+   "date": "2026-01-21"
+  },
+  "qwen3-tts-1.7b-customvoice": {
+   "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice",
+   "date": "2026-01-21"
+  },
+  "vibevoice-1.5b": {
+   "repo": "microsoft/VibeVoice-1.5B",
+   "date": "2025-08-25"
+  },
+  "moss-tts-local-v1.5": {
+   "repo": "OpenMOSS-Team/MOSS-TTS-Local-Transformer-v1.5",
+   "date": "2026-06-04"
+  },
+  "moss-tts-v1.5": {
+   "repo": "OpenMOSS-Team/MOSS-TTS-v1.5",
+   "date": "2026-05-25"
+  },
+  "illustrious-xl-v2.0": {
+   "repo": "OnomaAIResearch/Illustrious-XL-v2.0",
+   "date": "2025-04-18"
+  },
+  "sdxl-base-1.0": {
+   "repo": "stabilityai/stable-diffusion-xl-base-1.0",
+   "date": "2023-07-25"
+  },
+  "flux2-klein-4b": {
+   "repo": "black-forest-labs/FLUX.2-klein-4B",
+   "date": "2026-01-14"
+  },
+  "moss-image-sft": {
+   "repo": "OpenMOSS-Team/MOSS-Image-SFT",
+   "date": "2026-10-11"
+  },
+  "hidream-o1-image": {
+   "repo": "HiDream-ai/HiDream-O1-Image",
+   "date": "2026-05-08"
+  },
+  "hidream-o1-image-dev": {
+   "repo": "HiDream-ai/HiDream-O1-Image-Dev",
+   "date": "2026-05-08"
+  },
+  "ovis-image": {
+   "repo": "ATH-MaaS/Ovis-Image-7B",
+   "date": "2025-11-28"
+  },
+  "z-image-turbo": {
+   "repo": "Tongyi-MAI/Z-Image-Turbo",
+   "date": "2025-11-25"
+  },
+  "z-image": {
+   "repo": "Tongyi-MAI/Z-Image",
+   "date": "2026-01-23"
+  },
+  "ernie-image-turbo": {
+   "repo": "baidu/ERNIE-Image-Turbo",
+   "date": "2026-04-02"
+  },
+  "longcat-image": {
+   "repo": "meituan-longcat/LongCat-Image",
+   "date": "2025-12-04"
+  },
+  "ming-image-0.1-design": {
+   "repo": "inclusionAI/Ming-Image-0.1-Design",
+   "date": "2026-09-17"
+  },
+  "qwen-image-2512": {
+   "repo": "Qwen/Qwen-Image-2512",
+   "date": "2025-12-30"
+  },
+  "wan2.2-ti2v-5b": {
+   "repo": "Wan-AI/Wan2.2-TI2V-5B",
+   "date": "2025-07-18"
+  },
+  "hunyuanvideo-1.5": {
+   "repo": "tencent/HunyuanVideo-1.5",
+   "date": "2025-11-18"
+  },
+  "wan2.2-t2v-a14b": {
+   "repo": "Wan-AI/Wan2.2-T2V-A14B",
+   "date": "2025-07-24"
+  },
+  "wan2.2-i2v-a14b": {
+   "repo": "Wan-AI/Wan2.2-I2V-A14B",
+   "date": "2025-07-24"
+  },
+  "minimax-h3": {
+   "repo": "MiniMaxAI/MiniMax-H3",
+   "date": "2026-07-28"
+  },
+  "all-minilm-l6-v2": {
+   "repo": "sentence-transformers/all-MiniLM-L6-v2",
+   "date": "2022-03-02"
+  },
+  "granite-embedding-30m-english": {
+   "repo": "ibm-granite/granite-embedding-30m-english",
+   "date": "2024-12-04"
+  },
+  "granite-embedding-small-english-r2": {
+   "repo": "ibm-granite/granite-embedding-small-english-r2",
+   "date": "2025-07-17"
+  },
+  "nomic-embed-text-v1.5": {
+   "repo": "nomic-ai/nomic-embed-text-v1.5",
+   "date": "2024-02-10"
+  },
+  "gte-modernbert-base": {
+   "repo": "Alibaba-NLP/gte-modernbert-base",
+   "date": "2025-01-20"
+  },
+  "modernbert-embed-base": {
+   "repo": "nomic-ai/modernbert-embed-base",
+   "date": "2024-12-29"
+  },
+  "embeddinggemma-300m": {
+   "repo": "google/embeddinggemma-300m",
+   "date": "2025-07-17"
+  },
+  "nomic-embed-text-v2-moe": {
+   "repo": "nomic-ai/nomic-embed-text-v2-moe",
+   "date": "2025-02-07"
+  },
+  "bge-m3": {
+   "repo": "BAAI/bge-m3",
+   "date": "2024-01-27"
+  },
+  "snowflake-arctic-embed-l-v2.0": {
+   "repo": "Snowflake/snowflake-arctic-embed-l-v2.0",
+   "date": "2024-11-08"
+  },
+  "qwen3-embedding-0.6b": {
+   "repo": "Qwen/Qwen3-Embedding-0.6B",
+   "date": "2025-06-03"
+  },
+  "mxbai-embed-large-v1": {
+   "repo": "mixedbread-ai/mxbai-embed-large-v1",
+   "date": "2024-03-07"
+  },
+  "embeddinggemma-2": {
+   "repo": "google/embeddinggemma-2",
+   "date": "2026-09-14"
+  },
+  "qwen3-vl-embedding-2b": {
+   "repo": "Qwen/Qwen3-VL-Embedding-2B",
+   "date": "2026-01-07"
+  },
+  "qwen3-embedding-8b": {
+   "repo": "Qwen/Qwen3-Embedding-8B",
+   "date": "2025-06-03"
+  },
+  "qwen3-vl-embedding-8b": {
+   "repo": "Qwen/Qwen3-VL-Embedding-8B",
+   "date": "2026-01-07"
+  },
+  "ms-marco-minilm-l6-v2": {
+   "repo": "cross-encoder/ms-marco-MiniLM-L-6-v2",
+   "date": "2022-03-02"
+  },
+  "mxbai-rerank-xsmall-v1": {
+   "repo": "mixedbread-ai/mxbai-rerank-xsmall-v1",
+   "date": "2024-02-29"
+  },
+  "gte-reranker-modernbert-base": {
+   "repo": "Alibaba-NLP/gte-reranker-modernbert-base",
+   "date": "2025-01-20"
+  },
+  "bge-reranker-base": {
+   "repo": "BAAI/bge-reranker-base",
+   "date": "2023-09-11"
+  },
+  "all-mpnet-base-v2": {
+   "repo": "sentence-transformers/all-mpnet-base-v2",
+   "date": "2022-03-02"
+  },
+  "paraphrase-multilingual-minilm-l12-v2": {
+   "repo": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+   "date": "2022-03-02"
+  },
+  "distiluse-base-multilingual-cased-v2": {
+   "repo": "sentence-transformers/distiluse-base-multilingual-cased-v2",
+   "date": "2022-03-02"
+  },
+  "bge-reranker-v2-m3": {
+   "repo": "BAAI/bge-reranker-v2-m3",
+   "date": "2024-03-15"
+  },
+  "qwen3-reranker-0.6b": {
+   "repo": "Qwen/Qwen3-Reranker-0.6B",
+   "date": "2025-05-29"
+  },
+  "labse": {
+   "repo": "sentence-transformers/LaBSE",
+   "date": "2022-03-02"
+  },
+  "siglip2-so400m": {
+   "repo": "google/siglip2-so400m-patch14-384",
+   "date": "2025-02-17"
+  },
+  "qwen3-reranker-8b": {
+   "repo": "Qwen/Qwen3-Reranker-8B",
+   "date": "2025-05-29"
+  },
+  "qwen3-vl-reranker-8b": {
+   "repo": "Qwen/Qwen3-VL-Reranker-8B",
+   "date": "2026-01-07"
+  },
+  "acestep-v1.5": {
+   "repo": "ACE-Step/Ace-Step1.5",
+   "date": "2026-01-23"
+  },
+  "acestep-5hz-lm-4b": {
+   "repo": "ACE-Step/acestep-5Hz-lm-4B",
+   "date": "2026-01-23"
+  },
+  "ast-speech-commands-v2": {
+   "repo": "MIT/ast-finetuned-speech-commands-v2",
+   "date": "2022-11-14"
+  },
+  "ast-audioset": {
+   "repo": "MIT/ast-finetuned-audioset-10-10-0.4593",
+   "date": "2022-11-14"
+  },
+  "magenta-realtime-2": {
+   "repo": "google/magenta-realtime-2",
+   "date": "2026-05-28"
+  },
+  "acestep-v1.5-xl-turbo": {
+   "repo": "ACE-Step/acestep-v15-xl-turbo",
+   "date": "2026-04-02"
+  },
+  "acestep-v1.5-xl-sft": {
+   "repo": "ACE-Step/acestep-v15-xl-sft",
+   "date": "2026-04-02"
+  },
+  "yolos-tiny": {
+   "repo": "hustvl/yolos-tiny",
+   "date": "2022-04-26"
+  },
+  "resnet-18": {
+   "repo": "microsoft/resnet-18",
+   "date": "2022-03-16"
+  },
+  "cvt-13": {
+   "repo": "microsoft/cvt-13",
+   "date": "2022-04-04"
+  },
+  "rtdetr-v2-r18vd": {
+   "repo": "PekingU/rtdetr_v2_r18vd",
+   "date": "2025-01-31"
+  },
+  "dinov2-small": {
+   "repo": "facebook/dinov2-small",
+   "date": "2023-07-31"
+  },
+  "depth-anything-v2-small": {
+   "repo": "depth-anything/Depth-Anything-V2-Small-hf",
+   "date": "2024-06-18"
+  },
+  "swin-tiny": {
+   "repo": "microsoft/swin-tiny-patch4-window7-224",
+   "date": "2022-03-02"
+  },
+  "rf-detr-seg-xxlarge": {
+   "repo": "Roboflow/rf-detr-seg-xxlarge",
+   "date": "2026-05-11"
+  },
+  "sam2.1-hiera-tiny": {
+   "repo": "facebook/sam2.1-hiera-tiny",
+   "date": "2024-09-24"
+  },
+  "detr-resnet-50": {
+   "repo": "facebook/detr-resnet-50",
+   "date": "2022-03-02"
+  },
+  "vit-base-patch16-224": {
+   "repo": "google/vit-base-patch16-224",
+   "date": "2022-03-02"
+  },
+  "sam-vit-base": {
+   "repo": "facebook/sam-vit-base",
+   "date": "2023-04-19"
+  },
+  "florence-2-base-ft": {
+   "repo": "microsoft/Florence-2-base-ft",
+   "date": "2024-06-15"
+  },
+  "owlvit-base": {
+   "repo": "google/owlvit-base-patch32",
+   "date": "2022-07-05"
+  },
+  "owlv2-base": {
+   "repo": "google/owlv2-base-patch16-ensemble",
+   "date": "2023-10-13"
+  },
+  "grounding-dino-base": {
+   "repo": "IDEA-Research/grounding-dino-base",
+   "date": "2023-09-25"
+  },
+  "vjepa2-vitl": {
+   "repo": "facebook/vjepa2-vitl-fpc64-256",
+   "date": "2025-05-31"
+  },
+  "zoedepth-nyu-kitti": {
+   "repo": "Intel/zoedepth-nyu-kitti",
+   "date": "2024-04-30"
+  },
+  "da3-large-1.1": {
+   "repo": "depth-anything/DA3-LARGE-1.1",
+   "date": "2025-12-11"
+  },
+  "map-anything-apache": {
+   "repo": "facebook/map-anything-apache",
+   "date": "2025-09-08"
+  },
+  "trellis.2-4b": {
+   "repo": "microsoft/TRELLIS.2-4B",
+   "date": "2025-12-01"
+  },
+  "robobrain2.5-4b": {
+   "repo": "BAAI/RoboBrain2.5-4B",
+   "date": "2026-02-28"
+  },
+  "smolvla-base": {
+   "repo": "lerobot/smolvla_base",
+   "date": "2025-06-01"
+  },
+  "gr00t-n1.7-3b": {
+   "repo": "nvidia/GR00T-N1.7-3B",
+   "date": "2026-02-25"
+  },
+  "t5-small": {
+   "repo": "google-t5/t5-small",
+   "date": "2022-03-02"
+  },
+  "flan-t5-base": {
+   "repo": "google/flan-t5-base",
+   "date": "2022-10-21"
+  },
+  "d1-omni-600m": {
+   "repo": "LiquidAI/d1-omni-600M",
+   "date": "2026-10-05"
+  },
+  "d1-3b": {
+   "repo": "LiquidAI/d1-3B",
+   "date": "2026-10-05"
+  },
+  "kev-9b": {
+   "repo": "jaredpalmer/kev-9b",
+   "date": "2026-09-20"
+  },
+  "clef-flash": {
+   "repo": "Cloudflare/clef-flash",
+   "date": "2026-09-30"
+  },
+  "hy-mt2-7b": {
+   "repo": "tencent/Hy-MT2-7B",
+   "date": "2026-05-11"
+  },
+  "clef": {
+   "repo": "Cloudflare/clef",
+   "date": "2026-09-30"
+  },
+  "distilbert-sst2": {
+   "repo": "distilbert/distilbert-base-uncased-finetuned-sst-2-english",
+   "date": "2022-03-02"
+  },
+  "strands-decider-26b-a4b": {
+   "repo": "StrandsAgents/strands-decider-26B-A4B-gemma4-v1-2610",
+   "date": "2026-10-09"
+  },
+  "tinyroberta-squad2": {
+   "repo": "deepset/tinyroberta-squad2",
+   "date": "2022-03-02"
+  },
+  "roberta-base": {
+   "repo": "FacebookAI/roberta-base",
+   "date": "2022-03-02"
+  },
+  "nli-deberta-v3-small": {
+   "repo": "cross-encoder/nli-deberta-v3-small",
+   "date": "2022-03-02"
+  },
+  "modernbert-base": {
+   "repo": "answerdotai/ModernBERT-base",
+   "date": "2024-12-11"
+  },
+  "strands-decider-12b": {
+   "repo": "StrandsAgents/strands-decider-12B-gemma4-v1-2610",
+   "date": "2026-10-09"
+  },
+  "xlm-roberta-base": {
+   "repo": "FacebookAI/xlm-roberta-base",
+   "date": "2022-03-02"
+  },
+  "bart-large-cnn": {
+   "repo": "facebook/bart-large-cnn",
+   "date": "2022-03-02"
+  },
+  "bart-large-mnli": {
+   "repo": "facebook/bart-large-mnli",
+   "date": "2022-03-02"
+  },
+  "carbon-x": {
+   "repo": "HuggingFaceBio/Carbon-X",
+   "date": "2026-10-21"
+  },
+  "esm2-t6-8m": {
+   "repo": "facebook/esm2_t6_8M_UR50D",
+   "date": "2022-09-26"
+  },
+  "timesfm-2.5-200m": {
+   "repo": "google/timesfm-2.5-200m-transformers",
+   "date": "2026-02-19"
+  }
+ }
+}

@@ -86,6 +86,7 @@ let publicWavePreviewReads = 0;
 let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
 let sandboxArtistActivityEnabled = false;
+let sandboxProfileRepRating = null;
 let sandboxCreatedWaveType = "CHAT";
 let sandboxRuleGroupSequence = 0;
 const sandboxRuleGroups = new Map();
@@ -2586,7 +2587,17 @@ function requestLog() {
   return requests.map((request) => ({ ...request }));
 }
 
-function handleDiagnostics(method, pathname, res) {
+function handleDiagnostics(method, pathname, url, res) {
+  if (pathname === "/__composer-sandbox/profile-rep" && method === "POST") {
+    const rating = Number(url.searchParams.get("rating") ?? Number.NaN);
+    if (!Number.isSafeInteger(rating)) {
+      writeJson(res, 400, { error: "Expected an integer REP rating." });
+      return true;
+    }
+    sandboxProfileRepRating = rating;
+    return writeJsonResponse(res, { ok: true });
+  }
+
   if (
     pathname === "/__composer-sandbox/artist-activity" &&
     (method === "POST" || method === "DELETE")
@@ -2612,6 +2623,7 @@ function handleDiagnostics(method, pathname, res) {
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
     sandboxArtistActivityEnabled = false;
+    sandboxProfileRepRating = null;
     sandboxCreatedWaveType = "CHAT";
     for (const notification of sandboxNotifications) {
       notification.read_at = null;
@@ -3002,6 +3014,27 @@ function handlePatternMockApiRead(pathname, res) {
   return writeJsonResponse(res, route.response());
 }
 
+// The profile document and the browser can read the same saved fixture.
+function handleProfileRepFixture(pathname, res) {
+  if (sandboxProfileRepRating === null) return false;
+  const rating = {
+    total_rep: sandboxProfileRepRating,
+    contributor_count: 1,
+    authenticated_user_contribution: sandboxProfileRepRating,
+  };
+  if (pathname === "/api/profiles/following-artist-0/rep/overview") {
+    return writeJsonResponse(res, { ...rating, contributors: emptyPage() });
+  }
+  if (pathname === "/api/profiles/following-artist-0/rep/categories") {
+    return writeJsonResponse(res, {
+      ...emptyPage(),
+      data: [{ category: "Artist", ...rating, top_contributors: [] }],
+      count: 1,
+    });
+  }
+  return false;
+}
+
 function handleMockApiRead(method, pathname, url, res) {
   if (!isSafeReadMethod(method)) {
     return false;
@@ -3013,6 +3046,7 @@ function handleMockApiRead(method, pathname, url, res) {
     handleGroupIdentityWalletsRead(pathname, res) ||
     handleGroupRead(pathname, res) ||
     handleNotificationRead(pathname, url, res) ||
+    handleProfileRepFixture(pathname, res) ||
     handleExactMockApiRead(pathname, res) ||
     handlePatternMockApiRead(pathname, res)
   );
@@ -3307,7 +3341,7 @@ async function handleRequest(req, res) {
     return;
   }
 
-  if (handleDiagnostics(method, pathname, res)) {
+  if (handleDiagnostics(method, pathname, url, res)) {
     return;
   }
 

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 
 import type { PublicWaveDrop as PublicWaveDropData } from "@/app/waves/public-wave-drop.server";
 import { formatUtcDate } from "@/i18n/format";
@@ -31,13 +30,12 @@ export default function PublicWaveDrop({
         className="tw-mt-5 tw-break-words"
       >
         <h3 id={`${headingId}-title`} className="tw-text-base tw-font-semibold">
-          <Link
+          <a
             href={drop.href}
-            prefetch={false}
             className="tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-primary-400"
           >
             {title}
-          </Link>
+          </a>
         </h3>
         <p className="tw-text-sm tw-text-iron-300">{drop.author}</p>
         <time

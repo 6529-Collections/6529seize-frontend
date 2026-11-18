@@ -80,6 +80,9 @@ export const publicEnvSchema = z.object({
    * ────────────────
    */
   CORE_SCHEME: z.string().optional(),
+  DESKTOP_CLASSIC_SCHEME: z
+    .enum(["classiccore6529", "stagingclassiccore6529", "localclassiccore6529"])
+    .optional(),
   DEV_MODE_AUTH_JWT: z.string().optional(),
   DEV_MODE_MEMES_WAVE_ID: z.string().optional(),
   DEV_MODE_CURATION_WAVE_ID: z.string().optional(),

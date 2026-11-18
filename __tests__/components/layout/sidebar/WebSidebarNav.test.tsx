@@ -139,10 +139,23 @@ describe("WebSidebarNav", () => {
       screen.getByRole("link", { name: "Waves" }),
       screen.getByRole("link", { name: "DMs" }),
       screen.getByRole("link", { name: "Join 6529" }),
+      screen.getByRole("link", { name: "6529 AI" }),
       screen.getByRole("button", { name: "About" }),
       screen.getByRole("link", { name: "Drop Forge" }),
     ]);
   });
+
+  it.each([false, true])(
+    "links 6529 AI for everyone, after the member slot (collapsed=%s)",
+    (collapsed) => {
+      mockUsePathname.mockReturnValue("/ai/models");
+      render(<WebSidebarNav isCollapsed={collapsed} />);
+      const ai = screen.getByRole("link", { name: "6529 AI" });
+      expect(ai).toHaveAttribute("href", "/ai");
+      expect(ai).toHaveAttribute("aria-current", "page");
+      expect(ai).toHaveAttribute("data-tooltip-content", "6529 AI");
+    }
+  );
 
   it("keeps Waves active for nested wave routes", () => {
     mockUsePathname.mockReturnValue("/waves/example-wave");
@@ -242,6 +255,7 @@ describe("WebSidebarNav", () => {
       expectDocumentOrder([
         screen.getByRole("link", { name: "DMs" }),
         validator,
+        screen.getByRole("link", { name: "6529 AI" }),
         screen.getByRole("button", { name: "About" }),
       ]);
     }

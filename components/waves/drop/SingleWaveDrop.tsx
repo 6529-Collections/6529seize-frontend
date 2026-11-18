@@ -6,7 +6,7 @@ import type { SingleWaveDropProps } from "../drops/participation/participationRe
 import { useCompetitionDrop } from "@/hooks/competitions/useCompetitionDrop";
 
 function CompetitionSingleWaveDrop(props: SingleWaveDropProps) {
-  const drop = useCompetitionDrop(props.drop);
+  const drop = useCompetitionDrop(props.drop, { loadDetail: true });
   return <SingleWaveDropContent {...props} drop={drop} />;
 }
 

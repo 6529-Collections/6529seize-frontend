@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import AppSidebar from "@/components/header/AppSidebar";
 import type AppSidebarMenuItems from "@/components/header/AppSidebarMenuItems";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
@@ -163,9 +163,17 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         render(<AppSidebar open onClose={jest.fn()} />);
         expect(
           getMenu()
-            .slice(0, 6)
+            .slice(0, 7)
             .map((item) => item.label)
-        ).toEqual(["NFTs", "Museum", "Waves", "DMs", "Validator", "About"]);
+        ).toEqual([
+          "NFTs",
+          "Museum",
+          "Waves",
+          "DMs",
+          "Validator",
+          "6529 AI",
+          "About",
+        ]);
         expect(getMenuItem("Validator")).toMatchObject({
           path: "/validator",
           pending: false,
@@ -196,6 +204,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         "Waves",
         "DMs",
         "Join 6529",
+        "6529 AI",
         "About",
       ]);
       expect(getMenu()).toEqual(
@@ -209,6 +218,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
             label: "Join 6529",
             path: "/join-6529",
           }),
+          expect.objectContaining({ label: "6529 AI", path: "/ai" }),
         ])
       );
       expect(getMenuItem("Museum").children).toBeUndefined();
@@ -310,6 +320,47 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       expect(onClose).toHaveBeenCalledTimes(2);
     });
 
+    it("starts sign-out only after the sidebar closes", async () => {
+      const onClose = jest.fn();
+      const signOut = jest.fn();
+      const { rerender } = render(<AppSidebar open onClose={onClose} />);
+
+      await waitFor(() => {
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+      connectProps.onSignOut(signOut);
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(signOut).not.toHaveBeenCalled();
+
+      rerender(<AppSidebar open={false} onClose={onClose} />);
+      await waitFor(() => {
+        expect(screen.queryByTestId("connect")).not.toBeInTheDocument();
+        expect(signOut).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("discards a queued sign-out if the sidebar reopens during the close", async () => {
+      const onClose = jest.fn();
+      const signOut = jest.fn();
+      const { rerender } = render(<AppSidebar open onClose={onClose} />);
+
+      await waitFor(() => {
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+      connectProps.onSignOut(signOut);
+      rerender(<AppSidebar open={false} onClose={onClose} />);
+      rerender(<AppSidebar open onClose={onClose} />);
+
+      await waitFor(() => {
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+      rerender(<AppSidebar open={false} onClose={onClose} />);
+      await waitFor(() => {
+        expect(screen.queryByTestId("connect")).not.toBeInTheDocument();
+      });
+      expect(signOut).not.toHaveBeenCalled();
+    });
+
     it("adds Drop Forge as a gated top-level row after About", () => {
       mockDropForgePermissions = {
         ...DEFAULT_DROP_FORGE_PERMISSIONS,
@@ -327,6 +378,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         "Waves",
         "DMs",
         "Join 6529",
+        "6529 AI",
         "About",
         "Drop Forge",
       ]);

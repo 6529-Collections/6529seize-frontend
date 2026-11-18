@@ -12,7 +12,7 @@ import WavePicture from "@/components/waves/WavePicture";
 import { getWaveRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
-import { getActiveWaveVoteDeadlineLabel } from "./active-wave-vote.helpers";
+import { getActiveWaveVoteLabel } from "./active-wave-vote.helpers";
 
 export function ActiveWaveVoteRow({
   vote,
@@ -32,7 +32,7 @@ export function ActiveWaveVoteRow({
   const zone = useDisplayTimeZone();
   const { wave } = vote;
   const hasScore = hasWaveTrustSummaryScore(wave.wave_score);
-  const deadlineLabel = getActiveWaveVoteDeadlineLabel(vote, locale, zone);
+  const voteLabel = getActiveWaveVoteLabel(vote, locale, zone);
   return (
     <div
       className={`${compact ? "tw-h-12 tw-px-2 tw-py-1" : "tw-p-2"} tw-group/vote tw-relative tw-flex tw-min-w-0 tw-items-center tw-rounded-lg ${isActive ? "tw-bg-iron-800/70 desktop-hover:hover:tw-bg-iron-800" : "desktop-hover:hover:tw-bg-iron-900"}`}
@@ -59,10 +59,10 @@ export function ActiveWaveVoteRow({
             {wave.name}
           </span>
           <span
-            title={compact ? deadlineLabel : undefined}
+            title={compact ? voteLabel : undefined}
             className={`${compact ? "tw-mt-0.5 tw-truncate tw-text-[11px] tw-leading-4" : "tw-mt-1 tw-text-xs"} tw-block ${isActive ? "tw-text-iron-400" : "tw-text-iron-500"} desktop-hover:group-hover/vote:tw-text-iron-400`}
           >
-            {deadlineLabel}
+            {voteLabel}
           </span>
         </span>
       </Link>

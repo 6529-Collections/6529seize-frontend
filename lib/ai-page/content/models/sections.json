@@ -1,0 +1,138 @@
+{
+ "schema": "6529.io.ai-model-sections.v1",
+ "sections": [
+  {
+   "id": "chat-small",
+   "title": "General chat, small",
+   "line": "Assistants under 10 billion parameters. By the app's estimate, the smallest version of each needs 0.5 to 12 GB of GPU memory.",
+   "models": 19,
+   "modelsRunnableToday": 18
+  },
+  {
+   "id": "chat-medium",
+   "title": "General chat, medium",
+   "line": "Assistants of 10 to 40 billion parameters. By the app's estimate, the smallest version of each needs 8.5 to 34.8 GB of GPU memory.",
+   "models": 10,
+   "modelsRunnableToday": 10
+  },
+  {
+   "id": "chat-large",
+   "title": "General chat, large",
+   "line": "Assistants of 40 to 150 billion parameters. By the app's estimate, the smallest version of each needs 74.6 to 132 GB of GPU memory.",
+   "models": 5,
+   "modelsRunnableToday": 5
+  },
+  {
+   "id": "chat-very-large",
+   "title": "General chat, very large",
+   "line": "The largest open models, over 150 billion parameters. By the app's estimate, the smallest version of each needs 128.2 to 1,776 GB of GPU memory, so they need several data-center GPUs.",
+   "models": 10,
+   "modelsRunnableToday": 10
+  },
+  {
+   "id": "coding",
+   "title": "Coding and math",
+   "line": "Models trained to write and fix code, or to solve math problems.",
+   "models": 5,
+   "modelsRunnableToday": 5
+  },
+  {
+   "id": "vision",
+   "title": "Vision and multimodal",
+   "line": "Models built to answer questions about images, video or audio as well as text.",
+   "models": 10,
+   "modelsRunnableToday": 10
+  },
+  {
+   "id": "documents",
+   "title": "Documents and OCR",
+   "line": "Models that read scanned pages, PDFs, tables and charts into text, Markdown or structured data.",
+   "models": 24,
+   "modelsRunnableToday": 15
+  },
+  {
+   "id": "security",
+   "title": "Security research",
+   "line": "Models for offensive and defensive security work. Those marked as refusal-removed answer requests their originals decline.",
+   "models": 9,
+   "modelsRunnableToday": 5
+  },
+  {
+   "id": "uncensored",
+   "title": "Refusals removed",
+   "line": "General models whose publishers removed the refusals, so they answer requests the originals decline.",
+   "models": 12,
+   "modelsRunnableToday": 11
+  },
+  {
+   "id": "speech-to-text",
+   "title": "Speech to text",
+   "line": "Models that transcribe speech, some with timestamps, speaker labels or translation.",
+   "models": 14,
+   "modelsRunnableToday": 9
+  },
+  {
+   "id": "text-to-speech",
+   "title": "Text to speech",
+   "line": "Models that read text aloud, some in a voice cloned from a short sample.",
+   "models": 10,
+   "modelsRunnableToday": 0
+  },
+  {
+   "id": "image-generation",
+   "title": "Image generation",
+   "line": "Models that make and edit images from a text prompt.",
+   "models": 13,
+   "modelsRunnableToday": 13
+  },
+  {
+   "id": "video-generation",
+   "title": "Video generation",
+   "line": "Models that make short videos from a text prompt or a still image.",
+   "models": 5,
+   "modelsRunnableToday": 0
+  },
+  {
+   "id": "embeddings",
+   "title": "Embeddings and reranking",
+   "line": "Models that turn text or images into vectors for search, and rerankers that score how well a passage answers a query.",
+   "models": 29,
+   "modelsRunnableToday": 16
+  },
+  {
+   "id": "audio-music",
+   "title": "Audio and music",
+   "line": "Models that make music or label sounds.",
+   "models": 7,
+   "modelsRunnableToday": 2
+  },
+  {
+   "id": "computer-vision",
+   "title": "Computer vision",
+   "line": "Models that classify images, find and outline objects, estimate depth or build 3D scenes.",
+   "models": 21,
+   "modelsRunnableToday": 0
+  },
+  {
+   "id": "robotics",
+   "title": "Robotics",
+   "line": "Vision-language-action models that turn camera images and instructions into robot actions or plans.",
+   "models": 3,
+   "modelsRunnableToday": 1
+  },
+  {
+   "id": "text-tools",
+   "title": "Text tools and decision models",
+   "line": "Models for one task: summaries, translation, sentiment, question answering, or a typed decision such as yes or no, a choice or a rating.",
+   "models": 18,
+   "modelsRunnableToday": 8
+  },
+  {
+   "id": "other",
+   "title": "Science and forecasting",
+   "line": "Models for DNA, protein sequences and time series.",
+   "models": 3,
+   "modelsRunnableToday": 1
+  }
+ ]
+}
