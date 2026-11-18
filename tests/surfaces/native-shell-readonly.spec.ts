@@ -3,7 +3,10 @@ import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
 import { gotoReady, RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
-import { PROFILE_HANDLE } from "../social/profileReadonlyHelpers";
+import {
+  expectPersonalCollectedActionsAbsent,
+  PROFILE_HANDLE,
+} from "../social/profileReadonlyHelpers";
 import { expectUrlState } from "../support/urlState";
 import {
   isCapacitorSimulationProject,
@@ -314,12 +317,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(
       page.getByRole("main").locator('[data-profile-section="Filters"]')
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-    await expect(page.getByTestId("collected-purchase-actions")).toHaveCount(0);
-    for (const action of ["Manage orders", "Complete my set"]) {
-      await expect(
-        page.getByRole("link", { name: action, exact: true })
-      ).toHaveCount(0);
-    }
+    await expectPersonalCollectedActionsAbsent(page);
   });
 
   for (const path of ["/collect", "/collect/orders"]) {

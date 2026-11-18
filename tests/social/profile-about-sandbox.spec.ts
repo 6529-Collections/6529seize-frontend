@@ -1,4 +1,5 @@
 import type { Page } from "@playwright/test";
+import { expectPersonalCollectedActionsAbsent } from "./profileReadonlyHelpers";
 import { expectUrlState } from "../support/urlState";
 import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
 import {
@@ -1540,15 +1541,6 @@ test.describe("Profile editing @auth @medium @local-only", () => {
     });
   }
 });
-
-async function expectPersonalCollectedActionsAbsent(page: Page) {
-  await expect(page.getByTestId("collected-purchase-actions")).toHaveCount(0);
-  for (const action of ["Manage orders", "Complete my set"]) {
-    await expect(
-      page.getByRole("link", { name: action, exact: true })
-    ).toHaveCount(0);
-  }
-}
 
 async function expectCollectedActionAlignment(page: Page) {
   const viewport = page.viewportSize();

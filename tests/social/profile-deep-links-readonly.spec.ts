@@ -5,6 +5,7 @@ import {
   test,
 } from "../testHelpers";
 import {
+  expectPersonalCollectedActionsAbsent,
   expectProfileShell,
   gotoReady,
   PROFILE_HANDLE,
@@ -136,12 +137,7 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(
       page.getByRole("main").locator('[data-profile-section="Filters"]')
     ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
-    await expect(page.getByTestId("collected-purchase-actions")).toHaveCount(0);
-    for (const action of ["Manage orders", "Complete my set"]) {
-      await expect(
-        page.getByRole("link", { name: action, exact: true })
-      ).toHaveCount(0);
-    }
+    await expectPersonalCollectedActionsAbsent(page);
     await expect(
       page.getByRole("button", { name: "Details", exact: true })
     ).toBeVisible();
