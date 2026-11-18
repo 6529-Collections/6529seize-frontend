@@ -67,7 +67,7 @@ function categoryAvailabilityOptions(category: string) {
         endpoint: `rep/categories/availability?${params.toString()}`,
         signal,
       }),
-    staleTime: 60_000,
+    staleTime: ({ state }) => (state.data === true ? 60_000 : 0),
     retry: false,
   });
 }
@@ -215,7 +215,7 @@ export default function UserPageRepNewRepSearch({
   const categorySelectionInvalid = formError?.field === "category";
   const unavailableCategoryMessage = t(
     locale,
-    "rep.categories.validation.errorTitle"
+    "rep.categories.validation.unavailable"
   );
   let typedCategoryError: string | null = null;
   if (isDebouncedCategory && !categorySelectionInvalid) {

@@ -696,7 +696,7 @@ describe("UserPageRepNewRepSearch", () => {
     });
     await user.type(search, " Artist ");
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "That category name won't work"
+      "This category name is unavailable. Try a different name."
     );
     expect(commonApiFetch).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -707,6 +707,48 @@ describe("UserPageRepNewRepSearch", () => {
     expect(
       screen.getByRole("textbox", { name: "Your total REP for this category" })
     ).toBeDisabled();
+  });
+
+  it("reuses approval when Enter confirms the typed category and preserves the amount", async () => {
+    const user = userEvent.setup();
+    mockAllocation.mockImplementation(({ category }) => ({
+      ...allocation,
+      repState: category
+        ? { category, rating: 0, contributor_count: 0, rater_contribution: 0 }
+        : null,
+    }));
+    render(
+      <UserPageRepNewRepSearch
+        overview={null}
+        profile={{ query: "recipient" } as ApiIdentity}
+      />
+    );
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.type(search, "Art");
+    await waitFor(() => expect(amount).toBeEnabled());
+    await user.clear(amount);
+    await user.type(amount, "25");
+    await user.click(search);
+    await user.keyboard("{Enter}");
+
+    expect(
+      await screen.findByRole("button", { name: "Change category" })
+    ).toBeInTheDocument();
+    expect(amount).toHaveValue("25");
+    expect(screen.getByRole("button", { name: "Grant Rep" })).toBeEnabled();
+    expect(
+      jest
+        .mocked(commonApiFetch)
+        .mock.calls.filter(
+          ([{ endpoint }]) =>
+            endpoint === "rep/categories/availability?param=Art"
+        )
+    ).toHaveLength(1);
   });
 
   it("counts Unicode characters consistently for the search minimum", async () => {
