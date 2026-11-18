@@ -180,14 +180,16 @@ describe("SingleWaveDropVoteSubmit", () => {
     renderComponent();
 
     expect(screen.getByRole("button")).toBeInTheDocument();
-    expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: defaultIdleButtonLabel })
+    ).toBeInTheDocument();
   });
 
-  it("applies correct styling based on drop rank", () => {
+  it("uses the shared positive vote action styling", () => {
     renderComponent();
 
     const button = screen.getByRole("button");
-    expect(button).toHaveClass("voteButton");
+    expect(button).toHaveClass("tw-bg-emerald-500", "tw-w-full");
   });
 
   it("handles button click and shows loading state", async () => {
@@ -201,7 +203,9 @@ describe("SingleWaveDropVoteSubmit", () => {
 
     // Should show loading spinner
     await waitFor(() => {
-      expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: defaultIdleButtonLabel })
+      ).toBeInTheDocument();
     });
   });
 
@@ -472,7 +476,9 @@ describe("SingleWaveDropVoteSubmit", () => {
     expect(onVoteRequestStarted).not.toHaveBeenCalled();
     expect(onVoteApplied).not.toHaveBeenCalled();
     await waitFor(() => {
-      expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: defaultIdleButtonLabel })
+      ).toBeInTheDocument();
     });
 
     await advanceTimers(backgroundModalCloseDelayMs);
@@ -621,7 +627,9 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
 
     // Button should show initial text
-    expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: defaultIdleButtonLabel })
+    ).toBeInTheDocument();
     expect(onVoteApplied).not.toHaveBeenCalled();
     expect(invalidateQueriesSpy).not.toHaveBeenCalled();
   });
@@ -660,7 +668,9 @@ describe("SingleWaveDropVoteSubmit", () => {
 
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
-    expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: defaultIdleButtonLabel })
+    ).toBeInTheDocument();
   });
 
   it("exposes handleClick method through ref", () => {

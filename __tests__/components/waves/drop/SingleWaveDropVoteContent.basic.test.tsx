@@ -63,7 +63,7 @@ describe("SingleWaveDropVoteContent", () => {
   it("toggles between slider and input", () => {
     render(<SingleWaveDropVoteContent drop={drop} size={"NORMAL" as any} />);
     expect(screen.getByTestId("slider")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button"));
+    fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
     expect(screen.getByTestId("input")).toBeInTheDocument();
   });
 });

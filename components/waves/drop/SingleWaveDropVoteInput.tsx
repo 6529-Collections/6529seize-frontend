@@ -369,6 +369,7 @@ export const SingleWaveDropVoteInput: React.FC<
         <div className="tw-relative tw-h-full tw-w-full">
           <input
             type="text"
+            aria-label={t(locale, "competitions.voteValue")}
             pattern={inputPattern}
             inputMode="numeric"
             className={`tw-h-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-pr-12 tw-text-base tw-font-semibold tw-tabular-nums tw-placeholder-iron-500 tw-shadow-inner tw-outline-none tw-transition-all tw-duration-300 tw-ease-out ${inputShellClasses} ${inputTextClasses} ${inputCaretClasses}`}
@@ -406,6 +407,7 @@ export const SingleWaveDropVoteInput: React.FC<
         <div className="tw-relative tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center">
           <input
             type="text"
+            aria-label={t(locale, "competitions.voteValue")}
             pattern={inputPattern}
             inputMode="numeric"
             className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-tabular-nums tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses} ${inputCaretClasses}`}

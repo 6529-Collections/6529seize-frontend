@@ -1,14 +1,10 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
-import {
-  type SingleWaveDropVoteMode,
-  SingleWaveDropVoteSubmissionMode,
-} from "../waves/drop/SingleWaveDropVote.types";
+import { SingleWaveDropVoteSubmissionMode } from "../waves/drop/SingleWaveDropVote.types";
 import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
-import { VoteModeControl } from "./VoteModeControl";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
@@ -29,15 +25,12 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
   const { isCapacitor, isIos } = useCapacitor();
   const followsIosKeyboard = isCapacitor && isIos;
   useLayoutViewportLock(isOpen && followsIosKeyboard);
-  const [voteInputMode, setVoteInputMode] =
-    useState<SingleWaveDropVoteMode>("slider");
 
   const handleClose = (e?: React.MouseEvent | React.KeyboardEvent) => {
     if (e) {
       e.preventDefault();
       e.stopPropagation();
     }
-    setVoteInputMode("slider");
     onClose();
   };
 
@@ -56,17 +49,11 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
           : undefined
       }
       surfaceClassName={`tw-group/voting-dialog tw-bg-iron-950 ${followsIosKeyboard ? "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]" : ""}`}
-      headerClassName="tw-relative group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-absolute group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-right-4 group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-top-[calc(100%+33px)] group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-z-10 group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:tw-mt-0 group-has-[.is-vote-panel]/voting-dialog:[&>div:last-child]:-tw-translate-y-1/2"
-      headerActions={
-        <VoteModeControl value={voteInputMode} onChange={setVoteInputMode} />
-      }
     >
       <div className="tw-px-4 tw-pb-2 tw-pt-2">
         <SingleWaveDropVote
           drop={drop}
           onVoteRequestStarted={handleClose}
-          voteMode={voteInputMode}
-          onVoteModeChange={setVoteInputMode}
           submissionMode={
             SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
           }

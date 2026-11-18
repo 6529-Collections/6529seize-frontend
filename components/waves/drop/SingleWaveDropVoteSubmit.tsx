@@ -15,7 +15,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { commonApiPost } from "@/services/api/common-api";
 import type { DropRateChangeRequest } from "@/entities/IDrop";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
-import { formatNumberWithCommas } from "@/helpers/Helpers";
+import {
+  VoteActionButton,
+  getVoteActionLabel,
+} from "@/components/voting/VoteActionButton";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { AuthContext } from "@/components/auth/Auth";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
@@ -92,6 +96,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
     }: Props,
     ref
   ) => {
+    const locale = useBrowserLocale();
     const position = drop.rank;
     const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
       useContext(AuthContext);
@@ -498,36 +503,18 @@ const SingleWaveDropVoteSubmit = forwardRef<
       handleClick,
     }));
 
-    let voteDirectionClass = "";
-    if (size !== SingleWaveDropVoteSize.MINI) {
-      if (newRating > 0) {
-        voteDirectionClass = styles["voteButtonPositive"] ?? "";
-      } else if (newRating < 0) {
-        voteDirectionClass = styles["voteButtonNegative"] ?? "";
-      } else {
-        voteDirectionClass = styles["voteButtonNeutral"] ?? "";
-      }
-    }
-
-    const showVoteAmount =
-      size !== SingleWaveDropVoteSize.MINI &&
-      Number.isFinite(newRating) &&
-      newRating !== 0;
-    let voteAmountLabel: string | null = null;
-    if (showVoteAmount) {
-      const voteSign = newRating > 0 ? "+" : "";
-      voteAmountLabel = `${voteSign}${formatNumberWithCommas(
-        newRating
-      )} ${voteLabel}`;
-    }
-
     const idleButtonLabel =
-      submitLabelOverride ??
-      (voteAmountLabel === null ? "Vote" : `Vote ${voteAmountLabel}`);
+      submitLabelOverride ?? getVoteActionLabel(locale, newRating, voteLabel);
 
     const getButtonContent = () => {
       return (
-        <div className={styles["buttonContent"] ?? ""}>
+        <div className={`${styles["buttonContent"] ?? ""} tw-min-h-5`}>
+          <span
+            aria-hidden="true"
+            className="tw-invisible tw-whitespace-nowrap"
+          >
+            {idleButtonLabel}
+          </span>
           {(!loading || isTextExiting) && (
             <span
               className={`${styles["buttonText"] ?? ""} ${
@@ -555,21 +542,22 @@ const SingleWaveDropVoteSubmit = forwardRef<
     };
 
     return (
-      <div className={`vote-button-container-${randomID}`}>
-        <button
+      <div
+        className={`vote-button-container-${randomID} ${size === SingleWaveDropVoteSize.MINI ? "tw-w-auto" : "tw-w-full"}`}
+      >
+        <VoteActionButton
           id={`vote-button-${randomID}`}
-          className={`${
-            size === SingleWaveDropVoteSize.MINI
-              ? (styles["voteButtonMini"] ?? "")
-              : (styles["voteButton"] ?? "")
-          } ${voteDirectionClass} ${isProcessing ? (styles["processing"] ?? "") : ""}`}
+          amount={newRating}
+          unit={voteLabel}
+          variant={size === SingleWaveDropVoteSize.MINI ? "compact" : "default"}
+          className={isProcessing ? (styles["processing"] ?? "") : undefined}
           onClick={(e) => {
             e.stopPropagation();
             void handleClick();
           }}
         >
           {getButtonContent()}
-        </button>
+        </VoteActionButton>
       </div>
     );
   }

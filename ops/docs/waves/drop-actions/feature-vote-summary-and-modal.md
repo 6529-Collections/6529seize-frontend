@@ -36,9 +36,13 @@ distribution with signed positive and negative highlights.
    - credit label
    - `Vote` action when visible
 3. Select `Vote` to open `Vote for this artwork`.
-4. Use slider or numeric controls and submit.
-5. Submit button transitions `Vote` -> loading -> `Voted`.
-6. After success, voting closes and the same drop detail stays open.
+4. Use the compact `Slider` / `Numeric` tabs beside `Your vote` and set the
+   amount. Where available, the chat-icon `Explain vote` control opens its
+   reply field on a separate row.
+5. Select the `Vote` button showing the signed amount and credit label.
+6. Voting closes according to its submission flow; the same drop detail stays
+   open. Decision votes close after confirmation. Other votes briefly show
+   `Voted` and can finish saving after the surface closes.
 
 ### Read the Current Vote Distribution
 
@@ -88,6 +92,10 @@ ranking, and voting rules retain their usual meaning.
 - Default single-drop panels use centered modal overlay on all screen sizes.
 - Memes single-drop panels use bottom sheet on small screens and centered modal
   on larger screens.
+- Voting forms share the same header, reply control, and signed-amount action.
+  The action fills the dialog or sheet's available width, including on desktop,
+  and uses green for a positive amount, red for a negative amount, and a neutral
+  style for zero.
 - In the iPhone app, the voting sheet follows the keyboard while the wave
   behind it keeps its position. Opening an optional reply uses the same motion
   curve. Dismissing the keyboard preserves the vote amount and reply draft.
@@ -135,7 +143,9 @@ ranking, and voting rules retain their usual meaning.
 
 - Submit performs an auth check first; if auth is canceled or fails, voting
   stays open.
-- If vote submit request fails, voting stays open and an error toast is shown.
+- A failed decision vote stays open for retry. Other drop votes stay open if
+  saving fails before closure; a later background failure shows an error toast
+  so the voter can reopen and retry.
 - Closing voting only closes the voting surface; single-drop view stays open.
 - A background refresh failure does not turn a confirmed decision vote into
   a failed save. Loaded artwork stays visible during temporary refresh failures;

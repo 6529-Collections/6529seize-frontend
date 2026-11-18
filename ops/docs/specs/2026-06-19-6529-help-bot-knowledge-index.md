@@ -1073,6 +1073,19 @@ Competition list corrections: My Votes includes only active nonzero votes; archi
 
 Voting help records use **Explain vote** for public rationale replies in My Votes and voting dialogs. They distinguish sending a reply about a saved vote from posting one after a successful vote, and cover Slider / Numeric entry in competition submission popups. The My Votes record also describes compact phone and tablet rows, 16-pixel side padding, single-line titles and action labels, compact controls with unchanged labels on smaller rows, styled public-reply tooltips, controls that adapt to the available width, and Explain vote beside the amount control on tablet and desktop with the range hint underneath. Desktop controls stay to the right of the artwork and details.
 
+The `waves.reactions-voting` record describes the shared `Your vote` header,
+compact `Slider` / `Numeric` tabs, and signed amount/unit on the `Vote` action,
+including with a reply enabled. Full-size dialogs and sheets use a separate
+chat-icon `Explain vote` row above the reply and a full-width action, including
+on desktop. Compact submission cards keep `Explain vote` on the left and the
+small `Vote` action on the right of one footer row, with the reply above it.
+The record covers positive green/negative red/zero neutral styling and keyboard
+focus on the slider handle. Decision remaining,
+spent, and available credits retain their own meaning. The record keeps
+decision-card Slider defaults, other mini-card Numeric defaults without a reply,
+generated placeholder versus prefill behavior, and each flow's existing close
+timing distinct; My Votes retains its separate compact row controls.
+
 The subscriptions record distinguishes pending and failed reads from successfully
 loaded zero balances and empty lists. Failed balance, settings, airdrop-address
 and upcoming-drop reads show Unavailable and retain the existing Retry action.

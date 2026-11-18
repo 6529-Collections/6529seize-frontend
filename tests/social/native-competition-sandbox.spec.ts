@@ -6712,10 +6712,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         exact: true,
       });
       const expectCompactCenteredTabs = async () => {
-        const label = page
-          .getByRole("dialog")
-          .last()
-          .locator(".is-mini > div > p > span:first-child");
+        const label = dialog
+          .locator("[data-vote-panel-header]")
+          .getByText("Your vote", { exact: true });
+        await expect(label).toHaveCSS("font-size", "12px");
         const labelBox = (await label.boundingBox())!;
         const tabsBox = (await mode.boundingBox())!;
         expect(tabsBox.height).toBeLessThanOrEqual(32);
@@ -6818,7 +6818,93 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         }
       }
       await input.fill("-25");
-      await dialog.getByText("Explain vote", { exact: true }).click();
+      const save = dialog.getByRole("button", {
+        name: "Vote -25 TDH",
+        exact: true,
+      });
+      const explain = dialog.getByRole("switch", { name: "Explain vote" });
+      const expectCompactVoteFooter = async (expanded: boolean) => {
+        await expect(save).toHaveCSS("height", "32px");
+        await expect(save).toHaveCSS("font-size", "13px");
+        await expect
+          .poll(async () => {
+            const [inputBox, explainBox, saveBox, replyBox] = await Promise.all(
+              [
+                input.boundingBox(),
+                explain.boundingBox(),
+                save.boundingBox(),
+                expanded
+                  ? dialog
+                      .getByText(
+                        "Posts a public reply in the wave after your vote is saved.",
+                        { exact: true }
+                      )
+                      .boundingBox()
+                  : Promise.resolve(null),
+              ]
+            );
+            return {
+              explainAtLeft:
+                !!inputBox &&
+                !!explainBox &&
+                Math.abs(explainBox.x - inputBox.x) <= 1,
+              actionAtRight:
+                !!inputBox &&
+                !!saveBox &&
+                Math.abs(
+                  saveBox.x + saveBox.width - inputBox.x - inputBox.width
+                ) <= 1,
+              sameRow:
+                !!explainBox &&
+                !!saveBox &&
+                explainBox.x + explainBox.width + 8 <= saveBox.x &&
+                Math.abs(
+                  explainBox.y +
+                    explainBox.height / 2 -
+                    saveBox.y -
+                    saveBox.height / 2
+                ) <= 1,
+              belowReply:
+                !expanded ||
+                (!!replyBox &&
+                  !!explainBox &&
+                  !!saveBox &&
+                  Math.min(explainBox.y, saveBox.y) >=
+                    replyBox.y + replyBox.height),
+            };
+          })
+          .toEqual({
+            explainAtLeft: true,
+            actionAtRight: true,
+            sameRow: true,
+            belowReply: true,
+          });
+        if (testInfo.project.use.hasTouch) {
+          expect(
+            await save.evaluate((button) =>
+              parseFloat(getComputedStyle(button, "::after").height)
+            )
+          ).toBeGreaterThanOrEqual(44);
+        }
+      };
+      await expectCompactVoteFooter(false);
+      if (testInfo.project.use.hasTouch) {
+        await save.scrollIntoViewIfNeeded();
+        expect(
+          await save.evaluate((button) => {
+            const box = button.getBoundingClientRect();
+            return [-21, 21].every((offset) =>
+              button.contains(
+                document.elementFromPoint(
+                  box.x + box.width / 2,
+                  box.y + box.height / 2 + offset
+                )
+              )
+            );
+          })
+        ).toBe(true);
+      }
+      await explain.check();
       const rationale = dialog.getByLabel("Optional rationale reply");
       await expect(rationale).toHaveValue("");
       await expect(rationale).toHaveAttribute(
@@ -6829,15 +6915,18 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         dialog.getByText("Add rationale text or turn Explain vote off.")
       ).toHaveCount(0);
       await expect(
-        dialog.getByRole("button", { name: "Save vote", exact: true })
+        dialog.getByRole("button", { name: "Vote -25 TDH", exact: true })
       ).toBeEnabled();
       await rationale.fill("An explanation kept while changing input modes");
       await expect(
-        dialog.getByRole("button", { name: "Save vote", exact: true })
+        dialog.getByRole("button", { name: "Vote -25 TDH", exact: true })
       ).toBeEnabled();
       await mode.getByRole("button", { name: "Slider", exact: true }).click();
       // The range input uses a logarithmic position; the thumb shows the vote.
       await expect(dialog.getByText("-25", { exact: true })).toBeAttached();
+      await expect(
+        dialog.getByRole("button", { name: "Vote -25 TDH", exact: true })
+      ).toBeEnabled();
       await numeric.click();
       await expect(input).toHaveValue("-25");
       await expect(rationale).toHaveValue(
@@ -6845,18 +6934,33 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       );
       await expect(
         dialog.getByText(
-          "Posts a public reply in the wave after your vote is saved."
+          "Posts a public reply in the wave after your vote is saved.",
+          { exact: true }
         )
       ).toBeVisible();
+      await expectCompactVoteFooter(true);
+      await explain.focus();
+      await page.keyboard.press("Tab");
+      await expect(rationale).toBeFocused();
+      await page.keyboard.press("Tab");
+      await expect(save).toBeFocused();
+      await page.keyboard.press("Shift+Tab");
+      await expect(rationale).toBeFocused();
+      await save.scrollIntoViewIfNeeded();
+      await page.screenshot({
+        path: testInfo.outputPath("compact-vote-footer-with-reply.png"),
+      });
+      await dialog.locator(".is-mini").screenshot({
+        path: testInfo.outputPath("compact-vote-panel-with-reply.png"),
+      });
       await input.scrollIntoViewIfNeeded();
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath("inline-vote-modes.png"),
       });
-      await dialog.getByText("Explain vote", { exact: true }).click();
-      await dialog
-        .getByRole("button", { name: "Save vote", exact: true })
-        .click();
+      await explain.uncheck();
+      await expectCompactVoteFooter(false);
+      await save.click();
       await expect.poll(() => sandbox.requests.length).toBe(1);
       expect(sandbox.requests[0]?.body).toMatchObject({ value: -25 });
       await expect(dialog.getByText("Saved", { exact: true })).toBeVisible();
@@ -7029,9 +7133,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
     const toggle = dialog.getByRole("switch", { name: "Explain vote" });
     await expect(toggle).not.toBeChecked();
-    const voteHeading = page
-      .getByRole("dialog", { name: "Vote for this artwork" })
-      .locator(".is-vote-panel > div > p > span:first-child");
+    const voteHeading = dialog
+      .locator("[data-vote-panel-header]")
+      .getByText("Your vote", { exact: true });
     const modeTabs = dialog.getByRole("group", { name: "Vote input mode" });
     const expectCenteredVoteHeader = async () => {
       const labelBox = await voteHeading.boundingBox();
@@ -7076,10 +7180,32 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const voteSlider = await dialog.getByRole("slider").first().boundingBox();
     expect(voteSlider).not.toBeNull();
     expect(creditBoxes[0]!.y).toBeGreaterThan(voteSlider!.y);
+    const rangeInputs = dialog.getByRole("slider");
+    const thumb = dialog.locator("[data-vote-slider-thumb]");
+    await expect(rangeInputs).toHaveCount(2);
+    await modeTabs
+      .getByRole("button", { name: "Numeric", exact: true })
+      .focus();
+    // Both transparent range inputs must expose focus on their shared visible thumb.
+    for (const range of [rangeInputs.nth(0), rangeInputs.nth(1)]) {
+      await page.keyboard.press("Tab");
+      await expect(range).toBeFocused();
+      await expect(thumb).toHaveCSS("outline-style", "solid");
+      await expect(thumb).toHaveCSS("outline-width", "2px");
+      await expect(range.locator("xpath=ancestor::fieldset[1]")).toHaveCSS(
+        "box-shadow",
+        "none"
+      );
+    }
+    await page.keyboard.press("Shift+Tab");
+    await expect(rangeInputs.nth(0)).toBeFocused();
+    await expect(thumb).toHaveCSS("outline-style", "solid");
+    await voteHeading.click();
+    await expect(thumb).not.toHaveCSS("outline-style", "solid");
     await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
     await expectCenteredVoteHeader();
     await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
-    await dialog.getByText("Explain vote", { exact: true }).click();
+    await toggle.check();
     await expect(toggle).toBeChecked();
     const rationale = dialog.getByLabel("Optional rationale reply");
     await expect(rationale).toHaveValue("");
@@ -7089,13 +7215,32 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     );
     await rationale.pressSequentially("My competition rationale");
     await expect(rationale).toHaveValue("My competition rationale");
+    const save = dialog.getByRole("button", {
+      name: "Vote +25 TDH",
+      exact: true,
+    });
+    await expect(save).toBeEnabled();
+    const inputBox = (await dialog
+      .getByRole("spinbutton", { name: "Your vote" })
+      .boundingBox())!;
+    const explainBox = (await toggle.boundingBox())!;
+    const rationaleBox = (await rationale.boundingBox())!;
+    const saveBox = (await save.boundingBox())!;
+    expect(explainBox.y).toBeGreaterThanOrEqual(inputBox.y + inputBox.height);
+    expect(rationaleBox.y).toBeGreaterThanOrEqual(
+      explainBox.y + explainBox.height
+    );
+    expect(saveBox.y).toBeGreaterThanOrEqual(
+      rationaleBox.y + rationaleBox.height
+    );
+    expect(Math.abs(saveBox.x - inputBox.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(saveBox.width - inputBox.width)).toBeLessThanOrEqual(1);
+    expect(saveBox.height).toBeGreaterThanOrEqual(44);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("competition-vote-with-reply.png"),
     });
-    await dialog
-      .getByRole("button", { name: "Save vote", exact: true })
-      .click();
+    await save.click();
     await expect.poll(() => replies.length).toBe(1);
     expect(sandbox.requests[0]?.body).toMatchObject({ value: 25 });
     expect(replies[0]).toMatchObject({
@@ -7104,6 +7249,113 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       parts: [expect.objectContaining({ content: "My competition rationale" })],
     });
     await expect(dialog).toHaveCount(0);
+  });
+
+  test("shares voting controls in a legacy drop dialog without competition context", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page);
+    const response = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${WAVE}/drops`
+    );
+    expect(response.ok()).toBe(true);
+    const fixture = await response.json();
+    const wave = {
+      ...fixture.wave,
+      wave: { ...fixture.wave.wave, type: "RANK" },
+      voting: { ...fixture.wave.voting, credit_type: "TDH" },
+    };
+    const drop = {
+      ...fixture.drops[0],
+      id: entryDropId("alpha"),
+      title: "Legacy voting artwork",
+      drop_type: "PARTICIPATORY",
+      submission_context: {
+        status: "ACTIVE",
+        has_metadata: false,
+        is_additional_action_promised: false,
+        voting: {
+          is_open: true,
+          total_votes_given: 0,
+          current_calculated_vote: 0,
+          predicted_final_vote: 0,
+          voters_count: 0,
+          place: 1,
+          context_profile_context: {
+            can_vote: true,
+            min: -100,
+            max: 100,
+            current: 0,
+          },
+        },
+      },
+    };
+    await installCollaborationDropFixture(page, () => ({ wave, drop }));
+    await page.route(
+      `**/v3/waves/${WAVE}/drops/${drop.id}/competition-context`,
+      (route) =>
+        route.fulfill({
+          json: { competition: null, entry: null, vote_summary: null },
+        })
+    );
+    await page.goto(`${ROOT}/alpha?drop=${drop.id}`);
+    await dismissNextDevTools(page);
+    const detail = page
+      .getByRole("main")
+      .locator("[data-video-viewport]")
+      .filter({
+        has: page.getByRole("button", { name: "Close panel", exact: true }),
+      });
+    await detail.getByRole("button", { name: "Vote", exact: true }).click();
+    const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
+    const panel = dialog.locator("[data-vote-mode]");
+    const header = panel.locator("[data-vote-panel-header]");
+    await expect(header.getByText("Your vote", { exact: true })).toBeVisible();
+    const mode = header.getByRole("group", { name: "Vote input mode" });
+    await expect(mode).toHaveCount(1);
+    await mode.getByRole("button", { name: "Numeric", exact: true }).click();
+    // The legacy numeric adapter retains its text input and increment buttons.
+    const input = panel.getByRole("textbox", {
+      name: "Your vote",
+      exact: true,
+    });
+    await input.fill("-25");
+    const save = panel.getByRole("button", {
+      name: "Vote -25 TDH",
+      exact: true,
+    });
+    await expect(save).toBeEnabled();
+    await mode.getByRole("button", { name: "Slider", exact: true }).click();
+    await expect(panel.getByRole("slider").first()).toBeVisible();
+    await expect(save).toBeEnabled();
+    await mode.getByRole("button", { name: "Numeric", exact: true }).click();
+    await expect(input).toHaveValue("-25");
+    const explain = panel.getByRole("switch", { name: "Explain vote" });
+    await explain.check();
+    const rationale = panel.getByLabel("Optional rationale reply");
+    await rationale.fill("A legacy rationale draft");
+    await mode.getByRole("button", { name: "Slider", exact: true }).click();
+    await expect(rationale).toHaveValue("A legacy rationale draft");
+    await expect(save).toHaveAccessibleName("Vote -25 TDH");
+    const panelBox = (await panel.boundingBox())!;
+    const explainBox = (await explain.boundingBox())!;
+    const rationaleBox = (await rationale.boundingBox())!;
+    const saveBox = (await save.boundingBox())!;
+    expect(rationaleBox.y).toBeGreaterThanOrEqual(
+      explainBox.y + explainBox.height
+    );
+    expect(saveBox.y).toBeGreaterThanOrEqual(
+      rationaleBox.y + rationaleBox.height
+    );
+    expect(Math.abs(saveBox.x - panelBox.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(saveBox.width - panelBox.width)).toBeLessThanOrEqual(1);
+    expect(saveBox.height).toBeGreaterThanOrEqual(44);
+    await save.click({ trial: true });
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("legacy-shared-voting-controls.png"),
+    });
+    expect(sandbox.requests).toHaveLength(0);
   });
 
   for (const { chatEnabled, hideGroupMetadata, label } of [
@@ -7293,7 +7545,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
     await page.goto(`${ROOT}/alpha?drop=${entryDropId("alpha")}`);
-    // The development-only indicator can cover the mobile Save vote button.
+    // The development-only indicator can cover the mobile vote action.
     await page.addStyleTag({
       content: "nextjs-portal { display: none !important; }",
     });
@@ -7342,10 +7594,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name: "Vote for this artwork",
       });
       const save = dialog.getByRole("button", {
-        name: "Save vote",
-        exact: true,
+        name: /^Vote [+-]?[\d,]+ TDH$/,
       });
       await expect(save).toBeVisible();
+      await expect(save).toHaveAccessibleName("Vote 0 TDH");
       await expect(
         dialog.getByText(/Enter a whole number between/)
       ).toHaveCount(0);
@@ -7377,6 +7629,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         dialog.getByText(/Enter a whole number between/)
       ).toHaveCount(0);
       await input.fill("-25");
+      await expect(save).toHaveAccessibleName("Vote -25 TDH");
       let holdRefresh = false;
       await page.route("**/api/**", async (route) => {
         const request = route.request();
@@ -7695,13 +7948,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toBeCloseTo(backgroundHeight, 0);
     await expect(input).toBeFocused();
     await emitKeyboard("keyboardDidShow", 300);
-    await dialog.getByText("Explain vote", { exact: true }).click();
+    await dialog.getByRole("switch", { name: "Explain vote" }).check();
     const rationale = dialog.getByLabel("Optional rationale reply");
     await rationale.fill("A reply preserved through keyboard dismissal");
     await expect(rationale).toBeFocused();
     await expect(rationale).toBeInViewport({ ratio: 1 });
     await expect(
-      dialog.getByRole("button", { name: "Save vote", exact: true })
+      dialog.getByRole("button", { name: "Vote +25 TDH", exact: true })
     ).toBeInViewport({ ratio: 1 });
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
@@ -7797,7 +8050,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name: "Vote for this artwork",
       });
       await expect(
-        dialog.getByRole("button", { name: "Save vote", exact: true })
+        dialog.getByRole("button", { name: "Vote 0 TDH", exact: true })
       ).toBeVisible();
       expect(contextLookups).toBe(0);
       await dialog.getByRole("button", { name: /^Close(?: modal)?$/ }).click();
@@ -14148,7 +14401,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page.getByRole(mobile ? "button" : "tab", { name: "Chat", exact: true })
     ).toBeVisible();
     await expect(
-      page.getByRole("button", { name: "Save vote", exact: true })
+      page.getByRole("button", {
+        name: /^(?:Save vote|Vote [+-]?[\d,]+ TDH)$/,
+      })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });
@@ -14168,7 +14423,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       page.getByRole("button", { name: "Try again", exact: true })
     ).toBeVisible({ timeout: 30000 });
     await expect(
-      page.getByRole("button", { name: "Save vote", exact: true })
+      page.getByRole("button", {
+        name: /^(?:Save vote|Vote [+-]?[\d,]+ TDH)$/,
+      })
     ).toHaveCount(0);
     await expectNoHorizontalOverflow(page);
   });

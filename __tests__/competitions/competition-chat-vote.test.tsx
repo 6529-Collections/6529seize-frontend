@@ -103,6 +103,7 @@ const knownContext = {
   dropId: "drop",
   data: context,
 };
+const voteButtonName = /^Vote (?:[+-][\d,]+|0) TDH \+ XTDH$/;
 const initialBudget = {
   competition_id: "competition",
   profile_id: "viewer",
@@ -161,7 +162,7 @@ it("uses the entry budget and competition vote endpoint despite the parent wave'
   expect(input).toHaveAttribute("max", "1500");
   expect(screen.getByText("TDH + XTDH")).toBeInTheDocument();
   fireEvent.change(input, { target: { value: "25" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: "Vote +25 TDH + XTDH" }));
   await waitFor(() =>
     expect(setCompetitionVote).toHaveBeenCalledWith(
       { waveId: "wave", competitionId: "competition" },
@@ -186,7 +187,7 @@ it("does not submit a stale vote after the viewer changes during authentication"
   const { unmount } = mount();
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "25" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   await waitFor(() => expect(mockRequestAuth).toHaveBeenCalled());
   unmount();
   jest.mocked(useCompetitionViewer).mockReturnValue("other:self");
@@ -204,7 +205,7 @@ it("blocks an actor change before React updates the viewer", async () => {
   mount();
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "25" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   jest.mocked(isAuthSessionForProfile).mockReturnValue(false);
   await act(async () => finishAuth({ success: true }));
   expect(setCompetitionVote).not.toHaveBeenCalled();
@@ -229,7 +230,7 @@ it("uses the passed competition and entry without another lookup and fetches fre
     expect.any(AbortSignal)
   );
   fireEvent.change(input, { target: { value: "-25" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   await waitFor(() =>
     expect(setCompetitionVote).toHaveBeenCalledWith(
       { waveId: "wave", competitionId: "competition" },
@@ -305,7 +306,7 @@ it("closes after confirmation with fresh credits while background refresh is sti
   const { client } = mount("numeric", drop, onClose);
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "25" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   expect(
     client.getQueryData([
@@ -328,7 +329,7 @@ it("keeps the confirmed vote when a background refresh fails", async () => {
   const { client } = mount();
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "-25" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   await screen.findByText("Saved");
   expect(input).toHaveValue(-25);
   expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -364,7 +365,7 @@ it("does not close another modal when a submitted form unmounts before confirmat
   const { unmount } = mount("numeric", drop, onClose);
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "25" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   await waitFor(() => expect(setCompetitionVote).toHaveBeenCalledTimes(1));
   unmount();
   confirm({ ...initialBudget, current_vote: 25, spent: 25, remaining: 1475 });
@@ -423,7 +424,7 @@ it("invalidates the old viewer during commit before passive effects can flush", 
     const { rerender } = render(<VoteHarness switched={false} />);
     const input = await screen.findByRole("spinbutton", { name: "Your vote" });
     fireEvent.change(input, { target: { value: "25" } });
-    fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+    fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
     await waitFor(() => expect(checkViewer).toBeDefined());
     jest.mocked(useCompetitionViewer).mockReturnValue("viewer:proxy");
     rerender(<VoteHarness switched />);
@@ -447,7 +448,7 @@ it("keeps voting open and refreshes fresh limits when saving the vote fails", as
   mount("numeric", drop, onClose);
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "25" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   await screen.findByRole("alert");
   await waitFor(() => expect(input).toHaveAttribute("max", "10"));
   expect(fetchCompetitionCredits).toHaveBeenCalledTimes(2);
@@ -475,7 +476,7 @@ it("restores Explain vote for proxy competition votes after the vote succeeds", 
     "Vote rationale (+25 at time of posting):"
   );
   fireEvent.change(rationale, { target: { value: "Proxy vote rationale" } });
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   await waitFor(() =>
     expect(commonApiPost).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -498,7 +499,7 @@ it.each([SingleWaveDropVoteSize.MINI, SingleWaveDropVoteSize.NORMAL])(
     await screen.findByRole("spinbutton", { name: "Your vote" });
     fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
     const rationale = screen.getByLabelText("Optional rationale reply");
-    const save = screen.getByRole("button", { name: "Save vote" });
+    const save = screen.getByRole("button", { name: voteButtonName });
     expect(rationale).toHaveValue("");
     expect(rationale).toHaveAttribute(
       "placeholder",
@@ -531,7 +532,7 @@ it.each([SingleWaveDropVoteSize.MINI, SingleWaveDropVoteSize.NORMAL])(
     const input = await screen.findByRole("spinbutton", { name: "Your vote" });
     fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
     const rationale = screen.getByLabelText("Optional rationale reply");
-    const save = screen.getByRole("button", { name: "Save vote" });
+    const save = screen.getByRole("button", { name: voteButtonName });
     fireEvent.change(input, { target: { value: "25" } });
     expect(rationale).toHaveValue("");
     expect(rationale).toHaveAttribute(
@@ -574,7 +575,7 @@ it("blocks empty enabled replies before submitting a vote", async () => {
   fireEvent.change(screen.getByLabelText("Optional rationale reply"), {
     target: { value: " " },
   });
-  expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: voteButtonName })).toBeDisabled();
   expect(setCompetitionVote).not.toHaveBeenCalled();
 });
 it("does not post a reply if saving the competition vote fails", async () => {
@@ -585,7 +586,7 @@ it("does not post a reply if saving the competition vote fails", async () => {
   const input = await screen.findByRole("spinbutton", { name: "Your vote" });
   fireEvent.change(input, { target: { value: "25" } });
   fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   await screen.findByRole("alert");
   expect(commonApiPost).not.toHaveBeenCalled();
 });
@@ -632,7 +633,9 @@ it.each([0, -1500])(
     expect(input).toHaveAttribute("min", String(min));
     fireEvent.change(input, { target: { value: "-25" } });
     expect(
-      screen.getByRole("button", { name: "Save vote" }).hasAttribute("disabled")
+      screen
+        .getByRole("button", { name: voteButtonName })
+        .hasAttribute("disabled")
     ).toBe(min === 0);
   }
 );
@@ -645,7 +648,7 @@ it("keeps a vote saved when posting the public explanation fails", async () => {
     target: { value: "25" },
   });
   fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
-  fireEvent.click(screen.getByRole("button", { name: "Save vote" }));
+  fireEvent.click(screen.getByRole("button", { name: voteButtonName }));
   await waitFor(() => expect(commonApiPost).toHaveBeenCalledTimes(1));
   expect(screen.getByRole("spinbutton", { name: "Your vote" })).toHaveValue(25);
   expect(screen.getByText("Saved")).toBeInTheDocument();
@@ -667,7 +670,7 @@ it("hides the MINI vote footer for a signed-out viewer", async () => {
   const prompt = await screen.findByText("Connect your wallet to participate.");
   expect(prompt).not.toBeVisible();
   expect(screen.queryByRole("group", { name: "Vote input mode" })).toBeNull();
-  expect(screen.queryByRole("button", { name: "Save vote" })).toBeNull();
+  expect(screen.queryByRole("button", { name: voteButtonName })).toBeNull();
   expect(fetchCompetitionCredits).not.toHaveBeenCalled();
 });
 it("offers both modes without a reply option when the voter cannot chat", async () => {
@@ -696,12 +699,12 @@ it.each(["closed", "inactive"])(
     } as never);
     mount(null);
     await screen.findAllByRole("slider");
-    expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: voteButtonName })).toBeDisabled();
     fireEvent.click(screen.getByRole("button", { name: "Numeric" }));
     expect(
       screen.getByRole("spinbutton", { name: "Your vote" })
     ).toBeDisabled();
-    expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: voteButtonName })).toBeDisabled();
     expect(setCompetitionVote).not.toHaveBeenCalled();
   }
 );
@@ -720,6 +723,6 @@ it("keeps zero-credit voting bounded in both modes", async () => {
   expect(input).toHaveAttribute("min", "0");
   expect(input).toHaveAttribute("max", "0");
   fireEvent.change(input, { target: { value: "1" } });
-  expect(screen.getByRole("button", { name: "Save vote" })).toBeDisabled();
+  expect(screen.getByRole("button", { name: voteButtonName })).toBeDisabled();
   expect(setCompetitionVote).not.toHaveBeenCalled();
 });
