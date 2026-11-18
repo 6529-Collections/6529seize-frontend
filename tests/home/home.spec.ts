@@ -1631,6 +1631,7 @@ test("Active Votes keeps full-height artwork and every metric visible at respons
     .evaluate((element) => getComputedStyle(element).boxShadow);
   await cards.first().focus();
   await expect(cards.first()).toBeFocused();
+  await expect(cards.first()).not.toHaveCSS("box-shadow", "none");
   await expect
     .poll(() =>
       cards.first().evaluate((element) => getComputedStyle(element).boxShadow)
