@@ -36,10 +36,7 @@ jest.mock(
 );
 let mockBackupPhase: string | null = null;
 jest.mock("@/hooks/e2ee/useE2eeBackup", () => ({
-  useE2eeBackup: () => ({
-    manager: null,
-    snapshot: mockBackupPhase ? { phase: mockBackupPhase } : null,
-  }),
+  useE2eeBackupOff: () => mockBackupPhase === "off",
 }));
 describe("PreferencesPageClient", () => {
   beforeEach(() => {

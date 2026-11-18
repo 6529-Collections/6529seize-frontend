@@ -195,8 +195,6 @@ export const E2EE_MESSAGES = {
     "You cancelled the signature. This device keeps access until {date}.",
   "e2ee.renew.failed": "Couldn’t renew access. Try again.",
 
-  "e2ee.devices.description":
-    "Every active device listed here can read your encrypted messages. Revoke any device you don’t recognize.",
   "e2ee.devices.thisDevice": "This device",
   "e2ee.devices.platform.web": "Browser",
   "e2ee.devices.platform.desktop": "6529 Desktop",
@@ -242,10 +240,8 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.revokeThisConfirm": "Revoke this browser",
   "e2ee.devices.revokeConfirm": "Revoke device",
   "e2ee.devices.revokeFailed": "Couldn’t revoke the device. Try again.",
-  "e2ee.devices.revokeDone": "Device revoked.",
   "e2ee.devices.empty": "No devices yet.",
   "e2ee.devices.revokedSection": "Revoked devices",
-  "e2ee.devices.rename.action": "Rename device",
   "e2ee.devices.rename.label": "Device name",
   "e2ee.devices.rename.save": "Save name",
   "e2ee.devices.rename.saved": "Device name saved.",
@@ -791,7 +787,6 @@ export const E2EE_MESSAGES = {
   "e2ee.deviceStatus.enableBoth": "Turn on signed posts and encrypted DMs",
   "e2ee.deviceStatus.enableProof": "Turn on signed posts",
   "e2ee.deviceStatus.enableEncryption": "Turn on encrypted DMs",
-  "e2ee.devices.managePermission": "Manage access to encrypted DMs",
   "e2ee.devices.permission": "Encrypted DMs",
   "e2ee.devices.combinedPermissions":
     "Signed Posts and Encrypted DMs (shared grant)",
@@ -801,12 +796,6 @@ export const E2EE_MESSAGES = {
     "Revoke access to encrypted DMs for {label}?",
   "e2ee.devices.revokeHistory":
     "That device stops receiving encrypted messages. It deletes its saved chat history once it confirms the revocation came from a device of yours it trusts; otherwise the history stays on it until it’s removed there. An encrypted backup can restore the history it contains.",
-  "e2ee.devices.revokeHistoryThis":
-    "The encrypted chat history and keys saved in this browser are deleted right away. An encrypted backup can restore the history it contains.",
-  "e2ee.devices.revokeHistoryUnsigned":
-    "That device stops receiving encrypted messages. Its saved chat history stays on it until it’s removed there, because encrypted messages aren’t on in this browser to confirm the revocation.",
-  "e2ee.devices.revokeUnsignedNotice":
-    "{label} was revoked, but this browser couldn’t sign the revocation of its encrypted messages. Its saved chat history stays on that device until it’s removed there.",
   "e2ee.deviceStatus.summary":
     "This device: signed posts {proof}; encrypted DMs {encryption}.",
   "e2ee.deviceStatus.expiring": " · expires {time}",

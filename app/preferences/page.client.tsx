@@ -18,7 +18,7 @@ import {
   type PreferencesRouteTab,
 } from "@/helpers/preferences-navigation";
 import { t } from "@/i18n/messages";
-import { useE2eeBackup } from "@/hooks/e2ee/useE2eeBackup";
+import { useE2eeBackupOff } from "@/hooks/e2ee/useE2eeBackup";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
@@ -81,7 +81,7 @@ export default function PreferencesPageClient({
 }) {
   const locale = useBrowserLocale();
   // A dot on Devices & security while encrypted backup is off.
-  const backupOff = useE2eeBackup().snapshot?.phase === "off";
+  const backupOff = useE2eeBackupOff();
   const { isCapacitor } = useCapacitor();
   const { connectedProfile, fetchingProfile } = useAuth();
   const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
