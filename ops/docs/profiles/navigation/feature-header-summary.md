@@ -79,12 +79,9 @@ The profile header appears on profile routes under `/{user}` and shows:
      hovering uses a background highlight. Keyboard navigation shows a focus ring,
      and Escape closes the menu and returns focus to its button.
      See [Artist Artwork Alerts](../../notifications/feature-artist-artwork-alerts.md).
-   - if that target also has a primary wallet: direct-message button appears
-     beside follow/unfollow immediately; it is not gated on existing follow
-     state
-   - while direct-message creation is pending, the paper-plane button shows a
-     loader, stays disabled, and ignores repeated clicks until the request
-     settles
+   - **Direct Message** appears beside Follow or Following for another profile.
+     It opens **New message** with that person selected. Opening the composer
+     creates no chat. See [Starting a chat](../../encrypted-messages.md#starting-a-chat).
 
 The **Website** action opens the profile's published custom website. Its home
 page can use a readable address such as `/{user}/studio`; the normal profile stays
@@ -169,8 +166,8 @@ also offers a direct shortcut to add or edit an optional About statement.
   successful request.
 - If the published website cannot be loaded, its header link is omitted; other
   profile actions remain available.
-- If direct-message creation fails, users get an error toast, the paper-plane
-  button returns to its idle state, and they can retry.
+- **New message** shows encrypted-message eligibility and any chat creation
+  errors after you open it from a profile.
 - If profile header edits fail, users get a toast or inline error and can retry.
 - If subscription coverage cannot load, the header shows
   `Coverage unavailable`; owners can still open Subscriptions and recover there.
@@ -185,8 +182,8 @@ also offers a direct shortcut to add or edit an optional About statement.
 - Switching accounts or entering a proxy session closes the Following list.
 - New Following and empty Followers copy falls back to English in locales
   without translations.
-- Direct-message action requires a signed-in viewer with a handle, a viewed
-  profile with a handle, and a target primary wallet.
+- **Direct Message** requires a signed-in profile and a different recipient
+  profile. Both profiles need a handle.
 - Artist badge and modal tabs depend on loaded
   `active_main_stage_submission_ids` and `winner_main_stage_drop_ids`.
 - `Edit profile`, `Preferences`, and owner subscription coverage are hidden
