@@ -54,7 +54,9 @@ notification filters remain effective.
 The `profiles.identity-tab` record covers the existing-category Rep editor,
 its desktop inline panel and mobile sheet, pinned You contribution, owner Given
 category editing, permission rules, allowance loading, retry action and dismissal.
-Grant Rep uses one label across layouts. Category saves keep the category open;
+Grant Rep uses one label across layouts. A typed category is ready after it
+passes validation. Suggestions use the displayed spelling, and the field stays
+editable after a suggestion is picked. Category saves keep the category open;
 partial failures retain only unsaved drafts for retry. The Identity log names
 NIC explicitly and puts neutral running totals after each change.
 It also covers desktop/mobile NIC Received/Given, owner Given management with

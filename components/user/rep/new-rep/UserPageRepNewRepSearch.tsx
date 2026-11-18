@@ -1,6 +1,11 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import {
+  queryOptions,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   useCallback,
@@ -13,7 +18,7 @@ import {
 } from "react";
 import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
 import { AnimatePresence, motion } from "framer-motion";
-import { InformationCircleIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
 import { RepSearchState } from "./rep-search-types";
@@ -26,10 +31,7 @@ import {
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
-import {
-  formatNumberWithCommas,
-  getStringAsNumberOrZero,
-} from "@/helpers/Helpers";
+import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { RATING_INPUT_SURFACE_CLASS } from "@/components/user/utils/rate/ratingInputStyles";
@@ -42,13 +44,10 @@ import {
 import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  isMemesNomineeLookalike,
-  MEMES_NOMINEE_CATEGORY,
-  MEMES_NOMINEE_REQUIRED_REP,
-} from "@/helpers/waves/memes-nomination";
+import { isMemesNomineeLookalike } from "@/helpers/waves/memes-nomination";
 import { getGrantRepCategoriesToDisplay } from "./grantRepCategoryOptions";
 import GrantRepCategorySuggestions from "./GrantRepCategorySuggestions";
+import GrantRepSubmissionGuidance from "./GrantRepSubmissionGuidance";
 import GrantRepStats from "./GrantRepStats";
 
 import { isRatingValue } from "../ratingsManagement";
@@ -57,8 +56,23 @@ const SEARCH_LENGTH = {
   MIN: 3,
   MAX: 100,
 };
-const SUBMISSION_GUIDANCE_ID = "grant-rep-submission-guidance";
+const GENERIC_ERROR_KEY = "rep.categories.grant.errors.generic";
 const getSearchLength = (value: string): number => Array.from(value).length;
+
+function categoryAvailabilityOptions(category: string) {
+  const name = category.trim();
+  const params = new URLSearchParams({ param: name });
+  return queryOptions({
+    queryKey: [QueryKey.REP_CATEGORY_AVAILABILITY, name],
+    queryFn: ({ signal }) =>
+      commonApiFetch<boolean>({
+        endpoint: `rep/categories/availability?${params.toString()}`,
+        signal,
+      }),
+    staleTime: ({ state }) => (state.data === true ? 60_000 : 0),
+    retry: false,
+  });
+}
 
 const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
   if (error instanceof Error && error.message.trim()) {
@@ -75,96 +89,6 @@ const getErrorMessage = (error: unknown, fallbackMessage: string): string => {
   }
   return fallbackMessage;
 };
-
-function getSubmissionGuidanceContent(
-  submissionHint: string,
-  submissionLookalikeInfo: string | null,
-  hasSelectedSubmissionCategory: boolean
-): React.ReactNode {
-  const submissionCategoryStart = submissionHint.indexOf(
-    MEMES_NOMINEE_CATEGORY
-  );
-  if (submissionLookalikeInfo) {
-    return submissionLookalikeInfo;
-  }
-  if (submissionCategoryStart >= 0) {
-    return (
-      <>
-        {submissionHint.slice(0, submissionCategoryStart)}
-        <span
-          className={`tw-font-medium ${
-            hasSelectedSubmissionCategory
-              ? "tw-text-emerald-400"
-              : "tw-text-iron-200"
-          }`}
-        >
-          {MEMES_NOMINEE_CATEGORY}
-        </span>
-        {submissionHint.slice(
-          submissionCategoryStart + MEMES_NOMINEE_CATEGORY.length
-        )}
-      </>
-    );
-  }
-  return submissionHint;
-}
-
-function GrantRepSubmissionGuidance({
-  selectedCategory,
-  categoriesToDisplay,
-}: {
-  readonly selectedCategory: string | null;
-  readonly categoriesToDisplay: readonly string[];
-}) {
-  const locale = useBrowserLocale();
-  const hasSelectedSubmissionCategory =
-    selectedCategory === MEMES_NOMINEE_CATEGORY;
-  const selectedNonQualifyingLookalike =
-    selectedCategory && isMemesNomineeLookalike(selectedCategory)
-      ? selectedCategory
-      : null;
-  const showSubmissionSearchHint =
-    !selectedCategory && categoriesToDisplay.includes(MEMES_NOMINEE_CATEGORY);
-  const showSubmissionGuidance =
-    hasSelectedSubmissionCategory ||
-    !!selectedNonQualifyingLookalike ||
-    showSubmissionSearchHint;
-  const submissionHint = t(locale, "rep.categories.grant.submissionHint", {
-    category: MEMES_NOMINEE_CATEGORY,
-    amount: formatNumberWithCommas(MEMES_NOMINEE_REQUIRED_REP),
-  });
-  const submissionLookalikeInfo = selectedNonQualifyingLookalike
-    ? t(locale, "rep.categories.grant.submissionLookalikeInfo", {
-        category: selectedNonQualifyingLookalike,
-        submissionCategory: MEMES_NOMINEE_CATEGORY,
-      })
-    : null;
-  const submissionGuidanceContent = getSubmissionGuidanceContent(
-    submissionHint,
-    submissionLookalikeInfo,
-    hasSelectedSubmissionCategory
-  );
-
-  return (
-    <output
-      id={SUBMISSION_GUIDANCE_ID}
-      hidden={!showSubmissionGuidance}
-      className={`tw-mb-0 tw-mt-2 tw-items-start tw-gap-1.5 tw-text-xs tw-font-normal tw-leading-5 ${showSubmissionGuidance ? "tw-flex" : "tw-hidden"} ${
-        selectedNonQualifyingLookalike
-          ? "tw-text-amber-300"
-          : "tw-text-iron-400"
-      }`}
-    >
-      {selectedNonQualifyingLookalike && (
-        <InformationCircleIcon
-          aria-hidden="true"
-          className="tw-mt-0.5 tw-h-3.5 tw-w-3.5 tw-flex-shrink-0"
-        />
-      )}
-      <span>{showSubmissionGuidance ? submissionGuidanceContent : null}</span>
-    </output>
-  );
-}
 
 type Props = {
   readonly overview: ApiRepOverview | null;
@@ -203,6 +127,8 @@ function GrantRepForm({
   const amountFormId = useId();
   const availableRepId = useId();
   const categoryErrorId = useId();
+  const typedCategoryErrorId = useId();
+  const submissionGuidanceId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
   const amountFocusSource = useRef<Element | null>(null);
@@ -213,6 +139,7 @@ function GrantRepForm({
       isCurrentForm.current = false;
     };
   }, []);
+  const queryClient = useQueryClient();
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -229,14 +156,13 @@ function GrantRepForm({
     readonly value: string;
   } | null>(null);
   const [mutating, setMutating] = useState<boolean>(false);
+  const [checkingAvailability, setCheckingAvailability] = useState(false);
 
   const [formError, setError] = useState<{
     readonly message: string;
     readonly field: "category" | "save";
     readonly showDetails: boolean;
   } | null>(null);
-  const categoryInvalid = formError?.field === "category";
-
   const [debouncedValue, setDebouncedValue] = useState<string>("");
   useDebounce(
     () => {
@@ -246,22 +172,71 @@ function GrantRepForm({
     [repSearch]
   );
 
-  const debouncedSearchLength = getSearchLength(debouncedValue);
+  const typedCategory = repSearch.trim();
+  const debouncedCategory = debouncedValue.trim();
+  const debouncedSearchLength = getSearchLength(debouncedCategory);
   const matchingSearchLength =
     debouncedSearchLength >= SEARCH_LENGTH.MIN &&
     debouncedSearchLength <= SEARCH_LENGTH.MAX;
 
+  const typedCategoryViolation = getRepCategoryViolation(typedCategory);
+  const typedCategoryReserved = isHelpBotCreditRepCategory(typedCategory);
+  const isDebouncedCategory =
+    !selectedCategory && typedCategory === debouncedCategory;
+  const shouldCheckAvailability =
+    isDebouncedCategory &&
+    matchingSearchLength &&
+    !typedCategoryReserved &&
+    !typedCategoryViolation;
+  const availability = useQuery({
+    ...categoryAvailabilityOptions(typedCategory),
+    enabled: shouldCheckAvailability,
+  });
+  const activeCategory =
+    selectedCategory ??
+    (shouldCheckAvailability &&
+    availability.isSuccess &&
+    availability.data === true
+      ? typedCategory
+      : null);
+  const hasActiveCategory = activeCategory !== null;
+  const categorySelectionInvalid = formError?.field === "category";
+  const unavailableCategoryMessage = t(
+    locale,
+    "rep.categories.validation.unavailable"
+  );
+  let typedCategoryError: string | null = null;
+  if (isDebouncedCategory && !categorySelectionInvalid) {
+    if (typedCategoryReserved) {
+      typedCategoryError = helpBotCreditRepCategoryError;
+    } else if (typedCategoryViolation) {
+      typedCategoryError = t(locale, typedCategoryViolation.key, {
+        ...typedCategoryViolation.params,
+      });
+    } else if (shouldCheckAvailability && availability.isError) {
+      typedCategoryError = getErrorMessage(
+        availability.error,
+        t(locale, GENERIC_ERROR_KEY)
+      );
+    } else if (
+      shouldCheckAvailability &&
+      availability.isSuccess &&
+      availability.data === false
+    ) {
+      typedCategoryError = unavailableCategoryMessage;
+    }
+  }
+
   const { isFetching, data: categories } = useQuery<string[]>({
-    queryKey: [QueryKey.REP_CATEGORIES_SEARCH, debouncedValue],
-    queryFn: async () =>
-      await commonApiFetch<string[]>({
-        endpoint: "/rep/categories",
-        params: {
-          param: debouncedValue,
-        },
-      }),
-    enabled:
-      matchingSearchLength && repSearch === debouncedValue && !selectedCategory,
+    queryKey: [QueryKey.REP_CATEGORIES_SEARCH, debouncedCategory],
+    queryFn: ({ signal }) => {
+      const params = new URLSearchParams({ param: debouncedCategory });
+      return commonApiFetch<string[]>({
+        endpoint: `rep/categories?${params.toString()}`,
+        signal,
+      });
+    },
+    enabled: matchingSearchLength && isDebouncedCategory,
   });
 
   const {
@@ -273,15 +248,19 @@ function GrantRepForm({
     retry,
   } = useRepAllocation({
     profile,
-    category: selectedCategory,
+    category: activeCategory,
   });
 
-  const amountScope = [amountContext, selectedCategory].join(":");
-  const savedAmount = selectedCategory
+  const amountScope = [amountContext, activeCategory].join(":");
+  const draftWithoutCategoryScope = [amountContext, null].join(":");
+  const savedAmount = hasActiveCategory
     ? String(repState?.rater_contribution ?? 0)
     : "";
   const amountStr =
-    amountDraft?.scope === amountScope ? amountDraft.value : savedAmount;
+    amountDraft?.scope === amountScope ||
+    (amountDraft?.scope === draftWithoutCategoryScope && amountDraft.value)
+      ? amountDraft.value
+      : savedAmount;
   const setAmountStr = (value: string) =>
     setAmountDraft({ scope: amountScope, value });
 
@@ -292,7 +271,7 @@ function GrantRepForm({
       (amountNum >= minMaxValues.min && amountNum <= minMaxValues.max));
 
   const currentRep = repState?.rater_contribution ?? 0;
-  const amountReady = selectedCategory !== null && repState !== null;
+  const amountReady = hasActiveCategory && repState !== null;
   const focusSelectedAmount = useCallback(
     (input: HTMLInputElement | null) => {
       if (!input || !selectedCategory || !amountReady) return;
@@ -314,12 +293,12 @@ function GrantRepForm({
   const overAllowance =
     amountReady && isRatingValue(amountStr) && !isValidValue;
   const isGrantDisabled =
-    !selectedCategory ||
+    !amountReady ||
     isError ||
-    !repState ||
     !amountStr ||
     !haveChanged ||
     !isValidValue ||
+    checkingAvailability ||
     mutating;
 
   // --- End derived rep state ---
@@ -330,8 +309,6 @@ function GrantRepForm({
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
-  const [checkingAvailability, setCheckingAvailability] = useState(false);
-
   const showHelpBotCreditRepCategoryError = () => {
     setError({
       message: helpBotCreditRepCategoryError,
@@ -341,9 +318,10 @@ function GrantRepForm({
   };
 
   const onRepSelect = async (rep: string, knownCategory = false) => {
-    if (mutating || selectedCategory === rep) return;
+    const category = rep.trim();
+    if (mutating || selectedCategory === category) return;
     const request = ++selectionRequest.current;
-    if (isHelpBotCreditRepCategory(rep)) {
+    if (isHelpBotCreditRepCategory(category)) {
       showHelpBotCreditRepCategoryError();
       return;
     }
@@ -351,7 +329,7 @@ function GrantRepForm({
     // broken rule, localized and instantly, instead of a server error blob.
     // Runs before the search-length guard below so the over-length and
     // leading-dash messages actually reach the user.
-    const violation = getRepCategoryViolation(rep);
+    const violation = getRepCategoryViolation(category);
     if (violation) {
       setError({
         message: t(locale, violation.key, { ...violation.params }),
@@ -363,7 +341,7 @@ function GrantRepForm({
     // Search-specific minimum (below the server's 1-char floor): surface it
     // instead of silently dropping the input. Count code points to stay
     // consistent with the validator's length semantics.
-    if (!knownCategory && getSearchLength(rep) < SEARCH_LENGTH.MIN) {
+    if (!knownCategory && getSearchLength(category) < SEARCH_LENGTH.MIN) {
       setError({
         message: t(locale, "rep.categories.validation.tooShort", {
           min: SEARCH_LENGTH.MIN,
@@ -377,33 +355,30 @@ function GrantRepForm({
       searchInputRef.current?.ownerDocument.activeElement ?? null;
     setCheckingAvailability(!knownCategory);
     try {
-      if (!knownCategory)
-        await commonApiFetch<boolean>({
-          endpoint: "/rep/categories/availability",
-          params: {
-            param: rep,
-          },
-        });
-      if (request !== selectionRequest.current) return;
+      if (!knownCategory) {
+        const isAvailable = await queryClient.fetchQuery(
+          categoryAvailabilityOptions(category)
+        );
+        if (!isAvailable) throw new Error(unavailableCategoryMessage);
+      }
+      if (!isCurrentForm.current || request !== selectionRequest.current)
+        return;
       amountFocusSource.current = focusSource;
-      setSelectedCategory(rep);
-      setRepSearch(rep);
-      // Carry an amount entered without a selected category, including after
-      // Change category. Switching selected categories shows their saved rating.
-      setAmountDraft((draft) =>
-        !selectedCategory && draft?.scope === amountScope && draft.value
-          ? { scope: [amountContext, rep].join(":"), value: draft.value }
-          : null
-      );
+      setSelectedCategory(category);
+      setRepSearch(category);
+      const selectedAmountScope = [amountContext, category].join(":");
+      setAmountDraft((draft) => {
+        if (draft?.scope === selectedAmountScope) return draft;
+        if (draft?.scope === draftWithoutCategoryScope && draft.value)
+          return { scope: selectedAmountScope, value: draft.value };
+        return null;
+      });
       setError(null);
       setIsOpen(false);
     } catch (error: unknown) {
       if (request !== selectionRequest.current) return;
       setError({
-        message: getErrorMessage(
-          error,
-          t(locale, "rep.categories.grant.errors.generic")
-        ),
+        message: getErrorMessage(error, t(locale, GENERIC_ERROR_KEY)),
         field: "category",
         showDetails: true,
       });
@@ -449,18 +424,15 @@ function GrantRepForm({
         description: t(locale, "rep.categories.grant.toast.tryAgain"),
         details: getToastErrorDetails(
           error,
-          getErrorMessage(
-            error,
-            t(locale, "rep.categories.grant.errors.generic")
-          )
+          getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
         ),
       });
     },
   });
 
   const onGrantRep = async () => {
-    if (isGrantDisabled || !selectedCategory || !profile.query) return;
-    if (isHelpBotCreditRepCategory(selectedCategory)) {
+    if (isGrantDisabled || !activeCategory || !profile.query) return;
+    if (isHelpBotCreditRepCategory(activeCategory)) {
       showHelpBotCreditRepCategoryError();
       return;
     }
@@ -476,13 +448,10 @@ function GrantRepForm({
         });
         return;
       }
-      await addRepMutation.mutateAsync({ amount, category: selectedCategory });
+      await addRepMutation.mutateAsync({ amount, category: activeCategory });
     } catch (error: unknown) {
       setError({
-        message: getErrorMessage(
-          error,
-          t(locale, "rep.categories.grant.errors.generic")
-        ),
+        message: getErrorMessage(error, t(locale, GENERIC_ERROR_KEY)),
         field: "save",
         showDetails: true,
       });
@@ -504,22 +473,27 @@ function GrantRepForm({
 
   const categoriesToDisplay = useMemo(() => {
     return getGrantRepCategoriesToDisplay({
-      search: debouncedValue,
+      search: debouncedCategory,
       categories: categories ?? [],
-      includeTypedCategory: matchingSearchLength,
+      showSubmissionSuggestion: matchingSearchLength,
     });
-  }, [debouncedValue, categories, matchingSearchLength]);
+  }, [debouncedCategory, categories, matchingSearchLength]);
 
   const repSearchState = useMemo(() => {
-    const searchLength = getSearchLength(repSearch);
+    const searchLength = getSearchLength(typedCategory);
     if (searchLength < SEARCH_LENGTH.MIN)
       return RepSearchState.MIN_LENGTH_ERROR;
     if (searchLength > SEARCH_LENGTH.MAX)
       return RepSearchState.MAX_LENGTH_ERROR;
-    if (repSearch !== debouncedValue || isFetching)
+    if (typedCategory !== debouncedCategory || isFetching)
       return RepSearchState.LOADING;
     return RepSearchState.HAVE_RESULTS;
-  }, [debouncedValue, isFetching, repSearch]);
+  }, [debouncedCategory, isFetching, typedCategory]);
+  const showSearchDropdown =
+    isOpen &&
+    !selectedCategory &&
+    (repSearchState !== RepSearchState.HAVE_RESULTS ||
+      categoriesToDisplay.length > 0);
 
   const handleRepSearchChange = (
     event: React.ChangeEvent<HTMLInputElement>
@@ -531,9 +505,11 @@ function GrantRepForm({
     setCheckingAvailability(false);
     setRepSearch(newValue);
     setError(null);
-    if (selectedCategory && newValue !== selectedCategory) {
+    if (newValue.trim() !== typedCategory) {
       setSelectedCategory(null);
-      setAmountDraft(null);
+      setAmountDraft((draft) =>
+        draft?.scope === draftWithoutCategoryScope ? draft : null
+      );
     }
   };
 
@@ -578,18 +554,19 @@ function GrantRepForm({
               autoCorrect="off"
               spellCheck={false}
               value={repSearch}
-              readOnly={!!selectedCategory}
               disabled={mutating}
               onChange={handleRepSearchChange}
               onFocus={() => {
                 if (!selectedCategory) setIsOpen(true);
               }}
-              aria-invalid={categoryInvalid}
-              aria-describedby={
-                categoryInvalid
-                  ? `${SUBMISSION_GUIDANCE_ID} ${categoryErrorId}`
-                  : SUBMISSION_GUIDANCE_ID
-              }
+              aria-invalid={categorySelectionInvalid || !!typedCategoryError}
+              aria-describedby={[
+                submissionGuidanceId,
+                categorySelectionInvalid && categoryErrorId,
+                typedCategoryError && typedCategoryErrorId,
+              ]
+                .filter(Boolean)
+                .join(" ")}
               className={`${RATING_INPUT_SURFACE_CLASS} tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none`}
               placeholder={t(locale, "rep.categories.grant.searchPlaceholder")}
             />
@@ -600,6 +577,7 @@ function GrantRepForm({
                 aria-label={t(locale, "rep.categories.grant.changeCategory")}
                 onClick={() => {
                   selectionRequest.current++;
+                  amountFocusSource.current = null;
                   setSelectedCategory(null);
                   setRepSearch("");
                   setAmountDraft(null);
@@ -612,23 +590,33 @@ function GrantRepForm({
                 <XMarkIcon aria-hidden="true" className="tw-size-4" />
               </button>
             ) : (
-              checkingAvailability && (
+              (checkingAvailability ||
+                (shouldCheckAvailability && availability.isFetching)) && (
                 <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
                   <CircleLoader />
                 </div>
               )
             )}
           </div>
+          {typedCategoryError && (
+            <p
+              id={typedCategoryErrorId}
+              role="alert"
+              className="tw-mb-0 tw-mt-2 tw-break-words tw-text-xs tw-leading-5 tw-text-error"
+            >
+              {typedCategoryError}
+            </p>
+          )}
           <AnimatePresence initial={false}>
-            {isOpen && !selectedCategory && (
+            {showSearchDropdown && (
               <motion.div
                 initial={{ opacity: 0, y: -4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -4 }}
                 transition={{ duration: 0.15, ease: "easeOut" }}
-                className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-will-change-transform"
+                className="tw-mt-2 tw-will-change-transform"
               >
-                <div className="tw-max-h-48 tw-overflow-y-auto tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
+                <div className="tw-max-h-20 tw-overflow-y-auto tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
                   <UserPageRepNewRepSearchDropdown
                     categories={categoriesToDisplay}
                     state={repSearchState}
@@ -702,7 +690,8 @@ function GrantRepForm({
           </div>
         </form>
         <GrantRepSubmissionGuidance
-          selectedCategory={selectedCategory}
+          id={submissionGuidanceId}
+          selectedCategory={activeCategory}
           categoriesToDisplay={categoriesToDisplay}
         />
 
