@@ -27,10 +27,35 @@ const ACCESS_TTL_SECONDS = 30 * 24 * 60 * 60;
 const COOKIE_VERSION = "v1";
 const COOKIE_KEY_SALT = "6529.io validator page access cookie v1";
 
+const PERCENT_ESCAPE = /%([0-9A-Fa-f]{2})/g;
+
+/**
+ * The path as the server resolves it: percent-decoded once, with repeated
+ * slashes as one. A path whose encoding is malformed keeps its other
+ * escapes decoded byte by byte, so a bad escape later in the path cannot
+ * hide the prefix.
+ */
+function normalizePathname(pathname: string): string {
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    decoded = pathname.replaceAll(PERCENT_ESCAPE, (_escape, code: string) =>
+      String.fromCodePoint(Number.parseInt(code, 16))
+    );
+  }
+  return decoded.replaceAll(/\/{2,}/g, "/");
+}
+
+/**
+ * True for `/validator` and everything under it, however the path is
+ * spelled: Next.js serves `public/validator/` for `/%76alidator/...` too.
+ */
 export function isValidatorPath(pathname: string): boolean {
+  const normalized = normalizePathname(pathname);
   return (
-    pathname === VALIDATOR_BASE_PATH ||
-    pathname.startsWith(`${VALIDATOR_BASE_PATH}/`)
+    normalized === VALIDATOR_BASE_PATH ||
+    normalized.startsWith(`${VALIDATOR_BASE_PATH}/`)
   );
 }
 

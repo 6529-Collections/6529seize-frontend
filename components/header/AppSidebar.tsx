@@ -1,7 +1,4 @@
 "use client";
-import { useOptionalCookieConsent } from "@/components/cookies/CookieConsentContext";
-import { shouldHideSubscriptions } from "@/components/user/layout/userPageVisibility";
-import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
   Dialog,
@@ -25,7 +22,12 @@ import { t } from "@/i18n/messages";
 import { useAppWallets } from "../app-wallets/AppWalletsContext";
 import ChatBubbleIcon from "../common/icons/ChatBubbleIcon";
 import DropForgeIcon from "../common/icons/DropForgeIcon";
-import Join6529Icon from "../common/icons/Join6529Icon";
+import { useMembershipNavigation } from "@/hooks/useMembershipNavigation";
+import {
+  AI_NAVIGATION,
+  isAiNavigationActive,
+} from "@/components/navigation/aiNavigation";
+import { usePathname } from "next/navigation";
 import WatchTowerIcon from "../common/icons/WatchTowerIcon";
 import AppSidebarHeader from "./AppSidebarHeader";
 import AppSidebarMenuItems from "./AppSidebarMenuItems";
@@ -69,6 +71,8 @@ export default function AppSidebar({
   readonly open: boolean;
   readonly onClose: () => void;
 }) {
+  const membershipNavigation = useMembershipNavigation();
+  const pathname = usePathname();
   const { appWalletsSupported } = useAppWallets();
   const { canAccessLanding: showDropForge } = useDropForgePermissions();
   const moderatorAccess = useContentModeratorAccess();
@@ -76,20 +80,29 @@ export default function AppSidebar({
   const hasPendingModerationCases =
     (moderatorAccess.data?.needs_review_count ?? 0) > 0;
   const { hideNftPurchasing } = useNftPurchasingVisibility();
-  const capacitor = useCapacitor();
-  const consent = useOptionalCookieConsent();
-  const sections = useSidebarSections(
-    appWalletsSupported,
-    hideNftPurchasing,
-    consent !== undefined &&
-      shouldHideSubscriptions({
-        capacitorIsIos: capacitor.isIos,
-        country: consent.country,
-      })
-  );
+  const sections = useSidebarSections(appWalletsSupported, hideNftPurchasing);
   const handleClose = useCallback(() => onClose(), [onClose]);
   const dialogRef = useRef<HTMLDivElement>(null);
+  const pendingSignOut = useRef<(() => void) | null>(null);
   useAndroidBackLayer(open, dialogRef, handleClose);
+
+  const handleSignOut = (signOut: () => void) => {
+    // Keep the first request until the drawer releases its backdrop and focus trap.
+    pendingSignOut.current ??= signOut;
+    handleClose();
+  };
+
+  const finishClosing = () => {
+    const signOut = pendingSignOut.current;
+    pendingSignOut.current = null;
+    if (!open) {
+      signOut?.();
+    }
+  };
+
+  const clearPendingSignOut = () => {
+    pendingSignOut.current = null;
+  };
 
   const menu = useMemo(() => {
     const sectionMap = new Map(
@@ -115,9 +128,19 @@ export default function AppSidebar({
         icon: ChatBubbleIcon,
       },
       {
-        label: t(DEFAULT_LOCALE, "navigation.primary.join6529"),
-        path: "/join-6529",
-        icon: Join6529Icon,
+        label: membershipNavigation.label,
+        path: membershipNavigation.href,
+        icon: membershipNavigation.icon,
+        pending: membershipNavigation.isPending,
+        active:
+          pathname === membershipNavigation.href ||
+          pathname.startsWith(`${membershipNavigation.href}/`),
+      },
+      {
+        label: AI_NAVIGATION.label,
+        path: AI_NAVIGATION.href,
+        icon: AI_NAVIGATION.icon,
+        active: isAiNavigationActive(pathname),
       },
       sectionMap.get("about"),
       ...(showDropForge ? [dropForgeItem] : []),
@@ -146,7 +169,14 @@ export default function AppSidebar({
 
       return [item];
     });
-  }, [hasPendingModerationCases, sections, showDropForge, showModeration]);
+  }, [
+    hasPendingModerationCases,
+    membershipNavigation,
+    pathname,
+    sections,
+    showDropForge,
+    showModeration,
+  ]);
 
   // Close on right-to-left swipe
   useEffect(() => {
@@ -176,7 +206,13 @@ export default function AppSidebar({
   }, [open, handleClose]);
 
   return (
-    <Transition appear show={open} as={Fragment}>
+    <Transition
+      appear
+      show={open}
+      as={Fragment}
+      beforeEnter={clearPendingSignOut}
+      afterLeave={finishClosing}
+    >
       <Dialog
         ref={dialogRef}
         as="div"
@@ -216,7 +252,10 @@ export default function AppSidebar({
                     <AppSidebarMenuItems menu={menu} onNavigate={handleClose} />
                   </div>
                   <div className="tw-mt-auto tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-px-2 tw-pt-6">
-                    <AppUserConnect onNavigate={handleClose} />
+                    <AppUserConnect
+                      onNavigate={handleClose}
+                      onSignOut={handleSignOut}
+                    />
                   </div>
                 </div>
               </nav>

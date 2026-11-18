@@ -116,6 +116,7 @@ describe("PlaintextDmEncryptionNotice", () => {
       expect(mockPush).toHaveBeenCalledWith("/messages/encrypted/new")
     );
     expect(peekE2eeComposePrefill()).toEqual({
+      ownerProfileId: "profile-self",
       source: "dm",
       people: [
         {

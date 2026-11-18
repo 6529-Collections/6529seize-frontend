@@ -9,6 +9,10 @@ import type { ApiMentionedWave } from "@/generated/models/ApiMentionedWave";
 import type { ImageScale } from "@/helpers/image.helpers";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { type CSSProperties } from "react";
+import {
+  getDesktopAuthorHeader,
+  getMobileAuthorHeader,
+} from "./WaveDropAuthorHeaderSlots";
 import type { DropIdentityMode, DropTimestampLayout } from "./drop.types";
 import { DropLocation } from "./drop.types";
 import { getRankHoverRingClass } from "./dropRankStyles";
@@ -16,6 +20,7 @@ import DropMinimalIdentityRow from "./DropMinimalIdentityRow";
 import WaveDropAuthorPfp from "./WaveDropAuthorPfp";
 import WaveDropContent from "./WaveDropContent";
 import WaveDropHeader from "./WaveDropHeader";
+import WaveDropStormIndicator from "./WaveDropStormIndicator";
 
 import WaveDropReply from "./WaveDropReply";
 
@@ -548,7 +553,7 @@ const getAuthorHeader = ({
         drop={drop}
         signatureGroup={signatureGroup}
         showWaveInfo={showWaveInfo}
-        isStorm={isStorm}
+        isStorm={isStorm && timestampLayout !== "stacked-compact"}
         currentPartIndex={activePartIndex}
         partsCount={drop.parts.length}
         showActionsButton={showActionsButton}
@@ -565,26 +570,6 @@ const getAuthorHeader = ({
   );
 };
 
-const getDesktopAuthorHeader = ({
-  showAuthorInfo,
-  inlineAuthorOnDesktop,
-  authorHeader,
-}: {
-  readonly showAuthorInfo: boolean;
-  readonly inlineAuthorOnDesktop: boolean;
-  readonly authorHeader: React.ReactNode;
-}): React.ReactNode => {
-  if (showAuthorInfo && !inlineAuthorOnDesktop) {
-    return <div className="tw-hidden md:tw-block">{authorHeader}</div>;
-  }
-
-  if (showAuthorInfo) {
-    return null;
-  }
-
-  return authorHeader;
-};
-
 const getContentBlock = ({
   shouldShowReplyHeader,
   onReplyClick,
@@ -592,6 +577,7 @@ const getContentBlock = ({
   drop,
   showAuthorInfo,
   authorHeader,
+  showStormPartIndicator = false,
   shouldGroupWithPreviousDrop,
   isProfileView,
   activePartIndex,
@@ -607,6 +593,7 @@ const getContentBlock = ({
   allowLongPress,
   handleLinkCardActionsActiveChange,
   inlineAuthorOnDesktop,
+  isMdViewport,
   mediaImageScale,
   fullWidthMedia,
   fullWidthLinkPreviews,
@@ -622,6 +609,7 @@ const getContentBlock = ({
   readonly drop: ExtendedDrop;
   readonly showAuthorInfo: boolean;
   readonly authorHeader: React.ReactNode;
+  readonly showStormPartIndicator?: boolean;
   readonly shouldGroupWithPreviousDrop: boolean;
   readonly isProfileView: boolean;
   readonly activePartIndex: number;
@@ -645,6 +633,8 @@ const getContentBlock = ({
     active: boolean
   ) => void;
   readonly inlineAuthorOnDesktop: boolean;
+  /** See `WaveDropAuthorHeaderSlots`. */
+  readonly isMdViewport: boolean | null;
   readonly mediaImageScale?: ImageScale | undefined;
   readonly fullWidthMedia: boolean;
   readonly fullWidthLinkPreviews: boolean;
@@ -670,7 +660,7 @@ const getContentBlock = ({
     >
       {showAuthorInfo && (
         <div
-          className={`tw-flex tw-w-full tw-items-start tw-gap-x-2 ${
+          className={`${showStormPartIndicator ? "tw-grid tw-grid-cols-[auto_minmax(0,1fr)]" : "tw-flex"} tw-w-full tw-items-center tw-gap-x-2 md:tw-items-start ${
             inlineAuthorOnDesktop
               ? ""
               : "md:tw-block md:tw-w-auto md:tw-flex-shrink-0"
@@ -682,8 +672,19 @@ const getContentBlock = ({
               inlineAuthorOnDesktop ? "" : "md:tw-hidden"
             }`}
           >
-            {authorHeader}
+            {getMobileAuthorHeader({
+              inlineAuthorOnDesktop,
+              authorHeader,
+              isMdViewport,
+            })}
           </div>
+          {showStormPartIndicator && (
+            <WaveDropStormIndicator
+              currentPartIndex={activePartIndex}
+              partsCount={drop.parts.length}
+              className={`tw-col-start-2 ${inlineAuthorOnDesktop ? "" : "md:tw-hidden"}`}
+            />
+          )}
         </div>
       )}
       <div
@@ -697,7 +698,15 @@ const getContentBlock = ({
           showAuthorInfo,
           inlineAuthorOnDesktop,
           authorHeader,
+          isMdViewport,
         })}
+        {showStormPartIndicator && !inlineAuthorOnDesktop && (
+          <WaveDropStormIndicator
+            currentPartIndex={activePartIndex}
+            partsCount={drop.parts.length}
+            className="tw-hidden md:tw-inline-flex"
+          />
+        )}
         <div
           className={`${getDropContentClass({
             showAuthorInfo,

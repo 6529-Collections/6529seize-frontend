@@ -1,4 +1,6 @@
 "use client";
+
+import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
 import { ActiveWaveVotes } from "./ActiveWaveVotes";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveDiscoveryViewer } from "@/hooks/useWaveDiscoveryViewer";
@@ -242,7 +244,7 @@ export function DiscoverWaveExplorer() {
               selectView(views[next]!);
               tabsRef.current[next]?.focus();
             }}
-            className={`-tw-mb-px tw-min-h-11 tw-whitespace-nowrap tw-rounded-none tw-border-x-0 tw-border-b-2 tw-border-t-0 tw-border-solid tw-bg-transparent tw-px-0 tw-py-2 tw-text-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${active === (view === ACTIVE_VOTES_VIEW) ? "tw-border-primary-400 tw-font-semibold tw-text-white" : "tw-border-transparent tw-font-medium tw-text-iron-400"}`}
+            className={`${getUnderlineTabClasses({ active: active === (view === ACTIVE_VOTES_VIEW), size: "sm" })} -tw-mb-px tw-min-h-11 tw-px-0 tw-py-2`}
           >
             {t(
               locale,

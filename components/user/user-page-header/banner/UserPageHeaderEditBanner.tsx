@@ -14,6 +14,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ImageScale } from "@/helpers/image.helpers";
 import { getAnimatedImagePreviewUri } from "@/helpers/gif-preview.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { getUploadFailureMessage } from "@/services/uploads/MediaUploadRefusedError";
 import {
   getBannerColorValue,
   getBannerImageUrl,
@@ -146,10 +147,10 @@ export default function UserPageHeaderEditBanner({
       });
       return uploaded.url;
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to upload banner image";
+      const message = getUploadFailureMessage(
+        error,
+        "Failed to upload banner image"
+      );
       setToast({ message, type: "error" });
       return null;
     }

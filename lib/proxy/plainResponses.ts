@@ -35,12 +35,23 @@ export function getMissingNextAssetRewriteConfig(
   };
 }
 
+/**
+ * Response headers for anything proxy answers from the individual request:
+ * its cookies, its user agent, or a failure while handling it. The page edge
+ * cache stores only what the origin marks cacheable, so these responses must
+ * say they are not, rather than rely on the edge's default TTL. The value is
+ * the one Next itself sends for dynamic pages.
+ */
+export const UNCACHEABLE_RESPONSE_HEADERS: Readonly<Record<string, string>> =
+  Object.freeze({
+    "Cache-Control": "private, no-cache, no-store, max-age=0, must-revalidate",
+  });
+
 function plainTextResponse(body: string, status: number): Response {
   return new Response(body, {
     status,
     headers: {
-      "Cache-Control":
-        "private, no-cache, no-store, max-age=0, must-revalidate",
+      ...UNCACHEABLE_RESPONSE_HEADERS,
       "Content-Type": "text/plain; charset=utf-8",
     },
   });

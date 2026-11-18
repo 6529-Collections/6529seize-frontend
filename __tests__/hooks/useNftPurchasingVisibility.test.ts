@@ -6,7 +6,6 @@ import { renderToString } from "react-dom/server";
 let mockPlatform: "ios" | "android" | "web" = "web";
 let mockCountry: string | undefined = "US";
 let mockIsCountryPending = false;
-let mockUsCountryHint = false;
 
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
@@ -14,9 +13,6 @@ jest.mock("@/hooks/useCapacitor", () => ({
     isIos: mockPlatform === "ios",
     isAndroid: mockPlatform === "android",
   }),
-}));
-jest.mock("@/components/cookies/usCountryHint", () => ({
-  readUsCountryHint: () => mockUsCountryHint,
 }));
 jest.mock("@/components/cookies/CookieConsentContext", () => ({
   useCookieConsent: () => ({
@@ -36,9 +32,7 @@ const redirect = {
   reservesNftPurchasingSpace: false,
 };
 
-beforeEach(() => {
-  mockUsCountryHint = false;
-});
+beforeEach(() => {});
 
 function visibilityFor(
   platform: typeof mockPlatform,
@@ -71,8 +65,7 @@ it.each([
   }
 );
 
-it("ignores a remembered US country while the iOS country is pending", () => {
-  mockUsCountryHint = true;
+it("ignores the country while the lookup is pending", () => {
   expect(visibilityFor("ios", "", true)).toEqual(redirect);
 });
 

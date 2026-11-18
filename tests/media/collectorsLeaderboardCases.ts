@@ -341,9 +341,10 @@ export function defineCollectorsLeaderboardTests() {
     const csvButton = section.getByRole("button", {
       name: "Download collectors leaderboard as CSV",
     });
+    const csvTooltipText = "Download CSV";
     const csvTooltip = page
       .getByRole("tooltip")
-      .filter({ hasText: "Download CSV" });
+      .filter({ hasText: csvTooltipText });
     const initialWidth = page.viewportSize()?.width ?? 1280;
 
     if (initialWidth >= 768) {
@@ -383,11 +384,16 @@ export function defineCollectorsLeaderboardTests() {
     await expect(csvTooltip).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(csvTooltip).toBeHidden();
-    // Finish the hover interaction before exercising keyboard focus. The tooltip
-    // becomes invisible before its dismissal transition removes it from the DOM.
+    // The closing tooltip is hidden from the role query before it unmounts.
     await page.mouse.move(0, 0);
-    await expect(csvTooltip).toHaveCount(0);
+    await expect(
+      page
+        .getByRole("tooltip", { includeHidden: true })
+        .filter({ hasText: csvTooltipText })
+    ).toHaveCount(0);
+    await expect(csvButton).not.toBeFocused();
     await csvButton.focus();
+    await expect(csvButton).toBeFocused();
     await expect(csvTooltip).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(csvTooltip).toBeHidden();
@@ -435,6 +441,15 @@ export function defineCollectorsLeaderboardTests() {
     await farSort.click();
     await expect(farSort).toHaveAttribute("aria-pressed", "true");
     await expect(farSort).toBeInViewport({ ratio: 1 });
+    await Promise.all(
+      ["Sort ascending", "Sort descending"].map((name) => {
+        const direction = page.getByRole("button", { name, exact: true });
+        return Promise.all([
+          expect(direction).toHaveCSS("height", "28px"),
+          expect(direction).toHaveCSS("width", "28px"),
+        ]);
+      })
+    );
     await expect(
       page.getByRole("button", { name: "Sort descending", exact: true })
     ).toHaveAttribute("aria-pressed", "true");

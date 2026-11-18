@@ -7,6 +7,7 @@ import {
   getWalletAddress,
   getWalletRole,
 } from "../auth/auth.utils";
+import { assertWriteMatchesDisplayedWallet } from "../auth/displayed-wallet-guard";
 import { prepareSubmissionRequestKey } from "./submission-request-key";
 import { sessionAwareFetch } from "./session-aware-fetch";
 
@@ -70,6 +71,14 @@ export const getStructuredApiErrorCode = (
   return typeof code === "string" && code.trim().length > 0 ? code : undefined;
 };
 
+/** Header sets whose Authorization is the stored session this module added. */
+const storedSessionHeaders = new WeakSet<Record<string, string>>();
+
+const hasOwnAuthorization = (headers?: Record<string, string>): boolean =>
+  Object.keys(headers ?? {}).some(
+    (key) => key.toLowerCase() === "authorization"
+  );
+
 const getHeaders = (
   headers?: Record<string, string>,
   contentType: boolean = true,
@@ -77,12 +86,16 @@ const getHeaders = (
 ) => {
   const apiAuth = getStagingAuth();
   const walletAuth = includeWalletAuth ? getAuthJwt() : null;
-  return {
+  const result: Record<string, string> = {
     ...(contentType ? { "Content-Type": "application/json" } : {}),
     ...(apiAuth ? { "x-6529-auth": apiAuth } : {}),
     ...(walletAuth ? { Authorization: `Bearer ${walletAuth}` } : {}),
     ...(headers ?? {}),
   };
+  if (walletAuth && !hasOwnAuthorization(headers)) {
+    storedSessionHeaders.add(result);
+  }
+  return result;
 };
 
 const buildUrl = (
@@ -375,6 +388,12 @@ const executeApiRequest = async <T>({
   credentials,
   cache,
 }: ExecuteApiRequestParams): Promise<T> => {
+  assertWriteMatchesDisplayedWallet({
+    url,
+    method,
+    headers,
+    usesStoredSession: manageWalletAuth && storedSessionHeaders.has(headers),
+  });
   const requestStartedAtMs = getRequestTimingNow();
   let status: RequestStatus = "unknown";
   const requestInit = createRequestInit({

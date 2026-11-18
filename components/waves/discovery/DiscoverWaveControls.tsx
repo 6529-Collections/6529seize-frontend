@@ -173,7 +173,7 @@ export function DiscoverWaveControls({
       </legend>
       <div className="tw-flex tw-items-center tw-gap-2 tw-overflow-x-auto tw-p-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 @[56rem]/discovery-controls:tw-justify-between">
         <Button
-          variant="tertiary"
+          variant="dropdown"
           size="sm"
           aria-label={t(locale, "waves.discovery.sort.open", {
             sort: currentLabel,
@@ -189,7 +189,8 @@ export function DiscoverWaveControls({
         </Button>
         <div className="tw-hidden tw-shrink-0 @[56rem]/discovery-controls:tw-block">
           <CommonTabs<DiscoverSort>
-            variant="filter"
+            variant="connected"
+            connectedSize="sm"
             items={SORT_OPTIONS.map((option) => ({
               key: option.value,
               value: option.value,

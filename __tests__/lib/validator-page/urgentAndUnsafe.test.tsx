@@ -12,6 +12,7 @@ import {
   RC9_URGENT_REASON,
   SAME_DAY_FEED,
 } from "./fixtures";
+import { signFeed } from "./feedSigning";
 
 const mockRead = jest.fn<Promise<BucketObject>, [string]>();
 const mockPresign = jest.fn(
@@ -25,6 +26,11 @@ jest.mock("@/lib/validator-page/releasesBucket", () => ({
     `releases/${version}/${name}`,
   readReleaseObject: (key: string) => mockRead(key),
   presignReleaseObject: (key: string) => mockPresign(key),
+}));
+jest.mock("@/lib/validator-page/feedSigningKeys", () => ({
+  FEED_SIGNING_KEYS: [
+    jest.requireActual("./feedSigning").TEST_FEED_SIGNING_KEY,
+  ],
 }));
 
 jest.mock("next/headers", () => ({
@@ -75,7 +81,12 @@ function serveFeed(feed: unknown) {
   mockRead.mockImplementation(async (key) =>
     key === "feed/releases.json"
       ? { state: "found", body, etag: '"e"', lastModified: null }
-      : { state: "missing" }
+      : {
+          state: "found",
+          body: signFeed(body),
+          etag: '"s"',
+          lastModified: null,
+        }
   );
 }
 

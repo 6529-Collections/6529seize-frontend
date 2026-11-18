@@ -23,6 +23,7 @@ import {
 } from "../dropImageGallery";
 
 import { createLinkHandlers, createSeizeHandlers } from "./handlers";
+import { isAllowedMarkdownImageSource } from "./imageSource";
 import type { LinkHandler } from "./linkTypes";
 import {
   isDirectImageUrl,
@@ -170,7 +171,7 @@ export const createLinkRenderer = ({
       return null;
     }
 
-    if (!isSafeMarkdownImageSrc(src)) {
+    if (!isSafeMarkdownImageSrc(src) || !isAllowedMarkdownImageSource(src)) {
       return null;
     }
 
@@ -207,6 +208,7 @@ export const createLinkRenderer = ({
 
     if (
       isDirectImageUrl(stableHref, parsedUrl) &&
+      isAllowedMarkdownImageSource(stableHref) &&
       hasBareHrefLabel &&
       hasPreviewableHrefSource
     ) {

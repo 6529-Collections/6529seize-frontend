@@ -8,9 +8,9 @@ import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 
 import {
-  getMainStageTabClassName,
-  MAIN_STAGE_TABLIST_CLASS_NAME,
-} from "./mainStageToolbarStyles";
+  CONNECTED_TAB_LIST_CLASSES,
+  getConnectedTabButtonClasses,
+} from "@/components/utils/select/tabs/connectedTabStyles";
 
 interface WaveleaderboardSortProps {
   readonly isMainStage?: boolean;
@@ -186,19 +186,6 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
     telemetryScope,
     telemetryScope !== undefined
   );
-  const getTabClassName = (value: WaveDropsLeaderboardSort): string => {
-    if (isMainStage) {
-      return `${getMainStageTabClassName(sort === value)} tw-whitespace-nowrap tw-px-[11px] tw-text-xs tw-font-medium tw-leading-5`;
-    }
-    const baseClass =
-      "tw-flex tw-h-[30px] tw-items-center tw-justify-center tw-gap-2 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2.5 tw-py-0 tw-text-xs tw-font-medium tw-leading-5 tw-transition-[color,background-color,box-shadow] tw-duration-200 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 focus-visible:tw-ring-offset-1 focus-visible:tw-ring-offset-iron-900 motion-reduce:tw-transition-none";
-
-    if (sort === value) {
-      return `${baseClass} tw-bg-iron-800/90 tw-text-iron-50 tw-shadow-sm tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-white/[0.06]`;
-    }
-
-    return `${baseClass} tw-border-transparent tw-bg-transparent tw-text-iron-500 desktop-hover:hover:tw-bg-iron-800/50 desktop-hover:hover:tw-text-iron-200`;
-  };
 
   if (mode === "tabs") {
     return (
@@ -206,11 +193,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
         role="tablist"
         ref={featureUsageRef}
         aria-label="Sort options"
-        className={
-          isMainStage
-            ? MAIN_STAGE_TABLIST_CLASS_NAME
-            : "tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center tw-gap-x-1 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-900/75 tw-p-1 tw-shadow-sm tw-shadow-black/30 tw-backdrop-blur"
-        }
+        className={`tw-box-border tw-flex tw-h-[38px] tw-flex-shrink-0 tw-items-center ${CONNECTED_TAB_LIST_CLASSES} ${isMainStage ? "" : "tw-backdrop-blur"}`}
       >
         {items.map((item) => (
           <button
@@ -224,7 +207,10 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
             aria-label={item.label}
             aria-selected={sort === item.value}
             tabIndex={sort === item.value ? 0 : -1}
-            className={getTabClassName(item.value)}
+            className={getConnectedTabButtonClasses({
+              isActive: sort === item.value,
+              size: isMainStage ? "sm" : "xs",
+            })}
             onClick={() => onSortChange(item.value)}
           >
             {item.label}
@@ -235,12 +221,7 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
   }
 
   return (
-    <div
-      ref={featureUsageRef}
-      className={`tw-min-w-0 tw-flex-shrink-0 [&_button]:tw-pl-2 ${
-        isMainStage ? "[&_button]:tw-pr-8" : "[&_button]:tw-pr-6"
-      }`}
-    >
+    <div ref={featureUsageRef} className="tw-min-w-0 tw-flex-shrink-0">
       <CommonDropdown<WaveDropsLeaderboardSort>
         items={items}
         activeItem={sort}

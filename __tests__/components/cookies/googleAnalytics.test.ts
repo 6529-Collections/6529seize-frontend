@@ -1,6 +1,7 @@
 import {
   normalizeAnalyticsUrl,
   scheduleGoogleAnalytics,
+  setGoogleAnalyticsDisabled,
 } from "@/components/cookies/googleAnalytics";
 
 type AnalyticsWindow = typeof globalThis & {
@@ -19,6 +20,9 @@ const idleCallbackWindow = globalThis as unknown as IdleCallbackWindow;
 const GA_SCRIPT_URL =
   "https://www.googletagmanager.com/gtag/js?id=G-71NLVV3KY3";
 const LANDING_URL = "http://localhost/landing?section=top";
+// Page views carry the route family as their title, never document.title.
+const LANDING_TITLE = "/[user]";
+const DISABLE_FLAG = "ga-disable-G-71NLVV3KY3";
 
 const gtagScripts = (): HTMLScriptElement[] =>
   Array.from(document.head.querySelectorAll("script")).filter(
@@ -51,6 +55,7 @@ describe("scheduleGoogleAnalytics", () => {
     window.history.replaceState(null, "", "/landing?section=top#intro");
     document.title = "Landing";
     setReadyState("complete");
+    setGoogleAnalyticsDisabled(false);
   });
 
   afterEach(() => {
@@ -238,26 +243,82 @@ describe("scheduleGoogleAnalytics", () => {
       [
         "config",
         "G-71NLVV3KY3",
-        { cookie_expires: 31_536_000, send_page_view: false },
+        {
+          cookie_expires: 31_536_000,
+          send_page_view: false,
+          page_title: LANDING_TITLE,
+        },
       ],
       [
         "event",
         "page_view",
-        { page_location: LANDING_URL, page_title: "Landing" },
+        { page_location: LANDING_URL, page_title: LANDING_TITLE },
       ],
     ]);
   });
 
-  it("uses the landing title as it reads when gtag.js loads", () => {
+  it("reports the route family instead of the document title", () => {
+    window.history.replaceState(null, "", "/messages?wave=synthetic-wave");
+    document.title = "Ann, Bo | Messages";
     cancel = scheduleGoogleAnalytics(hasConsent);
-    document.title = "Landing (updated)";
     window.dispatchEvent(new Event("pointerdown"));
+    window.history.pushState(null, "", "/network");
 
-    expect(queuedCommands()[1]).toEqual([
+    expect(JSON.stringify(queuedCommands())).not.toContain("Ann");
+    expect(queuedCommands()).toContainEqual([
       "event",
       "page_view",
-      { page_location: LANDING_URL, page_title: "Landing (updated)" },
+      {
+        page_location: "http://localhost/messages?wave=synthetic-wave",
+        page_title: "/messages",
+      },
     ]);
+    expect(queuedCommands()).toContainEqual([
+      "set",
+      {
+        page_location: "http://localhost/network",
+        page_referrer: "http://localhost/messages?wave=synthetic-wave",
+        page_title: "/network",
+      },
+    ]);
+  });
+
+  it("stops page views and sets the gtag.js disable flag once consent is withdrawn", () => {
+    cancel = scheduleGoogleAnalytics(hasConsent);
+    window.dispatchEvent(new Event("pointerdown"));
+    const queuedBefore = queuedCommands().length;
+
+    setGoogleAnalyticsDisabled(true);
+    window.history.pushState(null, "", "/network");
+    gtagScripts()[0]?.dispatchEvent(new Event("load"));
+
+    expect(
+      (globalThis as unknown as Record<string, unknown>)[DISABLE_FLAG]
+    ).toBe(true);
+    expect(queuedCommands()).toHaveLength(queuedBefore);
+
+    setGoogleAnalyticsDisabled(false);
+    window.history.pushState(null, "", "/about");
+
+    expect(
+      (globalThis as unknown as Record<string, unknown>)[DISABLE_FLAG]
+    ).toBe(false);
+    expect(queuedCommands()).toHaveLength(queuedBefore + 1);
+  });
+
+  it("follows the page's disable flag when it is set directly", () => {
+    cancel = scheduleGoogleAnalytics(hasConsent);
+    window.dispatchEvent(new Event("pointerdown"));
+    const queuedBefore = queuedCommands().length;
+    const flags = globalThis as unknown as Record<string, unknown>;
+
+    flags[DISABLE_FLAG] = true;
+    window.history.pushState(null, "", "/network");
+    expect(queuedCommands()).toHaveLength(queuedBefore);
+
+    flags[DISABLE_FLAG] = false;
+    window.history.pushState(null, "", "/about");
+    expect(queuedCommands()).toHaveLength(queuedBefore + 1);
   });
 
   it("keeps the landing page and adds the current one after an early navigation", () => {
@@ -271,12 +332,16 @@ describe("scheduleGoogleAnalytics", () => {
       [
         "config",
         "G-71NLVV3KY3",
-        { cookie_expires: 31_536_000, send_page_view: false },
+        {
+          cookie_expires: 31_536_000,
+          send_page_view: false,
+          page_title: LANDING_TITLE,
+        },
       ],
       [
         "event",
         "page_view",
-        { page_location: LANDING_URL, page_title: "Landing" },
+        { page_location: LANDING_URL, page_title: LANDING_TITLE },
       ],
       [
         "event",
@@ -284,6 +349,7 @@ describe("scheduleGoogleAnalytics", () => {
         {
           page_location: "http://localhost/second?tab=all",
           page_referrer: LANDING_URL,
+          page_title: LANDING_TITLE,
         },
       ],
     ]);
@@ -315,12 +381,16 @@ describe("scheduleGoogleAnalytics", () => {
       [
         "event",
         "page_view",
-        { page_location: LANDING_URL, page_title: "Landing" },
+        { page_location: LANDING_URL, page_title: LANDING_TITLE },
       ],
       [
         "event",
         "page_view",
-        { page_location: "http://localhost/third", page_referrer: LANDING_URL },
+        {
+          page_location: "http://localhost/third",
+          page_referrer: LANDING_URL,
+          page_title: LANDING_TITLE,
+        },
       ],
     ]);
   });
@@ -351,6 +421,7 @@ describe("scheduleGoogleAnalytics", () => {
         {
           cookie_expires: 31_536_000,
           send_page_view: false,
+          page_title: LANDING_TITLE,
           page_location: redactedSecond,
           page_referrer:
             "https://6529.io/accept-connection-sharing?connection_share_code=[Filtered]",
@@ -359,12 +430,19 @@ describe("scheduleGoogleAnalytics", () => {
       [
         "event",
         "page_view",
-        { page_location: redactedLanding, page_title: "Landing" },
+        {
+          page_location: redactedLanding,
+          page_title: "/:id",
+        },
       ],
       [
         "event",
         "page_view",
-        { page_location: redactedSecond, page_referrer: redactedLanding },
+        {
+          page_location: redactedSecond,
+          page_referrer: redactedLanding,
+          page_title: LANDING_TITLE,
+        },
       ],
     ]);
     const queued = JSON.stringify(queuedCommands());
@@ -389,6 +467,8 @@ describe("scheduleGoogleAnalytics", () => {
     window.history.pushState(null, "", "/network");
 
     const chatUrl = "http://localhost/messages/encrypted/[chat]";
+    const CHAT_TITLE = "/messages/encrypted/_chat_";
+    const NEW_CHAT_TITLE = "/messages/encrypted/new";
     expect(queuedCommands()).toEqual([
       [
         "config",
@@ -396,16 +476,22 @@ describe("scheduleGoogleAnalytics", () => {
         {
           cookie_expires: 31_536_000,
           send_page_view: false,
+          page_title: CHAT_TITLE,
           page_location: chatUrl,
           page_referrer: "https://6529.io/messages/encrypted/[chat]",
         },
       ],
-      ["event", "page_view", { page_location: chatUrl, page_title: "Landing" }],
+      [
+        "event",
+        "page_view",
+        { page_location: chatUrl, page_title: CHAT_TITLE },
+      ],
       [
         "set",
         {
           page_location: "http://localhost/messages/encrypted/new",
           page_referrer: chatUrl,
+          page_title: NEW_CHAT_TITLE,
         },
       ],
       [
@@ -413,6 +499,7 @@ describe("scheduleGoogleAnalytics", () => {
         {
           page_location: "http://localhost/network",
           page_referrer: "http://localhost/messages/encrypted/new",
+          page_title: "/network",
         },
       ],
     ]);

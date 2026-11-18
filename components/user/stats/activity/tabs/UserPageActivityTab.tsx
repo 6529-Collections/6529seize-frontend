@@ -3,6 +3,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { USER_PAGE_ACTIVITY_TAB } from "../activity.types";
 import { getActivityPanelId, getActivityTabId } from "./activity-tabs.helpers";
+import { getConnectedTabButtonClasses } from "@/components/utils/select/tabs/connectedTabStyles";
 
 type ActivityTabMessageKey = Extract<
   MessageKey,
@@ -33,14 +34,7 @@ export default function UserPageActivityTab({
   readonly onKeyDown: KeyboardEventHandler<HTMLButtonElement>;
 }) {
   const isActive = tab === activeTab;
-  const className = [
-    "tw-min-w-max tw-flex-1 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-xs tw-font-semibold tw-leading-4 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px] focus-visible:tw-outline-primary-400 sm:tw-flex-none sm:tw-px-4 sm:tw-text-sm",
-    isActive
-      ? "tw-bg-white/[0.08] tw-text-iron-100"
-      : "tw-bg-transparent tw-text-iron-500 hover:tw-bg-white/[0.04] hover:tw-text-iron-200",
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const className = `${getConnectedTabButtonClasses({ isActive, fill: true })} sm:tw-flex-none`;
 
   return (
     <button

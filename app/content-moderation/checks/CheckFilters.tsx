@@ -9,6 +9,7 @@ import {
   CHECK_FILTER_OPTIONS,
   checkValueLabel,
   checkControlClass,
+  checkSelectClass,
   checkButtonClass,
   readCheckFilters,
 } from "./checks.helpers";
@@ -151,7 +152,7 @@ export default function CheckFilters({
                 name={name}
                 value={draftValues[name] ?? ""}
                 onChange={(event) => change(name, event.currentTarget.value)}
-                className={checkControlClass}
+                className={checkSelectClass}
               >
                 <option value="">{t(locale, "checks.all")}</option>
                 {options.map((option) => (

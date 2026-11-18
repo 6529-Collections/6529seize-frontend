@@ -105,6 +105,10 @@ function applyEffectiveAppPrCiPlan(plan) {
 
   const playwrightProfileDialogs = files.some(
     (file) =>
+      file.startsWith("components/user/identity/getting-started/") ||
+      file ===
+        "components/brain/my-stream/tabs/MainStageNominationPopover.tsx" ||
+      file === "i18n/messages/identityGettingStarted.en-US.json" ||
       file.startsWith("components/user/rep/") ||
       file.startsWith("components/user/user-page-header/about/") ||
       file === "components/user/user-page-header/UserPageHeaderClient.tsx" ||
@@ -194,6 +198,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
+        "tests/social/wave-share-image-sandbox.spec.ts",
         "tests/social/android-back-sandbox.spec.ts",
         "tests/social/mobile-gestures-sandbox.spec.ts",
         "hooks/useAndroidBackLayer.ts",
@@ -242,8 +247,11 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/support/composerSandboxServer.cjs",
         "components/waves/WavesMobile.tsx",
         "components/brain/BrainMobile.tsx",
+        "components/shared/WavesMessagesWrapper.tsx",
         "components/brain/my-stream/MyStreamWaveContent.tsx",
         "components/waves/drops/WaveDropActionsOpen.tsx",
+        "components/waves/drops/WaveDropActionsMore.tsx",
+        "components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper.tsx",
         "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
         "components/waves/drops/WaveDropMobileMenuOpen.tsx",
         "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
@@ -264,6 +272,7 @@ function applyEffectiveAppPrCiPlan(plan) {
   const playwrightSubmissionArtwork = files.some((file) =>
     [
       "tests/media/submission-artwork-sandbox.spec.ts",
+      "tests/media/image-viewer-layout-sandbox.spec.ts",
       "tests/media/waveImagePreviewCases.ts",
       "tests/support/videoArtworkSandbox.ts",
       "components/waves/drop/WaveDropAdditionalInfo.tsx",
@@ -271,6 +280,7 @@ function applyEffectiveAppPrCiPlan(plan) {
       "hooks/useChatVideoPoster.ts",
       "public/video-preview-placeholder.svg",
       "components/waves/drop/MemesDropArtworkHero.tsx",
+      "components/waves/drop/useAutomaticSubmissionGifOriginal.ts",
       "components/drops/view/item/content/media/DropImagePreview.tsx",
       "components/drops/view/item/content/media/GifPreviewLoadingIndicator.tsx",
       "components/drops/view/item/content/media/DropListItemContentMedia.tsx",
@@ -333,14 +343,26 @@ function applyEffectiveAppPrCiPlan(plan) {
       ].includes(file)
   );
 
+  const membershipNavigationBrowser = files.some((file) =>
+    [
+      "hooks/useMembershipNavigation.ts",
+      "components/layout/sidebar/WebSidebarNav.tsx",
+      "components/layout/sidebar/nav/WebSidebarNavItem.tsx",
+      "components/header/AppSidebar.tsx",
+      "components/header/AppSidebarMenuItems.tsx",
+      "tests/auth/session-recovery-sandbox.spec.ts",
+    ].includes(file)
+  );
+
   const checks = {
     ...plan.checks,
-    playwright_critical_shell: playwrightProfileDialogs
-      ? check(
-          true,
-          "Profile editing changes require the profile dialog browser pack."
-        )
-      : baseChecks.playwright_critical_shell,
+    playwright_critical_shell:
+      playwrightProfileDialogs || membershipNavigationBrowser
+        ? check(
+            true,
+            "Profile editing and membership navigation changes require their browser regression packs."
+          )
+        : baseChecks.playwright_critical_shell,
     playwright_profile_nic: check(
       files.some(
         (file) =>

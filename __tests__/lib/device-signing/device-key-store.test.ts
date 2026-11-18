@@ -18,6 +18,16 @@ jest.mock("@/lib/storage/persistent-storage", () => ({
   requestPersistentStorage: () => mockRequestPersistentStorage(),
 }));
 
+const mockReportDeviceKeyLoss = jest.fn(async (_loss: unknown) => undefined);
+jest.mock("@/lib/device-signing/key-loss-report", () => ({
+  reportDeviceKeyLoss: (loss: unknown) => mockReportDeviceKeyLoss(loss),
+}));
+
+import {
+  readDeviceGrantHint,
+  writeDeviceGrantHint,
+} from "@/lib/device-signing/grant-hint";
+import { readDeviceKeyLoss } from "@/lib/device-signing/key-loss";
 import {
   allocateDeviceSeq,
   ensureDeviceKey,
@@ -25,6 +35,8 @@ import {
   getDeviceGrantStatus,
   installSharedDeviceKey,
   listLocalDevicePublicKeys,
+  readDeviceKey,
+  readUsableDeviceGrant,
   saveDeviceGrant,
   subscribeToDeviceGrantChanges,
 } from "@/lib/device-signing/device-key-store";
@@ -58,6 +70,64 @@ describe("device key store", () => {
   beforeEach(() => {
     mockRecords.clear();
     mockRequestPersistentStorage.mockClear();
+    mockReportDeviceKeyLoss.mockClear();
+    localStorage.clear();
+  });
+
+  describe("a key store the browser dropped", () => {
+    const LOST_GRANT = grantFor(`0x${"cd".repeat(32)}`, {
+      id: `0x${"9".repeat(64)}`,
+    });
+
+    it("records this browser's lost grant before the warm-up read clears its note", async () => {
+      writeDeviceGrantHint(ADDRESS.toLowerCase(), LOST_GRANT, "profile-1");
+
+      await expect(readUsableDeviceGrant(ADDRESS, NOW)).resolves.toBeNull();
+
+      expect(readDeviceGrantHint(ADDRESS)).toBeNull();
+      expect(readDeviceKeyLoss(ADDRESS)).toMatchObject({
+        grantId: LOST_GRANT.id,
+        ownProfileId: "profile-1",
+      });
+      expect(mockReportDeviceKeyLoss).toHaveBeenCalledTimes(1);
+
+      // Later reads, here or in the notice, never report it again.
+      await readDeviceKey(ADDRESS);
+      await ensureDeviceKey(ADDRESS);
+      expect(mockReportDeviceKeyLoss).toHaveBeenCalledTimes(1);
+    });
+
+    it("never counts an expired grant on a key that is still here as a loss", async () => {
+      const record = await ensureDeviceKey(ADDRESS);
+      const expired = grantFor(record.publicKeyHex, { expires_at: NOW - DAY });
+      await saveDeviceGrant(ADDRESS, expired);
+      writeDeviceGrantHint(ADDRESS.toLowerCase(), expired, null);
+
+      await expect(readUsableDeviceGrant(ADDRESS, NOW)).resolves.toBeNull();
+      await readDeviceKey(ADDRESS);
+
+      expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      expect(mockReportDeviceKeyLoss).not.toHaveBeenCalled();
+      expect(getDeviceGrantStatus(expired, NOW)).toBe("expired");
+    });
+
+    it("records nothing for a wallet this browser never held a grant for", async () => {
+      await expect(readDeviceKey(ADDRESS)).resolves.toBeNull();
+      await ensureDeviceKey(ADDRESS);
+
+      expect(readDeviceKeyLoss(ADDRESS)).toBeNull();
+      expect(mockReportDeviceKeyLoss).not.toHaveBeenCalled();
+    });
+
+    it("asks to keep storage on every page that finds a stored key", async () => {
+      await ensureDeviceKey(ADDRESS);
+      expect(mockRequestPersistentStorage).not.toHaveBeenCalled();
+
+      await readDeviceKey(ADDRESS);
+      await readUsableDeviceGrant(ADDRESS, NOW);
+      // Once per page in the helper itself; asked from each read here.
+      expect(mockRequestPersistentStorage).toHaveBeenCalledTimes(2);
+    });
   });
 
   it("creates one non-extractable key per lowercase wallet", async () => {

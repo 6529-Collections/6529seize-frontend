@@ -107,8 +107,9 @@ URLs, and contact details are not rewritten by mobile keyboards.
 - Opening a wallet row shows the full address and ENS name when available. Each
   dark value field is itself a copy control, and only one wallet row stays
   expanded at a time.
-- On mobile, expanded wallet rows show labeled `Open on Etherscan` and `Open on
-OpenSea` actions. Desktop retains compact external-link actions.
+- On mobile, expanded wallet rows show a labeled `Open on Etherscan` action.
+  `Open on OpenSea` is available on the web and Android. Desktop retains
+  compact external-link actions.
 - `Primary` badge marks the active primary wallet.
 - `Wallet Checker` is shown when the profile has a primary or consolidated
   wallet address.
@@ -168,7 +169,8 @@ OpenSea` actions. Desktop retains compact external-link actions.
 ## Common Scenarios
 
 - Visitors expand consolidated wallet rows, copy exact addresses or ENS names,
-  and open the wallet on Etherscan or OpenSea without edit controls.
+  and open the wallet on Etherscan without edit controls. OpenSea is also
+  available on the web and Android.
 - Eligible profile owners see `Add`, `Delete`, and `Set primary` where those
   actions apply.
 - Owners can start wallet consolidation from `Add another wallet`. The wallets

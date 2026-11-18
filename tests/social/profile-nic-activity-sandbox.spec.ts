@@ -169,6 +169,24 @@ async function selectNic(page: Page, width: number) {
       .click();
 }
 
+// These flows supply activity rows through browser request interception.
+// Enter through the hydrated app so the browser owns the first read as
+// well as the later reads for filters, pagination, and viewport changes.
+async function openProfileInApp(page: Page) {
+  await page.goto("/playwright/curations", { waitUntil: "domcontentloaded" });
+  const profileTabs = page.getByRole("navigation", {
+    name: "Profile sections",
+  });
+  // This web-only tab appears after the client has hydrated the profile nav.
+  await expect(
+    profileTabs.getByRole("link", { name: "Subscriptions" })
+  ).toBeAttached();
+  await profileTabs
+    .getByRole("link", { name: "Identity", exact: true })
+    .click();
+  await page.waitForURL(/\/playwright$/, { timeout: 20000 });
+}
+
 test.describe("Profile NIC activity @local-only", () => {
   useLocalSandboxMutationGuard(
     test,
@@ -193,10 +211,10 @@ test.describe("Profile NIC activity @local-only", () => {
     test(`${width}px fetches only the visible activity log`, async ({
       page,
       baseURL,
-    }) => {
+    }, testInfo) => {
       await page.setViewportSize({ width, height: 1000 });
       const requests = await installLogs(page, getSandboxApiOrigin(baseURL));
-      await page.goto("/playwright");
+      await openProfileInApp(page);
       await expect(
         page
           .getByText("rep-leak-marker", { exact: true })
@@ -207,6 +225,19 @@ test.describe("Profile NIC activity @local-only", () => {
       expect(requests[0]?.get("rating_matter")).toBe(
         width >= 1024 ? null : "REP"
       );
+      const direction = page
+        .getByRole("tablist", { name: "Filter direction" })
+        .filter({ visible: true });
+      const heights = await direction
+        .getByRole("tab")
+        .evaluateAll((tabs) =>
+          tabs.map((tab) => tab.getBoundingClientRect().height)
+        );
+      expect(heights).toEqual([32, 32, 32]);
+      await page.screenshot({
+        path: testInfo.outputPath("compact-profile-activity-controls.png"),
+        fullPage: true,
+      });
     });
 
     for (const optimizerFails of [false, true]) {
@@ -223,12 +254,25 @@ test.describe("Profile NIC activity @local-only", () => {
           "base64"
         );
         const widths: number[] = [];
+        let imageCandidates: number[] = [];
+        const image = page.getByRole("img", {
+          name: "profile-picture's profile picture",
+          exact: true,
+        });
         await page.route(source, (route) =>
           route.fulfill({ contentType: "image/png", body: png })
         );
         await page.route("**/_next/image?**", async (route) => {
           const params = new URL(route.request().url()).searchParams;
           if (params.get("url") !== source) return route.continue();
+          // Capture candidates before a failed optimizer removes srcset.
+          const srcset = await image.getAttribute("srcset");
+          if (srcset)
+            imageCandidates = srcset
+              .split(",")
+              .map((candidate) =>
+                Number(candidate.trim().split(/\s+/).at(-1)?.replace(/w$/, ""))
+              );
           widths.push(Number(params.get("w")));
           await route.fulfill({
             status: optimizerFails ? 503 : 200,
@@ -237,17 +281,23 @@ test.describe("Profile NIC activity @local-only", () => {
           });
         });
         await page.goto("/profile-picture");
-        const image = page.getByRole("img", {
-          name: "profile-picture's profile picture",
-          exact: true,
-        });
         await expect
           .poll(() =>
             image.evaluate((img: HTMLImageElement) => img.naturalWidth)
           )
           .toBeGreaterThan(0);
         expect(widths.length).toBeGreaterThan(0);
-        expect(widths.every((value) => value > 0 && value <= 256)).toBe(true);
+        const displaySize = width < 640 ? 80 : 112;
+        const density = await page.evaluate(() => globalThis.devicePixelRatio);
+        const smallestSuitableWidth = imageCandidates
+          .filter((candidate) => candidate >= displaySize * density)
+          .toSorted((a, b) => a - b)[0];
+        if (smallestSuitableWidth === undefined)
+          throw new Error("Missing suitable responsive profile image size");
+        expect(
+          widths.every((value) => value === smallestSuitableWidth),
+          `Requested widths: ${widths.join(", ")}; expected ${smallestSuitableWidth}`
+        ).toBe(true);
         if (optimizerFails) await expect(image).toHaveAttribute("src", source);
         else await expect(image).toHaveAttribute("src", /\/_next\/image\?/);
         const box = await image.boundingBox();
@@ -271,7 +321,7 @@ test.describe("Profile NIC activity @local-only", () => {
       const api = getSandboxApiOrigin(baseURL);
       const requests = await installLogs(page, api);
       await page.setViewportSize({ width: startWidth, height: 1000 });
-      await page.goto("/playwright");
+      await openProfileInApp(page);
       await expect(
         page
           .getByText("rep-leak-marker", { exact: true })
@@ -441,21 +491,27 @@ test.describe("Profile NIC activity @local-only", () => {
             body: optimizerFails ? "" : png,
           });
         });
-        await page.goto("/playwright");
+        await openProfileInApp(page);
         const avatar = page
           .getByRole("img", { name: "avatar-user", exact: true })
           .filter({ visible: true })
           .first();
-        await avatar.scrollIntoViewIfNeeded();
+        // The fallback replaces the image, so scroll its stable neighboring link.
+        await page
+          .getByRole("link", { name: "avatar-user", exact: true })
+          .filter({ visible: true })
+          .first()
+          .scrollIntoViewIfNeeded();
         await expect
           .poll(() =>
             avatar.evaluate((img: HTMLImageElement) => img.naturalWidth)
           )
           .toBeGreaterThan(0);
         expect(optimizerWidths.length).toBeGreaterThan(0);
-        expect(optimizerWidths.every((value) => value > 0 && value <= 96)).toBe(
-          true
-        );
+        expect(
+          optimizerWidths.every((value) => value > 0 && value <= 96),
+          `Requested avatar widths: ${optimizerWidths.join(", ")}`
+        ).toBe(true);
         if (optimizerFails) await expect(avatar).toHaveAttribute("src", source);
         else await expect(avatar).toHaveAttribute("src", /\/_next\/image\?/);
         const box = await avatar.boundingBox();
@@ -497,10 +553,9 @@ test.describe("Profile NIC activity @local-only", () => {
         await seedViewer(page, api, viewer);
         const requests = await installLogs(page, api);
         if (viewer === "logged-out") {
-          await page.goto("/playwright");
+          await openProfileInApp(page);
         } else {
-          // Hydrate the saved session before navigating to the profile, as in
-          // the existing authenticated profile sandbox coverage.
+          // Restore the saved session on the wave before opening the profile.
           await page.goto("/waves/00000000-0000-4000-8000-000000000529");
           await page
             .getByRole("link", { name: "playwright", exact: true })
@@ -615,7 +670,7 @@ test.describe("Profile NIC activity @local-only", () => {
   test("REP-only profile has an empty NIC log", async ({ page, baseURL }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
     await installLogs(page, getSandboxApiOrigin(baseURL), true);
-    await page.goto("/playwright");
+    await openProfileInApp(page);
     await selectNic(page, 1440);
     await expect(
       page.getByText("No Activity Log", { exact: true })
@@ -649,7 +704,7 @@ test.describe("Profile NIC activity @local-only", () => {
           await route.fallback();
         }
       });
-      await page.goto("/playwright");
+      await openProfileInApp(page);
       await selectNic(page, width);
       const alert = page.getByRole("alert").filter({
         hasText: "Unable to load activity log.",

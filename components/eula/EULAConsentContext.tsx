@@ -13,6 +13,7 @@ import { t } from "@/i18n/messages";
 import type { ApiEulaConsent } from "@/generated/models/ApiEulaConsent";
 import type { ApiSaveEulaConsentRequest } from "@/generated/models/ApiSaveEulaConsentRequest";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { getApiAccessPath } from "@/services/auth/api-access-redirect";
 import LogoIcon from "@/components/common/icons/LogoIcon";
 import { EULAConsentContext } from "./useEULAConsent";
 import { Device } from "@capacitor/device";
@@ -77,7 +78,10 @@ const getApiErrorStatus = (error: unknown): number | undefined => {
 
 const getAccessControlRoute = (error: unknown): string | null => {
   const status = getApiErrorStatus(error);
-  if (status === 401) return "/access";
+  if (status === 401) {
+    const { pathname, search, hash } = window.location;
+    return getApiAccessPath(pathname + search, hash);
+  }
   if (status === 403) return "/restricted";
   return null;
 };

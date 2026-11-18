@@ -395,14 +395,13 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       await expect(tablist).toHaveCSS("border-radius", "8px");
       for (const tab of await tabs.all()) {
         await expect(tab).toHaveCSS("white-space", "nowrap");
-        await expect(tab).toHaveCSS("border-radius", "8px");
+        await expect(tab).toHaveCSS("border-radius", "6px");
+        await expect(tab).toHaveCSS("font-size", "13px");
         if (width < 640) {
           await expect(tab).toHaveCSS("flex-grow", "1");
-          await expect(tab).toHaveCSS("padding-left", "12px");
-          await expect(tab).toHaveCSS("padding-right", "12px");
-          await expect(tab).toHaveCSS("font-size", "12px");
-        } else {
-          await expect(tab).toHaveCSS("font-size", "14px");
+          const padding = width <= 360 ? "6px" : "12px";
+          await expect(tab).toHaveCSS("padding-left", padding);
+          await expect(tab).toHaveCSS("padding-right", padding);
         }
       }
       if (width < 640) {
@@ -411,15 +410,17 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
           widths: Array.from(node.querySelectorAll("button")).map(
             (tab) => tab.getBoundingClientRect().width
           ),
+          gap: Number.parseFloat(
+            getComputedStyle(node.firstElementChild!).columnGap
+          ),
         }));
         if (sizing.fits) {
           expect(
             Math.max(...sizing.widths) - Math.min(...sizing.widths)
           ).toBeLessThanOrEqual(1);
-          const filledWidth = sizing.widths.reduce(
-            (sum, value) => sum + value,
-            0
-          );
+          const filledWidth =
+            sizing.widths.reduce((sum, value) => sum + value, 0) +
+            sizing.gap * (sizing.widths.length - 1);
           const availableWidth = await tablist.evaluate((node) => {
             const style = getComputedStyle(node);
             return (
@@ -740,6 +741,9 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
       .getByRole("list", { name: "Collected cards", exact: true })
       .getByRole("link")
       .nth(6);
+    // The card's return link follows the address a render later: read it
+    // once it carries the closed Details state.
+    await expect(card).toHaveAttribute("href", /details%3Dclosed/);
     const href = await card.getAttribute("href");
     expect(href).not.toBeNull();
     await card.click();
@@ -899,12 +903,12 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
         exact: true,
       });
       await collection.hover();
-      await expect(collection).toHaveCSS("background-color", "rgb(28, 28, 33)");
+      await expect(collection).toHaveCSS("background-color", "rgb(38, 39, 43)");
       for (const filter of await filters.all()) {
         if (
           (await filter.getAttribute("aria-label")) !== "Collection: The Memes"
         ) {
-          await expect(filter).toHaveCSS("background-color", "rgb(19, 19, 22)");
+          await expect(filter).toHaveCSS("background-color", "rgb(28, 28, 33)");
         }
       }
     }
@@ -981,6 +985,59 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
         exact: true,
       })
     ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+
+    const viewTabs = page.getByRole("tablist", { name: "View", exact: true });
+    const sortTabs = page.getByRole("tablist", {
+      name: "Sort By",
+      exact: true,
+    });
+    for (const width of [1024, 1440]) {
+      await page.setViewportSize({ width, height: 844 });
+      await expect(viewTabs).toBeVisible();
+      await expect(sortTabs).toBeVisible();
+      await expect(viewTabs.getByRole("tab")).toHaveCount(2);
+      await expect(sortTabs.getByRole("tab")).toHaveCount(3);
+      for (const group of [viewTabs, sortTabs]) {
+        for (const tab of await group.getByRole("tab").all()) {
+          await expect(tab).toHaveCSS("font-size", "12px");
+          await expect(tab).toHaveCSS("height", "32px");
+        }
+      }
+      await expect(
+        viewTabs.getByRole("tab", { name: "Network", exact: true })
+      ).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expectNoHorizontalOverflow(page);
+    }
+    await viewTabs.getByRole("tab", { name: "Native", exact: true }).focus();
+    await viewTabs
+      .getByRole("tab", { name: "Native", exact: true })
+      .press("ArrowRight");
+    await expectUrlState(
+      page,
+      (url) => url.searchParams.get("collection") === "network"
+    );
+    await expect(
+      sortTabs.getByRole("tab", { name: "xTDH", exact: true })
+    ).toBeVisible();
+    await viewTabs
+      .getByRole("tab", { name: "Network", exact: true })
+      .press("ArrowLeft");
+    await expectUrlState(page, (url) => !url.searchParams.has("collection"));
+    const rank = sortTabs.getByRole("tab", { name: "Rank", exact: true });
+    await rank.click();
+    await expect(rank).toHaveAttribute("aria-selected", "true");
+    await expectUrlState(
+      page,
+      (url) => url.searchParams.get("sort-by") === "rank"
+    );
+    const tdh = sortTabs.getByRole("tab", { name: "TDH", exact: true });
+    await tdh.click();
+    await expect(tdh).toHaveAttribute("aria-selected", "true");
+    await expectUrlState(
+      page,
+      (url) => url.searchParams.get("sort-by") === "tdh"
+    );
     await expectNoHorizontalOverflow(page);
   });
 

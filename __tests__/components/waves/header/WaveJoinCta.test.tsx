@@ -145,6 +145,19 @@ describe("WaveJoinCta", () => {
     expect(button).not.toHaveAttribute("data-tooltip-id");
   });
 
+  it("preserves the labelled action and confirmation in its compact presentation", async () => {
+    render(<WaveJoinCta wave={createWave()} compact />);
+    expect(getJoinButton()).toHaveTextContent("Join");
+    await act(async () => fireEvent.click(getJoinButton()));
+    expect(mockJoin.join).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId("wave-join-confirmation")).toHaveTextContent(
+      "Joined"
+    );
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "You joined Follow The Repo."
+    );
+  });
+
   it.each([
     [
       "members",

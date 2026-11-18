@@ -1,12 +1,26 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import AppSidebar from "@/components/header/AppSidebar";
 import type AppSidebarMenuItems from "@/components/header/AppSidebarMenuItems";
 import { DEFAULT_DROP_FORGE_PERMISSIONS } from "../../helpers/dropForgePermissions";
 
+let mockPathname = "/about";
+jest.mock("next/navigation", () => ({ usePathname: () => mockPathname }));
+
 let headerProps: any = null;
 let connectProps: any = null;
 let mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
+
+let mockMembershipAuth = {
+  connectedProfile: null,
+  isAuthenticated: false,
+  fetchingProfile: false,
+};
+let mockConnectionState = "disconnected";
+jest.mock("@/components/auth/SeizeConnectContext", () => ({
+  useSeizeConnectContext: () => ({ connectionState: mockConnectionState }),
+}));
+
 let mockModeratorAccess = {
   data: { moderator: false, has_open_reports: false, needs_review_count: 0 },
 };
@@ -35,6 +49,9 @@ jest.mock("@/components/header/AppUserConnect", () => (props: any) => {
 });
 
 jest.mock("@/components/app-wallets/AppWalletsContext");
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => mockMembershipAuth,
+}));
 jest.mock("@/hooks/useDropForgePermissions", () => ({
   useDropForgePermissions: () => mockDropForgePermissions,
 }));
@@ -113,6 +130,16 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
     };
 
     beforeEach(() => {
+      mockMembershipAuth = {
+        connectedProfile: null,
+        isAuthenticated: false,
+        fetchingProfile: false,
+      };
+      mockConnectionState = "disconnected";
+      mockPathname = "/about";
+      (useAppWallets as jest.Mock).mockReturnValue({
+        appWalletsSupported: false,
+      });
       headerProps = menuProps = connectProps = null;
       mockDropForgePermissions = { ...DEFAULT_DROP_FORGE_PERMISSIONS };
       mockModeratorAccess = {
@@ -124,6 +151,45 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       };
       mockIsIos = false;
       setCookieCountry("US");
+    });
+
+    it.each([false, true])(
+      "uses the same membership slot in native iOS and Android menus (iOS=%s)",
+      (isIos) => {
+        mockIsIos = isIos;
+        mockConnectionState = "connected";
+        mockMembershipAuth.isAuthenticated = true;
+        mockPathname = "/validator/status";
+        render(<AppSidebar open onClose={jest.fn()} />);
+        expect(
+          getMenu()
+            .slice(0, 7)
+            .map((item) => item.label)
+        ).toEqual([
+          "NFTs",
+          "Museum",
+          "Waves",
+          "DMs",
+          "Validator",
+          "6529 AI",
+          "About",
+        ]);
+        expect(getMenuItem("Validator")).toMatchObject({
+          path: "/validator",
+          pending: false,
+          active: true,
+        });
+      }
+    );
+
+    it("keeps a pending menu row during profile restoration", () => {
+      mockConnectionState = "connected";
+      mockMembershipAuth.fetchingProfile = true;
+      render(<AppSidebar open onClose={jest.fn()} />);
+      expect(getMenuItem("Join 6529")).toMatchObject({
+        path: "/join-6529",
+        pending: true,
+      });
     });
 
     it("renders the menu IA with App Wallets under About when supported and handles close", () => {
@@ -138,6 +204,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         "Waves",
         "DMs",
         "Join 6529",
+        "6529 AI",
         "About",
       ]);
       expect(getMenu()).toEqual(
@@ -151,6 +218,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
             label: "Join 6529",
             path: "/join-6529",
           }),
+          expect.objectContaining({ label: "6529 AI", path: "/ai" }),
         ])
       );
       expect(getMenuItem("Museum").children).toBeUndefined();
@@ -252,6 +320,47 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
       expect(onClose).toHaveBeenCalledTimes(2);
     });
 
+    it("starts sign-out only after the sidebar closes", async () => {
+      const onClose = jest.fn();
+      const signOut = jest.fn();
+      const { rerender } = render(<AppSidebar open onClose={onClose} />);
+
+      await waitFor(() => {
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+      connectProps.onSignOut(signOut);
+      expect(onClose).toHaveBeenCalledTimes(1);
+      expect(signOut).not.toHaveBeenCalled();
+
+      rerender(<AppSidebar open={false} onClose={onClose} />);
+      await waitFor(() => {
+        expect(screen.queryByTestId("connect")).not.toBeInTheDocument();
+        expect(signOut).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    it("discards a queued sign-out if the sidebar reopens during the close", async () => {
+      const onClose = jest.fn();
+      const signOut = jest.fn();
+      const { rerender } = render(<AppSidebar open onClose={onClose} />);
+
+      await waitFor(() => {
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+      connectProps.onSignOut(signOut);
+      rerender(<AppSidebar open={false} onClose={onClose} />);
+      rerender(<AppSidebar open onClose={onClose} />);
+
+      await waitFor(() => {
+        expect(document.querySelector("[data-transition]")).toBeNull();
+      });
+      rerender(<AppSidebar open={false} onClose={onClose} />);
+      await waitFor(() => {
+        expect(screen.queryByTestId("connect")).not.toBeInTheDocument();
+      });
+      expect(signOut).not.toHaveBeenCalled();
+    });
+
     it("adds Drop Forge as a gated top-level row after About", () => {
       mockDropForgePermissions = {
         ...DEFAULT_DROP_FORGE_PERMISSIONS,
@@ -269,6 +378,7 @@ jest.mock("@/components/cookies/CookieConsentContext", () => ({
         "Waves",
         "DMs",
         "Join 6529",
+        "6529 AI",
         "About",
         "Drop Forge",
       ]);

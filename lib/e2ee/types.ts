@@ -229,6 +229,8 @@ export interface E2eeEngine {
   // state (synchronous snapshots) + change subscription
   getStatus(): E2eeEngineStatus;
   getError(): string | null;
+  /** Locally held device key, available before the server device list loads. */
+  getLocalDeviceKey(): string | null;
   getThisDevice(): E2eeDeviceInfo | null;
   getDevices(): E2eeDeviceInfo[];
   /** Whether the server accepts encrypted attachments (false until known). */
@@ -269,6 +271,8 @@ export interface E2eeEngine {
     profileIds: string[];
     kind: "dm" | "group";
     name?: string | null;
+    /** Abort creation if any chosen recipient's key claim is refused. */
+    requireAllRecipients?: boolean;
   }): Promise<string>; // g
   findDm(profileId: string): string | null;
   send(
@@ -453,4 +457,11 @@ export interface E2eeEngineExt extends E2eeEngine {
   setOpenConversation(g: string | null): void;
   /** Resolves when no operation or background task is in flight. */
   idle(): Promise<void>;
+  /**
+   * Stops taking in new history (sync, polling, wake events) until
+   * resumeIncoming(), and resolves once work in flight has settled: a final
+   * backup then holds everything (sign-out, before local data is removed).
+   */
+  pauseIncoming(): Promise<void>;
+  resumeIncoming(): void;
 }

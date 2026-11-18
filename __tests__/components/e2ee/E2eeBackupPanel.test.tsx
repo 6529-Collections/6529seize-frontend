@@ -59,8 +59,9 @@ function fakeManager(initial: E2eeBackupSnapshot) {
       code: CODE,
       secret: new Uint8Array(32),
     })),
-    confirmBackup: jest.fn(async () => {
+    confirmBackup: jest.fn(async (): Promise<boolean> => {
       manager.set(snapshot({ phase: "on", lastBackupAt: Date.now() }));
+      return true;
     }),
     restore: jest.fn(async (code: string) => {
       if (code.trim() !== CODE) {
@@ -68,7 +69,7 @@ function fakeManager(initial: E2eeBackupSnapshot) {
       }
       return { conversations: 2, messages: 5 };
     }),
-    backupNow: jest.fn(async () => undefined),
+    backupNow: jest.fn(async (): Promise<boolean> => true),
     turnOff: jest.fn(async () => {
       manager.set(snapshot({ phase: "off" }));
     }),
@@ -144,6 +145,180 @@ describe("E2eeBackupPanel", () => {
     expect(screen.getByText("Backup is on.")).toBeInTheDocument();
     expect(screen.getByText("On")).toBeInTheDocument();
     expect(screen.queryByText(CODE)).not.toBeInTheDocument();
+  });
+
+  /** Saves the code in the open code dialog and confirms it. */
+  async function confirmCode(dialogName: string, confirmName: string) {
+    const dialog = await screen.findByRole("dialog", { name: dialogName });
+    fireEvent.click(
+      within(dialog).getByRole("checkbox", {
+        name: "I saved my recovery code somewhere safe",
+      })
+    );
+    fireEvent.click(within(dialog).getByRole("button", { name: confirmName }));
+    return dialog;
+  }
+
+  /** The upload needs another run (a conflict or fork repair). */
+  const queueRepair = (manager: ReturnType<typeof fakeManager>) =>
+    manager.confirmBackup.mockImplementationOnce(async () => {
+      manager.set(
+        snapshot({ phase: "on", uploading: true, lastBackupAt: null })
+      );
+      return false;
+    });
+
+  it("keeps a new backup's dialog uploading until a queued repair run finishes it", async () => {
+    const manager = fakeManager(snapshot());
+    queueRepair(manager);
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Turn on backup" }));
+    const dialog = await confirmCode(
+      "Save your recovery code",
+      "Turn on backup"
+    );
+    await waitFor(() => expect(manager.confirmBackup).toHaveBeenCalledTimes(1));
+    expect(
+      await within(dialog).findByText("Backing up your history…")
+    ).toBeInTheDocument();
+    expect(screen.getByRole("dialog")).toBe(dialog);
+    expect(screen.queryByText("Backup is up to date.")).not.toBeInTheDocument();
+
+    // The queued run activates the backup and finishes the upload.
+    act(() => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+    });
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(screen.getByText("Backup is up to date.")).toBeInTheDocument();
+  });
+
+  it("shows a replacement's failed queued run with Try again, then finishes", async () => {
+    const manager = fakeManager(snapshot({ phase: "on", lastBackupAt: 2000 }));
+    queueRepair(manager);
+    renderPanel(manager);
+    fireEvent.click(
+      screen.getByRole("button", { name: "Replace recovery code" })
+    );
+    const dialog = await confirmCode(
+      "Save your new recovery code",
+      "Use the new code"
+    );
+    expect(
+      await within(dialog).findByText("Backing up your history…")
+    ).toBeInTheDocument();
+
+    // The queued run fails: its error, and Try again on the same backup.
+    act(() => {
+      manager.set(
+        snapshot({
+          phase: "on",
+          uploading: true,
+          lastBackupAt: null,
+          lastError: "E2EE_RATE_LIMITED",
+        })
+      );
+    });
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "Too many backup requests"
+    );
+    expect(screen.queryByText("Backup is up to date.")).not.toBeInTheDocument();
+    manager.backupNow.mockImplementationOnce(async () => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+      return true;
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Try again" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    expect(manager.backupNow).toHaveBeenCalledTimes(1);
+    expect(manager.confirmBackup).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Backup is up to date.")).toBeInTheDocument();
+  });
+
+  it("offers Try again on the same backup when its first upload fails", async () => {
+    const manager = fakeManager(snapshot());
+    // The backup was created; its first upload failed (and is retried).
+    manager.confirmBackup.mockImplementationOnce(async () => {
+      manager.set(
+        snapshot({
+          phase: "on",
+          uploading: true,
+          lastError: "E2EE_RATE_LIMITED",
+        })
+      );
+      return false;
+    });
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Turn on backup" }));
+    const dialog = await confirmCode(
+      "Save your recovery code",
+      "Turn on backup"
+    );
+    expect(await within(dialog).findByRole("alert")).toHaveTextContent(
+      "Too many backup requests"
+    );
+    manager.backupNow.mockImplementationOnce(async () => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+      return true;
+    });
+    fireEvent.click(within(dialog).getByRole("button", { name: "Try again" }));
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+    // Carried on with that backup: no second one was created.
+    expect(manager.confirmBackup).toHaveBeenCalledTimes(1);
+    expect(manager.backupNow).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Backup is up to date.")).toBeInTheDocument();
+  });
+
+  it("offers restore instead of Try again once the backup was replaced elsewhere", async () => {
+    const manager = fakeManager(snapshot());
+    queueRepair(manager);
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Turn on backup" }));
+    const dialog = await confirmCode(
+      "Save your recovery code",
+      "Turn on backup"
+    );
+    await within(dialog).findByText("Backing up your history…");
+    // Another device replaced the backup: this one's state is gone.
+    act(() => {
+      manager.set(
+        snapshot({ phase: "available", lastError: "E2EE_BACKUP_REPLACED" })
+      );
+    });
+    expect(within(dialog).getByRole("alert")).toHaveTextContent(
+      "Backup was turned off or replaced on another device"
+    );
+    expect(
+      within(dialog).queryByRole("button", { name: "Try again" })
+    ).not.toBeInTheDocument();
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Restore messages" })
+    );
+    expect(
+      await screen.findByRole("dialog", { name: "Restore messages" })
+    ).toBeInTheDocument();
+    expect(manager.backupNow).not.toHaveBeenCalled();
+  });
+
+  it("announces a queued run's progress and its new backup time", async () => {
+    const manager = fakeManager(snapshot({ phase: "on", lastBackupAt: 2000 }));
+    renderPanel(manager);
+    const line = screen.getByText(/^Last backed up /).closest("output");
+    expect(line).not.toBeNull();
+    act(() => {
+      manager.set(
+        snapshot({ phase: "on", lastBackupAt: 2000, uploading: true })
+      );
+    });
+    expect(line).toHaveTextContent("Backing up your history…");
+    act(() => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+    });
+    expect(line).toHaveTextContent(/^Last backed up /);
   });
 
   it("restores with the code and explains a wrong code", async () => {
@@ -247,7 +422,9 @@ describe("E2eeBackupPanel", () => {
       ]);
       expect(screen.getAllByText("Replace your recovery code")).toHaveLength(1);
       expect(
-        screen.getByText(/^You revoked 3 devices after this backup was set up\./)
+        screen.getByText(
+          /^You revoked 3 devices after this backup was set up\./
+        )
       ).toBeVisible();
       expect(
         screen.getAllByRole("button", { name: "Replace recovery code" })
@@ -295,6 +472,34 @@ describe("E2eeBackupPanel", () => {
     }
   );
 
+  it("says it is still backing up, not up to date, while a repair run is queued", async () => {
+    const manager = fakeManager(snapshot({ phase: "on", lastBackupAt: 2000 }));
+    // The upload needs another run (a conflict or fork repair): the manager
+    // marks the backup as still uploading and reports the run incomplete.
+    manager.backupNow.mockImplementation(async () => {
+      manager.set(
+        snapshot({ phase: "on", lastBackupAt: 2000, uploading: true })
+      );
+      return false;
+    });
+    renderPanel(manager);
+    fireEvent.click(screen.getByRole("button", { name: "Back up now" }));
+    await waitFor(() => expect(manager.backupNow).toHaveBeenCalledTimes(1));
+    expect(
+      await screen.findByText("Backing up your history…")
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Backup is up to date.")).not.toBeInTheDocument();
+
+    // The queued run succeeds: only then does the status show the new time.
+    act(() => {
+      manager.set(snapshot({ phase: "on", lastBackupAt: 3000 }));
+    });
+    expect(
+      screen.queryByText("Backing up your history…")
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/^Last backed up /)).toBeInTheDocument();
+  });
+
   it("folds the back-up-now result into the status line and clears it (F-08)", async () => {
     jest.useFakeTimers();
     try {
@@ -303,10 +508,10 @@ describe("E2eeBackupPanel", () => {
       );
       renderPanel(manager);
       fireEvent.click(screen.getByRole("button", { name: "Back up now" }));
-      const status = await screen.findByRole("status");
-      await waitFor(() =>
-        expect(status).toHaveTextContent("Backup is up to date.")
-      );
+      const status = (await screen.findByText("Backup is up to date.")).closest(
+        "output"
+      )!;
+      expect(status).toHaveTextContent("Backup is up to date.");
       expect(screen.queryByText("Backed up")).not.toBeInTheDocument();
       act(() => {
         jest.advanceTimersByTime(6000);

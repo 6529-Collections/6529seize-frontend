@@ -1,6 +1,6 @@
 "use client";
 
-import EnsAddressInput from "@/components/utils/input/ens-address/EnsAddressInput";
+import VerifiedEnsAddressInput from "@/components/utils/input/ens-address/VerifiedEnsAddressInput";
 import React, { useCallback, useState } from "react";
 import { TraitWrapper } from "../../traits/TraitWrapper";
 import type { PaymentInfo } from "../types/OperationalData";
@@ -134,7 +134,7 @@ const PaymentConfig: React.FC<PaymentConfigProps> = ({
         labelTone="muted"
         className="tw-pb-0"
       >
-        <EnsAddressInput
+        <VerifiedEnsAddressInput
           variant="dark"
           value={address}
           placeholder="0x... or ENS"

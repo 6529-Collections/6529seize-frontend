@@ -1,4 +1,11 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import { E2eeDeviceList } from "@/components/e2ee/devices/E2eeDeviceList";
 import type { E2eeBackupManager, E2eeBackupSnapshot } from "@/lib/e2ee/backup";
 import type { E2eeDeviceInfo } from "@/lib/e2ee/types";
@@ -72,7 +79,9 @@ describe("E2eeDeviceList", () => {
     expect(within(thisRow).getByText("Active now")).toBeInTheDocument();
     const phoneRow = rowOf("6529 app on iPhone");
     expect(within(phoneRow).getByText(/^Last active /)).toBeInTheDocument();
-    expect(within(phoneRow).getByText(/^Expires \w{3} \d{1,2}, 20\d\d$/)).toBeInTheDocument();
+    expect(
+      within(phoneRow).getByText(/^Expires \w{3} \d{1,2}, 20\d\d$/)
+    ).toBeInTheDocument();
     expect(screen.queryByText(/^Last seen/)).not.toBeInTheDocument();
   });
 
@@ -122,6 +131,42 @@ describe("E2eeDeviceList", () => {
         screen.queryByRole("dialog", { name: "Revoke this browser?" })
       ).not.toBeInTheDocument()
     );
+  });
+
+  it("keeps Set up backup first unavailable while the revoke runs, so its outcome stays in view", async () => {
+    const onSetUpBackup = jest.fn();
+    const engine = renderList({ onSetUpBackup });
+    let failRevoke: (error: unknown) => void = () => undefined;
+    (engine.revokeDevice as jest.Mock).mockImplementationOnce(
+      () =>
+        new Promise<void>((_, reject) => {
+          failRevoke = reject;
+        })
+    );
+    fireEvent.click(
+      within(rowOf("Brave on Windows")).getByRole("button", {
+        name: "Revoke Brave on Windows",
+      })
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Revoke this browser?",
+    });
+    fireEvent.click(
+      within(dialog).getByRole("button", { name: "Revoke this browser" })
+    );
+    const setUp = within(dialog).getByRole("button", {
+      name: "Set up backup first",
+    });
+    await waitFor(() => expect(setUp).toBeDisabled());
+    fireEvent.click(setUp);
+    expect(onSetUpBackup).not.toHaveBeenCalled();
+
+    // The revoke fails: the dialog is still there to say so.
+    await act(async () => {
+      failRevoke(new Error("offline"));
+    });
+    expect(await within(dialog).findByRole("alert")).toBeInTheDocument();
+    expect(setUp).toBeEnabled();
   });
 
   it("reassures instead of warning when this browser is backed up", async () => {

@@ -1,6 +1,7 @@
 import { useEffect, useRef, type KeyboardEvent } from "react";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { CONNECTED_TAB_LIST_CLASSES } from "@/components/utils/select/tabs/connectedTabStyles";
 import type { USER_PAGE_ACTIVITY_TAB } from "../activity.types";
 import {
   getActivityTabId,
@@ -104,9 +105,9 @@ export default function UserPageActivityTabs({
       ref={tablistRef}
       role="tablist"
       aria-label={t(locale, "user.collected.stats.activityTabs.listLabel")}
-      className="tw-no-scrollbar tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-nowrap tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-white/[0.02] tw-p-1 sm:tw-inline-flex sm:tw-w-auto"
+      className={`${CONNECTED_TAB_LIST_CLASSES} tw-no-scrollbar tw-relative tw-flex tw-w-full tw-max-w-full tw-flex-nowrap tw-overflow-x-auto tw-overflow-y-hidden tw-overscroll-x-contain sm:tw-inline-flex sm:tw-w-auto`}
     >
-      <div className="tw-grid tw-min-w-max tw-flex-1 tw-auto-cols-fr tw-grid-flow-col sm:tw-flex">
+      <div className="tw-grid tw-min-w-max tw-flex-1 tw-auto-cols-fr tw-grid-flow-col tw-gap-0.5 sm:tw-flex">
         {USER_PAGE_ACTIVITY_TABS.map((tab) => (
           <UserPageActivityTab
             key={tab}

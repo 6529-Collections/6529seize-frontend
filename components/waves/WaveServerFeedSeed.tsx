@@ -28,6 +28,7 @@ import type { ServerWaveFeedSeedResult } from "@/contexts/wave/server-wave-feed-
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { toApiWaveMin } from "@/helpers/waves/wave.helpers";
+import { recordWaveCompetitionPresence } from "@/helpers/waves/wave-competition-presence";
 import useCapacitor from "@/hooks/useCapacitor";
 import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
 import { markMobileLaunchStep } from "@/utils/monitoring/mobileLaunchTiming";
@@ -133,14 +134,7 @@ export function WaveServerFeedSeedGate({
     return () => {
       globalThis.clearTimeout(timeoutId);
     };
-  }, [
-    expectedPromise,
-    expire,
-    isCapacitor,
-    registerWave,
-    startedAtMs,
-    waveId,
-  ]);
+  }, [expectedPromise, expire, isCapacitor, registerWave, startedAtMs, waveId]);
 
   useLayoutEffect(() => {
     const handleProfileSwitch = () => {
@@ -172,14 +166,7 @@ export function WaveServerFeedSeedGate({
         handleProfileSwitch
       );
     };
-  }, [
-    expectedPromise,
-    expire,
-    isCapacitor,
-    registerWave,
-    startedAtMs,
-    waveId,
-  ]);
+  }, [expectedPromise, expire, isCapacitor, registerWave, startedAtMs, waveId]);
 
   const contextValue = useMemo<ServerFeedSeedGateContextValue>(
     () => ({ expectedPromise, invalidated, markTerminal, startedAtMs }),
@@ -259,6 +246,7 @@ function ResolvedServerFeedSeed({
       return;
     }
 
+    recordWaveCompetitionPresence(waveId, result.hasCompetition);
     const { drops, hasNextPage } = prepareServerFeedSeed({
       isNative,
       result,

@@ -50,6 +50,11 @@ export interface EngineContext {
   /** Serialises storage writes so each one sees the previous version. */
   persistChain: Promise<void>;
   disposed: boolean;
+  /**
+   * No new history comes in (sync, polling, wake events) while true: a
+   * final backup before local data is removed then holds everything.
+   */
+  incomingPaused: boolean;
   lastMeAt: number;
   lastWakeAt: number;
   openConversation: string | null;
@@ -320,6 +325,8 @@ export async function rollback(ctx: EngineContext): Promise<void> {
     const runtime = ctx.store.groups.get(record.g);
     if (runtime) {
       runtime.record = record;
+      // The restored cursor may predate the last catch-up: fetch again.
+      delete runtime.listedThrough;
       runtime.messages.clear();
       runtime.originals.clear();
       runtime.dirty.clear();

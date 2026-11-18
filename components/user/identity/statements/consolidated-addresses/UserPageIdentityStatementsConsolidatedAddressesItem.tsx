@@ -1,5 +1,7 @@
 "use client";
 
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
+
 import { DELEGATION_ABI } from "@/abis/abis";
 import { useAuth } from "@/components/auth/Auth";
 import { PRIMARY_ADDRESS_USE_CASE } from "@/components/delegation/delegation-constants";
@@ -531,36 +533,38 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                 style={TOOLTIP_STYLES}
               />
             )}
-            <a
-              href={`https://opensea.io/${address.wallet}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={t(
-                locale,
-                "user.profile.identity.statements.openOpenSea"
+            <NftPurchasingGate>
+              <a
+                href={`https://opensea.io/${address.wallet}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={t(
+                  locale,
+                  "user.profile.identity.statements.openOpenSea"
+                )}
+                className="tw-inline-flex tw-items-center tw-justify-center tw-p-0.5 tw-text-iron-500 tw-transition-colors hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                data-tooltip-id={`opensea-tooltip-${address.wallet}`}
+                data-tooltip-content={
+                  isTouchScreen
+                    ? null
+                    : t(locale, "user.profile.identity.statements.openOpenSea")
+                }
+              >
+                <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
+                  <OpenseaIcon />
+                </div>
+              </a>
+              {!isTouchScreen && (
+                <Tooltip
+                  id={`opensea-tooltip-${address.wallet}`}
+                  place="top"
+                  positionStrategy="fixed"
+                  offset={8}
+                  opacity={1}
+                  style={TOOLTIP_STYLES}
+                />
               )}
-              className="tw-inline-flex tw-items-center tw-justify-center tw-p-0.5 tw-text-iron-500 tw-transition-colors hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              data-tooltip-id={`opensea-tooltip-${address.wallet}`}
-              data-tooltip-content={
-                isTouchScreen
-                  ? null
-                  : t(locale, "user.profile.identity.statements.openOpenSea")
-              }
-            >
-              <div className="tw-flex tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-items-center tw-justify-center">
-                <OpenseaIcon />
-              </div>
-            </a>
-            {!isTouchScreen && (
-              <Tooltip
-                id={`opensea-tooltip-${address.wallet}`}
-                place="top"
-                positionStrategy="fixed"
-                offset={8}
-                opacity={1}
-                style={TOOLTIP_STYLES}
-              />
-            )}
+            </NftPurchasingGate>
             <button
               type="button"
               aria-label={t(
@@ -660,24 +664,26 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
                   </span>
                   {t(locale, "user.profile.identity.statements.etherscan")}
                 </ButtonLink>
-                <ButtonLink
-                  href={`https://opensea.io/${address.wallet}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  prefetch={false}
-                  variant="secondary"
-                  size="xs"
-                  fullWidth
-                  aria-label={t(
-                    locale,
-                    "user.profile.identity.statements.openOpenSea"
-                  )}
-                >
-                  <span className="tw-h-4 tw-w-4" aria-hidden="true">
-                    <OpenseaIcon />
-                  </span>
-                  {t(locale, "user.profile.identity.statements.openSea")}
-                </ButtonLink>
+                <NftPurchasingGate>
+                  <ButtonLink
+                    href={`https://opensea.io/${address.wallet}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    prefetch={false}
+                    variant="secondary"
+                    size="xs"
+                    fullWidth
+                    aria-label={t(
+                      locale,
+                      "user.profile.identity.statements.openOpenSea"
+                    )}
+                  >
+                    <span className="tw-h-4 tw-w-4" aria-hidden="true">
+                      <OpenseaIcon />
+                    </span>
+                    {t(locale, "user.profile.identity.statements.openSea")}
+                  </ButtonLink>
+                </NftPurchasingGate>
               </div>
             </div>
             <span className="tw-sr-only" aria-live="polite">

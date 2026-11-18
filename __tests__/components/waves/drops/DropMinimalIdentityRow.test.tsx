@@ -44,6 +44,13 @@ jest.mock("@/components/waves/drops/DropAuthorBadges", () => ({
 jest.mock("@/lib/device-signing/feature", () => ({
   isSignedMessagesEnabled: () => true,
 }));
+// Placement only: this browser's own check is covered in
+// dropSignatureVerdicts.test.tsx, so every seal here reads as verified.
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: readonly unknown[]) => drops.map(() => "verified"),
+  readSealState: () => "verified",
+}));
+
 jest.mock("@/components/waves/drops/signature/DropSignatureDialog", () => ({
   __esModule: true,
   default: () => null,
@@ -142,7 +149,7 @@ describe("DropMinimalIdentityRow", () => {
       "0x1111111111111111111111111111111111111111"
     );
   });
-  it.each(["inline", "stacked"] as const)(
+  it.each(["inline", "stacked", "stacked-compact"] as const)(
     "keeps the author signed seal with the %s timestamp",
     (timestampLayout) => {
       render(

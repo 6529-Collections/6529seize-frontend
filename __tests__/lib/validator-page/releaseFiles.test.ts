@@ -24,11 +24,11 @@ describe("groupReleaseFiles", () => {
       ["deb-arm64", "6529-validator_0.1.0_arm64.deb"],
       ["appimage", "6529-Validator-0.1.0-x86_64.AppImage"],
     ]);
-    expect(groups.installers[0]?.signedBy).toBe("6529 Collection LLC");
-    expect(groups.installers[0]?.signedNote).toBe("notarized by Apple");
-    expect(groups.installers[1]?.signedBy).toBe("6529 Collection LLC");
-    expect(groups.installers[1]?.signedNote).toBeNull();
-    expect(groups.installers[2]?.signedBy).toBeNull();
+    expect(groups.installers[0]?.publisher).toBe("6529 Collection LLC");
+    expect(groups.installers[0]?.publisherNote).toBe("notarized by Apple");
+    expect(groups.installers[1]?.publisher).toBe("6529 Collection LLC");
+    expect(groups.installers[1]?.publisherNote).toBeNull();
+    expect(groups.installers[2]?.publisher).toBeNull();
     expect(groups.installers.map((item) => item.summary)).toEqual([
       "macOS 11 or newer · Apple silicon or Intel",
       "Windows 10 or 11 · 64-bit",
@@ -88,7 +88,7 @@ describe("groupReleaseFiles", () => {
       "release.json",
     ]);
     expect(
-      entries.map((entry) => [entry.system, entry.cpu, entry.signedBy])
+      entries.map((entry) => [entry.system, entry.cpu, entry.publisher])
     ).toContainEqual(["Linux", "ARM64", null]);
   });
 
@@ -117,7 +117,7 @@ describe("groupReleaseFiles", () => {
       system: "Any",
       cpu: "",
       what: "Source of lyrebird, Tor's bridge program in the validator (GPL 3.0 or later)",
-      signedBy: null,
+      publisher: null,
     });
     expect(
       listReleaseFiles(withSource!)

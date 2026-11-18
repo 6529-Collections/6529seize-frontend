@@ -120,12 +120,47 @@ async function expectWalletCanonical(page: Page, address = "") {
 
 test.describe("Delegation read-only coverage @surface @medium @large @readonly", () => {
   test("Safe Collecting exposes disconnected-safe choices and references", async ({
+    isMobile,
     page,
   }) => {
     await gotoReady(page, "/safe-collecting");
 
     await expect(page).toHaveTitle("Safe Collecting | 6529.io");
     await expectHeading(page, "Safe Collecting");
+    if (isMobile) {
+      await expect(
+        page.getByRole("button", { name: "Open menu", exact: true })
+      ).toBeEnabled();
+    } else {
+      // The desktop navigation stays disabled until hydration; SSR tab markup
+      // is visible earlier, before its keyboard handler is attached.
+      await expect(
+        page.getByRole("button", { name: "NFTs", exact: true })
+      ).toBeEnabled();
+    }
+    const setupTabs = page.getByRole("tablist", {
+      name: "Setup path",
+      exact: true,
+    });
+    await expect(setupTabs.getByRole("tab")).toHaveCount(2);
+    for (const tab of await setupTabs.getByRole("tab").all()) {
+      await expect(tab).toHaveCSS("font-size", "14px");
+      await expect(tab).toHaveCSS("height", "40px");
+    }
+    const fresh = setupTabs.getByRole("tab", {
+      name: "Starting fresh",
+      exact: true,
+    });
+    const existing = setupTabs.getByRole("tab", {
+      name: "Already collecting",
+      exact: true,
+    });
+    await fresh.press("ArrowRight");
+    await expect(existing).toHaveAttribute("aria-selected", "true");
+    await expect(existing).toBeFocused();
+    await existing.press("ArrowLeft");
+    await expect(fresh).toHaveAttribute("aria-selected", "true");
+    await expect(fresh).toBeFocused();
     await expect(
       page.getByRole("heading", { name: "All tools", exact: true })
     ).toBeVisible();
@@ -225,6 +260,54 @@ test.describe("Delegation read-only coverage @surface @medium @large @readonly",
     await back.click();
     await expect(page).toHaveURL(/\/safe-collecting\/faq$/);
     await expectHeading(page, "FAQ");
+  });
+
+  test("keeps the FAQ return link in place while the mobile app banner hydrates", async ({
+    page,
+    isMobile,
+  }) => {
+    // Desktop Chromium never renders the mobile app banner.
+    test.skip(!isMobile, "The mobile app banner only appears on mobile web.");
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
+    });
+    await page.route(
+      /\/_next\/static\/chunks\/[^?]+\.js(?:\?|$)/,
+      async (route) => {
+        await scriptsReady;
+        await route.continue();
+      }
+    );
+    const back = page.getByRole("link", { name: "All FAQ topics" });
+    const dismissBanner = page.getByRole("button", {
+      name: "Dismiss app banner for seven days",
+    });
+
+    try {
+      await page.goto("/safe-collecting/faq/register-delegation", {
+        waitUntil: "commit",
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+      await expect(back).toBeInViewport();
+      await expect(dismissBanner).toHaveCount(0);
+      const before = await back.boundingBox();
+      if (!before) throw new Error("The FAQ return link has no layout box");
+      await page.mouse.move(
+        before.x + before.width / 2,
+        before.y + before.height / 2
+      );
+      await page.mouse.down();
+      releaseScripts();
+      await expect(dismissBanner).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+      const after = await back.boundingBox();
+      expect(after?.y).toBeCloseTo(before.y, 0);
+      await page.mouse.up();
+      await expect(page).toHaveURL(/\/safe-collecting\/faq$/);
+      await expectHeading(page, "FAQ");
+    } finally {
+      releaseScripts();
+    }
   });
 
   for (const article of ARTICLE_ROUTES) {

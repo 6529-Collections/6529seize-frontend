@@ -1,3 +1,4 @@
+import "server-only";
 import { serverEnvSchema, type ServerEnv } from "./serverEnv.schema";
 
 if (globalThis.window !== undefined) {
@@ -55,6 +56,9 @@ export const getStagingApiKey = (): string | undefined =>
 export const getFarcasterWarpcastApiKey = (): string | undefined =>
   getOptionalServerValue(process.env["FARCASTER_WARPCAST_API_KEY"]);
 
+export const getDesktopWalletRequestSignerEnv = (): string | undefined =>
+  process.env["DESKTOP_WALLET_REQUEST_SIGNER"];
+
 /**
  * Settings of the validator download page under `/validator`. The deploy
  * workflow sets them from the production environment's GitHub secret and
@@ -81,6 +85,25 @@ export const getValidatorPageServerEnv = (): ValidatorPageServerEnv => ({
   ),
   releasesRegion: getOptionalServerValue(
     process.env["VALIDATOR_RELEASES_REGION"]
+  ),
+});
+
+/**
+ * Where 6529 Desktop's signed release list and release files are stored,
+ * served at `/desktop/releases.json` and `/desktop/download`. Unset: the
+ * production bucket and region built into `lib/desktop-releases/releaseList.ts`.
+ */
+type DesktopReleasesServerEnv = {
+  readonly releasesBucket: string | undefined;
+  readonly releasesRegion: string | undefined;
+};
+
+export const getDesktopReleasesServerEnv = (): DesktopReleasesServerEnv => ({
+  releasesBucket: getOptionalServerValue(
+    process.env["DESKTOP_RELEASES_BUCKET"]
+  ),
+  releasesRegion: getOptionalServerValue(
+    process.env["DESKTOP_RELEASES_REGION"]
   ),
 });
 

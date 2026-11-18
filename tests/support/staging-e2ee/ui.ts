@@ -99,17 +99,16 @@ export async function startEncryptedChat(
 ): Promise<string> {
   const { page } = session;
   await gotoStaging(page, `${ENCRYPTED_ROUTE}/new`);
-  await expect(
-    page.getByRole("heading", { name: "New encrypted chat" })
-  ).toBeVisible({ timeout: FIRST_LOAD_TIMEOUT_MS });
+  await expect(page.getByRole("heading", { name: "New message" })).toBeVisible({
+    timeout: FIRST_LOAD_TIMEOUT_MS,
+  });
   for (const handle of handles) {
     await pickPerson(page, handle);
   }
   if (options.group) {
-    await page.getByRole("radio", { name: /^Group/u }).check();
     await page.getByLabel("Group name (optional)").fill(options.group.name);
   }
-  await page.getByRole("button", { name: "Start encrypted chat" }).click();
+  await page.getByRole("button", { name: "Start chat" }).click();
   await expect(page).toHaveURL((url) => CONVERSATION_PATH.test(url.pathname), {
     timeout: UI_TIMEOUT_MS,
   });

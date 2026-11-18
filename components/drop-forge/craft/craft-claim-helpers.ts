@@ -2,6 +2,8 @@ import { isDropForgeVideoUrl } from "@/components/drop-forge/drop-forge-media-ty
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { canonicalizeInteractiveMediaUrl } from "@/components/waves/memes/submission/constants/security";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
+import { publicEnv } from "@/config/env";
+import { toIsolatedHtmlUrlFromInput } from "@/lib/media/decentralized-media";
 
 export const BTN_PRIMARY =
   "tw-rounded-lg tw-border-0 tw-ring-1 tw-ring-inset tw-ring-primary-400/60 tw-bg-primary-500 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-white tw-transition-colors tw-duration-150 enabled:hover:tw-bg-primary-600 enabled:hover:tw-ring-primary-300 enabled:active:tw-bg-primary-700 enabled:active:tw-ring-primary-300 disabled:tw-opacity-50";
@@ -102,11 +104,16 @@ export function getOpenableMediaUrl(
       : trimmedValue;
     const parsedUrl = new URL(resolvedValue);
 
-    if (
-      parsedUrl.protocol === "http:" ||
-      parsedUrl.protocol === "https:" ||
-      parsedUrl.protocol === "blob:"
-    ) {
+    if (parsedUrl.protocol === "https:") {
+      // Stored first-party media opens on its per-CID host when the separate
+      // content domain is configured; otherwise the URL is unchanged.
+      return toIsolatedHtmlUrlFromInput(
+        resolvedValue,
+        publicEnv.MEDIA_RESOLVER_ENDPOINT
+      );
+    }
+
+    if (parsedUrl.protocol === "http:" || parsedUrl.protocol === "blob:") {
       return resolvedValue;
     }
   } catch {

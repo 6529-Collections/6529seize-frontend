@@ -7,7 +7,10 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import type { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
-import { useDeviceGrants } from "@/hooks/device-signing/useDeviceGrants";
+import {
+  DEVICE_GRANTS_REFRESH_MS,
+  useDeviceGrants,
+} from "@/hooks/device-signing/useDeviceGrants";
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
@@ -352,7 +355,7 @@ function readProfileEncryptionState(
   return device.grant.expires_at * 1000 <= now ? "expired" : "on";
 }
 
-/** Use local records for inactive profiles without changing the active session. */
+/** Read the wallet's last verification without fetching under another session. */
 function InactiveProfileBadge({
   address,
   profileId,
@@ -364,6 +367,7 @@ function InactiveProfileBadge({
 }) {
   const wallet = address.toLowerCase();
   const now = useMinuteClock();
+  const remote = useDeviceGrants(wallet, "cache-only");
   const query = useQuery({
     queryKey: ["local-profile-device-status", wallet, profileId],
     queryFn: async () => {
@@ -373,16 +377,27 @@ function InactiveProfileBadge({
           ? getDefaultE2eeStorage().getDevice(profileId)
           : null,
       ]);
-      return { signing: signing?.grant ?? null, encryption };
+      return { signing, encryption };
     },
     retry: false,
   });
-  const grant = query.data?.signing ?? null;
+  const signing = query.data?.signing;
+  const verifiedRecently =
+    remote.isSuccess && now < remote.dataUpdatedAt + DEVICE_GRANTS_REFRESH_MS;
+  const grant =
+    signing && verifiedRecently
+      ? (remote.data.find(
+          (item) =>
+            item.id === signing.grant?.id &&
+            item.wallet.toLowerCase() === wallet &&
+            item.device_key.toLowerCase() === signing.publicKeyHex.toLowerCase()
+        ) ?? null)
+      : null;
   const grantStatus = getDeviceGrantStatus(grant, now);
   const proof = getProofStatus(
     wallet,
     !query.isPending && now > 0,
-    query.isError,
+    query.isError || (Boolean(signing?.grant) && !verifiedRecently),
     grantStatus
   );
   let encrypted: EncryptionState = "checking";

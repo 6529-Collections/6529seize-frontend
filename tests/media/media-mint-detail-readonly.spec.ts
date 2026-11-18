@@ -1,4 +1,5 @@
 import { getStagingVideoFixtures } from "./stagingVideoFixtures";
+import { mediaResolverUrlPattern } from "../support/mediaResolverHosts";
 import { defineMobileVideoBatteryTest } from "./mobileVideoBatteryCases";
 import { defineCollectorsLeaderboardTests } from "./collectorsLeaderboardCases";
 import { defineNftMarketActivityTests } from "./nftMarketActivityCases";
@@ -61,6 +62,16 @@ async function expectFullWidthTabDivider(page: Page, name: string) {
   expect(fillsContent, "Primary tab divider spans the content width").toBe(
     true
   );
+}
+
+async function expectProfileStyleTabs(navigation: Locator) {
+  await expect(navigation).toBeVisible();
+  await expect(navigation.getByRole("button").first()).toBeVisible();
+  for (const tab of await navigation.getByRole("button").all()) {
+    await expect(tab).toHaveCSS("font-size", "16px");
+    await expect(tab).toHaveCSS("font-weight", "500");
+    await expect(tab).toHaveCSS("height", "50px");
+  }
 }
 
 async function expectUniformMarketplaceIcons(page: Page) {
@@ -1205,6 +1216,12 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     const season = page.getByRole("link", { name: "View SZN 1 cards" });
     for (const width of [390, 767, 768, 1600]) {
       await page.setViewportSize({ width, height: 1000 });
+      await expectProfileStyleTabs(
+        page.getByRole("navigation", {
+          name: "Meme page sections",
+          exact: true,
+        })
+      );
       await expect(properties).toHaveCSS(
         "font-size",
         width >= 768 ? "16px" : "12px"
@@ -1255,6 +1272,12 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     const nextCard = page.getByRole("link", { name: "Next NFT", exact: true });
     for (const width of [390, 767, 768, 1600]) {
       await page.setViewportSize({ width, height: 1000 });
+      await expectProfileStyleTabs(
+        page.getByRole("navigation", {
+          name: "Meme Lab page sections",
+          exact: true,
+        })
+      );
       await expect(labProperties).toHaveCSS(
         "font-size",
         width >= 768 ? "16px" : "12px"
@@ -1384,7 +1407,11 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   }) => {
     const tx = "IFosq_ZN9_PrDSQmq65JTjeB2GnnfPSFoHxRazxC4PY";
     const primary = `https://arweave.net/${tx}/timeline-history.png`;
-    const fallback = `https://media.6529.io/arweave/${tx}/timeline-history.png`;
+    // The deployed build's media resolver: media.6529.io in production, the
+    // separate content domain on staging. The path stays exact.
+    const fallback = mediaResolverUrlPattern(
+      `/arweave/${tx}/timeline-history.png`
+    );
     const requests: string[] = [];
     await page.route("**/api/nft_history/**", async (route) => {
       await route.fulfill({
@@ -1433,7 +1460,9 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         preview.evaluate((image: HTMLImageElement) => image.naturalWidth)
       )
       .toBeGreaterThan(0);
-    expect(requests).toEqual([primary, fallback]);
+    expect(requests).toHaveLength(2);
+    expect(requests[0]).toBe(primary);
+    expect(requests[1]).toMatch(fallback);
     await expect(
       timeline.getByRole("link", { name: "Open metadata URI" })
     ).toHaveAttribute("href", `https://arweave.net/${tx}`);
@@ -1544,6 +1573,18 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("tab", { name: "Card Activity" })
     ).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "font-size",
+      "12px"
+    );
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "border-radius",
+      "9999px"
+    );
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "height",
+      "32px"
+    );
     await expect(page.getByRole("tab", { name: "Timeline" })).toBeVisible();
     await expect(
       page.getByRole("region", { name: "The Memes card activity" })
@@ -1560,6 +1601,16 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
   });
 
   test("renders The Memes mint page read-only", async ({ page }, testInfo) => {
+    const rootsRequests: string[] = [];
+    page.on("request", (request) => {
+      const pathname = new URL(request.url()).pathname;
+      if (
+        request.method() === "GET" &&
+        /^\/api\/minting-claims\/[^/]+\/\d+\/roots$/.test(pathname)
+      ) {
+        rootsRequests.push(pathname);
+      }
+    });
     await gotoReady(page, "/the-memes/mint");
 
     await expect(page).toHaveTitle(MEMES_MINT_TITLE_PATTERN);
@@ -1622,6 +1673,11 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     await expect(
       page.getByRole("cell", { name: "Status" }).first()
     ).toBeVisible();
+    expect(rootsRequests).toHaveLength(1);
+    await testInfo.attach("mint-roots-requests", {
+      body: Buffer.from(JSON.stringify(rootsRequests)),
+      contentType: "application/json",
+    });
   });
 
   test("renders Meme Lab card activity focus with locale-preserving links", async ({
@@ -1646,6 +1702,14 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
     ).toHaveAttribute("href", "/meme-lab?locale=de-DE");
     await expectNavigation(page, "Meme Lab page sections");
     await expectNavigation(page, "Meme Lab history sections");
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "font-size",
+      "14px"
+    );
+    await expect(page.getByRole("tab", { name: "Card Activity" })).toHaveCSS(
+      "height",
+      "32px"
+    );
     await expect(page.getByRole("button", { name: "History" })).toHaveAttribute(
       "aria-pressed",
       "true"
@@ -1728,10 +1792,7 @@ test.describe("Media, mint, and detail read-only coverage @surface @medium @larg
         await page.setViewportSize({ width, height: 1000 });
         await expect(external).toHaveCSS("font-size", "14px");
         await expectUniformMarketplaceIcons(page);
-        await expect(metadataTab).toHaveCSS(
-          "font-weight",
-          width >= 768 ? "500" : "600"
-        );
+        await expect(metadataTab).toHaveCSS("font-weight", "500");
         if (width >= 768) {
           await expectFullWidthTabDivider(page, "ReMemes page sections");
         }

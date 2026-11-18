@@ -5,6 +5,7 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { PencilSquareIcon } from "@heroicons/react/24/outline";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
 import { Tooltip } from "react-tooltip";
@@ -29,6 +30,7 @@ export default function UserPageSubscriptionsAirdropAddress(
   }>
 ) {
   const locale = useBrowserLocale();
+  const isTouchDevice = useIsTouchDevice();
   const airdropAddress = props.airdrop?.airdrop_address;
   const addressTooltipId = `airdrop-address-${airdropAddress?.address ?? "unavailable"}`;
   const editHref = `/safe-collecting/register-delegation?collection=${MEMES_CONTRACT}&use_case=${AIRDROPS_USE_CASE.use_case}`;
@@ -83,9 +85,15 @@ export default function UserPageSubscriptionsAirdropAddress(
                     ? formatAddress(airdropAddress.address)
                     : airdropAddress.address}
                 </button>
+                {/* Compatibility mouse events can interrupt tap-to-open on touch devices. */}
                 <Tooltip
                   id={addressTooltipId}
-                  openEvents={{ mouseover: true, focus: true, click: true }}
+                  openEvents={{
+                    mouseover: !isTouchDevice,
+                    focus: true,
+                    click: true,
+                  }}
+                  closeEvents={{ mouseout: !isTouchDevice, blur: true }}
                   place="top"
                   positionStrategy="fixed"
                   offset={8}

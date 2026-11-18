@@ -2,6 +2,8 @@
 
 import type { ApiWave } from "@/generated/models/ApiWave";
 import Button from "@/components/utils/button/Button";
+import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import { CheckIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveJoin } from "@/hooks/waves/useWaveJoin";
 import { t } from "@/i18n/messages";
@@ -16,8 +18,8 @@ const SVG_CLASSES: Record<WaveFollowBtnSize, string> = {
   [WaveFollowBtnSize.MEDIUM]: "tw-h-5 tw-w-5",
 };
 
-const BUTTON_SIZES: Record<WaveFollowBtnSize, "sm" | "md"> = {
-  [WaveFollowBtnSize.SMALL]: "sm",
+const BUTTON_SIZES: Record<WaveFollowBtnSize, "xs" | "md"> = {
+  [WaveFollowBtnSize.SMALL]: "xs",
   [WaveFollowBtnSize.MEDIUM]: "md",
 };
 
@@ -46,6 +48,16 @@ export default function WaveHeaderFollow({
   );
 
   const printIcon = () => {
+    if (size === WaveFollowBtnSize.SMALL) {
+      const Icon = following ? CheckIcon : PlusIcon;
+      return (
+        <Icon
+          className="tw-size-4 tw-shrink-0"
+          strokeWidth={2}
+          aria-hidden="true"
+        />
+      );
+    }
     if (following) {
       return (
         <svg
@@ -91,6 +103,11 @@ export default function WaveHeaderFollow({
       loading={mutating}
       variant={following ? "secondary" : "primary"}
       size={BUTTON_SIZES[size]}
+      className={
+        size === WaveFollowBtnSize.SMALL
+          ? COMPACT_ACTION_TOUCH_TARGET_CLASS
+          : undefined
+      }
       fullWidth={fullWidth}
     >
       {!mutating && printIcon()}

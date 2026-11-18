@@ -28,7 +28,7 @@ export default function ParticipationDropHeader({
   winningThreshold,
   timestampLayout = "inline",
 }: ParticipationDropHeaderProps) {
-  const isStackedTimestamp = timestampLayout === "stacked";
+  const isStackedTimestamp = timestampLayout !== "inline";
   const authorIdentity = drop.author.handle ?? drop.author.primary_address;
   const isApproveDrop =
     typeof winningThreshold === "number" && winningThreshold > 0;

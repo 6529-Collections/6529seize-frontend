@@ -31,21 +31,23 @@ import {
   MinusCircleIcon,
   QuestionMarkCircleIcon,
   ShieldCheckIcon,
+  UserMinusIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
-import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { useQuery } from "@tanstack/react-query";
 import type { KeyboardEvent, ReactNode, SyntheticEvent } from "react";
 import { useRef } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { usePublicClient } from "wagmi";
+import {
+  recordDropSignatureVerdict,
+  type SignedContentDrop,
+} from "./dropSignatureVerdicts";
 
 interface DropSignatureDialogProps {
   readonly dropId: string;
   /** The drop as shown; its content is checked against the signed body. */
-  readonly drop?:
-    | Pick<ApiDrop, "title" | "parts" | "wave" | "author">
-    | undefined;
+  readonly drop?: SignedContentDrop | undefined;
   readonly isOpen: boolean;
   readonly onClose: () => void;
 }
@@ -73,6 +75,7 @@ function SignedDetails({
       t(locale, "signedMessages.signature.deviceKey"),
       getDeviceKeyFingerprint(signature.deviceKey),
     ],
+    [t(locale, "signedMessages.signature.origin"), signature.origin],
     [
       t(locale, "signedMessages.signature.grantExpires"),
       formatDate(locale, signature.grantExpiresAt),
@@ -135,6 +138,38 @@ const VERDICT_PRESENTATION = {
   },
 } as const;
 
+/** A signature by a wallet that is not one of the author's wallets now. */
+const UNLINKED_PRESENTATION = {
+  Icon: UserMinusIcon,
+  iconClassName: "tw-text-iron-400",
+  titleKey: "signedMessages.signature.unlinked",
+  descriptionKey: "signedMessages.signature.unlinkedWalletDescription",
+} as const;
+
+const presentationOf = (verdict: DropSignatureVerdict) =>
+  verdict.status === "unverifiable" && verdict.unlinkedWallet
+    ? UNLINKED_PRESENTATION
+    : VERDICT_PRESENTATION[verdict.status];
+
+/** The verdict's explanation, naming why a signature is not verifiable. */
+function describeVerdict(
+  locale: SupportedLocale,
+  verdict: DropSignatureVerdict,
+  descriptionKey: ReturnType<typeof presentationOf>["descriptionKey"]
+): string {
+  if (verdict.status === "unverifiable" && verdict.unrecognizedOrigin) {
+    return t(locale, "signedMessages.signature.unrecognizedOriginDescription", {
+      origin: verdict.unrecognizedOrigin,
+    });
+  }
+  if (verdict.status === "unverifiable" && verdict.unlinkedWallet) {
+    return t(locale, "signedMessages.signature.unlinkedWalletDescription", {
+      wallet: verdict.unlinkedWallet,
+    });
+  }
+  return t(locale, descriptionKey);
+}
+
 function VerdictView({
   locale,
   verdict,
@@ -143,7 +178,8 @@ function VerdictView({
   readonly verdict: DropSignatureVerdict;
 }) {
   const { Icon, iconClassName, titleKey, descriptionKey } =
-    VERDICT_PRESENTATION[verdict.status];
+    presentationOf(verdict);
+  const description = describeVerdict(locale, verdict, descriptionKey);
   return (
     <div>
       <p className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-base tw-font-semibold tw-text-iron-50">
@@ -154,7 +190,7 @@ function VerdictView({
         <span>{t(locale, titleKey)}</span>
       </p>
       <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-        {t(locale, descriptionKey)}
+        {description}
       </p>
       {verdict.status === "signed" && (
         <SignedDetails locale={locale} verdict={verdict} />
@@ -194,13 +230,19 @@ function useDropSignatureVerdict({
         drop && authorAddress && signedEvents.events.length > 0
           ? await fetchAuthorWallets(authorAddress, signal)
           : [];
-      return await verifyDropSignedEvents(signedEvents, {
+      const verdict = await verifyDropSignedEvents(signedEvents, {
         contractWallets,
         displayed: content,
         expected: drop
           ? { dropId, waveId: drop.wave.id, authorWallets }
           : undefined,
       });
+      // The drop's seal shows this check too (including a contract wallet
+      // verified on Ethereum, which the seal's own check leaves unverified).
+      if (drop) {
+        recordDropSignatureVerdict(dropId, drop, verdict);
+      }
+      return verdict;
     },
     staleTime: 60_000,
     retry: 1,
@@ -299,7 +341,7 @@ export function SignatureDialogFrame({
                 type="button"
                 onClick={onClose}
                 aria-label={t(locale, "signedMessages.signature.close")}
-                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
               >
                 <XMarkIcon aria-hidden="true" className="tw-size-5" />
               </button>

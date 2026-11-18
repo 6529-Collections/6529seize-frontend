@@ -8,6 +8,9 @@ let mockIsRightSidebarOpen = false;
 let mockEffectiveDropId: string | undefined;
 let mockSearchParams = new URLSearchParams();
 let mockIsEncryptedRoute = false;
+let mockPathname = "/waves";
+// The shared wave selection; undefined renders outside a MyStream provider.
+let mockSelectedWaveId: string | null | undefined;
 
 const mockChildMounted = jest.fn();
 const mockCloseRightSidebar = jest.fn();
@@ -49,12 +52,13 @@ jest.mock("framer-motion", () => {
 });
 
 jest.mock("next/navigation", () => ({
-  usePathname: () => "/waves",
+  usePathname: () => mockPathname,
   useRouter: () => ({ replace: mockRouterReplace }),
   useSearchParams: () => mockSearchParams,
 }));
 
 jest.mock("@/helpers/navigation.helpers", () => ({
+  ...jest.requireActual("@/helpers/navigation.helpers"),
   getActiveWaveIdFromUrl: () => mockWaveId,
   isEncryptedMessagesPathname: () => mockIsEncryptedRoute,
 }));
@@ -98,6 +102,10 @@ jest.mock("@/contexts/wave/MyStreamContext", () => ({
   useMyStreamActionsOptional: () => ({
     requestMainWavesList: mockRequestMainWavesList,
   }),
+  useMyStreamOptional: () =>
+    mockSelectedWaveId === undefined
+      ? null
+      : { activeWave: { id: mockSelectedWaveId } },
 }));
 
 jest.mock("@/contexts/wave/WaveChatScrollContext", () => ({
@@ -172,11 +180,13 @@ function renderWrapper({ defaultPath = "/waves" } = {}) {
 describe("WavesMessagesWrapper", () => {
   beforeEach(() => {
     mockBreakpoint = "LG";
+    mockPathname = "/waves";
     mockWaveId = null;
     mockIsRightSidebarOpen = false;
     mockEffectiveDropId = undefined;
     mockSearchParams = new URLSearchParams();
     mockIsEncryptedRoute = false;
+    mockSelectedWaveId = undefined;
     jest.clearAllMocks();
     mockUseQuery.mockReturnValue({ data: undefined, error: null });
   });
@@ -215,6 +225,15 @@ describe("WavesMessagesWrapper", () => {
     expect(screen.getByTestId("main-content")).toBeInTheDocument();
     expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
     expect(mockChildMounted).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the new-message page as main content on small screens", () => {
+    mockBreakpoint = "S";
+    mockPathname = "/messages/new";
+    renderWrapper({ defaultPath: "/messages" });
+
+    expect(screen.getByTestId("main-content")).toBeInTheDocument();
+    expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
   });
 
   it("renders the direct profile feed query on small screens", () => {
@@ -459,5 +478,79 @@ describe("WavesMessagesWrapper", () => {
     expect(screen.getByTestId("right-sidebar")).toBe(controller);
     expect(controller).toHaveAttribute("data-open", "true");
     expect(controller).toHaveAttribute("data-wave-id", "wave-2");
+  });
+
+  describe("with a shared wave selection", () => {
+    const rerenderWrapper = (
+      rerender: ReturnType<typeof render>["rerender"],
+      defaultPath = "/waves"
+    ) =>
+      rerender(
+        <WavesMessagesWrapper defaultPath={defaultPath}>
+          <MainContentProbe />
+        </WavesMessagesWrapper>
+      );
+
+    it("opens the selected wave in the same render on small screens", () => {
+      mockBreakpoint = "S";
+      mockWaveId = null;
+      mockSelectedWaveId = null;
+      const { rerender } = renderWrapper();
+      expect(screen.getByTestId("left-sidebar")).toBeInTheDocument();
+      expect(screen.queryByTestId("main-content")).not.toBeInTheDocument();
+
+      // The selection changes with the history entry; the route still reads
+      // the list until the router commits its own update.
+      mockSelectedWaveId = "wave-1";
+      rerenderWrapper(rerender);
+
+      expect(screen.getByTestId("main-content")).toBeInTheDocument();
+      expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+      expect(screen.getByTestId("right-sidebar")).toHaveAttribute(
+        "data-wave-id",
+        "wave-1"
+      );
+    });
+
+    it("returns to the list in the same render as the selection clears", () => {
+      mockBreakpoint = "S";
+      mockWaveId = "wave-1";
+      mockSelectedWaveId = "wave-1";
+      const { rerender } = renderWrapper();
+      expect(screen.getByTestId("main-content")).toBeInTheDocument();
+
+      mockSelectedWaveId = null;
+      rerenderWrapper(rerender);
+
+      expect(screen.getByTestId("left-sidebar")).toBeInTheDocument();
+      expect(screen.queryByTestId("main-content")).not.toBeInTheDocument();
+    });
+
+    it("keeps the selected wave once the route agrees", () => {
+      mockBreakpoint = "S";
+      mockWaveId = "wave-1";
+      mockSelectedWaveId = "wave-1";
+
+      renderWrapper();
+
+      expect(screen.getByTestId("main-content")).toBeInTheDocument();
+      expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+    });
+
+    it("keeps Messages pages on the routed conversation", () => {
+      mockBreakpoint = "S";
+      mockWaveId = null;
+      mockSelectedWaveId = "dm-1";
+      const { rerender } = renderWrapper({ defaultPath: "/messages" });
+      expect(screen.getByTestId("left-sidebar")).toBeInTheDocument();
+      expect(screen.queryByTestId("main-content")).not.toBeInTheDocument();
+
+      mockWaveId = "dm-1";
+      mockSelectedWaveId = null;
+      rerenderWrapper(rerender, "/messages");
+
+      expect(screen.getByTestId("main-content")).toBeInTheDocument();
+      expect(screen.queryByTestId("left-sidebar")).not.toBeInTheDocument();
+    });
   });
 });

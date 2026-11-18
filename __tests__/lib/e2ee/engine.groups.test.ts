@@ -62,6 +62,22 @@ async function groupRoundTrip(size: number): Promise<void> {
 }
 
 describe("E2EE engine: groups", () => {
+  it("does not create a strict group when a selected recipient cannot join", async () => {
+    const world = await createWorld();
+    const [alice, bob] = await users(world, 2, "strict");
+    const engine = alice!.primary.engine;
+    await expect(
+      engine.createConversation({
+        profileIds: [bob!.profileId, "no-device"],
+        kind: "group",
+        requireAllRecipients: true,
+      })
+    ).rejects.toThrow("E2EE_NO_DEVICES");
+    expect(engine.getConversations()).toEqual([]);
+    await settle(world);
+    expect(bob!.primary.engine.getConversations()).toEqual([]);
+  });
+
   it("publishes the actor's own change notices to a subscribed timeline", async () => {
     const world = await createWorld();
     const [alice, bob, carol] = await users(world, 3, "n");

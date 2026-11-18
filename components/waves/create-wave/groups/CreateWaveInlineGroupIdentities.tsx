@@ -371,6 +371,8 @@ export default function CreateWaveInlineGroupIdentities(
     >
       <div data-group-criteria-tabs className="tw-w-fit">
         <CommonTabs<InlineIdentityMode>
+          variant="connected"
+          connectedSize="sm"
           items={modeItems}
           activeItem={mode}
           setSelected={setMode}

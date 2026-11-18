@@ -1,5 +1,6 @@
 import { decryptData } from "@/components/app-wallets/app-wallet-helpers";
 import { areEqualAddresses } from "@/helpers/Helpers";
+import { getAppWalletAvatarDataUri } from "@/helpers/app-wallet-avatar.helpers";
 import {
   InvalidPasswordError,
   PrivateKeyDecryptionError,
@@ -25,6 +26,7 @@ const mockWalletClient = {
 
 jest.mock("viem/accounts", () => ({
   privateKeyToAccount: jest.fn(),
+  toAccount: jest.fn((source: object) => ({ ...source, type: "local" })),
 }));
 
 jest.mock("viem", () => ({
@@ -346,13 +348,11 @@ describe("wagmiAppWalletConnector", () => {
   });
 
   describe("connector properties", () => {
-    it("has correct icon URL based on wallet address", () => {
-      expect(connectorInstance.icon).toBe(
-        `https://robohash.org/${mockAppWallet.address}.png?size=64x64`
-      );
-      expect(connectorInstance.iconUrl).toBe(
-        `https://robohash.org/${mockAppWallet.address}.png?size=64x64`
-      );
+    it("uses the locally generated avatar as its icon", () => {
+      const avatar = getAppWalletAvatarDataUri(mockAppWallet.address);
+      expect(avatar).toMatch(/^data:image\/svg\+xml/);
+      expect(connectorInstance.icon).toBe(avatar);
+      expect(connectorInstance.iconUrl).toBe(avatar);
     });
 
     it("has correct ID based on wallet address", () => {

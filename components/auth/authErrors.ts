@@ -32,3 +32,14 @@ export class DeviceGrantUnavailableError extends Error {
     this.name = "DeviceGrantUnavailableError";
   }
 }
+
+/**
+ * A sign-in endpoint answered 429: too many sign-in attempts in a short
+ * time. Asking again right away is refused the same way.
+ */
+export class SignInRateLimitedError extends Error {
+  constructor() {
+    super("Too many sign-in attempts");
+    this.name = "SignInRateLimitedError";
+  }
+}

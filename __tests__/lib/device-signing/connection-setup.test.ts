@@ -30,6 +30,7 @@ let mockStorage = createMemoryE2eeStorage();
 let mockRecord: StoredDeviceKey | null = null;
 let mockGrant: ApiDeviceGrant;
 let mockGrantId: string;
+let mockServerGrants: ApiDeviceGrant[];
 const mockWasm = loadMlsWasm({
   bytes: new Uint8Array(
     readFileSync(join(process.cwd(), "public", MLS_WASM_MANIFEST.file))
@@ -62,10 +63,14 @@ const mockRegister = jest.fn(
       expires_at: request.grant.expires_at * 1000,
       revoked_at: null,
     } as ApiDeviceGrant;
+    mockServerGrants.push(mockGrant);
     return mockGrant;
   }
 );
 const mockRevoke = jest.fn(async (_input: { endpoint: string }) => undefined);
+const mockFetchGrants = jest.fn(
+  async (_input: { endpoint: string }) => mockServerGrants
+);
 jest.mock("@/services/api/common-api", () => ({
   commonApiPost: (input: {
     endpoint: string;
@@ -74,7 +79,10 @@ jest.mock("@/services/api/common-api", () => ({
     input.endpoint === "device-grants"
       ? mockRegister(input)
       : mockRevoke(input),
-  commonApiFetch: async () => ({ id: profileId }),
+  commonApiFetch: async (input: { endpoint: string }) =>
+    input.endpoint === "device-grants"
+      ? mockFetchGrants(input)
+      : { id: profileId },
 }));
 jest.mock("@/components/e2ee/e2eeLocalState", () => ({
   setE2eeEnrollmentMarker: jest.fn(),
@@ -83,6 +91,8 @@ jest.mock("@/components/e2ee/e2eeLocalState", () => ({
 beforeEach(() => {
   mockRegister.mockClear();
   mockRevoke.mockClear();
+  mockFetchGrants.mockClear();
+  mockServerGrants = [];
   mockRecord = null;
   mockStorage = createMemoryE2eeStorage();
 });
@@ -233,6 +243,55 @@ it("keeps existing signing keys and registered MLS history when another setup li
     beforeDevice?.deviceKey
   );
   expect(await mockStorage.getWasmState(profileId)).toEqual(beforeState);
+});
+
+it("replaces a stale Desktop signing grant while keeping the registered MLS device and history", async () => {
+  async function acceptDesktopShare() {
+    const share = await prepareConnectionDeviceSetup({
+      wallet,
+      profileId,
+      target: "desktop",
+      sign: async (data) => {
+        mockGrantId = computeAppGrantId(data.message);
+        return { signature: "0x1234" };
+      },
+      isCurrent: () => true,
+    });
+    if (!share) throw new Error("Expected a signed Desktop share");
+    return acceptConnectionDeviceSetup({
+      ...share,
+      wallet,
+      accessToken: "test-session",
+      target: "desktop",
+    });
+  }
+
+  await acceptDesktopShare();
+  const staleGrant = mockGrant;
+  const device = await mockStorage.getDevice(profileId);
+  if (!device) throw new Error("Expected the existing encryption device");
+  const registered = { ...device, registered: true };
+  await mockStorage.writeBatch(profileId, { device: registered });
+  const beforeState = await mockStorage.getWasmState(profileId);
+  mockServerGrants = [];
+
+  await expect(acceptDesktopShare()).resolves.toBe("reused");
+
+  expect(mockFetchGrants).toHaveBeenCalledWith({
+    endpoint: "device-grants",
+    includeWalletAuth: false,
+    headers: { Authorization: "Bearer test-session" },
+    cache: "no-store",
+  });
+  expect(mockRegister).toHaveBeenCalledTimes(2);
+  expect(mockGrant.id).not.toBe(staleGrant.id);
+  expect(mockRecord).toMatchObject({
+    grant: mockGrant,
+    publicKeyHex: mockGrant.device_key,
+  });
+  expect(await mockStorage.getDevice(profileId)).toEqual(registered);
+  expect(await mockStorage.getWasmState(profileId)).toEqual(beforeState);
+  expect(mockRevoke).not.toHaveBeenCalled();
 });
 
 /** Signs a mobile share and records the grant ID expected by the API mock. */

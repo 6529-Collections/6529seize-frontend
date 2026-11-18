@@ -1,4 +1,5 @@
 import { parseCsvFile } from "@/components/mapping-tools/mappingToolCsv";
+import { buildCsv } from "@/helpers/csv-export.helpers";
 
 function parse<T>(
   csv: string,
@@ -25,6 +26,24 @@ describe("parseCsvFile", () => {
       { address: "address", tokenId: "token_id" },
       { address: "0xabc", tokenId: "1" },
       { address: "0xdef", tokenId: "2" },
+    ]);
+  });
+
+  it("reads back a file built for download, formula-like cells included", async () => {
+    const wallet = `0x${"a".repeat(40)}`;
+    const exported = buildCsv([
+      ["address", "balance", "name"],
+      [wallet, -3, "=HYPERLINK(1)"],
+      [wallet.toUpperCase(), 2, '@me, "quoted"'],
+    ]);
+
+    const rows = await parse(exported, (row, index) =>
+      index === 0 ? undefined : [row["_0"], row["_1"], row["_2"]]
+    );
+
+    expect(rows).toEqual([
+      [wallet, "-3", "=HYPERLINK(1)"],
+      [wallet.toUpperCase(), "2", '@me, "quoted"'],
     ]);
   });
 

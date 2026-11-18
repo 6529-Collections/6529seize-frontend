@@ -47,6 +47,8 @@ import type {
   ApiDropV2View,
   ApiDropWithoutWaveV2View,
 } from "@/services/api/drop-v2-view.types";
+import { recordWaveCompetitionPresence } from "@/helpers/waves/wave-competition-presence";
+import type { ApiWaveMinWithChatLinkSettings } from "@/helpers/waves/wave.helpers";
 import { fetchDropMetadataByIdV2 } from "./wave-drop-metadata-v2-api";
 import type {
   ApiWaveDropsV2PageFeed,
@@ -201,6 +203,12 @@ const hydrateDropV2 = async ({
   const dropType = getDropType(drop);
   const winningContext = getWinningContext(drop);
   const replyTo = mapReplyToDrop(drop);
+  const entry = drop.competition_entry;
+  const hasEntryReference =
+    typeof entry?.competition_id === "string" &&
+    entry.competition_id.length > 0 &&
+    typeof entry.entry_id === "string" &&
+    entry.entry_id.length > 0;
 
   return {
     collaborators: drop.collaborators ?? [],
@@ -210,6 +218,9 @@ const hydrateDropV2 = async ({
     id: drop.id,
     serial_no: drop.serial_no,
     drop_type: dropType,
+    ...(entry === null || hasEntryReference
+      ? { competition_entry: entry }
+      : {}),
     rank: voting?.place ?? null,
     ...(winningContext ? { winning_context: winningContext } : {}),
     ...(drop.submission_context
@@ -288,7 +299,8 @@ export const mapLeaderboardDropV2 = ({
     updated_at: drop.updated_at ?? null,
     title: drop.title ?? null,
     parts: [createBasePart(drop)],
-    parts_count: 1,
+    // The post's real part count: only its first part is loaded here.
+    parts_count: drop.parts_count,
     referenced_nfts: drop.referenced_nfts ?? [],
     mentioned_users: drop.mentioned_users ?? [],
     mentioned_groups: drop.mentioned_groups ?? [],
@@ -396,6 +408,11 @@ const fetchDropAndWaveV2 = async (
     signal,
   });
 
+/** A feed page whose wave keeps the client-only settings the mapper adds. */
+type WaveDropsFeedWithWaveSettings = Omit<ApiWaveDropsFeed, "wave"> & {
+  wave: ApiWaveMinWithChatLinkSettings;
+};
+
 export async function fetchWaveDropsFeedV2({
   waveId,
   limit,
@@ -407,7 +424,7 @@ export async function fetchWaveDropsFeedV2({
   includeFullMetadata = false,
   includeTopRaters = false,
   withRetry = false,
-}: FetchWaveDropsV2Props): Promise<ApiWaveDropsFeed> {
+}: FetchWaveDropsV2Props): Promise<WaveDropsFeedWithWaveSettings> {
   const params: Record<string, string> = {
     limit: limit.toString(),
     respect_drop_reply_collapse: "true",
@@ -440,6 +457,7 @@ export async function fetchWaveDropsFeedV2({
     : await commonApiFetch<ApiWaveDropsFeedV2>(request);
 
   const wave = mapApiWaveOverviewToApiWaveMin(data.wave);
+  recordWaveCompetitionPresence(waveId, wave.has_competition);
   const drops = await hydrateDropsV2({
     drops: data.drops,
     headers,

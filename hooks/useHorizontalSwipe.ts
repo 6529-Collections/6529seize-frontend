@@ -14,6 +14,7 @@ interface HorizontalSwipeOptions {
   readonly enabled: boolean;
   readonly direction: -1 | 1;
   readonly threshold: number;
+  readonly intentRatio?: number;
   readonly flick?: boolean;
   readonly onStart?: () => void;
   readonly onMove: (distance: number, ready: boolean) => void;
@@ -131,27 +132,29 @@ function additionalTouch(event: TouchEvent) {
 
 function track(current: Gesture, touch: Touch, isRelease = false) {
   const deltaX = touch.clientX - current.x;
+  const absoluteDeltaX = Math.abs(deltaX);
   const deltaY = Math.abs(touch.clientY - current.y);
   if (!current.owner) {
     if (globalThis.getSelection()?.isCollapsed === false) {
       cancel();
       return;
     }
-    if (deltaY >= AXIS_SLOP && deltaY >= Math.abs(deltaX)) {
+    if (deltaY >= AXIS_SLOP && deltaY >= absoluteDeltaX) {
       cancel();
       return;
     }
-    if (Math.abs(deltaX) < AXIS_SLOP || Math.abs(deltaX) < deltaY * AXIS_RATIO)
-      return;
-    current.owner =
-      current.candidates.find(
-        ({ options }) =>
-          options.current.enabled && deltaX * options.current.direction > 0
-      ) ?? null;
-    if (!current.owner) {
+    if (absoluteDeltaX < AXIS_SLOP) return;
+    const candidate = current.candidates.find(
+      ({ options }) =>
+        options.current.enabled && deltaX * options.current.direction > 0
+    );
+    if (!candidate) {
       cancel();
       return;
     }
+    const intentRatio = candidate.options.current.intentRatio ?? AXIS_RATIO;
+    if (absoluteDeltaX < deltaY * intentRatio) return;
+    current.owner = candidate;
     suppressClick(current.owner.element);
     current.owner.options.current.onStart?.();
   }
@@ -187,14 +190,15 @@ function move(event: TouchEvent) {
     !current ||
     !touch ||
     event.touches.length !== 1 ||
-    touch.identifier !== current.id
+    touch.identifier !== current.id ||
+    !event.cancelable
   ) {
     cancel();
     return;
   }
   track(current, touch);
   if (gesture !== current || !current.owner) return;
-  if (event.cancelable) event.preventDefault();
+  event.preventDefault();
   current.frame ??= globalThis.requestAnimationFrame(() => paint(current));
 }
 

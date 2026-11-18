@@ -28,6 +28,9 @@ Users can:
 
 - Visible only for active non-DM waves.
 - Hidden when `description_drop.id` is missing.
+- Hidden when the desktop/tablet center header is narrower than 640px to preserve
+  room for the wave name. The preview stays visible with compact action icons in
+  columns of 640–767px. Select the name to read the full description in `About`.
 - Hidden when the first description part resolves to empty preview text,
   including a pinned drop that is only an image or a 6529 drop link. Its full
   content stays available from the wave name's `About` panel.

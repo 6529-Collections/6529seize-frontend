@@ -22,7 +22,7 @@ const PROBE = [
   'fs.appendFileSync("gate-invocations.log", JSON.stringify({',
   "  args: process.argv.slice(2), base: process.env.ESLINT_PLUGIN_DIFF_COMMIT",
   '}) + "\\n");',
-  'if (process.argv.includes("src/fail.ts")) process.exit(2);',
+  'if (process.argv.includes("src/fail.ts") || process.argv.includes("config/fail.ts")) process.exit(2);',
 ].join("\n");
 
 function write(root: string, file: string, content: string) {
@@ -168,6 +168,33 @@ it("runs merge-base gates in a SHA-256 repository", () => {
     fs.rmSync(root, { recursive: true, force: true });
   }
 }, 60000);
+
+it.each(["lint:changed", "lint:changed:fix"])(
+  "runs %s with a separate base-rules batch for changed config files",
+  (gate) => {
+    const root = fixture();
+    try {
+      write(root, "config/fail.ts", "export {};\n");
+      write(root, "src/feature.ts", "export {};\n");
+      const result = runGate(root, gate);
+      expect(result.error).toBeUndefined();
+      expect(result.status).toBe(123);
+      expect(result.calls).toHaveLength(2);
+      expect(
+        result.calls.map(({ args }) => args.slice(args.indexOf("--") + 1))
+      ).toEqual([["src/feature.ts"], ["config/fail.ts"]]);
+      expect(result.calls[0]!.args).toContain("eslint.config.diff.mjs");
+      expect(result.calls[1]!.args).toContain("eslint.config.base-diff.mjs");
+      for (const call of result.calls) {
+        expect(call.base).toBe(git(root, ["rev-parse", "origin/main"]));
+        expect(call.args.includes("--fix")).toBe(gate.endsWith(":fix"));
+      }
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  },
+  60000
+);
 
 describe.each(GATES)("%s command transport", (gate) => {
   let root: string;

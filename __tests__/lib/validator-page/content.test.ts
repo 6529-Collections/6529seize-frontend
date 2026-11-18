@@ -319,6 +319,9 @@ describe("validator page text", () => {
     expect(fold("keep-it-awake")).toContain(
       `keep it awake for about ${KEEP_ON_MINUTES} minutes from 00:15 UTC`
     );
+    expect(fold("keep-it-awake")).toContain(
+      "Running 24/7 earns the most. A computer that's sometimes off isn't penalized; it just doesn't earn while it's off."
+    );
     for (const page of [GUIDE, VALIDATOR_KNOWN_ISSUES_MARKDOWN]) {
       expect(page).not.toMatch(/random|two hours|three hours|2 hours/i);
     }

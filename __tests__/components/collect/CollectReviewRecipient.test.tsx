@@ -33,6 +33,21 @@ jest.mock("@/hooks/useIdentity", () => ({ useIdentity: jest.fn() }));
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 jest.mock("@/helpers/server.helpers", () => ({ getUserProfile: jest.fn() }));
 jest.mock("@/components/nft-transfer/TransferModalPfp", () => () => null);
+// The recipient picker auto-selects a .eth result only when the name resolves
+// forward to that wallet; fren.eth resolves to the fren wallet here.
+jest.mock("wagmi", () => ({
+  ...jest.requireActual("wagmi"),
+  useEnsAddress: ({ name }: { name?: string }) => ({
+    data:
+      name === "fren.eth"
+        ? "0x5aaeb6053f3e94c9b9a09f33669435e7ef1beaed"
+        : name === undefined
+          ? undefined
+          : null,
+    isLoading: false,
+    isError: false,
+  }),
+}));
 
 type Props = ComponentProps<typeof CollectReviewRecipient>;
 function setup(overrides: Partial<Props> = {}) {

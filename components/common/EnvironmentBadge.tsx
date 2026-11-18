@@ -8,6 +8,7 @@ import {
   isLocalAppEnvironment,
 } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
+import { isDesktopApp } from "@/helpers/desktop-shell";
 import { useId, useSyncExternalStore } from "react";
 import { Tooltip } from "react-tooltip";
 
@@ -23,6 +24,7 @@ const subscribeToBrowserOrigin = () => () => undefined;
 // different port, shows its own badge right after hydration.
 const getConfiguredOrigin = () =>
   getConfiguredAppOrigin(publicEnv.BASE_ENDPOINT);
+const getServerIsDesktopApp = () => false;
 
 export default function EnvironmentBadge({
   compact = false,
@@ -33,7 +35,16 @@ export default function EnvironmentBadge({
     getBrowserOrigin,
     getConfiguredOrigin
   );
-  const { badge, host } = getAppEnvironment(browserOrigin);
+  const isDesktop = useSyncExternalStore(
+    subscribeToBrowserOrigin,
+    isDesktopApp,
+    getServerIsDesktopApp
+  );
+  // 6529 Desktop always runs on a local server; its badge follows the build
+  // (none for production), not the local origin.
+  const { badge, host } = getAppEnvironment(
+    isDesktop ? getConfiguredOrigin() : browserOrigin
+  );
   const tooltipId = buildTooltipId("environment-badge", useId());
 
   if (!badge) {
@@ -43,9 +54,10 @@ export default function EnvironmentBadge({
   const tooltipContent = `Environment: ${host}`;
 
   if (logoOverlay) {
-    const localPort = isLocalAppEnvironment(browserOrigin)
-      ? new URL(browserOrigin).port
-      : undefined;
+    const localPort =
+      !isDesktop && isLocalAppEnvironment(browserOrigin)
+        ? new URL(browserOrigin).port
+        : undefined;
 
     return (
       <span

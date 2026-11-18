@@ -99,10 +99,10 @@ Scope:
 - Symptom: tab is missing on one device/session but visible on another.
   - Meaning:
     - `Brain` needs Waves enabled.
-    - `Subscriptions` is hidden on iOS when consent country is not `US`, and it
-      is added a moment after the page loads on every other platform.
+    - The iOS app hides `Subscriptions`. On the web and Android, the tab
+      appears after the page loads.
     - `Proxy` is visible only on your own profile.
-  - Action: retest with expected account, device, and country context.
+  - Action: retest with expected account and device context.
 
 - Symptom: tab URL opens, then moves to another tab.
   - Meaning: current tab is hidden in current context; app falls back to first
@@ -110,9 +110,8 @@ Scope:
     checking whether the profile belongs to you. On direct `/{user}/brain`
     links, the fallback also waits for client hydration, wallet reconnection,
     or connected-profile restoration to decide whether Waves is available.
-    On iOS, `/{user}/subscriptions` waits for the country check; a non-US,
-    unknown, failed, or slow check then falls back to `/{user}`, while `US`
-    keeps the `Subscriptions` tab.
+    In the iOS app, `/{user}/subscriptions` returns to `/{user}` (Identity)
+    after the page loads.
   - Action: switch context or use a visible tab URL.
 
 - Symptom: followers stat does not open `/{user}/followers`.
@@ -187,7 +186,7 @@ Scope:
   to the target tab.
 - Replace removed or unsupported saved links with the documented supported
   routes.
-- Re-test tab visibility under the expected account, device, and country
+- Re-test tab visibility under the expected account and device
   context when behavior differs across sessions.
 
 ## Limitations / Notes

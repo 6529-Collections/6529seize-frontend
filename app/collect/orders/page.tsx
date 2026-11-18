@@ -1,4 +1,5 @@
 import CollectOrdersClient from "@/components/collect/CollectOrdersClient";
+import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -19,9 +20,11 @@ export default async function CollectOrdersPage({
       ? query["operation"]
       : undefined;
   return (
-    <CollectOrdersClient
-      initialOperationId={operationId}
-      initialBatch={query["kind"] === "BUY_BATCH"}
-    />
+    <NftPurchasingGate redirectTo="/the-memes">
+      <CollectOrdersClient
+        initialOperationId={operationId}
+        initialBatch={query["kind"] === "BUY_BATCH"}
+      />
+    </NftPurchasingGate>
   );
 }

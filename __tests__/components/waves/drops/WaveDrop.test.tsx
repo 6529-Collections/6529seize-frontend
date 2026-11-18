@@ -24,6 +24,17 @@ const mockWaveDropContent = jest.fn();
 const mockWaveDropHeader = jest.fn();
 const mockMutate = jest.fn();
 let mockEditMentionedGroups: ApiDropGroupMention[] = [];
+// Placement only: this browser's own check is covered in
+// dropSignatureVerdicts.test.tsx, so every seal here reads as verified.
+const mockUseDropSealStates = jest.fn(
+  (drops: readonly unknown[], _active: boolean) => drops.map(() => "verified")
+);
+jest.mock("@/components/waves/drops/signature/dropSignatureVerdicts", () => ({
+  useDropSealStates: (drops: readonly unknown[], active: boolean) =>
+    mockUseDropSealStates(drops, active),
+  readSealState: () => "verified",
+}));
+
 jest.mock("@/components/waves/drops/WaveDropActions", () => (props: any) => {
   mockWaveDropActions(props);
   return <div data-testid="actions" />;
@@ -77,6 +88,11 @@ jest.mock("@/components/waves/drops/WaveDropMobileMenu", () => (props: any) => {
   return <div data-testid="mobile" data-open={String(props.isOpen)} />;
 });
 
+let mockIsMdViewport: boolean | null = null;
+jest.mock("@/hooks/useIsMdViewportOrUnknown", () => ({
+  __esModule: true,
+  default: () => mockIsMdViewport,
+}));
 jest.mock("@/hooks/isMobileDevice");
 jest.mock("@/lib/device-signing/feature", () => ({
   isSignedMessagesEnabled: () => true,
@@ -223,6 +239,7 @@ describe("WaveDrop", () => {
     mockWaveDropHeader.mockClear();
     mockMutate.mockClear();
     mockEditMentionedGroups = [];
+    mockIsMdViewport = null;
     mobileMenuProps = undefined;
     isMobileMock.mockReturnValue(false);
     hasTouchInputMock.mockReturnValue(false);
@@ -271,6 +288,58 @@ describe("WaveDrop", () => {
       expect(headerProps.showActionsButton).toBe(isMobile && canRemove);
       expect(Boolean(headerProps.desktopActions)).toBe(!isMobile && canRemove);
       expect(screen.queryByTestId("actions")).not.toBeInTheDocument();
+    }
+  );
+
+  it.each([
+    { isMdViewport: true, headers: 1 },
+    { isMdViewport: false, headers: 1 },
+    // Unknown (server render, hydration): both slots mount and CSS hides one.
+    { isMdViewport: null, headers: 2 },
+  ])(
+    "mounts $headers author header(s) when the md viewport is $isMdViewport",
+    ({ isMdViewport, headers }) => {
+      mockIsMdViewport = isMdViewport;
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+        />
+      );
+      expect(screen.getAllByTestId("header")).toHaveLength(headers);
+    }
+  );
+
+  it.each([true, false])(
+    "keeps the inline author header when the md viewport is %s",
+    (isMdViewport) => {
+      mockIsMdViewport = isMdViewport;
+      renderWithEditingDropProvider(
+        <WaveDrop
+          drop={drop}
+          previousDrop={null}
+          nextDrop={null}
+          showWaveInfo={false}
+          activeDrop={null}
+          showReplyAndQuote={false}
+          location={DropLocation.WAVE}
+          dropViewDropId={null}
+          onReply={jest.fn()}
+          onReplyClick={jest.fn()}
+          onQuoteClick={jest.fn()}
+          inlineAuthorOnDesktop
+        />
+      );
+      expect(screen.getAllByTestId("header")).toHaveLength(1);
     }
   );
 
@@ -782,6 +851,11 @@ describe("WaveDrop", () => {
         { name: "Signed by its author" }
       )
     ).toBeInTheDocument();
+    // The row's own drop is what this browser checks for that seal.
+    expect(mockUseDropSealStates).toHaveBeenCalledWith(
+      [expect.objectContaining({ id: "current-grouped" })],
+      true
+    );
     unmount();
 
     renderGrouped(false);

@@ -193,6 +193,9 @@ The launch surface combines:
   configured `MEMES_DEPLOYER` payment receiver, and metadata-only updates preserve
   the claim's current receiver. `Pay Artist` sends ETH directly from the signing
   wallet's own balance, in addition to gas; it does not withdraw mint revenue.
+  Its payment address input shows the address that will be paid in full,
+  checksummed. In a pasted `name - 0x...` value, an ENS name is resolved again
+  and the pasted address is ignored; any other label leaves no address.
 - Launch uses the craft claim as its content source; unpublished craft metadata
   blocks launch initialization.
 - Tracked completion toggles are launch workflow metadata; they do not

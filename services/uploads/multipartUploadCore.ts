@@ -21,8 +21,10 @@ import type { ApiCreateAttachmentMultipartUploadResponse } from "@/generated/mod
 import type { ApiCompleteAttachmentMultipartUploadRequest } from "@/generated/models/ApiCompleteAttachmentMultipartUploadRequest";
 import { getApiAttachmentUploadMimeType } from "@/services/uploads/attachmentUploadMimeType";
 import { t } from "@/i18n/messages";
-import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { captureVideoPoster } from "./captureVideoPoster";
+import { ImageProcessingError } from "@/services/uploads/ImageProcessingError";
+import { toUploadRequestError } from "@/services/uploads/MediaUploadRefusedError";
 
 const PART_SIZE = 5 * 1024 * 1024;
 const CONCURRENCY = 5;
@@ -44,6 +46,7 @@ interface MultipartUploadCoreParams {
   onCompleting?: (() => void) | undefined;
   waitForReady?: boolean | undefined;
   signal?: AbortSignal | undefined;
+  locale?: SupportedLocale | undefined;
 }
 
 interface MediaMultipartUploadCoreParams extends MultipartUploadCoreParams {
@@ -70,6 +73,24 @@ export {
   getContentType,
   toApiMediaUploadMimeType,
 } from "@/services/uploads/mediaUploadMimeType";
+
+/**
+ * Awaits an upload start or completion request made in structured error
+ * mode. The upload-limit and media-size refusals become a
+ * MediaUploadRefusedError with a localized message; neither is retried,
+ * because asking again right away would be refused the same way. An error
+ * body that is not JSON is never shown: see toUploadRequestError.
+ */
+async function withUploadRefusalMessage<T>(
+  request: Promise<T>,
+  locale: SupportedLocale
+): Promise<T> {
+  try {
+    return await request;
+  } catch (error) {
+    throw toUploadRequestError(error, locale);
+  }
+}
 
 export function getApiMediaUploadMimeType(file: File): ApiMediaUploadMimeType {
   const contentType = getContentType(file);
@@ -220,30 +241,33 @@ function isAbortError(error: unknown): boolean {
 }
 
 function getImageProcessingFailedMessage(
-  response: ApiCompleteMultipartUploadResponse
+  response: ApiCompleteMultipartUploadResponse,
+  locale: SupportedLocale
 ): string {
-  return (
-    response.media_error ?? t(DEFAULT_LOCALE, "drop.media.processingFailed")
-  );
+  return response.media_error ?? t(locale, "drop.media.processingFailed");
 }
 
 function assertImageProcessingDidNotFail(
-  response: ApiCompleteMultipartUploadResponse
+  response: ApiCompleteMultipartUploadResponse,
+  locale: SupportedLocale
 ): void {
   if (response.media_status === ApiDropMediaStatus.Failed) {
-    throw new Error(getImageProcessingFailedMessage(response));
+    throw new ImageProcessingError(
+      getImageProcessingFailedMessage(response, locale)
+    );
   }
 }
 
 async function waitForMediaReady(
   completionData: ApiCompleteMultipartUploadResponse,
+  locale: SupportedLocale,
   signal?: AbortSignal
 ): Promise<ApiCompleteMultipartUploadResponse> {
   if (!completionData.media_upload_id) {
     return completionData;
   }
 
-  assertImageProcessingDidNotFail(completionData);
+  assertImageProcessingDidNotFail(completionData, locale);
 
   if (
     completionData.media_status === undefined ||
@@ -276,13 +300,13 @@ async function waitForMediaReady(
       return status;
     }
 
-    assertImageProcessingDidNotFail(status);
+    assertImageProcessingDidNotFail(status, locale);
   }
 
   if (lastPollError instanceof Error) {
     throw lastPollError;
   }
-  throw new Error(t(DEFAULT_LOCALE, "drop.media.processingTimedOut"));
+  throw new ImageProcessingError(t(locale, "drop.media.processingTimedOut"));
 }
 
 export async function multipartUploadCore({
@@ -293,21 +317,26 @@ export async function multipartUploadCore({
   waitForReady = false,
   signal,
   purpose,
+  locale = DEFAULT_LOCALE,
 }: MediaMultipartUploadCoreParams): Promise<ApiCompleteMultipartUploadResponse> {
   const contentType = getApiMediaUploadMimeType(file);
 
-  const startData = await commonApiPost<
-    ApiCreateMediaUploadUrlRequest,
-    ApiStartMultipartMediaUploadResponse
-  >({
-    endpoint: endpoints.start,
-    body: {
-      file_name: file.name,
-      content_type: contentType,
-      ...getStartPurposeBody(purpose),
-    },
-    ...(signal ? { signal } : {}),
-  });
+  const startData = await withUploadRefusalMessage(
+    commonApiPost<
+      ApiCreateMediaUploadUrlRequest,
+      ApiStartMultipartMediaUploadResponse
+    >({
+      endpoint: endpoints.start,
+      body: {
+        file_name: file.name,
+        content_type: contentType,
+        ...getStartPurposeBody(purpose),
+      },
+      ...(signal ? { signal } : {}),
+      errorMode: "structured",
+    }),
+    locale
+  );
 
   const { upload_id, key } = startData;
   if (!upload_id || !key) {
@@ -343,32 +372,36 @@ export async function multipartUploadCore({
 
   onCompleting?.();
 
-  const completionData = await commonApiPost<
-    ApiCompleteMultipartUploadRequest,
-    ApiCompleteMultipartUploadResponse
-  >({
-    endpoint: endpoints.complete,
-    body: {
-      upload_id,
-      key,
-      parts: uploadedParts.map((p) => ({
-        part_no: p.partNumber,
-        etag: p.eTag,
-      })),
-      ...(videoPoster ? { video_poster_base64: videoPoster } : {}),
-    },
-    ...(signal ? { signal } : {}),
-  });
+  const completionData = await withUploadRefusalMessage(
+    commonApiPost<
+      ApiCompleteMultipartUploadRequest,
+      ApiCompleteMultipartUploadResponse
+    >({
+      endpoint: endpoints.complete,
+      body: {
+        upload_id,
+        key,
+        parts: uploadedParts.map((p) => ({
+          part_no: p.partNumber,
+          etag: p.eTag,
+        })),
+        ...(videoPoster ? { video_poster_base64: videoPoster } : {}),
+      },
+      ...(signal ? { signal } : {}),
+      errorMode: "structured",
+    }),
+    locale
+  );
 
   const { media_url } = completionData;
   if (!media_url) {
     throw new Error("No final media_url returned from completion endpoint");
   }
 
-  assertImageProcessingDidNotFail(completionData);
+  assertImageProcessingDidNotFail(completionData, locale);
 
   return waitForReady
-    ? await waitForMediaReady(completionData, signal)
+    ? await waitForMediaReady(completionData, locale, signal)
     : completionData;
 }
 
@@ -377,6 +410,7 @@ export async function multipartAttachmentUploadCore({
   endpoints,
   onProgress,
   signal,
+  locale = DEFAULT_LOCALE,
 }: MultipartUploadCoreParams): Promise<ApiAttachment> {
   const contentType = getApiAttachmentUploadMimeType(file);
 
@@ -384,17 +418,21 @@ export async function multipartAttachmentUploadCore({
     throw new Error(`Unsupported attachment type for upload: ${file.name}`);
   }
 
-  const startData = await commonApiPost<
-    ApiCreateAttachmentMultipartUploadRequest,
-    ApiCreateAttachmentMultipartUploadResponse
-  >({
-    endpoint: endpoints.start,
-    body: {
-      file_name: file.name,
-      content_type: contentType,
-    },
-    ...(signal ? { signal } : {}),
-  });
+  const startData = await withUploadRefusalMessage(
+    commonApiPost<
+      ApiCreateAttachmentMultipartUploadRequest,
+      ApiCreateAttachmentMultipartUploadResponse
+    >({
+      endpoint: endpoints.start,
+      body: {
+        file_name: file.name,
+        content_type: contentType,
+      },
+      ...(signal ? { signal } : {}),
+      errorMode: "structured",
+    }),
+    locale
+  );
 
   const { attachment_id, upload_id, key } = startData;
   if (!attachment_id || !upload_id || !key) {
@@ -413,20 +451,21 @@ export async function multipartAttachmentUploadCore({
     signal,
   });
 
-  return await commonApiPost<
-    ApiCompleteAttachmentMultipartUploadRequest,
-    ApiAttachment
-  >({
-    endpoint: endpoints.complete,
-    body: {
-      attachment_id,
-      upload_id,
-      key,
-      parts: uploadedParts.map((p) => ({
-        part_no: p.partNumber,
-        etag: p.eTag,
-      })),
-    },
-    ...(signal ? { signal } : {}),
-  });
+  return await withUploadRefusalMessage(
+    commonApiPost<ApiCompleteAttachmentMultipartUploadRequest, ApiAttachment>({
+      endpoint: endpoints.complete,
+      body: {
+        attachment_id,
+        upload_id,
+        key,
+        parts: uploadedParts.map((p) => ({
+          part_no: p.partNumber,
+          etag: p.eTag,
+        })),
+      },
+      ...(signal ? { signal } : {}),
+      errorMode: "structured",
+    }),
+    locale
+  );
 }

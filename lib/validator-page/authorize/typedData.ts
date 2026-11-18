@@ -136,8 +136,21 @@ function checkDomain(domain: JsonObject, network: string): string[] {
     problems.push("Its domain salt isn't 32 bytes.");
   } else if (network === "mainnet" && salt.toLowerCase() !== MAINNET_SALT) {
     problems.push("Its domain salt isn't the mainnet one.");
+  } else if (network !== "mainnet" && salt.toLowerCase() === MAINNET_SALT) {
+    problems.push(
+      "Its domain salt is the mainnet one, on a test network link."
+    );
   }
   return problems;
+}
+
+/**
+ * The network a signature over this domain salt counts on. The salt alone
+ * decides it: a grant signed with the mainnet salt counts on mainnet,
+ * whatever the link said.
+ */
+export function grantNetwork(salt: string): "mainnet" | "test" {
+  return salt.toLowerCase() === MAINNET_SALT ? "mainnet" : "test";
 }
 
 function checkTypes(types: JsonObject): string[] {

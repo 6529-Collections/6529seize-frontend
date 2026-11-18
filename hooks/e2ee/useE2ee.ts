@@ -44,6 +44,7 @@ export interface UseE2eeResult {
   readonly error: string | null;
   readonly profileId: string | null;
   readonly engine: E2eeEngine | null;
+  readonly localDeviceKey: string | null;
   readonly thisDevice: E2eeDeviceInfo | null;
   readonly devices: readonly E2eeDeviceInfo[];
   readonly conversations: readonly E2eeConversation[];
@@ -103,6 +104,7 @@ export function useE2ee(): UseE2eeResult {
       error: context.loadError ?? snapshot?.error ?? null,
       profileId: context.profileId,
       engine: context.engine,
+      localDeviceKey: snapshot?.localDeviceKey ?? null,
       thisDevice: snapshot?.thisDevice ?? null,
       devices: snapshot?.devices ?? EMPTY_DEVICES,
       conversations: snapshot?.conversations ?? EMPTY_CONVERSATIONS,

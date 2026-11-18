@@ -12,7 +12,7 @@ import { documentationQueryKey } from "@/hooks/artwork-documentation/useArtworkD
 import { useDocumentationActor } from "./DocumentationAuthGate";
 import {
   DocumentationButton,
-  inputClass,
+  selectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 
@@ -181,7 +181,7 @@ function MediaSession({
             <label className="tw-block tw-text-sm tw-text-iron-300">
               {msg("museum.captionFile")}
               <select
-                className={`${inputClass} tw-mt-2`}
+                className={`${selectClass} tw-mt-2`}
                 value={caption?.asset.id ?? ""}
                 onChange={(event) => setCaptionId(event.target.value)}
               >

@@ -1,10 +1,12 @@
 "use client";
 
+import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import Button from "@/components/utils/button/Button";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants/constants";
 import type { NextGenToken } from "@/entities/INextgen";
 import { numberWithCommas } from "@/helpers/Helpers";
+import { openUrlInNewTab } from "@/helpers/open-url.helpers";
 import { useState } from "react";
 import { mainnet } from "wagmi/chains";
 import NextGenTokenDownload, { Resolution } from "./NextGenTokenDownload";
@@ -105,7 +107,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
-    window.open(url, "_blank");
+    openUrlInNewTab(url);
   }
 
   return (
@@ -123,7 +125,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
             onChange={(event) => {
               setRenderType(event.target.value as RenderType);
             }}
-            className="tw-[color-scheme:dark] tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-2 tw-text-base tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            className={`${DROPDOWN_FIELD_CLASSES} tw-[color-scheme:dark] tw-min-h-11 tw-px-3 tw-py-2 tw-text-base`}
           >
             {Object.values(RenderType).map((type) => (
               <option
@@ -145,7 +147,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
             onChange={(event) => {
               setScriptVersion(event.target.value as ScriptVersion);
             }}
-            className="tw-[color-scheme:dark] tw-min-h-11 tw-cursor-pointer tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-2 tw-text-base tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+            className={`${DROPDOWN_FIELD_CLASSES} tw-[color-scheme:dark] tw-min-h-11 tw-px-3 tw-py-2 tw-text-base`}
           >
             {Object.values(ScriptVersion).map((version) => (
               <option

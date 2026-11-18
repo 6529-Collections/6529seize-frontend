@@ -3,7 +3,10 @@
 import Download, { type DownloadLabels } from "@/components/download/Download";
 import { publicEnv } from "@/config/env";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
-import { normalizeDecentralizedMediaUrl } from "@/lib/media/decentralized-media";
+import {
+  normalizeDecentralizedMediaUrl,
+  toIsolatedHtmlUrlFromInput,
+} from "@/lib/media/decentralized-media";
 import { ArrowTopRightOnSquareIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import type { ComponentType, ReactNode, SVGProps } from "react";
@@ -48,10 +51,15 @@ function getSafeUrl(
 }
 
 export function getSafeExternalUrl(url: string): string | null {
+  const resolverEndpoint = publicEnv.MEDIA_RESOLVER_ENDPOINT;
   const resolvedUrl =
-    normalizeDecentralizedMediaUrl(url, publicEnv.MEDIA_RESOLVER_ENDPOINT) ??
-    url;
-  return getSafeUrl(resolvedUrl, SAFE_EXTERNAL_PROTOCOLS);
+    normalizeDecentralizedMediaUrl(url, resolverEndpoint) ?? url;
+  // Opened top-level: IPFS media gets its own per-CID origin when the
+  // separate content domain is configured.
+  return getSafeUrl(
+    toIsolatedHtmlUrlFromInput(resolvedUrl, resolverEndpoint),
+    SAFE_EXTERNAL_PROTOCOLS
+  );
 }
 
 function getSafeDownloadUrl(url: string): string | null {

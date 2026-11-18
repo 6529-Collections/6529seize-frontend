@@ -56,6 +56,19 @@ browser tests for distinct rendering or navigation risks according to
 [AGENTS.md](../AGENTS.md#test-layer-selection), and register real browser packs
 in `tests/packs.manifest.cjs`.
 
+The session recovery sandbox also checks the Join 6529 / Validator slot using
+synthetic stored sessions on desktop and mobile. It holds identity restoration
+to verify hidden actions and stable neighboring rows, then checks newcomers,
+profileless wallets, members, failed identity lookup/retry, steady hover backgrounds,
+keyboard focus, direct navigation, and active state.
+App PR CI selects this registered pack through the critical-shell lane for
+membership-navigation source changes.
+
+The deployed read-only search pack also checks that newcomer Pages searches
+exclude Validator after results settle and still navigate through Join 6529.
+Member search results are covered by the focused search unit tests, alongside
+the member navigation scenarios in the session recovery sandbox.
+
 ## Pack registry
 
 The reaction sandbox covers live count and profile-list updates, desktop tooltip
@@ -218,6 +231,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:edit-drop-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Drop edit sandbox against the local mock API.                                                         |
 | `test:e2e:native-competition-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Native competition context, parallel budgets and navigation against the local mock API.               |
 | `test:e2e:submission-artwork-sandbox`               | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Submission artwork loading, GIF animation and HD controls in an isolated media sandbox.               |
+| `test:e2e:image-viewer-layout-sandbox`              | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Image viewer background geometry, focus restoration and gallery navigation in Chromium and WebKit.    |
 | `test:e2e:signature-sandbox`                        | —                             | sandbox  | local       | manual                    | 15m     | Signed participation sandbox that fails closed unsigned.                                              |
 | `test:e2e:session-recovery-sandbox`                 | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Expired session cold-start and foreground recovery against the local mock API.                        |
 | `test:e2e:auth-sandbox`                             | —                             | sandbox  | local       | manual                    | 15m     | Aggregate authenticated sandbox pack.                                                                 |
@@ -227,7 +241,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:profile-nic-sandbox`                      | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.               |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | manual                    | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |
-| `test:e2e:e2ee-picker-sandbox`                      | —                             | sandbox  | local       | manual                    | 15m     | Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.                             |
+| `test:e2e:e2ee-picker-sandbox`                      | —                             | sandbox  | local       | manual                    | 15m     | Encrypted chat recipient selection and the iPhone sign-out dialog.                                    |
 | `test:e2e:metamask-bridge`                          | —                             | sandbox  | local       | manual                    | 15m     | Isolated WebKit MetaMask bridge attribution and application-error boundaries.                         |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
 | `test:e2e:surface-matrix`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Core surfaces on desktop and mobile web shells.                                                       |
@@ -578,7 +592,9 @@ Surface matrix:
 - `test:e2e:e2ee-picker-sandbox` runs the real encrypted-compose recipient
   picker in desktop Chromium and iPhone WebKit. It checks completed taps,
   selection and eligibility, search reset, Enter/Space activation, Escape and
-  outside dismissal. This is browser simulation; physical iPhone verification
+  outside dismissal. On iPhone WebKit it also verifies that logout replaces the
+  sidebar with the encrypted-messages dialog and that cancel and confirm are
+  reachable by touch. This is browser simulation; physical iPhone verification
   remains separate. Like the other local E2EE pack, it is manually owned and
   uses only the loopback delivery service.
 - `test:e2e:e2ee-sandbox` runs end-to-end encrypted DMs and groups (D109)

@@ -7,6 +7,12 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import {
+  SINGLE_DROP_CLOSE_BUTTON_CLASSES,
+  SINGLE_DROP_CLOSE_ICON_CLASSES,
+  SINGLE_DROP_CLOSE_LABEL_CLASSES,
+} from "./singleWaveDropCloseStyles";
 
 interface SingleWaveDropLoadingProps {
   readonly onClose?: (() => void) | undefined;
@@ -71,16 +77,19 @@ export default function SingleWaveDropLoading({
       data-testid="single-drop-loading"
     >
       {onClose && (
-        <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-p-3">
+        <div className="tw-px-4 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] sm:tw-px-6 lg:tw-px-8">
           <button
             ref={closeRef}
             type="button"
-            className={buttonClass}
+            className={SINGLE_DROP_CLOSE_BUTTON_CLASSES}
             onClick={onClose}
             onKeyDown={onControlKeyDown}
             aria-label={t(locale, "singleDrop.closeLabel")}
           >
-            {t(locale, "singleDrop.close")}
+            <ArrowLeftIcon className={SINGLE_DROP_CLOSE_ICON_CLASSES} />
+            <span className={SINGLE_DROP_CLOSE_LABEL_CLASSES}>
+              {t(locale, "singleDrop.close")}
+            </span>
           </button>
         </div>
       )}

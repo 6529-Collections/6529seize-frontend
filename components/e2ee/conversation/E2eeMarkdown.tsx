@@ -1,32 +1,16 @@
 "use client";
 
 import {
-  Children,
   createContext,
   memo,
   useContext,
-  useEffect,
-  useId,
   useMemo,
-  useRef,
+  type ComponentPropsWithoutRef,
 } from "react";
-import Markdown, {
-  defaultUrlTransform,
-  type Components,
-  type ExtraProps,
-} from "react-markdown";
-import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
-import remarkGfm from "remark-gfm";
-import type { Plugin, PluggableList } from "unified";
-import type { ComponentPropsWithoutRef } from "react";
-
-import { highlightCodeElement } from "@/components/drops/view/part/dropPartMarkdown/highlight";
-import { normalizeDropMarkdownContent } from "@/components/drops/view/part/dropPartMarkdown/normalizeContent";
-import { rehypePreserveOrderedListDelimiter } from "@/components/drops/view/part/dropPartMarkdown/orderedListDelimiter";
-import { rehypeDropPreview } from "@/components/drops/view/part/dropPartMarkdown/preview";
+import type { Components } from "react-markdown";
+import type { Plugin } from "unified";
+import { MessageMarkdown } from "@/components/markdown/MessageMarkdown";
 import type { E2eeMember } from "@/lib/e2ee/types";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
 import { findMember } from "../e2eeFormat";
 import { E2eeProfileLink } from "../ui/E2eeProfileLink";
 import { E2eeEmojiText } from "./E2eeEmojiText";
@@ -36,6 +20,7 @@ interface PrivateTextContext {
   readonly members: readonly E2eeMember[];
   readonly mentions: readonly string[];
   readonly selfProfileId: string | null;
+  readonly preview?: boolean;
 }
 
 const TextContext = createContext<PrivateTextContext>({
@@ -73,8 +58,9 @@ function wrapProse(node: TextTree): void {
 const rehypePrivateText: Plugin = () => (tree) => wrapProse(tree as TextTree);
 
 function Prose({ children }: ComponentPropsWithoutRef<"span">) {
-  const { members, mentions, selfProfileId } = useContext(TextContext);
+  const { members, mentions, selfProfileId, preview } = useContext(TextContext);
   if (typeof children !== "string") return <span>{children}</span>;
+  if (preview) return <E2eeEmojiText text={children} size="sm" />;
   return splitMentions(children, members, mentions).map((segment) =>
     segment.kind === "mention" ? (
       <E2eeProfileLink
@@ -90,151 +76,10 @@ function Prose({ children }: ComponentPropsWithoutRef<"span">) {
   );
 }
 
-function PrivateLink({
-  node: _node,
-  href,
-  children,
-  ...props
-}: ComponentPropsWithoutRef<"a"> & ExtraProps) {
-  // Native anchors have no router prefetch, preview, proxy or hover fetch.
-  const safeHref = href ? defaultUrlTransform(href) : undefined;
-  if (!safeHref) return <span>{children}</span>;
-  return (
-    <a
-      {...props}
-      href={safeHref}
-      target={safeHref.startsWith("#") ? undefined : "_blank"}
-      rel="noopener noreferrer nofollow ugc"
-      className="tw-break-all tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-2 hover:tw-decoration-primary-300 focus-visible:tw-rounded focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-    >
-      {children}
-    </a>
-  );
-}
+const COMPONENTS: Components = { span: Prose };
+const TEXT_PLUGINS = [rehypePrivateText];
 
-function PrivateImage({ src, alt, title }: ComponentPropsWithoutRef<"img">) {
-  const locale = useBrowserLocale();
-  // Rendering a Markdown image must not contact its host or an image proxy.
-  const href = typeof src === "string" ? src : undefined;
-  if (!href) return <span>{alt}</span>;
-  let label = alt;
-  if (!label?.trim()) {
-    let host: string | undefined;
-    try {
-      host = new URL(href).hostname;
-    } catch {
-      /* Relative links have no host label. */
-    }
-    label = host
-      ? t(locale, "e2ee.message.imageLinkFrom", { host })
-      : t(locale, "e2ee.message.imageLink");
-  }
-  return (
-    <PrivateLink href={href} title={title}>
-      {label}
-    </PrivateLink>
-  );
-}
-
-function Table({ children }: ComponentPropsWithoutRef<"table">) {
-  const locale = useBrowserLocale();
-  return (
-    <div
-      role="region"
-      aria-label={t(locale, "e2ee.message.markdownTable")}
-      tabIndex={0}
-      className="tw-max-w-full tw-overflow-x-auto focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-    >
-      <table>{children}</table>
-    </div>
-  );
-}
-
-function Code({
-  children,
-  className,
-}: ComponentPropsWithoutRef<"code"> & ExtraProps) {
-  const ref = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const element = ref.current;
-    if (!element || element.parentElement?.tagName !== "PRE") return;
-    delete element.dataset["highlighted"];
-    const language = /language-([\w+-]+)/.exec(className ?? "")?.[1];
-    // The highlighter loads bundled code only; no content or language URL is fetched.
-    void highlightCodeElement(element, language).catch(() => {
-      // Readable code remains available if local highlighting fails.
-    });
-  }, [children, className]);
-  return (
-    <code
-      key={typeof children === "string" ? children : undefined}
-      ref={ref}
-      className={className}
-    >
-      {children}
-    </code>
-  );
-}
-
-function Paragraph({ children }: ComponentPropsWithoutRef<"p">) {
-  const parts = Children.toArray(children);
-  const blank =
-    parts.length > 0 &&
-    parts.every((part) => typeof part === "string" && part.trim().length === 0);
-  if (blank) {
-    return (
-      <p
-        aria-hidden="true"
-        className="word-break tw-my-1 tw-h-2 tw-leading-none"
-      >
-        {"\u00a0"}
-      </p>
-    );
-  }
-  return (
-    <p className="tw-m-0 tw-mb-1.5 tw-whitespace-pre-wrap tw-text-md tw-leading-6 last:tw-mb-0">
-      {children}
-    </p>
-  );
-}
-
-const COMPONENTS: Components = {
-  span: Prose,
-  a: PrivateLink,
-  img: PrivateImage,
-  code: Code,
-  p: Paragraph,
-  blockquote: ({ children }) => (
-    <blockquote className="tw-border-y-0 tw-border-l-4 tw-border-r-0 tw-border-solid tw-border-l-iron-500 tw-pl-4">
-      {children}
-    </blockquote>
-  ),
-  table: Table,
-};
-
-function PreviewImage({ alt }: ComponentPropsWithoutRef<"img">) {
-  const locale = useBrowserLocale();
-  const label = alt?.trim() ?? "";
-  return (
-    <span>{label.length > 0 ? label : t(locale, "e2ee.message.imageLink")}</span>
-  );
-}
-
-// Notification previews sit inside the link that opens the chat. Message links
-// and images are labels here, so they neither nest anchors nor load resources.
-const PREVIEW_COMPONENTS: Components = {
-  ...COMPONENTS,
-  a: ({ children }) => <span>{children}</span>,
-  img: PreviewImage,
-  input: ({ checked }) => <span>{checked ? "☑" : "☐"}</span>,
-  table: ({ children }) => <table>{children}</table>,
-  p: ({ children }) => (
-    <p className="tw-m-0 tw-text-sm tw-leading-5">{children}</p>
-  ),
-};
-
-const REMARK_PLUGINS = [remarkGfm];
-
+/** The encrypted adapter supplies only local mentions and catalog emoji. */
 export const E2eeMarkdown = memo(
   ({
     text,
@@ -243,40 +88,32 @@ export const E2eeMarkdown = memo(
     mentions,
     selfProfileId,
     preview = false,
+    inlinePreview = false,
   }: PrivateTextContext & {
     readonly text: string;
     readonly messageId: string;
-    readonly preview?: boolean;
+    readonly inlinePreview?: boolean;
   }) => {
-    const renderId = useId();
     const context = useMemo(
-      () => ({ members, mentions, selfProfileId }),
-      [members, mentions, selfProfileId]
-    );
-    const plugins = useMemo<PluggableList>(
-      () => [
-        // Raw HTML is disabled; remark already scopes its generated footnote IDs.
-        [rehypeSanitize, { ...defaultSchema, clobberPrefix: "" }],
-        rehypePreserveOrderedListDelimiter,
-        ...(preview ? [rehypeDropPreview] : []),
-        rehypePrivateText,
-      ],
-      [preview]
+      () => ({
+        members,
+        mentions,
+        selfProfileId,
+        preview: preview || inlinePreview,
+      }),
+      [members, mentions, selfProfileId, preview, inlinePreview]
     );
     return (
       <TextContext.Provider value={context}>
-        <Markdown
-          className={`word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-iron-200 [&_code]:tw-text-iron-200 [&_h1]:tw-text-iron-200 [&_h2]:tw-text-iron-200 [&_h3]:tw-text-iron-200 [&_h4]:tw-text-iron-200 [&_h5]:tw-text-iron-200 [&_h6]:tw-text-iron-200 [&_li]:tw-text-md [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_pre_code]:tw-whitespace-pre-wrap [&_ul]:tw-list-disc [&_ul_ul]:tw-list-[circle] [&_ul_ul_ul]:tw-list-[square] ${preview ? "[&_*]:!tw-my-0 [&_*]:!tw-text-sm [&_*]:!tw-leading-5 [&_pre_code]:!tw-p-0" : ""}`}
-          skipHtml
-          remarkPlugins={REMARK_PLUGINS}
-          remarkRehypeOptions={{
-            clobberPrefix: `e2ee-${messageId}-${renderId}-`,
-          }}
-          rehypePlugins={plugins}
-          components={preview ? PREVIEW_COMPONENTS : COMPONENTS}
-        >
-          {preview ? text : normalizeDropMarkdownContent(text)}
-        </Markdown>
+        <MessageMarkdown
+          text={text}
+          messageId={messageId}
+          privacy="private"
+          preview={preview}
+          inlinePreview={inlinePreview}
+          components={COMPONENTS}
+          textPlugins={TEXT_PLUGINS}
+        />
       </TextContext.Provider>
     );
   }

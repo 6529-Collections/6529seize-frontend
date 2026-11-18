@@ -39,11 +39,8 @@
 
 - Marketplace links render only after token detail data is loaded.
 - On tabbed routes, links render only on `Live`.
-- On Capacitor iOS sessions, icons are shown only when detected country is
-  exactly `US`.
-- On Capacitor iOS with empty, unknown, or non-`US` country values, icons stay
-  hidden.
-- On non-iOS sessions, links are not country-gated.
+- The marketplace icons are available on the web and Android. The iOS app
+  hides these shortcuts.
 
 ## Edge Cases
 
@@ -58,8 +55,6 @@
   errors while the 6529 page remains unchanged.
 - Retry by selecting the same icon after provider recovery.
 - If one provider fails, other available provider links can still be used.
-- If icons are missing on iOS, verify detected country is `US` and retry after
-  route reload.
 
 ## Limitations / Notes
 

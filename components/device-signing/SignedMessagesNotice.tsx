@@ -13,6 +13,12 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { useId } from "react";
+import {
+  deviceSecurityNoticeKey,
+  useDeviceSecurityNotices,
+} from "@/hooks/device-signing/useDeviceSecurityNotices";
+import { useSignedMessagesAccount } from "@/hooks/device-signing/useSignedMessagesAccount";
+import { DeviceSecurityNotice } from "./DeviceSecurityNotice";
 import { useDeviceSecurityState } from "./DeviceSecurityStatus";
 import { openDeviceSetup } from "./deviceSetup";
 import SignedMessagesEnableStatus from "./SignedMessagesEnableStatus";
@@ -80,6 +86,12 @@ function getNoticeCopy(
         ),
         action: t(locale, "signedMessages.notice.enable.action"),
       };
+    case "restore":
+      return {
+        title: t(locale, "signedMessages.notice.restore.title"),
+        body: t(locale, "signedMessages.notice.restore.body"),
+        action: t(locale, "signedMessages.notice.restore.action"),
+      };
   }
 }
 
@@ -96,8 +108,13 @@ function SignedMessagesNoticeContent({
   const locale = useBrowserLocale();
   const titleId = useId();
   const { canEnableEncryption } = useDeviceSecurityState();
+  const address = useSignedMessagesAccount();
+  const { notices, removeNotice } = useDeviceSecurityNotices(address !== null);
   const {
     model,
+    canShowDeviceAlerts,
+    localSigningKeys,
+    localGrantIds,
     canEnable,
     enable,
     enableStatus,
@@ -108,7 +125,32 @@ function SignedMessagesNoticeContent({
     isAcknowledging,
     revoke,
     isRevoking,
-  } = useSignedMessagesNotice({ composerEmpty });
+  } = useSignedMessagesNotice({
+    address,
+    composerEmpty,
+    legacyNewDeviceAlerts: notices === null,
+  });
+
+  const pending = canShowDeviceAlerts
+    ? notices?.find(
+        (notice) =>
+          notice.signing_grant_id !== null &&
+          notice.signing_device_key !== null &&
+          !localSigningKeys.includes(notice.signing_device_key.toLowerCase()) &&
+          localGrantIds?.includes(notice.signing_grant_id) !== true
+      )
+    : undefined;
+  if (pending) {
+    return (
+      <div className="tw-mb-2">
+        <DeviceSecurityNotice
+          key={deviceSecurityNoticeKey(pending)}
+          notice={pending}
+          onHandled={removeNotice}
+        />
+      </div>
+    );
+  }
 
   if (!model || (hideRenewal && model.kind === "renew")) {
     return null;
@@ -124,7 +166,11 @@ function SignedMessagesNoticeContent({
       void revoke(model.grant);
       return;
     }
-    if (model.kind === "enable" || model.kind === "expired") {
+    if (
+      model.kind === "enable" ||
+      model.kind === "expired" ||
+      model.kind === "restore"
+    ) {
       openDeviceSetup(canEnableEncryption ? "both" : "posts");
       return;
     }

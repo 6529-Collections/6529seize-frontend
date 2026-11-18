@@ -124,7 +124,7 @@ function EndedParticipationDropInner({
     useDropActionInteractionMode();
   const mobileMenu = useWaveDropMobileMenu();
   const showIdentity = identityMode !== "hidden";
-  const isStackedTimestamp = timestampLayout === "stacked";
+  const isStackedTimestamp = timestampLayout !== "inline";
   const isChatProposal =
     contentPresentation === "proposalCard" && location === DropLocation.WAVE;
   const shouldOffsetRows =

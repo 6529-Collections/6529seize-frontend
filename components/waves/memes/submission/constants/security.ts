@@ -6,13 +6,27 @@ import {
 import { getConfiguredIpfsGatewayHost } from "@/lib/media/ipfs-gateways";
 import {
   DEFAULT_MEDIA_RESOLVER_ENDPOINT,
+  FIRST_PARTY_MEDIA_RESOLVER_HOSTS,
+  getMediaResolverSource,
+  isFirstPartyMediaHostname,
+  isFirstPartyMediaResolverHostname,
   parseDecentralizedMediaRef,
   to6529ResolverUrl,
 } from "@/lib/media/decentralized-media";
 import { publicEnv } from "@/config/env";
 
 const DEFAULT_INTERACTIVE_MEDIA_IPFS_HOSTS = ["ipfs.io", "www.ipfs.io"];
-const MEDIA_RESOLVER_HOST = "media.6529.io";
+// Canonical interactive media URLs use the configured resolver's path host
+// when it is one of the app's own media hosts (which the checks below
+// accept); any other endpoint keeps media.6529.io, as before.
+const getConfiguredMediaResolverSource = (): string => {
+  const source = getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT);
+  return FIRST_PARTY_MEDIA_RESOLVER_HOSTS.some(
+    (host) => source === `https://${host}`
+  )
+    ? source
+    : DEFAULT_MEDIA_RESOLVER_ENDPOINT;
+};
 
 const INTERACTIVE_MEDIA_IPFS_HOSTS = new Set<string>(
   [
@@ -97,8 +111,19 @@ const getInteractiveMediaProviderForHost = (
   return null;
 };
 
+// The app's own media hosts on either domain: the resolver path hosts and the
+// per-CID hosts of the separate content domain.
+const isFirstPartyInteractiveMediaHost = (hostname: string): boolean => {
+  const normalized = canonicalizeInteractiveMediaHostname(hostname);
+  return (
+    isFirstPartyMediaResolverHostname(normalized) ||
+    (isFirstPartyMediaHostname(normalized) &&
+      parseDecentralizedMediaRef(`https://${normalized}/`)?.protocol === "ipfs")
+  );
+};
+
 export const isInteractiveMediaAllowedHost = (hostname: string): boolean =>
-  canonicalizeInteractiveMediaHostname(hostname) === MEDIA_RESOLVER_HOST ||
+  isFirstPartyInteractiveMediaHost(hostname) ||
   getInteractiveMediaProviderForHost(hostname) !== null;
 
 const isValidIpfsCid = (cid: string): boolean =>
@@ -170,7 +195,8 @@ export const isInteractiveMediaContentPathAllowed = (
 
   const normalizedHostname = canonicalizeInteractiveMediaHostname(hostname);
   const provider = getInteractiveMediaProviderForHost(normalizedHostname);
-  const isMediaResolverHost = normalizedHostname === MEDIA_RESOLVER_HOST;
+  const isMediaResolverHost =
+    isFirstPartyInteractiveMediaHost(normalizedHostname);
   if (!isMediaResolverHost && !provider) {
     return false;
   }
@@ -255,7 +281,7 @@ const canonicalizeNativeInteractiveMediaUrl = (
   if (nativeRef?.protocol === "ipfs" || nativeRef?.protocol === "arweave") {
     return `${to6529ResolverUrl(
       nativeRef,
-      DEFAULT_MEDIA_RESOLVER_ENDPOINT
+      getConfiguredMediaResolverSource()
     )}${getUrlSuffix(src)}`;
   }
 
@@ -309,7 +335,7 @@ const canonicalizeParsedInteractiveMediaUrl = (
   const decentralizedRef = parseDecentralizedMediaRef(parsedUrl.toString());
   if (decentralizedRef) {
     return appendUrlSuffix(
-      to6529ResolverUrl(decentralizedRef, DEFAULT_MEDIA_RESOLVER_ENDPOINT),
+      to6529ResolverUrl(decentralizedRef, getConfiguredMediaResolverSource()),
       parsedUrl.search,
       parsedUrl.hash
     );
@@ -360,8 +386,8 @@ export const INTERACTIVE_MEDIA_GATEWAY_BASE_URL: Record<
   InteractiveMediaProvider,
   string
 > = {
-  ipfs: `${DEFAULT_MEDIA_RESOLVER_ENDPOINT}/ipfs/`,
-  arweave: `${DEFAULT_MEDIA_RESOLVER_ENDPOINT}/arweave/`,
+  ipfs: `${getConfiguredMediaResolverSource()}/ipfs/`,
+  arweave: `${getConfiguredMediaResolverSource()}/arweave/`,
 };
 
 export const INTERACTIVE_MEDIA_ALLOWED_CONTENT_TYPES = [

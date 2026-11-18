@@ -2,6 +2,9 @@ import { act, renderHook } from "@testing-library/react";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
+
+jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn() }));
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -31,6 +34,7 @@ describe("useCreateModalState", () => {
       () => new URLSearchParams(globalThis.window.location.search)
     );
     (useDeviceInfo as jest.Mock).mockReturnValue({ isApp: false });
+    jest.mocked(isE2eeEnabled).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -75,6 +79,20 @@ describe("useCreateModalState", () => {
     expect(result.current.isDirectMessageModalOpen).toBe(true);
     expect(replace).not.toHaveBeenCalled();
   });
+
+  it.each([false, true])(
+    "opens the unified composer as a page with isApp=%s",
+    (isApp) => {
+      jest.mocked(isE2eeEnabled).mockReturnValue(true);
+      (useDeviceInfo as jest.Mock).mockReturnValue({ isApp });
+      globalThis.history.replaceState(null, "", "/messages?create=dm");
+      const { result } = renderHook(() => useCreateModalState());
+
+      expect(result.current.isDirectMessageModalOpen).toBe(false);
+      act(() => result.current.openDirectMessage());
+      expect(push).toHaveBeenCalledWith("/messages/new");
+    }
+  );
 
   it("closes with replaceState and removes only create", () => {
     globalThis.history.replaceState(

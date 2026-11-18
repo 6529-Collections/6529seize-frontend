@@ -24,6 +24,15 @@ import userEvent from "@testing-library/user-event";
 import React from "react";
 import { act } from "react-dom/test-utils";
 
+jest.mock("@/helpers/waves/wave-draft.helpers", () => ({
+  ...jest.requireActual("@/helpers/waves/wave-draft.helpers"),
+  clearAllWaveDrafts: jest.fn(),
+}));
+jest.mock("@/helpers/waves/create-wave-draft.helpers", () => ({
+  ...jest.requireActual("@/helpers/waves/create-wave-draft.helpers"),
+  removeCreateWaveDrafts: jest.fn(),
+}));
+
 // Mock the Reown AppKit hooks
 jest.mock("@reown/appkit/react", () => ({
   useAppKit: jest.fn(() => ({
@@ -2094,6 +2103,17 @@ describe("Regression Tests: Original Functionality with Secure Implementation", 
 
     expect(mockDisconnect).toHaveBeenCalled();
     expect(authUtils.removeAuthJwt).toHaveBeenCalled();
+    // Forced logouts use this path too; only the account menus remove drafts.
+    expect(
+      jest.requireMock<{ clearAllWaveDrafts: jest.Mock }>(
+        "@/helpers/waves/wave-draft.helpers"
+      ).clearAllWaveDrafts
+    ).not.toHaveBeenCalled();
+    expect(
+      jest.requireMock<{ removeCreateWaveDrafts: jest.Mock }>(
+        "@/helpers/waves/create-wave-draft.helpers"
+      ).removeCreateWaveDrafts
+    ).not.toHaveBeenCalled();
   });
 });
 

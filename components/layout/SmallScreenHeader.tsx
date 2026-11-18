@@ -46,7 +46,7 @@ export default function SmallScreenHeader({
   return (
     <header
       aria-busy={!interactive}
-      className="tailwind-scope tw-sticky tw-top-0 tw-z-50 tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black"
+      className="tailwind-scope tw-sticky tw-top-[var(--desktop-top-inset,0px)] tw-z-50 tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-bg-black"
     >
       <div className="tw-flex tw-h-16 tw-items-center tw-justify-between tw-px-5">
         <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2">

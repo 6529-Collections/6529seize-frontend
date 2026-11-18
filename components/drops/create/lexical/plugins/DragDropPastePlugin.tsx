@@ -24,6 +24,7 @@ import { filterValidDropUploadFiles } from "@/services/uploads/dropUploadValidat
 import { validateDropImageSignature } from "@/services/uploads/prepareDropImage";
 import { t } from "@/i18n/messages";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 
 const isImageFile = (file: File): boolean =>
   getContentType(file).startsWith("image/");
@@ -211,9 +212,12 @@ function insertPlainText(text: string): void {
   selection.insertRawText(text);
 }
 
-async function uploadImage(file: File): Promise<string> {
+async function uploadImage(
+  file: File,
+  locale: SupportedLocale
+): Promise<string> {
   const multiPart = await withTimeout(
-    (signal) => multiPartUpload({ file, path: "drop", signal }),
+    (signal) => multiPartUpload({ file, path: "drop", signal, locale }),
     INLINE_IMAGE_UPLOAD_TIMEOUT_MS,
     "Image upload timed out. Please try again."
   );
@@ -334,7 +338,7 @@ export default function DragDropPaste({
           if ($isImageNode(node) && node.isAttached())
             node.setPreviewSrc(previewUrl);
         });
-        const url = await uploadImage(file);
+        const url = await uploadImage(file, localeRef.current);
         if (isMounted) finishUpload(key, token, url);
       } catch (error) {
         if (!isMounted) return;

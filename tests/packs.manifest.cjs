@@ -509,6 +509,22 @@ const PACKS = [
     ),
     triggers: ["pr-ci", "manual"],
   },
+  {
+    ...sandboxPack(
+      "test:e2e:image-viewer-layout-sandbox",
+      "Image viewer background geometry, focus restoration and gallery navigation in Chromium and WebKit.",
+      ["tests/media/image-viewer-layout-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        PLAYWRIGHT_BASE_URL: "http://localhost:3297",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4297",
+        NEXT_DEV_DIST_DIR: ".next-playwright-submission-artwork",
+      },
+      [DESKTOP, MOBILE, "web-desktop-webkit"]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
   sandboxPack(
     "test:e2e:signature-sandbox",
     "Signed participation sandbox that fails closed unsigned.",
@@ -636,8 +652,11 @@ const PACKS = [
   },
   sandboxPack(
     "test:e2e:e2ee-picker-sandbox",
-    "Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.",
-    ["tests/e2ee/encrypted-people-picker-sandbox.spec.ts"],
+    "Encrypted chat recipient selection and the iPhone sign-out dialog.",
+    [
+      "tests/e2ee/encrypted-people-picker-sandbox.spec.ts",
+      "tests/e2ee/encrypted-sign-out-sandbox.spec.ts",
+    ],
     E2EE_SANDBOX_ENV,
     [DESKTOP, "capacitor-ios-sim"]
   ),
@@ -714,6 +733,7 @@ const PACKS = [
   stagingPack("core", "", "Staging core surfaces on both web shells.", [
     "tests/surfaces",
     "tests/critical-shell",
+    "tests/pages/access.spec.ts",
     ...SMOKE_SPECS,
   ]),
   stagingPack(
