@@ -27,21 +27,17 @@ export const rehypeDropNotificationPreview: Plugin<[], Root> = () => (tree) => {
   let image: Element | undefined;
 
   function separateImages(children: Content[]): Content[] {
-    return children.flatMap((child, index): Content[] => {
-      if (child.type !== "element") return [child];
+    return children.map((child): Content => {
+      if (child.type !== "element") return child;
       if (
         child.tagName === "img" &&
         isDropNotificationImage(child.properties["src"])
       ) {
         image ??= child;
         // Keep words on either side of an inline image from running together.
-        return index > 0 && index < children.length - 1
-          ? [{ type: "text", value: " " }]
-          : [];
+        return { type: "text", value: " " };
       }
-      if (!child.children.length) return [child];
-      const content = separateImages(child.children);
-      return content.length ? [{ ...child, children: content }] : [];
+      return { ...child, children: separateImages(child.children) };
     });
   }
 

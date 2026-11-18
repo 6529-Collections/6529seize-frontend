@@ -206,7 +206,7 @@ it("renders one resized drop upload beside the preview text", () => {
             quoted_drop: null,
             content:
               `gmgm\n\n![Seize](${dropImage})my macbook is turning into 6529Book` +
-              ` ![Seize](${dropImage.replace("first", "second")})`,
+              `\n\n[A second![Seize](${dropImage.replace("first", "second")})](https://example.com)image`,
           },
         ],
       },
@@ -232,6 +232,7 @@ it("renders one resized drop upload beside the preview text", () => {
     screen.getByText("my macbook is turning into 6529Book")
   ).toBeInTheDocument();
   expect(container).not.toHaveTextContent("Seize");
+  expect(container).toHaveTextContent("A second image");
   expect(screen.getAllByRole("link")).toHaveLength(1);
   fireEvent.click(thumbnail);
   expect(onOpen).toHaveBeenCalledWith([1]);
