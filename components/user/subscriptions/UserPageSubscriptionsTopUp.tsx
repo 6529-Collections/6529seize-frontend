@@ -41,14 +41,16 @@ import {
   SUBSCRIPTIONS_CHAIN,
 } from "@/constants/constants";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
-import { ApiSubscriptionCoverageDeadlineBasis } from "@/generated/models/ApiSubscriptionCoverageDeadlineBasis";
 import { formatAddress } from "@/helpers/Helpers";
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDecimalString, formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { formatSubscriptionEth } from "./coverage/subscriptionCoverage.helpers";
-import { subscriptionCoverageTimestamp } from "./coverage/subscriptionCoverageSummary.helpers";
+import {
+  getAuthoritativeSubscriptionDeadline,
+  subscriptionCoverageTimestamp,
+} from "./coverage/subscriptionCoverageSummary.helpers";
 import { useSubscriptionCoverageClock } from "./coverage/useSubscriptionCoverageClock";
 
 const MEMES_MINT_PRICE_WEI = parseEther(MEMES_MINT_PRICE.toString());
@@ -179,16 +181,37 @@ function hasCurrentCoverageProjections(
   now: number
 ): boolean {
   if (isStale) return false;
-  const deadline = subscriptionCoverageTimestamp(
-    coverage?.next_unfunded?.top_up_deadline
-  );
-  if (
-    deadline === undefined ||
-    coverage?.forecast.deadline_basis !==
-      ApiSubscriptionCoverageDeadlineBasis.Authoritative
-  )
-    return true;
+  const deadline = getAuthoritativeSubscriptionDeadline(coverage);
+  if (deadline === undefined) return true;
   return now > 0 && now < deadline;
+}
+
+function isCoverageChoice(
+  option: string | null
+): option is "minimum" | "recommended" {
+  return option === "minimum" || option === "recommended";
+}
+
+function getProjectionFingerprint(
+  coverage: ApiSubscriptionCoverage | undefined,
+  option: string | null
+): string | null {
+  if (!isCoverageChoice(option)) return null;
+  const projection =
+    option === "minimum"
+      ? coverage?.minimum_top_up
+      : coverage?.recommended_top_up;
+  if (!projection) return null;
+  return JSON.stringify([
+    option,
+    projection.amount_eth,
+    projection.additional_mints,
+    projection.projected_through.token_id,
+    subscriptionCoverageTimestamp(projection.projected_through.mint_at),
+    "target_fully_funded_drops" in projection
+      ? projection.target_fully_funded_drops
+      : projection.resulting_fully_funded_drops,
+  ]);
 }
 
 function getTopUpSelection({
@@ -323,11 +346,10 @@ function SubscriptionTopUpForm({
   expanded = true,
 }: TopUpProps) {
   const locale = useBrowserLocale();
-  const suppliedDeadline = subscriptionCoverageTimestamp(
-    sourceCoverage?.next_unfunded?.top_up_deadline
-  );
+  const suppliedDeadline = getAuthoritativeSubscriptionDeadline(sourceCoverage);
   const now = useSubscriptionCoverageClock(
-    expanded && !isCoverageStale && suppliedDeadline !== undefined
+    expanded && !isCoverageStale && suppliedDeadline !== undefined,
+    suppliedDeadline
   );
   const coverage =
     sourceCoverage &&
@@ -366,13 +388,20 @@ function SubscriptionTopUpForm({
   const [showDeep, setShowDeep] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState<string | null>(null);
   const [topUpCardCount, setTopUpCardCount] = useState<number | null>(null);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [selection, setSelection] = useState<{
+    option: string | null;
+    fingerprint: string | null;
+  }>({ option: null, fingerprint: null });
+  const selectedOption = selection.option;
+  const setSelectedOption = useCallback((option: string | null) => {
+    setSelection({ option, fingerprint: null });
+  }, []);
   const otherInputRef = useRef<HTMLInputElement | null>(null);
   const handleSelectOther = useCallback(() => {
     setSelectedOption("other");
     setError("");
     otherInputRef.current?.focus();
-  }, []);
+  }, [setSelectedOption]);
   const confirmedHashRef = useRef<string | undefined>(undefined);
   const mounted = useSyncExternalStore(
     () => () => {},
@@ -405,15 +434,32 @@ function SubscriptionTopUpForm({
     era: remainingMintsForEra,
     eon: remainingMintsForEon,
   };
+  const currentFingerprint = getProjectionFingerprint(coverage, selectedOption);
+  const currentChoice =
+    !isCoverageChoice(selectedOption) ||
+    (currentFingerprint !== null &&
+      currentFingerprint === selection.fingerprint);
   const selectedTopUp = getTopUpSelection({
     coverage,
     customCount: memeCount,
-    option: selectedOption,
+    option: currentChoice ? selectedOption : null,
     optionCounts,
   });
 
-  function handleSend(): void {
+  function handleSend(submittedAt: number): void {
     setError("");
+    if (
+      isCoverageChoice(selectedOption) &&
+      !hasCurrentCoverageProjections(
+        sourceCoverage,
+        isCoverageStale,
+        submittedAt
+      )
+    ) {
+      setSelectedOption(null);
+      setError(t(locale, "subscriptions.topUp.validation.selectOption"));
+      return;
+    }
     if (selectedTopUp === null) {
       setError(t(locale, "subscriptions.topUp.validation.selectOption"));
       return;
@@ -484,7 +530,7 @@ function SubscriptionTopUpForm({
       setSelectedOption(null);
       setMemeCount("");
     }
-  }, [transactionModal.closable, sendTransaction]);
+  }, [transactionModal.closable, sendTransaction, setSelectedOption]);
 
   let modalSubtitle: string | undefined;
   if (topUpAmount !== null && topUpCardCount !== null) {
@@ -499,6 +545,14 @@ function SubscriptionTopUpForm({
   }
 
   const isSending = sendTransaction.isPending || waitSendTransaction.isLoading;
+  if (
+    isCoverageChoice(selectedOption) &&
+    !currentChoice &&
+    !isSending &&
+    transactionModal.status === null
+  ) {
+    setSelectedOption(null);
+  }
   const selectedAmount = selectedTopUp?.amountEth ?? null;
   const isSendDisabled = selectedTopUp === null;
   const submitLabel =
@@ -508,7 +562,10 @@ function SubscriptionTopUpForm({
           amount: formatSubscriptionEth(locale, selectedAmount),
         });
   const selectCoverageTopUp = (option: "minimum" | "recommended"): void => {
-    setSelectedOption(option);
+    setSelection({
+      option,
+      fingerprint: getProjectionFingerprint(coverage, option),
+    });
     setMemeCount("");
     setError("");
   };
@@ -545,7 +602,7 @@ function SubscriptionTopUpForm({
       <div className="tw-grid tw-grid-cols-1 tw-gap-2">
         <CoverageTopUpOptions
           coverage={coverage}
-          selectedOption={selectedOption}
+          selectedOption={currentChoice ? selectedOption : null}
           onSelect={selectCoverageTopUp}
         />
         <CardCountOption
@@ -668,7 +725,7 @@ function SubscriptionTopUpForm({
         size="lg"
         loading={isSending}
         disabled={isSendDisabled}
-        onClick={handleSend}
+        onClick={() => handleSend(Date.now())}
         aria-label={submitLabel}
         fullWidth
         className="tw-mt-5 !tw-text-[15px] md:!tw-text-sm"

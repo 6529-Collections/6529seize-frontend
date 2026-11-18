@@ -135,7 +135,7 @@ const localProfile = {
   handle: SANDBOX_HANDLE,
   normalised_handle: SANDBOX_HANDLE,
   consolidation_key:
-    process.env.PLAYWRIGHT_SUBSCRIPTIONS_SANDBOX === "1" ? "profile-key" : "",
+    process.env.PLAYWRIGHT_SUBSCRIPTIONS_SANDBOX === "1" ? SANDBOX_WALLET : "",
   display: SANDBOX_HANDLE,
   banner1: null,
   banner2: null,

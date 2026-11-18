@@ -16,7 +16,7 @@ const emptyAllocation = {
   final: null,
   isLoading: false,
   isError: false,
-  hasNoAllocation: false,
+  hasNoAllocation: true,
 };
 const beforeDeadline = Date.parse("2026-11-16T14:29:59Z");
 function coverage() {
@@ -50,8 +50,92 @@ beforeEach(() => {
 });
 afterEach(() => jest.useRealTimers());
 
-it("switches at the authoritative cutoff without navigation and separates future top-ups", () => {
+it("keeps an unfinished final record neutral after the cutoff", () => {
+  jest.setSystemTime(beforeDeadline + 2000);
+  allocation.mockReturnValue({
+    ...emptyAllocation,
+    hasNoAllocation: false,
+    final: {
+      consolidation_key: "profile-key",
+      contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+      token_id: 575,
+      subscribed_count: 1,
+      airdrop_address: "0x0000000000000000000000000000000000000529",
+      balance: 0.06529,
+      phase: null,
+      phase_position: -1,
+      redeemed_count: 0,
+    },
+  });
   render(
+    <SubscriptionCoverageSummary
+      coverage={coverage()}
+      profileKey="profile-key"
+      isOwner
+      isLoading={false}
+    />
+  );
+  expect(
+    screen.getByRole("heading", { name: "Loading subscription coverage" })
+  ).toBeVisible();
+  expect(screen.queryByText("Deadline passed")).not.toBeInTheDocument();
+});
+
+it("keeps a missing-cutoff payment check neutral until absence is verified", () => {
+  const data = {
+    ...coverage(),
+    next_unfunded: { ...coverage().next_unfunded, top_up_deadline: null },
+  };
+  allocation.mockReturnValue({ ...emptyAllocation, hasNoAllocation: false });
+  render(
+    <SubscriptionCoverageSummary
+      coverage={data}
+      profileKey="profile-key"
+      isOwner
+      isLoading={false}
+    />
+  );
+  expect(allocation).toHaveBeenLastCalledWith(
+    expect.objectContaining({ verifyAbsence: true, waitForRefresh: false })
+  );
+  expect(
+    screen.getByRole("heading", { name: "Loading subscription coverage" })
+  ).toBeVisible();
+  expect(screen.queryByText("Action required")).not.toBeInTheDocument();
+});
+
+it("keeps an elapsed later cutoff factual without changing funded counts", () => {
+  const data = {
+    ...coverage(),
+    fully_funded_drops: 1,
+    funded_through: {
+      token_id: 574,
+      mint_at: new Date("2026-11-14T15:40:00Z"),
+    },
+  };
+  render(
+    <SubscriptionCoverageSummary
+      coverage={data}
+      profileKey="profile-key"
+      isOwner
+      isLoading={false}
+      topUpAction={topUp}
+    />
+  );
+  expect(screen.getByText(/Top up by/)).toBeVisible();
+  act(() => jest.advanceTimersByTime(1000));
+  expect(screen.getByText(/Top-up deadline:/)).toHaveTextContent(
+    "Nov 16, 2026, 14:30 UTC"
+  );
+  expect(screen.getByRole("heading", { name: "1 drop funded" })).toBeVisible();
+  expect(screen.queryByText("Deadline passed")).not.toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Top up for future drops" })
+  ).toHaveAttribute("data-primary", "false");
+});
+
+it("switches at the authoritative cutoff without navigation and separates future top-ups", () => {
+  const { rerender } = render(
     <SubscriptionCoverageSummary
       coverage={coverage()}
       profileKey="profile-key"
@@ -66,7 +150,31 @@ it("switches at the authoritative cutoff without navigation and separates future
   expect(screen.getByText(/Top up by/)).toHaveTextContent(
     "Top up by Nov 16, 2026, 14:30 UTC to receive The Memes #575."
   );
+  const heading = screen.getByRole("heading", {
+    name: "Today’s mint isn’t covered",
+  });
+  heading.focus();
+  allocation.mockReturnValue({
+    ...emptyAllocation,
+    final: undefined,
+    isLoading: true,
+    hasNoAllocation: false,
+  });
   act(() => jest.advanceTimersByTime(1000));
+  expect(heading).toHaveTextContent("Loading subscription coverage");
+  expect(heading).toHaveFocus();
+  expect(screen.queryByText("Deadline passed")).not.toBeInTheDocument();
+  allocation.mockReturnValue(emptyAllocation);
+  rerender(
+    <SubscriptionCoverageSummary
+      coverage={coverage()}
+      profileKey="profile-key"
+      isOwner
+      isLoading={false}
+      topUpAction={topUp}
+    />
+  );
+  expect(heading).toHaveFocus();
   expect(allocation).toHaveBeenLastCalledWith(
     expect.objectContaining({ waitForRefresh: true })
   );
@@ -114,7 +222,9 @@ it("uses the current UTC day rather than the forecast calculation day", () => {
   expect(
     screen.getByRole("heading", { name: "Today’s mint isn’t covered" })
   ).toBeVisible();
-  expect(allocation).toHaveBeenCalled();
+  expect(allocation).toHaveBeenLastCalledWith(
+    expect.objectContaining({ subscribed: true, waitForRefresh: false })
+  );
 });
 
 it("keeps the overview heading focused when a day-before cutoff enables payment checking", () => {

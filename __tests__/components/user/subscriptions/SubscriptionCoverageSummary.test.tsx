@@ -21,7 +21,7 @@ jest.mock(
       final: null,
       isLoading: false,
       isError: false,
-      hasNoAllocation: false,
+      hasNoAllocation: true,
     })),
   })
 );
@@ -94,6 +94,9 @@ function createCoverage(
 }
 
 describe("SubscriptionCoverageSummary", () => {
+  beforeEach(() =>
+    jest.mocked(Date.now).mockReturnValue(Date.parse("2026-10-10T10:00:00Z"))
+  );
   afterEach(() => jest.useRealTimers());
   const renderSummary = (
     coverage: ApiSubscriptionCoverage | undefined = createCoverage(),
@@ -997,9 +1000,7 @@ describe("Mint-day subscription payment", () => {
         screen.getByRole("heading", { name: "Subscription paid" })
       ).toBeVisible();
       expect(screen.getByText(/The subscription for/)).toBeVisible();
-      expect(
-        screen.getByText("From the remaining balance: 0 drops funded.")
-      ).toBeVisible();
+      expect(screen.getByText("Last forecast: 0 drops funded.")).toBeVisible();
       expect(screen.queryByText("Action required")).not.toBeInTheDocument();
       expect(
         screen.queryByText("A top-up deadline is not available yet.")
@@ -1067,7 +1068,7 @@ describe("Mint-day subscription payment", () => {
       final: null,
       isLoading: false,
       isError: false,
-      hasNoAllocation: false,
+      hasNoAllocation: true,
     });
     render(
       <SubscriptionCoverageSummary

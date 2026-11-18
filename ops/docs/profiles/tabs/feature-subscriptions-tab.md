@@ -122,7 +122,7 @@ On the web and Android, the tab appears after the page loads.
    On or after minting day, or when a supplied cutoff expires, an unfunded forecast is checked against the final subscription
    list before showing an alarm. A confirmed payment for all requested editions
    shows Subscription paid, keeps Top up optional, and preserves the funded-drop
-   count as a remaining-balance fact. Checking and failed payment reads stay
+   count as a last-forecast fact. Checking and failed payment reads stay
    neutral. Payment confirmation does not promise that the airdrop is complete.
    A passed authoritative cutoff with an unpaid drop shows Deadline passed in
    grey, the named uncovered Meme and the exact cutoff in the highlighted box.

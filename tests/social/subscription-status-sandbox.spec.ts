@@ -20,6 +20,8 @@ import {
 
 const phase = process.env["SUBSCRIPTION_AUDIT_PHASE"] ?? "after";
 const fullAudit = Boolean(process.env["SUBSCRIPTION_AUDIT_PHASE"]);
+const SUBSCRIPTION_PROFILE_KEY = "0x0000000000000000000000000000000000000529";
+const SUBSCRIPTION_CONTRACT = "0x33fd426905f149f8376e227d0c9d3340aad17af1";
 const point = (token_id: number) => ({
   token_id,
   mint_at: new Date(Date.UTC(2026, 10, 16 + (token_id - 575) * 2, 15, 40)),
@@ -248,6 +250,7 @@ function coverageFor(overrides: Partial<ApiSubscriptionCoverage>) {
       forecast_truncated: true,
     },
     ...overrides,
+    consolidation_key: SUBSCRIPTION_PROFILE_KEY,
     next_unfunded: next
       ? {
           ...next,
@@ -369,6 +372,22 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           if (route.request().method() !== "GET") return route.fallback();
           if (finalResponse) await finalResponse;
           const activeName = states.find(([, data]) => data === current)?.[0];
+          const tuple = new URL(route.request().url()).pathname.match(
+            /\/final\/([^/]+)\/([^/]+)\/(\d+)$/
+          );
+          if (
+            !tuple ||
+            tuple[1] !== SUBSCRIPTION_PROFILE_KEY ||
+            tuple[2]?.toLowerCase() !== SUBSCRIPTION_CONTRACT ||
+            ![575, 576, 577, 578, 579].includes(Number(tuple[3])) ||
+            (activeName === "mint-paid" && Number(tuple[3]) !== 575)
+          ) {
+            await route.fulfill({
+              status: 409,
+              json: { error: "Unexpected final-payment fixture tuple" },
+            });
+            return;
+          }
           if (activeName === "mint-payment-loading") return;
           if (activeName === "mint-payment-error") {
             await route.fulfill({
@@ -380,7 +399,7 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           if (activeName === "mint-paid") {
             await route.fulfill({
               json: {
-                consolidation_key: "profile-key",
+                consolidation_key: SUBSCRIPTION_PROFILE_KEY,
                 contract: "0x33fd426905f149f8376e227d0c9d3340aad17af1",
                 token_id: 575,
                 subscribed_count: 1,
@@ -402,6 +421,19 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           /\/distributions\/[^/]+\/\d+\/wallet-allocations$/.test(url.pathname),
         async (route) => {
           if (route.request().method() !== "GET") return route.fallback();
+          const url = new URL(route.request().url());
+          if (
+            url.searchParams.get("wallet") !== SUBSCRIPTION_PROFILE_KEY ||
+            !url.pathname.toLowerCase().includes(`/${SUBSCRIPTION_CONTRACT}/`)
+          ) {
+            await route.fulfill({
+              status: 400,
+              json: {
+                error: "Unexpected publication fixture wallet or contract",
+              },
+            });
+            return;
+          }
           await route.fulfill({
             json: { has_distribution: true, allocations: [] },
           });
@@ -513,6 +545,16 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
           }
           if (phase !== "before" && name === "mint-paid")
             await expect(headline).toHaveText("Subscription paid");
+          if (phase !== "before" && name === "mint-payment-error") {
+            await expect(headline).toHaveText("Coverage unavailable");
+            await expect(
+              overview.getByText(
+                "This subscription could not be checked. It will be checked again shortly.",
+                { exact: true }
+              )
+            ).toBeVisible();
+            await expect(headline).not.toContainText("isn’t covered");
+          }
           if (
             phase !== "before" &&
             ["zero-funded", "no-deadline"].includes(name)
@@ -795,9 +837,18 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
         path: testInfo.outputPath(`stale-${owner ? "owner" : "visitor"}.png`),
       });
       if (owner) {
-        current = states.find(([name]) => name === "zoku-manual")![1];
+        current = {
+          ...coverageFor(
+            states.find(
+              ([name]) => name === "zoku-manual"
+            )![1] as Partial<ApiSubscriptionCoverage>
+          ),
+          balance_eth: "0.13058",
+          mint_capacity: 2,
+        };
         await notice.getByRole("button", { name: "Refresh coverage" }).click();
         await expect(notice).toBeHidden();
+        await expect(overview.getByText(/0\.13058\s*ETH/)).toBeVisible();
       }
       for (const width of [320, 768, 1023, 1440]) {
         await page.setViewportSize({ width, height: 900 });
