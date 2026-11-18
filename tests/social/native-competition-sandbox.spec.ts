@@ -7551,32 +7551,53 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         "keyboardWillShow"
       );
     });
-    const sampleMotion = (eventName: "keyboardWillShow" | "keyboardWillHide") =>
+    const sampleMotion = (
+      eventName: "keyboardWillShow" | "keyboardWillHide",
+      keyboardHeight = 300
+    ) =>
       dialog.evaluate(
-        async (element, { eventName, background }) => {
+        async (element, { eventName, background, keyboardHeight }) => {
           const panel = element.querySelector<HTMLElement>(
             ".mobile-wrapper-dialog"
           );
           if (!panel) throw new Error("Voting sheet missing");
+          const surface = panel.querySelector<HTMLElement>(".tw-rounded-t-2xl");
+          if (!surface) throw new Error("Voting surface missing");
           // This reference follows the app's keyboard curve. It verifies frame
           // alignment, rather than merely checking the final keyboard clearance.
           const reference = document.createElement("div");
           reference.style.cssText =
-            "position:fixed;left:-10px;width:1px;height:1px;" +
+            "position:fixed;left:-10px;width:1px;" +
             "bottom:var(--native-keyboard-inset-bottom,0px);" +
-            "transition:bottom var(--native-keyboard-layout-transition-duration,0ms) var(--native-keyboard-layout-transition-easing,ease-out)";
+            "transition:bottom var(--native-keyboard-layout-transition-duration,0ms) var(--native-keyboard-layout-transition-easing,ease-out),max-height var(--native-keyboard-layout-transition-duration,0ms) var(--native-keyboard-layout-transition-easing,ease-out)";
+          reference.style.height = `${surface.firstElementChild?.scrollHeight ?? surface.scrollHeight}px`;
+          reference.style.maxHeight = surface.style.maxHeight;
+          reference.style.setProperty(
+            "--mobile-wrapper-dialog-keyboard-inset",
+            "var(--native-keyboard-inset-bottom,0px)"
+          );
           document.body.append(reference);
           await new Promise<void>((resolve) =>
             requestAnimationFrame(() => resolve())
           );
           reference.getBoundingClientRect();
+          const starting = {
+            bottom: panel.getBoundingClientRect().bottom,
+            height: surface.getBoundingClientRect().height,
+          };
+          const expectedBottom =
+            innerHeight -
+            (eventName === "keyboardWillShow" ? keyboardHeight : 0);
+          const reducedMotion = matchMedia(
+            "(prefers-reduced-motion: reduce)"
+          ).matches;
           const backgroundBefore = {
             height: background.getBoundingClientRect().height,
             scroll: background.scrollTop,
           };
           const delivered = !globalThis.dispatchEvent(
             new CustomEvent(`playwright:${eventName}`, {
-              detail: { keyboardHeight: 300 },
+              detail: { keyboardHeight },
               cancelable: true,
             })
           );
@@ -7585,6 +7606,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             drift: number;
             top: number;
             backgroundMovement: number;
+            bottom: number;
+            heightDrift: number;
           }[] = [];
           const start = performance.now();
           try {
@@ -7597,6 +7620,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
                 elapsed: performance.now() - start,
                 drift: box.bottom - reference.getBoundingClientRect().bottom,
                 top: box.top,
+                bottom: box.bottom,
+                heightDrift:
+                  surface.getBoundingClientRect().height -
+                  reference.getBoundingClientRect().height,
                 backgroundMovement: Math.max(
                   Math.abs(
                     background.getBoundingClientRect().height -
@@ -7609,17 +7636,44 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           } finally {
             reference.remove();
           }
-          return { delivered, frames };
+          return {
+            delivered,
+            frames,
+            starting,
+            expectedBottom,
+            keyboardHeight,
+            reducedMotion,
+            settled: {
+              bottom: panel.getBoundingClientRect().bottom,
+              height: surface.getBoundingClientRect().height,
+            },
+          };
         },
-        { eventName, background }
+        { eventName, background, keyboardHeight }
       );
     const expectAlignedMotion = (
       motion: Awaited<ReturnType<typeof sampleMotion>>
     ) => {
       expect(motion.delivered).toBe(true);
       expect(motion.frames.length).toBeGreaterThan(2);
+      expect(motion.settled.bottom).toBeCloseTo(motion.expectedBottom, 0);
+      expect(
+        Math.abs(motion.settled.bottom - motion.starting.bottom)
+      ).toBeCloseTo(motion.keyboardHeight, 0);
+      if (!motion.reducedMotion) {
+        const minimum = Math.min(motion.starting.bottom, motion.settled.bottom);
+        const maximum = Math.max(motion.starting.bottom, motion.settled.bottom);
+        expect(
+          motion.frames.some(
+            (frame) => frame.bottom > minimum + 1 && frame.bottom < maximum - 1
+          )
+        ).toBe(true);
+      }
       expect(
         Math.max(...motion.frames.map((frame) => Math.abs(frame.drift)))
+      ).toBeLessThan(2);
+      expect(
+        Math.max(...motion.frames.map((frame) => Math.abs(frame.heightDrift)))
       ).toBeLessThan(2);
       expect(
         Math.max(...motion.frames.map((frame) => frame.backgroundMovement))
@@ -7662,8 +7716,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(input).toHaveValue("25");
     // Closing a focused sheet must not unlock/reflow the wave until the
     // keyboard has finished. The next keyboard cycle proves the lock released.
-    expectAlignedMotion(await sampleMotion("keyboardWillShow"));
-    await emitKeyboard("keyboardDidShow", 300);
+    const replyMotion = await sampleMotion("keyboardWillShow", 400);
+    expectAlignedMotion(replyMotion);
+    expect(replyMotion.settled.height).toBeLessThan(
+      replyMotion.starting.height - 20
+    );
+    await emitKeyboard("keyboardDidShow", 400);
     await dialog.getByRole("button", { name: /^Close(?: modal)?$/ }).click();
     await expect(dialog).toHaveCount(0);
     expect(
@@ -7671,7 +7729,19 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         (element) => element.getBoundingClientRect().height
       )
     ).toBeCloseTo(backgroundHeight, 0);
-    await hideKeyboard();
+    await emitKeyboard("keyboardWillHide");
+    await expect(page.locator("html")).toHaveCSS(
+      "--native-keyboard-inset-bottom",
+      "0px"
+    );
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-layout-viewport-locked",
+      "true"
+    );
+    await emitKeyboard("keyboardDidHide");
+    await expect(page.locator("html")).not.toHaveAttribute(
+      "data-layout-viewport-locked"
+    );
     await emitKeyboard("keyboardWillShow", 300);
     await expect
       .poll(() =>

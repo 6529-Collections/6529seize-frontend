@@ -484,6 +484,15 @@ function setupBrowserKeyboardFallbackListeners(): void {
   let viewportAnimationFrame: number | null = null;
 
   const handleFocusIn = () => {
+    // iOS focus restoration must not cancel recovery from a missing did-hide.
+    if (
+      currentState.isIos &&
+      nativeKeyboardLifecycleActive &&
+      currentState.phase === "hiding" &&
+      !hasEditableFocus()
+    ) {
+      return;
+    }
     clearHiddenFallbackTimeout();
     if (!currentState.isVisible) {
       rememberKeyboardClosedViewportHeight();

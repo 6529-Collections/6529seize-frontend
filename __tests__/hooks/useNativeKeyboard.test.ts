@@ -871,6 +871,72 @@ describe("useNativeKeyboard", () => {
     }
   });
 
+  it("finishes iOS hiding after focus returns to a button without did-hide", async () => {
+    const { result } = await renderNativeKeyboardHook();
+    const input = document.createElement("input");
+    const opener = document.createElement("button");
+    document.body.append(input, opener);
+    jest.useFakeTimers();
+
+    try {
+      act(() => {
+        input.focus();
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+        listeners["keyboardWillHide"]?.();
+        opener.focus();
+      });
+
+      expect(document.activeElement).toBe(opener);
+      expect(result.current.phase).toBe("hiding");
+
+      act(() => {
+        jest.advanceTimersByTime(499);
+      });
+      expect(result.current.phase).toBe("hiding");
+
+      act(() => {
+        jest.advanceTimersByTime(1);
+      });
+      expect(result.current.isVisible).toBe(false);
+      expect(result.current.keyboardHeight).toBe(0);
+      expect(result.current.phase).toBe("hidden");
+    } finally {
+      input.remove();
+      opener.remove();
+      jest.useRealTimers();
+    }
+  });
+
+  it("cancels the pending native hide fallback when an editable field gains focus", async () => {
+    const { result } = await renderNativeKeyboardHook();
+    const input = document.createElement("input");
+    document.body.append(input);
+    jest.useFakeTimers();
+
+    try {
+      act(() => {
+        listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+        listeners["keyboardWillHide"]?.();
+        input.focus();
+        jest.advanceTimersByTime(500);
+      });
+
+      expect(document.activeElement).toBe(input);
+      expect(result.current.phase).toBe("hiding");
+
+      act(() => {
+        listeners["keyboardDidShow"]?.({ keyboardHeight: 300 });
+      });
+
+      expect(result.current.isVisible).toBe(true);
+      expect(result.current.keyboardHeight).toBe(300);
+      expect(result.current.phase).toBe("visible");
+    } finally {
+      input.remove();
+      jest.useRealTimers();
+    }
+  });
+
   it("keeps a rapid reopen visible after a pending hide fallback", async () => {
     const { result } = await renderNativeKeyboardHook();
     jest.useFakeTimers();
