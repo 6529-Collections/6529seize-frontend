@@ -202,7 +202,7 @@ export default function DesktopConnectDialog() {
       onClose={close}
     >
       <div className="tw-flex tw-flex-col tw-gap-3 tw-pb-2">
-        <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+        <p className="tw-m-0 tw-px-4 tw-text-sm tw-text-iron-300 sm:tw-px-6">
           {t(locale, "desktopConnect.intro")}
         </p>
         <Option
