@@ -105,7 +105,10 @@ On the web and Android, the tab appears after the page loads.
    Top up by cutoff follows for owners in Plan a top up, Running low and Action
    required. The zero- and one-funded-drop Action required explanations are omitted
    because the count and deadline already convey them. States without a status
-   keep their existing explanation for owners and visitors.
+   keep their existing explanation for owners. Visitors see the status without
+   setup or funding instructions. Manual selections, eligibility and unavailable
+   coverage retain neutral explanations; balances, dates and other facts remain
+   visible. The unavailable-data tooltip also uses visitor wording.
 2. Read Subscription balance, available mints and Forecast use in the quiet facts
    zone. Desktop keeps each fact inline in 14px text. Phones place the two facts
    side by side, with 14px labels above 16px values and `N mints available` below
@@ -150,8 +153,19 @@ On the web and Android, the tab appears after the page loads.
    Escape or Show Less returns to the three-row preview and restores focus.
    Phone rows keep the date first and the title beneath it. The quantity selector
    and toggle stay together beside the title when there is room, or below it
-   together on narrower rows. Minting Today artwork aligns with the top of the
-   text on phones, and the Meme name stays on one line. Visitors keep static quantity
+   together on narrower rows. Minting Today artwork sits above the full-width
+   text on phones, and the Meme name stays on one line.
+   Each Meme title links to its `/the-memes/{id}` page, including before minting,
+   with keyboard focus and the tab's existing link styling. Scheduled cards in
+   the upcoming subscription season open the existing upcoming-card view;
+   later placeholders stay out of search indexing until publication.
+   On mint days, the row
+   uses the matching minted thumbnail or, before indexing, a Main Stage winner
+   explicitly mapped to that Meme number. Winner artwork uses a small resized
+   image or preview. Unmatched, unavailable or failed artwork leaves no image
+   slot. Artwork data is requested only when a Minting Today row is present,
+   reusing the shared cache; title links do not prefetch Meme pages.
+   Visitors keep static quantity
    and subscription status. One amber boundary follows the last funded drop,
    using the existing Funded through wording. If no funded-through point is
    supplied, Next unfunded appears before the next unfunded drop instead.

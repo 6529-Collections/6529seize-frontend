@@ -19,6 +19,7 @@ export function useRepAllocation({
   readonly enabled?: boolean;
 }): {
   repState: RatingStats | null;
+  ratingStats: readonly RatingStats[] | undefined;
   heroAvailableRep: number;
   proxyAvailableCredit: number | null;
   minMaxValues: { readonly min: number; readonly max: number };
@@ -86,6 +87,7 @@ export function useRepAllocation({
 
   return {
     repState,
+    ratingStats: data?.rating_stats,
     heroAvailableRep,
     proxyAvailableCredit,
     minMaxValues,

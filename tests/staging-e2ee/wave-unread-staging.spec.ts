@@ -2,6 +2,7 @@ import { createChatWave } from "../support/staging-e2ee/chat-wave";
 import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
+import { e2eeMessage } from "../support/e2ee/e2eeCopy";
 import { newRunId } from "../support/staging-e2ee/fixtures";
 import {
   attachSessionEvidence,
@@ -80,17 +81,36 @@ async function visibleToastText(page: Page): Promise<string> {
  * Posts `text` from the wave composer. A new profile may first be asked to
  * enable Signed Posts; the scripted wallet signs that as a user would.
  */
-async function post(session: StagingE2eeSession, text: string) {
+async function post(
+  session: StagingE2eeSession,
+  text: string,
+  mentionHandle?: string
+) {
   const { page } = session;
   const input = chatComposer(page);
   await expect(
     input,
     `${session.label}: the wave composer did not appear for a new profile`
   ).toBeVisible({ timeout: UI_TIMEOUT_MS });
-  await input.fill(text);
+  await input.fill(mentionHandle ? `${text} @${mentionHandle}` : text);
+  if (mentionHandle) {
+    await page
+      .getByRole("button", {
+        name: new RegExp(`^${mentionHandle}(?: |$)`, "u"),
+      })
+      .click({ timeout: UI_TIMEOUT_MS });
+  }
   await input.press("Enter");
-  const message = page.getByText(text, { exact: true }).last();
-  const signedPosts = page.getByRole("dialog", { name: "Enable Signed Posts" });
+  const message = mentionHandle
+    ? page
+        .getByRole("main")
+        .locator("[data-drop-serial-no]")
+        .filter({ hasText: text })
+        .last()
+    : page.getByText(text, { exact: true }).last();
+  const signedPosts = page.getByRole("dialog", {
+    name: e2eeMessage("e2ee.deviceStatus.enableProof"),
+  });
   await expect(message.or(signedPosts).first()).toBeVisible({
     timeout: UI_TIMEOUT_MS,
   });
@@ -296,5 +316,46 @@ test.describe("Live wave unread state between real users on staging @large", () 
     await b.page.reload({ waitUntil: "domcontentloaded" });
     await expect(row.link).toBeVisible({ timeout: UI_TIMEOUT_MS });
     await expect(row.anyBadge).toHaveCount(0);
+  });
+
+  test("a real mention notification opens the staging message in view", async () => {
+    const { a, b, watched, other, runId } = requireWorld();
+    const text = `unreadqa ${runId} mention`;
+    await gotoStaging(b.page, `/waves/${other.id}`);
+    await gotoStaging(a.page, `/waves/${watched.id}`);
+    await post(a, text, b.user.handle);
+    await post(a, `unreadqa ${runId} after mention`);
+
+    const bell = b.page.getByRole("link", {
+      name: "Notifications",
+      exact: true,
+    });
+    await expect(bell).toBeVisible({ timeout: UI_TIMEOUT_MS });
+    await bell.focus();
+    await bell.press("ArrowDown");
+    const inbox = b.page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    const mention = inbox
+      .getByRole("link")
+      .filter({ hasText: `${a.user.handle} mentioned you` });
+    await expect(mention).toHaveAttribute(
+      "href",
+      new RegExp(`/waves/${watched.id}\\?serialNo=\\d+$`, "u"),
+      { timeout: SYNC_TIMEOUT_MS }
+    );
+    const href = await mention.getAttribute("href");
+    const serialNo = new URL(href!, b.page.url()).searchParams.get("serialNo");
+    await mention.click();
+    await expect(inbox).toBeHidden();
+    await expect(
+      b.page
+        .getByRole("main")
+        .locator(
+          `[data-wave-drops-scroll-container] [data-drop-serial-no="${serialNo}"]`
+        )
+        .filter({ hasText: text })
+    ).toBeInViewport({ timeout: UI_TIMEOUT_MS });
   });
 });

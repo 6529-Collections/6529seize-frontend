@@ -20,6 +20,25 @@
   }
 }
 
+@media (scripting: none) {
+  /* React streams this boundary in a hidden body child and uses a script
+     to insert it into the layout. Let the public preview fill the viewport
+     when that script cannot run. The interactive subtree remains inert. */
+  body > div[hidden]:has(> .previewGate) {
+    display: contents;
+  }
+
+  body > div[hidden] > .previewGate {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+  }
+
+  .previewGate > [inert] {
+    display: none;
+  }
+}
+
 /* Progressive fallback for browsers without the scripting media feature. */
 .enhanced .loading {
   display: flex;

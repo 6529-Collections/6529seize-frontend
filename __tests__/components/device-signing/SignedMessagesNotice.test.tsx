@@ -9,6 +9,8 @@ import {
   waitFor,
 } from "@testing-library/react";
 import type { ReactElement } from "react";
+import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
+import { contextFor, E2eeTestProvider } from "../e2ee/fakeE2eeEngine";
 
 const NOW = Date.UTC(2026, 9, 12, 12, 0);
 const DAY = 86_400_000;
@@ -154,7 +156,7 @@ describe("SignedMessagesNotice", () => {
 
     expect(
       screen.getByRole("region", {
-        name: "Turn on Signed Posts (one signature)",
+        name: "Turn on signed posts",
       })
     ).toBeVisible();
     fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
@@ -163,6 +165,95 @@ describe("SignedMessagesNotice", () => {
       expect.objectContaining({ detail: "posts" })
     );
     expect(mockRequestGrant).not.toHaveBeenCalled();
+  });
+
+  describe("after the browser cleared this site's saved keys", () => {
+    const recordLoss = () =>
+      localStorage.setItem(
+        `6529-device-key-loss:${ADDRESS}`,
+        JSON.stringify({
+          grantId: `0x${"9".repeat(64)}`,
+          ownProfileId: null,
+          detectedAt: NOW,
+          hintAgeHours: 3,
+        })
+      );
+
+    it("explains the cleared keys and offers to turn on again", () => {
+      mockLocal = { loaded: true, grant: null, publicKeys: [] };
+      recordLoss();
+      const setup = jest.fn();
+      window.addEventListener("6529:device-setup", setup, { once: true });
+      render(<SignedMessagesNotice composerEmpty />);
+
+      expect(
+        screen.getByRole("region", {
+          name: "Your browser cleared this site's saved keys",
+        })
+      ).toBeVisible();
+      expect(
+        // No promise about the earlier permission: whether it is removed
+        // depends on the cleanup (only a Signed Posts-only grant is).
+        screen.getByText(
+          "This browser can no longer sign your posts. Turn Signed Posts on again with one signature."
+        )
+      ).toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Turn on again" }));
+      expect(setup).toHaveBeenCalledWith(
+        expect.objectContaining({ detail: "posts" })
+      );
+    });
+
+    it("follows a loss recorded while the notice is open", () => {
+      mockLocal = { loaded: true, grant: null, publicKeys: [] };
+      render(<SignedMessagesNotice composerEmpty />);
+      expect(screen.getByRole("button", { name: "Turn on" })).toBeVisible();
+
+      act(() => {
+        recordLoss();
+        window.dispatchEvent(new Event("6529-device-key-loss-change"));
+      });
+      expect(
+        screen.getByRole("button", { name: "Turn on again" })
+      ).toBeVisible();
+    });
+
+    it("keeps the first turn-on for a browser with no sign of an earlier key", () => {
+      mockLocal = { loaded: true, grant: null, publicKeys: [] };
+      render(<SignedMessagesNotice composerEmpty />);
+
+      expect(
+        screen.getByRole("region", {
+          name: "Turn on signed posts",
+        })
+      ).toBeVisible();
+      expect(screen.queryByRole("button", { name: "Turn on again" })).toBeNull();
+    });
+
+    it("keeps the expired notice for an expired grant on a key that is still here", () => {
+      mockLocal = {
+        loaded: true,
+        grant: grant({ expires_at: NOW - DAY }),
+        publicKeys: [OWN_KEY],
+      };
+      localStorage.setItem(
+        "6529-signed-messages-notice",
+        JSON.stringify({ [ADDRESS]: { localGrantIds: [grant().id] } })
+      );
+      render(<SignedMessagesNotice composerEmpty />);
+
+      expect(
+        screen.getByText("Signed posts have ended in this browser")
+      ).toBeVisible();
+      expect(screen.queryByRole("button", { name: "Turn on again" })).toBeNull();
+    });
+
+    it("shows nothing once the new grant is in place", () => {
+      mockLocal = { loaded: true, grant: grant(), publicKeys: [OWN_KEY] };
+      recordLoss();
+      render(<SignedMessagesNotice composerEmpty />);
+      expect(screen.queryByTestId("signed-messages-notice")).toBeNull();
+    });
   });
 
   it("stays out of the way while the user is typing", () => {
@@ -589,7 +680,10 @@ describe("SignedMessagesNotice", () => {
       expect(
         screen.queryByRole("button", { name: "Revoke access" })
       ).toBeNull();
-      expect(screen.getByRole("button", { name: "Turn on" })).toBeVisible();
+      // The remembered grant also shows the keys are gone, not a first turn-on.
+      expect(
+        screen.getByRole("button", { name: "Turn on again" })
+      ).toBeVisible();
 
       mockGrants = [ownGrant, otherDevice];
       rerenderAfterKeyLoss(<SignedMessagesNotice composerEmpty />);
@@ -679,6 +773,46 @@ describe("SignedMessagesNotice", () => {
       expect(screen.queryByRole("button", { name: "This was me" })).toBeNull();
       expect(mockAcknowledge).not.toHaveBeenCalled();
       expect(mockRevoke).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("when encrypted DMs can be turned on too (F-18)", () => {
+    // An idle engine: encrypted DMs are allowed but not set up here yet.
+    const renderWithEncryption = () =>
+      render(
+        <E2eeTestProvider value={contextFor(null)}>
+          <SignedMessagesNotice composerEmpty />
+        </E2eeTestProvider>
+      );
+
+    it("names both permissions, as the setup dialog it opens does", () => {
+      const setup = jest.fn();
+      window.addEventListener("6529:device-setup", setup, { once: true });
+      renderWithEncryption();
+
+      expect(
+        screen.getByRole("region", {
+          name: E2EE_MESSAGES["e2ee.deviceStatus.enableBoth"],
+        })
+      ).toBeVisible();
+      expect(
+        screen.getByText(
+          "One wallet signature, no gas. Lasts 180 days in this browser."
+        )
+      ).toBeVisible();
+      fireEvent.click(screen.getByRole("button", { name: "Turn on" }));
+      expect(setup).toHaveBeenCalledWith(
+        expect.objectContaining({ detail: "both" })
+      );
+    });
+
+    it("says renewing also turns on encrypted DMs", () => {
+      mockLocal = { ...mockLocal, grant: grant({ expires_at: NOW - DAY }) };
+      renderWithEncryption();
+
+      expect(
+        screen.getByText(/The same one signature also turns on encrypted DMs\.$/)
+      ).toBeVisible();
     });
   });
 });

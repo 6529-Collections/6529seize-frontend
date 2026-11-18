@@ -13,8 +13,9 @@ import RepDirectionToggle from "../RepDirectionToggle";
 import RatingContributorsControl from "../RatingContributorsControl";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
-import { t, tRich } from "@/i18n/messages";
+import { t } from "@/i18n/messages";
 import GrantRepDialog from "../new-rep/GrantRepDialog";
+import AssignedRepSummary from "../AssignedRepSummary";
 import {
   canShowPersonalRepContribution,
   getCanEditRep,
@@ -126,27 +127,10 @@ export default function UserPageRepHeader({
                   overview !== null &&
                   overview.authenticated_user_contribution !== null &&
                   overview.authenticated_user_contribution !== 0 && (
-                    <span className="tw-inline-flex tw-items-center tw-gap-x-1.5 tw-text-meta/4 tw-font-normal tw-text-iron-400">
-                      {tRich(
-                        locale,
-                        repDirection === "given"
-                          ? "user.profile.rep.rep.assignedToYou"
-                          : "user.profile.rep.rep.youAssigned",
-                        {
-                          value: (
-                            <span
-                              key="value"
-                              className="tw-text-meta/4 tw-font-medium tw-text-iron-100"
-                            >
-                              {formatInteger(
-                                locale,
-                                overview.authenticated_user_contribution
-                              )}
-                            </span>
-                          ),
-                        }
-                      )}
-                    </span>
+                    <AssignedRepSummary
+                      amount={overview.authenticated_user_contribution}
+                      direction={repDirection}
+                    />
                   )}
               </div>
               {canEditRep && repDirection === "received" && (

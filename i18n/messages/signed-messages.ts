@@ -46,10 +46,17 @@ export const SIGNED_MESSAGES_MESSAGES = {
     "Your wallet or network changed while signing. Please try again.",
   "signedMessages.notice.ariaLabel": "Signed posts",
   "signedMessages.notice.dismiss": "Dismiss",
-  "signedMessages.notice.enable.title": "Turn on Signed Posts (one signature)",
+  "signedMessages.notice.enable.title": "Turn on signed posts",
   "signedMessages.notice.enable.body":
     "Your wallet signs once. This browser then signs your posts, edits, deletes and reactions for 180 days, so anyone can verify they came from you.",
   "signedMessages.notice.enable.action": "Turn on",
+  "signedMessages.notice.restore.title":
+    "Your browser cleared this site's saved keys",
+  "signedMessages.notice.restore.body":
+    "This browser can no longer sign your posts. Turn Signed Posts on again with one signature.",
+  "signedMessages.notice.restore.action": "Turn on again",
+  "signedMessages.notice.restore.replaced":
+    "Signed Posts are on again. This browser's earlier permission was removed.",
   "signedMessages.notice.renew.title": "Signed posts end on {date}",
   "signedMessages.notice.renew.body":
     "Renew with one signature to keep signing your messages in this browser.",
@@ -81,6 +88,12 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.notice.newDevice.acknowledgeError":
     "Couldn’t acknowledge this device. Try again.",
   "signedMessages.notice.enabled": "Signed posts are on in this browser.",
+  "signedMessages.notice.enableBoth.title":
+    "Turn on signed posts and encrypted DMs",
+  "signedMessages.notice.enableBoth.body":
+    "One wallet signature, no gas. Lasts 180 days in this browser.",
+  "signedMessages.notice.expired.bodyBoth":
+    "Your messages are sent unsigned until you renew. The same one signature also turns on encrypted DMs.",
   "signedMessages.revoke.success": "{label} can no longer post as you.",
   "signedMessages.revoke.error":
     "Couldn't revoke this device. Please try again.",
@@ -101,8 +114,6 @@ export const SIGNED_MESSAGES_MESSAGES = {
   "signedMessages.devices.expires": "Expires {date}",
   "signedMessages.devices.expiredOn": "Expired {date}",
   "signedMessages.devices.revokedOn": "Revoked {date}",
-  "signedMessages.devices.lastUsed": "Last used {date}",
-  "signedMessages.devices.neverUsed": "Not used yet",
   "signedMessages.devices.status.active": "Active",
   "signedMessages.devices.status.expired": "Expired",
   "signedMessages.devices.status.revoked": "Revoked",

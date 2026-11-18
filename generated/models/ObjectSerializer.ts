@@ -381,6 +381,7 @@ export * from '../models/ApiDropBoost';
 export * from '../models/ApiDropBoostV2';
 export * from '../models/ApiDropBoostsPage';
 export * from '../models/ApiDropCompetitionContext';
+export * from '../models/ApiDropCompetitionEntryReference';
 export * from '../models/ApiDropContextProfileContext';
 export * from '../models/ApiDropCuration';
 export * from '../models/ApiDropCurationRequest';
@@ -541,6 +542,9 @@ export * from '../models/ApiJoinedWavesPage';
 export * from '../models/ApiLightDrop';
 export * from '../models/ApiLoginRequest';
 export * from '../models/ApiLoginResponse';
+export * from '../models/ApiMainStageTraitIssue';
+export * from '../models/ApiMainStageTraitRule';
+export * from '../models/ApiMainStageTraitValidation';
 export * from '../models/ApiMarkDropUnreadResponse';
 export * from '../models/ApiMarkWaveReadRequest';
 export * from '../models/ApiMarkWaveReadResponse';
@@ -832,6 +836,7 @@ export * from '../models/ApiUploadItem';
 export * from '../models/ApiUploadPartOfMultipartUploadRequest';
 export * from '../models/ApiUploadPartOfMultipartUploadResponse';
 export * from '../models/ApiUploadsPage';
+export * from '../models/ApiValidateMainStageTraitsRequest';
 export * from '../models/ApiValidateProfileCmsAgentCandidateRequest';
 export * from '../models/ApiValidateProfileCmsAgentPatchRequest';
 export * from '../models/ApiValidateProfileCmsPackageRequest';
@@ -1223,7 +1228,7 @@ import { ApiCommunityMetric } from '../models/ApiCommunityMetric';
 import { ApiCommunityMetricSample } from '../models/ApiCommunityMetricSample';
 import { ApiCommunityMetrics } from '../models/ApiCommunityMetrics';
 import { ApiCommunityMetricsSeries } from '../models/ApiCommunityMetricsSeries';
-import { ApiCompetition                        } from '../models/ApiCompetition';
+import { ApiCompetition                         } from '../models/ApiCompetition';
 import { ApiCompetitionActionRequest } from '../models/ApiCompetitionActionRequest';
 import { ApiCompetitionAward } from '../models/ApiCompetitionAward';
 import { ApiCompetitionAwardPage } from '../models/ApiCompetitionAwardPage';
@@ -1378,6 +1383,7 @@ import { ApiDropBoost } from '../models/ApiDropBoost';
 import { ApiDropBoostV2 } from '../models/ApiDropBoostV2';
 import { ApiDropBoostsPage } from '../models/ApiDropBoostsPage';
 import { ApiDropCompetitionContext } from '../models/ApiDropCompetitionContext';
+import { ApiDropCompetitionEntryReference } from '../models/ApiDropCompetitionEntryReference';
 import { ApiDropContextProfileContext } from '../models/ApiDropContextProfileContext';
 import { ApiDropCuration } from '../models/ApiDropCuration';
 import { ApiDropCurationRequest } from '../models/ApiDropCurationRequest';
@@ -1418,7 +1424,7 @@ import { ApiDropSubscriptionActions } from '../models/ApiDropSubscriptionActions
 import { ApiDropSubscriptionTargetAction } from '../models/ApiDropSubscriptionTargetAction';
 import { ApiDropTraceItem } from '../models/ApiDropTraceItem';
 import { ApiDropType } from '../models/ApiDropType';
-import { ApiDropV2                                   } from '../models/ApiDropV2';
+import { ApiDropV2                                    } from '../models/ApiDropV2';
 import { ApiDropV2ContextProfileContext } from '../models/ApiDropV2ContextProfileContext';
 import { ApiDropV2Page } from '../models/ApiDropV2Page';
 import { ApiDropV2PageWithoutCount } from '../models/ApiDropV2PageWithoutCount';
@@ -1538,6 +1544,9 @@ import { ApiJoinedWavesPage } from '../models/ApiJoinedWavesPage';
 import { ApiLightDrop               } from '../models/ApiLightDrop';
 import { ApiLoginRequest } from '../models/ApiLoginRequest';
 import { ApiLoginResponse } from '../models/ApiLoginResponse';
+import { ApiMainStageTraitIssue , ApiMainStageTraitIssueCodeEnum   } from '../models/ApiMainStageTraitIssue';
+import { ApiMainStageTraitRule , ApiMainStageTraitRuleTypeEnum        } from '../models/ApiMainStageTraitRule';
+import { ApiMainStageTraitValidation } from '../models/ApiMainStageTraitValidation';
 import { ApiMarkDropUnreadResponse } from '../models/ApiMarkDropUnreadResponse';
 import { ApiMarkWaveReadRequest } from '../models/ApiMarkWaveReadRequest';
 import { ApiMarkWaveReadResponse } from '../models/ApiMarkWaveReadResponse';
@@ -1829,6 +1838,7 @@ import { ApiUploadItem } from '../models/ApiUploadItem';
 import { ApiUploadPartOfMultipartUploadRequest } from '../models/ApiUploadPartOfMultipartUploadRequest';
 import { ApiUploadPartOfMultipartUploadResponse } from '../models/ApiUploadPartOfMultipartUploadResponse';
 import { ApiUploadsPage } from '../models/ApiUploadsPage';
+import { ApiValidateMainStageTraitsRequest } from '../models/ApiValidateMainStageTraitsRequest';
 import { ApiValidateProfileCmsAgentCandidateRequest } from '../models/ApiValidateProfileCmsAgentCandidateRequest';
 import { ApiValidateProfileCmsAgentPatchRequest } from '../models/ApiValidateProfileCmsAgentPatchRequest';
 import { ApiValidateProfileCmsPackageRequest } from '../models/ApiValidateProfileCmsPackageRequest';
@@ -2140,6 +2150,8 @@ let enumsMap: Set<string> = new Set<string>([
     "ApiGroupTdhInclusionStrategy",
     "ApiIdentitySubscriptionTargetAction",
     "ApiIdentitySubscriptionTargetType",
+    "ApiMainStageTraitIssueCodeEnum",
+    "ApiMainStageTraitRuleTypeEnum",
     "ApiMarketBatchCapabilitiesExecutionPolicyEnum",
     "ApiMarketBatchCapabilitiesCurrencyEnum",
     "ApiMarketBatchCapabilitiesPayerTypeEnum",
@@ -2653,6 +2665,7 @@ let typeMap: {[index: string]: any} = {
     "ApiDropBoostV2": ApiDropBoostV2,
     "ApiDropBoostsPage": ApiDropBoostsPage,
     "ApiDropCompetitionContext": ApiDropCompetitionContext,
+    "ApiDropCompetitionEntryReference": ApiDropCompetitionEntryReference,
     "ApiDropContextProfileContext": ApiDropContextProfileContext,
     "ApiDropCuration": ApiDropCuration,
     "ApiDropCurationRequest": ApiDropCurationRequest,
@@ -2795,6 +2808,9 @@ let typeMap: {[index: string]: any} = {
     "ApiLightDrop": ApiLightDrop,
     "ApiLoginRequest": ApiLoginRequest,
     "ApiLoginResponse": ApiLoginResponse,
+    "ApiMainStageTraitIssue": ApiMainStageTraitIssue,
+    "ApiMainStageTraitRule": ApiMainStageTraitRule,
+    "ApiMainStageTraitValidation": ApiMainStageTraitValidation,
     "ApiMarkDropUnreadResponse": ApiMarkDropUnreadResponse,
     "ApiMarkWaveReadRequest": ApiMarkWaveReadRequest,
     "ApiMarkWaveReadResponse": ApiMarkWaveReadResponse,
@@ -3062,6 +3078,7 @@ let typeMap: {[index: string]: any} = {
     "ApiUploadPartOfMultipartUploadRequest": ApiUploadPartOfMultipartUploadRequest,
     "ApiUploadPartOfMultipartUploadResponse": ApiUploadPartOfMultipartUploadResponse,
     "ApiUploadsPage": ApiUploadsPage,
+    "ApiValidateMainStageTraitsRequest": ApiValidateMainStageTraitsRequest,
     "ApiValidateProfileCmsAgentCandidateRequest": ApiValidateProfileCmsAgentCandidateRequest,
     "ApiValidateProfileCmsAgentPatchRequest": ApiValidateProfileCmsAgentPatchRequest,
     "ApiValidateProfileCmsPackageRequest": ApiValidateProfileCmsPackageRequest,

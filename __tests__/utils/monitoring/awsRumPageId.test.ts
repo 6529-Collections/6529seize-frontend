@@ -12,6 +12,7 @@ describe("getAwsRumPageId", () => {
     [`/waves/${WAVE_ID}`, "/waves/[wave]"],
     [`/messages/${WAVE_ID}`, "/messages/[wave]"],
     [`/tools/app-wallets/${WALLET}`, "/tools/app-wallets/[app-wallet-address]"],
+    ["/ai/guide", "/ai"],
     ["/alice", "/[user]"],
     ["/alice/rep", "/[user]/[...cmsPath]"],
     [`/${WALLET}`, "/[user]"],
@@ -21,7 +22,7 @@ describe("getAwsRumPageId", () => {
     expect(getAwsRumPageId(route)).toBe(expectedPageId);
   });
 
-  it.each(["/author", "/notifications", "/rep", "/waves"])(
+  it.each(["/ai", "/author", "/notifications", "/rep", "/waves"])(
     "keeps the known static root %s literal",
     (route) => {
       expect(getAwsRumPageId(route)).toBe(route);

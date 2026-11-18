@@ -21,6 +21,7 @@ import {
 import { useLocalDeviceKeys } from "@/hooks/device-signing/useLocalDeviceKeys";
 import { useMinuteClock } from "@/hooks/device-signing/useMinuteClock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { formatDate, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
@@ -32,6 +33,11 @@ import { isE2eeEnabled } from "@/config/e2eeEnv";
 import { getEncryptedDevicesRoute } from "@/helpers/navigation.helpers";
 import type { ApiE2eeDevice, ApiE2eeMe } from "@/lib/e2ee/api-types";
 import { RenameDevice } from "@/components/e2ee/devices/RenameDevice";
+import { RevokeThisBrowserDetails } from "@/components/e2ee/devices/RevokeThisBrowserDetails";
+import {
+  formatE2eeLastActive,
+  formatE2eeWallet,
+} from "@/components/e2ee/e2eeFormat";
 import { useLinkedDeviceRevocation } from "@/components/e2ee/devices/useLinkedDeviceRevocation";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 
@@ -70,18 +76,24 @@ const formatScopes = (
     })
   );
 
+/** The later activity of the grant's two permissions, if either was used. */
+const getLastActiveAt = (
+  grant: ApiDeviceGrant,
+  linkedDevice: ApiE2eeDevice | undefined
+): number | null => {
+  const times = [grant.last_used_at, linkedDevice?.last_seen_at].filter(
+    (value): value is number => typeof value === "number"
+  );
+  return times.length > 0 ? Math.max(...times) : null;
+};
+
 function getGrantDates(
   locale: SupportedLocale,
   grant: ApiDeviceGrant,
-  status: GrantStatus
+  status: GrantStatus,
+  lastActive: string
 ): string[] {
   const date = (value: number) => formatDate(locale, value);
-  const lastUsed =
-    grant.last_used_at === null
-      ? t(locale, "signedMessages.devices.neverUsed")
-      : t(locale, "signedMessages.devices.lastUsed", {
-          date: date(grant.last_used_at),
-        });
   const endingKey: MessageKey =
     status === "expired"
       ? "signedMessages.devices.expiredOn"
@@ -100,8 +112,51 @@ function getGrantDates(
       }),
     }),
     ending,
-    lastUsed,
+    lastActive,
   ];
+}
+
+/**
+ * Revoke confirmation copy. The browser in use gets its own title, since
+ * revoking it can delete the encrypted chats saved here.
+ */
+/**
+ * `linkedHistoryKey`: for a combined grant, what happens to that device's
+ * encrypted history (useLinkedDeviceRevocation); null for a signing-only one.
+ */
+function getRevokeDialogCopy(
+  locale: SupportedLocale,
+  {
+    label,
+    linkedHistoryKey,
+    thisBrowser,
+  }: {
+    readonly label: string;
+    readonly linkedHistoryKey: MessageKey | null;
+    readonly thisBrowser: boolean;
+  }
+): { title: string; message: string; confirmText: string } {
+  if (thisBrowser) {
+    return {
+      title: t(locale, "e2ee.devices.revokeThisTitle"),
+      message: t(locale, "e2ee.devices.revokeThisConfirmBody", { label }),
+      confirmText: t(locale, "e2ee.devices.revokeThisConfirm"),
+    };
+  }
+  return {
+    title: t(
+      locale,
+      linkedHistoryKey
+        ? "e2ee.devices.revokeCombinedTitle"
+        : "signedMessages.devices.revokeProofTitle",
+      { label }
+    ),
+    message: t(
+      locale,
+      linkedHistoryKey ?? "signedMessages.devices.revokeConfirm"
+    ),
+    confirmText: t(locale, "signedMessages.devices.revoke"),
+  };
 }
 
 function DeviceGrantRow({
@@ -124,6 +179,7 @@ function DeviceGrantRow({
   readonly onRevoke: (grant: ApiDeviceGrant) => void;
 }) {
   const locale = useBrowserLocale();
+  const zone = useDisplayTimeZone();
   const status = getStatus(grant, nowMs);
   const label = linkedDevice?.label ?? grant.device_label;
   const statusKey: MessageKey = `signedMessages.devices.status.${status}`;
@@ -160,12 +216,23 @@ function DeviceGrantRow({
         <p className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-iron-400">
           {[
             t(locale, "signedMessages.devices.wallet", {
-              address: shortenAddress(grant.wallet),
+              address:
+                formatE2eeWallet(grant.wallet) || shortenAddress(grant.wallet),
             }),
             t(locale, "signedMessages.devices.origin", {
               origin: grant.domain,
             }),
-            ...getGrantDates(locale, grant, status),
+            ...getGrantDates(
+              locale,
+              grant,
+              status,
+              formatE2eeLastActive(
+                locale,
+                isThisDevice && status === "active",
+                getLastActiveAt(grant, linkedDevice),
+                zone
+              )
+            ),
           ].join(" · ")}
         </p>
       </div>
@@ -213,6 +280,67 @@ function EnableSignedMessagesButton() {
       </Button>
     </div>
   );
+}
+
+/**
+ * Encryption devices enrolled by a combined grant (by grant id), and the
+ * ones listed on their own: separate grants, or a grant not listed here.
+ */
+function splitEncryptedDevices(
+  devices: readonly ApiE2eeDevice[],
+  grants: readonly ApiDeviceGrant[]
+) {
+  const combined = (device: ApiE2eeDevice) =>
+    device.grant_message !== null && device.grant_message !== undefined;
+  return {
+    linkedDevices: new Map(
+      devices
+        .filter((device) => combined(device))
+        .map((device) => [device.grant_id, device])
+    ),
+    separateDevices: devices.filter(
+      (device) =>
+        !combined(device) ||
+        !grants.some((grant) => grant.id === device.grant_id)
+    ),
+  };
+}
+
+/**
+ * The grant being revoked: its linked encryption device, whether its
+ * signing key is this browser's (`own`), and whether it is this browser at
+ * all (`thisBrowser`): the same check as the cleanup after the revoke, so
+ * an encryption-device match counts too (also when the keys can't be read).
+ */
+function getPendingRevokeOwnership(
+  pending: ApiDeviceGrant | null,
+  {
+    linkedDevices,
+    ownKeys,
+    isThisBrowser,
+  }: {
+    readonly linkedDevices: ReadonlyMap<string, ApiE2eeDevice>;
+    readonly ownKeys: ReadonlySet<string>;
+    readonly isThisBrowser: (
+      device: ApiE2eeDevice,
+      ownGrant: boolean
+    ) => boolean;
+  }
+): {
+  readonly linked: ApiE2eeDevice | undefined;
+  readonly own: boolean;
+  readonly thisBrowser: boolean;
+} {
+  if (pending === null) {
+    return { linked: undefined, own: false, thisBrowser: false };
+  }
+  const linked = linkedDevices.get(pending.id);
+  const own = ownKeys.has(pending.device_key.toLowerCase());
+  return {
+    linked,
+    own,
+    thisBrowser: linked ? isThisBrowser(linked, own) : own,
+  };
 }
 
 export default function DevicesPreferencesSettings() {
@@ -275,30 +403,25 @@ export default function DevicesPreferencesSettings() {
   const encryptedDevices = encryptionEnabled
     ? (encryptionDevices.data ?? [])
     : [];
-  const linkedDevices = new Map(
-    encryptedDevices
-      .filter(
-        (device) =>
-          device.grant_message !== null && device.grant_message !== undefined
-      )
-      .map((device) => [device.grant_id, device])
-  );
-  const separateDevices = encryptedDevices.filter(
-    (device) =>
-      device.grant_message === null ||
-      device.grant_message === undefined ||
-      !grants.some((grant) => grant.id === device.grant_id)
+  const { linkedDevices, separateDevices } = splitEncryptedDevices(
+    encryptedDevices,
+    grants
   );
   const canVerifyRevocation =
     !encryptionEnabled ||
     (encryptionDevices.isSuccess && !encryptionDevices.isError);
-  const pendingLinkedDevice = pendingRevoke
-    ? linkedDevices.get(pendingRevoke.id)
-    : undefined;
-  const ownKeys = new Set(local.publicKeys);
-  const pendingIsOwn =
-    pendingRevoke !== null &&
-    ownKeys.has(pendingRevoke.device_key.toLowerCase());
+  // Both sides lowercase: missing this browser would skip the stricter
+  // "Revoke this browser?" dialog and its encrypted-chats warning.
+  const ownKeys = new Set(local.publicKeys.map((key) => key.toLowerCase()));
+  const {
+    linked: pendingLinkedDevice,
+    own: pendingIsOwn,
+    thisBrowser: revokingThisBrowser,
+  } = getPendingRevokeOwnership(pendingRevoke, {
+    linkedDevices,
+    ownKeys,
+    isThisBrowser: linkedRevocation.isThisBrowser,
+  });
 
   const confirmRevoke = async () => {
     if (!canVerifyRevocation || !pendingRevoke || revokingRef.current) return;
@@ -469,27 +592,27 @@ export default function DevicesPreferencesSettings() {
           !isRevoking && !revokeInProgress && setPendingRevoke(null)
         }
         onConfirm={() => void confirmRevoke()}
-        title={t(
-          locale,
-          pendingLinkedDevice
-            ? "e2ee.devices.revokeCombinedTitle"
-            : "signedMessages.devices.revokeProofTitle",
-          {
-            label:
-              pendingLinkedDevice?.label ?? pendingRevoke?.device_label ?? "",
-          }
-        )}
-        message={t(
-          locale,
-          pendingLinkedDevice
+        {...getRevokeDialogCopy(locale, {
+          label:
+            pendingLinkedDevice?.label ?? pendingRevoke?.device_label ?? "",
+          linkedHistoryKey: pendingLinkedDevice
             ? linkedRevocation.historyKey(pendingLinkedDevice, pendingIsOwn)
-            : "signedMessages.devices.revokeConfirm"
-        )}
-        confirmText={t(locale, "signedMessages.devices.revoke")}
+            : null,
+          thisBrowser: revokingThisBrowser,
+        })}
         cancelText={t(locale, "signedMessages.devices.cancel")}
         isConfirming={isRevoking || revokeInProgress}
         confirmVariant="destructive"
       >
+        {revokingThisBrowser ? (
+          <div className="tw-mt-3">
+            <RevokeThisBrowserDetails
+              signedPosts
+              encryptedDms={pendingLinkedDevice?.revoked_at === null}
+              setUpBackup={{ href: getEncryptedDevicesRoute() }}
+            />
+          </div>
+        ) : null}
         {local.failed ? (
           <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-leading-6 tw-text-iron-200">
             {t(locale, "signedMessages.devices.revokeMaybeThisDevice")}

@@ -46,7 +46,12 @@ export default function PublicWaveFeedGate({
 
   return (
     <PublicWaveFeedReadyContext value={markReady}>
-      <div className="tailwind-scope tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
+      <div
+        className={clsx(
+          "tailwind-scope tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col",
+          showFallback && styles["previewGate"]
+        )}
+      >
         <div
           aria-hidden={showFallback}
           className="tw-flex tw-min-h-0 tw-flex-1 tw-flex-col"

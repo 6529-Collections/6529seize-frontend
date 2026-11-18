@@ -12,6 +12,9 @@ import * as localeFormat from "@/i18n/format";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import userEvent from "@testing-library/user-event";
 import { useNowMinting } from "@/hooks/useNowMinting";
+import { useNextMintDrop } from "@/hooks/useNextMintDrop";
+import { MEMES_CONTRACT } from "@/constants/constants";
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import { useQuery } from "@tanstack/react-query";
 import {
   fireEvent,
@@ -24,6 +27,30 @@ import {
 jest.mock("@/hooks/useMediaQuery");
 
 jest.mock("@/hooks/useNowMinting", () => ({ useNowMinting: jest.fn() }));
+jest.mock("@/hooks/useNextMintDrop", () => ({ useNextMintDrop: jest.fn() }));
+
+const winnerImage =
+  "https://d3lqz0a4bldqgf.cloudfront.net/drops/test-winner/artwork.png";
+const winnerThumbnail =
+  "https://d3lqz0a4bldqgf.cloudfront.net/drops/test-winner/200x200/artwork.png";
+const nextMintResult: ReturnType<typeof useNextMintDrop> = {
+  nextMint: null,
+  nextMintTitle: null,
+  waveId: "main-stage",
+  nextDecisionTime: null,
+  isReady: true,
+  isSettingsLoaded: true,
+  isFetching: false,
+  isLoading: false,
+};
+
+// Include malformed API mappings at this fixture boundary to test rejection.
+const matchingWinner = (cardId: unknown): ApiDropV2View =>
+  ({
+    submission_context: { meme_card_id: cardId },
+    parts: [{ media: [{ url: winnerImage, mime_type: "image/png" }] }],
+    metadata: [],
+  }) as unknown as ApiDropV2View;
 
 const mockNowMintingResult = {
   nft: undefined,
@@ -137,6 +164,7 @@ describe("UserPageSubscriptionsUpcoming", () => {
       .mocked(getUpcomingMintsAcrossSeasons)
       .mockReturnValue(mockUpcomingRows);
     jest.mocked(useNowMinting).mockReturnValue(mockNowMintingResult);
+    jest.mocked(useNextMintDrop).mockReturnValue(nextMintResult);
     useQueryMock.mockImplementation(({ enabled }) => ({
       data: enabled
         ? {
@@ -271,10 +299,13 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(
       within(marker).getByRole("link", { name: "The Memes #3" })
     ).toHaveAttribute("href", "/the-memes/3");
+    const rowTitle = screen
+      .getAllByRole("link", { name: "The Memes #3" })
+      .find((link) => !marker.contains(link));
+    expect(rowTitle).toBeDefined();
     expect(
-      screen
-        .getByText("The Memes #3", { selector: "span" })
-        .compareDocumentPosition(marker) & Node.DOCUMENT_POSITION_FOLLOWING
+      rowTitle!.compareDocumentPosition(marker) &
+        Node.DOCUMENT_POSITION_FOLLOWING
     ).toBeTruthy();
   });
 
@@ -290,10 +321,13 @@ describe("UserPageSubscriptionsUpcoming", () => {
       expect(
         within(marker).getByRole("link", { name: "The Memes #2" })
       ).toHaveAttribute("href", "/the-memes/2");
+      const rowTitle = screen
+        .getAllByRole("link", { name: "The Memes #2" })
+        .find((link) => !marker.contains(link));
+      expect(rowTitle).toBeDefined();
       expect(
-        marker.compareDocumentPosition(
-          screen.getByText("The Memes #2", { selector: "span" })
-        ) & Node.DOCUMENT_POSITION_FOLLOWING
+        marker.compareDocumentPosition(rowTitle!) &
+          Node.DOCUMENT_POSITION_FOLLOWING
       ).toBeTruthy();
       expect(screen.queryByText("Unfunded")).not.toBeInTheDocument();
       expect(
@@ -351,7 +385,184 @@ describe("UserPageSubscriptionsUpcoming", () => {
   it("does not request current artwork on days without a Minting Today row", () => {
     renderComponent();
     expect(useNowMinting).not.toHaveBeenCalled();
+    expect(useNextMintDrop).not.toHaveBeenCalled();
   });
+
+  it.each([false, true])(
+    "links every upcoming drop, including expanded rows (readonly=%s)",
+    (readonly) => {
+      renderComponent({ readonly });
+      for (const id of [1, 2, 3]) {
+        expect(
+          screen.getByRole("link", { name: `The Memes #${id}` })
+        ).toHaveAttribute("href", `/the-memes/${id}`);
+      }
+      fireEvent.click(screen.getByRole("button", { name: "Show More" }));
+      expect(
+        screen.getByRole("link", { name: "The Memes #4" })
+      ).toHaveAttribute("href", "/the-memes/4");
+    }
+  );
+
+  it.each([false, true])(
+    "shows the matching winner before indexing and keeps the row if its image fails (readonly=%s)",
+    (readonly) => {
+      jest.mocked(isMintingToday).mockReturnValue(true);
+      jest.mocked(useNowMinting).mockReturnValue({
+        ...mockNowMintingResult,
+        nft: {
+          id: 574,
+          contract: MEMES_CONTRACT,
+          thumbnail: "https://example.com/previous.jpg",
+        } as ApiMemesExtendedData,
+      });
+      jest.mocked(useNextMintDrop).mockReturnValue({
+        ...nextMintResult,
+        nextMint: matchingWinner(575),
+      });
+      const { container } = renderComponent({
+        readonly,
+        memes_subscriptions: [
+          { ...mockSubscriptions[0], token_id: 575, contract: MEMES_CONTRACT },
+        ],
+      });
+      const image = container.querySelector("img");
+      expect(image).toHaveAttribute("src", winnerThumbnail);
+      expect(image).toHaveAttribute("width", "80");
+      expect(image).toHaveAttribute("height", "113");
+      expect(
+        screen.getByRole("link", { name: "The Memes #575" })
+      ).toHaveAttribute("href", "/the-memes/575");
+      expect(
+        screen.getByRole("button", { name: "Minting Today" })
+      ).toBeVisible();
+      if (readonly)
+        expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+      else
+        expect(
+          screen.getByRole("switch", {
+            name: "Toggle subscription for The Memes #575",
+          })
+        ).toBeDisabled();
+      fireEvent.error(image!);
+      expect(container.querySelector("img")).toHaveAttribute(
+        "src",
+        winnerThumbnail.replace("200x200", "AUTOx450")
+      );
+      fireEvent.error(container.querySelector("img")!);
+      expect(container.querySelector("img")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: "The Memes #575" })
+      ).toBeVisible();
+      expect(
+        screen.getByRole("button", { name: "Minting Today" })
+      ).toBeVisible();
+    }
+  );
+
+  it("uses the matching winner when indexed image fields are empty", () => {
+    jest.mocked(isMintingToday).mockReturnValue(true);
+    jest.mocked(useNowMinting).mockReturnValue({
+      ...mockNowMintingResult,
+      nft: {
+        id: 1,
+        contract: MEMES_CONTRACT,
+        thumbnail: "",
+        scaled: "",
+        icon: "",
+      } as ApiMemesExtendedData,
+    });
+    jest.mocked(useNextMintDrop).mockReturnValue({
+      ...nextMintResult,
+      nextMint: matchingWinner(1),
+    });
+    const { container } = renderComponent({
+      readonly: true,
+      memes_subscriptions: [
+        { ...mockSubscriptions[0], contract: MEMES_CONTRACT },
+      ],
+    });
+    expect(container.querySelector("img")).toHaveAttribute(
+      "src",
+      winnerThumbnail
+    );
+  });
+
+  it("uses only resized GIF previews, including when every preview fails", () => {
+    jest.mocked(isMintingToday).mockReturnValue(true);
+    const original = winnerImage.replace(".png", ".gif");
+    const winner = matchingWinner(1);
+    jest.mocked(useNextMintDrop).mockReturnValue({
+      ...nextMintResult,
+      nextMint: {
+        ...winner,
+        parts: [
+          {
+            ...winner.parts[0]!,
+            media: [{ url: original, mime_type: "image/gif" }],
+          },
+        ],
+      },
+    });
+    const { container } = renderComponent({
+      readonly: true,
+      memes_subscriptions: [
+        { ...mockSubscriptions[0], contract: MEMES_CONTRACT },
+      ],
+    });
+    for (const size of [
+      "200x200_gifv2",
+      "200x200",
+      "AUTOx450_gifv2",
+      "AUTOx450",
+    ]) {
+      const image = container.querySelector("img");
+      expect(image).toHaveAttribute(
+        "src",
+        original.replace("artwork.gif", `${size}/artwork.gif`)
+      );
+      expect(image).not.toHaveAttribute("src", original);
+      fireEvent.error(image!);
+    }
+    expect(container.querySelector("img")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "The Memes #1" })).toBeVisible();
+  });
+
+  it.each([
+    { token: 575, card: 574 },
+    { token: 575, card: 576 },
+    { token: 575, card: null },
+    { token: 575, card: undefined },
+    { token: 575, card: "575" },
+    { token: 575, card: 575.5 },
+    { token: 0, card: null },
+    { token: 0, card: "" },
+    { token: 0, card: 0 },
+    { token: -1, card: -1 },
+  ])(
+    "omits a winner that is not confirmed as Meme $token (card=$card)",
+    ({ token, card }) => {
+      jest.mocked(isMintingToday).mockReturnValue(true);
+      jest.mocked(useNextMintDrop).mockReturnValue({
+        ...nextMintResult,
+        nextMint: matchingWinner(card),
+      });
+      const { container } = renderComponent({
+        readonly: true,
+        memes_subscriptions: [
+          {
+            ...mockSubscriptions[0],
+            token_id: token,
+            contract: MEMES_CONTRACT,
+          },
+        ],
+      });
+      expect(container.querySelector("img")).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("link", { name: `The Memes #${token}` })
+      ).toBeVisible();
+    }
+  );
 
   it("shows matching current artwork and keeps the mint-day lock when the image fails", () => {
     jest.mocked(isMintingToday).mockReturnValue(true);
@@ -359,11 +570,19 @@ describe("UserPageSubscriptionsUpcoming", () => {
       ...mockNowMintingResult,
       nft: {
         id: 1,
-        contract: "0x123",
+        contract: MEMES_CONTRACT.toLowerCase(),
         thumbnail: "https://example.com/meme-1.jpg",
       } as ApiMemesExtendedData,
     });
-    const { container } = renderComponent();
+    jest.mocked(useNextMintDrop).mockReturnValue({
+      ...nextMintResult,
+      nextMint: matchingWinner(1),
+    });
+    const { container } = renderComponent({
+      memes_subscriptions: [
+        { ...mockSubscriptions[0], contract: MEMES_CONTRACT },
+      ],
+    });
     const image = container.querySelector("img");
     expect(image).toHaveAttribute("src", "https://example.com/meme-1.jpg");
     expect(
@@ -402,6 +621,58 @@ describe("UserPageSubscriptionsUpcoming", () => {
         screen.getByRole("button", { name: "Minting Today" })
       ).toBeVisible();
       expect(screen.queryByRole("switch")).not.toBeInTheDocument();
+    }
+  );
+
+  it("does not use a Main Stage winner for another contract", () => {
+    jest.mocked(isMintingToday).mockReturnValue(true);
+    jest.mocked(useNextMintDrop).mockReturnValue({
+      ...nextMintResult,
+      nextMint: matchingWinner(1),
+    });
+    const { container } = renderComponent({ readonly: true });
+    expect(container.querySelector("img")).not.toBeInTheDocument();
+  });
+
+  it.each([true, false])(
+    "uses a non-image winner's preview only when available (hasPreview=%s)",
+    (hasPreview) => {
+      jest.mocked(isMintingToday).mockReturnValue(true);
+      const winner = matchingWinner(1);
+      jest.mocked(useNextMintDrop).mockReturnValue({
+        ...nextMintResult,
+        nextMint: {
+          ...winner,
+          parts: [
+            {
+              ...winner.parts[0]!,
+              media: [
+                { url: "https://example.com/art.mp4", mime_type: "video/mp4" },
+              ],
+            },
+          ],
+          metadata: hasPreview
+            ? [
+                {
+                  data_key: "additional_media",
+                  data_value: JSON.stringify({ preview_image: winnerImage }),
+                },
+              ]
+            : [],
+        },
+      });
+      const { container } = renderComponent({
+        readonly: true,
+        memes_subscriptions: [
+          { ...mockSubscriptions[0], contract: MEMES_CONTRACT },
+        ],
+      });
+      if (hasPreview)
+        expect(container.querySelector("img")).toHaveAttribute(
+          "src",
+          winnerThumbnail
+        );
+      else expect(container.querySelector("img")).not.toBeInTheDocument();
     }
   );
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { MemesSubmissionPreviewScreen } from "./preview/MemesSubmissionPreviewScreen";
@@ -104,6 +105,7 @@ export function MemesArtSubmissionStepContent({
     case SubmissionStep.ARTWORK:
       return (
         <ArtworkStep
+          competition={presentationCompetition(wave)}
           proposalFrame={form.proposalFrame}
           onProposalFrameChange={form.setProposalFrame}
           collaborators={form.collaborators}

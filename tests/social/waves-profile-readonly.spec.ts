@@ -1,6 +1,7 @@
 import type { Locator, Page } from "@playwright/test";
 import { ApiProfileClassification } from "../../generated/models/ApiProfileClassification";
 import type { ApiWaveOverviewPage } from "../../generated/models/ApiWaveOverviewPage";
+import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
 import type { ApiXTdhGrantsPage } from "../../generated/models/ApiXTdhGrantsPage";
 import { ApiXTdhGrantStatus } from "../../generated/models/ApiXTdhGrantStatus";
 import { ApiXTdhGrantTargetChain } from "../../generated/models/ApiXTdhGrantTargetChain";
@@ -26,13 +27,18 @@ import {
   RESPONSE_TIMEOUT_MS,
 } from "../support/routeReadiness";
 
-import { installSubscriptionFixtures } from "../support/subscriptionFixtures";
+import {
+  installSubscriptionFixtures,
+  subscriptionCoverageFixture,
+} from "../support/subscriptionFixtures";
+import { ApiSubscriptionCoverageStatus } from "../../generated/models/ApiSubscriptionCoverageStatus";
 
 import { EN_US_MESSAGES } from "../../i18n/messages/en-US.complete";
 import {
   captureSafeScreenshot,
   expect,
   expectNoHorizontalOverflow,
+  seedStagingAccessCookie,
   test,
   waitForRouteReady,
 } from "../testHelpers";
@@ -121,7 +127,7 @@ async function getFirstWaveId(page: Page) {
   return match?.[1] ?? "";
 }
 
-async function getPublicChatMessageTarget(page: Page) {
+async function findPublicChatWave(page: Page) {
   const response = await gotoReadyWithApiResponse(
     page,
     "/waves",
@@ -153,10 +159,15 @@ async function getPublicChatMessageTarget(page: Page) {
   }
   expect(
     wave,
-    "Legacy-link fixture unavailable: public discovery must contain a nonempty public chat wave"
+    "Public discovery must contain a nonempty public chat wave"
   ).toBeDefined();
   const waveId = wave!.id;
   expect(waveId).toMatch(/^[0-9a-f-]{36}$/i);
+  return wave!;
+}
+
+async function getPublicChatMessageTarget(page: Page) {
+  const { id: waveId } = await findPublicChatWave(page);
   await gotoReady(page, `/waves/${waveId}`);
   const message = page
     .getByRole("region", {
@@ -680,6 +691,269 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       }
     });
   }
+
+  test("shows verified pre-mint artwork without image-load movement and links upcoming drops", async ({
+    page,
+  }, testInfo) => {
+    await page.clock.setFixedTime(new Date("2026-10-30T00:01:00Z"));
+    await installSubscriptionFixtures(page);
+    await page.route(
+      (url) => url.pathname.endsWith("/memes_latest"),
+      (route) => route.fulfill({ json: { id: 567 } })
+    );
+    const thumbnail =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/subscription-artwork/200x200/artwork.png";
+    let decisionRequests = 0;
+    await page.route(
+      (url) => /\/v2\/waves\/[^/]+\/decisions$/.test(url.pathname),
+      (route) => {
+        decisionRequests += 1;
+        return route.fulfill({
+          json: {
+            count: 1,
+            page: 1,
+            next: false,
+            data: [
+              {
+                decision_time: 1,
+                winners: [
+                  {
+                    place: 1,
+                    awards: [],
+                    drop: {
+                      id: "subscription-artwork-winner",
+                      serial_no: 1,
+                      created_at: 1,
+                      drop_type: "SUBMISSION",
+                      is_signed: false,
+                      hide_link_preview: false,
+                      parts_count: 1,
+                      boosts: 0,
+                      author: {
+                        id: "subscription-artist",
+                        handle: "subscription-artist",
+                        level: 1,
+                        primary_address:
+                          "0x0000000000000000000000000000000000000529",
+                        classification: "PSEUDONYM",
+                        badges: {},
+                      },
+                      submission_context: { meme_card_id: 568, voting: {} },
+                      media: [
+                        {
+                          url: thumbnail.replace("/200x200/", "/"),
+                          mime_type: "image/png",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        });
+      }
+    );
+    let releaseImage!: () => void;
+    const imageReady = new Promise<void>((resolve) => {
+      releaseImage = resolve;
+    });
+    let failImage = false;
+    let imageRequests = 0;
+    const artworkRequests: string[] = [];
+    await page.route(
+      (url) =>
+        url.origin === new URL(thumbnail).origin &&
+        url.pathname.includes("/subscription-artwork/"),
+      async (route) => {
+        imageRequests += 1;
+        const url = route.request().url();
+        artworkRequests.push(url);
+        expect([thumbnail, thumbnail.replace("200x200", "AUTOx450")]).toContain(
+          url
+        );
+        await imageReady;
+        if (failImage) await route.fulfill({ status: 404, body: "" });
+        else
+          await route.fulfill({
+            path: "public/profile-cms/templates/memes/1.webp",
+          });
+      }
+    );
+    try {
+      await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+      const upcoming = page.getByRole("region", {
+        name: "Upcoming Drops",
+        exact: true,
+      });
+      const image = page
+        .getByRole("region", { name: "Upcoming Drops", exact: true })
+        .locator("img");
+      await expect(
+        upcoming.getByRole("button", { name: "Minting Today", exact: true })
+      ).toBeVisible();
+      await expect
+        .poll(() => decisionRequests, { timeout: RESPONSE_TIMEOUT_MS })
+        .toBe(1);
+      await expect(image).toBeVisible();
+      await image.scrollIntoViewIfNeeded();
+      await expect.poll(() => imageRequests).toBe(1);
+      const before = await image.boundingBox();
+      const sectionBefore = await upcoming.boundingBox();
+      releaseImage();
+      await expect
+        .poll(() =>
+          image.evaluate(
+            (element) => (element as HTMLImageElement).naturalWidth
+          )
+        )
+        .toBeGreaterThan(0);
+      expect(await image.boundingBox()).toEqual(before);
+      expect((await upcoming.boundingBox())!.height).toBe(
+        sectionBefore!.height
+      );
+      for (const token of [568, 569, 570]) {
+        await expect(
+          upcoming
+            .getByRole("link", { name: `The Memes #${token}`, exact: true })
+            .first()
+        ).toHaveAttribute("href", `/the-memes/${token}`);
+      }
+      const title = upcoming.getByRole("link", {
+        name: "The Memes #568",
+        exact: true,
+      });
+      await title.focus();
+      await expect(title).toBeFocused();
+      await expect(title).toHaveCSS("outline-style", "solid");
+      await expect(title).toHaveCSS("outline-width", "2px");
+      await expect(upcoming.getByRole("switch")).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+      await captureSafeScreenshot(
+        page,
+        testInfo,
+        "subscription-pre-mint-artwork"
+      );
+
+      failImage = true;
+      await page.reload();
+      await waitForRouteReady(page);
+      await expect.poll(() => imageRequests).toBeGreaterThan(1);
+      await expect(image).toHaveCount(0);
+      expect(artworkRequests).not.toContain(
+        thumbnail.replace("/200x200/", "/")
+      );
+      await expect(
+        upcoming.getByRole("button", { name: "Minting Today", exact: true })
+      ).toBeVisible();
+      await title.focus();
+      await title.press("Enter");
+      await expect(page).toHaveURL(/\/the-memes\/568(?:[?#].*)?$/, {
+        timeout: RESPONSE_TIMEOUT_MS,
+      });
+    } finally {
+      releaseImage();
+    }
+  });
+
+  test("does not fetch mint-day artwork on a day without a mint", async ({
+    page,
+  }) => {
+    await page.clock.setFixedTime(new Date("2026-10-31T00:01:00Z"));
+    await installSubscriptionFixtures(page);
+    const artworkRequests: string[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      if (
+        url.pathname.endsWith("/memes_latest") ||
+        /\/v2\/waves\/[^/]+\/decisions$/.test(url.pathname)
+      )
+        artworkRequests.push(url.pathname);
+    });
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    const upcoming = page.getByRole("region", {
+      name: "Upcoming Drops",
+      exact: true,
+    });
+    await expect(
+      upcoming.getByRole("link", { name: "The Memes #568", exact: true })
+    ).toBeVisible();
+    await upcoming
+      .getByRole("button", { name: "Show More", exact: true })
+      .click();
+    await expect(
+      page.getByRole("link", { name: "The Memes #572", exact: true })
+    ).toBeVisible();
+    expect(artworkRequests).toEqual([]);
+  });
+
+  test("keeps a visitor's Not set up subscription status informational", async ({
+    page,
+  }, testInfo) => {
+    await installSubscriptionFixtures(page);
+    await page.route("**/subscriptions/consolidation/coverage/**", (route) =>
+      route.fulfill({
+        json: subscriptionCoverageFixture({
+          status: ApiSubscriptionCoverageStatus.NotSetUp,
+          mode: null,
+          balance_eth: "0",
+          mint_capacity: 0,
+          allocated_mints: 0,
+          fully_funded_drops: 0,
+          funded_through: null,
+          next_unfunded: null,
+          minimum_top_up: null,
+          recommended_top_up: null,
+        }),
+      })
+    );
+    await gotoReady(page, `/${PROFILE_HANDLE}/subscriptions`);
+    const overview = page
+      .getByRole("region", { name: "Subscription minting", exact: true })
+      .locator("#profile-subscriptions-overview");
+    await expect(
+      overview.getByRole("heading", { name: "Not set up", exact: true })
+    ).toBeVisible();
+    await expect(
+      overview.getByText("Subscription balance", { exact: true })
+    ).toBeVisible();
+    await expect(
+      overview.getByText("0 mints available", { exact: true })
+    ).toBeVisible();
+    await expect(
+      overview.getByText("0 allocated", { exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByText(
+        /Set up subscriptions to receive|Choose a drop to see|Review settings or refresh/
+      )
+    ).toHaveCount(0);
+    await expect(
+      overview.getByRole("button", { name: "Top up", exact: true })
+    ).toHaveCount(0);
+    await expect(
+      overview.getByRole("button", { name: "Refresh balance", exact: true })
+    ).toHaveCount(0);
+    await expect(page.getByRole("switch")).toHaveCount(0);
+    await overview
+      .getByRole("button", { name: "Forecast use", exact: true })
+      .click();
+    await expect(
+      page
+        .getByRole("tooltip")
+        .getByText(
+          "Projected from current eligibility, settings, balance, and the published Meme schedule.",
+          { exact: true }
+        )
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(
+      page,
+      testInfo,
+      "subscription-visitor-not-set-up.png"
+    );
+  });
 
   test("keeps the full subscription airdrop address available on touch and keyboard", async ({
     page,
@@ -1795,6 +2069,37 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     const settings = await response.json();
     expect(settings.memes_wave_id).toMatch(/^[0-9a-f-]{36}$/i);
 
+    const ordinaryFeedIds = new Set<string>();
+    if (process.env["PLAYWRIGHT_ENV"] === "staging") {
+      const feedUrl = new URL(response.url());
+      feedUrl.pathname = `/api/v2/waves/${settings.memes_wave_id}/drops`;
+      feedUrl.searchParams.set("limit", "50");
+      feedUrl.searchParams.set("respect_drop_reply_collapse", "true");
+      const access = await response.request().headerValue("x-6529-auth");
+      const feedResponse = await page.request.get(feedUrl.href, {
+        headers: access ? { "x-6529-auth": access } : {},
+      });
+      expect(feedResponse.ok()).toBe(true);
+      const feed: ApiWaveDropsFeedV2 = await feedResponse.json();
+      expect(feed.wave.has_competition).toBe(true);
+      expect(feed.drops.length).toBeGreaterThan(0);
+      for (const drop of feed.drops) {
+        expect(drop.competition_entry).toBeDefined();
+        if (drop.competition_entry === null) ordinaryFeedIds.add(drop.id);
+      }
+    }
+    const ordinaryContextRequests: string[] = [];
+    page.on("request", (request) => {
+      const parts = new URL(request.url()).pathname.split("/");
+      const dropId = parts.at(-2);
+      if (
+        parts.at(-1) === "competition-context" &&
+        dropId &&
+        ordinaryFeedIds.has(dropId)
+      ) {
+        ordinaryContextRequests.push(dropId);
+      }
+    });
     await gotoReady(page, `/waves/${settings.memes_wave_id}`);
     await expect(
       page.getByRole("heading", { level: 1, name: "The Memes - Main Stage" })
@@ -1831,6 +2136,7 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       body: await page.screenshot(),
       contentType: "image/png",
     });
+    expect(ordinaryContextRequests).toEqual([]);
     // This pack runs signed out; personal voting controls remain authenticated.
     await expect(
       page.getByRole("tab", { name: "My Votes", exact: true })
@@ -2208,6 +2514,63 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     ).toBeVisible();
   });
 
+  test("keeps Wave details clear of the Desktop title strip", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "The integrated title strip case uses the desktop Waves layout."
+    );
+
+    await page.addInitScript(() => {
+      const applyTitleStrip = () => {
+        const root = document.documentElement;
+        if (!root) return false;
+        root.dataset["desktopTitlebar"] = "overlay";
+        root.style.setProperty("--desktop-titlebar-height", "34px");
+        return true;
+      };
+      if (applyTitleStrip()) return;
+      const observer = new MutationObserver(() => {
+        if (applyTitleStrip()) observer.disconnect();
+      });
+      observer.observe(document, { childList: true });
+    });
+
+    const waveId = await getFirstWaveId(page);
+    await gotoReady(page, `/waves/${waveId}`);
+    const strip = page.getByRole("toolbar", {
+      name: "6529 Desktop window title",
+    });
+    const header = page
+      .getByRole("main")
+      .locator("header")
+      .filter({ has: page.getByRole("heading", { level: 1 }) });
+    await expect(strip).toBeVisible();
+    await expect(header).toBeVisible();
+    await expect(page.locator("body")).toHaveAttribute(
+      "data-seize-body-scroll-locked",
+      "true"
+    );
+
+    // A scroll-locked Wave has its own scroll regions. The document must not
+    // have spare space that a programmatic scroll can move under the strip.
+    await page.evaluate(() =>
+      window.scrollTo({ top: 12, behavior: "instant" })
+    );
+    await expect
+      .poll(async () => {
+        const [stripBox, headerBox] = await Promise.all([
+          strip.boundingBox(),
+          header.boundingBox(),
+        ]);
+        return stripBox && headerBox
+          ? headerBox.y - stripBox.y - stripBox.height
+          : null;
+      })
+      .toBe(8);
+  });
+
   test("keeps wave identity compact and sharing reachable through details", async ({
     page,
   }, testInfo) => {
@@ -2419,6 +2782,54 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
     );
   });
 
+  test("opens public Wave message links with JavaScript disabled", async ({
+    browser,
+    baseURL,
+    page,
+  }) => {
+    const { id: waveId, name: waveName } = await findPublicChatWave(page);
+    const viewport = page.viewportSize();
+    const context = await browser.newContext({
+      javaScriptEnabled: false,
+      ...(baseURL === undefined ? {} : { baseURL }),
+      ...(viewport === null ? {} : { viewport }),
+    });
+    try {
+      await seedStagingAccessCookie(context, baseURL);
+      const previewPage = await context.newPage();
+      const response = await gotoDocumentWithTransientRetry(
+        previewPage,
+        `/waves/${waveId}`
+      );
+      expect(response?.ok()).toBe(true);
+      const preview = previewPage.getByRole("region", {
+        name: waveName,
+        exact: true,
+      });
+      await expect(preview).toHaveAttribute("data-public-wave-feed", waveId);
+      const messageLink = preview.getByRole("article").last().getByRole("link");
+      await expect(messageLink).toBeVisible();
+      await expect(messageLink).toBeInViewport();
+      await messageLink.focus();
+      await expect(messageLink).toBeFocused();
+      const href = await messageLink.getAttribute("href");
+      if (!href) throw new Error("Public Wave preview link is missing its URL");
+      const target = new URL(href, previewPage.url());
+      const dropId = target.searchParams.get("drop");
+      if (!dropId)
+        throw new Error("Public Wave preview link is missing its message ID");
+      expect(dropId).toMatch(/^[0-9a-f-]{36}$/i);
+
+      await messageLink.press("Enter");
+      await expect(previewPage).toHaveURL(target.href);
+      await expect(preview).toHaveAttribute("data-public-wave-drop", dropId);
+      await expect(preview.getByRole("article")).toBeVisible();
+      await expectNoHorizontalOverflow(previewPage);
+    } finally {
+      await context.close();
+    }
+  });
+
   test("handles legacy wave query links without mutation", async ({ page }) => {
     const { waveId, serialNo } = await getPublicChatMessageTarget(page);
     const wavePath = `/waves/${waveId}`;
@@ -2472,19 +2883,43 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("keeps profile statistics natural and activity loading compact", async ({
     page,
   }) => {
-    let releaseLogs: () => void = () => {};
-    const logsReady = new Promise<void>((resolve) => {
-      releaseLogs = resolve;
+    let releaseScripts: () => void = () => undefined;
+    const scriptsReady = new Promise<void>((resolve) => {
+      releaseScripts = resolve;
     });
-    await page.route("**/api/profile-logs?**", async (route) => {
-      await logsReady;
+    const browserReads: string[] = [];
+    page.on("request", (request) => {
+      const url = new URL(request.url());
+      const defaultLog =
+        url.pathname === "/api/profile-logs" &&
+        url.searchParams.get("profile") === PROFILE_HANDLE &&
+        url.searchParams.get("page") === "1" &&
+        url.searchParams.get("include_incoming") === "true";
+      const initialRatingsOrStatements = [
+        "rep/overview",
+        "rep/categories",
+        "cic/overview",
+        "cic/statements",
+      ].some(
+        (suffix) => url.pathname === `/api/profiles/${PROFILE_HANDLE}/${suffix}`
+      );
+      if (
+        request.method() === "GET" &&
+        (defaultLog || initialRatingsOrStatements)
+      ) {
+        browserReads.push(url.pathname);
+      }
+    });
+    await page.route("**/_next/static/chunks/**", async (route) => {
+      if (new URL(route.request().url()).pathname.endsWith(".js")) {
+        await scriptsReady;
+      }
       await route.continue();
     });
+
+    const loading = page.getByRole("status", { name: "Loading activity log" });
     try {
-      await gotoReady(page, `/${PROFILE_HANDLE}`);
-      const loading = page.getByRole("status", {
-        name: "Loading activity log",
-      });
+      await page.goto(`/${PROFILE_HANDLE}`, { waitUntil: "commit" });
       await expect(loading).toBeVisible();
       const loadingBox = await loading.boundingBox();
       expect(loadingBox).not.toBeNull();
@@ -2503,54 +2938,18 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
       expect(numericStyles.variant).toBe("normal");
       await expectNoHorizontalOverflow(page);
       await loading.scrollIntoViewIfNeeded();
-      await expect
-        .poll(() =>
-          loading.evaluate((element) => {
-            let ancestor: Element | null = element;
-            while (ancestor) {
-              if (Number(getComputedStyle(ancestor).opacity) < 1) return false;
-              ancestor = ancestor.parentElement;
-            }
-            return true;
-          })
-        )
-        .toBe(true);
       await captureSafeScreenshot(
         page,
         test.info(),
         "profile-activity-loading"
       );
-
-      // Releasing the held request starts the network round trip; it does not
-      // mean the activity data has arrived. Keep network and render readiness
-      // separate, and fail explicitly if the activity endpoint returns an error.
-      const activityResponse = page.waitForResponse(
-        (response) => {
-          const url = new URL(response.url());
-          return (
-            response.request().method() === "GET" &&
-            url.pathname === "/api/profile-logs" &&
-            url.searchParams.get("profile") === PROFILE_HANDLE
-          );
-        },
-        { timeout: RESPONSE_TIMEOUT_MS }
-      );
-      releaseLogs();
-      const response = await activityResponse;
-      expect(
-        response.ok(),
-        `Profile activity request returned HTTP ${response.status()}`
-      ).toBe(true);
-      await expect(
-        response.finished(),
-        "Profile activity response must complete successfully"
-      ).resolves.toBeNull();
-      await expect(
-        page.getByRole("status", { name: "Loading activity log" })
-      ).toHaveCount(0);
     } finally {
-      releaseLogs();
+      releaseScripts();
     }
+    const rep = page.getByRole("region", { name: "REP", exact: true });
+    await expect(rep.getByText(/^[\d,]+ raters?$/).first()).toBeVisible();
+    await expect(loading).toHaveCount(0);
+    expect(browserReads).toEqual([]);
   });
 
   test("waits for identity guidance hydration before accepting activation", async ({

@@ -48,9 +48,9 @@ describe("toasts in 6529 Desktop", () => {
     ).toMatch(/top:\s*calc\([^;]*var\(--desktop-top-inset, 0px\)/u);
   });
 
-  it("rely on the inset the page reserves for the title strip", () => {
+  it("rely on the inset the page reserves for the title strip and its gap", () => {
     expect(globalStyles).toMatch(
-      /:root\[data-desktop-titlebar="overlay"\]\s*\{[^}]*--desktop-top-inset:\s*var\(--desktop-titlebar-height/u
+      /:root\[data-desktop-titlebar="overlay"\]\s*\{[^}]*--desktop-top-inset:\s*calc\(var\(--desktop-titlebar-height, 0px\) \+ 8px\)/u
     );
   });
 });

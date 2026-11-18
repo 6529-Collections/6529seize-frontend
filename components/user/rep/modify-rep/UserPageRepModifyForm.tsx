@@ -64,7 +64,7 @@ export default function UserPageRepModifyForm({
 
   return (
     <div className="tw-px-4 sm:tw-px-6">
-      <div className="tw-relative tw-mt-5 tw-grid tw-min-h-10">
+      <div className="tw-relative tw-mt-3 tw-grid tw-min-h-10 md:tw-mt-5">
         <div
           className={isError ? "tw-invisible" : undefined}
           aria-hidden={isError}
@@ -107,23 +107,16 @@ export default function UserPageRepModifyForm({
       >
         <label
           htmlFor={inputId}
-          className="tw-block tw-break-words tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-400"
+          className="tw-mb-1 tw-block tw-break-words tw-text-sm tw-font-medium tw-text-iron-200"
         >
           {tRich(locale, "rep.categories.edit.totalLabel", {
-            category: (
-              <span
-                key="category"
-                className="tw-font-semibold tw-text-iron-300"
-              >
-                {category}
-              </span>
-            ),
+            category: <span key="category">{category}</span>,
           })}
         </label>
-        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
+        <p className="tw-mb-2 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-500">
           {t(locale, "user.rate.totalHelp")}
         </p>
-        <div className="tw-relative tw-mt-2 tw-flex">
+        <div className="tw-relative tw-flex">
           <UserPageRateInput
             value={repState ? adjustedRatingStr : ""}
             onChange={setDraftRating}
@@ -146,14 +139,16 @@ export default function UserPageRepModifyForm({
             originalValue={repState?.rater_contribution ?? 0}
             adjustedValue={newRating}
             adjustmentType="Rep"
+            variant="summary"
           />
         </div>
-        <div className="tw-mt-7 tw-flex tw-justify-end tw-gap-3">
+        <div className="tw-mt-7 tw-flex tw-flex-col tw-gap-2 md:tw-flex-row md:tw-justify-end md:tw-gap-3">
           <Button
             onClick={onCancel}
             disabled={mutating}
             variant="ghost"
             size="lg"
+            className="tw-w-full md:tw-w-auto"
           >
             {t(locale, "rep.categories.edit.cancel")}
           </Button>
@@ -163,6 +158,7 @@ export default function UserPageRepModifyForm({
             loading={mutating}
             variant="action"
             size="lg"
+            className="tw-w-full md:tw-w-auto"
           >
             {t(locale, "rep.categories.edit.save")}
           </Button>
