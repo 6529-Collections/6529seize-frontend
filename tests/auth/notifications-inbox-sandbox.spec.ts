@@ -71,7 +71,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       }
     });
   });
-  test("compact Markdown previews preserve formatting without fetching message URLs", async ({
+  test("compact Markdown previews load one hosted thumbnail and preserve formatting", async ({
     page,
   }, testInfo) => {
     // The compact inbox is desktop-only; the mobile full-page flow is covered below.
@@ -80,6 +80,8 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       "Desktop compact inbox"
     );
     const longBold = "formatted ".repeat(30).trim();
+    const uploads =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/inbox-thumbnail";
     const requests: string[] = [];
     page.on("request", (request) => {
       if (request.url().includes("notification-markdown-canary"))
@@ -88,16 +90,23 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.route("**/*notification-markdown-canary*", (route) =>
       route.abort()
     );
+    await page.route(`${uploads}/**`, (route) =>
+      route.fulfill({ path: "public/favicon.png", contentType: "image/png" })
+    );
     await page.route("**/api/v2/notifications?*", async (route) => {
       const response = await route.fetch();
       const data = (await response.json()) as ApiNotificationsResponseV2;
-      const content = `**Bold** :el_fafo_angy: :fire: *italic* ~~gone~~ and \`code\`.\n\n**${longBold}**\n\n[Canary link](https://notification-markdown-canary.invalid/link) ![Canary image](https://notification-markdown-canary.invalid/image.png)`;
+      const text = `**Bold** :el_fafo_angy: :fire: *italic* ~~gone~~ and \`code\`.\n\n**${longBold}**\n\n[Canary link](https://notification-markdown-canary.invalid/link) ![Canary image](https://notification-markdown-canary.invalid/image.png)`;
+      const uploadsMarkdown = `\n\n![Seize](${uploads}/first.png)body text ![Seize](${uploads}/second.png)`;
       data.notifications = data.notifications.map((notification) => ({
         ...notification,
         related_drops: notification.related_drops.map(
           ({ title: _title, ...drop }) => ({
             ...drop,
-            content,
+            content:
+              notification.cause === ApiNotificationCause.DropReacted
+                ? text + uploadsMarkdown
+                : text,
           })
         ),
       }));
@@ -146,6 +155,19 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       "STRONG"
     );
     await expect(row.getByText("Canary image", { exact: true })).toHaveCount(1);
+    const thumbnail = inbox
+      .getByRole("link")
+      .filter({ hasText: "New reactions to your drop" })
+      .locator("img[src*='/drops/inbox-thumbnail/']");
+    await expect(thumbnail).toHaveCount(1);
+    await expect(thumbnail).toHaveAttribute(
+      "src",
+      `${uploads}/AUTOx50/first.png`
+    );
+    await expect(thumbnail).toHaveJSProperty("naturalWidth", 96);
+    await expect(thumbnail).toHaveCSS("width", "40px");
+    await expect(thumbnail).toHaveCSS("height", "40px");
+    await expect(row).not.toContainText("Seize");
     await expect(
       inbox
         .getByRole("link")
@@ -154,6 +176,9 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
           "a,iframe,video,audio,input,img[src*='notification-markdown-canary']"
         )
     ).toHaveCount(0);
+    const textOnlyRow = inbox
+      .getByRole("link")
+      .filter({ hasText: "sandbox-alice mentioned you" });
     for (const width of [1440, 1100]) {
       await page.setViewportSize({ width, height: 900 });
       await expect(inbox).toBeVisible();
@@ -165,18 +190,20 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
             requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
           })
       );
-      const bounds = await row
-        .getByText("Bold", { exact: true })
-        .evaluate((strong) => {
-          const preview = strong.closest("p")!.parentElement!.parentElement!;
-          return {
-            height: preview.getBoundingClientRect().height,
-            width: preview.scrollWidth,
-            available: preview.clientWidth,
-          };
-        });
-      expect(bounds.height).toBeLessThanOrEqual(40);
-      expect(bounds.width).toBeLessThanOrEqual(bounds.available);
+      for (const previewRow of [row, textOnlyRow]) {
+        const bounds = await previewRow
+          .getByText("Bold", { exact: true })
+          .evaluate((strong) => {
+            const preview = strong.closest("p")!.parentElement!.parentElement!;
+            return {
+              height: preview.getBoundingClientRect().height,
+              width: preview.scrollWidth,
+              available: preview.clientWidth,
+            };
+          });
+        expect(bounds.height).toBe(40);
+        expect(bounds.width).toBeLessThanOrEqual(bounds.available);
+      }
       await expectNoHorizontalOverflow(page);
       await captureSafeScreenshot(
         page,

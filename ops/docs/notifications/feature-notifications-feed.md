@@ -44,10 +44,11 @@ in previews appear as `@handle` and `#wave`, without storage brackets.
 Regular and encrypted message previews render Markdown formatting, including
 bold, italic, strikethrough, lists, and code, within two compact lines. Drop titles
 keep their original plain-text formatting, and separate message parts retain
-their Markdown block boundaries. Links
-and images appear as labels in the preview; selecting the row opens the related
-message. Previewing does not load linked pages, embedded content, or message
-images. Encrypted previews remain available only from this device's local history.
+their Markdown block boundaries. A wave drop preview can show one inline image
+uploaded to 6529 as a thumbnail beside the text. Links, external images, and
+images in encrypted previews appear as text labels. Selecting the row opens
+the related message. Encrypted previews are available from this device's local
+history.
 Known custom emoji shortcodes render as compact emoji images in regular and
 encrypted previews, including encrypted rows on the full notifications page.
 Native emoji shortcodes render as their Unicode emoji, which keep their normal

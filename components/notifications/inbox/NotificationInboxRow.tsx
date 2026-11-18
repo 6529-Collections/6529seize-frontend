@@ -144,6 +144,7 @@ export default function NotificationInboxRow({
                 <NotificationMarkdownPreview
                   text={preview}
                   messageId={`notification-${notification.id}`}
+                  drop
                 />
               )}
             </div>
