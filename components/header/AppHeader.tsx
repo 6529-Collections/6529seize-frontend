@@ -500,6 +500,7 @@ export default function AppHeader() {
     pathname === "/waves" &&
     !waveParam &&
     activeView !== "messages" &&
+    searchParams.get("view") !== "notifications" &&
     searchParams.get("view") !== "profile-feed";
   const showPageShareAction =
     isCapacitor &&
