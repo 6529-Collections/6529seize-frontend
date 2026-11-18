@@ -5,7 +5,7 @@ import RatingInputSigns from "./RatingInputSigns";
 import { RATING_INPUT_SURFACE_CLASS } from "./ratingInputStyles";
 
 const INPUT_CLASS_NAME =
-  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-text-iron-100 tw-caret-primary-400 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
+  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-text-iron-100 tw-caret-primary-400 tw-ring-1 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 const VARIANT_CLASSES = {
   compact:

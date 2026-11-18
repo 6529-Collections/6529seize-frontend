@@ -17,6 +17,19 @@ import {
 const TARGET = "following-artist-0";
 const CATEGORY = "Artist";
 
+async function expectFocusedAmountWithoutSelection(amount: Locator) {
+  await expect(amount).toBeFocused();
+  await expect
+    .poll(() =>
+      amount.evaluate(
+        (input: HTMLInputElement) =>
+          input.selectionStart !== null &&
+          input.selectionStart === input.selectionEnd
+      )
+    )
+    .toBe(true);
+}
+
 async function seedSession(page: Page, role: string | null) {
   const address = "0x0000000000000000000000000000000000000529";
   const jwt = [
@@ -572,16 +585,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expectFixedLayout();
     await grant.getByRole("button", { name: "Music", exact: true }).click();
     await expect(amount).toHaveValue("35");
-    await expect(amount).toBeFocused();
-    await expect
-      .poll(() =>
-        amount.evaluate(
-          (input: HTMLInputElement) =>
-            input.selectionStart !== null &&
-            input.selectionStart === input.selectionEnd
-        )
-      )
-      .toBe(true);
+    await expectFocusedAmountWithoutSelection(amount);
     await expect(
       grant.getByText("Current Rep:", { exact: true }).locator("..")
     ).toHaveText("Current Rep:0");
@@ -621,16 +625,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(search).toHaveValue("Research");
     await expect(search).toHaveAttribute("readonly");
     await expect(amount).toHaveValue("-25");
-    await expect(amount).toBeFocused();
-    await expect
-      .poll(() =>
-        amount.evaluate(
-          (input: HTMLInputElement) =>
-            input.selectionStart !== null &&
-            input.selectionStart === input.selectionEnd
-        )
-      )
-      .toBe(true);
+    await expectFocusedAmountWithoutSelection(amount);
     await expect(
       grant.getByText("Current Rep:", { exact: true }).locator("..")
     ).toHaveText("Current Rep:-25");
