@@ -1,5 +1,8 @@
 import { useCallback, useRef, type RefObject } from "react";
-import { hasWalletChunkLoadFailed } from "@/components/providers/walletChunkRecovery";
+import {
+  hasWalletChunkLoadFailed,
+  reloadToRetryWalletChunks,
+} from "@/components/providers/walletChunkRecovery";
 import { SecurityEventType } from "@/types/security";
 import {
   createConnectionEventContext,
@@ -9,6 +12,34 @@ import {
 import type { AppKitModalBridgeStore } from "./AppKitModalBridge";
 import { defaultConnectModalView } from "./capacitorConnectController";
 import { WalletConnectionError } from "./seizeConnectErrors";
+
+export const APPKIT_MODAL_TRANSITION_TIMEOUT_MS = 30_000;
+
+async function waitForModalTransition(
+  transition: Promise<void>,
+  signal: AbortSignal | undefined
+): Promise<"finished" | "aborted" | "timed-out"> {
+  if (signal?.aborted) return "aborted";
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let abort: (() => void) | undefined;
+  const interrupted = new Promise<"aborted" | "timed-out">((resolve) => {
+    abort = () => resolve("aborted");
+    signal?.addEventListener("abort", abort, { once: true });
+    timer = setTimeout(
+      () => resolve("timed-out"),
+      APPKIT_MODAL_TRANSITION_TIMEOUT_MS
+    );
+  });
+  try {
+    return await Promise.race([
+      transition.then(() => "finished" as const),
+      interrupted,
+    ]);
+  } finally {
+    clearTimeout(timer);
+    if (abort) signal?.removeEventListener("abort", abort);
+  }
+}
 
 interface OpenConnectModalOptions {
   readonly appKitModalBridgeStore: AppKitModalBridgeStore;
@@ -50,18 +81,32 @@ export function useOpenConnectModal({
       const intent = Symbol("connect modal");
       latestIntent.current = intent;
       const signOutGeneration = getSignOutAllGeneration();
+      let timedOut = false;
       const ownsModal = () =>
         latestIntent.current === intent && isMountedRef.current;
       const shouldStop = () => {
         if (!ownsModal()) return true;
         if (
           signal?.aborted ||
+          timedOut ||
           hasSignOutAllGenerationChanged(signOutGeneration)
         ) {
           clearConnectIntentWaitingForAppKit();
           return true;
         }
         return false;
+      };
+      const waitForTransition = async (transition: Promise<void>) => {
+        const outcome = await waitForModalTransition(transition, signal);
+        if (shouldStop()) return false;
+        if (outcome === "timed-out") {
+          // The SDK open cannot be cancelled. A reload gives the next
+          // connection a fresh SDK without racing the stuck modal.
+          timedOut = true;
+          reloadToRetryWalletChunks();
+          throw new Error("Timed out opening the wallet connection modal");
+        }
+        return outcome === "finished";
       };
 
       try {
@@ -73,7 +118,13 @@ export function useOpenConnectModal({
         }
         if (shouldStop()) return;
         const openAppKit = await appKitModalBridgeStore.waitForOpen();
-        await modalTransition.current;
+        const previousTransition = modalTransition.current;
+        if (
+          previousTransition &&
+          !(await waitForTransition(previousTransition))
+        ) {
+          return;
+        }
         if (shouldStop()) return;
 
         // Opening and cleanup share one transition. A newer intent waits
@@ -87,8 +138,14 @@ export function useOpenConnectModal({
             }
           }
         })();
-        modalTransition.current = transition.catch(() => undefined);
-        await transition;
+        const settled = transition
+          .catch(() => undefined)
+          .finally(() => {
+            if (modalTransition.current === settled)
+              modalTransition.current = null;
+          });
+        modalTransition.current = settled;
+        if (!(await waitForTransition(transition))) return;
         if (shouldStop()) return;
 
         logSecurityEvent(
