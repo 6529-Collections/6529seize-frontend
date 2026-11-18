@@ -323,6 +323,13 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     await expect(
       page.getByRole("combobox", { name: "Search 6529", exact: true })
     ).toHaveCount(0);
+
+    await gotoReady(page, "/waves?view=notifications");
+    await expect(more).toHaveCount(0);
+    await expect(searchButton).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Share page", exact: true })
+    ).toBeVisible();
   });
 
   test("calendar invites omit the mint URL only on iOS", async ({
