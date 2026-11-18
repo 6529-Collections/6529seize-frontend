@@ -7,7 +7,8 @@ import {
   waitFor,
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useState } from "react";
+import CompetitionAwareDropVote from "@/components/competitions/CompetitionAwareDropVote";
 import * as competitionVoteCache from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
 import { SingleWaveDropVoteSize } from "@/components/waves/drop/SingleWaveDropVote.types";
 import { SingleWaveDropVote } from "@/components/waves/drop/SingleWaveDropVote";
@@ -138,6 +139,34 @@ function mount(
   );
   return { ...rendered, client };
 }
+
+function LegacyDraftFallback() {
+  const [numeric, setNumeric] = useState(false);
+  const [vote, setVote] = useState("");
+  const [reply, setReply] = useState("");
+  return (
+    <div>
+      <button
+        type="button"
+        aria-pressed={numeric}
+        onClick={() => setNumeric(true)}
+      >
+        Numeric
+      </button>
+      <input
+        aria-label="Legacy vote"
+        value={vote}
+        onChange={(event) => setVote(event.target.value)}
+      />
+      <textarea
+        aria-label="Legacy reply"
+        value={reply}
+        onChange={(event) => setReply(event.target.value)}
+      />
+    </div>
+  );
+}
+
 beforeEach(() => {
   jest.mocked(isAuthSessionForProfile).mockReturnValue(true);
   jest.clearAllMocks();
@@ -177,6 +206,41 @@ it("uses the entry budget and competition vote endpoint despite the parent wave'
   );
   expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
 });
+it.each([
+  { creditType: "REP", label: "Rep" },
+  { creditType: "CIC", label: "NIC" },
+  { creditType: "CUSTOM_CREDITS", label: "CUSTOM_CREDITS" },
+])(
+  "labels numeric voting and signed actions for $creditType",
+  async ({ creditType, label }) => {
+    jest.mocked(fetchDropCompetitionContext).mockResolvedValue({
+      ...context,
+      competition: {
+        ...context.competition,
+        voting: { ...context.competition.voting, credit_type: creditType },
+      },
+    } as never);
+    mount();
+    const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+    expect(input).toHaveAttribute("min", "-1500");
+    expect(input).toHaveAttribute("max", "1500");
+    expect(screen.getByText(label, { exact: true })).toBeInTheDocument();
+
+    fireEvent.change(input, { target: { value: "25" } });
+    expect(
+      screen.getByRole("button", { name: `Vote +25 ${label}` })
+    ).toBeEnabled();
+    fireEvent.change(input, { target: { value: "-25" } });
+    fireEvent.click(screen.getByRole("button", { name: `Vote -25 ${label}` }));
+    await waitFor(() => {
+      expect(setCompetitionVote).toHaveBeenCalledWith(
+        { waveId: "wave", competitionId: "competition" },
+        "entry",
+        { value: -25, config_version: 4, idempotency_key: "request-key" }
+      );
+    });
+  }
+);
 it("does not submit a stale vote after the viewer changes during authentication", async () => {
   let finishAuth!: (result: { success: boolean }) => void;
   mockRequestAuth.mockReturnValue(
@@ -289,12 +353,108 @@ it("keeps legacy voting for a verified legacy drop", async () => {
 it("does not fall back to the wrong voting endpoint when lookup fails", async () => {
   jest
     .mocked(fetchDropCompetitionContext)
-    .mockRejectedValue(new Error("Unavailable"));
+    .mockRejectedValueOnce(new Error("Unavailable"))
+    .mockResolvedValue({ competition: null, entry: null });
   mount();
   expect(await screen.findByRole("alert")).toBeInTheDocument();
   expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
   expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+
+  fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+  expect(await screen.findByText("Legacy voting")).toBeInTheDocument();
+  expect(fetchCompetitionCredits).not.toHaveBeenCalled();
 });
+it("retains a mounted legacy vote and reply draft across a temporary context refresh failure", async () => {
+  jest
+    .mocked(fetchDropCompetitionContext)
+    .mockResolvedValue({ competition: null, entry: null });
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  render(
+    <QueryClientProvider client={client}>
+      <CompetitionAwareDropVote
+        drop={drop}
+        fallback={<LegacyDraftFallback />}
+      />
+    </QueryClientProvider>
+  );
+  const numeric = await screen.findByRole("button", { name: "Numeric" });
+  fireEvent.click(numeric);
+  const vote = screen.getByRole("textbox", { name: "Legacy vote" });
+  const reply = screen.getByRole("textbox", { name: "Legacy reply" });
+  fireEvent.change(vote, { target: { value: "25" } });
+  fireEvent.change(reply, { target: { value: "A preserved explanation" } });
+
+  jest
+    .mocked(fetchDropCompetitionContext)
+    .mockRejectedValue(
+      Object.assign(new Error("Unavailable"), { status: 503 })
+    );
+  await act(async () => {
+    await client.refetchQueries({
+      queryKey: [QueryKey.COMPETITION_DROP_CONTEXT],
+    });
+    // React Query batches observer notifications onto the next task.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Numeric" })).toBe(numeric);
+  expect(numeric).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("textbox", { name: "Legacy vote" })).toBe(vote);
+  expect(vote).toHaveValue("25");
+  expect(screen.getByRole("textbox", { name: "Legacy reply" })).toBe(reply);
+  expect(reply).toHaveValue("A preserved explanation");
+
+  jest
+    .mocked(fetchDropCompetitionContext)
+    .mockResolvedValue({ competition: null, entry: null });
+  await act(async () => {
+    await client.refetchQueries({
+      queryKey: [QueryKey.COMPETITION_DROP_CONTEXT],
+    });
+  });
+  expect(screen.getByRole("button", { name: "Numeric" })).toBe(numeric);
+  expect(vote).toHaveValue("25");
+  expect(reply).toHaveValue("A preserved explanation");
+
+  jest.mocked(fetchDropCompetitionContext).mockResolvedValue({
+    ...context,
+    competition: { ...context.competition, permissions: { vote: false } },
+  } as never);
+  await act(async () => {
+    await client.refetchQueries({
+      queryKey: [QueryKey.COMPETITION_DROP_CONTEXT],
+    });
+  });
+  expect(screen.queryByRole("textbox", { name: "Legacy vote" })).toBeNull();
+  expect(
+    await screen.findByRole("button", { name: voteButtonName })
+  ).toBeDisabled();
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+});
+it.each([401, 403, 404])(
+  "blocks cached legacy voting after context access is denied with %s",
+  async (status) => {
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockResolvedValue({ competition: null, entry: null });
+    const { client } = mount();
+    await screen.findByText("Legacy voting");
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockRejectedValue(Object.assign(new Error("Access denied"), { status }));
+    await act(async () => {
+      await client.refetchQueries({
+        queryKey: [QueryKey.COMPETITION_DROP_CONTEXT],
+      });
+    });
+    expect(await screen.findByRole("alert")).toBeInTheDocument();
+    expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
+    expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+  }
+);
 it("closes after confirmation with fresh credits while background refresh is still pending", async () => {
   let finishRefresh!: () => void;
   jest.mocked(invalidateCompetition).mockReturnValue(
@@ -462,6 +622,38 @@ const replyDrop = {
   wave: { ...drop.wave, authenticated_user_eligible_to_chat: true },
   parts: [{ part_id: 7 }],
 } as ApiDrop;
+it("preserves competition input mode, vote and reply drafts after a temporary context refresh error", async () => {
+  const { client } = mount(null, replyDrop);
+  await screen.findAllByRole("slider");
+  const numeric = screen.getByRole("button", { name: "Numeric" });
+  fireEvent.click(numeric);
+  const vote = screen.getByRole("spinbutton", { name: "Your vote" });
+  fireEvent.change(vote, { target: { value: "25" } });
+  fireEvent.click(screen.getByRole("switch", { name: "Explain vote" }));
+  const reply = screen.getByLabelText("Optional rationale reply");
+  fireEvent.change(reply, { target: { value: "A competition explanation" } });
+  jest
+    .mocked(fetchDropCompetitionContext)
+    .mockRejectedValue(
+      Object.assign(new Error("Unavailable"), { status: 503 })
+    );
+
+  await act(async () => {
+    await client.refetchQueries({
+      queryKey: [QueryKey.COMPETITION_DROP_CONTEXT],
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(numeric).toHaveAttribute("aria-pressed", "true");
+  expect(screen.getByRole("spinbutton", { name: "Your vote" })).toBe(vote);
+  expect(vote).toHaveValue(25);
+  expect(screen.getByLabelText("Optional rationale reply")).toBe(reply);
+  expect(reply).toHaveValue("A competition explanation");
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+  expect(commonApiPost).not.toHaveBeenCalled();
+});
 it("restores Explain vote for proxy competition votes after the vote succeeds", async () => {
   jest.mocked(useCompetitionViewer).mockReturnValue("viewer:proxy");
   jest.mocked(commonApiPost).mockResolvedValue({ id: "reply" } as never);
@@ -670,7 +862,7 @@ it("hides the MINI vote footer for a signed-out viewer", async () => {
   const prompt = await screen.findByText("Connect your wallet to participate.");
   expect(prompt).not.toBeVisible();
   expect(screen.queryByRole("group", { name: "Vote input mode" })).toBeNull();
-  expect(screen.queryByRole("button", { name: voteButtonName })).toBeNull();
+  expect(screen.queryByRole("button")).toBeNull();
   expect(fetchCompetitionCredits).not.toHaveBeenCalled();
 });
 it("offers both modes without a reply option when the voter cannot chat", async () => {

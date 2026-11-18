@@ -13,6 +13,7 @@ import {
 } from "@/components/waves/drop/SingleWaveDropVote.types";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
+import { isCompetitionAccessError } from "@/helpers/competition.helpers";
 import { CompetitionVoteForm } from "./CompetitionVote";
 import CompetitionVoteWithReply from "./CompetitionVoteWithReply";
 import { CompetitionState } from "./CompetitionState";
@@ -70,7 +71,11 @@ export default function CompetitionAwareDropVote(
     retry: false,
     staleTime: 0,
   });
-  if (!knownContext && context.isError)
+  if (
+    !knownContext &&
+    context.isError &&
+    (!context.data || isCompetitionAccessError(context.error))
+  )
     return (
       <CompetitionState
         error

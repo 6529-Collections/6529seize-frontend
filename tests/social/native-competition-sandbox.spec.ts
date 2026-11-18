@@ -208,7 +208,8 @@ async function verifyNativePreviewKeyboard(
         const reference = document.createElement("div");
         reference.style.cssText = "position:fixed;top:0;left:-5px;width:1px;";
         reference.style.height = element.style.height;
-        reference.style.transition = element.style.transition;
+        reference.style.transition =
+          "height var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)";
         document.body.append(reference);
         await new Promise<void>((resolve) =>
           requestAnimationFrame(() => resolve())

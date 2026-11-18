@@ -32,6 +32,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
+import { getCompetitionConfigLabel } from "@/helpers/competition-labels.helpers";
 import { CompetitionState } from "./CompetitionState";
 import CompetitionCredits from "./CompetitionCredits";
 import { VotePanel } from "@/components/voting/VotePanel";
@@ -148,8 +149,10 @@ export function CompetitionVoteForm({
   }, [viewer]);
   const locale = useBrowserLocale();
   const explainTooltipId = useId();
-  const creditLabel =
-    WAVE_VOTING_LABELS[competition.voting.credit_type as ApiWaveCreditType];
+  const creditType = competition.voting.credit_type;
+  const creditLabel = Object.hasOwn(WAVE_VOTING_LABELS, creditType)
+    ? WAVE_VOTING_LABELS[creditType as ApiWaveCreditType]
+    : getCompetitionConfigLabel(locale, creditType);
   const client = useQueryClient();
   const sign = useCompetitionSignatureFor(competition);
   const credit = useCompetitionVoteBudget(competition, entryId, budgetEnabled);

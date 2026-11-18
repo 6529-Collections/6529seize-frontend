@@ -124,10 +124,10 @@
   display: inline-block;
   width: 24px;
   height: 24px;
-  border: 2px solid rgba(10, 10, 10, 0.2);
+  border: 2px solid color-mix(in srgb, currentColor 20%, transparent);
   border-radius: 50%;
-  border-top-color: #0a0a0a;
-  border-right-color: #0a0a0a;
+  border-top-color: currentColor;
+  border-right-color: currentColor;
   animation:
     spinnerEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards,
     funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;

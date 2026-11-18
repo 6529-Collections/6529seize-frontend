@@ -54,10 +54,10 @@ current voting budget; other drops use their own allowed range.
   touch devices keep a larger field and text for entry.
 - In full-size dialogs and sheets, `Explain vote` uses a chat icon on its own
   row. Its reply field opens below that row, followed by a full-width `Vote`
-  button, including on desktop. Compact submission cards keep `Explain vote`
-  on the left and a small `Vote` button on the right of one footer row; their
-  reply field opens above the footer. Positive amounts use green, negative
-  amounts use red, and zero uses a neutral style.
+  button, including on desktop. Compact decision submission cards that offer
+  replies keep `Explain vote` on the left and a small `Vote` button on the right
+  of one footer row; their reply field opens above the footer. Positive amounts
+  use green, negative amounts use red, and zero uses a neutral style.
 - Slider mode uses larger hit areas and logarithmic mapping so low and high
   values are easier to reach.
 - Keyboard focus highlights the slider handle. Clicking or dragging does not
@@ -89,8 +89,8 @@ line below the input shows the remaining balance on the left and spent credits
 out of available credits on the right, for example `679 remaining` and
 `33,591 of 34,270 credits spent`. On narrow cards it wraps between those two groups;
 numbers stay with their words. Full credit labels remain available to screen
-readers. The footer keeps the chat-icon `Explain vote` control on the left and
-a compact `Vote` button on the right. The reply field opens above that row,
+readers. When replies are available, the footer keeps the chat-icon `Explain vote`
+control on the left and a compact `Vote` button on the right. The reply field opens above that row,
 with its public-reply note below the text field. It opens and closes with a short
 expand/fade transition, respecting reduced-motion settings. Generated text such
 as `Vote rationale (0 at time of posting):` appears as a placeholder, so typing

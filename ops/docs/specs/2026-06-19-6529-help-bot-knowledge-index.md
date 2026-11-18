@@ -1077,8 +1077,9 @@ The `waves.reactions-voting` record describes the shared `Your vote` header,
 compact `Slider` / `Numeric` tabs, and signed amount/unit on the `Vote` action,
 including with a reply enabled. Full-size dialogs and sheets use a separate
 chat-icon `Explain vote` row above the reply and a full-width action, including
-on desktop. Compact submission cards keep `Explain vote` on the left and the
-small `Vote` action on the right of one footer row, with the reply above it.
+on desktop. Compact decision submission cards that offer replies keep
+`Explain vote` on the left and the small `Vote` action on the right of one footer
+row, with the reply above it.
 The record covers positive green/negative red/zero neutral styling and keyboard
 focus on the slider handle. In the iPhone app, single-submission and leaderboard
 voting share the same sheet, including in landscape. Voting sheets and compact artist,
