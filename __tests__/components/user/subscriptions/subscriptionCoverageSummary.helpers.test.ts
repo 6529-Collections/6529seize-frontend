@@ -9,6 +9,7 @@ import {
 import { getSubscriptionCoveragePresentation } from "@/components/user/subscriptions/coverage/subscriptionCoverage.helpers";
 import { ApiSubscriptionCoverageMode as Mode } from "@/generated/models/ApiSubscriptionCoverageMode";
 import { ApiSubscriptionCoverageStatus as Status } from "@/generated/models/ApiSubscriptionCoverageStatus";
+import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
 import { subscriptionCoverageFixture } from "@/tests/support/subscriptionFixtures";
 
 it.each([
@@ -140,12 +141,9 @@ describe("Mint-day payment evidence", () => {
         contract: "other-collection",
       })
     ).toBe(false);
-    expect(
-      isNextDropSubscriptionPaid(coverage, {
-        ...final,
-        redeemed_count: undefined,
-      })
-    ).toBe(false);
+    const missingRedemption: NFTFinalSubscription = { ...final };
+    delete missingRedemption.redeemed_count;
+    expect(isNextDropSubscriptionPaid(coverage, missingRedemption)).toBe(false);
     expect(isNextDropSubscriptionPaid(coverage, null)).toBe(false);
   });
 });

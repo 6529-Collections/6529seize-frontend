@@ -84,7 +84,7 @@ it("switches at the authoritative cutoff without navigation and separates future
     "#profile-subscriptions-history"
   );
   expect(
-    screen.queryByRole("button", { name: "Top up", exact: true })
+    screen.queryByRole("button", { name: "Top up" })
   ).not.toBeInTheDocument();
   expect(
     screen.getByRole("button", { name: "Top up for future drops" })
@@ -145,9 +145,10 @@ it("gives confirmed payment priority after an expired cutoff, including a past m
   expect(
     screen.queryByText(/Top up by|Top-up deadline:/)
   ).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: "Top up", exact: true })
-  ).toHaveAttribute("data-primary", "false");
+  expect(screen.getByRole("button", { name: "Top up" })).toHaveAttribute(
+    "data-primary",
+    "false"
+  );
 });
 
 it("does not infer a missed deadline when the payment read fails", () => {
@@ -173,9 +174,10 @@ it("does not infer a missed deadline when the payment read fails", () => {
     screen.getAllByText("Coverage unavailable", { exact: true })
   ).toHaveLength(1);
   expect(screen.queryByText("Deadline passed")).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: "Top up", exact: true })
-  ).toHaveAttribute("data-primary", "false");
+  expect(screen.getByRole("button", { name: "Top up" })).toHaveAttribute(
+    "data-primary",
+    "false"
+  );
 });
 
 it("keeps stale coverage neutral with its calculation timestamp and refresh", () => {
@@ -211,9 +213,10 @@ it("keeps stale coverage neutral with its calculation timestamp and refresh", ()
   ).toBeVisible();
   expect(screen.queryByText("Deadline passed")).not.toBeInTheDocument();
   expect(screen.queryByText("Action required")).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: "Top up", exact: true })
-  ).toHaveAttribute("data-primary", "false");
+  expect(screen.getByRole("button", { name: "Top up" })).toHaveAttribute(
+    "data-primary",
+    "false"
+  );
 });
 
 it.each([1, 2])(
