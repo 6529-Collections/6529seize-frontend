@@ -463,4 +463,11 @@ export interface E2eeEngineExt extends E2eeEngine {
   idle(): Promise<void>;
   /** Sends unsent read positions now (the page or app is going away). */
   flushReadSync(): Promise<void>;
+  /**
+   * Stops taking in new history (sync, polling, wake events) until
+   * resumeIncoming(), and resolves once work in flight has settled: a final
+   * backup then holds everything (sign-out, before local data is removed).
+   */
+  pauseIncoming(): Promise<void>;
+  resumeIncoming(): void;
 }

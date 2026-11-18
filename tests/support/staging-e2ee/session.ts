@@ -27,6 +27,7 @@ import {
   SCRIPTED_WALLET_RDNS,
   ScriptedWalletKey,
 } from "../scriptedWallet";
+import { e2eeExactMessages, e2eeMessage } from "../e2ee/e2eeCopy";
 import { E2eeNetworkEvidence } from "./evidence";
 
 /**
@@ -619,7 +620,10 @@ export async function createThrowawayProfile(session: StagingE2eeSession) {
 
 function enrollmentHeading(page: Page) {
   return page.getByRole("heading", {
-    name: /^(Enable Encrypted DMs|Post Signing & DM Encryption)$/,
+    name: e2eeExactMessages(
+      "e2ee.deviceStatus.enableEncryption",
+      "e2ee.deviceStatus.enableBoth"
+    ),
   });
 }
 
@@ -631,8 +635,11 @@ function enrollmentButton(page: Page) {
 
 /** What the encrypted messages gate shows instead of chats, if anything. */
 const GATE_STATES = [
-  { state: "enrollment", text: "Enable Encrypted DMs" },
-  { state: "enrollment", text: "Post Signing & DM Encryption" },
+  {
+    state: "enrollment",
+    text: e2eeMessage("e2ee.deviceStatus.enableEncryption"),
+  },
+  { state: "enrollment", text: e2eeMessage("e2ee.deviceStatus.enableBoth") },
   {
     state: "no connected wallet (the scripted wallet did not reconnect)",
     text: "Connect the wallet for this profile to use encrypted messages.",
@@ -852,7 +859,9 @@ async function prepareSignedPosts(session: StagingE2eeSession) {
       new CustomEvent("6529:device-setup", { detail: "posts" })
     );
   });
-  const dialog = page.getByRole("dialog", { name: "Enable Signed Posts" });
+  const dialog = page.getByRole("dialog", {
+    name: e2eeMessage("e2ee.deviceStatus.enableProof"),
+  });
   const signaturesBefore = wallet.count("personal_sign");
   const encryptionRegistrations = () =>
     evidence.requestsMatching(

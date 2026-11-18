@@ -92,6 +92,7 @@ export class EngineController {
   private isReady(): boolean {
     return (
       !this.ctx.disposed &&
+      !this.ctx.incomingPaused &&
       this.ctx.store.status === "ready" &&
       this.ctx.mls !== null
     );
@@ -510,6 +511,27 @@ export class EngineController {
       });
     }
     this.armPoll();
+  }
+
+  /**
+   * Takes in no new history (sync, polling, wake events) until
+   * resumeIncoming(): every sync path checks isReady().
+   */
+  pauseIncoming(): void {
+    this.ctx.incomingPaused = true;
+    this.stopBackground();
+  }
+
+  /** Takes in history again and catches up on what arrived meanwhile. */
+  resumeIncoming(): void {
+    if (!this.ctx.incomingPaused) {
+      return;
+    }
+    this.ctx.incomingPaused = false;
+    if (this.isReady()) {
+      this.startBackground();
+      this.background(() => this.syncAll());
+    }
   }
 
   /** Stops wake events and polling; startBackground() resumes both. */
