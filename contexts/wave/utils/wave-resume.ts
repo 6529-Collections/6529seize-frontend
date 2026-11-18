@@ -18,7 +18,7 @@ export function reconcileWaveSnapshot(
   });
 }
 
-export function addWaveHistoryGap(
+function addWaveHistoryGap(
   gaps: readonly WaveHistoryGap[],
   nextGap: WaveHistoryGap
 ): WaveHistoryGap[] {
