@@ -38,6 +38,8 @@ interface MarkdownLinkMatch {
 interface MarkdownToPlainTextOptions {
   readonly includeImageUrls?: boolean;
   readonly includeLinkDestinations?: boolean;
+  /** Retains inline images for the card's media extraction. */
+  readonly preserveImageMarkdown?: boolean;
   /** Drops matching bare URLs and link destinations from the text. */
   readonly omitUrl?: ((url: string) => boolean) | undefined;
 }
@@ -154,7 +156,8 @@ const omitBareUrls = (
 
 const replaceMarkdownLinks = (
   input: string,
-  options: MarkdownToPlainTextOptions
+  options: MarkdownToPlainTextOptions,
+  protect: (value: string) => string
 ): string => {
   let result = "";
   let cursor = 0;
@@ -176,20 +179,127 @@ const replaceMarkdownLinks = (
     result += omitBareUrls(input.slice(cursor, match.segmentStart), options);
     const label = input.slice(match.labelStart, match.labelEnd);
     const url = input.slice(match.urlStart, match.urlEnd);
-    result += formatMarkdownLink(label, url, match.isImage, options);
+    result +=
+      match.isImage && options.preserveImageMarkdown
+        ? protect(input.slice(match.segmentStart, match.urlEnd + 1))
+        : formatMarkdownLink(label, url, match.isImage, options);
     cursor = match.urlEnd + 1;
   }
 
   return result;
 };
 
+const trackEmphasis = (text: string, open: Map<string, number>): void => {
+  for (const match of text.matchAll(/(?<!\\)(\*+|_+|~+)/g)) {
+    const marker = match[0].charAt(0);
+    const previous = text.charAt(match.index - 1);
+    const next = text.charAt(match.index + match[0].length);
+    const canClose =
+      /\S/.test(previous) && (marker !== "_" || !/[\p{L}\p{N}]/u.test(next));
+    const canOpen =
+      /\S/.test(next) && (marker !== "_" || !/[\p{L}\p{N}]/u.test(previous));
+    const count = open.get(marker) ?? 0;
+    const closed = canClose ? Math.min(count, match[0].length) : 0;
+    open.set(marker, count - closed + (canOpen ? match[0].length - closed : 0));
+  }
+};
+
+const getProtectedUrlEnd = (url: string, open: Map<string, number>): number => {
+  let end = url.length;
+  while (
+    end > 0 &&
+    URL_TRAILING_CHARACTERS.has(url.charAt(end - 1)) &&
+    !open.has(url.charAt(end - 1))
+  ) {
+    end -= 1;
+  }
+
+  while (end > 0) {
+    const marker = url.charAt(end - 1);
+    const available = open.get(marker) ?? 0;
+    if (available === 0) break;
+    let start = end;
+    while (start > 0 && url.charAt(start - 1) === marker) start -= 1;
+    const closed = Math.min(available, end - start);
+    open.set(marker, available - closed);
+    end -= closed;
+    if (end > start) break;
+  }
+  return end;
+};
+
+const protectUrlText = (
+  text: string,
+  protect: (value: string) => string,
+  open: Map<string, number>,
+  beforeBoundary: string,
+  afterBoundary: string
+): string => {
+  let result = "";
+  let cursor = 0;
+  for (const match of text.matchAll(BARE_URL_REGEX)) {
+    const before = text.slice(cursor, match.index);
+    trackEmphasis((cursor === 0 ? beforeBoundary : "") + before, open);
+    const end = getProtectedUrlEnd(match[0], open);
+    result += before + protect(match[0].slice(0, end)) + match[0].slice(end);
+    cursor = match.index + match[0].length;
+  }
+  const tail = text.slice(cursor);
+  trackEmphasis(
+    (cursor === 0 ? beforeBoundary : "") + tail + afterBoundary,
+    open
+  );
+  return result + tail;
+};
+
+const protectBareUrls = (
+  text: string,
+  protect: (value: string) => string,
+  marker: string
+): string => {
+  const open = new Map([
+    ["*", 0],
+    ["_", 0],
+    ["~", 0],
+  ]);
+  return text
+    .split(marker)
+    .map((part, index, parts) => {
+      if (index % 2 === 1) return part;
+      const beforeBoundary = index > 0 ? marker : "";
+      const afterBoundary = index < parts.length - 1 ? marker : "";
+      return protectUrlText(part, protect, open, beforeBoundary, afterBoundary);
+    })
+    .join(marker);
+};
+
+const findLiteralMarker = (markdown: string): string | null => {
+  const characters = new Set(markdown);
+  // A single BMP character cannot form by joining surrogate halves either.
+  for (let point = 0xe000; point <= 0xf8ff; point += 1) {
+    const marker = String.fromCharCode(point);
+    if (!characters.has(marker)) return marker;
+  }
+  return null;
+};
+
 export const markdownToPlainText = (
   markdown: string,
   options: MarkdownToPlainTextOptions = {}
 ): string => {
-  const withoutLinks = replaceMarkdownLinks(markdown, options);
+  // An absent character cannot be introduced by stripping markdown formatting.
+  const marker = findLiteralMarker(markdown);
+  // Preserve content if an exceptional input exhausts every available marker.
+  if (!marker) return markdown;
+  const literals: string[] = [];
+  const protect = (value: string): string => {
+    const index = literals.push(value) - 1;
+    return `${marker}${index}${marker}`;
+  };
+  const withoutLinks = replaceMarkdownLinks(markdown, options, protect);
+  const protectedText = protectBareUrls(withoutLinks, protect, marker);
 
-  return withoutLinks
+  const plainText = protectedText
     .replaceAll(/```([\s\S]*?)```/g, "$1")
     .replaceAll(/`([^`]+)`/g, "$1")
     .replaceAll(/(\*\*|__)(.*?)\1/g, "$2")
@@ -201,6 +311,14 @@ export const markdownToPlainText = (
     .replaceAll(/(^|\n)>\s?/g, "$1")
     .replaceAll(/\s+/g, " ")
     .trim();
+  return plainText
+    .split(marker)
+    .map((part, index) =>
+      index % 2 === 0
+        ? part
+        : (literals[Number(part)] ?? `${marker}${part}${marker}`)
+    )
+    .join("");
 };
 
 const isMediaCdnOrigin = (origin: string): boolean => {
