@@ -26,6 +26,11 @@ opens the full Memes set when no season is selected. Gradients opens the full
 Gradients set; Pebbles opens its trait-set planner. Collected and Pebbles Trait
 Sets also link to relevant collecting goals.
 
+On your own Collected tab, **Complete my set** and **Manage orders** appear once
+your account has loaded and you are signed in directly. These personal shortcuts
+are omitted on other profiles and in proxy sessions, and follow the existing
+platform restrictions.
+
 In the Android app, the header Back button returns from Collect or Manage orders
 to the page you came from, keeping its URL filters. Returning to a
 [profile's Collected tab](../profiles/tabs/feature-collected-tab.md) through

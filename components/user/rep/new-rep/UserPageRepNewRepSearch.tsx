@@ -5,6 +5,7 @@ import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
 import {
   useCallback,
   useContext,
+  useEffect,
   useId,
   useMemo,
   useRef,
@@ -31,6 +32,7 @@ import {
 } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
+import { RATING_INPUT_SURFACE_CLASS } from "@/components/user/utils/rate/ratingInputStyles";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import {
@@ -40,7 +42,6 @@ import {
 import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { formatInteger } from "@/i18n/format";
 import {
   isMemesNomineeLookalike,
   MEMES_NOMINEE_CATEGORY,
@@ -48,6 +49,7 @@ import {
 } from "@/helpers/waves/memes-nomination";
 import { getGrantRepCategoriesToDisplay } from "./grantRepCategoryOptions";
 import GrantRepCategorySuggestions from "./GrantRepCategorySuggestions";
+import GrantRepStats from "./GrantRepStats";
 
 import { isRatingValue } from "../ratingsManagement";
 
@@ -107,49 +109,6 @@ function getSubmissionGuidanceContent(
   return submissionHint;
 }
 
-function GrantRepStats({
-  available,
-  assigned,
-  profileName,
-  overAllowance,
-  id,
-}: {
-  readonly available: number;
-  readonly assigned: number;
-  readonly profileName: string;
-  readonly overAllowance: boolean;
-  readonly id: string;
-}) {
-  const locale = useBrowserLocale();
-  return (
-    <dl className="tw-m-0 tw-mb-4 tw-space-y-2 tw-rounded-lg tw-bg-white/[0.03] tw-px-3.5 tw-py-3 tw-text-xs">
-      <div
-        id={id}
-        className={`tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1 ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-400"}`}
-      >
-        <dt className="tw-font-normal">
-          {t(locale, "rep.categories.grant.availableRepLabel")}
-        </dt>
-        <dd
-          className={`tw-m-0 tw-ml-auto tw-whitespace-nowrap tw-font-medium ${overAllowance ? "tw-text-rose-400" : "tw-text-iron-100"}`}
-        >
-          {formatInteger(locale, available)}
-        </dd>
-      </div>
-      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1">
-        <dt className="tw-min-w-0 tw-break-words tw-font-normal tw-text-iron-400">
-          {t(locale, "rep.categories.grant.assignedRepLabel", {
-            name: profileName,
-          })}
-        </dt>
-        <dd className="tw-m-0 tw-ml-auto tw-whitespace-nowrap tw-font-medium tw-text-iron-100">
-          {formatInteger(locale, assigned)}
-        </dd>
-      </div>
-    </dl>
-  );
-}
-
 function GrantRepSubmissionGuidance({
   selectedCategory,
   categoriesToDisplay,
@@ -207,16 +166,37 @@ function GrantRepSubmissionGuidance({
   );
 }
 
-export default function UserPageRepNewRepSearch({
-  overview,
-  profile,
-  onSuccess,
-  onCancel,
-}: {
+type Props = {
   readonly overview: ApiRepOverview | null;
   readonly profile: ApiIdentity;
   readonly onSuccess?: (() => void) | undefined;
   readonly onCancel?: (() => void) | undefined;
+};
+
+export default function UserPageRepNewRepSearch(props: Props) {
+  const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
+  const amountContext = [
+    props.profile.id ?? props.profile.query ?? props.profile.display,
+    connectedProfile?.id,
+    activeProfileProxy?.id,
+  ].join(":");
+  return (
+    <GrantRepForm
+      key={amountContext}
+      {...props}
+      amountContext={amountContext}
+    />
+  );
+}
+
+function GrantRepForm({
+  overview,
+  profile,
+  onSuccess,
+  onCancel,
+  amountContext,
+}: Props & {
+  readonly amountContext: string;
 }) {
   const locale = useBrowserLocale();
   const amountInputId = useId();
@@ -225,6 +205,14 @@ export default function UserPageRepNewRepSearch({
   const categoryErrorId = useId();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRequest = useRef(0);
+  const amountFocusSource = useRef<Element | null>(null);
+  const isCurrentForm = useRef(false);
+  useEffect(() => {
+    isCurrentForm.current = true;
+    return () => {
+      isCurrentForm.current = false;
+    };
+  }, []);
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
@@ -288,16 +276,12 @@ export default function UserPageRepNewRepSearch({
     category: selectedCategory,
   });
 
-  const amountScope = [
-    profile.id ?? profile.query ?? profile.display,
-    connectedProfile?.id,
-    activeProfileProxy?.id,
-    selectedCategory,
-  ].join(":");
+  const amountScope = [amountContext, selectedCategory].join(":");
+  const savedAmount = selectedCategory
+    ? String(repState?.rater_contribution ?? 0)
+    : "";
   const amountStr =
-    amountDraft?.scope === amountScope
-      ? amountDraft.value
-      : String(repState?.rater_contribution ?? 0);
+    amountDraft?.scope === amountScope ? amountDraft.value : savedAmount;
   const setAmountStr = (value: string) =>
     setAmountDraft({ scope: amountScope, value });
 
@@ -309,17 +293,26 @@ export default function UserPageRepNewRepSearch({
 
   const currentRep = repState?.rater_contribution ?? 0;
   const amountReady = selectedCategory !== null && repState !== null;
-  const hasAmountDraft = amountDraft?.scope === amountScope;
   const focusSelectedAmount = useCallback(
     (input: HTMLInputElement | null) => {
-      if (selectedCategory && amountReady && !hasAmountDraft)
-        input?.focus({ preventScroll: true });
+      if (!input || !selectedCategory || !amountReady) return;
+      const source = amountFocusSource.current;
+      amountFocusSource.current = null;
+      if (!source) return;
+      const ownerDocument = input.ownerDocument;
+      if (
+        ownerDocument.activeElement === source ||
+        (ownerDocument.activeElement === ownerDocument.body &&
+          !source.isConnected)
+      ) {
+        input.focus({ preventScroll: true });
+      }
     },
-    [selectedCategory, amountReady, hasAmountDraft]
+    [selectedCategory, amountReady]
   );
   const haveChanged = amountNum !== currentRep;
   const overAllowance =
-    selectedCategory !== null && isRatingValue(amountStr) && !isValidValue;
+    amountReady && isRatingValue(amountStr) && !isValidValue;
   const isGrantDisabled =
     !selectedCategory ||
     isError ||
@@ -380,6 +373,8 @@ export default function UserPageRepNewRepSearch({
       });
       return;
     }
+    const focusSource =
+      searchInputRef.current?.ownerDocument.activeElement ?? null;
     setCheckingAvailability(!knownCategory);
     try {
       if (!knownCategory)
@@ -390,9 +385,16 @@ export default function UserPageRepNewRepSearch({
           },
         });
       if (request !== selectionRequest.current) return;
+      amountFocusSource.current = focusSource;
       setSelectedCategory(rep);
       setRepSearch(rep);
-      setAmountDraft(null);
+      // Carry an amount entered without a selected category, including after
+      // Change category. Switching selected categories shows their saved rating.
+      setAmountDraft((draft) =>
+        !selectedCategory && draft?.scope === amountScope && draft.value
+          ? { scope: [amountContext, rep].join(":"), value: draft.value }
+          : null
+      );
       setError(null);
       setIsOpen(false);
     } catch (error: unknown) {
@@ -432,6 +434,7 @@ export default function UserPageRepNewRepSearch({
         connectedProfile,
         profileProxy: activeProfileProxy ?? null,
       });
+      if (!isCurrentForm.current) return;
       setSelectedCategory(null);
       setRepSearch("");
       setAmountDraft(null);
@@ -524,6 +527,7 @@ export default function UserPageRepNewRepSearch({
     const newValue = event.target.value;
     setIsOpen(true);
     selectionRequest.current++;
+    amountFocusSource.current = null;
     setCheckingAvailability(false);
     setRepSearch(newValue);
     setError(null);
@@ -586,7 +590,7 @@ export default function UserPageRepNewRepSearch({
                   ? `${SUBMISSION_GUIDANCE_ID} ${categoryErrorId}`
                   : SUBMISSION_GUIDANCE_ID
               }
-              className="tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none"
+              className={`${RATING_INPUT_SURFACE_CLASS} tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none`}
               placeholder={t(locale, "rep.categories.grant.searchPlaceholder")}
             />
             {selectedCategory ? (
@@ -670,23 +674,22 @@ export default function UserPageRepNewRepSearch({
           </p>
           <UserPageRateInput
             inputRef={focusSelectedAmount}
-            selectOnFocus
-            value={selectedCategory ? amountStr : ""}
+            value={amountStr}
             onChange={setAmountStr}
             minMax={minMaxValues}
             isProxy={!!activeProfileProxy}
             clampOnBlur={false}
             variant="form"
             inputId={amountInputId}
-            disabled={!selectedCategory || mutating}
+            disabled={mutating}
             placeholder="0"
             descriptionId={`${availableRepId} ${amountInputId}-hint`}
-            invalid={selectedCategory !== null && !isValidValue}
+            invalid={amountReady && !isValidValue}
           />
           <div
             role="status"
-            aria-hidden={!selectedCategory}
-            className={!selectedCategory ? "tw-invisible" : undefined}
+            aria-hidden={!amountReady}
+            className={!amountReady ? "tw-invisible" : undefined}
           >
             <UserRateAdjustmentHelper
               inLineValues
@@ -727,8 +730,8 @@ export default function UserPageRepNewRepSearch({
             onClick={onCancel}
             disabled={mutating}
             variant="ghost"
-            size="lg"
-            className="tw-w-full md:tw-w-auto"
+            size="md"
+            className="tw-min-h-11 tw-w-full md:tw-w-auto"
           >
             {t(locale, "rep.categories.grant.actions.cancel")}
           </Button>
@@ -739,8 +742,8 @@ export default function UserPageRepNewRepSearch({
           form={amountFormId}
           loading={mutating}
           variant="action"
-          size="lg"
-          className="tw-w-full md:tw-w-auto"
+          size="md"
+          className="tw-min-h-11 tw-w-full md:tw-w-auto"
         >
           {t(
             locale,
