@@ -143,7 +143,7 @@ export function SidebarWaveNavigationControls({
                 ))}
               </fieldset>
             ) : (
-              <span className="tw-min-w-0 tw-text-sm tw-font-semibold tw-text-iron-300">
+              <span className="tw-min-w-0 tw-text-sm tw-font-semibold tw-text-iron-300 [@media(any-hover:none)]:tw-text-[13px] [@media(any-hover:none)]:tw-font-medium">
                 {t(locale, "waves.sidebar.allWaves")}
               </span>
             )}
