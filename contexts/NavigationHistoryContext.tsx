@@ -161,7 +161,6 @@ export const NavigationHistoryProvider: React.FC<{
     canGoBack: false,
   });
   const skipNext = useRef(false);
-  const prevPathRef = useRef<string>("");
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform()) return;
@@ -231,22 +230,12 @@ export const NavigationHistoryProvider: React.FC<{
       scrollRestoration.committed(url + hash);
       if (skipNext.current) {
         skipNext.current = false;
-        prevPathRef.current = url;
         const current = historyRef.current.at(-1);
         if (current?.type === "route") {
           current.href = url + hash;
         }
         return;
       }
-
-      if (url === prevPathRef.current) {
-        const current = historyRef.current.at(-1);
-        if (current?.type === "route") {
-          current.href = getHistoryHref(url, current.path, hash);
-        }
-        return;
-      }
-      prevPathRef.current = url;
 
       const pathKey = getHistoryRoutePath(url, currentPathname);
       let i = historyRef.current.length - 1;
