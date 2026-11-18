@@ -901,6 +901,39 @@ describe("backup completion", () => {
     });
   });
 
+  it("uploads a message that arrives during the run's last request", async () => {
+    const server = createFakeBackupServer(() => 1);
+    const { api, writer, prepared } = await backupWithHistory(server);
+    // m5 arrives while the run waits for its final status, after the
+    // upload itself.
+    let armed = false;
+    const late: E2eeBackupApi = {
+      ...api,
+      getStatus: async () => {
+        const status = await api.getStatus();
+        if (armed) {
+          armed = false;
+          writer.engine.arrive(message("m5", "five"));
+        }
+        return status;
+      },
+    };
+    const device = deviceWith(late, {
+      engine: writer.engine,
+      state: writer.state,
+    });
+    await device.manager.start();
+    armed = true;
+    writer.engine.put(message("m4", "four"));
+    await expect(device.manager.backupNow()).resolves.toBe(true);
+    const restored = await restoreWith(api, prepared);
+    expect(texts(restored.engine.imported[0])).toEqual({
+      ...FINAL,
+      m4: "four",
+      m5: "five",
+    });
+  });
+
   it("reports up to date at once when nothing changed during the upload", async () => {
     const server = createFakeBackupServer(() => 1);
     const { api, writer } = await backupWithHistory(server);
@@ -1001,9 +1034,9 @@ describe("backup completion", () => {
     const writer = deviceWith(refusing);
     await writer.manager.start();
     const prepared = await writer.manager.prepareBackup();
-    await expect(errorCode(writer.manager.confirmBackup(prepared))).resolves.toBe(
-      "E2EE_RATE_LIMITED"
-    );
+    await expect(
+      errorCode(writer.manager.confirmBackup(prepared))
+    ).resolves.toBe("E2EE_RATE_LIMITED");
     expect(server.generations(PROFILE)).toHaveLength(0);
   });
 
