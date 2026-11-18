@@ -564,8 +564,9 @@ opening the tab starts encrypted messages in that browser so backup can show.
   button), **Active now**, the date it expires and its wallet. **Rename**
   changes its name on the server for all your devices.
 - **Other devices** lists the rest, each with its permissions, when it was set
-  up, when it was last active and when it expires, and **Revoke**. A device
-  whose wallet signature couldn't be checked says so.
+  up, when it was last active and when it expires, where its signing
+  permission was authorized (**Authorized from**, for example 6529.io), and
+  **Revoke**. A device whose wallet signature couldn't be checked says so.
 - **Earlier setups of this browser** groups devices with the same name as this
   browser that haven't been active since it was set up, usually this browser
   before it lost its saved keys. **Clean up…** lists them with their dates,

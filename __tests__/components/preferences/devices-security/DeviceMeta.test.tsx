@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import type { SecurityDevice } from "@/components/preferences/devices-security/classifyDevices";
+import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 import { DeviceMeta } from "@/components/preferences/devices-security/DeviceParts";
 
 const DAY = 86_400_000;
@@ -29,6 +30,24 @@ const thisBrowser = (
 });
 
 describe("DeviceMeta", () => {
+  it("shows where a signing permission was authorized", () => {
+    render(
+      <DeviceMeta
+        locale="en-US"
+        device={{
+          ...thisBrowser("active"),
+          grant: { domain: "6529.io" } as ApiDeviceGrant,
+        }}
+      />
+    );
+    expect(screen.getByText("Authorized from 6529.io")).toBeInTheDocument();
+  });
+
+  it("names no origin for a device without a signing grant", () => {
+    render(<DeviceMeta locale="en-US" device={thisBrowser("active")} />);
+    expect(screen.queryByText(/^Authorized from /)).not.toBeInTheDocument();
+  });
+
   it("says Active now for this browser while a permission is in force", () => {
     render(<DeviceMeta locale="en-US" device={thisBrowser("active")} />);
     expect(screen.getByText("Active now")).toBeInTheDocument();
