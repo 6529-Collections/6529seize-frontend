@@ -12,15 +12,13 @@ import { revokeScope, type SecurityDevice } from "./classifyDevices";
 import { CleanUpDialog } from "./CleanUpDialog";
 import { Disclosure } from "./DeviceParts";
 import { DeviceRow, HistoryRow } from "./DeviceRow";
-import {
-  LocalCleanupAlert,
-  useLocalCleanupFailure,
-} from "./LocalCleanupAlert";
+import { LocalCleanupAlert, useLocalCleanupFailure } from "./LocalCleanupAlert";
 import { RenameDeviceDialog } from "./RenameDeviceDialog";
 import { RevokeDeviceDialog } from "./RevokeDeviceDialog";
 import { ThisDeviceCard } from "./ThisDeviceCard";
 import {
   DeviceChangedError,
+  DeviceNotRevocableError,
   type SecurityDevicesState,
   useSecurityDevices,
 } from "./useSecurityDevices";
@@ -63,10 +61,7 @@ function GroupHeading({
 }) {
   const locale = useBrowserLocale();
   return (
-    <h3
-      id={id}
-      className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300"
-    >
+    <h3 id={id} className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-300">
       {t(locale, "devicesSecurity.labelWithCount", {
         label,
         count: formatInteger(locale, count),
@@ -115,6 +110,10 @@ export default function DevicesSecuritySettings() {
         setTarget(current);
       }
       throw new DeviceChangedError();
+    }
+    if (!security.canRevoke(current)) {
+      // Its row doesn't offer Revoke now: the dialog stays open.
+      throw new DeviceNotRevocableError();
     }
     localCleanup.report(await security.revoke(current), current.label);
     setAnnouncement(
@@ -295,6 +294,7 @@ export default function DevicesSecuritySettings() {
         key={cleanUp.run}
         signed={security.signsRevocations}
         devices={security.earlierSetups.filter(security.canRevoke)}
+        findActive={(id) => findDevice(security, id)}
         open={cleanUp.open}
         onRevoke={async (device) => {
           localCleanup.report(await security.revoke(device), device.label);

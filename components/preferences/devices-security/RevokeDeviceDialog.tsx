@@ -12,6 +12,7 @@ import { DeviceMeta } from "./DeviceParts";
 import {
   DeviceActionUnavailableError,
   DeviceChangedError,
+  DeviceNotRevocableError,
 } from "./useSecurityDevices";
 
 const isOn = (device: SecurityDevice, key: "signedPosts" | "encryptedDms") =>
@@ -60,6 +61,9 @@ function getCopy(
 const getErrorKey = (error: unknown): MessageKey => {
   if (error instanceof DeviceChangedError) {
     return "devicesSecurity.revokeChanged";
+  }
+  if (error instanceof DeviceNotRevocableError) {
+    return "devicesSecurity.revokeNotNow";
   }
   return error instanceof DeviceActionUnavailableError
     ? "devicesSecurity.revokeUnavailable"
