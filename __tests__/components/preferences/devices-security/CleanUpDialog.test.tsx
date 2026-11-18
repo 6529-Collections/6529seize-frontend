@@ -28,30 +28,43 @@ const device = (
     unverified: false,
   }) as SecurityDevice;
 
+interface DialogProps {
+  readonly signed?: boolean;
+  readonly onRevoke?: (device: SecurityDevice) => Promise<void>;
+}
+
 function renderDialog(
   devices: readonly SecurityDevice[],
-  props: {
-    readonly signed?: boolean;
-    readonly onRevoke?: (device: SecurityDevice) => Promise<void>;
-  } = {}
+  props: DialogProps = {}
 ) {
   const onRevoke = jest.fn(props.onRevoke ?? (async () => undefined));
-  const ui = (list: readonly SecurityDevice[]) => (
+  const onClose = jest.fn();
+  const onDone = jest.fn();
+  const ui = (list: readonly SecurityDevice[], next: DialogProps) => (
     <CleanUpDialog
       devices={list}
       open
-      signed={props.signed ?? false}
-      onRevoke={onRevoke}
-      onClose={jest.fn()}
-      onDone={jest.fn()}
+      signed={next.signed ?? props.signed ?? false}
+      onRevoke={next.onRevoke ?? onRevoke}
+      onClose={onClose}
+      onDone={onDone}
     />
   );
-  const view = render(ui(devices));
+  const view = render(ui(devices, {}));
   return {
     onRevoke,
-    update: (list: readonly SecurityDevice[]) => view.rerender(ui(list)),
+    onClose,
+    onDone,
+    /** A later render: the list, and optionally the mode and handler. */
+    update: (list: readonly SecurityDevice[], next: DialogProps = {}) =>
+      view.rerender(ui(list, next)),
   };
 }
+
+const confirmButton = (count: number) =>
+  within(dialog()).getByRole("button", {
+    name: count === 1 ? "Revoke 1 device" : `Revoke ${count} devices`,
+  });
 
 const dialog = () => screen.getByRole("dialog", { name: "Clean up earlier setups" });
 const checkbox = (id: string) =>
@@ -126,7 +139,7 @@ describe("CleanUpDialog", () => {
     );
   });
 
-  it("skips a device whose permissions changed after it was reviewed", async () => {
+  it("reports a device whose permissions changed after review and keeps it for a new confirm", async () => {
     const a = device("a");
     let update: (list: readonly SecurityDevice[]) => void = () => undefined;
     const rendered = renderDialog([a, device("b")], {
@@ -139,11 +152,89 @@ describe("CleanUpDialog", () => {
     });
     update = rendered.update;
     await act(async () => {
-      fireEvent.click(
-        within(dialog()).getByRole("button", { name: "Revoke 2 devices" })
-      );
+      fireEvent.click(confirmButton(2));
     });
     expect(rendered.onRevoke).toHaveBeenCalledTimes(1);
+    // Not a success: the dialog stays open, naming B apart from A's revoke.
+    expect(rendered.onClose).not.toHaveBeenCalled();
+    expect(rendered.onDone).not.toHaveBeenCalled();
+    const alert = within(dialog()).getByRole("alert");
+    expect(alert).toHaveTextContent("1 device revoked.");
+    expect(alert).toHaveTextContent(
+      "Not revoked because they changed while this was open: Browser b."
+    );
+    expect(alert).not.toHaveTextContent("Couldn’t revoke");
+    // B is listed as it is now, still selected: revoked on a new confirm.
+    expect(checkbox("b")).toBeChecked();
+    expect(checkbox("b")).toHaveAccessibleName(/encrypted DMs/i);
+    await act(async () => {
+      fireEvent.click(confirmButton(1));
+    });
+    expect(rendered.onRevoke).toHaveBeenCalledTimes(2);
+    expect(rendered.onRevoke).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: "b" })
+    );
+    expect(rendered.onDone).toHaveBeenCalledWith(1);
+  });
+
+  it("stops the batch when revokes start being signed, and doesn't switch handlers mid-batch", async () => {
+    const signedRevoke = jest.fn(async () => undefined);
+    let update: (
+      list: readonly SecurityDevice[],
+      next?: DialogProps
+    ) => void = () => undefined;
+    const b = device("b", { dms: true });
+    const rendered = renderDialog([device("a"), b], {
+      signed: false,
+      onRevoke: async (target) => {
+        if (target.id === "a") {
+          // Encrypted DMs start here while A is revoked: a signed revoke
+          // of B would delete its chats, which wasn't what was confirmed.
+          update([b], { signed: true, onRevoke: signedRevoke });
+        }
+      },
+    });
+    update = rendered.update;
+    expect(dialog()).not.toHaveTextContent("deletes the encrypted chats");
+    await act(async () => {
+      fireEvent.click(confirmButton(2));
+    });
+    expect(rendered.onRevoke).toHaveBeenCalledTimes(1);
+    expect(signedRevoke).not.toHaveBeenCalled();
+    expect(rendered.onClose).not.toHaveBeenCalled();
+    expect(within(dialog()).getByRole("alert")).toHaveTextContent(
+      "Encrypted DMs started or stopped in this browser while this ran."
+    );
+    // The dialog now shows the signed terms; a new confirm uses them.
+    expect(dialog()).toHaveTextContent("deletes the encrypted chats");
+    await act(async () => {
+      fireEvent.click(confirmButton(1));
+    });
+    expect(signedRevoke).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "b" })
+    );
+  });
+
+  it("revokes each device with the handler of the latest render while the mode holds", async () => {
+    const later = jest.fn(async () => undefined);
+    let update: (
+      list: readonly SecurityDevice[],
+      next?: DialogProps
+    ) => void = () => undefined;
+    const b = device("b");
+    const rendered = renderDialog([device("a"), b], {
+      onRevoke: async (target) => {
+        if (target.id === "a") {
+          update([b], { onRevoke: later });
+        }
+      },
+    });
+    update = rendered.update;
+    await act(async () => {
+      fireEvent.click(confirmButton(2));
+    });
+    expect(later).toHaveBeenCalledWith(expect.objectContaining({ id: "b" }));
+    expect(rendered.onDone).toHaveBeenCalledWith(2);
   });
 
   it("warns that signed revokes delete saved chats when encrypted DMs are selected", () => {

@@ -96,6 +96,12 @@ export interface E2eeStorage {
    * `expectedVersion`, the clear is a compare-and-swap like writeBatch.
    */
   clearProfile(profileId: string, expectedVersion?: number): Promise<void>;
+  /**
+   * clearProfile, only while the stored device is `deviceKey`: the check and
+   * the clear are one write transaction, so a device stored in between is
+   * kept. False (nothing changed) when it isn't that device.
+   */
+  clearProfileIfDevice(profileId: string, deviceKey: string): Promise<boolean>;
 }
 
 /** In-memory storage for tests and browsers without IndexedDB. */
@@ -363,6 +369,22 @@ const versionOf = (record: WasmRecord | undefined): number =>
  * then writes. `next` computes the new record and throws on a version
  * conflict, which aborts the transaction before anything is written.
  */
+/** Deletes one profile's records in `tx`, keeping only its version. */
+function clearInTransaction(
+  tx: IDBTransaction,
+  profileId: string,
+  record: WasmRecord
+): void {
+  tx.objectStore(S_DEVICES).delete(profileId);
+  // Version only: no key material survives the clear.
+  tx.objectStore(S_WASM).put(record);
+  tx.objectStore(S_KEYS).delete(profileId);
+  deleteByIndex(tx, S_MESSAGES, null, messageRange(profileId));
+  for (const name of [S_GROUPS, S_OUTBOX]) {
+    deleteByIndex(tx, name, IDX_PROFILE, profileRange(profileId));
+  }
+}
+
 async function versionedWrite(
   db: IDBDatabase,
   profileId: string,
@@ -699,18 +721,44 @@ class IndexedDbE2eeStorage implements E2eeStorage {
         profileId,
         version: nextVersion(versionOf(stored), expectedVersion, true),
       }),
-      (tx, record) => {
-        tx.objectStore(S_DEVICES).delete(profileId);
-        // Version only: no key material survives the clear.
-        tx.objectStore(S_WASM).put(record);
-        tx.objectStore(S_KEYS).delete(profileId);
-        deleteByIndex(tx, S_MESSAGES, null, messageRange(profileId));
-        for (const name of [S_GROUPS, S_OUTBOX]) {
-          deleteByIndex(tx, name, IDX_PROFILE, profileRange(profileId));
-        }
-      }
+      (tx, record) => clearInTransaction(tx, profileId, record)
     );
     this.keys.delete(profileId);
+  }
+
+  async clearProfileIfDevice(
+    profileId: string,
+    deviceKey: string
+  ): Promise<boolean> {
+    const db = await this.open();
+    const tx = db.transaction(ALL_STORES, "readwrite");
+    const finished = done(tx);
+    // Set from the request callbacks below.
+    const outcome = { cleared: false };
+    // Read and clear in the same transaction: no other write lands between.
+    const device = tx.objectStore(S_DEVICES).get(profileId) as IDBRequest<
+      StoredDevice | undefined
+    >;
+    device.onsuccess = () => {
+      if (device.result?.deviceKey.toLowerCase() !== deviceKey.toLowerCase()) {
+        return;
+      }
+      const wasm = tx.objectStore(S_WASM).get(profileId) as IDBRequest<
+        WasmRecord | undefined
+      >;
+      wasm.onsuccess = () => {
+        clearInTransaction(tx, profileId, {
+          profileId,
+          version: nextVersion(versionOf(wasm.result), undefined, true),
+        });
+        outcome.cleared = true;
+      };
+    };
+    await finished;
+    if (outcome.cleared) {
+      this.keys.delete(profileId);
+    }
+    return outcome.cleared;
   }
 }
 
@@ -726,25 +774,6 @@ let sharedStorage: E2eeStorage | null = null;
 export function getDefaultE2eeStorage(): E2eeStorage {
   sharedStorage ??= createIndexedDbE2eeStorage();
   return sharedStorage;
-}
-
-/**
- * This browser's stored encrypted-messages device key for the profile
- * (lowercase), read without the engine (for example while another tab
- * runs it); null when there is none or storage can't be read.
- */
-export async function readStoredE2eeDeviceKey(
-  profileId: string
-): Promise<string | null> {
-  if (!isIndexedDbAvailable()) {
-    return null;
-  }
-  try {
-    const device = await getDefaultE2eeStorage().getDevice(profileId);
-    return device?.deviceKey.toLowerCase() ?? null;
-  } catch {
-    return null;
-  }
 }
 
 /**

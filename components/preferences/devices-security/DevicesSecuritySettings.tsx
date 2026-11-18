@@ -8,7 +8,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { BackupCard } from "./BackupCard";
-import type { SecurityDevice } from "./classifyDevices";
+import { revokeScope, type SecurityDevice } from "./classifyDevices";
 import { CleanUpDialog } from "./CleanUpDialog";
 import { Disclosure } from "./DeviceParts";
 import { DeviceRow, HistoryRow } from "./DeviceRow";
@@ -39,14 +39,6 @@ function findDevice(
     ].find((device) => device?.id === id) ?? null
   );
 }
-
-/** What a revoke of this device stops, and whose dialog it gets. */
-const revokeScope = (device: SecurityDevice): string =>
-  [
-    device.signedPosts?.status === "active",
-    device.encryptedDms?.status === "active",
-    device.isThisDevice,
-  ].join(":");
 
 function PermissionsExplainer() {
   const locale = useBrowserLocale();

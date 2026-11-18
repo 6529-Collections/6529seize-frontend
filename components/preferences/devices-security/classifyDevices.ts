@@ -56,8 +56,9 @@ export interface ClassifiedDevices {
   readonly thisDevice: SecurityDevice | null;
   readonly otherDevices: readonly SecurityDevice[];
   /**
-   * Same name as this device, not this device, and no activity since this
-   * device was set up: usually this browser before it lost its saved keys.
+   * Same name as this device, no key this browser holds, and no activity
+   * since this device was set up: usually this browser before it lost its
+   * saved keys.
    */
   readonly earlierSetups: readonly SecurityDevice[];
   /** Ended in the last 30 days, newest first. */
@@ -98,6 +99,19 @@ const latest = (...values: readonly (number | null | undefined)[]) => {
   );
   return present.length > 0 ? Math.max(...present) : null;
 };
+
+/**
+ * What a revoke of the device stops, and which copy its confirmation shows:
+ * a confirmed revoke goes ahead only while this is unchanged.
+ */
+export const revokeScope = (device: SecurityDevice): string =>
+  [
+    device.signedPosts?.status === "active",
+    device.encryptedDms?.status === "active",
+    device.isThisDevice,
+    device.encryptedDevice?.deviceKey.toLowerCase() ?? "",
+    device.encryptedDevice?.isThisDevice === true,
+  ].join(":");
 
 /** Whether either permission is still in force (not revoked or expired). */
 export const isDeviceActive = (device: SecurityDevice) =>
@@ -186,6 +200,10 @@ function mergeDevices({
   ];
 }
 
+/** 1 for the encrypted device this browser's storage or engine names. */
+const ownEncrypted = (device: SecurityDevice) =>
+  device.encryptedDevice?.isThisDevice === true ? 1 : 0;
+
 const byNewest = (a: SecurityDevice, b: SecurityDevice) =>
   (b.lastActiveAt ?? b.createdAt) - (a.lastActiveAt ?? a.createdAt);
 
@@ -196,14 +214,19 @@ const byNewest = (a: SecurityDevice, b: SecurityDevice) =>
 export function classifyDevices(input: ClassifyDevicesInput): ClassifiedDevices {
   const devices = mergeDevices(input);
   const active = devices.filter(isDeviceActive);
-  // The newest active match wins if this browser holds more than one key.
+  // This browser's encrypted device is the card; else the newest key it
+  // holds (a newer posts-only key doesn't displace its encrypted device).
   const thisDevice =
     active
       .filter((device) => device.isThisDevice)
-      .toSorted((a, b) => b.createdAt - a.createdAt)[0] ?? null;
+      .toSorted(
+        (a, b) => ownEncrypted(b) - ownEncrypted(a) || b.createdAt - a.createdAt
+      )[0] ?? null;
   const rest = active.filter((device) => device !== thisDevice);
+  // Never a key this browser holds: revoking it could delete its chats.
   const isEarlierSetup = (device: SecurityDevice) =>
     thisDevice !== null &&
+    !device.isThisDevice &&
     device.label === thisDevice.label &&
     device.createdAt < thisDevice.createdAt &&
     (device.lastActiveAt === null ||

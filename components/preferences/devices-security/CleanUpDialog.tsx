@@ -10,22 +10,84 @@ import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatList } from "@/i18n/format";
 import { t } from "@/i18n/messages";
-import type { SecurityDevice } from "./classifyDevices";
+import { revokeScope, type SecurityDevice } from "./classifyDevices";
 import { DeviceMeta, formatDeviceWithPermissions } from "./DeviceParts";
 
-/** What a revoke of the device stops: it must match what was reviewed. */
-const scopeOf = (device: SecurityDevice): string =>
-  [
-    device.signedPosts?.status === "active",
-    device.encryptedDms?.status === "active",
-  ].join(":");
+/** What one confirmed batch did. */
+interface BatchReport {
+  readonly revoked: number;
+  /** The revoke failed. */
+  readonly failed: readonly string[];
+  /** Changed after it was reviewed: not revoked, listed as it is now. */
+  readonly changed: readonly string[];
+  /** Revokes started or stopped being signed here: the rest weren't tried. */
+  readonly stopped: boolean;
+}
+
+const NO_REPORT: BatchReport = {
+  revoked: 0,
+  failed: [],
+  changed: [],
+  stopped: false,
+};
+
+/** Anything the user has to review before confirming again. */
+const needsReview = (report: BatchReport) =>
+  report.failed.length > 0 || report.changed.length > 0 || report.stopped;
+
+/** What the last confirm left for review: revoked, failed, changed, stopped. */
+function CleanUpReport({ report }: { readonly report: BatchReport }) {
+  const locale = useBrowserLocale();
+  if (!needsReview(report)) {
+    return null;
+  }
+  return (
+    <div
+      role="alert"
+      className="tw-mt-3 tw-flex tw-flex-col tw-gap-1 tw-text-sm tw-leading-6 tw-text-rose-300"
+    >
+      {report.revoked > 0 ? (
+        <p className="tw-m-0 tw-text-iron-300">
+          {tCount(
+            locale,
+            {
+              one: "devicesSecurity.cleanUp.done.one",
+              other: "devicesSecurity.cleanUp.done.other",
+            },
+            report.revoked
+          )}
+        </p>
+      ) : null}
+      {report.failed.length > 0 ? (
+        <p className="tw-m-0">
+          {t(locale, "devicesSecurity.cleanUp.failed", {
+            labels: formatList(locale, report.failed),
+          })}
+        </p>
+      ) : null}
+      {report.changed.length > 0 ? (
+        <p className="tw-m-0">
+          {t(locale, "devicesSecurity.cleanUp.changed", {
+            labels: formatList(locale, report.changed),
+          })}
+        </p>
+      ) : null}
+      {report.stopped ? (
+        <p className="tw-m-0">
+          {t(locale, "devicesSecurity.cleanUp.modeChanged")}
+        </p>
+      ) : null}
+    </div>
+  );
+}
 
 /**
  * One reviewed revoke for earlier setups of this browser. The devices listed
  * when it opens are pre-selected (mount it per opening, with a key); the
  * user can keep any of them, and one that becomes eligible later is listed
- * unselected. Revokes run one after another, only for devices still
- * eligible, and failures are named.
+ * unselected. Revokes run one after another, each only while the device,
+ * and whether revokes are signed here, are still what was confirmed;
+ * anything else stays listed for a new confirm.
  */
 export function CleanUpDialog({
   devices,
@@ -49,58 +111,66 @@ export function CleanUpDialog({
     () => new Set(devices.map((device) => device.id))
   );
   const [pending, setPending] = useState(false);
-  const [failedLabels, setFailedLabels] = useState<readonly string[]>([]);
+  const [report, setReport] = useState<BatchReport>(NO_REPORT);
   // The current list: a device no longer eligible drops out.
   const selected = devices.filter((device) => chosen.has(device.id));
   const deletesChats =
     signed &&
     selected.some((device) => device.encryptedDms?.status === "active");
-  // The latest eligible list, read before each revoke of the batch: a
-  // device may change or stop being eligible while earlier ones run.
-  const latest = useRef(devices);
+  // The list, signing mode and handler of the latest committed render, read
+  // together before each revoke of a batch: they can change while earlier
+  // ones run.
+  const latest = useRef({ devices, signed, onRevoke });
   useEffect(() => {
-    latest.current = devices;
+    latest.current = { devices, signed, onRevoke };
   });
 
   const close = () => {
     if (pending) {
       return;
     }
-    setFailedLabels([]);
+    setReport(NO_REPORT);
     onClose();
   };
 
   const confirm = async () => {
     setPending(true);
-    setFailedLabels([]);
+    setReport(NO_REPORT);
     // One at a time on purpose: each failure is named, and revokes never
     // race each other through the engine.
-    const { revoked, failed } = await selected.reduce<
-      Promise<{ readonly revoked: number; readonly failed: readonly string[] }>
-    >(
+    const outcome = await selected.reduce<Promise<BatchReport>>(
       async (previous, confirmed) => {
-        const outcome = await previous;
-        const device = latest.current.find((item) => item.id === confirmed.id);
-        if (!device || scopeOf(device) !== scopeOf(confirmed)) {
-          // No longer eligible, or not what was reviewed: skipped.
-          return outcome;
+        const progress = await previous;
+        const now = latest.current;
+        if (progress.stopped || now.signed !== signed) {
+          // Signed or not decides what happens to saved chats: the user
+          // confirmed the other way.
+          return { ...progress, stopped: true };
+        }
+        const device = now.devices.find((item) => item.id === confirmed.id);
+        if (!device) {
+          // No longer eligible: skipped.
+          return progress;
+        }
+        if (revokeScope(device) !== revokeScope(confirmed)) {
+          return { ...progress, changed: [...progress.changed, device.label] };
         }
         try {
-          await onRevoke(device);
-          return { ...outcome, revoked: outcome.revoked + 1 };
+          await now.onRevoke(device);
+          return { ...progress, revoked: progress.revoked + 1 };
         } catch {
-          return { ...outcome, failed: [...outcome.failed, device.label] };
+          return { ...progress, failed: [...progress.failed, device.label] };
         }
       },
-      Promise.resolve({ revoked: 0, failed: [] })
+      Promise.resolve(NO_REPORT)
     );
     setPending(false);
-    if (failed.length > 0) {
-      setFailedLabels(failed);
+    if (needsReview(outcome)) {
+      setReport(outcome);
       return;
     }
     onClose();
-    onDone(revoked);
+    onDone(outcome.revoked);
   };
 
   return (
@@ -187,13 +257,7 @@ export function CleanUpDialog({
           {t(locale, "devicesSecurity.cleanUp.deletesChats")}
         </p>
       ) : null}
-      {failedLabels.length > 0 ? (
-        <p role="alert" className="tw-m-0 tw-mt-3 tw-text-sm tw-text-rose-300">
-          {t(locale, "devicesSecurity.cleanUp.failed", {
-            labels: formatList(locale, failedLabels),
-          })}
-        </p>
-      ) : null}
+      <CleanUpReport report={report} />
     </E2eeDialog>
   );
 }

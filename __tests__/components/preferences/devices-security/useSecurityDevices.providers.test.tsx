@@ -63,7 +63,7 @@ jest.mock("@/components/e2ee/useRemoveE2eeLocalData", () => ({
   useRemoveE2eeLocalData: () => mockRemoveLocal,
 }));
 let mockStoredKey: string | null = null;
-jest.mock("@/lib/e2ee/storage", () => ({
+jest.mock("@/lib/e2ee/stored-device-key", () => ({
   readStoredE2eeDeviceKey: async () => mockStoredKey,
 }));
 let mockMe: ApiE2eeDevice[] = [];

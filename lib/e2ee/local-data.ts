@@ -54,12 +54,15 @@ export async function removeE2eeProfileLocalData(
     const storage =
       deps.storage ?? (isIndexedDbAvailable() ? getDefaultE2eeStorage() : null);
     if (deps.onlyDeviceKey !== undefined) {
-      const stored = await storage?.getDevice(profileId);
-      if (stored?.deviceKey.toLowerCase() !== deps.onlyDeviceKey.toLowerCase()) {
+      // Checked in the same write as the clear, not only under the lock (a
+      // lease without Web Locks is advisory): a replacement device, and its
+      // backup state, stay.
+      if (!(await storage?.clearProfileIfDevice(profileId, deps.onlyDeviceKey))) {
         return false;
       }
+    } else {
+      await storage?.clearProfile(profileId);
     }
-    await storage?.clearProfile(profileId);
     await (deps.backupState ?? getDefaultBackupStateStore()).delete(profileId);
     return true;
   } finally {

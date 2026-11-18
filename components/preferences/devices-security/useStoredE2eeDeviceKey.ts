@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
-import { readStoredE2eeDeviceKey } from "@/lib/e2ee/storage";
+import { readStoredE2eeDeviceKey } from "@/lib/e2ee/stored-device-key";
 
 /** Query key of this browser's stored encrypted-messages device key. */
 export const storedE2eeDeviceKeyQueryKey = (profileId: string | null) =>
