@@ -209,6 +209,60 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
   });
 
+  it.each([
+    {
+      newRating: 100,
+      voteLabel: "Rep",
+      label: "Vote +100 Rep",
+    },
+    {
+      newRating: -1500,
+      voteLabel: "TDH",
+      label: "Vote -1,500 TDH",
+    },
+    {
+      newRating: 100,
+      voteLabel: "Rep",
+      submitLabelOverride: "Vote +100 Rep + reply",
+      label: "Vote +100 Rep + reply",
+    },
+  ])(
+    "keeps $label accessible while authentication and saving are pending",
+    async ({ label, ...props }) => {
+      let finishAuth!: (result: { success: boolean }) => void;
+      mockAuthContext.requestAuth.mockReturnValue(
+        new Promise((resolve) => {
+          finishAuth = resolve;
+        })
+      );
+      jest
+        .mocked(commonApi.commonApiPost)
+        .mockReturnValue(new Promise<ApiDrop>(() => undefined));
+      renderComponent(props);
+      const button = screen.getByRole("button", { name: label });
+
+      fireEvent.click(button);
+      await advanceTimers(300);
+
+      expect(mockAuthContext.requestAuth).toHaveBeenCalledTimes(1);
+      expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+      expect(button.querySelector(".buttonText")).not.toBeInTheDocument();
+      expect(button.querySelector(".spinner")).toBeInTheDocument();
+      expect(button).toHaveAccessibleName(label);
+
+      await act(async () => {
+        finishAuth({ success: true });
+        await flushMicrotasks();
+      });
+
+      await waitFor(() => {
+        expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+      });
+      expect(button.querySelector(".buttonText")).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: label })).toBe(button);
+    }
+  );
+
   it("calls requestAuth when button is clicked", async () => {
     const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
     mockCommonApiPost.mockResolvedValue(mockDrop);

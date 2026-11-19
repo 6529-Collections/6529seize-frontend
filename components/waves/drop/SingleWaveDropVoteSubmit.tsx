@@ -549,6 +549,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
           id={`vote-button-${randomID}`}
           amount={newRating}
           unit={voteLabel}
+          aria-label={loading ? idleButtonLabel : undefined}
           variant={size === SingleWaveDropVoteSize.MINI ? "compact" : "default"}
           className={isProcessing ? (styles["processing"] ?? "") : undefined}
           onClick={(e) => {
