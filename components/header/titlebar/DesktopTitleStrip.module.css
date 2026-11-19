@@ -81,6 +81,7 @@
 }
 
 .version {
+  /* Match the controls' offset within the centered flex strip. */
   margin-top: 4px;
   white-space: nowrap;
 }

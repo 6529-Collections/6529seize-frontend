@@ -26,20 +26,23 @@ test.describe("About Pages @smoke @medium @large", () => {
       }, height);
 
       await expect(toolbar).toBeVisible();
-      const geometry = await toolbar.evaluate((strip) => {
-        const version = strip.lastElementChild;
-        const button = strip.querySelector("button");
-        if (!version || !button)
-          throw new Error("Title-strip content is missing");
-        const text = version.getBoundingClientRect();
-        const control = button.getBoundingClientRect();
-        return {
-          textHeight: text.height,
-          centerDifference: Math.abs(
-            text.y + text.height / 2 - control.y - control.height / 2
-          ),
-        };
-      });
+      const geometry = await toolbar
+        .getByText("Version", { exact: true })
+        .locator("..")
+        .evaluate((version) => {
+          const button = version
+            .closest('[role="toolbar"]')
+            ?.querySelector("button");
+          if (!button) throw new Error("Title-strip control is missing");
+          const text = version.getBoundingClientRect();
+          const control = button.getBoundingClientRect();
+          return {
+            textHeight: text.height,
+            centerDifference: Math.abs(
+              text.y + text.height / 2 - control.y - control.height / 2
+            ),
+          };
+        });
 
       expect(geometry.textHeight).toBeGreaterThan(0);
       expect(geometry.centerDifference).toBeLessThanOrEqual(0.5);
