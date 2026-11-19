@@ -227,7 +227,7 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
       data-wave-view={isWaveView || undefined}
       className={clsx(
         "tailwind-scope tw-flex tw-flex-col tw-overflow-hidden tw-bg-black",
-        isWaveView && styles.waveView
+        isWaveView && styles["waveView"]
       )}
     >
       {content}

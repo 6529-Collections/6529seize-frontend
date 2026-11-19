@@ -1164,7 +1164,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(question).toBeVisible({ timeout: 30000 });
-    const item = question.locator("..").locator("..");
+    const item = page
+      .getByRole("button", { name: "How Does Voting Work?", exact: true })
+      .locator("../..");
     await expect(item).toHaveCSS(
       "border-top-color",
       "rgba(255, 255, 255, 0.06)"
@@ -1181,8 +1183,33 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(item).toHaveCSS("box-shadow", "none");
     await expectNoHorizontalOverflow(page);
     await page.screenshot({ path: testInfo.outputPath("quiet-faq.png") });
+    const feedResponse = await page.request.get(
+      `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/v2/waves/${MEMES_WAVE}/drops`
+    );
+    expect(feedResponse.ok()).toBe(true);
+    const feed = await feedResponse.json();
+    const drop = feed.drops[0];
+    await page.route(`**/v2/waves/${MEMES_WAVE}/drops?**`, (route) =>
+      route.fulfill({
+        json: {
+          ...feed,
+          drops: [
+            {
+              ...drop,
+              content: "Regular **Authored emphasis**",
+            },
+          ],
+        },
+      })
+    );
+    await page.goto(`/waves/${MEMES_WAVE}?tab=chat`);
+    await expect(
+      page.getByText("Authored emphasis", { exact: true }).first()
+    ).toHaveCSS("font-weight", "700");
     await page.goto("/waves");
-    await expect(page.locator("[data-wave-view]")).toHaveCount(0);
+    await expect(
+      page.getByRole("main").locator("[data-wave-view]")
+    ).toHaveCount(0);
     expect(sandbox.requests).toEqual([]);
   });
 
@@ -13719,19 +13746,25 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(
           page.getByText("No artwork submissions yet", { exact: true })
         ).toHaveCount(0);
-        const waveView = page.locator('[data-wave-view="true"]');
+        const waveView = page
+          .getByRole("main")
+          .locator('[data-wave-view="true"]');
         await expect(waveView).toBeVisible();
         await expect(
           page.getByText("Legacy Main Stage artwork", { exact: true }).first()
         ).toHaveCSS("font-weight", "500");
-        const totalLabel = waveView.locator("[data-wave-vote-total]").first();
+        const totalLabel = page
+          .getByRole("main")
+          .locator('[data-wave-view="true"] [data-wave-vote-total]')
+          .first();
         if (await totalLabel.isVisible()) {
           await expect(totalLabel).toHaveCSS("font-weight", "400");
           await expect(totalLabel).toHaveCSS("text-transform", "none");
           await expect(totalLabel).toHaveCSS("font-size", "15px");
         }
-        const protectedControls = waveView
-          .locator('[data-wave-typography="preserve"]')
+        const protectedControls = page
+          .getByRole("main")
+          .locator('[data-wave-view="true"] [data-wave-typography="preserve"]')
           .filter({ visible: true });
         for (const control of await protectedControls.all()) {
           await expect(control).toHaveCSS("font-weight", "600");
@@ -13742,8 +13775,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .locator('[class~="tw-border"][class~="tw-border-solid"]')
           .first();
         await expect(card).toHaveCSS("border-top-width", "1px");
-        const numericStyles = await waveView
-          .locator('[class~="tw-tabular-nums"]')
+        const numericStyles = await page
+          .getByRole("main")
+          .locator('[data-wave-view="true"] [class~="tw-tabular-nums"]')
           .evaluateAll((elements) =>
             elements.map(
               (element) => getComputedStyle(element).fontVariantNumeric

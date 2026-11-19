@@ -1,5 +1,8 @@
-/* Scope shared typography to an open wave, including its desktop/mobile rails.
-   Preserve the existing type on the three intentionally stronger controls. */
+/* Open waves deliberately use medium UI weights and proportional numbers,
+   including their desktop/mobile rails. Scope utility overrides here so shared
+   components keep their defaults elsewhere. Create wave, REP and level badges
+   opt out with data-wave-typography="preserve"; vote-total labels stay regular.
+   Semantic markdown strong/b tags are not utility classes and keep their weight. */
 .waveView
   :is(:global(.tw-font-semibold), :global(.tw-font-bold)):not(
     :global([data-wave-typography="preserve"]),

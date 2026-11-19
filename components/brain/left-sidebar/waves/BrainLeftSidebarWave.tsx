@@ -29,6 +29,7 @@ import {
 } from "./SidebarSubwaveConnector";
 import {
   getSidebarWaveRowLayoutClasses,
+  getSidebarWaveRowTextClasses,
   SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES,
 } from "./sidebarWaveRowLayout";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
@@ -245,9 +246,10 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     !isActive && haveNewDrops
   );
 
-  const inactiveNameClasses = haveNewDrops
-    ? "tw-font-medium tw-text-iron-100 desktop-hover:group-hover:tw-text-iron-100"
-    : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300";
+  const { name: nameClasses } = getSidebarWaveRowTextClasses({
+    isActive,
+    hasUnread: haveNewDrops,
+  });
 
   return (
     <div
@@ -273,11 +275,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         />
       )}
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-            : inactiveNameClasses
-        }`}
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${nameClasses}`}
       >
         <div
           aria-hidden="true"
@@ -351,11 +349,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                   href={href}
                   prefetch={false}
                   onClick={handleWaveClick}
-                  className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${
-                    isActive
-                      ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-                      : inactiveNameClasses
-                  }`}
+                  className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${nameClasses}`}
                 >
                   <span
                     className={`tw-relative tw-z-[6] tw-block tw-truncate ${titleTextClasses} tw-leading-tight`}
