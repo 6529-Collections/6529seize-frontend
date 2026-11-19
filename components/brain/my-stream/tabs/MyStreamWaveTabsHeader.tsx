@@ -594,10 +594,7 @@ export default function MyStreamWaveTabsHeader({
           </IconButton>
         </div>
       </header>
-      <MyStreamActionTooltip
-        id={headerActionsTooltipId}
-        variant="wave-header"
-      />
+      <MyStreamActionTooltip id={headerActionsTooltipId} />
     </>
   );
 }

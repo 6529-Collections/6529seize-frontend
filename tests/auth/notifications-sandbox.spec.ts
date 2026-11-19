@@ -137,7 +137,11 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
       await page.setViewportSize({ width: 430, height: viewport.height });
     }
     await expect(
-      create.locator("..").getByRole("link").first()
+      page
+        .getByRole("link", { name: "Create a Wave", exact: true })
+        .locator("..")
+        .getByRole("link")
+        .first()
     ).toHaveAccessibleName("Create a Wave");
     const createBox = (await create.boundingBox())!;
     const exploreBox = (await explore.boundingBox())!;

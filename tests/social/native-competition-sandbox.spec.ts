@@ -3109,6 +3109,25 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("wave-action-proportions.png"),
     });
+    if (!testInfo.project.use.hasTouch) {
+      for (const trigger of [
+        firstWaveLink,
+        create,
+        page.getByRole("link", { name: "Profile Waves Feed", exact: true }),
+      ]) {
+        await trigger.focus();
+        await trigger.hover();
+        const tooltip = page.getByRole("tooltip").filter({ visible: true });
+        await expect(tooltip).toHaveCount(1);
+        await expect(tooltip).toHaveCSS("padding", "6px 10px");
+        await expect(tooltip).toHaveCSS("border-radius", "6px");
+        await expect(tooltip).toHaveCSS("border-top-width", "0px");
+        await expect(tooltip).toHaveCSS("background-color", "rgb(55, 55, 62)");
+      }
+      await page.screenshot({
+        path: testInfo.outputPath("sidebar-shared-tooltip.png"),
+      });
+    }
     const repDialog = page.getByRole("dialog", { name: "Rate Wave REP" });
     for (const width of [375, 1280]) {
       await page.setViewportSize({ width, height: 900 });
@@ -13813,17 +13832,6 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(
           page.getByText("Legacy Main Stage artwork", { exact: true }).first()
         ).toHaveCSS("font-weight", "500");
-        await expect(
-          page
-            .getByRole("list", { name: "Leaderboard drops" })
-            .getByText(
-              artwork.author.handle ?? artwork.author.primary_address,
-              {
-                exact: true,
-              }
-            )
-            .first()
-        ).toHaveCSS("font-weight", "600");
         const totalLabel = page
           .getByRole("main")
           .locator('[data-wave-view="true"] [data-wave-vote-total]')
@@ -13838,7 +13846,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .locator('[data-wave-view="true"] [data-wave-typography="preserve"]')
           .filter({ visible: true });
         for (const control of await protectedControls.all()) {
-          await expect(control).toHaveCSS("font-weight", "600");
+          const originalWeight = await control.evaluate((element) =>
+            element.classList.contains("tw-font-bold") ? "700" : "600"
+          );
+          await expect(control).toHaveCSS("font-weight", originalWeight);
         }
         // Both card templates must retain a real border after typography settles.
         const card = page

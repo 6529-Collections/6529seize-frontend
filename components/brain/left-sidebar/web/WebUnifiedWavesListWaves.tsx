@@ -19,17 +19,14 @@ import { useRevealActiveSidebarWave } from "@/hooks/useRevealActiveSidebarWave";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useMemo, useRef } from "react";
-import { Tooltip as ReactTooltip } from "react-tooltip";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import {
   buildHighlyRatedWavePreviewItems,
   getHighlyRatedPreviewWaves,
 } from "../waves/HighlyRatedWavesToggle";
-import {
-  SIDEBAR_TOOLTIP_BORDER,
-  SIDEBAR_TOOLTIP_STYLE,
-} from "../waves/SidebarCategoryLabel";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { usePinnedSidebarList } from "../waves/SidebarPinnedWaves";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import { SidebarSubwavesToggle } from "../waves/SidebarSubwavesToggle";
@@ -71,10 +68,6 @@ const COLLAPSING_SUBWAVE_ROW_HEIGHT = 1 as const;
 const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
 const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
-const TOOLTIP_STYLE = {
-  ...SIDEBAR_TOOLTIP_STYLE,
-  zIndex: 10000,
-} as const satisfies React.CSSProperties;
 
 function getVirtualizedAriaLabel({
   isDirectMessage,
@@ -685,22 +678,20 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
       {!isTouchDevice && (
         <>
-          <ReactTooltip
+          <BodyPortalTooltip
             id="create-wave-tooltip"
             place="bottom"
             offset={8}
             opacity={1}
-            style={TOOLTIP_STYLE}
-            border={SIDEBAR_TOOLTIP_BORDER}
+            style={TOOLTIP_STYLES}
           />
           {shouldShowProfileFeedShortcut && (
-            <ReactTooltip
+            <BodyPortalTooltip
               id={PROFILE_FEED_TOOLTIP_ID}
               place={isCollapsed ? "right" : "bottom"}
               offset={8}
               opacity={1}
-              style={TOOLTIP_STYLE}
-              border={SIDEBAR_TOOLTIP_BORDER}
+              style={TOOLTIP_STYLES}
             />
           )}
         </>

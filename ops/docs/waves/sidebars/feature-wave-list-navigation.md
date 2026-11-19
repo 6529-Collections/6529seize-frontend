@@ -67,7 +67,8 @@ Wave and DM rows in the left list control which thread is open.
   `Discover Waves` link with a compass to `/discover`; the sidebar keeps the two section-specific `View all` links.
   The collapsed rail retains its icon-only feed link on a dark tile without
   a border. On desktop, the selected feed icon stays blue. Both layouts keep
-  visible blue keyboard focus.
+  visible blue keyboard focus. Wave names, Create wave, and Profile Waves Feed
+  use the shared tooltip styling.
 - Browser back/forward keeps the active row and URL in sync.
 - `All` includes pinned, joined, unjoined, and quiet accessible waves. Subwaves
   are reached by expanding their parent. It loads in stable batches so new

@@ -239,7 +239,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                           scroll={false}
                           className="tw-no-underline desktop-hover:hover:tw-underline"
                         >
-                          <span className="tw-text-sm tw-font-semibold tw-text-white">
+                          <span
+                            data-wave-typography="preserve"
+                            className="tw-text-sm tw-font-semibold tw-text-white"
+                          >
                             {winner.drop.author.handle}
                           </span>
                         </Link>
@@ -251,7 +254,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         scroll={false}
                         className="tw-no-underline desktop-hover:hover:tw-underline"
                       >
-                        <span className="tw-text-sm tw-font-semibold tw-text-white">
+                        <span
+                          data-wave-typography="preserve"
+                          className="tw-text-sm tw-font-semibold tw-text-white"
+                        >
                           {winner.drop.author.handle ?? winner.drop.author.id}
                         </span>
                       </Link>
