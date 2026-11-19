@@ -126,8 +126,9 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
   `--native-keyboard-layout-transition-easing`. This task generalizes those
   existing mechanisms. The shared
   wrapper now uses that curve by default and owns its native background lock.
-  The redundant voting caller lock is removed; the wrapper owns it. Existing
-  explicit easing overrides remain compatible with the same default curve.
+  Voting's established caller lock is retained, using the same reference-counted
+  background lock as the wrapper. Existing explicit easing overrides remain
+  compatible with the same default curve.
   Main's focused-field content-resize tracking, Android
   lock-release rule, duplicate Android visibility-attribute write guard and
   iOS non-text focus hide recovery are retained without a parallel lifecycle

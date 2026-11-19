@@ -8,6 +8,7 @@ import MobileWrapperDialog from "../mobile-wrapper-dialog/MobileWrapperDialog";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import useCapacitor from "@/hooks/useCapacitor";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 
 interface MobileVotingModalProps {
   readonly drop: ExtendedDrop;
@@ -23,6 +24,7 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
   const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
   const followsIosKeyboard = isCapacitor && isIos;
+  useLayoutViewportLock(isOpen && followsIosKeyboard);
 
   const handleClose = (e?: React.MouseEvent | React.KeyboardEvent) => {
     if (e) {

@@ -5287,7 +5287,23 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         testInfo.project.name !== "web-mobile-chromium",
         "The information overlay is specific to mobile web and app layouts."
       );
-      await installCompetitionApi(page);
+      // Owners now use the name to rename in-place. Retain the separate
+      // name-link/history contract with a viewer who cannot edit the wave.
+      await installCompetitionApi(page, false, false);
+      const waveResponse = await page.request.get(
+        `${getSandboxApiOrigin(process.env["PLAYWRIGHT_BASE_URL"])}/api/waves/${WAVE}`
+      );
+      expect(waveResponse.ok()).toBe(true);
+      const readOnlyWave = await waveResponse.json();
+      readOnlyWave.author = {
+        ...readOnlyWave.author,
+        id: "00000000-0000-4000-8000-000000000999",
+        handle: "sandbox-wave-author",
+      };
+      readOnlyWave.wave.authenticated_user_eligible_for_admin = false;
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: readOnlyWave })
+      );
       if (app)
         await installSurfaceSimulation(
           page.context(),
@@ -5308,6 +5324,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         .getByRole("dialog")
         .filter({ has: page.getByRole("tab", { name: "About", exact: true }) });
       await expect(dialog).toHaveAttribute("aria-modal", "true");
+      await expect(
+        dialog.getByRole("button", { name: "Edit wave name", exact: true })
+      ).toHaveCount(0);
       await expect(dialog).toHaveAccessibleName(
         /^About Local Composer Sandbox Wave/
       );
