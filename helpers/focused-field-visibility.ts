@@ -22,6 +22,8 @@ export function observeFocusedField(
         const field = focused.getBoundingClientRect();
         const scrollport = container.getBoundingClientRect();
         const viewport = globalThis.visualViewport;
+        let visibleLeft = scrollport.left;
+        let visibleRight = scrollport.right;
         let visibleTop = Math.max(scrollport.top, viewport?.offsetTop ?? 0);
         let visibleBottom = Math.min(
           scrollport.bottom,
@@ -34,11 +36,23 @@ export function observeFocusedField(
           parent && parent !== container;
           parent = parent.parentElement
         ) {
-          if (!/(auto|scroll|hidden|clip)/.test(getComputedStyle(parent).overflowY))
-            continue;
+          const style = getComputedStyle(parent);
+          const clipsVertically = /^(auto|scroll|hidden|clip)$/.test(
+            style.overflowY
+          );
+          const clipsHorizontally = /^(auto|scroll|hidden|clip)$/.test(
+            style.overflowX
+          );
+          if (!clipsVertically && !clipsHorizontally) continue;
           const clip = parent.getBoundingClientRect();
-          visibleTop = Math.max(visibleTop, clip.top);
-          visibleBottom = Math.min(visibleBottom, clip.bottom);
+          if (clipsVertically) {
+            visibleTop = Math.max(visibleTop, clip.top);
+            visibleBottom = Math.min(visibleBottom, clip.bottom);
+          }
+          if (clipsHorizontally) {
+            visibleLeft = Math.max(visibleLeft, clip.left);
+            visibleRight = Math.min(visibleRight, clip.right);
+          }
         }
         // Layout often keeps the input visible by itself. Avoid issuing scroll
         // commands on every keyboard frame when there is nothing to reveal.
@@ -47,8 +61,8 @@ export function observeFocusedField(
           field.height > 0 &&
           field.top >= visibleTop &&
           field.bottom <= visibleBottom &&
-          field.left >= scrollport.left &&
-          field.right <= scrollport.right
+          field.left >= visibleLeft &&
+          field.right <= visibleRight
         )
           return;
         focused.scrollIntoView({
