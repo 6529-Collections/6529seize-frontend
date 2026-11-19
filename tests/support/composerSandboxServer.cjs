@@ -279,6 +279,37 @@ const sandboxNetworkMembers = Array.from({ length: 100 }, (_, index) => {
   };
 });
 
+function getSandboxNetworkProfile(pathname) {
+  const handle = pathname.split("/").at(-1);
+  const member = sandboxNetworkMembers.find(
+    (item) => item.detail_view_key === handle
+  );
+  if (!member) return null;
+  const number = Number(handle.slice("collector-".length));
+  return {
+    ...localProfile,
+    id: `00000000-0000-4000-8000-${String(1000 + number).padStart(12, "0")}`,
+    query: handle,
+    handle,
+    normalised_handle: handle,
+    display: member.display,
+    level: member.level,
+    tdh: member.tdh,
+    xtdh: member.xtdh,
+    rep: member.rep,
+    cic: member.cic,
+    primary_address: member.wallet,
+    primary_wallet: member.wallet,
+    wallets: [
+      {
+        ...localProfile.wallets[0],
+        wallet: member.wallet,
+        display: member.wallet,
+      },
+    ],
+  };
+}
+
 function identityOverview({
   id,
   handle,
@@ -2980,6 +3011,14 @@ const mockApiPatternReadRoutes = [
       pfp: "https://media.6529.io/ipfs/QmRT2Ur5E1GooeiCWxqToiQXnnok6drPYxuK8J3RLnaMg8",
     }),
   },
+  {
+    pattern: /^\/api\/identities\/collector-\d+$/,
+    response: getSandboxNetworkProfile,
+  },
+  {
+    pattern: /^\/api\/+identities\/[^/]+\/subscriptions$/,
+    response: () => ({ actions: [] }),
+  },
   { pattern: /^\/api\/identities\/[^/]+$/, response: () => localProfile },
   { pattern: /^\/api\/profiles\/[^/]+\/proxies$/, response: () => [] },
   {
@@ -3021,7 +3060,12 @@ function handleTopCommunityMembersRead(pathname, url, res) {
 
   return writeJsonResponse(
     res,
-    sandboxGroupMembersPage(url.searchParams, sandboxNetworkMembers)
+    sandboxGroupMembersPage(
+      url.searchParams,
+      url.searchParams.has("group_id")
+        ? sandboxGroupMembers
+        : sandboxNetworkMembers
+    )
   );
 }
 
@@ -3115,7 +3159,7 @@ function handlePatternMockApiRead(pathname, res) {
     return false;
   }
 
-  return writeJsonResponse(res, route.response());
+  return writeJsonResponse(res, route.response(pathname));
 }
 
 function handleSharedPostFeedFixture(pathname, url, res) {

@@ -220,6 +220,8 @@ test("Network profile Back restores page, sorting and reading position without h
   const member = members.nth(12);
   await expect(member).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
   await member.scrollIntoViewIfNeeded();
+  const profileEntry = member.getByText(/^#\d+$/, { exact: true });
+  await profileEntry.scrollIntoViewIfNeeded();
   const position = () =>
     page.evaluate(() => ({
       windowTop: scrollY,
@@ -234,7 +236,7 @@ test("Network profile Back restores page, sorting and reading position without h
   await expect(
     page.getByRole("main").getByRole("row", { includeHidden: true })
   ).toHaveCount(0);
-  await member.click();
+  await profileEntry.click();
   await expect(
     page.getByRole("navigation", { name: "Profile sections" })
   ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
@@ -268,7 +270,7 @@ test("Network profile Back restores page, sorting and reading position without h
     globalThis.location.hash = "network-reading-position";
   });
   await expectUrlState(page, (url) => url.hash === "#network-reading-position");
-  await member.click();
+  await profileEntry.click();
   await expect(
     page.getByRole("navigation", { name: "Profile sections" })
   ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
