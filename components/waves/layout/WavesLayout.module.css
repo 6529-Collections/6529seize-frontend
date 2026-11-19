@@ -1,10 +1,13 @@
 /* Open waves deliberately use medium UI weights and proportional numbers,
    including their desktop/mobile rails. Scope utility overrides here so shared
-   components keep their defaults elsewhere. Create wave, REP and level badges
-   opt out with data-wave-typography="preserve"; vote-total labels stay regular.
+   components keep their defaults elsewhere. Buttons keep their own weights;
+   author handles and level badges opt out with data-wave-typography="preserve"
+   and vote-total labels stay regular.
    Semantic markdown strong/b tags are not utility classes and keep their weight. */
 .waveView
   :is(:global(.tw-font-semibold), :global(.tw-font-bold)):not(
+    :global(button),
+    :global(button *),
     :global([data-wave-typography="preserve"]),
     :global([data-wave-typography="preserve"] *),
     :global([data-wave-vote-total])
@@ -14,6 +17,8 @@
 
 .waveView
   :is(:global(.\!tw-font-semibold), :global(.\!tw-font-bold)):not(
+    :global(button),
+    :global(button *),
     :global([data-wave-typography="preserve"]),
     :global([data-wave-typography="preserve"] *),
     :global([data-wave-vote-total])

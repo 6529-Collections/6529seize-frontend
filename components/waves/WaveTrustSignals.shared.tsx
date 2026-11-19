@@ -111,7 +111,7 @@ const isSidebarVariant = (variant: WaveTrustSignalsVariant): boolean =>
   variant === "sidebar" || isInlineSidebarVariant(variant);
 
 const INLINE_STAT_TONE_CLASSES =
-  "tw-text-iron-500 desktop-hover:hover:tw-text-iron-300";
+  "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300";
 
 type VisibilityTone = "excellent" | "healthy" | "low" | "default";
 type VisibilityToneContext = "inline-sidebar" | "inline-header" | "default";

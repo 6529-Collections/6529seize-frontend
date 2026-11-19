@@ -261,6 +261,10 @@ describe("BrainLeftSidebarWave", () => {
       '[data-icon="bell-slash"]'
     );
     expect(bellSlashIcons.length).toBeGreaterThan(0);
+    expect(screen.getByRole("link", { name: "Chat Wave" })).toHaveClass(
+      "tw-text-iron-400"
+    );
+    expect(screen.getByText("Chat Wave")).toHaveClass("tw-font-normal");
   });
 
   it("does not show muted indicator when wave is not muted", () => {
@@ -290,6 +294,10 @@ describe("BrainLeftSidebarWave", () => {
     );
 
     expect(screen.getByText("2")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Chat Wave" })).toHaveClass(
+      "tw-text-iron-300"
+    );
+    expect(screen.getByText("Chat Wave")).toHaveClass("tw-font-medium");
     expect(screen.queryByText("7")).not.toBeInTheDocument();
     expect(getWaveRow().querySelector(".tw-bg-primary-400")).not.toBeNull();
   });

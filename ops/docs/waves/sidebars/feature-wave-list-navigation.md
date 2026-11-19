@@ -226,9 +226,13 @@ on hover and show a dark hover surface; their resting header surface is transpar
 
 ## Common Scenarios
 
-- Inactive rows with unread posts use brighter, medium-weight names and fully
-  visible avatars. Read rows retain their muted appearance. Row scores use
-  quieter, regular-weight text.
+- Inactive, unmuted rows with unread posts use soft light-grey, medium-weight
+  names and fully visible avatars. Both existing unread counts and newly
+  received posts use this treatment, matching the unread badges. The selected
+  wave keeps a white name and highlighted background. Read and muted rows
+  retain their quieter appearance. Row scores use regular-weight text.
+  Keyboard focus shows a blue inset ring on wave links in both the expanded
+  list and the collapsed rail.
 
 - The current wave also highlights in Active Votes when it appears there,
   including when the same wave is highlighted in the collection list below.

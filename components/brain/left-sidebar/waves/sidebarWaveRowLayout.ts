@@ -34,7 +34,7 @@ export const getSidebarWaveRowTextClasses = ({
   }
   if (hasUnread) {
     return {
-      name: "tw-text-iron-100 desktop-hover:group-hover:tw-text-iron-100",
+      name: "tw-text-iron-300 desktop-hover:group-hover:tw-text-iron-300",
       weight: "tw-font-medium",
     };
   }

@@ -33,6 +33,7 @@ import {
   SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES,
 } from "./sidebarWaveRowLayout";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { hasUnreadWaveDrops } from "./sidebarWaveListUtils";
 
 interface BrainLeftSidebarWaveProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
@@ -73,8 +74,7 @@ const isModifiedAnchorClick = (event: React.MouseEvent<HTMLAnchorElement>) =>
 
 const getRowPresentationClasses = (
   isChildRow: boolean,
-  isAnnouncement: boolean,
-  isUnread: boolean
+  isAnnouncement: boolean
 ) => {
   if (isChildRow) {
     return {
@@ -85,9 +85,7 @@ const getRowPresentationClasses = (
         "tw-absolute tw-bottom-[-1px] tw-right-[-1px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg",
       rowVerticalPaddingClasses: "tw-py-1",
       contentGapClasses: "tw-gap-y-0.5",
-      titleTextClasses: isUnread
-        ? "tw-text-[13px] tw-font-medium"
-        : "tw-text-[13px] tw-font-normal",
+      titleTextClasses: "tw-text-[13px]",
       timestampTextClasses: "tw-text-[11px]",
     };
   }
@@ -100,9 +98,7 @@ const getRowPresentationClasses = (
       "tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg",
     rowVerticalPaddingClasses: isAnnouncement ? "tw-py-1" : "tw-py-2",
     contentGapClasses: "tw-gap-y-1",
-    titleTextClasses: isUnread
-      ? "tw-text-sm tw-font-medium [@media(any-hover:none)]:tw-text-[13px]"
-      : "tw-text-sm tw-font-medium [@media(any-hover:none)]:tw-text-[13px] [@media(any-hover:none)]:tw-font-normal",
+    titleTextClasses: "tw-text-sm [@media(any-hover:none)]:tw-text-[13px]",
     timestampTextClasses: "tw-text-xs [@media(any-hover:none)]:tw-text-[11px]",
   };
 };
@@ -154,7 +150,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   }, [activeWaveId, isApp, isDirectMessage, wave.id, firstUnreadDropSerialNo]);
 
   const unreadCount = Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
-  const haveNewDrops = unreadCount > 0;
+  const haveNewDrops = hasUnreadWaveDrops(wave);
 
   const onWaveHover = useCallback(() => {
     if (wave.id !== activeWaveId) {
@@ -240,16 +236,13 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     contentGapClasses,
     titleTextClasses,
     timestampTextClasses,
-  } = getRowPresentationClasses(
-    isChildRow,
-    isAnnouncement,
-    !isActive && haveNewDrops
-  );
+  } = getRowPresentationClasses(isChildRow, isAnnouncement);
 
-  const { name: nameClasses } = getSidebarWaveRowTextClasses({
-    isActive,
-    hasUnread: haveNewDrops,
-  });
+  const { name: nameClasses, weight: weightClass } =
+    getSidebarWaveRowTextClasses({
+      isActive,
+      hasUnread: haveNewDrops,
+    });
 
   return (
     <div
@@ -352,7 +345,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                   className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${nameClasses}`}
                 >
                   <span
-                    className={`tw-relative tw-z-[6] tw-block tw-truncate ${titleTextClasses} tw-leading-tight`}
+                    className={`tw-relative tw-z-[6] tw-block tw-truncate ${titleTextClasses} ${weightClass} tw-leading-tight`}
                   >
                     {formattedWaveName}
                   </span>

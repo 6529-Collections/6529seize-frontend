@@ -1206,6 +1206,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByText("Authored emphasis", { exact: true }).first()
     ).toHaveCSS("font-weight", "700");
+    await expect(
+      page
+        .getByRole("region", {
+          name: "Wave chat file upload area",
+          exact: true,
+        })
+        .getByRole("link", {
+          name: drop.author.handle ?? drop.author.primary_address,
+          exact: true,
+        })
+        .first()
+    ).toHaveCSS("font-weight", "600");
     await page.goto("/waves");
     await expect(
       page.getByRole("main").locator("[data-wave-view]")
@@ -2969,12 +2981,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     );
     const repName = /Add Wave REP|Edit your Wave REP/;
     await expectAction(page.getByRole("button", { name: repName }));
+    await expect(
+      page.getByRole("button", { name: repName })
+    ).not.toHaveAttribute("class", /!tw-/);
 
     const details = await openWaveInformation(page);
     await details.getByRole("tab", { name: "About", exact: true }).click();
     await expectAction(
       details.getByRole("button", { name: "Join", exact: true })
     );
+    await expect(
+      details.getByRole("button", { name: repName })
+    ).not.toHaveAttribute("class", /!tw-/);
     const pin = details.getByRole("button", { name: "Pin wave", exact: true });
     await expect(pin).toHaveCSS("color", "rgb(132, 132, 144)");
     const mute = details.getByRole("button", {
@@ -3008,12 +3026,27 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ]) {
       await expectAction(action);
       await expect(action).toHaveCSS("border-top-width", "1px");
+      await expect(action).not.toHaveAttribute("class", /!tw-/);
     }
     const expandWaves = page.getByRole("button", {
       name: "Expand waves panel",
       exact: true,
     });
     await expect(expandWaves).toBeVisible();
+    await expect
+      .poll(async () => {
+        const fadeBottom = await expandWaves.evaluate(
+          (button) =>
+            button.parentElement
+              ?.querySelector('div[aria-hidden="true"]')
+              ?.getBoundingClientRect().bottom ?? null
+        );
+        const createBox = await create.boundingBox();
+        return (
+          fadeBottom !== null && createBox !== null && createBox.y >= fadeBottom
+        );
+      })
+      .toBe(true);
     const recentWaves = page.getByRole("region", {
       name: "All recent waves list",
       exact: true,
@@ -3037,6 +3070,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         return boxes.every((box, index) => {
           if (!box) return false;
           const previous = boxes[index - 1];
+          // Create wave clears the toggle fade; the remaining icons keep 44px spacing.
+          const expectedStride = index === 1 ? 56 : 44;
           return (
             index === 0 ||
             (!!previous &&
@@ -3044,7 +3079,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
                 box.x + box.width / 2 - previous.x - previous.width / 2
               ) < 1 &&
               Math.abs(
-                box.y + box.height / 2 - previous.y - previous.height / 2 - 44
+                box.y +
+                  box.height / 2 -
+                  previous.y -
+                  previous.height / 2 -
+                  expectedStride
               ) < 1)
           );
         });
@@ -3058,6 +3097,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       "height",
       "44px"
     );
+    const firstWaveLink = recentWaves.getByRole("link").first();
+    await firstWaveLink.focus();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(firstWaveLink).toBeFocused();
+    await expect(firstWaveLink).toHaveCSS("--tw-ring-inset", "inset");
+    await expect(firstWaveLink).toHaveCSS("box-shadow", /rgb\(82, 139, 255\)/);
+    await expect(firstWaveLink).toHaveCSS("box-shadow", /2px/);
     await expectNoHorizontalOverflow(page);
     await page.screenshot({
       path: testInfo.outputPath("wave-action-proportions.png"),
@@ -8542,6 +8589,19 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .filter({ visible: true });
     await expect(join).toBeVisible({ timeout: 30000 });
     await expect(join).toHaveText("Join");
+    await expect(join).toHaveCSS("font-weight", "600");
+    await expect(join.getByText("Join", { exact: true })).toHaveCSS(
+      "font-weight",
+      "600"
+    );
+    const waveName = page
+      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
+      .filter({ visible: true });
+    await expect(
+      app
+        ? waveName.getByText("Local Composer Sandbox Wave", { exact: true })
+        : waveName
+    ).toHaveCSS("font-weight", "500");
     await expect(join).toBeInViewport({ ratio: 1 });
     const joinBox = await join.boundingBox();
     expect(joinBox?.height).toBeGreaterThanOrEqual(24);
@@ -13753,6 +13813,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(
           page.getByText("Legacy Main Stage artwork", { exact: true }).first()
         ).toHaveCSS("font-weight", "500");
+        await expect(
+          page
+            .getByRole("list", { name: "Leaderboard drops" })
+            .getByText(
+              artwork.author.handle ?? artwork.author.primary_address,
+              {
+                exact: true,
+              }
+            )
+            .first()
+        ).toHaveCSS("font-weight", "600");
         const totalLabel = page
           .getByRole("main")
           .locator('[data-wave-view="true"] [data-wave-vote-total]')

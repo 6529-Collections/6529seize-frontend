@@ -15,6 +15,12 @@ const { default: useDeviceInfo } = require("@/hooks/useDeviceInfo");
 it("renders text and links", () => {
   render(<MyStreamNoItems />);
   expect(screen.getByText("No notifications found")).toBeInTheDocument();
+  expect(
+    screen.getByRole("link", { name: "following", exact: true })
+  ).toHaveAttribute("href", "/waves");
+  expect(
+    screen.getByRole("link", { name: "creating a Wave", exact: true })
+  ).toHaveAttribute("href", "/waves?create=wave");
   expect(screen.getByRole("link", { name: /Explore Waves/i })).toHaveAttribute(
     "href",
     "/waves"
@@ -28,6 +34,12 @@ it("renders text and links", () => {
 it("uses app routes when running in app", () => {
   (useDeviceInfo as jest.Mock).mockReturnValueOnce({ isApp: true });
   render(<MyStreamNoItems />);
+  expect(
+    screen.getByRole("link", { name: "following", exact: true })
+  ).toHaveAttribute("href", "/waves");
+  expect(
+    screen.getByRole("link", { name: "creating a Wave", exact: true })
+  ).toHaveAttribute("href", "/waves/create");
   expect(screen.getByRole("link", { name: /Explore Waves/i })).toHaveAttribute(
     "href",
     "/waves"

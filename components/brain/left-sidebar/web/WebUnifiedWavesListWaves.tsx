@@ -187,7 +187,7 @@ function WebWavesListHeader({
     }
 
     return (
-      <div className="tw-flex tw-h-11 tw-shrink-0 tw-items-center tw-justify-center tw-px-2">
+      <div className="tw-mt-5 tw-flex tw-h-11 tw-shrink-0 tw-items-center tw-justify-center tw-px-2">
         <CreateWaveButton onClick={onCreateWave} compact />
       </div>
     );
