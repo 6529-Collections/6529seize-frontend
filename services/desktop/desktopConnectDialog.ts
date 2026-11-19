@@ -6,10 +6,11 @@
 
 import {
   cancelBrowserConnectorSignIn,
+  getBrowserConnectorStatus,
   resetFinishedBrowserConnectorStatus,
 } from "./browserConnectorSignIn";
 
-type OpenWalletConnect = () => Promise<void>;
+type OpenWalletConnect = (signal?: AbortSignal) => Promise<void>;
 
 export type DesktopWalletSetupStatus =
   | "picker"
@@ -31,6 +32,7 @@ export interface DesktopWalletSetup {
 let openWalletConnect: OpenWalletConnect | null = null;
 let pickerVersion = 0;
 let walletSetup: DesktopWalletSetup | undefined;
+let handoffAbort: AbortController | undefined;
 let stopWatchingAbort: (() => void) | undefined;
 const listeners = new Set<() => void>();
 
@@ -44,12 +46,19 @@ export function openDesktopConnectDialog(
 ): void {
   if (setup?.signal.aborted) return;
   // A new picker must not inherit the previous permission request.
-  if (walletSetup) closeDesktopConnectDialog();
-  else if (setup) cancelBrowserConnectorSignIn();
+  if (walletSetup || handoffAbort) {
+    const hadSetup = walletSetup !== undefined;
+    closeDesktopConnectDialog();
+    if (!hadSetup && getBrowserConnectorStatus() !== "signing-in") {
+      cancelBrowserConnectorSignIn();
+    }
+  } else if (setup) cancelBrowserConnectorSignIn();
   // A finished or failed earlier browser sign-in must not show again.
   resetFinishedBrowserConnectorStatus();
   pickerVersion += 1;
-  openWalletConnect = open;
+  const controller = new AbortController();
+  handoffAbort = controller;
+  openWalletConnect = (signal = controller.signal) => open(signal);
   walletSetup = setup;
   if (setup) {
     const abort = () => closeDesktopConnectDialog();
@@ -61,19 +70,40 @@ export function openDesktopConnectDialog(
 }
 
 export function closeDesktopConnectDialog(
-  reason: "cancelled" | "signed-in" | "walletconnect" = "cancelled"
+  reason: "cancelled" | "signed-in" | "walletconnect" | "hidden" = "cancelled"
 ): void {
-  if (openWalletConnect === null) return;
+  if (openWalletConnect === null && !handoffAbort) return;
+  openWalletConnect = null;
+  if (reason === "walletconnect" || reason === "hidden") {
+    notify();
+    return;
+  }
   const setup = walletSetup;
   walletSetup = undefined;
-  openWalletConnect = null;
   stopWatchingAbort?.();
   stopWatchingAbort = undefined;
+  handoffAbort?.abort();
+  handoffAbort = undefined;
   if (setup && reason === "cancelled") {
     cancelBrowserConnectorSignIn();
     if (!setup.signal.aborted) setup.onStatus("cancelled");
   }
   notify();
+}
+
+/** Release setup ownership before its completion callback can abort the signal. */
+export function finishDesktopConnectHandoff(
+  version: number,
+  status: "walletconnect" | "failed"
+): boolean {
+  if (version !== pickerVersion || !handoffAbort) return false;
+  const setup = walletSetup;
+  walletSetup = undefined;
+  handoffAbort = undefined;
+  stopWatchingAbort?.();
+  stopWatchingAbort = undefined;
+  if (!setup?.signal.aborted) setup?.onStatus(status);
+  return true;
 }
 
 export const getDesktopWalletSetup = (): DesktopWalletSetup | undefined =>

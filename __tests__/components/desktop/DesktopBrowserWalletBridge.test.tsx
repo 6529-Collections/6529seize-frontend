@@ -98,6 +98,19 @@ describe("DesktopBrowserWalletBridge", () => {
     expect(connectAsync).toHaveBeenCalledTimes(2);
   });
 
+  it("leaves a rejected same-profile connection for an explicit user retry", async () => {
+    const connection = Promise.withResolvers<undefined>();
+    connectAsync.mockReturnValueOnce(connection.promise);
+    const { rerender } = render(<DesktopBrowserWalletBridge />);
+    account = { status: "disconnected" };
+    rerender(<DesktopBrowserWalletBridge />);
+
+    await act(async () => connection.reject(new Error("user rejected")));
+    rerender(<DesktopBrowserWalletBridge />);
+
+    expect(connectAsync).toHaveBeenCalledTimes(1);
+  });
+
   it("leaves a WalletConnect connection alone and stops offering forwarding", () => {
     account = {
       status: "connected",

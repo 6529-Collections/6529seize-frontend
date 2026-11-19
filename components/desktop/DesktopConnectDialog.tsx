@@ -19,6 +19,7 @@ import {
 } from "@/services/desktop/browserConnectorSignIn";
 import {
   closeDesktopConnectDialog,
+  finishDesktopConnectHandoff,
   getDesktopConnectDialogOpener,
   getDesktopConnectPickerVersion,
   getDesktopWalletSetup,
@@ -131,7 +132,7 @@ export default function DesktopConnectDialog() {
     startAttempt.current = null;
     setStartingPicker(null);
     setProblem(null);
-    closeDesktopConnectDialog();
+    closeDesktopConnectDialog(status === "signing-in" ? "hidden" : "cancelled");
   };
 
   const chooseWalletConnect = () => {
@@ -142,10 +143,10 @@ export default function DesktopConnectDialog() {
     closeDesktopConnectDialog("walletconnect");
     open()
       .then(() => {
-        if (setup && !setup.signal.aborted) setup.onStatus("walletconnect");
+        finishDesktopConnectHandoff(picker, "walletconnect");
       })
       .catch(() => {
-        if (setup && !setup.signal.aborted) setup.onStatus("failed");
+        if (!finishDesktopConnectHandoff(picker, "failed")) return;
         // Bring the unscoped choice back with the reason.
         if (
           !setup &&

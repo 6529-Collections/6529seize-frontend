@@ -132,6 +132,22 @@ describe("desktopBrowserWallet", () => {
       );
     });
 
+    it("does not persist a profile invalidated by a sign-out subscriber", async () => {
+      await loadBrowserWalletProfiles();
+      subscribeBrowserWalletProfiles(() => {
+        if (isBrowserWalletProfile(ADDRESS)) {
+          void forgetAllBrowserWalletProfiles();
+        }
+      });
+
+      await markBrowserWalletProfile(ADDRESS);
+
+      expect(isBrowserWalletProfile(ADDRESS)).toBe(false);
+      expect(store.set.mock.calls).toEqual([
+        ["desktop-browser-wallet-profiles", []],
+      ]);
+    });
+
     it("remembers and forgets a profile and never throws", async () => {
       await markBrowserWalletProfile(ADDRESS);
       await markBrowserWalletProfile(ADDRESS);

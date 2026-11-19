@@ -310,6 +310,7 @@ export const SeizeConnectProvider: React.FC<{ children: React.ReactNode }> = ({
         isCapacitor: capacitor.isCapacitor,
         isActiveAppWalletConnector,
         isSigningOutAll: isSigningOutAllRef.current,
+        signal: desktopWalletSetup?.signal,
         disconnect,
         getSignOutAllGeneration,
         hasSignOutAllGenerationChanged,
