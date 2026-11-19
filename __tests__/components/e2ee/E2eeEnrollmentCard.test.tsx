@@ -492,7 +492,9 @@ describe("E2eeEnrollmentCard upgrade copy (D172)", () => {
     const engine = renderScoped("both", { superseded: 0 });
 
     expect(
-      screen.getByRole("heading", { name: "Turn on signed posts and encrypted DMs" })
+      screen.getByRole("heading", {
+        name: "Turn on signed posts and encrypted DMs",
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByText(/moving to stronger encryption/u)
