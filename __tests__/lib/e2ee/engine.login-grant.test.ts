@@ -185,6 +185,44 @@ async function signedInWaitingEngine() {
 }
 
 describe("E2EE engine: combined sign-in grant (NC8)", () => {
+  it("clears a rejected session on real engine recreation and settles at the device limit", async () => {
+    const world = await createWorld();
+    const account = privateKeyToAccount(generatePrivateKey());
+    world.ds.setWallets("alice", [account.address]);
+    const first = await startDevice(world, "alice", account, { enroll: false });
+    world.ds.addFault({ method: "POST", path: /^e2ee\/devices$/, status: 401 });
+    await expect(first.engine.enroll()).rejects.toThrow();
+    expect(first.engine.getError()).toBe("E2EE_SESSION_EXPIRED");
+    const saved = await first.storage.getDevice("alice");
+    first.engine.dispose();
+    for (let count = 0; count < 10; count += 1) {
+      const other = await startDevice(world, "alice", account);
+      other.engine.dispose();
+    }
+    // Provider restart disposes the old engine and recreates it with the
+    // same storage. The API now accepts the session; its real device cap
+    // is the remaining refusal, without manually clearing engine errors.
+    const restarted = await startDevice(world, "alice", account, {
+      storage: first.storage,
+      enroll: false,
+    });
+    expect(restarted.engine.getError()).toBeNull();
+    await expect(
+      restarted.engine.enrollWithLoginGrant({ resumeStored: true })
+    ).resolves.toBe("device-limit");
+    expect(restarted.engine.getError()).toBeNull();
+    expect(restarted.engine.getDevices()).toHaveLength(10);
+    expect((await first.storage.getDevice("alice"))?.deviceKey).toBe(
+      saved?.deviceKey
+    );
+    await expect(
+      restarted.engine.enrollWithLoginGrant({ resumeStored: true })
+    ).resolves.toBe("device-limit");
+    expect(restarted.engine.getError()).toBeNull();
+    expect(restarted.signCalls).toBe(0);
+    for (const device of world.devices) device.engine.dispose();
+  });
+
   it.each([false, true])(
     "resumes an existing typed-data grant without a wallet prompt (renewal due: %s)",
     async (renewal) => {
