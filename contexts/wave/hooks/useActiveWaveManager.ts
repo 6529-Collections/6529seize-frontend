@@ -16,6 +16,7 @@ import {
   getWaveHomeRoute,
   getWaveRoute,
   isEncryptedMessagesPathname,
+  isMessageComposePathname,
 } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
@@ -52,11 +53,12 @@ const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
     isOnWaves:
       !isCompetitionPathname(pathname) &&
       (pathname === "/waves" || pathname.startsWith("/waves/")),
-    // Encrypted chats are separate routes: leaving them for a plaintext DM
-    // needs a router navigation, not a history-only wave switch.
+    // Opening a legacy DM from the composer or an encrypted chat requires
+    // router navigation to mount the legacy timeline.
     isOnMessages:
       (pathname === "/messages" || pathname.startsWith("/messages/")) &&
-      !isEncryptedMessagesPathname(pathname),
+      !isEncryptedMessagesPathname(pathname) &&
+      !isMessageComposePathname(pathname),
   };
 };
 
