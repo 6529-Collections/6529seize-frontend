@@ -19,6 +19,38 @@ export function observeFocusedField(
           focused instanceof HTMLTextAreaElement ||
           focused.isContentEditable)
       ) {
+        const field = focused.getBoundingClientRect();
+        const scrollport = container.getBoundingClientRect();
+        const viewport = globalThis.visualViewport;
+        let visibleTop = Math.max(scrollport.top, viewport?.offsetTop ?? 0);
+        let visibleBottom = Math.min(
+          scrollport.bottom,
+          viewport
+            ? viewport.offsetTop + viewport.height
+            : globalThis.innerHeight
+        );
+        for (
+          let parent = focused.parentElement;
+          parent && parent !== container;
+          parent = parent.parentElement
+        ) {
+          if (!/(auto|scroll|hidden|clip)/.test(getComputedStyle(parent).overflowY))
+            continue;
+          const clip = parent.getBoundingClientRect();
+          visibleTop = Math.max(visibleTop, clip.top);
+          visibleBottom = Math.min(visibleBottom, clip.bottom);
+        }
+        // Layout often keeps the input visible by itself. Avoid issuing scroll
+        // commands on every keyboard frame when there is nothing to reveal.
+        if (
+          scrollport.height > 0 &&
+          field.height > 0 &&
+          field.top >= visibleTop &&
+          field.bottom <= visibleBottom &&
+          field.left >= scrollport.left &&
+          field.right <= scrollport.right
+        )
+          return;
         focused.scrollIntoView({
           behavior: "instant",
           block: "nearest",
