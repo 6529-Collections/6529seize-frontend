@@ -49,23 +49,29 @@ describe("ArtistPreviewAppWrapper", () => {
     jest.mocked(useCapacitor).mockReturnValue(webPlatform);
   });
 
-  it("locks the background only while an iOS app preview is open", () => {
-    jest.mocked(useCapacitor).mockReturnValue({
-      ...webPlatform,
-      isCapacitor: true,
-      platform: "ios",
-      isIos: true,
-    });
-    const { rerender } = render(<ArtistPreviewAppWrapper {...defaultProps} />);
+  it.each(["ios", "android"])(
+    "locks the %s app background while open",
+    (platform) => {
+      jest.mocked(useCapacitor).mockReturnValue({
+        ...webPlatform,
+        isCapacitor: true,
+        platform,
+        isIos: platform === "ios",
+        isAndroid: platform === "android",
+      });
+      const { rerender } = render(
+        <ArtistPreviewAppWrapper {...defaultProps} />
+      );
 
-    expect(useLayoutViewportLock).toHaveBeenLastCalledWith(true);
+      expect(useLayoutViewportLock).toHaveBeenLastCalledWith(true);
 
-    rerender(<ArtistPreviewAppWrapper {...defaultProps} isOpen={false} />);
-    expect(useLayoutViewportLock).toHaveBeenLastCalledWith(false);
+      rerender(<ArtistPreviewAppWrapper {...defaultProps} isOpen={false} />);
+      expect(useLayoutViewportLock).toHaveBeenLastCalledWith(false);
 
-    rerender(<ArtistPreviewAppWrapper {...defaultProps} />);
-    expect(useLayoutViewportLock).toHaveBeenLastCalledWith(true);
-  });
+      rerender(<ArtistPreviewAppWrapper {...defaultProps} />);
+      expect(useLayoutViewportLock).toHaveBeenLastCalledWith(true);
+    }
+  );
 
   it("scopes the shared reply motion curve to the iOS preview and its children", () => {
     jest.mocked(useCapacitor).mockReturnValue({
@@ -86,27 +92,42 @@ describe("ArtistPreviewAppWrapper", () => {
   it.each([
     { platform: "android", isCapacitor: true, isAndroid: true },
     { platform: "web", isCapacitor: false, isAndroid: false },
-  ])(
-    "preserves the $platform background and reply-motion behavior",
-    (platform) => {
-      jest.mocked(useCapacitor).mockReturnValue({
-        ...webPlatform,
-        ...platform,
-      });
-      render(<ArtistPreviewAppWrapper {...defaultProps} />);
+  ])("preserves the $platform reply-motion behavior", (platform) => {
+    jest.mocked(useCapacitor).mockReturnValue({
+      ...webPlatform,
+      ...platform,
+    });
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
 
-      expect(useLayoutViewportLock).toHaveBeenLastCalledWith(false);
-      expect(screen.getByTestId("dialog")).not.toHaveClass(
-        "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]"
-      );
-    }
-  );
+    expect(useLayoutViewportLock).toHaveBeenLastCalledWith(
+      platform.isCapacitor
+    );
+    expect(screen.getByTestId("dialog")).not.toHaveClass(
+      "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]"
+    );
+  });
 
   it("renders when isOpen is true", () => {
     render(<ArtistPreviewAppWrapper {...defaultProps} />);
 
     expect(screen.getByTestId("dialog")).toBeInTheDocument();
     expect(screen.getByTestId("test-content")).toBeInTheDocument();
+  });
+
+  it.each([
+    { platform: "android", isCapacitor: true, isIos: false, isAndroid: true },
+    { platform: "ios", isCapacitor: true, isIos: true, isAndroid: false },
+    { platform: "web", isCapacitor: false, isIos: false, isAndroid: false },
+  ])("matches the desktop backdrop on $platform", (platform) => {
+    jest.mocked(useCapacitor).mockReturnValue({
+      ...webPlatform,
+      ...platform,
+    });
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
+
+    const backdrop = screen.getByTestId("artist-preview-app-backdrop");
+    expect(backdrop).toHaveClass("tw-bg-iron-600/60", "tw-transition-opacity");
+    expect(backdrop).not.toHaveClass("tw-backdrop-blur-[1px]");
   });
 
   it("does not render when isOpen is false", () => {

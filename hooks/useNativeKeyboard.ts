@@ -184,6 +184,14 @@ function applyKeyboardLayoutVariables(
   );
 
   if (isKeyboardActive) {
+    // Reassigning this Android flag invalidates descendant styles even when
+    // native and viewport callbacks report the same visible keyboard.
+    if (
+      state.isAndroid &&
+      documentElement.dataset["nativeKeyboardVisible"] === "true"
+    ) {
+      return;
+    }
     documentElement.dataset["nativeKeyboardVisible"] = "true";
   } else {
     delete documentElement.dataset["nativeKeyboardVisible"];

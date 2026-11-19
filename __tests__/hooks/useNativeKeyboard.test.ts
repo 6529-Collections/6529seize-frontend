@@ -377,6 +377,57 @@ describe("useNativeKeyboard", () => {
       }
     );
 
+    it("avoids duplicate Android visibility mutations while preserving geometry and lifecycle updates", async () => {
+      const mutations: MutationRecord[] = [];
+      const observer = new MutationObserver((records) => {
+        mutations.push(...records);
+      });
+      observer.observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-native-keyboard-visible"],
+      });
+
+      try {
+        const { result } = await renderNativeKeyboardHook();
+        act(() => {
+          input.focus();
+          listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+        });
+        expect(result.current.phase).toBe("showing");
+        flushViewportResize(800, 480);
+        act(() => {
+          listeners["keyboardDidShow"]?.({ keyboardHeight: 320 });
+          listeners["keyboardDidShow"]?.({ keyboardHeight: 320 });
+        });
+        await act(() => Promise.resolve());
+
+        expect(result.current.phase).toBe("visible");
+        expect(readInset()).toBe("320px");
+        expect(mutations).toHaveLength(1);
+
+        flushViewportResize(800, 400);
+        await act(() => Promise.resolve());
+        expect(result.current.keyboardHeight).toBe(400);
+        expect(readInset()).toBe("400px");
+        expect(mutations).toHaveLength(1);
+
+        act(() => {
+          listeners["keyboardWillHide"]?.();
+          listeners["keyboardDidHide"]?.();
+        });
+        flushViewportResize(800);
+        await act(() => Promise.resolve());
+        expect(result.current.phase).toBe("hidden");
+        expect(readInset()).toBe("0px");
+        expect(mutations).toHaveLength(2);
+        expect(
+          document.documentElement.dataset["nativeKeyboardVisible"]
+        ).toBeUndefined();
+      } finally {
+        observer.disconnect();
+      }
+    });
+
     it.each(["viewport-first", "native-first"])(
       "keeps a fully panned keyboard visible without adding another inset with %s delivery",
       async (order) => {

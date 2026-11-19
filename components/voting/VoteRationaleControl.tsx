@@ -13,6 +13,8 @@ const VARIANT_STYLES = {
     panel: "",
     spacing: "tw-pt-1.5",
     field: "tw-text-sm tw-leading-5",
+    placeholder: "placeholder:tw-text-iron-400",
+    description: "tw-leading-5",
     rows: 4,
     height: "tw-h-24",
     action: "tw-mt-4",
@@ -25,6 +27,9 @@ const VARIANT_STYLES = {
     panel: "tw-col-span-2 tw-col-start-1 tw-row-start-1",
     spacing: "tw-pb-3",
     field: "tw-text-xs tw-leading-[18px]",
+    placeholder:
+      "placeholder:tw-text-[13px] placeholder:tw-leading-[18px] placeholder:tw-text-iron-500",
+    description: "tw-leading-4",
     rows: 3,
     height: "tw-h-[72px]",
     action: "tw-col-start-2 tw-row-start-2",
@@ -125,10 +130,12 @@ export function VoteRationaleControl({
                 onChange={(event) => onChange(event.target.value)}
                 aria-invalid={showInvalid}
                 aria-describedby={describedBy}
-                className={`tw-block tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2.5 tw-py-2 tw-transition-colors placeholder:tw-text-iron-400 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/30 touch-only:tw-text-base motion-reduce:tw-transition-none max-sm:tw-text-base ${resizeWithContainer ? "tw-h-full tw-min-h-full tw-resize-none tw-overflow-clip" : "tw-min-h-24 tw-resize-y"} ${styles.field} ${generated ? "tw-text-iron-400" : "tw-text-iron-100"}`}
+                className={`tw-block tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2.5 tw-py-2 tw-transition-colors focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400/30 touch-only:tw-text-base motion-reduce:tw-transition-none max-sm:tw-text-base ${resizeWithContainer ? "tw-h-full tw-min-h-full tw-resize-none tw-overflow-clip" : "tw-min-h-24 tw-resize-y"} ${styles.field} ${styles.placeholder} ${generated ? "tw-text-iron-400" : "tw-text-iron-100"}`}
               />
             </div>
-            <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
+            <p
+              className={`tw-m-0 tw-text-xs tw-text-iron-400 ${styles.description}`}
+            >
               {t(locale, "waves.voteRationale.publicReplyDescription")}
             </p>
             {showInvalid && (

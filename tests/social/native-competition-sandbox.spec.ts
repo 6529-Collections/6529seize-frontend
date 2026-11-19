@@ -6603,19 +6603,25 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     }
   });
 
-  for (const { popup, app } of [
-    { popup: "artist submissions", app: false },
-    { popup: "artist submissions", app: true },
-    { popup: "participant entries", app: false },
-    { popup: "participant entries", app: true },
+  for (const { popup, app, android } of [
+    { popup: "artist submissions", app: false, android: false },
+    { popup: "artist submissions", app: true, android: false },
+    { popup: "participant entries", app: false, android: false },
+    { popup: "participant entries", app: true, android: false },
+    { popup: "artist submissions", app: true, android: true },
   ]) {
-    test(`preserves Numeric votes and explanations in the ${popup} popup${app ? " in app" : ""}`, async ({
+    const appSuffix = android ? " in Android app" : " in app";
+    test(`preserves Numeric votes and explanations in the ${popup} popup${app ? appSuffix : ""}`, async ({
       page,
     }, testInfo) => {
+      test.skip(
+        android && !testInfo.project.use.hasTouch,
+        "Native Android keyboard coverage uses the touch viewport."
+      );
       if (app) {
         await installSurfaceSimulation(
           page.context(),
-          "capacitor-ios-sim",
+          android ? "capacitor-android-sim" : "capacitor-ios-sim",
           testInfo.project.use.baseURL
         );
       }
@@ -6767,6 +6773,20 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await badge.click();
       const dialog = page.getByRole("dialog").last();
+      if (app) {
+        const backdrop = dialog.getByTestId("artist-preview-app-backdrop");
+        await expect(backdrop).toHaveCSS("backdrop-filter", "none");
+        await expect(backdrop).toHaveCSS(
+          "background-color",
+          "rgba(96, 96, 108, 0.6)"
+        );
+      }
+      if (android) {
+        await expect(page.locator("html")).toHaveAttribute(
+          "data-layout-viewport-locked",
+          "true"
+        );
+      }
       if (popup === "participant entries") {
         const entryTabs = dialog.getByRole("tablist", {
           name: /decision entries$/,
@@ -7252,6 +7272,24 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(rationale).toHaveValue("");
       await expect(rationale).toHaveAttribute("rows", "3");
       await expect(rationale).toHaveCSS("height", "72px");
+      await expect(rationale).toHaveCSS(
+        "font-size",
+        app || testInfo.project.use.hasTouch ? "16px" : "12px"
+      );
+      expect(
+        await rationale.evaluate((element) => {
+          const placeholder = getComputedStyle(element, "::placeholder");
+          return {
+            fontSize: placeholder.fontSize,
+            lineHeight: placeholder.lineHeight,
+            color: placeholder.color,
+          };
+        })
+      ).toEqual({
+        fontSize: "13px",
+        lineHeight: "18px",
+        color: "rgb(132, 132, 144)",
+      });
       await expect(rationale).toHaveAttribute(
         "placeholder",
         /Vote rationale \(-25.*at time of posting\):/
@@ -7288,12 +7326,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           "gallery-vote-layout"
         );
       }
-      await expect(
-        dialog.getByText(
-          "Posts a public reply in the wave after your vote is saved.",
-          { exact: true }
-        )
-      ).toBeVisible();
+      const publicReplyNote = dialog.getByText(
+        "Posts a public reply in the wave after your vote is saved.",
+        { exact: true }
+      );
+      await expect(publicReplyNote).toBeVisible();
+      await expect(publicReplyNote).toHaveCSS("line-height", "16px");
       await expectCompactVoteFooter(true);
       await explain.focus();
       await page.keyboard.press("Tab");
@@ -7460,20 +7498,154 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await numeric.click();
         await explain.check();
         await rationale.fill("A native preview reply draft");
-        await verifyNativePreviewKeyboard(
-          page,
-          dialog,
-          page
-            .getByRole("main", { includeHidden: true })
-            .locator('[data-competition-entry="entry-alpha"]')
-            .first(),
-          dialog.getByRole("button", { name: "Close panel", exact: true }),
-          testInfo,
-          popup === "artist submissions"
-            ? "artist-preview"
-            : "participant-preview",
-          rationale
-        );
+        if (android) {
+          await page.waitForFunction(() => {
+            const runtime = globalThis as typeof globalThis & {
+              __playwrightKeyboardListeners?: string[];
+            };
+            return runtime.__playwrightKeyboardListeners?.includes(
+              "keyboardWillShow"
+            );
+          });
+          const layout = dialog.getByTestId("artist-preview-app-layout");
+          const root = page.locator("html");
+          await expect(root).toHaveAttribute(
+            "data-layout-viewport-locked",
+            "true"
+          );
+          const viewportHeight = await page.evaluate(() => innerHeight);
+          expect(await emitNativeKeyboard(page, "keyboardWillShow", 300)).toBe(
+            false
+          );
+          await expect(page.locator("html")).toHaveCSS(
+            "--native-keyboard-layout-transition-duration",
+            "0ms"
+          );
+          await expect(layout).toHaveCSS("transition-duration", "0s");
+          await expect(layout).toHaveCSS("height", `${viewportHeight - 300}px`);
+          await expect(root).toHaveAttribute(
+            "data-layout-viewport-locked",
+            "true"
+          );
+          expect(await emitNativeKeyboard(page, "keyboardDidShow", 300)).toBe(
+            false
+          );
+          await expect(rationale).toBeFocused();
+          try {
+            await expect(rationale).toBeInViewport({ ratio: 1 });
+          } catch (error) {
+            const geometry = await rationale
+              .evaluate((field) => {
+                const ancestors = [];
+                let element: Element | null = field;
+                while (element) {
+                  const box = element.getBoundingClientRect();
+                  const style = getComputedStyle(element);
+                  ancestors.push({
+                    tag: element.tagName,
+                    id: element.id,
+                    testId: element.getAttribute("data-testid"),
+                    classes: element.getAttribute("class"),
+                    rect: {
+                      x: box.x,
+                      y: box.y,
+                      width: box.width,
+                      height: box.height,
+                      top: box.top,
+                      bottom: box.bottom,
+                    },
+                    scrollTop: element.scrollTop,
+                    scrollHeight: element.scrollHeight,
+                    clientHeight: element.clientHeight,
+                    overflowX: style.overflowX,
+                    overflowY: style.overflowY,
+                    gridTemplateRows: style.gridTemplateRows,
+                  });
+                  element = element.parentElement;
+                }
+                return {
+                  viewport: {
+                    width: innerWidth,
+                    height: innerHeight,
+                    visualHeight: visualViewport?.height,
+                    visualOffsetTop: visualViewport?.offsetTop,
+                  },
+                  ancestors,
+                };
+              })
+              .catch(() => null);
+            const geometryPath = testInfo.outputPath(
+              "android-rationale-clipping-geometry.json"
+            );
+            await writeFile(
+              geometryPath,
+              JSON.stringify(geometry, null, 2)
+            ).catch(() => undefined);
+            await testInfo
+              .attach("android-rationale-clipping-geometry", {
+                path: geometryPath,
+                contentType: "application/json",
+              })
+              .catch(() => undefined);
+            throw error;
+          }
+          await expect(rationale).toHaveValue("A native preview reply draft");
+          await expect(input).toHaveValue("-25");
+          await expect(save).toHaveAccessibleName("Vote -25 TDH");
+          await expectNoHorizontalOverflow(page);
+          await page.screenshot({
+            path: testInfo.outputPath("android-artist-preview-keyboard.png"),
+          });
+          expect(await emitNativeKeyboard(page, "keyboardWillHide")).toBe(
+            false
+          );
+          await expect(page.locator("html")).toHaveCSS(
+            "--native-keyboard-layout-transition-duration",
+            "0ms"
+          );
+          await expect(layout).toHaveCSS("height", `${viewportHeight}px`);
+          expect(await emitNativeKeyboard(page, "keyboardDidHide")).toBe(false);
+          await expect(root).toHaveAttribute(
+            "data-layout-viewport-locked",
+            "true"
+          );
+          await expect(rationale).toHaveValue("A native preview reply draft");
+          await expect(input).toHaveValue("-25");
+          expect(await emitNativeKeyboard(page, "keyboardWillShow", 300)).toBe(
+            false
+          );
+          expect(await emitNativeKeyboard(page, "keyboardDidShow", 300)).toBe(
+            false
+          );
+          await dialog
+            .getByRole("button", { name: "Close panel", exact: true })
+            .click();
+          await expect(dialog).toHaveCount(0);
+          await expect(root).toHaveAttribute(
+            "data-layout-viewport-locked",
+            "true"
+          );
+          expect(await emitNativeKeyboard(page, "keyboardWillHide")).toBe(
+            false
+          );
+          expect(await emitNativeKeyboard(page, "keyboardDidHide")).toBe(false);
+          await expect(root).not.toHaveAttribute("data-layout-viewport-locked");
+        } else {
+          await verifyNativePreviewKeyboard(
+            page,
+            dialog,
+            page
+              .getByRole("main", { includeHidden: true })
+              .locator('[data-competition-entry="entry-alpha"]')
+              .first(),
+            dialog.getByRole("button", { name: "Close panel", exact: true }),
+            testInfo,
+            popup === "artist submissions"
+              ? "artist-preview"
+              : "participant-preview",
+            rationale
+          );
+        }
         expect(sandbox.requests).toHaveLength(1);
       }
     });

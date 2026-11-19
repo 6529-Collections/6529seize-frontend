@@ -428,7 +428,9 @@ it("retains a mounted legacy vote and reply draft across a temporary context ref
       queryKey: [QueryKey.COMPETITION_DROP_CONTEXT],
     });
   });
-  expect(screen.queryByRole("textbox", { name: "Legacy vote" })).toBeNull();
+  await waitFor(() => {
+    expect(screen.queryByRole("textbox", { name: "Legacy vote" })).toBeNull();
+  });
   expect(
     await screen.findByRole("button", { name: voteButtonName })
   ).toBeDisabled();

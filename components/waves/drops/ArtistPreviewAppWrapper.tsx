@@ -33,25 +33,32 @@ export default function ArtistPreviewAppWrapper({
   readonly onClose: () => void;
   readonly children: ReactNode;
 }) {
-  const { isCapacitor, isIos } = useCapacitor();
+  const { isCapacitor, isIos, isAndroid } = useCapacitor();
   const followsIosKeyboard = isCapacitor && isIos;
-  useLayoutViewportLock(isOpen && followsIosKeyboard);
+  const followsNativeKeyboard = isCapacitor && (isIos || isAndroid);
+  const isNativeAndroid = isCapacitor && isAndroid;
+  useLayoutViewportLock(isOpen && followsNativeKeyboard);
   const dialogRef = useRef<HTMLDivElement>(null);
   useAndroidBackLayer(isOpen, dialogRef, onClose);
-  const contentRef = useCallback((container: HTMLDivElement | null) => {
-    if (!container) return;
-    const focusedField = observeFocusedField(container);
-    const viewport = globalThis.visualViewport;
-    viewport?.addEventListener("resize", focusedField.reveal);
-    viewport?.addEventListener("scroll", focusedField.reveal, {
-      passive: true,
-    });
-    return () => {
-      focusedField.disconnect();
-      viewport?.removeEventListener("resize", focusedField.reveal);
-      viewport?.removeEventListener("scroll", focusedField.reveal);
-    };
-  }, []);
+  const contentRef = useCallback(
+    (container: HTMLDivElement | null) => {
+      if (!container) return;
+      const focusedField = observeFocusedField(container, {
+        observeContentResize: isNativeAndroid,
+      });
+      const viewport = globalThis.visualViewport;
+      viewport?.addEventListener("resize", focusedField.reveal);
+      viewport?.addEventListener("scroll", focusedField.reveal, {
+        passive: true,
+      });
+      return () => {
+        focusedField.disconnect();
+        viewport?.removeEventListener("resize", focusedField.reveal);
+        viewport?.removeEventListener("scroll", focusedField.reveal);
+      };
+    },
+    [isNativeAndroid]
+  );
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -70,7 +77,10 @@ export default function ArtistPreviewAppWrapper({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div className="tw-fixed tw-inset-0 tw-bg-black/70 tw-backdrop-blur-[1px] tw-transition-opacity" />
+          <div
+            data-testid="artist-preview-app-backdrop"
+            className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-transition-opacity"
+          />
         </TransitionChild>
 
         <div
@@ -103,8 +113,6 @@ export default function ArtistPreviewAppWrapper({
                   <MobileWrapperDialogCloseButton
                     onClick={onClose}
                     label="Close panel"
-                    variant="minimal"
-                    size="compact"
                   />
                 </div>
               </TransitionChild>
