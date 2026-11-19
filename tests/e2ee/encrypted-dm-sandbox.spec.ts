@@ -42,6 +42,7 @@ import {
   installGiphyFixture,
   openGifPicker,
 } from "../support/e2ee/giphyFixture";
+import { checkEncryptedPoll } from "../support/e2ee/polls";
 
 /** A valid 1x1 RGBA PNG (raster images are the only inline type). */
 const PIXEL_PNG_BASE64 =
@@ -118,6 +119,31 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     const open = sessions;
     sessions = [];
     await closeE2eeUsers(open);
+  });
+
+  test("both participants can create and vote in encrypted DM polls", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
+    sessions = [alice, bob];
+    await enroll(alice);
+    await enroll(bob);
+    await startChat(alice, ["bob"], { kind: "dm" });
+    await openConversationFromList(bob.page, "alice");
+
+    const singlePoll = "Which drink do you prefer?";
+    const multiPoll = "Which drinks work for you?";
+    await checkEncryptedPoll(alice.page, bob.page, "bob", singlePoll, false);
+    await checkEncryptedPoll(bob.page, alice.page, "alice", multiPoll, true);
+    const scan = await e2eeSandboxControls.plaintextScan(baseURL, [
+      singlePoll,
+      multiPoll,
+    ]);
+    expect(scan.scannedBytes).toBeGreaterThan(0);
+    expect(scan.found).toEqual([]);
   });
 
   test("a public GIF selection is sent privately as an encrypted attachment", async ({

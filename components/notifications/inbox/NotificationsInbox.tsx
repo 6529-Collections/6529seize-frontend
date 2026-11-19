@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useContext, useEffect, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
@@ -121,14 +123,15 @@ export default function NotificationsInbox({
               )}
             </button>
           )}
-          <button
+          <IconButton
             type="button"
-            className="tw-inline-flex tw-size-8 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-white"
+            size={32}
+            variant="ghost"
             onClick={onClose}
             aria-label={t(locale, "notifications.inbox.close")}
           >
             <XMarkIcon aria-hidden="true" className="tw-size-5 tw-shrink-0" />
-          </button>
+          </IconButton>
         </div>
       </div>
       <output className="tw-sr-only">

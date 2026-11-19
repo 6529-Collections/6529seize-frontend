@@ -2,8 +2,10 @@ import { renderHook, act, waitFor } from "@testing-library/react";
 import { useActiveWaveManager } from "@/contexts/wave/hooks/useActiveWaveManager";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { defaultCompetitionQueryKey } from "@/services/api/competitions-api";
+import { useLayoutEffect } from "react";
 
 const mockQueryData = jest.fn();
+let mockIsApp = false;
 jest.mock("@tanstack/react-query", () => ({
   useQueryClient: () => ({ getQueryData: mockQueryData }),
 }));
@@ -18,7 +20,7 @@ jest.mock("@/helpers/competition.helpers", () => ({
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => ({
-    isApp: false,
+    isApp: mockIsApp,
     isMobileDevice: false,
     hasTouchScreen: false,
     isAppleMobile: false,
@@ -39,7 +41,77 @@ describe("useActiveWaveManager", () => {
     jest.restoreAllMocks();
     localStorage.clear();
     mockQueryData.mockReset();
+    mockIsApp = false;
     globalThis.history.replaceState(null, "", "http://localhost/");
+  });
+
+  it("commits the route's wave identity before the destination can paint", () => {
+    mockIsApp = true;
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    const commits: (string | null)[] = [];
+    const { rerender } = renderHook(() => {
+      const manager = useActiveWaveManager();
+      useLayoutEffect(() => {
+        commits.push(manager.activeWaveId);
+      });
+      return manager;
+    });
+    commits.length = 0;
+    (usePathname as jest.Mock).mockReturnValue("/waves/def");
+    rerender();
+    expect(commits).toEqual(["def"]);
+  });
+
+  it("does not reuse an old history selection when a route is revisited", () => {
+    globalThis.history.replaceState(null, "", "/waves/abc");
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    const { result, rerender } = renderHook(useActiveWaveManager);
+    act(() => result.current.setActiveWave("def"));
+    expect(result.current.activeWaveId).toBe("def");
+    (usePathname as jest.Mock).mockReturnValue("/waves/def");
+    rerender();
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc");
+    rerender();
+    expect(result.current.activeWaveId).toBe("abc");
+  });
+
+  it("keeps the chat until the native Feed URL commits without fetching a route", () => {
+    mockIsApp = true;
+    globalThis.history.replaceState(
+      null,
+      "",
+      "/waves/abc?returnTo=%2Fwaves%3Fview%3Dprofile-feed"
+    );
+    (usePathname as jest.Mock).mockReturnValue("/waves/abc");
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams(globalThis.location.search)
+    );
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
+    const pushState = jest.spyOn(globalThis.history, "pushState");
+    const { result, rerender } = renderHook(useActiveWaveManager);
+    act(() => result.current.setActiveWave(null, { profileFeed: true }));
+    expect(pushState).toHaveBeenLastCalledWith(
+      null,
+      "",
+      "/waves?view=profile-feed"
+    );
+    // Clearing this early leaves an empty chat under the still-current route.
+    expect(result.current.activeWaveId).toBe("abc");
+    act(() => result.current.setActiveWave(null, { profileFeed: true }));
+    expect(result.current.activeWaveId).toBe("abc");
+    expect(pushState).toHaveBeenCalledTimes(1);
+    (usePathname as jest.Mock).mockReturnValue("/waves");
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams("view=profile-feed")
+    );
+    rerender();
+    expect(result.current.activeWaveId).toBeNull();
+    act(() => result.current.setActiveWave(null));
+    expect(pushState).toHaveBeenLastCalledWith(null, "", "/waves");
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("reads wave from pathname and updates via setActiveWave", async () => {
@@ -151,6 +223,44 @@ describe("useActiveWaveManager", () => {
       "",
       "/waves/wave-xyz?serialNo=99"
     );
+  });
+
+  it.each([
+    "/messages/new?compose=profile-dm",
+    "/messages/new",
+    "/messages/create",
+  ])("opens the legacy DM route when switching from %s", (source) => {
+    globalThis.history.replaceState(null, "", source);
+    (usePathname as jest.Mock).mockReturnValue(globalThis.location.pathname);
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams(globalThis.location.search)
+    );
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
+    const pushState = jest.spyOn(globalThis.history, "pushState");
+    const { result } = renderHook(useActiveWaveManager);
+
+    act(() => result.current.setActiveWave("chat", { isDirectMessage: true }));
+
+    expect(push).toHaveBeenCalledWith("/messages/chat");
+    expect(pushState).not.toHaveBeenCalled();
+  });
+
+  it("uses browser history when switching between legacy DM threads", () => {
+    globalThis.history.replaceState(null, "", "/messages/first");
+    (usePathname as jest.Mock).mockReturnValue("/messages/first");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
+    const pushState = jest.spyOn(globalThis.history, "pushState");
+    const { result } = renderHook(useActiveWaveManager);
+
+    act(() =>
+      result.current.setActiveWave("second", { isDirectMessage: true })
+    );
+
+    expect(pushState).toHaveBeenCalledWith(null, "", "/messages/second");
+    expect(push).not.toHaveBeenCalled();
   });
 
   it("opens a remembered competition directly without changing the visible wave before the route commits", async () => {

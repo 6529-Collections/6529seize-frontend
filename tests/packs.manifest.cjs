@@ -608,6 +608,25 @@ const PACKS = [
   },
   {
     ...sandboxPack(
+      "test:e2e:subscription-status-sandbox",
+      "Subscription status explanations, funding controls, recovery and native purchasing gates.",
+      ["tests/social/subscription-status-sandbox.spec.ts"],
+      {
+        ...AUTH_SANDBOX_ENV,
+        USE_DEV_AUTH: "false",
+        PLAYWRIGHT_SUBSCRIPTIONS_SANDBOX: "1",
+        NEXTGEN_CHAIN_ID: "1",
+        PLAYWRIGHT_BASE_URL: "http://localhost:3327",
+        PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3327",
+        PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4327",
+        NEXT_DEV_DIST_DIR: ".next-playwright-subscription-status",
+      },
+      [DESKTOP, MOBILE, "capacitor-ios-sim", "capacitor-android-sim"]
+    ),
+    triggers: ["pr-ci", "manual"],
+  },
+  {
+    ...sandboxPack(
       "test:e2e:profile-nic-sandbox",
       "Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.",
       ["tests/social/profile-nic-activity-sandbox.spec.ts"],

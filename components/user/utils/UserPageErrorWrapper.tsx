@@ -1,3 +1,4 @@
+import IconButton from "@/components/utils/button/IconButton";
 import {
   ExclamationTriangleIcon,
   XMarkIcon,
@@ -30,15 +31,17 @@ export default function UserPageErrorWrapper({
         aria-hidden="true"
       />
       <div className="tw-min-w-0">{children}</div>
-      <button
+      <IconButton
         onClick={closeError}
         type="button"
         title={closeLabel}
         aria-label={closeLabel}
-        className="tw-group -tw-mt-3 tw-inline-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors tw-duration-200 tw-ease-out focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-error desktop-hover:hover:tw-bg-white/[0.05] desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none"
+        size={44}
+        variant="ghost"
+        className="-tw-mt-3"
       >
         <XMarkIcon className="tw-size-5" aria-hidden="true" />
-      </button>
+      </IconButton>
     </div>
   );
 }

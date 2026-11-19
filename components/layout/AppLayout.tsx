@@ -138,13 +138,17 @@ function AppLayoutContent({ children }: Props) {
     activeWaveId: waveParam,
     searchParams,
   });
-  const waveNavigationScreen = getWaveNavigationScreen(pathname, waveParam);
+  const { isApp } = useDeviceInfo();
+  const waveNavigationScreen = getWaveNavigationScreen(
+    pathname,
+    waveParam,
+    isApp && searchParams.get("view") === "profile-feed"
+  );
   const waveNavigationRef = useWaveNavigationTransition(waveNavigationScreen);
   const shouldHideBottomNavForRoute = hidesMobileBottomNavigation({
     pathname,
   });
   const { editingDropId } = useEditingDrop();
-  const { isApp } = useDeviceInfo();
   const { isVisible: isKeyboardVisible } = useNativeKeyboard();
   const isEditingOnMobile = isApp && editingDropId !== null;
   const isLayoutKeyboardVisible = isKeyboardVisible && !isViewportLocked;

@@ -217,7 +217,7 @@ export function ExpandedMediaToolbar({
         aria-label={actionLabels.close}
         title={actionLabels.close}
         onClick={stopAndRun(onClose)}
-        className="tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700"
+        className="tw-inline-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-700"
       >
         <XMarkIcon className="tw-size-5" aria-hidden="true" />
       </button>

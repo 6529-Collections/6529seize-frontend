@@ -65,6 +65,149 @@ async function trio() {
 }
 
 describe("E2EE engine: features", () => {
+  it("replays polls and named votes in chat order, one ballot per profile", async () => {
+    const { world, a, b, c, bob, carol, g } = await trio();
+    const bobPhone = await startDevice(world, "bob", bob.account);
+    const oldClient = (
+      await startDevice(world, "carol", carol.account, { withoutPolls: true })
+    ).engine;
+    await settle(world);
+    await a.createPoll!(g, {
+      question: "Which drinks?",
+      options: ["Tea", "Coffee"],
+      multi: true,
+    });
+    await settle(world);
+    const poll = b.getMessages(g).find((message) => message.poll);
+    expect(poll?.text).toBe("Which drinks?");
+    const id = poll!.id;
+    await b.updatePoll!(g, id, [0, 1]);
+    await settle(world);
+    expect(
+      a.getMessages(g).find((message) => message.id === id)?.poll?.ballots
+    ).toEqual({ bob: { seq: expect.any(Number), options: [0, 1] } });
+    await bobPhone.engine.updatePoll!(g, id, [1]);
+    await settle(world);
+    await expect(b.updatePoll!(g, id, null)).rejects.toMatchObject({
+      code: "E2EE_NOT_SENDER",
+    });
+    const removeCloseFault = world.ds.addFault({
+      method: "POST",
+      path: SEND_PATH,
+      status: 400,
+      code: "E2EE_INVALID_INPUT",
+      times: 1,
+    });
+    try {
+      await expect(a.updatePoll!(g, id, null)).rejects.toMatchObject({
+        code: "E2EE_SEND_FAILED",
+      });
+      expect(
+        a.getMessages(g).find((message) => message.id === id)?.poll?.closed
+      ).toBe(false);
+    } finally {
+      removeCloseFault();
+    }
+    await a.updatePoll!(g, id, null);
+    await settle(world);
+    for (const engine of [a, b, c, bobPhone.engine]) {
+      expect(
+        engine.getMessages(g).find((message) => message.id === id)?.poll
+      ).toMatchObject({
+        closed: true,
+        ballots: { bob: { seq: expect.any(Number), options: [1] } },
+      });
+    }
+    await expect(b.updatePoll!(g, id, [0])).rejects.toMatchObject({
+      code: "E2EE_INVALID_INPUT",
+    });
+    await b.send(g, { text: "The chat still works." });
+    await settle(world);
+    expect(
+      oldClient.getMessages(g).filter((message) => message.undecryptable)
+    ).toHaveLength(4);
+    expect(texts(oldClient.getMessages(g))).toContain("The chat still works.");
+    await oldClient.send(g, { text: "Even from the old client." });
+    await settle(world);
+    expect(texts(a.getMessages(g))).toContain("Even from the old client.");
+  });
+
+  it("counts an intervening ballot after a poll send loses its response", async () => {
+    const { world, a, b, c, g } = await trio();
+    const handle = world.ds.handle;
+    const laggedPage = await handle("GET", `e2ee/groups/${g}/log`, {
+      profileId: "alice",
+      query: {
+        device_key: a.getLocalDeviceKey()!,
+        after_seq: "0",
+        limit: "200",
+      },
+    });
+    expect(laggedPage.status).toBe(200);
+
+    let finishFirstSend: () => void = () => undefined;
+    let firstCommitted: () => void = () => undefined;
+    const waitToLoseReply = new Promise<void>((resolve) => {
+      finishFirstSend = resolve;
+    });
+    const committed = new Promise<void>((resolve) => {
+      firstCommitted = resolve;
+    });
+    let sends = 0;
+    const spy = jest
+      .spyOn(world.ds, "handle")
+      .mockImplementation(async (method, path, input) => {
+        if (input?.profileId !== "alice") return handle(method, path, input);
+        if (method === "GET" && path.endsWith("/log") && sends === 1)
+          return laggedPage;
+        const response = await handle(method, path, input);
+        if (method === "POST" && SEND_PATH.test(path)) {
+          sends += 1;
+          if (sends === 1) {
+            firstCommitted();
+            await waitToLoseReply;
+            return { status: 503, body: { error: "reply lost", code: null } };
+          }
+        }
+        return response;
+      });
+
+    try {
+      await a.createPoll!(g, {
+        question: "Drink?",
+        options: ["Tea", "Coffee"],
+        multi: false,
+      });
+      await committed;
+      await b.sync();
+      const original = b.getMessages(g).find((message) => message.poll);
+      expect(original).toBeDefined();
+      await b.updatePoll!(g, original!.id, [0]);
+      await b.idle();
+      await c.sync();
+      expect(
+        c.getMessages(g).find((message) => message.id === original!.id)?.poll
+          ?.ballots["bob"]?.options
+      ).toEqual([0]);
+      finishFirstSend();
+      await settle(world);
+      expect(sends).toBe(2);
+      expect(
+        a.getMessages(g).find((message) => message.id === original!.id)?.poll
+          ?.ballots["bob"]?.options
+      ).toEqual([0]);
+      expect(
+        a.getMessages(g).filter((message) => message.undecryptable)
+      ).toEqual([]);
+      expect(a.getMessages(g).filter((message) => message.poll)).toHaveLength(
+        1
+      );
+    } finally {
+      finishFirstSend();
+      spy.mockRestore();
+    }
+  });
+
   it("sends content-free notify hints with mention and reply kinds", async () => {
     const { world, a, b, g } = await trio();
     await a.send(g, { text: "plain secret words" });

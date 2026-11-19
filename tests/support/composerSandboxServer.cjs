@@ -86,6 +86,7 @@ let publicWavePreviewReads = 0;
 let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
 let sandboxArtistActivityEnabled = false;
+let sandboxSharedPostsEnabled = false;
 let sandboxSharedPostFeedEnabled = false;
 let sandboxProfileRepRating = null;
 let sandboxCreatedWaveType = "CHAT";
@@ -133,7 +134,8 @@ const localProfile = {
   query: SANDBOX_HANDLE,
   handle: SANDBOX_HANDLE,
   normalised_handle: SANDBOX_HANDLE,
-  consolidation_key: "",
+  consolidation_key:
+    process.env.PLAYWRIGHT_SUBSCRIPTIONS_SANDBOX === "1" ? SANDBOX_WALLET : "",
   display: SANDBOX_HANDLE,
   banner1: null,
   banner2: null,
@@ -265,6 +267,48 @@ const sandboxGroupMembers = Array.from({ length: 25 }, (_, index) => {
     wallet: `0x${walletSuffix}`,
   };
 });
+
+// Network Back coverage needs a real second page; group previews keep 25 members.
+const sandboxNetworkMembers = Array.from({ length: 100 }, (_, index) => {
+  const suffix = String(index + 1).padStart(2, "0");
+  return {
+    ...sandboxGroupMembers[index % sandboxGroupMembers.length],
+    display: `collector-${suffix}`,
+    detail_view_key: `collector-${suffix}`,
+    wallet: `0x${(index + 1).toString(16).padStart(40, "0")}`,
+  };
+});
+
+function getSandboxNetworkProfile(pathname) {
+  const handle = pathname.split("/").at(-1);
+  const member = sandboxNetworkMembers.find(
+    (item) => item.detail_view_key === handle
+  );
+  if (!member) return null;
+  const number = Number(handle.slice("collector-".length));
+  return {
+    ...localProfile,
+    id: `00000000-0000-4000-8000-${String(1000 + number).padStart(12, "0")}`,
+    query: handle,
+    handle,
+    normalised_handle: handle,
+    display: member.display,
+    level: member.level,
+    tdh: member.tdh,
+    xtdh: member.xtdh,
+    rep: member.rep,
+    cic: member.cic,
+    primary_address: member.wallet,
+    primary_wallet: member.wallet,
+    wallets: [
+      {
+        ...localProfile.wallets[0],
+        wallet: member.wallet,
+        display: member.wallet,
+      },
+    ],
+  };
+}
 
 function identityOverview({
   id,
@@ -1130,7 +1174,7 @@ function emptyPage() {
   return { data: [], count: 0, page: 1, next: false };
 }
 
-function sandboxGroupMembersPage(searchParams) {
+function sandboxGroupMembersPage(searchParams, members = sandboxGroupMembers) {
   const query = (searchParams.get("param") ?? "").trim().toLowerCase();
   const page = Math.max(1, Number(searchParams.get("page") ?? "1") || 1);
   const pageSize = Math.max(
@@ -1138,12 +1182,12 @@ function sandboxGroupMembersPage(searchParams) {
     Number(searchParams.get("page_size") ?? "20") || 20
   );
   const filteredMembers = query
-    ? sandboxGroupMembers.filter(
+    ? members.filter(
         (member) =>
           member.display.toLowerCase().includes(query) ||
           member.wallet.toLowerCase().includes(query)
       )
-    : sandboxGroupMembers;
+    : members;
   const pageStart = (page - 1) * pageSize;
 
   return {
@@ -2589,6 +2633,10 @@ function requestLog() {
 }
 
 function handleDiagnostics(method, pathname, url, res) {
+  if (pathname === "/__composer-sandbox/shared-posts" && method === "POST") {
+    sandboxSharedPostsEnabled = true;
+    return writeJsonResponse(res, { ok: true });
+  }
   if (pathname === "/__composer-sandbox/profile-rep" && method === "POST") {
     const rating = Number(url.searchParams.get("rating") ?? Number.NaN);
     if (!Number.isSafeInteger(rating)) {
@@ -2632,6 +2680,7 @@ function handleDiagnostics(method, pathname, url, res) {
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
     sandboxArtistActivityEnabled = false;
+    sandboxSharedPostsEnabled = false;
     sandboxSharedPostFeedEnabled = false;
     sandboxProfileRepRating = null;
     sandboxCreatedWaveType = "CHAT";
@@ -2962,6 +3011,14 @@ const mockApiPatternReadRoutes = [
       pfp: "https://media.6529.io/ipfs/QmRT2Ur5E1GooeiCWxqToiQXnnok6drPYxuK8J3RLnaMg8",
     }),
   },
+  {
+    pattern: /^\/api\/identities\/collector-\d+$/,
+    response: getSandboxNetworkProfile,
+  },
+  {
+    pattern: /^\/api\/+identities\/[^/]+\/subscriptions$/,
+    response: () => ({ actions: [] }),
+  },
   { pattern: /^\/api\/identities\/[^/]+$/, response: () => localProfile },
   { pattern: /^\/api\/profiles\/[^/]+\/proxies$/, response: () => [] },
   {
@@ -3001,7 +3058,15 @@ function handleTopCommunityMembersRead(pathname, url, res) {
     return false;
   }
 
-  return writeJsonResponse(res, sandboxGroupMembersPage(url.searchParams));
+  return writeJsonResponse(
+    res,
+    sandboxGroupMembersPage(
+      url.searchParams,
+      url.searchParams.has("group_id")
+        ? sandboxGroupMembers
+        : sandboxNetworkMembers
+    )
+  );
 }
 
 function handleGroupIdentityWalletsRead(pathname, res) {
@@ -3094,7 +3159,7 @@ function handlePatternMockApiRead(pathname, res) {
     return false;
   }
 
-  return writeJsonResponse(res, route.response());
+  return writeJsonResponse(res, route.response(pathname));
 }
 
 function handleSharedPostFeedFixture(pathname, url, res) {
@@ -3141,12 +3206,39 @@ function handleProfileRepFixture(pathname, res) {
   return false;
 }
 
+function handleSharedPostFeedRead(pathname, url, res) {
+  if (
+    !sandboxSharedPostsEnabled ||
+    pathname !== `/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+  ) {
+    return false;
+  }
+  // Server rendering must see the same history as the shared-link browser
+  // fixture, rather than seeding its unrelated default post into that history.
+  const template = currentLocalDrop();
+  const drops = Array.from({ length: 150 }, (_, index) => {
+    const serial = index + 2;
+    return {
+      ...template,
+      id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+      serial_no: serial,
+      created_at: 1714000000000 + serial * 60000,
+      content: `Shared link fixture post ${serial}`,
+    };
+  }).reverse();
+  return writeJsonResponse(res, {
+    wave: localWaveOverview,
+    drops: drops.slice(0, Number(url.searchParams.get("limit")) || 50),
+  });
+}
+
 function handleMockApiRead(method, pathname, url, res) {
   if (!isSafeReadMethod(method)) {
     return false;
   }
 
   return (
+    handleSharedPostFeedRead(pathname, url, res) ||
     handleCommunityMemberRead(pathname, url, res) ||
     handleTopCommunityMembersRead(pathname, url, res) ||
     handleGroupIdentityWalletsRead(pathname, res) ||
@@ -3500,6 +3592,7 @@ function buildPublicRuntime() {
     ...(isE2eeSandbox
       ? {
           NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
+          NEXT_PUBLIC_E2EE_POLLS_ENABLED: "true",
           NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
           GIPHY_API_KEY: "e2ee-sandbox-fixture",
         }

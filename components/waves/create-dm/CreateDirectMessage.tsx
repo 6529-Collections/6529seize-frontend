@@ -1,9 +1,12 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useEffect, useRef, useState } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
+import type { E2eePrefillPerson } from "@/components/e2ee/e2eeComposePrefill";
 import { NewMessageForm } from "@/components/e2ee/new/NewMessageForm";
 import { E2eePageShell } from "@/components/e2ee/ui/E2eePageShell";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
@@ -22,12 +25,14 @@ import { useNativeKeyboard } from "@/hooks/useNativeKeyboard";
 import DirectMessageRecipients, {
   recipientKey,
   recipientName,
+  type DirectMessageRecipient,
 } from "./DirectMessageRecipients";
 import { useCreateUnencryptedMessage } from "./useCreateUnencryptedMessage";
 
 interface DirectMessagePageProps {
   readonly profile: ApiIdentity;
   readonly onBack: () => void;
+  readonly initialPerson?: E2eePrefillPerson | undefined;
 }
 
 interface CreateDirectMessageProps extends DirectMessagePageProps {
@@ -39,14 +44,16 @@ function DirectMessagePageHeader({ onBack }: { readonly onBack: () => void }) {
   const locale = useBrowserLocale();
   return (
     <header className="tw-grid tw-h-14 tw-flex-shrink-0 tw-grid-cols-[2.75rem_1fr_2.75rem] tw-items-center tw-px-2">
-      <button
+      <IconButton
         type="button"
         onClick={onBack}
         aria-label={t(locale, "quickDm.backAriaLabel")}
-        className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        size={44}
+        variant="ghost"
+        shape="circle"
       >
         <ChevronLeftIcon aria-hidden="true" className="tw-size-5" />
-      </button>
+      </IconButton>
       <h1 className="tw-m-0 tw-text-center tw-text-base tw-font-semibold">
         {t(locale, "quickDm.createModalTitle")}
       </h1>
@@ -54,7 +61,11 @@ function DirectMessagePageHeader({ onBack }: { readonly onBack: () => void }) {
   );
 }
 
-function UnifiedDirectMessage({ profile, onBack }: DirectMessagePageProps) {
+function UnifiedDirectMessage({
+  profile,
+  onBack,
+  initialPerson,
+}: DirectMessagePageProps) {
   const e2ee = useE2ee();
   const { isApp } = useDeviceInfo();
   const { waveViewStyle } = useLayout();
@@ -65,6 +76,7 @@ function UnifiedDirectMessage({ profile, onBack }: DirectMessagePageProps) {
       key={profile.id}
       e2ee={e2ee}
       selfProfileId={profile.id ?? undefined}
+      initialPeople={initialPerson ? [initialPerson] : undefined}
       createUnencrypted={createUnencrypted}
       onCancel={onBack}
     />
@@ -94,7 +106,7 @@ function UnifiedDirectMessage({ profile, onBack }: DirectMessagePageProps) {
 
 export default function CreateDirectMessage(props: CreateDirectMessageProps) {
   return isE2eeEnabled() ? (
-    <UnifiedDirectMessage profile={props.profile} onBack={props.onBack} />
+    <UnifiedDirectMessage {...props} />
   ) : (
     <UnencryptedDirectMessage {...props} />
   );
@@ -104,6 +116,7 @@ function UnencryptedDirectMessage({
   profile,
   onBack,
   onSuccess,
+  initialPerson,
   presentation = "page",
 }: CreateDirectMessageProps) {
   const [isCreating, setIsCreating] = useState(false);
@@ -119,8 +132,22 @@ function UnencryptedDirectMessage({
   const { setToast } = useAuth();
 
   const [selectedIdentities, setSelectedIdentities] = useState<
-    CommunityMemberMinimal[]
-  >([]);
+    (DirectMessageRecipient & { readonly wallet: string })[]
+  >(() => {
+    if (!initialPerson?.wallet || initialPerson.profileId === profile.id) {
+      return [];
+    }
+    return [
+      {
+        profile_id: initialPerson.profileId,
+        handle: initialPerson.handle,
+        display: initialPerson.handle,
+        pfp: initialPerson.pfp,
+        primary_wallet: initialPerson.wallet,
+        wallet: initialPerson.wallet,
+      },
+    ];
+  });
 
   useEffect(() => {
     if (presentation === "modal") return;

@@ -61,14 +61,14 @@
     "seen title=\"Network\" owned=false for=/network canGoBack=true",
     "metadata <title> = \"Metadata /network\"",
     "--- back stack",
-    "router.push /open-data",
+    "router.push /open-data?tab=b",
     "seen title=\"Network\" owned=false for=/network canGoBack=true",
-    "page effect /open-data",
+    "page effect /open-data?tab=b",
     "seen title=\"Open Data | Tools\" owned=false for=/open-data canGoBack=true",
-    "router.push /network",
+    "router.push /network?tab=a",
     "seen title=\"Open Data | Tools\" owned=false for=/open-data canGoBack=false",
     "seen title=\"Open Data | Tools\" owned=false for=/open-data canGoBack=false",
-    "page effect /network",
+    "page effect /network?tab=a",
     "seen title=\"Network\" owned=false for=/network canGoBack=false"
   ],
   "back and forward": [

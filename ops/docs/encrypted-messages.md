@@ -64,9 +64,19 @@ continue to appear as Unknown member.
 
 Encrypted and ordinary messages use the same rich-text editor. Custom emoji
 shortcodes render as inline images while composing and editing; encrypted drafts
-keep their shortcode representation for encryption and sending. Encrypted chat
-does not offer Poll or Storm actions. GIFs can be sent as encrypted attachments;
-their search and previews connect publicly to GIPHY.
+keep their shortcode representation for encryption and sending. GIFs can be
+sent as encrypted attachments. Their search and previews connect publicly to GIPHY.
+
+### Polls
+
+In supported builds, select **Create poll** in an encrypted DM or group chat.
+Enter a question and two to ten choices in the inline composer. Choose
+**Single** or **Multiple**, then select **Post poll**.
+
+Select your choices and choose **Vote**. Use **View results** to see the tally,
+then select a result row to see who chose it. Use **Change vote** to update or
+clear your vote. The creator can select **End poll** to stop voting.
+People who join a group after the poll was posted need a new poll to participate.
 
 Messages support the same Markdown formatting as ordinary chats: headings,
 **bold** and italic text, strikethrough, lists and task lists, quotes,
@@ -251,6 +261,11 @@ due, this displays preview wording with renewal actions disabled, rather than
 claiming your permissions are expiring.
 
 ## Starting a chat
+
+Select **Direct Message** on someone’s profile or profile card to open
+**New message** with that person already selected. From there, use **Open
+chat** for an existing encrypted conversation or **Start chat** for a new one.
+Opening the composer creates no conversation.
 
 In the 6529 app, the back arrow to the left of the chat avatar returns to the
 encrypted messages list. It stays visible on iPad in portrait and landscape.

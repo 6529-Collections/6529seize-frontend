@@ -80,7 +80,7 @@ export async function preparePayload(
   await loadMessage(
     ctx,
     runtime,
-    payload.t === "msg" ? payload.id : payload.target
+    "target" in payload ? payload.target : payload.id
   );
   return (
     payload.t !== "msg" ||

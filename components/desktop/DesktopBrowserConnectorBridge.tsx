@@ -4,7 +4,10 @@ import { useEffect, useRef } from "react";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { getDesktopShellApi } from "@/helpers/desktop-shell";
 import { parseBrowserConnectorResult } from "@/lib/desktop/browserConnector";
-import { canStoreAnotherWalletAccount } from "@/services/auth/auth.utils";
+import {
+  canStoreAnotherWalletAccount,
+  getWalletAddress,
+} from "@/services/auth/auth.utils";
 import {
   loginWithSessionV2,
   persistSessionResponse,
@@ -37,16 +40,18 @@ export default function DesktopBrowserConnectorBridge() {
     // An older host has no offWalletConnection, so its listener is never
     // removed: after unmount it must not consume a request or sign in.
     let active = true;
-    const stopIfInactive = (): boolean => {
-      if (active) return false;
-      setBrowserConnectorStatus("failed");
-      return true;
-    };
-
     const signIn = async (payload: unknown) => {
       if (!active) return;
       const result = parseBrowserConnectorResult(payload);
-      if (!result || !takeBrowserConnectorRequest(result.requestId)) return;
+      if (!result) return;
+      const request = takeBrowserConnectorRequest(result.requestId);
+      if (!request) return;
+      const { setup, isCurrent } = request;
+      const fail = () => {
+        if (!isCurrent()) return;
+        setBrowserConnectorStatus("failed");
+        setup?.onStatus("failed");
+      };
       // Read synchronously: a sign-out-all that starts and ends between two
       // renders still counts. False once one started after this sign-in.
       const signOutsAtStart = getSignOutAllState().started;
@@ -54,18 +59,24 @@ export default function DesktopBrowserConnectorBridge() {
         const signOutAll = getSignOutAllState();
         return (
           active &&
+          isCurrent() &&
           !signOutAll.running &&
-          signOutAll.started === signOutsAtStart
+          signOutAll.started === signOutsAtStart &&
+          (!setup || getWalletAddress()?.toLowerCase() === setup.address)
         );
       };
-      if (!shouldPersist()) {
-        setBrowserConnectorStatus("failed");
+      if (
+        !shouldPersist() ||
+        (setup && result.address.toLowerCase() !== setup.address)
+      ) {
+        fail();
         return;
       }
       setBrowserConnectorStatus("signing-in");
+      setup?.onStatus("signing-in");
       try {
         if (!canStoreAnotherWalletAccount(result.address)) {
-          setBrowserConnectorStatus("failed");
+          fail();
           return;
         }
         const session = await loginWithSessionV2({
@@ -74,26 +85,29 @@ export default function DesktopBrowserConnectorBridge() {
           signerAddress: result.address,
           role: null,
         });
-        if (stopIfInactive()) return;
         // The session must be for the wallet that signed (both lower-cased).
-        if (session.address.toLowerCase() !== result.address.toLowerCase()) {
-          setBrowserConnectorStatus("failed");
+        if (
+          !shouldPersist() ||
+          session.address.toLowerCase() !== result.address.toLowerCase()
+        ) {
+          fail();
           return;
         }
         if (!(await persistSessionResponse(session, { shouldPersist }))) {
-          setBrowserConnectorStatus("failed");
+          fail();
           return;
         }
-        if (stopIfInactive() || !shouldPersist()) {
-          setBrowserConnectorStatus("failed");
+        if (!shouldPersist()) {
+          fail();
           return;
         }
         acceptConnection.current(session.address);
         setBrowserConnectorStatus("signed-in");
         // Offer wallet forwarding to this profile; never fails the sign-in.
         markBrowserWalletProfile(session.address).catch(() => undefined);
+        setup?.onStatus("signed-in");
       } catch {
-        setBrowserConnectorStatus("failed");
+        fail();
       }
     };
 

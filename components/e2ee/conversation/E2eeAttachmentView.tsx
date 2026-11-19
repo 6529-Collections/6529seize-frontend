@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { ArrowDownTrayIcon, DocumentIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -240,19 +242,20 @@ function DownloadableFile({
           </span>
         ) : null}
       </span>
-      <button
+      <IconButton
         type="button"
         onClick={() => void download()}
         disabled={pending}
         aria-label={t(locale, "e2ee.message.attachment.download", { name })}
-        className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+        size={36}
+        variant="ghost"
       >
         {pending ? (
           <CircleLoader />
         ) : (
           <ArrowDownTrayIcon aria-hidden="true" className="tw-size-4" />
         )}
-      </button>
+      </IconButton>
     </span>
   );
 }
