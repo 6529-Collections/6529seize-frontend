@@ -1,6 +1,6 @@
 "use client";
 
-import { MobileVotingModal, VotingModal } from "@/components/voting";
+import { VotingModal } from "@/components/voting";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useIsMobileScreen from "@/hooks/isMobileScreen";
 import type { FC, RefObject } from "react";
@@ -88,19 +88,21 @@ interface WaveLeaderboardVotingModalProps {
   readonly onClose: () => void;
 }
 
-export const WaveLeaderboardVotingModal: FC<WaveLeaderboardVotingModalProps> = ({
-  drop,
-  onClose,
-}) => {
+export const WaveLeaderboardVotingModal: FC<
+  WaveLeaderboardVotingModalProps
+> = ({ drop, onClose }) => {
   const isMobileScreen = useIsMobileScreen();
 
   if (!drop) {
     return null;
   }
 
-  return isMobileScreen ? (
-    <MobileVotingModal drop={drop} isOpen onClose={onClose} />
-  ) : (
-    <VotingModal drop={drop} isOpen onClose={onClose} />
+  return (
+    <VotingModal
+      drop={drop}
+      isOpen
+      onClose={onClose}
+      preferMobile={isMobileScreen}
+    />
   );
 };

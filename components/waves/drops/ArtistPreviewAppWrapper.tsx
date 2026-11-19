@@ -11,6 +11,8 @@ import type { CSSProperties, ReactNode } from "react";
 import { Fragment, useCallback, useRef } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 
 const KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const KEYBOARD_TRANSITION =
@@ -31,29 +33,39 @@ export default function ArtistPreviewAppWrapper({
   readonly onClose: () => void;
   readonly children: ReactNode;
 }) {
+  const { isCapacitor, isIos, isAndroid } = useCapacitor();
+  const followsIosKeyboard = isCapacitor && isIos;
+  const followsNativeKeyboard = isCapacitor && (isIos || isAndroid);
+  const isNativeAndroid = isCapacitor && isAndroid;
+  useLayoutViewportLock(isOpen && followsNativeKeyboard);
   const dialogRef = useRef<HTMLDivElement>(null);
   useAndroidBackLayer(isOpen, dialogRef, onClose);
-  const contentRef = useCallback((container: HTMLDivElement | null) => {
-    if (!container) return;
-    const focusedField = observeFocusedField(container);
-    const viewport = globalThis.visualViewport;
-    viewport?.addEventListener("resize", focusedField.reveal);
-    viewport?.addEventListener("scroll", focusedField.reveal, {
-      passive: true,
-    });
-    return () => {
-      focusedField.disconnect();
-      viewport?.removeEventListener("resize", focusedField.reveal);
-      viewport?.removeEventListener("scroll", focusedField.reveal);
-    };
-  }, []);
+  const contentRef = useCallback(
+    (container: HTMLDivElement | null) => {
+      if (!container) return;
+      const focusedField = observeFocusedField(container, {
+        observeContentResize: isNativeAndroid,
+      });
+      const viewport = globalThis.visualViewport;
+      viewport?.addEventListener("resize", focusedField.reveal);
+      viewport?.addEventListener("scroll", focusedField.reveal, {
+        passive: true,
+      });
+      return () => {
+        focusedField.disconnect();
+        viewport?.removeEventListener("resize", focusedField.reveal);
+        viewport?.removeEventListener("scroll", focusedField.reveal);
+      };
+    },
+    [isNativeAndroid]
+  );
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         ref={dialogRef}
         as="div"
-        className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden"
+        className={`tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden ${followsIosKeyboard ? "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]" : ""}`}
         onClose={onClose}
       >
         <TransitionChild
@@ -65,7 +77,10 @@ export default function ArtistPreviewAppWrapper({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div className="tw-fixed tw-inset-0 tw-bg-black/70 tw-backdrop-blur-[1px] tw-transition-opacity" />
+          <div
+            data-testid="artist-preview-app-backdrop"
+            className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-transition-opacity"
+          />
         </TransitionChild>
 
         <div
@@ -100,6 +115,7 @@ export default function ArtistPreviewAppWrapper({
                     label="Close panel"
                     variant="minimal"
                     size="compact"
+                    className="!tw-text-white"
                   />
                 </div>
               </TransitionChild>

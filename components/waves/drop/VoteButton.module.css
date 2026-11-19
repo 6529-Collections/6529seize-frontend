@@ -94,127 +94,6 @@
     opacity: 1;
   }
 }
-.voteButton,
-.voteButtonMini {
-  position: relative;
-  font-size: 14px;
-  border-radius: 8px;
-  width: 72px;
-  height: 40px;
-  background: #e5e5e5;
-  border: 1px solid white;
-  outline: none;
-  color: #0a0a0a;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease-out;
-}
-.voteButton:not(:disabled):hover,
-.voteButtonMini:not(:disabled):hover {
-  background: #d4d4d4;
-  border-color: #d4d4d4;
-}
-.voteButton:disabled,
-.voteButtonMini:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-.voteButton:focus-visible,
-.voteButtonMini:focus-visible {
-  outline: 2px solid rgba(64, 106, 254, 0.75);
-  outline-offset: 2px;
-}
-
-.voteButtonMini {
-  width: 48px;
-  height: 32px;
-  font-size: 12px !important;
-  border-radius: 6px;
-  background: #ffffff;
-  border-color: #ffffff;
-  color: #0a0a0a;
-  box-shadow: none;
-}
-.voteButtonMini:not(:disabled):hover {
-  background: #efeff1;
-  border-color: #efeff1;
-  color: #0a0a0a;
-}
-.voteButtonMini .buttonContent {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.voteButtonMini .spinner {
-  width: 18px;
-  height: 18px;
-  border-width: 1.5px;
-  border-color: rgba(10, 10, 10, 0.2);
-  border-top-color: #0a0a0a;
-  border-right-color: #0a0a0a;
-}
-
-.voteSubmitFull {
-  width: 100%;
-}
-.voteSubmitFull > div {
-  width: 100%;
-}
-.voteSubmitFull .voteButton,
-.voteSubmitFull .voteButtonMini {
-  width: 100%;
-  height: auto;
-  min-height: 40px;
-  padding: 10px 14px;
-  background: transparent;
-  border-color: #26272b;
-  color: #4c4c55;
-  box-shadow: none;
-}
-.voteSubmitFull .voteButton:not(:disabled):hover,
-.voteSubmitFull .voteButtonMini:not(:disabled):hover {
-  background: rgba(255, 255, 255, 0.03);
-  border-color: #37373e;
-  color: #60606c;
-}
-.voteSubmitFull .voteButtonPositive {
-  background: #10b981;
-  border-color: #34d399;
-  color: #022c22;
-  font-weight: 700;
-  box-shadow: none;
-}
-.voteSubmitFull .voteButtonPositive:not(:disabled):hover {
-  background: #34d399;
-  border-color: #6ee7b7;
-  box-shadow: none;
-  color: #022c22;
-}
-.voteSubmitFull .voteButtonNegative {
-  background: #e11d48;
-  border-color: #f43f5e;
-  color: #fff;
-  font-weight: 700;
-  box-shadow: none;
-}
-.voteSubmitFull .voteButtonNegative:not(:disabled):hover {
-  background: #be123c;
-  border-color: #e11d48;
-  box-shadow: none;
-  color: #fff;
-}
-.voteSubmitFull .voteButtonNeutral {
-  background: transparent;
-  border-color: #26272b;
-  color: #4c4c55;
-}
-.voteSubmitFull .buttonContent {
-  height: 20px;
-}
-
 .buttonContent {
   position: relative;
   width: 100%;
@@ -245,10 +124,10 @@
   display: inline-block;
   width: 24px;
   height: 24px;
-  border: 2px solid rgba(10, 10, 10, 0.2);
+  border: 2px solid color-mix(in srgb, currentColor 20%, transparent);
   border-radius: 50%;
-  border-top-color: #0a0a0a;
-  border-right-color: #0a0a0a;
+  border-top-color: currentColor;
+  border-right-color: currentColor;
   animation:
     spinnerEnter 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards,
     funSpin 5s cubic-bezier(0.6, 0.2, 0.4, 0.8) infinite;

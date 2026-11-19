@@ -409,6 +409,7 @@ describe("LayoutProvider", () => {
   });
 
   it("keeps the viewport locked until the native keyboard is fully hidden", () => {
+    mockCapacitorValues = { isCapacitor: true, isAndroid: false, isIos: true };
     mockKeyboardValues = {
       isVisible: true,
       keyboardHeight: 320,
@@ -436,7 +437,7 @@ describe("LayoutProvider", () => {
     );
 
     mockKeyboardValues = {
-      isVisible: true,
+      isVisible: false,
       keyboardHeight: 0,
       phase: "hiding",
     };
@@ -465,6 +466,93 @@ describe("LayoutProvider", () => {
       "unlocked"
     );
   });
+
+  it.each([
+    { phase: "hiding", reopen: false, reason: "a missing did-hide event" },
+    { phase: "hidden", reopen: false, reason: "an early did-hide event" },
+    { phase: "hiding", reopen: true, reason: "a rapid reopen during hiding" },
+  ] as const)(
+    "restores Android layout safely after $reason",
+    ({ phase, reopen }) => {
+      jest.useFakeTimers();
+      mockCapacitorValues = {
+        isCapacitor: true,
+        isAndroid: true,
+        isIos: false,
+      };
+      const originalHeight = Object.getOwnPropertyDescriptor(
+        globalThis,
+        "innerHeight"
+      );
+      const originalViewport = Object.getOwnPropertyDescriptor(
+        globalThis,
+        "visualViewport"
+      );
+      let height = 800;
+      const viewport = new EventTarget();
+      Object.defineProperty(viewport, "height", { get: () => height });
+      Object.defineProperties(globalThis, {
+        innerHeight: { configurable: true, get: () => height },
+        visualViewport: { configurable: true, value: viewport },
+      });
+      const view = (isOpen: boolean) => (
+        <LayoutProvider>
+          <ViewportLockTestComponent isOpen={isOpen} />
+        </LayoutProvider>
+      );
+      const { rerender, unmount } = render(view(true));
+
+      try {
+        height = 480;
+        mockKeyboardValues = {
+          isVisible: true,
+          keyboardHeight: 320,
+          phase: "visible",
+        };
+        rerender(view(true));
+        rerender(view(false));
+        expect(screen.getByTestId("viewport-lock-state")).toHaveTextContent(
+          "locked"
+        );
+
+        mockKeyboardValues = { isVisible: false, keyboardHeight: 0, phase };
+        rerender(view(false));
+        expect(screen.getByTestId("viewport-lock-state")).toHaveTextContent(
+          "locked"
+        );
+
+        if (reopen) rerender(view(true));
+        act(() => {
+          height = 800;
+          viewport.dispatchEvent(new Event("resize"));
+        });
+        if (reopen) {
+          act(() => jest.advanceTimersByTime(1250));
+          expect(screen.getByTestId("viewport-lock-state")).toHaveTextContent(
+            "locked"
+          );
+          rerender(view(false));
+        }
+
+        expect(screen.getByTestId("viewport-lock-state")).toHaveTextContent(
+          "unlocked"
+        );
+        expect(document.documentElement).not.toHaveAttribute(
+          "data-layout-viewport-locked"
+        );
+        expect(mockKeyboardValues.phase).toBe(phase);
+      } finally {
+        unmount();
+        if (originalHeight)
+          Object.defineProperty(globalThis, "innerHeight", originalHeight);
+        else Reflect.deleteProperty(globalThis, "innerHeight");
+        if (originalViewport)
+          Object.defineProperty(globalThis, "visualViewport", originalViewport);
+        else Reflect.deleteProperty(globalThis, "visualViewport");
+        jest.useRealTimers();
+      }
+    }
+  );
 
   it("refreshes the locked viewport height after device rotation", () => {
     const originalInnerHeight = globalThis.innerHeight;

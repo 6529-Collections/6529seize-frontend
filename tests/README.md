@@ -314,6 +314,11 @@ size at runtime.
 
 Choosing the test layer:
 
+- The native competition sandbox includes a simulated iPhone voting check that
+  samples the sheet during keyboard movement, keeps the background stable, and
+  preserves the vote and reply draft. It checks alignment with the app's shared
+  keyboard curve; it does not measure a physical iPhone's keyboard or frame rate.
+
 - Use Playwright for browser-specific behavior such as rendering, hydration,
   navigation, responsive layout, accessibility, and runtime integrations.
 - Do not add repeated browser assertions across content-equivalent static

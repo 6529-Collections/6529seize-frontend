@@ -146,7 +146,8 @@ const getSliderGeometry = (isMini: boolean): SliderGeometry => {
       thumbHitWidth: 72,
       thumbHitHeight: 48,
       rootClassName: "tw-flex tw-h-6 tw-items-center [touch-action:none]",
-      trackContainerClassName: "tw-group tw-relative tw-mt-3 tw-h-[6px]",
+      trackContainerClassName:
+        "tw-group tw-group/vote-slider tw-relative tw-mt-3 tw-h-[6px]",
       tooltipBottomClassName: "tw-bottom-6",
     };
   }
@@ -156,7 +157,8 @@ const getSliderGeometry = (isMini: boolean): SliderGeometry => {
     thumbHitWidth: 96,
     thumbHitHeight: 64,
     rootClassName: "tw-flex tw-h-[72px] tw-items-center [touch-action:none]",
-    trackContainerClassName: "tw-group tw-relative tw-mt-8 tw-h-[7px]",
+    trackContainerClassName:
+      "tw-group tw-group/vote-slider tw-relative tw-mt-8 tw-h-[7px]",
     tooltipBottomClassName: "tw-bottom-10",
   };
 };
