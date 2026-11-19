@@ -3,12 +3,13 @@
 import { useCallback, useLayoutEffect, useRef } from "react";
 import type { TouchEvent as ReactTouchEvent } from "react";
 
-const AXIS_SLOP = 12;
+const AXIS_SLOP = 8;
+const VERTICAL_SLOP = 12;
 const AXIS_RATIO = 1.5;
 const EDGE_RESERVE = 20;
 const FLICK_DISTANCE = 24;
 const FLICK_VELOCITY = 0.5;
-const RELEASE_JITTER_PX = 1;
+const VELOCITY_JITTER_PX = 1;
 
 interface HorizontalSwipeOptions {
   readonly enabled: boolean;
@@ -33,6 +34,9 @@ interface Gesture {
   readonly candidates: Candidate[];
   owner: Candidate | null;
   distance: number;
+  velocityDistance: number;
+  velocityPeak: number;
+  velocityPeakAt: number;
   velocity: number;
   movedAt: number;
   frame: number | null;
@@ -49,7 +53,7 @@ function ignoreTarget(element: HTMLElement, target: EventTarget | null) {
   if (!(target instanceof Element) || !element.contains(target)) return true;
   if (
     target.closest(
-      "a, button, input, textarea, select, summary, iframe, video, audio, canvas, [contenteditable]:not([contenteditable='false']), [role='slider'], [role='button'], [data-wave-swipe-back-ignore='true'], [data-horizontal-swipe-ignore], .swiper"
+      "a, button, input, textarea, select, summary, iframe, video, audio, canvas, [contenteditable]:not([contenteditable='false']), [role='slider'], [role='button']:not([data-horizontal-swipe-content='true']), [data-wave-swipe-back-ignore='true'], [data-horizontal-swipe-ignore], .swiper"
     ) ||
     globalThis.getSelection()?.isCollapsed === false
   ) {
@@ -130,7 +134,33 @@ function additionalTouch(event: TouchEvent) {
   if (event.touches.length !== 1) cancel();
 }
 
-function track(current: Gesture, touch: Touch, isRelease = false) {
+function trackVelocity(current: Gesture, distance: number) {
+  if (distance !== current.distance) {
+    const now = performance.now();
+    if (distance > current.velocityPeak) {
+      current.velocityPeak = distance;
+      current.velocityPeakAt = now;
+    }
+    const reversing = current.velocityPeak - distance >= VELOCITY_JITTER_PX;
+    const referenceDistance = reversing
+      ? current.velocityPeak
+      : current.velocityDistance;
+    const referenceTime = reversing ? current.velocityPeakAt : current.movedAt;
+    // Native WebViews interpolate tiny final moves as well as rounding release
+    // coordinates. Keep either from replacing the finger's forward velocity.
+    if (Math.abs(distance - referenceDistance) >= VELOCITY_JITTER_PX) {
+      current.velocity =
+        (distance - referenceDistance) / Math.max(1, now - referenceTime);
+      current.movedAt = now;
+      current.velocityDistance = distance;
+      current.velocityPeak = distance;
+      current.velocityPeakAt = now;
+    }
+    current.distance = distance;
+  }
+}
+
+function track(current: Gesture, touch: Touch) {
   const deltaX = touch.clientX - current.x;
   const absoluteDeltaX = Math.abs(deltaX);
   const deltaY = Math.abs(touch.clientY - current.y);
@@ -139,7 +169,7 @@ function track(current: Gesture, touch: Touch, isRelease = false) {
       cancel();
       return;
     }
-    if (deltaY >= AXIS_SLOP && deltaY >= absoluteDeltaX) {
+    if (deltaY >= VERTICAL_SLOP && deltaY >= absoluteDeltaX) {
       cancel();
       return;
     }
@@ -149,7 +179,7 @@ function track(current: Gesture, touch: Touch, isRelease = false) {
         options.current.enabled && deltaX * options.current.direction > 0
     );
     if (!candidate) {
-      cancel();
+      if (absoluteDeltaX >= deltaY * AXIS_RATIO) cancel();
       return;
     }
     const intentRatio = candidate.options.current.intentRatio ?? AXIS_RATIO;
@@ -162,20 +192,7 @@ function track(current: Gesture, touch: Touch, isRelease = false) {
     0,
     deltaX * current.owner.options.current.direction
   );
-  if (distance !== current.distance) {
-    // Native WebViews can round the release coordinate back by a fraction of
-    // a CSS pixel. Keep that from replacing a forward drag with reverse speed.
-    if (
-      !isRelease ||
-      Math.abs(distance - current.distance) >= RELEASE_JITTER_PX
-    ) {
-      const now = performance.now();
-      current.velocity =
-        (distance - current.distance) / Math.max(1, now - current.movedAt);
-      current.movedAt = now;
-    }
-    current.distance = distance;
-  }
+  trackVelocity(current, distance);
 }
 
 /** A long press/menu owns the remainder of its original touch sequence. */
@@ -214,7 +231,7 @@ function end(event: TouchEvent) {
   }
   // An end event cannot acquire a gesture: vertical scrolling or a tap must
   // have demonstrated horizontal intent while the finger was down.
-  if (current.owner) track(current, touch, true);
+  if (current.owner) track(current, touch);
   finish(true);
 }
 
@@ -261,6 +278,9 @@ export function useHorizontalSwipe(
         candidates: [],
         owner: null,
         distance: 0,
+        velocityDistance: 0,
+        velocityPeak: 0,
+        velocityPeakAt: 0,
         velocity: 0,
         movedAt: performance.now(),
         frame: null,
