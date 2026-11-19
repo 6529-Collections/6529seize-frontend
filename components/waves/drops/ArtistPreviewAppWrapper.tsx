@@ -1,6 +1,6 @@
 "use client";
 
-import { observeFocusedField } from "@/helpers/focused-field-visibility";
+import useDialogKeyboard from "@/hooks/useDialogKeyboard";
 import {
   Dialog,
   DialogPanel,
@@ -8,7 +8,7 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import type { CSSProperties, ReactNode } from "react";
-import { Fragment, useCallback, useRef } from "react";
+import { Fragment, useRef } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
 
@@ -32,21 +32,8 @@ export default function ArtistPreviewAppWrapper({
   readonly children: ReactNode;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const keyboardViewportRef = useDialogKeyboard(isOpen);
   useAndroidBackLayer(isOpen, dialogRef, onClose);
-  const contentRef = useCallback((container: HTMLDivElement | null) => {
-    if (!container) return;
-    const focusedField = observeFocusedField(container);
-    const viewport = globalThis.visualViewport;
-    viewport?.addEventListener("resize", focusedField.reveal);
-    viewport?.addEventListener("scroll", focusedField.reveal, {
-      passive: true,
-    });
-    return () => {
-      focusedField.disconnect();
-      viewport?.removeEventListener("resize", focusedField.reveal);
-      viewport?.removeEventListener("scroll", focusedField.reveal);
-    };
-  }, []);
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -70,6 +57,7 @@ export default function ArtistPreviewAppWrapper({
 
         <div
           data-testid="artist-preview-app-layout"
+          ref={keyboardViewportRef}
           className="tw-fixed tw-inset-x-0 tw-top-0 tw-flex tw-items-end tw-pt-[calc(env(safe-area-inset-top,0px)+4rem)]"
           style={APP_DIALOG_LAYOUT_STYLE}
           onClick={(e) => e.stopPropagation()}
@@ -106,7 +94,6 @@ export default function ArtistPreviewAppWrapper({
 
               <DialogPanel className="tw-relative tw-flex tw-max-h-[85vh] tw-min-h-0 tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-t-2xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-[#0B0C0E] tw-pb-[env(safe-area-inset-bottom,0px)] tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]">
                 <div
-                  ref={contentRef}
                   data-testid="artist-preview-app-scroll"
                   className="tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-overflow-y-auto tw-overscroll-contain tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600"
                 >

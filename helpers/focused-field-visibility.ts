@@ -1,5 +1,10 @@
 /** Keep a dialog's focused field visible as its scrollport changes size. */
-export function observeFocusedField(container: HTMLElement) {
+export function observeFocusedField(
+  container: HTMLElement,
+  {
+    observeContentResize = false,
+  }: { readonly observeContentResize?: boolean } = {}
+) {
   let focusFrame: number | undefined;
   const reveal = () => {
     if (focusFrame !== undefined) globalThis.cancelAnimationFrame(focusFrame);
@@ -14,12 +19,19 @@ export function observeFocusedField(container: HTMLElement) {
           focused instanceof HTMLTextAreaElement ||
           focused.isContentEditable)
       ) {
-        focused.scrollIntoView({ block: "nearest", inline: "nearest" });
+        focused.scrollIntoView({
+          behavior: "instant",
+          block: "nearest",
+          inline: "nearest",
+        });
       }
     });
   };
   const observer = new ResizeObserver(reveal);
   observer.observe(container);
+  if (observeContentResize) {
+    for (const child of container.children) observer.observe(child);
+  }
   container.addEventListener("focusin", reveal);
   return {
     reveal,

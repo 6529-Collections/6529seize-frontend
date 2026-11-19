@@ -56,6 +56,7 @@ describe("observeFocusedField", () => {
       paint();
       expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
       expect(input.scrollIntoView).toHaveBeenCalledWith({
+        behavior: "instant",
         block: "nearest",
         inline: "nearest",
       });

@@ -54,6 +54,48 @@ async function expectSheetTop(sheet: Locator, top: number) {
     .toBeLessThanOrEqual(1);
 }
 
+async function expectCompactInformationSheet(
+  page: Page,
+  sheet: Locator,
+  lastAction: string
+) {
+  await expect
+    .poll(async () => {
+      const header = await sheet
+        .getByTestId("mobile-dialog-header")
+        .boundingBox();
+      return header?.y ?? 0;
+    })
+    .toBeGreaterThan(page.viewportSize()!.height / 2);
+  await expect
+    .poll(() =>
+      sheet
+        .getByRole("button", { name: lastAction, exact: true })
+        .evaluate((element) => {
+          const surface = element.closest(".mobile-wrapper-dialog")!;
+          return (
+            surface.getBoundingClientRect().bottom -
+            element.getBoundingClientRect().bottom
+          );
+        })
+    )
+    .toBeLessThan(80);
+  await expect
+    .poll(() =>
+      sheet
+        .getByRole("button", { name: lastAction, exact: true })
+        .evaluate((element) => {
+          const bounds = element.getBoundingClientRect();
+          const viewport = globalThis.visualViewport!;
+          return (
+            bounds.bottom <= viewport.offsetTop + viewport.height &&
+            bounds.top >= viewport.offsetTop
+          );
+        })
+    )
+    .toBe(true);
+}
+
 async function swipeVertically(page: Page, target: Locator, distance: number) {
   await target.click({ trial: true });
   const box = await target.boundingBox();
@@ -1415,20 +1457,17 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       });
     });
     await page.goto(`${ROOT}/alpha`);
-    await page
-      .getByRole("button", { name: /^About Local Composer Sandbox Wave/ })
-      .click();
-    await page
+    const information = await openWaveInformation(page);
+    await information
       .getByRole("button", { name: "Edit wave name", exact: true })
       .press("Enter");
-    const dialog = page.getByRole("dialog", {
-      name: "Rename wave",
-      exact: true,
-    });
-    await dialog
+    const editor = page
+      .getByRole("complementary", { name: "Wave details" })
+      .or(page.getByRole("dialog", { name: "Rename wave", exact: true }));
+    await editor
       .getByPlaceholder("Please select a name")
       .fill("Shared wave renamed");
-    await dialog.getByRole("button", { name: "Save", exact: true }).click();
+    await editor.getByRole("button", { name: "Save", exact: true }).click();
     await expect.poll(() => patches).toEqual([{ name: "Shared wave renamed" }]);
     await expect(
       page.getByRole("heading", { name: "Shared wave renamed", exact: true })
@@ -10730,6 +10769,113 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
   });
 
   for (const surface of ["web", "ios", "android"] as const) {
+    test(`renames a wave within the ${surface} information sheet`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Touch sheet coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await installCompetitionApi(page, true);
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      await openWaveInformation(page);
+      const sheet = page.getByRole("dialog");
+      const trigger = sheet.getByRole("button", {
+        name: "Edit wave name",
+        exact: true,
+      });
+      await trigger.click({ trial: true });
+      const aboutHeader = await sheet
+        .getByTestId("mobile-dialog-header")
+        .boundingBox();
+      expect(aboutHeader).not.toBeNull();
+      await trigger.click();
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await expect(sheet).toHaveAccessibleName("Rename wave");
+      await expectCompactInformationSheet(page, sheet, "Save");
+      await expect(
+        sheet.getByRole("button", { name: "Close", exact: true })
+      ).toHaveCount(1);
+      const name = sheet.getByRole("textbox", {
+        name: "Wave name",
+        exact: true,
+      });
+      await expect(name).toHaveValue("Local Composer Sandbox Wave");
+      await name.fill("Unsaved rename");
+      await page.evaluate((native) => {
+        if (native)
+          globalThis.dispatchEvent(
+            new CustomEvent("playwright:keyboardWillShow", {
+              detail: { keyboardHeight: 350 },
+            })
+          );
+        const viewport = globalThis.visualViewport!;
+        Object.defineProperty(viewport, "height", {
+          configurable: true,
+          value: globalThis.innerHeight - 350,
+        });
+        viewport.dispatchEvent(new Event("resize"));
+        if (native)
+          globalThis.dispatchEvent(
+            new CustomEvent("playwright:keyboardDidShow", {
+              detail: { keyboardHeight: 350 },
+            })
+          );
+      }, surface !== "web");
+      await expect
+        .poll(() =>
+          name.evaluate((element) => {
+            const bounds = element.getBoundingClientRect();
+            const viewport = globalThis.visualViewport!;
+            return (
+              bounds.top >= viewport.offsetTop &&
+              bounds.bottom <= viewport.offsetTop + viewport.height
+            );
+          })
+        )
+        .toBe(true);
+      await page.evaluate((native) => {
+        if (native)
+          globalThis.dispatchEvent(
+            new CustomEvent("playwright:keyboardWillHide")
+          );
+        const viewport = globalThis.visualViewport!;
+        Object.defineProperty(viewport, "height", {
+          configurable: true,
+          value: globalThis.innerHeight,
+        });
+        viewport.dispatchEvent(new Event("resize"));
+        if (native)
+          globalThis.dispatchEvent(
+            new CustomEvent("playwright:keyboardDidHide")
+          );
+      }, surface !== "web");
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(trigger).toBeFocused();
+      await expectSheetTop(sheet, aboutHeader!.y);
+      await trigger.click();
+      await expect(name).toHaveValue("Local Composer Sandbox Wave");
+      await sheet.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await openWaveInformation(page);
+      await expect(trigger).toBeVisible();
+      await trigger.click();
+      await swipeVertically(
+        page,
+        sheet.getByTestId("mobile-dialog-header"),
+        320
+      );
+      await expect(page.getByRole("dialog")).toHaveCount(0);
+      await expectNoHorizontalOverflow(page);
+    });
+
     test(`keeps curation create and edit inside the ${surface} Wave sheet`, async ({
       page,
       baseURL,
@@ -10953,7 +11099,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           exact: true,
         });
         await expect(page.getByRole("dialog")).toHaveCount(1);
-        await expectSheetTop(sheet, initialHeader!.y);
+        await expectCompactInformationSheet(page, sheet, "Delete");
+        const optionsHeader = await sheet
+          .getByTestId("mobile-dialog-header")
+          .boundingBox();
+        expect(optionsHeader).not.toBeNull();
         await expect(
           sheet.getByRole("heading", { name: "Wave options", exact: true })
         ).toBeVisible();
@@ -10974,7 +11124,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByRole("button", { name: "Cancel", exact: true })
           .click();
         await expect(confirmation).toHaveCount(0);
-        await expectSheetTop(sheet, initialHeader!.y);
+        await expectSheetTop(sheet, optionsHeader!.y);
         await expect(
           sheet.getByRole("heading", { name: "Wave options", exact: true })
         ).toBeVisible();

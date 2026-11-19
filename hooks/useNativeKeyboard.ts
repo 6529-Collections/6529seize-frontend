@@ -357,6 +357,29 @@ function isEditableElement(element: Element | null): boolean {
   );
 }
 
+function isKeyboardTextEntryElement(element: Element | null): boolean {
+  if (!isEditableElement(element)) return false;
+  if (element instanceof HTMLInputElement) {
+    return [
+      "text",
+      "search",
+      "email",
+      "url",
+      "tel",
+      "password",
+      "number",
+    ].includes(element.type);
+  }
+  return (
+    element instanceof HTMLTextAreaElement ||
+    (element instanceof HTMLElement &&
+      (element.isContentEditable ||
+        element.matches(
+          '[contenteditable="true"], [contenteditable="plaintext-only"]'
+        )))
+  );
+}
+
 function hasEditableFocus(): boolean {
   const documentRef = globalThis.document as Document | undefined;
 
@@ -484,6 +507,16 @@ function setupBrowserKeyboardFallbackListeners(): void {
   let viewportAnimationFrame: number | null = null;
 
   const handleFocusIn = () => {
+    // Restoring focus to a sheet's Back/Close control must not cancel iOS
+    // recovery when the keyboard omits its final did-hide event.
+    if (
+      currentState.isIos &&
+      nativeKeyboardLifecycleActive &&
+      currentState.phase === "hiding" &&
+      !isKeyboardTextEntryElement(documentRef.activeElement)
+    ) {
+      return;
+    }
     clearHiddenFallbackTimeout();
     if (!currentState.isVisible) {
       rememberKeyboardClosedViewportHeight();

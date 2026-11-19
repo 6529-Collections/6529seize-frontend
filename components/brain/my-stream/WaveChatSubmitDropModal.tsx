@@ -11,6 +11,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import { useEffect, useId, useRef, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
+import useDialogKeyboard from "@/hooks/useDialogKeyboard";
 
 interface WaveChatSubmitDropModalProps {
   readonly isOpen: boolean;
@@ -25,8 +26,8 @@ const KEYBOARD_TRANSITION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
 const DIALOG_LAYOUT_STYLE: CSSProperties = {
   height: `max(0px, calc(100% - ${KEYBOARD_INSET}))`,
-  transform: `translate3d(0, calc(0px - ${KEYBOARD_INSET}), 0)`,
-  transition: `height ${KEYBOARD_TRANSITION} ease-out, transform ${KEYBOARD_TRANSITION} ease-out`,
+  bottom: KEYBOARD_INSET,
+  transition: `height ${KEYBOARD_TRANSITION} var(--native-keyboard-layout-transition-easing, ease-out), bottom ${KEYBOARD_TRANSITION} var(--native-keyboard-layout-transition-easing, ease-out)`,
 };
 
 function SubmitDropForm({
@@ -80,6 +81,7 @@ export function WaveChatSubmitDropModal({
   initialCurationUrl = null,
 }: WaveChatSubmitDropModalProps) {
   const canUseDOM = typeof document !== "undefined";
+  const keyboardViewportRef = useDialogKeyboard(isOpen);
   const titleId = useId();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -176,6 +178,7 @@ export function WaveChatSubmitDropModal({
       />
       <LazyMotion features={domAnimation}>
         <div
+          ref={keyboardViewportRef}
           className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-10 tw-flex tw-items-end tw-justify-center tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:tw-items-center sm:tw-px-4 sm:tw-pb-4"
           style={DIALOG_LAYOUT_STYLE}
         >

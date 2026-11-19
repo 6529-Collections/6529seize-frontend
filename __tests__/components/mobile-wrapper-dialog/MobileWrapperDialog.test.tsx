@@ -259,17 +259,17 @@ describe("MobileWrapperDialog", () => {
       );
       expect(container?.style.transform).toBe("");
       expect(container?.style.transition).toBe(
-        "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+        "bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)"
       );
       expect(surface?.style.maxHeight).toBe(
         "min(var(--mobile-wrapper-dialog-resting-height, calc(min(100vh, 100svh) - 10rem)), var(--mobile-wrapper-dialog-available-height, max(0px, calc(min(100vh, 100svh) - var(--mobile-wrapper-dialog-viewport-reserve, 4rem) - var(--mobile-wrapper-dialog-keyboard-inset, 0px)))))"
       );
       expect(surface?.style.transition).toBe(
-        "max-height var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+        "max-height var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)"
       );
     });
 
-    it("fits an opted-in browser sheet to the visible keyboard viewport", async () => {
+    it("fits browser sheets to the visible keyboard viewport by default", async () => {
       const realViewport = globalThis.visualViewport;
       const viewport = Object.assign(new EventTarget(), {
         height: globalThis.innerHeight,
@@ -283,7 +283,7 @@ describe("MobileWrapperDialog", () => {
       const removeListener = jest.spyOn(viewport, "removeEventListener");
       try {
         const { unmount } = render(
-          <MobileWrapperDialog {...defaultProps} isOpen fitVisualViewport />
+          <MobileWrapperDialog {...defaultProps} isOpen />
         );
         const container = document.querySelector<HTMLElement>(
           ".tw-pointer-events-none.tw-fixed.tw-inset-x-0"
@@ -368,7 +368,7 @@ describe("MobileWrapperDialog", () => {
         "var(--mobile-wrapper-dialog-keyboard-inset, 0px)"
       );
       expect(surface?.style.transition).toBe(
-        "height var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+        "height var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)"
       );
     });
 

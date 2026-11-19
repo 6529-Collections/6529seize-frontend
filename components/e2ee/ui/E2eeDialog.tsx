@@ -1,4 +1,7 @@
 "use client";
+import useDialogKeyboard, {
+  DIALOG_KEYBOARD_VIEWPORT_STYLE,
+} from "@/hooks/useDialogKeyboard";
 
 import IconButton from "@/components/utils/button/IconButton";
 
@@ -45,6 +48,7 @@ export function E2eeDialog({
   scrollBody = false,
 }: E2eeDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const keyboardViewportRef = useDialogKeyboard(open);
   useAndroidBackLayer(open, dialogRef, onClose);
   const widthClass = size === "md" ? "tw-max-w-xl" : "tw-max-w-md";
   return (
@@ -56,6 +60,16 @@ export function E2eeDialog({
     >
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80 motion-safe:tw-animate-sidebar-account-fade-in" />
       <div
+        ref={keyboardViewportRef}
+        style={
+          scrollBody
+            ? {
+                ...DIALOG_KEYBOARD_VIEWPORT_STYLE,
+                bottom:
+                  "max(env(safe-area-inset-bottom, 0px), var(--native-keyboard-inset-bottom, 0px))",
+              }
+            : DIALOG_KEYBOARD_VIEWPORT_STYLE
+        }
         className={
           scrollBody
             ? "tw-fixed tw-inset-x-0 tw-bottom-[env(safe-area-inset-bottom)] tw-top-[env(safe-area-inset-top)] tw-overflow-y-auto tw-p-4"

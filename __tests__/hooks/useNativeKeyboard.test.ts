@@ -871,6 +871,33 @@ describe("useNativeKeyboard", () => {
     }
   });
 
+  it.each(["button", "range", "checkbox"])(
+    "finishes iOS hide recovery after restoring focus to a %s",
+    async (type) => {
+      const { result } = await renderNativeKeyboardHook();
+      const control =
+        type === "button"
+          ? document.createElement("button")
+          : document.createElement("input");
+      if (control instanceof HTMLInputElement) control.type = type;
+      document.body.append(control);
+      jest.useFakeTimers();
+      try {
+        act(() => {
+          listeners["keyboardWillShow"]?.({ keyboardHeight: 320 });
+          listeners["keyboardWillHide"]?.();
+          control.focus();
+          jest.advanceTimersByTime(500);
+        });
+        expect(result.current.phase).toBe("hidden");
+        expect(result.current.isVisible).toBe(false);
+      } finally {
+        control.remove();
+        jest.useRealTimers();
+      }
+    }
+  );
+
   it("keeps a rapid reopen visible after a pending hide fallback", async () => {
     const { result } = await renderNativeKeyboardHook();
     jest.useFakeTimers();

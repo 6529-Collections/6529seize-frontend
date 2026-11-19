@@ -248,7 +248,7 @@ const LayoutContext = createContext<LayoutContextType>({
 export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const { isCapacitor } = useCapacitor();
+  const { isCapacitor, isAndroid } = useCapacitor();
   const { isVisible: isKeyboardVisible, phase: keyboardPhase } =
     useNativeKeyboard();
 
@@ -271,7 +271,12 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
     acquire: acquireViewportLock,
     isLocked: isViewportLocked,
     lockedValue: lockedSpaces,
-  } = useViewportLayoutLock(spaces, keyboardPhase !== "hidden");
+  } = useViewportLayoutLock(
+    spaces,
+    // Android may restore its viewport without delivering a final did-hide.
+    // The lock also waits for the captured viewport geometry before releasing.
+    isAndroid ? isKeyboardVisible : keyboardPhase !== "hidden"
+  );
 
   // Create refs for callback functions to solve circular dependency
   const calculateSpacesRef = useRef<() => void>(() => {});

@@ -9,7 +9,11 @@ import { WaveDeleteFlowProvider } from "@/components/waves/header/options/delete
 import { Mode, SidebarTab } from "../right-sidebar/BrainRightSidebarTypes";
 import { WaveContent } from "../right-sidebar/WaveContent";
 import { useWaveInformation } from "@/contexts/WaveInformationContext";
-import { WaveInformationPanelContext } from "./WaveInformationPanelContext";
+import {
+  WaveInformationPanelContext,
+  WAVE_NAME_EDIT_VIEW,
+  WAVE_OPTIONS_VIEW,
+} from "./WaveInformationPanelContext";
 
 export default function WaveInformationSheet({
   wave,
@@ -34,6 +38,9 @@ export default function WaveInformationSheet({
   const subviewOpen = Boolean(
     information?.request && information.request.view !== "about"
   );
+  const isCompactSubview =
+    information?.request?.view === WAVE_NAME_EDIT_VIEW ||
+    information?.request?.view === WAVE_OPTIONS_VIEW;
   const contentId = useId();
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const panel = useMemo(
@@ -69,7 +76,7 @@ export default function WaveInformationSheet({
       focusTitleOnOpen={subviewOpen}
       showHeaderDivider={false}
       tall
-      fixedHeight
+      fixedHeight={!isCompactSubview}
       fitVisualViewport
       noPadding
       headerClassName="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-4"
