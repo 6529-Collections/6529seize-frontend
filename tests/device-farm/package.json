@@ -11,7 +11,7 @@
     "test:e2ee-probe": "mocha specs/e2ee-capabilities.probe.spec.cjs --timeout 900000 --reporter spec"
   },
   "dependencies": {
-    "mocha": "^11.1.0",
+    "mocha": "^12.0.3",
     "webdriverio": "^9.12.2"
   },
   "bundleDependencies": true
