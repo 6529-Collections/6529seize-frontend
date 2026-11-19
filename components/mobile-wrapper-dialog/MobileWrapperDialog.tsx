@@ -55,6 +55,8 @@ type MobileWrapperDialogProps = {
   readonly fitVisualViewport?: boolean | undefined;
   /** Action-only sheets enter at their final position while the keyboard closes. */
   readonly avoidKeyboard?: boolean | undefined;
+  /** Coordinate an opted-in sheet with its surrounding keyboard motion. */
+  readonly keyboardTransitionEasing?: string | undefined;
   readonly tabletModal?: boolean | undefined;
   /** Keep opt-in desktop dialogs anchored while their content grows. */
   readonly desktopAlign?: "center" | "top" | undefined;
@@ -343,9 +345,11 @@ function getPanelStyle({
 function getSurfaceStyle({
   dialogHeight,
   fixedHeight,
+  keyboardTransitionEasing = "ease-out",
 }: {
   readonly dialogHeight: string;
   readonly fixedHeight?: boolean | undefined;
+  readonly keyboardTransitionEasing?: string | undefined;
 }): CSSProperties {
   const dimension = fixedHeight ? "height" : "max-height";
   const size = fixedHeight
@@ -354,7 +358,7 @@ function getSurfaceStyle({
 
   return {
     ...size,
-    transition: `${dimension} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+    transition: `${dimension} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${keyboardTransitionEasing}`,
   };
 }
 
@@ -446,6 +450,7 @@ export default function MobileWrapperDialog({
   fixedHeight,
   fitVisualViewport = false,
   avoidKeyboard = true,
+  keyboardTransitionEasing,
   tabletModal,
   desktopAlign = "center",
   desktopTopOffset = 14,
@@ -538,6 +543,7 @@ export default function MobileWrapperDialog({
   const surfaceStyle = getSurfaceStyle({
     dialogHeight,
     fixedHeight,
+    keyboardTransitionEasing,
   });
   const showDesktopHeaderCloseButton =
     dismissible && !!tabletModal && !showHeaderCloseButton;
@@ -680,6 +686,9 @@ export default function MobileWrapperDialog({
               style={
                 {
                   ...MOBILE_DIALOG_CONTAINER_STYLE,
+                  ...(keyboardTransitionEasing && {
+                    transition: `bottom ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${keyboardTransitionEasing}`,
+                  }),
                   "--mobile-wrapper-dialog-top-offset": `${desktopTopOffset}vh`,
                   ...(!avoidKeyboard && {
                     "--mobile-wrapper-dialog-keyboard-inset": "0px",
