@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { FocusTrap } from "focus-trap-react";
@@ -207,15 +209,16 @@ export default function GroupAssignmentDialog({
                     {description}
                   </p>
                 </div>
-                <button
+                <IconButton
                   onClick={onClose}
                   type="button"
                   aria-label="Close dialog"
-                  className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
+                  size={36}
+                  variant="ghost"
                 >
                   <span className="tw-sr-only">Close</span>
                   <FontAwesomeIcon icon={faXmark} className="tw-size-4" />
-                </button>
+                </IconButton>
               </div>
 
               <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-5 sm:tw-p-6">

@@ -69,6 +69,13 @@ exclude Validator after results settle and still navigate through Join 6529.
 Member search results are covered by the focused search unit tests, alongside
 the member navigation scenarios in the session recovery sandbox.
 
+The profile pages sandbox also checks Collected personal actions against its
+isolated API. Anonymous and visitor profiles omit the entire action row. Owners
+retain action alignment, browser/native Back, filter and focus restoration;
+iOS owners retain the existing purchasing restriction. These owner-only cases
+replace the old anonymous action-navigation assumptions in the public read-only
+profile and native-shell packs.
+
 ## Pack registry
 
 The reaction sandbox covers live count and profile-list updates, desktop tooltip
@@ -238,6 +245,7 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:wave-link-preview-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Embedded wave preview readability in the sidebar and responsive chat.                                 |
 | `test:e2e:notifications-inbox-sandbox`              | —                             | sandbox  | local       | manual                    | 15m     | Desktop notification preview, explicit read actions, and mobile navigation.                           |
 | `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile editing, Following, artist artwork alerts and REP editing dialogs, permissions and recovery.  |
+| `test:e2e:subscription-status-sandbox`              | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Subscription status explanations, funding controls, recovery and native purchasing gates.             |
 | `test:e2e:profile-nic-sandbox`                      | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.               |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | manual                    | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |

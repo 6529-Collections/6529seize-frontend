@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
 import { shortenAddress } from "@/helpers/address.helpers";
@@ -337,14 +339,15 @@ export function SignatureDialogFrame({
               <DialogTitle className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
                 {title}
               </DialogTitle>
-              <button
+              <IconButton
                 type="button"
                 onClick={onClose}
                 aria-label={t(locale, "signedMessages.signature.close")}
-                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+                size={36}
+                variant="ghost"
               >
                 <XMarkIcon aria-hidden="true" className="tw-size-5" />
-              </button>
+              </IconButton>
             </div>
             {children}
           </DialogPanel>

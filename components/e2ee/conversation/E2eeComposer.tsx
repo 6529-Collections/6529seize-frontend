@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { PaperClipIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import {
   type ChangeEvent,
@@ -209,14 +211,16 @@ function ContextBar({
           </p>
         ) : null}
       </div>
-      <button
+      <IconButton
         type="button"
         onClick={onCancel}
         aria-label={cancelLabel}
-        className="tw-flex tw-size-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        size={32}
+        variant="ghost"
+        shape="compact"
       >
         <XMarkIcon aria-hidden="true" className="tw-size-4" />
-      </button>
+      </IconButton>
     </div>
   );
 }

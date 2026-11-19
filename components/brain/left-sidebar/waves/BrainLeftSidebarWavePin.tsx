@@ -3,6 +3,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import IconButton from "@/components/utils/button/IconButton";
+import type { IconButtonLayout } from "@/components/utils/button/iconButtonLayouts";
 import {
   usePinnedWavesServer,
   MAX_PINNED_WAVES,
@@ -154,9 +156,6 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
   const tooltipContent = getTooltipContent();
 
-  const buttonStyles =
-    "tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-iron-900";
-
   const getAriaLabel = () => {
     return t(
       locale,
@@ -167,20 +166,20 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   };
 
   const positionClasses = compact ? "" : "-tw-mr-2 tw-mt-0.5";
-  const getSizeClasses = () => {
-    if (!compact) return "tw-size-7 sm:tw-size-6";
-    if (isTouchDevice) return "tw-size-7";
-    return "tw-h-7 tw-w-0 desktop-hover:group-hover:tw-w-7 focus-visible:tw-w-7 touch-only:tw-w-7";
+  const getPinLayout = (): IconButtonLayout => {
+    if (!compact) return "pin";
+    return isTouchDevice ? "pin-compact" : "pin-reveal";
   };
-  const sizeClasses = getSizeClasses();
   const iconSizeClasses = compact ? "tw-size-3.5" : "tw-size-4";
 
   return (
     <>
-      <button
+      <IconButton
+        type="submit"
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`${positionClasses} tw-flex ${sizeClasses} tw-items-center tw-justify-center tw-overflow-hidden tw-rounded-md tw-border-0 tw-transition-all tw-duration-200 ${opacityClass} ${buttonStyles} ${className ?? ""} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
+        layout={getPinLayout()}
+        className={`${positionClasses} ${opacityClass} ${className ?? ""}`}
         aria-label={getAriaLabel()}
         data-tooltip-id={`wave-pin-${waveId}`}
         data-tooltip-content={tooltipContent}
@@ -189,7 +188,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
           className={`${iconSizeClasses} tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
           filled={isPinned}
         />
-      </button>
+      </IconButton>
       {/* Portalled so the sticky list filter and row stacking contexts cannot
           cover it. Touch devices have no hover, so they skip the tooltip. */}
       {!isTouchDevice && tooltipContent !== null && (

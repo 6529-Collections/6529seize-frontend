@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
@@ -195,15 +197,16 @@ export function WaveChatSubmitDropModal({
               >
                 {title}
               </h2>
-              <button
+              <IconButton
                 ref={closeButtonRef}
                 type="button"
                 onClick={onClose}
-                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-100"
+                size={36}
+                variant="outline"
                 aria-label="Close modal"
               >
                 <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
-              </button>
+              </IconButton>
             </div>
 
             <SubmitDropForm

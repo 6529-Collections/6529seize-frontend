@@ -86,6 +86,8 @@ let publicWavePreviewReads = 0;
 let sandboxDropReaction = null;
 let sandboxWaveGuidelinesEnabled = false;
 let sandboxArtistActivityEnabled = false;
+let sandboxSharedPostsEnabled = false;
+let sandboxSharedPostFeedEnabled = false;
 let sandboxProfileRepRating = null;
 let sandboxCreatedWaveType = "CHAT";
 let sandboxRuleGroupSequence = 0;
@@ -132,7 +134,8 @@ const localProfile = {
   query: SANDBOX_HANDLE,
   handle: SANDBOX_HANDLE,
   normalised_handle: SANDBOX_HANDLE,
-  consolidation_key: "",
+  consolidation_key:
+    process.env.PLAYWRIGHT_SUBSCRIPTIONS_SANDBOX === "1" ? SANDBOX_WALLET : "",
   display: SANDBOX_HANDLE,
   banner1: null,
   banner2: null,
@@ -2588,6 +2591,10 @@ function requestLog() {
 }
 
 function handleDiagnostics(method, pathname, url, res) {
+  if (pathname === "/__composer-sandbox/shared-posts" && method === "POST") {
+    sandboxSharedPostsEnabled = true;
+    return writeJsonResponse(res, { ok: true });
+  }
   if (pathname === "/__composer-sandbox/profile-rep" && method === "POST") {
     const rating = Number(url.searchParams.get("rating") ?? Number.NaN);
     if (!Number.isSafeInteger(rating)) {
@@ -2617,12 +2624,22 @@ function handleDiagnostics(method, pathname, url, res) {
     writeJson(res, 200, { requests: requestLog() });
     return true;
   }
+  if (
+    pathname === "/__composer-sandbox/shared-post-feed" &&
+    method === "POST"
+  ) {
+    sandboxSharedPostFeedEnabled = true;
+    writeJson(res, 200, { ok: true });
+    return true;
+  }
   if (pathname === "/__composer-sandbox/reset" && method === "POST") {
     requests.length = 0;
     publicWavePreviewReads = 0;
     sandboxDropReaction = null;
     sandboxWaveGuidelinesEnabled = false;
     sandboxArtistActivityEnabled = false;
+    sandboxSharedPostsEnabled = false;
+    sandboxSharedPostFeedEnabled = false;
     sandboxProfileRepRating = null;
     sandboxCreatedWaveType = "CHAT";
     for (const notification of sandboxNotifications) {
@@ -2806,6 +2823,79 @@ const mockApiExactReadRoutes = new Map([
 ]);
 
 const mockApiPatternReadRoutes = [
+  // Empty, deterministic holdings keep owner/visitor Collected QA local.
+  {
+    pattern: /^\/api\/collected-stats\/[^/]+$/,
+    response: () => ({
+      boost: 1,
+      nextgen_balance: 0,
+      gradients_balance: 0,
+      memes_balance: 0,
+      unique_memes: 0,
+      seasons: [],
+    }),
+  },
+  {
+    pattern: /^\/api\/profiles\/[^/]+\/collected$/,
+    response: emptyPage,
+  },
+  {
+    pattern: /^\/api\/new_memes_seasons$/,
+    response: () => [
+      {
+        id: 1,
+        start_index: 1,
+        end_index: 47,
+        count: 47,
+        name: "Season 1",
+        display: "SZN1",
+        boost: 1,
+      },
+    ],
+  },
+  {
+    pattern: /^\/api\/collect\/catalog$/,
+    response: () => ({
+      version: "collected-actions",
+      chain_id: 1,
+      seasons: [
+        {
+          id: 1,
+          name: "Season 1",
+          asset_keys: Array.from(
+            { length: 47 },
+            (_, index) =>
+              `1:0x33fd426905f149f8376e227d0c9d3340aad17af1:${index + 1}`
+          ),
+          current: false,
+        },
+      ],
+      artists: [],
+      pebbles_traits: [],
+      tdh_snapshot: null,
+    }),
+  },
+  {
+    pattern: /^\/api\/collect\/capabilities$/,
+    response: () => ({
+      version: "collected-actions",
+      chain_id: 1,
+      profile_scope: "confirmed_consolidation",
+      families: ["memes"],
+      actions: [],
+      provider: "sandbox",
+      creator_fees: "SIGNED_ORDER_TERMS",
+      platform_fee_bps: 0,
+    }),
+  },
+  {
+    pattern: /^\/api\/market\/me\/operations$/,
+    response: () => ({ operations: [], next: null }),
+  },
+  {
+    pattern: /^\/api\/collect\/rules$/,
+    response: () => ({ rules: [], complete: true }),
+  },
   // Current sandbox artworks have no managed collaboration record.
   {
     pattern: /^\/api\/drops\/[^/]+\/collaborations$/,
@@ -3014,6 +3104,29 @@ function handlePatternMockApiRead(pathname, res) {
   return writeJsonResponse(res, route.response());
 }
 
+function handleSharedPostFeedFixture(pathname, url, res) {
+  if (
+    !sandboxSharedPostFeedEnabled ||
+    pathname !== `/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+  ) {
+    return false;
+  }
+  const limit = Math.min(Number(url.searchParams.get("limit")) || 50, 150);
+  return writeJsonResponse(res, {
+    wave: localWaveOverview,
+    drops: Array.from({ length: limit }, (_, index) => {
+      const serial = 151 - index;
+      return {
+        ...currentLocalDrop(),
+        id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+        serial_no: serial,
+        created_at: 1714000000000 + serial * 60000,
+        content: `Shared link fixture post ${serial}`,
+      };
+    }),
+  });
+}
+
 // The profile document and the browser can read the same saved fixture.
 function handleProfileRepFixture(pathname, res) {
   if (sandboxProfileRepRating === null) return false;
@@ -3035,18 +3148,46 @@ function handleProfileRepFixture(pathname, res) {
   return false;
 }
 
+function handleSharedPostFeedRead(pathname, url, res) {
+  if (
+    !sandboxSharedPostsEnabled ||
+    pathname !== `/api/v2/waves/${SANDBOX_WAVE_ID}/drops`
+  ) {
+    return false;
+  }
+  // Server rendering must see the same history as the shared-link browser
+  // fixture, rather than seeding its unrelated default post into that history.
+  const template = currentLocalDrop();
+  const drops = Array.from({ length: 150 }, (_, index) => {
+    const serial = index + 2;
+    return {
+      ...template,
+      id: `00000000-0000-4000-8000-${String(serial + 9000).padStart(12, "0")}`,
+      serial_no: serial,
+      created_at: 1714000000000 + serial * 60000,
+      content: `Shared link fixture post ${serial}`,
+    };
+  }).reverse();
+  return writeJsonResponse(res, {
+    wave: localWaveOverview,
+    drops: drops.slice(0, Number(url.searchParams.get("limit")) || 50),
+  });
+}
+
 function handleMockApiRead(method, pathname, url, res) {
   if (!isSafeReadMethod(method)) {
     return false;
   }
 
   return (
+    handleSharedPostFeedRead(pathname, url, res) ||
     handleCommunityMemberRead(pathname, url, res) ||
     handleTopCommunityMembersRead(pathname, url, res) ||
     handleGroupIdentityWalletsRead(pathname, res) ||
     handleGroupRead(pathname, res) ||
     handleNotificationRead(pathname, url, res) ||
     handleProfileRepFixture(pathname, res) ||
+    handleSharedPostFeedFixture(pathname, url, res) ||
     handleExactMockApiRead(pathname, res) ||
     handlePatternMockApiRead(pathname, res)
   );

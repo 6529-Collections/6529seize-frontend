@@ -1,3 +1,4 @@
+import IconButton from "@/components/utils/button/IconButton";
 import { formatNumberWithCommasOrDash } from "@/helpers/Helpers";
 import { buildTooltipId, TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -56,12 +57,14 @@ export default function UserPageStatsActivityWalletTableRowGas({
 
   return (
     <>
-      <button
+      <IconButton
         type="button"
         aria-label={gasInformationLabel}
         aria-describedby={tooltipId}
         data-tooltip-id={tooltipId}
-        className="tw-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-full tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-500 tw-transition-colors tw-duration-200 hover:tw-text-iron-300 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
+        size={40}
+        variant="muted"
+        shape="circle"
       >
         <svg
           aria-hidden="true"
@@ -83,7 +86,7 @@ export default function UserPageStatsActivityWalletTableRowGas({
             />
           </g>
         </svg>
-      </button>
+      </IconButton>
       <Tooltip id={tooltipId} place="left" style={TOOLTIP_STYLES}>
         {tooltipContent}
       </Tooltip>

@@ -6,6 +6,7 @@ import {
   MOBILE_ACTION_ITEM_CLASSES,
 } from "@/components/compact-menu/constants";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
+import MobileTabsScrollControls from "@/components/brain/my-stream/MobileTabsScrollControls";
 import Button from "@/components/utils/button/Button";
 import FilterButton from "@/components/utils/button/FilterButton";
 import ButtonLink from "@/components/utils/button/ButtonLink";
@@ -27,7 +28,7 @@ import {
   ShieldCheckIcon,
   Squares2X2Icon,
 } from "@heroicons/react/24/outline";
-import { useId, useState, type KeyboardEvent } from "react";
+import { useId, useRef, useState, type KeyboardEvent } from "react";
 
 export type DiscoverScoreFilter = "ALL" | "SCORE_50" | "HOT_60" | "REP_60";
 export type DiscoverSort = ApiWaveScoreSort | "NEWEST" | "LATEST_POSTS";
@@ -159,6 +160,7 @@ export function DiscoverWaveControls({
 }) {
   const locale = useBrowserLocale();
   const [sortOpen, setSortOpen] = useState(false);
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const sortLabel = t(locale, "waves.discovery.sort.label");
   const currentLabel = t(
     locale,
@@ -171,76 +173,93 @@ export function DiscoverWaveControls({
       <legend className="tw-sr-only">
         {t(locale, "waves.discovery.controls")}
       </legend>
-      <div className="tw-flex tw-items-center tw-gap-2 tw-overflow-x-auto tw-p-1 tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700 @[56rem]/discovery-controls:tw-justify-between">
-        <Button
-          variant="dropdown"
-          size="sm"
-          aria-label={t(locale, "waves.discovery.sort.open", {
-            sort: currentLabel,
-          })}
-          aria-haspopup="dialog"
-          aria-expanded={sortOpen}
-          onClick={() => setSortOpen(true)}
-          className="@[56rem]/discovery-controls:tw-hidden motion-reduce:tw-transition-none"
-        >
-          <ArrowsUpDownIcon className="tw-size-4" aria-hidden="true" />
-          {currentLabel}
-          <ChevronDownIcon className="tw-size-3" aria-hidden="true" />
-        </Button>
-        <div className="tw-hidden tw-shrink-0 @[56rem]/discovery-controls:tw-block">
-          <CommonTabs<DiscoverSort>
-            variant="connected"
-            connectedSize="sm"
-            items={SORT_OPTIONS.map((option) => ({
-              key: option.value,
-              value: option.value,
-              label: t(locale, option.label),
-              icon: <ScoreSortIcon sort={option.value} />,
-            }))}
-            activeItem={activeSort}
-            filterLabel={sortLabel}
-            setSelected={onSortChange}
-            size="sm"
-            fill={false}
-          />
-        </div>
-        <span
-          aria-hidden="true"
-          className="tw-mx-1 tw-h-5 tw-w-px tw-shrink-0 tw-bg-iron-800 @[56rem]/discovery-controls:tw-hidden"
-        />
+      <div className="tw-relative tw-w-full tw-min-w-0">
         <div
-          role="radiogroup"
-          aria-label={t(locale, "waves.discovery.filter.label")}
-          aria-disabled={!scoreFiltersEnabled}
-          className="tw-flex tw-shrink-0 tw-items-center tw-gap-1.5"
+          ref={scrollerRef}
+          data-discovery-controls-scroll
+          className="tw-no-scrollbar tw-flex tw-scroll-px-12 tw-items-center tw-gap-2 tw-overflow-x-auto tw-p-1 @[56rem]/discovery-controls:tw-justify-between"
         >
-          {FILTER_OPTIONS.map((option) => {
-            const selected = activeFilter === option.value;
-            return (
-              <FilterButton
-                key={option.value}
-                selected={selected}
-                role="radio"
-                aria-checked={selected}
-                disabled={!scoreFiltersEnabled}
-                tabIndex={scoreFiltersEnabled && selected ? 0 : -1}
-                data-radio-value={option.value}
-                onClick={() => onFilterChange(option.value)}
-                onKeyDown={(event) =>
-                  onRadioKeyDown(
-                    event,
-                    FILTER_OPTIONS,
-                    activeFilter,
-                    onFilterChange
-                  )
-                }
-                className="tw-scroll-mx-1 motion-reduce:tw-transition-none"
-              >
-                {t(locale, option.label)}
-              </FilterButton>
-            );
-          })}
+          <Button
+            variant="dropdown"
+            size="sm"
+            aria-label={t(locale, "waves.discovery.sort.open", {
+              sort: currentLabel,
+            })}
+            aria-haspopup="dialog"
+            aria-expanded={sortOpen}
+            onClick={() => setSortOpen(true)}
+            className="@[56rem]/discovery-controls:tw-hidden motion-reduce:tw-transition-none"
+          >
+            <ArrowsUpDownIcon className="tw-size-4" aria-hidden="true" />
+            {currentLabel}
+            <ChevronDownIcon className="tw-size-3" aria-hidden="true" />
+          </Button>
+          <div className="tw-hidden tw-shrink-0 @[56rem]/discovery-controls:tw-block">
+            <CommonTabs<DiscoverSort>
+              variant="connected"
+              connectedSize="sm"
+              items={SORT_OPTIONS.map((option) => ({
+                key: option.value,
+                value: option.value,
+                label: t(locale, option.label),
+                icon: <ScoreSortIcon sort={option.value} />,
+              }))}
+              activeItem={activeSort}
+              filterLabel={sortLabel}
+              setSelected={onSortChange}
+              size="sm"
+              fill={false}
+            />
+          </div>
+          <span
+            aria-hidden="true"
+            className="tw-mx-1 tw-h-5 tw-w-px tw-shrink-0 tw-bg-iron-800 @[56rem]/discovery-controls:tw-hidden"
+          />
+          <div
+            role="radiogroup"
+            aria-label={t(locale, "waves.discovery.filter.label")}
+            aria-disabled={!scoreFiltersEnabled}
+            className="tw-flex tw-shrink-0 tw-items-center tw-gap-1.5"
+          >
+            {FILTER_OPTIONS.map((option) => {
+              const selected = activeFilter === option.value;
+              return (
+                <FilterButton
+                  key={option.value}
+                  selected={selected}
+                  role="radio"
+                  aria-checked={selected}
+                  disabled={!scoreFiltersEnabled}
+                  tabIndex={scoreFiltersEnabled && selected ? 0 : -1}
+                  data-radio-value={option.value}
+                  onClick={() => onFilterChange(option.value)}
+                  onKeyDown={(event) =>
+                    onRadioKeyDown(
+                      event,
+                      FILTER_OPTIONS,
+                      activeFilter,
+                      onFilterChange
+                    )
+                  }
+                  className="tw-scroll-mx-1 motion-reduce:tw-transition-none"
+                >
+                  {t(locale, option.label)}
+                </FilterButton>
+              );
+            })}
+          </div>
         </div>
+        <MobileTabsScrollControls
+          scrollerRef={scrollerRef}
+          fadeColorClassName="tw-from-black tw-via-black/40"
+          activeControlSelector={
+            '[role="tab"][aria-selected="true"], [role="radio"][aria-checked="true"], button[aria-haspopup="dialog"]'
+          }
+          scrollLabels={{
+            left: t(locale, "user.collected.filters.scrollLeft"),
+            right: t(locale, "user.collected.filters.scrollRight"),
+          }}
+        />
       </div>
       <MobileWrapperDialog
         isOpen={sortOpen}

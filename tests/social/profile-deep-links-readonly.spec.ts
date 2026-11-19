@@ -5,6 +5,7 @@ import {
   test,
 } from "../testHelpers";
 import {
+  expectPersonalCollectedActionsAbsent,
   expectProfileShell,
   gotoReady,
   PROFILE_HANDLE,
@@ -12,7 +13,6 @@ import {
 
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 import { expectUrlState } from "../support/urlState";
-import { isCapacitorSimulationProject } from "../support/surfaceSimulation";
 
 test.describe("Profile deep-link read-only coverage @surface @medium @large @readonly", () => {
   test("toggles Details without a route fetch while its own data is loading", async ({
@@ -127,62 +127,20 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     ).toBeVisible();
   });
 
-  test("browser Back from Collect actions keeps the Collected filters", async ({
+  test("omits personal collecting actions from a public profile", async ({
     page,
-  }, testInfo) => {
-    test.skip(
-      isCapacitorSimulationProject(testInfo.project.name),
-      "Web history contract; native app Back is covered in native-shell-readonly"
+  }) => {
+    await gotoReady(
+      page,
+      `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
     );
-    for (const action of ["Manage orders", "Complete my set"]) {
-      await gotoReady(
-        page,
-        `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
-      );
-      await expect(
-        page.getByRole("main").locator('[data-profile-section="Filters"]')
-      ).toBeVisible({
-        timeout: RESPONSE_TIMEOUT_MS,
-      });
-      const source = new URL(page.url());
-      const link = page.getByRole("link", { name: action, exact: true });
-      // Record the position after Playwright's click preparation scrolls the
-      // target clear of the mobile browser's viewport edge.
-      await link.click({ trial: true });
-      const sourceTop = await link.evaluate(
-        (element) => element.getBoundingClientRect().top
-      );
-      const destination = new URL(
-        (await link.getAttribute("href"))!,
-        page.url()
-      );
-      expect(destination.searchParams.has("returnTo")).toBe(false);
-      await link.click();
-      await expect(page).toHaveURL(
-        (url) =>
-          url.pathname ===
-          (action === "Manage orders" ? "/collect/orders" : "/collect")
-      );
-      await expect(
-        page.getByRole("button", { name: "Back", exact: true })
-      ).toHaveCount(0);
-      await page.goBack();
-      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
-      await expectUrlState(page, (url) =>
-        ["collection", "szn", "details"].every(
-          (key) => url.searchParams.get(key) === source.searchParams.get(key)
-        )
-      );
-      await expect
-        .poll(() =>
-          link.evaluate(
-            (element, top) =>
-              Math.abs(element.getBoundingClientRect().top - top),
-            sourceTop
-          )
-        )
-        .toBeLessThanOrEqual(2);
-    }
+    await expect(
+      page.getByRole("main").locator('[data-profile-section="Filters"]')
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expectPersonalCollectedActionsAbsent(page);
+    await expect(
+      page.getByRole("button", { name: "Details", exact: true })
+    ).toBeVisible();
   });
 
   test("keeps Collected statistics, tabs and tables readable on compact screens", async ({
@@ -332,39 +290,9 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     await expect(boost).toBeVisible();
     for (const width of [360, 390, 430, 520, 639, 1280]) {
       await page.setViewportSize({ width, height: 844 });
-      const actions = await page
-        .getByRole("link", { name: "Manage orders", exact: true })
-        .evaluate((orders) => {
-          const row = orders.parentElement!;
-          const rowBounds = row.getBoundingClientRect();
-          const complete = row.querySelector("a")!.getBoundingClientRect();
-          const manage = orders.getBoundingClientRect();
-          const style = getComputedStyle(row);
-          const left = rowBounds.left + Number.parseFloat(style.paddingLeft);
-          const right = rowBounds.right - Number.parseFloat(style.paddingRight);
-          return {
-            fits:
-              right - left >=
-              complete.width +
-                manage.width +
-                Number.parseFloat(style.columnGap),
-            centers: Math.abs(
-              complete.y + complete.height / 2 - manage.y - manage.height / 2
-            ),
-            leftInset: Math.abs(complete.left - left),
-            rightInset: Math.abs(manage.right - right),
-            stackedLeftInset: Math.abs(manage.left - left),
-            stackedGap: manage.top - complete.bottom,
-          };
-        });
-      expect(actions.leftInset).toBeLessThanOrEqual(1);
-      if (actions.fits) {
-        expect(actions.centers).toBeLessThanOrEqual(1);
-        expect(actions.rightInset).toBeLessThanOrEqual(1);
-      } else {
-        expect(actions.stackedLeftInset).toBeLessThanOrEqual(1);
-        expect(actions.stackedGap).toBeGreaterThanOrEqual(8);
-      }
+      await expect(page.getByTestId("collected-purchase-actions")).toHaveCount(
+        0
+      );
       await expect(
         page.getByRole("region", {
           name: "TDH boost breakdown by source",
@@ -994,6 +922,8 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
     });
     for (const width of [1024, 1440]) {
       await page.setViewportSize({ width, height: 844 });
+      // Resizing the shorter visitor page can leave the pointer over a tab.
+      await page.mouse.move(0, 0);
       await expect(viewTabs).toBeVisible();
       await expect(sortTabs).toBeVisible();
       await expect(viewTabs.getByRole("tab")).toHaveCount(2);
