@@ -1,11 +1,7 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
-import {
-  VOTE_NUMERIC_INPUT_BASE_CLASS,
-  VOTE_NUMERIC_INPUT_CLASSES,
-  VOTE_NUMERIC_UNIT_CLASS,
-} from "@/components/voting/VoteControl.styles";
+import { VoteNumericInput } from "@/components/voting/VoteNumericInput";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -77,66 +73,6 @@ const getCaretAfterDigits = (text: string, digits: number): number => {
   return text.length;
 };
 
-const getInputShellClasses = (
-  isPositiveVote: boolean,
-  isNegativeVote: boolean
-): string => {
-  if (isPositiveVote) {
-    return "tw-border-emerald-500/40 focus:tw-border-emerald-500/70 focus:tw-ring-1 focus:tw-ring-emerald-500/35 focus-within:tw-border-emerald-500/70 focus-within:tw-ring-1 focus-within:tw-ring-emerald-500/35";
-  }
-
-  if (isNegativeVote) {
-    return "tw-border-rose-500/40 focus:tw-border-rose-500/70 focus:tw-ring-1 focus:tw-ring-rose-500/35 focus-within:tw-border-rose-500/70 focus-within:tw-ring-1 focus-within:tw-ring-rose-500/35";
-  }
-
-  return "tw-border-iron-650 focus:tw-border-primary-400/60 focus:tw-ring-1 focus:tw-ring-primary-400/40 focus-within:tw-border-primary-400/60 focus-within:tw-ring-1 focus-within:tw-ring-primary-400/40";
-};
-
-const getInputTextClasses = (
-  isPositiveVote: boolean,
-  isNegativeVote: boolean
-): string => {
-  if (isPositiveVote) {
-    return "tw-text-emerald-400";
-  }
-
-  if (isNegativeVote) {
-    return "tw-text-rose-400";
-  }
-
-  return "tw-text-iron-50";
-};
-
-const getInputCaretClasses = (
-  isPositiveVote: boolean,
-  isNegativeVote: boolean
-): string => {
-  if (isPositiveVote) {
-    return "tw-caret-emerald-400";
-  }
-
-  if (isNegativeVote) {
-    return "tw-caret-rose-400";
-  }
-
-  return "tw-caret-primary-400";
-};
-
-const getInputLabelClasses = (
-  isPositiveVote: boolean,
-  isNegativeVote: boolean
-): string => {
-  if (isPositiveVote) {
-    return "tw-text-emerald-500/70";
-  }
-
-  if (isNegativeVote) {
-    return "tw-text-rose-500/70";
-  }
-
-  return "tw-text-iron-500";
-};
-
 export const SingleWaveDropVoteInput: React.FC<
   SingleWaveDropVoteInputProps
 > = ({
@@ -168,33 +104,10 @@ export const SingleWaveDropVoteInput: React.FC<
   const quickPercentages = allowsNegativeValues
     ? QUICK_PERCENTAGES
     : QUICK_PERCENTAGES.filter((percentage) => percentage > 0);
-  const mobileQuickPercentages = quickPercentages;
   // Digits plus the grouping marks locales use (comma, period, spaces).
   const inputPattern = allowsNegativeValues
     ? String.raw`-?[0-9.,\s]*`
     : String.raw`[0-9.,\s]*`;
-  const numericVoteValue =
-    typeof voteValue === "number" && Number.isFinite(voteValue)
-      ? voteValue
-      : Number(voteValue);
-  const isPositiveVote =
-    Number.isFinite(numericVoteValue) && numericVoteValue > 0;
-  const isNegativeVote =
-    Number.isFinite(numericVoteValue) && numericVoteValue < 0;
-  const inputShellClasses = getInputShellClasses(
-    isPositiveVote,
-    isNegativeVote
-  );
-  const inputTextClasses = getInputTextClasses(isPositiveVote, isNegativeVote);
-  const inputCaretClasses = getInputCaretClasses(
-    isPositiveVote,
-    isNegativeVote
-  );
-  const inputLabelClasses = getInputLabelClasses(
-    isPositiveVote,
-    isNegativeVote
-  );
-
   const clampValue = (value: number) =>
     Math.min(Math.max(value, minValue), maxValue);
 
@@ -368,99 +281,81 @@ export const SingleWaveDropVoteInput: React.FC<
     }
   };
 
-  if (size === SingleWaveDropVoteSize.MINI) {
-    return (
-      <div className="tw-relative">
-        <input
-          type="text"
-          aria-label={t(locale, "competitions.voteValue")}
-          pattern={inputPattern}
-          inputMode="numeric"
-          className={`${VOTE_NUMERIC_INPUT_BASE_CLASS} ${VOTE_NUMERIC_INPUT_CLASSES.compact}`}
-          value={displayValue}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-        />
-        <span className={VOTE_NUMERIC_UNIT_CLASS}>{label}</span>
-      </div>
-    );
-  }
+  const isCompact = size === SingleWaveDropVoteSize.MINI;
+  const stepControls = isCompact
+    ? undefined
+    : {
+        decrease: (
+          <button
+            type="button"
+            onPointerDown={() => startPress(false)}
+            onPointerUp={stopPress}
+            onPointerLeave={stopPress}
+            onPointerCancel={stopPress}
+            onLostPointerCapture={stopPress}
+            onClick={(event) => {
+              if (event.detail === 0) updateValue(false);
+            }}
+            aria-label={t(locale, "waves.vote.decreaseLabel")}
+            className="tw-flex tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-self-stretch tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-rose-400/70 active:tw-bg-rose-500/15 active:tw-text-rose-300 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-300"
+          >
+            <ArrowDownIcon
+              aria-hidden="true"
+              className="tw-size-[15px] tw-flex-shrink-0"
+            />
+          </button>
+        ),
+        increase: (
+          <button
+            type="button"
+            onPointerDown={() => startPress(true)}
+            onPointerUp={stopPress}
+            onPointerLeave={stopPress}
+            onPointerCancel={stopPress}
+            onLostPointerCapture={stopPress}
+            onClick={(event) => {
+              if (event.detail === 0) updateValue(true);
+            }}
+            aria-label={t(locale, "waves.vote.increaseLabel")}
+            className="tw-flex tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-self-stretch tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-emerald-400/70 active:tw-bg-emerald-500/15 active:tw-text-emerald-300 desktop-hover:hover:tw-bg-emerald-500/10 desktop-hover:hover:tw-text-emerald-300"
+          >
+            <ArrowUpIcon
+              aria-hidden="true"
+              className="tw-size-[15px] tw-flex-shrink-0"
+            />
+          </button>
+        ),
+      };
 
   return (
-    <div className="tw-flex tw-flex-col">
-      <div
-        className={`tw-flex tw-h-11 tw-items-center tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-bg-iron-950 tw-shadow-sm tw-transition-colors ${inputShellClasses}`}
-      >
-        <button
-          onMouseDown={() => startPress(false)}
-          onMouseUp={stopPress}
-          onMouseLeave={stopPress}
-          onTouchStart={() => startPress(false)}
-          onTouchEnd={stopPress}
-          aria-label={t(locale, "waves.vote.decreaseLabel")}
-          className="tw-flex tw-h-full tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-rose-400/70 active:tw-bg-rose-500/15 active:tw-text-rose-300 desktop-hover:hover:tw-bg-rose-500/10 desktop-hover:hover:tw-text-rose-300"
-        >
-          <ArrowDownIcon className="tw-size-[15px] tw-flex-shrink-0" />
-        </button>
-
-        <div className="tw-relative tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center">
-          <input
-            type="text"
-            aria-label={t(locale, "competitions.voteValue")}
-            pattern={inputPattern}
-            inputMode="numeric"
-            className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-tabular-nums tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses} ${inputCaretClasses}`}
-            value={displayValue}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-          />
-          <div
-            className={`tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-[11px] tw-transition-colors ${inputLabelClasses}`}
-          >
-            {label}
+    <VoteNumericInput
+      type="text"
+      aria-label={t(locale, "competitions.voteValue")}
+      pattern={inputPattern}
+      inputMode="numeric"
+      value={displayValue}
+      onChange={handleInputChange}
+      onKeyDown={handleKeyDown}
+      unit={label}
+      variant={isCompact ? "compact" : "default"}
+      stepControls={stepControls}
+      shortcuts={
+        !isCompact && (
+          <div className="tw-flex tw-w-full tw-gap-1.5">
+            {quickPercentages.map((percentage) => (
+              <button
+                type="button"
+                key={percentage}
+                onClick={() => handleQuickPercentage(percentage)}
+                className={`tw-min-w-0 tw-flex-1 tw-rounded tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-transition-all active:tw-scale-[0.98] active:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-bg-iron-700 ${quickPercentageButtonClasses}`}
+              >
+                {percentage > 0 ? "+" : ""}
+                {percentage}%
+              </button>
+            ))}
           </div>
-        </div>
-
-        <button
-          onMouseDown={() => startPress(true)}
-          onMouseUp={stopPress}
-          onMouseLeave={stopPress}
-          onTouchStart={() => startPress(true)}
-          onTouchEnd={stopPress}
-          aria-label={t(locale, "waves.vote.increaseLabel")}
-          className="tw-flex tw-h-full tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-emerald-400/70 active:tw-bg-emerald-500/15 active:tw-text-emerald-300 desktop-hover:hover:tw-bg-emerald-500/10 desktop-hover:hover:tw-text-emerald-300"
-        >
-          <ArrowUpIcon className="tw-size-[15px] tw-flex-shrink-0" />
-        </button>
-      </div>
-
-      <div className="tw-mt-2 tw-w-full">
-        <div className="tw-flex tw-w-full tw-gap-1.5 sm:tw-hidden">
-          {mobileQuickPercentages.map((percentage) => (
-            <button
-              key={percentage}
-              onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-min-w-0 tw-flex-1 tw-rounded tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-transition-all active:tw-scale-[0.98] active:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-bg-iron-700 ${quickPercentageButtonClasses}`}
-            >
-              {percentage > 0 ? "+" : ""}
-              {percentage}%
-            </button>
-          ))}
-        </div>
-
-        <div className="tw-hidden tw-w-full tw-gap-1.5 sm:tw-flex">
-          {quickPercentages.map((percentage) => (
-            <button
-              key={percentage}
-              onClick={() => handleQuickPercentage(percentage)}
-              className={`tw-min-w-0 tw-flex-1 tw-rounded tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-800 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-transition-all active:tw-scale-[0.98] active:tw-bg-iron-650 desktop-hover:hover:tw-border-iron-650 desktop-hover:hover:tw-bg-iron-700 ${quickPercentageButtonClasses}`}
-            >
-              {percentage > 0 ? "+" : ""}
-              {percentage}%
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
+        )
+      }
+    />
   );
 };

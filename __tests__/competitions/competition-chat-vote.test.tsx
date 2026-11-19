@@ -206,6 +206,27 @@ it("uses the entry budget and competition vote endpoint despite the parent wave'
   );
   expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
 });
+it.each([SingleWaveDropVoteSize.NORMAL, SingleWaveDropVoteSize.MINI])(
+  "keeps %s competition numeric entry free of legacy controls",
+  async (size) => {
+    mount("numeric", drop, undefined, size);
+
+    const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+    expect(input).toHaveAttribute("min", "-1500");
+    expect(input).toHaveAttribute("max", "1500");
+    expect(screen.queryByRole("button", { name: "Increase vote" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Decrease vote" })).toBeNull();
+    expect(screen.queryByRole("button", { name: /%$/ })).toBeNull();
+
+    fireEvent.change(input, { target: { value: "1501" } });
+    expect(screen.getByRole("button", { name: voteButtonName })).toBeDisabled();
+    fireEvent.change(input, { target: { value: "0" } });
+    expect(
+      screen.getByRole("button", { name: "Vote 0 TDH + XTDH" })
+    ).toBeEnabled();
+    expect(setCompetitionVote).not.toHaveBeenCalled();
+  }
+);
 it.each([
   { creditType: "REP", label: "Rep" },
   { creditType: "CIC", label: "NIC" },

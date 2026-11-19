@@ -52,6 +52,8 @@ current voting budget; other drops use their own allowed range.
   submitting a vote.
 - Compact submission cards use a smaller numeric field on desktop. Phones and
   touch devices keep a larger field and text for entry.
+- Full and compact numeric fields share the app font, neutral background and
+  visible keyboard focus. Existing credit labels remain beside the amount.
 - In full-size dialogs and sheets, `Explain vote` uses a chat icon on its own
   row. Its reply field opens below that row, followed by a full-width `Vote`
   button, including on desktop. Compact decision submission cards that offer
@@ -67,6 +69,10 @@ current voting budget; other drops use their own allowed range.
   are not allowed. Decision numeric controls do not include these shortcuts.
 - Holding an up/down step button outside decisions accelerates step size:
   `1`, then `10`, then `100`, then `1000`.
+- Use `Enter` or `Space` on a focused step button to change the amount once.
+  A pointer click or tap also steps once. Releasing or cancelling a held press
+  stops repeated stepping. Step buttons and percentage shortcuts change the
+  draft without submitting it.
 - Hold-to-step snaps when crossing memetic values
   (`±69`, `±420`, `±6529`, `±42069`, `±69420`) and pauses briefly before
   continuing.

@@ -49,6 +49,19 @@ const entryDropId = (id: string) =>
     : "00000000-0000-4000-8000-000000000533";
 const ROOT = `/waves/${WAVE}/decisions`;
 
+async function expectNumericVoteAppearance(input: Locator) {
+  await expect(input).toHaveCSS("background-color", "rgb(28, 28, 33)");
+  await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
+  await expect(input).toHaveCSS("font-weight", "600");
+  expect(
+    await input.evaluate(
+      (element) =>
+        getComputedStyle(element).fontFamily ===
+        getComputedStyle(document.body).fontFamily
+    )
+  ).toBe(true);
+}
+
 async function expectVoteHeight(
   scope: Locator,
   previous?: { inputArea: number; container: number }
@@ -150,6 +163,11 @@ async function verifyVoteBreakpoints(
       await page.setViewportSize({ ...viewport, width });
       await mode.getByRole("button", { name: "Numeric", exact: true }).click();
       const numeric = await expectVoteHeight(scope);
+      await expectNumericVoteAppearance(
+        panel
+          .getByRole("textbox", { name: "Your vote", exact: true })
+          .or(panel.getByRole("spinbutton", { name: "Your vote", exact: true }))
+      );
       await expectContained();
       await mode.getByRole("button", { name: "Slider", exact: true }).click();
       const slider = await expectVoteHeight(scope, numeric);
@@ -7123,6 +7141,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         path: testInfo.outputPath("compact-vote-tabs.png"),
       });
       const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+      await expectNumericVoteAppearance(input);
+      await expect(
+        dialog.getByRole("button", { name: /^(Increase|Decrease) vote$/ })
+      ).toHaveCount(0);
+      await expect(dialog.getByRole("button", { name: /%$/ })).toHaveCount(0);
       await expect(input).toHaveCSS(
         "height",
         testInfo.project.use.hasTouch ? "44px" : "36px"
@@ -7826,6 +7849,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
     await expectCenteredVoteHeader();
     await expectVoteHeight(dialog, closedVoteHeight);
+    await expect(
+      dialog.getByRole("button", { name: /^(Increase|Decrease) vote$/ })
+    ).toHaveCount(0);
+    await expect(dialog.getByRole("button", { name: /%$/ })).toHaveCount(0);
     await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
     await toggle.check();
     await expect(toggle).toBeChecked();
@@ -7892,6 +7919,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
 
   test("shares voting controls in a legacy drop dialog without competition context", async ({
     page,
+    browserName,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
     const response = await page.request.get(
@@ -7922,8 +7950,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           place: 1,
           context_profile_context: {
             can_vote: true,
-            min: -100,
-            max: 100,
+            min: -10_000_000,
+            max: 10_000_000,
             current: 0,
           },
         },
@@ -7965,6 +7993,66 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       name: "Your vote",
       exact: true,
     });
+    const decrease = panel.getByRole("button", { name: "Decrease vote" });
+    const increase = panel.getByRole("button", { name: "Increase vote" });
+    // WebKit follows Safari's default: Option-Tab includes clickable controls.
+    const nextControlKey = browserName === "webkit" ? "Alt+Tab" : "Tab";
+    await decrease.focus();
+    await page.keyboard.press("Enter");
+    await expect(input).toHaveValue("-1");
+    await page.keyboard.press(nextControlKey);
+    await expect(input).toBeFocused();
+    await expect(input).toHaveCSS("outline-style", "solid");
+    await expect(input).toHaveCSS("outline-width", "2px");
+    await page.keyboard.press(nextControlKey);
+    await expect(increase).toBeFocused();
+    await page.keyboard.press(" ");
+    await expect(input).toHaveValue("0");
+    await increase.click();
+    await expect(input).toHaveValue("1");
+    if (testInfo.project.use.hasTouch) {
+      await input.fill("0");
+      await increase.tap();
+      await expect(input).toHaveValue("1");
+    }
+    const shortcuts = panel.getByRole("button", { name: /^[+-]\d+%$/ });
+    await expect(shortcuts).toHaveCount(4);
+    await panel.getByRole("button", { name: "+100%", exact: true }).click();
+    await expect(input).toHaveValue("10,000,000");
+    await panel.getByRole("button", { name: "-50%", exact: true }).click();
+    await expect(input).toHaveValue("-5,000,000");
+    await input.fill("5000000");
+    const viewport = page.viewportSize()!;
+    try {
+      await page.setViewportSize({ ...viewport, width: 320 });
+      await expect(input).toHaveValue("5,000,000");
+      const largeValue = await input.evaluate((element: HTMLInputElement) => {
+        const style = getComputedStyle(element);
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (!context) throw new Error("Text measurement unavailable");
+        context.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+        return {
+          available:
+            element.clientWidth -
+            parseFloat(style.paddingLeft) -
+            parseFloat(style.paddingRight),
+          needed: context.measureText(element.value).width,
+        };
+      });
+      expect(largeValue.available).toBeGreaterThanOrEqual(largeValue.needed);
+      for (const button of [decrease, increase]) {
+        const box = (await button.boundingBox())!;
+        expect(box.width).toBeGreaterThanOrEqual(40);
+        expect(box.height).toBeGreaterThanOrEqual(40);
+      }
+      await expectNoHorizontalOverflow(page);
+      await panel.screenshot({
+        path: testInfo.outputPath("legacy-large-numeric-320.png"),
+      });
+    } finally {
+      await page.setViewportSize(viewport);
+    }
     await input.fill("-25");
     const save = panel.getByRole("button", {
       name: "Vote -25 TDH",

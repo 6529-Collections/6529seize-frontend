@@ -1105,6 +1105,11 @@ spent, and available credits retain their own meaning. The record keeps
 decision-card Slider defaults, other mini-card Numeric defaults without a reply,
 generated placeholder versus prefill behavior, and each flow's existing close
 timing distinct; My Votes retains its separate compact row controls.
+Numeric fields share the app font, neutral styling and visible keyboard focus
+across full and compact panels. Full-size numeric controls outside decisions
+retain their percentage shortcuts and step buttons. The record covers one-step
+keyboard, pointer and touch activation, cancellation of a held press, and draft
+changes without submission; decision and mini inputs gain no extra controls.
 
 The subscriptions record distinguishes pending and failed reads from successfully
 loaded zero balances and empty lists. Failed balance, settings, airdrop-address

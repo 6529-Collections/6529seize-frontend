@@ -37,12 +37,8 @@ import { CompetitionState } from "./CompetitionState";
 import CompetitionCredits from "./CompetitionCredits";
 import { VotePanel } from "@/components/voting/VotePanel";
 import { VoteActionButton } from "@/components/voting/VoteActionButton";
-import {
-  VOTE_INPUT_AREA_CLASSES,
-  VOTE_NUMERIC_INPUT_BASE_CLASS,
-  VOTE_NUMERIC_INPUT_CLASSES,
-  VOTE_NUMERIC_UNIT_CLASS,
-} from "@/components/voting/VoteControl.styles";
+import { VOTE_INPUT_AREA_CLASSES } from "@/components/voting/VoteControl.styles";
+import { VoteNumericInput } from "@/components/voting/VoteNumericInput";
 import type { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import type { ApiCompetition } from "@/generated/models/ApiCompetition";
 import {
@@ -513,13 +509,14 @@ export function CompetitionVoteForm({
             >
               {t(locale, "competitions.voteValue")}
             </label>
-            <input
+            <VoteNumericInput
               id={`competition-vote-${entryId}`}
+              unit={creditLabel}
+              variant={controlVariant}
               type="number"
               step="1"
               min={min ?? undefined}
               max={max ?? undefined}
-              className={`${VOTE_NUMERIC_INPUT_BASE_CLASS} ${VOTE_NUMERIC_INPUT_CLASSES[controlVariant]}`}
               value={value}
               disabled={busy || disabled || !competition.permissions.vote}
               aria-invalid={!valid}
@@ -529,7 +526,6 @@ export function CompetitionVoteForm({
                 setSaved(false);
               }}
             />
-            <span className={VOTE_NUMERIC_UNIT_CLASS}>{creditLabel}</span>
           </div>
         )}
       </div>
