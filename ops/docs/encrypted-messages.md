@@ -826,9 +826,10 @@ without images**. Images and files too large for one encrypted attachment
   chats. The inbox lists each chat as it arrives. After a brief wait for a
   trusted device to send an invitation, an empty list says **No encrypted
   chats available on this device yet** and offers **Check device setup**.
-  Invitations continue arriving in the background. If the check stalls or
-  fails, an empty list offers **Try again**. **No encrypted chats yet**
-  appears when the check confirms an empty inbox.
+  Invitations continue arriving in the background. Select **Check again**
+  to check immediately. If the check stalls or fails, an empty list offers
+  **Try again**. **No encrypted chats yet** appears when the check confirms
+  an empty inbox.
 - **Encrypted messages couldn’t start**: select **Try again**. The error code
   under the message helps the team diagnose staging issues.
 - **Chat not found on this device**: devices only receive chats they were

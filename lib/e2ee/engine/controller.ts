@@ -1,11 +1,9 @@
 import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eeDeviceGroup } from "../api-types";
-import {
-  E2EE_INITIAL_INBOX_WAIT_MS,
-  type E2eeInitialSyncStatus,
-} from "../types";
+import { E2EE_INITIAL_INBOX_WAIT_MS } from "../types";
 import { type EngineContext, isActive, ownDeviceKey } from "./context";
 import { RetryableError } from "./errors";
+import { InboxDiscovery } from "./inbox-discovery";
 import {
   groupChanges,
   noteStallFor,
@@ -31,7 +29,6 @@ const POLL_IDLE_MS = 30_000;
 const MAINTAIN_EVERY_MS = 10 * 60_000;
 const WAKE_DEBOUNCE_MS = 50;
 const WS_QUIET_MS = 60_000;
-const INITIAL_INBOX_WAIT_TIMER = "initial-inbox-wait";
 
 const isNetworkish = (error: unknown): boolean => {
   if (error instanceof RetryableError) {
@@ -81,8 +78,10 @@ interface ControllerHooks {
 export class EngineController {
   private readonly ctx: EngineContext;
   private readonly hooks: ControllerHooks;
+  private readonly inbox: InboxDiscovery;
   private syncRun: Promise<void> | null = null;
   private syncAgain = false;
+  private recheckInbox = false;
   private readonly flushes = new Map<string, Promise<void>>();
   private readonly flushAgain = new Set<string>();
   private readonly maintainedAt = new Map<string, number>();
@@ -92,6 +91,10 @@ export class EngineController {
   constructor(ctx: EngineContext, hooks: ControllerHooks) {
     this.ctx = ctx;
     this.hooks = hooks;
+    this.inbox = new InboxDiscovery(ctx, {
+      isReady: () => this.isReady(),
+      onOwnRevoked: hooks.onOwnRevoked,
+    });
   }
 
   private isReady(): boolean {
@@ -101,10 +104,6 @@ export class EngineController {
       this.ctx.store.status === "ready" &&
       this.ctx.mls !== null
     );
-  }
-
-  private hasDeviceKey(deviceKey: string): boolean {
-    return this.ctx.device?.deviceKey === deviceKey;
   }
 
   private syncRepeat(): boolean {
@@ -131,7 +130,8 @@ export class EngineController {
   // Sync
   // -------------------------------------------------------------------------
 
-  syncAll(): Promise<void> {
+  syncAll(recheckInbox = false): Promise<void> {
+    this.recheckInbox ||= recheckInbox;
     if (this.syncRun) {
       this.syncAgain = true;
       return this.syncRun;
@@ -139,7 +139,9 @@ export class EngineController {
     const run = (async () => {
       do {
         this.syncAgain = false;
-        await this.syncOnce();
+        const recheck = this.recheckInbox;
+        this.recheckInbox = false;
+        await this.syncOnce(recheck);
       } while (this.syncRepeat());
     })().finally(() => {
       this.syncRun = null;
@@ -168,18 +170,18 @@ export class EngineController {
     }
   }
 
-  private async syncOnce(): Promise<void> {
+  private async syncOnce(recheckInbox: boolean): Promise<void> {
     if (!this.isReady()) {
       return;
     }
     this.lastFullSyncAt = this.ctx.now();
-    const { groups, confirm } = await this.syncInbox();
+    const { groups, confirm } = await this.syncInbox(recheckInbox);
     if (!this.isReady()) {
       return;
     }
     await Promise.all([
       this.syncKnownGroups(groups),
-      confirm ? this.confirmInitialInbox() : undefined,
+      confirm ? this.inbox.confirm() : undefined,
     ]);
   }
 
@@ -267,106 +269,25 @@ export class EngineController {
     }
   }
 
-  private initialInboxSettled(): boolean {
-    const status = this.ctx.store.initialSyncStatus;
-    return status === "complete" || status === "awaiting-invitation";
-  }
-
-  private setInitialSyncStatus(status: E2eeInitialSyncStatus): void {
-    const store = this.ctx.store;
-    const current = store.initialSyncStatus;
-    if (
-      !this.isReady() ||
-      this.initialInboxSettled() ||
-      (current === "delayed" && status === "pending")
-    ) {
-      return;
-    }
-    const next =
-      current === "delayed" && status === "waiting"
-        ? "awaiting-invitation"
-        : status;
-    if (next === "pending" || next === "waiting") {
-      this.ctx.timers.arm(
-        INITIAL_INBOX_WAIT_TIMER,
-        E2EE_INITIAL_INBOX_WAIT_MS,
-        () =>
-          this.setInitialSyncStatus(
-            store.initialSyncStatus === "waiting"
-              ? "awaiting-invitation"
-              : "delayed"
-          )
-      );
-    } else {
-      this.ctx.timers.cancel(INITIAL_INBOX_WAIT_TIMER);
-    }
-    if (current === next) return;
-    store.initialSyncStatus = next;
-    store.touch();
-  }
-
   /** Check chat discovery independently of maintenance and cosmetic lookups. */
-  private async syncInbox(): Promise<{
+  private async syncInbox(recheck: boolean): Promise<{
     groups: ApiE2eeDeviceGroup[] | null;
     confirm: boolean;
   }> {
-    const status = this.ctx.store.initialSyncStatus;
-    if (status === "failed" || status === "pending") {
-      this.setInitialSyncStatus("pending");
-    }
+    this.inbox.begin(recheck);
     try {
       const inboxComplete = await this.pullInbox();
       if (!this.isReady()) return { groups: null, confirm: false };
       const groups = await this.deviceGroups();
       if (inboxComplete === null || groups === null) {
-        this.setInitialSyncStatus("failed");
+        this.inbox.update("failed");
       } else if (!inboxComplete) {
-        this.setInitialSyncStatus("pending");
+        this.inbox.update("pending");
       }
       return { groups, confirm: inboxComplete === true && groups !== null };
     } catch (error) {
-      this.setInitialSyncStatus("failed");
+      this.inbox.update("failed");
       throw error;
-    }
-  }
-
-  private async confirmInitialInbox(): Promise<void> {
-    const { store } = this.ctx;
-    const status = store.initialSyncStatus;
-    if (!this.isReady() || this.initialInboxSettled()) {
-      return;
-    }
-    // After a longer wait, a usable inbox does not need an empty-state check.
-    // Normal Welcome reads still run and publish any chats that arrive.
-    if (status === "delayed" && store.getConversations().length > 0) {
-      return;
-    }
-    const deviceKey = ownDeviceKey(this.ctx);
-    try {
-      const { has_pending_chats: pending, has_queued_welcomes: queued } =
-        await requestWithDeadline(
-          this.ctx.scheduler,
-          E2EE_INITIAL_INBOX_WAIT_MS,
-          (signal) => this.ctx.api.getDeviceInboxStatus(deviceKey, signal)
-        );
-      // The first Welcome read can succeed before another device adds this
-      // one to existing chats. Check after delivery processing so a newly
-      // queued Welcome also keeps discovery open for the next pass.
-      if (this.hasDeviceKey(deviceKey)) {
-        if (queued === true) {
-          this.setInitialSyncStatus("pending");
-          return;
-        }
-        this.setInitialSyncStatus(pending ? "waiting" : "complete");
-      }
-    } catch (error) {
-      if (!this.isReady() || !this.hasDeviceKey(deviceKey)) return;
-      if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
-        await this.hooks.onOwnRevoked();
-      }
-      if (this.hasDeviceKey(deviceKey)) {
-        this.setInitialSyncStatus("failed");
-      }
     }
   }
 
@@ -653,7 +574,7 @@ export class EngineController {
     this.unsubscribeWake?.();
     this.unsubscribeWake = null;
     this.ctx.timers.cancel("poll");
-    this.ctx.timers.cancel(INITIAL_INBOX_WAIT_TIMER);
+    this.inbox.stop();
   }
 
   /**

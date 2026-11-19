@@ -78,6 +78,14 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
       ? "e2ee.list.awaitingInvitation.title"
       : "e2ee.list.empty.title"
   );
+  const checkAgain = () => {
+    if (!engine) return;
+    setChecking(true);
+    void engine
+      .sync({ recheckInbox: true })
+      .catch(() => undefined)
+      .finally(() => setChecking(false));
+  };
   let status = "";
   if (loading) status = t(locale, "e2ee.list.loading");
   if (waiting && !checking) status = t(locale, "e2ee.list.waiting");
@@ -110,18 +118,7 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
       </output>
       {showRetry && (
         <E2eeCenteredMessage title={status}>
-          <Button
-            variant="secondary"
-            size="md"
-            onClick={() => {
-              if (!engine) return;
-              setChecking(true);
-              void engine
-                .sync()
-                .catch(() => undefined)
-                .finally(() => setChecking(false));
-            }}
-          >
+          <Button variant="secondary" size="md" onClick={checkAgain}>
             {t(locale, "e2ee.action.retry")}
           </Button>
         </E2eeCenteredMessage>
@@ -138,15 +135,20 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
           )}
         >
           {awaitingInvitation && (
-            <Link
-              href={getEncryptedDevicesRoute()}
-              className={getButtonClasses({
-                variant: "secondary",
-                className: "tw-no-underline",
-              })}
-            >
-              {t(locale, "e2ee.list.awaitingInvitation.action")}
-            </Link>
+            <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-2">
+              <Link
+                href={getEncryptedDevicesRoute()}
+                className={getButtonClasses({
+                  variant: "secondary",
+                  className: "tw-no-underline",
+                })}
+              >
+                {t(locale, "e2ee.list.awaitingInvitation.action")}
+              </Link>
+              <Button variant="ghost" size="md" onClick={checkAgain}>
+                {t(locale, "e2ee.list.checkAgain")}
+              </Button>
+            </div>
           )}
         </E2eeCenteredMessage>
       )}

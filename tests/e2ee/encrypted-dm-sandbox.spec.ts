@@ -395,6 +395,16 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       await expect(
         phone.page.getByRole("link", { name: "Check device setup" })
       ).toHaveAttribute("href", "/messages/encrypted/devices");
+      const checked = phone.page.waitForResponse(
+        (response) =>
+          response.ok() &&
+          new URL(response.url()).pathname.endsWith("/inbox-status")
+      );
+      await Promise.all([
+        checked,
+        phone.page.getByRole("button", { name: "Check again" }).click(),
+      ]);
+      await expect(awaitingInvitation).toBeVisible();
       await phone.page.screenshot({
         path: testInfo.outputPath("encrypted-inbox-awaiting-invitation.png"),
       });

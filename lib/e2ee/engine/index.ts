@@ -358,11 +358,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  async sync(): Promise<void> {
+  async sync(options?: { readonly recheckInbox?: boolean }): Promise<void> {
     if (this.ctx.store.status !== "ready") {
       return;
     }
-    await this.controller.syncAll();
+    await this.controller.syncAll(options?.recheckInbox);
   }
 
   async pauseIncoming(): Promise<void> {

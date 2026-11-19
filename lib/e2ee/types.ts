@@ -286,7 +286,8 @@ export interface E2eeEngine {
    * (`needsNewDevice()` is true, so a combined sign-in can carry it).
    */
   getUpgrade(): { superseded: number } | null;
-  sync(): Promise<void>; // pull inbox + all groups now
+  /** Pull the inbox and all groups. Explicit rechecks also refresh roster hints. */
+  sync(options?: { readonly recheckInbox?: boolean }): Promise<void>;
   dispose(): void;
 
   // conversations

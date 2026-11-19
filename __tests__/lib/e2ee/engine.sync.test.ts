@@ -107,44 +107,81 @@ describe("E2EE engine: sync paths", () => {
     await engine.sync();
     expect(engine.getInitialSyncStatus()).toBe("awaiting-invitation");
     expect(inboxStatus).toHaveBeenCalledTimes(1);
+
+    await engine.sync({ recheckInbox: true });
+    expect(engine.getInitialSyncStatus()).toBe("awaiting-invitation");
+    inboxStatus.mockResolvedValueOnce({
+      has_pending_chats: false,
+      has_queued_welcomes: false,
+    });
+    await engine.sync({ recheckInbox: true });
+    expect(engine.getInitialSyncStatus()).toBe("complete");
+    expect(inboxStatus).toHaveBeenCalledTimes(3);
   });
 
-  it("keeps recovery available after the wait when a Welcome is still queued", async () => {
+  it("uses the latest state when a queued Welcome supersedes a roster gap before the timer fires", async () => {
     const world = await createWorld();
-    let pending = true;
-    let failed = false;
     const alice = await addUser(world, "alice", {
       api: {
         ...createFakeApiClient(world.ds, "alice"),
-        getDeviceInboxStatus: async () => {
-          if (failed) {
-            throw new E2eeApiError({ status: 503, message: "Unavailable" });
-          }
-          return {
-            has_pending_chats: pending,
-            has_queued_welcomes: pending,
-          };
-        },
+        getDeviceInboxStatus: jest
+          .fn()
+          .mockResolvedValueOnce({
+            has_pending_chats: true,
+            has_queued_welcomes: false,
+          })
+          .mockResolvedValue({
+            has_pending_chats: true,
+            has_queued_welcomes: true,
+          }),
       },
     });
     const { engine } = alice.primary;
     await engine.idle();
+    expect(engine.getInitialSyncStatus()).toBe("waiting");
+    await engine.sync();
+    expect(engine.getInitialSyncStatus()).toBe("pending");
     await waitFor(() => engine.getInitialSyncStatus() === "delayed");
-    expect(engine.getConversations()).toHaveLength(0);
-    await engine.sync();
-    expect(engine.getInitialSyncStatus()).toBe("delayed");
-    expect(engine.getConversations()).toHaveLength(0);
-
-    failed = true;
-    await engine.sync();
-    expect(engine.getInitialSyncStatus()).toBe("failed");
-
-    failed = false;
-    pending = false;
-    await engine.sync();
-    expect(engine.getInitialSyncStatus()).toBe("complete");
-    expect(engine.getConversations()).toHaveLength(0);
   });
+
+  it.each(["queued", "legacy"] as const)(
+    "keeps recovery available for %s pending inbox status",
+    async (kind) => {
+      const world = await createWorld();
+      let pending = true;
+      let failed = false;
+      const alice = await addUser(world, "alice", {
+        api: {
+          ...createFakeApiClient(world.ds, "alice"),
+          getDeviceInboxStatus: async () => {
+            if (failed) {
+              throw new E2eeApiError({ status: 503, message: "Unavailable" });
+            }
+            return kind === "legacy"
+              ? { has_pending_chats: pending }
+              : { has_pending_chats: pending, has_queued_welcomes: pending };
+          },
+        },
+      });
+      const { engine } = alice.primary;
+      await engine.idle();
+      await waitFor(() => engine.getInitialSyncStatus() === "delayed");
+      expect(engine.getConversations()).toHaveLength(0);
+      await engine.sync();
+      expect(engine.getInitialSyncStatus()).toBe("delayed");
+      expect(engine.getConversations()).toHaveLength(0);
+
+      failed = true;
+      await engine.sync();
+      expect(engine.getInitialSyncStatus()).toBe("failed");
+
+      failed = false;
+      pending = false;
+      await engine.sync();
+      expect(engine.getInitialSyncStatus()).toBe("complete");
+      expect(engine.getConversations()).toHaveLength(0);
+    }
+  );
 
   it("lets a new attempt retry an inbox read that did not respond", async () => {
     const world = await createWorld();

@@ -272,6 +272,7 @@ export const E2EE_MESSAGES = {
   "e2ee.list.awaitingInvitation.body":
     "Existing chats can appear after a trusted device in the chat adds this one.",
   "e2ee.list.awaitingInvitation.action": "Check device setup",
+  "e2ee.list.checkAgain": "Check again",
   "e2ee.list.empty.title": "No encrypted chats yet",
   "e2ee.list.empty.body":
     "Start an encrypted chat with one person or a group. Only the people in the chat can read it.",
