@@ -4116,22 +4116,6 @@ export const EN_US_ROOT_MESSAGES = {
   "desktop.appInfo.checkingUpdates": "Checking for updates…",
   "desktop.appInfo.noUpdates": "No updates found.",
   "desktop.appInfo.checkFailed": "Couldn’t check for updates. Try again.",
-  "desktopConnectPreview.title": "Desktop wallet dialog preview",
-  "desktopConnectPreview.description":
-    "This development-only page uses the same dialog as 6529 Desktop. Wallet actions are simulated; no sign-in or signature is requested.",
-  "desktopConnectPreview.stateLabel": "Dialog state",
-  "desktopConnectPreview.open": "Open dialog",
-  "desktopConnectPreview.instructions":
-    "Close the dialog to choose another state, then reopen it. The browser-wallet choice simulates waiting; the phone-wallet choice simulates a connection error. Cancel returns to the default state.",
-  "desktopConnectPreview.state.idle": "Default",
-  "desktopConnectPreview.state.starting": "Starting (disabled choices)",
-  "desktopConnectPreview.state.waiting": "Waiting for browser",
-  "desktopConnectPreview.state.signingIn": "Signing in",
-  "desktopConnectPreview.state.failed": "Sign-in failed",
-  "desktopConnectPreview.state.expired": "Sign-in timed out",
-  "desktopConnectPreview.state.startFailed": "Browser could not open",
-  "desktopConnectPreview.state.walletConnectFailed":
-    "Phone-wallet connection failed",
   "desktopConnect.title": "Connect a wallet",
   "desktopConnect.intro":
     "6529 Desktop cannot use browser extensions directly. Choose how to connect:",
