@@ -176,11 +176,12 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
       votingLabel,
     });
 
-  const handleOpenQuickVote = () => {
+  const handleOpenQuickVote = (event?: React.MouseEvent<HTMLButtonElement>) => {
     if (!isAvailable) {
       return;
     }
 
+    event?.currentTarget.focus({ preventScroll: true });
     onOpenQuickVote();
   };
 

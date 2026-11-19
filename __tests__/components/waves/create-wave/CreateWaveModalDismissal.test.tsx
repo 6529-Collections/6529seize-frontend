@@ -20,6 +20,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ contentContainerStyle: {} }),
+  useLayoutViewportLock: jest.fn(),
 }));
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest

@@ -4,7 +4,10 @@ import IconButton from "@/components/utils/button/IconButton";
 
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
-import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
+import {
+  useWaveInformationPanel,
+  WAVE_OPTIONS_VIEW,
+} from "@/components/brain/mobile/WaveInformationPanelContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
@@ -26,7 +29,8 @@ export default function WaveHeaderOptions({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const locale = useBrowserLocale();
   const panel = useWaveInformationPanel(
-    t(locale, "waves.header.ownerOptionsTitle")
+    t(locale, "waves.header.ownerOptionsTitle"),
+    WAVE_OPTIONS_VIEW
   );
   const {
     isOpen: isOptionsOpen,
