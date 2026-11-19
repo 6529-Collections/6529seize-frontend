@@ -14,7 +14,7 @@ export default function CompetitionCredits({
     value === null ? "—" : formatInteger(locale, value);
   return (
     <div
-      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4 group-[.is-vote-panel]/inline-vote:tw-col-span-2 group-[.is-vote-panel]/inline-vote:tw-row-start-3 group-[.is-vote-panel]/inline-vote:tw-rounded-none group-[.is-vote-panel]/inline-vote:tw-border-0 group-[.is-vote-panel]/inline-vote:tw-px-0 group-[.is-vote-panel]/inline-vote:tw-pb-4 group-[.is-vote-panel]/inline-vote:tw-pt-1.5"
+      className="tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-p-4 group-[.is-vote-panel]/inline-vote:tw-rounded-none group-[.is-vote-panel]/inline-vote:tw-border-0 group-[.is-vote-panel]/inline-vote:tw-p-0"
       aria-live="polite"
     >
       <dl className="tw-m-0 tw-grid tw-grid-cols-1 tw-gap-3 group-[.is-vote-panel]/inline-vote:tw-hidden sm:tw-grid-cols-3">
