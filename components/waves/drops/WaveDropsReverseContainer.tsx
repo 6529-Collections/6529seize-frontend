@@ -14,6 +14,7 @@ interface WaveDropsReverseContainerProps {
   readonly bottomPaddingClassName?: string | undefined;
   readonly bottomPaddingStyle?: React.CSSProperties | undefined;
   readonly containerClassName?: string | undefined;
+  readonly topFade?: "mask" | "overlay" | undefined;
 }
 
 export const WaveDropsReverseContainer = forwardRef<
@@ -29,6 +30,7 @@ export const WaveDropsReverseContainer = forwardRef<
       bottomPaddingClassName,
       bottomPaddingStyle,
       containerClassName,
+      topFade = "mask",
     },
     ref
   ) => {
@@ -71,14 +73,14 @@ export const WaveDropsReverseContainer = forwardRef<
       scrollRootElement !== null
     );
 
-    return (
+    const scrollContainer = (
       <div
         ref={handleScrollContainerRef}
         data-mobile-bottom-nav-scroll-target="true"
         {...{ [WAVE_DROPS_SCROLL_CONTAINER_ATTRIBUTE]: "true" }}
         className={`tw-min-h-0 tw-flex-1 ${
           bottomPaddingClassName ?? "tw-pb-6"
-        } tw-no-scrollbar lg:tw-[scrollbar-gutter:stable] tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-transition-[padding-bottom] tw-duration-300 tw-ease-out tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 [mask-image:linear-gradient(to_bottom,transparent,black_24px)] hover:tw-scrollbar-thumb-iron-300 motion-reduce:tw-transition-none lg:tw-pr-2 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
+        } tw-no-scrollbar lg:tw-[scrollbar-gutter:stable] tw-flex tw-flex-col-reverse tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-y-contain tw-bg-iron-950 tw-transition-[padding-bottom] tw-duration-300 tw-ease-out tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500 ${topFade === "mask" ? "[mask-image:linear-gradient(to_bottom,transparent,black_24px)]" : ""} hover:tw-scrollbar-thumb-iron-300 motion-reduce:tw-transition-none lg:tw-pr-2 lg:tw-scrollbar-thin ${containerClassName ?? ""}`}
         style={bottomPaddingStyle}
       >
         <div className="tw-flex tw-flex-col">
@@ -90,6 +92,20 @@ export const WaveDropsReverseContainer = forwardRef<
           {children}
         </div>
         <div ref={topSentinelRef} style={{ height: "1px" }} />
+      </div>
+    );
+
+    if (topFade === "mask") return scrollContainer;
+
+    // WebKit can blank a masked scroll layer while capturing a view transition.
+    // Paint the same fade above the chat without masking its scroll contents.
+    return (
+      <div className="tw-relative tw-flex tw-min-h-0 tw-flex-1 tw-flex-col">
+        {scrollContainer}
+        <div
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-x-0 tw-top-0 tw-z-10 tw-h-6 tw-bg-gradient-to-b tw-from-iron-950 tw-to-transparent"
+        />
       </div>
     );
   }
