@@ -10,13 +10,18 @@ The pinned coverage cells are every combination of `scope.routes`,
 (default `en-US`). When only some combinations matter, list them instead as
 `scope.cells`, an array of `{ "route", "state", "viewport", "locale" }`.
 
+`not_applicable` pins dimensions, and S1–S5 when the reviewed states exclude the
+lifecycle stage a check governs, each with a scope-based reason, for example
+`"S4": "Rejection and failure states are unchanged and not reviewed"`. The
+scoring script refuses a pin on an I, M, or S6 check, or a pin without a reason.
+
 ## Full template
 
 Use for a new surface, a multi-route polish pass, or any crypto flow.
 
 ```json
 {
-  "rubric_version": "fe-polish-judge/2.0",
+  "rubric_version": "fe-polish-judge/2.1",
   "run_id": "2026-10-11-delegation-polish",
   "candidate": { "commit": "<sha>", "build": "dev | production" },
   "scope": {
@@ -55,7 +60,7 @@ mobile; states are the ones the diff can affect.
 
 ```json
 {
-  "rubric_version": "fe-polish-judge/2.0",
+  "rubric_version": "fe-polish-judge/2.1",
   "run_id": "2026-10-11-wave-empty-state",
   "candidate": { "commit": "<sha>", "build": "dev" },
   "scope": {
@@ -80,7 +85,7 @@ and M1–M4, requires the three lens reviews, and fixes the viewports.
 
 ```json
 {
-  "rubric_version": "fe-polish-judge/2.0",
+  "rubric_version": "fe-polish-judge/2.1",
   "profile": "museum",
   "run_id": "2026-10-11-museum-research-landing",
   "candidate": { "commit": "<sha>", "build": "production" },

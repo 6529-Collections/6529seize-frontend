@@ -1,0 +1,171 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "museum-pre-art-first-production",
+  "coverage": [
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-390x844-01.png"
+    },
+    {
+      "route": "/museum/network/gifts/[accessionId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/gift-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/objects/[objectId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/object-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/programs/[programId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/program-1440x1000-01.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 4,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/home-390x844-01.png",
+        "evidence/gift-1440x1000-01.png",
+        "evidence/object-1440x1000-01.png",
+        "evidence/program-1440x1000-01.png"
+      ],
+      "findings": ["C-001", "C-002", "C-003", "C-005"],
+      "note": "No captured viewport on any route shows an artwork. The records give useful accession, donor, and status information, but the 'experience the art' half of the primary task fails on the landing page, the gift, the object, and the program."
+    },
+    "J14": {
+      "score": 4,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/gift-1440x1000-01.png",
+        "evidence/object-1440x1000-01.png",
+        "evidence/program-1440x1000-01.png"
+      ],
+      "findings": ["C-001", "C-002", "C-003", "C-004", "C-005", "C-006"],
+      "note": "Reads as a provenance registry rather than a museum publication. There is no art hierarchy, and every route opens with the same masthead and verification banner. The object label lacks a date and credit line, and caveats come before the description. Strengths are the accession numbering, the donor credit line, and the conservative status gates."
+    }
+  },
+  "checks": {
+    "M1": "fail",
+    "M2": "fail",
+    "M3": "pass",
+    "M4": "pass"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": ["M1", "J01", "J14"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/objects/[objectId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "The CENTURY #31 object record shows no image or live render of the work anywhere in the captured viewport. The top ~390 px hold the shared section masthead ('A public collection for internet-native art', its deck, and the release line), the tab bar, and the 'Verified from the canonical Museum release' banner. Below them come the accession number, title, 'Casey REAS', two status chips, a technical-verification caveat, a comparative-sample note, an 'Artist statement' panel, and a 'Technical evidence' heading. The work the record describes never appears where the record leads.",
+      "consequence": "A visitor who opens an object record cannot see the artwork. The page reads as a registry entry about a work, not a presentation of it, so it fails the primary task of experiencing the Museum's art.",
+      "change": "Make the work the first element of the object record. Render CENTURY #31 (its live generative output, or a verified still at native aspect ratio) directly under a compact section header. Put the title, artist, and accession number beside it on desktop and beneath it on narrow widths. On detail routes, reduce the shared masthead and release banner to one compact line. If the media cannot render, show a labelled fallback that states the reason instead of omitting the work.",
+      "acceptance_check": "At 1440x1000 the CENTURY #31 work is visible in the first viewport at its native aspect ratio, uncropped and unobstructed, with its title and artist next to it. No masthead deck or verification banner sits between the section header and the work.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-002",
+      "targets": ["J01", "J14"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000 and 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-01.png",
+      "observation": "No artwork appears in the first viewport at either width. At 1440 the landing page runs in this order: headline and deck, tab bar, release-verification banner, a 'Mission' section that restates the deck, then 'The 6529 Network Museum' as a text transcription. The transcription starts with a Record ID, an authority class, a source URL, a source-HTML timestamp, and a SHA-256 digest, followed by a note that operational facts 'must be reverified before action'. At 390 (evidence/home-390x844-01.png) the whole viewport is masthead, a horizontally scrolling tab row, and the release banner.",
+      "consequence": "The Museum's front page shows provenance metadata and policy prose instead of the collection. A visitor cannot see what the Museum holds or why it matters without leaving the page, and the section does not read as a museum publication.",
+      "change": "Open the landing page with the collection. After the headline, show a selection of accessioned works (for example, the works in the Casey Reas gift lot), each with image, title, artist, date, and credit line taken from the record and linking to its object record. Add a short, plain statement of what the Museum collects and why. Move the founding-note transcription and its record ID, source, and digest to Methodology or to a 'Source' disclosure below the works.",
+      "acceptance_check": "At 1440x1000 and 390x844 at least one accessioned work is visible in the first viewport with its title, artist, and credit line, and it links to its object record. The record ID, source URL, and SHA-256 digest are not in the first viewport.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-003",
+      "targets": ["J01", "J14"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/programs/[programId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/program-1440x1000-01.png",
+      "observation": "The captured program route is headed by the generic 'Programs' label and the section intro. 'Keys and Gates' appears only as a card with a lowercase subtitle ('photographs of access, control, and exit'), a status chip, and the count '16 selected works'. None of the 16 photographs appear, and neither do their photographers, a curatorial statement, the selector, or selection dates. Below the card the page ends with a footer disclaimer.",
+      "consequence": "A visitor cannot see what the program selected or learn why. A count stands in for the art, so the page supports neither experiencing nor understanding the program.",
+      "change": "Make the program its own subject. Use 'Keys and Gates' as the page heading, with the identifier secondary. Add a short curatorial statement (theme, who selected, when, and on what basis, as far as the record supports it) and the status in plain words. Follow with a grid of the 16 selected photographs at native aspect ratio, each captioned with title and artist and linking to its record. If this route is meant to be the index, link the card to a program record built this way.",
+      "acceptance_check": "At 1440x1000 the program route has 'Keys and Gates' as its page heading and a curatorial statement. The first row of selected photographs, with title and artist captions, appears in the first viewport or directly after the statement, and the grid holds all 16 selected works.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-004",
+      "targets": ["M2", "J14"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/objects/[objectId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "The panel headed 'Artist statement' holds a third-person paraphrase ('The artist describes CENTURY as a generative response to modernist painting and drawing…') with no source, link, or date. The artist's name also differs between linked records: 'Casey REAS' on the object record (object-1440x1000-01.png) and 'Casey Reas' in the gift lot title (gift-1440x1000-01.png).",
+      "consequence": "Visitors cannot tell whether the text is the artist's own words or the Museum's interpretation, and cannot check it. Two spellings of the artist's name across linked records undermine confidence that the labels follow one authority record.",
+      "change": "Either quote the artist's statement verbatim with a source line (publication or platform, and date), or retitle the panel 'About the work' and cite the source of the paraphrase. Use one authority form of the artist's name on the gift, object, and program records, taken from the Museum's artist record.",
+      "acceptance_check": "The object record's statement panel is either a verbatim quotation with a visible source and date, or a retitled interpretation with a citation. The artist's name is spelled identically on the object record and the gift lot record.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-005",
+      "targets": ["J01", "J14"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/gifts/[accessionId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/gift-1440x1000-01.png",
+      "observation": "The gift record 'Casey Reas donation from punk6529' shows none of its seven works in the viewport. Several blocks come before the 'Objects in lot' heading, which starts at the bottom edge: a process sentence and status chips, four data cards (object count, donor credit, custody ENS name, and receipt transaction hash with date), and a 'Completion limits' panel that contains only '—'.",
+      "consequence": "The gift reads as a custody ledger. The works that make the gift significant sit below a transaction hash and an empty panel, so a visitor meets the bookkeeping before the art.",
+      "change": "Place 'Objects in lot' directly after the title and the 'Gift of punk6529' credit line, as a grid of the seven works (image, title, artist, date) linking to each object record. Move the custody reference and receipt evidence into a 'Provenance' section below the works. Omit the 'Completion limits' panel when it has no entries, or state plainly that none are recorded.",
+      "acceptance_check": "At 1440x1000 the gift record shows the first row of its seven works, with titles and artist, in the first viewport ahead of the custody and receipt fields. No panel renders with only a dash as its content.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-006",
+      "targets": ["J14"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/objects/[objectId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "The object label gives the accession number, title, and artist, but no date, credit line, or rights statement appears in the viewport. The first descriptive lines are a verification caveat ('Determinism of live behavior has not yet been independently verified') and a sampling disclaimer ('it is not an artist-defined triptych'), not a description of what the work is or how it looks.",
+      "consequence": "The record lacks the tombstone a museum visitor expects. Because the scholarship opens with what has not been verified, the work's significance is harder to grasp than its caveats.",
+      "change": "Add a standard tombstone under the title, filled from the record: artist, date, medium, credit line (the gift's 'Gift of punk6529' with the accession year), accession number, and rights. Open the interpretation with one or two sentences about the work itself. Move the determinism caveat and the comparative-sample note into the technical or research section.",
+      "acceptance_check": "At 1440x1000 the object label shows artist, date, medium, credit line, and accession number together under the title, and the first interpretive sentence describes the work rather than stating a verification caveat.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The structured accession numbering (6529NM.2026.001 for the lot, 6529NM.2026.001.01 for the object) and the lot-to-object hierarchy with 'Back to accession register' and 'Back to accession' links",
+    "The public donor credit line 'Gift of punk6529' on the gift record",
+    "Conservative, gate-specific status chips ('Formally Accepted', 'Accessioned') and the explicit refusal to infer accession, ownership, or rights from a transfer or a selected outcome",
+    "The comparative-sample context for CENTURY #31 (one state in a three-token sample, not an artist-defined triptych), kept as scholarship placed after the work",
+    "The link to the release manifest as provenance that stays available but secondary",
+    "The restrained dark 6529 shell, with no crypto-casino or generic web3 styling competing with the collection"
+  ]
+}

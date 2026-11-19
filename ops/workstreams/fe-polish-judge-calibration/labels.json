@@ -1,0 +1,75 @@
+{
+  "c01": {
+    "kind": "control",
+    "expect": "no-required"
+  },
+  "c02": {
+    "kind": "seeded",
+    "seed": "brief leakage in the intro",
+    "expect": ["I2"]
+  },
+  "c03": {
+    "kind": "seeded",
+    "seed": "fake profundity heading and paragraph",
+    "expect": ["J07"]
+  },
+  "c04": {
+    "kind": "seeded",
+    "seed": "governance theater paragraph",
+    "expect": ["I3"]
+  },
+  "c05": {
+    "kind": "seeded",
+    "seed": "invented metrics tiles",
+    "expect": ["I1"]
+  },
+  "c06": {
+    "kind": "seeded",
+    "seed": "internal path, commit, and TODO as a headline",
+    "expect": ["I2"]
+  },
+  "c07": {
+    "kind": "control",
+    "expect": "no-required"
+  },
+  "c08": {
+    "kind": "seeded",
+    "seed": "false urgency mint banner and misleading claim CTA",
+    "expect": ["S6"]
+  },
+  "c09": {
+    "kind": "repeat",
+    "of": "c01",
+    "expect": "no-required"
+  },
+  "c10": {
+    "kind": "repeat",
+    "of": "c01",
+    "expect": "no-required"
+  },
+  "c11": {
+    "kind": "recorded",
+    "source": "museum-home-consolidation: three reviewers PASS, shipped",
+    "expect": "no-required"
+  },
+  "c12": {
+    "kind": "recorded",
+    "source": "museum-art-first-rebuild: owner rejected registry-first pages with no artwork",
+    "expect": "required"
+  },
+  "c13": {
+    "kind": "recorded",
+    "source": "museum-art-first-rebuild: owner review passed release-verified captures",
+    "expect": "no-required"
+  },
+  "c14": {
+    "kind": "recorded",
+    "source": "mint-progress-modals: reviewed and shipped",
+    "expect": "no-required"
+  },
+  "c15": {
+    "kind": "recorded",
+    "source": "mint-success-modal: reviewed and shipped",
+    "expect": "no-required"
+  }
+}

@@ -1,0 +1,233 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "museum-pre-art-first-production",
+  "coverage": [
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-390x844-01.png"
+    },
+    {
+      "route": "/museum/network/gifts/[accessionId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/gift-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/objects/[objectId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/object-1440x1000-01.png"
+    },
+    {
+      "route": "/museum/network/programs/[programId]",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/program-1440x1000-01.png"
+    }
+  ],
+  "dimensions": {
+    "J02": {
+      "score": 6.5,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/gift-1440x1000-01.png",
+        "evidence/object-1440x1000-01.png",
+        "evidence/program-1440x1000-01.png",
+        "evidence/home-390x844-01.png"
+      ],
+      "findings": ["V-002", "V-003", "V-008"],
+      "note": "The six section tabs are a sensible structure, and the gift and object pages have back links. But no tab marks the current section on any route, the program route looks like the Programs index with no back link or program heading, and at 390 the tab row hides half the sections."
+    },
+    "J03": {
+      "score": 5,
+      "evidence": [
+        "evidence/gift-1440x1000-01.png",
+        "evidence/object-1440x1000-01.png",
+        "evidence/program-1440x1000-01.png",
+        "evidence/home-1440x1000-01.png"
+      ],
+      "findings": ["V-004", "V-005", "V-006"],
+      "note": "On every detail route, the section masthead H1, the intro, the tabs and the tinted verification banner fill the top ~390px. The record title sits at y≈513 in smaller type than the masthead, no artwork is in any first viewport, and on the home page the provenance metadata renders at body-prose size."
+    },
+    "J04": {
+      "score": 5,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/gift-1440x1000-01.png",
+        "evidence/object-1440x1000-01.png",
+        "evidence/program-1440x1000-01.png"
+      ],
+      "findings": ["V-005", "V-007"],
+      "note": "The dark iron surfaces, radius hierarchy and kicker system look native to 6529. But across all five captures the Museum presents as a records portal (SHA-256 and transaction hashes, a 'canonical release · main' label, KPI-style cards) with no artwork visible, so 'art with museum care' is absent from the first viewports."
+    },
+    "J05": {
+      "score": 6,
+      "evidence": [
+        "evidence/gift-1440x1000-01.png",
+        "evidence/object-1440x1000-01.png",
+        "evidence/program-1440x1000-01.png",
+        "evidence/home-1440x1000-01.png"
+      ],
+      "findings": ["V-004", "V-007"],
+      "note": "The same ~390px chrome block repeats on every route. The gift page boxes each field in its own padded card and spends a full-width card on a lone '—'. The object and program pages leave the right ~40% of the column empty."
+    },
+    "J06": {
+      "score": 6,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/home-390x844-01.png",
+        "evidence/gift-1440x1000-01.png"
+      ],
+      "findings": ["V-001", "V-002", "V-006"],
+      "note": "Kickers, chips and body type are consistent across routes. But the home record block runs labels and values together inline at body size, text is clipped at 390, and the mobile tab row shows a bright white native scrollbar on the dark UI."
+    },
+    "J10": {
+      "score": 4.5,
+      "evidence": ["evidence/home-390x844-01.png"],
+      "findings": ["V-001", "V-002"],
+      "note": "At 390 the page scrolls horizontally, the mission paragraph is cut off mid-word ('perman'), the tab row clips 'Acces' and hides Governance and Methodology, and the content column is only ~280px wide next to the persistent icon rail."
+    }
+  },
+  "checks": {},
+  "findings": [
+    {
+      "id": "V-001",
+      "targets": ["J10", "J06"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network · default · 390x844 · en-US",
+      "evidence": "evidence/home-390x844-01.png",
+      "observation": "A page-level horizontal scrollbar sits across the bottom of the viewport. Under 'Culture held in public' the paragraph is cut off at the right edge ('The 6529 Network Museum is a perman'). The desktop icon rail stays visible and leaves a ~280px content column. The home page's long unbroken tokens (the Arweave source URL and the 'sha256:…' hash chip) are the likely cause of the overflow.",
+      "consequence": "Phone visitors have to pan sideways to read the Museum's opening text and lose line endings. This is the pinned mobile viewport, and the page cannot be read there without horizontal scrolling.",
+      "change": "Constrain the Museum content column to the viewport (min-w-0 on flex/grid children) and let long URLs and hashes wrap or truncate (overflow-wrap:anywhere, or middle-truncate with a copy control). Confirm that the shell switches to its mobile navigation at 390 on a touch-first device so the rail does not take ~20% of the width.",
+      "acceptance_check": "At 390x844 en-US on /museum/network there is no horizontal page scrollbar, and every paragraph, including the Record ID, Source and SHA-256 block, wraps inside the viewport with no clipped words.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-002",
+      "targets": ["J10", "J02"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 390x844 · en-US",
+      "evidence": "evidence/home-390x844-01.png",
+      "observation": "The section tab row is cut off after 'Collections | Acces'. Governance and Methodology are off-screen. The only cue to scroll is a bright white, Windows-classic scrollbar track with arrow buttons under the tabs, which clashes with the dark surface.",
+      "consequence": "Mobile visitors may not find half of the Museum's sections, and the light scrollbar reads as a rendering defect.",
+      "change": "Either wrap the six tabs onto two rows at narrow widths, or keep a horizontal scroller with a hidden or dark thin scrollbar plus an edge fade, and scroll the current tab into view.",
+      "acceptance_check": "At 390x844 the tab row shows no light scrollbar track, and every section name is either fully visible or clearly signalled as scrollable by an edge fade, with the current section's tab in view.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-003",
+      "targets": ["J02"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network, /museum/network/gifts/[accessionId], /museum/network/objects/[objectId], /museum/network/programs/[programId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/program-1440x1000-01.png",
+      "observation": "In all four desktop captures the six tabs (Overview, Collections, Accessions, Programs, Governance, Methodology) have the same dark pill style. None is marked as current, including 'Programs' on the program route and 'Overview' on the home page.",
+      "consequence": "The masthead is also identical on every route, so the top of every page looks the same and visitors cannot tell which part of the Museum they are in.",
+      "change": "Give the current section's tab a distinct selected treatment (for example a white or primary-tinted fill, or an underline, plus aria-current=\"page\"): Overview on the home page, Accessions on gift and object records, Programs on program pages.",
+      "acceptance_check": "In each 1440x1000 capture, exactly one tab is visibly distinct and it matches the route's section.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-004",
+      "targets": ["J03", "J05"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/gifts/[accessionId], /museum/network/objects/[objectId], /museum/network/programs/[programId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "Each detail route repeats the home masthead: the H1 'A public collection for internet-native art', the intro paragraph, a floating 'Canonical Museum release · main' label, the tab row, and a full-width green-tinted 'Verified from the canonical Museum release' banner. Together they fill y≈0–390. The record's own title ('CENTURY #31', 'Casey Reas donation from punk6529') starts at y≈513 in smaller type than the masthead H1, and the release provenance appears twice above the content.",
+      "consequence": "The largest and most prominent element on every object, lot and program page is the same section chrome, so the thing the visitor opened is secondary and every route looks alike at first glance.",
+      "change": "On detail routes, replace the full masthead with a compact section header (a small '6529 Network Museum' kicker and the tabs). Make the record title the page's largest heading, and reduce the verification banner to one muted line, or move it to the page foot, keeping its manifest and GitHub links. Keep the full H1 and intro only on /museum/network.",
+      "acceptance_check": "At 1440x1000 on the gift, object and program routes, the record title is the largest text on the page and begins within the top ~250px, and the home H1 and intro sentence do not appear on those routes.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-005",
+      "targets": ["J04", "J03"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network, /museum/network/gifts/[accessionId], /museum/network/objects/[objectId], /museum/network/programs/[programId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/object-1440x1000-01.png",
+      "observation": "None of the five first viewports shows an artwork. The object page for CENTURY #31 shows the title, chips, prose and an 'Artist statement' card in a ~770px column, with the right ~40% empty. On the gift page the 'Objects in lot' section starts at the bottom edge (y≈990), below a 2x2 metadata grid. The program card reads '16 selected works' with no thumbnails. The home page is text, a URL and a SHA-256 hash.",
+      "consequence": "The Museum reads as a records and compliance portal, not an art museum. Visitors have to scroll or click through chrome and hashes before they see any work, which undercuts the section's purpose.",
+      "change": "Compose art-first. On object pages, lead with the work's image at its correct aspect ratio beside or above the title and caption, using the empty right column at 1440. On gift pages, show the lot's object thumbnails before the custody and receipt details. On program cards, add a thumbnail strip of selected works. On the home page, put a featured work or collection imagery that links into Collections in the first viewport.",
+      "acceptance_check": "At 1440x1000, the first viewport of each of the home, gift, object and program routes shows at least one artwork image from the record at its correct aspect ratio. On the object route, the work's image is the largest element in the viewport.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-006",
+      "targets": ["J06", "J03"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000 · en-US",
+      "evidence": "evidence/home-1440x1000-01.png",
+      "observation": "Under the heading 'The 6529 Network Museum', the record fields run together as one inline paragraph at full body size: 'Record ID: [6529NM-POL-001] Authority class: founding institutional note Source: https://… Source HTML observed: 2026-08-01 UTC Source HTML SHA-256: [sha256:75889…]'. No field has its own line or separator. That heading is also the same size as the section heading 'Culture held in public' directly above it, so two peer headings stack.",
+      "consequence": "The provenance block reads as a garbled sentence, outweighs the mission prose, and blurs where the section ends and the transcribed note begins.",
+      "change": "Render the record fields as a compact labelled list (one label/value row each) in small muted type below or beside the transcription, or collapse them under a 'Record details' disclosure. Middle-truncate the hash with a copy control. Size the transcription's headings below the section heading.",
+      "acceptance_check": "At 1440x1000, each record field is on its own row with an aligned label and value, the block's type is smaller and more muted than the body prose, and 'The 6529 Network Museum' renders smaller than 'Culture held in public'.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-007",
+      "targets": ["J05", "J04"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/gifts/[accessionId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/gift-1440x1000-01.png",
+      "observation": "The donation's facts sit in four equal, heavily padded cards in a KPI-style 2x2 grid: 'OBJECTS IN LOT 7', 'PUBLIC DONOR CREDIT Gift of punk6529', 'CUSTODY REFERENCE networkmuseum.6529.eth', and 'RECEIPT EVIDENCE 0xbdde33…0498 · Aug 1, 2026' with the full hash in small mono. Below them, a full-width 'Completion limits' card contains only '—'.",
+      "consequence": "The gift looks like a dashboard rather than a museum record with a credit line. The empty card spends ~100px on nothing, and together these push the lot's objects below the fold.",
+      "change": "Replace the grid with one compact record block of label/value rows or a credit line (for example 'Gift of punk6529 · 7 objects · Received Aug 1, 2026', then custody and receipt rows with a truncated hash that links to the explorer). Omit 'Completion limits' when it is empty, or state its content in one line.",
+      "acceptance_check": "At 1440x1000 the gift page has no standalone card whose only content is '—', and the donor credit, object count, custody and receipt fields sit together in a single block no taller than about 140px.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-008",
+      "targets": ["J02"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/programs/[programId] · default · 1440x1000 · en-US",
+      "evidence": "evidence/program-1440x1000-01.png",
+      "observation": "The program route capture shows the kicker 'PROGRAMS' over the heading 'Programs', the general programs description, and 'Keys and Gates' as a half-width list card. Unlike the gift and object records, it has no back link and no program-level heading. The kicker also just repeats the heading.",
+      "consequence": "A visitor on a program's page cannot tell they are on that program's own page or how to get back to the program list, and the page adds nothing beyond the index card.",
+      "change": "Follow the gift and object detail pattern: a 'Back to programs' link, the program ID kicker (6529NM-AP-01), 'Keys and Gates' as the page heading, then status, description and the selected works. If this capture is actually the index, recapture the [programId] route.",
+      "acceptance_check": "At 1440x1000 the program route shows a 'Back to programs' link and 'Keys and Gates' as the record heading, laid out like the gift and object pages, with no kicker that only repeats the heading.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Dark iron surfaces, rounded-xl cards and rounded-lg tab pills that sit natively inside the 6529 app shell",
+    "Back links on records ('Back to accession register' on the gift, 'Back to accession' on the object) above an accession-number kicker and the record title",
+    "Compact rounded status chips beside record titles (Formally Accepted, Accessioned)",
+    "Consistent tracked uppercase primary-blue kicker system for section and record identifiers",
+    "Verification banner's links to the release manifest and GitHub (keep them reachable once the banner is compacted)",
+    "Verification banner stacking its text and links cleanly at 390",
+    "Readable home body-prose line length at 1440 (~85–90 characters per line)"
+  ]
+}

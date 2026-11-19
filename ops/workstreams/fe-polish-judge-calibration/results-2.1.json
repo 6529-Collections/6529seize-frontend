@@ -1,0 +1,246 @@
+{
+  "summary": {
+    "repeat_totals": [],
+    "repeat_mean": null,
+    "repeat_spread": null,
+    "repeat_outcomes": []
+  },
+  "results": {
+    "c16": {
+      "label": {
+        "kind": "control",
+        "of": "c01",
+        "note": "phone device profile capture",
+        "expect": "adjudicate"
+      },
+      "decision": "repair",
+      "total": 8.048,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P2",
+          "targets": ["J06", "J10", "J03"],
+          "observation": "The Collection care section is the only bordered box on the page. It has generous top and bottom padding but almost none at the sides. At 1440 the heading 'Collection care' starts against the left border (page-1440x1000-04.png). At 390 every line starts against the left border and the longest lines reach the right border, for example 'Future stewards should be able to reconstruct the'. The vertical edges render heavier and lighter than the 1px top and bottom edges, and the corners are square. Every sibling section uses a top hairline divider with no frame."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "The governance card says 'The Network uses TDH-weighted voting for major collecting and policy decisions' without saying what TDH is or who votes. It continues with 'Adopted effects and proposals awaiting adoption remain separate in the public record.', where 'effects' is unexplained internal vocabulary. The next-stage cards in page-1440x1000-04.png are abstract: 'Approved Museum decisions will have a form that can be independently verified on Ethereum and in the institutional record' and 'Valid decisions will have a reliable path to an authorized Ethereum action'."
+        }
+      ],
+      "failed_checks": [],
+      "outcome": "adjudicate"
+    },
+    "c17": {
+      "label": {
+        "kind": "control",
+        "of": "c07",
+        "note": "phone device profile capture",
+        "expect": "adjudicate"
+      },
+      "decision": "incomplete",
+      "total": 7.938,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P2",
+          "targets": ["J01", "J07"],
+          "observation": "Above the mint card, the only explanation of 6529 is the eyebrow '6529' and the headline 'Building a decentralized network state'. The descriptive section ('6529 is a network society … funds, builds, and coordinates public-goods work…') comes after the Latest Drop card and is still abstract. No sentence on the page says what a visitor can do here, although the page itself shows a Memes mint, a TDH vote queue, and community chats."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J07", "J06"],
+          "observation": "The chats section is headed 'Tired of bot replies?' with the subhead 'JOIN THE MOST INTERESTING CHATS IN CRYPTO'. It never names waves, says nothing about how these six cards were chosen, and the superlative is unsupported. It is also the only centered section heading on the page, and its 'View all' is centered at the bottom, while 'Coming up' is left-aligned with 'View all' at the top right."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J06", "J07"],
+          "observation": "The 6529 Book Club card preview shows literal markdown at both widths: '**Punk6529's SciFi/NearFi Book List** **Background** I consider this my basic NearFi (Sci…'."
+        },
+        {
+          "id": "F-004",
+          "severity": "P2",
+          "targets": ["J04", "J06"],
+          "observation": "The statement 'We're extending what Bitcoin and Ethereum proved for money and code to human coordination itself, so any activity can be organized permissionlessly.' is set in monospace inside a bordered panel, styled like a terminal readout, beside the sans-serif mission paragraph."
+        },
+        {
+          "id": "F-005",
+          "severity": "P2",
+          "targets": ["J06", "J10"],
+          "observation": "At 390 px, the network-society block starts about 12 px from the left edge, and its quote panel and divider run to about 378 px. The block includes '6529 is a network society', its paragraph, the goal line, the quote panel, and the divider. 'Latest Drop', 'Coming up', and every card sit at a 16 px gutter (16–372 px)."
+        },
+        {
+          "id": "F-006",
+          "severity": "P2",
+          "targets": ["J06", "J10"],
+          "observation": "At 390 px, the footer's '|' separators wrap along with the links. Lines begin with '| Cookie Policy' and '| Contact Us', and the social row ends with '@6529Collections |' before '6529-Collections' drops to the next line."
+        },
+        {
+          "id": "F-007",
+          "severity": "P2",
+          "targets": ["J13", "J07"],
+          "observation": "With no wallet connected, the Latest Drop card shows 'YOUR ALLOWANCE', an off 'Subscription Minting' toggle with 'SET UP →', 'x67 subscriptions', and 'FLOOR N/A'. Only a '?' icon hints at what subscription minting is. 'x67' does not say whose subscriptions it counts or what they are for."
+        },
+        {
+          "id": "F-008",
+          "severity": "P2",
+          "targets": ["J13", "J07"],
+          "observation": "Coming up ranks submissions as 'LEADING 37,248,905 TDH' and '2ND PLACE 37,034,203 TDH' with no explanation of TDH. Each wave card shows 'Score 96', 'Hot 98', and 'REP +691.8K' with no definition, and Score and Hot fall between 92 and 98 on every card."
+        }
+      ],
+      "failed_checks": [],
+      "outcome": "adjudicate"
+    },
+    "c18": {
+      "label": {
+        "kind": "evidence-gap",
+        "of": "c01",
+        "note": "same evidence as c01: truncated phone capture with the desktop shell",
+        "expect": "adjudicate"
+      },
+      "decision": "incomplete",
+      "total": null,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P2",
+          "targets": ["J04", "J06", "J03"],
+          "observation": "Only the 'Collection care' section sits inside a square-cornered frame. The frame's left edge is heavier and looks doubled, its top and bottom edges are thin, and there is a right edge. Every other section is separated only by a top hairline. The frame has vertical padding but almost none on the left, so the heading starts about 3 px right of the content edge used by every other heading. The 390 capture shows the same frame with body text about 3 px from the border."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J07"],
+          "observation": "The audience is visitors learning what the Museum is, but several cards use internal vocabulary. 'How the Museum works' says 'TDH-weighted voting' without explaining TDH, 'Adopted effects and proposals awaiting adoption remain separate', 'The repository is the Museum's current canonical institutional record', and 'the object-level rights record'. 'The next stage' (page-1440x1000-04.png) says 'Decision-constrained custody', 'technical custody controls', and 'Valid decisions will have a reliable path to an authorized Ethereum action'. 'Collection care' opens in the present tense with 'The Museum is built to survive changes in ... operators, signers', while the decision-bound custody it relies on is described above as a future stage."
+        }
+      ],
+      "failed_checks": [],
+      "outcome": "adjudicate"
+    },
+    "c19": {
+      "label": {
+        "kind": "seeded",
+        "of": "c02",
+        "seed": "brief leakage in the intro",
+        "expect": ["I2"]
+      },
+      "decision": "incomplete",
+      "total": null,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P1",
+          "targets": ["I2", "J07", "J01", "J04"],
+          "observation": "The lede directly under the H1 'The 6529 Network Museum' reads 'A calm, premium, curator-grade experience: clear hierarchy, considered pacing, and actionable insight into the collection.' It describes the interface's own qualities in build-brief vocabulary and says nothing about the Museum. The same text appears at 390 px (page-390x844-01.png)."
+        },
+        {
+          "id": "F-002",
+          "severity": "P2",
+          "targets": ["J06", "J04"],
+          "observation": "'Collection care' is the only section drawn inside a bordered, square-cornered frame, and the frame has no left inner padding. The heading 'Collection care' sits flush against the left border, while the top, right and bottom have clear padding. At 390 px the body paragraphs also touch the left border (page-390x844-08.png). Every other section uses a top divider rule instead of a frame."
+        }
+      ],
+      "failed_checks": ["I2"],
+      "outcome": "detected"
+    },
+    "c20": {
+      "label": {
+        "kind": "seeded",
+        "of": "c08",
+        "seed": "false urgency mint banner and misleading claim CTA",
+        "expect": ["S6"]
+      },
+      "decision": "incomplete",
+      "total": null,
+      "errors": [],
+      "required": [
+        {
+          "id": "F-001",
+          "severity": "P0",
+          "targets": [
+            "S6",
+            "I1",
+            "I3",
+            "S1",
+            "J03",
+            "J04",
+            "J07",
+            "J13",
+            "J01"
+          ],
+          "observation": "A full-width red-to-orange gradient banner sits between the headline and the CTAs: 'Mint closes in 04:59 - only 3 left! Connect your wallet to claim instantly. No fees, ever.' The same page contradicts every claim. The Latest Drop card shows 'Public Phase Ends In 17h : 21m : 27s', Edition 149/331, and Mint price 0.06529 ETH (page-1440x1000-02.png). At 390 the banner wraps to three lines directly under the headline (page-390x844-01.png)."
+        },
+        {
+          "id": "F-002",
+          "severity": "P1",
+          "targets": ["I3", "S1", "S6", "J01", "J07", "J13"],
+          "observation": "The secondary hero CTA next to 'Start here' reads 'Claim your free Meme now'. The current drop is priced at 0.06529 ETH on the same screen. The run record says this slot is the visitor's connect-wallet step. In the 390 capture the label overflows the button row and is clipped to 'im your free Meme no' (page-390x844-01.png)."
+        },
+        {
+          "id": "F-003",
+          "severity": "P2",
+          "targets": ["J06", "J07"],
+          "observation": "The 6529 Book Club wave card preview shows literal markdown: '**Punk6529's SciFi/NearFi Book List** **Background** I consider this my basic NearFi (Sci…'. The same text appears at 390 (page-390x844-07.png)."
+        },
+        {
+          "id": "F-004",
+          "severity": "P2",
+          "targets": ["J04", "J06"],
+          "observation": "The card beside '6529 is a network society' sets a full sentence of prose ('We're extending what Bitcoin and Ethereum proved for money and code to human coordination itself, so any activity can be organized permissionlessly.') in a monospace face, framed like a terminal readout. It does the same at 390 (page-390x844-03.png)."
+        }
+      ],
+      "failed_checks": ["I1", "I3", "S1", "S6"],
+      "outcome": "detected"
+    },
+    "c21": {
+      "label": {
+        "kind": "recorded",
+        "of": "c14",
+        "source": "mint-progress-modals: reviewed and shipped",
+        "expect": "accepted"
+      },
+      "decision": "accepted",
+      "total": 8.844,
+      "errors": [],
+      "required": [],
+      "failed_checks": [],
+      "outcome": "agrees"
+    },
+    "c22": {
+      "label": {
+        "kind": "recorded",
+        "of": "c15",
+        "source": "mint-success-modal: reviewed and shipped",
+        "expect": "no-required"
+      },
+      "decision": "accepted",
+      "total": 8.738,
+      "errors": [],
+      "required": [],
+      "failed_checks": [],
+      "outcome": "agrees"
+    },
+    "c23": {
+      "label": {
+        "kind": "recorded",
+        "of": "c22",
+        "note": "after the S3 lifecycle-evidence prompt line",
+        "source": "mint-success-modal: reviewed and shipped",
+        "expect": "no-required"
+      },
+      "decision": "incomplete",
+      "total": 8.85,
+      "errors": [],
+      "required": [],
+      "failed_checks": [],
+      "outcome": "agrees"
+    }
+  }
+}

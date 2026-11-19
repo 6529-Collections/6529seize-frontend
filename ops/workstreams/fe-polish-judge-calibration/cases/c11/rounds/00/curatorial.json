@@ -1,0 +1,132 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "museum-home-consolidation-final",
+  "coverage": [
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-1440x1000-01..04"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-820x1000-01..06"
+    },
+    {
+      "route": "/museum/network",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/home-390x844-01..10"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/home-1440x1000-02.png",
+        "evidence/home-820x1000-01.png",
+        "evidence/home-390x844-01.png",
+        "evidence/home-390x844-06.png"
+      ],
+      "findings": ["C-001", "C-004"],
+      "note": "At every viewport the page opens on a captioned principal work, and the Acquisitions section states holdings and status plainly. But one of the five image slots repeats the hero, and the second half of the page shows no art, which weakens the 'experience the art' part of the task."
+    },
+    "J14": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/home-1440x1000-01.png",
+        "evidence/home-1440x1000-02.png",
+        "evidence/home-1440x1000-03.png",
+        "evidence/home-820x1000-03.png",
+        "evidence/home-390x844-04.png",
+        "evidence/home-390x844-05.png",
+        "evidence/home-390x844-07.png"
+      ],
+      "findings": ["C-001", "C-002", "C-003", "C-004"],
+      "note": "Reads as a credible museum front page, with record-based status lines and substantive acquisition texts. It is held back by a repeated principal image, object labels that follow no single format, one photograph framed differently from the others, and a text-only second half that features one program a second time."
+    }
+  },
+  "checks": {
+    "M1": "pass",
+    "M2": "pass",
+    "M3": "pass",
+    "M4": "fail"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": ["M4", "J14", "J01"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-01.png, evidence/home-1440x1000-02.png, evidence/home-820x1000-01.png, evidence/home-820x1000-03.png, evidence/home-390x844-01.png, evidence/home-390x844-05.png",
+      "observation": "Themes and Variations #210 (Vera Molnár, in collaboration with Martin Grasser) is the hero image, and the same image appears again as the fourth Acquisitions card ('A Gift of Themes and Variations #210') on the same route at all three viewports. At 820 both copies are large (near full width in the hero, half width in the grid) and two screens apart. The run record does not name this repetition as a curatorial decision.",
+      "consequence": "One of the page's five artwork slots repeats a work, so visitors see only four distinct works. On tablet and mobile the same blue-and-cream composition returns a few screens later, which makes the page look like a template filling slots rather than a curated selection.",
+      "change": "Lead the hero with a different accessioned work that is not in the Acquisitions grid, for example another work from The System in Seven States or Conflict at Its Edges, captioned from its record. Keep #210 as the only image for its gift card, since that acquisition is a single work. If #210 must lead the page, name the repetition as a curatorial decision in the run record.",
+      "acceptance_check": "At 1440, 820 and 390, each artwork image appears only once on /museum/network, or the run record names the repetition as a curatorial decision.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-002",
+      "targets": ["J14"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-01.png, evidence/home-1440x1000-02.png, evidence/home-820x1000-03.png, evidence/home-390x844-03.png, evidence/home-390x844-04.png",
+      "observation": "Only the Seymour card has a date and credit line ('David Seymour, Negev, 1952. © David Seymour/Magnum Photos 2022.'). The hero and the other three work labels show only title and 'artist · project', with no year: 'Themes and Variations #210 / Vera Molnár, in collaboration with Martin Grasser · Themes and Variations', 'CENTURY #31 / Casey Reas · CENTURY', and 'Take the Key! / GulYildiz'. The last credit is a run-together, handle-style name.",
+      "consequence": "The object labels follow no single format. Visitors can date only one of the five works shown, and one artist credit reads like a username rather than a museum credit, which weakens the page as a public record.",
+      "change": "Give every work label on the page the same core fields from the record: title, artist (the record's display name) and year. Where a rights holder requires a credit line, show it in the same position and style on every card that needs one.",
+      "acceptance_check": "At all three viewports, the hero and all four Acquisitions cards show title, artist and year from the record in one consistent format, and the Take the Key! artist credit matches the record's display name.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-003",
+      "targets": ["J14"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-02.png, evidence/home-820x1000-03.png, evidence/home-390x844-04.png",
+      "observation": "The Seymour photograph 'Patrolling the border between the Negev Desert and Jordan' is the only artwork with rounded corners; the hero and the other three card images have square corners. It also fills a square frame, while 'Take the Key!' is shown at its own portrait proportions within the same grid, so the captures cannot confirm that the photograph shows its full source frame.",
+      "consequence": "The rounded corners trim the edges of a documentary photograph and make it look like a social-feed tile rather than a collection object. The different framing suggests this one work is treated by different rules than the rest of the collection.",
+      "change": "Render the Seymour photograph with the same media treatment as the other Acquisitions cards: square corners, shown whole at its source aspect ratio.",
+      "acceptance_check": "At all three viewports, the Seymour photograph has square corners, uses the same image treatment as the other three cards, and shows its full source frame without cropping.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-004",
+      "targets": ["J14", "J01"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/home-1440x1000-03.png, evidence/home-1440x1000-04.png, evidence/home-820x1000-04.png, evidence/home-820x1000-05.png, evidence/home-390x844-06.png, evidence/home-390x844-07.png, evidence/home-390x844-08.png",
+      "observation": "The last artwork on the page is in the Acquisitions grid. Everything after it is text only: the four-principle strip, 'Explore the collection' with three text links, the Artists, Acquisitions and Research features, 'How the Network Museum works' and 'Public record'. That covers tiles 03–04 at 1440, tiles 04–06 at 820, and tiles 06–10 at 390 (half the mobile page). The 'Casey Reas' feature introduces the artist without any of his work. The 'Keys and Gates' feature presents again, with nearly the same description, the program already shown as an Acquisitions card a few screens earlier.",
+      "consequence": "The second half of the Museum's front page reads as a link directory. The art-led structure set up at the top falls away, and the one artist the page singles out appears only as a name.",
+      "change": "Give the Artists feature an image of a held Casey Reas work that is not used elsewhere on the page, captioned from the record. Replace the repeated Keys and Gates feature with a destination not already presented above, or remove it and keep two features.",
+      "acceptance_check": "At all three viewports, no acquisition or program is featured twice on the page, and the Artists feature shows a captioned, held work by that artist that appears nowhere else on the page.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The hero leads with a principal work shown whole at its aspect ratio, captioned with title, artist and project. At 820 and 390 the artwork comes before the text.",
+    "Each Acquisitions card pairs a representative work with the acquisition's own description and a plain status line ('Accessioned into the permanent Collection' / 'Selected through an acquisition program; unminted').",
+    "The Acquisitions intro names the three completed acquisitions and says that Keys and Gates is in progress, with sixteen selected photographs awaiting minting and accession.",
+    "'Take the Key!' keeps its portrait proportions rather than being forced into a square.",
+    "The Seymour card's dated credit line and rights attribution, as the model for the other labels.",
+    "Substantive acquisition texts that describe what each group is and how it was formed (for example 'Five photographs made between 1952 and 2016 ... Accessioned together from two Magnum Photos 75 curations').",
+    "The public-record links (Museum Safe, Decisions, Public repository) and the Source and contribute strip.",
+    "A restrained dark presentation with no interface elements over any artwork."
+  ]
+}

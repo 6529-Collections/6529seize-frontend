@@ -1,0 +1,221 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "04d8b1e250984d73c2c537794e6b83e2ed1f6721",
+  "coverage": [
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-1440x1000-01.png through evidence/page-1440x1000-05.png"
+    },
+    {
+      "route": "/museum/network/about",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/page-390x844-01.png through evidence/page-390x844-09.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png"
+      ],
+      "findings": ["F-001", "F-004"],
+      "note": "The page explains what the Museum is, shows real works, and links each section onward. But the lead presents invented KPI metrics instead of holdings, and the governance answer depends on 'TDH', which the page never explains."
+    },
+    "J02": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-1440x1000-05.png"
+      ],
+      "findings": ["F-005"],
+      "note": "The order is logical: definition, works, collection, scholarship, public access, governance, next stage, care, sources. Only three near-duplicate links to the Collection (P3) remain."
+    },
+    "J03": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "After the H1, the bold KPI numerals are the heaviest elements in the lead and push the art below the fold. The framed Collection care section gets more weight than its peers for no reason."
+    },
+    "J04": {
+      "score": 6.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-002"],
+      "note": "Most of the page has a restrained, dark editorial museum register. A leading SaaS KPI-card row of vanity metrics and a square-cornered, unpadded frame break both the 6529 style and the radius rules."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-390x844-04.png"
+      ],
+      "findings": [],
+      "note": "Each two-column section groups its text with one onward link, and the captions scan quickly. The 110-140 px gaps between sections at 1440 are slightly loose but suit an About page."
+    },
+    "J06": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/page-1440x1000-04.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-1440x1000-02.png",
+        "evidence/page-1440x1000-05.png"
+      ],
+      "findings": ["F-002", "F-005", "F-006", "F-007"],
+      "note": "Type roles are consistent overall. The Collection care frame has uneven edges and no padding, so text sits against the border. Smaller P3 issues: work-caption alignment, 'Collection' capitalization, and footer alignment."
+    },
+    "J07": {
+      "score": 6.5,
+      "evidence": [
+        "evidence/page-1440x1000-01.png",
+        "evidence/page-1440x1000-03.png",
+        "evidence/page-1440x1000-04.png"
+      ],
+      "findings": ["F-001", "F-004", "F-005"],
+      "note": "Most copy is specific museum language that names its mechanisms. But the lead shows unsourced satisfaction, growth, and reach figures, and the governance copy relies on unexplained 'TDH' and 'adopted effects'."
+    },
+    "J10": {
+      "score": 7.0,
+      "evidence": [
+        "evidence/page-390x844-01.png",
+        "evidence/page-390x844-02.png",
+        "evidence/page-390x844-08.png",
+        "evidence/page-390x844-09.png"
+      ],
+      "findings": ["F-001", "F-002", "F-003"],
+      "note": "The page reflows cleanly to one column. On a phone, though, the stacked KPI cards take most of two screens before the art, Collection care text runs flush against its border, and the 390 capture ends before Institutional sources and the footer."
+    }
+  },
+  "checks": {
+    "I1": "fail",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "F-001",
+      "targets": ["I1", "J01", "J03", "J04", "J07", "J10"],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png; evidence/page-390x844-01.png; evidence/page-390x844-02.png",
+      "observation": "Directly under the opening statement, a row of four bordered stat cards reads '12,483 Collectors', '98.7% Visitor satisfaction', '4.2x Growth this quarter' and '31 Countries reached'. None has a source, date, defined unit, or link. The page describes no visitor survey, no growth measure, and no tracking of countries. At 390 the cards stack to about 430 px across the first two screens, ahead of any artwork. At 1440 the row also stops short of the content grid's right edge.",
+      "consequence": "The first figures a visitor reads about a public institution are unsupported marketing metrics, which undermines trust in the page's real factual claims. A SaaS KPI row replaces the statement and the art as the lead, and on phones it pushes the first work to the third screen.",
+      "change": "Remove the stat-card row. If the lead needs a figure, use only a count backed by the collection record. State it as plain text with its date and a link, for example: '<n> accessioned works by <m> artists, as of <date> · View the Collection'. Do not use a KPI-card row. Do not show satisfaction, growth, or reach figures unless the page names their source and measurement method.",
+      "acceptance_check": "At 1440x1000 and 390x844 the page shows no 'Collectors', 'Visitor satisfaction', 'Growth this quarter' or 'Countries reached' figures. Any remaining number shows its source or date and matches the collection record. At 1440x1000 the 'Works held and studied' images start within the first viewport.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-002",
+      "targets": ["J06", "J04", "J03", "J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-04.png; evidence/page-390x844-08.png; evidence/page-390x844-09.png",
+      "observation": "'Collection care' is the only section wrapped in a frame. The frame has square corners, thin top and bottom edges, heavier left and right edges, and no inner padding. At 1440 the heading's first letter sits against the left edge. At 390 the heading and all three paragraphs run flush against the left border and reach within a few px of the right border. Every neighboring section uses an open layout under a hairline top divider.",
+      "consequence": "The section looks broken or unfinished and gets more emphasis than its peers for no reason. At phone width, text crowded against the border is harder to read.",
+      "change": "Remove the frame and give Collection care the same layout as the sections above it: hairline top divider, heading column, body column. If a frame is meant to set the section apart, use one even 1px border (tw-border-white/10 or an iron border), tw-rounded-xl corners, and inner padding (about tw-p-6 on desktop, tw-p-4 on mobile), with the heading and body inside that padding.",
+      "acceptance_check": "At 1440x1000 and 390x844, no Collection care text touches or crowds a border. The section either matches its neighbors' divider pattern, or has an even 1px border with rounded-xl corners and visible inner padding on all sides.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-003",
+      "targets": ["J10"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 390x844 · en-US",
+      "evidence": "evidence/page-390x844-09.png; evidence/page-1440x1000-05.png",
+      "observation": "At 1440, Collection care is followed by three blocks. First, 'Institutional sources' with five links: Founding record, Open Museum statement, On-chain transition, Museum Safe, View the public record. Second, the 'Source and contribute' bar: Read the source, Propose an edit, Contributor guide, Related works and context. Third, the site footer. The 390 full-page capture ends right after the hairline divider below Collection care (the last tile is 563 px tall), and none of that content appears.",
+      "consequence": "If the page itself ends there at phone width, mobile visitors lose three things: the institutional source links that back the governance and custody claims, the read-source and propose-edit path, and the site's legal links.",
+      "change": "Make the Institutional sources list, the Source and contribute bar, and the site footer render and stay reachable at 390 px, with the links in a wrapping list. If they already render and only the capture was cut short, recapture the full 390 page so the evidence shows them.",
+      "acceptance_check": "A 390x844 full-page capture shows, below Collection care, the Institutional sources links, the Source and contribute bar, and the site footer. Links wrap with no horizontal overflow.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-004",
+      "targets": ["J07", "J01"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-03.png; evidence/page-1440x1000-04.png; evidence/page-390x844-06.png; evidence/page-390x844-08.png",
+      "observation": "The governance card reads: 'The Network uses TDH-weighted voting for major collecting and policy decisions. Adopted effects and proposals awaiting adoption remain separate in the public record.' TDH is not explained anywhere on the page, and 'adopted effects' is internal wording. 'The next stage' uses similarly abstract wording, such as the heading 'Decision-constrained custody' and the line 'Valid decisions will have a reliable path to an authorized Ethereum action'.",
+      "consequence": "Visitors learning what the Museum is cannot tell who votes, how votes are weighted, or what 'adopted effects' means. The page's central 'how it works' answer stays unclear to its intended audience.",
+      "change": "Define TDH at first use and describe the record in plain words. Draft (confirm the TDH definition against the Network's documentation): 'Network members vote on major collecting and policy decisions. Votes are weighted by TDH (Total Days Held), a measure of how long a member has held 6529 NFTs. The public record lists adopted decisions separately from proposals still awaiting a vote.' In 'The next stage', name who acts and what they do, for example the heading 'Custody limited to approved decisions' and the line 'Once a decision is approved, the Museum Safe will be able to carry it out on Ethereum as an acquisition, transfer, or mint.' Add all copy through the i18n message keys.",
+      "acceptance_check": "The governance copy defines TDH at first use in plain words, says who votes, and no longer contains 'adopted effects'. Each 'next stage' heading and line names the actor (the Network or the Museum Safe) and the concrete action. All of this text wraps cleanly at 390x844.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-005",
+      "targets": ["J07", "J06", "J02"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000, 390x844 · en-US",
+      "evidence": "evidence/page-1440x1000-01.png; evidence/page-1440x1000-02.png; evidence/page-1440x1000-03.png",
+      "observation": "Three near-duplicate links lead to the Collection, and their capitalization differs: 'View the Collection' (Works header), 'Explore the Collection' (Collection and acquisition), and the primary button 'Explore the collection'. Body copy treats 'Collection' as a proper noun.",
+      "consequence": "Repeated, inconsistently styled labels make the page's next steps look less deliberate.",
+      "change": "Capitalize 'the Collection' consistently, including on the button. Either drop one duplicate link or label each by its destination.",
+      "acceptance_check": "Every link to the Collection uses the same capitalization, and no two adjacent sections offer the same destination under a near-identical label.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-006",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-02.png",
+      "observation": "In the work cards, the 'CENTURY #31' and 'CENTURY #724' titles start about 10 px lower than the two-line Seymour title. The gap between title and artist differs (about 37 px vs 27 px), and the rules under the captions sit at different heights. Captions give only title and artist, with no year or medium.",
+      "consequence": "The caption row looks slightly unaligned, and the works carry less museum context than a credit line would give.",
+      "change": "Top-align the caption blocks with one consistent title-to-artist gap and one rule position. Consider adding the year (and medium where known) from the record.",
+      "acceptance_check": "At 1440, all three caption titles share a top edge, the title-to-artist gap is the same, and the rules line up.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "F-007",
+      "targets": ["J06"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network/about · default · 1440x1000 · en-US",
+      "evidence": "evidence/page-1440x1000-05.png",
+      "observation": "The content frame's right rule at about x=1381 continues down beside the site footer. The 'Source and contribute' label sits about 20 px below the link row it labels.",
+      "consequence": "Minor finishing roughness at the end of the page.",
+      "change": "End the frame rule above the site footer, and align the 'Source and contribute' label with its links.",
+      "acceptance_check": "At 1440 no vertical rule runs beside the site footer, and the label shares a baseline or top edge with the link row.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The plain opening definition: a permanent collection of digital art held for the 6529 Network and the public, which collects, preserves, studies, and shares internet-native art",
+    "'Works held and studied' led by real artworks with titles and artists, each at its correct aspect ratio (the portrait Seymour photograph is not cropped)",
+    "Two-column editorial sections with hairline dividers, each with one clear onward link",
+    "The distinction between the permanent Collection (completed gifts) and Keys and Gates acquisition work that stays separate until accession",
+    "Governance and public-record copy that names a mechanism and links to it (View Museum decisions, View the Museum repository, Visit the rights handbook)",
+    "'The next stage' written in the future tense and kept separate from present-tense claims",
+    "The Institutional sources link list and the Source and contribute bar (Read the source, Propose an edit, Contributor guide)",
+    "The dark iron palette with primary-blue eyebrows and links, and a single primary button paired with an outlined secondary button",
+    "The clean single-column reflow at 390 with readable line length and buttons that do not clip"
+  ]
+}
