@@ -19,14 +19,15 @@ function getPictureUpdateErrorMessage(error: unknown): string {
   if (error instanceof Error && error.message) return error.message;
   if (typeof error === "string") return error;
   if (
-    error &&
+    error !== null &&
     typeof error === "object" &&
     "message" in error &&
     typeof error.message === "string"
   )
     return error.message;
+  if (error === undefined) return "Failed to update wave picture";
   try {
-    return JSON.stringify(error) ?? "Failed to update wave picture";
+    return JSON.stringify(error);
   } catch {
     return "Failed to update wave picture";
   }
