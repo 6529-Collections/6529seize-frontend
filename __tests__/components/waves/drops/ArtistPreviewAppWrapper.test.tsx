@@ -254,8 +254,10 @@ describe("ArtistPreviewAppWrapper", () => {
     const closeButton = screen.getByLabelText("Close panel");
     const dialogPanel = screen.getByTestId("dialog-panel");
     expect(closeButton).toHaveClass(
-      "focus-visible:tw-ring-2",
-      "focus-visible:tw-ring-primary-400"
+      "focus-visible:tw-outline",
+      "focus-visible:tw-outline-2",
+      "focus-visible:tw-outline-offset-2",
+      "focus-visible:tw-outline-primary-400"
     );
     expect(dialogPanel).not.toContainElement(closeButton);
   });

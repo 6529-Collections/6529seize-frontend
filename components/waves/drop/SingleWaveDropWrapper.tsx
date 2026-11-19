@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { CompactModeProvider } from "@/contexts/CompactModeContext";
 import videoFrameStyles from "@/components/drops/view/item/content/media/SeizeVideoFrame.module.css";
 import clsx from "clsx";
@@ -228,14 +230,16 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
               >
                 <DialogPanel className="@container tw-absolute tw-inset-0 tw-z-[100] tw-flex tw-h-full tw-min-h-0 tw-transform-gpu tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 tw-will-change-transform lg:tw-hidden">
                   <div className="tw-relative tw-z-10 tw-flex tw-flex-none tw-items-center tw-px-4 tw-pb-2 tw-pt-[calc(env(safe-area-inset-top,0px)+0.5rem)] sm:tw-px-6 lg:tw-px-8">
-                    <button
+                    <IconButton
                       type="button"
                       onClick={closeChat}
                       aria-label={t(locale, "singleDrop.closeChat")}
-                      className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-text-iron-300 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none"
+                      size={44}
+                      variant="contrast"
+                      shape="circle"
                     >
                       <ArrowLeftIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0" />
-                    </button>
+                    </IconButton>
                   </div>
 
                   <div className="@container tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-hidden">

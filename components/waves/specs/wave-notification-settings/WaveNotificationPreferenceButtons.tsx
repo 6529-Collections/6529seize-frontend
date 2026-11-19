@@ -1,5 +1,6 @@
+import IconButton from "@/components/utils/button/IconButton";
+
 import { Spinner } from "@/components/dotLoader/DotLoader";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import { useWaveInformationPanel } from "@/components/brain/mobile/WaveInformationPanelContext";
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
@@ -15,12 +16,6 @@ interface WaveNotificationPreferenceButtonsProps {
   readonly settings: WaveNotificationSettingsState;
   readonly compact?: boolean | undefined;
 }
-
-const getButtonStyle = (active: boolean) => {
-  return active
-    ? "tw-bg-primary-400/10 tw-border-primary-400/30 tw-text-primary-400 desktop-hover:hover:tw-bg-primary-400/20"
-    : "tw-text-iron-400 desktop-hover:hover:tw-text-iron-300 tw-bg-transparent tw-border-iron-700";
-};
 
 const getMenuItemStyle = ({
   active,
@@ -148,11 +143,9 @@ export default function WaveNotificationPreferenceButtons({
   const isOpen = sheet.isOpen;
   const triggerActive =
     settings.broadcastMentionsEnabled || settings.allDropsEnabled;
-  const triggerSizeClass = compact
-    ? `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-8 tw-p-0`
-    : "tw-h-10 tw-w-full tw-px-2.5 tw-py-2 lg:tw-h-9";
+
   const trigger = (
-    <button
+    <IconButton
       id={triggerId}
       type="button"
       disabled={settings.loading && !settings.loadingTarget}
@@ -170,7 +163,8 @@ export default function WaveNotificationPreferenceButtons({
       }}
       data-tooltip-id={tooltipId}
       data-tooltip-content={title}
-      className={`tw-flex ${triggerSizeClass} tw-cursor-pointer tw-items-center tw-justify-center tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-font-semibold tw-transition tw-duration-300 tw-ease-out aria-disabled:tw-cursor-not-allowed aria-disabled:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${getButtonStyle(triggerActive)}`}
+      layout={compact ? "notification-compact" : "notification-wide"}
+      variant={triggerActive ? "selected" : "ghost"}
       aria-label={waveNotificationSettingsMessage(
         "waves.notificationSettings.trigger.ariaLabel"
       )}
@@ -186,7 +180,7 @@ export default function WaveNotificationPreferenceButtons({
       ) : (
         <BellIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
       )}
-    </button>
+    </IconButton>
   );
   const choices = (close: () => void) => (
     <ul

@@ -1099,6 +1099,12 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
       content: `Shared link fixture post ${serial}`,
     };
   }).reverse();
+  // Browser routes cannot intercept the server-rendered feed seed. Give the
+  // sandbox server this same history before opening the shared-link page.
+  const serverFixture = await page.request.post(
+    `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/shared-posts`
+  );
+  expect(serverFixture.ok()).toBe(true);
   await page.route("**/api/v2/drops?**", (route) => {
     const ids =
       new URL(route.request().url()).searchParams.get("ids")?.split(",") ?? [];
@@ -1554,6 +1560,11 @@ test("shared post loads only its surroundings and fills the rest as the reader s
   baseURL,
 }) => {
   const { post } = await sharedPostFixture(page, baseURL);
+  // Keep the streamed server seed consistent with the browser's latest page.
+  const seed = await page.request.post(
+    `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/shared-post-feed`
+  );
+  expect(seed.ok()).toBe(true);
   const chat = page.getByRole("region", {
     name: "Wave chat file upload area",
     exact: true,

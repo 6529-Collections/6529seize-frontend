@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { DialogTitle } from "@headlessui/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -81,17 +83,19 @@ export default function UserPageBrainSidebarCreatedModal({
             </div>
 
             {!isApp && (
-              <button
+              <IconButton
                 type="button"
                 onClick={onClose}
-                className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/70 tw-bg-iron-950 tw-text-white tw-transition tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-scale-95 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 motion-reduce:tw-transition-none"
+                size={40}
+                variant="contrast"
+                pressEffect
                 aria-label={getUserPageBrainSidebarMessage(
                   locale,
                   "user.brain.sidebar.closeCreatedWaves"
                 )}
               >
                 <XMarkIcon aria-hidden="true" className="tw-h-5 tw-w-5" />
-              </button>
+              </IconButton>
             )}
           </header>
 

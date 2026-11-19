@@ -215,14 +215,7 @@ export default function UserPageSubscriptions(
             fetchSubscriptionData();
             void history.refresh();
           }}
-          show={coverageQuery.isError && !!coverageQuery.data}
-          onRefresh={
-            isConnectedAccount
-              ? () => {
-                  void coverageQuery.refetch();
-                }
-              : undefined
-          }
+          show={false}
         />
         <div className="tw-grid tw-min-w-0 tw-grid-cols-1 tw-gap-8 lg:tw-grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)] lg:tw-gap-x-6 lg:tw-gap-y-10">
           <UserPageSubscriptionsSection
@@ -254,8 +247,10 @@ export default function UserPageSubscriptions(
               <div className="tw-relative tw-flex tw-min-w-0 tw-flex-1 tw-flex-col">
                 <SubscriptionCoverageSummary
                   coverage={coverageQuery.data}
+                  profileKey={profileKey}
                   isLoading={coverageQuery.isLoading}
                   isOwner={isConnectedAccount}
+                  isStale={coverageQuery.isError && !!coverageQuery.data}
                   showFundingPrompt={!hideNftPurchasing}
                   action={
                     <UserPageSubscriptionsBalance
@@ -266,18 +261,31 @@ export default function UserPageSubscriptions(
                       show_refresh={isConnectedAccount}
                     />
                   }
-                  topUpAction={
+                  topUpAction={(primary, forFutureDrops) =>
                     !hideNftPurchasing &&
                     isConnectedAccount &&
                     !coverageQuery.isLoading && (
                       <SubscriptionTopUpButton
-                        status={coverageQuery.data?.status}
+                        primary={primary}
+                        forFutureDrops={forFutureDrops}
                         expanded={topUp.expanded}
                         onClick={() => topUp.setExpanded(!topUp.expanded)}
                       />
                     )
                   }
-                />
+                >
+                  <SubscriptionCoverageNotice
+                    show={coverageQuery.isError && !!coverageQuery.data}
+                    calculatedAt={coverageQuery.data?.calculated_at}
+                    onRefresh={
+                      isConnectedAccount
+                        ? () => {
+                            void coverageQuery.refetch();
+                          }
+                        : undefined
+                    }
+                  />
+                </SubscriptionCoverageSummary>
               </div>
             </section>
           </UserPageSubscriptionsSection>
@@ -285,6 +293,7 @@ export default function UserPageSubscriptions(
             <UserPageSubscriptionsTopUp
               expanded={topUp.expanded}
               coverage={coverageQuery.data}
+              isCoverageStale={coverageQuery.isError}
               onTransactionConfirmed={refresh}
               onCancel={() => {
                 topUp.setExpanded(false);

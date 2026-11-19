@@ -30,6 +30,8 @@ identities.
 
 - Select **+** beside **Messages** on web or in the app. On builds without
   encrypted chats, use the paper-plane action or **Create DM**.
+- Select **Direct Message** on another person’s profile or profile card to open
+  **New message** with that person already selected.
 - Open `/messages/new` directly.
 - Older `?create=dm` links from Messages open `/messages/new` when encrypted
   chats are available.

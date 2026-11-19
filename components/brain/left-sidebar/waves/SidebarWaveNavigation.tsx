@@ -1,4 +1,7 @@
 "use client";
+
+import IconButton from "@/components/utils/button/IconButton";
+
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 
@@ -99,14 +102,16 @@ export function SidebarWaveNavigationControls({
                 autoComplete="off"
                 className="tw-w-full tw-min-w-0 tw-border-0 tw-bg-transparent tw-py-1.5 tw-text-xs tw-leading-5 tw-text-white tw-outline-none tw-ring-0 placeholder:tw-text-iron-400 focus:tw-ring-0 touch-only:tw-text-base [&::-webkit-search-cancel-button]:tw-appearance-none"
               />
-              <button
+              <IconButton
                 type="button"
                 onClick={closeSearch}
                 aria-label={t(locale, "waves.sidebar.closeSearch")}
-                className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-flex tw-size-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white motion-reduce:tw-transition-none`}
+                size={32}
+                variant="ghost"
+                expandTouchTarget
               >
                 <XMarkIcon className="tw-size-4" />
-              </button>
+              </IconButton>
             </div>
           </>
         ) : (
@@ -138,11 +143,11 @@ export function SidebarWaveNavigationControls({
                 ))}
               </fieldset>
             ) : (
-              <span className="tw-min-w-0 tw-text-sm tw-font-semibold tw-text-iron-300">
+              <span className="tw-min-w-0 tw-text-sm tw-font-semibold tw-text-iron-300 [@media(any-hover:none)]:tw-text-[13px] [@media(any-hover:none)]:tw-font-medium">
                 {t(locale, "waves.sidebar.allWaves")}
               </span>
             )}
-            <button
+            <IconButton
               ref={toggleRef}
               {...waveFeatureAttributes("sidebar_entry", "search")}
               type="button"
@@ -151,12 +156,11 @@ export function SidebarWaveNavigationControls({
               title={findWaveLabel}
               aria-expanded={false}
               onClick={() => setSearchOpen(true)}
-              className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-group tw-ml-auto tw-flex tw-size-9 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white touch-only:tw-size-11`}
+              layout="sidebar-search"
+              className="tw-ml-auto"
             >
-              <span className="tw-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent desktop-hover:group-hover:tw-bg-iron-900 touch-only:tw-size-10">
-                <MagnifyingGlassIcon className="tw-size-4" aria-hidden="true" />
-              </span>
-            </button>
+              <MagnifyingGlassIcon className="tw-size-4" aria-hidden="true" />
+            </IconButton>
           </div>
         )}
       </div>

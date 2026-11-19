@@ -3230,6 +3230,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       details.getByRole("button", { name: "Join", exact: true })
     );
     const pin = details.getByRole("button", { name: "Pin wave", exact: true });
+    await expect(pin).toHaveCSS("color", "rgb(132, 132, 144)");
     const mute = details.getByRole("button", {
       name: "Mute wave",
       exact: true,
@@ -3248,7 +3249,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(mute).toHaveCSS("color", "rgb(206, 207, 212)");
       await pin.hover();
       await expect(pin).toHaveCSS("background-color", "rgb(28, 28, 33)");
-      await expect(pin).toHaveCSS("color", "rgb(255, 255, 255)");
+      await expect(pin).toHaveCSS("color", "rgb(147, 147, 159)");
     }
     await pin.press("Tab");
     await page.keyboard.press("Shift+Tab");
@@ -9374,6 +9375,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         route.fulfill({ json: [joined[44]] })
       );
       let failContinuation = true;
+      let retryRecoveryArmed = false;
+      const retryRequestedAttribute = "data-wave-pagination-retry-requested";
       const requested: string[] = [];
       const offsets = new Map([
         ["joined-continuation-alpha", 20],
@@ -9386,6 +9389,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             "cursor"
           );
           requested.push(cursor ?? "first");
+          if (cursor && failContinuation && retryRecoveryArmed) {
+            failContinuation = !(await page.evaluate(
+              (attribute) => document.documentElement.hasAttribute(attribute),
+              retryRequestedAttribute
+            ));
+          }
           if (cursor && failContinuation) {
             await route.fulfill({
               status: 503,
@@ -9499,7 +9508,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               : "Some waves could not be loaded.",
         })
       ).toBeVisible();
-      failContinuation = false;
+      // Keep background refreshes failing until the real Retry click. Otherwise
+      // they can recover the list and remove Retry before Playwright activates it.
+      await retry.evaluate((button, attribute) => {
+        button.addEventListener(
+          "click",
+          () => document.documentElement.setAttribute(attribute, "true"),
+          { capture: true, once: true }
+        );
+      }, retryRequestedAttribute);
+      retryRecoveryArmed = true;
       await retry.click();
       await finishPagination();
       await page.reload({ waitUntil: "domcontentloaded" });
