@@ -104,6 +104,40 @@ export async function reserveSelfGroupClaim(
   return true;
 }
 
+/**
+ * This device's self-group budget for the debug status: whether its claims
+ * are used up for now, and when one frees (by the budget's clock; null when
+ * not known, as for a new device or without a fresh listing).
+ */
+export function selfGroupBudget(ctx: EngineContext): {
+  spent: boolean;
+  nextAt: number | null;
+} {
+  const clock = budgetClock(ctx);
+  const state = ctx.device?.readSync;
+  const pausedUntil = state?.claimsPausedUntil ?? 0;
+  if (pausedUntil > ctx.now()) {
+    return { spent: true, nextAt: pausedUntil };
+  }
+  if (!clock) {
+    return { spent: true, nextAt: null };
+  }
+  const recent = (state?.selfGroupClaims ?? [])
+    .map((at) => Math.min(at, clock.now))
+    .filter((at) => clock.now - at < CLAIM_LOG_WINDOW_MS)
+    .sort((a, b) => a - b);
+  const share = claimShare(ctx, clock);
+  if (recent.length < share) {
+    return { spent: false, nextAt: null };
+  }
+  // One frees when all but share - 1 of them have left the window.
+  const freeing = share > 0 ? recent[recent.length - share] : undefined;
+  return {
+    spent: true,
+    nextAt: freeing === undefined ? null : freeing + CLAIM_LOG_WINDOW_MS,
+  };
+}
+
 /** Writes the claim-through marks to the device record. */
 export async function saveSelfGroupClaims(ctx: EngineContext): Promise<void> {
   if (ctx.device) {
