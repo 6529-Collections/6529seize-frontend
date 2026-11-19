@@ -603,6 +603,12 @@ describe("turn on signed messages flow", () => {
       expect(harness.onEnabled).toHaveBeenCalledTimes(1);
       expect(harness.isBusy()).toBe(true);
       expect(harness.status()).toEqual({ kind: "connecting" });
+
+      harness.set({ isConnectOpen: false, canSignActiveWallet: true });
+      await flush();
+      expect(harness.requestGrant).toHaveBeenCalledTimes(1);
+      expect(harness.isBusy()).toBe(false);
+      expect(harness.onEnabled).toHaveBeenCalledTimes(1);
     });
 
     it("treats a failed phone signature as a pairing problem, not a locked wallet", async () => {

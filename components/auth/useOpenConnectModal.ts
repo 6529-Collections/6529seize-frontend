@@ -114,9 +114,11 @@ export function useOpenConnectModal({
         clearConnectIntentHandoffTimeout();
         setIsConnectIntentWaitingForAppKit(true);
         // A failed wallet chunk requires reloading even if the stack looks ready.
-        if (!isAppKitReady || hasWalletChunkLoadFailed()) {
-          await waitForAppKitReady();
-        }
+        if (
+          (!isAppKitReady || hasWalletChunkLoadFailed()) &&
+          !(await waitForTransition(waitForAppKitReady().then(() => undefined)))
+        )
+          return;
         if (shouldStop()) return;
         const openAppKit = await appKitModalBridgeStore.waitForOpen();
         if (
@@ -128,15 +130,15 @@ export function useOpenConnectModal({
 
         // Opening and cleanup share one transition. A newer intent waits
         // while this one closes the modal it opened after being superseded.
-        const transition = (async () => {
-          try {
-            await openAppKit({ view });
-          } finally {
-            if (shouldStop() && isMountedRef.current) {
-              await appKitModalBridgeStore.close();
-            }
-          }
+        const completion = Promise.withResolvers<boolean>();
+        const opening = (async () => {
+          await openAppKit({ view });
         })();
+        const transition = opening.finally(async () => {
+          if (!(await completion.promise) && isMountedRef.current) {
+            await appKitModalBridgeStore.close();
+          }
+        });
         const settled = transition
           .catch(() => undefined)
           .finally(() => {
@@ -144,14 +146,18 @@ export function useOpenConnectModal({
               modalTransition.current = null;
           });
         modalTransition.current = settled;
-        if (!(await waitForTransition(transition))) return;
-        if (shouldStop()) return;
-
-        logSecurityEvent(
-          SecurityEventType.WALLET_MODAL_OPENED,
-          createConnectionEventContext(source)
-        );
-        scheduleConnectIntentHandoffFallback();
+        try {
+          if (!(await waitForTransition(opening))) return;
+          if (shouldStop()) return;
+          logSecurityEvent(
+            SecurityEventType.WALLET_MODAL_OPENED,
+            createConnectionEventContext(source)
+          );
+          scheduleConnectIntentHandoffFallback();
+          completion.resolve(true);
+        } finally {
+          completion.resolve(false);
+        }
       } catch (error) {
         if (latestIntent.current !== intent) return;
         if (signal?.aborted) {

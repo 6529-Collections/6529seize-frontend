@@ -113,6 +113,7 @@ interface PendingStep {
   readonly source: SignedMessagesEnableSource;
   readonly resumeUntil: number;
   modalOpened: boolean;
+  grantEnabled?: boolean;
   connectAbort?: AbortController;
   desktopStatus?: Exclude<
     DesktopWalletSetupStatus,
@@ -497,6 +498,10 @@ export class SignedMessagesEnableFlow {
     if (this.signing || !current) {
       return;
     }
+    if (this.pending?.grantEnabled) {
+      this.settle(null);
+      return;
+    }
     this.dropPending();
     this.clearTimers();
     const { requestGrant } = current;
@@ -603,6 +608,12 @@ export class SignedMessagesEnableFlow {
       // An abandoned attempt only matters if the wallet still approved it.
       if (result.success) {
         this.deps.report(source, "enabled");
+        if (
+          this.pending &&
+          this.pending.address === snapshot.address?.toLowerCase()
+        ) {
+          this.pending.grantEnabled = true;
+        }
         if (!this.signing && !this.pending) {
           this.settle(null);
         }

@@ -176,6 +176,7 @@ async function updateProfiles(
   const next = change(profiles);
   if (next === null) return;
   setProfiles(next);
+  if (generation !== profilesGeneration) return;
   await getDesktopStore()?.set(PROFILES_KEY, [...next]);
 }
 

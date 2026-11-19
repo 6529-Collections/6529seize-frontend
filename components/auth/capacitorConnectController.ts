@@ -69,10 +69,7 @@ async function openConnectEntryPoint({
   if (!isSigningOutAll && isDesktopShell()) {
     logWalletConnectionAttempt(source);
     openDesktopConnectDialog(
-      () =>
-        desktopWalletSetup
-          ? openWebConnection(source, desktopWalletSetup.signal)
-          : openWebConnection(source),
+      (signal) => openWebConnection(source, signal),
       desktopWalletSetup
     );
     return;
@@ -162,6 +159,7 @@ export async function openFreshUserConnection({
   isCapacitor,
   isActiveAppWalletConnector,
   isSigningOutAll,
+  signal,
   disconnect,
   getSignOutAllGeneration,
   hasSignOutAllGenerationChanged,
@@ -173,13 +171,14 @@ export async function openFreshUserConnection({
   readonly isCapacitor: boolean;
   readonly isActiveAppWalletConnector: boolean;
   readonly isSigningOutAll: boolean;
+  readonly signal?: AbortSignal | undefined;
   readonly disconnect: () => Promise<unknown>;
   readonly getSignOutAllGeneration: () => number;
   readonly hasSignOutAllGenerationChanged: (generation: number) => boolean;
   readonly isMounted: () => boolean;
   readonly openUserConnectionSurface: (source: string) => Promise<void>;
 }): Promise<void> {
-  if (isSigningOutAll) {
+  if (isSigningOutAll || signal?.aborted) {
     return;
   }
 
@@ -213,7 +212,11 @@ export async function openFreshUserConnection({
     setTimeout(resolve, CONNECT_AFTER_DISCONNECT_DELAY_MS);
   });
 
-  if (!isMounted() || hasSignOutAllGenerationChanged(signOutGeneration)) {
+  if (
+    !isMounted() ||
+    signal?.aborted ||
+    hasSignOutAllGenerationChanged(signOutGeneration)
+  ) {
     return;
   }
 
