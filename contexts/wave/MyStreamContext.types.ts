@@ -48,6 +48,7 @@ export interface WavesContextData {
 
 export interface ActiveWaveSetOptions {
   readonly isDirectMessage?: boolean | undefined;
+  readonly profileFeed?: boolean | undefined;
   readonly replace?: boolean | undefined;
   readonly serialNo?: number | string | null | undefined;
   readonly divider?: number | null | undefined;
