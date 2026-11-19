@@ -135,7 +135,10 @@ export const WaveSmallLeaderboardDefaultDrop: React.FC<
                     <UserProfileTooltipWrapper
                       user={drop.author.handle ?? drop.author.id}
                     >
-                      <span className="tw-text-sm tw-font-semibold tw-text-iron-50">
+                      <span
+                        data-wave-typography="preserve"
+                        className="tw-text-sm tw-font-semibold tw-text-iron-50"
+                      >
                         {drop.author.handle}
                       </span>
                     </UserProfileTooltipWrapper>

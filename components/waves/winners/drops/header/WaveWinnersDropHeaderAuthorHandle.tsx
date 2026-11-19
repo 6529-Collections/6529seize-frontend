@@ -14,7 +14,10 @@ export default function WaveWinnersDropHeaderAuthorHandle({
 }: WaveWinnersDropHeaderAuthorHandleProps) {
   return (
     <>
-      <p className="tw-m-0 tw-text-md tw-font-semibold tw-leading-none">
+      <p
+        data-wave-typography="preserve"
+        className="tw-m-0 tw-text-md tw-font-semibold tw-leading-none"
+      >
         <UserProfileTooltipWrapper
           user={winner.drop.author.handle ?? winner.drop.author.id}
         >

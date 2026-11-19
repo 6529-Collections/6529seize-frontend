@@ -210,7 +210,7 @@ const InlineSidebar = ({
         {isOpen && (
           <m.div
             key="inline-sidebar"
-            className="tw-absolute tw-inset-y-0 tw-right-0 tw-w-[22rem] tw-pl-6 tw-pt-2 tw-will-change-transform"
+            className="tw-absolute tw-inset-y-0 tw-right-0 tw-w-[22rem] tw-p-2 tw-will-change-transform"
             initial={prefersReducedMotion ? false : { x: "100%" }}
             animate={{ x: 0 }}
             exit={{
@@ -222,7 +222,7 @@ const InlineSidebar = ({
             <aside
               id={BRAIN_RIGHT_SIDEBAR_ID}
               aria-label={panelLabel}
-              className="tw-flex tw-h-full tw-w-[20.5rem] tw-min-w-0 tw-max-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+              className="tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950"
             >
               {children}
             </aside>

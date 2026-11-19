@@ -20,10 +20,16 @@ export default function CreateDropReplying({
   };
 
   return (
-    <div className="-tw-mt-2 tw-flex tw-justify-between tw-items-center" data-text-selection-exclude="true">
+    <div
+      className="-tw-mt-2 tw-flex tw-items-center tw-justify-between"
+      data-text-selection-exclude="true"
+    >
       <span className="tw-text-xs tw-text-iron-400">
         {ACTION_LABELS[action]}{" "}
-        <span className="tw-text-green tw-text-xs tw-font-semibold">
+        <span
+          data-wave-typography="preserve"
+          className="tw-text-xs tw-font-semibold tw-text-green"
+        >
           {drop.author.handle}
         </span>
       </span>
@@ -32,9 +38,9 @@ export default function CreateDropReplying({
         aria-label="Cancel reply"
         onClick={onCancel}
         disabled={disabled}
-        className={`tw-bg-transparent tw-rounded-lg tw-flex tw-items-center tw-justify-center tw-h-8 tw-w-8 tw-border-0 -tw-mr-2 tw-transition tw-duration-300 tw-ease-out ${
+        className={`-tw-mr-2 tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-transition tw-duration-300 tw-ease-out ${
           disabled
-            ? "tw-text-iron-600 tw-cursor-not-allowed"
+            ? "tw-cursor-not-allowed tw-text-iron-600"
             : "tw-text-primary-400 hover:tw-text-primary-500"
         }`}
       >

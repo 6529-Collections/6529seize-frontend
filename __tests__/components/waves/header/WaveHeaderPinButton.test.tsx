@@ -473,7 +473,11 @@ describe("WaveHeaderPinButton", () => {
       const button = screen.getByRole("button");
       const icon = button.querySelector("svg");
 
-      expect(button).toHaveClass("tw-text-iron-500");
+      expect(button).toHaveClass(
+        "tw-border-iron-700",
+        "tw-bg-iron-800",
+        "tw-text-iron-300"
+      );
       expect(icon).not.toHaveClass("tw-rotate-[-45deg]");
     });
 
@@ -492,7 +496,11 @@ describe("WaveHeaderPinButton", () => {
       const icon = button.querySelector("svg");
       const tooltipId = button.getAttribute("data-tooltip-id");
 
-      expect(button).toHaveClass("tw-bg-transparent", "tw-text-iron-300");
+      expect(button).toHaveClass(
+        "tw-border-iron-700",
+        "tw-bg-iron-800",
+        "tw-text-iron-300"
+      );
       expect(button).toHaveAttribute("data-tooltip-content", "Unpin wave");
       expect(screen.getByTestId(`tooltip-${tooltipId}`)).toBeInTheDocument();
       expect(icon).toHaveClass("tw-rotate-[-45deg]");

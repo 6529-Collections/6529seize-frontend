@@ -93,7 +93,7 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
             >
               <div
                 aria-hidden="true"
-                className="tw-pointer-events-none tw-absolute tw-inset-x-0 -tw-top-2 tw-h-[76px] tw-bg-[linear-gradient(180deg,rgba(0,0,0,1)_0%,rgba(0,0,0,0.96)_45%,rgba(0,0,0,0)_100%)]"
+                className="tw-pointer-events-none tw-absolute tw-inset-x-0 -tw-top-2.5 tw-h-[76px] tw-bg-[linear-gradient(180deg,rgba(0,0,0,1)_0%,rgba(0,0,0,1)_60%,rgba(0,0,0,0)_100%)]"
               />
               <IconButton
                 type="button"
@@ -102,7 +102,7 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
                 aria-label={expandLabel}
                 title={expandLabel}
                 layout="toolbar"
-                className="tw-relative tw-z-10"
+                className={`tw-relative tw-z-10 ${isMessagesView ? "" : "tw-translate-y-2"}`}
               >
                 <ChevronDoubleRightIcon
                   strokeWidth={2}

@@ -47,7 +47,7 @@ describe("UserPageStatsActivityWalletTableRowRoyalties", () => {
     expect(screen.getByAltText("pepe-smile")).toBeInTheDocument();
     expect(tooltip).toHaveTextContent("Royalties:");
     expect(tooltip).toHaveAttribute("data-tooltip-background", "#37373E");
-    expect(tooltip).toHaveAttribute("data-tooltip-padding", "4px 8px");
+    expect(tooltip).toHaveAttribute("data-tooltip-padding", "6px 10px");
   });
 
   it("shows the xglasses icon above the threshold", () => {

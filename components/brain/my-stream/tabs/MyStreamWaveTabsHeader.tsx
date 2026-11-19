@@ -226,7 +226,7 @@ function MyStreamWaveHeaderIdentity({
           variant={isCompact ? "compact-header" : "header"}
         />
         <div className="tw-flex tw-min-h-6 tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-1.5">
-          <h1 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+          <h1 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-truncate tw-text-sm tw-font-medium tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
             <button
               type="button"
               onClick={() => {
@@ -243,7 +243,7 @@ function MyStreamWaveHeaderIdentity({
               aria-label={t(locale, "waves.information.open", {
                 name: wave.name,
               })}
-              className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-normal tw-leading-6 tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-medium tw-leading-6 tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
             >
               {wave.name}
             </button>
@@ -594,10 +594,7 @@ export default function MyStreamWaveTabsHeader({
           </IconButton>
         </div>
       </header>
-      <MyStreamActionTooltip
-        id={headerActionsTooltipId}
-        variant="wave-header"
-      />
+      <MyStreamActionTooltip id={headerActionsTooltipId} />
     </>
   );
 }

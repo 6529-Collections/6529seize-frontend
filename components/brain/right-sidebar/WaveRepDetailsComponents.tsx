@@ -264,13 +264,17 @@ export function LogRow({
         <div className="tw-min-w-0">
           {raterHref ? (
             <Link
+              data-wave-typography="preserve"
               href={raterHref}
               className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-white tw-no-underline hover:tw-text-iron-300"
             >
               {rater}
             </Link>
           ) : (
-            <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-400">
+            <span
+              data-wave-typography="preserve"
+              className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-400"
+            >
               {rater}
             </span>
           )}

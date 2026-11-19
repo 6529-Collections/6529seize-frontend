@@ -36,7 +36,10 @@ export default function MemeWinnerArtistInfo({
                 size={UserCICAndLevelSize.SMALL}
               />
             )}
-            <p className="tw-m-0 tw-min-w-0 tw-text-md tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]">
+            <p
+              data-wave-typography="preserve"
+              className="tw-m-0 tw-min-w-0 tw-text-md tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]"
+            >
               {drop.author.handle ? (
                 <UserProfileTooltipWrapper user={drop.author.handle}>
                   <Link
