@@ -52,7 +52,7 @@ import {
 } from "./membership";
 import { searchHistory } from "./history-search";
 import { latestReadSeq } from "./history";
-import { queuePoll, queuePollUpdate } from "./polls";
+import { PollActions } from "./polls";
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
@@ -81,6 +81,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private readonly conversationCreator: ConversationCreator;
   private readonly restarter: ConversationRestarter;
   private readonly unsent: UnsentMessages;
+  private readonly polls: PollActions;
   private readonly enrollment: EnrollmentFlight;
 
   constructor(ctx: EngineContext) {
@@ -99,6 +100,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
         await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
       },
     });
+    this.polls = new PollActions(
+      ctx,
+      this.controller,
+      () => this.requireReady(),
+      (task) => this.background(task)
+    );
     this.conversationCreator = new ConversationCreator(
       ctx,
       () => this.controller.syncAll(),
@@ -464,34 +471,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  createPoll = (g: string, poll: PollDefinition) =>
-    this.queuePoll(g, () => queuePoll(this.ctx, g, poll));
+  createPoll = (g: string, poll: PollDefinition) => this.polls.create(g, poll);
 
-  updatePoll = async (g: string, id: string, options: number[] | null) => {
-    await this.queuePoll(
-      g,
-      () => queuePollUpdate(this.ctx, g, id, options),
-      options === null
-    );
-    if (options === null) {
-      const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
-      if (!message.poll?.closed) throw new E2eeError("E2EE_SEND_FAILED");
-    }
-  };
-
-  private async queuePoll(
-    g: string,
-    enqueue: () => Promise<void>,
-    waitForDelivery = false
-  ) {
-    this.requireReady();
-    await enqueue();
-    if (waitForDelivery) {
-      await this.controller.flush(g.toLowerCase());
-    } else {
-      this.background(() => this.controller.flush(g.toLowerCase()));
-    }
-  }
+  updatePoll = (g: string, id: string, options: number[] | null) =>
+    this.polls.update(g, id, options);
 
   private ownMessage = (g: string, id: string) =>
     requireSavedMessage(this.ctx, g, id);
