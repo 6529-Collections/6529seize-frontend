@@ -164,10 +164,9 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
 - Wave options also fits its short action list. Its Delete action and existing
   confirmation/cancellation path remain available; Back restores About's size
   and the three-dot trigger's focus.
-- Switching these views eases the existing surface height over 220ms with a
-  short content fade. Focus/keyboard events retain the shared keyboard timing;
-  reduced motion disables the added transitions. The sheet and backdrop remain
-  mounted throughout, with one header and one Close control.
+- Switching views retains the existing immediate content/height change, with
+  the same mounted sheet, backdrop, header and Close control. Keyboard movement
+  continues to use the shared native timing.
 - Standalone rename entry points retain their existing dialog. Permission checks
   are unchanged: connected, non-proxy author/admin eligibility on non-DM waves.
 - The other nesting findings in the baseline inventory remain source-audited:
@@ -199,8 +198,6 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
   the keyboard while retaining Rename; in-sheet Back restores About and focus.
   Compact options, Delete/Cancel, Close/lock release and a physical header swipe
   also pass. These recordings establish visual behavior, not a fixed frame rate.
-- Browser resize sampling observes intermediate heights between About and
-  Rename on mobile web and both simulated native surfaces. Reduced-motion
-  coverage checks that the surface transition and content fade are disabled.
-  The final navigation-animation refinement is being checked on Android;
-  the iPhone went offline after the earlier same-sheet/keyboard checks.
+- The content-sized view switching was checked on Android. The iPhone went
+  offline after the earlier same-sheet/keyboard checks; the final follow-up
+  keyboard guard also has focused Android lifecycle coverage.
