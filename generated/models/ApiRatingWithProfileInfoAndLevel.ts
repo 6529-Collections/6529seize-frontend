@@ -22,6 +22,7 @@ export class ApiRatingWithProfileInfoAndLevel {
     'rating': number;
     'cic': number;
     'last_modified': string;
+    'level': number;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -75,6 +76,12 @@ export class ApiRatingWithProfileInfoAndLevel {
             "baseName": "last_modified",
             "type": "string",
             "format": ""
+        },
+        {
+            "name": "level",
+            "baseName": "level",
+            "type": "number",
+            "format": "int64"
         }    ];
 
     static getAttributeTypeMap() {
