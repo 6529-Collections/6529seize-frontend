@@ -5,31 +5,35 @@ import useDeviceInfo from "@/hooks/useDeviceInfo";
 import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
-import {
-  type SingleWaveDropVoteMode,
-  SingleWaveDropVoteSubmissionMode,
-} from "../waves/drop/SingleWaveDropVote.types";
+import { SingleWaveDropVoteSubmissionMode } from "../waves/drop/SingleWaveDropVote.types";
 import ModalLayout from "../waves/memes/submission/layout/ModalLayout";
-import { VoteModeControl } from "./VoteModeControl";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
+import MobileVotingModal from "./MobileVotingModal";
 
 interface VotingModalProps {
   readonly drop: ExtendedDrop;
   readonly isOpen: boolean;
   readonly onClose: () => void;
+  readonly preferMobile?: boolean | undefined;
 }
 
-const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
+const CenteredVotingModal: React.FC<VotingModalProps> = ({
+  drop,
+  isOpen,
+  onClose,
+}) => {
   const titleId = useId();
   const modalRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
   const { isApp } = useDeviceInfo();
+  const { isCapacitor, isIos } = useCapacitor();
+  useLayoutViewportLock(isOpen && isCapacitor && isIos);
   const locale = useBrowserLocale();
-  const [voteInputMode, setVoteInputMode] =
-    useState<SingleWaveDropVoteMode>("slider");
   const handleClose = useCallback(() => {
-    setVoteInputMode("slider");
     onClose();
   }, [onClose]);
 
@@ -97,17 +101,9 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
           wrapperClassName="tw-px-0"
           contentClassName="tw-group/voting-dialog tw-relative tw-z-10 tw-px-6 tw-pt-0 tw-pb-6"
         >
-          <div className="tw-mb-5 group-has-[.is-vote-panel]/voting-dialog:tw-absolute group-has-[.is-vote-panel]/voting-dialog:tw-right-6 group-has-[.is-vote-panel]/voting-dialog:tw-top-[25px] group-has-[.is-vote-panel]/voting-dialog:tw-z-10 group-has-[.is-vote-panel]/voting-dialog:tw-mb-0 group-has-[.is-vote-panel]/voting-dialog:-tw-translate-y-1/2">
-            <VoteModeControl
-              value={voteInputMode}
-              onChange={setVoteInputMode}
-            />
-          </div>
           <SingleWaveDropVote
             drop={drop}
             onVoteRequestStarted={handleClose}
-            voteMode={voteInputMode}
-            onVoteModeChange={setVoteInputMode}
             submissionMode={
               SingleWaveDropVoteSubmissionMode.BACKGROUND_AFTER_AUTH
             }
@@ -123,6 +119,36 @@ const VotingModal: React.FC<VotingModalProps> = ({ drop, isOpen, onClose }) => {
   }
 
   return createPortal(modalContent, document.body);
+};
+
+const OpenVotingModal: React.FC<
+  VotingModalProps & { readonly useMobileSheet: boolean }
+> = ({ useMobileSheet, ...props }) => {
+  // Keep the adapter mounted while open so resizing cannot discard its draft.
+  const [isMobileSheet] = useState(useMobileSheet);
+  return isMobileSheet ? (
+    <MobileVotingModal {...props} />
+  ) : (
+    <CenteredVotingModal {...props} />
+  );
+};
+
+const VotingModal: React.FC<VotingModalProps> = (props) => {
+  const { isCapacitor, isIos } = useCapacitor();
+  const isCompactLayout = useIsMobileLayoutViewport();
+
+  // Some detail and landscape callers request this dialog directly.
+  // Keep every iPhone entry on the same keyboard-aware sheet.
+  if (!props.isOpen) return null;
+
+  return (
+    <OpenVotingModal
+      {...props}
+      useMobileSheet={
+        props.preferMobile === true || (isCompactLayout && isCapacitor && isIos)
+      }
+    />
+  );
 };
 
 export default VotingModal;

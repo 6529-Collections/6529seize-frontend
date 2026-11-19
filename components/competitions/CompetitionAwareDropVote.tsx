@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useState, type ReactNode } from "react";
 import { VoteModeControl } from "@/components/voting/VoteModeControl";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
@@ -13,9 +13,14 @@ import {
 } from "@/components/waves/drop/SingleWaveDropVote.types";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 import { fetchDropCompetitionContext } from "@/services/api/competitions-api";
+import { isCompetitionAccessError } from "@/helpers/competition.helpers";
 import { CompetitionVoteForm } from "./CompetitionVote";
 import CompetitionVoteWithReply from "./CompetitionVoteWithReply";
 import { CompetitionState } from "./CompetitionState";
+
+// A later transient error must not restore data whose access was denied.
+// Query identity keeps this boundary scoped to the viewer and drop across mounts.
+const accessDeniedContexts = new WeakSet<object>();
 
 interface CompetitionAwareDropVoteProps {
   readonly drop: ApiDrop & Pick<ExtendedDrop, "competition_context">;
@@ -55,22 +60,62 @@ export default function CompetitionAwareDropVote(
   props: CompetitionAwareDropVoteProps
 ) {
   const viewer = useCompetitionViewer();
+  const queryClient = useQueryClient();
   const [localVoteMode, setLocalVoteMode] =
     useState<SingleWaveDropVoteMode>("slider");
   const { drop } = props;
   const knownContext = getKnownContext(drop, viewer);
+  const contextQueryKey = [
+    QueryKey.COMPETITION_DROP_CONTEXT,
+    { wave_id: drop.wave.id, drop_id: drop.id, viewer },
+  ] as const;
   const context = useQuery({
-    queryKey: [
-      QueryKey.COMPETITION_DROP_CONTEXT,
-      { wave_id: drop.wave.id, drop_id: drop.id, viewer },
-    ],
-    queryFn: ({ signal }) =>
-      fetchDropCompetitionContext(drop.wave.id, drop.id, signal),
+    queryKey: contextQueryKey,
+    queryFn: async ({ signal, client, queryKey }) => {
+      const query = client.getQueryCache().find({ queryKey, exact: true });
+      try {
+        const result = await fetchDropCompetitionContext(
+          drop.wave.id,
+          drop.id,
+          signal
+        );
+        if (query) accessDeniedContexts.delete(query);
+        return result;
+      } catch (error) {
+        if (query && isCompetitionAccessError(error)) {
+          accessDeniedContexts.add(query);
+        }
+        throw error;
+      }
+    },
     enabled: knownContext === undefined,
     retry: false,
     staleTime: 0,
+    // A fresh response can restore access even when cached data is unchanged.
+    notifyOnChangeProps: ["data", "error", "isFetching"],
   });
-  if (!knownContext && context.isError)
+  const cachedQuery = queryClient.getQueryCache().find({
+    queryKey: contextQueryKey,
+    exact: true,
+  });
+  const contextError = context.error;
+  useLayoutEffect(() => {
+    // Another observer can own requests for this same cached context.
+    if (
+      !knownContext &&
+      cachedQuery?.state.error === contextError &&
+      isCompetitionAccessError(contextError)
+    ) {
+      accessDeniedContexts.add(cachedQuery);
+    }
+  }, [cachedQuery, contextError, knownContext]);
+  const accessDenied = cachedQuery && accessDeniedContexts.has(cachedQuery);
+  if (
+    !knownContext &&
+    (accessDenied ||
+      (context.isError &&
+        (!context.data || isCompetitionAccessError(context.error))))
+  )
     return (
       <CompetitionState
         error
@@ -88,31 +133,25 @@ export default function CompetitionAwareDropVote(
     drop.parts.at(0)?.part_id !== undefined;
   const VoteForm = canReply ? CompetitionVoteWithReply : CompetitionVoteForm;
   return (
-    <div
+    <VoteForm
       hidden={props.size === SingleWaveDropVoteSize.MINI && !viewer}
-      className={
-        props.size === SingleWaveDropVoteSize.MINI
-          ? "is-mini is-vote-panel tw-group/inline-vote tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-grid-rows-[auto_minmax(56px,auto)] tw-items-center tw-gap-x-3 tw-gap-y-3 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-3 tw-@container/vote [&>fieldset>button]:tw-inline-flex [&>fieldset>button]:tw-min-h-6 [&>fieldset>button]:tw-items-center [&>fieldset>button]:tw-justify-center [&>fieldset>button]:tw-rounded-md [&>fieldset>button]:tw-text-xs [&>fieldset>button]:touch-only:tw-relative [&>fieldset>button]:touch-only:tw-min-h-6 [&>fieldset>button]:touch-only:after:tw-absolute [&>fieldset>button]:touch-only:after:tw-inset-x-0 [&>fieldset>button]:touch-only:after:tw-top-1/2 [&>fieldset>button]:touch-only:after:tw-h-11 [&>fieldset>button]:touch-only:after:-tw-translate-y-1/2 [&>fieldset>button]:touch-only:after:tw-content-[''] [&>fieldset]:tw-col-start-2 [&>fieldset]:tw-row-start-1 [&>fieldset]:tw-items-center [&>fieldset]:tw-self-center [&>fieldset]:tw-rounded-lg [&>fieldset]:tw-p-0.5 [&[hidden]]:tw-hidden"
-          : "is-vote-panel tw-group/inline-vote tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-grid-rows-[auto_minmax(80px,auto)] tw-items-center tw-gap-x-3 tw-gap-y-2 tw-@container/vote group-has-[.is-vote-panel]/voting-dialog:tw-grid-cols-[minmax(0,1fr)_9rem] group-has-[.is-vote-panel]/voting-dialog:tw-grid-rows-[minmax(50px,auto)_minmax(80px,auto)] [&>fieldset]:tw-col-start-2 [&>fieldset]:tw-row-start-1 [&>fieldset]:tw-self-center"
+      modeControl={
+        viewer && props.voteMode === undefined ? (
+          <VoteModeControl value={localVoteMode} onChange={setLocalVoteMode} />
+        ) : undefined
       }
-    >
-      {viewer && props.voteMode === undefined && (
-        <VoteModeControl value={localVoteMode} onChange={setLocalVoteMode} />
-      )}
-      <VoteForm
-        key={`${viewer ?? "anonymous"}:${entry.id}`}
-        drop={drop}
-        competition={competition}
-        entryId={entry.id}
-        dropId={entry.drop_id}
-        disabled={entry.status !== ApiCompetitionEntryStatus.Active}
-        voteMode={props.voteMode ?? localVoteMode}
-        size={props.size}
-        onVoteSuccess={() => {
-          props.onVoteSuccess?.();
-          props.onVoteRequestStarted?.();
-        }}
-      />
-    </div>
+      key={`${viewer ?? "anonymous"}:${entry.id}`}
+      drop={drop}
+      competition={competition}
+      entryId={entry.id}
+      dropId={entry.drop_id}
+      disabled={entry.status !== ApiCompetitionEntryStatus.Active}
+      voteMode={props.voteMode ?? localVoteMode}
+      size={props.size}
+      onVoteSuccess={() => {
+        props.onVoteSuccess?.();
+        props.onVoteRequestStarted?.();
+      }}
+    />
   );
 }
