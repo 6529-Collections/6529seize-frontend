@@ -136,7 +136,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
           >
             <DialogPanel
               data-testid="memes-art-submission-modal-panel"
-              className="tw-flex tw-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))] tw-max-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))] tw-w-full tw-max-w-screen-xl tw-flex-col tw-transition-[height,max-height] tw-ease-out motion-reduce:tw-transition-none md:tw-h-full md:tw-max-h-none"
+              className="tw-flex tw-h-[min(var(--dialog-viewport-height,100dvh),calc(100dvh-var(--native-keyboard-inset-bottom,0px)))] tw-max-h-[min(var(--dialog-viewport-height,100dvh),calc(100dvh-var(--native-keyboard-inset-bottom,0px)))] tw-w-full tw-max-w-screen-xl tw-flex-col tw-transition-[height,max-height] tw-ease-out motion-reduce:tw-transition-none md:tw-h-full md:tw-max-h-none"
               style={{
                 transitionDuration: NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION,
                 transitionTimingFunction:

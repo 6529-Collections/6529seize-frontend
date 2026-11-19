@@ -20,7 +20,7 @@ const KEYBOARD_TRANSITION =
 const KEYBOARD_EASING =
   "var(--native-keyboard-layout-transition-easing, ease-out)";
 const APP_DIALOG_LAYOUT_STYLE: CSSProperties = {
-  height: `max(0px, calc(100% - ${KEYBOARD_INSET}))`,
+  height: `var(--dialog-viewport-height, max(0px, calc(100% - ${KEYBOARD_INSET})))`,
   transition: `height ${KEYBOARD_TRANSITION} ${KEYBOARD_EASING}`,
 };
 

@@ -6075,6 +6075,54 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(search).toHaveCount(0);
       await add.click();
       await search.fill("art");
+      for (const offsetTop of [0, 40]) {
+        await page.evaluate((offset) => {
+          const viewport = globalThis.visualViewport!;
+          Object.defineProperty(viewport, "height", {
+            configurable: true,
+            value: 320,
+          });
+          Object.defineProperty(viewport, "offsetTop", {
+            configurable: true,
+            value: offset,
+          });
+          viewport.dispatchEvent(new Event("resize"));
+        }, offsetTop);
+        await expect
+          .poll(() =>
+            manager
+              .getByRole("button", { name: "Done", exact: true })
+              .evaluate((element) => {
+                const bounds = element.getBoundingClientRect();
+                const viewport = globalThis.visualViewport!;
+                return (
+                  bounds.top >= viewport.offsetTop &&
+                  bounds.bottom <= viewport.offsetTop + viewport.height
+                );
+              })
+          )
+          .toBe(true);
+        await expect
+          .poll(() =>
+            manager
+              .getByRole("button", {
+                name: "Close collaborator management",
+                exact: true,
+              })
+              .evaluate(
+                (element) =>
+                  element.getBoundingClientRect().top >=
+                  globalThis.visualViewport!.offsetTop
+              )
+          )
+          .toBe(true);
+      }
+      await page.evaluate(() => {
+        const viewport = globalThis.visualViewport!;
+        Reflect.deleteProperty(viewport, "height");
+        Reflect.deleteProperty(viewport, "offsetTop");
+        viewport.dispatchEvent(new Event("resize"));
+      });
       await expect(
         page.getByRole("status").filter({ hasText: "Searching…" })
       ).toBeVisible();
