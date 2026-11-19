@@ -1,5 +1,6 @@
 import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eeDeviceGroup } from "../api-types";
+import type { E2eeInitialSyncStatus } from "../types";
 import { type EngineContext, isActive, ownDeviceKey } from "./context";
 import { RetryableError } from "./errors";
 import {
@@ -159,11 +160,7 @@ export class EngineController {
       return;
     }
     this.lastFullSyncAt = this.ctx.now();
-    await this.pullInbox();
-    if (!this.isReady()) {
-      return;
-    }
-    const serverGroups = await this.deviceGroups();
+    const serverGroups = await this.syncInbox();
     if (!this.isReady()) {
       return;
     }
@@ -253,19 +250,46 @@ export class EngineController {
     }
   }
 
-  private async pullInbox(): Promise<void> {
-    if (!this.isReady()) {
-      return;
+  private setInitialSyncStatus(status: E2eeInitialSyncStatus): void {
+    const store = this.ctx.store;
+    if (
+      this.isReady() &&
+      store.initialSyncStatus !== "complete" &&
+      store.initialSyncStatus !== status
+    ) {
+      store.initialSyncStatus = status;
+      store.touch();
     }
+  }
+
+  /** Check chat discovery independently of maintenance and cosmetic lookups. */
+  private async syncInbox(): Promise<ApiE2eeDeviceGroup[] | null> {
+    this.setInitialSyncStatus("pending");
     try {
-      await swallowNetwork(this.ctx.queue.run(() => processInbox(this.ctx)));
+      const inboxComplete = await this.pullInbox();
+      if (!this.isReady()) return null;
+      const groups = await this.deviceGroups();
+      this.setInitialSyncStatus(
+        inboxComplete && groups !== null ? "complete" : "failed"
+      );
+      return groups;
     } catch (error) {
-      // Revoked from another device before its WS hint arrived: the inbox is
-      // the first own-device call of a pass, so handle it here, not as an error.
+      this.setInitialSyncStatus("failed");
+      throw error;
+    }
+  }
+
+  private async pullInbox(): Promise<boolean> {
+    try {
+      return await this.ctx.queue.run(() => processInbox(this.ctx));
+    } catch (error) {
+      // The inbox is the first own-device call of a pass. Check a revocation
+      // here if it arrived before the WebSocket hint.
       if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
         await this.hooks.onOwnRevoked();
-        return;
+        return false;
       }
+      if (isNetworkish(error)) return false;
       throw error;
     }
   }

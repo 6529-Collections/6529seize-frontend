@@ -182,8 +182,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private start(): void {
     this.controller.startBackground();
     this.background(async () => {
-      await this.refreshMe();
-      await this.controller.syncAll();
+      try {
+        await this.refreshMe();
+      } finally {
+        await this.controller.syncAll();
+      }
     });
   }
 
@@ -339,6 +342,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   getStatus = () => this.ctx.store.status;
   getError = () => this.ctx.store.error;
+  getInitialSyncStatus = () => this.ctx.store.initialSyncStatus;
   getUpgrade = () => this.ctx.store.upgrade;
   getLocalDeviceKey = () => this.ctx.device?.deviceKey ?? null;
   getThisDevice = () => this.ctx.store.thisDevice;
@@ -358,9 +362,9 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   // -- lifecycle --------------------------------------------------------------
 
-  async enroll(): Promise<void> {
+  async enroll(onProvisioning?: () => void): Promise<void> {
     await this.recheckRevocation();
-    await this.enrollment.run(true);
+    await this.enrollment.run(true, onProvisioning);
   }
 
   /** 8.8: in the grant's last 14 days, enroll() renews it (one prompt). */

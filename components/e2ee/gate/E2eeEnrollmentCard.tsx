@@ -366,7 +366,7 @@ export function E2eeEnrollmentCard({
       closed.current = false;
       try {
         if (selectedScope === "dms") {
-          await engine.enroll();
+          await engine.enroll(() => setNoticeKey("e2ee.enroll.finishing"));
           return { success: true };
         }
         const outcome = await turnOnWithCombinedSignIn({
@@ -379,7 +379,7 @@ export function E2eeEnrollmentCard({
                   onSignatureRequested: options?.onSignatureRequested,
                 })
             : undefined,
-          onRegistering: () => setNoticeKey(finishingKey),
+          onRegistering: () => setNoticeKey("e2ee.enroll.finishing"),
         });
         if (outcome !== "pending") setNoticeKey(null);
         switch (outcome) {
@@ -415,7 +415,6 @@ export function E2eeEnrollmentCard({
     [
       address,
       engine,
-      finishingKey,
       requestSignedMessagesGrant,
       selectedScope,
       showPartial,

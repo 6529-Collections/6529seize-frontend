@@ -422,6 +422,25 @@ async function provision(
     mls.setCredential(credentialIdentity(device.wallet, device.grantId));
     await checkpoint(ctx);
   }
+  // Let setup progress paint before synchronous key generation. The timer
+  // also releases the wait if the app moves to the background mid-frame.
+  if (
+    typeof document !== "undefined" &&
+    document.visibilityState === "visible" &&
+    typeof globalThis.requestAnimationFrame === "function" &&
+    typeof globalThis.cancelAnimationFrame === "function"
+  ) {
+    await new Promise<void>((resolve) => {
+      const timeout = globalThis.setTimeout(() => {
+        globalThis.cancelAnimationFrame(frame);
+        resolve();
+      }, 100);
+      const frame = globalThis.requestAnimationFrame(() => {
+        globalThis.clearTimeout(timeout);
+        globalThis.setTimeout(resolve, 0);
+      });
+    });
+  }
   await ensureKeyPackages(ctx, null);
   device.provisioned = true;
   await checkpoint(ctx, { device, skipWasm: true });
@@ -505,10 +524,17 @@ const isLoginGrantRejection = (error: unknown): boolean =>
 async function registerPending(
   ctx: EngineContext,
   device: StoredDevice,
-  allowPrompt: boolean
+  allowPrompt: boolean,
+  onProvisioning: (() => void) | undefined
 ): Promise<StoredDevice | null> {
-  try {
+  if (!hasLoginGrant(device)) {
+    onProvisioning?.();
     return (await register(ctx, device)) ? device : null;
+  }
+  try {
+    if (!(await register(ctx, device))) return null;
+    onProvisioning?.();
+    return device;
   } catch (error) {
     if (!isLoginGrantRejection(error)) {
       throw error;
@@ -518,6 +544,7 @@ async function registerPending(
       throw error;
     }
     const fresh = await createDevice(ctx);
+    onProvisioning?.();
     return (await register(ctx, fresh)) ? fresh : null;
   }
 }
@@ -531,7 +558,13 @@ async function registerPending(
  */
 export async function enrollDevice(
   ctx: EngineContext,
-  { allowPrompt = true }: { readonly allowPrompt?: boolean } = {}
+  {
+    allowPrompt = true,
+    onProvisioning,
+  }: {
+    readonly allowPrompt?: boolean;
+    readonly onProvisioning?: (() => void) | undefined;
+  } = {}
 ): Promise<boolean> {
   await ensureWasm(ctx);
   const stored = await loadCurrentSuiteDevice(ctx);
@@ -553,11 +586,18 @@ export async function enrollDevice(
     return false;
   }
   if (!device.registered) {
-    const registered = await registerPending(ctx, device, allowPrompt);
+    const registered = await registerPending(
+      ctx,
+      device,
+      allowPrompt,
+      onProvisioning
+    );
     if (!registered) {
       return false;
     }
     device = registered;
+  } else if (!device.provisioned) {
+    onProvisioning?.();
   }
   if (!device.provisioned) {
     await provision(ctx, device);
