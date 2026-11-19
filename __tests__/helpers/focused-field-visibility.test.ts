@@ -85,6 +85,50 @@ describe("observeFocusedField", () => {
     tracking.disconnect();
   });
 
+  it("does not scroll an input already visible during keyboard resize frames", () => {
+    const container = document.createElement("div");
+    const input = document.createElement("input");
+    input.scrollIntoView = jest.fn();
+    container.getBoundingClientRect = () => new DOMRect(0, 80, 400, 350);
+    input.getBoundingClientRect = () => new DOMRect(20, 150, 300, 44);
+    container.append(input);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    for (let frame = 0; frame < 12; frame++) {
+      onResize([], observer);
+      paint();
+    }
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    input.getBoundingClientRect = () => new DOMRect(20, 410, 300, 44);
+    onResize([], observer);
+    paint();
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+    tracking.disconnect();
+  });
+
+  it("reveals a field clipped by an inner editor even when the outer sheet fits it", () => {
+    const container = document.createElement("div");
+    const editor = document.createElement("div");
+    const input = document.createElement("input");
+    input.scrollIntoView = jest.fn();
+    editor.style.overflowY = "auto";
+    jest.spyOn(globalThis, "getComputedStyle").mockReturnValue(
+      Object.assign(getComputedStyle(editor), { overflowY: "auto" })
+    );
+    container.getBoundingClientRect = () => new DOMRect(0, 0, 400, 600);
+    editor.getBoundingClientRect = () => new DOMRect(0, 200, 400, 300);
+    input.getBoundingClientRect = () => new DOMRect(20, 130, 300, 44);
+    editor.append(input);
+    container.append(editor);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    paint();
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+    tracking.disconnect();
+  });
+
   it("tracks reply content growth when opted in and cancels pending reveals on cleanup", () => {
     const container = document.createElement("div");
     const content = document.createElement("div");
