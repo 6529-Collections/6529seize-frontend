@@ -1,3 +1,4 @@
+import type { ApiE2eeDeviceInboxStatus } from "@/generated/models/ApiE2eeDeviceInboxStatus";
 import { asE2eeApiError } from "../api-errors";
 import {
   E2EE_INITIAL_INBOX_WAIT_MS,
@@ -7,6 +8,17 @@ import { type EngineContext, ownDeviceKey } from "./context";
 import { requestWithDeadline } from "./runtime";
 
 const WAIT_TIMER = "initial-inbox-wait";
+const AWAITING_INVITATION = "awaiting-invitation";
+
+function statusFromResponse({
+  has_pending_chats: pending,
+  has_queued_welcomes: queued,
+}: ApiE2eeDeviceInboxStatus): E2eeInitialSyncStatus {
+  // Legacy replies only provide the combined hint. Require an explicit
+  // false to interpret a positive hint as a roster gap alone.
+  if (queued === true || (pending && queued === undefined)) return "pending";
+  return pending ? "waiting" : "complete";
+}
 
 interface InboxDiscoveryHooks {
   readonly isReady: () => boolean;
@@ -25,7 +37,7 @@ export class InboxDiscovery {
   }
 
   private get settled(): boolean {
-    return this.status === "complete" || this.status === "awaiting-invitation";
+    return this.status === "complete" || this.status === AWAITING_INVITATION;
   }
 
   private publish(status: E2eeInitialSyncStatus): void {
@@ -35,7 +47,7 @@ export class InboxDiscovery {
   }
 
   begin(recheck: boolean): void {
-    if (recheck && this.status === "awaiting-invitation") {
+    if (recheck && this.status === AWAITING_INVITATION) {
       // Recheck once without restarting the grace period for a roster gap.
       this.publish("delayed");
     } else if (this.status === "failed" || this.status === "pending") {
@@ -48,12 +60,12 @@ export class InboxDiscovery {
     if (this.status === "delayed" && status === "pending") return;
     const next =
       this.status === "delayed" && status === "waiting"
-        ? "awaiting-invitation"
+        ? AWAITING_INVITATION
         : status;
     if (next === "pending" || next === "waiting") {
       this.ctx.timers.arm(WAIT_TIMER, E2EE_INITIAL_INBOX_WAIT_MS, () => {
         this.update(
-          this.status === "waiting" ? "awaiting-invitation" : "delayed"
+          this.status === "waiting" ? AWAITING_INVITATION : "delayed"
         );
       });
     } else {
@@ -76,20 +88,12 @@ export class InboxDiscovery {
     const isCurrent = () =>
       this.hooks.isReady() && this.ctx.device?.deviceKey === deviceKey;
     try {
-      const { has_pending_chats: pending, has_queued_welcomes: queued } =
-        await requestWithDeadline(
-          this.ctx.scheduler,
-          E2EE_INITIAL_INBOX_WAIT_MS,
-          (signal) => this.ctx.api.getDeviceInboxStatus(deviceKey, signal)
-        );
-      if (!isCurrent()) return;
-      // Legacy replies only provide the combined hint. Require an explicit
-      // false to interpret a positive hint as a roster gap alone.
-      if (queued === true || (pending && queued === undefined)) {
-        this.update("pending");
-      } else {
-        this.update(pending ? "waiting" : "complete");
-      }
+      const response = await requestWithDeadline(
+        this.ctx.scheduler,
+        E2EE_INITIAL_INBOX_WAIT_MS,
+        (signal) => this.ctx.api.getDeviceInboxStatus(deviceKey, signal)
+      );
+      if (isCurrent()) this.update(statusFromResponse(response));
     } catch (error) {
       if (!isCurrent()) return;
       if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
