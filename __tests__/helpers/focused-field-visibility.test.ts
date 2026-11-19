@@ -129,6 +129,44 @@ describe("observeFocusedField", () => {
     tracking.disconnect();
   });
 
+  it("reveals horizontal clipping when an inner editor resizes without changing focus", () => {
+    const container = document.createElement("div");
+    const editor = document.createElement("div");
+    const input = document.createElement("input");
+    input.scrollIntoView = jest.fn();
+    jest.spyOn(globalThis, "getComputedStyle").mockReturnValue(
+      Object.assign(getComputedStyle(editor), {
+        overflowX: "auto",
+        overflowY: "visible",
+      })
+    );
+    container.getBoundingClientRect = () => new DOMRect(0, 0, 400, 600);
+    editor.getBoundingClientRect = () => new DOMRect(0, 100, 400, 300);
+    input.getBoundingClientRect = () => new DOMRect(320, 150, 60, 44);
+    editor.append(input);
+    container.append(editor);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    paint();
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    editor.getBoundingClientRect = () => new DOMRect(0, 100, 300, 300);
+    onResize([], observer);
+    paint();
+    expect(document.activeElement).toBe(input);
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(input.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "instant",
+      block: "nearest",
+      inline: "nearest",
+    });
+    input.getBoundingClientRect = () => new DOMRect(20, 150, 60, 44);
+    onResize([], observer);
+    paint();
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+    tracking.disconnect();
+  });
+
   it("tracks reply content growth when opted in and cancels pending reveals on cleanup", () => {
     const container = document.createElement("div");
     const content = document.createElement("div");
