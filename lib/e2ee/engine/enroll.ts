@@ -375,6 +375,19 @@ async function provision(
   await checkpoint(ctx, { device, skipWasm: true });
 }
 
+/** Renews a ready device outside the engine queue, retaining its chat keys. */
+export async function renewStoredDeviceIfDue(
+  ctx: EngineContext
+): Promise<boolean> {
+  const device = ctx.device;
+  if (!device || !renewalDue(ctx, device)) return false;
+  await ctx.queue.run(() => renewGrant(ctx));
+  for (const runtime of ctx.store.groups.values()) {
+    runtime.record.selfUpdateRequested = true;
+  }
+  return true;
+}
+
 /**
  * 8.8 renewal: one new signature for the same device key; the server
  * updates the grant, the MLS credential is replaced (groups pick it up with

@@ -34,8 +34,7 @@ import {
   markRevocationUnverified,
   needsNewDevice,
   refreshMe,
-  renewalDue,
-  renewGrant,
+  renewStoredDeviceIfDue,
   submitRevocation,
 } from "./enroll";
 import { backupHistory, importBackupHistory } from "./backup";
@@ -348,13 +347,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   /** 8.8: in the grant's last 14 days, enroll() renews it (one prompt). */
   private async renew(): Promise<void> {
-    const device = this.ctx.device;
-    if (!device || !renewalDue(this.ctx, device)) {
+    if (!(await renewStoredDeviceIfDue(this.ctx))) {
       return;
-    }
-    await this.ctx.queue.run(() => renewGrant(this.ctx));
-    for (const runtime of this.ctx.store.groups.values()) {
-      runtime.record.selfUpdateRequested = true;
     }
     await this.refreshMe();
     for (const [g, runtime] of this.ctx.store.groups) {

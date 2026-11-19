@@ -87,28 +87,41 @@ describe("E2eeRouteGate", () => {
     expect(value.restart).toHaveBeenCalled();
   });
 
-  it("recovers a rejected sign-in before restarting encrypted messages", async () => {
-    let finish: (result: { success: boolean }) => void = () => undefined;
-    mockRequestAuth.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          finish = resolve;
-        })
-    );
-    const value = contextFor(null, {
-      availability: "failed",
-      loadError: "E2EE_SESSION_EXPIRED",
-    });
-    renderGate(value);
-    fireEvent.click(screen.getByRole("button", { name: "Sign in again" }));
-    expect(mockRequestAuth).toHaveBeenCalledWith({ serverRejected: true });
-    expect(
-      screen.getByRole("button", { name: "Sign in again" })
-    ).toBeDisabled();
-    expect(value.restart).not.toHaveBeenCalled();
-    finish({ success: true });
-    await waitFor(() => expect(value.restart).toHaveBeenCalledTimes(1));
-  });
+  it.each([
+    "load-failed",
+    "error",
+    "needs-enrollment",
+    "device-limit",
+  ] as const)(
+    "recovers a rejected sign-in from %s before restarting encrypted messages",
+    async (status) => {
+      let finish: (result: { success: boolean }) => void = () => undefined;
+      mockRequestAuth.mockImplementation(
+        () =>
+          new Promise((resolve) => {
+            finish = resolve;
+          })
+      );
+      const value =
+        status === "load-failed"
+          ? contextFor(null, {
+              availability: "failed",
+              loadError: "E2EE_SESSION_EXPIRED",
+            })
+          : contextFor(
+              createFakeE2eeEngine({ status, error: "E2EE_SESSION_EXPIRED" })
+            );
+      renderGate(value);
+      fireEvent.click(screen.getByRole("button", { name: "Sign in again" }));
+      expect(mockRequestAuth).toHaveBeenCalledWith({ serverRejected: true });
+      expect(
+        screen.getByRole("button", { name: "Sign in again" })
+      ).toBeDisabled();
+      expect(value.restart).not.toHaveBeenCalled();
+      finish({ success: true });
+      await waitFor(() => expect(value.restart).toHaveBeenCalledTimes(1));
+    }
+  );
 
   it.each(["declined", "failed"])(
     "does not restart after %s sign-in recovery",
@@ -132,13 +145,26 @@ describe("E2eeRouteGate", () => {
     }
   );
 
-  it.each(["loading", "enrolling"] as const)(
+  it.each(["loading", "enrolling", "unsupported", "ready"] as const)(
     "keeps %s progress visible when an old session error remains",
     (status) => {
       renderGate(
         contextFor(
           createFakeE2eeEngine({ status, error: "E2EE_SESSION_EXPIRED" })
         )
+      );
+      expect(
+        screen.queryByRole("button", { name: "Sign in again" })
+      ).not.toBeInTheDocument();
+      expect(mockRequestAuth).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each(["idle", "disabled", "proxy", "unavailable", "elsewhere"] as const)(
+    "keeps the %s gate ahead of an old session error",
+    (availability) => {
+      renderGate(
+        contextFor(null, { availability, loadError: "E2EE_SESSION_EXPIRED" })
       );
       expect(
         screen.queryByRole("button", { name: "Sign in again" })
