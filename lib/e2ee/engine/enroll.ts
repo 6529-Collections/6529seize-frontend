@@ -54,7 +54,7 @@ const MIN_REUSABLE_GRANT_MS = 7 * DAY_MS;
 /** 8.8: renewal is offered in the grant's last 14 days. */
 const RENEWAL_WINDOW_MS = 14 * DAY_MS;
 
-export const renewalDue = (ctx: EngineContext, device: StoredDevice): boolean =>
+const renewalDue = (ctx: EngineContext, device: StoredDevice): boolean =>
   device.grant.expires_at * 1000 - ctx.now() <= RENEWAL_WINDOW_MS;
 
 const grantExpired = (ctx: EngineContext, device: StoredDevice): boolean =>
@@ -397,7 +397,7 @@ export async function renewStoredDeviceIfDue(
  * updates the grant, the MLS credential is replaced (groups pick it up with
  * a self-update) and fresh KeyPackages carry the new credential.
  */
-export async function renewGrant(ctx: EngineContext): Promise<void> {
+async function renewGrant(ctx: EngineContext): Promise<void> {
   const device = requireDevice(ctx);
   const mls = requireMls(ctx);
   const { grant, signature } = await signGrant(ctx, device.deviceKey);
