@@ -21,7 +21,7 @@ path = "src/bin/bench.rs"
 # Cargo.lock also lists the optional OpenMLS storage and provider crates that
 # this feature names as weak features (sqlite storage, libcrux provider,
 # openmls_test); they are not built for either target (`cargo tree`).
-openmls = { version = "=0.9.1", features = ["draft-ietf-mls-pq-ciphersuites"] }
+openmls = { version = "=0.9.2", features = ["draft-ietf-mls-pq-ciphersuites"] }
 openmls_rust_crypto = { version = "=0.6.0", features = ["draft-ietf-mls-pq-ciphersuites"] }
 openmls_basic_credential = { version = "=0.6.0", features = ["draft-ietf-mls-pq-ciphersuites"] }
 openmls_traits = { version = "=0.6.0", features = ["draft-ietf-mls-pq-ciphersuites"] }
