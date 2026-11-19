@@ -3,7 +3,7 @@
 import MediaTypeBadge from "@/components/drops/media/MediaTypeBadge";
 import MediaDisplay from "@/components/drops/view/item/content/media/MediaDisplay";
 import UserProfileTooltipWrapper from "@/components/utils/tooltip/UserProfileTooltipWrapper";
-import { MobileVotingModal, VotingModal } from "@/components/voting";
+import { VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import ParticipationDropVoteDetailsTrigger from "@/components/waves/drops/participation/ratings/ParticipationDropVoteDetailsTrigger";
@@ -455,20 +455,14 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
           </div>
         </div>
 
-        {!onVoteClick &&
-          (isMobileScreen ? (
-            <MobileVotingModal
-              drop={drop}
-              isOpen={isVoteModalOpen}
-              onClose={closeVoteModal}
-            />
-          ) : (
-            <VotingModal
-              drop={drop}
-              isOpen={isVoteModalOpen}
-              onClose={closeVoteModal}
-            />
-          ))}
+        {!onVoteClick && (
+          <VotingModal
+            drop={drop}
+            isOpen={isVoteModalOpen}
+            onClose={closeVoteModal}
+            preferMobile={isMobileScreen}
+          />
+        )}
         {opensWholeCard && (
           <WaveLeaderboardGridItemMobileActionsMenu
             drop={drop}
