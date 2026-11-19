@@ -3,6 +3,31 @@ import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
+function getInvalidOptions(
+  options: readonly { value: string }[],
+  maxLength: number,
+  caseSensitive: boolean
+): Set<number> {
+  const values = options.map(({ value }) => value.trim());
+  const missingOptions = values.filter(Boolean).length < 2;
+  const normalized = values.map((value) =>
+    caseSensitive ? value : value.toLowerCase()
+  );
+  return new Set(
+    values.flatMap((value, index) => {
+      const duplicate =
+        value !== "" &&
+        normalized.indexOf(normalized[index]!) !==
+          normalized.lastIndexOf(normalized[index]!);
+      const invalid =
+        (missingOptions && value === "") ||
+        value.length > maxLength ||
+        duplicate;
+      return invalid ? [index] : [];
+    })
+  );
+}
+
 export default function PollComposerOptions({
   options,
   multi,
@@ -15,6 +40,7 @@ export default function PollComposerOptions({
   onAdd,
   onChange,
   onRemove,
+  caseSensitiveOptions = false,
 }: {
   readonly options: readonly { id: string | number; value: string }[];
   readonly multi: boolean;
@@ -27,9 +53,15 @@ export default function PollComposerOptions({
   readonly onAdd: () => void;
   readonly onChange: (index: number, value: string) => void;
   readonly onRemove: (index: number) => void;
+  readonly caseSensitiveOptions?: boolean;
 }) {
   const canAddOption = options.length < maxOptions;
   const canRemoveOption = options.length > 2;
+  const invalidOptions = getInvalidOptions(
+    options,
+    maxOptionLength,
+    caseSensitiveOptions
+  );
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-2">
@@ -64,6 +96,14 @@ export default function PollComposerOptions({
               value={value}
               disabled={disabled}
               maxLength={maxOptionLength}
+              aria-invalid={
+                validationError && invalidOptions.has(index) ? true : undefined
+              }
+              aria-describedby={
+                validationError && invalidOptions.has(index)
+                  ? validationErrorId
+                  : undefined
+              }
               aria-label={t(locale, "waves.poll.composer.optionLabel", {
                 number: formatInteger(locale, index + 1),
               })}

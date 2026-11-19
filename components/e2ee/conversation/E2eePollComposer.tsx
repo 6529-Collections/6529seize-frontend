@@ -169,6 +169,7 @@ export function E2eePollComposer({
           )}
         </p>
         <PollComposerOptions
+          caseSensitiveOptions
           options={options}
           multi={multi}
           disabled={sending}

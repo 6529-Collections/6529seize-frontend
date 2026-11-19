@@ -37,7 +37,10 @@ export function PollVotedStatus({
   readonly updated?: boolean;
 }) {
   return (
-    <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300">
+    <span
+      role="status"
+      className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300"
+    >
       <span
         className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/30 tw-bg-emerald-500/15"
         aria-hidden="true"

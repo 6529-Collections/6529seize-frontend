@@ -4,7 +4,14 @@ import {
   openE2eeUser,
   resetE2eeSandbox,
 } from "../support/e2ee/e2eeSandboxSession";
-import { composer, enroll, startChat } from "../support/e2ee/e2eeUi";
+import {
+  composer,
+  enroll,
+  messageRow,
+  openMessageActions,
+  sendMessage,
+  startChat,
+} from "../support/e2ee/e2eeUi";
 
 test.describe("Encrypted poll composer @medium @local-only @e2ee", () => {
   test.describe.configure({ timeout: 240_000 });
@@ -25,6 +32,8 @@ test.describe("Encrypted poll composer @medium @local-only @e2ee", () => {
       await enroll(alice);
       await enroll(bob);
       await startChat(alice, ["bob"], { kind: "group" });
+      const originalMessage = "A message to edit";
+      await sendMessage(alice.page, originalMessage);
 
       const page = alice.page;
       await composer(page).fill("An unfinished chat message");
@@ -58,11 +67,36 @@ test.describe("Encrypted poll composer @medium @local-only @e2ee", () => {
       await expect(form.getByLabel("Poll option 3")).toBeVisible();
       await form.getByRole("button", { name: "Remove option 3" }).click();
       await expect(form.getByLabel("Poll option 3")).toHaveCount(0);
+      await form.getByLabel("Question", { exact: true }).fill("Drink?");
+      const first = form.getByLabel("Poll option 1");
+      const second = form.getByLabel("Poll option 2");
+      await first.fill("Tea");
+      await second.fill("Tea");
+      await expect(first).toHaveAttribute("aria-invalid", "true");
+      await expect(second).toHaveAttribute("aria-invalid", "true");
+      await expect(first).toHaveAccessibleDescription(
+        "Poll options must be unique."
+      );
+      await second.fill("Coffee");
+      await expect(first).not.toHaveAttribute("aria-invalid");
+      await expect(second).not.toHaveAttribute("aria-invalid");
 
       await form.getByRole("button", { name: "Remove poll" }).click();
       await expect(form).toBeHidden();
       await expect(composer(page)).toHaveText("An unfinished chat message");
       await expect(create).toBeFocused();
+      await create.click();
+      const actions = await openMessageActions(
+        page,
+        messageRow(page, originalMessage)
+      );
+      await actions
+        .getByRole("menuitem", { name: "Edit", exact: true })
+        .click();
+      await expect(form).toBeHidden();
+      await page.getByRole("button", { name: "Cancel edit" }).click();
+      await expect(form).toBeHidden();
+      await expect(composer(page)).toBeVisible();
     } finally {
       await closeE2eeUsers([alice, bob]);
     }

@@ -194,6 +194,8 @@ export interface StoredMessage {
   poll?: E2eePoll;
   /** The last vote event from each device of an enrolled profile. */
   pollVoteIds?: Record<string, string>;
+  /** Superseded vote IDs, retained per device to reject delayed retries. */
+  pollVoteHistory?: Record<string, string[]>;
   id: string;
   g: string;
   seq: number;

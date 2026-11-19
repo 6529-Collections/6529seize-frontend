@@ -471,6 +471,10 @@ export function E2eeComposer({
   const showPoll = pollOpen && createPoll !== undefined;
   const mentions = useMentionPicker(conversation.members, selfProfileId);
 
+  if (editing && pollOpen) {
+    setPollOpen(false);
+  }
+
   // Attachments switched off server-side drop anything already picked.
   if (!attachmentsEnabled && files.length > 0) {
     setFiles([]);
