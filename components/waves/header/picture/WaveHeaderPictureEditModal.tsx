@@ -19,10 +19,12 @@ export default function WaveHeaderPictureEditModal({
   isOpen,
   wave,
   onClose,
+  embedded = false,
 }: {
   readonly isOpen: boolean;
   readonly wave: ApiWave;
   readonly onClose: () => void;
+  readonly embedded?: boolean;
 }) {
   const { setToast, requestAuth } = useContext(AuthContext);
   const { onWaveCreated } = useContext(ReactQueryWrapperContext);
@@ -103,6 +105,47 @@ export default function WaveHeaderPictureEditModal({
     }
   };
 
+  const form = (
+    <form onSubmit={onSubmit} className="tw-px-4 sm:tw-px-6">
+      <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
+        {t(locale, "waves.header.pictureEditDescription")}
+      </p>
+
+      <div className="tw-mt-5">
+        <CreateWaveImageInput
+          imageToShow={file}
+          setFile={setFile}
+          allowRemove={false}
+        />
+      </div>
+
+      <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 md:tw-flex-row-reverse md:tw-justify-start">
+        <Button
+          disabled={!file}
+          loading={mutating}
+          type="submit"
+          variant="action"
+          size="lg"
+          fullWidth
+          className="md:tw-w-auto"
+        >
+          {t(locale, "waves.header.pictureEditSave")}
+        </Button>
+        <Button
+          onClick={onClose}
+          variant="secondary"
+          size="lg"
+          fullWidth
+          className="tw-hidden md:tw-inline-flex md:tw-w-auto"
+        >
+          {t(locale, "waves.header.pictureEditCancel")}
+        </Button>
+      </div>
+    </form>
+  );
+
+  if (embedded) return isOpen ? form : null;
+
   return (
     <MobileWrapperDialog
       title={t(locale, "waves.header.pictureEditTitle")}
@@ -116,42 +159,7 @@ export default function WaveHeaderPictureEditModal({
       zIndexClassName="tw-z-[9999]"
       headerClassName="-tw-mt-2 tw-pb-4 md:tw-mt-0"
     >
-      <form onSubmit={onSubmit} className="tw-px-4 sm:tw-px-6">
-        <p className="tw-m-0 tw-text-sm tw-leading-5 tw-text-iron-400">
-          {t(locale, "waves.header.pictureEditDescription")}
-        </p>
-
-        <div className="tw-mt-5">
-          <CreateWaveImageInput
-            imageToShow={file}
-            setFile={setFile}
-            allowRemove={false}
-          />
-        </div>
-
-        <div className="tw-flex tw-flex-col tw-gap-2 tw-pt-5 md:tw-flex-row-reverse md:tw-justify-start">
-          <Button
-            disabled={!file}
-            loading={mutating}
-            type="submit"
-            variant="action"
-            size="lg"
-            fullWidth
-            className="md:tw-w-auto"
-          >
-            {t(locale, "waves.header.pictureEditSave")}
-          </Button>
-          <Button
-            onClick={onClose}
-            variant="secondary"
-            size="lg"
-            fullWidth
-            className="tw-hidden md:tw-inline-flex md:tw-w-auto"
-          >
-            {t(locale, "waves.header.pictureEditCancel")}
-          </Button>
-        </div>
-      </form>
+      {form}
     </MobileWrapperDialog>
   );
 }

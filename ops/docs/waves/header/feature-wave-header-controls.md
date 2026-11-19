@@ -176,13 +176,22 @@ Add/Edit REP sits beside `Join` when both controls are shown.
 7. Select `Joined` count to toggle between about content and followers.
 8. Use `Back` in followers to return to `About`.
 9. Use pin to keep the wave in pinned lists (up to 20 total).
-10. Open the wave name to go to `/waves/{waveId}`.
+10. In the mobile information sheet or tablet overlay, edit-eligible users can
+    select the wave name to open `Rename wave` inside the same panel. Other name
+    links open `/waves/{waveId}`.
 11. Renaming the wave leaves decision titles and rules unchanged.
-    If edit-eligible on a non-DM wave, use pencil actions to rename or update
-    picture.
+    If edit-eligible on a non-DM wave, select the name or its pencil in About to
+    rename; use the picture pencil to update the image. `Rename wave` fits its
+    name field and Save action inside the same
+    sheet, without the full About view's empty space. `Back`
+    returns to `About` and discards an unsaved name; `Close` dismisses the whole
+    panel. `Save` returns to `About` after the name is saved.
+    Picture editing also uses the same panel, with a compact upload form and one
+    `Close` control. `Back` discards a selected image and returns to About;
+    uploading and saving retain the existing image validation and update flow.
 12. If author, open `⋮` for profile-wave actions and `Delete`. In the mobile
     sheet or tablet overlay, `Wave options` opens inside the same panel. The
-    mobile sheet keeps its height as you enter options or return to About. Use
+    mobile sheet fits the available actions and expands back to About's full view. Use
     `Back` to return to `About`; `Close` dismisses the whole panel.
 13. For `Delete`, confirm in modal. Success redirects to `/waves`.
 
@@ -192,6 +201,8 @@ Add/Edit REP sits beside `Join` when both controls are shown.
 - Open followers, then use `Back` or `Joined` again to return to `About`.
 - Pin active waves for faster return.
 - Rename a wave without leaving the thread (`Save` stays disabled until the name changes).
+- On phones, rename keeps one sheet with one Close control. Its Back control
+  returns to `About`; swiping down from the header dismisses the sheet.
 - Mobile Wave REP and picture editors use Close or a downward header swipe to
   dismiss; their desktop dialogs also offer Cancel.
 - On direct-message waves, the name link stays available but rename/picture
@@ -213,7 +224,8 @@ Add/Edit REP sits beside `Join` when both controls are shown.
   connected user would otherwise pass `canEditWave`.
 - Pin attempts beyond 20 are blocked and show an error toast.
 - Controls show loading states and disable repeat clicks while requests are running.
-- Pencil edit controls are hover-revealed and may not appear on touch-only web layouts.
+- Pencil edit controls are visible on touch-only layouts and become visible on
+  hover or keyboard focus when using a mouse or keyboard.
 
 ## Failure and Recovery
 
