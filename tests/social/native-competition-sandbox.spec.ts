@@ -6936,17 +6936,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await promiseBadge.click();
         // The dialog wrapper has fixed-position children and no box of its own.
         await expect(promiseBadge).toBeVisible();
+        const isAppPreview =
+          app || testInfo.project.name.startsWith("capacitor-");
         const close = dialog.getByRole("button", {
-          name:
-            app || testInfo.project.name.startsWith("capacitor-")
-              ? "Close panel"
-              : "Close Gallery",
+          name: isAppPreview ? "Close panel" : "Close Gallery",
           exact: true,
         });
         await expect(close).toBeVisible();
         await expect(close).toHaveCSS("border-radius", "8px");
-        await expect(close).toHaveCSS("width", "36px");
-        await expect(close).toHaveCSS("height", "36px");
+        const closeSize = isAppPreview ? "40px" : "36px";
+        await expect(close).toHaveCSS("width", closeSize);
+        await expect(close).toHaveCSS("height", closeSize);
         await expect(close).toHaveCSS("border-top-width", "0px");
         await expect(close).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
         await expect(close).toHaveCSS("margin-right", "0px");
@@ -6961,7 +6961,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
                 ?.getAttribute("stroke-width"),
             };
           })
-        ).toEqual({ width: 16, height: 16, stroke: "2" });
+        ).toEqual({
+          width: isAppPreview ? 20 : 16,
+          height: isAppPreview ? 20 : 16,
+          stroke: "2",
+        });
         if (testInfo.project.use.hasTouch) {
           await expect
             .poll(() =>
