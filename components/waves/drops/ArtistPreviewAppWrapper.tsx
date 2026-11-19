@@ -11,7 +11,6 @@ import type { CSSProperties, ReactNode } from "react";
 import { Fragment, useCallback, useRef } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 
@@ -114,7 +113,9 @@ export default function ArtistPreviewAppWrapper({
                   <MobileWrapperDialogCloseButton
                     onClick={onClose}
                     label="Close panel"
-                    className={COMPACT_ACTION_TOUCH_TARGET_CLASS}
+                    variant="minimal"
+                    size="compact"
+                    className="!tw-text-white"
                   />
                 </div>
               </TransitionChild>

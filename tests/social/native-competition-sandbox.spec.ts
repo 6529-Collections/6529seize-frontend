@@ -6944,11 +6944,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         });
         await expect(close).toBeVisible();
         await expect(close).toHaveCSS("border-radius", "8px");
-        const closeSize = isAppPreview ? "40px" : "36px";
-        await expect(close).toHaveCSS("width", closeSize);
-        await expect(close).toHaveCSS("height", closeSize);
+        await expect(close).toHaveCSS("width", "36px");
+        await expect(close).toHaveCSS("height", "36px");
         await expect(close).toHaveCSS("border-top-width", "0px");
         await expect(close).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+        if (isAppPreview) {
+          await expect(close).toHaveCSS("color", "rgb(255, 255, 255)");
+        }
         await expect(close).toHaveCSS("margin-right", "0px");
         expect(
           await close.evaluate((button) => {
@@ -6962,8 +6964,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             };
           })
         ).toEqual({
-          width: isAppPreview ? 20 : 16,
-          height: isAppPreview ? 20 : 16,
+          width: 16,
+          height: 16,
           stroke: "2",
         });
         if (testInfo.project.use.hasTouch) {
