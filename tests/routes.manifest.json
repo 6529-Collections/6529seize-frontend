@@ -368,6 +368,10 @@
     "/desktop/releases": {
       "classification": "crawlable"
     },
+    "/dev/desktop-connect": {
+      "classification": "exempt",
+      "exemptReason": "Development-only desktop wallet UI preview; returns not-found in production."
+    },
     "/discover": {
       "classification": "crawlable",
       "family": "social"
