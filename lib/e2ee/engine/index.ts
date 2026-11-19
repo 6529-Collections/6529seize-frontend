@@ -34,8 +34,7 @@ import {
   markRevocationUnverified,
   needsNewDevice,
   refreshMe,
-  renewalDue,
-  renewGrant,
+  renewStoredDeviceIfDue,
   submitRevocation,
 } from "./enroll";
 import { backupHistory, importBackupHistory } from "./backup";
@@ -171,8 +170,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
   }
 
   /** NC8: enrolls from a combined sign-in grant stored meanwhile. */
-  enrollWithLoginGrant(): Promise<E2eeEngineStatus> {
-    return this.enrollment.withLoginGrant();
+  enrollWithLoginGrant(options?: {
+    readonly resumeStored?: boolean;
+  }): Promise<E2eeEngineStatus> {
+    return this.enrollment.withLoginGrant(options?.resumeStored);
   }
 
   needsNewDevice(): Promise<boolean> {
@@ -369,13 +370,8 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   /** 8.8: in the grant's last 14 days, enroll() renews it (one prompt). */
   private async renew(): Promise<void> {
-    const device = this.ctx.device;
-    if (!device || !renewalDue(this.ctx, device)) {
+    if (!(await renewStoredDeviceIfDue(this.ctx))) {
       return;
-    }
-    await this.ctx.queue.run(() => renewGrant(this.ctx));
-    for (const runtime of this.ctx.store.groups.values()) {
-      runtime.record.selfUpdateRequested = true;
     }
     await this.refreshMe();
     for (const [g, runtime] of this.ctx.store.groups) {
@@ -385,11 +381,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  async sync(): Promise<void> {
+  async sync(options?: { readonly recheckInbox?: boolean }): Promise<void> {
     if (this.ctx.store.status !== "ready") {
       return;
     }
-    await this.controller.syncAll();
+    await this.controller.syncAll(options?.recheckInbox);
   }
 
   async pauseIncoming(): Promise<void> {

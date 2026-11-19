@@ -54,7 +54,7 @@ const MIN_REUSABLE_GRANT_MS = 7 * DAY_MS;
 /** 8.8: renewal is offered in the grant's last 14 days. */
 const RENEWAL_WINDOW_MS = 14 * DAY_MS;
 
-export const renewalDue = (ctx: EngineContext, device: StoredDevice): boolean =>
+const renewalDue = (ctx: EngineContext, device: StoredDevice): boolean =>
   device.grant.expires_at * 1000 - ctx.now() <= RENEWAL_WINDOW_MS;
 
 const grantExpired = (ctx: EngineContext, device: StoredDevice): boolean =>
@@ -447,11 +447,28 @@ async function provision(
 }
 
 /**
+ * Renews a ready device outside the engine queue, retaining its chat keys.
+ * On true, the caller must refresh the device listing and maintain active
+ * groups to commit the requested credential updates.
+ */
+export async function renewStoredDeviceIfDue(
+  ctx: EngineContext
+): Promise<boolean> {
+  const device = ctx.device;
+  if (!device || !renewalDue(ctx, device)) return false;
+  await ctx.queue.run(() => renewGrant(ctx));
+  for (const runtime of ctx.store.groups.values()) {
+    runtime.record.selfUpdateRequested = true;
+  }
+  return true;
+}
+
+/**
  * 8.8 renewal: one new signature for the same device key; the server
  * updates the grant, the MLS credential is replaced (groups pick it up with
  * a self-update) and fresh KeyPackages carry the new credential.
  */
-export async function renewGrant(ctx: EngineContext): Promise<void> {
+async function renewGrant(ctx: EngineContext): Promise<void> {
   const device = requireDevice(ctx);
   const mls = requireMls(ctx);
   const { grant, signature } = await signGrant(ctx, device.deviceKey);
@@ -549,6 +566,22 @@ async function registerPending(
   }
 }
 
+/** Restores the saved MLS state before resuming this device's enrollment. */
+async function resumeStoredDevice(
+  ctx: EngineContext,
+  device: StoredDevice
+): Promise<void> {
+  if (!ctx.mls) {
+    const state = await ctx.storage.getWasmState(ctx.profileId);
+    if (!state || !ctx.wasm) {
+      throw new E2eeError("E2EE_NOT_READY", "missing device state");
+    }
+    ctx.mls = MlsClient.load(ctx.wasm, state);
+    ctx.lastState = state;
+  }
+  ctx.device = device;
+}
+
 /**
  * Enrollment: device key in WASM, ONE signTypedData, register, credential,
  * KeyPackages. Resumable: a stored grant is reused instead of re-prompting,
@@ -568,18 +601,15 @@ export async function enrollDevice(
 ): Promise<boolean> {
   await ensureWasm(ctx);
   const stored = await loadCurrentSuiteDevice(ctx);
+  // Resuming an existing grant must never turn into a renewal signature.
+  // Leave that permission to the separate enrollment action.
+  if (!allowPrompt && stored && renewalDue(ctx, stored)) {
+    return false;
+  }
   let device: StoredDevice;
   if (stored && (stored.registered || reusablePending(ctx, stored))) {
     device = stored;
-    if (!ctx.mls) {
-      const state = await ctx.storage.getWasmState(ctx.profileId);
-      if (!state || !ctx.wasm) {
-        throw new E2eeError("E2EE_NOT_READY", "missing device state");
-      }
-      ctx.mls = MlsClient.load(ctx.wasm, state);
-      ctx.lastState = state;
-    }
-    ctx.device = device;
+    await resumeStoredDevice(ctx, device);
   } else if (allowPrompt) {
     device = await createDevice(ctx);
   } else {

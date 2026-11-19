@@ -87,10 +87,23 @@ export interface E2eeApiClient {
     group: string,
     body: ApiE2eeRosterRepairRequest
   ): Promise<ApiE2eeGroup>;
-  getWelcomes(deviceKey: string): Promise<ApiE2eeWelcome[]>;
-  ackWelcome(deviceKey: string, welcomeId: string): Promise<void>;
-  getDeviceGroups(deviceKey: string): Promise<ApiE2eeDeviceGroup[]>;
-  getDeviceInboxStatus(deviceKey: string): Promise<ApiE2eeDeviceInboxStatus>;
+  getWelcomes(
+    deviceKey: string,
+    signal?: AbortSignal
+  ): Promise<ApiE2eeWelcome[]>;
+  ackWelcome(
+    deviceKey: string,
+    welcomeId: string,
+    signal?: AbortSignal
+  ): Promise<void>;
+  getDeviceGroups(
+    deviceKey: string,
+    signal?: AbortSignal
+  ): Promise<ApiE2eeDeviceGroup[]>;
+  getDeviceInboxStatus(
+    deviceKey: string,
+    signal?: AbortSignal
+  ): Promise<ApiE2eeDeviceInboxStatus>;
   createBlob(body: ApiE2eeCreateBlobRequest): Promise<ApiE2eeBlob>;
   putBlobChunk(
     blobId: string,
@@ -206,9 +219,14 @@ function requests(account: E2eeApiAccount) {
           ...(signal ? { signal } : {}),
         })
       ),
-    post: <T>(endpoint: string, body: object) =>
+    post: <T>(endpoint: string, body: object, signal?: AbortSignal) =>
       send(() =>
-        commonApiPost<object, T>({ endpoint, body, errorMode: "structured" })
+        commonApiPost<object, T>({
+          endpoint,
+          body,
+          errorMode: "structured",
+          ...(signal ? { signal } : {}),
+        })
       ),
     put: <T>(endpoint: string, body: object) =>
       send(() =>

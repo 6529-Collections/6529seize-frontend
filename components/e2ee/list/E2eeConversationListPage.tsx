@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Button from "@/components/utils/button/Button";
+import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import {
   getEncryptedDevicesRoute,
@@ -17,6 +18,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { t } from "@/i18n/messages";
+import { E2EE_INITIAL_INBOX_WAIT_MS } from "@/lib/e2ee/types";
 import { E2eeNewDeviceNotice } from "../devices/E2eeNewDeviceNotice";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
 import { E2eeRouteGate } from "../gate/E2eeRouteGate";
@@ -27,7 +29,6 @@ import { useSyncEncryptedPush } from "./useSyncEncryptedPush";
 
 const ACTION_LINK_CLASS =
   "tw-inline-flex tw-h-9 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border tw-border-solid tw-px-3 tw-text-xs tw-font-semibold tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400";
-const SLOW_INBOX_SYNC_MS = 15_000;
 
 function DevicesLink() {
   const locale = useBrowserLocale();
@@ -50,44 +51,51 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
   const { conversations, profileId, initialSyncStatus, engine } = e2ee;
   const hasChats = conversations.length > 0;
   const waiting = initialSyncStatus === "waiting";
-  const [slow, setSlow] = useState(false);
   const [checking, setChecking] = useState(false);
   useEffect(() => {
-    if (!waiting) return;
+    if (!checking) return;
     const timer = globalThis.setTimeout(
-      () => setSlow(true),
-      SLOW_INBOX_SYNC_MS
+      () => setChecking(false),
+      E2EE_INITIAL_INBOX_WAIT_MS
     );
     return () => globalThis.clearTimeout(timer);
-  }, [waiting]);
-  const showWaitHelp = waiting && slow;
+  }, [checking]);
   const loading =
     checking || waiting || (!hasChats && initialSyncStatus === "pending");
   const loadingPadding = hasChats ? "tw-py-3" : "tw-py-12";
-  const loadFailed = !checking && !hasChats && initialSyncStatus === "failed";
-  const loadError = t(locale, "e2ee.list.error");
+  const showRetry =
+    !checking &&
+    !hasChats &&
+    (initialSyncStatus === "failed" || initialSyncStatus === "delayed");
+  const awaitingInvitation = initialSyncStatus === "awaiting-invitation";
+  const showEmpty =
+    !checking &&
+    !hasChats &&
+    (awaitingInvitation || initialSyncStatus === "complete");
+  const emptyTitle = t(
+    locale,
+    awaitingInvitation
+      ? "e2ee.list.awaitingInvitation.title"
+      : "e2ee.list.empty.title"
+  );
+  const checkAgain = () => {
+    if (!engine) return;
+    setChecking(true);
+    void engine
+      .sync({ recheckInbox: true })
+      .catch(() => undefined)
+      .finally(() => setChecking(false));
+  };
   let status = "";
   if (loading) status = t(locale, "e2ee.list.loading");
   if (waiting && !checking) status = t(locale, "e2ee.list.waiting");
-  if (loadFailed) status = loadError;
-
-  const retryButton = (
-    <Button
-      variant="secondary"
-      size="md"
-      disabled={checking}
-      onClick={() => {
-        if (!engine) return;
-        setChecking(true);
-        void engine
-          .sync()
-          .catch(() => undefined)
-          .finally(() => setChecking(false));
-      }}
-    >
-      {t(locale, "e2ee.action.retry")}
-    </Button>
-  );
+  if (showRetry) {
+    status = t(
+      locale,
+      initialSyncStatus === "delayed" ? "e2ee.list.delayed" : "e2ee.list.error"
+    );
+  }
+  if (showEmpty && awaitingInvitation) status = emptyTitle;
 
   return (
     <>
@@ -105,28 +113,44 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
             : "tw-sr-only"
         }
       >
-        {loading && (checking || !showWaitHelp) && <CircleLoader />}
-        <span className="tw-flex tw-flex-col tw-gap-1.5">
-          {status}
-          {showWaitHelp && !checking && (
-            <span>{t(locale, "e2ee.list.waitingHelp")}</span>
-          )}
-        </span>
+        {loading && <CircleLoader />}
+        {status}
       </output>
-      {showWaitHelp && (
-        <div className="tw-flex tw-justify-center">{retryButton}</div>
-      )}
-      {loadFailed && (
-        <E2eeCenteredMessage title={loadError}>
-          {retryButton}
+      {showRetry && (
+        <E2eeCenteredMessage title={status}>
+          <Button variant="secondary" size="md" onClick={checkAgain}>
+            {t(locale, "e2ee.action.retry")}
+          </Button>
         </E2eeCenteredMessage>
       )}
-      {!checking && !hasChats && initialSyncStatus === "complete" && (
+      {showEmpty && (
         <E2eeCenteredMessage
           icon={<LockClosedIcon className="tw-size-6" />}
-          title={t(locale, "e2ee.list.empty.title")}
-          body={t(locale, "e2ee.list.empty.body")}
-        />
+          title={emptyTitle}
+          body={t(
+            locale,
+            awaitingInvitation
+              ? "e2ee.list.awaitingInvitation.body"
+              : "e2ee.list.empty.body"
+          )}
+        >
+          {awaitingInvitation && (
+            <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-2">
+              <Link
+                href={getEncryptedDevicesRoute()}
+                className={getButtonClasses({
+                  variant: "secondary",
+                  className: "tw-no-underline",
+                })}
+              >
+                {t(locale, "e2ee.list.awaitingInvitation.action")}
+              </Link>
+              <Button variant="ghost" size="md" onClick={checkAgain}>
+                {t(locale, "e2ee.list.checkAgain")}
+              </Button>
+            </div>
+          )}
+        </E2eeCenteredMessage>
       )}
     </>
   );

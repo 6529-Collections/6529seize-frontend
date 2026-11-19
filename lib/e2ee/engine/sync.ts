@@ -6,6 +6,7 @@ import type {
   ApiE2eeWelcome,
 } from "../api-types";
 import { MlsError } from "../mls-adapter";
+import { E2EE_INITIAL_INBOX_WAIT_MS } from "../types";
 import type { WasmWelcomeSummary } from "../wasm-types";
 import { discardPendingCommit } from "./commit";
 import {
@@ -24,6 +25,7 @@ import {
   type LeafOwner,
 } from "./dm-join";
 import { RetryableError } from "./errors";
+import { requestWithDeadline } from "./runtime";
 import {
   addNotices,
   applySummary,
@@ -181,14 +183,22 @@ export async function tryCatchUp(
  * When the acknowledgement fails the entry stays, so a redelivered Welcome
  * keeps the time left in its window.
  */
-async function ack(ctx: EngineContext, welcome: ApiE2eeWelcome): Promise<void> {
+async function ack(
+  ctx: EngineContext,
+  welcome: ApiE2eeWelcome
+): Promise<boolean> {
   try {
-    await ctx.api.ackWelcome(ownDeviceKey(ctx), welcome.id);
+    await requestWithDeadline(
+      ctx.scheduler,
+      E2EE_INITIAL_INBOX_WAIT_MS,
+      (signal) => ctx.api.ackWelcome(ownDeviceKey(ctx), welcome.id, signal)
+    );
   } catch {
-    // Retried with the next inbox pull.
-    return;
+    // The acknowledgement is idempotent. A redelivery can retry it.
+    return false;
   }
   releaseHeldWelcome(ctx, welcome.id);
+  return true;
 }
 
 async function senderBlocked(
@@ -344,12 +354,10 @@ async function handleWelcome(
   const g = welcome.group.toLowerCase();
   const existing = ctx.store.groups.get(g);
   if (existing?.record.status === "active" && mls.hasGroup(g)) {
-    await ack(ctx, welcome);
-    return true;
+    return ack(ctx, welcome);
   }
   if (await senderBlocked(ctx, [welcome.added_by_profile_id])) {
-    await ack(ctx, welcome);
-    return true;
+    return ack(ctx, welcome);
   }
   let staged: WasmWelcomeSummary;
   try {
@@ -358,8 +366,7 @@ async function handleWelcome(
     if (!(error instanceof MlsError)) {
       throw error;
     }
-    await ack(ctx, welcome);
-    return true;
+    return ack(ctx, welcome);
   }
   try {
     const metadataOk =
@@ -385,8 +392,7 @@ async function handleWelcome(
     if (participants !== "ok") {
       mls.rejectWelcome(g);
       await checkpoint(ctx);
-      await ack(ctx, welcome);
-      return true;
+      return ack(ctx, welcome);
     }
     const splitView = !(await commitKeyMatches(ctx, staged));
     await acceptJoin(ctx, welcome, staged, {
@@ -394,8 +400,7 @@ async function handleWelcome(
       splitView,
       senderProfileId,
     });
-    await ack(ctx, welcome);
-    return true;
+    return ack(ctx, welcome);
   } catch (error) {
     await rollback(ctx);
     throw error;
@@ -404,7 +409,11 @@ async function handleWelcome(
 
 /** Whether all pending Welcomes were resolved. Runs inside the queue. */
 export async function processInbox(ctx: EngineContext): Promise<boolean> {
-  const welcomes = await ctx.api.getWelcomes(ownDeviceKey(ctx));
+  const welcomes = await requestWithDeadline(
+    ctx.scheduler,
+    E2EE_INITIAL_INBOX_WAIT_MS,
+    (signal) => ctx.api.getWelcomes(ownDeviceKey(ctx), signal)
+  );
   let complete = true;
   for (const welcome of welcomes) {
     // Each Welcome may change the shared MLS state before the next one.

@@ -72,11 +72,29 @@ describe("E2EE REST client (contract 4.2)", () => {
     );
   });
 
-  it("rejects an inbox response that cannot confirm whether chats are pending", async () => {
-    fetchMock.mockResolvedValueOnce({});
-    await expect(
-      createE2eeApiClient(ACCOUNT).getDeviceInboxStatus(KEY)
-    ).rejects.toThrow("Invalid encrypted inbox status");
+  it.each([{}, { has_pending_chats: true, has_queued_welcomes: "true" }])(
+    "rejects a malformed inbox status %j",
+    async (response) => {
+      fetchMock.mockResolvedValueOnce(response);
+      await expect(
+        createE2eeApiClient(ACCOUNT).getDeviceInboxStatus(KEY)
+      ).rejects.toThrow("Invalid encrypted inbox status");
+    }
+  );
+
+  it("preserves the queued Welcome signal and forwards acknowledgement cancellation", async () => {
+    const api = createE2eeApiClient(ACCOUNT);
+    const signal = new AbortController().signal;
+    const status = { has_pending_chats: true, has_queued_welcomes: false };
+    fetchMock.mockResolvedValueOnce(status);
+    await expect(api.getDeviceInboxStatus(KEY)).resolves.toEqual(status);
+    await api.ackWelcome(KEY, "w", signal);
+    expect(postMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: `e2ee/devices/${KEY}/welcomes/w/ack`,
+        signal,
+      })
+    );
   });
 
   it("maps every endpoint with structured errors", async () => {

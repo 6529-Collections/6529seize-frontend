@@ -1,6 +1,7 @@
 "use client";
 
-import type { ComponentProps, ReactNode } from "react";
+import { useState, type ComponentProps, type ReactNode } from "react";
+import { useAuth } from "@/components/auth/Auth";
 import { useDeviceSecurityState } from "@/components/device-signing/DeviceSecurityStatus";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Button from "@/components/utils/button/Button";
@@ -11,6 +12,7 @@ import { E2eeCenteredMessage } from "../ui/E2eePageShell";
 import { E2eeDeviceLimitPanel } from "./E2eeDeviceLimitPanel";
 import { E2eeEnrollmentCard } from "./E2eeEnrollmentCard";
 import { E2eeEnrollmentIdentity } from "./E2eeEnrollmentIdentity";
+import { E2EE_SESSION_EXPIRED } from "@/lib/e2ee/engine/errors";
 
 export function E2eeLoadingState({ label }: { readonly label: string }) {
   return (
@@ -51,6 +53,17 @@ export function E2eeRouteGate({ children, shell }: E2eeRouteGateProps) {
 
 export function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
   const locale = useBrowserLocale();
+  // Recover settled API failures, including device management. Active work
+  // and local restrictions (proxy, unsupported browser, another tab) keep
+  // their own UI even if an older error is still present.
+  const canRecoverSession =
+    e2ee.status === "error" ||
+    e2ee.status === "load-failed" ||
+    e2ee.status === "needs-enrollment" ||
+    e2ee.status === "device-limit";
+  if (e2ee.error === E2EE_SESSION_EXPIRED && canRecoverSession) {
+    return <E2eeSessionRecovery restart={e2ee.restart} />;
+  }
   switch (e2ee.status) {
     case "proxy":
       return (
@@ -125,6 +138,47 @@ export function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
     case "ready":
       return <E2eeLoadingState label={t(locale, "e2ee.loading")} />;
   }
+}
+
+function E2eeSessionRecovery({ restart }: { readonly restart: () => void }) {
+  const locale = useBrowserLocale();
+  const { requestAuth } = useAuth();
+  const [pending, setPending] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const recover = async () => {
+    setPending(true);
+    setFailed(false);
+    try {
+      const result = await requestAuth({ serverRejected: true });
+      if (result.success) restart();
+      else setFailed(true);
+    } catch {
+      setFailed(true);
+    } finally {
+      setPending(false);
+    }
+  };
+  return (
+    <E2eeCenteredMessage
+      title={t(locale, "e2ee.gate.session.title")}
+      body={t(locale, "e2ee.gate.session.body")}
+    >
+      <Button
+        variant="secondary"
+        size="md"
+        disabled={pending}
+        aria-busy={pending}
+        onClick={recover}
+      >
+        {t(locale, "e2ee.gate.session.action")}
+      </Button>
+      {failed ? (
+        <p role="alert" className="tw-mt-3 tw-text-sm tw-text-rose-300">
+          {t(locale, "e2ee.gate.session.failed")}
+        </p>
+      ) : null}
+    </E2eeCenteredMessage>
+  );
 }
 
 function InlineDeviceSetup(

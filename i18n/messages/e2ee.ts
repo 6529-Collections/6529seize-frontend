@@ -51,6 +51,11 @@ export const E2EE_MESSAGES = {
   "e2ee.action.newChat": "New encrypted chat",
   "e2ee.action.devices": "Devices",
   "e2ee.action.retry": "Try again",
+  "e2ee.gate.session.title": "Sign in again to continue",
+  "e2ee.gate.session.body":
+    "Your sign-in is no longer valid. Sign in again to continue setting up encrypted messages. Your chats stay on this device.",
+  "e2ee.gate.session.action": "Sign in again",
+  "e2ee.gate.session.failed": "Sign-in did not finish. Please try again.",
   "e2ee.action.cancel": "Cancel",
   "e2ee.action.close": "Close",
   "e2ee.action.dismiss": "Dismiss",
@@ -260,9 +265,14 @@ export const E2EE_MESSAGES = {
   "e2ee.list.subtitle": "End-to-end encrypted chats on this device.",
   "e2ee.list.loading": "Loading encrypted chats…",
   "e2ee.list.waiting": "Waiting for encrypted chats to sync to this device…",
-  "e2ee.list.waitingHelp":
-    "You can open the chat on another device to help it sync.",
+  "e2ee.list.delayed": "Encrypted chats are taking longer to sync",
   "e2ee.list.error": "Couldn’t load encrypted chats.",
+  "e2ee.list.awaitingInvitation.title":
+    "No encrypted chats available on this device yet",
+  "e2ee.list.awaitingInvitation.body":
+    "Existing chats can appear after a trusted device in the chat adds this one.",
+  "e2ee.list.awaitingInvitation.action": "Check device setup",
+  "e2ee.list.checkAgain": "Check again",
   "e2ee.list.empty.title": "No encrypted chats yet",
   "e2ee.list.empty.body":
     "Start an encrypted chat with one person or a group. Only the people in the chat can read it.",
