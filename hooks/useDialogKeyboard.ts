@@ -43,10 +43,14 @@ export default function useDialogKeyboard(isOpen: boolean) {
               0,
               globalThis.innerHeight - viewport.height - viewport.offsetTop
             );
-            element.style.setProperty(
-              "--native-keyboard-inset-bottom",
-              `${inset}px`
-            );
+            if (inset > 0) {
+              element.style.setProperty(
+                "--native-keyboard-inset-bottom",
+                `${inset}px`
+              );
+            } else {
+              element.style.removeProperty("--native-keyboard-inset-bottom");
+            }
             element.style.setProperty(
               "--dialog-viewport-height",
               `${viewport.height}px`

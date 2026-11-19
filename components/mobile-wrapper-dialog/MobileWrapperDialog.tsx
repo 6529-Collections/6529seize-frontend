@@ -20,6 +20,7 @@ import { useMobileDialogDrag } from "./useMobileDialogDrag";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import { observeFocusedField } from "@/helpers/focused-field-visibility";
+import MobileDialogSurface from "./MobileDialogSurface";
 
 // Browser chrome can resize the viewport slightly without opening a keyboard.
 const BROWSER_KEYBOARD_MIN_INSET = 100;
@@ -55,6 +56,8 @@ type MobileWrapperDialogProps = {
   readonly noPadding?: boolean | undefined;
   readonly tall?: boolean | undefined;
   readonly fixedHeight?: boolean | undefined;
+  /** Ease between views in the same surface; keyboard frames keep native timing. */
+  readonly resizeKey?: string | undefined;
   /** Also fit the software keyboard viewport in mobile browsers. */
   readonly fitVisualViewport?: boolean | undefined;
   /** Action-only sheets enter at their final position while the keyboard closes. */
@@ -448,6 +451,7 @@ export default function MobileWrapperDialog({
   noPadding,
   tall,
   fixedHeight,
+  resizeKey,
   fitVisualViewport = true,
   avoidKeyboard = true,
   tabletModal,
@@ -720,7 +724,14 @@ export default function MobileWrapperDialog({
                       closeLabel={resolvedCloseLabel}
                       disabled={busy}
                     />
-                    <div className={surfaceClassNames} style={surfaceStyle}>
+                    <MobileDialogSurface
+                      className={surfaceClassNames}
+                      style={surfaceStyle}
+                      dialogHeight={dialogHeight}
+                      fixedHeight={fixedHeight}
+                      resizeKey={resizeKey}
+                      isOpen={isOpen}
+                    >
                       <div
                         ref={trackFocusedField}
                         data-keyboard-scroll-container
@@ -731,6 +742,7 @@ export default function MobileWrapperDialog({
                       >
                         <div
                           data-testid="mobile-dialog-header"
+                          data-mobile-dialog-header
                           {...dragTouchHandlers}
                           style={
                             canDragToClose
@@ -768,7 +780,7 @@ export default function MobileWrapperDialog({
                         {children}
                       </div>
                       {footer}
-                    </div>
+                    </MobileDialogSurface>
                   </DialogPanel>
                 </div>
               </TransitionChild>

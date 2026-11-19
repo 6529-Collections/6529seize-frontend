@@ -7,7 +7,7 @@ const mockReveal = jest.fn();
 const mockDisconnect = jest.fn();
 jest.mock("@/hooks/useCapacitor", () => ({
   __esModule: true,
-  default: () => ({ isCapacitor: mockIsNative }),
+  default: () => ({ isCapacitor: mockIsNative, isAndroid: false }),
 }));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayoutViewportLock: (active: boolean) => mockLock(active),
@@ -75,6 +75,15 @@ describe("useDialogKeyboard", () => {
       "450px"
     );
     expect(element.style.top).toBe("30px");
+    act(() => {
+      viewport.height = 800;
+      viewport.offsetTop = 0;
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    expect(
+      element.style.getPropertyValue("--native-keyboard-inset-bottom")
+    ).toBe("");
+    expect(element.style.top).toBe("");
     expect(mockLock).toHaveBeenLastCalledWith(false);
     const reveals = mockReveal.mock.calls.length;
     unmount();
@@ -96,6 +105,22 @@ describe("useDialogKeyboard", () => {
         .getByTestId("viewport")
         .style.getPropertyValue("--native-keyboard-inset-bottom")
     ).toBe("");
+  });
+
+  it("clears browser compensation when the native platform becomes available", () => {
+    viewport.height = 450;
+    const { rerender } = render(<Dialog />);
+    const element = screen.getByTestId("viewport");
+    expect(
+      element.style.getPropertyValue("--native-keyboard-inset-bottom")
+    ).toBe("350px");
+    mockIsNative = true;
+    rerender(<Dialog />);
+    expect(
+      element.style.getPropertyValue("--native-keyboard-inset-bottom")
+    ).toBe("");
+    expect(element.style.getPropertyValue("--dialog-viewport-height")).toBe("");
+    expect(mockLock).toHaveBeenLastCalledWith(true);
   });
 
   it("uses the native inset and locks the background instead of applying browser compensation", () => {

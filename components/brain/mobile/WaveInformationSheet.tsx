@@ -77,12 +77,16 @@ export default function WaveInformationSheet({
       showHeaderDivider={false}
       tall
       fixedHeight={!isCompactSubview}
+      resizeKey={information?.request?.view ?? "about"}
       fitVisualViewport
       noPadding
       headerClassName="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-4"
     >
       <WaveInformationPanelContext.Provider value={panel}>
-        <div hidden={subviewOpen} className="tw-min-h-0 tw-flex-1">
+        <div
+          hidden={subviewOpen}
+          className="tw-min-h-0 tw-flex-1 motion-safe:[&:not([hidden])]:tw-animate-sidebar-account-fade-in"
+        >
           <WaveDeleteFlowProvider>
             <WaveContent
               wave={wave}
@@ -99,7 +103,8 @@ export default function WaveInformationSheet({
           id={contentId}
           ref={setContainer}
           hidden={!subviewOpen}
-          className="tw-min-h-0 tw-flex-1 tw-py-4"
+          data-dialog-content-size
+          className="tw-min-h-0 tw-flex-1 tw-py-4 motion-safe:[&:not([hidden])]:tw-animate-sidebar-account-fade-in"
         />
       </WaveInformationPanelContext.Provider>
     </MobileWrapperDialog>

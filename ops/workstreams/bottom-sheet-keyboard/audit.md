@@ -128,7 +128,8 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
   The voting PR's caller-specific lock and optional easing override can therefore
   use these defaults when the branches are integrated; no second curve is needed.
   This PR also incorporates its focused-field content-resize tracking, Android
-  lock-release rule and iOS non-text focus hide recovery. The voting UI changes
+  lock-release rule, duplicate Android visibility-attribute write guard and
+  iOS non-text focus hide recovery. The voting UI changes
   themselves remain in that PR.
 
 ## Resulting keyboard policy
@@ -163,6 +164,10 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
 - Wave options also fits its short action list. Its Delete action and existing
   confirmation/cancellation path remain available; Back restores About's size
   and the three-dot trigger's focus.
+- Switching these views eases the existing surface height over 220ms with a
+  short content fade. Focus/keyboard events retain the shared keyboard timing;
+  reduced motion disables the added transitions. The sheet and backdrop remain
+  mounted throughout, with one header and one Close control.
 - Standalone rename entry points retain their existing dialog. Permission checks
   are unchanged: connected, non-proxy author/admin eligibility on non-DM waves.
 - The other nesting findings in the baseline inventory remain source-audited:
@@ -187,5 +192,15 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
   to About. A second native recording of the compact editor shows the sheet
   and keyboard moving together, with the input and Save remaining above it.
   This is visual runtime evidence, not a constant-frame-rate measurement.
-- Android updated-build verification remains in progress. Browser results do
-  not establish Android native animation smoothness.
+- Physical Android baseline also reproduces two dialogs and two Close controls.
+  The updated test app has one dialog and one Close. An actual screen tap opens
+  the native keyboard; the field and Save remain inside its visible viewport.
+  Native video shows coordinated sheet/keyboard movement. Android Back hides
+  the keyboard while retaining Rename; in-sheet Back restores About and focus.
+  Compact options, Delete/Cancel, Close/lock release and a physical header swipe
+  also pass. These recordings establish visual behavior, not a fixed frame rate.
+- Browser resize sampling observes intermediate heights between About and
+  Rename on mobile web and both simulated native surfaces. Reduced-motion
+  coverage checks that the surface transition and content fade are disabled.
+  The final navigation-animation refinement is being checked on Android;
+  the iPhone went offline after the earlier same-sheet/keyboard checks.

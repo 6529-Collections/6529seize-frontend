@@ -353,6 +353,47 @@ describe("MobileWrapperDialog", () => {
       }
     });
 
+    it("preserves an explicit browser viewport-fit opt-out", () => {
+      const original = globalThis.visualViewport;
+      const viewport = Object.assign(new EventTarget(), {
+        height: globalThis.innerHeight - 300,
+        offsetTop: 0,
+      });
+      Object.defineProperty(globalThis, "visualViewport", {
+        configurable: true,
+        value: viewport,
+      });
+      try {
+        render(
+          <MobileWrapperDialog
+            {...defaultProps}
+            isOpen
+            fitVisualViewport={false}
+          />
+        );
+        const container = document.querySelector<HTMLElement>(
+          ".tw-pointer-events-none.tw-fixed.tw-inset-x-0"
+        );
+        act(() => viewport.dispatchEvent(new Event("resize")));
+        expect(container).not.toBeNull();
+        expect(
+          container!.style.getPropertyValue(
+            "--mobile-wrapper-dialog-available-height"
+          )
+        ).toBe("");
+        expect(
+          container!.style.getPropertyValue(
+            "--mobile-wrapper-dialog-keyboard-inset"
+          )
+        ).toBe("");
+      } finally {
+        Object.defineProperty(globalThis, "visualViewport", {
+          configurable: true,
+          value: original,
+        });
+      }
+    });
+
     it("animates keyboard resizing for fixed-height sheets", () => {
       render(
         <MobileWrapperDialog

@@ -184,6 +184,14 @@ function applyKeyboardLayoutVariables(
   );
 
   if (isKeyboardActive) {
+    // Android native and viewport callbacks can report the same open keyboard.
+    // Rewriting this flag still invalidates descendant styles in the WebView.
+    if (
+      state.isAndroid &&
+      documentElement.dataset["nativeKeyboardVisible"] === "true"
+    ) {
+      return;
+    }
     documentElement.dataset["nativeKeyboardVisible"] = "true";
   } else {
     delete documentElement.dataset["nativeKeyboardVisible"];

@@ -60,6 +60,17 @@ async function expectCompactInformationSheet(
   lastAction: string
 ) {
   await expect
+    .poll(() =>
+      sheet
+        .locator("[data-mobile-dialog-surface]")
+        .evaluate((element) =>
+          element
+            .getAnimations()
+            .some((animation) => animation.playState === "running")
+        )
+    )
+    .toBe(false);
+  await expect
     .poll(async () => {
       const header = await sheet
         .getByTestId("mobile-dialog-header")
@@ -10796,10 +10807,60 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .getByTestId("mobile-dialog-header")
         .boundingBox();
       expect(aboutHeader).not.toBeNull();
+      // Start at the actual click: Playwright may wait for the opening sheet
+      // animation before dispatching it. Sampling beforehand misses the resize.
+      await trigger.evaluate((element) => {
+        element.addEventListener(
+          "click",
+          () => {
+            const surface = element
+              .closest('[role="dialog"]')!
+              .querySelector("[data-mobile-dialog-surface]")!;
+            const heights: number[] = [];
+            const end = performance.now() + 350;
+            const sample = () => {
+              heights.push(Math.round(surface.getBoundingClientRect().height));
+              if (performance.now() < end) requestAnimationFrame(sample);
+              else
+                element.setAttribute(
+                  "data-resize-heights",
+                  JSON.stringify(heights)
+                );
+            };
+            requestAnimationFrame(sample);
+          },
+          { once: true }
+        );
+      });
       await trigger.click();
       await expect(page.getByRole("dialog")).toHaveCount(1);
       await expect(sheet).toHaveAccessibleName("Rename wave");
+      await expect(
+        sheet.getByRole("heading", { name: "Rename wave", exact: true })
+      ).toBeFocused();
+      const controlledTrigger = sheet.getByRole("button", {
+        name: "Edit wave name",
+        exact: true,
+        includeHidden: true,
+      });
+      await expect(controlledTrigger).toHaveAttribute("aria-expanded", "true");
+      expect(
+        await controlledTrigger.evaluate((element) => {
+          const region = document.getElementById(
+            element.getAttribute("aria-controls")!
+          );
+          return region !== null && !region.hidden;
+        })
+      ).toBe(true);
       await expectCompactInformationSheet(page, sheet, "Save");
+      await expect
+        .poll(async () => {
+          const samples = await controlledTrigger.getAttribute(
+            "data-resize-heights"
+          );
+          return samples ? new Set(JSON.parse(samples) as number[]).size : 0;
+        })
+        .toBeGreaterThan(2);
       await expect(
         sheet.getByRole("button", { name: "Close", exact: true })
       ).toHaveCount(1);
@@ -10829,6 +10890,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             })
           );
       }, surface !== "web");
+      if (surface !== "web")
+        await expect(page.locator("html")).toHaveAttribute(
+          "data-native-keyboard-visible",
+          "true"
+        );
       await expect
         .poll(() =>
           name.evaluate((element) => {
@@ -10859,6 +10925,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }, surface !== "web");
       await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(trigger).toBeFocused();
+      await expect(trigger).toHaveAttribute("aria-expanded", "false");
       await expectSheetTop(sheet, aboutHeader!.y);
       await trigger.click();
       await expect(name).toHaveValue("Local Composer Sandbox Wave");
@@ -10873,6 +10940,22 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         320
       );
       await expect(page.getByRole("dialog")).toHaveCount(0);
+      if (surface === "web") {
+        await page.emulateMedia({ reducedMotion: "reduce" });
+        await openWaveInformation(page);
+        await trigger.click();
+        await expectCompactInformationSheet(page, sheet, "Save");
+        await expect(sheet.locator("[data-mobile-dialog-surface]")).toHaveCSS(
+          "transition-property",
+          "none"
+        );
+        await expect(sheet.locator("[data-dialog-content-size]")).toHaveCSS(
+          "animation-name",
+          "none"
+        );
+        await sheet.getByRole("button", { name: "Close", exact: true }).click();
+        await expect(page.getByRole("dialog")).toHaveCount(0);
+      }
       await expectNoHorizontalOverflow(page);
     });
 
