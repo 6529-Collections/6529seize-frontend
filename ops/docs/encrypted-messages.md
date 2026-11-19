@@ -194,6 +194,10 @@ scrolls; on a phone it leaves space around the dialog and respects the safe area
 Ordinary web sign-in can itself include a combined grant. When that happens,
 the encryption engine adopts it without another signature, including if the
 setup page was already open. Signing and encryption still use separate keys.
+If this browser already saved an encryption device, **Sign to enable both**
+signs for posts and resumes that device using its existing approval. Its key
+and chat history are kept. If that encryption approval needs renewal, signing
+stays on and encryption requests its own approval separately.
 If combined setup cannot finish, the page explains the result and offers explicit
 next actions. It does not silently request a different permission. If signing
 succeeds but encryption registration fails, signing stays on and encryption can
@@ -800,6 +804,9 @@ without images**. Images and files too large for one encrypted attachment
 
 ## Troubleshooting
 
+- **Sign in again to continue**: the server rejected this browser's sign-in.
+  Select **Sign in again** to restore the session, then encrypted messages
+  restart. This keeps the device's local chats and keys.
 - **Loading encrypted chats…** appears while this device first checks for
   chats. The inbox lists each chat as it arrives. During a longer wait,
   available chats stay visible and the loading message clears. If no chats

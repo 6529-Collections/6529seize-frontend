@@ -51,6 +51,11 @@ export const E2EE_MESSAGES = {
   "e2ee.action.newChat": "New encrypted chat",
   "e2ee.action.devices": "Devices",
   "e2ee.action.retry": "Try again",
+  "e2ee.gate.session.title": "Sign in again to continue",
+  "e2ee.gate.session.body":
+    "Your sign-in is no longer valid. Sign in again to continue setting up encrypted messages. Your chats stay on this device.",
+  "e2ee.gate.session.action": "Sign in again",
+  "e2ee.gate.session.failed": "Sign-in did not finish. Please try again.",
   "e2ee.action.cancel": "Cancel",
   "e2ee.action.close": "Close",
   "e2ee.action.dismiss": "Dismiss",

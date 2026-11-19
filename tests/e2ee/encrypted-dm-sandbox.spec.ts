@@ -168,6 +168,57 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     expect(scan.found).toEqual([]);
   });
 
+  test("a saved encryption device recovers a rejected session and enables both permissions", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    sessions.push(alice);
+    await expectEnrollmentCard(alice.page);
+    // Start with encryption-only setup, retaining a pending typed-data key
+    // like a browser that saved it before its sign-in became invalid.
+    await alice.page.route(
+      "**/api/auth/session-nonce?*",
+      (route) => route.fulfill({ status: 503, json: { error: "Unavailable" } }),
+      { times: 1 }
+    );
+    await enrollButton(alice.page).click();
+    await alice.page
+      .getByRole("button", { name: "Turn on encrypted DMs", exact: true })
+      .click();
+    await e2eeSandboxControls.addFault(baseURL, {
+      method: "POST",
+      path: "^e2ee/devices$",
+      status: 401,
+    });
+    const before = alice.signatureCount();
+    await enrollButton(alice.page).click();
+    await expect(
+      alice.page.getByRole("heading", { name: "Sign in again to continue" })
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    expect(alice.signatureCount()).toBe(before + 1);
+    await e2eeSandboxControls.clearFaults(baseURL);
+    await alice.page
+      .getByRole("button", { name: "Sign in again", exact: true })
+      .click();
+    await alice.page
+      .getByRole("button", { name: "Sign to enable both", exact: true })
+      .click();
+    await expect(
+      alice.page.getByRole("heading", {
+        name: "No encrypted chats yet",
+        exact: true,
+      })
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    // One approval for encryption, one for posts. Resuming the encryption
+    // key after the posts signature does not request a third signature.
+    expect(alice.signatureCount()).toBe(before + 2);
+    await alice.page.screenshot({
+      path: testInfo.outputPath("encrypted-setup-recovered.png"),
+    });
+  });
+
   test("iPhone enrollment shows progress and the inbox waits for a successful first sync", async ({
     baseURL,
     browser,

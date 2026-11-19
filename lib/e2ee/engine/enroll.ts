@@ -497,6 +497,11 @@ export async function enrollDevice(
 ): Promise<boolean> {
   await ensureWasm(ctx);
   const stored = await loadCurrentSuiteDevice(ctx);
+  // Resuming an existing grant must never turn into a renewal signature.
+  // Leave that permission to the separate enrollment action.
+  if (!allowPrompt && stored && renewalDue(ctx, stored)) {
+    return false;
+  }
   let device: StoredDevice;
   if (stored && (stored.registered || reusablePending(ctx, stored))) {
     device = stored;

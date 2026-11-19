@@ -147,8 +147,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
   }
 
   /** NC8: enrolls from a combined sign-in grant stored meanwhile. */
-  enrollWithLoginGrant(): Promise<E2eeEngineStatus> {
-    return this.enrollment.withLoginGrant();
+  enrollWithLoginGrant(options?: {
+    readonly resumeStored?: boolean;
+  }): Promise<E2eeEngineStatus> {
+    return this.enrollment.withLoginGrant(options?.resumeStored);
   }
 
   needsNewDevice(): Promise<boolean> {

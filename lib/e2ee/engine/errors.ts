@@ -1,3 +1,8 @@
+import { asE2eeApiError } from "../api-errors";
+
+/** The API rejected this browser's sign-in, rather than its encryption key. */
+export const E2EE_SESSION_EXPIRED = "E2EE_SESSION_EXPIRED";
+
 /** Code used when the user declines the device-grant wallet signature. */
 export const E2EE_SIGNATURE_REJECTED = "E2EE_SIGNATURE_REJECTED";
 
@@ -90,6 +95,9 @@ export class RetryableError extends Error {
 }
 
 export const errorMessage = (error: unknown): string => {
+  if (asE2eeApiError(error)?.status === 401) {
+    return E2EE_SESSION_EXPIRED;
+  }
   if (error instanceof E2eeError) {
     return error.code;
   }

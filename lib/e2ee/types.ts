@@ -263,8 +263,12 @@ export interface E2eeEngine {
    * NC8: registers the key a combined sign-in just stored for this profile,
    * with no wallet prompt, and starts the engine. Resolves with the status
    * it settles on; a refused sign-in grant leaves "needs-enrollment".
+   * `resumeStored` also accepts an existing encryption grant without renewing it.
    */
-  enrollWithLoginGrant(): Promise<E2eeEngineStatus>;
+  enrollWithLoginGrant(options?: {
+    /** Reuse an existing encryption grant after a signing-only sign-in. */
+    readonly resumeStored?: boolean;
+  }): Promise<E2eeEngineStatus>;
   /**
    * Non-null while this device has moved off an earlier MLS ciphersuite and
    * not enrolled again (status "needs-enrollment"): the UI shows upgrade

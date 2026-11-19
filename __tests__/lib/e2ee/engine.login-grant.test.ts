@@ -185,6 +185,42 @@ async function signedInWaitingEngine() {
 }
 
 describe("E2EE engine: combined sign-in grant (NC8)", () => {
+  it.each([false, true])(
+    "resumes an existing typed-data grant without a wallet prompt (renewal due: %s)",
+    async (renewal) => {
+      const world = await createWorld();
+      const account = privateKeyToAccount(generatePrivateKey());
+      world.ds.setWallets("alice", [account.address]);
+      const first = await startDevice(world, "alice", account, {
+        enroll: false,
+      });
+      world.ds.addFault({
+        method: "POST",
+        path: /^e2ee\/devices$/,
+        status: 401,
+      });
+      await expect(first.engine.enroll()).rejects.toThrow();
+      expect(first.engine.getError()).toBe("E2EE_SESSION_EXPIRED");
+      const saved = await first.storage.getDevice("alice");
+      expect(saved?.registered).toBe(false);
+      first.engine.dispose();
+      if (renewal) world.clock.advance(170 * 86_400_000);
+      const resumed = await startDevice(world, "alice", account, {
+        storage: first.storage,
+        enroll: false,
+      });
+      await expect(
+        resumed.engine.enrollWithLoginGrant({ resumeStored: true })
+      ).resolves.toBe(renewal ? "needs-enrollment" : "ready");
+      expect(resumed.signCalls).toBe(0);
+      expect((await first.storage.getDevice("alice"))?.deviceKey).toBe(
+        saved?.deviceKey
+      );
+      expect(world.ds.devicesOf("alice")).toHaveLength(renewal ? 0 : 1);
+      for (const device of world.devices) device.engine.dispose();
+    }
+  );
+
   it("enrolls from the sign-in grant with no wallet prompt and chats with an EIP-712 device", async () => {
     const world = await createWorld();
     const bob = await addUser(world, "bob");

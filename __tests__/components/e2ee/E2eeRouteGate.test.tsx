@@ -8,6 +8,11 @@ import {
   E2eeTestProvider,
 } from "./fakeE2eeEngine";
 
+const mockRequestAuth = jest.fn();
+jest.mock("@/components/auth/Auth", () => ({
+  useAuth: () => ({ requestAuth: mockRequestAuth }),
+}));
+
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({
     address: "0x1111111111111111111111111111111111111111",
@@ -34,6 +39,7 @@ const renderGate = (value: ReturnType<typeof contextFor>) =>
   );
 
 describe("E2eeRouteGate", () => {
+  beforeEach(() => mockRequestAuth.mockReset());
   afterEach(() => {
     mockIsRemoteWallet.mockReturnValue(false);
   });
@@ -74,6 +80,51 @@ describe("E2eeRouteGate", () => {
     fireEvent.click(screen.getByRole("button", { name: "Try again" }));
     expect(value.restart).toHaveBeenCalled();
   });
+
+  it("recovers a rejected sign-in before restarting encrypted messages", async () => {
+    let finish: (result: { success: boolean }) => void = () => undefined;
+    mockRequestAuth.mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          finish = resolve;
+        })
+    );
+    const value = contextFor(null, {
+      availability: "failed",
+      loadError: "E2EE_SESSION_EXPIRED",
+    });
+    renderGate(value);
+    fireEvent.click(screen.getByRole("button", { name: "Sign in again" }));
+    expect(mockRequestAuth).toHaveBeenCalledWith({ serverRejected: true });
+    expect(
+      screen.getByRole("button", { name: "Sign in again" })
+    ).toBeDisabled();
+    expect(value.restart).not.toHaveBeenCalled();
+    finish({ success: true });
+    await waitFor(() => expect(value.restart).toHaveBeenCalledTimes(1));
+  });
+
+  it.each(["declined", "failed"])(
+    "does not restart after %s sign-in recovery",
+    async (outcome) => {
+      if (outcome === "declined")
+        mockRequestAuth.mockResolvedValue({ success: false });
+      else mockRequestAuth.mockRejectedValue(new Error("unavailable"));
+      const value = contextFor(null, {
+        availability: "failed",
+        loadError: "E2EE_SESSION_EXPIRED",
+      });
+      renderGate(value);
+      fireEvent.click(screen.getByRole("button", { name: "Sign in again" }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Sign-in did not finish"
+      );
+      expect(value.restart).not.toHaveBeenCalled();
+      expect(
+        screen.getByRole("button", { name: "Sign in again" })
+      ).not.toBeDisabled();
+    }
+  );
 
   it("shows the enrollment card with the plain-words explanation", async () => {
     const engine = createFakeE2eeEngine({ status: "needs-enrollment" });

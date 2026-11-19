@@ -53,15 +53,17 @@ export class EnrollmentFlight {
    * engine waited for enrollment (holding the engine lock). The sign-in
    * writes without a state version and keeps it, so this engine's next
    * write still passes its version check.
+   * A signing-only sign-in can instead resume a stored encryption grant.
+   * Neither path permits another wallet prompt.
    */
-  async withLoginGrant(): Promise<E2eeEngineStatus> {
+  async withLoginGrant(resumeStored = false): Promise<E2eeEngineStatus> {
     if (this.current) {
       // Another caller is already enrolling: report its final status, not
       // "enrolling".
       await this.current.catch(() => undefined);
     } else if (
       this.ctx.store.status === NEEDS_ENROLLMENT &&
-      (await this.takeLoginGrantDevice())
+      (await this.takeLoginGrantDevice(resumeStored))
     ) {
       await this.enrollFromLoginGrant();
     }
@@ -81,14 +83,19 @@ export class EnrollmentFlight {
   }
 
   /**
-   * Whether storage holds an unregistered device a combined sign-in stored.
+   * Whether storage holds a combined sign-in device, or an existing device
+   * explicitly selected for resuming after a signing-only sign-in.
    * Any key this engine still holds from an earlier attempt is released,
    * so enrollment loads the stored device's own key state.
    */
-  private takeLoginGrantDevice(): Promise<boolean> {
+  private takeLoginGrantDevice(resumeStored = false): Promise<boolean> {
     return this.ctx.queue.run(async () => {
       const stored = await this.ctx.storage.getDevice(this.ctx.profileId);
-      if (!hasLoginGrant(stored) || stored.registered) {
+      if (
+        stored === null ||
+        stored.revocationUnverified === true ||
+        (!resumeStored && (!hasLoginGrant(stored) || stored.registered))
+      ) {
         return false;
       }
       if (this.ctx.device?.deviceKey !== stored.deviceKey) {
