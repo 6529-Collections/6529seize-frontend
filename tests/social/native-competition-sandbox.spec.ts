@@ -2415,6 +2415,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             .first();
           await expect(lock).toHaveCSS("color", utilityColor);
           await expect(lock).toHaveCSS("opacity", "1");
+          await expect(lock).toHaveCSS("width", "14px");
+          await expect(lock).toHaveCSS("height", "14px");
+          await expect(lock).toHaveAttribute("stroke-width", "1.75");
+          await expect(submit).toHaveCSS("padding-left", "10px");
+          await expect(submit).toHaveCSS("padding-right", "10px");
         }
         await expect(
           page.getByRole("button", { name: "Drop", exact: true })
@@ -2939,17 +2944,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
             iconWidth: icon?.getBoundingClientRect().width,
             iconHeight: icon?.getBoundingClientRect().height,
             iconMargin: icon ? getComputedStyle(icon).marginLeft : null,
+            iconStrokeWidth: icon?.getAttribute("stroke-width"),
             paddingLeft: style.paddingLeft,
             paddingRight: style.paddingRight,
           };
         })
       ).toEqual({
         height: 32,
-        iconWidth: 16,
-        iconHeight: 16,
+        iconWidth: iconOnly ? 16 : 14,
+        iconHeight: iconOnly ? 16 : 14,
         iconMargin: "0px",
-        paddingLeft: iconOnly ? "0px" : "10px",
-        paddingRight: iconOnly ? "0px" : "10px",
+        iconStrokeWidth: iconOnly ? "1.5" : "1.75",
+        paddingLeft: iconOnly ? "0px" : "12px",
+        paddingRight: iconOnly ? "0px" : "14px",
       });
       if (testInfo.project.use.hasTouch) {
         expect(
@@ -2994,7 +3001,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       details.getByRole("button", { name: repName })
     ).not.toHaveAttribute("class", /!tw-/);
     const pin = details.getByRole("button", { name: "Pin wave", exact: true });
-    await expect(pin).toHaveCSS("color", "rgb(132, 132, 144)");
+    await expect(pin).toHaveCSS("color", "rgb(206, 207, 212)");
     const mute = details.getByRole("button", {
       name: "Mute wave",
       exact: true,
@@ -3005,6 +3012,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     for (const action of [mute, pin]) {
       await expectAction(action, true);
       await expect(action).toHaveCSS("width", "32px");
+      await expect(action).toHaveCSS("background-color", "rgb(38, 39, 43)");
+      await expect(action).toHaveCSS("border-color", "rgb(55, 55, 62)");
     }
     if (!testInfo.project.use.hasTouch) {
       await mute.hover();
@@ -3012,8 +3021,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(mute).toHaveCSS("border-color", "rgb(96, 96, 108)");
       await expect(mute).toHaveCSS("color", "rgb(206, 207, 212)");
       await pin.hover();
-      await expect(pin).toHaveCSS("background-color", "rgb(28, 28, 33)");
-      await expect(pin).toHaveCSS("color", "rgb(147, 147, 159)");
+      await expect(pin).toHaveCSS("background-color", "rgb(55, 55, 62)");
+      await expect(pin).toHaveCSS("border-color", "rgb(96, 96, 108)");
+      await expect(pin).toHaveCSS("color", "rgb(206, 207, 212)");
     }
     await pin.press("Tab");
     await page.keyboard.press("Shift+Tab");
@@ -8608,6 +8618,19 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .filter({ visible: true });
     await expect(join).toBeVisible({ timeout: 30000 });
     await expect(join).toHaveText("Join");
+    await expect(join).toHaveCSS("height", app ? "36px" : "32px");
+    await expect(join).toHaveCSS("padding-left", app ? "10px" : "12px");
+    await expect(join).toHaveCSS("padding-right", app ? "10px" : "14px");
+    const joinIcon = page
+      .getByRole("button", {
+        name: "Join Local Composer Sandbox Wave",
+        exact: true,
+      })
+      .filter({ visible: true })
+      .locator("svg")
+      .first();
+    await expect(joinIcon).toHaveCSS("width", app ? "16px" : "14px");
+    await expect(joinIcon).toHaveAttribute("stroke-width", app ? "2" : "1.75");
     await expect(join).toHaveCSS("font-weight", "600");
     await expect(join.getByText("Join", { exact: true })).toHaveCSS(
       "font-weight",

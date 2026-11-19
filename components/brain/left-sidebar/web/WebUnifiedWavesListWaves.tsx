@@ -8,7 +8,12 @@ import {
 import { useSidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 
 import Button from "@/components/utils/button/Button";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import {
+  COMPACT_ACTION_BUTTON_SIZE_CLASS,
+  COMPACT_ACTION_ICON_CLASS,
+  COMPACT_ACTION_ICON_STROKE_WIDTH,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -139,19 +144,21 @@ function CreateWaveButton({
   return (
     <Button
       variant="primary"
-      size={compact ? null : "xs"}
+      size={null}
       onClick={onClick}
       aria-label={label}
       data-wave-typography="preserve"
       data-tooltip-id="create-wave-tooltip"
       data-tooltip-content={label}
       className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${
-        compact ? "tw-size-8 tw-p-0" : "tw-py-0"
+        compact
+          ? "tw-size-8 tw-p-0"
+          : `${COMPACT_ACTION_BUTTON_SIZE_CLASS} tw-py-0`
       }`}
     >
       <PlusIcon
-        className="tw-size-4 tw-flex-shrink-0"
-        strokeWidth={2}
+        className={COMPACT_ACTION_ICON_CLASS}
+        strokeWidth={COMPACT_ACTION_ICON_STROKE_WIDTH}
         aria-hidden="true"
       />
       {!compact && <span>{label}</span>}
