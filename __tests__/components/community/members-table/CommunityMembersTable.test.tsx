@@ -3,6 +3,9 @@ import { SortDirection } from "@/entities/ISort";
 import type { ApiCommunityMemberOverview } from "@/generated/models/ApiCommunityMemberOverview";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import { render, screen } from "@testing-library/react";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+
+jest.mock("@/hooks/useMediaQuery", () => ({ useMediaQuery: jest.fn() }));
 
 jest.mock(
   "@/components/community/members-table/CommunityMembersTableHeader",
@@ -105,6 +108,7 @@ const baseProps = {
 describe("CommunityMembersTable", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useMediaQuery).mockReturnValue(true);
   });
 
   describe("rendering", () => {
@@ -120,12 +124,15 @@ describe("CommunityMembersTable", () => {
     });
 
     it("renders mobile cards with correct rank calculation", () => {
+      jest.mocked(useMediaQuery).mockReturnValue(false);
       render(<CommunityMembersTable {...baseProps} />);
 
       const cards = screen.getAllByTestId("mobile-card");
       expect(cards).toHaveLength(2);
       expect(cards[0]).toHaveTextContent("6-Alice");
       expect(cards[1]).toHaveTextContent("7-Bob");
+      expect(screen.queryByTestId("header")).not.toBeInTheDocument();
+      expect(screen.queryAllByTestId("row")).toHaveLength(0);
     });
   });
 
@@ -142,7 +149,7 @@ describe("CommunityMembersTable", () => {
       render(<CommunityMembersTable {...baseProps} members={singleMember} />);
 
       expect(screen.getAllByTestId("row")).toHaveLength(1);
-      expect(screen.getAllByTestId("mobile-card")).toHaveLength(1);
+      expect(screen.queryAllByTestId("mobile-card")).toHaveLength(0);
     });
 
     it("calculates rank from page 1 correctly", () => {
