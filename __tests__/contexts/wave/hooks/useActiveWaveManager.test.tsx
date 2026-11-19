@@ -225,6 +225,44 @@ describe("useActiveWaveManager", () => {
     );
   });
 
+  it.each([
+    "/messages/new?compose=profile-dm",
+    "/messages/new",
+    "/messages/create",
+  ])("opens the legacy DM route when switching from %s", (source) => {
+    globalThis.history.replaceState(null, "", source);
+    (usePathname as jest.Mock).mockReturnValue(globalThis.location.pathname);
+    (useSearchParams as jest.Mock).mockReturnValue(
+      new URLSearchParams(globalThis.location.search)
+    );
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
+    const pushState = jest.spyOn(globalThis.history, "pushState");
+    const { result } = renderHook(useActiveWaveManager);
+
+    act(() => result.current.setActiveWave("chat", { isDirectMessage: true }));
+
+    expect(push).toHaveBeenCalledWith("/messages/chat");
+    expect(pushState).not.toHaveBeenCalled();
+  });
+
+  it("uses browser history when switching between legacy DM threads", () => {
+    globalThis.history.replaceState(null, "", "/messages/first");
+    (usePathname as jest.Mock).mockReturnValue("/messages/first");
+    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    const push = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
+    const pushState = jest.spyOn(globalThis.history, "pushState");
+    const { result } = renderHook(useActiveWaveManager);
+
+    act(() =>
+      result.current.setActiveWave("second", { isDirectMessage: true })
+    );
+
+    expect(pushState).toHaveBeenCalledWith(null, "", "/messages/second");
+    expect(push).not.toHaveBeenCalled();
+  });
+
   it("opens a remembered competition directly without changing the visible wave before the route commits", async () => {
     globalThis.history.replaceState(null, "", "/waves/chat");
     (usePathname as jest.Mock).mockReturnValue("/waves/chat");
