@@ -98,6 +98,22 @@ export default function CommonSelect<T, U = unknown>({
   if (breakpoint === "LG") {
     return <CommonTabs {...props} variant={tabsVariant ?? props.variant} />;
   } else {
-    return <CommonDropdown {...props} />;
+    return (
+      <CommonDropdown
+        {...props}
+        variant={
+          props.variant === "filter" && props.size === "sm"
+            ? "compact"
+            : "regular"
+        }
+        presentation={
+          props.variant === "editorial" ||
+          props.variant === "toolbar" ||
+          props.variant === "filter"
+            ? props.variant
+            : undefined
+        }
+      />
+    );
   }
 }

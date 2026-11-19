@@ -7,8 +7,9 @@ import { CompactMenu } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import { COMPACT_ACTION_BUTTON_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import {
-  DROPDOWN_FIELD_CLASSES,
+  getDropdownTriggerClasses,
   DROPDOWN_CHEVRON_CLASSES,
+  DROPDOWN_CHECKMARK_CLASSES,
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { ApiCompetitionMyVotesSort } from "@/generated/models/ApiCompetitionMyVotesSort";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -46,10 +47,10 @@ export function CompetitionMyVotesSort({
   const isMobile = isCapacitor || isMobileViewport;
   const title = t(locale, "waves.myVotes.sort");
   const ariaLabel = `${title}: ${labels[sort]}`;
-  const triggerClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-max-w-full ${isMobile ? "tw-min-h-11" : "tw-h-8"}`;
+  const triggerClassName = `${COMPACT_ACTION_BUTTON_CLASS} tw-max-w-full ${isMobile ? "tw-min-h-11" : ""}`;
   const trigger = (
     <span
-      className={`${DROPDOWN_FIELD_CLASSES} tw-inline-flex tw-h-8 tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-whitespace-nowrap tw-px-3 tw-text-xs group-focus-visible:tw-outline group-focus-visible:tw-outline-2 group-focus-visible:tw-outline-offset-2 group-focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-bg-iron-800`}
+      className={`${getDropdownTriggerClasses({ variant: "compact", border: "solid" })} tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 tw-whitespace-nowrap group-focus-visible:tw-outline group-focus-visible:tw-outline-2 group-focus-visible:tw-outline-offset-2 group-focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-bg-iron-800`}
     >
       <span className="tw-truncate">{labels[sort]}</span>
       <ChevronDownIcon
@@ -60,6 +61,7 @@ export function CompetitionMyVotesSort({
   );
   const items = Object.values(ApiCompetitionMyVotesSort).map((value) => ({
     id: value,
+    active: value === sort,
     label: (
       <span className="tw-flex tw-items-center tw-justify-between tw-gap-x-2">
         <span>{labels[value]}</span>
@@ -67,7 +69,7 @@ export function CompetitionMyVotesSort({
           <FontAwesomeIcon
             icon={faCheck}
             aria-hidden="true"
-            className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-primary-300"
+            className={`tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
           />
         )}
       </span>

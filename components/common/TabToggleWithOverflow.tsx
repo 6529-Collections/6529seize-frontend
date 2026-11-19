@@ -269,12 +269,7 @@ export const TabToggleWithOverflow: React.FC<TabToggleWithOverflowProps> = ({
             },
             active: activeKey === option.key,
           }))}
-          itemClassName="tw-block tw-w-full tw-border-0 tw-bg-transparent tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-transition-colors"
-          inactiveItemClassName="tw-text-iron-300 hover:tw-bg-iron-800 hover:tw-text-iron-200"
-          activeItemClassName={
-            isCompactPills ? "tw-text-iron-50" : "tw-text-iron-100"
-          }
-          focusItemClassName="tw-bg-iron-800 tw-text-iron-100"
+          itemClassName="tw-block tw-w-full tw-border-0 tw-px-4 tw-py-2 tw-text-left tw-text-sm tw-font-medium tw-transition-colors"
           menuWidthClassName="tw-w-36"
           menuClassName={clsx(
             "tailwind-scope tw-z-[120] tw-mt-2 tw-rounded-md tw-bg-iron-900 tw-py-1 tw-shadow-lg tw-ring-1 focus:tw-outline-none",

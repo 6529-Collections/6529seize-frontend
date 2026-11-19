@@ -2,7 +2,7 @@
 
 import IconButton from "@/components/utils/button/IconButton";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useAuth } from "@/components/auth/Auth";
 import Button from "@/components/utils/button/Button";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
@@ -634,7 +634,7 @@ export default function ReportDropModal({
                                     .value as ApiContentModerationReportReason
                                 )
                               }
-                              className={`${DROPDOWN_FIELD_CLASSES} tw-mt-2 tw-w-full tw-px-3 tw-py-2.5 tw-text-sm`}
+                              className={`${getDropdownTriggerClasses({ variant: "form", metrics: { x: 12, y: 10, text: "sm" } })} tw-mt-2 tw-w-full`}
                             >
                               {REASONS.map((item) => (
                                 <option key={item.value} value={item.value}>

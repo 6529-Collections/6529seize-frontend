@@ -1,6 +1,7 @@
 "use client";
 
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { getDropdownOptionStateClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import {
@@ -302,7 +303,7 @@ export default function AdvancedWaveSearchInput({
                     id={`advanced-search-option-${index}`}
                     key={option.id}
                     onClick={() => choose(option)}
-                    className={`tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-300 ${selectedIndex === index ? "tw-bg-iron-800" : "tw-bg-transparent"}`}
+                    className={`tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-2 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-text-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-300 ${getDropdownOptionStateClasses(selectedIndex === index)}`}
                   >
                     <span className="tw-text-iron-400">
                       {option.kind === "in" ? "#" : "@"}
@@ -322,7 +323,7 @@ export default function AdvancedWaveSearchInput({
                       startFilter(kind);
                       inputRef.current?.focus();
                     }}
-                    className="tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-300"
+                    className={`tw-flex tw-min-h-11 tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-text-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-300 ${getDropdownOptionStateClasses(selectedIndex === index)}`}
                   >
                     <span className="tw-w-10 tw-font-semibold tw-text-iron-400">
                       {SEARCH_OPERATOR_LABELS[kind]}

@@ -1,3 +1,7 @@
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  getDropdownOptionStateClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import IconButton from "@/components/utils/button/IconButton";
 
 import { Spinner } from "@/components/dotLoader/DotLoader";
@@ -25,14 +29,10 @@ const getMenuItemStyle = ({
   readonly disabled: boolean;
 }) => {
   if (disabled) {
-    return "tw-cursor-not-allowed tw-text-iron-500";
+    return "tw-bg-transparent tw-cursor-not-allowed tw-text-iron-500";
   }
 
-  if (active) {
-    return "tw-cursor-pointer tw-text-primary-400 desktop-hover:hover:tw-bg-primary-400/10";
-  }
-
-  return "tw-cursor-pointer tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800";
+  return `tw-cursor-pointer ${getDropdownOptionStateClasses(active)}`;
 };
 
 interface NotificationMenuItemProps {
@@ -59,7 +59,10 @@ function NotificationMenuItemIndicator({
 
   if (active) {
     return (
-      <CheckIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+      <CheckIcon
+        className={`tw-size-4 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
+        aria-hidden="true"
+      />
     );
   }
 
@@ -98,7 +101,7 @@ function NotificationMenuItem({
         event.stopPropagation();
         onSelect();
       }}
-      className={`tw-flex tw-w-full ${mobile ? "tw-min-h-12" : ""} tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
+      className={`tw-flex tw-w-full ${mobile ? "tw-min-h-12" : ""} tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
         {
           active,
           disabled: buttonDisabled,

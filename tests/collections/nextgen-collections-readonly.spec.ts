@@ -246,12 +246,17 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
 
     await expect(page).toHaveTitle(/Art.*Pebbles|Pebbles.*Art|Pebbles/);
     await expect(page.getByRole("heading", { name: "The Art" })).toBeVisible();
-    await expect(page.getByRole("button", { name: /^Sort:/ })).toBeVisible();
+    const sort = page.getByRole("button", { name: /^Sort:/ });
+    await expect(sort).toBeVisible();
+    await expect(sort).toHaveCSS("height", "40px");
     if (!isMobile) {
       for (const name of ["Sort ascending", "Sort descending"]) {
         const direction = page.getByRole("button", { name, exact: true });
         await expect(direction).toHaveCSS("height", "36px");
         await expect(direction).toHaveCSS("width", "36px");
+        await expect(
+          page.getByRole("button", { name, exact: true }).locator("..")
+        ).toHaveCSS("height", "40px");
       }
     }
     await expectCardsOrEmpty(
@@ -259,6 +264,32 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
       page.locator('main a[href*="/nextgen/token/"]'),
       "Expected NextGen collection art to settle with token links or an empty state"
     );
+    const listingStatus = page.getByRole("combobox", {
+      name: "Listing status",
+    });
+    if ((await listingStatus.count()) > 0) {
+      await listingStatus.scrollIntoViewIfNeeded();
+      const coversControl = await listingStatus.evaluate((select) => {
+        const bounds = select.closest("label")!.getBoundingClientRect();
+        return [
+          [bounds.left + 4, bounds.top + bounds.height / 2],
+          [bounds.right - 4, bounds.top + bounds.height / 2],
+          [bounds.left + bounds.width / 2, bounds.top + 4],
+          [bounds.left + bounds.width / 2, bounds.bottom - 4],
+        ].every(([x, y]) => document.elementFromPoint(x!, y!) === select);
+      });
+      expect(coversControl).toBe(true);
+    }
+    await sort.click();
+    const idOption = page.getByRole("button", { name: "ID", exact: true });
+    await expect(idOption).toBeVisible();
+    const optionBounds = (await idOption.boundingBox())!;
+    expect(optionBounds.x).toBeGreaterThanOrEqual(0);
+    expect(optionBounds.x + optionBounds.width).toBeLessThanOrEqual(
+      page.viewportSize()!.width
+    );
+    await sort.press("Escape");
+    await expect(idOption).toHaveCount(0);
   });
 
   test("NextGen token detail exposes read-only detail sections", async ({

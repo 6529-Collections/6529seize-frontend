@@ -2,43 +2,19 @@
 
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
 import type { SortDirection } from "@/entities/ISort";
-import { useAnimate } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { CommonSelectProps } from "../CommonSelect";
+import { useDropdownToolbarMetrics } from "./DropdownToolbar";
 import CommonDropdownItem from "./CommonDropdownItem";
 import CommonDropdownItemsWrapper from "./CommonDropdownItemsWrapper";
 import {
   DROPDOWN_CHEVRON_CLASSES,
-  DROPDOWN_TRIGGER_CLASSES,
+  getDropdownTriggerClasses,
+  getDropdownMenuMetrics,
+  getEditorialDropdownClasses,
+  type DropdownMetrics,
+  type DropdownVariant,
 } from "./dropdownTriggerStyles";
-
-function getEditorialButtonStateClass(disabled: boolean) {
-  if (disabled) {
-    return "tw-cursor-not-allowed tw-text-iron-500 tw-opacity-50";
-  }
-
-  return "tw-text-iron-300 hover:tw-text-iron-100";
-}
-
-function getEditorialUnderlineClass(isOpen: boolean, disabled: boolean) {
-  if (isOpen && !disabled) {
-    return "after:tw-scale-x-100 after:tw-bg-primary-400";
-  }
-
-  return "after:tw-scale-x-0 after:tw-bg-iron-700 hover:after:tw-scale-x-100";
-}
-
-function getDefaultSizeClass(size: string) {
-  if (size === "md") {
-    return "tw-py-3 tw-text-sm";
-  }
-
-  if (size === "tabs") {
-    return "tw-py-[11px] tw-text-sm";
-  }
-
-  return "tw-py-2.5 tw-text-xs";
-}
 
 function getContentClasses(
   isEditorial: boolean,
@@ -64,7 +40,12 @@ function getContentClasses(
 }
 
 export default function CommonDropdown<T, U = unknown>(
-  props: CommonSelectProps<T, U>
+  props: Omit<CommonSelectProps<T, U>, "variant"> & {
+    readonly variant?: DropdownVariant | undefined;
+    readonly presentation?: "editorial" | "toolbar" | "filter" | undefined;
+    readonly metrics?: DropdownMetrics | undefined;
+    readonly sortDirection?: SortDirection | undefined;
+  }
 ) {
   const {
     items,
@@ -74,24 +55,21 @@ export default function CommonDropdown<T, U = unknown>(
     setSelected,
     dynamicPosition = true,
     disabled = false,
-    size = "md",
-    variant = "default",
+    size,
+    variant = "regular",
+    presentation,
+    metrics,
     renderItemChildren,
     closeOnSelect = true,
     showFilterLabel = false,
     menuMinWidth,
   } = props;
   const [isOpen, setIsOpen] = useState(false);
-  const [iconScope, animateIcon] = useAnimate<SVGSVGElement>();
-  const isEditorial = variant === "editorial";
-  const isToolbar = variant === "toolbar";
-  const isFilter = variant === "filter";
+  const toolbarMetrics = useDropdownToolbarMetrics();
+  const isEditorial = presentation === "editorial";
+  const isToolbar = presentation === "toolbar";
+  const isFilter = presentation === "filter";
   const usesInlineContent = isEditorial || isToolbar || isFilter;
-
-  useEffect(() => {
-    if (isFilter) return;
-    animateIcon(iconScope.current, { rotate: isOpen ? 180 : 0 });
-  }, [animateIcon, iconScope, isEditorial, isFilter, isOpen]);
 
   const activeItemMatch = useMemo(
     () => items.find((item) => item.value === activeItem),
@@ -130,13 +108,13 @@ export default function CommonDropdown<T, U = unknown>(
     isEditorial || isFilter
       ? "tw-relative tw-inline-flex tw-max-w-full"
       : "tw-relative tw-w-full";
-  const editorialUnderlineClass = getEditorialUnderlineClass(isOpen, disabled);
-  let buttonClasses = `${DROPDOWN_TRIGGER_CLASSES} ${getDefaultSizeClass(size)} tw-group tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-pl-3 tw-pr-9 tw-text-left tw-leading-5`;
+  const triggerMetrics = metrics ?? getDropdownMenuMetrics(variant, size);
+  let buttonClasses = `${getDropdownTriggerClasses({ variant, metrics: { ...triggerMetrics, ...toolbarMetrics } })} tw-group tw-relative tw-block tw-w-full tw-justify-between tw-truncate tw-whitespace-nowrap tw-text-left`;
   if (isEditorial) {
-    buttonClasses = `${getEditorialButtonStateClass(disabled)} ${editorialUnderlineClass} tw-group tw-relative tw-inline-flex tw-max-w-full tw-items-center tw-gap-1.5 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-0.5 tw-py-1 tw-text-left tw-text-sm tw-font-semibold tw-leading-5 tw-caret-primary-400 tw-shadow-none tw-transition tw-duration-200 tw-ease-out after:tw-absolute after:-tw-bottom-0.5 after:tw-left-0 after:tw-h-px after:tw-w-full after:tw-origin-left after:tw-transition-transform after:tw-duration-200 after:tw-content-[''] focus:tw-outline-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-text-iron-100`;
+    buttonClasses = getEditorialDropdownClasses(isOpen, disabled);
   }
   if (isFilter) {
-    buttonClasses = `${DROPDOWN_TRIGGER_CLASSES} ${size === "sm" ? "tw-h-8" : "tw-h-9"} tw-relative tw-inline-flex tw-w-auto tw-flex-shrink-0 tw-items-center tw-whitespace-nowrap tw-pl-2.5 tw-pr-9 tw-text-left tw-text-xs`;
+    buttonClasses = `${getDropdownTriggerClasses({ variant, metrics: { height: size === "sm" ? 32 : 36, left: 10, right: 36, text: "xs", ...metrics, ...toolbarMetrics } })} tw-relative tw-inline-flex tw-w-auto tw-flex-shrink-0 tw-items-center tw-whitespace-nowrap tw-text-left`;
   }
   const { labelClassName, valueClassName } = getContentClasses(
     isEditorial,
@@ -186,8 +164,7 @@ export default function CommonDropdown<T, U = unknown>(
           </span>
           <span className={chevronClassName}>
             <svg
-              ref={isFilter ? undefined : iconScope}
-              className={`${DROPDOWN_CHEVRON_CLASSES} tw-transition-transform tw-duration-150 motion-reduce:tw-transition-none ${isFilter && isOpen ? "tw-rotate-180" : ""}`}
+              className={`${DROPDOWN_CHEVRON_CLASSES} tw-transition-transform tw-duration-150 motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-180" : "tw-rotate-0"}`}
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

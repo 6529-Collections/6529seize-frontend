@@ -1,6 +1,6 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -205,7 +205,7 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                   );
                   setSelectedPhase(nextPhase);
                 }}
-                className={`${DROPDOWN_FIELD_CLASSES} tw-[color-scheme:dark] tw-min-h-11 tw-px-3 tw-py-2 tw-text-base`}
+                className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "base" } })} tw-[color-scheme:dark]`}
               >
                 <option value="" className="tw-bg-black tw-text-white">
                   All Phases

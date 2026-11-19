@@ -62,14 +62,16 @@ export default function ActivityFilters({
       }`}
     >
       <CommonDropdown
-        variant="filter"
+        variant="regular"
+        presentation="filter"
         items={ActivityContractItems}
         activeItem={selectedContract}
         filterLabel={t(locale, "nftActivity.filters.collection")}
         setSelected={onContractFilterChange}
       />
       <CommonDropdown
-        variant="filter"
+        variant="regular"
+        presentation="filter"
         items={activityTypeItems}
         activeItem={typeFilter}
         filterLabel={t(locale, "nftActivity.filters.type")}

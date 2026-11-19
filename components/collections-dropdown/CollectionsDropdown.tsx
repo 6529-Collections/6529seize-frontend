@@ -2,8 +2,10 @@
 
 import CommonDropdownItemsWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsWrapper";
 import {
-  DROPDOWN_TRIGGER_CLASSES,
+  getDropdownTriggerClasses,
   DROPDOWN_CHEVRON_CLASSES,
+  DROPDOWN_CHECKMARK_CLASSES,
+  DROPDOWN_SELECTED_OPTION_CLASSES,
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -55,7 +57,7 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
   };
 
   const triggerClassNames: Record<CollectionsDropdownVariant, string> = {
-    default: `${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-py-3 tw-pl-3 tw-pr-9 tw-text-left tw-text-xs`,
+    default: `${getDropdownTriggerClasses({ variant: "regular", metrics: { y: 12, left: 12, right: 36, text: "xs" } })} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-text-left `,
     title:
       "tw-group tw-m-0 tw-inline-flex tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 tw-transition tw-duration-200 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 sm:tw-text-2xl md:tw-text-3xl",
     brand:
@@ -166,17 +168,17 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
                 isMobile
                   ? "tw-min-h-12 tw-px-3 tw-py-3 max-lg:tw-rounded-lg max-lg:tw-text-[15px]"
                   : "tw-px-3 tw-py-2"
-              } tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
+              } tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-md tw-border-0 tw-text-left tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
                 collection.id === props.activePage
-                  ? "tw-bg-iron-800 tw-text-iron-100"
-                  : ""
+                  ? DROPDOWN_SELECTED_OPTION_CLASSES
+                  : "tw-bg-transparent tw-text-iron-200"
               }`}
             >
               <span className="tw-truncate">{collection.name}</span>
               {collection.id === props.activePage && (
                 <FontAwesomeIcon
                   icon={faCheck}
-                  className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-primary-300"
+                  className={`tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
                   aria-hidden="true"
                 />
               )}

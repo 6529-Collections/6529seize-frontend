@@ -1,12 +1,17 @@
 "use client";
 
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useMemo, useRef, useState } from "react";
 import FilterGridDropdownItemsWrapper from "./FilterGridDropdownItemsWrapper";
 import {
   DROPDOWN_CHEVRON_CLASSES,
-  DROPDOWN_TRIGGER_CLASSES,
+  DROPDOWN_CHECKMARK_CLASSES,
+  DROPDOWN_OPTION_ACTIVE_CLASSES,
+  DROPDOWN_SELECTED_OPTION_CLASSES,
+  getDropdownTriggerClasses,
 } from "./dropdownTriggerStyles";
+
+import { useDropdownToolbarMetrics } from "./DropdownToolbar";
 
 interface FilterGridDropdownItem<TValue extends string | number> {
   readonly value: TValue;
@@ -32,6 +37,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
   readonly triggerLabel?: string | undefined;
   readonly triggerAriaLabel: string;
 }) {
+  const toolbarMetrics = useDropdownToolbarMetrics();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -48,10 +54,10 @@ export default function FilterGridDropdown<TValue extends string | number>({
   };
 
   const getMenuItemClassName = (isActive: boolean) =>
-    `tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2 tw-py-2 tw-text-sm tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 motion-reduce:tw-transition-none lg:tw-min-h-9 ${
+    `tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 motion-reduce:tw-transition-none lg:tw-min-h-9 lg:tw-gap-x-0 ${DROPDOWN_OPTION_ACTIVE_CLASSES} ${
       isActive
-        ? "tw-bg-iron-200 tw-font-semibold tw-text-iron-950"
-        : "tw-bg-iron-800 tw-font-medium tw-text-iron-300 hover:tw-bg-iron-700"
+        ? DROPDOWN_SELECTED_OPTION_CLASSES
+        : "tw-bg-transparent tw-text-iron-200"
     }`;
 
   return (
@@ -65,7 +71,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
-          className={`${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-py-3 tw-pl-3 tw-pr-9 tw-text-left tw-text-xs`}
+          className={`${getDropdownTriggerClasses({ variant: "regular", metrics: { y: 12, left: 12, right: 36, text: "xs", ...toolbarMetrics } })} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-text-left`}
         >
           {activeLabel}
           <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-3 tw-flex tw-items-center">
@@ -92,7 +98,13 @@ export default function FilterGridDropdown<TValue extends string | number>({
           aria-current={selectedValue === null ? "true" : undefined}
           role="menuitem"
         >
-          <span className="tw-whitespace-nowrap">{allItemLabel}</span>
+          <span className="tw-shrink-0 tw-whitespace-nowrap">
+            {allItemLabel}
+          </span>
+          <CheckIcon
+            aria-hidden="true"
+            className={`tw-size-3 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES} ${selectedValue === null ? "" : "tw-invisible"}`}
+          />
         </button>
         {items.map((item) => (
           <button
@@ -103,7 +115,13 @@ export default function FilterGridDropdown<TValue extends string | number>({
             aria-current={selectedValue === item.value ? "true" : undefined}
             role="menuitem"
           >
-            <span className="tw-whitespace-nowrap">{item.label}</span>
+            <span className="tw-shrink-0 tw-whitespace-nowrap">
+              {item.label}
+            </span>
+            <CheckIcon
+              aria-hidden="true"
+              className={`tw-size-3 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES} ${selectedValue === item.value ? "" : "tw-invisible"}`}
+            />
           </button>
         ))}
       </FilterGridDropdownItemsWrapper>

@@ -225,8 +225,10 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
 
+    // The open modal makes the page inert; retain the trigger's semantic locator.
     const trigger = page.getByRole("button", {
       name: /^Filter notifications:/,
+      includeHidden: true,
     });
     await expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
     await trigger.click();
@@ -251,7 +253,8 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await expect(
       dialog.getByRole("heading", { name: "Filter notifications" })
     ).toBeVisible();
-    await expect(trigger).toHaveAccessibleName(
+    await expect(trigger).toHaveAttribute(
+      "aria-label",
       "Filter notifications: 2 selected"
     );
     await expect(
@@ -260,6 +263,16 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await expect(
       dialog.getByRole("checkbox", { name: "Reactions" })
     ).toBeChecked();
+    const selectedMention = dialog
+      .getByRole("checkbox", { name: "Mentions" })
+      .locator("..");
+    await expect(selectedMention).toHaveCSS("color", "rgb(239, 239, 241)");
+    await expect(
+      dialog
+        .getByRole("checkbox", { name: "Mentions" })
+        .locator("..")
+        .locator("svg")
+    ).toHaveCSS("color", "rgb(206, 207, 212)");
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(
       page,
@@ -269,6 +282,9 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
 
     await dialog.getByRole("button", { name: "Close" }).click();
     await expect(dialog).toHaveCount(0);
+    await expect(trigger).toHaveAccessibleName(
+      "Filter notifications: 2 selected"
+    );
     await expect(trigger).toBeFocused();
 
     await trigger.click();
@@ -279,7 +295,10 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
       reopenedDialog.getByRole("checkbox", { name: "Mentions" })
     ).toBeChecked();
     await reopenedDialog.getByText("All", { exact: true }).click();
-    await expect(trigger).toHaveAccessibleName("Filter notifications: All");
+    await expect(trigger).toHaveAttribute(
+      "aria-label",
+      "Filter notifications: All"
+    );
 
     await page.setViewportSize({ width: 1023, height: 768 });
     await expect(
@@ -287,13 +306,25 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await page.setViewportSize({ width: 1024, height: 768 });
     await expect(reopenedDialog).toHaveCount(0);
+    await expect(trigger).toHaveAccessibleName("Filter notifications: All");
     await expect(trigger).toBeFocused();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(trigger).toHaveAttribute("aria-haspopup", "menu");
 
     await trigger.click();
     await expect(page.getByRole("menu")).toBeVisible();
+    await expect(page.getByRole("menu")).toHaveCSS("opacity", "1");
     await expect(page.getByRole("dialog")).toHaveCount(0);
+    const selectedAll = page.getByRole("menuitemcheckbox", {
+      name: "All",
+      exact: true,
+    });
+    await expect(selectedAll).toHaveCSS("color", "rgb(239, 239, 241)");
+    await expect(
+      page
+        .getByRole("menuitemcheckbox", { name: "All", exact: true })
+        .locator("svg")
+    ).toHaveCSS("color", "rgb(206, 207, 212)");
     await captureSafeScreenshot(
       page,
       testInfo,

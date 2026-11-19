@@ -1,6 +1,6 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import Button from "@/components/utils/button/Button";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants/constants";
@@ -125,7 +125,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
             onChange={(event) => {
               setRenderType(event.target.value as RenderType);
             }}
-            className={`${DROPDOWN_FIELD_CLASSES} tw-[color-scheme:dark] tw-min-h-11 tw-px-3 tw-py-2 tw-text-base`}
+            className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "base" } })} tw-[color-scheme:dark]`}
           >
             {Object.values(RenderType).map((type) => (
               <option
@@ -147,7 +147,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
             onChange={(event) => {
               setScriptVersion(event.target.value as ScriptVersion);
             }}
-            className={`${DROPDOWN_FIELD_CLASSES} tw-[color-scheme:dark] tw-min-h-11 tw-px-3 tw-py-2 tw-text-base`}
+            className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "base" } })} tw-[color-scheme:dark]`}
           >
             {Object.values(ScriptVersion).map((version) => (
               <option

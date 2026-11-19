@@ -1,6 +1,10 @@
 "use client";
 
 import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  DROPDOWN_SELECTED_OPTION_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import {
   cloneElement,
   isValidElement,
   useEffect,
@@ -50,8 +54,10 @@ export default function CommonDropdownItem<T, U = unknown>(
         type="button"
         className={`${
           isMobile ? "tw-px-4 tw-py-3" : "tw-px-3 tw-py-2"
-        } tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-text-left tw-text-sm tw-font-medium tw-text-iron-200 tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
-          isActive ? "tw-bg-iron-800 tw-text-iron-100" : ""
+        } tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-x-2 tw-rounded-md tw-border-0 tw-text-left tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
+          isActive
+            ? DROPDOWN_SELECTED_OPTION_CLASSES
+            : "tw-bg-transparent tw-text-iron-200"
         }`}
         role="menuitem"
         onClick={onSelected}
@@ -77,7 +83,7 @@ export default function CommonDropdownItem<T, U = unknown>(
         {item.value === activeItem && (
           <FontAwesomeIcon
             icon={faCheck}
-            className="tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 tw-text-primary-300 tw-transition tw-duration-200 tw-ease-out"
+            className={`tw-h-3.5 tw-w-3.5 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES} tw-transition tw-duration-200 tw-ease-out`}
             aria-hidden="true"
           />
         )}

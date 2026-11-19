@@ -62,6 +62,10 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
   xl: "tw-min-h-12 tw-px-5 tw-py-3 tw-text-sm",
 };
 
+export function getButtonSizeClasses(size: ButtonSize): string {
+  return SIZE_CLASSES[size];
+}
+
 interface ButtonStyleOptions {
   readonly variant?: ButtonVariant | undefined;
   readonly size?: ButtonSize | null | undefined;
@@ -90,7 +94,7 @@ export function getButtonClasses({
     withoutShadow ? "tw-shadow-none" : "tw-shadow-sm tw-shadow-black/20",
     FOCUS_CLASSES[variant] ?? "focus-visible:tw-outline-primary-400",
     VARIANT_CLASSES[variant],
-    size && SIZE_CLASSES[size],
+    size && getButtonSizeClasses(size),
     fullWidth && "tw-w-full",
     className
   );

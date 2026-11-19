@@ -1,5 +1,9 @@
 "use client";
 
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  getDropdownOptionStateClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useState } from "react";
 import { ConnectedProfileDeviceBadge } from "@/components/device-signing/DeviceSecurityStatus";
 import { getConnectionProfileIndicator } from "@/components/auth/connection-state-indicator";
@@ -115,7 +119,7 @@ function ConnectedAccountRow({
         </div>
         {showActiveState && account.isActive && (
           <svg
-            className="tw-ml-2 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+            className={`tw-ml-2 tw-h-5 tw-w-5 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES} tw-transition tw-duration-300 tw-ease-out`}
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"
@@ -134,9 +138,7 @@ function ConnectedAccountRow({
     </>
   );
 
-  const rowClassName = `tw-group tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out ${
-    showActiveState && account.isActive ? "tw-bg-iron-700" : "tw-bg-transparent"
-  }`;
+  const rowClassName = `tw-group tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out ${getDropdownOptionStateClasses(showActiveState && account.isActive)}`;
 
   if (!showActiveState) {
     return <div className={rowClassName}>{rowContent}</div>;
@@ -147,7 +149,7 @@ function ConnectedAccountRow({
       type="button"
       onClick={() => onSelect(account.address)}
       disabled={actionsDisabled}
-      className={`${rowClassName} tw-cursor-pointer hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-50`}
+      className={`${rowClassName} tw-cursor-pointer focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-50`}
       aria-label={t(HEADER_USER_MENU_LOCALE, "headerUserMenu.switchToProfile", {
         profile: label,
         wallet: walletLabel,
