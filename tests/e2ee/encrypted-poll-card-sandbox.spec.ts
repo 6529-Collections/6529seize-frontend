@@ -72,7 +72,27 @@ test.describe("Posted encrypted poll @medium @local-only @e2ee", () => {
       await vote.click();
       await expect(coffeeResult).toBeVisible({ timeout: 45_000 });
 
+      await alice.page.route(
+        /\/e2ee\/groups\/[^/]+\/messages(?:\?|$)/u,
+        (route) =>
+          route.fulfill({
+            status: 400,
+            contentType: "application/json",
+            body: JSON.stringify({
+              error: "Rejected close event",
+              code: "E2EE_INVALID_INPUT",
+            }),
+          }),
+        { times: 1 }
+      );
       await endEncryptedPoll(alice.page, question);
+      const endDialog = alice.page.getByRole("dialog", { name: "End poll" });
+      await expect(endDialog.getByRole("alert")).toBeVisible();
+      await expect(card.getByText("Poll ended", { exact: true })).toHaveCount(
+        0
+      );
+      await endDialog.getByRole("button", { name: "End poll" }).click();
+      await expect(endDialog).toBeHidden();
       await expect(card.getByText("Poll ended", { exact: true })).toBeVisible({
         timeout: 45_000,
       });

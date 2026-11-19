@@ -1,4 +1,6 @@
 import { pollRosterHash } from "@/lib/e2ee/engine/poll-roster";
+import { decodeSegment } from "@/lib/e2ee/backup/format";
+import { utf8Encode } from "@/lib/e2ee/bytes";
 import { newRuntime } from "@/lib/e2ee/engine/groups";
 import {
   applyPayload,
@@ -92,6 +94,26 @@ describe("message rules (contract 6)", () => {
     expect(rt.messages.get(ID)?.poll?.ballots).toEqual({
       bob: { seq: 5, options: [] },
     });
+    expect(vote("bob", voter, 7, [0])).toBe(true);
+    expect(vote("bob", voter, 8, [1], id(3))).toBe(false);
+    expect(vote("bob", voter, 9, [0], id(7))).toBe(false);
+    expect(rt.messages.get(ID)?.poll?.ballots).toEqual({
+      bob: { seq: 7, options: [0] },
+    });
+    const restored = decodeSegment(
+      utf8Encode(
+        JSON.stringify({
+          v: 2,
+          at: 1,
+          groups: [],
+          messages: [rt.messages.get(ID)],
+        })
+      )
+    ).messages[0];
+    expect(restored?.pollVoteHistory?.[voter]).toEqual([id(3)]);
+    expect(restored).toBeDefined();
+    rt.messages.set(ID, { ...restored!, pending: false });
+    expect(vote("bob", voter, 10, [1], id(3))).toBe(false);
   });
 
   it("keeps the latest edit's own signed copy for reports", () => {

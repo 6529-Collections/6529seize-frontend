@@ -56,7 +56,7 @@ import { ReadSync } from "./read-sync";
 import { readSyncStatus } from "./read-sync-status";
 import { searchHistory } from "./history-search";
 import { latestReadSeq } from "./history";
-import { queuePoll, queuePollUpdate } from "./polls";
+import { PollActions } from "./polls";
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
@@ -85,6 +85,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private readonly conversationCreator: ConversationCreator;
   private readonly restarter: ConversationRestarter;
   private readonly unsent: UnsentMessages;
+  private readonly polls: PollActions;
   private readonly enrollment: EnrollmentFlight;
   private readonly readSync: ReadSync;
 
@@ -114,6 +115,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
         await this.readSync.afterSync();
       },
     });
+    this.polls = new PollActions(
+      ctx,
+      this.controller,
+      () => this.requireReady(),
+      (task) => this.background(task)
+    );
     this.conversationCreator = new ConversationCreator(
       ctx,
       () => this.controller.syncAll(),
@@ -489,17 +496,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  createPoll = (g: string, poll: PollDefinition) =>
-    this.queuePoll(g, () => queuePoll(this.ctx, g, poll));
+  createPoll = (g: string, poll: PollDefinition) => this.polls.create(g, poll);
 
   updatePoll = (g: string, id: string, options: number[] | null) =>
-    this.queuePoll(g, () => queuePollUpdate(this.ctx, g, id, options));
-
-  private async queuePoll(g: string, enqueue: () => Promise<void>) {
-    this.requireReady();
-    await enqueue();
-    this.background(() => this.controller.flush(g.toLowerCase()));
-  }
+    this.polls.update(g, id, options);
 
   private ownMessage = (g: string, id: string) =>
     requireSavedMessage(this.ctx, g, id);

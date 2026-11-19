@@ -285,6 +285,9 @@ function isMessageRecord(value: unknown): value is BackupMessageRecord {
     (value["pollVoteIds"] === undefined ||
       (isObject(value["pollVoteIds"]) &&
         Object.values(value["pollVoteIds"]).every(isString))) &&
+    (value["pollVoteHistory"] === undefined ||
+      (isObject(value["pollVoteHistory"]) &&
+        Object.values(value["pollVoteHistory"]).every(isStringArray))) &&
     isNullable(value["epoch"], isNumber) &&
     isNullable(value["body"], isString) &&
     isNullable(value["sig"], isString)

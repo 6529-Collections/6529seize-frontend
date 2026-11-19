@@ -91,6 +91,23 @@ describe("E2EE engine: features", () => {
     await expect(b.updatePoll!(g, id, null)).rejects.toMatchObject({
       code: "E2EE_NOT_SENDER",
     });
+    const removeCloseFault = world.ds.addFault({
+      method: "POST",
+      path: SEND_PATH,
+      status: 400,
+      code: "E2EE_INVALID_INPUT",
+      times: 1,
+    });
+    try {
+      await expect(a.updatePoll!(g, id, null)).rejects.toMatchObject({
+        code: "E2EE_SEND_FAILED",
+      });
+      expect(
+        a.getMessages(g).find((message) => message.id === id)?.poll?.closed
+      ).toBe(false);
+    } finally {
+      removeCloseFault();
+    }
     await a.updatePoll!(g, id, null);
     await settle(world);
     for (const engine of [a, b, c, bobPhone.engine]) {

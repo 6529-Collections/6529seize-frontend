@@ -216,11 +216,19 @@ function applyPollUpdate(
   )
     return false;
 
-  if (target.pollVoteIds?.[meta.senderDeviceKey] === payload.id) return false;
+  const lastId = target.pollVoteIds?.[meta.senderDeviceKey];
+  const priorIds = target.pollVoteHistory?.[meta.senderDeviceKey] ?? [];
+  if (lastId === payload.id || priorIds.includes(payload.id)) return false;
   const previous = Object.hasOwn(poll.ballots, voter)
     ? poll.ballots[voter]
     : undefined;
   if (previous && meta.seq <= previous.seq) return false;
+  if (lastId) {
+    target.pollVoteHistory = {
+      ...target.pollVoteHistory,
+      [meta.senderDeviceKey]: [...priorIds, lastId],
+    };
+  }
   target.pollVoteIds = {
     ...target.pollVoteIds,
     [meta.senderDeviceKey]: payload.id,
@@ -263,6 +271,7 @@ function applyTargeted(
       target.latestEdit = null;
       delete target.poll;
       delete target.pollVoteIds;
+      delete target.pollVoteHistory;
     }
     changed = true;
   } else if (payload.t === "poll-vote" || payload.t === "poll-close") {
