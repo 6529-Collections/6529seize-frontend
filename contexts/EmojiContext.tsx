@@ -75,10 +75,37 @@ const EMOJI_CATEGORY_ICONS = {
   },
 };
 
+// After a failed custom emoji list load, wait before the next request, doubling
+// the wait on each consecutive failure. Callers re-request on render (the
+// composer's EmojiPlugin, DropPartMarkdown, the picker), so without a wait a
+// fast-failing request is retried by every caller, every time.
+const CUSTOM_EMOJI_RETRY_BASE_MS = 2_000;
+const CUSTOM_EMOJI_RETRY_MAX_MS = 5 * 60_000;
+
+// One shared empty map. Returning a new [] on each failure changed the
+// provider's emojiMap identity, which re-ran EmojiPlugin's load effect and
+// refetched the list in a loop that froze the page.
+const NO_CUSTOM_EMOJIS: EmojiCategory[] = [];
+
 let customEmojiMapCache: EmojiCategory[] | null = null;
 let customEmojiMapPromise: Promise<EmojiCategory[]> | null = null;
+let customEmojiFailureCount = 0;
+let customEmojiRetryAt = 0;
 let nativeEmojiDataCache: EmojiMartData | null = null;
 let nativeEmojiDataPromise: Promise<EmojiMartData | null> | null = null;
+
+const isCustomEmojiRetryDeferred = (): boolean =>
+  customEmojiMapPromise === null && Date.now() < customEmojiRetryAt;
+
+const recordCustomEmojiFailure = () => {
+  customEmojiFailureCount += 1;
+  customEmojiRetryAt =
+    Date.now() +
+    Math.min(
+      CUSTOM_EMOJI_RETRY_BASE_MS * 2 ** (customEmojiFailureCount - 1),
+      CUSTOM_EMOJI_RETRY_MAX_MS
+    );
+};
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   value !== null && typeof value === "object";
@@ -109,6 +136,9 @@ const fetchCustomEmojiMap = async (): Promise<EmojiCategory[]> => {
   if (customEmojiMapCache !== null) {
     return customEmojiMapCache;
   }
+  if (isCustomEmojiRetryDeferred()) {
+    return NO_CUSTOM_EMOJIS;
+  }
 
   customEmojiMapPromise ??= (async () => {
     try {
@@ -122,10 +152,13 @@ const fetchCustomEmojiMap = async (): Promise<EmojiCategory[]> => {
 
       const loadedEmojiMap = mapCustomEmojiList(emojiIds);
       customEmojiMapCache = loadedEmojiMap;
+      customEmojiFailureCount = 0;
+      customEmojiRetryAt = 0;
       return loadedEmojiMap;
     } catch (error) {
+      recordCustomEmojiFailure();
       console.error("Error fetching emoji list:", error);
-      return [];
+      return NO_CUSTOM_EMOJIS;
     } finally {
       customEmojiMapPromise = null;
     }
@@ -176,6 +209,8 @@ const importNativeEmojiData = async (): Promise<EmojiMartData | null> => {
 const resetEmojiContextCachesForTests = () => {
   customEmojiMapCache = null;
   customEmojiMapPromise = null;
+  customEmojiFailureCount = 0;
+  customEmojiRetryAt = 0;
   nativeEmojiDataCache = null;
   nativeEmojiDataPromise = null;
 };
@@ -191,7 +226,7 @@ if ("expect" in globalThis && "afterEach" in globalThis) {
 
 export const EmojiProvider = ({ children }: { children: ReactNode }) => {
   const [emojiMap, setEmojiMap] = useState<EmojiCategory[]>(
-    () => customEmojiMapCache ?? []
+    () => customEmojiMapCache ?? NO_CUSTOM_EMOJIS
   );
   const [emojiData, setEmojiData] = useState<EmojiMartData | null>(
     () => nativeEmojiDataCache
@@ -203,6 +238,11 @@ export const EmojiProvider = ({ children }: { children: ReactNode }) => {
     if (customEmojiMapCache !== null) {
       setEmojiMap(customEmojiMapCache);
       return customEmojiMapCache;
+    }
+    // While a failed load backs off, skip the request and the loading state
+    // updates, so repeated callers do not re-render every emoji consumer.
+    if (isCustomEmojiRetryDeferred()) {
+      return NO_CUSTOM_EMOJIS;
     }
 
     setCustomEmojiLoading(true);
