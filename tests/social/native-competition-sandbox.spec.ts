@@ -102,6 +102,47 @@ async function verifyVoteBreakpoints(
   const mode = scope.getByRole("group", { name: "Vote input mode" });
   const originalMode = await panel.getAttribute("data-vote-mode");
   const measurements = [];
+  const expectContained = async () => {
+    const overflow = await panel.evaluate((element) => {
+      const bounds = element.getBoundingClientRect();
+      return [
+        ...element.querySelectorAll(
+          '[data-vote-panel-header], dl, button, input:not([type="range"]), textarea, [data-vote-slider-thumb]'
+        ),
+      ]
+        .filter((child) => {
+          const box = child.getBoundingClientRect();
+          return (
+            box.width > 0 &&
+            box.height > 0 &&
+            (box.left < bounds.left - 1 ||
+              box.right > bounds.right + 1 ||
+              child.scrollWidth > child.clientWidth + 1)
+          );
+        })
+        .map((child) => {
+          const box = child.getBoundingClientRect();
+          const style = getComputedStyle(child);
+          return {
+            label:
+              child.getAttribute("aria-label") ||
+              child.textContent ||
+              child.tagName,
+            type: child.getAttribute("type"),
+            left: box.left,
+            right: box.right,
+            panelLeft: bounds.left,
+            panelRight: bounds.right,
+            clientWidth: child.clientWidth,
+            scrollWidth: child.scrollWidth,
+            marginLeft: style.marginLeft,
+            marginRight: style.marginRight,
+          };
+        });
+    });
+    expect(overflow).toEqual([]);
+    await expectNoHorizontalOverflow(page);
+  };
   try {
     for (const width of testInfo.project.use.hasTouch
       ? [320, 390]
@@ -109,36 +150,13 @@ async function verifyVoteBreakpoints(
       await page.setViewportSize({ ...viewport, width });
       await mode.getByRole("button", { name: "Numeric", exact: true }).click();
       const numeric = await expectVoteHeight(scope);
+      await expectContained();
       await mode.getByRole("button", { name: "Slider", exact: true }).click();
       const slider = await expectVoteHeight(scope, numeric);
+      await expectContained();
       await mode.getByRole("button", { name: "Numeric", exact: true }).click();
       const restored = await expectVoteHeight(scope, numeric);
-      const overflow = await panel.evaluate((element) => {
-        const bounds = element.getBoundingClientRect();
-        return [
-          ...element.querySelectorAll(
-            '[data-vote-panel-header], dl, button, input:not([type="range"]), textarea'
-          ),
-        ]
-          .filter((child) => {
-            const box = child.getBoundingClientRect();
-            return (
-              box.width > 0 &&
-              box.height > 0 &&
-              (box.left < bounds.left - 1 ||
-                box.right > bounds.right + 1 ||
-                child.scrollWidth > child.clientWidth + 1)
-            );
-          })
-          .map(
-            (child) =>
-              child.getAttribute("aria-label") ??
-              child.textContent ??
-              child.tagName
-          );
-      });
-      expect(overflow).toEqual([]);
-      await expectNoHorizontalOverflow(page);
+      await expectContained();
       measurements.push({ width, numeric, slider, restored });
       await panel.screenshot({
         path: testInfo.outputPath(`${name}-${width}.png`),
@@ -7307,6 +7325,40 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(
         dialog.getByRole("button", { name: "Vote -25 TDH", exact: true })
       ).toBeEnabled();
+      if (popup === "artist submissions" && !app) {
+        const longReply = Array.from(
+          { length: 24 },
+          (_, index) =>
+            `Reply line ${index + 1}: artwork detail worth discussing.`
+        ).join("\n");
+        await rationale.fill(longReply);
+        await rationale.evaluate((element) => {
+          element.scrollTop = 0;
+        });
+        const scrollDistance = await rationale.evaluate(
+          (element) => element.scrollHeight
+        );
+        await rationale.hover();
+        await page.mouse.wheel(0, scrollDistance);
+        await expect
+          .poll(() =>
+            rationale.evaluate(
+              (element) =>
+                element.scrollHeight - element.clientHeight - element.scrollTop
+            )
+          )
+          .toBeLessThanOrEqual(1);
+        await expect(rationale).toHaveValue(longReply);
+        await expect(rationale).toHaveAttribute("rows", "3");
+        await expect(rationale).toHaveCSS("height", "72px");
+        await rationale.screenshot({
+          path: testInfo.outputPath("compact-long-reply-last-lines.png"),
+        });
+        await page.mouse.wheel(0, -scrollDistance);
+        await expect
+          .poll(() => rationale.evaluate((element) => element.scrollTop))
+          .toBe(0);
+      }
       await rationale.fill("An explanation kept while changing input modes");
       await expect(
         dialog.getByRole("button", { name: "Vote -25 TDH", exact: true })
@@ -8592,6 +8644,25 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(rationale).toHaveValue(
         "A reply preserved through keyboard dismissal"
       );
+      const originalViewport = page.viewportSize()!;
+      const retainedSheet = await dialog.elementHandle();
+      if (!retainedSheet) throw new Error("Voting sheet missing");
+      try {
+        for (const width of [1100, originalViewport.width]) {
+          await page.setViewportSize({ ...originalViewport, width });
+          await expect(dialog).toHaveCount(1);
+          expect(
+            await retainedSheet.evaluate((element) => element.isConnected)
+          ).toBe(true);
+          await expect(input).toHaveValue("25");
+          await expect(rationale).toHaveValue(
+            "A reply preserved through keyboard dismissal"
+          );
+        }
+      } finally {
+        await page.setViewportSize(originalViewport);
+        await retainedSheet.dispose();
+      }
       await rationale.focus();
       await expect(
         dialog.getByRole("button", { name: "Vote +25 TDH", exact: true })

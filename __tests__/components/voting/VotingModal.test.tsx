@@ -19,13 +19,16 @@ jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
 jest.mock("@/components/voting/MobileVotingModal", () => ({
   __esModule: true,
   default: ({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) => (
-    <button
-      data-testid="mobile-voting-modal"
-      data-open={String(isOpen)}
-      onClick={onClose}
-    >
-      Close mobile voting
-    </button>
+    <div>
+      <input aria-label="Mobile vote draft" defaultValue="0" />
+      <button
+        data-testid="mobile-voting-modal"
+        data-open={String(isOpen)}
+        onClick={onClose}
+      >
+        Close mobile voting
+      </button>
+    </div>
   ),
 }));
 
@@ -79,6 +82,7 @@ describe("VotingModal", () => {
       isIos: true,
       compact: true,
       mobile: true,
+      preferMobile: false,
     },
     {
       platform: "wide iOS",
@@ -86,6 +90,7 @@ describe("VotingModal", () => {
       isIos: true,
       compact: false,
       mobile: false,
+      preferMobile: false,
     },
     {
       platform: "Android phone",
@@ -93,6 +98,7 @@ describe("VotingModal", () => {
       isIos: false,
       compact: true,
       mobile: false,
+      preferMobile: false,
     },
     {
       platform: "mobile browser",
@@ -100,14 +106,38 @@ describe("VotingModal", () => {
       isIos: false,
       compact: true,
       mobile: false,
+      preferMobile: false,
+    },
+    {
+      platform: "compact memes panel",
+      isCapacitor: false,
+      isIos: false,
+      compact: true,
+      mobile: true,
+      preferMobile: true,
+    },
+    {
+      platform: "wide memes panel",
+      isCapacitor: false,
+      isIos: false,
+      compact: false,
+      mobile: false,
+      preferMobile: false,
     },
   ])(
     "uses the intended voting surface on $platform",
-    ({ isCapacitor, isIos, compact, mobile }) => {
+    ({ isCapacitor, isIos, compact, mobile, preferMobile }) => {
       mockUseCapacitor.mockReturnValue({ isCapacitor, isIos });
       mockIsCompactLayout.mockReturnValue(compact);
       const onClose = jest.fn();
-      render(<VotingModal drop={drop} isOpen onClose={onClose} />);
+      render(
+        <VotingModal
+          drop={drop}
+          isOpen
+          onClose={onClose}
+          preferMobile={preferMobile}
+        />
+      );
 
       if (mobile) {
         expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -131,6 +161,44 @@ describe("VotingModal", () => {
       <VotingModal drop={drop} isOpen={false} onClose={jest.fn()} />
     );
     expect(container.firstChild).toBeNull();
+  });
+
+  it("retains the open iPhone sheet and draft across a layout breakpoint", () => {
+    mockUseCapacitor.mockReturnValue({ isCapacitor: true, isIos: true });
+    mockIsCompactLayout.mockReturnValue(true);
+    const props = { drop, isOpen: true, onClose: jest.fn() };
+    const { rerender } = render(<VotingModal {...props} />);
+    const draft = screen.getByRole("textbox", { name: "Mobile vote draft" });
+    fireEvent.change(draft, { target: { value: "42" } });
+
+    mockIsCompactLayout.mockReturnValue(false);
+    rerender(<VotingModal {...props} />);
+    expect(screen.getByRole("textbox", { name: "Mobile vote draft" })).toBe(
+      draft
+    );
+    expect(draft).toHaveValue("42");
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+
+    rerender(<VotingModal {...props} isOpen={false} />);
+    rerender(<VotingModal {...props} />);
+    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    expect(screen.queryByTestId("mobile-voting-modal")).not.toBeInTheDocument();
+  });
+
+  it("retains a wide iPhone dialog until it closes", () => {
+    mockUseCapacitor.mockReturnValue({ isCapacitor: true, isIos: true });
+    const props = { drop, isOpen: true, onClose: jest.fn() };
+    const { rerender } = render(<VotingModal {...props} />);
+    const vote = screen.getByTestId("vote");
+
+    mockIsCompactLayout.mockReturnValue(true);
+    rerender(<VotingModal {...props} />);
+    expect(screen.getByTestId("vote")).toBe(vote);
+    expect(screen.queryByTestId("mobile-voting-modal")).not.toBeInTheDocument();
+
+    rerender(<VotingModal {...props} isOpen={false} />);
+    rerender(<VotingModal {...props} />);
+    expect(screen.getByTestId("mobile-voting-modal")).toBeInTheDocument();
   });
 
   it("closes when cancel button is clicked", () => {

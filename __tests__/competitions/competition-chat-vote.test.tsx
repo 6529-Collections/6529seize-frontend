@@ -210,6 +210,9 @@ it.each([
   { creditType: "REP", label: "Rep" },
   { creditType: "CIC", label: "NIC" },
   { creditType: "CUSTOM_CREDITS", label: "CUSTOM_CREDITS" },
+  { creditType: "constructor", label: "constructor" },
+  { creditType: "toString", label: "toString" },
+  { creditType: "__proto__", label: "__proto__" },
 ])(
   "labels numeric voting and signed actions for $creditType",
   async ({ creditType, label }) => {
@@ -437,7 +440,7 @@ it("retains a mounted legacy vote and reply draft across a temporary context ref
   expect(setCompetitionVote).not.toHaveBeenCalled();
 });
 it.each([401, 403, 404])(
-  "blocks cached legacy voting after context access is denied with %s",
+  "blocks cached legacy voting after access denial %s until a fresh retry succeeds",
   async (status) => {
     jest
       .mocked(fetchDropCompetitionContext)
@@ -454,6 +457,177 @@ it.each([401, 403, 404])(
     });
     expect(await screen.findByRole("alert")).toBeInTheDocument();
     expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
+    expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockRejectedValue(
+        Object.assign(new Error("Unavailable"), { status: 503 })
+      );
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    await waitFor(() => {
+      expect(fetchDropCompetitionContext).toHaveBeenCalledTimes(3);
+      expect(
+        client.getQueryState([
+          QueryKey.COMPETITION_DROP_CONTEXT,
+          { wave_id: "wave", drop_id: "drop", viewer: "viewer:self" },
+        ])?.error
+      ).toMatchObject({ status: 503 });
+    });
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
+
+    let resolveRetry!: () => void;
+    jest.mocked(fetchDropCompetitionContext).mockReturnValue(
+      new Promise((resolve) => {
+        resolveRetry = () => resolve({ competition: null, entry: null });
+      })
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
+    await act(async () => resolveRetry());
+    expect(await screen.findByText("Legacy voting")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+  }
+);
+it("retains an observed access denial from another query function through a transient retry", async () => {
+  jest
+    .mocked(fetchDropCompetitionContext)
+    .mockResolvedValue({ competition: null, entry: null });
+  const { client } = mount();
+  await screen.findByText("Legacy voting");
+  const queryKey = [
+    QueryKey.COMPETITION_DROP_CONTEXT,
+    { wave_id: "wave", drop_id: "drop", viewer: "viewer:self" },
+  ];
+  const denied = Object.assign(new Error("Access denied"), { status: 403 });
+  await act(async () => {
+    await expect(
+      client.fetchQuery({
+        queryKey,
+        queryFn: () => Promise.reject(denied),
+      })
+    ).rejects.toBe(denied);
+  });
+  expect(await screen.findByRole("alert")).toBeInTheDocument();
+  expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
+
+  const unavailable = Object.assign(new Error("Unavailable"), { status: 503 });
+  await act(async () => {
+    await expect(
+      client.fetchQuery({
+        queryKey,
+        queryFn: () => Promise.reject(unavailable),
+      })
+    ).rejects.toBe(unavailable);
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+  expect(client.getQueryState(queryKey)?.error).toBe(unavailable);
+  expect(screen.getByRole("alert")).toBeInTheDocument();
+  expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
+  expect(fetchDropCompetitionContext).toHaveBeenCalledTimes(1);
+
+  fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+  expect(await screen.findByText("Legacy voting")).toBeInTheDocument();
+  expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  expect(fetchDropCompetitionContext).toHaveBeenCalledTimes(2);
+  expect(fetchCompetitionCredits).not.toHaveBeenCalled();
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+});
+it.each(["viewer", "drop"])(
+  "retains a cached denial across remounts without blocking another %s",
+  async (changedScope) => {
+    const legacyContext = { competition: null, entry: null };
+    const contextQueryKey = [
+      QueryKey.COMPETITION_DROP_CONTEXT,
+      { wave_id: "wave", drop_id: "drop", viewer: "viewer:self" },
+    ];
+    jest.mocked(fetchDropCompetitionContext).mockResolvedValue(legacyContext);
+    const { client, unmount } = mount();
+    await screen.findByText("Legacy voting");
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockRejectedValue(
+        Object.assign(new Error("Access denied"), { status: 403 })
+      );
+    await act(async () => {
+      await client.refetchQueries({
+        queryKey: [QueryKey.COMPETITION_DROP_CONTEXT],
+      });
+    });
+    await screen.findByRole("alert");
+    jest
+      .mocked(fetchDropCompetitionContext)
+      .mockRejectedValue(
+        Object.assign(new Error("Unavailable"), { status: 503 })
+      );
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    await waitFor(() => {
+      expect(client.getQueryState(contextQueryKey)?.error).toMatchObject({
+        status: 503,
+      });
+    });
+    unmount();
+
+    const rendered = render(
+      <QueryClientProvider client={client}>
+        <CompetitionAwareDropVote drop={drop} fallback={"Legacy voting"} />
+      </QueryClientProvider>
+    );
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
+    await act(async () => {
+      await client.refetchQueries({
+        queryKey: [QueryKey.COMPETITION_DROP_CONTEXT],
+      });
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    await act(async () => {
+      client.setQueryData(contextQueryKey, legacyContext);
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
+
+    let resolveLookup!: () => void;
+    jest.mocked(fetchDropCompetitionContext).mockReturnValue(
+      new Promise((resolve) => {
+        resolveLookup = () => resolve(legacyContext);
+      })
+    );
+    if (changedScope === "viewer") {
+      jest.mocked(useCompetitionViewer).mockReturnValue("other:self");
+    }
+    rendered.rerender(
+      <QueryClientProvider client={client}>
+        <CompetitionAwareDropVote
+          drop={changedScope === "drop" ? { ...drop, id: "other" } : drop}
+          fallback={"Legacy voting"}
+        />
+      </QueryClientProvider>
+    );
+    expect(screen.getByRole("status")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await act(async () => resolveLookup());
+    expect(await screen.findByText("Legacy voting")).toBeInTheDocument();
+
+    jest.mocked(useCompetitionViewer).mockReturnValue("viewer:self");
+    jest.mocked(fetchDropCompetitionContext).mockReturnValue(
+      new Promise((resolve) => {
+        resolveLookup = () => resolve(legacyContext);
+      })
+    );
+    rendered.rerender(
+      <QueryClientProvider client={client}>
+        <CompetitionAwareDropVote drop={drop} fallback={"Legacy voting"} />
+      </QueryClientProvider>
+    );
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+    await act(async () => resolveLookup());
+    expect(await screen.findByText("Legacy voting")).toBeInTheDocument();
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     expect(fetchCompetitionCredits).not.toHaveBeenCalled();
   }
 );

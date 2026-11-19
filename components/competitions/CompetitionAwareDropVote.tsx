@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useLayoutEffect, useState, type ReactNode } from "react";
 import { VoteModeControl } from "@/components/voting/VoteModeControl";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import { ApiCompetitionEntryStatus } from "@/generated/models/ApiCompetitionEntryStatus";
@@ -17,6 +17,10 @@ import { isCompetitionAccessError } from "@/helpers/competition.helpers";
 import { CompetitionVoteForm } from "./CompetitionVote";
 import CompetitionVoteWithReply from "./CompetitionVoteWithReply";
 import { CompetitionState } from "./CompetitionState";
+
+// A later transient error must not restore data whose access was denied.
+// Query identity keeps this boundary scoped to the viewer and drop across mounts.
+const accessDeniedContexts = new WeakSet<object>();
 
 interface CompetitionAwareDropVoteProps {
   readonly drop: ApiDrop & Pick<ExtendedDrop, "competition_context">;
@@ -56,25 +60,61 @@ export default function CompetitionAwareDropVote(
   props: CompetitionAwareDropVoteProps
 ) {
   const viewer = useCompetitionViewer();
+  const queryClient = useQueryClient();
   const [localVoteMode, setLocalVoteMode] =
     useState<SingleWaveDropVoteMode>("slider");
   const { drop } = props;
   const knownContext = getKnownContext(drop, viewer);
+  const contextQueryKey = [
+    QueryKey.COMPETITION_DROP_CONTEXT,
+    { wave_id: drop.wave.id, drop_id: drop.id, viewer },
+  ] as const;
   const context = useQuery({
-    queryKey: [
-      QueryKey.COMPETITION_DROP_CONTEXT,
-      { wave_id: drop.wave.id, drop_id: drop.id, viewer },
-    ],
-    queryFn: ({ signal }) =>
-      fetchDropCompetitionContext(drop.wave.id, drop.id, signal),
+    queryKey: contextQueryKey,
+    queryFn: async ({ signal, client, queryKey }) => {
+      const query = client.getQueryCache().find({ queryKey, exact: true });
+      try {
+        const result = await fetchDropCompetitionContext(
+          drop.wave.id,
+          drop.id,
+          signal
+        );
+        if (query) accessDeniedContexts.delete(query);
+        return result;
+      } catch (error) {
+        if (query && isCompetitionAccessError(error)) {
+          accessDeniedContexts.add(query);
+        }
+        throw error;
+      }
+    },
     enabled: knownContext === undefined,
     retry: false,
     staleTime: 0,
+    // A fresh response can restore access even when cached data is unchanged.
+    notifyOnChangeProps: ["data", "error", "isFetching"],
   });
+  const cachedQuery = queryClient.getQueryCache().find({
+    queryKey: contextQueryKey,
+    exact: true,
+  });
+  const contextError = context.error;
+  useLayoutEffect(() => {
+    // Another observer can own requests for this same cached context.
+    if (
+      !knownContext &&
+      cachedQuery?.state.error === contextError &&
+      isCompetitionAccessError(contextError)
+    ) {
+      accessDeniedContexts.add(cachedQuery);
+    }
+  }, [cachedQuery, contextError, knownContext]);
+  const accessDenied = cachedQuery && accessDeniedContexts.has(cachedQuery);
   if (
     !knownContext &&
-    context.isError &&
-    (!context.data || isCompetitionAccessError(context.error))
+    (accessDenied ||
+      (context.isError &&
+        (!context.data || isCompetitionAccessError(context.error))))
   )
     return (
       <CompetitionState

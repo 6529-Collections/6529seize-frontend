@@ -105,7 +105,11 @@ const SingleWaveDropVoteSubmit = forwardRef<
     const [showSuccess, setShowSuccess] = useState(false);
     const [isSpinnerExiting, setIsSpinnerExiting] = useState(false);
     const [isTextExiting, setIsTextExiting] = useState(false);
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [processingVote, setProcessingVote] = useState<{
+      amount: number;
+      label: string;
+    } | null>(null);
+    const isProcessing = processingVote !== null;
     const animationTimelineRef = useRef<VoteAnimationTimeline | null>(null);
     const timeoutsRef = useRef<NodeJS.Timeout[]>([]);
     const delayCancelersRef = useRef<(() => void)[]>([]);
@@ -317,7 +321,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
       setLoading(false);
       setIsSpinnerExiting(false);
       setIsTextExiting(false);
-      setIsProcessing(false);
+      setProcessingVote(null);
     };
 
     const showSuccessfulVote = () => {
@@ -335,7 +339,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
         const resetTimeout = setTimeout(() => {
           setShowSuccess(false);
           setIsTextExiting(false);
-          setIsProcessing(false);
+          setProcessingVote(null);
         }, VOTE_BUTTON_TRANSITION_MS);
         timeoutsRef.current.push(resetTimeout);
       }, totalParticlesTime);
@@ -446,7 +450,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
       setShowSuccess(false);
       setIsTextExiting(false);
-      setIsProcessing(false);
+      setProcessingVote(null);
     };
 
     const handleClick = async () => {
@@ -463,7 +467,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
         return;
       }
 
-      setIsProcessing(true);
+      setProcessingVote({ amount: newRating, label: idleButtonLabel });
       setIsTextExiting(true);
       setLoading(true);
 
@@ -505,6 +509,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
 
     const idleButtonLabel =
       submitLabelOverride ?? getVoteActionLabel(locale, newRating, voteLabel);
+    const displayedButtonLabel = processingVote?.label ?? idleButtonLabel;
 
     const getButtonContent = () => {
       return (
@@ -513,7 +518,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
             aria-hidden="true"
             className="tw-invisible tw-whitespace-nowrap"
           >
-            {idleButtonLabel}
+            {displayedButtonLabel}
           </span>
           {(!loading || isTextExiting) && (
             <span
@@ -521,7 +526,7 @@ const SingleWaveDropVoteSubmit = forwardRef<
                 isTextExiting ? (styles["exit"] ?? "") : (styles["enter"] ?? "")
               }`}
             >
-              {showSuccess ? "Voted" : idleButtonLabel}
+              {showSuccess ? "Voted" : displayedButtonLabel}
             </span>
           )}
           {loading && (
@@ -547,9 +552,9 @@ const SingleWaveDropVoteSubmit = forwardRef<
       >
         <VoteActionButton
           id={`vote-button-${randomID}`}
-          amount={newRating}
+          amount={processingVote?.amount ?? newRating}
           unit={voteLabel}
-          aria-label={loading ? idleButtonLabel : undefined}
+          aria-label={loading ? displayedButtonLabel : undefined}
           variant={size === SingleWaveDropVoteSize.MINI ? "compact" : "default"}
           className={isProcessing ? (styles["processing"] ?? "") : undefined}
           onClick={(e) => {

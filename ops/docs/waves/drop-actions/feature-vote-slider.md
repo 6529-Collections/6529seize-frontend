@@ -99,8 +99,8 @@ warning. Leaving the field untouched preserves the existing generated reply;
 entering text replaces it. Clearing an edited field while `Explain vote` is on
 blocks `Vote` until you enter text or turn the control off. Reply fields start
 at three rows in compact submission cards and four rows in full dialogs and
-sheets. They retain their resize control. The card reply does not scroll
-internally; drag its resize handle to enlarge it for longer explanations.
+sheets. Long replies scroll inside the field. Drag its resize handle to enlarge
+the field when needed.
 Vote amounts, limits, eligibility, and saving work the same in both input modes.
 
 The full decision voting modal and mobile sheet use the same header, reply
@@ -139,13 +139,14 @@ field retains the existing generated reply.
   an error toast tells the user to retry the reply.
 - Submit always runs an auth check first; canceling auth keeps controls open.
 - Decision forms report a save error and refresh their voting limits for retry.
-  Other vote forms use an error toast. A failed save keeps the entered value.
+  Other vote forms use an error toast. A failed save keeps the entered value
+  while the form remains open.
 - Decision voting closes after the server confirms the vote. Scores and
   rankings can continue refreshing in the background.
 - Other modal/sheet votes validate and complete auth first, then start the vote
   request, briefly show the success state, and close. An immediate failure keeps
   the controls open. If the request fails after closing, an error toast appears
-  and users can reopen voting to retry.
+  and users can reopen voting and re-enter the amount to retry.
 - In mini active-submission cards, successful submit refreshes submission/drop
   queries and keeps users in the same list.
 - My Votes retains its separate compact amount, range, and saved-vote

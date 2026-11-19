@@ -142,7 +142,7 @@ describe("SingleWaveDropVoteSubmit", () => {
       },
     });
 
-    return render(
+    const content = (nextProps: typeof props) => (
       <QueryClientProvider client={queryClient}>
         <AuthContext.Provider value={mockAuthContext as any}>
           <ReactQueryWrapperContext.Provider
@@ -152,12 +152,18 @@ describe("SingleWaveDropVoteSubmit", () => {
               drop={mockDrop}
               newRating={100}
               voteLabel={defaultVoteLabel}
-              {...props}
+              {...nextProps}
             />
           </ReactQueryWrapperContext.Provider>
         </AuthContext.Provider>
       </QueryClientProvider>
     );
+    const view = render(content(props));
+    return {
+      ...view,
+      rerenderWithProps: (nextProps: typeof props) =>
+        view.rerender(content({ ...props, ...nextProps })),
+    };
   };
 
   beforeEach(() => {
@@ -260,6 +266,63 @@ describe("SingleWaveDropVoteSubmit", () => {
       });
       expect(button.querySelector(".buttonText")).not.toBeInTheDocument();
       expect(screen.getByRole("button", { name: label })).toBe(button);
+    }
+  );
+
+  it.each([
+    {
+      submitted: 100,
+      edited: -50,
+      label: "Vote +100 Rep",
+      color: "tw-bg-emerald-500",
+    },
+    {
+      submitted: -100,
+      edited: 50,
+      label: "Vote -100 Rep",
+      color: "tw-bg-rose-600",
+    },
+  ])(
+    "keeps pending feedback for submitted $submitted while the draft changes",
+    async ({ submitted, edited, label, color }) => {
+      let finishSave!: (value: ApiDrop) => void;
+      jest.mocked(commonApi.commonApiPost).mockReturnValue(
+        new Promise((resolve) => {
+          finishSave = resolve;
+        })
+      );
+      const { rerenderWithProps } = renderComponent({ newRating: submitted });
+      const button = screen.getByRole("button", { name: label });
+      fireEvent.click(button);
+      rerenderWithProps({
+        newRating: edited,
+        submitLabelOverride: "Edited draft + reply",
+      });
+      expect(button).toHaveAccessibleName(label);
+      expect(button).toHaveClass(color);
+
+      await advanceTimers(300);
+      expect(button.querySelector(".buttonText")).not.toBeInTheDocument();
+      expect(button).toHaveAccessibleName(label);
+      expect(button).toHaveClass(color);
+      expect(commonApi.commonApiPost).toHaveBeenCalledWith({
+        endpoint: `drops/${mockDrop.id}/ratings`,
+        body: { rating: submitted, category: "Rep" },
+      });
+
+      await act(async () => {
+        finishSave(mockDrop);
+        await flushMicrotasks();
+      });
+      await advanceTimers(300);
+      expect(button).toHaveAccessibleName("Voted");
+      expect(button).toHaveClass(color);
+      await advanceTimers(4200);
+      await advanceTimers(300);
+      expect(button).toHaveAccessibleName("Edited draft + reply");
+      expect(button).toHaveClass(
+        edited > 0 ? "tw-bg-emerald-500" : "tw-bg-rose-600"
+      );
     }
   );
 

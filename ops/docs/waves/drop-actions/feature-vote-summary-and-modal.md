@@ -18,8 +18,11 @@ distribution with signed positive and negative highlights.
   - focused drop overlay via `?drop={dropId}`
 - Both default and memes single-drop panels reuse the same summary strip.
 - Container variants:
-  - `VotingModal` (default panel and memes on larger screens)
-  - `MobileVotingModal` (memes panel on small screens only)
+  - A centered dialog in default panels and larger memes panels.
+  - A mobile sheet in small memes panels and compact native iPhone layouts,
+    including compact landscape layouts. Wider iPhone layouts use the centered
+    dialog. The chosen surface stays mounted until voting closes, so resizing
+    does not discard the draft.
 
 ## Entry Points
 
@@ -148,7 +151,7 @@ ranking, and voting rules retain their usual meaning.
   stays open.
 - A failed decision vote stays open for retry. Other drop votes stay open if
   saving fails before closure; a later background failure shows an error toast
-  so the voter can reopen and retry.
+  so the voter can reopen and re-enter the amount to retry.
 - Closing voting only closes the voting surface; single-drop view stays open.
 - A background refresh failure does not turn a confirmed decision vote into
   a failed save. Loaded artwork stays visible during temporary refresh failures;

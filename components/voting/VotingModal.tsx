@@ -2,7 +2,7 @@
 
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
-import React, { useCallback, useEffect, useId, useRef } from "react";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { SingleWaveDropVote } from "../waves/drop/SingleWaveDropVote";
 import { SingleWaveDropVoteSubmissionMode } from "../waves/drop/SingleWaveDropVote.types";
@@ -18,6 +18,7 @@ interface VotingModalProps {
   readonly drop: ExtendedDrop;
   readonly isOpen: boolean;
   readonly onClose: () => void;
+  readonly preferMobile?: boolean | undefined;
 }
 
 const CenteredVotingModal: React.FC<VotingModalProps> = ({
@@ -120,17 +121,34 @@ const CenteredVotingModal: React.FC<VotingModalProps> = ({
   return createPortal(modalContent, document.body);
 };
 
+const OpenVotingModal: React.FC<
+  VotingModalProps & { readonly useMobileSheet: boolean }
+> = ({ useMobileSheet, ...props }) => {
+  // Keep the adapter mounted while open so resizing cannot discard its draft.
+  const [isMobileSheet] = useState(useMobileSheet);
+  return isMobileSheet ? (
+    <MobileVotingModal {...props} />
+  ) : (
+    <CenteredVotingModal {...props} />
+  );
+};
+
 const VotingModal: React.FC<VotingModalProps> = (props) => {
   const { isCapacitor, isIos } = useCapacitor();
   const isCompactLayout = useIsMobileLayoutViewport();
 
   // Some detail and landscape callers request this dialog directly.
   // Keep every iPhone entry on the same keyboard-aware sheet.
-  if (isCapacitor && isIos && isCompactLayout) {
-    return <MobileVotingModal {...props} />;
-  }
+  if (!props.isOpen) return null;
 
-  return <CenteredVotingModal {...props} />;
+  return (
+    <OpenVotingModal
+      {...props}
+      useMobileSheet={
+        props.preferMobile === true || (isCompactLayout && isCapacitor && isIos)
+      }
+    />
+  );
 };
 
 export default VotingModal;
