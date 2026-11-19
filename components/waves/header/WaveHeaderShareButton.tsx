@@ -30,13 +30,13 @@ export default function WaveHeaderShareButton({
     <>
       <Button
         type="button"
-        variant="tertiary"
+        variant="tertiaryStrong"
         size="xs"
         onClick={onClick}
         disabled={isSharing}
         aria-label={actionLabel}
         data-wave-link-action-mode={mode}
-        className={`!tw-border-iron-700 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`}
+        className={COMPACT_ACTION_TOUCH_TARGET_CLASS}
       >
         <Icon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
         <span aria-hidden="true">{label}</span>

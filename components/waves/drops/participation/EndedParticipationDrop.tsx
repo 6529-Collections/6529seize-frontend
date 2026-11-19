@@ -195,7 +195,10 @@ function EndedParticipationDropInner({
           }
         >
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-            <p className="tw-m-0 tw-inline-flex tw-h-5 tw-items-center tw-text-md tw-font-semibold tw-leading-5">
+            <p
+              data-wave-typography="preserve"
+              className="tw-m-0 tw-inline-flex tw-h-5 tw-items-center tw-text-md tw-font-semibold tw-leading-5"
+            >
               {drop.author.is_anonymous ? (
                 <AnonymousAuthorName />
               ) : (

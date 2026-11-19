@@ -239,7 +239,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                           scroll={false}
                           className="tw-no-underline desktop-hover:hover:tw-underline"
                         >
-                          <span className="tw-text-sm tw-font-semibold tw-text-white">
+                          <span
+                            data-wave-typography="preserve"
+                            className="tw-text-sm tw-font-semibold tw-text-white"
+                          >
                             {winner.drop.author.handle}
                           </span>
                         </Link>
@@ -251,7 +254,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                         scroll={false}
                         className="tw-no-underline desktop-hover:hover:tw-underline"
                       >
-                        <span className="tw-text-sm tw-font-semibold tw-text-white">
+                        <span
+                          data-wave-typography="preserve"
+                          className="tw-text-sm tw-font-semibold tw-text-white"
+                        >
                           {winner.drop.author.handle ?? winner.drop.author.id}
                         </span>
                       </Link>
@@ -344,7 +350,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 >
                   {formatNumberWithCommas(rating)}
                 </span>
-                <span className="tw-whitespace-nowrap tw-text-label tw-font-medium tw-uppercase tw-tracking-ordinal tw-text-iron-500">
+                <span
+                  data-wave-vote-total
+                  className="tw-whitespace-nowrap tw-text-label tw-font-medium tw-uppercase tw-tracking-ordinal tw-text-iron-500"
+                >
                   {creditType} {WAVE_VOTE_STATS_LABELS.TOTAL}
                 </span>
               </div>

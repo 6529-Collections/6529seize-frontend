@@ -46,6 +46,11 @@ describe("WaveHeaderShareButton", () => {
     const shareActionButton = screen.getByRole("button", {
       name: "Share wave",
     });
+    expect(shareActionButton).toHaveClass(
+      "tw-border-iron-700",
+      "tw-bg-iron-950"
+    );
+    expect(shareActionButton.className).not.toContain("!");
     expect(shareActionButton).toHaveAttribute(
       "data-wave-link-action-mode",
       "share"
