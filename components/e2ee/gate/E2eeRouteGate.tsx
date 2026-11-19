@@ -53,7 +53,11 @@ export function E2eeRouteGate({ children, shell }: E2eeRouteGateProps) {
 
 export function E2eeGateState({ e2ee }: { readonly e2ee: UseE2eeResult }) {
   const locale = useBrowserLocale();
-  if (e2ee.error === E2EE_SESSION_EXPIRED && e2ee.status !== "ready") {
+  const canRecoverSession =
+    e2ee.status === "error" ||
+    e2ee.status === "load-failed" ||
+    e2ee.status === "needs-enrollment";
+  if (e2ee.error === E2EE_SESSION_EXPIRED && canRecoverSession) {
     return <E2eeSessionRecovery restart={e2ee.restart} />;
   }
   switch (e2ee.status) {

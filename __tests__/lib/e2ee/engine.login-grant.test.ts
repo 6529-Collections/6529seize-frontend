@@ -221,6 +221,19 @@ describe("E2EE engine: combined sign-in grant (NC8)", () => {
     }
   );
 
+  it("still renews an enrolled device with wallet approval through the separate action", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const key = alice.primary.engine.getLocalDeviceKey();
+    const before = alice.primary.signCalls;
+    world.clock.advance(170 * 86_400_000);
+    await alice.primary.engine.enroll();
+    expect(alice.primary.engine.getStatus()).toBe("ready");
+    expect(alice.primary.signCalls).toBe(before + 1);
+    expect(alice.primary.engine.getLocalDeviceKey()).toBe(key);
+    for (const device of world.devices) device.engine.dispose();
+  });
+
   it("enrolls from the sign-in grant with no wallet prompt and chats with an EIP-712 device", async () => {
     const world = await createWorld();
     const bob = await addUser(world, "bob");

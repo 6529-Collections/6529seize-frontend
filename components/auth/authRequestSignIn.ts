@@ -619,6 +619,11 @@ export const createAuthRequestSignIn =
       }
 
       const e2ee = await settleGrantHandover(handover);
+      // Explicit setup succeeds only once this browser keeps its signing
+      // approval. Ordinary sign-in remains usable if grant storage fails.
+      if (deviceGrantMode === "required" && !e2ee.grantSaved) {
+        return { success: false };
+      }
       return requireE2eeDevice === true
         ? { success: true, e2ee }
         : { success: true };

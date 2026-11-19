@@ -1,4 +1,10 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import { E2eeRouteGate } from "@/components/e2ee/gate/E2eeRouteGate";
 import { E2eeError } from "@/lib/e2ee/engine/errors";
 import {
@@ -125,6 +131,40 @@ describe("E2eeRouteGate", () => {
       ).not.toBeDisabled();
     }
   );
+
+  it.each(["loading", "enrolling"] as const)(
+    "keeps %s progress visible when an old session error remains",
+    (status) => {
+      renderGate(
+        contextFor(
+          createFakeE2eeEngine({ status, error: "E2EE_SESSION_EXPIRED" })
+        )
+      );
+      expect(
+        screen.queryByRole("button", { name: "Sign in again" })
+      ).not.toBeInTheDocument();
+      expect(mockRequestAuth).not.toHaveBeenCalled();
+    }
+  );
+
+  it("returns to enrollment when a recovered engine clears its session error", async () => {
+    mockRequestAuth.mockResolvedValue({ success: true });
+    const engine = createFakeE2eeEngine({
+      status: "needs-enrollment",
+      error: "E2EE_SESSION_EXPIRED",
+    });
+    const value = contextFor(engine);
+    renderGate(value);
+    fireEvent.click(screen.getByRole("button", { name: "Sign in again" }));
+    await waitFor(() => expect(value.restart).toHaveBeenCalledTimes(1));
+    act(() => engine.update({ status: "needs-enrollment", error: null }));
+    expect(
+      await screen.findByRole("heading", { name: "Turn on encrypted DMs" })
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Sign in again" })
+    ).not.toBeInTheDocument();
+  });
 
   it("shows the enrollment card with the plain-words explanation", async () => {
     const engine = createFakeE2eeEngine({ status: "needs-enrollment" });
