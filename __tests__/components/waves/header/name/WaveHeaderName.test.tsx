@@ -77,20 +77,17 @@ describe("WaveHeaderName", () => {
         </WaveInformationPanelContext.Provider>
       );
       if (eligible) {
-        const name = screen.getByRole("button", { name: "Wave", exact: true });
+        const name = screen.getByRole("button", { name: "Wave" });
         expect(name).toHaveAttribute("aria-controls", "editor");
         fireEvent.click(name);
         expect(open).toHaveBeenCalledWith(WAVE_NAME_EDIT_VIEW, "Rename wave");
-        expect(
-          screen.queryByRole("link", { name: "Wave", exact: true })
-        ).toBeNull();
+        expect(screen.queryByRole("link", { name: "Wave" })).toBeNull();
       } else {
-        expect(
-          screen.queryByRole("button", { name: "Wave", exact: true })
-        ).toBeNull();
-        expect(
-          screen.getByRole("link", { name: "Wave", exact: true })
-        ).toHaveAttribute("href", "/waves/w1");
+        expect(screen.queryByRole("button", { name: "Wave" })).toBeNull();
+        expect(screen.getByRole("link", { name: "Wave" })).toHaveAttribute(
+          "href",
+          "/waves/w1"
+        );
         expect(open).not.toHaveBeenCalled();
       }
     }

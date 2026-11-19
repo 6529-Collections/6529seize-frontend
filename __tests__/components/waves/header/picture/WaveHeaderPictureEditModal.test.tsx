@@ -4,6 +4,7 @@ import WaveHeaderPictureEditModal from "@/components/waves/header/picture/WaveHe
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useContext, type ReactNode } from "react";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiUpdateWaveHubRequest } from "@/generated/models/ApiUpdateWaveHubRequest";
 import { updateWaveHub } from "@/services/api/wave-hub-api";
@@ -47,6 +48,21 @@ jest.mock(
     )
 );
 
+function CacheContext({
+  children,
+  onWaveCreated,
+}: {
+  readonly children: ReactNode;
+  readonly onWaveCreated: () => void;
+}) {
+  const context = useContext(ReactQueryWrapperContext);
+  return (
+    <ReactQueryWrapperContext.Provider value={{ ...context, onWaveCreated }}>
+      {children}
+    </ReactQueryWrapperContext.Provider>
+  );
+}
+
 describe("WaveHeaderPictureEditModal", () => {
   it("uploads and saves a picture-only update inside the existing sheet", async () => {
     const user = userEvent.setup();
@@ -55,12 +71,10 @@ describe("WaveHeaderPictureEditModal", () => {
       setToast: jest.fn(),
     });
     const close = jest.fn();
-    const query = { onWaveCreated: jest.fn() } as React.ContextType<
-      typeof ReactQueryWrapperContext
-    >;
+    const query = { onWaveCreated: jest.fn() };
     render(
       <AuthContext.Provider value={auth}>
-        <ReactQueryWrapperContext.Provider value={query}>
+        <CacheContext onWaveCreated={query.onWaveCreated}>
           <div role="dialog" aria-label="Update wave picture">
             <WaveHeaderPictureEditModal
               isOpen
@@ -69,7 +83,7 @@ describe("WaveHeaderPictureEditModal", () => {
               onClose={close}
             />
           </div>
-        </ReactQueryWrapperContext.Provider>
+        </CacheContext>
       </AuthContext.Provider>
     );
     expect(screen.getAllByRole("dialog")).toHaveLength(1);
@@ -95,9 +109,7 @@ describe("WaveHeaderPictureEditModal", () => {
       requestAuth: jest.fn().mockResolvedValue({ success: true }),
       setToast: jest.fn(),
     });
-    const query = { onWaveCreated: jest.fn() } as React.ContextType<
-      typeof ReactQueryWrapperContext
-    >;
+    const query = { onWaveCreated: jest.fn() };
     const oldClose = jest.fn();
     const newClose = jest.fn();
     let finishOld!: (
@@ -119,14 +131,14 @@ describe("WaveHeaderPictureEditModal", () => {
       });
     const editor = (onClose: () => void) => (
       <AuthContext.Provider value={auth}>
-        <ReactQueryWrapperContext.Provider value={query}>
+        <CacheContext onWaveCreated={query.onWaveCreated}>
           <WaveHeaderPictureEditModal
             isOpen
             embedded
             wave={{ id: "picture-wave" } as ApiWave}
             onClose={onClose}
           />
-        </ReactQueryWrapperContext.Provider>
+        </CacheContext>
       </AuthContext.Provider>
     );
     const old = render(editor(oldClose));
