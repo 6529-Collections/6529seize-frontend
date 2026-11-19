@@ -32,6 +32,27 @@ describe("getWaveCardTint", () => {
     expect(getImageData).toHaveBeenCalledTimes(1);
   });
 
+  it.each([
+    [[15, 10, 10, 255], "19 19 22", "10 9 9"],
+    [[255, 200, 150, 255], "58 47 37", "58 47 37"],
+  ])(
+    "clamps only dark Discover channels while preserving lighter tints",
+    (pixels, expected, homeTint) => {
+      const getImageData = jest.fn(() => ({
+        data: new Uint8ClampedArray(pixels),
+      }));
+      jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+        drawImage: jest.fn(),
+        getImageData,
+      } as unknown as CanvasRenderingContext2D);
+      const image = loadedImage(`https://example.com/floor-${pixels[0]}.png`);
+      expect(getWaveCardTint(image, true)).toBe(expected);
+      expect(getWaveCardTint(image, true)).toBe(expected);
+      expect(getImageData).toHaveBeenCalledTimes(1);
+      expect(getWaveCardTint(image)).toBe(homeTint);
+    }
+  );
+
   it("caches the fallback when pixel access is blocked without changing the image", () => {
     const getImageData = jest.fn(() => {
       throw new DOMException("Tainted canvas", "SecurityError");

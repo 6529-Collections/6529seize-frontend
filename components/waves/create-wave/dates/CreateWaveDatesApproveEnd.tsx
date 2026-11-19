@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useMemo } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faInfoCircle, faXmark } from "@fortawesome/free-solid-svg-icons";
@@ -146,17 +148,19 @@ export default function CreateWaveDatesApproveEnd({
                 : t(locale, "waves.create.dates.approve.end.noEndDate")}
             </p>
             {hasSelectedEndDate && (
-              <button
+              <IconButton
                 type="button"
                 aria-label={t(
                   locale,
                   "waves.create.dates.approve.end.clearAriaLabel"
                 )}
                 onClick={handleClearEndDate}
-                className="tw-flex tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-600 tw-bg-iron-800 tw-text-iron-300 tw-transition tw-duration-300 hover:tw-border-primary-400 hover:tw-text-primary-300"
+                size={24}
+                variant="ghost"
+                shape="circle"
               >
                 <FontAwesomeIcon icon={faXmark} className="tw-size-3" />
-              </button>
+              </IconButton>
             )}
           </div>
         </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import type { MouseEvent } from "react";
 import { useCallback } from "react";
 import { useSwipeDismiss } from "./useSwipeDismiss";
@@ -103,10 +105,11 @@ export function WaveDropsScrollControlsUnreadButton({
       }}
     >
       <div className="tw-group tw-relative">
-        <button
+        <IconButton
           type="button"
           onClick={handleDismiss}
-          className="tw-absolute -tw-right-2 -tw-top-2 tw-z-50 tw-hidden tw-size-6 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-indigo-500 tw-text-white tw-opacity-0 tw-transition-all tw-duration-200 focus-visible:tw-opacity-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:group-hover:tw-opacity-50 desktop-hover:hover:!tw-opacity-100 touch-only:tw-opacity-100 lg:tw-flex"
+          layout="unread-dismiss"
+          className="tw-absolute -tw-right-2 -tw-top-2 tw-z-50"
           aria-label="Dismiss"
         >
           <svg
@@ -122,7 +125,7 @@ export function WaveDropsScrollControlsUnreadButton({
               d="M6 18L18 6M6 6l12 12"
             />
           </svg>
-        </button>
+        </IconButton>
         <button
           type="button"
           onClick={handleUnreadClick}

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { ChevronLeftIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useQuery } from "@tanstack/react-query";
@@ -625,14 +627,16 @@ function ScopedHeaderSearchModal({
               className="tw-flex tw-h-[100dvh] tw-min-h-0 tw-w-full tw-max-w-[900px] tw-transform tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-pt-[env(safe-area-inset-top)] tw-text-left tw-shadow-[0_24px_70px_rgba(0,0,0,0.6)] sm:tw-h-[min(720px,82vh)] sm:tw-rounded-2xl sm:tw-pt-0"
             >
               <div className="tw-flex tw-flex-shrink-0 tw-items-start tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-items-center sm:tw-px-5">
-                <button
+                <IconButton
                   type="button"
                   onClick={onClose}
                   aria-label={t(locale, "headerSearch.goBack")}
-                  className="-tw-ml-1 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-hidden"
+                  size={32}
+                  variant="ghost"
+                  className="-tw-ml-1 sm:tw-hidden"
                 >
                   <ChevronLeftIcon className="tw-size-6" />
-                </button>
+                </IconButton>
                 <div className="tw-min-w-0 tw-flex-1">
                   <h2
                     id={HEADER_SEARCH_DIALOG_TITLE_ID}
@@ -644,14 +648,16 @@ function ScopedHeaderSearchModal({
                     {t(locale, "headerSearch.dialogDescription.site")}
                   </p>
                 </div>
-                <button
+                <IconButton
                   type="button"
                   onClick={onClose}
                   aria-label={t(locale, "headerSearch.close")}
-                  className="tw-hidden tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-inline-flex"
+                  size={36}
+                  variant="ghost"
+                  className="tw-hidden sm:tw-inline-flex"
                 >
                   <XMarkIcon className="tw-size-5" />
-                </button>
+                </IconButton>
               </div>
 
               <div className="tw-flex-shrink-0 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-px-5">

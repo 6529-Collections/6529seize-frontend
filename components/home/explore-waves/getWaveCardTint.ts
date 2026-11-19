@@ -3,13 +3,18 @@ const MAX_CACHED_TINTS = 64;
 const tintCache = new Map<string, string | null>();
 
 /** Sample the loaded thumbnail only; blocked canvas reads keep the Iron fallback. */
-export function getWaveCardTint(image: HTMLImageElement): string | null {
+export function getWaveCardTint(
+  image: HTMLImageElement,
+  useIronFloor = false
+): string | null {
   if (!image.complete || !image.naturalWidth || !image.naturalHeight)
     return null;
   const source = image.currentSrc || image.src;
   if (!source) return null;
-  if (tintCache.has(source)) return tintCache.get(source) ?? null;
+  const cacheKey = useIronFloor ? `iron:${source}` : source;
+  if (tintCache.has(cacheKey)) return tintCache.get(cacheKey) ?? null;
 
+  const minimum = useIronFloor ? ([19, 19, 22] as const) : ([0, 0, 0] as const);
   let tint: string | null = null;
   try {
     const canvas = document.createElement("canvas");
@@ -36,8 +41,8 @@ export function getWaveCardTint(image: HTMLImageElement): string | null {
         weight += alpha;
       }
       if (weight > 0) {
-        // Match the reference: 20% of the sampled color plus a dark base of 7.
-        tint = `${Math.round((red / weight) * 0.2 + 7)} ${Math.round((green / weight) * 0.2 + 7)} ${Math.round((blue / weight) * 0.2 + 7)}`;
+        // Discover keeps dark artwork above the Iron surface; Home retains its tint.
+        tint = `${Math.max(minimum[0], Math.round((red / weight) * 0.2 + 7))} ${Math.max(minimum[1], Math.round((green / weight) * 0.2 + 7))} ${Math.max(minimum[2], Math.round((blue / weight) * 0.2 + 7))}`;
       }
     }
   } catch {
@@ -47,6 +52,6 @@ export function getWaveCardTint(image: HTMLImageElement): string | null {
   if (tintCache.size >= MAX_CACHED_TINTS) {
     tintCache.delete(tintCache.keys().next().value!);
   }
-  tintCache.set(source, tint);
+  tintCache.set(cacheKey, tint);
   return tint;
 }

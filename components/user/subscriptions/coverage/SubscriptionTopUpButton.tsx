@@ -1,25 +1,26 @@
 import Button from "@/components/utils/button/Button";
-import { ApiSubscriptionCoverageStatus as Status } from "@/generated/models/ApiSubscriptionCoverageStatus";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 export default function SubscriptionTopUpButton({
-  status,
+  primary,
   expanded,
   onClick,
+  forFutureDrops = false,
 }: Readonly<{
-  status: Status | undefined;
+  primary: boolean;
   expanded: boolean;
   onClick: () => void;
+  forFutureDrops?: boolean | undefined;
 }>) {
   const locale = useBrowserLocale();
-  const primary =
-    status === Status.ActionRequired ||
-    status === Status.RunningLow ||
-    status === Status.NotSetUp;
+  let variant: "primary" | "secondary" | "ghost" = primary
+    ? "primary"
+    : "secondary";
+  if (forFutureDrops) variant = "ghost";
   return (
     <Button
-      variant={primary ? "primary" : "secondary"}
+      variant={variant}
       size={null}
       id="subscription-top-up-opener"
       type="button"
@@ -27,9 +28,14 @@ export default function SubscriptionTopUpButton({
       aria-expanded={expanded}
       aria-controls="profile-subscriptions-top-up"
       onClick={onClick}
-      className={`tw-min-h-11 tw-w-full tw-px-3 tw-py-1.5 tw-text-sm tw-shadow-none sm:tw-min-h-9 sm:tw-w-auto ${primary ? "" : "!tw-border-white/[0.16] !tw-bg-transparent desktop-hover:hover:!tw-bg-white/[0.04]"}`}
+      className={`tw-min-h-11 tw-w-full tw-px-3 tw-py-1.5 tw-text-sm tw-shadow-none sm:tw-min-h-9 sm:tw-w-auto ${primary ? "" : "!tw-border-white/[0.16] !tw-bg-transparent desktop-hover:hover:!tw-bg-white/[0.04]"} ${forFutureDrops ? "!tw-w-auto !tw-border-0 !tw-px-0 tw-text-xs tw-font-normal tw-underline tw-underline-offset-4" : ""}`}
     >
-      {t(locale, "subscriptions.page.topUpTitle")}
+      {t(
+        locale,
+        forFutureDrops
+          ? "subscriptions.coverage.summary.topUpFutureDrops"
+          : "subscriptions.page.topUpTitle"
+      )}
     </Button>
   );
 }
