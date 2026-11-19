@@ -409,6 +409,7 @@ describe("LayoutProvider", () => {
   });
 
   it("keeps the viewport locked until the native keyboard is fully hidden", () => {
+    mockCapacitorValues = { isCapacitor: true, isAndroid: false, isIos: true };
     mockKeyboardValues = {
       isVisible: true,
       keyboardHeight: 320,
@@ -436,7 +437,7 @@ describe("LayoutProvider", () => {
     );
 
     mockKeyboardValues = {
-      isVisible: true,
+      isVisible: false,
       keyboardHeight: 0,
       phase: "hiding",
     };

@@ -15,7 +15,10 @@ export const DIALOG_KEYBOARD_VIEWPORT_STYLE: CSSProperties = {
     "bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
 };
 
-export default function useDialogKeyboard(isOpen: boolean) {
+export default function useDialogKeyboard(
+  isOpen: boolean,
+  { observeFocus = true }: { readonly observeFocus?: boolean } = {}
+) {
   const { isCapacitor } = useCapacitor();
   useLayoutViewportLock(isOpen && isCapacitor);
 
@@ -24,9 +27,9 @@ export default function useDialogKeyboard(isOpen: boolean) {
       if (!isOpen || !element) return;
       const previousMarker = element.getAttribute(KEYBOARD_SCROLL_CONTAINER);
       element.setAttribute(KEYBOARD_SCROLL_CONTAINER, "");
-      const focusedField = observeFocusedField(element, {
-        observeContentResize: true,
-      });
+      const focusedField = observeFocus
+        ? observeFocusedField(element, { observeContentResize: true })
+        : null;
       const viewport = globalThis.visualViewport;
       const resetBrowserViewport = () => {
         element.style.removeProperty("--native-keyboard-inset-bottom");
@@ -64,13 +67,13 @@ export default function useDialogKeyboard(isOpen: boolean) {
             else element.style.removeProperty("top");
           }
         }
-        focusedField.reveal();
+        focusedField?.reveal();
       };
       fitViewport();
       viewport?.addEventListener("resize", fitViewport);
       viewport?.addEventListener("scroll", fitViewport, { passive: true });
       return () => {
-        focusedField.disconnect();
+        focusedField?.disconnect();
         viewport?.removeEventListener("resize", fitViewport);
         viewport?.removeEventListener("scroll", fitViewport);
         if (!isCapacitor) resetBrowserViewport();
@@ -79,6 +82,6 @@ export default function useDialogKeyboard(isOpen: boolean) {
         else element.setAttribute(KEYBOARD_SCROLL_CONTAINER, previousMarker);
       };
     },
-    [isCapacitor, isOpen]
+    [isCapacitor, isOpen, observeFocus]
   );
 }

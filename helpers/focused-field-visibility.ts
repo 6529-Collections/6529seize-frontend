@@ -29,6 +29,8 @@ export function observeFocusedField(
   };
   const observer = new ResizeObserver(reveal);
   observer.observe(container);
+  // Android can finish its keyboard resize before the reply expansion ends.
+  // Follow the content too so the last frame reveals the entire focused field.
   if (observeContentResize) {
     for (const child of container.children) observer.observe(child);
   }

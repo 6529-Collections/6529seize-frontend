@@ -1,6 +1,7 @@
 "use client";
 
 import useDialogKeyboard from "@/hooks/useDialogKeyboard";
+import { observeFocusedField } from "@/helpers/focused-field-visibility";
 import {
   Dialog,
   DialogPanel,
@@ -8,9 +9,10 @@ import {
   TransitionChild,
 } from "@headlessui/react";
 import type { CSSProperties, ReactNode } from "react";
-import { Fragment, useRef } from "react";
+import { Fragment, useCallback, useRef } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
+import useCapacitor from "@/hooks/useCapacitor";
 
 const KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const KEYBOARD_TRANSITION =
@@ -31,16 +33,40 @@ export default function ArtistPreviewAppWrapper({
   readonly onClose: () => void;
   readonly children: ReactNode;
 }) {
+  const { isCapacitor, isIos, isAndroid } = useCapacitor();
+  const followsIosKeyboard = isCapacitor && isIos;
   const dialogRef = useRef<HTMLDivElement>(null);
-  const keyboardViewportRef = useDialogKeyboard(isOpen);
+  // The inner scroller owns late reply-content resizing, as in the voting fix.
+  const keyboardViewportRef = useDialogKeyboard(isOpen, {
+    observeFocus: false,
+  });
   useAndroidBackLayer(isOpen, dialogRef, onClose);
+  const contentRef = useCallback(
+    (container: HTMLDivElement | null) => {
+      if (!container) return;
+      const focusedField = observeFocusedField(container, {
+        observeContentResize: isCapacitor && isAndroid,
+      });
+      const viewport = globalThis.visualViewport;
+      viewport?.addEventListener("resize", focusedField.reveal);
+      viewport?.addEventListener("scroll", focusedField.reveal, {
+        passive: true,
+      });
+      return () => {
+        focusedField.disconnect();
+        viewport?.removeEventListener("resize", focusedField.reveal);
+        viewport?.removeEventListener("scroll", focusedField.reveal);
+      };
+    },
+    [isCapacitor, isAndroid]
+  );
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         ref={dialogRef}
         as="div"
-        className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden"
+        className={`tailwind-scope tw-fixed tw-inset-0 tw-z-[1010] tw-overflow-hidden ${followsIosKeyboard ? "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]" : ""}`}
         onClose={onClose}
       >
         <TransitionChild
@@ -52,7 +78,10 @@ export default function ArtistPreviewAppWrapper({
           leaveFrom="tw-opacity-100"
           leaveTo="tw-opacity-0"
         >
-          <div className="tw-fixed tw-inset-0 tw-bg-black/70 tw-backdrop-blur-[1px] tw-transition-opacity" />
+          <div
+            data-testid="artist-preview-app-backdrop"
+            className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-transition-opacity"
+          />
         </TransitionChild>
 
         <div
@@ -88,12 +117,14 @@ export default function ArtistPreviewAppWrapper({
                     label="Close panel"
                     variant="minimal"
                     size="compact"
+                    className="!tw-text-white"
                   />
                 </div>
               </TransitionChild>
 
               <DialogPanel className="tw-relative tw-flex tw-max-h-[85vh] tw-min-h-0 tw-w-full tw-flex-col tw-overflow-hidden tw-rounded-t-2xl tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/10 tw-bg-[#0B0C0E] tw-pb-[env(safe-area-inset-bottom,0px)] tw-shadow-[0_-18px_50px_rgba(0,0,0,0.45)]">
                 <div
+                  ref={contentRef}
                   data-testid="artist-preview-app-scroll"
                   className="tw-min-h-0 tw-flex-1 tw-scroll-py-3 tw-overflow-y-auto tw-overscroll-contain tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600"
                 >

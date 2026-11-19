@@ -24,6 +24,8 @@ export function getCompetitionConfigLabel(
   value: string | null
 ): string {
   if (value === null) return "";
-  const key = CONFIG_LABELS[value];
+  const key = Object.hasOwn(CONFIG_LABELS, value)
+    ? CONFIG_LABELS[value]
+    : undefined;
   return key ? t(locale, key) : value;
 }

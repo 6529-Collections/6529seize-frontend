@@ -107,6 +107,26 @@ describe("useDialogKeyboard", () => {
     ).toBe("");
   });
 
+  it("lets a custom inner scroller own focus tracking without duplicating it", () => {
+    function CustomDialog() {
+      const ref = useDialogKeyboard(true, { observeFocus: false });
+      return <div ref={ref} data-testid="viewport" />;
+    }
+    const { unmount } = render(<CustomDialog />);
+    act(() => {
+      viewport.height = 450;
+      viewport.dispatchEvent(new Event("resize"));
+    });
+    expect(
+      screen
+        .getByTestId("viewport")
+        .style.getPropertyValue("--dialog-viewport-height")
+    ).toBe("450px");
+    expect(mockReveal).not.toHaveBeenCalled();
+    unmount();
+    expect(mockDisconnect).not.toHaveBeenCalled();
+  });
+
   it("clears browser compensation when the native platform becomes available", () => {
     viewport.height = 450;
     const { rerender } = render(<Dialog />);

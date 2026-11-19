@@ -267,16 +267,16 @@ export const LayoutProvider: React.FC<{ children: ReactNode }> = ({
 
   // State for calculated spaces
   const [spaces, setSpaces] = useState<LayoutSpaces>(defaultSpaces);
+  // Android can finish restoring its viewport without a final did-hide event.
+  // The lock still waits for the captured viewport geometry before releasing.
+  const isViewportReleaseBlocked = isAndroid
+    ? isKeyboardVisible
+    : keyboardPhase !== "hidden";
   const {
     acquire: acquireViewportLock,
     isLocked: isViewportLocked,
     lockedValue: lockedSpaces,
-  } = useViewportLayoutLock(
-    spaces,
-    // Android may restore its viewport without delivering a final did-hide.
-    // The lock also waits for the captured viewport geometry before releasing.
-    isAndroid ? isKeyboardVisible : keyboardPhase !== "hidden"
-  );
+  } = useViewportLayoutLock(spaces, isViewportReleaseBlocked);
 
   // Create refs for callback functions to solve circular dependency
   const calculateSpacesRef = useRef<() => void>(() => {});

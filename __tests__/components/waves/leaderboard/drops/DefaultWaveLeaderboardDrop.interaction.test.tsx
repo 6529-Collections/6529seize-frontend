@@ -18,9 +18,17 @@ jest.mock("@/utils/monitoring/dropOpenTiming", () => ({
   startDropOpen: jest.fn(),
 }));
 jest.mock("@/components/voting", () => ({
-  VotingModal: (p: any) => <div data-testid="modal">{String(p.isOpen)}</div>,
-  MobileVotingModal: (p: any) => (
-    <div data-testid="mobile">{String(p.isOpen)}</div>
+  VotingModal: ({
+    isOpen,
+    preferMobile,
+  }: {
+    readonly isOpen: boolean;
+    readonly preferMobile?: boolean;
+  }) => (
+    <div data-testid={preferMobile ? "mobile" : "modal"}>
+      {String(isOpen)}
+      {isOpen && <input aria-label="Vote draft" defaultValue="0" />}
+    </div>
   ),
 }));
 jest.mock("@/components/voting/VotingModalButton", () => (p: any) => (
@@ -197,6 +205,28 @@ test("uses mobile modal and keeps only the direct open action without delete per
   expect(screen.getByTestId("mobile")).toHaveTextContent("false");
   expect(screen.getByTestId("desktop-open-action")).toBeInTheDocument();
   expect(screen.queryByTestId("desktop-delete-action")).not.toBeInTheDocument();
+});
+
+test("keeps the open vote draft when the mobile preference changes", () => {
+  useRules.mockReturnValue({ canShowVote: true, canDelete: false });
+  useDeviceInfo.mockReturnValue({ hasTouchScreen: false });
+  useIsMobileScreen.mockReturnValue(false);
+  const onDropClick = jest.fn();
+  const { rerender } = render(
+    <DefaultWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />
+  );
+  fireEvent.click(screen.getByTestId("vote-btn"));
+  const draft = screen.getByRole("textbox", { name: "Vote draft" });
+  fireEvent.change(draft, { target: { value: "42" } });
+
+  useIsMobileScreen.mockReturnValue(true);
+  rerender(
+    <DefaultWaveLeaderboardDrop drop={drop} onDropClick={onDropClick} />
+  );
+
+  expect(screen.getByTestId("mobile")).toHaveTextContent("true");
+  expect(screen.getByRole("textbox", { name: "Vote draft" })).toBe(draft);
+  expect(draft).toHaveValue("42");
 });
 
 test("keeps proposal cards on their read-full path without a duplicate open action", () => {

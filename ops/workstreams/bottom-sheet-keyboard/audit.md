@@ -120,17 +120,19 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
 - Other nested navigation exists, particularly curation creation and composer
   pickers. Removing actions or flattening mandatory confirmations is not a fix.
 - [Voting PR #4961](https://github.com/6529-Collections/6529seize-frontend/pull/4961)
-  is not merged into this baseline. Its committed implementation opts iOS voting
+  was open during the initial audit and has now merged into main. This branch
+  integrates that main version. Its implementation opts iOS voting
   into `useLayoutViewportLock` and the existing
-  `--native-keyboard-layout-transition-easing`. This task will generalize those
-  existing mechanisms rather than introduce a second timing curve. The shared
+  `--native-keyboard-layout-transition-easing`. This task generalizes those
+  existing mechanisms. The shared
   wrapper now uses that curve by default and owns its native background lock.
-  The voting PR's caller-specific lock and optional easing override can therefore
-  use these defaults when the branches are integrated; no second curve is needed.
-  This PR also incorporates its focused-field content-resize tracking, Android
+  The redundant voting caller lock is removed; the wrapper owns it. Existing
+  explicit easing overrides remain compatible with the same default curve.
+  Main's focused-field content-resize tracking, Android
   lock-release rule, duplicate Android visibility-attribute write guard and
-  iOS non-text focus hide recovery. The voting UI changes
-  themselves remain in that PR.
+  iOS non-text focus hide recovery are retained without a parallel lifecycle
+  implementation. Artist preview retains the voting fix's inner-scroll content
+  observer, while the shared dialog hook owns viewport fitting and its lock.
 
 ## Resulting keyboard policy
 

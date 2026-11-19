@@ -84,4 +84,33 @@ describe("observeFocusedField", () => {
     expect(outside.scrollIntoView).not.toHaveBeenCalled();
     tracking.disconnect();
   });
+
+  it("tracks reply content growth when opted in and cancels pending reveals on cleanup", () => {
+    const container = document.createElement("div");
+    const content = document.createElement("div");
+    const input = document.createElement("textarea");
+    input.scrollIntoView = jest.fn();
+    content.append(input);
+    container.append(content);
+    document.body.append(container);
+    const tracking = observeFocusedField(container, {
+      observeContentResize: true,
+    });
+
+    expect(observer.observe).toHaveBeenCalledTimes(2);
+    expect(observer.observe).toHaveBeenNthCalledWith(1, container);
+    expect(observer.observe).toHaveBeenNthCalledWith(2, content);
+    input.focus();
+    onResize([], observer);
+    onResize([], observer);
+    expect(frames.size).toBe(1);
+    paint();
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+
+    onResize([], observer);
+    tracking.disconnect();
+    paint();
+    expect(frames.size).toBe(0);
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+  });
 });

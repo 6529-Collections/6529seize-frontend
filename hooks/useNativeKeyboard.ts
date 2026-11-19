@@ -184,8 +184,8 @@ function applyKeyboardLayoutVariables(
   );
 
   if (isKeyboardActive) {
-    // Android native and viewport callbacks can report the same open keyboard.
-    // Rewriting this flag still invalidates descendant styles in the WebView.
+    // Reassigning this Android flag invalidates descendant styles even when
+    // native and viewport callbacks report the same visible keyboard.
     if (
       state.isAndroid &&
       documentElement.dataset["nativeKeyboardVisible"] === "true"
@@ -515,8 +515,8 @@ function setupBrowserKeyboardFallbackListeners(): void {
   let viewportAnimationFrame: number | null = null;
 
   const handleFocusIn = () => {
-    // Restoring focus to a sheet's Back/Close control must not cancel iOS
-    // recovery when the keyboard omits its final did-hide event.
+    // iOS focus restoration to non-text controls must not cancel recovery
+    // from a missing did-hide.
     if (
       currentState.isIos &&
       nativeKeyboardLifecycleActive &&
