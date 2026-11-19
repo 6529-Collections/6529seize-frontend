@@ -495,6 +495,22 @@ async function registerPending(
   }
 }
 
+/** Restores the saved MLS state before resuming this device's enrollment. */
+async function resumeStoredDevice(
+  ctx: EngineContext,
+  device: StoredDevice
+): Promise<void> {
+  if (!ctx.mls) {
+    const state = await ctx.storage.getWasmState(ctx.profileId);
+    if (!state || !ctx.wasm) {
+      throw new E2eeError("E2EE_NOT_READY", "missing device state");
+    }
+    ctx.mls = MlsClient.load(ctx.wasm, state);
+    ctx.lastState = state;
+  }
+  ctx.device = device;
+}
+
 /**
  * Enrollment: device key in WASM, ONE signTypedData, register, credential,
  * KeyPackages. Resumable: a stored grant is reused instead of re-prompting,
@@ -522,15 +538,7 @@ export async function enrollDevice(
   let device: StoredDevice;
   if (stored && (stored.registered || reusablePending(ctx, stored))) {
     device = stored;
-    if (!ctx.mls) {
-      const state = await ctx.storage.getWasmState(ctx.profileId);
-      if (!state || !ctx.wasm) {
-        throw new E2eeError("E2EE_NOT_READY", "missing device state");
-      }
-      ctx.mls = MlsClient.load(ctx.wasm, state);
-      ctx.lastState = state;
-    }
-    ctx.device = device;
+    await resumeStoredDevice(ctx, device);
   } else if (allowPrompt) {
     device = await createDevice(ctx);
   } else {

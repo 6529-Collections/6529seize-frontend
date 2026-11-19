@@ -73,7 +73,7 @@ export function buildE2eeApiClient({
       );
       // A successful HTTP response confirms discovery only with an explicit flag.
       if (typeof status?.has_pending_chats !== "boolean") {
-        throw new Error("Invalid encrypted inbox status");
+        throw new TypeError("Invalid encrypted inbox status");
       }
       return { has_pending_chats: status.has_pending_chats };
     },
