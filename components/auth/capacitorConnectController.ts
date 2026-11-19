@@ -141,7 +141,7 @@ async function openWebOrCapacitorConnection({
  */
 export function useSeizeConnect(
   isSigningOutAllRef: { readonly current: boolean },
-  openWebConnection: (source: string) => Promise<void>
+  openWebConnection: OpenWebConnection
 ): () => void {
   return useCallback((): void => {
     openConnectEntryPoint({
