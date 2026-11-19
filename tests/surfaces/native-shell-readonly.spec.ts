@@ -180,7 +180,7 @@ async function expectUsableNotificationTarget(dock: Locator) {
   return target.center;
 }
 
-async function scrollAboutToCompact(page: Page) {
+async function scrollToCompactDock(page: Page) {
   const position = await page.evaluate(async () => {
     const element =
       Array.from(
@@ -190,10 +190,10 @@ async function scrollAboutToCompact(page: Page) {
       ).find((candidate) => candidate.scrollHeight > candidate.clientHeight) ??
       document.scrollingElement;
     if (!element) {
-      throw new Error("Expected a scrollable About page.");
+      throw new Error("Expected a scrollable page.");
     }
-    // Give the dock's scroll tracker a real initial position before crossing
-    // its threshold; /about supplies the content, without injected spacers.
+    // Use the page's real content to cross the dock's scroll threshold,
+    // starting with a small scroll so its tracker has an initial position.
     element.scrollTo({ top: 1, behavior: "instant" });
     await new Promise<void>((resolve) =>
       requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
@@ -1169,6 +1169,75 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     );
   });
 
+  test("selected dock highlight stays horizontal across phone widths", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "The floating dock belongs to native app layouts"
+    );
+    await mockCountryCheck(page, "US");
+    await gotoReady(page, "/");
+    const dock = page
+      .getByRole("navigation", {
+        name: "Primary navigation",
+        exact: true,
+      })
+      .locator('[data-mobile-bottom-nav-dock="true"]');
+    const home = dock.getByRole("link", { name: "Home", exact: true });
+    const pill = dock.getByTestId("mobile-dock-active-pill");
+    await expect(home).toHaveAttribute("aria-current", "page");
+
+    for (const width of [320, 360, 390, 430, 744]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.evaluate(() => {
+        for (const element of document.querySelectorAll(
+          '[data-mobile-bottom-nav-scroll-target="true"]'
+        )) {
+          element.scrollTo({ top: 0, behavior: "instant" });
+        }
+        globalThis.scrollTo({ top: 0, behavior: "instant" });
+      });
+      await expect(dock).toHaveAttribute("data-compact", "false");
+      await expect
+        .poll(() =>
+          dock
+            .getByRole("link", { name: "Notifications", exact: true })
+            .evaluate((link) => link.getBoundingClientRect().width)
+        )
+        .toBeGreaterThanOrEqual(48);
+
+      for (const compact of [false, true]) {
+        if (compact) {
+          await scrollToCompactDock(page);
+          await expect(dock).toHaveAttribute("data-compact", "true");
+        }
+        await expect(pill).toHaveCSS("opacity", "1");
+        await expect
+          .poll(async () => {
+            return pill.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              const icon = element
+                .closest('[data-mobile-bottom-nav-dock="true"]')
+                ?.querySelector('a[aria-current="page"] > div > :first-child');
+              if (!icon) throw new Error("Expected the selected tab icon.");
+              const iconBox = icon.getBoundingClientRect();
+              return {
+                horizontal: box.width >= box.height * 1.19,
+                containsIcon: box.height >= iconBox.height + 2,
+                centered:
+                  Math.abs(
+                    box.x + box.width / 2 - iconBox.x - iconBox.width / 2
+                  ) <= 0.5,
+              };
+            });
+          })
+          .toEqual({ horizontal: true, containsIcon: true, centered: true });
+        await expectUsableNotificationTarget(dock);
+      }
+    }
+  });
+
   test("Android notification bell accepts first taps across phone dock sizes", async ({
     page,
   }, testInfo) => {
@@ -1197,7 +1266,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       for (const compact of [false, true]) {
         await test.step(`${width}px ${compact ? "compact" : "expanded"}`, async () => {
           if (compact) {
-            await scrollAboutToCompact(page);
+            await scrollToCompactDock(page);
           }
           await expect
             .poll(() =>
@@ -1222,7 +1291,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
                 "opacity",
                 "0.5"
               );
-              await scrollAboutToCompact(page);
+              await scrollToCompactDock(page);
               // Release as soon as the transition moves the target, without
               // Playwright relocating the input to the moving link.
               await expect
@@ -1317,7 +1386,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         type: "touchStart",
         touchPoints: [point],
       });
-      await scrollAboutToCompact(page);
+      await scrollToCompactDock(page);
       await expect
         .poll(() =>
           dock.evaluate((element) => element.getBoundingClientRect().height)
