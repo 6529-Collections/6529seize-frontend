@@ -148,6 +148,10 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
   geometry uses the visual viewport and preserves pinch zoom. Artist preview,
   single-drop reply, submission composer, artwork wizard, quick vote and
   collaboration review use the same published native timing curve.
+- Panned browser viewports use both the visual viewport's height and top offset.
+  Custom composer, preview, artwork and Quick Vote surfaces cap their panels to
+  that viewport; centered collaborator management also caps its panel to its
+  fitted parent so header and footer controls remain visible.
 - Android retains its existing immediate viewport compensation, subtracting
   window resize/pan exactly once. Lock release still waits for restored geometry
   but tolerates a missing final did-hide event. iOS keeps its native lifecycle
@@ -174,6 +178,8 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
   a selected file; saving retains authentication, image validation, multipart
   upload, the picture-only hub update and cache refresh. Standalone entry points
   retain their existing dialog.
+  Closing during authentication or upload aborts that submission before its
+  picture PATCH, preventing an older editor from overwriting a newer selection.
 - Switching views retains the existing immediate content/height change, with
   the same mounted sheet, backdrop, header and Close control. Keyboard movement
   continues to use the shared native timing.
