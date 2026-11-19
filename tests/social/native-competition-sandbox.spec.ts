@@ -10929,7 +10929,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         );
       await installCompetitionApi(page, true);
       await page.goto(`/waves/${WAVE}?tab=chat`);
-      const sheet = await openWaveInformation(page);
+      await openWaveInformation(page);
+      const sheet = page.getByRole("dialog");
       const edit = sheet.getByRole("button", {
         name: "Edit wave picture",
         exact: true,
