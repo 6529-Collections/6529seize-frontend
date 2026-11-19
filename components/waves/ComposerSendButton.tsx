@@ -27,6 +27,7 @@ export function ComposerSendButton({
       title={title}
       size={40}
       variant="action"
+      data-wave-send
     >
       {loading ? (
         <CircleLoader />

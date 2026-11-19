@@ -149,6 +149,7 @@ function CreateWaveButton({
       size={compact ? null : "xs"}
       onClick={onClick}
       aria-label={label}
+      data-wave-typography="preserve"
       data-tooltip-id="create-wave-tooltip"
       data-tooltip-content={label}
       className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${

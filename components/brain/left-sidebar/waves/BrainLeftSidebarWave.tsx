@@ -72,7 +72,8 @@ const isModifiedAnchorClick = (event: React.MouseEvent<HTMLAnchorElement>) =>
 
 const getRowPresentationClasses = (
   isChildRow: boolean,
-  isAnnouncement: boolean
+  isAnnouncement: boolean,
+  isUnread: boolean
 ) => {
   if (isChildRow) {
     return {
@@ -83,7 +84,9 @@ const getRowPresentationClasses = (
         "tw-absolute tw-bottom-[-1px] tw-right-[-1px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg",
       rowVerticalPaddingClasses: "tw-py-1",
       contentGapClasses: "tw-gap-y-0.5",
-      titleTextClasses: "tw-text-[13px] tw-font-normal",
+      titleTextClasses: isUnread
+        ? "tw-text-[13px] tw-font-medium"
+        : "tw-text-[13px] tw-font-normal",
       timestampTextClasses: "tw-text-[11px]",
     };
   }
@@ -96,8 +99,9 @@ const getRowPresentationClasses = (
       "tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg",
     rowVerticalPaddingClasses: isAnnouncement ? "tw-py-1" : "tw-py-2",
     contentGapClasses: "tw-gap-y-1",
-    titleTextClasses:
-      "tw-text-sm tw-font-medium [@media(any-hover:none)]:tw-text-[13px] [@media(any-hover:none)]:tw-font-normal",
+    titleTextClasses: isUnread
+      ? "tw-text-sm tw-font-medium [@media(any-hover:none)]:tw-text-[13px]"
+      : "tw-text-sm tw-font-medium [@media(any-hover:none)]:tw-text-[13px] [@media(any-hover:none)]:tw-font-normal",
     timestampTextClasses: "tw-text-xs [@media(any-hover:none)]:tw-text-[11px]",
   };
 };
@@ -235,7 +239,15 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     contentGapClasses,
     titleTextClasses,
     timestampTextClasses,
-  } = getRowPresentationClasses(isChildRow, isAnnouncement);
+  } = getRowPresentationClasses(
+    isChildRow,
+    isAnnouncement,
+    !isActive && haveNewDrops
+  );
+
+  const inactiveNameClasses = haveNewDrops
+    ? "tw-font-medium tw-text-iron-100 desktop-hover:group-hover:tw-text-iron-100"
+    : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300";
 
   return (
     <div
@@ -264,7 +276,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-            : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+            : inactiveNameClasses
         }`}
       >
         <div
@@ -278,7 +290,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             } tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
               isAnnouncement ? "" : getAvatarRingClasses()
             } ${
-              isAnnouncement || isActive
+              isAnnouncement || isActive || haveNewDrops
                 ? "tw-opacity-100"
                 : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
             }`}
@@ -342,7 +354,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                   className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${
                     isActive
                       ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-                      : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+                      : inactiveNameClasses
                   }`}
                 >
                   <span

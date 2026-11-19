@@ -104,8 +104,7 @@ export const WaveAvatar = ({
   const dropIconClasses = isLarge
     ? "tw-size-3 tw-flex-shrink-0 tw-text-[#E8D48A]"
     : DROP_ICON_CLASSES;
-  let avatarStateClasses =
-    "tw-opacity-80 tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100";
+  let avatarStateClasses = `${showNewDropsBadge ? "tw-opacity-100" : "tw-opacity-80"} tw-ring-1 tw-ring-white/20 desktop-hover:group-hover:tw-opacity-100`;
   if (isAnnouncement) {
     avatarStateClasses = "tw-opacity-100";
   } else if (isActive) {

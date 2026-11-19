@@ -159,6 +159,13 @@ export const ExpandedWave = ({
 
   useEffect(() => cancelSubwavePrefetch, [cancelSubwavePrefetch]);
 
+  const inactiveNameClasses = haveNewDrops
+    ? "tw-text-iron-100 desktop-hover:group-hover:tw-text-iron-100"
+    : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300";
+  const inactiveWeightClass = haveNewDrops
+    ? "tw-font-medium"
+    : "tw-font-normal";
+
   return (
     <div
       onMouseEnter={handleRowMouseEnter}
@@ -185,7 +192,7 @@ export const ExpandedWave = ({
         className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
           isActive
             ? "tw-font-medium tw-text-white desktop-hover:group-hover:tw-text-white"
-            : "tw-font-normal tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+            : `${inactiveWeightClass} ${inactiveNameClasses}`
         }`}
       >
         <div
@@ -222,7 +229,7 @@ export const ExpandedWave = ({
                   className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${
                     isActive
                       ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-                      : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
+                      : inactiveNameClasses
                   }`}
                 >
                   <div

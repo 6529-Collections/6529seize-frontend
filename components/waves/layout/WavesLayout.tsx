@@ -16,6 +16,8 @@ import WavesRouteLoading from "../WavesRouteLoading";
 import useBodyScrollLock from "@/hooks/useBodyScrollLock";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import clsx from "clsx";
+import styles from "./WavesLayout.module.css";
 
 type WavesBranchProps = {
   readonly children: ReactNode;
@@ -142,9 +144,8 @@ function getWavesContent({
 function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   const { contentState } = useAuthenticatedContent();
   const pathname = usePathname();
-  const hasRouteWave =
-    Boolean(getWaveIdFromPathname(pathname)) &&
-    !isCompetitionPathname(pathname);
+  const isWaveView = Boolean(getWaveIdFromPathname(pathname));
+  const hasRouteWave = isWaveView && !isCompetitionPathname(pathname);
   const { isApp } = useDeviceInfo();
 
   // The chat/feed views manage their own internal scroll, so WavesLayout locks
@@ -222,7 +223,13 @@ function WavesLayoutContent({ children }: { readonly children: ReactNode }) {
   }, [contentState]);
 
   return (
-    <div className="tailwind-scope tw-flex tw-flex-col tw-overflow-hidden tw-bg-black">
+    <div
+      data-wave-view={isWaveView || undefined}
+      className={clsx(
+        "tailwind-scope tw-flex tw-flex-col tw-overflow-hidden tw-bg-black",
+        isWaveView && styles.waveView
+      )}
+    >
       {content}
     </div>
   );

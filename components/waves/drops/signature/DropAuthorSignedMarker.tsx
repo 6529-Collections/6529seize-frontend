@@ -143,6 +143,7 @@ function SignedSealButton({
     <>
       <button
         ref={buttonRef}
+        data-wave-signed-seal
         type="button"
         aria-label={label}
         aria-haspopup="dialog"

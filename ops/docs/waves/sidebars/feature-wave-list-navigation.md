@@ -226,6 +226,10 @@ on hover and show a dark hover surface; their resting header surface is transpar
 
 ## Common Scenarios
 
+- Inactive rows with unread posts use brighter, medium-weight names and fully
+  visible avatars. Read rows retain their muted appearance. Row scores use
+  quieter, regular-weight text.
+
 - The current wave also highlights in Active Votes when it appears there,
   including when the same wave is highlighted in the collection list below.
 - Wave rows open `/waves/{waveId}`.

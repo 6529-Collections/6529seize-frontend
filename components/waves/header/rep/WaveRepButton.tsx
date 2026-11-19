@@ -53,6 +53,7 @@ export default function WaveRepButton({
       <Button
         type="button"
         aria-label={label}
+        data-wave-typography="preserve"
         {...(showTooltip
           ? {
               "data-tooltip-id": tooltipId,

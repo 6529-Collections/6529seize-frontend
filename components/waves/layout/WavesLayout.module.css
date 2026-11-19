@@ -1,0 +1,39 @@
+/* Scope shared typography to an open wave, including its desktop/mobile rails.
+   Preserve the existing type on the three intentionally stronger controls. */
+.waveView
+  :is(:global(.tw-font-semibold), :global(.tw-font-bold)):not(
+    :global([data-wave-typography="preserve"]),
+    :global([data-wave-typography="preserve"] *),
+    :global([data-wave-vote-total])
+  ) {
+  @apply tw-font-medium;
+}
+
+.waveView
+  :is(:global(.\!tw-font-semibold), :global(.\!tw-font-bold)):not(
+    :global([data-wave-typography="preserve"]),
+    :global([data-wave-typography="preserve"] *),
+    :global([data-wave-vote-total])
+  ) {
+  @apply tw-font-medium !important;
+}
+
+.waveView :global(.tw-tabular-nums) {
+  @apply tw-normal-nums;
+}
+
+.waveView :global([data-wave-drop-time]) {
+  @apply tw-text-iron-500;
+}
+
+.waveView :global([data-wave-signed-seal]) {
+  @apply tw-text-iron-600;
+}
+
+.waveView :global([data-wave-send]):disabled {
+  @apply tw-bg-transparent;
+}
+
+.waveView :global([data-wave-vote-total]) {
+  @apply tw-text-body tw-font-normal tw-normal-case tw-tracking-normal tw-text-iron-500;
+}

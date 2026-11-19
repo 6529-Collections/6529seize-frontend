@@ -344,7 +344,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
                 >
                   {formatNumberWithCommas(rating)}
                 </span>
-                <span className="tw-whitespace-nowrap tw-text-label tw-font-medium tw-uppercase tw-tracking-ordinal tw-text-iron-500">
+                <span
+                  data-wave-vote-total
+                  className="tw-whitespace-nowrap tw-text-label tw-font-medium tw-uppercase tw-tracking-ordinal tw-text-iron-500"
+                >
                   {creditType} {WAVE_VOTE_STATS_LABELS.TOTAL}
                 </span>
               </div>

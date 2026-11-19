@@ -1152,6 +1152,40 @@ async function openAppearanceDraft(
 }
 
 test.describe("Native competition sandbox @auth @medium @local-only", () => {
+  test("keeps FAQ borders quiet and wave typography scoped", async ({
+    page,
+  }, testInfo) => {
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    await page.goto(`/waves/${MEMES_WAVE}?tab=faq`);
+    const question = page.getByRole("button", {
+      name: "How Does Voting Work?",
+      exact: true,
+    });
+    await expect(question).toBeVisible({ timeout: 30000 });
+    const item = question.locator("..").locator("..");
+    await expect(item).toHaveCSS(
+      "border-top-color",
+      "rgba(255, 255, 255, 0.06)"
+    );
+    await expect(item).toHaveCSS("box-shadow", "none");
+    await question.focus();
+    await page.keyboard.press("Enter");
+    await expect(question).toHaveAttribute("aria-expanded", "true");
+    await expect(question).toBeFocused();
+    await expect(item).toHaveCSS(
+      "border-top-color",
+      "rgba(255, 255, 255, 0.06)"
+    );
+    await expect(item).toHaveCSS("box-shadow", "none");
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({ path: testInfo.outputPath("quiet-faq.png") });
+    await page.goto("/waves");
+    await expect(page.locator("[data-wave-view]")).toHaveCount(0);
+    expect(sandbox.requests).toEqual([]);
+  });
+
   test("shows compact outcomes in Settings and opens retired Outcome links there", async ({
     page,
   }, testInfo) => {
@@ -1206,6 +1240,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(outcomes).toBeVisible();
+    await expect(outcomes).toHaveCSS(
+      "border-top-color",
+      "rgba(255, 255, 255, 0.06)"
+    );
     await expect(
       outcomes.getByText("A signed art print for each selected winner.", {
         exact: true,
@@ -13681,6 +13719,38 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(
           page.getByText("No artwork submissions yet", { exact: true })
         ).toHaveCount(0);
+        const waveView = page.locator('[data-wave-view="true"]');
+        await expect(waveView).toBeVisible();
+        await expect(
+          page.getByText("Legacy Main Stage artwork", { exact: true }).first()
+        ).toHaveCSS("font-weight", "500");
+        const totalLabel = waveView.locator("[data-wave-vote-total]").first();
+        if (await totalLabel.isVisible()) {
+          await expect(totalLabel).toHaveCSS("font-weight", "400");
+          await expect(totalLabel).toHaveCSS("text-transform", "none");
+          await expect(totalLabel).toHaveCSS("font-size", "15px");
+        }
+        const protectedControls = waveView
+          .locator('[data-wave-typography="preserve"]')
+          .filter({ visible: true });
+        for (const control of await protectedControls.all()) {
+          await expect(control).toHaveCSS("font-weight", "600");
+        }
+        // Both card templates must retain a real border after typography settles.
+        const card = page
+          .getByRole("list", { name: "Leaderboard drops" })
+          .locator('[class~="tw-border"][class~="tw-border-solid"]')
+          .first();
+        await expect(card).toHaveCSS("border-top-width", "1px");
+        const numericStyles = await waveView
+          .locator('[class~="tw-tabular-nums"]')
+          .evaluateAll((elements) =>
+            elements.map(
+              (element) => getComputedStyle(element).fontVariantNumeric
+            )
+          );
+        expect(numericStyles.length).toBeGreaterThan(0);
+        expect(numericStyles.every((value) => value === "normal")).toBe(true);
       };
       await modes.getByRole("tab", { name: "Grid view", exact: true }).click();
       await expectArtwork();
