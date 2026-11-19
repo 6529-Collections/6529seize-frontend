@@ -218,6 +218,43 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
       page.getByRole("button", { name: "Start chat" })
     ).toBeDisabled();
     await expect(continueUnencrypted).toHaveCount(0);
+
+    await page.route("**/api/v2/waves?*", async (route) => {
+      const url = new URL(route.request().url());
+      if (url.searchParams.get("direct_message") !== "true") {
+        await route.fallback();
+        return;
+      }
+      const response = await route.fetch();
+      const body = await response.json();
+      await route.fulfill({
+        response,
+        json: {
+          ...body,
+          data: [
+            {
+              ...body.data[0],
+              id: PLAINTEXT_DM_WAVE_ID,
+              name: "Sandbox Direct Message",
+              is_private: true,
+              is_dm_wave: true,
+            },
+          ],
+        },
+      });
+    });
+    await openFromProfile("bob");
+    await page
+      .getByRole("link", { name: "Sandbox Direct Message", exact: true })
+      .click({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expectUrlState(
+      page,
+      (url) => url.pathname === `/messages/${PLAINTEXT_DM_WAVE_ID}`
+    );
+    await expect(
+      page.getByRole("region", { name: "Unencrypted chat notice" })
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+
     expect(creationRequests).toHaveLength(1);
     expect(creationRequests[0]).toMatch(/\/e2ee\/groups$/u);
     expect((await e2eeSandboxControls.state(baseURL)).groups).toHaveLength(1);
