@@ -192,6 +192,25 @@ describe("E2eeRouteGate", () => {
     ).not.toBeInTheDocument();
   });
 
+  it("returns to the device limit panel after session recovery", async () => {
+    mockRequestAuth.mockResolvedValue({ success: true });
+    const engine = createFakeE2eeEngine({
+      status: "device-limit",
+      error: "E2EE_SESSION_EXPIRED",
+    });
+    const value = contextFor(engine);
+    renderGate(value);
+    fireEvent.click(screen.getByRole("button", { name: "Sign in again" }));
+    await waitFor(() => expect(value.restart).toHaveBeenCalledTimes(1));
+    act(() => engine.update({ status: "device-limit", error: null }));
+    expect(
+      await screen.findByRole("heading", { name: "Too many devices" })
+    ).toBeVisible();
+    expect(
+      screen.queryByRole("button", { name: "Sign in again" })
+    ).not.toBeInTheDocument();
+  });
+
   it("shows the enrollment card with the plain-words explanation", async () => {
     const engine = createFakeE2eeEngine({ status: "needs-enrollment" });
     renderGate(contextFor(engine));

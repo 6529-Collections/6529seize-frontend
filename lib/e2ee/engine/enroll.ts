@@ -375,7 +375,11 @@ async function provision(
   await checkpoint(ctx, { device, skipWasm: true });
 }
 
-/** Renews a ready device outside the engine queue, retaining its chat keys. */
+/**
+ * Renews a ready device outside the engine queue, retaining its chat keys.
+ * On true, the caller must refresh the device listing and maintain active
+ * groups to commit the requested credential updates.
+ */
 export async function renewStoredDeviceIfDue(
   ctx: EngineContext
 ): Promise<boolean> {
