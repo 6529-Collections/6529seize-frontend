@@ -467,13 +467,30 @@ class E2eeEngineImpl implements E2eeEngineExt {
   createPoll = (g: string, poll: PollDefinition) =>
     this.queuePoll(g, () => queuePoll(this.ctx, g, poll));
 
-  updatePoll = (g: string, id: string, options: number[] | null) =>
-    this.queuePoll(g, () => queuePollUpdate(this.ctx, g, id, options));
+  updatePoll = async (g: string, id: string, options: number[] | null) => {
+    await this.queuePoll(
+      g,
+      () => queuePollUpdate(this.ctx, g, id, options),
+      options === null
+    );
+    if (options === null) {
+      const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
+      if (!message.poll?.closed) throw new E2eeError("E2EE_SEND_FAILED");
+    }
+  };
 
-  private async queuePoll(g: string, enqueue: () => Promise<void>) {
+  private async queuePoll(
+    g: string,
+    enqueue: () => Promise<void>,
+    waitForDelivery = false
+  ) {
     this.requireReady();
     await enqueue();
-    this.background(() => this.controller.flush(g.toLowerCase()));
+    if (waitForDelivery) {
+      await this.controller.flush(g.toLowerCase());
+    } else {
+      this.background(() => this.controller.flush(g.toLowerCase()));
+    }
   }
 
   private ownMessage = (g: string, id: string) =>

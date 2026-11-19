@@ -69,6 +69,7 @@ type E2eeErrorCode =
   | "E2EE_DEVICE_MISMATCH"
   | "E2EE_ACCOUNT_MISMATCH"
   | "E2EE_COMMIT_FAILED"
+  | "E2EE_SEND_FAILED"
   | "E2EE_DISPOSED";
 
 export class E2eeError extends Error {
