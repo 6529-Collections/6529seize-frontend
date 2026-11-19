@@ -1,3 +1,5 @@
+import type { DesktopWalletSetup } from "@/services/desktop/desktopConnectDialog";
+
 export type WalletState =
   | { status: "initializing" }
   | { status: "error"; error: Error }
@@ -26,7 +28,7 @@ export interface SeizeConnectContextType {
    * Use this for user-facing "Connect Wallet" actions that should connect a
    * different authenticated profile.
    */
-  seizeConnectFresh: () => Promise<void>;
+  seizeConnectFresh: (desktopWalletSetup?: DesktopWalletSetup) => Promise<void>;
 
   /**
    * Disconnects the current wallet connection

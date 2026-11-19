@@ -13,7 +13,10 @@ import {
 } from "@/services/desktop/browserConnectorSignIn";
 import {
   closeDesktopConnectDialog,
+  finishDesktopConnectHandoff,
   getDesktopConnectDialogOpener,
+  getDesktopConnectPickerVersion,
+  getDesktopWalletSetup,
   openDesktopConnectDialog,
   getServerDesktopConnectDialogOpener,
   subscribeDesktopConnectDialog,
@@ -40,15 +43,17 @@ export default function DesktopConnectDialog() {
   const [problem, setProblem] = useState<DesktopConnectProblem>(null);
   // The browser sign-in start in flight, set synchronously so a double click
   // starts only one. Closing clears it; a cleared attempt's result is ignored.
-  const startAttempt = useRef<number | null>(null);
-  const attempts = useRef(0);
-  const [isStarting, setIsStarting] = useState(false);
+  const startAttempt = useRef<{ picker: number } | null>(null);
+  const [startingPicker, setStartingPicker] = useState<number | null>(null);
+  const picker = getDesktopConnectPickerVersion();
   const isOpen = openWalletConnect !== null;
+  const isStarting = isOpen && startingPicker === picker;
   const isBusy = isStarting || status === "waiting" || status === "signing-in";
 
   // A finished browser sign-in closes the choice.
   useEffect(() => {
-    if (isOpen && status === "signed-in") closeDesktopConnectDialog();
+    if (isOpen && status === "signed-in")
+      closeDesktopConnectDialog("signed-in");
   }, [isOpen, status]);
 
   // Waiting for the browser can be cancelled. Once the app is signing in
@@ -57,42 +62,60 @@ export default function DesktopConnectDialog() {
   const close = () => {
     // Also while the start is still asking the shell for its scheme (the
     // status is idle then), so the browser does not open after closing.
-    if (status === "waiting" || startAttempt.current !== null) {
+    if (!getDesktopWalletSetup() && (status === "waiting" || isStarting)) {
       cancelBrowserConnectorSignIn();
     }
     startAttempt.current = null;
-    setIsStarting(false);
+    setStartingPicker(null);
     setProblem(null);
-    closeDesktopConnectDialog();
+    closeDesktopConnectDialog(status === "signing-in" ? "hidden" : "cancelled");
   };
 
   const chooseWalletConnect = () => {
     const open = openWalletConnect;
     if (!open) return;
+    const setup = getDesktopWalletSetup();
     setProblem(null);
-    closeDesktopConnectDialog();
-    open().catch(() => {
-      // Bring the choice back with the reason, instead of failing silently.
-      openDesktopConnectDialog(open);
-      setProblem("walletconnect-failed");
-    });
+    closeDesktopConnectDialog("walletconnect");
+    open()
+      .then(() => {
+        finishDesktopConnectHandoff(picker, "walletconnect");
+      })
+      .catch(() => {
+        if (!finishDesktopConnectHandoff(picker, "failed")) return;
+        // Bring the unscoped choice back with the reason.
+        if (
+          !setup &&
+          getDesktopConnectPickerVersion() === picker &&
+          getDesktopConnectDialogOpener() === null
+        ) {
+          openDesktopConnectDialog(open);
+          setProblem("walletconnect-failed");
+        }
+      });
   };
 
   const chooseBrowserWallet = () => {
-    if (startAttempt.current !== null) return;
-    attempts.current += 1;
-    const attempt = attempts.current;
+    if (startAttempt.current?.picker === picker) return;
+    const attempt = { picker };
+    const stillStarting = () =>
+      startAttempt.current === attempt &&
+      getDesktopConnectPickerVersion() === picker &&
+      getDesktopConnectDialogOpener() !== null;
     startAttempt.current = attempt;
-    setIsStarting(true);
+    setStartingPicker(picker);
     setProblem(null);
-    startBrowserConnectorSignIn()
+    const setup = getDesktopWalletSetup();
+    startBrowserConnectorSignIn(setup)
       .catch(() => {
-        if (startAttempt.current === attempt) setProblem("start-failed");
+        if (!stillStarting()) return;
+        if (setup) setup.onStatus("failed");
+        else setProblem("start-failed");
       })
       .finally(() => {
-        if (startAttempt.current !== attempt) return;
+        if (!stillStarting()) return;
         startAttempt.current = null;
-        setIsStarting(false);
+        setStartingPicker(null);
       });
   };
 
@@ -105,7 +128,10 @@ export default function DesktopConnectDialog() {
       onClose={close}
       onBrowserWallet={chooseBrowserWallet}
       onWalletConnect={chooseWalletConnect}
-      onCancel={cancelBrowserConnectorSignIn}
+      onCancel={() => {
+        if (getDesktopWalletSetup()) close();
+        else cancelBrowserConnectorSignIn();
+      }}
     />
   );
 }
