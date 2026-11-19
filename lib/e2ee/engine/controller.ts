@@ -18,7 +18,7 @@ import {
   runGroupCommit,
   STALL_RETRY_MS,
 } from "./maintenance";
-import { readWithDeadline, sleep } from "./runtime";
+import { requestWithDeadline, sleep } from "./runtime";
 import { hasOverdueChanges } from "./required-changes";
 import { sendNext } from "./send";
 import type { GroupRuntime } from "./store";
@@ -150,7 +150,7 @@ export class EngineController {
 
   private async deviceGroups(): Promise<ApiE2eeDeviceGroup[] | null> {
     try {
-      return await readWithDeadline(
+      return await requestWithDeadline(
         this.ctx.scheduler,
         E2EE_INITIAL_INBOX_WAIT_MS,
         (signal) => this.ctx.api.getDeviceGroups(ownDeviceKey(this.ctx), signal)
@@ -267,27 +267,41 @@ export class EngineController {
     }
   }
 
+  private initialInboxSettled(): boolean {
+    const status = this.ctx.store.initialSyncStatus;
+    return status === "complete" || status === "awaiting-invitation";
+  }
+
   private setInitialSyncStatus(status: E2eeInitialSyncStatus): void {
     const store = this.ctx.store;
     const current = store.initialSyncStatus;
     if (
       !this.isReady() ||
-      current === "complete" ||
-      (current === "delayed" && status === "waiting")
+      this.initialInboxSettled() ||
+      (current === "delayed" && status === "pending")
     ) {
       return;
     }
-    if (status === "pending" || status === "waiting") {
+    const next =
+      current === "delayed" && status === "waiting"
+        ? "awaiting-invitation"
+        : status;
+    if (next === "pending" || next === "waiting") {
       this.ctx.timers.arm(
         INITIAL_INBOX_WAIT_TIMER,
         E2EE_INITIAL_INBOX_WAIT_MS,
-        () => this.setInitialSyncStatus("delayed")
+        () =>
+          this.setInitialSyncStatus(
+            store.initialSyncStatus === "waiting"
+              ? "awaiting-invitation"
+              : "delayed"
+          )
       );
     } else {
       this.ctx.timers.cancel(INITIAL_INBOX_WAIT_TIMER);
     }
-    if (current === status) return;
-    store.initialSyncStatus = status;
+    if (current === next) return;
+    store.initialSyncStatus = next;
     store.touch();
   }
 
@@ -307,7 +321,7 @@ export class EngineController {
       if (inboxComplete === null || groups === null) {
         this.setInitialSyncStatus("failed");
       } else if (!inboxComplete) {
-        this.setInitialSyncStatus("waiting");
+        this.setInitialSyncStatus("pending");
       }
       return { groups, confirm: inboxComplete === true && groups !== null };
     } catch (error) {
@@ -319,7 +333,7 @@ export class EngineController {
   private async confirmInitialInbox(): Promise<void> {
     const { store } = this.ctx;
     const status = store.initialSyncStatus;
-    if (!this.isReady() || status === "complete") {
+    if (!this.isReady() || this.initialInboxSettled()) {
       return;
     }
     // After a longer wait, a usable inbox does not need an empty-state check.
@@ -329,15 +343,20 @@ export class EngineController {
     }
     const deviceKey = ownDeviceKey(this.ctx);
     try {
-      const { has_pending_chats: pending } = await readWithDeadline(
-        this.ctx.scheduler,
-        E2EE_INITIAL_INBOX_WAIT_MS,
-        (signal) => this.ctx.api.getDeviceInboxStatus(deviceKey, signal)
-      );
+      const { has_pending_chats: pending, has_queued_welcomes: queued } =
+        await requestWithDeadline(
+          this.ctx.scheduler,
+          E2EE_INITIAL_INBOX_WAIT_MS,
+          (signal) => this.ctx.api.getDeviceInboxStatus(deviceKey, signal)
+        );
       // The first Welcome read can succeed before another device adds this
       // one to existing chats. Check after delivery processing so a newly
       // queued Welcome also keeps discovery open for the next pass.
       if (this.hasDeviceKey(deviceKey)) {
+        if (queued === true) {
+          this.setInitialSyncStatus("pending");
+          return;
+        }
         this.setInitialSyncStatus(pending ? "waiting" : "complete");
       }
     } catch (error) {

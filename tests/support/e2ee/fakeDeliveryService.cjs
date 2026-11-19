@@ -1297,7 +1297,10 @@ function createFakeDeliveryService(options = {}) {
         !group.roster.has(deviceKey) &&
         [...group.roster.values()].some((row) => row.profile_id === profileId)
     );
-    return { has_pending_chats: hasDelivery || hasUnjoinedChat };
+    return {
+      has_pending_chats: hasDelivery || hasUnjoinedChat,
+      has_queued_welcomes: hasDelivery,
+    };
   }
 
   // -- blobs --------------------------------------------------------------------

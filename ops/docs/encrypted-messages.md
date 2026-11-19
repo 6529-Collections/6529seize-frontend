@@ -823,11 +823,12 @@ without images**. Images and files too large for one encrypted attachment
   Select **Sign in again** to restore the session, then encrypted messages
   restart. This keeps the device's local chats and keys.
 - **Loading encrypted chats…** appears while this device first checks for
-  chats. The inbox lists each chat as it arrives. During a longer wait,
-  available chats stay visible and the loading message clears. If no chats
-  are available yet, the inbox says syncing is taking longer and offers
-  **Try again**. **No encrypted chats yet** appears when the check confirms
-  an empty inbox.
+  chats. The inbox lists each chat as it arrives. After a brief wait for a
+  trusted device to send an invitation, an empty list says **No encrypted
+  chats available on this device yet** and offers **Check device setup**.
+  Invitations continue arriving in the background. If the check stalls or
+  fails, an empty list offers **Try again**. **No encrypted chats yet**
+  appears when the check confirms an empty inbox.
 - **Encrypted messages couldn’t start**: select **Try again**. The error code
   under the message helps the team diagnose staging issues.
 - **Chat not found on this device**: devices only receive chats they were

@@ -9,6 +9,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import Button from "@/components/utils/button/Button";
+import { getButtonClasses } from "@/components/utils/button/buttonStyles";
 import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import {
   getEncryptedDevicesRoute,
@@ -66,6 +67,17 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
     !checking &&
     !hasChats &&
     (initialSyncStatus === "failed" || initialSyncStatus === "delayed");
+  const awaitingInvitation = initialSyncStatus === "awaiting-invitation";
+  const showEmpty =
+    !checking &&
+    !hasChats &&
+    (awaitingInvitation || initialSyncStatus === "complete");
+  const emptyTitle = t(
+    locale,
+    awaitingInvitation
+      ? "e2ee.list.awaitingInvitation.title"
+      : "e2ee.list.empty.title"
+  );
   let status = "";
   if (loading) status = t(locale, "e2ee.list.loading");
   if (waiting && !checking) status = t(locale, "e2ee.list.waiting");
@@ -75,6 +87,7 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
       initialSyncStatus === "delayed" ? "e2ee.list.delayed" : "e2ee.list.error"
     );
   }
+  if (showEmpty && awaitingInvitation) status = emptyTitle;
 
   return (
     <>
@@ -113,12 +126,29 @@ function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
           </Button>
         </E2eeCenteredMessage>
       )}
-      {!checking && !hasChats && initialSyncStatus === "complete" && (
+      {showEmpty && (
         <E2eeCenteredMessage
           icon={<LockClosedIcon className="tw-size-6" />}
-          title={t(locale, "e2ee.list.empty.title")}
-          body={t(locale, "e2ee.list.empty.body")}
-        />
+          title={emptyTitle}
+          body={t(
+            locale,
+            awaitingInvitation
+              ? "e2ee.list.awaitingInvitation.body"
+              : "e2ee.list.empty.body"
+          )}
+        >
+          {awaitingInvitation && (
+            <Link
+              href={getEncryptedDevicesRoute()}
+              className={getButtonClasses({
+                variant: "secondary",
+                className: "tw-no-underline",
+              })}
+            >
+              {t(locale, "e2ee.list.awaitingInvitation.action")}
+            </Link>
+          )}
+        </E2eeCenteredMessage>
       )}
     </>
   );

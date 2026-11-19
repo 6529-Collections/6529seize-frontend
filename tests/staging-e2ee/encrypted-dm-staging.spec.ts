@@ -899,6 +899,14 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       await expect(
         b2.page.getByRole("heading", { name: "No encrypted chats yet" })
       ).toHaveCount(0);
+      await expect(
+        b2.page.getByRole("heading", {
+          name: "No encrypted chats available on this device yet",
+        })
+      ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+      await expect(
+        b2.page.getByRole("link", { name: "Check device setup" })
+      ).toHaveAttribute("href", "/messages/encrypted/devices");
     } finally {
       allowAddition.resolve();
       await Promise.all([

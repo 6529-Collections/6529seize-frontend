@@ -29,6 +29,7 @@ export type E2eeInitialSyncStatus =
   | "pending"
   | "waiting"
   | "delayed"
+  | "awaiting-invitation"
   | "failed"
   | "complete";
 

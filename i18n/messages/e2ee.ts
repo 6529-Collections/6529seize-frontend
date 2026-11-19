@@ -267,6 +267,11 @@ export const E2EE_MESSAGES = {
   "e2ee.list.waiting": "Waiting for encrypted chats to sync to this device…",
   "e2ee.list.delayed": "Encrypted chats are taking longer to sync",
   "e2ee.list.error": "Couldn’t load encrypted chats.",
+  "e2ee.list.awaitingInvitation.title":
+    "No encrypted chats available on this device yet",
+  "e2ee.list.awaitingInvitation.body":
+    "Existing chats can appear after a trusted device in the chat adds this one.",
+  "e2ee.list.awaitingInvitation.action": "Check device setup",
   "e2ee.list.empty.title": "No encrypted chats yet",
   "e2ee.list.empty.body":
     "Start an encrypted chat with one person or a group. Only the people in the chat can read it.",

@@ -15,9 +15,13 @@ import { HttpFile } from '../http/http';
 
 export class ApiE2eeDeviceInboxStatus {
     /**
-    * A Welcome is pending or an existing chat still needs to add this device.
+    * A Welcome is queued or a current roster includes another device of this profile without including this one.
     */
     'has_pending_chats': boolean;
+    /**
+    * A Welcome is queued for this device. Omitted by servers that only provide the combined has_pending_chats hint.
+    */
+    'has_queued_welcomes'?: boolean;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -27,6 +31,12 @@ export class ApiE2eeDeviceInboxStatus {
         {
             "name": "has_pending_chats",
             "baseName": "has_pending_chats",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "has_queued_welcomes",
+            "baseName": "has_queued_welcomes",
             "type": "boolean",
             "format": ""
         }    ];

@@ -87,7 +87,29 @@ describe("E2EE engine: sync paths", () => {
     expect(engine.getInitialSyncStatus()).toBe("complete");
   });
 
-  it("stops waiting without confirming an empty inbox while chat discovery remains unresolved", async () => {
+  it("ends the initial wait when only a roster gap is known", async () => {
+    const world = await createWorld();
+    const inboxStatus = jest.fn(async () => ({
+      has_pending_chats: true,
+      has_queued_welcomes: false,
+    }));
+    const alice = await addUser(world, "alice", {
+      api: {
+        ...createFakeApiClient(world.ds, "alice"),
+        getDeviceInboxStatus: inboxStatus,
+      },
+    });
+    const { engine } = alice.primary;
+    await waitFor(
+      () => engine.getInitialSyncStatus() === "awaiting-invitation"
+    );
+    expect(engine.getConversations()).toHaveLength(0);
+    await engine.sync();
+    expect(engine.getInitialSyncStatus()).toBe("awaiting-invitation");
+    expect(inboxStatus).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps recovery available after the wait when a Welcome is still queued", async () => {
     const world = await createWorld();
     let pending = true;
     let failed = false;
@@ -98,7 +120,10 @@ describe("E2EE engine: sync paths", () => {
           if (failed) {
             throw new E2eeApiError({ status: 503, message: "Unavailable" });
           }
-          return { has_pending_chats: pending };
+          return {
+            has_pending_chats: pending,
+            has_queued_welcomes: pending,
+          };
         },
       },
     });
@@ -144,6 +169,52 @@ describe("E2EE engine: sync paths", () => {
     blocked = false;
     await engine.sync();
     expect(engine.getInitialSyncStatus()).toBe("complete");
+  });
+
+  it("retries a stalled Welcome acknowledgement without restarting the engine", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const bob = await addUser(world, "bob");
+    await bob.primary.engine.idle();
+    stopDevice(world, bob.primary);
+    await alice.primary.engine.createConversation({
+      profileIds: ["bob"],
+      kind: "dm",
+    });
+    const api = createFakeApiClient(world.ds, "bob");
+    const stalled = Promise.withResolvers<void>();
+    const started = Promise.withResolvers<AbortSignal | undefined>();
+    let attempts = 0;
+    const device = await startDevice(world, "bob", bob.account, {
+      storage: bob.primary.storage,
+      enroll: false,
+      extra: {
+        isBlocked: () => true,
+        api: {
+          ...api,
+          ackWelcome: async (deviceKey, welcomeId, signal) => {
+            attempts += 1;
+            if (attempts === 1) {
+              started.resolve(signal);
+              return stalled.promise;
+            }
+            return api.ackWelcome(deviceKey, welcomeId);
+          },
+        },
+      },
+    });
+    try {
+      const signal = await started.promise;
+      await waitFor(() => device.engine.getInitialSyncStatus() === "delayed");
+      await device.engine.sync();
+      expect(signal?.aborted).toBe(true);
+      expect(attempts).toBe(2);
+      expect(device.engine.getInitialSyncStatus()).toBe("complete");
+      expect(device.engine.getConversations()).toHaveLength(0);
+    } finally {
+      stalled.resolve();
+      stopDevice(world, device);
+    }
   });
 
   it("catches up available chats while the first inbox confirmation is pending", async () => {

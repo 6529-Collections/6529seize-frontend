@@ -149,22 +149,22 @@ export const sleep = (scheduler: E2eeScheduler, ms: number): Promise<void> =>
     scheduler.setTimeout(resolve, ms);
   });
 
-export async function readWithDeadline<T>(
+export async function requestWithDeadline<T>(
   scheduler: E2eeScheduler,
   ms: number,
-  read: (signal: AbortSignal) => Promise<T>
+  request: (signal: AbortSignal) => Promise<T>
 ): Promise<T> {
   const abort = new AbortController();
   let timer: E2eeTimerHandle | undefined;
   const deadline = new Promise<never>((_resolve, reject) => {
     timer = scheduler.setTimeout(() => {
-      const error = new RetryableError("E2EE_INBOX_READ_TIMEOUT");
+      const error = new RetryableError("E2EE_INBOX_REQUEST_TIMEOUT");
       reject(error);
       abort.abort(error);
     }, ms);
   });
   try {
-    return await Promise.race([read(abort.signal), deadline]);
+    return await Promise.race([request(abort.signal), deadline]);
   } finally {
     if (timer) scheduler.clearTimeout(timer);
   }

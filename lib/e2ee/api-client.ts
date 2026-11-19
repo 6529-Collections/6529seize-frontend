@@ -8,7 +8,7 @@ interface E2eeRequestTransport {
     params?: Record<string, string>,
     signal?: AbortSignal
   ) => Promise<T>;
-  post: <T>(endpoint: string, body: object) => Promise<T>;
+  post: <T>(endpoint: string, body: object, signal?: AbortSignal) => Promise<T>;
   put: <T>(endpoint: string, body: object) => Promise<T>;
 }
 const enc = encodeURIComponent;
@@ -57,10 +57,11 @@ export function buildE2eeApiClient({
       post(`e2ee/groups/${enc(group)}/roster`, body),
     getWelcomes: (deviceKey, signal) =>
       get(`e2ee/devices/${enc(deviceKey)}/welcomes`, undefined, signal),
-    ackWelcome: async (deviceKey, welcomeId) => {
+    ackWelcome: async (deviceKey, welcomeId, signal) => {
       await post<unknown>(
         `e2ee/devices/${enc(deviceKey)}/welcomes/${enc(welcomeId)}/ack`,
-        {}
+        {},
+        signal
       );
     },
     getDeviceGroups: (deviceKey, signal) =>
@@ -71,11 +72,17 @@ export function buildE2eeApiClient({
         undefined,
         signal
       );
-      // A successful HTTP response confirms discovery only with an explicit flag.
-      if (typeof status?.has_pending_chats !== "boolean") {
+      const queued = status?.has_queued_welcomes;
+      if (
+        typeof status?.has_pending_chats !== "boolean" ||
+        (queued !== undefined && typeof queued !== "boolean")
+      ) {
         throw new TypeError("Invalid encrypted inbox status");
       }
-      return { has_pending_chats: status.has_pending_chats };
+      return {
+        has_pending_chats: status.has_pending_chats,
+        ...(queued === undefined ? {} : { has_queued_welcomes: queued }),
+      };
     },
     createBlob: (body) => post(`e2ee/blobs`, body),
     putBlobChunk: (blobId, index, body) =>

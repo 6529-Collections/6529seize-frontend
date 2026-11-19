@@ -11279,11 +11279,12 @@ paths:
     get:
       tags:
         - Encrypted Messages
-      summary: Check whether encrypted chats still need to sync to an own device
+      summary: Check for encrypted chats that may be available to an own device
       description: >-
-        Reports whether the device has pending Welcome deliveries or the caller
-        has current chats this device has yet to join. Requires an active own
-        device and rejects proxies.
+        Reports queued Welcome deliveries and whether the caller may have chats
+        on other devices. A roster gap can require device approval, and some
+        chats may never add this device. Requires an active own device and
+        rejects proxies.
       operationId: e2eeGetDeviceInboxStatus
       security:
         - bearerAuth: []
@@ -34544,8 +34545,13 @@ components:
         has_pending_chats:
           type: boolean
           description: >-
-            A Welcome is pending or an existing chat still needs to add this
-            device.
+            A Welcome is queued or a current roster includes another device of
+            this profile without including this one.
+        has_queued_welcomes:
+          type: boolean
+          description: >-
+            A Welcome is queued for this device. Omitted by servers that only
+            provide the combined has_pending_chats hint.
     ApiE2eeDeviceLookupRequest:
       type: object
       properties:

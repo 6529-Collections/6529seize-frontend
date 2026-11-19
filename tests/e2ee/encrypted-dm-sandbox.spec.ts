@@ -320,7 +320,7 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     }
   });
 
-  test("iPhone shows existing encrypted chats as they join without reporting an empty inbox", async ({
+  test("iPhone shows a late encrypted invitation without reporting an empty inbox", async ({
     baseURL,
     browser,
   }, testInfo) => {
@@ -331,30 +331,21 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
     const users = await resetE2eeSandbox(baseURL);
     const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
     const bob = await openE2eeUser(browser, testInfo, baseURL, users.bob);
-    const carol = await openE2eeUser(browser, testInfo, baseURL, users.carol);
-    sessions.push(alice, bob, carol);
+    sessions.push(alice, bob);
     await enroll(alice);
     await enroll(bob);
-    await enroll(carol);
-    const dm = await startChat(alice, ["bob"]);
-    const secondDm = await startChat(alice, ["carol"]);
-    const allowDm = Promise.withResolvers<void>();
-    const allowSecondDm = Promise.withResolvers<void>();
+    const dm = await startChat(alice, ["bob"], { kind: "dm" });
+    const allowInvitation = Promise.withResolvers<void>();
 
     try {
-      for (const { context } of [alice, bob, carol]) {
-        for (const [id, allow] of [
-          [dm, allowDm],
-          [secondDm, allowSecondDm],
-        ] as const) {
-          await context.route(
-            `**/api/e2ee/groups/${id}/entries`,
-            async (route) => {
-              await allow.promise;
-              await route.fallback();
-            }
-          );
-        }
+      for (const { context } of [alice, bob]) {
+        await context.route(
+          `**/api/e2ee/groups/${dm}/entries`,
+          async (route) => {
+            await allowInvitation.promise;
+            await route.fallback();
+          }
+        );
       }
       const phone = await openE2eeUser(
         browser,
@@ -387,65 +378,45 @@ test.describe("Encrypted DMs @medium @local-only @e2ee", () => {
       await expect(waiting).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
       await expect(empty).toHaveCount(0);
 
-      const delayed = phone.page.getByRole("heading", {
-        name: "Encrypted chats are taking longer to sync",
+      const awaitingInvitation = phone.page.getByRole("heading", {
+        name: "No encrypted chats available on this device yet",
         exact: true,
       });
-      await expect(delayed).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+      await expect(awaitingInvitation).toBeVisible({
+        timeout: E2EE_UI_TIMEOUT_MS,
+      });
       await expect(waiting).toBeHidden();
       await expect(empty).toHaveCount(0);
       const retry = phone.page.getByRole("button", {
         name: "Try again",
         exact: true,
       });
-      await expect(retry).toBeEnabled({ timeout: E2EE_UI_TIMEOUT_MS });
-      const allowCheck = Promise.withResolvers<void>();
-      const checkStarted = Promise.withResolvers<void>();
-      await phone.page.route(
-        "**/api/e2ee/devices/*/inbox-status",
-        async (route) => {
-          checkStarted.resolve();
-          await allowCheck.promise;
-          await route.fulfill({ json: { has_pending_chats: true } });
-        },
-        { times: 1 }
-      );
-      try {
-        await retry.click();
-        await checkStarted.promise;
-        await expect(
-          phone.page
-            .getByRole("status")
-            .filter({ hasText: "Loading encrypted chats…" })
-        ).toBeVisible();
-        await expect(retry).toBeHidden();
-      } finally {
-        allowCheck.resolve();
-      }
-      await expect(delayed).toBeVisible();
-      await expect(empty).toHaveCount(0);
+      await expect(retry).toHaveCount(0);
+      await expect(
+        phone.page.getByRole("link", { name: "Check device setup" })
+      ).toHaveAttribute("href", "/messages/encrypted/devices");
+      await phone.page.screenshot({
+        path: testInfo.outputPath("encrypted-inbox-awaiting-invitation.png"),
+      });
 
-      allowDm.resolve();
+      allowInvitation.resolve();
+      // The sandbox has no WebSocket device-added event. Reload the
+      // original device's roster and send to require its pending own add.
+      await alice.page.reload();
+      await sendMessage(alice.page, "A message after the invitation");
       await expect(conversationListRow(phone.page, "bob")).toBeVisible({
         timeout: E2EE_SYNC_TIMEOUT_MS,
       });
-      await expect(conversationListRow(phone.page, "carol")).toHaveCount(0);
       await expect(waiting).toBeHidden();
-      await expect(delayed).toHaveCount(0);
+      await expect(awaitingInvitation).toHaveCount(0);
       await expect(retry).toHaveCount(0);
       await phone.page.screenshot({
         path: testInfo.outputPath("encrypted-inbox-available-chats.png"),
       });
 
-      allowSecondDm.resolve();
-      await expect(conversationListRow(phone.page, "carol")).toBeVisible({
-        timeout: E2EE_SYNC_TIMEOUT_MS,
-      });
-      await expect(waiting).toBeHidden();
       await expect(empty).toHaveCount(0);
     } finally {
-      allowDm.resolve();
-      allowSecondDm.resolve();
+      allowInvitation.resolve();
     }
   });
 

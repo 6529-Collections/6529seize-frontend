@@ -91,7 +91,11 @@ export interface E2eeApiClient {
     deviceKey: string,
     signal?: AbortSignal
   ): Promise<ApiE2eeWelcome[]>;
-  ackWelcome(deviceKey: string, welcomeId: string): Promise<void>;
+  ackWelcome(
+    deviceKey: string,
+    welcomeId: string,
+    signal?: AbortSignal
+  ): Promise<void>;
   getDeviceGroups(
     deviceKey: string,
     signal?: AbortSignal
@@ -215,9 +219,14 @@ function requests(account: E2eeApiAccount) {
           ...(signal ? { signal } : {}),
         })
       ),
-    post: <T>(endpoint: string, body: object) =>
+    post: <T>(endpoint: string, body: object, signal?: AbortSignal) =>
       send(() =>
-        commonApiPost<object, T>({ endpoint, body, errorMode: "structured" })
+        commonApiPost<object, T>({
+          endpoint,
+          body,
+          errorMode: "structured",
+          ...(signal ? { signal } : {}),
+        })
       ),
     put: <T>(endpoint: string, body: object) =>
       send(() =>
