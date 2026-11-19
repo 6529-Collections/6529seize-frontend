@@ -111,11 +111,15 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
   return (
     <>
       <IconButton
-        size={32}
-        variant={isPinned ? "ghost" : "muted"}
-        expandTouchTarget
+        layout="notification-mute"
+        variant="ghost"
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
+        className={
+          isCurrentlyProcessing
+            ? "tw-cursor-not-allowed tw-opacity-50"
+            : undefined
+        }
         aria-label={ariaLabel}
         data-tooltip-id={`wave-header-pin-${waveId}`}
         data-tooltip-content={tooltipContent}
@@ -125,7 +129,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
           viewBox="0 0 24 24"
           fill={isPinned ? "currentColor" : "none"}
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           className={`tw-size-4 tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
