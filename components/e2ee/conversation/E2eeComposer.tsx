@@ -15,6 +15,8 @@ import {
 } from "react";
 import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
 import { ComposerSendButton } from "@/components/waves/ComposerSendButton";
+import { isE2eePollCreationEnabled } from "@/config/e2eeEnv";
+import { E2eePollComposer, E2eePollComposerButton } from "./E2eePollComposer";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
@@ -460,7 +462,18 @@ export function E2eeComposer({
   // Files of the message being encrypted and uploaded right now.
   const [uploading, setUploading] = useState<readonly File[]>([]);
   const [gifPending, setGifPending] = useState(false);
+  const [pollOpen, setPollOpen] = useState(false);
+  const pollButtonRef = useRef<HTMLButtonElement>(null);
+  const createPoll =
+    isE2eePollCreationEnabled() && !editing
+      ? engine.createPoll?.bind(engine, conversation.g)
+      : undefined;
+  const showPoll = pollOpen && createPoll !== undefined;
   const mentions = useMentionPicker(conversation.members, selfProfileId);
+
+  if (editing && pollOpen) {
+    setPollOpen(false);
+  }
 
   // Attachments switched off server-side drop anything already picked.
   if (!attachmentsEnabled && files.length > 0) {
@@ -634,118 +647,137 @@ export function E2eeComposer({
       className={containerClassName}
       style={getNativeComposerStyle(isCapacitor)}
     >
-      <ComposerTopBars
-        locale={locale}
-        showRenewal={isEmpty && !editing && !isUploading}
-        replyTo={editing ? null : replyTo}
-        replyName={replyName}
-        onCancelReply={onCancelReply}
-        editing={editing !== null}
-        onCancelEdit={onCancelEdit}
-        files={files}
-        onRemoveFile={(index) =>
-          setFiles((current) => current.filter((_, i) => i !== index))
-        }
-      />
-      {isUploading ? (
-        <UploadingFiles locale={locale} files={uploading} />
-      ) : null}
-      <div
-        className={`tw-relative tw-flex tw-items-end ${COMPOSER_ROW_GAP_CLASS_NAME} ${COMPOSER_ROW_PADDING_CLASS_NAME}`}
-      >
-        {mentions.open ? (
-          <MentionList
-            id={listboxId}
-            candidates={mentions.candidates}
-            activeIndex={mentions.activeIndex}
-            onPick={pickMention}
-            label={t(locale, "e2ee.composer.mentions.label")}
-          />
+      {showPoll && (
+        <E2eePollComposer
+          onCreate={createPoll}
+          onClose={() => {
+            setPollOpen(false);
+            globalThis.requestAnimationFrame(() =>
+              pollButtonRef.current?.focus()
+            );
+          }}
+        />
+      )}
+      <div hidden={showPoll}>
+        <ComposerTopBars
+          locale={locale}
+          showRenewal={isEmpty && !editing && !isUploading}
+          replyTo={editing ? null : replyTo}
+          replyName={replyName}
+          onCancelReply={onCancelReply}
+          editing={editing !== null}
+          onCancelEdit={onCancelEdit}
+          files={files}
+          onRemoveFile={(index) =>
+            setFiles((current) => current.filter((_, i) => i !== index))
+          }
+        />
+        {isUploading ? (
+          <UploadingFiles locale={locale} files={uploading} />
         ) : null}
-        {editing === null ? (
-          <>
-            {canAttach && (
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                tabIndex={-1}
-                aria-hidden="true"
-                className="tw-hidden"
-                onChange={onFilesChosen}
-              />
-            )}
-            <DropActionTooltip content={t(locale, "e2ee.composer.attach")}>
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                aria-label={t(locale, "e2ee.composer.attach")}
-                disabled={!attachmentsEnabled}
-                className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-50`}
-              >
-                <PaperClipIcon
+        <div
+          className={`tw-relative tw-flex tw-items-end ${COMPOSER_ROW_GAP_CLASS_NAME} ${COMPOSER_ROW_PADDING_CLASS_NAME}`}
+        >
+          {mentions.open ? (
+            <MentionList
+              id={listboxId}
+              candidates={mentions.candidates}
+              activeIndex={mentions.activeIndex}
+              onPick={pickMention}
+              label={t(locale, "e2ee.composer.mentions.label")}
+            />
+          ) : null}
+          {editing === null ? (
+            <>
+              {canAttach && (
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  multiple
+                  tabIndex={-1}
                   aria-hidden="true"
-                  className={COMPOSER_ACTION_ICON_CLASS_NAME}
+                  className="tw-hidden"
+                  onChange={onFilesChosen}
                 />
-              </button>
-            </DropActionTooltip>
-            {canAttach && !isUploading && (
-              <E2eeGifAttachmentPicker
-                key={conversation.g}
-                onAttach={(file) => addFiles([file])}
-                onError={setError}
-                onPendingChange={setGifPending}
-              />
-            )}
-          </>
-        ) : null}
-        <div className="tw-relative tw-min-w-0 tw-flex-1">
-          <label className="tw-sr-only" htmlFor={textareaId}>
-            {t(locale, "e2ee.composer.label")}
-          </label>
-          <E2eeComposerEditor
-            ref={editorRef}
-            value={text}
-            onChange={(value) => {
-              setText(value);
-              setError(null);
-            }}
-            onSelection={mentions.update}
-            onKeyDown={onKeyDown}
-            onSubmit={() => void submit()}
-            canAttach={canAttach}
-            onPasteImages={paste.attachImages}
-            canEditLastMessage={canEditLastMessage}
-            onEditLastMessage={onRequestEditLastMessage}
-            canUseShortcuts={() => !mentions.open}
-            placeholder={t(locale, "e2ee.composer.placeholder")}
-            inputProps={{
-              id: textareaId,
-              ariaLabel: t(locale, "e2ee.composer.label"),
-              "aria-placeholder": t(locale, "e2ee.composer.placeholder"),
-              "aria-invalid": tooLong || undefined,
-              ariaAutoComplete: "list",
-              ariaControls: mentions.open ? listboxId : undefined,
-              ariaActiveDescendant: mentions.open
-                ? `${listboxId}-${mentions.activeIndex}`
-                : undefined,
-              onBlur: mentions.close,
-            }}
-          />
+              )}
+              <DropActionTooltip content={t(locale, "e2ee.composer.attach")}>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  aria-label={t(locale, "e2ee.composer.attach")}
+                  disabled={!attachmentsEnabled}
+                  className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-50`}
+                >
+                  <PaperClipIcon
+                    aria-hidden="true"
+                    className={COMPOSER_ACTION_ICON_CLASS_NAME}
+                  />
+                </button>
+              </DropActionTooltip>
+              {createPoll && (
+                <E2eePollComposerButton
+                  buttonRef={pollButtonRef}
+                  onClick={() => setPollOpen(true)}
+                />
+              )}
+              {canAttach && !isUploading && (
+                <E2eeGifAttachmentPicker
+                  key={conversation.g}
+                  onAttach={(file) => addFiles([file])}
+                  onError={setError}
+                  onPendingChange={setGifPending}
+                />
+              )}
+            </>
+          ) : null}
+          <div className="tw-relative tw-min-w-0 tw-flex-1">
+            <label className="tw-sr-only" htmlFor={textareaId}>
+              {t(locale, "e2ee.composer.label")}
+            </label>
+            <E2eeComposerEditor
+              ref={editorRef}
+              value={text}
+              onChange={(value) => {
+                setText(value);
+                setError(null);
+              }}
+              onSelection={mentions.update}
+              onKeyDown={onKeyDown}
+              onSubmit={() => void submit()}
+              canAttach={canAttach}
+              onPasteImages={paste.attachImages}
+              canEditLastMessage={canEditLastMessage}
+              onEditLastMessage={onRequestEditLastMessage}
+              canUseShortcuts={() => !mentions.open}
+              placeholder={t(locale, "e2ee.composer.placeholder")}
+              inputProps={{
+                id: textareaId,
+                ariaLabel: t(locale, "e2ee.composer.label"),
+                "aria-placeholder": t(locale, "e2ee.composer.placeholder"),
+                "aria-invalid": tooLong || undefined,
+                ariaAutoComplete: "list",
+                ariaControls: mentions.open ? listboxId : undefined,
+                ariaActiveDescendant: mentions.open
+                  ? `${listboxId}-${mentions.activeIndex}`
+                  : undefined,
+                onBlur: mentions.close,
+              }}
+            />
+          </div>
+          <DropActionTooltip content={t(locale, "e2ee.composer.hint")}>
+            <ComposerSendButton
+              onClick={() => void submit()}
+              disabled={isEmpty || tooLong || isUploading || gifPending}
+              aria-label={t(
+                locale,
+                editing ? "e2ee.composer.saveEdit" : "e2ee.composer.send"
+              )}
+            />
+          </DropActionTooltip>
         </div>
-        <DropActionTooltip content={t(locale, "e2ee.composer.hint")}>
-          <ComposerSendButton
-            onClick={() => void submit()}
-            disabled={isEmpty || tooLong || isUploading || gifPending}
-            aria-label={t(
-              locale,
-              editing ? "e2ee.composer.saveEdit" : "e2ee.composer.send"
-            )}
-          />
-        </DropActionTooltip>
+        <PastedImagesStatus locale={locale} notice={paste.notice} />
+        <ComposerFooter locale={locale} error={error} gifPending={gifPending} />
       </div>
-      <PastedImagesStatus locale={locale} notice={paste.notice} />
-      <ComposerFooter locale={locale} error={error} gifPending={gifPending} />
     </div>
   );
 }

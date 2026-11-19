@@ -1,19 +1,19 @@
 "use client";
 
-import type { ApiDropPollOption } from "@/generated/models/ApiDropPollOption";
 import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { CSSProperties, MouseEvent } from "react";
 import { getVoteCountLabel } from "./WaveDropPoll.helpers";
 
 interface PollResultOptionProps {
-  readonly option: ApiDropPollOption;
+  readonly label: string;
+  readonly votes: number;
   readonly totalVotes: number;
   readonly canShowVoters: boolean;
   readonly isSelected: boolean;
   readonly isDimmed: boolean;
   readonly isExpanded: boolean;
   readonly showSelectionIndicator: boolean;
-  readonly onToggle: (optionNo: number) => void;
+  readonly onToggle: () => void;
 }
 
 const getSelectionClassName = ({
@@ -152,13 +152,13 @@ function PollResultOptionStats({
   canShowVoters,
   isExpanded,
   isSelected,
-  option,
+  voteCountLabel,
   percentage,
 }: {
   readonly canShowVoters: boolean;
   readonly isExpanded: boolean;
   readonly isSelected: boolean;
-  readonly option: ApiDropPollOption;
+  readonly voteCountLabel: string;
   readonly percentage: number;
 }) {
   const voteCountClassName = getPollResultVoteCountClassName({
@@ -177,7 +177,7 @@ function PollResultOptionStats({
         <span
           className={`tw-text-[11.5px] tw-font-medium tw-transition-colors ${voteCountClassName}`}
         >
-          {getVoteCountLabel(option.votes)}
+          {voteCountLabel}
         </span>
       </span>
       <span
@@ -214,7 +214,8 @@ const getPollResultFillClassName = ({
 };
 
 export function PollResultOption({
-  option,
+  label,
+  votes,
   totalVotes,
   canShowVoters,
   isSelected,
@@ -224,12 +225,13 @@ export function PollResultOption({
   onToggle,
 }: PollResultOptionProps) {
   const percentage =
-    totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
+    totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
   const fillScale = Math.max(0, Math.min(100, percentage)) / 100;
-  const canShowOptionVoters = canShowVoters && option.votes > 0;
+  const canShowOptionVoters = canShowVoters && votes > 0;
+  const voteCountLabel = getVoteCountLabel(votes);
   const handleToggle = (event: MouseEvent<HTMLButtonElement>) => {
     event.stopPropagation();
-    onToggle(option.option_no);
+    onToggle();
   };
   const optionClassName = getPollResultOptionClassName({
     canShowVoters: canShowOptionVoters,
@@ -258,14 +260,14 @@ export function PollResultOption({
           <PollResultOptionLabel
             canShowVoters={canShowOptionVoters}
             isSelected={isSelected}
-            optionString={option.option_string}
+            optionString={label}
           />
         </div>
         <PollResultOptionStats
           canShowVoters={canShowOptionVoters}
           isExpanded={isExpanded}
           isSelected={isSelected}
-          option={option}
+          voteCountLabel={voteCountLabel}
           percentage={percentage}
         />
       </div>
@@ -278,11 +280,7 @@ export function PollResultOption({
         <button
           type="button"
           aria-expanded={isExpanded}
-          aria-label={`${isExpanded ? "Hide" : "View"} voters for ${
-            option.option_string
-          }. ${getVoteCountLabel(
-            option.votes
-          )}, ${percentage} percent.${selectedAriaLabel}`}
+          aria-label={`${isExpanded ? "Hide" : "View"} voters for ${label}. ${voteCountLabel}, ${percentage} percent.${selectedAriaLabel}`}
           onClick={handleToggle}
           className={optionClassName}
         >

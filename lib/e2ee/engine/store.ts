@@ -99,6 +99,9 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
     sigOk: stored.sigOk,
     undecryptable: stored.undecryptable,
     pending: stored.pending,
+    ...(stored.poll && !stored.deleted
+      ? { poll: structuredClone(stored.poll) }
+      : {}),
     ...(stored.unsent ? { unsent: stored.unsent.reason } : {}),
   };
   if (stored.imported) {

@@ -25,6 +25,7 @@ import {
   checkConversationPreviews,
 } from "../support/markdownParity";
 
+import { checkEncryptedPoll } from "../support/e2ee/polls";
 import { expect, test } from "../testHelpers";
 import {
   plaintextEncodings,
@@ -351,6 +352,22 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       "A's sends were not observed, so the plaintext check would be vacuous"
     ).toBeGreaterThan(0);
     expectPrivateAndClean([a, b], needles({ hello, reply }));
+  });
+
+  test("both participants can create and vote in encrypted DM polls", async () => {
+    const current = requireWorld();
+    const { a, b, runId } = current;
+    const dm = await ensureDm(current);
+    await openChat(a, dm);
+    await openChat(b, dm);
+
+    const singlePoll = qaMessage(runId, "Which drink do you prefer?");
+    const multiPoll = qaMessage(runId, "Which drinks work for you?");
+    await checkEncryptedPoll(a.page, b.page, b.user.handle, singlePoll, false);
+    await checkEncryptedPoll(b.page, a.page, a.user.handle, multiPoll, true);
+    await expectNothingUndecryptable(a);
+    await expectNothingUndecryptable(b);
+    expectPrivateAndClean([a, b], needles({ singlePoll, multiPoll }));
   });
 
   test("formats conversation-list Markdown previews on desktop and mobile", async ({}, testInfo) => {
@@ -834,6 +851,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await openChatFromList(c, group, groupName);
     await expectDecrypted(c, fromA);
 
+    const singlePoll = qaMessage(runId, "Which drink?");
+    const multiPoll = qaMessage(runId, "Which drinks?");
+    await checkEncryptedPoll(a.page, b.page, b.user.handle, singlePoll, false);
+    await checkEncryptedPoll(a.page, c.page, c.user.handle, multiPoll, true);
+
     await sendEncrypted(c, fromC);
     await expectDecrypted(a, fromC);
     await expectDecrypted(b, fromC);
@@ -841,7 +863,10 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       await expectNothingUndecryptable(session);
     }
 
-    expectPrivateAndClean([a, b, c], needles({ groupName, fromA, fromC }));
+    expectPrivateAndClean(
+      [a, b, c],
+      needles({ groupName, fromA, fromC, singlePoll, multiPoll })
+    );
   });
 
   test("a revoked device can no longer read new messages", async ({

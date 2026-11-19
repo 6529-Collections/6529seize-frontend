@@ -81,6 +81,12 @@ function describe(version: SignedVersion | null): E2eeReportVersion | null {
       attachmentNames: (payload.att ?? []).map((att) => att.name),
     };
   }
+  if (payload?.t === "poll") {
+    return {
+      text: [payload.poll.question, ...payload.poll.options].join("\n"),
+      attachmentNames: [],
+    };
+  }
   if (payload?.t === "edit") {
     return { text: payload.text, attachmentNames: [] };
   }

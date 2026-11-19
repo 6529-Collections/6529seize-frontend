@@ -1,17 +1,27 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, renderHook, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useRouter } from "next/navigation";
 import type { ComponentProps, ContextType } from "react";
 
 import { AuthContext } from "@/components/auth/Auth";
+import {
+  PROFILE_MESSAGE_PREFILL_PARAM,
+  useE2eeComposePrefill,
+} from "@/components/e2ee/e2eeComposePrefill";
 import UserProfileTooltip from "@/components/user/utils/profile/UserProfileTooltip";
+import { isE2eeEnabled } from "@/config/e2eeEnv";
 import type { CicStatement } from "@/entities/IProfile";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
 import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
-import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
 import { commonApiFetch } from "@/services/api/common-api";
+
+const mockRequestEngine = jest.fn();
+jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn() }));
+jest.mock("@/components/e2ee/E2eeContext", () => ({
+  useE2eeContext: () => ({ requestEngine: mockRequestEngine }),
+}));
 
 type TooltipProps = ComponentProps<typeof UserProfileTooltip>;
 
@@ -116,21 +126,12 @@ jest.mock("@/hooks/useIdentity", () => ({
   useIdentity: jest.fn(),
 }));
 
-jest.mock("@/hooks/useDeviceInfo", () => ({
-  __esModule: true,
-  default: jest.fn(() => ({ isApp: false })),
-}));
-
 jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
 }));
 
 jest.mock("@/helpers/waves/waves.helpers", () => ({
   createDirectMessageWave: jest.fn(),
-}));
-
-jest.mock("@/helpers/navigation.helpers", () => ({
-  navigateToDirectMessage: jest.fn(),
 }));
 
 jest.mock("next/navigation", () => ({
@@ -140,7 +141,6 @@ jest.mock("next/navigation", () => ({
 const useIdentityMock = useIdentity as jest.Mock;
 const commonApiFetchMock = commonApiFetch as jest.Mock;
 const createDirectMessageWaveMock = createDirectMessageWave as jest.Mock;
-const navigateToDirectMessageMock = navigateToDirectMessage as jest.Mock;
 const useRouterMock = useRouter as jest.Mock;
 
 let queryClient: QueryClient;
@@ -170,7 +170,7 @@ const renderTooltip = ({
   readonly tooltipProps?: Omit<Partial<TooltipProps>, "user">;
 } = {}) => {
   const authValue = {
-    connectedProfile: { handle: "alice" },
+    connectedProfile: { id: "profile-alice", handle: "alice" },
     activeProfileProxy: null,
     setToast: jest.fn(),
     ...authOverrides,
@@ -188,6 +188,7 @@ const renderTooltip = ({
 describe("UserProfileTooltip", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(isE2eeEnabled).mockReturnValue(false);
 
     capturedDropAuthorBadgesProps = null;
     queryClient = new QueryClient({
@@ -219,7 +220,6 @@ describe("UserProfileTooltip", () => {
 
     useRouterMock.mockReturnValue(mockRouter);
     useIdentityMock.mockReturnValue({ profile: mockProfile });
-    createDirectMessageWaveMock.mockResolvedValue({ id: "wave-1" });
 
     commonApiFetchMock.mockImplementation(
       async ({ endpoint }: { readonly endpoint: string }) => {
@@ -284,17 +284,66 @@ describe("UserProfileTooltip", () => {
       screen.getByRole("button", { name: "Send direct message" })
     );
 
-    await waitFor(() => {
-      expect(createDirectMessageWaveMock).toHaveBeenCalledWith({
-        addresses: ["0xbob"],
-      });
+    expect(createDirectMessageWaveMock).not.toHaveBeenCalled();
+    expect(mockRequestEngine).toHaveBeenCalledTimes(1);
+    const href = new URL(mockRouter.push.mock.calls[0][0], "https://6529.io");
+    expect(href.pathname).toBe("/messages/new");
+    const navigationId = href.searchParams.get(PROFILE_MESSAGE_PREFILL_PARAM);
+    expect(navigationId).toMatch(/^[a-f0-9-]{36}$/);
+    const { result } = renderHook(() =>
+      useE2eeComposePrefill("profile", navigationId)
+    );
+    expect(result.current).toEqual({
+      navigationId,
+      ownerProfileId: "profile-alice",
+      people: [
+        {
+          profileId: "profile-1",
+          handle: "bob",
+          pfp: "pfp-url",
+          wallet: "0xbob",
+        },
+      ],
+      source: "profile",
+    });
+  });
+
+  it("opens the profile composer when randomUUID is unavailable", async () => {
+    const originalCrypto = Object.getOwnPropertyDescriptor(
+      globalThis,
+      "crypto"
+    );
+    const getRandomValues = globalThis.crypto.getRandomValues.bind(
+      globalThis.crypto
+    );
+    Object.defineProperty(globalThis, "crypto", {
+      configurable: true,
+      value: { getRandomValues },
     });
 
-    expect(navigateToDirectMessageMock).toHaveBeenCalledWith({
-      waveId: "wave-1",
-      router: mockRouter,
-      isApp: false,
-    });
+    try {
+      renderTooltip();
+      await userEvent.click(
+        screen.getByRole("button", { name: "Send direct message" })
+      );
+
+      const href = new URL(mockRouter.push.mock.calls[0][0], "https://6529.io");
+      expect(href.pathname).toBe("/messages/new");
+      const navigationId = href.searchParams.get(PROFILE_MESSAGE_PREFILL_PARAM);
+      const { result } = renderHook(() =>
+        useE2eeComposePrefill("profile", navigationId)
+      );
+      expect(result.current).toMatchObject({
+        ownerProfileId: "profile-alice",
+        people: [{ profileId: "profile-1" }],
+      });
+    } finally {
+      if (originalCrypto) {
+        Object.defineProperty(globalThis, "crypto", originalCrypto);
+      } else {
+        Reflect.deleteProperty(globalThis, "crypto");
+      }
+    }
   });
 
   it("renders the about statement when the bio statement is present", async () => {
@@ -352,6 +401,19 @@ describe("UserProfileTooltip", () => {
       onArtistPreviewOpen
     );
   });
+
+  it.each([false, true])(
+    "requires a recipient wallet only when encryption is disabled (encryption enabled: %s)",
+    (enabled) => {
+      jest.mocked(isE2eeEnabled).mockReturnValue(enabled);
+      mockProfile["primary_wallet"] = "";
+      renderTooltip();
+
+      expect(
+        screen.queryAllByRole("button", { name: "Send direct message" })
+      ).toHaveLength(enabled ? 1 : 0);
+    }
+  );
 
   it("does not render follow or DM actions on your own profile", () => {
     renderTooltip({
