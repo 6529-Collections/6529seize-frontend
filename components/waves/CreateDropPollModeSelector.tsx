@@ -5,18 +5,17 @@ import {
   CONNECTED_TAB_SURFACE_CLASSES,
   getConnectedTabStateClasses,
 } from "@/components/utils/select/tabs/connectedTabStyles";
-import type { CreateDropPollDraft } from "./CreateDropPoll";
 
 interface CreateDropPollModeSelectorProps {
-  readonly draft: CreateDropPollDraft;
+  readonly multi: boolean;
   readonly disabled: boolean;
   readonly descriptionId: string;
   readonly locale: SupportedLocale;
-  readonly onChange: (draft: CreateDropPollDraft) => void;
+  readonly onChange: (multi: boolean) => void;
 }
 
 export default function CreateDropPollModeSelector({
-  draft,
+  multi,
   disabled,
   descriptionId,
   locale,
@@ -31,19 +30,19 @@ export default function CreateDropPollModeSelector({
     >
       <button
         type="button"
-        aria-pressed={!draft.multichoice}
+        aria-pressed={!multi}
         disabled={disabled}
-        onClick={() => onChange({ ...draft, multichoice: false })}
-        className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: !draft.multichoice })}`}
+        onClick={() => onChange(false)}
+        className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: !multi })}`}
       >
         {t(locale, "waves.poll.composer.mode.single")}
       </button>
       <button
         type="button"
-        aria-pressed={draft.multichoice}
+        aria-pressed={multi}
         disabled={disabled}
-        onClick={() => onChange({ ...draft, multichoice: true })}
-        className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: draft.multichoice })}`}
+        onClick={() => onChange(true)}
+        className={`tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-font-semibold ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: multi })}`}
       >
         {t(locale, "waves.poll.composer.mode.multiple")}
       </button>

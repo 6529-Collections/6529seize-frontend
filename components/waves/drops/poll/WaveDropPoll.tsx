@@ -14,7 +14,6 @@ import { preserveAuthenticatedPollVote } from "@/helpers/waves/poll-vote-reconci
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { voteDropPollV2 } from "@/services/api/wave-drops-v2-api";
-import { CheckIcon } from "@heroicons/react/24/outline";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   type SyntheticEvent,
@@ -23,6 +22,12 @@ import {
   useRef,
   useState,
 } from "react";
+import {
+  POLL_CARD_CLASS_NAME,
+  POLL_FOOTER_CLASS_NAME,
+  PollCardHeader,
+  PollVotedStatus,
+} from "./PollCardPresentation";
 import { PollOptionVoters } from "./PollOptionVoters";
 import { PollResultOption } from "./PollResultOption";
 import { PollVoteOption } from "./PollVoteOption";
@@ -466,34 +471,27 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
   return (
     <div
       role="presentation"
-      className="tw-mb-2 tw-mt-3 tw-w-full tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-4 tw-shadow-lg tw-backdrop-blur md:tw-max-w-2xl"
+      className={POLL_CARD_CLASS_NAME}
       onClick={stopPollEventPropagation}
       onKeyDown={stopPollEventPropagation}
     >
-      <div className="tw-mb-3.5 tw-flex tw-flex-wrap tw-items-center tw-gap-3">
-        <div className="tw-text-[15px] tw-font-bold tw-text-white">Poll</div>
-        <div className="tw-flex tw-min-w-0 tw-items-center tw-gap-2 tw-text-xs tw-font-medium tw-text-iron-400">
-          <span
-            className={`tw-size-1.5 tw-flex-shrink-0 tw-rounded-full ${
-              poll.is_open ? "tw-bg-emerald-500" : "tw-bg-iron-600"
-            }`}
-            aria-hidden="true"
-          />
-          <span className="tw-truncate">{getPollClosingLabel(poll)}</span>
-        </div>
-      </div>
+      <PollCardHeader
+        title="Poll"
+        status={getPollClosingLabel(poll)}
+        open={poll.is_open}
+      />
 
       {effectiveView === "vote" && poll.is_open ? (
         <div className="tw-flex tw-flex-col tw-gap-2">
           {poll.options.map((option) => (
             <PollVoteOption
               key={option.option_no}
-              option={option}
+              label={option.option_string}
               checked={selectedOptions.has(option.option_no)}
               multichoice={poll.multichoice}
               groupName={voteOptionGroupName}
               disabled={voteMutation.isPending || !canRespondToPoll}
-              onChange={handleVoteOptionChange}
+              onChange={() => handleVoteOptionChange(option.option_no)}
             />
           ))}
           {poll.multichoice && !isChangingVote && (
@@ -538,14 +536,15 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
             return (
               <div key={option.option_no}>
                 <PollResultOption
-                  option={option}
+                  label={option.option_string}
+                  votes={option.votes}
                   totalVotes={totalVotes}
                   canShowVoters={canShowOptionVoters}
                   isSelected={votedOptionNos.has(option.option_no)}
                   isDimmed={hasVoted && !votedOptionNos.has(option.option_no)}
                   isExpanded={isExpanded}
                   showSelectionIndicator={showSelectionIndicator}
-                  onToggle={(optionNo) =>
+                  onToggle={() =>
                     setInteractionState((current) => {
                       const currentState = getScopedPollInteractionState(
                         current,
@@ -554,9 +553,9 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
                       return {
                         ...currentState,
                         expandedOptionNo:
-                          currentState.expandedOptionNo === optionNo
+                          currentState.expandedOptionNo === option.option_no
                             ? null
-                            : optionNo,
+                            : option.option_no,
                       };
                     })
                   }
@@ -591,7 +590,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       )}
 
       {showVoteResultsFooterAction && (
-        <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
+        <div className={POLL_FOOTER_CLASS_NAME}>
           <div className="tw-flex tw-justify-start">
             <Button
               type="button"
@@ -610,7 +609,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       )}
 
       {showVoteEditFooterAction && (
-        <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
+        <div className={POLL_FOOTER_CLASS_NAME}>
           {poll.multichoice ? (
             <div className="tw-flex tw-gap-2">
               <Button
@@ -660,7 +659,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
       )}
 
       {showResultsFooterAction && (
-        <div className="tw-mt-3.5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-3.5">
+        <div className={POLL_FOOTER_CLASS_NAME}>
           <div className="tw-flex tw-items-center tw-justify-between tw-gap-2">
             <Button
               type="button"
@@ -675,24 +674,7 @@ export default function WaveDropPoll({ drop }: WaveDropPollProps) {
               {resultsFooterActionLabel}
             </Button>
             {hasVoted && (
-              <span className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-1.5 tw-transition-all tw-duration-300">
-                <span
-                  className="tw-flex tw-size-4 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-emerald-500/30 tw-bg-emerald-500/15"
-                  aria-hidden="true"
-                >
-                  <CheckIcon
-                    className="tw-size-2.5 tw-text-emerald-400"
-                    strokeWidth={3}
-                  />
-                </span>
-                <span
-                  className={`tw-text-[12px] tw-font-medium tw-transition-colors tw-duration-300 ${
-                    showUpdated ? "tw-text-emerald-400" : "tw-text-iron-300"
-                  }`}
-                >
-                  {voteStatusLabel}
-                </span>
-              </span>
+              <PollVotedStatus label={voteStatusLabel} updated={showUpdated} />
             )}
           </div>
         </div>
