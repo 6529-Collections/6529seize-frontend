@@ -1,7 +1,20 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import CommunityCurations from "@/components/community-curations/CommunityCurations";
 
 const mockUseCommunityCurationsDrops = jest.fn();
+const mockCommitWaveNavigationContent = jest.fn();
+let mockIsApp = false;
+let mockRestoreScrollOffset = () => true;
+
+jest.mock("@/helpers/waves/wave-navigation-transition", () => ({
+  commitWaveNavigationContent: (...args: unknown[]) =>
+    mockCommitWaveNavigationContent(...args),
+}));
+
+jest.mock("@/hooks/useDeviceInfo", () => ({
+  __esModule: true,
+  default: () => ({ isApp: mockIsApp }),
+}));
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ waveViewStyle: { height: "600px" } }),
@@ -21,7 +34,14 @@ jest.mock("@/components/token-list/hooks/usePersistentScrollOffset", () => ({
 
 jest.mock("@/components/community-curations/CommunityCurationsMasonry", () => ({
   __esModule: true,
-  default: () => <div data-testid="profile-feed-masonry" />,
+  default: ({
+    restoreScrollOffset,
+  }: {
+    restoreScrollOffset: () => boolean;
+  }) => {
+    mockRestoreScrollOffset = restoreScrollOffset;
+    return <div data-testid="profile-feed-masonry" />;
+  },
 }));
 
 const loadingState = {
@@ -46,6 +66,7 @@ describe("CommunityCurations", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsApp = false;
     mockUseCommunityCurationsDrops.mockReturnValue(loadingState);
   });
 
@@ -72,5 +93,77 @@ describe("CommunityCurations", () => {
 
     expect(screen.getByTestId("profile-feed-masonry")).toBeInTheDocument();
     expect(scrollTo).toHaveBeenCalledWith({ top: 240 });
+  });
+
+  it("keeps a native feed return destination on Discover Waves", () => {
+    mockIsApp = true;
+    render(<CommunityCurations />);
+    const href = screen
+      .getByRole("link", { name: "Discover Waves" })
+      .getAttribute("href");
+    const destination = new URL(href!, "http://localhost");
+    expect(destination.pathname).toBe("/discover");
+    expect(destination.searchParams.get("returnTo")).toBe(
+      "/waves?view=profile-feed"
+    );
+  });
+
+  it("retries a clamped saved offset as later Feed rows grow, then stops", () => {
+    let availableTop = 100;
+    scrollTo.mockImplementation(function (
+      this: HTMLElement,
+      { top }: ScrollToOptions
+    ) {
+      this.scrollTop = Math.min(top ?? 0, availableTop);
+    });
+    const drop = { stableKey: "drop-1" };
+    mockUseCommunityCurationsDrops.mockReturnValue({
+      ...loadingState,
+      allDrops: [drop],
+      drops: [drop],
+      isLoading: false,
+    });
+    const { container } = render(<CommunityCurations />);
+    expect(mockRestoreScrollOffset()).toBe(false);
+    availableTop = 500;
+    expect(mockRestoreScrollOffset()).toBe(true);
+    const scroll = container.querySelector("section")!;
+    expect(scroll.scrollTop).toBe(240);
+    scroll.scrollTop = 200;
+    expect(mockRestoreScrollOffset()).toBe(true);
+    expect(scroll.scrollTop).toBe(200);
+    scrollTo.mockReset();
+  });
+
+  it.each(["pointerDown", "wheel", "keyDown"] as const)(
+    "gives a pending Feed restore to the reader on %s",
+    (input) => {
+      const drop = { stableKey: "drop-1" };
+      mockUseCommunityCurationsDrops.mockReturnValue({
+        ...loadingState,
+        allDrops: [drop],
+        drops: [drop],
+        isLoading: false,
+      });
+      const { container } = render(<CommunityCurations />);
+      const scroll = container.querySelector("section")!;
+      expect(mockRestoreScrollOffset()).toBe(false);
+      fireEvent[input](scroll);
+      scrollTo.mockClear();
+      expect(mockRestoreScrollOffset()).toBe(true);
+      expect(scrollTo).not.toHaveBeenCalled();
+    }
+  );
+
+  it("releases a pagination-only Feed without waiting for absent cards", () => {
+    mockUseCommunityCurationsDrops.mockReturnValue({
+      ...loadingState,
+      isLoading: false,
+      hasNextPage: true,
+      isFetchingNextPage: true,
+    });
+    render(<CommunityCurations />);
+    expect(screen.getByTestId("profile-feed-masonry")).toBeInTheDocument();
+    expect(mockCommitWaveNavigationContent).toHaveBeenCalledWith("feed");
   });
 });
