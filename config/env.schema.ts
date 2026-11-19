@@ -133,8 +133,7 @@ export const publicEnvSchema = z.object({
   // App-socket PING keepalive and liveness checks (API #2354). On only when
   // exactly "true"; staging builds set it, production builds leave it unset.
   NEXT_PUBLIC_FEATURE_WS_PING: z.string().optional(),
-  // End-to-end encrypted DMs and groups (D109). On only when exactly "true";
-  // staging builds set it, production builds leave it unset.
+  // End-to-end encrypted chats and poll creation. On only when exactly "true".
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),
   NEXT_PUBLIC_E2EE_POLLS_ENABLED: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
