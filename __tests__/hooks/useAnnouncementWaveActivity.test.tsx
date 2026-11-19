@@ -1,16 +1,23 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  focusManager,
+  QueryClient,
+  QueryClientProvider,
+} from "@tanstack/react-query";
 import type { PropsWithChildren } from "react";
 import { useAnnouncementWaveActivity } from "@/hooks/useAnnouncementWaveActivity";
 import { commonApiFetch } from "@/services/api/common-api";
 import { WsMessageType } from "@/helpers/Types";
 import type { SidebarWave } from "@/types/waves.types";
+import { WebSocketStatus } from "@/services/websocket/WebSocketTypes";
 
 const callbacks = new Map<string, (data: unknown) => void>();
+let mockSocketStatus: WebSocketStatus = WebSocketStatus.CONNECTED;
 jest.mock("@/services/websocket/useWebSocketMessage", () => ({
   useWebSocketMessage: (type: string, callback: (data: unknown) => void) => {
     callbacks.set(type, callback);
   },
+  useWebsocketStatus: () => mockSocketStatus,
 }));
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
 const fetchMock = jest.mocked(commonApiFetch);
@@ -55,6 +62,7 @@ function emit(type: WsMessageType, data: unknown) {
 beforeEach(() => {
   callbacks.clear();
   fetchMock.mockReset();
+  mockSocketStatus = WebSocketStatus.CONNECTED;
 });
 
 it("loads the latest main-feed post without using a reply-inclusive metric", async () => {
@@ -155,4 +163,76 @@ it("removes the timestamp override when replies switch back to inline", async ()
   );
   rerender({ repliesCollapsed: false });
   expect(result.current).not.toHaveProperty("latestTopLevelDropTimestamp");
+});
+
+describe("refresh cadence", () => {
+  const FIVE_MINUTES = 5 * 60 * 1000;
+
+  const advance = async (ms: number) => {
+    await act(async () => {
+      await jest.advanceTimersByTimeAsync(ms);
+    });
+  };
+
+  const renderLoaded = async () => {
+    fetchMock.mockResolvedValue({ drops: [{ created_at: 100 }] });
+    const { wrapper } = setup();
+    const view = renderHook(() => useTimestamp(options), { wrapper });
+    await advance(0);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(view.result.current).toBe(100);
+    return view;
+  };
+
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    focusManager.setFocused(undefined);
+    jest.useRealTimers();
+  });
+
+  it("relies on socket frames instead of polling while the socket is connected", async () => {
+    await renderLoaded();
+
+    await advance(2 * FIVE_MINUTES);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    emit(WsMessageType.DROP_UPDATE, { wave: { id: "announcements" } });
+    await advance(0);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("polls every five minutes, not every 30 seconds, without a socket", async () => {
+    mockSocketStatus = WebSocketStatus.DISCONNECTED;
+    await renderLoaded();
+
+    await advance(30_000);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await advance(FIVE_MINUTES - 30_000 - 1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    await advance(1);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await advance(FIVE_MINUTES);
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+
+  it("falls back to the slow poll once the socket drops", async () => {
+    const view = await renderLoaded();
+
+    mockSocketStatus = WebSocketStatus.CONNECTING;
+    view.rerender();
+    await advance(FIVE_MINUTES);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not poll while the tab is hidden", async () => {
+    mockSocketStatus = WebSocketStatus.DISCONNECTED;
+    await renderLoaded();
+
+    act(() => focusManager.setFocused(false));
+    await advance(3 * FIVE_MINUTES);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });
