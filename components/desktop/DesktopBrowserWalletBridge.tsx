@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import {
+  useEffect,
+  useEffectEvent,
+  useReducer,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import { useAccount, useConnect, useConnectors, useDisconnect } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
@@ -8,6 +14,7 @@ import {
   forgetBrowserWalletProfile,
   getDesktopWalletRequestStatus,
   isBrowserWalletProfile,
+  subscribeBrowserWalletProfiles,
 } from "@/services/desktop/desktopBrowserWallet";
 import { DESKTOP_BROWSER_WALLET_CONNECTOR_ID } from "@/wagmiConfig/desktopBrowserWalletConnector";
 
@@ -36,9 +43,21 @@ export default function DesktopBrowserWalletBridge() {
   const isForwarding = connectorId === DESKTOP_BROWSER_WALLET_CONNECTOR_ID;
   const active = activeAddress?.toLowerCase() ?? null;
   const connectedAddress = account.address?.toLowerCase() ?? null;
-  const mayForward = isBrowserWalletProfile(active);
+  const mayForward = useSyncExternalStore(
+    subscribeBrowserWalletProfiles,
+    () => isBrowserWalletProfile(active),
+    () => false
+  );
 
   const connecting = useRef(false);
+  const [connectionRevision, retryForActiveProfile] = useReducer(
+    (revision: number) => revision + 1,
+    0
+  );
+  const finishConnection = useEffectEvent((startedFor: string | null) => {
+    connecting.current = false;
+    if (startedFor !== active) retryForActiveProfile();
+  });
 
   // A request belongs to the profile that started it.
   const requestProfile = useRef(active);
@@ -76,9 +95,7 @@ export default function DesktopBrowserWalletBridge() {
       connecting.current = true;
       connectAsync({ connector })
         .catch(() => undefined)
-        .finally(() => {
-          connecting.current = false;
-        });
+        .finally(() => finishConnection(active));
     }
   }, [
     account.status,
@@ -87,6 +104,7 @@ export default function DesktopBrowserWalletBridge() {
     connectedAddress,
     connector,
     connectorId,
+    connectionRevision,
     disconnectAsync,
     isForwarding,
     mayForward,

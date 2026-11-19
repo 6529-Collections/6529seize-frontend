@@ -4,6 +4,7 @@ import type { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommun
 import CommunityMembersMobileCard from "./CommunityMembersMobileCard";
 import CommunityMembersTableHeader from "./CommunityMembersTableHeader";
 import CommunityMembersTableRow from "./CommunityMembersTableRow";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 export default function CommunityMembersTable({
   members,
@@ -22,39 +23,42 @@ export default function CommunityMembersTable({
   readonly isLoading: boolean;
   readonly onSort: (sort: ApiCommunityMembersSortOption) => void;
 }) {
+  const isTableViewport = useMediaQuery("(min-width: 640px)");
   return (
     <>
-      <div className="tw-hidden sm:tw-block">
-        <table className="tw-w-full tw-min-w-[56rem] tw-border-collapse">
-          <CommunityMembersTableHeader
-            activeSort={activeSort}
-            sortDirection={sortDirection}
-            isLoading={isLoading}
-            onSort={onSort}
-          />
-          <tbody>
+      {isTableViewport ? (
+        <div className="tw-hidden sm:tw-block">
+          <table className="tw-w-full tw-min-w-[56rem] tw-border-collapse">
+            <CommunityMembersTableHeader
+              activeSort={activeSort}
+              sortDirection={sortDirection}
+              isLoading={isLoading}
+              onSort={onSort}
+            />
+            <tbody>
+              {members.map((member, index) => (
+                <CommunityMembersTableRow
+                  key={member.detail_view_key}
+                  member={member}
+                  rank={index + 1 + (page - 1) * pageSize}
+                />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <div className="tw-mt-3 sm:tw-hidden">
+          <div className="tw-flex tw-flex-col tw-gap-y-3">
             {members.map((member, index) => (
-              <CommunityMembersTableRow
+              <CommunityMembersMobileCard
                 key={member.detail_view_key}
                 member={member}
                 rank={index + 1 + (page - 1) * pageSize}
               />
             ))}
-          </tbody>
-        </table>
-      </div>
-
-      <div className="tw-mt-3 sm:tw-hidden">
-        <div className="tw-flex tw-flex-col tw-gap-y-3">
-          {members.map((member, index) => (
-            <CommunityMembersMobileCard
-              key={member.detail_view_key}
-              member={member}
-              rank={index + 1 + (page - 1) * pageSize}
-            />
-          ))}
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }

@@ -137,7 +137,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
   const router = useRouter();
   const { removeWaveDeliveredNotifications } = useNotificationsContext();
   const { connectedProfile } = useAuth();
-  const { isAppleMobile, isMobileDevice } = useDeviceInfo();
+  const { isAppleMobile, isMobileDevice, isApp } = useDeviceInfo();
   const containerRef = useRef<HTMLDivElement | null>(null);
   // Render-window reduction applies to all mobile webviews; isAppleMobile below
   // only gates the iOS-specific newest-drop deferral behavior.
@@ -410,6 +410,7 @@ const WaveDropsAllInner: React.FC<WaveDropsAllProps> = ({
         className="tw-relative tw-flex tw-h-full tw-flex-col tw-justify-end tw-overflow-hidden tw-bg-iron-950"
       >
         <WaveDropsContent
+          topFade={isApp ? "overlay" : "mask"}
           waveMessages={renderedWaveMessagesWithFullWave}
           dropId={dropId}
           scrollContainerRef={scrollContainerRef}

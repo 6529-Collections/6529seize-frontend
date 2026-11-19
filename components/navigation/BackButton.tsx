@@ -2,7 +2,7 @@
 
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useTransition } from "react";
 import Spinner from "../utils/Spinner";
 import { useWave } from "@/hooks/useWave";
 import { useWaveData } from "@/hooks/useWaveData";
@@ -21,6 +21,7 @@ import { useClosingDropId } from "@/hooks/useClosingDropId";
 import { useExitActiveWave } from "./useExitActiveWave";
 import { isCompetitionPathname } from "@/helpers/competition.helpers";
 import { getMissingWaveNavigationRoute } from "@/helpers/waves/missing-wave-navigation.helpers";
+import { isProfileWavesFeed } from "@/helpers/waves/profile-feed-navigation";
 
 export default function BackButton({
   returnTo,
@@ -31,7 +32,7 @@ export default function BackButton({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchParamsString = searchParams.toString();
-  const [loading, setLoading] = useState(false);
+  const [loading, startNavigation] = useTransition();
   const { isApp } = useDeviceInfo();
   const myStream = useMyStreamOptional();
   const exitActiveWave = useExitActiveWave();
@@ -47,14 +48,19 @@ export default function BackButton({
     useClosingDropId(dropIdFromUrl);
 
   const isInMessagesContext = pathname.startsWith("/messages");
+  const isClientFeedReturn =
+    isApp &&
+    returnTo === "/waves" &&
+    !!myStream &&
+    isProfileWavesFeed(pathname, searchParams);
 
   useEffect(() => {
-    if (!returnTo) {
+    if (!returnTo || isClientFeedReturn) {
       return;
     }
 
     router.prefetch(returnTo);
-  }, [returnTo, router]);
+  }, [returnTo, router, isClientFeedReturn]);
 
   // Fetch wave to determine if it is DM
   const { data: wave } = useWaveData({
@@ -123,14 +129,16 @@ export default function BackButton({
     }
 
     if (returnTo) {
-      setLoading(true);
-      goBackTo(returnTo);
+      if (isClientFeedReturn) {
+        myStream.activeWave.set(null);
+        return;
+      }
+      startNavigation(() => goBackTo(returnTo));
       return;
     }
 
     // Fallback: use navigation history
-    setLoading(true);
-    goBack();
+    startNavigation(() => goBack());
   };
 
   return (
@@ -140,15 +148,16 @@ export default function BackButton({
       aria-busy={loading}
       disabled={loading}
       onClick={handleClick}
-      className="tw-flex tw-size-11 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-white/[0.08] disabled:tw-cursor-default disabled:tw-opacity-70 desktop-hover:hover:tw-bg-white/[0.06]"
+      className="tw-relative tw-flex tw-size-11 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-white/[0.08] disabled:tw-cursor-default disabled:tw-opacity-70 desktop-hover:hover:tw-bg-white/[0.06]"
     >
-      {loading && !returnTo ? (
-        <Spinner />
-      ) : (
-        <ChevronLeftIcon
-          strokeWidth={2}
-          className="tw-size-6 tw-flex-shrink-0 tw-text-iron-50"
-        />
+      <ChevronLeftIcon
+        strokeWidth={2}
+        className={`tw-size-6 tw-flex-shrink-0 tw-text-iron-50 ${loading && !returnTo ? "tw-animate-[fadeIn_0s_linear_100ms_reverse_both]" : ""}`}
+      />
+      {loading && !returnTo && (
+        <span className="tw-absolute tw-inset-0 tw-flex tw-animate-[fadeIn_0s_linear_100ms_both] tw-items-center tw-justify-center">
+          <Spinner />
+        </span>
       )}
     </button>
   );

@@ -91,6 +91,10 @@ context-aware `Back`).
   before starting a swipe back.
 - Encrypted conversations support the same rightward return to the encrypted
   messages list. The visible Back control remains available.
+- In Profile Waves Feed, swipe right to return to Waves. Open a feed post to
+  enter its chat; a right swipe or the visible Back button then returns to the
+  feed at the same reading position. A chat opened directly still returns to
+  Waves.
 - Inputs, links, buttons, voting sliders, media controls, selected text and
   horizontal carousels keep their own interactions. Vertical scrolling and
   multi-touch do not trigger conversation navigation. Screen edges remain
@@ -98,7 +102,8 @@ context-aware `Back`).
 - Android system Back first dismisses an open keyboard, then the topmost
   dismissible sheet, menu or dialog. A reaction picker returns to its action
   sheet before the sheet closes. Single-drop details close before the wave;
-  a wave returns to Waves, and a direct message returns to Messages.
+  a chat opened from Profile Waves Feed returns to the Feed. Other waves return
+  to Waves, and direct messages return to Messages.
 - Deeper pages return through app history or to an in-app destination. Only
   a main-section root with no earlier app destination can minimize the app.
   A dialog awaiting a required decision keeps its visible actions and does not

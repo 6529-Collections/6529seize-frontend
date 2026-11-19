@@ -209,6 +209,31 @@ test("Android Back closes single-drop content before the wave and minimizes only
   await expectNoUnsafeSandboxMutations(baseURL);
 });
 
+test("Android Back returns Feed to Waves before minimizing at root", async ({
+  page,
+  baseURL,
+}) => {
+  await page.goto("/waves?view=profile-feed", {
+    waitUntil: "domcontentloaded",
+  });
+  await waitForRouteReady(page);
+  await expect(
+    page.getByRole("heading", {
+      name: "Latest From Profile Waves",
+      exact: true,
+    })
+  ).toBeVisible();
+  await back(page);
+  await expect(page).toHaveURL(/\/waves$/);
+  await expect(
+    page.getByRole("button", { name: "Find a wave…", exact: true })
+  ).toBeVisible();
+  expect(await nativeCalls(page)).not.toContain("App.minimizeApp");
+  await back(page);
+  await expect.poll(() => nativeCalls(page)).toContain("App.minimizeApp");
+  await expectNoUnsafeSandboxMutations(baseURL);
+});
+
 test("Android Back returns a direct-message deep link to Messages", async ({
   page,
   baseURL,

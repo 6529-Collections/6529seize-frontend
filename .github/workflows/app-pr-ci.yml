@@ -605,6 +605,30 @@ jobs:
           PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/session-recovery"
         run: ./bin/6529 run test:e2e:session-recovery-sandbox
 
+      - name: Run mobile Network Back browser regression
+        if: matrix.lane == 'playwright-critical-shell'
+        env:
+          PLAYWRIGHT_ENV: "local"
+          PLAYWRIGHT_AUTH_SANDBOX: "1"
+          PLAYWRIGHT_COMPOSER_SANDBOX: "1"
+          PLAYWRIGHT_FORCE_WEB_SERVER: "1"
+          USE_DEV_AUTH: "true"
+          DEV_MODE_WALLET_ADDRESS: "0x0000000000000000000000000000000000000529"
+          PLAYWRIGHT_DEV_AUTH_PROFILE_HANDLE: "playwright"
+          PLAYWRIGHT_BASE_URL: "http://localhost:3297"
+          PLAYWRIGHT_WEB_SERVER_URL: "http://localhost:3297"
+          PLAYWRIGHT_WEB_SERVER_COMMAND: "node tests/support/composerSandboxServer.cjs"
+          PLAYWRIGHT_COMPOSER_SANDBOX_API_PORT: "4297"
+          NEXT_DEV_DIST_DIR: ".next-playwright-network-back"
+          NEXT_DEV_TURBOPACK_FS_CACHE: "0"
+          PLAYWRIGHT_READONLY: "1"
+          PLAYWRIGHT_OUTPUT_DIR: "test-results/playwright/network-back"
+          PLAYWRIGHT_HTML_REPORT_DIR: "playwright-report/network-back"
+        run: >-
+          ./bin/6529 exec playwright test tests/critical-shell/profile-navigation-readonly.spec.ts
+          --project=capacitor-ios-sim --project=capacitor-android-sim
+          --grep="Network profile Back" --workers=1
+
       # Each shard boots its own sandbox server; together they run every
       # profile pages test once on all four projects.
       - name: Run own-profile Following browser regression pack
