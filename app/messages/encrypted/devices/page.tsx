@@ -1,22 +1,15 @@
-import { notFound } from "next/navigation";
-import { Suspense } from "react";
-import E2eeMessagesRoute from "@/components/e2ee/routes/E2eeMessagesRoute";
-import { getAppMetadata } from "@/components/providers/metadata";
+import { notFound, permanentRedirect } from "next/navigation";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
+import { getEncryptedDevicesRoute } from "@/helpers/navigation.helpers";
 
-export const metadata = getAppMetadata(
-  { title: "Devices for encrypted messages" },
-  { robots: { index: false, follow: false } }
-);
-
+/**
+ * Devices and encrypted backup moved to Preferences → Devices & security.
+ * The config redirect (config/nextConfig.ts) answers first with a 308; this
+ * page only covers a request that reaches rendering anyway.
+ */
 export default function EncryptedMessagesDevicesPage() {
   if (!isE2eeEnabled()) {
     notFound();
   }
-
-  return (
-    <Suspense fallback={null}>
-      <E2eeMessagesRoute view={{ kind: "devices" }} />
-    </Suspense>
-  );
+  permanentRedirect(getEncryptedDevicesRoute());
 }

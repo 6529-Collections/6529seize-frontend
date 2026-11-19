@@ -5,7 +5,7 @@ const PREFERENCES_PROFILE_ENTRY_SOURCE = "profile";
 export type PreferencesRouteTab =
   | "blocked-profiles"
   | "reports"
-  | "devices"
+  | "security"
   | "time-zone";
 
 export const getPreferencesHref = ({

@@ -1667,6 +1667,19 @@ function createFakeDeliveryService(options = {}) {
       s.loginGrants.set(id, { message, signature, wallet, revoked: false });
       return id;
     },
+    /**
+     * When the device a combined sign-in grant enrolled was revoked, or
+     * null. Like the backend, revoking that device ends the grant too.
+     */
+    loginGrantRevokedAt(grantId) {
+      const id = lower(grantId);
+      for (const device of s.devices.values()) {
+        if (device.grant_id === id && device.revoked_at !== null) {
+          return device.revoked_at;
+        }
+      }
+      return null;
+    },
     /** NC8: the wallet's session revoked the grant (DN1 device list). */
     revokeLoginGrant(grantId) {
       const stored = s.loginGrants.get(lower(grantId));
