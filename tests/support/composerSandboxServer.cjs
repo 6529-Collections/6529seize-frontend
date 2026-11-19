@@ -3592,6 +3592,7 @@ function buildPublicRuntime() {
     ...(isE2eeSandbox
       ? {
           NEXT_PUBLIC_E2EE_DM_ENABLED: "true",
+          NEXT_PUBLIC_E2EE_POLLS_ENABLED: "true",
           NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true",
           GIPHY_API_KEY: "e2ee-sandbox-fixture",
         }

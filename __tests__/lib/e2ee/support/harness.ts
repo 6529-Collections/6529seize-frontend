@@ -9,6 +9,7 @@ import {
 
 import { createE2eeEngine } from "@/lib/e2ee/engine";
 import { buildGrant, E2EE_LEGACY_CIPHERSUITE } from "@/lib/e2ee/grant";
+import type * as PayloadCodec from "@/lib/e2ee/payload";
 import { createMemoryE2eeStorage, type E2eeStorage } from "@/lib/e2ee/storage";
 import type {
   E2eeEngineExt,
@@ -179,6 +180,33 @@ function loadEarlierSuiteEngine(): typeof createE2eeEngine {
   return earlierSuiteEngine;
 }
 
+// Only the reader differs: previous clients return null for new payload types.
+function loadEngineWithoutPolls(): typeof createE2eeEngine {
+  const payloadModule = "@/lib/e2ee/payload";
+  let create: typeof createE2eeEngine | undefined;
+  try {
+    jest.isolateModules(() => {
+      jest.doMock(payloadModule, () => {
+        const codec = jest.requireActual<typeof PayloadCodec>(payloadModule);
+        return {
+          ...codec,
+          decodePayload: (body: Uint8Array) => {
+            const value = codec.decodePayload(body);
+            return value && codec.isPollEvent(value) ? null : value;
+          },
+        };
+      });
+      create = jest.requireActual<{
+        createE2eeEngine: typeof createE2eeEngine;
+      }>("@/lib/e2ee/engine").createE2eeEngine;
+    });
+  } finally {
+    jest.dontMock(payloadModule);
+  }
+  if (!create) throw new Error("The earlier poll reader did not load");
+  return create;
+}
+
 export async function startDevice(
   world: World,
   profileId: string,
@@ -191,6 +219,7 @@ export async function startDevice(
     noWake?: boolean;
     /** Runs the engine as before D172 (0x004F, grant v1). */
     earlierSuite?: boolean;
+    withoutPolls?: boolean;
   } = {}
 ): Promise<TestDevice> {
   const storage = options.storage ?? createMemoryE2eeStorage();
@@ -225,8 +254,9 @@ export async function startDevice(
     delete engineOptions.onWake;
   }
   device.options = engineOptions;
-  const create =
-    options.earlierSuite === true ? loadEarlierSuiteEngine() : createE2eeEngine;
+  let create = createE2eeEngine;
+  if (options.earlierSuite === true) create = loadEarlierSuiteEngine();
+  if (options.withoutPolls === true) create = loadEngineWithoutPolls();
   device.engine = await create(engineOptions);
   if (
     options.enroll !== false &&
