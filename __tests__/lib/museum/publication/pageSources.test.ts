@@ -132,22 +132,14 @@ describe("Museum page source projection", () => {
     }
   });
 
-  it("uses closed visitor labels while retaining each immutable related path", () => {
+  it("leaves About's founding and transition sources to the page body", () => {
     const source = resolveMuseumPageSource(
       "/museum/network/about",
       buildMuseumPageSourceCatalog(publication)
     );
 
-    expect(source?.relatedSources).toEqual([
-      {
-        path: "docs/onchain-transition.md",
-        label: "onchainTransition",
-      },
-      {
-        path: "policies/founding-and-operating-principles.md",
-        label: "foundingPrinciples",
-      },
-    ]);
+    expect(source?.primaryPath).toBe("docs/open-museum.md");
+    expect(source?.relatedSources).toEqual([]);
   });
 
   it("grounds each Casey system study in its dossier and project essay", () => {

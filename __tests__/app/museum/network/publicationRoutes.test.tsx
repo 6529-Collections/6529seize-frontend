@@ -413,7 +413,7 @@ describe("Museum finished publication routes", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The 6529 Network Museum is a permanent collection of digital art held for the benefit of the 6529 Network and the public. It collects, preserves, studies, and shares art from the history of internet-native culture."
+        "The 6529 Network Museum is a permanent collection of digital art and photography, held on Ethereum for the benefit of the 6529 Network and the public. It collects, preserves, studies, and shares the works in its care."
       )
     ).toBeInTheDocument();
     expect(
@@ -430,7 +430,7 @@ describe("Museum finished publication routes", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "The 6529 Network holds the Collection for the public commons. Museum governance, rights, provenance, and preservation records explain how that responsibility is carried out."
+        "The 6529 Network holds the Collection for the public commons."
       )
     ).toBeInTheDocument();
     expect(
@@ -443,16 +443,16 @@ describe("Museum finished publication routes", () => {
       screen.getByRole("heading", { level: 2, name: "How the Museum works" })
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/Long-term care joins Ethereum state/u)
+      screen.getByText(/fixed by cryptographic hashes of every file/u)
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: "Founding record" })
+      screen.getByRole("link", { name: "Founding principles" })
     ).toHaveAttribute(
       "href",
       expect.stringContaining(`/blob/${"a".repeat(40)}/policies/`)
     );
     expect(
-      screen.getByRole("link", { name: "Open Museum statement" })
+      screen.getByRole("link", { name: "The Open Museum statement" })
     ).toHaveAttribute(
       "href",
       expect.stringContaining(`/blob/${"a".repeat(40)}/docs/`)
