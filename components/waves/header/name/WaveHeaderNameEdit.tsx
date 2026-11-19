@@ -37,9 +37,7 @@ export default function WaveHeaderNameEdit({
 
   return (
     <div>
-      {/* Hidden by opacity rather than `display`, and revealed by hover, focus
-          and `touch-only` alike: renaming a wave has no other entry point in
-          the app, so this control must stay reachable by every input. */}
+      {/* Keep the pencil reachable through hover, focus and touch alike. */}
       <IconButton
         ref={triggerRef}
         type="button"

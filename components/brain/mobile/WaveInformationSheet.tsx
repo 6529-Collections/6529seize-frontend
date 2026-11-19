@@ -12,6 +12,7 @@ import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import {
   WaveInformationPanelContext,
   WAVE_NAME_EDIT_VIEW,
+  WAVE_PICTURE_EDIT_VIEW,
   WAVE_OPTIONS_VIEW,
 } from "./WaveInformationPanelContext";
 
@@ -40,6 +41,7 @@ export default function WaveInformationSheet({
   );
   const isCompactSubview =
     information?.request?.view === WAVE_NAME_EDIT_VIEW ||
+    information?.request?.view === WAVE_PICTURE_EDIT_VIEW ||
     information?.request?.view === WAVE_OPTIONS_VIEW;
   const contentId = useId();
   const [container, setContainer] = useState<HTMLDivElement | null>(null);

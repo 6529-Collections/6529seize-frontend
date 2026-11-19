@@ -10889,7 +10889,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await openWaveInformation(page);
       await expect(trigger).toBeVisible();
+      const titleTrigger = sheet.getByRole("button", {
+        name: "Local Composer Sandbox Wave",
+        exact: true,
+      });
+      const currentUrl = page.url();
+      await titleTrigger.click();
+      await expect(page).toHaveURL(currentUrl);
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await expect(name).toHaveValue("Local Composer Sandbox Wave");
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(titleTrigger).toBeFocused();
       await trigger.click();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(trigger).toBeFocused();
+      await titleTrigger.click();
       await swipeVertically(
         page,
         sheet.getByTestId("mobile-dialog-header"),
@@ -10897,6 +10911,54 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       );
       await expect(page.getByRole("dialog")).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
+    });
+
+    test(`edits a wave picture within the ${surface} information sheet`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Touch sheet coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      await installCompetitionApi(page, true);
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      const sheet = await openWaveInformation(page);
+      const edit = sheet.getByRole("button", {
+        name: "Edit wave picture",
+        exact: true,
+      });
+      await edit.click();
+      await expect(sheet).toHaveAccessibleName("Update wave picture");
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await expect(
+        sheet.getByRole("button", { name: "Close", exact: true })
+      ).toHaveCount(1);
+      const save = sheet.getByRole("button", { name: "Save", exact: true });
+      await expect(save).toBeDisabled();
+      await expect(save).toBeInViewport({ ratio: 1 });
+      await sheet.getByLabel(/Click to upload/).setInputFiles({
+        name: "wave.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aWa0AAAAASUVORK5CYII=",
+          "base64"
+        ),
+      });
+      await expect(save).toBeEnabled();
+      await sheet.getByRole("button", { name: "Back", exact: true }).click();
+      await expect(edit).toBeFocused();
+      await edit.click();
+      await expect(save).toBeDisabled();
+      await expect(page.getByRole("dialog")).toHaveCount(1);
+      await sheet.getByRole("button", { name: "Close", exact: true }).click();
+      await expect(page.getByRole("dialog")).toHaveCount(0);
     });
 
     test(`keeps curation create and edit inside the ${surface} Wave sheet`, async ({

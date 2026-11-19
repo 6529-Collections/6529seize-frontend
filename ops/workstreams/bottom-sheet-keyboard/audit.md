@@ -154,7 +154,9 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
 
 - Wave rename is now an information-panel subview, using its existing portal,
   Back history and single Close control. Back discards an unsaved draft and
-  returns focus to the pencil. Save retains the v3 name-only PATCH and returns
+  returns focus to the name or pencil that opened it. Eligible editors can tap
+  the wave name in About to rename without navigating away. Other name links
+  and existing permission checks retain their behavior. Save retains the v3 name-only PATCH and returns
   to About. Close, outside dismissal and header swipe still dismiss the panel.
 - Rename fits its field and Save action instead of inheriting About's tall
   fixed surface. Back restores About's full information view. This follows the
@@ -164,13 +166,18 @@ These do not automatically inherit changes to `MobileWrapperDialog`.
 - Wave options also fits its short action list. Its Delete action and existing
   confirmation/cancellation path remain available; Back restores About's size
   and the three-dot trigger's focus.
+- Picture editing also uses the existing information-panel portal and history.
+  Its short upload form fits its content, with Back and one Close. Back discards
+  a selected file; saving retains authentication, image validation, multipart
+  upload, the picture-only hub update and cache refresh. Standalone entry points
+  retain their existing dialog.
 - Switching views retains the existing immediate content/height change, with
   the same mounted sheet, backdrop, header and Close control. Keyboard movement
   continues to use the shared native timing.
 - Standalone rename entry points retain their existing dialog. Permission checks
   are unchanged: connected, non-proxy author/admin eligibility on non-DM waves.
 - The other nesting findings in the baseline inventory remain source-audited:
-  picture editing, curation creation from a drop's picker, composer pickers,
+  curation creation from a drop's picker, composer pickers,
   category/rating detail transitions and mandatory confirmations. This PR does
   not remove any of those actions or confirmations. Their input surfaces inherit
   the common keyboard changes; the rename requirement is addressed directly.
