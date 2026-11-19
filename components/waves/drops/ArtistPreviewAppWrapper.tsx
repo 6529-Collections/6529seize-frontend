@@ -1,5 +1,6 @@
 "use client";
 
+import useDialogKeyboard from "@/hooks/useDialogKeyboard";
 import { observeFocusedField } from "@/helpers/focused-field-visibility";
 import {
   Dialog,
@@ -12,7 +13,6 @@ import { Fragment, useCallback, useRef } from "react";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import MobileWrapperDialogCloseButton from "@/components/mobile-wrapper-dialog/MobileWrapperDialogCloseButton";
 import useCapacitor from "@/hooks/useCapacitor";
-import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 
 const KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const KEYBOARD_TRANSITION =
@@ -20,7 +20,7 @@ const KEYBOARD_TRANSITION =
 const KEYBOARD_EASING =
   "var(--native-keyboard-layout-transition-easing, ease-out)";
 const APP_DIALOG_LAYOUT_STYLE: CSSProperties = {
-  height: `max(0px, calc(100% - ${KEYBOARD_INSET}))`,
+  height: `var(--dialog-viewport-height, max(0px, calc(100% - ${KEYBOARD_INSET})))`,
   transition: `height ${KEYBOARD_TRANSITION} ${KEYBOARD_EASING}`,
 };
 
@@ -35,16 +35,17 @@ export default function ArtistPreviewAppWrapper({
 }) {
   const { isCapacitor, isIos, isAndroid } = useCapacitor();
   const followsIosKeyboard = isCapacitor && isIos;
-  const followsNativeKeyboard = isCapacitor && (isIos || isAndroid);
-  const isNativeAndroid = isCapacitor && isAndroid;
-  useLayoutViewportLock(isOpen && followsNativeKeyboard);
   const dialogRef = useRef<HTMLDivElement>(null);
+  // The inner scroller owns late reply-content resizing, as in the voting fix.
+  const keyboardViewportRef = useDialogKeyboard(isOpen, {
+    observeFocus: false,
+  });
   useAndroidBackLayer(isOpen, dialogRef, onClose);
   const contentRef = useCallback(
     (container: HTMLDivElement | null) => {
       if (!container) return;
       const focusedField = observeFocusedField(container, {
-        observeContentResize: isNativeAndroid,
+        observeContentResize: isCapacitor && isAndroid,
       });
       const viewport = globalThis.visualViewport;
       viewport?.addEventListener("resize", focusedField.reveal);
@@ -57,7 +58,7 @@ export default function ArtistPreviewAppWrapper({
         viewport?.removeEventListener("scroll", focusedField.reveal);
       };
     },
-    [isNativeAndroid]
+    [isCapacitor, isAndroid]
   );
 
   return (
@@ -85,6 +86,7 @@ export default function ArtistPreviewAppWrapper({
 
         <div
           data-testid="artist-preview-app-layout"
+          ref={keyboardViewportRef}
           className="tw-fixed tw-inset-x-0 tw-top-0 tw-flex tw-items-end tw-pt-[calc(env(safe-area-inset-top,0px)+4rem)]"
           style={APP_DIALOG_LAYOUT_STYLE}
           onClick={(e) => e.stopPropagation()}

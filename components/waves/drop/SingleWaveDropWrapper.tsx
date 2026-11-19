@@ -1,4 +1,5 @@
 "use client";
+import useDialogKeyboard from "@/hooks/useDialogKeyboard";
 
 import IconButton from "@/components/utils/button/IconButton";
 
@@ -51,7 +52,7 @@ interface SingleWaveDropWrapperProps {
 const mobileChatPanelStyle: React.CSSProperties = {
   bottom: "var(--native-keyboard-inset-bottom, 0px)",
   transition:
-    "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out",
+    "bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
 };
 
 export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
@@ -67,6 +68,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
   const locale = useBrowserLocale();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const isCompactLayout = useIsMobileLayoutViewport();
+  const keyboardViewportRef = useDialogKeyboard(isChatOpen && isCompactLayout);
   const readyKeyRef = useRef<string | null>(null);
   const chatDialogRef = useRef<HTMLDivElement>(null);
 
@@ -205,6 +207,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
             aria-label={t(locale, "singleDrop.chatLabel")}
           >
             <div
+              ref={keyboardViewportRef}
               className="tw-fixed tw-left-[var(--left-rail,0px)] tw-right-0 tw-top-0 tw-max-h-[100dvh] tw-overflow-hidden tw-overscroll-none"
               style={mobileChatPanelStyle}
             >

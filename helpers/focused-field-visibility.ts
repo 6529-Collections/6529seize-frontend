@@ -19,7 +19,11 @@ export function observeFocusedField(
           focused instanceof HTMLTextAreaElement ||
           focused.isContentEditable)
       ) {
-        focused.scrollIntoView({ block: "nearest", inline: "nearest" });
+        focused.scrollIntoView({
+          behavior: "instant",
+          block: "nearest",
+          inline: "nearest",
+        });
       }
     });
   };
