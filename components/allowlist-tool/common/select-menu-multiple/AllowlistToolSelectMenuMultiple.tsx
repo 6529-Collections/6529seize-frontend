@@ -52,26 +52,16 @@ export default function AllowlistToolSelectMenuMultiple({
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
-  const [title, setTitle] = useState("");
-
-  useEffect(() => {
-    const count = selectedOptions.length;
-    if (count === 0) {
-      setTitle(placeholder);
-    } else if (count === 1) {
-      setTitle(selectedOptions[0]!.title);
-    } else if (count === options.length) {
-      setTitle(allSelectedTitle);
-    } else {
-      setTitle(`${count} ${someSelectedTitleSuffix}`);
-    }
-  }, [
-    selectedOptions,
-    placeholder,
-    options,
-    allSelectedTitle,
-    someSelectedTitleSuffix,
-  ]);
+  const selectedCount = selectedOptions.length;
+  let title = placeholder;
+  if (selectedCount === 1) {
+    title = selectedOptions[0]!.title;
+  } else if (selectedCount > 1) {
+    title =
+      selectedCount === options.length
+        ? allSelectedTitle
+        : `${selectedCount} ${someSelectedTitleSuffix}`;
+  }
 
   return (
     <div ref={listRef}>
