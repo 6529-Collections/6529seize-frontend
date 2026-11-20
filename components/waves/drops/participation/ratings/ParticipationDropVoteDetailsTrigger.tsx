@@ -422,7 +422,11 @@ export default function ParticipationDropVoteDetailsTrigger({
             ? t(locale, "waves.voteDetails.voters.unavailable")
             : tRich(locale, voterMessageKey, {
                 count: (
-                  <span key="count" className={countTextColorClassName}>
+                  <span
+                    key="count"
+                    data-wave-typography="preserve"
+                    className={`tw-tabular-nums ${countTextColorClassName}`}
+                  >
                     {formattedVoterCount}
                   </span>
                 ),

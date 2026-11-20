@@ -648,6 +648,7 @@ export function WaveLeaderboardVirtualizedRows<TItem>({
             loading={isFetchingNextPage}
             variant="tertiary"
             size="sm"
+            className="!tw-font-medium"
           >
             {isFetchingNextPage
               ? t(locale, "waves.leaderboard.loadingMoreButton")

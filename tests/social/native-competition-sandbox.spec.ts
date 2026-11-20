@@ -15608,7 +15608,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(waveView).toBeVisible();
         await expect(
           page.getByText("Legacy Main Stage artwork", { exact: true }).first()
-        ).toHaveCSS("font-weight", "500");
+        ).toHaveCSS(
+          "font-weight",
+          (await modes
+            .getByRole("tab", { name: "Grid view", exact: true })
+            .getAttribute("aria-selected")) === "true"
+            ? "600"
+            : "500"
+        );
         const totalLabel = page
           .getByRole("main")
           .locator('[data-wave-view="true"] [data-wave-vote-total]')
@@ -15624,7 +15631,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .filter({ visible: true });
         for (const control of await protectedControls.all()) {
           const originalWeight = await control.evaluate((element) =>
-            element.classList.contains("tw-font-bold") ? "700" : "600"
+            element.classList.contains("tw-font-bold")
+              ? "700"
+              : element.classList.contains("tw-font-semibold")
+                ? "600"
+                : "400"
           );
           await expect(control).toHaveCSS("font-weight", originalWeight);
         }
@@ -15638,12 +15649,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByRole("main")
           .locator('[data-wave-view="true"] [class~="tw-tabular-nums"]')
           .evaluateAll((elements) =>
-            elements.map(
-              (element) => getComputedStyle(element).fontVariantNumeric
-            )
+            elements.map((element) => ({
+              actual: getComputedStyle(element).fontVariantNumeric,
+              expected: element.closest('[data-wave-typography="preserve"]')
+                ? "tabular-nums"
+                : "normal",
+            }))
           );
         expect(numericStyles.length).toBeGreaterThan(0);
-        expect(numericStyles.every((value) => value === "normal")).toBe(true);
+        expect(
+          numericStyles.every(({ actual, expected }) => actual === expected)
+        ).toBe(true);
       };
       await modes.getByRole("tab", { name: "Grid view", exact: true }).click();
       await expectArtwork();
