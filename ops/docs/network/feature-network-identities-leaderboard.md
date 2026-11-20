@@ -79,7 +79,7 @@ pagination, and profile links.
   The filter does not offer saved-group search or `Hide criteria and members`.
 - When a signed-in user has an active Network scope with at least one
   criterion, the selected-group summary shows `REP everyone matching criteria`
-  and `NIC everyone matching criteria` directly below the group name.
+  and `NIC everyone matching criteria` directly below the criteria chips.
 - The REP action requires an amount and category. The NIC action requires an
   amount. Both actions show the matching member count and available credit per
   member before `Grant` becomes available.
