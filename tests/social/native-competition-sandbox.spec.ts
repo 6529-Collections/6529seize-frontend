@@ -3501,6 +3501,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(action).toHaveCSS("border-top-width", "1px");
       await expect(action).not.toHaveAttribute("class", /!tw-/);
     }
+    await expect(
+      details
+        .getByRole("button", { name: /^(Share wave|Copy wave link)$/ })
+        .locator("span")
+    ).toHaveCSS("font-weight", "500");
     const expandWaves = page.getByRole("button", {
       name: "Expand waves panel",
       exact: true,
@@ -13288,6 +13293,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await sandbox.legacyPrimary("alpha");
     await page.goto(`/waves/${WAVE}?tab=chat`);
     const information = await openWaveInformation(page);
+    await expect(
+      information.getByRole("tab", { name: "About", exact: true })
+    ).toHaveCSS("font-weight", "500");
     for (const name of ["About", "REP", "Configuration"]) {
       const section = information.getByRole("tab", { name, exact: true });
       await expect(section).toHaveCSS("height", "32px");
@@ -13296,6 +13304,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await information
       .getByRole("tab", { name: "Configuration", exact: true })
       .click();
+    await expect(
+      information.getByRole("tab", { name: "Configuration", exact: true })
+    ).toHaveCSS("font-weight", "500");
+    await expect(
+      information.getByRole("button", {
+        name: "Delete all my messages from this wave",
+        exact: true,
+      })
+    ).toHaveCSS("font-weight", "500");
     await expect(
       information.getByRole("button", { name: "Edit proposal card settings" })
     ).toHaveCount(0);

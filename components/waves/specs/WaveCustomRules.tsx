@@ -213,7 +213,7 @@ export default function WaveCustomRules({
         {customRules}
       </p>
     ) : (
-      <p className="tw-mb-0 tw-font-light tw-italic tw-text-iron-500">
+      <p className="tw-mb-0 tw-font-normal tw-italic tw-text-iron-500">
         {waveRightPanelText("waves.sidebar.rightPanel.rules.emptyGuidelines")}
       </p>
     );
