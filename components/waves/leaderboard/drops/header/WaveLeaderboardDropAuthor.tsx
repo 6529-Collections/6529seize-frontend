@@ -112,7 +112,10 @@ export const WaveLeaderboardDropAuthor: React.FC<
             onClick={(e) => e.stopPropagation()}
             className="tw-no-underline"
           >
-            <span className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none">
+            <span
+              data-wave-typography="preserve"
+              className="tw-mb-0 tw-text-md tw-font-semibold tw-leading-none"
+            >
               {authorLabel}
             </span>
           </Link>

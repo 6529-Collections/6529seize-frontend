@@ -39,9 +39,7 @@ test('exposes an accessible name and a non-hover reveal path', () => {
   render(<WaveHeaderNameEdit wave={createMockApiWave({ id: 'w1' })} />);
 
   const trigger = screen.getByRole('button', { name: 'Edit wave name' });
-  // Renaming a wave has no other entry point, so the control must never be
-  // removed from the layout — it is revealed by opacity, plus focus and
-  // touch-only paths for inputs that cannot hover.
+  // Keep the pencil reachable through focus and touch as well as hover.
   expect(trigger.className).not.toContain('tw-hidden');
   expect(trigger.className).toContain('focus-visible:tw-opacity-100');
   expect(trigger.className).toContain('touch-only:tw-opacity-100');

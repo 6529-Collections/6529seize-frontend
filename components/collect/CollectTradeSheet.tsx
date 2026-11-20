@@ -78,7 +78,7 @@ export function CollectTradeDialog({
       surfaceClassName={
         fixedHeight ? `tw-bg-iron-950 ${styles["orderSheet"] ?? ""}` : undefined
       }
-      fitVisualViewport={fixedHeight}
+      fitVisualViewport
       hideOnDesktopHover={false}
       enableDragToClose={false}
       maxWidthClass="md:tw-max-w-xl"

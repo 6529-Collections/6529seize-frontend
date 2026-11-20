@@ -1,4 +1,7 @@
 "use client";
+import useDialogKeyboard, {
+  DIALOG_KEYBOARD_VIEWPORT_STYLE,
+} from "@/hooks/useDialogKeyboard";
 
 import IconButton from "@/components/utils/button/IconButton";
 
@@ -75,6 +78,7 @@ export default function GroupAssignmentDialog({
   ) => Promise<ApiGroupFull | null>;
 }) {
   const locale = useBrowserLocale();
+  const keyboardViewportRef = useDialogKeyboard(!embedded);
   const modalRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const descriptionId = useId();
@@ -183,7 +187,11 @@ export default function GroupAssignmentDialog({
     >
       <div className="tw-relative tw-z-50 tw-cursor-default">
         <div className="tw-fixed tw-inset-0 tw-bg-gray-950/75"></div>
-        <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
+        <div
+          ref={keyboardViewportRef}
+          style={DIALOG_KEYBOARD_VIEWPORT_STYLE}
+          className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto"
+        >
           <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-px-0 tw-pt-8 tw-text-center sm:tw-items-center sm:tw-p-4">
             <dialog
               ref={modalRef}

@@ -18,6 +18,8 @@ import MobileWrapperDialogCloseButton from "./MobileWrapperDialogCloseButton";
 import MobileWrapperDialogHeader from "./MobileWrapperDialogHeader";
 import { useMobileDialogDrag } from "./useMobileDialogDrag";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
+import { observeFocusedField } from "@/helpers/focused-field-visibility";
 
 // Browser chrome can resize the viewport slightly without opening a keyboard.
 const BROWSER_KEYBOARD_MIN_INSET = 100;
@@ -28,11 +30,13 @@ const MOBILE_DIALOG_VIEWPORT_RESERVE =
   "var(--mobile-wrapper-dialog-viewport-reserve, 4rem)";
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
+const NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING =
+  "var(--native-keyboard-layout-transition-easing, ease-out)";
 // Animate layout offset with the surface height. A compositor transform can
 // outrun height layout on iOS, briefly pushing the sheet offscreen.
 const MOBILE_DIALOG_CONTAINER_STYLE: CSSProperties = {
   bottom: MOBILE_DIALOG_KEYBOARD_INSET,
-  transition: `bottom ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ease-out`,
+  transition: `bottom ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION} ${NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING}`,
 };
 
 type MobileWrapperDialogProps = {
@@ -345,7 +349,7 @@ function getPanelStyle({
 function getSurfaceStyle({
   dialogHeight,
   fixedHeight,
-  keyboardTransitionEasing = "ease-out",
+  keyboardTransitionEasing = NATIVE_KEYBOARD_LAYOUT_TRANSITION_EASING,
 }: {
   readonly dialogHeight: string;
   readonly fixedHeight?: boolean | undefined;
@@ -448,7 +452,7 @@ export default function MobileWrapperDialog({
   noPadding,
   tall,
   fixedHeight,
-  fitVisualViewport = false,
+  fitVisualViewport = true,
   avoidKeyboard = true,
   keyboardTransitionEasing,
   tabletModal,
@@ -482,6 +486,16 @@ export default function MobileWrapperDialog({
 }: MobileWrapperDialogProps) {
   const locale = useBrowserLocale();
   const { isCapacitor, isIos } = useCapacitor();
+  useLayoutViewportLock(isOpen && isCapacitor);
+  const trackFocusedField = useCallback(
+    (element: HTMLDivElement | null) => {
+      if (!isOpen || !element) return;
+      return observeFocusedField(element, {
+        observeContentResize: true,
+      }).disconnect;
+    },
+    [isOpen]
+  );
   const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const isTouchDevice = useIsTouchDevice();
   const titleRef = useRef<HTMLElement>(null);
@@ -717,6 +731,8 @@ export default function MobileWrapperDialog({
                     />
                     <div className={surfaceClassNames} style={surfaceStyle}>
                       <div
+                        ref={trackFocusedField}
+                        data-keyboard-scroll-container
                         className={contentClassNames}
                         style={{
                           paddingBottom: bottomPadding,

@@ -992,6 +992,43 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       );
       expect(positions.length).toBeGreaterThan(0);
       expect(positions.every((x) => Math.abs(x - before.x) < 1)).toBe(true);
+      if (!(touch && width === 375)) {
+        for (const offsetTop of [0, 120]) {
+          await page.evaluate((offset) => {
+            const viewport = globalThis.visualViewport!;
+            Object.defineProperty(viewport, "height", {
+              configurable: true,
+              value: 450,
+            });
+            Object.defineProperty(viewport, "offsetTop", {
+              configurable: true,
+              value: offset,
+            });
+            viewport.dispatchEvent(new Event("resize"));
+          }, offsetTop);
+          await expect
+            .poll(() =>
+              close.evaluate((element) => {
+                const overlay = element.parentElement!.parentElement!;
+                const bounds = overlay.getBoundingClientRect();
+                const viewport = globalThis.visualViewport!;
+                return (
+                  bounds.top >= viewport.offsetTop - 1 &&
+                  bounds.bottom <= viewport.offsetTop + viewport.height + 1
+                );
+              })
+            )
+            .toBe(true);
+          await expect(close).toBeInViewport({ ratio: 1 });
+        }
+        await page.evaluate(() => {
+          const viewport = globalThis.visualViewport!;
+          Reflect.deleteProperty(viewport, "height");
+          Reflect.deleteProperty(viewport, "offsetTop");
+          viewport.dispatchEvent(new Event("resize"));
+        });
+        await expect.poll(() => close.boundingBox()).toEqual(before);
+      }
       if (touch && width === 375) {
         await page.evaluate(() =>
           document.documentElement.style.setProperty(

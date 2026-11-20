@@ -1,4 +1,7 @@
 "use client";
+import useDialogKeyboard, {
+  DIALOG_KEYBOARD_VIEWPORT_STYLE,
+} from "@/hooks/useDialogKeyboard";
 
 import { useRef } from "react";
 import {
@@ -57,6 +60,7 @@ export function MemeCollaborationManageDialog({
       item.status === ApiMemeCollaborationInvitationStatusEnum.Accepted
   ).length;
   const locale = useBrowserLocale();
+  const keyboardViewportRef = useDialogKeyboard(true);
   const headingRef = useRef<HTMLHeadingElement>(null);
   return (
     <Dialog
@@ -68,8 +72,12 @@ export function MemeCollaborationManageDialog({
       className="tailwind-scope tw-fixed tw-inset-0 tw-z-[1000001]"
     >
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-backdrop-blur-[1px]" />
-      <div className="tw-fixed tw-inset-0 tw-flex tw-items-end tw-justify-center tw-overflow-hidden tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:tw-items-center sm:tw-p-4">
-        <DialogPanel className="tw-flex tw-max-h-full tw-w-full tw-max-w-xl tw-flex-col tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-2xl sm:tw-max-h-[calc(100dvh-2rem)] sm:tw-rounded-xl">
+      <div
+        ref={keyboardViewportRef}
+        style={DIALOG_KEYBOARD_VIEWPORT_STYLE}
+        className="tw-fixed tw-inset-0 tw-flex tw-items-end tw-justify-center tw-overflow-hidden tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:tw-items-center sm:tw-p-4"
+      >
+        <DialogPanel className="tw-flex tw-max-h-full tw-w-full tw-max-w-xl tw-flex-col tw-overflow-hidden tw-rounded-t-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-shadow-2xl sm:tw-max-h-[min(100%,calc(100dvh-2rem))] sm:tw-rounded-xl">
           <div className="tw-flex tw-items-start tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/10 tw-p-5">
             <div className="tw-min-w-0">
               <DialogTitle

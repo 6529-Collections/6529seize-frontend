@@ -18,9 +18,10 @@ jest.mock("@/services/api/wave-drops-v2-api", () => ({
 }));
 
 const mockContainer = jest.fn(
-  (_props: { readonly sourceDrop?: ExtendedDrop | undefined; readonly wave: ApiWave }) => (
-    <div data-testid="container" />
-  )
+  (_props: {
+    readonly sourceDrop?: ExtendedDrop | undefined;
+    readonly wave: ApiWave;
+  }) => <div data-testid="container" />
 );
 
 function render(ui: React.ReactElement) {
@@ -41,8 +42,10 @@ jest.mock(
   "@/components/waves/memes/submission/MemesArtSubmissionContainer",
   () => ({
     __esModule: true,
-    default: (props: { readonly sourceDrop?: ExtendedDrop | undefined; readonly wave: ApiWave }) =>
-      mockContainer(props),
+    default: (props: {
+      readonly sourceDrop?: ExtendedDrop | undefined;
+      readonly wave: ApiWave;
+    }) => mockContainer(props),
   })
 );
 
@@ -163,10 +166,10 @@ describe("MemesArtSubmissionModal", () => {
     );
     const panel = screen.getByTestId("memes-art-submission-modal-panel");
     expect(panel).toHaveClass(
-      "tw-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))]"
+      "tw-h-[min(var(--dialog-viewport-height,100dvh),calc(100dvh-var(--native-keyboard-inset-bottom,0px)))]"
     );
     expect(panel).toHaveClass(
-      "tw-max-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))]"
+      "tw-max-h-[min(var(--dialog-viewport-height,100dvh),calc(100dvh-var(--native-keyboard-inset-bottom,0px)))]"
     );
   });
 

@@ -19,7 +19,57 @@ export function observeFocusedField(
           focused instanceof HTMLTextAreaElement ||
           focused.isContentEditable)
       ) {
-        focused.scrollIntoView({ block: "nearest", inline: "nearest" });
+        const field = focused.getBoundingClientRect();
+        const scrollport = container.getBoundingClientRect();
+        const viewport = globalThis.visualViewport;
+        let visibleLeft = scrollport.left;
+        let visibleRight = scrollport.right;
+        let visibleTop = Math.max(scrollport.top, viewport?.offsetTop ?? 0);
+        let visibleBottom = Math.min(
+          scrollport.bottom,
+          viewport
+            ? viewport.offsetTop + viewport.height
+            : globalThis.innerHeight
+        );
+        for (
+          let parent = focused.parentElement;
+          parent && parent !== container;
+          parent = parent.parentElement
+        ) {
+          const style = getComputedStyle(parent);
+          const clipsVertically = /^(auto|scroll|hidden|clip)$/.test(
+            style.overflowY
+          );
+          const clipsHorizontally = /^(auto|scroll|hidden|clip)$/.test(
+            style.overflowX
+          );
+          if (!clipsVertically && !clipsHorizontally) continue;
+          const clip = parent.getBoundingClientRect();
+          if (clipsVertically) {
+            visibleTop = Math.max(visibleTop, clip.top);
+            visibleBottom = Math.min(visibleBottom, clip.bottom);
+          }
+          if (clipsHorizontally) {
+            visibleLeft = Math.max(visibleLeft, clip.left);
+            visibleRight = Math.min(visibleRight, clip.right);
+          }
+        }
+        // Layout often keeps the input visible by itself. Avoid issuing scroll
+        // commands on every keyboard frame when there is nothing to reveal.
+        if (
+          scrollport.height > 0 &&
+          field.height > 0 &&
+          field.top >= visibleTop &&
+          field.bottom <= visibleBottom &&
+          field.left >= visibleLeft &&
+          field.right <= visibleRight
+        )
+          return;
+        focused.scrollIntoView({
+          behavior: "instant",
+          block: "nearest",
+          inline: "nearest",
+        });
       }
     });
   };

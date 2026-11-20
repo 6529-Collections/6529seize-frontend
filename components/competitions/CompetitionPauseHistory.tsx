@@ -34,9 +34,9 @@ export default function CompetitionPauseHistory({
   return (
     <section
       aria-labelledby="competition-pause-history"
-      className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+      className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950"
     >
-      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-p-4 sm:tw-px-5">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-p-4 sm:tw-px-5">
         <h2
           id="competition-pause-history"
           className="tw-m-0 tw-flex tw-items-center tw-gap-2.5 tw-text-sm tw-font-semibold tw-text-iron-100"

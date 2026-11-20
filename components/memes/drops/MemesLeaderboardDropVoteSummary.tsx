@@ -54,7 +54,10 @@ const MemesLeaderboardDropVoteSummary: React.FC<
             numberWeight="semibold"
             visualVariant="memes"
           />
-          <span className="tw-whitespace-nowrap tw-text-label tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-ordinal tw-text-iron-600">
+          <span
+            data-wave-vote-total
+            className="tw-whitespace-nowrap tw-text-label tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-ordinal tw-text-iron-600"
+          >
             {t(locale, "waves.leaderboard.voteSummary.total", { creditType })}
           </span>
         </div>
