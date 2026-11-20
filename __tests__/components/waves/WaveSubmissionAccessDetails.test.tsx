@@ -264,7 +264,10 @@ describe("WaveSubmissionAccessDetails", () => {
     expect(
       jest
         .mocked(useQuery)
-        .mock.calls.filter(([{ queryKey }]) => queryKey[0] === QueryKey.GROUP)
+        .mock.calls.filter(
+          ([{ queryKey, enabled }]) =>
+            queryKey[0] === QueryKey.GROUP && enabled === true
+        )
     ).toHaveLength(1);
     expect(
       screen.getByText("Submissions require a wallet signature.")

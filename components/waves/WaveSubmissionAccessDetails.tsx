@@ -19,7 +19,7 @@ import {
 import { commonApiFetch } from "@/services/api/common-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { WaveGroupMembersSummaryLink } from "./specs/WaveRulesGroupMembersLink";
+import WaveRulesGroupMembersLink from "./specs/WaveRulesGroupMembersLink";
 
 type SubmissionGroup = Pick<ApiGroup, "id" | "is_hidden" | "is_direct_message">;
 
@@ -36,7 +36,8 @@ function SubmissionScope({
   const locale = useBrowserLocale();
   const groupId = group?.id?.trim() ?? "";
   // Legacy waves already mark groups that should be kept private.
-  const isHidden = group?.is_hidden || group?.is_direct_message;
+  const isHidden =
+    group?.is_hidden === true || group?.is_direct_message === true;
   const fetchGroupDetails = groupId.length > 0 && !isHidden;
   const groupDetails = useQuery<ApiGroupFull>({
     queryKey: [QueryKey.GROUP, groupId],
@@ -63,13 +64,14 @@ function SubmissionScope({
   let scopeValue: ReactNode = t(locale, "waves.access.publicGroup");
   if (canShowSummary) {
     scopeValue = (
-      <WaveGroupMembersSummaryLink
+      <WaveRulesGroupMembersLink
         groupId={groupId}
         href={`/network?page=1&group=${encodeURIComponent(groupId)}`}
-        groupDetails={groupDetails}
+        groupDetails={details}
       />
     );
   } else if (isHidden || fetchGroupDetails) {
+    // Hidden and unverified groups share the same privacy-preserving label.
     scopeValue = t(locale, "waves.chatSettings.access.privateGroup");
   } else if (group) {
     scopeValue = t(locale, "waves.chatSettings.access.unavailableGroup");
