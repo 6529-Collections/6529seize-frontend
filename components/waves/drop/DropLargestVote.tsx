@@ -102,6 +102,7 @@ function LargestVoteContent({
       </Link>
       <span
         aria-hidden="true"
+        data-wave-typography="preserve"
         className={`tw-shrink-0 tw-whitespace-nowrap tw-font-medium tw-tabular-nums ${voteColor}`}
       >
         {compactVote}

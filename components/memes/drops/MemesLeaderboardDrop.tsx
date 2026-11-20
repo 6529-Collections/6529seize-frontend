@@ -268,6 +268,7 @@ export const MemesLeaderboardDrop: React.FC<MemesLeaderboardDropProps> = ({
                         {drop.is_additional_action_promised === true && (
                           <AdditionalActionPromiseBadge
                             focusable={!opensWholeCard}
+                            className="!tw-font-medium"
                           />
                         )}
                       </div>
