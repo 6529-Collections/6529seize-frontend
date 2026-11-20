@@ -136,19 +136,21 @@ function readStoredProfiles(): Promise<boolean> {
   const store = getDesktopStore();
   if (!store) return Promise.resolve(false);
   const generation = profilesGeneration;
-  profilesLoading ??= Promise.resolve().then(async () => {
-    try {
-      const storedProfiles = await store.get(PROFILES_KEY);
-      if (generation !== profilesGeneration) return false;
-      profilesRead = true;
-      setProfiles(readProfiles(storedProfiles));
-      return true;
-    } catch {
-      return false;
-    } finally {
+  profilesLoading ??= Promise.resolve()
+    .then(async () => {
+      try {
+        const storedProfiles = await store.get(PROFILES_KEY);
+        if (generation !== profilesGeneration) return false;
+        profilesRead = true;
+        setProfiles(readProfiles(storedProfiles));
+        return true;
+      } catch {
+        return false;
+      }
+    })
+    .finally(() => {
       profilesLoading = null;
-    }
-  });
+    });
   return profilesLoading;
 }
 
