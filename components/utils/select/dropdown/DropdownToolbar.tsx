@@ -14,8 +14,8 @@ export function useDropdownToolbarMetrics() {
 }
 
 const TOOLBAR_METRICS = {
-  compact: { height: 32, y: 0, left: 10 },
-  regular: { height: 40, y: 8 },
+  compact: { height: 32, minHeight: 0, y: 0, left: 10 },
+  regular: { height: 40, minHeight: 0, y: 8 },
 } as const;
 
 export default function DropdownToolbar({

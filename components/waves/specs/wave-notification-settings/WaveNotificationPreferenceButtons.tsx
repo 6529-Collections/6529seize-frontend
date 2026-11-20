@@ -101,7 +101,7 @@ function NotificationMenuItem({
         event.stopPropagation();
         onSelect();
       }}
-      className={`tw-flex tw-w-full ${mobile ? "tw-min-h-12" : ""} tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 ${getMenuItemStyle(
+      className={`tw-flex tw-w-full ${mobile ? "tw-min-h-12" : ""} tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-text-iron-500 [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-2 [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-inset [[role=menu]:focus-visible_&]:data-[focus]:tw-ring-iron-400 ${getMenuItemStyle(
         {
           active,
           disabled: buttonDisabled,

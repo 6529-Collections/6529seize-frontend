@@ -1,6 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { createRef } from "react";
 import NativeSelect from "@/components/utils/select/NativeSelect";
+import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
 
 describe("NativeSelect", () => {
   it("keeps native labels, changes, form data and the forwarded ref", () => {
@@ -53,4 +54,17 @@ describe("NativeSelect", () => {
         expect(select).not.toHaveAttribute(name);
     }
   );
+
+  it("uses the toolbar height for a native select with the default form variant", () => {
+    render(
+      <DropdownToolbar variant="compact">
+        <NativeSelect aria-label="Timeframe">
+          <option>30 days</option>
+        </NativeSelect>
+      </DropdownToolbar>
+    );
+    const select = screen.getByRole("combobox", { name: "Timeframe" });
+    expect(select).toHaveClass("tw-h-8", "tw-min-h-0");
+    expect(select).not.toHaveClass("tw-min-h-11");
+  });
 });
