@@ -1,4 +1,4 @@
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { faTimesCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import type {
@@ -227,7 +227,10 @@ function FormControl({ as, className, ...props }: Readonly<FormControlProps>) {
     return (
       <select
         {...(props as ComponentPropsWithoutRef<"select">)}
-        className={controlClassName}
+        className={adminClassName(
+          `${getDropdownTriggerClasses({ variant: "form", metrics: { x: 12, y: 6, text: "base" } })} tw-block tw-w-full`,
+          className
+        )}
       />
     );
   }
@@ -249,7 +252,7 @@ function FormSelect({
     <select
       {...props}
       className={adminClassName(
-        `${DROPDOWN_FIELD_CLASSES} tw-block tw-w-full tw-px-3 tw-py-1.5 tw-text-base`,
+        `${getDropdownTriggerClasses({ variant: "form", metrics: { x: 12, y: 6, text: "base" } })} tw-block tw-w-full`,
         className
       )}
     >

@@ -187,7 +187,10 @@ describe("WaveNotificationSettings", () => {
     const broadcastMentionsButton = screen.getByLabelText(
       "Receive @all and @contributors notifications"
     );
-    expect(broadcastMentionsButton).toHaveClass("tw-text-primary-400");
+    expect(broadcastMentionsButton).toHaveClass(
+      "tw-text-iron-100",
+      "tw-bg-iron-800"
+    );
   });
 
   it("shows all-message menu item as active when all-message notifications enabled", async () => {
@@ -209,7 +212,7 @@ describe("WaveNotificationSettings", () => {
     const allButton = screen.getByLabelText(
       "Receive notifications for all messages"
     );
-    expect(allButton).toHaveClass("tw-text-primary-400");
+    expect(allButton).toHaveClass("tw-text-iron-100", "tw-bg-iron-800");
   });
 
   it("can show broadcast mention and all-message menu items active together", async () => {
@@ -233,10 +236,10 @@ describe("WaveNotificationSettings", () => {
 
     expect(
       screen.getByLabelText("Receive @all and @contributors notifications")
-    ).toHaveClass("tw-text-primary-400");
+    ).toHaveClass("tw-text-iron-100", "tw-bg-iron-800");
     expect(
       screen.getByLabelText("Receive notifications for all messages")
-    ).toHaveClass("tw-text-primary-400");
+    ).toHaveClass("tw-text-iron-100", "tw-bg-iron-800");
   });
 
   it("enables all-message notifications for waves with many followers", async () => {

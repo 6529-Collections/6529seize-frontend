@@ -153,7 +153,7 @@ export default function UserPageCollectedFilters({
   };
 
   return (
-    <DropdownToolbar size="sm" className="tw-relative tw-w-full">
+    <DropdownToolbar variant="compact" className="tw-relative tw-w-full">
       <div
         ref={scrollContainerRef}
         className="tw-w-full tw-overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:tw-hidden"

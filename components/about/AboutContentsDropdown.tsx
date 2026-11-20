@@ -1,11 +1,12 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import useCapacitor from "@/hooks/useCapacitor";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import { useAppWallets } from "@/components/app-wallets/AppWalletsContext";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import { DEFAULT_ITEM_CLASSES } from "@/components/compact-menu/constants";
 import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
@@ -150,7 +151,8 @@ export function AboutContentsDropdown({
             page: currentLabel,
           })}
           unstyledTrigger
-          triggerClassName={`${DROPDOWN_FIELD_CLASSES} tw-inline-flex tw-min-h-10 tw-max-w-full tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-left hover:tw-border-primary-400/60`}
+          unstyledItems
+          triggerClassName={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 40, x: 12, y: 8 } })} tw-inline-flex tw-max-w-full tw-items-center tw-gap-2 tw-text-left`}
           trigger={<AboutContentsDropdownTrigger currentLabel={currentLabel} />}
           items={items}
           activeItemId={activeItemId}
@@ -160,7 +162,8 @@ export function AboutContentsDropdown({
           headerClassName="tw-mb-1 tw-flex tw-min-h-14 tw-items-center tw-px-3 tw-py-2"
           itemsWrapperClassName="tw-pr-2"
           menuClassName="tw-[scrollbar-gutter:stable] tw-max-h-80 tw-overflow-y-auto tw-overflow-x-hidden tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-2 tw-pr-3 tw-shadow-2xl tw-scrollbar-thin tw-scrollbar-track-transparent tw-scrollbar-thumb-iron-700/70 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-max-h-96"
-          itemClassName="!tw-no-underline hover:!tw-no-underline focus:!tw-no-underline tw-px-3 tw-py-2.5"
+          itemClassName={`${DEFAULT_ITEM_CLASSES} !tw-no-underline hover:!tw-no-underline focus:!tw-no-underline tw-px-3 tw-py-2.5`}
+          activeItemClassName="tw-bg-transparent tw-text-primary-300"
           inactiveItemClassName="tw-text-iron-200 hover:tw-bg-iron-900 hover:tw-text-iron-50"
           focusItemClassName="tw-bg-iron-900 tw-text-iron-50"
         />

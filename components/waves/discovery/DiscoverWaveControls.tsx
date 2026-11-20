@@ -1,10 +1,13 @@
 "use client";
 
 import {
-  ACTION_LABEL_CLASSES,
   MOBILE_ACTION_ICON_CLASSES,
   MOBILE_ACTION_ITEM_CLASSES,
 } from "@/components/compact-menu/constants";
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  DROPDOWN_OPTION_ACTIVE_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import MobileTabsScrollControls from "@/components/brain/my-stream/MobileTabsScrollControls";
 import Button from "@/components/utils/button/Button";
@@ -181,7 +184,7 @@ export function DiscoverWaveControls({
         >
           <Button
             variant="dropdown"
-            size="sm"
+            size="xs"
             aria-label={t(locale, "waves.discovery.sort.open", {
               sort: currentLabel,
             })}
@@ -278,19 +281,19 @@ export function DiscoverWaveControls({
                 onSortChange(option.value);
                 setSortOpen(false);
               }}
-              className={`${MOBILE_ACTION_ITEM_CLASSES} tw-min-h-12 tw-px-3 aria-pressed:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
+              className={`${MOBILE_ACTION_ITEM_CLASSES} tw-min-h-12 tw-px-3 ${DROPDOWN_OPTION_ACTIVE_CLASSES} focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400`}
             >
               <span className={`${MOBILE_ACTION_ICON_CLASSES} tw-self-center`}>
                 <ScoreSortIcon sort={option.value} className="tw-size-5" />
               </span>
               <span
-                className={`${ACTION_LABEL_CLASSES} tw-min-w-0 tw-flex-1 tw-self-center`}
+                className={`tw-min-w-0 tw-flex-1 tw-self-center tw-font-semibold`}
               >
                 {t(locale, option.label)}
               </span>
               {activeSort === option.value && (
                 <CheckIcon
-                  className="tw-size-5 tw-shrink-0 tw-self-center"
+                  className={`tw-size-5 tw-shrink-0 tw-self-center ${DROPDOWN_CHECKMARK_CLASSES}`}
                   aria-hidden="true"
                 />
               )}

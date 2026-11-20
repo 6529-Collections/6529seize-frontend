@@ -50,7 +50,8 @@ export default function UserPageCollectedFiltersNetworkCollection({
       )}
       setSelected={setSelected}
       size="sm"
-      variant="filter"
+      variant="regular"
+      presentation="filter"
     />
   );
 }

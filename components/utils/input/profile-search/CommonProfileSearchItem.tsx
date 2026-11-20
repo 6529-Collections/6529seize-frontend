@@ -1,3 +1,7 @@
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  getDropdownOptionStateClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCheck } from "@fortawesome/free-solid-svg-icons";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
@@ -40,11 +44,7 @@ export default function CommonProfileSearchItem({
         type="button"
         onClick={onProfileClick}
         tabIndex={-1}
-        className={`tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-bg-transparent tw-px-2 tw-py-2 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-700 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${
-          isHighlighted
-            ? "tw-bg-iron-700 tw-ring-2 tw-ring-inset tw-ring-primary-400"
-            : "tw-bg-transparent"
-        }`}
+        className={`tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-px-2 tw-py-2 tw-text-left tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${getDropdownOptionStateClasses(isSelected || isHighlighted)} ${isHighlighted ? "tw-ring-2 tw-ring-inset tw-ring-iron-500" : ""}`}
       >
         <div className="tw-flex tw-w-full tw-items-center tw-justify-between">
           <div className="tw-flex tw-items-center tw-space-x-2">
@@ -79,7 +79,7 @@ export default function CommonProfileSearchItem({
           {isSelected && (
             <FontAwesomeIcon
               icon={faCheck}
-              className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+              className={`tw-h-5 tw-w-5 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES} tw-transition tw-duration-300 tw-ease-out`}
               aria-hidden="true"
               focusable={false}
             />

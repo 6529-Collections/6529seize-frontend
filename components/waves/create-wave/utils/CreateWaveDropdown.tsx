@@ -3,6 +3,8 @@
 import {
   DROPDOWN_CHEVRON_CLASSES,
   getDropdownTriggerClasses,
+  DROPDOWN_CHECKMARK_CLASSES,
+  getDropdownOptionStateClasses,
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -206,7 +208,7 @@ export default function CreateWaveDropdown<TValue extends string>({
       role="listbox"
       aria-label={ariaLabel}
       data-placement={useMobileSheet ? undefined : menuPlacement}
-      className={`tw-m-0 tw-w-full tw-list-none tw-bg-iron-950 tw-p-2 ${menuClasses}`}
+      className={`tw-m-0 tw-w-full tw-list-none tw-bg-iron-900 tw-p-2 ${menuClasses}`}
     >
       {options.map((option, index) => (
         <li key={option.value} role="none">
@@ -220,13 +222,13 @@ export default function CreateWaveDropdown<TValue extends string>({
             disabled={disabled}
             onClick={() => selectOption(option)}
             onKeyDown={(event) => onOptionKeyDown(event, index)}
-            className="tw-relative tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-text-white tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.06] motion-reduce:tw-transition-none"
+            className={`tw-relative tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition-colors tw-duration-150 tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none ${getDropdownOptionStateClasses(option.value === value)}`}
           >
             <span>{option.label}</span>
             {option.value === value && (
               <FontAwesomeIcon
                 icon={faCheck}
-                className="tw-ml-2 tw-size-4 tw-flex-shrink-0 tw-text-primary-300"
+                className={`tw-ml-2 tw-size-4 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
                 aria-hidden="true"
               />
             )}
@@ -269,7 +271,7 @@ export default function CreateWaveDropdown<TValue extends string>({
         data-testid={dataTestId}
         onClick={() => setIsOpen((current) => !current)}
         onKeyDown={onTriggerKeyDown}
-        className={`${getDropdownTriggerClasses({ invalid: hasError, rounding })} tw-group tw-flex tw-h-11 tw-w-full tw-items-center tw-justify-between tw-px-3 tw-text-base sm:tw-text-sm`}
+        className={`${getDropdownTriggerClasses({ variant: "regular", metrics: { height: 44, x: 12, text: "responsive" }, invalid: hasError, rounding })} tw-group tw-flex tw-w-full tw-items-center tw-justify-between`}
       >
         <span className={valueClasses}>{selectedOption?.label}</span>
         <FontAwesomeIcon
