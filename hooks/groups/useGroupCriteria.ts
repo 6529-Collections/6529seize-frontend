@@ -18,6 +18,21 @@ const normalizeWallets = (wallets: readonly string[]): string[] => [
   ),
 ];
 
+export function useSavedGroup(groupId: string | null) {
+  const normalizedGroupId = groupId ?? "";
+  return useQuery<ApiGroupFull>({
+    queryKey: [QueryKey.GROUP, normalizedGroupId],
+    queryFn: async ({ signal }) =>
+      await commonApiFetch<ApiGroupFull>({
+        endpoint: `groups/${encodeURIComponent(normalizedGroupId)}`,
+        errorMode: "structured",
+        signal,
+      }),
+    enabled: groupId !== null,
+    staleTime: 60_000,
+  });
+}
+
 export function useGroupCriteria(groupId: string | null): {
   readonly criteria: GroupCriteria | null;
   readonly isLoading: boolean;
@@ -25,16 +40,7 @@ export function useGroupCriteria(groupId: string | null): {
   readonly retry: () => void;
 } {
   const normalizedGroupId = groupId ?? "";
-  const groupQuery = useQuery<ApiGroupFull>({
-    queryKey: [QueryKey.GROUP, normalizedGroupId],
-    queryFn: async ({ signal }) =>
-      await commonApiFetch<ApiGroupFull>({
-        endpoint: `groups/${encodeURIComponent(normalizedGroupId)}`,
-        signal,
-      }),
-    enabled: groupId !== null,
-    staleTime: 60_000,
-  });
+  const groupQuery = useSavedGroup(groupId);
   const group = groupQuery.data ?? null;
   const includedIdentityGroupId = group?.group.identity_group_id ?? null;
   const excludedIdentityGroupId =
