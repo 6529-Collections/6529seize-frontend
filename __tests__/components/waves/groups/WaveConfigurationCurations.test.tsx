@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithQueryClient } from "@/__tests__/utils/reactQuery";
 import { useAuth } from "@/components/auth/Auth";
@@ -9,6 +9,8 @@ import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReo
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { commonApiFetch } from "@/services/api/common-api";
 import { fetchSavedGroupMembersPage } from "@/services/api/group-members-api";
+import { PROFILE_SWITCHED_EVENT } from "@/services/auth/auth.utils";
+import { getCurrentProfileQueryViewer } from "@/services/auth/profile-query-viewer";
 
 const replace = jest.fn();
 let searchParams = new URLSearchParams();
@@ -23,6 +25,9 @@ jest.mock("@/components/auth/Auth", () => ({
 }));
 jest.mock("@/helpers/waves/waves.helpers", () => ({
   canEditWave: jest.fn(),
+}));
+jest.mock("@/services/auth/profile-query-viewer", () => ({
+  getCurrentProfileQueryViewer: jest.fn(),
 }));
 jest.mock("@/hooks/waves/useWaveCurations", () => ({
   useWaveCurations: jest.fn(),
@@ -140,6 +145,7 @@ describe("WaveConfigurationCurations", () => {
       connectedProfile: null,
     } as ReturnType<typeof useAuth>);
     mockCanEditWave.mockReturnValue(true);
+    jest.mocked(getCurrentProfileQueryViewer).mockReturnValue("first-session");
     mockUseWaveCurations.mockReturnValue({
       data: curations,
       isPending: false,
@@ -153,6 +159,7 @@ describe("WaveConfigurationCurations", () => {
     jest.mocked(commonApiFetch).mockImplementation(async ({ endpoint }) => ({
       id: endpoint.split("/").at(-1),
       name: endpoint === "groups/group-1" ? "Artists" : "Collectors",
+      is_private: true,
       group: {
         tdh: { min: null, max: null, inclusion_strategy: "TDH" },
         rep: {
@@ -210,6 +217,7 @@ describe("WaveConfigurationCurations", () => {
     expect(
       screen.queryByText("Artists", { exact: true })
     ).not.toBeInTheDocument();
+    expect(commonApiFetch).toHaveBeenCalledTimes(curations.length);
     const configurationMenu = screen.getByRole("button", {
       name: "Configure First curation",
     }).parentElement;
@@ -237,6 +245,26 @@ describe("WaveConfigurationCurations", () => {
     expect(
       screen.getByRole("button", { name: "Configure First curation" })
     ).toBeInTheDocument();
+  });
+
+  it("discards private group criteria when the active session changes", async () => {
+    renderWithQueryClient(<WaveConfigurationCurations wave={wave} />);
+    await screen.findByRole("link", {
+      name: "Inspect Artists group criteria and members: 17 users",
+    });
+
+    jest.mocked(getCurrentProfileQueryViewer).mockReturnValue("second-session");
+    jest.mocked(commonApiFetch).mockRejectedValue(new Error("Unavailable"));
+    act(() => {
+      window.dispatchEvent(new Event(PROFILE_SWITCHED_EVENT));
+    });
+
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(screen.getAllByText("Unavailable group")).toHaveLength(
+        curations.length
+      )
+    );
   });
 
   it("opens curation creation and exposes ordering actions", async () => {

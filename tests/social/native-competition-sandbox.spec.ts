@@ -12420,9 +12420,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await configuration.click();
-    const curations = information.locator("section").filter({
-      has: page.getByRole("heading", { name: "Curations", exact: true }),
-    });
+    const curations = information
+      .getByRole("heading", { name: "Curations", exact: true })
+      .locator("xpath=ancestor::section[1]");
     const memberLink = curations.getByRole("link", {
       name: "Inspect Active collectors group criteria and members: 25 users",
     });

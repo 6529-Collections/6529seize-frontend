@@ -10,7 +10,7 @@ import {
   ArrowUpIcon,
   PlusIcon,
 } from "@heroicons/react/24/outline";
-import { useQuery } from "@tanstack/react-query";
+import { CancelledError, useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { CompactMenuItem } from "@/components/compact-menu";
@@ -22,9 +22,14 @@ import type { ApiWaveCuration } from "@/generated/models/ApiWaveCuration";
 import WaveGroupMembersScope from "@/components/waves/specs/groups/group/WaveGroupMembersScope";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
+import {
+  PENDING_PROFILE_QUERY_VIEWER,
+  useProfileQueryViewer,
+} from "@/hooks/useProfileQueryViewer";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
 import { commonApiFetch } from "@/services/api/common-api";
+import { getCurrentProfileQueryViewer } from "@/services/auth/profile-query-viewer";
 import WavePanelSection from "./WavePanelSection";
 
 interface WaveConfigurationCurationRowProps {
@@ -34,6 +39,7 @@ interface WaveConfigurationCurationRowProps {
   readonly isMovePending: boolean;
   readonly onDeleted: () => void;
   readonly onMove: (direction: "previous" | "next") => void;
+  readonly viewer: string | null;
   readonly wave: ApiWave;
 }
 
@@ -44,16 +50,24 @@ function WaveConfigurationCurationRow({
   isMovePending,
   onDeleted,
   onMove,
+  viewer,
   wave,
 }: WaveConfigurationCurationRowProps) {
+  // A wave editor only sees private criteria returned for their own session.
   const groupQuery = useQuery<ApiGroupFull>({
-    queryKey: [QueryKey.GROUP, curation.group_id],
-    queryFn: async ({ signal }) =>
-      await commonApiFetch<ApiGroupFull>({
+    queryKey: [QueryKey.GROUP, curation.group_id, viewer],
+    queryFn: async ({ signal }) => {
+      if (getCurrentProfileQueryViewer() !== viewer) {
+        throw new CancelledError({ revert: true });
+      }
+      return await commonApiFetch<ApiGroupFull>({
         endpoint: `groups/${encodeURIComponent(curation.group_id)}`,
         signal,
-      }),
-    staleTime: 60_000,
+        cache: "no-store",
+      });
+    },
+    enabled: viewer !== null && viewer !== PENDING_PROFILE_QUERY_VIEWER,
+    staleTime: 5 * 60 * 1000,
   });
   const leadingItems: CompactMenuItem[] = [
     {
@@ -86,6 +100,7 @@ function WaveConfigurationCurationRow({
         {group ? (
           <WaveGroupMembersScope
             group={{ id: group.id, name: group.name, is_hidden: false }}
+            groupDetails={group}
           />
         ) : (
           <span className="tw-min-w-0 tw-break-words tw-py-0.5 tw-font-medium tw-leading-5 tw-text-iron-50">
@@ -122,6 +137,7 @@ function WaveConfigurationCurationsAuthorizedContent({
   // react-doctor-disable-next-line react-doctor/nextjs-no-use-search-params-without-suspense -- Wrapped by WaveConfigurationAdminSettings Suspense boundary.
   const searchParams = useSearchParams();
   const locale = useBrowserLocale();
+  const viewer = useProfileQueryViewer();
   const createPanel = useWaveInformationPanel(
     t(locale, "profileCuration.editor.createTitle")
   );
@@ -186,6 +202,7 @@ function WaveConfigurationCurationsAuthorizedContent({
             onMove={(direction) =>
               moveCuration({ curation, direction, curations })
             }
+            viewer={viewer}
             wave={wave}
           />
         ))}
