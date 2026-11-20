@@ -12391,6 +12391,74 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   });
 
+  test("shows curation group criteria and opens its member list from Wave Configuration", async ({
+    page,
+  }, testInfo) => {
+    const groupId = composerSandboxConstants.previewGroupId;
+    const criteria = "TDH at least 100 and Level at least 1";
+    await installCompetitionApi(page);
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "art-curation",
+            name: "Art",
+            wave_id: WAVE,
+            group_id: groupId,
+            created_at: 1,
+            updated_at: 1,
+            priority_order: 1,
+          },
+        ],
+      })
+    );
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    const waveUrl = page.url();
+    const information = await openWaveInformation(page);
+    const configuration = information.getByRole("tab", {
+      name: "Configuration",
+      exact: true,
+    });
+    await configuration.click();
+    const curations = information.locator("section").filter({
+      has: page.getByRole("heading", { name: "Curations", exact: true }),
+    });
+    const memberLink = curations.getByRole("link", {
+      name: "Inspect Active collectors group criteria and members: 25 users",
+    });
+    await expect(memberLink.getByText(criteria, { exact: true })).toBeVisible();
+    await expect(memberLink).toHaveAccessibleDescription(criteria);
+    await expect(curations.getByText("Art", { exact: true })).toBeVisible();
+    await expect(
+      curations.getByText("Active collectors", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      curations.getByRole("button", { name: "Configure Art", exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await curations.screenshot({
+      path: testInfo.outputPath("curation-group-criteria.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+
+    await memberLink.focus();
+    await expect(memberLink).toBeFocused();
+    await memberLink.press("Enter");
+    await expect(page).toHaveURL(`/network?page=1&group=${groupId}`, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("button", { name: "Clear selected group", exact: true })
+    ).toBeVisible();
+    await page.goBack();
+    await expect(page).toHaveURL(waveUrl);
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await expect(configuration).toHaveAttribute("aria-selected", "true");
+      await expect(memberLink).toBeVisible();
+    }
+  });
+
   test("keeps Cancel in desktop Wave setting popovers", async ({
     page,
   }, testInfo) => {

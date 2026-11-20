@@ -1,11 +1,14 @@
-import { render, screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithQueryClient } from "@/__tests__/utils/reactQuery";
 import { useAuth } from "@/components/auth/Auth";
 import WaveConfigurationCurations from "@/components/waves/groups/WaveConfigurationCurations";
+import type { ApiWave } from "@/generated/models/ApiWave";
 import { canEditWave } from "@/helpers/waves/waves.helpers";
 import { useWaveCurationReorderMutation } from "@/hooks/waves/useWaveCurationReorderMutation";
 import { useWaveCurations } from "@/hooks/waves/useWaveCurations";
-import { useQuery } from "@tanstack/react-query";
+import { commonApiFetch } from "@/services/api/common-api";
+import { fetchSavedGroupMembersPage } from "@/services/api/group-members-api";
 
 const replace = jest.fn();
 let searchParams = new URLSearchParams();
@@ -27,8 +30,11 @@ jest.mock("@/hooks/waves/useWaveCurations", () => ({
 jest.mock("@/hooks/waves/useWaveCurationReorderMutation", () => ({
   useWaveCurationReorderMutation: jest.fn(),
 }));
-jest.mock("@tanstack/react-query", () => ({
-  useQuery: jest.fn(),
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn(),
+}));
+jest.mock("@/services/api/group-members-api", () => ({
+  fetchSavedGroupMembersPage: jest.fn(),
 }));
 jest.mock(
   "@/components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog",
@@ -101,8 +107,8 @@ const mockUseWaveCurationReorderMutation =
   useWaveCurationReorderMutation as jest.MockedFunction<
     typeof useWaveCurationReorderMutation
   >;
-const mockUseQuery = useQuery as jest.Mock;
 const moveCuration = jest.fn();
+const wave = { id: "wave-id" } as ApiWave;
 const curations = [
   {
     id: "curation-1",
@@ -127,7 +133,8 @@ describe("WaveConfigurationCurations", () => {
     moveCuration.mockReset();
     mockUseWaveCurations.mockReset();
     mockUseWaveCurationReorderMutation.mockReset();
-    mockUseQuery.mockReset();
+    jest.mocked(commonApiFetch).mockReset();
+    jest.mocked(fetchSavedGroupMembersPage).mockClear();
     mockUseAuth.mockReturnValue({
       activeProfileProxy: null,
       connectedProfile: null,
@@ -143,31 +150,66 @@ describe("WaveConfigurationCurations", () => {
       isPending: false,
       pendingCurationId: null,
     } as any);
-    mockUseQuery.mockImplementation(({ queryKey }) => ({
-      data: { name: queryKey[1] === "group-1" ? "Artists" : "Collectors" },
-      isPending: false,
+    jest.mocked(commonApiFetch).mockImplementation(async ({ endpoint }) => ({
+      id: endpoint.split("/").at(-1),
+      name: endpoint === "groups/group-1" ? "Artists" : "Collectors",
+      group: {
+        tdh: { min: null, max: null, inclusion_strategy: "TDH" },
+        rep: {
+          min: 1,
+          max: null,
+          category: "6529 Dev Team",
+          user_identity: "punk6529",
+          direction: "RECEIVED",
+        },
+        cic: {
+          min: null,
+          max: null,
+          user_identity: null,
+          direction: "RECEIVED",
+        },
+        level: { min: null, max: null },
+        owns_nfts: [],
+        identity_group_identities_count: 11,
+      },
     }));
+    jest.mocked(fetchSavedGroupMembersPage).mockResolvedValue({
+      count: 17,
+      page: 1,
+      next: false,
+      data: [],
+    });
   });
 
   it("does not render or query curations without configuration permission", () => {
     mockCanEditWave.mockReturnValue(false);
 
-    render(<WaveConfigurationCurations wave={{ id: "wave-id" } as any} />);
+    renderWithQueryClient(<WaveConfigurationCurations wave={wave} />);
 
     expect(
       screen.queryByRole("heading", { name: "Curations" })
     ).not.toBeInTheDocument();
     expect(mockUseWaveCurations).not.toHaveBeenCalled();
+    expect(commonApiFetch).not.toHaveBeenCalled();
   });
 
-  it("lists curation names and groups with gear-style management menus", () => {
-    render(<WaveConfigurationCurations wave={{ id: "wave-id" } as any} />);
+  it("shows curation group criteria and a linked member count beside the gear menu", async () => {
+    renderWithQueryClient(<WaveConfigurationCurations wave={wave} />);
 
     expect(
       screen.getByRole("heading", { name: "Curations" })
     ).toBeInTheDocument();
     expect(screen.getByText("First curation")).toBeInTheDocument();
-    expect(screen.getByText("Artists")).toBeInTheDocument();
+    const memberLink = await screen.findByRole("link", {
+      name: "Inspect Artists group criteria and members: 17 users",
+    });
+    expect(memberLink).toHaveAttribute("href", "/network?page=1&group=group-1");
+    expect(memberLink).toHaveAccessibleDescription(
+      "REP in 6529 Dev Team from punk6529 at least 1 and 11 explicitly included users"
+    );
+    expect(
+      screen.queryByText("Artists", { exact: true })
+    ).not.toBeInTheDocument();
     const configurationMenu = screen.getByRole("button", {
       name: "Configure First curation",
     }).parentElement;
@@ -181,9 +223,25 @@ describe("WaveConfigurationCurations", () => {
     );
   });
 
+  it("keeps the gear menu available when the curation group cannot be read", async () => {
+    jest.mocked(commonApiFetch).mockRejectedValue(new Error("Unavailable"));
+    renderWithQueryClient(<WaveConfigurationCurations wave={wave} />);
+
+    await waitFor(() =>
+      expect(screen.getAllByText("Unavailable group")).toHaveLength(
+        curations.length
+      )
+    );
+    expect(screen.queryByRole("link")).not.toBeInTheDocument();
+    expect(fetchSavedGroupMembersPage).not.toHaveBeenCalled();
+    expect(
+      screen.getByRole("button", { name: "Configure First curation" })
+    ).toBeInTheDocument();
+  });
+
   it("opens curation creation and exposes ordering actions", async () => {
     const user = userEvent.setup();
-    render(<WaveConfigurationCurations wave={{ id: "wave-id" } as any} />);
+    renderWithQueryClient(<WaveConfigurationCurations wave={wave} />);
 
     await user.click(screen.getByRole("button", { name: "Create curation" }));
     expect(screen.getByRole("dialog")).toHaveTextContent("Curation editor");
@@ -209,7 +267,7 @@ describe("WaveConfigurationCurations", () => {
       pendingCurationId: "curation-1",
     } as any);
 
-    render(<WaveConfigurationCurations wave={{ id: "wave-id" } as any} />);
+    renderWithQueryClient(<WaveConfigurationCurations wave={wave} />);
 
     screen.getAllByRole("button", { name: "Move up" }).forEach((button) => {
       expect(button).toBeDisabled();
@@ -224,7 +282,7 @@ describe("WaveConfigurationCurations", () => {
       "curation=curation-1&view=compact&filter=active"
     );
     const user = userEvent.setup();
-    render(<WaveConfigurationCurations wave={{ id: "wave-id" } as any} />);
+    renderWithQueryClient(<WaveConfigurationCurations wave={wave} />);
 
     const deleteCallbackButton = screen
       .getAllByRole("button", { name: "Run delete callback" })
