@@ -30,6 +30,7 @@ export async function getForgeLaunch(
   try {
     return await commonApiFetch<ApiDropForgeLaunch>({
       endpoint: claimPath(contract, claim),
+      errorMode: "structured",
     });
   } catch (error) {
     if (getStructuredApiErrorStatus(error) === 404) return null;
@@ -69,6 +70,7 @@ export async function latestForgeProcess(
   const rows = await commonApiFetch<ApiDropForgeJob[]>({
     endpoint: `drop-forge/distribution-jobs/${contract}/${claim}`,
     params: { plan_id: plan },
+    errorMode: "structured",
   });
   return rows[0] ?? null;
 }

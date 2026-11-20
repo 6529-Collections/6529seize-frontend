@@ -13,8 +13,7 @@ import DropForgeTransactionRecovery from "./DropForgeTransactionRecovery";
 import DropForgeSupplyEvidence from "./DropForgeSupplyEvidence";
 
 function actionStatus(action: ApiDropForgeAction) {
-  if (action.state === State.Skipped)
-    return "dropForge.actionSoldOut" as const;
+  if (action.state === State.Skipped) return "dropForge.actionSoldOut" as const;
   if (action.state === State.Confirmed && (action.unfilled_tokens ?? 0) > 0)
     return "dropForge.actionPartiallyFulfilled" as const;
   if (action.state === State.Confirmed)
@@ -51,6 +50,22 @@ function ActionRow({
 }>) {
   const locale = useBrowserLocale();
   const unfilledCards = action.unfilled_tokens ?? 0;
+  const retryAt = action.retry_at;
+  let retryStatus: string | undefined;
+  if (action.wallet_blocked === true) {
+    retryStatus =
+      typeof retryAt !== "number"
+        ? t(locale, "dropForge.walletRetryManual")
+        : t(locale, "dropForge.walletRetryScheduled", {
+            date: new Intl.DateTimeFormat(locale, {
+              dateStyle: "medium",
+              timeStyle: "short",
+              timeZone: "UTC",
+            }).format(retryAt * 1000),
+          });
+  } else if (action.attempt_error && action.state === State.Pending) {
+    retryStatus = t(locale, "dropForge.actionRetryWindow");
+  }
   const explorer = (
     {
       1: "https://etherscan.io",
@@ -118,10 +133,8 @@ function ActionRow({
           {action.attempt_error}
         </p>
       )}
-      {action.attempt_error && action.state === State.Pending && (
-        <p className="tw-my-1 tw-text-iron-400">
-          {t(locale, "dropForge.actionRetryWindow")}
-        </p>
+      {retryStatus !== undefined && (
+        <p className="tw-my-1 tw-text-iron-400">{retryStatus}</p>
       )}
       <DropForgeTransactionRecovery
         launch={launch}

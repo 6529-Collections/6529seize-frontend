@@ -143,6 +143,7 @@ export default function DropForgeLaunchClaimPageClient({
 
   const {
     coordinateManualWrites,
+    automationLaunch,
     artistAirdropSummary,
     teamAirdropSummary,
     subscriptionAirdropSections,
@@ -346,6 +347,7 @@ export default function DropForgeLaunchClaimPageClient({
         pageTitle={pageTitle}
         craftHref={`/drop-forge/craft/${claimId}`}
         showAutoLaunch={coordinateManualWrites}
+        automationLaunch={automationLaunch}
         loading={loading}
         error={error}
         rootsError={rootsError}

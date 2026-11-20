@@ -50,6 +50,7 @@ const DROP_FORGE_WRITE_ACTIONS: readonly RegExp[] = [
   /^Prepare manually$/,
   /^Resume automatic execution$/,
   /^Pause automatic execution$/,
+  /^Retry now$/,
   /^Record transaction$/,
   /^Cancel unsubmitted manual operation$/,
   /^Add Admin$/,

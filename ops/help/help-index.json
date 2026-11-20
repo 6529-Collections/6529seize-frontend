@@ -9361,6 +9361,7 @@
         "About EMMA, the question-mark link beside the title on the entry and plans pages, opens /emma/help. This public help page contains the full introduction, Janus link, TDH policy, and Back to EMMA link.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
         "In EMMA Review, distribution administrators confirm the token ID and choose Prepare manually or Process and Finalize. The first saved manual action or creation of a background job sets the mode. Reset Subscriptions clears subscriber work and restores both choices while keeping artist and team uploads.",
+        "In EMMA Review, Artist Airdrops and Team Airdrops CSV file uploads accept the downloaded address,count header or a headerless file. Paste CSV takes wallet-and-count data rows.",
         "Process and Finalize recognizes one phase each for 0, 1, and 2. For example, Phase 1, Phase1, P 1, P1, and 1 are equivalent regardless of case. Missing or duplicate phases block processing. Empty phases are accepted and Public is generated automatically.",
         "EMMA Review shows the current step while processing. Download lists appears in each phase and Public row after processing completes with matching phase inputs, alongside Completed · Lists ready to download in the preparation row. In manual mode, a red × or green check beside Finalize Distribution shows whether finalization is complete.",
         "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
@@ -9648,7 +9649,8 @@
         "launch claims",
         "drop forge launch",
         "claim launch",
-        "launch detail"
+        "launch detail",
+        "mint watch"
       ],
       "keywords": ["drop", "forge", "launch", "claims", "detail", "mint"],
       "facts": [
@@ -9656,8 +9658,9 @@
         "Launch claim detail pages use /drop-forge/launch/{id}.",
         "Configured claims admins, creator owner, and approved on-chain admins can use Launch completion tracking on the configured contract. The API verifies creator permissions on the relevant chain.",
         "The Auto Launch pill identifies a saved automation plan in Craft, the Launch list, and Launch detail.",
+        "Saved plans show inline prerequisite and manual completion statuses beside the manual Launch controls. Authorized operators can use Retry now after fixing a wallet funding or permission block while the safe execution window allows.",
         "Phase 2 and Public subscriber airdrops run in separate transactions during the Phase 2 transition. New Auto Launch plans use manual Launch subscription rank and give Phase 2 the first allocation. The last eligible wallet can receive a partial allocation. Each row is marked Completed when the full group is delivered.",
-        "Drop Forge Ops reports partial subscriber airdrops and sold-out skips. Readiness checks at 17:20, 18:28, 18:58, and 19:22 Athens time also cover manual launches and verify sellouts on-chain.",
+        "Drop Forge Ops reports partial subscriber airdrops and sold-out skips. Mint Watch posts readiness results at 17:20, 18:28, 18:58, and 19:22 Athens time. These checks also cover manual launches and verify sellouts on-chain. Ready and verified sellout posts are untagged. Reports with issues list the findings and tag @dropforgeops.",
         "The signing wallet pays operation gas. Admin approval does not redirect mint revenue. Pay Artist is a direct ETH transfer from the signing wallet's balance plus gas, not a withdrawal from the mint-income wallet or contract.",
         "If the authorized wallet is disconnected, a launch on-chain action opens wallet connection and continues after connection succeeds when its transaction details are unchanged; refreshed details cancel the pending action so the user can review and retry.",
         "Launch claim pages can include mint stats and subscription airdrop sections when configured."

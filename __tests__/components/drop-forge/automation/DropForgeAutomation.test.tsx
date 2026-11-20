@@ -11,6 +11,7 @@ import {
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DropForgeAutomationStatus from "@/components/drop-forge/launch/DropForgeAutomationStatus";
+import { getLaunchInlineStatuses } from "@/components/drop-forge/launch/DropForgeInlineStatus";
 import CraftLaunchActions from "@/components/drop-forge/craft/CraftLaunchActions";
 import ProcessAndFinalize from "@/components/distribution-plan-tool/review-distribution-plan/ProcessAndFinalize";
 import {
@@ -19,11 +20,20 @@ import {
   latestForgeProcess,
   startForgeProcess,
 } from "@/services/api/drop-forge-api";
-import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
+import {
+  ApiDropForgeLaunchStateEnum as LaunchState,
+  type ApiDropForgeLaunch,
+} from "@/generated/models/ApiDropForgeLaunch";
 import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
+import {
+  dropForgeStatusInterval,
+  dropForgeStatusPolling,
+  hasActiveLaunchWork,
+} from "@/hooks/drop-forge-status-polling";
 import { forgeProcessKey } from "@/hooks/useDropForgeProcess";
 import { resolveForgePhaseInputs } from "@/services/api/drop-forge-process-inputs";
+import { commonApiPost } from "@/services/api/common-api";
 import {
   ApiDropForgeJobKindEnum as JobKind,
   ApiDropForgeJobStatusEnum as JobStatus,
@@ -43,6 +53,12 @@ jest.mock("@/components/drop-forge/drop-forge-config", () => ({
   useDropForgeMintingConfig: () => ({ contract: "0xcreator" }),
 }));
 jest.mock("@/hooks/useDropForgeSettings");
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual<typeof import("@/services/api/common-api")>(
+    "@/services/api/common-api"
+  ),
+  commonApiPost: jest.fn(),
+}));
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
@@ -95,6 +111,106 @@ beforeEach(() => {
   jest.mocked(useDropForgeSettings).mockReturnValue({
     data: { automation_enabled: true },
   } as ReturnType<typeof useDropForgeSettings>);
+});
+
+it("refreshes active launches and outstanding manual or signed work only", () => {
+  const current = launch(true);
+  const initialization = current.actions[0];
+  if (!initialization) throw new Error("Initialization fixture missing");
+  expect(hasActiveLaunchWork(null)).toBe(false);
+  expect(hasActiveLaunchWork(current)).toBe(true);
+  current.state = LaunchState.Completed;
+  expect(hasActiveLaunchWork(current)).toBe(false);
+  current.state = LaunchState.Cancelled;
+  expect(hasActiveLaunchWork(current)).toBe(false);
+  initialization.state = ActionState.Signed;
+  expect(hasActiveLaunchWork(current)).toBe(true);
+  initialization.state = ActionState.Confirmed;
+  current.state = LaunchState.Paused;
+  current.manual_pending = true;
+  expect(hasActiveLaunchWork(current)).toBe(true);
+});
+
+it.each([401, 403])("stops refreshing and retrying after HTTP %s", (status) => {
+  const error = Object.assign(new Error("Access denied"), { status });
+  expect(dropForgeStatusInterval({ error, fetchFailureCount: 1 }, 5000)).toBe(
+    false
+  );
+  expect(dropForgeStatusPolling.retry(0, error)).toBe(false);
+});
+
+it("backs off failed status reads and resumes the normal interval on success", () => {
+  const error = new Error("Unavailable");
+  expect(dropForgeStatusInterval({ error, fetchFailureCount: 2 }, 5000)).toBe(
+    20_000
+  );
+  expect(
+    dropForgeStatusInterval({ error: null, fetchFailureCount: 0 }, 3000)
+  ).toBe(3000);
+  expect(dropForgeStatusPolling.refetchIntervalInBackground).toBe(false);
+});
+it("shows inline prerequisites only for a saved plan and confirms manual artist delivery independently", () => {
+  expect(getLaunchInlineStatuses(undefined, "phase0")).toBeUndefined();
+  const current = launch(false);
+  expect(
+    getLaunchInlineStatuses({ ...current, state: LaunchState.Draft }, "phase0")
+  ).toBeUndefined();
+  current.phases = [
+    { name: "Phase 0", start: 10, end: 20, root: "0x0", price_wei: "0" },
+  ];
+  const initialization = current.actions[0];
+  if (!initialization) throw new Error("Initialization fixture missing");
+  const artist = {
+    ...initialization,
+    id: "artist",
+    kind: ActionKind.Airdrop,
+    label: "Airdrop - Artist",
+    recipients: 1,
+  };
+  current.actions.push(artist, {
+    ...artist,
+    id: "team",
+    label: "Airdrop - Team",
+  });
+  expect(getLaunchInlineStatuses(current, "phase0")?.artist?.key).toBe(
+    "waitingInit"
+  );
+  initialization.state = ActionState.Confirmed;
+  artist.state = ActionState.Confirmed;
+  artist.observed = true;
+  const verified = getLaunchInlineStatuses(current, "phase0");
+  expect(verified?.artist?.key).toBe("completedManually");
+  expect(verified?.team).toBeUndefined();
+});
+it("only offers Retry now when the server allows it and submits the current revision", async () => {
+  const current = launch(false);
+  const action = current.actions[0]!;
+  action.wallet_blocked = true;
+  action.wallet_retry_available = false;
+  jest.mocked(getForgeLaunch).mockResolvedValue(current);
+  jest.mocked(commonApiPost).mockResolvedValue(current);
+  const { client } = renderUI(
+    <DropForgeAutomationStatus
+      claimId={123}
+      onConfirmedWork={() => undefined}
+    />
+  );
+  await screen.findByText("No automatic retry scheduled.");
+  expect(screen.queryByRole("button", { name: "Retry now" })).toBeNull();
+  act(() => {
+    client.setQueryData(forgeLaunchKey("0xcreator", 123), {
+      ...current,
+      actions: [{ ...action, wallet_retry_available: true }],
+    });
+  });
+  fireEvent.click(await screen.findByRole("button", { name: "Retry now" }));
+  await waitFor(() =>
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "drop-forge/launches/0xcreator/123/control",
+      body: { revision: current.revision, operation: "RETRY" },
+    })
+  );
+  expect(mockRequestAuth).toHaveBeenCalledTimes(1);
 });
 it.each([
   [1, "https://etherscan.io"],

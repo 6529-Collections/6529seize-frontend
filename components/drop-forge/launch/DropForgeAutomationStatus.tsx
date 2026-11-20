@@ -3,6 +3,7 @@ import DropForgeActionGroups from "./DropForgeActionGroups";
 import { ApiDropForgeActionStateEnum as ActionState } from "@/generated/models/ApiDropForgeAction";
 import { useEffect, useEffectEvent, useState } from "react";
 import { useDropForgeLaunch } from "@/hooks/useDropForgeLaunch";
+import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { useAuth } from "@/components/auth/Auth";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
 import { finishForgeManual } from "@/services/api/drop-forge-api";
@@ -22,7 +23,8 @@ export default function DropForgeAutomationStatus({
   const { contract } = useDropForgeMintingConfig();
   const { requestAuth } = useAuth();
   const locale = useBrowserLocale();
-  const query = useDropForgeLaunch(claimId, true);
+  const query = useDropForgeLaunch(claimId, { watch: true });
+  const settings = useDropForgeSettings();
   const [hash, setHash] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -37,7 +39,7 @@ export default function DropForgeAutomationStatus({
     if (confirmed) confirmedWork();
   }, [confirmed]);
   if (!launch) return null;
-  async function control(resume: boolean) {
+  async function control(operation: ApiDropForgeControlRequest["operation"]) {
     if (!launch) return;
     setBusy(true);
     setError(null);
@@ -47,9 +49,7 @@ export default function DropForgeAutomationStatus({
         endpoint: `drop-forge/launches/${contract}/${claimId}/control`,
         body: {
           revision: launch.revision,
-          operation: resume
-            ? ApiDropForgeControlRequestOperationEnum.Resume
-            : ApiDropForgeControlRequestOperationEnum.Pause,
+          operation,
         },
       });
       await query.refetch();
@@ -91,6 +91,21 @@ export default function DropForgeAutomationStatus({
         </p>
       )}
       <DropForgeActionGroups launch={launch} onChange={() => query.refetch()} />
+      {settings.data?.automation_enabled &&
+        !launch.manual_pending &&
+        ["ARMED", "RUNNING"].includes(launch.state) &&
+        launch.actions.some((action) => action.wallet_retry_available) && (
+          <button
+            type="button"
+            disabled={busy}
+            className="tw-mt-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-800 tw-px-4 tw-py-2 tw-text-sm tw-text-iron-100 disabled:tw-opacity-50"
+            onClick={() =>
+              void control(ApiDropForgeControlRequestOperationEnum.Retry)
+            }
+          >
+            {t(locale, "dropForge.retryNow")}
+          </button>
+        )}
       {launch.manual_pending && (
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
           <label>
@@ -127,7 +142,11 @@ export default function DropForgeAutomationStatus({
             type="button"
             disabled={busy}
             onClick={() => {
-              void control(["PAUSED", "BLOCKED"].includes(launch.state));
+              void control(
+                ["PAUSED", "BLOCKED"].includes(launch.state)
+                  ? ApiDropForgeControlRequestOperationEnum.Resume
+                  : ApiDropForgeControlRequestOperationEnum.Pause
+              );
             }}
           >
             {t(

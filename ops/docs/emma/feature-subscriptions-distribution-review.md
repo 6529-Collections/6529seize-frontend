@@ -77,7 +77,8 @@ The Memes token distribution outputs.
   - the row shows wallet and token counts from the current distribution overview.
   - uploads accept pasted CSV text or `.csv`, `text/csv`, `text/plain` files up
     to `10MB`.
-  - CSV must use raw `address,count` lines only; header rows are rejected.
+  - downloaded CSVs include an `address,count` header. File uploads accept
+    that header or a headerless CSV. Paste only wallet-and-count data rows.
   - each line must contain exactly one valid Ethereum address and one positive
     integer count.
   - uploads replace the current artist/team airdrop list for the confirmed
