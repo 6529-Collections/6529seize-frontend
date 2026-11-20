@@ -24,6 +24,17 @@ export type E2eeEngineStatus =
   | "device-limit" // 10 active devices: user must revoke one
   | "error";
 
+/** How far the first chat discovery has got on this device. */
+export type E2eeInitialSyncStatus =
+  | "pending"
+  | "waiting"
+  | "delayed"
+  | "awaiting-invitation"
+  | "failed"
+  | "complete";
+
+export const E2EE_INITIAL_INBOX_WAIT_MS = 15_000;
+
 export interface E2eeDeviceInfo {
   linkedAuthorProof?: boolean;
   authorProofGrantId?: string;
@@ -237,6 +248,7 @@ export interface E2eeEngine {
   // state (synchronous snapshots) + change subscription
   getStatus(): E2eeEngineStatus;
   getError(): string | null;
+  getInitialSyncStatus(): E2eeInitialSyncStatus;
   /** Locally held device key, available before the server device list loads. */
   getLocalDeviceKey(): string | null;
   getThisDevice(): E2eeDeviceInfo | null;
@@ -249,7 +261,7 @@ export interface E2eeEngine {
   subscribe(listener: () => void): () => void; // any state change
 
   // lifecycle
-  enroll(): Promise<void>; // the single wallet prompt
+  enroll(onProvisioning?: () => void): Promise<void>; // the single wallet prompt
   /**
    * Whether turning on needs a brand-new device key: no stored device that
    * enroll() would resume, register or renew. A combined sign-in (NC8) can
@@ -260,8 +272,12 @@ export interface E2eeEngine {
    * NC8: registers the key a combined sign-in just stored for this profile,
    * with no wallet prompt, and starts the engine. Resolves with the status
    * it settles on; a refused sign-in grant leaves "needs-enrollment".
+   * `resumeStored` also accepts an existing encryption grant without renewing it.
    */
-  enrollWithLoginGrant(): Promise<E2eeEngineStatus>;
+  enrollWithLoginGrant(options?: {
+    /** Reuse an existing encryption grant after a signing-only sign-in. */
+    readonly resumeStored?: boolean;
+  }): Promise<E2eeEngineStatus>;
   /**
    * Non-null while this device has moved off an earlier MLS ciphersuite and
    * not enrolled again (status "needs-enrollment"): the UI shows upgrade
@@ -270,7 +286,8 @@ export interface E2eeEngine {
    * (`needsNewDevice()` is true, so a combined sign-in can carry it).
    */
   getUpgrade(): { superseded: number } | null;
-  sync(): Promise<void>; // pull inbox + all groups now
+  /** Pull the inbox and all groups. Explicit rechecks also refresh roster hints. */
+  sync(options?: { readonly recheckInbox?: boolean }): Promise<void>;
   dispose(): void;
 
   // conversations

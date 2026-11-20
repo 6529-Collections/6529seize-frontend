@@ -11,6 +11,7 @@ import {
   type RouteSearchParams,
 } from "@/helpers/navigation.helpers";
 import MessagesPageClient from "./page.client";
+import MessagesRouteLoading from "@/components/messages/MessagesRouteLoading";
 
 export const metadata = getAppMetadata(
   {
@@ -54,7 +55,7 @@ export default async function MessagesPage({
   const queryClient = new QueryClient();
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <Suspense fallback={null}>
+      <Suspense fallback={<MessagesRouteLoading />}>
         <MessagesPageClient />
       </Suspense>
     </HydrationBoundary>
