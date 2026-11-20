@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import type { ApiGroupFull } from "../../generated/models/ApiGroupFull";
 import type { ApiWave } from "../../generated/models/ApiWave";
 import { ApiDropModerationStatus } from "../../generated/models/ApiDropModerationStatus";
 import { ApiWaveSubscriptionTargetAction } from "../../generated/models/ApiWaveSubscriptionTargetAction";
@@ -9,6 +10,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import {
   expectNoUnsafeSandboxMutations,
   getSandboxApiOrigin,
@@ -135,6 +137,55 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Wave previews require the isolated mock API runner."
   );
+
+  test("shows Network as the group preview title and retains the group details", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const groupId = composerSandboxConstants.previewGroupId;
+    const groupHref = `/network?page=1&group=${groupId}`;
+    const groupResponse = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}/api/groups/${groupId}`
+    );
+    expect(groupResponse.ok()).toBe(true);
+    const group: ApiGroupFull = await groupResponse.json();
+    await installPreview(
+      page,
+      baseURL,
+      WAVE_NAME,
+      true,
+      new URL(groupHref, baseURL).href
+    );
+    await page.goto(`/waves/${WAVE_ID}`, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+
+    const chat = page.getByRole("region", { name: "Wave chat file upload area" });
+    const title = chat.getByRole("link", { name: "Network", exact: true });
+    await expect(title).toHaveAttribute("href", groupHref, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(title).toHaveText("Network");
+    await expect(title).toHaveAttribute("title", "Network");
+    await expect(title).toHaveAccessibleDescription(/>= 100.*Created /);
+    await expect(
+      chat.getByText(group.name, { exact: true })
+    ).toHaveCount(0);
+    const criterion = chat.getByText(">= 100", { exact: true });
+    await expect(criterion).toBeVisible();
+    await criterion.scrollIntoViewIfNeeded();
+    const bodyLink = await criterion.evaluate((element) => {
+      const { x, y, width, height } = element.getBoundingClientRect();
+      return document
+        .elementFromPoint(x + width / 2, y + height / 2)
+        ?.closest("a")
+        ?.getAttribute("href");
+    });
+    expect(bodyLink).toBe(groupHref);
+    await expect(chat.getByText(/^Created /)).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, testInfo, "network-group-preview");
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
 
   test("keeps a shared NFT preview openable and copyable without a price on iOS", async ({
     page,
