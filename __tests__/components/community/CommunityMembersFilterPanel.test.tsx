@@ -1,26 +1,17 @@
 import { useState, type ComponentProps } from "react";
 import type { GroupCriteriaView } from "@/components/groups/assignment/GroupCriteriaEditor";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { renderWithQueryClient } from "@/__tests__/utils/reactQuery";
 import CommunityMembersFilterPanel from "@/components/community/CommunityMembersFilterPanel";
-import type GroupMembersPreviewTrigger from "@/components/groups/members/GroupMembersPreviewTrigger";
 import type GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersPreviewDialog";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { createEmptyInlineGroupPayload } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
+import { fetchGroupMembersPage } from "@/services/api/group-members-api";
 
-jest.mock("@/components/groups/members/GroupMembersPreviewTrigger", () => ({
-  __esModule: true,
-  default: ({
-    target,
-    onOpen,
-  }: ComponentProps<typeof GroupMembersPreviewTrigger>) => (
-    <div>
-      <span>
-        {target.kind === "draft" ? target.summary : target.group.name}
-      </span>
-      <button onClick={onOpen}>View members</button>
-    </div>
-  ),
+jest.mock("@/services/api/group-members-api", () => ({
+  ...jest.requireActual("@/services/api/group-members-api"),
+  fetchGroupMembersPage: jest.fn(),
 }));
 jest.mock("@/components/groups/members/GroupMembersPreviewDialog", () => ({
   __esModule: true,
@@ -68,7 +59,7 @@ function renderPanel(
 ) {
   const onCreateGroup = jest.fn().mockResolvedValue(createdGroup);
   const onChange = jest.fn();
-  render(
+  renderWithQueryClient(
     <PanelHarness
       suggestedName="Network filter"
       defaultLabel="All Network members"
@@ -96,6 +87,15 @@ async function openCriterion(
 beforeAll(() => {
   HTMLElement.prototype.scrollTo = jest.fn();
   HTMLElement.prototype.scrollIntoView = jest.fn();
+});
+
+beforeEach(() => {
+  jest.mocked(fetchGroupMembersPage).mockImplementation(async ({ target }) => ({
+    count: target.kind === "saved" ? 277 : 0,
+    page: 1,
+    next: false,
+    data: [],
+  }));
 });
 
 it("opens the mobile list with all eight criteria and readiness guidance on demand", async () => {
@@ -253,10 +253,19 @@ it("prefills a saved group, keeps both previews, and does not change the origina
     name: "Original group",
     is_private: true,
     group: {
-      ...initial.group,
+      tdh: initial.group.tdh,
+      rep: initial.group.rep,
+      cic: initial.group.cic,
       level: { min: 20, max: null },
+      owns_nfts: [],
       identity_group_id: "included",
+      identity_group_identities_count: 1,
       excluded_identity_group_id: "excluded",
+      excluded_identity_group_identities_count: 1,
+      is_beneficiary_of_grant_id: null,
+      is_beneficiary_of_grant_match_mode:
+        initial.group.is_beneficiary_of_grant_match_mode,
+      is_beneficiary_of_grant: null,
     },
   } as unknown as ApiGroupFull;
   const { onCreateGroup } = renderPanel({
@@ -268,9 +277,13 @@ it("prefills a saved group, keeps both previews, and does not change the origina
       "0x0000000000000000000000000000000000000002",
     ],
   });
-  for (const label of screen.getAllByText("Original group")) {
-    expect(label).toBeVisible();
-  }
+  expect(screen.queryByText(saved.name)).not.toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "Level at least 20, 1 explicitly included user, and 1 explicitly excluded user"
+    )
+  ).toBeVisible();
+  expect(await screen.findByText("277 users")).toBeVisible();
   expect(screen.queryByText("Before editing")).not.toBeInTheDocument();
   expect(screen.queryByText("After editing")).not.toBeInTheDocument();
   await openCriterion(user, /^Level(?: Configured)?$/);
