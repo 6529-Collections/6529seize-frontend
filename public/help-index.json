@@ -9024,6 +9024,7 @@
         "About EMMA, the question-mark link beside the title on the entry and plans pages, opens /emma/help. This public help page contains the full introduction, Janus link, TDH policy, and Back to EMMA link.",
         "The distribution plan tool helps build mint plans with airdrops, allowlists, and public minting in one or more phases.",
         "In EMMA Review, distribution administrators confirm the token ID and choose Prepare manually or Process and Finalize. The first saved manual action or creation of a background job sets the mode. Reset Subscriptions clears subscriber work and restores both choices while keeping artist and team uploads.",
+        "In EMMA Review, Artist Airdrops and Team Airdrops CSV file uploads accept the downloaded address,count header or a headerless file. Paste CSV takes wallet-and-count data rows.",
         "Process and Finalize recognizes one phase each for 0, 1, and 2. For example, Phase 1, Phase1, P 1, P1, and 1 are equivalent regardless of case. Missing or duplicate phases block processing. Empty phases are accepted and Public is generated automatically.",
         "EMMA Review shows the current step while processing. Download lists appears in each phase and Public row after processing completes with matching phase inputs, alongside Completed · Lists ready to download in the preparation row. In manual mode, a red × or green check beside Finalize Distribution shows whether finalization is complete.",
         "EMMA uses TDH as a lightweight anti-spam/rate-limit measure for allowlist creation.",
