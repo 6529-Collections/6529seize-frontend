@@ -435,7 +435,7 @@ function useSaveMessagePreferences(
         wallet !== getWalletAddress() || role !== getWalletRole();
       if (
         result.ok &&
-        (!profileChanged || result.group.created_by?.id === profileId)
+        (!profileChanged || result.group.created_by.id === profileId)
       ) {
         pendingGroup.current = { key, id: result.group.id };
       }
