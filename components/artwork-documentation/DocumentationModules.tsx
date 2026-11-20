@@ -42,6 +42,7 @@ import {
   DocumentationButton,
   inputClass,
   selectClass,
+  compactSelectClass,
   useDocumentationMessages,
 } from "./DocumentationControls";
 import DocumentationValueEditor, {
@@ -656,7 +657,7 @@ function AnswerVisibility({
     <label className="tw-flex tw-flex-wrap tw-items-center tw-gap-2 tw-text-xs tw-text-iron-400">
       {msg("visibility")}
       <select
-        className={`${selectClass} !tw-w-auto !tw-max-w-full !tw-py-2 !tw-text-xs`}
+        className={compactSelectClass}
         disabled={disabled}
         value={value}
         onChange={(event) =>

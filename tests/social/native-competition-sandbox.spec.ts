@@ -14868,6 +14868,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(
           page.getByRole("tab", { name: "Newest", exact: true })
         ).toHaveAttribute("aria-selected", "true");
+      } else {
+        await expect(
+          page.getByRole("button", { name: "Sort: Newest", exact: true })
+        ).toHaveCSS("height", "32px");
       }
       for (const name of width >= 1024
         ? ["Leaderboard view modes", "Sort options"]
@@ -14905,7 +14909,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             .getByRole("checkbox", { name: "Additional Action", exact: true })
             .locator("..")
             .boundingBox())!.height
-        ).toBe(38);
+        ).toBe(width >= 1024 ? 38 : 32);
       }
       await testInfo.attach(`additional-action-${width}px`, {
         body: await page.screenshot(),

@@ -93,13 +93,6 @@ const AUDITED_EXCEPTIONS: readonly AuditedException[] = [
     reason: OPTIONS_REASON,
   },
   {
-    file: "components/collect/CollectGoalDefinitionPicker.tsx",
-    marker: "[--anchor-max-height:16rem] focus:tw-outline-none",
-    literalHash:
-      "175d8af1cac20732ec0f620107c3854dc5d71745eb0c8af464bb165d57a80d0b",
-    reason: OPTIONS_REASON,
-  },
-  {
     file: "components/collect/CollectOrderExpiryPicker.tsx",
     marker: "[--anchor-gap:0.5rem] focus:tw-outline-none",
     literalHash:
@@ -114,10 +107,10 @@ const AUDITED_EXCEPTIONS: readonly AuditedException[] = [
     reason: OPTIONS_REASON,
   },
   {
-    file: "components/compact-menu/constants.ts",
-    marker: "tw-ring-white/10 focus:tw-outline-none",
+    file: "components/e2ee/conversation/E2eeMessageActionsMenu.tsx",
+    marker: "tw-ring-iron-700/80 focus:tw-outline-none",
     literalHash:
-      "fc67692f96fa47ea517e75389f640e1b72ce241bce2aa5d34ad76f70249950d0",
+      "1e441db33583131ce10a4ce24f5de2395ab46d8a8d1d6374e9e08ed489011ac1",
     reason: OPTIONS_REASON,
   },
   {
@@ -133,13 +126,6 @@ const AUDITED_EXCEPTIONS: readonly AuditedException[] = [
     literalHash:
       "d1c8e49498881149e692f89866b28f4d8cd267f6b0a2367d031769287ae02a8f",
     reason: LIGHT_SURFACE_REASON,
-  },
-  {
-    file: "components/user/proxy/create/target/ProxyCreateTargetSearch.tsx",
-    marker: "tw-ring-opacity-5 focus:tw-outline-none",
-    literalHash:
-      "38395627062cf57de2aa5f22903407f7d1dee38db62aaded55df0f2540b7b831",
-    reason: OPTIONS_REASON,
   },
 ];
 

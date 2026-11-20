@@ -5,6 +5,10 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { CollectCollection, CollectIntent } from "./collect.types";
+import {
+  getButtonSizeClasses,
+  type ButtonSize,
+} from "@/components/utils/button/buttonStyles";
 
 export function getCollectHref({
   collection,
@@ -35,6 +39,7 @@ export default function CollectEntryLink({
   complete = false,
   profileActivityKey,
   className = "",
+  size,
 }: {
   readonly collection?: CollectCollection | undefined;
   readonly intent?: CollectIntent | undefined;
@@ -44,10 +49,11 @@ export default function CollectEntryLink({
   readonly complete?: boolean | undefined;
   readonly profileActivityKey?: string | undefined;
   readonly className?: string | undefined;
+  readonly size?: ButtonSize | undefined;
 }) {
   const props = {
     href: getCollectHref({ collection, intent, tokenId, definitionId }),
-    className: `${className} tw-inline-flex tw-min-h-11 tw-items-center tw-gap-2 tw-rounded-lg tw-px-2 tw-text-sm tw-font-medium tw-text-iron-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white`,
+    className: `${className} tw-inline-flex tw-items-center tw-gap-2 tw-rounded-lg ${size ? getButtonSizeClasses(size) : "tw-min-h-11 tw-px-2 tw-text-sm"} tw-font-medium tw-text-iron-300 tw-no-underline focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-white`,
     children: (
       <>
         {t(

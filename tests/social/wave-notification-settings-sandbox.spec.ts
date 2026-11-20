@@ -357,6 +357,10 @@ test.describe("Wave notification settings @auth @medium @local-only", () => {
       await expectReachable(page, "menuitemcheckbox");
       await page.keyboard.press("ArrowDown");
       await expect(menu).toHaveAttribute("aria-activedescendant", /.+/);
+      await page.keyboard.press("End");
+      await expect(
+        menu.getByRole("menuitemcheckbox", { name: ALL, exact: true })
+      ).toHaveCSS("box-shadow", /0px 0px 0px 2px inset/);
       await page.keyboard.press("Escape");
       await expect(menu).toHaveCount(0);
       await expect(bell).toHaveAttribute("aria-expanded", "false");

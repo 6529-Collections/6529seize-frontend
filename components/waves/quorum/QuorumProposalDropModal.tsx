@@ -2,7 +2,7 @@
 
 import IconButton from "@/components/utils/button/IconButton";
 
-import { DROPDOWN_TRIGGER_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { presentationCompetition } from "@/helpers/competition-presentation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -556,7 +556,7 @@ export default function QuorumProposalDropModal({
                 event.target.value as QuorumProposalUrgency
               )
             }
-            className={`${DROPDOWN_TRIGGER_CLASSES} tw-form-select tw-block tw-h-11 tw-w-full tw-px-3 tw-text-sm`}
+            className={`${getDropdownTriggerClasses({ variant: "regular", metrics: { height: 44, x: 12, text: "sm" } })} tw-form-select tw-block tw-w-full`}
           >
             <option value="">Select urgency</option>
             <option value="Low">Low</option>

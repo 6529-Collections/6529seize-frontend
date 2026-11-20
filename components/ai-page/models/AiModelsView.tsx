@@ -1,5 +1,7 @@
 "use client";
 
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
 import {
   AdjustmentsHorizontalIcon,
   CheckCircleIcon,
@@ -223,8 +225,7 @@ function compare(sort: Sort, runs: boolean) {
     memory(a) - memory(b) || byName(a, b);
 }
 
-const SELECT =
-  "tw-h-11 tw-cursor-pointer tw-appearance-none tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-bg-[length:16px] tw-bg-[right_0.5rem_center] tw-bg-no-repeat tw-pl-3 tw-pr-8 tw-text-sm tw-font-medium tw-text-iron-100 tw-transition hover:tw-border-white/20 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-h-9";
+const SELECT = `${getDropdownTriggerClasses({ variant: "form", metrics: { height: "responsive", left: 12, right: 32, text: "sm" } })} tw-appearance-none tw-bg-[length:16px] tw-bg-[right_0.5rem_center] tw-bg-no-repeat`;
 // A chevron for the native select, drawn as a background so it keeps the
 // select's own keyboard and screen reader behaviour.
 const CHEVRON = {
