@@ -21,7 +21,7 @@ import GroupCriteriaEditor from "./GroupCriteriaEditor";
 import CreateWaveInlineGroupSearch from "@/components/waves/create-wave/groups/CreateWaveInlineGroupSearch";
 import CreateWaveInlineGroupActions from "@/components/waves/create-wave/groups/CreateWaveInlineGroupActions";
 import {
-  type CreateWaveGroupInlinePanelProps,
+  type GroupInlinePanelOptions,
   useCreateWaveGroupInlinePanel,
 } from "@/components/waves/create-wave/groups/useCreateWaveGroupInlinePanel";
 import GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersPreviewDialog";
@@ -39,7 +39,7 @@ export type GroupAssignmentDraftOptions = {
   readonly onApply: (draft: CreateWaveInlineGroupBuilderState) => void;
 };
 
-type GroupAssignmentPanelProps = CreateWaveGroupInlinePanelProps & {
+type GroupAssignmentPanelProps = GroupInlinePanelOptions & {
   readonly criteriaDraft?: GroupAssignmentDraftOptions | undefined;
   readonly presentation?: "default" | "quiet" | "embedded";
   readonly startMode?: GroupAssignmentPanelStartMode;

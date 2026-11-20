@@ -57,12 +57,22 @@ export type CreateWaveGroupInlinePanelProps = {
   readonly onCriteriaReplacementChange?:
     | ((active: boolean) => void)
     | undefined;
+  readonly onChange: (
+    group: ApiGroupFull | null
+  ) => void | boolean | Promise<void | boolean>;
+  readonly onCreateGroup: (
+    payload: ApiCreateGroup
+  ) => Promise<ApiGroupFull | null>;
+};
+
+export type GroupInlinePanelOptions = Omit<
+  CreateWaveGroupInlinePanelProps,
+  "onChange" | "onCreateGroup"
+> & {
   readonly initialCriteriaDraft?: CreateWaveInlineGroupBuilderState | undefined;
-  readonly onChange?:
-    | ((group: ApiGroupFull | null) => void | boolean | Promise<void | boolean>)
-    | undefined;
+  readonly onChange?: CreateWaveGroupInlinePanelProps["onChange"] | undefined;
   readonly onCreateGroup?:
-    | ((payload: ApiCreateGroup) => Promise<ApiGroupFull | null>)
+    | CreateWaveGroupInlinePanelProps["onCreateGroup"]
     | undefined;
 };
 
@@ -577,7 +587,7 @@ export function useCreateWaveGroupInlinePanel({
   onChange,
   onCriteriaReplacementChange,
   onCreateGroup,
-}: CreateWaveGroupInlinePanelProps) {
+}: GroupInlinePanelOptions) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [builder, setBuilder] = useState<CreateWaveInlineGroupBuilderState>(

@@ -9,6 +9,7 @@ import Button from "@/components/utils/button/Button";
 import type { CreateWaveInlineGroupBuilderState } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
+import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import type { ApiProfileNotificationCategories } from "@/generated/models/ApiProfileNotificationCategories";
 import type { ApiProfilePreferences } from "@/generated/models/ApiProfilePreferences";
 import {
@@ -433,10 +434,11 @@ function useSaveMessagePreferences(
       });
       const profileChanged =
         wallet !== getWalletAddress() || role !== getWalletRole();
-      if (
-        result.ok &&
-        (!profileChanged || result.group.created_by.id === profileId)
-      ) {
+      // The API can return null when it cannot resolve the group creator.
+      const creator = result.ok
+        ? (result.group.created_by as ApiProfileMin | null)
+        : null;
+      if (result.ok && (!profileChanged || creator?.id === profileId)) {
         pendingGroup.current = { key, id: result.group.id };
       }
       if (profileChanged) {

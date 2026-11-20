@@ -188,7 +188,7 @@ describe("ProfilePreferencesSettings", () => {
     expect(nobody).toHaveFocus();
   });
 
-  it.each(["notifications", "messages"] as const)(
+  it.each<"notifications" | "messages">(["notifications", "messages"])(
     "saves the tabs independently with %s saved first",
     async (firstTab) => {
       const user = userEvent.setup();
@@ -212,7 +212,8 @@ describe("ProfilePreferencesSettings", () => {
         messages: { direct_message_policy: "NOBODY" },
       };
       const secondTab = firstTab === "messages" ? "notifications" : "messages";
-      for (const [index, tab] of [firstTab, secondTab].entries()) {
+      const saveOrder = [firstTab, secondTab] as const;
+      for (const [index, tab] of saveOrder.entries()) {
         view.rerender(<ProfilePreferencesSettings activeTab={tab} />);
         await user.click(saveButton());
         await waitFor(() =>
@@ -387,6 +388,7 @@ describe("ProfilePreferencesSettings", () => {
   it.each([
     { creator: "profile-1", savedGroupId: "group-2", createAttempts: 1 },
     { creator: "profile-2", savedGroupId: "group-3", createAttempts: 2 },
+    { creator: null, savedGroupId: "group-3", createAttempts: 2 },
   ])(
     "checks the group creator when retrying after a profile switch ($creator)",
     async ({ creator, savedGroupId, createAttempts }) => {
@@ -398,7 +400,10 @@ describe("ProfilePreferencesSettings", () => {
           getWalletRole.mockReturnValue("bob");
           return {
             ok: true,
-            group: { id: "group-2", created_by: { id: creator } },
+            group: {
+              id: "group-2",
+              created_by: creator === null ? null : { id: creator },
+            },
           };
         })
         .mockResolvedValue({ ok: true, group: { id: "group-3" } });
