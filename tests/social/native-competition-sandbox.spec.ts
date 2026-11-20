@@ -193,6 +193,19 @@ async function verifyVoteBreakpoints(
           .getByRole("textbox", { name: "Your vote", exact: true })
           .or(panel.getByRole("spinbutton", { name: "Your vote", exact: true }))
       );
+      const numericField = panel
+        .getByRole("textbox", { name: "Your vote", exact: true })
+        .or(panel.getByRole("spinbutton", { name: "Your vote", exact: true }));
+      expect(
+        await numericField.evaluate((input) => {
+          const unit = input.parentElement?.querySelector("span");
+          return (
+            unit !== null &&
+            unit !== undefined &&
+            unit.scrollWidth <= unit.clientWidth
+          );
+        })
+      ).toBe(true);
       await expectContained();
       await mode.getByRole("button", { name: "Slider", exact: true }).click();
       const slider = await expectVoteHeight(scope, numeric);
@@ -1139,7 +1152,7 @@ async function installCompetitionApi(
       entry_id:
         url.searchParams.get("entry_id") ??
         (resource.startsWith("entries/") ? resource.split("/")[1] : null),
-      credit_type: "TDH",
+      credit_type: selected?.voting.credit_type ?? "TDH",
       credit_scope: "WAVE",
       available: 100,
       spent: Math.abs(votes[id] ?? 0),
@@ -1350,6 +1363,11 @@ async function installCompetitionApi(
 
   return {
     requests,
+    setCreditType: (id: string, creditType: string) => {
+      const selected = competitions.find((item) => item.id === id);
+      expect(selected).toBeDefined();
+      selected!.voting.credit_type = creditType;
+    },
     setVote: (id: string, value: number) => {
       votes[id] = value;
     },
@@ -8007,8 +8025,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
 
   test("restores Explain vote in the competition vote dialog", async ({
     page,
+    browserName,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
+    sandbox.setCreditType("alpha", "TDH_PLUS_XTDH");
     const replies: Record<string, unknown>[] = [];
     await page.route("**/api/drops", async (route) => {
       if (route.request().method() !== "POST") return route.fallback();
@@ -8100,10 +8120,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await modeTabs
       .getByRole("button", { name: "Numeric", exact: true })
       .focus();
+    // WebKit's default traversal includes range controls with Option-Tab.
+    const tabKey = browserName === "webkit" ? "Alt+Tab" : "Tab";
     // Both transparent range inputs must expose focus on their shared visible thumb.
     for (const index of [0, 1]) {
       const range = rangeInputs.nth(index);
-      await page.keyboard.press("Tab");
+      await page.keyboard.press(tabKey);
       await expect(range).toBeFocused();
       await expect(thumb).toHaveCSS("outline-style", "solid");
       await expect(thumb).toHaveCSS("outline-width", "2px");
@@ -8114,7 +8136,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .locator("xpath=ancestor::fieldset[1]")
       ).toHaveCSS("box-shadow", "none");
     }
-    await page.keyboard.press("Shift+Tab");
+    await page.keyboard.press(`Shift+${tabKey}`);
     await expect(rangeInputs.nth(0)).toBeFocused();
     await expect(thumb).toHaveCSS("outline-style", "solid");
     await voteHeading.click();
@@ -8172,7 +8194,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toHaveValue("25");
     await expect(rationale).toHaveValue("My competition rationale");
     const save = dialog.getByRole("button", {
-      name: "Vote +25 TDH",
+      name: "Vote +25 TDH + XTDH",
       exact: true,
     });
     await expect(save).toBeEnabled();
@@ -9139,17 +9161,35 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       }
     );
     for (const view of ["List view", "Grid view"]) {
+      if (view === "Grid view" && !testInfo.project.use.hasTouch) {
+        await page.setViewportSize({ ...page.viewportSize()!, width: 768 });
+      }
       await page.getByRole("tab", { name: view, exact: true }).click();
       await card.getByRole("button", { name: "Vote", exact: true }).click();
       const dialog = page.getByRole("dialog", {
         name: "Vote for this artwork",
       });
-      await expectVoteSurface(dialog, testInfo.project.use.hasTouch === true);
+      await expectVoteSurface(dialog, page.viewportSize()!.width < 1024);
       await expect(
         dialog.getByRole("button", { name: "Vote 0 TDH", exact: true })
       ).toBeVisible();
       expect(contextLookups).toBe(0);
-      await dialog.getByRole("button", { name: /^Close(?: modal)?$/ }).click();
+      await dialog
+        .getByRole("button", { name: "Numeric", exact: true })
+        .click();
+      const amount = dialog.getByRole("spinbutton", { name: "Your vote" });
+      await dialog.getByRole("button", { name: "Increase vote" }).focus();
+      await page.keyboard.press("Enter");
+      await expect(amount).toHaveValue("1");
+      await dialog.getByRole("switch", { name: "Explain vote" }).check();
+      const reply = dialog.getByLabel("Optional rationale reply");
+      await reply.fill("Long draft explanation.\n".repeat(30));
+      await reply.press("ControlOrMeta+End");
+      expect(
+        await reply.evaluate((element) => element.scrollTop)
+      ).toBeGreaterThan(0);
+      await expectNoHorizontalOverflow(page);
+      await page.keyboard.press("Escape");
       await expect(dialog).toHaveCount(0);
     }
   });

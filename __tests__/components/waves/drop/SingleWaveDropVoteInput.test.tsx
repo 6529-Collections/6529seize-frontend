@@ -191,6 +191,40 @@ describe("SingleWaveDropVoteInput", () => {
     expect(setVoteValue).toHaveBeenLastCalledWith(1);
   });
 
+  it("steps once when a touch click reports zero detail after release and blur", () => {
+    const setVoteValue = jest.fn();
+    render(
+      <SingleWaveDropVoteInput {...defaultProps} setVoteValue={setVoteValue} />
+    );
+    const increase = screen.getByRole("button", { name: "Increase vote" });
+    fireEvent.pointerDown(increase, { pointerType: "touch" });
+    fireEvent.pointerUp(increase, { pointerType: "touch" });
+    fireEvent.blur(increase);
+    fireEvent.click(increase, { detail: 0 });
+    expect(setVoteValue).toHaveBeenCalledTimes(1);
+    expect(setVoteValue).toHaveBeenLastCalledWith(1);
+  });
+
+  it("allows keyboard stepping after a cancelled pointer hold", async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    const setVoteValue = jest.fn();
+    render(
+      <SingleWaveDropVoteInput {...defaultProps} setVoteValue={setVoteValue} />
+    );
+    const increase = screen.getByRole("button", { name: "Increase vote" });
+    fireEvent.pointerDown(increase);
+    fireEvent.pointerCancel(increase);
+    increase.focus();
+    await user.keyboard("{Enter}");
+    expect(setVoteValue).toHaveBeenCalledTimes(2);
+    expect(setVoteValue).toHaveBeenLastCalledWith(2);
+    setVoteValue.mockClear();
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+    expect(setVoteValue).not.toHaveBeenCalled();
+  });
+
   it("stops repeating when a touch press is cancelled", () => {
     const setVoteValue = jest.fn();
     render(
@@ -209,6 +243,39 @@ describe("SingleWaveDropVoteInput", () => {
       jest.advanceTimersByTime(1000);
     });
 
+    expect(setVoteValue).not.toHaveBeenCalled();
+  });
+
+  it("preserves the held step acceleration and stops on release", () => {
+    const setVoteValue = jest.fn();
+    render(
+      <SingleWaveDropVoteInput
+        {...defaultProps}
+        voteValue={10000}
+        minValue={0}
+        maxValue={1000000}
+        setVoteValue={setVoteValue}
+      />
+    );
+    const increase = screen.getByRole("button", { name: "Increase vote" });
+    fireEvent.pointerDown(increase);
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    expect(setVoteValue).toHaveBeenLastCalledWith(10030);
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    expect(setVoteValue).toHaveBeenLastCalledWith(10300);
+    act(() => {
+      jest.advanceTimersByTime(2000);
+    });
+    expect(setVoteValue).toHaveBeenLastCalledWith(13000);
+    fireEvent.pointerUp(increase);
+    setVoteValue.mockClear();
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
     expect(setVoteValue).not.toHaveBeenCalled();
   });
 
@@ -297,13 +364,13 @@ describe("SingleWaveDropVoteInput", () => {
       button.textContent?.includes("%")
     );
     const activePercentageButton = percentageButtons.find((button) =>
-      button.className.includes("tw-bg-emerald-500/10")
+      button.classList.contains("tw-bg-emerald-500/10")
     );
 
     expect(activePercentageButton).toBeUndefined();
     expect(
       percentageButtons.every((button) =>
-        button.className.includes("tw-bg-iron-800")
+        button.classList.contains("tw-bg-iron-900")
       )
     ).toBe(true);
   });
@@ -320,7 +387,7 @@ describe("SingleWaveDropVoteInput", () => {
 
     // Check that at least one button has the expected base styling
     const buttonWithStyling = percentageButtons.find((button) =>
-      button.className.includes("tw-px-2")
+      button.classList.contains("tw-px-2.5")
     );
     expect(buttonWithStyling).toBeDefined();
   });

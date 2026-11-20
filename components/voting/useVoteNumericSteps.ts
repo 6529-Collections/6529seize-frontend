@@ -30,6 +30,7 @@ export function useVoteNumericSteps(
 ) {
   const value = useRef(adjustments?.value ?? 0);
   const onChange = useRef(adjustments?.onChange);
+  const pointerDirection = useRef<-1 | 1 | null>(null);
   const hold = useRef<{
     direction: -1 | 1;
     timer: ReturnType<typeof setTimeout>;
@@ -74,6 +75,7 @@ export function useVoteNumericSteps(
   const start = (direction: -1 | 1) => {
     if (disabled || min === undefined || max === undefined) return;
     stop();
+    pointerDirection.current = direction;
     const startedAt = Date.now();
     const repeat = () => {
       const snapped = step(direction, Date.now() - startedAt);
@@ -86,10 +88,17 @@ export function useVoteNumericSteps(
   };
 
   const click = (direction: -1 | 1, detail: number) => {
-    const wasPressed = hold.current?.direction === direction;
+    // Pointer release/blur stops the timer before the following click arrives.
+    const fromPointer = pointerDirection.current === direction;
+    pointerDirection.current = null;
     stop();
-    if (detail === 0 && !wasPressed) step(direction);
+    if (detail === 0 && !fromPointer) step(direction);
   };
 
-  return { setValue, start, stop, click };
+  const resetPointer = () => {
+    pointerDirection.current = null;
+    stop();
+  };
+
+  return { setValue, start, stop, click, resetPointer };
 }

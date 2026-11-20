@@ -67,9 +67,10 @@ export function VoteNumericInput({
         }}
         onPointerUp={stop}
         onPointerLeave={stop}
-        onPointerCancel={stop}
+        onPointerCancel={steps.resetPointer}
         onLostPointerCapture={stop}
         onBlur={stop}
+        onKeyDown={steps.resetPointer}
         onClick={(event) => steps.click(direction, event.detail)}
         className={`${STEP_BUTTON_CLASS} ${increase ? "tw-border-l tw-border-r-0" : "tw-border-l-0 tw-border-r"}`}
       >

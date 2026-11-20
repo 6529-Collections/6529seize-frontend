@@ -107,15 +107,44 @@ describe("observeFocusedField", () => {
     tracking.disconnect();
   });
 
+  it("honors a field's action clearance only when both fit above the keyboard", () => {
+    const container = document.createElement("div");
+    const input = document.createElement("textarea");
+    jest
+      .spyOn(globalThis, "getComputedStyle")
+      .mockReturnValue(
+        Object.assign(getComputedStyle(input), { scrollMarginBottom: "96px" })
+      );
+    input.scrollIntoView = jest.fn();
+    container.getBoundingClientRect = () => new DOMRect(0, 80, 400, 350);
+    input.getBoundingClientRect = () => new DOMRect(20, 300, 300, 96);
+    container.append(input);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    paint();
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    expect(container.scrollTop).toBe(62);
+    container.scrollTop = 0;
+    container.getBoundingClientRect = () => new DOMRect(0, 280, 400, 150);
+    onResize([], observer);
+    paint();
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    expect(container.scrollTop).toBe(0);
+    tracking.disconnect();
+  });
+
   it("reveals a field clipped by an inner editor even when the outer sheet fits it", () => {
     const container = document.createElement("div");
     const editor = document.createElement("div");
     const input = document.createElement("input");
     input.scrollIntoView = jest.fn();
     editor.style.overflowY = "auto";
-    jest.spyOn(globalThis, "getComputedStyle").mockReturnValue(
-      Object.assign(getComputedStyle(editor), { overflowY: "auto" })
-    );
+    jest
+      .spyOn(globalThis, "getComputedStyle")
+      .mockReturnValue(
+        Object.assign(getComputedStyle(editor), { overflowY: "auto" })
+      );
     container.getBoundingClientRect = () => new DOMRect(0, 0, 400, 600);
     editor.getBoundingClientRect = () => new DOMRect(0, 200, 400, 300);
     input.getBoundingClientRect = () => new DOMRect(20, 130, 300, 44);
