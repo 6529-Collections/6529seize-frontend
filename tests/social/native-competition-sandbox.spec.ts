@@ -9617,6 +9617,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await expect(active).toHaveAttribute("aria-selected", "true");
+    await expect(active).toHaveCSS("font-weight", "500");
     await expect(active).toHaveAttribute(
       "aria-controls",
       `competition-collection-${WAVE}-active`
