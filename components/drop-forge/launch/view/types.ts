@@ -1,3 +1,4 @@
+import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
 import type { ApiMemesMintStat } from "@/generated/models/ApiMemesMintStat";
 import type { ApiMintingClaimAction } from "@/generated/models/ApiMintingClaimAction";
 import type { MintingClaim } from "@/generated/models/MintingClaim";
@@ -87,6 +88,7 @@ interface LaunchPayArtistPhaseProps {
 }
 
 interface LaunchSelectedPhaseConfigProps {
+  automationLaunch?: ApiDropForgeLaunch | null | undefined;
   selectedPhaseDiffs: LaunchPhaseDiffsView;
   changedFieldBoxClassName: string;
   changedFieldBoxLabelClassName: string;

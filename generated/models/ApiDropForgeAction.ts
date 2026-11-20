@@ -26,6 +26,14 @@ export class ApiDropForgeAction {
     'group'?: string;
     'attempt_count'?: number;
     'attempt_error'?: string | null;
+    /**
+    * The operator can request a retry within the execution window
+    */
+    'wallet_retry_available'?: boolean;
+    /**
+    * This pending action is waiting on operational wallet permission or funding
+    */
+    'wallet_blocked'?: boolean;
     'retry_at'?: number | null;
     /**
     * Completed work detected on-chain and skipped without another transaction
@@ -95,6 +103,18 @@ export class ApiDropForgeAction {
             "name": "attempt_error",
             "baseName": "attempt_error",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "wallet_retry_available",
+            "baseName": "wallet_retry_available",
+            "type": "boolean",
+            "format": ""
+        },
+        {
+            "name": "wallet_blocked",
+            "baseName": "wallet_blocked",
+            "type": "boolean",
             "format": ""
         },
         {

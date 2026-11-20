@@ -1,5 +1,10 @@
 import DropForgeFieldBox from "@/components/drop-forge/DropForgeFieldBox";
 import {
+  DropForgeInlineStatus,
+  type getLaunchInlineStatuses,
+} from "@/components/drop-forge/launch/DropForgeInlineStatus";
+import type { ComponentProps } from "react";
+import {
   BTN_METADATA_UPDATE_ACTION,
   BTN_SUBSCRIPTIONS_AIRDROP,
   DropForgeArweaveLinkValue,
@@ -27,6 +32,7 @@ function DropForgeAirdropSummaryActionRow({
   claimWritePending,
   actionPending,
   onActionToggle,
+  inlineStatus,
 }: Readonly<{
   title: string;
   loading: boolean;
@@ -39,6 +45,7 @@ function DropForgeAirdropSummaryActionRow({
   claimWritePending: boolean;
   actionPending: string | null;
   onActionToggle: (action: string, completed: boolean) => Promise<void>;
+  inlineStatus?: ComponentProps<typeof DropForgeInlineStatus>["status"];
 }>) {
   const isCompleted = action?.completed ?? false;
   const isActionToggleDisabled =
@@ -48,6 +55,7 @@ function DropForgeAirdropSummaryActionRow({
     <div className="tw-space-y-5">
       <DropForgeSectionTitleWithToggle
         title={title}
+        status={<DropForgeInlineStatus status={inlineStatus} />}
         action={action}
         toggleDisabled={isActionToggleDisabled}
         toggleAriaLabel={`${title} completed`}
@@ -88,8 +96,10 @@ export function DropForgePhase0AirdropsSection({
   mintingClaimActionsByName,
   mintingClaimActionPending,
   onMintingClaimActionToggle,
+  inlineStatuses,
 }: Readonly<{
   visible: boolean;
+  inlineStatuses?: ReturnType<typeof getLaunchInlineStatuses>;
   phase0AirdropsError: string | null;
   phase0AirdropsLoading: boolean;
   isInitialized: boolean;
@@ -136,6 +146,7 @@ export function DropForgePhase0AirdropsSection({
 
       <DropForgeAirdropSummaryActionRow
         title="Artist Airdrops"
+        inlineStatus={inlineStatuses?.artist}
         loading={phase0AirdropsLoading}
         summary={artistAirdropSummary}
         isInitialized={isInitialized}
@@ -161,6 +172,7 @@ export function DropForgePhase0AirdropsSection({
 
       <DropForgeAirdropSummaryActionRow
         title="Team Airdrops"
+        inlineStatus={inlineStatuses?.team}
         loading={phase0AirdropsLoading}
         summary={teamAirdropSummary}
         isInitialized={isInitialized}
@@ -195,8 +207,10 @@ export function DropForgeSubscriptionAirdropSections({
   mintingClaimActionsByName,
   mintingClaimActionPending,
   onMintingClaimActionToggle,
+  inlineStatuses,
 }: Readonly<{
   sections: LaunchSubscriptionAirdropSectionView[];
+  inlineStatuses?: ReturnType<typeof getLaunchInlineStatuses>;
   isInitialized: boolean;
   claimWritePending: boolean;
   runAirdropWrite: DropForgeLaunchClaimPageViewProps["runAirdropWrite"];
@@ -236,6 +250,7 @@ export function DropForgeSubscriptionAirdropSections({
             ) : null}
             <DropForgeAirdropSummaryActionRow
               title={section.title}
+              inlineStatus={inlineStatuses?.subscription(section.phaseKey)}
               loading={section.loading}
               summary={section}
               isInitialized={isInitialized}

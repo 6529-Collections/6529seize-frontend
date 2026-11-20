@@ -83,8 +83,8 @@ Existing mint-announcement waves receive none of these reports.
 The default windows use `Europe/Athens` wall time, including daylight saving:
 Phase 0 17:40–18:20, Phase 1 18:30–18:50, Phase 2 19:00–19:20, and
 public 19:20–17:00 the next day. Initialization and Phase 0 allocations precede
-17:40. Phase 1 subscriber allocations belong in 18:20–18:30; Phase 2 and public
-subscriber allocations belong in 18:50–19:00. The existing Phase 2 tab groups
+17:40. Phase 1 subscriber allocations belong in 18:21–18:30; Phase 2 and public
+subscriber allocations belong in 18:51–19:00. The existing Phase 2 tab groups
 those two subscription lists. On-chain windows are editable; use the configured
 windows when operating a claim. Craft Launch uses these defaults for the automated
 plan; Launch exposes progress and transaction recovery controls.

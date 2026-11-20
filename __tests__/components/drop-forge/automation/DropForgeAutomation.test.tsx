@@ -11,6 +11,7 @@ import {
 } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DropForgeAutomationStatus from "@/components/drop-forge/launch/DropForgeAutomationStatus";
+import { getLaunchInlineStatuses } from "@/components/drop-forge/launch/DropForgeInlineStatus";
 import CraftLaunchActions from "@/components/drop-forge/craft/CraftLaunchActions";
 import ProcessAndFinalize from "@/components/distribution-plan-tool/review-distribution-plan/ProcessAndFinalize";
 import {
@@ -19,11 +20,15 @@ import {
   latestForgeProcess,
   startForgeProcess,
 } from "@/services/api/drop-forge-api";
-import type { ApiDropForgeLaunch } from "@/generated/models/ApiDropForgeLaunch";
+import {
+  ApiDropForgeLaunchStateEnum as LaunchState,
+  type ApiDropForgeLaunch,
+} from "@/generated/models/ApiDropForgeLaunch";
 import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
 import { forgeProcessKey } from "@/hooks/useDropForgeProcess";
 import { resolveForgePhaseInputs } from "@/services/api/drop-forge-process-inputs";
+import { commonApiPost } from "@/services/api/common-api";
 import {
   ApiDropForgeJobKindEnum as JobKind,
   ApiDropForgeJobStatusEnum as JobStatus,
@@ -43,6 +48,7 @@ jest.mock("@/components/drop-forge/drop-forge-config", () => ({
   useDropForgeMintingConfig: () => ({ contract: "0xcreator" }),
 }));
 jest.mock("@/hooks/useDropForgeSettings");
+jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
@@ -95,6 +101,67 @@ beforeEach(() => {
   jest.mocked(useDropForgeSettings).mockReturnValue({
     data: { automation_enabled: true },
   } as ReturnType<typeof useDropForgeSettings>);
+});
+it("shows inline prerequisites only for a saved plan and confirms manual artist delivery independently", () => {
+  expect(getLaunchInlineStatuses(undefined, "phase0")).toBeUndefined();
+  const current = launch(false);
+  expect(
+    getLaunchInlineStatuses({ ...current, state: LaunchState.Draft }, "phase0")
+  ).toBeUndefined();
+  current.phases = [
+    { name: "Phase 0", start: 10, end: 20, root: "0x0", price_wei: "0" },
+  ];
+  current.actions.push({
+    ...current.actions[0],
+    id: "artist",
+    kind: ActionKind.Airdrop,
+    label: "Airdrop - Artist",
+    recipients: 1,
+  });
+  current.actions.push({
+    ...current.actions[1],
+    id: "team",
+    label: "Airdrop - Team",
+  });
+  expect(getLaunchInlineStatuses(current, "phase0")?.artist?.key).toBe(
+    "waitingInit"
+  );
+  current.actions[0].state = ActionState.Confirmed;
+  current.actions[1].state = ActionState.Confirmed;
+  current.actions[1].observed = true;
+  const verified = getLaunchInlineStatuses(current, "phase0");
+  expect(verified?.artist?.key).toBe("completedManually");
+  expect(verified?.team).toBeUndefined();
+});
+it("only offers Retry now when the server allows it and submits the current revision", async () => {
+  const current = launch(false);
+  const action = current.actions[0]!;
+  action.wallet_blocked = true;
+  action.wallet_retry_available = false;
+  jest.mocked(getForgeLaunch).mockResolvedValue(current);
+  jest.mocked(commonApiPost).mockResolvedValue(current);
+  const { client } = renderUI(
+    <DropForgeAutomationStatus
+      claimId={123}
+      onConfirmedWork={() => undefined}
+    />
+  );
+  await screen.findByText("No automatic retry scheduled.");
+  expect(screen.queryByRole("button", { name: "Retry now" })).toBeNull();
+  act(() => {
+    client.setQueryData(forgeLaunchKey("0xcreator", 123), {
+      ...current,
+      actions: [{ ...action, wallet_retry_available: true }],
+    });
+  });
+  fireEvent.click(await screen.findByRole("button", { name: "Retry now" }));
+  await waitFor(() =>
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "drop-forge/launches/0xcreator/123/control",
+      body: { revision: current.revision, operation: "RETRY" },
+    })
+  );
+  expect(mockRequestAuth).toHaveBeenCalledTimes(1);
 });
 it.each([
   [1, "https://etherscan.io"],

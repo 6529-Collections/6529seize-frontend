@@ -458,6 +458,7 @@ export function useLaunchClaimViewModel({
 
   return {
     coordinateManualWrites,
+    automationLaunch: savedLaunch.data,
     artistAirdropSummary,
     teamAirdropSummary,
     subscriptionAirdropSections,

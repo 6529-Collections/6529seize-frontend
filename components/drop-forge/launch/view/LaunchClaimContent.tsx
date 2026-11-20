@@ -113,6 +113,7 @@ function getLaunchPhasePanelProps(
     payArtistActionDisabled: props.payArtistActionDisabled,
     payArtistWritePending: props.payArtistWritePending,
     runPayArtistWrite: props.runPayArtistWrite,
+    automationLaunch: props.automationLaunch,
     selectedPhaseDiffs: props.selectedPhaseDiffs,
     changedFieldBoxClassName: props.changedFieldBoxClassName,
     changedFieldBoxLabelClassName: props.changedFieldBoxLabelClassName,
