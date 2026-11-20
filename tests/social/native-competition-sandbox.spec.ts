@@ -13310,6 +13310,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const sandbox = await installCompetitionApi(page);
     sandbox.onlyCompetition("alpha");
     await sandbox.legacyPrimary("alpha");
+    await page.route(`**/waves/${WAVE}/rep/overview**`, (route) =>
+      route.fulfill({
+        json: {
+          total_rep: 42,
+          positive_rep: 47,
+          negative_rep: -5,
+          authenticated_user_contribution: 7,
+          contributor_count: 2,
+          contributors: { data: [], page: 1, next: false },
+        },
+      })
+    );
+    await page.route(`**/waves/${WAVE}/rep/categories**`, (route) =>
+      route.fulfill({ json: { data: [], page: 1, next: false } })
+    );
     await page.goto(`/waves/${WAVE}?tab=chat`);
     const information = await openWaveInformation(page);
     await expect(
@@ -13319,6 +13334,17 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       const section = information.getByRole("tab", { name, exact: true });
       await expect(section).toHaveCSS("height", "32px");
       await expect(section).toHaveCSS("border-radius", "9999px");
+    }
+    await information.getByRole("tab", { name: "REP", exact: true }).click();
+    await expect(
+      information.getByRole("tab", { name: "REP", exact: true })
+    ).toHaveCSS("font-weight", "500");
+    for (const value of ["+42", "+7", "+47", "-5"]) {
+      await expect(
+        information
+          .getByRole("region", { name: "Wave REP", exact: true })
+          .getByText(value, { exact: true })
+      ).toHaveCSS("font-variant-numeric", "normal");
     }
     await information
       .getByRole("tab", { name: "Configuration", exact: true })
