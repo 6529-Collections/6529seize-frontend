@@ -10235,7 +10235,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       const filter = filters.getByRole("button", { name, exact: true });
       await expect(filter).toHaveCSS("height", app ? "34px" : "30px");
       await expect(filter).toHaveCSS("font-size", "12px");
-      await expect(filter).toHaveCSS("font-weight", "400");
+      await expect(filter).toHaveCSS(
+        "font-weight",
+        name === "Pinned" ? "400" : "500"
+      );
       await expect(filter).toHaveCSS("padding-left", "8px");
       await expect(filter).toHaveCSS("padding-right", "8px");
       if (app) {
@@ -10260,6 +10263,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await filter.click();
       }
       await expect(filter).toHaveAttribute("aria-pressed", "true");
+      await expect(filter).toHaveCSS("font-weight", "500");
     }
     await search.click();
     const input = page.getByRole("searchbox", { name: "Find a wave…" });
