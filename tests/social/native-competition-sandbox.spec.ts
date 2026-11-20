@@ -4469,10 +4469,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         "font-variant-numeric",
         "tabular-nums"
       );
-      for (const timestamp of await page
+      const timestamps = page
         .getByRole("tabpanel", { name: "Activity", exact: true })
-        .locator("span.tw-font-medium.tw-normal-nums")
-        .all()) {
+        .locator("span.tw-font-medium.tw-normal-nums");
+      await expect(timestamps.first()).toBeVisible();
+      for (const timestamp of await timestamps.all()) {
         await expect(timestamp).toHaveCSS("font-weight", "400");
         await expect(timestamp).toHaveCSS("font-variant-numeric", "normal");
       }
