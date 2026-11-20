@@ -74,7 +74,7 @@ const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
     >
       <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-primary-300/20" />
       {leftThisRoundCount > 0 && (
-        <span className="tw-text-xs tw-font-semibold">
+        <span className="tw-text-xs tw-font-medium">
           {formatInteger(locale, leftThisRoundCount)}
         </span>
       )}
