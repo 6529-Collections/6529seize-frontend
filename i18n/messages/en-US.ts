@@ -3,6 +3,7 @@ import { NOTIFICATIONS_INBOX_MESSAGES } from "@/i18n/messages/notifications-inbo
 import { VOTING_CREDIT_RETURN_MESSAGES } from "@/i18n/messages/voting-credit-returns";
 import { MEME_COLLABORATION_MESSAGES } from "@/i18n/messages/meme-collaborations";
 import emmaMessages from "@/i18n/messages/emma.en-US.json";
+import dropForgeSettingsMessages from "@/i18n/messages/drop-forge-settings.en-US.json";
 import additionalActionMessages from "@/i18n/messages/additionalAction.en-US.json";
 import { EN_SUBMISSION_DISCOVERY_MESSAGES } from "@/i18n/messages/submission-discovery";
 import waveCreationMessages from "@/i18n/messages/wave-creation.en-US.json";
@@ -3341,6 +3342,127 @@ const TOKEN_NUMBER_MESSAGE = "Token #{tokenId}";
  * both into the complete dictionary.
  */
 export const EN_US_ROOT_MESSAGES = {
+  ...dropForgeSettingsMessages,
+  "dropForge.actionDone": "Completed",
+  "dropForge.actionFailed": "Failed",
+  "dropForge.actionSubmitted": "Submitted",
+  "dropForge.actionSkipped": "Skipped — already completed on-chain",
+  "dropForge.actionSoldOut": "Skipped · sold out",
+  "dropForge.actionPartiallyFulfilled": "Partially fulfilled",
+  "dropForge.actionUnfilledCards":
+    "{count} of the requested cards went unfilled",
+  "dropForge.actionReadinessFailed": "Readiness check failed",
+  "dropForge.actionRetryWindow":
+    "Retries automatically while its execution window remains open. Later groups check their own readiness.",
+  "dropForge.openingGroup": "Opening: initialization and Phase 0 airdrops",
+  "dropForge.researchGroup": "Post-mint Research airdrop",
+  "dropForge.metadataGroup": "Published metadata updates",
+  "dropForge.phaseGroup": "Mint phase",
+  "dropForge.actionPending": "Pending",
+  "dropForge.manualHash": "Manual transaction hash",
+  "dropForge.recordTransaction": "Record transaction",
+  "dropForge.cancelManual": "Cancel unsubmitted manual operation",
+  "dropForge.resume": "Resume automatic execution",
+  "dropForge.pause": "Pause automatic execution",
+  "dropForge.supply.verified": "RPC and database mint counts agree",
+  "dropForge.supply.waiting": "Waiting for verified mint accounting",
+  "dropForge.supply.unknown": "Unavailable",
+  "dropForge.supply.rpc": "RPC minted",
+  "dropForge.supply.database": "Database minted",
+  "dropForge.supply.block": "Finalized comparison block",
+  "dropForge.supply.indexed": "Database indexed through",
+  "dropForge.supply.retry":
+    "Retry eligible at {time} (Europe/Athens). No new transfer is approved while verification is pending.",
+  "dropForge.inputsChanged":
+    "Inputs changed. Reset the distribution before processing again.",
+  "dropForge.launch": "Launch",
+  "dropForge.update": "Update Claim",
+  "dropForge.initializing": "Initializing…",
+  "dropForge.updating": "Updating…",
+  "dropForge.autoLaunch": "Auto Launch",
+  "dropForge.retryNow": "Retry now",
+  "dropForge.walletRetryScheduled": "Next attempt · {date} UTC",
+  "dropForge.walletRetryManual": "No automatic retry scheduled.",
+  "dropForge.inline.waitingInit": "Waiting for initialization",
+  "dropForge.inline.waitingPhase": "Waiting for {phase} update",
+  "dropForge.inline.manualConfirming": "Manual transaction confirming",
+  "dropForge.inline.blocked": "Automation blocked",
+  "dropForge.inline.completedManually": "Completed manually",
+  "dropForge.inline.initialized": "Initialized on-chain",
+  "dropForge.inline.phaseVerified": "Phase update verified",
+  "dropForge.inline.automationOff": "Automatic launch is off",
+  "dropForge.claimInitialized": "Claim initialized",
+  "dropForge.automaticLaunchOff": "Automatic launch is off.",
+  "dropForge.manualPending": "Manual transaction in progress.",
+  "dropForge.publishFirst": "Save and publish Craft changes before continuing.",
+  "dropForge.retry": "Retry",
+  "dropForge.processing": "Processing and finalizing…",
+  "dropForge.processingStep": "Step {step} of {total}",
+  "dropForge.process": "Process and Finalize",
+  "dropForge.prepareManually": "Prepare manually",
+  "dropForge.resumeAuth": "Sign in to resume",
+  "dropForge.authRequired":
+    "EMMA access expired or was denied. Sign in to resume the same job; saved progress is preserved.",
+  "dropForge.completed": "Completed",
+  "dropForge.listsReady": "Lists ready to download",
+  "dropForge.inputsMissing": "This plan needs Phase 0, Phase 1, and Phase 2.",
+  "dropForge.planMissing": "Select a distribution plan to continue.",
+  "dropForge.tokenMissing": "Confirm a valid token ID to continue.",
+  "dropForge.phasesMissing": "Missing from this plan: {phases}.",
+  "dropForge.phasesDuplicated":
+    "Multiple phases match {phases}. Rename the duplicates in EMMA.",
+  "dropForge.download": "Download lists",
+  "dropForge.downloading": "Downloading…",
+  "dropForge.pendingLists": "Process and finalize to make lists available.",
+  "dropForge.automation": "Automatic launch progress",
+  "dropForge.initialized": "Initialized",
+  "dropForge.processError": "Unable to start processing",
+  "dropForge.launchError": "Unable to request launch",
+  "dropForge.controlError": "Unable to change automatic execution",
+  "dropForge.recoveryError": "Unable to recover manual operation",
+  "dropForge.downloadError": "Unable to download completed lists",
+  "dropForge.manualRecoveryError": "Manual operation requires recovery",
+  "dropForge.previousManualError":
+    "Reconcile the previous manual transaction before starting another",
+  "dropForge.storageError":
+    "Browser storage is unavailable. Manual transactions require recovery storage.",
+  "dropForge.hashStorageError":
+    "Unable to save transaction {hash}. Keep this hash for manual recovery.",
+  "dropForge.winnerHash":
+    "Existing replacement or cancellation transaction hash",
+  "dropForge.recordWinner": "Verify existing transaction",
+  "dropForge.recordWinnerExplanation":
+    "Verify this transaction belongs to the exact operational wallet, nonce and action, or is its cancellation. The wallet remains reserved until canonical finality proves the outcome.",
+  "dropForge.transactionRecovery": "Transaction recovery",
+  "dropForge.transactionRecoveryError":
+    "Unable to request transaction recovery",
+  "dropForge.signer": "Operational wallet",
+  "dropForge.nonce": "Nonce",
+  "dropForge.executionDeadline": "Execution deadline (UTC)",
+  "dropForge.totalMinted": "Total minted at the winning block",
+  "dropForge.recoveryQueued": "Queued for signing",
+  "dropForge.recoveryWaiting":
+    "Recovery pending. The wallet remains reserved until the winning transaction is finalized.",
+  "dropForge.recoveryExecuted":
+    "The action executed and is finalized. Its allocations will not be replayed.",
+  "dropForge.recoveryOutstanding":
+    "The action did not execute. Its allocations remain outstanding.",
+  "dropForge.recoveryAllocations": "Inspect action allocations",
+  "dropForge.speedUp": "Speed up transaction",
+  "dropForge.cancelTransaction": "Cancel pending transaction",
+  "dropForge.retryOutstanding": "Retry outstanding action",
+  "dropForge.deliverRemaining": "Deliver outstanding allocations after minting",
+  "dropForge.confirmRecovery": "Confirm recovery request",
+  "dropForge.dismissRecovery": "Dismiss",
+  "dropForge.recoverySubmitting": "Requesting recovery…",
+  "dropForge.actionCancelled": "Transaction cancelled — work outstanding",
+  "dropForge.cancelTransactionExplanation":
+    "Request a cancellation using the same nonce. The original may still win. Undelivered allocations remain owed until delivery is confirmed.",
+  "dropForge.speedUpExplanation":
+    "Increase transaction fees while preserving the original nonce, recipients and quantities. The backend enforces the execution window and gas budget.",
+  "dropForge.retryOutstandingExplanation":
+    "Request delivery of outstanding work only after the backend verifies finalized cancellation or revert evidence. Previously delivered allocations are not replayed.",
+  "dropForge.transaction": "View transaction",
   "artworkAlerts.label": "Artwork alerts",
   "artworkAlerts.on": "On",
   "artworkAlerts.off": "Off",
