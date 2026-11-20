@@ -189,7 +189,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
 
   return (
     <motion.div
-      className="tw-h-full tw-min-w-0"
+      className="tw-h-full tw-min-w-0 !tw-tabular-nums [&_.tw-tabular-nums]:!tw-tabular-nums"
       variants={podiumVariants}
       initial={reduceMotion ? false : "hidden"}
       animate="visible"

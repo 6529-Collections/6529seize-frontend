@@ -14540,14 +14540,22 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       try {
         await page.goto(`/waves/${waveId}/decisions/alpha?tab=decisions`);
         if (waveId === MEMES_WAVE) {
-          await expect(
-            page
-              .getByRole("heading", {
-                name: "Direct native winner",
-                exact: true,
-              })
-              .first()
-          ).toBeVisible();
+          const artworkTitle = page
+            .getByRole("heading", {
+              name: "Direct native winner",
+              exact: true,
+            })
+            .first();
+          await expect(artworkTitle).toBeVisible();
+          await expect(artworkTitle).toHaveCSS("font-weight", "600");
+          const voteTotal = page
+            .locator('[data-wave-typography="preserve"].tw-tabular-nums')
+            .filter({ hasText: "123" });
+          await expect(voteTotal).toHaveCSS("font-weight", "600");
+          await expect(voteTotal).toHaveCSS(
+            "font-variant-numeric",
+            "tabular-nums"
+          );
         }
         if (waveId === WAVE) {
           const voters = page.getByRole("button", {

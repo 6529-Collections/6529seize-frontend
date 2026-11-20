@@ -107,10 +107,13 @@ function MemesWinnerMintDate({ memeCardId }: { readonly memeCardId: number }) {
 
   return (
     <p className="tw-mb-0 tw-mt-2 tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-1.5 tw-text-sm tw-leading-5">
-      <span className="tw-whitespace-nowrap tw-font-medium tw-text-iron-300">
+      <span className="tw-whitespace-nowrap tw-font-normal tw-text-iron-300">
         {t(locale, "theMemes.detail.live.artwork.mintDateLabel")}
       </span>
-      <time className="tw-text-iron-400" dateTime={mintDate.toISOString()}>
+      <time
+        className="tw-font-medium tw-text-iron-400"
+        dateTime={mintDate.toISOString()}
+      >
         {mintDateLabel}
       </time>
     </p>
@@ -301,7 +304,10 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             />
             <div className="tw-min-w-0">
               <div className="tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-x-[8px] tw-gap-y-[3px]">
-                <h3 className="tw-mb-0 tw-mt-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100">
+                <h3
+                  data-wave-typography="preserve"
+                  className="tw-mb-0 tw-mt-0 tw-text-base tw-font-semibold tw-leading-tight tw-text-iron-100"
+                >
                   {title}
                 </h3>
                 <MainStageMemeCardLink
@@ -346,6 +352,7 @@ export const MemesWaveWinnersDrop: React.FC<MemesWaveWinnersDropProps> = ({
             <div className="tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-[13px] tw-gap-y-[8px]">
               <div className="tw-flex tw-items-baseline tw-gap-x-1 tw-leading-5">
                 <span
+                  data-wave-typography="preserve"
                   className={`tw-text-body tw-font-semibold tw-tabular-nums tw-tracking-identity ${totalVoteClass}`}
                 >
                   {formatNumberWithCommas(rating)}
