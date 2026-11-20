@@ -111,24 +111,26 @@ it("shows inline prerequisites only for a saved plan and confirms manual artist 
   current.phases = [
     { name: "Phase 0", start: 10, end: 20, root: "0x0", price_wei: "0" },
   ];
-  current.actions.push({
-    ...current.actions[0],
+  const initialization = current.actions[0];
+  if (!initialization) throw new Error("Initialization fixture missing");
+  const artist = {
+    ...initialization,
     id: "artist",
     kind: ActionKind.Airdrop,
     label: "Airdrop - Artist",
     recipients: 1,
-  });
-  current.actions.push({
-    ...current.actions[1],
+  };
+  current.actions.push(artist, {
+    ...artist,
     id: "team",
     label: "Airdrop - Team",
   });
   expect(getLaunchInlineStatuses(current, "phase0")?.artist?.key).toBe(
     "waitingInit"
   );
-  current.actions[0].state = ActionState.Confirmed;
-  current.actions[1].state = ActionState.Confirmed;
-  current.actions[1].observed = true;
+  initialization.state = ActionState.Confirmed;
+  artist.state = ActionState.Confirmed;
+  artist.observed = true;
   const verified = getLaunchInlineStatuses(current, "phase0");
   expect(verified?.artist?.key).toBe("completedManually");
   expect(verified?.team).toBeUndefined();
