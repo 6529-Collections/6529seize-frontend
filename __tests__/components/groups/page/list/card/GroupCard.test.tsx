@@ -55,7 +55,7 @@ describe("GroupCard", () => {
 
   it("exposes a native whole-card link when idle", () => {
     const { getByRole } = renderComp();
-    expect(getByRole("link", { name: "Open g" })).toHaveAttribute(
+    expect(getByRole("link", { name: "Network" })).toHaveAttribute(
       "href",
       `/network?page=1&group=${group.id}`
     );
@@ -64,7 +64,7 @@ describe("GroupCard", () => {
   it("navigates to community view when pressing Enter", async () => {
     const user = userEvent.setup();
     const { getByRole } = renderComp();
-    const cardLink = getByRole("link", { name: "Open g" });
+    const cardLink = getByRole("link", { name: "Network" });
 
     cardLink.focus();
     await user.keyboard("{Enter}");
@@ -75,7 +75,7 @@ describe("GroupCard", () => {
   it("navigates to community view when pressing Space", async () => {
     const user = userEvent.setup();
     const { getByRole } = renderComp();
-    const cardLink = getByRole("link", { name: "Open g" });
+    const cardLink = getByRole("link", { name: "Network" });
 
     cardLink.focus();
     await user.keyboard(" ");
@@ -86,16 +86,14 @@ describe("GroupCard", () => {
   it("does not activate whole-card navigation for placeholders", () => {
     const { getByTestId, queryByRole } = render(
       <AuthContext.Provider value={{ connectedProfile: null } as any}>
-        <GroupCard titlePlaceholder="Loading group" />
+        <GroupCard />
       </AuthContext.Provider>
     );
 
     fireEvent.click(getByTestId("view"));
 
     expect(push).not.toHaveBeenCalled();
-    expect(
-      queryByRole("link", { name: "Open Loading group" })
-    ).not.toBeInTheDocument();
+    expect(queryByRole("link")).not.toBeInTheDocument();
   });
   it("uses only plain banner colours in the card gradient", () => {
     const renderMarkup = (banner1: string) =>

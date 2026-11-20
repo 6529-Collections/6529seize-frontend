@@ -9,6 +9,7 @@ import {
   test,
   waitForRouteReady,
 } from "../testHelpers";
+import composerSandboxConstants from "../support/composerSandboxConstants.json";
 import {
   expectNoUnsafeSandboxMutations,
   getSandboxApiOrigin,
@@ -135,6 +136,37 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Wave previews require the isolated mock API runner."
   );
+
+  test("shows Network as the group preview title and retains the group details", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const groupHref = `/network?page=1&group=${composerSandboxConstants.previewGroupId}`;
+    await installPreview(
+      page,
+      baseURL,
+      WAVE_NAME,
+      true,
+      new URL(groupHref, baseURL).href
+    );
+    await page.goto(`/waves/${WAVE_ID}`, { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+
+    const chat = page.getByRole("region", { name: "Wave chat file upload area" });
+    const title = chat.getByTitle("Network", { exact: true });
+    await expect(title).toHaveAttribute("href", groupHref, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(title).toHaveText("Network");
+    await expect(
+      chat.getByText("Active collectors", { exact: true })
+    ).toHaveCount(0);
+    await expect(chat.getByText(">= 100", { exact: true })).toBeVisible();
+    await expect(chat.getByText(/^Created /)).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, testInfo, "network-group-preview");
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
 
   test("keeps a shared NFT preview openable and copyable without a price on iOS", async ({
     page,

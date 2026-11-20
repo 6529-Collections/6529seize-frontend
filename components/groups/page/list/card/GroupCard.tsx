@@ -4,6 +4,8 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { ApiRateMatter } from "@/generated/models/ApiRateMatter";
 import { getSafeCssColor } from "@/helpers/css-color.helpers";
 import { getRandomColorWithSeed } from "@/helpers/Helpers";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { KeyboardEvent } from "react";
@@ -19,12 +21,11 @@ export type GroupCardRateMatter = ApiRateMatter.Rep | ApiRateMatter.Cic;
 export default function GroupCard({
   group,
   userPlaceholder,
-  titlePlaceholder,
 }: {
   readonly group?: ApiGroupFull | undefined;
   readonly userPlaceholder?: string | undefined;
-  readonly titlePlaceholder?: string | undefined;
 }) {
+  const locale = useBrowserLocale();
   const router = useRouter();
 
   const banner1 =
@@ -34,8 +35,7 @@ export default function GroupCard({
     getSafeCssColor(group?.created_by.banner2_color) ??
     getRandomColorWithSeed(group?.created_by.handle ?? "");
 
-  const cardLabel =
-    group?.name ?? titlePlaceholder ?? "View community group details";
+  const cardTitle = t(locale, "titleContext.routes.network");
   const cardHref = group ? `/network?page=1&group=${group.id}` : undefined;
   const gradientStyle = {
     background: `linear-gradient(135deg, ${banner1} 0%, ${banner2} 100%)`,
@@ -65,7 +65,7 @@ export default function GroupCard({
             href={cardHref}
             onKeyDown={onCardLinkKeyDown}
             className="tw-absolute tw-inset-0 tw-z-20 tw-rounded-xl focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-500"
-            aria-label={`Open ${cardLabel}`}
+            aria-label={cardTitle}
           />
         )}
         <div className="tw-absolute tw-inset-0 tw-h-1 tw-rounded-t-xl">
@@ -79,7 +79,8 @@ export default function GroupCard({
           <GroupCardView
             group={group}
             userPlaceholder={userPlaceholder}
-            titlePlaceholder={titlePlaceholder}
+            title={cardTitle}
+            href={cardHref}
           />
         </div>
       </div>

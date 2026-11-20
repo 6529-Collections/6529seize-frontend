@@ -18,7 +18,7 @@ describe('GroupCardChat', () => {
     mockUseQuery.mockReturnValue({ data: { id: 'g1', name: 'name' } });
     render(<GroupCardChat href="/h" groupId="g1" />);
     expect(mockGroupCard).toHaveBeenCalledWith(
-      expect.objectContaining({ group: { id: 'g1', name: 'name' }, userPlaceholder: '/h', titlePlaceholder: 'g1' })
+      { group: { id: 'g1', name: 'name' }, userPlaceholder: '/h' }
     );
     expect(mockButtons).toHaveBeenCalledWith(expect.objectContaining({ href: '/h', relativeHref: '/network?group=g1' }));
   });
