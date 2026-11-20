@@ -48,6 +48,12 @@ jobs:
   staging-packs:
     name: Staging E2E packs
     runs-on: ${{ vars.E2E_RUNNER || vars.CI_LINUX_RUNNER || 'ubuntu-latest' }}
+    container:
+      image: mcr.microsoft.com/playwright:v1.61.1-noble@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48
+      options: --init --ipc=host
+    defaults:
+      run:
+        shell: bash
     timeout-minutes: 90
     permissions:
       actions: read
@@ -56,8 +62,49 @@ jobs:
       expected-sha: ${{ steps.source.outputs.sha }}
     env:
       SELECTED_PACK: ${{ inputs.pack || 'all' }}
+      PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
 
     steps:
+      - name: Install pinned workflow tools
+        timeout-minutes: 5
+        run: |
+          set -euo pipefail
+          # Bump each tool's version and both architecture digests together.
+          case "$(uname -m)" in
+            x86_64)
+              architecture=amd64
+              gh_digest=1c5252d4ce3db07b51c01ff0b909583da6364ff3fdc06d0c2e75e62dc0380a34
+              jq_digest=020468de7539ce70ef1bceaf7cde2e8c4f2ca6c3afb84642aabc5c97d9fc2a0d
+              ;;
+            aarch64)
+              architecture=arm64
+              gh_digest=36af472f8e96fd67253f813f71d9610624cc4e3c7a5b148459e42ffa1a933f64
+              jq_digest=6bc62f25981328edd3cfcfe6fe51b073f2d7e7710d7ef7fcdac28d4e384fc3d4
+              ;;
+            *) echo "Unsupported workflow architecture" >&2; exit 1 ;;
+          esac
+          tools_root="$RUNNER_TEMP/staging-workflow-tools"
+          mkdir -p "$tools_root/bin"
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+            --fail --location --silent --show-error --retry 2 --max-time 60 \
+            "https://github.com/cli/cli/releases/download/v2.83.1/gh_2.83.1_linux_${architecture}.tar.gz" \
+            --output "$tools_root/gh.tar.gz"
+          curl --proto '=https' --proto-redir '=https' --tlsv1.2 \
+            --fail --location --silent --show-error --retry 2 --max-time 60 \
+            "https://github.com/jqlang/jq/releases/download/jq-1.8.1/jq-linux-${architecture}" \
+            --output "$tools_root/jq"
+          {
+            printf '%s  %s\n' "$gh_digest" "$tools_root/gh.tar.gz"
+            printf '%s  %s\n' "$jq_digest" "$tools_root/jq"
+          } | sha256sum --check --strict
+          tar -xzf "$tools_root/gh.tar.gz" -C "$tools_root" \
+            "gh_2.83.1_linux_${architecture}/bin/gh"
+          install -m 0755 "$tools_root/gh_2.83.1_linux_${architecture}/bin/gh" "$tools_root/bin/gh"
+          install -m 0755 "$tools_root/jq" "$tools_root/bin/jq"
+          "$tools_root/bin/gh" --version
+          "$tools_root/bin/jq" --version
+          echo "$tools_root/bin" >> "$GITHUB_PATH"
+
       - name: Resolve exact deployed SHA
         id: source
         env:
@@ -268,60 +315,20 @@ jobs:
             echo "publication_commit=$(jq -r .publication_commit "$identity_file")"
           } >> "$GITHUB_OUTPUT"
 
-      - name: Use HTTPS Ubuntu archive for browser dependencies
+      - name: Verify bundled Chromium runtime
+        timeout-minutes: 2
         run: |
-          # The hosted runner's Azure HTTP mirror can stall apt while the
-          # official HTTPS archive remains reachable. Preserve mirror metadata
-          # and all other configured sources. This is inline because deployed
-          # source may predate a repository-owned setup helper.
-          sudo "$(command -v node)" - /etc/apt/apt-mirrors.txt <<'NODE'
-          const fs = require("node:fs");
-          const mirrorListPath = process.argv[2];
-          if (!fs.existsSync(mirrorListPath)) process.exit(0);
-          const before = fs.readFileSync(mirrorListPath, "utf8");
-          const after = before.replace(
-            /^([ \t]*)http:\/\/azure\.archive\.ubuntu\.com\/ubuntu(\/?)(?=[ \t\r]|$)/gm,
-            "$1https://archive.ubuntu.com/ubuntu$2"
-          );
-          if (after !== before) fs.writeFileSync(mirrorListPath, after);
+          ./bin/6529 exec node <<'NODE'
+          const { chromium } = require("playwright");
+          async function verify() {
+            const browser = await chromium.launch();
+            await browser.close();
+          }
+          verify().catch((error) => {
+            console.error(error);
+            process.exitCode = 1;
+          });
           NODE
-
-      - name: Install Playwright dependencies
-        id: playwright_dependencies_primary
-        timeout-minutes: 10
-        continue-on-error: true
-        run: ./bin/6529 exec playwright install-deps chromium
-
-      - name: Retry Playwright dependencies
-        if: steps.playwright_dependencies_primary.outcome != 'success'
-        id: playwright_dependencies_retry
-        timeout-minutes: 15
-        continue-on-error: true
-        run: |
-          set -euo pipefail
-          # A timed-out install can leave apt-get running. Wait for it rather
-          # than deleting locks or killing another package-manager process.
-          sudo timeout 300 bash -euc '
-            command -v fuser >/dev/null
-            while fuser /var/lib/dpkg/lock-frontend /var/lib/dpkg/lock /var/lib/apt/lists/lock >/dev/null 2>&1; do
-              sleep 2
-            done
-          '
-          ./bin/6529 exec playwright install-deps chromium
-
-      - name: Verify Playwright dependencies
-        env:
-          PRIMARY_OUTCOME: ${{ steps.playwright_dependencies_primary.outcome }}
-          RETRY_OUTCOME: ${{ steps.playwright_dependencies_retry.outcome }}
-        run: |
-          if [ "$PRIMARY_OUTCOME" != success ] && [ "$RETRY_OUTCOME" != success ]; then
-            echo "Playwright system dependency installation failed twice." >&2
-            exit 1
-          fi
-
-      - name: Install Playwright browser
-        timeout-minutes: 10
-        run: ./bin/6529 exec playwright install chromium
 
       - name: Run read-only staging packs
         if: env.SELECTED_PACK != 'e2ee-staging'
