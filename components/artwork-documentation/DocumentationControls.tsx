@@ -9,7 +9,7 @@ import "@/i18n/namespaces/artwork-documentation";
 export const inputClass =
   "tw-block tw-w-full tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-950 tw-px-4 tw-py-3 tw-text-base tw-leading-7 tw-text-iron-100 focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 disabled:tw-opacity-60";
 export const compactSelectClass = `${getDropdownTriggerClasses({ variant: "form", metrics: { x: 16, y: 8, text: "xs", leading: "7" } })}`;
-export const selectClass = `${getDropdownTriggerClasses({ variant: "form", metrics: { x: 16, y: 12, text: "document" } })} tw-block tw-w-full tw-min-w-0 `;
+export const selectClass = `${getDropdownTriggerClasses({ variant: "form", metrics: { x: 16, y: 12, text: "document" } })} tw-block tw-w-full tw-min-w-0`;
 
 export const panelClass =
   "tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-p-4 sm:tw-p-6";

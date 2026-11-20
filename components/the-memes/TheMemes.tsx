@@ -758,21 +758,3 @@ export default function TheMemesComponent({
     </NftBalancesProvider>
   );
 }
-
-export function printVolumeTypeDropdown(
-  isVolumeSort: boolean,
-  setVolumeType: (volumeType: VolumeType) => void,
-  setVolumeSort: () => void,
-  selectedVolumeSort: VolumeType = VolumeType.ALL_TIME,
-  locale: SupportedLocale = DEFAULT_LOCALE
-) {
-  return (
-    <VolumeTypeDropdown
-      isVolumeSort={isVolumeSort}
-      selectedVolumeSort={selectedVolumeSort}
-      setVolumeType={setVolumeType}
-      setVolumeSort={setVolumeSort}
-      locale={locale}
-    />
-  );
-}

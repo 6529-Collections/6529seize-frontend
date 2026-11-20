@@ -551,7 +551,7 @@ export default function ManifoldMintingWidget(
     return (
       <select
         id={mintCountControlId}
-        className={`${getDropdownTriggerClasses({ variant: "form", metrics: { height: 44, x: 12, text: "sm" } })} `}
+        className={`${getDropdownTriggerClasses({ variant: "form", metrics: { height: 44, x: 12, text: "sm" } })}`}
         value={safeMintCount}
         onChange={(e) => setMintCount(normalizeMintCount(e.target.value))}
       >

@@ -54,25 +54,24 @@ export default function AllowlistToolSelectMenuMultiple({
 
   const [title, setTitle] = useState("");
 
-  useEffect(
-    () =>
-      setTitle(
-        !selectedOptions.length
-          ? placeholder
-          : selectedOptions.length === 1
-          ? selectedOptions.at(0)!?.title
-          : selectedOptions.length === options.length
-          ? allSelectedTitle
-          : `${selectedOptions.length} ${someSelectedTitleSuffix}`
-      ),
-    [
-      selectedOptions,
-      placeholder,
-      options,
-      allSelectedTitle,
-      someSelectedTitleSuffix,
-    ]
-  );
+  useEffect(() => {
+    const count = selectedOptions.length;
+    if (count === 0) {
+      setTitle(placeholder);
+    } else if (count === 1) {
+      setTitle(selectedOptions[0]!.title);
+    } else if (count === options.length) {
+      setTitle(allSelectedTitle);
+    } else {
+      setTitle(`${count} ${someSelectedTitleSuffix}`);
+    }
+  }, [
+    selectedOptions,
+    placeholder,
+    options,
+    allSelectedTitle,
+    someSelectedTitleSuffix,
+  ]);
 
   return (
     <div ref={listRef}>

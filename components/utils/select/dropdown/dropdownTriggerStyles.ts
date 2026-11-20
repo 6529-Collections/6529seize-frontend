@@ -7,7 +7,7 @@ const DROPDOWN_SURFACE_CLASSES =
 export const DROPDOWN_TRIGGER_SURFACE_CLASSES = `${DROPDOWN_SURFACE_CLASSES} tw-font-medium tw-text-iron-300 enabled:tw-cursor-pointer`;
 
 /** Validation-aware selectors can retain ownership of their semantic edge color. */
-export const DROPDOWN_TRIGGER_FRAME_CLASSES =
+const DROPDOWN_TRIGGER_FRAME_CLASSES =
   "tw-border-0 tw-ring-1 tw-ring-inset focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-[-2px]";
 
 export type DropdownVariant = "compact" | "regular" | "form";
@@ -202,7 +202,7 @@ function metricClass<Key extends string | number>(
   return key === undefined ? undefined : classes[key];
 }
 
-export function getDropdownMetricsClasses(metrics: DropdownMetrics): string {
+function getDropdownMetricsClasses(metrics: DropdownMetrics): string {
   return clsx(
     metricClass(HEIGHT_CLASSES, metrics.height),
     metricClass(MIN_HEIGHT_CLASSES, metrics.minHeight),

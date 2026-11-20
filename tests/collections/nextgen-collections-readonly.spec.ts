@@ -304,7 +304,7 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
   test("NextGen collection art page exposes token browse links", async ({
     isMobile,
     page,
-  }) => {
+  }, testInfo) => {
     await gotoReady(page, "/nextgen/collection/pebbles/art");
 
     await expect(page).toHaveTitle(/Art.*Pebbles|Pebbles.*Art|Pebbles/);
@@ -330,7 +330,11 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
     const listingStatus = page.getByRole("combobox", {
       name: "Listing status",
     });
-    if ((await listingStatus.count()) > 0) {
+    if (testInfo.project.name === "capacitor-ios-sim") {
+      await expect(listingStatus).toHaveCount(0);
+    } else {
+      await expect(listingStatus).toBeVisible();
+      await expect(listingStatus).toHaveValue("All");
       await listingStatus.scrollIntoViewIfNeeded();
       const coversControl = await listingStatus.evaluate((select) => {
         const bounds = select.closest("label")!.getBoundingClientRect();

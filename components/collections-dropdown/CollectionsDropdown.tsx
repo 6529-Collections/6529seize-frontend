@@ -57,7 +57,7 @@ export default function CollectionsDropdown(props: Readonly<Props>) {
   };
 
   const triggerClassNames: Record<CollectionsDropdownVariant, string> = {
-    default: `${getDropdownTriggerClasses({ variant: "regular", metrics: { y: 12, left: 12, right: 36, text: "xs" } })} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-text-left `,
+    default: `${getDropdownTriggerClasses({ variant: "regular", metrics: { y: 12, left: 12, right: 36, text: "xs" } })} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-text-left`,
     title:
       "tw-group tw-m-0 tw-inline-flex tw-min-w-0 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-xl tw-font-semibold tw-leading-tight tw-tracking-tight tw-text-iron-200 tw-transition tw-duration-200 hover:tw-text-white focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-primary-400 sm:tw-text-2xl md:tw-text-3xl",
     brand:

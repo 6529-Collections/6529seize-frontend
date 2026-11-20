@@ -9,11 +9,12 @@ import {
   type DropdownVariant,
 } from "./dropdown/dropdownTriggerStyles";
 
+/** Use an associated label or pass an accessible name to the native select. */
 const NativeSelect = forwardRef<
   HTMLSelectElement,
   SelectHTMLAttributes<HTMLSelectElement> & {
     readonly variant?: DropdownVariant;
-    readonly metrics?: DropdownMetrics;
+    readonly metrics?: Omit<DropdownMetrics, "right">;
     readonly invalid?: boolean;
   }
 >(

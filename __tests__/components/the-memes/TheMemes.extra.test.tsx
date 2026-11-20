@@ -1,6 +1,7 @@
 import React from "react";
 import { render } from "@testing-library/react";
-import { printVolumeTypeDropdown } from "@/components/the-memes/TheMemes";
+import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
+import { VolumeType } from "@/entities/INFT";
 
 jest.mock("@headlessui/react", () => ({
   Menu: ({ children, className }: any) => (
@@ -24,17 +25,27 @@ jest.mock("@/components/the-memes/TheMemes.module.css", () => ({
   volumeDropdownEnabled: "enabled",
 }));
 
-describe("printVolumeTypeDropdown css", () => {
+describe("VolumeTypeDropdown css", () => {
   it("adds enabled class when volume sort active", () => {
     const { getByTestId } = render(
-      printVolumeTypeDropdown(true, jest.fn(), jest.fn())
+      <VolumeTypeDropdown
+        isVolumeSort={true}
+        selectedVolumeSort={VolumeType.ALL_TIME}
+        setVolumeType={jest.fn()}
+        setVolumeSort={jest.fn()}
+      />
     );
     expect(getByTestId("dropdown").textContent).toBeDefined();
   });
 
   it("does not add enabled class when not active", () => {
     const { getByTestId } = render(
-      printVolumeTypeDropdown(false, jest.fn(), jest.fn())
+      <VolumeTypeDropdown
+        isVolumeSort={false}
+        selectedVolumeSort={VolumeType.ALL_TIME}
+        setVolumeType={jest.fn()}
+        setVolumeSort={jest.fn()}
+      />
     );
     expect(getByTestId("dropdown").textContent).toBeDefined();
   });
