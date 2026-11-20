@@ -62,6 +62,31 @@ async function expectNumericVoteAppearance(input: Locator) {
   ).toBe(true);
 }
 
+async function expectVoteSurface(dialog: Locator, opensAsSheet: boolean) {
+  await expect(
+    dialog.getByRole("heading", { name: "Vote for this artwork", exact: true })
+  ).toBeVisible();
+  const header = dialog.getByTestId("mobile-dialog-header");
+  if (!opensAsSheet) {
+    await expect(header).toHaveCount(0);
+    return;
+  }
+  await expect(header).toBeVisible();
+  await expect
+    .poll(() =>
+      header.evaluate((element) => {
+        const bounds = element
+          .closest(".mobile-wrapper-dialog")
+          ?.getBoundingClientRect();
+        return (
+          bounds !== undefined &&
+          Math.abs(bounds.bottom - window.innerHeight) < 2
+        );
+      })
+    )
+    .toBe(true);
+}
+
 async function expectVoteHeight(
   scope: Locator,
   previous?: { inputArea: number; container: number }
@@ -8015,6 +8040,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toBeVisible({ timeout: 30000 });
     await detail.getByRole("button", { name: "Vote", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
+    await expectVoteSurface(dialog, testInfo.project.use.hasTouch === true);
     const toggle = dialog.getByRole("switch", { name: "Explain vote" });
     await expect(toggle).not.toBeChecked();
     const voteHeading = dialog
@@ -8237,6 +8263,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
     await detail.getByRole("button", { name: "Vote", exact: true }).click();
     const dialog = page.getByRole("dialog", { name: "Vote for this artwork" });
+    await expectVoteSurface(dialog, testInfo.project.use.hasTouch === true);
     const panel = dialog.getByRole("group", {
       name: "Vote controls",
       exact: true,
@@ -9094,7 +9121,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
 
   test("reuses competition entry context when voting from list and grid cards", async ({
     page,
-  }) => {
+  }, testInfo) => {
     await installCompetitionApi(page);
     await page.goto(`${ROOT}/alpha`);
     const card = page
@@ -9117,6 +9144,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       const dialog = page.getByRole("dialog", {
         name: "Vote for this artwork",
       });
+      await expectVoteSurface(dialog, testInfo.project.use.hasTouch === true);
       await expect(
         dialog.getByRole("button", { name: "Vote 0 TDH", exact: true })
       ).toBeVisible();

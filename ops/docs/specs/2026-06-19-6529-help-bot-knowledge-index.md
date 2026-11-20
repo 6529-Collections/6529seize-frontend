@@ -1097,8 +1097,9 @@ on desktop. Compact decision submission cards that offer replies keep
 `Explain vote` on the left and the small `Vote` action on the right of one footer
 row, with the reply above it.
 The record covers positive green/negative red/zero neutral styling and keyboard
-focus on the slider handle. In the iPhone app, single-submission and leaderboard
-voting share the same sheet, including in landscape. Voting sheets and compact artist,
+focus on the slider handle. On compact screens, single-submission and leaderboard
+voting open as a bottom sheet. In the iPhone app the sheet follows the keyboard,
+including in compact landscape. Voting sheets and compact artist,
 participant, and My submissions galleries track the keyboard while keeping the
 wave behind them steady; optional replies use the same motion curve. Decision remaining,
 spent, and available credits retain their own meaning. The record keeps

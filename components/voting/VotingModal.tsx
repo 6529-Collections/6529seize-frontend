@@ -134,19 +134,14 @@ const OpenVotingModal: React.FC<
 };
 
 const VotingModal: React.FC<VotingModalProps> = (props) => {
-  const { isCapacitor, isIos } = useCapacitor();
   const isCompactLayout = useIsMobileLayoutViewport();
 
-  // Some detail and landscape callers request this dialog directly.
-  // Keep every iPhone entry on the same keyboard-aware sheet.
   if (!props.isOpen) return null;
 
   return (
     <OpenVotingModal
       {...props}
-      useMobileSheet={
-        props.preferMobile === true || (isCompactLayout && isCapacitor && isIos)
-      }
+      useMobileSheet={props.preferMobile === true || isCompactLayout}
     />
   );
 };
