@@ -1,7 +1,11 @@
 export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.editor.createTitle": "Create curation",
   "profileCuration.editor.editTitle": "Edit curation",
-  "profileCuration.editor.groupBack": "Back to selected group",
+  "profileCuration.editor.whoCanCurate": "Who can curate?",
+  "profileCuration.editor.editCriteria": "Edit criteria",
+  "profileCuration.editor.curators": "Eligible curators",
+  "profileCuration.editor.criteriaRequired": "No criteria set",
+  "profileCuration.editor.criteriaUnavailable": "Current criteria unavailable",
   "profileCuration.setup.title": "Create a Curation",
   "profileCuration.setup.intro": "Give your Curation a name to get started.",
   "profileCuration.setup.nameLabel": "Curation name",
@@ -106,7 +110,7 @@ export const PROFILE_CURATION_MESSAGES = {
     "Refresh the page and try again.",
   "profileCuration.permissions.advanced": "Advanced permissions",
   "profileCuration.permissions.description":
-    "Choose the Group whose members can manage this Curation.",
+    "Set the criteria for who can manage this Curation.",
   "profileCuration.actions.openOriginal": "Open original Wave",
   "profileCuration.actions.editPost": "Edit post",
   "profileCuration.actions.remove": "Remove from Curation",

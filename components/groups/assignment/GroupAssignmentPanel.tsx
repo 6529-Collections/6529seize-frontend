@@ -33,6 +33,7 @@ type GroupAssignmentPanelProps = CreateWaveGroupInlinePanelProps & {
   readonly presentation?: "default" | "quiet" | "embedded";
   readonly startMode?: GroupAssignmentPanelStartMode;
   readonly showChooseGroup?: boolean;
+  readonly membersDialogTitle?: string;
   readonly showPrivacyControl?: boolean;
   readonly isWaveAccessEditor?: boolean;
   readonly mobileCriteriaNavigation?: boolean;
@@ -538,6 +539,7 @@ export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
         key={previewTarget.kind}
         target={previewTarget}
         roleLabel={membersRoleLabel}
+        title={props.membersDialogTitle}
         onClose={() => setPreviewTarget(null)}
       />
     ) : null;

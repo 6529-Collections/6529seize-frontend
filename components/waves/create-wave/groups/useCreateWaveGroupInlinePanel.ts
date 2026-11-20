@@ -12,6 +12,7 @@ import { t } from "@/i18n/messages";
 import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api";
 import { validateGroupPayload } from "@/services/groups/groupMutations";
 import {
+  createInlineGroupBuilderStateFromDraft,
   createInlineGroupBuilderStateFromSavedGroup,
   createInitialInlineGroupBuilderState,
   dedupeInlineIdentities,
@@ -57,13 +58,24 @@ export type CreateWaveGroupInlinePanelProps = {
   readonly onCriteriaReplacementChange?:
     | ((active: boolean) => void)
     | undefined;
-  readonly onChange: (
-    group: ApiGroupFull | null
-  ) => void | boolean | Promise<void | boolean>;
-  readonly onCreateGroup: (
-    payload: ApiCreateGroup
-  ) => Promise<ApiGroupFull | null>;
-};
+} & (
+  | {
+      readonly onChange: (
+        group: ApiGroupFull | null
+      ) => void | boolean | Promise<void | boolean>;
+      readonly onCreateGroup: (
+        payload: ApiCreateGroup
+      ) => Promise<ApiGroupFull | null>;
+      readonly initialDraft?: never;
+      readonly onSaveDraft?: never;
+    }
+  | {
+      readonly initialDraft?: ApiCreateGroup | undefined;
+      readonly onSaveDraft: (payload: ApiCreateGroup) => void;
+      readonly onChange?: never;
+      readonly onCreateGroup?: never;
+    }
+);
 
 function useCreateWaveGroupInlinePanelViewState({
   builder,
@@ -183,6 +195,7 @@ function useCreateWaveGroupInlinePanelController({
   onChange,
   onCriteriaReplacementChange,
   onCreateGroup,
+  onSaveDraft,
   selectedGroup,
   selectedGroupIncludedWallets,
   selectedGroupExcludedWallets,
@@ -195,15 +208,12 @@ function useCreateWaveGroupInlinePanelController({
   readonly canCreateDraft: boolean;
   readonly canResetDraft: boolean;
   readonly defaultIncludedIdentity: CommunityMemberMinimal | null;
-  readonly onChange: (
-    group: ApiGroupFull | null
-  ) => void | boolean | Promise<void | boolean>;
+  readonly onChange: CreateWaveGroupInlinePanelProps["onChange"];
   readonly onCriteriaReplacementChange?:
     | ((active: boolean) => void)
     | undefined;
-  readonly onCreateGroup: (
-    payload: ApiCreateGroup
-  ) => Promise<ApiGroupFull | null>;
+  readonly onCreateGroup: CreateWaveGroupInlinePanelProps["onCreateGroup"];
+  readonly onSaveDraft: CreateWaveGroupInlinePanelProps["onSaveDraft"];
   readonly selectedGroup: ApiGroupFull | null;
   readonly selectedGroupIncludedWallets: readonly string[] | undefined;
   readonly selectedGroupExcludedWallets: readonly string[] | undefined;
@@ -489,21 +499,26 @@ function useCreateWaveGroupInlinePanelController({
       return;
     }
 
+    const nextPayload: ApiCreateGroup = {
+      ...builder.draft,
+      name:
+        suggestedName.trim() ||
+        t(locale, "waves.create.groups.defaultGroupName"),
+    };
+    if (onSaveDraft) {
+      onSaveDraft(nextPayload);
+      return;
+    }
+
     setIsCreating(true);
     try {
-      const nextPayload: ApiCreateGroup = {
-        ...builder.draft,
-        name:
-          suggestedName.trim() ||
-          t(locale, "waves.create.groups.defaultGroupName"),
-      };
-
+      if (!onCreateGroup) return;
       const createdGroup = await onCreateGroup(nextPayload);
       if (!createdGroup) {
         return;
       }
 
-      const changed = await onChange(createdGroup);
+      const changed = await onChange?.(createdGroup);
       if (changed !== false) {
         resetBuilder();
       }
@@ -530,7 +545,7 @@ function useCreateWaveGroupInlinePanelController({
       return;
     }
 
-    const changed = await onChange(group);
+    const changed = await onChange?.(group);
     if (group && changed !== false) {
       resetBuilder();
     }
@@ -572,14 +587,19 @@ export function useCreateWaveGroupInlinePanel({
   collapseOnClickAway = true,
   startMode = "actions",
   defaultIncludedIdentity = null,
+  initialDraft,
   onChange,
   onCriteriaReplacementChange,
   onCreateGroup,
+  onSaveDraft,
 }: CreateWaveGroupInlinePanelProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [builder, setBuilder] = useState<CreateWaveInlineGroupBuilderState>(
     () => {
+      if (initialDraft) {
+        return createInlineGroupBuilderStateFromDraft(initialDraft);
+      }
       if (
         startMode === "criteria" &&
         selectedGroup &&
@@ -665,6 +685,7 @@ export function useCreateWaveGroupInlinePanel({
     onChange,
     onCriteriaReplacementChange,
     onCreateGroup,
+    onSaveDraft,
     selectedGroup,
     selectedGroupIncludedWallets,
     selectedGroupExcludedWallets,

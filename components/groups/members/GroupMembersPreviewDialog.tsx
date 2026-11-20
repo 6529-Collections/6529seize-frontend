@@ -245,10 +245,12 @@ function MembersResults({
 export default function GroupMembersPreviewDialog({
   target,
   roleLabel,
+  title,
   onClose,
 }: {
   readonly target: GroupMembersPreviewTarget;
   readonly roleLabel: string;
+  readonly title?: string | undefined;
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
@@ -297,10 +299,13 @@ export default function GroupMembersPreviewDialog({
 
   return (
     <MobileWrapperDialog
-      title={t(locale, "waves.create.groups.members.dialogTitle", {
-        role: roleLabel,
-        group: groupName,
-      })}
+      title={
+        title ??
+        t(locale, "waves.create.groups.members.dialogTitle", {
+          role: roleLabel,
+          group: groupName,
+        })
+      }
       isOpen
       onClose={onClose}
       tall

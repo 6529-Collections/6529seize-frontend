@@ -85,10 +85,13 @@ Users can:
     group is contained in `Visibility` before saving.
 15. After success, the affected rows refresh.
 16. In `Curations`, administrators can create or delete curations, edit their
-    name and group, and move them up or down.
-    On mobile and in the tablet overlay, create and edit use the existing
-    information panel at the same height. Group selection stays inside the form.
-    Back discards the draft and returns to Configuration; Close or a downward
+    name and criteria, and move them up or down. `Who can curate?` shows the
+    current criteria and eligible member count. Select `Edit criteria` to
+    adjust the rules, then select `Save changes` to return to the curation
+    form. `Create` or `Save` applies the rules to that curation.
+    On mobile and in the tablet overlay, both forms use the existing
+    information panel at the same height.
+    Back discards the draft and returns to Configuration. Close or a downward
     header swipe dismisses the panel. Successful saves return to Configuration,
     and failed saves keep the draft open. Desktop forms remain separate dialogs.
 

@@ -856,6 +856,7 @@ export * from '../models/ApiWaveCreditNft';
 export * from '../models/ApiWaveCreditScope';
 export * from '../models/ApiWaveCreditType';
 export * from '../models/ApiWaveCuration';
+export * from '../models/ApiWaveCurationCriteria';
 export * from '../models/ApiWaveCurationRequest';
 export * from '../models/ApiWaveDecision';
 export * from '../models/ApiWaveDecisionAward';
@@ -1859,6 +1860,7 @@ import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveCuration } from '../models/ApiWaveCuration';
+import { ApiWaveCurationCriteria } from '../models/ApiWaveCurationCriteria';
 import { ApiWaveCurationRequest } from '../models/ApiWaveCurationRequest';
 import { ApiWaveDecision } from '../models/ApiWaveDecision';
 import { ApiWaveDecisionAward       } from '../models/ApiWaveDecisionAward';
@@ -3097,6 +3099,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
     "ApiWaveCreditNft": ApiWaveCreditNft,
     "ApiWaveCuration": ApiWaveCuration,
+    "ApiWaveCurationCriteria": ApiWaveCurationCriteria,
     "ApiWaveCurationRequest": ApiWaveCurationRequest,
     "ApiWaveDecision": ApiWaveDecision,
     "ApiWaveDecisionAward": ApiWaveDecisionAward,
