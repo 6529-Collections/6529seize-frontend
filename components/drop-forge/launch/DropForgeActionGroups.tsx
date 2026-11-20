@@ -54,7 +54,7 @@ function ActionRow({
   let retryStatus: string | undefined;
   if (action.wallet_blocked === true) {
     retryStatus =
-      retryAt == null
+      typeof retryAt !== "number"
         ? t(locale, "dropForge.walletRetryManual")
         : t(locale, "dropForge.walletRetryScheduled", {
             date: new Intl.DateTimeFormat(locale, {

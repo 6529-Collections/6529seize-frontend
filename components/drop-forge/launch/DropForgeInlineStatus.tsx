@@ -58,7 +58,8 @@ function getRowStatus(
   const blocked = actions.find(
     (action) =>
       ![State.Confirmed, State.Skipped].includes(action.state) &&
-      (action.wallet_blocked === true || action.attempt_error != null)
+      (action.wallet_blocked === true ||
+        typeof action.attempt_error === "string")
   );
   return blocked
     ? { key: "blocked", detail: blocked.attempt_error ?? undefined }
