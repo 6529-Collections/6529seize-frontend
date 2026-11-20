@@ -1,4 +1,5 @@
 import type { Locator, Page } from "@playwright/test";
+import type { ApiGroupFull } from "../../generated/models/ApiGroupFull";
 import type { ApiWave } from "../../generated/models/ApiWave";
 import { ApiDropModerationStatus } from "../../generated/models/ApiDropModerationStatus";
 import { ApiWaveSubscriptionTargetAction } from "../../generated/models/ApiWaveSubscriptionTargetAction";
@@ -141,7 +142,13 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
     page,
     baseURL,
   }, testInfo) => {
-    const groupHref = `/network?page=1&group=${composerSandboxConstants.previewGroupId}`;
+    const groupId = composerSandboxConstants.previewGroupId;
+    const groupHref = `/network?page=1&group=${groupId}`;
+    const groupResponse = await page.request.get(
+      `${getSandboxApiOrigin(baseURL)}/api/groups/${groupId}`
+    );
+    expect(groupResponse.ok()).toBe(true);
+    const group: ApiGroupFull = await groupResponse.json();
     await installPreview(
       page,
       baseURL,
@@ -153,15 +160,27 @@ test.describe("Embedded wave preview sandbox @auth @local-only", () => {
     await waitForRouteReady(page);
 
     const chat = page.getByRole("region", { name: "Wave chat file upload area" });
-    const title = chat.getByTitle("Network", { exact: true });
+    const title = chat.getByRole("link", { name: "Network", exact: true });
     await expect(title).toHaveAttribute("href", groupHref, {
       timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
     });
     await expect(title).toHaveText("Network");
+    await expect(title).toHaveAttribute("title", "Network");
+    await expect(title).toHaveAccessibleDescription(/>= 100.*Created /);
     await expect(
-      chat.getByText("Active collectors", { exact: true })
+      chat.getByText(group.name, { exact: true })
     ).toHaveCount(0);
-    await expect(chat.getByText(">= 100", { exact: true })).toBeVisible();
+    const criterion = chat.getByText(">= 100", { exact: true });
+    await expect(criterion).toBeVisible();
+    await criterion.scrollIntoViewIfNeeded();
+    const bodyLink = await criterion.evaluate((element) => {
+      const { x, y, width, height } = element.getBoundingClientRect();
+      return document
+        .elementFromPoint(x + width / 2, y + height / 2)
+        ?.closest("a")
+        ?.getAttribute("href");
+    });
+    expect(bodyLink).toBe(groupHref);
     await expect(chat.getByText(/^Created /)).toBeVisible();
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(page, testInfo, "network-group-preview");

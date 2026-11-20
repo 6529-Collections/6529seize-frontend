@@ -22,9 +22,11 @@ describe("GroupCardView", () => {
   it("renders title, details, then the creator footer", () => {
     const group: any = { id: "g", name: "Collectors" };
     const href = "/network?page=1&group=g";
-    render(<GroupCardView group={group} title="Network" href={href} />);
-    expect(HeaderMock).toHaveBeenCalledWith({ title: "Network", href });
-    expect(ContentMock).toHaveBeenCalledWith({ group });
+    render(<GroupCardView group={group} />);
+    expect(HeaderMock).toHaveBeenCalledWith(
+      expect.objectContaining({ href, detailsId: expect.any(String) })
+    );
+    expect(ContentMock).toHaveBeenCalledWith(expect.objectContaining({ group }));
     expect(CreatorMock).toHaveBeenCalledWith(
       expect.objectContaining({ group })
     );
