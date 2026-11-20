@@ -122,8 +122,8 @@ export default function ProfilePreferencesDirectMessageGroup({
           selectedGroup={criteria?.group ?? null}
           selectedGroupIncludedWallets={criteria?.includedWallets}
           selectedGroupExcludedWallets={criteria?.excludedWallets}
-          isContentLoading={isLoading}
-          contentError={isError}
+          isContentLoading={draft === null && isLoading}
+          contentError={draft === null && isError}
           onRetry={retry}
           onClose={() => setOpen(false)}
           criteriaDraft={{

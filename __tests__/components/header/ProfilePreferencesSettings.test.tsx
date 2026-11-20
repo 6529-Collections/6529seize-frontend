@@ -1,5 +1,6 @@
 import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import { useAuth } from "@/components/auth/Auth";
+import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
   createEmptyInlineGroupPayload,
   createInitialInlineGroupBuilderState,
@@ -10,6 +11,7 @@ import {
 } from "@/generated/models/ApiProfilePreferences";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
 import * as authUtils from "@/services/auth/auth.utils";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -324,7 +326,14 @@ describe("ProfilePreferencesSettings", () => {
           : fetch(request)
       );
     const user = userEvent.setup();
-    render(<ProfilePreferencesSettings activeTab="messages" />);
+    const queryClient = new QueryClient({
+      defaultOptions: { queries: { retry: false } },
+    });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <ProfilePreferencesSettings activeTab="messages" />
+      </QueryClientProvider>
+    );
     await user.click(
       await screen.findByRole("button", { name: "Edit criteria" })
     );
@@ -333,6 +342,14 @@ describe("ProfilePreferencesSettings", () => {
     pendingGroup.resolve(existingGroup);
     expect(await screen.findByText("Saved minimum 15")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Done" }));
+    queryClient.removeQueries({ queryKey: [QueryKey.GROUP, "group-1"] });
+    jest.mocked(commonApiFetch).mockImplementation(async (request) => {
+      if (request.endpoint === "groups/group-1") throw new Error("Read failed");
+      return fetch(request);
+    });
+    await user.click(screen.getByRole("button", { name: "Edit criteria" }));
+    expect(await screen.findByText("Draft minimum 25")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Close" }));
     await user.click(saveButton());
     await waitFor(() =>
       expect(commonApiPut).toHaveBeenCalledWith({
@@ -367,36 +384,60 @@ describe("ProfilePreferencesSettings", () => {
     expect(mockSubmit).toHaveBeenCalledTimes(1);
   });
 
-  it("reports a profile switch before saving the newly created group", async () => {
-    const user = userEvent.setup();
-    const getWalletRole = jest.spyOn(authUtils, "getWalletRole");
-    getWalletRole.mockReturnValue("alice");
-    mockSubmit.mockImplementationOnce(async () => {
-      getWalletRole.mockReturnValue("bob");
-      return { ok: true, group: { id: "group-2" } };
-    });
-    try {
-      const { setToast } = jest.mocked(useAuth).getMockImplementation()!();
-      render(<ProfilePreferencesSettings activeTab="messages" />);
-      await user.click(
-        await screen.findByRole("radio", {
-          name: "People who meet my criteria",
+  it.each([
+    { creator: "profile-1", savedGroupId: "group-2", createAttempts: 1 },
+    { creator: "profile-2", savedGroupId: "group-3", createAttempts: 2 },
+  ])(
+    "checks the group creator when retrying after a profile switch ($creator)",
+    async ({ creator, savedGroupId, createAttempts }) => {
+      const user = userEvent.setup();
+      const getWalletRole = jest.spyOn(authUtils, "getWalletRole");
+      getWalletRole.mockReturnValue("alice");
+      mockSubmit
+        .mockImplementationOnce(async () => {
+          getWalletRole.mockReturnValue("bob");
+          return {
+            ok: true,
+            group: { id: "group-2", created_by: { id: creator } },
+          };
         })
-      );
-      await user.click(screen.getByRole("button", { name: "Set criteria" }));
-      await user.click(await screen.findByRole("button", { name: "Done" }));
-      await user.click(saveButton());
-      await waitFor(() =>
-        expect(setToast).toHaveBeenCalledWith({
-          type: "error",
-          message: expect.stringContaining("The active profile changed"),
-        })
-      );
-      expect(commonApiPut).not.toHaveBeenCalled();
-    } finally {
-      getWalletRole.mockRestore();
+        .mockResolvedValue({ ok: true, group: { id: "group-3" } });
+      try {
+        const { setToast } = jest.mocked(useAuth).getMockImplementation()!();
+        render(<ProfilePreferencesSettings activeTab="messages" />);
+        await user.click(
+          await screen.findByRole("radio", {
+            name: "People who meet my criteria",
+          })
+        );
+        await user.click(screen.getByRole("button", { name: "Set criteria" }));
+        await user.click(await screen.findByRole("button", { name: "Done" }));
+        await user.click(saveButton());
+        await waitFor(() =>
+          expect(setToast).toHaveBeenCalledWith({
+            type: "error",
+            message: expect.stringContaining("The active profile changed"),
+          })
+        );
+        expect(commonApiPut).not.toHaveBeenCalled();
+        getWalletRole.mockReturnValue("alice");
+        await waitFor(() => expect(saveButton()).toBeEnabled());
+        await user.click(saveButton());
+        await waitFor(() =>
+          expect(commonApiPut).toHaveBeenCalledWith({
+            endpoint: "profile-preferences",
+            body: {
+              direct_message_policy: "GROUP_MEMBERS",
+              direct_message_group_id: savedGroupId,
+            },
+          })
+        );
+        expect(mockSubmit).toHaveBeenCalledTimes(createAttempts);
+      } finally {
+        getWalletRole.mockRestore();
+      }
     }
-  });
+  );
 
   it("can switch to Everyone without resending the old group or notification settings", async () => {
     seedPreferences({

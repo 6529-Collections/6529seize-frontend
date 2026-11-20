@@ -135,23 +135,25 @@ function readStoredProfiles(): Promise<boolean> {
   if (profilesRead) return Promise.resolve(true);
   const store = getDesktopStore();
   if (!store) return Promise.resolve(false);
+  if (profilesLoading) return profilesLoading;
   const generation = profilesGeneration;
-  profilesLoading ??= Promise.resolve()
-    .then(async () => {
-      try {
-        const storedProfiles = await store.get(PROFILES_KEY);
-        if (generation !== profilesGeneration) return false;
+  const read: Promise<boolean> = Promise.resolve().then(async () => {
+    let loaded = false;
+    try {
+      const storedProfiles = await store.get(PROFILES_KEY);
+      if (generation === profilesGeneration) {
         profilesRead = true;
         setProfiles(readProfiles(storedProfiles));
-        return true;
-      } catch {
-        return false;
+        loaded = true;
       }
-    })
-    .finally(() => {
-      profilesLoading = null;
-    });
-  return profilesLoading;
+    } catch {
+      loaded = false;
+    }
+    if (profilesLoading === read) profilesLoading = null;
+    return loaded;
+  });
+  profilesLoading = read;
+  return read;
 }
 
 /** Loads the browser-wallet profile list (an unreadable list offers none). */

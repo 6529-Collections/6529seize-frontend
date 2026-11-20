@@ -431,7 +431,15 @@ function useSaveMessagePreferences(
         currentHandle: connectedProfile?.handle ?? null,
         publish: true,
       });
-      if (wallet !== getWalletAddress() || role !== getWalletRole()) {
+      const profileChanged =
+        wallet !== getWalletAddress() || role !== getWalletRole();
+      if (
+        result.ok &&
+        (!profileChanged || result.group.created_by?.id === profileId)
+      ) {
+        pendingGroup.current = { key, id: result.group.id };
+      }
+      if (profileChanged) {
         setToast({
           type: "error",
           message: t(locale, "profilePreferences.saveProfileChanged"),
@@ -448,7 +456,6 @@ function useSaveMessagePreferences(
         }
         return null;
       }
-      pendingGroup.current = { key, id: result.group.id };
       return { ...body, direct_message_group_id: result.group.id };
     }
   );

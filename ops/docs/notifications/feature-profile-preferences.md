@@ -143,9 +143,9 @@ internal moderation or AI detail.
   are connected.
 - Existing direct-message conversations remain available after the admission
   policy changes.
-- If the chosen group is deleted or hidden, Preferences warns that only people
-  you follow can start new conversations until you choose another group. New
-  conversations fall back to **People I follow** in the meantime.
+- If the saved criteria group is deleted or hidden, new conversations fall back
+  to **People I follow**. To replace the criteria, open **Edit criteria**, set
+  the rules, select **Done**, then select **Save**.
 
 ## Failure and Recovery
 
