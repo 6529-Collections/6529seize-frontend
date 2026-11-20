@@ -184,6 +184,10 @@ export function CompetitionVoteForm({
   const rangeDescriptionId = `competition-vote-range-${entryId}`;
   const min = credit.data?.min_vote;
   const max = credit.data?.max_vote;
+  const updateNumericDraft = (next: string) => {
+    setVoteDraft(next);
+    setSaved(false);
+  };
   const valid =
     value.trim() !== "" &&
     Number.isSafeInteger(numeric) &&
@@ -521,10 +525,17 @@ export function CompetitionVoteForm({
               disabled={busy || disabled || !competition.permissions.vote}
               aria-invalid={!valid}
               aria-describedby={errorDescriptionId}
-              onChange={(event) => {
-                setVoteDraft(event.target.value);
-                setSaved(false);
-              }}
+              onChange={(event) => updateNumericDraft(event.target.value)}
+              adjustments={
+                typeof min === "number" && typeof max === "number"
+                  ? {
+                      min,
+                      max,
+                      value: Number.isSafeInteger(numeric) ? numeric : 0,
+                      onChange: (next) => updateNumericDraft(String(next)),
+                    }
+                  : undefined
+              }
             />
           </div>
         )}

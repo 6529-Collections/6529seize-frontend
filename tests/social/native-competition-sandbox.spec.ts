@@ -8096,11 +8096,28 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await dialog.getByRole("button", { name: "Numeric", exact: true }).click();
     await expectCenteredVoteHeader();
     await expectVoteHeight(dialog, closedVoteHeight);
+    const input = dialog.getByRole("spinbutton", { name: "Your vote" });
+    const stepper = dialog
+      .getByRole("group", { name: "Vote controls", exact: true })
+      .locator("[data-vote-numeric-stepper]");
+    await expect(stepper).toHaveCSS("border-top-width", "1px");
+    const increase = stepper.getByRole("button", { name: "Increase vote" });
+    const decrease = stepper.getByRole("button", { name: "Decrease vote" });
     await expect(
-      dialog.getByRole("button", { name: /^(Increase|Decrease) vote$/ })
-    ).toHaveCount(0);
-    await expect(dialog.getByRole("button", { name: /%$/ })).toHaveCount(0);
-    await dialog.getByRole("spinbutton", { name: "Your vote" }).fill("25");
+      dialog.getByRole("button", { name: /^[+-]\d+%$/ })
+    ).toHaveCount(4);
+    await dialog.getByRole("button", { name: "+50%", exact: true }).click();
+    await expect(input).toHaveValue("50");
+    if (testInfo.project.use.hasTouch) await increase.tap();
+    else await increase.click();
+    await expect(input).toHaveValue("51");
+    await decrease.focus();
+    await page.keyboard.press("Enter");
+    await expect(input).toHaveValue("50");
+    await dialog.getByRole("button", { name: "-100%", exact: true }).click();
+    await expect(input).toHaveValue("-100");
+    expect(sandbox.requests).toHaveLength(0);
+    await input.fill("25");
     await toggle.check();
     await expect(toggle).toBeChecked();
     const rationale = dialog.getByLabel("Optional rationale reply");
@@ -8133,9 +8150,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       exact: true,
     });
     await expect(save).toBeEnabled();
-    const inputBox = (await dialog
-      .getByRole("spinbutton", { name: "Your vote" })
-      .boundingBox())!;
+    const inputBox = (await stepper.boundingBox())!;
     const explainBox = (await toggle.boundingBox())!;
     const rationaleBox = (await rationale.boundingBox())!;
     const saveBox = (await save.boundingBox())!;
@@ -8235,7 +8250,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     const closedVoteHeight = await expectVoteHeight(dialog);
     await mode.getByRole("button", { name: "Numeric", exact: true }).click();
     await expectVoteHeight(dialog, closedVoteHeight);
-    // The legacy numeric adapter retains its text input and increment buttons.
+    // The wave adapter retains its grouped text input inside the shared stepper.
     const input = panel.getByRole("textbox", {
       name: "Your vote",
       exact: true,

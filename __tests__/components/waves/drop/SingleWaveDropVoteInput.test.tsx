@@ -431,7 +431,6 @@ describe("SingleWaveDropVoteInput", () => {
   });
 
   it("cleans up timers on unmount", () => {
-    const clearIntervalSpy = jest.spyOn(global, "clearInterval");
     const setVoteValue = jest.fn();
 
     const { unmount } = render(
@@ -447,8 +446,11 @@ describe("SingleWaveDropVoteInput", () => {
     });
 
     unmount();
-
-    expect(clearIntervalSpy).toHaveBeenCalled();
+    setVoteValue.mockClear();
+    act(() => {
+      jest.advanceTimersByTime(1100);
+    });
+    expect(setVoteValue).not.toHaveBeenCalled();
   });
 
   it("handles string vote values correctly in updateValue", () => {
@@ -499,19 +501,18 @@ describe("SingleWaveDropVoteInput", () => {
       />
     );
 
-    const incrementButton = screen.getAllByRole("button")[0];
-
-    act(() => {
-      fireEvent.pointerDown(incrementButton);
-      jest.advanceTimersByTime(50);
+    const incrementButton = screen.getByRole("button", {
+      name: "Increase vote",
     });
-
-    // Should hit memetic value 69 and pause
-    expect(setVoteValue).toHaveBeenCalled();
-
-    // Advance time to trigger resume
+    fireEvent.pointerDown(incrementButton);
+    expect(setVoteValue).toHaveBeenLastCalledWith(69);
     act(() => {
       jest.advanceTimersByTime(1000);
     });
+    expect(setVoteValue).toHaveBeenCalledTimes(1);
+    act(() => {
+      jest.advanceTimersByTime(100);
+    });
+    expect(setVoteValue).toHaveBeenLastCalledWith(70);
   });
 });

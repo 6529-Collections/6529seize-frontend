@@ -33,8 +33,8 @@ current voting budget; other drops use their own allowed range.
 3. Set the value:
    - slider drag
    - numeric text input
-   - `%` quick buttons in full-size numeric controls outside decisions
-   - up/down step buttons in full-size numeric controls outside decisions
+   - `%` quick buttons in full-size numeric controls
+   - up/down step buttons in full-size numeric controls
 4. Review the live value and vote-credit label.
 5. Optional: enable `Explain vote` and edit the rationale. Decision popups
    and full decision dialogs display the generated rationale as a placeholder;
@@ -53,7 +53,8 @@ current voting budget; other drops use their own allowed range.
 - Compact submission cards use a smaller numeric field on desktop. Phones and
   touch devices keep a larger field and text for entry.
 - Full and compact numeric fields share the app font, neutral background and
-  visible keyboard focus. Existing credit labels remain beside the amount.
+  visible keyboard focus. Credit labels remain beside the amount. In full
+  panels, a visible border frames the numeric field and its two arrows.
 - In full-size dialogs and sheets, `Explain vote` uses a chat icon on its own
   row. Its reply field opens below that row, followed by a full-width `Vote`
   button, including on desktop. Compact decision submission cards that offer
@@ -64,10 +65,11 @@ current voting budget; other drops use their own allowed range.
   values are easier to reach.
 - Keyboard focus highlights the slider handle. Clicking or dragging does not
   draw a focus box around the whole slider area.
-- Full-size numeric controls outside decisions offer `-100%`, `-50%`, `+50%`,
-  and `+100%` shortcuts. Negative shortcuts are omitted when negative votes
-  are not allowed. Decision numeric controls do not include these shortcuts.
-- Holding an up/down step button outside decisions accelerates step size:
+- Full-size numeric controls offer `-100%`, `-50%`, `+50%`, and `+100%`.
+  The shortcuts use the allowed vote on this drop or decision entry. For
+  example, `+50%` fills in 40 if the maximum is 80. Negative shortcuts are
+  omitted when negative votes are not allowed.
+- Holding an up/down step button accelerates step size:
   `1`, then `10`, then `100`, then `1000`.
 - Use `Enter` or `Space` on a focused step button to change the amount once.
   A pointer click or tap also steps once. Releasing or cancelling a held press
