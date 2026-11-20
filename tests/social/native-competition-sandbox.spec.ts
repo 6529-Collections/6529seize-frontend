@@ -13021,8 +13021,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(
         sheet.getByText("Active collectors", { exact: true })
       ).toBeHidden();
-      await expect(sheet.getByText("25 users", { exact: true })).toBeVisible();
-      await expect(sheet.getByText(/TDH at least 100/)).toBeVisible();
+      await expect(
+        sheet.getByText("25 users", { exact: true }).filter({ visible: true })
+      ).toBeVisible();
+      await expect(
+        sheet.getByText(/TDH at least 100/).filter({ visible: true })
+      ).toBeVisible();
       await sheet
         .getByRole("button", { name: "View members", exact: true })
         .click();
