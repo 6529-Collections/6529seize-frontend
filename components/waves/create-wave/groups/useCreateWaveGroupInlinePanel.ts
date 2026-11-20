@@ -509,16 +509,16 @@ function useCreateWaveGroupInlinePanelController({
       onSaveDraft(nextPayload);
       return;
     }
+    if (!onCreateGroup || !onChange) return;
 
     setIsCreating(true);
     try {
-      if (!onCreateGroup) return;
       const createdGroup = await onCreateGroup(nextPayload);
       if (!createdGroup) {
         return;
       }
 
-      const changed = await onChange?.(createdGroup);
+      const changed = await onChange(createdGroup);
       if (changed !== false) {
         resetBuilder();
       }

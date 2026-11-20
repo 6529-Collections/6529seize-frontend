@@ -1,6 +1,26 @@
 export const PROFILE_CURATION_MESSAGES = {
   "profileCuration.editor.createTitle": "Create curation",
   "profileCuration.editor.editTitle": "Edit curation",
+  "profileCuration.editor.name": "Name",
+  "profileCuration.editor.namePlaceholder": "Create your own custom...",
+  "profileCuration.editor.preset.art": "Art",
+  "profileCuration.editor.preset.favourites": "Favourites",
+  "profileCuration.editor.preset.marketplace": "Marketplace",
+  "profileCuration.editor.preset.important": "Important",
+  "profileCuration.editor.save": "Save",
+  "profileCuration.editor.saving": "Saving...",
+  "profileCuration.editor.creating": "Creating...",
+  "profileCuration.editor.created": "Curation created.",
+  "profileCuration.editor.updated": "Curation updated.",
+  "profileCuration.editor.createFailed": "Failed to create curation.",
+  "profileCuration.editor.updateFailed": "Failed to update curation.",
+  "profileCuration.editor.duplicate":
+    "A curation with this name already exists in this wave. Choose another name.",
+  "profileCuration.editor.createForbidden":
+    "You don't have permission to create a curation.",
+  "profileCuration.editor.updateForbidden":
+    "You don't have permission to update this curation.",
+  "profileCuration.editor.authCancelled": "Authentication was cancelled.",
   "profileCuration.editor.whoCanCurate": "Who can curate?",
   "profileCuration.editor.editCriteria": "Edit criteria",
   "profileCuration.editor.curators": "Eligible curators",

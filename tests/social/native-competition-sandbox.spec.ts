@@ -12798,14 +12798,32 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         `**/api/waves/${WAVE}/curations/${curation.id}`,
         async (route) => {
           expect(route.request().method()).toBe("POST");
-          expect(route.request().postDataJSON()).toMatchObject({
+          expect(route.request().postDataJSON()).toEqual({
             name: "Updated art",
             criteria: {
-              group: { tdh: { min: 200, inclusion_strategy: "TDH" } },
+              group: {
+                tdh: { min: 200, max: null, inclusion_strategy: "TDH" },
+                cic: {
+                  min: null,
+                  max: null,
+                  direction: "RECEIVED",
+                  user_identity: null,
+                },
+                rep: {
+                  min: null,
+                  max: null,
+                  direction: "RECEIVED",
+                  user_identity: null,
+                  category: null,
+                },
+                level: { min: 1, max: null },
+                owns_nfts: [],
+                identity_addresses: null,
+                excluded_identity_addresses: null,
+              },
               is_private: true,
             },
           });
-          expect(route.request().postDataJSON()).not.toHaveProperty("group_id");
           writes++;
           if (failSave)
             return route.fulfill({

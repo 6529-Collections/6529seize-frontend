@@ -12,6 +12,7 @@ import type { ApiWaveMin } from "@/generated/models/ApiWaveMin";
 import { useSavedGroup } from "@/hooks/groups/useGroupCriteria";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { getWaveCurationsQueryKey } from "@/hooks/waves/useWaveCurations";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import {
   commonApiPost,
@@ -30,26 +31,11 @@ import {
 } from "./CurationCriteria";
 
 const CURATION_NAME_PRESETS = [
-  "Art",
-  "Favourites",
-  "Marketplace",
-  "Important",
+  "profileCuration.editor.preset.art",
+  "profileCuration.editor.preset.favourites",
+  "profileCuration.editor.preset.marketplace",
+  "profileCuration.editor.preset.important",
 ] as const;
-
-const getMatchingPresetLabel = (
-  value: string | null | undefined
-): string | null => {
-  const normalizedValue = value?.trim().toLowerCase();
-  if (!normalizedValue) {
-    return null;
-  }
-
-  const matchingPreset = CURATION_NAME_PRESETS.find(
-    (preset) => preset.toLowerCase() === normalizedValue
-  );
-
-  return matchingPreset ?? null;
-};
 
 interface MyStreamWaveCurationCreateDialogProps {
   /** The Wave information panel owns the header, focus trap and dismissal. */
@@ -89,14 +75,22 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
 
 const getCurationSaveErrorMessage = ({
   error,
-  fallbackErrorMessage,
   isEditMode,
+  locale,
 }: {
   readonly error: unknown;
-  readonly fallbackErrorMessage: string;
   readonly isEditMode: boolean;
+  readonly locale: SupportedLocale;
 }): string => {
-  const errorMessage = getErrorMessage(error, fallbackErrorMessage);
+  const errorMessage = getErrorMessage(
+    error,
+    t(
+      locale,
+      isEditMode
+        ? "profileCuration.editor.updateFailed"
+        : "profileCuration.editor.createFailed"
+    )
+  );
   const normalizedMessage = errorMessage.toLowerCase();
 
   if (
@@ -104,7 +98,7 @@ const getCurationSaveErrorMessage = ({
     normalizedMessage.includes("duplicate") ||
     normalizedMessage.includes("unique constraint")
   ) {
-    return "A curation with this name already exists in this wave. Choose another name.";
+    return t(locale, "profileCuration.editor.duplicate");
   }
 
   if (
@@ -113,27 +107,35 @@ const getCurationSaveErrorMessage = ({
     normalizedMessage.includes("not authorized") ||
     normalizedMessage.includes("not allowed")
   ) {
-    return isEditMode
-      ? "You don't have permission to update this curation."
-      : "You don't have permission to create a curation.";
+    return t(
+      locale,
+      isEditMode
+        ? "profileCuration.editor.updateForbidden"
+        : "profileCuration.editor.createForbidden"
+    );
   }
 
   return errorMessage;
 };
 
 const getSubmitButtonLabel = (
+  locale: SupportedLocale,
   isPending: boolean,
   isEditMode: boolean
 ): string => {
   if (isPending) {
-    return isEditMode ? "Saving..." : "Creating...";
+    return t(
+      locale,
+      isEditMode
+        ? "profileCuration.editor.saving"
+        : "profileCuration.editor.creating"
+    );
   }
 
-  if (isEditMode) {
-    return "Save";
-  }
-
-  return "Create";
+  return t(
+    locale,
+    isEditMode ? "profileCuration.editor.save" : "waves.create.actions.create"
+  );
 };
 
 function CurationNameField({
@@ -145,7 +147,8 @@ function CurationNameField({
 }) {
   const inputId = useId();
   const nameInputRef = useRef<HTMLInputElement>(null);
-  const selectedPresetLabel = getMatchingPresetLabel(name);
+  const locale = useBrowserLocale();
+  const normalizedName = name.trim().toLocaleLowerCase(locale);
 
   const handlePresetSelect = (presetLabel: string) => {
     onChange(presetLabel);
@@ -171,15 +174,17 @@ function CurationNameField({
         htmlFor={inputId}
         className="tw-block tw-text-sm tw-font-medium tw-text-iron-300 group-data-[profile-typography=true]/curation-dialog:tw-text-iron-100"
       >
-        Name
+        {t(locale, "profileCuration.editor.name")}
       </label>
       <div className="tw-flex tw-flex-wrap tw-gap-2.5">
-        {CURATION_NAME_PRESETS.map((preset) => {
-          const isSelected = selectedPresetLabel === preset;
+        {CURATION_NAME_PRESETS.map((key) => {
+          const preset = t(locale, key);
+          const isSelected =
+            preset.toLocaleLowerCase(locale) === normalizedName;
 
           return (
             <button
-              key={preset}
+              key={key}
               type="button"
               onClick={() => handlePresetSelect(preset)}
               aria-pressed={isSelected}
@@ -204,7 +209,7 @@ function CurationNameField({
           onChange={handleNameChange}
           maxLength={50}
           autoComplete="off"
-          placeholder="Create your own custom..."
+          placeholder={t(locale, "profileCuration.editor.namePlaceholder")}
           className="tw-form-input tw-block tw-w-full tw-appearance-none tw-rounded-lg tw-border-0 tw-border-iron-700 tw-bg-iron-900 tw-px-4 tw-py-3 tw-text-sm tw-font-medium tw-text-iron-100 tw-caret-primary-400 tw-shadow-inner tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-sm placeholder:tw-text-iron-500 group-data-[profile-typography=true]/curation-dialog:tw-text-base group-data-[profile-typography=true]/curation-dialog:tw-font-normal group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-base hover:tw-ring-iron-650 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:tw-text-sm md:desktop-hover:group-data-[profile-typography=true]/curation-dialog:placeholder:tw-text-sm"
         />
       </div>
@@ -234,10 +239,9 @@ export default function MyStreamWaveCurationCreateDialog({
       ? "profileCuration.editor.editTitle"
       : "profileCuration.editor.createTitle"
   );
-  const fallbackErrorMessage = isEditMode
-    ? "Failed to update curation."
-    : "Failed to create curation.";
-  const initialGroupId = curation?.group_id ?? getWaveAdminGroupId(wave);
+  const initialGroupId = curation
+    ? curation.group_id || null
+    : getWaveAdminGroupId(wave);
   const [name, setName] = useState(initialName);
   const [criteriaDraft, setCriteriaDraft] = useState<ApiCreateGroup | null>(
     null
@@ -295,7 +299,7 @@ export default function MyStreamWaveCurationCreateDialog({
     mutationFn: async (body: ApiWaveCurationRequest) => {
       const auth = await requestAuth();
       if (!auth.success) {
-        throw new Error("Authentication was cancelled.");
+        throw new Error(t(locale, "profileCuration.editor.authCancelled"));
       }
 
       return await commonApiPost<ApiWaveCurationRequest, ApiWaveCuration>({
@@ -329,7 +333,12 @@ export default function MyStreamWaveCurationCreateDialog({
       if (showSuccessToast) {
         setToast({
           type: "success",
-          message: isEditMode ? "Curation updated." : "Curation created.",
+          message: t(
+            locale,
+            isEditMode
+              ? "profileCuration.editor.updated"
+              : "profileCuration.editor.created"
+          ),
         });
       }
       await onSaved(saved);
@@ -340,13 +349,14 @@ export default function MyStreamWaveCurationCreateDialog({
         type: "error",
         message: getCurationSaveErrorMessage({
           error,
-          fallbackErrorMessage,
           isEditMode,
+          locale,
         }),
       });
     },
   });
   const submitButtonLabel = getSubmitButtonLabel(
+    locale,
     saveMutation.isPending,
     isEditMode
   );
@@ -440,7 +450,7 @@ export default function MyStreamWaveCurationCreateDialog({
               size="md"
               className="tw-hidden md:tw-inline-flex"
             >
-              Cancel
+              {t(locale, "waves.create.actions.cancel")}
             </Button>
           )}
           <Button
