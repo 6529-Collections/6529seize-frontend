@@ -1493,7 +1493,8 @@ async function openLockedSubmissionRules(page: Page, draft: string) {
   await expect(details).toBeFocused();
   await expect(
     details.getByRole("link", {
-      name: "Inspect Sandbox Submission Club group criteria and members",
+      name: "25 users",
+      exact: true,
     })
   ).toBeVisible();
   await page.keyboard.press("Tab");
