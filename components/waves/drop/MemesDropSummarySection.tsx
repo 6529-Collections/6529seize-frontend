@@ -55,7 +55,10 @@ export function MemesDropSummarySection({
         </div>
 
         <div className="tw-mb-6">
-          <h1 className="tw-mb-4 tw-text-lg tw-font-bold tw-tracking-tight tw-text-white sm:tw-text-2xl">
+          <h1
+            data-wave-typography="preserve"
+            className="tw-mb-4 tw-text-lg tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-2xl"
+          >
             {title}
           </h1>
           {description && (

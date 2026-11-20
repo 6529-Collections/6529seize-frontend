@@ -53,6 +53,7 @@ async function expectNumericVoteAppearance(input: Locator) {
   await expect(input).toHaveCSS("background-color", "rgb(28, 28, 33)");
   await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
   await expect(input).toHaveCSS("font-weight", "600");
+  await expect(input).toHaveCSS("font-variant-numeric", "tabular-nums");
   expect(
     await input.evaluate(
       (element) =>
@@ -1879,6 +1880,13 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await expect(activity.getByText("voted", { exact: true })).toBeVisible();
     await expect(activity).toHaveCSS("opacity", "1");
+    for (const panel of [voterPanel, activity]) {
+      const numbers = panel.locator(".tw-tabular-nums");
+      expect(await numbers.count()).toBeGreaterThan(0);
+      for (const number of await numbers.all()) {
+        await expect(number).toHaveCSS("font-variant-numeric", "tabular-nums");
+      }
+    }
     await expect(
       page.getByText("Current votes couldn’t be loaded.", { exact: true })
     ).toHaveCount(0);
@@ -2347,6 +2355,24 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(summary).toContainText(plan);
+    await expect(
+      page.getByRole("heading", {
+        name: "Saved Additional Action",
+        exact: true,
+      })
+    ).toHaveCSS("font-weight", "600");
+    await expect(page.getByText("Media Type:", { exact: true })).toHaveCSS(
+      "font-weight",
+      "400"
+    );
+    await expect(
+      page.locator("[data-video-viewport]").getByText("Title", { exact: true })
+    ).toHaveCSS("font-weight", "500");
+    const voteTotal = page.locator(
+      "[data-video-viewport] span.tw-tabular-nums.tw-text-white"
+    );
+    await expect(voteTotal).toHaveCSS("font-weight", "600");
+    await expect(voteTotal).toHaveCSS("font-variant-numeric", "tabular-nums");
     await expect(
       page.getByText("Saved artist biography.", { exact: true })
     ).toBeVisible();
