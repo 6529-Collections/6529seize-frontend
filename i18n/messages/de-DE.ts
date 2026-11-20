@@ -907,7 +907,6 @@ export const DE_DE_MESSAGES = {
     "Aktuelle Zielgruppe nicht verfügbar",
   "waves.create.groups.members.view": "Mitglieder anzeigen",
   "waves.create.groups.members.previewDraft": "Treffer ansehen",
-  "waves.create.groups.members.dialogTitle": "{role}: {group}",
   "waves.create.groups.members.dynamicDescription":
     "Diese Live-Vorschau basiert auf aktuellen Profil-, Reputations- und Besitzdaten. Die Mitgliedschaft kann sich ändern.",
   "waves.create.groups.members.criteriaSummary":
