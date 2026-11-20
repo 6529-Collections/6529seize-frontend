@@ -9,6 +9,7 @@ import {
   ApiProfilePreferencesNotificationLevelEnum as NotificationLevel,
 } from "@/generated/models/ApiProfilePreferences";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
+import * as authUtils from "@/services/auth/auth.utils";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
@@ -27,6 +28,7 @@ jest.mock("@/components/groups/assignment/GroupAssignmentDialog", () => ({
     criteriaDraft,
     selectedGroup,
     contentError,
+    isContentLoading,
     onRetry,
     onClose,
   }: React.ComponentProps<
@@ -43,6 +45,8 @@ jest.mock("@/components/groups/assignment/GroupAssignmentDialog", () => ({
           <button type="button" onClick={onRetry}>
             Try again
           </button>
+        ) : isContentLoading ? (
+          <p>Loading saved criteria</p>
         ) : (
           <>
             {selectedGroup && (
@@ -249,7 +253,7 @@ describe("ProfilePreferencesSettings", () => {
 
   it("requires criteria and saves them only from Messages Save", async () => {
     const user = userEvent.setup();
-    render(<ProfilePreferencesSettings activeTab="messages" />);
+    const view = render(<ProfilePreferencesSettings activeTab="messages" />);
     await user.click(
       await screen.findByRole("radio", { name: "People who meet my criteria" })
     );
@@ -258,6 +262,19 @@ describe("ProfilePreferencesSettings", () => {
     await user.click(await screen.findByRole("button", { name: "Done" }));
     expect(commonApiPut).not.toHaveBeenCalled();
     expect(mockSubmit).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Edit criteria" }));
+    expect(await screen.findByText("Draft minimum 25")).toBeVisible();
+    view.rerender(<ProfilePreferencesSettings activeTab="notifications" />);
+    expect(screen.queryByRole("dialog", { hidden: true })).toBeNull();
+    await user.click(screen.getByRole("checkbox", { name: "New followers" }));
+    await user.click(saveButton());
+    await waitFor(() =>
+      expect(commonApiPut).toHaveBeenCalledWith({
+        endpoint: "profile-preferences",
+        body: { notifications: { new_followers: false } },
+      })
+    );
+    view.rerender(<ProfilePreferencesSettings activeTab="messages" />);
     await user.click(screen.getByRole("button", { name: "Edit criteria" }));
     expect(await screen.findByText("Draft minimum 25")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Close" }));
@@ -297,11 +314,23 @@ describe("ProfilePreferencesSettings", () => {
       direct_message_policy: DirectMessagePolicy.GroupMembers,
       direct_message_group_id: "group-1",
     });
+    const pendingGroup = Promise.withResolvers<typeof existingGroup>();
+    const fetch = jest.mocked(commonApiFetch).getMockImplementation()!;
+    jest
+      .mocked(commonApiFetch)
+      .mockImplementation((request) =>
+        request.endpoint === "groups/group-1"
+          ? pendingGroup.promise
+          : fetch(request)
+      );
     const user = userEvent.setup();
     render(<ProfilePreferencesSettings activeTab="messages" />);
     await user.click(
       await screen.findByRole("button", { name: "Edit criteria" })
     );
+    expect(screen.getByText("Loading saved criteria")).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Done" })).toBeNull();
+    pendingGroup.resolve(existingGroup);
     expect(await screen.findByText("Saved minimum 15")).toBeVisible();
     await user.click(screen.getByRole("button", { name: "Done" }));
     await user.click(saveButton());
@@ -331,9 +360,42 @@ describe("ProfilePreferencesSettings", () => {
     await user.click(await screen.findByRole("button", { name: "Done" }));
     await user.click(saveButton());
     await waitFor(() => expect(saveButton()).toBeEnabled());
+    await user.click(screen.getByRole("button", { name: "Edit criteria" }));
+    await user.click(await screen.findByRole("button", { name: "Done" }));
     await user.click(saveButton());
     await waitFor(() => expect(commonApiPut).toHaveBeenCalledTimes(2));
     expect(mockSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports a profile switch before saving the newly created group", async () => {
+    const user = userEvent.setup();
+    const getWalletRole = jest.spyOn(authUtils, "getWalletRole");
+    getWalletRole.mockReturnValue("alice");
+    mockSubmit.mockImplementationOnce(async () => {
+      getWalletRole.mockReturnValue("bob");
+      return { ok: true, group: { id: "group-2" } };
+    });
+    try {
+      const { setToast } = jest.mocked(useAuth).getMockImplementation()!();
+      render(<ProfilePreferencesSettings activeTab="messages" />);
+      await user.click(
+        await screen.findByRole("radio", {
+          name: "People who meet my criteria",
+        })
+      );
+      await user.click(screen.getByRole("button", { name: "Set criteria" }));
+      await user.click(await screen.findByRole("button", { name: "Done" }));
+      await user.click(saveButton());
+      await waitFor(() =>
+        expect(setToast).toHaveBeenCalledWith({
+          type: "error",
+          message: expect.stringContaining("The active profile changed"),
+        })
+      );
+      expect(commonApiPut).not.toHaveBeenCalled();
+    } finally {
+      getWalletRole.mockRestore();
+    }
   });
 
   it("can switch to Everyone without resending the old group or notification settings", async () => {

@@ -6,7 +6,6 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { CreateWaveInlineGroupBuilderState } from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
 import { useGroupMutations } from "@/hooks/groups/useGroupMutations";
 import { getWalletAddress, getWalletRole } from "@/services/auth/auth.utils";
@@ -80,7 +79,12 @@ const UPDATE_NOTIFICATION_LEVEL: Record<
   [NotificationLevel.EssentialOnly]: UpdateNotificationLevel.EssentialOnly,
 };
 
-type ProfilePreferencesTab = "notifications" | "messages";
+const SECTION_LABELS = {
+  notifications: "preferences.tabs.notifications",
+  messages: "preferences.tabs.messages",
+} as const;
+
+type ProfilePreferencesTab = keyof typeof SECTION_LABELS;
 type PreferencesFormProps = {
   readonly preferences: ApiProfilePreferences;
   readonly profileId: string;
@@ -106,7 +110,7 @@ export default function ProfilePreferencesSettings({
 
   return (
     <section
-      aria-label={t(locale, `preferences.tabs.${activeTab}`)}
+      aria-label={t(locale, SECTION_LABELS[activeTab])}
       className="tw-overflow-hidden tw-rounded-2xl tw-border tw-border-solid tw-border-iron-800/80 tw-bg-iron-900/70 tw-shadow-sm tw-shadow-black/20"
     >
       {profileId === null && (
@@ -135,12 +139,11 @@ export default function ProfilePreferencesSettings({
               profileId={profileId}
             />
           </div>
-          <div hidden={activeTab !== "messages"}>
-            <MessagePreferencesForm
-              preferences={preferencesQuery.data}
-              profileId={profileId}
-            />
-          </div>
+          <MessagePreferencesForm
+            active={activeTab === "messages"}
+            preferences={preferencesQuery.data}
+            profileId={profileId}
+          />
         </div>
       )}
     </section>
@@ -399,15 +402,26 @@ function useSaveMessagePreferences(
   const { onGroupCreate } = useContext(ReactQueryWrapperContext);
   const { submit } = useGroupMutations({ requestAuth, onGroupCreate });
   const pendingGroup = useRef<{
-    criteria: CreateWaveInlineGroupBuilderState;
-    group: ApiGroupFull;
+    readonly key: string;
+    readonly id: string;
   } | null>(null);
 
-  return useSaveProfilePreferences(profileId, "messages", async (body) => {
-    if (criteria === null) return body;
-    const wallet = getWalletAddress();
-    const role = getWalletRole();
-    if (pendingGroup.current?.criteria !== criteria) {
+  const { save, isSaving } = useSaveProfilePreferences(
+    profileId,
+    "messages",
+    async (body) => {
+      if (criteria === null) {
+        pendingGroup.current = null;
+        return body;
+      }
+      const wallet = getWalletAddress();
+      const role = getWalletRole();
+      const key = JSON.stringify([wallet, role, criteria.draft.group]);
+      if (pendingGroup.current?.key === key) {
+        return { ...body, direct_message_group_id: pendingGroup.current.id };
+      }
+
+      pendingGroup.current = null;
       const result = await submit({
         payload: {
           ...criteria.draft,
@@ -417,6 +431,13 @@ function useSaveMessagePreferences(
         currentHandle: connectedProfile?.handle ?? null,
         publish: true,
       });
+      if (wallet !== getWalletAddress() || role !== getWalletRole()) {
+        setToast({
+          type: "error",
+          message: t(locale, "profilePreferences.saveProfileChanged"),
+        });
+        return null;
+      }
       if (!result.ok) {
         if (result.reason !== "auth") {
           setToast({
@@ -427,18 +448,26 @@ function useSaveMessagePreferences(
         }
         return null;
       }
-      pendingGroup.current = { criteria, group: result.group };
+      pendingGroup.current = { key, id: result.group.id };
+      return { ...body, direct_message_group_id: result.group.id };
     }
+  );
 
-    if (wallet !== getWalletAddress() || role !== getWalletRole()) return null;
-    return { ...body, direct_message_group_id: pendingGroup.current.group.id };
-  });
+  return {
+    isSaving,
+    save: async (body: ApiUpdateProfilePreferences) => {
+      const saved = await save(body);
+      if (saved) pendingGroup.current = null;
+      return saved;
+    },
+  };
 }
 
 function MessagePreferencesForm({
+  active,
   profileId,
   preferences,
-}: PreferencesFormProps) {
+}: PreferencesFormProps & { readonly active: boolean }) {
   const locale = useBrowserLocale();
   const [policyDraft, setPolicyDraft] = useState<DirectMessagePolicy>();
   const [followDraft, setFollowDraft] = useState<boolean>();
@@ -454,6 +483,8 @@ function MessagePreferencesForm({
     activeCriteria
   );
   const requiredHintId = useId();
+  if (!active) return null;
+
   const isMissingCriteria =
     isGroupPolicy &&
     preferences.direct_message_group_id === null &&

@@ -3574,6 +3574,8 @@ export const EN_US_ROOT_MESSAGES = {
   "profilePreferences.save": "Save",
   "profilePreferences.saving": "Saving…",
   "profilePreferences.saveSuccess": "Profile preferences saved.",
+  "profilePreferences.saveProfileChanged":
+    "The active profile changed during the save. Check your profile and try again.",
   "profilePreferences.saveError":
     "Couldn’t save profile preferences. Please try again.",
   "profilePreferences.dm.heading": "Who can start a direct message with me?",
