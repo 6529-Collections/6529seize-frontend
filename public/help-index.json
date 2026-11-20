@@ -3561,6 +3561,7 @@
         "Swipe down from the mobile information panel's handle or header, select Close, tap outside, press Escape, or use Back to return to the original decision, tab, curation and scroll position. The underlying view stays mounted. Scrolling the panel content does not dismiss it; short or canceled header drags return it to its open position.",
         "On mobile, Configuration gear controls open editors inside the information panel. Back, browser Back or Escape returns to Configuration without submitting changes; Save returns after a successful update. Failed saves keep the editor open for retry. Configuration retains its selected tab and scroll position. Close or a downward header swipe dismisses the whole panel.",
         "On tablet-sized layouts, the overlay side panel also keeps these editors inside the panel. Back or Escape returns to the selected information tab.",
+        "Each row in Configuration's Curations section shows the assigned group's criteria summary and a member count. Select the count to open the full criteria and current members in Network.",
         "In Configuration's Curations section, the plus button creates a curation and a row gear manages an existing curation. Create curation and Edit curation use the same mobile information sheet or tablet panel at its existing height. Group selection stays inside the form. Back discards the draft and returns to Configuration; Close or a downward header swipe dismisses the panel. Successful saves return to Configuration, while a failed save keeps the draft open. Desktop forms remain separate dialogs.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
@@ -3572,6 +3573,7 @@
         "components/brain/BrainMobile.tsx",
         "components/brain/right-sidebar/WaveContent.tsx",
         "components/brain/mobile/WaveInformationSheet.tsx",
+        "components/waves/groups/WaveConfigurationCurations.tsx",
         "contexts/WaveInformationContext.tsx",
         "components/competitions/CompetitionVotes.tsx"
       ]
@@ -7888,12 +7890,19 @@
       "id": "waves.drop.quote-link-cards",
       "kind": "ui_affordance",
       "title": "Wave quote link cards",
-      "aliases": ["quote link", "link preview", "quote card", "drop link card"],
+      "aliases": [
+        "quote link",
+        "link preview",
+        "quote card",
+        "drop link card",
+        "group link preview"
+      ],
       "keywords": ["waves", "drop", "quote", "link", "card", "preview"],
       "facts": [
         "Wave quote link cards are documented under drop actions.",
         "Supported source links and rendering behavior are covered in the quote-link docs.",
         "Direct same-origin /waves/{waveId} links without a serial number can show wave preview cards. Names truncate with an ellipsis when space is limited. Narrow cards put Follow or Following below the wave details; wider cards keep it beside the name.",
+        "Group links in drops show a Network preview. When the group is available, the card shows its membership criteria, creator, and creation date and opens that group in Network.",
         "If a quote card fails, the original link can still be opened or copied where available."
       ],
       "canonical_path": "/waves",
@@ -8176,11 +8185,11 @@
       ],
       "facts": [
         "Filter opens Filter Network with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Desktop keeps a left-side list with Identities open first. Phones and touch tablets open a vertical list; scroll down to reach the remaining rows. Selecting a row opens only its editor. Back returns to the list with the draft preserved and focus restored to the selected row. Configured rows have a checkmark. Close dismisses either step. The mobile sheet uses the available screen height, keeps its height between criteria, and keeps only Create and use new group in a fixed bottom action area. Editors and EMMA allow-list results scroll above the keyboard. The mobile criteria summary scrolls with the content rather than taking space from the editor while typing.",
-        "The summary shows selected criteria as separate tags and View members for valid criteria. On mobile, the summary is a filled card at the end of the category list or editor content. Its tags, member count, and View members scroll together, and long tag lists expand with the card. Only the create action stays fixed at the bottom. Desktop keeps the summary beside the action and scrolls long tag lists within the summary. An incomplete draft keeps the create action disabled; select the information button beside the summary to read Not ready yet. and its guidance. The untouched filter does not open with a warning message. When a group is selected, its name, criteria, count, and View members appear at the top. On mobile this summary is in the list step, reached with Back from an editor. Without a selected group, the sheet starts directly with the criteria list. The filter does not show Before editing or After editing labels. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
+        "The summary shows selected criteria as separate tags and View members for valid criteria. On mobile, the summary is a filled card at the end of the category list or editor content. Its tags, member count, and View members scroll together, and long tag lists expand with the card. Only the create action stays fixed at the bottom. Desktop keeps the summary beside the action and scrolls long tag lists within the summary. An incomplete draft keeps the create action disabled; select the information button beside the summary to read Not ready yet. and its guidance. The untouched filter does not open with a warning message. When a group is selected, its criteria, member count, and View members appear at the top. On mobile this summary is in the list step, reached with Back from an editor. Without a selected group, the sheet starts directly with the criteria list. The filter does not show Before editing or After editing labels. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
         "In Identities > Included, search directly to add identities or use Include me, an EMMA allowlist, or a CSV file. Find an identity to include appears above the Search identities to include... input. Excluded shows Find an identity to exclude above the Search identities to exclude... input. Both tabs omit the empty-selection sentence and empty import messages. Included and Excluded omit the duplicate combined identity count and retain the bottom criteria summary. Individual import counts, file names, limit warnings, and errors remain visible. Neither Included nor Excluded shows No allowlist added. or No CSV file added. when its import sections are empty. On phones and touch tablets, direct identity selection, EMMA, and CSV file appear in distinct stacked sections. The allowlist search and file upload are always visible. Selected source names, imported counts, loading states, errors, retry, and removal remain available. Desktop keeps its existing two-column import layout.",
         "In xTDH Grant, Clear filters appears after entering a collection name or selecting a grantor. Switching status tabs alone does not show it. It clears the grant search fields, keeps the active status tab, and disappears again. It does not remove a selected grant or other Network criteria. On phones and touch tablets, the search fields and grant cards share one scroll area. Load more follows the last loaded card, while Back, Close, and the bottom action stay accessible. Desktop keeps its separate results scroll area.",
         "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
-        "Signed-in users with active Network criteria can use REP everyone matching criteria or NIC everyone matching criteria below the selected Network filter name to grant credits to every matching member.",
+        "The Network page shows the selected group's criteria as chips above the member list. Signed-in users with active criteria can use REP everyone matching criteria or NIC everyone matching criteria below the chips to grant credits to every matching member.",
         "Criteria-matched bulk REP requires an amount and category; bulk NIC requires an amount. The actions are hidden when criteria are empty, loading, unavailable, or the viewer is signed out.",
         "If active group criteria cannot be loaded, the filter shows a retry state instead of an empty draft.",
         "The leaderboard also has sorting, pagination, profile links, and URL state for browsing identity rankings.",

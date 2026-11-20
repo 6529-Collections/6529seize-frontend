@@ -11,8 +11,11 @@ jest.mock("next/navigation", () => ({
   usePathname: () => "/",
 }));
 
-jest.mock("@/components/groups/page/list/card/GroupCardView", () => () => (
-  <div data-testid="view" />
+jest.mock("@/components/groups/page/list/card/GroupCardContent", () => () => (
+  <div>TDH 100</div>
+));
+jest.mock("@/components/groups/page/list/card/GroupCardCreator", () => () => (
+  <div>Created by h</div>
 ));
 
 const push = jest.fn();
@@ -53,18 +56,17 @@ describe("GroupCard", () => {
     );
   }
 
-  it("exposes a native whole-card link when idle", () => {
+  it("exposes one Network link with the group details as its description", () => {
     const { getByRole } = renderComp();
-    expect(getByRole("link", { name: "Open g" })).toHaveAttribute(
-      "href",
-      `/network?page=1&group=${group.id}`
-    );
+    const link = getByRole("link", { name: "Network" });
+    expect(link).toHaveAttribute("href", `/network?page=1&group=${group.id}`);
+    expect(link).toHaveAccessibleDescription("TDH 100 Created by h");
   });
 
   it("navigates to community view when pressing Enter", async () => {
     const user = userEvent.setup();
     const { getByRole } = renderComp();
-    const cardLink = getByRole("link", { name: "Open g" });
+    const cardLink = getByRole("link", { name: "Network" });
 
     cardLink.focus();
     await user.keyboard("{Enter}");
@@ -75,7 +77,7 @@ describe("GroupCard", () => {
   it("navigates to community view when pressing Space", async () => {
     const user = userEvent.setup();
     const { getByRole } = renderComp();
-    const cardLink = getByRole("link", { name: "Open g" });
+    const cardLink = getByRole("link", { name: "Network" });
 
     cardLink.focus();
     await user.keyboard(" ");
@@ -84,18 +86,16 @@ describe("GroupCard", () => {
   });
 
   it("does not activate whole-card navigation for placeholders", () => {
-    const { getByTestId, queryByRole } = render(
+    const { getByText, queryByRole } = render(
       <AuthContext.Provider value={{ connectedProfile: null } as any}>
-        <GroupCard titlePlaceholder="Loading group" />
+        <GroupCard />
       </AuthContext.Provider>
     );
 
-    fireEvent.click(getByTestId("view"));
+    fireEvent.click(getByText("Network"));
 
     expect(push).not.toHaveBeenCalled();
-    expect(
-      queryByRole("link", { name: "Open Loading group" })
-    ).not.toBeInTheDocument();
+    expect(queryByRole("link")).not.toBeInTheDocument();
   });
   it("uses only plain banner colours in the card gradient", () => {
     const renderMarkup = (banner1: string) =>
