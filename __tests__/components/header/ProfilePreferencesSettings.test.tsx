@@ -1,13 +1,15 @@
 import ProfilePreferencesSettings from "@/components/header/ProfilePreferencesSettings";
 import { useAuth } from "@/components/auth/Auth";
-import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import type { ReactQueryWrapperContextType } from "@/components/react-query-wrapper/ReactQueryWrapperContext";
+import {
+  createEmptyInlineGroupPayload,
+  createInitialInlineGroupBuilderState,
+} from "@/components/waves/create-wave/groups/createWaveInlineGroupBuilder";
 import {
   ApiProfilePreferencesDirectMessagePolicyEnum as DirectMessagePolicy,
   ApiProfilePreferencesNotificationLevelEnum as NotificationLevel,
 } from "@/generated/models/ApiProfilePreferences";
 import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
@@ -15,30 +17,65 @@ jest.mock("@/services/api/common-api", () => ({
   commonApiFetch: jest.fn(),
   commonApiPut: jest.fn(),
 }));
+const mockSubmit = jest.fn();
+jest.mock("@/hooks/groups/useGroupMutations", () => ({
+  useGroupMutations: () => ({ submit: mockSubmit }),
+}));
 jest.mock("@/components/groups/assignment/GroupAssignmentDialog", () => ({
   __esModule: true,
   default: ({
-    onChange,
+    criteriaDraft,
+    selectedGroup,
+    contentError,
+    onRetry,
     onClose,
-  }: {
-    readonly onChange: (group: unknown) => unknown;
-    readonly onClose: () => void;
-  }) => (
-    <div role="dialog" aria-label="Who can message you">
-      <button
-        type="button"
-        onClick={() =>
-          onChange({ id: "group-2", name: "Meme holders", group: {} })
-        }
-      >
-        Pick Meme holders
-      </button>
-      <button type="button" onClick={onClose}>
-        Close picker
-      </button>
-    </div>
-  ),
+  }: React.ComponentProps<
+    typeof import("@/components/groups/assignment/GroupAssignmentDialog").default
+  >) => {
+    const { createInitialInlineGroupBuilderState: makeDraft } =
+      jest.requireActual<
+        typeof import("@/components/waves/create-wave/groups/createWaveInlineGroupBuilder")
+      >("@/components/waves/create-wave/groups/createWaveInlineGroupBuilder");
+    const initial = criteriaDraft?.initial ?? makeDraft();
+    return (
+      <div role="dialog" aria-label="Who can message you">
+        {contentError ? (
+          <button type="button" onClick={onRetry}>
+            Try again
+          </button>
+        ) : (
+          <>
+            {selectedGroup && (
+              <p>Saved minimum {selectedGroup.group.level.min}</p>
+            )}
+            <p>Draft minimum {initial.draft.group.level.min}</p>
+            <button
+              type="button"
+              onClick={() =>
+                criteriaDraft?.onApply({
+                  ...initial,
+                  draft: {
+                    ...initial.draft,
+                    group: {
+                      ...initial.draft.group,
+                      level: { min: 25, max: null },
+                    },
+                  },
+                })
+              }
+            >
+              Done
+            </button>
+          </>
+        )}
+        <button type="button" onClick={onClose}>
+          Close
+        </button>
+      </div>
+    );
+  },
 }));
+
 const preferences = {
   direct_message_policy: DirectMessagePolicy.Everyone,
   direct_message_group_id: null as string | null,
@@ -55,121 +92,56 @@ const preferences = {
   },
 };
 
-const groups: Record<string, unknown> = {
-  "group-1": { id: "group-1", name: "Level 20+", group: {} },
-  "group-2": { id: "group-2", name: "Meme holders", group: {} },
+const existingGroup = {
+  id: "group-1",
+  name: "Wave access",
+  is_private: false,
+  group: {
+    ...createEmptyInlineGroupPayload().group,
+    identity_group_id: null,
+    excluded_identity_group_id: null,
+    level: { min: 15, max: null },
+  },
 };
 
-function mockFetch(saved: typeof preferences) {
-  (commonApiFetch as jest.Mock).mockImplementation(
-    ({ endpoint }: { readonly endpoint: string }) => {
-      if (endpoint === "profile-preferences") {
-        return Promise.resolve(saved);
-      }
-      const groupId = decodeURIComponent(endpoint.replace("groups/", ""));
-      const group = groups[groupId];
-      return group
-        ? Promise.resolve(group)
-        : Promise.reject(new Error("Group not found"));
-    }
-  );
+function seedPreferences(overrides: Partial<typeof preferences> = {}) {
+  const saved = { ...preferences, ...overrides };
+  jest.mocked(commonApiFetch).mockImplementation(async ({ endpoint }) => {
+    if (endpoint === "profile-preferences") return { ...saved };
+    if (endpoint === "groups/group-1") return existingGroup;
+    throw new Error("Group could not be loaded");
+  });
+  jest.mocked(commonApiPut).mockImplementation(async ({ body }) => {
+    const fields = body as Partial<typeof preferences>;
+    const notifications = { ...saved.notifications, ...fields.notifications };
+    Object.assign(saved, fields, { notifications });
+    return { ...saved };
+  });
 }
+
+const saveButton = () => screen.getByRole("button", { name: "Save" });
 
 describe("ProfilePreferencesSettings", () => {
   beforeEach(() => {
-    (useAuth as jest.Mock).mockReturnValue({
-      connectedProfile: { id: "profile-1" },
+    jest.mocked(useAuth).mockReturnValue({
+      connectedProfile: { id: "profile-1", handle: "alice" },
       setToast: jest.fn(),
-    });
-    mockFetch(preferences);
-    (commonApiPut as jest.Mock).mockImplementation(({ body }) =>
-      Promise.resolve(body)
-    );
+      requestAuth: jest.fn().mockResolvedValue({ success: true }),
+    } as unknown as ReturnType<typeof useAuth>);
+    seedPreferences();
+    mockSubmit.mockResolvedValue({ ok: true, group: { id: "group-2" } });
   });
 
   afterEach(() => jest.clearAllMocks());
 
-  it("explains that DM policy only applies to new conversations", async () => {
-    render(<ProfilePreferencesSettings />);
-
-    expect(
-      await screen.findByText(
-        /existing direct messages and group messages stay available/i
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /essential security and account notifications, plus the optional categories selected below/i
-      )
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/^Security and account notifications only\.$/i)
-    ).toBeInTheDocument();
-    expect(commonApiFetch).toHaveBeenCalledWith({
-      endpoint: "profile-preferences",
-    });
-    expect(
-      screen.getByRole("region", { name: "Notifications & Messages" })
-    ).toBeInTheDocument();
-    const sectionHeadings = screen.getAllByRole("heading", { level: 2 });
-    expect(
-      sectionHeadings.map(({ textContent }) => textContent?.trim())
-    ).toEqual(["Notifications", "Who can start a direct message with me?"]);
-    sectionHeadings.forEach((heading) => expect(heading).toHaveClass("tw-m-0"));
-    const notificationsSection = screen.getByRole("region", {
-      name: "Notifications",
-    });
-    expect(notificationsSection).toHaveClass("tw-pt-6", "sm:tw-pt-8");
-    expect(notificationsSection.nextElementSibling).toHaveClass(
-      "tw-my-10",
-      "tw-h-px",
-      "tw-bg-iron-800"
+  it("keeps the preferences options as native controls with full-row labels", async () => {
+    const view = render(
+      <ProfilePreferencesSettings activeTab="notifications" />
     );
-    expect(
-      screen.getByRole("region", {
-        name: "Who can start a direct message with me?",
-      })
-    ).toHaveClass("tw-pb-8", "sm:tw-pb-10");
-    const saveButton = screen.getByRole("button", { name: "Save Changes" });
-    expect(saveButton.parentElement).toHaveClass(
-      "tw-py-6",
-      "tw-mx-4",
-      "lg:tw-mx-8"
-    );
-    expect(saveButton).toHaveClass("tw-bg-primary-500", "tw-px-3.5");
-    expect(saveButton).not.toHaveClass(
-      "tw-w-full",
-      "sm:tw-w-auto",
-      "sm:tw-px-6",
-      "sm:tw-min-w-40"
-    );
-  });
-
-  it("keeps native controls and full-row labels for each option", async () => {
-    render(<ProfilePreferencesSettings />);
-
-    await screen.findByText("Subscription coverage");
-
-    const notificationGroup = screen.getByRole("group", {
-      name: "Notifications",
-    });
-    const directMessageGroup = screen.getByRole("group", {
-      name: "Who can start a direct message with me?",
-    });
-    const radios = [
-      ...within(notificationGroup).getAllByRole("radio"),
-      ...within(directMessageGroup).getAllByRole("radio"),
-    ];
-    const categoryCheckboxes = screen.getAllByRole("checkbox");
-
-    // 2 notification levels + 4 DM policies (GROUP_MEMBERS added).
-    expect(radios).toHaveLength(6);
-    radios.forEach((radio) => {
-      expect(radio).toHaveClass("tw-peer", "tw-sr-only");
-      expect(radio.nextElementSibling).toHaveClass("tw-min-h-12", "tw-w-full");
-    });
-
+    const categoryCheckboxes = await screen.findAllByRole("checkbox");
+    const notificationRadios = screen.getAllByRole("radio");
     expect(categoryCheckboxes).toHaveLength(6);
+    expect(notificationRadios).toHaveLength(2);
     categoryCheckboxes.forEach((checkbox) => {
       expect(checkbox).toHaveClass("tw-peer", "tw-sr-only");
       expect(checkbox.closest("label")).toHaveClass("tw-min-h-12", "tw-w-full");
@@ -178,322 +150,233 @@ describe("ProfilePreferencesSettings", () => {
         "tw-bg-emerald-500"
       );
     });
-    expect(document.querySelector(".react-toggle")).not.toBeInTheDocument();
-  });
-
-  it("hides optional categories while preserving their saved values", async () => {
-    const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-    await screen.findByText("Subscription coverage");
-
-    await user.click(screen.getByRole("radio", { name: /^Essential\b/i }));
-
-    await waitFor(() => {
-      expect(
-        screen.queryByText("Subscription coverage")
-      ).not.toBeInTheDocument();
-      expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
-    });
-    await user.click(screen.getByRole("radio", { name: /^All/i }));
-    await screen.findByText("Subscription coverage");
-    expect(screen.getAllByRole("checkbox")).toHaveLength(6);
-    expect(screen.getAllByRole("checkbox")[5]).toBeChecked();
-  });
-
-  it("saves DM and notification preference changes together", async () => {
-    const user = userEvent.setup();
-    const invalidateNotifications = jest.fn();
-    render(
-      <ReactQueryWrapperContext.Provider
-        value={
-          { invalidateNotifications } as unknown as ReactQueryWrapperContextType
-        }
-      >
-        <ProfilePreferencesSettings />
-      </ReactQueryWrapperContext.Provider>
-    );
-    await screen.findByText("Subscription coverage");
-
-    await user.click(screen.getByRole("radio", { name: /People I follow/i }));
-    await user.click(screen.getAllByRole("checkbox")[5]!);
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() => {
-      expect(commonApiPut).toHaveBeenCalledWith({
-        endpoint: "profile-preferences",
-        body: expect.objectContaining({
-          direct_message_policy: DirectMessagePolicy.PeopleIFollow,
-          notifications: expect.objectContaining({
-            subscription_coverage: false,
-          }),
-        }),
-      });
-      expect(invalidateNotifications).toHaveBeenCalledTimes(1);
+    view.rerender(<ProfilePreferencesSettings activeTab="messages" />);
+    const messageRadios = screen.getAllByRole("radio");
+    expect(messageRadios).toHaveLength(4);
+    [...notificationRadios, ...messageRadios].forEach((radio) => {
+      expect(radio).toHaveClass("tw-peer", "tw-sr-only");
+      expect(radio.nextElementSibling).toHaveClass("tw-min-h-12", "tw-w-full");
     });
   });
 
-  it("requires a group before saving the group policy and sends it", async () => {
+  it("keeps DM policy choices together in the keyboard order", async () => {
     const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-    await screen.findByText("Subscription coverage");
-
-    await user.click(
-      screen.getByRole("radio", { name: "Members of a group I choose" })
-    );
-
-    expect(screen.getByText("No group chosen")).toBeInTheDocument();
-    expect(
-      screen.getByText("Choose a group to save this option.")
-    ).toBeInTheDocument();
-    const saveButton = screen.getByRole("button", { name: "Save Changes" });
-    expect(saveButton).toBeDisabled();
-    expect(saveButton).toHaveAccessibleDescription(
-      "Choose a group to save this option."
-    );
-    const followToggle = screen.getByRole("checkbox", {
-      name: /People I follow can always message me/i,
+    render(<ProfilePreferencesSettings activeTab="messages" />);
+    const criteria = await screen.findByRole("radio", {
+      name: "People who meet my criteria",
     });
-    expect(followToggle).toBeChecked();
-
-    await user.click(screen.getByRole("button", { name: "Choose group" }));
-    await user.click(screen.getByRole("button", { name: "Pick Meme holders" }));
-
-    expect(
-      await screen.findByRole("link", { name: "View members of Meme holders" })
-    ).toHaveAttribute("href", "/network?page=1&group=group-2");
-    expect(
-      screen.queryByRole("dialog", { name: "Who can message you" })
-    ).not.toBeInTheDocument();
-
-    await user.click(followToggle);
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() =>
-      expect(commonApiPut).toHaveBeenCalledWith({
-        endpoint: "profile-preferences",
-        body: expect.objectContaining({
-          direct_message_policy: DirectMessagePolicy.GroupMembers,
-          direct_message_group_id: "group-2",
-          direct_message_allow_people_i_follow: false,
-        }),
-      })
-    );
-  });
-
-  it("warns when the saved group is gone and admission falls back", async () => {
-    mockFetch({
-      ...preferences,
-      direct_message_policy: DirectMessagePolicy.GroupMembers,
-      direct_message_group_id: "deleted-group",
-      direct_message_group_unavailable: true,
-    });
-    const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-
-    expect(await screen.findByRole("alert")).toHaveTextContent(
-      /until you choose another group, only people you follow can start a new conversation/i
-    );
-    expect(screen.getByText("Group no longer available")).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: "Change group" }));
-    await user.click(screen.getByRole("button", { name: "Pick Meme holders" }));
-
-    await waitFor(() =>
-      expect(
-        screen.queryByText(/until you choose another group/i)
-      ).not.toBeInTheDocument()
-    );
-    expect(screen.getByRole("button", { name: "Save Changes" })).toBeEnabled();
-  });
-
-  it("shows the saved group and leaves it saved when switching policies", async () => {
-    mockFetch({
-      ...preferences,
-      direct_message_policy: DirectMessagePolicy.GroupMembers,
-      direct_message_group_id: "group-1",
-    });
-    const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-
-    expect(
-      await screen.findByRole("link", { name: "View members of Level 20+" })
-    ).toBeInTheDocument();
-
-    await user.click(screen.getByRole("radio", { name: /^Nobody/i }));
-    expect(
-      screen.queryByRole("button", { name: "Change group" })
-    ).not.toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() => expect(commonApiPut).toHaveBeenCalledTimes(1));
-    const [{ body }] = (commonApiPut as jest.Mock).mock.calls[0];
-    expect(body.direct_message_policy).toBe(DirectMessagePolicy.Nobody);
-    // The saved group is neither re-sent nor cleared, so switching back to the
-    // group option restores it.
-    expect(body).not.toHaveProperty("direct_message_group_id");
-  });
-
-  it("saves the group this form shows, even if another session changed it", async () => {
-    // The form loaded group-1; another session may since have saved another
-    // group. Saving any change keeps what this form shows.
-    mockFetch({
-      ...preferences,
-      direct_message_policy: DirectMessagePolicy.GroupMembers,
-      direct_message_group_id: "group-1",
-    });
-    const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-    await screen.findByRole("link", { name: "View members of Level 20+" });
-
-    await user.click(
-      screen.getByRole("checkbox", {
-        name: /People I follow can always message me/i,
-      })
-    );
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() =>
-      expect(commonApiPut).toHaveBeenCalledWith({
-        endpoint: "profile-preferences",
-        body: expect.objectContaining({
-          direct_message_policy: DirectMessagePolicy.GroupMembers,
-          direct_message_group_id: "group-1",
-          direct_message_allow_people_i_follow: false,
-        }),
-      })
-    );
-  });
-
-  it("sends the saved group when the save turns the group policy on", async () => {
-    mockFetch({ ...preferences, direct_message_group_id: "group-1" });
-    const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-    await screen.findByText("Subscription coverage");
-
-    await user.click(
-      screen.getByRole("radio", { name: "Members of a group I choose" })
-    );
-    await screen.findByRole("link", { name: "View members of Level 20+" });
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() =>
-      expect(commonApiPut).toHaveBeenCalledWith({
-        endpoint: "profile-preferences",
-        body: expect.objectContaining({
-          direct_message_policy: DirectMessagePolicy.GroupMembers,
-          direct_message_group_id: "group-1",
-        }),
-      })
-    );
-  });
-
-  it("does not resend an untouched saved group the API reports as unavailable", async () => {
-    mockFetch({
-      ...preferences,
-      direct_message_policy: DirectMessagePolicy.GroupMembers,
-      direct_message_group_id: "deleted-group",
-      direct_message_group_unavailable: true,
-    });
-    const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-    await screen.findByRole("alert");
-
-    await user.click(
-      screen.getByRole("checkbox", {
-        name: /People I follow can always message me/i,
-      })
-    );
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() => expect(commonApiPut).toHaveBeenCalledTimes(1));
-    const [{ body }] = (commonApiPut as jest.Mock).mock.calls[0];
-    expect(body).toEqual(
-      expect.objectContaining({
-        direct_message_policy: DirectMessagePolicy.GroupMembers,
-        direct_message_allow_people_i_follow: false,
-      })
-    );
-    expect(body).not.toHaveProperty("direct_message_group_id");
-  });
-
-  it("treats a failed group lookup as retryable, not as a deleted group", async () => {
-    mockFetch({
-      ...preferences,
-      direct_message_policy: DirectMessagePolicy.GroupMembers,
-      direct_message_group_id: "flaky-group",
-    });
-    const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-
-    expect(
-      await screen.findByText("Couldn’t load the group details.")
-    ).toBeInTheDocument();
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/until you choose another group/i)
-    ).not.toBeInTheDocument();
-
-    groups["flaky-group"] = {
-      id: "flaky-group",
-      name: "Back online",
-      group: {},
-    };
-    await user.click(screen.getByRole("button", { name: "Try again" }));
-    expect(
-      await screen.findByRole("link", { name: "View members of Back online" })
-    ).toBeInTheDocument();
-    delete groups["flaky-group"];
-  });
-
-  it("does not send a group for the existing policies", async () => {
-    const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-    await screen.findByText("Subscription coverage");
-
-    await user.click(screen.getByRole("radio", { name: /^Nobody/i }));
-    await user.click(screen.getByRole("button", { name: "Save Changes" }));
-
-    await waitFor(() => expect(commonApiPut).toHaveBeenCalledTimes(1));
-    const [{ body }] = (commonApiPut as jest.Mock).mock.calls[0];
-    expect(body.direct_message_policy).toBe(DirectMessagePolicy.Nobody);
-    expect(body).not.toHaveProperty("direct_message_group_id");
-    expect(body).not.toHaveProperty("direct_message_allow_people_i_follow");
-    expect(
-      screen.getByText(/profiles you block can never start a new conversation/i)
-    ).toBeInTheDocument();
-  });
-
-  it("keeps the policy radios one keyboard group around the group controls", async () => {
-    const user = userEvent.setup();
-    render(<ProfilePreferencesSettings />);
-    await screen.findByText("Subscription coverage");
-
-    const groupRadio = screen.getByRole("radio", {
-      name: "Members of a group I choose",
-    });
-    await user.click(groupRadio);
-    // Opening the group panel must not remount the radio (that drops focus).
-    expect(groupRadio).toBeInTheDocument();
-    groupRadio.focus();
-
-    // Tab leaves the radio group for the group controls in reading order.
+    await user.click(criteria);
+    criteria.focus();
     await user.tab();
-    expect(screen.getByRole("button", { name: "Choose group" })).toHaveFocus();
+    expect(screen.getByRole("button", { name: "Set criteria" })).toHaveFocus();
     await user.tab();
     expect(
       screen.getByRole("checkbox", {
-        name: /People I follow can always message me/i,
+        name: /People I follow can always message me/,
       })
     ).toHaveFocus();
-
-    // Arrow keys still move between the policy radios, past the controls.
-    groupRadio.focus();
+    criteria.focus();
     await user.keyboard("{ArrowDown}");
-    const nobodyRadio = screen.getByRole("radio", { name: /^Nobody/i });
-    expect(nobodyRadio).toBeChecked();
-    expect(nobodyRadio).toHaveFocus();
+    const nobody = screen.getByRole("radio", { name: "Nobody" });
+    expect(nobody).toBeChecked();
+    expect(nobody).toHaveFocus();
+  });
+
+  it.each(["notifications", "messages"] as const)(
+    "saves the tabs independently with %s saved first",
+    async (firstTab) => {
+      const user = userEvent.setup();
+      const view = render(
+        <ProfilePreferencesSettings activeTab="notifications" />
+      );
+      const notificationsToggle = await screen.findByRole("checkbox", {
+        name: "New followers",
+      });
+      await user.click(notificationsToggle);
+      expect(screen.queryByRole("radio", { name: "Nobody" })).toBeNull();
+      view.rerender(<ProfilePreferencesSettings activeTab="messages" />);
+      expect(
+        screen.queryByRole("checkbox", { name: "New followers" })
+      ).toBeNull();
+      expect(screen.getByText(/add you to an encrypted group/i)).toBeVisible();
+      await user.click(screen.getByRole("radio", { name: "Nobody" }));
+
+      const bodies = {
+        notifications: { notifications: { new_followers: false } },
+        messages: { direct_message_policy: "NOBODY" },
+      };
+      const secondTab = firstTab === "messages" ? "notifications" : "messages";
+      for (const [index, tab] of [firstTab, secondTab].entries()) {
+        view.rerender(<ProfilePreferencesSettings activeTab={tab} />);
+        await user.click(saveButton());
+        await waitFor(() =>
+          expect(commonApiPut).toHaveBeenNthCalledWith(index + 1, {
+            endpoint: "profile-preferences",
+            body: bodies[tab],
+          })
+        );
+      }
+      view.rerender(<ProfilePreferencesSettings activeTab="notifications" />);
+      expect(
+        screen.getByRole("checkbox", { name: "New followers" })
+      ).not.toBeChecked();
+      view.rerender(<ProfilePreferencesSettings activeTab="messages" />);
+      expect(screen.getByRole("radio", { name: "Nobody" })).toBeChecked();
+    }
+  );
+
+  it("saves the notification level on its own and keeps category choices", async () => {
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings activeTab="notifications" />);
+    await user.click(await screen.findByRole("radio", { name: "Essential" }));
+    await waitFor(() =>
+      expect(
+        screen.queryByRole("checkbox", { name: "New followers" })
+      ).toBeNull()
+    );
+    await user.click(saveButton());
+    await waitFor(() =>
+      expect(commonApiPut).toHaveBeenCalledWith({
+        endpoint: "profile-preferences",
+        body: { notification_level: "ESSENTIAL_ONLY" },
+      })
+    );
+    await user.click(screen.getByRole("radio", { name: "All" }));
     expect(
-      screen.queryByRole("button", { name: "Choose group" })
-    ).not.toBeInTheDocument();
+      screen.getByRole("checkbox", { name: "New followers" })
+    ).toBeChecked();
+  });
+
+  it("requires criteria and saves them only from Messages Save", async () => {
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings activeTab="messages" />);
+    await user.click(
+      await screen.findByRole("radio", { name: "People who meet my criteria" })
+    );
+    expect(saveButton()).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Set criteria" }));
+    await user.click(await screen.findByRole("button", { name: "Done" }));
+    expect(commonApiPut).not.toHaveBeenCalled();
+    expect(mockSubmit).not.toHaveBeenCalled();
+    await user.click(screen.getByRole("button", { name: "Edit criteria" }));
+    expect(await screen.findByText("Draft minimum 25")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    await user.click(
+      screen.getByRole("checkbox", {
+        name: /People I follow can always message me/,
+      })
+    );
+    await user.click(saveButton());
+    await waitFor(() =>
+      expect(commonApiPut).toHaveBeenCalledWith({
+        endpoint: "profile-preferences",
+        body: {
+          direct_message_policy: "GROUP_MEMBERS",
+          direct_message_group_id: "group-2",
+          direct_message_allow_people_i_follow: false,
+        },
+      })
+    );
+    expect(mockSubmit).toHaveBeenCalledWith({
+      currentHandle: "alice",
+      publish: true,
+      payload: {
+        ...createInitialInlineGroupBuilderState().draft,
+        name: "Can message me",
+        group: {
+          ...createEmptyInlineGroupPayload().group,
+          level: { min: 25, max: null },
+        },
+        is_private: true,
+      },
+    });
+  });
+
+  it("starts from existing criteria and saves edits as a separate private group", async () => {
+    seedPreferences({
+      direct_message_policy: DirectMessagePolicy.GroupMembers,
+      direct_message_group_id: "group-1",
+    });
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings activeTab="messages" />);
+    await user.click(
+      await screen.findByRole("button", { name: "Edit criteria" })
+    );
+    expect(await screen.findByText("Saved minimum 15")).toBeVisible();
+    await user.click(screen.getByRole("button", { name: "Done" }));
+    await user.click(saveButton());
+    await waitFor(() =>
+      expect(commonApiPut).toHaveBeenCalledWith({
+        endpoint: "profile-preferences",
+        body: { direct_message_group_id: "group-2" },
+      })
+    );
+    expect(mockSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        payload: expect.objectContaining({ is_private: true }),
+      })
+    );
+  });
+
+  it("reuses the created criteria if saving the preference fails and is retried", async () => {
+    const user = userEvent.setup();
+    jest
+      .mocked(commonApiPut)
+      .mockRejectedValueOnce(new Error("Could not save"));
+    render(<ProfilePreferencesSettings activeTab="messages" />);
+    await user.click(
+      await screen.findByRole("radio", { name: "People who meet my criteria" })
+    );
+    await user.click(screen.getByRole("button", { name: "Set criteria" }));
+    await user.click(await screen.findByRole("button", { name: "Done" }));
+    await user.click(saveButton());
+    await waitFor(() => expect(saveButton()).toBeEnabled());
+    await user.click(saveButton());
+    await waitFor(() => expect(commonApiPut).toHaveBeenCalledTimes(2));
+    expect(mockSubmit).toHaveBeenCalledTimes(1);
+  });
+
+  it("can switch to Everyone without resending the old group or notification settings", async () => {
+    seedPreferences({
+      direct_message_policy: DirectMessagePolicy.GroupMembers,
+      direct_message_group_id: "group-1",
+      direct_message_group_unavailable: true,
+    });
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings activeTab="messages" />);
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      /saved criteria are unavailable/i
+    );
+    await user.click(screen.getByRole("radio", { name: "Everyone" }));
+    await user.click(saveButton());
+    await waitFor(() =>
+      expect(commonApiPut).toHaveBeenCalledWith({
+        endpoint: "profile-preferences",
+        body: { direct_message_policy: "EVERYONE" },
+      })
+    );
+  });
+
+  it("can retry loading the saved criteria without treating a fetch failure as deletion", async () => {
+    seedPreferences({
+      direct_message_policy: DirectMessagePolicy.GroupMembers,
+      direct_message_group_id: "group-1",
+    });
+    const fetch = jest.mocked(commonApiFetch).getMockImplementation()!;
+    jest.mocked(commonApiFetch).mockImplementation(async (request) => {
+      if (request.endpoint === "groups/group-1")
+        throw new Error("Transient failure");
+      return fetch(request);
+    });
+    const user = userEvent.setup();
+    render(<ProfilePreferencesSettings activeTab="messages" />);
+    await user.click(
+      await screen.findByRole("button", { name: "Edit criteria" })
+    );
+    const retry = await screen.findByRole("button", { name: "Try again" });
+    jest.mocked(commonApiFetch).mockImplementation(fetch);
+    await user.click(retry);
+    expect(await screen.findByText("Saved minimum 15")).toBeVisible();
+    expect(screen.queryByRole("alert")).toBeNull();
   });
 });
