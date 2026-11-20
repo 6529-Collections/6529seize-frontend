@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
+import type { ReactNode } from "react";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
@@ -18,7 +19,9 @@ import {
 import { commonApiFetch } from "@/services/api/common-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import WaveGroupScope from "./specs/groups/group/WaveGroupScope";
+import WaveRulesGroupMembersLink from "./specs/WaveRulesGroupMembersLink";
+
+type SubmissionGroup = Pick<ApiGroup, "id" | "is_hidden" | "is_direct_message">;
 
 /** Present one submission audience while preserving private group metadata. */
 function SubmissionScope({
@@ -26,11 +29,26 @@ function SubmissionScope({
   signatureRequired,
   isClosed,
 }: {
-  readonly group: ApiGroup | null;
+  readonly group: SubmissionGroup | null;
   readonly signatureRequired: boolean;
   readonly isClosed: boolean;
 }) {
   const locale = useBrowserLocale();
+  const groupId = group?.id?.trim();
+  let scopeValue: ReactNode = t(locale, "waves.access.publicGroup");
+  if (group?.is_hidden || group?.is_direct_message) {
+    scopeValue = t(locale, "waves.chatSettings.access.privateGroup");
+  } else if (groupId) {
+    scopeValue = (
+      <WaveRulesGroupMembersLink
+        groupId={groupId}
+        href={`/network?page=1&group=${encodeURIComponent(groupId)}`}
+      />
+    );
+  } else if (group) {
+    scopeValue = t(locale, "waves.chatSettings.access.unavailableGroup");
+  }
+
   return (
     <>
       <dl className="tw-m-0 tw-grid tw-grid-cols-[auto_minmax(0,1fr)] tw-items-center tw-gap-x-2">
@@ -38,11 +56,7 @@ function SubmissionScope({
           {t(locale, "waves.access.submissionScope")}
         </dt>
         <dd className="tw-m-0 tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-justify-end tw-font-medium tw-text-iron-100">
-          {group ? (
-            <WaveGroupScope group={group} />
-          ) : (
-            t(locale, "waves.access.publicGroup")
-          )}
+          {scopeValue}
         </dd>
       </dl>
       {!isClosed && (
@@ -91,12 +105,11 @@ function CompetitionSubmissionScope({
     return <p className="tw-m-0">{t(locale, "waves.access.unavailable")}</p>;
   if (groupId !== null && groupQuery.isPending)
     return <p className="tw-m-0">{t(locale, "waves.access.loading")}</p>;
-  const group: ApiGroup | null =
+  const group: SubmissionGroup | null =
     groupId === null
       ? null
       : {
           id: groupId,
-          name: groupQuery.data?.name ?? "",
           is_hidden:
             groupQuery.isError ||
             groupQuery.data?.visible !== true ||

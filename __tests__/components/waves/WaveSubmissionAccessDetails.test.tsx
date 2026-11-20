@@ -7,6 +7,7 @@ import {
   useDefaultCompetition,
 } from "@/hooks/competitions/useCompetitionQueries";
 import type { ComponentProps } from "react";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import WaveSubmissionAccessDetails from "@/components/waves/WaveSubmissionAccessDetails";
 import { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiGroup } from "@/generated/models/ApiGroup";
@@ -15,7 +16,10 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionDetail: jest.fn(),
   useDefaultCompetition: jest.fn(),
 }));
-jest.mock("@tanstack/react-query", () => ({ useQuery: jest.fn() }));
+jest.mock("@tanstack/react-query", () => ({
+  useQuery: jest.fn(),
+  useQueries: () => [],
+}));
 jest.mock("next/navigation", () => ({
   usePathname: jest.fn(),
   useSearchParams: jest.fn(),
@@ -40,11 +44,6 @@ jest.mock("next/link", () => ({
     </a>
   ),
 }));
-jest.mock("@/helpers/image.helpers", () => ({
-  getScaledImageUri: (uri: string) => uri,
-  ImageScale: { W_AUTO_H_50: "50" },
-}));
-
 /** Build a signed-submission fixture with the audience under test. */
 function makeWave(group: ApiGroup | null = null): ApiWave {
   return Object.assign(new ApiWave(), {
@@ -72,6 +71,30 @@ function selectCompetition(
     isPending: false,
     isError: false,
   });
+}
+
+function mockPublicGroup() {
+  (useQuery as jest.Mock).mockImplementation(
+    ({ queryKey }: { readonly queryKey: readonly unknown[] }) => {
+      if (queryKey[0] === QueryKey.COMMUNITY_MEMBERS_TOP) {
+        return { data: { count: 10_191 } };
+      }
+      return {
+        data: {
+          name: "Public Club",
+          visible: true,
+          is_private: false,
+          group: {
+            tdh: { min: 1, max: null, inclusion_strategy: "TDH" },
+            rep: { min: null, max: null, user_identity: null },
+            cic: { min: null, max: null, user_identity: null },
+            level: { min: null, max: null },
+            owns_nfts: [],
+          },
+        },
+      };
+    }
+  );
 }
 
 describe("WaveSubmissionAccessDetails", () => {
@@ -191,24 +214,12 @@ describe("WaveSubmissionAccessDetails", () => {
     expect(
       screen.getByRole("link", { name: "View submission rules" })
     ).toBeVisible();
-    (useQuery as jest.Mock).mockReturnValue({
-      data: {
-        name: "Public Club",
-        visible: true,
-        is_private: false,
-        is_direct_message: false,
-      },
-      isPending: false,
-    });
+    mockPublicGroup();
     rerender(<WaveSubmissionAccessDetails wave={makeWave()} />);
     expect(
       screen.queryByText("Loading submission access…")
     ).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("link", {
-        name: "Inspect Public Club group criteria and members",
-      })
-    ).toBeVisible();
+    expect(screen.getByRole("link", { name: "10,191 users" })).toBeVisible();
   });
 
   it.each([
@@ -235,22 +246,21 @@ describe("WaveSubmissionAccessDetails", () => {
     }
   );
 
-  it("shows an inspectable selected group and its signing requirement", () => {
+  it("shows the selected group's count, criteria, and signing requirement", () => {
     selectCompetition({ group_id: "beta-group", signature_required: true });
-    (useQuery as jest.Mock).mockReturnValue({
-      data: {
-        id: "beta-group",
-        name: "Beta Club",
-        visible: true,
-        is_private: false,
-      },
-    });
-    render(<WaveSubmissionAccessDetails wave={makeWave()} />);
-    expect(
-      screen.getByRole("link", {
-        name: "Inspect Beta Club group criteria and members",
-      })
-    ).toHaveAttribute("href", "/network?page=1&group=beta-group");
+    mockPublicGroup();
+    const { container } = render(
+      <WaveSubmissionAccessDetails wave={makeWave()} />
+    );
+    const countLink = screen.getByRole("link", { name: "10,191 users" });
+    expect(countLink).toHaveAttribute(
+      "href",
+      "/network?page=1&group=beta-group"
+    );
+    expect(countLink).toHaveAccessibleDescription("TDH at least 1");
+    expect(countLink).not.toHaveAttribute("title");
+    expect(screen.getByText("TDH at least 1")).toBeVisible();
+    expect(container.innerHTML).not.toContain("Public Club");
     expect(
       screen.getByText("Submissions require a wallet signature.")
     ).toBeVisible();
@@ -281,6 +291,11 @@ describe("WaveSubmissionAccessDetails", () => {
       expect(screen.getByText("Private group")).toBeVisible();
       expect(container.innerHTML).not.toContain("secret-beta");
       expect(container.innerHTML).not.toContain("Secret Beta Club");
+      expect(useQuery).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          queryKey: expect.arrayContaining([QueryKey.COMMUNITY_MEMBERS_TOP]),
+        })
+      );
     }
   );
 
@@ -312,22 +327,21 @@ describe("WaveSubmissionAccessDetails", () => {
   );
 
   it("uses wave access after confirming there is no default competition", () => {
+    mockPublicGroup();
     render(
       <WaveSubmissionAccessDetails
         wave={makeWave({
           id: "legacy-group",
-          name: "Legacy Club",
           is_hidden: false,
         })}
       />
     );
     expect(useCompetitionDetail).not.toHaveBeenCalled();
     expect(useDefaultCompetition).toHaveBeenCalledWith("wave-1", true);
-    expect(
-      screen.getByRole("link", {
-        name: "Inspect Legacy Club group criteria and members",
-      })
-    ).toBeVisible();
+    expect(screen.getByRole("link", { name: "10,191 users" })).toHaveAttribute(
+      "href",
+      "/network?page=1&group=legacy-group"
+    );
   });
 
   it.each([
@@ -370,7 +384,8 @@ describe("WaveSubmissionAccessDetails", () => {
 
   it("links inspectable submission groups and uses existing rules navigation", () => {
     const onViewRules = jest.fn();
-    render(
+    mockPublicGroup();
+    const { container } = render(
       <WaveSubmissionAccessDetails
         wave={makeWave({
           id: "group /1",
@@ -380,11 +395,11 @@ describe("WaveSubmissionAccessDetails", () => {
         onViewRules={onViewRules}
       />
     );
-    expect(
-      screen.getByRole("link", {
-        name: "Inspect Submission Club group criteria and members",
-      })
-    ).toHaveAttribute("href", "/network?page=1&group=group%20%2F1");
+    expect(screen.getByRole("link", { name: "10,191 users" })).toHaveAttribute(
+      "href",
+      "/network?page=1&group=group%20%2F1"
+    );
+    expect(container.innerHTML).not.toContain("Submission Club");
     const rules = screen.getByRole("link", { name: "View submission rules" });
     expect(rules).toHaveAttribute("href", "/waves/wave-1?tab=configuration");
     fireEvent.click(rules);
@@ -421,7 +436,7 @@ describe("WaveSubmissionAccessDetails", () => {
   it("does not describe an incomplete restricted group as public", () => {
     render(
       <WaveSubmissionAccessDetails
-        wave={makeWave({ id: "missing-name", is_hidden: false })}
+        wave={makeWave({ id: "", name: "Submission Club", is_hidden: false })}
       />
     );
     expect(screen.getByText("Group unavailable")).toBeVisible();
