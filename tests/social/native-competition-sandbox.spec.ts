@@ -1493,7 +1493,8 @@ async function openLockedSubmissionRules(page: Page, draft: string) {
   await expect(details).toBeFocused();
   await expect(
     details.getByRole("link", {
-      name: "Inspect Sandbox Submission Club group criteria and members",
+      name: "25 users",
+      exact: true,
     })
   ).toBeVisible();
   await page.keyboard.press("Tab");
@@ -3755,11 +3756,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(restriction).toContainText(
       "You don't have permission to submit in this wave"
     );
+    const memberCount = restriction.getByRole("link", {
+      name: "25 users",
+      exact: true,
+    });
+    const criteria = "TDH at least 100 and Level at least 1";
+    await expect(memberCount).toBeVisible();
+    await expect(memberCount).toHaveAttribute(
+      "href",
+      "/network?page=1&group=sandbox-submission-club"
+    );
+    await expect(memberCount).toHaveAccessibleDescription(criteria);
+    await expect(memberCount).not.toHaveAttribute("title");
     await expect(
-      restriction.getByRole("link", {
-        name: "Inspect Sandbox Submission Club group criteria and members",
-      })
+      restriction.getByText(criteria, { exact: true })
     ).toBeVisible();
+    await expect(restriction).not.toContainText("Sandbox Submission Club");
     await expect
       .poll(() =>
         restriction
@@ -3832,11 +3844,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.keyboard.press("Space");
     await expect(restriction).toBeFocused();
     await page.keyboard.press("Tab");
-    await expect(
-      restriction.getByRole("link", {
-        name: "Inspect Sandbox Submission Club group criteria and members",
-      })
-    ).toBeFocused();
+    await expect(memberCount).toBeFocused();
     await page.keyboard.press("Tab");
     await expect(
       restriction.getByRole("link", { name: "View submission rules" })

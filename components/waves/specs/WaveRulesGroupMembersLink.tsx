@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useGroupCriteriaIdentityLabels } from "@/hooks/useGroupCriteriaIdentityLabels";
 import { t } from "@/i18n/messages";
@@ -22,7 +22,9 @@ export default function WaveRulesGroupMembersLink({
   linkLabel,
 }: {
   readonly groupId: string;
-  readonly groupName: string;
+  /** Existing Wave Rules links use this for their group-name tooltip. */
+  readonly groupName?: string | undefined;
+  /** The complete saved group response, including its criteria payload. */
   readonly groupDetails?: ApiGroupFull | undefined;
   readonly href: string;
   readonly linkLabel?: string | undefined;
