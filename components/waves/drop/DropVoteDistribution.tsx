@@ -127,7 +127,7 @@ function VoteRibbonPiece({
         className={`tw-block tw-h-4 tw-overflow-hidden tw-rounded-md tw-transition-transform tw-duration-150 desktop-hover:group-hover:-tw-translate-y-px motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${color}`}
       >
         {text && (
-          <span className="tw-block tw-truncate tw-px-1 tw-text-center tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-950">
+          <span className="tw-block tw-truncate tw-px-1 tw-text-center tw-text-xs tw-font-medium tw-tabular-nums tw-leading-4 tw-text-iron-950">
             {text}
           </span>
         )}

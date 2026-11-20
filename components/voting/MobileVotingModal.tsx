@@ -50,7 +50,7 @@ const MobileVotingModal: React.FC<MobileVotingModalProps> = ({
       }
       surfaceClassName={`tw-group/voting-dialog tw-bg-iron-950 ${followsIosKeyboard ? "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]" : ""}`}
     >
-      <div className="tw-px-4 tw-pb-2 tw-pt-2">
+      <div className="tw-px-4 tw-pb-2 tw-pt-4">
         <SingleWaveDropVote
           drop={drop}
           onVoteRequestStarted={handleClose}

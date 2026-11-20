@@ -65,6 +65,9 @@ export function defineWaveVideoLayoutTests() {
           video.evaluate((element: HTMLVideoElement) => element.readyState)
         )
         .toBeGreaterThanOrEqual(1);
+      await expect(
+        page.getByText(/^\d+:\d{2} \/ \d+:\d{2}$/).first()
+      ).toHaveCSS("font-variant-numeric", "normal");
       const playbackBox = await video.boundingBox();
       expect(playbackBox).not.toBeNull();
       for (const dimension of ["width", "height", "x", "y"] as const) {

@@ -268,7 +268,10 @@ test("sidebar collection and search controls count deliberate use without query 
     exact: true,
   });
   await expect(allCollection).toHaveCSS("font-size", "12px");
-  await expect(allCollection).toHaveCSS("font-weight", "600");
+  await expect(allCollection).toHaveCSS("font-weight", "500");
+  await expect(
+    collectionFilter.getByRole("button", { name: "Joined", exact: true })
+  ).toHaveCSS("font-weight", "500");
   await expect(allCollection).toHaveCSS("min-height", "30px");
   await expect(allCollection).toHaveCSS("background-color", "rgb(38, 39, 43)");
   const searchButton = page.getByRole("button", {
@@ -307,6 +310,9 @@ test("sidebar collection and search controls count deliberate use without query 
     )
   ).toHaveLength(0);
   await page.keyboard.press("Enter");
+  await expect(
+    collectionFilter.getByRole("button", { name: "Pinned", exact: true })
+  ).toHaveCSS("font-weight", "500");
   await expect
     .poll(
       async () =>

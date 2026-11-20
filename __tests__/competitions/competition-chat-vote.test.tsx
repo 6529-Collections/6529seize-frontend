@@ -206,6 +206,58 @@ it("uses the entry budget and competition vote endpoint despite the parent wave'
   );
   expect(screen.queryByText("Legacy voting")).not.toBeInTheDocument();
 });
+it.each([SingleWaveDropVoteSize.NORMAL, SingleWaveDropVoteSize.MINI])(
+  "validates the entry limits and allows a zero draft in %s numeric mode",
+  async (size) => {
+    mount("numeric", drop, undefined, size);
+
+    const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+    expect(input).toHaveAttribute("min", "-1500");
+    expect(input).toHaveAttribute("max", "1500");
+    expect(screen.getByRole("button", { name: "Increase vote" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Decrease vote" })).toBeEnabled();
+    expect(screen.queryAllByRole("button", { name: /%$/ })).toHaveLength(
+      size === SingleWaveDropVoteSize.MINI ? 0 : 4
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Increase vote" }));
+    expect(input).toHaveValue(1);
+
+    fireEvent.change(input, { target: { value: "1501" } });
+    expect(screen.getByRole("button", { name: voteButtonName })).toBeDisabled();
+    fireEvent.change(input, { target: { value: "0" } });
+    expect(
+      screen.getByRole("button", { name: "Vote 0 TDH + XTDH" })
+    ).toBeEnabled();
+    expect(setCompetitionVote).not.toHaveBeenCalled();
+  }
+);
+it("adjusts the full Decision draft against the entry limits without submitting", async () => {
+  jest.mocked(fetchCompetitionCredits).mockResolvedValue({
+    ...initialBudget,
+    remaining: 53,
+    min_vote: -75,
+    max_vote: 125,
+  });
+  mount();
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.click(screen.getByRole("button", { name: "+50%" }));
+  expect(input).toHaveValue(63);
+  fireEvent.click(screen.getByRole("button", { name: "Increase vote" }));
+  expect(input).toHaveValue(64);
+  fireEvent.click(screen.getByRole("button", { name: "-100%" }));
+  fireEvent.click(screen.getByRole("button", { name: "Decrease vote" }));
+  expect(input).toHaveValue(-75);
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+});
+it("omits negative shortcuts in Decisions that disallow negative votes", async () => {
+  jest.mocked(fetchCompetitionCredits).mockResolvedValue({
+    ...initialBudget,
+    min_vote: 0,
+  });
+  mount();
+  expect(await screen.findByRole("button", { name: "+100%" })).toBeEnabled();
+  expect(screen.queryByRole("button", { name: /^-\d+%$/ })).toBeNull();
+});
 it.each([
   { creditType: "REP", label: "Rep" },
   { creditType: "CIC", label: "NIC" },

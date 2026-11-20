@@ -97,7 +97,7 @@ describe("VotingModal", () => {
       isCapacitor: true,
       isIos: false,
       compact: true,
-      mobile: false,
+      mobile: true,
       preferMobile: false,
     },
     {
@@ -105,7 +105,7 @@ describe("VotingModal", () => {
       isCapacitor: false,
       isIos: false,
       compact: true,
-      mobile: false,
+      mobile: true,
       preferMobile: false,
     },
     {

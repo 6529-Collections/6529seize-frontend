@@ -50,7 +50,10 @@ export const WaveDropVoteSummary = ({
   return (
     <div className="tw-inline-flex tw-items-center tw-gap-2 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950 tw-p-1.5 tw-shadow-2xl tw-transition-transform hover:tw-scale-[1.01] sm:tw-gap-3">
       <div className="tw-flex tw-cursor-default tw-flex-wrap tw-items-baseline tw-gap-1.5 tw-px-4">
-        <span className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-white sm:tw-text-base">
+        <span
+          data-wave-typography="preserve"
+          className="tw-text-sm tw-font-semibold tw-tabular-nums tw-text-white sm:tw-text-base"
+        >
           {formatNumberWithCommas(drop.rating)}
         </span>
         {drop.rating !== progressVote && (
@@ -60,6 +63,7 @@ export const WaveDropVoteSummary = ({
               className="tw-size-2.5 tw-flex-shrink-0 tw-text-iron-600"
             />
             <span
+              data-wave-typography="preserve"
               className={`tw-cursor-help tw-text-sm tw-font-semibold tw-tabular-nums sm:tw-text-base ${
                 drop.rating < progressVote
                   ? "tw-text-emerald-400"
@@ -105,12 +109,7 @@ export const WaveDropVoteSummary = ({
       )}
 
       {canShowVote && (
-        <Button
-          type="button"
-          onClick={onVoteClick}
-          variant="primary"
-          size="md"
-        >
+        <Button type="button" onClick={onVoteClick} variant="primary" size="md">
           Vote
         </Button>
       )}

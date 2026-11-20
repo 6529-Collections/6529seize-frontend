@@ -54,7 +54,7 @@ function DeleteChatHistory({
         fullWidth
         aria-haspopup="dialog"
         onClick={() => setIsOpen(true)}
-        className="!tw-whitespace-normal !tw-px-3 !tw-text-xs"
+        className="!tw-whitespace-normal !tw-px-3 !tw-text-xs !tw-font-medium"
       >
         {text(
           "waves.sidebar.rightPanel.configuration.deleteChatHistory.button"
