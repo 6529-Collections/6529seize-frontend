@@ -29,9 +29,11 @@ import {
 } from "./SidebarSubwaveConnector";
 import {
   getSidebarWaveRowLayoutClasses,
+  getSidebarWaveRowTextClasses,
   SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES,
 } from "./sidebarWaveRowLayout";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { hasUnreadWaveDrops } from "./sidebarWaveListUtils";
 
 interface BrainLeftSidebarWaveProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
@@ -83,7 +85,7 @@ const getRowPresentationClasses = (
         "tw-absolute tw-bottom-[-1px] tw-right-[-1px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg",
       rowVerticalPaddingClasses: "tw-py-1",
       contentGapClasses: "tw-gap-y-0.5",
-      titleTextClasses: "tw-text-[13px] tw-font-normal",
+      titleTextClasses: "tw-text-[13px]",
       timestampTextClasses: "tw-text-[11px]",
     };
   }
@@ -96,8 +98,7 @@ const getRowPresentationClasses = (
       "tw-absolute tw-bottom-[-2px] tw-right-[-2px] tw-flex tw-size-3.5 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-950 tw-shadow-lg",
     rowVerticalPaddingClasses: isAnnouncement ? "tw-py-1" : "tw-py-2",
     contentGapClasses: "tw-gap-y-1",
-    titleTextClasses:
-      "tw-text-sm tw-font-medium [@media(any-hover:none)]:tw-text-[13px] [@media(any-hover:none)]:tw-font-normal",
+    titleTextClasses: "tw-text-sm [@media(any-hover:none)]:tw-text-[13px]",
     timestampTextClasses: "tw-text-xs [@media(any-hover:none)]:tw-text-[11px]",
   };
 };
@@ -149,7 +150,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
   }, [activeWaveId, isApp, isDirectMessage, wave.id, firstUnreadDropSerialNo]);
 
   const unreadCount = Math.max(wave.unreadDropsCount, wave.newDropsCount.count);
-  const haveNewDrops = unreadCount > 0;
+  const haveNewDrops = hasUnreadWaveDrops(wave);
 
   const onWaveHover = useCallback(() => {
     if (wave.id !== activeWaveId) {
@@ -237,6 +238,12 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
     timestampTextClasses,
   } = getRowPresentationClasses(isChildRow, isAnnouncement);
 
+  const { name: nameClasses, weight: weightClass } =
+    getSidebarWaveRowTextClasses({
+      isActive,
+      hasUnread: haveNewDrops,
+    });
+
   return (
     <div
       {...(!hasTouchScreen && {
@@ -261,11 +268,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
         />
       )}
       <div
-        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${
-          isActive
-            ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-            : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
-        }`}
+        className={`tw-flex tw-min-w-0 tw-flex-1 ${linkGapClasses} tw-transition-colors tw-duration-200 tw-ease-out ${nameClasses}`}
       >
         <div
           aria-hidden="true"
@@ -278,7 +281,7 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
             } tw-transition tw-duration-300 desktop-hover:group-hover:tw-brightness-110 ${
               isAnnouncement ? "" : getAvatarRingClasses()
             } ${
-              isAnnouncement || isActive
+              isAnnouncement || isActive || haveNewDrops
                 ? "tw-opacity-100"
                 : "tw-opacity-80 desktop-hover:group-hover:tw-opacity-100"
             }`}
@@ -339,14 +342,10 @@ const BrainLeftSidebarWave: React.FC<BrainLeftSidebarWaveProps> = ({
                   href={href}
                   prefetch={false}
                   onClick={handleWaveClick}
-                  className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${
-                    isActive
-                      ? "tw-text-white desktop-hover:group-hover:tw-text-white"
-                      : "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300"
-                  }`}
+                  className={`tw-static tw-block tw-min-w-0 tw-flex-shrink tw-no-underline before:tw-absolute before:tw-inset-0 before:tw-z-[5] before:tw-content-[''] focus-visible:tw-outline-none focus-visible:before:tw-ring-2 focus-visible:before:tw-ring-inset focus-visible:before:tw-ring-primary-400 ${nameClasses}`}
                 >
                   <span
-                    className={`tw-relative tw-z-[6] tw-block tw-truncate ${titleTextClasses} tw-leading-tight`}
+                    className={`tw-relative tw-z-[6] tw-block tw-truncate ${titleTextClasses} ${weightClass} tw-leading-tight`}
                   >
                     {formattedWaveName}
                   </span>

@@ -110,6 +110,7 @@ jest.mock("@/hooks/waves/useApprovalWaveStatus", () => ({
 
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ waveViewStyle: { height: "1px" } }),
+  useLayoutViewportLock: jest.fn(),
 }));
 
 const capturedPropsHolder = { current: {} as any };

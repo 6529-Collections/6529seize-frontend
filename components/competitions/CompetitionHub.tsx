@@ -41,7 +41,7 @@ function CompetitionCard({
     <li className="tw-min-w-0">
       <Link
         href={getCompetitionRoute(competition.wave_id, competition.id)}
-        className="tw-group tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-iron-600 hover:tw-bg-iron-900/60 hover:tw-text-iron-100 hover:tw-no-underline focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
+        className="tw-group tw-flex tw-h-full tw-flex-col tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 tw-text-iron-100 tw-no-underline tw-transition-colors hover:tw-border-iron-600 hover:tw-bg-iron-900/60 hover:tw-text-iron-100 hover:tw-no-underline focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none"
       >
         <div className="tw-flex-1 tw-px-5 tw-pb-3 tw-pt-4">
           <div className="tw-mb-3 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">

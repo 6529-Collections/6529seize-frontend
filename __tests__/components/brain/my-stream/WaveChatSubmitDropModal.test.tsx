@@ -175,10 +175,11 @@ describe("WaveChatSubmitDropModal", () => {
         rerender(<WaveChatSubmitDropModal {...props} isOpen />);
         const input = screen.getByRole("textbox", { name: "Metadata value" });
         input.focus();
-        act(() => jest.advanceTimersByTime(400));
+        act(() => jest.advanceTimersByTime(16));
         expect(scrollIntoView).toHaveBeenLastCalledWith({
-          behavior: "smooth",
-          block: "center",
+          behavior: "instant",
+          block: "nearest",
+          inline: "nearest",
         });
         expect(scrollIntoView.mock.instances.at(-1)).toBe(input);
         rerender(<WaveChatSubmitDropModal {...props} isOpen={false} />);

@@ -280,6 +280,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                         className={`tw-relative tw-flex tw-min-h-6 tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-text-center tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-min-h-8 ${hoverTextColorClass} tw-group/link`}
                       >
                         <span
+                          data-wave-typography="preserve"
                           title={primaryLabel}
                           className={`${styles.authorFontSize} tw-block tw-min-w-0 tw-max-w-full tw-truncate tw-font-semibold tw-leading-tight tw-text-iron-100 ${hoverTextColorClass} tw-transition-colors`}
                         >
@@ -304,6 +305,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                     </UserProfileTooltipWrapper>
                   ) : (
                     <span
+                      data-wave-typography="preserve"
                       title={primaryLabel}
                       className={`${styles.authorFontSize} tw-block tw-min-w-0 tw-max-w-full tw-truncate tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-100`}
                     >
@@ -349,6 +351,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                     className={`tw-relative tw-flex tw-min-h-6 tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-text-center tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-min-h-8 ${hoverTextColorClass} tw-group/link`}
                   >
                     <span
+                      data-wave-typography="preserve"
                       title={authorProfileLabel}
                       className={`${styles.authorFontSize} tw-block tw-min-w-0 tw-max-w-full tw-truncate tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-200 ${hoverTextColorClass} tw-transition-colors`}
                     >

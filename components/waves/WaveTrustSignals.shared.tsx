@@ -296,7 +296,7 @@ const getChipLabelClasses = (variant: WaveTrustSignalsVariant): string => {
   }
 
   if (isInlineSidebarVariant(variant)) {
-    return "tw-text-[11px] tw-font-medium";
+    return "tw-text-[11px] tw-font-normal";
   }
 
   if (variant === "sidebar") {
@@ -323,7 +323,7 @@ const getIconClasses = (variant: WaveTrustSignalsVariant): string => {
 
 const getValueClasses = (variant: WaveTrustSignalsVariant): string => {
   if (isInlineSidebarVariant(variant)) {
-    return "tw-tabular-nums";
+    return "tw-font-normal";
   }
 
   if (isInlineHeaderVariant(variant)) {

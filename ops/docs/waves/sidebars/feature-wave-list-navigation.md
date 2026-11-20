@@ -67,7 +67,8 @@ Wave and DM rows in the left list control which thread is open.
   `Discover Waves` link with a compass to `/discover`; the sidebar keeps the two section-specific `View all` links.
   The collapsed rail retains its icon-only feed link on a dark tile without
   a border. On desktop, the selected feed icon stays blue. Both layouts keep
-  visible blue keyboard focus.
+  visible blue keyboard focus. Wave names, Create wave, and Profile Waves Feed
+  use the shared tooltip styling.
 - Browser back/forward keeps the active row and URL in sync.
 - `All` includes pinned, joined, unjoined, and quiet accessible waves. Subwaves
   are reached by expanding their parent. It loads in stable batches so new
@@ -225,6 +226,14 @@ on hover and show a dark hover surface; their resting header surface is transpar
    and URL in sync.
 
 ## Common Scenarios
+
+- Inactive, unmuted rows with unread posts use soft light-grey, medium-weight
+  names and fully visible avatars. Both existing unread counts and newly
+  received posts use this treatment, matching the unread badges. The selected
+  wave keeps a white name and highlighted background. Read and muted rows
+  retain their quieter appearance. Row scores use regular-weight text.
+  Keyboard focus shows a blue inset ring on wave links in both the expanded
+  list and the collapsed rail.
 
 - The current wave also highlights in Active Votes when it appears there,
   including when the same wave is highlighted in the collection list below.

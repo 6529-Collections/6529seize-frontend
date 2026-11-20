@@ -44,6 +44,7 @@ jest.mock("@/hooks/useCapacitor", () => ({
 }));
 jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
   useLayout: () => ({ registerRef }),
+  useLayoutViewportLock: jest.fn(),
 }));
 
 jest.mock("@/hooks/useWave", () => ({
