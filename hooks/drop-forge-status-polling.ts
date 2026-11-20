@@ -13,7 +13,7 @@ export const dropForgeStatusPolling = {
 };
 
 export function dropForgeStatusInterval(
-  state: Pick<QueryState<unknown>, "error" | "fetchFailureCount">,
+  state: Pick<QueryState<unknown, unknown>, "error" | "fetchFailureCount">,
   interval: number
 ): number | false {
   if (isAccessDenied(state.error)) return false;
