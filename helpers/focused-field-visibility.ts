@@ -54,6 +54,14 @@ export function observeFocusedField(
             visibleRight = Math.min(visibleRight, clip.right);
           }
         }
+        // Honor optional space for nearby actions without displacing a field
+        // when the keyboard leaves too little room for both.
+        const bottomMargin =
+          Number.parseFloat(getComputedStyle(focused).scrollMarginBottom) || 0;
+        const fieldBottom =
+          field.height + bottomMargin <= visibleBottom - visibleTop
+            ? field.bottom + bottomMargin
+            : field.bottom;
         // Layout often keeps the input visible by itself. Avoid issuing scroll
         // commands on every keyboard frame when there is nothing to reveal.
         if (
@@ -63,8 +71,17 @@ export function observeFocusedField(
           field.bottom <= visibleBottom &&
           field.left >= visibleLeft &&
           field.right <= visibleRight
-        )
+        ) {
+          // Move only the dialog for optional action clearance; scrolling all
+          // ancestors can move the background under a native keyboard.
+          if (
+            visibleBottom === scrollport.bottom &&
+            fieldBottom > visibleBottom
+          ) {
+            container.scrollTop += fieldBottom - visibleBottom;
+          }
           return;
+        }
         focused.scrollIntoView({
           behavior: "instant",
           block: "nearest",

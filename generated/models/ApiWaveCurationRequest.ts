@@ -11,11 +11,19 @@
  * Do not edit the class manually.
  */
 
+import { ApiWaveCurationCriteria } from '../models/ApiWaveCurationCriteria';
 import { HttpFile } from '../http/http';
 
+/**
+* Provide exactly one of group_id or criteria.
+*/
 export class ApiWaveCurationRequest {
     'name': string;
-    'group_id': string;
+    /**
+    * Keep or assign an existing group.
+    */
+    'group_id'?: string;
+    'criteria'?: ApiWaveCurationCriteria;
     'priority_order'?: number;
 
     static readonly discriminator: string | undefined = undefined;
@@ -33,6 +41,12 @@ export class ApiWaveCurationRequest {
             "name": "group_id",
             "baseName": "group_id",
             "type": "string",
+            "format": ""
+        },
+        {
+            "name": "criteria",
+            "baseName": "criteria",
+            "type": "ApiWaveCurationCriteria",
             "format": ""
         },
         {

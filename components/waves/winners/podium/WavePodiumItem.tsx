@@ -189,7 +189,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
 
   return (
     <motion.div
-      className="tw-h-full tw-min-w-0"
+      className="tw-h-full tw-min-w-0 [&_.tw-tabular-nums]:!tw-tabular-nums"
       variants={podiumVariants}
       initial={reduceMotion ? false : "hidden"}
       animate="visible"
@@ -250,7 +250,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
               </Link>
             )}
 
-            <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-translate-y-1 tw-justify-center sm:tw-translate-y-0">
+            <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-translate-y-1 tw-justify-center !tw-tabular-nums sm:tw-translate-y-0">
               <WinnerDropBadge
                 rank={winner.place}
                 decisionTime={null}

@@ -604,7 +604,6 @@ describe("GroupAssignmentPanel shared layout", () => {
       defaultMembersPreviewTarget: {
         kind: "draft",
         group: {} as ApiCreateGroup["group"],
-        name: "Only me",
         summary: "Only me",
       },
     });

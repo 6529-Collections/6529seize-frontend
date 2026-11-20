@@ -44385,11 +44385,22 @@ components:
           type: integer
           format: int32
           minimum: 1
-    ApiWaveCurationRequest:
+    ApiWaveCurationCriteria:
       type: object
       required:
+        - group
+        - is_private
+      properties:
+        group:
+          $ref: "#/components/schemas/ApiCreateGroupDescription"
+        is_private:
+          type: boolean
+          description: Restrict access to the criteria and member list.
+    ApiWaveCurationRequest:
+      type: object
+      description: Provide exactly one of group_id or criteria.
+      required:
         - name
-        - group_id
       properties:
         name:
           type: string
@@ -44397,6 +44408,9 @@ components:
           maxLength: 50
         group_id:
           type: string
+          description: Keep or assign an existing group.
+        criteria:
+          $ref: "#/components/schemas/ApiWaveCurationCriteria"
         priority_order:
           type: integer
           format: int32
