@@ -99,7 +99,7 @@ const CenteredVotingModal: React.FC<VotingModalProps> = ({
           closeButtonClassName="-tw-mr-2 tw-flex tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-600 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.06] desktop-hover:hover:tw-text-iron-300"
           closeIconClassName="tw-size-5 tw-flex-shrink-0"
           wrapperClassName="tw-px-0"
-          contentClassName="tw-group/voting-dialog tw-relative tw-z-10 tw-px-6 tw-pt-0 tw-pb-6"
+          contentClassName="tw-group/voting-dialog tw-relative tw-z-10 tw-px-6 tw-pt-2 tw-pb-6"
         >
           <SingleWaveDropVote
             drop={drop}
