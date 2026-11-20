@@ -16,6 +16,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useId, useState, type ReactNode } from "react";
+import { getPreferencesHref } from "@/helpers/preferences-navigation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { E2eeMessage } from "@/lib/e2ee/types";
@@ -119,7 +120,10 @@ function SafetyMenuItems({
         </ActionMenuItem>
       ) : null}
       <MenuItem>
-        <Link href="/preferences" className={MENU_ITEM_CLASS}>
+        <Link
+          href={getPreferencesHref({ tab: "messages" })}
+          className={MENU_ITEM_CLASS}
+        >
           <ChatBubbleLeftEllipsisIcon
             aria-hidden="true"
             className={iconClass}

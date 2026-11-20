@@ -65,6 +65,17 @@ export type CreateWaveGroupInlinePanelProps = {
   ) => Promise<ApiGroupFull | null>;
 };
 
+export type GroupInlinePanelOptions = Omit<
+  CreateWaveGroupInlinePanelProps,
+  "onChange" | "onCreateGroup"
+> & {
+  readonly initialCriteriaDraft?: CreateWaveInlineGroupBuilderState | undefined;
+  readonly onChange?: CreateWaveGroupInlinePanelProps["onChange"] | undefined;
+  readonly onCreateGroup?:
+    | CreateWaveGroupInlinePanelProps["onCreateGroup"]
+    | undefined;
+};
+
 function useCreateWaveGroupInlinePanelViewState({
   builder,
   defaultLabel,
@@ -195,15 +206,15 @@ function useCreateWaveGroupInlinePanelController({
   readonly canCreateDraft: boolean;
   readonly canResetDraft: boolean;
   readonly defaultIncludedIdentity: CommunityMemberMinimal | null;
-  readonly onChange: (
-    group: ApiGroupFull | null
-  ) => void | boolean | Promise<void | boolean>;
+  readonly onChange?:
+    | ((group: ApiGroupFull | null) => void | boolean | Promise<void | boolean>)
+    | undefined;
   readonly onCriteriaReplacementChange?:
     | ((active: boolean) => void)
     | undefined;
-  readonly onCreateGroup: (
-    payload: ApiCreateGroup
-  ) => Promise<ApiGroupFull | null>;
+  readonly onCreateGroup?:
+    | ((payload: ApiCreateGroup) => Promise<ApiGroupFull | null>)
+    | undefined;
   readonly selectedGroup: ApiGroupFull | null;
   readonly selectedGroupIncludedWallets: readonly string[] | undefined;
   readonly selectedGroupExcludedWallets: readonly string[] | undefined;
@@ -485,7 +496,7 @@ function useCreateWaveGroupInlinePanelController({
   };
 
   const createAndUse = async () => {
-    if (!canCreateDraft) {
+    if (!canCreateDraft || !onCreateGroup || !onChange) {
       return;
     }
 
@@ -526,7 +537,7 @@ function useCreateWaveGroupInlinePanelController({
   };
 
   const selectExistingGroup = async (group: ApiGroupFull | null) => {
-    if (!group && !allowGroupClear) {
+    if (!onChange || (!group && !allowGroupClear)) {
       return;
     }
 
@@ -572,14 +583,22 @@ export function useCreateWaveGroupInlinePanel({
   collapseOnClickAway = true,
   startMode = "actions",
   defaultIncludedIdentity = null,
+  initialCriteriaDraft,
   onChange,
   onCriteriaReplacementChange,
   onCreateGroup,
-}: CreateWaveGroupInlinePanelProps) {
+}: GroupInlinePanelOptions) {
   const panelRef = useRef<HTMLDivElement>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [builder, setBuilder] = useState<CreateWaveInlineGroupBuilderState>(
     () => {
+      if (initialCriteriaDraft) {
+        return {
+          ...initialCriteriaDraft,
+          panel: PANEL_IDENTITY,
+          activeRule: null,
+        };
+      }
       if (
         startMode === "criteria" &&
         selectedGroup &&
