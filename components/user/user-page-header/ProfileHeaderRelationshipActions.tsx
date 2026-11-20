@@ -4,6 +4,7 @@ import {
   getSubmissionCount,
   getTrophyArtworkCount,
 } from "@/helpers/artist-activity.helpers";
+import { useProfileDirectMessage } from "@/hooks/useProfileDirectMessage";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import UserFollowBtn from "../utils/UserFollowBtn";
@@ -24,24 +25,18 @@ export type ProfileModerationControls = Readonly<{
 }>;
 
 export default function ProfileHeaderRelationshipActions({
-  directMessageLoading,
   moderationControls,
-  onCreateDirectMessage,
   profile,
 }: Readonly<{
-  directMessageLoading: boolean;
   moderationControls: ProfileModerationControls;
-  onCreateDirectMessage: (primaryWallet: string | undefined) => void;
   profile: ApiIdentity;
 }>) {
   const { connectedProfile } = useAuth();
+  const onDirectMessage = useProfileDirectMessage(profile);
   if (!profile.handle) {
     return null;
   }
 
-  const directMessageAction = profile.primary_wallet
-    ? () => onCreateDirectMessage(profile.primary_wallet)
-    : undefined;
   const moderationKind = moderationControls.isSuspended
     ? ("reinstate" as const)
     : ("suspend" as const);
@@ -91,8 +86,7 @@ export default function ProfileHeaderRelationshipActions({
       showMuteButton={false}
       unblockPending={moderationControls.isUnblocking}
       onUnblock={() => moderationControls.onSelectAction("unblock")}
-      onDirectMessage={directMessageAction}
-      directMessageLoading={directMessageLoading}
+      onDirectMessage={onDirectMessage}
       beforeFollowAction={actionMenu}
     />
   );

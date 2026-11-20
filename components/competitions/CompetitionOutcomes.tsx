@@ -113,9 +113,9 @@ export default function CompetitionOutcomes() {
   return (
     <section
       aria-labelledby={headingId}
-      className="tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+      className="tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950"
     >
-      <div className="tw-flex tw-items-center tw-gap-2.5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3.5 sm:tw-px-5">
+      <div className="tw-flex tw-items-center tw-gap-2.5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3.5 sm:tw-px-5">
         <TrophyIcon className="tw-size-4 tw-text-iron-400" aria-hidden="true" />
         <h2
           id={headingId}

@@ -22,6 +22,7 @@ Header search, clock, and sidebar toggles use transparent, borderless icon
 buttons with a dark hover surface and visible blue keyboard focus. The open
 sidebar toggle stays blue. Create wave and Join keep white primary styling;
 Joined and other secondary actions retain their borders and dark surfaces.
+Pin and mute use matching compact dark button surfaces.
 
 ## User Journey
 

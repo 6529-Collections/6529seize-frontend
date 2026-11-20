@@ -1,6 +1,6 @@
 "use client";
 
-import { MobileVotingModal, VotingModal } from "@/components/voting";
+import { VotingModal } from "@/components/voting";
 import type { ExtendedDrop } from "@/helpers/waves/drop.helpers";
 import React from "react";
 
@@ -14,9 +14,12 @@ interface WaveLeaderboardGridItemVotingModalProps {
 export const WaveLeaderboardGridItemVotingModal: React.FC<
   WaveLeaderboardGridItemVotingModalProps
 > = ({ drop, isOpen, isMobileScreen, onClose }) => {
-  return isMobileScreen ? (
-    <MobileVotingModal drop={drop} isOpen={isOpen} onClose={onClose} />
-  ) : (
-    <VotingModal drop={drop} isOpen={isOpen} onClose={onClose} />
+  return (
+    <VotingModal
+      drop={drop}
+      isOpen={isOpen}
+      onClose={onClose}
+      preferMobile={isMobileScreen}
+    />
   );
 };

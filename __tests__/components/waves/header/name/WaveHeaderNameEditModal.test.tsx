@@ -42,6 +42,36 @@ describe("WaveHeaderNameEditModal", () => {
     onWaveCreated: jest.fn(),
   } as React.ContextType<typeof ReactQueryWrapperContext>;
 
+  it("edits and saves inside an existing sheet without creating a second dialog", async () => {
+    const closeEditor = jest.fn();
+    const user = userEvent.setup();
+    render(
+      <AuthContext.Provider value={auth}>
+        <ReactQueryWrapperContext.Provider value={rq}>
+          <div role="dialog" aria-label="Rename wave">
+            <WaveHeaderNameEditModal
+              isOpen
+              embedded
+              wave={createMockApiWave({ id: "embedded-wave", name: "Old" })}
+              onClose={closeEditor}
+            />
+          </div>
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+    expect(screen.getAllByRole("dialog")).toHaveLength(1);
+    const input = screen.getByRole("textbox", { name: "Wave name" });
+    expect(input).not.toHaveAttribute("data-autofocus");
+    expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+    await user.clear(input);
+    await user.type(input, "New name");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(updateWaveHub).toHaveBeenCalledWith("embedded-wave", {
+      name: "New name",
+    });
+    expect(closeEditor).toHaveBeenCalledTimes(1);
+  });
+
   it("picks up a rename that landed while the dialog was closed", () => {
     const { rerender } = render(
       <AuthContext.Provider value={auth}>

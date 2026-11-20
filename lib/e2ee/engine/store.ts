@@ -10,6 +10,7 @@ import type {
   E2eeDelayedReason,
   E2eeDeviceInfo,
   E2eeEngineStatus,
+  E2eeInitialSyncStatus,
   E2eeMember,
   E2eeMessage,
   E2eeUntrustedDevice,
@@ -99,6 +100,9 @@ export function toE2eeMessage(stored: StoredMessage): E2eeMessage {
     sigOk: stored.sigOk,
     undecryptable: stored.undecryptable,
     pending: stored.pending,
+    ...(stored.poll && !stored.deleted
+      ? { poll: structuredClone(stored.poll) }
+      : {}),
     ...(stored.unsent ? { unsent: stored.unsent.reason } : {}),
   };
   if (stored.imported) {
@@ -142,6 +146,7 @@ const isCountable = (message: StoredMessage, own: string): boolean =>
 
 export class EngineStore {
   status: E2eeEngineStatus = "loading";
+  initialSyncStatus: E2eeInitialSyncStatus = "pending";
   error: string | null = null;
   /** Set while this device has moved off an earlier suite (getUpgrade). */
   upgrade: { superseded: number } | null = null;

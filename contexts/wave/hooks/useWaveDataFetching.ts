@@ -31,7 +31,10 @@ import {
 } from "./waveFeedTelemetry";
 import { useWaveLoadingState } from "./useWaveLoadingState";
 import type { WaveDataStoreUpdater, WaveMessagesUpdate } from "./types";
-import { addWaveHistoryGap, reconcileWaveSnapshot } from "../utils/wave-resume";
+import {
+  reconcileNewestPageGap,
+  reconcileWaveSnapshot,
+} from "../utils/wave-resume";
 
 const FETCH_NEWEST_LIMIT = 50;
 const MAX_FETCH_NEWEST_ITERATIONS = 20;
@@ -275,10 +278,15 @@ function useSyncExistingWaveNewestMessages({
           const historyGaps =
             oldestFetchedSerialNo > highestSerialNo &&
             result.drops.length === FETCH_NEWEST_LIMIT
-              ? addWaveHistoryGap(current.historyGaps ?? [], {
-                  newerThan: highestSerialNo,
-                  olderThan: oldestFetchedSerialNo,
-                })
+              ? reconcileNewestPageGap(
+                  wave.historyGaps,
+                  current,
+                  {
+                    newerThan: highestSerialNo,
+                    olderThan: oldestFetchedSerialNo,
+                  },
+                  result.drops
+                )
               : current.historyGaps;
           updateData({
             key: waveId,

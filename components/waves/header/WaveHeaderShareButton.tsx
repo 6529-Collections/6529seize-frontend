@@ -2,7 +2,12 @@
 
 import { CheckIcon, LinkIcon, ShareIcon } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import {
+  COMPACT_ACTION_BUTTON_SIZE_CLASS,
+  COMPACT_ACTION_ICON_CLASS,
+  COMPACT_ACTION_ICON_STROKE_WIDTH,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWaveShareCopyAction } from "@/hooks/waves/useWaveShareCopyAction";
 
@@ -30,15 +35,19 @@ export default function WaveHeaderShareButton({
     <>
       <Button
         type="button"
-        variant="tertiary"
-        size="xs"
+        variant="tertiaryStrong"
+        size={null}
         onClick={onClick}
         disabled={isSharing}
         aria-label={actionLabel}
         data-wave-link-action-mode={mode}
-        className={`!tw-border-iron-700 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`}
+        className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${COMPACT_ACTION_BUTTON_SIZE_CLASS}`}
       >
-        <Icon aria-hidden="true" className="tw-size-4 tw-shrink-0" />
+        <Icon
+          aria-hidden="true"
+          className={COMPACT_ACTION_ICON_CLASS}
+          strokeWidth={COMPACT_ACTION_ICON_STROKE_WIDTH}
+        />
         <span aria-hidden="true">{label}</span>
       </Button>
       <span role="status" className="tw-sr-only">

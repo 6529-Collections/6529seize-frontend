@@ -143,6 +143,7 @@ function SignedSealButton({
     <>
       <button
         ref={buttonRef}
+        data-wave-signed-seal
         type="button"
         aria-label={label}
         aria-haspopup="dialog"
@@ -393,6 +394,7 @@ function StaticSeal({
   return (
     <span
       ref={sealRef}
+      data-wave-signed-seal
       role="img"
       aria-label={t(locale, SEAL_LABEL_KEYS[state])}
       className="tw-inline-flex tw-flex-shrink-0 tw-text-iron-400"

@@ -184,6 +184,14 @@ function applyKeyboardLayoutVariables(
   );
 
   if (isKeyboardActive) {
+    // Reassigning this Android flag invalidates descendant styles even when
+    // native and viewport callbacks report the same visible keyboard.
+    if (
+      state.isAndroid &&
+      documentElement.dataset["nativeKeyboardVisible"] === "true"
+    ) {
+      return;
+    }
     documentElement.dataset["nativeKeyboardVisible"] = "true";
   } else {
     delete documentElement.dataset["nativeKeyboardVisible"];
@@ -357,6 +365,29 @@ function isEditableElement(element: Element | null): boolean {
   );
 }
 
+function isKeyboardTextEntryElement(element: Element | null): boolean {
+  if (!isEditableElement(element)) return false;
+  if (element instanceof HTMLInputElement) {
+    return [
+      "text",
+      "search",
+      "email",
+      "url",
+      "tel",
+      "password",
+      "number",
+    ].includes(element.type);
+  }
+  return (
+    element instanceof HTMLTextAreaElement ||
+    (element instanceof HTMLElement &&
+      (element.isContentEditable ||
+        element.matches(
+          '[contenteditable="true"], [contenteditable="plaintext-only"]'
+        )))
+  );
+}
+
 function hasEditableFocus(): boolean {
   const documentRef = globalThis.document as Document | undefined;
 
@@ -484,6 +515,16 @@ function setupBrowserKeyboardFallbackListeners(): void {
   let viewportAnimationFrame: number | null = null;
 
   const handleFocusIn = () => {
+    // iOS focus restoration to non-text controls must not cancel recovery
+    // from a missing did-hide.
+    if (
+      currentState.isIos &&
+      nativeKeyboardLifecycleActive &&
+      currentState.phase === "hiding" &&
+      !isKeyboardTextEntryElement(documentRef.activeElement)
+    ) {
+      return;
+    }
     clearHiddenFallbackTimeout();
     if (!currentState.isVisible) {
       rememberKeyboardClosedViewportHeight();

@@ -395,11 +395,38 @@ describe("turn on encrypted messages with one combined sign-in (NC8)", () => {
     await expect(run(asEngine, undefined)).resolves.toBe("fallback");
   });
 
-  it("lets enroll() resume or renew a stored device without a new grant", async () => {
-    const { asEngine } = createEngine({ needsNewDevice: false });
-    const requestGrant = jest.fn(async () => combined());
+  it("signs for posts and resumes a stored encryption device without replacing its grant", async () => {
+    const { engine, asEngine } = createEngine({ needsNewDevice: false });
+    const requestGrant = jest.fn(async () => ({ success: true as const }));
 
-    await expect(run(asEngine, requestGrant)).resolves.toBe("fallback");
-    expect(requestGrant).not.toHaveBeenCalled();
+    await expect(run(asEngine, requestGrant)).resolves.toBe("done");
+    expect(requestGrant).toHaveBeenCalledWith({ silent: true });
+    expect(engine.enrollWithLoginGrant).toHaveBeenCalledWith({
+      resumeStored: true,
+    });
+    expect(engine.enroll).not.toHaveBeenCalled();
+    expect(mockRevoke).not.toHaveBeenCalled();
+  });
+
+  it("offers separate encryption approval when the stored grant cannot resume", async () => {
+    const { engine, asEngine } = createEngine({
+      needsNewDevice: false,
+      settlesOn: "needs-enrollment",
+    });
+
+    await expect(run(asEngine, async () => ({ success: true }))).resolves.toBe(
+      "partial"
+    );
+    expect(engine.enroll).not.toHaveBeenCalled();
+    expect(mockRevoke).not.toHaveBeenCalled();
+  });
+
+  it("keeps a stored encryption device untouched when the posts signature is declined", async () => {
+    const { engine, asEngine } = createEngine({ needsNewDevice: false });
+    await expect(
+      run(asEngine, async () => ({ success: false, reason: "rejected" }))
+    ).resolves.toBe("declined");
+    expect(engine.enrollWithLoginGrant).not.toHaveBeenCalled();
+    expect(mockRevoke).not.toHaveBeenCalled();
   });
 });

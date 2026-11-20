@@ -11,8 +11,8 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 ## Location in the Site
 
 - Route: `/notifications`.
-- Reached by clicking the desktop sidebar bell, choosing `View all
-  notifications` in its preview, or using mobile/app notifications navigation.
+- Reached by clicking the desktop sidebar bell, choosing `View all notifications`
+  in its preview, or using mobile/app notifications navigation.
 - Opened directly from URL, including `/notifications?reload=true`.
 
 ## Entry Points
@@ -97,7 +97,9 @@ provides filters, grouped reactions, and richer drop interactions.
   `Loading notifications is taking longer than expected. Please try again.`
   with `Try again`.
 - Empty state: `No notifications found` with `Explore Waves` and
-  `Create a Wave`.
+  `Create a Wave`. The icon, message, and actions are centered in the available
+  feed area, with compact actions stacked on narrow screens. The description's
+  `following` link opens Waves, and `creating a Wave` opens wave creation.
 
 ## Feed Filters
 

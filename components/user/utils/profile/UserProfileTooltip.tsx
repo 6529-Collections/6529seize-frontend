@@ -1,5 +1,4 @@
-import { useRouter } from "next/navigation";
-import { useId, useMemo, useState } from "react";
+import { useId, useMemo } from "react";
 
 import { useAuth } from "@/components/auth/Auth";
 import UserFollowBtn, {
@@ -15,15 +14,9 @@ import type {
 import { CLASSIFICATIONS } from "@/entities/IProfile";
 import type { ApiIncomingIdentitySubscriptionsPage } from "@/generated/models/ApiIncomingIdentitySubscriptionsPage";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
-import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
-import { getDirectMessageAdmissionErrorMessage } from "@/helpers/waves/direct-message-admission.helpers";
-import useDeviceInfo from "@/hooks/useDeviceInfo";
-import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIdentity } from "@/hooks/useIdentity";
-import { t } from "@/i18n/messages";
+import { useProfileDirectMessage } from "@/hooks/useProfileDirectMessage";
 import type { ArtistPreviewTab } from "@/hooks/useArtistPreviewModal";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -46,9 +39,6 @@ export default function UserProfileTooltip({
   user,
   onArtistPreviewOpen,
 }: UserProfileTooltipProps) {
-  const router = useRouter();
-  const locale = useBrowserLocale();
-  const { isApp } = useDeviceInfo();
   const { profile } = useIdentity({
     handleOrWallet: user,
     initialProfile: null,
@@ -106,14 +96,14 @@ export default function UserProfileTooltip({
       ) ?? null,
     [statements]
   );
-  const [directMessageLoading, setDirectMessageLoading] = useState(false);
 
   const description =
     profile?.classification === undefined
       ? null
       : CLASSIFICATIONS[profile.classification].title;
 
-  const { connectedProfile, activeProfileProxy, setToast } = useAuth();
+  const { connectedProfile, activeProfileProxy } = useAuth();
+  const onDirectMessage = useProfileDirectMessage(profile);
   const profileHandle = profile?.handle ?? null;
   const normalizedProfileHandle = profileHandle?.toLowerCase() ?? null;
   const normalizedConnectedHandle =
@@ -126,36 +116,6 @@ export default function UserProfileTooltip({
   const tooltipInstanceId = useId();
   const badgesTooltipIdPrefix = `user-profile-tooltip-author-badges-${tooltipInstanceId.replaceAll(":", "")}`;
 
-  const handleCreateDirectMessage = async (
-    primaryWallet: string | undefined
-  ) => {
-    if (!primaryWallet) {
-      return;
-    }
-
-    setDirectMessageLoading(true);
-
-    try {
-      const wave = await createDirectMessageWave({
-        addresses: [primaryWallet],
-      });
-      navigateToDirectMessage({ waveId: wave.id, router, isApp });
-    } catch (error) {
-      console.error(error);
-      const errorMessage =
-        getDirectMessageAdmissionErrorMessage(locale, error) ??
-        getToastErrorDetails(error);
-      setToast({
-        type: "error",
-        title: "Couldn't create this direct message.",
-        description:
-          errorMessage ?? t(locale, "profilePreferences.dm.createRetry"),
-      });
-    } finally {
-      setDirectMessageLoading(false);
-    }
-  };
-
   return (
     <div className="tailwind-scope tw-min-w-[280px] tw-max-w-[320px] tw-rounded-xl tw-bg-iron-950">
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-x-3">
@@ -167,14 +127,7 @@ export default function UserProfileTooltip({
             <UserFollowBtn
               handle={profileHandle}
               size={UserFollowBtnSize.SMALL}
-              onDirectMessage={
-                connectedProfile?.handle &&
-                !activeProfileProxy &&
-                profile?.primary_wallet
-                  ? () => handleCreateDirectMessage(profile.primary_wallet)
-                  : undefined
-              }
-              directMessageLoading={directMessageLoading}
+              onDirectMessage={activeProfileProxy ? undefined : onDirectMessage}
             />
           </div>
         )}

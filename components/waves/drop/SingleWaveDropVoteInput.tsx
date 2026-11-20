@@ -1,6 +1,11 @@
 "use client";
 
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import {
+  VOTE_NUMERIC_INPUT_BASE_CLASS,
+  VOTE_NUMERIC_INPUT_CLASSES,
+  VOTE_NUMERIC_UNIT_CLASS,
+} from "@/components/voting/VoteControl.styles";
 import { ArrowDownIcon, ArrowUpIcon } from "@heroicons/react/24/outline";
 import { SingleWaveDropVoteSize } from "./SingleWaveDropVote.types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -365,23 +370,18 @@ export const SingleWaveDropVoteInput: React.FC<
 
   if (size === SingleWaveDropVoteSize.MINI) {
     return (
-      <div className="tw-flex tw-items-center">
-        <div className="tw-relative tw-h-full tw-w-full">
-          <input
-            type="text"
-            pattern={inputPattern}
-            inputMode="numeric"
-            className={`tw-h-8 tw-w-full tw-rounded-md tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-pr-12 tw-text-base tw-font-semibold tw-tabular-nums tw-placeholder-iron-500 tw-shadow-inner tw-outline-none tw-transition-all tw-duration-300 tw-ease-out ${inputShellClasses} ${inputTextClasses} ${inputCaretClasses}`}
-            value={displayValue}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-          />
-          <div
-            className={`tw-pointer-events-none tw-absolute tw-right-3 tw-top-1/2 -tw-translate-y-1/2 tw-text-[11px] tw-transition-colors ${inputLabelClasses}`}
-          >
-            {label}
-          </div>
-        </div>
+      <div className="tw-relative">
+        <input
+          type="text"
+          aria-label={t(locale, "competitions.voteValue")}
+          pattern={inputPattern}
+          inputMode="numeric"
+          className={`${VOTE_NUMERIC_INPUT_BASE_CLASS} ${VOTE_NUMERIC_INPUT_CLASSES.compact}`}
+          value={displayValue}
+          onChange={handleInputChange}
+          onKeyDown={handleKeyDown}
+        />
+        <span className={VOTE_NUMERIC_UNIT_CLASS}>{label}</span>
       </div>
     );
   }
@@ -406,6 +406,7 @@ export const SingleWaveDropVoteInput: React.FC<
         <div className="tw-relative tw-flex tw-h-full tw-min-w-0 tw-flex-1 tw-items-center">
           <input
             type="text"
+            aria-label={t(locale, "competitions.voteValue")}
             pattern={inputPattern}
             inputMode="numeric"
             className={`tw-h-full tw-w-full tw-border-0 tw-bg-transparent tw-px-3 tw-py-0 tw-pr-14 tw-text-center tw-text-base tw-font-bold tw-tabular-nums tw-placeholder-iron-500 tw-outline-none tw-transition-colors ${inputTextClasses} ${inputCaretClasses}`}

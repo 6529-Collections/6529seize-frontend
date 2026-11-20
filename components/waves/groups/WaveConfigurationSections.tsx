@@ -28,7 +28,7 @@ export default function WaveConfigurationSections({
   const showChatSection = showChatStatus || showChatSettings;
 
   return (
-    <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800 tw-pb-4">
+    <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06] tw-pb-4">
       <WavePanelSection
         title={waveRightPanelText("waves.sidebar.rightPanel.settings.access")}
       >
