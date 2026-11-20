@@ -136,7 +136,6 @@ export default function CommunityMembersGroupDetails({
     );
   }
 
-  const groupName = group.name.trim();
   const criteriaSummary = getGroupCriteriaSummary({
     group: group.group,
     locale,
@@ -150,20 +149,12 @@ export default function CommunityMembersGroupDetails({
 
   return (
     <section
-      aria-labelledby="selected-group-name"
+      aria-label={t(locale, "network.groupInspection.selectedGroup")}
       className={INSPECTION_SURFACE_CLASSES}
     >
       <div className="tw-flex tw-items-start tw-justify-between tw-gap-3">
         <div className="tw-min-w-0 tw-flex-1">
-          <p className="tw-mb-1 tw-mt-0 tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-400">
-            {t(locale, "network.groupInspection.selectedGroup")}
-          </p>
-          <h2
-            id="selected-group-name"
-            className="tw-m-0 tw-break-words !tw-text-base !tw-font-semibold !tw-leading-5 !tw-text-iron-100 sm:!tw-text-lg sm:!tw-leading-6"
-          >
-            {groupName}
-          </h2>
+          <GroupCardConfigs group={group} quiet />
         </div>
         {closeButton}
       </div>
@@ -215,9 +206,6 @@ export default function CommunityMembersGroupDetails({
           />
         </div>
       ) : null}
-      <div className="tw-mt-5 tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/5 tw-pt-4">
-        <GroupCardConfigs group={group} quiet />
-      </div>
     </section>
   );
 }
