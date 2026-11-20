@@ -129,7 +129,7 @@ export function SidebarWaveNavigationControls({
                     aria-label={t(locale, COLLECTION_LABELS[tab])}
                     aria-pressed={navigation.collection === tab}
                     onClick={() => navigation.setCollection(tab)}
-                    className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${getConnectedTabButtonClasses(
+                    className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${tab !== "pinned" || navigation.collection === tab ? "!tw-font-medium" : ""} ${getConnectedTabButtonClasses(
                       {
                         isActive: navigation.collection === tab,
                         fill: true,

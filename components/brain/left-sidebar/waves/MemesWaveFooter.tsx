@@ -288,7 +288,7 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
 
                     <div className="tw-flex tw-items-center tw-gap-1.5">
                       <MemesWaveZapIcon className="tw-size-3.5 tw-flex-shrink-0 tw-fill-none tw-text-primary-400" />
-                      <span className="tw-truncate tw-text-xs tw-font-semibold tw-tracking-tight tw-text-iron-100">
+                      <span className="tw-truncate tw-text-xs tw-font-medium tw-tracking-tight tw-text-iron-100">
                         {buttonValue}
                       </span>
                     </div>
@@ -296,7 +296,7 @@ export const MemesWaveFooterView: React.FC<MemesWaveFooterViewProps> = ({
 
                   {isReady && (
                     <div className="tw-flex tw-flex-shrink-0 tw-flex-col tw-items-end tw-gap-0.5 tw-text-right">
-                      <span className="tw-text-xs tw-font-medium tw-text-primary-300">
+                      <span className="tw-text-xs tw-font-normal tw-text-primary-300">
                         {leftThisRoundText}
                       </span>
                       <span className="tw-text-xs tw-font-normal tw-text-iron-500">

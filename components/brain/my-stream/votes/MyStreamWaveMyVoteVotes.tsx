@@ -25,31 +25,34 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
         {t(locale, "waves.myVotes.total")}
       </span>
       <span
+        data-wave-typography="preserve"
         className={`tw-font-semibold tw-tabular-nums tw-tracking-identity ${voteClass}`}
       >
         {formatInteger(locale, drop.rating)}
       </span>
 
-      <DropVoteProgressing
-        current={drop.rating}
-        projected={
-          hasWinningThreshold ? drop.realtime_rating : drop.rating_prediction
-        }
-        projectedLabel={formatInteger(
-          locale,
-          hasWinningThreshold ? drop.realtime_rating : drop.rating_prediction
-        )}
-        tooltipLabel={
-          hasWinningThreshold
-            ? t(locale, "waves.myVotes.votesGivenNow")
-            : t(locale, "waves.myVotes.projectedAtDecision")
-        }
-        subtle={true}
-        visualVariant="memes"
-        numberFont="sans"
-        numberSize="sm"
-        numberWeight="semibold"
-      />
+      <div data-wave-typography="preserve" className="tw-font-semibold">
+        <DropVoteProgressing
+          current={drop.rating}
+          projected={
+            hasWinningThreshold ? drop.realtime_rating : drop.rating_prediction
+          }
+          projectedLabel={formatInteger(
+            locale,
+            hasWinningThreshold ? drop.realtime_rating : drop.rating_prediction
+          )}
+          tooltipLabel={
+            hasWinningThreshold
+              ? t(locale, "waves.myVotes.votesGivenNow")
+              : t(locale, "waves.myVotes.projectedAtDecision")
+          }
+          subtle={true}
+          visualVariant="memes"
+          numberFont="sans"
+          numberSize="sm"
+          numberWeight="semibold"
+        />
+      </div>
     </div>
   );
 };

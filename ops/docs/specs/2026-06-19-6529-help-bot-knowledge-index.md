@@ -1098,14 +1098,22 @@ on desktop. Compact decision submission cards that offer replies keep
 `Explain vote` on the left and the small `Vote` action on the right of one footer
 row, with the reply above it.
 The record covers positive green/negative red/zero neutral styling and keyboard
-focus on the slider handle. In the iPhone app, single-submission and leaderboard
-voting share the same sheet, including in landscape. Voting sheets and compact artist,
+focus on the slider handle. On compact screens, single-submission and leaderboard
+voting open as a bottom sheet. In the iPhone app the sheet follows the keyboard,
+including in compact landscape. Voting sheets and compact artist,
 participant, and My submissions galleries track the keyboard while keeping the
 wave behind them steady; optional replies use the same motion curve. Decision remaining,
 spent, and available credits retain their own meaning. The record keeps
 decision-card Slider defaults, other mini-card Numeric defaults without a reply,
 generated placeholder versus prefill behavior, and each flow's existing close
 timing distinct; My Votes retains its separate compact row controls.
+Numeric fields share the app font, neutral styling and visible keyboard focus
+across full and compact panels. Full-size and compact submission-card numeric
+controls in waves and decisions share the bordered field and step buttons.
+Percentage shortcuts appear in full panels.
+Shortcuts use the allowed vote on the drop or entry. The record covers one-step
+keyboard, pointer and touch activation, cancellation of a held press, and draft
+changes without submission. Mini controls keep their smaller field and arrows without percentage shortcuts.
 
 The subscriptions record distinguishes pending and failed reads from successfully
 loaded zero balances and empty lists. Failed balance, settings, airdrop-address

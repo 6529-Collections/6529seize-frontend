@@ -159,7 +159,7 @@ function WaveConfigurationCurationsAuthorizedContent({
     );
   } else if (curations.length === 0) {
     content = (
-      <p className="tw-mb-0 tw-px-2 tw-py-1.5 tw-text-sm tw-font-light tw-italic tw-text-iron-500">
+      <p className="tw-mb-0 tw-px-2 tw-py-1.5 tw-text-sm tw-font-normal tw-italic tw-text-iron-500">
         {waveRightPanelText(
           "waves.sidebar.rightPanel.configuration.curations.empty"
         )}

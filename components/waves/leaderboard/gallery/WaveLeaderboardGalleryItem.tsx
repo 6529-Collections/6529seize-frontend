@@ -374,7 +374,10 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                     showTooltip={!opensWholeCard}
                   />
                   {drop.is_additional_action_promised === true && (
-                    <AdditionalActionPromiseBadge focusable={!opensWholeCard} />
+                    <AdditionalActionPromiseBadge
+                      focusable={!opensWholeCard}
+                      className="!tw-font-medium"
+                    />
                   )}
                 </div>
                 <div className="tw-flex-shrink-0">
@@ -385,13 +388,16 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                 </div>
               </div>
               {(Boolean(drop.title) || opensWholeCard) && (
-                <h3 className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-mt-2 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-sm tw-font-bold tw-leading-tight tw-text-iron-200">
+                <h3
+                  data-wave-typography="preserve"
+                  className="tw-[overflow-wrap:anywhere] tw-mb-0 tw-mt-2 tw-min-w-0 tw-whitespace-normal tw-break-words tw-text-sm tw-font-semibold tw-leading-tight tw-text-iron-200"
+                >
                   {opensWholeCard ? title : drop.title}
                 </h3>
               )}
               {(drop.author.is_anonymous === true ||
                 (Boolean(drop.author.handle) && opensWholeCard)) && (
-                <span className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400">
+                <span className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-font-medium tw-text-iron-400">
                   {drop.author.is_anonymous
                     ? t(locale, "competitions.anonymousAuthor")
                     : drop.author.handle}
@@ -409,7 +415,7 @@ export const WaveLeaderboardGalleryItem = memo<WaveLeaderboardGalleryItemProps>(
                         "waves.leaderboard.grid.authorProfile",
                         { author: drop.author.handle }
                       )}
-                      className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
+                      className="tw-mt-1 tw-block tw-max-w-full tw-truncate tw-text-xs tw-font-medium tw-text-iron-400 tw-no-underline tw-transition-colors tw-duration-150 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-iron-300 desktop-hover:hover:tw-underline"
                     >
                       {drop.author.handle}
                     </Link>

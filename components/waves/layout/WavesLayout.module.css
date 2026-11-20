@@ -26,7 +26,11 @@
   @apply tw-font-medium !important;
 }
 
-.waveView :global(.tw-tabular-nums) {
+.waveView
+  :global(.tw-tabular-nums):not(
+    :global([data-wave-typography="preserve"]),
+    :global([data-wave-typography="preserve"] *)
+  ) {
   @apply tw-normal-nums;
 }
 

@@ -18,11 +18,10 @@ distribution with signed positive and negative highlights.
   - focused drop overlay via `?drop={dropId}`
 - Both default and memes single-drop panels reuse the same summary strip.
 - Container variants:
-  - A centered dialog in default panels and larger memes panels.
-  - A mobile sheet in small memes panels and compact native iPhone layouts,
-    including compact landscape layouts. Wider iPhone layouts use the centered
-    dialog. The chosen surface stays mounted until voting closes, so resizing
-    does not discard the draft.
+  - A bottom sheet on compact screens in the browser and app, including
+    compact landscape layouts.
+  - A centered dialog in wider layouts. The chosen surface stays mounted until
+    voting closes, so resizing does not discard the draft.
 
 ## Entry Points
 
@@ -92,11 +91,9 @@ ranking, and voting rules retain their usual meaning.
 - `Your votes` appears only when voting ended or the drop is a winner, and only
   when the viewer vote is non-zero.
 - Negative `Your votes` values display with a leading `-`.
-- Default single-drop panels use a centered modal overlay, except in compact
-  iPhone app layouts, where they use the same keyboard-aware voting sheet as
-  leaderboard cards, including in landscape.
-- Memes single-drop panels use bottom sheet on small screens and centered modal
-  on larger screens.
+- Default and Memes single-drop panels use the same bottom sheet as
+  leaderboard cards on compact screens. In the iPhone app it follows the
+  keyboard, including in compact landscape layouts.
 - Voting forms share the same header, reply control, and signed-amount action.
   The action fills the dialog or sheet's available width, including on desktop,
   and uses green for a positive amount, red for a negative amount, and a neutral
