@@ -216,7 +216,11 @@ it.each([SingleWaveDropVoteSize.NORMAL, SingleWaveDropVoteSize.MINI])(
     expect(input).toHaveAttribute("max", "1500");
     expect(screen.getByRole("button", { name: "Increase vote" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Decrease vote" })).toBeEnabled();
-    expect(screen.getAllByRole("button", { name: /%$/ })).toHaveLength(4);
+    expect(screen.queryAllByRole("button", { name: /%$/ })).toHaveLength(
+      size === SingleWaveDropVoteSize.MINI ? 0 : 4
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Increase vote" }));
+    expect(input).toHaveValue(1);
 
     fireEvent.change(input, { target: { value: "1501" } });
     expect(screen.getByRole("button", { name: voteButtonName })).toBeDisabled();
@@ -227,27 +231,24 @@ it.each([SingleWaveDropVoteSize.NORMAL, SingleWaveDropVoteSize.MINI])(
     expect(setCompetitionVote).not.toHaveBeenCalled();
   }
 );
-it.each([SingleWaveDropVoteSize.NORMAL, SingleWaveDropVoteSize.MINI])(
-  "adjusts the %s Decision draft against the entry limits without submitting",
-  async (size) => {
-    jest.mocked(fetchCompetitionCredits).mockResolvedValue({
-      ...initialBudget,
-      remaining: 53,
-      min_vote: -75,
-      max_vote: 125,
-    });
-    mount("numeric", drop, undefined, size);
-    const input = await screen.findByRole("spinbutton", { name: "Your vote" });
-    fireEvent.click(screen.getByRole("button", { name: "+50%" }));
-    expect(input).toHaveValue(63);
-    fireEvent.click(screen.getByRole("button", { name: "Increase vote" }));
-    expect(input).toHaveValue(64);
-    fireEvent.click(screen.getByRole("button", { name: "-100%" }));
-    fireEvent.click(screen.getByRole("button", { name: "Decrease vote" }));
-    expect(input).toHaveValue(-75);
-    expect(setCompetitionVote).not.toHaveBeenCalled();
-  }
-);
+it("adjusts the full Decision draft against the entry limits without submitting", async () => {
+  jest.mocked(fetchCompetitionCredits).mockResolvedValue({
+    ...initialBudget,
+    remaining: 53,
+    min_vote: -75,
+    max_vote: 125,
+  });
+  mount();
+  const input = await screen.findByRole("spinbutton", { name: "Your vote" });
+  fireEvent.click(screen.getByRole("button", { name: "+50%" }));
+  expect(input).toHaveValue(63);
+  fireEvent.click(screen.getByRole("button", { name: "Increase vote" }));
+  expect(input).toHaveValue(64);
+  fireEvent.click(screen.getByRole("button", { name: "-100%" }));
+  fireEvent.click(screen.getByRole("button", { name: "Decrease vote" }));
+  expect(input).toHaveValue(-75);
+  expect(setCompetitionVote).not.toHaveBeenCalled();
+});
 it("omits negative shortcuts in Decisions that disallow negative votes", async () => {
   jest.mocked(fetchCompetitionCredits).mockResolvedValue({
     ...initialBudget,

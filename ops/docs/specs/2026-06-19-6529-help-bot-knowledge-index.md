@@ -1108,11 +1108,11 @@ generated placeholder versus prefill behavior, and each flow's existing close
 timing distinct; My Votes retains its separate compact row controls.
 Numeric fields share the app font, neutral styling and visible keyboard focus
 across full and compact panels. Full-size and compact submission-card numeric
-controls in waves and decisions use the same bordered field, step buttons and
-percentage shortcuts.
+controls in waves and decisions share the bordered field and step buttons.
+Percentage shortcuts appear in full panels.
 Shortcuts use the allowed vote on the drop or entry. The record covers one-step
 keyboard, pointer and touch activation, cancellation of a held press, and draft
-changes without submission. Mini controls keep their smaller field and the same arrows and shortcuts.
+changes without submission. Mini controls keep their smaller field and arrows without percentage shortcuts.
 
 The subscriptions record distinguishes pending and failed reads from successfully
 loaded zero balances and empty lists. Failed balance, settings, airdrop-address

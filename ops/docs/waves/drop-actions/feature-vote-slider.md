@@ -66,10 +66,11 @@ current voting budget; other drops use their own allowed range.
   values are easier to reach.
 - Keyboard focus highlights the slider handle. Clicking or dragging does not
   draw a focus box around the whole slider area.
-- Full-size and compact submission-card numeric controls offer `-100%`, `-50%`, `+50%`, and `+100%`.
+- Full-size numeric controls offer `-100%`, `-50%`, `+50%`, and `+100%`.
   The shortcuts use the allowed vote on this drop or decision entry. For
   example, `+50%` fills in 40 if the maximum is 80. Negative shortcuts are
-  omitted when negative votes are not allowed.
+  omitted when negative votes are not allowed. Compact submission cards keep
+  the arrows without the percentage row.
 - Holding an up/down step button accelerates step size:
   `1`, then `10`, then `100`, then `1000`.
 - Use `Enter` or `Space` on a focused step button to change the amount once.

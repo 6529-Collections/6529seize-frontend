@@ -8,7 +8,7 @@ export const VOTE_NUMERIC_UNIT_CLASS =
 
 export const VOTE_INPUT_AREA_CLASSES = {
   default: "tw-min-h-20",
-  compact: "tw-min-h-20",
+  compact: "tw-min-h-14",
 } as const;
 
 export const VOTE_NUMERIC_INPUT_CLASSES = {
