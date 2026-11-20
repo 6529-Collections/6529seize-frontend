@@ -361,7 +361,7 @@ export function CompetitionVoteForm({
               aria-describedby={[rangeDescriptionId, errorDescriptionId]
                 .filter(Boolean)
                 .join(" ")}
-              className="tw-h-11 tw-w-[12ch] tw-min-w-[10ch] tw-max-w-[12ch] tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-outline-none [appearance:textfield] focus:tw-ring-0 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-min-w-0 @[46rem]/my-vote:tw-text-sm [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
+              className="tw-h-11 tw-w-[12ch] tw-min-w-[10ch] tw-max-w-[12ch] tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold !tw-tabular-nums tw-text-iron-50 tw-outline-none [appearance:textfield] focus:tw-ring-0 @[46rem]/my-vote:tw-h-9 @[46rem]/my-vote:tw-min-w-0 @[46rem]/my-vote:tw-text-sm [&::-webkit-inner-spin-button]:tw-appearance-none [&::-webkit-outer-spin-button]:tw-appearance-none"
             />
             <span className="tw-ml-auto tw-mr-2 tw-flex-shrink-0 tw-whitespace-nowrap tw-py-1 tw-text-xs tw-leading-4 tw-text-iron-400">
               {creditLabel}
@@ -396,7 +396,7 @@ export function CompetitionVoteForm({
               <Button
                 variant="tertiary"
                 size="sm"
-                className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 tw-self-center after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[24rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-my-0"
+                className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 tw-self-center !tw-font-medium after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[24rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-my-0"
                 aria-label={t(locale, "waves.voteRationale.explainAriaLabel")}
                 data-tooltip-id={explainTooltipId}
                 data-tooltip-content={t(

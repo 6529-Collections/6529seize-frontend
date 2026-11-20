@@ -52,11 +52,11 @@ export default function CompetitionVotes({
   };
   return (
     <div
-      className="tw-space-y-4 [&_[role=status]_p]:tw-italic"
+      className="tw-space-y-4 [&_.tw-tabular-nums]:!tw-tabular-nums [&_[role=status]_p]:tw-italic"
       key={competition.id}
     >
       <div
-        className={`tw-bg-iron-950 tw-py-1.5 [&_[role=tablist]]:tw-flex-wrap [&_[role=tablist]]:tw-gap-y-2.5 ${embedded ? "-tw-mx-4 tw-px-4" : ""}`}
+        className={`tw-bg-iron-950 tw-py-1.5 [&_[role=tab][aria-selected=true]]:!tw-font-medium [&_[role=tablist]]:tw-flex-wrap [&_[role=tablist]]:tw-gap-y-2.5 ${embedded ? "-tw-mx-4 tw-px-4" : ""}`}
       >
         <TabToggleWithOverflow
           transition

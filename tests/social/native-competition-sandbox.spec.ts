@@ -4308,6 +4308,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           name: "All votes",
           exact: true,
         });
+        await expect(selectedTab).toHaveCSS("font-weight", "500");
         await expect(selectedTab).toHaveCSS("height", "32px");
         await expect(selectedTab).toHaveCSS("border-radius", "9999px");
         await expect(selectedTab).toHaveCSS("border-bottom-width", "0px");
@@ -4360,6 +4361,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(voters.getByText("-1,000", { exact: true })).toBeVisible();
       const totals = voters.getByText("123,456,789", { exact: true });
       await expect(totals).toBeInViewport();
+      await expect(totals).toHaveCSS("font-weight", "600");
+      await expect(totals).toHaveCSS("font-variant-numeric", "tabular-nums");
+      await expect(voters.getByText("+123,456,789", { exact: true })).toHaveCSS(
+        "font-variant-numeric",
+        "tabular-nums"
+      );
+      await expect(voters.getByText("-1,000", { exact: true })).toHaveCSS(
+        "font-variant-numeric",
+        "tabular-nums"
+      );
       const totalBox = await voters
         .getByText("1,000", { exact: true })
         .boundingBox();
@@ -4437,6 +4448,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         pendingActivityHeight
       );
       await expect(activity.getByRole("status")).toHaveCount(0);
+      await expect(
+        page.getByRole("tab", { name: "Activity", exact: true })
+      ).toHaveCSS("font-weight", "500");
+      const activityAmount = activity.getByText("1,234,567 TDH", {
+        exact: true,
+      });
+      await expect(activityAmount).toHaveCSS("font-weight", "600");
+      await expect(activityAmount).toHaveCSS(
+        "font-variant-numeric",
+        "tabular-nums"
+      );
+      for (const timestamp of await activity
+        .locator("span.tw-font-medium.tw-tabular-nums")
+        .all()) {
+        await expect(timestamp).toHaveCSS("font-weight", "400");
+      }
       await expect(creator).toBeVisible();
       await expect(
         activity.getByText("System Adjustment", { exact: true })
@@ -4643,6 +4670,19 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       });
       const row = panel.getByRole("article").first();
       await expect(row).toBeVisible();
+      await expect(
+        page.getByRole("tab", { name: "My Votes", exact: true })
+      ).toHaveCSS("font-weight", "500");
+      await expect(row.getByRole("spinbutton")).toHaveCSS(
+        "font-variant-numeric",
+        "tabular-nums"
+      );
+      for (const total of await row
+        .locator("span.tw-font-semibold.tw-tabular-nums")
+        .all()) {
+        await expect(total).toHaveCSS("font-weight", "600");
+        await expect(total).toHaveCSS("font-variant-numeric", "tabular-nums");
+      }
       const wavePane = page
         .getByRole("main")
         .locator("#my-stream-wave-tabpanel-my_votes");
@@ -4706,6 +4746,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(selectAll).toBeVisible();
+      await expect(selectAll.locator("span")).toHaveCSS("font-weight", "500");
       await expect(resetVotes).toHaveCount(0);
       await page.mouse.move(0, 0);
       // My Votes keeps the bordered secondary surface; Create is now a ghost action.
@@ -4743,7 +4784,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         for (const [property, value] of Object.entries(selectionStyle)) {
           await expect(
             panel.getByRole("button", { name, exact: true }).locator("span")
-          ).toHaveCSS(property, value);
+          ).toHaveCSS(
+            property,
+            property === "font-weight" && name === "Reset 1 vote"
+              ? "600"
+              : value
+          );
         }
         await expect(action).toHaveCSS(
           "height",

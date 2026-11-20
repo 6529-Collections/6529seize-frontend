@@ -179,10 +179,12 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                 <button
                   type="button"
                   onClick={onToggleSelectAll}
-                  className={buttonClassName}
+                  className={`${buttonClassName} !tw-font-medium`}
                   disabled={isResetting}
                 >
-                  <span className={COMPACT_ACTION_CONTENT_CLASS}>
+                  <span
+                    className={`${COMPACT_ACTION_CONTENT_CLASS} !tw-font-medium`}
+                  >
                     {t(
                       locale,
                       allItemsSelected
@@ -200,14 +202,16 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                       disabled={isResetting}
                       aria-label={resetButtonAriaLabel}
                     >
-                      <span className={COMPACT_ACTION_CONTENT_CLASS}>
+                      <span
+                        className={`${COMPACT_ACTION_CONTENT_CLASS} !tw-tabular-nums`}
+                      >
                         {isResetting
                           ? t(locale, "waves.myVotes.resetting")
                           : resetButtonLabel}
                       </span>
                     </button>
                     {selectedCount > 0 && (
-                      <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
+                      <output className="tw-whitespace-nowrap tw-text-sm !tw-tabular-nums tw-leading-5 tw-text-iron-400">
                         {selectedLabel}
                       </output>
                     )}
@@ -219,7 +223,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
           {typeof availableVotes === "number" && (
             <p className="tw-m-0 tw-whitespace-nowrap tw-text-left tw-text-xs tw-leading-5 tw-text-iron-500">
               {t(locale, "waves.myVotes.availableInWave")}{" "}
-              <span className="tw-font-semibold tw-tabular-nums tw-text-iron-200">
+              <span className="tw-font-semibold !tw-tabular-nums tw-text-iron-200">
                 {formatInteger(locale, availableVotes)}
               </span>
             </p>
