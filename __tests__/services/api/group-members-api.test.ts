@@ -46,7 +46,7 @@ describe("group members API", () => {
   it("posts draft criteria to the read-only preview endpoint", async () => {
     const group = getOnlyMeGroupDescription("0xcreator");
     await fetchGroupMembersPage({
-      target: { kind: "draft", group, name: "Draft", summary: "1 rule" },
+      target: { kind: "draft", group, summary: "1 rule" },
       params: { page: 1, pageSize: 20, param: "alice" },
     });
 

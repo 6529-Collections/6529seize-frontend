@@ -33,7 +33,6 @@ type GroupAssignmentPanelProps = GroupInlinePanelOptions & {
   readonly presentation?: "default" | "quiet" | "embedded";
   readonly startMode?: GroupAssignmentPanelStartMode;
   readonly showChooseGroup?: boolean;
-  readonly membersDialogTitle?: string;
   readonly showPrivacyControl?: boolean;
   readonly isWaveAccessEditor?: boolean;
   readonly mobileCriteriaNavigation?: boolean;
@@ -487,7 +486,6 @@ function SharedGroupAssignmentPanel({
 }
 
 export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
-  const locale = useBrowserLocale();
   const {
     defaultMembersPreviewTarget,
     disabled = false,
@@ -518,9 +516,6 @@ export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
       ? {
           kind: "draft",
           group: displayedBuilder.draft.group,
-          name:
-            props.suggestedName.trim() ||
-            t(locale, "waves.create.groups.defaultGroupName"),
           summary: draftSummary,
         }
       : null;
@@ -539,7 +534,6 @@ export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
         key={previewTarget.kind}
         target={previewTarget}
         roleLabel={membersRoleLabel}
-        title={props.membersDialogTitle}
         onClose={() => setPreviewTarget(null)}
       />
     ) : null;

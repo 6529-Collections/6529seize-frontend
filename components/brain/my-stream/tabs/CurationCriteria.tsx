@@ -43,7 +43,6 @@ export function useCurationCriteriaPreview(
     return {
       kind: "draft",
       group: draft.group,
-      name: t(locale, "profileCuration.editor.curators"),
       summary:
         getInlineGroupDraftSummary({
           draft,
@@ -122,7 +121,6 @@ export function CurationCriteriaSummary({
         <GroupMembersPreviewDialog
           target={previewTarget}
           roleLabel={curators}
-          title={curators}
           onClose={() => setPreviewTarget(null)}
         />
       )}
@@ -234,7 +232,6 @@ export function CurationCriteriaEditor({
           selectedGroupExcludedWallets={criteria?.excludedWallets}
           defaultMembersPreviewTarget={target ?? undefined}
           membersRoleLabel={curators}
-          membersDialogTitle={curators}
           defaultIncludedIdentity={defaultIdentity}
           initialDraft={initialDraft}
           startMode="criteria"
