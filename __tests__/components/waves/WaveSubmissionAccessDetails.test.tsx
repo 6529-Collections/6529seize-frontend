@@ -262,6 +262,11 @@ describe("WaveSubmissionAccessDetails", () => {
     expect(screen.getByText("TDH at least 1")).toBeVisible();
     expect(container.innerHTML).not.toContain("Public Club");
     expect(
+      jest
+        .mocked(useQuery)
+        .mock.calls.filter(([{ queryKey }]) => queryKey[0] === QueryKey.GROUP)
+    ).toHaveLength(1);
+    expect(
       screen.getByText("Submissions require a wallet signature.")
     ).toBeVisible();
   });
@@ -443,6 +448,24 @@ describe("WaveSubmissionAccessDetails", () => {
     expect(
       screen.queryByText("Public", { exact: true })
     ).not.toBeInTheDocument();
+  });
+
+  it("uses the current group visibility when legacy wave access is stale", () => {
+    (useQuery as jest.Mock).mockReturnValue({
+      data: { name: "Legacy Club", visible: true, is_private: true },
+    });
+    render(
+      <WaveSubmissionAccessDetails
+        wave={makeWave({ id: "legacy-group", is_hidden: false })}
+      />
+    );
+    expect(screen.getByText("Private group")).toBeVisible();
+    expect(screen.getAllByRole("link")).toHaveLength(1);
+    expect(useQuery).not.toHaveBeenCalledWith(
+      expect.objectContaining({
+        queryKey: expect.arrayContaining([QueryKey.COMMUNITY_MEMBERS_TOP]),
+      })
+    );
   });
 
   it("does not imply that public group access overrides submission rules", () => {

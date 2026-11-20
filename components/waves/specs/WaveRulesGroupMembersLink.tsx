@@ -9,21 +9,46 @@ import { getGroupCriteriaSummary } from "@/helpers/groups/group-criteria-summary
 import { formatGroupMembersCount } from "@/helpers/groups/group-members-count";
 import { commonApiFetch } from "@/services/api/common-api";
 import { fetchSavedGroupMembersPage } from "@/services/api/group-members-api";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import Link from "next/link";
 import { useContext, useId } from "react";
 import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInformationPanelContext";
 
-export default function WaveRulesGroupMembersLink({
-  groupId,
-  groupName,
-  href,
-  linkLabel,
-}: {
+interface WaveGroupMembersLinkProps {
   readonly groupId: string;
   readonly groupName?: string | undefined;
   readonly href: string;
   readonly linkLabel?: string | undefined;
+}
+
+export default function WaveRulesGroupMembersLink(
+  props: WaveGroupMembersLinkProps & { readonly groupName: string }
+) {
+  const { groupId } = props;
+  const groupDetails = useQuery<ApiGroupFull>({
+    queryKey: [QueryKey.GROUP, groupId],
+    queryFn: ({ signal }) =>
+      commonApiFetch<ApiGroupFull>({
+        endpoint: `groups/${encodeURIComponent(groupId)}`,
+        signal,
+      }),
+    enabled: groupId.length > 0,
+    staleTime: 60_000,
+  });
+  return <WaveGroupMembersSummaryLink {...props} groupDetails={groupDetails} />;
+}
+
+export function WaveGroupMembersSummaryLink({
+  groupId,
+  groupName,
+  href,
+  linkLabel,
+  groupDetails,
+}: WaveGroupMembersLinkProps & {
+  readonly groupDetails: Pick<
+    UseQueryResult<ApiGroupFull>,
+    "data" | "isError" | "isLoading"
+  >;
 }) {
   const locale = useBrowserLocale();
   const criteriaId = useId();
@@ -51,16 +76,7 @@ export default function WaveRulesGroupMembersLink({
     data: group,
     isError: isGroupError,
     isLoading: isGroupLoading,
-  } = useQuery<ApiGroupFull>({
-    queryKey: [QueryKey.GROUP, groupId],
-    queryFn: async ({ signal }) =>
-      await commonApiFetch<ApiGroupFull>({
-        endpoint: `groups/${encodeURIComponent(groupId)}`,
-        signal,
-      }),
-    enabled: groupId.length > 0,
-    staleTime: 60_000,
-  });
+  } = groupDetails;
   const identityLabels = useGroupCriteriaIdentityLabels(group?.group);
 
   let countLabel = t(locale, "waves.create.groups.members.countLoading");

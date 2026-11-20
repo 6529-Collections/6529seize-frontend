@@ -19,11 +19,11 @@ import {
 import { commonApiFetch } from "@/services/api/common-api";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import WaveRulesGroupMembersLink from "./specs/WaveRulesGroupMembersLink";
+import { WaveGroupMembersSummaryLink } from "./specs/WaveRulesGroupMembersLink";
 
 type SubmissionGroup = Pick<ApiGroup, "id" | "is_hidden" | "is_direct_message">;
 
-/** Present one submission audience while preserving private group metadata. */
+/** Show the access summary for a public submission group. */
 function SubmissionScope({
   group,
   signatureRequired,
@@ -34,17 +34,43 @@ function SubmissionScope({
   readonly isClosed: boolean;
 }) {
   const locale = useBrowserLocale();
-  const groupId = group?.id?.trim();
+  const groupId = group?.id?.trim() ?? "";
+  // Legacy waves already mark groups that should be kept private.
+  const isHidden = group?.is_hidden || group?.is_direct_message;
+  const fetchGroupDetails = groupId.length > 0 && !isHidden;
+  const groupDetails = useQuery<ApiGroupFull>({
+    queryKey: [QueryKey.GROUP, groupId],
+    queryFn: ({ signal }) =>
+      commonApiFetch<ApiGroupFull>({
+        endpoint: `groups/${encodeURIComponent(groupId)}`,
+        signal,
+      }),
+    enabled: fetchGroupDetails,
+    retry: false,
+    staleTime: 60_000,
+  });
+  if (fetchGroupDetails && groupDetails.isPending) {
+    return <p className="tw-m-0">{t(locale, "waves.access.loading")}</p>;
+  }
+
+  const details = groupDetails.data;
+  const canShowSummary =
+    fetchGroupDetails &&
+    !groupDetails.isError &&
+    details?.visible === true &&
+    details.is_private === false &&
+    !details.is_direct_message;
   let scopeValue: ReactNode = t(locale, "waves.access.publicGroup");
-  if (group?.is_hidden || group?.is_direct_message) {
-    scopeValue = t(locale, "waves.chatSettings.access.privateGroup");
-  } else if (groupId) {
+  if (canShowSummary) {
     scopeValue = (
-      <WaveRulesGroupMembersLink
+      <WaveGroupMembersSummaryLink
         groupId={groupId}
         href={`/network?page=1&group=${encodeURIComponent(groupId)}`}
+        groupDetails={groupDetails}
       />
     );
+  } else if (isHidden || fetchGroupDetails) {
+    scopeValue = t(locale, "waves.chatSettings.access.privateGroup");
   } else if (group) {
     scopeValue = t(locale, "waves.chatSettings.access.unavailableGroup");
   }
@@ -87,38 +113,14 @@ function CompetitionSubmissionScope({
   const locale = useBrowserLocale();
   const competitionQuery = useCompetitionDetail({ waveId, competitionId });
   const competition = competitionQuery.data;
-  const groupId = competition?.participation.group_id ?? null;
-  const groupQuery = useQuery<ApiGroupFull>({
-    queryKey: [QueryKey.GROUP, groupId],
-    queryFn: ({ signal }) =>
-      commonApiFetch<ApiGroupFull>({
-        endpoint: `groups/${encodeURIComponent(groupId ?? "")}`,
-        signal,
-      }),
-    enabled: groupId !== null,
-    retry: false,
-    staleTime: 60_000,
-  });
   if (competitionQuery.isPending)
     return <p className="tw-m-0">{t(locale, "waves.access.loading")}</p>;
   if (competitionQuery.isError || !competition)
     return <p className="tw-m-0">{t(locale, "waves.access.unavailable")}</p>;
-  if (groupId !== null && groupQuery.isPending)
-    return <p className="tw-m-0">{t(locale, "waves.access.loading")}</p>;
-  const group: SubmissionGroup | null =
-    groupId === null
-      ? null
-      : {
-          id: groupId,
-          is_hidden:
-            groupQuery.isError ||
-            groupQuery.data?.visible !== true ||
-            groupQuery.data.is_private !== false,
-          is_direct_message: groupQuery.data?.is_direct_message ?? false,
-        };
+  const groupId = competition.participation.group_id ?? null;
   return (
     <SubmissionScope
-      group={group}
+      group={groupId === null ? null : { id: groupId, is_hidden: false }}
       signatureRequired={competition.participation.signature_required}
       isClosed={isClosed}
     />
