@@ -127,8 +127,7 @@ field retains the existing generated reply.
   zero.
 - Numeric typed and stepped values outside decisions are clamped to the drop's
   bounds. Decision votes must stay within the displayed current credit limits.
-- Mini numeric mode has text input only (no `%` quick buttons, no `+`/`-`
-  step buttons).
+- Mini numeric mode includes up/down step buttons without percentage shortcuts.
 - Long-press stepping repeats every `100ms` while pressed.
 - Outside decisions, vote actions can be hidden for: not logged in, no profile
   handle, proxy, ineligible drop/group, winner drops, voting not started, and
