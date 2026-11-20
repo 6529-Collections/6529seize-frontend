@@ -215,9 +215,36 @@ export const createInlineGroupBuilderStateFromSavedGroup = ({
   readonly group: ApiGroupFull;
   readonly includedWallets: readonly string[];
   readonly excludedWallets: readonly string[];
-}): CreateWaveInlineGroupBuilderState => {
-  const normalizedIncludedWallets = dedupeInlineWallets(includedWallets);
-  const normalizedExcludedWallets = dedupeInlineWallets(excludedWallets);
+}): CreateWaveInlineGroupBuilderState =>
+  createInlineGroupBuilderStateFromDraft({
+    name: group.name,
+    is_private: group.is_private,
+    group: {
+      tdh: { ...group.group.tdh },
+      rep: { ...group.group.rep },
+      cic: { ...group.group.cic },
+      level: { ...group.group.level },
+      owns_nfts: group.group.owns_nfts.map((ownership) => ({
+        ...ownership,
+        tokens: [...ownership.tokens],
+      })),
+      identity_addresses: [...includedWallets],
+      excluded_identity_addresses: [...excludedWallets],
+      is_beneficiary_of_grant_id: group.group.is_beneficiary_of_grant_id,
+      is_beneficiary_of_grant_match_mode:
+        group.group.is_beneficiary_of_grant_match_mode,
+    },
+  });
+
+export function createInlineGroupBuilderStateFromDraft(
+  draft: ApiCreateGroup
+): CreateWaveInlineGroupBuilderState {
+  const normalizedIncludedWallets = dedupeInlineWallets(
+    draft.group.identity_addresses ?? []
+  );
+  const normalizedExcludedWallets = dedupeInlineWallets(
+    draft.group.excluded_identity_addresses ?? []
+  );
   const includedWalletKeys = new Set(normalizedIncludedWallets);
   const nonOverlappingExcludedWallets = normalizedExcludedWallets.filter(
     (wallet) => !includedWalletKeys.has(wallet)
@@ -227,26 +254,15 @@ export const createInlineGroupBuilderStateFromSavedGroup = ({
 
   return {
     draft: {
-      name: group.name,
-      is_private: group.is_private,
+      ...draft,
       group: {
-        tdh: { ...group.group.tdh },
-        rep: { ...group.group.rep },
-        cic: { ...group.group.cic },
-        level: { ...group.group.level },
-        owns_nfts: group.group.owns_nfts.map((ownership) => ({
-          ...ownership,
-          tokens: [...ownership.tokens],
-        })),
+        ...draft.group,
         identity_addresses: normalizedIncludedWallets.length
           ? normalizedIncludedWallets
           : null,
         excluded_identity_addresses: nonOverlappingExcludedWallets.length
           ? nonOverlappingExcludedWallets
           : null,
-        is_beneficiary_of_grant_id: group.group.is_beneficiary_of_grant_id,
-        is_beneficiary_of_grant_match_mode:
-          group.group.is_beneficiary_of_grant_match_mode,
       },
     },
     identities: normalizedIncludedWallets.map(
@@ -261,7 +277,7 @@ export const createInlineGroupBuilderStateFromSavedGroup = ({
     activeRule: null,
     criteriaReplacementActive: true,
   };
-};
+}
 
 const hasRepRule = (draft: ApiCreateGroup): boolean =>
   draft.group.rep.min !== null ||
