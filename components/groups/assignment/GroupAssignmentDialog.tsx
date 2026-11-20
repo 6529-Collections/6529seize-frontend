@@ -19,7 +19,9 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { t } from "@/i18n/messages";
-import GroupAssignmentPanel from "./GroupAssignmentPanel";
+import GroupAssignmentPanel, {
+  type GroupAssignmentDraftOptions,
+} from "./GroupAssignmentPanel";
 
 export default function GroupAssignmentDialog({
   title,
@@ -40,6 +42,7 @@ export default function GroupAssignmentDialog({
   disabled = false,
   allowGroupClear = true,
   showChooseGroup = true,
+  criteriaDraft,
   isWaveAccessEditor = false,
   embedded = false,
   onRetry,
@@ -65,17 +68,18 @@ export default function GroupAssignmentDialog({
   readonly disabled?: boolean;
   readonly allowGroupClear?: boolean;
   readonly showChooseGroup?: boolean;
+  readonly criteriaDraft?: GroupAssignmentDraftOptions | undefined;
   readonly isWaveAccessEditor?: boolean;
   /** The containing sheet supplies the title, scrolling and focus boundary. */
   readonly embedded?: boolean;
   readonly onRetry?: (() => void) | undefined;
   readonly onClose: () => void;
-  readonly onChange: (
-    group: ApiGroupFull | null
-  ) => void | boolean | Promise<void | boolean>;
-  readonly onCreateGroup: (
-    payload: ApiCreateGroup
-  ) => Promise<ApiGroupFull | null>;
+  readonly onChange?:
+    | ((group: ApiGroupFull | null) => void | boolean | Promise<void | boolean>)
+    | undefined;
+  readonly onCreateGroup?:
+    | ((payload: ApiCreateGroup) => Promise<ApiGroupFull | null>)
+    | undefined;
 }) {
   const locale = useBrowserLocale();
   const keyboardViewportRef = useDialogKeyboard(!embedded);
@@ -125,6 +129,7 @@ export default function GroupAssignmentDialog({
       selectedGroupCriteriaStatus={selectedGroupCriteriaStatus}
       allowGroupClear={allowGroupClear}
       showChooseGroup={showChooseGroup}
+      criteriaDraft={criteriaDraft}
       isWaveAccessEditor={isWaveAccessEditor}
       collapseOnClickAway={false}
       startMode={startMode}

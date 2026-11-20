@@ -69,17 +69,26 @@ export type CreateWaveGroupInlinePanelProps = GroupInlinePanelBaseProps & {
   ) => Promise<ApiGroupFull | null>;
 };
 
-export type GroupInlinePanelOptions =
-  | (CreateWaveGroupInlinePanelProps & {
-      readonly initialDraft?: never;
-      readonly onSaveDraft?: never;
-    })
-  | (GroupInlinePanelBaseProps & {
-      readonly initialDraft?: ApiCreateGroup | undefined;
-      readonly onSaveDraft: (payload: ApiCreateGroup) => void;
-      readonly onChange?: never;
-      readonly onCreateGroup?: never;
-    });
+export type GroupInlinePanelOptions = GroupInlinePanelBaseProps & {
+  readonly initialCriteriaDraft?: CreateWaveInlineGroupBuilderState | undefined;
+} & (
+    | {
+        readonly initialDraft?: never;
+        readonly onSaveDraft?: never;
+        readonly onChange?:
+          | CreateWaveGroupInlinePanelProps["onChange"]
+          | undefined;
+        readonly onCreateGroup?:
+          | CreateWaveGroupInlinePanelProps["onCreateGroup"]
+          | undefined;
+      }
+    | {
+        readonly initialDraft?: ApiCreateGroup | undefined;
+        readonly onSaveDraft: (payload: ApiCreateGroup) => void;
+        readonly onChange?: never;
+        readonly onCreateGroup?: never;
+      }
+  );
 
 function useCreateWaveGroupInlinePanelViewState({
   builder,
@@ -545,11 +554,11 @@ function useCreateWaveGroupInlinePanelController({
   };
 
   const selectExistingGroup = async (group: ApiGroupFull | null) => {
-    if (!group && !allowGroupClear) {
+    if (!onChange || (!group && !allowGroupClear)) {
       return;
     }
 
-    const changed = await onChange?.(group);
+    const changed = await onChange(group);
     if (group && changed !== false) {
       resetBuilder();
     }
@@ -591,6 +600,7 @@ export function useCreateWaveGroupInlinePanel({
   collapseOnClickAway = true,
   startMode = "actions",
   defaultIncludedIdentity = null,
+  initialCriteriaDraft,
   initialDraft,
   onChange,
   onCriteriaReplacementChange,
@@ -601,6 +611,13 @@ export function useCreateWaveGroupInlinePanel({
   const [isCreating, setIsCreating] = useState(false);
   const [builder, setBuilder] = useState<CreateWaveInlineGroupBuilderState>(
     () => {
+      if (initialCriteriaDraft) {
+        return {
+          ...initialCriteriaDraft,
+          panel: PANEL_IDENTITY,
+          activeRule: null,
+        };
+      }
       if (initialDraft) {
         return createInlineGroupBuilderStateFromDraft(initialDraft);
       }

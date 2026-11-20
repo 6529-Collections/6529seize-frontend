@@ -451,7 +451,7 @@ appear.
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
   mark), **Block** the sender (they can't start new chats with you or add you
   to encrypted chats; chats you already share stay until you leave them),
-  **Choose who can message you** (Preferences) and, last, **Report illegal or
+  **Choose who can message you** (the Messages tab in Preferences) and **Report illegal or
   severe harm**.
 - Search in the header looks only through messages on this device.
 - **Chat info** lists members (with admin badges and their devices, each with

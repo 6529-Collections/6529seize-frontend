@@ -3570,14 +3570,17 @@ export const EN_US_ROOT_MESSAGES = {
   "profilePreferences.loading": "Loading profile preferences",
   "profilePreferences.loadError":
     "Couldn’t load profile preferences. Please try again.",
-  "profilePreferences.save": "Save Changes",
+  "profilePreferences.save": "Save",
   "profilePreferences.saving": "Saving…",
   "profilePreferences.saveSuccess": "Profile preferences saved.",
+  "profilePreferences.saveProfileChanged":
+    "The active profile changed during the save. Check your profile and try again.",
   "profilePreferences.saveError":
     "Couldn’t save profile preferences. Please try again.",
   "profilePreferences.dm.heading": "Who can start a direct message with me?",
+  "profilePreferences.dm.linkLabel": "Message preferences",
   "profilePreferences.dm.description":
-    "This only affects new conversations. Existing direct messages and group messages stay available.",
+    "This controls who can start a conversation with you or add you to an encrypted group. You can still use chats you already share.",
   "profilePreferences.dm.EVERYONE.label": "Everyone",
   "profilePreferences.dm.EVERYONE.description":
     "Any profile can start a new conversation with you.",
@@ -3587,33 +3590,27 @@ export const EN_US_ROOT_MESSAGES = {
   "profilePreferences.dm.NOBODY.label": "Nobody",
   "profilePreferences.dm.NOBODY.description":
     "No one can start a new conversation with you.",
-  "profilePreferences.dm.GROUP_MEMBERS.label": "Members of a group I choose",
+  "profilePreferences.dm.GROUP_MEMBERS.label": "People who meet my criteria",
   "profilePreferences.dm.GROUP_MEMBERS.description":
-    "Only members of a group you pick, for example by level, TDH, REP or NIC, can start a new conversation with you.",
+    "Set rules such as level, TDH, REP, NIC, NFT ownership or specific profiles.",
   "profilePreferences.dm.blockNote":
     "Profiles you block can never start a new conversation with you, whichever option you choose.",
-  "profilePreferences.dm.group.label": "Group",
-  "profilePreferences.dm.group.none": "No group chosen",
-  "profilePreferences.dm.group.loading": "Loading group…",
-  "profilePreferences.dm.group.unavailableName": "Group no longer available",
-  "profilePreferences.dm.group.loadError": "Couldn’t load the group details.",
-  "profilePreferences.dm.group.retry": "Try again",
-  "profilePreferences.dm.group.viewMembers": "View members of {groupName}",
-  "profilePreferences.dm.group.choose": "Choose group",
-  "profilePreferences.dm.group.change": "Change group",
-  "profilePreferences.dm.group.required": "Choose a group to save this option.",
+  "profilePreferences.dm.group.setCriteria": "Set criteria",
+  "profilePreferences.dm.group.editCriteria": "Edit criteria",
+  "profilePreferences.dm.group.done": "Done",
+  "profilePreferences.dm.group.required": "Add criteria to save this option.",
   "profilePreferences.dm.group.unavailable":
-    "The group you chose was deleted or hidden. Until you choose another group, only people you follow can start a new conversation with you.",
+    "Your saved criteria are unavailable. Until you save new criteria, only people you follow can start a new conversation with you.",
   "profilePreferences.dm.group.allowFollowed":
     "People I follow can always message me",
   "profilePreferences.dm.group.allowFollowedDescription":
-    "Profiles you follow can start a conversation even if they aren’t in the group.",
+    "Profiles you follow can start a conversation even if they don’t meet your criteria.",
   "profilePreferences.dm.group.dialogTitle": "Who can message you",
   "profilePreferences.dm.group.dialogDescription":
-    "Use an existing group or build one from level, TDH, REP, NIC, NFTs and specific profiles.",
+    "Set the criteria people need to meet to contact you.",
   "profilePreferences.dm.group.suggestedName": "Can message me",
-  "profilePreferences.dm.group.membersRoleLabel": "Can message me",
-  "profilePreferences.dm.group.createErrorTitle": "Couldn’t create this group.",
+  "profilePreferences.dm.group.createErrorTitle":
+    "Couldn’t save your criteria.",
   "profilePreferences.dm.group.createError": PLEASE_TRY_AGAIN,
   "directMessageAdmission.notAccepting":
     "@{handle} doesn’t accept new direct messages.",
