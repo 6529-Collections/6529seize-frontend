@@ -942,7 +942,6 @@ export const FR_FR_MESSAGES = {
     "Audience actuelle indisponible",
   "waves.create.groups.members.view": "Voir les membres",
   "waves.create.groups.members.previewDraft": "Prévisualiser les résultats",
-  "waves.create.groups.members.dialogTitle": "{role} : {group}",
   "waves.create.groups.members.dynamicDescription":
     "Cet aperçu en direct repose sur les données actuelles de profil, de réputation et de propriété. L’appartenance peut évoluer.",
   "waves.create.groups.members.criteriaSummary":

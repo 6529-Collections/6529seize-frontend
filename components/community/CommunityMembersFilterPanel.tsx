@@ -60,7 +60,6 @@ export default function CommunityMembersFilterPanel(
       ? {
           kind: "draft",
           group: displayedBuilder.draft.group,
-          name: props.suggestedName,
           summary: draftSummary,
         }
       : null;

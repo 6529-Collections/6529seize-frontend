@@ -925,7 +925,6 @@ export const ES_ES_MESSAGES = {
     "Audiencia actual no disponible",
   "waves.create.groups.members.view": "Ver miembros",
   "waves.create.groups.members.previewDraft": "Previsualizar coincidencias",
-  "waves.create.groups.members.dialogTitle": "{role}: {group}",
   "waves.create.groups.members.dynamicDescription":
     "Esta vista previa en directo se basa en los datos actuales de perfil, reputación y propiedad. La pertenencia puede cambiar.",
   "waves.create.groups.members.criteriaSummary":

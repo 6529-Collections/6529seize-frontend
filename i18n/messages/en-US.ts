@@ -1922,7 +1922,6 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "members.countUnavailable": "Current audience unavailable",
   "members.view": "View members",
   "members.previewDraft": "Preview matches",
-  "members.dialogTitle": "{role}: {group}",
   "members.dynamicDescription":
     "This is a live preview based on current profile, reputation, and ownership data. Membership can change over time.",
   "members.criteriaSummary": "Why these identities qualify",
