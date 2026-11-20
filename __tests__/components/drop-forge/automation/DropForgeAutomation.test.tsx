@@ -26,6 +26,11 @@ import {
 } from "@/generated/models/ApiDropForgeLaunch";
 import { useDropForgeSettings } from "@/hooks/useDropForgeSettings";
 import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
+import {
+  dropForgeStatusInterval,
+  dropForgeStatusPolling,
+} from "@/hooks/drop-forge-status-polling";
+import { hasActiveLaunchWork } from "@/hooks/useDropForgeLaunch";
 import { forgeProcessKey } from "@/hooks/useDropForgeProcess";
 import { resolveForgePhaseInputs } from "@/services/api/drop-forge-process-inputs";
 import { commonApiPost } from "@/services/api/common-api";
@@ -48,7 +53,12 @@ jest.mock("@/components/drop-forge/drop-forge-config", () => ({
   useDropForgeMintingConfig: () => ({ contract: "0xcreator" }),
 }));
 jest.mock("@/hooks/useDropForgeSettings");
-jest.mock("@/services/api/common-api", () => ({ commonApiPost: jest.fn() }));
+jest.mock("@/services/api/common-api", () => ({
+  ...jest.requireActual<typeof import("@/services/api/common-api")>(
+    "@/services/api/common-api"
+  ),
+  commonApiPost: jest.fn(),
+}));
 jest.mock("@/hooks/useBrowserLocale", () => ({
   useBrowserLocale: () => "en-US",
 }));
@@ -101,6 +111,43 @@ beforeEach(() => {
   jest.mocked(useDropForgeSettings).mockReturnValue({
     data: { automation_enabled: true },
   } as ReturnType<typeof useDropForgeSettings>);
+});
+
+it("refreshes active launches and outstanding manual or signed work only", () => {
+  const current = launch(true);
+  const initialization = current.actions[0];
+  if (!initialization) throw new Error("Initialization fixture missing");
+  expect(hasActiveLaunchWork(null)).toBe(false);
+  expect(hasActiveLaunchWork(current)).toBe(true);
+  current.state = LaunchState.Completed;
+  expect(hasActiveLaunchWork(current)).toBe(false);
+  current.state = LaunchState.Cancelled;
+  expect(hasActiveLaunchWork(current)).toBe(false);
+  initialization.state = ActionState.Signed;
+  expect(hasActiveLaunchWork(current)).toBe(true);
+  initialization.state = ActionState.Confirmed;
+  current.state = LaunchState.Paused;
+  current.manual_pending = true;
+  expect(hasActiveLaunchWork(current)).toBe(true);
+});
+
+it.each([401, 403])("stops refreshing and retrying after HTTP %s", (status) => {
+  const error = Object.assign(new Error("Access denied"), { status });
+  expect(dropForgeStatusInterval({ error, fetchFailureCount: 1 }, 5000)).toBe(
+    false
+  );
+  expect(dropForgeStatusPolling.retry(0, error)).toBe(false);
+});
+
+it("backs off failed status reads and resumes the normal interval on success", () => {
+  const error = new Error("Unavailable");
+  expect(dropForgeStatusInterval({ error, fetchFailureCount: 2 }, 5000)).toBe(
+    20_000
+  );
+  expect(
+    dropForgeStatusInterval({ error: null, fetchFailureCount: 0 }, 3000)
+  ).toBe(3000);
+  expect(dropForgeStatusPolling.refetchIntervalInBackground).toBe(false);
 });
 it("shows inline prerequisites only for a saved plan and confirms manual artist delivery independently", () => {
   expect(getLaunchInlineStatuses(undefined, "phase0")).toBeUndefined();

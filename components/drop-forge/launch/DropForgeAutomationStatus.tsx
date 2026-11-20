@@ -23,7 +23,7 @@ export default function DropForgeAutomationStatus({
   const { contract } = useDropForgeMintingConfig();
   const { requestAuth } = useAuth();
   const locale = useBrowserLocale();
-  const query = useDropForgeLaunch(claimId, true);
+  const query = useDropForgeLaunch(claimId, { watch: true });
   const settings = useDropForgeSettings();
   const [hash, setHash] = useState("");
   const [error, setError] = useState<string | null>(null);

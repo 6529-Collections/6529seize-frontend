@@ -25,10 +25,8 @@ import {
 import type { LaunchClaimState } from "@/components/drop-forge/launch/useLaunchClaimState";
 import { getMintTimelineDetails as getClaimTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
 import type { ApiMintingClaimAction } from "@/generated/models/ApiMintingClaimAction";
-import { useQuery } from "@tanstack/react-query";
 import { useDropForgeMintingConfig } from "@/components/drop-forge/drop-forge-config";
-import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
-import { getForgeLaunch } from "@/services/api/drop-forge-api";
+import { useDropForgeLaunch } from "@/hooks/useDropForgeLaunch";
 import { launchCalendarPhases } from "./launch-calendar";
 import type { ManifoldClaim } from "@/hooks/useManifoldClaim";
 
@@ -218,11 +216,9 @@ export function useLaunchClaimViewModel({
     mintingClaimActions?.claim_id === claimId &&
     mintingClaimActions.contract.toLowerCase() === contract.toLowerCase() &&
     mintingClaimActions.drop_forge_launch_exists === true;
-  const savedLaunch = useQuery({
-    queryKey: forgeLaunchKey(contract, claimId),
-    queryFn: () => getForgeLaunch(contract, claimId),
-    enabled: claimId > 0 && (automaticLaunchEnabled || hasSavedPlan),
-    refetchInterval: 5000,
+  const savedLaunch = useDropForgeLaunch(claimId, {
+    enabled: automaticLaunchEnabled || hasSavedPlan,
+    watch: true,
   });
   const coordinateManualWrites = Boolean(savedLaunch.data) || hasSavedPlan;
   const savedPhases =

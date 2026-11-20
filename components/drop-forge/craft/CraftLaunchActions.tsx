@@ -43,7 +43,7 @@ export default function CraftLaunchActions({
   const { requestAuth } = useAuth();
   const locale = useBrowserLocale();
   const client = useQueryClient();
-  const query = useDropForgeLaunch(claimId, true);
+  const query = useDropForgeLaunch(claimId, { watch: true });
   const settings = useDropForgeSettings();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
