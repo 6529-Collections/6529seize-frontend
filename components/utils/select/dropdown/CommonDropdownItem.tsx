@@ -18,7 +18,9 @@ import type { CommonSelectItemProps } from "../CommonSelect";
 import { SortDirection } from "@/entities/ISort";
 
 export default function CommonDropdownItem<T, U = unknown>(
-  props: Readonly<CommonSelectItemProps<T, U>>
+  props: Readonly<
+    CommonSelectItemProps<T, U> & { ariaCurrent?: boolean | undefined }
+  >
 ) {
   const { item, activeItem, setSelected, sortDirection, children, isMobile } =
     props;
@@ -60,6 +62,7 @@ export default function CommonDropdownItem<T, U = unknown>(
             : "tw-bg-transparent tw-text-iron-200"
         }`}
         role="menuitem"
+        aria-current={props.ariaCurrent}
         onClick={onSelected}
         onMouseEnter={() => setShouldRotate(true)}
         onMouseLeave={() => setShouldRotate(false)}

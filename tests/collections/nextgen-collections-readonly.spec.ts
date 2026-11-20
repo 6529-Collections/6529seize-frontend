@@ -150,6 +150,43 @@ async function expectCollectionTitle(
 }
 
 test.describe("NextGen and collections read-only coverage @surface @medium @large @readonly", () => {
+  test("NFT activity filters fit narrow screens without resizing", async ({
+    page,
+  }) => {
+    await gotoReady(page, "/nft-activity");
+    const collection = page.getByRole("button", {
+      name: "Collection: All Collections",
+      exact: true,
+    });
+    const activity = page.getByRole("button", {
+      name: "Activity type: All activity",
+      exact: true,
+    });
+    for (const width of [320, 390, 1280]) {
+      await page.setViewportSize({ width, height: 844 });
+      for (const trigger of [collection, activity]) {
+        await expect(trigger).toBeInViewport({ ratio: 1 });
+        await expect(trigger).toHaveCSS("height", "36px");
+        await expect(trigger).toHaveCSS("font-size", "12px");
+      }
+      await expectNoHorizontalOverflow(page);
+      const titleBounds = await page
+        .getByRole("heading", { level: 1, name: "NFT Activity", exact: true })
+        .boundingBox();
+      const collectionBounds = await collection.boundingBox();
+      expect(titleBounds).not.toBeNull();
+      expect(collectionBounds).not.toBeNull();
+      if (collectionBounds!.y >= titleBounds!.y + titleBounds!.height) {
+        expect(collectionBounds!.x).toBeCloseTo(titleBounds!.x, 0);
+      }
+      if (width >= 390) {
+        const activityBounds = await activity.boundingBox();
+        expect(activityBounds).not.toBeNull();
+        expect(collectionBounds!.y).toBeCloseTo(activityBounds!.y, 0);
+      }
+    }
+  });
+
   test("NextGen landing exposes public collection navigation", async ({
     page,
   }) => {
@@ -214,6 +251,32 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
       page.locator('main a[href*="/nextgen/collection/"]'),
       "Expected NextGen collections to settle with cards or an empty state"
     );
+
+    await expect(statusFilter).toHaveCSS("height", "40px");
+    expect(
+      await statusFilter.evaluate(
+        (button) => button.getBoundingClientRect().width
+      )
+    ).toBeLessThan(224);
+    await statusFilter.click();
+    const menu = page.getByRole("menu").filter({
+      has: page.getByRole("menuitem", { name: "All statuses", exact: true }),
+    });
+    const rows = menu.getByRole("menuitem");
+    await expect(rows).toHaveText([
+      "All statuses",
+      "Live",
+      "Upcoming",
+      "Completed",
+    ]);
+    await expect(rows.first()).toHaveAttribute("aria-current", "true");
+    const columns = await rows.evaluateAll((options) =>
+      options.map((option) => option.getBoundingClientRect().left)
+    );
+    expect(new Set(columns).size).toBe(1);
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+    await expect(statusFilter).toBeFocused();
   });
 
   test("NextGen collection detail tabs remain navigable", async ({ page }) => {

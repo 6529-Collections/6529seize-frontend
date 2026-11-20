@@ -34,7 +34,7 @@ type Space =
 /** Geometry is independent of appearance so existing controls do not resize. */
 export interface DropdownMetrics {
   readonly height?: 28 | 32 | 36 | 40 | 42 | 44 | "subscription" | "responsive";
-  readonly minHeight?: 40 | 44;
+  readonly minHeight?: 0 | 40 | 44;
   readonly x?: Space;
   readonly y?: Space;
   readonly left?: Space;
@@ -182,7 +182,11 @@ export function getDropdownMenuMetrics(
     : DEFAULT_METRICS[variant];
 }
 
-const MIN_HEIGHT_CLASSES = { 40: "tw-min-h-10", 44: "tw-min-h-11" } as const;
+const MIN_HEIGHT_CLASSES = {
+  0: "tw-min-h-0",
+  40: "tw-min-h-10",
+  44: "tw-min-h-11",
+} as const;
 const LEADING_CLASSES = {
   5: "tw-leading-5",
   6: "tw-leading-6",
@@ -279,9 +283,9 @@ export function getDropdownOptionStateClasses(selected: boolean): string {
   );
 }
 
-/** The composite listbox owns keyboard focus; its active option stays unframed. */
+/** Keep listbox keyboard focus visible inside the active row, without framing the popup. */
 export const DROPDOWN_LISTBOX_FOCUS_CLASSES =
-  "focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-iron-400";
+  "focus:tw-outline-none [&_[role=option][data-focus]:not(:hover)]:focus-visible:tw-shadow-[inset_2px_0_0_0_var(--tw-shadow-color)] [&_[role=option][data-focus]:not(:hover)]:focus-visible:tw-shadow-iron-400";
 
 /** Typography, selection indicators and row geometry belong to the consumer. */
 export const DROPDOWN_OPTION_SURFACE_CLASSES = `${DROPDOWN_OPTION_ACTIVE_CLASSES} tw-rounded-lg tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none`;

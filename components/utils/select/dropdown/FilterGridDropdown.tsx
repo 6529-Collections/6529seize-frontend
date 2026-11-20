@@ -1,13 +1,10 @@
 "use client";
 
-import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useMemo, useRef, useState } from "react";
 import FilterGridDropdownItemsWrapper from "./FilterGridDropdownItemsWrapper";
 import {
   DROPDOWN_CHEVRON_CLASSES,
-  DROPDOWN_CHECKMARK_CLASSES,
-  DROPDOWN_OPTION_ACTIVE_CLASSES,
-  DROPDOWN_SELECTED_OPTION_CLASSES,
   getDropdownTriggerClasses,
 } from "./dropdownTriggerStyles";
 
@@ -54,10 +51,10 @@ export default function FilterGridDropdown<TValue extends string | number>({
   };
 
   const getMenuItemClassName = (isActive: boolean) =>
-    `tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2 tw-py-2 tw-text-sm tw-font-medium tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 motion-reduce:tw-transition-none lg:tw-min-h-9 lg:tw-gap-x-0 ${DROPDOWN_OPTION_ACTIVE_CLASSES} ${
+    `tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-gap-x-1 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-px-2 tw-py-2 tw-text-sm tw-transition tw-duration-200 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 motion-reduce:tw-transition-none lg:tw-min-h-9 ${
       isActive
-        ? DROPDOWN_SELECTED_OPTION_CLASSES
-        : "tw-bg-transparent tw-text-iron-200"
+        ? "tw-bg-iron-200 tw-font-semibold tw-text-iron-950"
+        : "tw-bg-iron-800 tw-font-medium tw-text-iron-300 hover:tw-bg-iron-700"
     }`;
 
   return (
@@ -98,13 +95,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           aria-current={selectedValue === null ? "true" : undefined}
           role="menuitem"
         >
-          <span className="tw-shrink-0 tw-whitespace-nowrap">
-            {allItemLabel}
-          </span>
-          <CheckIcon
-            aria-hidden="true"
-            className={`tw-size-3 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES} ${selectedValue === null ? "" : "tw-invisible"}`}
-          />
+          <span className="tw-whitespace-nowrap">{allItemLabel}</span>
         </button>
         {items.map((item) => (
           <button
@@ -115,13 +106,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
             aria-current={selectedValue === item.value ? "true" : undefined}
             role="menuitem"
           >
-            <span className="tw-shrink-0 tw-whitespace-nowrap">
-              {item.label}
-            </span>
-            <CheckIcon
-              aria-hidden="true"
-              className={`tw-size-3 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES} ${selectedValue === item.value ? "" : "tw-invisible"}`}
-            />
+            <span className="tw-whitespace-nowrap">{item.label}</span>
           </button>
         ))}
       </FilterGridDropdownItemsWrapper>

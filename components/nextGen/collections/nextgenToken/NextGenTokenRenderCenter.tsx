@@ -1,6 +1,6 @@
 "use client";
 
-import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import NativeSelect from "@/components/utils/select/NativeSelect";
 import Button from "@/components/utils/button/Button";
 import { NEXTGEN_CHAIN_ID } from "@/components/nextGen/nextgen_contracts";
 import { NEXTGEN_GENERATOR_BASE_URL } from "@/constants/constants";
@@ -120,12 +120,13 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
           <span className="tw-text-sm tw-font-medium tw-text-iron-400">
             Render Type
           </span>
-          <select
+          <NativeSelect
             value={renderType}
             onChange={(event) => {
               setRenderType(event.target.value as RenderType);
             }}
-            className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "base" } })} tw-[color-scheme:dark]`}
+            metrics={{ text: "base" }}
+            className="tw-[color-scheme:dark]"
           >
             {Object.values(RenderType).map((type) => (
               <option
@@ -136,18 +137,19 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
                 {type}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <label className="tw-grid tw-gap-2">
           <span className="tw-text-sm tw-font-medium tw-text-iron-400">
             Script Version
           </span>
-          <select
+          <NativeSelect
             value={scriptVersion}
             onChange={(event) => {
               setScriptVersion(event.target.value as ScriptVersion);
             }}
-            className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "base" } })} tw-[color-scheme:dark]`}
+            metrics={{ text: "base" }}
+            className="tw-[color-scheme:dark]"
           >
             {Object.values(ScriptVersion).map((version) => (
               <option
@@ -158,7 +160,7 @@ function CustomRender(props: Readonly<{ token: NextGenToken }>) {
                 {version}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
         <label className="tw-grid tw-gap-2">
           <span className="tw-text-sm tw-font-medium tw-text-iron-400">

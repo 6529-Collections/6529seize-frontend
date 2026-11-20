@@ -1,6 +1,6 @@
 "use client";
 
-import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import NativeSelect from "@/components/utils/select/NativeSelect";
 
 import {
   DELEGATION_USE_CASES,
@@ -22,6 +22,12 @@ import { buildCsv } from "@/helpers/csv-export.helpers";
 import { parseCsvFile } from "./mappingToolCsv";
 import { downloadCsvFile } from "./mappingToolDownload";
 import styles from "./MappingTool.module.css";
+
+const MAPPING_SELECT_METRICS = {
+  minHeight: 40,
+  text: "base",
+  leading: "6",
+} as const;
 
 export default function DelegationMappingTool() {
   const [file, setFile] = useState<File | undefined>();
@@ -122,9 +128,9 @@ export default function DelegationMappingTool() {
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         <div className="tw-w-full tw-px-3">
-          <select
+          <NativeSelect
             id="delegation-collection"
-            className={`${getDropdownTriggerClasses({ variant: "form", metrics: {} })} tw-form-select tw-block tw-w-full`}
+            metrics={MAPPING_SELECT_METRICS}
             value={collection}
             onChange={(e) => {
               setCollection(e.target.value);
@@ -143,7 +149,7 @@ export default function DelegationMappingTool() {
                 </option>
               );
             })}
-          </select>
+          </NativeSelect>
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">
@@ -153,9 +159,9 @@ export default function DelegationMappingTool() {
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-2">
         <div className="tw-w-full tw-px-3">
-          <select
+          <NativeSelect
             id="delegation-use-case"
-            className={`${getDropdownTriggerClasses({ variant: "form", metrics: {} })} tw-form-select tw-block tw-w-full`}
+            metrics={MAPPING_SELECT_METRICS}
             value={useCase}
             onChange={(e) => {
               const newCase = Number.parseInt(e.target.value);
@@ -175,7 +181,7 @@ export default function DelegationMappingTool() {
                 </option>
               );
             })}
-          </select>
+          </NativeSelect>
         </div>
       </div>
       <div className="-tw-mx-3 tw-flex tw-flex-wrap tw-pt-4">

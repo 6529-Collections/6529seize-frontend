@@ -57,8 +57,8 @@ export default function ActivityFilters({
   const activityTypeItems = getActivityTypeItems(locale);
   return (
     <div
-      className={`tailwind-scope tw-ml-auto tw-flex tw-w-auto tw-items-center tw-gap-4 tw-py-2 ${
-        isMobile ? "tw-justify-center" : "tw-justify-end"
+      className={`tailwind-scope tw-flex tw-w-auto tw-max-w-full tw-flex-wrap tw-items-center tw-gap-4 tw-py-2 ${
+        isMobile ? "tw-justify-start" : "tw-justify-end"
       }`}
     >
       <CommonDropdown

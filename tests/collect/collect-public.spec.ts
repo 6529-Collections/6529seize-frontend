@@ -1033,9 +1033,7 @@ test("one collection selector stays available across set, listings and future TD
   ]);
   const listbox = page.getByRole("listbox");
   await expect(listbox).toBeFocused();
-  await expect(listbox).toHaveCSS("outline-style", "solid");
-  await expect(listbox).toHaveCSS("outline-width", "2px");
-  await expect(listbox).toHaveCSS("outline-color", "rgb(147, 147, 159)");
+  await expect(listbox).toHaveCSS("outline-color", "rgba(0, 0, 0, 0)");
   await listbox.press("ArrowDown");
   const keyboardOption = page.getByRole("option", {
     name: "Pebbles · NextGen",
@@ -1043,6 +1041,12 @@ test("one collection selector stays available across set, listings and future TD
   });
   await expect(keyboardOption).toHaveAttribute("data-focus");
   await expect(keyboardOption).toHaveCSS("background-color", "rgb(38, 39, 43)");
+  await expect(keyboardOption).toHaveCSS(
+    "box-shadow",
+    /rgb\(147, 147, 159\).*2px 0px 0px 0px inset/
+  );
+  await listbox.press("Escape");
+  await collection.click();
   const hoveredOption = page.getByRole("option", {
     name: "The Memes",
     exact: true,

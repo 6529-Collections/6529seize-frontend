@@ -45,6 +45,8 @@ export default function CommonDropdown<T, U = unknown>(
     readonly presentation?: "editorial" | "toolbar" | "filter" | undefined;
     readonly metrics?: DropdownMetrics | undefined;
     readonly sortDirection?: SortDirection | undefined;
+    readonly triggerAriaLabel?: string | undefined;
+    readonly markCurrentItem?: boolean | undefined;
   }
 ) {
   const {
@@ -133,7 +135,9 @@ export default function CommonDropdown<T, U = unknown>(
           {...props.buttonDataAttributes}
           type="button"
           aria-haspopup="true"
-          aria-label={`${filterLabel}: ${computedLabel}`}
+          aria-label={
+            props.triggerAriaLabel ?? `${filterLabel}: ${computedLabel}`
+          }
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
@@ -199,6 +203,11 @@ export default function CommonDropdown<T, U = unknown>(
             itemIdx={i}
             totalItems={items.length}
             activeItem={activeItem}
+            ariaCurrent={
+              props.markCurrentItem && item.value === activeItem
+                ? true
+                : undefined
+            }
             sortDirection={sortDirection}
             isMobile={isMobile}
             setSelected={onSelect}

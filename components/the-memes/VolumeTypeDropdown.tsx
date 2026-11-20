@@ -4,7 +4,6 @@ import {
   DROPDOWN_CHECKMARK_CLASSES,
   DROPDOWN_SELECTED_OPTION_CLASSES,
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
-import FilterButton from "@/components/utils/button/FilterButton";
 import CommonDropdownItemsWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsWrapper";
 import { getVolumeTypeLabel } from "@/components/the-memes/theMemesI18n";
 import { VolumeType } from "@/entities/INFT";
@@ -86,23 +85,17 @@ export default function VolumeTypeDropdown({
       data-testid="dropdown"
       className="tailwind-scope tw-relative tw-inline-flex tw-shrink-0"
     >
-      {presentation === "underline" ? (
-        <button
-          {...triggerProps}
-          type="button"
-          className={`${getCollectionSortButtonClasses(isVolumeSort)} tw-inline-flex tw-items-center tw-gap-x-1.5`}
-        >
-          {triggerContent}
-        </button>
-      ) : (
-        <FilterButton
-          {...triggerProps}
-          selected={isVolumeSort}
-          className={getMemesSortButtonClasses(isVolumeSort)}
-        >
-          {triggerContent}
-        </FilterButton>
-      )}
+      <button
+        {...triggerProps}
+        type="button"
+        className={
+          presentation === "underline"
+            ? `${getCollectionSortButtonClasses(isVolumeSort)} tw-inline-flex tw-items-center tw-gap-x-1.5`
+            : getMemesSortButtonClasses(isVolumeSort)
+        }
+      >
+        {triggerContent}
+      </button>
 
       <CommonDropdownItemsWrapper
         isOpen={isOpen}
