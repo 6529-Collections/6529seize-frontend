@@ -85,7 +85,9 @@ Users can:
     group is contained in `Visibility` before saving.
 15. After success, the affected rows refresh.
 16. In `Curations`, administrators can create or delete curations, edit their
-    name and group, and move them up or down.
+    name and group, and move them up or down. Each row shows its group's
+    criteria summary and member count. Select the count to see the full
+    criteria and current members in Network.
     On mobile and in the tablet overlay, create and edit use the existing
     information panel at the same height. Group selection stays inside the form.
     Back discards the draft and returns to Configuration; Close or a downward
