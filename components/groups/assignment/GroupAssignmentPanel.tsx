@@ -486,7 +486,6 @@ function SharedGroupAssignmentPanel({
 }
 
 export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
-  const locale = useBrowserLocale();
   const {
     defaultMembersPreviewTarget,
     disabled = false,
@@ -517,9 +516,6 @@ export default function GroupAssignmentPanel(props: GroupAssignmentPanelProps) {
       ? {
           kind: "draft",
           group: displayedBuilder.draft.group,
-          name:
-            props.suggestedName.trim() ||
-            t(locale, "waves.create.groups.defaultGroupName"),
           summary: draftSummary,
         }
       : null;
