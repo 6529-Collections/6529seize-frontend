@@ -46,8 +46,9 @@ and artist payment reports show the amount in ETH.
 Drop Forge checks mint readiness at 17:20, 18:28, 18:58 and 19:22 Athens time
 on scheduled mint days, including manual launches. The first three checks
 verify the next mint window and the required airdrops. The last verifies
-that public minting is active. Problems alert the configured `@dropforgeops`
-group. Passing checks stay quiet.
+that public minting is active. Each check posts a Mint Watch result in Drop Forge
+Ops. Ready and verified sellout posts are untagged. Reports with issues list
+what needs attention and tag the configured `@dropforgeops` group.
 
 Craft and contract-admin access remain distinct. Admin grants/revocations remain owner-only on chain. Automatic artist payment is
 separately opt-in and defaults Off. The hub's **Automatic launch** switch also
