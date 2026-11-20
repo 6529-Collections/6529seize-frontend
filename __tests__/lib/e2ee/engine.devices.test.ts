@@ -202,6 +202,7 @@ describe("E2EE engine: devices", () => {
       world.clock.advance(11 * 60_000);
       await alice.primary.engine.sync();
       await alice.primary.engine.enrollWithLoginGrant();
+      await alice.primary.engine.enrollWithLoginGrant({ resumeStored: true });
       alice.primary.engine.setOpenConversation(g);
       await settle(world);
       await realSleep(50);

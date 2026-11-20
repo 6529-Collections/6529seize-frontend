@@ -162,7 +162,8 @@ Open the setup action in the account menu, Preferences → **Device Permissions*
 or the composer notice. Each opens the same permission dialog. The initial
 `/messages/encrypted` page presents the same explanation inline, without the
 **Encrypted messages / End-to-end encrypted** header until encryption is ready.
-Setup does not open automatically after sign-in.
+Setup does not open automatically after sign-in. Once you sign for setup, the
+app shows **Finishing encrypted message setup…** while it turns encryption on.
 
 The explanation and signature button name the permissions this device needs:
 
@@ -203,6 +204,10 @@ scrolls; on a phone it leaves space around the dialog and respects the safe area
 Ordinary web sign-in can itself include a combined grant. When that happens,
 the encryption engine adopts it without another signature, including if the
 setup page was already open. Signing and encryption still use separate keys.
+If this browser already saved an encryption device, **Sign to enable both**
+signs for posts and resumes that device using its existing approval. Its key
+and chat history are kept. If that encryption approval needs renewal, signing
+stays on and encryption requests its own approval separately.
 If combined setup cannot finish, the page explains the result and offers explicit
 next actions. It does not silently request a different permission. If signing
 succeeds but encryption registration fails, signing stays on and encryption can
@@ -814,6 +819,17 @@ without images**. Images and files too large for one encrypted attachment
 
 ## Troubleshooting
 
+- **Sign in again to continue**: the server rejected this browser's sign-in.
+  Select **Sign in again** to restore the session, then encrypted messages
+  restart. This keeps the device's local chats and keys.
+- **Loading encrypted chats…** appears while this device first checks for
+  chats. The inbox lists each chat as it arrives. After a brief wait for a
+  trusted device to send an invitation, an empty list says **No encrypted
+  chats available on this device yet** and offers **Check device setup**.
+  Invitations continue arriving in the background. Select **Check again**
+  to check immediately. If the check stalls or fails, an empty list offers
+  **Try again**. **No encrypted chats yet** appears when the check confirms
+  an empty inbox.
 - **Encrypted messages couldn’t start**: select **Try again**. The error code
   under the message helps the team diagnose staging issues.
 - **Chat not found on this device**: devices only receive chats they were

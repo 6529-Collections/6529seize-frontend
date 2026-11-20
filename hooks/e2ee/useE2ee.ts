@@ -15,6 +15,7 @@ import type {
   E2eeDeviceInfo,
   E2eeEngine,
   E2eeEngineStatus,
+  E2eeInitialSyncStatus,
   E2eeMessage,
 } from "@/lib/e2ee/types";
 import { useMutedE2eeChats } from "@/components/e2ee/e2eeMutedChats";
@@ -48,6 +49,7 @@ export interface UseE2eeResult {
   readonly thisDevice: E2eeDeviceInfo | null;
   readonly devices: readonly E2eeDeviceInfo[];
   readonly conversations: readonly E2eeConversation[];
+  readonly initialSyncStatus: E2eeInitialSyncStatus;
   /** Server switch; attaching is hidden while false (and until it is known). */
   readonly attachmentsEnabled: boolean;
   readonly restart: () => void;
@@ -108,6 +110,7 @@ export function useE2ee(): UseE2eeResult {
       thisDevice: snapshot?.thisDevice ?? null,
       devices: snapshot?.devices ?? EMPTY_DEVICES,
       conversations: snapshot?.conversations ?? EMPTY_CONVERSATIONS,
+      initialSyncStatus: snapshot?.initialSyncStatus ?? "pending",
       attachmentsEnabled: snapshot?.attachmentsEnabled ?? false,
       restart: context.restart,
       takeOverHere: context.takeOverHere,
