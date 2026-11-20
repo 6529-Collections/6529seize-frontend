@@ -40,7 +40,6 @@ export default function CommunityMembersFilterPanel(
     isDraftValid,
     isCreating,
     panelRef,
-    currentGroupLabel,
     canCreateDraft,
     onCreateAndUse,
     setDraft,
@@ -119,18 +118,13 @@ export default function CommunityMembersFilterPanel(
             hidden={mobileNavigation && view !== null}
             className={`tw-shrink-0 ${isKeyboardVisible ? "tw-sr-only focus-within:tw-not-sr-only" : ""} [[data-mobile-dialog-keyboard-visible=true]_&]:tw-sr-only [[data-mobile-dialog-keyboard-visible=true]_&]:focus-within:tw-not-sr-only`}
           >
-            <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-py-3 sm:tw-px-6">
-              <span className="tw-break-words tw-text-xs tw-font-medium tw-text-iron-200">
-                {currentGroupLabel}
-              </span>
-              <div className="tw-flex">
-                <GroupMembersPreviewTrigger
-                  target={savedTarget}
-                  appearance="inline"
-                  disabled={props.disabled ?? false}
-                  onOpen={() => setPreviewTarget(savedTarget)}
-                />
-              </div>
+            <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/5 tw-px-4 tw-py-3 sm:tw-px-6">
+              <GroupMembersPreviewTrigger
+                target={savedTarget}
+                appearance="inline"
+                disabled={props.disabled ?? false}
+                onOpen={() => setPreviewTarget(savedTarget)}
+              />
             </div>
           </div>
         )}

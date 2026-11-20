@@ -69,7 +69,7 @@ pagination, and profile links.
   an incomplete draft keeps the create action disabled. Select the information
   button beside the summary to read `Not ready yet.` and its guidance.
   The untouched filter does not open with a warning message.
-- When a group is selected, its name, criteria, count, and `View members`
+- When a group is selected, its criteria, member count, and `View members`
   appear at the top without changing the draft. On mobile, this summary
   appears in the list step; use `Back` from an editor to return to it.
   Without a selected group, the sheet starts directly with the criteria list.
