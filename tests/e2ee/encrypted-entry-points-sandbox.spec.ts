@@ -260,6 +260,45 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     expect((await e2eeSandboxControls.state(baseURL)).groups).toHaveLength(1);
   });
 
+  test("the unencrypted composer shows a generic group refusal", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    sessions = [alice];
+    const { page } = alice;
+    await page.clock.setFixedTime(
+      new Date(Date.parse(LEGACY_DM_DELETION_AT) - 60_000)
+    );
+    await page.route("**/api/waves/direct-message/new", (route) =>
+      route.fulfill({
+        status: 403,
+        json: {
+          error:
+            '@carol only accepts new direct messages from members of the group "Meme Holders".',
+          code: "DM_RECIPIENT_GROUP_MEMBERS_ONLY",
+          handle: "carol",
+          group_name: "Meme Holders",
+        },
+      })
+    );
+
+    await gotoPath(page, "/messages/new");
+    await page.getByPlaceholder("Search people", { exact: true }).fill("carol");
+    await page.getByRole("button", { name: /^carol Level\b/u }).click();
+    await expect(enrollmentHeading(page)).toBeVisible({
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    await page
+      .getByRole("button", { name: "Continue unencrypted", exact: true })
+      .click();
+    const form = page.getByRole("form", { name: "New message" });
+    await expect(form.getByRole("alert")).toHaveText(
+      "@carol only accepts new direct messages from members of a group they chose."
+    );
+  });
+
   test("DM policy and blocks are shown before creation and enforced at creation", async ({
     baseURL,
     browser,

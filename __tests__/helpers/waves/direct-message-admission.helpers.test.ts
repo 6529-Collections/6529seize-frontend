@@ -40,12 +40,13 @@ describe("getDirectMessageAdmissionErrorMessage", () => {
     ).toBe(expected);
   });
 
-  it("names a public group only when the API includes it", () => {
+  it("uses the generic group wording even when the API names a public group", () => {
     expect(
       getDirectMessageAdmissionErrorMessage(
         "en-US",
         apiError({
-          error: "server copy",
+          error:
+            '@alice only accepts new direct messages from members of the group "Meme holders".',
           code: "DM_RECIPIENT_GROUP_MEMBERS_ONLY",
           handle: "alice",
           group_id: "group-1",
@@ -53,7 +54,7 @@ describe("getDirectMessageAdmissionErrorMessage", () => {
         })
       )
     ).toBe(
-      "@alice only accepts new direct messages from members of the group “Meme holders”."
+      "@alice only accepts new direct messages from members of a group they chose."
     );
   });
 

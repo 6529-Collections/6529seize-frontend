@@ -3622,8 +3622,6 @@ export const EN_US_ROOT_MESSAGES = {
     "@{handle} only accepts new direct messages from people they follow.",
   "directMessageAdmission.groupMembersOnly":
     "@{handle} only accepts new direct messages from members of a group they chose.",
-  "directMessageAdmission.groupMembersOnlyWithGroup":
-    "@{handle} only accepts new direct messages from members of the group “{groupName}”.",
   "directMessageAdmission.senderBlockedRecipient":
     "You blocked @{handle}. Unblock them to start a new direct message.",
   "profilePreferences.dm.createRetry": PLEASE_TRY_AGAIN,
