@@ -11908,6 +11908,50 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/inbox-status:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Check for encrypted chats that may be available to an own device
+      description: >-
+        Reports queued Welcome deliveries and whether the caller may have chats
+        on other devices. A roster gap can require device approval, and some
+        chats may never add this device. Requires an active own device and
+        rejects proxies.
+      operationId: e2eeGetDeviceInboxStatus
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetDeviceInboxStatus
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: Inbox status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDeviceInboxStatus"
+        "400":
+          description: Invalid device key
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: Encrypted Messages disabled (E2EE_DISABLED)
+        "429":
+          description: Rate limited
   /e2ee/profiles/{profile_id}/devices:
     get:
       tags:
@@ -35723,6 +35767,21 @@ components:
           type: integer
           format: int64
           description: Unix milliseconds
+    ApiE2eeDeviceInboxStatus:
+      type: object
+      required:
+        - has_pending_chats
+      properties:
+        has_pending_chats:
+          type: boolean
+          description: >-
+            A Welcome is queued or a current roster includes another device of
+            this profile without including this one.
+        has_queued_welcomes:
+          type: boolean
+          description: >-
+            A Welcome is queued for this device. Omitted by servers that only
+            provide the combined has_pending_chats hint.
     ApiE2eeDeviceLookupRequest:
       type: object
       properties:

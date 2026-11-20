@@ -3487,6 +3487,7 @@ export const EN_US_ROOT_MESSAGES = {
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",
+  "messages.loading": "Loading messages",
   // The header and the drop actions menu link to artwork documentation from
   // any page; the rest of its copy is @/i18n/namespaces/artwork-documentation.
   "artworkDocumentation.title": "Artwork documentation",
