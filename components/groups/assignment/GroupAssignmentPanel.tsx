@@ -20,7 +20,7 @@ import GroupCriteriaEditor from "./GroupCriteriaEditor";
 import CreateWaveInlineGroupSearch from "@/components/waves/create-wave/groups/CreateWaveInlineGroupSearch";
 import CreateWaveInlineGroupActions from "@/components/waves/create-wave/groups/CreateWaveInlineGroupActions";
 import {
-  type CreateWaveGroupInlinePanelProps,
+  type GroupInlinePanelOptions,
   useCreateWaveGroupInlinePanel,
 } from "@/components/waves/create-wave/groups/useCreateWaveGroupInlinePanel";
 import GroupMembersPreviewDialog from "@/components/groups/members/GroupMembersPreviewDialog";
@@ -29,7 +29,7 @@ import type { GroupMembersPreviewTarget } from "@/services/api/group-members-api
 
 type GroupAssignmentPanelStartMode = "actions" | "existing" | "criteria";
 
-type GroupAssignmentPanelProps = CreateWaveGroupInlinePanelProps & {
+type GroupAssignmentPanelProps = GroupInlinePanelOptions & {
   readonly presentation?: "default" | "quiet" | "embedded";
   readonly startMode?: GroupAssignmentPanelStartMode;
   readonly showChooseGroup?: boolean;
