@@ -327,7 +327,7 @@ const getValueClasses = (variant: WaveTrustSignalsVariant): string => {
   }
 
   if (isInlineHeaderVariant(variant)) {
-    return "tw-text-[11px] tw-font-semibold tw-leading-4 tw-tabular-nums";
+    return `tw-text-[11px] ${variant === "header-inline" ? "tw-font-medium" : "tw-font-semibold"} tw-leading-4 tw-tabular-nums`;
   }
 
   return "tw-tabular-nums";
