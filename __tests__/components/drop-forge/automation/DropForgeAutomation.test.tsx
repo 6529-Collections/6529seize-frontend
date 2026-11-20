@@ -29,8 +29,8 @@ import { forgeLaunchKey } from "@/hooks/drop-forge-query-keys";
 import {
   dropForgeStatusInterval,
   dropForgeStatusPolling,
+  hasActiveLaunchWork,
 } from "@/hooks/drop-forge-status-polling";
-import { hasActiveLaunchWork } from "@/hooks/useDropForgeLaunch";
 import { forgeProcessKey } from "@/hooks/useDropForgeProcess";
 import { resolveForgePhaseInputs } from "@/services/api/drop-forge-process-inputs";
 import { commonApiPost } from "@/services/api/common-api";

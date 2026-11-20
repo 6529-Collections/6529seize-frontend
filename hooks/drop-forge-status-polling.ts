@@ -1,5 +1,23 @@
 import type { QueryState } from "@tanstack/react-query";
+import { ApiDropForgeActionStateEnum as ActionState } from "@/generated/models/ApiDropForgeAction";
+import {
+  ApiDropForgeLaunchStateEnum as LaunchState,
+  type ApiDropForgeLaunch,
+} from "@/generated/models/ApiDropForgeLaunch";
 import { getStructuredApiErrorStatus } from "@/services/api/common-api";
+
+export function hasActiveLaunchWork(
+  launch: ApiDropForgeLaunch | null | undefined
+): boolean {
+  return (
+    launch !== undefined &&
+    launch !== null &&
+    (launch.state === LaunchState.Armed ||
+      launch.state === LaunchState.Running ||
+      launch.manual_pending === true ||
+      launch.actions.some((action) => action.state === ActionState.Signed))
+  );
+}
 
 function isAccessDenied(error: unknown): boolean {
   const status = getStructuredApiErrorStatus(error);
