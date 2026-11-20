@@ -42,7 +42,7 @@ const MetadataItem: React.FC<{
     : "tw-text-xs tw-font-medium tw-text-iron-200 tw-truncate";
   const content = (
     <>
-      <span className="tw-mb-1 tw-block tw-text-[9px] tw-font-normal tw-uppercase tw-tracking-wide tw-text-iron-500">
+      <span className="tw-mb-1 tw-block tw-text-[9px] tw-font-medium tw-uppercase tw-tracking-wide tw-text-iron-500">
         {label}
       </span>
       <span className={valueClassName} data-tooltip-id={tooltipId}>
@@ -538,7 +538,7 @@ const SingleWaveDropTraitsContent: React.FC<
             variant="tertiary"
             size="xs"
             fullWidth
-            className={`tw-min-w-[100px] tw-self-end ${
+            className={`tw-min-w-[100px] tw-self-end !tw-font-medium ${
               isCompactLayout ? "tw-min-h-11" : ""
             }`}
             aria-expanded={showAllTraits}

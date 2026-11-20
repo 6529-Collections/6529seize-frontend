@@ -206,7 +206,7 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
             data-competition-filters-scroll
             className={`tw-scroll-px-10 tw-overflow-x-auto ${isApp ? "tw-no-scrollbar tw-overscroll-x-contain" : "tw-scrollbar-thin tw-scrollbar-track-iron-800 tw-scrollbar-thumb-iron-500"}`}
           >
-            <div className="tw-w-max tw-pr-px">
+            <div className="tw-w-max tw-pr-px [&_[role=tab][aria-selected=true]]:!tw-font-medium">
               <TabToggleWithOverflow
                 variant="compactPills"
                 maxVisibleTabs={isApp ? 1 : tabOptions.length}

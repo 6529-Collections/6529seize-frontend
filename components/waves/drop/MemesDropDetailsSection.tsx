@@ -60,7 +60,7 @@ export function MemesDropDetailsSection({
               {artworkMedia && fileInfo && (
                 <>
                   <span className="tw-inline-flex tw-items-baseline tw-gap-x-1.5">
-                    <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+                    <span className="tw-text-xs tw-font-normal tw-text-iron-600">
                       Media Type:
                     </span>
                     <span className="tw-text-xs tw-font-medium tw-text-iron-400">

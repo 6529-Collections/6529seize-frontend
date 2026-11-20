@@ -48,7 +48,9 @@ export default function WaveHeaderShareButton({
           className={COMPACT_ACTION_ICON_CLASS}
           strokeWidth={COMPACT_ACTION_ICON_STROKE_WIDTH}
         />
-        <span aria-hidden="true">{label}</span>
+        <span aria-hidden="true" className="tw-font-medium">
+          {label}
+        </span>
       </Button>
       <span role="status" className="tw-sr-only">
         {feedbackState === "idle" ? "" : label}

@@ -31,7 +31,7 @@ const MemesLeaderboardDropArtistInfo = ({
   const authorName = (
     <span
       data-wave-typography="preserve"
-      className="tw-text-sm tw-font-bold tw-leading-none tw-tracking-identity tw-text-white"
+      className="tw-text-sm tw-font-semibold tw-leading-none tw-tracking-identity tw-text-white"
     >
       {drop.author.handle ?? drop.author.primary_address}
     </span>

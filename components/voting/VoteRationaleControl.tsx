@@ -12,7 +12,7 @@ const VARIANT_STYLES = {
     label: "tw-min-h-9 touch-only:tw-min-h-11 max-sm:tw-text-sm",
     panel: "",
     spacing: "tw-pt-1.5",
-    field: "tw-text-sm tw-leading-5",
+    field: "tw-scroll-mb-24 tw-text-sm tw-leading-5",
     placeholder: "placeholder:tw-text-iron-400",
     description: "tw-leading-5",
     rows: 4,
