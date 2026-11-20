@@ -31,16 +31,15 @@ type VoteNumericInputProps = Omit<
 export function VoteNumericInput({
   unit,
   variant,
-  adjustments,
+  adjustments: controls,
   ...inputProps
 }: VoteNumericInputProps) {
-  const fullControls = variant === "default" ? adjustments : undefined;
   const disabled = inputProps.disabled === true || inputProps.readOnly === true;
-  const steps = useVoteNumericSteps(fullControls, disabled);
+  const steps = useVoteNumericSteps(controls, disabled);
   const locale = useBrowserLocale();
   const fieldClass = `${VOTE_NUMERIC_INPUT_BASE_CLASS} ${VOTE_NUMERIC_INPUT_CLASSES[variant]} tw-pl-3`;
 
-  if (!fullControls) {
+  if (!controls) {
     return (
       <div className="tw-relative">
         <input {...inputProps} className={`${fieldClass} tw-pr-28`} />
@@ -99,15 +98,14 @@ export function VoteNumericInput({
       </div>
       <div className="tw-mt-2 tw-flex tw-w-full tw-gap-1.5">
         {PERCENTAGES.filter(
-          (percentage) => percentage > 0 || fullControls.min < 0
+          (percentage) => percentage > 0 || controls.min < 0
         ).map((percentage) => (
           <button
             type="button"
             key={percentage}
-            disabled={disabled || (percentage > 0 && fullControls.max < 0)}
+            disabled={disabled || (percentage > 0 && controls.max < 0)}
             onClick={() => {
-              const bound =
-                percentage < 0 ? fullControls.min : fullControls.max;
+              const bound = percentage < 0 ? controls.min : controls.max;
               steps.setValue(Math.round((Math.abs(percentage) / 100) * bound));
             }}
             className="tw-min-w-0 tw-flex-1 tw-rounded tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900 tw-px-2.5 tw-py-1 tw-text-[11px] tw-font-medium tw-text-iron-400 tw-transition-colors focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 enabled:active:tw-bg-iron-700 disabled:tw-opacity-50 desktop-hover:enabled:hover:tw-bg-iron-800 desktop-hover:enabled:hover:tw-text-iron-50"

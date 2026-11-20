@@ -145,16 +145,12 @@ export const SingleWaveDropVoteInput: React.FC<
       onKeyDown={handleKeyDown}
       unit={label}
       variant={isCompact ? "compact" : "default"}
-      adjustments={
-        isCompact
-          ? undefined
-          : {
-              min: minValue,
-              max: maxValue,
-              value: typeof voteValue === "number" ? voteValue : 0,
-              onChange: setVoteValue,
-            }
-      }
+      adjustments={{
+        min: minValue,
+        max: maxValue,
+        value: typeof voteValue === "number" ? voteValue : 0,
+        onChange: setVoteValue,
+      }}
     />
   );
 };

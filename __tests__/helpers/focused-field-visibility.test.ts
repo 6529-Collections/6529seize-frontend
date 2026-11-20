@@ -134,6 +134,32 @@ describe("observeFocusedField", () => {
     tracking.disconnect();
   });
 
+  it("does not scroll the outer dialog for action space clipped by an inner editor", () => {
+    const container = document.createElement("div");
+    const editor = document.createElement("div");
+    const input = document.createElement("textarea");
+    input.scrollIntoView = jest.fn();
+    const style = getComputedStyle(input);
+    jest.spyOn(globalThis, "getComputedStyle").mockImplementation((element) =>
+      Object.assign({}, style, {
+        overflowY: element === editor ? "hidden" : "visible",
+        scrollMarginBottom: element === input ? "96px" : "0px",
+      })
+    );
+    container.getBoundingClientRect = () => new DOMRect(0, 0, 400, 600);
+    editor.getBoundingClientRect = () => new DOMRect(0, 100, 400, 200);
+    input.getBoundingClientRect = () => new DOMRect(20, 200, 300, 96);
+    editor.append(input);
+    container.append(editor);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    paint();
+    expect(container.scrollTop).toBe(0);
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    tracking.disconnect();
+  });
+
   it("reveals a field clipped by an inner editor even when the outer sheet fits it", () => {
     const container = document.createElement("div");
     const editor = document.createElement("div");

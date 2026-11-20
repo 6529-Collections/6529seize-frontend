@@ -312,7 +312,7 @@ describe("SingleWaveDropVoteInput", () => {
     expect(screen.getByRole("button", { name: "+100%" })).toBeEnabled();
   });
 
-  it("keeps compact legacy entry free of step and percentage controls", () => {
+  it("offers step and percentage controls in compact submission cards", () => {
     render(
       <SingleWaveDropVoteInput
         {...defaultProps}
@@ -321,7 +321,11 @@ describe("SingleWaveDropVoteInput", () => {
     );
 
     expect(screen.getByRole("textbox", { name: "Your vote" })).toHaveValue("0");
-    expect(screen.queryByRole("button")).toBeNull();
+    expect(screen.getByRole("button", { name: "Increase vote" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Decrease vote" })).toBeEnabled();
+    for (const name of ["-100%", "-50%", "+50%", "+100%"]) {
+      expect(screen.getByRole("button", { name })).toBeEnabled();
+    }
   });
 
   it("handles quick percentage button clicks", async () => {

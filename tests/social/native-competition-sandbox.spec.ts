@@ -7434,8 +7434,14 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expectNumericVoteAppearance(input);
       await expect(
         dialog.getByRole("button", { name: /^(Increase|Decrease) vote$/ })
-      ).toHaveCount(0);
-      await expect(dialog.getByRole("button", { name: /%$/ })).toHaveCount(0);
+      ).toHaveCount(2);
+      await expect(dialog.getByRole("button", { name: /%$/ })).toHaveCount(4);
+      await dialog.getByRole("button", { name: "+50%", exact: true }).click();
+      await expect(input).toHaveValue("50");
+      await dialog.getByRole("button", { name: "Increase vote" }).focus();
+      await page.keyboard.press("Enter");
+      await expect(input).toHaveValue("51");
+      expect(sandbox.requests).toHaveLength(0);
       await expect(input).toHaveCSS(
         "height",
         testInfo.project.use.hasTouch ? "44px" : "36px"
@@ -7522,7 +7528,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .poll(async () => {
             const [inputBox, explainBox, saveBox, replyBox] = await Promise.all(
               [
-                input.boundingBox(),
+                dialog.locator("[data-vote-numeric-stepper]").boundingBox(),
                 explain.boundingBox(),
                 save.boundingBox(),
                 expanded

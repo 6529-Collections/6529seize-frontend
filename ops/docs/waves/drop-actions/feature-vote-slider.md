@@ -53,8 +53,9 @@ current voting budget; other drops use their own allowed range.
 - Compact submission cards use a smaller numeric field on desktop. Phones and
   touch devices keep a larger field and text for entry.
 - Full and compact numeric fields share the app font, neutral background and
-  visible keyboard focus. Credit labels remain beside the amount. In full
-  panels, a visible border frames the numeric field and its two arrows.
+  visible keyboard focus. Credit labels remain beside the amount. A visible
+  border frames the numeric field and its two arrows in full panels and compact
+  submission cards.
 - In full-size dialogs and sheets, `Explain vote` uses a chat icon on its own
   row. Its reply field opens below that row, followed by a full-width `Vote`
   button, including on desktop. Compact decision submission cards that offer
@@ -65,7 +66,7 @@ current voting budget; other drops use their own allowed range.
   values are easier to reach.
 - Keyboard focus highlights the slider handle. Clicking or dragging does not
   draw a focus box around the whole slider area.
-- Full-size numeric controls offer `-100%`, `-50%`, `+50%`, and `+100%`.
+- Full-size and compact submission-card numeric controls offer `-100%`, `-50%`, `+50%`, and `+100%`.
   The shortcuts use the allowed vote on this drop or decision entry. For
   example, `+50%` fills in 40 if the maximum is 80. Negative shortcuts are
   omitted when negative votes are not allowed.

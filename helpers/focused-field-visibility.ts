@@ -74,7 +74,10 @@ export function observeFocusedField(
         ) {
           // Move only the dialog for optional action clearance; scrolling all
           // ancestors can move the background under a native keyboard.
-          if (fieldBottom > visibleBottom) {
+          if (
+            visibleBottom === scrollport.bottom &&
+            fieldBottom > visibleBottom
+          ) {
             container.scrollTop += fieldBottom - visibleBottom;
           }
           return;
