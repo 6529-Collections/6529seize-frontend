@@ -375,7 +375,8 @@ export default function Rememes({
                 filterLabel={t(locale, "rememes.sorting.filterLabel")}
                 setSelected={setSelectedSorting}
                 size="sm"
-                variant="editorial"
+                variant="regular"
+                presentation="editorial"
                 showFilterLabel
               />
               {selectedSorting === RememeSort.RANDOM && (
@@ -407,7 +408,8 @@ export default function Rememes({
                 filterLabel={t(locale, "rememes.tokenType.filterLabel")}
                 setSelected={setSelectedTokenType}
                 size="sm"
-                variant="editorial"
+                variant="regular"
+                presentation="editorial"
                 showFilterLabel
               />
               <div className="tw-shrink-0">
@@ -418,7 +420,8 @@ export default function Rememes({
                   noneLabel={selectedMeme ? selectedMeme.toString() : undefined}
                   setSelected={updateSelectedMeme}
                   size="sm"
-                  variant="editorial"
+                  variant="regular"
+                  presentation="editorial"
                   menuMinWidth={320}
                   showFilterLabel
                 />

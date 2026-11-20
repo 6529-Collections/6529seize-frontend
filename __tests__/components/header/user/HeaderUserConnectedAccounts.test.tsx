@@ -113,7 +113,7 @@ describe("HeaderUserConnectedAccounts", () => {
     });
     const addProfile = screen.getByRole("button", { name: "Add profile" });
     const signOutAll = screen.getByRole("button", { name: "Sign out all" });
-    expect(activeButton).toHaveClass("tw-bg-iron-700");
+    expect(activeButton).toHaveClass("tw-bg-iron-800", "tw-text-iron-100");
     expect(activeButton.querySelector("svg")).toBeInTheDocument();
     expect(addProfile).toHaveClass("tw-border", "tw-border-iron-600");
     expect(signOutAll).toHaveClass("tw-border", "tw-border-iron-600");

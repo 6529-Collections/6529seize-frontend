@@ -214,7 +214,7 @@ export default function UserPageCollectedStats({
   return (
     <section
       data-profile-section="Collection summary"
-      className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black"
+      className={`${isDetailsOpen ? "tw-overflow-visible" : "tw-overflow-hidden"} tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-black`}
     >
       <div
         data-profile-section-anchor={

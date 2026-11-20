@@ -13,6 +13,12 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useId, useRef, useState } from "react";
 import type { CollectGoalOption } from "./collect.types";
+import {
+  getDropdownTriggerClasses,
+  DROPDOWN_OPTION_ACTIVE_CLASSES,
+  DROPDOWN_SELECTED_OPTION_CLASSES,
+  DROPDOWN_CHECKMARK_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
 interface Props {
   readonly label: string;
@@ -89,7 +95,7 @@ export default function CollectGoalDefinitionMobilePicker({
             setQuery("");
             setIsOpen(true);
           }}
-          className={`tw-flex tw-min-h-11 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-bg-iron-950 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 ${invalid ? "tw-border-error" : "tw-border-iron-700"}`}
+          className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "sm" }, invalid })} tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-text-left`}
         >
           <span id={`${id}-value`} className="tw-min-w-0 tw-break-words">
             {selected?.label ?? placeholder}
@@ -143,7 +149,7 @@ export default function CollectGoalDefinitionMobilePicker({
                   onChange={(event) => setQuery(event.target.value)}
                   placeholder={t(locale, "collect.goal.searchArtist")}
                   autoComplete="off"
-                  className="tw-mb-3 tw-block tw-min-h-11 tw-w-full tw-shrink-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+                  className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "sm" }, textInput: true })} tw-mb-3 tw-block tw-w-full tw-shrink-0 tw-text-iron-100 placeholder:tw-text-iron-500`}
                 />
                 {filtered.length === 0 && (
                   <output className="tw-block tw-py-4 tw-text-sm tw-text-iron-400">
@@ -164,7 +170,7 @@ export default function CollectGoalDefinitionMobilePicker({
                     }) => (
                       <ComboboxOption
                         value={definition}
-                        className="tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400"
+                        className={`tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 ${DROPDOWN_OPTION_ACTIVE_CLASSES}`}
                       >
                         {({ selected: isSelected }) => (
                           <>
@@ -174,7 +180,7 @@ export default function CollectGoalDefinitionMobilePicker({
                             {isSelected && (
                               <CheckIcon
                                 aria-hidden="true"
-                                className="tw-size-4 tw-shrink-0 tw-text-iron-300"
+                                className={`tw-size-4 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
                               />
                             )}
                           </>
@@ -197,7 +203,9 @@ export default function CollectGoalDefinitionMobilePicker({
               <ul className="tw-m-0 tw-list-none tw-p-0">
                 {filtered.map((definition) => (
                   <li key={definition.id}>
-                    <label className="tw-relative tw-flex tw-min-h-12 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 active:tw-bg-iron-800">
+                    <label
+                      className={`tw-relative tw-flex tw-min-h-12 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-px-3 tw-py-2 tw-text-sm active:tw-bg-iron-800 ${DROPDOWN_OPTION_ACTIVE_CLASSES} ${definition.id === value ? DROPDOWN_SELECTED_OPTION_CLASSES : "tw-bg-transparent tw-text-iron-200"}`}
+                    >
                       <input
                         type="radio"
                         name={`${id}-definition`}
@@ -215,7 +223,7 @@ export default function CollectGoalDefinitionMobilePicker({
                       {definition.id === value && (
                         <CheckIcon
                           aria-hidden="true"
-                          className="tw-size-4 tw-shrink-0 tw-text-iron-300"
+                          className={`tw-size-4 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
                         />
                       )}
                       <span

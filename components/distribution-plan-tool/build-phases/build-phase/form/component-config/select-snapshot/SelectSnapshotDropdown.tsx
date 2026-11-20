@@ -1,6 +1,9 @@
 "use client";
 
-import { DROPDOWN_TRIGGER_CLASSES, DROPDOWN_CHEVRON_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import {
+  getDropdownTriggerClasses,
+  DROPDOWN_CHEVRON_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import AllowlistToolAnimationWrapper from "@/components/allowlist-tool/common/animation/AllowlistToolAnimationWrapper";
 import type { DistributionPlanSnapshot } from "@/components/distribution-plan-tool/build-phases/build-phase/form/BuildPhaseFormConfigModal";
 import { motion, useAnimate } from "framer-motion";
@@ -47,20 +50,22 @@ export default function SelectSnapshotDropdown({
     <div ref={listRef}>
       <label
         id="listbox-label"
-        className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100">
+        className="tw-block tw-text-sm tw-font-normal tw-leading-5 tw-text-iron-100"
+      >
         Snapshot
       </label>
       <div className="tw-relative tw-mt-1.5">
         <button
           type="button"
-          className={`${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-flex tw-w-full tw-items-center tw-px-3.5 tw-py-3 tw-pr-9 tw-text-base tw-caret-primary-400 sm:tw-leading-6`}
+          className={`${getDropdownTriggerClasses({ variant: "regular", metrics: { x: 14, y: 12, right: 36, text: "base", leading: "responsive" } })} tw-relative tw-flex tw-w-full tw-items-center tw-caret-primary-400`}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           aria-labelledby="listbox-label"
           onClick={(e) => {
             e.stopPropagation();
             toggleOpen();
-          }}>
+          }}
+        >
           <span className="tw-block tw-truncate">{title}</span>
           <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
             <svg
@@ -68,7 +73,8 @@ export default function SelectSnapshotDropdown({
               className={DROPDOWN_CHEVRON_CLASSES}
               viewBox="0 0 24 24"
               fill="none"
-              xmlns="http://www.w3.org/2000/svg">
+              xmlns="http://www.w3.org/2000/svg"
+            >
               <path
                 d="M6 9L12 15L18 9"
                 stroke="currentColor"
@@ -82,11 +88,12 @@ export default function SelectSnapshotDropdown({
         <AllowlistToolAnimationWrapper>
           {isOpen && (
             <motion.div
-              className="tw-origin-top-right tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-rounded-lg tw-shadow-xl tw-bg-iron-800 tw-ring-1 tw-ring-black tw-ring-opacity-5"
+              className="tw-absolute tw-right-0 tw-mt-1 tw-w-full tw-origin-top-right tw-rounded-lg tw-bg-iron-900 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.2 }}>
+              transition={{ duration: 0.2 }}
+            >
               <SelectSnapshotDropdownList
                 snapshots={snapshots}
                 setSelectedSnapshot={onSelect}

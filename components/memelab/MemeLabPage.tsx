@@ -17,6 +17,7 @@ import {
 } from "@/components/the-memes/MemePageSkeleton";
 import { MEME_FOCUS } from "@/components/the-memes/MemeShared";
 import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
+import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
 import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import ProfileCollectedReturnLink from "@/components/user/collected/ProfileCollectedReturnLink";
 import { apiUrl } from "@/services/api/api-endpoints";
@@ -511,15 +512,20 @@ export default function MemeLabPageComponent({
           aria-labelledby="meme-lab-card-activity-heading"
           className="tw-scroll-mt-24"
         >
-          <div className="tw-mb-4 tw-flex tw-flex-col tw-items-stretch tw-justify-between tw-gap-3 md:tw-flex-row md:tw-items-center">
+          <div className="tw-mb-4 tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
             <h3
               id="meme-lab-card-activity-heading"
-              className="tw-mb-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg md:tw-text-base md:tw-leading-6 md:tw-text-iron-100"
+              className="tw-m-0 tw-text-base tw-font-semibold tw-text-iron-200 sm:tw-text-lg md:tw-text-base md:tw-leading-6 md:tw-text-iron-100"
             >
               {t(locale, "memeLab.detail.tabs.cardActivity")}
             </h3>
-            <div className="tw-w-full tw-shrink-0 md:tw-w-72">
+            <DropdownToolbar
+              variant="regular"
+              className="tw-w-fit tw-max-w-full tw-shrink-0"
+            >
               <CommonDropdown
+                variant="regular"
+                presentation="toolbar"
                 items={getActivityTypeItems(locale)}
                 activeItem={activityTypeFilter}
                 filterLabel={t(
@@ -530,7 +536,7 @@ export default function MemeLabPageComponent({
                   setActivityTypeFilter(filter);
                 }}
               />
-            </div>
+            </DropdownToolbar>
           </div>
           <NftMarketActivity
             contract={MEMELAB_CONTRACT}

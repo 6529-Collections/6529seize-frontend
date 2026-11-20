@@ -1,4 +1,4 @@
-
+import { DROPDOWN_PANEL_SURFACE_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import type { AllowlistToolSelectMenuMultipleOption } from "./AllowlistToolSelectMenuMultiple";
 import AllowlistToolSelectMenuMultipleListItem from "./AllowlistToolSelectMenuMultipleListItem";
 
@@ -13,7 +13,7 @@ export default function AllowlistToolSelectMenuList({
 }) {
   return (
     <ul
-      className="tw-absolute tw-z-10 tw-pl-1.5 tw-pr-1.5 tw-list-none tw-mt-1 tw-max-h-60 tw-w-full tw-overflow-auto tw-rounded-lg tw-bg-[#282828] tw-py-2 tw-text-base tw-shadow-xl  tw-ring-1 tw-ring-inset tw-ring-white/10 focus:tw-outline-none sm:tw-text-sm"
+      className={`${DROPDOWN_PANEL_SURFACE_CLASSES} tw-absolute tw-z-10 tw-mt-1 tw-max-h-60 tw-w-full tw-list-none tw-overflow-auto tw-py-2 tw-pl-1.5 tw-pr-1.5 tw-text-base tw-ring-inset focus:tw-outline-none sm:tw-text-sm`}
       role="listbox"
       aria-labelledby="listbox-label"
       aria-activedescendant="listbox-option-3"
@@ -28,12 +28,8 @@ export default function AllowlistToolSelectMenuList({
           />
         ))}
       {options.length === 0 && (
-        <li className="tw-p-2 tw-text-iron-300">
-          No options found
-        </li>
+        <li className="tw-p-2 tw-text-iron-300">No options found</li>
       )}
     </ul>
   );
 }
-
-
