@@ -5,6 +5,7 @@ import clsx from "clsx";
 import type { ReactNode } from "react";
 import { useRef, useState } from "react";
 import type { CompactMenuItem } from "./types";
+import { DEFAULT_ACTIVE_ITEM_CLASSES } from "./constants";
 
 interface MobileBottomSheetTriggerProps {
   readonly ariaLabel: string;
@@ -99,7 +100,7 @@ export default function CompactMenuMobileBottomSheet({
         onAfterLeave={runPendingAction}
         zIndexClassName={zIndexClassName}
       >
-        <div className="tw-flex tw-flex-col tw-px-4 sm:tw-px-6">
+        <div className="tw-flex tw-flex-col tw-gap-0.5 tw-px-4 sm:tw-px-6">
           {items.map((item) =>
             item.kind === "section" ? (
               <div
@@ -120,7 +121,12 @@ export default function CompactMenuMobileBottomSheet({
                 }
                 className={clsx(
                   itemClassName ??
-                    "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-0 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-text-iron-200 tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+                    clsx(
+                      "tw-flex tw-min-h-12 tw-w-full tw-items-center tw-gap-3 tw-rounded-xl tw-border-0 tw-px-3 tw-py-3 tw-text-left tw-text-base tw-font-medium tw-transition-colors tw-duration-200 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-50",
+                      item.active
+                        ? DEFAULT_ACTIVE_ITEM_CLASSES
+                        : "tw-bg-transparent tw-text-iron-200"
+                    ),
                   item.className
                 )}
               >

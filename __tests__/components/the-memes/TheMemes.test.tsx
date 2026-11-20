@@ -1,4 +1,4 @@
-import { printVolumeTypeDropdown } from "@/components/the-memes/TheMemes";
+import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
 import { VolumeType } from "@/entities/INFT";
 import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
@@ -33,7 +33,14 @@ jest.mock("@/components/the-memes/TheMemes.module.css", () => ({
 
 describe("TheMemes helpers", () => {
   it("renders volume type options", () => {
-    render(printVolumeTypeDropdown(false, jest.fn(), jest.fn()));
+    render(
+      <VolumeTypeDropdown
+        isVolumeSort={false}
+        selectedVolumeSort={VolumeType.ALL_TIME}
+        setVolumeType={jest.fn()}
+        setVolumeSort={jest.fn()}
+      />
+    );
     fireEvent.click(screen.getByRole("button", { name: /Volume/ }));
     expect(screen.getByText(VolumeType.ALL_TIME)).toBeInTheDocument();
     expect(screen.getByText(VolumeType.DAYS_7)).toBeInTheDocument();

@@ -1,7 +1,7 @@
 "use client";
 
 import CollectionSortControls from "@/components/collection-page/CollectionSortControls";
-import { printVolumeTypeDropdown } from "@/components/the-memes/TheMemes";
+import VolumeTypeDropdown from "@/components/the-memes/VolumeTypeDropdown";
 import { VolumeType } from "@/entities/INFT";
 import { SortDirection } from "@/entities/ISort";
 import { type SupportedLocale } from "@/i18n/locales";
@@ -49,13 +49,14 @@ export default function MemeLabSortControls({
       ascendingLabel={t(locale, "memeLab.sorting.ascendingLabel")}
       descendingLabel={t(locale, "memeLab.sorting.descendingLabel")}
     >
-      {printVolumeTypeDropdown(
-        currentSort === MemeLabSort.VOLUME,
-        setVolumeType,
-        () => setSort(MemeLabSort.VOLUME),
-        volumeType,
-        locale
-      )}
+      <VolumeTypeDropdown
+        presentation="underline"
+        isVolumeSort={currentSort === MemeLabSort.VOLUME}
+        setVolumeType={setVolumeType}
+        setVolumeSort={() => setSort(MemeLabSort.VOLUME)}
+        selectedVolumeSort={volumeType}
+        locale={locale}
+      />
     </CollectionSortControls>
   );
 }
