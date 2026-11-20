@@ -73,7 +73,14 @@ function selectCompetition(
   });
 }
 
-function mockPublicGroup() {
+function mockPublicGroup({ includeCriteria = true } = {}) {
+  const criteria = {
+    tdh: { min: 1, max: null, inclusion_strategy: "TDH" },
+    rep: { min: null, max: null, user_identity: null },
+    cic: { min: null, max: null, user_identity: null },
+    level: { min: null, max: null },
+    owns_nfts: [],
+  };
   (useQuery as jest.Mock).mockImplementation(
     ({ queryKey }: { readonly queryKey: readonly unknown[] }) => {
       if (queryKey[0] === QueryKey.COMMUNITY_MEMBERS_TOP) {
@@ -84,13 +91,7 @@ function mockPublicGroup() {
           name: "Public Club",
           visible: true,
           is_private: false,
-          group: {
-            tdh: { min: 1, max: null, inclusion_strategy: "TDH" },
-            rep: { min: null, max: null, user_identity: null },
-            cic: { min: null, max: null, user_identity: null },
-            level: { min: null, max: null },
-            owns_nfts: [],
-          },
+          group: includeCriteria ? criteria : undefined,
         },
       };
     }
@@ -274,6 +275,15 @@ describe("WaveSubmissionAccessDetails", () => {
     ).toBeVisible();
   });
 
+  it("reports unavailable criteria when the public group payload omits them", () => {
+    selectCompetition({ group_id: "beta-group", signature_required: false });
+    mockPublicGroup({ includeCriteria: false });
+    render(<WaveSubmissionAccessDetails wave={makeWave()} />);
+    expect(
+      screen.getByRole("link", { name: "10,191 users" })
+    ).toHaveAccessibleDescription("Group criteria unavailable");
+  });
+
   it.each([
     { data: { visible: true, is_private: true }, isError: false },
     { data: { visible: false, is_private: false }, isError: false },
@@ -453,23 +463,32 @@ describe("WaveSubmissionAccessDetails", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("uses the current group visibility when legacy wave access is stale", () => {
-    (useQuery as jest.Mock).mockReturnValue({
-      data: { name: "Legacy Club", visible: true, is_private: true },
-    });
-    render(
-      <WaveSubmissionAccessDetails
-        wave={makeWave({ id: "legacy-group", is_hidden: false })}
-      />
-    );
-    expect(screen.getByText("Private group")).toBeVisible();
-    expect(screen.getAllByRole("link")).toHaveLength(1);
-    expect(useQuery).not.toHaveBeenCalledWith(
-      expect.objectContaining({
-        queryKey: expect.arrayContaining([QueryKey.COMMUNITY_MEMBERS_TOP]),
-      })
-    );
-  });
+  it.each([
+    {
+      status: "has a private group",
+      groupQuery: {
+        data: { name: "Legacy Club", visible: true, is_private: true },
+      },
+    },
+    { status: "cannot load its group", groupQuery: { isError: true } },
+  ])(
+    "keeps legacy group details private when the Wave $status",
+    ({ groupQuery }) => {
+      (useQuery as jest.Mock).mockReturnValue(groupQuery);
+      render(
+        <WaveSubmissionAccessDetails
+          wave={makeWave({ id: "legacy-group", is_hidden: false })}
+        />
+      );
+      expect(screen.getByText("Private group")).toBeVisible();
+      expect(screen.getAllByRole("link")).toHaveLength(1);
+      expect(useQuery).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          queryKey: expect.arrayContaining([QueryKey.COMMUNITY_MEMBERS_TOP]),
+        })
+      );
+    }
+  );
 
   it("does not imply that public group access overrides submission rules", () => {
     render(<WaveSubmissionAccessDetails wave={makeWave()} />);

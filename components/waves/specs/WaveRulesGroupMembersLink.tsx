@@ -24,6 +24,7 @@ export default function WaveRulesGroupMembersLink({
   readonly groupId: string;
   /** Existing Wave Rules links use this for their group-name tooltip. */
   readonly groupName?: string | undefined;
+  /** The complete saved group response, including its criteria payload. */
   readonly groupDetails?: ApiGroupFull | undefined;
   readonly href: string;
   readonly linkLabel?: string | undefined;
