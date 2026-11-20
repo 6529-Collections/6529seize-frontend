@@ -15,7 +15,7 @@ const MyStreamWaveMyVotesResetProgress: React.FC<
     <div className="tw-mt-3 tw-px-0.5">
       <div className="tw-mb-1 tw-flex tw-items-center tw-justify-between tw-text-xs tw-text-iron-400">
         <span>Resetting votes...</span>
-        <span className="tw-font-medium !tw-tabular-nums">
+        <span className="tw-font-medium">
           {resetProgress} / {totalCount}
         </span>
       </div>

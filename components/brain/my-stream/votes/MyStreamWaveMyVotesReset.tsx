@@ -202,16 +202,14 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                       disabled={isResetting}
                       aria-label={resetButtonAriaLabel}
                     >
-                      <span
-                        className={`${COMPACT_ACTION_CONTENT_CLASS} !tw-tabular-nums`}
-                      >
+                      <span className={COMPACT_ACTION_CONTENT_CLASS}>
                         {isResetting
                           ? t(locale, "waves.myVotes.resetting")
                           : resetButtonLabel}
                       </span>
                     </button>
                     {selectedCount > 0 && (
-                      <output className="tw-whitespace-nowrap tw-text-sm !tw-tabular-nums tw-leading-5 tw-text-iron-400">
+                      <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
                         {selectedLabel}
                       </output>
                     )}

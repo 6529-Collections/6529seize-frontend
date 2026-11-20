@@ -111,7 +111,7 @@ export const SingleWaveDropWrapper: React.FC<SingleWaveDropWrapperProps> = ({
       data-video-viewport
       className={clsx(
         videoFrameStyles["viewport"],
-        "tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 [--video-bottom-reserve:env(safe-area-inset-bottom,0px)] [--video-header-reserve:calc(env(safe-area-inset-top,0px)+4rem)] lg:tw-flex-row [&_.tw-tabular-nums]:!tw-tabular-nums"
+        "tw-flex tw-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-overscroll-none tw-bg-iron-950 [--video-bottom-reserve:env(safe-area-inset-bottom,0px)] [--video-header-reserve:calc(env(safe-area-inset-top,0px)+4rem)] lg:tw-flex-row"
       )}
     >
       <div className="@container tw-relative tw-h-full tw-flex-1 tw-overflow-hidden">

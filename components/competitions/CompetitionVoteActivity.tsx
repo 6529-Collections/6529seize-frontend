@@ -55,7 +55,7 @@ export default function CompetitionVoteActivity() {
   const logs = query.data.pages.flat();
   if (!logs.length) return <CompetitionState empty />;
   return (
-    <div className="tw-w-full tw-max-w-6xl [&_span.tw-font-medium.tw-tabular-nums]:!tw-font-normal [&_span.tw-font-semibold.tw-tabular-nums]:!tw-font-semibold">
+    <div className="tw-w-full tw-max-w-6xl [&_span.tw-font-medium.tw-normal-nums]:!tw-font-normal [&_span.tw-font-semibold.tw-tabular-nums]:!tw-font-semibold">
       {logs.map((log) => (
         <WaveLeaderboardRightSidebarActivityLog
           key={log.id}

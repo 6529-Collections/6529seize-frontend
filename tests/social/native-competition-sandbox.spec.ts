@@ -1880,8 +1880,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await expect(activity.getByText("voted", { exact: true })).toBeVisible();
     await expect(activity).toHaveCSS("opacity", "1");
-    for (const panel of [voterPanel, activity]) {
-      const numbers = panel.locator(".tw-tabular-nums");
+    for (const name of ["Top voters", "Activity log"]) {
+      const numbers = page
+        .getByRole("region", { name, exact: true })
+        .locator(".tw-tabular-nums");
       expect(await numbers.count()).toBeGreaterThan(0);
       for (const number of await numbers.all()) {
         await expect(number).toHaveCSS("font-variant-numeric", "tabular-nums");
@@ -2366,11 +2368,14 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       "400"
     );
     await expect(
-      page.locator("[data-video-viewport]").getByText("Title", { exact: true })
+      page
+        .getByRole("main")
+        .locator("[data-video-viewport]")
+        .getByText("Title", { exact: true })
     ).toHaveCSS("font-weight", "500");
-    const voteTotal = page.locator(
-      "[data-video-viewport] span.tw-tabular-nums.tw-text-white"
-    );
+    const voteTotal = page
+      .getByRole("main")
+      .locator("[data-video-viewport] span.tw-tabular-nums.tw-text-white");
     await expect(voteTotal).toHaveCSS("font-weight", "600");
     await expect(voteTotal).toHaveCSS("font-variant-numeric", "tabular-nums");
     await expect(
@@ -4464,10 +4469,12 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         "font-variant-numeric",
         "tabular-nums"
       );
-      for (const timestamp of await activity
-        .locator("span.tw-font-medium.tw-tabular-nums")
+      for (const timestamp of await page
+        .getByRole("tabpanel", { name: "Activity", exact: true })
+        .locator("span.tw-font-medium.tw-normal-nums")
         .all()) {
         await expect(timestamp).toHaveCSS("font-weight", "400");
+        await expect(timestamp).toHaveCSS("font-variant-numeric", "normal");
       }
       await expect(creator).toBeVisible();
       await expect(
@@ -4682,7 +4689,10 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         "font-variant-numeric",
         "tabular-nums"
       );
-      for (const total of await row
+      for (const total of await page
+        .getByRole("tabpanel", { name: "My Votes", exact: true })
+        .getByRole("article")
+        .first()
         .locator("span.tw-font-semibold.tw-tabular-nums")
         .all()) {
         await expect(total).toHaveCSS("font-weight", "600");
@@ -4751,7 +4761,11 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       });
       await expect(selectAll).toBeVisible();
-      await expect(selectAll.locator("span")).toHaveCSS("font-weight", "500");
+      await expect(
+        panel
+          .getByRole("button", { name: "Select all", exact: true })
+          .locator("span")
+      ).toHaveCSS("font-weight", "500");
       await expect(resetVotes).toHaveCount(0);
       await page.mouse.move(0, 0);
       // My Votes keeps the bordered secondary surface; Create is now a ghost action.
@@ -14613,6 +14627,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           await expect(artworkTitle).toBeVisible();
           await expect(artworkTitle).toHaveCSS("font-weight", "600");
           const voteTotal = page
+            .getByRole("main")
             .locator('[data-wave-typography="preserve"].tw-tabular-nums')
             .filter({ hasText: "123" });
           await expect(voteTotal).toHaveCSS("font-weight", "600");
@@ -15069,6 +15084,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .boundingBox();
       expect(navigationTab).not.toBeNull();
       expect(timeline).not.toBeNull();
+      const countdown = page
+        .getByRole("button", { name: "Toggle results timeline", exact: true })
+        .locator('span[aria-hidden="true"]')
+        .filter({ hasText: /\d/ });
+      await expect(countdown).toHaveCount(1);
+      await expect(countdown).toHaveCSS("font-variant-numeric", "normal");
       // The page already supplies the gap below navigation; do not double it.
       const timelineGap =
         timeline!.y - (navigationTab!.y + navigationTab!.height);
