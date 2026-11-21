@@ -5,8 +5,10 @@ import { useMemo, useRef, useState } from "react";
 import FilterGridDropdownItemsWrapper from "./FilterGridDropdownItemsWrapper";
 import {
   DROPDOWN_CHEVRON_CLASSES,
-  DROPDOWN_TRIGGER_CLASSES,
+  getDropdownTriggerClasses,
 } from "./dropdownTriggerStyles";
+
+import { useDropdownToolbarMetrics } from "./DropdownToolbar";
 
 interface FilterGridDropdownItem<TValue extends string | number> {
   readonly value: TValue;
@@ -32,6 +34,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
   readonly triggerLabel?: string | undefined;
   readonly triggerAriaLabel: string;
 }) {
+  const toolbarMetrics = useDropdownToolbarMetrics();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -65,7 +68,7 @@ export default function FilterGridDropdown<TValue extends string | number>({
           aria-expanded={isOpen}
           onClick={() => setIsOpen(!isOpen)}
           disabled={disabled}
-          className={`${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-py-3 tw-pl-3 tw-pr-9 tw-text-left tw-text-xs`}
+          className={`${getDropdownTriggerClasses({ variant: "regular", metrics: { y: 12, left: 12, right: 36, text: "xs", ...toolbarMetrics } })} tw-relative tw-block tw-w-full tw-truncate tw-whitespace-nowrap tw-text-left`}
         >
           {activeLabel}
           <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-3 tw-flex tw-items-center">

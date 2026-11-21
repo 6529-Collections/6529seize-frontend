@@ -74,9 +74,9 @@ export default function HeaderTitleContent({
                 aria-label={t(locale, "waves.information.open", {
                   name: displayWave.name,
                 })}
-                className="tw-flex tw-min-h-6 tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                className="tw-flex tw-min-h-6 tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-font-medium tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
               >
-                <span className="tw-w-full tw-truncate tw-text-sm tw-font-semibold">
+                <span className="tw-w-full tw-truncate tw-text-sm tw-font-medium">
                   {displayWave.name}
                 </span>
                 {previewText && (

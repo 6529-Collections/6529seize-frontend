@@ -25,13 +25,13 @@ export default function RepCategorySearchDropdown({
       <AnimatePresence mode="wait" initial={false}>
         {open && (
           <m.div
-            className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-bg-iron-800 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
+            className="tw-absolute tw-z-50 tw-mt-1.5 tw-w-full tw-rounded-lg tw-bg-iron-900 tw-shadow-xl tw-ring-1 tw-ring-black tw-ring-opacity-5"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="tw-absolute tw-z-50 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
+            <div className="tw-absolute tw-z-50 tw-w-full tw-overflow-hidden tw-rounded-md tw-bg-iron-900 tw-shadow-2xl tw-ring-1 tw-ring-white/10">
               <div className="tw-flow-root tw-overflow-y-auto tw-overflow-x-hidden tw-py-1">
                 <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-px-2">
                   {categories.length ? (

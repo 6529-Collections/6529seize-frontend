@@ -11,8 +11,8 @@ with a multi-select cause filter, grouped reactions, and inline drop previews.
 ## Location in the Site
 
 - Route: `/notifications`.
-- Reached by clicking the desktop sidebar bell, choosing `View all
-  notifications` in its preview, or using mobile/app notifications navigation.
+- Reached by clicking the desktop sidebar bell, choosing `View all notifications`
+  in its preview, or using mobile/app notifications navigation.
 - Opened directly from URL, including `/notifications?reload=true`.
 
 ## Entry Points
@@ -44,10 +44,11 @@ in previews appear as `@handle` and `#wave`, without storage brackets.
 Regular and encrypted message previews render Markdown formatting, including
 bold, italic, strikethrough, lists, and code, within two compact lines. Drop titles
 keep their original plain-text formatting, and separate message parts retain
-their Markdown block boundaries. Links
-and images appear as labels in the preview; selecting the row opens the related
-message. Previewing does not load linked pages, embedded content, or message
-images. Encrypted previews remain available only from this device's local history.
+their Markdown block boundaries. A wave drop preview can show one inline image
+uploaded to 6529 as a thumbnail beside the text. Links, external images, and
+images in encrypted previews appear as text labels. Selecting the row opens
+the related message. Encrypted previews are available from this device's local
+history.
 Known custom emoji shortcodes render as compact emoji images in regular and
 encrypted previews, including encrypted rows on the full notifications page.
 Native emoji shortcodes render as their Unicode emoji, which keep their normal
@@ -96,7 +97,9 @@ provides filters, grouped reactions, and richer drop interactions.
   `Loading notifications is taking longer than expected. Please try again.`
   with `Try again`.
 - Empty state: `No notifications found` with `Explore Waves` and
-  `Create a Wave`.
+  `Create a Wave`. The icon, message, and actions are centered in the available
+  feed area, with compact actions stacked on narrow screens. The description's
+  `following` link opens Waves, and `creating a Wave` opens wave creation.
 
 ## Feed Filters
 

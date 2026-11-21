@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import React, {
   useCallback,
   useEffect,
@@ -208,7 +210,7 @@ const InlineSidebar = ({
         {isOpen && (
           <m.div
             key="inline-sidebar"
-            className="tw-absolute tw-inset-y-0 tw-right-0 tw-w-[22rem] tw-pl-6 tw-pt-2 tw-will-change-transform"
+            className="tw-absolute tw-inset-y-0 tw-right-0 tw-w-[22rem] tw-p-2 tw-will-change-transform"
             initial={prefersReducedMotion ? false : { x: "100%" }}
             animate={{ x: 0 }}
             exit={{
@@ -220,7 +222,7 @@ const InlineSidebar = ({
             <aside
               id={BRAIN_RIGHT_SIDEBAR_ID}
               aria-label={panelLabel}
-              className="tw-flex tw-h-full tw-w-[20.5rem] tw-min-w-0 tw-max-w-full tw-flex-col tw-overflow-hidden tw-rounded-lg tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-bg-iron-950"
+              className="tw-flex tw-h-full tw-w-full tw-min-w-0 tw-max-w-full tw-flex-col tw-overflow-hidden tw-rounded-xl tw-bg-iron-950"
             >
               {children}
             </aside>
@@ -375,12 +377,12 @@ const OverlaySidebar = ({
                 className="tw-relative tw-flex tw-h-full tw-w-full tw-min-w-0 tw-flex-col tw-overflow-visible tw-border-y-0 tw-border-l tw-border-r-0 tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-shadow-2xl"
               >
                 <div className="tw-absolute -tw-left-5 tw-top-2 tw-z-[110]">
-                  <button
+                  <IconButton
                     type="button"
                     onClick={close}
                     ref={closeButtonRef}
                     data-autofocus
-                    className="tw-group tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-r-0 tw-border-solid tw-border-white/[0.08] tw-bg-iron-700 tw-shadow-md tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-border-white/[0.16] desktop-hover:hover:tw-bg-iron-600 motion-reduce:tw-transition-none"
+                    layout="sidebar-edge"
                     aria-label={waveRightPanelText(
                       "waves.sidebar.rightPanel.close"
                     )}
@@ -390,7 +392,7 @@ const OverlaySidebar = ({
                       strokeWidth={2}
                       className="tw-size-4 tw-text-iron-200 tw-transition-all tw-duration-200 motion-reduce:tw-transition-none"
                     />
-                  </button>
+                  </IconButton>
                 </div>
                 <WaveInformationPanelContext.Provider value={panel}>
                   <div

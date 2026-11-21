@@ -14,7 +14,7 @@ import {
   seedProcessedHistory,
   browserPerformanceSnapshot,
 } from "../support/staging-e2ee/performance";
-import type { Browser, TestInfo } from "@playwright/test";
+import type { Browser, Route, TestInfo } from "@playwright/test";
 import { createChatWave } from "../support/staging-e2ee/chat-wave";
 import {
   MARKDOWN_PARITY_CASES,
@@ -25,6 +25,7 @@ import {
   checkConversationPreviews,
 } from "../support/markdownParity";
 
+import { checkEncryptedPoll } from "../support/e2ee/polls";
 import { expect, test } from "../testHelpers";
 import {
   plaintextEncodings,
@@ -351,6 +352,22 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       "A's sends were not observed, so the plaintext check would be vacuous"
     ).toBeGreaterThan(0);
     expectPrivateAndClean([a, b], needles({ hello, reply }));
+  });
+
+  test("both participants can create and vote in encrypted DM polls", async () => {
+    const current = requireWorld();
+    const { a, b, runId } = current;
+    const dm = await ensureDm(current);
+    await openChat(a, dm);
+    await openChat(b, dm);
+
+    const singlePoll = qaMessage(runId, "Which drink do you prefer?");
+    const multiPoll = qaMessage(runId, "Which drinks work for you?");
+    await checkEncryptedPoll(a.page, b.page, b.user.handle, singlePoll, false);
+    await checkEncryptedPoll(b.page, a.page, a.user.handle, multiPoll, true);
+    await expectNothingUndecryptable(a);
+    await expectNothingUndecryptable(b);
+    expectPrivateAndClean([a, b], needles({ singlePoll, multiPoll }));
   });
 
   test("formats conversation-list Markdown previews on desktop and mobile", async ({}, testInfo) => {
@@ -834,6 +851,11 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     await openChatFromList(c, group, groupName);
     await expectDecrypted(c, fromA);
 
+    const singlePoll = qaMessage(runId, "Which drink?");
+    const multiPoll = qaMessage(runId, "Which drinks?");
+    await checkEncryptedPoll(a.page, b.page, b.user.handle, singlePoll, false);
+    await checkEncryptedPoll(a.page, c.page, c.user.handle, multiPoll, true);
+
     await sendEncrypted(c, fromC);
     await expectDecrypted(a, fromC);
     await expectDecrypted(b, fromC);
@@ -841,7 +863,10 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       await expectNothingUndecryptable(session);
     }
 
-    expectPrivateAndClean([a, b, c], needles({ groupName, fromA, fromC }));
+    expectPrivateAndClean(
+      [a, b, c],
+      needles({ groupName, fromA, fromC, singlePoll, multiPoll })
+    );
   });
 
   test("a revoked device can no longer read new messages", async ({
@@ -853,8 +878,42 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     const beforeRevoke = qaMessage(runId, "before revoke");
     const afterRevoke = qaMessage(runId, "after revoke");
 
-    // A second browser for B is a new device: one more grant signature.
-    const b2 = await addSession(browser, testInfo, b.user, "B (second device)");
+    // Hold the real DM's invitations until the new device has checked its
+    // inbox. Its successful first lookup must show progress during that gap.
+    const entries = `**/api/e2ee/groups/${dm}/entries`;
+    const allowAddition = Promise.withResolvers<void>();
+    const holdAddition = async (route: Route) => {
+      await allowAddition.promise;
+      await route.fallback();
+    };
+    let b2: StagingE2eeSession;
+    try {
+      await a.context.route(entries, holdAddition);
+      await b.context.route(entries, holdAddition);
+      b2 = await addSession(browser, testInfo, b.user, "B (second device)");
+      await expect(
+        b2.page.getByRole("status").filter({
+          hasText: "Waiting for encrypted chats to sync to this device…",
+        })
+      ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+      await expect(
+        b2.page.getByRole("heading", { name: "No encrypted chats yet" })
+      ).toHaveCount(0);
+      await expect(
+        b2.page.getByRole("heading", {
+          name: "No encrypted chats available on this device yet",
+        })
+      ).toBeVisible({ timeout: UI_TIMEOUT_MS });
+      await expect(
+        b2.page.getByRole("link", { name: "Check device setup" })
+      ).toHaveAttribute("href", "/messages/encrypted/devices");
+    } finally {
+      allowAddition.resolve();
+      await Promise.all([
+        a.context.unroute(entries, holdAddition),
+        b.context.unroute(entries, holdAddition),
+      ]);
+    }
     await openChat(a, dm);
     await openChat(b, dm);
     await expect(
@@ -976,6 +1035,18 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     });
     const migrationMs = performance.now() - upgrading;
     await a.page.goto("https://staging.6529.io/api/version");
+    // A caught-up group skips its log. Leave a real server entry for the
+    // returning device so this test can verify the incremental cursor.
+    const missedMessage = qaMessage(current.runId, "history catch-up");
+    const delivered = b.page.waitForResponse(
+      (response) =>
+        response.request().method() === "POST" &&
+        new URL(response.url()).pathname ===
+          `/api/e2ee/groups/${dm}/messages` &&
+        response.ok(),
+      { timeout: SYNC_TIMEOUT_MS }
+    );
+    await Promise.all([delivered, sendEncrypted(b, missedMessage)]);
     const opened = performance.now();
     await openChat(a, dm);
     await expect(input).toBeEnabled({ timeout: UI_TIMEOUT_MS });
@@ -1008,6 +1079,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
     expect(logCursors.every((cursor) => cursor >= fixture.originalCursor)).toBe(
       true
     );
+    await expectDecrypted(a, missedMessage);
     await testInfo.attach("long-history-opening.json", {
       body: Buffer.from(
         JSON.stringify({
@@ -1108,6 +1180,7 @@ test.describe("Encrypted DMs between real users on staging @large @e2ee", () => 
       needles({
         historySeed,
         photoCaption,
+        missedMessage,
         imageMarker: image.marker,
         imageBytes: image.buffer,
       })

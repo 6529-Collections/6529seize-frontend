@@ -1,12 +1,19 @@
 "use client";
 
 import {
+  getDropdownTriggerClasses,
+  DROPDOWN_CHECKMARK_CLASSES,
+  DROPDOWN_OPTION_ACTIVE_CLASSES,
+  DROPDOWN_SELECTED_OPTION_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
+import {
   Combobox,
   ComboboxInput,
   ComboboxOption,
   ComboboxOptions,
 } from "@headlessui/react";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useEffect, useId, useMemo, useState } from "react";
 import { describeDisplayTimeZone } from "@/components/display-time-zone/displayTimeZoneChoices";
 import PreferenceRadioOption from "@/components/preferences/PreferenceRadioOption";
@@ -199,7 +206,7 @@ function TimeZonePreferencesCard() {
                   autoComplete="off"
                   placeholder={t(locale, "displayTimeZone.search.placeholder")}
                   onChange={(event) => setQuery(event.target.value)}
-                  className="tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-py-2 tw-pl-9 tw-pr-3 tw-text-sm tw-text-iron-50 placeholder:tw-text-iron-500 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                  className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, y: 8, left: 36, right: 12, text: "sm" }, textInput: true })} tw-w-full tw-text-iron-50 placeholder:tw-text-iron-500`}
                 />
               </div>
               {query.trim().length > 0 && (
@@ -219,10 +226,10 @@ function TimeZonePreferencesCard() {
                       <ComboboxOption
                         key={zone}
                         value={zone}
-                        className="tw-flex tw-min-h-12 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-px-3 tw-py-2 data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400"
+                        className={`tw-flex tw-min-h-12 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-px-3 tw-py-2 ${DROPDOWN_OPTION_ACTIVE_CLASSES} ${preference === zone ? DROPDOWN_SELECTED_OPTION_CLASSES : "tw-text-iron-200"}`}
                       >
                         <span className="tw-min-w-0">
-                          <span className="tw-block tw-truncate tw-text-sm tw-font-medium tw-text-iron-50">
+                          <span className="tw-block tw-truncate tw-text-sm tw-font-medium">
                             {getTimeZoneCityName(zone)}
                           </span>
                           <span className="tw-block tw-truncate tw-text-xs tw-text-iron-400">
@@ -237,6 +244,12 @@ function TimeZonePreferencesCard() {
                             zone: { timeZone: zone, isLocal: true },
                           })}
                         </span>
+                        {preference === zone && (
+                          <CheckIcon
+                            aria-hidden="true"
+                            className={`tw-size-4 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
+                          />
+                        )}
                       </ComboboxOption>
                     ))
                   )}

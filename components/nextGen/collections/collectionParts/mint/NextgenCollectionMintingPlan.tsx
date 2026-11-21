@@ -1,6 +1,7 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import NativeSelect from "@/components/utils/select/NativeSelect";
+import DropdownToolbar from "@/components/utils/select/dropdown/DropdownToolbar";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -194,10 +195,11 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
           <h3 className="tw-mb-0 tw-text-lg tw-font-semibold tw-text-white">
             Allowlist
           </h3>
-          <div className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
+          <DropdownToolbar className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-center">
             <label className="tw-grid tw-gap-1">
               <span className="tw-sr-only">Filter by phase</span>
-              <select
+              <NativeSelect
+                variant="regular"
                 value={selectedPhase?.phase ?? ""}
                 onChange={(event) => {
                   const nextPhase = phases.find(
@@ -205,7 +207,8 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                   );
                   setSelectedPhase(nextPhase);
                 }}
-                className={`${DROPDOWN_FIELD_CLASSES} tw-[color-scheme:dark] tw-min-h-11 tw-px-3 tw-py-2 tw-text-base`}
+                metrics={{ text: "base" }}
+                className="tw-[color-scheme:dark]"
               >
                 <option value="" className="tw-bg-black tw-text-white">
                   All Phases
@@ -219,14 +222,14 @@ export default function NextgenCollectionMintingPlan(props: Readonly<Props>) {
                     {p.phase}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
             </label>
             <SearchWalletsDisplay
               searchWallets={searchWallets}
               setSearchWallets={setSearchWallets}
               setShowSearchModal={setShowSearchModal}
             />
-          </div>
+          </DropdownToolbar>
         </div>
 
         <div className="tw-no-scrollbar tw-overflow-x-auto tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80">

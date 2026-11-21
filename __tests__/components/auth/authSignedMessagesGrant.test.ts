@@ -1,5 +1,6 @@
 import { createSignedMessagesGrantRequest } from "@/components/auth/authSignedMessagesGrant";
 import type { ApiSessionNonceResponse } from "@/generated/models/ApiSessionNonceResponse";
+import { storeLoginDeviceGrant } from "@/lib/device-signing/login-grant";
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
 const SIGNATURE = `0x${"ab".repeat(65)}`;
@@ -123,6 +124,16 @@ const createSubject = ({
 };
 
 describe("turn on signed messages", () => {
+  it("reports failure when the signed approval cannot be saved in this browser", async () => {
+    jest.mocked(storeLoginDeviceGrant).mockResolvedValueOnce(false);
+    const { getSignature, request } = createSubject();
+    await expect(request({ silent: true })).resolves.toEqual({
+      success: false,
+      reason: "sign-in-failed",
+    });
+    expect(getSignature).toHaveBeenCalledTimes(1);
+  });
+
   beforeEach(() => {
     mockPreparedGrant = GRANT;
     mockIsGrantChallenge = true;

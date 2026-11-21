@@ -109,6 +109,8 @@ export const COMPETITION_MESSAGES = {
   "competitions.voteClosed":
     "Voting is currently closed or you are not eligible to vote.",
   "competitions.vote": "Save vote",
+  "competitions.voteAction": "Vote",
+  "competitions.voteActionAmount": "Vote {amount} {unit}",
   "competitions.voteValue": "Your vote",
   "competitions.voteRange": "Enter a whole number between {min} and {max}.",
   "competitions.available": "Available credits",

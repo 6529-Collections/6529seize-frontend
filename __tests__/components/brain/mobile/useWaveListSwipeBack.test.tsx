@@ -1,5 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useWaveListSwipeBack } from "@/components/brain/mobile/useWaveListSwipeBack";
+import * as waveNavigation from "@/helpers/waves/wave-navigation-transition";
 
 const touch = (clientX: number, clientY = 100) => ({
   clientX,
@@ -12,17 +13,20 @@ function SwipeHarness({
   scope = "wave",
   onIntentStart,
   onSwipeBack,
+  targetScreen,
 }: {
   readonly enabled?: boolean;
   readonly scope?: string;
   readonly onIntentStart: () => void;
   readonly onSwipeBack: () => void;
+  readonly targetScreen?: waveNavigation.WaveScreen | undefined;
 }) {
   const { ref, onTouchStart } = useWaveListSwipeBack({
     enabled,
     scope,
     onIntentStart,
     onSwipeBack,
+    targetScreen,
   });
   return (
     <div ref={ref} onTouchStart={onTouchStart} data-testid="surface">
@@ -35,15 +39,47 @@ function SwipeHarness({
 beforeEach(() => {
   jest.useFakeTimers();
 });
+
+it("does not navigate from a captured release after its surface is disabled", () => {
+  let capturedNavigation = () => {};
+  const capture = jest
+    .spyOn(waveNavigation, "runWaveNavigationTransition")
+    .mockImplementation((_screen, navigate) => {
+      capturedNavigation = navigate;
+      return true;
+    });
+  const onSwipeBack = jest.fn();
+  const onIntentStart = jest.fn();
+  const { rerender } = render(
+    <SwipeHarness targetScreen="feed" {...{ onSwipeBack, onIntentStart }} />
+  );
+  const surface = screen.getByTestId("surface");
+  Object.defineProperty(surface, "animate", { value: jest.fn() });
+  const content = screen.getByTestId("content");
+  fireEvent.touchStart(content, { touches: [touch(160)] });
+  fireEvent.touchMove(content, { touches: [touch(300)] });
+  fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(300)] });
+  expect(capture).toHaveBeenCalledTimes(1);
+  rerender(
+    <SwipeHarness
+      enabled={false}
+      targetScreen="feed"
+      {...{ onSwipeBack, onIntentStart }}
+    />
+  );
+  capturedNavigation();
+  expect(onSwipeBack).not.toHaveBeenCalled();
+});
 afterEach(() => {
   jest.useRealTimers();
+  jest.restoreAllMocks();
 });
 
-function setup(enabled = true) {
+function setup(enabled = true, targetScreen?: waveNavigation.WaveScreen) {
   const onIntentStart = jest.fn();
   const onSwipeBack = jest.fn();
   const result = render(
-    <SwipeHarness {...{ enabled, onIntentStart, onSwipeBack }} />
+    <SwipeHarness {...{ enabled, onIntentStart, onSwipeBack, targetScreen }} />
   );
   return {
     ...result,
@@ -113,7 +149,8 @@ it("ignores disabled gestures, vertical scrolling, sliders and OS edges", () => 
 });
 
 it("settles before navigation and cancels an in-flight animation when unmounted", async () => {
-  const { content, surface, onSwipeBack, unmount } = setup();
+  const capture = jest.spyOn(waveNavigation, "runWaveNavigationTransition");
+  const { content, surface, onSwipeBack, unmount } = setup(true, "list");
   let finish = () => {};
   const finished = new Promise<void>((resolve) => {
     finish = resolve;
@@ -125,6 +162,7 @@ it("settles before navigation and cancels an in-flight animation when unmounted"
   fireEvent.touchMove(content, { touches: [touch(300)] });
   fireEvent.touchEnd(content, { touches: [], changedTouches: [touch(300)] });
   expect(onSwipeBack).not.toHaveBeenCalled();
+  expect(capture).not.toHaveBeenCalled();
   expect(animate).toHaveBeenCalledTimes(1);
   await act(async () => {
     finish();

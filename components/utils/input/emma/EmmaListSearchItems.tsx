@@ -58,7 +58,7 @@ export default function EmmaListSearchItems({
   const content = (
     <div
       id={resultsId}
-      className="tw-max-h-52 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-contain tw-rounded-lg tw-bg-iron-800 tw-py-1 tw-shadow-xl tw-ring-1 tw-ring-white/10"
+      className="tw-max-h-52 tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-contain tw-rounded-lg tw-bg-iron-900 tw-py-1 tw-shadow-xl tw-ring-1 tw-ring-white/10"
     >
       <ul className="tw-m-0 tw-flex tw-list-none tw-flex-col tw-gap-y-1 tw-px-2">
         <EmmaListSearchItemsContent

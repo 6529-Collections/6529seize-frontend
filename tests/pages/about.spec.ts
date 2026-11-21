@@ -8,6 +8,47 @@ import {
 } from "../testHelpers";
 
 test.describe("About Pages @smoke @medium @large", () => {
+  test("Desktop version text aligns with the title-strip controls", async ({
+    page,
+  }) => {
+    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const toolbar = page.getByRole("toolbar", {
+      name: "6529 Desktop window title",
+    });
+
+    for (const height of [28, 34]) {
+      await page.evaluate((stripHeight) => {
+        const root = document.documentElement;
+        root.setAttribute("data-desktop-titlebar", "overlay");
+        root.style.setProperty("--desktop-titlebar-height", `${stripHeight}px`);
+        root.style.setProperty("--desktop-app-version", '"0.1.0-rc.2"');
+      }, height);
+
+      await expect(toolbar).toBeVisible();
+      const geometry = await toolbar
+        .getByText("Version", { exact: true })
+        .locator("..")
+        .evaluate((version) => {
+          const button = version
+            .closest('[role="toolbar"]')
+            ?.querySelector("button");
+          if (!button) throw new Error("Title-strip control is missing");
+          const text = version.getBoundingClientRect();
+          const control = button.getBoundingClientRect();
+          return {
+            textHeight: text.height,
+            centerDifference: Math.abs(
+              text.y + text.height / 2 - control.y - control.height / 2
+            ),
+          };
+        });
+
+      expect(geometry.textHeight).toBeGreaterThan(0);
+      expect(geometry.centerDifference).toBeLessThanOrEqual(0.5);
+    }
+  });
+
   test("shows direct desktop downloads and independent macOS 12 recovery", async ({
     page,
     isMobile,

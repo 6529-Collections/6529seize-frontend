@@ -17,15 +17,15 @@ export function ActiveWaveVotes() {
       aria-label={t(locale, "waves.discovery.activeVotes")}
       aria-busy={votes.isPending}
     >
-      <h1 className="tw-m-0 tw-mb-4 tw-flex tw-items-center tw-gap-3 tw-text-2xl tw-font-semibold tw-leading-8 tw-text-white">
+      <h1 className="tw-m-0 tw-mb-1.5 tw-flex tw-items-center tw-gap-3 tw-text-2xl tw-font-semibold tw-leading-8 tw-tracking-[-0.02em] tw-text-white">
         {t(locale, "waves.discovery.activeVotes")}
         {count !== undefined && (
-          <span className="tw-shrink-0 tw-rounded-full tw-bg-primary-500/20 tw-px-2 tw-py-0.5 tw-text-base tw-font-medium tw-text-primary-300">
+          <span className="tw-inline-flex tw-aspect-square tw-min-w-[22px] tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 tw-px-1 tw-text-[13px] tw-font-medium tw-leading-4 tw-text-iron-400">
             {formatInteger(locale, count)}
           </span>
         )}
       </h1>
-      <p className="tw-text-sm tw-text-iron-400">
+      <p className="tw-m-0 tw-mb-6 tw-text-sm tw-leading-5 tw-text-iron-400">
         {t(locale, "waves.discovery.voteDescription")}
       </p>
       {votes.isPending && (
@@ -50,7 +50,7 @@ export function ActiveWaveVotes() {
           {t(locale, "waves.discovery.emptyVotes")}
         </output>
       )}
-      <div className="tw-grid tw-grid-cols-1 tw-gap-x-3 tw-gap-y-4 sm:tw-grid-cols-2 sm:tw-gap-6 lg:tw-grid-cols-3">
+      <div className="tw-grid tw-grid-cols-1 tw-gap-4 sm:tw-grid-cols-2 lg:tw-grid-cols-3">
         {votes.isPending &&
           Array.from({ length: 6 }, (_, index) => (
             <ExploreWaveCardSkeleton key={`vote-skeleton-${index}`} compact />

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
 import Button from "@/components/utils/button/Button";
 import { useMyStreamOptional } from "@/contexts/wave/MyStreamContext";
@@ -112,14 +114,16 @@ export default function WaveDropsSearchModal({
               className="tw-mt-[env(safe-area-inset-top)] tw-flex tw-h-full tw-min-h-0 tw-w-full tw-max-w-[min(100vw,860px)] tw-transform tw-flex-col tw-overflow-hidden tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 tw-text-left tw-shadow-[0_24px_70px_rgba(0,0,0,0.55)] tw-transition-all sm:tw-h-[min(720px,78vh)] sm:tw-rounded-xl"
             >
               <div className="tw-flex tw-items-start tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-items-center sm:tw-px-5">
-                <button
+                <IconButton
                   type="button"
                   onClick={onClose}
                   aria-label={t(locale, "waves.drops.searchModal.close")}
-                  className="-tw-ml-1 tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-border-none tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-hidden"
+                  size={32}
+                  variant="ghost"
+                  className="-tw-ml-1 sm:tw-hidden"
                 >
                   <ChevronLeftIcon className="tw-size-6 tw-flex-shrink-0" />
-                </button>
+                </IconButton>
 
                 <div className="tw-min-w-0 tw-flex-1">
                   <h2
@@ -147,14 +151,16 @@ export default function WaveDropsSearchModal({
                   </Button>
                 )}
 
-                <button
+                <IconButton
                   type="button"
                   onClick={onClose}
                   aria-label={t(locale, "waves.drops.searchModal.close")}
-                  className="tw-hidden tw-size-9 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition tw-duration-150 hover:tw-bg-iron-900 hover:tw-text-white focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400/70 sm:tw-inline-flex"
+                  size={36}
+                  variant="ghost"
+                  className="tw-hidden sm:tw-inline-flex"
                 >
                   <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
-                </button>
+                </IconButton>
               </div>
 
               <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3 sm:tw-px-5">

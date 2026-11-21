@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import React from "react";
 import BrainMobile from "../brain/BrainMobile";
+import MessagesRouteLoading from "./MessagesRouteLoading";
 import { SidebarProvider } from "../../hooks/useSidebarState";
 import { ContentTabProvider } from "../brain/ContentTabContext";
 
@@ -14,7 +15,7 @@ interface Props {
 const MessagesMobile: React.FC<Props> = ({ children }) => (
   <SidebarProvider>
     <ContentTabProvider>
-      <BrainMobile>{children}</BrainMobile>
+      <BrainMobile fallback={<MessagesRouteLoading />}>{children}</BrainMobile>
     </ContentTabProvider>
   </SidebarProvider>
 );

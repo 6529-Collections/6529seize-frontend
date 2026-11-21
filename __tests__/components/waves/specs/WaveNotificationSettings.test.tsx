@@ -187,7 +187,10 @@ describe("WaveNotificationSettings", () => {
     const broadcastMentionsButton = screen.getByLabelText(
       "Receive @all and @contributors notifications"
     );
-    expect(broadcastMentionsButton).toHaveClass("tw-text-primary-400");
+    expect(broadcastMentionsButton).toHaveClass(
+      "tw-text-iron-100",
+      "tw-bg-iron-800"
+    );
   });
 
   it("shows all-message menu item as active when all-message notifications enabled", async () => {
@@ -209,7 +212,7 @@ describe("WaveNotificationSettings", () => {
     const allButton = screen.getByLabelText(
       "Receive notifications for all messages"
     );
-    expect(allButton).toHaveClass("tw-text-primary-400");
+    expect(allButton).toHaveClass("tw-text-iron-100", "tw-bg-iron-800");
   });
 
   it("can show broadcast mention and all-message menu items active together", async () => {
@@ -233,10 +236,10 @@ describe("WaveNotificationSettings", () => {
 
     expect(
       screen.getByLabelText("Receive @all and @contributors notifications")
-    ).toHaveClass("tw-text-primary-400");
+    ).toHaveClass("tw-text-iron-100", "tw-bg-iron-800");
     expect(
       screen.getByLabelText("Receive notifications for all messages")
-    ).toHaveClass("tw-text-primary-400");
+    ).toHaveClass("tw-text-iron-100", "tw-bg-iron-800");
   });
 
   it("enables all-message notifications for waves with many followers", async () => {
@@ -633,6 +636,29 @@ describe("WaveNotificationSettings", () => {
 
     const muteButton = screen.getByLabelText("Mute wave");
     expect(muteButton).not.toBeDisabled();
+  });
+
+  it("keeps keyboard focus on mute when switching between compact and full controls", () => {
+    const view = (compact: boolean) => (
+      <AuthContext.Consumer>
+        {(auth) => (
+          <AuthContext.Provider value={{ ...auth, ...mockAuthContext }}>
+            <WaveNotificationSettings wave={mockWave} compact={compact} />
+          </AuthContext.Provider>
+        )}
+      </AuthContext.Consumer>
+    );
+    const { rerender } = render(view(false));
+    const muteButton = screen.getByRole("button", { name: "Mute wave" });
+    muteButton.focus();
+
+    for (const compact of [true, false]) {
+      rerender(view(compact));
+      expect(screen.getByRole("button", { name: "Mute wave" })).toBe(
+        muteButton
+      );
+      expect(muteButton).toHaveFocus();
+    }
   });
 
   it("renders muted button when wave is muted", () => {

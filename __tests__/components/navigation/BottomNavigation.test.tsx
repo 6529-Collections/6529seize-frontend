@@ -375,7 +375,12 @@ describe("BottomNavigation", () => {
     });
 
     const activePill = getByTestId("mobile-dock-active-pill");
-    expect(activePill).toHaveClass("tw-h-10", "tw-w-12");
+    expect(activePill).toHaveClass(
+      "tw-aspect-[6/5]",
+      "tw-h-auto",
+      "tw-max-h-10",
+      "tw-w-12"
+    );
     expectActivePillLayoutCalc({
       style: activePill.getAttribute("style"),
     });

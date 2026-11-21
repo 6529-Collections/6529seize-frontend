@@ -31,7 +31,7 @@ export const toErrorMessage = (error: unknown): string => {
   return "Couldn't save this group. Please try again.";
 };
 
-const sanitiseGroupPayload = (
+export const sanitiseGroupPayload = (
   payload: ApiCreateGroup,
   name: string
 ): ApiCreateGroup => {

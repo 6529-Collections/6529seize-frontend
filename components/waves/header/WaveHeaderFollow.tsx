@@ -2,7 +2,12 @@
 
 import type { ApiWave } from "@/generated/models/ApiWave";
 import Button from "@/components/utils/button/Button";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import {
+  COMPACT_ACTION_BUTTON_SIZE_CLASS,
+  COMPACT_ACTION_ICON_CLASS,
+  COMPACT_ACTION_ICON_STROKE_WIDTH,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import { CheckIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveJoin } from "@/hooks/waves/useWaveJoin";
@@ -18,8 +23,8 @@ const SVG_CLASSES: Record<WaveFollowBtnSize, string> = {
   [WaveFollowBtnSize.MEDIUM]: "tw-h-5 tw-w-5",
 };
 
-const BUTTON_SIZES: Record<WaveFollowBtnSize, "xs" | "md"> = {
-  [WaveFollowBtnSize.SMALL]: "xs",
+const BUTTON_SIZES: Record<WaveFollowBtnSize, "md" | null> = {
+  [WaveFollowBtnSize.SMALL]: null,
   [WaveFollowBtnSize.MEDIUM]: "md",
 };
 
@@ -52,8 +57,8 @@ export default function WaveHeaderFollow({
       const Icon = following ? CheckIcon : PlusIcon;
       return (
         <Icon
-          className="tw-size-4 tw-shrink-0"
-          strokeWidth={2}
+          className={COMPACT_ACTION_ICON_CLASS}
+          strokeWidth={COMPACT_ACTION_ICON_STROKE_WIDTH}
           aria-hidden="true"
         />
       );
@@ -105,7 +110,7 @@ export default function WaveHeaderFollow({
       size={BUTTON_SIZES[size]}
       className={
         size === WaveFollowBtnSize.SMALL
-          ? COMPACT_ACTION_TOUCH_TARGET_CLASS
+          ? `${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${COMPACT_ACTION_BUTTON_SIZE_CLASS}`
           : undefined
       }
       fullWidth={fullWidth}

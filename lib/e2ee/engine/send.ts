@@ -9,6 +9,7 @@ import type { ApiE2eeNotifyHint, ApiE2eeNotifyKind } from "../api-types";
 import { mediaFromFile, uploadMedia } from "../media";
 import {
   encodePayload,
+  isPollEvent,
   newMessageId,
   PayloadError,
   type MsgPayload,
@@ -28,6 +29,7 @@ import {
 import { E2eeError, RetryableError } from "./errors";
 import { importedText, isValidImported, toImportedPayload } from "./imported";
 import { applyPayload } from "./messages";
+import { pollAttemptKey, pollRoster, pollRosterHash } from "./poll-roster";
 import type { GroupRuntime } from "./store";
 import { catchUpGroup } from "./sync";
 
@@ -64,7 +66,7 @@ function computeNotify(
   payload: Payload
 ): ApiE2eeNotifyHint[] {
   // Imported history is old news: it never wakes anyone.
-  if (payload.t !== "msg" || payload.imp) {
+  if (payload.t !== "poll" && (payload.t !== "msg" || payload.imp)) {
     return [];
   }
   const recipients = new Set<string>();
@@ -73,10 +75,11 @@ function computeNotify(
       recipients.add(member.profileId);
     }
   }
-  const mentions = new Set(payload.mentions);
-  const replyAuthor = payload.reply
-    ? (runtime.messages.get(payload.reply)?.senderProfileId ?? null)
-    : null;
+  const mentions = new Set(payload.t === "msg" ? payload.mentions : []);
+  const replyAuthor =
+    payload.t === "msg" && payload.reply
+      ? (runtime.messages.get(payload.reply)?.senderProfileId ?? null)
+      : null;
   return [...recipients]
     .map((profileId) => ({
       profile_id: profileId,
@@ -156,7 +159,7 @@ async function enqueue(
       const echo = localEcho(ctx, runtime.record.g, payload);
       runtime.messages.set(echo.id, echo);
       runtime.dirty.add(echo.id);
-    } else {
+    } else if (!isPollEvent(payload)) {
       applyPayload(runtime, payload, {
         g: runtime.record.g,
         seq: 0,
@@ -330,8 +333,9 @@ export async function queueTargeted(
 type SendStep = "sent" | "empty" | "stale" | "failed" | "dropped" | "inactive";
 
 const oldestOutbox = (runtime: GroupRuntime): StoredOutboxItem | null =>
-  [...runtime.outbox.values()].sort((a, b) => a.createdAt - b.createdAt)[0] ??
-  null;
+  [...runtime.outbox.values()]
+    .filter((entry) => entry.acceptedSeq === undefined)
+    .sort((a, b) => a.createdAt - b.createdAt)[0] ?? null;
 
 async function markSent(
   ctx: EngineContext,
@@ -339,6 +343,15 @@ async function markSent(
   item: StoredOutboxItem,
   sent: { seq: number; created_at: number }
 ): Promise<void> {
+  if (isPollEvent(item.payload)) {
+    item.acceptedSeq = sent.seq;
+    await checkpoint(ctx, {
+      groups: [runtime],
+      outbox: [item],
+      skipWasm: true,
+    });
+    return;
+  }
   runtime.outbox.delete(item.id);
   runtime.record.sentSeqs.push(sent.seq);
   const echo = await loadMessage(ctx, runtime, item.id);
@@ -398,17 +411,40 @@ export async function sendNext(
     }
     throw error;
   }
-  const item = oldestOutbox(runtime);
-  if (!isActive(runtime)) {
-    return "inactive";
+  if (!isActive(runtime)) return "inactive";
+  const expiredAck = [...runtime.outbox.values()].find(
+    (entry) =>
+      entry.acceptedSeq !== undefined &&
+      entry.acceptedSeq <= (runtime.listedThrough ?? 0)
+  );
+  if (expiredAck) {
+    // A confirmed send is inserted atomically with the group head. Reaching
+    // its sequence without the ciphertext means the log item is unavailable
+    // (for example, after retention expiry). Report the normal send error.
+    await dropItem(ctx, runtime, expiredAck, "E2EE_SEND_FAILED");
+    return "dropped";
   }
+  const item = oldestOutbox(runtime);
   if (!item) {
     return "empty";
   }
+  const roster = item.payload.t === "poll" ? pollRoster(runtime.record) : null;
+  const payload =
+    item.payload.t === "poll" && roster
+      ? { ...item.payload, rosterHash: pollRosterHash(roster) }
+      : item.payload;
   const sealed = requireMls(ctx).encryptMessage(
     runtime.record.g,
-    encodePayload(item.payload)
+    encodePayload(payload)
   );
+  const attempt = isPollEvent(payload) ? pollAttemptKey(sealed.data) : null;
+  if (attempt !== null) {
+    item.pollAttempts = { ...item.pollAttempts, [attempt]: sealed.epoch };
+    if (roster) {
+      item.pollAttemptRosters ??= {};
+      item.pollAttemptRosters[String(sealed.epoch)] ??= roster;
+    }
+  }
   item.sealed = {
     epoch: sealed.epoch,
     data: sealed.data,
@@ -432,6 +468,7 @@ export async function sendNext(
     }
     item.sealed = null;
     if (apiError.code === "E2EE_EPOCH_STALE") {
+      if (attempt && item.pollAttempts) delete item.pollAttempts[attempt];
       await checkpoint(ctx, {
         groups: [runtime],
         outbox: [item],

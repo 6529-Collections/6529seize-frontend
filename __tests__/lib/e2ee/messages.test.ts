@@ -1,3 +1,6 @@
+import { pollRosterHash } from "@/lib/e2ee/engine/poll-roster";
+import { decodeSegment } from "@/lib/e2ee/backup/format";
+import { utf8Encode } from "@/lib/e2ee/bytes";
 import { newRuntime } from "@/lib/e2ee/engine/groups";
 import {
   applyPayload,
@@ -26,6 +29,93 @@ const meta = (profile: string, seq: number, sigOk = true): PayloadMeta => ({
 const id = (n: number) => n.toString(16).padStart(32, "0");
 
 describe("message rules (contract 6)", () => {
+  it("uses the poll epoch roster and rejects older or ineligible ballots", () => {
+    const creator = `0x${"a".repeat(64)}`;
+    const voter = `0x${"b".repeat(64)}`;
+    const lateDevice = `0x${"c".repeat(64)}`;
+    const secondVotingDevice = `0x${"d".repeat(64)}`;
+    const roster = [creator, voter, secondVotingDevice];
+    const rt = runtime();
+    rt.record.epoch = 2;
+    rt.record.metadata = {
+      v: 1,
+      g: "g",
+      kind: "group",
+      name: null,
+      admins: [],
+      created_by: "alice",
+      history: "from_join",
+    };
+    rt.record.previousPollRosters = { 1: roster };
+    expect(
+      applyPayload(
+        rt,
+        {
+          t: "poll",
+          v: 1,
+          id: ID,
+          ts: 1,
+          rosterHash: pollRosterHash(roster),
+          poll: {
+            question: "Drink?",
+            options: ["Tea", "Coffee"],
+            multi: false,
+          },
+        },
+        { ...meta("alice", 1), senderDeviceKey: creator }
+      )
+    ).toBe(true);
+
+    // The creation roster lives on the poll even after its epoch expires.
+    rt.record.epoch = 5;
+    rt.record.previousPollRosters = {};
+
+    const vote = (
+      profile: string,
+      deviceKey: string,
+      seq: number,
+      options: number[],
+      eventId = id(seq)
+    ) =>
+      applyPayload(
+        rt,
+        { t: "poll-vote", v: 1, id: eventId, ts: seq, target: ID, options },
+        {
+          ...meta(profile, seq),
+          epoch: rt.record.epoch,
+          senderDeviceKey: deviceKey,
+        }
+      );
+    expect(vote("dave", lateDevice, 2, [1])).toBe(false);
+    expect(vote("bob", voter, 3, [1])).toBe(true);
+    expect(vote("bob", secondVotingDevice, 5, [])).toBe(true);
+    expect(vote("bob", voter, 4, [0])).toBe(false);
+    expect(vote("bob", voter, 6, [1], id(3))).toBe(false);
+    expect(rt.messages.get(ID)?.poll?.ballots).toEqual({
+      bob: { seq: 5, options: [] },
+    });
+    expect(vote("bob", voter, 7, [0])).toBe(true);
+    expect(vote("bob", voter, 8, [1], id(3))).toBe(false);
+    expect(vote("bob", voter, 9, [0], id(7))).toBe(false);
+    expect(rt.messages.get(ID)?.poll?.ballots).toEqual({
+      bob: { seq: 7, options: [0] },
+    });
+    const restored = decodeSegment(
+      utf8Encode(
+        JSON.stringify({
+          v: 2,
+          at: 1,
+          groups: [],
+          messages: [rt.messages.get(ID)],
+        })
+      )
+    ).messages[0];
+    expect(restored?.pollVoteHistory?.[voter]).toEqual([id(3)]);
+    expect(restored).toBeDefined();
+    rt.messages.set(ID, { ...restored!, pending: false });
+    expect(vote("bob", voter, 10, [1], id(3))).toBe(false);
+  });
+
   it("keeps the latest edit's own signed copy for reports", () => {
     const rt = runtime();
     applyPayload(

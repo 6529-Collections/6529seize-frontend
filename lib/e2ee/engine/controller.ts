@@ -1,7 +1,9 @@
 import { asE2eeApiError } from "../api-errors";
 import type { ApiE2eeDeviceGroup } from "../api-types";
+import { E2EE_INITIAL_INBOX_WAIT_MS } from "../types";
 import { type EngineContext, isActive, ownDeviceKey } from "./context";
 import { RetryableError } from "./errors";
+import { InboxDiscovery } from "./inbox-discovery";
 import {
   groupChanges,
   noteStallFor,
@@ -14,7 +16,7 @@ import {
   runGroupCommit,
   STALL_RETRY_MS,
 } from "./maintenance";
-import { sleep } from "./runtime";
+import { requestWithDeadline, sleep } from "./runtime";
 import { sendNext } from "./send";
 import type { GroupRuntime } from "./store";
 import { processInbox, tryCatchUp } from "./sync";
@@ -75,8 +77,10 @@ interface ControllerHooks {
 export class EngineController {
   private readonly ctx: EngineContext;
   private readonly hooks: ControllerHooks;
+  private readonly inbox: InboxDiscovery;
   private syncRun: Promise<void> | null = null;
   private syncAgain = false;
+  private recheckInbox = false;
   private readonly flushes = new Map<string, Promise<void>>();
   private readonly flushAgain = new Set<string>();
   private readonly maintainedAt = new Map<string, number>();
@@ -86,6 +90,10 @@ export class EngineController {
   constructor(ctx: EngineContext, hooks: ControllerHooks) {
     this.ctx = ctx;
     this.hooks = hooks;
+    this.inbox = new InboxDiscovery(ctx, {
+      isReady: () => this.isReady(),
+      onOwnRevoked: hooks.onOwnRevoked,
+    });
   }
 
   private isReady(): boolean {
@@ -121,7 +129,8 @@ export class EngineController {
   // Sync
   // -------------------------------------------------------------------------
 
-  syncAll(): Promise<void> {
+  syncAll(recheckInbox = false): Promise<void> {
+    this.recheckInbox ||= recheckInbox;
     if (this.syncRun) {
       this.syncAgain = true;
       return this.syncRun;
@@ -129,7 +138,9 @@ export class EngineController {
     const run = (async () => {
       do {
         this.syncAgain = false;
-        await this.syncOnce();
+        const recheck = this.recheckInbox;
+        this.recheckInbox = false;
+        await this.syncOnce(recheck);
       } while (this.syncRepeat());
     })().finally(() => {
       this.syncRun = null;
@@ -140,7 +151,11 @@ export class EngineController {
 
   private async deviceGroups(): Promise<ApiE2eeDeviceGroup[] | null> {
     try {
-      return await this.ctx.api.getDeviceGroups(ownDeviceKey(this.ctx));
+      return await requestWithDeadline(
+        this.ctx.scheduler,
+        E2EE_INITIAL_INBOX_WAIT_MS,
+        (signal) => this.ctx.api.getDeviceGroups(ownDeviceKey(this.ctx), signal)
+      );
     } catch (error) {
       const apiError = asE2eeApiError(error);
       if (apiError?.code === "E2EE_NOT_YOUR_DEVICE") {
@@ -154,19 +169,24 @@ export class EngineController {
     }
   }
 
-  private async syncOnce(): Promise<void> {
+  private async syncOnce(recheckInbox: boolean): Promise<void> {
     if (!this.isReady()) {
       return;
     }
     this.lastFullSyncAt = this.ctx.now();
-    await this.pullInbox();
+    const { groups, confirm } = await this.syncInbox(recheckInbox);
     if (!this.isReady()) {
       return;
     }
-    const serverGroups = await this.deviceGroups();
-    if (!this.isReady()) {
-      return;
-    }
+    await Promise.all([
+      this.syncKnownGroups(groups),
+      confirm ? this.inbox.confirm() : undefined,
+    ]);
+  }
+
+  private async syncKnownGroups(
+    serverGroups: ApiE2eeDeviceGroup[] | null
+  ): Promise<void> {
     const lastSeq = lastSeqByGroup(serverGroups);
     for (const [g, runtime] of [...this.ctx.store.groups]) {
       if (!isActive(runtime)) {
@@ -248,19 +268,39 @@ export class EngineController {
     }
   }
 
-  private async pullInbox(): Promise<void> {
-    if (!this.isReady()) {
-      return;
-    }
+  /** Check chat discovery independently of maintenance and cosmetic lookups. */
+  private async syncInbox(recheck: boolean): Promise<{
+    groups: ApiE2eeDeviceGroup[] | null;
+    confirm: boolean;
+  }> {
+    this.inbox.begin(recheck);
     try {
-      await swallowNetwork(this.ctx.queue.run(() => processInbox(this.ctx)));
+      const inboxComplete = await this.pullInbox();
+      if (!this.isReady()) return { groups: null, confirm: false };
+      const groups = await this.deviceGroups();
+      if (inboxComplete === null || groups === null) {
+        this.inbox.update("failed");
+      } else if (!inboxComplete) {
+        this.inbox.update("pending");
+      }
+      return { groups, confirm: inboxComplete === true && groups !== null };
     } catch (error) {
-      // Revoked from another device before its WS hint arrived: the inbox is
-      // the first own-device call of a pass, so handle it here, not as an error.
+      this.inbox.update("failed");
+      throw error;
+    }
+  }
+
+  private async pullInbox(): Promise<boolean | null> {
+    try {
+      return await this.ctx.queue.run(() => processInbox(this.ctx));
+    } catch (error) {
+      // The inbox is the first own-device call of a pass. Check a revocation
+      // here if it arrived before the WebSocket hint.
       if (asE2eeApiError(error)?.code === "E2EE_NOT_YOUR_DEVICE") {
         await this.hooks.onOwnRevoked();
-        return;
+        return null;
       }
+      if (isNetworkish(error)) return null;
       throw error;
     }
   }
@@ -500,6 +540,7 @@ export class EngineController {
     this.unsubscribeWake?.();
     this.unsubscribeWake = null;
     this.ctx.timers.cancel("poll");
+    this.inbox.stop();
   }
 
   /**

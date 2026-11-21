@@ -1,6 +1,9 @@
 "use client";
 
-import { DROPDOWN_TRIGGER_CLASSES, DROPDOWN_CHEVRON_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import {
+  getDropdownTriggerClasses,
+  DROPDOWN_CHEVRON_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { BlockPickerTimeWindow } from "@/app/tools/block-finder/page.client";
 import { motion, useAnimate } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
@@ -66,7 +69,7 @@ export default function BlockPickerTimeWindowSelect({
       <div className="tw-relative tw-mt-1.5">
         <button
           type="button"
-          className={`${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-flex tw-w-full tw-items-center tw-px-3.5 tw-py-3 tw-pr-9 tw-text-base tw-caret-primary-400 sm:tw-leading-6`}
+          className={`${getDropdownTriggerClasses({ variant: "regular", metrics: { x: 14, y: 12, right: 36, text: "base", leading: "responsive" } })} tw-relative tw-flex tw-w-full tw-items-center tw-caret-primary-400`}
           aria-haspopup="listbox"
           aria-expanded={isOpen}
           aria-labelledby="listbox-label"

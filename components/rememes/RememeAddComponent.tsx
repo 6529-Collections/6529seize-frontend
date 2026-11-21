@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  getDropdownTriggerClasses,
+  DROPDOWN_OPTION_ACTIVE_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 import Button from "@/components/utils/button/Button";
 import { apiUrl } from "@/services/api/api-endpoints";
@@ -296,7 +301,7 @@ export default function RememeAddComponent({
               onChange={(event) => setReferenceSearch(event.target.value)}
               placeholder="Meme References"
               autoComplete="off"
-              className={`${INPUT_CLASS} tw-pl-10 tw-pr-11 tw-ring-iron-700 hover:tw-ring-iron-600 [&::-webkit-search-cancel-button]:tw-hidden`}
+              className={`${getDropdownTriggerClasses({ variant: "form", border: "inset", textInput: true, metrics: { minHeight: 44, x: 12, y: 10, left: 40, right: 44, text: "responsive" } })} tw-form-input tw-block tw-w-full tw-text-iron-50 placeholder:tw-text-iron-500 [&::-webkit-search-cancel-button]:tw-hidden`}
             />
             <ComboboxButton
               aria-label="Meme References"
@@ -309,7 +314,7 @@ export default function RememeAddComponent({
                 <ComboboxOption
                   key={meme.id}
                   value={meme}
-                  className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400"
+                  className={`tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-gap-2 tw-rounded-md tw-px-3 tw-py-2 tw-text-sm tw-text-iron-100 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-iron-500 ${DROPDOWN_OPTION_ACTIVE_CLASSES}`}
                 >
                   <PlusIcon
                     aria-hidden="true"
