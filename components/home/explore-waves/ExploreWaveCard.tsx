@@ -36,6 +36,7 @@ interface ExploreWaveCardProps {
 }
 
 interface ExploreWaveMetric {
+  readonly kind: "score" | "hot" | "rep";
   readonly label: string;
   readonly ariaLabel: string;
   readonly iconToneClasses: string;
@@ -45,7 +46,7 @@ interface ExploreWaveMetric {
 
 const EXPLORE_WAVE_CARD_LOCALE = DEFAULT_LOCALE;
 const METRIC_CHIP_CLASSES =
-  "tw-inline-flex tw-cursor-help tw-items-center tw-whitespace-nowrap tw-font-medium tw-leading-none";
+  "tw-inline-flex tw-cursor-help tw-items-center tw-whitespace-nowrap";
 const METRIC_ICON_CLASSES = "tw-size-3 tw-flex-shrink-0";
 
 const getDropsCountMessageKey = (
@@ -173,6 +174,7 @@ const getExploreWaveMetrics = (wave: SidebarWave): ExploreWaveMetric[] => {
 
   if (visibilityScore !== null) {
     metrics.push({
+      kind: "score",
       label: t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.scoreLabel"),
       ariaLabel: t(
         EXPLORE_WAVE_CARD_LOCALE,
@@ -195,6 +197,7 @@ const getExploreWaveMetrics = (wave: SidebarWave): ExploreWaveMetric[] => {
 
   if (hotnessScore !== null) {
     metrics.push({
+      kind: "hot",
       label: t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.hotLabel"),
       ariaLabel: t(
         EXPLORE_WAVE_CARD_LOCALE,
@@ -215,6 +218,7 @@ const getExploreWaveMetrics = (wave: SidebarWave): ExploreWaveMetric[] => {
 
   if (repScore !== null) {
     metrics.push({
+      kind: "rep",
       label: t(EXPLORE_WAVE_CARD_LOCALE, "waves.score.details.repLabel"),
       ariaLabel: getRepAriaLabel(wave, repScore),
       icon: (
@@ -245,8 +249,23 @@ const getMetricsSummaryLabel = (
 function getWaveCardClassNames(
   horizontalOnMobile: boolean,
   subtleHover: boolean,
-  artworkOverlay: boolean
+  artworkOverlay: boolean,
+  compact: boolean
 ) {
+  if (compact) {
+    return {
+      cardInteractionClassName:
+        "tw-transition-[background-color,box-shadow] tw-duration-200 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.12)]",
+      imageInteractionClassName: "",
+      cardDirectionClassName: "tw-flex-row",
+      cardSurfaceClassName:
+        "tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08)]",
+      titleClassName:
+        "tw-truncate tw-text-[15px] tw-leading-5 tw-tracking-[-0.01em]",
+      imageSizeClassName: "",
+      contentPaddingClassName: "tw-p-3",
+    };
+  }
   const cardInteractionClassName = subtleHover
     ? "tw-transition-[transform,border-color,box-shadow] tw-duration-500 focus-visible:tw-border-white/20 desktop-hover:hover:tw-border-white/20 active:tw-border-white/20 md:motion-safe:desktop-hover:hover:-tw-translate-y-1 md:desktop-hover:hover:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_30px_60px_-20px_rgba(0,0,0,0.6)]"
     : "tw-transform-gpu tw-transition-[transform,border-color,box-shadow] tw-duration-300 desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-border-white/15 desktop-hover:hover:tw-shadow-[0_14px_34px_rgba(0,0,0,0.36)]";
@@ -255,12 +274,13 @@ function getWaveCardClassNames(
     : "tw-transform-gpu tw-saturate-[.9] tw-transition-[transform,filter] tw-duration-700 tw-ease-out group-focus-visible:tw-saturate-100 desktop-hover:group-hover:tw-scale-105 desktop-hover:group-hover:tw-saturate-100 touch-only:tw-saturate-100 motion-reduce:tw-transform-none motion-reduce:tw-transition-none";
   if (artworkOverlay) {
     return {
-      cardInteractionClassName,
+      cardInteractionClassName:
+        "tw-transition-[transform,box-shadow] tw-duration-500 md:motion-safe:desktop-hover:hover:-tw-translate-y-1 desktop-hover:hover:tw-shadow-[0_0_0_1px_rgba(255,255,255,0.16),0_30px_60px_-20px_rgba(0,0,0,0.6)]",
       imageInteractionClassName,
       cardDirectionClassName:
         "tw-min-h-72 tw-w-full tw-min-w-0 tw-aspect-square tw-flex-col tw-justify-end md:tw-min-h-0",
       cardSurfaceClassName:
-        "tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.05)]",
+        "tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08),0_10px_28px_rgba(0,0,0,0.2)]",
       titleClassName:
         "tw-line-clamp-1 tw-text-[21px] tw-leading-[1.2] tw-tracking-[-0.025em] tw-text-white desktop-hover:group-hover:tw-text-white",
       imageSizeClassName: "tw-absolute tw-inset-0 tw-h-full tw-w-full",
@@ -323,7 +343,9 @@ export function ExploreWaveCard({
     const desktop = window.matchMedia("(min-width: 768px)");
     const updateTint = () => {
       const tint =
-        showArtworkOverlay || desktop.matches ? getWaveCardTint(image) : null;
+        showArtworkOverlay || desktop.matches
+          ? getWaveCardTint(image, showArtworkOverlay)
+          : null;
       if (tint) details.style.setProperty("--card-tint", tint);
       else details.style.removeProperty("--card-tint");
     };
@@ -350,7 +372,8 @@ export function ExploreWaveCard({
   } = getWaveCardClassNames(
     horizontalOnMobile,
     subtleHover,
-    showArtworkOverlay
+    showArtworkOverlay,
+    compact
   );
   const waveHref = getWaveRoute({
     waveId: wave.id,
@@ -425,7 +448,7 @@ export function ExploreWaveCard({
       data-home-action="Open wave"
       href={waveHref}
       prefetch={false}
-      className={`${compact ? "tw-flex-row" : cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} tw-group tw-relative tw-flex tw-h-full tw-overflow-hidden tw-border tw-border-solid tw-text-left tw-no-underline tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)] tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
+      className={`${cardDirectionClassName} ${cardSurfaceClassName} ${cardInteractionClassName} ${!compact && !showArtworkOverlay ? "tw-border tw-shadow-[0_10px_28px_rgba(0,0,0,0.2)]" : ""} tw-group tw-relative tw-flex tw-h-full tw-overflow-hidden tw-border-solid tw-text-left tw-no-underline tw-ease-out focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 motion-reduce:tw-transform-none motion-reduce:tw-transition-none`}
       aria-label={cardAriaLabel}
     >
       {compact && (
@@ -480,13 +503,13 @@ export function ExploreWaveCard({
 
       <div
         ref={detailsRef}
-        className={`tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${compact ? "tw-p-3" : contentPaddingClassName}`}
+        className={`tw-relative tw-z-10 tw-flex tw-min-w-0 tw-flex-1 tw-flex-col ${contentPaddingClassName}`}
       >
         <div
           className={compact ? "tw-flex tw-min-w-0 tw-items-start" : undefined}
         >
           <span
-            className={`${compact ? "tw-flex-1 tw-truncate tw-text-base tw-leading-6 tw-tracking-tight" : titleClassName} ${subtleHover ? "tw-duration-200 tw-ease-out" : "tw-duration-300"} tw-m-0 tw-min-w-0 tw-break-words tw-font-semibold tw-text-iron-50 tw-transition-colors group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300 motion-reduce:tw-transition-none`}
+            className={`${titleClassName} ${subtleHover ? "tw-duration-200 tw-ease-out" : "tw-duration-300"} tw-m-0 tw-min-w-0 tw-break-words tw-font-semibold tw-text-iron-50 tw-transition-colors group-focus-visible:tw-text-primary-300 desktop-hover:group-hover:tw-text-primary-300 motion-reduce:tw-transition-none`}
           >
             {wave.name}
           </span>
@@ -507,7 +530,10 @@ export function ExploreWaveCard({
           </div>
         ) : (
           <MessagePreviewContent
-            previewContent={getWavePreviewContent(wave)}
+            previewContent={getWavePreviewContent(
+              wave,
+              compact || showArtworkOverlay
+            )}
             compact={compact}
             artworkOverlay={showArtworkOverlay}
           />
@@ -537,9 +563,15 @@ function ExploreWaveCompactMetrics({
   readonly horizontalOnMobile: boolean;
   readonly artworkOverlay: boolean;
 }) {
-  let defaultSpacingClassName = compact ? "tw-mt-2" : "tw-mt-3";
+  let defaultSpacingClassName = compact ? "tw-mt-2.5" : "tw-mt-3";
   if (artworkOverlay) defaultSpacingClassName = "tw-mt-0";
   const metricIconClassName = artworkOverlay ? "tw-opacity-70" : "";
+  const metricValueWeightClassName = compact
+    ? "tw-font-medium"
+    : "tw-font-semibold tw-tabular-nums";
+  const metricsLayoutClassName = compact
+    ? "tw-gap-x-[9px] tw-gap-y-1.5 tw-text-xs tw-leading-4"
+    : "tw-min-h-5 tw-gap-x-3 tw-gap-y-1.5";
   const metricValueClassName = artworkOverlay
     ? "tw-text-white/70"
     : "tw-text-iron-200";
@@ -549,7 +581,7 @@ function ExploreWaveCompactMetrics({
 
   return (
     <span
-      className={`explore-wave-card-metrics ${spacingClassName} tw-flex tw-min-h-5 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1.5`}
+      className={`explore-wave-card-metrics ${spacingClassName} tw-flex tw-flex-wrap tw-items-center ${metricsLayoutClassName}`}
     >
       {metrics.map((metric) => (
         <span
@@ -557,17 +589,19 @@ function ExploreWaveCompactMetrics({
           className="tw-contents"
         >
           <span
-            className={`${METRIC_CHIP_CLASSES} ${horizontalOnMobile || artworkOverlay ? "tw-text-xs" : "tw-text-[11px]"} tw-gap-1`}
+            className={`${METRIC_CHIP_CLASSES} ${horizontalOnMobile || artworkOverlay || compact ? "tw-text-xs" : "tw-text-[11px]"} ${compact ? "tw-font-normal tw-leading-4" : "tw-font-medium tw-leading-none"} tw-gap-1`}
             aria-label={metric.ariaLabel}
           >
             <span
-              className={`${metric.iconToneClasses} ${horizontalOnMobile ? "md:tw-opacity-70" : metricIconClassName}`}
+              className={`${compact ? "tw-flex tw-items-center" : ""} ${compact && metric.kind === "hot" ? "tw-text-iron-600" : metric.iconToneClasses} ${compact && metric.kind !== "hot" ? "tw-opacity-75" : ""} ${horizontalOnMobile ? "md:tw-opacity-70" : metricIconClassName}`}
             >
               {metric.icon}
             </span>
-            <span className="tw-text-iron-400">{metric.label}</span>
+            <span className={compact ? "tw-text-iron-500" : "tw-text-iron-400"}>
+              {metric.label}
+            </span>
             <span
-              className={`${horizontalOnMobile ? "tw-text-iron-50 md:tw-text-white/70" : metricValueClassName} tw-font-semibold tw-tabular-nums`}
+              className={`${horizontalOnMobile ? "tw-text-iron-50 md:tw-text-white/70" : metricValueClassName} ${metricValueWeightClassName}`}
             >
               {metric.value}
             </span>
@@ -587,12 +621,13 @@ function MessagePreviewContent({
   readonly compact: boolean;
   readonly artworkOverlay: boolean;
 }) {
+  const compactPreviewClassName = "tw-mt-2 tw-h-[18px]";
   const previewClassName = artworkOverlay
     ? "tw-mb-4 tw-mt-3 tw-min-h-9"
     : "tw-mt-1.5 tw-min-h-9";
-  const previewTextClassName = artworkOverlay
-    ? "tw-text-white/55"
-    : "tw-text-iron-500";
+  let previewTextClassName = "tw-text-iron-500";
+  if (artworkOverlay) previewTextClassName = "tw-text-white/55";
+  if (compact) previewTextClassName = "tw-text-iron-400";
   const emptyPreviewClassName = artworkOverlay
     ? previewClassName
     : "tw-mt-2 tw-min-h-10";
@@ -600,7 +635,7 @@ function MessagePreviewContent({
     return (
       <div
         aria-hidden="true"
-        className={compact ? "tw-mt-1.5 tw-h-[18px]" : emptyPreviewClassName}
+        className={compact ? compactPreviewClassName : emptyPreviewClassName}
       />
     );
   }
@@ -609,14 +644,17 @@ function MessagePreviewContent({
     <ContentDisplay
       content={previewContent}
       shouldClamp={false}
-      className={`${compact ? "tw-mt-1.5 tw-h-[18px]" : previewClassName} tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden`}
+      className={`${compact ? compactPreviewClassName : previewClassName} tw-flex tw-min-w-0 tw-items-start tw-gap-1 tw-overflow-hidden`}
       textClassName={`${compact ? "tw-line-clamp-1" : "tw-line-clamp-2"} tw-text-[13px] tw-leading-[18px] ${previewTextClassName} tw-break-words tw-font-normal`}
       linkify={false}
     />
   );
 }
 
-function getWavePreviewContent(wave: SidebarWave): ProcessedContent | null {
+function getWavePreviewContent(
+  wave: SidebarWave,
+  plainText: boolean
+): ProcessedContent | null {
   const combinedText = wave.descriptionDrop.contents?.trim() ?? "";
   const media = [...wave.descriptionDrop.media];
 
@@ -624,5 +662,12 @@ function getWavePreviewContent(wave: SidebarWave): ProcessedContent | null {
     return null;
   }
 
-  return buildProcessedContent(combinedText || null, media);
+  const content = plainText
+    ? markdownToPlainText(combinedText, {
+        includeLinkDestinations: false,
+        preserveImageMarkdown: true,
+      })
+    : combinedText;
+  if (!content && media.length === 0) return null;
+  return buildProcessedContent(content || null, media);
 }

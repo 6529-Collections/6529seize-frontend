@@ -86,6 +86,7 @@ const WaveDropTime: React.FC<WaveDropTimeProps> = ({
 
   return (
     <p
+      data-wave-drop-time
       className={`${textSizeClass} ${textColorClass} ${textWeightClass} tw-m-0 tw-whitespace-nowrap tw-leading-none`}
     >
       <time dateTime={date.toISOString()}>{label}</time>

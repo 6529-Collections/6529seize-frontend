@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import type { ReactNode } from "react";
 import {
   useEffect,
@@ -188,15 +190,18 @@ export function AppWalletModalShell(
             >
               {title}
             </h2>
-            <button
+            <IconButton
               type="button"
               aria-label={t(locale, "appWallet.modal.close")}
               onClick={onHide}
               disabled={dismissDisabled}
-              className="tw--mr-2 tw-inline-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 active:tw-bg-white/5 active:tw-text-iron-100 desktop-hover:hover:tw-bg-white/5 desktop-hover:hover:tw-text-iron-100"
+              size={44}
+              variant="muted"
+              shape="circle"
+              className="tw--mr-2"
             >
               <XMarkIcon className="tw-size-5" aria-hidden="true" />
-            </button>
+            </IconButton>
           </header>
           <div className="tw-px-5 tw-py-5 sm:tw-px-6">{children}</div>
           <div

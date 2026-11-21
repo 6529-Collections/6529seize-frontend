@@ -63,7 +63,10 @@ export default function ParticipationDropHeader({
         }
       >
         <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
-          <p className="tw-m-0 tw-text-md tw-font-semibold tw-leading-none">
+          <p
+            data-wave-typography="preserve"
+            className="tw-m-0 tw-text-md tw-font-semibold tw-leading-none"
+          >
             {drop.author.is_anonymous ? (
               <AnonymousAuthorName />
             ) : (

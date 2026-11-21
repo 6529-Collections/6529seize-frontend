@@ -1,6 +1,9 @@
 import {
-  DROPDOWN_FIELD_CLASSES,
+  getDropdownTriggerClasses,
+  DROPDOWN_OPTION_ACTIVE_CLASSES,
+  DROPDOWN_LISTBOX_FOCUS_CLASSES,
   DROPDOWN_CHEVRON_CLASSES,
+  DROPDOWN_CHECKMARK_CLASSES,
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -118,7 +121,7 @@ export default function OfferPlanPricing({
                     event.currentTarget.click();
                   }
                 }}
-                className={`${DROPDOWN_FIELD_CLASSES} tw-flex tw-min-h-11 tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-px-3 tw-py-2 tw-text-left tw-text-sm`}
+                className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "sm" } })} tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-text-left`}
               >
                 <Description as="span" className="tw-min-w-0">
                   {t(locale, OFFER_METHODS[value.method])}
@@ -131,13 +134,13 @@ export default function OfferPlanPricing({
               <ListboxOptions
                 aria-label={pricingLabel}
                 anchor="bottom start"
-                className="tailwind-scope tw-z-50 tw-w-[var(--button-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none"
+                className={`${DROPDOWN_LISTBOX_FOCUS_CLASSES} tailwind-scope tw-z-50 tw-w-[var(--button-width)] tw-overflow-auto tw-rounded-lg tw-bg-iron-900 tw-p-1 tw-text-sm tw-text-iron-100 tw-shadow-lg tw-ring-1 tw-ring-white/10 [--anchor-gap:0.5rem] focus:tw-outline-none`}
               >
                 {Object.entries(OFFER_METHODS).map(([method, key]) => (
                   <ListboxOption
                     key={method}
                     value={method}
-                    className="tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-px-3 tw-py-2 data-[focus]:tw-bg-iron-800 data-[focus]:tw-ring-2 data-[focus]:tw-ring-inset data-[focus]:tw-ring-primary-400"
+                    className={`tw-flex tw-min-h-11 tw-cursor-pointer tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-px-3 tw-py-2 ${DROPDOWN_OPTION_ACTIVE_CLASSES}`}
                   >
                     {({ selected }) => (
                       <>
@@ -147,7 +150,7 @@ export default function OfferPlanPricing({
                         {selected && (
                           <CheckIcon
                             aria-hidden="true"
-                            className="tw-size-4 tw-shrink-0 tw-text-iron-300"
+                            className={`tw-size-4 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
                           />
                         )}
                       </>

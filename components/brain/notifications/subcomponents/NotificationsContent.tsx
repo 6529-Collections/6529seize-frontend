@@ -69,11 +69,7 @@ export default function NotificationsContent({
   }
 
   if (showNoItems) {
-    return (
-      <div className="tw-flex tw-min-h-full tw-flex-1 tw-flex-col tw-items-center tw-justify-start">
-        <MyStreamNoItems />
-      </div>
-    );
+    return <MyStreamNoItems />;
   }
 
   return (

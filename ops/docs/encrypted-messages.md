@@ -64,9 +64,19 @@ continue to appear as Unknown member.
 
 Encrypted and ordinary messages use the same rich-text editor. Custom emoji
 shortcodes render as inline images while composing and editing; encrypted drafts
-keep their shortcode representation for encryption and sending. Encrypted chat
-does not offer Poll or Storm actions. GIFs can be sent as encrypted attachments;
-their search and previews connect publicly to GIPHY.
+keep their shortcode representation for encryption and sending. GIFs can be
+sent as encrypted attachments. Their search and previews connect publicly to GIPHY.
+
+### Polls
+
+In supported builds, select **Create poll** in an encrypted DM or group chat.
+Enter a question and two to ten choices in the inline composer. Choose
+**Single** or **Multiple**, then select **Post poll**.
+
+Select your choices and choose **Vote**. Use **View results** to see the tally,
+then select a result row to see who chose it. Use **Change vote** to update or
+clear your vote. The creator can select **End poll** to stop voting.
+People who join a group after the poll was posted need a new poll to participate.
 
 Messages support the same Markdown formatting as ordinary chats: headings,
 **bold** and italic text, strikethrough, lists and task lists, quotes,
@@ -153,7 +163,8 @@ Open the setup action in the account menu, Preferences → **Devices & security*
 or the composer notice. Each opens the same permission dialog. The initial
 `/messages/encrypted` page presents the same explanation inline, without the
 **Encrypted messages / End-to-end encrypted** header until encryption is ready.
-Setup does not open automatically after sign-in.
+Setup does not open automatically after sign-in. Once you sign for setup, the
+app shows **Finishing encrypted message setup…** while it turns encryption on.
 
 The explanation and signature button name the permissions this device needs:
 
@@ -194,6 +205,10 @@ scrolls; on a phone it leaves space around the dialog and respects the safe area
 Ordinary web sign-in can itself include a combined grant. When that happens,
 the encryption engine adopts it without another signature, including if the
 setup page was already open. Signing and encryption still use separate keys.
+If this browser already saved an encryption device, **Sign to enable both**
+signs for posts and resumes that device using its existing approval. Its key
+and chat history are kept. If that encryption approval needs renewal, signing
+stays on and encryption requests its own approval separately.
 If combined setup cannot finish, the page explains the result and offers explicit
 next actions. It does not silently request a different permission. If signing
 succeeds but encryption registration fails, signing stays on and encryption can
@@ -247,6 +262,11 @@ due, this displays preview wording with renewal actions disabled, rather than
 claiming your permissions are expiring.
 
 ## Starting a chat
+
+Select **Direct Message** on someone’s profile or profile card to open
+**New message** with that person already selected. From there, use **Open
+chat** for an existing encrypted conversation or **Start chat** for a new one.
+Opening the composer creates no conversation.
 
 In the 6529 app, the back arrow to the left of the chat avatar returns to the
 encrypted messages list. It stays visible on iPad in portrait and landscape.
@@ -432,7 +452,7 @@ appear.
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
   mark), **Block** the sender (they can't start new chats with you or add you
   to encrypted chats; chats you already share stay until you leave them),
-  **Choose who can message you** (Preferences) and, last, **Report illegal or
+  **Choose who can message you** (the Messages tab in Preferences) and **Report illegal or
   severe harm**.
 - Search in the header looks only through messages on this device.
 - **Chat info** lists members (with admin badges and their devices, each with
@@ -871,6 +891,17 @@ without images**. Images and files too large for one encrypted attachment
 
 ## Troubleshooting
 
+- **Sign in again to continue**: the server rejected this browser's sign-in.
+  Select **Sign in again** to restore the session, then encrypted messages
+  restart. This keeps the device's local chats and keys.
+- **Loading encrypted chats…** appears while this device first checks for
+  chats. The inbox lists each chat as it arrives. After a brief wait for a
+  trusted device to send an invitation, an empty list says **No encrypted
+  chats available on this device yet** and offers **Check device setup**.
+  Invitations continue arriving in the background. Select **Check again**
+  to check immediately. If the check stalls or fails, an empty list offers
+  **Try again**. **No encrypted chats yet** appears when the check confirms
+  an empty inbox.
 - **Encrypted messages couldn’t start**: select **Try again**. The error code
   under the message helps the team diagnose staging issues.
 - **Chat not found on this device**: devices only receive chats they were

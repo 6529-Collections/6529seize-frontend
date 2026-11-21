@@ -8,11 +8,13 @@ import {
   DEFAULT_INACTIVE_ITEM_CLASSES,
   DEFAULT_ITEM_CLASSES,
   FOCUS_ITEM_RING_CLASSES,
+  SELECTION_INACTIVE_ITEM_CLASSES,
 } from "../constants";
 
 interface CompactMenuItemButtonProps {
   readonly item: CompactMenuActionItem;
   readonly isActive: boolean;
+  readonly isSelectionItem: boolean;
   readonly onClick: () => void;
   readonly itemClassName?: string | undefined;
   readonly activeItemClassName?: string | undefined;
@@ -24,6 +26,7 @@ interface CompactMenuItemButtonProps {
 export function CompactMenuItemButton({
   item,
   isActive,
+  isSelectionItem,
   onClick,
   itemClassName,
   activeItemClassName,
@@ -31,15 +34,17 @@ export function CompactMenuItemButton({
   focusItemClassName,
   unstyledItems = false,
 }: CompactMenuItemButtonProps) {
+  const inactiveClasses = isSelectionItem
+    ? SELECTION_INACTIVE_ITEM_CLASSES
+    : DEFAULT_INACTIVE_ITEM_CLASSES;
+  const focusClasses = isSelectionItem
+    ? DEFAULT_ACTIVE_ITEM_CLASSES
+    : DEFAULT_FOCUS_ITEM_CLASSES;
   const activeDefaultClasses = unstyledItems
     ? undefined
     : DEFAULT_ACTIVE_ITEM_CLASSES;
-  const inactiveDefaultClasses = unstyledItems
-    ? undefined
-    : DEFAULT_INACTIVE_ITEM_CLASSES;
-  const focusDefaultClasses = unstyledItems
-    ? undefined
-    : DEFAULT_FOCUS_ITEM_CLASSES;
+  const inactiveDefaultClasses = unstyledItems ? undefined : inactiveClasses;
+  const focusDefaultClasses = unstyledItems ? undefined : focusClasses;
 
   const stateClasses = isActive
     ? clsx(activeDefaultClasses, activeItemClassName)
@@ -50,6 +55,7 @@ export function CompactMenuItemButton({
     const showFocus = focus && !item.disabled;
     return clsx(
       unstyledItems ? undefined : DEFAULT_ITEM_CLASSES,
+      !unstyledItems && !isActive && !showFocus && "tw-bg-transparent",
       stateClasses,
       showFocus && FOCUS_ITEM_RING_CLASSES,
       showFocus && !isActive && clsx(focusDefaultClasses, focusItemClassName),

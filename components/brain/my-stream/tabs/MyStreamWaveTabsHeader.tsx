@@ -1,4 +1,7 @@
 "use client";
+
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useWaveInformation } from "@/contexts/WaveInformationContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -43,18 +46,11 @@ import { useSidebarState } from "../../../../hooks/useSidebarState";
 import WaveParentNavigation from "@/components/waves/header/WaveParentNavigation";
 import WaveRepButton from "@/components/waves/header/rep/WaveRepButton";
 import WaveJoinCta from "@/components/waves/header/WaveJoinCta";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
 import CompactWaveActions from "./CompactWaveActions";
 import WaveHeaderDisplayMenu from "./WaveHeaderDisplayMenu";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
 import { BRAIN_RIGHT_SIDEBAR_ID } from "@/components/brain/right-sidebar/BrainRightSidebarTypes";
 import { PlaintextDmEncryptionNotice } from "@/components/e2ee/plaintext/PlaintextDmEncryptionNotice";
-import {
-  WAVE_HEADER_ACTION_CLASSES,
-  WAVE_HEADER_ACTION_SURFACE_CLASSES,
-  WAVE_HEADER_COMPACT_ACTION_CLASSES,
-  WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES,
-} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 
 const TRUNCATION_EPSILON_PX = 1;
 const CONDENSED_HEADER_WIDTH_PX = 768;
@@ -230,7 +226,7 @@ function MyStreamWaveHeaderIdentity({
           variant={isCompact ? "compact-header" : "header"}
         />
         <div className="tw-flex tw-min-h-6 tw-min-w-0 tw-flex-nowrap tw-items-center tw-gap-x-1.5">
-          <h1 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-truncate tw-text-sm tw-font-semibold tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
+          <h1 className="tw-m-0 tw-min-w-0 tw-max-w-full tw-truncate tw-text-sm tw-font-medium tw-tracking-tight tw-text-white/95 lg:tw-text-xl">
             <button
               type="button"
               onClick={() => {
@@ -247,7 +243,7 @@ function MyStreamWaveHeaderIdentity({
               aria-label={t(locale, "waves.information.open", {
                 name: wave.name,
               })}
-              className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-normal tw-leading-6 tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+              className="tw-block tw-min-h-6 tw-max-w-full tw-truncate tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-medium tw-leading-6 tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
             >
               {wave.name}
             </button>
@@ -435,16 +431,7 @@ export default function MyStreamWaveTabsHeader({
         compactTrigger={isCompactWave}
       />
     ) : null;
-  const backButtonSizeClass = isCompactWave
-    ? `tw-h-8 tw-w-6 @[21rem]/wave-header:tw-w-8 ${COMPACT_ACTION_TOUCH_TARGET_CLASS}`
-    : "tw-size-11 tw-self-start sm:-tw-ml-2.5 sm:desktop-hover:tw-h-9";
   const directTimeZoneVariant = isCompact ? "compact" : "header";
-  const utilityButtonClassName = isCompactWave
-    ? WAVE_HEADER_COMPACT_ACTION_CLASSES
-    : WAVE_HEADER_ACTION_CLASSES;
-  const utilitySurfaceClassName = isCompactWave
-    ? WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES
-    : WAVE_HEADER_ACTION_SURFACE_CLASSES;
   const centeredActionsClassName = `tw-flex tw-shrink-0 tw-self-center tw-items-center ${
     isCompactWave
       ? "tw-gap-x-0.5 @[21rem]/wave-header:tw-gap-x-2"
@@ -506,17 +493,17 @@ export default function MyStreamWaveTabsHeader({
           className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 ${isCondensed || isCompactWave ? "tw-self-center" : "tw-self-start tw-pt-0.5"}`}
         >
           {showBackButton && (
-            <button
+            <IconButton
               type="button"
               onClick={handleMobileBack}
-              className={`tw-flex tw-shrink-0 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 tw-transition-colors hover:tw-text-iron-50 ${backButtonSizeClass}`}
+              layout={isCompactWave ? "back-compact" : "back"}
               aria-label="Go back"
             >
               <ArrowLeftIcon
                 aria-hidden="true"
                 className="tw-size-4 tw-flex-shrink-0"
               />
-            </button>
+            </IconButton>
           )}
           <MyStreamWaveHeaderIdentity
             isNarrow={isNarrow}
@@ -552,7 +539,7 @@ export default function MyStreamWaveTabsHeader({
           {renderLeadingActions?.(actionContext)}
           {renderTrailingActions?.(actionContext)}
           {isDirectMessage && compactActions}
-          <button
+          <IconButton
             type="button"
             ref={searchTrigger}
             onClick={openSearch}
@@ -561,12 +548,10 @@ export default function MyStreamWaveTabsHeader({
             aria-label={searchMessagesLabel}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={searchMessagesLabel}
-            className={utilityButtonClassName}
+            layout={isCompactWave ? "toolbar-compact" : "toolbar"}
           >
-            <span className={utilitySurfaceClassName}>
-              <MagnifyingGlassIcon className="tw-size-4 tw-flex-shrink-0" />
-            </span>
-          </button>
+            <MagnifyingGlassIcon className="tw-size-4 tw-flex-shrink-0" />
+          </IconButton>
           {!isDirectMessage && compactActions}
           {!isCompact && !isDirectMessage && (
             <WaveHeaderDisplayMenu
@@ -580,14 +565,14 @@ export default function MyStreamWaveTabsHeader({
               tooltipId={headerActionsTooltipId}
             />
           )}
-          <button
+          <IconButton
             type="button"
             onClick={toggleRightSidebar}
             data-tooltip-id={headerActionsTooltipId}
             data-tooltip-content={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }
-            className={utilityButtonClassName}
+            layout={isCompactWave ? "toolbar-compact" : "toolbar"}
             aria-label={
               isCompact ? rightSidebarCompactLabel : rightSidebarActionLabel
             }
@@ -597,24 +582,19 @@ export default function MyStreamWaveTabsHeader({
             aria-expanded={isRightSidebarOpen}
             aria-pressed={isRightSidebarOpen}
           >
-            <span className={utilitySurfaceClassName}>
-              <ChevronDoubleLeftIcon
-                strokeWidth={2}
-                aria-hidden="true"
-                className={`tw-size-4 tw-flex-shrink-0 tw-transition tw-duration-300 ${
-                  isRightSidebarOpen
-                    ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
-                    : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
-                }`}
-              />
-            </span>
-          </button>
+            <ChevronDoubleLeftIcon
+              strokeWidth={2}
+              aria-hidden="true"
+              className={`tw-size-4 tw-flex-shrink-0 tw-transition tw-duration-300 ${
+                isRightSidebarOpen
+                  ? "tw-rotate-180 desktop-hover:group-hover:tw-translate-x-0.5"
+                  : "tw-rotate-0 desktop-hover:group-hover:-tw-translate-x-0.5"
+              }`}
+            />
+          </IconButton>
         </div>
       </header>
-      <MyStreamActionTooltip
-        id={headerActionsTooltipId}
-        variant="wave-header"
-      />
+      <MyStreamActionTooltip id={headerActionsTooltipId} />
     </>
   );
 }

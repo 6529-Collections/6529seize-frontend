@@ -78,6 +78,8 @@ Profile access stays in the app drawer/account surfaces.
   layout reserves bottom space so content is not hidden behind the bar.
 - Tablet-sized app viewports use wider expanded and compact dock widths so the
   seven destinations remain balanced against the available canvas.
+- On narrow phones, the selected tab keeps a horizontal white highlight. The
+  bar reduces its horizontal shrink during scrolling to leave room for the icons.
 - On phones, `Discovery` and `Notifications` keep extra tap space around their
   icons when the bar compacts during scrolling.
 - In the Android app, bottom spacing respects the space the device reports

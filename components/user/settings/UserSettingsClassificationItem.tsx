@@ -1,5 +1,10 @@
 "use client";
 
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  DROPDOWN_SELECTED_OPTION_CLASSES,
+  DROPDOWN_OPTION_ACTIVE_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { CLASSIFICATIONS } from "@/entities/IProfile";
 import type { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 export default function UserSettingsClassificationItem({
@@ -18,14 +23,14 @@ export default function UserSettingsClassificationItem({
       <button
         type="button"
         onClick={() => onClassification(classification)}
-        className="tw-flex tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-2.5 tw-text-left tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-bg-iron-800 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800"
+        className={`tw-flex tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-0 tw-p-2.5 tw-text-left tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-bg-iron-800 focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 ${DROPDOWN_OPTION_ACTIVE_CLASSES} ${isActive ? DROPDOWN_SELECTED_OPTION_CLASSES : "tw-bg-transparent tw-text-iron-200"}`}
       >
-        <span className="tw-text-sm tw-font-medium tw-text-iron-100">
+        <span className="tw-text-sm tw-font-medium">
           {CLASSIFICATIONS[classification].title}
         </span>
         {isActive && (
           <svg
-            className="tw-ml-2 tw-h-5 tw-w-5 tw-text-primary-300"
+            className={`tw-ml-2 tw-h-5 tw-w-5 ${DROPDOWN_CHECKMARK_CLASSES}`}
             viewBox="0 0 24 24"
             fill="none"
             aria-hidden="true"

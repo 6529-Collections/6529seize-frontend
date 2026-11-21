@@ -48,6 +48,13 @@ Explicit tab, decision, curation and message links retain their destinations.
 Browser Back/Forward and native app Back restore the section from that visit
 when it is still available, ahead of the wave's latest remembered choice.
 
+Open wave views use medium-weight interface text and proportional numbers.
+Buttons, author handles, and level badges retain their original font weights. Leaderboard
+cards in both list and grid views and Winners cards keep visible borders.
+Settings blocks and Decisions cards use subtle borders, including Settings
+title dividers. FAQ items keep a subtle border when opened or closed; opening
+an item changes its background without adding a blue side line.
+
 ## Unread Chat Messages
 
 - On desktop and mobile web, `Chat` shows a quiet dark unread-message badge

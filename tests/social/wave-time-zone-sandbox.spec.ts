@@ -192,7 +192,8 @@ test.describe("Display time zone @auth @local-only", () => {
     });
     await expect(rep.getByText("Add REP", { exact: true })).toBeVisible();
     await expect(rep).toHaveCSS("height", "32px");
-    await expect(rep).toHaveCSS("padding-left", "10px");
+    await expect(rep).toHaveCSS("padding-left", "12px");
+    await expect(rep).toHaveCSS("padding-right", "14px");
     await expect(
       header.getByRole("button", { name: "Show wave description", exact: true })
     ).toHaveCount(0);
@@ -277,7 +278,8 @@ test.describe("Display time zone @auth @local-only", () => {
       })
     ).toHaveCount(0);
     await expect(more).toBeVisible();
-    await expect(rep).toHaveCSS("padding-left", "10px");
+    await expect(rep).toHaveCSS("padding-left", "12px");
+    await expect(rep).toHaveCSS("padding-right", "14px");
     await expectNoHorizontalOverflow(page);
     await page.setViewportSize({ width: 375, height: 900 });
     await expect(more).toBeVisible();

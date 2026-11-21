@@ -94,13 +94,11 @@ it.each([
 
 it("never registers a public route's ?wave= without its drop target", async () => {
   expect(await hydrateAt("/the-memes/1", "wave=abc&serialNo=42")).toBe("none");
-  // The query arrives after hydration. The wave id follows one commit after
-  // the drop target, through useClientNavigation's state sync (as on any
-  // client navigation), so no commit pairs it with `false`: that pair would
-  // run the backfill the target skips.
+  // The query arrives after hydration. Commit the wave and its target together,
+  // without an extra effect-driven frame. Pairing the wave with `false` would
+  // incorrectly run the backfill that a targeted link must skip.
   expect(commits).toEqual([
     [null, false],
-    [null, true],
     ["abc", true],
   ]);
 });

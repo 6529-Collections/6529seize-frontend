@@ -1,6 +1,6 @@
 # Direct-Message Admission Localization Fallback Debt
 
-- Routes/components: `/preferences` (**Notifications & messages**),
+- Routes/components: `/preferences?tab=messages` (**Messages**),
   `components/header/ProfilePreferencesSettings.tsx`,
   `components/header/ProfilePreferencesDirectMessageGroup.tsx`, and the
   new-DM refusal toasts from `helpers/waves/direct-message-admission.helpers.ts`
@@ -8,9 +8,9 @@
   `UserPageHeaderClient`.
 - Untranslated surface: the `profilePreferences.dm.GROUP_MEMBERS.*`,
   `profilePreferences.dm.blockNote`, and `profilePreferences.dm.group.*`
-  messages (option label and description, group summary, Choose/Change group,
-  required-group hint, unavailable-group warning, follow switch, picker dialog
-  title and description, creation error), and the
+  messages (option label and description, Set/Edit criteria, required-criteria
+  hint, unavailable-criteria warning, follow switch, editor dialog title and
+  description, creation error), and the
   `directMessageAdmission.*` refusal messages.
 - Current fallback: all of these exist only in the `en-US` source dictionary.
   `t()` resolves them to `en-US` in `en-GB`, `fr-FR`, `es-ES`, and `de-DE`.

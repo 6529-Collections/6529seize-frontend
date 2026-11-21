@@ -7,6 +7,7 @@ import type {
 import type { ImportedPayload } from "./imported-payload";
 import type { Payload, PayloadAttachment } from "./payload";
 import type { E2eeNoticeType } from "./notice-types";
+import type { E2eePoll } from "./types";
 import type { GroupMetadata, WasmLeaf } from "./wasm-types";
 
 /** Records the engine persists per profile (contract 8.7). */
@@ -128,6 +129,8 @@ export interface StoredGroup {
   epochFp: string;
   /** Recent epoch -> epoch_fp (split-view detection, 8.1.3). */
   epochFps: Record<string, string>;
+  /** MLS membership snapshots for application messages that arrive after an own commit. */
+  previousPollRosters?: Record<string, string[]>;
   commitKey: string;
   members: StoredMember[];
   splitView: boolean;
@@ -143,6 +146,8 @@ export interface StoredGroup {
   rosterCheckNeeded: boolean;
   /** Seqs of our own messages (we cannot decrypt our own ciphertext). */
   sentSeqs: number[];
+  /** Other attempts for own poll events already applied from the log. */
+  sentPollAttempts?: string[];
   readSeq: number;
   /** Incremental summary of processed, persisted local history. */
   history?: HistorySummary;
@@ -186,6 +191,11 @@ export interface SignedVersion {
 }
 
 export interface StoredMessage {
+  poll?: E2eePoll;
+  /** The last vote event from each device of an enrolled profile. */
+  pollVoteIds?: Record<string, string>;
+  /** Superseded vote IDs, retained per device to reject delayed retries. */
+  pollVoteHistory?: Record<string, string[]>;
   id: string;
   g: string;
   seq: number;
@@ -245,4 +255,10 @@ export interface StoredOutboxItem {
   createdAt: number;
   /** The ciphertext last submitted (lets a crashed send be recognized). */
   sealed: SealedOutboxMessage | null;
+  /** A confirmed poll event still awaiting ordered application from the log. */
+  acceptedSeq?: number;
+  /** Ciphertext fingerprints of submitted poll events, keyed to their MLS epoch. */
+  pollAttempts?: Record<string, number>;
+  /** Captured membership for each epoch used to submit an own poll creation. */
+  pollAttemptRosters?: Record<string, string[]>;
 }

@@ -47,6 +47,10 @@ Rules:
   has room to read. Long names end with an ellipsis instead of wrapping inside
   words. Wider cards keep the action beside the name.
 
+- A `/network?group={groupId}` link in a drop shows a `Network` preview.
+  When the group is available, the card shows its membership criteria, creator,
+  and creation date. Open the card to view that group in Network.
+
 - Path-style and legacy query-style wave serial links both render as quote cards.
 - Same-thread quote-card clicks jump in place.
 - Cross-thread quote-card clicks navigate first, then jump by `serialNo`.

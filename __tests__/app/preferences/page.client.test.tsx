@@ -14,9 +14,17 @@ jest.mock("@/components/user/utils/set-up-profile/UserSetUpProfileCta", () => {
     jest.requireActual<typeof import("next/link")>("next/link");
   return () => <Link href="/0x123">Create profile</Link>;
 });
-jest.mock("@/components/header/ProfilePreferencesSettings", () => () => (
-  <div>Notification settings panel</div>
-));
+jest.mock(
+  "@/components/header/ProfilePreferencesSettings",
+  () =>
+    ({ activeTab }: { readonly activeTab: "notifications" | "messages" }) => (
+      <div>
+        {activeTab === "messages"
+          ? "Message settings panel"
+          : "Notification settings panel"}
+      </div>
+    )
+);
 jest.mock("@/components/preferences/ContentPreferencesSettings", () => () => (
   <div>Content settings panel</div>
 ));
@@ -99,7 +107,7 @@ describe("PreferencesPageClient", () => {
     expect(screen.getByRole("heading", { name: "Preferences" })).toBeVisible();
     expect(screen.queryByText("@alice")).not.toBeInTheDocument();
     const notificationsTab = screen.getByRole("link", {
-      name: "Notifications & Messages",
+      name: "Notifications",
     });
     expect(notificationsTab).toHaveAttribute("aria-current", "page");
     expect(notificationsTab).toHaveClass(
@@ -118,6 +126,15 @@ describe("PreferencesPageClient", () => {
       "tw-border-r",
       "tw-border-iron-800"
     );
+  });
+
+  it("opens the Messages settings from its deep link", () => {
+    render(<PreferencesPageClient activeTab="messages" />);
+    const tab = screen.getByRole("link", { name: "Messages" });
+    expect(tab).toHaveAttribute("aria-current", "page");
+    expect(tab).toHaveAttribute("href", "/preferences?tab=messages");
+    expect(screen.getByText("Message settings panel")).toBeVisible();
+    expect(screen.queryByText("Notification settings panel")).toBeNull();
   });
 
   it("renders the blocked profiles tab and preserves its deep link", () => {

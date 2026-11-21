@@ -401,7 +401,6 @@ describe("CreateWaveGroup", () => {
     expect(mockSetDropsAdminCanDelete).toHaveBeenCalledWith(true);
     expect(inlinePanelProps?.defaultMembersPreviewTarget).toMatchObject({
       kind: "draft",
-      name: "Only me",
       summary: "Only me",
       group: {
         identity_addresses: ["0xcreator"],

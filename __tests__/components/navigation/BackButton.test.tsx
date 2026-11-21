@@ -1,7 +1,8 @@
-import { act, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
 import BackButton from "@/components/navigation/BackButton";
+let mockIsApp = false;
 
 jest.mock("next/navigation", () => ({
   useRouter: jest.fn(),
@@ -24,7 +25,7 @@ jest.mock("@/components/utils/Spinner", () => ({
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
   default: () => ({
-    isApp: false,
+    isApp: mockIsApp,
     isMobileDevice: false,
     hasTouchScreen: false,
   }),
@@ -88,6 +89,7 @@ function setup(
 
 describe("BackButton", () => {
   afterEach(() => {
+    mockIsApp = false;
     jest.clearAllMocks();
     window.history.replaceState(null, "", "/");
   });
@@ -191,6 +193,35 @@ describe("BackButton", () => {
     expect(mockGoBack).toHaveBeenCalled();
   });
 
+  it("stays busy only while navigation is pending and recovers afterward", async () => {
+    let finish = () => {};
+    mockGoBack.mockReturnValueOnce(
+      new Promise<void>((resolve) => {
+        finish = resolve;
+      })
+    );
+    setup({});
+    const back = screen.getByRole("button", { name: "Back" });
+    fireEvent.click(back);
+    expect(back).toHaveAttribute("aria-busy", "true");
+    expect(back).toBeDisabled();
+    await act(async () => finish());
+    expect(back).toHaveAttribute("aria-busy", "false");
+    expect(back).toBeEnabled();
+  });
+
+  it("returns from the native feed to Waves without a route navigation", async () => {
+    mockIsApp = true;
+    const { setActiveWave, prefetch } = setup(
+      { view: "profile-feed" },
+      { pathname: "/waves", returnTo: "/waves" }
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Back" }));
+    expect(setActiveWave).toHaveBeenCalledWith(null);
+    expect(mockGoBackTo).not.toHaveBeenCalled();
+    expect(prefetch).not.toHaveBeenCalled();
+  });
+
   it("uses the explicit collected return target when provided", async () => {
     const returnTo =
       "/Shelby/collected?collection=memelab#collected-card-memelab-65";
@@ -202,7 +233,7 @@ describe("BackButton", () => {
 
     expect(mockGoBackTo).toHaveBeenCalledWith(returnTo);
     expect(mockGoBack).not.toHaveBeenCalled();
-    expect(screen.getByRole("button", { name: "Back" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Back" })).toBeEnabled();
     expect(screen.queryByTestId("spinner")).not.toBeInTheDocument();
   });
 });

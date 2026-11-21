@@ -1,5 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import EncryptedConversationPage from "@/app/messages/encrypted/[group]/page";
+import EncryptedMessagesLoading from "@/app/messages/encrypted/loading";
+import MessagesLoading from "@/app/messages/loading";
 import EncryptedMessagesDevicesPage from "@/app/messages/encrypted/devices/page";
 import NewEncryptedChatPage from "@/app/messages/encrypted/new/page";
 import EncryptedMessagesPage from "@/app/messages/encrypted/page";
@@ -51,6 +53,15 @@ describe("/messages/encrypted routes", () => {
     expect(() => EncryptedMessagesDevicesPage()).toThrow(
       "NEXT_REDIRECT /preferences?tab=security"
     );
+  });
+
+  it.each([
+    { Loading: MessagesLoading, label: "Loading messages" },
+    { Loading: EncryptedMessagesLoading, label: "Loading encrypted chats…" },
+  ])("renders one visible route status for $label", ({ Loading, label }) => {
+    render(<Loading />);
+    expect(screen.getAllByRole("status")).toHaveLength(1);
+    expect(screen.getByRole("status", { name: label })).toBeVisible();
   });
 
   it("renders the client-only views when the flag is on", () => {

@@ -6,7 +6,11 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useE2ee } from "@/hooks/e2ee/useE2ee";
+import { useEffect, useState } from "react";
+import CircleLoader from "@/components/distribution-plan-tool/common/CircleLoader";
+import Button from "@/components/utils/button/Button";
+import { getButtonClasses } from "@/components/utils/button/buttonStyles";
+import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import {
   getEncryptedDevicesRoute,
   getMessagesBaseRoute,
@@ -14,6 +18,7 @@ import {
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import { t } from "@/i18n/messages";
+import { E2EE_INITIAL_INBOX_WAIT_MS } from "@/lib/e2ee/types";
 import { E2eeNewDeviceNotice } from "../devices/E2eeNewDeviceNotice";
 import { E2eeRenewalBanner } from "../gate/E2eeRenewalBanner";
 import { BackupNudgeBanner } from "../backup/BackupNudgeBanner";
@@ -39,6 +44,116 @@ function DevicesLink() {
         {t(locale, "e2ee.action.devices")}
       </span>
     </Link>
+  );
+}
+
+function EncryptedChats({ e2ee }: { readonly e2ee: UseE2eeResult }) {
+  const locale = useBrowserLocale();
+  const { conversations, profileId, initialSyncStatus, engine } = e2ee;
+  const hasChats = conversations.length > 0;
+  const waiting = initialSyncStatus === "waiting";
+  const [checking, setChecking] = useState(false);
+  useEffect(() => {
+    if (!checking) return;
+    const timer = globalThis.setTimeout(
+      () => setChecking(false),
+      E2EE_INITIAL_INBOX_WAIT_MS
+    );
+    return () => globalThis.clearTimeout(timer);
+  }, [checking]);
+  const loading =
+    checking || waiting || (!hasChats && initialSyncStatus === "pending");
+  const loadingPadding = hasChats ? "tw-py-3" : "tw-py-12";
+  const showRetry =
+    !checking &&
+    !hasChats &&
+    (initialSyncStatus === "failed" || initialSyncStatus === "delayed");
+  const awaitingInvitation = initialSyncStatus === "awaiting-invitation";
+  const showEmpty =
+    !checking &&
+    !hasChats &&
+    (awaitingInvitation || initialSyncStatus === "complete");
+  const emptyTitle = t(
+    locale,
+    awaitingInvitation
+      ? "e2ee.list.awaitingInvitation.title"
+      : "e2ee.list.empty.title"
+  );
+  const checkAgain = () => {
+    if (!engine) return;
+    setChecking(true);
+    void engine
+      .sync({ recheckInbox: true })
+      .catch(() => undefined)
+      .finally(() => setChecking(false));
+  };
+  let status = "";
+  if (loading) status = t(locale, "e2ee.list.loading");
+  if (waiting && !checking) status = t(locale, "e2ee.list.waiting");
+  if (showRetry) {
+    status = t(
+      locale,
+      initialSyncStatus === "delayed" ? "e2ee.list.delayed" : "e2ee.list.error"
+    );
+  }
+  if (showEmpty && awaitingInvitation) status = emptyTitle;
+
+  return (
+    <>
+      {hasChats && (
+        <E2eeConversationList
+          conversations={conversations}
+          selfProfileId={profileId}
+          label={t(locale, "e2ee.list.label")}
+        />
+      )}
+      <output
+        className={
+          loading
+            ? `tw-flex tw-items-center tw-justify-center tw-gap-3 tw-px-6 tw-text-center tw-text-sm tw-text-iron-400 motion-reduce:[&>svg]:tw-animate-none ${loadingPadding}`
+            : "tw-sr-only"
+        }
+      >
+        {loading && <CircleLoader />}
+        {status}
+      </output>
+      {showRetry && (
+        <E2eeCenteredMessage title={status}>
+          <Button variant="secondary" size="md" onClick={checkAgain}>
+            {t(locale, "e2ee.action.retry")}
+          </Button>
+        </E2eeCenteredMessage>
+      )}
+      {showEmpty && (
+        <E2eeCenteredMessage
+          icon={<LockClosedIcon className="tw-size-6" />}
+          title={emptyTitle}
+          body={t(
+            locale,
+            awaitingInvitation
+              ? "e2ee.list.awaitingInvitation.body"
+              : "e2ee.list.empty.body"
+          )}
+        >
+          {awaitingInvitation && (
+            <div className="tw-flex tw-flex-wrap tw-justify-center tw-gap-2">
+              <Link
+                href={getEncryptedDevicesRoute()}
+                className={getButtonClasses({
+                  variant: "secondary",
+                  className: "tw-no-underline",
+                })}
+              >
+                {t(locale, "e2ee.list.awaitingInvitation.action")}
+              </Link>
+              <Button variant="ghost" size="md" onClick={checkAgain}>
+                {t(locale, "e2ee.list.checkAgain")}
+              </Button>
+            </div>
+          )}
+        </E2eeCenteredMessage>
+      )}
+    </>
   );
 }
 
@@ -85,24 +200,12 @@ export function E2eeConversationListPage() {
       }
     >
       <E2eeRouteGate>
-        {({ conversations, profileId }) => (
+        {(e2ee) => (
           <div className="tw-flex tw-w-full tw-flex-col tw-gap-3 tw-px-2 tw-py-4 sm:tw-px-4">
             <E2eeNewDeviceNotice className="tw-px-2" />
             <E2eeRenewalBanner className="tw-mx-2" />
             <BackupNudgeBanner className="tw-mx-2" />
-            {conversations.length === 0 ? (
-              <E2eeCenteredMessage
-                icon={<LockClosedIcon className="tw-size-6" />}
-                title={t(locale, "e2ee.list.empty.title")}
-                body={t(locale, "e2ee.list.empty.body")}
-              />
-            ) : (
-              <E2eeConversationList
-                conversations={conversations}
-                selfProfileId={profileId}
-                label={t(locale, "e2ee.list.label")}
-              />
-            )}
+            <EncryptedChats e2ee={e2ee} />
           </div>
         )}
       </E2eeRouteGate>

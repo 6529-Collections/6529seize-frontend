@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import {
   useCallback,
   useEffect,
@@ -168,7 +170,7 @@ export default function UserPageIdentityStatementsGuidance() {
 
   return (
     <>
-      <button
+      <IconButton
         ref={buttonRef}
         type="button"
         disabled={!hydrated}
@@ -180,7 +182,9 @@ export default function UserPageIdentityStatementsGuidance() {
         onFocus={open}
         onBlur={hideAfterPointerLeaves}
         onClick={open}
-        className="tw-inline-flex tw-h-8 tw-w-8 tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-white/5 hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        size={32}
+        variant="ghost"
+        shape="circle"
       >
         <svg
           className="tw-h-[18px] tw-w-[18px]"
@@ -196,7 +200,7 @@ export default function UserPageIdentityStatementsGuidance() {
             strokeLinejoin="round"
           />
         </svg>
-      </button>
+      </IconButton>
       {isOpen &&
         createPortal(
           <div

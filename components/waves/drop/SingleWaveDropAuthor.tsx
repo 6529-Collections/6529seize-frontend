@@ -51,7 +51,10 @@ export const SingleWaveDropAuthor: React.FC<SingleWaveDropAuthorProps> = ({
         )}
         <div className="tw-inline-flex tw-items-center tw-gap-x-2">
           <UserProfileTooltipWrapper user={authorIdentity}>
-            <span className="tw-text-md tw-font-semibold tw-text-white desktop-hover:hover:tw-text-opacity-80">
+            <span
+              data-wave-typography="preserve"
+              className="tw-text-md tw-font-semibold tw-text-white desktop-hover:hover:tw-text-opacity-80"
+            >
               <ProfileNameWithAiMarker
                 classification={drop.author.classification}
               >

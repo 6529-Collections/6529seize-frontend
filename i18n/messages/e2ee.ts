@@ -51,6 +51,11 @@ export const E2EE_MESSAGES = {
   "e2ee.action.newChat": "New encrypted chat",
   "e2ee.action.devices": "Devices & security",
   "e2ee.action.retry": "Try again",
+  "e2ee.gate.session.title": "Sign in again to continue",
+  "e2ee.gate.session.body":
+    "Your sign-in is no longer valid. Sign in again to continue setting up encrypted messages. Your chats stay on this device.",
+  "e2ee.gate.session.action": "Sign in again",
+  "e2ee.gate.session.failed": "Sign-in did not finish. Please try again.",
   "e2ee.action.cancel": "Cancel",
   "e2ee.action.close": "Close",
   "e2ee.action.dismiss": "Dismiss",
@@ -150,6 +155,7 @@ export const E2EE_MESSAGES = {
   "e2ee.enroll.unavailable":
     "Open Encrypted messages to check whether this device can be set up.",
   "e2ee.enroll.waiting": "Waiting for your wallet signature…",
+  "e2ee.enroll.finishing": "Finishing encrypted message setup…",
   "e2ee.enroll.rejected": "Signature cancelled.",
   "e2ee.enroll.failed": "Couldn’t turn on encrypted messages. Try again.",
   "e2ee.enroll.revocationUnverified":
@@ -252,6 +258,16 @@ export const E2EE_MESSAGES = {
   "e2ee.devices.open": "Devices & security",
 
   "e2ee.list.subtitle": "End-to-end encrypted chats on this device.",
+  "e2ee.list.loading": "Loading encrypted chats…",
+  "e2ee.list.waiting": "Waiting for encrypted chats to sync to this device…",
+  "e2ee.list.delayed": "Encrypted chats are taking longer to sync",
+  "e2ee.list.error": "Couldn’t load encrypted chats.",
+  "e2ee.list.awaitingInvitation.title":
+    "No encrypted chats available on this device yet",
+  "e2ee.list.awaitingInvitation.body":
+    "Existing chats can appear after a trusted device in the chat adds this one.",
+  "e2ee.list.awaitingInvitation.action": "Check device setup",
+  "e2ee.list.checkAgain": "Check again",
   "e2ee.list.empty.title": "No encrypted chats yet",
   "e2ee.list.empty.body":
     "Start an encrypted chat with one person or a group. Only the people in the chat can read it.",
@@ -505,6 +521,19 @@ export const E2EE_MESSAGES = {
   "e2ee.composer.blocked":
     "Sending is paused until the group change goes through.",
   "e2ee.composer.unavailable": "You can’t send messages in this chat.",
+  "e2ee.poll.create": "Create poll",
+  "e2ee.poll.post": "Post poll",
+  "e2ee.poll.question": "Question",
+  "e2ee.poll.title": "Poll",
+  "e2ee.poll.open": "Open",
+  "e2ee.poll.vote": "Vote",
+  "e2ee.poll.updateVote": "Update vote",
+  "e2ee.poll.clearSelection": "Clear selection",
+  "e2ee.poll.voteQueued": "Vote queued",
+  "e2ee.poll.end": "End poll",
+  "e2ee.poll.endConfirm":
+    "Everyone can still see the results. Voting will close.",
+  "e2ee.poll.closed": "Poll ended",
   "e2ee.composer.sendFailed": "Couldn’t send. Try again.",
   "e2ee.composer.uploading.one": "Encrypting and sending {count} file…",
   "e2ee.composer.uploading.other": "Encrypting and sending {count} files…",

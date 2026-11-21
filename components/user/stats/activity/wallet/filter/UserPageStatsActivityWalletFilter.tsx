@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  DROPDOWN_TRIGGER_CLASSES,
+  getDropdownTriggerClasses,
   DROPDOWN_CHEVRON_CLASSES,
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import {
@@ -68,7 +68,7 @@ export default function UserPageStatsActivityWalletFilter({
             { filter: activeFilterLabel },
             locale
           )}
-          className={`${DROPDOWN_TRIGGER_CLASSES} tw-relative tw-flex tw-w-full tw-items-center tw-px-3.5 tw-py-2.5 tw-pr-9 tw-text-base sm:tw-leading-6`}
+          className={`${getDropdownTriggerClasses({ variant: "regular", metrics: { x: 14, y: 10, right: 36, text: "base", leading: "responsive" } })} tw-relative tw-flex tw-w-full tw-items-center`}
         >
           <span>{activeFilterLabel}</span>
         </button>
@@ -94,7 +94,7 @@ export default function UserPageStatsActivityWalletFilter({
           <AnimatePresence mode="wait" initial={false}>
             {isOpen && (
               <m.div
-                className="tw-absolute tw-right-0 tw-z-10 tw-mt-1.5 tw-w-full tw-origin-top-right tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900 tw-shadow-xl"
+                className="tw-absolute tw-right-0 tw-z-50 tw-mt-1.5 tw-w-full tw-origin-top-right tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.08] tw-bg-iron-900 tw-shadow-xl"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}

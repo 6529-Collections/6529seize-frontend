@@ -29,7 +29,7 @@ const MetadataItem: React.FC<{
   const tooltipId = buildTooltipId("metadata", label, value);
   const content = (
     <>
-      <span className="tw-mr-1.5 tw-min-w-0 tw-max-w-full tw-break-words tw-text-xs tw-font-normal tw-uppercase tw-text-iron-400">
+      <span className="tw-mr-1.5 tw-min-w-0 tw-max-w-full tw-break-words tw-text-xs tw-font-medium tw-uppercase tw-text-iron-400">
         {label}:
       </span>
       <span
@@ -118,7 +118,7 @@ const SingleWaveDropContentMetadataContent: React.FC<
               onClick={handleToggleMetadata}
               variant="tertiary"
               size="xs"
-              className={`tw-min-w-[100px] tw-self-end ${
+              className={`tw-min-w-[100px] tw-self-end !tw-font-medium ${
                 isCompactLayout ? "tw-col-span-2 tw-min-h-11" : ""
               }`}
               aria-expanded={showAllMetadata}

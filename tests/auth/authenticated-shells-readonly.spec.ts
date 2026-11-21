@@ -1946,6 +1946,33 @@ test.describe("Authenticated read-only route shells @auth @medium @readonly", ()
           .toBe(true);
       }
     }
+    await page
+      .getByRole("button", { name: "Assign Proxy", exact: true })
+      .click();
+    const targetSearch = page.getByRole("combobox", {
+      name: "Assigned to",
+      exact: true,
+    });
+    await expect(targetSearch).toBeVisible();
+    for (const width of [320, 390, 1280]) {
+      await page.setViewportSize({ width, height: 1000 });
+      await expect
+        .poll(() =>
+          targetSearch.evaluate((element) => {
+            const input = element.getBoundingClientRect();
+            const container = element.parentElement!.getBoundingClientRect();
+            return (
+              input.left >= container.left &&
+              input.right <= container.right + 1 &&
+              input.right <= window.innerWidth
+            );
+          })
+        )
+        .toBe(true);
+      await expectNoHorizontalOverflow(page);
+    }
+    await page.getByRole("button", { name: "Back", exact: true }).click();
+    await expect(filters).toBeVisible();
     await page.setViewportSize(initialViewport);
   });
 

@@ -122,43 +122,66 @@ export default function Notifications({
     return <NotificationsLoading />;
   }
 
+  const content = (
+    <NotificationsContent
+      isLoadingProfile={contentState.isLoadingProfile}
+      showProxyDisabledState={contentState.showProxyDisabledState}
+      showErrorState={contentState.showErrorState}
+      resolvedErrorMessage={contentState.resolvedErrorMessage}
+      handleRetry={handlers.handleRetry}
+      handleProxyDisable={handlers.handleProxyDisable}
+      showLoader={contentState.showLoader}
+      showNoItems={contentState.showNoItems}
+      items={items}
+      loadingOlder={isFetchingNextPage}
+      activeDrop={activeDrop}
+      setActiveDrop={setActiveDrop}
+      markNotificationIdsAsRead={markNotificationIdsAsRead}
+    />
+  );
+
   return (
     <div
       className="scroll-shadow tw-relative tw-flex tw-flex-col tw-overflow-x-hidden tw-rounded-t-xl"
       style={notificationsViewStyle}
     >
-      <div className="tw-relative tw-flex tw-h-full tw-flex-1 tw-flex-col tw-px-2 sm:tw-px-4 md:tw-px-6 lg:tw-px-0">
+      {contentState.showNoItems && (
+        <div
+          aria-hidden="true"
+          className="tw-pointer-events-none tw-absolute tw-inset-0 tw-overflow-hidden"
+        >
+          <div className="tw-pointer-events-none tw-absolute tw-left-1/2 tw-top-1/2 tw-h-[500px] tw-w-[500px] -tw-translate-x-1/2 -tw-translate-y-1/2 tw-rounded-full tw-bg-blue-600/10 tw-blur-[120px]" />
+        </div>
+      )}
+      <div className="tw-relative tw-flex tw-h-full tw-flex-1 tw-flex-col tw-px-4 md:tw-px-6">
         {isAuthenticated ? (
           <NotificationsCauseFilter
             activeFilter={activeFilter}
             setActiveFilter={setActiveFilter}
           />
         ) : null}
-        <WaveDropsReverseContainer
-          ref={scrollContainerRef}
-          onTopIntersection={handleTopIntersection}
-          isFetchingNextPage={isFetchingNextPage}
-          hasNextPage={pagination.hasNextPage}
-          bottomPaddingClassName={bottomPaddingClassName}
-          bottomPaddingStyle={bottomPaddingStyle}
-          containerClassName="tw-bg-transparent"
-        >
-          <NotificationsContent
-            isLoadingProfile={contentState.isLoadingProfile}
-            showProxyDisabledState={contentState.showProxyDisabledState}
-            showErrorState={contentState.showErrorState}
-            resolvedErrorMessage={contentState.resolvedErrorMessage}
-            handleRetry={handlers.handleRetry}
-            handleProxyDisable={handlers.handleProxyDisable}
-            showLoader={contentState.showLoader}
-            showNoItems={contentState.showNoItems}
-            items={items}
-            loadingOlder={isFetchingNextPage}
-            activeDrop={activeDrop}
-            setActiveDrop={setActiveDrop}
-            markNotificationIdsAsRead={markNotificationIdsAsRead}
-          />
-        </WaveDropsReverseContainer>
+        {contentState.showNoItems ? (
+          <div
+            ref={scrollContainerRef}
+            data-mobile-bottom-nav-scroll-target="true"
+            className={`tw-flex tw-min-h-0 tw-flex-1 tw-flex-col tw-overflow-y-auto ${bottomPaddingClassName ?? ""}`}
+            style={bottomPaddingStyle}
+          >
+            {content}
+          </div>
+        ) : (
+          <WaveDropsReverseContainer
+            ref={scrollContainerRef}
+            onTopIntersection={handleTopIntersection}
+            isFetchingNextPage={isFetchingNextPage}
+            hasNextPage={pagination.hasNextPage}
+            bottomPaddingClassName={bottomPaddingClassName}
+            bottomPaddingStyle={bottomPaddingStyle}
+            containerClassName="tw-bg-transparent"
+          >
+            {content}
+          </WaveDropsReverseContainer>
+        )}
       </div>
     </div>
   );

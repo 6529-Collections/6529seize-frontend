@@ -39,6 +39,7 @@ import {
   type E2eeMessageActions,
 } from "./E2eeMessageActionsMenu";
 import { E2eeEmojiText } from "./E2eeEmojiText";
+import { E2eePollCard } from "./E2eePollCard";
 import { E2eeUnsentNotice } from "./E2eeUnsentNotice";
 
 export type { E2eeMessageActions } from "./E2eeMessageActionsMenu";
@@ -528,12 +529,23 @@ function E2eeMessageItemComponent({
                 onJumpTo={actions.onJumpTo}
               />
             ) : null}
-            <MessageBody
-              message={message}
-              conversation={conversation}
-              selfProfileId={selfProfileId}
-              senderName={shownName}
-            />
+            {message.poll && !message.deleted ? (
+              <E2eePollCard
+                message={message}
+                poll={message.poll}
+                conversation={conversation}
+                engine={engine}
+                selfProfileId={selfProfileId}
+                canAct={canAct}
+              />
+            ) : (
+              <MessageBody
+                message={message}
+                conversation={conversation}
+                selfProfileId={selfProfileId}
+                senderName={shownName}
+              />
+            )}
             {message.imported && !message.deleted ? (
               <E2eeImportedNote
                 imported={message.imported}

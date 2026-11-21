@@ -103,7 +103,8 @@ export function MemePageActivity(
           </h3>
           <div className="tw-ml-auto tw-w-auto tw-shrink-0">
             <CommonDropdown
-              variant="filter"
+              variant="regular"
+              presentation="filter"
               items={activityTypeItems}
               activeItem={activityTypeFilter}
               filterLabel={t(

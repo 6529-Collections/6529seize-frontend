@@ -72,6 +72,31 @@ describe("E2EE REST client (contract 4.2)", () => {
     );
   });
 
+  it.each([{}, { has_pending_chats: true, has_queued_welcomes: "true" }])(
+    "rejects a malformed inbox status %j",
+    async (response) => {
+      fetchMock.mockResolvedValueOnce(response);
+      await expect(
+        createE2eeApiClient(ACCOUNT).getDeviceInboxStatus(KEY)
+      ).rejects.toThrow("Invalid encrypted inbox status");
+    }
+  );
+
+  it("preserves the queued Welcome signal and forwards acknowledgement cancellation", async () => {
+    const api = createE2eeApiClient(ACCOUNT);
+    const signal = new AbortController().signal;
+    const status = { has_pending_chats: true, has_queued_welcomes: false };
+    fetchMock.mockResolvedValueOnce(status);
+    await expect(api.getDeviceInboxStatus(KEY)).resolves.toEqual(status);
+    await api.ackWelcome(KEY, "w", signal);
+    expect(postMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: `e2ee/devices/${KEY}/welcomes/w/ack`,
+        signal,
+      })
+    );
+  });
+
   it("maps every endpoint with structured errors", async () => {
     const api = createE2eeApiClient(ACCOUNT);
     await api.getMe();
@@ -81,6 +106,10 @@ describe("E2EE REST client (contract 4.2)", () => {
     await api.getLog(G, { deviceKey: KEY, afterSeq: 5 });
     await api.getWelcomes(KEY);
     await api.getDeviceGroups(KEY);
+    fetchMock.mockResolvedValueOnce({ has_pending_chats: true });
+    await expect(api.getDeviceInboxStatus(KEY)).resolves.toEqual({
+      has_pending_chats: true,
+    });
     await api.getBlobChunk("0xb1", 2, KEY);
     expect(
       fetchMock.mock.calls.map(([arg]) => [arg.endpoint, arg.params ?? null])
@@ -95,6 +124,7 @@ describe("E2EE REST client (contract 4.2)", () => {
       ],
       [`e2ee/devices/${KEY}/welcomes`, null],
       [`e2ee/devices/${KEY}/groups`, null],
+      [`e2ee/devices/${KEY}/inbox-status`, null],
       ["e2ee/blobs/0xb1/chunks/2", { device_key: KEY }],
     ]);
     for (const [arg] of fetchMock.mock.calls) {

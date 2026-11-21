@@ -32,7 +32,10 @@ export default function PublicWaveFeed({
                   className="tw-size-9 tw-shrink-0 tw-rounded-full tw-bg-iron-800"
                 />
                 <div className="tw-min-w-0 tw-flex-1">
-                  <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+                  <p
+                    data-wave-typography="preserve"
+                    className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200"
+                  >
                     {item.authorLabel}
                   </p>
                   <h3 className="tw-m-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-6">
