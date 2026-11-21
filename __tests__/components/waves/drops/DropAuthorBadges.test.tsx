@@ -51,6 +51,24 @@ type WaveCompetitionPreviewModalProps = {
   readonly hasWinningEntries: boolean;
 };
 
+type ValidatorBadgeProps = {
+  readonly validator: {
+    readonly isValidator: boolean;
+    readonly lastQualifyingCycle?: number | null;
+    readonly qualifyingDays?: number | null;
+    readonly observedThroughCycle?: number | null;
+  };
+  readonly onBadgeClick: () => void;
+  readonly tooltipId?: string;
+};
+
+type ValidatorDetailsPanelProps = {
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
+  readonly profileHandle: string | null;
+  readonly validator: ValidatorBadgeProps["validator"];
+};
+
 jest.mock("@/hooks/useArtistPreviewModal", () => ({
   useArtistPreviewModal: () => mockUseArtistPreviewModal(),
 }));
@@ -163,6 +181,41 @@ jest.mock("@/components/waves/drops/WaveCompetitionPreviewModal", () => ({
       data-active-tab={activeTab}
       data-has-active={String(hasActiveEntries)}
       data-has-winners={String(hasWinningEntries)}
+    />
+  ),
+}));
+
+jest.mock("@/components/waves/drops/ValidatorBadge", () => ({
+  ValidatorBadge: ({
+    validator,
+    onBadgeClick,
+    tooltipId,
+  }: ValidatorBadgeProps) =>
+    validator.isValidator ? (
+      <button
+        type="button"
+        data-testid="validator-badge"
+        data-is-validator={String(validator.isValidator)}
+        data-qualifying-days={validator.qualifyingDays ?? ""}
+        {...(tooltipId === undefined ? {} : { "data-tooltip-id": tooltipId })}
+        onClick={onBadgeClick}
+      >
+        Validator
+      </button>
+    ) : null,
+}));
+
+jest.mock("@/components/waves/drops/ValidatorDetailsPanel", () => ({
+  ValidatorDetailsPanel: ({
+    isOpen,
+    profileHandle,
+    validator,
+  }: ValidatorDetailsPanelProps) => (
+    <div
+      data-testid="validator-details-panel"
+      data-open={String(isOpen)}
+      data-handle={profileHandle ?? ""}
+      data-qualifying-days={validator.qualifyingDays ?? ""}
     />
   ),
 }));
@@ -485,5 +538,148 @@ describe("DropAuthorBadges", () => {
       "data-user-primary-address",
       "0xwallet"
     );
+  });
+
+  describe("validator badge", () => {
+    it("renders validator badge when is_validator is true", () => {
+      render(
+        <DropAuthorBadges
+          profile={{
+            ...baseProfile,
+            badges: {
+              artist_of_main_stage_submissions: 0,
+              artist_of_memes: 0,
+              is_validator: true,
+              validator_qualifying_days: 42,
+              validator_last_qualifying_cycle: 100,
+              validator_observed_through_cycle: 105,
+            },
+          }}
+        />
+      );
+
+      const badge = screen.getByTestId("validator-badge");
+      expect(badge).toBeInTheDocument();
+      expect(badge).toHaveAttribute("data-is-validator", "true");
+      expect(badge).toHaveAttribute("data-qualifying-days", "42");
+    });
+
+    it("does not render validator badge when is_validator is false", () => {
+      render(
+        <DropAuthorBadges
+          profile={{
+            ...baseProfile,
+            badges: {
+              artist_of_main_stage_submissions: 0,
+              artist_of_memes: 0,
+              is_validator: false,
+            },
+          }}
+        />
+      );
+
+      expect(screen.queryByTestId("validator-badge")).not.toBeInTheDocument();
+    });
+
+    it("does not render validator badge when is_validator is null/undefined", () => {
+      render(
+        <DropAuthorBadges
+          profile={{
+            ...baseProfile,
+            badges: {
+              artist_of_main_stage_submissions: 0,
+              artist_of_memes: 0,
+            },
+          }}
+        />
+      );
+
+      expect(screen.queryByTestId("validator-badge")).not.toBeInTheDocument();
+    });
+
+    it("opens validator details panel when badge is clicked", () => {
+      render(
+        <DropAuthorBadges
+          profile={{
+            ...baseProfile,
+            badges: {
+              artist_of_main_stage_submissions: 0,
+              artist_of_memes: 0,
+              is_validator: true,
+              validator_qualifying_days: 42,
+            },
+          }}
+        />
+      );
+
+      const badge = screen.getByTestId("validator-badge");
+      fireEvent.click(badge);
+
+      expect(mockCloseAllCustomTooltips).toHaveBeenCalledTimes(1);
+      const panel = screen.getByTestId("validator-details-panel");
+      expect(panel).toHaveAttribute("data-open", "true");
+      expect(panel).toHaveAttribute("data-handle", "artist");
+    });
+
+    it("forwards tooltip id prefix to validator badge", () => {
+      render(
+        <DropAuthorBadges
+          profile={{
+            ...baseProfile,
+            badges: {
+              artist_of_main_stage_submissions: 0,
+              artist_of_memes: 0,
+              is_validator: true,
+            },
+          }}
+          tooltipIdPrefix="custom-prefix"
+        />
+      );
+
+      expect(screen.getByTestId("validator-badge")).toHaveAttribute(
+        "data-tooltip-id",
+        "custom-prefix-validator"
+      );
+    });
+
+    it("renders validator badge alongside other badges", () => {
+      render(
+        <DropAuthorBadges
+          profile={{
+            ...baseProfile,
+            active_main_stage_submission_ids: ["s1"],
+            profile_wave_id: "wave-1",
+            badges: {
+              artist_of_main_stage_submissions: 1,
+              artist_of_memes: 0,
+              is_validator: true,
+            },
+          }}
+        />
+      );
+
+      expect(screen.getByTestId("artist-activity-badge")).toBeInTheDocument();
+      expect(screen.getByTestId("profile-wave-badge")).toBeInTheDocument();
+      expect(screen.getByTestId("validator-badge")).toBeInTheDocument();
+    });
+
+    it("does not render validator badge for anonymous authors", () => {
+      const { container } = render(
+        <DropAuthorBadges
+          profile={{
+            ...baseProfile,
+            is_anonymous: true,
+            badges: {
+              artist_of_main_stage_submissions: 0,
+              artist_of_memes: 0,
+              is_validator: true,
+            },
+          }}
+        />
+      );
+
+      expect(container.firstChild).toBeNull();
+      expect(screen.queryByTestId("validator-badge")).not.toBeInTheDocument();
+    });
   });
 });
