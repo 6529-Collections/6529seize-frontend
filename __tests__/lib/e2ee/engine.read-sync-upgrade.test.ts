@@ -556,6 +556,83 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     for (const device of world.devices) device.engine.dispose();
   });
 
+  it("says in the debug status why the phone is missing, then that it was invited and joined", async () => {
+    const { world, laptop, updated, phoneKey, laptopGroup, listDevices } =
+      await onlyTheLaptopCanAdd({ olderApi: false });
+    const alice = world.users.get("alice");
+    if (!alice) throw new Error("no alice");
+    const phoneLabel =
+      contextOf(laptop).ownDevices.find(
+        (item) => item.device_key.toLowerCase() === phoneKey
+      )?.label ?? "";
+    expect(phoneLabel).not.toBe("");
+    // The laptop has not listed the phone's new KeyPackages yet: to it the
+    // phone is still an older client.
+    expect(laptop.engine.getReadSyncStatus?.()).toEqual({
+      group: laptopGroup.g,
+      sharedWith: 0,
+      olderGroups: 0,
+      reasons: [
+        { kind: "older-key-packages", deviceKey: phoneKey, device: phoneLabel },
+      ],
+    });
+    // The phone goes offline; the laptop lists and adds it.
+    stopDevice(world, updated);
+    const addedAt = world.clock.now();
+    await listDevices();
+    expect(laptopGroup.roster.has(phoneKey)).toBe(true);
+    const invited = laptop.engine.getReadSyncStatus?.();
+    expect(invited?.sharedWith).toBe(1);
+    expect(invited?.reasons).toEqual([
+      {
+        kind: "invited",
+        deviceKey: phoneKey,
+        device: phoneLabel,
+        since: expect.any(Number) as number,
+      },
+    ]);
+    const [reason] = invited?.reasons ?? [];
+    expect(reason?.kind === "invited" && reason.since >= addedAt).toBe(true);
+    // Back online, the phone joins and says hello: nothing left to explain.
+    const phone = await startDevice(world, "alice", alice.account, {
+      storage: updated.storage,
+      enroll: false,
+      extra: { readSync: true },
+    });
+    await settle(world);
+    expect(phone.engine.getReadSyncStatus?.()?.sharedWith).toBe(1);
+    expect(laptop.engine.getReadSyncStatus?.()).toEqual({
+      group: laptopGroup.g,
+      sharedWith: 1,
+      olderGroups: 0,
+      reasons: [],
+    });
+    for (const device of world.devices) device.engine.dispose();
+  });
+
+  it("shows when self-group claims resume in the debug status after a 429", async () => {
+    const { world, laptop, laptopGroup, listDevices } =
+      await onlyTheLaptopCanAdd({ olderApi: false });
+    world.ds.addFault({
+      method: "POST",
+      path: /^e2ee\/key-packages\/claim$/u,
+      status: 429,
+      code: "E2EE_RATE_LIMITED",
+    });
+    await listDevices();
+    const pausedUntil =
+      contextOf(laptop).device?.readSync?.claimsPausedUntil ?? null;
+    expect(pausedUntil).not.toBeNull();
+    const status = laptop.engine.getReadSyncStatus?.();
+    expect(status?.group).toBe(laptopGroup.g);
+    expect(status?.sharedWith).toBe(0);
+    expect(status?.reasons).toEqual([
+      { kind: "claim-budget", nextAt: pausedUntil },
+      { kind: "maintenance", nextAt: expect.any(Number) as number },
+    ]);
+    for (const device of world.devices) device.engine.dispose();
+  });
+
   it("stops claiming for self groups until the server's window ends after a 429", async () => {
     const {
       world,

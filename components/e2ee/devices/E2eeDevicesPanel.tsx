@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { isE2eeReadSyncDebugShown } from "@/config/e2eeReadSyncEnv";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -8,6 +9,7 @@ import { requestE2eeBackupSetup } from "../backup/backupSetupRequest";
 import { E2eeBackupPanel } from "../backup/E2eeBackupPanel";
 import { E2eeDeviceList } from "./E2eeDeviceList";
 import { E2eeNewDeviceNotice } from "./E2eeNewDeviceNotice";
+import { E2eeReadSyncDebugRow } from "./E2eeReadSyncDebugRow";
 import { RenameDevice } from "./RenameDevice";
 
 /** "Devices for encrypted messages": list, revoke, rename this device. */
@@ -36,6 +38,7 @@ export function E2eeDevicesPanel() {
         onRevoked={(device) => setRevokedLabel(device.label)}
         onSetUpBackup={requestE2eeBackupSetup}
       />
+      {isE2eeReadSyncDebugShown() && <E2eeReadSyncDebugRow engine={engine} />}
       <p role="status" className="tw-sr-only">
         {revokedLabel ? t(locale, "e2ee.devices.revokeDone") : null}
       </p>

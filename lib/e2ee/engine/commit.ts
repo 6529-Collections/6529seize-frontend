@@ -142,7 +142,10 @@ export async function finalizeOwnCommit(
   addNotices(ctx, runtime, notices, input.seq, input.serverTs);
   // The adder sends the new devices its read state (D175, P60 §5).
   if (record.metadata.kind === "self" && added.length > 0) {
-    ctx.readSync?.devicesAdded(record.g);
+    ctx.readSync?.devicesAdded(
+      record.g,
+      added.map((member) => member.deviceKey)
+    );
   }
 }
 

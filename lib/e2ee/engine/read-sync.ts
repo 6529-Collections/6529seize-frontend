@@ -117,6 +117,11 @@ export class ReadSync implements ReadSyncHooks {
   private lastSentAt = 0;
   /** The device whose hello is waiting for a snapshot, if any. */
   private helloFrom: string | null = null;
+  /**
+   * Siblings this device added to a self group in this run, with when, not
+   * heard from in it since (debug status only).
+   */
+  private readonly invited = new Map<string, number>();
 
   constructor(ctx: EngineContext, deps: ReadSyncDeps) {
     this.ctx = ctx;
@@ -402,6 +407,7 @@ export class ReadSync implements ReadSyncHooks {
     if (!payload || senderDeviceKey === ownDeviceKey(this.ctx)) {
       return;
     }
+    this.invited.delete(senderDeviceKey.toLowerCase());
     const record = runtime.record;
     const received = { ...(record.readSync?.received ?? {}) };
     for (const [g, seq] of payload.r) {
@@ -471,8 +477,38 @@ export class ReadSync implements ReadSyncHooks {
     }
   }
 
-  devicesAdded(g: string): void {
+  devicesAdded(g: string, deviceKeys: readonly string[]): void {
+    for (const key of deviceKeys) {
+      this.invited.set(key.toLowerCase(), this.ctx.now());
+    }
     this.scheduleSnapshot(g, TIMER_SNAPSHOT, 0);
+  }
+
+  /** Debug status: siblings added in this run and not heard from since. */
+  invitedSiblings(): ReadonlyMap<string, number> {
+    return this.invited;
+  }
+
+  /**
+   * Debug status: when this device, without a self group, may next create
+   * one (after the join wait, at most once a day); null when it does not
+   * create them or has not started waiting.
+   */
+  createDueAt(): number | null {
+    const state = this.ctx.device?.readSync;
+    if (!this.enabled) {
+      return null;
+    }
+    const createdAt = state?.createdAt;
+    if (
+      createdAt !== undefined &&
+      this.ctx.now() - createdAt < CREATE_EVERY_MS
+    ) {
+      return createdAt + CREATE_EVERY_MS;
+    }
+    return state?.waitingSince === undefined
+      ? null
+      : state.waitingSince + JOIN_WAIT_MS;
   }
 
   /**
