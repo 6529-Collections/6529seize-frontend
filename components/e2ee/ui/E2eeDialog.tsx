@@ -1,4 +1,9 @@
 "use client";
+import useDialogKeyboard, {
+  DIALOG_KEYBOARD_VIEWPORT_STYLE,
+} from "@/hooks/useDialogKeyboard";
+
+import IconButton from "@/components/utils/button/IconButton";
 
 import {
   Description,
@@ -51,6 +56,7 @@ export function E2eeDialog({
   scrollBody = false,
 }: E2eeDialogProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const keyboardViewportRef = useDialogKeyboard(open);
   useAndroidBackLayer(open, dialogRef, onClose);
   const widthClass = size === "md" ? "tw-max-w-xl" : "tw-max-w-md";
   return (
@@ -62,6 +68,16 @@ export function E2eeDialog({
     >
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-950/80 motion-safe:tw-animate-sidebar-account-fade-in" />
       <div
+        ref={keyboardViewportRef}
+        style={
+          scrollBody
+            ? {
+                ...DIALOG_KEYBOARD_VIEWPORT_STYLE,
+                bottom:
+                  "max(env(safe-area-inset-bottom, 0px), var(--native-keyboard-inset-bottom, 0px))",
+              }
+            : DIALOG_KEYBOARD_VIEWPORT_STYLE
+        }
         className={
           scrollBody
             ? "tw-fixed tw-inset-x-0 tw-bottom-[env(safe-area-inset-bottom)] tw-top-[env(safe-area-inset-top)] tw-overflow-y-auto tw-p-4"
@@ -79,14 +95,15 @@ export function E2eeDialog({
                 {title}
               </DialogTitle>
               {!hideCloseButton && (
-                <button
+                <IconButton
                   type="button"
                   onClick={onClose}
                   aria-label={closeLabel}
-                  className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                  size={36}
+                  variant="ghost"
                 >
                   <XMarkIcon aria-hidden="true" className="tw-size-5" />
-                </button>
+                </IconButton>
               )}
             </div>
             {hasContent(description) ? (

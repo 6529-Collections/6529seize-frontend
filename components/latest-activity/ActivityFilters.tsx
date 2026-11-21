@@ -57,19 +57,21 @@ export default function ActivityFilters({
   const activityTypeItems = getActivityTypeItems(locale);
   return (
     <div
-      className={`tailwind-scope tw-ml-auto tw-flex tw-w-auto tw-items-center tw-gap-4 tw-py-2 ${
-        isMobile ? "tw-justify-center" : "tw-justify-end"
+      className={`tailwind-scope tw-flex tw-w-auto tw-max-w-full tw-flex-wrap tw-items-center tw-gap-4 tw-py-2 ${
+        isMobile ? "tw-justify-start" : "tw-justify-end"
       }`}
     >
       <CommonDropdown
-        variant="filter"
+        variant="regular"
+        presentation="filter"
         items={ActivityContractItems}
         activeItem={selectedContract}
         filterLabel={t(locale, "nftActivity.filters.collection")}
         setSelected={onContractFilterChange}
       />
       <CommonDropdown
-        variant="filter"
+        variant="regular"
+        presentation="filter"
         items={activityTypeItems}
         activeItem={typeFilter}
         filterLabel={t(locale, "nftActivity.filters.type")}

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { getCopiedDropLink } from "@/helpers/waves/drop-copy-link.helpers";
 import { isWaveDirectMessage } from "@/helpers/waves/wave.helpers";
@@ -69,10 +71,6 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
 
   const isDisabled = isTemporaryDrop(drop);
   const iconSizeClass = size === "compact" ? "tw-h-4 tw-w-4" : "tw-h-5 tw-w-5";
-  const buttonSizeClass =
-    size === "compact"
-      ? "tw-h-full tw-w-full tw-justify-center tw-px-0 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
-      : "tw-size-7 tw-justify-center tw-p-0 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200";
 
   const getLinkText = () => {
     if (isDisabled) return "Unavailable";
@@ -115,10 +113,10 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
       content={<span className="tw-text-xs">{getLinkText()}</span>}
       disabled={isDisabled}
     >
-      <button
-        className={`icon tw-group tw-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-2 tw-rounded-full tw-border-0 tw-bg-transparent tw-text-[0.8125rem] tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${buttonSizeClass} ${
-          isDisabled ? "tw-cursor-default tw-opacity-50" : "tw-cursor-pointer"
-        }`}
+      <IconButton
+        type="submit"
+        layout={size === "compact" ? "drop-link-fill" : "drop-link"}
+        className="icon"
         onClick={copyToClipboard}
         disabled={isDisabled}
         aria-label="Copy link"
@@ -137,7 +135,7 @@ const WaveDropActionsCopyLink: React.FC<WaveDropActionsCopyLinkProps> = ({
             d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244"
           />
         </svg>
-      </button>
+      </IconButton>
     </DropActionTooltip>
   );
 };

@@ -82,7 +82,7 @@ export function SingleWaveDropVotersDownload({
       variant="tertiary"
       size={null}
       aria-label={t(locale, "waves.voteInsights.downloadAllVoters")}
-      className="tw-relative tw-z-10 tw-h-8 tw-w-8 tw-p-0 tw-text-xs sm:tw-w-auto sm:tw-px-2.5"
+      className="tw-relative tw-z-10 tw-h-8 tw-w-8 tw-p-0 tw-text-xs !tw-font-medium sm:tw-w-auto sm:tw-px-2.5"
     >
       <span className="tw-hidden sm:tw-inline">
         {t(

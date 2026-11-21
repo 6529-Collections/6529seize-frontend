@@ -37,13 +37,17 @@ const MemesLeaderboardDropVoteSummary: React.FC<
       {/* Left side: Vote counts + User vote (on large) */}
       <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-baseline tw-gap-2 tw-text-sm">
         <span
+          data-wave-typography="preserve"
           className={`tw-text-body tw-font-semibold tw-tabular-nums tw-leading-5 tw-tracking-identity ${
             isPositive ? "tw-text-iron-100" : "tw-text-rose-400"
           }`}
         >
           {formatInteger(locale, current)}
         </span>
-        <div className="tw-flex tw-items-baseline tw-gap-1">
+        <div
+          data-wave-typography="preserve"
+          className="tw-flex tw-items-baseline tw-gap-1 tw-font-semibold"
+        >
           <DropVoteProgressing
             current={current}
             projected={projected}
@@ -54,7 +58,10 @@ const MemesLeaderboardDropVoteSummary: React.FC<
             numberWeight="semibold"
             visualVariant="memes"
           />
-          <span className="tw-whitespace-nowrap tw-text-label tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-ordinal tw-text-iron-600">
+          <span
+            data-wave-vote-total
+            className="tw-whitespace-nowrap tw-text-label tw-font-semibold tw-uppercase tw-leading-5 tw-tracking-ordinal tw-text-iron-600"
+          >
             {t(locale, "waves.leaderboard.voteSummary.total", { creditType })}
           </span>
         </div>

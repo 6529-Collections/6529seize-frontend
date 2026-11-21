@@ -1,9 +1,15 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  DROPDOWN_PANEL_SURFACE_CLASSES,
+  getDropdownOptionStateClasses,
+  getDropdownTriggerClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
 import {
   faArrowCircleRight,
+  faCheck,
   faChevronDown,
   faChevronRight,
   faChevronUp,
@@ -26,6 +32,7 @@ import { commonApiFetch } from "@/services/api/common-api";
 import DotLoader from "@/components/dotLoader/DotLoader";
 import NextGenLoadError from "@/components/nextGen/NextGenLoadError";
 import CollectEntryLink from "@/components/collect/CollectEntryLink";
+import IconButton from "@/components/utils/button/IconButton";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
 import {
@@ -316,11 +323,9 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
     );
   }
 
-  const selectClassName =
-    "tw-cursor-pointer tw-appearance-none tw-border-0 tw-bg-transparent tw-p-0 tw-pr-6 tw-text-sm tw-font-medium tw-text-inherit focus:tw-outline-none";
-  const sortButtonClassName = `${DROPDOWN_FIELD_CLASSES} tw-inline-flex tw-min-h-10 tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm`;
+  const sortButtonClassName = `${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 40, x: 12, y: 8, text: "sm" } })} tw-inline-flex tw-items-center tw-gap-2 `;
   const sortMenuItemClassName =
-    "tw-w-full tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-white tw-transition hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400";
+    "tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-transition-colors tw-duration-150 focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 motion-reduce:tw-transition-none";
   const sortMenuId = `nextgen-collection-art-sort-${props.collection.id}`;
 
   return (
@@ -340,7 +345,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
           )}
         </div>
         <div
-          className={`tw-flex tw-items-center tw-gap-3 ${
+          className={`tw-relative tw-flex tw-items-center tw-gap-2 ${
             props.show_view_all
               ? "tw-ml-auto"
               : "tw-w-full tw-flex-wrap tw-justify-start md:tw-w-auto md:tw-justify-end"
@@ -352,6 +357,7 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               intent="pebbles_set"
               locale={locale}
               complete
+              size="md"
             />
           )}
           {props.show_view_all ? (
@@ -370,22 +376,23 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
             </Link>
           ) : (
             <>
-              <button
+              <IconButton
                 type="button"
+                variant="surface"
+                size={40}
                 onClick={() => setShowFilters(!showFilters)}
                 aria-label={`${showFilters ? "Hide" : "Show"} filters`}
-                className="tw-inline-flex tw-h-10 tw-w-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-text-white tw-ring-1 tw-ring-inset tw-ring-white/10 hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
                 data-tooltip-id={`nextgen-collection-art-filters-${props.collection.id}`}
               >
                 <FontAwesomeIcon
                   icon={showFilters ? faFilterCircleXmark : faFilter}
-                  className={`tw-h-[22px] ${
+                  className={`tw-size-4 ${
                     selectedTraitValues.length > 0
                       ? "tw-text-success"
                       : "tw-text-white"
                   }`}
                 />
-              </button>
+              </IconButton>
               <Tooltip
                 id={`nextgen-collection-art-filters-${props.collection.id}`}
                 className="!tw-bg-iron-800 !tw-px-2 !tw-py-1 !tw-text-white"
@@ -400,137 +407,157 @@ export default function NextGenCollectionArt(props: Readonly<Props>) {
               </Tooltip>
               {!hideNftPurchasing && (
                 <label
-                  className={`${DROPDOWN_FIELD_CLASSES} tw-flex tw-min-h-10 tw-items-center tw-gap-2 tw-px-3 tw-py-2 tw-text-sm focus-within:tw-ring-2 focus-within:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800`}
+                  className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 40, x: 12, y: 8, text: "sm" } })} tw-relative tw-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2 focus-within:tw-ring-2 focus-within:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800`}
                 >
-                  <span>Listing status</span>
-                  <span className="tw-relative tw-flex tw-items-center">
-                    <select
-                      value={listedType}
-                      onChange={(event) =>
-                        setListedType(
-                          event.target.value as NextGenTokenListedType
-                        )
-                      }
-                      className={`${selectClassName} tw-[color-scheme:dark]`}
-                    >
-                      {Object.values(NextGenTokenListedType).map((lt) => (
-                        <option
-                          key={`listed-type-${lt}`}
-                          value={lt}
-                          className="tw-bg-black tw-text-white"
-                        >
-                          {lt}
-                        </option>
-                      ))}
-                    </select>
+                  <span className="tw-min-w-0 tw-truncate">Listing status</span>
+                  <span
+                    aria-hidden="true"
+                    className="tw-relative tw-grid tw-shrink-0 tw-items-center tw-pr-6"
+                  >
+                    {Object.values(NextGenTokenListedType).map((lt) => (
+                      <span
+                        key={`listed-value-${lt}`}
+                        className={`tw-col-start-1 tw-row-start-1 ${listedType === lt ? "" : "tw-invisible"}`}
+                      >
+                        {lt}
+                      </span>
+                    ))}
                     <FontAwesomeIcon
                       icon={faChevronDown}
                       className="tw-pointer-events-none tw-absolute tw-right-0 tw-h-3 tw-w-3 tw-text-iron-400"
                       aria-hidden="true"
                     />
                   </span>
+                  <select
+                    value={listedType}
+                    onChange={(event) =>
+                      setListedType(
+                        event.target.value as NextGenTokenListedType
+                      )
+                    }
+                    className="tw-[color-scheme:dark] tw-absolute tw-inset-0 tw-h-full tw-w-full tw-cursor-pointer tw-opacity-0"
+                  >
+                    {Object.values(NextGenTokenListedType).map((lt) => (
+                      <option
+                        key={`listed-type-${lt}`}
+                        value={lt}
+                        className="tw-bg-black tw-text-white"
+                      >
+                        {lt}
+                      </option>
+                    ))}
+                  </select>
                 </label>
               )}
-              <div className="tw-relative" ref={sortMenuRef}>
-                <button
-                  type="button"
-                  className={sortButtonClassName}
-                  aria-haspopup="true"
-                  aria-controls={isSortMenuOpen ? sortMenuId : undefined}
-                  aria-expanded={isSortMenuOpen}
-                  onClick={() => setIsSortMenuOpen((isOpen) => !isOpen)}
-                >
-                  <span>Sort: {sort}</span>
-                  <FontAwesomeIcon
-                    icon={faChevronDown}
-                    className={`tw-h-3 tw-w-3 tw-transition-transform ${
-                      isSortMenuOpen ? "tw-rotate-180" : ""
-                    }`}
-                    aria-hidden="true"
-                  />
-                </button>
-                {isSortMenuOpen && (
-                  <div
-                    id={sortMenuId}
-                    className="tw-[margin-top:0.5rem] tw-absolute tw-right-0 tw-top-full tw-z-50 tw-min-w-[240px] tw-rounded-md tw-bg-iron-900 tw-p-1 tw-shadow-lg tw-ring-1 tw-ring-white/10"
+              <div className="tw-flex tw-items-center tw-gap-2">
+                <div className="md:tw-relative" ref={sortMenuRef}>
+                  <button
+                    type="button"
+                    className={sortButtonClassName}
+                    aria-haspopup="true"
+                    aria-controls={isSortMenuOpen ? sortMenuId : undefined}
+                    aria-expanded={isSortMenuOpen}
+                    onClick={() => setIsSortMenuOpen((isOpen) => !isOpen)}
                   >
-                    <div>
-                      {Object.values(NextGenListFilters)
-                        .filter(
-                          (filter) =>
-                            !hideNftPurchasing ||
-                            filter !== NextGenListFilters.LISTED_PRICE
-                        )
-                        .map((lf) => (
-                          <Fragment key={`sort-filter-${lf}`}>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setSort(lf);
-                                setIsSortMenuOpen(false);
-                              }}
-                              className={sortMenuItemClassName}
-                            >
-                              {lf}
-                            </button>
-                            {(lf === NextGenListFilters.ID ||
-                              lf === NextGenListFilters.HIGHEST_SALE) && (
-                              <div className="tw-my-1 tw-h-px tw-bg-white/10" />
-                            )}
-                          </Fragment>
-                        ))}
+                    <span>Sort: {sort}</span>
+                    <FontAwesomeIcon
+                      icon={faChevronDown}
+                      className={`tw-h-3 tw-w-3 tw-transition-transform ${
+                        isSortMenuOpen ? "tw-rotate-180" : ""
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                  {isSortMenuOpen && (
+                    <div
+                      id={sortMenuId}
+                      className={`tw-[margin-top:0.5rem] tw-absolute tw-left-0 tw-top-full tw-z-50 tw-w-60 tw-max-w-full tw-p-1 md:tw-left-auto md:tw-right-0 md:tw-max-w-none ${DROPDOWN_PANEL_SURFACE_CLASSES}`}
+                    >
+                      <div className="tw-flex tw-flex-col tw-gap-0.5">
+                        {Object.values(NextGenListFilters)
+                          .filter(
+                            (filter) =>
+                              !hideNftPurchasing ||
+                              filter !== NextGenListFilters.LISTED_PRICE
+                          )
+                          .map((lf) => (
+                            <Fragment key={`sort-filter-${lf}`}>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSort(lf);
+                                  setIsSortMenuOpen(false);
+                                }}
+                                className={`${sortMenuItemClassName} ${getDropdownOptionStateClasses(sort === lf)}`}
+                              >
+                                <span>{lf}</span>
+                                {sort === lf && (
+                                  <FontAwesomeIcon
+                                    icon={faCheck}
+                                    className={`tw-h-3.5 tw-w-3.5 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
+                                    aria-hidden="true"
+                                  />
+                                )}
+                              </button>
+                              {(lf === NextGenListFilters.ID ||
+                                lf === NextGenListFilters.HIGHEST_SALE) && (
+                                <div className="tw-my-1 tw-h-px tw-bg-white/10" />
+                              )}
+                            </Fragment>
+                          ))}
+                      </div>
+                      <div className="tw-[margin-top:0.25rem] tw-space-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-px-2 tw-py-2">
+                        <span className="tw-flex tw-items-center tw-gap-2">
+                          <NextgenRarityToggle
+                            disabled={!isRaritySort(sort)}
+                            title={"Trait Normalization"}
+                            show={showNormalised}
+                            setShow={setShowNormalised}
+                          />
+                        </span>
+                        <span className="tw-flex tw-items-center tw-gap-2">
+                          <NextgenRarityToggle
+                            title={"Trait Count"}
+                            show={showTraitCount}
+                            disabled={!isRaritySort(sort)}
+                            setShow={setShowTraitCount}
+                          />
+                        </span>
+                      </div>
                     </div>
-                    <div className="tw-[margin-top:0.25rem] tw-space-y-2 tw-border-0 tw-border-t tw-border-solid tw-border-white/10 tw-px-2 tw-py-2">
-                      <span className="tw-flex tw-items-center tw-gap-2">
-                        <NextgenRarityToggle
-                          disabled={!isRaritySort(sort)}
-                          title={"Trait Normalization"}
-                          show={showNormalised}
-                          setShow={setShowNormalised}
-                        />
-                      </span>
-                      <span className="tw-flex tw-items-center tw-gap-2">
-                        <NextgenRarityToggle
-                          title={"Trait Count"}
-                          show={showTraitCount}
-                          disabled={!isRaritySort(sort)}
-                          setShow={setShowTraitCount}
-                        />
-                      </span>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </div>
+                <span
+                  className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1 tw-border-0 tw-p-0.5 tw-ring-1 tw-ring-inset`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => setSortDir(SortDirection.ASC)}
+                    aria-label="Sort ascending"
+                    aria-pressed={sortDir === SortDirection.ASC}
+                    className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: sortDir === SortDirection.ASC })}`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faChevronUp}
+                      className="tw-h-4 tw-w-4"
+                      aria-hidden="true"
+                    />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSortDir(SortDirection.DESC)}
+                    aria-label="Sort descending"
+                    aria-pressed={sortDir === SortDirection.DESC}
+                    className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: sortDir === SortDirection.DESC })}`}
+                  >
+                    <FontAwesomeIcon
+                      icon={faChevronDown}
+                      className="tw-h-4 tw-w-4"
+                      aria-hidden="true"
+                    />
+                  </button>
+                </span>
               </div>
-              <span
-                className={`${CONNECTED_TAB_SURFACE_CLASSES} tw-inline-flex tw-items-center tw-gap-1 tw-border tw-border-solid tw-p-1`}
-              >
-                <button
-                  type="button"
-                  onClick={() => setSortDir(SortDirection.ASC)}
-                  aria-label="Sort ascending"
-                  aria-pressed={sortDir === SortDirection.ASC}
-                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: sortDir === SortDirection.ASC })}`}
-                >
-                  <FontAwesomeIcon
-                    icon={faChevronUp}
-                    className="tw-h-4 tw-w-4"
-                    aria-hidden="true"
-                  />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSortDir(SortDirection.DESC)}
-                  aria-label="Sort descending"
-                  aria-pressed={sortDir === SortDirection.DESC}
-                  className={`tw-inline-flex tw-h-9 tw-w-9 tw-items-center tw-justify-center tw-rounded-md tw-border-0 ${CONNECTED_TAB_INTERACTION_CLASSES} ${getConnectedTabStateClasses({ isActive: sortDir === SortDirection.DESC })}`}
-                >
-                  <FontAwesomeIcon
-                    icon={faChevronDown}
-                    className="tw-h-4 tw-w-4"
-                    aria-hidden="true"
-                  />
-                </button>
-              </span>
             </>
           )}
         </div>

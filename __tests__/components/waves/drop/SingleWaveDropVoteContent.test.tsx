@@ -7,11 +7,6 @@ import { ApiWaveCreditType } from "@/generated/models/ApiWaveCreditType";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { SingleWaveDropVoteSubmissionMode } from "@/components/waves/drop/SingleWaveDropVote.types";
 
-jest.mock("@fortawesome/react-fontawesome", () => ({
-  FontAwesomeIcon: ({ flip }: any) => (
-    <span data-testid="font-awesome-icon" data-flip={flip} />
-  ),
-}));
 jest.mock("@tanstack/react-query", () => ({
   useMutation: () => ({ mutateAsync: jest.fn() }),
 }));
@@ -207,8 +202,9 @@ describe("SingleWaveDropVoteContent", () => {
     ).toBeInTheDocument();
     expect(screen.getByTestId("vote-submit")).toHaveAttribute(
       "data-submit-label",
-      "Vote + reply"
+      ""
     );
+    expect(screen.getByTestId("new-rating")).toHaveTextContent("50");
   });
 
   it("preserves a rationale draft when the field is hidden and shown again", () => {
@@ -657,7 +653,14 @@ describe("SingleWaveDropVoteContent", () => {
 
     expect(screen.getByTestId("vote-slider")).toBeInTheDocument();
     expect(screen.queryByTestId("vote-input")).not.toBeInTheDocument();
-    expect(screen.getByText("Switch to numeric")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Slider" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
+    expect(screen.getByRole("button", { name: "Numeric" })).toHaveAttribute(
+      "aria-pressed",
+      "false"
+    );
   });
 
   it("toggles between slider and numeric input modes", () => {
@@ -675,14 +678,17 @@ describe("SingleWaveDropVoteContent", () => {
 
     // Initially in slider mode
     expect(screen.getByTestId("vote-slider")).toBeInTheDocument();
-    expect(screen.getByText("Switch to numeric")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Slider" })).toHaveAttribute(
+      "aria-pressed",
+      "true"
+    );
 
     // Toggle to numeric mode
     fireEvent.click(toggleButton);
 
     expect(screen.getByTestId("vote-input")).toBeInTheDocument();
     expect(screen.queryByTestId("vote-slider")).not.toBeInTheDocument();
-    expect(screen.getByText("Switch to slider")).toBeInTheDocument();
+    expect(toggleButton).toHaveAttribute("aria-pressed", "true");
 
     // Toggle back to slider mode
     const sliderButton = screen.getByRole("button", { name: /slider/i });
@@ -690,7 +696,8 @@ describe("SingleWaveDropVoteContent", () => {
 
     expect(screen.getByTestId("vote-slider")).toBeInTheDocument();
     expect(screen.queryByTestId("vote-input")).not.toBeInTheDocument();
-    expect(screen.getByText("Switch to numeric")).toBeInTheDocument();
+    expect(sliderButton).toHaveAttribute("aria-pressed", "true");
+    expect(toggleButton).toHaveAttribute("aria-pressed", "false");
   });
 
   it("updates vote value when slider changes", () => {
@@ -914,7 +921,7 @@ describe("SingleWaveDropVoteContent", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows correct icon flip based on mode", () => {
+  it("shows the selected MINI mode without adding reply controls", () => {
     const drop = createMockDrop();
 
     render(
@@ -925,17 +932,24 @@ describe("SingleWaveDropVoteContent", () => {
       />
     );
 
-    const icon = screen.getByTestId("font-awesome-icon");
-
     // Mini mode starts in numeric mode.
-    expect(icon).toHaveAttribute("data-flip", "vertical");
+    const numericButton = screen.getByRole("button", { name: "Numeric" });
+    expect(numericButton).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByTestId("vote-input")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("switch", { name: "Explain vote" })
+    ).not.toBeInTheDocument();
 
     // Switch to slider mode
     const toggleButton = screen.getByRole("button", { name: /slider/i });
     fireEvent.click(toggleButton);
 
-    // In slider mode, should show "horizontal" flip
-    expect(icon).toHaveAttribute("data-flip", "horizontal");
+    expect(toggleButton).toHaveAttribute("aria-pressed", "true");
+    expect(numericButton).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByTestId("vote-slider")).toBeInTheDocument();
+    expect(
+      screen.queryByRole("switch", { name: "Explain vote" })
+    ).not.toBeInTheDocument();
   });
 
   it("calls onVoteSuccess when vote is submitted successfully", () => {

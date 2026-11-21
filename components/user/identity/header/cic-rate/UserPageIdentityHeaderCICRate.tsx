@@ -339,8 +339,8 @@ function UserPageIdentityHeaderCICRateForm({
                   onClick={onCancel}
                   disabled={mutating}
                   variant="ghost"
-                  size="lg"
-                  className="tw-w-full md:tw-w-auto"
+                  size="md"
+                  className="tw-min-h-11 tw-w-full md:tw-w-auto"
                 >
                   {t(locale, "user.rate.cancel")}
                 </Button>
@@ -350,8 +350,8 @@ function UserPageIdentityHeaderCICRateForm({
                 disabled={isSaveDisabled}
                 loading={mutating}
                 variant="success"
-                size="lg"
-                className="tw-w-full md:tw-w-auto"
+                size="md"
+                className="tw-min-h-11 tw-w-full md:tw-w-auto"
               >
                 {t(locale, "user.rate.save")}
               </Button>

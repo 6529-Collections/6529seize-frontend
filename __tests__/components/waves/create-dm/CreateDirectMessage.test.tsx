@@ -1,6 +1,12 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  PROFILE_MESSAGE_PREFILL_PARAM,
+  setE2eeComposePrefill,
+} from "@/components/e2ee/e2eeComposePrefill";
+import NewMessagePageClient from "@/components/messages/NewMessagePageClient";
+import type { ReactNode } from "react";
 import CreateDirectMessage from "@/components/waves/create-dm/CreateDirectMessage";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -16,10 +22,23 @@ import {
 
 const mockPush = jest.fn();
 const mockToast = jest.fn();
+let mockProfileId: string;
+let mockSearchParams: URLSearchParams;
+const PROFILE_NAVIGATION_ID = "profile-message-navigation";
 jest.mock("@/config/e2eeEnv", () => ({ isE2eeEnabled: jest.fn(() => false) }));
-jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush }),
+  useSearchParams: () => mockSearchParams,
+}));
 jest.mock("@/components/auth/Auth", () => ({
-  useAuth: () => ({ setToast: mockToast }),
+  useAuth: () => ({
+    setToast: mockToast,
+    connectedProfile: { id: mockProfileId, primary_wallet: "0x111" },
+  }),
+}));
+jest.mock("@/components/messages/layout/MessagesLayout", () => ({
+  __esModule: true,
+  default: ({ children }: { readonly children: ReactNode }) => children,
 }));
 jest.mock("@/hooks/useDeviceInfo", () => ({
   __esModule: true,
@@ -93,6 +112,8 @@ function setup() {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockProfileId = "viewer";
+  mockSearchParams = new URLSearchParams();
   jest.mocked(isE2eeEnabled).mockReturnValue(false);
   jest.mocked(commonApiFetch).mockResolvedValue([alice, bob, self]);
   jest
@@ -100,6 +121,84 @@ beforeEach(() => {
     .mockResolvedValue({ id: "dm-1" } as Awaited<
       ReturnType<typeof createDirectMessageWave>
     >);
+});
+
+function seedProfileHandoff(ownerProfileId: string) {
+  setE2eeComposePrefill({
+    ownerProfileId,
+    people: [
+      { profileId: "recipient", handle: "bob", pfp: null, wallet: "0xdef" },
+    ],
+    source: "profile",
+    navigationId: PROFILE_NAVIGATION_ID,
+  });
+}
+
+function renderProfileMessage(ownerProfileId: string) {
+  seedProfileHandoff(ownerProfileId);
+  mockSearchParams.set(PROFILE_MESSAGE_PREFILL_PARAM, PROFILE_NAVIGATION_ID);
+  const client = new QueryClient();
+  const page = () => (
+    <QueryClientProvider client={client}>
+      <NewMessagePageClient />
+    </QueryClientProvider>
+  );
+  const view = render(page());
+  return {
+    unmount: view.unmount,
+    update: () => view.rerender(page()),
+  };
+}
+
+it("prefills the profile recipient once and requires confirmation on builds without encrypted messaging", async () => {
+  const view = renderProfileMessage("viewer");
+  const submit = screen.getByRole("button", { name: "Message bob" });
+  expect(createDirectMessageWave).not.toHaveBeenCalled();
+  fireEvent.click(submit);
+  await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/messages/dm-1"));
+  expect(createDirectMessageWave).toHaveBeenCalledWith({
+    addresses: ["0xdef"],
+  });
+  view.unmount();
+
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <NewMessagePageClient />
+    </QueryClientProvider>
+  );
+  expect(screen.getByRole("button", { name: "Message" })).toBeDisabled();
+});
+
+it("ignores a profile recipient handoff owned by another profile", () => {
+  renderProfileMessage("other-profile");
+
+  expect(screen.queryByRole("button", { name: "Message bob" })).toBeNull();
+  expect(screen.getByRole("button", { name: "Message" })).toBeDisabled();
+  expect(createDirectMessageWave).not.toHaveBeenCalled();
+});
+
+it("does not reuse a consumed recipient after switching accounts and back", () => {
+  const view = renderProfileMessage("viewer");
+  expect(screen.getByRole("button", { name: "Message bob" })).toBeEnabled();
+
+  mockProfileId = "other-profile";
+  view.update();
+  expect(screen.getByRole("button", { name: "Message" })).toBeDisabled();
+
+  mockProfileId = "viewer";
+  view.update();
+  expect(screen.getByRole("button", { name: "Message" })).toBeDisabled();
+});
+
+it("ignores an abandoned profile handoff on a regular composer navigation", () => {
+  seedProfileHandoff("viewer");
+  render(
+    <QueryClientProvider client={new QueryClient()}>
+      <NewMessagePageClient />
+    </QueryClientProvider>
+  );
+
+  expect(screen.getByRole("button", { name: "Message" })).toBeDisabled();
 });
 
 it("keeps the chosen recipient in the unified composer when they need an unencrypted DM", async () => {

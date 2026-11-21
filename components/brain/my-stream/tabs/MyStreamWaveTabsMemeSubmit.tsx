@@ -7,7 +7,11 @@ import {
   PlusIcon,
 } from "@heroicons/react/24/outline";
 import Button from "@/components/utils/button/Button";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import {
+  COMPACT_ACTION_ICON_CLASS,
+  COMPACT_ACTION_ICON_STROKE_WIDTH,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import WaveHeaderRestrictionButton, {
   WAVE_HEADER_RESTRICTION_BUTTON_CLASS,
 } from "@/components/waves/header/WaveHeaderRestrictionButton";
@@ -172,7 +176,10 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
               : `tw-w-auto sm:tw-px-2.5 ${HEADER_ACTION_BUTTON_CLASS}`
           }`}
         >
-          <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+          <LockClosedIcon
+            className={COMPACT_ACTION_ICON_CLASS}
+            strokeWidth={COMPACT_ACTION_ICON_STROKE_WIDTH}
+          />
           <span
             className={
               iconOnly

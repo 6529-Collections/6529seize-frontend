@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { ChevronLeftIcon } from "@heroicons/react/24/outline";
 import Image from "next/image";
 import Link from "next/link";
@@ -32,11 +34,16 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
         </Link>
       </div>
       {/* Position against the full-height WebSidebar, not the logo header. */}
-      <button
+      <IconButton
         type="button"
         onClick={onToggle}
         onMouseDown={(event) => event.preventDefault()}
-        className={`tw-group/sidebar-toggle tw-absolute tw-right-0 tw-top-1/2 tw-z-20 tw-flex tw-h-[52px] tw-w-5 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-border-0 tw-bg-transparent tw-p-0 tw-opacity-0 tw-transition-opacity tw-duration-150 group-hover/sidebar:tw-opacity-100 focus-visible:tw-opacity-100 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 touch-only:tw-opacity-100 motion-reduce:tw-transition-none ${collapsed ? "[body:has([data-sidebar-flyout])_&]:tw-hidden" : ""}`}
+        layout="sidebar-rail"
+        className={
+          collapsed
+            ? "[body:has([data-sidebar-flyout])_&]:tw-hidden"
+            : undefined
+        }
         aria-label="Toggle right sidebar"
         aria-expanded={!collapsed}
       >
@@ -58,7 +65,7 @@ function WebSidebarHeader({ collapsed, onToggle }: WebSidebarHeaderProps) {
           aria-hidden="true"
           className={`tw-relative tw-scale-x-75 tw-text-iron-200 tw-transition-colors desktop-hover:group-hover/sidebar-toggle:tw-text-white motion-reduce:tw-transition-none ${collapsed ? "tw-size-4 tw-rotate-180" : "tw-size-5"}`}
         />
-      </button>
+      </IconButton>
     </div>
   );
 }

@@ -51,9 +51,8 @@ no standalone Network Groups page.
 3. `/network` applies the selected scope and stores its group id in the URL.
    Group links shared from supported app surfaces can also open
    `/network?group={groupId}` directly.
-4. Public groups and private groups available to the
-   current authenticated member or creator show the selected group's name and
-   criteria above its scoped member results.
+4. Public groups and private groups available to the current authenticated
+   member or creator show criteria chips above the scoped member results.
 5. Inspect both how membership is determined and the current member list in the
    same view. Signed-in users can also open `REP everyone matching criteria` or
    `NIC everyone matching criteria` from the summary when the group has active

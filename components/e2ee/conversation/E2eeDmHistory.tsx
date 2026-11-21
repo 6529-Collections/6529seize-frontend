@@ -1,6 +1,6 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useDisplayTimeZone } from "@/hooks/useDisplayTimeZone";
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { withDisplayTimeZoneDate } from "@/lib/display-time-zone/displayTimeZone";
@@ -82,7 +82,7 @@ export function E2eeDmHistory({
               onChange={(event) =>
                 router.push(getEncryptedConversationRoute(event.target.value))
               }
-              className={`${DROPDOWN_FIELD_CLASSES} tw-block tw-min-h-10 tw-w-full tw-min-w-0 tw-appearance-none tw-py-2 tw-pe-10 tw-ps-3 tw-text-sm`}
+              className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 40, y: 8, end: 40, start: 12, text: "sm" } })} tw-block tw-w-full tw-min-w-0 tw-appearance-none`}
             >
               {thread.sessions.map((session, index) => (
                 <option key={session.g} value={session.g}>

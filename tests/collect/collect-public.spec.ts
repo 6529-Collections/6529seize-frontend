@@ -950,9 +950,12 @@ test("artist choices stay scrollable and searchable on mobile and desktop", asyn
     await search.focus();
     await expect(search).toHaveAttribute("aria-expanded", "true");
     await search.press("End");
-    await expect(
-      choices.getByRole("option", { name: "Catalog artist 30" })
-    ).toBeVisible();
+    const lastArtist = choices.getByRole("option", {
+      name: "Catalog artist 30",
+    });
+    await expect(lastArtist).toBeVisible();
+    await expect(lastArtist).toHaveCSS("background-color", "rgb(38, 39, 43)");
+    await expect(lastArtist).toHaveCSS("box-shadow", "none");
     await search.press("Enter");
     await expect(sheet).toHaveCount(0);
     await expect(artist).toContainText("Catalog artist 30");
@@ -986,6 +989,13 @@ test("artist choices stay scrollable and searchable on mobile and desktop", asyn
         (element) => element.getBoundingClientRect().height
       )
     ).toBeLessThanOrEqual(257);
+    const lastArtist = choices.getByRole("option", {
+      name: "Catalog artist 30",
+      exact: true,
+    });
+    await lastArtist.hover();
+    await expect(lastArtist).toHaveCSS("background-color", "rgb(38, 39, 43)");
+    await expect(lastArtist).toHaveCSS("box-shadow", "none");
     await choices
       .getByRole("option", { name: "Catalog artist 30", exact: true })
       .click();
@@ -1021,6 +1031,32 @@ test("one collection selector stays available across set, listings and future TD
     "Gradients",
     "Pebbles · NextGen",
   ]);
+  const listbox = page.getByRole("listbox");
+  await expect(listbox).toBeFocused();
+  await expect(listbox).toHaveCSS("outline-color", "rgba(0, 0, 0, 0)");
+  await listbox.press("ArrowDown");
+  const keyboardOption = page.getByRole("option", {
+    name: "Pebbles · NextGen",
+    exact: true,
+  });
+  await expect(keyboardOption).toHaveAttribute("data-focus");
+  await expect(keyboardOption).toHaveCSS("background-color", "rgb(38, 39, 43)");
+  await expect(keyboardOption).toHaveCSS(
+    "box-shadow",
+    /rgb\(147, 147, 159\).*2px 0px 0px 0px inset/
+  );
+  await listbox.press("Escape");
+  await collection.click();
+  const hoveredOption = page.getByRole("option", {
+    name: "The Memes",
+    exact: true,
+  });
+  await hoveredOption.hover();
+  await expect(hoveredOption).toHaveCSS("background-color", "rgb(38, 39, 43)");
+  await expect(hoveredOption).toHaveCSS("box-shadow", "none");
+  await page.screenshot({
+    path: info.outputPath("collect-option-hover.png"),
+  });
   await page
     .getByRole("option", { name: "Pebbles · NextGen", exact: true })
     .click();

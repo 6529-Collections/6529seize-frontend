@@ -1,6 +1,7 @@
 "use client";
 
 import StreamRouteLoadingShell from "@/components/brain/my-stream/layout/StreamRouteLoadingShell";
+import MessagesRouteLoading from "../MessagesRouteLoading";
 import type { ReactNode } from "react";
 import { useMemo } from "react";
 import UserSetUpProfileCta from "../../user/utils/set-up-profile/UserSetUpProfileCta";
@@ -14,22 +15,12 @@ import CreateDirectMessageModal from "@/components/waves/create-dm/CreateDirectM
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
-function MessagesBranchLoadingFallback() {
-  const locale = useBrowserLocale();
-  return (
-    <StreamRouteLoadingShell
-      ariaLabel={t(locale, "webSidebar.account.loading")}
-      variant="messages"
-    />
-  );
-}
-
 // The mobile shell (BrainMobile) is rendered only inside the native app.
 const MessagesMobile = createNativeOnlyBranch(
   () => import("../MessagesMobile"),
   {
     name: "messages shell",
-    loading: MessagesBranchLoadingFallback,
+    loading: () => <MessagesRouteLoading />,
     webBranch: MessagesDesktop,
   }
 );

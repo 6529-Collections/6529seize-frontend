@@ -37,7 +37,7 @@ export function VoteModeControl({ value, onChange }: VoteModeControlProps) {
             type="button"
             onClick={() => onChange(mode.value)}
             aria-pressed={isActive}
-            className={`tw-inline-flex tw-min-h-6 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-transition-colors focus-visible:tw-relative focus-visible:tw-z-10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 touch-only:tw-min-h-11 ${getConnectedTabStateClasses({ isActive })} ${
+            className={`tw-inline-flex tw-min-h-6 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-px-2.5 tw-py-1 tw-text-xs tw-transition-colors focus-visible:tw-relative focus-visible:tw-z-10 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400 touch-only:tw-relative touch-only:after:tw-absolute touch-only:after:tw-inset-x-0 touch-only:after:tw-top-1/2 touch-only:after:tw-h-11 touch-only:after:-tw-translate-y-1/2 touch-only:after:tw-content-[''] ${getConnectedTabStateClasses({ isActive })} ${
               isActive ? "tw-font-semibold" : "tw-font-normal"
             }`}
           >

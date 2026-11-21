@@ -22,6 +22,7 @@ import CircleLoader, {
 } from "@/components/distribution-plan-tool/common/CircleLoader";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import IconButton from "@/components/utils/button/IconButton";
 
 interface ImageComponentProps {
   readonly src: string;
@@ -136,15 +137,17 @@ export default function ImageComponent({
           <CircleLoader size={CircleLoaderSize.MEDIUM} />
         </span>
       )}
-      <button
+      <IconButton
         type="button"
+        size={28}
+        variant="surface"
         aria-label={t(locale, "drop.composer.removeImage")}
         disabled={!isEditable}
         onClick={removeImage}
-        className="tw-absolute tw-right-1 tw-top-1 tw-flex tw-size-7 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-black/60 tw-text-white hover:tw-bg-black/80 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400"
+        className="tw-absolute tw-right-1 tw-top-1"
       >
         <XMarkIcon className="tw-size-4" aria-hidden="true" />
-      </button>
+      </IconButton>
     </span>
   );
 }

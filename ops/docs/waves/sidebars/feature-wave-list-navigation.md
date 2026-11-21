@@ -52,11 +52,12 @@ Wave and DM rows in the left list control which thread is open.
   active-row reveal again. Signed-out visitors see an `All Waves` label on the
   left and the same search icon on the right, without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:
-  feed, then create on desktop and mobile web. The native app's list shows
-  feed only and keeps create in its top bar.
+  feed, then create on desktop and mobile web. The native app keeps its heading,
+  Create Wave, Search 6529 and More in the top bar.
 - Select the feed icon to open Profile Waves Feed. On desktop, it clears the
-  selected wave; on mobile web and in the native app, it opens
-  `/waves?view=profile-feed`. The feed's `Waves` link returns to the list.
+  selected wave; on mobile web, it opens `/waves?view=profile-feed`.
+  In the native app, select `More` then `Profile Waves Feed` to open that feed.
+  The feed's `Waves` link returns to the list.
 - The feed tooltip reads `Profile Waves Feed`. Its header shortcut uses the same
   transparent resting surface, rounded corners and dark hover surface on desktop
   and smaller screens. Touch devices keep a larger target. Create uses a solid white
@@ -66,7 +67,8 @@ Wave and DM rows in the left list control which thread is open.
   `Discover Waves` link with a compass to `/discover`; the sidebar keeps the two section-specific `View all` links.
   The collapsed rail retains its icon-only feed link on a dark tile without
   a border. On desktop, the selected feed icon stays blue. Both layouts keep
-  visible blue keyboard focus.
+  visible blue keyboard focus. Wave names, Create wave, and Profile Waves Feed
+  use the shared tooltip styling.
 - Browser back/forward keeps the active row and URL in sync.
 - `All` includes pinned, joined, unjoined, and quiet accessible waves. Subwaves
   are reached by expanding their parent. It loads in stable batches so new
@@ -90,6 +92,10 @@ Wave and DM rows in the left list control which thread is open.
   without mixing its old and new batches. Newly joined waves appear on refresh.
 - In the native app, swipe right across ordinary wave or direct-message content
   to return to its list. See [Touch Navigation in the Native App](../../navigation/flow-navigation-entry-and-switching.md#touch-navigation-in-the-native-app).
+- Profile Waves Feed also supports a right swipe to Waves in the native app.
+  Opening a feed post enters its chat; swiping right or tapping Back then
+  returns to the feed at the same reading position. A fresh opening from the
+  Waves More menu starts at the top.
 
 ## Discovery and wave search
 
@@ -110,7 +116,9 @@ on hover and show a dark hover surface; their resting header surface is transpar
 - Each expanded section shows its short explanation together with loaded content, available to
   signed-in and signed-out visitors. Active Votes says “Community decisions
   powered by TDH.” Worth Checking Out says “Highly rated waves you don’t follow.”
-  The same wording appears for signed-out visitors.
+  The same wording appears for signed-out visitors. On devices without hover,
+  these explanations stay available to screen readers without adding visible
+  paragraphs above the previews. The section dividers remain visible.
 - While content first loads, each expanded section shows quiet placeholders shaped
   like its avatars or three vote rows. Descriptions, loading sentences and empty
   messages stay hidden; screen readers receive a loading announcement. Titles,
@@ -131,6 +139,11 @@ on hover and show a dark hover surface; their resting header surface is transpar
   remains visible, and hover brightens the score.
 - Worth Checking Out shows up to six spaced previews, with fewer on narrow screens,
   with score shields overlapping the bottom-right corner of each avatar.
+  When no input device supports hover, a small wave name appears below each
+  avatar, limited to one line with an ellipsis for longer names. The name is
+  part of the same link, so tapping it opens the wave directly. Devices with
+  hover keep the avatar-only strip and existing name and score details on hover
+  or keyboard focus.
   The section keeps its own compact height independently of the vote list.
 - Create wave uses a solid white button in both desktop sidebar modes, including
   signed-out visits. The expanded panel shows a plus icon and `Create wave` label;
@@ -138,6 +151,13 @@ on hover and show a dark hover surface; their resting header surface is transpar
   tooltip read `Create wave`. The mobile Waves list keeps its visible label.
   Desktop sidebar buttons keep a compact visible surface on touch screens,
   with a larger invisible tap area.
+- In the native app, the Waves directory has one heading in the top bar, with
+  Create Wave, Search 6529 and a vertical More icon beside it. Search stays
+  directly visible; More contains Profile Waves Feed and, when page sharing is
+  enabled, Share page.
+  Find a wave stays beside the collection controls. Subwave
+  toggles use an indented text control; Pin remains directly available on
+  eligible rows.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
@@ -207,6 +227,14 @@ on hover and show a dark hover surface; their resting header surface is transpar
 
 ## Common Scenarios
 
+- Inactive, unmuted rows with unread posts use soft light-grey, medium-weight
+  names and fully visible avatars. Both existing unread counts and newly
+  received posts use this treatment, matching the unread badges. The selected
+  wave keeps a white name and highlighted background. Read and muted rows
+  retain their quieter appearance. Row scores use regular-weight text.
+  Keyboard focus shows a blue inset ring on wave links in both the expanded
+  list and the collapsed rail.
+
 - The current wave also highlights in Active Votes when it appears there,
   including when the same wave is highlighted in the collection list below.
 - Wave rows open `/waves/{waveId}`.
@@ -217,6 +245,8 @@ on hover and show a dark hover surface; their resting header surface is transpar
 - Active-row re-click returns to `/waves` or `/messages`.
 - Native-app right swipe across conversation content returns from
   `/waves/{waveId}` to `/waves`, or `/messages/{waveId}` to `/messages`.
+  A chat opened from Profile Waves Feed returns to that feed instead, restoring
+  the reading position. The feed's right swipe returns to `/waves`.
 - Inside the `/waves` or `/messages` shell, row changes update URL/history in
   place and keep row highlight aligned.
 - Opening `/waves/{waveId}` directly keeps that wave visible and highlighted

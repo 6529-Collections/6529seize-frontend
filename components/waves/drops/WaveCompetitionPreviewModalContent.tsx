@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
 
 import { useCompactMode } from "@/contexts/CompactModeContext";
@@ -174,14 +176,16 @@ export const WaveCompetitionPreviewModalContent = ({
         </div>
 
         {!isApp && (
-          <button
+          <IconButton
             type="button"
             onClick={onClose}
-            className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border tw-border-solid tw-border-iron-800/70 tw-bg-iron-950 tw-text-white tw-transition tw-duration-200 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-scale-95 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900"
+            size={40}
+            variant="contrast"
+            pressEffect
             aria-label={t(locale, "waves.competitionBadges.close")}
           >
             <XMarkIcon className="tw-size-5" />
-          </button>
+          </IconButton>
         )}
       </header>
 
