@@ -81,11 +81,7 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
     ownKeyPackages: new Map(),
     ownDevices: [],
     listedAt: null,
-    monotonic:
-      options.monotonic ??
-      (options.now
-        ? options.now
-        : () => globalThis.performance?.now() ?? Date.now()),
+    monotonic: options.monotonic ?? options.now ?? (() => performance.now()),
     poolReplaceRefused: false,
     lastWakeAt: 0,
     openConversation: null,
