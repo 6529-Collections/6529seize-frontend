@@ -3,7 +3,10 @@ import type { Locator, Page } from "@playwright/test";
 
 import { expect, test } from "../testHelpers";
 import { gotoReady, RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
-import { PROFILE_HANDLE } from "../social/profileReadonlyHelpers";
+import {
+  expectPersonalCollectedActionsAbsent,
+  PROFILE_HANDLE,
+} from "../social/profileReadonlyHelpers";
 import { expectUrlState } from "../support/urlState";
 import {
   isCapacitorSimulationProject,
@@ -177,7 +180,7 @@ async function expectUsableNotificationTarget(dock: Locator) {
   return target.center;
 }
 
-async function scrollAboutToCompact(page: Page) {
+async function scrollToCompactDock(page: Page) {
   const position = await page.evaluate(async () => {
     const element =
       Array.from(
@@ -187,10 +190,10 @@ async function scrollAboutToCompact(page: Page) {
       ).find((candidate) => candidate.scrollHeight > candidate.clientHeight) ??
       document.scrollingElement;
     if (!element) {
-      throw new Error("Expected a scrollable About page.");
+      throw new Error("Expected a scrollable page.");
     }
-    // Give the dock's scroll tracker a real initial position before crossing
-    // its threshold; /about supplies the content, without injected spacers.
+    // Use the page's real content to cross the dock's scroll threshold,
+    // starting with a small scroll so its tracker has an initial position.
     element.scrollTo({ top: 1, behavior: "instant" });
     await new Promise<void>((resolve) =>
       requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
@@ -240,6 +243,98 @@ async function readNotificationHistoryPushCount(page: Page) {
 }
 
 test.describe("Native and Electron simulated shell read-only coverage @surface @medium @readonly", () => {
+  test("Waves directory keeps secondary actions reachable through More", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "Native Waves header"
+    );
+    await gotoReady(page, "/waves");
+    const more = page.getByRole("button", { name: "More", exact: true });
+    const searchButton = page.getByRole("button", {
+      name: "Search 6529",
+      exact: true,
+    });
+    await expect(more).toBeEnabled();
+    await expect(searchButton).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Create Wave", exact: true })
+    ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Share page", exact: true })
+    ).toHaveCount(0);
+    await more.click();
+    const menu = page.getByRole("menu");
+    await expect(
+      page.getByRole("menuitem", { name: "Search 6529", exact: true })
+    ).toHaveCount(0);
+    const feedItem = page.getByRole("menuitem", {
+      name: "Profile Waves Feed",
+      exact: true,
+    });
+    const shareItem = page.getByRole("menuitem", {
+      name: "Share page",
+      exact: true,
+    });
+    for (const width of [320, 430]) {
+      await page.setViewportSize({ width, height: 900 });
+      await expect(menu).toHaveCSS("width", "224px");
+      for (const item of [feedItem, shareItem]) {
+        await expect(item).toHaveCSS("font-size", "14px");
+        await expect(item).toHaveCSS("font-weight", "500");
+        await expect(item).toHaveCSS("text-decoration-line", "none");
+      }
+      const label = feedItem.getByText("Profile Waves Feed", { exact: true });
+      await expect(label).toHaveCSS("line-height", "20px");
+      await expect
+        .poll(async () => (await label.boundingBox())?.height)
+        .toBe(20);
+      const bounds = await menu.boundingBox();
+      expect(bounds).not.toBeNull();
+      expect(bounds!.x).toBeGreaterThanOrEqual(0);
+      expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(width);
+      await more.click();
+      await expect(searchButton).toBeVisible();
+      const titleBounds = await page
+        .getByText("Waves", { exact: true })
+        .boundingBox();
+      const searchBounds = await searchButton.boundingBox();
+      expect(titleBounds).not.toBeNull();
+      expect(searchBounds).not.toBeNull();
+      expect(titleBounds!.x + titleBounds!.width).toBeLessThanOrEqual(
+        searchBounds!.x
+      );
+      await more.click();
+    }
+    await page.screenshot({
+      path: testInfo.outputPath("waves-visible-search.png"),
+    });
+    await expect(
+      page.getByRole("menuitem", { name: "Profile Waves Feed", exact: true })
+    ).toHaveAttribute("href", "/waves?view=profile-feed");
+    await expect(
+      page.getByRole("menuitem", { name: "Share page", exact: true })
+    ).toBeVisible();
+    await more.click();
+    await searchButton.click();
+    await expect(
+      page.getByRole("combobox", { name: "Search 6529", exact: true })
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Go back", exact: true }).click();
+    await expect(more).toBeVisible();
+    await expect(
+      page.getByRole("combobox", { name: "Search 6529", exact: true })
+    ).toHaveCount(0);
+
+    await gotoReady(page, "/waves?view=notifications");
+    await expect(more).toHaveCount(0);
+    await expect(searchButton).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Share page", exact: true })
+    ).toBeVisible();
+  });
+
   test("calendar invites omit the mint URL only on iOS", async ({
     page,
   }, testInfo) => {
@@ -304,58 +399,17 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     }
   });
 
-  test("Collect Back restores the Collected filters and source action", async ({
+  test("public Collected profiles omit personal collecting actions in native shells", async ({
     page,
-  }, testInfo) => {
-    test.skip(
-      !isCapacitorSimulationProject(testInfo.project.name),
-      "Native app Back contract"
+  }) => {
+    await gotoReady(
+      page,
+      `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
     );
-    for (const action of ["Manage orders", "Complete my set"]) {
-      await gotoReady(
-        page,
-        `/${PROFILE_HANDLE}/collected?collection=memes&szn=1&details=closed`
-      );
-      await expect(
-        page.getByRole("main").locator('[data-profile-section="Filters"]')
-      ).toBeVisible({
-        timeout: RESPONSE_TIMEOUT_MS,
-      });
-      const source = new URL(page.url());
-      const link = page.getByRole("link", { name: action, exact: true });
-      const purchaseActions = page.getByTestId("collected-purchase-actions");
-      if (testInfo.project.name === "capacitor-ios-sim") {
-        await expect(link).toHaveCount(0);
-        await expect(purchaseActions).toHaveCount(0);
-        continue;
-      }
-      await expect(purchaseActions).toBeVisible();
-      await link.scrollIntoViewIfNeeded();
-      const destination = new URL(
-        (await link.getAttribute("href"))!,
-        page.url()
-      );
-      expect(destination.searchParams.has("returnTo")).toBe(true);
-      await link.click();
-      await expect(page).toHaveURL(
-        (url) =>
-          url.pathname ===
-          (action === "Manage orders" ? "/collect/orders" : "/collect")
-      );
-      await page.getByRole("button", { name: "Back", exact: true }).click();
-      await expect(page).toHaveURL((url) => url.pathname === source.pathname);
-      await expectUrlState(page, (url) =>
-        ["collection", "szn", "details"].every(
-          (key) => url.searchParams.get(key) === source.searchParams.get(key)
-        )
-      );
-      await expect(
-        page.getByRole("link", { name: action, exact: true })
-      ).toBeFocused();
-      await expect(
-        page.getByRole("link", { name: action, exact: true })
-      ).toBeInViewport();
-    }
+    await expect(
+      page.getByRole("main").locator('[data-profile-section="Filters"]')
+    ).toBeVisible({ timeout: RESPONSE_TIMEOUT_MS });
+    await expectPersonalCollectedActionsAbsent(page);
   });
 
   for (const path of ["/collect", "/collect/orders"]) {
@@ -382,53 +436,6 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       ).toHaveCount(0);
     });
   }
-
-  test("Back remains usable after returning from Orders to a profile", async ({
-    page,
-  }, testInfo) => {
-    test.skip(
-      testInfo.project.name !== "capacitor-android-sim",
-      "Orders remains available in the Android app"
-    );
-    await gotoReady(page, "/about");
-    await expect(
-      page.getByRole("navigation", { name: "Primary navigation", exact: true })
-    ).toBeVisible();
-    await page
-      .getByRole("button", { name: "Search 6529", exact: true })
-      .click();
-    await page
-      .getByRole("combobox", { name: "Search 6529", exact: true })
-      .fill(PROFILE_HANDLE);
-    await page
-      .getByRole("option")
-      .filter({ hasText: PROFILE_HANDLE })
-      .first()
-      .click();
-    await page
-      .getByRole("navigation", { name: "Profile sections" })
-      .getByRole("link", { name: "Collected", exact: true })
-      .click();
-    await expect(
-      page.getByRole("main").locator('[data-profile-section="Filters"]')
-    ).toBeVisible({
-      timeout: RESPONSE_TIMEOUT_MS,
-    });
-    await page
-      .getByRole("link", { name: "Manage orders", exact: true })
-      .click();
-    await expectUrlState(page, (url) => url.pathname === "/collect/orders");
-    await page.getByRole("button", { name: "Back", exact: true }).click();
-    await expectUrlState(
-      page,
-      (url) => url.pathname === `/${PROFILE_HANDLE}/collected`
-    );
-    await expect(
-      page.getByRole("button", { name: "Back", exact: true })
-    ).toBeEnabled();
-    await page.getByRole("button", { name: "Back", exact: true }).click();
-    await expectUrlState(page, (url) => url.pathname === "/about");
-  });
 
   test("native profile artwork opens above the app header and closes back to the profile", async ({
     page,
@@ -1162,6 +1169,75 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
     );
   });
 
+  test("selected dock highlight stays horizontal across phone widths", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      !isCapacitorSimulationProject(testInfo.project.name),
+      "The floating dock belongs to native app layouts"
+    );
+    await mockCountryCheck(page, "US");
+    await gotoReady(page, "/");
+    const dock = page
+      .getByRole("navigation", {
+        name: "Primary navigation",
+        exact: true,
+      })
+      .locator('[data-mobile-bottom-nav-dock="true"]');
+    const home = dock.getByRole("link", { name: "Home", exact: true });
+    const pill = dock.getByTestId("mobile-dock-active-pill");
+    await expect(home).toHaveAttribute("aria-current", "page");
+
+    for (const width of [320, 360, 390, 430, 744]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.evaluate(() => {
+        for (const element of document.querySelectorAll(
+          '[data-mobile-bottom-nav-scroll-target="true"]'
+        )) {
+          element.scrollTo({ top: 0, behavior: "instant" });
+        }
+        globalThis.scrollTo({ top: 0, behavior: "instant" });
+      });
+      await expect(dock).toHaveAttribute("data-compact", "false");
+      await expect
+        .poll(() =>
+          dock
+            .getByRole("link", { name: "Notifications", exact: true })
+            .evaluate((link) => link.getBoundingClientRect().width)
+        )
+        .toBeGreaterThanOrEqual(48);
+
+      for (const compact of [false, true]) {
+        if (compact) {
+          await scrollToCompactDock(page);
+          await expect(dock).toHaveAttribute("data-compact", "true");
+        }
+        await expect(pill).toHaveCSS("opacity", "1");
+        await expect
+          .poll(async () => {
+            return pill.evaluate((element) => {
+              const box = element.getBoundingClientRect();
+              const icon = element
+                .closest('[data-mobile-bottom-nav-dock="true"]')
+                ?.querySelector('a[aria-current="page"] > div > :first-child');
+              if (!icon) throw new Error("Expected the selected tab icon.");
+              const iconBox = icon.getBoundingClientRect();
+              return {
+                horizontal: box.width >= box.height * 1.19,
+                containsIcon: box.height >= iconBox.height + 2,
+                centered:
+                  Math.abs(
+                    box.x + box.width / 2 - iconBox.x - iconBox.width / 2
+                  ) <= 0.5,
+              };
+            });
+          })
+          .toEqual({ horizontal: true, containsIcon: true, centered: true });
+        await expectUsableNotificationTarget(dock);
+      }
+    }
+  });
+
   test("Android notification bell accepts first taps across phone dock sizes", async ({
     page,
   }, testInfo) => {
@@ -1190,7 +1266,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
       for (const compact of [false, true]) {
         await test.step(`${width}px ${compact ? "compact" : "expanded"}`, async () => {
           if (compact) {
-            await scrollAboutToCompact(page);
+            await scrollToCompactDock(page);
           }
           await expect
             .poll(() =>
@@ -1215,7 +1291,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
                 "opacity",
                 "0.5"
               );
-              await scrollAboutToCompact(page);
+              await scrollToCompactDock(page);
               // Release as soon as the transition moves the target, without
               // Playwright relocating the input to the moving link.
               await expect
@@ -1310,7 +1386,7 @@ test.describe("Native and Electron simulated shell read-only coverage @surface @
         type: "touchStart",
         touchPoints: [point],
       });
-      await scrollAboutToCompact(page);
+      await scrollToCompactDock(page);
       await expect
         .poll(() =>
           dock.evaluate((element) => element.getBoundingClientRect().height)

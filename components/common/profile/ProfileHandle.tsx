@@ -49,6 +49,7 @@ export default function ProfileHandle({
 
   return (
     <p
+      data-wave-typography="preserve"
       className={`${textClasses} tw-mb-0 tw-font-semibold tw-leading-none tw-text-iron-50`}
     >
       {content}

@@ -1,3 +1,4 @@
+import type { ApiE2eeDeviceInboxStatus } from "@/generated/models/ApiE2eeDeviceInboxStatus";
 import type { E2eeApiClient } from "./api";
 import type { ApiE2eeBlob, ApiE2eeMe } from "./api-types";
 
@@ -7,7 +8,7 @@ interface E2eeRequestTransport {
     params?: Record<string, string>,
     signal?: AbortSignal
   ) => Promise<T>;
-  post: <T>(endpoint: string, body: object) => Promise<T>;
+  post: <T>(endpoint: string, body: object, signal?: AbortSignal) => Promise<T>;
   put: <T>(endpoint: string, body: object) => Promise<T>;
 }
 const enc = encodeURIComponent;
@@ -54,15 +55,35 @@ export function buildE2eeApiClient({
       post(`e2ee/groups/${enc(group)}/messages`, body),
     repairRoster: (group, body) =>
       post(`e2ee/groups/${enc(group)}/roster`, body),
-    getWelcomes: (deviceKey) => get(`e2ee/devices/${enc(deviceKey)}/welcomes`),
-    ackWelcome: async (deviceKey, welcomeId) => {
+    getWelcomes: (deviceKey, signal) =>
+      get(`e2ee/devices/${enc(deviceKey)}/welcomes`, undefined, signal),
+    ackWelcome: async (deviceKey, welcomeId, signal) => {
       await post<unknown>(
         `e2ee/devices/${enc(deviceKey)}/welcomes/${enc(welcomeId)}/ack`,
-        {}
+        {},
+        signal
       );
     },
-    getDeviceGroups: (deviceKey) =>
-      get(`e2ee/devices/${enc(deviceKey)}/groups`),
+    getDeviceGroups: (deviceKey, signal) =>
+      get(`e2ee/devices/${enc(deviceKey)}/groups`, undefined, signal),
+    getDeviceInboxStatus: async (deviceKey, signal) => {
+      const status = await get<Partial<ApiE2eeDeviceInboxStatus> | null>(
+        `e2ee/devices/${enc(deviceKey)}/inbox-status`,
+        undefined,
+        signal
+      );
+      const queued = status?.has_queued_welcomes;
+      if (
+        typeof status?.has_pending_chats !== "boolean" ||
+        (queued !== undefined && typeof queued !== "boolean")
+      ) {
+        throw new TypeError("Invalid encrypted inbox status");
+      }
+      return {
+        has_pending_chats: status.has_pending_chats,
+        ...(queued === undefined ? {} : { has_queued_welcomes: queued }),
+      };
+    },
     createBlob: (body) => post(`e2ee/blobs`, body),
     putBlobChunk: (blobId, index, body) =>
       put(`e2ee/blobs/${enc(blobId)}/chunks/${index}`, body),

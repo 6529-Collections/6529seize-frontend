@@ -345,7 +345,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   activeItem={props.selected_artist}
                   setSelected={props.setSelectedArtist}
                   size="sm"
-                  variant="editorial"
+                  variant="regular"
+                  presentation="editorial"
                   showFilterLabel
                   menuMinWidth={224}
                 />
@@ -356,7 +357,8 @@ export function GasRoyaltiesHeader(props: Readonly<HeaderProps>) {
                   activeItem={activeDateSelection}
                   setSelected={setDateFilter}
                   size="sm"
-                  variant="editorial"
+                  variant="regular"
+                  presentation="editorial"
                   showFilterLabel
                   menuMinWidth={224}
                 />

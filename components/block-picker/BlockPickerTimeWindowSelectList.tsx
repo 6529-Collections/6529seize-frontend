@@ -1,3 +1,7 @@
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  getDropdownOptionStateClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import type { BlockPickerTimeWindow } from "@/app/tools/block-finder/page.client";
 
 export default function BlockPickerTimeWindowSelectList({
@@ -26,7 +30,7 @@ export default function BlockPickerTimeWindowSelectList({
             e.stopPropagation();
             setTimeWindow(option.value);
           }}
-          className="tw-group tw-relative tw-cursor-pointer tw-select-none tw-rounded-lg tw-py-2.5 tw-pl-3 tw-pr-9 tw-text-iron-200 tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 hover:tw-text-iron-50"
+          className={`tw-group tw-relative tw-cursor-pointer tw-select-none tw-rounded-lg tw-py-2.5 tw-pl-3 tw-pr-9 tw-transition-colors tw-duration-150 tw-ease-out ${getDropdownOptionStateClasses(timeWindow === option.value)}`}
           role="option"
           aria-selected={timeWindow === option.value}
         >
@@ -41,7 +45,7 @@ export default function BlockPickerTimeWindowSelectList({
           {timeWindow === option.value && (
             <span className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-4">
               <svg
-                className="tw-h-5 tw-w-5 tw-text-primary-300"
+                className={`tw-h-5 tw-w-5 ${DROPDOWN_CHECKMARK_CLASSES}`}
                 viewBox="0 0 20 20"
                 fill="currentColor"
                 aria-hidden="true"

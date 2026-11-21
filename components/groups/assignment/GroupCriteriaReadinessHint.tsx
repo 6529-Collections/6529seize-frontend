@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useId } from "react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
@@ -12,14 +14,16 @@ export default function GroupCriteriaReadinessHint() {
   const tooltipId = buildTooltipId("group-criteria-readiness", useId());
   return (
     <>
-      <button
+      <IconButton
         type="button"
         data-tooltip-id={tooltipId}
         aria-label={t(locale, "waves.create.groups.draft.notReadyTitle")}
-        className="-tw-my-2 tw-flex tw-size-10 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        size={40}
+        variant="ghost"
+        className="-tw-my-2"
       >
         <InformationCircleIcon aria-hidden="true" className="tw-size-5" />
-      </button>
+      </IconButton>
       <BodyPortalTooltip
         id={tooltipId}
         place="top-end"

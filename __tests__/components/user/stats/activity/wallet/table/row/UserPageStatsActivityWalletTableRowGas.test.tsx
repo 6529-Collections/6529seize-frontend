@@ -41,7 +41,7 @@ describe("UserPageStatsActivityWalletTableRowGas", () => {
       tooltip.getAttribute("data-tooltip-id")
     );
     expect(tooltip).toHaveAttribute("data-tooltip-background", "#37373E");
-    expect(tooltip).toHaveAttribute("data-tooltip-padding", "4px 8px");
+    expect(tooltip).toHaveAttribute("data-tooltip-padding", "6px 10px");
     expect(tooltip).toHaveTextContent("Gas");
     expect(tooltip).toHaveTextContent("1.23456");
     expect(tooltip).toHaveTextContent("123");

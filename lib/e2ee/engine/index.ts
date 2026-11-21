@@ -7,6 +7,7 @@ import {
 } from "./history-read";
 import type { HistoryPageOptions } from "../history-order";
 import { downloadMedia, localBlobType } from "../media";
+import type { PollDefinition } from "../payload";
 import { getDefaultBackupStateStore } from "../backup/state";
 import type { BackupHistory } from "../backup/format";
 import type {
@@ -33,8 +34,7 @@ import {
   markRevocationUnverified,
   needsNewDevice,
   refreshMe,
-  renewalDue,
-  renewGrant,
+  renewStoredDeviceIfDue,
   submitRevocation,
 } from "./enroll";
 import { backupHistory, importBackupHistory } from "./backup";
@@ -51,6 +51,7 @@ import {
 } from "./membership";
 import { searchHistory } from "./history-search";
 import { latestReadSeq } from "./history";
+import { PollActions } from "./polls";
 import { previewReport, sendReport } from "./report";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
@@ -79,6 +80,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private readonly conversationCreator: ConversationCreator;
   private readonly restarter: ConversationRestarter;
   private readonly unsent: UnsentMessages;
+  private readonly polls: PollActions;
   private readonly enrollment: EnrollmentFlight;
 
   constructor(ctx: EngineContext) {
@@ -97,6 +99,12 @@ class E2eeEngineImpl implements E2eeEngineExt {
         await resolveProfiles(this.ctx, memberProfileIds(this.ctx));
       },
     });
+    this.polls = new PollActions(
+      ctx,
+      this.controller,
+      () => this.requireReady(),
+      (task) => this.background(task)
+    );
     this.conversationCreator = new ConversationCreator(
       ctx,
       () => this.controller.syncAll(),
@@ -147,8 +155,10 @@ class E2eeEngineImpl implements E2eeEngineExt {
   }
 
   /** NC8: enrolls from a combined sign-in grant stored meanwhile. */
-  enrollWithLoginGrant(): Promise<E2eeEngineStatus> {
-    return this.enrollment.withLoginGrant();
+  enrollWithLoginGrant(options?: {
+    readonly resumeStored?: boolean;
+  }): Promise<E2eeEngineStatus> {
+    return this.enrollment.withLoginGrant(options?.resumeStored);
   }
 
   needsNewDevice(): Promise<boolean> {
@@ -158,8 +168,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
   private start(): void {
     this.controller.startBackground();
     this.background(async () => {
-      await this.refreshMe();
-      await this.controller.syncAll();
+      try {
+        await this.refreshMe();
+      } finally {
+        await this.controller.syncAll();
+      }
     });
   }
 
@@ -313,6 +326,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   getStatus = () => this.ctx.store.status;
   getError = () => this.ctx.store.error;
+  getInitialSyncStatus = () => this.ctx.store.initialSyncStatus;
   getUpgrade = () => this.ctx.store.upgrade;
   getLocalDeviceKey = () => this.ctx.device?.deviceKey ?? null;
   getThisDevice = () => this.ctx.store.thisDevice;
@@ -326,20 +340,15 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   // -- lifecycle --------------------------------------------------------------
 
-  async enroll(): Promise<void> {
+  async enroll(onProvisioning?: () => void): Promise<void> {
     await this.recheckRevocation();
-    await this.enrollment.run(true);
+    await this.enrollment.run(true, onProvisioning);
   }
 
   /** 8.8: in the grant's last 14 days, enroll() renews it (one prompt). */
   private async renew(): Promise<void> {
-    const device = this.ctx.device;
-    if (!device || !renewalDue(this.ctx, device)) {
+    if (!(await renewStoredDeviceIfDue(this.ctx))) {
       return;
-    }
-    await this.ctx.queue.run(() => renewGrant(this.ctx));
-    for (const runtime of this.ctx.store.groups.values()) {
-      runtime.record.selfUpdateRequested = true;
     }
     await this.refreshMe();
     for (const [g, runtime] of this.ctx.store.groups) {
@@ -349,11 +358,11 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  async sync(): Promise<void> {
+  async sync(options?: { readonly recheckInbox?: boolean }): Promise<void> {
     if (this.ctx.store.status !== "ready") {
       return;
     }
-    await this.controller.syncAll();
+    await this.controller.syncAll(options?.recheckInbox);
   }
 
   async pauseIncoming(): Promise<void> {
@@ -462,13 +471,22 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
+  createPoll = (g: string, poll: PollDefinition) => this.polls.create(g, poll);
+
+  updatePoll = (g: string, id: string, options: number[] | null) =>
+    this.polls.update(g, id, options);
+
   private ownMessage = (g: string, id: string) =>
     requireSavedMessage(this.ctx, g, id);
 
   async edit(g: string, id: string, text: string): Promise<void> {
     this.requireReady();
     const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
-    if (message.senderProfileId !== this.ctx.profileId || message.deleted) {
+    if (
+      message.senderProfileId !== this.ctx.profileId ||
+      message.deleted ||
+      message.poll
+    ) {
       throw new E2eeError("E2EE_NOT_SENDER");
     }
     await queueTargeted(this.ctx, g.toLowerCase(), (base) => ({

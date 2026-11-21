@@ -1,6 +1,10 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import {
+  getDropdownTriggerClasses,
+  DROPDOWN_CHECKMARK_CLASSES,
+  DROPDOWN_SELECTED_OPTION_CLASSES,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { AuthContext } from "@/components/auth/Auth";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import CommonDropdownItemsDefaultWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper";
@@ -139,16 +143,16 @@ function FilterMenuItem({
             onDismiss();
           }
         }}
-        className={`tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 ${
+        className={`tw-flex tw-w-full tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2.5 tw-text-left tw-text-sm tw-font-medium tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-iron-800 ${
           selected
-            ? "tw-text-primary-400 desktop-hover:hover:tw-bg-primary-400/10"
-            : "tw-text-iron-300 desktop-hover:hover:tw-bg-iron-800"
+            ? DROPDOWN_SELECTED_OPTION_CLASSES
+            : "tw-bg-transparent tw-text-iron-300"
         }`}
       >
         <span className="tw-min-w-0 tw-flex-1 tw-truncate">{title}</span>
         {selected ? (
           <CheckIcon
-            className="tw-size-4 tw-flex-shrink-0"
+            className={`tw-size-4 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
             aria-hidden="true"
           />
         ) : (
@@ -171,8 +175,10 @@ function FilterSheetItem({
   return (
     <li className="tw-list-none">
       <label
-        className={`tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-3.5 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-within:tw-outline-none focus-within:tw-ring-2 focus-within:tw-ring-primary-400 focus-within:tw-ring-offset-2 focus-within:tw-ring-offset-iron-950 active:tw-bg-iron-800 motion-reduce:tw-transition-none ${
-          selected ? "tw-text-primary-400" : "tw-text-iron-200"
+        className={`tw-flex tw-min-h-12 tw-w-full tw-cursor-pointer tw-items-center tw-gap-3 tw-rounded-lg tw-border-0 tw-px-3.5 tw-py-3 tw-text-left tw-transition-colors tw-duration-200 focus-within:tw-outline-none focus-within:tw-ring-2 focus-within:tw-ring-primary-400 focus-within:tw-ring-offset-2 focus-within:tw-ring-offset-iron-950 active:tw-bg-iron-800 motion-reduce:tw-transition-none ${
+          selected
+            ? DROPDOWN_SELECTED_OPTION_CLASSES
+            : "tw-bg-transparent tw-text-iron-200"
         }`}
       >
         <input
@@ -186,7 +192,7 @@ function FilterSheetItem({
         </span>
         {selected ? (
           <CheckIcon
-            className="tw-size-5 tw-flex-shrink-0"
+            className={`tw-size-5 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
             aria-hidden="true"
           />
         ) : (
@@ -312,7 +318,7 @@ export default function NotificationsCauseFilter({
           aria-expanded={isOpen}
           aria-haspopup={isMobileLayoutViewport ? "dialog" : "menu"}
           aria-controls={isDesktopOpen ? menuId : undefined}
-          className={`${DROPDOWN_FIELD_CLASSES} tw-flex tw-h-10 tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-px-3 tw-text-sm`}
+          className={`${getDropdownTriggerClasses({ variant: "form", metrics: { height: 40, x: 12, text: "sm" } })} tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2`}
         >
           <span className="tw-min-w-0 tw-truncate">{triggerLabel}</span>
           <ChevronDownIcon

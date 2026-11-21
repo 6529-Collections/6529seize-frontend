@@ -1,6 +1,7 @@
 "use client";
 
 import { CheckIcon } from "@heroicons/react/24/outline";
+import { DROPDOWN_CHECKMARK_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import type { CompactMenuItem } from "@/components/compact-menu";
 import { useBoostedDropsDisplayPreference } from "@/hooks/useBoostedDropsDisplayPreference";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
@@ -113,7 +114,9 @@ export const getBoostedDropsDisplayPreferenceMenuItems = ({
       id: `boosted-drops-display-${option}`,
       label,
       icon: selected ? (
-        <CheckIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />
+        <CheckIcon
+          className={`tw-h-4 tw-w-4 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
+        />
       ) : (
         <span className="tw-h-4 tw-w-4 tw-flex-shrink-0" aria-hidden="true" />
       ),

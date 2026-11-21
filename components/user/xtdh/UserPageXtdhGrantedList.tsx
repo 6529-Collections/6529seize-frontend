@@ -106,7 +106,7 @@ export default function UserPageXtdhGrantedList({
             />
           </div>
           {activeTab === "ACTIVE" && (
-            <div className="tw-w-auto tw-shrink-0 [&_button[aria-haspopup]:not(:focus)]:tw-ring-0 [&_button[aria-haspopup]]:tw-h-8 [&_button[aria-haspopup]]:tw-border [&_button[aria-haspopup]]:tw-border-solid [&_button[aria-haspopup]]:tw-border-white/[0.06] [&_button[aria-haspopup]]:tw-bg-transparent [&_button[aria-haspopup]]:tw-py-1 [&_button[aria-haspopup]]:tw-text-[13px] [&_button[aria-haspopup]]:tw-font-medium [&_button[aria-haspopup]]:tw-text-iron-300 [&_button[aria-haspopup]]:tw-shadow-none">
+            <div className="tw-w-auto tw-shrink-0">
               <UserPageXtdhGrantedListSubFilters
                 activeSubFilter={activeSubFilter}
                 onSubFilterChange={handleSubFilterChange}

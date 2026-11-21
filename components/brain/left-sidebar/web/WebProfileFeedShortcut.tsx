@@ -6,10 +6,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
 import React from "react";
-import {
-  WAVE_HEADER_ACTION_CLASSES,
-  WAVE_HEADER_ACTION_SURFACE_CLASSES,
-} from "../waves/WaveHeaderActions";
+import { getIconButtonClasses } from "@/components/utils/button/iconButtonStyles";
+import { getIconButtonLayoutSurfaceClasses } from "@/components/utils/button/iconButtonLayouts";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
 import { waveFeatureAttributes } from "@/services/analytics/waveFeatureUsage";
 
@@ -85,11 +83,11 @@ export function WebProfileFeedShortcut({
           onClick={handleClick}
           aria-label={profileFeedLabel}
           aria-current={isActive ? "page" : undefined}
-          className={WAVE_HEADER_ACTION_CLASSES}
+          className={getIconButtonClasses({ layout: "toolbar-filled" })}
           data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
           data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
         >
-          <span className="tw-inline-flex tw-size-full tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-transition-colors tw-duration-150 desktop-hover:group-hover:tw-bg-iron-800 touch-only:tw-size-10 motion-reduce:tw-transition-none">
+          <span className={getIconButtonLayoutSurfaceClasses("toolbar-filled")}>
             <MasonryGridIcon />
           </span>
         </Link>
@@ -106,11 +104,11 @@ export function WebProfileFeedShortcut({
       onClick={handleClick}
       aria-label={profileFeedLabel}
       aria-current={isActive ? "page" : undefined}
-      className={WAVE_HEADER_ACTION_CLASSES}
+      className={getIconButtonClasses({ layout: "toolbar" })}
       data-tooltip-id={PROFILE_FEED_TOOLTIP_ID}
       data-tooltip-content={t(locale, "waves.sidebar.openProfileFeed")}
     >
-      <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
+      <span className={getIconButtonLayoutSurfaceClasses("toolbar")}>
         <MasonryGridIcon />
       </span>
     </Link>

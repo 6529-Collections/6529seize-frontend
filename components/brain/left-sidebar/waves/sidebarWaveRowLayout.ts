@@ -19,6 +19,31 @@ const DEFAULT_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[62px]";
 const CHILD_ROW_HEIGHT_CLASSES = "tw-h-full tw-min-h-[48px]";
 export const SIDEBAR_SUBWAVE_GUIDE_LINE_OFFSET_CLASSES = "tw-left-9";
 
+export const getSidebarWaveRowTextClasses = ({
+  isActive,
+  hasUnread,
+}: {
+  readonly isActive: boolean;
+  readonly hasUnread: boolean;
+}): { readonly name: string; readonly weight: string } => {
+  if (isActive) {
+    return {
+      name: "tw-text-white desktop-hover:group-hover:tw-text-white",
+      weight: "tw-font-medium",
+    };
+  }
+  if (hasUnread) {
+    return {
+      name: "tw-text-iron-300 desktop-hover:group-hover:tw-text-iron-300",
+      weight: "tw-font-medium",
+    };
+  }
+  return {
+    name: "tw-text-iron-400 desktop-hover:group-hover:tw-text-iron-300",
+    weight: "tw-font-normal",
+  };
+};
+
 const rowLayoutByVariant = {
   app: {
     child: {

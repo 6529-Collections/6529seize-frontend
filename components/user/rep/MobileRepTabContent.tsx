@@ -140,20 +140,28 @@ export default function MobileRepTabContent({
           </div>
         )}
 
-      <div className="tw-mb-3 tw-mt-5 tw-flex tw-min-w-0 tw-items-start tw-justify-between tw-gap-3">
+      <div className="tw-mb-3 tw-mt-5 tw-flex tw-min-w-0 tw-flex-wrap tw-items-start tw-justify-between tw-gap-x-3 tw-gap-y-2">
         <h3
           className={`tw-m-0 tw-flex tw-shrink-0 tw-items-center tw-whitespace-nowrap tw-text-[11px] tw-font-medium tw-uppercase tw-tracking-[0.05em] tw-text-iron-500 ${showGrant ? "tw-min-h-9" : ""}`}
         >
           {t(locale, "rep.categories.sidebar.repCategories")}
         </h3>
         {showGrant && (
-          <div className="tw-ml-auto tw-min-w-0 tw-flex-1">
+          <div className="tw-ml-auto tw-min-w-0 tw-max-w-full">
             <UserPageRateWrapper
               profile={profile}
               type={RateMatter.REP}
               hideOwnProfileMessage
             >
-              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-x-2 tw-gap-y-2 max-[360px]:tw-gap-x-0.5">
+              <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-end tw-gap-2">
+                {overview !== null &&
+                  overview.authenticated_user_contribution !== null &&
+                  overview.authenticated_user_contribution !== 0 && (
+                    <AssignedRepSummary
+                      amount={overview.authenticated_user_contribution}
+                      compact
+                    />
+                  )}
                 <Button
                   variant="action"
                   size="sm"
@@ -174,14 +182,6 @@ export default function MobileRepTabContent({
                   </svg>
                   {t(locale, "user.profile.rep.rep.grantAction")}
                 </Button>
-                {overview !== null &&
-                  overview.authenticated_user_contribution !== null &&
-                  overview.authenticated_user_contribution !== 0 && (
-                    <AssignedRepSummary
-                      amount={overview.authenticated_user_contribution}
-                      compact
-                    />
-                  )}
               </div>
             </UserPageRateWrapper>
           </div>

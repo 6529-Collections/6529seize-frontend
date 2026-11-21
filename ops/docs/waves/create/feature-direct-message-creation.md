@@ -30,6 +30,8 @@ identities.
 
 - Select **+** beside **Messages** on web or in the app. On builds without
   encrypted chats, use the paper-plane action or **Create DM**.
+- Select **Direct Message** on another person’s profile or profile card to open
+  **New message** with that person already selected.
 - Open `/messages/new` directly.
 - Older `?create=dm` links from Messages open `/messages/new` when encrypted
   chats are available.
@@ -109,10 +111,10 @@ identities.
   selection so it can be adjusted or retried.
 - If a recipient does not accept a new direct message from the creator, the UI
   explains that recipient's policy, for example "@alice only accepts new direct
-  messages from members of a group they chose". The group is named only when
-  the recipient made it public. A recipient's block shows the same "doesn't
-  accept new direct messages" notice as the Nobody setting and is never
-  disclosed. Change the participant set or use an existing conversation.
+  messages from members of a group they chose". This wording applies to public
+  and private groups. A recipient's block shows the same "doesn't accept new
+  direct messages" notice as the Nobody setting. Change the participant set or
+  use an existing conversation.
 - For other creation failures, the UI shows the server error when available;
   retry from the same flow.
 

@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { type FormEvent, useEffect, useId, useRef, useState } from "react";
 import Button from "@/components/utils/button/Button";
@@ -143,14 +145,15 @@ export function E2eeSearchPanel({
             className="tw-h-10 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-pl-9 tw-pr-3 tw-text-sm tw-text-iron-100 placeholder:tw-text-iron-500 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
           />
         </div>
-        <button
+        <IconButton
           type="button"
           onClick={onClose}
           aria-label={t(locale, "e2ee.conversation.search.close")}
-          className="tw-flex tw-size-10 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          size={40}
+          variant="ghost"
         >
           <XMarkIcon aria-hidden="true" className="tw-size-5" />
-        </button>
+        </IconButton>
       </form>
       <p className="tw-m-0 tw-mt-1.5 tw-text-xs tw-text-iron-500">
         {t(locale, "e2ee.conversation.search.localNote")}

@@ -122,7 +122,7 @@ export default function CompetitionVoters() {
   const voters = query.data.pages.flatMap((page) => page.data);
   const creditType = competition.voting.credit_type as ApiWaveCreditType;
   return (
-    <div className="tw-w-full tw-max-w-6xl">
+    <div className="tw-w-full tw-max-w-6xl [&_span.tw-font-semibold.tw-tabular-nums]:!tw-font-semibold">
       {!voters.length && <CompetitionState empty />}
       {voters.map((voter, index) =>
         // Newer APIs embed the voter profile in the page; older responses

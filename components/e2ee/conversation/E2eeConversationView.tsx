@@ -448,6 +448,7 @@ function ConversationScreen({ g, e2ee }: ConversationScreenProps) {
                   message.senderProfileId === profileId &&
                   !message.deleted &&
                   !message.undecryptable &&
+                  !message.poll &&
                   !message.pending
               );
               if (!last) return false;

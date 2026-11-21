@@ -303,7 +303,8 @@ export const CONTENT_MODERATION_MESSAGES = {
     "Connect an authenticated profile to manage preferences.",
   "preferences.createProfile": "Create a profile to manage preferences.",
   "preferences.tabs.ariaLabel": "Preference sections",
-  "preferences.tabs.notifications": "Notifications & Messages",
+  "preferences.tabs.notifications": "Notifications",
+  "preferences.tabs.messages": "Messages",
   "preferences.tabs.blockedProfiles": "Blocked Profiles",
   "preferences.tabs.reports": "Reports",
 } as const;

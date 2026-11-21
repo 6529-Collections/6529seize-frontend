@@ -1,4 +1,7 @@
-import { openUserConnectionSurfaceForRuntime } from "@/components/auth/capacitorConnectController";
+import {
+  openFreshUserConnection,
+  openUserConnectionSurfaceForRuntime,
+} from "@/components/auth/capacitorConnectController";
 import {
   closeDesktopConnectDialog,
   getDesktopConnectDialogOpener,
@@ -45,6 +48,33 @@ describe("openUserConnectionSurfaceForRuntime in 6529 Desktop", () => {
     const openWalletConnect = getDesktopConnectDialogOpener();
     expect(openWalletConnect).not.toBeNull();
     await openWalletConnect?.();
-    expect(openWebConnection).toHaveBeenCalledWith("test");
+    expect(openWebConnection).toHaveBeenCalledWith(
+      "test",
+      expect.any(AbortSignal)
+    );
+  });
+
+  it("keeps a live wallet connected when its setup was already cancelled", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const disconnect = jest.fn();
+    const openUserConnectionSurface = jest.fn();
+
+    await openFreshUserConnection({
+      address: `0x${"a".repeat(40)}`,
+      isConnected: true,
+      isCapacitor: false,
+      isActiveAppWalletConnector: false,
+      isSigningOutAll: false,
+      signal: controller.signal,
+      disconnect,
+      getSignOutAllGeneration: () => 0,
+      hasSignOutAllGenerationChanged: () => false,
+      isMounted: () => true,
+      openUserConnectionSurface,
+    });
+
+    expect(disconnect).not.toHaveBeenCalled();
+    expect(openUserConnectionSurface).not.toHaveBeenCalled();
   });
 });

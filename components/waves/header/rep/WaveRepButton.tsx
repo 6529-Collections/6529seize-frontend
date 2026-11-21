@@ -2,7 +2,12 @@
 
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
 import Button from "@/components/utils/button/Button";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import {
+  COMPACT_ACTION_BUTTON_SIZE_CLASS,
+  COMPACT_ACTION_ICON_CLASS,
+  COMPACT_ACTION_ICON_STROKE_WIDTH,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { formatNumber } from "@/i18n/format";
@@ -14,7 +19,6 @@ import clsx from "clsx";
 import WaveRepRatingModal from "./WaveRepRatingModal";
 
 const WAVE_REP_ACTION_LOCALE = DEFAULT_LOCALE;
-const WAVE_REP_BUTTON_BORDER_CLASSES = "!tw-border-iron-700";
 const formatCompactRep = (value: number): string =>
   formatNumber(WAVE_REP_ACTION_LOCALE, value, {
     notation: "compact",
@@ -53,6 +57,7 @@ export default function WaveRepButton({
       <Button
         type="button"
         aria-label={label}
+        data-wave-typography="preserve"
         {...(showTooltip
           ? {
               "data-tooltip-id": tooltipId,
@@ -60,17 +65,20 @@ export default function WaveRepButton({
             }
           : {})}
         onClick={() => setIsModalOpen(true)}
-        variant="tertiary"
-        size={iconOnly ? null : "xs"}
+        variant={variant === "compact" ? "tertiaryOutline" : "tertiaryStrong"}
+        size={null}
         className={clsx(
-          WAVE_REP_BUTTON_BORDER_CLASSES,
           COMPACT_ACTION_TOUCH_TARGET_CLASS,
-          iconOnly && "tw-size-8 tw-p-0 tw-text-xs",
-          variant === "compact" &&
-            "!tw-bg-transparent !tw-text-iron-200 active:!tw-bg-black desktop-hover:hover:!tw-border-iron-600 desktop-hover:hover:!tw-bg-iron-900 desktop-hover:hover:!tw-text-white"
+          iconOnly
+            ? "tw-size-8 tw-p-0 tw-text-xs"
+            : COMPACT_ACTION_BUTTON_SIZE_CLASS
         )}
       >
-        <ScaleIcon className="tw-size-4 tw-flex-shrink-0" aria-hidden="true" />
+        <ScaleIcon
+          className={COMPACT_ACTION_ICON_CLASS}
+          strokeWidth={COMPACT_ACTION_ICON_STROKE_WIDTH}
+          aria-hidden="true"
+        />
         <span className={iconOnly ? "tw-sr-only" : undefined}>
           {actionText}
         </span>

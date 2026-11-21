@@ -280,7 +280,7 @@ export function ParticipationDropVoteDetailsContent({
       )}
 
       <div className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-4 tw-pt-2">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
+        <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1 tw-text-xs tw-font-normal tw-tabular-nums tw-leading-4 tw-text-iron-500">
           <span>{voterCountLabel}</span>
           <span aria-hidden="true" className="tw-text-iron-700">
             /

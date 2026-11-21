@@ -91,8 +91,9 @@ are configured separately in [decision setup](../competitions/feature-manage-com
   The proposed criteria remain below the editor; an incomplete draft shows the
   shared information tooltip beside the summary.
 - `View members` is available for saved groups and valid drafts when membership can
-  be evaluated. The member browser is searchable, paginated, links identities
-  to their profiles, and explains why identities qualify.
+  be evaluated. The dialog title shows the role, such as `Admins`. The member
+  browser is searchable, paginated, links identities to their profiles, and
+  explains why identities qualify.
 - `Hide criteria and members` makes criteria and membership visible to group
   members but hidden from everyone else. It starts off for a new group and
   preserves the setting copied from an existing assignment.

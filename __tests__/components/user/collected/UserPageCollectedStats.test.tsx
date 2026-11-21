@@ -1,4 +1,5 @@
 import UserPageCollectedStats from "@/components/user/collected/UserPageCollectedStats";
+import { useAuth } from "@/components/auth/Auth";
 import { getCollectedClick } from "@/components/user/collected/collectedTracking";
 import type { UserPageStatsInitialData } from "@/components/user/stats/userPageStats.types";
 import { CollectedCollectionType } from "@/entities/IProfile";
@@ -15,6 +16,9 @@ import userEvent from "@testing-library/user-event";
 import { cloneElement, isValidElement, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { useDesktopSeasonRowCapacity } from "@/components/user/collected/stats/useDesktopSeasonRowCapacity";
+import { renderToString } from "react-dom/server";
+
+jest.mock("@/components/auth/Auth", () => ({ useAuth: jest.fn() }));
 
 jest.mock("@/components/user/stats/UserPageStatsDetailsContent", () => ({
   __esModule: true,
@@ -59,11 +63,13 @@ jest.mock(
 );
 
 const apiMock = commonApiFetch as jest.Mock;
+const useAuthMock = useAuth as jest.Mock;
 const useSearchParamsMock = useSearchParams as jest.Mock;
 const useDesktopSeasonRowCapacityMock =
   useDesktopSeasonRowCapacity as jest.Mock;
 
 const profile = {
+  id: "profile-punk6529",
   handle: "punk6529",
   wallets: [{ wallet: "0x1" }],
   consolidation_key: "key",
@@ -152,6 +158,13 @@ const createDeferred = <T,>() => {
 
 describe("UserPageCollectedStats", () => {
   beforeEach(() => {
+    useAuthMock.mockReturnValue({
+      connectedProfile: profile,
+      isAuthenticated: true,
+      isDirectProfileSession: true,
+      fetchingProfile: false,
+      activeProfileProxy: null,
+    });
     nativeReplaceState(null, "", "/punk6529/collected");
     jest
       .spyOn(globalThis.history, "replaceState")
@@ -179,6 +192,126 @@ describe("UserPageCollectedStats", () => {
     jest.restoreAllMocks();
   });
 
+  it.each([
+    [
+      "another profile",
+      { connectedProfile: { ...profile, id: "other-profile" } },
+    ],
+    [
+      "a signed-out visitor",
+      { connectedProfile: null, isAuthenticated: false },
+    ],
+    ["unverified authentication", { isAuthenticated: undefined }],
+    ["unresolved session scope", { isDirectProfileSession: undefined }],
+    ["a non-direct session", { isDirectProfileSession: false }],
+    ["expired authentication", { isAuthenticated: false }],
+    ["a loading profile", { fetchingProfile: true }],
+    ["a proxy session", { activeProfileProxy: { id: "proxy" } }],
+    [
+      "an unresolved identity",
+      { connectedProfile: { ...profile, id: undefined } },
+    ],
+  ])("omits personal actions and their row for %s", (_scenario, overrides) => {
+    useAuthMock.mockReturnValue({ ...useAuthMock(), ...overrides });
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress={null}
+        initialStatsData={buildInitialStatsData()}
+      />
+    );
+
+    expect(
+      screen.queryByRole("link", { name: "Complete my set" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("link", { name: "Manage orders" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("collected-purchase-actions")
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Details" })).toBeVisible();
+    expect(screen.getByText("2/3 started")).toBeVisible();
+  });
+
+  it("keeps the owner's season goal and order destinations with a custody wallet filter", () => {
+    renderWithQueryClient(
+      <UserPageCollectedStats
+        profile={profile}
+        activeAddress="0x0000000000000000000000000000000000000001"
+        activeSeasonNumber={2}
+        initialStatsData={buildInitialStatsData()}
+      />
+    );
+
+    expect(
+      screen.getByRole("link", { name: "Complete my set" })
+    ).toHaveAttribute(
+      "href",
+      "/collect?collection=memes&intent=season&definition=2"
+    );
+    expect(screen.getByRole("link", { name: "Manage orders" })).toHaveAttribute(
+      "href",
+      "/collect/orders"
+    );
+  });
+
+  it("removes personal actions when the connected account changes or disconnects", () => {
+    const client = new QueryClient();
+    const ui = () => (
+      <QueryClientProvider client={client}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+        />
+      </QueryClientProvider>
+    );
+    const { rerender } = render(ui());
+    expect(screen.getByTestId("collected-purchase-actions")).toBeVisible();
+
+    useAuthMock.mockReturnValue({
+      ...useAuthMock(),
+      connectedProfile: { ...profile, id: "another-account" },
+    });
+    rerender(ui());
+    expect(
+      screen.queryByTestId("collected-purchase-actions")
+    ).not.toBeInTheDocument();
+
+    useAuthMock.mockReturnValue({
+      ...useAuthMock(),
+      connectedProfile: profile,
+    });
+    rerender(ui());
+    expect(screen.getByTestId("collected-purchase-actions")).toBeVisible();
+
+    useAuthMock.mockReturnValue({
+      ...useAuthMock(),
+      connectedProfile: null,
+      isAuthenticated: false,
+    });
+    rerender(ui());
+    expect(
+      screen.queryByTestId("collected-purchase-actions")
+    ).not.toBeInTheDocument();
+  });
+
+  it("does not include personal collecting actions in server HTML even for an owner", () => {
+    const html = renderToString(
+      <QueryClientProvider client={new QueryClient()}>
+        <UserPageCollectedStats
+          profile={profile}
+          activeAddress={null}
+          initialStatsData={buildInitialStatsData()}
+        />
+      </QueryClientProvider>
+    );
+    expect(html).not.toContain("collected-purchase-actions");
+    expect(html).not.toContain("Complete my set");
+    expect(html).not.toContain("Manage orders");
+  });
+
   it("opens with a loading state and closes without waiting for its requests", async () => {
     const pending = createDeferred<unknown>();
     apiMock.mockReturnValue(pending.promise);
@@ -190,17 +323,16 @@ describe("UserPageCollectedStats", () => {
       />
     );
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Details" })
-    );
+    fireEvent.click(screen.getByRole("button", { name: "Details" }));
     expect(screen.getByRole("status")).toHaveTextContent(
       "Loading collection details"
     );
     fireEvent.click(screen.getByRole("button", { name: "Hide Details" }));
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
-    expect(
-      screen.getByRole("button", { name: "Details" })
-    ).toHaveAttribute("aria-expanded", "false");
+    expect(screen.getByRole("button", { name: "Details" })).toHaveAttribute(
+      "aria-expanded",
+      "false"
+    );
     expect(mockRouterReplace).not.toHaveBeenCalled();
     await act(async () => {
       pending.resolve([]);

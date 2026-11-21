@@ -16,15 +16,18 @@ import {
   getWaveHomeRoute,
   getWaveRoute,
   isEncryptedMessagesPathname,
+  isMessageComposePathname,
 } from "@/helpers/navigation.helpers";
 import { useClientNavigation } from "@/hooks/useClientNavigation";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useShellSearchParams } from "@/contexts/ShellSearchParamsContext";
 import { usePathname } from "next/navigation";
 import { useCallback, useMemo } from "react";
+import { PROFILE_WAVES_FEED_HREF } from "@/helpers/waves/profile-feed-navigation";
 
 interface WaveNavigationOptions {
   isDirectMessage?: boolean | undefined;
+  profileFeed?: boolean | undefined;
   serialNo?: number | string | null | undefined;
   divider?: number | null | undefined;
 }
@@ -50,11 +53,12 @@ const getRouteContext = (): { isOnWaves: boolean; isOnMessages: boolean } => {
     isOnWaves:
       !isCompetitionPathname(pathname) &&
       (pathname === "/waves" || pathname.startsWith("/waves/")),
-    // Encrypted chats are separate routes: leaving them for a plaintext DM
-    // needs a router navigation, not a history-only wave switch.
+    // Opening a legacy DM from the composer or an encrypted chat requires
+    // router navigation to mount the legacy timeline.
     isOnMessages:
       (pathname === "/messages" || pathname.startsWith("/messages/")) &&
-      !isEncryptedMessagesPathname(pathname),
+      !isEncryptedMessagesPathname(pathname) &&
+      !isMessageComposePathname(pathname),
   };
 };
 
@@ -85,11 +89,16 @@ export function useActiveWaveManager() {
   const buildUrl = useCallback(
     (waveId: string | null, options?: WaveNavigationOptions) => {
       const isDirectMessage = options?.isDirectMessage ?? false;
+      if (!waveId) {
+        if (isApp && !isDirectMessage && options?.profileFeed) {
+          return PROFILE_WAVES_FEED_HREF;
+        }
+        return getWaveHomeRoute({ isDirectMessage, isApp });
+      }
       const serialNo = options?.serialNo ?? undefined;
       const divider = options?.divider;
-      const remembered = waveId ? tabsRef.current[waveId] : undefined;
+      const remembered = tabsRef.current[waveId];
       if (
-        waveId &&
         !isDirectMessage &&
         serialNo === undefined &&
         typeof remembered === "object"
@@ -105,20 +114,18 @@ export function useActiveWaveManager() {
           return `${getCompetitionRoute(waveId, remembered.competitionId)}?${params}`;
         }
       }
-      return waveId
-        ? getWaveRoute({
-            waveId,
-            serialNo,
-            extraParams: {
-              divider:
-                divider !== null && divider !== undefined
-                  ? String(divider)
-                  : undefined,
-            },
-            isDirectMessage,
-            isApp,
-          })
-        : getWaveHomeRoute({ isDirectMessage, isApp });
+      return getWaveRoute({
+        waveId,
+        serialNo,
+        extraParams: {
+          divider:
+            divider !== null && divider !== undefined
+              ? String(divider)
+              : undefined,
+        },
+        isDirectMessage,
+        isApp,
+      });
     },
     [isApp, tabsRef, queryClient, viewer]
   );
@@ -147,7 +154,7 @@ export function useActiveWaveManager() {
     buildUrl,
     parseUrl: getWaveFromWindow,
     canUsePushState,
-    deferRouteState: true,
+    deferRouteState: isApp,
   });
 
   const setActiveWave = useCallback<typeof navigate>(
@@ -158,7 +165,9 @@ export function useActiveWaveManager() {
         !options?.isDirectMessage &&
         canUsePushState(buildUrl(waveId, options), options)
       ) {
-        runWaveNavigationTransition(waveId ? "wave" : "list", navigateToWave);
+        const rootScreen = options?.profileFeed ? "feed" : "list";
+        const screen = waveId ? "wave" : rootScreen;
+        runWaveNavigationTransition(screen, navigateToWave);
       } else {
         navigateToWave();
       }

@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  DROPDOWN_TRIGGER_CLASSES,
+  getDropdownTriggerClasses,
   DROPDOWN_CHEVRON_CLASSES,
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
@@ -64,7 +64,7 @@ export default function UserSettingsClassification({
         aria-labelledby={`${labelId} ${valueId}`}
         aria-expanded={isOpen}
         aria-controls={isOpen ? optionsId : undefined}
-        className={`${DROPDOWN_TRIGGER_CLASSES} tw-mt-2 tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-text-left ${compact ? "tw-min-h-11 tw-px-3 tw-py-2.5 tw-text-base sm:tw-text-sm" : "tw-px-4 tw-py-3 tw-text-base"}`}
+        className={`${getDropdownTriggerClasses({ variant: "regular", metrics: compact ? { minHeight: 44, x: 12, y: 10, text: "responsive" } : { x: 16, y: 12, text: "base" } })} tw-mt-2 tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-2 tw-text-left`}
       >
         <span id={valueId}>{title}</span>
         <svg

@@ -1,6 +1,6 @@
 "use client";
 
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { getUnderlineTabClasses } from "@/components/common/underlineTabStyles";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -68,7 +68,7 @@ export default function ContentModerationTabs({
         <select
           value={activeTab}
           onChange={(event) => selectTab(event.target.value as ModerationTab)}
-          className={`${DROPDOWN_FIELD_CLASSES} tw-min-h-11 tw-w-full tw-px-3 tw-py-2 tw-text-sm`}
+          className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "sm" } })} tw-w-full`}
         >
           {tabs.map((tab) => (
             <option key={tab.id} value={tab.id}>
