@@ -275,11 +275,15 @@ offer nothing, as for the Ed25519 feed. A server that restarts reads both
 again.
 
 **The key.** The bundle's signature must be by a key that
-`lib/ai-page/releaseListKeys.ts` lists. That list is empty: 6529 AI's
-release-list key (secp256k1, in the release-signing account) waits for the
-owner's approval. Until its address and public key are added there, no
-bundle verifies, and `/ai` stays on the Ed25519 feed. The tests sign
-bundles with a test key instead.
+`lib/ai-page/releaseListKeys.ts` lists. It lists one: 6529 AI's
+release-list key, secp256k1 in AWS KMS, alias `alias/6529-ai-releases`,
+in 6529's release-signing account, made on 21 November 2026, address
+`0xe8FA289405f8Bd4227aec6256cCD412aE9d0a37B`. Its public key and address
+are also in 6529 AI's `deploy/release/release-key.pub` and its
+`ai_releases::RELEASE_KEYS`. Until a bundle signed with it is in the
+bucket, `/ai` stays on the Ed25519 feed. A successor key is added there
+beside it before the old one is retired. The tests sign bundles with a
+test key, and check that the site refuses them.
 
 ### The bundle
 
@@ -317,9 +321,10 @@ is JSON: `algorithm` `ed25519-sha256`, `public_key` (64 hex digits) and
 `signature` (128 hex digits), an Ed25519 signature (RFC 8032) over
 SHA-256(`6529 AI releases v1`, a zero byte, the feed's bytes as stored). The
 key it names must be one that `lib/ai-page/feedSigningKeys.ts` lists. That
-file pins 6529 AI's release key in AWS KMS, alias `alias/6529-ai-releases`,
-whose public half is also 6529 AI's `deploy/release/release-key.pub`. A
-successor key is added there beside it before the old one is retired.
+file pins 6529 AI's Ed25519 release key in AWS KMS, alias
+`alias/6529-ai-releases-ed25519`, whose public half is also 6529 AI's
+`deploy/release/release-key-ed25519.pub`. It signed 0.1.0-rc.1's and
+rc.2's feed and signs nothing new.
 
 A missing signature, one that does not verify, a feed larger than 64 KiB,
 a feed whose `format` is not `6529-ai-releases/1`, or one whose `sequence`
