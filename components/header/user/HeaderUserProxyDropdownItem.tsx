@@ -1,3 +1,7 @@
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  getDropdownOptionStateClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 
@@ -22,9 +26,7 @@ export default function HeaderUserProxyDropdownItem({
         type="button"
         disabled={disabled}
         aria-pressed={isActive}
-        className={`${
-          isActive ? "tw-bg-iron-700" : "tw-bg-transparent hover:tw-bg-iron-700"
-        } tw-group tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60`}
+        className={`${getDropdownOptionStateClasses(isActive)} tw-group tw-relative tw-flex tw-h-full tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-gap-x-3 tw-rounded-lg tw-border-none tw-px-3 tw-py-2.5 tw-text-left tw-text-white tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 disabled:tw-cursor-wait disabled:tw-opacity-60`}
         onClick={() => onActivateProfileProxy(isActive ? null : profileProxy)}
       >
         {profileProxy.created_by.pfp ? (
@@ -57,7 +59,7 @@ export default function HeaderUserProxyDropdownItem({
           <div>
             {isActive && (
               <svg
-                className="tw-ml-2 tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                className={`tw-ml-2 tw-h-5 tw-w-5 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES} tw-transition tw-duration-300 tw-ease-out`}
                 viewBox="0 0 24 24"
                 fill="none"
                 aria-hidden="true"

@@ -42,6 +42,8 @@ export default function RepCategoryPill({
     omitHref: !linkAvatars || disabled,
   });
   const label = `${formatInteger(locale, category.contributor_count)} ${getContributorLabel(direction, category.contributor_count)}`;
+  const backgroundClass = compact ? "tw-bg-iron-950" : "tw-bg-white/5";
+  const openBackgroundClass = compact ? "tw-bg-iron-900" : "tw-bg-[#17171B]";
   return (
     <span
       data-rep-tag={category.category}
@@ -52,10 +54,14 @@ export default function RepCategoryPill({
           "desktop-hover:hover:tw-border-white/10": !disabled,
         },
         compact
-          ? "tw-min-h-[46px] tw-w-full tw-flex-wrap tw-gap-x-1.5 tw-gap-y-1 tw-py-2 tw-@container"
+          ? "tw-min-h-[46px] tw-w-full tw-flex-wrap tw-justify-between tw-gap-x-1.5 tw-gap-y-1 tw-py-2 tw-@container"
           : "tw-h-[38px] tw-gap-3.5",
-        isOpen ? "tw-bg-[#17171B]" : "tw-bg-white/5",
-        !disabled && !isOpen && "desktop-hover:hover:tw-bg-white/[0.085]",
+        isOpen ? openBackgroundClass : backgroundClass,
+        !disabled &&
+          !isOpen &&
+          (compact
+            ? "desktop-hover:hover:tw-bg-iron-900"
+            : "desktop-hover:hover:tw-bg-white/[0.085]"),
         isJoined &&
           !compact &&
           "tw-rounded-b-none tw-border-b-transparent desktop-hover:hover:tw-border-b-transparent"
@@ -76,33 +82,24 @@ export default function RepCategoryPill({
       />
       <span
         className={clsx(
-          "tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2",
-          compact && "tw-w-full @[32rem]:tw-w-auto"
+          "tw-inline-flex tw-min-w-0 tw-items-center tw-gap-3.5",
+          compact && "tw-max-w-full tw-shrink-0 tw-flex-wrap tw-gap-y-1"
         )}
       >
-        <span
-          className={`tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-100 ${compact ? "tw-break-words" : "tw-max-w-60 tw-truncate"}`}
-        >
-          {category.category}
+        <span className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2">
+          <span
+            className={`tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-100 ${compact ? "tw-break-words" : "tw-max-w-60 tw-truncate"}`}
+          >
+            {category.category}
+          </span>
+          <span className="tw-shrink-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:group-hover/rep-category:tw-text-iron-300">
+            {formatInteger(locale, category.total_rep)}
+          </span>
         </span>
-        <span className="tw-shrink-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:group-hover/rep-category:tw-text-iron-300">
-          {formatInteger(locale, category.total_rep)}
-        </span>
-      </span>
-      <span
-        className={
-          compact
-            ? "tw-flex tw-w-full tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 @[32rem]:tw-contents"
-            : "tw-contents"
-        }
-      >
         {hasContribution && (
           <span
             id={contributionId}
-            className={clsx(
-              "tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-leading-4 tw-text-iron-400",
-              compact && "tw-order-2 @[32rem]:tw-order-none"
-            )}
+            className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-leading-4 tw-text-iron-400"
           >
             <span
               aria-hidden="true"
@@ -137,30 +134,25 @@ export default function RepCategoryPill({
             </span>
           </span>
         )}
-        <span
-          className={clsx(
-            "tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5",
-            compact && "tw-order-1 @[32rem]:tw-ml-auto"
-          )}
-        >
-          {avatars.length > 0 && (
-            <OverlappingAvatars
-              items={avatars}
-              size="sm"
-              overlapClass="-tw-space-x-1.5"
-              ringClassName="tw-ring-[#0d0d10]"
-              maxCount={avatarCount}
-            />
-          )}
-          <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
-            <span className="-tw-ml-0.5 tw-whitespace-nowrap tw-font-medium">
-              {label}
-            </span>
-            <ChevronDownIcon
-              aria-hidden="true"
-              className={`tw-size-[13px] tw-shrink-0 tw-transition-transform motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-180 tw-text-iron-100" : "tw-text-iron-600 desktop-hover:group-hover/rep-category:tw-text-iron-400"}`}
-            />
+      </span>
+      <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5">
+        {avatars.length > 0 && (
+          <OverlappingAvatars
+            items={avatars}
+            size="sm"
+            overlapClass="-tw-space-x-1.5"
+            ringClassName="tw-ring-[#0d0d10]"
+            maxCount={avatarCount}
+          />
+        )}
+        <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-text-xs tw-text-iron-400">
+          <span className="-tw-ml-0.5 tw-whitespace-nowrap tw-font-medium">
+            {label}
           </span>
+          <ChevronDownIcon
+            aria-hidden="true"
+            className={`tw-size-[13px] tw-shrink-0 tw-transition-transform motion-reduce:tw-transition-none ${isOpen ? "tw-rotate-180 tw-text-iron-100" : "tw-text-iron-600 desktop-hover:group-hover/rep-category:tw-text-iron-400"}`}
+          />
         </span>
       </span>
     </span>

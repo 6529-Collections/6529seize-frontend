@@ -7,6 +7,8 @@ export type ButtonVariant =
   | "action"
   | "secondary"
   | "tertiary"
+  | "tertiaryStrong"
+  | "tertiaryOutline"
   | "filter"
   | "filterSelected"
   | "dropdown"
@@ -21,6 +23,9 @@ export type ButtonSize = "xs" | "sm" | "md" | "lg" | "xl";
 const PRIMARY_CLASSES =
   "tw-border-iron-200 tw-bg-iron-200 tw-text-iron-950 desktop-hover:hover:tw-border-iron-300 desktop-hover:hover:tw-bg-iron-300 desktop-hover:hover:tw-text-iron-950 active:tw-border-iron-400 active:tw-bg-iron-400";
 
+const TERTIARY_SURFACE_CLASSES =
+  "tw-bg-iron-950 tw-text-iron-100 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-black";
+
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   ghost:
     "tw-bg-transparent tw-text-iron-400 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 enabled:active:tw-bg-iron-900 disabled:tw-opacity-50",
@@ -31,8 +36,10 @@ const VARIANT_CLASSES: Record<ButtonVariant, string> = {
     "tw-border-primary-500 tw-bg-primary-500 tw-text-white tw-ring-1 tw-ring-inset tw-ring-white/10 desktop-hover:hover:tw-border-primary-600 desktop-hover:hover:tw-bg-primary-600 active:tw-border-primary-700 active:tw-bg-primary-700",
   secondary:
     "tw-border-white/10 tw-bg-white/[0.07] tw-text-iron-100 desktop-hover:hover:tw-border-white/20 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-iron-50 active:tw-bg-white/5",
-  tertiary:
-    "tw-border-iron-800 tw-bg-iron-950 tw-text-iron-100 desktop-hover:hover:tw-border-iron-700 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-black",
+  tertiary: `tw-border-iron-800 desktop-hover:hover:tw-border-iron-700 ${TERTIARY_SURFACE_CLASSES}`,
+  tertiaryStrong: `tw-border-iron-700 desktop-hover:hover:tw-border-iron-700 ${TERTIARY_SURFACE_CLASSES}`,
+  tertiaryOutline:
+    "tw-border-iron-700 tw-bg-transparent tw-text-iron-200 desktop-hover:hover:tw-border-iron-600 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-black",
   filter:
     "tw-border-white/5 tw-bg-iron-900 tw-text-iron-300 desktop-hover:hover:tw-border-white/10 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50 active:tw-bg-iron-800",
   success:
@@ -62,6 +69,10 @@ const SIZE_CLASSES: Record<ButtonSize, string> = {
   xl: "tw-min-h-12 tw-px-5 tw-py-3 tw-text-sm",
 };
 
+export function getButtonSizeClasses(size: ButtonSize): string {
+  return SIZE_CLASSES[size];
+}
+
 interface ButtonStyleOptions {
   readonly variant?: ButtonVariant | undefined;
   readonly size?: ButtonSize | null | undefined;
@@ -90,7 +101,7 @@ export function getButtonClasses({
     withoutShadow ? "tw-shadow-none" : "tw-shadow-sm tw-shadow-black/20",
     FOCUS_CLASSES[variant] ?? "focus-visible:tw-outline-primary-400",
     VARIANT_CLASSES[variant],
-    size && SIZE_CLASSES[size],
+    size && getButtonSizeClasses(size),
     fullWidth && "tw-w-full",
     className
   );

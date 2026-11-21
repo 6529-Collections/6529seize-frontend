@@ -127,7 +127,7 @@ describe("SingleWaveDropWrapper", () => {
 
     expect(panel.style.bottom).toBe("var(--native-keyboard-inset-bottom, 0px)");
     expect(panel.style.transition).toBe(
-      "bottom var(--native-keyboard-layout-transition-duration, 0ms) ease-out"
+      "bottom var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)"
     );
     expect(panel).toHaveClass("tw-max-h-[100dvh]");
   });

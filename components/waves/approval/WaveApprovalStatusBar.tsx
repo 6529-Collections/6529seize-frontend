@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -296,17 +298,19 @@ const ApprovalRulesButton: FC<ApprovalRulesButtonProps> = ({
   "aria-haspopup": ariaHasPopup,
   onClick,
 }) => (
-  <button
+  <IconButton
     type="button"
     aria-label={APPROVAL_RULES_TITLE}
     aria-controls={ariaControls}
     aria-expanded={ariaExpanded}
     aria-haspopup={ariaHasPopup}
     onClick={onClick}
-    className="tw-inline-flex tw-size-6 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition-colors focus:tw-outline-none focus:tw-ring-2 focus:tw-ring-iron-300 desktop-hover:hover:tw-border-iron-500 desktop-hover:hover:tw-text-iron-200"
+    size={24}
+    variant="ghost"
+    shape="circle"
   >
     <FontAwesomeIcon icon={faInfoCircle} className="tw-size-3.5" />
-  </button>
+  </IconButton>
 );
 
 const formatWinningThreshold = (

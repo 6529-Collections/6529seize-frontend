@@ -137,7 +137,7 @@ export const WaveLeaderboardRightSidebarActivityLog: React.FC<
 
       <div className="tw-col-start-2 tw-row-start-1 tw-flex tw-items-center tw-justify-end tw-gap-1 md:tw-col-start-4">
         {log.created_at !== null && (
-          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-400">
+          <span className="tw-whitespace-nowrap tw-text-xs tw-font-medium tw-normal-nums tw-text-iron-400">
             {timeAgoShort(new Date(log.created_at).getTime())}
           </span>
         )}

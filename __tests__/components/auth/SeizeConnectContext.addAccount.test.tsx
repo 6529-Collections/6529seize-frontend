@@ -13,6 +13,7 @@ import {
 import { AppKitBootstrapContext } from "@/components/providers/AppKitBootstrapContext";
 import { WALLET_ACCOUNTS_UPDATED_EVENT } from "@/services/auth/auth.utils";
 import { APP_WALLET_CONNECTOR_TYPE } from "@/wagmiConfig/wagmiAppWalletConnector";
+import { CONNECT_INTENT_HANDOFF_GRACE_MS } from "@/components/auth/seizeConnectWalletState";
 import * as capacitorHook from "@/hooks/useCapacitor";
 
 const ACTIVE_ADDRESS = "0x00000000000000000000000000000000000000AA";
@@ -575,7 +576,7 @@ describe("SeizeConnectProvider add-account flow", () => {
     expect(mockOpen).not.toHaveBeenCalled();
 
     act(() => {
-      jest.runOnlyPendingTimers();
+      jest.advanceTimersByTime(CONNECT_INTENT_HANDOFF_GRACE_MS);
       fireEvent.click(addButton);
     });
 

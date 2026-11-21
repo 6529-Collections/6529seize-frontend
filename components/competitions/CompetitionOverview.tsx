@@ -137,7 +137,7 @@ export default function CompetitionOverview() {
       (item) => item.data_key === WAVE_DISPLAY_METADATA_KEYS.customRules
     )?.data_value ?? "";
   return (
-    <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+    <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950">
       <div className="tw-space-y-4 tw-p-4 sm:tw-p-5">
         <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
           <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3">
@@ -171,7 +171,7 @@ export default function CompetitionOverview() {
               </p>
             )}
             {(guidelines || editable) && (
-              <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-pt-4">
+              <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-pt-4">
                 <h3 className="tw-m-0 tw-flex tw-items-center tw-gap-2 tw-text-sm tw-font-semibold tw-text-iron-100">
                   <DocumentTextIcon
                     className="tw-size-4 tw-text-iron-400"

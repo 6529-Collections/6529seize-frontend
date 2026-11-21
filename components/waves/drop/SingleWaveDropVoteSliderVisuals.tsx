@@ -143,7 +143,8 @@ export const SliderThumb: FC<SliderThumbProps> = ({
       </div>
 
       <m.div
-        className={visualState.thumbOuterClasses}
+        data-vote-slider-thumb
+        className={`${visualState.thumbOuterClasses} group-has-[input:focus-visible]/vote-slider:tw-outline group-has-[input:focus-visible]/vote-slider:tw-outline-2 group-has-[input:focus-visible]/vote-slider:tw-outline-offset-4 group-has-[input:focus-visible]/vote-slider:tw-outline-primary-400`}
         style={{
           scale: thumbScale,
         }}

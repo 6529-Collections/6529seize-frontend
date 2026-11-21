@@ -102,6 +102,7 @@ export function setStatus(
   error: string | null = null
 ): void {
   ctx.store.status = status;
+  if (status !== "ready") ctx.store.initialSyncStatus = "pending";
   ctx.store.error = error;
   ctx.store.touch();
 }

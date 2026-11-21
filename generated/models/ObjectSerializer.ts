@@ -461,6 +461,7 @@ export * from '../models/ApiE2eeCreateGroupRequest';
 export * from '../models/ApiE2eeDevice';
 export * from '../models/ApiE2eeDeviceGrant';
 export * from '../models/ApiE2eeDeviceGroup';
+export * from '../models/ApiE2eeDeviceInboxStatus';
 export * from '../models/ApiE2eeDeviceLookupRequest';
 export * from '../models/ApiE2eeDeviceLookupResponse';
 export * from '../models/ApiE2eeDevicePlatform';
@@ -855,6 +856,7 @@ export * from '../models/ApiWaveCreditNft';
 export * from '../models/ApiWaveCreditScope';
 export * from '../models/ApiWaveCreditType';
 export * from '../models/ApiWaveCuration';
+export * from '../models/ApiWaveCurationCriteria';
 export * from '../models/ApiWaveCurationRequest';
 export * from '../models/ApiWaveDecision';
 export * from '../models/ApiWaveDecisionAward';
@@ -1463,6 +1465,7 @@ import { ApiE2eeCreateGroupRequest } from '../models/ApiE2eeCreateGroupRequest';
 import { ApiE2eeDevice     , ApiE2eeDeviceVerifiedViaEnum           } from '../models/ApiE2eeDevice';
 import { ApiE2eeDeviceGrant } from '../models/ApiE2eeDeviceGrant';
 import { ApiE2eeDeviceGroup } from '../models/ApiE2eeDeviceGroup';
+import { ApiE2eeDeviceInboxStatus } from '../models/ApiE2eeDeviceInboxStatus';
 import { ApiE2eeDeviceLookupRequest } from '../models/ApiE2eeDeviceLookupRequest';
 import { ApiE2eeDeviceLookupResponse } from '../models/ApiE2eeDeviceLookupResponse';
 import { ApiE2eeDevicePlatform } from '../models/ApiE2eeDevicePlatform';
@@ -1857,6 +1860,7 @@ import { ApiWaveCreditNft } from '../models/ApiWaveCreditNft';
 import { ApiWaveCreditScope } from '../models/ApiWaveCreditScope';
 import { ApiWaveCreditType } from '../models/ApiWaveCreditType';
 import { ApiWaveCuration } from '../models/ApiWaveCuration';
+import { ApiWaveCurationCriteria } from '../models/ApiWaveCurationCriteria';
 import { ApiWaveCurationRequest } from '../models/ApiWaveCurationRequest';
 import { ApiWaveDecision } from '../models/ApiWaveDecision';
 import { ApiWaveDecisionAward       } from '../models/ApiWaveDecisionAward';
@@ -2738,6 +2742,7 @@ let typeMap: {[index: string]: any} = {
     "ApiE2eeDevice": ApiE2eeDevice,
     "ApiE2eeDeviceGrant": ApiE2eeDeviceGrant,
     "ApiE2eeDeviceGroup": ApiE2eeDeviceGroup,
+    "ApiE2eeDeviceInboxStatus": ApiE2eeDeviceInboxStatus,
     "ApiE2eeDeviceLookupRequest": ApiE2eeDeviceLookupRequest,
     "ApiE2eeDeviceLookupResponse": ApiE2eeDeviceLookupResponse,
     "ApiE2eeDeviceRevocation": ApiE2eeDeviceRevocation,
@@ -3094,6 +3099,7 @@ let typeMap: {[index: string]: any} = {
     "ApiWaveContributorOverview": ApiWaveContributorOverview,
     "ApiWaveCreditNft": ApiWaveCreditNft,
     "ApiWaveCuration": ApiWaveCuration,
+    "ApiWaveCurationCriteria": ApiWaveCurationCriteria,
     "ApiWaveCurationRequest": ApiWaveCurationRequest,
     "ApiWaveDecision": ApiWaveDecision,
     "ApiWaveDecisionAward": ApiWaveDecisionAward,

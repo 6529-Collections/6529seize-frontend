@@ -1,4 +1,5 @@
 "use client";
+import useDialogKeyboard from "@/hooks/useDialogKeyboard";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
@@ -570,6 +571,7 @@ export default function MemesQuickVoteDialog({
 }: MemesQuickVoteDialogProps) {
   const locale = useBrowserLocale();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
+  const keyboardViewportRef = useDialogKeyboard(isOpen);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
   const previousBodyOverflowRef = useRef("");
   const isMobile = useMediaQuery(QUICK_VOTE_MOBILE_QUERY);
@@ -680,7 +682,14 @@ export default function MemesQuickVoteDialog({
     >
       {isOpen && (
         <div
-          className="tw-flex tw-h-full tw-w-full tw-items-stretch tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] md:tw-items-center md:tw-p-6"
+          ref={keyboardViewportRef}
+          style={{
+            height:
+              "var(--dialog-viewport-height, max(0px, calc(100% - var(--native-keyboard-inset-bottom, 0px))))",
+            transition:
+              "height var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
+          }}
+          className="tw-fixed tw-inset-x-0 tw-top-[var(--dialog-viewport-top,0px)] tw-flex tw-h-full tw-w-full tw-items-stretch tw-justify-center tw-bg-gray-600 tw-bg-opacity-50 tw-backdrop-blur-[1px] md:tw-items-center md:tw-p-6"
           onClick={(event) => {
             if (event.target !== event.currentTarget) {
               return;
@@ -689,7 +698,7 @@ export default function MemesQuickVoteDialog({
             onClose();
           }}
         >
-          <div className="tw-relative tw-flex tw-h-[calc(100%_-_var(--native-keyboard-inset-bottom,0px))] tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] tw-transition-[height] tw-duration-[var(--native-keyboard-layout-transition-duration,0ms)] tw-ease-out motion-reduce:tw-transition-none md:tw-h-[38rem] md:tw-max-h-[min(calc(100vh-3rem),38rem)] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
+          <div className="tw-relative tw-flex tw-h-full tw-max-h-full tw-w-full tw-flex-col tw-overflow-hidden tw-bg-[#0a0a0a] tw-shadow-[0_0_80px_rgba(0,0,0,0.8)] md:tw-h-[38rem] md:tw-max-w-[68rem] md:tw-rounded-2xl md:tw-border md:tw-border-solid md:tw-border-white/10">
             <button
               type="button"
               data-autofocus="true"

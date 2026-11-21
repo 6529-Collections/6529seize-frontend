@@ -60,6 +60,7 @@ jest.mock("@/contexts/wave/WaveChatScrollContext", () => ({
 
 jest.mock("@heroicons/react/24/outline", () => ({
   MagnifyingGlassIcon: (props: any) => <svg data-testid="icon" {...props} />,
+  EllipsisVerticalIcon: (props: any) => <svg {...props} />,
 }));
 
 jest.mock("@/hooks/useDeviceInfo");
@@ -86,6 +87,32 @@ describe("HeaderSearchButton", () => {
 
     fireEvent.click(screen.getByTestId("modal"));
     expect(screen.queryByTestId("modal")).toBeNull();
+  });
+
+  it("keeps Search visible and secondary actions in More", async () => {
+    useDeviceInfoMock.mockReturnValue({ isApp: true } as any);
+    render(
+      <HeaderSearchButton
+        wave={null}
+        additionalMenuItems={[
+          {
+            id: "profile-feed",
+            label: "Profile Waves Feed",
+            href: "/waves?view=profile-feed",
+          },
+        ]}
+      />
+    );
+    expect(screen.getByRole("button", { name: "Search 6529" })).toBeVisible();
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
+    expect(
+      await screen.findByRole("menuitem", { name: "Profile Waves Feed" })
+    ).toHaveAttribute("href", "/waves?view=profile-feed");
+    expect(screen.queryByRole("menuitem", { name: "Search 6529" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "More" }));
+    fireEvent.click(screen.getByRole("button", { name: "Search 6529" }));
+    expect(await screen.findByTestId("modal")).toBeInTheDocument();
+    expect(screen.queryByRole("menu")).not.toBeInTheDocument();
   });
 
   it("opens modal when meta+k is pressed", async () => {

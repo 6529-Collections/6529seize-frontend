@@ -53,7 +53,10 @@ export default function DropMinimalIdentityRow({
       <div
         className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${timestampLayout === "stacked" ? identityRowHeightClass : ""}`}
       >
-        <p className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-sm tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]">
+        <p
+          data-wave-typography="preserve"
+          className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-sm tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]"
+        >
           {isAnonymousAuthor(drop.author) ? (
             <AnonymousAuthorName />
           ) : (

@@ -1,3 +1,5 @@
+import type { Page } from "@playwright/test";
+import { checkEncryptedPoll, pollCard } from "../support/e2ee/polls";
 import { expect, test } from "../testHelpers";
 import {
   buildSyntheticJwt,
@@ -110,6 +112,14 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
       notice(bob.page, "alice renamed the chat to “Planning v2”")
     ).toBeVisible();
 
+    await checkEncryptedPoll(
+      alice.page,
+      bob.page,
+      "bob",
+      "Which drink?",
+      false
+    );
+
     // Add dave (story 2) and the joined notice (story 12).
     info = await openChatInfo(alice.page);
     await pickPerson(info, "dave", {
@@ -132,6 +142,14 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
     await sendMessage(alice.page, afterDave);
     await expectMessage(dave.page, afterDave);
     await expect(messageRow(dave.page, beforeDave)).toHaveCount(0);
+    await expect(pollCard(dave.page, "Which drink?")).toHaveCount(0);
+    await checkEncryptedPoll(
+      alice.page,
+      dave.page,
+      "dave",
+      "Which drinks should we bring?",
+      true
+    );
 
     // Story 8: a mention while dave is on the list raises his badges.
     await gotoPath(dave.page, ENCRYPTED_ROUTE);
@@ -169,13 +187,11 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
       timeout: E2EE_UI_TIMEOUT_MS,
     });
     await closeChatInfo(alice.page);
-    await expect(notice(alice.page, "You removed carol")).toBeVisible();
+    await expectLatestNotice(alice.page, "You removed carol");
     await expect(
       carol.page.getByText("You were removed from this chat.")
     ).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
-    await expect(notice(bob.page, "alice removed carol")).toBeVisible({
-      timeout: E2EE_SYNC_TIMEOUT_MS,
-    });
+    await expectLatestNotice(bob.page, "alice removed carol");
 
     // Story 3: a removed member gets no later messages, on screen or wire.
     await sendMessage(alice.page, afterCarol);
@@ -208,6 +224,20 @@ test.describe("Encrypted groups @medium @local-only @e2ee", () => {
     }
   });
 });
+
+async function expectLatestNotice(page: Page, text: string) {
+  const row = notice(page, text);
+  const newMessages = page.getByRole("button", {
+    name: "New messages",
+    exact: true,
+  });
+  // Taller poll cards can leave the reader above the latest timeline row.
+  await expect(row.or(newMessages).first()).toBeVisible({
+    timeout: E2EE_SYNC_TIMEOUT_MS,
+  });
+  if (await newMessages.isVisible()) await newMessages.click();
+  await expect(row).toBeVisible({ timeout: E2EE_SYNC_TIMEOUT_MS });
+}
 
 /**
  * Asks the delivery service, as carol's device, for the group log: it must

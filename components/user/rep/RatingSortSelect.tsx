@@ -1,13 +1,14 @@
 "use client";
 
 import { CompactMenu } from "@/components/compact-menu";
+import { DROPDOWN_CHECKMARK_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import {
   COMPACT_ACTION_BUTTON_CLASS,
   COMPACT_ACTION_CONTENT_CLASS,
 } from "@/components/utils/button/compactActionButtonStyles";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { CheckIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
 import type { RepDirection } from "./UserPageRep.helpers";
 
 export type RatingListOrder = "rating" | "last_modified";
@@ -61,12 +62,32 @@ export default function RatingSortSelect({
         items={[
           {
             id: "rating",
-            label: t(locale, "user.rate.highestFirst"),
+            label: (
+              <span className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <span>{t(locale, "user.rate.highestFirst")}</span>
+                {value === "rating" && (
+                  <CheckIcon
+                    aria-hidden="true"
+                    className={`tw-size-3.5 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
+                  />
+                )}
+              </span>
+            ),
             onSelect: () => onChange("rating"),
           },
           {
             id: "last_modified",
-            label: t(locale, "user.rate.recentFirst"),
+            label: (
+              <span className="tw-flex tw-items-center tw-justify-between tw-gap-2">
+                <span>{t(locale, "user.rate.recentFirst")}</span>
+                {value === "last_modified" && (
+                  <CheckIcon
+                    aria-hidden="true"
+                    className={`tw-size-3.5 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
+                  />
+                )}
+              </span>
+            ),
             onSelect: () => onChange("last_modified"),
           },
         ]}

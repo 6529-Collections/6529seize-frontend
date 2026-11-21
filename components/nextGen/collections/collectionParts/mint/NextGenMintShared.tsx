@@ -1,4 +1,4 @@
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Tooltip } from "react-tooltip";
 import { useEnsName } from "wagmi";
@@ -8,7 +8,7 @@ import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
 export const MINT_INPUT_CLASSNAME =
   "tw-min-h-11 tw-w-full tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-black/20 tw-px-3 tw-py-2 tw-text-base tw-text-white tw-[color-scheme:dark] placeholder:tw-text-iron-500 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 disabled:tw-cursor-not-allowed disabled:tw-bg-black/10 disabled:tw-text-iron-500";
 
-export const MINT_SELECT_CLASSNAME = `${DROPDOWN_FIELD_CLASSES} tw-min-h-11 tw-w-full tw-px-3 tw-py-2 tw-text-base tw-[color-scheme:dark]`;
+export const MINT_SELECT_CLASSNAME = `${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, x: 12, y: 8, text: "base" } })} tw-w-full tw-[color-scheme:dark]`;
 
 export function MintInfoTooltip(
   props: Readonly<{ id: string; label: string; content: string }>

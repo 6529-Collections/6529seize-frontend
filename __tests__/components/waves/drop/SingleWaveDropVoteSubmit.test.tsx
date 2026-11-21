@@ -142,7 +142,7 @@ describe("SingleWaveDropVoteSubmit", () => {
       },
     });
 
-    return render(
+    const content = (nextProps: typeof props) => (
       <QueryClientProvider client={queryClient}>
         <AuthContext.Provider value={mockAuthContext as any}>
           <ReactQueryWrapperContext.Provider
@@ -152,12 +152,18 @@ describe("SingleWaveDropVoteSubmit", () => {
               drop={mockDrop}
               newRating={100}
               voteLabel={defaultVoteLabel}
-              {...props}
+              {...nextProps}
             />
           </ReactQueryWrapperContext.Provider>
         </AuthContext.Provider>
       </QueryClientProvider>
     );
+    const view = render(content(props));
+    return {
+      ...view,
+      rerenderWithProps: (nextProps: typeof props) =>
+        view.rerender(content({ ...props, ...nextProps })),
+    };
   };
 
   beforeEach(() => {
@@ -180,14 +186,16 @@ describe("SingleWaveDropVoteSubmit", () => {
     renderComponent();
 
     expect(screen.getByRole("button")).toBeInTheDocument();
-    expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: defaultIdleButtonLabel })
+    ).toBeInTheDocument();
   });
 
-  it("applies correct styling based on drop rank", () => {
+  it("uses the shared positive vote action styling", () => {
     renderComponent();
 
     const button = screen.getByRole("button");
-    expect(button).toHaveClass("voteButton");
+    expect(button).toHaveClass("tw-bg-emerald-500", "tw-w-full");
   });
 
   it("handles button click and shows loading state", async () => {
@@ -201,9 +209,122 @@ describe("SingleWaveDropVoteSubmit", () => {
 
     // Should show loading spinner
     await waitFor(() => {
-      expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: defaultIdleButtonLabel })
+      ).toBeInTheDocument();
     });
   });
+
+  it.each([
+    {
+      newRating: 100,
+      voteLabel: "Rep",
+      label: "Vote +100 Rep",
+    },
+    {
+      newRating: -1500,
+      voteLabel: "TDH",
+      label: "Vote -1,500 TDH",
+    },
+    {
+      newRating: 100,
+      voteLabel: "Rep",
+      submitLabelOverride: "Vote +100 Rep + reply",
+      label: "Vote +100 Rep + reply",
+    },
+  ])(
+    "keeps $label accessible while authentication and saving are pending",
+    async ({ label, ...props }) => {
+      let finishAuth!: (result: { success: boolean }) => void;
+      mockAuthContext.requestAuth.mockReturnValue(
+        new Promise((resolve) => {
+          finishAuth = resolve;
+        })
+      );
+      jest
+        .mocked(commonApi.commonApiPost)
+        .mockReturnValue(new Promise<ApiDrop>(() => undefined));
+      renderComponent(props);
+      const button = screen.getByRole("button", { name: label });
+
+      fireEvent.click(button);
+      await advanceTimers(300);
+
+      expect(mockAuthContext.requestAuth).toHaveBeenCalledTimes(1);
+      expect(commonApi.commonApiPost).not.toHaveBeenCalled();
+      expect(button.querySelector(".buttonText")).not.toBeInTheDocument();
+      expect(button.querySelector(".spinner")).toBeInTheDocument();
+      expect(button).toHaveAccessibleName(label);
+
+      await act(async () => {
+        finishAuth({ success: true });
+        await flushMicrotasks();
+      });
+
+      await waitFor(() => {
+        expect(commonApi.commonApiPost).toHaveBeenCalledTimes(1);
+      });
+      expect(button.querySelector(".buttonText")).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: label })).toBe(button);
+    }
+  );
+
+  it.each([
+    {
+      submitted: 100,
+      edited: -50,
+      label: "Vote +100 Rep",
+      color: "tw-bg-emerald-500",
+    },
+    {
+      submitted: -100,
+      edited: 50,
+      label: "Vote -100 Rep",
+      color: "tw-bg-rose-600",
+    },
+  ])(
+    "keeps pending feedback for submitted $submitted while the draft changes",
+    async ({ submitted, edited, label, color }) => {
+      let finishSave!: (value: ApiDrop) => void;
+      jest.mocked(commonApi.commonApiPost).mockReturnValue(
+        new Promise((resolve) => {
+          finishSave = resolve;
+        })
+      );
+      const { rerenderWithProps } = renderComponent({ newRating: submitted });
+      const button = screen.getByRole("button", { name: label });
+      fireEvent.click(button);
+      rerenderWithProps({
+        newRating: edited,
+        submitLabelOverride: "Edited draft + reply",
+      });
+      expect(button).toHaveAccessibleName(label);
+      expect(button).toHaveClass(color);
+
+      await advanceTimers(300);
+      expect(button.querySelector(".buttonText")).not.toBeInTheDocument();
+      expect(button).toHaveAccessibleName(label);
+      expect(button).toHaveClass(color);
+      expect(commonApi.commonApiPost).toHaveBeenCalledWith({
+        endpoint: `drops/${mockDrop.id}/ratings`,
+        body: { rating: submitted, category: "Rep" },
+      });
+
+      await act(async () => {
+        finishSave(mockDrop);
+        await flushMicrotasks();
+      });
+      await advanceTimers(300);
+      expect(button).toHaveAccessibleName("Voted");
+      expect(button).toHaveClass(color);
+      await advanceTimers(4200);
+      await advanceTimers(300);
+      expect(button).toHaveAccessibleName("Edited draft + reply");
+      expect(button).toHaveClass(
+        edited > 0 ? "tw-bg-emerald-500" : "tw-bg-rose-600"
+      );
+    }
+  );
 
   it("calls requestAuth when button is clicked", async () => {
     const mockCommonApiPost = jest.mocked(commonApi.commonApiPost);
@@ -472,7 +593,9 @@ describe("SingleWaveDropVoteSubmit", () => {
     expect(onVoteRequestStarted).not.toHaveBeenCalled();
     expect(onVoteApplied).not.toHaveBeenCalled();
     await waitFor(() => {
-      expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: defaultIdleButtonLabel })
+      ).toBeInTheDocument();
     });
 
     await advanceTimers(backgroundModalCloseDelayMs);
@@ -621,7 +744,9 @@ describe("SingleWaveDropVoteSubmit", () => {
     });
 
     // Button should show initial text
-    expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: defaultIdleButtonLabel })
+    ).toBeInTheDocument();
     expect(onVoteApplied).not.toHaveBeenCalled();
     expect(invalidateQueriesSpy).not.toHaveBeenCalled();
   });
@@ -660,7 +785,9 @@ describe("SingleWaveDropVoteSubmit", () => {
 
     const button = screen.getByRole("button");
     expect(button).toBeInTheDocument();
-    expect(screen.getByText(defaultIdleButtonLabel)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: defaultIdleButtonLabel })
+    ).toBeInTheDocument();
   });
 
   it("exposes handleClick method through ref", () => {

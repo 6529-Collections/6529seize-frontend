@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import React, { useRef } from "react";
 import WebBrainLeftSidebarWaves from "./WebBrainLeftSidebarWaves";
 import WebDirectMessagesList from "./WebDirectMessagesList";
@@ -11,10 +13,6 @@ import {
 import { usePathname } from "next/navigation";
 import { useSidebarState } from "../../../../hooks/useSidebarState";
 import { ChevronDoubleRightIcon } from "@heroicons/react/24/outline";
-import {
-  WAVE_HEADER_ACTION_CLASSES,
-  WAVE_HEADER_ACTION_SURFACE_CLASSES,
-} from "../waves/WaveHeaderActions";
 
 /**
  * WebLeftSidebar
@@ -95,24 +93,23 @@ const WebLeftSidebar: React.FC<WebLeftSidebarProps> = ({
             >
               <div
                 aria-hidden="true"
-                className="tw-pointer-events-none tw-absolute tw-inset-x-0 -tw-top-2 tw-h-[76px] tw-bg-[linear-gradient(180deg,rgba(0,0,0,1)_0%,rgba(0,0,0,0.96)_45%,rgba(0,0,0,0)_100%)]"
+                className="tw-pointer-events-none tw-absolute tw-inset-x-0 -tw-top-2.5 tw-h-[76px] tw-bg-[linear-gradient(180deg,rgba(0,0,0,1)_0%,rgba(0,0,0,1)_60%,rgba(0,0,0,0)_100%)]"
               />
-              <button
+              <IconButton
                 type="button"
                 onClick={closeRightSidebar}
                 onMouseDown={(event) => event.preventDefault()}
                 aria-label={expandLabel}
                 title={expandLabel}
-                className={`tw-relative tw-z-10 ${WAVE_HEADER_ACTION_CLASSES}`}
+                layout="toolbar"
+                className={`tw-relative tw-z-10 ${isMessagesView ? "" : "tw-translate-y-2"}`}
               >
-                <span className={WAVE_HEADER_ACTION_SURFACE_CLASSES}>
-                  <ChevronDoubleRightIcon
-                    strokeWidth={2}
-                    aria-hidden="true"
-                    className="tw-size-4 tw-flex-shrink-0"
-                  />
-                </span>
-              </button>
+                <ChevronDoubleRightIcon
+                  strokeWidth={2}
+                  aria-hidden="true"
+                  className="tw-size-4 tw-flex-shrink-0"
+                />
+              </IconButton>
             </div>
           )}
           {!isMessagesView && (

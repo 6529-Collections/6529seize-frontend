@@ -13,6 +13,7 @@ import {
   reopenDesktopWalletRequest,
   runDesktopWalletRequest,
   showDesktopWalletRefusal,
+  subscribeBrowserWalletProfiles,
   watchDesktopWalletStatus,
 } from "@/services/desktop/desktopBrowserWallet";
 import {
@@ -83,6 +84,92 @@ describe("desktopBrowserWallet", () => {
       ).toBe(true);
       expect(isBrowserWalletProfile("nope")).toBe(false);
       expect(isBrowserWalletProfile(null)).toBe(false);
+    });
+
+    it("publishes eligibility changes for an already mounted connector", async () => {
+      const changes: boolean[] = [];
+      const unsubscribe = subscribeBrowserWalletProfiles(() => {
+        changes.push(isBrowserWalletProfile(ADDRESS));
+      });
+      await loadBrowserWalletProfiles();
+      await markBrowserWalletProfile(ADDRESS);
+      await forgetBrowserWalletProfile(ADDRESS);
+      unsubscribe();
+      await markBrowserWalletProfile(ADDRESS);
+      expect(changes).toEqual([false, true, false]);
+    });
+
+    it("keeps profiles cleared when the first store read completes after sign-out", async () => {
+      const stored = Promise.withResolvers<unknown>();
+      store.get.mockReturnValueOnce(stored.promise);
+      const subscriber = jest.fn(() => isBrowserWalletProfile(ADDRESS));
+      subscribeBrowserWalletProfiles(subscriber);
+      const loading = loadBrowserWalletProfiles();
+      await Promise.resolve();
+      expect(store.get).toHaveBeenCalledTimes(1);
+
+      await forgetAllBrowserWalletProfiles();
+      stored.resolve([ADDRESS]);
+      await loading;
+
+      expect(subscriber.mock.results.map((entry) => entry.value)).toEqual([
+        false,
+      ]);
+      expect(isBrowserWalletProfile(ADDRESS)).toBe(false);
+    });
+
+    it("keeps sharing a new store read after an earlier read completes", async () => {
+      const earlierRead = Promise.withResolvers<unknown>();
+      const currentRead = Promise.withResolvers<unknown>();
+      store.get
+        .mockReturnValueOnce(earlierRead.promise)
+        .mockReturnValueOnce(currentRead.promise);
+      const earlierLoad = loadBrowserWalletProfiles();
+      await Promise.resolve();
+      __resetDesktopBrowserWalletForTests();
+      const currentLoad = loadBrowserWalletProfiles();
+      await Promise.resolve();
+
+      earlierRead.resolve([ADDRESS]);
+      await earlierLoad;
+      const sharedLoad = loadBrowserWalletProfiles();
+      await Promise.resolve();
+      expect(store.get).toHaveBeenCalledTimes(2);
+
+      currentRead.resolve([OTHER]);
+      await Promise.all([currentLoad, sharedLoad]);
+      expect(isBrowserWalletProfile(OTHER)).toBe(true);
+      expect(isBrowserWalletProfile(ADDRESS)).toBe(false);
+    });
+
+    it("clears the store and notifies other subscribers when one throws", async () => {
+      subscribeBrowserWalletProfiles(() => {
+        throw new Error("listener failed");
+      });
+      const subscriber = jest.fn();
+      subscribeBrowserWalletProfiles(subscriber);
+      await forgetAllBrowserWalletProfiles();
+      expect(subscriber).toHaveBeenCalledTimes(1);
+      expect(store.set).toHaveBeenCalledWith(
+        "desktop-browser-wallet-profiles",
+        []
+      );
+    });
+
+    it("does not persist a profile invalidated by a sign-out subscriber", async () => {
+      await loadBrowserWalletProfiles();
+      subscribeBrowserWalletProfiles(() => {
+        if (isBrowserWalletProfile(ADDRESS)) {
+          void forgetAllBrowserWalletProfiles();
+        }
+      });
+
+      await markBrowserWalletProfile(ADDRESS);
+
+      expect(isBrowserWalletProfile(ADDRESS)).toBe(false);
+      expect(store.set.mock.calls).toEqual([
+        ["desktop-browser-wallet-profiles", []],
+      ]);
     });
 
     it("remembers and forgets a profile and never throws", async () => {

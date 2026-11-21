@@ -1,6 +1,9 @@
 import { act, render } from "@testing-library/react";
 import DesktopBrowserConnectorBridge from "@/components/desktop/DesktopBrowserConnectorBridge";
-import { canStoreAnotherWalletAccount } from "@/services/auth/auth.utils";
+import {
+  canStoreAnotherWalletAccount,
+  getWalletAddress,
+} from "@/services/auth/auth.utils";
 import {
   loginWithSessionV2,
   persistSessionResponse,
@@ -18,6 +21,7 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 }));
 jest.mock("@/services/auth/auth.utils", () => ({
   canStoreAnotherWalletAccount: jest.fn(() => true),
+  getWalletAddress: jest.fn(),
 }));
 jest.mock("@/services/auth/session-v2.utils", () => ({
   loginWithSessionV2: jest.fn(),
@@ -25,6 +29,15 @@ jest.mock("@/services/auth/session-v2.utils", () => ({
 }));
 
 const ADDRESS = `0x${"a".repeat(40)}`;
+const session = {
+  client_type: "desktop",
+  address: ADDRESS,
+  role: null,
+  access_token: "token",
+  access_token_expires_at: "",
+  native_refresh_token: "",
+  refresh_token_expires_at: "",
+} as const;
 type Listener = (event: unknown, payload: unknown) => void;
 
 const createApi = (scheme: unknown = "localcore6529") => {
@@ -86,15 +99,8 @@ describe("browser connector sign-in in 6529 Desktop", () => {
     jest.useRealTimers();
     __resetBrowserConnectorForTests();
     api = createApi();
-    jest.mocked(loginWithSessionV2).mockResolvedValue({
-      client_type: "desktop",
-      address: ADDRESS,
-      role: null,
-      access_token: "token",
-      access_token_expires_at: "",
-      native_refresh_token: "",
-      refresh_token_expires_at: "",
-    });
+    jest.mocked(getWalletAddress).mockReturnValue(ADDRESS);
+    jest.mocked(loginWithSessionV2).mockResolvedValue(session);
     jest.mocked(persistSessionResponse).mockResolvedValue(true);
   });
 
@@ -110,6 +116,48 @@ describe("browser connector sign-in in 6529 Desktop", () => {
       "only in 6529 Desktop"
     );
     expect(api.onWalletConnection).not.toHaveBeenCalled();
+  });
+
+  it("does not switch accounts when setup returns from another wallet", async () => {
+    installDesktopShell();
+    render(<DesktopBrowserConnectorBridge />);
+    const onStatus = jest.fn();
+    await startBrowserConnectorSignIn({
+      address: ADDRESS,
+      signal: new AbortController().signal,
+      onStatus,
+    });
+
+    await deliver(
+      result(openedRequest().requestId, { address: `0x${"c".repeat(40)}` })
+    );
+
+    expect(loginWithSessionV2).not.toHaveBeenCalled();
+    expect(seizeAcceptConnection).not.toHaveBeenCalled();
+    expect(onStatus).toHaveBeenLastCalledWith("failed");
+  });
+
+  it("discards setup when the active wallet changes during browser sign-in", async () => {
+    installDesktopShell();
+    render(<DesktopBrowserConnectorBridge />);
+    const onStatus = jest.fn();
+    await startBrowserConnectorSignIn({
+      address: ADDRESS,
+      signal: new AbortController().signal,
+      onStatus,
+    });
+    const login = Promise.withResolvers<typeof session>();
+    jest.mocked(loginWithSessionV2).mockReturnValueOnce(login.promise);
+
+    await deliver(result(openedRequest().requestId));
+    expect(loginWithSessionV2).toHaveBeenCalledTimes(1);
+    expect(onStatus).toHaveBeenLastCalledWith("signing-in");
+    jest.mocked(getWalletAddress).mockReturnValue(`0x${"c".repeat(40)}`);
+    await act(async () => login.resolve(session));
+
+    expect(persistSessionResponse).not.toHaveBeenCalled();
+    expect(seizeAcceptConnection).not.toHaveBeenCalled();
+    expect(onStatus).toHaveBeenLastCalledWith("failed");
   });
 
   it("opens the connector with the scheme this build reports", async () => {
@@ -271,21 +319,34 @@ describe("browser connector sign-in in 6529 Desktop", () => {
     expect(loginWithSessionV2).not.toHaveBeenCalled();
   });
 
-  it("refuses an expired request", async () => {
-    installDesktopShell();
-    jest.useFakeTimers();
-    render(<DesktopBrowserConnectorBridge />);
-    await startBrowserConnectorSignIn();
-    const { requestId } = openedRequest();
+  it.each([false, true])(
+    "refuses an expired request (for setup: %s)",
+    async (forSetup) => {
+      installDesktopShell();
+      jest.useFakeTimers();
+      render(<DesktopBrowserConnectorBridge />);
+      const onStatus = jest.fn();
+      await startBrowserConnectorSignIn(
+        forSetup
+          ? {
+              address: ADDRESS,
+              signal: new AbortController().signal,
+              onStatus,
+            }
+          : undefined
+      );
+      const { requestId } = openedRequest();
 
-    act(() => {
-      jest.advanceTimersByTime(120_001);
-    });
-    expect(getBrowserConnectorStatus()).toBe("expired");
-    await deliver(result(requestId));
+      act(() => {
+        jest.advanceTimersByTime(120_001);
+      });
+      expect(getBrowserConnectorStatus()).toBe("expired");
+      if (forSetup) expect(onStatus).toHaveBeenLastCalledWith("failed");
+      await deliver(result(requestId));
 
-    expect(loginWithSessionV2).not.toHaveBeenCalled();
-  });
+      expect(loginWithSessionV2).not.toHaveBeenCalled();
+    }
+  );
 
   it("fails when the session is for another wallet or cannot be saved", async () => {
     installDesktopShell();

@@ -1,5 +1,6 @@
 "use client";
 
+import { DROPDOWN_CHECKMARK_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { useRef, useState } from "react";
@@ -213,7 +214,7 @@ export default function HeaderProxyNewModal({
                                   </div>
                                   <div>
                                     <svg
-                                      className="tw-flex-shrink-0 tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-400 tw-transition tw-duration-300 tw-ease-out"
+                                      className={`tw-flex-shrink-0 tw-h-5 tw-w-5 tw-ml-2 ${DROPDOWN_CHECKMARK_CLASSES} tw-transition tw-duration-300 tw-ease-out`}
                                       viewBox="0 0 24 24"
                                       fill="none"
                                       aria-hidden="true"

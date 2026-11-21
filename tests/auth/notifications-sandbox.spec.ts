@@ -71,6 +71,121 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     "Notifications sandbox requires the local mock API runner."
   );
 
+  test("centers the empty notifications state and keeps actions reachable", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    await page.route("**/api/v2/notifications?**", (route) =>
+      route.fulfill({ json: { unread_count: 0, notifications: [] } })
+    );
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    const heading = page.getByRole("heading", {
+      name: "No notifications found",
+      exact: true,
+    });
+    await expect(heading).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("button", {
+        name: "Filter notifications: All",
+        exact: true,
+      })
+    ).toBeVisible();
+    await expect
+      .poll(() =>
+        page
+          .getByRole("heading", { name: "No notifications found", exact: true })
+          .locator("..")
+          .evaluate((element) => {
+            const content = element.getBoundingClientRect();
+            const region = element.parentElement!.getBoundingClientRect();
+            const centerX = content.x + content.width / 2;
+            return (
+              Math.abs(centerX - region.x - region.width / 2) < 2 &&
+              Math.abs(
+                content.y + content.height / 2 - region.y - region.height / 2
+              ) < 2 &&
+              getComputedStyle(element).textAlign === "center" &&
+              [...element.children].every((child) => {
+                const box = child.getBoundingClientRect();
+                return Math.abs(box.x + box.width / 2 - centerX) < 2;
+              })
+            );
+          })
+      )
+      .toBe(true);
+    const explore = page.getByRole("link", {
+      name: "Explore Waves",
+      exact: true,
+    });
+    const create = page.getByRole("link", {
+      name: "Create a Wave",
+      exact: true,
+    });
+    await expect(explore).toHaveAttribute("href", "/waves");
+    await expect(create).toHaveAttribute("href", "/waves?create=wave");
+    await expect(explore).toBeInViewport();
+    await expect(create).toBeInViewport();
+    for (const action of [explore, create]) {
+      const box = (await action.boundingBox())!;
+      expect(box.width).toBeLessThan(200);
+      expect(box.height).toBeGreaterThanOrEqual(44);
+    }
+    const viewport = page.viewportSize()!;
+    if (testInfo.project.use.isMobile) {
+      await page.setViewportSize({ width: 430, height: viewport.height });
+    }
+    await expect(
+      page
+        .getByRole("link", { name: "Create a Wave", exact: true })
+        .locator("..")
+        .getByRole("link")
+        .first()
+    ).toHaveAccessibleName("Create a Wave");
+    const createBox = (await create.boundingBox())!;
+    const exploreBox = (await explore.boundingBox())!;
+    expect(Math.abs(createBox.y - exploreBox.y)).toBeLessThan(2);
+    expect(createBox.x + createBox.width).toBeLessThan(exploreBox.x);
+    const following = page.getByRole("link", {
+      name: "following",
+      exact: true,
+    });
+    const creating = page.getByRole("link", {
+      name: "creating a Wave",
+      exact: true,
+    });
+    await expect(following).toHaveAttribute("href", "/waves");
+    await expect(creating).toHaveAttribute("href", "/waves?create=wave");
+    await following.focus();
+    await page.keyboard.press("Tab");
+    await page.keyboard.press("Shift+Tab");
+    await expect(following).toBeFocused();
+    await expect(following).toHaveCSS("outline-width", "2px");
+    if (!testInfo.project.use.hasTouch) {
+      await following.hover();
+      await expect(following).toHaveCSS("text-decoration-line", "underline");
+    }
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, testInfo, "notifications-empty-centered");
+
+    await page.setViewportSize({ width: 320, height: viewport.height });
+    await expect
+      .poll(async () => {
+        const primary = (await create.boundingBox())!;
+        const secondary = (await explore.boundingBox())!;
+        return primary.y + primary.height < secondary.y;
+      })
+      .toBe(true);
+    await expectNoHorizontalOverflow(page);
+    await captureSafeScreenshot(page, testInfo, "notifications-empty-stacked");
+    await page.setViewportSize({ width: viewport.width, height: 360 });
+    await create.scrollIntoViewIfNeeded();
+    await expect(create).toBeInViewport();
+    await expectNoHorizontalOverflow(page);
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
+
   test("shows artist artwork alerts and opens the single submission", async ({
     page,
   }, testInfo) => {
@@ -120,7 +235,10 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     );
     await expect(artwork).toBeVisible();
     await expect(page.getByText("mentioned you")).toHaveCount(0);
-    const thumbnail = page.getByRole("presentation");
+    const thumbnail = page
+      .getByRole("link", { name: "Sandbox artwork", exact: true })
+      .locator("../..")
+      .getByRole("presentation");
     await expect(thumbnail).toBeVisible();
     await expect
       .poll(() =>
@@ -225,8 +343,10 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await page.goto("/notifications", { waitUntil: "domcontentloaded" });
     await waitForRouteReady(page);
 
+    // The open modal makes the page inert; retain the trigger's semantic locator.
     const trigger = page.getByRole("button", {
       name: /^Filter notifications:/,
+      includeHidden: true,
     });
     await expect(trigger).toHaveAttribute("aria-haspopup", "dialog");
     await trigger.click();
@@ -251,7 +371,8 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await expect(
       dialog.getByRole("heading", { name: "Filter notifications" })
     ).toBeVisible();
-    await expect(trigger).toHaveAccessibleName(
+    await expect(trigger).toHaveAttribute(
+      "aria-label",
       "Filter notifications: 2 selected"
     );
     await expect(
@@ -260,6 +381,16 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     await expect(
       dialog.getByRole("checkbox", { name: "Reactions" })
     ).toBeChecked();
+    const selectedMention = dialog
+      .getByRole("checkbox", { name: "Mentions" })
+      .locator("..");
+    await expect(selectedMention).toHaveCSS("color", "rgb(239, 239, 241)");
+    await expect(
+      dialog
+        .getByRole("checkbox", { name: "Mentions" })
+        .locator("..")
+        .locator("svg")
+    ).toHaveCSS("color", "rgb(206, 207, 212)");
     await expectNoHorizontalOverflow(page);
     await captureSafeScreenshot(
       page,
@@ -269,6 +400,9 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
 
     await dialog.getByRole("button", { name: "Close" }).click();
     await expect(dialog).toHaveCount(0);
+    await expect(trigger).toHaveAccessibleName(
+      "Filter notifications: 2 selected"
+    );
     await expect(trigger).toBeFocused();
 
     await trigger.click();
@@ -279,7 +413,10 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
       reopenedDialog.getByRole("checkbox", { name: "Mentions" })
     ).toBeChecked();
     await reopenedDialog.getByText("All", { exact: true }).click();
-    await expect(trigger).toHaveAccessibleName("Filter notifications: All");
+    await expect(trigger).toHaveAttribute(
+      "aria-label",
+      "Filter notifications: All"
+    );
 
     await page.setViewportSize({ width: 1023, height: 768 });
     await expect(
@@ -287,13 +424,25 @@ test.describe("Notifications local sandbox @auth @medium @local-only", () => {
     ).toBeVisible();
     await page.setViewportSize({ width: 1024, height: 768 });
     await expect(reopenedDialog).toHaveCount(0);
+    await expect(trigger).toHaveAccessibleName("Filter notifications: All");
     await expect(trigger).toBeFocused();
     await expect(trigger).toHaveAttribute("aria-expanded", "false");
     await expect(trigger).toHaveAttribute("aria-haspopup", "menu");
 
     await trigger.click();
     await expect(page.getByRole("menu")).toBeVisible();
+    await expect(page.getByRole("menu")).toHaveCSS("opacity", "1");
     await expect(page.getByRole("dialog")).toHaveCount(0);
+    const selectedAll = page.getByRole("menuitemcheckbox", {
+      name: "All",
+      exact: true,
+    });
+    await expect(selectedAll).toHaveCSS("color", "rgb(239, 239, 241)");
+    await expect(
+      page
+        .getByRole("menuitemcheckbox", { name: "All", exact: true })
+        .locator("svg")
+    ).toHaveCSS("color", "rgb(206, 207, 212)");
     await captureSafeScreenshot(
       page,
       testInfo,

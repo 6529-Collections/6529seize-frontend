@@ -4,6 +4,8 @@ import type {
 } from "@/components/auth/authSignedMessagesGrant";
 import {
   isReconnectStatus,
+  DESKTOP_SIGNER_ATTACH_TIMEOUT_MS,
+  DESKTOP_SHELL_STEP_TIMEOUT_MS,
   RECONNECT_WAIT_MS,
   REMOTE_WALLET_STALL_MS,
   SignedMessagesEnableFlow,
@@ -12,6 +14,8 @@ import {
   type SignedMessagesEnableSnapshot,
   type SignedMessagesEnableStatus,
 } from "@/components/device-signing/signedMessagesEnableFlow";
+import { BROWSER_CONNECTOR_TIMEOUT_MS } from "@/lib/desktop/browserConnector";
+import type { DesktopWalletSetup } from "@/services/desktop/desktopConnectDialog";
 
 const ADDRESS = "0xAbCdEf0000000000000000000000000000001234";
 
@@ -98,6 +102,17 @@ function createHarness(overrides: Partial<SignedMessagesEnableSnapshot> = {}) {
   };
 }
 
+function createDesktopHarness() {
+  const connectWallet = jest.fn(async (setup?: DesktopWalletSetup) => {
+    setup?.onStatus("picker");
+  });
+  const harness = createHarness({ canSignActiveWallet: false, connectWallet });
+  harness.flow.enable("notice");
+  const setup = connectWallet.mock.calls[0]?.[0];
+  if (!setup) throw new Error("Expected a Desktop setup attempt");
+  return { ...harness, setup };
+}
+
 describe("turn on signed messages flow", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -106,6 +121,79 @@ describe("turn on signed messages flow", () => {
   afterEach(() => {
     jest.useRealTimers();
   });
+
+  it("keeps Desktop setup pending through the picker, browser and signer attachment", async () => {
+    const harness = createDesktopHarness();
+    await flush();
+    jest.advanceTimersByTime(10_000);
+    expect(harness.isBusy()).toBe(true);
+
+    harness.setup.onStatus("opening-browser");
+    jest.advanceTimersByTime(20_000);
+    harness.setup.onStatus("browser");
+    jest.advanceTimersByTime(BROWSER_CONNECTOR_TIMEOUT_MS - 1);
+    harness.setup.onStatus("signing-in");
+    jest.advanceTimersByTime(10_000);
+    expect(harness.requestGrant).not.toHaveBeenCalled();
+    harness.setup.onStatus("signed-in");
+    jest.advanceTimersByTime(DESKTOP_SIGNER_ATTACH_TIMEOUT_MS - 1);
+    expect(harness.isBusy()).toBe(true);
+    expect(harness.requestGrant).not.toHaveBeenCalled();
+
+    harness.set({ canSignActiveWallet: true });
+    harness.set({ isConnectOpen: false });
+    expect(harness.requestGrant).toHaveBeenCalledTimes(1);
+    await harness.answer({ success: true });
+    expect(harness.onEnabled).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ["opening-browser", DESKTOP_SHELL_STEP_TIMEOUT_MS],
+    ["signing-in", DESKTOP_SHELL_STEP_TIMEOUT_MS],
+    ["signed-in", DESKTOP_SIGNER_ATTACH_TIMEOUT_MS],
+  ] as const)("ends Desktop setup if the %s phase stalls", (phase, timeout) => {
+    const harness = createDesktopHarness();
+    harness.setup.onStatus(phase);
+    jest.advanceTimersByTime(timeout);
+
+    expect(harness.isBusy()).toBe(false);
+    expect(harness.setup.signal.aborted).toBe(true);
+    harness.set({ canSignActiveWallet: true });
+    expect(harness.requestGrant).not.toHaveBeenCalled();
+  });
+
+  it("ends Desktop setup when the user closes the phone-wallet modal", async () => {
+    const harness = createDesktopHarness();
+    await flush();
+    harness.set({ isConnectOpen: true });
+    harness.setup.onStatus("walletconnect");
+    expect(harness.setup.signal.aborted).toBe(true);
+    expect(harness.isBusy()).toBe(true);
+
+    harness.set({ isConnectOpen: false });
+    jest.advanceTimersByTime(1_000);
+
+    expect(harness.status()).toEqual({ kind: "not-connected" });
+    expect(harness.isBusy()).toBe(false);
+    expect(harness.requestGrant).not.toHaveBeenCalled();
+  });
+
+  it.each(["cancelled", "expired", "profile changed"] as const)(
+    "ignores a late Desktop return when setup is %s",
+    (reason) => {
+      const harness = createDesktopHarness();
+      harness.setup.onStatus("browser");
+      if (reason === "cancelled") harness.setup.onStatus("cancelled");
+      if (reason === "expired") harness.setup.onStatus("failed");
+      if (reason === "profile changed") harness.set({ address: undefined });
+
+      expect(harness.setup.signal.aborted).toBe(true);
+      harness.setup.onStatus("signed-in");
+      harness.set({ address: ADDRESS, canSignActiveWallet: true });
+      expect(harness.requestGrant).not.toHaveBeenCalled();
+      expect(harness.isBusy()).toBe(false);
+    }
+  );
 
   it("asks a connected wallet for the signature at once and confirms success", async () => {
     const harness = createHarness();
@@ -499,6 +587,28 @@ describe("turn on signed messages flow", () => {
       harness.set({ isConnectOpen: false, canSignActiveWallet: true });
       await flush();
       expect(harness.requestGrant).toHaveBeenCalledTimes(2);
+    });
+
+    it("keeps a newer pairing pending when an earlier signature succeeds late", async () => {
+      const harness = createHarness({ isRemoteWallet: true });
+      harness.flow.enable("notice");
+      await flush();
+      harness.askWallet();
+      jest.advanceTimersByTime(REMOTE_WALLET_STALL_MS);
+      harness.flow.reconnect();
+      harness.set({ canSignActiveWallet: false, isConnectOpen: true });
+
+      await harness.answer({ success: true });
+
+      expect(harness.onEnabled).toHaveBeenCalledTimes(1);
+      expect(harness.isBusy()).toBe(true);
+      expect(harness.status()).toEqual({ kind: "connecting" });
+
+      harness.set({ isConnectOpen: false, canSignActiveWallet: true });
+      await flush();
+      expect(harness.requestGrant).toHaveBeenCalledTimes(1);
+      expect(harness.isBusy()).toBe(false);
+      expect(harness.onEnabled).toHaveBeenCalledTimes(1);
     });
 
     it("treats a failed phone signature as a pairing problem, not a locked wallet", async () => {

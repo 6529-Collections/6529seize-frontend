@@ -63,7 +63,6 @@ export default function CreateWaveReview({
           target={{
             kind: "draft",
             group: getOnlyMeGroupDescription(connectedProfile.primary_wallet),
-            name: row.value,
             summary: row.value,
           }}
           roleLabel={row.label}

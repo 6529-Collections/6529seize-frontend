@@ -2,7 +2,7 @@
 
 import AgreementStepAgreement from "@/components/waves/memes/submission/steps/AgreementStepAgreement";
 
-import { useCallback, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
   Dialog,
@@ -15,7 +15,7 @@ import type { ApiMemeCollaborationState } from "@/generated/models/ApiMemeCollab
 import { resolveIpfsUrlSync } from "@/components/ipfs/IPFSContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { observeFocusedField } from "@/helpers/focused-field-visibility";
+import useDialogKeyboard from "@/hooks/useDialogKeyboard";
 import clsx from "clsx";
 import styles from "./MemeCollaborationReviewDialog.module.css";
 
@@ -57,36 +57,8 @@ export function MemeCollaborationReviewDialog({
   const [artistName, setArtistName] = useState(initialArtistName);
   const artistNameId = useId();
   const trimmedArtistName = artistName.trim();
-  const viewportRef = useCallback((element: HTMLDivElement | null) => {
-    const viewport = globalThis.visualViewport;
-    if (!element || !viewport) return;
-    const focusedField = observeFocusedField(element);
-    const fitViewport = () => {
-      // Preserve browser zoom; native shells also retain their own inset.
-      if (viewport.scale > 1) {
-        element.style.removeProperty("--review-viewport-height");
-        element.style.removeProperty("--review-viewport-top");
-        return;
-      }
-      element.style.setProperty(
-        "--review-viewport-height",
-        `${viewport.height}px`
-      );
-      element.style.setProperty(
-        "--review-viewport-top",
-        `${viewport.offsetTop}px`
-      );
-      focusedField.reveal();
-    };
-    fitViewport();
-    viewport.addEventListener("resize", fitViewport);
-    viewport.addEventListener("scroll", fitViewport, { passive: true });
-    return () => {
-      focusedField.disconnect();
-      viewport.removeEventListener("resize", fitViewport);
-      viewport.removeEventListener("scroll", fitViewport);
-    };
-  }, []);
+  const viewportRef = useDialogKeyboard(true);
+
   return (
     <Dialog
       initialFocus={headingRef}
@@ -99,7 +71,11 @@ export function MemeCollaborationReviewDialog({
       <DialogBackdrop className="tw-fixed tw-inset-0 tw-bg-iron-600/60 tw-backdrop-blur-[1px]" />
       <div
         ref={viewportRef}
-        className="tw-fixed tw-inset-x-0 tw-top-[var(--review-viewport-top,0px)] tw-flex tw-h-[min(var(--review-viewport-height,100dvh),calc(100dvh-var(--native-keyboard-inset-bottom,0px)))] tw-items-end tw-justify-center tw-overflow-hidden tw-pt-[env(safe-area-inset-top,0px)] sm:tw-items-center md:tw-p-4"
+        style={{
+          transition:
+            "height var(--native-keyboard-layout-transition-duration, 0ms) var(--native-keyboard-layout-transition-easing, ease-out)",
+        }}
+        className="tw-fixed tw-inset-x-0 tw-top-[var(--dialog-viewport-top,0px)] tw-flex tw-h-[min(var(--dialog-viewport-height,100dvh),calc(100dvh-var(--native-keyboard-inset-bottom,0px)))] tw-items-end tw-justify-center tw-overflow-hidden tw-pt-[env(safe-area-inset-top,0px)] sm:tw-items-center md:tw-p-4"
       >
         <DialogPanel
           className={clsx(

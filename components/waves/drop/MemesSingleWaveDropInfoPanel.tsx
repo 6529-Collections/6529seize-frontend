@@ -2,7 +2,7 @@
 
 import { MemeCollaborationPanel } from "@/components/waves/memes/collaborations/MemeCollaborationPanel";
 import { shouldLoadMemeCollaboration } from "@/components/waves/memes/collaborations/shouldLoadMemeCollaboration";
-import { MobileVotingModal, VotingModal } from "@/components/voting";
+import { VotingModal } from "@/components/voting";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { getFileInfoFromUrl } from "@/helpers/file.helpers";
@@ -171,15 +171,12 @@ export const MemesSingleWaveDropInfoPanel = ({
         />
       </div>
 
-      {isCompactLayout ? (
-        <MobileVotingModal
-          drop={drop}
-          isOpen={isVotingOpen}
-          onClose={closeVoting}
-        />
-      ) : (
-        <VotingModal drop={drop} isOpen={isVotingOpen} onClose={closeVoting} />
-      )}
+      <VotingModal
+        drop={drop}
+        isOpen={isVotingOpen}
+        onClose={closeVoting}
+        preferMobile={isCompactLayout}
+      />
     </>
   );
 };

@@ -337,18 +337,18 @@ export default function WaveRepDetails({ wave }: WaveRepDetailsProps) {
         <div className="tw-overflow-hidden tw-border-x-0 tw-border-y tw-border-solid tw-border-white/5">
           <div className="tw-flex tw-items-end tw-justify-between tw-gap-4 tw-px-2 tw-py-2.5">
             <div className="tw-min-w-0">
-              <p className="tw-mb-1 tw-mt-0 tw-text-[13px] tw-font-medium tw-normal-case tw-leading-5 tw-tracking-normal tw-text-iron-500">
+              <p className="tw-mb-1 tw-mt-0 tw-text-[13px] tw-font-normal tw-normal-case tw-leading-5 tw-tracking-normal tw-text-iron-500">
                 {detailText("waves.rep.details.summary.total")}
               </p>
               <p
-                className={`tw-mb-0 tw-mt-0 tw-text-[13px] tw-font-semibold tw-tabular-nums tw-leading-5 ${getRepTextClass(
+                className={`tw-mb-0 tw-mt-0 tw-text-[13px] tw-font-semibold tw-normal-nums tw-leading-5 ${getRepTextClass(
                   summary.totalRep
                 )}`}
               >
                 {formatSignedRep(summary.totalRep)}
               </p>
             </div>
-            <span className="tw-max-w-32 tw-text-right tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-500">
+            <span className="tw-max-w-32 tw-text-right tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
               {getContributorCountLabel(summary.contributorCount)}
             </span>
           </div>

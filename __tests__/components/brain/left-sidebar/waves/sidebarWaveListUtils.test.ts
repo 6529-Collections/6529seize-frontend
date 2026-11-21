@@ -1,10 +1,46 @@
 import { createMockMinimalWave } from "@/__tests__/utils/mockFactories";
 import {
   groupSidebarWaves,
+  hasUnreadWaveDrops,
   prioritizeActiveWaveContainer,
 } from "@/components/brain/left-sidebar/waves/sidebarWaveListUtils";
 
 describe("sidebarWaveListUtils", () => {
+  it.each([
+    { label: "known unread", unread: 3, live: 0, muted: false, expected: true },
+    { label: "live unread", unread: 0, live: 2, muted: false, expected: true },
+    { label: "read", unread: 0, live: 0, muted: false, expected: false },
+    {
+      label: "muted known unread",
+      unread: 3,
+      live: 0,
+      muted: true,
+      expected: false,
+    },
+    {
+      label: "muted live unread",
+      unread: 0,
+      live: 2,
+      muted: true,
+      expected: false,
+    },
+  ])(
+    "uses the same unread state for $label rows",
+    ({ unread, live, muted, expected }) => {
+      const wave = createMockMinimalWave({
+        unreadDropsCount: unread,
+        isMuted: muted,
+        newDropsCount: {
+          count: live,
+          latestDropTimestamp: null,
+          firstUnreadSerialNo: null,
+        },
+      });
+
+      expect(hasUnreadWaveDrops(wave)).toBe(expected);
+    }
+  );
+
   it("groups followed-subwave parent containers with following waves", () => {
     const groups = groupSidebarWaves({
       waves: [

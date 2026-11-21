@@ -1,10 +1,14 @@
 "use client";
 
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import clsx from "clsx";
+import {
+  EllipsisVerticalIcon,
+  MagnifyingGlassIcon,
+} from "@heroicons/react/24/outline";
+import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useKey } from "react-use";
+import IconButton from "@/components/utils/button/IconButton";
 
 import LazyWaveDropsSearchModal, {
   preloadWaveDropsSearchModal,
@@ -25,11 +29,15 @@ import LazyHeaderSearchModal, {
 
 interface HeaderSearchButtonProps {
   readonly wave: ApiWave | null;
+  readonly additionalMenuItems?: readonly CompactMenuItem[] | undefined;
 }
 
 type OpenSearch = "site" | "wave" | null;
 
-export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
+export default function HeaderSearchButton({
+  wave,
+  additionalMenuItems,
+}: HeaderSearchButtonProps) {
   const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const wasOpenRef = useRef(false);
@@ -97,28 +105,45 @@ export default function HeaderSearchButton({ wave }: HeaderSearchButtonProps) {
     ? t(locale, "waves.drops.searchModal.inputLabel", { waveName: wave.name })
     : t(locale, "headerSearch.inputLabel");
   return (
-    <div className="tailwind-scope tw-self-center">
-      <button
+    <div className="tailwind-scope tw-flex tw-items-center tw-gap-0.5 tw-self-center">
+      <IconButton
         ref={buttonRef}
         type="button"
+        size={40}
+        variant={isApp ? "contrast" : "secondary"}
         disabled={!hasHydrated}
         aria-label={buttonLabel}
         title={buttonLabel}
         onClick={openContextSearch}
         onPointerEnter={preloadContextSearch}
         onFocus={preloadContextSearch}
-        className={clsx(
-          "tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-text-iron-300 tw-shadow-sm tw-transition tw-duration-200 hover:tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400",
-          isApp
-            ? "tw-bg-black"
-            : "tw-bg-iron-800 tw-ring-1 tw-ring-inset tw-ring-iron-700 hover:tw-bg-iron-700"
-        )}
       >
         <MagnifyingGlassIcon
           className="tw-size-5 tw-flex-shrink-0"
           strokeWidth={isApp ? 2 : 1.5}
         />
-      </button>
+      </IconButton>
+      {additionalMenuItems && (
+        <CompactMenu
+          aria-label={t(locale, "headerShare.social.more")}
+          disabled={!hasHydrated}
+          menuClassName="tailwind-scope"
+          menuWidthClassName="tw-w-56 tw-max-w-[calc(100vw-2rem)]"
+          itemClassName="tw-no-underline"
+          triggerAsChild
+          unstyledTrigger
+          trigger={
+            <button
+              type="button"
+              disabled={!hasHydrated}
+              className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+            >
+              <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
+            </button>
+          }
+          items={additionalMenuItems}
+        />
+      )}
 
       {wave && (
         <LazyWaveDropsSearchModal
