@@ -2273,6 +2273,85 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     expect(sandbox.requests).toEqual([]);
   });
 
+  test("fills the interactive submission preview below its banner when resized", async ({
+    page,
+  }, testInfo) => {
+    test.setTimeout(120000);
+    const hash = "A".repeat(43);
+    const url = `https://arweave.net/${hash}`;
+    const sandbox = await installCompetitionApi(page, false, true, MEMES_WAVE);
+    sandbox.onlyCompetition("alpha");
+    await sandbox.legacyPrimary("alpha");
+    // Keep validation and artwork loading local to this test.
+    await page.route("**/api/interactive-preview", (route) =>
+      route.fulfill({
+        json: { ok: true, finalUrl: url, contentType: "text/html" },
+      })
+    );
+    await page.route(`**/${hash}`, (route) =>
+      route.fulfill({
+        contentType: "text/html",
+        body: '<!doctype html><html lang="en"><title>Preview fixture</title><body style="margin:0;background:#12603c"><main style="position:fixed;inset:0;border:8px solid #5fff92;box-sizing:border-box">Full-height artwork fixture</main></body></html>',
+      })
+    );
+    await page.goto(`/waves/${MEMES_WAVE}?tab=leaderboard`, {
+      waitUntil: "domcontentloaded",
+      timeout: 60000,
+    });
+    await dismissNextDevTools(page);
+    await page.getByRole("button", { name: /^Submit (Work|Meme)/ }).click();
+    const modal = page.getByRole("dialog", {
+      name: "Submit Work to The Memes",
+      exact: true,
+    });
+    // This isolated fixture advances a draft; it never submits an artwork.
+    await modal.getByRole("button", { name: "Check terms agreement" }).click();
+    await modal
+      .getByRole("button", { name: "I Agree & Continue", exact: true })
+      .click();
+    await modal
+      .getByRole("tab", { name: "Interactive HTML", exact: true })
+      .click();
+    await modal.getByRole("tab", { name: "Arweave", exact: true }).click();
+    await modal
+      .getByRole("textbox", { name: "Content Hash or Path" })
+      .fill(hash);
+    const frame = modal.getByTitle(/^Interactive artwork preview:/);
+    await expect(frame).toBeVisible();
+    await expect(frame).toHaveAttribute("sandbox", "allow-scripts");
+    await expect(frame).toHaveAttribute("allow", "fullscreen");
+
+    for (const viewport of [
+      { width: 1280, height: 900 },
+      { width: 390, height: 844 },
+    ]) {
+      await page.setViewportSize(viewport);
+      await frame.scrollIntoViewIfNeeded();
+      await expect
+        .poll(() =>
+          frame.evaluate((element) => {
+            const bounds = element.getBoundingClientRect();
+            const slot = element.parentElement!.getBoundingClientRect();
+            return Math.max(
+              Math.abs(bounds.x - slot.x),
+              Math.abs(bounds.y - slot.y),
+              Math.abs(bounds.width - slot.width),
+              Math.abs(bounds.height - slot.height)
+            );
+          })
+        )
+        .toBeLessThanOrEqual(1);
+      const bounds = await frame.boundingBox();
+      expect(bounds!.height).toBeGreaterThan(150);
+      await expectNoHorizontalOverflow(page);
+      await testInfo.attach(`interactive-preview-${viewport.width}`, {
+        body: await modal.screenshot(),
+        contentType: "image/png",
+      });
+    }
+    expect(sandbox.requests).toEqual([]);
+  });
+
   test("shows saved Additional Action details and restores them for resubmission", async ({
     page,
   }, testInfo) => {

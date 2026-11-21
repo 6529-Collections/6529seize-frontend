@@ -251,7 +251,7 @@ const SandboxedExternalIframe: React.FC<SandboxedExternalIframeProps> = ({
   return (
     <div ref={containerRef} className={containerClasses}>
       {banner}
-      <div className="tw-min-h-0 tw-flex-1 tw-overflow-hidden">
+      <div className="tw-relative tw-min-h-0 tw-flex-1 tw-overflow-hidden">
         {isVisible ? (
           <iframe
             {...iframeProps}
