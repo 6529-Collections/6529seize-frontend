@@ -126,6 +126,12 @@ interface SecurityHeaderOptions {
    */
   readonly allowWasmUnsafeEval?: boolean | undefined;
   readonly webSocketEndpoint?: string | undefined;
+  /**
+   * This build's user-upload CDN (NEXT_PUBLIC_CLOUDFRONT_DOMAIN). Staging
+   * serves uploads from its own host; prod uses the prod CloudFront CDN, which
+   * the static lists already allow.
+   */
+  readonly userMediaEndpoint?: string | undefined;
   readonly sentryDsn?: string | undefined;
   /**
    * The bundle 6529 Desktop builds for its own local server: allow the Tauri
@@ -152,6 +158,9 @@ export function createSecurityHeaders(
   const configuredWebSocketSource = getConfiguredConnectSource(
     options.webSocketEndpoint,
     options.allowInsecureLocalhostConnectSrc
+  );
+  const configuredUserMediaSource = getConfiguredConnectSource(
+    options.userMediaEndpoint
   );
   const cspReportEndpoint = getSentrySecurityReportEndpoint(options.sentryDsn);
   const ipfsGatewaySources = IPFS_GATEWAY_CSP_SOURCES.join(" ");
@@ -209,6 +218,7 @@ export function createSecurityHeaders(
     "https://6529-artwork-documentation-987989283142-eu-west-1.s3.eu-west-1.amazonaws.com",
     "https://6529-artwork-documentation-987989283142-us-east-1.s3.us-east-1.amazonaws.com",
     "https://*.cloudfront.net",
+    configuredUserMediaSource,
     "https://videos.files.wordpress.com",
     // OpenSea NFT previews use the original video while processing is pending.
     "https://i2c.seadn.io",
@@ -241,6 +251,7 @@ export function createSecurityHeaders(
     "https://verify.walletconnect.org",
     "https://secure.walletconnect.com",
     "https://d3lqz0a4bldqgf.cloudfront.net",
+    configuredUserMediaSource,
     // Link-preview video embeds use youtube-nocookie.com; www.youtube.com is the
     // only other host the client-side embed allowlist accepts.
     "https://www.youtube-nocookie.com",
