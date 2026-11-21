@@ -508,6 +508,14 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     ).toHaveCount(0);
     await expect(page.getByText("Hide criteria and members")).toHaveCount(0);
 
+    await preview.click();
+    const members = page.getByRole("dialog", { name: "Network", exact: true });
+    await expect(
+      members.getByRole("heading", { name: "Network", exact: true })
+    ).toBeVisible();
+    await members.getByRole("button", { name: "Close", exact: true }).click();
+    await expect(members).toBeHidden();
+
     await filter.getByRole("button", { name: "Close", exact: true }).click();
     await expect(filter).toBeHidden();
     await expect(
@@ -546,17 +554,23 @@ test.describe("Public tools, calendar, and removed Groups route coverage @surfac
     await expect(
       page.getByRole("button", { name: "Open group filters (active)" })
     ).toBeVisible({ timeout: 30000 });
-    await expect(page.getByText("Selected group", { exact: true })).toBeVisible(
-      {
-        timeout: 30000,
-      }
-    );
+    const selectedGroup = page.getByRole("region", {
+      name: "Selected group",
+      exact: true,
+    });
+    await expect(
+      selectedGroup.getByText("Manual list:", { exact: true })
+    ).toBeVisible({ timeout: 30000 });
+    await expect(selectedGroup.getByRole("heading")).toHaveCount(0);
+    await expect(
+      selectedGroup.getByText("Selected group", { exact: true })
+    ).toHaveCount(0);
 
     // Clearing the group exercises the state transition back to null and
     // must drop the URL param.
-    const clearButton = page
-      .getByRole("button", { name: "Clear selected group" })
-      .filter({ visible: true });
+    const clearButton = selectedGroup.getByRole("button", {
+      name: "Clear selected group",
+    });
     await expect(clearButton).toBeVisible({ timeout: 15000 });
     await clearButton.click();
     await expect(page).toHaveURL(

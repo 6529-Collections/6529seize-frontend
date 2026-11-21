@@ -30,6 +30,8 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.de-DE.jso
 const RETRY_LABEL = "Erneut versuchen";
 
 export const DE_DE_MESSAGES = {
+  "rep.categories.validation.unavailable":
+    "Dieser Kategoriename ist nicht verfügbar. Versuche es mit einem anderen Namen.",
   "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
   "waves.discovery.activeSubmissions.one": "{count} aktive Einreichung",
   "waves.discovery.activeSubmissions.other": "{count} aktive Einreichungen",
@@ -905,7 +907,6 @@ export const DE_DE_MESSAGES = {
     "Aktuelle Zielgruppe nicht verfügbar",
   "waves.create.groups.members.view": "Mitglieder anzeigen",
   "waves.create.groups.members.previewDraft": "Treffer ansehen",
-  "waves.create.groups.members.dialogTitle": "{role}: {group}",
   "waves.create.groups.members.dynamicDescription":
     "Diese Live-Vorschau basiert auf aktuellen Profil-, Reputations- und Besitzdaten. Die Mitgliedschaft kann sich ändern.",
   "waves.create.groups.members.criteriaSummary":

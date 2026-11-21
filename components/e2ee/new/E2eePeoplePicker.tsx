@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import {
   CheckCircleIcon,
   ExclamationCircleIcon,
@@ -147,14 +149,15 @@ export function E2eePeoplePicker({
                     onRetry={() => onRetry(person.profileId)}
                   />
                 </div>
-                <button
+                <IconButton
                   type="button"
                   onClick={() => onRemove(person.profileId)}
                   aria-label={t(locale, "e2ee.new.remove", { name })}
-                  className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-bg-iron-800 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                  size={36}
+                  variant="ghost"
                 >
                   <XMarkIcon aria-hidden="true" className="tw-size-4" />
-                </button>
+                </IconButton>
               </li>
             );
           })}

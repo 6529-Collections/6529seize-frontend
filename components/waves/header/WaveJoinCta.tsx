@@ -6,7 +6,12 @@ import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { useAuth } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import {
+  COMPACT_ACTION_BUTTON_PADDING_CLASS,
+  COMPACT_ACTION_ICON_CLASS,
+  COMPACT_ACTION_ICON_STROKE_WIDTH,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveJoin } from "@/hooks/waves/useWaveJoin";
@@ -127,6 +132,14 @@ export default function WaveJoinCta({
 
   const waveName = wave.name;
   const sizeClasses = BUTTON_SIZE_CLASSES[variant];
+  const paddingClasses =
+    variant === "header" ? COMPACT_ACTION_BUTTON_PADDING_CLASS : "tw-px-2.5";
+  const iconClasses =
+    variant === "header"
+      ? COMPACT_ACTION_ICON_CLASS
+      : "tw-size-4 tw-flex-shrink-0";
+  const iconStrokeWidth =
+    variant === "header" ? COMPACT_ACTION_ICON_STROKE_WIDTH : 2;
 
   const handleJoin = async (viaKeyboard: boolean) => {
     const joined = await join();
@@ -167,12 +180,12 @@ export default function WaveJoinCta({
           className={clsx(
             "tw-inline-flex tw-flex-shrink-0 tw-items-center tw-justify-center tw-gap-x-1.5 tw-whitespace-nowrap tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-white/[0.05] tw-text-xs tw-font-semibold tw-text-iron-200 focus:tw-outline-none focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
             sizeClasses,
-            compact ? "tw-w-8 tw-p-0" : "tw-px-2.5"
+            compact ? "tw-w-8 tw-p-0" : paddingClasses
           )}
         >
           <CheckIcon
-            className="tw-size-4 tw-flex-shrink-0 tw-text-emerald-400"
-            strokeWidth={2}
+            className={`${iconClasses} tw-text-emerald-400`}
+            strokeWidth={iconStrokeWidth}
             aria-hidden="true"
           />
           <span className={compact ? "tw-sr-only" : undefined}>
@@ -211,15 +224,16 @@ export default function WaveJoinCta({
           void handleJoin(isKeyboardActivation(event.currentTarget));
         }}
         className={clsx(
-          "tw-px-2.5 tw-text-xs",
+          "tw-text-xs",
+          paddingClasses,
           sizeClasses,
           COMPACT_ACTION_TOUCH_TARGET_CLASS
         )}
       >
         {!isPending && (
           <PlusIcon
-            className="tw-size-4 tw-flex-shrink-0"
-            strokeWidth={2}
+            className={iconClasses}
+            strokeWidth={iconStrokeWidth}
             aria-hidden="true"
           />
         )}

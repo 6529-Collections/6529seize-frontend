@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { trapTabFocus } from "@/components/utils/modal/focusTrap";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import { WaveDropCreate } from "@/components/waves/leaderboard/create/WaveDropCreate";
@@ -9,6 +11,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 import { LazyMotion, domAnimation, m } from "framer-motion";
 import { useEffect, useId, useRef, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
+import useDialogKeyboard from "@/hooks/useDialogKeyboard";
 
 interface WaveChatSubmitDropModalProps {
   readonly isOpen: boolean;
@@ -22,9 +25,9 @@ const KEYBOARD_INSET = "var(--native-keyboard-inset-bottom, 0px)";
 const KEYBOARD_TRANSITION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
 const DIALOG_LAYOUT_STYLE: CSSProperties = {
-  height: `max(0px, calc(100% - ${KEYBOARD_INSET}))`,
-  transform: `translate3d(0, calc(0px - ${KEYBOARD_INSET}), 0)`,
-  transition: `height ${KEYBOARD_TRANSITION} ease-out, transform ${KEYBOARD_TRANSITION} ease-out`,
+  height: `var(--dialog-viewport-height, max(0px, calc(100% - ${KEYBOARD_INSET})))`,
+  bottom: KEYBOARD_INSET,
+  transition: `height ${KEYBOARD_TRANSITION} var(--native-keyboard-layout-transition-easing, ease-out), bottom ${KEYBOARD_TRANSITION} var(--native-keyboard-layout-transition-easing, ease-out)`,
 };
 
 function SubmitDropForm({
@@ -78,6 +81,7 @@ export function WaveChatSubmitDropModal({
   initialCurationUrl = null,
 }: WaveChatSubmitDropModalProps) {
   const canUseDOM = typeof document !== "undefined";
+  const keyboardViewportRef = useDialogKeyboard(isOpen);
   const titleId = useId();
   const dialogRef = useRef<HTMLDialogElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -174,6 +178,7 @@ export function WaveChatSubmitDropModal({
       />
       <LazyMotion features={domAnimation}>
         <div
+          ref={keyboardViewportRef}
           className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-z-10 tw-flex tw-items-end tw-justify-center tw-pt-[calc(env(safe-area-inset-top,0px)+1rem)] sm:tw-items-center sm:tw-px-4 sm:tw-pb-4"
           style={DIALOG_LAYOUT_STYLE}
         >
@@ -195,15 +200,16 @@ export function WaveChatSubmitDropModal({
               >
                 {title}
               </h2>
-              <button
+              <IconButton
                 ref={closeButtonRef}
                 type="button"
                 onClick={onClose}
-                className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-100"
+                size={36}
+                variant="outline"
                 aria-label="Close modal"
               >
                 <XMarkIcon className="tw-size-5 tw-flex-shrink-0" />
-              </button>
+              </IconButton>
             </div>
 
             <SubmitDropForm

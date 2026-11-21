@@ -82,10 +82,13 @@ function waitWhileEnrolling(
  * deadline; past it the status still reads "enrolling" (pending).
  */
 async function enrollGrantedDevice(
-  engine: E2eeEngine
+  engine: E2eeEngine,
+  resumeStored = false
 ): Promise<E2eeEngineStatus> {
   const deadline = Date.now() + ENROLLMENT_SETTLE_TIMEOUT_MS;
-  const enrolling = engine.enrollWithLoginGrant();
+  const enrolling = resumeStored
+    ? engine.enrollWithLoginGrant({ resumeStored: true })
+    : engine.enrollWithLoginGrant();
   // A late failure after the deadline is reported through the status.
   enrolling.catch(() => undefined);
   let timer: ReturnType<typeof setTimeout> | undefined;
@@ -150,6 +153,15 @@ async function needsNewDevice(engine: E2eeEngine): Promise<boolean> {
   }
 }
 
+function enrollmentOutcome(
+  status: E2eeEngineStatus | null,
+  grantSaved: boolean
+): CombinedTurnOnOutcome {
+  if (status !== null && SETTLED_STATUSES.includes(status)) return "done";
+  if (!grantSaved) return "fallback";
+  return status === "enrolling" ? "pending" : "partial";
+}
+
 /**
  * Combined setup grants this device's signing key and its
  * encrypted-messages key with one signature, with one expiry and one thing
@@ -165,16 +177,15 @@ export async function turnOnWithCombinedSignIn({
   requestGrant,
   onRegistering,
 }: CombinedTurnOnInput): Promise<CombinedTurnOnOutcome> {
-  if (
-    !address ||
-    !requestGrant ||
-    !isAnyDeviceGrantPossible(null) ||
-    !(await needsNewDevice(engine))
-  ) {
+  if (!address || !requestGrant || !isAnyDeviceGrantPossible(null)) {
     return "fallback";
   }
-  const replacedGrantId = await readReplacedGrantId(address);
-  const result = await requestGrant({ silent: true, encryptedMessages: true });
+  const newDevice = await needsNewDevice(engine);
+  const replacedGrantId = newDevice ? await readReplacedGrantId(address) : null;
+  const result = await requestGrant({
+    silent: true,
+    ...(newDevice ? { encryptedMessages: true } : {}),
+  });
   if (!result.success) {
     if (result.reason === "rejected") {
       return "declined";
@@ -184,6 +195,14 @@ export async function turnOnWithCombinedSignIn({
     // a failed login) lets the user choose separate setup explicitly.
     return result.reason === "context-changed" ? "stopped" : "fallback";
   }
+  if (!newDevice) {
+    // This key already has its wallet approval. Sign only for posts, then
+    // resume encryption without replacing its key/history or asking again.
+    // Keep its old signing grant: it may also authorize this encryption key.
+    onRegistering?.();
+    const status = await enrollGrantedDevice(engine, true);
+    return enrollmentOutcome(status, true);
+  }
   const e2ee = result.e2ee;
   if (!e2ee) {
     return "fallback";
@@ -192,7 +211,5 @@ export async function turnOnWithCombinedSignIn({
   if (e2ee.adopted && e2ee.grantSaved) onRegistering?.();
   const status = e2ee.adopted ? await enrollGrantedDevice(engine) : null;
   await revoked;
-  if (status !== null && SETTLED_STATUSES.includes(status)) return "done";
-  if (!e2ee.grantSaved) return "fallback";
-  return status === "enrolling" ? "pending" : "partial";
+  return enrollmentOutcome(status, e2ee.grantSaved);
 }

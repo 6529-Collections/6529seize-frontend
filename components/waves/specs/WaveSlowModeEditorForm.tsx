@@ -1,4 +1,4 @@
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import NativeSelect from "@/components/utils/select/NativeSelect";
 import {
   SLOW_MODE_UNITS,
   type SlowModeUnit,
@@ -56,23 +56,25 @@ export default function WaveSlowModeEditorForm({
           onFocus={(event) => event.currentTarget.select()}
           onChange={(event) => onValueChange(event.target.value)}
         />
-        <select
-          aria-label="Slow mode unit"
-          className={`${DROPDOWN_FIELD_CLASSES} tw-px-2.5 tw-py-2 tw-text-sm`}
-          disabled={disabled}
-          value={unit}
-          onChange={(event) => {
-            if (isSlowModeUnit(event.target.value)) {
-              onUnitChange(event.target.value);
-            }
-          }}
-        >
-          {SLOW_MODE_UNITS.map((slowModeUnit) => (
-            <option key={slowModeUnit} value={slowModeUnit}>
-              {slowModeUnit}
-            </option>
-          ))}
-        </select>
+        <div className="tw-shrink-0">
+          <NativeSelect
+            aria-label="Slow mode unit"
+            metrics={{ minHeight: 0, x: 10 }}
+            disabled={disabled}
+            value={unit}
+            onChange={(event) => {
+              if (isSlowModeUnit(event.target.value)) {
+                onUnitChange(event.target.value);
+              }
+            }}
+          >
+            {SLOW_MODE_UNITS.map((slowModeUnit) => (
+              <option key={slowModeUnit} value={slowModeUnit}>
+                {slowModeUnit}
+              </option>
+            ))}
+          </NativeSelect>
+        </div>
       </div>
 
       <WaveSettingEditorActions

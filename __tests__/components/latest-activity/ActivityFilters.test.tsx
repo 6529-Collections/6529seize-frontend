@@ -94,10 +94,10 @@ describe("ActivityFilters", () => {
   });
 
   describe("Responsive Layout", () => {
-    it("applies center alignment on mobile", () => {
+    it("applies start alignment on mobile", () => {
       const mobileProps = { ...mockProps, isMobile: true };
       const { wrapper } = renderFilters(mobileProps);
-      expect(wrapper).toHaveClass("tw-justify-center");
+      expect(wrapper).toHaveClass("tw-justify-start");
     });
 
     it("applies end alignment on desktop", () => {
@@ -115,7 +115,8 @@ describe("ActivityFilters", () => {
         "tw-w-auto",
         "tw-items-center",
         "tw-gap-4",
-        "tw-ml-auto"
+        "tw-max-w-full",
+        "tw-flex-wrap"
       );
     });
 

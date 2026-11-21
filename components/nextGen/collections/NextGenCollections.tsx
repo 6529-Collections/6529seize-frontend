@@ -1,7 +1,7 @@
 "use client";
 
 import Pagination from "@/components/pagination/Pagination";
-import FilterGridDropdown from "@/components/utils/select/dropdown/FilterGridDropdown";
+import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import { apiUrl } from "@/services/api/api-endpoints";
 import type { DBResponse } from "@/entities/IDBResponse";
 import type { NextGenCollection } from "@/entities/INextgen";
@@ -18,9 +18,18 @@ enum StatusFilter {
 }
 
 const STATUS_FILTER_ITEMS = [
-  { value: StatusFilter.LIVE, label: "Live" },
-  { value: StatusFilter.UPCOMING, label: "Upcoming" },
-  { value: StatusFilter.COMPLETED, label: "Completed" },
+  { key: "all", value: null, label: "All statuses" },
+  { key: StatusFilter.LIVE, value: StatusFilter.LIVE, label: "Live" },
+  {
+    key: StatusFilter.UPCOMING,
+    value: StatusFilter.UPCOMING,
+    label: "Upcoming",
+  },
+  {
+    key: StatusFilter.COMPLETED,
+    value: StatusFilter.COMPLETED,
+    label: "Completed",
+  },
 ] as const;
 
 const COLLECTION_SKELETONS = Array.from({ length: 6 }, (_, index) => index);
@@ -71,23 +80,23 @@ export default function NextGenCollections() {
 
   return (
     <section className="tw-py-6 sm:tw-py-8">
-      <div className="tw-flex tw-flex-col tw-gap-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+      <div className="tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
         <h1 className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-white sm:tw-text-3xl">
           Collections
         </h1>
-        <div className="tw-w-full sm:tw-w-56">
-          <FilterGridDropdown
-            filterLabel="Status"
-            triggerAriaLabel="Filter collections by status"
-            items={STATUS_FILTER_ITEMS}
-            selectedValue={selectedStatus}
-            allItemLabel="All statuses"
-            onSelect={(status) => {
-              setSelectedStatus(status);
-              setPage(1);
-            }}
-          />
-        </div>
+        <CommonDropdown
+          presentation="filter"
+          metrics={{ height: 40, left: 12, text: "xs" }}
+          filterLabel="Status"
+          triggerAriaLabel="Filter collections by status"
+          items={STATUS_FILTER_ITEMS}
+          activeItem={selectedStatus}
+          markCurrentItem
+          setSelected={(status) => {
+            setSelectedStatus(status);
+            setPage(1);
+          }}
+        />
       </div>
 
       <div

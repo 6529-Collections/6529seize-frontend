@@ -22,6 +22,7 @@ Header search, clock, and sidebar toggles use transparent, borderless icon
 buttons with a dark hover surface and visible blue keyboard focus. The open
 sidebar toggle stays blue. Create wave and Join keep white primary styling;
 Joined and other secondary actions retain their borders and dark surfaces.
+Pin and mute use matching compact dark button surfaces.
 
 ## User Journey
 
@@ -59,7 +60,7 @@ Joined and other secondary actions retain their borders and dark surfaces.
   Cancel. Chat, Links and Replies checkboxes use the shared dark styling.
 - In Curations, the section plus opens Create curation. A row gear offers
   management actions including Edit Curation. Both forms stay inside the same
-  mobile sheet or tablet panel, with inline group selection and Back to
+  mobile sheet or tablet panel, with inline criteria editing and Back to
   Configuration.
 - On tablet-sized layouts, the overlay side panel also keeps these editors
   inside the panel. Back or Escape returns to the selected information tab.

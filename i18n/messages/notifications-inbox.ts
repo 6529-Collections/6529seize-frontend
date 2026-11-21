@@ -1,4 +1,12 @@
 export const NOTIFICATIONS_INBOX_MESSAGES = {
+  "notifications.empty.title": "No notifications found",
+  "notifications.empty.description":
+    "Engage with the community and get started by {actions}",
+  "notifications.empty.actions": "{following} or {creating}!",
+  "notifications.empty.following": "following",
+  "notifications.empty.creating": "creating a Wave",
+  "notifications.empty.explore": "Explore Waves",
+  "notifications.empty.create": "Create a Wave",
   "notifications.inbox.title": "Notifications",
   "notifications.inbox.close": "Close notifications",
   "notifications.inbox.unread": "Unread",

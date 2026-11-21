@@ -99,7 +99,7 @@ function AppearanceForm({ onClose }: { readonly onClose: () => void }) {
           onChange={setDisplay}
         />
       </fieldset>
-      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800 tw-p-4 sm:tw-p-5">
+      <div className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06] tw-p-4 sm:tw-p-5">
         <CompetitionConfigSaveActions
           busy={editor.busy}
           error={editor.error}
@@ -117,7 +117,7 @@ export default function CompetitionAppearance() {
   const [open, setOpen] = useState(false);
   if (!editable) return null;
   return (
-    <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950">
+    <section className="tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950">
       <button
         type="button"
         aria-expanded={open}
@@ -140,7 +140,7 @@ export default function CompetitionAppearance() {
       <div
         id="competition-appearance"
         hidden={!open}
-        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-iron-800"
+        className="tw-border-x-0 tw-border-b-0 tw-border-t tw-border-solid tw-border-white/[0.06]"
       >
         {open && <AppearanceForm onClose={() => setOpen(false)} />}
       </div>

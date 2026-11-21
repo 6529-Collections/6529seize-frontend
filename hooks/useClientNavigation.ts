@@ -24,6 +24,7 @@ interface UseClientNavigationOptions<T, TOptions = undefined> {
    * Return true for fast client-side nav, false for router.push
    */
   readonly canUsePushState: (targetUrl: string, options?: TOptions) => boolean;
+  /** Keep source state until the route supplies its committed initialState. */
   readonly deferRouteState?: boolean;
 }
 
@@ -50,32 +51,35 @@ export function useClientNavigation<T, TOptions = undefined>({
   TOptions
 > {
   const router = useRouter();
-  const [state, setState] = useState<T>(initialState);
-
-  // Sync state when initialState changes (after router.push navigation)
-  useEffect(() => {
-    setState(initialState);
-  }, [initialState]);
+  const [navigation, setNavigation] = useState({
+    route: initialState,
+    value: initialState,
+  });
+  if (!deferRouteState && !Object.is(navigation.route, initialState)) {
+    setNavigation({ route: initialState, value: initialState });
+  }
+  // A history-only update can be immediate. A newly committed route owns its
+  // value directly, without copying it into state after a stale frame paints.
+  const state = deferRouteState ? initialState : navigation.value;
 
   // Sync with back/forward navigation
   useEffect(() => {
+    if (deferRouteState) return;
     if (globalThis.window === undefined) return;
 
     const { window: browserWindow } = globalThis;
     if (!browserWindow) return;
 
     const onPopState = () => {
-      setState(parseUrl());
+      setNavigation({ route: initialState, value: parseUrl() });
     };
 
     browserWindow.addEventListener("popstate", onPopState);
     return () => browserWindow.removeEventListener("popstate", onPopState);
-  }, [parseUrl]);
+  }, [deferRouteState, initialState, parseUrl]);
 
   const navigate = useCallback(
     (newState: T, options?: TOptions & { replace?: boolean | undefined }) => {
-      if (globalThis.window === undefined) return;
-
       const { window: browserWindow } = globalThis;
       if (!browserWindow) return;
 
@@ -84,26 +88,26 @@ export function useClientNavigation<T, TOptions = undefined>({
         browserWindow.location.pathname + browserWindow.location.search;
 
       if (currentUrl === target) {
-        setState(newState);
+        if (!deferRouteState)
+          setNavigation({ route: initialState, value: newState });
         return;
       }
 
       if (canUsePushState(target, options)) {
         const method = options?.replace ? "replaceState" : "pushState";
         browserWindow.history[method](null, "", target);
-        setState(newState);
+        // Next commits native-history URLs asynchronously too. Route-owned
+        // content must keep its source state until that URL reaches render.
+        if (!deferRouteState)
+          setNavigation({ route: initialState, value: newState });
+      } else if (options?.replace) {
+        // Router navigation keeps source state until the destination commits.
+        router.replace(target);
       } else {
-        // Route-owned views must remain on their committed wave until the new
-        // URL commits, otherwise destination content renders under the old tabs.
-        if (!deferRouteState) setState(newState);
-        if (options?.replace) {
-          router.replace(target);
-        } else {
-          router.push(target);
-        }
+        router.push(target);
       }
     },
-    [buildUrl, canUsePushState, deferRouteState, router]
+    [buildUrl, canUsePushState, deferRouteState, initialState, router]
   );
 
   return {

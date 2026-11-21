@@ -1,4 +1,9 @@
 "use client";
+import useDialogKeyboard, {
+  DIALOG_KEYBOARD_VIEWPORT_STYLE,
+} from "@/hooks/useDialogKeyboard";
+
+import IconButton from "@/components/utils/button/IconButton";
 
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,7 +19,9 @@ import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { t } from "@/i18n/messages";
-import GroupAssignmentPanel from "./GroupAssignmentPanel";
+import GroupAssignmentPanel, {
+  type GroupAssignmentDraftOptions,
+} from "./GroupAssignmentPanel";
 
 export default function GroupAssignmentDialog({
   title,
@@ -35,6 +42,7 @@ export default function GroupAssignmentDialog({
   disabled = false,
   allowGroupClear = true,
   showChooseGroup = true,
+  criteriaDraft,
   isWaveAccessEditor = false,
   embedded = false,
   onRetry,
@@ -60,19 +68,21 @@ export default function GroupAssignmentDialog({
   readonly disabled?: boolean;
   readonly allowGroupClear?: boolean;
   readonly showChooseGroup?: boolean;
+  readonly criteriaDraft?: GroupAssignmentDraftOptions | undefined;
   readonly isWaveAccessEditor?: boolean;
   /** The containing sheet supplies the title, scrolling and focus boundary. */
   readonly embedded?: boolean;
   readonly onRetry?: (() => void) | undefined;
   readonly onClose: () => void;
-  readonly onChange: (
-    group: ApiGroupFull | null
-  ) => void | boolean | Promise<void | boolean>;
-  readonly onCreateGroup: (
-    payload: ApiCreateGroup
-  ) => Promise<ApiGroupFull | null>;
+  readonly onChange?:
+    | ((group: ApiGroupFull | null) => void | boolean | Promise<void | boolean>)
+    | undefined;
+  readonly onCreateGroup?:
+    | ((payload: ApiCreateGroup) => Promise<ApiGroupFull | null>)
+    | undefined;
 }) {
   const locale = useBrowserLocale();
+  const keyboardViewportRef = useDialogKeyboard(!embedded);
   const modalRef = useRef<HTMLDialogElement>(null);
   const titleId = useId();
   const descriptionId = useId();
@@ -119,6 +129,7 @@ export default function GroupAssignmentDialog({
       selectedGroupCriteriaStatus={selectedGroupCriteriaStatus}
       allowGroupClear={allowGroupClear}
       showChooseGroup={showChooseGroup}
+      criteriaDraft={criteriaDraft}
       isWaveAccessEditor={isWaveAccessEditor}
       collapseOnClickAway={false}
       startMode={startMode}
@@ -181,7 +192,11 @@ export default function GroupAssignmentDialog({
     >
       <div className="tw-relative tw-z-50 tw-cursor-default">
         <div className="tw-fixed tw-inset-0 tw-bg-gray-950/75"></div>
-        <div className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto">
+        <div
+          ref={keyboardViewportRef}
+          style={DIALOG_KEYBOARD_VIEWPORT_STYLE}
+          className="tw-fixed tw-inset-0 tw-z-10 tw-overflow-y-auto"
+        >
           <div className="tw-flex tw-min-h-full tw-items-end tw-justify-center tw-px-0 tw-pt-8 tw-text-center sm:tw-items-center sm:tw-p-4">
             <dialog
               ref={modalRef}
@@ -207,15 +222,16 @@ export default function GroupAssignmentDialog({
                     {description}
                   </p>
                 </div>
-                <button
+                <IconButton
                   onClick={onClose}
                   type="button"
                   aria-label="Close dialog"
-                  className="tw-flex tw-size-9 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-p-0 tw-text-iron-400 tw-transition tw-duration-200 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-50"
+                  size={36}
+                  variant="ghost"
                 >
                   <span className="tw-sr-only">Close</span>
                   <FontAwesomeIcon icon={faXmark} className="tw-size-4" />
-                </button>
+                </IconButton>
               </div>
 
               <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-p-5 sm:tw-p-6">

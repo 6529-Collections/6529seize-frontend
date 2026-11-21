@@ -114,12 +114,12 @@ export function SummaryStat({
 }) {
   return (
     <div className="tw-min-w-0 tw-rounded-lg tw-bg-iron-800/35 tw-px-2.5 tw-py-2">
-      <p className="tw-mb-2 tw-mt-0 tw-text-[13px] tw-font-medium tw-normal-case tw-leading-5 tw-tracking-normal tw-text-iron-500">
+      <p className="tw-mb-2 tw-mt-0 tw-text-[13px] tw-font-normal tw-normal-case tw-leading-5 tw-tracking-normal tw-text-iron-500">
         {label}
       </p>
       <p
         title={value}
-        className={`tw-mb-0 tw-mt-0 tw-break-all tw-text-[13px] tw-font-semibold tw-tabular-nums ${toneClassName}`}
+        className={`tw-mb-0 tw-mt-0 tw-break-all tw-text-[13px] tw-font-semibold tw-normal-nums ${toneClassName}`}
       >
         {value}
       </p>
@@ -156,15 +156,15 @@ export function CategoryRow({
       }`}
     >
       <span className="tw-min-w-0">
-        <span className="tw-block tw-break-words tw-text-xs tw-font-semibold tw-leading-4 tw-text-iron-100">
+        <span className="tw-block tw-break-words tw-text-xs tw-font-medium tw-leading-4 tw-text-iron-100">
           {label}
         </span>
-        <span className="tw-mt-0.5 tw-block tw-text-[0.6875rem] tw-font-medium tw-leading-4 tw-text-iron-500">
+        <span className="tw-mt-0.5 tw-block tw-text-[0.6875rem] tw-font-normal tw-leading-4 tw-text-iron-500">
           {getContributorCountLabel(contributorCount)}
         </span>
       </span>
       <span
-        className={`tw-whitespace-nowrap tw-text-xs tw-font-semibold ${getRepTextClass(
+        className={`tw-whitespace-nowrap tw-text-xs tw-font-medium ${getRepTextClass(
           totalRep
         )}`}
       >
@@ -264,13 +264,17 @@ export function LogRow({
         <div className="tw-min-w-0">
           {raterHref ? (
             <Link
+              data-wave-typography="preserve"
               href={raterHref}
               className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-white tw-no-underline hover:tw-text-iron-300"
             >
               {rater}
             </Link>
           ) : (
-            <span className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-400">
+            <span
+              data-wave-typography="preserve"
+              className="tw-block tw-truncate tw-text-sm tw-font-semibold tw-text-iron-400"
+            >
               {rater}
             </span>
           )}

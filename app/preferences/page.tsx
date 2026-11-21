@@ -28,7 +28,12 @@ export default async function PreferencesPage({
   const resolvedSearchParams = await searchParams;
   const requestedTab = resolvedSearchParams?.tab;
   let activeTab: PreferencesTab = "notifications";
-  if (requestedTab === "blocked-profiles" || requestedTab === "content") {
+  if (requestedTab === "messages") {
+    activeTab = "messages";
+  } else if (
+    requestedTab === "blocked-profiles" ||
+    requestedTab === "content"
+  ) {
     activeTab = "blocked-profiles";
   } else if (requestedTab === "reports") {
     activeTab = "reports";

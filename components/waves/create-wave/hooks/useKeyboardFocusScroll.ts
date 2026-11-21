@@ -2,6 +2,7 @@
 
 import { useEffect, type RefObject } from "react";
 import useDeviceInfo from "@/hooks/useDeviceInfo";
+import { observeFocusedField } from "@/helpers/focused-field-visibility";
 
 const TEXT_ENTRY_SELECTOR =
   'input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]), textarea, [contenteditable="true"]';
@@ -56,6 +57,25 @@ export default function useKeyboardFocusScroll(
     const container = containerRef.current;
     if (!hasTouchScreen || !container) {
       return;
+    }
+    // The shared sheet already follows each keyboard layout frame. A second
+    // delayed smooth scroll would move the field again after the keyboard.
+    if (container.closest("[data-keyboard-scroll-container]")) return;
+
+    if (container.closest('[role="dialog"], dialog')) {
+      const focusedField = observeFocusedField(container, {
+        observeContentResize: true,
+      });
+      const viewport = globalThis.visualViewport;
+      viewport?.addEventListener("resize", focusedField.reveal);
+      viewport?.addEventListener("scroll", focusedField.reveal, {
+        passive: true,
+      });
+      return () => {
+        focusedField.disconnect();
+        viewport?.removeEventListener("resize", focusedField.reveal);
+        viewport?.removeEventListener("scroll", focusedField.reveal);
+      };
     }
 
     let timer: ReturnType<typeof setTimeout> | undefined;

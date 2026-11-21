@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import React, { useState, useEffect, useId } from "react";
 import { ApiWaveMetadataType } from "@/generated/models/ApiWaveMetadataType";
 import type { CreateDropMetadataType } from "./CreateDropContent";
@@ -151,17 +153,19 @@ const CreateDropMetadataRow: React.FC<CreateDropMetadataRowProps> = ({
         </div>
       </div>
       {!metadata.required && (
-        <button
+        <IconButton
           type="button"
           onClick={() => onRemove(index)}
           aria-label={t(locale, "waves.metadata.remove", {
             number: formatNumber(locale, index + 1),
           })}
           disabled={disabled}
-          className="tw-mt-[26px] tw-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-text-error focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-cursor-not-allowed disabled:tw-opacity-50"
+          size={44}
+          variant="ghost"
+          className="tw-mt-[26px]"
         >
           <TrashIcon aria-hidden="true" className="tw-size-4" />
-        </button>
+        </IconButton>
       )}
     </div>
   );

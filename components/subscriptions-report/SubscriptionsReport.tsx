@@ -1,6 +1,6 @@
 "use client";
 
-import { DROPDOWN_TRIGGER_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import styles from "./SubscriptionsReport.module.css";
 import {
   ACTIVE_REPORT_GRID_CLASS_NAME,
@@ -670,7 +670,7 @@ export default function SubscriptionsReportComponent() {
                       <select
                         id="redeemed-meme-subscription-season"
                         aria-label="Redeemed meme subscription counts season"
-                        className={`${DROPDOWN_TRIGGER_CLASSES} tw-h-11 tw-w-full tw-appearance-none tw-py-0 tw-pl-4 tw-pr-11 tw-text-sm ${isDownloadingCsv ? "tw-pointer-events-none tw-opacity-50" : ""} `}
+                        className={`${getDropdownTriggerClasses({ variant: "regular", metrics: { height: 44, y: 0, left: 16, right: 44, text: "sm" } })} tw-w-full tw-appearance-none ${isDownloadingCsv ? "tw-pointer-events-none tw-opacity-50" : ""} `}
                         value={selectedSeasonId}
                         onChange={(e) => {
                           setSelectedSeasonId(e.currentTarget.value);

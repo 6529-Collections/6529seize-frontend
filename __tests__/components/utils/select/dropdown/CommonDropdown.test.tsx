@@ -4,11 +4,6 @@ import CommonDropdown from "@/components/utils/select/dropdown/CommonDropdown";
 import type { CommonSelectItem } from "@/components/utils/select/CommonSelect";
 import { SortDirection } from "@/entities/ISort";
 
-// Mock dependencies
-jest.mock("framer-motion", () => ({
-  useAnimate: () => [{ current: document.createElement("div") }, jest.fn()],
-}));
-
 jest.mock(
   "@/components/utils/select/dropdown/CommonDropdownItemsWrapper",
   () => {
@@ -129,7 +124,11 @@ describe("CommonDropdown", () => {
 
     it("should render editorial variant as an inline label and value trigger", () => {
       render(
-        <CommonDropdown {...defaultProps} variant="editorial" showFilterLabel />
+        <CommonDropdown
+          {...defaultProps}
+          presentation="editorial"
+          showFilterLabel
+        />
       );
 
       const button = screen.getByRole("button", {
@@ -149,7 +148,11 @@ describe("CommonDropdown", () => {
 
     it("should render toolbar variant as a framed trigger", () => {
       render(
-        <CommonDropdown {...defaultProps} variant="toolbar" showFilterLabel />
+        <CommonDropdown
+          {...defaultProps}
+          presentation="toolbar"
+          showFilterLabel
+        />
       );
 
       const button = screen.getByRole("button", {
@@ -161,7 +164,7 @@ describe("CommonDropdown", () => {
         "tw-rounded-lg",
         "tw-bg-iron-900",
         "tw-ring-inset",
-        "tw-ring-white/10"
+        "tw-ring-white/[0.08]"
       );
       expect(screen.getByText("Test Filter:")).toHaveClass(
         "tw-font-medium",
@@ -192,7 +195,11 @@ describe("CommonDropdown", () => {
 
     it("should open editorial dropdown when the inline label/value trigger is clicked", () => {
       render(
-        <CommonDropdown {...defaultProps} variant="editorial" showFilterLabel />
+        <CommonDropdown
+          {...defaultProps}
+          presentation="editorial"
+          showFilterLabel
+        />
       );
 
       fireEvent.click(
@@ -212,7 +219,7 @@ describe("CommonDropdown", () => {
       render(
         <CommonDropdown
           {...defaultProps}
-          variant="editorial"
+          presentation="editorial"
           showFilterLabel
           menuMinWidth={320}
         />
@@ -242,13 +249,13 @@ describe("CommonDropdown", () => {
       expect(screen.queryByTestId("dropdown-items")).not.toBeInTheDocument();
     });
 
-    it.each(["default", "filter"] as const)(
+    it.each([undefined, "filter"] as const)(
       "should call setSelected when item is selected (%s)",
       (variant) => {
         const mockSetSelected = jest.fn();
         const props = { ...defaultProps, setSelected: mockSetSelected };
 
-        render(<CommonDropdown {...props} variant={variant} />);
+        render(<CommonDropdown {...props} presentation={variant} />);
 
         // Open dropdown
         fireEvent.click(screen.getByRole("button"));
@@ -273,6 +280,24 @@ describe("CommonDropdown", () => {
       expect(screen.queryByTestId("dropdown-items")).not.toBeInTheDocument();
     });
   });
+
+  it.each(["compact", "regular", "form"] as const)(
+    "keeps selection and close behavior with the shared %s variant",
+    (variant) => {
+      const setSelected = jest.fn();
+      render(
+        <CommonDropdown
+          {...defaultProps}
+          variant={variant}
+          setSelected={setSelected}
+        />
+      );
+      fireEvent.click(screen.getByRole("button"));
+      fireEvent.click(screen.getByTestId("dropdown-item-item2"));
+      expect(setSelected).toHaveBeenCalledWith("value2");
+      expect(screen.queryByTestId("dropdown-items")).not.toBeInTheDocument();
+    }
+  );
 
   describe("disabled state", () => {
     it("should render disabled button when disabled prop is true", () => {
@@ -307,7 +332,7 @@ describe("CommonDropdown", () => {
       expect(button).toHaveClass(
         "tw-bg-iron-900",
         "tw-font-medium",
-        "tw-ring-white/10"
+        "tw-ring-white/[0.08]"
       );
     });
 

@@ -89,8 +89,8 @@ describe("WaveleaderboardSort", () => {
       expect.objectContaining({
         activeItem: WaveDropsLeaderboardSort.TREND,
         filterLabel: "Sort",
-        size: "sm",
-        variant: "toolbar",
+        variant: "compact",
+        presentation: "toolbar",
         showFilterLabel: false,
       })
     );

@@ -1,10 +1,20 @@
 import React from "react";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { ApiProfileClassification } from "@/generated/models/ApiProfileClassification";
 import { ApiDropType } from "@/generated/models/ApiDropType";
 import WaveDropHeader from "@/components/waves/drops/WaveDropHeader";
 
 const mockDropAuthorBadges = jest.fn();
+const mockRouterPush = jest.fn();
+let mockNative = false;
+
+jest.mock("@capacitor/core", () => {
+  const actual = jest.requireActual("@capacitor/core");
+  return {
+    ...actual,
+    Capacitor: { ...actual.Capacitor, isNativePlatform: () => mockNative },
+  };
+});
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -17,7 +27,7 @@ jest.mock("next/link", () => ({
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
-    push: jest.fn(),
+    push: mockRouterPush,
   }),
 }));
 
@@ -84,6 +94,11 @@ jest.mock(
 );
 
 describe("WaveDropHeader", () => {
+  beforeEach(() => {
+    mockNative = false;
+    mockRouterPush.mockClear();
+  });
+  afterEach(() => window.history.replaceState(null, "", "/"));
   const createDrop = (
     handle: string | null,
     primaryAddress: string,
@@ -107,6 +122,47 @@ describe("WaveDropHeader", () => {
       drop_type: dropType,
       parts: [],
     }) as any;
+
+  it.each(["native-feed", "web-feed", "ordinary-wave", "dm"])(
+    "preserves the Wave-name link's return context for %s",
+    (mode) => {
+      mockNative = mode !== "web-feed";
+      window.history.replaceState(
+        null,
+        "",
+        mode === "ordinary-wave" ? "/waves/other" : "/waves?view=profile-feed"
+      );
+      const drop = createDrop(
+        "human",
+        "0xabc",
+        ApiProfileClassification.Pseudonym
+      );
+      drop.wave.chat = {
+        scope: { group: { is_direct_message: mode === "dm" } },
+      };
+      render(
+        <WaveDropHeader
+          drop={drop}
+          isStorm={false}
+          currentPartIndex={0}
+          partsCount={1}
+          showWaveInfo={true}
+        />
+      );
+      fireEvent.click(screen.getByRole("link", { name: "Wave Name" }));
+      const destination = new URL(
+        mockRouterPush.mock.calls[0][0],
+        window.location.origin
+      );
+      expect(destination.pathname).toBe(
+        mode === "dm" ? "/messages/wave-1" : "/waves/wave-1"
+      );
+      expect(destination.searchParams.get("returnTo")).toBe(
+        mode === "native-feed" ? "/waves?view=profile-feed" : null
+      );
+      expect(destination.searchParams.has("serialNo")).toBe(false);
+    }
+  );
 
   it("renders a robot emoji before the author name for AI profiles", () => {
     render(

@@ -3,7 +3,7 @@
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import ContentModerationDropActions from "@/components/content-moderation/ContentModerationDropActions";
 import ReportDropModal from "@/components/content-moderation/ReportDropModal";
-import { MobileVotingModal, VotingModal } from "@/components/voting";
+import { VotingModal } from "@/components/voting";
 import VotingModalButton from "@/components/voting/VotingModalButton";
 import { useVotingModalState } from "@/components/voting/useVotingModalState";
 import WaveDropActionsOpen from "@/components/waves/drops/WaveDropActionsOpen";
@@ -247,20 +247,14 @@ export const DefaultWaveLeaderboardDrop: React.FC<
       </div>
 
       {/* Voting modal */}
-      {!onVoteClick &&
-        (isMobileScreen ? (
-          <MobileVotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
-        ) : (
-          <VotingModal
-            drop={drop}
-            isOpen={isVoteModalOpen}
-            onClose={closeVoteModal}
-          />
-        ))}
+      {!onVoteClick && (
+        <VotingModal
+          drop={drop}
+          isOpen={isVoteModalOpen}
+          onClose={closeVoteModal}
+          preferMobile={isMobileScreen}
+        />
+      )}
 
       {/* Mobile menu slide-up */}
       {hasTouchScreen &&

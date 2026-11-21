@@ -164,7 +164,6 @@ describe("group member preview", () => {
     const target = {
       kind: "draft" as const,
       group: draftGroup,
-      name: "Network filter",
       summary:
         "TDH + xTDH at least 1,000 and xTDH grant for Art, Light and Life",
     };
@@ -221,7 +220,6 @@ describe("group member preview", () => {
         target={{
           kind: "draft",
           group: draftGroup,
-          name: "Only me",
           summary: "Only me",
         }}
         appearance="summary"
@@ -253,7 +251,7 @@ describe("group member preview", () => {
     );
 
     const dialog = screen.getByRole("dialog", {
-      name: "Who can vote: Collectors",
+      name: "Who can vote",
     });
     expect(dialog).toBeInTheDocument();
     expect(dialog).toHaveAttribute("data-z-index-class", "tw-z-[10000]");
@@ -262,6 +260,7 @@ describe("group member preview", () => {
       "200"
     );
     expect(await screen.findByText("alpha")).toBeInTheDocument();
+    expect(within(dialog).queryByText(group.name)).not.toBeInTheDocument();
     const membersList = screen.getByRole("list", {
       name: "Current group members",
     });
@@ -303,7 +302,6 @@ describe("group member preview", () => {
         target={{
           kind: "draft",
           group: draftGroup,
-          name: "Draft voters",
           summary: "1 rule",
         }}
         roleLabel="Who can vote"
@@ -311,6 +309,7 @@ describe("group member preview", () => {
       />
     );
 
+    expect(screen.getByRole("dialog", { name: "Who can vote" })).toBeVisible();
     expect(await screen.findByText("alpha")).toBeInTheDocument();
     expect(fetchGroupMembersPage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -334,7 +333,7 @@ describe("group member preview", () => {
 
     expect(await screen.findByText("alpha")).toBeInTheDocument();
     expect(
-      screen.getByRole("dialog", { name: "Visibility: Selected group" })
+      screen.getByRole("dialog", { name: "Visibility" })
     ).toBeInTheDocument();
     expect(
       screen.getByText(

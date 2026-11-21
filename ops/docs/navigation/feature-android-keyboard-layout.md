@@ -57,6 +57,11 @@ blank space.
 - AppKit wallet search on iOS and Android: the wallet sheet lifts by a capped
   amount while the keyboard is open, keeping search results reachable without
   forcing the sheet to the top of the screen.
+- Input sheets keep the focused field above the keyboard as it opens, changes
+  height, or closes. On iOS, the sheet follows the shared keyboard motion while
+  the page behind it keeps its position. Android follows the space already
+  provided by its app window. Mobile web sheets also fit the visible browser
+  viewport when the software keyboard opens.
 
 ## Edge Cases
 
@@ -77,7 +82,8 @@ blank space.
   closed-keyboard geometry instead of being treated as keyboard visibility.
 - If keyboard listeners are unavailable or fail, layout stays in non-keyboard
   state.
-- This behavior does not apply to desktop web or small-screen web sidebar layout.
+- Native bottom-navigation behavior does not apply to web layouts. Browser
+  input sheets still respond to the visible viewport.
 
 ## Failure and Recovery
 

@@ -1,17 +1,13 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import type { CompactMenuItem } from "@/components/compact-menu";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useRef, useState, type Ref } from "react";
 import { createPortal } from "react-dom";
-import {
-  WAVE_HEADER_ACTION_CLASSES,
-  WAVE_HEADER_ACTION_SURFACE_CLASSES,
-  WAVE_HEADER_COMPACT_ACTION_CLASSES,
-  WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES,
-} from "@/components/brain/left-sidebar/waves/WaveHeaderActions";
 
 const COMPACT_ACTION_CLASSES =
   "tw-flex tw-min-h-12 tw-w-full tw-select-none tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-text-base tw-font-semibold tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
@@ -132,7 +128,7 @@ export default function CompactWaveActions({
 
   return (
     <>
-      <button
+      <IconButton
         type="button"
         ref={triggerRef}
         aria-label="More wave actions"
@@ -140,22 +136,10 @@ export default function CompactWaveActions({
         aria-expanded={isOpen}
         data-compact-wave-actions-trigger="true"
         onClick={() => setIsOpen(true)}
-        className={
-          compactTrigger
-            ? WAVE_HEADER_COMPACT_ACTION_CLASSES
-            : WAVE_HEADER_ACTION_CLASSES
-        }
+        layout={compactTrigger ? "toolbar-compact" : "toolbar"}
       >
-        <span
-          className={
-            compactTrigger
-              ? WAVE_HEADER_COMPACT_ACTION_SURFACE_CLASSES
-              : WAVE_HEADER_ACTION_SURFACE_CLASSES
-          }
-        >
-          <EllipsisVerticalIcon className="tw-size-5 tw-flex-shrink-0" />
-        </span>
-      </button>
+        <EllipsisVerticalIcon className="tw-size-5 tw-flex-shrink-0" />
+      </IconButton>
       {sheet}
     </>
   );

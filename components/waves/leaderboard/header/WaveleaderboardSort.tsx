@@ -239,8 +239,8 @@ export const WaveleaderboardSort: React.FC<WaveleaderboardSortProps> = ({
             isTrusted
           );
         }}
-        size="sm"
-        variant="toolbar"
+        variant="compact"
+        presentation="toolbar"
         showFilterLabel={false}
         buttonDataAttributes={waveFeatureAttributes("leaderboard_sort", "menu")}
       />

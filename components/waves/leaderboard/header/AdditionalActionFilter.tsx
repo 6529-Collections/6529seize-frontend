@@ -2,6 +2,7 @@
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import { getButtonSizeClasses } from "@/components/utils/button/buttonStyles";
 
 export function AdditionalActionFilter({
   checked,
@@ -13,10 +14,10 @@ export function AdditionalActionFilter({
   const locale = useBrowserLocale();
   return (
     <label
-      className={`tw-relative tw-m-0 tw-inline-flex tw-h-[38px] tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-text-xs tw-font-medium tw-leading-5 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-150 [&:has(:focus-visible)]:tw-outline [&:has(:focus-visible)]:tw-outline-2 [&:has(:focus-visible)]:tw-outline-offset-2 [&:has(:focus-visible)]:tw-outline-amber-300/80 ${
+      className={`${getButtonSizeClasses("xs")} tw-relative tw-m-0 tw-inline-flex tw-max-w-full tw-cursor-pointer tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-rounded-lg tw-font-medium tw-leading-5 tw-ring-1 tw-ring-inset tw-transition-colors tw-duration-150 lg:tw-h-[38px] [&:has(:focus-visible)]:tw-outline [&:has(:focus-visible)]:tw-outline-2 [&:has(:focus-visible)]:tw-outline-offset-2 [&:has(:focus-visible)]:tw-outline-amber-300/80 ${
         checked
-          ? "tw-bg-amber-400/[0.08] tw-pl-[11px] tw-pr-[13px] tw-text-amber-300 tw-ring-amber-300/30 desktop-hover:hover:tw-bg-amber-400/[0.12] desktop-hover:hover:tw-ring-amber-300/40"
-          : "tw-bg-iron-950 tw-px-[13px] tw-text-iron-400 tw-ring-white/[0.07] desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-300"
+          ? "tw-bg-amber-400/[0.08] tw-text-amber-300 tw-ring-amber-300/30 desktop-hover:hover:tw-bg-amber-400/[0.12] desktop-hover:hover:tw-ring-amber-300/40 lg:tw-pl-[11px] lg:tw-pr-[13px]"
+          : "tw-bg-iron-950 tw-text-iron-400 tw-ring-white/[0.07] desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-iron-300 lg:tw-px-[13px]"
       }`}
     >
       <input

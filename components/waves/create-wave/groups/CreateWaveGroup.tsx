@@ -242,7 +242,6 @@ export default function CreateWaveGroup({
       ? {
           kind: "draft" as const,
           group: getOnlyMeGroupDescription(connectedProfile.primary_wallet),
-          name: defaultLabel,
           summary: defaultLabel,
         }
       : undefined;
