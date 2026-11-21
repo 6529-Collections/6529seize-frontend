@@ -1,5 +1,6 @@
 import { defineConfig, devices } from "@playwright/test";
 import * as dotenv from "dotenv";
+import { CHROMIUM_SANDBOX } from "./tests/support/chromiumSandbox";
 
 dotenv.config(); // Loads variables from .env
 dotenv.config({ path: ".env.test" }); // Overrides or adds variables from .env
@@ -61,6 +62,7 @@ const config = defineConfig({
   use: {
     baseURL,
     trace: isRemoteReadonlyBaseURL ? "off" : "on-first-retry",
+    launchOptions: { chromiumSandbox: CHROMIUM_SANDBOX },
   },
   projects: [
     {
