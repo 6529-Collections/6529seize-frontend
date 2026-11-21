@@ -1,5 +1,7 @@
+import { checkDesktopUpdates } from "@/lib/desktop/checkDesktopUpdates";
 import {
   __resetDesktopAutoUpdateForTests,
+  checkDesktopUpdateNow,
   getDesktopAutoUpdate,
   restartDesktopToUpdate,
   setDesktopUpdateSettings,
@@ -68,6 +70,52 @@ describe("desktopUpdateState", () => {
     Reflect.deleteProperty(window, "api");
     Reflect.deleteProperty(window, "nativeAuth");
     Reflect.deleteProperty(window, "updater");
+  });
+
+  it("joins a check in flight on Check now and answers each time", async () => {
+    const channels = {
+      available: new Set<Listener>(),
+      notAvailable: new Set<Listener>(),
+      error: new Set<Listener>(),
+    };
+    const on = (set: Set<Listener>) => (cb: Listener) => set.add(cb);
+    const off = (set: Set<Listener>) => (cb: Listener) => set.delete(cb);
+    const updater = {
+      checkUpdates: jest.fn(),
+      onUpdateAvailable: on(channels.available),
+      offUpdateAvailable: off(channels.available),
+      onUpdateNotAvailable: on(channels.notAvailable),
+      offUpdateNotAvailable: off(channels.notAvailable),
+      onUpdateError: on(channels.error),
+      offUpdateError: off(channels.error),
+    };
+    Object.defineProperty(window, "updater", {
+      configurable: true,
+      value: updater,
+    });
+    Object.defineProperty(window, "api", {
+      configurable: true,
+      value: { openExternal: jest.fn(), getInfo: jest.fn() },
+    });
+    Object.defineProperty(window, "nativeAuth", {
+      configurable: true,
+      value: { sessionLogin: jest.fn() },
+    });
+
+    // The startup check is still waiting for the app's answer.
+    const startup = checkDesktopUpdates(updater as never);
+    checkDesktopUpdateNow();
+    expect(updater.checkUpdates).toHaveBeenCalledTimes(1);
+
+    channels.notAvailable.forEach((cb) => cb({}));
+    await expect(startup).resolves.toBe("current");
+    expect(channels.notAvailable.size).toBe(0);
+
+    // Answered: the next Check now asks again.
+    checkDesktopUpdateNow();
+    expect(updater.checkUpdates).toHaveBeenCalledTimes(2);
+    channels.available.forEach((cb) => cb({}));
+    expect(channels.available.size).toBe(0);
   });
 
   it("is unsupported on the web", () => {

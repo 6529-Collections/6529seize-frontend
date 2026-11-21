@@ -1,4 +1,5 @@
 import { getDesktopShellApi, getDesktopUpdater } from "@/helpers/desktop-shell";
+import { checkDesktopUpdates } from "@/lib/desktop/checkDesktopUpdates";
 import {
   type DesktopUpdateState,
   parseDesktopUpdateState,
@@ -129,9 +130,13 @@ export const getDesktopAutoUpdate = (): DesktopAutoUpdateSnapshot => snapshot;
 export const getServerDesktopAutoUpdate = (): DesktopAutoUpdateSnapshot =>
   DETECTING;
 
-/** "Check now". */
+/**
+ * "Check now". Joins a check already in flight (the startup check), since
+ * the app broadcasts each answer; the new state arrives as a state event.
+ */
 export function checkDesktopUpdateNow(): void {
-  getDesktopUpdater()?.checkUpdates();
+  const updater = getDesktopUpdater();
+  if (updater) void checkDesktopUpdates(updater);
 }
 
 const MAX_REASON = 300;
