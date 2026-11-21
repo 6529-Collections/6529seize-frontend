@@ -248,6 +248,9 @@ async function phoneUpdates(
   const first = (value: number | null, now: boolean): number | null =>
     value ?? (now ? minutes() : null);
   for (let step = 0; step <= maxMinutes; step += 1) {
+    // The first pass can move the clock by the updated client's 15 s
+    // initial-inbox wait (E2EE_INITIAL_INBOX_WAIT_MS), so an upload made as
+    // the client starts reads as under one minute, not exactly zero.
     await settle(world);
     timeline.capableKeyPackages = first(
       timeline.capableKeyPackages,
@@ -320,7 +323,7 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
     // The phone replaces its last-resort KeyPackage as it starts, waits
     // two minutes to be added, then makes its own self group with the
     // laptop, whose KeyPackages are capable: one claim.
-    expect(timeline.capableKeyPackages).toBe(0);
+    expect(timeline.capableKeyPackages).toBeLessThan(1);
     expect(timeline.sharedGroup ?? Infinity).toBeLessThanOrEqual(4);
     expect(timeline.readStateSynced ?? Infinity).toBeLessThanOrEqual(4);
     expect(timeline.claimsPerHour[0]).toBeLessThanOrEqual(SELF_GROUP_BUDGET);
@@ -348,7 +351,7 @@ describe("E2EE engine: read sync after a device updates (D175, P60)", () => {
 
     const g = await readOnLaptop(world, laptop);
     const timeline = await phoneUpdates(world, alice, laptop, phone, g, 30);
-    expect(timeline.capableKeyPackages).toBe(0);
+    expect(timeline.capableKeyPackages).toBeLessThan(1);
     // The phone replaced its older queue as it started (replace_one_time),
     // so one claim of it returns a capable KeyPackage: measured 3.6 minutes
     // (claiming through a full older queue took about two hours).
