@@ -10,6 +10,10 @@ import { MEMES_CONTRACT } from "@/constants/constants";
 import type { ApiWaveCreditNft } from "@/generated/models/ApiWaveCreditNft";
 import { commonApiFetch } from "@/services/api/common-api";
 import { CREATE_WAVE_VALIDATION_ERROR } from "@/helpers/waves/create-wave.validation";
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  getDropdownOptionStateClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
 const MEMES_CONTRACT_LOWER = MEMES_CONTRACT.toLowerCase();
 
@@ -150,14 +154,16 @@ function MemeCardSearch({
           <button
             type="button"
             onClick={() => handleSelect(item)}
-            className="tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-md tw-border-0 tw-bg-transparent tw-px-3 tw-py-2 tw-text-left tw-text-sm tw-text-iron-100 hover:tw-bg-iron-800 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400"
+            className={`tw-flex tw-w-full tw-items-center tw-justify-between tw-gap-3 tw-rounded-lg tw-border-0 tw-px-3 tw-py-2 tw-text-left tw-text-sm focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 ${getDropdownOptionStateClasses(isSelected)}`}
             aria-label={`Add The Memes #${item.id}`}
           >
             <span className="tw-truncate">
               #{item.id} - {item.name}
             </span>
             {isSelected && (
-              <span className="tw-shrink-0 tw-text-xs tw-font-semibold tw-text-primary-300">
+              <span
+                className={`tw-shrink-0 tw-text-xs tw-font-semibold ${DROPDOWN_CHECKMARK_CLASSES}`}
+              >
                 Selected
               </span>
             )}
@@ -195,7 +201,7 @@ function MemeCardSearch({
       />
       {isOpen && searchCriteria.trim().length > 0 && (
         <div className="tw-absolute tw-left-0 tw-right-0 tw-top-full tw-z-20 tw-mt-2 tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900 tw-shadow-xl">
-          <ul className="tw-m-0 tw-max-h-56 tw-list-none tw-overflow-y-auto tw-p-1">
+          <ul className="tw-m-0 tw-max-h-56 tw-list-none tw-space-y-0.5 tw-overflow-y-auto tw-p-1">
             {searchResultItems}
           </ul>
         </div>

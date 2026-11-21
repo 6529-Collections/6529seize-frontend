@@ -58,7 +58,9 @@ export function CompactMenuItemsPanel({
   );
 
   return (
-    <div className={clsx("tw-flex tw-flex-col", itemsWrapperClassName)}>
+    <div
+      className={clsx("tw-flex tw-flex-col tw-gap-0.5", itemsWrapperClassName)}
+    >
       {header !== undefined && header !== null && (
         <div className={headerClassName}>{header}</div>
       )}
@@ -86,6 +88,9 @@ export function CompactMenuItemsPanel({
             key={item.id}
             item={item}
             isActive={isActive}
+            isSelectionItem={
+              activeItemId !== undefined || item.active !== undefined
+            }
             onClick={() => handleItemClick(item)}
             itemClassName={itemClassName}
             activeItemClassName={activeItemClassName}

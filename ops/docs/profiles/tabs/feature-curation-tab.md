@@ -58,7 +58,8 @@ leave without submitting. Their desktop dialogs also offer Cancel.
 - **No eligible public Wave:** guided Curation setup is the primary action;
   `Advanced Wave setup` remains available for custom Wave configuration.
 - **No Curation in the selected source:** `Create curation` opens the compact
-  name flow, with Group permissions under `Advanced permissions`.
+  name flow, with curator criteria under `Advanced permissions`. Select
+  `Edit criteria` to adjust who can curate.
 - **Empty Curation:** `Add your first post` opens the post composer.
 - **Existing post:** from its Wave menu, choose `Manage curations`, then add or
   remove the post from an eligible named Curation.

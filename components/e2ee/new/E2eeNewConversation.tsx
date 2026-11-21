@@ -1,14 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getEncryptedMessagesRoute } from "@/helpers/navigation.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  clearE2eeComposePrefill,
-  peekE2eeComposePrefill,
-} from "../e2eeComposePrefill";
+import { useE2eeComposePrefill } from "../e2eeComposePrefill";
 import { E2eeRouteGate } from "../gate/E2eeRouteGate";
 import { E2eePageShell } from "../ui/E2eePageShell";
 import { NewMessageForm } from "./NewMessageForm";
@@ -17,11 +13,7 @@ import { NewMessageForm } from "./NewMessageForm";
 export function E2eeNewConversation() {
   const locale = useBrowserLocale();
   const router = useRouter();
-  const [prefill] = useState(() => peekE2eeComposePrefill());
-
-  useEffect(() => {
-    clearE2eeComposePrefill();
-  }, []);
+  const prefill = useE2eeComposePrefill("dm");
 
   return (
     <E2eePageShell

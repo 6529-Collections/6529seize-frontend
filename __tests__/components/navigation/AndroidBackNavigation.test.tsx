@@ -162,12 +162,23 @@ it("unwinds information navigation before leaving the wave", () => {
 
 it.each([
   ["/waves/wave-a", false],
+  ["/waves?view=profile-feed", false],
   ["/messages/wave-a", true],
 ] as const)("returns %s to its corresponding list", (path, isDm) => {
   globalThis.history.replaceState(null, "", path);
   render(<AndroidBackNavigation />);
   back();
   expect(mockExitWave).toHaveBeenCalledWith(isDm);
+  expect(mockMinimize).not.toHaveBeenCalled();
+});
+
+it("returns Feed to Waves before following history to another section", () => {
+  globalThis.history.replaceState(null, "", "/waves?view=profile-feed");
+  mockHistory.canGoBack = true;
+  render(<AndroidBackNavigation />);
+  back();
+  expect(mockExitWave).toHaveBeenCalledWith(false);
+  expect(mockGoBack).not.toHaveBeenCalled();
   expect(mockMinimize).not.toHaveBeenCalled();
 });
 
@@ -199,14 +210,17 @@ it.each([
   expect(mockMinimize).not.toHaveBeenCalled();
 });
 
-it("returns to the wave list even without the optional stream provider", () => {
-  mockStream = null;
-  globalThis.history.replaceState(null, "", "/waves/wave-a");
-  render(<AndroidBackNavigation />);
-  back();
-  expect(mockReplace).toHaveBeenCalledWith("/waves");
-  expect(mockExitWave).not.toHaveBeenCalled();
-});
+it.each(["/waves/wave-a", "/waves?view=profile-feed"])(
+  "returns %s to Waves even without the optional stream provider",
+  (path) => {
+    mockStream = null;
+    globalThis.history.replaceState(null, "", path);
+    render(<AndroidBackNavigation />);
+    back();
+    expect(mockReplace).toHaveBeenCalledWith("/waves");
+    expect(mockExitWave).not.toHaveBeenCalled();
+  }
+);
 
 it("provides an in-app fallback for a direct profile link without app history", () => {
   globalThis.history.replaceState(null, "", "/profile-a");

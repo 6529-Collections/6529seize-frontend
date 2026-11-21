@@ -1,4 +1,3 @@
-import FilterButton from "@/components/utils/button/FilterButton";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { MemesSort } from "@/types/enums";
@@ -17,8 +16,8 @@ export default function TheMemesSortButton(
   const label = getMemesSortLabel(props.sort, props.locale);
 
   return (
-    <FilterButton
-      selected={isActive}
+    <button
+      type="button"
       aria-pressed={isActive}
       aria-label={t(props.locale, "theMemes.sorting.sortButtonLabel", {
         sort: label,
@@ -27,6 +26,6 @@ export default function TheMemesSortButton(
       className={getMemesSortButtonClasses(isActive)}
     >
       {label}
-    </FilterButton>
+    </button>
   );
 }

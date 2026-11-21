@@ -1,7 +1,7 @@
 "use client";
 
 import type { Dispatch, FC, SetStateAction } from "react";
-import { useId, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
 import {
@@ -14,15 +14,15 @@ import SingleWaveDropVoteSubmit from "./SingleWaveDropVoteSubmit";
 import SingleWaveDropVoteSlider from "./SingleWaveDropVoteSlider";
 import { SingleWaveDropVoteInput } from "./SingleWaveDropVoteInput";
 import { SingleWaveDropVoteStats } from "./SingleWaveDropVoteStats";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faExchange } from "@fortawesome/free-solid-svg-icons";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { useSingleWaveDropVoteState } from "./useSingleWaveDropVoteState";
 import { useSingleWaveDropVoteRationale } from "./useSingleWaveDropVoteRationale";
-import styles from "./VoteButton.module.css";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import { VotePanel } from "@/components/voting/VotePanel";
+import { VoteModeControl } from "@/components/voting/VoteModeControl";
+import { VoteRationaleControl } from "@/components/voting/VoteRationaleControl";
+import { VOTE_INPUT_AREA_CLASSES } from "@/components/voting/VoteControl.styles";
 
 interface SingleWaveDropVoteContentProps {
   readonly drop: ApiDrop;
@@ -94,42 +94,6 @@ const getInitialVoteMode = (
   return "slider";
 };
 
-const getNextVoteMode = (isSliderMode: boolean): SingleWaveDropVoteMode => {
-  if (isSliderMode) {
-    return "numeric";
-  }
-
-  return "slider";
-};
-
-const getExchangeIconFlip = (
-  isSliderMode: boolean
-): "horizontal" | "vertical" => {
-  if (isSliderMode) {
-    return "horizontal";
-  }
-
-  return "vertical";
-};
-
-const getVoteModeLabels = (
-  locale: SupportedLocale,
-  isSliderMode: boolean
-): { readonly title: string; readonly ariaLabel: string } => ({
-  title: t(
-    locale,
-    isSliderMode
-      ? "waves.voteMode.switchToNumeric"
-      : "waves.voteMode.switchToSlider"
-  ),
-  ariaLabel: t(
-    locale,
-    isSliderMode
-      ? "waves.voteMode.switchToNumericAriaLabel"
-      : "waves.voteMode.switchToSliderAriaLabel"
-  ),
-});
-
 const VoteModeField: FC<VoteModeFieldProps> = ({
   isSliderMode,
   voteValue,
@@ -197,13 +161,10 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     uncontrolledVoteMode,
     setUncontrolledVoteMode,
   });
-  const hasExternalVoteModeControl = voteModeControl.isControlled;
-  const showInternalVoteModeControl = hasExternalVoteModeControl === false;
+  const showInternalVoteModeControl = !voteModeControl.isControlled;
   const currentVoteMode = voteModeControl.value;
   const setCurrentVoteMode = voteModeControl.setValue;
   const isSliderMode = currentVoteMode === "slider";
-  const { title: switchModeTitle, ariaLabel: switchModeAriaLabel } =
-    getVoteModeLabels(locale, isSliderMode);
 
   const voteLabel =
     WAVE_VOTING_LABELS[displayDrop.wave.voting_credit_type] || "votes";
@@ -216,12 +177,6 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     voteTotal: rationaleVoteTotal,
     voteChange: rationaleVoteTotal - currentVoteValue,
   });
-  const rationaleTextareaId = useId();
-  const rationalePanelId = useId();
-  const rationaleSwitchId = useId();
-  const rationaleSwitchLabelId = useId();
-  const rationaleDescriptionId = useId();
-  const rationaleValidationId = useId();
   const canPostRationale =
     displayDrop.wave.authenticated_user_eligible_to_chat === true;
   const shouldPostRationale =
@@ -229,9 +184,6 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
   // The voter can delete the generated prefix while the reply switch stays on.
   const isRationaleEmpty = voteRationale.rationaleText.trim().length === 0;
   const showRationaleValidation = shouldPostRationale && isRationaleEmpty;
-  const rationaleDescriptionIds = showRationaleValidation
-    ? `${rationaleDescriptionId} ${rationaleValidationId}`
-    : rationaleDescriptionId;
   const rationaleSubmitBlockReason = showRationaleValidation
     ? t(locale, "waves.voteRationale.emptyBlockReason")
     : submitBlockReason;
@@ -256,239 +208,73 @@ export const SingleWaveDropVoteContent: FC<SingleWaveDropVoteContentProps> = ({
     void submitRef.current?.handleClick();
   };
 
-  if (size === SingleWaveDropVoteSize.MINI) {
-    return (
-      <fieldset className="tw-m-0 tw-min-w-0 tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-bg-[#1A1A1F] tw-px-2 tw-py-1.5">
-        <legend className="tw-sr-only">
-          {t(locale, "waves.vote.controlsLegend")}
-        </legend>
-        <div className="tw-flex tw-items-center tw-gap-x-2">
-          <button
-            type="button"
-            onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
-            className="tw-flex tw-h-8 tw-w-8 tw-flex-shrink-0 tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-white/[0.06] tw-font-medium tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-bg-white/[0.1] desktop-hover:hover:tw-text-white"
-            title={switchModeTitle}
-            aria-label={switchModeAriaLabel}
-          >
-            <FontAwesomeIcon
-              icon={faExchange}
-              className="tw-size-3 tw-flex-shrink-0 tw-text-current"
-              flip={getExchangeIconFlip(isSliderMode)}
-            />
-          </button>
-
-          <div className="tw-h-8 tw-min-w-0 tw-flex-1">
-            <VoteModeField
-              isSliderMode={isSliderMode}
-              voteValue={voteValue}
-              minRating={minRating}
-              maxRating={maxRating}
-              label={voteLabel}
-              setVoteValue={setVoteValue}
-              onValueAccepted={handleSliderValueAccepted}
-              onSubmit={handleSubmit}
-              size={size}
-            />
-          </div>
-
-          <div className="tw-h-8 tw-flex-shrink-0">
-            <SingleWaveDropVoteSubmit
-              drop={displayDrop}
-              newRating={submitVoteValue}
-              voteLabel={voteLabel}
-              ref={submitRef}
-              onVoteApplied={handleSubmitVoteApplied}
-              onVoteSuccess={onVoteSuccess}
-              onVoteRequestStarted={onVoteRequestStarted}
-              submissionMode={submissionMode}
-              size={size}
-              submitBlockReason={submitBlockReason}
-            />
-          </div>
-        </div>
-
-        <div className="tw-mt-3">
-          <SingleWaveDropVoteStats
-            currentRating={currentVoteValue}
+  const isMini = size === SingleWaveDropVoteSize.MINI;
+  const controlVariant = isMini ? "compact" : "default";
+  return (
+    <VotePanel
+      mode={currentVoteMode}
+      variant={controlVariant}
+      modeControl={
+        showInternalVoteModeControl ? (
+          <VoteModeControl
+            value={currentVoteMode}
+            onChange={setCurrentVoteMode}
+          />
+        ) : undefined
+      }
+    >
+      <div
+        data-vote-input-area
+        className={`tw-flex tw-min-w-0 tw-flex-col tw-justify-center ${VOTE_INPUT_AREA_CLASSES[controlVariant]}`}
+      >
+        <div className={isSliderMode && isMini ? "tw-pt-8" : undefined}>
+          <VoteModeField
+            isSliderMode={isSliderMode}
+            voteValue={voteValue}
+            minRating={minRating}
             maxRating={maxRating}
+            setVoteValue={setVoteValue}
+            onValueAccepted={handleSliderValueAccepted}
+            onSubmit={handleSubmit}
             label={voteLabel}
-            creditScope={creditScope}
-            subtle={true}
+            size={size}
           />
         </div>
-      </fieldset>
-    );
-  }
-
-  return (
-    <fieldset className="tw-m-0 tw-min-w-0 tw-space-y-4 tw-border-0 tw-p-0">
-      <legend className="tw-sr-only">
-        {t(locale, "waves.vote.controlsLegend")}
-      </legend>
-      <div className={isSliderMode ? undefined : "tw-min-h-[92px]"}>
-        <VoteModeField
-          isSliderMode={isSliderMode}
-          voteValue={voteValue}
-          minRating={minRating}
-          maxRating={maxRating}
-          setVoteValue={setVoteValue}
-          onValueAccepted={handleSliderValueAccepted}
-          onSubmit={handleSubmit}
-          label={voteLabel}
-        />
       </div>
-
-      <div
-        className={`tw-flex tw-items-center tw-justify-between tw-gap-4 ${
-          isSliderMode ? "tw-pt-5" : ""
-        }`}
-      >
-        <SingleWaveDropVoteStats
-          currentRating={currentVoteValue}
-          maxRating={maxRating}
-          label={voteLabel}
-          creditScope={creditScope}
-          className={
-            hasExternalVoteModeControl ? "tw-w-full tw-justify-between" : ""
+      <SingleWaveDropVoteStats
+        currentRating={currentVoteValue}
+        maxRating={maxRating}
+        label={voteLabel}
+        creditScope={creditScope}
+        subtle={isMini}
+        className="tw-justify-between"
+      />
+      {!isMini && canPostRationale && (
+        <VoteRationaleControl
+          checked={shouldPostRationale}
+          onCheckedChange={voteRationale.handlePostRationaleChange}
+          value={voteRationale.rationaleText}
+          onChange={voteRationale.handleRationaleTextChange}
+          generated={voteRationale.isUsingGeneratedRationale}
+          invalid={showRationaleValidation}
+        />
+      )}
+      <div className="tw-flex tw-w-full tw-justify-end">
+        <SingleWaveDropVoteSubmit
+          drop={displayDrop}
+          newRating={submitVoteValue}
+          voteLabel={voteLabel}
+          ref={submitRef}
+          onVoteApplied={handleSubmitVoteApplied}
+          onVoteSuccess={onVoteSuccess}
+          onVoteRequestStarted={onVoteRequestStarted}
+          submissionMode={submissionMode}
+          size={size}
+          submitBlockReason={
+            isMini ? submitBlockReason : rationaleSubmitBlockReason
           }
         />
-        {showInternalVoteModeControl && (
-          <button
-            type="button"
-            onClick={() => setCurrentVoteMode(getNextVoteMode(isSliderMode))}
-            className="tw-flex-shrink-0 tw-border-0 tw-bg-transparent tw-p-0 tw-text-[11px] tw-font-medium tw-text-primary-400 tw-transition-colors desktop-hover:hover:tw-text-primary-300"
-            title={t(locale, "waves.voteMode.switchTitle")}
-            aria-label={switchModeAriaLabel}
-          >
-            {switchModeTitle}
-          </button>
-        )}
       </div>
-
-      <div className="tw-grid tw-grid-cols-1 tw-gap-6">
-        {canPostRationale && (
-          <div>
-            <label
-              htmlFor={rationaleSwitchId}
-              className="tw-flex tw-min-h-11 tw-w-fit tw-cursor-pointer tw-flex-wrap tw-items-center tw-gap-2"
-            >
-              <span className="tw-relative tw-inline-flex tw-h-6 tw-w-11 tw-flex-shrink-0 tw-items-center">
-                <input
-                  id={rationaleSwitchId}
-                  type="checkbox"
-                  role="switch"
-                  checked={shouldPostRationale}
-                  onChange={(event) =>
-                    voteRationale.handlePostRationaleChange(
-                      event.target.checked
-                    )
-                  }
-                  className="tw-peer tw-sr-only"
-                  aria-labelledby={rationaleSwitchLabelId}
-                  aria-describedby={rationaleDescriptionIds}
-                  aria-controls={rationalePanelId}
-                />
-                <span
-                  aria-hidden="true"
-                  className={`tw-absolute tw-inset-0 tw-rounded-full tw-ring-1 tw-ring-inset tw-ring-white/10 tw-transition-colors peer-focus-visible:tw-ring-2 peer-focus-visible:tw-ring-primary-400 ${
-                    shouldPostRationale ? "tw-bg-primary-500" : "tw-bg-iron-650"
-                  }`}
-                />
-                <span
-                  aria-hidden="true"
-                  className={`tw-absolute tw-left-0.5 tw-top-0.5 tw-size-5 tw-rounded-full tw-bg-iron-50 tw-shadow tw-transition-transform ${
-                    shouldPostRationale ? "tw-translate-x-5" : ""
-                  }`}
-                />
-              </span>
-              <span
-                id={rationaleSwitchLabelId}
-                className="tw-text-sm tw-font-medium tw-text-iron-200"
-              >
-                {t(locale, "waves.voteRationale.switchLabel")}
-              </span>
-              <span
-                aria-hidden="true"
-                className="tw-rounded-full tw-bg-white/[0.06] tw-px-2 tw-py-0.5 tw-text-[11px] tw-font-semibold tw-uppercase tw-text-iron-400"
-              >
-                {shouldPostRationale
-                  ? t(locale, "waves.voteRationale.stateOn")
-                  : t(locale, "waves.voteRationale.stateOff")}
-              </span>
-            </label>
-            <p id={rationaleDescriptionId} className="tw-sr-only">
-              {t(locale, "waves.voteRationale.fieldDescription")}
-            </p>
-
-            <div
-              id={rationalePanelId}
-              aria-hidden={!shouldPostRationale}
-              inert={!shouldPostRationale}
-              className={`tw-grid tw-transition-[grid-template-rows,opacity] tw-duration-200 tw-ease-out motion-reduce:tw-transition-none ${
-                shouldPostRationale
-                  ? "tw-grid-rows-[1fr] tw-opacity-100"
-                  : "tw-grid-rows-[0fr] tw-opacity-0"
-              }`}
-            >
-              <div className="tw-min-h-0 tw-overflow-hidden">
-                <div className="tw-space-y-2 tw-pt-3">
-                  <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
-                    {t(locale, "waves.voteRationale.publicReplyDescription")}
-                  </p>
-                  <label
-                    htmlFor={rationaleTextareaId}
-                    className="tw-block tw-text-xs tw-font-semibold tw-uppercase tw-text-iron-400"
-                  >
-                    {t(locale, "waves.voteRationale.fieldLabel")}
-                  </label>
-                  <textarea
-                    id={rationaleTextareaId}
-                    value={voteRationale.rationaleText}
-                    onChange={(event) =>
-                      voteRationale.handleRationaleTextChange(
-                        event.target.value
-                      )
-                    }
-                    rows={4}
-                    className={`tw-form-textarea tw-block tw-w-full tw-resize-y tw-rounded-lg tw-border tw-border-solid tw-border-iron-650 tw-bg-iron-900 tw-px-3 tw-py-2.5 tw-text-sm tw-leading-5 tw-shadow-sm tw-transition-colors placeholder:tw-text-iron-600 focus:tw-border-primary-400 focus:tw-outline-none focus:tw-ring-0 ${
-                      voteRationale.isUsingGeneratedRationale
-                        ? "tw-text-iron-600"
-                        : "tw-text-iron-100"
-                    }`}
-                    aria-describedby={rationaleDescriptionIds}
-                  />
-                  {showRationaleValidation && (
-                    <p id={rationaleValidationId} className="tw-sr-only">
-                      {t(locale, "waves.voteRationale.emptyBlockReason")}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <div
-          className={`wave-drop-vote-submit-full tw-w-full ${styles["voteSubmitFull"] ?? ""}`}
-        >
-          <SingleWaveDropVoteSubmit
-            drop={displayDrop}
-            newRating={submitVoteValue}
-            voteLabel={voteLabel}
-            ref={submitRef}
-            onVoteApplied={handleSubmitVoteApplied}
-            onVoteSuccess={onVoteSuccess}
-            onVoteRequestStarted={onVoteRequestStarted}
-            submissionMode={submissionMode}
-            submitBlockReason={rationaleSubmitBlockReason}
-            submitLabelOverride={
-              shouldPostRationale
-                ? t(locale, "waves.voteRationale.submitLabel")
-                : undefined
-            }
-          />
-        </div>
-      </div>
-    </fieldset>
+    </VotePanel>
   );
 };

@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import DesktopBrowserWalletBridge from "@/components/desktop/DesktopBrowserWalletBridge";
 
 const ACTIVE = "0x1111111111111111111111111111111111111111";
@@ -13,6 +13,7 @@ let account: {
 } = { status: "disconnected" };
 let connectors: { id: string }[] = [forwarding];
 let flagged = new Set([ACTIVE]);
+const profileListeners = new Set<() => void>();
 let requestKind = "idle";
 const connectAsync = jest.fn(async () => undefined);
 const disconnectAsync = jest.fn(async () => undefined);
@@ -31,6 +32,10 @@ jest.mock("@/components/auth/SeizeConnectContext", () => ({
 jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
   isBrowserWalletProfile: (address: string | null) =>
     address !== null && flagged.has(address),
+  subscribeBrowserWalletProfiles: (listener: () => void) => {
+    profileListeners.add(listener);
+    return () => profileListeners.delete(listener);
+  },
   getDesktopWalletRequestStatus: () => ({ kind: requestKind }),
   cancelDesktopWalletRequest: () => cancel(),
   forgetBrowserWalletProfile: (address: string) => forget(address),
@@ -62,6 +67,48 @@ describe("DesktopBrowserWalletBridge", () => {
     flagged = new Set();
     render(<DesktopBrowserWalletBridge />);
     expect(connectAsync).not.toHaveBeenCalled();
+  });
+
+  it("attaches when the same signed-in profile becomes eligible", () => {
+    flagged = new Set();
+    render(<DesktopBrowserWalletBridge />);
+    expect(connectAsync).not.toHaveBeenCalled();
+
+    act(() => {
+      flagged.add(ACTIVE);
+      profileListeners.forEach((listener) => listener());
+    });
+
+    expect(connectAsync).toHaveBeenCalledTimes(1);
+    expect(connectAsync).toHaveBeenCalledWith({ connector: forwarding });
+  });
+
+  it("attaches for the new active profile when a previous connection finishes", async () => {
+    flagged.add(OTHER);
+    const connection = Promise.withResolvers<undefined>();
+    connectAsync.mockReturnValueOnce(connection.promise);
+    const { rerender } = render(<DesktopBrowserWalletBridge />);
+    expect(connectAsync).toHaveBeenCalledTimes(1);
+
+    activeAddress = OTHER;
+    rerender(<DesktopBrowserWalletBridge />);
+    expect(connectAsync).toHaveBeenCalledTimes(1);
+    await act(async () => connection.reject(new Error("profile changed")));
+
+    expect(connectAsync).toHaveBeenCalledTimes(2);
+  });
+
+  it("leaves a rejected same-profile connection for an explicit user retry", async () => {
+    const connection = Promise.withResolvers<undefined>();
+    connectAsync.mockReturnValueOnce(connection.promise);
+    const { rerender } = render(<DesktopBrowserWalletBridge />);
+    account = { status: "disconnected" };
+    rerender(<DesktopBrowserWalletBridge />);
+
+    await act(async () => connection.reject(new Error("user rejected")));
+    rerender(<DesktopBrowserWalletBridge />);
+
+    expect(connectAsync).toHaveBeenCalledTimes(1);
   });
 
   it("leaves a WalletConnect connection alone and stops offering forwarding", () => {

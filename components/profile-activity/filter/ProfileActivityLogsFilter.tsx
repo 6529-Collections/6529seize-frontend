@@ -1,7 +1,8 @@
 "use client";
 
 import {
-  DROPDOWN_FIELD_CLASSES,
+  getDropdownTriggerClasses,
+  getDropdownMenuMetrics,
   DROPDOWN_CHEVRON_CLASSES,
 } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
@@ -62,13 +63,13 @@ export default function ProfileActivityLogsFilter({
               aria-label={`Filter activity types: ${title}`}
               aria-expanded={isOpen}
               aria-controls={isOpen ? listId : undefined}
-              className={`${DROPDOWN_FIELD_CLASSES} tw-group tw-flex tw-min-h-11 tw-w-full tw-items-center tw-px-3.5 tw-py-2.5`}
+              className={`${getDropdownTriggerClasses({ variant: "compact", metrics: getDropdownMenuMetrics("compact") })} tw-group tw-ml-auto tw-flex tw-w-fit tw-max-w-full tw-items-center`}
               onClick={(e) => {
                 e.stopPropagation();
                 toggleOpen();
               }}
             >
-              <span className="tw-block tw-truncate tw-text-sm">{title}</span>
+              <span className="tw-block tw-truncate">{title}</span>
               <span className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3.5">
                 <svg
                   className={`${DROPDOWN_CHEVRON_CLASSES} tw-transition-transform tw-duration-150 motion-reduce:tw-transition-none ${

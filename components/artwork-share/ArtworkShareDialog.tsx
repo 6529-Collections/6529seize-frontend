@@ -1,4 +1,5 @@
-import { DROPDOWN_FIELD_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import IconButton from "@/components/utils/button/IconButton";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { ChevronDownIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -62,15 +63,16 @@ export default function ArtworkShareDialog({
             {artwork.title}
           </p>
         </div>
-        <button
+        <IconButton
           ref={closeRef}
           type="button"
           onClick={onClose}
           aria-label={t(locale, "artworkShare.close")}
-          className="tw-inline-flex tw-size-11 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-300 hover:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          size={44}
+          variant="ghost"
         >
           <XMarkIcon className="tw-size-5" aria-hidden="true" />
-        </button>
+        </IconButton>
       </header>
       <div className="tw-p-4 sm:tw-p-6">
         <ArtworkShareExport
@@ -89,7 +91,7 @@ export default function ArtworkShareDialog({
                     );
                     if (selected) setFormat(selected);
                   }}
-                  className={`${DROPDOWN_FIELD_CLASSES} tw-min-h-11 tw-w-full tw-appearance-none tw-py-2 tw-pl-3 tw-pr-10 tw-text-sm`}
+                  className={`${getDropdownTriggerClasses({ variant: "form", metrics: { minHeight: 44, y: 8, left: 12, right: 40, text: "sm" } })} tw-w-full tw-appearance-none`}
                 >
                   {FORMATS.map((value) => (
                     <option key={value} value={value}>

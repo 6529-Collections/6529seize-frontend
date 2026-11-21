@@ -321,7 +321,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   test("pastes one image when Chrome exposes different timestamp wrappers", async ({
     baseURL,
     page,
-  }) => {
+  }, testInfo) => {
     let uploadStartCount = 0;
     await installDropImageUploadFixture(page, baseURL, () => {
       uploadStartCount += 1;
@@ -376,7 +376,14 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     ).toHaveCount(0);
     expect(uploadStartCount).toBe(1);
 
-    await page.getByRole("button", { name: "Remove image" }).click();
+    const removeImage = page.getByRole("button", { name: "Remove image" });
+    await expect(removeImage).toHaveCSS("width", "28px");
+    await expect(removeImage).toHaveCSS("height", "28px");
+    await expect(removeImage).toHaveCSS("border-radius", "8px");
+    await page.screenshot({
+      path: testInfo.outputPath("composer-image-remove.png"),
+    });
+    await removeImage.click();
     await expect(
       page.getByRole("button", { name: "Select image" })
     ).toHaveCount(0);
@@ -504,7 +511,7 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
   test("renders deterministic link preview and keeps composer usable", async ({
     baseURL,
     page,
-  }) => {
+  }, testInfo) => {
     await gotoSandboxWave(page);
 
     const previewLink = page
@@ -519,6 +526,33 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     });
     await expect(page.getByText(PREVIEW_DESCRIPTION).first()).toBeVisible();
 
+    const previewFrame = page
+      .getByTestId("link-preview-card-stable-frame")
+      .filter({ has: previewLink })
+      .first();
+    const actions = previewFrame.getByRole("button", {
+      name: "Link actions",
+      exact: true,
+    });
+    await actions.focus();
+    await expect(actions).toHaveCSS("width", "32px");
+    await expect(actions).toHaveCSS("height", "32px");
+    await expect(actions).toHaveCSS("border-radius", "8px");
+    await page.keyboard.press("Enter");
+    await expect(actions).toHaveAttribute("aria-expanded", "true");
+    await expect(
+      page.getByRole("button", { name: "Copy link", exact: true }).last()
+    ).toBeVisible();
+    await expect(
+      page.getByRole("link", { name: "Open link", exact: true }).last()
+    ).toHaveAttribute("href", PREVIEW_URL);
+    await page.keyboard.press("Escape");
+    await expect(actions).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      page.getByRole("button", { name: "Copy link", exact: true }).last()
+    ).toBeHidden();
+    await expect(actions).toBeFocused();
+
     const composer = page
       .getByRole("textbox", { name: "Write a message" })
       .last();
@@ -526,6 +560,10 @@ test.describe("Waves composer local sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("button", { name: "Post" }).last()
     ).toBeEnabled();
+    if (!testInfo.project.use.hasTouch) await previewLink.hover();
+    await page.screenshot({
+      path: testInfo.outputPath("link-preview-actions.png"),
+    });
     await expectNoHorizontalOverflow(page);
     await expectNoUnsafeSandboxMutations(baseURL);
   });

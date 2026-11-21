@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useContext, useEffect, useState } from "react";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import type { ApiProfileProxyAction } from "@/generated/models/ApiProfileProxyAction";
@@ -31,19 +33,22 @@ export default function ProfileProxyEndTime({
 
   return (
     <div className="tw-flex tw-items-center">
-      <span className="tw-whitespace-nowrap tw-text-iron-300 tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5">
+      <span className="tw-whitespace-nowrap tw-text-meta tw-font-normal tw-tabular-nums tw-leading-5 tw-text-iron-300">
         {profileProxyAction.end_time
           ? getTimeUntil(profileProxyAction.end_time)
           : "Not set"}
       </span>
       {isOwner && (
-        <button
+        <IconButton
           type="button"
           aria-label="Edit end time"
-          className="tw-group tw-bg-transparent tw-border-0 tw-h-8 tw-w-8 tw-flex tw-items-center tw-justify-center tw-rounded-full tw-text-iron-300 hover:tw-text-iron-400 tw-transition tw-duration-300 tw-ease-out"
-          onClick={onEndTimeEdit}>
+          size={32}
+          variant="ghost"
+          shape="circle"
+          onClick={onEndTimeEdit}
+        >
           <PencilIcon size={PencilIconSize.SMALL} />
-        </button>
+        </IconButton>
       )}
     </div>
   );

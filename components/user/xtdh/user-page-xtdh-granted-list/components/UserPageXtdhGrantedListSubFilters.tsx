@@ -24,7 +24,15 @@ export function UserPageXtdhGrantedListSubFilters({
       activeItem={activeSubFilter}
       setSelected={onSubFilterChange}
       filterLabel="Status"
-      size="tabs"
+      variant="compact"
+      metrics={{
+        height: 32,
+        y: 4,
+        left: 12,
+        right: 36,
+        text: "small",
+        leading: "5",
+      }}
     />
   );
 }

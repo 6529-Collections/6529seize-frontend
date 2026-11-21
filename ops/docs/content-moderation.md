@@ -25,11 +25,12 @@ being objectionable.
   the desktop, mobile-browser, and mobile-app side navigation. It is not shown
   in the profile menu. The page heading is **WatchTower - Content Moderation**.
 
-The unified `/preferences` page contains **Notifications & messages**,
-**Blocked Profiles**, and **Reports** tabs and fills the available page height.
+The `/preferences` page fills the available height and has separate
+**Notifications** and **Messages** tabs alongside **Blocked Profiles** and
+**Reports**.
 Preferences are saved to a profile.
 An authenticated wallet without a profile is offered the existing profile
-creation flow before the controls in either tab become available.
+creation flow before profile preferences become available.
 
 ## Posting and the safety check
 

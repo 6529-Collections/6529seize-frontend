@@ -429,9 +429,9 @@ export default function AppWalletComponent(
           <TooltipIconButton
             icon={faExternalLink}
             tooltipText="View on Etherscan"
-            buttonSizeClassName="tw-size-9"
-            buttonShapeClassName="tw-rounded-lg"
-            className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+            size={36}
+            shape="rounded"
+            variant="subtle"
             iconClassName="tw-size-4 tw-text-current"
             onClick={() =>
               window.open(
@@ -444,9 +444,9 @@ export default function AppWalletComponent(
           <TooltipIconButton
             icon={faFileDownload}
             tooltipText="Download encrypted recovery file"
-            buttonSizeClassName="tw-size-9"
-            buttonShapeClassName="tw-rounded-lg"
-            className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+            size={36}
+            shape="rounded"
+            variant="subtle"
             iconClassName="tw-size-4 tw-text-current"
             onClick={() => doEncryptedDownload(appWallet)}
           />
@@ -455,9 +455,9 @@ export default function AppWalletComponent(
             tooltipText={
               addressCopied ? "Copied!" : "Copy address to clipboard"
             }
-            buttonSizeClassName="tw-size-9"
-            buttonShapeClassName="tw-rounded-lg"
-            className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+            size={36}
+            shape="rounded"
+            variant="subtle"
             iconClassName="tw-size-4 tw-text-current"
             onClick={() => {
               void navigator.clipboard
@@ -489,9 +489,9 @@ export default function AppWalletComponent(
               <TooltipIconButton
                 icon={revealPhrase ? faEye : faEyeSlash}
                 tooltipText={revealPhrase ? "Hide" : "Reveal"}
-                buttonSizeClassName="tw-size-9"
-                buttonShapeClassName="tw-rounded-lg"
-                className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+                size={36}
+                shape="rounded"
+                variant="subtle"
                 iconClassName="tw-size-4 tw-text-current"
                 onClick={() => {
                   if (revealPhrase) {
@@ -532,9 +532,9 @@ export default function AppWalletComponent(
                 <TooltipIconButton
                   icon={faCopy}
                   tooltipText={mnemonicCopied ? "Copied!" : "Copy to clipboard"}
-                  buttonSizeClassName="tw-size-9"
-                  buttonShapeClassName="tw-rounded-lg"
-                  className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+                  size={36}
+                  shape="rounded"
+                  variant="subtle"
                   iconClassName="tw-size-4 tw-text-current"
                   onClick={() => {
                     void copySecretToClipboard(
@@ -579,9 +579,9 @@ export default function AppWalletComponent(
             <TooltipIconButton
               icon={revealPrivateKey ? faEye : faEyeSlash}
               tooltipText={revealPrivateKey ? "Hide" : "Reveal"}
-              buttonSizeClassName="tw-size-9"
-              buttonShapeClassName="tw-rounded-lg"
-              className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+              size={36}
+              shape="rounded"
+              variant="subtle"
               iconClassName="tw-size-4 tw-text-current"
               onClick={() => {
                 if (revealPrivateKey) {
@@ -622,9 +622,9 @@ export default function AppWalletComponent(
               <TooltipIconButton
                 icon={faCopy}
                 tooltipText={privateKeyCopied ? "Copied!" : "Copy to clipboard"}
-                buttonSizeClassName="tw-size-9"
-                buttonShapeClassName="tw-rounded-lg"
-                className="tw-bg-white/[0.04] tw-text-iron-400 tw-transition-colors hover:tw-bg-white/[0.07] hover:tw-text-iron-100"
+                size={36}
+                shape="rounded"
+                variant="subtle"
                 iconClassName="tw-size-4 tw-text-current"
                 onClick={() => {
                   void copySecretToClipboard(

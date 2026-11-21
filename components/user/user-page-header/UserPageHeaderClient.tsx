@@ -14,12 +14,8 @@ import ButtonLink from "@/components/utils/button/ButtonLink";
 import type { CicStatement } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { amIUser } from "@/helpers/Helpers";
-import { navigateToDirectMessage } from "@/helpers/navigation.helpers";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { PROFILE_PREFERENCES_HREF } from "@/helpers/preferences-navigation";
 import { STATEMENT_GROUP, STATEMENT_TYPE } from "@/helpers/Types";
-import { createDirectMessageWave } from "@/helpers/waves/waves.helpers";
-import { getDirectMessageAdmissionErrorMessage } from "@/helpers/waves/direct-message-admission.helpers";
 import { getBannerColorValue } from "@/helpers/profile-banner.helpers";
 import { useContentModeratorAccess } from "@/hooks/content-moderation/useContentModeratorAccess";
 import { useProfileBlockState } from "@/hooks/content-moderation/useProfileBlockState";
@@ -49,10 +45,7 @@ import ProfileHeaderRelationshipActions, {
   type ProfileModerationControls,
 } from "./ProfileHeaderRelationshipActions";
 import SuspendedProfileHeaderIndicator from "./SuspendedProfileHeaderIndicator";
-import {
-  getUserProfileHeaderDisplayName,
-  getUserProfileHeaderMessage,
-} from "./user-page-header.messages";
+import { getUserProfileHeaderDisplayName } from "./user-page-header.messages";
 import {
   USER_PAGE_HEADER_INTERACTIVE_SURFACE_CLASS,
   USER_PAGE_HEADER_SURFACE_CLASS,
@@ -163,10 +156,8 @@ function SmallScreenPreferencesButton({
 type ProfileHeaderActionColumnProps = Readonly<{
   editProfileButton: ReactNode;
   canManageProfilePreferences: boolean;
-  directMessageLoading: boolean;
   followHandle: string | null;
   moderationControls: ProfileModerationControls;
-  onCreateDirectMessage: (primaryWallet: string | undefined) => void;
   profile: ApiIdentity;
   showSubscriptionStatus: boolean;
   websiteAction: WebsiteAction | null;
@@ -175,10 +166,8 @@ type ProfileHeaderActionColumnProps = Readonly<{
 function ProfileHeaderActionColumn({
   editProfileButton,
   canManageProfilePreferences,
-  directMessageLoading,
   followHandle,
   moderationControls,
-  onCreateDirectMessage,
   profile,
   showSubscriptionStatus,
   websiteAction,
@@ -217,9 +206,7 @@ function ProfileHeaderActionColumn({
         ) : null}
         {followHandle ? (
           <ProfileHeaderRelationshipActions
-            directMessageLoading={directMessageLoading}
             moderationControls={moderationControls}
-            onCreateDirectMessage={onCreateDirectMessage}
             profile={profile}
           />
         ) : null}
@@ -239,14 +226,12 @@ type ProfileHeaderContentProps = Readonly<{
   banner1Color: string;
   banner2Color: string;
   canManageProfilePreferences: boolean;
-  directMessageLoading: boolean;
   followHandle: string | null;
   followersCount: number | null;
   hasTouchScreen: boolean;
   mainAddress: string;
   moderationControls: ProfileModerationControls;
   normalizedHandleOrWallet: string;
-  onCreateDirectMessage: (primaryWallet: string | undefined) => void;
   profile: ApiIdentity;
   profileEnabledAt: string | null;
   profileLabel: string;
@@ -261,14 +246,12 @@ function ProfileHeaderContent({
   banner1Color,
   banner2Color,
   canManageProfilePreferences,
-  directMessageLoading,
   followHandle,
   followersCount,
   hasTouchScreen,
   mainAddress,
   moderationControls,
   normalizedHandleOrWallet,
-  onCreateDirectMessage,
   profile,
   profileEnabledAt,
   profileLabel,
@@ -286,9 +269,9 @@ function ProfileHeaderContent({
       <div className="tw-relative tw-z-10 tw-px-4 tw-pt-3.5 sm:tw-px-6 md:tw-px-8 lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_auto] lg:tw-gap-x-6">
         <div className="tw-relative tw-mb-6 tw-flex tw-flex-col tw-items-start tw-gap-4 sm:tw-mb-4 md:tw-flex-row md:tw-justify-between md:tw-gap-6 lg:tw-contents">
           <div
-            className={`tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-3 sm:tw-relative sm:tw-min-h-16 sm:tw-flex-row sm:tw-items-end sm:tw-gap-4 sm:tw-pt-16 md:tw-flex-1 md:tw-gap-5 lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-pl-[132px] lg:tw-pt-0 ${identityPaddingClass}`}
+            className={`tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-gap-3 sm:tw-relative sm:tw-min-h-16 sm:tw-flex-row sm:tw-items-end sm:tw-gap-4 sm:tw-pt-16 md:tw-flex-1 md:tw-gap-5 lg:tw-col-start-1 lg:tw-row-start-1 lg:tw-items-start lg:tw-gap-4 lg:tw-pt-0 ${identityPaddingClass}`}
           >
-            <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:tw-absolute sm:-tw-top-14 sm:tw-left-0 sm:tw-mt-0">
+            <div className="tw-relative -tw-mt-10 tw-flex-shrink-0 sm:tw-absolute sm:-tw-top-14 sm:tw-left-0 sm:tw-mt-0 lg:tw-relative lg:tw-top-0 lg:-tw-mt-14">
               <UserPageHeaderPfpWrapper
                 profile={profile}
                 canEdit={false}
@@ -336,10 +319,8 @@ function ProfileHeaderContent({
           <ProfileHeaderActionColumn
             editProfileButton={editProfileButton}
             canManageProfilePreferences={canManageProfilePreferences}
-            directMessageLoading={directMessageLoading}
             followHandle={followHandle}
             moderationControls={moderationControls}
-            onCreateDirectMessage={onCreateDirectMessage}
             profile={profile}
             showSubscriptionStatus={showSubscriptionStatus}
             websiteAction={websiteAction}
@@ -466,18 +447,14 @@ export default function UserPageHeaderClient({
 }: Readonly<Props>) {
   const params = useParams();
   const router = useRouter();
-  const { hasTouchScreen, isApp } = useDeviceInfo();
+  const { hasTouchScreen } = useDeviceInfo();
   const routeHandleOrWallet = params["user"]?.toString().toLowerCase() ?? null;
   const normalizedHandleOrWallet =
     routeHandleOrWallet ?? handleOrWallet.toLowerCase();
 
   const { address } = useSeizeConnectContext();
-  const {
-    connectedProfile,
-    activeProfileProxy,
-    isDirectProfileSession,
-    setToast,
-  } = useContext(AuthContext);
+  const { connectedProfile, activeProfileProxy, isDirectProfileSession } =
+    useContext(AuthContext);
   const hasHydrated = useHasHydrated();
 
   const { profile: hydratedProfile } = useIdentity({
@@ -505,8 +482,6 @@ export default function UserPageHeaderClient({
     [profile, mainAddress]
   );
 
-  const [directMessageLoading, setDirectMessageLoading] =
-    useState<boolean>(false);
   const [profileBlockConfirmation, setProfileBlockConfirmation] =
     useState<ProfileAction | null>(null);
 
@@ -568,41 +543,6 @@ export default function UserPageHeaderClient({
   const canManageProfilePreferences =
     hasHydrated && isMyProfile && !activeProfileProxy;
   const showSubscriptionStatus = canManageProfilePreferences;
-
-  const handleCreateDirectMessage = async (
-    primaryWallet: string | undefined
-  ) => {
-    if (!primaryWallet) {
-      return;
-    }
-
-    setDirectMessageLoading(true);
-
-    try {
-      const wave = await createDirectMessageWave({
-        addresses: [primaryWallet],
-      });
-      navigateToDirectMessage({ waveId: wave.id, router, isApp });
-    } catch (error) {
-      console.error(error);
-      const errorMessage =
-        getDirectMessageAdmissionErrorMessage(DEFAULT_LOCALE, error) ??
-        getToastErrorDetails(error);
-      setToast({
-        type: "error",
-        title: getUserProfileHeaderMessage(
-          "user.profileHeader.dm.createFailed.title"
-        ),
-        description:
-          errorMessage ??
-          getUserProfileHeaderMessage(
-            "user.profileHeader.dm.createFailed.description"
-          ),
-      });
-    } finally {
-      setDirectMessageLoading(false);
-    }
-  };
 
   const isProfileBlockMutationPending =
     profileBlockState.isBlocking || profileBlockState.isUnblocking;
@@ -756,14 +696,12 @@ export default function UserPageHeaderClient({
           banner1Color={banner1Color}
           banner2Color={banner2Color}
           canManageProfilePreferences={canManageProfilePreferences}
-          directMessageLoading={directMessageLoading}
           followHandle={followHandle}
           followersCount={followersCount}
           hasTouchScreen={hasTouchScreen}
           mainAddress={mainAddress}
           moderationControls={moderationControls}
           normalizedHandleOrWallet={normalizedHandleOrWallet}
-          onCreateDirectMessage={handleCreateDirectMessage}
           profile={profile}
           profileEnabledAt={profileEnabledAt}
           profileLabel={profileLabel}

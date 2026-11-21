@@ -1,5 +1,10 @@
 import { utf8Decode, utf8Encode } from "../bytes";
-import type { PayloadAttachment } from "../payload";
+import {
+  isPollRoster,
+  isValidPollBallot,
+  parsePollDefinition,
+  type PayloadAttachment,
+} from "../payload";
 import type { StoredMessage, StoredNotice } from "../records";
 import type { GroupMetadata } from "../wasm-types";
 import { BackupError } from "./errors";
@@ -245,6 +250,25 @@ function isMessageCore(value: Json): boolean {
   );
 }
 
+function isPollRecord(value: unknown): boolean {
+  if (!isObject(value)) return false;
+  const definition = parsePollDefinition(value);
+  return (
+    definition !== null &&
+    typeof value["closed"] === "boolean" &&
+    isPollRoster(value["eligibleDeviceKeys"]) &&
+    isObject(value["ballots"]) &&
+    Object.values(value["ballots"]).every(
+      (ballot) =>
+        isObject(ballot) &&
+        isNumber(ballot["seq"]) &&
+        Number.isSafeInteger(ballot["seq"]) &&
+        ballot["seq"] > 0 &&
+        isValidPollBallot(definition, ballot["options"])
+    )
+  );
+}
+
 function isMessageRecord(value: unknown): value is BackupMessageRecord {
   return (
     isObject(value) &&
@@ -257,6 +281,13 @@ function isMessageRecord(value: unknown): value is BackupMessageRecord {
     typeof value["sigOk"] === "boolean" &&
     typeof value["undecryptable"] === "boolean" &&
     (value["notice"] === undefined || isNotice(value["notice"])) &&
+    (value["poll"] === undefined || isPollRecord(value["poll"])) &&
+    (value["pollVoteIds"] === undefined ||
+      (isObject(value["pollVoteIds"]) &&
+        Object.values(value["pollVoteIds"]).every(isString))) &&
+    (value["pollVoteHistory"] === undefined ||
+      (isObject(value["pollVoteHistory"]) &&
+        Object.values(value["pollVoteHistory"]).every(isStringArray))) &&
     isNullable(value["epoch"], isNumber) &&
     isNullable(value["body"], isString) &&
     isNullable(value["sig"], isString)

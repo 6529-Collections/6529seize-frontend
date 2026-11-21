@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import E2eeMessagesRoute from "@/components/e2ee/routes/E2eeMessagesRoute";
 import { getAppMetadata } from "@/components/providers/metadata";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
+import MessagesRouteLoading from "@/components/messages/MessagesRouteLoading";
 
 export const metadata = getAppMetadata(
   {
@@ -20,7 +21,7 @@ export default function EncryptedMessagesPage() {
   }
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<MessagesRouteLoading encrypted />}>
       <E2eeMessagesRoute view={{ kind: "list" }} />
     </Suspense>
   );

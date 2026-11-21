@@ -43,7 +43,7 @@ export default function LatestActivity(props: Readonly<Props>) {
 
   return (
     <section className={`tw-p-0 ${showViewAll ? "tw-pt-4" : ""}`}>
-      <div className="tw-flex tw-flex-wrap tw-items-center">
+      <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4">
         <ActivityHeader showViewAll={showViewAll} fetching={false} />
         <ActivityFilters
           typeFilter={typeFilter}

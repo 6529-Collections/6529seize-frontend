@@ -56,10 +56,10 @@ export default function MyStreamWaveFAQAccordionItem({
     <section
       ref={sectionRef}
       className={cx(
-        "tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none",
+        "tw-group tw-overflow-hidden tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-transition-colors tw-duration-200 motion-reduce:tw-transition-none",
         isOpen
-          ? "tw-border-primary-500/40 tw-bg-iron-900/90 tw-shadow-[inset_3px_0_0_rgba(59,130,246,0.75)]"
-          : "tw-border-white/[0.09] tw-bg-iron-900/60 desktop-hover:hover:tw-border-white/[0.14] desktop-hover:hover:tw-bg-iron-900/80"
+          ? "tw-bg-iron-900/90"
+          : "tw-bg-iron-900/60 desktop-hover:hover:tw-border-white/[0.14] desktop-hover:hover:tw-bg-iron-900/80"
       )}
     >
       <h3 className="tw-m-0">

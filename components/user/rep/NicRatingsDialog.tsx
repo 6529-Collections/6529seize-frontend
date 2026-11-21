@@ -451,15 +451,16 @@ function RatingsList({
                   href={`/${encodeURIComponent(target.identity)}`}
                   className={RATING_CONTRIBUTOR_IDENTITY_CLASS}
                 >
-                  <span aria-hidden="true">
-                    <ProfileAvatar
-                      pfpUrl={picture}
-                      size={ProfileBadgeSize.SMALL}
-                      shape="circle"
-                      alt=""
-                      fallbackContent={target.display.charAt(0).toUpperCase()}
-                    />
-                  </span>
+                  {picture && (
+                    <span aria-hidden="true">
+                      <ProfileAvatar
+                        pfpUrl={picture}
+                        size={ProfileBadgeSize.SMALL}
+                        shape="circle"
+                        alt=""
+                      />
+                    </span>
+                  )}
                   <span className={RATING_CONTRIBUTOR_NAME_CLASS}>
                     {target.display}
                   </span>

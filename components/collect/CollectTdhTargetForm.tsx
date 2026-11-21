@@ -1,10 +1,11 @@
 "use client";
 
 import Button from "@/components/utils/button/Button";
+import NativeSelect from "@/components/utils/select/NativeSelect";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { useId, type ReactNode } from "react";
-import { COLLECT_INPUT_CLASS, COLLECT_SELECT_CLASS } from "./CollectGoalForm";
+import { COLLECT_INPUT_CLASS, COLLECT_SELECT_METRICS } from "./CollectGoalForm";
 import {
   TDH_TARGET_HORIZONS,
   type CollectTdhTargetDraft,
@@ -70,7 +71,7 @@ export default function CollectTdhTargetForm({
         </label>
         <label className="tw-block tw-min-w-0 tw-space-y-2 tw-text-xs tw-text-iron-300">
           <span>{t(locale, "collect.tdhTarget.timeframe")}</span>
-          <select
+          <NativeSelect
             value={draft.horizonDays}
             onChange={(event) => {
               const horizon = TDH_TARGET_HORIZONS.find(
@@ -78,7 +79,8 @@ export default function CollectTdhTargetForm({
               );
               if (horizon !== undefined) change({ horizonDays: horizon });
             }}
-            className={COLLECT_SELECT_CLASS}
+            variant="form"
+            metrics={COLLECT_SELECT_METRICS}
           >
             {TDH_TARGET_HORIZONS.map((days) => (
               <option key={days} value={days}>
@@ -91,7 +93,7 @@ export default function CollectTdhTargetForm({
                 )}
               </option>
             ))}
-          </select>
+          </NativeSelect>
         </label>
       </div>
       <details className="tw-max-w-xl">
@@ -101,7 +103,7 @@ export default function CollectTdhTargetForm({
         <div className="tw-space-y-4 tw-pb-2 tw-pt-1">
           <label className="tw-block tw-max-w-sm tw-space-y-2 tw-text-xs tw-text-iron-300">
             <span>{t(locale, "collect.tdhTarget.interpretation")}</span>
-            <select
+            <NativeSelect
               value={draft.mode}
               onChange={(event) =>
                 change({
@@ -111,7 +113,8 @@ export default function CollectTdhTargetForm({
                       : "total",
                 })
               }
-              className={COLLECT_SELECT_CLASS}
+              variant="form"
+              metrics={COLLECT_SELECT_METRICS}
             >
               <option value="total">
                 {t(locale, "collect.tdhTarget.total")}
@@ -119,7 +122,7 @@ export default function CollectTdhTargetForm({
               <option value="additional">
                 {t(locale, "collect.tdhTarget.additional")}
               </option>
-            </select>
+            </NativeSelect>
           </label>
           <p className="tw-m-0 tw-text-xs tw-leading-5 tw-text-iron-400">
             {t(locale, "collect.tdhTarget.additionalHint")}

@@ -170,7 +170,7 @@ export default function WaveRulesPanel({
         </div>
       )}
 
-      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-iron-800">
+      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/[0.06]">
         {rules.automatic.map((section) => (
           <section key={section.id} className="tw-px-4 tw-py-4">
             <SectionHeading className="tw-mb-2.5 tw-mt-0 !tw-text-[0.6875rem] !tw-font-semibold tw-uppercase !tw-leading-4 tw-tracking-[0.06em] !tw-text-iron-400 sm:tw-tracking-[0.1em]">

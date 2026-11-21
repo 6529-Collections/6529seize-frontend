@@ -48,9 +48,9 @@ function RulesSection({
 }) {
   return (
     <section
-      className={`tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-950 ${className}`}
+      className={`tw-min-w-0 tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.06] tw-bg-iron-950 ${className}`}
     >
-      <div className="tw-flex tw-items-center tw-gap-2.5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-px-4 tw-py-3.5 sm:tw-px-5">
+      <div className="tw-flex tw-items-center tw-gap-2.5 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-px-4 tw-py-3.5 sm:tw-px-5">
         <span className="tw-text-iron-400">{icon}</span>
         <h2 className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-100">
           {title}

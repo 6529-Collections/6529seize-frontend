@@ -1,6 +1,6 @@
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import type { Drop } from "@/helpers/waves/drop.helpers";
-import type { WaveHistoryGap } from "@/contexts/wave/hooks/types";
+import type { WaveHistoryGap, WaveMessages } from "@/contexts/wave/hooks/types";
 
 /** Protect edits received in flight. All writes still pass through the store's
  * tombstone filter, which also rejects deletions of IDs absent from this snapshot. */
@@ -18,7 +18,7 @@ export function reconcileWaveSnapshot(
   });
 }
 
-export function addWaveHistoryGap(
+function addWaveHistoryGap(
   gaps: readonly WaveHistoryGap[],
   nextGap: WaveHistoryGap
 ): WaveHistoryGap[] {
@@ -36,6 +36,27 @@ export function addWaveHistoryGap(
     }
   }
   return merged;
+}
+
+export function reconcileNewestPageGap(
+  previousGaps: WaveMessages["historyGaps"],
+  current: Pick<WaveMessages, "drops" | "historyGaps">,
+  gap: WaveHistoryGap,
+  windowDrops: readonly Pick<ApiDrop, "serial_no">[]
+): readonly WaveHistoryGap[] {
+  const currentGaps = current.historyGaps ?? [];
+  if (current.historyGaps === previousGaps) {
+    return addWaveHistoryGap(currentGaps, gap);
+  }
+  // A jump or gap fill landed while this sync was in flight. Use the current
+  // older edge so the newest page does not reopen ranges already loaded.
+  return getTargetWindowHistoryGaps({
+    currentDrops: current.drops.filter(
+      (drop) => drop.serial_no < gap.olderThan
+    ),
+    currentGaps,
+    windowDrops,
+  });
 }
 
 /**

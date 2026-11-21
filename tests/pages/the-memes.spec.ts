@@ -31,7 +31,7 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     await expect(page.locator("h1", { hasText: "The Memes" })).toBeVisible();
   });
 
-  test("sort options keep pills on mobile and native apps and use underlines on desktop web", async ({
+  test("sort options use underlines on mobile, native apps and desktop web", async ({
     page,
   }, testInfo) => {
     const age = page.getByRole("button", { name: "Sort by Age", exact: true });
@@ -100,47 +100,27 @@ test.describe("The Memes Page @smoke @medium @large", () => {
       await expect(directionGroup).toHaveCSS("box-shadow", "none");
       await expect(age).toHaveAttribute("aria-pressed", "true");
       await expect(age).toHaveCSS("font-weight", "500");
-      await expect(age).toHaveCSS("font-size", editorial ? "14px" : "12px");
+      await expect(age).toHaveCSS("font-size", "14px");
       await expect(age).toHaveCSS("height", editorial ? "28px" : "32px");
-      await expect(age).toHaveCSS(
-        "background-color",
-        editorial ? "rgba(0, 0, 0, 0)" : "rgb(236, 236, 238)"
-      );
-      await expect(age).toHaveCSS(
-        "color",
-        editorial ? "rgb(255, 255, 255)" : "rgb(19, 19, 22)"
-      );
-      await expect(edition).toHaveCSS(
-        "color",
-        editorial ? "rgb(147, 147, 159)" : "rgb(206, 207, 212)"
-      );
-      await expect(volume).toHaveCSS(
-        "color",
-        editorial ? "rgb(147, 147, 159)" : "rgb(206, 207, 212)"
-      );
-      await expect(volume).toHaveCSS(
-        "background-color",
-        editorial ? "rgba(0, 0, 0, 0)" : "rgb(28, 28, 33)"
-      );
-      await expect(edition).toHaveCSS(
-        "background-color",
-        editorial ? "rgba(0, 0, 0, 0)" : "rgb(28, 28, 33)"
-      );
+      await expect(age).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(age).toHaveCSS("color", "rgb(255, 255, 255)");
+      await expect(edition).toHaveCSS("color", "rgb(147, 147, 159)");
+      await expect(volume).toHaveCSS("color", "rgb(147, 147, 159)");
+      await expect(volume).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(edition).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
       await expect
         .poll(() =>
           age.evaluate(
             (element) => getComputedStyle(element, "::after").backgroundColor
           )
         )
-        .toBe(editorial ? "rgb(82, 139, 255)" : "rgba(0, 0, 0, 0)");
-      if (editorial) {
-        expect(
-          await age.evaluate((element) => ({
-            color: getComputedStyle(element, "::after").backgroundColor,
-            height: getComputedStyle(element, "::after").height,
-          }))
-        ).toEqual({ color: "rgb(82, 139, 255)", height: "1px" });
-      }
+        .toBe("rgb(82, 139, 255)");
+      expect(
+        await age.evaluate((element) => ({
+          color: getComputedStyle(element, "::after").backgroundColor,
+          height: getComputedStyle(element, "::after").height,
+        }))
+      ).toEqual({ color: "rgb(82, 139, 255)", height: "1px" });
       await expectNoHorizontalOverflow(page);
     }
 
@@ -177,10 +157,9 @@ test.describe("The Memes Page @smoke @medium @large", () => {
     await expect(selectedVolume).toHaveAttribute("aria-expanded", "false");
     for (const width of [390, 1024, 1440]) {
       await page.setViewportSize({ width, height: 900 });
-      const editorial = width >= 1024 && !isNative;
       await expect(selectedVolume).toHaveCSS(
         "background-color",
-        editorial ? "rgba(0, 0, 0, 0)" : "rgb(236, 236, 238)"
+        "rgba(0, 0, 0, 0)"
       );
       await expect
         .poll(() =>
@@ -188,7 +167,7 @@ test.describe("The Memes Page @smoke @medium @large", () => {
             (element) => getComputedStyle(element, "::after").backgroundColor
           )
         )
-        .toBe(editorial ? "rgb(82, 139, 255)" : "rgba(0, 0, 0, 0)");
+        .toBe("rgb(82, 139, 255)");
     }
   });
 

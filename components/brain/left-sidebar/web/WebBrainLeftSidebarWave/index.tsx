@@ -12,6 +12,7 @@ import { useWaveNameTruncation } from "./hooks/useWaveNameTruncation";
 import { formatWaveName } from "./utils/formatWaveName";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import type { MinimalWave } from "@/contexts/wave/hooks/useEnhancedWavesListCore";
+import { hasUnreadWaveDrops } from "../../waves/sidebarWaveListUtils";
 
 interface WebBrainLeftSidebarWaveProps {
   readonly scoreDetailsDisabled?: boolean | undefined;
@@ -81,7 +82,7 @@ const WebBrainLeftSidebarWave = ({
   });
 
   const isDropWave = wave.type !== ApiWaveType.Chat;
-  const haveNewDrops = wave.newDropsCount.count > 0;
+  const haveNewDrops = hasUnreadWaveDrops(wave);
   const tooltipId = `wave-collapsed-${wave.id}`;
   const expandedTooltipId = `wave-expanded-${wave.id}`;
   const showCollapsedTooltip = collapsed && !hasTouchScreen;

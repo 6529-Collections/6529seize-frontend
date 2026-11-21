@@ -56,6 +56,7 @@ describe("observeFocusedField", () => {
       paint();
       expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
       expect(input.scrollIntoView).toHaveBeenCalledWith({
+        behavior: "instant",
         block: "nearest",
         inline: "nearest",
       });
@@ -82,5 +83,171 @@ describe("observeFocusedField", () => {
     paint();
     expect(outside.scrollIntoView).not.toHaveBeenCalled();
     tracking.disconnect();
+  });
+
+  it("does not scroll an input already visible during keyboard resize frames", () => {
+    const container = document.createElement("div");
+    const input = document.createElement("input");
+    input.scrollIntoView = jest.fn();
+    container.getBoundingClientRect = () => new DOMRect(0, 80, 400, 350);
+    input.getBoundingClientRect = () => new DOMRect(20, 150, 300, 44);
+    container.append(input);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    for (let frame = 0; frame < 12; frame++) {
+      onResize([], observer);
+      paint();
+    }
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    input.getBoundingClientRect = () => new DOMRect(20, 410, 300, 44);
+    onResize([], observer);
+    paint();
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+    tracking.disconnect();
+  });
+
+  it("honors a field's action clearance only when both fit above the keyboard", () => {
+    const container = document.createElement("div");
+    const input = document.createElement("textarea");
+    jest
+      .spyOn(globalThis, "getComputedStyle")
+      .mockReturnValue(
+        Object.assign(getComputedStyle(input), { scrollMarginBottom: "96px" })
+      );
+    input.scrollIntoView = jest.fn();
+    container.getBoundingClientRect = () => new DOMRect(0, 80, 400, 350);
+    input.getBoundingClientRect = () => new DOMRect(20, 300, 300, 96);
+    container.append(input);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    paint();
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    expect(container.scrollTop).toBe(62);
+    container.scrollTop = 0;
+    container.getBoundingClientRect = () => new DOMRect(0, 280, 400, 150);
+    onResize([], observer);
+    paint();
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    expect(container.scrollTop).toBe(0);
+    tracking.disconnect();
+  });
+
+  it("does not scroll the outer dialog for action space clipped by an inner editor", () => {
+    const container = document.createElement("div");
+    const editor = document.createElement("div");
+    const input = document.createElement("textarea");
+    input.scrollIntoView = jest.fn();
+    const style = getComputedStyle(input);
+    jest.spyOn(globalThis, "getComputedStyle").mockImplementation((element) =>
+      Object.assign({}, style, {
+        overflowY: element === editor ? "hidden" : "visible",
+        scrollMarginBottom: element === input ? "96px" : "0px",
+      })
+    );
+    container.getBoundingClientRect = () => new DOMRect(0, 0, 400, 600);
+    editor.getBoundingClientRect = () => new DOMRect(0, 100, 400, 200);
+    input.getBoundingClientRect = () => new DOMRect(20, 200, 300, 96);
+    editor.append(input);
+    container.append(editor);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    paint();
+    expect(container.scrollTop).toBe(0);
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    tracking.disconnect();
+  });
+
+  it("reveals a field clipped by an inner editor even when the outer sheet fits it", () => {
+    const container = document.createElement("div");
+    const editor = document.createElement("div");
+    const input = document.createElement("input");
+    input.scrollIntoView = jest.fn();
+    editor.style.overflowY = "auto";
+    jest
+      .spyOn(globalThis, "getComputedStyle")
+      .mockReturnValue(
+        Object.assign(getComputedStyle(editor), { overflowY: "auto" })
+      );
+    container.getBoundingClientRect = () => new DOMRect(0, 0, 400, 600);
+    editor.getBoundingClientRect = () => new DOMRect(0, 200, 400, 300);
+    input.getBoundingClientRect = () => new DOMRect(20, 130, 300, 44);
+    editor.append(input);
+    container.append(editor);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    paint();
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+    tracking.disconnect();
+  });
+
+  it("reveals horizontal clipping when an inner editor resizes without changing focus", () => {
+    const container = document.createElement("div");
+    const editor = document.createElement("div");
+    const input = document.createElement("input");
+    input.scrollIntoView = jest.fn();
+    jest.spyOn(globalThis, "getComputedStyle").mockReturnValue(
+      Object.assign(getComputedStyle(editor), {
+        overflowX: "auto",
+        overflowY: "visible",
+      })
+    );
+    container.getBoundingClientRect = () => new DOMRect(0, 0, 400, 600);
+    editor.getBoundingClientRect = () => new DOMRect(0, 100, 400, 300);
+    input.getBoundingClientRect = () => new DOMRect(320, 150, 60, 44);
+    editor.append(input);
+    container.append(editor);
+    document.body.append(container);
+    const tracking = observeFocusedField(container);
+    input.focus();
+    paint();
+    expect(input.scrollIntoView).not.toHaveBeenCalled();
+    editor.getBoundingClientRect = () => new DOMRect(0, 100, 300, 300);
+    onResize([], observer);
+    paint();
+    expect(document.activeElement).toBe(input);
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+    expect(input.scrollIntoView).toHaveBeenCalledWith({
+      behavior: "instant",
+      block: "nearest",
+      inline: "nearest",
+    });
+    input.getBoundingClientRect = () => new DOMRect(20, 150, 60, 44);
+    onResize([], observer);
+    paint();
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+    tracking.disconnect();
+  });
+
+  it("tracks reply content growth when opted in and cancels pending reveals on cleanup", () => {
+    const container = document.createElement("div");
+    const content = document.createElement("div");
+    const input = document.createElement("textarea");
+    input.scrollIntoView = jest.fn();
+    content.append(input);
+    container.append(content);
+    document.body.append(container);
+    const tracking = observeFocusedField(container, {
+      observeContentResize: true,
+    });
+
+    expect(observer.observe).toHaveBeenCalledTimes(2);
+    expect(observer.observe).toHaveBeenNthCalledWith(1, container);
+    expect(observer.observe).toHaveBeenNthCalledWith(2, content);
+    input.focus();
+    onResize([], observer);
+    onResize([], observer);
+    expect(frames.size).toBe(1);
+    paint();
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
+
+    onResize([], observer);
+    tracking.disconnect();
+    paint();
+    expect(frames.size).toBe(0);
+    expect(input.scrollIntoView).toHaveBeenCalledTimes(1);
   });
 });

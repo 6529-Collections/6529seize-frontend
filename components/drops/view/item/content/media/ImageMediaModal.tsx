@@ -473,7 +473,7 @@ export function ImageMediaModal({
                 event.stopPropagation();
                 goToPrevious();
               }}
-              className="tw-fixed tw-left-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-left-4 sm:tw-size-12"
+              className="tw-fixed tw-left-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-left-4 sm:tw-size-12"
             >
               <ChevronLeftIcon className="tw-size-6" aria-hidden="true" />
             </button>
@@ -486,7 +486,7 @@ export function ImageMediaModal({
                 event.stopPropagation();
                 goToNext();
               }}
-              className="tw-fixed tw-right-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-xl tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-right-4 sm:tw-size-12"
+              className="tw-fixed tw-right-3 tw-top-1/2 tw-z-[1101] tw-inline-flex tw-size-10 -tw-translate-y-1/2 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-iron-900/95 tw-text-iron-100 tw-shadow-lg tw-shadow-black/30 tw-ring-1 tw-ring-inset tw-ring-iron-700/70 tw-backdrop-blur tw-transition tw-duration-200 disabled:tw-cursor-default disabled:tw-opacity-40 desktop-hover:hover:tw-bg-iron-700 sm:tw-right-4 sm:tw-size-12"
             >
               <ChevronRightIcon className="tw-size-6" aria-hidden="true" />
             </button>

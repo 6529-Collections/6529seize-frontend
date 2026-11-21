@@ -1,0 +1,51 @@
+/* Open waves deliberately use medium UI weights and proportional numbers,
+   including their desktop/mobile rails. Scope utility overrides here so shared
+   components keep their defaults elsewhere. Buttons keep their own weights;
+   author handles and level badges opt out with data-wave-typography="preserve"
+   and vote-total labels stay regular.
+   Semantic markdown strong/b tags are not utility classes and keep their weight. */
+.waveView
+  :is(:global(.tw-font-semibold), :global(.tw-font-bold)):not(
+    :global(button),
+    :global(button *),
+    :global([data-wave-typography="preserve"]),
+    :global([data-wave-typography="preserve"] *),
+    :global([data-wave-vote-total])
+  ) {
+  @apply tw-font-medium;
+}
+
+.waveView
+  :is(:global(.\!tw-font-semibold), :global(.\!tw-font-bold)):not(
+    :global(button),
+    :global(button *),
+    :global([data-wave-typography="preserve"]),
+    :global([data-wave-typography="preserve"] *),
+    :global([data-wave-vote-total])
+  ) {
+  @apply tw-font-medium !important;
+}
+
+.waveView
+  :global(.tw-tabular-nums):not(
+    :global([data-wave-typography="preserve"]),
+    :global([data-wave-typography="preserve"] *)
+  ) {
+  @apply tw-normal-nums;
+}
+
+.waveView :global([data-wave-drop-time]) {
+  @apply tw-text-iron-500;
+}
+
+.waveView :global([data-wave-signed-seal]) {
+  @apply tw-text-iron-600;
+}
+
+.waveView :global([data-wave-send]):disabled {
+  @apply tw-bg-transparent;
+}
+
+.waveView :global([data-wave-vote-total]) {
+  @apply tw-text-body tw-font-normal tw-normal-case tw-tracking-normal tw-text-iron-500;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useGroupCriteriaIdentityLabels } from "@/hooks/useGroupCriteriaIdentityLabels";
 import { t } from "@/i18n/messages";
@@ -17,11 +17,15 @@ import { WaveInformationPanelContext } from "@/components/brain/mobile/WaveInfor
 export default function WaveRulesGroupMembersLink({
   groupId,
   groupName,
+  groupDetails,
   href,
   linkLabel,
 }: {
   readonly groupId: string;
-  readonly groupName: string;
+  /** Existing Wave Rules links use this for their group-name tooltip. */
+  readonly groupName?: string | undefined;
+  /** The complete saved group response, including its criteria payload. */
+  readonly groupDetails?: ApiGroupFull | undefined;
   readonly href: string;
   readonly linkLabel?: string | undefined;
 }) {
@@ -58,10 +62,11 @@ export default function WaveRulesGroupMembersLink({
         endpoint: `groups/${encodeURIComponent(groupId)}`,
         signal,
       }),
-    enabled: groupId.length > 0,
+    enabled: groupId.length > 0 && groupDetails === undefined,
     staleTime: 60_000,
   });
-  const identityLabels = useGroupCriteriaIdentityLabels(group?.group);
+  const criteriaGroup = (groupDetails ?? group)?.group;
+  const identityLabels = useGroupCriteriaIdentityLabels(criteriaGroup);
 
   let countLabel = t(locale, "waves.create.groups.members.countLoading");
   if (typeof members?.count === "number") {
@@ -71,15 +76,18 @@ export default function WaveRulesGroupMembersLink({
   }
 
   const criteria = getGroupCriteriaSummary({
-    group: group?.group,
+    group: criteriaGroup,
     identityLabels,
     locale,
   });
   let criteriaLabel =
     criteria.text ?? t(locale, "waves.create.groups.members.noCriteria");
-  if (isGroupLoading) {
+  if (groupDetails === undefined && isGroupLoading) {
     criteriaLabel = t(locale, "waves.create.groups.members.criteria.loading");
-  } else if (isGroupError || criteria.status === "unavailable") {
+  } else if (
+    criteria.status === "unavailable" ||
+    (groupDetails === undefined && isGroupError)
+  ) {
     criteriaLabel = t(
       locale,
       "waves.create.groups.members.criteria.unavailable"

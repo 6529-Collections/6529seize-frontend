@@ -1,3 +1,7 @@
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  getDropdownOptionStateClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
@@ -19,7 +23,7 @@ export default function GroupCreateIdentitiesSearchItem({
       <button
         type="button"
         aria-pressed={selected}
-        className="tw-relative tw-flex tw-min-h-10 tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2.5 tw-py-2 tw-text-left tw-text-white tw-transition-colors tw-duration-200 focus-visible:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800"
+        className={`tw-relative tw-flex tw-min-h-10 tw-w-full tw-cursor-pointer tw-select-none tw-items-center tw-justify-between tw-rounded-md tw-border-0 tw-px-2.5 tw-py-2 tw-text-left tw-transition-colors tw-duration-200 focus-visible:tw-bg-iron-800 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:-tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${getDropdownOptionStateClasses(selected)}`}
         onMouseDown={(event) => {
           // Safari blurs the search before click without focusing this button.
           // Keep the result mounted until click; touch scrolling stays native.
@@ -71,7 +75,7 @@ export default function GroupCreateIdentitiesSearchItem({
           </div>
           {selected && (
             <svg
-              className="tw-size-4 tw-flex-shrink-0 tw-text-primary-300"
+              className={`tw-size-4 tw-flex-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

@@ -63,6 +63,31 @@ const renderCollapsedWave = (
 };
 
 describe("CollapsedWave", () => {
+  it("retains the active row fill and avatar emphasis", () => {
+    renderCollapsedWave({ isActive: true });
+
+    const link = screen.getByRole("link", { name: "Chat Wave" });
+    expect(link.parentElement).toHaveClass("tw-bg-iron-700/60");
+    expect(screen.getByTestId("wave-picture").parentElement).toHaveClass(
+      "tw-opacity-100",
+      "tw-ring-white/30"
+    );
+  });
+
+  it("suppresses direct unread badges and labels on muted waves", () => {
+    renderCollapsedWave({
+      wave: createMockMinimalWave({
+        unreadDropsCount: 3,
+        isMuted: true,
+      }),
+    });
+
+    const link = screen.getByRole("link", { name: "Chat Wave" });
+    expect(link.querySelector(".tw-bg-primary-500")).toBeNull();
+    expect(screen.queryByText("3")).not.toBeInTheDocument();
+    expect(link.querySelector('[data-icon="bell-slash"]')).not.toBeNull();
+  });
+
   it("forwards hover enter and leave to the wave link", () => {
     const onMouseEnter = jest.fn();
     const onMouseLeave = jest.fn();

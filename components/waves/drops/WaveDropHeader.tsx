@@ -19,6 +19,8 @@ import type { DropTimestampLayout } from "./drop.types";
 import { isAnonymousAuthor } from "@/helpers/anonymous-author.helpers";
 import { AnonymousAuthorName } from "./AnonymousDropAuthor";
 import WaveDropStormIndicator from "./WaveDropStormIndicator";
+import { Capacitor } from "@capacitor/core";
+import { withProfileFeedReturn } from "@/helpers/waves/profile-feed-navigation";
 
 interface WaveDropHeaderProps {
   readonly drop: ApiDrop;
@@ -87,6 +89,7 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
               className={`tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-1.5 tw-gap-y-1 ${timestampLayout === "stacked" ? identityRowHeightClass : ""}`}
             >
               <p
+                data-wave-typography="preserve"
                 className={`tw-m-0 tw-min-w-0 tw-max-w-full tw-font-semibold tw-leading-5 [overflow-wrap:anywhere] ${compact ? "tw-text-sm" : "tw-text-md"}`}
               >
                 {isAnonymousAuthor(drop.author) ? (
@@ -178,7 +181,15 @@ const WaveDropHeader: React.FC<WaveDropHeaderProps> = ({
             });
             return (
               <Link
-                onClick={(e) => handleNavigation(e, waveHref)}
+                onClick={(e) =>
+                  handleNavigation(
+                    e,
+                    withProfileFeedReturn(
+                      waveHref,
+                      Capacitor.isNativePlatform()
+                    )
+                  )
+                }
                 href={waveHref}
                 className="tw-block tw-rounded-sm tw-text-xs tw-leading-4 tw-text-iron-400 tw-no-underline tw-transition tw-duration-300 tw-ease-out [overflow-wrap:anywhere] hover:tw-text-iron-300 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950"
               >

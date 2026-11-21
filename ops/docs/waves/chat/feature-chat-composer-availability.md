@@ -63,8 +63,9 @@ availability. Submission availability is exposed through the Chat tab
   composer, including when submissions are restricted.
 - In ordinary `Rank` and `Approve` Chat headers, activate the unavailable
   `Submit drop` action to see the submission restriction, submission group, and
-  `View submission rules` link to Settings. Public groups link to their
-  criteria and members; hidden and direct-message groups show only `Private group`.
+  `View submission rules` link to Settings. For a public group, the row shows
+  a linked member count with the criteria underneath. Hidden and direct-message
+  groups show `Private group`.
 - Ended submissions keep the lock and show `Submission period has ended`, a
   known closing date, and a compact submission-group row. They do not present
   closure as missing permission. See

@@ -13,6 +13,11 @@ const mockUseIntersectionObserver =
 function setup({
   ref = React.createRef<HTMLDivElement>(),
   hasNextPage = true,
+  topFade = "mask",
+}: {
+  ref?: React.RefObject<HTMLDivElement | null>;
+  hasNextPage?: boolean;
+  topFade?: "mask" | "overlay";
 } = {}) {
   const onTopIntersection = jest.fn();
 
@@ -22,6 +27,7 @@ function setup({
       onTopIntersection={onTopIntersection}
       isFetchingNextPage={false}
       hasNextPage={hasNextPage}
+      topFade={topFade}
     >
       <div>child</div>
     </WaveDropsReverseContainer>
@@ -68,6 +74,17 @@ describe("WaveDropsReverseContainer", () => {
     lastCallback({ isIntersecting: true } as IntersectionObserverEntry);
 
     expect(onTopIntersection).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps the ref, pagination root, and anchor content on the scrollport with an overlay fade", () => {
+    const ref = React.createRef<HTMLDivElement>();
+    const { container, getByText } = setup({ ref, topFade: "overlay" });
+    const [, lastOptions] = mockUseIntersectionObserver.mock.calls.at(-1)!;
+
+    expect(ref.current).not.toBe(container.firstElementChild);
+    expect(ref.current).toHaveAttribute("data-wave-drops-scroll-container");
+    expect(lastOptions.root).toBe(ref.current);
+    expect(ref.current?.firstElementChild).toContainElement(getByText("child"));
   });
 
   it("allows scrolling without attaching container-level callbacks", () => {

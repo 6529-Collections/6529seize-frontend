@@ -905,7 +905,6 @@ export const EN_GB_MESSAGES = {
     "Current audience unavailable",
   "waves.create.groups.members.view": "View members",
   "waves.create.groups.members.previewDraft": "Preview matches",
-  "waves.create.groups.members.dialogTitle": "{role}: {group}",
   "waves.create.groups.members.dynamicDescription":
     "This is a live preview based on current profile, reputation, and ownership data. Membership can change over time.",
   "waves.create.groups.members.criteriaSummary": "Why these identities qualify",
