@@ -3,6 +3,7 @@ import {
   getWaveNavigationScreen,
   useWaveNavigationTransition,
 } from "@/components/brain/mobile/useWaveNavigationTransition";
+import { navigateAfterWaveSwipe } from "@/helpers/waves/wave-navigation-transition";
 
 const cancel = jest.fn();
 const animate = jest.fn<
@@ -52,7 +53,44 @@ it("does not animate initial loads or unrelated routes", () => {
   expect(getWaveNavigationScreen("/notifications", null)).toBeNull();
   expect(getWaveNavigationScreen("/messages/wave-a", "wave-a")).toBeNull();
   expect(getWaveNavigationScreen("/waves", null)).toBe("list");
+  expect(getWaveNavigationScreen("/waves", null, true)).toBe("feed");
   expect(getWaveNavigationScreen("/waves/wave-a", "wave-a")).toBe("wave");
+});
+
+it("does not replay a completed swipe when the return route commits slowly", () => {
+  jest.useFakeTimers();
+  try {
+    const { rerender } = render(<Surface screen="feed" />);
+    navigateAfterWaveSwipe(jest.fn());
+    act(() => jest.advanceTimersByTime(1500));
+    rerender(<Surface screen="list" />);
+    expect(animate).not.toHaveBeenCalled();
+
+    rerender(<Surface screen="wave" />);
+    expect(animate).toHaveBeenCalledTimes(1);
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+it("treats the feed as a distinct screen and reverses direction back from a chat", () => {
+  const { rerender } = render(<Surface screen="list" />);
+  rerender(<Surface screen="feed" />);
+  expect(animate.mock.calls[0]?.[0][0]).toEqual({
+    opacity: 0.75,
+    transform: "scale(0.98)",
+  });
+  rerender(<Surface screen="wave" />);
+  rerender(<Surface screen="feed" />);
+  expect(animate.mock.calls[2]?.[0][0]).toEqual({
+    opacity: 0.75,
+    transform: "scale(1.02)",
+  });
+  rerender(<Surface screen="list" />);
+  expect(animate.mock.calls[3]?.[0][0]).toEqual({
+    opacity: 0.75,
+    transform: "scale(1.02)",
+  });
 });
 
 it("moves into a wave and reverses direction on return without remounting", () => {

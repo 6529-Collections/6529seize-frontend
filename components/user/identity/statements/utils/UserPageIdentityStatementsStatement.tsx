@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import SocialStatementIcon from "@/components/user/utils/icons/SocialStatementIcon";
 import CopyIcon from "@/components/utils/icons/CopyIcon";
 import OutsideLinkIcon from "@/components/utils/icons/OutsideLinkIcon";
@@ -160,17 +162,17 @@ export default function UserPageIdentityStatementsStatement({
           </div>
         )}
         <div className="tw-flex tw-flex-shrink-0 tw-items-center tw-gap-2 tw-leading-none">
-          <button
+          <IconButton
             type="button"
+            size={36}
+            variant={isCopyIconActive ? "selected" : "muted"}
+            shape="circle"
+            pressEffect
             aria-label={`${t(
               locale,
               "user.profile.identity.statements.copyStatement"
             )} ${presentation.title}`}
-            className={`tw-inline-flex tw-h-9 tw-w-9 tw-cursor-pointer tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-p-0 tw-transition tw-duration-200 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-scale-95 motion-reduce:tw-transform-none motion-reduce:tw-transition-none ${
-              isCopyIconActive
-                ? "tw-bg-primary-500/15 tw-text-primary-300 tw-ring-1 tw-ring-inset tw-ring-primary-400/25"
-                : "tw-bg-transparent tw-text-iron-500 focus-visible:tw-bg-white/10 desktop-hover:hover:tw-bg-white/10 desktop-hover:hover:tw-text-white lg:tw-text-iron-600"
-            }`}
+            className="tw-touch-manipulation"
             onClick={handleCopy}
             onPointerDown={handleCopyPointerDown}
             onPointerUp={handleCopyPointerEnd}
@@ -184,7 +186,7 @@ export default function UserPageIdentityStatementsStatement({
             <span className="tw-sr-only">
               {t(locale, "user.profile.identity.statements.copyStatement")}
             </span>
-          </button>
+          </IconButton>
           {!isTouchScreen && (
             <Tooltip
               id={`copy-statement-${statement.id}`}

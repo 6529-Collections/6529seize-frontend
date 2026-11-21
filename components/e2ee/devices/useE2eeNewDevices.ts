@@ -46,14 +46,25 @@ function recordInitialDevices(
   notify();
 }
 
+/**
+ * Unannounced active devices set up after this one. A device that already
+ * existed when this device was set up is never news: it is usually an
+ * earlier setup of this same browser, found again after its storage was
+ * cleared.
+ */
 function findNewDevices(
   devices: readonly E2eeDeviceInfo[],
   knownSerialized: string,
   now: number
 ): E2eeDeviceInfo[] {
   const known = new Set(knownSerialized.split(",").filter(Boolean));
+  const ownSetupAt =
+    devices.find((device) => device.isThisDevice)?.createdAt ?? null;
   return devices.filter(
-    (device) => isActiveOtherDevice(device, now) && !known.has(device.deviceKey)
+    (device) =>
+      isActiveOtherDevice(device, now) &&
+      !known.has(device.deviceKey) &&
+      (ownSetupAt === null || device.createdAt > ownSetupAt)
   );
 }
 

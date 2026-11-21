@@ -77,6 +77,10 @@ import {
   getDropQueryKey,
 } from "@/services/api/drop-api";
 import { useWaveListSwipeBack } from "./mobile/useWaveListSwipeBack";
+import {
+  isProfileWavesFeed,
+  returnsToProfileWavesFeed,
+} from "@/helpers/waves/profile-feed-navigation";
 import { SidebarTab } from "./right-sidebar/BrainRightSidebarTypes";
 import { WaveContentTabs } from "./right-sidebar/WaveContent";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
@@ -89,6 +93,7 @@ import { useOptionalHeaderContext } from "@/contexts/HeaderContext";
 
 interface Props {
   readonly children: ReactNode;
+  readonly fallback?: ReactNode;
 }
 
 interface MobileAboutTabState {
@@ -382,10 +387,11 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
 
   const hasWave = Boolean(waveId);
   const isDirectMessage = pathname.startsWith("/messages/");
+  const isProfileFeed = !hasWave && isProfileWavesFeed(pathname, searchParams);
   const canSwipeBackToWaves =
     isApp &&
-    hasWave &&
-    (pathname.startsWith("/waves/") || isDirectMessage) &&
+    (isProfileFeed ||
+      (hasWave && (pathname.startsWith("/waves/") || isDirectMessage))) &&
     dropId === undefined &&
     searchParams.get("create") === null;
   const handleSwipeBackIntent = useCallback(() => {
@@ -394,13 +400,23 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   const handleSwipeBackToWaves = useCallback(() => {
     const input = document.activeElement;
     if (input instanceof HTMLElement) input.blur();
-    exitActiveWave(isDirectMessage);
-  }, [exitActiveWave, isDirectMessage]);
+    if (isProfileFeed) {
+      // Leaving Feed returns to Waves; leaving its chat returns to Feed.
+      if (myStream) myStream.activeWave.set(null);
+      else router.push("/waves", { scroll: false });
+    } else {
+      exitActiveWave(isDirectMessage);
+    }
+  }, [myStream, router, exitActiveWave, isDirectMessage, isProfileFeed]);
+  const swipeRootScreen = returnsToProfileWavesFeed(searchParams)
+    ? "feed"
+    : "list";
   const swipeBackHandlers = useWaveListSwipeBack({
     enabled: canSwipeBackToWaves,
-    scope: waveId ?? "root",
+    scope: waveId ?? (isProfileFeed ? "profile-feed" : "root"),
     onIntentStart: handleSwipeBackIntent,
     onSwipeBack: handleSwipeBackToWaves,
+    targetScreen: isDirectMessage ? undefined : swipeRootScreen,
   });
 
   const closeCreateOverlay = useCallback(() => {
@@ -585,9 +601,9 @@ const BrainMobileContent: React.FC<Props> = ({ children }) => {
   );
 };
 
-const BrainMobile: React.FC<Props> = (props) => (
-  <Suspense fallback={null}>
-    <BrainMobileContent {...props} />
+const BrainMobile: React.FC<Props> = ({ children, fallback }) => (
+  <Suspense fallback={fallback}>
+    <BrainMobileContent>{children}</BrainMobileContent>
   </Suspense>
 );
 

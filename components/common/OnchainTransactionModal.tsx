@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { WalletIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import Image from "next/image";
@@ -402,14 +404,17 @@ export default function OnchainTransactionModal({
               </h2>
             </div>
             {closable ? (
-              <button
+              <IconButton
                 type="button"
                 aria-label={closeLabel ?? "Close modal"}
                 onClick={onClose}
-                className="tw--mr-2 tw--mt-2 tw-inline-flex tw-size-11 tw-flex-none tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-text-iron-300 tw-transition-colors focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 desktop-hover:hover:tw-text-white"
+                size={44}
+                variant="ghost"
+                shape="circle"
+                className="tw--mr-2 tw--mt-2"
               >
                 <XMarkIcon className="tw-size-5" aria-hidden="true" />
-              </button>
+              </IconButton>
             ) : null}
           </div>
           {hasSubtitle ? (

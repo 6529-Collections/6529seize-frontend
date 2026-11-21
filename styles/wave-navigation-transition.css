@@ -38,6 +38,44 @@ html[data-wave-navigation-transition="back"] {
   --wave-exit-scale: 0.98;
 }
 
+html[data-wave-navigation-transition="swipe-back"]::view-transition-old(
+    wave-navigation
+  ) {
+  z-index: 2;
+  animation: wave-navigation-swipe-leave 180ms cubic-bezier(0.22, 1, 0.36, 1)
+    both;
+}
+
+html[data-wave-navigation-transition="swipe-back"]::view-transition-new(
+    wave-navigation
+  ) {
+  z-index: 1;
+  animation: none;
+}
+
+/* The old snapshot covers the handoff while virtualized rows are measured.
+   Rendering stays active; only the snapshot animations wait. */
+html[data-wave-navigation-content-pending]::view-transition-old(
+    wave-navigation
+  ),
+html[data-wave-navigation-content-pending]::view-transition-new(
+    wave-navigation
+  ) {
+  animation-play-state: paused;
+}
+
+html[data-wave-navigation-content-pending]::view-transition-new(
+    wave-navigation
+  ) {
+  visibility: hidden;
+}
+
+@keyframes wave-navigation-swipe-leave {
+  to {
+    transform: translateX(var(--wave-swipe-remainder));
+  }
+}
+
 @keyframes wave-navigation-leave {
   from {
     opacity: 1;

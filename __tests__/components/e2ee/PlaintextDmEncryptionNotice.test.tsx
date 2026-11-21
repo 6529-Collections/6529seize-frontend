@@ -1,8 +1,11 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import {
-  clearE2eeComposePrefill,
-  peekE2eeComposePrefill,
-} from "@/components/e2ee/e2eeComposePrefill";
+  fireEvent,
+  render,
+  renderHook,
+  screen,
+  waitFor,
+} from "@testing-library/react";
+import { useE2eeComposePrefill } from "@/components/e2ee/e2eeComposePrefill";
 import { PlaintextDmEncryptionNotice } from "@/components/e2ee/plaintext/PlaintextDmEncryptionNotice";
 import { isE2eeEnabled } from "@/config/e2eeEnv";
 import type { ApiWave } from "@/generated/models/ApiWave";
@@ -54,7 +57,6 @@ const publicWave = {
 describe("PlaintextDmEncryptionNotice", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    clearE2eeComposePrefill();
     isE2eeEnabledMock.mockReturnValue(true);
     mockIsApp = false;
     mockAuth = {
@@ -115,7 +117,8 @@ describe("PlaintextDmEncryptionNotice", () => {
     await waitFor(() =>
       expect(mockPush).toHaveBeenCalledWith("/messages/encrypted/new")
     );
-    expect(peekE2eeComposePrefill()).toEqual({
+    const { result } = renderHook(() => useE2eeComposePrefill("dm"));
+    expect(result.current).toEqual({
       ownerProfileId: "profile-self",
       source: "dm",
       people: [

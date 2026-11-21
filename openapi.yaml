@@ -11275,6 +11275,50 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/inbox-status:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Check for encrypted chats that may be available to an own device
+      description: >-
+        Reports queued Welcome deliveries and whether the caller may have chats
+        on other devices. A roster gap can require device approval, and some
+        chats may never add this device. Requires an active own device and
+        rejects proxies.
+      operationId: e2eeGetDeviceInboxStatus
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetDeviceInboxStatus
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: Inbox status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDeviceInboxStatus"
+        "400":
+          description: Invalid device key
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: Encrypted Messages disabled (E2EE_DISABLED)
+        "429":
+          description: Rate limited
   /e2ee/profiles/{profile_id}/devices:
     get:
       tags:
@@ -21618,12 +21662,13 @@ paths:
       description: >-
         Lists readable, non-DM voting waves using TDH, TDH_PLUS_XTDH or
         CARD_SET_TDH, regardless of follow or pin status. Excludes upcoming,
-        ended and completed voting and unresolved decisions. Waves with
-        proposals open for voting come first. Within each group, orders by the
-        nearest voting end or next decision, then open-ended waves, with a
-        stable wave ID tie-breaker. Wave and parent visibility apply before
-        counting and pagination. Personal voting eligibility depends on each
-        wave's voting rules.
+        ended and completed voting and unresolved decisions. Main Stage comes
+        first when eligible. Remaining waves with active leaderboard entries
+        precede waves with zero. Within each group, waves are sorted by
+        descending total Wave REP with a stable wave ID tie-breaker. Approval
+        waves include their active submission count. Wave and parent visibility
+        apply before counting and pagination. Personal voting eligibility
+        depends on each wave's voting rules.
       operationId: getActiveWaveVotes
       x-6529-router:
         enabled: true
@@ -23097,6 +23142,13 @@ components:
           type: integer
           format: int64
           nullable: true
+        active_submission_count:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Number of submissions open for voting, present only for approval
+            waves.
     ApiActiveWaveVotesPage:
       type: object
       required:
@@ -32862,6 +32914,18 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/ApiCompetitionEntry"
+    ApiDropCompetitionEntryReference:
+      type: object
+      required:
+        - competition_id
+        - entry_id
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
     ApiDropContextProfileContext:
       type: object
       required:
@@ -33513,6 +33577,14 @@ components:
         - drop_type
         - hide_link_preview
       properties:
+        competition_entry:
+          description: >-
+            Visible competition entry for this drop in a Wave timeline or reply
+            feed. Null means there is no visible entry. Omitted when membership
+            was not evaluated.
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDropCompetitionEntryReference"
         submission_artist:
           type: string
           description: >-
@@ -34465,6 +34537,21 @@ components:
           type: integer
           format: int64
           description: Unix milliseconds
+    ApiE2eeDeviceInboxStatus:
+      type: object
+      required:
+        - has_pending_chats
+      properties:
+        has_pending_chats:
+          type: boolean
+          description: >-
+            A Welcome is queued or a current roster includes another device of
+            this profile without including this one.
+        has_queued_welcomes:
+          type: boolean
+          description: >-
+            A Welcome is queued for this device. Omitted by servers that only
+            provide the combined has_pending_chats hint.
     ApiE2eeDeviceLookupRequest:
       type: object
       properties:
@@ -44298,11 +44385,22 @@ components:
           type: integer
           format: int32
           minimum: 1
-    ApiWaveCurationRequest:
+    ApiWaveCurationCriteria:
       type: object
       required:
+        - group
+        - is_private
+      properties:
+        group:
+          $ref: "#/components/schemas/ApiCreateGroupDescription"
+        is_private:
+          type: boolean
+          description: Restrict access to the criteria and member list.
+    ApiWaveCurationRequest:
+      type: object
+      description: Provide exactly one of group_id or criteria.
+      required:
         - name
-        - group_id
       properties:
         name:
           type: string
@@ -44310,6 +44408,9 @@ components:
           maxLength: 50
         group_id:
           type: string
+          description: Keep or assign an existing group.
+        criteria:
+          $ref: "#/components/schemas/ApiWaveCurationCriteria"
         priority_order:
           type: integer
           format: int32

@@ -74,7 +74,8 @@ export default function WaveLeaderboardGalleryItemVotes({
       >
         <div
           aria-hidden="true"
-          className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2"
+          data-wave-typography="preserve"
+          className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2 tw-font-semibold"
         >
           <span
             className={`tw-text-xs tw-font-semibold tw-tabular-nums sm:tw-text-sm ${getColorClass()}`}

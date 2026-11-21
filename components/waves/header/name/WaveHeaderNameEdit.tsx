@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useRef } from "react";
+import { createPortal } from "react-dom";
+import {
+  useWaveInformationPanel,
+  WAVE_NAME_EDIT_VIEW,
+} from "@/components/brain/mobile/WaveInformationPanelContext";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import PencilIcon, {
   PencilIconSize,
 } from "@/components/utils/icons/PencilIcon";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import IconButton from "@/components/utils/button/IconButton";
 import WaveHeaderNameEditModal from "./WaveHeaderNameEditModal";
 
 export default function WaveHeaderNameEdit({
@@ -14,29 +20,41 @@ export default function WaveHeaderNameEdit({
 }: {
   readonly wave: ApiWave;
 }) {
-  const [isEditNameOpen, setIsEditNameOpen] = useState(false);
   const locale = useBrowserLocale();
+  const panel = useWaveInformationPanel(
+    t(locale, "waves.header.nameEditTitle"),
+    WAVE_NAME_EDIT_VIEW
+  );
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const editor = (
+    <WaveHeaderNameEditModal
+      isOpen={panel.isOpen}
+      wave={wave}
+      onClose={panel.close}
+      embedded={panel.isInSheet}
+    />
+  );
 
   return (
     <div>
-      {/* Hidden by opacity rather than `display`, and revealed by hover, focus
-          and `touch-only` alike: renaming a wave has no other entry point in
-          the app, so this control must stay reachable by every input. */}
-      <button
+      {/* Keep the pencil reachable through hover, focus and touch alike. */}
+      <IconButton
+        ref={triggerRef}
         type="button"
-        onClick={() => setIsEditNameOpen(true)}
+        layout="edit-wave-name"
+        onClick={() => panel.open(triggerRef.current)}
         aria-label={t(locale, "waves.header.nameEditLabel")}
-        aria-expanded={isEditNameOpen}
-        aria-haspopup="dialog"
-        className="tw-pointer-events-none tw-flex tw-items-center tw-border-none tw-bg-transparent tw-p-0 tw-text-iron-300 tw-opacity-0 tw-transition-all tw-duration-300 tw-ease-out focus:tw-outline-none focus-visible:tw-pointer-events-auto focus-visible:tw-opacity-100 focus-visible:tw-ring-2 focus-visible:tw-ring-primary-500 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 desktop-hover:group-hover:tw-pointer-events-auto desktop-hover:group-hover:tw-opacity-100 desktop-hover:hover:tw-text-iron-400 touch-only:tw-pointer-events-auto touch-only:tw-opacity-100"
+        aria-expanded={panel.isOpen}
+        aria-controls={panel.isInSheet ? panel.contentId : undefined}
+        aria-haspopup={panel.isInSheet ? undefined : "dialog"}
       >
         <PencilIcon size={PencilIconSize.SMALL} />
-      </button>
-      <WaveHeaderNameEditModal
-        isOpen={isEditNameOpen}
-        wave={wave}
-        onClose={() => setIsEditNameOpen(false)}
-      />
+      </IconButton>
+      {panel.isInSheet
+        ? panel.isOpen &&
+          panel.container &&
+          createPortal(editor, panel.container)
+        : editor}
     </div>
   );
 }

@@ -1,9 +1,6 @@
 "use client";
 
-import {
-  DROPDOWN_TRIGGER_SURFACE_CLASSES,
-  DROPDOWN_TRIGGER_FRAME_CLASSES,
-} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { CheckCircleIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useRef } from "react";
 import type { TraitsData } from "../submission/types/TraitsData";
@@ -117,9 +114,6 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
       }
     }, [onBlur, field]);
 
-    const paddingClass =
-      size === "sm" ? "tw-px-3 tw-py-2.5" : "tw-px-4 tw-py-3.5";
-
     return (
       <TraitWrapper
         label={label}
@@ -143,7 +137,7 @@ export const DropdownTrait: React.FC<DropdownTraitProps> = React.memo(
           defaultValue={currentValue}
           onChange={handleChange}
           onBlur={handleBlur}
-          className={`${DROPDOWN_TRIGGER_SURFACE_CLASSES} ${DROPDOWN_TRIGGER_FRAME_CLASSES} tw-form-select tw-w-full tw-rounded-lg ${paddingClass} tw-appearance-none tw-text-base focus-visible:tw-outline-primary-400 sm:tw-text-sm [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100`}
+          className={`${getDropdownTriggerClasses({ variant: "form", border: "inset", externalValidation: true, metrics: { x: size === "sm" ? 12 : 16, y: size === "sm" ? 10 : 14, text: "responsive" } })} tw-form-select tw-w-full tw-appearance-none [&>option]:tw-bg-iron-950 [&>option]:tw-text-iron-100`}
           style={{ color: getSelectTextColor(currentValue) }}
         >
           <option

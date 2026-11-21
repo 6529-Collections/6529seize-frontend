@@ -77,6 +77,14 @@ const recommendationWave: MinimalWave = {
   sidebarActivityTimestamp: null,
   isFollowedSubwaveContainer: false,
 };
+const longRecommendationNames = [
+  "An exceptionally long recommendation name that cannot fit in the compact strip",
+  "AnExceptionallyLongUnbrokenRecommendationNameThatCannotFit",
+  "6529 Book Club",
+  "The Memes - Main Stage",
+  "The Flow",
+  "Three Memigos Meme Competition",
+];
 
 export const useActiveWaveVotes = () => ({
   data: {
@@ -112,6 +120,16 @@ export const useContentTab = () => ({
 });
 
 function Fixture() {
+  const showsLongRecommendationNames =
+    new URLSearchParams(location.search).get("recommendations") ===
+    "long-names";
+  const recommendationWaves = showsLongRecommendationNames
+    ? longRecommendationNames.map((name, index) => ({
+        ...recommendationWave,
+        id: `private-recommendation-${index}`,
+        name,
+      }))
+    : [recommendationWave];
   const [consent, setConsent] = useState(false);
   const [instance, setInstance] = useState(0);
   const [tab, setTab] = useState(MyStreamWaveTab.CHAT);
@@ -223,27 +241,32 @@ function Fixture() {
         <WebProfileFeedShortcut basePath="/waves" isCollapsed={false} />
         <div
           id="nested-scroll"
-          style={{ height: 220, width: 300, overflow: "auto" }}
+          style={{
+            height: showsLongRecommendationNames ? "auto" : 220,
+            width: showsLongRecommendationNames ? "min(100%, 430px)" : 300,
+            overflow: showsLongRecommendationNames ? "visible" : "auto",
+          }}
         >
           <SidebarDiscovery
             recommendationsStatus="success"
             onRetryRecommendations={undefined}
             previewItems={
               new URLSearchParams(location.search).has("recommendations")
-                ? [
-                    {
-                      wave: recommendationWave,
-                      href: "/waves/private-recommendation",
-                      isActive: recommendationActive,
-                      onClick: (event) => {
-                        event.preventDefault();
-                        setRecommendationActive((active) => !active);
-                      },
+                ? recommendationWaves.map((wave, index) => ({
+                    wave,
+                    href: `/waves/${wave.id}`,
+                    isActive: recommendationActive && index === 0,
+                    onClick: (event) => {
+                      event.preventDefault();
+                      setRecommendationActive((active) => !active);
                     },
-                  ]
+                  }))
                 : []
             }
-            isTouchPreview={false}
+            isTouchPreview={
+              showsLongRecommendationNames &&
+              window.matchMedia("(any-hover: none)").matches
+            }
           />
         </div>
         <ContentTabsContext.Provider value={availableTabs}>

@@ -73,11 +73,15 @@ jest.mock("@/components/utils/button/WaveDropDeleteButton", () => ({
 }));
 jest.mock("@/components/voting", () => ({
   __esModule: true,
-  MobileVotingModal: ({ isOpen }: any) => (
-    <div data-testid="mobile-voting-modal" data-open={String(isOpen)} />
-  ),
-  VotingModal: ({ isOpen }: any) => (
-    <div data-testid="desktop-voting-modal" data-open={String(isOpen)} />
+  VotingModal: ({ isOpen, preferMobile }: any) => (
+    <div
+      data-testid={
+        preferMobile && mockIsMobileScreen
+          ? "mobile-voting-modal"
+          : "desktop-voting-modal"
+      }
+      data-open={String(isOpen)}
+    />
   ),
 }));
 jest.mock("@/components/waves/memes/submission/MemesArtResubmitAction", () => ({

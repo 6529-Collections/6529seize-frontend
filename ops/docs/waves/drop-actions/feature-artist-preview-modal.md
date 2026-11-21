@@ -59,9 +59,10 @@ Badge state decides which section opens first.
   touch screens.
 - In the native app, the focused vote field stays visible as the keyboard opens,
   and the close button remains above the submission panel.
-- Close buttons use a 36px rounded-square surface with a 16px X across both
-  sections on web and in the native app, retaining a 44px touch target. They use
-  the shared modal's muted, borderless style with a dark hover background.
+- App previews use the same gray, dimmed backdrop as the desktop browser.
+- Native previews use the shared compact close button as a white X above the
+  panel, with a transparent background and no border. Web previews keep the
+  shared compact, muted close button in the header.
 - The active card's top row shows the media-format indicator and optional
   `Additional Action` badge on the left, with the leaderboard-style position
   badge on the right. The title appears below this row. Hover or focus the

@@ -62,7 +62,7 @@ export const SingleWaveDropVoter: React.FC<SingleWaveDropVoterProps> = ({
   return (
     <div className="tw-flex tw-items-center tw-justify-between tw-gap-4 tw-p-3 tw-transition-colors desktop-hover:hover:tw-bg-white/[0.02] motion-reduce:tw-transition-none">
       <div className="tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-4">
-        <span className="tw-text-xs tw-font-medium tw-text-iron-600">
+        <span className="tw-text-xs tw-font-medium tw-tabular-nums tw-text-iron-600">
           {position}
         </span>
         <Link

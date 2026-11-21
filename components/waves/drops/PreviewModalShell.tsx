@@ -1,4 +1,7 @@
 "use client";
+import useDialogKeyboard, {
+  DIALOG_KEYBOARD_VIEWPORT_STYLE,
+} from "@/hooks/useDialogKeyboard";
 
 import useDeviceInfo from "@/hooks/useDeviceInfo";
 import {
@@ -35,6 +38,7 @@ export const PreviewModalShell = ({
   maxWidth = "5xl",
 }: PreviewModalShellProps) => {
   const { isApp } = useDeviceInfo();
+  const keyboardViewportRef = useDialogKeyboard(isOpen && !isApp);
 
   useEffect(() => {
     if (!isOpen || isApp) {
@@ -79,7 +83,11 @@ export const PreviewModalShell = ({
           <DialogBackdrop className="tw-fixed tw-inset-0 tw-border-0 tw-bg-iron-600/60 tw-p-0" />
         </TransitionChild>
 
-        <div className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[100] tw-flex tw-overflow-hidden sm:tw-overflow-y-auto sm:tw-scrollbar-thin sm:tw-scrollbar-track-iron-800 sm:tw-scrollbar-thumb-iron-500 sm:hover:tw-scrollbar-thumb-iron-300">
+        <div
+          ref={keyboardViewportRef}
+          style={DIALOG_KEYBOARD_VIEWPORT_STYLE}
+          className="tw-pointer-events-none tw-fixed tw-inset-0 tw-z-[100] tw-flex tw-overflow-hidden sm:tw-overflow-y-auto sm:tw-scrollbar-thin sm:tw-scrollbar-track-iron-800 sm:tw-scrollbar-thumb-iron-500 sm:hover:tw-scrollbar-thumb-iron-300"
+        >
           <div className="tw-flex tw-min-h-full tw-w-full tw-items-end tw-justify-center tw-pt-10 sm:tw-items-center sm:tw-p-4">
             <TransitionChild
               as={Fragment}

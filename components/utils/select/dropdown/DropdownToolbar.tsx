@@ -1,22 +1,33 @@
-import type { ComponentPropsWithoutRef } from "react";
+"use client";
+
+import {
+  createContext,
+  useContext,
+  type ComponentPropsWithoutRef,
+} from "react";
+import type { DropdownMetrics, DropdownVariant } from "./dropdownTriggerStyles";
+
+const ToolbarMetricsContext = createContext<DropdownMetrics | null>(null);
+
+export function useDropdownToolbarMetrics() {
+  return useContext(ToolbarMetricsContext);
+}
+
+const TOOLBAR_METRICS = {
+  compact: { height: 32, minHeight: 0, y: 0, left: 10 },
+  regular: { height: 40, minHeight: 0, y: 8 },
+} as const;
 
 export default function DropdownToolbar({
   className = "",
-  size = "md",
+  variant = "regular",
   ...props
 }: Readonly<ComponentPropsWithoutRef<"div">> & {
-  readonly size?: "sm" | "md";
+  readonly variant?: Exclude<DropdownVariant, "form">;
 }) {
-  const triggerClasses =
-    "[&_button[aria-haspopup]]:tw-h-10 [&_button[aria-haspopup]]:tw-py-2";
-
-  const compactTriggerClasses =
-    "[&_button[aria-haspopup]]:tw-h-8 [&_button[aria-haspopup]]:tw-py-0 [&_button[aria-haspopup]]:tw-pl-2.5";
-
   return (
-    <div
-      {...props}
-      className={`${className} ${size === "sm" ? compactTriggerClasses : triggerClasses}`}
-    />
+    <ToolbarMetricsContext.Provider value={TOOLBAR_METRICS[variant]}>
+      <div {...props} className={className} />
+    </ToolbarMetricsContext.Provider>
   );
 }

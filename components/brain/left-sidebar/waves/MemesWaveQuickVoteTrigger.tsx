@@ -59,7 +59,12 @@ const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
       type="button"
       aria-label={label}
       title={title}
-      onClick={onOpenQuickVote}
+      onClick={(event) => {
+        // Safari does not focus buttons on pointer activation. Capture this
+        // launcher as the dialog's restoration target before opening it.
+        event.currentTarget.focus({ preventScroll: true });
+        onOpenQuickVote();
+      }}
       onFocus={onPrefetchQuickVote}
       onMouseEnter={onPrefetchQuickVote}
       onPointerDown={onPrefetchQuickVote}
@@ -69,7 +74,7 @@ const MemesWaveQuickVoteTrigger: React.FC<MemesWaveQuickVoteTriggerProps> = ({
     >
       <MemesWaveZapIcon className="tw-size-4 tw-flex-shrink-0 tw-fill-primary-300/20" />
       {leftThisRoundCount > 0 && (
-        <span className="tw-text-xs tw-font-semibold">
+        <span className="tw-text-xs tw-font-medium">
           {formatInteger(locale, leftThisRoundCount)}
         </span>
       )}

@@ -1,6 +1,7 @@
 import type { ReactNode, ComponentProps } from "react";
 import type { Tooltip } from "react-tooltip";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 
 export type WaveTooltipPlacement = ComponentProps<typeof Tooltip>["place"];
 
@@ -16,8 +17,9 @@ export const WaveTooltip = ({ id, place, children }: WaveTooltipProps) => (
   <BodyPortalTooltip
     id={id}
     {...(place && { place })}
-    className="tw-z-[10000] tw-rounded-md tw-bg-[#37373E] tw-px-2.5 tw-py-1.5 tw-text-xs tw-font-medium tw-text-white tw-shadow-[0_4px_12px_rgba(0,0,0,0.3)]"
+    opacity={1}
+    style={TOOLTIP_STYLES}
   >
-    <span className="tw-text-xs">{children}</span>
+    {children}
   </BodyPortalTooltip>
 );

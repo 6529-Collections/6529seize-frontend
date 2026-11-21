@@ -1,6 +1,9 @@
 "use client";
 
-import { DROPDOWN_TRIGGER_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+import {
+  getDropdownTriggerClasses,
+  getEmbeddedDropdownClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 
 import { AuthContext } from "@/components/auth/Auth";
 import { Spinner } from "@/components/dotLoader/DotLoader";
@@ -34,8 +37,7 @@ import SubscriptionHeaderLinks, {
 import UserPageSubscriptionsToggle from "./UserPageSubscriptionsToggle";
 import { useSubscriptionAllocationStatus } from "./useSubscriptionAllocationStatus";
 
-const SUBSCRIPTION_COUNT_SELECT_CLASS =
-  "tw-h-10 tw-w-12 tw-cursor-pointer tw-appearance-none tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-5 tw-text-sm tw-leading-none tw-text-inherit [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-text-iron-500";
+const SUBSCRIPTION_COUNT_SELECT_CLASS = `${getEmbeddedDropdownClasses({ height: 40, y: 0, left: 12, right: 20, text: "sm", leading: "none" })} tw-w-12 [color-scheme:dark] disabled:tw-text-iron-500`;
 
 function MintingTodayLabel({
   tokenId,
@@ -368,14 +370,14 @@ export default function MemeSubscriptionRow(
 
     return (
       <span
-        className={`${DROPDOWN_TRIGGER_CLASSES} tw-inline-flex tw-flex-shrink-0 tw-items-center focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${isCountSelectDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800"} ${isCompact ? "tw-h-11" : "tw-h-11 md:tw-h-9"}`}
+        className={`${getDropdownTriggerClasses({ variant: "regular", metrics: { height: isCompact ? 44 : "subscription" } })} tw-inline-flex tw-flex-shrink-0 tw-items-center focus-within:tw-ring-2 focus-within:tw-ring-primary-400 ${isCountSelectDisabled ? "tw-cursor-not-allowed" : "tw-cursor-pointer desktop-hover:hover:tw-bg-iron-800"}`}
       >
         <span className="tw-relative tw-inline-flex tw-items-center">
           <select
             className={
               isCompact
                 ? SUBSCRIPTION_COUNT_SELECT_CLASS
-                : "tw-h-11 tw-w-12 tw-cursor-pointer tw-appearance-none tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-2.5 tw-pr-6 tw-text-meta tw-font-medium tw-text-inherit [color-scheme:dark] focus:tw-outline-none disabled:tw-cursor-not-allowed disabled:tw-opacity-40 md:tw-h-9"
+                : `${getEmbeddedDropdownClasses({ height: "subscription", y: 0, left: 10, right: 24, text: "meta" })} tw-w-12 tw-rounded-lg [color-scheme:dark] disabled:tw-opacity-40`
             }
             value={Math.max(0, Math.min(selectedCount, props.eligibilityCount))}
             disabled={isCountSelectDisabled}

@@ -4,8 +4,9 @@
 
 This page covers vote value entry controls: slider mode and numeric mode.
 Both modes edit one shared value for the same drop.
-The value uses each drop's `min_rating` and `max_rating` bounds and shows the
-wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
+The value respects the current voting limits and shows the wave credit label
+(`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`). Decision entries use their decision's
+current voting budget; other drops use their own allowed range.
 
 ## Location in the Site
 
@@ -23,11 +24,7 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 
 - Select `Vote` on an eligible drop surface to open modal/sheet voting.
 - In active submissions, use the inline mini vote card.
-- Switch entry mode with:
-  - `Switch to slider`
-  - `Switch to numeric`
-  - `Slider` / `Numeric` in decision submission popups
-  - mini-card mode toggle icon for older votes outside decisions
+- Use the compact `Slider` / `Numeric` tabs beside `Your vote` to switch modes.
 
 ## User Journey
 
@@ -36,28 +33,54 @@ wave credit label (`TDH`, `XTDH`, `TDH + XTDH`, or `Rep`).
 3. Set the value:
    - slider drag
    - numeric text input
-   - `%` quick buttons (normal numeric mode)
-   - `+` and `-` step buttons (normal numeric mode)
+   - `%` quick buttons in full-size numeric controls
+   - up/down step buttons in full-size numeric controls
 4. Review the live value and vote-credit label.
 5. Optional: enable `Explain vote` and edit the rationale. Decision popups
    and full decision dialogs display the generated rationale as a placeholder;
    other vote dialogs prefill it.
-6. Select `Vote` or `Vote + reply` to submit.
+6. Select `Vote`. Its button includes the current signed amount and credit
+   label, such as `Vote +250 TDH`, including when an explanation is enabled.
 
 ## Common Scenarios
 
-- Normal voting opens in slider mode; mini voting opens in numeric mode.
+- Full voting dialogs and sheets open in slider mode. Decision submission
+  cards also open in slider mode; mini cards outside decisions open in numeric
+  mode and do not offer a rationale reply.
+- Both voting forms use a `Your vote` header with compact `Slider` / `Numeric`
+  tabs. Switching modes keeps the entered amount and the panel's height without
+  submitting a vote.
+- Compact submission cards use a smaller numeric field on desktop. Phones and
+  touch devices keep a larger field and text for entry.
+- Full and compact numeric fields share the app font, neutral background and
+  visible keyboard focus. Credit labels remain beside the amount. A visible
+  border frames the numeric field and its two arrows in full panels and compact
+  submission cards.
+- In full-size dialogs and sheets, `Explain vote` uses a chat icon on its own
+  row. Its reply field opens below that row, followed by a full-width `Vote`
+  button, including on desktop. Compact decision submission cards that offer
+  replies keep `Explain vote` on the left and a small `Vote` button on the right
+  of one footer row; their reply field opens above the footer. Positive amounts
+  use green, negative amounts use red, and zero uses a neutral style.
 - Slider mode uses larger hit areas and logarithmic mapping so low and high
   values are easier to reach.
-- Quick percentage buttons in normal numeric mode:
-  - mobile: `-75`, `-50`, `-25`, `25`, `50`, `75`
-  - desktop: `-100`, `-75`, `-50`, `-25`, `25`, `50`, `75`, `100`
-- Holding `+` or `-` in normal numeric mode accelerates step size over time:
+- Keyboard focus highlights the slider handle. Clicking or dragging does not
+  draw a focus box around the whole slider area.
+- Full-size numeric controls offer `-100%`, `-50%`, `+50%`, and `+100%`.
+  The shortcuts use the allowed vote on this drop or decision entry. For
+  example, `+50%` fills in 40 if the maximum is 80. Negative shortcuts are
+  omitted when negative votes are not allowed. Compact submission cards keep
+  the arrows without the percentage row.
+- Holding an up/down step button accelerates step size:
   `1`, then `10`, then `100`, then `1000`.
+- Use `Enter` or `Space` on a focused step button to change the amount once.
+  A pointer click or tap also steps once. Releasing or cancelling a held press
+  stops repeated stepping. Step buttons and percentage shortcuts change the
+  draft without submitting it.
 - Hold-to-step snaps when crossing memetic values
   (`±69`, `±420`, `±6529`, `±42069`, `±69420`) and pauses briefly before
   continuing.
-- Pressing `Enter` in numeric input submits immediately.
+- Pressing `Enter` in numeric input starts submission.
 - Normal vote modal/sheet controls include an optional rationale reply. The
   switch starts off, turns on with the first text edit, and keeps the user's
   later manual on/off choice.
@@ -76,23 +99,24 @@ line below the input shows the remaining balance on the left and spent credits
 out of available credits on the right, for example `679 remaining` and
 `33,591 of 34,270 credits spent`. On narrow cards it wraps between those two groups;
 numbers stay with their words. Full credit labels remain available to screen
-readers. The icon-style `Explain vote` control and compact `Save
-vote` button share the bottom row. The explanation opens above that row, with
-its public-reply note below the text field. It opens and closes with a short
+readers. When replies are available, the footer keeps the chat-icon `Explain vote`
+control on the left and a compact `Vote` button on the right. The reply field opens above that row,
+with its public-reply note below the text field. It opens and closes with a short
 expand/fade transition, respecting reduced-motion settings. Generated text such
 as `Vote rationale (0 at time of posting):` appears as a placeholder, so typing
 starts in an empty field. Opening `Explain vote` does not show an empty-field
 warning. Leaving the field untouched preserves the existing generated reply;
 entering text replaces it. Clearing an edited field while `Explain vote` is on
-blocks `Save vote` until you enter text or turn the control off. The compact
-text field does not scroll internally; drag its resize handle to enlarge it and
-reveal longer explanations. Vote amounts, limits, eligibility, and saving work
-the same in both input modes.
+blocks `Vote` until you enter text or turn the control off. Reply fields start
+at three rows in compact submission cards and four rows in full dialogs and
+sheets. Long replies scroll inside the field. Drag its resize handle to enlarge
+the field when needed.
+Vote amounts, limits, eligibility, and saving work the same in both input modes.
 
-The full decision voting modal and mobile sheet use the same compact
-remaining/spent credit line beneath the input, and the same
-centered `Explain vote` and `Save vote` actions. Their numeric input and
-rationale field are taller than the card controls. Generated rationale appears
+The full decision voting modal and mobile sheet use the same header, reply
+control, and compact remaining/spent credit line beneath the input. Their
+`Explain vote` control has its own row above the reply field, followed by a
+full-width `Vote` action. Generated rationale appears
 as a placeholder here too: typing starts in an empty field, while an untouched
 field retains the existing generated reply.
 
@@ -101,12 +125,14 @@ field retains the existing generated reply.
 - When min and max are both zero, the slider rests at center.
 - Positive and negative values share one range, with slider fill split around
   zero.
-- Numeric typed and stepped values are clamped to each drop's bounds.
-- Mini numeric mode has text input only (no `%` quick buttons, no `+`/`-`
-  step buttons).
+- Numeric typed and stepped values outside decisions are clamped to the drop's
+  bounds. Decision votes must stay within the displayed current credit limits.
+- Mini numeric mode includes up/down step buttons without percentage shortcuts.
 - Long-press stepping repeats every `100ms` while pressed.
-- Vote controls are hidden for: not logged in, no profile handle, proxy,
-  ineligible drop/group, winner drops, voting not started, and voting ended.
+- Outside decisions, vote actions can be hidden for: not logged in, no profile
+  handle, proxy, ineligible drop/group, winner drops, voting not started, and
+  voting ended. Decision voting follows the entry and acting profile's
+  permissions, including authorized proxy voting.
 - `No credit` still shows vote controls, but `max_rating` can be zero and
   submit can fail.
 
@@ -121,13 +147,19 @@ field retains the existing generated reply.
 - If the vote succeeds but the optional reply fails, the vote stays saved and
   an error toast tells the user to retry the reply.
 - Submit always runs an auth check first; canceling auth keeps controls open.
-- If vote submission fails, users stay in place, see an error toast, and can
-  retry with the same value.
-- In modal/sheet flows, submit validates and completes auth first, then starts
-  the vote request, briefly shows the success state, and closes. If the request
-  later fails, users see an error toast and can reopen voting to retry.
+- Decision forms report a save error and refresh their voting limits for retry.
+  Other vote forms use an error toast. A failed save keeps the entered value
+  while the form remains open.
+- Decision voting closes after the server confirms the vote. Scores and
+  rankings can continue refreshing in the background.
+- Other modal/sheet votes validate and complete auth first, then start the vote
+  request, briefly show the success state, and close. An immediate failure keeps
+  the controls open. If the request fails after closing, an error toast appears
+  and users can reopen voting and re-enter the amount to retry.
 - In mini active-submission cards, successful submit refreshes submission/drop
   queries and keeps users in the same list.
+- My Votes retains its separate compact amount, range, and saved-vote
+  explanation controls; the panel layout does not replace those table rows.
 
 ## Limitations / Notes
 

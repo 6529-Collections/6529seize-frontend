@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import { useAuth } from "@/components/auth/Auth";
 import MailUnreadIcon from "@/components/common/icons/MailUnreadIcon";
 import { Spinner } from "@/components/dotLoader/DotLoader";
@@ -170,13 +172,14 @@ export default function WaveDropActionsMarkUnread({
       disabled={loading}
       style={{ backgroundColor: "#1F2937", color: "white", padding: "4px 8px" }}
     >
-      <button
+      <IconButton
         onClick={(e) => {
           e.stopPropagation();
           handleMarkUnread();
         }}
         disabled={loading}
-        className="tw-group tw-flex tw-h-full tw-cursor-pointer tw-items-center tw-gap-x-1.5 tw-rounded-full tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-leading-5 tw-text-iron-500 tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-text-iron-50"
+        type="submit"
+        layout="drop-inline"
         aria-label="Mark as unread"
       >
         {loading ? (
@@ -184,7 +187,7 @@ export default function WaveDropActionsMarkUnread({
         ) : (
           <MailUnreadIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
         )}
-      </button>
+      </IconButton>
     </DropActionTooltip>
   );
 }

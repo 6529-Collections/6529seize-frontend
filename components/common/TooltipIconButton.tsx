@@ -5,6 +5,12 @@ import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { useId, useState } from "react";
 import type { ComponentPropsWithoutRef, FocusEvent, MouseEvent } from "react";
+import IconButton from "@/components/utils/button/IconButton";
+import type {
+  IconButtonShape,
+  IconButtonSize,
+  IconButtonVariant,
+} from "@/components/utils/button/iconButtonStyles";
 
 interface TooltipIconButtonProps extends Omit<
   ComponentPropsWithoutRef<"button">,
@@ -13,8 +19,9 @@ interface TooltipIconButtonProps extends Omit<
   readonly icon: IconDefinition;
   readonly tooltipText: string;
   readonly iconClassName?: string | undefined;
-  readonly buttonSizeClassName?: string | undefined;
-  readonly buttonShapeClassName?: string | undefined;
+  readonly size?: IconButtonSize | undefined;
+  readonly shape?: IconButtonShape | undefined;
+  readonly variant?: IconButtonVariant | undefined;
   readonly tooltipWidth?: string | undefined;
   readonly tooltipPosition?: "top" | "bottom" | "left" | "right" | undefined;
 }
@@ -23,8 +30,9 @@ export default function TooltipIconButton({
   icon,
   tooltipText,
   iconClassName = "tw-text-iron-400 tw-size-4",
-  buttonSizeClassName = "tw-size-6",
-  buttonShapeClassName = "tw-rounded-full",
+  size = 24,
+  shape = "circle",
+  variant = "ghost",
   tooltipWidth = "tw-w-72",
   tooltipPosition = "top",
   type = "button",
@@ -46,7 +54,7 @@ export default function TooltipIconButton({
   const ariaDescribedBy = [ariaDescribedByProp, tooltipElementId]
     .filter(Boolean)
     .join(" ");
-  const buttonClassName = `tw-relative tw-inline-flex ${buttonSizeClassName} tw-shrink-0 tw-cursor-pointer tw-items-center tw-justify-center ${buttonShapeClassName} tw-border-none tw-bg-transparent tw-p-0 tw-leading-none focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 focus-visible:tw-ring-offset-2 focus-visible:tw-ring-offset-iron-950 ${className ?? ""}`;
+  const buttonClassName = `tw-relative tw-leading-none ${className ?? ""}`;
   const showTooltip = isHovered || isFocused;
 
   const getPositionClasses = () => {
@@ -88,8 +96,11 @@ export default function TooltipIconButton({
   };
 
   return (
-    <button
+    <IconButton
       type={type}
+      size={size}
+      shape={shape}
+      variant={variant}
       className={buttonClassName}
       tabIndex={tabIndex}
       aria-label={ariaLabel ?? tooltipText}
@@ -112,6 +123,6 @@ export default function TooltipIconButton({
           {tooltipText}
         </div>
       )}
-    </button>
+    </IconButton>
   );
 }

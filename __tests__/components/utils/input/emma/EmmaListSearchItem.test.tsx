@@ -49,7 +49,7 @@ describe('EmmaListSearchItem', () => {
 
       const button = screen.getByRole('button');
       expect(button).toHaveClass(
-        'hover:tw-bg-iron-700',
+        'desktop-hover:hover:tw-bg-iron-800',
         'tw-py-2',
         'tw-w-full',
         'tw-h-full',
@@ -59,7 +59,7 @@ describe('EmmaListSearchItem', () => {
         'tw-flex',
         'tw-items-center',
         'tw-justify-between',
-        'tw-text-white',
+        'tw-text-iron-200',
         'tw-rounded-lg',
         'tw-relative',
         'tw-cursor-pointer',
@@ -138,7 +138,7 @@ describe('EmmaListSearchItem', () => {
         'tw-h-5',
         'tw-w-5',
         'tw-ml-2',
-        'tw-text-primary-300',
+        'tw-text-iron-300',
         'tw-transition',
         'tw-duration-300',
         'tw-ease-out'

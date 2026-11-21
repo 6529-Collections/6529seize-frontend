@@ -1504,6 +1504,240 @@ test("homepage artwork request has a visible failure and retry @smoke @medium @l
   await expectNoHorizontalOverflow(page);
 });
 
+test("Discover controls fade offscreen options and hide the scrollbar @smoke @medium @large", async ({
+  page,
+  browserName,
+}, testInfo) => {
+  await page.route("**/api/v2/waves?*", (route) =>
+    route.fulfill({
+      headers: { "access-control-allow-origin": "*" },
+      json: { data: [], page: 1, count: 0, next: false },
+    })
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.setViewportSize({ width: 390, height: 1000 });
+  await page.goto("/discover", { waitUntil: "domcontentloaded" });
+  const controls = page.getByRole("group", { name: "Discovery controls" });
+  const scroller = page
+    .getByRole("group", { name: "Discovery controls" })
+    .locator("[data-discovery-controls-scroll]");
+  const leftFade = page
+    .getByRole("group", { name: "Discovery controls" })
+    .locator('[data-wave-tabs-fade="left"]');
+  const rightFade = page
+    .getByRole("group", { name: "Discovery controls" })
+    .locator('[data-wave-tabs-fade="right"]');
+  const leftArrow = controls.getByRole("button", {
+    name: "Scroll filters left",
+  });
+  const rightArrow = controls.getByRole("button", {
+    name: "Scroll filters right",
+  });
+  await expect(scroller).toHaveCSS("scrollbar-width", "none");
+  if (browserName !== "firefox") {
+    expect(
+      await scroller.evaluate(
+        (element) => getComputedStyle(element, "::-webkit-scrollbar").display
+      )
+    ).toBe("none");
+  }
+  await expect(leftFade).toHaveCSS("opacity", "0");
+  await expect(rightFade).toHaveCSS("opacity", "1");
+  await expect(rightFade).toHaveCSS("pointer-events", "none");
+  await controls.screenshot({
+    path: testInfo.outputPath("controls-start.png"),
+  });
+
+  await rightArrow.click();
+  await expect(leftFade).toHaveCSS("opacity", "1");
+  await expect(rightFade).toHaveCSS("opacity", "0");
+  await expect(leftArrow).toBeFocused();
+  await controls.getByRole("radio", { name: "REP 60+" }).click();
+  await expect(page).toHaveURL(/filter=REP_60/);
+  await expect(
+    controls.getByRole("radio", { name: "REP 60+" })
+  ).toHaveAttribute("aria-checked", "true");
+  await controls.screenshot({ path: testInfo.outputPath("controls-end.png") });
+
+  await leftArrow.click();
+  await controls
+    .getByRole("button", { name: "Wave discovery sort: Balanced" })
+    .click();
+  const sortSheet = page.getByRole("dialog", { name: "Wave discovery sort" });
+  await sortSheet.getByRole("button", { name: "Quality", exact: true }).click();
+  await expect(sortSheet).not.toBeVisible();
+  await expect(page).toHaveURL(/sort=QUALITY/);
+  const selectedFilter = controls.getByRole("radio", { name: "REP 60+" });
+  await selectedFilter.focus();
+  await selectedFilter.press("Home");
+  await expect(
+    controls.getByRole("radio", { name: "All", exact: true })
+  ).toBeFocused();
+  await expect(
+    controls.getByRole("radio", { name: "All", exact: true })
+  ).toHaveAttribute("aria-checked", "true");
+  await expect(page).not.toHaveURL(/filter=REP_60/);
+  await expect(
+    controls.getByRole("radio", { name: "All", exact: true })
+  ).toBeInViewport({ ratio: 1 });
+  await expectNoHorizontalOverflow(page);
+
+  await leftArrow.focus();
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await expect(leftFade).toHaveCSS("opacity", "0");
+  await expect(rightFade).toHaveCSS("opacity", "0");
+  await expect(leftArrow).not.toBeVisible();
+  await expect(rightArrow).not.toBeVisible();
+  await expect(
+    controls.getByRole("tab", { name: "Quality", exact: true })
+  ).toBeFocused();
+  await expect(scroller).toHaveCSS("scrollbar-width", "none");
+  await expectNoHorizontalOverflow(page);
+  await controls.screenshot({ path: testInfo.outputPath("controls-wide.png") });
+});
+
+test("Active Votes keeps full-height artwork and every metric visible at responsive widths @smoke @medium @large", async ({
+  page,
+}, testInfo) => {
+  const data = [0, 2, null, 1, null, 3].map((count, index) => ({
+    voting_ends_at: null,
+    next_decision_at: null,
+    active_submission_count: count,
+    wave: {
+      id: `discover-layout-${index}`,
+      name: `Community proposal ${index} with a long wave name`,
+      pfp: "https://6529.io/discover-cover-fixture.png",
+      creator: null,
+      created_at: 0,
+      last_drop_time: 0,
+      has_competition: true,
+      is_dm_wave: false,
+      is_private: false,
+      total_drops_count: 2,
+      description_drop: {
+        contents:
+          "- **QUORUM Proposal Template** and [details](https://example.com)",
+        media: [],
+      },
+      wave_score: { visibility_score: 100, hotness_score: 100 },
+      wave_rep: { total_rep: index % 2 === 0 ? 1250 : -1250 },
+    },
+  }));
+  await page.route("**/api/v2/waves/active-votes?*", (route) =>
+    route.fulfill({
+      headers: { "access-control-allow-origin": "*" },
+      json: { page: 1, next: false, count: data.length, data },
+    })
+  );
+  await page.route("**/_next/image?*", (route) =>
+    route.fulfill({
+      contentType: "image/svg+xml",
+      body: '<svg xmlns="http://www.w3.org/2000/svg" width="92" height="92"><rect width="92" height="92" fill="#161616"/></svg>',
+    })
+  );
+  await page.goto("/discover?view=active-votes", {
+    waitUntil: "domcontentloaded",
+  });
+  const section = page
+    .getByRole("region", { name: "Active Votes", exact: true })
+    .last();
+  const cards = section.getByRole("link", {
+    name: /^View wave Community proposal/,
+  });
+  await expect(cards).toHaveCount(data.length);
+  await expect(
+    section.getByText("0 active submissions", { exact: true })
+  ).toBeVisible();
+  await expect(
+    section.getByText("2 active submissions", { exact: true })
+  ).toBeVisible();
+  const countBadge = section
+    .getByRole("heading", { name: /^Active Votes/ })
+    .locator("span");
+  for (const width of [320, 390, 640, 768, 1024, 1280, 1440]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await expectNoHorizontalOverflow(page);
+    const badgeBox = (await countBadge.boundingBox())!;
+    expect(Math.abs(badgeBox.width - badgeBox.height)).toBeLessThanOrEqual(0.5);
+
+    for (const card of await cards.all()) {
+      await expect(
+        card.getByText("QUORUM Proposal Template and details", {
+          exact: true,
+        })
+      ).toBeVisible();
+      const layout = await card.evaluate((element) => {
+        const cover = element.firstElementChild!;
+        const metrics = element.querySelector(".explore-wave-card-metrics")!;
+        return {
+          card: element.getBoundingClientRect().toJSON(),
+          cover: cover.getBoundingClientRect().toJSON(),
+          metrics: Array.from(
+            metrics.querySelectorAll("[aria-label]"),
+            (metric) => ({
+              box: metric.getBoundingClientRect().toJSON(),
+              icon: metric
+                .querySelector("svg")!
+                .getBoundingClientRect()
+                .toJSON(),
+              label: metric.children[1]!.getBoundingClientRect().toJSON(),
+              value: metric.children[2]!.getBoundingClientRect().toJSON(),
+              clipped: metric.scrollWidth > metric.clientWidth,
+            })
+          ),
+        };
+      });
+      expect(layout.cover.width).toBe(width < 640 ? 80 : 96);
+      expect(layout.cover.height).toBeCloseTo(layout.card.height, 1);
+      expect(layout.cover.left).toBeCloseTo(layout.card.left, 1);
+      expect(layout.cover.top).toBeCloseTo(layout.card.top, 1);
+      expect(layout.cover.bottom).toBeCloseTo(layout.card.bottom, 1);
+      expect(layout.metrics).toHaveLength(3);
+      for (const metric of layout.metrics) {
+        expect(metric.clipped).toBe(false);
+        const iconCenter = metric.icon.top + metric.icon.height / 2;
+        for (const text of [metric.label, metric.value]) {
+          expect(
+            Math.abs(iconCenter - (text.top + text.height / 2))
+          ).toBeLessThanOrEqual(0.5);
+        }
+        expect(metric.box.left).toBeGreaterThan(layout.cover.right);
+        expect(metric.box.right).toBeLessThanOrEqual(layout.card.right - 12);
+        expect(metric.box.bottom).toBeLessThanOrEqual(layout.card.bottom - 12);
+      }
+      if (width === 1440) {
+        expect(
+          new Set(layout.metrics.map((metric) => metric.box.top)).size
+        ).toBe(1);
+        expect(layout.card.height).toBe(116);
+      }
+    }
+    if (width === 390 || width === 1440) {
+      await page.screenshot({
+        path: testInfo.outputPath(`active-votes-${width}.png`),
+      });
+    }
+  }
+  const restingShadow = await cards
+    .first()
+    .evaluate((element) => getComputedStyle(element).boxShadow);
+  await cards.first().focus();
+  await expect(cards.first()).toBeFocused();
+  await expect(cards.first()).not.toHaveCSS("box-shadow", "none");
+  await expect
+    .poll(() =>
+      cards.first().evaluate((element) => getComputedStyle(element).boxShadow)
+    )
+    .not.toBe(restingShadow);
+  await cards.first().hover();
+  await expect(cards.first()).toHaveCSS("transform", "none");
+  await expect(cards.first().getByRole("img")).toHaveCSS("transform", "none");
+  await expect(cards.first()).toHaveAttribute(
+    "href",
+    "/waves/discover-layout-0"
+  );
+});
+
 test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
     // Layout and hover assertions must not depend on a live voting round.
@@ -1789,7 +2023,7 @@ test.describe("Home Page @smoke @medium @large", () => {
               .trim()
           )
         )
-        .toBe("7 7 58");
+        .toBe("19 19 58");
       const layout = await firstCard.evaluate((card) => {
         const cover = card.firstElementChild!;
         const details = card.lastElementChild!;
@@ -1813,7 +2047,7 @@ test.describe("Home Page @smoke @medium @large", () => {
       );
       expect(layout.details.top).toBeGreaterThan(layout.card.top);
       expect(layout.metrics.bottom).toBeLessThan(layout.card.bottom);
-      expect(layout.gradient).toContain("rgb(7, 7, 58) calc(100% - 60px)");
+      expect(layout.gradient).toContain("rgb(19, 19, 58) calc(100% - 60px)");
       if (width === 390 || width === 1440) {
         await page.screenshot({
           path: testInfo.outputPath(`discover-cards-${width}.png`),
@@ -2576,6 +2810,94 @@ test("homepage tracking follows nested scrolling and loaded sections @smoke @med
     .getByRole("heading", { name: "Introduction" })
     .scrollIntoViewIfNeeded();
   await expect(seen).toHaveText(["Introduction", "Explore waves"]);
+});
+
+test("collapsed sidebar fits full rows when a desktop update appears @smoke @medium @large", async ({
+  page,
+}, testInfo) => {
+  // Mobile and native projects use different navigation shells.
+  test.skip(
+    !isDesktopWebProject(testInfo.project.name),
+    "Desktop collapsed sidebar geometry"
+  );
+  await page.setViewportSize({ width: 1440, height: 600 });
+  await page.addInitScript(() => {
+    globalThis.sessionStorage.setItem("sidebarCollapsed", "true");
+  });
+  let releaseVersion!: () => void;
+  const versionReady = new Promise<void>((resolve) => {
+    releaseVersion = resolve;
+  });
+  await page.route("**/api/version", async (route) => {
+    await versionReady;
+    const currentOrder = Number(
+      route.request().headers()["x-6529-client-release-order"] ?? "0"
+    );
+    await route.fulfill({
+      json: { stale: true, announced_release_order: currentOrder + 1 },
+    });
+  });
+  try {
+    await page.goto("/about", { waitUntil: "domcontentloaded" });
+    const sidebar = page.getByLabel("Primary sidebar", { exact: true });
+    const navigation = page
+      .getByLabel("Primary sidebar", { exact: true })
+      .locator("[data-sidebar-scroll]");
+    const about = navigation.getByRole("button", {
+      name: "About",
+      exact: true,
+    });
+    const search = sidebar.getByRole("button", { name: "Search", exact: true });
+    const share = sidebar.getByRole("button", { name: "Share this page" });
+    const update = sidebar.getByRole("button", { name: "Update", exact: true });
+    const account = page
+      .getByLabel("Primary sidebar", { exact: true })
+      .locator("[data-sidebar-account]");
+    await expect(share).toBeVisible();
+    await expect(account).toHaveAttribute("data-sidebar-account", "signed-out");
+    await expect(
+      page
+        .getByLabel("Primary sidebar", { exact: true })
+        .locator("[data-sidebar-version-slot]")
+    ).toBeHidden();
+    await expect(about).toHaveCSS("height", "46px");
+    const accountBeforeUpdate = await account.boundingBox();
+
+    releaseVersion();
+    await expect(update).toBeVisible();
+    await expect
+      .poll(async () => (await about.boundingBox())!.height)
+      .toBeLessThan(46);
+    const rowHeight = await about.evaluate(
+      (node) => getComputedStyle(node).height
+    );
+    for (const control of [update, search, share]) {
+      await expect(control).toHaveCSS("height", rowHeight);
+    }
+    const navBox = await navigation.boundingBox();
+    const aboutBox = await about.boundingBox();
+    expect(aboutBox!.y + aboutBox!.height).toBeLessThanOrEqual(
+      navBox!.y + navBox!.height + 1
+    );
+    expect(await account.boundingBox()).toEqual(accountBeforeUpdate);
+
+    await page.setViewportSize({ width: 1440, height: 460 });
+    await expect(about).toHaveCSS("height", "42px");
+    await expect(update).toBeInViewport({ ratio: 1 });
+    await expect(
+      account.getByRole("button", { name: "Connect Wallet", exact: true })
+    ).toBeInViewport({ ratio: 1 });
+    await about.focus();
+    await expect(about).toBeInViewport({ ratio: 1 });
+
+    await page.setViewportSize({ width: 1440, height: 600 });
+    await page.goto("/notifications", { waitUntil: "domcontentloaded" });
+    await expect(share).toHaveCount(0);
+    await expect(update).toBeVisible();
+    await expect(about).toHaveCSS("height", "46px");
+  } finally {
+    releaseVersion();
+  }
 });
 
 test("desktop account updates do not move utilities, including in short expanded sidebars @smoke @medium @large", async ({

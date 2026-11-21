@@ -5,7 +5,7 @@ import { renderToString } from "react-dom/server";
 // During a static prerender Next's useSearchParams() throws to bail the
 // nearest Suspense boundary out to client rendering, so the HTML holds the
 // boundary's fallback until the browser renders the Share button. The
-// fallback must keep the button's 46px row where the button would appear,
+// fallback must use the same row height where the button would appear,
 // and nothing where it would not.
 class MockBailoutToClientRendering extends Error {}
 
@@ -51,11 +51,11 @@ beforeEach(() => {
   mockIsMobileDevice = false;
 });
 
-it("holds the Share button's 46px row on pages that offer Share", () => {
+it("matches the Share button row height on pages that offer Share", () => {
   const html = prerender();
   expect(html).toContain('data-testid="header-share-space"');
   expect(html).toContain('aria-hidden="true"');
-  expect(html).toContain("tw-h-[2.875rem]");
+  expect(html).toContain("tw-h-[var(--sidebar-row-height,2.875rem)]");
   // Blank space only: no button or label before the browser renders it.
   expect(html).not.toContain("<button");
   expect(html).toContain("<p>Update</p>");

@@ -396,6 +396,7 @@ const REP_CATEGORY_VALIDATION_MESSAGES = objectMessages(
   "rep.categories.validation",
   {
     errorTitle: "That category name won't work",
+    unavailable: "This category name is unavailable. Try a different name.",
     required: "Rep category is required.",
     tooShort: "Use at least {min} characters.",
     tooLong: "It's {length} characters long — the maximum is {max}.",
@@ -1903,7 +1904,6 @@ const WAVE_CREATE_GROUPS_MESSAGES = objectMessages("waves.create.groups", {
   "members.countUnavailable": "Current audience unavailable",
   "members.view": "View members",
   "members.previewDraft": "Preview matches",
-  "members.dialogTitle": "{role}: {group}",
   "members.dynamicDescription":
     "This is a live preview based on current profile, reputation, and ownership data. Membership can change over time.",
   "members.criteriaSummary": "Why these identities qualify",
@@ -3375,6 +3375,7 @@ export const EN_US_ROOT_MESSAGES = {
   "header.menu.open": "Open menu",
   "header.menu.close": "Close menu",
   "header.navigation.loading": "Loading navigation…",
+  "messages.loading": "Loading messages",
   // The header and the drop actions menu link to artwork documentation from
   // any page; the rest of its copy is @/i18n/namespaces/artwork-documentation.
   "artworkDocumentation.title": "Artwork documentation",
@@ -3569,14 +3570,17 @@ export const EN_US_ROOT_MESSAGES = {
   "profilePreferences.loading": "Loading profile preferences",
   "profilePreferences.loadError":
     "Couldn’t load profile preferences. Please try again.",
-  "profilePreferences.save": "Save Changes",
+  "profilePreferences.save": "Save",
   "profilePreferences.saving": "Saving…",
   "profilePreferences.saveSuccess": "Profile preferences saved.",
+  "profilePreferences.saveProfileChanged":
+    "The active profile changed during the save. Check your profile and try again.",
   "profilePreferences.saveError":
     "Couldn’t save profile preferences. Please try again.",
   "profilePreferences.dm.heading": "Who can start a direct message with me?",
+  "profilePreferences.dm.linkLabel": "Message preferences",
   "profilePreferences.dm.description":
-    "This only affects new conversations. Existing direct messages and group messages stay available.",
+    "This controls who can start a conversation with you or add you to an encrypted group. You can still use chats you already share.",
   "profilePreferences.dm.EVERYONE.label": "Everyone",
   "profilePreferences.dm.EVERYONE.description":
     "Any profile can start a new conversation with you.",
@@ -3586,33 +3590,27 @@ export const EN_US_ROOT_MESSAGES = {
   "profilePreferences.dm.NOBODY.label": "Nobody",
   "profilePreferences.dm.NOBODY.description":
     "No one can start a new conversation with you.",
-  "profilePreferences.dm.GROUP_MEMBERS.label": "Members of a group I choose",
+  "profilePreferences.dm.GROUP_MEMBERS.label": "People who meet my criteria",
   "profilePreferences.dm.GROUP_MEMBERS.description":
-    "Only members of a group you pick, for example by level, TDH, REP or NIC, can start a new conversation with you.",
+    "Set rules such as level, TDH, REP, NIC, NFT ownership or specific profiles.",
   "profilePreferences.dm.blockNote":
     "Profiles you block can never start a new conversation with you, whichever option you choose.",
-  "profilePreferences.dm.group.label": "Group",
-  "profilePreferences.dm.group.none": "No group chosen",
-  "profilePreferences.dm.group.loading": "Loading group…",
-  "profilePreferences.dm.group.unavailableName": "Group no longer available",
-  "profilePreferences.dm.group.loadError": "Couldn’t load the group details.",
-  "profilePreferences.dm.group.retry": "Try again",
-  "profilePreferences.dm.group.viewMembers": "View members of {groupName}",
-  "profilePreferences.dm.group.choose": "Choose group",
-  "profilePreferences.dm.group.change": "Change group",
-  "profilePreferences.dm.group.required": "Choose a group to save this option.",
+  "profilePreferences.dm.group.setCriteria": "Set criteria",
+  "profilePreferences.dm.group.editCriteria": "Edit criteria",
+  "profilePreferences.dm.group.done": "Done",
+  "profilePreferences.dm.group.required": "Add criteria to save this option.",
   "profilePreferences.dm.group.unavailable":
-    "The group you chose was deleted or hidden. Until you choose another group, only people you follow can start a new conversation with you.",
+    "Your saved criteria are unavailable. Until you save new criteria, only people you follow can start a new conversation with you.",
   "profilePreferences.dm.group.allowFollowed":
     "People I follow can always message me",
   "profilePreferences.dm.group.allowFollowedDescription":
-    "Profiles you follow can start a conversation even if they aren’t in the group.",
+    "Profiles you follow can start a conversation even if they don’t meet your criteria.",
   "profilePreferences.dm.group.dialogTitle": "Who can message you",
   "profilePreferences.dm.group.dialogDescription":
-    "Use an existing group or build one from level, TDH, REP, NIC, NFTs and specific profiles.",
+    "Set the criteria people need to meet to contact you.",
   "profilePreferences.dm.group.suggestedName": "Can message me",
-  "profilePreferences.dm.group.membersRoleLabel": "Can message me",
-  "profilePreferences.dm.group.createErrorTitle": "Couldn’t create this group.",
+  "profilePreferences.dm.group.createErrorTitle":
+    "Couldn’t save your criteria.",
   "profilePreferences.dm.group.createError": PLEASE_TRY_AGAIN,
   "directMessageAdmission.notAccepting":
     "@{handle} doesn’t accept new direct messages.",
@@ -3620,8 +3618,6 @@ export const EN_US_ROOT_MESSAGES = {
     "@{handle} only accepts new direct messages from people they follow.",
   "directMessageAdmission.groupMembersOnly":
     "@{handle} only accepts new direct messages from members of a group they chose.",
-  "directMessageAdmission.groupMembersOnlyWithGroup":
-    "@{handle} only accepts new direct messages from members of the group “{groupName}”.",
   "directMessageAdmission.senderBlockedRecipient":
     "You blocked @{handle}. Unblock them to start a new direct message.",
   "profilePreferences.dm.createRetry": PLEASE_TRY_AGAIN,
@@ -3789,7 +3785,7 @@ export const EN_US_ROOT_MESSAGES = {
   "acceptConnection.unsupportedWeb":
     "Open this connection link in the 6529 mobile app.",
   "acceptConnection.unsupportedLegacyDesktop":
-    "This connection link can only be accepted in the 6529 Desktop app.",
+    "This connection link can only be accepted in the 6529 Desktop Classic app.",
   "acceptConnection.missingParameters": "Missing required parameters",
   "acceptConnection.toast.maxProfiles": "Maximum connected profiles reached",
   "acceptConnection.toast.invalidResponse": "Invalid connection response",
@@ -3896,7 +3892,7 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.shareModal.backdropAriaLabel": "Dismiss share modal",
   "headerShare.connectModal.title": "Connect Device",
   "headerShare.connectModal.mobileTitle": "Connect 6529 Mobile",
-  "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop",
+  "headerShare.connectModal.desktopTitle": "Connect 6529 Desktop Classic",
   "headerShare.connectModal.chooseApp": "Which app are you connecting?",
   "headerShare.connectModal.only": "Connect only",
   "headerShare.connectModal.secure":
@@ -3905,7 +3901,7 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.connectModal.asSecure":
     "Connect as {name} with Post Signing & DM Encryption",
   "headerShare.connectModal.desktopMinimumVersion":
-    "Requires 6529 Desktop {version} or later.",
+    "Requires 6529 Desktop Classic {version} or later.",
   "headerShare.connectModal.back": "Back",
   "headerShare.connectModal.oneTime":
     "Use only on a device you own. This code works once.",
@@ -3918,7 +3914,7 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.menu.browser": "Browser",
   "headerShare.menu.app": "App",
   "headerShare.menu.mobile": "6529 Mobile",
-  "headerShare.menu.desktop": "6529 Desktop",
+  "headerShare.menu.desktop": "6529 Desktop Classic",
   "desktop.profiles.restoreError":
     "Your saved profiles could not be opened. You can browse signed out, or restart 6529 Desktop and allow access to the system keychain to restore them.",
   "desktop.profiles.restart": "Restart to restore profiles",
@@ -4165,8 +4161,8 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.qr.browserAlt": "Current page QR code",
   "headerShare.qr.mobileAlt": "Mobile App Link - QR Code",
   "headerShare.qr.shareConnectionAlt": "Connect 6529 Mobile QR code",
-  "headerShare.core.alt": "6529 Desktop",
-  "headerShare.core.open": "Open in 6529 Desktop",
+  "headerShare.core.alt": "6529 Desktop Classic",
+  "headerShare.core.open": "Open in 6529 Desktop Classic",
   "headerShare.connectionNotice.legacyTitle": "Update Authentication",
   "headerShare.connectionNotice.loadingTitle": "Preparing Device Connection",
   "headerShare.connectionNotice.errorTitle": "Device Connection Unavailable",
@@ -4410,6 +4406,34 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.history.emptyLogs": "No logs found",
   "subscriptions.history.emptyTopups": "No Top Ups found",
   "subscriptions.history.loading": "Loading {title}",
+  "subscriptions.coverage.summary.nextFundedDrops": "Next {count} drops funded",
+  "subscriptions.coverage.summary.paidTitle": "Subscription paid",
+  "subscriptions.coverage.summary.paid":
+    "The subscription for {meme} is already paid.",
+  "subscriptions.coverage.summary.forecastSnapshot": "Last forecast: {funded}.",
+  "subscriptions.coverage.summary.paymentUnavailable":
+    "This subscription could not be checked. It will be checked again shortly.",
+  "subscriptions.coverage.summary.uncoveredToday": "Today’s mint isn’t covered",
+  "subscriptions.coverage.summary.uncovered":
+    "The Memes #{token} isn’t covered",
+  "subscriptions.coverage.summary.partiallyCoveredToday":
+    "Today’s mint isn’t fully covered",
+  "subscriptions.coverage.summary.partiallyCovered":
+    "The Memes #{token} isn’t fully covered",
+  "subscriptions.coverage.summary.partialEditions":
+    "{funded} of {total} editions funded",
+  "subscriptions.coverage.summary.partialDeadline.one":
+    "Top up by {deadline} to receive the remaining {count} edition of The Memes #{token}.",
+  "subscriptions.coverage.summary.partialDeadline.many":
+    "Top up by {deadline} to receive the remaining {count} editions of The Memes #{token}.",
+  "subscriptions.coverage.summary.deadlinePassed": "Deadline passed",
+  "subscriptions.coverage.summary.expiredDeadline":
+    "Top-up deadline: {deadline}.",
+  "subscriptions.coverage.summary.viewHistory": "View history",
+  "subscriptions.coverage.summary.topUpFutureDrops": "Top up for future drops",
+  "subscriptions.coverage.summary.lastKnown": "Last known coverage",
+  "subscriptions.coverage.summary.lastUpdated":
+    "Last updated {time}. May be out of date.",
   "subscriptions.coverage.title": "Subscription coverage",
   "subscriptions.coverage.loading": "Loading subscription coverage",
   "subscriptions.coverage.unavailable":
@@ -4458,6 +4482,7 @@ export const EN_US_ROOT_MESSAGES = {
     "Projected from current eligibility, settings, balance, and the published Meme schedule.",
   "subscriptions.coverage.fundedThrough": "Funded through",
   "subscriptions.coverage.nextUnfunded": "Next unfunded",
+  "subscriptions.coverage.summary.nextDrop": "Next drop",
   "subscriptions.coverage.projected": "Projected",
   "subscriptions.coverage.memeToken": "The Memes #{token}",
   "subscriptions.coverage.topUpBy":
@@ -5489,6 +5514,8 @@ export const EN_US_ROOT_MESSAGES = {
   "waves.discovery.votingOpen": "Voting open",
   "waves.discovery.votingEnds": "Voting ends {date}",
   "waves.discovery.nextDecision": "Next result {date}",
+  "waves.discovery.activeSubmissions.one": "{count} active submission",
+  "waves.discovery.activeSubmissions.other": "{count} active submissions",
   "waves.discovery.emptyVotes": "No active TDH votes right now.",
   "waves.discovery.emptyRecommendations": "No recommendations right now.",
   "waves.discovery.loadingRecommendations": "Loading recommendations…",

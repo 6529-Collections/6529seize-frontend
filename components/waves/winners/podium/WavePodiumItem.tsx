@@ -189,7 +189,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
 
   return (
     <motion.div
-      className="tw-h-full tw-min-w-0"
+      className="tw-h-full tw-min-w-0 [&_.tw-tabular-nums]:!tw-tabular-nums"
       variants={podiumVariants}
       initial={reduceMotion ? false : "hidden"}
       animate="visible"
@@ -250,7 +250,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
               </Link>
             )}
 
-            <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-translate-y-1 tw-justify-center sm:tw-translate-y-0">
+            <div className="tw-absolute tw-inset-x-0 tw-bottom-0 tw-flex tw-translate-y-1 tw-justify-center !tw-tabular-nums sm:tw-translate-y-0">
               <WinnerDropBadge
                 rank={winner.place}
                 decisionTime={null}
@@ -280,6 +280,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                         className={`tw-relative tw-flex tw-min-h-6 tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-text-center tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-min-h-8 ${hoverTextColorClass} tw-group/link`}
                       >
                         <span
+                          data-wave-typography="preserve"
                           title={primaryLabel}
                           className={`${styles.authorFontSize} tw-block tw-min-w-0 tw-max-w-full tw-truncate tw-font-semibold tw-leading-tight tw-text-iron-100 ${hoverTextColorClass} tw-transition-colors`}
                         >
@@ -304,6 +305,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                     </UserProfileTooltipWrapper>
                   ) : (
                     <span
+                      data-wave-typography="preserve"
                       title={primaryLabel}
                       className={`${styles.authorFontSize} tw-block tw-min-w-0 tw-max-w-full tw-truncate tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-100`}
                     >
@@ -349,6 +351,7 @@ export const WavePodiumItem: React.FC<WavePodiumItemProps> = ({
                     className={`tw-relative tw-flex tw-min-h-6 tw-min-w-0 tw-max-w-full tw-items-center tw-justify-center tw-gap-1 tw-rounded-md tw-text-center tw-no-underline tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 sm:tw-min-h-8 ${hoverTextColorClass} tw-group/link`}
                   >
                     <span
+                      data-wave-typography="preserve"
                       title={authorProfileLabel}
                       className={`${styles.authorFontSize} tw-block tw-min-w-0 tw-max-w-full tw-truncate tw-text-center tw-font-semibold tw-leading-tight tw-text-iron-200 ${hoverTextColorClass} tw-transition-colors`}
                     >

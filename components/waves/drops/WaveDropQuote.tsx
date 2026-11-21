@@ -171,7 +171,10 @@ function WaveDropQuoteBody({
           <div className="tw-flex tw-min-h-6 tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
             <div className="tw-flex tw-min-w-0 tw-max-w-full tw-flex-wrap tw-items-center tw-gap-x-2 tw-gap-y-1">
               {quoteAuthorLabel && (
-                <p className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-md tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]">
+                <p
+                  data-wave-typography="preserve"
+                  className="tw-m-0 tw-min-w-0 tw-max-w-full tw-text-md tw-font-semibold tw-leading-5 [overflow-wrap:anywhere]"
+                >
                   {drop?.author.is_anonymous ? (
                     <AnonymousAuthorName />
                   ) : (

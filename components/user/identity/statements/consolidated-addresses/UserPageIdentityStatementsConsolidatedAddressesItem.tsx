@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import NftPurchasingGate from "@/components/common/NftPurchasingGate";
 
 import { DELEGATION_ABI } from "@/abis/abis";
@@ -481,7 +483,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             }
           />
 
-          <button
+          <IconButton
             type="button"
             aria-label={t(
               locale,
@@ -492,7 +494,10 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
             aria-expanded={isOpen}
             aria-controls={`consolidated-address-panel-${address.wallet}`}
             onClick={onToggleOpen}
-            className="tw-ml-1 tw-inline-flex tw-h-11 tw-w-11 tw-flex-shrink-0 tw-touch-manipulation tw-items-center tw-justify-center tw-rounded-md tw-border-0 tw-bg-transparent tw-text-iron-500 tw-transition hover:tw-text-iron-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-white/40 lg:tw-hidden"
+            size={44}
+            variant="muted"
+            shape="compact"
+            className="tw-ml-1 tw-touch-manipulation lg:tw-hidden"
           >
             <ChevronDownIcon
               className={`tw-h-4 tw-w-4 tw-flex-shrink-0 tw-transition-transform tw-duration-200 motion-reduce:tw-transition-none ${
@@ -500,7 +505,7 @@ export default function UserPageIdentityStatementsConsolidatedAddressesItem({
               }`}
               aria-hidden="true"
             />
-          </button>
+          </IconButton>
 
           <div className="tw-ml-auto tw-hidden tw-flex-shrink-0 tw-items-center tw-gap-1.5 lg:tw-flex">
             <a

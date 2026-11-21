@@ -1,5 +1,3 @@
-import Link from "next/link";
-
 import type { PublicWaveFeedResult } from "@/app/waves/public-wave-feed.server";
 
 export default function PublicWaveFeed({
@@ -34,17 +32,19 @@ export default function PublicWaveFeed({
                   className="tw-size-9 tw-shrink-0 tw-rounded-full tw-bg-iron-800"
                 />
                 <div className="tw-min-w-0 tw-flex-1">
-                  <p className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200">
+                  <p
+                    data-wave-typography="preserve"
+                    className="tw-m-0 tw-text-sm tw-font-semibold tw-text-iron-200"
+                  >
                     {item.authorLabel}
                   </p>
                   <h3 className="tw-m-0 tw-mt-1 tw-text-sm tw-font-normal tw-leading-6">
-                    <Link
+                    <a
                       className="tw-break-words tw-text-iron-100 tw-no-underline tw-outline-none focus-visible:tw-rounded-sm focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300"
                       href={item.href}
-                      prefetch={false}
                     >
                       {item.title ?? item.excerpt ?? `#${item.serialNo}`}
-                    </Link>
+                    </a>
                   </h3>
                   {item.title && item.excerpt ? (
                     <p className="tw-m-0 tw-mt-1 tw-break-words tw-text-sm tw-leading-6 tw-text-iron-300">

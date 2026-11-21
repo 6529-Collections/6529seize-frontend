@@ -20,17 +20,13 @@ jest.mock(
 
 describe("GroupCardView", () => {
   it("renders title, details, then the creator footer", () => {
-    const group: any = { id: "g" };
-    render(<GroupCardView group={group} titlePlaceholder="Loading group" />);
+    const group: any = { id: "g", name: "Collectors" };
+    const href = "/network?page=1&group=g";
+    render(<GroupCardView group={group} />);
     expect(HeaderMock).toHaveBeenCalledWith(
-      expect.objectContaining({ group, titlePlaceholder: "Loading group" })
+      expect.objectContaining({ href, detailsId: expect.any(String) })
     );
-    expect(ContentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ group })
-    );
-    expect(ContentMock).not.toHaveBeenCalledWith(
-      expect.objectContaining({ titlePlaceholder: expect.anything() })
-    );
+    expect(ContentMock).toHaveBeenCalledWith(expect.objectContaining({ group }));
     expect(CreatorMock).toHaveBeenCalledWith(
       expect.objectContaining({ group })
     );
