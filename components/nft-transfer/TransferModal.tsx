@@ -108,9 +108,14 @@ export default function TransferModal({
           contract: item.contract,
           tokenId: String(item.tokenId),
           erc1155: item.contractType === ContractType.ERC1155,
-        }))
+          quantity: Math.min(
+            Math.max(1, item.qty ?? 1),
+            Math.max(1, item.max ?? 1)
+          ),
+        })),
+        { from: address ?? null, to: selectedWallet }
       ),
-    [chainId, t.selected]
+    [chainId, t.selected, address, selectedWallet]
   );
 
   const groupByContractAndOriginator = useCallback(

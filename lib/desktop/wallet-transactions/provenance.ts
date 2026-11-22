@@ -40,14 +40,16 @@ export const isPublisherCall = (description: TransactionDescription) =>
 
 /**
  * Whether `sender` may publish to `registry` now: an authorized publisher
- * key, or the registry's owner. Throws when a read fails.
+ * key, or the registry's owner. Either read confirming it is enough; it is
+ * refused only when both reads answered and neither confirms it. Throws
+ * when a failed read leaves it open.
  */
 export async function readPublisherAuthorization(
   client: RegistryReader,
   registry: Address,
   sender: Address
 ): Promise<boolean> {
-  const [owner, publisher] = await Promise.all([
+  const [owner, publisher] = await Promise.allSettled([
     client.readContract({
       address: registry,
       abi: REGISTRY_READ_ABI,
@@ -60,10 +62,16 @@ export async function readPublisherAuthorization(
       args: [sender],
     }),
   ]);
-  return (
-    publisher === true ||
-    (typeof owner === "string" && owner.toLowerCase() === sender.toLowerCase())
-  );
+  const isOwner =
+    owner.status === "fulfilled" &&
+    typeof owner.value === "string" &&
+    owner.value.toLowerCase() === sender.toLowerCase();
+  const isPublisher =
+    publisher.status === "fulfilled" && publisher.value === true;
+  if (isOwner || isPublisher) return true;
+  if (owner.status === "rejected") throw owner.reason;
+  if (publisher.status === "rejected") throw publisher.reason;
+  return false;
 }
 
 const BASE32 = "abcdefghijklmnopqrstuvwxyz234567";
@@ -97,14 +105,41 @@ function encodeBits(bytes: readonly number[], alphabet: string, bits: number) {
   return out;
 }
 
+/** An unsigned varint at `at`: [value, next offset], or null. */
+function readVarint(
+  bytes: readonly number[],
+  at: number
+): readonly [number, number] | null {
+  let value = 0;
+  for (let shift = 0, i = at; i < bytes.length && shift < 28; shift += 7, i++) {
+    const byte = bytes[i]!;
+    value += (byte & 0x7f) * 2 ** shift;
+    if ((byte & 0x80) === 0) return [value, i + 1];
+  }
+  return null;
+}
+
 /**
- * A binary CIDv1 as its usual text (multibase base32, `b...`); other bytes
- * as hex; null when empty.
+ * Whether the bytes are a whole binary CIDv1: version 1, a codec, then a
+ * multihash whose digest length matches the bytes left.
+ */
+function isCidV1(bytes: readonly number[]): boolean {
+  const version = readVarint(bytes, 0);
+  if (version?.[0] !== 1) return false;
+  const codec = readVarint(bytes, version[1]);
+  const hash = codec && readVarint(bytes, codec[1]);
+  const length = hash && readVarint(bytes, hash[1]);
+  return length !== null && length[1] + length[0] === bytes.length;
+}
+
+/**
+ * A binary CIDv1 as its usual text (multibase base32, `b...`); any other
+ * bytes as hex; null when empty.
  */
 export function formatCid(hex: string): string | null {
   const bytes = bytesOf(hex);
   if (bytes.length === 0) return null;
-  return bytes[0] === 1 ? `b${encodeBits(bytes, BASE32, 5)}` : hex;
+  return isCidV1(bytes) ? `b${encodeBits(bytes, BASE32, 5)}` : hex;
 }
 
 /** An Arweave transaction id (base64url of 32 bytes); null when zero. */
