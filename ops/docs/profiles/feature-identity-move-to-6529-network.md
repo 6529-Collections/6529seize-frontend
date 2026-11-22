@@ -49,6 +49,20 @@ switch-on while the page stays open.
 Wave and drop ratings, follows, artwork alerts, profile preferences and the
 profile website studio are not affected.
 
+## Delegation Center and NextGen
+
+Every Delegation Center page under `/safe-collecting`, the consolidation
+builder included, shows from the time the setting is present:
+
+> From Tuesday 24 November 00:00 UTC, new delegations and consolidations on
+> NFTDelegation don't count for 6529. Your delegations and consolidations as of
+> that time moved to the 6529 Network. Make changes there, on this site.
+
+NFTDelegation registrations keep working on Ethereum. The NextGen Minter
+contract still reads them, so the NextGen mint form says under `Mint For`:
+`NextGen mints still read delegations from NFTDelegation, not from the 6529
+Network.`
+
 ## Changing the Date
 
 The instant is baked into each build. Postponing the freeze means changing

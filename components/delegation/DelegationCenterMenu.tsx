@@ -2,6 +2,7 @@
 
 import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
+import NftDelegationMoveNotice from "@/components/identity-move/NftDelegationMoveNotice";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
@@ -352,6 +353,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
 
   return (
     <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
+      <NftDelegationMoveNotice className="tw-mb-6" />
       {showNavigation && (
         <nav
           aria-label={t(DEFAULT_LOCALE, "safeCollecting.menuLabel")}
