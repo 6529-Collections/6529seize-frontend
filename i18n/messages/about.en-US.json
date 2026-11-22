@@ -284,6 +284,7 @@
   "about.subscriptions.reference.funding.send": "You can top up your minting balance at any time by sending ETH to: seize.6529.eth from any wallet of your consolidation",
   "about.subscriptions.reference.funding.nonRefundableLead": "Any amount sent to seize.6529.eth is completely non-refundable:",
   "about.subscriptions.reference.funding.nonRefundableBody": "you can choose which cards to mint but we do not have the capacity to send ETH back",
+  "about.subscriptions.reference.funding.useOnly": "The balance pays only for subscription airdrops, used automatically in the phase you are eligible for. It cannot pay for a card you mint yourself on the minting page.",
   "about.subscriptions.reference.funding.calculator": "The calculator on your profile will calculate the correct amount to send for any number of cards, with options for the remainder of the SZN and remainder of the year",
   "about.subscriptions.reference.funding.profile": "The balance will appear on the site profile associated with the sending ETH address",
   "about.subscriptions.reference.funding.deadline": "Top ups must be received by 00:00 UTC the day before the Meme Card mint to be eligible for the mint; otherwise they will roll over to the next mint",

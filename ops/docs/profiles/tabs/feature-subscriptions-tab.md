@@ -280,6 +280,10 @@ On the web and Android, the tab appears after the page loads.
 - `Automatic` mode does not expire when the balance runs out. The forecast says
   what the current balance funds; it does not claim that the mode itself runs
   until a date.
+- The subscription balance pays only for subscription airdrops, used
+  automatically in the phase the subscriber is eligible for. It cannot pay for
+  a card minted manually on the minting page, and it is not refunded; About >
+  Subscription Minting says this in the Fill Balance step.
 - `mint capacity` is the raw floor of balance divided by the subscription mint
   price. `Forecast use` is the capacity allocated within the current intended
   drop horizon.
