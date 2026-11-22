@@ -5,7 +5,10 @@ import { useContext, useEffect, useId, useRef, useState } from "react";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { AuthContext } from "@/components/auth/Auth";
-import { chainRatingFailureText } from "@/components/chain-identity/chainErrorMessage";
+import {
+  chainRatingBlockedText,
+  chainRatingFailureText,
+} from "@/components/chain-identity/chainErrorMessage";
 import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
@@ -66,7 +69,17 @@ function UserPageIdentityHeaderCICRateForm({
 
   const { onProfileCICModify } = useContext(ReactQueryWrapperContext);
 
-  const { data: currentCICState, isError, isFetching, refetch } = ratingState;
+  const {
+    data: currentCICState,
+    error: stateError,
+    isError,
+    isFetching,
+    refetch,
+  } = ratingState;
+  // Only the 6529 Network's reads carry a reason a retry can't fix.
+  const blocked = chainWrite
+    ? chainRatingBlockedText(locale, stateError)
+    : null;
 
   const [mutating, setMutating] = useState<boolean>(false);
   const setBusy = (busy: boolean) => {
@@ -280,17 +293,19 @@ function UserPageIdentityHeaderCICRateForm({
       />
       {isError && (
         <div role="alert" className="tw-mt-3 tw-text-sm tw-text-iron-300">
-          <p>{t(locale, "user.rate.loadError")}</p>
-          <Button
-            variant="secondary"
-            size="sm"
-            loading={isFetching}
-            onClick={() => {
-              void refetch();
-            }}
-          >
-            {t(locale, "user.rate.retry")}
-          </Button>
+          <p>{blocked ?? t(locale, "user.rate.loadError")}</p>
+          {blocked === null && (
+            <Button
+              variant="secondary"
+              size="sm"
+              loading={isFetching}
+              onClick={() => {
+                void refetch();
+              }}
+            >
+              {t(locale, "user.rate.retry")}
+            </Button>
+          )}
         </div>
       )}
       {!currentCICState && !isError && (

@@ -26,24 +26,38 @@ const isAddress = (value: string): value is Hex =>
 
 const abs = (value: bigint): bigint => (value < 0n ? -value : value);
 
+/**
+ * The identity a profile is on the chain: the one holding its handle, as
+ * long as it also holds one of the profile's wallets (a handle 6529.io shows
+ * may have moved to someone else since), else the identity of its wallets.
+ */
 async function findChainIdentity(
   target: ChainRatingTarget,
   signal?: AbortSignal
 ): Promise<ChainIdentity | null> {
+  const wallets = (target.wallets ?? [])
+    .filter(isAddress)
+    .map((wallet) => wallet.toLowerCase());
   if (target.handle) {
     const byHandle = await chainGateway.getIdentityByHandle(
       target.handle,
       signal
     );
-    if (byHandle) {
+    if (
+      byHandle &&
+      (wallets.length === 0 ||
+        (byHandle.wallets ?? []).some((wallet) =>
+          wallets.includes(wallet.toLowerCase())
+        ))
+    ) {
       return byHandle;
     }
   }
-  for (const wallet of target.wallets ?? []) {
-    if (!isAddress(wallet)) {
-      continue;
-    }
-    const byWallet = await chainGateway.getIdentityByWallet(wallet, signal);
+  for (const wallet of wallets) {
+    const byWallet = await chainGateway.getIdentityByWallet(
+      wallet as Hex,
+      signal
+    );
     if (byWallet) {
       return byWallet;
     }

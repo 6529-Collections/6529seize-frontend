@@ -30,7 +30,10 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
-import { chainRatingFailureText } from "@/components/chain-identity/chainErrorMessage";
+import {
+  chainRatingBlockedText,
+  chainRatingFailureText,
+} from "@/components/chain-identity/chainErrorMessage";
 import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
@@ -248,6 +251,7 @@ function GrantRepForm({
     heroAvailableRep,
     minMaxValues,
     isError,
+    chainError,
     retry,
   } = useRepAllocation({
     profile,
@@ -707,10 +711,14 @@ function GrantRepForm({
 
         {isError && (
           <div role="alert" className="tw-mt-3 tw-text-xs tw-text-iron-400">
-            {t(locale, "rep.categories.edit.loadError")}{" "}
-            <Button variant="ghost" size="sm" onClick={retry}>
-              {t(locale, "rep.categories.edit.retry")}
-            </Button>
+            {chainRatingBlockedText(locale, chainError) ?? (
+              <>
+                {t(locale, "rep.categories.edit.loadError")}{" "}
+                <Button variant="ghost" size="sm" onClick={retry}>
+                  {t(locale, "rep.categories.edit.retry")}
+                </Button>
+              </>
+            )}
           </div>
         )}
         {formError && (

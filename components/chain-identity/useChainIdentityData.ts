@@ -29,6 +29,7 @@ export function useChainIdentityData(wallet: Hex | undefined) {
   const ops = useQuery({
     queryKey: [QueryKey.CHAIN_IDENTITY, "ops"],
     queryFn: ({ signal }) => chainGateway.getOps(signal),
+    enabled: !!wallet,
     staleTime: 60_000,
   });
 

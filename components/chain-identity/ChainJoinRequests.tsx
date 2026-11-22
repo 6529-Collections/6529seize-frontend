@@ -28,7 +28,7 @@ import { chainRelay, type RelayOperation } from "@/lib/chain-identity/relay";
 import { walletSigner } from "@/lib/chain-identity/signers";
 import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import ChainActionStatus from "./ChainActionStatus";
-import { chainErrorMessage } from "./chainErrorMessage";
+import { chainErrorMessage, chainRefusalName } from "./chainErrorMessage";
 import { ChainSection, shortHex } from "./chainIdentityUi";
 import { useChainAction } from "./useChainAction";
 
@@ -55,9 +55,11 @@ async function signThroughRelay(
     sig: signature,
   });
   if (op.status === "FAILED") {
+    // The relay words the chain's refusal itself; only its code is shown.
     throw new ChainOperationError(
       "rejected",
-      op.last_error ?? t(locale, "chainIdentity.error.generic")
+      t(locale, "chainIdentity.requests.refused"),
+      chainRefusalName(new Error(op.last_error ?? ""))
     );
   }
   if (op.status !== "SUBMITTED") {
@@ -134,13 +136,18 @@ function JoinRequestCard({
   } else if (readiness?.kind === "bound") {
     blocked = t(locale, "chainIdentity.requests.bound");
   } else if (readiness?.kind === "waiting") {
-    blocked = t(locale, "chainIdentity.wallets.readyWaiting", {
+    blocked = t(locale, "chainIdentity.create.waiting", {
       left: formatDate(locale, readiness.leftMs, DATE_TIME),
       until: formatDate(locale, readiness.untilMs, DATE_TIME),
     });
   }
-  const name =
-    identity.data?.handle ?? (op.principal ? shortHex(op.principal) : "");
+  const shortId = op.principal ? shortHex(op.principal) : "";
+  let name = shortId;
+  if (identity.data?.handle) {
+    name = identity.data.handle;
+  } else if (identity.isSuccess) {
+    name = t(locale, "chainIdentity.requests.noHandle", { id: shortId });
+  }
 
   return (
     <li className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/5 tw-p-3">
@@ -176,6 +183,7 @@ function JoinRequestCard({
       </div>
       <ChainActionStatus
         state={action.state}
+        note={t(locale, "chainIdentity.requests.joinNote", { identity: name })}
         feeText={(amount) =>
           t(locale, "chainIdentity.requests.feeFromIdentity", { amount })
         }
@@ -257,6 +265,27 @@ export default function ChainJoinRequests({
           }
         >
           {t(locale, "chainIdentity.requests.signInAction")}
+        </Button>
+      </div>
+    );
+  }
+
+  if (requests.isError) {
+    return (
+      <div
+        role="alert"
+        className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-px-4 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between"
+      >
+        <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+          {t(locale, "chainIdentity.requests.loadError")}
+        </p>
+        <Button
+          variant="secondary"
+          size="sm"
+          loading={requests.isFetching}
+          onClick={() => void requests.refetch()}
+        >
+          {t(locale, "chainIdentity.retry")}
         </Button>
       </div>
     );

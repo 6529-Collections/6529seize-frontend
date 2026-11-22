@@ -10,8 +10,9 @@ and the site sends it. Fees are paid in $fake6529.
 
 The page exists only in builds with `NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY` set
 to `true` and `NEXT_PUBLIC_CHAIN_GATEWAY_URL` set to the gateway's https
-origin. Profile pages use the chain for REP and NIC, and link here, once the
-switch-on has passed (`NEXT_PUBLIC_IDENTITY_FREEZE_AT` plus 24 hours).
+origin. It takes changes, and profile pages use the chain for REP and NIC and
+link here, once the switch-on has passed (`NEXT_PUBLIC_IDENTITY_FREEZE_AT`
+plus 24 hours). Before that the page says when changes open.
 
 ## Location in the Site
 
@@ -31,7 +32,7 @@ switch-on has passed (`NEXT_PUBLIC_IDENTITY_FREEZE_AT` plus 24 hours).
 | Profile                     | Saves classification, about, website, picture URL and banner colors as a new profile document                                                              | The identity                            |
 | REP and NIC                 | Shows the REP and the NIC left to give: your TDH less what you have given in each. REP and NIC are given on profile pages                                  | No fee to look                          |
 | Wallets                     | Removes a wallet (not the last), or adds one: this wallet signs, and 6529.io holds its signature until the new wallet signs in on any device and signs too | The identity                            |
-| Requests to add this wallet | Shown to a signed-in wallet that another identity's wallet asked to add: review, sign or decline                                                           | The asking identity                     |
+| Requests to add this wallet | Shown to a wallet with no identity, signed in to 6529.io, that an identity's wallet asked to add: review, sign or decline                                  | The asking identity                     |
 | Sign on this browser        | The wallet signs once to give this browser a key for 30 days that signs REP, NIC and profile changes without a wallet prompt                               | The identity, within the budget shown   |
 | Delegations                 | Registers and revokes delegations with the Delegation Center's collections and use cases, for the identity or one wallet                                   | The identity, or the wallet for its own |
 

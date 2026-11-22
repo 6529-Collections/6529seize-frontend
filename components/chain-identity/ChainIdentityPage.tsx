@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useCallback } from "react";
 import { useAccount, useConfig } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
@@ -10,11 +11,16 @@ import {
 import Button from "@/components/utils/button/Button";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger } from "@/i18n/format";
+import { useChainIdentityActive } from "@/hooks/useIdentityMovePhase";
+import { formatDate, formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
 import type { ChainIdentity } from "@/lib/chain-identity/gateway";
+import {
+  getIdentityFreezeAtMs,
+  getIdentitySwitchOnMs,
+} from "@/lib/identity-move/schedule";
 import { formatFake6529 } from "./chainAmount";
 import { ChainSection, shortHex } from "./chainIdentityUi";
 import ChainIdentityCreate from "./ChainIdentityCreate";
@@ -112,12 +118,14 @@ export default function ChainIdentityPage() {
   const { address } = useAccount();
   const { seizeConnect } = useSeizeConnectContext();
   const wallet = address;
+  const active = useChainIdentityActive();
   const { identity, ops, balances, given, session, refresh } =
-    useChainIdentityData(wallet);
+    useChainIdentityData(active ? wallet : undefined);
 
-  const changed = () => {
+  // Stable, so effects that refresh after a change run once per change.
+  const changed = useCallback(() => {
     void refresh();
-  };
+  }, [refresh]);
 
   const header = (
     <header className="tw-pb-6">
@@ -129,6 +137,25 @@ export default function ChainIdentityPage() {
       </p>
     </header>
   );
+
+  if (!active) {
+    const freezeAtMs = getIdentityFreezeAtMs();
+    return (
+      <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
+        {header}
+        <p role="status" className="tw-text-sm tw-text-iron-300">
+          {freezeAtMs === null
+            ? t(locale, "chainIdentity.notOpenNoDate")
+            : t(locale, "chainIdentity.notOpen", {
+                date: formatDate(locale, getIdentitySwitchOnMs(freezeAtMs), {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                }),
+              })}
+        </p>
+      </main>
+    );
+  }
 
   if (!wallet) {
     return (
@@ -186,12 +213,14 @@ export default function ChainIdentityPage() {
     <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
       {header}
       <div className="tw-max-w-4xl tw-space-y-4">
-        <ChainJoinRequests
-          wallet={wallet}
-          config={config}
-          rejoinWaitMs={rejoinWaitMs}
-          onChanged={changed}
-        />
+        {!current && (
+          <ChainJoinRequests
+            wallet={wallet}
+            config={config}
+            rejoinWaitMs={rejoinWaitMs}
+            onChanged={changed}
+          />
+        )}
         <ChainSection
           id="chain-identity-summary"
           heading={t(locale, "chainIdentity.summary.heading")}
@@ -247,6 +276,7 @@ export default function ChainIdentityPage() {
           <ChainIdentityCreate
             wallet={wallet}
             config={config}
+            rejoinWaitMs={rejoinWaitMs}
             onChanged={changed}
           />
         )}

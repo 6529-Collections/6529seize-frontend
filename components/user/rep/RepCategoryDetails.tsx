@@ -11,6 +11,7 @@ import type { ApiRepCategory } from "@/generated/models/ApiRepCategory";
 import type { ApiRepContributorsPage } from "@/generated/models/ApiRepContributorsPage";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { chainRatingBlockedText } from "@/components/chain-identity/chainErrorMessage";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { formatInteger } from "@/i18n/format";
 import { t, tRich } from "@/i18n/messages";
@@ -345,6 +346,7 @@ export default function RepCategoryDetails({
     heroAvailableRep,
     minMaxValues,
     isError,
+    chainError,
     isFetching,
     retry,
   } = useRepAllocation({
@@ -713,15 +715,19 @@ export default function RepCategoryDetails({
       )}
       {canEdit && isError && (
         <p role="alert" className="tw-px-2.5 tw-text-sm tw-text-iron-300">
-          {t(locale, "rep.categories.edit.loadError")}{" "}
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={retry}
-            loading={isFetching}
-          >
-            {t(locale, "rep.categories.edit.retry")}
-          </Button>
+          {chainRatingBlockedText(locale, chainError) ?? (
+            <>
+              {t(locale, "rep.categories.edit.loadError")}{" "}
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={retry}
+                loading={isFetching}
+              >
+                {t(locale, "rep.categories.edit.retry")}
+              </Button>
+            </>
+          )}
         </p>
       )}
       {query.isFetchNextPageError && (

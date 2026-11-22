@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { isAddress, type Hex } from "viem";
 import type { Config } from "wagmi";
 import { useAuth } from "@/components/auth/authContext";
@@ -29,11 +29,11 @@ import {
   snapshotStartedJoins,
   startedJoins,
   subscribeStartedJoins,
-  type StartedJoin,
 } from "@/lib/chain-identity/pendingJoin";
 import { chainRelay } from "@/lib/chain-identity/relay";
 import { walletSigner } from "@/lib/chain-identity/signers";
 import ChainActionStatus from "./ChainActionStatus";
+import ChainStartedJoin from "./ChainStartedJoin";
 import { chainErrorMessage } from "./chainErrorMessage";
 import {
   CHAIN_HINT_CLASS,
@@ -49,8 +49,6 @@ const DATE_TIME: Intl.DateTimeFormatOptions = {
   timeStyle: "short",
 };
 
-const RELAY_POLL_MS = 10_000;
-
 const sameWallet = (a: string, b: string) =>
   a.toLowerCase() === b.toLowerCase();
 
@@ -61,140 +59,6 @@ const joinWindow = (locale: SupportedLocale): string =>
     unit: "hour",
     unitDisplay: "long",
   }).format(JOIN_VALID_MS / 3_600_000);
-
-/** One join this browser started, as 6529.io's relay holds it. */
-function StartedJoinRow({
-  join,
-  identity,
-  onChanged,
-}: {
-  readonly join: StartedJoin;
-  readonly identity: ChainIdentity;
-  readonly onChanged: () => void;
-}) {
-  const locale = useBrowserLocale();
-  const [busy, setBusy] = useState(false);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const joined = identity.wallets.some((item) =>
-    sameWallet(item, join.joiningWallet)
-  );
-  const relay = useQuery({
-    queryKey: [QueryKey.CHAIN_IDENTITY, "relay", join.txId],
-    queryFn: ({ signal }) => chainRelay.get(join.txId, signal),
-    enabled: !joined,
-    refetchInterval: (query) => {
-      const status = query.state.data?.status;
-      return status === "PENDING" || status === "SUBMITTED"
-        ? RELAY_POLL_MS
-        : false;
-    },
-    retry: 1,
-  });
-  const status = relay.data?.status;
-
-  useEffect(() => {
-    if (joined) {
-      startedJoins.remove(join.txId);
-    }
-  }, [joined, join.txId]);
-
-  useEffect(() => {
-    if (status === "SUBMITTED") {
-      onChanged();
-    }
-  }, [status, onChanged]);
-
-  if (joined) {
-    return null;
-  }
-
-  const wallet = shortHex(join.joiningWallet);
-  const run = async (step: () => Promise<unknown>) => {
-    setBusy(true);
-    setActionError(null);
-    try {
-      await step();
-      await relay.refetch();
-    } catch (error) {
-      setActionError(chainErrorMessage(locale, error));
-    } finally {
-      setBusy(false);
-    }
-  };
-  const dismiss = () => startedJoins.remove(join.txId);
-  const allSigned = relay.data?.signers.every((entry) => entry.signed) ?? false;
-
-  let text: string;
-  let actions: "cancel" | "retry" | "dismiss";
-  if (relay.isError) {
-    text = t(locale, "chainIdentity.wallets.startedUnknown");
-    actions = "cancel";
-  } else if (status === "SUBMITTED") {
-    text = t(locale, "chainIdentity.wallets.startedSent", { wallet });
-    actions = "dismiss";
-  } else if (status === "FAILED") {
-    text = t(locale, "chainIdentity.wallets.startedFailed", {
-      reason:
-        chainErrorMessage(locale, new Error(relay.data?.last_error ?? "")) ??
-        "",
-    });
-    actions = "dismiss";
-  } else if (status === "PENDING" && allSigned && relay.data?.last_error) {
-    text = t(locale, "chainIdentity.wallets.startedUnreachable");
-    actions = "retry";
-  } else if (status === "PENDING" || status === undefined) {
-    text = t(locale, "chainIdentity.wallets.started", {
-      wallet,
-      date: formatDate(locale, join.expiresAtMs, DATE_TIME),
-    });
-    actions = "cancel";
-  } else {
-    text = t(locale, "chainIdentity.wallets.startedGone");
-    actions = "dismiss";
-  }
-
-  return (
-    <li className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/5 tw-p-3">
-      <p className="tw-m-0 tw-text-sm tw-text-iron-200">{text}</p>
-      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
-        {actions === "retry" && (
-          <Button
-            variant="primary"
-            size="sm"
-            disabled={busy}
-            onClick={() => void run(() => chainRelay.retry(join.txId))}
-          >
-            {t(locale, "chainIdentity.wallets.sendAgain")}
-          </Button>
-        )}
-        {actions === "dismiss" ? (
-          <Button variant="secondary" size="sm" onClick={dismiss}>
-            {t(locale, "chainIdentity.wallets.dismiss")}
-          </Button>
-        ) : (
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={busy}
-            onClick={() =>
-              void run(async () => {
-                await chainRelay.cancel(join.txId);
-                dismiss();
-              })
-            }
-          >
-            {t(locale, "chainIdentity.wallets.cancelJoin")}
-          </Button>
-        )}
-      </div>
-      {actionError && (
-        <p role="alert" className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-error">
-          {actionError}
-        </p>
-      )}
-    </li>
-  );
-}
 
 /**
  * The identity's wallets: IDENTITY_REMOVE for any of them but the last, and
@@ -226,8 +90,10 @@ export default function ChainIdentityWallets({
     snapshotStartedJoins,
     serverStartedJoins
   ).filter((item) => sameWallet(item.principalId, identity.principalId));
-  const waiting = started.find((item) =>
-    sameWallet(item.identityWallet, wallet)
+  // One held join per wallet: its nonce would clash with a second one's.
+  const waiting = started.find(
+    (item) =>
+      sameWallet(item.identityWallet, wallet) && item.expiresAtMs > Date.now()
   );
 
   const typed = joining.trim();
@@ -394,7 +260,7 @@ export default function ChainIdentityWallets({
         {started.length > 0 && (
           <ul className="tw-mb-4 tw-mt-0 tw-list-none tw-space-y-3 tw-p-0">
             {started.map((item) => (
-              <StartedJoinRow
+              <ChainStartedJoin
                 key={item.txId}
                 join={item}
                 identity={identity}
@@ -452,6 +318,13 @@ export default function ChainIdentityWallets({
         )}
         <ChainActionStatus
           state={join.state}
+          note={
+            typedOk
+              ? t(locale, "chainIdentity.wallets.joinNote", {
+                  wallet: shortHex(typed),
+                })
+              : undefined
+          }
           onConfirm={() => void join.confirm()}
           onCancel={join.cancel}
         />

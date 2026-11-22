@@ -24,7 +24,7 @@ describe("the 6529 Network's refusals in plain words", () => {
     );
     expect(chainRefusalName(legacy)).toBe("LEGACY_EXPIRED");
     expect(chainErrorMessage(L, legacy)).toBe(
-      "The 6529 Network refused this change (LEGACY_EXPIRED)."
+      "The 6529 Network refused this change. Its reason code is LEGACY_EXPIRED."
     );
   });
 
@@ -84,7 +84,7 @@ describe("the 6529 Network's refusals in plain words", () => {
   it("says the fee was paid only when the chain ran the change and it failed", () => {
     const ran = new ChainOperationError("failed", "refused", "STALE_VERSION");
     expect(chainFailureText(L, ran)).toBe(
-      "The change didn't go through, and its fee was paid. This changed since the page loaded. Reload and try again."
+      "The change didn't go through, and its fee was still charged. This changed since the page loaded. Reload and try again."
     );
     const refused = new ChainGatewayError(
       422,

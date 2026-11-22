@@ -95,12 +95,18 @@ it("signs a held join after showing who asks and the fee, then waits for the cha
       /^tester_one asks to add this wallet\. Signed by 0x000000…0000aa\. Open until/
     )
   ).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "Sign only if you asked for this from your own identity. Once this wallet joins an identity, its NFTs count toward that identity's TDH, that identity's delegations cover it, and any of that identity's wallets can remove it."
+    )
+  ).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Review and sign" }));
   expect(
     await screen.findByText(
       "Fee: at most 0.003 $fake6529, from that identity's balance."
     )
   ).toBeInTheDocument();
+  expect(screen.getByText("This wallet joins tester_one.")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Sign with wallet" }));
   await waitFor(() =>
     expect(relay["sign"]).toHaveBeenCalledWith(op.tx_id, {
@@ -169,4 +175,40 @@ it("won't offer a held operation it can't check as this wallet's join", async ()
   expect(
     screen.queryByRole("button", { name: "Review and sign" })
   ).not.toBeInTheDocument();
+});
+
+it("says when the requests can't be listed, and lets the person try again", async () => {
+  relay["waiting"]!.mockRejectedValueOnce(
+    Object.assign(new Error("Service unavailable"), { status: 503 })
+  );
+  renderRequests();
+  expect(
+    await screen.findByText(
+      "6529.io can't list the requests for this wallet right now."
+    )
+  ).toBeInTheDocument();
+  relay["waiting"]!.mockResolvedValue([heldJoin()]);
+  fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+  expect(
+    await screen.findByRole("button", { name: "Review and sign" })
+  ).toBeInTheDocument();
+});
+
+it("tells the joiner who can send a held join again when the network can't be reached", async () => {
+  relay["sign"]!.mockResolvedValue({
+    ...heldJoin(),
+    last_error: "The 6529 Network could not be reached: timeout",
+  });
+  renderRequests();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review and sign" })
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Sign with wallet" })
+  );
+  expect(
+    await screen.findByText(
+      "Nothing changed. Your signature is saved, but 6529.io couldn't reach the 6529 Network. The wallet that asked can send it again from its identity page."
+    )
+  ).toBeInTheDocument();
 });

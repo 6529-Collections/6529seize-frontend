@@ -42,7 +42,8 @@ export function useChainRatingWriter(): ChainRatingWriter | null {
       if (!wallet) {
         throw new ChainOperationError(
           "signer_mismatch",
-          "Connect your wallet to rate on the 6529 Network."
+          "Connect your wallet to rate on the 6529 Network.",
+          "NO_WALLET"
         );
       }
       try {

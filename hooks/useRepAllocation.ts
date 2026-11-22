@@ -31,6 +31,8 @@ export function useRepAllocation({
   proxyAvailableCredit: number | null;
   minMaxValues: { readonly min: number; readonly max: number };
   isError: boolean;
+  /** The 6529 Network read's error, for words a retry can't fix. */
+  chainError: unknown;
   isFetching: boolean;
   retry: () => void;
 } {
@@ -117,6 +119,7 @@ export function useRepAllocation({
     proxyAvailableCredit,
     minMaxValues,
     isError: allocation.isError || (chain.active && chain.isError),
+    chainError: chain.active ? chain.error : null,
     isFetching: allocation.isFetching || (chain.active && chain.isFetching),
     retry: () => {
       void allocation.refetch();

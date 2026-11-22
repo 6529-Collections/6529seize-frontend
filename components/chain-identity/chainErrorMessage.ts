@@ -6,7 +6,7 @@ import { ChainOperationError } from "@/lib/chain-identity/operation";
 
 /**
  * The 6529 Network's refusals in plain words. The chain names each refusal
- * (P61's result names, e.g. `0x2702 OVER_RATING_BUDGET`); a name without a
+ * (its result names, e.g. `0x2702 OVER_RATING_BUDGET`); a name without a
  * sentence here is shown with the general one.
  */
 const KNOWN_NAMES = new Set([
@@ -35,6 +35,7 @@ const KNOWN_NAMES = new Set([
   "NO_CHANGE",
   "NO_RATER_IDENTITY",
   "NO_TARGET_IDENTITY",
+  "NO_WALLET",
   "NONCE",
   "NONCE_WINDOW",
   "NOT_DELEGATOR",
@@ -168,4 +169,21 @@ export function chainRatingFailureText(
   return isFeeShortfall(error)
     ? `${text} ${t(locale, "chainIdentity.rating.feeHint")}`
     : text;
+}
+
+/** Refusals no retry can fix: the rater or the profile has no identity yet. */
+const NO_IDENTITY_NAMES = new Set(["NO_RATER_IDENTITY", "NO_TARGET_IDENTITY"]);
+
+/**
+ * Why a REP or NIC form can't offer a rating on the 6529 Network, when
+ * trying again won't help; null for anything a retry may fix.
+ */
+export function chainRatingBlockedText(
+  locale: SupportedLocale,
+  error: unknown
+): string | null {
+  const name = chainRefusalName(error);
+  return name !== null && NO_IDENTITY_NAMES.has(name)
+    ? t(locale, `chainIdentity.error.${name}` as MessageKey)
+    : null;
 }

@@ -209,3 +209,28 @@ it("says so when the rater or the target has no identity", async () => {
   });
   expect(runOperation).not.toHaveBeenCalled();
 });
+
+it("doesn't rate the holder of a handle that left the profile's wallets", async () => {
+  (usableSessionKey as jest.Mock).mockResolvedValue(null);
+  const PROFILE_WALLET = `0x${"22".repeat(20)}`;
+  gateway["getIdentityByHandle"]!.mockResolvedValue({
+    principalId: `0x${"0e".repeat(32)}`,
+    wallets: [`0x${"33".repeat(20)}`],
+  });
+  gateway["getIdentityByWallet"]!.mockImplementation(async (wallet: string) =>
+    wallet === WALLET
+      ? { principalId: RATER, level: { level: 3, tdh: "1000" } }
+      : wallet === PROFILE_WALLET
+        ? { principalId: TARGET }
+        : null
+  );
+  await writeChainRating(config, WALLET, {
+    matter: "NIC",
+    target: { handle: "moved_on", wallets: [PROFILE_WALLET] },
+    category: null,
+    value: 3n,
+  });
+  expect((runOperation as jest.Mock).mock.calls[0][0].body).toMatchObject({
+    target: TARGET,
+  });
+});

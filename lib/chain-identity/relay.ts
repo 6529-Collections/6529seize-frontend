@@ -82,12 +82,17 @@ export const chainRelay = {
     (
       await commonApiFetch<{ readonly data?: readonly RelayOperation[] }>({
         endpoint: pendingPath(),
+        errorMode: "structured",
         signal,
       })
     ).data ?? [],
 
   get: (txId: Hex, signal?: AbortSignal) =>
-    commonApiFetch<RelayOperation>({ endpoint: pendingPath(txId), signal }),
+    commonApiFetch<RelayOperation>({
+      endpoint: pendingPath(txId),
+      errorMode: "structured",
+      signal,
+    }),
 
   /** Adds the signed-in wallet's signature; the relay sends it once complete. */
   sign: (txId: Hex, signature: RelaySignature) =>

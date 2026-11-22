@@ -121,12 +121,10 @@ it("checks the new wallet on the chain before anything is signed", async () => {
   });
   expect(
     await screen.findByText(
-      "This wallet belongs to another identity. Remove it there first."
+      "That wallet belongs to another identity. Remove it there first."
     )
   ).toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: "Sign with this wallet" })
-  ).toBeDisabled();
+  expect(screen.getByRole("button", { name: "Add wallet" })).toBeDisabled();
 });
 
 it("signs a join first and leaves it with 6529.io's relay for the new wallet", async () => {
@@ -153,10 +151,8 @@ it("signs a join first and leaves it with 6529.io's relay for the new wallet", a
   fireEvent.change(screen.getByLabelText("Wallet address"), {
     target: { value: JOINING_WALLET },
   });
-  expect(await screen.findByText("This wallet can join.")).toBeInTheDocument();
-  fireEvent.click(
-    screen.getByRole("button", { name: "Sign with this wallet" })
-  );
+  expect(await screen.findByText("That wallet can join.")).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Add wallet" }));
   fireEvent.click(
     await screen.findByRole("button", { name: "Sign with wallet" })
   );

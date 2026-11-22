@@ -13,6 +13,10 @@ jest.mock("wagmi", () => ({
   useAccount: () => ({ address: mockAddress }),
 }));
 jest.mock("@/contexts/TitleContext", () => ({ useSetTitle: jest.fn() }));
+let mockActive = true;
+jest.mock("@/hooks/useIdentityMovePhase", () => ({
+  useChainIdentityActive: () => mockActive,
+}));
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
   useSeizeConnectContext: () => ({ seizeConnect: jest.fn() }),
 }));
@@ -24,6 +28,7 @@ jest.mock("@/lib/chain-identity/gateway", () => ({
     getState: jest.fn(),
     getHandle: jest.fn(),
     getDoc: jest.fn(),
+    getWalletMembership: jest.fn(async () => ({ principalId: null })),
   },
 }));
 jest.mock("@/lib/chain-identity/operation", () => ({
@@ -55,6 +60,7 @@ const draft = {
 beforeEach(() => {
   jest.clearAllMocks();
   mockAddress = WALLET;
+  mockActive = true;
   gateway["getOps"]!.mockResolvedValue({
     ruleVersion: 6,
     currencyAsset: ASSET,
@@ -63,6 +69,18 @@ beforeEach(() => {
     valueFields: { amount: "2000000000000000000" },
   });
   (draftOperation as jest.Mock).mockResolvedValue(draft);
+});
+
+it("says changes open at the switch-on, and reads nothing, before it", () => {
+  mockActive = false;
+  render(<ChainIdentityPage />);
+  expect(
+    screen.getByText(
+      "Changes on the 6529 Network open here once identities have moved there."
+    )
+  ).toBeInTheDocument();
+  expect(gateway["getIdentityByWallet"]).not.toHaveBeenCalled();
+  expect(gateway["getOps"]).not.toHaveBeenCalled();
 });
 
 it("asks for a wallet first", () => {

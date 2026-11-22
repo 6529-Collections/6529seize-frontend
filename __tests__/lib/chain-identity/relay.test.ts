@@ -49,11 +49,13 @@ it("lists, reads, signs, retries and cancels held operations", async () => {
   await expect(chainRelay.waiting()).resolves.toEqual([]);
   expect(commonApiFetch).toHaveBeenLastCalledWith({
     endpoint: "chain/pending",
+    errorMode: "structured",
     signal: undefined,
   });
   await chainRelay.get(txId);
   expect(commonApiFetch).toHaveBeenLastCalledWith({
     endpoint: `chain/pending/${txId}`,
+    errorMode: "structured",
     signal: undefined,
   });
   await chainRelay.sign(txId, { role: 4, key_type: 1, sig: SIG });
