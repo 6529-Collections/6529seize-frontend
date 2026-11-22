@@ -44,6 +44,8 @@ export const PERSONAL_RECORDS_MESSAGES = {
   unsupported:
     "This browser can't save private settings. Update it and try again.",
   notSaved: "The setting wasn't saved. Try again.",
+  timedOut:
+    "The change took too long and may still be saved. Reload in a moment to check before you try again.",
   proxy: "Proxies can't change settings.",
   outOfOrder:
     "A newer change from another device or tab came first. Reload and try again.",

@@ -624,9 +624,12 @@ describe("a burst of changes from one person", () => {
       const stalledPost = submitPersonalChange(followOf(0), modeOf(), PRIMARY);
       const next = submitPersonalChange(followOf(1), modeOf(), PRIMARY);
       await jest.advanceTimersByTimeAsync(31_000);
+      // The API may still take it: the person is told to check, not to retry.
       await expect(stalledPost).resolves.toMatchObject({
         status: "not-saved",
         reason: "timeout",
+        message:
+          "The change took too long and may still be saved. Reload in a moment to check before you try again.",
       });
       await expect(next).resolves.toEqual({ status: "saved" });
 

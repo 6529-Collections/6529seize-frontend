@@ -498,7 +498,7 @@ async function sendBatch(
     // The API may still take it; a later change is signed later, so it
     // still orders after this one.
     if (error instanceof RequestTimeout) {
-      return notSaved("timeout", PERSONAL_RECORDS_MESSAGES.notSaved);
+      return notSaved("timeout", PERSONAL_RECORDS_MESSAGES.timedOut);
     }
     throw error;
   }
