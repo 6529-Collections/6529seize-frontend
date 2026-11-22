@@ -118,8 +118,10 @@ export interface SignRecordsOptions {
   /** A finalized chain height, from the anchor source drops use. */
   readonly anchor: number;
   /**
-   * The earliest claimed time, Unix ms: a change signed again must be
-   * ordered after a newer one the API already holds from another device.
+   * The earliest claimed time, Unix ms, inclusive. To order a change after
+   * a newer one the API already holds (from another device), pass that
+   * record's claimed time + 1: at the same anchor, an equal time would
+   * leave the order to the event ids.
    */
   readonly notBefore?: number | undefined;
   readonly signal?: AbortSignal | undefined;

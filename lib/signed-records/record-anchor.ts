@@ -47,7 +47,11 @@ export async function fetchRecordAnchor(
   }
   const request: Promise<RecordAnchor> = requestAnchor()
     .then((value) => {
-      cached = { value, at: now };
+      // An older request can finish after a fresh one: never go back to a
+      // lower height.
+      if (!cached || value.anchor >= cached.value.anchor) {
+        cached = { value, at: now };
+      }
       return value;
     })
     .finally(() => {
