@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useDeferredValue, useId, useMemo, useState } from "react";
+import {
+  useDeferredValue,
+  useId,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 
 export interface FilterableItem {
   readonly key: string;
@@ -48,10 +54,13 @@ export function FilterableGroups({
   groups,
   copy,
   headingLevel = 3,
+  afterFilter,
 }: Readonly<{
   groups: readonly FilterableGroup[];
   copy: FilterableGroupsCopy;
   headingLevel?: 2 | 3;
+  /** Rendered between the filter and the groups, such as a jump row. */
+  afterFilter?: ReactNode;
 }>) {
   const inputId = useId();
   const [query, setQuery] = useState("");
@@ -101,6 +110,7 @@ export function FilterableGroups({
                 .replace("{total}", String(total))}
         </p>
       </div>
+      {afterFilter}
       {shown === 0 ? (
         <p className="tw-m-0 tw-text-base tw-text-iron-300">{copy.empty}</p>
       ) : null}

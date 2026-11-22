@@ -153,6 +153,7 @@ export interface OnchainTextGroup {
   readonly heading: string;
   /** The entity the group's texts belong to, when it is on-chain. */
   readonly contextHref: string | null;
+  readonly contextSubjectId: Hex | null;
   readonly records: readonly OnchainMuseumRecord[];
 }
 
@@ -411,6 +412,7 @@ function buildTextGroups(
           : labelOf(context),
       contextHref:
         context === null ? null : onchainMuseumRecordHref(context.subjectId),
+      contextSubjectId: context?.subjectId ?? null,
       records: [],
     });
   }
@@ -511,6 +513,19 @@ export function relationsReferencing(
       record.content?.kind === "json" &&
       payloadStrings(record.content.payload["references"]).includes(entityId)
   );
+}
+
+/** The works an entity names among its source records, such as an accession's. */
+export function worksNamedBy(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): OnchainMuseumRecord[] {
+  return sourceRecordIds(record)
+    .map((id) => view.recordById(id))
+    .filter(
+      (item): item is OnchainMuseumRecord =>
+        item !== null && payloadString(item, "entity_type") === "WORK"
+    );
 }
 
 /** Texts whose title names the given title, for a work or an artist. */

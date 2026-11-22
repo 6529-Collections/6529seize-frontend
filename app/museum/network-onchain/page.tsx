@@ -158,6 +158,23 @@ function Verification({
   );
 }
 
+function releaseContents(records: number, texts: number): string {
+  if (texts === 0) {
+    return t(locale, "museum.onchain.releases.contentsRecords", {
+      records: formatCount(records),
+    });
+  }
+  if (records === 0) {
+    return t(locale, "museum.onchain.releases.contentsTexts", {
+      texts: formatCount(texts),
+    });
+  }
+  return t(locale, "museum.onchain.releases.contents", {
+    records: formatCount(records),
+    texts: formatCount(texts),
+  });
+}
+
 function Releases({ view }: Readonly<{ view: OnchainMuseumView }>) {
   const { releases } = view.snapshot.registry;
   return (
@@ -194,10 +211,7 @@ function Releases({ view }: Readonly<{ view: OnchainMuseumView }>) {
                 })}
               </h3>
               <p className="tw-m-0 tw-mt-1 tw-text-base tw-text-iron-200">
-                {t(locale, "museum.onchain.releases.contents", {
-                  records: formatCount(records.length - texts),
-                  texts: formatCount(texts),
-                })}
+                {releaseContents(records.length - texts, texts)}
                 {" · "}
                 {release.isSealed
                   ? t(locale, "museum.onchain.releases.sealed", {
@@ -260,10 +274,6 @@ function Releases({ view }: Readonly<{ view: OnchainMuseumView }>) {
                           </span>
                         </>
                       ),
-                    },
-                    {
-                      label: t(locale, "museum.onchain.releases.label"),
-                      value: release.label,
                     },
                   ]}
                 />

@@ -19,6 +19,7 @@ import {
   payloadStrings,
   relationsReferencing,
   textsNaming,
+  worksNamedBy,
   type OnchainLink,
   type OnchainMuseumView,
 } from "@/lib/museum/onchain/presentation";
@@ -26,29 +27,21 @@ import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";
 import { registryValueLabel } from "../../_components/labels";
 import { onchainMuseumMetadata } from "../../_components/metadata";
 import {
-  algorithmLabel,
-  canonicalizationLabel,
-  CopyValue,
   FactList,
-  formatCount,
-  formatUtcDateTime,
   LIST_LINK,
-  literalLabel,
   Mono,
   PageHeading,
   PayloadTree,
   SectionHeading,
   StateBadge,
-  stateLabel,
   statusLabel,
   TEXT_LINK,
 } from "../../_components/OnchainParts";
+import { OnchainFacts } from "../../_components/OnchainFacts";
 import { OnchainUnavailable } from "../../_components/OnchainUnavailable";
 import { onchainMuseumView } from "../../_components/view";
 
 const locale = DEFAULT_LOCALE;
-const IPFS_RESOLVER = "https://media.6529.io/ipfs/";
-const ETHERSCAN = "https://sepolia.etherscan.io";
 
 interface OnchainRecordRouteProps {
   readonly params: Promise<{ subjectId: string }>;
@@ -502,154 +495,16 @@ function Connections({
   );
 }
 
-function OnchainFacts({ record }: Readonly<{ record: OnchainMuseumRecord }>) {
-  const { version } = record;
-  const field = (key: MessageKey) => t(locale, key);
-  const facts: Fact[] = [
-    {
-      label: field("museum.onchain.field.subject"),
-      value: (
-        <CopyValue
-          value={record.subjectId}
-          field={field("museum.onchain.field.subject")}
-        />
-      ),
-    },
-    {
-      label: field("museum.onchain.field.recordType"),
-      value: <Mono>{literalLabel(record.recordType)}</Mono>,
-    },
-    {
-      label: field("museum.onchain.field.schema"),
-      value: <Mono>{literalLabel(record.schemaLiteral)}</Mono>,
-    },
-    {
-      label: field("museum.onchain.field.digest"),
-      value: (
-        <>
-          <span className="tw-block tw-text-iron-300">
-            {algorithmLabel(version.contentHash.algorithm)}
-          </span>
-          <CopyValue
-            value={version.contentHash.digest}
-            field={field("museum.onchain.field.digest")}
-          />
-        </>
-      ),
-    },
-    {
-      label: field("museum.onchain.field.canonicalization"),
-      value: canonicalizationLabel(record.canonicalizationLiteral),
-    },
-    {
-      label: field("museum.onchain.field.cid"),
-      value:
-        record.cidText === null ? (
-          "-"
-        ) : (
-          <CopyValue
-            value={record.cidText}
-            field={field("museum.onchain.field.cid")}
-            href={`${IPFS_RESOLVER}${record.cidText}`}
-          />
-        ),
-    },
-    {
-      label: field("museum.onchain.field.effectiveAt"),
-      value: formatUtcDateTime(version.effectiveAt),
-    },
-    {
-      label: field("museum.onchain.field.publishedAt"),
-      value: formatUtcDateTime(version.publishedAt),
-    },
-    {
-      label: field("museum.onchain.field.release"),
-      value: (
-        <Link
-          href={`${ONCHAIN_MUSEUM_BASE_PATH}#releases`}
-          className={TEXT_LINK}
-        >
-          {t(locale, "museum.onchain.releases.item", { id: version.releaseId })}
-        </Link>
-      ),
-    },
-    {
-      label: field("museum.onchain.field.sequence"),
-      value: formatCount(version.sequence),
-    },
-    {
-      label: field("museum.onchain.field.version"),
-      value: t(locale, "museum.onchain.field.versionValue", {
-        version: formatCount(version.version),
-        count: formatCount(record.versionCount),
-      }),
-    },
-    {
-      label: field("museum.onchain.field.publisher"),
-      value: (
-        <CopyValue
-          value={version.publisher}
-          field={field("museum.onchain.field.publisher")}
-          href={`${ETHERSCAN}/address/${version.publisher}`}
-        />
-      ),
-    },
-    ...(record.documentPath === null
-      ? []
-      : [
-          {
-            label: field("museum.onchain.field.path"),
-            value: <Mono>{record.documentPath}</Mono>,
-          },
-        ]),
-    ...(record.servedBy === null
-      ? []
-      : [
-          {
-            label: field("museum.onchain.field.servedBy"),
-            value: <Mono>{record.servedBy}</Mono>,
-          },
-        ]),
-    ...(record.state === "verified"
-      ? []
-      : [
-          {
-            label: field("museum.onchain.field.verification"),
-            value:
-              record.check === null
-                ? stateLabel(record.state)
-                : `${stateLabel(record.state)} (${record.check})`,
-          },
-          ...(record.computedDigest === null
-            ? []
-            : [
-                {
-                  label: field("museum.onchain.field.computedDigest"),
-                  value: <Mono>{record.computedDigest}</Mono>,
-                },
-              ]),
-        ]),
-  ];
-  return (
-    <section aria-labelledby="record-facts" className="tw-mb-10">
-      <SectionHeading id="record-facts">
-        {field("museum.onchain.record.onchain")}
-      </SectionHeading>
-      <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
-        {field("museum.onchain.record.onchainIntro")}
-      </p>
-      <div className="tw-mt-4">
-        <FactList facts={facts} />
-      </div>
-    </section>
-  );
-}
-
 function HeadingAside({
   view,
   record,
 }: Readonly<{ view: OnchainMuseumView; record: OnchainMuseumRecord }>) {
   const group = view.textGroupOf(record);
+  const contextId = group?.contextSubjectId ?? null;
+  const context = contextId === null ? null : view.find(contextId);
+  const named = context === null ? [] : worksNamedBy(view, context);
+  // A text in a group about one or a few works names them.
+  const works = named.length > 0 && named.length <= 3 ? named : [];
   const isWork = payloadString(record, "entity_type") === "WORK";
   const route = payloadString(record, "canonical_route");
   return (
@@ -666,6 +521,22 @@ function HeadingAside({
           >
             {group.heading}
           </Link>
+        </p>
+      )}
+      {works.length === 0 ? null : (
+        <p className="tw-m-0 tw-text-base tw-text-iron-200">
+          {t(locale, "museum.onchain.record.about")}{" "}
+          {works.map((work, index) => (
+            <span key={work.subjectId}>
+              {index > 0 ? ", " : null}
+              <Link
+                href={onchainMuseumRecordHref(work.subjectId)}
+                className={TEXT_LINK}
+              >
+                {view.labelOf(work)}
+              </Link>
+            </span>
+          ))}
         </p>
       )}
       <div className="tw-flex tw-flex-wrap tw-items-start tw-gap-3">
