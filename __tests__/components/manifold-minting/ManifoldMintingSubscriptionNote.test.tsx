@@ -40,7 +40,7 @@ function finalSubscription(
   };
 }
 
-function renderNote(memePhaseId: string | undefined = "1", tokenId = 575) {
+function renderNote(memePhaseId: string | undefined, tokenId = 575) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -162,7 +162,7 @@ describe("ManifoldMintingSubscriptionNote", () => {
       connectedProfile: { consolidation_key: PROFILE_KEY, wallets: [] },
       activeProfileProxy: null,
     });
-    const unknownPhase = renderNote(undefined);
+    const unknownPhase = renderNote("unscheduled");
     expect(unknownPhase.container).toBeEmptyDOMElement();
 
     expect(commonApiFetchMock).not.toHaveBeenCalled();

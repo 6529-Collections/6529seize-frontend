@@ -16,9 +16,7 @@ jest.mock(
   "@/components/manifold-minting/ManifoldMintingSubscriptionNote",
   () => ({
     __esModule: true,
-    default: (
-      props: Readonly<{ tokenId?: number; memePhaseId?: string }>
-    ) => (
+    default: (props: Readonly<{ tokenId?: number; memePhaseId?: string }>) => (
       <div
         data-testid="subscription-note"
         data-token-id={props.tokenId}
