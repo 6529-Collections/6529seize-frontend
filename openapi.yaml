@@ -3323,6 +3323,46 @@ paths:
                 $ref: "#/components/schemas/ApiSessionNonceResponse"
         "400":
           description: Invalid request
+  /signed-records/owners:
+    get:
+      tags:
+        - Authentication
+      summary: The stream owner each wallet's records use
+      description: >-
+        For each wallet, the owner that names it in signed records: its
+        principal id at the latest finalized height, or the wallet itself
+        while it is bound to no principal. Clients use it for the targets of
+        follows, mutes, blocks, artwork alerts and mention shortcuts. 1 to 50
+        wallets. 503 while the chain gateway is unavailable.
+      operationId: getSignedRecordsOwners
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: signed-records
+        handler:
+          import: "@/api/signed-records/signed-records.handlers"
+          name: handleGetSignedRecordsOwners
+      parameters:
+        - name: wallets
+          in: query
+          required: true
+          description: Comma-separated wallets, 0x + 40 hex.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSignedRecordsOwners"
+        "400":
+          description: Not 1 to 50 wallets
+        "503":
+          description: The chain gateway is unavailable
   /signed-records/anchor:
     get:
       tags:
@@ -32433,6 +32473,32 @@ components:
           type: integer
           format: int64
           nullable: true
+    ApiSignedRecordsOwner:
+      type: object
+      required:
+        - wallet
+        - owner
+      properties:
+        wallet:
+          type: string
+          description: Lowercase wallet.
+        owner:
+          type: string
+          description: Its principal id, or the wallet while it is bound to none.
+    ApiSignedRecordsOwners:
+      type: object
+      required:
+        - anchor
+        - owners
+      properties:
+        anchor:
+          type: integer
+          format: int64
+          description: The finalized height the owners were read at.
+        owners:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiSignedRecordsOwner"
     ApiSignedRecordsAnchor:
       type: object
       required:
