@@ -4366,6 +4366,8 @@ export const EN_US_ROOT_MESSAGES = {
     "This changes who controls the registry, freezes it or removes records. It cannot be undone once executed. Check every value before you sign.",
   "browserConnector.safeTx.understand":
     "I checked this action and want to approve it",
+  "browserConnector.safeTx.check.finished": "Checks finished.",
+  "browserConnector.safeTx.check.blocked": "Not offered for signing: {reason}",
   "browserConnector.safeTx.check.checking":
     "Checking the Safe and the registry on chain…",
   "browserConnector.safeTx.check.ok":

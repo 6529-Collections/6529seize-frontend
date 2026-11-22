@@ -298,15 +298,21 @@ export default function BrowserWalletSafeTxView({
         </div>
       )}
       <div id={checksId} className="tw-flex tw-flex-col tw-gap-2 tw-text-sm">
-        <output
-          aria-live="polite"
-          className="tw-block tw-text-iron-200 empty:tw-hidden"
-        >
-          {blocked ? "" : checkMessage(locale, check)}
+        {/* Progress and success stay in the polite region (never emptied
+            when a check fails); a blocking result goes into the alert
+            region, keyed by round so a repeated failure is announced. */}
+        <output aria-live="polite" className="tw-block tw-text-iron-200">
+          {blocked
+            ? t(locale, "browserConnector.safeTx.check.finished")
+            : checkMessage(locale, check)}
         </output>
         <div role="alert" className="empty:tw-hidden">
           {blocked && (
-            <p className="tw-m-0 tw-text-red">{checkMessage(locale, check)}</p>
+            <p key={round} className="tw-m-0 tw-font-semibold tw-text-red">
+              {t(locale, "browserConnector.safeTx.check.blocked", {
+                reason: checkMessage(locale, check),
+              })}
+            </p>
           )}
         </div>
         {blocked && (

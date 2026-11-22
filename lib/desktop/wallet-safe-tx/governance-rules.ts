@@ -9,9 +9,9 @@
  * one of them only on its own, never inside a batch.
  */
 
+import { hashRef } from "@/lib/desktop/wallet-transactions/provenance-rules";
 import type {
   ArgRule,
-  RuleArg,
   TransactionRule,
 } from "@/lib/desktop/wallet-transactions/types";
 
@@ -22,17 +22,6 @@ const LITERAL: ArgRule = { readableAscii: true };
 /** A CID or specification CID: at most 128 bytes. */
 const CID: ArgRule = { lenMax: 128 };
 const ZERO_VALUE = { min: "0", max: "0" } as const;
-
-const hashRef = (name: string): RuleArg => ({
-  name,
-  type: "(uint16,bytes32,bytes32)",
-  rule: ANY,
-  components: [
-    { name: "algorithm", type: "uint16", rule: { oneOf: ["1", "2"] } },
-    { name: "digest", type: "bytes32", rule: NOT_ZERO },
-    { name: "canonicalizationId", type: "bytes32", rule: ANY },
-  ],
-});
 
 /** Calls a Safe transaction may carry only alone (not in a batch). */
 export const SINGLE_CALL_ONLY: readonly string[] = [

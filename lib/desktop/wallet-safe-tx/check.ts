@@ -81,7 +81,8 @@ const isZeroAddress = (value: unknown): boolean =>
 
 /** The pin for this domain: exactly `{chainId, verifyingContract}`. */
 function pinFor(domain: Readonly<Record<string, unknown>>): SafeTxPin | null {
-  const keys = Object.keys(domain).sort();
+  // Only the key set matters; sorted by code unit.
+  const keys = Object.keys(domain).sort((a, b) => (a < b ? -1 : 1));
   if (keys.join(",") !== "chainId,verifyingContract") return null;
   return (
     SAFE_TX_PINS.find(

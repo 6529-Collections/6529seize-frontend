@@ -33,6 +33,13 @@ function canonicalize(value: unknown): unknown {
   return value;
 }
 
+/**
+ * Canonical JSON of any plain value: keys sorted by code unit at every
+ * level, arrays in order, no whitespace (the form 6529 Desktop rebuilds).
+ */
+export const canonicalJson = (value: unknown): string =>
+  JSON.stringify(canonicalize(value));
+
 /** The canonical JSON text of a rule table. */
 export function canonicalTransactionRulesJson(
   rules: readonly TransactionRule[] = WALLET_TRANSACTION_RULES
@@ -41,9 +48,7 @@ export function canonicalTransactionRulesJson(
     (a, b) =>
       byCodeUnit(a.id, b.id) || a.chainId - b.chainId || byCodeUnit(a.to, b.to)
   );
-  return JSON.stringify(
-    canonicalize({ v: RULES_FORMAT_VERSION, rules: ordered })
-  );
+  return canonicalJson({ v: RULES_FORMAT_VERSION, rules: ordered });
 }
 
 /** SHA-256 of the canonical JSON, as 64 lower-case hex digits. */

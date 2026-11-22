@@ -49,10 +49,12 @@ export function describeSafeTx(
     const registry = pin.registries.find(
       (item) => item.address === call.registry
     );
+    // checkSafeTx only accepts calls to the pin's registries.
+    if (registry === undefined) throw new Error("Registry is not pinned");
     const signature = call.rule.signature ?? "";
     return {
       registry: call.registry,
-      registryName: registry?.name ?? "provenanceTest",
+      registryName: registry.name,
       ruleId: call.rule.id,
       functionName: signature.slice(0, signature.indexOf("(")),
       args: call.rule.args.map(({ name, type, components }) => ({

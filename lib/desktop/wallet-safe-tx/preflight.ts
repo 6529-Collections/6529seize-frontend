@@ -4,7 +4,7 @@
  * urgent): the user checks again.
  */
 
-import type { Address } from "viem";
+import { type Address, isAddress } from "viem";
 import type { SafeTxDescription } from "./describe";
 
 const SAFE_READ_ABI = [
@@ -73,8 +73,17 @@ export type SafeTxPreflight =
   /** The Safe already used this nonce. */
   | { readonly kind: "usedNonce"; readonly currentNonce: bigint };
 
-const same = (a: unknown, b: string): boolean =>
-  typeof a === "string" && a.toLowerCase() === b.toLowerCase();
+/**
+ * A chain answer that must be an address, lower-cased. Anything else (not
+ * a string, the wrong length, not hex) cannot be verified: it throws, so
+ * the page shows "could not be checked" and offers nothing to sign.
+ */
+function addressAnswer(value: unknown): string {
+  if (typeof value !== "string" || !isAddress(value, { strict: false })) {
+    throw new TypeError("Unexpected address from the chain");
+  }
+  return value.toLowerCase();
+}
 
 /**
  * Reads the Safe (owners, threshold, nonce) and each registry's owner (or
@@ -87,25 +96,42 @@ export async function readSafeTxPreflight(
   signer: string
 ): Promise<SafeTxPreflight> {
   const safe = description.safe as Address;
+  const safeLower = safe.toLowerCase();
   const read = (address: Address, abi: readonly unknown[], name: string) =>
     client.readContract({ address, abi, functionName: name });
-  const [owners, threshold, currentNonce] = await Promise.all([
-    read(safe, SAFE_READ_ABI, "getOwners"),
-    read(safe, SAFE_READ_ABI, "getThreshold"),
-    read(safe, SAFE_READ_ABI, "nonce"),
-  ]);
-  for (const call of description.calls) {
-    const registry = call.registry as Address;
-    if (call.ruleId === "governance.acceptOwnership") {
-      const pending = await read(registry, REGISTRY_READ_ABI, "pendingOwner");
-      if (!same(pending, safe)) return { kind: "notPendingOwner", registry };
-    } else {
-      const owner = await read(registry, REGISTRY_READ_ABI, "owner");
-      if (!same(owner, safe)) return { kind: "notOwner", registry };
+  // Each registry once: its owner, or its pending owner for acceptOwnership.
+  const registryReads = [
+    ...new Map(
+      description.calls.map((call) => {
+        const pending = call.ruleId === "governance.acceptOwnership";
+        return [
+          `${call.registry}:${pending}`,
+          { registry: call.registry, pending },
+        ];
+      })
+    ).values(),
+  ];
+  const [owners, threshold, currentNonce, ...registryAnswers] =
+    await Promise.all([
+      read(safe, SAFE_READ_ABI, "getOwners"),
+      read(safe, SAFE_READ_ABI, "getThreshold"),
+      read(safe, SAFE_READ_ABI, "nonce"),
+      ...registryReads.map(({ registry, pending }) =>
+        read(
+          registry as Address,
+          REGISTRY_READ_ABI,
+          pending ? "pendingOwner" : "owner"
+        )
+      ),
+    ]);
+  if (!Array.isArray(owners)) throw new TypeError("Unexpected Safe owners");
+  const ownerList = (owners as readonly unknown[]).map(addressAnswer);
+  for (const [index, { registry, pending }] of registryReads.entries()) {
+    if (addressAnswer(registryAnswers[index]) !== safeLower) {
+      return { kind: pending ? "notPendingOwner" : "notOwner", registry };
     }
   }
-  const ownerList = Array.isArray(owners) ? (owners as unknown[]) : [];
-  if (!ownerList.some((owner) => same(owner, signer))) {
+  if (!ownerList.includes(addressAnswer(signer))) {
     return { kind: "notSigner" };
   }
   if (typeof currentNonce !== "bigint" || typeof threshold !== "bigint") {

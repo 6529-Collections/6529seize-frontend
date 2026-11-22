@@ -7,7 +7,10 @@
  */
 
 import { sha256 } from "viem";
-import { canonicalTransactionRulesJson } from "@/lib/desktop/wallet-transactions/hash";
+import {
+  canonicalJson,
+  canonicalTransactionRulesJson,
+} from "@/lib/desktop/wallet-transactions/hash";
 import { governanceRules, SINGLE_CALL_ONLY } from "./governance-rules";
 import { SAFE_TX_BATCH, SAFE_TX_FIELDS, SAFE_TX_PINS } from "./pins";
 
@@ -43,27 +46,8 @@ function safeTxTable() {
   };
 }
 
-/** Orders strings by UTF-16 code unit, as `Array.prototype.sort` does. */
-const byCodeUnit = (a: string, b: string): number => {
-  if (a === b) return 0;
-  return a < b ? -1 : 1;
-};
-
-function canonicalize(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(canonicalize);
-  if (value !== null && typeof value === "object") {
-    const sorted: Record<string, unknown> = {};
-    for (const key of Object.keys(value).sort(byCodeUnit)) {
-      sorted[key] = canonicalize((value as Record<string, unknown>)[key]);
-    }
-    return sorted;
-  }
-  return value;
-}
-
 /** Canonical JSON: keys sorted at every level, arrays in order. */
-export const canonicalSafeTxJson = (): string =>
-  JSON.stringify(canonicalize(safeTxTable()));
+export const canonicalSafeTxJson = (): string => canonicalJson(safeTxTable());
 
 let ownHash: string | null = null;
 

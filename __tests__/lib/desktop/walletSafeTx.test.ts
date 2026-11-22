@@ -17,6 +17,12 @@ import {
   walletSafeTxHash,
 } from "@/lib/desktop/wallet-safe-tx/hash";
 import { SAFE_TX_PINS } from "@/lib/desktop/wallet-safe-tx/pins";
+import { describeSafeTx } from "@/lib/desktop/wallet-safe-tx/describe";
+import { checkSafeTx } from "@/lib/desktop/wallet-safe-tx/check";
+import {
+  readSafeTxPreflight,
+  type SafeReader,
+} from "@/lib/desktop/wallet-safe-tx/preflight";
 import { describeWalletRequest } from "@/lib/desktop/walletRequestDescribe";
 import {
   buildSafeTxVectors,
@@ -254,5 +260,112 @@ describe("SafeTx size", () => {
     // Literal 128 characters (the most a literal may have), 64-byte CID.
     expect(fits(13, 128)).toBe(true);
     expect(fits(14, 128)).toBe(false);
+  });
+});
+
+describe("readSafeTxPreflight", () => {
+  const SAFE = "0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68";
+  const vector = buildSafeTxVectors().find(
+    (item) =>
+      item.name === "governance.registerRecordType alone on the test registry"
+  )!;
+  const parsed = JSON.parse(vector.payload) as {
+    domain: Record<string, unknown>;
+    message: Record<string, unknown>;
+  };
+  const checked = checkSafeTx(parsed.domain, parsed.message);
+  if (!checked.ok) throw new Error("vector refused");
+  const description = describeSafeTx(checked);
+  const reader = (answers: Record<string, unknown>): SafeReader => ({
+    readContract: jest.fn(async ({ functionName }) => {
+      const answer = answers[functionName];
+      if (answer instanceof Error) throw answer;
+      return answer;
+    }),
+  });
+  const base = {
+    getOwners: [SAFE_TX_SIGNER],
+    getThreshold: 2n,
+    nonce: 7n,
+    owner: SAFE,
+  };
+
+  it("accepts the Safe as owner in any letter case", async () => {
+    await expect(
+      readSafeTxPreflight(
+        reader({ ...base, owner: SAFE.toLowerCase() }),
+        description,
+        SAFE_TX_SIGNER
+      )
+    ).resolves.toMatchObject({ kind: "ok", owners: 1, currentNonce: 7n });
+    await expect(
+      readSafeTxPreflight(
+        reader({
+          ...base,
+          getOwners: [SAFE_TX_SIGNER.toUpperCase().replace("0X", "0x")],
+        }),
+        description,
+        SAFE_TX_SIGNER
+      )
+    ).resolves.toMatchObject({ kind: "ok" });
+  });
+
+  it("cannot verify an owner answer that is not an address", async () => {
+    for (const owner of [
+      undefined,
+      42,
+      "",
+      "0x87BD1Be4FbDEf9251C318b4870542217AA2AdB",
+      `${SAFE}00`,
+      "not an address",
+    ]) {
+      await expect(
+        readSafeTxPreflight(
+          reader({ ...base, owner }),
+          description,
+          SAFE_TX_SIGNER
+        )
+      ).rejects.toThrow();
+    }
+  });
+
+  it("cannot verify malformed Safe owners, and fails on an RPC error", async () => {
+    await expect(
+      readSafeTxPreflight(
+        reader({ ...base, getOwners: [SAFE_TX_SIGNER, "0x12"] }),
+        description,
+        SAFE_TX_SIGNER
+      )
+    ).rejects.toThrow();
+    await expect(
+      readSafeTxPreflight(
+        reader({ ...base, getOwners: "0x" }),
+        description,
+        SAFE_TX_SIGNER
+      )
+    ).rejects.toThrow();
+    await expect(
+      readSafeTxPreflight(
+        reader({ ...base, owner: new Error("node down") }),
+        description,
+        SAFE_TX_SIGNER
+      )
+    ).rejects.toThrow("node down");
+  });
+
+  it("reports another owner as not owned by the Safe", async () => {
+    await expect(
+      readSafeTxPreflight(
+        reader({
+          ...base,
+          owner: "0x2222222222222222222222222222222222222222",
+        }),
+        description,
+        SAFE_TX_SIGNER
+      )
+    ).resolves.toEqual({
+      kind: "notOwner",
+      registry: "0x0e289576c7565d29018134517309668946ffc912",
+    });
   });
 });

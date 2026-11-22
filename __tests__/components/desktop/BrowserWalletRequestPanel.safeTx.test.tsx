@@ -255,6 +255,42 @@ describe("BrowserWalletRequestPanel: Safe transactions", () => {
     ).toBeInTheDocument();
   });
 
+  it("announces a blocking result in the alert region after checking", async () => {
+    let release: (value: unknown) => void = () => undefined;
+    const pending = new Promise((resolve) => {
+      release = resolve;
+    });
+    chain();
+    const answers = readContract.getMockImplementation()!;
+    readContract.mockImplementation(async (call: { functionName: string }) =>
+      call.functionName === "owner" ? pending : answers(call)
+    );
+    render(
+      <BrowserWalletRequestPanel
+        hash={await fragmentFor(
+          "governance.registerRecordType alone on the test registry"
+        )}
+      />
+    );
+    expect(
+      await screen.findByText("Checking the Safe and the registry on chain…")
+    ).toBeInTheDocument();
+    release("0x2222222222222222222222222222222222222222");
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole("alert")
+          .some((element) =>
+            /Not offered for signing: .*is not owned by this Safe/.test(
+              element.textContent ?? ""
+            )
+          )
+      ).toBe(true)
+    );
+    expect(screen.getByText("Checks finished.")).toBeInTheDocument();
+    expect(signButton()).toBeDisabled();
+  });
+
   it("refuses a high-impact call inside a batch", async () => {
     render(
       <BrowserWalletRequestPanel
