@@ -58,6 +58,195 @@ describe("DesktopConnectDialog", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   });
 
+  it("starts browser sign-in for the setup that opened the picker and cancels it on close", async () => {
+    const user = userEvent.setup();
+    const controller = new AbortController();
+    const setup = {
+      address: `0x${"a".repeat(40)}`,
+      signal: controller.signal,
+      onStatus: jest.fn(),
+    };
+    render(<DesktopConnectDialog />);
+    act(() => {
+      openDesktopConnectDialog(openWalletConnect, setup);
+    });
+    expect(setup.onStatus).toHaveBeenLastCalledWith("picker");
+
+    await user.click(
+      screen.getByRole("button", { name: /Use a browser wallet/ })
+    );
+    expect(startBrowserConnectorSignIn).toHaveBeenCalledWith(setup);
+    setStatus("waiting");
+
+    await user.click(screen.getByRole("button", { name: /Cancel/ }));
+    expect(setup.onStatus).toHaveBeenLastCalledWith("cancelled");
+    await waitFor(() =>
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    );
+  });
+
+  it("ignores a phone-wallet handoff that finishes after setup has ended", async () => {
+    const user = userEvent.setup();
+    const controller = new AbortController();
+    const onStatus = jest.fn();
+    let finishHandoff: () => void = () => undefined;
+    const handoff = new Promise<void>((resolve) => {
+      finishHandoff = resolve;
+    });
+    const openPhoneWallet = jest.fn(() => handoff);
+    render(<DesktopConnectDialog />);
+    act(() => {
+      openDesktopConnectDialog(openPhoneWallet, {
+        address: `0x${"a".repeat(40)}`,
+        signal: controller.signal,
+        onStatus,
+      });
+    });
+
+    await user.click(
+      screen.getByRole("button", { name: /Scan with a phone wallet/ })
+    );
+    expect(openPhoneWallet).toHaveBeenCalledTimes(1);
+    controller.abort();
+    await act(async () => finishHandoff());
+
+    expect(onStatus.mock.calls).toEqual([["picker"]]);
+  });
+
+  it("leaves a newer picker open when an old phone-wallet handoff fails", async () => {
+    const user = userEvent.setup();
+    const handoff = Promise.withResolvers<void>();
+    openWalletConnect.mockReturnValueOnce(handoff.promise);
+    render(<DesktopConnectDialog />);
+    open();
+    await user.click(
+      screen.getByRole("button", { name: /Scan with a phone wallet/ })
+    );
+    expect(openWalletConnect).toHaveBeenCalledTimes(1);
+
+    const setup = {
+      address: `0x${"a".repeat(40)}`,
+      signal: new AbortController().signal,
+      onStatus: jest.fn(),
+    };
+    act(() => {
+      openDesktopConnectDialog(openWalletConnect, setup);
+    });
+    await act(async () => handoff.reject(new Error("cannot open")));
+
+    expect(setup.onStatus.mock.calls).toEqual([["picker"]]);
+    await user.click(
+      screen.getByRole("button", { name: /Use a browser wallet/ })
+    );
+    expect(startBrowserConnectorSignIn).toHaveBeenCalledWith(setup);
+  });
+
+  it("cancels an unfinished phone-wallet handoff when a new picker opens", async () => {
+    const user = userEvent.setup();
+    const handoff = Promise.withResolvers<void>();
+    const controller = new AbortController();
+    const onStatus = jest.fn();
+    openWalletConnect.mockReturnValueOnce(handoff.promise);
+    render(<DesktopConnectDialog />);
+    act(() => {
+      openDesktopConnectDialog(openWalletConnect, {
+        address: `0x${"a".repeat(40)}`,
+        signal: controller.signal,
+        onStatus,
+      });
+    });
+    await user.click(
+      screen.getByRole("button", { name: /Scan with a phone wallet/ })
+    );
+    const signal = openWalletConnect.mock.calls.at(-1)?.[0] as AbortSignal;
+
+    open();
+    expect(signal.aborted).toBe(true);
+    expect(onStatus).toHaveBeenLastCalledWith("cancelled");
+    await act(async () => handoff.resolve());
+    expect(onStatus).not.toHaveBeenCalledWith("walletconnect");
+    expect(screen.getByRole("dialog")).toBeVisible();
+  });
+
+  it("retires a pending unscoped browser startup when another picker opens", async () => {
+    const user = userEvent.setup();
+    const startup = Promise.withResolvers<void>();
+    jest
+      .mocked(startBrowserConnectorSignIn)
+      .mockReturnValueOnce(startup.promise);
+    render(<DesktopConnectDialog />);
+    open();
+    await user.click(
+      screen.getByRole("button", { name: /Use a browser wallet/ })
+    );
+    const cancellations = jest.mocked(cancelBrowserConnectorSignIn).mock.calls
+      .length;
+
+    open();
+    expect(cancelBrowserConnectorSignIn).toHaveBeenCalledTimes(
+      cancellations + 1
+    );
+    await user.click(
+      screen.getByRole("button", { name: /Scan with a phone wallet/ })
+    );
+    await act(async () => startup.resolve());
+    expect(openWalletConnect).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps a hidden scoped browser login abortable while signing in", async () => {
+    const user = userEvent.setup();
+    const controller = new AbortController();
+    const onStatus = jest.fn();
+    render(<DesktopConnectDialog />);
+    act(() => {
+      openDesktopConnectDialog(openWalletConnect, {
+        address: `0x${"a".repeat(40)}`,
+        signal: controller.signal,
+        onStatus,
+      });
+    });
+    setStatus("signing-in");
+    const cancellations = jest.mocked(cancelBrowserConnectorSignIn).mock.calls
+      .length;
+
+    await user.click(screen.getByRole("button", { name: "Close" }));
+    expect(onStatus).not.toHaveBeenCalledWith("cancelled");
+    expect(cancelBrowserConnectorSignIn).toHaveBeenCalledTimes(cancellations);
+
+    act(() => controller.abort());
+    expect(cancelBrowserConnectorSignIn).toHaveBeenCalledTimes(
+      cancellations + 1
+    );
+  });
+
+  it("lets a new picker start while a retired browser startup is still pending", async () => {
+    const user = userEvent.setup();
+    const startup = Promise.withResolvers<void>();
+    jest
+      .mocked(startBrowserConnectorSignIn)
+      .mockReturnValueOnce(startup.promise);
+    const controller = new AbortController();
+    render(<DesktopConnectDialog />);
+    act(() => {
+      openDesktopConnectDialog(openWalletConnect, {
+        address: `0x${"a".repeat(40)}`,
+        signal: controller.signal,
+        onStatus: jest.fn(),
+      });
+    });
+    await user.click(
+      screen.getByRole("button", { name: /Use a browser wallet/ })
+    );
+    act(() => controller.abort());
+    open();
+
+    await user.click(
+      screen.getByRole("button", { name: /Use a browser wallet/ })
+    );
+    await act(async () => startup.resolve());
+    expect(startBrowserConnectorSignIn).toHaveBeenCalledTimes(2);
+  });
+
   it("offers WalletConnect and a browser wallet, and no seed wallets", () => {
     render(<DesktopConnectDialog />);
     open();

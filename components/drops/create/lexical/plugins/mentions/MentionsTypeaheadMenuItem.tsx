@@ -1,3 +1,4 @@
+import { DROPDOWN_CHECKMARK_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
 import UserCICAndLevel, {
@@ -87,7 +88,7 @@ export default function MentionsTypeaheadMenuItem({
                 )}
                 {isSelected && (
                   <svg
-                    className="tw-ml-auto tw-size-4 tw-shrink-0 tw-text-primary-300"
+                    className={`tw-ml-auto tw-size-4 tw-shrink-0 ${DROPDOWN_CHECKMARK_CLASSES}`}
                     viewBox="0 0 24 24"
                     fill="none"
                     aria-hidden="true"

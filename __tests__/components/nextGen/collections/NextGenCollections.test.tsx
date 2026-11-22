@@ -14,25 +14,6 @@ jest.mock(
     ({ collection }: any) => <div data-testid="preview">{collection.name}</div>
 );
 
-jest.mock(
-  "@/components/utils/select/dropdown/FilterGridDropdown",
-  () =>
-    ({ items, onSelect, selectedValue, triggerAriaLabel }: any) => (
-      <select
-        aria-label={triggerAriaLabel}
-        value={selectedValue ?? ""}
-        onChange={(event) => onSelect(event.target.value || null)}
-      >
-        <option value="">All statuses</option>
-        {items.map((item: any) => (
-          <option key={item.value} value={item.value}>
-            {item.label}
-          </option>
-        ))}
-      </select>
-    )
-);
-
 jest.mock("@/components/pagination/Pagination", () => (props: any) => (
   <div data-testid="pagination">
     <button onClick={() => props.setPage(props.page + 1)}>next</button>
@@ -72,23 +53,43 @@ it("shows an error instead of an empty result when loading fails", async () => {
 });
 
 it("filters by status and resets page", async () => {
-  fetchUrl.mockResolvedValue({ count: 1, data: [{ id: 1, name: "A" }] });
+  fetchUrl.mockResolvedValue({ count: 26, data: [{ id: 1, name: "A" }] });
   fetchUrl
-    .mockResolvedValueOnce({ count: 1, data: [{ id: 1, name: "A" }] })
-    .mockResolvedValueOnce({ count: 1, data: [{ id: 1, name: "A" }] })
+    .mockResolvedValueOnce({ count: 26, data: [{ id: 1, name: "A" }] })
+    .mockResolvedValueOnce({ count: 26, data: [{ id: 2, name: "B" }] })
     .mockResolvedValueOnce({ count: 1, data: [{ id: 2, name: "B" }] });
 
   render(<NextGenCollections />);
-  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(1));
-
-  await userEvent.selectOptions(
-    screen.getByRole("combobox", { name: /status/i }),
-    "LIVE"
+  await userEvent.click(await screen.findByRole("button", { name: "next" }));
+  await waitFor(() =>
+    expect(fetchUrl).toHaveBeenLastCalledWith(
+      "https://api.test.6529.io/api/nextgen/collections?page_size=25&page=2"
+    )
   );
 
-  await waitFor(() => expect(fetchUrl).toHaveBeenCalledTimes(2));
-  expect(fetchUrl).toHaveBeenLastCalledWith(
-    "https://api.test.6529.io/api/nextgen/collections?page_size=25&page=1&status=LIVE"
+  const filter = screen.getByRole("button", {
+    name: "Filter collections by status",
+  });
+  await userEvent.click(filter);
+  expect(
+    await screen.findByRole("menuitem", { name: "All statuses" })
+  ).toHaveAttribute("aria-current", "true");
+  await userEvent.click(screen.getByRole("menuitem", { name: "Live" }));
+  await waitFor(() =>
+    expect(fetchUrl).toHaveBeenLastCalledWith(
+      "https://api.test.6529.io/api/nextgen/collections?page_size=25&page=1&status=LIVE"
+    )
+  );
+  expect(filter).toHaveTextContent("Live");
+
+  await userEvent.click(filter);
+  await userEvent.click(
+    await screen.findByRole("menuitem", { name: "All statuses" })
+  );
+  await waitFor(() =>
+    expect(fetchUrl).toHaveBeenLastCalledWith(
+      "https://api.test.6529.io/api/nextgen/collections?page_size=25&page=1"
+    )
   );
 });
 

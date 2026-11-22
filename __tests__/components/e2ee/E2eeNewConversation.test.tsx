@@ -7,10 +7,7 @@ import {
   screen,
   waitFor,
 } from "@testing-library/react";
-import {
-  clearE2eeComposePrefill,
-  setE2eeComposePrefill,
-} from "@/components/e2ee/e2eeComposePrefill";
+import { setE2eeComposePrefill } from "@/components/e2ee/e2eeComposePrefill";
 import { E2eeNewConversation } from "@/components/e2ee/new/E2eeNewConversation";
 import { NewMessageForm } from "@/components/e2ee/new/NewMessageForm";
 import { useE2ee } from "@/hooks/e2ee/useE2ee";
@@ -99,7 +96,6 @@ const renderNew = (engine = createFakeE2eeEngine()) => {
 describe("E2eeNewConversation", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    clearE2eeComposePrefill();
   });
 
   it("explains why each person can't receive encrypted messages", async () => {
@@ -257,7 +253,6 @@ function PlaintextCapableForm({
 describe("unified new message", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    clearE2eeComposePrefill();
     jest
       .spyOn(Date, "now")
       .mockReturnValue(Date.parse(LEGACY_DM_DELETION_AT) - 60_000);

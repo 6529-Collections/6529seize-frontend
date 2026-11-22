@@ -96,7 +96,7 @@ export const CollapsedWave = ({
         {...(onMouseEnter ? { onMouseEnter } : {})}
         {...(onMouseLeave ? { onMouseLeave } : {})}
         onClick={onClick}
-        className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-no-underline"
+        className="tw-flex tw-size-11 tw-items-center tw-justify-center tw-no-underline focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-inset focus-visible:tw-ring-primary-400"
         {...(showTooltip ? { "data-tooltip-id": tooltipId } : {})}
       >
         <div className="tw-relative">

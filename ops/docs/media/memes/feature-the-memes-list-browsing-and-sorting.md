@@ -46,13 +46,12 @@
   dropdowns use the same light fill for selected options as the mobile sheets,
   and their triggers use equal widths and the same compact styling as a profile’s
   Collected view at every screen size.
-- At 1024px and wider on the web, the sort options, including Volume, use the
-  editorial text style: white text and a blue underline for the selected
-  option, with gray inactive text. The options spread across the available row
-  width. Sort direction uses up/down arrows with an unframed toggle at every screen size.
-  The sort label stays visible at every screen size. Smaller screens and the
-  native app keep the shared soft gray pills and light selected pill. Year and
-  Season keep their framed dropdown triggers.
+- The sort options, including Volume, use white text and a blue underline for
+  the selected option, with gray inactive text on mobile, in the app, and on
+  desktop. At 1024px and wider on the web, the options spread across the available
+  row width. Sort direction uses up/down arrows with an unframed toggle at every
+  screen size. The sort label stays visible. Year and Season use framed dropdown
+  triggers.
 
 ## URL Query Model
 

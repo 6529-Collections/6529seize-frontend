@@ -8,9 +8,9 @@ profiles, and submitted report history.
 
 ## Location in the Site
 
-Preferences is a dedicated page at `/preferences`. It contains five tabs:
-**Notifications & Messages**, **Blocked Profiles**, **Reports**, **Device
-Permissions** (`/preferences?tab=devices`), and **Time Zone**
+Preferences is a dedicated page at `/preferences` with tabs for **Notifications**,
+**Messages** (`/preferences?tab=messages`), **Blocked Profiles**, **Reports**,
+**Device Permissions** (`/preferences?tab=devices`), and **Time Zone**
 (`/preferences?tab=time-zone`). Desktop uses the underlined tab row; narrow
 layouts use a two-column grid without horizontal scrolling.
 
@@ -21,7 +21,9 @@ is saved on the device and works signed out; see
 ## Entry Points
 
 Users can open Preferences from the app sidebar, the desktop profile menu, or
-the **Preferences** action in their own profile header. The profile-header
+the **Preferences** action in their own profile header. The gear beside
+**Messages** in the sidebar and **Choose who can message you** in an encrypted
+message menu open the **Messages** tab. The profile-header
 action sits in the far-right owner area on desktop. Touch-first and phone
 layouts place an icon-only action beside **Edit profile**; smaller
 fine-pointer layouts place the labeled action beside the identity.
@@ -36,9 +38,10 @@ The profile-header action is hidden while an active profile proxy is in use.
 ## User Journey
 
 1. Open your own profile and select **Preferences**.
-2. Choose **Notifications & Messages**, **Blocked Profiles**, **Reports**,
+2. Choose **Notifications**, **Messages**, **Blocked Profiles**, **Reports**,
    **Device Permissions**, or **Time Zone**.
-3. Review or change the available settings for the active profile.
+3. Review or change the available settings for the active profile. Select
+   **Save** in **Notifications** or **Messages** to apply that tab’s edits.
 4. When Preferences was opened from the profile header, return to the active
    profile with **Back to profile** on desktop or the standard back arrow in
    the mobile app header.
@@ -56,26 +59,28 @@ profile is created.
 
 - `Everyone`
 - `People I follow`
-- `Members of a group I choose`
+- `People who meet my criteria`
 - `Nobody`
 
-**Members of a group I choose** reuses network groups, so it can require a
-level, TDH, REP (overall or in one category), NIC, NFTs, or specific included
-and excluded profiles. Select **Choose group** to pick an existing group or
-build a new one with the same group builder used for Wave access. Membership is
-checked when someone starts a conversation, so daily TDH and REP changes apply.
+In the **Messages** tab, choose **People who meet my criteria** and open
+**Set criteria** or **Edit criteria**. The editor uses the same criteria as
+Wave access. You can set a level, TDH, REP (overall or in one category), NIC,
+NFT ownership, or specific included and excluded profiles. It opens with
+your saved criteria when available. Select **Done** to return to the form,
+then **Save** to apply the changes.
+
 **People I follow can always message me** is on by default and also admits
-profiles you follow who are not in the group. **Save Changes** stays disabled
-until a group is chosen.
+profiles you follow who fall outside your criteria. If saved criteria become
+unavailable, only people you follow can start a conversation until you save
+new criteria.
 
 Profiles you block can never start a new conversation with you, whichever
 option you choose, including people you follow.
 
-The policy applies only when a new exact participant set is created. Existing
-one-to-one and group conversations remain available even if one of their
-participants would not pass the current policy. A new group conversation must
-be accepted by every recipient; otherwise the creator sees that recipient's
-admission notice, such as "@alice only accepts new direct messages from people
+The policy is checked for new conversations and when someone adds you to an
+encrypted group. Participants can continue messaging in chats they already
+share. Every recipient must allow the creator of a new group conversation.
+If a recipient refuses admission, the creator sees that recipient's notice, such as "@alice only accepts new direct messages from people
 they follow". A group is named in that notice only when it is public, and a
 block is shown as the generic "doesn't accept new direct messages" notice.
 
@@ -108,11 +113,16 @@ profile preferences cannot trigger a push.
 ### Device Permissions
 
 **Authorized devices** lists signing and encrypted-DM permissions, including
-combined grants, with their status, wallet, added/expiry dates, last use and
-**This device** where applicable. You can rename any unrevoked device you own
-from a browser or app; the server name is shared across your devices.
-**Revoke** explains whether signing, encryption or both will stop before you
-confirm. Revoking this encryption device also clears its local encrypted history.
+combined grants, with their status, wallet, added date, expiry date, one
+**Last active** time (the later use of either permission; **Active now** for
+this browser) and **This device** where applicable. Signing and encrypted DMs
+name a browser the same way (for example "Brave on Windows"). You can rename
+any unrevoked device you own from a browser or app; the server name is shared
+across your devices. **Revoke** explains whether signing, encryption or both
+will stop before you confirm. Revoking this browser opens **Revoke this
+browser?**, which names it as the browser in use; for a combined grant it
+also says the encrypted chats saved here are deleted and that only messages
+in the last backup can be restored, and links to the backup section first.
 
 The setup action names whichever permissions this device is missing and opens
 the shared consent dialog before a wallet request. It is omitted when both are
@@ -133,9 +143,9 @@ internal moderation or AI detail.
   are connected.
 - Existing direct-message conversations remain available after the admission
   policy changes.
-- If the chosen group is deleted or hidden, Preferences warns that only people
-  you follow can start new conversations until you choose another group. New
-  conversations fall back to **People I follow** in the meantime.
+- If the saved criteria group is deleted or hidden, new conversations fall back
+  to **People I follow**. To replace the criteria, open **Edit criteria**, set
+  the rules, select **Done**, then select **Save**.
 
 ## Failure and Recovery
 

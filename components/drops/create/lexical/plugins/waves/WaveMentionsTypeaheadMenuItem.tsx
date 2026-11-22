@@ -1,3 +1,4 @@
+import { DROPDOWN_CHECKMARK_CLASSES } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { getScaledImageUri, ImageScale } from "@/helpers/image.helpers";
 import Image from "next/image";
 export default function WaveMentionsTypeaheadMenuItem({
@@ -56,7 +57,7 @@ export default function WaveMentionsTypeaheadMenuItem({
           </div>
           {isSelected && (
             <svg
-              className="tw-ml-2 tw-h-5 tw-w-5 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+              className={`tw-ml-2 tw-h-5 tw-w-5 ${DROPDOWN_CHECKMARK_CLASSES} tw-transition tw-duration-300 tw-ease-out`}
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

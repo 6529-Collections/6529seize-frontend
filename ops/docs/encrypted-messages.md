@@ -64,9 +64,19 @@ continue to appear as Unknown member.
 
 Encrypted and ordinary messages use the same rich-text editor. Custom emoji
 shortcodes render as inline images while composing and editing; encrypted drafts
-keep their shortcode representation for encryption and sending. Encrypted chat
-does not offer Poll or Storm actions. GIFs can be sent as encrypted attachments;
-their search and previews connect publicly to GIPHY.
+keep their shortcode representation for encryption and sending. GIFs can be
+sent as encrypted attachments. Their search and previews connect publicly to GIPHY.
+
+### Polls
+
+In supported builds, select **Create poll** in an encrypted DM or group chat.
+Enter a question and two to ten choices in the inline composer. Choose
+**Single** or **Multiple**, then select **Post poll**.
+
+Select your choices and choose **Vote**. Use **View results** to see the tally,
+then select a result row to see who chose it. Use **Change vote** to update or
+clear your vote. The creator can select **End poll** to stop voting.
+People who join a group after the poll was posted need a new poll to participate.
 
 Messages support the same Markdown formatting as ordinary chats: headings,
 **bold** and italic text, strikethrough, lists and task lists, quotes,
@@ -152,14 +162,21 @@ Open the setup action in the account menu, Preferences → **Device Permissions*
 or the composer notice. Each opens the same permission dialog. The initial
 `/messages/encrypted` page presents the same explanation inline, without the
 **Encrypted messages / End-to-end encrypted** header until encryption is ready.
-Setup does not open automatically after sign-in.
+Setup does not open automatically after sign-in. Once you sign for setup, the
+app shows **Finishing encrypted message setup…** while it turns encryption on.
 
 The explanation and signature button name the permissions this device needs:
 
-- Neither permission is on: **Post Signing & DM Encryption**, with separate
-  **Signed Posts** and **Encrypted DMs** sections and **Sign to enable both**.
-- Only signing is missing: **Enable Signed Posts** and **Sign to enable Signed Posts**.
-- Only encryption is missing: **Enable Encrypted DMs** and **Sign to enable Encrypted DMs**.
+- Neither permission is on: **Turn on signed posts and encrypted DMs**, with
+  separate **Signed Posts** and **Encrypted DMs** sections and **Sign to enable
+  both**. The composer's first-time notice uses the same title, so it and the
+  dialog it opens name the same permissions. Once signed posts have expired,
+  the notice is titled **Signed posts have ended in this browser**; when
+  encrypted DMs can be turned on too, its text says the same signature also
+  turns them on, and **Renew** opens **Turn on signed posts and encrypted
+  DMs**.
+- Only signing is missing: **Turn on signed posts** and **Sign to enable Signed Posts**.
+- Only encryption is missing: **Turn on encrypted DMs** and **Sign to enable Encrypted DMs**.
   This requests encryption alone and keeps the existing signing permission.
 
 A device that used the earlier encryption sees **Upgrade encrypted messages**
@@ -187,6 +204,10 @@ scrolls; on a phone it leaves space around the dialog and respects the safe area
 Ordinary web sign-in can itself include a combined grant. When that happens,
 the encryption engine adopts it without another signature, including if the
 setup page was already open. Signing and encryption still use separate keys.
+If this browser already saved an encryption device, **Sign to enable both**
+signs for posts and resumes that device using its existing approval. Its key
+and chat history are kept. If that encryption approval needs renewal, signing
+stays on and encryption requests its own approval separately.
 If combined setup cannot finish, the page explains the result and offers explicit
 next actions. It does not silently request a different permission. If signing
 succeeds but encryption registration fails, signing stays on and encryption can
@@ -240,6 +261,11 @@ due, this displays preview wording with renewal actions disabled, rather than
 claiming your permissions are expiring.
 
 ## Starting a chat
+
+Select **Direct Message** on someone’s profile or profile card to open
+**New message** with that person already selected. From there, use **Open
+chat** for an existing encrypted conversation or **Start chat** for a new one.
+Opening the composer creates no conversation.
 
 In the 6529 app, the back arrow to the left of the chat avatar returns to the
 encrypted messages list. It stays visible on iPad in portrait and landscape.
@@ -425,7 +451,7 @@ appear.
   same switch as in **Chat info**: the chat stops counting toward the Messages badge and shows a muted
   mark), **Block** the sender (they can't start new chats with you or add you
   to encrypted chats; chats you already share stay until you leave them),
-  **Choose who can message you** (Preferences) and, last, **Report illegal or
+  **Choose who can message you** (the Messages tab in Preferences) and **Report illegal or
   severe harm**.
 - Search in the header looks only through messages on this device.
 - **Chat info** lists members (with admin badges and their devices, each with
@@ -548,14 +574,20 @@ time your device sees someone. Compare safety codes and check the wallets in
 
 `/messages/encrypted/devices` lists every device of your profile that can read
 your encrypted messages, marks **This device**, and shows each device's
-platform, when it was added, last seen and when it expires, and whether its
-wallet signature was verified on this device. You can rename any unrevoked
+platform, when it was added, when it was last active (**Active now** for this
+device), the date it expires, and whether its wallet signature was verified on
+this device. You can rename any unrevoked
 device belonging to your profile from any authenticated browser or app. The name
 is saved on the server and appears on your other devices after their lists refresh;
 linked signing and encryption entries share that name. You can also revoke any
-device, including this one. Revoking this device removes its
-encrypted messages and keys from this browser right away and shows the card
-to turn encrypted messages on again. Your device's data is removed only when
+device, including this one. Revoking this device opens its own
+**Revoke this browser?** dialog: it names the browser you're using, says what
+stops, and with backup on says that only messages included in your last
+backup can be restored. With backup off it warns
+that the encrypted chats in this browser can't be restored afterwards and
+offers **Set up backup first**. Revoking it removes its encrypted messages and
+keys from this browser right away and shows the card to turn encrypted
+messages on again. Your device's data is removed only when
 the revocation verifies on it (it came from that device, or from a device of
 yours this device trusts). If 6529.io lists this device as revoked but the
 revocation can't be confirmed, the device stops sending and receiving
@@ -596,15 +628,32 @@ encrypted copy of your message history so you can restore it on a new device.
   numbers. Select **Copy code** or **Download as text file**, store it
   somewhere safe (for example a password manager), tick **I saved my recovery
   code somewhere safe**, then select **Turn on backup**. Closing the dialog
-  before that turns nothing on and discards the code.
+  before that turns nothing on and discards the code. The dialog (and the
+  one for **Replace recovery code**) finishes only once the new backup is
+  active and fully uploaded: if the upload needs another run, it says
+  "Backing up your history…" until that run succeeds. If the upload fails
+  (the first one or a later run), it shows the error with **Try again**,
+  which carries on with the same backup and code instead of creating
+  another one; it is also retried by itself about 5 minutes later. If the
+  backup was replaced or turned off on another device meanwhile, the dialog
+  offers **Restore messages** or **Turn on backup** instead. Once the backup
+  exists, closing the dialog doesn't stop the upload.
 - What is backed up: messages you have on this device (text, edits,
   deletions, reactions, notices), the chat names and members needed to show
   them, and references to attachments with their keys. Never the device's
   encryption state; a new device always joins chats as a new device.
 - Backups are incremental: after a change the device uploads only what
-  changed, about 30 seconds later. **Back up now** uploads immediately. The
-  section shows when the device last backed up and how much of the 256 MB
-  backup storage is used.
+  changed, about 30 seconds later. **Back up now** uploads immediately and
+  then shows "Backup is up to date." in the status line for a few seconds.
+  If the upload needs another run (another device wrote to the backup at the
+  same moment, or messages arrived while it uploaded and keep arriving), the
+  status says "Backing up your history…" until that run succeeds, never
+  "up to date"; messages that arrive during an upload are included before
+  it reports up to date. A failed upload shows its error and is retried
+  about 5 minutes later. Removing encrypted messages at sign-out first stops
+  new messages coming in, then updates the backup, so everything removed is
+  in it. The section shows when the device last backed up and how much of the
+  256 MB backup storage is used (in kB below 1 MB).
 - 6529 stores only encrypted data. It cannot read your messages, contact
   list or chat names, and cannot recover your recovery code. It can see that
   you have a backup, its size and when it changes.
@@ -617,6 +666,10 @@ encrypted copy of your message history so you can restore it on a new device.
   read-only until someone in the chat adds this device; then new messages
   continue below the restored ones. After a restore the device also keeps the
   same backup up to date.
+- **Lost your recovery code?** sits next to **Restore messages**. It first asks
+  **Start a new backup without restoring?**: starting over deletes the
+  existing backup, including messages that aren't on this browser, and can't
+  be undone. Only **Delete old backup and start over** shows a new code.
 - The backup's encrypted pieces are linked in order, so 6529 cannot reorder,
   replay or remove pieces from the middle of your history. If the restore
   finds a piece missing, out of place or altered, it says "Part of the backup
@@ -624,12 +677,18 @@ encrypted copy of your message history so you can restore it on a new device.
   devices back up at exactly the same moment, the next backup run uploads a
   fresh full copy and removes the overlapping pieces; a restore attempted in
   between also stops without importing anything.
-- **Create new recovery code** shows a new code and uploads a fresh copy of
-  your history. Your old code stops working once the new backup finishes
-  uploading. Do this after you revoke a device that had backup on: the
-  section reminds you when a device was revoked after the backup was set up.
-- **Turn off backup** deletes the encrypted backup from 6529. Your recovery
-  code stops working; messages on your devices stay.
+- **Replace recovery code** shows a new code and uploads a fresh copy of
+  your history from this browser. Your old code stops working once the new
+  backup finishes uploading, and messages that are in the backup but not on
+  this browser aren't in the new one. When you revoke a device after the
+  backup was set up, the section shows **Replace your recovery code**: if that
+  device ever restored the backup, it may still hold its key. One device is
+  named; several (for example after a clean-up) are counted in one warning,
+  with one **Replace recovery code** action.
+- **Turn off backup…** is in the section's **More backup options** menu.
+  After confirmation it deletes the encrypted backup from 6529. Your recovery
+  code stops working; messages on your devices stay, but can't be restored if
+  this browser clears its data later.
 - Attachments themselves are not copied into the backup. A restored
   attachment downloads only after this device has been added back to the
   chat, and only while the encrypted file is still stored (one year).
@@ -760,6 +819,17 @@ without images**. Images and files too large for one encrypted attachment
 
 ## Troubleshooting
 
+- **Sign in again to continue**: the server rejected this browser's sign-in.
+  Select **Sign in again** to restore the session, then encrypted messages
+  restart. This keeps the device's local chats and keys.
+- **Loading encrypted chats…** appears while this device first checks for
+  chats. The inbox lists each chat as it arrives. After a brief wait for a
+  trusted device to send an invitation, an empty list says **No encrypted
+  chats available on this device yet** and offers **Check device setup**.
+  Invitations continue arriving in the background. Select **Check again**
+  to check immediately. If the check stalls or fails, an empty list offers
+  **Try again**. **No encrypted chats yet** appears when the check confirms
+  an empty inbox.
 - **Encrypted messages couldn’t start**: select **Try again**. The error code
   under the message helps the team diagnose staging issues.
 - **Chat not found on this device**: devices only receive chats they were
@@ -776,7 +846,7 @@ without images**. Images and files too large for one encrypted attachment
   on or when the current recovery code was created.
 - **Backup was turned off or replaced on another device**: restore with the
   current recovery code to back up this device too, or start a new backup.
-- **Your backup storage is full**: select **Create new recovery code** to
+- **Your backup storage is full**: select **Replace recovery code** to
   replace the backup with a compact copy.
 - **Too many devices**: revoke a device you no longer use, then select
   **Turn on this device**.
@@ -786,15 +856,16 @@ without images**. Images and files too large for one encrypted attachment
 ## Setup through connection sharing
 
 In the browser account menu, open **Connect Device**. Confirm the avatar,
-handle and full wallet address, then select **6529 Mobile** or **6529 Desktop**.
+handle and full wallet address, then select **6529 Mobile** or **6529 Desktop
+Classic**.
 Choose **Connect only** for an additional signed-in app session, or
 **Connect with Post Signing & DM Encryption** to approve those permissions too.
 The source browser does not need encryption enabled on itself to approve the
 receiving app. Proxy sessions cannot authorize secure setup.
 
-Desktop secure setup requires 6529 Desktop v0.4.0 or later. Approve the wallet
-signature in the browser, then select **Open in 6529 Desktop** to open the
-private link.
+Desktop connection links require 6529 Desktop Classic v0.4.1 or later. For
+secure setup, approve the wallet signature in the browser, then select **Open in
+6529 Desktop Classic** to open the private link.
 
 For Mobile secure setup, approve the wallet signature in the browser, then scan
 one QR or open its private link in the receiving app. The regular **Scan QR Code**
@@ -820,8 +891,8 @@ icon and separate refresh icon. **Back** returns to the app and connection
 choices. Connect-only refresh creates a new code directly; secure refresh clears
 the old displayed link, returns to the signing state and requests a fresh wallet
 signature. The dialog changes height smoothly, with scrolling for short screens.
-The Desktop handoff uses the 6529 logo and **Open in 6529 Desktop**, rather than
-a QR, followed by the same link controls.
+The Desktop handoff uses the 6529 logo and **Open in 6529 Desktop Classic**
+with the same link controls.
 
 Links expire shortly and work once. Use them only on a device you own. Existing
 source keys and history are not copied. Working keys and registered encrypted

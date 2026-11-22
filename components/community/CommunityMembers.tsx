@@ -237,6 +237,7 @@ export default function CommunityMembers() {
     isError: isMembersError,
     isLoading,
     isFetching,
+    isPlaceholderData,
     data: members,
   } = useQuery<Page<ApiCommunityMemberOverview>>({
     queryKey: [
@@ -276,11 +277,14 @@ export default function CommunityMembers() {
     (updateItems: QueryUpdateInput[], lowerCase: boolean = true): void => {
       const queryString = createQueryString(updateItems, lowerCase);
       const path = queryString ? `${pathname}?${queryString}` : pathname;
-      if (path) {
-        router.replace(path);
+      const currentPath = searchParams.toString()
+        ? `${pathname}?${searchParams}`
+        : pathname;
+      if (path && path !== currentPath) {
+        router.replace(path + globalThis.location.hash);
       }
     },
-    [createQueryString, pathname, router]
+    [createQueryString, pathname, router, searchParams]
   );
 
   const setSortBy = async (
@@ -326,37 +330,35 @@ export default function CommunityMembers() {
   }, [activeGroupId, params.group_id, updateFields]);
 
   const setPage = useCallback(
-    async (page: number): Promise<void> => {
+    (page: number): void => {
       const items: QueryUpdateInput[] = [
         {
           name: "page",
           value: page.toString(),
         },
       ];
-      await updateFields(items);
+      updateFields(items);
     },
     [updateFields]
   );
 
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const totalPages = Math.max(
+    1,
+    Math.ceil((members?.count ?? 0) / debouncedParams.page_size)
+  );
+  const canCorrectPage =
+    params === debouncedParams &&
+    !isLoading &&
+    !isFetching &&
+    !isMembersError &&
+    !isPlaceholderData &&
+    Boolean(members);
 
   useEffect(() => {
-    if (isLoading) return;
-    if (!members?.count) {
-      setPage(1);
-      setTotalPages(1);
-      return;
-    }
-    const pagesCount = Math.ceil(members.count / debouncedParams.page_size);
-    if (pagesCount < debouncedParams.page) setPage(pagesCount);
-    setTotalPages(pagesCount);
-  }, [
-    debouncedParams.page,
-    debouncedParams.page_size,
-    isLoading,
-    members?.count,
-    setPage,
-  ]);
+    // eslint-disable-next-line react-you-might-not-need-an-effect/no-event-handler -- A settled server result can shrink pagination after Back or a background refresh, without a user event.
+    if (canCorrectPage && debouncedParams.page > totalPages)
+      setPage(totalPages);
+  }, [canCorrectPage, debouncedParams.page, totalPages, setPage]);
 
   const goToNerd = () => router.push("/network/nerd");
 

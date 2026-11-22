@@ -116,21 +116,26 @@ show the profile-creation welcome.
 - The summary count is unique identities. A receiver with REP in several
   categories counts once overall and once in each applicable category. Category
   counts therefore need not add up to the summary count.
-- Avatars beside the REP and NIC summary totals open those profiles.
-  Select the rater/receiver count and chevron to open the full list.
+- On desktop, avatars beside the REP and NIC summary totals open those profiles;
+  the rater/receiver count and chevron open the full list. On touch devices,
+  tapping either the avatars or the count opens that list. Profile links remain
+  available inside the list.
 - Direction-specific contributor labels:
   - `Received`: `rater` / `raters`
   - `Given`: `receiver` / `receivers`
 - When signed in and viewing another profile, your existing contribution uses `You assigned:` with the same grouped number
   format as Total REP, without a plus sign. Negative totals retain their minus
-  sign. On mobile and medium screens, this summary stays beside `Grant Rep`
-  as a group at the right of the category heading. When space is tight, the
-  summary moves below the button and stays right-aligned.
+  sign. This summary stays to the left of `Grant Rep` at every screen size.
+  On mobile and medium screens they stay together at the right of the category
+  heading. When space is tight, the whole pair moves to the next row, with the
+  same order and an 8px gap.
 - `You assigned` is plain information without a chevron or hover state.
-  Select `Grant Rep` to open the modal and choose a category to grant or edit.
+  Select `Grant Rep` to open the modal, then type a category name or pick a suggestion.
 - Category headers show the name, total, up to three top-contributor avatars and
   rater/receiver count. Long names truncate on desktop; phone tags let names wrap
-  beside the total, with avatars, contributor count and your amount below. The tag opens the contributor
+  beside the total. Avatars and the contributor count stay beside the category
+  when there is room and wrap below on the left only when needed. The name,
+  total and personal amount stay together before the contributor group. The tag opens the contributor
   panel, with separate desktop profile links on its avatars. Tags have no separate edit
   pencil; editing is available inside the panel when permitted.
 - When signed in and viewing another profile, a nonzero personal amount is visible on each category tag, after a
@@ -142,15 +147,17 @@ show the profile-creation welcome.
   In Received, your assigned amount is blue while `You assigned:` stays gray.
   This accent applies only to the tag amount; the expandable's `You` label
   keeps its standard styling.
-  Narrow tags place this beside the contributor details below the title, without
-  a leading dot. Wider full-row tags place it beside the category name and total,
-  with contributor avatars and count kept at the right. Tags grow to fit the
-  personal amount comfortably.
+  The personal amount sits directly beside the category name and total, with
+  a small fixed gap. When it needs another line, it stays left-aligned below
+  them, without a leading dot on narrow tags. Contributor avatars and count
+  follow this group at every width; they never switch places with your amount.
+  Tags grow to fit the content comfortably.
 - Category avatars are 24px. On desktop, hovering an avatar enlarges it and
   shows the profile name and REP contribution; clicking it opens that profile.
   The rest of the tag opens the contributor list. On touch devices, tapping
   anywhere on the tag, including its avatars, opens the list; profiles are
-  linked inside that list. Avatars beside the summary totals still link to profiles.
+  linked inside that list. Summary avatars follow the same touch behavior and
+  retain their individual profile links on desktop.
 - Select a category to open its list. Desktop Received and Given categories
   use the same compact tags, arranged side by side and wrapping as needed.
   The open tag keeps its size and position. A short filled bridge joins it to a
@@ -180,7 +187,7 @@ show the profile-creation welcome.
   other direction's list back to 5 immediately.
 - Opening a different profile route resets both directions to that profile's
   own category list, beginning again at 5 visible items.
-- `Grant Rep` opens the existing category selection flow on every layout.
+- `Grant Rep` opens the same category entry dialog on every layout.
 - In `Received`, eligible viewers open a category and edit their own pinned
   `You` row. Your own Received view is read-only.
 - In your own `Given` view outside proxy mode, each receiver's amount is editable
@@ -201,12 +208,13 @@ show the profile-creation welcome.
   rater and receiver lists for REP keep that positioning. NIC rater and receiver lists start about 10%
   down and grow to at most 80% of the viewport height. Long content scrolls
   inside. Mobile keeps the bottom sheet.
-- The fixed layout starts with an always-visible quiet summary block above
+- The fixed layout starts with always-visible summary rows above
   category search: `Your available REP:` and `Your REP assigned to [profile]:`.
   Both use grouped numbers and remain visible when your assigned total is zero.
+  They appear as plain aligned info rows, without a separate filled background.
   Search, your assigned categories, the amount label and field, a small
   `Current Rep` / `Adjustment` row, the primary action and `Cancel` stay in place.
-  The adjustment row reserves its space but stays hidden until a category is selected.
+  The adjustment row reserves space until the category and its rating data are ready.
   The amount label includes the same total-rating hint as Rate NIC.
   `You assigned` uses an 11px uppercase label. Its category
   pills use the profile tag style: 38px height, 8px corners, subtle fill and
@@ -219,30 +227,31 @@ show the profile-creation welcome.
   existing assigned-category chips can be selected without typing. Focusing an
   empty search or selecting `Change category` opens the
   `Type at least 3 characters.` prompt without searching the network.
-- Results appear after a short debounce as compact category pills, including the
-  typed category and matching categories returned by the existing search.
+- Pause after typing a category name. Grant Rep checks that exact name. Matching
+  categories appear as optional suggestions above the amount section, which
+  stays visible while you type. Category names are case-sensitive, so `artist`
+  and `Artist` can hold separate ratings.
 - Similar categories remain independent and selectable. The exact
   `MemesNominee` pill is marked as counting toward the 50,000 REP submission
   requirement. When the typed value differs from it only by capitalization,
   spacing, punctuation, or Unicode width, the exact pill is surfaced first; the
   typed value remains available and look-alikes use subdued styling. Search
-  guidance stays neutral until a category is selected. Selecting exact
-  `MemesNominee` confirms the requirement in green; selecting a look-alike
-  instead shows an amber informational note explaining that the categories are
-  separate and only exact `MemesNominee` counts toward the requirement. All
-  other category pills keep their existing behavior.
-- Selecting a search result validates availability; assigned chips use their
-  known category names. After choosing, the category stays in the search field.
-  Its amount is focused and selected once the current rating has loaded, ready
-  for typing. Rate NIC focuses its amount on desktop only; opening it on a phone
-  does not summon the keyboard.
-  Select its `×` (`Change category`) to choose another category and clear the draft.
-- Before selection, the amount field is dimmed and disabled with placeholder
-  `0`, and the visible `Grant Rep` action is disabled. Selecting a category
-  prefills your saved total, or zero for a new rating. You can type an amount while
-  rating data loads; submitting stays disabled until the current contribution
-  and allowance are available.
-- If availability fails, inline error is shown.
+  guidance stays neutral until a category is ready. Using exact `MemesNominee`
+  confirms the requirement in green. Using a look-alike shows an amber note
+  explaining that only exact `MemesNominee` counts toward the requirement.
+- Pick a suggestion to use its exact spelling. After you pick a suggestion or
+  an assigned category, the amount receives focus when the current rating loads,
+  provided focus is still on the category selection control. You can edit the
+  category text or use `×` (`Change category`) to clear it.
+  Rate NIC focuses its amount on desktop only.
+- You can type an amount before the category is ready or while rating data
+  loads. An amount typed before validation is kept when the name passes or you
+  pick a suggestion. Switching between ready categories loads the new category's
+  saved total or zero. `Change category` clears the draft. Submitting requires a
+  ready category, its current contribution and allowance, and a valid changed
+  amount.
+- If the typed category fails validation, the reason appears below the category
+  field.
 - Amount accepts integers. Type the desired amount in Grant REP and Rate NIC.
   The plus/minus symbols indicate signed amounts and are not buttons.
 - Enter the desired total, including any existing contribution.
@@ -260,10 +269,8 @@ show the profile-creation welcome.
   Rate NIC retains its existing guidance and blur behavior. The action says
   `Save` for an existing contribution and
   `Grant Rep` for a new one. Enter in the amount field submits the same action.
-- The primary action stays disabled until category is selected, amount changed, amount
-  is valid, and submit is idle.
-- The amount label is medium iron text and the summary block has a quiet
-  filled background. Desktop actions sit at the bottom right, `Cancel` then
+- The amount label is medium iron text and the summary uses plain, aligned
+  info rows. Desktop actions sit at the bottom right, `Cancel` then
   `Save` or `Grant Rep`, at matching heights. On mobile, the buttons form a
   full-width column in the same order.
 
@@ -352,8 +359,9 @@ show the profile-creation welcome.
 
 - NIC has `Received` and `Given` views on desktop and mobile.
 - Both directions use a compact summary with a score, up to five avatars and a count,
-  matching REP. Avatars open individual profiles; the borderless count button
-  and chevron open the full list. Owners can adjust their Given ratings there.
+  matching REP. Desktop avatars open individual profiles; on touch, they open
+  the full list, where each handle links to its profile. The borderless count
+  button and chevron also open that list. Owners can adjust their Given ratings there.
 - The NIC total is green. In both `Received` and `Given` on desktop and mobile,
   contributor avatars, count and chevron are right-aligned on its number row.
   When a large total leaves too little room, the contributor group wraps below
@@ -375,9 +383,9 @@ show the profile-creation welcome.
 - The NIC editor loads the current total and allowance before enabling Save.
   If loading fails, select `Retry`. A background refresh keeps an entered draft.
 - Enter the desired total, then select `Save`, or `Cancel` to leave without saving.
-- The Rate NIC modal groups available credit and max/min ratings in a quiet,
-  borderless filled block. The brighter rating label, hint and input form one
-  group. Current NIC sits on the left below the input, with Adjustment on the
+- The Rate NIC modal shows available credit and max/min ratings as plain,
+  aligned info rows without a separate filled background. The brighter rating
+  label, hint and input form one group. Current NIC sits on the left below the input, with Adjustment on the
   right; a positive adjustment is emerald, a negative adjustment rose, and zero
   neutral iron.
 - Desktop keeps `Cancel` then `Save` at the bottom right. On mobile, the buttons
@@ -400,8 +408,8 @@ show the profile-creation welcome.
    and scroll position; Cancel closes management without saving. New REP
    categories stay with `Grant Rep`. The expandable category tags remain the
    main way to adjust multiple receiver amounts together.
-   The category editor matches the main rating forms: a quiet filled allowance
-   block, brighter values and amount label, a subdued helper sentence, and
+   The category editor matches the main rating forms: plain aligned allowance
+   rows, brighter values and amount label, a subdued helper sentence, and
    `Current Rep` on the left with `Adjustment` on the right. Increases use
    emerald and decreases rose. `Cancel` then `Save` sit at the bottom right on
    desktop and stack at full width on mobile. Amounts, limits and saving behavior
@@ -420,8 +428,10 @@ retry, and editing an amount clears the previous save or lookup error. Lists hav
 public ratings with sorting but without adjustment controls. REP Received shows each
 rater and their total, without expanding that person's categories.
 
-Received and Given use the same subtle row background, circular avatar, linked handle
-and right-aligned amount styling. Read-only values are plain numbers; eligible
+Received and Given use the same compact row spacing, subtle background, linked
+handle and right-aligned amount styling. A circular profile image appears only
+when one is available; missing images do not leave an initial or an empty circle.
+The category list and sheet follow the same image rule. Read-only values are plain numbers; eligible
 editors get an amount input on the right in the category editor and NIC list.
 REP receiver management keeps its existing Adjust flow.
 

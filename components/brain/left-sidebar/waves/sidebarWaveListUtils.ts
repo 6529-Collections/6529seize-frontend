@@ -8,6 +8,9 @@ interface SidebarWaveGroups {
   readonly allWaves: MinimalWave[];
 }
 
+export const hasUnreadWaveDrops = (wave: MinimalWave): boolean =>
+  !wave.isMuted && (wave.unreadDropsCount > 0 || wave.newDropsCount.count > 0);
+
 export const isValidSidebarWave = (wave: unknown): wave is MinimalWave => {
   if (wave === null || wave === undefined || typeof wave !== "object") {
     return false;

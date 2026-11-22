@@ -2,7 +2,7 @@ import type { E2eeMessage } from "./types";
 
 type ProfileReferences = Pick<
   E2eeMessage,
-  "senderProfileId" | "notice" | "reactions"
+  "senderProfileId" | "notice" | "reactions" | "poll"
 >;
 
 /** Only the bounded loaded timeline is inspected, never all saved history. */
@@ -15,6 +15,11 @@ export function referencedProfileIds(
     if (message.notice?.actorProfileId) ids.add(message.notice.actorProfileId);
     for (const id of message.notice?.targetProfileIds ?? []) ids.add(id);
     for (const id of Object.values(message.reactions).flat()) ids.add(id);
+    for (const [profileId, ballot] of Object.entries(
+      message.poll?.ballots ?? {}
+    )) {
+      if (ballot.options.length > 0) ids.add(profileId);
+    }
   }
   return ids;
 }

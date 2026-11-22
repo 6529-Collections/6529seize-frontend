@@ -19,6 +19,9 @@ import { useDropDetailMetadata } from "@/components/waves/drop/useDropDetailMeta
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useAndroidBackLayer } from "@/hooks/useAndroidBackLayer";
 import { t, type MessageKey } from "@/i18n/messages";
+import useDialogKeyboard, {
+  DIALOG_KEYBOARD_VIEWPORT_STYLE,
+} from "@/hooks/useDialogKeyboard";
 
 const NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION =
   "var(--native-keyboard-layout-transition-duration, 0ms)";
@@ -40,6 +43,7 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
   onSourceDropDeleted,
 }) => {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const keyboardViewportRef = useDialogKeyboard(isOpen);
   useAndroidBackLayer(isOpen, dialogRef, onClose);
   const locale = useBrowserLocale();
   const { metadata, metadataState } = useDropDetailMetadata(sourceDrop, isOpen);
@@ -116,7 +120,11 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
           />
         </TransitionChild>
 
-        <div className="tw-fixed tw-inset-0 tw-flex tw-items-start tw-justify-center md:tw-inset-4 md:tw-items-center">
+        <div
+          ref={keyboardViewportRef}
+          style={DIALOG_KEYBOARD_VIEWPORT_STYLE}
+          className="tw-fixed tw-inset-0 tw-flex tw-items-start tw-justify-center md:tw-inset-4 md:tw-items-center md:[--dialog-bottom-reserve:1rem]"
+        >
           <TransitionChild
             as={Fragment}
             enter="tw-transition-opacity tw-duration-200 tw-ease-out motion-reduce:tw-transition-none"
@@ -128,9 +136,11 @@ const MemesArtSubmissionModal: React.FC<MemesArtSubmissionModalProps> = ({
           >
             <DialogPanel
               data-testid="memes-art-submission-modal-panel"
-              className="tw-flex tw-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))] tw-max-h-[calc(100dvh-var(--native-keyboard-inset-bottom,0px))] tw-w-full tw-max-w-screen-xl tw-flex-col tw-transition-[height,max-height] tw-ease-out motion-reduce:tw-transition-none md:tw-h-full md:tw-max-h-none"
+              className="tw-flex tw-h-[min(var(--dialog-viewport-height,100dvh),calc(100dvh-var(--native-keyboard-inset-bottom,0px)))] tw-max-h-[min(var(--dialog-viewport-height,100dvh),calc(100dvh-var(--native-keyboard-inset-bottom,0px)))] tw-w-full tw-max-w-screen-xl tw-flex-col tw-transition-[height,max-height] tw-ease-out motion-reduce:tw-transition-none md:tw-h-full md:tw-max-h-none"
               style={{
                 transitionDuration: NATIVE_KEYBOARD_LAYOUT_TRANSITION_DURATION,
+                transitionTimingFunction:
+                  "var(--native-keyboard-layout-transition-easing, ease-out)",
               }}
             >
               <DialogTitle className="tw-sr-only">{dialogTitle}</DialogTitle>

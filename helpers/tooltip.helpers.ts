@@ -1,5 +1,5 @@
 export const TOOLTIP_STYLES = {
-  padding: "4px 8px",
+  padding: "6px 10px",
   background: "#37373E",
   color: "white",
   fontSize: "13px",

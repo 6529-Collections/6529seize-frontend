@@ -11,8 +11,17 @@ subject to wave visibility rules.
 Open `/discover?view=active-votes`, or select `View all` in the Active Votes
 sidebar heading. The page shows the total accessible count and compact discovery
 cards with cover artwork on the left, single-line ellipsized
-titles and single-line description previews. Tight padding keeps more cards visible. A prominent line beneath each wave name
-shows the voting end or next result when available, otherwise `Voting open`. Votes closing soonest appear first; open-ended votes appear last.
+titles and single-line description previews. Approval waves show how many
+submissions are open for voting. Other waves show the voting end or next result
+when available, otherwise `Voting open`. Submission counts appear as text;
+zero submissions use muted text. Score, Hot and REP remain visible beneath the
+plain-text description. Metrics wrap when needed on narrow cards. Cover artwork
+fills the full card height along the left edge. A subtle border separates each
+card from the page and brightens on hover without lifting the card or zooming
+the artwork.
+The Memes - Main Stage appears first whenever it has active voting. Remaining
+waves with active leaderboard entries appear above waves with zero. Within
+each group, the waves with the highest total Wave REP appear first.
 Use `Load more` to browse additional results.
 
 This includes ongoing TDH, TDH + xTDH, and card-set TDH votes, regardless of
@@ -42,7 +51,10 @@ the backdrop closes it without changing the sort. Wider content areas show the
 six choices inline.
 
 The same control row includes All, Score 50+, Hot 60+, and REP 60+ threshold
-buttons. Swipe or scroll the row when it does not fit the available width.
+buttons. Swipe or scroll the row when it does not fit the available width. The
+scrollbar is hidden, and dark edge fades indicate which side has more controls
+offscreen. Use the edge arrows with a mouse, or swipe the row on touchscreens.
+The fades and arrows disappear when all controls fit.
 Newest and Latest Posts disable score thresholds and reset them to All.
 Sort and threshold choices remain in the URL when switching between discovery
 tabs. Use `Score formula` beside the heading to open the score explanation; on
@@ -60,6 +72,11 @@ The `Discovery` destination remains available in web navigation, app drawer,
 mobile navigation and header search Pages results. The Profile Waves Feed content header has a labeled `Discover Waves` link
 with a compass, aligned right on desktop and below the description on smaller
 screens. The sidebar uses each section’s `View all` link.
+
+In the native app, opening `Discover Waves` from Profile Waves Feed shows a
+header `Back` button that returns to the feed at its saved reading position.
+Switching Discover tabs, sort, or score filters keeps this return path. Opening
+Discovery directly or from main navigation keeps its usual menu control.
 
 The sidebar's `Find a wave…` searches accessible waves across collections;
 there is no new relevance algorithm or route-local search on `/discover`.

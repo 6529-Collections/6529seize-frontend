@@ -1,14 +1,27 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import {
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { getDesktopShellApi, getDesktopUpdater } from "@/helpers/desktop-shell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatNumber } from "@/i18n/format";
 import { t } from "@/i18n/messages";
+import { checkDesktopUpdates } from "@/lib/desktop/checkDesktopUpdates";
 import {
   DEFAULT_DESKTOP_DOWNLOAD_PAGE,
   readDesktopDownloadPage,
 } from "@/lib/desktop/updateDownloadPage";
+import {
+  getDesktopAutoUpdate,
+  getServerDesktopAutoUpdate,
+  subscribeDesktopAutoUpdate,
+} from "@/services/desktop/desktopUpdateState";
+import DesktopAutoUpdateNotice from "./DesktopAutoUpdateNotice";
 
 type UpdateState =
   | { readonly kind: "idle" }
@@ -70,7 +83,7 @@ const readPercent = (progress: unknown): number | null => {
  * system browser and never asks the shell to download. Silent when there is
  * no update, when the updater reports none, and on the web.
  */
-export default function DesktopUpdateNotice() {
+function EventUpdateNotice() {
   const locale = useBrowserLocale();
   const messageId = useId();
   const sectionRef = useRef<HTMLElement>(null);
@@ -134,7 +147,7 @@ export default function DesktopUpdateNotice() {
     updater.onUpdateProgress(onProgress);
     updater.onUpdateDownloaded(onDownloaded);
     updater.onUpdateError(onError);
-    updater.checkUpdates();
+    void checkDesktopUpdates(updater);
     return () => {
       active = false;
       updater.offUpdateAvailable(onAvailable);
@@ -304,4 +317,21 @@ export default function DesktopUpdateNotice() {
       </div>
     </section>
   );
+}
+
+/**
+ * The update notice. Builds that install their own updates report a state
+ * (U1-U14) and get the notice driven by it; every other build (0.1.0-rc.2,
+ * the older app) keeps the event-driven notice above. Silent on the web.
+ */
+export default function DesktopUpdateNotice() {
+  const auto = useSyncExternalStore(
+    subscribeDesktopAutoUpdate,
+    getDesktopAutoUpdate,
+    getServerDesktopAutoUpdate
+  );
+  if (auto.support === "supported") {
+    return <DesktopAutoUpdateNotice state={auto.state} />;
+  }
+  return <EventUpdateNotice />;
 }

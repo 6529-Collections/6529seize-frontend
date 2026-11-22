@@ -268,7 +268,10 @@ test("sidebar collection and search controls count deliberate use without query 
     exact: true,
   });
   await expect(allCollection).toHaveCSS("font-size", "12px");
-  await expect(allCollection).toHaveCSS("font-weight", "600");
+  await expect(allCollection).toHaveCSS("font-weight", "500");
+  await expect(
+    collectionFilter.getByRole("button", { name: "Joined", exact: true })
+  ).toHaveCSS("font-weight", "500");
   await expect(allCollection).toHaveCSS("min-height", "30px");
   await expect(allCollection).toHaveCSS("background-color", "rgb(38, 39, 43)");
   const searchButton = page.getByRole("button", {
@@ -307,6 +310,9 @@ test("sidebar collection and search controls count deliberate use without query 
     )
   ).toHaveLength(0);
   await page.keyboard.press("Enter");
+  await expect(
+    collectionFilter.getByRole("button", { name: "Pinned", exact: true })
+  ).toHaveCSS("font-weight", "500");
   await expect
     .poll(
       async () =>
@@ -907,6 +913,75 @@ test("recommendation telemetry preserves active state before keyboard and pointe
     )
   ).not.toContain("private-recommendation");
 });
+
+for (const width of [320, 430]) {
+  test(`recommendation names follow hover capability and stay compact at ${width}px`, async ({
+    page,
+  }, testInfo) => {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/waves/private-wave?recommendations=long-names");
+    const recommendations = page.getByRole("region", {
+      name: "Worth Checking Out",
+      exact: true,
+    });
+    const names = [
+      "An exceptionally long recommendation name that cannot fit in the compact strip",
+      "AnExceptionallyLongUnbrokenRecommendationNameThatCannotFit",
+    ];
+    const canHover = await page.evaluate(
+      () => matchMedia("(any-hover: hover)").matches
+    );
+    // Keep the original section boundary in the quieter touch presentation.
+    await expect(recommendations).toHaveCSS("border-bottom-width", "1px");
+    for (const name of names) {
+      const link = recommendations.getByRole("link", {
+        name: `Open ${name}`,
+        exact: true,
+      });
+      await expect(link).toBeVisible();
+      const caption = link.getByText(name, { exact: true });
+      if (canHover) {
+        await expect(caption).toBeHidden();
+      } else {
+        await expect(caption).toBeVisible();
+        await expect(caption).toHaveCSS("white-space", "nowrap");
+        await expect(caption).toHaveCSS("text-overflow", "ellipsis");
+        await expect(caption).toHaveCSS("overflow-x", "hidden");
+        const bounds = await caption.boundingBox();
+        expect(bounds).not.toBeNull();
+        expect(bounds!.height).toBeLessThanOrEqual(14);
+        expect(
+          await caption.evaluate((element) => element.scrollWidth)
+        ).toBeGreaterThan(bounds!.width);
+        const sectionBounds = await recommendations.boundingBox();
+        expect(sectionBounds).not.toBeNull();
+        expect(bounds!.x).toBeGreaterThanOrEqual(sectionBounds!.x);
+        expect(bounds!.x + bounds!.width).toBeLessThanOrEqual(
+          sectionBounds!.x + sectionBounds!.width
+        );
+        expect(bounds!.y + bounds!.height).toBeLessThanOrEqual(
+          sectionBounds!.y + sectionBounds!.height
+        );
+      }
+    }
+    const firstLink = recommendations.getByRole("link", {
+      name: `Open ${names[0]}`,
+      exact: true,
+    });
+    await expect(firstLink).toHaveAttribute("aria-current", "page");
+    if (canHover) {
+      await firstLink.focus();
+      await firstLink.press("Enter");
+    } else {
+      await firstLink.getByText(names[0]!, { exact: true }).tap();
+    }
+    await expect(firstLink).not.toHaveAttribute("aria-current");
+    await testInfo.attach("compact-recommendation-names", {
+      body: await recommendations.screenshot(),
+      contentType: "image/png",
+    });
+  });
+}
 
 test("rapid consent regrant waits for all real SDK queue deletions", async ({
   page,

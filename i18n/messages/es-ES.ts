@@ -28,7 +28,11 @@ import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.es-ES.json";
 
 export const ES_ES_MESSAGES = {
+  "rep.categories.validation.unavailable":
+    "Este nombre de categoría no está disponible. Prueba con otro nombre.",
   "waves.drops.searchModal.result.emoji": "Emoji {shortcode}",
+  "waves.discovery.activeSubmissions.one": "{count} propuesta activa",
+  "waves.discovery.activeSubmissions.other": "{count} propuestas activas",
   "waves.historyGap.load": "Cargar más mensajes",
   "waves.historyGap.loaded": "Más mensajes cargados",
   "waves.historyGap.loading": "Cargando más mensajes…",
@@ -896,7 +900,6 @@ export const ES_ES_MESSAGES = {
     "Audiencia actual no disponible",
   "waves.create.groups.members.view": "Ver miembros",
   "waves.create.groups.members.previewDraft": "Previsualizar coincidencias",
-  "waves.create.groups.members.dialogTitle": "{role}: {group}",
   "waves.create.groups.members.dynamicDescription":
     "Esta vista previa en directo se basa en los datos actuales de perfil, reputación y propiedad. La pertenencia puede cambiar.",
   "waves.create.groups.members.criteriaSummary":

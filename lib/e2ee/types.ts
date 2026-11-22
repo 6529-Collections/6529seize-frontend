@@ -4,6 +4,7 @@ import type { E2eeApiClient } from "./api";
 import type { BackupHistory } from "./backup/format";
 import type { BackupStateStore } from "./backup/state";
 import type { E2eeNoticeType } from "./notice-types";
+import type { PollDefinition } from "./payload";
 import type { E2eeStorage } from "./storage";
 import type { WasmModule } from "./wasm-types";
 
@@ -22,6 +23,17 @@ export type E2eeEngineStatus =
   | "ready"
   | "device-limit" // 10 active devices: user must revoke one
   | "error";
+
+/** How far the first chat discovery has got on this device. */
+export type E2eeInitialSyncStatus =
+  | "pending"
+  | "waiting"
+  | "delayed"
+  | "awaiting-invitation"
+  | "failed"
+  | "complete";
+
+export const E2EE_INITIAL_INBOX_WAIT_MS = 15_000;
 
 export interface E2eeDeviceInfo {
   linkedAuthorProof?: boolean;
@@ -91,6 +103,12 @@ export interface E2eeAttachment {
 /** Why an own message stayed unsent (E2eeMessage.unsent). */
 export type E2eeUnsentReason = "suite_upgrade";
 
+export interface E2eePoll extends PollDefinition {
+  eligibleDeviceKeys: string[];
+  ballots: Record<string, { seq: number; options: number[] }>;
+  closed: boolean;
+}
+
 export interface E2eeMessage {
   id: string;
   g: string;
@@ -128,6 +146,7 @@ export interface E2eeMessage {
   };
   /** Moved from an unencrypted 6529.io DM: not verified (D146). */
   imported?: E2eeImported;
+  poll?: E2eePoll;
 }
 
 /**
@@ -229,6 +248,7 @@ export interface E2eeEngine {
   // state (synchronous snapshots) + change subscription
   getStatus(): E2eeEngineStatus;
   getError(): string | null;
+  getInitialSyncStatus(): E2eeInitialSyncStatus;
   /** Locally held device key, available before the server device list loads. */
   getLocalDeviceKey(): string | null;
   getThisDevice(): E2eeDeviceInfo | null;
@@ -241,7 +261,7 @@ export interface E2eeEngine {
   subscribe(listener: () => void): () => void; // any state change
 
   // lifecycle
-  enroll(): Promise<void>; // the single wallet prompt
+  enroll(onProvisioning?: () => void): Promise<void>; // the single wallet prompt
   /**
    * Whether turning on needs a brand-new device key: no stored device that
    * enroll() would resume, register or renew. A combined sign-in (NC8) can
@@ -252,8 +272,12 @@ export interface E2eeEngine {
    * NC8: registers the key a combined sign-in just stored for this profile,
    * with no wallet prompt, and starts the engine. Resolves with the status
    * it settles on; a refused sign-in grant leaves "needs-enrollment".
+   * `resumeStored` also accepts an existing encryption grant without renewing it.
    */
-  enrollWithLoginGrant(): Promise<E2eeEngineStatus>;
+  enrollWithLoginGrant(options?: {
+    /** Reuse an existing encryption grant after a signing-only sign-in. */
+    readonly resumeStored?: boolean;
+  }): Promise<E2eeEngineStatus>;
   /**
    * Non-null while this device has moved off an earlier MLS ciphersuite and
    * not enrolled again (status "needs-enrollment"): the UI shows upgrade
@@ -262,7 +286,8 @@ export interface E2eeEngine {
    * (`needsNewDevice()` is true, so a combined sign-in can carry it).
    */
   getUpgrade(): { superseded: number } | null;
-  sync(): Promise<void>; // pull inbox + all groups now
+  /** Pull the inbox and all groups. Explicit rechecks also refresh roster hints. */
+  sync(options?: { readonly recheckInbox?: boolean }): Promise<void>;
   dispose(): void;
 
   // conversations
@@ -297,6 +322,8 @@ export interface E2eeEngine {
       files?: File[];
     }
   ): Promise<void>;
+  createPoll?(g: string, poll: PollDefinition): Promise<void>;
+  updatePoll?(g: string, id: string, options: number[] | null): Promise<void>;
   edit(g: string, id: string, text: string): Promise<void>;
   remove(g: string, id: string): Promise<void>; // delete own message
   react(g: string, id: string, reaction: string, on: boolean): Promise<void>;
@@ -455,4 +482,11 @@ export interface E2eeEngineExt extends E2eeEngine {
   setOpenConversation(g: string | null): void;
   /** Resolves when no operation or background task is in flight. */
   idle(): Promise<void>;
+  /**
+   * Stops taking in new history (sync, polling, wake events) until
+   * resumeIncoming(), and resolves once work in flight has settled: a final
+   * backup then holds everything (sign-out, before local data is removed).
+   */
+  pauseIncoming(): Promise<void>;
+  resumeIncoming(): void;
 }

@@ -23,7 +23,7 @@ export function DesktopConnectionVersionNotice({
         {
           version: (
             <span key="version" className="tw-font-semibold">
-              v0.4.0
+              v0.4.1
             </span>
           ),
         }

@@ -146,7 +146,8 @@ const getSliderGeometry = (isMini: boolean): SliderGeometry => {
       thumbHitWidth: 72,
       thumbHitHeight: 48,
       rootClassName: "tw-flex tw-h-6 tw-items-center [touch-action:none]",
-      trackContainerClassName: "tw-group tw-relative tw-mt-3 tw-h-[6px]",
+      trackContainerClassName:
+        "tw-group tw-group/vote-slider tw-relative tw-mt-3 tw-h-[6px]",
       tooltipBottomClassName: "tw-bottom-6",
     };
   }
@@ -156,7 +157,8 @@ const getSliderGeometry = (isMini: boolean): SliderGeometry => {
     thumbHitWidth: 96,
     thumbHitHeight: 64,
     rootClassName: "tw-flex tw-h-[72px] tw-items-center [touch-action:none]",
-    trackContainerClassName: "tw-group tw-relative tw-mt-8 tw-h-[7px]",
+    trackContainerClassName:
+      "tw-group tw-group/vote-slider tw-relative tw-mt-8 tw-h-[7px]",
     tooltipBottomClassName: "tw-bottom-10",
   };
 };
@@ -241,8 +243,8 @@ const getTooltipClasses = ({
   readonly isNegativeVote: boolean;
 }): string => {
   const sizeClasses = isMini
-    ? "tw-min-h-[22px] tw-min-w-[48px] tw-max-w-[88px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums group-[.is-vote-panel]/inline-vote:tw-max-w-[11rem]"
-    : "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] tw-tabular-nums group-[.is-vote-panel]/inline-vote:tw-max-w-[11rem]";
+    ? "tw-min-h-[22px] tw-min-w-[48px] tw-max-w-[88px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] !tw-tabular-nums group-[.is-vote-panel]/inline-vote:tw-max-w-[11rem]"
+    : "tw-min-h-[22px] tw-min-w-[56px] tw-max-w-[108px] tw-rounded-md tw-px-2 tw-py-1 tw-text-[11px] tw-font-bold tw-leading-[14px] !tw-tabular-nums group-[.is-vote-panel]/inline-vote:tw-max-w-[11rem]";
 
   if (isPositiveVote) {
     return `${sizeClasses} tw-border-solid tw-border-emerald-500/60 tw-bg-iron-950 tw-text-emerald-400 tw-shadow-sm`;

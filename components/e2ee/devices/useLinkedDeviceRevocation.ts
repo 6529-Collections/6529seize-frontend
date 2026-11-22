@@ -24,7 +24,11 @@ export function useLinkedDeviceRevocation() {
   const removeLocal = useRemoveE2eeLocalData();
   const ready = status === "ready" && engine !== null;
 
-  /** `ownGrant`: the grant's signing key is this browser's. */
+  /**
+   * Whether the device is this browser: its grant's signing key is this
+   * browser's (`ownGrant`), or it is this browser's encrypted-messages
+   * device. The dialog and the cleanup after the revoke both use it.
+   */
   const isThisBrowser = (device: ApiE2eeDevice, ownGrant: boolean): boolean =>
     ownGrant ||
     (thisDevice !== null &&
@@ -81,5 +85,5 @@ export function useLinkedDeviceRevocation() {
     }
   };
 
-  return { historyKey, sign, finish };
+  return { isThisBrowser, historyKey, sign, finish };
 }

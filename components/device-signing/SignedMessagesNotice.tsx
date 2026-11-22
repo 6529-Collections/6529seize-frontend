@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import Button from "@/components/utils/button/Button";
 import { faSignature } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -33,9 +35,14 @@ interface NoticeCopy {
   readonly action: string;
 }
 
+/**
+ * `withEncryption`: the action opens setup for signed posts and encrypted DMs
+ * together, so the banner names both, as the setup dialog does.
+ */
 function getNoticeCopy(
   locale: SupportedLocale,
-  model: SignedMessagesNoticeModel
+  model: SignedMessagesNoticeModel,
+  withEncryption: boolean
 ): NoticeCopy {
   switch (model.kind) {
     case "new-device":
@@ -57,13 +64,28 @@ function getNoticeCopy(
     case "expired":
       return {
         title: t(locale, "signedMessages.notice.expired.title"),
-        body: t(locale, "signedMessages.notice.expired.body"),
+        body: t(
+          locale,
+          withEncryption
+            ? "signedMessages.notice.expired.bodyBoth"
+            : "signedMessages.notice.expired.body"
+        ),
         action: t(locale, "signedMessages.notice.renew.action"),
       };
     case "enable":
       return {
-        title: t(locale, "signedMessages.notice.enable.title"),
-        body: t(locale, "signedMessages.notice.enable.body"),
+        title: t(
+          locale,
+          withEncryption
+            ? "signedMessages.notice.enableBoth.title"
+            : "signedMessages.notice.enable.title"
+        ),
+        body: t(
+          locale,
+          withEncryption
+            ? "signedMessages.notice.enableBoth.body"
+            : "signedMessages.notice.enable.body"
+        ),
         action: t(locale, "signedMessages.notice.enable.action"),
       };
     case "restore":
@@ -139,7 +161,7 @@ function SignedMessagesNoticeContent({
   if (!isAlert && !canEnable) {
     return null;
   }
-  const copy = getNoticeCopy(locale, model);
+  const copy = getNoticeCopy(locale, model, canEnableEncryption);
   const iconClass = "tw-col-start-1 tw-row-start-1 tw-size-5 tw-shrink-0";
   const onAction = () => {
     if (model.kind === "new-device") {
@@ -229,14 +251,16 @@ function SignedMessagesNoticeContent({
           {copy.action}
         </Button>
         {!isAlert && (
-          <button
+          <IconButton
             type="button"
             onClick={dismiss}
             aria-label={t(locale, "signedMessages.notice.dismiss")}
-            className="tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-100"
+            size={32}
+            variant="ghost"
+            shape="circle"
           >
             <XMarkIcon aria-hidden="true" className="tw-size-5" />
-          </button>
+          </IconButton>
         )}
       </div>
     </section>

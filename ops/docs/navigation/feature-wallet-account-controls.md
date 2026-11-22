@@ -83,9 +83,9 @@ action.
   - `Profile` opens the active handle route, with wallet-address fallback
   - `Connect Device` opens the Mobile/Desktop connection dialog on
     desktop web
-  - `Post Signing & DM Encryption` opens the shared consent dialog when both
-    permissions are missing. If only one is missing, the action is `Enable
-Signed Posts` or `Enable Encrypted DMs`. It is absent when both are on;
+  - `Turn on signed posts and encrypted DMs` opens the shared consent dialog
+    when both permissions are missing. If only one is missing, the action is
+    `Turn on signed posts` or `Turn on encrypted DMs`. It is absent when both are on;
     choosing it does not immediately open a wallet or navigate to another page
   - wallet connection/disconnection and `Connect Device` share one connection
     section, separated by a lighter full-width divider; surrounding account,

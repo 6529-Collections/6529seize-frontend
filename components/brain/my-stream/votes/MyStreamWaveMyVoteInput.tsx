@@ -372,7 +372,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             inputMode="numeric"
             aria-describedby={voteInputDescription}
             aria-invalid={isVoteValueOutOfRange ? true : undefined}
-            className="tw-h-11 tw-w-full tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold tw-tabular-nums tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 @[46rem]/my-vote:tw-h-10 @[46rem]/my-vote:tw-text-sm"
+            className="tw-h-11 tw-w-full tw-min-w-0 tw-flex-1 tw-rounded-lg tw-border-0 tw-bg-transparent tw-py-0 tw-pl-3 tw-pr-0 tw-text-base tw-font-semibold !tw-tabular-nums tw-text-iron-50 tw-placeholder-iron-400 tw-outline-none focus:tw-ring-0 disabled:tw-cursor-not-allowed disabled:tw-opacity-50 @[46rem]/my-vote:tw-h-10 @[46rem]/my-vote:tw-text-sm"
           />
           <span className="tw-flex-shrink-0 tw-whitespace-nowrap tw-py-1 tw-text-sm tw-leading-4 tw-text-iron-400">
             {voteLabel}
@@ -422,7 +422,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
                 locale,
                 "waves.voteRationale.savedDescription"
               )}
-              className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[24rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-my-0 @[46rem]/my-vote:tw-h-8"
+              className="tw-relative tw-col-start-2 tw-row-start-2 tw-my-1 !tw-font-medium after:tw-absolute after:tw-inset-x-0 after:tw-top-1/2 after:tw-h-11 after:-tw-translate-y-1/2 after:tw-content-[''] @[24rem]/vote-controls:tw-row-start-1 @[46rem]/my-vote:tw-my-0 @[46rem]/my-vote:tw-h-8"
             >
               {t(locale, "waves.voteRationale.explain")}
             </Button>

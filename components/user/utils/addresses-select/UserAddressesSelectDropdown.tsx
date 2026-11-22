@@ -96,7 +96,8 @@ export default function UserAddressesSelectDropdown({
       containerRef={containerRef}
       setSelected={onAddressChange}
       size="sm"
-      variant={variant}
+      variant="compact"
+      presentation={variant === "filter" ? "filter" : undefined}
       renderItemChildren={(item) =>
         item.childrenProps ? (
           <UserAddressesSelectDropdownItem wallet={item.childrenProps} />

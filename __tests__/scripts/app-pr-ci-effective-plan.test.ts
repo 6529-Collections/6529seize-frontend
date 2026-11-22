@@ -233,6 +233,10 @@ describe("effective App PR CI plan", () => {
     "components/navigation/AndroidBackNavigation.tsx",
     "services/capacitor/android-back-layers.ts",
     "components/brain/mobile/useWaveListSwipeBack.ts",
+    "components/brain/mobile/useWaveNavigationTransition.ts",
+    "helpers/waves/wave-navigation-transition.ts",
+    "styles/wave-navigation-transition.css",
+    "components/community-curations/CommunityCurationsMasonry.tsx",
     "components/brain/my-stream/MyStreamWaveChat.tsx",
     "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
     "components/waves/drops/wave-drops-all/utils/observeSerialScrollTarget.ts",
@@ -719,6 +723,44 @@ describe("Wave link-preview browser lane selection", () => {
   });
 });
 
+describe("Composer control browser selection", () => {
+  const workflow = YAML.parse(
+    fs.readFileSync(".github/workflows/app-pr-ci.yml", "utf8")
+  );
+  const publish = requireRunStep(
+    workflow.jobs.plan.steps as WorkflowStep[],
+    ({ id }) => id === "plan_outputs",
+    "Publish CI plan outputs"
+  );
+
+  it.each([
+    ["components/waves/ChatItemHrefButtons.tsx", true],
+    ["components/drops/create/lexical/nodes/ImageComponent.tsx", true],
+    ["components/waves/CreateDrop.tsx", true],
+    ["README.md", false],
+  ] as const)("selects composer checks for %s: %s", (file, selected) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "composer-control-plan-"));
+    const planDir = path.join(root, "test-results/app-pr-ci");
+    try {
+      fs.mkdirSync(planDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(planDir, "ci-plan.json"),
+        JSON.stringify({ ...executePlan([file]), risk: { computed_floor: 2 } })
+      );
+      const result = runWorkflowScript(publish.run, root, {
+        DEFAULT_CI_RUNNER: "ubuntu-latest",
+        BUILD_CI_RUNNER: "ubuntu-latest",
+      });
+      expect(result.status).toBe(0);
+      expect(result.output.split("\n")).toContain(
+        `composer_browser_required=${selected}`
+      );
+    } finally {
+      fs.rmSync(root, { recursive: true, force: true });
+    }
+  });
+});
+
 describe("Profile browser job isolation", () => {
   const workflow = YAML.parse(
     fs.readFileSync(".github/workflows/app-pr-ci.yml", "utf8")
@@ -1047,6 +1089,21 @@ it.each([
     ).toBe(true);
   }
 );
+
+it.each([
+  "contexts/NavigationHistoryContext.tsx",
+  "helpers/navigation-scroll-restoration.ts",
+  "components/navigation/BackButton.tsx",
+  "components/community/CommunityMembers.tsx",
+  "components/community/members-table/CommunityMembersTable.tsx",
+  "tests/critical-shell/profile-navigation-readonly.spec.ts",
+])("selects Back navigation browser coverage for %s", (file) => {
+  const input = plan([file]);
+  input.checks.playwright_critical_shell.required = false;
+  expect(executeRawPlan(input).checks.playwright_critical_shell?.required).toBe(
+    true
+  );
+});
 
 it("selects the artwork and viewer lane for image viewer geometry coverage", () => {
   expect(

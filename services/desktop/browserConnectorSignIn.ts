@@ -5,6 +5,7 @@ import {
   normalizeDesktopScheme,
 } from "@/lib/desktop/browserConnector";
 import { getDesktopShellApi } from "@/helpers/desktop-shell";
+import type { DesktopWalletSetup } from "./desktopConnectDialog";
 
 /**
  * The desktop side of the browser connector: one sign-in request at a time,
@@ -25,6 +26,8 @@ interface PendingRequest {
   readonly requestId: string;
   readonly expiresAt: number;
   readonly timer: ReturnType<typeof setTimeout>;
+  readonly setup: DesktopWalletSetup | undefined;
+  readonly isCurrent: () => boolean;
 }
 
 let pending: PendingRequest | null = null;
@@ -77,18 +80,23 @@ export function cancelBrowserConnectorSignIn(): void {
  * the scheme this desktop build reports (`window.api.getInfo().scheme`);
  * there is no default, so a build that reports none cannot start.
  */
-export async function startBrowserConnectorSignIn(): Promise<void> {
+export async function startBrowserConnectorSignIn(
+  setup?: DesktopWalletSetup
+): Promise<void> {
   const api = getDesktopShellApi();
   if (!api) {
     throw new Error("The browser connector is available only in 6529 Desktop");
   }
   operation += 1;
   const current = operation;
+  const isCurrent = () => current === operation && !setup?.signal.aborted;
+  if (!isCurrent()) return;
+  setup?.onStatus("opening-browser");
   const info = await api.getInfo();
   // Cancelled, or replaced by a newer start, while the shell answered.
   // Everything below runs without another await, so this one check covers
   // creating the request and opening the browser.
-  if (current !== operation) return;
+  if (!isCurrent()) return;
   const scheme = normalizeDesktopScheme(info.scheme);
   if (!scheme) {
     throw new Error("6529 Desktop did not report its link scheme");
@@ -99,13 +107,18 @@ export async function startBrowserConnectorSignIn(): Promise<void> {
   pending = {
     requestId,
     expiresAt,
+    setup,
+    isCurrent,
     timer: setTimeout(() => {
       if (pending?.requestId !== requestId) return;
       pending = null;
       setBrowserConnectorStatus("expired");
+      setup?.onStatus("failed");
     }, BROWSER_CONNECTOR_TIMEOUT_MS),
   };
   setBrowserConnectorStatus("waiting");
+  setup?.onStatus("browser");
+  if (!isCurrent()) return;
   try {
     api.openExternal(
       buildBrowserConnectorUrl({
@@ -127,12 +140,16 @@ export async function startBrowserConnectorSignIn(): Promise<void> {
  * Consume the open request if `requestId` is it and it has not expired.
  * Each request is accepted at most once.
  */
-export function takeBrowserConnectorRequest(requestId: string): boolean {
-  if (pending?.requestId !== requestId) return false;
-  const isLive = pending.expiresAt > Date.now();
+export function takeBrowserConnectorRequest(
+  requestId: string
+): PendingRequest | null {
+  if (pending?.requestId !== requestId || !pending.isCurrent()) return null;
+  const request = pending;
   clearPending();
-  if (!isLive) setBrowserConnectorStatus("expired");
-  return isLive;
+  if (request.expiresAt > Date.now()) return request;
+  setBrowserConnectorStatus("expired");
+  request.setup?.onStatus("failed");
+  return null;
 }
 
 /** @api Resets the module state between tests. */

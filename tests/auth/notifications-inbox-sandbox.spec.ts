@@ -14,6 +14,7 @@ import {
 } from "../support/localSandbox";
 import AxeBuilder from "@axe-core/playwright";
 import { ApiNotificationCause } from "../../generated/models/ApiNotificationCause";
+import type { ApiWaveDropsFeedV2 } from "../../generated/models/ApiWaveDropsFeedV2";
 import type { ApiNotificationsResponseV2 } from "../../generated/models/ApiNotificationsResponseV2";
 import type { Locator } from "@playwright/test";
 import { ApiVotingCreditReleaseReason } from "../../generated/models/ApiVotingCreditReleaseReason";
@@ -70,7 +71,7 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       }
     });
   });
-  test("compact Markdown previews preserve formatting without fetching message URLs", async ({
+  test("compact Markdown previews load one hosted thumbnail and preserve formatting", async ({
     page,
   }, testInfo) => {
     // The compact inbox is desktop-only; the mobile full-page flow is covered below.
@@ -79,6 +80,8 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       "Desktop compact inbox"
     );
     const longBold = "formatted ".repeat(30).trim();
+    const uploads =
+      "https://d3lqz0a4bldqgf.cloudfront.net/drops/inbox-thumbnail";
     const requests: string[] = [];
     page.on("request", (request) => {
       if (request.url().includes("notification-markdown-canary"))
@@ -87,16 +90,23 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.route("**/*notification-markdown-canary*", (route) =>
       route.abort()
     );
+    await page.route(`${uploads}/**`, (route) =>
+      route.fulfill({ path: "public/favicon.png", contentType: "image/png" })
+    );
     await page.route("**/api/v2/notifications?*", async (route) => {
       const response = await route.fetch();
       const data = (await response.json()) as ApiNotificationsResponseV2;
-      const content = `**Bold** :el_fafo_angy: :fire: *italic* ~~gone~~ and \`code\`.\n\n**${longBold}**\n\n[Canary link](https://notification-markdown-canary.invalid/link) ![Canary image](https://notification-markdown-canary.invalid/image.png)`;
+      const text = `**Bold** :el_fafo_angy: :fire: *italic* ~~gone~~ and \`code\`.\n\n**${longBold}**\n\n[Canary link](https://notification-markdown-canary.invalid/link) ![Canary image](https://notification-markdown-canary.invalid/image.png)`;
+      const uploadsMarkdown = `\n\n![Seize](${uploads}/first.png)body text ![Seize](${uploads}/second.png)`;
       data.notifications = data.notifications.map((notification) => ({
         ...notification,
         related_drops: notification.related_drops.map(
           ({ title: _title, ...drop }) => ({
             ...drop,
-            content,
+            content:
+              notification.cause === ApiNotificationCause.DropReacted
+                ? text + uploadsMarkdown
+                : text,
           })
         ),
       }));
@@ -145,6 +155,19 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       "STRONG"
     );
     await expect(row.getByText("Canary image", { exact: true })).toHaveCount(1);
+    const thumbnail = inbox
+      .getByRole("link")
+      .filter({ hasText: "New reactions to your drop" })
+      .locator("img[src*='/drops/inbox-thumbnail/']");
+    await expect(thumbnail).toHaveCount(1);
+    await expect(thumbnail).toHaveAttribute(
+      "src",
+      `${uploads}/AUTOx50/first.png`
+    );
+    await expect(thumbnail).toHaveJSProperty("naturalWidth", 96);
+    await expect(thumbnail).toHaveCSS("width", "40px");
+    await expect(thumbnail).toHaveCSS("height", "40px");
+    await expect(row).not.toContainText("Seize");
     await expect(
       inbox
         .getByRole("link")
@@ -153,6 +176,9 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
           "a,iframe,video,audio,input,img[src*='notification-markdown-canary']"
         )
     ).toHaveCount(0);
+    const textOnlyRow = inbox
+      .getByRole("link")
+      .filter({ hasText: "sandbox-alice mentioned you" });
     for (const width of [1440, 1100]) {
       await page.setViewportSize({ width, height: 900 });
       await expect(inbox).toBeVisible();
@@ -164,18 +190,20 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
             requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
           })
       );
-      const bounds = await row
-        .getByText("Bold", { exact: true })
-        .evaluate((strong) => {
-          const preview = strong.closest("p")!.parentElement!.parentElement!;
-          return {
-            height: preview.getBoundingClientRect().height,
-            width: preview.scrollWidth,
-            available: preview.clientWidth,
-          };
-        });
-      expect(bounds.height).toBeLessThanOrEqual(40);
-      expect(bounds.width).toBeLessThanOrEqual(bounds.available);
+      for (const previewRow of [row, textOnlyRow]) {
+        const bounds = await previewRow
+          .getByText("Bold", { exact: true })
+          .evaluate((strong) => {
+            const preview = strong.closest("p")!.parentElement!.parentElement!;
+            return {
+              height: preview.getBoundingClientRect().height,
+              width: preview.scrollWidth,
+              available: preview.clientWidth,
+            };
+          });
+        expect(bounds.height).toBe(40);
+        expect(bounds.width).toBeLessThanOrEqual(bounds.available);
+      }
       await expectNoHorizontalOverflow(page);
       await captureSafeScreenshot(
         page,
@@ -187,6 +215,123 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
     await page.keyboard.press("Escape");
     await expect(bell).toBeFocused();
   });
+  test("an older mention notification finishes its jump with the message visible", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop sidebar inbox"
+    );
+    const waveId = "00000000-0000-4000-8000-000000000533";
+    const mentionSerialNo = 2;
+    const mentionText =
+      "Mentioned @playwright inside the sandbox notification flow.";
+    // Keep the virtual row's observer behind the jump, as can happen when
+    // scrolling straight to an old row. Leave every other observer untouched.
+    await page.addInitScript((serialNo) => {
+      const NativeObserver = globalThis.IntersectionObserver;
+      globalThis.IntersectionObserver = class extends NativeObserver {
+        constructor(
+          callback: IntersectionObserverCallback,
+          options?: IntersectionObserverInit
+        ) {
+          super((entries, observer) => {
+            const adjusted = entries.map((entry) =>
+              entry.target.parentElement?.id === `drop-${serialNo}` &&
+              options?.rootMargin?.includes("5000px")
+                ? { ...entry, isIntersecting: false }
+                : entry
+            );
+            callback(adjusted, observer);
+          }, options);
+        }
+      };
+    }, mentionSerialNo);
+    const history = Promise.withResolvers<void>();
+    await page.route(`**/api/v2/waves/${waveId}/drops?*`, async (route) => {
+      const response = await route.fetch();
+      const feed = (await response.json()) as ApiWaveDropsFeedV2;
+      const request = new URL(route.request().url());
+      const mention = feed.drops.find(
+        (drop) => drop.serial_no === mentionSerialNo
+      );
+      if (!mention)
+        throw new Error("Sandbox mention is missing from the fixture");
+      const strategy = request.searchParams.get("search_strategy");
+      if (strategy === "FIND_BOTH") await history.promise;
+      const newer = Array.from({ length: 70 }, (_, index) => ({
+        ...mention,
+        id: `00000000-0000-4000-8000-000000000${700 + index}`,
+        serial_no: 10 + index,
+        created_at: mention.created_at + (index + 1) * 120_000,
+        content: `Newer message ${index + 1}`,
+      })).reverse();
+      const cursor = Number(request.searchParams.get("serial_no_limit"));
+      let drops: ApiWaveDropsFeedV2["drops"] = newer.slice(0, 50);
+      if (strategy === "FIND_BOTH") {
+        drops = [mention];
+      } else if (strategy === "FIND_OLDER") {
+        drops = newer.filter((drop) => drop.serial_no < cursor).slice(0, 50);
+      } else if (strategy === "FIND_NEWER") {
+        drops = newer.filter((drop) => drop.serial_no > cursor).slice(-50);
+      }
+      await route.fulfill({ response, json: { ...feed, drops } });
+    });
+
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const bell = page.getByRole("link", { name: "Notifications", exact: true });
+    await bell.focus();
+    await bell.press("ArrowDown");
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    const mention = inbox
+      .getByRole("link")
+      .filter({ hasText: "sandbox-alice mentioned you" });
+    const chat = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]");
+    const jumpLoader = page
+      .getByRole("main")
+      .locator("[data-wave-drops-scroll-container]")
+      .locator("..")
+      .locator(':scope > div > div > svg[role="status"].tw-w-10');
+    try {
+      await mention.click();
+      await expect(jumpLoader).toBeVisible({
+        timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+      });
+      await expect(chat.getByText(mentionText, { exact: true })).toHaveCount(0);
+    } finally {
+      history.resolve();
+    }
+
+    await expect(jumpLoader).toBeHidden({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    // Check the first completed state without an assertion retry that could
+    // hide the blank row until a later render.
+    expect(
+      await chat.evaluate(
+        (viewport, { serialNo, text }) => {
+          const row = viewport.querySelector(`#drop-${serialNo}`);
+          if (!row?.textContent?.includes(text)) return false;
+          const bounds = row.getBoundingClientRect();
+          const view = viewport.getBoundingClientRect();
+          return (
+            bounds.height > 0 &&
+            bounds.top >= view.top &&
+            bounds.bottom <= view.bottom
+          );
+        },
+        { serialNo: mentionSerialNo, text: mentionText }
+      )
+    ).toBe(true);
+    await expect(inbox).toBeHidden();
+  });
+
   test("desktop preview marks notifications read, preserves the route, restores focus, and opens a destination", async ({
     page,
     baseURL,
@@ -646,6 +791,88 @@ test.describe("Notifications inbox sandbox @auth @local-only", () => {
       }
     });
   }
+
+  test("desktop load more keeps the inbox open while fetching and after the last page", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop sidebar inbox"
+    );
+    await page.route("**/api/v2/notifications?*", async (route) => {
+      const url = new URL(route.request().url());
+      url.searchParams.set("limit", "1");
+      await route.fulfill({ response: await route.fetch({ url: url.href }) });
+    });
+
+    await page.goto("/waves", { waitUntil: "domcontentloaded" });
+    await waitForRouteReady(page);
+    const currentUrl = page.url();
+    const bell = page.getByRole("link", { name: "Notifications", exact: true });
+    await bell.hover();
+    const inbox = page.getByRole("region", {
+      name: "Notifications",
+      exact: true,
+    });
+    const loadMore = inbox.getByRole("button", { name: "Load more" });
+    const newest = inbox.getByRole("link", {
+      name: /^sandbox-alice submitted Sandbox artwork/,
+    });
+    const older = inbox.getByText("sandbox-alice mentioned you", {
+      exact: true,
+    });
+    await expect(newest).toBeVisible({
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(older).toHaveCount(0);
+    await expect(
+      inbox.getByRole("button", { name: "Mark all as read" })
+    ).toBeEnabled();
+    const olderPage = Promise.withResolvers<void>();
+    try {
+      await page.route(
+        "**/api/v2/notifications?*id_less_than=*",
+        async (route) => {
+          await olderPage.promise;
+          await route.continue();
+        }
+      );
+      await loadMore.click();
+      await expect(
+        inbox.getByRole("button", { name: "Loading notifications…" })
+      ).toBeDisabled();
+      await expect(newest).toBeVisible();
+      expect(
+        await inbox.evaluate((panel) => panel.contains(document.activeElement))
+      ).toBe(true);
+    } finally {
+      olderPage.resolve();
+    }
+    await expect(older).toBeVisible();
+    await expect(newest).toBeVisible();
+
+    await loadMore.focus();
+    await page.keyboard.press("Enter");
+    await expect(
+      inbox.getByRole("button", {
+        name: /^(Load more|Loading notifications…)$/,
+      })
+    ).toHaveCount(0);
+    await expect(inbox).toBeVisible();
+    await expect(older).toBeVisible();
+    await expect
+      .poll(() =>
+        inbox.evaluate((panel) => panel.contains(document.activeElement))
+      )
+      .toBe(true);
+    await expect(page).toHaveURL(currentUrl);
+
+    await page.keyboard.press("Escape");
+    await expect(inbox).toBeHidden();
+    await expect(bell).toBeFocused();
+    await expectNoUnsafeSandboxMutations(baseURL);
+  });
 
   test("desktop mark-all retries an automatic read failure and View all opens the full feed", async ({
     page,

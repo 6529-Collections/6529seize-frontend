@@ -3,6 +3,7 @@ export const PREFERENCES_ENTRY_SOURCE_PARAM = "from";
 const PREFERENCES_PROFILE_ENTRY_SOURCE = "profile";
 
 export type PreferencesRouteTab =
+  | "messages"
   | "blocked-profiles"
   | "reports"
   | "devices"

@@ -67,9 +67,11 @@ Deleting a wallet or app database is not a TDH repair step. Transaction/NFT work
 
 ### App version, updates, and diagnostics
 
-Open 6529 Desktop > About for the installed version, OS/architecture, app scheme, app port, IPFS ports, updater status, and App Logs. Opening About checks for updates.
+In the desktop title bar, select **App info**, then **Check for updates**. The dialog shows **Checking for updates…** followed by **No updates found** or an available-update message. If the check fails, select **Check for updates** to try again. The app shows the download action in its update notice.
 
-The update area shows checking, available, downloading progress, downloaded, no-update, or error states. Use the action offered for that state; the bot does not know the latest available build unless it has current release evidence.
+In 6529 Core, open **6529 Desktop > About** in the sidebar for the installed version, OS/architecture, app scheme, app port, IPFS ports, updater status, and App Logs. Opening this page checks for updates and shows any download or installation progress.
+
+In builds that install their own updates (after 0.1.0-rc.2), the info button in the title strip opens **About 6529 Desktop** with an **Updates** section: the running version, the update state in the app's own words (release standard states U1-U14), **Last checked**, and the buttons that apply: **Check now**, **Update now**, **Restart to update** or **Try again**. Two switches, **Check for new releases** and **Install updates automatically**, change at once; automatic installs need the first, and both are on by default. Before installing, the section shows the offered release's notes (**What's in {version}**) and links them on 6529.io. An install that cannot update by itself shows no switches and links the download page. After a release went back, **Try again** is not offered: the app does not retry that release. A later release installs by itself when **Check for new releases** and **Install updates automatically** are on; otherwise use **Update now** when it is offered. When the app does not go ahead (for example "Please wait a moment and try again." or "The last download failed. Try again after …"), the section shows its reason; nothing is retried by itself. **Restart to update** waits while a file is still uploading or a drop is still being sent in the app window, and says so. The title strip's info button carries the state's short label, with a mark when there is something to do (red only when the person must update: the running release is listed unsafe or below the minimum).
 
 The update notice in the app window, by build:
 
@@ -105,6 +107,16 @@ The help bot explains documented controls. It cannot read or change your local
 node, confirm a repair remotely, decrypt wallets, or promise a sync duration.
 Never provide it passwords, private keys, recovery phrases, or credential-bearing
 RPC URLs. Use the installed app's confirmation text before a recovery action.
+
+## Localization fallback debt
+
+| Field                     | Current exception                                                                                                                                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | The **Updates** section of About 6529 Desktop (`DesktopUpdatePanel`), the update notice (`DesktopAutoUpdateNotice`) and the title strip's info button label                                          |
+| Untranslated surface      | Text the app reports: the state's `headline`, `note`, `label` and `cannotInstallWhy`, and the reasons it gives when it refuses an action; plus the website's `desktop.update.*` copy outside `en-US` |
+| Current fallback behavior | The app's text is shown as it comes, in English (the release standard's words); the website's own copy falls back to `en-US`                                                                         |
+| User impact               | 6529 Desktop users with another locale see the update states in English                                                                                                                              |
+| Owner or follow-up        | 6529 Desktop (localized state text from the app) and frontend localization maintainers (`desktop.update.*` entries)                                                                                  |
 
 ## Related Pages
 

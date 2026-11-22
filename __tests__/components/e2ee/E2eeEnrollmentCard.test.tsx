@@ -160,7 +160,7 @@ describe("E2eeEnrollmentCard turn-on", () => {
     fireEvent.click(screen.getByRole("button", BUTTON));
 
     fireEvent.click(
-      await screen.findByRole("button", { name: "Enable Encrypted DMs" })
+      await screen.findByRole("button", { name: "Turn on encrypted DMs" })
     );
     expect(engine.enroll).not.toHaveBeenCalled();
     fireEvent.click(
@@ -193,8 +193,7 @@ describe("E2eeEnrollmentCard turn-on", () => {
   describe("when encryption is still registering after the sign-in", () => {
     const FINISHING =
       "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves. You can close this window.";
-    const FINISHING_INLINE =
-      "Signed posts are on. Encrypted DMs are still finishing setup in this browser and will turn on by themselves.";
+    const FINISHING_INLINE = "Finishing encrypted message setup…";
     const PARTIAL =
       "Signed posts are on. Encrypted DMs could not finish setup. You can try enabling them separately.";
 
@@ -425,7 +424,7 @@ describe("E2eeEnrollmentCard upgrade copy (D172)", () => {
     renderScoped("dms", null);
 
     expect(
-      screen.getByRole("heading", { name: "Enable Encrypted DMs" })
+      screen.getByRole("heading", { name: "Turn on encrypted DMs" })
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -493,7 +492,9 @@ describe("E2eeEnrollmentCard upgrade copy (D172)", () => {
     const engine = renderScoped("both", { superseded: 0 });
 
     expect(
-      screen.getByRole("heading", { name: "Post Signing & DM Encryption" })
+      screen.getByRole("heading", {
+        name: "Turn on signed posts and encrypted DMs",
+      })
     ).toBeInTheDocument();
     expect(
       screen.getByText(/moving to stronger encryption/u)
@@ -519,7 +520,7 @@ describe("E2eeEnrollmentCard upgrade copy (D172)", () => {
     act(() => engine.update({ upgrade: null }));
 
     expect(
-      screen.getByRole("heading", { name: "Enable Encrypted DMs" })
+      screen.getByRole("heading", { name: "Turn on encrypted DMs" })
     ).toBeInTheDocument();
   });
 

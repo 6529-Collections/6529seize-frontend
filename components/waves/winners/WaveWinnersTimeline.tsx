@@ -105,7 +105,7 @@ export const WaveWinnersTimeline: React.FC<WaveWinnersTimelineProps> = ({
                       </h3>
                     </div>
 
-                    <span className="tw-text-xs tw-font-light tw-tracking-wide tw-text-iron-400">
+                    <span className="tw-text-xs tw-font-normal tw-tracking-wide tw-text-iron-400">
                       {formattedTime}
                     </span>
                   </div>

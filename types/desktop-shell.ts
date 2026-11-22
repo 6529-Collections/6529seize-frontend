@@ -226,7 +226,8 @@ export interface DesktopUpdater {
   readonly checkUpdates: () => void;
   /** The Tauri host returns its IPC promise; the older app returns nothing. */
   readonly downloadUpdate: () => Promise<void> | undefined;
-  readonly installUpdate: () => void;
+  /** The auto-installing host returns a promise that rejects when it can't. */
+  readonly installUpdate: () => Promise<void> | void;
   readonly onUpdateAvailable: (
     callback: DesktopShellListener<[DesktopUpdateInfo?]>
   ) => void;
@@ -253,6 +254,31 @@ export interface DesktopUpdater {
   readonly offUpdateDownloaded: (
     callback: DesktopShellListener<[DesktopUpdateInfo?]>
   ) => void;
+  /**
+   * Auto-installing 6529 Desktop builds only (`getInfo()` reports
+   * `supportsInAppUpdates: true`): the update state (U1-U14), its change
+   * event and the two settings. Absent in older builds.
+   */
+  readonly getState?: (() => Promise<unknown>) | undefined;
+  readonly onUpdateState?:
+    | ((callback: DesktopShellListener<[unknown?]>) => void)
+    | undefined;
+  readonly offUpdateState?:
+    | ((callback: DesktopShellListener<[unknown?]>) => void)
+    | undefined;
+  /**
+   * Work in this window would be lost by a restart: "Restart to update" is
+   * refused with `reason` until it is cleared. Auto-installing builds only.
+   */
+  readonly setBusy?:
+    | ((busy: boolean, reason?: string) => Promise<void>)
+    | undefined;
+  readonly setSettings?:
+    | ((settings: {
+        readonly check?: boolean;
+        readonly auto?: boolean;
+      }) => Promise<unknown>)
+    | undefined;
 }
 
 /** Small key-value store owned by the shell. */

@@ -21,14 +21,20 @@ import rehypeExternalLinks from "rehype-external-links";
 import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import remarkGfm from "remark-gfm";
 import type { PluggableList } from "unified";
+import { DropImagePreview } from "@/components/drops/view/item/content/media/DropImagePreview";
 import { highlightCodeElement } from "@/components/drops/view/part/dropPartMarkdown/highlight";
 import { isSafeMarkdownImageSrc } from "@/components/drops/view/part/dropPartMarkdown/linkUtils";
 import { normalizeDropMarkdownContent } from "@/components/drops/view/part/dropPartMarkdown/normalizeContent";
 import { rehypePreserveOrderedListDelimiter } from "@/components/drops/view/part/dropPartMarkdown/orderedListDelimiter";
 import { rehypeDropPreview } from "@/components/drops/view/part/dropPartMarkdown/preview";
+import { ImageScale } from "@/helpers/image.helpers";
 import { getInternalPageLinkPath } from "@/helpers/internalLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import {
+  isDropNotificationImage,
+  rehypeDropNotificationPreview,
+} from "./dropNotificationPreview";
 import { rehypeScopeFootnoteLabel } from "./footnotes";
 import { rehypeInlinePreview } from "./inlinePreview";
 
@@ -246,6 +252,24 @@ function PreviewImage({ alt }: ComponentPropsWithoutRef<"img">) {
   );
 }
 
+function DropNotificationImage({ src, alt }: ComponentPropsWithoutRef<"img">) {
+  if (!isDropNotificationImage(src)) return <PreviewImage alt={alt} />;
+  return (
+    <DropImagePreview
+      originalSrc={src}
+      imageScale={ImageScale.W_AUTO_H_50}
+      alt={alt?.trim() === "Seize" ? "" : (alt ?? "")}
+      width={40}
+      height={40}
+      loading="lazy"
+      decoding="async"
+      className="tw-size-10 tw-shrink-0 tw-rounded-md tw-bg-iron-900 tw-object-cover"
+      allowOriginalGif={false}
+      fallback={null}
+    />
+  );
+}
+
 function PreviewTask({ checked }: ComponentPropsWithoutRef<"input">) {
   const locale = useBrowserLocale();
   return (
@@ -277,8 +301,7 @@ const COMPONENTS: Components = {
   table: Table,
 };
 const PRIVATE_COMPONENTS: Components = { a: MarkdownLink, img: ImageLink };
-// A notification row is already a link. Its body must never nest links,
-// interactive controls, embeds or remote images inside that destination.
+// A notification row is already a link. Keep its Markdown non-interactive.
 const PREVIEW_COMPONENTS: Components = {
   a: ({ children }) => <span>{children}</span>,
   img: PreviewImage,
@@ -299,8 +322,8 @@ const INLINE_PREVIEW_COMPONENTS: Components = {
 interface MessageMarkdownProps {
   readonly text: string | null;
   readonly privacy: "public" | "private";
-  /** Two-line, non-interactive notification content. Parse before shortening. */
-  readonly preview?: boolean;
+  /** Two-line notification content. Wave drop previews can include a thumbnail. */
+  readonly preview?: boolean | "drop";
   /** One-line conversation-list content; never render block or resource elements. */
   readonly inlinePreview?: boolean;
   /** Longer expandable drop excerpts retain their public media behavior. */
@@ -319,7 +342,7 @@ export const MessageMarkdown = memo(
   ({
     text,
     privacy,
-    preview = false,
+    preview: previewMode = false,
     inlinePreview = false,
     collapsedPreview = false,
     messageId = "message",
@@ -329,6 +352,8 @@ export const MessageMarkdown = memo(
     textPlugins = EMPTY_PLUGINS,
   }: MessageMarkdownProps) => {
     const locale = useBrowserLocale();
+    const preview = previewMode !== false;
+    const dropPreview = previewMode === "drop" && privacy === "public";
     const renderId = useId();
     const idPrefix = `${privacy === "private" ? "e2ee" : "user-content"}-${messageId}-${renderId}-`;
     const context = useMemo(
@@ -354,6 +379,7 @@ export const MessageMarkdown = memo(
         ],
         [rehypeScopeFootnoteLabel, idPrefix],
         rehypePreserveOrderedListDelimiter,
+        ...(dropPreview ? [rehypeDropNotificationPreview] : []),
         ...(preview || collapsedPreview ? [rehypeDropPreview] : []),
         ...textPlugins,
         ...(inlinePreview
@@ -365,6 +391,7 @@ export const MessageMarkdown = memo(
       [
         privacy,
         preview,
+        dropPreview,
         inlinePreview,
         collapsedPreview,
         textPlugins,
@@ -378,11 +405,18 @@ export const MessageMarkdown = memo(
         ...components,
         ...(privacy === "private" ? PRIVATE_COMPONENTS : {}),
         ...(preview ? PREVIEW_COMPONENTS : {}),
+        ...(dropPreview ? { img: DropNotificationImage } : {}),
         ...(inlinePreview ? INLINE_PREVIEW_COMPONENTS : {}),
       }),
-      [components, privacy, preview, inlinePreview]
+      [components, privacy, preview, dropPreview, inlinePreview]
     );
-    const markdownClassName = `word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-iron-200 [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_ul]:tw-list-disc [&_ul_ul]:tw-list-[circle] [&_ul_ul_ul]:tw-list-[square] ${preview ? "tw-line-clamp-2 tw-max-h-10 tw-overflow-hidden [&_*]:!tw-my-0 [&_*]:!tw-text-sm [&_*]:!tw-leading-5 [&_pre_code]:!tw-p-0" : ""} ${className}`;
+    const previewLayout = dropPreview
+      ? "tw-flex tw-items-start tw-gap-2"
+      : "tw-line-clamp-2 tw-max-h-10 tw-overflow-hidden";
+    const previewClassName = preview
+      ? `${previewLayout} [&_*]:!tw-my-0 [&_*]:!tw-text-sm [&_*]:!tw-leading-5 [&_pre_code]:!tw-p-0`
+      : "";
+    const markdownClassName = `word-break tw-min-w-0 tw-max-w-full tw-break-words tw-text-iron-200 [&_pre]:tw-max-w-full [&_pre]:tw-overflow-x-auto [&_ul]:tw-list-disc [&_ul_ul]:tw-list-[circle] [&_ul_ul_ul]:tw-list-[square] ${previewClassName} ${className}`;
     return (
       <RenderingContext.Provider value={context}>
         <Markdown

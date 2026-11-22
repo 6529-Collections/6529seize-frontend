@@ -72,6 +72,29 @@ describe("Button", () => {
     );
   });
 
+  it.each([
+    {
+      variant: "tertiaryStrong",
+      background: "tw-bg-iron-950",
+      text: "tw-text-iron-100",
+    },
+    {
+      variant: "tertiaryOutline",
+      background: "tw-bg-transparent",
+      text: "tw-text-iron-200",
+    },
+  ] as const)(
+    "provides $variant without important overrides",
+    ({ variant, background, text }) => {
+      render(<Button variant={variant}>Add REP</Button>);
+
+      const button = screen.getByRole("button", { name: "Add REP" });
+      expect(button).toHaveClass("tw-border-iron-700", background, text);
+      expect(button).not.toHaveClass("tw-border-iron-800");
+      expect(button.className).not.toContain("!");
+    }
+  );
+
   it("supports an outlined destructive action with full red text", () => {
     render(<Button variant="destructiveOutline">Delete drop</Button>);
 
