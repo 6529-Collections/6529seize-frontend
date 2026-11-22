@@ -219,7 +219,26 @@ export function E2eeTimeline({
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [historyError, setHistoryError] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  // The chat and first record shown when an "older" page added nothing.
+  const [oldestReachedAt, setOldestReachedAt] = useState<{
+    readonly g: string;
+    readonly firstId: string | null;
+  } | null>(null);
   const pagingRef = useRef(false);
+  const firstId = allMessages[0]?.id ?? null;
+  // Any other first record or chat may have older history again: offer the
+  // control until a page shows otherwise.
+  if (
+    oldestReachedAt !== null &&
+    (oldestReachedAt.g !== conversation.g ||
+      oldestReachedAt.firstId !== firstId)
+  ) {
+    setOldestReachedAt(null);
+  }
+  const oldestReached =
+    oldestReachedAt?.g === conversation.g &&
+    oldestReachedAt.firstId === firstId &&
+    !conversation.historyError;
   const latestLoaded =
     !conversation.lastMessage ||
     messages.some((message) => message.id === conversation.lastMessage?.id);
@@ -251,8 +270,12 @@ export function E2eeTimeline({
       let options = {};
       if (direction !== "latest" && key)
         options = direction === "older" ? { before: key } : { after: key };
+      const before = { g: conversation.g, firstId };
       await engine.loadHistory(conversation.g, options);
       setHistoryLoaded(true);
+      // Applied in the render that reads the settled page: kept only when
+      // the page left the same first record in place.
+      if (direction === "older") setOldestReachedAt(before);
     } catch {
       setHistoryError(true);
     } finally {
@@ -441,7 +464,13 @@ export function E2eeTimeline({
             empty={!messages.some((message) => message.kind === "message")}
           />
           {notice}
+          {engine.loadHistory && oldestReached ? (
+            <p className="tw-m-0 tw-px-4 tw-text-center tw-text-sm tw-text-iron-400">
+              {t(locale, "e2ee.conversation.noOlder")}
+            </p>
+          ) : null}
           {engine.loadHistory &&
+          !oldestReached &&
           (messages.length > 0 || conversation.historyError) ? (
             <button
               type="button"
