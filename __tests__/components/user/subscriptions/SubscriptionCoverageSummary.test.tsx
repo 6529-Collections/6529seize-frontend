@@ -1132,3 +1132,36 @@ describe("24-drop forecast headline", () => {
     }
   );
 });
+
+describe("funding that reaches the forecast end", () => {
+  it("says funded at least through instead of naming an end", () => {
+    const coverage = subscriptionCoverageFixture({
+      status: ApiSubscriptionCoverageStatus.Covered,
+      fully_funded_drops: 24,
+      funded_through: {
+        token_id: 598,
+        mint_at: new Date("2027-01-01T15:40:00Z"),
+      },
+      next_unfunded: null,
+      forecast: {
+        ...subscriptionCoverageFixture().forecast,
+        horizon_drop_count: 24,
+        horizon_end_token_id: 598,
+        forecast_truncated: true,
+      },
+    });
+    render(
+      <SubscriptionCoverageSummary
+        coverage={coverage}
+        isLoading={false}
+        isOwner
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "Next 24 drops funded" })
+    ).toBeVisible();
+    expect(screen.getByText(/Funded at least through/)).toHaveTextContent(
+      "Funded at least through The Memes #598 · Jan 1, 2027"
+    );
+  });
+});

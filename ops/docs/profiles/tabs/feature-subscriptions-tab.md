@@ -109,7 +109,13 @@ On the web and Android, the tab appears after the page loads.
    Running low. Action required is red only when the immediate selected drop is
    not fully funded. Plan a top up is neutral, and Running low is amber. Visitors
    see factual headings and no owner instructions, deadlines or actions.
-   Funded through appears when at least one drop is funded. A supplied top-up
+   Funded through appears when at least one drop is funded. When funding reaches
+   the last drop of the 24-drop forecast with no unfunded drop, the balance may
+   cover later drops, so the line reads Funded at least through, the Upcoming
+   Drops boundary uses the same words, the profile header says at least
+   through, and the compact home line says Next 24 drops funded. The profile
+   header and coverage notification show one funded drop as Running low, like
+   the card. A supplied top-up
    deadline keeps its highlighted background, bold full date/time and original
    Top up by wording ending in to receive The Memes #N. When the immediate drop
    is not covered, the owner's heading says Today's mint isn't covered only on

@@ -290,6 +290,21 @@ describe("UserPageSubscriptionsUpcoming", () => {
     expect(mockRefresh).not.toHaveBeenCalled();
   });
 
+  it("says funded at least through when funding reaches the forecast end", () => {
+    renderComponent({
+      coverage: {
+        funded_through: { token_id: 3 },
+        next_unfunded: null,
+        fully_funded_drops: 24,
+        forecast: { forecast_truncated: true, horizon_end_token_id: 3 },
+      },
+    });
+    expect(screen.getByText("Funded at least through")).toHaveClass(
+      "tw-text-amber-200"
+    );
+    expect(screen.queryByText("Funded through")).not.toBeInTheDocument();
+  });
+
   it("places one amber funded boundary after its drop in both list views", () => {
     renderComponent({ coverage: { funded_through: { token_id: 3 } } });
     const marker = screen.getByText("Funded through");
