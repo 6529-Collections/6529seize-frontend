@@ -721,7 +721,7 @@ function SubscriptionTopUpForm({
       </p>
       {topUpContent}
       <div className="tw-mt-5">
-        <DesktopWalletTransactionGate>
+        <DesktopWalletTransactionGate forwardable>
           <Button
             type="button"
             variant="primary"

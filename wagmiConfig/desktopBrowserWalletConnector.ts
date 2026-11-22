@@ -13,6 +13,7 @@ import {
 import { ChainNotConfiguredError, createConnector } from "wagmi";
 import {
   parseWalletRequest,
+  toCanonicalTransaction,
   type WalletBridgeResponse,
   type WalletRequest,
   type WalletRequestInput,
@@ -53,15 +54,19 @@ interface DesktopBrowserWalletConnectorOptions {
     fingerprint: string | null
   ) => Promise<WalletBridgeResponse>;
   /**
-   * Called when the app asks to send a transaction, which this connector
-   * does not forward, so the app can point to the website.
+   * Called when the app asks for a transaction this connector does not
+   * forward, so the app can point to the website.
    */
   readonly onTransactionRefused?: () => void;
+  /** Whether the shell sends allow-listed transactions (same rules). */
+  readonly sendsTransactions?: () => boolean;
 }
 
-/** Wallet methods that send (or sign for sending) a transaction. */
+/**
+ * Wallet methods for transactions that are never forwarded (only
+ * `eth_sendTransaction` is, when the shell sends transactions).
+ */
 const TRANSACTION_METHODS: ReadonlySet<string> = new Set([
-  "eth_sendTransaction",
   "wallet_sendTransaction",
   "eth_signTransaction",
   "wallet_sendCalls",
@@ -90,6 +95,12 @@ function toProviderError(code: string): Error {
     case "invalid":
       return new UnsupportedProviderMethodError(
         asError("The browser page will not sign this request.")
+      );
+    case "unverified":
+      return new InternalRpcError(
+        asError(
+          "The wallet reported a transaction 6529 Desktop could not confirm yet. Check it before trying again."
+        )
       );
     default:
       return new InternalRpcError(asError(`Browser signing ${code}.`));
@@ -155,10 +166,12 @@ async function recoverSigner(
 /**
  * wagmi connector for a 6529 Desktop profile that signed in with a browser
  * wallet. It holds no keys: it reports the signed-in address, answers chain
- * questions itself, and forwards `personal_sign` and `eth_signTypedData_v4`
+ * questions itself, and forwards `personal_sign`, `eth_signTypedData_v4`
+ * and (when the shell sends transactions) allow-listed `eth_sendTransaction`
  * to the user's browser through the desktop shell. Everything else is
- * unsupported, transactions included. A returned signature is accepted only
- * when it recovers to the signed-in address for the exact request.
+ * unsupported. A returned signature is accepted only when it recovers to
+ * the signed-in address for the exact request; a transaction hash only
+ * after the shell found that transaction on chain.
  */
 export function desktopBrowserWalletConnector(
   options: DesktopBrowserWalletConnectorOptions
@@ -209,6 +222,48 @@ export function desktopBrowserWalletConnector(
       return response.value;
     };
 
+    /** Refuses a transaction, pointing the app to the website. */
+    const refuseTransaction = (code: "unsupported" | "invalid"): never => {
+      options.onTransactionRefused?.();
+      throw toProviderError(code);
+    };
+
+    /**
+     * Forwards one transaction in canonical form (`{from, to, data,
+     * value}`; gas, fees and nonce are the browser wallet's), only when
+     * the shell sends transactions and the app's allow-list has it. The
+     * shell answers with the hash after it has found the transaction on
+     * chain.
+     */
+    const sendTransaction = async (params: unknown): Promise<Hex> => {
+      const address = boundAddress();
+      if (!address) throw toProviderError("not-signed-in");
+      if (options.sendsTransactions?.() !== true) {
+        return refuseTransaction("unsupported");
+      }
+      const transaction =
+        Array.isArray(params) && params.length === 1
+          ? toCanonicalTransaction(params[0], address)
+          : null;
+      if (!transaction) return refuseTransaction("invalid");
+      const input: WalletRequestInput = {
+        method: "eth_sendTransaction",
+        params: [transaction],
+        address,
+        chainId,
+      };
+      const parsed = parseWalletRequest(
+        input,
+        config.chains.map((chain) => chain.id)
+      );
+      if (!parsed.ok) return refuseTransaction("invalid");
+      // The allow-list check shows its own message when it refuses.
+      if (!options.prepare(parsed.value)) throw toProviderError("refused");
+      const response = await options.runRequest(input, null);
+      if (!response.ok) throw toProviderError(response.code);
+      return response.value;
+    };
+
     /** Chain switching is answered here; the browser page checks the chain. */
     const selectChain = (next: number) => {
       const chain = config.chains.find((candidate) => candidate.id === next);
@@ -231,6 +286,8 @@ export function desktopBrowserWalletConnector(
           case "personal_sign":
           case "eth_signTypedData_v4":
             return forward(method, params);
+          case "eth_sendTransaction":
+            return sendTransaction(params);
           default:
             if (TRANSACTION_METHODS.has(method)) {
               options.onTransactionRefused?.();

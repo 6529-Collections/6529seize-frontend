@@ -11696,10 +11696,11 @@
         "continue in your browser"
       ],
       "facts": [
-        "When a 6529 Desktop profile signed in with Use a browser wallet, 6529 Desktop sends signatures to the web browser but does not send transactions there.",
-        "The Memes and NextGen mint buttons, NextGen burn-to-mint, the subscriptions top-up, NFT transfers, the delegation center forms and the consolidation builder show a Continue in your browser notice in place of their send button.",
-        "Any other action that would send a transaction opens a Transaction dialog that says 6529 Desktop does not send this transaction to your browser wallet, with Continue in your browser and Close.",
-        "Continue in your browser opens the same page on the website in the system browser, where the browser wallet sends the transaction directly. If the browser does not open, the notice says so; open the website yourself.",
+        "When a 6529 Desktop profile signed in with Use a browser wallet, builds that send transactions open a browser page for delegations (register, update, revoke, batches of up to five, locks), The Memes and NextGen mints, and Memes subscription top-ups up to 10 ETH. Your browser wallet sends them.",
+        "The browser page shows what the transaction does, the contract with its full address, the network, the amount in ETH plus the network fee, every decoded value, a check that it would go through now, and for mints whether the amount matches the current price.",
+        "A transaction that would fail is not offered; use Check again. If the check cannot run, Check again or Send anyway. High-impact transactions (delegations that let another wallet act for you, acting as a delegation manager, minting for another wallet, top-ups over 1 ETH) need I understand before Send in wallet.",
+        "The request waits five minutes; with under 45 seconds left Send is not offered. After sending, 6529 Desktop checks the transaction on chain. If it cannot confirm it yet, it shows the hash with View on Etherscan: do not send it again.",
+        "NFT transfers and NextGen burn-to-mint show Continue in your browser instead of their send button. A 6529 Desktop build without transaction support shows Update 6529 Desktop, or continue in your browser. Other transactions open a Transaction dialog with Continue in your browser.",
         "With a phone wallet (Scan with a phone wallet) these actions work inside 6529 Desktop as usual."
       ],
       "canonical_path": "/about/6529-apps",

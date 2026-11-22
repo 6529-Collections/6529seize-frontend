@@ -202,7 +202,7 @@ function StepAction(
   }
   if (step.canSign) {
     return (
-      <DesktopWalletTransactionGate>
+      <DesktopWalletTransactionGate forwardable>
         <SignButton step={step} context={context} />
       </DesktopWalletTransactionGate>
     );

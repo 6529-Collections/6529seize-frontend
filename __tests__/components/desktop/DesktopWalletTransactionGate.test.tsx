@@ -5,6 +5,10 @@ import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWa
 jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
   useIsDesktopBrowserWallet: jest.fn(),
 }));
+let mockSends = false;
+jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
+  desktopWalletSendsTransactions: () => mockSends,
+}));
 jest.mock("@/services/desktop/continueInBrowser", () => ({
   continueInBrowser: jest.fn(() => true),
   getWebsiteHost: () => "6529.io",
@@ -51,5 +55,43 @@ describe("DesktopWalletTransactionGate", () => {
     );
     expect(container.firstElementChild).toHaveClass("tw-pt-3");
     expect(screen.getByRole("button", { name: "Mint" })).toBeInTheDocument();
+  });
+
+  it("renders a forwardable control when 6529 Desktop sends transactions", () => {
+    forwarding.mockReturnValue(true);
+    mockSends = true;
+    render(
+      <DesktopWalletTransactionGate forwardable>
+        <button type="button">Mint</button>
+      </DesktopWalletTransactionGate>
+    );
+    expect(screen.getByRole("button", { name: "Mint" })).toBeInTheDocument();
+    mockSends = false;
+  });
+
+  it("asks for an update for a forwardable control otherwise", () => {
+    forwarding.mockReturnValue(true);
+    mockSends = false;
+    render(
+      <DesktopWalletTransactionGate forwardable>
+        <button type="button">Mint</button>
+      </DesktopWalletTransactionGate>
+    );
+    expect(screen.getByText(/Update 6529 Desktop/)).toBeVisible();
+  });
+
+  it("keeps a control that is not forwardable on the website", () => {
+    forwarding.mockReturnValue(true);
+    mockSends = true;
+    render(
+      <DesktopWalletTransactionGate>
+        <button type="button">Transfer</button>
+      </DesktopWalletTransactionGate>
+    );
+    expect(
+      screen.queryByRole("button", { name: "Transfer" })
+    ).not.toBeInTheDocument();
+    expect(screen.getByText(/does not send this transaction/)).toBeVisible();
+    mockSends = false;
   });
 });

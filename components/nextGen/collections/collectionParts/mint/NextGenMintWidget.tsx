@@ -554,7 +554,7 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               </select>
             </div>
             <div>
-              <DesktopWalletTransactionGate>
+              <DesktopWalletTransactionGate forwardable>
                 <Button
                   type="button"
                   variant="success"

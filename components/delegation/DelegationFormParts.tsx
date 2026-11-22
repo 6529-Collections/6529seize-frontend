@@ -523,7 +523,7 @@ export function DelegationSubmitGroups(
               Cancel
             </Button>
           )}
-          <DesktopWalletTransactionGate>
+          <DesktopWalletTransactionGate forwardable>
             <Button
               type="button"
               loading={isLoading()}

@@ -311,6 +311,7 @@ describe("desktopBrowserWallet", () => {
         requestCode: "ABC-123",
         expiresAt: 1_800_000_000_000,
         fingerprint: null,
+        transaction: false,
       });
       statusListener?.({ pending: false });
       expect(getDesktopWalletRequestStatus()).toEqual({ kind: "idle" });

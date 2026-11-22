@@ -86,6 +86,7 @@ describe("DesktopWalletRequestDialog", () => {
     requestCode: "ABC-123",
     expiresAt: 1,
     fingerprint: null,
+    transaction: false,
   };
   // The layered shell's two close controls: the backdrop (not tabbable) and
   // the header's X button. Both call the dialog's onHide.
@@ -251,5 +252,37 @@ describe("DesktopWalletRequestDialog", () => {
     expect(
       screen.getByRole("dialog", { name: "Transaction" })
     ).toBeInTheDocument();
+  });
+
+  it.each([
+    ["transactionUnverified", /reports it sent the transaction 0xcd/],
+    ["transactionMismatch", /is not the one 6529 Desktop asked for/],
+    ["lateTransaction", /approved after its request ended was sent/],
+  ] as const)("explains a %s with an explorer link", (kind, text) => {
+    const hash = `0x${"cd".repeat(32)}`;
+    render(<DesktopWalletRequestDialog />);
+    setStatus({ kind, hash, chainId: 11_155_111 });
+    expect(screen.getByRole("alert")).toHaveTextContent(text);
+    expect(
+      screen.getByRole("link", { name: "View on Etherscan" })
+    ).toHaveAttribute("href", `https://sepolia.etherscan.io/tx/${hash}`);
+    expect(screen.getByRole("dialog", { name: "Transaction" })).toBeVisible();
+  });
+
+  it("asks for an update when this 6529 Desktop sends no transactions", () => {
+    render(<DesktopWalletRequestDialog />);
+    setStatus({ kind: "transactionUpdate" });
+    expect(screen.getByRole("alert")).toHaveTextContent(/Update 6529 Desktop/);
+    expect(
+      screen.getByRole("button", { name: "Continue in your browser" })
+    ).toBeInTheDocument();
+  });
+
+  it("says a transaction waits for five minutes", () => {
+    render(<DesktopWalletRequestDialog />);
+    setStatus({ ...WAITING, transaction: true });
+    expect(
+      screen.getByText(/send this transaction.*five minutes/)
+    ).toBeVisible();
   });
 });
