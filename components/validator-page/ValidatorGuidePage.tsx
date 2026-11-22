@@ -1,10 +1,12 @@
 import Link from "next/link";
 
+import type {
+  ValidatorGuidePageText,
+  ValidatorGuidePath,
+} from "@/lib/validator-page/content/guidePageTypes";
 import {
   VALIDATOR_GUIDE_PAGES,
   VALIDATOR_GUIDE_PATHS,
-  type ValidatorGuidePageText,
-  type ValidatorGuidePath,
 } from "@/lib/validator-page/content/guidePages";
 import ValidatorMarkdown, { getMarkdownSections } from "./ValidatorMarkdown";
 import ValidatorPageFrame, { ValidatorPageHeader } from "./ValidatorPageFrame";

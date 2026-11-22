@@ -18,7 +18,7 @@ import { BODY, CODE, LINK } from "./validatorStyles";
 type SystemKey = "mac" | "windows" | "linux";
 
 /** This release's two .deb file names, or null while no release is out. */
-export type ValidatorDebs = {
+type ValidatorDebs = {
   readonly x64: string;
   readonly arm64: string;
 } | null;
