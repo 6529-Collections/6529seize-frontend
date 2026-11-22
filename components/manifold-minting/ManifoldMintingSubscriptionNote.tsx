@@ -93,7 +93,7 @@ export default function ManifoldMintingSubscriptionNote({
     refetchInterval: SUBSCRIPTION_REFRESH_INTERVAL,
   });
 
-  if (!enabled || !final || !phaseLabelKey) {
+  if (!enabled || !final) {
     return null;
   }
 
