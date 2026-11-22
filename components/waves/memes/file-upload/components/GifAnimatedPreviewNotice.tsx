@@ -72,8 +72,7 @@ export default function GifAnimatedPreviewNotice({
     }
 
     return (
-      <div
-        role="status"
+      <output
         data-testid="gif-animated-preview-warning"
         className="tw-mt-3 tw-flex tw-flex-shrink-0 tw-items-start tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-amber-500/30 tw-bg-amber-500/10 tw-px-3 tw-py-2 tw-text-sm tw-leading-5 tw-text-amber-200"
       >
@@ -81,8 +80,8 @@ export default function GifAnimatedPreviewNotice({
           className="tw-mt-0.5 tw-h-4 tw-w-4 tw-flex-shrink-0"
           aria-hidden="true"
         />
-        <p className="tw-m-0">{message}</p>
-      </div>
+        <span>{message}</span>
+      </output>
     );
   }
 

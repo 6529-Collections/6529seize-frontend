@@ -68,4 +68,16 @@ describe("GifAnimatedPreviewNotice", () => {
     expect(await screen.findByText(/GIFs get an animated preview/)).toBeVisible();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
+
+  it("drops the warning as soon as the file is cleared", async () => {
+    const { rerender } = render(
+      <GifAnimatedPreviewNotice file={gifFile(3000, 4500, 2)} />
+    );
+    expect(await screen.findByRole("status")).toBeInTheDocument();
+
+    rerender(<GifAnimatedPreviewNotice file={null} />);
+
+    expect(screen.queryByRole("status")).not.toBeInTheDocument();
+    expect(screen.getByText(/GIFs get an animated preview/)).toBeVisible();
+  });
 });
