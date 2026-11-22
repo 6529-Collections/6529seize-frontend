@@ -352,17 +352,14 @@ describe("the errors the site builder acts on", () => {
       chainProfileDocWriter(config, describe).replaceProfileDoc(setSite, "wallet")
     ).rejects.toEqual(new ProfileDocWriteError("submit_failed", "Plain words."));
     // Errors from outside the chain keep their own message: here the
-    // document size limit (profileDoc.ts signedProfileDoc).
+    // wallet connector's.
     (prepareProfileReplace as jest.Mock).mockRejectedValueOnce(
-      new RangeError("a profile document is at most 524,288 bytes")
+      new Error("Connector not connected.")
     );
     await expect(
       chainProfileDocWriter(config, describe).replaceProfileDoc(setSite, "wallet")
     ).rejects.toEqual(
-      new ProfileDocWriteError(
-        "submit_failed",
-        "a profile document is at most 524,288 bytes"
-      )
+      new ProfileDocWriteError("submit_failed", "Connector not connected.")
     );
     // A canceled signature and an unusable key keep their own errors.
     (prepareProfileReplace as jest.Mock).mockRejectedValueOnce(

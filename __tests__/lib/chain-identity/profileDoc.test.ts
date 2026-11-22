@@ -6,6 +6,7 @@ import {
   typedDataDigest,
 } from "@/lib/chain/codec/eip712";
 import { bytes32, struct, u32 } from "@/lib/chain/codec/schema";
+import { ChainOperationError } from "@/lib/chain-identity/operation";
 import {
   decodeProfileDoc,
   matchesCid,
@@ -109,14 +110,40 @@ it("keeps values exactly as given, whitespace included", () => {
   expect(decoded?.fields.get("displayName")).toBe(" punk ");
 });
 
-it("refuses a document over 524,288 bytes", () => {
-  const { unsigned } = prepareProfileDoc(
-    doc({ bio: "x".repeat(65_536), a: "x".repeat(65_536), b: "x".repeat(65_536), c: "x".repeat(65_536), d: "x".repeat(65_536), e: "x".repeat(65_536), f: "x".repeat(65_536), g: "x".repeat(65_536) }),
-    NONCE
+it("refuses a document over 524,288 bytes before anything is signed", () => {
+  const big = { bio: "x".repeat(65_536), a: "x".repeat(65_536), b: "x".repeat(65_536), c: "x".repeat(65_536), d: "x".repeat(65_536), e: "x".repeat(65_536), f: "x".repeat(65_536), g: "x".repeat(65_536) };
+  expect(() => prepareProfileDoc(doc(big), NONCE)).toThrow(
+    new ChainOperationError(
+      "rejected",
+      "Your profile would be larger than 524,288 bytes, so it wasn't changed."
+    )
   );
+  // Exactly at the limit with a wallet's signature: accepted; a byte more
+  // is refused before signing.
+  const wallet = { keyType: 1, keyId: KEY_ID, signature: `0x${"11".repeat(65)}` } as const;
+  // Seven full fields (65,536 bytes each, the codec's most) and an eighth
+  // sized to land exactly on the limit.
+  const full = Object.fromEntries(
+    ["a", "b", "c", "d", "e", "f", "g"].map((key) => [key, "x".repeat(65_536)])
+  );
+  const withLast = (length: number) => doc({ ...full, h: "x".repeat(length) });
+  const probe = prepareProfileDoc(withLast(60_000), NONCE);
+  const sigLength =
+    signedProfileDoc(probe.unsigned, wallet).bytes.length - probe.unsigned.length - 4;
+  const last = 524_288 - 4 - sigLength - (probe.unsigned.length - 60_000);
+  const fits = prepareProfileDoc(withLast(last), NONCE);
+  expect(signedProfileDoc(fits.unsigned, wallet).bytes.length).toBe(524_288);
+  expect(() => prepareProfileDoc(withLast(last + 1), NONCE)).toThrow(
+    ChainOperationError
+  );
+  // And signedProfileDoc still refuses bytes past the limit.
   expect(() =>
-    signedProfileDoc(unsigned, { keyType: 2, keyId: KEY_ID, signature: SIGNATURE })
-  ).toThrow(RangeError);
+    signedProfileDoc(new Uint8Array(524_288), {
+      keyType: 2,
+      keyId: KEY_ID,
+      signature: SIGNATURE,
+    })
+  ).toThrow(ChainOperationError);
 });
 
 it("leaves out empty values, sorts keys bytewise and keeps unknown keys", () => {

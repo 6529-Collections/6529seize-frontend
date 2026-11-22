@@ -1,5 +1,6 @@
 import { keccak256, sha256, type Hex } from "viem";
 import { decodeCe, encodeCe, hexBytes, toHex } from "@/lib/chain/codec/ce";
+import { ChainOperationError } from "./operation";
 import {
   bytes,
   bytes32,
@@ -100,6 +101,19 @@ const PROFILE_DOC_SIGNATURE = struct("ProfileDocSignature", [
   ["signature", bytes(1_024)],
 ]);
 
+/** The longest signature a document carries: a wallet's 65 bytes. */
+const MAX_SIGNATURE_BYTES = encodeCe(PROFILE_DOC_SIGNATURE, {
+  keyType: 1,
+  keyId: `0x${"00".repeat(32)}`,
+  signature: `0x${"00".repeat(65)}`,
+}).length;
+
+const tooLarge = () =>
+  new ChainOperationError(
+    "rejected",
+    "Your profile would be larger than 524,288 bytes, so it wasn't changed."
+  );
+
 /** The EIP-712 typed data a later document's signature covers. */
 export const profileDocumentTypedData = (
   networkId: Hex,
@@ -127,6 +141,10 @@ export function prepareProfileDoc(
   const { bytes: whole } = encodeProfileDoc(doc, nonce);
   // An empty `sig` is its 4-byte zero length; the hash covers what precedes it.
   const unsigned = whole.slice(0, whole.length - 4);
+  // Checked before anything is signed: no signature can make it fit.
+  if (unsigned.length + 4 + MAX_SIGNATURE_BYTES > MAX_DOC_BYTES) {
+    throw tooLarge();
+  }
   return { unsigned, docHash: keccak256(unsigned) };
 }
 
@@ -137,7 +155,7 @@ export function signedProfileDoc(
 ): { readonly bytes: Uint8Array; readonly cid: Hex } {
   const sig = encodeCe(PROFILE_DOC_SIGNATURE, signature);
   if (unsigned.length + 4 + sig.length > MAX_DOC_BYTES) {
-    throw new RangeError("a profile document is at most 524,288 bytes");
+    throw tooLarge();
   }
   const out = new Uint8Array(unsigned.length + 4 + sig.length);
   out.set(unsigned, 0);
