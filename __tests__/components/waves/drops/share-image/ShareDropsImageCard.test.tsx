@@ -61,3 +61,26 @@ describe("ShareDropsImageCard reactions", () => {
     expect(screen.getByText("🔥").parentElement).toHaveTextContent("2");
   });
 });
+
+describe("ShareDropsImageCard level badge", () => {
+  it.each([
+    [27, "tw-text-[9px]"],
+    [150, "tw-text-[8px]"],
+  ])("draws Level %p with %s text", (level, textClass) => {
+    render(
+      <ShareDropsImageCard
+        wave={{ id: "wave-1", name: "Sample Wave", picture: null } as never}
+        drops={[{ ...DROP, author: { ...DROP.author, level } }]}
+        messages={[]}
+        time={{ mode: "utc" }}
+        include={{ waveHeader: true, reactions: false }}
+        locale="en-US"
+      />
+    );
+
+    expect(screen.getByText(String(level))).toHaveClass(
+      "tw-size-[19px]",
+      textClass
+    );
+  });
+});
