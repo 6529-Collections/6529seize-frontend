@@ -16082,10 +16082,12 @@ paths:
           description: CMS package not found
         "409":
           description: >-
-            The pointer changed (expected-current guard), or profile sites are
-            on the 6529 chain and the target passed the check the chain index
-            will run (code cms_pointer_on_chain): move the pointer with
-            PROFILE_REPLACE instead.
+            The pointer changed (expected-current guard); the version was
+            published under a former handle (code cms_profile_changed), so
+            public reads wouldn't serve it; or profile sites are on the 6529
+            chain and the target passed the check the chain index will run (code
+            cms_pointer_on_chain): move the pointer with PROFILE_REPLACE
+            instead.
         "422":
           description: >-
             Profile sites are on the 6529 chain and the chain index would refuse
