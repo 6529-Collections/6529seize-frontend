@@ -745,10 +745,10 @@ describe("testing strategy CI plan", () => {
       if: "needs.plan.outputs.core_playwright_required == 'true' && github.event.pull_request.head.repo.full_name == github.repository",
       "runs-on": "${{ matrix.runner }}",
       "timeout-minutes":
-        "${{ (matrix.lane == 'playwright-native-competition' || startsWith(matrix.lane, 'playwright-critical-shell')) && 30 || 20 }}",
+        "${{ (matrix.lane == 'playwright-smoke' || matrix.lane == 'playwright-native-competition' || startsWith(matrix.lane, 'playwright-critical-shell')) && 30 || 20 }}",
       container: {
         image:
-          "mcr.microsoft.com/playwright:v1.64.1-noble@sha256:47b510dd9230bf0b9bfc9b20102241e577ea7a99334ab4c3ca19f19770e9b8ea",
+          "mcr.microsoft.com/playwright:v1.65.1-noble@sha256:1507cbfc550a63a6b7396791ca4f00df17beb56342d2447b3f106c306f525579",
         options: "--ipc=host",
       },
       defaults: { run: { shell: "bash" } },
