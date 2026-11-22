@@ -15,7 +15,7 @@ import type { MessageKey } from "@/i18n/messages";
  * Why the wallet signature a decision asks for was not made: no wallet is
  * connected in this window, the wallet declined, or the wallet failed.
  */
-export class CompetitionSignatureError extends Error {
+class CompetitionSignatureError extends Error {
   readonly reason: "walletNotConnected" | "rejected" | "failed";
 
   constructor(
@@ -38,6 +38,21 @@ const SIGNATURE_FAILURE_KEYS = {
   rejected: "competitions.signatureCancelled",
   failed: "competitions.signatureFailed",
 } as const satisfies Record<CompetitionSignatureError["reason"], MessageKey>;
+
+/**
+ * Marks an error thrown while signing as a signature-step failure. Forms that
+ * show their own message wrap only their `sign` call; other callers keep the
+ * wallet's original error.
+ */
+export function toCompetitionSignatureError(
+  error: unknown
+): CompetitionSignatureError {
+  if (error instanceof CompetitionSignatureError) return error;
+  return new CompetitionSignatureError(
+    isUserRejectedSigningError(error) ? "rejected" : "failed",
+    { cause: error }
+  );
+}
 
 /** The message for a failed signature step, or null for any other failure. */
 export function getCompetitionSignatureFailureKey(
@@ -84,13 +99,6 @@ export function useCompetitionSignatureFor(competition: ApiCompetition | null) {
     rememberWalletRequestContext(message, () =>
       buildDecisionSignatureContext(payload)
     );
-    try {
-      return { message, signature: await signMessageAsync({ message }) };
-    } catch (error) {
-      throw new CompetitionSignatureError(
-        isUserRejectedSigningError(error) ? "rejected" : "failed",
-        { cause: error }
-      );
-    }
+    return { message, signature: await signMessageAsync({ message }) };
   };
 }

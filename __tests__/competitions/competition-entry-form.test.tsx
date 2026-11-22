@@ -3,7 +3,6 @@ import CompetitionEntryForm from "@/components/competitions/CompetitionEntryForm
 import { getCreateWaveDropRequest } from "@/components/waves/create-wave/services/createWaveDropRequest";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { createCompetitionEntry } from "@/services/api/competitions-api";
-import { CompetitionSignatureError } from "@/hooks/competitions/useCompetitionSignature";
 
 let mockRequiredMetadata: Array<{ name: string; type: string }> = [];
 let mockTerms: string | null = null;
@@ -180,27 +179,27 @@ it("explains how to recover when an older upload cannot be submitted anonymously
   );
 });
 
-it.each([
-  [
-    "walletNotConnected",
-    "This decision needs a signature from your wallet, and no wallet is connected in this window.",
-  ],
-  ["rejected", "The wallet signature was cancelled."],
-  ["failed", "Your wallet didn’t complete the signature."],
-] as const)(
-  "says what went wrong when the wallet signature step fails (%s)",
-  async (reason, text) => {
-    mockSignatureRequired = true;
-    mockSign.mockRejectedValueOnce(new CompetitionSignatureError(reason));
-    const callsBefore = jest.mocked(createCompetitionEntry).mock.calls.length;
-    render(<CompetitionEntryForm onClose={jest.fn()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
-    const alert = await screen.findByRole("alert");
-    expect(alert).toHaveTextContent(text);
-    expect(alert).toHaveTextContent("Your input has been preserved.");
-    expect(createCompetitionEntry).toHaveBeenCalledTimes(callsBefore);
-  }
-);
+it("says the wallet did not complete the signature when signing fails", async () => {
+  mockSignatureRequired = true;
+  mockSign.mockRejectedValueOnce(new Error("Request expired"));
+  const callsBefore = jest.mocked(createCompetitionEntry).mock.calls.length;
+  render(<CompetitionEntryForm onClose={jest.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+  const alert = await screen.findByRole("alert");
+  expect(alert).toHaveTextContent("Your wallet didn’t complete the signature.");
+  expect(alert).toHaveTextContent("Your input has been preserved.");
+  expect(createCompetitionEntry).toHaveBeenCalledTimes(callsBefore);
+});
+
+it("reads a wallet's own rejection as a cancelled signature", async () => {
+  mockSignatureRequired = true;
+  mockSign.mockRejectedValueOnce({ code: 4001 });
+  render(<CompetitionEntryForm onClose={jest.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "The wallet signature was cancelled."
+  );
+});
 
 it("preserves wave and group mentions in the competition submission command and strips legacy signing fields", async () => {
   render(<CompetitionEntryForm onClose={jest.fn()} />);

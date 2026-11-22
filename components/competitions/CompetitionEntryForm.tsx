@@ -22,6 +22,7 @@ import { useCompetition } from "@/contexts/CompetitionContext";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 import {
   getCompetitionSignatureFailureKey,
+  toCompetitionSignatureError,
   useCompetitionSignature,
 } from "@/hooks/competitions/useCompetitionSignature";
 import DropEditor, {
@@ -242,7 +243,9 @@ export default function CompetitionEntryForm({
             { drop, drop_id: null },
             null,
             null
-          );
+          ).catch((error: unknown) => {
+            throw toCompetitionSignatureError(error);
+          });
         pending.current = { fingerprint, request };
       }
       const entry = await createCompetitionEntry(identity, request);

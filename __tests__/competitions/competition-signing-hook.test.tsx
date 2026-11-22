@@ -1,7 +1,7 @@
 import { renderHook } from "@testing-library/react";
 import {
-  CompetitionSignatureError,
   getCompetitionSignatureFailureKey,
+  toCompetitionSignatureError,
   useCompetitionSignature,
 } from "@/hooks/competitions/useCompetitionSignature";
 import { useAuth } from "@/components/auth/Auth";
@@ -56,17 +56,19 @@ describe("competition wallet identity", () => {
     } as ReturnType<typeof useAuth>);
     const { result } = renderHook(() => useCompetitionSignature());
     signMessageAsync.mockRejectedValueOnce({ code: 4001 });
-    const declined = await result
+    const raw = await result
       .current("VOTE_SET", { value: 1 }, "entry", "drop")
       .catch((error: unknown) => error);
-    expect(declined).toBeInstanceOf(CompetitionSignatureError);
+    // Other callers still receive the wallet's own error.
+    expect(raw).toEqual({ code: 4001 });
+    const declined = toCompetitionSignatureError(raw);
     expect(getCompetitionSignatureFailureKey(declined)).toBe(
       "competitions.signatureCancelled"
     );
     signMessageAsync.mockRejectedValueOnce(new Error("Request expired"));
     const failed = await result
       .current("VOTE_SET", { value: 1 }, "entry", "drop")
-      .catch((error: unknown) => error);
+      .catch((error: unknown) => toCompetitionSignatureError(error));
     expect(getCompetitionSignatureFailureKey(failed)).toBe(
       "competitions.signatureFailed"
     );

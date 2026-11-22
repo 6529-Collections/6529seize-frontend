@@ -25,6 +25,7 @@ import type { ApiSetCompetitionVoteRequest } from "@/generated/models/ApiSetComp
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
 import {
   getCompetitionSignatureFailureKey,
+  toCompetitionSignatureError,
   useCompetitionSignatureFor,
 } from "@/hooks/competitions/useCompetitionSignature";
 import {
@@ -240,7 +241,9 @@ export function CompetitionVoteForm({
             { value: numeric },
             entryId,
             dropId
-          );
+          ).catch((error: unknown) => {
+            throw toCompetitionSignatureError(error);
+          });
         pending.current = { actor: viewer, body };
       }
       if (!isCurrentActor()) return;
