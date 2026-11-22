@@ -34,7 +34,9 @@ const HAS_NOTES = new Set(["U4", "U5", "U6", "U7", "U8", "U12", "U13"]);
 const TONE_CLASS = {
   quiet: "tw-border-iron-700 tw-text-iron-100",
   warning: "tw-border-amber-400/60 tw-text-amber-100",
-  alert: "tw-border-red-400/70 tw-bg-red-500/10 tw-text-red-100",
+  // The theme defines red as one colour with no shades, so shade classes
+  // such as red-400 produce nothing here.
+  alert: "tw-border-red/70 tw-bg-red/10 tw-text-iron-50",
 } as const;
 
 /** Opens a 6529.io page in the system browser. */
