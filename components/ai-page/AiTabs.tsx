@@ -24,6 +24,12 @@ const SELECTED =
   "tw-bg-iron-100 tw-font-semibold tw-text-iron-950 tw-shadow-sm";
 const UNSELECTED =
   "tw-bg-transparent tw-font-medium tw-text-iron-400 hover:tw-text-iron-100";
+// Tabs that don't fit on one line wrap to the next, as the four Linux
+// packages do on a phone. Under 640 px a row is 54 px high, so a 27 px
+// radius draws one row as a pill and two with rounded corners. From 640 px
+// the tabs fit on one line.
+const LIST =
+  "tw-flex tw-flex-wrap tw-gap-1 tw-rounded-[27px] tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-1 sm:tw-inline-flex sm:tw-rounded-full";
 
 /**
  * Tabs as a segmented control: every panel is rendered on the server and
@@ -77,7 +83,7 @@ export default function AiTabs({
       <div
         role="tablist"
         aria-label={label}
-        className={`tw-flex tw-gap-1 tw-rounded-full tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/80 tw-p-1 sm:tw-inline-flex ${listClassName}`}
+        className={`${LIST} ${listClassName}`}
       >
         {tabs.map((tab, index) => {
           const active = tab.key === selected;
