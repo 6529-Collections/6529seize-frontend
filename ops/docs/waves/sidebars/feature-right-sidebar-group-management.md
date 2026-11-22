@@ -17,6 +17,7 @@ Users can:
 - open a prefilled group editor from a `Visibility`, `Chat access`, or `Admins` gear
 - edit criteria and identities or choose a different existing group
 - make wave visibility public or align an eligible access row with Visibility
+- turn `Admins can delete posts` on or off
 - create, edit, delete, and reorder wave curations without leaving the thread
 
 ## Location in the Site
@@ -84,7 +85,11 @@ Users can:
 14. The app verifies that an updated `Chat access` or `Admins`
     group is contained in `Visibility` before saving.
 15. After success, the affected rows refresh.
-16. In `Curations`, administrators can create or delete curations, edit their
+16. Below `Admins`, `Admins can delete posts` shows `On` or `Off`. Editors can
+    select its gear, check or clear `Allow admins to delete posts`, and save.
+    When it is on, the wave creator and admins see `Delete` in the post menu
+    for anyone's post. People can always delete their own posts.
+17. In `Curations`, administrators can create or delete curations, edit their
     name and criteria, and move them up or down. Each row shows its group's
     criteria summary and member count. Select the count to see the full
     criteria and current members in Network.
@@ -119,6 +124,10 @@ Users can:
   requires access to both waves.
 - Configuration shows only `Visibility`, `Chat access`, and `Admins` for every
   wave. Decision access rows are omitted.
+- `Admins can delete posts` is chosen during wave creation and can be changed
+  later from Configuration. Every viewer sees its current value; only editors
+  see its gear. Older waves created with it off keep it off until an editor
+  turns it on.
 - `Chat access` controls who can chat only when chat is enabled; it does not
   show whether chat is currently enabled or disabled.
 - Chat waves require chat to stay enabled, so Configuration does not show a

@@ -14,10 +14,10 @@ import {
   REQUEST_ID,
   SIGNATURE,
   WALLET_FORWARDING_VERSION,
-  WALLET_REQUEST_TTL_MS,
   type WalletRequest,
   type WalletRequestInput,
   type WalletRequestProblem,
+  walletRequestTtlMs,
 } from "./shared";
 import { base64UrlLength } from "./size";
 
@@ -175,7 +175,8 @@ function checkFragment(
     envelope.expiresAt <= envelope.issuedAt ||
     envelope.expiresAt <= context.now ||
     envelope.issuedAt > context.now + 60_000 ||
-    envelope.expiresAt - envelope.issuedAt > WALLET_REQUEST_TTL_MS
+    envelope.expiresAt - envelope.issuedAt >
+      walletRequestTtlMs(envelope.request.method)
   ) {
     return fail("expired");
   }

@@ -86,8 +86,9 @@ The **Decisions** tab follows the selected decision's **Settings** tab and prece
 - A published decision cannot change between Rank and Approve.
 - For newer decisions, after the first accepted entry, credit, signing, submission, timing, result
   and outcome rules are fixed. Approve threshold and hold duration remain editable in Settings. Participation and voting access, title, description
-  and presentation remain editable while the decision is published.
-- Original decisions in older waves retain their existing administration permissions after entries arrive. Their type, identity strategy and outcome definitions stay fixed. Voting credit source, scope and negative-vote rules stay fixed after the first vote, including votes later reset or deleted. An existing vote cap may only increase or become unlimited. Schedule changes must leave the next result in the future and cannot replace an unresolved due result; winner limits cannot fall below completed results.
+  and presentation remain editable while the decision is published. The
+  editor says so at the top once entries exist, and leaves out the fixed steps.
+- Original decisions in older waves retain their existing administration permissions after entries arrive. Their type, identity strategy and outcome definitions stay fixed. Voting credit source, scope and negative-vote rules stay fixed after the first vote, including votes later reset or deleted; the voting step then explains why those controls are disabled. An existing vote cap may only increase or become unlimited. Schedule changes must leave the next result in the future and cannot replace an unresolved due result; winner limits cannot fall below completed results.
 - A stale editing form is rejected if another administrator saved a newer
   version. For inline settings, cancel and reopen the section to edit the latest version. The draft setup editor also supports saving a separate draft copy.
 - Terminal decisions cannot reopen. A clone has its own identity, entries,
