@@ -2224,6 +2224,8 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
 const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
   title: "How Drops are Voted",
   ratingTitle: "How Drops are Rated",
+  creditsLocked:
+    "This decision already has votes, so its voting credit, scope and negative-vote settings can no longer change.",
   rankAdvancedSummary: "Vote limits and behavior",
   approveAdvancedSummary: "Vote limits, behavior, and timing",
   "timeUnit.minutes": "Minutes",

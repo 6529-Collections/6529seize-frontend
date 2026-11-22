@@ -228,6 +228,8 @@ export const COMPETITION_MESSAGES = {
   "competitions.threshold": "Winning threshold: {value}",
   "competitions.hold": "Threshold hold: {value} milliseconds",
   "competitions.lock": "Voting time lock: {value} milliseconds",
+  "competitions.rulesLockedAfterEntries":
+    "This decision already has entries, so its credit, signing, submission, timing, result and outcome rules can no longer change. Access, name, description and presentation can still be edited.",
   "competitions.configHint":
     "Choose participation and voting groups for this decision. Visibility and administrators are inherited from the wave.",
   "competitions.overlap":

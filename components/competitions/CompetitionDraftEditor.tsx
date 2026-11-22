@@ -557,6 +557,11 @@ function DraftForm({
       <p className="tw-m-0 tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.overlap")}
       </p>
+      {lockedRules && (
+        <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+          {t(locale, "competitions.rulesLockedAfterEntries")}
+        </p>
+      )}
       <fieldset
         disabled={busy || displayedError === "conflict"}
         className="tw-min-w-0 tw-border-0 tw-p-0"
