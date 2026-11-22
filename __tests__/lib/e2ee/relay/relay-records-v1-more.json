@@ -6,6 +6,39 @@
     "pending": "0xb6b6b6b6b6b6b6b6b6b6b6b6b6b6b6b6",
     "of_revoked": "0xc7c7c7c7c7c7c7c7c7c7c7c7c7c7c7c7"
   },
+  "deleted_but_served": {
+    "rseq": 1004,
+    "event": {
+      "kind": 10,
+      "kind_version": 1,
+      "wave": "dv/0x0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f0f",
+      "author": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "key_type": 2,
+      "device_key": "0xea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c",
+      "auth_ref": "0xc654c8aface3000b08f3f2809322ba19d927a493a0d803e471f9f1b24bed4cf1",
+      "seq": 1795000020008000,
+      "anchor": 4321,
+      "claimed_time": 1795000020008,
+      "refs": ["welcome"],
+      "body": "{\"c\":\"EAEAAAKSeyJiaW5zIjpbNDhdLCJvcHMiOlt7Im9wIjoicHV0Iiwicm93Ijp7ImFkZGVkX2J5X2RldmljZV9rZXkiOiIweDBlMGUwZTBlMGUwZTBlMGUwZTBlMGUwZTBlMGUwZTBlMGUwZTBlMGUwZTBlMGUwZTBlMGUwZTBlMGUwZTBlMGUiLCJhZGRlZF9ieV9wcm9maWxlX2lkIjoicGEiLCJjcmVhdGVkX2F0IjoxNzk1MDAwMDAwMDIxLCJkYXRhIjp7IiRiIjowfSwiZXBvY2giOjEsImdyb3VwX2hhbmRsZSI6IjB4MDEwMTAxMDEwMTAxMDEwMTAxMDEwMTAxMDEwMTAxMDEwMTAxMDEwMTAxMDEwMTAxMDEwMTAxMDEwMTAxMDEwMSIsImlkIjoiMHhhNWE1YTVhNWE1YTVhNWE1YTVhNWE1YTVhNWE1YTVhNSIsInJhdGNoZXRfdHJlZSI6bnVsbH0sInRhYmxlIjoiZTJlZV93ZWxjb21lcyJ9LHsib3AiOiJwdXQiLCJyb3ciOnsiY3JlYXRlZF9hdCI6MTc5NTAwMDAwMDAyMSwiZGV2aWNlX2tleSI6IjB4MGYwZjBmMGYwZjBmMGYwZjBmMGYwZjBmMGYwZjBmMGYwZjBmMGYwZjBmMGYwZjBmMGYwZjBmMGYwZjBmMGYwZiIsInByb2ZpbGVfaWQiOiJwYiIsIndlbGNvbWVfaWQiOiIweGE1YTVhNWE1YTVhNWE1YTVhNWE1YTVhNWE1YTVhNWE1In0sInRhYmxlIjoiZTJlZV93ZWxjb21lX2RlbGl2ZXJpZXMifV0sInBvcyI6MSwicHJldiI6bnVsbCwidHlwZSI6IndlbGNvbWUiLCJ2IjoxfaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpaWlpQ\",\"v\":1}",
+      "body_hash": "0xbd03c8e0776c23515471a55585c58ed7035a47c2b354feed5efdf66a16c339c1",
+      "body_size": 964,
+      "id": "0xce3abc0ffc12543db77dfac5233b813240cf4ebb17f8edef7fbf0e605d488ec7",
+      "signature": "0x39bccf7df1aaa8b7479e2b10bed87e99d086a64336a7f41c56579a5475d13d7e8683d9e4db40956c8a054b871f1d9bb40a90f24a91162e7a4d1cae0965ab3b0f"
+    },
+    "grant": {
+      "id": "0xc654c8aface3000b08f3f2809322ba19d927a493a0d803e471f9f1b24bed4cf1",
+      "message": "test grant",
+      "wallet_signature": "0x1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+      "chain_id": 1,
+      "wallet": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "device_key": "0xea4a6c63e29c520abef5507b132ec5f9954776aebebe7b92421eea691446d22c",
+      "scopes": ["post"],
+      "domain": "6529 Network P2P",
+      "expires_at": 4102444800000,
+      "revoked_at": null
+    }
+  },
   "items": [
     {
       "rseq": 1001,

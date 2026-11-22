@@ -215,6 +215,28 @@ describe("E2eeRelayReader", () => {
     ]);
   });
 
+  it("skips a record a DEL names even when a relay still serves it", async () => {
+    const device = MORE_VECTORS.device_with_del;
+    const head = await streamHead(`dv/${device}`);
+    const served = [...ALL_ITEMS, MORE_VECTORS.deleted_but_served];
+    const welcomes = await reader(fakeRelay(served)).welcomes(device, head);
+    expect(welcomes.map((welcome) => welcome.id)).toEqual([
+      MORE_VECTORS.welcomes.pending,
+    ]);
+    // Its DEL accounts for its own position, so a withheld record (the
+    // pending Welcome's) cannot hide behind it.
+    const pending = served.find(
+      (item) => item.event.wave === `dv/${device}` && item.event.kind === 10
+    )!;
+    expect(pending.rseq).not.toBe(MORE_VECTORS.deleted_but_served.rseq);
+    await expect(
+      reader(fakeRelay(served.filter((item) => item !== pending))).welcomes(
+        device,
+        head
+      )
+    ).rejects.toThrow("hash chain");
+  });
+
   it("refuses a gap no DEL names", async () => {
     const device = MORE_VECTORS.device_with_del;
     const head = await streamHead(`dv/${device}`);

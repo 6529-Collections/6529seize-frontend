@@ -32,6 +32,8 @@ const WELCOME_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
 
 /** One verified record of a stream, decoded. */
 interface StreamRecord {
+  /** The event id, lowercase: what an orderer's DEL names. */
+  readonly id: string;
   readonly pos: number;
   readonly prev: string | null;
   readonly hash: string;
@@ -43,12 +45,14 @@ interface StreamState {
   readonly records: StreamRecord[];
   /** Event ids the orderer's DELs name: records the relays no longer serve. */
   readonly deleted: Set<string>;
-  /** Positions passed over so far: never more than `deleted` names. */
+  /** Event ids of the records accepted into `records`. */
+  readonly accepted: Set<string>;
+  /** Positions passed over so far: never more than the DELs account for. */
   missing: number;
 }
 
 /** The head of a stream as 6529.io holds it: its newest record. */
-export interface RelayStreamHead {
+interface RelayStreamHead {
   readonly pos: number;
   readonly hash: string;
 }
@@ -190,6 +194,7 @@ export class E2eeRelayReader {
     if (!bytes) throw new RelayReadError("A record has no content");
     const content = decodeRecordContent(bytes);
     return {
+      id: item.event.id.toLowerCase(),
       pos: content.pos,
       prev: content.prev,
       hash: await sha256Hex(bytes),
@@ -207,6 +212,7 @@ export class E2eeRelayReader {
       after: 0,
       records: [],
       deleted: new Set<string>(),
+      accepted: new Set<string>(),
       missing: 0,
     };
     const connection = await this.connect();
@@ -236,6 +242,9 @@ export class E2eeRelayReader {
   }
 
   private accept(state: StreamState, record: StreamRecord): void {
+    // A record an orderer's DEL names is not applied, even if a relay still
+    // serves it: its position is one of the gaps the DEL accounts for.
+    if (state.deleted.has(record.id)) return;
     const last = state.records[state.records.length - 1];
     if (last && record.pos <= last.pos) {
       if (
@@ -252,13 +261,24 @@ export class E2eeRelayReader {
       if (record.prev !== (last?.hash ?? null)) {
         throw new RelayReadError("The stream's hash chain is broken");
       }
-    } else if (gap < 0 || state.missing + gap > state.deleted.size) {
-      // Only the orderer's DELs may take positions out of a stream.
+    } else if (gap < 0 || state.missing + gap > this.allowedGaps(state)) {
+      // Only the orderer's DELs may take positions out of a stream: one
+      // each, and none for a record accepted before its DEL arrived.
       throw new RelayReadError("The stream's hash chain is broken");
     } else {
       state.missing += gap;
     }
     state.records.push(record);
+    state.accepted.add(record.id);
+  }
+
+  /** The positions the DELs read so far may account for. */
+  private allowedGaps(state: StreamState): number {
+    let allowed = 0;
+    for (const id of Array.from(state.deleted)) {
+      if (!state.accepted.has(id)) allowed++;
+    }
+    return allowed;
   }
 
   /**

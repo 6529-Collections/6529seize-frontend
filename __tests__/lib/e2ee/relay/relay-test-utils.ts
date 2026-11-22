@@ -43,6 +43,8 @@ export const MORE_VECTORS = more as unknown as {
     readonly pending: string;
     readonly of_revoked: string;
   };
+  /** The acked Welcome's record as the relay served it before its DEL. */
+  readonly deleted_but_served: RelayItem;
   readonly items: RelayItem[];
 };
 
