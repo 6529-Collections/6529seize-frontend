@@ -62,6 +62,7 @@ const SYSTEM_OF: Readonly<Record<AiInstallerKind, AiHeroSystem["key"]>> = {
   "linux-x64": "linux",
   "linux-x64-cuda": "linux",
   "linux-arm64": "linux",
+  "linux-arm64-cuda": "linux",
 };
 
 const QUIET_LINK =

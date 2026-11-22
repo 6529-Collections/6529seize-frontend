@@ -183,6 +183,57 @@ describe("groupAiReleaseFiles", () => {
       ["checks", ["SHA256SUMS", "SHA256SUMS.sig", "manifest.json"]],
     ]);
   });
+
+  it("places the CUDA packages for 64-bit ARM after the ARM64 ones", () => {
+    const entry = aiFeedEntry("0.1.0-rc.4");
+    const armCuda = (name: string, digit: string) => ({
+      name,
+      system: "linux-arm64-cuda",
+      sha256: digit.repeat(64),
+      size: 1_000_000_000,
+      signed: null,
+    });
+    const [release] = parseAiReleaseFeed({
+      format: FORMAT,
+      releases: [
+        {
+          ...entry,
+          // Listed first, so the order comes from the system, not the feed.
+          files: [
+            armCuda("6529-ai-0.1.0-rc.4-linux-arm64-cuda.tar.gz", "c"),
+            armCuda("6529-ai-cuda_0.1.0-rc.4_arm64.deb", "d"),
+            ...entry.files,
+          ],
+        },
+      ],
+    })!;
+    const { installers, groups } = groupAiReleaseFiles(release!);
+
+    expect(release!.files[0]?.system).toBe("linux-arm64-cuda");
+    expect(
+      installers.map((installer) => [installer.kind, installer.file.name])
+    ).toEqual([
+      ["macos", "6529-ai-0.1.0-rc.4-macos-arm64.dmg"],
+      ["windows", "6529-ai-0.1.0-rc.4-windows-x64-setup.exe"],
+      ["linux-x64", "6529-ai_0.1.0-rc.4_amd64.deb"],
+      ["linux-x64-cuda", "6529-ai-cuda_0.1.0-rc.4_amd64.deb"],
+      ["linux-arm64", "6529-ai_0.1.0-rc.4_arm64.deb"],
+      ["linux-arm64-cuda", "6529-ai-cuda_0.1.0-rc.4_arm64.deb"],
+    ]);
+    const linux = groups.find((group) => group.family === "linux");
+    expect(
+      linux?.entries.map((entry) => [entry.file.name, entry.label])
+    ).toEqual([
+      ["6529-ai_0.1.0-rc.4_amd64.deb", "Debian package"],
+      ["6529-ai-cuda_0.1.0-rc.4_amd64.deb", "Debian package"],
+      ["6529-ai_0.1.0-rc.4_arm64.deb", "Debian package"],
+      ["6529-ai-cuda_0.1.0-rc.4_arm64.deb", "Debian package"],
+      ["6529-ai-0.1.0-rc.4-linux-x86_64-cpu.tar.gz", "Archive"],
+      ["6529-ai-0.1.0-rc.4-linux-x86_64-cuda.tar.gz", "Archive"],
+      ["6529-ai-0.1.0-rc.4-linux-arm64-cpu.tar.gz", "Archive"],
+      ["6529-ai-0.1.0-rc.4-linux-arm64-cuda.tar.gz", "Archive"],
+    ]);
+  });
 });
 
 describe("describeCodeSignature", () => {

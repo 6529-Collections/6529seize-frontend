@@ -5,6 +5,11 @@ import { DelegationSubmitGroups } from "@/components/delegation/DelegationFormPa
 import { DELEGATION_CONTRACT } from "@/constants/constants";
 
 import { useWaitForTransactionReceipt, useWriteContract } from "wagmi";
+import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: jest.fn(() => false),
+}));
 
 jest.mock("wagmi", () => ({
   useWriteContract: jest.fn(),
@@ -291,5 +296,33 @@ describe("DelegationSubmitGroups", () => {
         title: "Register Delegation",
       })
     );
+  });
+
+  it("offers the website instead of submitting with 6529 Desktop browser forwarding", () => {
+    jest.mocked(useIsDesktopBrowserWallet).mockReturnValue(true);
+    render(
+      <DelegationSubmitGroups
+        title="T"
+        writeParams={
+          {
+            functionName: "registerDelegationAddress",
+          } as React.ComponentProps<
+            typeof DelegationSubmitGroups
+          >["writeParams"]
+        }
+        showCancel={true}
+        gasError={undefined}
+        validate={() => []}
+        onHide={jest.fn()}
+        onSetToast={jest.fn()}
+      />
+    );
+    expect(
+      screen.queryByRole("button", { name: "Submit" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Continue in your browser" })
+    ).toBeInTheDocument();
+    expect(mockWriteContract).not.toHaveBeenCalled();
   });
 });

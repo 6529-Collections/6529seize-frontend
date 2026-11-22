@@ -153,4 +153,53 @@ describe("UserPageHeaderSubscriptionStatus", () => {
       "/sesamenoodles/subscriptions#profile-subscriptions-top-up"
     );
   });
+
+  it("shows one funded drop as running low and the forecast end as a lower bound", () => {
+    const profile = {
+      consolidation_key: "profile-key",
+      normalised_handle: "sesamenoodles",
+    } as ApiIdentity;
+    useSubscriptionCoverageMock.mockReturnValue({
+      data: {
+        status: ApiSubscriptionCoverageStatus.ActionRequired,
+        mode: ApiSubscriptionCoverageMode.Manual,
+        balance_eth: "0.06529",
+        fully_funded_drops: 1,
+        funded_through: {
+          token_id: 575,
+          mint_at: new Date("2026-11-16T15:40:00Z"),
+        },
+        next_unfunded: { token_id: 576 },
+      },
+      isLoading: false,
+    } as ReturnType<typeof useSubscriptionCoverage>);
+    const { unmount } = render(
+      <UserPageHeaderSubscriptionStatus profile={profile} />
+    );
+    expect(
+      screen.getByText("Running low · through The Memes #575, Nov 16, 2026")
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Action required/)).not.toBeInTheDocument();
+    unmount();
+
+    useSubscriptionCoverageMock.mockReturnValue({
+      data: {
+        status: ApiSubscriptionCoverageStatus.Covered,
+        mode: ApiSubscriptionCoverageMode.Automatic,
+        balance_eth: "2",
+        fully_funded_drops: 24,
+        funded_through: {
+          token_id: 598,
+          mint_at: new Date("2027-01-01T15:40:00Z"),
+        },
+        next_unfunded: null,
+        forecast: { forecast_truncated: true, horizon_end_token_id: 598 },
+      },
+      isLoading: false,
+    } as ReturnType<typeof useSubscriptionCoverage>);
+    render(<UserPageHeaderSubscriptionStatus profile={profile} />);
+    expect(
+      screen.getByText("Covered · at least through The Memes #598, Jan 1, 2027")
+    ).toBeInTheDocument();
+  });
 });

@@ -5,6 +5,7 @@ import {
   createMemoryBackupStateStore,
   E2EE_BACKUP_DB_NAME,
   type BackupLocalState,
+  type getDefaultBackupStateStore,
 } from "@/lib/e2ee/backup/state";
 import {
   removeAllE2eeLocalData,
@@ -74,6 +75,66 @@ describe("removing encrypted messages from this browser", () => {
 describe("removing a revoked device's data", () => {
   const storedDevice = (deviceKey: string) =>
     ({ profileId: "p1", deviceKey }) as unknown as StoredDevice;
+  const backupOf = (deviceKey: string) =>
+    ({ profileId: "p1", deviceKey }) as BackupLocalState;
+
+  it("removes the backup state on a retry after the device was already cleared", async () => {
+    // The first attempt cleared the device, then failed on the backup state.
+    const storage = createMemoryE2eeStorage();
+    const backupState = createMemoryBackupStateStore();
+    await backupState.put(backupOf("0xaa"));
+    await expect(
+      removeE2eeProfileLocalData("p1", {
+        storage,
+        backupState,
+        locks: createFakeLocks(),
+        onlyDeviceKey: "0xAA",
+      })
+    ).resolves.toBe(true);
+    expect(await backupState.get("p1")).toBeNull();
+  });
+
+  it("keeps a replacement device's backup state", async () => {
+    const storage = createMemoryE2eeStorage();
+    const backupState = createMemoryBackupStateStore();
+    await backupState.put(backupOf("0xbb"));
+    await expect(
+      removeE2eeProfileLocalData("p1", {
+        storage,
+        backupState,
+        locks: createFakeLocks(),
+        onlyDeviceKey: "0xaa",
+      })
+    ).resolves.toBe(false);
+    expect((await backupState.get("p1"))?.deviceKey).toBe("0xbb");
+  });
+
+  it("checks the backup state's device in the same IndexedDB write as its delete", async () => {
+    const fake = createFakeIndexedDb();
+    const uninstall = fake.install();
+    try {
+      let store: ReturnType<typeof getDefaultBackupStateStore> | null = null;
+      jest.isolateModules(() => {
+        store = (
+          jest.requireActual("@/lib/e2ee/backup/state") as {
+            getDefaultBackupStateStore: typeof getDefaultBackupStateStore;
+          }
+        ).getDefaultBackupStateStore();
+      });
+      const backupState = store!;
+      await backupState.put(backupOf("0xbb"));
+      await expect(backupState.deleteIfDevice("p1", "0xaa")).resolves.toBe(
+        false
+      );
+      expect((await backupState.get("p1"))?.deviceKey).toBe("0xbb");
+      await expect(backupState.deleteIfDevice("p1", "0xBB")).resolves.toBe(
+        true
+      );
+      expect(await backupState.get("p1")).toBeNull();
+    } finally {
+      uninstall();
+    }
+  });
 
   it("removes it while that device is still the one stored here", async () => {
     const storage = createMemoryE2eeStorage();
@@ -105,7 +166,7 @@ describe("removing a revoked device's data", () => {
         device: storedDevice("0xbb"),
         wasmState: new Uint8Array([3]),
       });
-      await backupState.put({ profileId: "p1" } as BackupLocalState);
+      await backupState.put(backupOf("0xbb"));
       await expect(
         removeE2eeProfileLocalData("p1", {
           storage,

@@ -12,7 +12,7 @@ import { revokeScope, type SecurityDevice } from "./classifyDevices";
 import { CleanUpDialog } from "./CleanUpDialog";
 import { Disclosure } from "./DeviceParts";
 import { DeviceRow, HistoryRow } from "./DeviceRow";
-import { LocalCleanupAlert, useLocalCleanupFailure } from "./LocalCleanupAlert";
+import { LocalDataAlert } from "./LocalDataAlert";
 import { RenameDeviceDialog } from "./RenameDeviceDialog";
 import { RevokeDeviceDialog } from "./RevokeDeviceDialog";
 import { ThisDeviceCard } from "./ThisDeviceCard";
@@ -87,8 +87,6 @@ export default function DevicesSecuritySettings() {
   // when it opens.
   const [cleanUp, setCleanUp] = useState({ open: false, run: 0 });
   const [announcement, setAnnouncement] = useState<string | null>(null);
-  // A revoke whose removal of this browser's data failed: retried alone.
-  const localCleanup = useLocalCleanupFailure(security.retryLocalCleanup);
 
   if (security.proxy) {
     return (
@@ -115,7 +113,7 @@ export default function DevicesSecuritySettings() {
       // Its row doesn't offer Revoke now: the dialog stays open.
       throw new DeviceNotRevocableError();
     }
-    localCleanup.report(await security.revoke(current), current.label);
+    await security.revoke(current);
     setAnnouncement(
       t(locale, "devicesSecurity.revoke.done", { label: current.label })
     );
@@ -124,7 +122,10 @@ export default function DevicesSecuritySettings() {
   return (
     <div className="tw-flex tw-flex-col tw-gap-5">
       <E2eeNewDeviceNotice />
-      <LocalCleanupAlert state={localCleanup} />
+      <LocalDataAlert
+        leftover={security.leftoverLocalData}
+        onRemove={security.removeLeftoverLocalData}
+      />
       <BackupCard />
       <section
         aria-labelledby={devicesTitleId}
@@ -222,7 +223,10 @@ export default function DevicesSecuritySettings() {
                     label={t(locale, "devicesSecurity.earlier.title")}
                     count={security.earlierSetups.length}
                   />
-                  {security.earlierSetups.some(security.canRevoke) ? (
+                  {/* Until this browser's own encrypted device is known it
+                      could look like an earlier setup, so no clean-up yet. */}
+                  {security.ownDeviceKnown &&
+                  security.earlierSetups.some(security.canRevoke) ? (
                     <Button
                       variant="secondary"
                       size="sm"
@@ -296,9 +300,7 @@ export default function DevicesSecuritySettings() {
         devices={security.earlierSetups.filter(security.canRevoke)}
         findActive={(id) => findDevice(security, id)}
         open={cleanUp.open}
-        onRevoke={async (device) => {
-          localCleanup.report(await security.revoke(device), device.label);
-        }}
+        onRevoke={security.revoke}
         onClose={() => setCleanUp(({ run }) => ({ open: false, run }))}
         onDone={(count) =>
           setAnnouncement(
