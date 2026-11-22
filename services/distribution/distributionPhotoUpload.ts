@@ -4,6 +4,10 @@ import type { DistributionPhotoCompleteRequest } from "@/generated/models/Distri
 import type { DistributionPhotoCompleteResponse } from "@/generated/models/DistributionPhotoCompleteResponse";
 import { commonApiPost } from "@/services/api/common-api";
 import {
+  MINT_ADMIN_ROUTES,
+  mintAdminRecordHeaders,
+} from "@/lib/mint-records/mint-admin-records";
+import {
   getApiMediaUploadMimeType,
   multipartUploadCore,
 } from "@/services/uploads/multipartUploadCore";
@@ -130,14 +134,21 @@ export async function uploadDistributionPhotos({
     mediaUrls.push(mediaUrl);
   }
 
+  const completeBody: DistributionPhotoCompleteRequest = {
+    photos: mediaUrls.map((url) => ({ media_url: url })),
+  };
   await commonApiPost<
     DistributionPhotoCompleteRequest,
     DistributionPhotoCompleteResponse
   >({
     endpoint: `distribution_photos/${contract}/${tokenId}/complete`,
-    body: {
-      photos: mediaUrls.map((url) => ({ media_url: url })),
-    },
+    body: completeBody,
+    headers: await mintAdminRecordHeaders({
+      action: "dist.photos",
+      route: MINT_ADMIN_ROUTES.distPhotos,
+      params: { contract, nft_id: tokenId },
+      body: completeBody,
+    }),
   });
 
   return mediaUrls;

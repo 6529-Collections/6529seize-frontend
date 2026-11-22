@@ -17,6 +17,10 @@ import {
   commonApiPostWithoutBodyAndResponse,
 } from "@/services/api/common-api";
 import { multipartUploadCore } from "@/services/uploads/multipartUploadCore";
+import {
+  MINT_ADMIN_ROUTES,
+  mintAdminRecordHeaders,
+} from "@/lib/mint-records/mint-admin-records";
 
 const MINTING_CLAIMS_BASE = `minting-claims/${encodeURIComponent(MEMES_CONTRACT)}`;
 const MINTING_CLAIMS_BASE_CLAIMS = `${MINTING_CLAIMS_BASE}/claims`;
@@ -112,6 +116,12 @@ export async function upsertMemesMintingClaimAction(
   >({
     endpoint: `minting-claims/actions/${encodeURIComponent(MEMES_CONTRACT)}/${claimId}`,
     body,
+    headers: await mintAdminRecordHeaders({
+      action: "claim.action",
+      route: MINT_ADMIN_ROUTES.claimAction,
+      params: { contract: MEMES_CONTRACT, claim_id: String(claimId) },
+      body,
+    }),
   });
 }
 
@@ -240,12 +250,23 @@ export async function patchClaim(
   return commonApiPatch<MintingClaimUpdateRequest, MintingClaim>({
     endpoint: `${MINTING_CLAIMS_BASE_CLAIMS}/${claimId}`,
     body,
+    headers: await mintAdminRecordHeaders({
+      action: "claim.edit",
+      route: MINT_ADMIN_ROUTES.claimEdit,
+      params: { contract: MEMES_CONTRACT, claim_id: String(claimId) },
+      body,
+    }),
   });
 }
 
 export async function postArweaveUpload(claimId: number): Promise<void> {
   return commonApiPostWithoutBodyAndResponse({
     endpoint: `${MINTING_CLAIMS_BASE_CLAIMS}/${claimId}/arweave-upload`,
+    headers: await mintAdminRecordHeaders({
+      action: "claim.media-request",
+      route: MINT_ADMIN_ROUTES.claimMediaRequest,
+      params: { contract: MEMES_CONTRACT, claim_id: String(claimId) },
+    }),
   });
 }
 

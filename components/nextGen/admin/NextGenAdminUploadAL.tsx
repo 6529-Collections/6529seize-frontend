@@ -21,6 +21,10 @@ import {
 } from "../nextgen_helpers";
 import { printAdminErrors } from "./NextGenAdmin";
 import {
+  isMintSignedWritesEnabled,
+  sha256Hex,
+} from "@/lib/mint-records/mint-admin-records";
+import {
   Button,
   Col,
   Container,
@@ -44,9 +48,12 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   const signMessage = useSignMessage();
   const uuid = useRef(uuidv4()).current;
   const signatureMessageRef = useRef<string | null>(null);
-  const signedPayloadRef = useRef<ReturnType<
-    typeof buildNextgenAllowlistPayload
-  > | null>(null);
+  const signedPayloadRef = useRef<
+    | (ReturnType<typeof buildNextgenAllowlistPayload> & {
+        allowlist_sha256?: string;
+      })
+    | null
+  >(null);
   const signerAddressRef = useRef<string | null>(null);
 
   const globalAdmin = useGlobalAdmin(account.address as string);
@@ -94,7 +101,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     signerAddressRef.current = null;
   }
 
-  function uploadFile() {
+  async function uploadFile() {
     setUploadError(undefined);
     signMessage.reset();
     setUploading(true);
@@ -107,7 +114,16 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
       setUploadError("Error: Connect a wallet before signing");
       return;
     }
-    const payload = buildNextgenAllowlistPayload();
+    // The signed payload names the file by its sha256, so the API logs
+    // exactly the allowlist the admin signed.
+    const allowlistSha256 =
+      isMintSignedWritesEnabled() && allowlistFile instanceof Blob
+        ? await sha256Hex(allowlistFile)
+        : null;
+    const payload = {
+      ...buildNextgenAllowlistPayload(),
+      ...(allowlistSha256 ? { allowlist_sha256: allowlistSha256 } : {}),
+    };
     signedPayloadRef.current = payload;
     signerAddressRef.current = signerAddress;
     const signatureMessage = isStructuredSignaturesEnabled()
@@ -284,7 +300,7 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
                   uploading ||
                   uploadSuccess
                 }
-                onClick={() => uploadFile()}
+                onClick={() => void uploadFile()}
               >
                 Upload
               </Button>
