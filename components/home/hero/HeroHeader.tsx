@@ -7,10 +7,11 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 function HeadlineText({ text }: Readonly<{ text: string }>) {
-  // Keep hyphenated words such as "peer-to-peer" from breaking at a hyphen.
+  // Move hyphenated words such as "peer-to-peer" to the next line whole.
+  // They still wrap at their hyphens when one is wider than the headline.
   return text.split(/(\s+)/u).map<ReactNode>((part, position) =>
     part.includes("-") ? (
-      <span key={`${position}:${part}`} className="tw-whitespace-nowrap">
+      <span key={`${position}:${part}`} className="tw-inline-block">
         {part}
       </span>
     ) : (
