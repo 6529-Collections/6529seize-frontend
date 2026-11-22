@@ -6,7 +6,7 @@ import {
 } from "@/hooks/useDropPriviledges";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
-import { t } from "@/i18n/messages";
+import { t, tRich } from "@/i18n/messages";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import PostingAccessLoadingPlaceholder from "./PostingAccessLoadingPlaceholder";
@@ -63,24 +63,39 @@ function WaveSignInPrompt() {
   );
 }
 
+type ProfileSetupMessageKey =
+  | "waves.chat.profileSetup.chat"
+  | "waves.chat.profileSetup.submission"
+  | "waves.chat.profileSetup.wave";
+
 function getProfileSetupMessage(
   profileSetupHref: string | undefined,
-  suffix: string
+  key: ProfileSetupMessageKey,
+  locale: SupportedLocale
 ): ReactNode {
+  const linkLabel = t(locale, "waves.chat.profileSetup.link");
   if (profileSetupHref === undefined) {
-    return `Create a profile ${suffix}`;
+    return t(locale, key, { link: linkLabel });
   }
 
-  return (
-    <>
+  return tRich(locale, key, {
+    link: (
       <Link
+        key="link"
         href={profileSetupHref}
         className="tw-text-primary-400 tw-no-underline tw-transition tw-duration-200 hover:tw-text-primary-300 hover:tw-no-underline focus:tw-outline-none focus-visible:tw-ring-1 focus-visible:tw-ring-primary-400"
       >
-        Create a profile
-      </Link>{" "}
-      <span className="tw-text-iron-400">{suffix}</span>
-    </>
+        {linkLabel}
+      </Link>
+    ),
+  }).map((part, index) =>
+    typeof part === "string" ? (
+      <span key={index} className="tw-text-iron-400">
+        {part}
+      </span>
+    ) : (
+      part
+    )
   );
 }
 
@@ -93,15 +108,19 @@ function getChatMessage(
     case ChatRestriction.NOT_LOGGED_IN:
       return null;
     case ChatRestriction.NEEDS_PROFILE:
-      return getProfileSetupMessage(profileSetupHref, "to participate in chat");
+      return getProfileSetupMessage(
+        profileSetupHref,
+        "waves.chat.profileSetup.chat",
+        locale
+      );
     case ChatRestriction.PROXY_USER:
       return t(locale, "waves.chat.proxySessionPlaceholder");
     case ChatRestriction.SLOW_MODE:
-      return "Slow mode is active. Please wait before posting again";
+      return t(locale, "waves.chat.restriction.slowMode");
     case ChatRestriction.NO_PERMISSION:
-      return "You don't have permission to chat in this wave";
+      return t(locale, "waves.chat.restriction.noChatPermission");
     case ChatRestriction.DISABLED:
-      return "Chat is currently disabled for this wave";
+      return t(locale, "waves.chat.restriction.chatDisabled");
     default:
       return throwUnhandledRestriction("chat", String(restriction));
   }
@@ -116,17 +135,21 @@ function getSubmissionMessage(
     case SubmissionRestriction.NOT_LOGGED_IN:
       return null;
     case SubmissionRestriction.NEEDS_PROFILE:
-      return getProfileSetupMessage(profileSetupHref, "to submit in this wave");
+      return getProfileSetupMessage(
+        profileSetupHref,
+        "waves.chat.profileSetup.submission",
+        locale
+      );
     case SubmissionRestriction.PROXY_USER:
       return t(locale, "waves.chat.proxySessionPlaceholder");
     case SubmissionRestriction.NO_PERMISSION:
-      return "You don't have permission to submit in this wave";
+      return t(locale, "waves.chat.restriction.noSubmitPermission");
     case SubmissionRestriction.NOT_STARTED:
-      return "Submissions haven't started yet";
+      return t(locale, "waves.chat.restriction.submissionsNotStarted");
     case SubmissionRestriction.ENDED:
-      return "Submission period has ended";
+      return t(locale, "waves.chat.restriction.submissionsEnded");
     case SubmissionRestriction.MAX_DROPS_REACHED:
-      return "You have reached the maximum number of drops allowed";
+      return t(locale, "waves.chat.restriction.maxDropsReached");
     default:
       return throwUnhandledRestriction("submission", String(restriction));
   }
@@ -238,7 +261,8 @@ export default function DropPlaceholder({
       ) {
         return getProfileSetupMessage(
           profileSetupHref,
-          "to participate in this wave"
+          "waves.chat.profileSetup.wave",
+          locale
         );
       }
 
@@ -249,10 +273,10 @@ export default function DropPlaceholder({
         return t(locale, "waves.chat.proxySessionPlaceholder");
       }
 
-      return "You cannot participate in this wave at the moment";
+      return t(locale, "waves.chat.restriction.cannotParticipate");
     }
 
-    return "Action not available";
+    return t(locale, "waves.chat.restriction.unavailable");
   };
 
   return (

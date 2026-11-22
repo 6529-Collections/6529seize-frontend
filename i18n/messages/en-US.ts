@@ -2388,6 +2388,24 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
     "Only chat members can start new drops here. You can reply to any drop.",
   proxySessionPlaceholder:
     "You're signed in as a proxy for another profile, so you can't post here. To post as yourself, switch back to your own profile, or sign out and connect again.",
+  "restriction.slowMode":
+    "Slow mode is active. Please wait before posting again",
+  "restriction.noChatPermission":
+    "You don't have permission to chat in this wave",
+  "restriction.chatDisabled": "Chat is currently disabled for this wave",
+  "restriction.noSubmitPermission":
+    "You don't have permission to submit in this wave",
+  "restriction.submissionsNotStarted": "Submissions haven't started yet",
+  "restriction.submissionsEnded": "Submission period has ended",
+  "restriction.maxDropsReached":
+    "You have reached the maximum number of drops allowed",
+  "restriction.cannotParticipate":
+    "You cannot participate in this wave at the moment",
+  "restriction.unavailable": "Action not available",
+  "profileSetup.link": "Create a profile",
+  "profileSetup.chat": "{link} to participate in chat",
+  "profileSetup.submission": "{link} to submit in this wave",
+  "profileSetup.wave": "{link} to participate in this wave",
   "replyThread.showOne": "Show 1 reply",
   "replyThread.showMany": "Show {count} replies",
   "replyThread.hide": "Hide replies",
