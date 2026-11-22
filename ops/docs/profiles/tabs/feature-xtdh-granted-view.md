@@ -88,7 +88,8 @@ Grant token panel:
 
 Grant actions are shown only when both are true:
 
-- owner mode is enabled,
+- owner mode is enabled (it is off for everyone while xTDH is frozen, from
+  the identity freeze),
 - row status is `Pending` or `Granted`.
 
 Actions:

@@ -63,6 +63,12 @@ Owner-only actions:
 - stop or revoke grants in `Pending` or `Granted` status,
 - use the `Outbound` quick action in the stats header.
 
+From the identity freeze (`NEXT_PUBLIC_IDENTITY_FREEZE_AT`), when identities
+move to the 6529 Network, xTDH is frozen and owner mode is off for everyone:
+none of these actions is shown, and an `xTDH is frozen` notice replaces the
+test-mode banner. During the backend freeze the API refuses grant writes
+as well.
+
 ## User Journey
 
 1. Open `/{user}/xtdh`.

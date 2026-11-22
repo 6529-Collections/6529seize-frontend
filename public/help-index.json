@@ -2400,7 +2400,9 @@
         "total dynamic head",
         "tdh rank ties",
         "tdh tie-break",
-        "same TDH different ranks"
+        "same TDH different ranks",
+        "tdh day",
+        "tdh from the 6529 network"
       ],
       "keywords": [
         "tdh",
@@ -2455,7 +2457,8 @@
         "Memes, Gradients and NextGen collection ranks compare that collection's boosted TDH, unboosted TDH and NFT balance, then total NFT balance, highest first. Owners of an individual Meme card compare that card's TDH, then total boosted TDH, highest first.",
         "A complete tie uses the lowercase wallet address in ascending order, or the consolidation key made from lowercase wallet addresses sorted in ascending order and joined with hyphens. Backend and native 6529 Desktop use the same ranking rules; tie-breaks change positions without changing holdings, TDH scores or boosts.",
         "Individual Gradient and NextGen token rankings compare token TDH highest first, then numeric token ID lowest first.",
-        "A collection rank of -1 means there is no positive boosted TDH for that collection. Empty singleton wallets are omitted from TDH rankings; wallets with eligible NFTs or membership in a multi-wallet consolidation remain included even when TDH is zero."
+        "A collection rank of -1 means there is no positive boosted TDH for that collection. Empty singleton wallets are omitted from TDH rankings; wallets with eligible NFTs or membership in a multi-wallet consolidation remain included even when TDH is zero.",
+        "Once 6529.io reads TDH from the 6529 Network, the Network Nerd leaderboard shows a TDH day stat such as 25 Nov 2026, from the 6529 Network. Validators agreed on that day's TDH on the 6529 Network, from holdings at the last Ethereum block before that day's midnight UTC. Days 6529.io computed itself show no TDH day stat."
       ],
       "canonical_path": "/network/tdh",
       "related_paths": [
@@ -2468,7 +2471,8 @@
       "tags": ["network", "tdh", "glossary"],
       "source_refs": [
         "ops/docs/network/feature-tdh-boost-rules.md",
-        "ops/docs/network/feature-network-definitions.md"
+        "ops/docs/network/feature-network-definitions.md",
+        "ops/docs/network/feature-network-nerd-leaderboard.md"
       ]
     },
     {
@@ -2920,7 +2924,10 @@
         "what is xtdh",
         "what is x tdh",
         "xtdh grants",
-        "xTDH grants"
+        "xTDH grants",
+        "xtdh frozen",
+        "xtdh is frozen",
+        "can't create grant"
       ],
       "keywords": [
         "xtdh",
@@ -2938,7 +2945,9 @@
         "tokens",
         "collections",
         "network",
-        "profile"
+        "profile",
+        "frozen",
+        "freeze"
       ],
       "facts": [
         "xTDH is an extension of TDH that lets TDH-like network participation flow beyond core 6529 holders to other NFT holders and communities.",
@@ -2959,14 +2968,17 @@
         "xTDH is not simply TDH for external NFTs; it is a grant and allocation layer where TDH producers create xTDH, can grant future production outward, external token owners can receive it, and ungranted or ineligible flow remains with the grantor.",
         "No produced xTDH is intended to disappear; it is allocated to someone.",
         "For live network-wide xTDH allocation data, use the xTDH Allocations Dashboard at /xtdh.",
-        "Profile xTDH information is available under /{user}/xtdh when visible."
+        "Profile xTDH information is available under /{user}/xtdh when visible.",
+        "When identities move to the 6529 Network, xTDH is frozen: from the identity freeze it stops changing, and everyone keeps the xTDH they had then. The xTDH pages then say xTDH is frozen and when it stopped changing.",
+        "While xTDH is frozen, creating a grant and changing one (Stop Grant, revoking) are not available on the profile's xTDH tab. New grants and changes to grants wait for one-time grants on the 6529 Network."
       ],
       "canonical_path": "/network/xtdh",
       "related_paths": ["/xtdh", "/{user}/xtdh", "/network"],
       "tags": ["network", "xtdh", "glossary"],
       "source_refs": [
         "ops/docs/network/feature-xtdh-formulas.md",
-        "ops/docs/profiles/tabs/feature-xtdh-tab.md"
+        "ops/docs/profiles/tabs/feature-xtdh-tab.md",
+        "ops/docs/network/feature-xtdh-network-overview.md"
       ]
     },
     {
