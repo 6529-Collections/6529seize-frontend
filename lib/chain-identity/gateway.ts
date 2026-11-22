@@ -320,6 +320,23 @@ export const chainGateway = {
       { signal, nullOn404: true, query: { at: "head" } }
     ),
 
+  /** The import's state: `import.completed` once every record is written. */
+  getMembership: (signal?: AbortSignal) =>
+    request<
+      { readonly import?: { readonly completed?: boolean } | null } | undefined
+    >("GET", "/v1/membership", { signal }),
+
+  /** The wallet's identity at the finalized height, with the read stamp. */
+  getIdentityByWalletFinalized: (wallet: Hex, signal?: AbortSignal) =>
+    request<{
+      readonly read?: { readonly height?: number };
+      readonly data?: ChainIdentity;
+    } | null>("GET", `/v1/identities/by-wallet/${lower(wallet)}`, {
+      signal,
+      nullOn404: true,
+      bare: true,
+    }),
+
   getIdentityByHandle: (handle: string, signal?: AbortSignal) =>
     request<ChainIdentity | null>(
       "GET",

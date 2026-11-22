@@ -40,9 +40,11 @@ interface CurrentProfile {
 /**
  * The identity's current document. A failed fetch, or bytes whose hash
  * isn't the CID, throws: nothing is saved over a document this browser
- * couldn't get. A document the store doesn't have (404), or bytes of the
- * CID that aren't a ProfileDoc.v1, read as unreadable; the page warns, and
- * saving replaces it.
+ * couldn't get. A document the store doesn't have (404) reads as unreadable
+ * only once the import has completed: imported documents go into the store
+ * around the switch-on, and replacing one before it arrives would lose
+ * fields only the import sets (cms.archive). Bytes of the CID that aren't a
+ * ProfileDoc.v1 read as unreadable. The page warns, and saving replaces it.
  */
 export async function readCurrentProfile(
   identity: ChainIdentity,
@@ -56,10 +58,18 @@ export async function readCurrentProfile(
   try {
     bytes = await chainGateway.getDoc(cid, signal);
   } catch (error) {
-    if (error instanceof ChainGatewayError && error.status === 404) {
-      return { doc: null, unreadable: true };
+    if (!(error instanceof ChainGatewayError) || error.status !== 404) {
+      throw error;
     }
-    throw error;
+    const membership = await chainGateway.getMembership(signal);
+    if (membership?.import?.completed !== true) {
+      throw new ChainGatewayError(
+        503,
+        "import_running",
+        "The 6529 Network is still importing identities. Try again in a few minutes."
+      );
+    }
+    return { doc: null, unreadable: true };
   }
   if (!matchesCid(bytes, cid)) {
     throw new ChainGatewayError(

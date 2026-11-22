@@ -45,6 +45,7 @@ jest.mock("@/lib/chain-identity/gateway", () => ({
   chainGateway: {
     getStatus: jest.fn(),
     getDoc: jest.fn(),
+    getMembership: jest.fn(),
     uploadDoc: jest.fn(),
   },
 }));
@@ -178,10 +179,29 @@ describe("saving the profile", () => {
     });
   });
 
+  it("keeps a missing document until the import has completed", async () => {
+    gateway["getDoc"]!.mockRejectedValue(
+      new ChainGatewayError(404, "not_found", "missing")
+    );
+    gateway["getMembership"]!.mockResolvedValue({
+      import: { completed: false },
+    });
+    await expect(readCurrentProfile(identity(1))).rejects.toMatchObject({
+      code: "import_running",
+    });
+    gateway["getMembership"]!.mockResolvedValue({ import: null });
+    await expect(readCurrentProfile(identity(1))).rejects.toMatchObject({
+      code: "import_running",
+    });
+  });
+
   it("lets a missing or undecodable document be replaced", async () => {
     gateway["getDoc"]!.mockRejectedValue(
       new ChainGatewayError(404, "not_found", "missing")
     );
+    gateway["getMembership"]!.mockResolvedValue({
+      import: { completed: true },
+    });
     await expect(readCurrentProfile(identity(3))).resolves.toEqual({
       doc: null,
       unreadable: true,
