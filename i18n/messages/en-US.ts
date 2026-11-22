@@ -610,6 +610,14 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "traits.invalidBoolean": "Choose Yes or No.",
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
+  "media.gifPreview.guide":
+    "GIFs get an animated preview in Waves and the leaderboard when each frame has at most {pixels} pixels (for example {exampleWidth} × {exampleHeight}), at most {frames} frames, and at most {totalPixels} pixels across all frames.",
+  "media.gifPreview.framePixels":
+    "This GIF is {width} × {height} ({pixels} pixels per frame). Animated previews need at most {limit} pixels per frame, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce its dimensions to keep the preview animated.",
+  "media.gifPreview.frames":
+    "This GIF has {frames} frames. Animated previews need at most {limit} frames, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce the number of frames to keep the preview animated.",
+  "media.gifPreview.totalPixels":
+    "This GIF has {frames} frames of {width} × {height}, {pixels} pixels in total. Animated previews need at most {limit} pixels across all frames, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce its dimensions or frames to keep the preview animated.",
   "identity.connectPrompt":
     "Connect a wallet to confirm the profile submitting this artwork.",
   "identity.unknownProfile": "Unknown profile",
