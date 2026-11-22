@@ -107,6 +107,7 @@ function run(
     env: {
       PATH: [...pathEntries, ...systemPathEntries()].join(path.delimiter),
       HOME: sandbox,
+      NODE_ENV: "test",
       SEIZE_6529_COMMAND: "1",
       ...env,
     },
