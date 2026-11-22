@@ -145,6 +145,12 @@ describe("production exact-artifact deployment contract", () => {
     expect(build.env.NEXT_PUBLIC_E2EE_DM_ENABLED).toBe("true");
   });
 
+  it("bakes the identity freeze instant into production builds", () => {
+    expect(build.env.NEXT_PUBLIC_IDENTITY_FREEZE_AT).toBe(
+      "2026-11-24T00:00:00Z"
+    );
+  });
+
   it("leaves gap-only chat sync off in production builds", () => {
     // Production flips need the owner (WAVES-PLAN 0.7/0.8, C11).
     expect(build.env).not.toHaveProperty("NEXT_PUBLIC_FEATURE_CHAT_GAP_SYNC");

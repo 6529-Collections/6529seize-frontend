@@ -2,6 +2,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { amIUser } from "@/helpers/Helpers";
+import { isIdentityEditingPaused } from "@/lib/identity-move/schedule";
 
 export type RepDirection = "received" | "given";
 
@@ -33,7 +34,7 @@ export function getCanEditRep({
   readonly targetProfile: ApiIdentity;
   readonly activeProfileProxy: ApiProfileProxy | null;
 }) {
-  if (!myProfile?.handle) {
+  if (!myProfile?.handle || isIdentityEditingPaused()) {
     return false;
   }
 
@@ -64,7 +65,7 @@ export function getCanEditNic({
   readonly activeProfileProxy: ApiProfileProxy | null;
   readonly address: string | undefined;
 }): boolean {
-  if (!connectedProfile?.handle) return false;
+  if (!connectedProfile?.handle || isIdentityEditingPaused()) return false;
   if (activeProfileProxy) {
     if (targetProfile.handle === activeProfileProxy.created_by.handle)
       return false;

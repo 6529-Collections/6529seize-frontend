@@ -5,6 +5,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import ButtonLink from "@/components/utils/button/ButtonLink";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { t } from "@/i18n/messages";
 
 interface UserSetUpProfileCtaProps {
@@ -38,6 +39,7 @@ export default function UserSetUpProfileCta({
   const { connectedProfile, fetchingProfile } = useContext(AuthContext);
   const { address, hasValidWalletAuth } = useSeizeConnectContext();
   const locale = useBrowserLocale();
+  const identityEditingPaused = useIdentityEditingPaused();
 
   const show = shouldShowUserSetUpProfileCta({
     address,
@@ -46,7 +48,7 @@ export default function UserSetUpProfileCta({
     hasValidWalletAuth,
   });
 
-  if (!show || !address) return null;
+  if (!show || !address || identityEditingPaused) return null;
 
   const wrapperClassName =
     className === undefined

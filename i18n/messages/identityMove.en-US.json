@@ -1,0 +1,8 @@
+{
+  "identityMove.noticeLabel": "Move to the 6529 Network",
+  "identityMove.day": "{weekday} {day} {month}",
+  "identityMove.notice": "Profiles, handles, ratings, consolidations and delegations move to the 6529 Network. From {freezeDay} {freezeTime} UTC you can't change them for about 24 hours. From {switchOnWeekday} you change them on the 6529 Network, through this site.",
+  "identityMove.frozen": "Profiles, handles, ratings, consolidations and delegations are moving to the 6529 Network. You can't change them until {switchOnDay} {switchOnTime} UTC. From then you change them on the 6529 Network, through this site.",
+  "identityMove.moved": "Profiles, handles, ratings, consolidations and delegations moved to the 6529 Network on {switchOnDay}. You can't change them on this site yet.",
+  "identityMove.paused": "Paused for the move to the 6529 Network."
+}

@@ -23,6 +23,9 @@ Coverage includes:
   visual page editing, image uploads, wallet galleries, publishing, and recovery.
 - [Use Your Own Agent with the Website Studio](feature-profile-cms-builder-ai-agent-affordances.md):
   optional file exports, patch review, and owner-controlled publication.
+- [Identities Move to the 6529 Network](feature-identity-move-to-6529-network.md):
+  the notice before the freeze and the profile, rating and proxy edits that
+  pause from it.
 
 ## Flows
 

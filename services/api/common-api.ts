@@ -8,6 +8,7 @@ import {
   getWalletRole,
 } from "../auth/auth.utils";
 import { assertWriteMatchesDisplayedWallet } from "../auth/displayed-wallet-guard";
+import { assertIdentityEditAllowed } from "@/lib/identity-move/editGuard";
 import { prepareSubmissionRequestKey } from "./submission-request-key";
 import { sessionAwareFetch } from "./session-aware-fetch";
 
@@ -388,6 +389,7 @@ const executeApiRequest = async <T>({
   credentials,
   cache,
 }: ExecuteApiRequestParams): Promise<T> => {
+  assertIdentityEditAllowed({ url, method });
   assertWriteMatchesDisplayedWallet({
     url,
     method,
