@@ -31,6 +31,26 @@ export interface RelayItem {
 
 const RecordKind = { RECORD: 9, SEALED: 10, LOG: 11, DEL: 12 } as const;
 
+/** Whether the event is a DEL (kind 12): it removes records, it holds none. */
+export function isDeletion(event: { readonly kind: number }): boolean {
+  return event.kind === RecordKind.DEL;
+}
+
+/**
+ * The event ids an orderer's DEL names (`{"ids": [...]}`); a malformed body
+ * names none.
+ */
+export function deletedIdsOf(event: RelaySignedEvent): string[] {
+  if (event.body === null) return [];
+  const body = JSON.parse(event.body) as Record<string, unknown>;
+  const ids = body["ids"];
+  return Array.isArray(ids)
+    ? ids
+        .filter((id): id is string => typeof id === "string")
+        .map((id) => id.toLowerCase())
+    : [];
+}
+
 /** Where a record's content is: inline, or a payload by hash. */
 interface ContentRef {
   readonly inline: Uint8Array | null;

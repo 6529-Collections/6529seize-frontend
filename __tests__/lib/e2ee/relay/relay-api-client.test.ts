@@ -3,7 +3,7 @@
  */
 import type { E2eeApiClient } from "@/lib/e2ee/api";
 import type { ApiE2eeMe } from "@/lib/e2ee/api-types";
-import { fakeRelay, RELAY_VECTORS } from "./relay-test-utils";
+import { fakeRelay, RELAY_VECTORS, streamHead } from "./relay-test-utils";
 
 const mockReadUsableDeviceGrant = jest.fn();
 jest.mock("@/lib/device-signing/device-key-store", () => ({
@@ -41,9 +41,19 @@ const PRIMARY = {
   grant_proofs: [GRANT],
 };
 
+let inboxHead: { pos: number; hash: string };
+beforeAll(async () => {
+  inboxHead = await streamHead(`dv/${RELAY_VECTORS.device}`);
+});
+
 function baseClient(relay: Record<string, unknown> | undefined) {
   return {
     getMe: jest.fn().mockResolvedValue(me(relay)),
+    getDeviceInboxStatus: jest.fn().mockImplementation(async () => ({
+      has_pending_chats: true,
+      has_queued_welcomes: true,
+      relay_head: inboxHead,
+    })),
     getWelcomes: jest.fn().mockResolvedValue([{ id: "from-rest" }]),
     getLog: jest
       .fn()
@@ -142,6 +152,22 @@ describe("withE2eeRelayReads", () => {
     });
     expect(base.getLog).toHaveBeenCalledTimes(1);
     expect(fallbacks).toEqual(["getWelcomes", "getLog"]);
+  });
+
+  it("falls back to 6529.io when it names no inbox head", async () => {
+    const base = baseClient(PRIMARY);
+    base.getDeviceInboxStatus.mockResolvedValue({ has_pending_chats: true });
+    const fallbacks: string[] = [];
+    const client = withE2eeRelayReads(base, {
+      wallet: WALLET,
+      open: fakeRelay().open,
+      onFallback: (call) => fallbacks.push(call),
+    });
+    await client.getMe();
+    await expect(client.getWelcomes(RELAY_VECTORS.device)).resolves.toEqual([
+      { id: "from-rest" },
+    ]);
+    expect(fallbacks).toEqual(["getWelcomes"]);
   });
 
   it("falls back without a device grant the relays accept", async () => {

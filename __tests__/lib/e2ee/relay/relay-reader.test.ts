@@ -9,7 +9,14 @@ import {
   isOrdererRecord,
   relayAuthDigest,
 } from "@/lib/e2ee/relay/relay-records";
-import { fakeRelay, RELAY_VECTORS, TEST_AUTH } from "./relay-test-utils";
+import {
+  ALL_ITEMS,
+  fakeRelay,
+  MORE_VECTORS,
+  RELAY_VECTORS,
+  streamHead,
+  TEST_AUTH,
+} from "./relay-test-utils";
 
 const T0 = 1_795_000_000_000;
 
@@ -29,7 +36,7 @@ const bytes = (length: number, value: number) =>
 
 describe("relay records written by the backend", () => {
   it("verifies every record against the pinned orderer key", async () => {
-    for (const item of RELAY_VECTORS.items) {
+    for (const item of ALL_ITEMS) {
       await expect(
         isOrdererRecord(item.event, RELAY_VECTORS.orderer_key)
       ).resolves.toBe(true);
@@ -100,7 +107,10 @@ describe("relay records written by the backend", () => {
 
 describe("E2eeRelayReader", () => {
   it("reads a device's pending Welcomes as the REST route returns them", async () => {
-    await expect(reader().welcomes(RELAY_VECTORS.device)).resolves.toEqual([
+    const head = await streamHead(`dv/${RELAY_VECTORS.device}`);
+    await expect(
+      reader().welcomes(RELAY_VECTORS.device, head)
+    ).resolves.toEqual([
       {
         id: `0x${"a2".repeat(16)}`,
         group: RELAY_VECTORS.group,
@@ -165,17 +175,17 @@ describe("E2eeRelayReader", () => {
 
   it("reads the latest upload of each attachment chunk", async () => {
     const relay = reader();
-    await expect(relay.blobChunk(RELAY_VECTORS.blob, 1)).resolves.toBe(
-      bytes(1000, 2)
-    );
-    await expect(relay.blobChunk(RELAY_VECTORS.blob, 0)).resolves.toBe(
-      bytes(70_000, 1)
-    );
+    await expect(
+      relay.blobChunk(RELAY_VECTORS.blob, 1, RELAY_VECTORS.device)
+    ).resolves.toBe(bytes(1000, 2));
+    await expect(
+      relay.blobChunk(RELAY_VECTORS.blob, 0, RELAY_VECTORS.device)
+    ).resolves.toBe(bytes(70_000, 1));
   });
 
   it("refuses a stream with a record that is not the orderer's", async () => {
     const relay = fakeRelay(
-      RELAY_VECTORS.items.map((item, index) =>
+      ALL_ITEMS.map((item, index) =>
         index === 1
           ? {
               ...item,
@@ -195,16 +205,33 @@ describe("E2eeRelayReader", () => {
     ).rejects.toThrow("not the orderer's");
   });
 
-  it("refuses a stream with a gap in its hash chain", async () => {
-    const wave = `cv/${RELAY_VECTORS.group}`;
-    const second = RELAY_VECTORS.items.filter(
-      (item) => item.event.wave === wave
-    )[1]!;
+  it("allows the position an orderer's DEL took out of a stream", async () => {
+    const device = MORE_VECTORS.device_with_del;
+    const head = await streamHead(`dv/${device}`);
+    const welcomes = await reader().welcomes(device, head);
+    // The acked Welcome's record was DEL'd; the pending one is read.
+    expect(welcomes.map((welcome) => welcome.id)).toEqual([
+      MORE_VECTORS.welcomes.pending,
+    ]);
+  });
+
+  it("refuses a gap no DEL names", async () => {
+    const device = MORE_VECTORS.device_with_del;
+    const head = await streamHead(`dv/${device}`);
     const relay = fakeRelay(
-      RELAY_VECTORS.items.filter((item) => item !== second)
+      ALL_ITEMS.filter(
+        (item) =>
+          !(item.event.wave === `dv/${device}` && item.event.kind === 12)
+      )
     );
+    await expect(reader(relay).welcomes(device, head)).rejects.toThrow(
+      "hash chain"
+    );
+    // A record taken out of a group's log, with no DEL: refused too.
+    const wave = `cv/${RELAY_VECTORS.group}`;
+    const second = ALL_ITEMS.filter((item) => item.event.wave === wave)[1]!;
     await expect(
-      reader(relay).log({
+      reader(fakeRelay(ALL_ITEMS.filter((item) => item !== second))).log({
         group: RELAY_VECTORS.group,
         deviceKey: RELAY_VECTORS.device,
         afterSeq: 0,
@@ -214,12 +241,47 @@ describe("E2eeRelayReader", () => {
     ).rejects.toThrow("hash chain");
   });
 
+  it("refuses Welcomes when the relays lack 6529.io's inbox head", async () => {
+    const head = await streamHead(`dv/${RELAY_VECTORS.device}`);
+    await expect(
+      reader().welcomes(RELAY_VECTORS.device, { ...head, pos: head.pos + 1 })
+    ).rejects.toThrow("behind 6529.io for this inbox");
+    await expect(
+      reader().welcomes(RELAY_VECTORS.device, {
+        ...head,
+        hash: `0x${"00".repeat(32)}`,
+      })
+    ).rejects.toThrow("behind 6529.io for this inbox");
+  });
+
+  it("reads nothing for a device that is not active", async () => {
+    const revoked = MORE_VECTORS.revoked_device;
+    await expect(
+      reader().welcomes(revoked, await streamHead(`dv/${revoked}`))
+    ).rejects.toThrow("not active");
+    const unknown = `0x${"99".repeat(32)}`;
+    await expect(
+      reader().blobChunk(RELAY_VECTORS.blob, 0, unknown)
+    ).rejects.toThrow("not active");
+    await expect(
+      reader().log({
+        group: RELAY_VECTORS.group,
+        deviceKey: unknown,
+        afterSeq: 0,
+        limit: 100,
+        lastSeq: 3,
+      })
+    ).rejects.toThrow("not active");
+  });
+
   it("reads a stream onward from its last page", async () => {
     const relay = fakeRelay();
     const cached = reader(relay);
-    await cached.welcomes(RELAY_VECTORS.device);
-    await cached.welcomes(RELAY_VECTORS.device);
+    const head = await streamHead(`dv/${RELAY_VECTORS.device}`);
+    await cached.welcomes(RELAY_VECTORS.device, head);
+    await cached.welcomes(RELAY_VECTORS.device, head);
     expect(relay.requests["HELLO"]).toBe(1);
-    expect(relay.requests["HIST"]).toBe(2);
+    // One page each of the device's record and its inbox, twice.
+    expect(relay.requests["HIST"]).toBe(4);
   });
 });

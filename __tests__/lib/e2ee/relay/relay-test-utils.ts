@@ -3,8 +3,14 @@ import type {
   CrpTransport,
   RelayGrantProof,
 } from "@/lib/e2ee/relay/crp-client";
-import type { RelayItem } from "@/lib/e2ee/relay/relay-records";
+import { decodeRecordContent } from "@/lib/e2ee/relay/record-content";
+import {
+  contentRefOf,
+  type RelayItem,
+  sha256Hex,
+} from "@/lib/e2ee/relay/relay-records";
 import vectors from "./relay-records-v1.json";
+import more from "./relay-records-v1-more.json";
 
 /**
  * Records the backend's orderer wrote (its publisher and mock relay), so
@@ -22,6 +28,45 @@ export const RELAY_VECTORS = vectors as unknown as {
   readonly items: RelayItem[];
   readonly payloads: Record<string, string>;
 };
+
+/**
+ * More records from the same orderer: each device's own record (`dr`), and
+ * the inbox of a device whose first Welcome was acked and then DEL'd (the
+ * relay serves that record no more; it serves the DEL), and the inbox of a
+ * revoked device.
+ */
+export const MORE_VECTORS = more as unknown as {
+  readonly device_with_del: string;
+  readonly revoked_device: string;
+  readonly welcomes: {
+    readonly acked: string;
+    readonly pending: string;
+    readonly of_revoked: string;
+  };
+  readonly items: RelayItem[];
+};
+
+/** Every record the test relay serves. */
+export const ALL_ITEMS: readonly RelayItem[] = [
+  ...RELAY_VECTORS.items,
+  ...MORE_VECTORS.items,
+];
+
+/** A stream's head as 6529.io would name it: its newest record served. */
+export async function streamHead(
+  wave: string,
+  items: readonly RelayItem[] = ALL_ITEMS
+): Promise<{ pos: number; hash: string }> {
+  const records = items.filter(
+    (item) => item.event.wave === wave && contentRefOf(item.event)
+  );
+  const newest = records[records.length - 1]!;
+  const bytes = contentRefOf(newest.event)!.inline!;
+  return {
+    pos: decodeRecordContent(bytes).pos,
+    hash: await sha256Hex(bytes),
+  };
+}
 
 function binaryFrame(header: object, bytes: Uint8Array): Uint8Array {
   const head = new TextEncoder().encode(JSON.stringify(header));
@@ -41,9 +86,7 @@ export interface FakeRelay {
 }
 
 /** A relay serving the vectors over CRP: HELLO, AUTH, HIST, PAYLOAD_GET. */
-export function fakeRelay(
-  items: readonly RelayItem[] = RELAY_VECTORS.items
-): FakeRelay {
+export function fakeRelay(items: readonly RelayItem[] = ALL_ITEMS): FakeRelay {
   const relay: FakeRelay = {
     requests: {},
     items: [...items],

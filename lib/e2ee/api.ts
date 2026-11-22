@@ -40,6 +40,14 @@ import type {
   ApiE2eeWelcome,
 } from "./api-types";
 
+/**
+ * `GET e2ee/devices/{k}/inbox-status`, with the head of the device's inbox
+ * stream on the relays (`relay_head`) while records are on.
+ */
+export type E2eeDeviceInboxStatus = ApiE2eeDeviceInboxStatus & {
+  readonly relay_head?: { readonly pos: number; readonly hash: string };
+};
+
 export { E2eeApiError, asE2eeApiError, e2eeErrorCode } from "./api-errors";
 
 /** Contract 4.2: every endpoint the engine uses. Tests inject a fake. */
@@ -104,7 +112,7 @@ export interface E2eeApiClient {
   getDeviceInboxStatus(
     deviceKey: string,
     signal?: AbortSignal
-  ): Promise<ApiE2eeDeviceInboxStatus>;
+  ): Promise<E2eeDeviceInboxStatus>;
   createBlob(body: ApiE2eeCreateBlobRequest): Promise<ApiE2eeBlob>;
   putBlobChunk(
     blobId: string,

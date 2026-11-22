@@ -2,7 +2,12 @@ import { signEventId } from "@/lib/device-signing/ed25519";
 import { readUsableDeviceGrant } from "@/lib/device-signing/device-key-store";
 import type { E2eeApiClient } from "@/lib/e2ee/api";
 import type { ApiE2eeMe } from "@/lib/e2ee/api-types";
-import type { CrpOpener, RelayAuth, RelayGrantProof } from "./crp-client";
+import {
+  type CrpOpener,
+  type RelayAuth,
+  type RelayGrantProof,
+  RelayReadError,
+} from "./crp-client";
 import { E2eeRelayReader } from "./relay-reader";
 
 /** How long relay settings from `GET e2ee/me` are trusted before a re-read. */
@@ -158,7 +163,14 @@ export function withE2eeRelayReads(
     getWelcomes: (deviceKey, signal) =>
       viaRelay(
         "getWelcomes",
-        (relay) => relay.welcomes(deviceKey),
+        async (relay) => {
+          // 6529.io's head of the inbox, as the log path takes last_seq.
+          const status = await base.getDeviceInboxStatus(deviceKey, signal);
+          if (!status.relay_head) {
+            throw new RelayReadError("6529.io named no inbox head");
+          }
+          return relay.welcomes(deviceKey, status.relay_head);
+        },
         () => base.getWelcomes(deviceKey, signal)
       ),
     getLog: (group, query) =>
@@ -180,7 +192,9 @@ export function withE2eeRelayReads(
     getBlobChunk: (blobId, index, deviceKey, signal) =>
       viaRelay(
         "getBlobChunk",
-        async (relay) => ({ data: await relay.blobChunk(blobId, index) }),
+        async (relay) => ({
+          data: await relay.blobChunk(blobId, index, deviceKey),
+        }),
         () => base.getBlobChunk(blobId, index, deviceKey, signal)
       ),
   };
