@@ -1,7 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import ChainDelegations from "@/components/chain-identity/ChainDelegations";
 import { MEMES_COLLECTION } from "@/components/delegation/delegation-constants";
-import { NEVER_DATE } from "@/constants/constants";
 import { chainGateway } from "@/lib/chain-identity/gateway";
 import { draftOperation } from "@/lib/chain-identity/operation";
 
@@ -99,7 +98,7 @@ it("registers a delegation for the whole identity by default, never expiring", a
       delegate: DELEGATE,
       useCase: 1,
       allTokens: 1,
-      expiry: String(NEVER_DATE),
+      expiry: "0",
     },
   });
   expect(

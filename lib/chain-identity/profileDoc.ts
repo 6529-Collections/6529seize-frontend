@@ -1,4 +1,4 @@
-import { sha256, type Hex } from "viem";
+import { keccak256, sha256, type Hex } from "viem";
 import { decodeCe, encodeCe, hexBytes, toHex } from "@/lib/chain/codec/ce";
 import {
   bytes,
@@ -7,6 +7,7 @@ import {
   string,
   struct,
   u32,
+  u8,
   type ValueOf,
 } from "@/lib/chain/codec/schema";
 
@@ -80,8 +81,68 @@ const randomNonce = (): Hex => {
   return toHex(nonce);
 };
 
-/** The document's bytes and CID. Empty values are left out. */
-export function encodeProfileDoc(
+/**
+ * A later document's signature (P37 4.2, INTERFACES 5.4): CE
+ * `(uint8 keyType, bytes32 keyId, bytes signature)` by a key that can sign
+ * PROFILE_REPLACE for the identity, over the EIP-712 `ProfileDocument`.
+ */
+export interface ProfileDocSignature {
+  readonly keyType: number;
+  readonly keyId: Hex;
+  readonly signature: Hex;
+}
+
+const PROFILE_DOC_SIGNATURE = struct("ProfileDocSignature", [
+  ["keyType", u8],
+  ["keyId", bytes32],
+  ["signature", bytes(1_024)],
+]);
+
+/** The EIP-712 typed data a later document's signature covers. */
+export const profileDocumentTypedData = (
+  networkId: Hex,
+  principal: Hex,
+  version: number,
+  docHash: Hex
+) => ({
+  domain: { name: "6529 Network", version: "1", salt: networkId },
+  types: {
+    ProfileDocument: [
+      { name: "principal", type: "bytes32" },
+      { name: "version", type: "uint32" },
+      { name: "docHash", type: "bytes32" },
+    ],
+  },
+  primaryType: "ProfileDocument" as const,
+  message: { principal, version, docHash },
+});
+
+/** The document as written before its signature, and its docHash. */
+export function prepareProfileDoc(
+  doc: ProfileDoc,
+  nonce: Hex = randomNonce()
+): { readonly unsigned: Uint8Array; readonly docHash: Hex } {
+  const { bytes: whole } = encodeProfileDoc(doc, nonce);
+  // An empty `sig` is its 4-byte zero length; the hash covers what precedes it.
+  const unsigned = whole.slice(0, whole.length - 4);
+  return { unsigned, docHash: keccak256(unsigned) };
+}
+
+/** The signed document's bytes and CID. */
+export function signedProfileDoc(
+  unsigned: Uint8Array,
+  signature: ProfileDocSignature
+): { readonly bytes: Uint8Array; readonly cid: Hex } {
+  const sig = encodeCe(PROFILE_DOC_SIGNATURE, signature);
+  const out = new Uint8Array(unsigned.length + 4 + sig.length);
+  out.set(unsigned, 0);
+  new DataView(out.buffer).setUint32(unsigned.length, sig.length);
+  out.set(sig, unsigned.length + 4);
+  return { bytes: out, cid: profileDocCid(out) };
+}
+
+/** The document's bytes and CID, with an empty signature. Empty values are left out. */
+function encodeProfileDoc(
   doc: ProfileDoc,
   nonce: Hex = randomNonce()
 ): { readonly bytes: Uint8Array; readonly cid: Hex } {

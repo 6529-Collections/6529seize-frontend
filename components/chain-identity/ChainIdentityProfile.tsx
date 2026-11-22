@@ -14,15 +14,22 @@ import "@/i18n/namespaces/chain-identity";
 import { chainGateway, type ChainIdentity } from "@/lib/chain-identity/gateway";
 import { profileReplace, type ChainActor } from "@/lib/chain-identity/identityOps";
 import { draftOperation } from "@/lib/chain-identity/operation";
+import { chainNetworkId } from "@/lib/chain-identity/network";
 import {
   decodeProfileDoc,
-  encodeProfileDoc,
   matchesCid,
+  prepareProfileDoc,
   PROFILE_DOC_KEYS,
+  profileDocumentTypedData,
+  signedProfileDoc,
   type ProfileDoc,
 } from "@/lib/chain-identity/profileDoc";
 import type { StoredSessionKey } from "@/lib/chain-identity/sessionKey";
-import { sessionSigner, walletSigner } from "@/lib/chain-identity/signers";
+import {
+  sessionSigner,
+  signProfileDocument,
+  walletSigner,
+} from "@/lib/chain-identity/signers";
 import ChainActionStatus from "./ChainActionStatus";
 import {
   CHAIN_HINT_CLASS,
@@ -129,12 +136,28 @@ export default function ChainIdentityProfile({
       for (const key of EDITED) {
         fields.set(key, draft[key]);
       }
-      const { bytes, cid } = encodeProfileDoc({
+      // A later document carries the signature of a key that can replace
+      // the profile (P37 4.2): the session key, or the wallet (a first prompt).
+      const version = (previous?.version ?? 0) + 1;
+      const { unsigned, docHash } = prepareProfileDoc({
         principal: identity.principalId,
-        version: (previous?.version ?? 0) + 1,
+        version,
         prev: identity.profile?.docCid ?? "0x",
         fields,
       });
+      const signature = await signProfileDocument(
+        config,
+        sessionKey
+          ? { kind: "session", record: sessionKey }
+          : { kind: "wallet", address: wallet },
+        profileDocumentTypedData(
+          await chainNetworkId(),
+          identity.principalId,
+          version,
+          docHash
+        )
+      );
+      const { bytes, cid } = signedProfileDoc(unsigned, signature);
       await chainGateway.uploadDoc(bytes, cid);
       const actor: ChainActor = sessionKey
         ? {

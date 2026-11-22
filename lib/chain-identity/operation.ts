@@ -165,7 +165,7 @@ const digestMatches = (draft: ChainDraft): boolean => {
 };
 
 /** The network the build expects drafts for, when it names one. */
-const expectedNetworkId = (): string | null => {
+export const expectedNetworkId = (): string | null => {
   const value = publicEnv.NEXT_PUBLIC_CHAIN_NETWORK_ID?.trim().toLowerCase();
   return value === undefined || value === "" ? null : value;
 };

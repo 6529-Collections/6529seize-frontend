@@ -12,7 +12,6 @@ import {
 } from "@/components/delegation/delegation-constants";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import Button from "@/components/utils/button/Button";
-import { NEVER_DATE } from "@/constants/constants";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
@@ -106,7 +105,8 @@ export default function ChainDelegations() {
 
   const principalId = identity.data?.principalId ?? null;
   const useIdentity = scope === "identity" && principalId !== null;
-  const expiry = never ? BigInt(NEVER_DATE) : expiryFromDate(date);
+  // 0 never expires on the 6529 Network.
+  const expiry = never ? 0n : expiryFromDate(date);
   const formOk =
     isAddress(delegate.trim()) &&
     expiry !== null &&

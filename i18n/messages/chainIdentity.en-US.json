@@ -42,7 +42,7 @@
   "chainIdentity.fees.moveAction": "Move to identity",
   "chainIdentity.fees.moveInvalid": "Enter an amount this wallet holds.",
   "chainIdentity.profile.heading": "Profile",
-  "chainIdentity.profile.body": "Saving stores your profile as a document with 6529's gateway and records it on the 6529 Network.",
+  "chainIdentity.profile.body": "Saving stores your profile as a document with 6529's gateway and records it on the 6529 Network. Without chain actions on this browser, your wallet signs twice: the profile, then the change.",
   "chainIdentity.profile.classification": "Classification",
   "chainIdentity.profile.classificationNone": "Not set",
   "chainIdentity.profile.bio": "About",
