@@ -544,9 +544,7 @@ function DraftForm({
       ref={formRef}
       className="tw-mx-auto tw-flex tw-w-full tw-max-w-[680px] tw-flex-1 tw-flex-col tw-gap-6"
       aria-labelledby="competition-draft-title"
-      aria-describedby={
-        lockedRules ? "competition-draft-rules-locked" : undefined
-      }
+      aria-describedby={rulesLockedNoteId(lockedRules)}
     >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <h1
@@ -560,14 +558,7 @@ function DraftForm({
       <p className="tw-m-0 tw-text-sm tw-text-iron-400">
         {t(locale, "competitions.overlap")}
       </p>
-      {lockedRules && (
-        <p
-          id="competition-draft-rules-locked"
-          className="tw-m-0 tw-text-sm tw-text-iron-400"
-        >
-          {t(locale, "competitions.rulesLockedAfterEntries")}
-        </p>
-      )}
+      <RulesLockedNote locale={locale} show={lockedRules} />
       <fieldset
         disabled={busy || displayedError === "conflict"}
         className="tw-min-w-0 tw-border-0 tw-p-0"
@@ -698,6 +689,27 @@ function DraftForm({
         )}
       </div>
     </section>
+  );
+}
+
+const RULES_LOCKED_NOTE_ID = "competition-draft-rules-locked";
+
+const rulesLockedNoteId = (lockedRules: boolean): string | undefined =>
+  lockedRules ? RULES_LOCKED_NOTE_ID : undefined;
+
+/** Explains why entries have fixed the decision's rules. */
+function RulesLockedNote({
+  locale,
+  show,
+}: {
+  readonly locale: ReturnType<typeof useBrowserLocale>;
+  readonly show: boolean;
+}) {
+  if (!show) return null;
+  return (
+    <p id={RULES_LOCKED_NOTE_ID} className="tw-m-0 tw-text-sm tw-text-iron-400">
+      {t(locale, "competitions.rulesLockedAfterEntries")}
+    </p>
   );
 }
 
