@@ -223,7 +223,10 @@ export default function DevicesSecuritySettings() {
                     label={t(locale, "devicesSecurity.earlier.title")}
                     count={security.earlierSetups.length}
                   />
-                  {security.earlierSetups.some(security.canRevoke) ? (
+                  {/* Until this browser's own encrypted device is known it
+                      could look like an earlier setup, so no clean-up yet. */}
+                  {security.ownDeviceKnown &&
+                  security.earlierSetups.some(security.canRevoke) ? (
                     <Button
                       variant="secondary"
                       size="sm"

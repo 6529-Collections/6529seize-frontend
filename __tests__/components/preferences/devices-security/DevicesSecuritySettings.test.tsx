@@ -118,6 +118,7 @@ const state = (
   failed: false,
   retry: jest.fn(),
   localKeysUnreadable: false,
+  ownDeviceKnown: true,
   canRevoke: () => true,
   revokeBlocker: () => null,
   revoke: jest.fn(async () => undefined),
@@ -593,6 +594,12 @@ describe("DevicesSecuritySettings", () => {
     expect(
       screen.queryByRole("button", { name: "More actions for this browser" })
     ).toBeNull();
+  });
+
+  it("offers no clean-up until this browser's own encrypted device is known", () => {
+    mockState = state({ ownDeviceKnown: false });
+    render(<DevicesSecuritySettings />);
+    expect(screen.queryByRole("button", { name: "Clean up…" })).toBeNull();
   });
 
   it("says when this browser's keys can't be read, and warns on every revoke", async () => {

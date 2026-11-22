@@ -330,6 +330,11 @@ export interface SecurityDevicesState extends ClassifiedDevices {
   readonly retry: () => void;
   /** This browser couldn't read its own keys, so "this device" is unknown. */
   readonly localKeysUnreadable: boolean;
+  /**
+   * This browser's own encrypted device is known, or there can't be one, so
+   * earlier setups can't include it. False while its stored key is read.
+   */
+  readonly ownDeviceKnown: boolean;
   /** Whether a device can be revoked from here right now. */
   readonly canRevoke: (device: SecurityDevice) => boolean;
   /** Why an active device can't be revoked here yet, if that's the reason. */
@@ -507,6 +512,8 @@ export function useSecurityDevices(): SecurityDevicesState {
       }
     },
     localKeysUnreadable: local.failed,
+    ownDeviceKnown:
+      !encryptionEnabled || engineListed || stored.status !== "pending",
     canRevoke,
     revokeBlocker,
     revoke,

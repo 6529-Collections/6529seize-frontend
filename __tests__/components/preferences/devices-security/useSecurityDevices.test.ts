@@ -54,13 +54,16 @@ let mockApiQuery: Record<string, unknown>;
 let mockApiQueryEnabled: boolean | undefined;
 // This browser's stored encrypted device (the one identity source).
 let mockStoredKey: string | null = null;
+let mockStoredPending = false;
 jest.mock("@/lib/e2ee/stored-device-key", () => ({
   readStoredE2eeDeviceKey: async () => mockStoredKey,
 }));
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (options: { enabled?: boolean; queryKey: readonly unknown[] }) => {
     if (options.queryKey[0] === "E2EE_STORED_DEVICE_KEY") {
-      return { data: mockStoredKey, isSuccess: true, isError: false };
+      return mockStoredPending
+        ? { data: undefined, isSuccess: false, isError: false }
+        : { data: mockStoredKey, isSuccess: true, isError: false };
     }
     mockApiQueryEnabled = options.enabled;
     return mockApiQuery;
@@ -131,6 +134,7 @@ describe("useSecurityDevices", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockStoredKey = null;
+    mockStoredPending = false;
     mockAuth = {
       activeProfileProxy: null,
       isAuthenticated: true,
@@ -621,6 +625,22 @@ describe("useSecurityDevices", () => {
     mockLocalKeys = { failed: false, publicKeys: [OWN_KEY] };
     rerender();
     expect(result.current.localKeysUnreadable).toBe(false);
+  });
+
+  it("knows this browser's own encrypted device once its stored key is read", () => {
+    mockStoredPending = true;
+    const { result, rerender } = renderHook(() => useSecurityDevices());
+    expect(result.current.ownDeviceKnown).toBe(false);
+    mockStoredPending = false;
+    rerender();
+    expect(result.current.ownDeviceKnown).toBe(true);
+  });
+
+  it("has no own encrypted device to wait for with encrypted messages off", () => {
+    mockStoredPending = true;
+    mockE2eeEnabled = false;
+    const { result } = renderHook(() => useSecurityDevices());
+    expect(result.current.ownDeviceKnown).toBe(true);
   });
 
   it("reports loading and a failure, and retries both lists", () => {
