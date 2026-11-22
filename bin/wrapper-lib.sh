@@ -42,10 +42,11 @@ seize_wrapper_canonical_dir() {
   if [[ -z "$dir" ]]; then
     return 1
   fi
-  if [[ "$dir" =~ ^[A-Za-z]:([\\/]|$) || "$dir" == *\\* ]]; then
-    if command -v cygpath >/dev/null 2>&1; then
-      dir="$(cygpath -u "$dir" 2>/dev/null || printf '%s' "$dir")"
-    fi
+  # Windows spellings only matter under Git Bash, where cygpath exists. Without
+  # it such a path fails the cd below and the entry is skipped.
+  if [[ "$dir" =~ ^[A-Za-z]:([\\/]|$) || "$dir" == *\\* ]] &&
+    command -v cygpath >/dev/null 2>&1; then
+    dir="$(cygpath -u "$dir" 2>/dev/null || printf '%s' "$dir")"
   fi
   dir="$(cd "$dir" 2>/dev/null && pwd -P)" || return 1
   if seize_wrapper_is_windows; then
