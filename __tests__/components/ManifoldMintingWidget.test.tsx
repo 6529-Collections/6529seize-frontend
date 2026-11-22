@@ -4,6 +4,14 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 jest.mock(
+  "@/components/manifold-minting/ManifoldMintingSubscriptionNote",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
+
+jest.mock(
   "@/components/manifold-minting/ManifoldMintingConnect",
   () =>
     function MockConnect(props: any) {

@@ -2,6 +2,10 @@
 
 import type { Distribution } from "@/entities/IDistribution";
 import { Time } from "@/helpers/time";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { formatInteger } from "@/i18n/format";
+import { t } from "@/i18n/messages";
 import type { ManifoldClaim, MemePhase } from "@/hooks/useManifoldClaim";
 import { PUBLIC_PRODUCTION_API_BASE } from "@/services/api/api-endpoints";
 import {
@@ -35,64 +39,103 @@ function getMemePhaseCardStatus(
   return MemePhaseCardStatus.UPCOMING;
 }
 
+interface PhaseSpots {
+  readonly allowlist: number;
+  readonly airdrop: number;
+}
+
+function getPhaseSpots(
+  entry: Distribution["allowlist"][number] | undefined
+): PhaseSpots | undefined {
+  if (!entry) {
+    return undefined;
+  }
+  const toCount = (value: unknown) => {
+    const count = Number(value ?? 0);
+    return Number.isFinite(count) && count > 0 ? count : 0;
+  };
+  // A subscription fills the subscriber's spot in this phase with an airdrop,
+  // so only allowlist spots can be minted on this page.
+  const allowlist = toCount(entry.spots_allowlist);
+  const airdrop = toCount(entry.spots_airdrop);
+  if (allowlist === 0 && airdrop === 0) {
+    // Entries without the split keep their combined count as mint spots.
+    return { allowlist: toCount(entry.spots), airdrop: 0 };
+  }
+  return { allowlist, airdrop };
+}
+
 function getEligibleMintsDetails(
+  locale: SupportedLocale,
   phaseId: string,
-  eligibleSpots: number | undefined,
+  spots: PhaseSpots | undefined,
   status: MemePhaseCardStatus,
   eligibilityState: "loading" | "ready" | "unavailable"
 ): { text: string; className: string } {
   if (phaseId === "public") {
+    const text = t(locale, "theMemes.mint.phaseEligibility.unlimited");
     if (status === MemePhaseCardStatus.ACTIVE) {
-      return {
-        text: "Unlimited spots",
-        className: "tw-font-semibold tw-text-success",
-      };
+      return { text, className: "tw-font-semibold tw-text-success" };
     }
 
     if (status === MemePhaseCardStatus.UPCOMING) {
-      return {
-        text: "Unlimited spots",
-        className: "tw-font-semibold tw-text-primary-300",
-      };
+      return { text, className: "tw-font-semibold tw-text-primary-300" };
     }
 
-    return {
-      text: "Unlimited spots",
-      className: "tw-font-semibold tw-text-red/75",
-    };
+    return { text, className: "tw-font-semibold tw-text-red/75" };
   }
 
   if (eligibilityState === "loading") {
     return {
-      text: "Loading eligibility...",
+      text: t(locale, "theMemes.mint.phaseEligibility.loading"),
       className: "tw-text-iron-300",
     };
   }
 
   if (eligibilityState === "unavailable") {
     return {
-      text: "Eligibility unavailable",
+      text: t(locale, "theMemes.mint.phaseEligibility.unavailable"),
       className: "tw-text-iron-300",
     };
   }
 
-  if (eligibleSpots === undefined) {
+  const allowlist = spots?.allowlist ?? 0;
+  const airdrop = spots?.airdrop ?? 0;
+  const params = {
+    allowlist: formatInteger(locale, allowlist),
+    airdrop: formatInteger(locale, airdrop),
+  };
+
+  if (allowlist > 0 && airdrop > 0) {
     return {
-      text: "No eligible spots",
-      className: "tw-text-iron-300",
+      text: t(locale, "theMemes.mint.phaseEligibility.mixed", params),
+      className: "tw-font-semibold tw-text-success",
     };
   }
 
-  if (eligibleSpots === 0) {
+  if (airdrop > 0) {
     return {
-      text: "No eligible spots",
-      className: "tw-text-iron-300",
+      text: t(locale, "theMemes.mint.phaseEligibility.airdrop", params),
+      className: "tw-font-semibold tw-text-success",
+    };
+  }
+
+  if (allowlist > 0) {
+    return {
+      text: t(
+        locale,
+        allowlist === 1
+          ? "theMemes.mint.phaseEligibility.allowlist.one"
+          : "theMemes.mint.phaseEligibility.allowlist.many",
+        params
+      ),
+      className: "tw-font-semibold tw-text-success",
     };
   }
 
   return {
-    text: `${eligibleSpots} eligible spot${eligibleSpots > 1 ? "s" : ""}`,
-    className: "tw-font-semibold tw-text-success",
+    text: t(locale, "theMemes.mint.phaseEligibility.none"),
+    className: "tw-text-iron-300",
   };
 }
 
@@ -249,6 +292,7 @@ function ManifoldMemesMintingPhase(
     local_timezone: boolean;
   }>
 ) {
+  const locale = useBrowserLocale();
   const eligibleMints = props.distribution?.allowlist.find((phase) =>
     phase.phase.includes(props.phase.id)
   );
@@ -261,8 +305,9 @@ function ManifoldMemesMintingPhase(
     eligibilityState = "unavailable";
   }
   const eligibleMintsDetails = getEligibleMintsDetails(
+    locale,
     props.phase.id,
-    eligibleMints?.spots,
+    getPhaseSpots(eligibleMints),
     status,
     eligibilityState
   );

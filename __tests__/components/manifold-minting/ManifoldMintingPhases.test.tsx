@@ -328,6 +328,106 @@ describe("ManifoldMinting phases", () => {
     });
   });
 
+  test("separates subscription airdrop spots from mintable allowlist spots", async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            airdrops: 0,
+            allowlist: [
+              {
+                phase: "Phase 0",
+                spots: 3,
+                spots_airdrop: 1,
+                spots_allowlist: 2,
+              },
+              {
+                phase: "Phase 1",
+                spots: 1,
+                spots_airdrop: 1,
+                spots_allowlist: 0,
+              },
+              {
+                phase: "Phase 2",
+                spots: 2,
+                spots_airdrop: 0,
+                spots_allowlist: 2,
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    render(
+      <ManifoldMinting
+        title="Test Meme"
+        contract="0xmemes"
+        chain={{ id: 1 } as any}
+        abi={[]}
+        mint_date={{ toMillis: () => Date.UTC(2026, 2, 18, 17, 40) } as any}
+        mintMetadata={{
+          tokenId: 123,
+          metadata: {
+            name: "Test NFT",
+            description: "Test description",
+            attributes: [],
+            image_url: "test.jpg",
+          },
+        }}
+      />
+    );
+
+    await userEvent.click(screen.getByTestId("mint-widget"));
+
+    expect(
+      await screen.findByText("2x Allowlist · 1x Airdrop")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("1x Airdrop · nothing to mint")
+    ).toBeInTheDocument();
+    expect(screen.getByText("2 eligible spots")).toBeInTheDocument();
+    expect(screen.queryByText("1 eligible spot")).not.toBeInTheDocument();
+  });
+
+  test("keeps the combined count for phase entries without the spot split", async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            airdrops: 0,
+            allowlist: [{ phase: "Phase 1", spots: 1 }],
+          },
+        ],
+      }),
+    });
+
+    render(
+      <ManifoldMinting
+        title="Test Meme"
+        contract="0xmemes"
+        chain={{ id: 1 } as any}
+        abi={[]}
+        mint_date={{ toMillis: () => Date.UTC(2026, 2, 18, 17, 40) } as any}
+        mintMetadata={{
+          tokenId: 123,
+          metadata: {
+            name: "Test NFT",
+            description: "Test description",
+            attributes: [],
+            image_url: "test.jpg",
+          },
+        }}
+      />
+    );
+
+    await userEvent.click(screen.getByTestId("mint-widget"));
+
+    expect(await screen.findByText("1 eligible spot")).toBeInTheDocument();
+  });
+
   test("shows an error when the distribution request times out", async () => {
     jest.useFakeTimers();
     jest.spyOn(console, "error").mockImplementation(() => undefined);

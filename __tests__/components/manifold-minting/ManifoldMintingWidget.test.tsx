@@ -12,6 +12,22 @@ import {
   useWriteContract,
 } from "wagmi";
 
+jest.mock(
+  "@/components/manifold-minting/ManifoldMintingSubscriptionNote",
+  () => ({
+    __esModule: true,
+    default: (
+      props: Readonly<{ tokenId?: number; memePhaseId?: string }>
+    ) => (
+      <div
+        data-testid="subscription-note"
+        data-token-id={props.tokenId}
+        data-phase-id={props.memePhaseId}
+      />
+    ),
+  })
+);
+
 jest.mock("wagmi");
 
 jest.mock("@/components/auth/SeizeConnectContext", () => ({
@@ -131,6 +147,25 @@ describe("ManifoldMintingWidget", () => {
     expect(
       screen.getByRole("button", { name: /SEIZE x1/i })
     ).toBeInTheDocument();
+  });
+
+  it("passes the claim token and phase to the subscription note", async () => {
+    const user = userEvent.setup();
+    render(
+      <ManifoldMintingWidget
+        {...baseProps}
+        claim={{
+          ...baseProps.claim,
+          tokenId: 575,
+          memePhase: { id: "public" },
+        }}
+      />
+    );
+    expect(screen.queryByTestId("subscription-note")).not.toBeInTheDocument();
+    await user.click(screen.getByTestId("connect"));
+    const note = screen.getByTestId("subscription-note");
+    expect(note).toHaveAttribute("data-token-id", "575");
+    expect(note).toHaveAttribute("data-phase-id", "public");
   });
 
   it("shows the current Meme token ID in the wallet confirmation details", async () => {

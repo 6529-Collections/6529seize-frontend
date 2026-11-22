@@ -24,6 +24,7 @@ import { useSeizeConnectContext } from "../auth/SeizeConnectContext";
 import DotLoader from "../dotLoader/DotLoader";
 import Button from "../utils/button/Button";
 import ManifoldMintingConnect from "./ManifoldMintingConnect";
+import ManifoldMintingSubscriptionNote from "./ManifoldMintingSubscriptionNote";
 import type { MintReceipt } from "./ManifoldMintingSuccess";
 import ManifoldMintingTransactionModal from "./ManifoldMintingTransactionModal";
 import {
@@ -688,6 +689,11 @@ export default function ManifoldMintingWidget(
 
     return (
       <div>
+        <ManifoldMintingSubscriptionNote
+          contract={props.contract}
+          tokenId={props.claim.tokenId}
+          memePhaseId={props.claim.memePhase?.id}
+        />
         {props.claim.phase === ManifoldPhase.PUBLIC ? (
           <div>{printMint()}</div>
         ) : (

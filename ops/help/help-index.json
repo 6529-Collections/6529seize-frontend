@@ -8462,7 +8462,9 @@
         "wallet not showing",
         "mint submitted",
         "seized",
-        "minted to"
+        "minted to",
+        "no mint button",
+        "subscription airdrop"
       ],
       "keywords": [
         "memes",
@@ -8489,7 +8491,8 @@
         "After receipt confirmation, the modal headline is SEIZED! with the message Your mint is confirmed. It shows artwork details, Quantity, and the full destination wallet address under Minted to. These details describe the submitted mint, including when minting for another wallet.",
         "Done closes the success confirmation and returns to the mint page. View transaction opens the transaction in a new browser tab; checking it is optional. The close control and Escape also dismiss the success confirmation.",
         "Artwork preview unavailable means only the image could not be displayed in a wallet-request, submitted, or success modal. Quantity, destination, and available transaction links remain accessible, and the transaction status is unchanged. Missing artwork titles use Artwork.",
-        "Mint eligibility is separate from subscription mode and allowlist rules."
+        "Mint eligibility is separate from subscription mode and allowlist rules.",
+        "A phase spot that a subscription fills is an airdrop, not a mint: the phase card shows Nx Airdrop · nothing to mint (or Nx Allowlist · Nx Airdrop when mintable spots remain), and the mint panel says the subscription covers the card and names the airdrop wallet. No spots in current phase for this address is then expected for that wallet."
       ],
       "canonical_path": "/the-memes/mint",
       "related_paths": ["/the-memes", "/about/subscriptions"],
@@ -8497,6 +8500,8 @@
       "source_refs": [
         "app/the-memes/mint/page.tsx",
         "components/manifold-minting/ManifoldMintingWidget.tsx",
+        "components/manifold-minting/ManifoldMintingPhases.tsx",
+        "components/manifold-minting/ManifoldMintingSubscriptionNote.tsx",
         "ops/docs/media/memes/feature-mint-flow.md"
       ]
     },
