@@ -25,7 +25,9 @@ jest.mock("@/lib/signed-records/sign-records", () => {
 
 import {
   MINT_ADMIN_ROUTES,
+  MINT_USER_ROUTES,
   mintAdminRecordHeaders,
+  mintUserRecordHeaders,
   setMintRecordContextSource,
   sha256Hex,
 } from "@/lib/mint-records/mint-admin-records";
@@ -135,6 +137,30 @@ describe("mint admin records", () => {
     expect(
       (await signedBody({ ...request, body: { csv: "x" } })).request_sha256
     ).not.toBe(none);
+  });
+
+  it("signs a collaboration reply as a mint.user record", async () => {
+    await mintUserRecordHeaders({
+      action: "collab.respond",
+      route: MINT_USER_ROUTES.collabRespond,
+      params: { drop_id: "drop", invitation_id: "inv-1" },
+      body: {
+        action: "DECLINE",
+        artwork_hash: "a".repeat(64),
+        terms_version: "b".repeat(64),
+      },
+    });
+    const [drafts] = mockSignRecords.mock.calls[0];
+    expect(drafts[0].refs[0]).toBe("mint.user");
+    expect(drafts[0].wave).toBe(`ps/${PRINCIPAL}`);
+    // The same vector is pinned in the API's mint-log-intent tests.
+    expect(drafts[0].body).toEqual({
+      action: "collab.respond",
+      route: "POST /drops/:drop_id/collaborations/:invitation_id/response",
+      params: { drop_id: "drop", invitation_id: "inv-1" },
+      request_sha256:
+        "7d159e21780275c8248076fc3908fa9a4df05f797c13a480728a0c4114e77f02",
+    });
   });
 
   it("hashes a file's bytes", async () => {

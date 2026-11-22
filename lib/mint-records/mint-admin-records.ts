@@ -11,11 +11,14 @@ import { recordDraft, signRecords } from "@/lib/signed-records/sign-records";
  * carry a signed `mint.admin` record: a kind 9 RECORD in the admin's own
  * public stream, signed by this browser's device key, so there is no wallet
  * prompt. The record names the action and the sha256 of the request, and the
- * API logs it beside the change. The route strings and the request hash must
- * match the API's (`src/mint-log/mint-log-http.ts` and `mint-log-intent.ts`).
+ * API logs it beside the change. A user's own collaboration invites and
+ * replies carry the same record with type `mint.user`. The route strings and
+ * the request hash must match the API's (`src/mint-log/mint-log-http.ts` and
+ * `mint-log-intent.ts`).
  */
 
 const MINT_ADMIN_RECORD_TYPE = "mint.admin";
+const MINT_USER_RECORD_TYPE = "mint.user";
 
 export const MINT_ADMIN_ROUTES = {
   distPhase:
@@ -35,6 +38,13 @@ export const MINT_ADMIN_ROUTES = {
 
 type MintAdminRoute = (typeof MINT_ADMIN_ROUTES)[keyof typeof MINT_ADMIN_ROUTES];
 
+export const MINT_USER_ROUTES = {
+  collabInvite: "POST /drops/:drop_id/collaborations",
+  collabRespond: "POST /drops/:drop_id/collaborations/:invitation_id/response",
+} as const;
+
+type MintUserRoute = (typeof MINT_USER_ROUTES)[keyof typeof MINT_USER_ROUTES];
+
 type MintLogAction =
   | "dist.phase"
   | "dist.public"
@@ -47,12 +57,28 @@ type MintLogAction =
   | "claim.media-request"
   | "claim.action";
 
+type MintUserAction = "collab.invite" | "collab.respond";
+
 interface MintAdminRequest {
   readonly action: MintLogAction;
   readonly route: MintAdminRoute;
   /** The route's path parameters, exactly as they appear in the URL. */
   readonly params: Readonly<Record<string, string>>;
   /** The JSON body as sent; omit it for a GET. */
+  readonly body?: unknown;
+}
+
+interface MintUserRequest {
+  readonly action: MintUserAction;
+  readonly route: MintUserRoute;
+  readonly params: Readonly<Record<string, string>>;
+  readonly body: unknown;
+}
+
+interface MintRecordRequest {
+  readonly action: MintLogAction | MintUserAction;
+  readonly route: MintAdminRoute | MintUserRoute;
+  readonly params: Readonly<Record<string, string>>;
   readonly body?: unknown;
 }
 
@@ -114,7 +140,7 @@ export async function sha256Hex(file: Blob): Promise<string> {
 
 /** sha256 (hex) of the request's canonical JSON, as the API computes it. */
 async function mintIntentSha256(
-  request: Pick<MintAdminRequest, "route" | "params" | "body">
+  request: Pick<MintRecordRequest, "route" | "params" | "body">
 ): Promise<string> {
   const canonical = canonicalJson({
     body: mintIntentBody(request.body),
@@ -136,8 +162,22 @@ function newRecordKey(): string {
  * write needs one; when it does and none came, it answers with a message
  * that asks to turn on signing.
  */
-export async function mintAdminRecordHeaders(
+export function mintAdminRecordHeaders(
   request: MintAdminRequest
+): Promise<Record<string, string>> {
+  return mintRecordHeaders(MINT_ADMIN_RECORD_TYPE, request);
+}
+
+/** The same header for a user's own collaboration invite or reply. */
+export function mintUserRecordHeaders(
+  request: MintUserRequest
+): Promise<Record<string, string>> {
+  return mintRecordHeaders(MINT_USER_RECORD_TYPE, request);
+}
+
+async function mintRecordHeaders(
+  type: string,
+  request: MintRecordRequest
 ): Promise<Record<string, string>> {
   if (!isMintSignedWritesEnabled()) return {};
   const context = await contextSource();
@@ -145,7 +185,7 @@ export async function mintAdminRecordHeaders(
   const draft = recordDraft(
     "ps",
     context.principal,
-    MINT_ADMIN_RECORD_TYPE,
+    type,
     newRecordKey(),
     {
       action: request.action,
