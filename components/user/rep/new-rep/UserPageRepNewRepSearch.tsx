@@ -30,6 +30,7 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
+import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -143,6 +144,7 @@ function GrantRepForm({
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const chainWrite = useChainRatingWriter();
   const helpBotCreditRepCategoryError = t(
     locale,
     "rep.categories.helpBotReserved.error",
@@ -395,10 +397,12 @@ function GrantRepForm({
       amount: number;
       category: string;
     }) =>
-      await commonApiPost<{ amount: number; category: string }, void>({
-        endpoint: `profiles/${profile.query ?? ""}/rep/rating`,
-        body: { amount, category },
-      }),
+      chainWrite
+        ? await chainWrite({ matter: "REP", profile, category, amount })
+        : await commonApiPost<{ amount: number; category: string }, void>({
+            endpoint: `profiles/${profile.query ?? ""}/rep/rating`,
+            body: { amount, category },
+          }),
     onSuccess: async () => {
       setToast({
         message: t(locale, "rep.categories.grant.toast.updated"),
@@ -440,7 +444,8 @@ function GrantRepForm({
     if (Number.isNaN(amount)) return;
     setMutating(true);
     try {
-      const { success } = await requestAuth();
+      // On the 6529 Network the rating carries its own signature.
+      const { success } = chainWrite ? { success: true } : await requestAuth();
       if (!success) {
         setToast({
           message: t(locale, "rep.categories.grant.toast.loginRequired"),

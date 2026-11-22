@@ -2,7 +2,10 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { amIUser } from "@/helpers/Helpers";
-import { isIdentityEditingPaused } from "@/lib/identity-move/schedule";
+import {
+  isChainIdentityActive,
+  isRatingPaused,
+} from "@/lib/chain-identity/active";
 
 export type RepDirection = "received" | "given";
 
@@ -34,11 +37,15 @@ export function getCanEditRep({
   readonly targetProfile: ApiIdentity;
   readonly activeProfileProxy: ApiProfileProxy | null;
 }) {
-  if (!myProfile?.handle || isIdentityEditingPaused()) {
+  if (!myProfile?.handle || isRatingPaused()) {
     return false;
   }
 
   if (activeProfileProxy) {
+    // Proxies stay on 6529.io; the 6529 Network takes the identity's own.
+    if (isChainIdentityActive()) {
+      return false;
+    }
     if (targetProfile.handle === activeProfileProxy.created_by.handle) {
       return false;
     }
@@ -65,8 +72,9 @@ export function getCanEditNic({
   readonly activeProfileProxy: ApiProfileProxy | null;
   readonly address: string | undefined;
 }): boolean {
-  if (!connectedProfile?.handle || isIdentityEditingPaused()) return false;
+  if (!connectedProfile?.handle || isRatingPaused()) return false;
   if (activeProfileProxy) {
+    if (isChainIdentityActive()) return false;
     if (targetProfile.handle === activeProfileProxy.created_by.handle)
       return false;
     return activeProfileProxy.actions.some(

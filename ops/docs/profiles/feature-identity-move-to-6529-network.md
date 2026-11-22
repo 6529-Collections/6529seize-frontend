@@ -63,6 +63,13 @@ contract still reads them, so the NextGen mint form says under `Mint For`:
 `NextGen mints still read delegations from NFTDelegation, not from the 6529
 Network.`
 
+## After the Switch-On
+
+In builds with the 6529 Network flows on, REP and NIC go to the 6529 Network
+from the switch-on, the notice links to `/network/identity`, and the
+Delegation Center lists and changes delegations there. See
+[Your Identity on the 6529 Network](feature-identity-on-6529-network.md).
+
 ## Changing the Date
 
 The instant is baked into each build. Postponing the freeze means changing

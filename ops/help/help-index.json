@@ -2321,6 +2321,46 @@
       ]
     },
     {
+      "id": "profiles.network-identity",
+      "kind": "route",
+      "environments": ["local", "staging"],
+      "title": "Your identity on the 6529 Network",
+      "aliases": [
+        "6529 Network identity",
+        "create identity",
+        "claim handle",
+        "add wallet",
+        "remove wallet",
+        "enable chain actions",
+        "get fake6529",
+        "fees on the 6529 Network"
+      ],
+      "keywords": [
+        "identity",
+        "handle",
+        "profile",
+        "wallet",
+        "fees",
+        "fake6529",
+        "session key",
+        "delegation"
+      ],
+      "facts": [
+        "/network/identity shows the connected wallet's identity on the 6529 Network: create an identity, get $fake6529 for fees, move $fake6529 to the identity, claim a handle, save the profile, enable chain actions on this browser, and add or remove wallets.",
+        "Each change shows the most it can cost in $fake6529 before the wallet is asked, then waits until the 6529 Network has made it final. The identity pays for its own changes; the wallet pays for creating an identity and for moving $fake6529.",
+        "Enable chain actions on this browser: the wallet signs once to give this browser a key for 30 days that rates REP and NIC and saves the profile without a wallet prompt each time.",
+        "Adding a wallet needs both wallets: the identity's wallet signs first, then the person switches the wallet app to the new wallet and signs on the same page.",
+        "The Delegation Center landing page lists, registers and revokes delegations on the 6529 Network."
+      ],
+      "canonical_path": "/network/identity",
+      "related_paths": ["/network/identity", "/safe-collecting"],
+      "tags": ["profiles", "identity", "delegation"],
+      "source_refs": [
+        "ops/docs/profiles/feature-identity-on-6529-network.md",
+        "lib/chain-identity/identityOps.ts"
+      ]
+    },
+    {
       "id": "profiles.brain-tab",
       "kind": "route",
       "title": "Profile Brain tab",

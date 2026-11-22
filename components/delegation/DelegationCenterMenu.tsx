@@ -3,6 +3,8 @@
 import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import NftDelegationMoveNotice from "@/components/identity-move/NftDelegationMoveNotice";
+import { useChainIdentityActive } from "@/hooks/useIdentityMovePhase";
+import dynamic from "next/dynamic";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import Button from "@/components/utils/button/Button";
 import ButtonLink from "@/components/utils/button/ButtonLink";
@@ -72,6 +74,12 @@ const DELEGATION_MENU_ITEMS: ReadonlyArray<{
   },
 ];
 
+// The 6529 Network's delegations load only once identities have moved there.
+const ChainDelegations = dynamic(
+  () => import("@/components/chain-identity/ChainDelegations"),
+  { ssr: false }
+);
+
 const SECTIONS_WITHOUT_NAVIGATION = new Set<DelegationCenterSection>([
   DelegationCenterSection.REGISTER_DELEGATION,
   DelegationCenterSection.REGISTER_SUB_DELEGATION,
@@ -108,6 +116,7 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
     chainId: 1,
   });
   const showNavigation = !SECTIONS_WITHOUT_NAVIGATION.has(props.section);
+  const chainIdentityActive = useChainIdentityActive();
   const previousConnectedAddress = useRef(connectedAddress);
 
   useEffect(() => {
@@ -354,6 +363,12 @@ export default function DelegationCenterMenu(props: Readonly<Props>) {
   return (
     <div className={DELEGATION_PAGE_CONTAINER_CLASS_NAME}>
       <NftDelegationMoveNotice className="tw-mb-6" />
+      {chainIdentityActive &&
+        props.section === DelegationCenterSection.CENTER && (
+          <div className="tw-mb-6">
+            <ChainDelegations />
+          </div>
+        )}
       {showNavigation && (
         <nav
           aria-label={t(DEFAULT_LOCALE, "safeCollecting.menuLabel")}

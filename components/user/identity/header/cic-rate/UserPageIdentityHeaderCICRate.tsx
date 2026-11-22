@@ -5,6 +5,7 @@ import { useContext, useEffect, useId, useRef, useState } from "react";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { AuthContext } from "@/components/auth/Auth";
+import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
@@ -60,6 +61,7 @@ function UserPageIdentityHeaderCICRateForm({
   const profileIdentity = profile.query ?? profile.handle ?? profile.display;
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
+  const chainWrite = useChainRatingWriter();
 
   const { onProfileCICModify } = useContext(ReactQueryWrapperContext);
 
@@ -74,6 +76,10 @@ function UserPageIdentityHeaderCICRateForm({
   const updateCICMutation = useMutation({
     mutationFn: async (amount: number) => {
       setBusy(true);
+      if (chainWrite) {
+        await chainWrite({ matter: "NIC", profile, category: null, amount });
+        return;
+      }
       return await commonApiPost({
         endpoint: `profiles/${encodeURIComponent(profileIdentity)}/cic/rating`,
         body: {
@@ -202,7 +208,8 @@ function UserPageIdentityHeaderCICRateForm({
     if (mutating || isSaveDisabled) return;
     setBusy(true);
     try {
-      const { success } = await requestAuth();
+      // On the 6529 Network the rating carries its own signature.
+      const { success } = chainWrite ? { success: true } : await requestAuth();
       if (!mounted.current) return;
       if (!success) {
         setToast({

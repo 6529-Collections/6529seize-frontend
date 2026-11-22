@@ -5,7 +5,7 @@ import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import CommonInfoBox from "@/components/utils/CommonInfoBox";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
+import { useRatingPaused } from "@/hooks/useIdentityMovePhase";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
 import { amIUser } from "@/helpers/Helpers";
@@ -43,7 +43,7 @@ export default function UserPageRateWrapper({
 }) {
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy, connectedProfile } = useContext(AuthContext);
-  const identityEditingPaused = useIdentityEditingPaused();
+  const ratingPaused = useRatingPaused();
   const locale = useBrowserLocale();
 
   const getIsProxyAndHaveAllowance = (): boolean => {
@@ -127,7 +127,7 @@ export default function UserPageRateWrapper({
 
   // REP and NIC move to the 6529 Network; wave and drop ratings stay here.
   if (
-    identityEditingPaused &&
+    ratingPaused &&
     (type === RateMatter.REP || type === RateMatter.NIC)
   ) {
     return <CommonInfoBox message={t(locale, "identityMove.paused")} />;

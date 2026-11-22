@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
@@ -55,6 +56,7 @@ export function useRatingSave(matter: Matter, rater: string | null = null) {
   const { onProfileRepModify, onProfileCICModify } = useContext(
     ReactQueryWrapperContext
   );
+  const chainWrite = useChainRatingWriter();
   const lock = useRef(false);
   const mounted = useRef(false);
   const principal = `${connectedProfile?.id ?? ""}:${activeProfileProxy?.id ?? ""}`;
@@ -94,7 +96,10 @@ export function useRatingSave(matter: Matter, rater: string | null = null) {
     setError(null);
     const savedProfiles = new Map<string, ApiIdentity>();
     try {
-      const { success } = await requestAuth();
+      // On the 6529 Network each rating carries its own signature.
+      const { success } = chainWrite
+        ? { success: true }
+        : await requestAuth();
       if (!isCurrentSession()) return false;
       if (!success) {
         const message = t(locale, copy.login);
@@ -105,7 +110,16 @@ export function useRatingSave(matter: Matter, rater: string | null = null) {
       // Sequential writes make released credit available to the next recipient.
       for (const update of updates) {
         if (!isCurrentSession()) return false;
-        await commonApiPost(getRatingRequest(matter, update));
+        if (chainWrite) {
+          await chainWrite({
+            matter,
+            profile: update.profile,
+            category: update.category ?? null,
+            amount: update.amount,
+          });
+        } else {
+          await commonApiPost(getRatingRequest(matter, update));
+        }
         savedProfiles.set(
           update.profile.id ?? update.profile.display,
           update.profile

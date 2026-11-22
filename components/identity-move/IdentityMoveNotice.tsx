@@ -1,7 +1,10 @@
 "use client";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { useIdentityMovePhase } from "@/hooks/useIdentityMovePhase";
+import {
+  useChainIdentityActive,
+  useIdentityMovePhase,
+} from "@/hooks/useIdentityMovePhase";
 import { formatUtcDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -57,12 +60,28 @@ export default function IdentityMoveNotice({
 }) {
   const locale = useBrowserLocale();
   const phase = useIdentityMovePhase();
+  const chainActive = useChainIdentityActive();
   const freezeAtMs = getIdentityFreezeAtMs();
   const text =
     freezeAtMs === null ? null : getNoticeText(locale, phase, freezeAtMs);
 
   if (text === null) {
     return null;
+  }
+
+  if (chainActive) {
+    return (
+      <IdentityMoveCallout
+        label={t(locale, "identityMove.noticeLabel")}
+        text={t(locale, "identityMove.movedChain")}
+        link={{
+          href: "/network/identity",
+          label: t(locale, "identityMove.movedChainLink"),
+        }}
+        testId="identity-move-notice"
+        className={className}
+      />
+    );
   }
 
   return (

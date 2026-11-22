@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import { isChainIdentityEnabled } from "@/lib/chain-identity/config";
 import {
   getIdentityFreezeAtMs,
   getIdentityMovePhase,
@@ -50,4 +51,21 @@ export function useIdentityMovePhase(): IdentityMovePhase {
 /** Whether 6529.io's own identity edits are closed, following the clock. */
 export function useIdentityEditingPaused(): boolean {
   return isIdentityEditingPausedPhase(useIdentityMovePhase());
+}
+
+/**
+ * Whether identity changes go through the 6529 Network now: the chain flows
+ * are on in this build and the switch-on has passed.
+ */
+export function useChainIdentityActive(): boolean {
+  return useIdentityMovePhase() === "moved" && isChainIdentityEnabled();
+}
+
+/** Whether REP and NIC rating is closed: paused, with no chain path. */
+export function useRatingPaused(): boolean {
+  const phase = useIdentityMovePhase();
+  return (
+    isIdentityEditingPausedPhase(phase) &&
+    !(phase === "moved" && isChainIdentityEnabled())
+  );
 }
