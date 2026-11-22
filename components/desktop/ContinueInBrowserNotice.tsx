@@ -8,19 +8,27 @@ import {
   getWebsiteHost,
 } from "@/services/desktop/continueInBrowser";
 
+const MESSAGES = {
+  signature: "desktopWalletRequest.notForwarded",
+  transaction: "desktopWalletRequest.transactionNotForwarded",
+} as const;
+
 /**
  * For actions 6529 Desktop does not forward to the browser wallet (market
- * orders, validator sessions): says so and opens the same page on the
- * website, where the browser wallet signs directly.
+ * orders, validator sessions, transactions): says so and opens the same
+ * page on the website, where the browser wallet signs directly.
  */
-export default function ContinueInBrowserNotice() {
+export default function ContinueInBrowserNotice({
+  kind = "signature",
+}: {
+  /** What the action asks the wallet for. */
+  readonly kind?: keyof typeof MESSAGES;
+}) {
   const locale = useBrowserLocale();
   return (
     <div className="tw-flex tw-flex-col tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-p-4">
       <p className="tw-m-0 tw-text-sm tw-text-iron-200">
-        {t(locale, "desktopWalletRequest.notForwarded", {
-          site: getWebsiteHost(),
-        })}
+        {t(locale, MESSAGES[kind], { site: getWebsiteHost() })}
       </p>
       <button
         type="button"

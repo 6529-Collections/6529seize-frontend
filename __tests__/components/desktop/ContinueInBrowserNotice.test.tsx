@@ -21,4 +21,13 @@ describe("ContinueInBrowserNotice", () => {
     );
     expect(continueInBrowser).toHaveBeenCalledTimes(1);
   });
+
+  it("names a transaction when it replaces one", () => {
+    render(<ContinueInBrowserNotice kind="transaction" />);
+    expect(
+      screen.getByText(
+        /does not send this transaction.*Continue on 6529\.io.*sends it directly/
+      )
+    ).toBeInTheDocument();
+  });
 });

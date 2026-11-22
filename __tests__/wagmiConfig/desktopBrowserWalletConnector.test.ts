@@ -31,6 +31,7 @@ const typedData = {
 function setup(address: string | null = wallet.address) {
   const emit = jest.fn();
   const runRequest = jest.fn();
+  const onTransactionRefused = jest.fn();
   const prepare = jest.fn<PreparedWalletRequest | null, [unknown]>(() => ({
     fingerprint: null,
   }));
@@ -38,11 +39,12 @@ function setup(address: string | null = wallet.address) {
     getAddress: () => address,
     prepare,
     runRequest,
+    onTransactionRefused,
   })({
     chains: [mainnet, sepolia],
     emitter: { emit },
   } as never);
-  return { connector, emit, runRequest, prepare };
+  return { connector, emit, runRequest, prepare, onTransactionRefused };
 }
 
 const request = async (
@@ -105,6 +107,24 @@ describe("desktopBrowserWalletConnector", () => {
     });
     expect(runRequest).not.toHaveBeenCalled();
   });
+
+  it.each([
+    ["eth_sendTransaction", 1],
+    ["wallet_sendTransaction", 1],
+    ["eth_signTransaction", 1],
+    ["wallet_sendCalls", 1],
+    ["eth_sign", 0],
+    ["wallet_addEthereumChain", 0],
+  ])(
+    "points %s to the website only when it is a transaction",
+    async (method, calls) => {
+      const { connector, onTransactionRefused } = setup();
+      await expect(request(connector, method, [])).rejects.toMatchObject({
+        code: 4200,
+      });
+      expect(onTransactionRefused).toHaveBeenCalledTimes(calls);
+    }
+  );
 
   it("forwards a message and returns the signature only if it is the account's", async () => {
     const { connector, runRequest } = setup();
