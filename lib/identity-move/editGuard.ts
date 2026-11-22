@@ -33,6 +33,11 @@ const readActionType = (body: unknown): unknown => {
 };
 
 /**
+ * The browser's guard is a convenience: the 6529.io API's own freeze decides
+ * what is accepted. "Set primary" and "Add wallet" register on NFTDelegation
+ * as Ethereum transactions from the wallet, with no 6529.io request to stop
+ * here; their controls are hidden instead.
+ *
  * Whether a request changes a profile, handle, classification, picture,
  * banner, statement, profile wave, REP or NIC rating, or adds a REP or NIC
  * proxy action. These move to the 6529 Network, and from the freeze the API

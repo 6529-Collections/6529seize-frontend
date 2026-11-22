@@ -49,6 +49,20 @@ switch-on while the page stays open.
 Wave and drop ratings, follows, artwork alerts, profile preferences and the
 profile website studio are not affected.
 
+## Changing the Date
+
+The instant is baked into each build. Postponing the freeze means changing
+`NEXT_PUBLIC_IDENTITY_FREEZE_AT` in the build workflows, then building and
+deploying again before the old instant passes; removing it calls the move
+off. The 6529.io API reads its own `IDENTITY_FREEZE_AT`, and both must name
+the same instant. The browser's checks are a convenience; the API's freeze
+decides what it accepts.
+
+## Localization
+
+The notice and the paused line are in en-US only. Other locales fall back to
+en-US until `identityMove.*` is added to their dictionaries.
+
 ## Troubleshooting
 
 - The notice is missing: the build does not set

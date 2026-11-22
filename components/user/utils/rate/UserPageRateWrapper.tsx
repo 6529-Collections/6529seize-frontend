@@ -4,6 +4,7 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import CommonInfoBox from "@/components/utils/CommonInfoBox";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { assertUnreachable } from "@/helpers/AllowlistToolHelpers";
@@ -43,6 +44,7 @@ export default function UserPageRateWrapper({
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy, connectedProfile } = useContext(AuthContext);
   const identityEditingPaused = useIdentityEditingPaused();
+  const locale = useBrowserLocale();
 
   const getIsProxyAndHaveAllowance = (): boolean => {
     switch (type) {
@@ -128,7 +130,7 @@ export default function UserPageRateWrapper({
     identityEditingPaused &&
     (type === RateMatter.REP || type === RateMatter.NIC)
   ) {
-    return <CommonInfoBox message={t(DEFAULT_LOCALE, "identityMove.paused")} />;
+    return <CommonInfoBox message={t(locale, "identityMove.paused")} />;
   }
 
   if (raterContextMessage) {
