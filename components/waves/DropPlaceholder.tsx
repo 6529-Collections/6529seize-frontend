@@ -88,9 +88,10 @@ function getProfileSetupMessage(
         {linkLabel}
       </Link>
     ),
-  }).map((part, index) =>
+  }).map((part) =>
     typeof part === "string" ? (
-      <span key={index} className="tw-text-iron-400">
+      // A message's text parts are distinct, so the text is a stable key.
+      <span key={`text:${part}`} className="tw-text-iron-400">
         {part}
       </span>
     ) : (
