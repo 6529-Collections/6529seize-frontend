@@ -1,6 +1,7 @@
 import {
   formatSubscriptionCoverageDeadline,
   getSubscriptionCoverageAnchor,
+  getDisplayedSubscriptionCoverageStatus,
   getSubscriptionCoverageCompactLine,
   getSubscriptionCoveragePresentation,
 } from "@/components/user/subscriptions/coverage/subscriptionCoverage.helpers";
@@ -40,6 +41,37 @@ describe("subscription coverage helpers", () => {
     expect(getSubscriptionCoverageCompactLine("en-US", coverage)).toBe(
       "Automatic · 0.18 ETH · 4 drops funded"
     );
+  });
+
+  it("calls a forecast-end count the next drops funded", () => {
+    const coverage = {
+      mode: ApiSubscriptionCoverageMode.Automatic,
+      balance_eth: "2",
+      fully_funded_drops: 24,
+      status: ApiSubscriptionCoverageStatus.Covered,
+      funded_through: { token_id: 598, mint_at: new Date("2027-01-01") },
+      next_unfunded: null,
+      forecast: { forecast_truncated: true, horizon_end_token_id: 598 },
+    } as ApiSubscriptionCoverage;
+
+    expect(getSubscriptionCoverageCompactLine("en-US", coverage)).toBe(
+      "Automatic · 2 ETH · Next 24 drops funded"
+    );
+  });
+
+  it("maps one funded action-required drop to running low", () => {
+    expect(
+      getDisplayedSubscriptionCoverageStatus(
+        ApiSubscriptionCoverageStatus.ActionRequired,
+        1
+      )
+    ).toBe(ApiSubscriptionCoverageStatus.RunningLow);
+    expect(
+      getDisplayedSubscriptionCoverageStatus(
+        ApiSubscriptionCoverageStatus.ActionRequired,
+        0
+      )
+    ).toBe(ApiSubscriptionCoverageStatus.ActionRequired);
   });
 
   it("does not imply funded runway for a profile without current eligibility", () => {

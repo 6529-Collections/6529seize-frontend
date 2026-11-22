@@ -4481,6 +4481,7 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.coverage.basis":
     "Projected from current eligibility, settings, balance, and the published Meme schedule.",
   "subscriptions.coverage.fundedThrough": "Funded through",
+  "subscriptions.coverage.fundedAtLeastThrough": "Funded at least through",
   "subscriptions.coverage.nextUnfunded": "Next unfunded",
   "subscriptions.coverage.summary.nextDrop": "Next drop",
   "subscriptions.coverage.projected": "Projected",
@@ -4513,6 +4514,8 @@ export const EN_US_ROOT_MESSAGES = {
     "One selected drop is fully funded. Add funds to cover more upcoming drops.",
   "subscriptions.coverage.header.through":
     "{status} · through The Memes #{token}, {date}",
+  "subscriptions.coverage.header.atLeastThrough":
+    "{status} · at least through The Memes #{token}, {date}",
   "subscriptions.coverage.header.noFundedThrough": "{status}",
   "subscriptions.page.title": "Subscription minting",
   "subscriptions.page.settingsTitle": "Minting settings",
