@@ -10,12 +10,6 @@ export {
   transactionRulesHash,
   walletTransactionRulesHash,
 } from "./hash";
-export { decodeTransactionData, type DecodedArgs } from "./decode";
-export {
-  checkWalletTransaction,
-  findTransactionRule,
-  type WalletTransaction,
-  type WalletTransactionCheck,
-  type WalletTransactionProblem,
-} from "./check";
-export type { TransactionRisk, TransactionRule } from "./types";
+export { decodeTransactionData } from "./decode";
+export { checkWalletTransaction } from "./check";
+export type { TransactionRule } from "./types";

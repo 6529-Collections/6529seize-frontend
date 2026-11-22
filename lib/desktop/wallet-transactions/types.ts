@@ -91,7 +91,7 @@ export const RULE_ARG_TYPES = [
   "bytes32[][]",
 ] as const;
 
-export type RuleArgType = (typeof RULE_ARG_TYPES)[number];
+type RuleArgType = (typeof RULE_ARG_TYPES)[number];
 
 export interface RuleArg {
   /** The ABI parameter name. */

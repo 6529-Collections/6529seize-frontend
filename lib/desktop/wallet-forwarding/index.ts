@@ -29,11 +29,9 @@
 export {
   WALLET_REQUEST_TTL_MS,
   WALLET_TRANSACTION_TTL_MS,
-  walletRequestTtlMs,
   type WalletForwardingMethod,
   type WalletRequest,
   type WalletRequestInput,
-  type WalletTransactionParams,
 } from "./shared";
 export { parseWalletRequest } from "./request";
 export { toCanonicalTransaction } from "./transaction";

@@ -22,7 +22,7 @@ import {
 } from "./types";
 
 /** A transaction as forwarded: canonical lower-case hex, value in wei. */
-export interface WalletTransaction {
+interface WalletTransaction {
   readonly from: string;
   readonly to: string;
   readonly data: Hex;
@@ -30,11 +30,9 @@ export interface WalletTransaction {
 }
 
 /** Why a transaction is not forwarded (fixed words, never data). */
-export type WalletTransactionProblem =
-  | "unknown-transaction"
-  | "transaction-rule";
+type WalletTransactionProblem = "unknown-transaction" | "transaction-rule";
 
-export type WalletTransactionCheck =
+type WalletTransactionCheck =
   | {
       readonly ok: true;
       readonly rule: TransactionRule;
@@ -45,6 +43,7 @@ export type WalletTransactionCheck =
 
 const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 const ADDRESS = /^0x[0-9a-f]{40}$/;
+const UTF8_ENCODER = new TextEncoder();
 const READABLE_ASCII = /^[\x20-\x7e]{1,128}$/;
 
 interface RuleContext {
@@ -55,7 +54,7 @@ interface RuleContext {
 }
 
 /** The rules for this chain, contract and selector (or plain value send). */
-export function findTransactionRule(
+function findTransactionRule(
   chainId: number,
   to: string,
   data: Hex,
@@ -97,7 +96,7 @@ function isZero(value: DecodedValue): boolean {
 function lengthOf(value: DecodedValue): number | null {
   if (Array.isArray(value)) return value.length;
   if (typeof value !== "string") return null;
-  return new TextEncoder().encode(value).length;
+  return UTF8_ENCODER.encode(value).length;
 }
 
 const isReadableText = (value: DecodedValue): boolean =>
@@ -228,6 +227,8 @@ function satisfiesValue(
 ): boolean {
   if (value < BigInt(rule.min)) return false;
   if ("max" in rule) return value <= BigInt(rule.max);
+  // `unitsArg` names a uint argument (the table test checks the name), and
+  // strict decoding gives every uint as a bigint; anything else refuses.
   const units = args[rule.unitsArg];
   return typeof units === "bigint" && value <= BigInt(rule.maxPerUnit) * units;
 }

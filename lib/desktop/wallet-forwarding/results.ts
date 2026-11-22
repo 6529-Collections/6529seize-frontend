@@ -47,7 +47,7 @@ function hasResultKeys(value: Record<string, unknown>): boolean {
 }
 
 /** A 65-byte signature, as an externally owned account's wallet returns. */
-export const isSignature = (value: unknown): value is Hex =>
+const isSignature = (value: unknown): value is Hex =>
   typeof value === "string" && SIGNATURE.test(value);
 
 /** A 32-byte transaction hash. */
