@@ -1493,6 +1493,18 @@
       "classification": "crawlable",
       "family": "museum-publication"
     },
+    "/museum/network-onchain": {
+      "classification": "exempt",
+      "exemptReason": "Unlinked noindex test preview of the Network Museum read from the Sepolia ProvenanceRegistry and IPFS; covered by the manual museum-onchain-preview pack, not route sampling."
+    },
+    "/museum/network-onchain/records/[subjectId]": {
+      "classification": "exempt",
+      "exemptReason": "Unlinked noindex test preview of the Network Museum read from the Sepolia ProvenanceRegistry and IPFS; covered by the manual museum-onchain-preview pack, not route sampling."
+    },
+    "/museum/network-onchain/texts": {
+      "classification": "exempt",
+      "exemptReason": "Unlinked noindex test preview of the Network Museum read from the Sepolia ProvenanceRegistry and IPFS; covered by the manual museum-onchain-preview pack, not route sampling."
+    },
     "/museum/network/about": {
       "classification": "crawlable",
       "family": "museum-publication"
