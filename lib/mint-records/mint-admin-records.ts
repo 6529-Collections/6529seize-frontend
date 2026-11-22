@@ -175,11 +175,27 @@ export function mintUserRecordHeaders(
   return mintRecordHeaders(MINT_USER_RECORD_TYPE, request);
 }
 
+/**
+ * Signing never blocks a write: on any failure (no anchor, a device key
+ * error) the write goes without the header, and the API decides. It takes
+ * unsigned writes until its PRIMARY switch.
+ */
 async function mintRecordHeaders(
   type: string,
   request: MintRecordRequest
 ): Promise<Record<string, string>> {
   if (!isMintSignedWritesEnabled()) return {};
+  try {
+    return await signedRecordHeaders(type, request);
+  } catch {
+    return {};
+  }
+}
+
+async function signedRecordHeaders(
+  type: string,
+  request: MintRecordRequest
+): Promise<Record<string, string>> {
   const context = await contextSource();
   if (!context) return {};
   const draft = recordDraft(

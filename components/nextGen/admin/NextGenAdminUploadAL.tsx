@@ -116,10 +116,16 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
     }
     // The signed payload names the file by its sha256, so the API logs
     // exactly the allowlist the admin signed.
-    const allowlistSha256 =
-      isMintSignedWritesEnabled() && allowlistFile instanceof Blob
-        ? await sha256Hex(allowlistFile)
-        : null;
+    let allowlistSha256: string | null = null;
+    if (isMintSignedWritesEnabled() && allowlistFile instanceof Blob) {
+      try {
+        allowlistSha256 = await sha256Hex(allowlistFile);
+      } catch {
+        setUploading(false);
+        setUploadError("Error: Could not read the allowlist file");
+        return;
+      }
+    }
     const payload = {
       ...buildNextgenAllowlistPayload(),
       ...(allowlistSha256 ? { allowlist_sha256: allowlistSha256 } : {}),

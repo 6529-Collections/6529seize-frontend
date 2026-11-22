@@ -181,6 +181,15 @@ describe("mint admin records", () => {
     expect(mockSignRecords).not.toHaveBeenCalled();
   });
 
+  it("sends no header, and lets the write go, when signing throws", async () => {
+    mockSignRecords.mockRejectedValue(new Error("device key unavailable"));
+    await expect(mintAdminRecordHeaders(airdrops)).resolves.toEqual({});
+    setMintRecordContextSource(async () => {
+      throw new Error("no anchor");
+    });
+    await expect(mintAdminRecordHeaders(airdrops)).resolves.toEqual({});
+  });
+
   it("sends no header when this device cannot sign", async () => {
     mockSignRecords.mockResolvedValue({ status: "no-grant" });
     await expect(mintAdminRecordHeaders(airdrops)).resolves.toEqual({});

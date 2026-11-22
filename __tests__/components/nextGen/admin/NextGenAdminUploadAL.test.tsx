@@ -17,6 +17,18 @@ jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   getCollectionIdsForAddress: () => ["1"],
   useParsedCollectionIndex: () => [],
 }));
+const mockSignedWrites = { enabled: false, hashFails: false };
+jest.mock("@/lib/mint-records/mint-admin-records", () => {
+  const actual = jest.requireActual("@/lib/mint-records/mint-admin-records");
+  return {
+    ...actual,
+    isMintSignedWritesEnabled: () => mockSignedWrites.enabled,
+    sha256Hex: (file: Blob) =>
+      mockSignedWrites.hashFails
+        ? Promise.reject(new Error("read failed"))
+        : actual.sha256Hex(file),
+  };
+});
 jest.mock("@/services/6529api", () => ({
   postFormData: jest.fn(() =>
     Promise.resolve({ status: 200, response: { merkle_root: "x" } })
@@ -56,6 +68,8 @@ function fillValidUploadForm() {
 describe("NextGenAdminUploadAL", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockSignedWrites.enabled = false;
+    mockSignedWrites.hashFails = false;
     signMessageState.isError = false;
     signMessageState.isSuccess = false;
     signMessageState.data = undefined;
@@ -84,6 +98,19 @@ describe("NextGenAdminUploadAL", () => {
     expect(button).not.toBeDisabled();
     fireEvent.click(button);
     expect(signMessageState.signMessage).toHaveBeenCalled();
+  });
+
+  it("shows an error and frees the button when the file cannot be hashed", async () => {
+    mockSignedWrites.enabled = true;
+    mockSignedWrites.hashFails = true;
+    render(<NextGenAdminUploadAL close={() => {}} />);
+    fillValidUploadForm();
+    fireEvent.click(screen.getByRole("button", { name: "Upload" }));
+    expect(
+      await screen.findByText("Error: Could not read the allowlist file")
+    ).toBeInTheDocument();
+    expect(signMessageState.signMessage).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Upload" })).not.toBeDisabled();
   });
 
   it("submits the address that signed even if the active wallet changes", async () => {
