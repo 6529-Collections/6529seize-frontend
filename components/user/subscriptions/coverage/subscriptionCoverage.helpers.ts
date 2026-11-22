@@ -98,7 +98,7 @@ export function isSubscriptionCoverageForecastFullyFunded(
   );
 }
 
-export interface SubscriptionFundedDropsAtCurrentSettings {
+interface SubscriptionFundedDropsAtCurrentSettings {
   readonly count: number;
   readonly capped: boolean;
 }
