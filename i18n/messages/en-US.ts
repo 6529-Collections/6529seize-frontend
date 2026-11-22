@@ -611,7 +611,7 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
   "media.gifPreview.guide":
-    "GIFs get an animated preview in Waves and the leaderboard when each frame has at most {pixels} pixels (for example {exampleWidth} × {exampleHeight}) and the GIF has at most {frames} frames.",
+    "GIFs get an animated preview in Waves and the leaderboard when each frame has at most {pixels} pixels (for example {exampleWidth} × {exampleHeight}), at most {frames} frames, and at most {totalPixels} pixels across all frames.",
   "media.gifPreview.framePixels":
     "This GIF is {width} × {height} ({pixels} pixels per frame). Animated previews need at most {limit} pixels per frame, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce its dimensions to keep the preview animated.",
   "media.gifPreview.frames":

@@ -92,6 +92,7 @@ export default function GifAnimatedPreviewNotice({
         exampleWidth: format(2048),
         exampleHeight: format(4096),
         frames: format(GIF_ANIMATED_PREVIEW_MAX_FRAMES),
+        totalPixels: format(GIF_ANIMATED_PREVIEW_MAX_TOTAL_PIXELS),
       })}
     </p>
   );

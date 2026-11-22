@@ -37,7 +37,7 @@ describe("GifAnimatedPreviewNotice", () => {
 
     expect(
       screen.getByText(
-        "GIFs get an animated preview in Waves and the leaderboard when each frame has at most 8,388,608 pixels (for example 2,048 × 4,096) and the GIF has at most 120 frames."
+        "GIFs get an animated preview in Waves and the leaderboard when each frame has at most 8,388,608 pixels (for example 2,048 × 4,096), at most 120 frames, and at most 268,435,456 pixels across all frames."
       )
     ).toBeInTheDocument();
   });
@@ -65,7 +65,9 @@ describe("GifAnimatedPreviewNotice", () => {
     const { rerender } = render(<GifAnimatedPreviewNotice file={file} />);
     rerender(<GifAnimatedPreviewNotice file={file} />);
 
-    expect(await screen.findByText(/GIFs get an animated preview/)).toBeVisible();
+    expect(
+      await screen.findByText(/GIFs get an animated preview/)
+    ).toBeVisible();
     expect(screen.queryByRole("status")).not.toBeInTheDocument();
   });
 

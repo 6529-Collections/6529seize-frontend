@@ -30,7 +30,12 @@ const buildGif = ({
   ];
   if (globalColorTable) bytes.push(...new Array(6).fill(0));
   // Netscape looping application extension.
-  bytes.push(0x21, 0xff, 11, ...Array.from("NETSCAPE2.0", (c) => c.charCodeAt(0)));
+  bytes.push(
+    0x21,
+    0xff,
+    11,
+    ...Array.from("NETSCAPE2.0", (c) => c.charCodeAt(0))
+  );
   bytes.push(3, 1, 0, 0, 0);
   for (let frame = 0; frame < frames; frame += 1) {
     bytes.push(0x21, 0xf9, 4, 0, 10, 0, 0, 0);
@@ -72,10 +77,15 @@ describe("parseGifAnimationInfo", () => {
   });
 
   it("rejects data that is not a GIF", () => {
-    expect(parseGifAnimationInfo(new Uint8Array([0x89, 0x50, 0x4e]))).toBeNull();
+    expect(
+      parseGifAnimationInfo(new Uint8Array([0x89, 0x50, 0x4e]))
+    ).toBeNull();
     expect(
       parseGifAnimationInfo(
-        Uint8Array.from([...Array.from("PNGxxx", (c) => c.charCodeAt(0)), ...new Array(10).fill(0)])
+        Uint8Array.from([
+          ...Array.from("PNGxxx", (c) => c.charCodeAt(0)),
+          ...new Array(10).fill(0),
+        ])
       )
     ).toBeNull();
   });
