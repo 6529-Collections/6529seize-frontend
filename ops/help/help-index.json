@@ -2928,8 +2928,8 @@
         "what is x tdh",
         "xtdh grants",
         "xTDH grants",
-        "xtdh frozen",
-        "xtdh is frozen",
+        "xtdh retired",
+        "xtdh is retired",
         "can't create grant"
       ],
       "keywords": [
@@ -2949,8 +2949,8 @@
         "collections",
         "network",
         "profile",
-        "frozen",
-        "freeze"
+        "retired",
+        "retirement"
       ],
       "facts": [
         "xTDH is an extension of TDH that lets TDH-like network participation flow beyond core 6529 holders to other NFT holders and communities.",
@@ -2972,8 +2972,9 @@
         "No produced xTDH is intended to disappear; it is allocated to someone.",
         "For live network-wide xTDH allocation data, use the xTDH Allocations Dashboard at /xtdh.",
         "Profile xTDH information is available under /{user}/xtdh when visible.",
-        "When identities move to the 6529 Network, xTDH is frozen: from the identity freeze it stops changing, and everyone keeps the xTDH they had then. The xTDH pages then say xTDH is frozen and when it stopped changing.",
-        "While xTDH is frozen, creating a grant and changing one (Stop Grant, revoking) are not available on the profile's xTDH tab. New grants and changes to grants wait for one-time grants on the 6529 Network."
+        "xTDH is retired when identities move to the 6529 Network. The network takes no xTDH and no grants over.",
+        "On the freeze day, the day identities move, grants can't be created or changed (no Stop Grant, no revoking), and the xTDH pages say xTDH is being retired. The figures stay that day.",
+        "From the switch-on, a day after the freeze, the site shows no xTDH figures: /xtdh and /{user}/xtdh show only the notice that xTDH was retired when identities moved to the 6529 Network, the profile's xTDH tab leaves the tab bar, and the xTDH stat, the network table's xTDH column, the health page's xTDH Granted card and the Collected tab's Network view are gone."
       ],
       "canonical_path": "/network/xtdh",
       "related_paths": ["/xtdh", "/{user}/xtdh", "/network"],

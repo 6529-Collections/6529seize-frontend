@@ -59,14 +59,15 @@ received from grants, granted out, and added to your total.
 - No wallet gating; same content for signed-in and signed-out users.
 - No route-specific loading, empty, or retry states.
 
-## xTDH Frozen
+## xTDH Retired
 
-When identities move to the 6529 Network, xTDH is frozen from the identity
-freeze (`NEXT_PUBLIC_IDENTITY_FREEZE_AT`). From then the page shows an
-`xTDH is frozen` notice above its content: xTDH stopped changing at that
-time, everyone keeps the xTDH they had then, and new grants and changes to
-grants wait for one-time grants on the 6529 Network. Before the freeze, or
-with no freeze set, nothing is shown.
+xTDH is retired when identities move to the 6529 Network
+(`NEXT_PUBLIC_IDENTITY_FREEZE_AT`); the network takes no xTDH and no grants
+over. On the freeze day the page shows a notice above its content: xTDH is
+being retired as identities move to the 6529 Network, and grants can't be
+created or changed. From the switch-on, a day later, the notice says xTDH
+was retired when identities moved to the 6529 Network. The explanation
+below stays. Before the freeze, or with no freeze set, nothing is shown.
 
 ## Failure and Recovery
 

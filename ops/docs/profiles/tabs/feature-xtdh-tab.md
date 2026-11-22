@@ -63,11 +63,17 @@ Owner-only actions:
 - stop or revoke grants in `Pending` or `Granted` status,
 - use the `Outbound` quick action in the stats header.
 
-From the identity freeze (`NEXT_PUBLIC_IDENTITY_FREEZE_AT`), when identities
-move to the 6529 Network, xTDH is frozen and owner mode is off for everyone:
-none of these actions is shown, and an `xTDH is frozen` notice replaces the
-test-mode banner. During the backend freeze the API refuses grant writes
-as well.
+xTDH is retired when identities move to the 6529 Network
+(`NEXT_PUBLIC_IDENTITY_FREEZE_AT`):
+
+- On the freeze day owner mode is off for everyone: none of these actions
+  is shown, and a notice that xTDH is being retired and grants can't be
+  created or changed replaces the test-mode banner. The stats and views
+  stay. The API refuses grant writes from the freeze as well.
+- From the switch-on, a day later, the tab leaves the profile's tab bar. A
+  link to `/{user}/xtdh` still opens it, with only the notice that xTDH was
+  retired when identities moved to the 6529 Network: no stats, no
+  `Granted` or `Received` views.
 
 ## User Journey
 

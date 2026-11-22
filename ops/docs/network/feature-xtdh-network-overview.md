@@ -61,14 +61,16 @@ Notes:
 - If a selected contract is not found in loaded collection metadata, the token
   view still opens and shows `Collection summary unavailable.`
 
-## xTDH Frozen
+## xTDH Retired
 
-When identities move to the 6529 Network, xTDH is frozen from the identity
-freeze (`NEXT_PUBLIC_IDENTITY_FREEZE_AT`). From then the page shows an
-`xTDH is frozen` notice above the stats: xTDH stopped changing at that
-time, everyone keeps the xTDH they had then, and new grants and changes to
-grants wait for one-time grants on the 6529 Network. Before the freeze, or
-with no freeze set, nothing is shown.
+xTDH is retired when identities move to the 6529 Network
+(`NEXT_PUBLIC_IDENTITY_FREEZE_AT`); the network takes no xTDH and no grants
+over. On the freeze day the page keeps its stats and lists, with a notice
+above them: xTDH is being retired as identities move to the 6529 Network,
+and grants can't be created or changed. From the switch-on, a day later,
+the page shows only the title `xTDH` and the notice that xTDH was retired
+when identities moved to the 6529 Network: no stats, no lists. Before the
+freeze, or with no freeze set, nothing changes.
 
 ## Failure and Recovery
 

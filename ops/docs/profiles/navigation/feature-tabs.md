@@ -24,7 +24,9 @@ Profile tab routes live under `/{user}`.
 - `/{user}/curations`: Curation
 - `/{user}/brain`: Brain
 - `/{user}/collected`: Collected
-- `/{user}/xtdh`: xTDH (Beta label in the tab UI)
+- `/{user}/xtdh`: xTDH (Beta label in the tab UI). From the identity
+  switch-on xTDH is retired and the tab leaves the tab bar; a link to the
+  route still opens it, with only the retirement notice.
 - `/{user}/subscriptions`: Subscriptions
 - `/{user}/proxy`: Proxy
 
