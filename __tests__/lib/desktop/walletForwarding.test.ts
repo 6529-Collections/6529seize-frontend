@@ -17,12 +17,16 @@ import {
   parseWalletRequestFragment,
   parseWalletResult,
   readWalletMessageText,
+  toCanonicalTransaction,
   verifyWalletRequestFragment,
   WALLET_REQUEST_TTL_MS,
+  WALLET_TRANSACTION_TTL_MS,
+  walletBridgeSendsTransactions,
   walletRequestCode,
   type WalletRequestEnvelope,
   type WalletRequestInput,
 } from "@/lib/desktop/wallet-forwarding";
+import { walletTransactionRulesHash } from "@/lib/desktop/wallet-transactions";
 
 // Public development keys (Hardhat/Anvil accounts 0 and 1); never funded.
 const SHELL_KEY =
@@ -93,7 +97,6 @@ describe("parseWalletRequest: common rules", () => {
   it("refuses methods that are not forwarded", () => {
     for (const method of [
       "eth_sign",
-      "eth_sendTransaction",
       "wallet_sendTransaction",
       "eth_signTypedData",
       "eth_signTypedData_v3",
@@ -856,6 +859,7 @@ describe("request envelope", () => {
       envelope({ issuedAt: NOW + 50_000, expiresAt: NOW + 40_000 }),
       envelope({ issuedAt: NOW + 120_000, expiresAt: NOW + 130_000 }),
       envelope({ expiresAt: NOW + WALLET_REQUEST_TTL_MS + 1 }),
+      envelope({ expiresAt: NOW + WALLET_TRANSACTION_TTL_MS }),
     ]) {
       expect(
         parseWalletRequestFragment(await signedFragment(value), context)
@@ -955,6 +959,169 @@ describe("walletRequestCode", () => {
   });
 });
 
+describe("request envelope: transactions", () => {
+  const tx = {
+    from: ADDRESS,
+    to: OTHER_ADDRESS,
+    data: "0x",
+    value: "0x1",
+  };
+  const envelope = (expiresAt: number): WalletRequestEnvelope => ({
+    v: 1,
+    id: ID,
+    scheme: "core6529",
+    origin: ORIGIN,
+    issuedAt: NOW,
+    expiresAt,
+    request: input("eth_sendTransaction", [tx]),
+  });
+  const context = { origin: ORIGIN, now: NOW + 1000, allowedChainIds: CHAINS };
+  const fragment = async (value: WalletRequestEnvelope) => {
+    const bytes = encodeWalletRequestEnvelope(value);
+    const signature = await shell.signMessage({ message: { raw: bytes } });
+    return buildWalletRequestFragment(bytes, signature)!;
+  };
+
+  it("gives a transaction five minutes, not more", async () => {
+    expect(WALLET_TRANSACTION_TTL_MS).toBe(300_000);
+    const accepted = parseWalletRequestFragment(
+      await fragment(envelope(NOW + WALLET_TRANSACTION_TTL_MS)),
+      context
+    );
+    expect(accepted.ok && accepted.value.request).toEqual({
+      method: "eth_sendTransaction",
+      address: CHECKSUMMED,
+      chainId: 1,
+      transaction: tx,
+    });
+    expect(
+      parseWalletRequestFragment(
+        await fragment(envelope(NOW + WALLET_TRANSACTION_TTL_MS + 1)),
+        context
+      )
+    ).toEqual({ ok: false, problem: "expired" });
+  });
+});
+
+describe("parseWalletRequest: eth_sendTransaction", () => {
+  const tx = (overrides: Record<string, unknown> = {}) => ({
+    from: ADDRESS,
+    to: OTHER_ADDRESS,
+    data: "0xabcdef01",
+    value: "0x1e",
+    ...overrides,
+  });
+  const send = (params: unknown, overrides: Partial<WalletRequestInput> = {}) =>
+    input("eth_sendTransaction", params, overrides);
+
+  it("accepts one canonical transaction from the bound address", () => {
+    expect(parse(send([tx()]))).toEqual({
+      ok: true,
+      value: {
+        method: "eth_sendTransaction",
+        address: CHECKSUMMED,
+        chainId: 1,
+        transaction: tx(),
+      },
+    });
+    expect(parse(send([tx({ data: "0x", value: "0x0" })])).ok).toBe(true);
+  });
+
+  it("refuses keys that are missing, extra or out of order", () => {
+    for (const value of [
+      { from: ADDRESS, to: OTHER_ADDRESS, data: "0x" },
+      { ...tx(), gas: "0x5208" },
+      { ...tx(), nonce: "0x1" },
+      { ...tx(), maxFeePerGas: "0x1" },
+      { ...tx(), chainId: "0x1" },
+      { to: OTHER_ADDRESS, from: ADDRESS, data: "0x", value: "0x0" },
+    ]) {
+      expect(problemOf(send([value]))).toBe("invalid-params");
+    }
+  });
+
+  it("refuses non-canonical values", () => {
+    for (const overrides of [
+      { to: "0xABCDEF0000000000000000000000000000000000" },
+      { to: undefined },
+      { data: "0xABCD" },
+      { data: "0xabc" },
+      { value: "0x01" },
+      { value: "0X1" },
+      { value: "1" },
+      { value: `0x1${"0".repeat(64)}` },
+    ]) {
+      expect(problemOf(send([tx(overrides)]))).toBe("invalid-params");
+    }
+    expect(problemOf(send([tx(), tx()]))).toBe("invalid-params");
+    expect(problemOf(send(tx()))).toBe("invalid-params");
+  });
+
+  it("refuses an upper-case sender even when it is the bound address", () => {
+    const bound = "0xabcdef0000000000000000000000000000000001";
+    expect(
+      problemOf(
+        send([tx({ from: "0xABCDEF0000000000000000000000000000000001" })], {
+          address: bound,
+        })
+      )
+    ).toBe("invalid-params");
+    expect(problemOf(send([tx({ from: bound })], { address: bound }))).toBe(
+      null
+    );
+  });
+
+  it("refuses another sender, context, and data over 10 KiB", () => {
+    expect(problemOf(send([tx({ from: OTHER_ADDRESS })]))).toBe(
+      "wrong-address"
+    );
+    expect(problemOf(send([tx()], { context: "{}" }))).toBe("invalid-params");
+    expect(
+      problemOf(send([tx({ data: `0x${"ab".repeat(10 * 1024 + 1)}` })]))
+    ).toBe("too-large");
+  });
+});
+
+describe("toCanonicalTransaction", () => {
+  it("normalizes what viem sends", () => {
+    expect(
+      toCanonicalTransaction(
+        { from: CHECKSUMMED, to: "0xABCDEF0000000000000000000000000000000000" },
+        ADDRESS
+      )
+    ).toEqual({
+      from: ADDRESS,
+      to: "0xabcdef0000000000000000000000000000000000",
+      data: "0x",
+      value: "0x0",
+    });
+    expect(
+      toCanonicalTransaction(
+        { from: ADDRESS, to: OTHER_ADDRESS, data: "0xAB", value: "0x0001" },
+        ADDRESS
+      )
+    ).toEqual({ from: ADDRESS, to: OTHER_ADDRESS, data: "0xab", value: "0x1" });
+  });
+
+  it("refuses fees, gas, nonce, another sender or no recipient", () => {
+    for (const value of [
+      { from: ADDRESS, to: OTHER_ADDRESS, gas: "0x1" },
+      { from: ADDRESS, to: OTHER_ADDRESS, maxPriorityFeePerGas: "0x1" },
+      { from: ADDRESS, to: OTHER_ADDRESS, nonce: "0x1" },
+      { from: ADDRESS, to: OTHER_ADDRESS, type: "0x2" },
+      { from: ADDRESS, to: OTHER_ADDRESS, chainId: "0x1" },
+      { from: OTHER_ADDRESS, to: OTHER_ADDRESS },
+      { from: ADDRESS },
+      { from: ADDRESS, to: OTHER_ADDRESS, data: "0xabc" },
+      { from: ADDRESS, to: OTHER_ADDRESS, value: 1 },
+      null,
+      [],
+    ]) {
+      expect(toCanonicalTransaction(value, ADDRESS)).toBeNull();
+    }
+  });
+});
+
 describe("wallet results", () => {
   it("builds the return link the shell parses", () => {
     const link = buildWalletResultDeepLink("stagingcore6529", {
@@ -983,6 +1150,15 @@ describe("wallet results", () => {
     for (const value of [NOT_A_SIGNATURE, `${SIGNATURE}00`, "0x", 42]) {
       expect(parseWalletResult(ok(value as string))).toBeNull();
     }
+  });
+
+  it("accepts a transaction hash only for a transaction", () => {
+    const ok = (value: string) => ({ v: 1, id: ID, ok: true, value });
+    expect(
+      parseWalletResult(ok(NOT_A_SIGNATURE), "eth_sendTransaction")
+    ).toEqual(ok(NOT_A_SIGNATURE));
+    expect(parseWalletResult(ok(SIGNATURE), "eth_sendTransaction")).toBeNull();
+    expect(parseWalletResult(ok(NOT_A_SIGNATURE), "personal_sign")).toBeNull();
   });
 
   it("accepts known failure codes only", () => {
@@ -1079,6 +1255,81 @@ describe("parseWalletBridgeResponse", () => {
   });
 });
 
+describe("parseWalletBridgeResponse: transactions", () => {
+  const HASH = NOT_A_SIGNATURE;
+
+  it("passes a transaction hash for a transaction, never a signature", () => {
+    expect(
+      parseWalletBridgeResponse(
+        { ok: true, value: HASH },
+        "eth_sendTransaction"
+      )
+    ).toEqual({ ok: true, value: HASH });
+    expect(
+      parseWalletBridgeResponse(
+        { ok: true, value: SIGNATURE },
+        "eth_sendTransaction"
+      )
+    ).toEqual({ ok: false, code: "failed" });
+  });
+
+  it("keeps the reported hash only with its reasons", () => {
+    for (const [code, reason] of [
+      ["unverified", "transaction-not-visible"],
+      ["unverified", "rpc-unavailable"],
+      ["failed", "transaction-mismatch"],
+    ]) {
+      expect(
+        parseWalletBridgeResponse(
+          {
+            ok: false,
+            code,
+            reason,
+            transactionHash: HASH.toUpperCase().replace("0X", "0x"),
+          },
+          "eth_sendTransaction"
+        )
+      ).toEqual({ ok: false, code, reason, transactionHash: HASH });
+    }
+    for (const value of [
+      {
+        ok: false,
+        code: "failed",
+        reason: "transaction-not-visible",
+        transactionHash: HASH,
+      },
+      {
+        ok: false,
+        code: "unverified",
+        reason: "transaction-mismatch",
+        transactionHash: HASH,
+      },
+      {
+        ok: false,
+        code: "failed",
+        reason: "unverified-signature",
+        transactionHash: HASH,
+      },
+      { ok: false, code: "unverified", transactionHash: HASH },
+    ]) {
+      expect(
+        parseWalletBridgeResponse(value, "eth_sendTransaction")
+      ).not.toHaveProperty("transactionHash");
+    }
+    expect(
+      parseWalletBridgeResponse(
+        {
+          ok: false,
+          code: "unverified",
+          reason: "rpc-unavailable",
+          transactionHash: SIGNATURE,
+        },
+        "eth_sendTransaction"
+      )
+    ).toEqual({ ok: false, code: "unverified", reason: "rpc-unavailable" });
+  });
+});
+
 describe("parseWalletBridgeStatus", () => {
   it("passes an open request with its code", () => {
     expect(
@@ -1115,7 +1366,7 @@ describe("parseWalletBridgeStatus", () => {
       {
         pending: true,
         code: "A1B-2C3",
-        method: "eth_sendTransaction",
+        method: "wallet_sendTransaction",
         expiresAt: NOW,
       },
       {
@@ -1145,6 +1396,37 @@ describe("parseWalletBridgeCapabilities", () => {
     expect(
       parseWalletBridgeCapabilities({ version: 1, methods: ["personal_sign"] })
     ).toEqual(["personal_sign"]);
+  });
+
+  it("offers transactions only with this website's rules hash", () => {
+    const methods = ["personal_sign", "eth_sendTransaction"];
+    const withRules = {
+      version: 1,
+      methods,
+      transactionRules: walletTransactionRulesHash(),
+    };
+    expect(parseWalletBridgeCapabilities(withRules)).toEqual([
+      "personal_sign",
+      "eth_sendTransaction",
+    ]);
+    expect(walletBridgeSendsTransactions(withRules)).toBe(true);
+    for (const value of [
+      { version: 1, methods },
+      { version: 1, methods, transactionRules: "0".repeat(64) },
+      {
+        version: 1,
+        methods,
+        transactionRules: walletTransactionRulesHash().toUpperCase(),
+      },
+      {
+        version: 1,
+        methods: ["personal_sign"],
+        transactionRules: walletTransactionRulesHash(),
+      },
+    ]) {
+      expect(parseWalletBridgeCapabilities(value)).toEqual(["personal_sign"]);
+      expect(walletBridgeSendsTransactions(value)).toBe(false);
+    }
   });
 
   it("returns nothing for another version or a malformed answer", () => {

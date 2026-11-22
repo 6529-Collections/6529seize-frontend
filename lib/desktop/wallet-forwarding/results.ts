@@ -6,10 +6,12 @@ import {
   isRecord,
   REQUEST_ID,
   SIGNATURE,
+  TRANSACTION_HASH,
   WALLET_FORWARDING_VERSION,
+  type WalletForwardingMethod,
 } from "./shared";
 
-/** Why the browser page did not return a signature. */
+/** Why the browser page did not return a signature or transaction hash. */
 export const WALLET_RESULT_FAILURES = [
   "rejected",
   "failed",
@@ -48,6 +50,22 @@ function hasResultKeys(value: Record<string, unknown>): boolean {
 export const isSignature = (value: unknown): value is Hex =>
   typeof value === "string" && SIGNATURE.test(value);
 
+/** A 32-byte transaction hash. */
+const isTransactionHash = (value: unknown): value is Hex =>
+  typeof value === "string" && TRANSACTION_HASH.test(value);
+
+/**
+ * Whether `value` is a success value for `method`: a transaction hash for
+ * `eth_sendTransaction`, a signature for everything else.
+ */
+export const isWalletResultValue = (
+  value: unknown,
+  method: WalletForwardingMethod
+): value is Hex =>
+  method === "eth_sendTransaction"
+    ? isTransactionHash(value)
+    : isSignature(value);
+
 export function buildWalletResultDeepLink(
   scheme: DesktopScheme,
   result: WalletResult
@@ -56,10 +74,14 @@ export function buildWalletResultDeepLink(
 }
 
 /**
- * Validate a returned result. The shell applies the same rules and also
- * matches the id to its live request.
+ * Validate a returned result for a request of `method` (a signature, or a
+ * transaction hash for `eth_sendTransaction`). The shell applies the same
+ * rules and also matches the id to its live request.
  */
-export function parseWalletResult(value: unknown): WalletResult | null {
+export function parseWalletResult(
+  value: unknown,
+  method: WalletForwardingMethod = "personal_sign"
+): WalletResult | null {
   // Exactly the result's keys: every field is then bounded by its own
   // check, with no need to serialize untrusted input to measure it.
   if (!isRecord(value) || !hasResultKeys(value)) return null;
@@ -73,7 +95,7 @@ export function parseWalletResult(value: unknown): WalletResult | null {
   }
   if (ok === true) {
     const result = value["value"];
-    return isSignature(result)
+    return isWalletResultValue(result, method)
       ? { v, id, ok, value: result.toLowerCase() as Hex }
       : null;
   }

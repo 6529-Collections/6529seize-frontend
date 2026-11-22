@@ -302,6 +302,10 @@ function signRequest(
       message: { raw: request.message },
     });
   }
+  // Never reached: a transaction is refused before anything is offered.
+  if (request.method === "eth_sendTransaction") {
+    return Promise.reject(new Error("Transactions are not signed here."));
+  }
   // viem derives the domain type from the domain itself.
   const { EIP712Domain: _domainType, ...types } = request.typedData.types;
   return signTypedData({

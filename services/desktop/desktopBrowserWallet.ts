@@ -344,7 +344,10 @@ export async function runDesktopWalletRequest(
   }
   try {
     const response = parseWalletBridgeResponse(
-      await bridge.request(request).catch(() => null)
+      await bridge.request(request).catch(() => null),
+      request.method === "eth_sendTransaction"
+        ? "eth_sendTransaction"
+        : "personal_sign"
     );
     return ownerRequest === id ? finish(response) : response;
   } finally {
