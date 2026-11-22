@@ -223,5 +223,6 @@
   "museum.onchain.works.selected": "Works selected, not in the collection",
   "museum.onchain.record.notPublished": "Also connected to {count} Museum records that are not published in this registry.",
   "museum.onchain.record.mediaNote": "Catalogued in the Museum's records; not published as images in this registry.",
-  "museum.onchain.filter.showAll": "Show all {count}"
+  "museum.onchain.filter.showAll": "Show all {count}",
+  "museum.onchain.record.notPublishedOne": "Also connected to 1 Museum record that is not published in this registry."
 }

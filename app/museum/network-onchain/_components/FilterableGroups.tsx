@@ -105,14 +105,11 @@ function CardRow({
 }>) {
   return (
     <li className="tw-min-w-0">
-      <div className="tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-bg-iron-950">
-        <VerifiedImage
-          derivatives={image.derivatives}
-          alt={image.alt}
-          copy={copy.image}
-          fit="square"
-        />
-      </div>
+      <VerifiedImage
+        derivatives={image.derivatives}
+        alt={image.alt}
+        copy={copy.image}
+      />
       <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-2">
         <span className="tw-min-w-0">
           <Link href={item.href} className={`tw-text-sm ${LINK}`}>
@@ -144,7 +141,7 @@ function CardGroup({
       {withImages.length === 0 ? null : (
         <ul
           aria-labelledby={group.anchor}
-          className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 tw-p-0 sm:tw-grid-cols-3 lg:tw-grid-cols-4"
+          className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-x-4 tw-gap-y-6 tw-p-0 min-[480px]:tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-4"
         >
           {withImages.map(({ item, image }) => (
             <CardRow key={item.key} item={item} image={image} copy={copy} />

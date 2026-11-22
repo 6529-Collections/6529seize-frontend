@@ -14,3 +14,13 @@
 - Repair batch 1 addresses every required finding. The candidate is served at
   http://localhost:3343 as a production build. Round 00 evidence moved to
   `evidence-round-00/`.
+- Repair batch 1 is commit 43538a2; 1a93640 punctuates built credits after titles that
+  end a sentence (found in the builder's own read of the captures before judging).
+- Score: `repair`, total 8.468. All round 00 findings resolved; V-003 (card frames
+  letterbox images in squares) raised to P2 to cover J06 at 8.
+
+## Round 02
+
+- Repair batch 2: work cards follow each image's proportion with no letterbox, in one
+  column below 480 px; "1 Museum record" is singular. Round 01 evidence moved to
+  `evidence-round-01/`.

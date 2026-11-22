@@ -328,9 +328,11 @@ function relationFacts(
           <LinkList links={references} />
           {unpublished === 0 ? null : (
             <p className="tw-m-0 tw-mt-2 tw-text-iron-400">
-              {t(locale, "museum.onchain.record.notPublished", {
-                count: unpublished,
-              })}
+              {unpublished === 1
+                ? t(locale, "museum.onchain.record.notPublishedOne")
+                : t(locale, "museum.onchain.record.notPublished", {
+                    count: unpublished,
+                  })}
             </p>
           )}
         </>
@@ -538,9 +540,11 @@ function Connections({
       </div>
       {unpublished.size === 0 ? null : (
         <p className="tw-m-0 tw-mt-4 tw-text-sm tw-text-iron-400">
-          {t(locale, "museum.onchain.record.notPublished", {
-            count: unpublished.size,
-          })}
+          {unpublished.size === 1
+            ? t(locale, "museum.onchain.record.notPublishedOne")
+            : t(locale, "museum.onchain.record.notPublished", {
+                count: unpublished.size,
+              })}
         </p>
       )}
     </section>
