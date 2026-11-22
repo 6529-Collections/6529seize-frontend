@@ -3,7 +3,7 @@
   "config": "tsconfig.jest.json",
   "toolchain": {
     "typescript_version": "5.9.3",
-    "pnpm_lock_sha256": "fccb065cf36c005e6115c4f1f6a7dacbab3cf86f0d568cacbc9b8c5cfb310720",
+    "pnpm_lock_sha256": "d1807feb7e54638eb9a68603ffa39b92a0ac59711b7368f5f488812d9999c366",
     "jest_tsconfig_sha256": "feda509a89cdd90cbcd9da6eecae28759c34c7aaae3725593ec2b1c022017062",
     "base_tsconfig_sha256": "fdbd8e548aed634324fd228e74d541ea702c1311597aa938741651e50de59c5f"
   },
@@ -367,7 +367,6 @@
     "__tests__/components/RevokeDelegationWithSub.test.tsx": 1,
     "__tests__/components/scrollTo/ScrollToButton.test.tsx": 1,
     "__tests__/components/searchModal/SearchModal.test.tsx": 1,
-    "__tests__/components/SelectGroupModalSearchName.test.tsx": 1,
     "__tests__/components/TableOfLevels.test.tsx": 6,
     "__tests__/components/the-memes/MemePage.test.tsx": 4,
     "__tests__/components/the-memes/MemePageTimeline.test.tsx": 1,
@@ -519,7 +518,7 @@
     "__tests__/components/waves/drop/SingleWaveDropVote.test.tsx": 1,
     "__tests__/components/waves/drop/SingleWaveDropVoteContent.basic.test.tsx": 2,
     "__tests__/components/waves/drop/SingleWaveDropVoteContent.test.tsx": 14,
-    "__tests__/components/waves/drop/SingleWaveDropVoteInput.test.tsx": 12,
+    "__tests__/components/waves/drop/SingleWaveDropVoteInput.test.tsx": 11,
     "__tests__/components/waves/drop/SingleWaveDropVoter.test.tsx": 1,
     "__tests__/components/waves/drop/SingleWaveDropVotes.test.tsx": 1,
     "__tests__/components/waves/drop/SingleWaveDropVoteSlider.test.tsx": 11,

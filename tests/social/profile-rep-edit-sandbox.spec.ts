@@ -17,6 +17,19 @@ import {
 const TARGET = "following-artist-0";
 const CATEGORY = "Artist";
 
+async function expectFocusedAmountWithoutSelection(amount: Locator) {
+  await expect(amount).toBeFocused();
+  await expect
+    .poll(() =>
+      amount.evaluate(
+        (input: HTMLInputElement) =>
+          input.selectionStart !== null &&
+          input.selectionStart === input.selectionEnd
+      )
+    )
+    .toBe(true);
+}
+
 async function seedSession(page: Page, role: string | null) {
   const address = "0x0000000000000000000000000000000000000529";
   const jwt = [
@@ -120,6 +133,13 @@ async function installCategories(
   );
 }
 
+async function setSandboxProfileRep(api: string, rating: number) {
+  const url = new URL("/__composer-sandbox/profile-rep", api);
+  url.searchParams.set("rating", rating.toString());
+  const response = await fetch(url, { method: "POST" });
+  expect(response.ok).toBe(true);
+}
+
 async function openProfile(page: Page, role: string | null = null) {
   await seedSession(page, role);
   await page.goto(`/${TARGET}`, { waitUntil: "domcontentloaded" });
@@ -179,6 +199,11 @@ function categoryPanel(page: Page) {
 }
 
 async function getContributorRowPresentation(list: Locator) {
+  // The header stays clear of development-only badges over the bottom row.
+  // Wait for its entrance without scrolling a contributor just to measure it.
+  await list
+    .getByRole("button", { name: "Close", exact: true })
+    .click({ trial: true });
   return list
     .getByRole("link")
     .first()
@@ -187,7 +212,7 @@ async function getContributorRowPresentation(list: Locator) {
         link.parentElement?.tagName === "LI" ? link.parentElement : link;
       const label = link.querySelector(".tw-truncate");
       const avatar = link.querySelector('[aria-hidden="true"] > div');
-      if (!label || !avatar) throw new Error("Missing contributor identity");
+      if (!label) throw new Error("Missing contributor identity");
       const style = getComputedStyle(row);
       const labelStyle = getComputedStyle(label);
       return {
@@ -198,8 +223,8 @@ async function getContributorRowPresentation(list: Locator) {
         padding: style.padding,
         fontSize: labelStyle.fontSize,
         fontWeight: labelStyle.fontWeight,
-        avatarSize: avatar.getBoundingClientRect().width,
-        avatarRadius: getComputedStyle(avatar).borderRadius,
+        avatarSize: avatar?.getBoundingClientRect().width ?? null,
+        avatarRadius: avatar ? getComputedStyle(avatar).borderRadius : null,
       };
     });
 }
@@ -253,13 +278,27 @@ async function expectPersonalTagSpacing(
   const spacing = await tag.evaluate((element) => {
     const id = element.getAttribute("aria-describedby");
     const amount = id ? document.getElementById(id) : null;
-    const title = element.nextElementSibling;
+    const identity = element.nextElementSibling;
+    const title = identity?.firstElementChild;
     if (!amount || !title) throw new Error("Missing personal REP amount");
     const box = element.getBoundingClientRect();
     const amountBox = amount.getBoundingClientRect();
     const titleBox = title.getBoundingClientRect();
+    const contributorBox = identity.nextElementSibling?.getBoundingClientRect();
+    const contentTop = Math.min(
+      titleBox.top,
+      amountBox.top,
+      contributorBox?.top ?? Infinity
+    );
+    const contentBottom = Math.max(
+      titleBox.bottom,
+      amountBox.bottom,
+      contributorBox?.bottom ?? 0
+    );
     return {
       height: box.height,
+      contentHeight: contentBottom - contentTop,
+      titleClipped: title.scrollWidth > title.clientWidth + 1,
       gap: amountBox.top - titleBox.bottom,
       bottom: box.bottom - amountBox.bottom,
       horizontalGap: amountBox.left - titleBox.right,
@@ -273,11 +312,18 @@ async function expectPersonalTagSpacing(
   if (isMobile && sameLine) {
     expect(spacing.height).toBe(46);
     expect(spacing.centerOffset).toBeCloseTo(0, 0);
-    expect(spacing.horizontalGap).toBeCloseTo(6, 0);
+    expect(spacing.horizontalGap).toBeGreaterThanOrEqual(6);
   } else if (isMobile) {
-    expect(spacing.height).toBeGreaterThan(46);
-    expect(spacing.height).toBeLessThanOrEqual(64);
-    expect(spacing.gap).toBeGreaterThanOrEqual(4);
+    expect(spacing.height).toBeGreaterThanOrEqual(46);
+    // Natural wrapping can use one or several rows; constrain the surrounding padding.
+    expect(spacing.height).toBeLessThanOrEqual(
+      Math.max(46, spacing.contentHeight + 22)
+    );
+    expect(spacing.titleClipped).toBe(false);
+    if (Math.abs(spacing.centerOffset) < 1) {
+      expect(spacing.horizontalGap).toBeGreaterThanOrEqual(6);
+      expect(spacing.horizontalGap).toBeLessThanOrEqual(14);
+    } else expect(spacing.gap).toBeGreaterThanOrEqual(4);
     expect(spacing.bottom).toBeGreaterThanOrEqual(8);
   } else expect(spacing.height).toBe(38);
 }
@@ -376,12 +422,701 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await installCategories(page, getSandboxApiOrigin(baseURL));
   });
 
-  test("signed-out viewers do not see personal amounts from stale REP responses", async ({
+  test("keeps Grant Rep fixed while selecting assigned chips and searching without saving", async ({
     page,
+    baseURL,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    let allocationReads = 0;
+    let writes = 0;
+    let searches = 0;
+    const checkedCategories: string[] = [];
+    const stats = [
+      {
+        category: CATEGORY,
+        rating: 2000,
+        contributor_count: 3,
+        rater_contribution: 1000,
+      },
+      {
+        category: "Research",
+        rating: 500,
+        contributor_count: 2,
+        rater_contribution: -25,
+      },
+      ...[
+        "Music",
+        "Community",
+        "Art",
+        "Curation",
+        "Memes",
+        "AI",
+        "Photography",
+      ].map((category, index) => ({
+        category,
+        rating: 900 - index,
+        contributor_count: 1,
+        rater_contribution: 0,
+      })),
+    ];
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) => {
+        allocationReads++;
+        return route.fulfill({
+          json: {
+            ...allowance,
+            rep_rates_left_for_rater: 5000,
+            rating_stats: stats,
+          },
+        });
+      }
+    );
+    await page.route(
+      (url) =>
+        /^\/api\/+rep\/categories(?:\/availability)?$/.test(url.pathname),
+      (route) => {
+        const url = new URL(route.request().url());
+        if (url.pathname.endsWith("/availability")) {
+          checkedCategories.push(url.searchParams.get("param") ?? "");
+          return route.fulfill({ json: true });
+        }
+        searches++;
+        return route.fulfill({ json: ["Music"] });
+      }
+    );
+    await page.route(`${api}/api/profiles/${TARGET}/rep/rating`, (route) => {
+      writes++;
+      return route.fulfill({
+        status: 500,
+        json: { message: "Unexpected save while choosing categories" },
+      });
+    });
+    await page.route(`${api}/api/profiles/${TARGET}/rep/overview*`, (route) =>
+      route.fulfill({
+        json: {
+          total_rep: stats.reduce((sum, item) => sum + item.rating, 0),
+          authenticated_user_contribution: 975,
+          contributor_count: 3,
+          contributors: { data: [], page: 1, next: false, count: 0 },
+        },
+      })
+    );
+    await openProfile(page);
+    await page.getByRole("button", { name: "Grant Rep", exact: true }).click();
+    const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
+    const search = grant.getByRole("textbox", {
+      name: "Category to grant REP for",
+      exact: true,
+    });
+    await expect(search).toHaveValue("");
+    const amount = grant.getByRole("textbox", {
+      name: "Your total REP for this category",
+      exact: true,
+    });
+    await expect(amount).toBeEnabled();
+    await amount.fill("35");
+    await amount.press("Enter");
+    expect(writes).toBe(0);
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeDisabled();
+    await expect(
+      grant.getByRole("button", { name: "Cancel", exact: true })
+    ).toBeVisible();
+    const own = grant.getByRole("group", { name: "You assigned", exact: true });
+    await expect(grant.getByText("Current Rep:", { exact: true })).toBeHidden();
+    await expect(grant.getByText("Adjustment:", { exact: true })).toBeHidden();
+    const profile = grant.getByRole("group", {
+      name: "On this profile",
+      exact: true,
+    });
+    await expect(own.getByRole("button")).toHaveCount(2);
+    await expect(profile).toHaveCount(0);
+    await expect(
+      grant
+        .getByText(`Your REP assigned to ${TARGET}:`, { exact: true })
+        .locator("..")
+        .getByText("975", { exact: true })
+    ).toBeVisible();
+    const surface = page
+      .getByRole("dialog", { name: "Grant Rep", exact: true })
+      .locator(".mobile-wrapper-dialog");
+    // Focus the category field after the sheet is actionable, before measuring.
+    await search.click();
+    await expect(
+      grant.getByText("Type at least 3 characters.", { exact: true })
+    ).toBeVisible();
+    await expect
+      .poll(() =>
+        surface.evaluate((panel) => {
+          let element: Element | null = panel;
+          while (element) {
+            if (
+              element
+                .getAnimations()
+                .some((animation) => animation.playState === "running")
+            )
+              return true;
+            element = element.parentElement;
+          }
+          return false;
+        })
+      )
+      .toBe(false);
+    const initialBox = await surface.boundingBox();
+    expect(initialBox).not.toBeNull();
+    const expectFixedLayout = async () => {
+      const box = await surface.boundingBox();
+      expect(box).not.toBeNull();
+      if (initialBox && box) {
+        expect(box.height).toBeCloseTo(initialBox.height, 0);
+        expect(box.y).toBeCloseTo(initialBox.y, 0);
+      }
+    };
+    expect(searches).toBe(0);
+    await page
+      .getByRole("dialog", { name: "Grant Rep", exact: true })
+      .locator(".mobile-wrapper-dialog")
+      .screenshot({ path: testInfo.outputPath("grant-rep-category-step.png") });
+    await search.fill("mus");
+    await expect(own.getByRole("button")).toHaveCount(0);
+    await expect(
+      grant.getByRole("button", { name: "Music", exact: true })
+    ).toBeVisible();
+    await expectFixedLayout();
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeEnabled();
+    await expect(search).toBeFocused();
+    await expect(
+      grant.getByRole("button", { name: "mus", exact: true })
+    ).toHaveCount(0);
+    await grant.getByRole("button", { name: "Music", exact: true }).click();
+    await expect(search).toBeEditable();
+    await expect(amount).toHaveValue("35");
+    await expectFocusedAmountWithoutSelection(amount);
+    await expect(
+      grant.getByText("Current Rep:", { exact: true }).locator("..")
+    ).toHaveText("Current Rep:0");
+    await expect(
+      grant.getByText("Adjustment:", { exact: true }).locator("..")
+    ).toHaveText("Adjustment:+35");
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeEnabled();
+    await amount.fill("5001");
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeDisabled();
+    await expect(
+      grant.getByText("Your available REP:", { exact: true }).locator("..")
+    ).toHaveCSS("color", "rgb(251, 113, 133)");
+    await amount.blur();
+    await expect(amount).toHaveValue("5,001");
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeDisabled();
+    await amount.click();
+    await amount.fill("35");
+    await expect(amount).toHaveValue("35");
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeEnabled();
+    await grant
+      .getByRole("button", { name: "Change category", exact: true })
+      .click();
+    await expect(
+      grant.getByText("Type at least 3 characters.", { exact: true })
+    ).toBeVisible();
+    await own
+      .getByRole("button", { name: "Research -25", exact: true })
+      .click();
+    await expect(search).toHaveValue("Research");
+    await expect(search).toBeEditable();
+    await expect(amount).toHaveValue("-25");
+    await expectFocusedAmountWithoutSelection(amount);
+    await expect(
+      grant.getByText("Current Rep:", { exact: true }).locator("..")
+    ).toHaveText("Current Rep:-25");
+    await expect(
+      grant.getByText("Adjustment:", { exact: true }).locator("..")
+    ).toHaveText("Adjustment:0");
+    await expect(
+      grant.getByText(
+        "Enter the total you want to give, including any existing rating.",
+        { exact: true }
+      )
+    ).toBeVisible();
+    await expect(
+      grant.getByRole("button", { name: "Save", exact: true })
+    ).toBeDisabled();
+    const selectedPill = own.getByRole("button", {
+      name: "Research -25",
+      exact: true,
+    });
+    await expect(selectedPill).toHaveAttribute("aria-pressed", "true");
+    await expect(selectedPill).toHaveCSS("height", "38px");
+    await expect(selectedPill).toHaveCSS("border-radius", "8px");
+    await expect(selectedPill).toHaveCSS(
+      "border-top-color",
+      "rgba(255, 255, 255, 0.3)"
+    );
+    await expect(selectedPill).toHaveCSS(
+      "background-color",
+      "rgba(255, 255, 255, 0.1)"
+    );
+    await amount.click();
+    await amount.fill("-15");
+    await expect(
+      grant.getByRole("status").getByText("+10", { exact: true })
+    ).toHaveCSS("color", "rgb(52, 211, 153)");
+    await amount.fill("-35");
+    await expect(
+      grant.getByText("Current Rep:", { exact: true }).locator("..")
+    ).toHaveText("Current Rep:-25");
+    await expect(
+      grant.getByText("Adjustment:", { exact: true }).locator("..")
+    ).toHaveText("Adjustment:-10");
+    await expect(
+      grant.getByRole("status").getByText("-10", { exact: true })
+    ).toHaveCSS("color", "rgb(251, 113, 133)");
+    await expect(
+      grant.getByRole("button", { name: "Save", exact: true })
+    ).toBeEnabled();
+    await expectFixedLayout();
+    await grant
+      .getByRole("button", { name: "Change category", exact: true })
+      .click();
+    await amount.fill("45");
+    await own
+      .getByRole("button", { name: "Artist 1,000", exact: true })
+      .click();
+    await expect(amount).toHaveValue("45");
+    await expectFocusedAmountWithoutSelection(amount);
+    await expect(
+      grant.getByText("Current Rep:", { exact: true }).locator("..")
+    ).toHaveText("Current Rep:+1,000");
+    expect(allocationReads).toBe(1);
+    expect(searches).toBe(1);
+    expect(checkedCategories).toEqual(["mus", "Music"]);
+    expect(writes).toBe(0);
+    await expectNoHorizontalOverflow(page);
+    await expectAxeClean(page);
+    await page
+      .getByRole("dialog", { name: "Grant Rep", exact: true })
+      .locator(".mobile-wrapper-dialog")
+      .screenshot({ path: testInfo.outputPath("grant-rep-two-step.png") });
+  });
+
+  test("opens Grant Rep without chip groups when no REP is assigned", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...allowance,
+            rating_stats: [
+              {
+                category: CATEGORY,
+                rating: 20,
+                contributor_count: 1,
+                rater_contribution: 0,
+              },
+            ],
+          },
+        })
+    );
+    await page.route(`${api}/api/profiles/${TARGET}/rep/overview*`, (route) =>
+      route.fulfill({
+        json: {
+          total_rep: 20,
+          authenticated_user_contribution: 0,
+          contributor_count: 1,
+          contributors: { data: [], page: 1, next: false, count: 0 },
+        },
+      })
+    );
+    await openProfile(page);
+    await page.getByRole("button", { name: "Grant Rep", exact: true }).click();
+    const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
+    await expect(
+      grant.getByRole("textbox", {
+        name: "Category to grant REP for",
+        exact: true,
+      })
+    ).toHaveValue("");
+    await expect(
+      grant.getByText("Your available REP:", { exact: true })
+    ).toBeVisible();
+    await expect(
+      grant.getByText(`Your REP assigned to ${TARGET}:`, { exact: true })
+    ).toBeVisible();
+    await expect(
+      grant
+        .getByText("Your available REP:", { exact: true })
+        .locator("..")
+        .getByText("80", { exact: true })
+    ).toBeVisible();
+    await expect(
+      grant
+        .getByText(`Your REP assigned to ${TARGET}:`, { exact: true })
+        .locator("..")
+        .getByText("0", { exact: true })
+    ).toBeVisible();
+    await expect(grant.getByRole("group")).toHaveCount(0);
+    await expect(
+      grant.getByText("No REP assigned yet.", { exact: true })
+    ).toHaveCount(0);
+    await expect(grant.getByRole("textbox")).toHaveCount(2);
+    await expect(
+      grant.getByRole("textbox", {
+        name: "Your total REP for this category",
+        exact: true,
+      })
+    ).toBeEnabled();
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeDisabled();
+    await expect(
+      grant.getByRole("button", { name: "Cancel", exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await page
+      .getByRole("dialog", { name: "Grant Rep", exact: true })
+      .locator(".mobile-wrapper-dialog")
+      .screenshot({
+        path: testInfo.outputPath("grant-rep-no-assigned-chips.png"),
+      });
+    await grant.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(grant).toBeHidden();
+  });
+
+  test("grants first REP from the pinned You row and refreshes the tag and header totals", async ({
+    page,
+    baseURL,
     isMobile,
   }, testInfo) => {
-    // installCategories deliberately includes a nonzero authenticated contribution.
-    // The local preview can also return these stale fields without a login.
+    const api = getSandboxApiOrigin(baseURL);
+    let rating = 0;
+    const saved: unknown[] = [];
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...allowance,
+            rep_rates_left_for_rater: 80 - rating,
+            rating_stats: [
+              {
+                category: CATEGORY,
+                rating: 20 + rating,
+                contributor_count: rating === 0 ? 20 : 21,
+                rater_contribution: rating,
+              },
+            ],
+          },
+        })
+    );
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/categories?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            data: [
+              {
+                category: CATEGORY,
+                total_rep: 20 + rating,
+                contributor_count: rating === 0 ? 20 : 21,
+                authenticated_user_contribution: rating,
+                top_contributors: [],
+              },
+            ],
+            count: 1,
+            page: 1,
+            next: false,
+          },
+        })
+    );
+    await page.route(`${api}/api/profiles/${TARGET}/rep/overview*`, (route) =>
+      route.fulfill({
+        json: {
+          total_rep: 20 + rating,
+          authenticated_user_contribution: rating,
+          contributor_count: rating === 0 ? 20 : 21,
+          contributors: { data: [], page: 1, next: false, count: 0 },
+        },
+      })
+    );
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/categories/*/contributors?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            data: Array.from({ length: 20 }, (_, index) => ({
+              profile: {
+                id: `other-${index}`,
+                handle: `other-rater-${index}`,
+                primary_address: `0x${(index + 1).toString(16).padStart(40, "0")}`,
+                pfp: "/icon-512.png",
+              },
+              contribution: 1,
+            })),
+            page: 1,
+            next: false,
+          },
+        })
+    );
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/rating`,
+      async (route) => {
+        const body: unknown = route.request().postDataJSON();
+        if (
+          typeof body !== "object" ||
+          body === null ||
+          !("amount" in body) ||
+          typeof body.amount !== "number" ||
+          !("category" in body) ||
+          body.category !== CATEGORY
+        )
+          throw new Error("Unexpected first-grant payload");
+        saved.push(body);
+        rating = body.amount;
+        await route.fulfill({ json: {} });
+      }
+    );
+    if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
+    await openProfile(page);
+    const tag = page.getByRole("button", {
+      name: `Open REP category ${CATEGORY}`,
+      exact: true,
+    });
+    await tag.click();
+    const panel = categoryPanel(page);
+    const amount = panel.getByRole("textbox", {
+      name: `Your REP in ${CATEGORY}`,
+      exact: true,
+    });
+    await expect(amount).toHaveValue("");
+    await expect(amount).toHaveAttribute("placeholder", "0");
+    await expect(amount).toHaveAttribute("aria-invalid", "false");
+    if (isMobile) await expect(amount).not.toBeFocused();
+    else await expect(amount).toBeFocused();
+    await expect(panel.getByRole("link").first()).toHaveAccessibleName("You");
+    await amount.scrollIntoViewIfNeeded();
+    const inputOffset = await amount.evaluate((field) => {
+      const form = field.closest("form");
+      if (!form) throw new Error("Missing category form");
+      return (
+        field.getBoundingClientRect().top - form.getBoundingClientRect().top
+      );
+    });
+    const raters = panel
+      .getByRole("link", { name: "other-rater-0", exact: true })
+      .locator("..")
+      .locator("..");
+    // Mobile WebKit does not support mouse.wheel; scroll the same container.
+    await raters.evaluate((list) => list.scrollTo(0, list.scrollHeight));
+    await expect
+      .poll(() => raters.evaluate((list) => list.scrollTop))
+      .toBeGreaterThan(0);
+    await expect(amount).toBeInViewport();
+    expect(
+      await amount.evaluate((field) => {
+        const form = field.closest("form");
+        if (!form) throw new Error("Missing category form");
+        return (
+          field.getBoundingClientRect().top - form.getBoundingClientRect().top
+        );
+      })
+    ).toBeCloseTo(inputOffset, 0);
+    await amount.fill("81");
+    await expect(
+      panel.getByText("Available REP 80", { exact: true })
+    ).toHaveCSS("color", "rgb(251, 113, 133)");
+    await expect(
+      panel.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeDisabled();
+    await amount.press("Escape");
+    await amount.fill("15");
+    const grant = panel.getByRole("button", { name: "Grant Rep", exact: true });
+    await expect(grant).toBeEnabled();
+    await expect(grant).toHaveCSS("height", "30px");
+    await expect(grant).toHaveCSS("font-size", "12px");
+    await expect(grant).toHaveCSS("border-radius", "8px");
+    const grantBox = await grant.boundingBox();
+    const amountBox = await panel
+      .getByRole("textbox", { name: `Your REP in ${CATEGORY}`, exact: true })
+      .locator("..")
+      .boundingBox();
+    expect(grantBox).not.toBeNull();
+    expect(amountBox).not.toBeNull();
+    if (grantBox && amountBox) {
+      expect(grantBox.x + grantBox.width).toBeCloseTo(
+        amountBox.x + amountBox.width,
+        1
+      );
+    }
+    await expect(
+      panel.getByRole("button", {
+        name: `Open category ${CATEGORY}`,
+        exact: true,
+      })
+    ).toBeVisible();
+    await panel.screenshot({
+      path: testInfo.outputPath("rep-pinned-grant.png"),
+    });
+    expect(saved).toHaveLength(0);
+    await amount.press("Escape");
+    await expect(amount).toHaveValue("");
+    await amount.fill("15");
+    if (isMobile) await grant.click();
+    else await amount.press("Enter");
+    await expect(panel.getByText("Saved", { exact: true })).toBeVisible();
+    await expect(
+      panel.getByText("Available REP 65", { exact: true })
+    ).toBeVisible();
+    if (isMobile) await expect(panel).toBeHidden();
+    await expect(tag).toHaveAccessibleDescription("You assigned: 15");
+    expect(saved).toEqual([{ amount: 15, category: CATEGORY }]);
+    const rep = page
+      .getByRole("region", { name: "REP", exact: true })
+      .filter({ visible: true });
+    await expect(
+      rep.getByText("You assigned: 15", { exact: true }).first()
+    ).toBeVisible();
+    await expect(rep.getByText("35", { exact: true }).first()).toBeVisible();
+    if (!isMobile) {
+      await expect(panel).toBeVisible();
+    }
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("rep-first-contribution.png"),
+      fullPage: true,
+    });
+  });
+
+  for (const largeTotals of [false, true]) {
+    test(`keeps NIC contributors aligned with ${largeTotals ? "large" : "standard"} totals`, async ({
+      page,
+      baseURL,
+      isMobile,
+    }, testInfo) => {
+      const api = getSandboxApiOrigin(baseURL);
+      const summary = largeTotals
+        ? { received: 2834567, given: 6789123, raters: 146, receivers: 397 }
+        : { received: 4689, given: 4689, raters: 3, receivers: 3 };
+      if (isMobile && largeTotals)
+        await page.setViewportSize({ width: 320, height: 844 });
+      await page.route(`${api}/api/profiles/*/cic/overview*`, (route) => {
+        const given =
+          new URL(route.request().url()).searchParams.get("direction") ===
+          "outgoing";
+        const total = given ? summary.given : summary.received;
+        const count = given ? summary.receivers : summary.raters;
+        return route.fulfill({
+          json: {
+            total_cic: total,
+            authenticated_user_contribution: 100,
+            contributor_count: count,
+            contributors: {
+              data: Array.from({ length: largeTotals ? 6 : 3 }, (_, index) => ({
+                profile: {
+                  handle: `nic-rater-${index}`,
+                  primary_address: `0x${(index + 1).toString(16).padStart(40, "0")}`,
+                  pfp: "/icon-512.png",
+                },
+                contribution: 100,
+              })),
+              page: 1,
+              next: false,
+              count,
+            },
+          },
+        });
+      });
+      await openProfile(page);
+      if (isMobile)
+        await page.getByRole("button", { name: "NIC", exact: true }).click();
+      const nic = page.getByRole("region", { name: "NIC", exact: true });
+      for (const direction of ["Received", "Given"] as const) {
+        if (direction === "Given")
+          await nic.getByRole("button", { name: "Given", exact: true }).click();
+        const given = direction === "Given";
+        const total = given ? summary.given : summary.received;
+        const count = given ? summary.receivers : summary.raters;
+        const contributors = nic.getByRole("button", {
+          name: `View NIC ${direction}: ${count} ${given ? "receivers" : "raters"}`,
+          exact: true,
+        });
+        await expect(contributors).toBeVisible();
+        const avatarCount = largeTotals ? 5 : 3;
+        await expect(nic.getByRole("link")).toHaveCount(
+          isMobile ? 0 : avatarCount
+        );
+        const score = nic.getByText(total.toLocaleString("en-US"), {
+          exact: true,
+        });
+        await expect(score).toBeVisible();
+        const scoreBox = await score.boundingBox();
+        const contributorsBox = await contributors.boundingBox();
+        const nicBox = await nic.boundingBox();
+        expect(scoreBox).not.toBeNull();
+        expect(contributorsBox).not.toBeNull();
+        expect(nicBox).not.toBeNull();
+        const sameLine =
+          Math.abs(
+            contributorsBox!.y +
+              contributorsBox!.height / 2 -
+              scoreBox!.y -
+              scoreBox!.height / 2
+          ) <= 3;
+        if (largeTotals && isMobile) expect(sameLine).toBe(false);
+        if (!largeTotals) expect(sameLine).toBe(true);
+        if (sameLine) {
+          expect(contributorsBox!.x).toBeGreaterThan(
+            scoreBox!.x + scoreBox!.width
+          );
+          expect(contributorsBox!.x + contributorsBox!.width).toBeCloseTo(
+            nicBox!.x + nicBox!.width,
+            0
+          );
+        } else {
+          const groupBox = await nic
+            .getByRole("button", {
+              name: `View NIC ${direction}: ${count} ${given ? "receivers" : "raters"}`,
+              exact: true,
+            })
+            .locator("..")
+            .boundingBox();
+          expect(groupBox).not.toBeNull();
+          expect(groupBox!.x).toBeCloseTo(nicBox!.x, 0);
+          expect(groupBox!.y).toBeGreaterThanOrEqual(
+            scoreBox!.y + scoreBox!.height
+          );
+          expect(groupBox!.x + groupBox!.width).toBeLessThanOrEqual(
+            nicBox!.x + nicBox!.width + 1
+          );
+        }
+        await expectNoHorizontalOverflow(page);
+        await nic.screenshot({
+          path: testInfo.outputPath(`nic-${direction.toLowerCase()}-total.png`),
+        });
+      }
+    });
+  }
+
+  test("signed-out viewers do not see personal amounts from stale REP responses", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    // Give both the server and browser reads a stale personal contribution.
+    await setSandboxProfileRep(getSandboxApiOrigin(baseURL), 20);
     if (isMobile) await page.setViewportSize({ width: 390, height: 844 });
     await page.goto(`/${TARGET}`, { waitUntil: "domcontentloaded" });
     if (isMobile)
@@ -418,6 +1153,184 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
         page.getByRole("button", { name: "Rate NIC", exact: true })
       ).toHaveCount(0);
       await expectNoHorizontalOverflow(page);
+    }
+  });
+
+  test("keeps REP header actions within phone width with enlarged text", async ({
+    page,
+    baseURL,
+  }, testInfo) => {
+    await page.route(
+      `${getSandboxApiOrigin(baseURL)}/api/profiles/${TARGET}/rep/overview*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            total_rep: 9_000_000,
+            authenticated_user_contribution: 9_000_000,
+            contributor_count: 1,
+            contributors: { data: [], page: 1, next: false },
+          },
+        })
+    );
+    await page.setViewportSize({ width: 320, height: 844 });
+    await openProfile(page);
+    await page.evaluate(() => {
+      document.documentElement.style.fontSize = "32px";
+    });
+    const rep = page
+      .getByRole("region", { name: "REP", exact: true })
+      .filter({ visible: true });
+    const summary = rep
+      .getByText("You assigned: 9,000,000", { exact: true })
+      .first();
+    const grant = rep.getByRole("button", { name: "Grant Rep", exact: true });
+    await expect(summary).toBeVisible();
+    await expect(grant).toBeVisible();
+    const summaryBox = await summary.boundingBox();
+    const grantBox = await grant.boundingBox();
+    expect(summaryBox).not.toBeNull();
+    expect(grantBox).not.toBeNull();
+    for (const box of [summaryBox!, grantBox!]) {
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(320);
+    }
+    expect(grantBox!.y).toBeGreaterThanOrEqual(
+      summaryBox!.y + summaryBox!.height + 8
+    );
+    await rep.screenshot({
+      path: testInfo.outputPath("rep-header-large-text.png"),
+    });
+  });
+
+  test("wraps REP contributors only when their content needs more room", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    const longCategory =
+      "A very long community category name that stays readable";
+    await page.route(`${api}/api/profiles/*/rep/categories?*`, (route) =>
+      route.fulfill({
+        json: {
+          data: ["Art", longCategory].map((category, index) => ({
+            category,
+            total_rep: 1380,
+            contributor_count: index === 0 ? 1 : 60,
+            authenticated_user_contribution: index === 0 ? 20 : null,
+            top_contributors: Array.from(
+              { length: index === 0 ? 1 : 3 },
+              (_, i) => ({
+                profile: {
+                  id: `rater-${i}`,
+                  handle: `rater-${i}`,
+                  pfp: "/icon-512.png",
+                },
+                contribution: 10,
+              })
+            ),
+          })),
+          count: 2,
+          page: 1,
+          next: false,
+        },
+      })
+    );
+    await openProfile(page);
+    for (const width of isMobile ? [320, 390, 430, 540, 768] : [1280]) {
+      await page.setViewportSize({ width, height: 844 });
+      const rep = page
+        .getByRole("region", { name: "REP", exact: true })
+        .filter({ visible: true });
+      for (const direction of ["Received", "Given"] as const) {
+        await rep
+          .getByRole("button", { name: direction, exact: true })
+          .or(rep.getByRole("tab", { name: direction, exact: true }))
+          .filter({ visible: true })
+          .first()
+          .click();
+        const tag = rep
+          .getByRole("button", { name: "Open REP category Art", exact: true })
+          .locator("..");
+        const count = tag.getByText(
+          direction === "Received" ? "1 rater" : "1 receiver",
+          { exact: true }
+        );
+        await expect(count).toBeVisible();
+        const assigned = tag.getByText(
+          direction === "Received" ? "You assigned: 20" : "Assigned to you: 20",
+          { exact: true }
+        );
+        const assignedBox = await assigned.boundingBox();
+        const peopleBox = await count.boundingBox();
+        const firstAvatarBox = await tag
+          .getByRole("img", { name: "rater-0", exact: true })
+          .boundingBox();
+        expect(assignedBox).not.toBeNull();
+        expect(peopleBox).not.toBeNull();
+        expect(firstAvatarBox).not.toBeNull();
+        const onSameLine =
+          Math.abs(
+            assignedBox!.y +
+              assignedBox!.height / 2 -
+              peopleBox!.y -
+              peopleBox!.height / 2
+          ) < 1;
+        if (onSameLine) {
+          expect(firstAvatarBox!.x).toBeGreaterThanOrEqual(
+            assignedBox!.x + assignedBox!.width + 6
+          );
+        } else {
+          expect(peopleBox!.y).toBeGreaterThanOrEqual(
+            assignedBox!.y + assignedBox!.height + 4
+          );
+          const nameBox = await tag
+            .getByText("Art", { exact: true })
+            .boundingBox();
+          expect(firstAvatarBox!.x).toBeCloseTo(nameBox!.x, 0);
+        }
+        // A full-row compact tag has room for all of this short category at these widths.
+        if (width >= 390) expect(onSameLine).toBe(true);
+        await expectPersonalTagSpacing(tag.getByRole("button"), isMobile);
+        const longTag = rep
+          .getByRole("button", {
+            name: `Open REP category ${longCategory}`,
+            exact: true,
+          })
+          .locator("..");
+        const label = longTag.getByText(longCategory, { exact: true });
+        const contributors = longTag.getByText(
+          direction === "Received" ? "60 raters" : "60 receivers",
+          { exact: true }
+        );
+        await expect(contributors).toBeVisible();
+        if (width <= 430) {
+          const labelBox = await label.boundingBox();
+          const countBox = await contributors.boundingBox();
+          expect(labelBox).not.toBeNull();
+          expect(countBox).not.toBeNull();
+          expect(countBox!.y).toBeGreaterThanOrEqual(
+            labelBox!.y + labelBox!.height + 4
+          );
+          const avatarBox = await longTag
+            .getByRole("img", { name: "rater-0", exact: true })
+            .boundingBox();
+          expect(avatarBox).not.toBeNull();
+          expect(avatarBox!.x).toBeCloseTo(labelBox!.x, 0);
+          expect(
+            await label.evaluate(
+              (element) => element.scrollWidth <= element.clientWidth + 1
+            )
+          ).toBe(true);
+        }
+        await expectNoHorizontalOverflow(page);
+        await longTag.scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: testInfo.outputPath(
+            `rep-tags-${direction.toLowerCase()}-${width}.png`
+          ),
+        });
+      }
     }
   });
 
@@ -542,6 +1455,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     page,
     baseURL,
     isMobile,
+    browserName,
   }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
     let release: () => void = () => undefined;
@@ -592,60 +1506,77 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       );
     }
     // The profile summary precedes the per-category contribution indicators.
-    const assigned = repSummary.getByText(/^You assigned:/).first();
+    const assigned = repSummary
+      .getByText("You assigned: 20", { exact: true })
+      .first()
+      .locator("..");
     await expect(assigned).toHaveText("You assigned: 20");
+    await expect(
+      repSummary.getByRole("button", { name: /^You assigned:/ })
+    ).toHaveCount(0);
+    await expect(
+      repSummary
+        .getByText("You assigned: 20", { exact: true })
+        .first()
+        .locator("..")
+        .locator("svg")
+    ).toHaveCount(0);
+    if (!isMobile) {
+      await assigned.hover();
+      await expect(assigned).toHaveCSS("color", "rgb(147, 147, 159)");
+    }
     if (isMobile) {
-      await expect(assigned).toHaveCSS("white-space", "nowrap");
-      for (const width of [320, 768]) {
-        await page.setViewportSize({ width, height: 844 });
-        const assignedBox = await assigned.boundingBox();
-        const grantBox = await repSummary
-          .getByRole("button", { name: "Grant Rep", exact: true })
-          .boundingBox();
-        const headingBox = await repSummary
-          .getByRole("heading", { name: /^REP Categories$/i })
-          .boundingBox();
-        expect(assignedBox).not.toBeNull();
-        expect(grantBox).not.toBeNull();
-        expect(headingBox).not.toBeNull();
-        if (assignedBox && grantBox && headingBox) {
-          expect(headingBox.x).toBeLessThan(assignedBox.x);
+      await repSummary
+        .getByRole("button", { name: "Grant Rep", exact: true })
+        .focus();
+      await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+      await expect(
+        repSummary.getByRole("button", {
+          name: `Open REP category ${CATEGORY}`,
+          exact: true,
+        })
+      ).toBeFocused();
+    }
+    await expect(assigned.getByText("20", { exact: true })).toHaveCSS(
+      "white-space",
+      "nowrap"
+    );
+    for (const width of isMobile ? [320, 390, 540, 768] : [1280]) {
+      await page.setViewportSize({ width, height: 844 });
+      const assignedBox = await assigned.boundingBox();
+      const grantBox = await repSummary
+        .getByRole("button", { name: "Grant Rep", exact: true })
+        .boundingBox();
+      const headingBox = await repSummary
+        .getByText(/^REP Categories$/i)
+        .boundingBox();
+      expect(assignedBox).not.toBeNull();
+      expect(grantBox).not.toBeNull();
+      expect(headingBox).not.toBeNull();
+      if (assignedBox && grantBox && headingBox) {
+        expect(grantBox.x - assignedBox.x - assignedBox.width).toBeCloseTo(
+          isMobile ? 8 : 12,
+          0
+        );
+        expect(assignedBox.y + assignedBox.height / 2).toBeCloseTo(
+          grantBox.y + grantBox.height / 2,
+          0
+        );
+        if (grantBox.y >= headingBox.y + headingBox.height) {
+          expect(
+            grantBox.y - headingBox.y - headingBox.height
+          ).toBeGreaterThanOrEqual(8);
+        } else {
+          expect(headingBox.x + headingBox.width).toBeLessThan(assignedBox.x);
           expect(headingBox.y + headingBox.height / 2).toBeCloseTo(
-            grantBox.y + grantBox.height / 2,
-            0
-          );
-          if (assignedBox.y >= grantBox.y + grantBox.height) {
-            expect(assignedBox.y - grantBox.y - grantBox.height).toBeCloseTo(
-              8,
-              0
-            );
-            expect(assignedBox.x + assignedBox.width).toBeCloseTo(
-              grantBox.x + grantBox.width,
-              0
-            );
-          } else {
-            expect(assignedBox.x + assignedBox.width).toBeLessThanOrEqual(
-              grantBox.x
-            );
-            expect(assignedBox.y + assignedBox.height / 2).toBeCloseTo(
-              grantBox.y + grantBox.height / 2,
-              0
-            );
-          }
-        }
-        if (width === 768 && assignedBox && grantBox) {
-          expect(grantBox.x - assignedBox.x - assignedBox.width).toBeCloseTo(
-            8,
-            0
-          );
-          expect(assignedBox.y + assignedBox.height / 2).toBeCloseTo(
             grantBox.y + grantBox.height / 2,
             0
           );
         }
       }
-      await page.setViewportSize({ width: 320, height: 844 });
+      await expectNoHorizontalOverflow(page);
     }
+    if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
     await expect(
       page.getByRole("button", { name: /^Edit REP category/ })
     ).toHaveCount(0);
@@ -696,7 +1627,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       await expect(overlay).toHaveCSS("opacity", "1");
     }
     const input = panel.getByRole("textbox", {
-      name: "You",
+      name: `Your REP in ${CATEGORY}`,
       exact: true,
     });
     await expect(input).toHaveAttribute("readonly");
@@ -768,7 +1699,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     expect(inputSpacing.top).toBeGreaterThanOrEqual(5);
     expect(inputSpacing.bottom).toBeGreaterThanOrEqual(5);
     const otherAmount = panel.getByText("10", { exact: true });
-    const inputBox = await input.boundingBox();
+    const inputBox = await panel
+      .getByRole("textbox", { name: `Your REP in ${CATEGORY}`, exact: true })
+      .locator("..")
+      .boundingBox();
     const otherAmountBox = await otherAmount.boundingBox();
     expect(inputBox).not.toBeNull();
     expect(otherAmountBox).not.toBeNull();
@@ -795,24 +1729,28 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await categoryToggle.click();
     await expect(input).toHaveValue("20");
     await input.fill("30");
-    await expect(panel.getByRole("status")).toHaveText("Total 20 → 30");
-    await expect(panel.getByText("+10", { exact: true })).toHaveCSS(
-      "color",
-      "rgb(52, 211, 153)"
-    );
-    await expect(input).toHaveCSS("color", "rgb(52, 211, 153)");
+    await expect(panel.getByRole("status")).toHaveText("20 → 30");
+    await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
     await expect(
       panel.getByRole("status").getByText("30", { exact: true })
     ).toHaveCSS("color", "rgb(52, 211, 153)");
     await input.fill("10");
-    await expect(panel.getByText("−10", { exact: true })).toHaveCSS(
-      "color",
-      "rgb(251, 113, 133)"
-    );
-    await expect(input).toHaveCSS("color", "rgb(251, 113, 133)");
+    await expect(panel.getByRole("status")).toHaveText("20 → 10");
+    await expect(input).toHaveCSS("color", "rgb(239, 239, 241)");
     await expect(
       panel.getByRole("status").getByText("10", { exact: true })
+    ).toHaveCSS("color", "rgb(52, 211, 153)");
+    await panel.screenshot({
+      path: testInfo.outputPath("rep-positive-reduction.png"),
+    });
+    await input.fill("-10");
+    await expect(
+      panel.getByRole("status").getByText("-10", { exact: true })
     ).toHaveCSS("color", "rgb(251, 113, 133)");
+    await input.fill("0");
+    await expect(
+      panel.getByRole("status").getByText("0", { exact: true })
+    ).toHaveCSS("color", "rgb(239, 239, 241)");
     await input.fill("30");
     const originalViewport = page.viewportSize();
     if (originalViewport) {
@@ -933,7 +1871,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     });
     await editedTag.click();
     const panel = categoryPanel(page);
-    const input = panel.getByRole("textbox", { name: "You", exact: true });
+    const input = panel.getByRole("textbox", {
+      name: `Your REP in ${CATEGORY}`,
+      exact: true,
+    });
     const categoryTags = rep.getByRole("button", {
       name: /^Open REP category /,
       includeHidden: true,
@@ -1013,7 +1954,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       })
       .click();
     const panel = categoryPanel(page);
-    const input = panel.getByRole("textbox", { name: "You", exact: true });
+    const input = panel.getByRole("textbox", {
+      name: `Your REP in ${CATEGORY}`,
+      exact: true,
+    });
     const blurKey = browserName === "webkit" ? "Alt+Tab" : "Tab";
     await expect(input).toHaveValue(isMobile ? "12,345" : "12345");
     await input.press(blurKey);
@@ -1045,11 +1989,66 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await input.press(blurKey);
     await expect(input).toHaveValue("-12,345");
     expect(reads).toBe(readsBeforeTyping);
-    await panel.getByRole("button", { name: "Cancel", exact: true }).click();
+    await input.press("Escape");
+    await expect(input).toHaveValue("12345");
+    await input.press(blurKey);
     await expect(input).toHaveValue("12,345");
   });
 
-  test("keeps a category read-only when the viewer has no existing contribution", async ({
+  test("keeps large signed REP comparisons and Save visible", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    const current = 1234567890;
+    if (isMobile) await page.setViewportSize({ width: 320, height: 844 });
+    await installCategories(page, api, () => current);
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) =>
+        route.fulfill({
+          json: {
+            ...allowance,
+            rating_stats: [
+              { ...allowance.rating_stats[0], rater_contribution: current },
+            ],
+          },
+        })
+    );
+    await openProfile(page);
+    await page
+      .getByRole("button", {
+        name: `Open REP category ${CATEGORY}`,
+        exact: true,
+      })
+      .click();
+    const panel = categoryPanel(page);
+    const input = panel.getByRole("textbox", {
+      name: `Your REP in ${CATEGORY}`,
+      exact: true,
+    });
+    await expect(input).toHaveValue(isMobile ? "1,234,567,890" : "1234567890");
+    await input.click();
+    await expect(input).toHaveValue("1234567890");
+    await input.fill("-1234567890");
+    await expect(input).toHaveValue("-1234567890");
+    const save = panel.getByRole("button", { name: "Save", exact: true });
+    await expect(save).toBeEnabled();
+    if (!isMobile) await save.scrollIntoViewIfNeeded();
+    await expect(save).toBeInViewport();
+    await expect(panel.getByRole("status")).toContainText("1,234,567,890");
+    await expect(panel.getByRole("status")).toContainText("-1,234,567,890");
+    await expect(
+      panel.getByText("Available REP 80", { exact: true })
+    ).toBeInViewport();
+    await expectNoHorizontalOverflow(page);
+    await panel.screenshot({
+      path: testInfo.outputPath("large-rep-comparison.png"),
+    });
+  });
+
+  test("offers an empty You input when the viewer has no existing contribution", async ({
     page,
     baseURL,
   }) => {
@@ -1078,10 +2077,21 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       panel.getByRole("link", { name: "other-rater", exact: true })
     ).toBeVisible();
     // The authoritative rating state also overrides stale contributor summaries.
-    await expect(panel.getByRole("textbox")).toHaveCount(0);
+    await expect(
+      panel.getByRole("textbox", {
+        name: `Your REP in ${CATEGORY}`,
+        exact: true,
+      })
+    ).toHaveValue("");
+    await expect(
+      panel.getByRole("textbox", {
+        name: `Your REP in ${CATEGORY}`,
+        exact: true,
+      })
+    ).toHaveAttribute("placeholder", "0");
     await expect(
       panel.getByRole("link", { name: "You", exact: true })
-    ).toHaveCount(0);
+    ).toHaveCount(1);
     await expect(
       panel.getByRole("button", { name: "Save", exact: true })
     ).toHaveCount(0);
@@ -1127,9 +2137,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
   test("keeps a Grant REP draft through delayed loading and reads its saved total after reload", async ({
     page,
     baseURL,
+    browserName,
   }) => {
     const api = getSandboxApiOrigin(baseURL);
     let rating = 20;
+    await setSandboxProfileRep(api, rating);
     let releaseAllowance: () => void = () => undefined;
     const allowanceReady = new Promise<void>((resolve) => {
       releaseAllowance = resolve;
@@ -1202,6 +2214,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
           throw new Error("Unexpected local Grant REP payload");
         saved.push(body);
         rating = body.amount;
+        await setSandboxProfileRep(api, rating);
         await route.fulfill({ json: {} });
       }
     );
@@ -1217,14 +2230,23 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await grant
       .getByRole("textbox", { name: "Category to grant REP for", exact: true })
       .fill(CATEGORY);
-    await grant.getByRole("button", { name: CATEGORY, exact: true }).click();
     const amount = grant.getByRole("textbox", {
       name: "Your total REP for this category",
       exact: true,
     });
+    let pendingFocusRing = "";
+    const cancel = grant.getByRole("button", { name: "Cancel", exact: true });
     try {
       await amount.fill("35");
-      await amount.press("Tab");
+      await expect(amount).toHaveAttribute("aria-invalid", "false");
+      await expect(
+        grant.getByText("Current Rep:", { exact: true })
+      ).toBeHidden();
+      pendingFocusRing = await amount.evaluate(
+        (input) => getComputedStyle(input).boxShadow
+      );
+      await amount.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+      await expect(cancel).toBeFocused();
       await expect(amount).toHaveValue("35");
       await expect(
         grant.getByRole("button", { name: "Grant Rep", exact: true })
@@ -1233,11 +2255,17 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       releaseAllowance();
     }
     await expect(
-      grant.getByRole("button", { name: "Grant Rep", exact: true })
+      grant.getByRole("button", { name: "Save", exact: true })
     ).toBeEnabled();
     await expect(amount).toHaveValue("35");
+    await expect(cancel).toBeFocused();
+    await expect(
+      grant.getByText("Current Rep:", { exact: true })
+    ).toBeVisible();
+    await amount.focus();
+    await expect(amount).toHaveCSS("box-shadow", pendingFocusRing);
     await expectDesktopRatingPosition(page, "Grant Rep");
-    await grant.getByRole("button", { name: "Grant Rep", exact: true }).click();
+    await grant.getByRole("button", { name: "Save", exact: true }).click();
     await expect(grant).toBeHidden();
     expect(saved).toEqual([{ amount: 35, category: CATEGORY }]);
     await expect(
@@ -1262,7 +2290,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expectNoHorizontalOverflow(page);
   });
 
-  test("reaches all sixty categories across server pages without wrapping tags", async ({
+  test("reaches all sixty categories across server pages with readable tags", async ({
     page,
     baseURL,
     isMobile,
@@ -1334,7 +2362,38 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await page.screenshot({
       path: testInfo.outputPath("rep-personal-amount-tags.png"),
     });
-    for (let step = 0; step < 6; step += 1) {
+    const more = rep.getByRole("button", { name: /^\+\d+ more$|^Load more$/ });
+    await expect(more).toHaveText("+20 more");
+    await expect(more).toHaveCSS("height", isMobile ? "44px" : "38px");
+    await expect(more).toHaveCSS("border-radius", "8px");
+    await expect(more).toHaveCSS("border-top-width", "1px");
+    await expect(more).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(more).toHaveCSS("font-weight", "500");
+    await expect(more).toHaveCSS("color", "rgb(206, 207, 212)");
+    if (!isMobile) {
+      await more.hover();
+      await expect(more).toHaveCSS("color", "rgb(245, 245, 245)");
+      await expect(more).toHaveCSS(
+        "border-top-color",
+        "rgba(255, 255, 255, 0.25)"
+      );
+      await expect(more).toHaveCSS(
+        "background-color",
+        "rgba(255, 255, 255, 0.03)"
+      );
+    }
+    await expect(
+      rep.getByRole("button", { name: /^Open REP category / })
+    ).toHaveCount(5);
+    await more.click();
+    await expect(
+      rep.getByRole("button", { name: /^Open REP category / })
+    ).toHaveCount(15);
+    await expect(more).toHaveText("+10 more");
+    await page.screenshot({
+      path: testInfo.outputPath("rep-more-control.png"),
+    });
+    for (let step = 0; step < 5; step += 1) {
       await rep
         .getByRole("button", { name: /^\+\d+ more$|^Load more$/ })
         .click();
@@ -1351,14 +2410,21 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .evaluateAll((tags) =>
         tags.map((tag) => ({
           height: tag.getBoundingClientRect().height,
-          personal: tag.hasAttribute("aria-describedby"),
+          nameClipped: (() => {
+            const name = tag.nextElementSibling?.firstElementChild;
+            return (
+              !name ||
+              name.scrollWidth > name.clientWidth + 1 ||
+              getComputedStyle(name).textOverflow === "ellipsis"
+            );
+          })(),
         }))
       );
-    for (const { height, personal } of tagSizes) {
-      if (isMobile && personal) {
-        expect(height).toBeGreaterThan(46);
-        expect(height).toBeLessThanOrEqual(64);
-      } else expect(height).toBe(isMobile ? 46 : 38);
+    for (const { height, nameClipped } of tagSizes) {
+      if (isMobile) {
+        expect(height).toBeGreaterThanOrEqual(46);
+        expect(nameClipped).toBe(false);
+      } else expect(height).toBe(38);
     }
     if (isMobile) {
       const targetHeights = await rep
@@ -1394,7 +2460,7 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(totalLabel).toHaveCSS("color", "rgb(147, 147, 159)");
     await expect(longTag).toHaveCSS(
       "background-color",
-      "rgba(255, 255, 255, 0.05)"
+      isMobile ? "rgb(19, 19, 22)" : "rgba(255, 255, 255, 0.05)"
     );
     await expect(longTag).toHaveCSS("border-top-width", "1px");
     await expect(longTag).toHaveCSS(
@@ -1444,9 +2510,14 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     const totalBox = await totalLabel.boundingBox();
     expect(totalBox).not.toBeNull();
     if (avatarBox && totalBox) {
-      expect(avatarBox.x - totalBox.x - totalBox.width).toBeGreaterThanOrEqual(
-        isMobile ? 6 : 14
-      );
+      if (isMobile) {
+        expect(avatarBox.y).toBeGreaterThanOrEqual(
+          totalBox.y + totalBox.height + 4
+        );
+      } else
+        expect(
+          avatarBox.x - totalBox.x - totalBox.width
+        ).toBeGreaterThanOrEqual(14);
     }
     if (!isMobile) {
       const restingTagBox = await longTag.boundingBox();
@@ -1783,6 +2854,16 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(first).toHaveValue("30");
+    await first.fill("20");
+    await expect(first).toHaveCSS("color", "rgb(52, 211, 153)");
+    await expect(panel.getByTitle("−10", { exact: true })).toHaveCSS(
+      "color",
+      "rgb(251, 113, 133)"
+    );
+    await expect(
+      panel.getByRole("status").getByText("10", { exact: true })
+    ).toHaveCSS("color", "rgb(52, 211, 153)");
+    await first.fill("30");
     await first.fill("110");
     await second.fill("0");
     await expect(panel.getByRole("status")).toHaveText("Total 20 → 80");
@@ -1893,6 +2974,12 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       exact: true,
     });
     await expect(category).toHaveAccessibleDescription("Assigned to you: 20");
+    await expect(
+      page.getByRole("button", { name: /^You assigned:/ })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toHaveCount(0);
     await expectPersonalTagSpacing(category, isMobile);
     if (isMobile) {
       await page.setViewportSize({ width: 768, height: 844 });
@@ -2043,6 +3130,10 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
     "PLAYWRIGHT_AUTH_SANDBOX",
     "Given edits require the isolated local API."
   );
+
+  test.beforeEach(async ({ context }) => {
+    await hideNextDevOverlay(context);
+  });
 
   for (const matter of ["REP", "NIC"] as const) {
     test(`${matter}: owner adjusts and removes from Given, then returns to the refreshed list`, async ({
@@ -2279,21 +3370,30 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await expect(manageGiven).toContainText("2 receivers");
       await expect(manageGiven).not.toContainText("All receivers");
       await expect(manageGiven).toHaveAttribute("aria-haspopup", "dialog");
-      const receiverAvatar = section.getByRole("link", {
+      const receiverLink = section.getByRole("link", {
         name: recipientHandle,
         exact: true,
       });
-      await expect(receiverAvatar).toHaveAttribute(
-        "href",
-        `/${recipientHandle}`
-      );
-      expect(
-        await receiverAvatar.evaluate((link) => link.closest("button"))
-      ).toBeNull();
-      await receiverAvatar.focus();
-      await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
-      await expect(manageGiven).toBeFocused();
-      await manageGiven.getByText("2 receivers", { exact: true }).click();
+      if (isMobile) {
+        await expect(receiverLink).toHaveCount(0);
+        await expect(manageGiven.getByRole("link")).toHaveCount(0);
+        await manageGiven
+          .getByRole("img", { name: recipientHandle, exact: true })
+          .tap();
+        await expect(page).toHaveURL(/\/playwright$/);
+      } else {
+        await expect(receiverLink).toHaveAttribute(
+          "href",
+          `/${recipientHandle}`
+        );
+        expect(
+          await receiverLink.evaluate((link) => link.closest("button"))
+        ).toBeNull();
+        await receiverLink.focus();
+        await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+        await expect(manageGiven).toBeFocused();
+        await manageGiven.getByText("2 receivers", { exact: true }).click();
+      }
       const list = page.getByRole("dialog", {
         name: `${matter} Given`,
         exact: true,
@@ -2400,10 +3500,6 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           expect(saveBox).not.toBeNull();
           expect(cancelBox!.height).toBe(44);
           expect(saveBox!.height).toBe(44);
-          expect(Math.abs(cancelBox!.y - saveBox!.y)).toBeLessThanOrEqual(1);
-          expect(cancelBox!.x + cancelBox!.width).toBeLessThanOrEqual(
-            saveBox!.x
-          );
           const inputBox = await editor.getByRole("textbox").boundingBox();
           expect(inputBox).not.toBeNull();
           expect(
@@ -2411,8 +3507,20 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
               saveBox!.x + saveBox!.width - inputBox!.x - inputBox!.width
             )
           ).toBeLessThanOrEqual(1);
-          expect(saveBox!.width).toBeLessThan(inputBox!.width / 2);
-          expect(cancelBox!.width).toBeLessThan(inputBox!.width / 2);
+          if (isMobile) {
+            expect(cancelBox!.x).toBeCloseTo(inputBox!.x, 0);
+            expect(saveBox!.x).toBeCloseTo(inputBox!.x, 0);
+            expect(cancelBox!.width).toBeCloseTo(inputBox!.width, 0);
+            expect(saveBox!.width).toBeCloseTo(inputBox!.width, 0);
+            expect(saveBox!.y - cancelBox!.y - cancelBox!.height).toBe(8);
+          } else {
+            expect(Math.abs(cancelBox!.y - saveBox!.y)).toBeLessThanOrEqual(1);
+            expect(cancelBox!.x + cancelBox!.width).toBeLessThanOrEqual(
+              saveBox!.x
+            );
+            expect(saveBox!.width).toBeLessThan(inputBox!.width / 2);
+            expect(cancelBox!.width).toBeLessThan(inputBox!.width / 2);
+          }
           const bottomGap = await editor
             .getByRole("button", { name: "Save", exact: true })
             .evaluate((button) => {
@@ -2432,6 +3540,18 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         };
         let editor = await openEditor();
         await expectAxeClean(page, { include: ['[role="dialog"]'] });
+        await page
+          .getByRole("dialog", {
+            name:
+              matter === "REP"
+                ? `Add Rep to ${recipientHandle}`
+                : `Adjust NIC for ${recipientHandle}`,
+            exact: true,
+          })
+          .locator(".mobile-wrapper-dialog")
+          .screenshot({
+            path: testInfo.outputPath("REP-receiver-adjust.png"),
+          });
         await editor.getByRole("textbox").fill("25");
         await editor.getByRole("button", { name: "Back", exact: true }).click();
         if (matter === "REP") {
@@ -2614,6 +3734,28 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       const repReadsBeforeEdit = recipientRepReads;
       const nicReadsBeforeEdit = recipientNicReads;
       await expectAxeClean(page, { include: ['[role="dialog"]'] });
+      await amount().fill("10");
+      await expect(amount()).toHaveCSS("color", "rgb(52, 211, 153)");
+      await expect(list.getByTitle("−10", { exact: true })).toHaveCSS(
+        "color",
+        "rgb(251, 113, 133)"
+      );
+      await expect(
+        list.getByRole("status").getByText("910", { exact: true })
+      ).toHaveCSS("color", "rgb(52, 211, 153)");
+      await page
+        .getByRole("dialog", { name: `${matter} Given`, exact: true })
+        .locator(".mobile-wrapper-dialog")
+        .screenshot({
+          path: testInfo.outputPath("NIC-positive-reduction.png"),
+        });
+      await amount().fill("-10");
+      await expect(amount()).toHaveCSS("color", "rgb(251, 113, 133)");
+      await expect(
+        list.getByRole("status").getByText("890", { exact: true })
+      ).toHaveCSS("color", "rgb(52, 211, 153)");
+      await amount().fill("0");
+      await expect(amount()).toHaveCSS("color", "rgb(239, 239, 241)");
       await amount().fill("25");
       if (isMobile && testInfo.project.name === "web-mobile-chromium") {
         try {
@@ -2696,6 +3838,10 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         page.getByText("Please try again.", { exact: true }).first()
       ).toBeVisible();
       await expect(amount()).toHaveValue("30");
+      await expect(list.getByRole("alert")).toBeVisible();
+      await amount().fill("31");
+      await expect(list.getByRole("alert")).toHaveCount(0);
+      await amount().fill("30");
       const pagesBeforeSave = requestedPages.length;
       await save.click();
       await expect(managementDialogs).toHaveCount(1);
@@ -3057,7 +4203,18 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
             [matter === "REP" ? "total_rep" : "total_cic"]: 150,
             authenticated_user_contribution: null,
             contributor_count: 3,
-            contributors: { data: [], page: 1, next: false },
+            contributors: {
+              data: people.map((person, index) => ({
+                profile: {
+                  handle: person.handle,
+                  primary_address: `0x${(index + 1).toString(16).padStart(40, "0")}`,
+                  pfp: "/icon-512.png",
+                },
+                contribution: person.rating,
+              })),
+              page: 1,
+              next: false,
+            },
           },
         })
       );
@@ -3087,18 +4244,39 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       const section = page
         .getByRole("region", { name: matter, exact: true })
         .filter({ visible: true });
-      await section
-        .getByRole("button", {
-          name:
-            matter === "REP" ? "View 3 raters" : "View NIC Received: 3 raters",
+      const summaryControl = section.getByRole("button", {
+        name:
+          matter === "REP" ? "View 3 raters" : "View NIC Received: 3 raters",
+        exact: true,
+      });
+      if (isMobile) {
+        await expect(
+          section.getByRole("link", { name: "older-high", exact: true })
+        ).toHaveCount(0);
+        await expect(summaryControl.getByRole("link")).toHaveCount(0);
+        await summaryControl
+          .getByRole("img", { name: "older-high", exact: true })
+          .tap();
+        await expect(page).toHaveURL(new RegExp(`/${TARGET}$`));
+      } else {
+        const raterLink = section.getByRole("link", {
+          name: "older-high",
           exact: true,
-        })
-        .click();
+        });
+        await expect(raterLink).toHaveAttribute("href", "/older-high");
+        expect(
+          await raterLink.evaluate((link) => link.closest("button"))
+        ).toBeNull();
+        await summaryControl.click();
+      }
       const list = page.getByRole("dialog", {
         name: matter === "REP" ? "All raters" : "NIC Received",
         exact: true,
       });
       const names = list.getByRole("link").locator(".tw-truncate");
+      await expect(
+        list.getByRole("link").filter({ hasText: "older-high" })
+      ).toHaveAttribute("href", "/older-high");
       const sort = list.getByRole("button", {
         name: new RegExp(`^Sort received ${matter}:`),
       });
@@ -3155,6 +4333,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
               data: Array.from({ length: count }, (_, index) => ({
                 profile_id: `person-${index}`,
                 handle: `rating-person-${index}`,
+                pfp: count === 2 && index === 0 ? "/icon-512.png" : null,
                 wallets: [],
                 rating: count - index,
               })),
@@ -3184,6 +4363,12 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         const name = direction === "Received" ? "All raters" : "REP Given";
         const list = page.getByRole("dialog", { name, exact: true });
         await expectDesktopRatingPosition(page, name);
+        await expect(list.getByRole("link").first().locator("img")).toHaveCount(
+          count === 2 ? 1 : 0
+        );
+        await expect(
+          list.getByRole("link").nth(1).locator('[aria-hidden="true"]')
+        ).toHaveCount(0);
         await expect(
           list.getByText(
             `${count} ${direction === "Received" ? "raters" : "receivers"}`,
@@ -3278,8 +4463,9 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           radius: "12px",
           fontSize: "14px",
           fontWeight: "500",
-          avatarSize: 28,
-          avatarRadius: "9999px",
+          padding: "6px 12px",
+          avatarSize: count === 2 ? 28 : null,
+          avatarRadius: count === 2 ? "9999px" : null,
         })
       );
     });
@@ -3292,6 +4478,8 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
     browserName,
   }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
+    const activate = (control: Locator) =>
+      isMobile ? control.tap() : control.click();
     await installCategories(page, api);
     const directions: string[] = [];
     const overviewDirections: string[] = [];
@@ -3338,8 +4526,8 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
           json: {
             data: [
               {
-                profile_id: "one",
-                handle: "another-profile",
+                profile_id: "00000000-0000-4000-8000-000000000531",
+                handle: "playwright",
                 wallets: [],
                 rating: -20,
               },
@@ -3355,14 +4543,14 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await page
         .getByRole("group", { name: "Identity sections", exact: true })
         .getByRole("button", { name: "NIC", exact: true })
-        .click();
+        .tap();
     const section = page
       .getByRole("region", { name: "NIC", exact: true })
       .filter({ visible: true });
     for (const direction of ["Received", "Given"]) {
-      await section
-        .getByRole("button", { name: direction, exact: true })
-        .click();
+      await activate(
+        section.getByRole("button", { name: direction, exact: true })
+      );
       await expect(section.getByText("NIC", { exact: true })).toBeVisible();
       await expect(
         section.getByRole("button", { name: direction, exact: true })
@@ -3410,53 +4598,39 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
             expect(countBox).not.toBeNull();
             expect(ratingBox).not.toBeNull();
             if (rateBox && countBox && ratingBox) {
-              expect(rateBox.x).toBeGreaterThanOrEqual(
-                countBox.x + countBox.width + 8
+              expect(rateBox.y).toBeGreaterThanOrEqual(
+                countBox.y + countBox.height
               );
-              expect(rateBox.y + rateBox.height / 2).toBeCloseTo(
-                countBox.y + countBox.height / 2,
+              expect(rateBox.x - ratingBox.x - ratingBox.width).toBeCloseTo(
+                8,
                 0
               );
-              if (width === 320) {
-                expect(ratingBox.y).toBeGreaterThanOrEqual(
-                  rateBox.y + rateBox.height
-                );
-                expect(ratingBox.y - rateBox.y - rateBox.height).toBeCloseTo(
-                  8,
-                  0
-                );
-                expect(ratingBox.x + ratingBox.width).toBeCloseTo(
-                  rateBox.x + rateBox.width,
-                  0
-                );
-              } else {
-                expect(rateBox.x - ratingBox.x - ratingBox.width).toBeCloseTo(
-                  8,
-                  0
-                );
-                expect(ratingBox.y + ratingBox.height / 2).toBeCloseTo(
-                  rateBox.y + rateBox.height / 2,
-                  0
-                );
-              }
+              expect(ratingBox.y + ratingBox.height / 2).toBeCloseTo(
+                rateBox.y + rateBox.height / 2,
+                0
+              );
             }
           }
           await page.setViewportSize({ width: 320, height: 844 });
         }
-        await rateButton.click();
+        await activate(rateButton);
         const rate = page.getByRole("dialog", {
           name: "Rate NIC",
           exact: true,
         });
         await expectDesktopRatingPosition(page, "Rate NIC");
-        await rate.getByRole("button", { name: "Cancel", exact: true }).click();
+        if (isMobile) await expect(rate.getByRole("textbox")).not.toBeFocused();
+        else await expect(rate.getByRole("textbox")).toBeFocused();
+        await activate(
+          rate.getByRole("button", { name: "Cancel", exact: true })
+        );
         await expect(rate).toBeHidden();
       }
-      await expect(avatar).toHaveAttribute("href", "/playwright");
-      expect(
-        await avatar.evaluate((link) => link.closest("button"))
-      ).toBeNull();
       if (!isMobile) {
+        await expect(avatar).toHaveAttribute("href", "/playwright");
+        expect(
+          await avatar.evaluate((link) => link.closest("button"))
+        ).toBeNull();
         const scoreBox = await section
           .getByText(expectedTotal, { exact: true })
           .boundingBox();
@@ -3465,10 +4639,11 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         expect(scoreBox).not.toBeNull();
         expect(contributorsBox).not.toBeNull();
         expect(avatarBox).not.toBeNull();
-        expect(contributorsBox!.y).toBeGreaterThanOrEqual(
-          scoreBox!.y + scoreBox!.height
+        expect(avatarBox!.x).toBeGreaterThan(scoreBox!.x + scoreBox!.width);
+        expect(contributorsBox!.y + contributorsBox!.height / 2).toBeCloseTo(
+          scoreBox!.y + scoreBox!.height / 2,
+          0
         );
-        expect(avatarBox!.x).toBeCloseTo(scoreBox!.x, 0);
         expect(contributorsBox!.x).toBeGreaterThan(
           avatarBox!.x + avatarBox!.width
         );
@@ -3476,15 +4651,23 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       const summaryScreenshot = testInfo.outputPath(
         `NIC-${direction}-summary.png`
       );
-      await page.screenshot({ path: summaryScreenshot, fullPage: true });
+      // Full-page captures reset Chromium touch emulation; keep this flow touch-capable.
+      await page.screenshot({ path: summaryScreenshot });
       await testInfo.attach(`NIC-${direction}-summary`, {
         path: summaryScreenshot,
         contentType: "image/png",
       });
-      await avatar.focus();
-      await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
-      await expect(contributorsButton).toBeFocused();
-      await contributorsButton.press("Enter");
+      if (isMobile) {
+        await expect(avatar).toHaveCount(0);
+        await contributorsButton
+          .getByRole("img", { name: "playwright", exact: true })
+          .tap();
+      } else {
+        await avatar.focus();
+        await page.keyboard.press(browserName === "webkit" ? "Alt+Tab" : "Tab");
+        await expect(contributorsButton).toBeFocused();
+        await contributorsButton.press("Enter");
+      }
       const list = page.getByRole("dialog", {
         name: `NIC ${direction}`,
         exact: true,
@@ -3507,7 +4690,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       if (!isMobile) await expectContributorHandleHover(list);
       rowStyles.push(await getContributorRowPresentation(list));
       await expect(
-        list.getByRole("link", { name: "another-profile" })
+        list.getByRole("link", { name: "playwright" })
       ).toBeVisible();
       await expect(list.getByRole("button", { name: /Adjust/ })).toHaveCount(0);
       await expect(
@@ -3525,12 +4708,12 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await page.screenshot({
         path: testInfo.outputPath(`NIC-${direction}-contributors.png`),
       });
-      await list.getByRole("button", { name: "Close", exact: true }).click();
+      await activate(list.getByRole("button", { name: "Close", exact: true }));
       await expect(list).toBeHidden();
     }
     expect(directions).toEqual(["false", "true"]);
     expect(rowStyles[1]).toEqual(rowStyles[0]);
-    expect(rowStyles[0]?.avatarRadius).toBe("9999px");
+    expect(rowStyles[0]?.avatarRadius).toBeNull();
     if (isMobile) {
       const sections = page.getByRole("group", {
         name: "Identity sections",
@@ -3541,7 +4724,7 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
         "NIC",
         "ID Statements",
       ]);
-      await sections.getByRole("button", { name: "REP", exact: true }).click();
+      await sections.getByRole("button", { name: "REP", exact: true }).tap();
       await expect(
         page
           .getByRole("region", { name: "REP", exact: true })
@@ -3600,7 +4783,6 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       await page.setViewportSize({ width: 320, height: 844 });
       await page.screenshot({
         path: testInfo.outputPath("id-statements-mobile.png"),
-        fullPage: true,
       });
       await sections.getByRole("button", { name: "NIC", exact: true }).click();
       await expect(section.getByText("4,100", { exact: true })).toBeVisible();
@@ -3609,9 +4791,17 @@ test.describe("Profile Given rating management @auth @medium @local-only", () =>
       overviewDirections.filter((direction) => direction === "outgoing")
     ).toHaveLength(1);
     await expectNoHorizontalOverflow(page);
-    await section
-      .getByRole("link", { name: "playwright", exact: true })
-      .press("Enter");
+    if (isMobile) {
+      await section.getByRole("button", { name: /^View NIC Received:/ }).tap();
+      await page
+        .getByRole("dialog", { name: "NIC Received", exact: true })
+        .getByRole("link", { name: "playwright", exact: true })
+        .tap();
+    } else {
+      await section
+        .getByRole("link", { name: "playwright", exact: true })
+        .press("Enter");
+    }
     await expect(page).toHaveURL(/\/playwright$/);
     await expect(
       page.getByRole("heading", { name: "playwright", exact: true })

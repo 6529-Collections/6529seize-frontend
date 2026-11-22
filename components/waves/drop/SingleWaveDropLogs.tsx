@@ -63,7 +63,7 @@ export const SingleWaveDropLogs: React.FC<SingleWaveDropLogsProps> = ({
 
   return (
     <LazyMotion features={domAnimation}>
-      <div>
+      <div className="[&_.tw-tabular-nums]:!tw-tabular-nums">
         <button
           type="button"
           id={buttonId}

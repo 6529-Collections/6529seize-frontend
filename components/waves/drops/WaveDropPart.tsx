@@ -215,6 +215,7 @@ const WaveDropPart: React.FC<WaveDropPartProps> = memo(
           isInteractive ? "tw-cursor-pointer" : "tw-cursor-default"
         }`}
         role={contentRole}
+        data-horizontal-swipe-content={isContentButton ? "true" : undefined}
         tabIndex={isContentButton ? 0 : undefined}
         onKeyDown={isContentButton ? handleKeyDown : undefined}
       >

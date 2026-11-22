@@ -76,6 +76,7 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
     stateVersion: 0,
     persistChain: Promise.resolve(),
     disposed: false,
+    incomingPaused: false,
     lastMeAt: 0,
     lastWakeAt: 0,
     openConversation: null,
@@ -91,6 +92,7 @@ export function setStatus(
   error: string | null = null
 ): void {
   ctx.store.status = status;
+  if (status !== "ready") ctx.store.initialSyncStatus = "pending";
   ctx.store.error = error;
   ctx.store.touch();
 }

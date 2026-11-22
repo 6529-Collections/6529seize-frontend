@@ -22,12 +22,12 @@ export default function UserPageRepModifyModalRaterStats({
   const { activeProfileProxy } = useContext(AuthContext);
   if (activeProfileProxy) {
     return (
-      <p className="tw-m-0 tw-break-words tw-text-base tw-font-normal tw-text-iron-300">
+      <p className="tw-m-0 tw-break-words tw-text-xs tw-font-normal tw-text-iron-400">
         {tRich(locale, "rep.categories.edit.proxy", {
           name: (
             <Link
               key="proxy"
-              className="tw-font-semibold tw-text-iron-50"
+              className="tw-font-medium tw-text-iron-100"
               href={`/${activeProfileProxy.created_by.handle ?? activeProfileProxy.created_by.id}`}
             >
               {activeProfileProxy.created_by.handle}
@@ -40,19 +40,19 @@ export default function UserPageRepModifyModalRaterStats({
 
   return (
     <div className="tw-flex tw-flex-col tw-gap-2 tw-text-xs tw-font-normal tw-text-iron-400">
-      <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-4">
+      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1">
         <span className="tw-min-w-0 tw-break-words">
           {t(locale, "rep.categories.edit.availableRep")}
         </span>
-        <span className="tw-w-32 tw-shrink-0 tw-text-right tw-font-medium tw-text-iron-300">
+        <span className="tw-ml-auto tw-whitespace-nowrap tw-font-medium tw-text-iron-100">
           {isLoading ? "…" : formatNumberWithCommas(heroAvailableCredit)}
         </span>
       </div>
-      <div className="tw-flex tw-items-baseline tw-justify-between tw-gap-4">
+      <div className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1">
         <span className="tw-min-w-0 tw-break-words">
           {t(locale, "rep.categories.edit.ratingLimit", { category })}
         </span>
-        <span className="tw-w-32 tw-shrink-0 tw-text-right tw-font-medium tw-text-iron-300">
+        <span className="tw-ml-auto tw-whitespace-nowrap tw-font-medium tw-text-iron-100">
           {isLoading ? "…" : `+/- ${formatNumberWithCommas(minMaxValues.max)}`}
         </span>
       </div>

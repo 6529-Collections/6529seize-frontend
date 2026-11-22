@@ -30,7 +30,11 @@ import profileCmsStudioMessages from "@/i18n/messages/profileCmsStudio.fr-FR.jso
 const LOADING_LABEL = "Chargement…";
 
 export const FR_FR_MESSAGES = {
+  "rep.categories.validation.unavailable":
+    "Ce nom de catégorie ne peut pas être utilisé. Essayez un autre nom.",
   "waves.drops.searchModal.result.emoji": "Émoji {shortcode}",
+  "waves.discovery.activeSubmissions.one": "{count} soumission active",
+  "waves.discovery.activeSubmissions.other": "{count} soumissions actives",
   "waves.historyGap.load": "Charger d’autres messages",
   "waves.historyGap.loaded": "Autres messages chargés",
   "waves.historyGap.loading": "Chargement d’autres messages…",
@@ -258,6 +262,9 @@ export const FR_FR_MESSAGES = {
   "waves.drop.actions.copied": "Copie !",
   "waves.drop.actions.copyFailed": "Echec de la copie",
   "waves.drop.actions.menuLabel": "Actions du drop",
+  "waves.drop.actions.scrollForMore":
+    "Plus d’actions, faire défiler vers le bas",
+  "waves.drop.actions.scrollUp": "Faire défiler vers le haut",
   "waves.drop.actions.reactionPickerLabel": "Ajouter une réaction au drop",
   "waves.drop.actions.showMore": "Afficher plus",
   "waves.drop.actions.showLess": "Afficher moins",
@@ -910,7 +917,6 @@ export const FR_FR_MESSAGES = {
     "Audience actuelle indisponible",
   "waves.create.groups.members.view": "Voir les membres",
   "waves.create.groups.members.previewDraft": "Prévisualiser les résultats",
-  "waves.create.groups.members.dialogTitle": "{role} : {group}",
   "waves.create.groups.members.dynamicDescription":
     "Cet aperçu en direct repose sur les données actuelles de profil, de réputation et de propriété. L’appartenance peut évoluer.",
   "waves.create.groups.members.criteriaSummary":

@@ -165,6 +165,7 @@ export function createUserTabPage<
   getTabProps?: (ctx: {
     profile: ApiIdentity;
     query: UserSearchParams;
+    user: string;
   }) => Promise<TExtra>;
 }) {
   async function Page({
@@ -220,7 +221,7 @@ export function createUserTabPage<
       profile.handle?.toLowerCase() ?? null
     );
     const extraProps = getTabProps
-      ? await getTabProps({ profile, query })
+      ? await getTabProps({ profile, query, user: normalizedUser })
       : ({} as TExtra);
 
     const canonicalUser =

@@ -5,7 +5,7 @@ import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { useAuth } from "@/components/auth/Auth";
 import MyStreamActionTooltip from "@/components/brain/my-stream/MyStreamActionTooltip";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import IconButton from "@/components/utils/button/IconButton";
 import {
   usePinnedWavesServer,
   MAX_PINNED_WAVES,
@@ -48,13 +48,6 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
     if (canPinCurrentWave) return PIN_ACTIONS.PIN;
     return `Max ${MAX_PINNED_WAVES} pinned waves. Unpin another wave first.`;
   }, [isPinned, canPinCurrentWave]);
-
-  const buttonStyles = useMemo(() => {
-    if (isPinned) {
-      return "tw-border-0 tw-bg-transparent tw-text-iron-300 desktop-hover:hover:tw-bg-iron-900 desktop-hover:hover:tw-text-white active:tw-bg-iron-900";
-    }
-    return "tw-border-0 tw-text-iron-500 desktop-hover:hover:tw-text-white desktop-hover:hover:tw-bg-iron-900 tw-bg-transparent active:tw-bg-iron-900";
-  }, [isPinned]);
 
   const ariaLabel = isPinned ? PIN_ACTIONS.UNPIN : PIN_ACTIONS.PIN;
 
@@ -117,10 +110,16 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
 
   return (
     <>
-      <button
+      <IconButton
+        layout="notification-mute"
+        variant="ghost"
         onClick={handleClick}
         disabled={isCurrentlyProcessing}
-        className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-flex tw-size-8 tw-items-center tw-justify-center tw-rounded-lg tw-p-0 tw-transition-colors tw-duration-150 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer motion-reduce:tw-transition-none ${buttonStyles} ${isCurrentlyProcessing ? "tw-cursor-not-allowed tw-opacity-50" : ""}`}
+        className={
+          isCurrentlyProcessing
+            ? "tw-cursor-not-allowed tw-opacity-50"
+            : undefined
+        }
         aria-label={ariaLabel}
         data-tooltip-id={`wave-header-pin-${waveId}`}
         data-tooltip-content={tooltipContent}
@@ -130,7 +129,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
           viewBox="0 0 24 24"
           fill={isPinned ? "currentColor" : "none"}
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
           className={`tw-size-4 tw-flex-shrink-0 ${isPinned ? "tw-rotate-[-45deg]" : ""}`}
@@ -139,7 +138,7 @@ const WaveHeaderPinButton: React.FC<WaveHeaderPinButtonProps> = ({
           <path d="M12 17v5" />
           <path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z" />
         </svg>
-      </button>
+      </IconButton>
       <MyStreamActionTooltip id={`wave-header-pin-${waveId}`} />
     </>
   );

@@ -398,7 +398,7 @@ it("fits the browser keyboard viewport and releases its listeners when review cl
     const container = within(dialog).getByRole("heading", {
       name: "Review invitation",
     }).parentElement?.parentElement?.parentElement;
-    expect(container?.style.getPropertyValue("--review-viewport-height")).toBe(
+    expect(container?.style.getPropertyValue("--dialog-viewport-height")).toBe(
       "700px"
     );
     act(() => {
@@ -406,10 +406,10 @@ it("fits the browser keyboard viewport and releases its listeners when review cl
       viewport.offsetTop = 20;
       viewport.dispatchEvent(new Event("resize"));
     });
-    expect(container?.style.getPropertyValue("--review-viewport-height")).toBe(
+    expect(container?.style.getPropertyValue("--dialog-viewport-height")).toBe(
       "300px"
     );
-    expect(container?.style.getPropertyValue("--review-viewport-top")).toBe(
+    expect(container?.style.getPropertyValue("--dialog-viewport-top")).toBe(
       "20px"
     );
     const creditName = within(dialog).getByRole("textbox", {
@@ -420,6 +420,7 @@ it("fits the browser keyboard viewport and releases its listeners when review cl
     act(() => creditName.focus());
     await waitFor(() =>
       expect(reveal).toHaveBeenCalledWith({
+        behavior: "instant",
         block: "nearest",
         inline: "nearest",
       })
@@ -434,7 +435,7 @@ it("fits the browser keyboard viewport and releases its listeners when review cl
       viewport.scale = 2;
       viewport.dispatchEvent(new Event("resize"));
     });
-    expect(container?.style.getPropertyValue("--review-viewport-height")).toBe(
+    expect(container?.style.getPropertyValue("--dialog-viewport-height")).toBe(
       ""
     );
     fireEvent.click(within(dialog).getByRole("button", { name: "Not now" }));

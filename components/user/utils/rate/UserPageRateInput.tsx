@@ -1,10 +1,11 @@
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
-import type { RefObject } from "react";
+import type { Ref } from "react";
 import RatingInput from "./RatingInput";
 import RatingInputSigns from "./RatingInputSigns";
+import { RATING_INPUT_SURFACE_CLASS } from "./ratingInputStyles";
 
 const INPUT_CLASS_NAME =
-  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-rounded-lg tw-border-0 tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-ring-inset tw-ring-iron-700/60 hover:tw-bg-iron-900 hover:tw-ring-iron-700 focus:tw-bg-iron-900 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
+  "tw-touch-manipulation tw-appearance-none tw-block tw-min-w-0 tw-w-full tw-text-iron-100 tw-caret-primary-400 tw-ring-1 focus:tw-outline-none placeholder:tw-text-iron-500 tw-transition-colors tw-duration-150 motion-reduce:tw-transition-none";
 
 const VARIANT_CLASSES = {
   compact:
@@ -34,12 +35,17 @@ export default function UserPageRateInput({
   readOnly = false,
   autoFocus = false,
   clampOnBlur = true,
+  disabled = false,
+  placeholder,
+  descriptionId,
+  invalid,
+  selectOnFocus = false,
 }: {
   readonly value: string;
   readonly onChange: (value: string) => void;
   readonly minMax: { min: number; max: number };
   readonly isProxy: boolean;
-  readonly inputRef?: RefObject<HTMLInputElement | null>;
+  readonly inputRef?: Ref<HTMLInputElement>;
   readonly variant?: "compact" | "form" | "tooltip";
   readonly inputId?: string;
   readonly focusRingClassName?: string;
@@ -47,10 +53,16 @@ export default function UserPageRateInput({
   readonly readOnly?: boolean;
   readonly autoFocus?: boolean;
   readonly clampOnBlur?: boolean;
+  readonly disabled?: boolean;
+  readonly placeholder?: string;
+  readonly descriptionId?: string;
+  readonly invalid?: boolean;
+  readonly selectOnFocus?: boolean;
 }) {
   const valueAsNumber = getStringAsNumberOrZero(value);
   const isValidValue =
     isProxy || (valueAsNumber >= minMax.min && valueAsNumber <= minMax.max);
+  const showInvalid = invalid ?? !isValidValue;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const inputValue = event.currentTarget.value;
@@ -74,7 +86,9 @@ export default function UserPageRateInput({
   };
 
   return (
-    <div className="tw-relative tw-w-full tw-min-w-0">
+    <div
+      className={`tw-relative tw-w-full tw-min-w-0 ${disabled ? "tw-opacity-40" : ""}`}
+    >
       <span
         aria-hidden="true"
         className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-left-4 tw-flex tw-items-center tw-gap-3 tw-text-iron-500"
@@ -87,6 +101,7 @@ export default function UserPageRateInput({
         )}
       </span>
       <RatingInput
+        selectOnFocus={selectOnFocus}
         ref={inputRef}
         data-rating-input="true"
         data-autofocus={autoFocus || undefined}
@@ -94,13 +109,17 @@ export default function UserPageRateInput({
         autoComplete="off"
         required={required}
         readOnly={readOnly}
+        disabled={disabled}
+        placeholder={placeholder}
+        aria-describedby={descriptionId}
+        aria-invalid={invalid}
         value={value}
         onChange={handleChange}
         onBlur={handleBlur}
         className={`${
           focusRingClassName ??
-          (isValidValue ? "focus:tw-ring-primary-400" : "focus:tw-ring-red")
-        } ${INPUT_CLASS_NAME} ${VARIANT_CLASSES[variant]}`}
+          (showInvalid ? "focus:tw-ring-red" : "focus:tw-ring-primary-400")
+        } ${INPUT_CLASS_NAME} ${RATING_INPUT_SURFACE_CLASS} ${VARIANT_CLASSES[variant]}`}
       />
     </div>
   );

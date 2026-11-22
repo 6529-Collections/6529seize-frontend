@@ -8,7 +8,12 @@ import {
 import { useSidebarWaveNavigation } from "@/hooks/useSidebarWaveNavigation";
 
 import Button from "@/components/utils/button/Button";
-import { COMPACT_ACTION_TOUCH_TARGET_CLASS } from "@/components/utils/button/compactActionButtonStyles";
+import {
+  COMPACT_ACTION_BUTTON_SIZE_CLASS,
+  COMPACT_ACTION_ICON_CLASS,
+  COMPACT_ACTION_ICON_STROKE_WIDTH,
+  COMPACT_ACTION_TOUCH_TARGET_CLASS,
+} from "@/components/utils/button/compactActionButtonStyles";
 import { useMyStream } from "@/contexts/wave/MyStreamContext";
 import useCreateModalState from "@/hooks/useCreateModalState";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
@@ -19,17 +24,14 @@ import { useRevealActiveSidebarWave } from "@/hooks/useRevealActiveSidebarWave";
 import { usePrefetchWaveData } from "@/hooks/usePrefetchWaveData";
 import { PlusIcon } from "@heroicons/react/24/outline";
 import React, { useCallback, useMemo, useRef } from "react";
-import { Tooltip as ReactTooltip } from "react-tooltip";
+import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import type { VirtualItem } from "../../../../hooks/useVirtualizedWaves";
 import { useVirtualizedWaves } from "../../../../hooks/useVirtualizedWaves";
 import {
   buildHighlyRatedWavePreviewItems,
   getHighlyRatedPreviewWaves,
 } from "../waves/HighlyRatedWavesToggle";
-import {
-  SIDEBAR_TOOLTIP_BORDER,
-  SIDEBAR_TOOLTIP_STYLE,
-} from "../waves/SidebarCategoryLabel";
+import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import { usePinnedSidebarList } from "../waves/SidebarPinnedWaves";
 import { SidebarWaveRowsSection } from "../waves/SidebarWaveRowsSection";
 import { SidebarSubwavesToggle } from "../waves/SidebarSubwavesToggle";
@@ -71,10 +73,6 @@ const COLLAPSING_SUBWAVE_ROW_HEIGHT = 1 as const;
 const SUBWAVE_TOGGLE_ROW_HEIGHT = 38 as const;
 const COLLAPSED_SUBWAVE_TOGGLE_ROW_HEIGHT = 42 as const;
 const SIDEBAR_LOCALE = DEFAULT_LOCALE;
-const TOOLTIP_STYLE = {
-  ...SIDEBAR_TOOLTIP_STYLE,
-  zIndex: 10000,
-} as const satisfies React.CSSProperties;
 
 function getVirtualizedAriaLabel({
   isDirectMessage,
@@ -146,18 +144,21 @@ function CreateWaveButton({
   return (
     <Button
       variant="primary"
-      size={compact ? null : "xs"}
+      size={null}
       onClick={onClick}
       aria-label={label}
+      data-wave-typography="preserve"
       data-tooltip-id="create-wave-tooltip"
       data-tooltip-content={label}
       className={`${COMPACT_ACTION_TOUCH_TARGET_CLASS} ${
-        compact ? "tw-size-8 tw-p-0" : "tw-py-0"
+        compact
+          ? "tw-size-8 tw-p-0"
+          : `${COMPACT_ACTION_BUTTON_SIZE_CLASS} tw-py-0`
       }`}
     >
       <PlusIcon
-        className="tw-size-4 tw-flex-shrink-0"
-        strokeWidth={2}
+        className={COMPACT_ACTION_ICON_CLASS}
+        strokeWidth={COMPACT_ACTION_ICON_STROKE_WIDTH}
         aria-hidden="true"
       />
       {!compact && <span>{label}</span>}
@@ -186,7 +187,7 @@ function WebWavesListHeader({
     }
 
     return (
-      <div className="tw-flex tw-h-11 tw-shrink-0 tw-items-center tw-justify-center tw-px-2">
+      <div className="tw-mt-5 tw-flex tw-h-11 tw-shrink-0 tw-items-center tw-justify-center tw-px-2">
         <CreateWaveButton onClick={onCreateWave} compact />
       </div>
     );
@@ -684,22 +685,20 @@ const WebUnifiedWavesListWaves: React.FC<WebUnifiedWavesListWavesProps> = ({
 
       {!isTouchDevice && (
         <>
-          <ReactTooltip
+          <BodyPortalTooltip
             id="create-wave-tooltip"
             place="bottom"
             offset={8}
             opacity={1}
-            style={TOOLTIP_STYLE}
-            border={SIDEBAR_TOOLTIP_BORDER}
+            style={TOOLTIP_STYLES}
           />
           {shouldShowProfileFeedShortcut && (
-            <ReactTooltip
+            <BodyPortalTooltip
               id={PROFILE_FEED_TOOLTIP_ID}
               place={isCollapsed ? "right" : "bottom"}
               offset={8}
               opacity={1}
-              style={TOOLTIP_STYLE}
-              border={SIDEBAR_TOOLTIP_BORDER}
+              style={TOOLTIP_STYLES}
             />
           )}
         </>

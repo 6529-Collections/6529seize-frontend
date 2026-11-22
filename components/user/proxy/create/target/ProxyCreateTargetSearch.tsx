@@ -1,6 +1,13 @@
 "use client";
 
-import { Combobox } from "@headlessui/react";
+import IconButton from "@/components/utils/button/IconButton";
+import {
+  DROPDOWN_LISTBOX_FOCUS_CLASSES,
+  DROPDOWN_PANEL_SURFACE_CLASSES,
+  getDropdownOptionStateClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
+
+import { Combobox, ComboboxOptions } from "@headlessui/react";
 import { useContext, useEffect, useState } from "react";
 import type { CommunityMemberMinimal } from "@/entities/IProfile";
 import { useDebounce } from "react-use";
@@ -99,11 +106,13 @@ export default function ProxyCreateTargetSearch({
             <span className="tw-text-base tw-font-semibold tw-text-iron-50">
               {profileProxy.granted_to.handle}
             </span>
-            <button
+            <IconButton
               type="button"
               aria-label="Remove selected profile"
               onClick={() => onTargetSelect(null)}
-              className="tw-flex tw-h-8 tw-w-8 tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-transition tw-duration-300 tw-ease-out hover:tw-bg-iron-800 focus:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+              size={32}
+              variant="ghost"
+              shape="circle"
             >
               <svg
                 className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-text-red"
@@ -120,13 +129,13 @@ export default function ProxyCreateTargetSearch({
                   strokeLinejoin="round"
                 />
               </svg>
-            </button>
+            </IconButton>
           </div>
         </div>
       ) : (
         <div className="tw-relative tw-mt-4 tw-max-w-xs">
           <Combobox.Input
-            className="sm:text-sm tw-form-input tw-block tw-w-80 tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-4 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 active:tw-fill-none"
+            className="sm:text-sm tw-form-input tw-block tw-w-full tw-rounded-lg tw-border-0 tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-4 tw-text-base tw-font-normal tw-text-iron-50 tw-caret-primary-400 tw-shadow-sm tw-ring-1 tw-ring-inset tw-ring-iron-700 tw-transition tw-duration-300 tw-ease-out placeholder:tw-text-iron-500 hover:tw-ring-iron-600 focus:tw-bg-iron-900 focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-inset focus:tw-ring-primary-400 active:tw-fill-none"
             placeholder="Search profile"
             autoComplete="off"
             onChange={(event) => setQuery(event.target.value)}
@@ -147,7 +156,9 @@ export default function ProxyCreateTargetSearch({
             ></path>
           </svg>
           {!!filteredProfiles.length && (
-            <Combobox.Options className="tw-absolute tw-z-10 tw-mt-1 tw-max-h-56 tw-w-full tw-list-none tw-overflow-auto tw-rounded-md tw-bg-iron-800 tw-px-2 tw-py-1 tw-text-base tw-shadow-lg tw-ring-1 tw-ring-white/10 tw-ring-opacity-5 focus:tw-outline-none sm:tw-text-sm">
+            <ComboboxOptions
+              className={`tw-absolute tw-z-10 tw-mt-1 tw-max-h-56 tw-w-full tw-list-none tw-space-y-0.5 tw-overflow-auto tw-px-2 tw-py-1 tw-text-base sm:tw-text-sm ${DROPDOWN_PANEL_SURFACE_CLASSES} ${DROPDOWN_LISTBOX_FOCUS_CLASSES}`}
+            >
               {filteredProfiles.map((profile) => (
                 <Combobox.Option
                   key={profile.handle}
@@ -156,8 +167,9 @@ export default function ProxyCreateTargetSearch({
                   className={({ active }) =>
                     classNames(
                       "tw-relative tw-cursor-pointer tw-select-none tw-rounded-lg tw-px-2 tw-py-2 tw-transition tw-duration-300 tw-ease-out",
+                      getDropdownOptionStateClasses(active),
                       active
-                        ? "tw-bg-iron-700 tw-font-medium tw-text-iron-50 tw-ring-2 tw-ring-inset tw-ring-primary-400"
+                        ? "tw-font-medium tw-ring-2 tw-ring-inset tw-ring-iron-500"
                         : ""
                     )
                   }
@@ -188,7 +200,7 @@ export default function ProxyCreateTargetSearch({
                   )}
                 </Combobox.Option>
               ))}
-            </Combobox.Options>
+            </ComboboxOptions>
           )}
         </div>
       )}

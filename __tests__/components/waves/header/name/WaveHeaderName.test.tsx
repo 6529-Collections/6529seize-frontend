@@ -1,11 +1,15 @@
 jest.mock("@/hooks/waves/useWaveConfiguration", () => ({
   useWaveConfiguration: (wave: unknown) => wave,
 }));
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import React from "react";
 import WaveHeaderName from "@/components/waves/header/name/WaveHeaderName";
 import { createMockApiWave } from "@/__tests__/utils/mockFactories";
 import type { ApiWave } from "@/generated/models/ApiWave";
+import {
+  WaveInformationPanelContext,
+  WAVE_NAME_EDIT_VIEW,
+} from "@/components/brain/mobile/WaveInformationPanelContext";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -53,6 +57,41 @@ describe("WaveHeaderName", () => {
     render(<WaveHeaderName wave={wave} />);
     expect(screen.queryByTestId("edit")).toBeNull();
   });
+
+  it.each([true, false])(
+    "uses the name to rename inside About only when edit eligible (%s)",
+    (eligible) => {
+      (canEditWave as jest.Mock).mockReturnValue(eligible);
+      const open = jest.fn();
+      render(
+        <WaveInformationPanelContext.Provider
+          value={{
+            view: "about",
+            contentId: "editor",
+            container: null,
+            open,
+            back: jest.fn(),
+          }}
+        >
+          <WaveHeaderName wave={wave} />
+        </WaveInformationPanelContext.Provider>
+      );
+      if (eligible) {
+        const name = screen.getByRole("button", { name: "Wave" });
+        expect(name).toHaveAttribute("aria-controls", "editor");
+        fireEvent.click(name);
+        expect(open).toHaveBeenCalledWith(WAVE_NAME_EDIT_VIEW, "Rename wave");
+        expect(screen.queryByRole("link", { name: "Wave" })).toBeNull();
+      } else {
+        expect(screen.queryByRole("button", { name: "Wave" })).toBeNull();
+        expect(screen.getByRole("link", { name: "Wave" })).toHaveAttribute(
+          "href",
+          "/waves/w1"
+        );
+        expect(open).not.toHaveBeenCalled();
+      }
+    }
+  );
 
   it("hides edit button for DM waves even when user can edit", () => {
     (canEditWave as jest.Mock).mockReturnValue(true);

@@ -532,7 +532,7 @@ describe("E2eeConversationView", () => {
     );
     expect(
       screen.getByRole("menuitem", { name: "Choose who can message you" })
-    ).toHaveAttribute("href", "/preferences");
+    ).toHaveAttribute("href", "/preferences?tab=messages");
 
     fireEvent.click(screen.getByRole("menuitem", { name: "Block alice" }));
     const dialog = await screen.findByRole("dialog", {

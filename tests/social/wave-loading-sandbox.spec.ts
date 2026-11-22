@@ -667,6 +667,7 @@ test("discovery reserves space while loading and retains its controls", async ({
           },
           voting_ends_at: null,
           next_decision_at: null,
+          ...(index === 0 ? { active_submission_count: 2 } : {}),
         })),
         page: 1,
         next: false,
@@ -733,6 +734,7 @@ test("discovery reserves space while loading and retains its controls", async ({
     await expect(
       discovery.getByText("Community decisions powered by TDH.")
     ).toBeVisible();
+    await expect(discovery.getByText("2 active submissions")).toBeVisible();
     await expect(
       discovery.getByRole("status").filter({ hasText: /Loading/ })
     ).toHaveCount(0);
@@ -990,6 +992,43 @@ for (const width of [375, 390, 768, 1024, 1440]) {
       );
       expect(positions.length).toBeGreaterThan(0);
       expect(positions.every((x) => Math.abs(x - before.x) < 1)).toBe(true);
+      if (!(touch && width === 375)) {
+        for (const offsetTop of [0, 120]) {
+          await page.evaluate((offset) => {
+            const viewport = globalThis.visualViewport!;
+            Object.defineProperty(viewport, "height", {
+              configurable: true,
+              value: 450,
+            });
+            Object.defineProperty(viewport, "offsetTop", {
+              configurable: true,
+              value: offset,
+            });
+            viewport.dispatchEvent(new Event("resize"));
+          }, offsetTop);
+          await expect
+            .poll(() =>
+              close.evaluate((element) => {
+                const overlay = element.parentElement!.parentElement!;
+                const bounds = overlay.getBoundingClientRect();
+                const viewport = globalThis.visualViewport!;
+                return (
+                  bounds.top >= viewport.offsetTop - 1 &&
+                  bounds.bottom <= viewport.offsetTop + viewport.height + 1
+                );
+              })
+            )
+            .toBe(true);
+          await expect(close).toBeInViewport({ ratio: 1 });
+        }
+        await page.evaluate(() => {
+          const viewport = globalThis.visualViewport!;
+          Reflect.deleteProperty(viewport, "height");
+          Reflect.deleteProperty(viewport, "offsetTop");
+          viewport.dispatchEvent(new Event("resize"));
+        });
+        await expect.poll(() => close.boundingBox()).toEqual(before);
+      }
       if (touch && width === 375) {
         await page.evaluate(() =>
           document.documentElement.style.setProperty(
@@ -1097,6 +1136,12 @@ async function sharedPostFixture(page: Page, baseURL: string | undefined) {
       content: `Shared link fixture post ${serial}`,
     };
   }).reverse();
+  // Browser routes cannot intercept the server-rendered feed seed. Give the
+  // sandbox server this same history before opening the shared-link page.
+  const serverFixture = await page.request.post(
+    `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/shared-posts`
+  );
+  expect(serverFixture.ok()).toBe(true);
   await page.route("**/api/v2/drops?**", (route) => {
     const ids =
       new URL(route.request().url()).searchParams.get("ids")?.split(",") ?? [];
@@ -1552,6 +1597,11 @@ test("shared post loads only its surroundings and fills the rest as the reader s
   baseURL,
 }) => {
   const { post } = await sharedPostFixture(page, baseURL);
+  // Keep the streamed server seed consistent with the browser's latest page.
+  const seed = await page.request.post(
+    `${getSandboxApiOrigin(baseURL)}/__composer-sandbox/shared-post-feed`
+  );
+  expect(seed.ok()).toBe(true);
   const chat = page.getByRole("region", {
     name: "Wave chat file upload area",
     exact: true,

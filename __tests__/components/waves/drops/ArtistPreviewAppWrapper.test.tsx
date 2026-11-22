@@ -1,6 +1,16 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import ArtistPreviewAppWrapper from "@/components/waves/drops/ArtistPreviewAppWrapper";
+import useCapacitor from "@/hooks/useCapacitor";
+import { useLayoutViewportLock } from "@/components/brain/my-stream/layout/LayoutContext";
+
+jest.mock("@/hooks/useCapacitor", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+jest.mock("@/components/brain/my-stream/layout/LayoutContext", () => ({
+  useLayoutViewportLock: jest.fn(),
+}));
 
 // Mock Headless UI components
 jest.mock("@headlessui/react", () => ({
@@ -20,6 +30,14 @@ jest.mock("@headlessui/react", () => ({
 }));
 
 describe("ArtistPreviewAppWrapper", () => {
+  const webPlatform: ReturnType<typeof useCapacitor> = {
+    isCapacitor: false,
+    platform: "web",
+    isIos: false,
+    isAndroid: false,
+    orientation: 0,
+    isActive: false,
+  };
   const defaultProps = {
     isOpen: true,
     onClose: jest.fn(),
@@ -28,6 +46,65 @@ describe("ArtistPreviewAppWrapper", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useCapacitor).mockReturnValue(webPlatform);
+  });
+
+  it.each(["ios", "android"])(
+    "locks the %s app background while open",
+    (platform) => {
+      jest.mocked(useCapacitor).mockReturnValue({
+        ...webPlatform,
+        isCapacitor: true,
+        platform,
+        isIos: platform === "ios",
+        isAndroid: platform === "android",
+      });
+      const { rerender } = render(
+        <ArtistPreviewAppWrapper {...defaultProps} />
+      );
+
+      expect(useLayoutViewportLock).toHaveBeenLastCalledWith(true);
+
+      rerender(<ArtistPreviewAppWrapper {...defaultProps} isOpen={false} />);
+      expect(useLayoutViewportLock).toHaveBeenLastCalledWith(false);
+
+      rerender(<ArtistPreviewAppWrapper {...defaultProps} />);
+      expect(useLayoutViewportLock).toHaveBeenLastCalledWith(true);
+    }
+  );
+
+  it("scopes the shared reply motion curve to the iOS preview and its children", () => {
+    jest.mocked(useCapacitor).mockReturnValue({
+      ...webPlatform,
+      isCapacitor: true,
+      platform: "ios",
+      isIos: true,
+    });
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
+
+    const dialog = screen.getByTestId("dialog");
+    expect(dialog).toHaveClass(
+      "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]"
+    );
+    expect(dialog).toContainElement(screen.getByTestId("test-content"));
+  });
+
+  it.each([
+    { platform: "android", isCapacitor: true, isAndroid: true },
+    { platform: "web", isCapacitor: false, isAndroid: false },
+  ])("preserves the $platform reply-motion behavior", (platform) => {
+    jest.mocked(useCapacitor).mockReturnValue({
+      ...webPlatform,
+      ...platform,
+    });
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
+
+    expect(useLayoutViewportLock).toHaveBeenLastCalledWith(
+      platform.isCapacitor
+    );
+    expect(screen.getByTestId("dialog")).not.toHaveClass(
+      "[--vote-reply-easing:var(--native-keyboard-layout-transition-easing,ease-out)]"
+    );
   });
 
   it("renders when isOpen is true", () => {
@@ -35,6 +112,22 @@ describe("ArtistPreviewAppWrapper", () => {
 
     expect(screen.getByTestId("dialog")).toBeInTheDocument();
     expect(screen.getByTestId("test-content")).toBeInTheDocument();
+  });
+
+  it.each([
+    { platform: "android", isCapacitor: true, isIos: false, isAndroid: true },
+    { platform: "ios", isCapacitor: true, isIos: true, isAndroid: false },
+    { platform: "web", isCapacitor: false, isIos: false, isAndroid: false },
+  ])("matches the desktop backdrop on $platform", (platform) => {
+    jest.mocked(useCapacitor).mockReturnValue({
+      ...webPlatform,
+      ...platform,
+    });
+    render(<ArtistPreviewAppWrapper {...defaultProps} />);
+
+    const backdrop = screen.getByTestId("artist-preview-app-backdrop");
+    expect(backdrop).toHaveClass("tw-bg-iron-600/60", "tw-transition-opacity");
+    expect(backdrop).not.toHaveClass("tw-backdrop-blur-[1px]");
   });
 
   it("does not render when isOpen is false", () => {
@@ -161,8 +254,10 @@ describe("ArtistPreviewAppWrapper", () => {
     const closeButton = screen.getByLabelText("Close panel");
     const dialogPanel = screen.getByTestId("dialog-panel");
     expect(closeButton).toHaveClass(
-      "focus-visible:tw-ring-2",
-      "focus-visible:tw-ring-primary-400"
+      "focus-visible:tw-outline",
+      "focus-visible:tw-outline-2",
+      "focus-visible:tw-outline-offset-2",
+      "focus-visible:tw-outline-primary-400"
     );
     expect(dialogPanel).not.toContainElement(closeButton);
   });

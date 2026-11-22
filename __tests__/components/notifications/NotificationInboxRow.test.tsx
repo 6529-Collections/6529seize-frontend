@@ -16,6 +16,8 @@ import { isGroupedReactionsItem } from "@/types/feed.types";
 
 const originalFetch = globalThis.fetch;
 const inlineEmoji = "data:image/png;base64,aGVsbG8=";
+const dropImage =
+  "https://d3lqz0a4bldqgf.cloudfront.net/drops/upload/first.png";
 const mockLoadEmojiData = jest.fn(async () => {});
 const mockFindCustomEmoji = jest.fn();
 const mockFindNativeEmoji = jest.fn();
@@ -189,11 +191,61 @@ function reaction(
   };
 }
 
+it("renders one resized drop upload beside the preview text", () => {
+  const onOpen = jest.fn();
+  const notification = {
+    ...reaction(1, "alice", null),
+    related_drops: [
+      {
+        ...drop,
+        parts: [
+          {
+            part_id: 1,
+            media: [],
+            attachments: [],
+            quoted_drop: null,
+            content:
+              `gmgm\n\n![Seize](${dropImage})my macbook is turning into 6529Book` +
+              `\n\n[A second![Seize](${dropImage.replace("first", "second")})](https://example.com)image`,
+          },
+        ],
+      },
+    ],
+  };
+  const { container } = render(
+    <NotificationInboxRow
+      notification={notification}
+      handle="viewer"
+      onOpen={onOpen}
+    />
+  );
+  const thumbnails = container.querySelectorAll("img[src*='/drops/upload/']");
+  expect(thumbnails).toHaveLength(1);
+  const thumbnail = thumbnails[0]!;
+  expect(thumbnail).toHaveAttribute(
+    "src",
+    dropImage.replace("first", "AUTOx50/first")
+  );
+  expect(thumbnail).toHaveAttribute("loading", "lazy");
+  expect(thumbnail).toHaveAttribute("alt", "");
+  expect(
+    screen.getByText("my macbook is turning into 6529Book")
+  ).toBeInTheDocument();
+  expect(container).not.toHaveTextContent("Seize");
+  expect(container).toHaveTextContent("A second image");
+  expect(screen.getAllByRole("link")).toHaveLength(1);
+  fireEvent.click(thumbnail);
+  expect(onOpen).toHaveBeenCalledWith([1]);
+});
+
 it.each(["regular", "encrypted-inbox", "encrypted-feed"])(
   "loads catalog emoji outside chat for %s previews without turning message URLs into resources",
   async (surface) => {
+    const hostedImage =
+      surface === "regular" ? "" : ` ![Hosted image](${dropImage})`;
     const content =
-      "**:el_fafo_angy:** 😀 :fire: :+1: :not_in_catalog: `:el_fafo_angy: :fire:` [Link](https://example.com/private) ![Image](https://example.com/private.png)";
+      "**:el_fafo_angy:** 😀 :fire: :+1: :not_in_catalog: `:el_fafo_angy: :fire:` [Link](https://example.com/private) ![Image](https://example.com/private.png)" +
+      hostedImage;
     jest
       .mocked(useEncryptedNotificationPreview)
       .mockReturnValue({ preview: content, needsSetup: false });
@@ -244,7 +296,7 @@ it.each(["regular", "encrypted-inbox", "encrypted-feed"])(
     expect(screen.getAllByRole("link")).toHaveLength(1);
     expect(
       container.querySelector(
-        "a a,iframe,video,audio,input,img[src*='example.com']"
+        "a a,iframe,video,audio,input,img[src*='example.com'],img[src*='/drops/upload/']"
       )
     ).toBeNull();
   }

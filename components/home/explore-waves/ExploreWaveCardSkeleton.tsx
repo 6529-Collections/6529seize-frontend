@@ -13,25 +13,25 @@ export function ExploreWaveCardSkeleton({
     return (
       <div
         aria-hidden="true"
-        className="tw-flex tw-h-full tw-overflow-hidden tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.05] tw-bg-iron-950"
+        className="tw-flex tw-h-full tw-overflow-hidden tw-rounded-xl tw-bg-iron-950 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
       >
-        <div className="tw-w-20 tw-shrink-0 tw-animate-pulse tw-bg-iron-900 motion-reduce:tw-animate-none sm:tw-w-24" />
+        <div className="tw-w-20 tw-shrink-0 tw-self-stretch tw-animate-pulse tw-bg-iron-900 motion-reduce:tw-animate-none sm:tw-w-24" />
         <div className="tw-flex tw-min-w-0 tw-flex-1 tw-flex-col tw-p-3">
-          <div className="tw-h-6">
+          <div className="tw-h-5">
             <div className="tw-h-5 tw-w-3/4 tw-animate-pulse tw-rounded tw-bg-iron-800 motion-reduce:tw-animate-none" />
           </div>
           <div className="tw-mt-1 tw-h-4 tw-w-2/3 tw-animate-pulse tw-rounded tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
-          <div className="tw-mt-1.5 tw-h-[18px]">
+          <div className="tw-mt-2 tw-h-[18px]">
             <div className="tw-h-3 tw-w-full tw-animate-pulse tw-rounded tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
           </div>
-          <div className="tw-mt-2 tw-h-5 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
+          <div className="tw-mt-2.5 tw-h-4 tw-w-1/2 tw-animate-pulse tw-rounded tw-bg-iron-800/60 motion-reduce:tw-animate-none" />
         </div>
       </div>
     );
   }
 
   const cardClassName = artworkOverlay
-    ? "tw-relative tw-min-h-72 tw-w-full tw-min-w-0 tw-aspect-square tw-flex-col tw-justify-end tw-rounded-xl md:tw-min-h-0 tw-border-0 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.05)]"
+    ? "tw-relative tw-min-h-72 tw-w-full tw-min-w-0 tw-aspect-square tw-flex-col tw-justify-end tw-rounded-xl md:tw-min-h-0 tw-border-0 tw-shadow-[0_0_0_1px_rgba(255,255,255,0.08)]"
     : "tw-min-h-[20rem] tw-flex-col tw-rounded-lg tw-border-white/[0.05]";
   const imageClassName = artworkOverlay
     ? "tw-absolute tw-inset-0 tw-h-full tw-w-full"

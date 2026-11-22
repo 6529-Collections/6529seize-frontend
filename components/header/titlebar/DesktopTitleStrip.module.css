@@ -80,7 +80,14 @@
   background: #31cd69;
 }
 
+/* An update state the person must act on (release standard R54). */
+.updateDotAlert {
+  background: #f97066;
+}
+
 .version {
+  /* Match the controls' offset within the centered flex strip. */
+  margin-top: 4px;
   white-space: nowrap;
 }
 
@@ -89,6 +96,8 @@
    with the other title bar variables, so the text never pops in. */
 .hostVersion::after {
   content: var(--desktop-app-version, "");
+  /* Keep the text in flow despite the global absolute-positioned pseudo reset. */
+  position: static;
 }
 
 /* A host that does not set it: the version the app reports a moment later

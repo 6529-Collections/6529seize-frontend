@@ -69,6 +69,13 @@ exclude Validator after results settle and still navigate through Join 6529.
 Member search results are covered by the focused search unit tests, alongside
 the member navigation scenarios in the session recovery sandbox.
 
+The profile pages sandbox also checks Collected personal actions against its
+isolated API. Anonymous and visitor profiles omit the entire action row. Owners
+retain action alignment, browser/native Back, filter and focus restoration;
+iOS owners retain the existing purchasing restriction. These owner-only cases
+replace the old anonymous action-navigation assumptions in the public read-only
+profile and native-shell packs.
+
 ## Pack registry
 
 The reaction sandbox covers live count and profile-list updates, desktop tooltip
@@ -238,10 +245,11 @@ Generated from `tests/packs.manifest.cjs` by
 | `test:e2e:wave-link-preview-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Embedded wave preview readability in the sidebar and responsive chat.                                 |
 | `test:e2e:notifications-inbox-sandbox`              | —                             | sandbox  | local       | manual                    | 15m     | Desktop notification preview, explicit read actions, and mobile navigation.                           |
 | `test:e2e:profile-following-sandbox`                | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile editing, Following, artist artwork alerts and REP editing dialogs, permissions and recovery.  |
+| `test:e2e:subscription-status-sandbox`              | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Subscription status explanations, funding controls, recovery and native purchasing gates.             |
 | `test:e2e:profile-nic-sandbox`                      | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Profile NIC activity filtering and cursor navigation across desktop, tablet and mobile.               |
 | `test:e2e:wave-creation-sandbox`                    | —                             | sandbox  | local       | pr-ci, manual             | 15m     | Wave creation, permissions, and draft recovery on desktop and mobile.                                 |
 | `test:e2e:e2ee-sandbox`                             | —                             | sandbox  | local       | manual                    | 30m     | Encrypted DMs and groups across several local browsers against the fake delivery service.             |
-| `test:e2e:e2ee-picker-sandbox`                      | —                             | sandbox  | local       | manual                    | 15m     | Encrypted chat recipient selection in desktop Chromium and iPhone WebKit.                             |
+| `test:e2e:e2ee-picker-sandbox`                      | —                             | sandbox  | local       | manual                    | 15m     | Encrypted chat recipient selection and the iPhone sign-out dialog.                                    |
 | `test:e2e:metamask-bridge`                          | —                             | sandbox  | local       | manual                    | 15m     | Isolated WebKit MetaMask bridge attribution and application-error boundaries.                         |
 | `test:e2e:smoke:surface-matrix`                     | —                             | local    | local       | pr-ci, manual             | 15m     | @smoke subset on desktop and mobile web shells.                                                       |
 | `test:e2e:surface-matrix`                           | —                             | local    | local       | pr-ci, manual             | 15m     | Core surfaces on desktop and mobile web shells.                                                       |
@@ -305,6 +313,11 @@ The same Playwright spec can be `@medium` locally and `@large` when
 size at runtime.
 
 Choosing the test layer:
+
+- The native competition sandbox includes a simulated iPhone voting check that
+  samples the sheet during keyboard movement, keeps the background stable, and
+  preserves the vote and reply draft. It checks alignment with the app's shared
+  keyboard curve; it does not measure a physical iPhone's keyboard or frame rate.
 
 - Use Playwright for browser-specific behavior such as rendering, hydration,
   navigation, responsive layout, accessibility, and runtime integrations.
@@ -592,7 +605,9 @@ Surface matrix:
 - `test:e2e:e2ee-picker-sandbox` runs the real encrypted-compose recipient
   picker in desktop Chromium and iPhone WebKit. It checks completed taps,
   selection and eligibility, search reset, Enter/Space activation, Escape and
-  outside dismissal. This is browser simulation; physical iPhone verification
+  outside dismissal. On iPhone WebKit it also verifies that logout replaces the
+  sidebar with the encrypted-messages dialog and that cancel and confirm are
+  reachable by touch. This is browser simulation; physical iPhone verification
   remains separate. Like the other local E2EE pack, it is manually owned and
   uses only the loopback delivery service.
 - `test:e2e:e2ee-sandbox` runs end-to-end encrypted DMs and groups (D109)

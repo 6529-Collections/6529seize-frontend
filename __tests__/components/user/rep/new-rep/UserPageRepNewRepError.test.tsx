@@ -1,25 +1,22 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import UserPageRepNewRepError from '@/components/user/rep/new-rep/UserPageRepNewRepError';
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import UserPageRepNewRepError from "@/components/user/rep/new-rep/UserPageRepNewRepError";
 
-jest.mock('@/components/user/utils/UserPageErrorWrapper', () => (props:any) => (
-  <div data-testid="wrapper" onClick={props.closeError}>{props.children}</div>
-));
-
-test('shows title, message and details, and triggers close', async () => {
+test("shows title, message and details, and triggers close", async () => {
   const user = userEvent.setup();
   const close = jest.fn();
   render(<UserPageRepNewRepError msg="oops" closeError={close} />);
   expect(
-    screen.getByRole('heading', { name: /category name won't work/i })
+    screen.getByRole("heading", { name: /category name won't work/i })
   ).toBeInTheDocument();
-  expect(screen.getByText('oops')).toBeInTheDocument();
+  expect(screen.getByText("oops")).toBeInTheDocument();
+  expect(screen.getByRole("alert")).toHaveTextContent("oops");
   expect(screen.getByText(/AI filter/)).toBeInTheDocument();
-  await user.click(screen.getByTestId('wrapper'));
+  await user.click(screen.getByRole("button", { name: "Dismiss error" }));
   expect(close).toHaveBeenCalled();
 });
 
-test('can hide the abuse-filter details for reserved categories', () => {
+test("can hide the abuse-filter details for reserved categories", () => {
   const close = jest.fn();
   render(
     <UserPageRepNewRepError
@@ -30,7 +27,7 @@ test('can hide the abuse-filter details for reserved categories', () => {
   );
 
   expect(
-    screen.getByText('Help6529 Credits is managed by help6529.')
+    screen.getByText("Help6529 Credits is managed by help6529.")
   ).toBeInTheDocument();
   expect(screen.queryByText(/AI filter/)).not.toBeInTheDocument();
 });

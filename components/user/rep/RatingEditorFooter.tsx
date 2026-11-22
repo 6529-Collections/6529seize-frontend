@@ -5,6 +5,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import type { KeyboardEvent, ReactNode } from "react";
 import { t } from "@/i18n/messages";
+import { getRatingTotalColor } from "./ratingContributorStyles";
 
 export default function RatingEditorFooter({
   matter,
@@ -34,10 +35,7 @@ export default function RatingEditorFooter({
   readonly children?: ReactNode;
 }) {
   const locale = useBrowserLocale();
-  let totalColor = "tw-text-iron-100";
-  if (after !== null && after !== before) {
-    totalColor = after < before ? "tw-text-rose-400" : "tw-text-emerald-400";
-  }
+  const totalColor = getRatingTotalColor(after);
   const onKeyDownCapture = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "Escape" && changed && !busy) {
       event.preventDefault();

@@ -1,3 +1,7 @@
+import {
+  DROPDOWN_CHECKMARK_CLASSES,
+  getDropdownOptionStateClasses,
+} from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 export default function RepCategorySearchItem({
   category,
   selected,
@@ -11,8 +15,9 @@ export default function RepCategorySearchItem({
 }) {
   const isSelected = selected === category;
   const isDisabled = disabledCategories.includes(category);
-  const disabledClasses = "tw-text-gray-500 tw-cursor-not-allowed";
-  const nonDisabledClasses = "hover:tw-bg-iron-700 tw-text-white";
+  const disabledClasses =
+    "tw-bg-transparent tw-text-gray-500 tw-cursor-not-allowed";
+  const nonDisabledClasses = getDropdownOptionStateClasses(isSelected);
   return (
     <li className="tw-h-full">
       <button
@@ -20,14 +25,14 @@ export default function RepCategorySearchItem({
         disabled={isDisabled}
         className={`${
           isDisabled ? disabledClasses : nonDisabledClasses
-        } tw-py-2 tw-w-full tw-h-full tw-bg-transparent tw-border-none tw-text-left tw-flex tw-items-center tw-justify-between  tw-rounded-lg tw-relative tw-select-none tw-px-2  focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400 tw-transition tw-duration-300 tw-ease-out`}
+        } tw-relative tw-flex tw-h-full tw-w-full tw-select-none tw-items-center tw-justify-between tw-rounded-lg tw-border-none tw-px-2 tw-py-2 tw-text-left tw-transition tw-duration-300 tw-ease-out focus:tw-outline-none focus:tw-ring-1 focus:tw-ring-primary-400`}
         onClick={() => onSelect(category)}
       >
         <div className="tw-w-full tw-truncate">
-          <span className="tw-text-sm tw-font-medium ">{category}</span>
+          <span className="tw-text-sm tw-font-medium">{category}</span>
           {isSelected && (
             <svg
-              className="tw-h-5 tw-w-5 tw-ml-2 tw-text-primary-300 tw-transition tw-duration-300 tw-ease-out"
+              className={`tw-ml-2 tw-h-5 tw-w-5 ${DROPDOWN_CHECKMARK_CLASSES} tw-transition tw-duration-300 tw-ease-out`}
               viewBox="0 0 24 24"
               fill="none"
               aria-hidden="true"

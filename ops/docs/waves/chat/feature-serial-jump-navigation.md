@@ -11,7 +11,7 @@ The target drop gets a temporary highlight.
 When `serialNo` parses as a valid number, chat treats `serialNo` and `divider`
 as one-time setup values and removes them from the URL without reopening chat.
 The selected post stays in view as loading finishes or new messages arrive.
-Scroll or use the bottom arrow to leave that position.
+Scrolling, interacting with chat, or starting another jump releases that position.
 
 ## Location in the Site
 
@@ -43,7 +43,7 @@ Scroll or use the bottom arrow to leave that position.
 4. If the target is loaded, chat scrolls and centers the drop.
 5. If the target is not loaded, chat fetches around the target serial and
    retries.
-6. During long jumps, a temporary loading overlay can appear.
+6. During long jumps, a temporary loading overlay can appear until the target message is rendered in view.
 7. The target drop is highlighted briefly, then thread browsing continues.
 
 ## Common Scenarios

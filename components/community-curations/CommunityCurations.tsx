@@ -5,15 +5,14 @@ import { COMMUNITY_CURATIONS_LIMIT } from "@/components/community-curations/comm
 import CommunityCurationsMasonry from "@/components/community-curations/CommunityCurationsMasonry";
 import { useLayout } from "@/components/brain/my-stream/layout/LayoutContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
 import { useCommunityCurationsDrops } from "@/hooks/useCommunityCurationsDrops";
 import { t } from "@/i18n/messages";
 import { usePersistentScrollOffset } from "@/components/token-list/hooks/usePersistentScrollOffset";
+import { PROFILE_WAVES_FEED_SCROLL_KEY } from "@/helpers/waves/profile-feed-navigation";
+import { commitWaveNavigationContent } from "@/helpers/waves/wave-navigation-transition";
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties, ReactNode } from "react";
-
-// Desktop and mobile web render the same logical feed. Sharing this key keeps
-// the reading position intact when the viewport crosses the layout breakpoint.
-const PROFILE_WAVES_FEED_SCROLL_KEY = "profile-waves-feed";
 
 const COMMUNITY_CURATIONS_SKELETON_COLUMNS = [
   {
@@ -146,6 +145,7 @@ export default function CommunityCurations({
   topContent,
 }: CommunityCurationsProps = {}) {
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
   const hasTopContent = Boolean(topContent);
   const { waveViewStyle } = useLayout();
   const scrollContainerRef = useRef<HTMLElement | null>(null);
@@ -157,6 +157,9 @@ export default function CommunityCurations({
     scrollContainerRef
   );
   const hasRestoredScrollOffsetRef = useRef(initialScrollOffset === 0);
+  const cancelScrollRestore = () => {
+    hasRestoredScrollOffsetRef.current = true;
+  };
   const {
     allDrops,
     drops,
@@ -186,23 +189,35 @@ export default function CommunityCurations({
     []
   );
 
+  const restoreScrollOffset = useCallback(
+    (contentMeasured = false) => {
+      if (hasRestoredScrollOffsetRef.current) return true;
+      const element = scrollContainerRef.current;
+      if (!element) return false;
+      element.scrollTo({ top: initialScrollOffset });
+      hasRestoredScrollOffsetRef.current =
+        Math.abs(element.scrollTop - initialScrollOffset) <= 1 ||
+        (contentMeasured && !hasMorePages);
+      return hasRestoredScrollOffsetRef.current;
+    },
+    [hasMorePages, initialScrollOffset]
+  );
+
   useLayoutEffect(() => {
-    if (hasRestoredScrollOffsetRef.current || !shouldShowMasonry) {
+    if (!shouldShowMasonry || drops.length === 0) {
+      // Empty, error and loading states are also complete visible destinations.
+      commitWaveNavigationContent("feed");
       return;
     }
-
-    const element = scrollContainerRef.current;
-    if (!element) {
-      return;
-    }
-
-    element.scrollTo({ top: initialScrollOffset });
-    hasRestoredScrollOffsetRef.current = true;
-  }, [initialScrollOffset, shouldShowMasonry]);
+    restoreScrollOffset();
+  }, [drops.length, restoreScrollOffset, shouldShowMasonry]);
 
   return (
     <section
       ref={setScrollContainerElement}
+      onPointerDownCapture={cancelScrollRestore}
+      onWheelCapture={cancelScrollRestore}
+      onKeyDownCapture={cancelScrollRestore}
       className="tw-flex tw-min-h-0 tw-w-full tw-flex-grow tw-flex-col tw-overflow-y-auto tw-overflow-x-hidden tw-overscroll-contain tw-px-4 tw-py-8 tw-scrollbar-thin tw-scrollbar-track-iron-900 tw-scrollbar-thumb-iron-600 desktop-hover:hover:tw-scrollbar-thumb-iron-500 sm:tw-px-6 lg:tw-px-8 lg:tw-pt-4"
       style={heightStyle ?? waveViewStyle}
     >
@@ -218,7 +233,7 @@ export default function CommunityCurations({
             </p>
           </div>
           <div className={hasTopContent ? "max-lg:tw-hidden" : undefined}>
-            <DiscoverWavesLink />
+            <DiscoverWavesLink returnToProfileFeed={isApp} />
           </div>
         </div>
 
@@ -246,6 +261,7 @@ export default function CommunityCurations({
               hasNextPage={hasNextPage}
               isFetchingNextPage={isFetchingNextPage}
               scrollContainer={scrollContainer}
+              restoreScrollOffset={restoreScrollOffset}
             />
           )}
         </div>

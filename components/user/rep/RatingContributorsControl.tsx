@@ -1,6 +1,7 @@
 import OverlappingAvatars from "@/components/common/OverlappingAvatars";
 import type { ApiRepContributor } from "@/generated/models/ApiRepContributor";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import { ChevronRightIcon } from "@heroicons/react/24/solid";
@@ -14,7 +15,6 @@ export default function RatingContributorsControl({
   matter,
   canManage,
   onClick,
-  compact = false,
 }: {
   readonly overview: {
     readonly contributor_count: number;
@@ -24,13 +24,16 @@ export default function RatingContributorsControl({
   readonly matter: "REP" | "NIC";
   readonly canManage: boolean;
   readonly onClick: () => void;
-  readonly compact?: boolean;
 }) {
   const locale = useBrowserLocale();
-  const maxCount = compact ? 3 : 5;
+  const isTouchDevice = useIsTouchDevice();
+  const maxCount = 5;
   const avatars = useMemo(
-    () => buildRepAvatarItems(overview?.contributors.data ?? [], maxCount),
-    [overview?.contributors.data, maxCount]
+    () =>
+      buildRepAvatarItems(overview?.contributors.data ?? [], maxCount, {
+        omitHref: isTouchDevice,
+      }),
+    [overview?.contributors.data, maxCount, isTouchDevice]
   );
   if (!overview) return null;
 
@@ -86,7 +89,7 @@ export default function RatingContributorsControl({
   );
   return (
     <div className="tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-gap-2">
-      {avatarGroup}
+      {!isTouchDevice && avatarGroup}
       <button
         type="button"
         aria-label={accessibleName}
@@ -94,6 +97,7 @@ export default function RatingContributorsControl({
         onClick={onClick}
         className={buttonClassName}
       >
+        {isTouchDevice && avatarGroup}
         {content}
         {chevron}
       </button>

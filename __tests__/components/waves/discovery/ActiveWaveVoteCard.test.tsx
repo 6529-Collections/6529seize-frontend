@@ -83,3 +83,13 @@ it("shows the next result time in the display time zone", () => {
     mockDisplayTimeZone = LOCAL_DISPLAY_TIME_ZONE;
   }
 });
+
+it("shows the active submission count in an approval card", () => {
+  render(
+    <ActiveWaveVoteCard
+      vote={{ ...vote(100000, null), active_submission_count: 2 }}
+    />
+  );
+  expect(screen.getByText("2 active submissions")).toBeVisible();
+  expect(screen.queryByText(/^Voting ends /)).not.toBeInTheDocument();
+});

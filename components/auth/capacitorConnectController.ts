@@ -1,5 +1,8 @@
 import { isDesktopShell } from "@/helpers/desktop-shell";
-import { openDesktopConnectDialog } from "@/services/desktop/desktopConnectDialog";
+import {
+  openDesktopConnectDialog,
+  type DesktopWalletSetup,
+} from "@/services/desktop/desktopConnectDialog";
 import { useCallback } from "react";
 import { getAddress, isAddress } from "viem";
 import { SecurityEventType } from "@/types/security";
@@ -20,6 +23,11 @@ type ConnectModalView =
   | "AllWallets"
   | "ConnectingWalletConnectBasic";
 
+type OpenWebConnection = (
+  source: string,
+  signal?: AbortSignal
+) => Promise<void>;
+
 /**
  * The wallet modal's first view. 6529 Desktop has no browser extensions, so
  * its WalletConnect choice opens straight on the WalletConnect QR code ("Scan
@@ -28,6 +36,13 @@ type ConnectModalView =
  */
 export const defaultConnectModalView = (): ConnectModalView =>
   isDesktopShell() ? "ConnectingWalletConnectBasic" : "Connect";
+
+export function logWalletConnectionAttempt(source: string): void {
+  logSecurityEvent(
+    SecurityEventType.WALLET_CONNECTION_ATTEMPT,
+    createConnectionEventContext(source)
+  );
+}
 
 /**
  * The one way a connect entry point opens a wallet connection. In 6529
@@ -42,19 +57,21 @@ async function openConnectEntryPoint({
   isSigningOutAll,
   openWebConnection,
   openDefault,
+  desktopWalletSetup,
 }: {
   readonly source: string;
   readonly isSigningOutAll: boolean;
-  readonly openWebConnection: (source: string) => Promise<void>;
+  readonly openWebConnection: OpenWebConnection;
   readonly openDefault: (source: string) => Promise<void>;
+  readonly desktopWalletSetup?: DesktopWalletSetup | undefined;
 }): Promise<void> {
   // Like the Capacitor options, this resolves once the choice is shown.
   if (!isSigningOutAll && isDesktopShell()) {
-    logSecurityEvent(
-      SecurityEventType.WALLET_CONNECTION_ATTEMPT,
-      createConnectionEventContext(source)
+    logWalletConnectionAttempt(source);
+    openDesktopConnectDialog(
+      (signal) => openWebConnection(source, signal),
+      desktopWalletSetup
     );
-    openDesktopConnectDialog(() => openWebConnection(source));
     return;
   }
   await openDefault(source);
@@ -66,17 +83,20 @@ export function openUserConnectionSurfaceForRuntime({
   isSigningOutAll,
   openWebConnection,
   setCapacitorView,
+  desktopWalletSetup,
 }: {
   readonly source: string;
   readonly isCapacitor: boolean;
   readonly isSigningOutAll: boolean;
-  readonly openWebConnection: (source: string) => Promise<void>;
+  readonly openWebConnection: OpenWebConnection;
   readonly setCapacitorView: (view: CapacitorConnectDialogView) => void;
+  readonly desktopWalletSetup?: DesktopWalletSetup | undefined;
 }): Promise<void> {
   return openConnectEntryPoint({
     source,
     isSigningOutAll,
     openWebConnection,
+    desktopWalletSetup,
     openDefault: (entrySource) =>
       openWebOrCapacitorConnection({
         source: entrySource,
@@ -110,10 +130,7 @@ async function openWebOrCapacitorConnection({
     return;
   }
 
-  logSecurityEvent(
-    SecurityEventType.WALLET_CONNECTION_ATTEMPT,
-    createConnectionEventContext(source)
-  );
+  logWalletConnectionAttempt(source);
   setCapacitorView("options");
 }
 
@@ -124,7 +141,7 @@ async function openWebOrCapacitorConnection({
  */
 export function useSeizeConnect(
   isSigningOutAllRef: { readonly current: boolean },
-  openWebConnection: (source: string) => Promise<void>
+  openWebConnection: OpenWebConnection
 ): () => void {
   return useCallback((): void => {
     openConnectEntryPoint({
@@ -142,6 +159,7 @@ export async function openFreshUserConnection({
   isCapacitor,
   isActiveAppWalletConnector,
   isSigningOutAll,
+  signal,
   disconnect,
   getSignOutAllGeneration,
   hasSignOutAllGenerationChanged,
@@ -153,13 +171,14 @@ export async function openFreshUserConnection({
   readonly isCapacitor: boolean;
   readonly isActiveAppWalletConnector: boolean;
   readonly isSigningOutAll: boolean;
+  readonly signal?: AbortSignal | undefined;
   readonly disconnect: () => Promise<unknown>;
   readonly getSignOutAllGeneration: () => number;
   readonly hasSignOutAllGenerationChanged: (generation: number) => boolean;
   readonly isMounted: () => boolean;
   readonly openUserConnectionSurface: (source: string) => Promise<void>;
 }): Promise<void> {
-  if (isSigningOutAll) {
+  if (isSigningOutAll || signal?.aborted) {
     return;
   }
 
@@ -193,7 +212,11 @@ export async function openFreshUserConnection({
     setTimeout(resolve, CONNECT_AFTER_DISCONNECT_DELAY_MS);
   });
 
-  if (!isMounted() || hasSignOutAllGenerationChanged(signOutGeneration)) {
+  if (
+    !isMounted() ||
+    signal?.aborted ||
+    hasSignOutAllGenerationChanged(signOutGeneration)
+  ) {
     return;
   }
 

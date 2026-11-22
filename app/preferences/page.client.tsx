@@ -23,6 +23,7 @@ import Link from "next/link";
 
 export type PreferencesTab =
   | "notifications"
+  | "messages"
   | "blocked-profiles"
   | "reports"
   | "devices"
@@ -33,6 +34,7 @@ const TABS: ReadonlyArray<{
   readonly routeTab: PreferencesRouteTab | undefined;
   readonly labelKey:
     | "preferences.tabs.notifications"
+    | "preferences.tabs.messages"
     | "preferences.tabs.blockedProfiles"
     | "preferences.tabs.reports"
     | "preferences.tabs.devices"
@@ -42,6 +44,11 @@ const TABS: ReadonlyArray<{
     id: "notifications",
     routeTab: undefined,
     labelKey: "preferences.tabs.notifications",
+  },
+  {
+    id: "messages",
+    routeTab: "messages",
+    labelKey: "preferences.tabs.messages",
   },
   {
     id: "blocked-profiles",
@@ -188,9 +195,11 @@ export default function PreferencesPageClient({
               key={connectedProfile?.id ?? "signed-out"}
             />
           ) : null}
-          {canManagePreferences && activeTab === "notifications" ? (
+          {canManagePreferences &&
+          (activeTab === "notifications" || activeTab === "messages") ? (
             <ProfilePreferencesSettings
               key={connectedProfile?.id ?? "signed-out"}
+              activeTab={activeTab}
             />
           ) : null}
         </div>

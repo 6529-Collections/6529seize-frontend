@@ -26,29 +26,68 @@ function etagMatches(header: string | null, etag: string | null): boolean {
   );
 }
 
+type StoredFeedObject = {
+  readonly body: Uint8Array<ArrayBuffer>;
+  readonly etag: string | null;
+  readonly lastModified: string | null;
+};
+
+/** A signed feed and its signature as last read, or why there is none. */
+export type SignedFeedSnapshot = {
+  readonly state: "ok" | "missing" | "error";
+  readonly feed: StoredFeedObject | null;
+  readonly signature: StoredFeedObject | null;
+  /**
+   * Sent on both answers as `X-Release-List-Pair`, so a client can tell a
+   * feed and a signature from different snapshots apart. Absent: no header
+   * (the validator's and 6529 AI's feeds).
+   */
+  readonly pairId?: string | undefined;
+};
+
+/** The header that names the feed-and-signature pair an answer belongs to. */
+export const RELEASE_LIST_PAIR_HEADER = "X-Release-List-Pair";
+
+/** What a feed's endpoints answer besides the files themselves. */
+export type SignedFeedText = {
+  /** The body of the 503 when the feed could not be read. */
+  readonly unavailable: string;
+  /** The body of the 404 before the first feed. */
+  readonly missing: string;
+  readonly signatureContentType: string;
+};
+
+const VALIDATOR_FEED_TEXT: SignedFeedText = {
+  unavailable: "The release feed is unavailable.\n",
+  missing: "No release feed yet.\n",
+  signatureContentType: "application/octet-stream",
+};
+
 /**
- * Serves the signed feed or its signature byte for byte, as stored, so the
- * signature verifies against what validators download. Public, with no
- * redirect and a five-minute cache.
+ * Serves a signed feed or its signature byte for byte, as stored, so the
+ * signature verifies against what anyone downloads. Public, with no
+ * redirect and a five-minute cache. The 6529 AI pages and 6529 Desktop's
+ * release list serve their own feeds with it too.
  */
-export async function serveFeedObject(
+export function serveSignedFeedObject(
   request: Request,
-  which: "feed" | "signature"
-): Promise<Response> {
-  const snapshot = await getReleaseFeedSnapshot();
+  snapshot: SignedFeedSnapshot,
+  which: "feed" | "signature",
+  text: SignedFeedText
+): Response {
   if (snapshot.state === "error") {
-    return plain(503, "The release feed is unavailable.\n", "no-store");
+    return plain(503, text.unavailable, "no-store");
   }
   const object = which === "feed" ? snapshot.feed : snapshot.signature;
   if (!object) {
-    return plain(404, "No release feed yet.\n", MISSING_CACHE_CONTROL);
+    return plain(404, text.missing, MISSING_CACHE_CONTROL);
   }
   const headers = new Headers({
     "Cache-Control": FEED_CACHE_CONTROL,
     "Content-Type":
       which === "feed"
         ? "application/json; charset=utf-8"
-        : "application/octet-stream",
+        : text.signatureContentType,
     "X-Content-Type-Options": "nosniff",
     "X-Robots-Tag": "noindex, nofollow",
     "Access-Control-Allow-Origin": "*",
@@ -59,8 +98,28 @@ export async function serveFeedObject(
   if (object.lastModified) {
     headers.set("Last-Modified", object.lastModified);
   }
+  if (snapshot.pairId) {
+    headers.set(RELEASE_LIST_PAIR_HEADER, snapshot.pairId);
+    headers.set("Access-Control-Expose-Headers", RELEASE_LIST_PAIR_HEADER);
+  }
   if (etagMatches(request.headers.get("if-none-match"), object.etag)) {
     return new Response(null, { status: 304, headers });
   }
   return new Response(object.body, { status: 200, headers });
+}
+
+/**
+ * Serves the validator's signed feed or its signature, which validators
+ * download to find updates.
+ */
+export async function serveFeedObject(
+  request: Request,
+  which: "feed" | "signature"
+): Promise<Response> {
+  return serveSignedFeedObject(
+    request,
+    await getReleaseFeedSnapshot(),
+    which,
+    VALIDATOR_FEED_TEXT
+  );
 }

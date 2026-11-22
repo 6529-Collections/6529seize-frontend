@@ -46,7 +46,7 @@ export default function UserPageIdentityHeaderCICRateStats({
     }
     return Math.abs(heroAvailableCredit) < Math.abs(proxyAvailableCredit ?? 0)
       ? heroAvailableCredit
-      : proxyAvailableCredit ?? 0;
+      : (proxyAvailableCredit ?? 0);
   };
 
   const [availableCredit, setAvailableCredit] = useState(getAvailableCredit());
@@ -68,12 +68,16 @@ export default function UserPageIdentityHeaderCICRateStats({
       }
     : null;
 
+  const valueColorClassName = isTooltip
+    ? "tw-text-iron-300"
+    : "tw-text-iron-100";
+
   const creditItem = activeProfileProxy
     ? null
     : {
         label: "Your available NIC:",
         value: formatNumberWithCommas(availableCredit),
-        valueColorClassName: "tw-text-iron-300",
+        valueColorClassName,
         labelBreakAll: false,
       };
 
@@ -82,7 +86,7 @@ export default function UserPageIdentityHeaderCICRateStats({
     : {
         label: `Your max/min NIC Rating to ${profile.handle}:`,
         value: `+/- ${formatNumberWithCommas(minMaxValues.max)}`,
-        valueColorClassName: "tw-text-iron-300",
+        valueColorClassName,
         labelBreakAll: true,
       };
 
@@ -92,17 +96,20 @@ export default function UserPageIdentityHeaderCICRateStats({
 
   if (isTooltip) {
     return (
-      <div className="tw-text-xs tw-flex tw-flex-col tw-space-y-1.5">
+      <div className="tw-flex tw-flex-col tw-space-y-1.5 tw-text-xs">
         {items.map((item) => (
           <span
             key={item.label}
-            className={`tw-block tw-text-iron-400 tw-font-normal${
-              item.labelBreakAll ? " tw-break-all" : ""
-            }`}>
+            className={`tw-block tw-font-normal tw-text-iron-400 ${
+              item.labelBreakAll ? "tw-break-all" : ""
+            }`}
+          >
             <span>
               {item.label.endsWith(":") ? item.label : `${item.label}:`}
             </span>
-            <span className={`tw-ml-1 tw-font-semibold ${item.valueColorClassName}`}>
+            <span
+              className={`tw-ml-1 tw-font-semibold ${item.valueColorClassName}`}
+            >
               {item.value}
             </span>
           </span>
@@ -116,13 +123,14 @@ export default function UserPageIdentityHeaderCICRateStats({
       {items.map((item) => (
         <div
           key={item.label}
-          className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1">
-          <span
-            className="tw-min-w-0 tw-break-words tw-text-xs tw-text-iron-400 tw-font-normal">
+          className="tw-flex tw-flex-wrap tw-items-baseline tw-justify-between tw-gap-x-4 tw-gap-y-1"
+        >
+          <span className="tw-min-w-0 tw-break-words tw-text-xs tw-font-normal tw-text-iron-400">
             {item.label}
           </span>
           <span
-            className={`tw-ml-auto tw-whitespace-nowrap tw-text-xs tw-font-medium ${item.valueColorClassName}`}>
+            className={`tw-ml-auto tw-whitespace-nowrap tw-text-xs tw-font-medium ${item.valueColorClassName}`}
+          >
             {item.value}
           </span>
         </div>

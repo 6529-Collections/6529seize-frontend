@@ -30,6 +30,7 @@ function plan(overrides: Record<string, string> = {}) {
         TARGET_INPUT: "production",
         EVENT_NAME: "workflow_dispatch",
         SCHEDULE_CRON: "",
+        WORKFLOW_REF: "refs/heads/main",
         ...overrides,
         GITHUB_OUTPUT: path.join(root, "outputs").replaceAll("\\", "/"),
         GITHUB_STEP_SUMMARY: path.join(root, "summary").replaceAll("\\", "/"),
@@ -108,6 +109,17 @@ describe("Device Farm cadence and pack selection", () => {
     const token = plan({ HAS_MOBILE_REPO_TOKEN: "false" });
     expect(token.output).toMatchObject({ web: "true", native: "false" });
     expect(token.log).toContain("::notice::MOBILE_REPO_TOKEN");
+  });
+
+  it("skips with a notice when dispatched from a branch the AWS role does not trust", () => {
+    const branch = plan({ WORKFLOW_REF: "refs/heads/feature/x" });
+    expect(branch.output).toMatchObject({ web: "false", native: "false" });
+    expect(branch.log).toContain("only accepts runs from main");
+    const unknown = plan({ WORKFLOW_REF: "" });
+    expect(unknown.output).toMatchObject({ web: "false", native: "false" });
+    expect(unknown.log).toContain("only accepts runs from main");
+    const main = plan({ WORKFLOW_REF: "refs/heads/main" });
+    expect(main.output).toMatchObject({ web: "true", native: "true" });
   });
 
   it("warns visibly and keeps web coverage if a future schedule drifts", () => {

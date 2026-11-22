@@ -207,7 +207,8 @@ export default function Leaderboard(
         activeItem={collector}
         setSelected={setCollector}
         size="sm"
-        variant="editorial"
+        variant="regular"
+        presentation="editorial"
         showFilterLabel
       />
     );
@@ -287,7 +288,8 @@ export default function Leaderboard(
         activeItem={content}
         setSelected={setContent}
         size="sm"
-        variant="editorial"
+        variant="regular"
+        presentation="editorial"
         showFilterLabel
       />
     );
@@ -315,7 +317,8 @@ export default function Leaderboard(
         activeItem={selectedSeason}
         setSelected={setSelectedSeason}
         size="sm"
-        variant="editorial"
+        variant="regular"
+        presentation="editorial"
         showFilterLabel
       />
     );

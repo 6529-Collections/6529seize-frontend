@@ -199,6 +199,9 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
             exact: true,
           });
           await expect(close).toBeVisible();
+          await expect(close).toHaveCSS("width", "36px");
+          await expect(close).toHaveCSS("height", "36px");
+          await expect(close).toHaveCSS("border-radius", "9999px");
           await expect
             .poll(() =>
               page.evaluate(() =>
@@ -222,6 +225,16 @@ test.describe("Image viewer background layout @auth @medium @local-only", () => 
             .toBe(true);
           expect(await readBackground(page)).toEqual(before);
           if (entry === "gallery") {
+            for (const label of ["Previous image", "Next image"]) {
+              const control = page.getByRole("button", {
+                name: label,
+                exact: true,
+              });
+              const size = page.viewportSize()!.width < 640 ? "40px" : "48px";
+              await expect(control).toHaveCSS("width", size);
+              await expect(control).toHaveCSS("height", size);
+              await expect(control).toHaveCSS("border-radius", "9999px");
+            }
             await page
               .getByRole("button", { name: "Next image", exact: true })
               .click();

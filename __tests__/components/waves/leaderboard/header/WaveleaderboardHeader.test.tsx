@@ -452,7 +452,7 @@ it("renders curation price controls and commits range updates", async () => {
   );
 
   const clearButton = screen.getByRole("button", { name: "Clear filters" });
-  expect(clearButton).toHaveClass("tw-h-9", "tw-w-9", "tw-rounded-lg");
+  expect(clearButton).toHaveClass("tw-size-9", "tw-rounded-lg");
   await user.click(clearButton);
   expect(onPriceRangeChange).toHaveBeenLastCalledWith({
     minPrice: undefined,

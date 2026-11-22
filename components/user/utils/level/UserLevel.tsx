@@ -53,13 +53,18 @@ export default function UserLevel({
   const sharedClasses = `tw-inline-flex tw-items-center tw-justify-center tw-ring-inset ${classes} ${shape}`;
 
   if (asSpan) {
-    return <span className={sharedClasses}>{content}</span>;
+    return (
+      <span data-wave-typography="preserve" className={sharedClasses}>
+        {content}
+      </span>
+    );
   }
 
   return (
     <button
       type="button"
       aria-label={`Level ${level}`}
+      data-wave-typography="preserve"
       onClick={openLevelsPage}
       className={`tw-border-none tw-bg-transparent ${sharedClasses}`}
     >

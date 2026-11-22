@@ -137,27 +137,30 @@ describe("sign-in with a device grant", () => {
     mockClientType = "web";
     mockFailStorageWrites = false;
     loginMock.mockReset();
-    loginMock.mockImplementation(async () => ({
-      address: SIGNER,
-      role: null,
-      access_token: "jwt",
-      access_token_expires_at: "2026-10-12T13:00:00.000Z",
-      client_type: "web",
-      device_grant: {
-        id: `0x${"7".repeat(64)}`,
-        wallet: SIGNER,
-        key_type: "ed25519",
-        device_key: mockRecords.get(SIGNER)?.publicKeyHex,
-        scopes: SCOPES.split(","),
-        device_label: "Browser",
-        domain: "staging.6529.io",
-        issued_at: Date.now(),
-        expires_at: Date.now() + 180 * 86_400_000,
-        created_at: Date.now(),
-        revoked_at: null,
-        last_used_at: null,
-      } as ApiDeviceGrant,
-    }));
+    loginMock.mockImplementation(
+      async ({ signerAddress }: { signerAddress: string }) => ({
+        address: signerAddress,
+        role: null,
+        access_token: "jwt",
+        access_token_expires_at: "2026-10-12T13:00:00.000Z",
+        client_type: "web",
+        device_grant: {
+          id: `0x${"7".repeat(64)}`,
+          wallet: signerAddress,
+          key_type: "ed25519",
+          device_key: mockRecords.get(signerAddress.toLowerCase())
+            ?.publicKeyHex,
+          scopes: SCOPES.split(","),
+          device_label: "Browser",
+          domain: "staging.6529.io",
+          issued_at: Date.now(),
+          expires_at: Date.now() + 180 * 86_400_000,
+          created_at: Date.now(),
+          revoked_at: null,
+          last_used_at: null,
+        } as ApiDeviceGrant,
+      })
+    );
   });
 
   it("asks for a grant for this device's key, checks it, sends the label and stores the grant", async () => {

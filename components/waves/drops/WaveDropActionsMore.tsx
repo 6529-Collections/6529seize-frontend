@@ -1,5 +1,7 @@
 "use client";
 
+import IconButton from "@/components/utils/button/IconButton";
+
 import DropsListItemDeleteDropModal from "@/components/drops/view/item/options/delete/DropsListItemDeleteDropModal";
 import CommonAnimationOpacity from "@/components/utils/animation/CommonAnimationOpacity";
 import CommonAnimationWrapper from "@/components/utils/animation/CommonAnimationWrapper";
@@ -14,6 +16,7 @@ import { useDropCurationMembershipMutation } from "@/hooks/drops/useDropCuration
 import { useDropInteractionRules } from "@/hooks/drops/useDropInteractionRules";
 import { getProfileWaveIdentity } from "@/hooks/useProfileWave";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
 import {
   EllipsisVerticalIcon,
@@ -58,6 +61,7 @@ export default function WaveDropActionsMore({
 }: WaveDropActionsMoreProps) {
   const { connectedProfile } = useAuth();
   const locale = useBrowserLocale();
+  const isMobileLayoutViewport = useIsMobileLayoutViewport();
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isCurationsDialogOpen, setIsCurationsDialogOpen] = useState(false);
@@ -150,10 +154,13 @@ export default function WaveDropActionsMore({
         content={<span className="tw-text-xs">More</span>}
         disabled={isOpen}
       >
-        <button
+        <IconButton
+          type="submit"
+          size={32}
+          variant="ghost"
+          shape="circle"
           ref={buttonRef}
           data-curation-card-actions
-          className="tw-flex tw-size-8 tw-cursor-pointer tw-items-center tw-justify-center tw-rounded-full tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-400 tw-transition-colors tw-duration-200 tw-ease-out desktop-hover:hover:tw-bg-iron-800 desktop-hover:hover:tw-text-iron-200"
           onClick={(event) => {
             event.stopPropagation();
             handleOpenChange(!isOpen);
@@ -163,12 +170,20 @@ export default function WaveDropActionsMore({
           aria-expanded={isOpen}
         >
           <EllipsisVerticalIcon className="tw-h-5 tw-w-5 tw-flex-shrink-0 tw-transition tw-duration-300 tw-ease-out" />
-        </button>
+        </IconButton>
       </DropActionTooltip>
       <CommonDropdownItemsDefaultWrapper
         isOpen={isOpen}
         setOpen={handleOpenChange}
         buttonRef={buttonRef}
+        scrollCue={
+          !showOnlyQuickRemove && !isMobileLayoutViewport
+            ? {
+                downLabel: t(locale, "waves.drop.actions.scrollForMore"),
+                upLabel: t(locale, "waves.drop.actions.scrollUp"),
+              }
+            : undefined
+        }
       >
         <li className="tw-list-none">
           <div className="tw-flex tw-flex-col tw-gap-y-1 tw-py-1">

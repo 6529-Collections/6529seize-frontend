@@ -5789,6 +5789,65 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiCompetitionError"
+  /v3/waves/{wave_id}/competitions/{competition_id}/main-stage-traits/validate:
+    post:
+      tags:
+        - Competitions
+      summary: Validate Main Stage artwork traits without creating an entry
+      operationId: validateMainStageTraitsV3
+      parameters:
+        - name: wave_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 100
+        - name: competition_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        handler:
+          import: "@/api/competitions/competition-commands.handlers"
+          name: handleValidateMainStageTraitsV3
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiValidateMainStageTraitsRequest"
+      responses:
+        "200":
+          description: Field validation issues. An empty array means validation passed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMainStageTraitValidation"
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "401":
+          description: Authentication required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
+        "404":
+          description: Competition is unavailable or does not use this policy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponse"
   /v3/waves/{wave_id}/competitions/{competition_id}/entries:
     post:
       tags:
@@ -11216,6 +11275,50 @@ paths:
           description: Payload too large (E2EE_TOO_LARGE)
         "429":
           description: Rate limited (E2EE_RATE_LIMITED)
+  /e2ee/devices/{device_key}/inbox-status:
+    get:
+      tags:
+        - Encrypted Messages
+      summary: Check for encrypted chats that may be available to an own device
+      description: >-
+        Reports queued Welcome deliveries and whether the caller may have chats
+        on other devices. A roster gap can require device approval, and some
+        chats may never add this device. Requires an active own device and
+        rejects proxies.
+      operationId: e2eeGetDeviceInboxStatus
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        typeImportGroup: e2ee
+        handler:
+          import: "@/api/e2ee/e2ee.handlers"
+          name: handleE2eeGetDeviceInboxStatus
+      parameters:
+        - name: device_key
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: ^0x[0-9a-f]{64}$
+      responses:
+        "200":
+          description: Inbox status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiE2eeDeviceInboxStatus"
+        "400":
+          description: Invalid device key
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden (E2EE_FORBIDDEN, E2EE_NOT_YOUR_DEVICE)
+        "404":
+          description: Encrypted Messages disabled (E2EE_DISABLED)
+        "429":
+          description: Rate limited
   /e2ee/profiles/{profile_id}/devices:
     get:
       tags:
@@ -21559,10 +21662,13 @@ paths:
       description: >-
         Lists readable, non-DM voting waves using TDH, TDH_PLUS_XTDH or
         CARD_SET_TDH, regardless of follow or pin status. Excludes upcoming,
-        ended and completed voting and unresolved decisions. Orders the nearest
-        voting end or next decision first, then open-ended waves, with a stable
-        wave ID tie-breaker. Wave and parent visibility apply before counting
-        and pagination. This is discovery, not personal voting eligibility.
+        ended and completed voting and unresolved decisions. Main Stage comes
+        first when eligible. Remaining waves with active leaderboard entries
+        precede waves with zero. Within each group, waves are sorted by
+        descending total Wave REP with a stable wave ID tie-breaker. Approval
+        waves include their active submission count. Wave and parent visibility
+        apply before counting and pagination. Personal voting eligibility
+        depends on each wave's voting rules.
       operationId: getActiveWaveVotes
       x-6529-router:
         enabled: true
@@ -23036,6 +23142,13 @@ components:
           type: integer
           format: int64
           nullable: true
+        active_submission_count:
+          type: integer
+          format: int64
+          minimum: 0
+          description: >-
+            Number of submissions open for voting, present only for approval
+            waves.
     ApiActiveWaveVotesPage:
       type: object
       required:
@@ -28983,6 +29096,13 @@ components:
         - cancelled_at
         - archived_at
       properties:
+        main_stage_trait_rules:
+          type: array
+          description: >-
+            Artwork trait rules for an enabled Main Stage decision. Points must
+            be finite and nonzero.
+          items:
+            $ref: "#/components/schemas/ApiMainStageTraitRule"
         your_active_entries_count:
           type: integer
           format: int64
@@ -32794,6 +32914,18 @@ components:
           nullable: true
           allOf:
             - $ref: "#/components/schemas/ApiCompetitionEntry"
+    ApiDropCompetitionEntryReference:
+      type: object
+      required:
+        - competition_id
+        - entry_id
+      properties:
+        competition_id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
     ApiDropContextProfileContext:
       type: object
       required:
@@ -33445,6 +33577,14 @@ components:
         - drop_type
         - hide_link_preview
       properties:
+        competition_entry:
+          description: >-
+            Visible competition entry for this drop in a Wave timeline or reply
+            feed. Null means there is no visible entry. Omitted when membership
+            was not evaluated.
+          nullable: true
+          allOf:
+            - $ref: "#/components/schemas/ApiDropCompetitionEntryReference"
         submission_artist:
           type: string
           description: >-
@@ -34397,6 +34537,21 @@ components:
           type: integer
           format: int64
           description: Unix milliseconds
+    ApiE2eeDeviceInboxStatus:
+      type: object
+      required:
+        - has_pending_chats
+      properties:
+        has_pending_chats:
+          type: boolean
+          description: >-
+            A Welcome is queued or a current roster includes another device of
+            this profile without including this one.
+        has_queued_welcomes:
+          type: boolean
+          description: >-
+            A Welcome is queued for this device. Omitted by servers that only
+            provide the combined has_pending_chats hint.
     ApiE2eeDeviceLookupRequest:
       type: object
       properties:
@@ -36003,6 +36158,60 @@ components:
           type: string
         refresh_token:
           type: string
+    ApiMainStageTraitIssue:
+      type: object
+      required:
+        - key
+        - code
+      properties:
+        key:
+          type: string
+        code:
+          type: string
+          enum:
+            - REQUIRED
+            - DUPLICATE
+            - INVALID_CHOICE
+            - INVALID_POINTS
+            - INVALID_BOOLEAN
+    ApiMainStageTraitRule:
+      type: object
+      required:
+        - key
+        - type
+        - required
+      properties:
+        key:
+          type: string
+        type:
+          type: string
+          enum:
+            - TEXT
+            - CHOICE
+            - POINTS
+            - BOOLEAN
+        required:
+          type: boolean
+        default_value:
+          type: string
+          description: Value applied when the metadata key is omitted.
+        choices:
+          type: array
+          items:
+            type: string
+        minimum:
+          type: number
+        maximum:
+          type: number
+    ApiMainStageTraitValidation:
+      type: object
+      required:
+        - issues
+      properties:
+        issues:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiMainStageTraitIssue"
     ApiMarkDropUnreadResponse:
       type: object
       required:
@@ -43753,6 +43962,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiUploadItem"
+    ApiValidateMainStageTraitsRequest:
+      type: object
+      required:
+        - metadata
+      properties:
+        metadata:
+          type: array
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/ApiDropMetadata"
     ApiValidateProfileCmsAgentCandidateRequest:
       type: object
       additionalProperties: false
@@ -44166,11 +44385,22 @@ components:
           type: integer
           format: int32
           minimum: 1
-    ApiWaveCurationRequest:
+    ApiWaveCurationCriteria:
       type: object
       required:
+        - group
+        - is_private
+      properties:
+        group:
+          $ref: "#/components/schemas/ApiCreateGroupDescription"
+        is_private:
+          type: boolean
+          description: Restrict access to the criteria and member list.
+    ApiWaveCurationRequest:
+      type: object
+      description: Provide exactly one of group_id or criteria.
+      required:
         - name
-        - group_id
       properties:
         name:
           type: string
@@ -44178,6 +44408,9 @@ components:
           maxLength: 50
         group_id:
           type: string
+          description: Keep or assign an existing group.
+        criteria:
+          $ref: "#/components/schemas/ApiWaveCurationCriteria"
         priority_order:
           type: integer
           format: int32

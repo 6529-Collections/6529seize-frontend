@@ -332,6 +332,8 @@ const SEQUENCES: Record<string, readonly string[]> = {
 };
 
 // Recorded from main, before the query readers moved into Suspense leaves.
+// The Back traces for pathname + query now preserve the original filters,
+// as required by the Back-navigation restoration behavior; other traces stay unchanged.
 // Re-record only on purpose: SHELL_QUERY_PARITY_RECORD=1.
 const FIXTURE = path.join(
   __dirname,

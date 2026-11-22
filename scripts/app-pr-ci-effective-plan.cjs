@@ -198,6 +198,7 @@ function applyEffectiveAppPrCiPlan(plan) {
         "tests/social/wave-notification-settings-sandbox.spec.ts",
         "tests/social/wave-switch-loading.spec.ts",
         "tests/social/wave-loading-sandbox.spec.ts",
+        "tests/social/wave-share-image-sandbox.spec.ts",
         "tests/social/android-back-sandbox.spec.ts",
         "tests/social/mobile-gestures-sandbox.spec.ts",
         "hooks/useAndroidBackLayer.ts",
@@ -211,6 +212,10 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/navigation/AndroidBackNavigation.tsx",
         "services/capacitor/android-back-layers.ts",
         "components/brain/mobile/useWaveListSwipeBack.ts",
+        "components/brain/mobile/useWaveNavigationTransition.ts",
+        "helpers/waves/wave-navigation-transition.ts",
+        "styles/wave-navigation-transition.css",
+        "components/community-curations/CommunityCurationsMasonry.tsx",
         "components/brain/my-stream/MyStreamWaveChat.tsx",
         "components/waves/drops/wave-drops-all/hooks/useWaveDropsSerialScroll.ts",
         "hooks/useNativeKeyboard.ts",
@@ -249,6 +254,8 @@ function applyEffectiveAppPrCiPlan(plan) {
         "components/shared/WavesMessagesWrapper.tsx",
         "components/brain/my-stream/MyStreamWaveContent.tsx",
         "components/waves/drops/WaveDropActionsOpen.tsx",
+        "components/waves/drops/WaveDropActionsMore.tsx",
+        "components/utils/select/dropdown/CommonDropdownItemsDefaultWrapper.tsx",
         "__tests__/components/waves/drops/WaveDropActionsOpen.test.tsx",
         "components/waves/drops/WaveDropMobileMenuOpen.tsx",
         "__tests__/components/waves/drops/WaveDropMobileMenuOpen.test.tsx",
@@ -351,13 +358,26 @@ function applyEffectiveAppPrCiPlan(plan) {
     ].includes(file)
   );
 
+  const backNavigationBrowser = files.some((file) =>
+    [
+      "contexts/NavigationHistoryContext.tsx",
+      "helpers/navigation-scroll-restoration.ts",
+      "components/navigation/BackButton.tsx",
+      "components/community/CommunityMembers.tsx",
+      "components/community/members-table/CommunityMembersTable.tsx",
+      "tests/critical-shell/profile-navigation-readonly.spec.ts",
+    ].includes(file)
+  );
+
   const checks = {
     ...plan.checks,
     playwright_critical_shell:
-      playwrightProfileDialogs || membershipNavigationBrowser
+      playwrightProfileDialogs ||
+      membershipNavigationBrowser ||
+      backNavigationBrowser
         ? check(
             true,
-            "Profile editing and membership navigation changes require their browser regression packs."
+            "Profile editing, membership and Back navigation changes require their browser regression packs."
           )
         : baseChecks.playwright_critical_shell,
     playwright_profile_nic: check(

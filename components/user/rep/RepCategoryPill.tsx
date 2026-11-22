@@ -37,25 +37,31 @@ export default function RepCategoryPill({
   const contribution = category.authenticated_user_contribution;
   const hasContribution =
     showPersonalContribution && contribution !== null && contribution !== 0;
-  const compactHeightClass = hasContribution
-    ? "tw-flex-wrap tw-gap-y-1 tw-py-2"
-    : "tw-h-[46px]";
   const avatarCount = 3;
   const avatars = buildRepAvatarItems(category.top_contributors, avatarCount, {
     omitHref: !linkAvatars || disabled,
   });
   const label = `${formatInteger(locale, category.contributor_count)} ${getContributorLabel(direction, category.contributor_count)}`;
+  const backgroundClass = compact ? "tw-bg-iron-950" : "tw-bg-white/5";
+  const openBackgroundClass = compact ? "tw-bg-iron-900" : "tw-bg-[#17171B]";
   return (
     <span
       data-rep-tag={category.category}
       className={clsx(
         "tw-group/rep-category tw-pointer-events-none tw-relative tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.06] tw-pl-[13px] tw-pr-[9px] tw-text-left tw-transition-colors tw-duration-200 tw-ease-out motion-reduce:tw-transition-none [&_a]:tw-pointer-events-auto",
-        disabled ? "tw-opacity-50" : "desktop-hover:hover:tw-border-white/10",
+        {
+          "tw-opacity-50": disabled,
+          "desktop-hover:hover:tw-border-white/10": !disabled,
+        },
         compact
-          ? `tw-min-h-[46px] tw-w-full tw-gap-x-1.5 tw-@container ${compactHeightClass}`
+          ? "tw-min-h-[46px] tw-w-full tw-flex-wrap tw-justify-between tw-gap-x-1.5 tw-gap-y-1 tw-py-2 tw-@container"
           : "tw-h-[38px] tw-gap-3.5",
-        isOpen ? "tw-bg-[#17171B]" : "tw-bg-white/5",
-        !disabled && !isOpen && "desktop-hover:hover:tw-bg-white/[0.085]",
+        isOpen ? openBackgroundClass : backgroundClass,
+        !disabled &&
+          !isOpen &&
+          (compact
+            ? "desktop-hover:hover:tw-bg-iron-900"
+            : "desktop-hover:hover:tw-bg-white/[0.085]"),
         isJoined &&
           !compact &&
           "tw-rounded-b-none tw-border-b-transparent desktop-hover:hover:tw-border-b-transparent"
@@ -76,54 +82,60 @@ export default function RepCategoryPill({
       />
       <span
         className={clsx(
-          "tw-inline-flex tw-min-w-0 tw-items-center tw-gap-2",
-          compact && "tw-flex-1 @[32rem]:tw-flex-initial"
+          "tw-inline-flex tw-min-w-0 tw-items-center tw-gap-3.5",
+          compact && "tw-max-w-full tw-shrink-0 tw-flex-wrap tw-gap-y-1"
         )}
       >
-        <span
-          className={`tw-min-w-0 tw-truncate tw-text-sm tw-font-medium tw-text-iron-100 ${compact ? "" : "tw-max-w-60"}`}
-        >
-          {category.category}
-        </span>
-        <span className="tw-shrink-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:group-hover/rep-category:tw-text-iron-300">
-          {formatInteger(locale, category.total_rep)}
-        </span>
-      </span>
-      {hasContribution && (
-        <span
-          id={contributionId}
-          className={clsx(
-            "tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-leading-4 tw-text-iron-400",
-            compact &&
-              "tw-order-2 tw-basis-full @[32rem]:tw-order-none @[32rem]:tw-basis-auto"
-          )}
-        >
-          <span aria-hidden="true" className="tw-text-white/20">
-            ·
+        <span className="tw-inline-flex tw-min-w-0 tw-max-w-full tw-items-center tw-gap-2">
+          <span
+            className={`tw-min-w-0 tw-text-sm tw-font-medium tw-text-iron-100 ${compact ? "tw-break-words" : "tw-max-w-60 tw-truncate"}`}
+          >
+            {category.category}
           </span>
-          <span>
-            {tRich(
-              locale,
-              direction === "given"
-                ? "user.profile.rep.rep.assignedToYou"
-                : "user.profile.rep.rep.youAssigned",
-              {
-                value: (
-                  <span key="value" className="tw-font-medium tw-text-iron-100">
-                    {formatInteger(locale, contribution)}
-                  </span>
-                ),
+          <span className="tw-shrink-0 tw-text-sm tw-font-medium tw-text-iron-400 tw-transition-colors desktop-hover:group-hover/rep-category:tw-text-iron-300">
+            {formatInteger(locale, category.total_rep)}
+          </span>
+        </span>
+        {hasContribution && (
+          <span
+            id={contributionId}
+            className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5 tw-whitespace-nowrap tw-text-xs tw-leading-4 tw-text-iron-400"
+          >
+            <span
+              aria-hidden="true"
+              className={
+                compact
+                  ? "tw-hidden tw-text-white/20 @[32rem]:tw-inline"
+                  : "tw-text-white/20"
               }
-            )}
+            >
+              ·
+            </span>
+            <span>
+              {tRich(
+                locale,
+                direction === "given"
+                  ? "user.profile.rep.rep.assignedToYou"
+                  : "user.profile.rep.rep.youAssigned",
+                {
+                  value: (
+                    <span
+                      key="value"
+                      className={clsx("tw-font-medium", {
+                        "tw-text-primary-400": direction === "received",
+                        "tw-text-iron-100": direction === "given",
+                      })}
+                    >
+                      {formatInteger(locale, contribution)}
+                    </span>
+                  ),
+                }
+              )}
+            </span>
           </span>
-        </span>
-      )}
-      <span
-        className={clsx(
-          "tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5",
-          compact && "tw-order-1 @[32rem]:tw-ml-auto"
         )}
-      >
+      </span>
+      <span className="tw-inline-flex tw-shrink-0 tw-items-center tw-gap-1.5">
         {avatars.length > 0 && (
           <OverlappingAvatars
             items={avatars}
