@@ -369,21 +369,18 @@ export default function UserPageHeaderSubscriptionStatus({
   const isUrgentTopUp =
     status === ApiSubscriptionCoverageStatus.RunningLow ||
     status === ApiSubscriptionCoverageStatus.ActionRequired;
+  const throughKey = isSubscriptionCoverageFundedToForecastEnd(coverage)
+    ? "subscriptions.coverage.header.atLeastThrough"
+    : "subscriptions.coverage.header.through";
   const secondaryLine = coverage.funded_through
-    ? t(
-        locale,
-        isSubscriptionCoverageFundedToForecastEnd(coverage)
-          ? "subscriptions.coverage.header.atLeastThrough"
-          : "subscriptions.coverage.header.through",
-        {
-          status: presentation.label,
-          token: formatInteger(locale, coverage.funded_through.token_id),
-          date: formatSubscriptionCoverageDate(
-            locale,
-            coverage.funded_through.mint_at
-          ),
-        }
-      )
+    ? t(locale, throughKey, {
+        status: presentation.label,
+        token: formatInteger(locale, coverage.funded_through.token_id),
+        date: formatSubscriptionCoverageDate(
+          locale,
+          coverage.funded_through.mint_at
+        ),
+      })
     : t(locale, "subscriptions.coverage.header.noFundedThrough", {
         status: presentation.label,
       });

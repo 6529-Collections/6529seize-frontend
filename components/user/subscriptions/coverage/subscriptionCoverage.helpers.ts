@@ -66,7 +66,7 @@ type ForecastEndCoverage = Pick<
   readonly forecast?:
     | Pick<
         ApiSubscriptionCoverage["forecast"],
-        "forecast_truncated" | "horizon_end_token_id"
+        "forecast_truncated" | "horizon_end_token_id" | "horizon_drop_count"
       >
     | undefined;
 };
@@ -82,6 +82,19 @@ export function isSubscriptionCoverageFundedToForecastEnd(
     coverage.forecast?.forecast_truncated === true &&
     horizonEnd !== null &&
     coverage.funded_through.token_id === horizonEnd
+  );
+}
+
+/**
+ * True when every scheduled drop in the forecast is funded, so the funded
+ * count is the forecast size and the balance may fund more drops.
+ */
+export function isSubscriptionCoverageForecastFullyFunded(
+  coverage: ForecastEndCoverage | undefined | null
+): boolean {
+  return (
+    isSubscriptionCoverageFundedToForecastEnd(coverage) &&
+    coverage?.fully_funded_drops === coverage?.forecast?.horizon_drop_count
   );
 }
 
@@ -220,7 +233,7 @@ export function getSubscriptionCoverageCompactLine(
     coverage.status !== ApiSubscriptionCoverageStatus.Unknown
   ) {
     parts.push(
-      isSubscriptionCoverageFundedToForecastEnd(coverage)
+      isSubscriptionCoverageForecastFullyFunded(coverage)
         ? t(locale, "subscriptions.coverage.summary.nextFundedDrops", {
             count: formatInteger(locale, coverage.fully_funded_drops),
           })

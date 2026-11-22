@@ -4,6 +4,8 @@ import {
   getDisplayedSubscriptionCoverageStatus,
   getSubscriptionCoverageCompactLine,
   getSubscriptionCoveragePresentation,
+  isSubscriptionCoverageForecastFullyFunded,
+  isSubscriptionCoverageFundedToForecastEnd,
 } from "@/components/user/subscriptions/coverage/subscriptionCoverage.helpers";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import { ApiSubscriptionCoverageMode } from "@/generated/models/ApiSubscriptionCoverageMode";
@@ -51,12 +53,54 @@ describe("subscription coverage helpers", () => {
       status: ApiSubscriptionCoverageStatus.Covered,
       funded_through: { token_id: 598, mint_at: new Date("2027-01-01") },
       next_unfunded: null,
-      forecast: { forecast_truncated: true, horizon_end_token_id: 598 },
+      forecast: {
+        forecast_truncated: true,
+        horizon_end_token_id: 598,
+        horizon_drop_count: 24,
+      },
     } as ApiSubscriptionCoverage;
 
     expect(getSubscriptionCoverageCompactLine("en-US", coverage)).toBe(
       "Automatic · 2 ETH · Next 24 drops funded"
     );
+  });
+
+  it("keeps the plain count when the funded count is not the forecast size", () => {
+    const coverage = {
+      mode: ApiSubscriptionCoverageMode.Manual,
+      balance_eth: "0.2",
+      fully_funded_drops: 3,
+      status: ApiSubscriptionCoverageStatus.RunningLow,
+      funded_through: { token_id: 598, mint_at: new Date("2027-01-01") },
+      next_unfunded: null,
+      forecast: {
+        forecast_truncated: true,
+        horizon_end_token_id: 598,
+        horizon_drop_count: 24,
+      },
+    } as ApiSubscriptionCoverage;
+
+    expect(getSubscriptionCoverageCompactLine("en-US", coverage)).toBe(
+      "Manual · 0.2 ETH · 3 drops funded"
+    );
+    expect(isSubscriptionCoverageForecastFullyFunded(coverage)).toBe(false);
+    expect(isSubscriptionCoverageFundedToForecastEnd(coverage)).toBe(true);
+  });
+
+  it("does not treat a funded-through point before the forecast end as open-ended", () => {
+    const coverage = {
+      fully_funded_drops: 24,
+      funded_through: { token_id: 590, mint_at: new Date("2026-12-14") },
+      next_unfunded: null,
+      forecast: {
+        forecast_truncated: true,
+        horizon_end_token_id: 598,
+        horizon_drop_count: 24,
+      },
+    } as ApiSubscriptionCoverage;
+
+    expect(isSubscriptionCoverageFundedToForecastEnd(coverage)).toBe(false);
+    expect(isSubscriptionCoverageForecastFullyFunded(coverage)).toBe(false);
   });
 
   it("maps one funded action-required drop to running low", () => {
