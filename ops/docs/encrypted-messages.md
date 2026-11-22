@@ -467,7 +467,10 @@ appear.
 A chat opens at its newest saved messages. **Load older messages** reads the
 previous part of this device's history; **Load newer messages** moves forward
 again. **New messages** returns to the latest messages. Incoming messages do
-not move you away from older history you are reading.
+not move you away from older history you are reading. When this device holds nothing
+older, the button is replaced by **No older messages on this device.** Messages
+from before this device joined a chat are not on it unless they are restored
+from an encrypted backup.
 
 Photos load when you approach them while scrolling. Moving away can release
 them from memory; returning to a photo may download it again. This does not
