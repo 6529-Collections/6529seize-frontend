@@ -20,7 +20,7 @@ const mockUpdater = (canEdit: boolean) => {
     saveChatUpdate: jest.fn(),
     saveAdminDropDeletion,
     setToast: jest.fn(),
-  });
+  } satisfies ReturnType<typeof useWaveSettingUpdater>);
   return saveAdminDropDeletion;
 };
 
