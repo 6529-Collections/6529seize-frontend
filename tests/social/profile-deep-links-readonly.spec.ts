@@ -13,6 +13,7 @@ import {
 
 import { RESPONSE_TIMEOUT_MS } from "../support/routeReadiness";
 import { expectUrlState } from "../support/urlState";
+import { readXtdhRetirement } from "../support/xtdhRetirement";
 
 test.describe("Profile deep-link read-only coverage @surface @medium @large @readonly", () => {
   test("toggles Details without a route fetch while its own data is loading", async ({
@@ -449,6 +450,10 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
   test("keeps Network card metrics readable and page counts below artwork", async ({
     page,
   }) => {
+    test.skip(
+      (await readXtdhRetirement(page)) === "retired",
+      "xTDH is retired: the Collected tab has no Network view"
+    );
     await page.setViewportSize({ width: 390, height: 844 });
     await gotoReady(page, `/${PROFILE_HANDLE}/collected?collection=network`);
     const networkCards = page.getByRole("list", {
@@ -789,6 +794,10 @@ test.describe("Profile deep-link read-only coverage @surface @medium @large @rea
   test("centers the Token ID sort arrows without changing selection behavior", async ({
     page,
   }) => {
+    test.skip(
+      (await readXtdhRetirement(page)) === "retired",
+      "xTDH is retired: the Collected tab has no View switch or Network view"
+    );
     await page.setViewportSize({ width: 390, height: 844 });
     await gotoReady(
       page,

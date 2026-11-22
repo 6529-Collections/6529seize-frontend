@@ -52,6 +52,7 @@ it("says xTDH is being retired on the freeze day", () => {
   render(<XtdhRetiredNotice />);
   const notice = screen.getByRole("region", { name: "xTDH" });
   expect(notice).toHaveTextContent(CLOSING);
+  expect(notice).toHaveAttribute("data-xtdh-retirement", "closing");
 });
 
 it("says xTDH was retired from the switch-on", () => {
@@ -60,6 +61,7 @@ it("says xTDH was retired from the switch-on", () => {
     const { unmount } = render(<XtdhRetiredNotice />);
     const notice = screen.getByRole("region", { name: "xTDH" });
     expect(notice).toHaveTextContent(RETIRED);
+    expect(notice).toHaveAttribute("data-xtdh-retirement", "retired");
     expect(notice).not.toHaveTextContent("Grants");
     unmount();
   }

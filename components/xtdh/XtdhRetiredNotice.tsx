@@ -25,6 +25,7 @@ export default function XtdhRetiredNotice({
     <section
       aria-label={t(locale, "xtdh.retired.label")}
       data-testid="xtdh-retired-notice"
+      data-xtdh-retirement={retirement}
       className={`tailwind-scope tw-flex tw-items-start tw-gap-3 tw-rounded-xl tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/5 tw-px-4 tw-py-3 ${className}`.trim()}
     >
       <LockClosedIcon
