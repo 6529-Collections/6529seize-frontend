@@ -4754,6 +4754,39 @@ export const EN_US_ROOT_MESSAGES = {
   "theMemes.mint.transaction.success": "SEIZED!",
   "theMemes.mint.transaction.error": "Transaction failed",
   "theMemes.mint.transaction.errorDetails": "{message}",
+  "theMemes.mint.phaseCard.statusLabel": "Status",
+  "theMemes.mint.phaseCard.status.upcoming": "UPCOMING",
+  "theMemes.mint.phaseCard.status.active": "ACTIVE",
+  "theMemes.mint.phaseCard.status.completed": "COMPLETED",
+  "theMemes.mint.phaseCard.started": "Started",
+  "theMemes.mint.phaseCard.ends": "Ends",
+  "theMemes.mint.phaseCard.ended": "Ended",
+  "theMemes.mint.phaseCard.expectedStart": "Expected start",
+  "theMemes.mint.phaseCard.expectedEnd": "Expected end",
+  "theMemes.mint.phaseCard.airdrops": "Airdrops: x{count}",
+  "theMemes.mint.phaseEligibility.unlimited": "Unlimited spots",
+  "theMemes.mint.phaseEligibility.loading": "Loading eligibility...",
+  "theMemes.mint.phaseEligibility.unavailable": "Eligibility unavailable",
+  "theMemes.mint.phaseEligibility.none": "No eligible spots",
+  "theMemes.mint.phaseEligibility.allowlist.one": "{allowlist} eligible spot",
+  "theMemes.mint.phaseEligibility.allowlist.many":
+    "{allowlist} eligible spots",
+  "theMemes.mint.phaseEligibility.airdrop":
+    "{airdrop}x Airdrop · nothing to mint",
+  "theMemes.mint.phaseEligibility.mixed":
+    "{allowlist}x Allowlist · {airdrop}x Airdrop",
+  "theMemes.mint.subscriptionAirdrop.phase.phase0": "Phase 0",
+  "theMemes.mint.subscriptionAirdrop.phase.phase1": "Phase 1",
+  "theMemes.mint.subscriptionAirdrop.phase.phase2": "Phase 2",
+  "theMemes.mint.subscriptionAirdrop.phase.public": "Public phase",
+  "theMemes.mint.subscriptionAirdrop.pending.one":
+    "{phase}: your subscription covers 1 card. It will be airdropped to {address}, so you do not need to mint it here.",
+  "theMemes.mint.subscriptionAirdrop.pending.many":
+    "{phase}: your subscription covers {count} cards. They will be airdropped to {address}, so you do not need to mint them here.",
+  "theMemes.mint.subscriptionAirdrop.airdropped.one":
+    "{phase}: your subscription card has been airdropped to {address}.",
+  "theMemes.mint.subscriptionAirdrop.airdropped.many":
+    "{phase}: your {count} subscription cards have been airdropped to {address}.",
   "theMemes.card.linkAriaLabel": "View {name}, card #{tokenId}",
   "theMemes.card.metric.unavailable": "-",
   "theMemes.card.metric.editionSize": "Edition Size: {value}",
