@@ -5,8 +5,11 @@ Parent: [Network Index](README.md)
 ## Overview
 
 `/network/levels` is the reference page for Level thresholds.
-It maps combined `TDH + Rep` to Levels and shows the full threshold table.
-The current table covers Level `0` through `100` (max threshold `25,000,000`).
+It maps combined `TDH + Rep` to Levels and shows a threshold table.
+Levels `0` through `100` have set thresholds; Level `100` needs `25,000,000`.
+Above Level `100` there is no top level: each level needs 4% more `TDH + Rep`
+than the one before, rounded down. Level `101` needs `26,000,000` and Level
+`150` needs `177,667,015`. The API assigns Levels by the same rule.
 When a signed-in active profile is available, the page also summarizes that
 profile's current Level and progress toward the next Level.
 
@@ -36,7 +39,8 @@ profile's current Level and progress toward the next Level.
 - For a signed-in active profile, a compact `Your Level` summary with the
   current Level, combined `TDH + Rep`, next Level, and additional amount needed,
   positioned directly above the table.
-- A full-width table with all `Level` and `TDH + Rep` thresholds.
+- A full-width table of `Level` and `TDH + Rep` thresholds from Level `0`
+  through `200`.
 - Table headings that remain visible while the table is scrolled.
 
 ## User Journey
@@ -47,7 +51,7 @@ profile's current Level and progress toward the next Level.
 4. If signed in, review the active profile's `Your Level` summary directly
    above the table. When a profile proxy is active, the summary reflects that
    proxy profile.
-5. Use the table for exact thresholds by Level (`0` through `100`). Pointer
+5. Use the table for exact thresholds by Level (`0` through `200`). Pointer
    users can also hover chart points for threshold tooltips.
 
 ## Common Scenarios
@@ -59,7 +63,8 @@ profile's current Level and progress toward the next Level.
 ## Route Behavior
 
 - No query params, filters, sorting, or pagination.
-- Thresholds are static app data (no route-level API request).
+- Thresholds are app data: the Level `0` to `100` table and the rule above
+  it (no route-level API request).
 - No route-level loading, empty, or retry state.
 - Signed-out users see the normal chart, explanation, and complete reference
   table without a personalized empty state or sign-in prompt.
@@ -78,8 +83,8 @@ profile's current Level and progress toward the next Level.
 
 - A real Level `0` profile is shown as Level `0`; loading or missing data does
   not produce a placeholder Level.
-- At Level `100`, the summary reports that the profile has reached the highest
-  Level instead of showing a nonexistent next Level.
+- Every Level has a next Level. At Level `100` and above, the summary shows
+  the next Level and the amount needed by the rule above Level `100`.
 - On touch or no-hover devices, use the table for exact chart values.
 - On narrow screens, the chart, summary, explanation, and table remain in one
   vertical page flow. The table container can scroll when needed.
