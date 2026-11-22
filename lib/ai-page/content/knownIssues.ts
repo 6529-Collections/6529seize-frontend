@@ -82,7 +82,7 @@ export const AI_KNOWN_BUGS: readonly AiKnownBug[] = [
 export const AI_FIXED_IN = "0.1.0-rc.3";
 
 export const AI_FIXED_BUGS: readonly string[] = [
-  "The download progress on the Provider page no longer freezes while the page is hidden.",
+  "A model's download progress no longer freezes while the page is hidden.",
   "Models served together that don't fit in memory say so, instead of **Restarting**.",
   "A model that keeps restarting shows why its engine stopped.",
   "On a Mac with 12 GB of memory or less, chat models start with a 4K context, and the page suggests smaller models.",
