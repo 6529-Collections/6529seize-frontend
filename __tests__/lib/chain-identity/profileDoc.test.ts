@@ -104,14 +104,23 @@ it("signs ProfileDocument(principal, version, docHash) in the 6529 Network domai
 });
 
 it("keeps values exactly as given, whitespace included", () => {
-  const { bytes } = signed({ bio: "gm\n", displayName: " punk " });
+  const { bytes } = signed({ bio: "gm\n", displayName: " tester " });
   const decoded = decodeProfileDoc(bytes);
   expect(decoded?.fields.get("bio")).toBe("gm\n");
-  expect(decoded?.fields.get("displayName")).toBe(" punk ");
+  expect(decoded?.fields.get("displayName")).toBe(" tester ");
 });
 
 it("refuses a document over 524,288 bytes before anything is signed", () => {
-  const big = { bio: "x".repeat(65_536), a: "x".repeat(65_536), b: "x".repeat(65_536), c: "x".repeat(65_536), d: "x".repeat(65_536), e: "x".repeat(65_536), f: "x".repeat(65_536), g: "x".repeat(65_536) };
+  const big = {
+    bio: "x".repeat(65_536),
+    a: "x".repeat(65_536),
+    b: "x".repeat(65_536),
+    c: "x".repeat(65_536),
+    d: "x".repeat(65_536),
+    e: "x".repeat(65_536),
+    f: "x".repeat(65_536),
+    g: "x".repeat(65_536),
+  };
   let refusal: unknown;
   try {
     prepareProfileDoc(doc(big), NONCE);
@@ -121,11 +130,16 @@ it("refuses a document over 524,288 bytes before anything is signed", () => {
   expect(refusal).toBeInstanceOf(ChainOperationError);
   expect(refusal).toMatchObject({
     reason: "rejected",
-    message: "Your profile would be larger than 524,288 bytes. Make it shorter and try again.",
+    message:
+      "Your profile would be larger than 524,288 bytes. Make it shorter and try again.",
   });
   // Exactly at the limit with a wallet's signature: accepted; a byte more
   // is refused before signing.
-  const wallet = { keyType: 1, keyId: KEY_ID, signature: `0x${"11".repeat(65)}` } as const;
+  const wallet = {
+    keyType: 1,
+    keyId: KEY_ID,
+    signature: `0x${"11".repeat(65)}`,
+  } as const;
   // Seven full fields (65,536 bytes each, the codec's most) and an eighth
   // sized to land exactly on the limit.
   const full = Object.fromEntries(
@@ -134,7 +148,9 @@ it("refuses a document over 524,288 bytes before anything is signed", () => {
   const withLast = (length: number) => doc({ ...full, h: "x".repeat(length) });
   const probe = prepareProfileDoc(withLast(60_000), NONCE);
   const sigLength =
-    signedProfileDoc(probe.unsigned, wallet).bytes.length - probe.unsigned.length - 4;
+    signedProfileDoc(probe.unsigned, wallet).bytes.length -
+    probe.unsigned.length -
+    4;
   const last = 524_288 - 4 - sigLength - (probe.unsigned.length - 60_000);
   const fits = prepareProfileDoc(withLast(last), NONCE);
   expect(signedProfileDoc(fits.unsigned, wallet).bytes.length).toBe(524_288);

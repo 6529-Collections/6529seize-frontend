@@ -3,6 +3,7 @@ import {
   chainFailureText,
   chainRatingFailureText,
   chainRefusalName,
+  isFeeShortfall,
 } from "@/components/chain-identity/chainErrorMessage";
 import { ChainGatewayError } from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
@@ -107,5 +108,31 @@ describe("the 6529 Network's refusals in plain words", () => {
     expect(chainRatingFailureText(L, short)).toBe(
       "Nothing changed. Not enough $fake6529 to pay the fee. Get $fake6529 for fees on your identity page."
     );
+  });
+});
+
+describe("a fee the chain wouldn't take, by its cause", () => {
+  const refusal = (detail: number) =>
+    new ChainGatewayError(
+      422,
+      "inadmissible",
+      `0x0305 FEE_UNCOVERED, detail ${detail}`
+    );
+  it("tells a short balance from a fee limit and a browser key's budget", () => {
+    // detail 0: the payer's balance doesn't cover the fee.
+    expect(chainErrorMessage(L, refusal(0))).toBe(
+      "Not enough $fake6529 to pay the fee."
+    );
+    expect(isFeeShortfall(refusal(0))).toBe(true);
+    // Header field 13, maxFee: the limit signed is below the fee now.
+    expect(chainErrorMessage(L, refusal((0x100 + 13) * 0x10000))).toBe(
+      "Fees rose past the most this change allowed. Try again."
+    );
+    expect(isFeeShortfall(refusal((0x100 + 13) * 0x10000))).toBe(false);
+    // Header field 5, authRef: the browser key's fee budget is spent.
+    expect(chainErrorMessage(L, refusal((0x100 + 5) * 0x10000))).toBe(
+      "This browser's key has used up its fee budget. Turn its key off and on again on your identity page."
+    );
+    expect(isFeeShortfall(refusal((0x100 + 5) * 0x10000))).toBe(false);
   });
 });

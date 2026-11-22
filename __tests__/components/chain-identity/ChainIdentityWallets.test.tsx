@@ -171,7 +171,7 @@ it("signs a join first and leaves it with 6529.io's relay for the new wallet", a
   ).toBeInTheDocument();
   expect(
     screen.getByText(
-      "Finish or withdraw the join waiting for 0x000000…0000bb first."
+      "The join for 0x000000…0000bb is still listed above. Withdraw it, or take it off the list once it has ended, to add another wallet."
     )
   ).toBeInTheDocument();
   expect(

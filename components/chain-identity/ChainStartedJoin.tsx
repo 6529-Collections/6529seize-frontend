@@ -147,7 +147,7 @@ export default function ChainStartedJoin({
             locale,
             new ChainOperationError("failed", "", tx.data.result.name)
           ) ?? "")
-        : t(locale, "chainIdentity.error.generic"),
+        : t(locale, "chainIdentity.wallets.reasonUnknown"),
     });
     actions = "dismiss";
   } else if (status === "SUBMITTED") {
@@ -173,7 +173,9 @@ export default function ChainStartedJoin({
 
   return (
     <li className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/5 tw-p-3">
-      <p className="tw-m-0 tw-text-sm tw-text-iron-200">{text}</p>
+      <p aria-live="polite" className="tw-m-0 tw-text-sm tw-text-iron-200">
+        {text}
+      </p>
       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
         {actions === "retry" && (
           <Button

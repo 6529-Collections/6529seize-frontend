@@ -110,7 +110,7 @@ it("says the fee was charged when the chain ran the join and it failed", async (
   renderRow();
   expect(
     await screen.findByText(
-      "The join didn't go through, and its fee was still charged to your identity. That wallet already belongs to an identity."
+      "The join didn't go through, and its fee was still charged to your identity. That wallet already belongs to an identity. Take it off this list to start again."
     )
   ).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Take off this list" }));
@@ -203,7 +203,7 @@ it("words a refusal the network didn't name as the general one", async () => {
   renderRow();
   expect(
     await screen.findByText(
-      "The join didn't go through, and its fee was still charged to your identity. Something went wrong. Try again."
+      "The join didn't go through, and its fee was still charged to your identity. The 6529 Network didn't say why. Take it off this list to start again."
     )
   ).toBeInTheDocument();
 });

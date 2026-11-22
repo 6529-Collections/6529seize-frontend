@@ -4,7 +4,10 @@ import type { ReactNode } from "react";
 import type { Config } from "wagmi";
 import ChainJoinRequests from "@/components/chain-identity/ChainJoinRequests";
 import { chainGateway } from "@/lib/chain-identity/gateway";
-import { awaitFinal } from "@/lib/chain-identity/operation";
+import {
+  awaitFinal,
+  ChainOperationError,
+} from "@/lib/chain-identity/operation";
 import { chainRelay } from "@/lib/chain-identity/relay";
 import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import {
@@ -229,9 +232,17 @@ it("says the asking identity, not this wallet, is short of $fake6529", async () 
   );
   expect(
     await screen.findByText(
-      "tester_one doesn't have enough $fake6529 for the fee. One of its wallets can add some, then you can sign again."
+      "tester_one doesn't have enough $fake6529 for the fee."
     )
   ).toBeInTheDocument();
+  expect(
+    screen.getByText(
+      "This request has ended. The wallet that asked can send a new one."
+    )
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Review and sign" })
+  ).not.toBeInTheDocument();
   expect(
     screen.queryByRole("link", { name: "Get $fake6529 for fees." })
   ).not.toBeInTheDocument();
@@ -246,5 +257,24 @@ it("lets this wallet rejoin the identity it left without waiting", async () => {
   renderRequests();
   expect(
     await screen.findByRole("button", { name: "Review and sign" })
+  ).toBeInTheDocument();
+});
+
+it("says from this wallet's side why a join the chain ran didn't go through", async () => {
+  relay["sign"]!.mockResolvedValue({ ...heldJoin(), status: "SUBMITTED" });
+  (awaitFinal as jest.Mock).mockRejectedValueOnce(
+    new ChainOperationError("failed", "refused", "IDENTITY_FULL")
+  );
+  renderRequests();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review and sign" })
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Sign with wallet" })
+  );
+  expect(
+    await screen.findByText(
+      "The join didn't go through, and tester_one paid the fee for it. tester_one has as many wallets as the 6529 Network allows."
+    )
   ).toBeInTheDocument();
 });

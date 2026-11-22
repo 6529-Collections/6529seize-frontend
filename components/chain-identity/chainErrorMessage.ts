@@ -19,6 +19,9 @@ const KNOWN_NAMES = new Set([
   "EXPIRED_AT_EXECUTION",
   "FEE_ALLOWANCE_SPENT",
   "FEE_UNCOVERED",
+  "FEE_UNCOVERED_KEY",
+  "FEE_UNCOVERED_LIMIT",
+  "GRANT_LIMIT",
   "GRANT_INACTIVE",
   "GRANT_NOT_LIVE",
   "HANDLE_RESERVED",
@@ -52,11 +55,14 @@ const KNOWN_NAMES = new Set([
   "REJOIN_WAIT",
   "REPLACEMENT_UNDERPRICED",
   "SELF_RATING",
+  "SESSION_KEY_LIMIT",
   "STALE_VERSION",
   "TARGET_INACTIVE",
   "TDH_NOT_APPLIED",
   "UNDERPRICED",
+  "VALIDITY_TOO_LONG",
   "WORK_EXHAUSTED",
+  "WRONG_NETWORK",
 ]);
 
 /** Names that mean the payer had too little $fake6529. */
@@ -64,6 +70,16 @@ const FEE_NAMES = new Set(["FEE_UNCOVERED", "INSUFFICIENT_BALANCE"]);
 
 /** "0x2101 ADDRESS_BOUND, detail 1", as the gateway and the relay word it. */
 const NAMED_CODE = /\b0x[0-9a-fA-F]{4} ([A-Z][A-Z0-9_]+)\b/;
+const DETAIL = /\b0x[0-9a-fA-F]{4} [A-Z][A-Z0-9_]+, detail (\d+)\b/;
+
+/**
+ * FEE_UNCOVERED's three causes, by its detail: header field n is detail
+ * `(0x100 + n) << 16`. Field 13 (maxFee): the fee limit signed is below the
+ * fee now; field 5 (authRef): the browser key's fee budget is spent; 0: the
+ * payer's balance is short.
+ */
+const FEE_LIMIT_DETAIL = (0x100 + 13) * 0x10000;
+const FEE_KEY_DETAIL = (0x100 + 5) * 0x10000;
 
 const USER_REJECTION = /user (rejected|denied)/i;
 
@@ -102,9 +118,31 @@ export function chainRefusalName(error: unknown): string | null {
   return NAMED_CODE.exec(messageOf(error))?.[1] ?? null;
 }
 
+const refusalDetail = (error: unknown): number | null => {
+  const match = DETAIL.exec(messageOf(error));
+  return match?.[1] === undefined ? null : Number(match[1]);
+};
+
+/** FEE_UNCOVERED split by its cause; other names as they are. */
+const refusalKey = (error: unknown, name: string): string => {
+  if (name !== "FEE_UNCOVERED") {
+    return name;
+  }
+  const detail = refusalDetail(error);
+  if (detail === FEE_LIMIT_DETAIL) {
+    return "FEE_UNCOVERED_LIMIT";
+  }
+  if (detail === FEE_KEY_DETAIL) {
+    return "FEE_UNCOVERED_KEY";
+  }
+  return name;
+};
+
 /** Whether the refusal means the payer had too little $fake6529 for the fee. */
-export const isFeeShortfall = (error: unknown): boolean =>
-  FEE_NAMES.has(chainRefusalName(error) ?? "");
+export const isFeeShortfall = (error: unknown): boolean => {
+  const name = chainRefusalName(error);
+  return name !== null && FEE_NAMES.has(refusalKey(error, name));
+};
 
 /** The reason to show, or null when the person declined in the wallet. */
 export function chainErrorMessage(
@@ -116,8 +154,9 @@ export function chainErrorMessage(
   }
   const name = chainRefusalName(error);
   if (name !== null) {
-    return KNOWN_NAMES.has(name)
-      ? t(locale, `chainIdentity.error.${name}` as MessageKey)
+    const key = refusalKey(error, name);
+    return KNOWN_NAMES.has(key)
+      ? t(locale, `chainIdentity.error.${key}` as MessageKey)
       : t(locale, "chainIdentity.error.refused", { name });
   }
   const status = statusOf(error);
@@ -155,7 +194,7 @@ export function chainFailureText(
   // Sent or kept, not refused: the reason says where it stands.
   if (
     error instanceof ChainOperationError &&
-    (error.reason === "timeout" || error.reason === "pending")
+    (error.reason === "timeout" || error.reason === "stated")
   ) {
     return reason;
   }

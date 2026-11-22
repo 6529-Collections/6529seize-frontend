@@ -32,7 +32,7 @@ export class ChainOperationError extends Error {
       | "rejected"
       | "failed"
       | "timeout"
-      | "pending",
+      | "stated",
     message: string,
     /** The chain's result name when it refused the change, e.g. STALE_VERSION. */
     readonly resultName: string | null = null
