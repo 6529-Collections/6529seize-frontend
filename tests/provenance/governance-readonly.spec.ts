@@ -33,9 +33,9 @@ test.describe("provenance governance", () => {
       timeout: 60_000,
     });
 
-    await page.getByLabel("Literal").fill("E2E_TYPE");
+    await page.getByLabel("Literal", { exact: true }).fill("E2E_TYPE");
     await page.getByRole("button", { name: "Add call" }).click();
-    await page.getByLabel("Call").selectOption("freeze");
+    await page.getByLabel("Call", { exact: true }).selectOption("freeze");
     await page.getByRole("button", { name: "Add call" }).click();
     await page.getByRole("button", { name: "Build Safe transactions" }).click();
 
