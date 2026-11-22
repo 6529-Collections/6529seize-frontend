@@ -47,12 +47,7 @@ export async function moveProfileSitePointer(params: {
   if (!writer) {
     return unavailable();
   }
-  const available = await writer.availableSigners();
-  const signers = SIGNER_ORDER.filter((signer) => available.includes(signer));
-  if (signers.length === 0) {
-    return unavailable();
-  }
-  for (const signer of signers) {
+  for (const signer of await usableSigners(writer)) {
     try {
       const { txId } = await writer.replaceProfileDoc(
         (current) => withProfileSitePointer(current, params.pointer),
@@ -61,30 +56,10 @@ export async function moveProfileSitePointer(params: {
       const confirmed = params.confirm ? await params.confirm() : false;
       return { ok: true, txId, signer, confirmed };
     } catch (error) {
-      if (
-        error instanceof ProfileDocWriteError &&
-        error.code === "session_key_unusable"
-      ) {
-        continue;
+      const failure = moveFailure(error);
+      if (failure) {
+        return failure;
       }
-      if (
-        error instanceof ProfileDocWriteError &&
-        error.code === "signature_rejected"
-      ) {
-        return {
-          ok: false,
-          code: "signature_rejected",
-          message: "The signature request was canceled in your wallet.",
-        };
-      }
-      return {
-        ok: false,
-        code: "chain_failed",
-        message:
-          error instanceof Error && error.message
-            ? error.message
-            : "The profile change did not go through.",
-      };
     }
   }
   return unavailable();
@@ -124,6 +99,41 @@ export async function waitForProfileSitePrimary(params: {
     }
     await sleep(intervalMs);
   }
+}
+
+/** The signers this browser has, session key first. */
+async function usableSigners(
+  writer: ProfileDocWriter
+): Promise<ProfileDocSigner[]> {
+  const available = await writer.availableSigners();
+  return SIGNER_ORDER.filter((signer) => available.includes(signer));
+}
+
+/**
+ * The result of a write that failed; null when the chain refused the session
+ * key, so the next signer (the wallet) tries.
+ */
+function moveFailure(error: unknown): ProfileSiteMoveResult | null {
+  if (error instanceof ProfileDocWriteError) {
+    if (error.code === "session_key_unusable") {
+      return null;
+    }
+    if (error.code === "signature_rejected") {
+      return {
+        ok: false,
+        code: "signature_rejected",
+        message: "The signature request was canceled in your wallet.",
+      };
+    }
+  }
+  return {
+    ok: false,
+    code: "chain_failed",
+    message:
+      error instanceof Error && error.message
+        ? error.message
+        : "The profile change did not go through.",
+  };
 }
 
 function unavailable(): ProfileSiteMoveResult {
