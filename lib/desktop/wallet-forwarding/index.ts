@@ -27,6 +27,7 @@
  */
 
 export {
+  MAX_TRANSACTION_DATA_BYTES,
   WALLET_REQUEST_TTL_MS,
   WALLET_TRANSACTION_TTL_MS,
   type WalletForwardingMethod,

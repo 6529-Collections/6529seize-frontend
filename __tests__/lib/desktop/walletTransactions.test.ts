@@ -8,11 +8,18 @@ import {
 } from "@/abis/abis";
 import {
   DELEGATION_CONTRACT,
+  GRADIENT_CONTRACT,
   MANIFOLD_LAZY_CLAIM_CONTRACT,
+  MEMELAB_CONTRACT,
   MEMES_CONTRACT,
   NEVER_DATE,
+  NULL_DEAD_ADDRESS,
   SUBSCRIPTIONS_ADDRESS,
 } from "@/constants/constants";
+import {
+  ERC1155_TRANSFER_ABI,
+  ERC721_TRANSFER_ABI,
+} from "@/components/nft-transfer/transfer-abis";
 import {
   CONSOLIDATION_USE_CASE,
   DELEGATION_USE_CASES,
@@ -20,7 +27,11 @@ import {
   SUB_DELEGATION_USE_CASE,
   SUPPORTED_COLLECTIONS,
 } from "@/components/delegation/delegation-constants";
-import { NEXTGEN_MINTER_ADDRESSES } from "@/components/nextGen/nextgen_addresses";
+import {
+  NEXTGEN_CORE_ADDRESSES,
+  NEXTGEN_MINTER_ADDRESSES,
+} from "@/components/nextGen/nextgen_addresses";
+import { parseWalletRequest } from "@/lib/desktop/wallet-forwarding";
 import {
   canonicalTransactionRulesJson,
   checkWalletTransaction,
@@ -34,6 +45,7 @@ import {
   ARG_RULE_KEYS,
   type ArgRule,
   RULE_ARG_TYPES,
+  type RuleArg,
 } from "@/lib/desktop/wallet-transactions/types";
 import {
   buildWalletTransactionVectors,
@@ -113,6 +125,24 @@ describe("wallet transaction vectors", () => {
     }
   });
 
+  it("are requests forwarding accepts (shape and size)", () => {
+    for (const vector of vectors) {
+      const parsed = parseWalletRequest(
+        {
+          method: "eth_sendTransaction",
+          params: [vector.transaction],
+          address: vector.transaction.from,
+          chainId: vector.chainId,
+        },
+        [1, 11_155_111]
+      );
+      expect({ name: vector.name, ok: parsed.ok }).toEqual({
+        name: vector.name,
+        ok: true,
+      });
+    }
+  });
+
   it("matches the shared JSON vectors", () => {
     expect(readFixture(VECTORS_FIXTURE, vectors)).toEqual(
       JSON.parse(JSON.stringify(vectors))
@@ -186,6 +216,26 @@ function argRuleProblems(rule: ArgRule, argNames: readonly string[]): string[] {
   return problems;
 }
 
+/**
+ * A listed type, or a tuple (array) whose text is its components' types;
+ * component rules may not name other arguments.
+ */
+function argTypeProblems(arg: RuleArg): string[] {
+  if (arg.components === undefined) {
+    return (RULE_ARG_TYPES as readonly string[]).includes(arg.type)
+      ? []
+      : [`type ${arg.type}`];
+  }
+  const tuple = `(${arg.components.map((item) => item.type).join(",")})`;
+  const problems =
+    arg.type === tuple || arg.type === `${tuple}[]` ? [] : [`type ${arg.type}`];
+  for (const component of arg.components) {
+    problems.push(...argTypeProblems(component));
+    problems.push(...argRuleProblems(component.rule, []));
+  }
+  return problems;
+}
+
 describe("WALLET_TRANSACTION_RULES", () => {
   it.each(
     WALLET_TRANSACTION_RULES.map(
@@ -197,7 +247,7 @@ describe("WALLET_TRANSACTION_RULES", () => {
     const names = rule.args.map((arg) => arg.name);
     expect(new Set(names).size).toBe(names.length);
     for (const arg of rule.args) {
-      expect(RULE_ARG_TYPES).toContain(arg.type);
+      expect(argTypeProblems(arg)).toEqual([]);
       expect(argRuleProblems(arg.rule, names)).toEqual([]);
     }
     if (rule.signature === null) {
@@ -231,11 +281,13 @@ describe("WALLET_TRANSACTION_RULES", () => {
     delegation: DELEGATION_ABI,
     memes: MEMES_MANIFOLD_PROXY_ABI,
     nextgen: NEXTGEN_MINTER_ABI,
+    nft: [...ERC721_TRANSFER_ABI, ...ERC1155_TRANSFER_ABI],
   };
 
   it("uses the same functions and parameter names as the site's ABIs", () => {
     for (const rule of WALLET_TRANSACTION_RULES) {
-      if (rule.selector === null) continue;
+      // Provenance calls have no site ABI; their vectors encode them.
+      if (rule.selector === null || rule.id.startsWith("provenance.")) continue;
       const abi = SITE_ABIS[rule.id.split(".")[0]!]!;
       const item = abi.find(
         (entry): entry is AbiFunction =>
@@ -295,6 +347,37 @@ describe("WALLET_TRANSACTION_RULES", () => {
     expect(byId("delegation.register").args[2]!.rule.uintMax).toBe(
       String(NEVER_DATE)
     );
+  });
+
+  it("transfers only on the site's 6529 NFT contracts", () => {
+    const contracts = (id: string) =>
+      WALLET_TRANSACTION_RULES.filter((rule) => rule.id === id).map(
+        (rule) => `${rule.chainId}:${rule.to}`
+      );
+    const lower = (address: string) => address.toLowerCase();
+    expect(contracts("nft.transfer721")).toEqual([
+      `1:${lower(GRADIENT_CONTRACT)}`,
+      `1:${lower(NEXTGEN_CORE_ADDRESSES[1])}`,
+      `11155111:${lower(NEXTGEN_CORE_ADDRESSES[11_155_111])}`,
+    ]);
+    const erc1155 = [
+      `1:${lower(MEMES_CONTRACT)}`,
+      `1:${lower(MEMELAB_CONTRACT)}`,
+      // The drop forge test contract (`drop-forge-config.ts`).
+      "11155111:0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c",
+    ];
+    expect(contracts("nft.transfer1155")).toEqual(erc1155);
+    expect(contracts("nft.batchTransfer1155")).toEqual(erc1155);
+    for (const rule of WALLET_TRANSACTION_RULES) {
+      if (!rule.id.startsWith("nft.")) continue;
+      expect(rule.risk).toBe("transfer");
+      expect(rule.value).toEqual({ min: "0", max: "0" });
+      expect(rule.args[1]!.rule.noneOf).toEqual([
+        "$from",
+        NULL_DEAD_ADDRESS,
+        rule.to,
+      ]);
+    }
   });
 });
 

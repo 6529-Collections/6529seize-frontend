@@ -4157,12 +4157,69 @@ export const EN_US_ROOT_MESSAGES = {
   "browserConnector.tx.title.nextgen.mint": "Mint NextGen tokens",
   "browserConnector.tx.title.subscriptions.topUp":
     "Top up your Memes subscription balance",
+  "browserConnector.tx.title.nft.transfer721": "Transfer an NFT",
+  "browserConnector.tx.title.nft.transfer1155": "Transfer NFTs",
+  "browserConnector.tx.title.nft.batchTransfer1155": "Transfer several NFTs",
+  "browserConnector.tx.title.provenance.openRelease":
+    "Open a 6529 Provenance release",
+  "browserConnector.tx.title.provenance.publish":
+    "Publish records to 6529 Provenance",
+  "browserConnector.tx.title.provenance.sealRelease":
+    "Seal a 6529 Provenance release",
   "browserConnector.tx.contract": "Contract",
   "browserConnector.tx.contract.delegation": "6529 delegation contract",
   "browserConnector.tx.contract.memes": "Manifold claim contract for The Memes",
   "browserConnector.tx.contract.nextgen": "NextGen minter contract",
   "browserConnector.tx.contract.subscriptions":
     "6529 subscriptions wallet (seize.6529.eth)",
+  "browserConnector.tx.contract.nft": "6529 NFT contract",
+  "browserConnector.tx.contract.provenance": "6529 Provenance registry",
+  "browserConnector.tx.transfer.recipient":
+    "Recipient: the NFTs go to this address",
+  "browserConnector.tx.transfer.identity": "6529 profile: {name}",
+  "browserConnector.tx.transfer.identityChecking":
+    "Looking up the 6529 profile for this address…",
+  "browserConnector.tx.transfer.identityNone":
+    "No 6529 profile was found for this address.",
+  "browserConnector.tx.transfer.identityUnavailable":
+    "The 6529 profile for this address could not be looked up.",
+  "browserConnector.tx.transfer.identityNote":
+    "The profile comes from 6529 profile data. It is not part of the transaction: check the address itself.",
+  "browserConnector.tx.transfer.contract":
+    "This address is a contract. If it cannot handle NFTs, they can be lost. Send only if you know this contract accepts them.",
+  "browserConnector.tx.transfer.codeUnavailable":
+    "It could not be checked whether this address is a contract.",
+  "browserConnector.tx.transfer.confirm":
+    "I checked that this is the right recipient. Transfers cannot be undone.",
+  "browserConnector.tx.sender.checking":
+    "Checking that this wallet may publish to this registry…",
+  "browserConnector.tx.sender.ok":
+    "Checked: this wallet may publish to this registry.",
+  "browserConnector.tx.sender.denied":
+    "This wallet is neither a publisher nor the owner of this registry, so the transaction would fail. Start again from 6529 Desktop with an authorized wallet.",
+  "browserConnector.tx.sender.unavailable":
+    "It could not be checked whether this wallet may publish. You can check again or send it anyway.",
+  "browserConnector.tx.provenance.none": "None",
+  "browserConnector.tx.provenance.digest": "Hash",
+  "browserConnector.tx.provenance.digestValue": "{algorithm} {digest}",
+  "browserConnector.tx.provenance.manifestCid": "Manifest CID",
+  "browserConnector.tx.provenance.rootCid": "Root CID",
+  "browserConnector.tx.provenance.arweaveId": "Arweave ID",
+  "browserConnector.tx.provenance.sourceCommit": "Source commit",
+  "browserConnector.tx.provenance.label": "Label",
+  "browserConnector.tx.provenance.release": "Release",
+  "browserConnector.tx.provenance.expectedCount": "Expected record count",
+  "browserConnector.tx.provenance.record": "Record {position}",
+  "browserConnector.tx.provenance.subject": "Subject ID",
+  "browserConnector.tx.provenance.recordType": "Record type ID",
+  "browserConnector.tx.provenance.schema": "Schema ID",
+  "browserConnector.tx.provenance.cid": "CID",
+  "browserConnector.tx.provenance.expectedVersion":
+    "Versions before this record",
+  "browserConnector.tx.provenance.newSubject": "0 (a new subject)",
+  "browserConnector.tx.provenance.effectiveAt": "Effective time",
+  "browserConnector.tx.provenance.effectiveAtValue":
+    "{time} UTC, as the publisher states it",
   "browserConnector.tx.network": "Network",
   "browserConnector.tx.network.mainnet": "Ethereum",
   "browserConnector.tx.network.sepolia": "Sepolia test network",
@@ -4187,6 +4244,7 @@ export const EN_US_ROOT_MESSAGES = {
   "browserConnector.tx.proof": "allowlist proof ({count} hashes)",
   "browserConnector.tx.proofs": "allowlist proofs ({count})",
   "browserConnector.tx.quoted": "“{text}”",
+  "browserConnector.tx.field": "{name}: {value}",
   "browserConnector.tx.useCase": "{id} ({name})",
   "browserConnector.tx.plainTransfer": "plain ETH transfer",
   "browserConnector.tx.yes": "Yes",

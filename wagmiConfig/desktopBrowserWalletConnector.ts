@@ -12,6 +12,7 @@ import {
 } from "viem";
 import { ChainNotConfiguredError, createConnector } from "wagmi";
 import {
+  MAX_TRANSACTION_DATA_BYTES,
   parseWalletRequest,
   toCanonicalTransaction,
   type WalletBridgeResponse,
@@ -21,6 +22,14 @@ import {
 
 /** wagmi connector id and type for 6529 Desktop wallet forwarding. */
 export const DESKTOP_BROWSER_WALLET_CONNECTOR_ID = "desktopBrowserWallet";
+
+/**
+ * The capability this connector reports per chain (EIP-5792
+ * `wallet_getCapabilities` shape) while the shell sends transactions: the
+ * most call data one forwarded transaction may carry, so a caller can size
+ * batches (for example provenance `publish` records) to fit.
+ */
+const DESKTOP_FORWARDING_CAPABILITY = "desktopForwarding";
 
 /** A forwarded signature request (this connector sends no transaction). */
 type SignatureRequest = Exclude<
@@ -264,6 +273,25 @@ export function desktopBrowserWalletConnector(
       return response.value;
     };
 
+    /**
+     * `wallet_getCapabilities`: per configured chain (hex id), the
+     * forwarding limits while the shell sends transactions; nothing else
+     * (no atomic batches, no paymaster).
+     */
+    const capabilities = (): Record<string, Record<string, unknown>> => {
+      if (options.sendsTransactions?.() !== true) return {};
+      return Object.fromEntries(
+        config.chains.map((chain) => [
+          `0x${chain.id.toString(16)}`,
+          {
+            [DESKTOP_FORWARDING_CAPABILITY]: {
+              maxTransactionDataBytes: MAX_TRANSACTION_DATA_BYTES,
+            },
+          },
+        ])
+      );
+    };
+
     /** Chain switching is answered here; the browser page checks the chain. */
     const selectChain = (next: number) => {
       const chain = config.chains.find((candidate) => candidate.id === next);
@@ -288,6 +316,8 @@ export function desktopBrowserWalletConnector(
             return forward(method, params);
           case "eth_sendTransaction":
             return sendTransaction(params);
+          case "wallet_getCapabilities":
+            return capabilities();
           default:
             if (TRANSACTION_METHODS.has(method)) {
               options.onTransactionRefused?.();
@@ -310,7 +340,7 @@ export function desktopBrowserWalletConnector(
           if (parameters?.chainId !== undefined)
             selectChain(parameters.chainId);
           const accounts = parameters?.withCapabilities
-            ? [{ address, capabilities: {} }]
+            ? [{ address, capabilities: capabilities() }]
             : [address];
           return Promise.resolve({ accounts, chainId } as never);
         } catch (error_) {

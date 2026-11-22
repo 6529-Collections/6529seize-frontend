@@ -7,6 +7,7 @@ import { type Hex, stringToHex } from "viem";
 import { readWalletMessageText } from "@/lib/desktop/wallet-forwarding/messageText";
 import {
   type DecodedArgs,
+  type DecodedTuple,
   type DecodedValue,
   decodeTransactionData,
 } from "./decode";
@@ -14,7 +15,7 @@ import { WALLET_TRANSACTION_RULES } from "./rules";
 import {
   type ArgRule,
   FROM,
-  type RiskRule,
+  type RuleArg,
   type RuleLiteral,
   type TransactionRisk,
   type TransactionRule,
@@ -53,6 +54,11 @@ interface RuleContext {
   readonly index?: number;
 }
 
+const ZERO_HEX = /^0x(?:00)+$/;
+const isBytesType = (type: string): boolean => type.startsWith("bytes");
+const elementTypeOf = (type: string): string =>
+  type.endsWith("[]") ? type.slice(0, -2) : type;
+
 /** The rules for this chain, contract and selector (or plain value send). */
 function findTransactionRule(
   chainId: number,
@@ -85,17 +91,23 @@ function matchesLiteral(
   return typeof value === "string" && value === literal.toLowerCase();
 }
 
-function isZero(value: DecodedValue): boolean {
-  return value === 0n || value === ZERO_ADDRESS;
+/** 0, the zero address, `false`, or fixed bytes that are all zero. */
+function isZero(value: DecodedValue, type: string): boolean {
+  if (value === 0n || value === false || value === ZERO_ADDRESS) return true;
+  return (
+    type !== "bytes" &&
+    isBytesType(type) &&
+    typeof value === "string" &&
+    ZERO_HEX.test(value)
+  );
 }
 
-/**
- * Elements of an array, UTF-8 bytes of a string. (The rule types have no
- * dynamic `bytes`; adding one needs its byte length here.)
- */
-function lengthOf(value: DecodedValue): number | null {
+/** Elements of an array, UTF-8 bytes of a string, bytes of `bytes(N)`. */
+function lengthOf(value: DecodedValue, type: string): number | null {
   if (Array.isArray(value)) return value.length;
   if (typeof value !== "string") return null;
+  if (isBytesType(type)) return (value.length - 2) / 2;
+  if (type !== "string") return null;
   return UTF8_ENCODER.encode(value).length;
 }
 
@@ -112,9 +124,13 @@ function satisfiesUintBounds(value: DecodedValue, rule: ArgRule): boolean {
   );
 }
 
-function satisfiesLengthBounds(value: DecodedValue, rule: ArgRule): boolean {
+function satisfiesLengthBounds(
+  value: DecodedValue,
+  rule: ArgRule,
+  type: string
+): boolean {
   if (rule.lenMin === undefined && rule.lenMax === undefined) return true;
-  const length = lengthOf(value);
+  const length = lengthOf(value, type);
   if (length === null) return false;
   return (
     (rule.lenMin === undefined || length >= rule.lenMin) &&
@@ -122,8 +138,12 @@ function satisfiesLengthBounds(value: DecodedValue, rule: ArgRule): boolean {
   );
 }
 
-const satisfiesBounds = (value: DecodedValue, rule: ArgRule): boolean =>
-  satisfiesUintBounds(value, rule) && satisfiesLengthBounds(value, rule);
+const satisfiesBounds = (
+  value: DecodedValue,
+  rule: ArgRule,
+  type: string
+): boolean =>
+  satisfiesUintBounds(value, rule) && satisfiesLengthBounds(value, rule, type);
 
 function satisfiesText(value: DecodedValue, rule: ArgRule): boolean {
   if (
@@ -140,7 +160,8 @@ function satisfiesText(value: DecodedValue, rule: ArgRule): boolean {
 function satisfiesLiterals(
   value: DecodedValue,
   rule: ArgRule,
-  from: string
+  from: string,
+  type: string
 ): boolean {
   if (rule.equals !== undefined && !matchesLiteral(value, rule.equals, from)) {
     return false;
@@ -151,11 +172,14 @@ function satisfiesLiterals(
   ) {
     return false;
   }
-  if (rule.notZero && isZero(value)) return false;
+  if (rule.notZero && isZero(value, type)) return false;
   if (
     rule.oneOf !== undefined &&
     !rule.oneOf.some((literal) => matchesLiteral(value, literal, from))
   ) {
+    return false;
+  }
+  if (rule.noneOf?.some((literal) => matchesLiteral(value, literal, from))) {
     return false;
   }
   return true;
@@ -176,7 +200,8 @@ function relatedValue(
 function satisfiesRelations(
   value: DecodedValue,
   rule: ArgRule,
-  context: RuleContext
+  context: RuleContext,
+  type: string
 ): boolean {
   if (rule.sameLength !== undefined) {
     if (!Array.isArray(value)) return false;
@@ -199,24 +224,64 @@ function satisfiesRelations(
   if (rule.each !== undefined) {
     if (!Array.isArray(value)) return false;
     const each = rule.each;
+    const elementType = elementTypeOf(type);
     return (value as readonly DecodedValue[]).every((element, index) =>
-      satisfiesArgRule(element, each, { ...context, index })
+      satisfiesArgRule(element, each, { ...context, index }, elementType)
     );
   }
   return true;
 }
 
-/** Whether `value` satisfies every key of `rule`. */
+/** Whether `value` (of ABI `type`) satisfies every key of `rule`. */
 function satisfiesArgRule(
   value: DecodedValue,
   rule: ArgRule,
-  context: RuleContext
+  context: RuleContext,
+  type: string
 ): boolean {
   return (
-    satisfiesLiterals(value, rule, context.from) &&
-    satisfiesBounds(value, rule) &&
+    satisfiesLiterals(value, rule, context.from, type) &&
+    satisfiesBounds(value, rule, type) &&
     satisfiesText(value, rule) &&
-    satisfiesRelations(value, rule, context)
+    satisfiesRelations(value, rule, context, type)
+  );
+}
+
+const isTuple = (value: DecodedValue | undefined): value is DecodedTuple =>
+  typeof value === "object" && !Array.isArray(value);
+
+/** Every field of one decoded tuple against the components' rules. */
+function satisfiesComponents(
+  tuple: DecodedValue,
+  components: readonly RuleArg[],
+  context: RuleContext
+): boolean {
+  if (!isTuple(tuple)) return false;
+  return components.every((component) => {
+    const field = tuple[component.name];
+    return field !== undefined && satisfiesArg(field, component, context);
+  });
+}
+
+/** An argument (or tuple field): its rule, then its components' rules. */
+function satisfiesArg(
+  value: DecodedValue,
+  arg: RuleArg,
+  context: RuleContext
+): boolean {
+  if (!satisfiesArgRule(value, arg.rule, context, arg.type)) return false;
+  const { components } = arg;
+  if (components === undefined) return true;
+  // Component rules see no element index: they cannot name other arguments.
+  const fields: RuleContext = { from: context.from, args: context.args };
+  if (!arg.type.endsWith("[]")) {
+    return satisfiesComponents(value, components, fields);
+  }
+  return (
+    Array.isArray(value) &&
+    (value as readonly DecodedValue[]).every((element) =>
+      satisfiesComponents(element, components, fields)
+    )
   );
 }
 
@@ -234,23 +299,32 @@ function satisfiesValue(
 }
 
 function riskOf(
-  risk: RiskRule,
+  rule: TransactionRule,
   value: bigint,
   context: RuleContext
 ): TransactionRisk {
-  if (risk === "normal" || risk === "high") return risk;
+  const { risk } = rule;
+  if (typeof risk === "string") return risk;
   const high = risk.highIf.some((condition) => {
     if ("valueAbove" in condition) {
       return value > BigInt(condition.valueAbove);
     }
     const argValue = context.args[condition.arg];
+    const type =
+      rule.args.find((arg) => arg.name === condition.arg)?.type ?? "";
     if (argValue === undefined) return false;
     if (Array.isArray(argValue)) {
+      const elementType = elementTypeOf(type);
       return (argValue as readonly DecodedValue[]).some((element, index) =>
-        satisfiesArgRule(element, condition.is, { ...context, index })
+        satisfiesArgRule(
+          element,
+          condition.is,
+          { ...context, index },
+          elementType
+        )
       );
     }
-    return satisfiesArgRule(argValue, condition.is, context);
+    return satisfiesArgRule(argValue, condition.is, context, type);
   });
   return high ? "high" : "normal";
 }
@@ -277,12 +351,10 @@ export function checkWalletTransaction(
   const context: RuleContext = { from, args };
   const argsOk = rule.args.every((arg) => {
     const argValue = args[arg.name];
-    return (
-      argValue !== undefined && satisfiesArgRule(argValue, arg.rule, context)
-    );
+    return argValue !== undefined && satisfiesArg(argValue, arg, context);
   });
   if (!argsOk || !satisfiesValue(value, rule.value, args)) {
     return { ok: false, problem: "transaction-rule" };
   }
-  return { ok: true, rule, args, risk: riskOf(rule.risk, value, context) };
+  return { ok: true, rule, args, risk: riskOf(rule, value, context) };
 }

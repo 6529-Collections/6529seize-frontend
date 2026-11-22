@@ -17,7 +17,13 @@ import {
   type WalletClient,
   type WriteContractParameters,
 } from "viem";
-import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import {
+  useAccount,
+  useChainId,
+  usePublicClient,
+  useWalletClient,
+} from "wagmi";
+import { canForwardTransfer } from "@/lib/desktop/wallet-transactions/transfers";
 import {
   anyTxsPending,
   BodyByFlow,
@@ -26,49 +32,7 @@ import {
   HeaderRight,
 } from "./TransferModal.view";
 import type { FlowState, TxEntry } from "./TransferModal.types";
-
-const ERC721_ABI = [
-  {
-    type: "function",
-    name: "safeTransferFrom",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "from", type: "address" },
-      { name: "to", type: "address" },
-      { name: "tokenId", type: "uint256" },
-    ],
-    outputs: [],
-  },
-] as const;
-
-const ERC1155_ABI = [
-  {
-    type: "function",
-    name: "safeTransferFrom",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "from", type: "address" },
-      { name: "to", type: "address" },
-      { name: "id", type: "uint256" },
-      { name: "amount", type: "uint256" },
-      { name: "data", type: "bytes" },
-    ],
-    outputs: [],
-  },
-  {
-    type: "function",
-    name: "safeBatchTransferFrom",
-    stateMutability: "nonpayable",
-    inputs: [
-      { name: "from", type: "address" },
-      { name: "to", type: "address" },
-      { name: "ids", type: "uint256[]" },
-      { name: "amounts", type: "uint256[]" },
-      { name: "data", type: "bytes" },
-    ],
-    outputs: [],
-  },
-] as const;
+import { ERC1155_TRANSFER_ABI, ERC721_TRANSFER_ABI } from "./transfer-abis";
 
 const MANIFOLD_CORE_ABI = [
   {
@@ -134,6 +98,20 @@ export default function TransferModal({
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
   const { address } = useAccount();
+  const chainId = useChainId();
+  // 6529 Desktop's browser-wallet forwarding sends allow-listed transfers.
+  const forwardable = useMemo(
+    () =>
+      canForwardTransfer(
+        chainId,
+        Array.from(t.selected.values()).map((item) => ({
+          contract: item.contract,
+          tokenId: String(item.tokenId),
+          erc1155: item.contractType === ContractType.ERC1155,
+        }))
+      ),
+    [chainId, t.selected]
+  );
 
   const groupByContractAndOriginator = useCallback(
     async (publicClient: PublicClient, items: TxItem[]) => {
@@ -408,7 +386,7 @@ export default function TransferModal({
           const { request } = await publicClient.simulateContract({
             account: address,
             address: contract as Address,
-            abi: ERC1155_ABI,
+            abi: ERC1155_TRANSFER_ABI,
             functionName: "safeBatchTransferFrom",
             args: [address as Address, destinationWallet, ids, amts, "0x"],
           });
@@ -470,7 +448,7 @@ export default function TransferModal({
             const { request } = await publicClient.simulateContract({
               account: address,
               address: contract as Address,
-              abi: ERC721_ABI,
+              abi: ERC721_TRANSFER_ABI,
               functionName: "safeTransferFrom",
               args: [address as Address, destinationWallet, x.tokenId],
             });
@@ -657,6 +635,7 @@ export default function TransferModal({
           <FooterActions
             flow={flow}
             canConfirm={!!canConfirm}
+            forwardable={forwardable}
             onCancel={handleClose}
             onConfirm={handleConfirm}
             onClose={handleClose}

@@ -23,11 +23,12 @@ export const FROM = "$from";
  * What an argument must satisfy. Every key present applies (logical and);
  * `{ any: true }` accepts any value of the argument's type.
  *
- * - `equals`, `notEqual`, `oneOf`: compare with literals.
- * - `notZero`: not the zero address, not 0.
+ * - `equals`, `notEqual`, `oneOf`, `noneOf`: compare with literals.
+ * - `notZero`: not the zero address, not 0, not `false`, not all-zero
+ *   fixed bytes.
  * - `uintMin`, `uintMax`: inclusive bounds for uints (decimal strings).
  * - `lenMin`, `lenMax`: element count of an array, UTF-8 byte length of
- *   a `string`.
+ *   a `string`, byte length of `bytes` and `bytesN`.
  * - `readableAscii`: 1-128 printable ASCII characters.
  * - `readableText`: empty, or text a reader can check exactly (the rules
  *   the browser page applies to messages it shows).
@@ -44,6 +45,7 @@ export interface ArgRule {
   readonly notEqual?: RuleLiteral;
   readonly notZero?: true;
   readonly oneOf?: readonly RuleLiteral[];
+  readonly noneOf?: readonly RuleLiteral[];
   readonly uintMin?: string;
   readonly uintMax?: string;
   readonly lenMin?: number;
@@ -63,6 +65,7 @@ export const ARG_RULE_KEYS = [
   "notEqual",
   "notZero",
   "oneOf",
+  "noneOf",
   "uintMin",
   "uintMax",
   "lenMin",
@@ -75,14 +78,20 @@ export const ARG_RULE_KEYS = [
   "zeroIf",
 ] as const;
 
-/** ABI types a rule argument may have. */
+/**
+ * ABI types a rule argument may have, besides tuples (see `RuleArg`).
+ */
 export const RULE_ARG_TYPES = [
   "address",
   "bool",
   "uint16",
   "uint32",
+  "uint64",
   "uint256",
   "string",
+  "bytes",
+  "bytes20",
+  "bytes32",
   "address[]",
   "bool[]",
   "uint32[]",
@@ -93,11 +102,22 @@ export const RULE_ARG_TYPES = [
 
 type RuleArgType = (typeof RULE_ARG_TYPES)[number];
 
+/** A tuple, or an array of tuples, as canonical ABI text: `(uint16,bytes32)[]`. */
+type TupleArgType = `(${string})` | `(${string})[]`;
+
+/**
+ * One parameter. A tuple (or tuple array) parameter has the canonical
+ * tuple text as its `type` and lists its fields in `components`; `rule`
+ * then applies to the tuple (or the array: `lenMin`, `lenMax`), and each
+ * component's rule to that field (of every element). Component rules
+ * cannot name other arguments (`sameLength`, `zeroIf`).
+ */
 export interface RuleArg {
-  /** The ABI parameter name. */
+  /** The ABI parameter or field name. */
   readonly name: string;
-  readonly type: RuleArgType;
+  readonly type: RuleArgType | TupleArgType;
   readonly rule: ArgRule;
+  readonly components?: readonly RuleArg[];
 }
 
 /**
@@ -116,17 +136,22 @@ export type ValueRule =
  * When a rule's transaction is high-impact: an argument satisfies a rule
  * (for an array, any element does), or the value exceeds a bound in wei.
  */
-export type RiskCondition =
+type RiskCondition =
   | { readonly arg: string; readonly is: ArgRule }
   | { readonly valueAbove: string };
 
-/** `normal`, `high`, or high when any listed condition holds. */
+/**
+ * `normal`, `high`, high when any listed condition holds, or `transfer`:
+ * the transaction moves the sender's NFTs to another address, which the
+ * page shows with the recipient in full and a confirmation.
+ */
 export type RiskRule =
   | "normal"
   | "high"
+  | "transfer"
   | { readonly highIf: readonly RiskCondition[] };
 
-export type TransactionRisk = "normal" | "high";
+export type TransactionRisk = "normal" | "high" | "transfer";
 
 export interface TransactionRule {
   /** Stable name, used in vectors, logs and descriptions. */
