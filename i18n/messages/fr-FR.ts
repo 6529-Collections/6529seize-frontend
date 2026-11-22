@@ -77,6 +77,8 @@ export const FR_FR_MESSAGES = {
     "Demandez et vérifiez un instantané des portefeuilles avant d’enregistrer ou de publier cette galerie.",
   "profileCms.builder.publish.savedNotCurrent":
     "Cette publication signée est enregistrée, mais ce n’est pas le site actif. Consultez l’historique des versions avant de modifier le site.",
+  "profileCms.builder.publish.pendingOnChain":
+    "Envoyé au 6529 Network. Votre site change dès que le réseau confirme la modification :",
   "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
     "Les dimensions de certaines images n’ont pas pu être vérifiées. Ces œuvres conservent leurs informations NFT sans image dans la publication. Actualisez l’instantané pour réessayer.",
   "profileCms.builder.json.pending":
@@ -148,6 +150,10 @@ export const FR_FR_MESSAGES = {
     "Empreinte du manifeste : {hash}",
   "profileCms.builder.publish.error.publishFailed":
     "La publication a échoué. Veuillez réessayer.",
+  "profileCms.builder.publish.error.chainUnavailable":
+    "Ce navigateur ne peut pas encore signer de modifications de profil sur le 6529 Network.",
+  "profileCms.builder.publish.error.chainFailed":
+    "Votre modification de profil sur le 6529 Network n’a pas abouti. Veuillez réessayer.",
   "profileCms.builder.history.title": "Historique des versions",
   "profileCms.builder.history.refresh": "Actualiser",
   "profileCms.builder.history.loading": LOADING_LABEL,
@@ -186,6 +192,10 @@ export const FR_FR_MESSAGES = {
     "Ce paquet contient un site personnalisé. Utilisez JSON ou Agent pour le modifier en conservant toutes les pages et ressources.",
   "profileCms.builder.history.changed":
     "Le site public a été mis à jour. Les visiteurs verront le changement dans quelques secondes.",
+  "profileCms.builder.history.pendingOnChain":
+    "Envoyé au 6529 Network. 6529.io n’affiche pas encore la modification ; actualisez l’historique des versions dans une minute.",
+  "profileCms.builder.history.rollbackRefused":
+    "Cette version ne peut pas être le site sur le 6529 Network : sa publication signée ne passe pas les vérifications. Chargez-la et publiez-la plutôt comme nouvelle version.",
   "profileCms.builder.publish.error.stale":
     "Le brouillon ou le portefeuille a changé. Relancez la publication.",
   "navigation.primary.loading.home": "Chargement de l’accueil",

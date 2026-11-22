@@ -34,6 +34,8 @@ export type ProfileCmsPackageRecord = {
   readonly updatedAt: string;
   readonly createdAt: string;
   readonly publishedAt?: string | undefined;
+  /** The signed publication record's CID, once the package was signed for publishing. */
+  readonly publicationCid?: string | undefined;
 };
 
 export type LoadedProfileCmsPackageRecord = ProfileCmsPackageRecord & {
@@ -61,6 +63,9 @@ export function normalizeProfileCmsPackageRecord(
     ...(record.published_at === undefined
       ? {}
       : { publishedAt: new Date(record.published_at).toISOString() }),
+    ...(record.publication_cid
+      ? { publicationCid: record.publication_cid }
+      : {}),
   };
 }
 

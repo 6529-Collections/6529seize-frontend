@@ -68,6 +68,8 @@ export const EN_GB_MESSAGES = {
     "Request and review a wallet snapshot before saving or publishing this gallery.",
   "profileCms.builder.publish.savedNotCurrent":
     "This signed publication is saved but is not the active website. Review version history before changing the website.",
+  "profileCms.builder.publish.pendingOnChain":
+    "Submitted to the 6529 Network. Your website changes when the network confirms it:",
   "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
     "Some image sizes could not be verified. Those works keep their NFT details without an image in the publication. Refresh the snapshot to try again.",
   "profileCms.builder.json.pending":
@@ -136,6 +138,10 @@ export const EN_GB_MESSAGES = {
   "profileCms.builder.publish.signedPublicationHash": "Manifest hash: {hash}",
   "profileCms.builder.publish.error.publishFailed":
     "Publishing failed. Please try again.",
+  "profileCms.builder.publish.error.chainUnavailable":
+    "This browser can't sign profile changes on the 6529 Network yet.",
+  "profileCms.builder.publish.error.chainFailed":
+    "Your profile change on the 6529 Network did not go through. Please try again.",
   "profileCms.builder.history.title": "Version history",
   "profileCms.builder.history.refresh": "Refresh",
   "profileCms.builder.history.loading": "Loading...",
@@ -172,6 +178,10 @@ export const EN_GB_MESSAGES = {
     "This package contains a custom site. Use JSON or Agent to edit it while preserving every page and asset.",
   "profileCms.builder.history.changed":
     "The public website was updated. It may take a few seconds for visitors to see the change.",
+  "profileCms.builder.history.pendingOnChain":
+    "Submitted to the 6529 Network. 6529.io doesn't show the change yet; refresh version history in a minute.",
+  "profileCms.builder.history.rollbackRefused":
+    "This version can't be the website on the 6529 Network: its signed publication doesn't pass the checks. Load it and publish it as a new version instead.",
   "profileCms.builder.publish.error.stale":
     "The draft or wallet changed. Start publishing again.",
   "navigation.primary.loading.home": "Loading home",

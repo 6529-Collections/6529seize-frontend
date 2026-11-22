@@ -78,6 +78,8 @@ export const DE_DE_MESSAGES = {
     "Fordere eine Wallet-Momentaufnahme an und prüfe sie, bevor du diese Galerie speicherst oder veröffentlichst.",
   "profileCms.builder.publish.savedNotCurrent":
     "Diese signierte Veröffentlichung ist gespeichert, aber nicht die aktive Website. Prüfe den Versionsverlauf, bevor du die Website änderst.",
+  "profileCms.builder.publish.pendingOnChain":
+    "An das 6529 Network gesendet. Deine Website ändert sich, sobald das Netzwerk die Änderung bestätigt:",
   "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
     "Einige Bildgrößen konnten nicht geprüft werden. Diese Werke behalten ihre NFT-Details ohne Bild in der Veröffentlichung. Aktualisiere die Momentaufnahme, um es erneut zu versuchen.",
   "profileCms.builder.json.pending":
@@ -147,6 +149,10 @@ export const DE_DE_MESSAGES = {
   "profileCms.builder.publish.signedPublicationHash": "Manifest-Hash: {hash}",
   "profileCms.builder.publish.error.publishFailed":
     "Die Veröffentlichung ist fehlgeschlagen. Bitte versuche es erneut.",
+  "profileCms.builder.publish.error.chainUnavailable":
+    "Dieser Browser kann noch keine Profiländerungen im 6529 Network signieren.",
+  "profileCms.builder.publish.error.chainFailed":
+    "Deine Profiländerung im 6529 Network ist nicht durchgegangen. Bitte versuche es erneut.",
   "profileCms.builder.history.title": "Versionsverlauf",
   "profileCms.builder.history.refresh": "Aktualisieren",
   "profileCms.builder.history.loading": "Wird geladen …",
@@ -185,6 +191,10 @@ export const DE_DE_MESSAGES = {
     "Dieses Paket enthält eine individuelle Website. Bearbeite sie mit JSON oder Agent, um alle Seiten und Medien zu erhalten.",
   "profileCms.builder.history.changed":
     "Die öffentliche Website wurde aktualisiert. Es kann einige Sekunden dauern, bis Besucher die Änderung sehen.",
+  "profileCms.builder.history.pendingOnChain":
+    "An das 6529 Network gesendet. 6529.io zeigt die Änderung noch nicht an; aktualisiere den Versionsverlauf in einer Minute.",
+  "profileCms.builder.history.rollbackRefused":
+    "Diese Version kann nicht die Website im 6529 Network sein: Ihre signierte Veröffentlichung besteht die Prüfungen nicht. Lade sie und veröffentliche sie stattdessen als neue Version.",
   "profileCms.builder.publish.error.stale":
     "Der Entwurf oder die Wallet wurde geändert. Starte die Veröffentlichung erneut.",
   "navigation.primary.loading.home": "Startseite wird geladen",

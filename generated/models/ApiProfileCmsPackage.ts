@@ -30,6 +30,10 @@ export class ApiProfileCmsPackage {
     'updated_at': number;
     'created_at': number;
     'published_at'?: number;
+    /**
+    * CID (CIDv1, raw codec, sha2-256) of the package\'s signed publication record, once the package was signed for publishing. With profile sites on the 6529 chain, a draft that has it waits for the person\'s PROFILE_REPLACE to name it in their ProfileDoc.
+    */
+    'publication_cid'?: string;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -119,6 +123,12 @@ export class ApiProfileCmsPackage {
             "baseName": "published_at",
             "type": "number",
             "format": "int64"
+        },
+        {
+            "name": "publication_cid",
+            "baseName": "publication_cid",
+            "type": "string",
+            "format": ""
         }    ];
 
     static getAttributeTypeMap() {
