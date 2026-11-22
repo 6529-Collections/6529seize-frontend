@@ -22,6 +22,10 @@ jest.mock("@/components/waves/specs/WaveChatReplies", () => ({
   __esModule: true,
   default: () => <div data-testid="replies-setting" />,
 }));
+jest.mock("@/components/waves/specs/WaveAdminDropDeletion", () => ({
+  __esModule: true,
+  default: () => <div data-testid="admin-drop-deletion-setting" />,
+}));
 jest.mock("@/components/waves/specs/WaveChatStatus", () => ({
   __esModule: true,
   default: ({ display }: { readonly display?: string }) => (
@@ -111,6 +115,12 @@ describe("WaveConfigurationSections", () => {
     expect(
       screen.queryByTestId(`group-${WaveGroupType.VOTE}`)
     ).not.toBeInTheDocument();
+    const adminGroup = screen.getByTestId(`group-${WaveGroupType.ADMIN}`);
+    const adminDropDeletion = screen.getByTestId("admin-drop-deletion-setting");
+    expect(
+      adminGroup.compareDocumentPosition(adminDropDeletion) &
+        Node.DOCUMENT_POSITION_FOLLOWING
+    ).toBeTruthy();
     expect(screen.getByRole("heading", { name: "Chat" })).toBeInTheDocument();
     expect(screen.queryByTestId("chat-status-setting")).not.toBeInTheDocument();
     expect(screen.getByTestId("links-setting")).toHaveAttribute(
@@ -185,6 +195,9 @@ describe("WaveConfigurationSections", () => {
     expect(screen.queryByTestId("slow-mode-setting")).not.toBeInTheDocument();
     expect(screen.queryByTestId("replies-setting")).not.toBeInTheDocument();
     expect(screen.queryByTestId("personal-display")).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId("admin-drop-deletion-setting")
+    ).toBeInTheDocument();
     expect(screen.getByTestId("chat-status-setting")).toHaveAttribute(
       "data-display",
       "configuration"

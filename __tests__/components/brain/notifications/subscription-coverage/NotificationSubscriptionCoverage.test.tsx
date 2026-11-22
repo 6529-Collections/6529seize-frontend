@@ -64,4 +64,45 @@ describe("NotificationSubscriptionCoverage", () => {
       screen.getByRole("link", { name: "Top up 0.01587 ETH" })
     ).toHaveAttribute("data-prefetch", "false");
   });
+
+  it("describes one funded drop as running low, not as an unfunded next drop", () => {
+    const notification: INotificationSubscriptionCoverage = {
+      id: 43,
+      cause: ApiNotificationCause.SubscriptionCoverage,
+      created_at: Date.now(),
+      read_at: null,
+      additional_context: {
+        profile_handle: "sesamenoodles",
+        status: ApiSubscriptionCoverageStatus.ActionRequired,
+        consolidation_key: "profile-key",
+        mint_capacity: 1,
+        allocated_mints: 1,
+        fully_funded_drops: 1,
+        funded_through: {
+          token_id: 575,
+          mint_at: new Date("2026-11-16T15:40:00Z"),
+        },
+        next_unfunded: {
+          token_id: 576,
+          mint_at: new Date("2026-11-18T15:40:00Z"),
+          requested_mints: 1,
+          funded_mints: 0,
+          missing_mints: 1,
+        },
+        minimum_top_up_eth: "0.06529",
+        top_up_deadline: null,
+      },
+    };
+
+    render(<NotificationSubscriptionCoverage notification={notification} />);
+
+    expect(
+      screen.getByText("Only a few intended drops remain fully funded.")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "Your immediate next intended drop is not fully funded."
+      )
+    ).not.toBeInTheDocument();
+  });
 });

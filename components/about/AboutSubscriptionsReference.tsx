@@ -116,6 +116,9 @@ function HowItWorks({ locale }: { readonly locale: SupportedLocale }) {
               </p>
             </div>
             <p className="tw-m-0">
+              {m(locale, "about.subscriptions.reference.funding.useOnly")}
+            </p>
+            <p className="tw-m-0">
               {m(locale, "about.subscriptions.reference.funding.calculator")}
             </p>
             <p className="tw-m-0">
