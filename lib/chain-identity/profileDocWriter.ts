@@ -105,7 +105,9 @@ function signingWallet(
   if (!bound) {
     throw new ProfileDocWriteError(
       "submit_failed",
-      `Switch your wallet to ${short(signedIn)} and try again.`
+      connected === undefined
+        ? `Connect your wallet ${short(signedIn)} and try again.`
+        : `Switch your wallet to ${short(signedIn)} and try again.`
     );
   }
   return connected;
@@ -192,10 +194,14 @@ async function replaceOnce(
   return { txId: prepared.draft.txId };
 }
 
+/** A refusal in plain words for the person, or null to keep the error's own message. */
+type DescribeError = (error: unknown) => string | null;
+
 /** The publish lane's error for whatever stopped the change. */
 function writeErrorOf(
   error: unknown,
-  signer: ProfileDocSigner
+  signer: ProfileDocSigner,
+  describe: DescribeError
 ): ProfileDocWriteError {
   if (error instanceof ProfileDocWriteError) {
     return error;
@@ -212,9 +218,10 @@ function writeErrorOf(
   }
   return new ProfileDocWriteError(
     "submit_failed",
-    error instanceof Error && error.message !== ""
-      ? error.message
-      : "The profile change did not go through."
+    describe(error) ??
+      (error instanceof Error && error.message !== ""
+        ? error.message
+        : "The profile change did not go through.")
   );
 }
 
@@ -224,19 +231,26 @@ function writeErrorOf(
  * applies the builder's edit, signs and stores the next version, and
  * submits PROFILE_REPLACE, waiting until it is final. When someone else
  * replaced the profile meanwhile (STALE_VERSION), it reads the newer
- * document and applies the edit once more.
+ * document and applies the edit once more. `describe` puts the chain's
+ * refusals in the person's words, as the identity page does.
  */
-export function chainProfileDocWriter(config: Config): ProfileDocWriter {
+export function chainProfileDocWriter(
+  config: Config,
+  describe: DescribeError = () => null
+): ProfileDocWriter {
   return {
     availableSigners: async () => {
+      let identity: ChainIdentity;
       try {
-        const { identity } = await signedInIdentity();
-        return (await usableSessionKey(identity.principalId)) === null
-          ? ["wallet"]
-          : ["session-key", "wallet"];
-      } catch {
-        return [];
+        ({ identity } = await signedInIdentity());
+      } catch (error) {
+        // Signed out or no identity: nothing can sign. Anything else (the
+        // gateway down) leaves the wallet, whose try then says what failed.
+        return error instanceof ProfileDocWriteError ? [] : ["wallet"];
       }
+      return (await usableSessionKey(identity.principalId)) === null
+        ? ["wallet"]
+        : ["session-key", "wallet"];
     },
     replaceProfileDoc: async (edit, signer) => {
       for (let attempt = 1; ; attempt += 1) {
@@ -244,7 +258,7 @@ export function chainProfileDocWriter(config: Config): ProfileDocWriter {
           return await replaceOnce(config, edit, signer);
         } catch (error) {
           if (refusalName(error) !== "STALE_VERSION" || attempt >= ATTEMPTS) {
-            throw writeErrorOf(error, signer);
+            throw writeErrorOf(error, signer, describe);
           }
         }
       }

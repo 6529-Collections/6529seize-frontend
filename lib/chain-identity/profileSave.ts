@@ -71,17 +71,19 @@ export async function readCurrentProfile(
       );
     }
     // The imported document itself (version 1, written by the import) is
-    // never replaced on a 404: it holds fields only the import sets.
+    // never replaced on a 404: it holds fields only the import sets. A
+    // missing height counts as the import's, the safe side.
     const doneHeight = imported.doneHeight;
-    if (
-      identity.profile?.version === 1 &&
-      (typeof doneHeight !== "number" ||
-        identity.profile.updatedHeight <= doneHeight)
-    ) {
+    const updatedHeight: unknown = identity.profile?.updatedHeight;
+    const writtenAfterImport =
+      typeof doneHeight === "number" &&
+      typeof updatedHeight === "number" &&
+      updatedHeight > doneHeight;
+    if (identity.profile?.version === 1 && !writtenAfterImport) {
       throw new ChainGatewayError(
         503,
         "imported_doc_missing",
-        "Your imported profile isn't in the document store yet. Try again later."
+        "Your imported profile isn't in 6529's document store yet, so it can't be changed. Try again later."
       );
     }
     return { doc: null, unreadable: true };

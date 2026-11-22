@@ -2,6 +2,8 @@
 
 import { useContext, useEffect } from "react";
 import { WagmiContext, type Config } from "wagmi";
+import type { SupportedLocale } from "@/i18n/locales";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useChainIdentityActive } from "@/hooks/useIdentityMovePhase";
 import {
   getProfileDocWriter,
@@ -9,16 +11,25 @@ import {
   type ProfileDocWriter,
 } from "@/lib/profile-cms/chain/profile-doc-writer";
 
-const loadWriter = async (config: Config) =>
-  (await import("@/lib/chain-identity/profileDocWriter")).chainProfileDocWriter(
-    config
+const loadWriter = async (config: Config, locale: SupportedLocale) => {
+  const [{ chainProfileDocWriter }, { chainErrorMessage }] = await Promise.all([
+    import("@/lib/chain-identity/profileDocWriter"),
+    import("./chainErrorMessage"),
+  ]);
+  return chainProfileDocWriter(config, (refusal) =>
+    chainErrorMessage(locale, refusal)
   );
+};
 
 /** Registers at once; the chain code loads on the first call. */
-const lazyWriter = (config: Config): ProfileDocWriter => ({
-  availableSigners: async () => (await loadWriter(config)).availableSigners(),
+const lazyWriter = (
+  config: Config,
+  locale: SupportedLocale
+): ProfileDocWriter => ({
+  availableSigners: async () =>
+    (await loadWriter(config, locale)).availableSigners(),
   replaceProfileDoc: async (edit, signer) =>
-    (await loadWriter(config)).replaceProfileDoc(edit, signer),
+    (await loadWriter(config, locale)).replaceProfileDoc(edit, signer),
 });
 
 /**
@@ -29,11 +40,12 @@ const lazyWriter = (config: Config): ProfileDocWriter => ({
 export default function ChainProfileDocWriterHost() {
   const active = useChainIdentityActive();
   const config = useContext(WagmiContext);
+  const locale = useBrowserLocale();
   useEffect(() => {
     if (!active || !config) {
       return;
     }
-    const writer = lazyWriter(config);
+    const writer = lazyWriter(config, locale);
     registerProfileDocWriter(writer);
     return () => {
       // Clears only its own registration.
@@ -41,6 +53,6 @@ export default function ChainProfileDocWriterHost() {
         registerProfileDocWriter(null);
       }
     };
-  }, [active, config]);
+  }, [active, config, locale]);
   return null;
 }

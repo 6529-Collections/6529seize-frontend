@@ -114,6 +114,15 @@ describe("the signers this browser offers", () => {
     );
   });
 
+  it("offers the wallet when the gateway fails, so its try says why", async () => {
+    gateway["getIdentityByWallet"]!.mockRejectedValue(
+      new ChainGatewayError(0, "network", "The 6529 Network gateway did not answer.")
+    );
+    await expect(chainProfileDocWriter(config).availableSigners()).resolves.toEqual(
+      ["wallet"]
+    );
+  });
+
   it("offers nothing when signed out or without an identity", async () => {
     (getWalletAddress as jest.Mock).mockReturnValue(null);
     await expect(chainProfileDocWriter(config).availableSigners()).resolves.toEqual([]);
@@ -171,6 +180,18 @@ describe("replacing the profile document", () => {
       principalId: PRINCIPAL,
     });
     expect(usableSessionKey).toHaveBeenCalledWith(PRINCIPAL);
+  });
+
+  it("asks to connect the wallet when none is connected", async () => {
+    (getAccount as jest.Mock).mockReturnValue({ address: undefined });
+    await expect(
+      chainProfileDocWriter(config).replaceProfileDoc(setSite, "wallet")
+    ).rejects.toEqual(
+      new ProfileDocWriteError(
+        "submit_failed",
+        "Connect your wallet 0x0000…00aa and try again."
+      )
+    );
   });
 
   it("lets any wallet of the identity sign", async () => {
@@ -308,6 +329,29 @@ describe("the errors the site builder acts on", () => {
     );
     await expect(
       chainProfileDocWriter(config).replaceProfileDoc(setSite, "wallet")
+    ).rejects.toMatchObject({ code: "signature_rejected" });
+  });
+
+  it("puts refusals in the person's words when given a describer", async () => {
+    (submitAndAwait as jest.Mock).mockRejectedValue(
+      new ChainOperationError(
+        "failed",
+        "The 6529 Network refused this change: STALE_VERSION.",
+        "STALE_VERSION"
+      )
+    );
+    const describe = jest.fn((error: unknown) =>
+      error instanceof ChainOperationError ? "Plain words." : null
+    );
+    await expect(
+      chainProfileDocWriter(config, describe).replaceProfileDoc(setSite, "wallet")
+    ).rejects.toEqual(new ProfileDocWriteError("submit_failed", "Plain words."));
+    // A canceled signature and an unusable key keep their own errors.
+    (prepareProfileReplace as jest.Mock).mockRejectedValueOnce(
+      new UserRejectedRequestError(new Error("User rejected."))
+    );
+    await expect(
+      chainProfileDocWriter(config, describe).replaceProfileDoc(setSite, "wallet")
     ).rejects.toMatchObject({ code: "signature_rejected" });
   });
 

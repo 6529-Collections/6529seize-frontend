@@ -211,6 +211,17 @@ describe("saving the profile", () => {
     await expect(readCurrentProfile(identity(1))).rejects.toMatchObject({
       code: "imported_doc_missing",
     });
+    // No updatedHeight on the identity: treated as imported, to be safe.
+    gateway["getMembership"]!.mockResolvedValue({
+      import: { completed: true, doneHeight: 5 },
+    });
+    const noHeight = {
+      principalId: PRINCIPAL,
+      profile: { docCid: CURRENT_CID, version: 1 },
+    } as unknown as ChainIdentity;
+    await expect(readCurrentProfile(noHeight)).rejects.toMatchObject({
+      code: "imported_doc_missing",
+    });
     // A version 1 written after the import (IDENTITY_CREATE with a doc) may be replaced.
     gateway["getMembership"]!.mockResolvedValue({
       import: { completed: true, doneHeight: 5 },
