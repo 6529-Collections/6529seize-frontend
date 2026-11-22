@@ -1,5 +1,6 @@
 "use client";
 
+import DesktopWalletTransactionGate from "@/components/desktop/DesktopWalletTransactionGate";
 import { getDropdownTriggerClasses } from "@/components/utils/select/dropdown/dropdownTriggerStyles";
 import { useSearchParams } from "next/navigation";
 import { type ReactNode, useEffect, useId, useReducer, useState } from "react";
@@ -609,7 +610,7 @@ export default function ManifoldMintingWidget(
             )}
           </div>
         </div>
-        <div className="tw-pt-3">
+        <DesktopWalletTransactionGate className="tw-pt-3">
           <Button
             variant="action"
             size="md"
@@ -624,7 +625,7 @@ export default function ManifoldMintingWidget(
           >
             {getButtonText()}
           </Button>
-        </div>
+        </DesktopWalletTransactionGate>
         {mintError && !hasOnchainTransactionError && (
           <div className="tw-pt-3 tw-text-base tw-text-red">{mintError}</div>
         )}

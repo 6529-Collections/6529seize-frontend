@@ -217,6 +217,11 @@ describe("DesktopWalletRequestDialog", () => {
       /Smart-contract wallets .* continue on staging\.6529\.io/,
       true,
     ],
+    [
+      "transaction",
+      /does not send this transaction to your browser wallet. Continue on staging\.6529\.io/,
+      true,
+    ],
     ["busy", /Another signature request/, false],
     ["expired", /timed out/, false],
     ["cancelled", /was cancelled/, false],
@@ -238,5 +243,13 @@ describe("DesktopWalletRequestDialog", () => {
     }
     await userEvent.click(screen.getByRole("button", { name: "Close" }));
     expect(dismiss).toHaveBeenCalled();
+  });
+
+  it("titles a transaction refusal as a transaction", () => {
+    render(<DesktopWalletRequestDialog />);
+    setStatus({ kind: "transaction" });
+    expect(
+      screen.getByRole("dialog", { name: "Transaction" })
+    ).toBeInTheDocument();
   });
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import DesktopWalletTransactionGate from "@/components/desktop/DesktopWalletTransactionGate";
 import { isWalletConnectionResolving } from "@/components/auth/authResolution";
 import AuthLoadingPlaceholder from "@/components/auth/AuthLoadingPlaceholder";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
@@ -553,17 +554,19 @@ export default function NextGenMintWidget(props: Readonly<Props>) {
               </select>
             </div>
             <div>
-              <Button
-                type="button"
-                variant="success"
-                size="lg"
-                fullWidth
-                disabled={disableMint()}
-                onClick={handleMintClick}
-              >
-                {renderButtonText()}
-                {isMinting && <Spinner />}
-              </Button>
+              <DesktopWalletTransactionGate>
+                <Button
+                  type="button"
+                  variant="success"
+                  size="lg"
+                  fullWidth
+                  disabled={disableMint()}
+                  onClick={handleMintClick}
+                >
+                  {renderButtonText()}
+                  {isMinting && <Spinner />}
+                </Button>
+              </DesktopWalletTransactionGate>
             </div>
           </div>
         </fieldset>

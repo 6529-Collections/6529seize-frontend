@@ -4028,6 +4028,7 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopConnect.status.walletConnectFailed":
     "Could not open WalletConnect. Try again.",
   "desktopWalletRequest.title": "Signature request",
+  "desktopWalletRequest.transactionTitle": "Transaction",
   "desktopWalletRequest.waiting":
     "Your browser opened a page to sign with your wallet. Finish there; this waits for two minutes.",
   "desktopWalletRequest.code":
@@ -4055,6 +4056,8 @@ export const EN_US_ROOT_MESSAGES = {
     "Trading is not available in 6529 Desktop with a browser wallet. Continue on {site} in your browser.",
   "desktopWalletRequest.notForwarded":
     "6529 Desktop does not send this kind of signature to your browser wallet. Continue on {site} in your browser, where your wallet signs it directly.",
+  "desktopWalletRequest.transactionNotForwarded":
+    "6529 Desktop does not send this transaction to your browser wallet. Continue on {site} in your browser, where your wallet sends it directly.",
   "browserConnector.title": "Sign in to 6529 Desktop",
   "browserConnector.description":
     "Sign in to 6529 Desktop with a browser wallet.",
@@ -4130,6 +4133,8 @@ export const EN_US_ROOT_MESSAGES = {
     "Submit an entry to a 6529 decision.",
   "browserConnector.wallet.refusal.unknown-typed-data":
     "This page will not ask your wallet to sign this request: it is a kind of request 6529 Desktop does not send from here. Continue on {site} in your browser instead.",
+  "browserConnector.wallet.refusal.unknown-transaction":
+    "This page will not ask your wallet to send this transaction: 6529 Desktop does not send it from here. Continue on {site} in your browser instead.",
   "browserConnector.wallet.refusal.wrong-wallet":
     "This page will not ask your wallet to sign this request: it names a different wallet than the one asked to sign.",
   "browserConnector.wallet.refusal.wrong-origin":

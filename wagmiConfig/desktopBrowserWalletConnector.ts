@@ -21,6 +21,12 @@ import {
 /** wagmi connector id and type for 6529 Desktop wallet forwarding. */
 export const DESKTOP_BROWSER_WALLET_CONNECTOR_ID = "desktopBrowserWallet";
 
+/** A forwarded signature request (this connector sends no transaction). */
+type SignatureRequest = Exclude<
+  WalletRequest,
+  { readonly method: "eth_sendTransaction" }
+>;
+
 /** What the app adds to a request it forwards. */
 export interface PreparedWalletRequest {
   /**
@@ -46,7 +52,20 @@ interface DesktopBrowserWalletConnectorOptions {
     request: WalletRequestInput,
     fingerprint: string | null
   ) => Promise<WalletBridgeResponse>;
+  /**
+   * Called when the app asks to send a transaction, which this connector
+   * does not forward, so the app can point to the website.
+   */
+  readonly onTransactionRefused?: () => void;
 }
+
+/** Wallet methods that send (or sign for sending) a transaction. */
+const TRANSACTION_METHODS: ReadonlySet<string> = new Set([
+  "eth_sendTransaction",
+  "wallet_sendTransaction",
+  "eth_signTransaction",
+  "wallet_sendCalls",
+]);
 
 interface ProviderRequest {
   readonly method: string;
@@ -87,7 +106,7 @@ const sameAddress = (left: string, right: string) =>
  * `[address, json]` with the exact JSON that was validated.
  */
 function toShellInput(
-  request: WalletRequest,
+  request: SignatureRequest,
   typedDataJson: string | null,
   context: string | undefined
 ): WalletRequestInput {
@@ -109,7 +128,7 @@ function toShellInput(
  * message bytes, or the EIP-712 digest of the validated typed data.
  */
 async function recoverSigner(
-  request: WalletRequest,
+  request: SignatureRequest,
   signature: Hex
 ): Promise<Address | null> {
   try {
@@ -168,7 +187,9 @@ export function desktopBrowserWalletConnector(
         { method, params, address, chainId },
         config.chains.map((chain) => chain.id)
       );
-      if (!parsed.ok) throw toProviderError("invalid");
+      if (!parsed.ok || parsed.value.method === "eth_sendTransaction") {
+        throw toProviderError("invalid");
+      }
       const request = parsed.value;
       const prepared = options.prepare(request);
       if (!prepared) throw toProviderError("refused");
@@ -211,6 +232,9 @@ export function desktopBrowserWalletConnector(
           case "eth_signTypedData_v4":
             return forward(method, params);
           default:
+            if (TRANSACTION_METHODS.has(method)) {
+              options.onTransactionRefused?.();
+            }
             throw new UnsupportedProviderMethodError(
               asError(`${method} is not available through the browser.`)
             );

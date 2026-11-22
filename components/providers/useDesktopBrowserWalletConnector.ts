@@ -8,6 +8,7 @@ import {
   isBrowserWalletProfile,
   loadBrowserWalletProfiles,
   runDesktopWalletRequest,
+  showDesktopWalletTransactionRefusal,
   watchDesktopWalletStatus,
 } from "@/services/desktop/desktopBrowserWallet";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
@@ -65,6 +66,7 @@ export function useDesktopBrowserWalletConnector(
           },
           prepare: precheck,
           runRequest: runDesktopWalletRequest,
+          onTransactionRefused: showDesktopWalletTransactionRefusal,
         })
       );
       wagmiConfig._internal.connectors.setState((connectors) => [

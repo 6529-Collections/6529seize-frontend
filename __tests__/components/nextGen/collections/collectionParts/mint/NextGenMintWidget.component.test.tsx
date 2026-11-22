@@ -2,6 +2,11 @@ import React from "react";
 import { render, screen } from "@testing-library/react";
 import NextGenMintWidget from "@/components/nextGen/collections/collectionParts/mint/NextGenMintWidget";
 import { Status } from "@/components/nextGen/nextgen_entities";
+import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: jest.fn(() => false),
+}));
 
 let minting = false;
 jest.mock("@/components/nextGen/nextgen_helpers", () => ({
@@ -127,4 +132,19 @@ test("shows processing state when minting", () => {
   render(<NextGenMintWidget {...baseProps} />);
   minting = false;
   expect(screen.getByRole("button")).toHaveTextContent("Processing...");
+});
+
+test("offers the website instead of minting with 6529 Desktop browser forwarding", () => {
+  useChainId.mockReturnValue(1);
+  useSeizeConnectContext.mockReturnValue({
+    isConnected: true,
+    address: "0x1",
+    seizeConnect: jest.fn(),
+  });
+  jest.mocked(useIsDesktopBrowserWallet).mockReturnValue(true);
+  render(<NextGenMintWidget {...baseProps} />);
+  expect(
+    screen.getByRole("button", { name: "Continue in your browser" })
+  ).toBeInTheDocument();
+  expect(screen.getByText(/does not send this transaction/)).toBeVisible();
 });
