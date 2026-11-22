@@ -202,6 +202,37 @@ describe("signRecords", () => {
     });
   });
 
+  it("claims a time no earlier than notBefore", async () => {
+    jest.useFakeTimers({ now: 1_800_000_000_000 });
+    try {
+      mockAllocateDeviceSeq
+        .mockResolvedValueOnce(await allocation(21))
+        .mockResolvedValueOnce(await allocation(22));
+      const draft = recordDraft("ps", inputs.principal, "follow", "k", {});
+      const later = await signRecords([draft], {
+        anchor: 1,
+        notBefore: 1_800_000_090_000,
+      });
+      const now = await signRecords([draft], {
+        anchor: 1,
+        notBefore: 1_700_000_000_000,
+      });
+      if (later.status !== "signed" || now.status !== "signed") {
+        throw new Error("not signed");
+      }
+      expect(later.events[0]!.claimed_time).toBe(1_800_000_090_000);
+      expect(now.events[0]!.claimed_time).toBe(1_800_000_000_000);
+    } finally {
+      jest.useRealTimers();
+    }
+    await expect(
+      signRecords([recordDraft("ps", inputs.principal, "follow", "k", {})], {
+        anchor: 1,
+        notBefore: 1.5,
+      })
+    ).rejects.toThrow("notBefore");
+  });
+
   it("needs an anchor and something to sign", async () => {
     const draft = recordDraft("ps", inputs.principal, "follow", "k", {});
     await expect(signRecords([draft], { anchor: 0 })).rejects.toThrow("anchor");

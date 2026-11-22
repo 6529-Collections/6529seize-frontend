@@ -26,23 +26,37 @@ let inFlight: Promise<RecordAnchor> | null = null;
  * The height to sign as a record's anchor, from GET /signed-records/anchor.
  * Throws when the API has no anchor (503 while the chain gateway is down);
  * the caller tries the write again later and never signs a guessed height.
+ * `fresh` asks the API again, for a record that must be ordered after one
+ * signed elsewhere since the last answer.
  * @api
  */
 export async function fetchRecordAnchor(
-  now: number = Date.now()
+  now: number = Date.now(),
+  { fresh = false }: { readonly fresh?: boolean } = {}
 ): Promise<RecordAnchor> {
-  if (cached && now - cached.at >= 0 && now - cached.at < ANCHOR_REUSE_MS) {
+  if (
+    !fresh &&
+    cached &&
+    now - cached.at >= 0 &&
+    now - cached.at < ANCHOR_REUSE_MS
+  ) {
     return cached.value;
   }
-  inFlight ??= requestAnchor()
+  if (inFlight && !fresh) {
+    return inFlight;
+  }
+  const request: Promise<RecordAnchor> = requestAnchor()
     .then((value) => {
       cached = { value, at: now };
       return value;
     })
     .finally(() => {
-      inFlight = null;
+      if (inFlight === request) {
+        inFlight = null;
+      }
     });
-  return inFlight;
+  inFlight = request;
+  return request;
 }
 
 async function requestAnchor(): Promise<RecordAnchor> {

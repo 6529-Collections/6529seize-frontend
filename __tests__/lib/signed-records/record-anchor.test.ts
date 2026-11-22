@@ -49,6 +49,19 @@ describe("fetchRecordAnchor", () => {
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
+  it("asks again at once when told to, and keeps the fresh answer", async () => {
+    mockFetch.mockResolvedValueOnce(ANSWER);
+    await fetchRecordAnchor(1_000);
+    mockFetch.mockResolvedValueOnce({ ...ANSWER, anchor: 1201 });
+    await expect(
+      fetchRecordAnchor(2_000, { fresh: true })
+    ).resolves.toMatchObject({ anchor: 1201 });
+    await expect(fetchRecordAnchor(3_000)).resolves.toMatchObject({
+      anchor: 1201,
+    });
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+
   it("fails rather than sign without a height, and asks again next time", async () => {
     mockFetch.mockRejectedValueOnce(new Error("503"));
     await expect(fetchRecordAnchor(1_000)).rejects.toThrow("503");

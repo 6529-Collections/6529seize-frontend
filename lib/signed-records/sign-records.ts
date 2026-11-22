@@ -117,6 +117,11 @@ export function payloadDraft(
 export interface SignRecordsOptions {
   /** A finalized chain height, from the anchor source drops use. */
   readonly anchor: number;
+  /**
+   * The earliest claimed time, Unix ms: a change signed again must be
+   * ordered after a newer one the API already holds from another device.
+   */
+  readonly notBefore?: number | undefined;
   readonly signal?: AbortSignal | undefined;
 }
 
@@ -185,7 +190,7 @@ async function signAll(
       auth_ref: grant.id.toLowerCase(),
       seq,
       anchor: options.anchor,
-      claimed_time: Date.now(),
+      claimed_time: Math.max(Date.now(), options.notBefore ?? 0),
       refs: [...draft.refs],
       body: canonical,
       body_hash: bodyHash,
@@ -216,6 +221,12 @@ export async function signRecords(
   }
   if (!Number.isSafeInteger(options.anchor) || options.anchor <= 0) {
     throw new Error("Records need a finalized chain height as their anchor");
+  }
+  if (
+    options.notBefore !== undefined &&
+    !Number.isSafeInteger(options.notBefore)
+  ) {
+    throw new Error("notBefore is a time in whole milliseconds");
   }
   const address = getWalletAddress();
   if (!address) {
