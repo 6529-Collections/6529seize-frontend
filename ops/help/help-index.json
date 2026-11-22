@@ -1974,7 +1974,8 @@
         "If Post asks you to reconnect or reactions show Please reconnect your wallet, the saved profile can still be visible even though its session cannot renew. Reconnect that profile from the wallet account controls, then retry the action. Save your draft before logging out or reloading; failed authentication keeps it in the composer, and reactions are not automatically retried after sign-in.",
         "Protected pages show a loading placeholder while wallet identity and the required profile are being restored; connect-wallet, profile-setup, and permission messages appear after those checks settle. Public browsing, Search, and Share remain available while account-dependent controls load.",
         "Delegation, NextGen Manager, and signing or minting controls also wait for the live wallet connection to restore. A saved profile session alone does not provide a signer.",
-        "Some write actions, settings, and subscriptions require a connected profile."
+        "Some write actions, settings, and subscriptions require a connected profile.",
+        "If the wave footer says You're signed in as a proxy for another profile, so you can't post here, the current sign-in acts for another profile, even when the header still shows your own profile (for example after that proxy was removed or accounts were consolidated). Switch back to your own profile, or sign out and connect again, to post as yourself."
       ],
       "canonical_path": "/",
       "related_paths": ["/access"],
