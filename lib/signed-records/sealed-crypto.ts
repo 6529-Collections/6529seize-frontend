@@ -324,9 +324,9 @@ const utf8Length = (value: string): number => encoder.encode(value).length;
 function checkItem(value: unknown): SealedItem {
   const item = value as Partial<SealedItem> | null;
   const body = item?.b;
+  // typeof "object" already rules out undefined; null is checked first.
   const bodyValid =
-    body === null ||
-    (typeof body === "object" && body !== undefined && !Array.isArray(body));
+    body === null || (typeof body === "object" && !Array.isArray(body));
   if (
     typeof item !== "object" ||
     item === null ||
@@ -496,19 +496,22 @@ export async function openSealedItems(args: {
   } catch {
     throw new Error("Sealed items do not open with this key");
   }
-  let doc: { items?: unknown; v?: unknown };
+  let parsed: unknown;
   let text: string;
   try {
     // Fatal decoding: invalid UTF-8 is refused, never replaced.
     text = decoder.decode(unpad(plaintext));
-    doc = JSON.parse(text) as { items?: unknown; v?: unknown };
+    parsed = JSON.parse(text);
   } catch {
     throw new Error("Sealed items are not UTF-8 JSON");
   }
+  // JSON can be any value: anything but an object is refused here.
+  const doc =
+    typeof parsed === "object" && parsed !== null
+      ? (parsed as { items?: unknown; v?: unknown })
+      : null;
   if (
-    typeof doc !== "object" ||
-    doc === null ||
-    doc.v !== 1 ||
+    doc?.v !== 1 ||
     !Array.isArray(doc.items) ||
     doc.items.length === 0 ||
     Object.keys(doc).length !== 2 ||

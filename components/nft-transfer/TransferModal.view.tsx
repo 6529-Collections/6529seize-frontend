@@ -1,3 +1,4 @@
+import DesktopWalletTransactionGate from "@/components/desktop/DesktopWalletTransactionGate";
 import Image from "next/image";
 import RecipientSelector from "@/components/common/RecipientSelector";
 import CircleLoader, {
@@ -367,23 +368,20 @@ export function FooterActions({
   if (flow === "review") {
     return (
       <div className="tw-flex tw-items-center tw-gap-2">
-        <Button
-          type="button"
-          onClick={onCancel}
-          variant="secondary"
-          size="md"
-        >
+        <Button type="button" onClick={onCancel} variant="secondary" size="md">
           {translate(locale, "transfer.modal.cancel")}
         </Button>
-        <Button
-          type="button"
-          disabled={!canConfirm}
-          onClick={onConfirm}
-          variant="primary"
-          size="md"
-        >
-          {translate(locale, "transfer.modal.transfer")}
-        </Button>
+        <DesktopWalletTransactionGate>
+          <Button
+            type="button"
+            disabled={!canConfirm}
+            onClick={onConfirm}
+            variant="primary"
+            size="md"
+          >
+            {translate(locale, "transfer.modal.transfer")}
+          </Button>
+        </DesktopWalletTransactionGate>
       </div>
     );
   }
@@ -391,24 +389,14 @@ export function FooterActions({
   const anyPending = anyTxsPending(txs);
   if (anyPending) {
     return (
-      <Button
-        type="button"
-        disabled
-        variant="secondary"
-        size="md"
-      >
+      <Button type="button" disabled variant="secondary" size="md">
         {translate(locale, "transfer.modal.processing")}
       </Button>
     );
   }
 
   return (
-    <Button
-      type="button"
-      onClick={onClose}
-      variant="primary"
-      size="md"
-    >
+    <Button type="button" onClick={onClose} variant="primary" size="md">
       {translate(locale, "common.close")}
     </Button>
   );

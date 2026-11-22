@@ -1,5 +1,6 @@
 "use client";
 
+import DesktopWalletTransactionGate from "@/components/desktop/DesktopWalletTransactionGate";
 import Button from "@/components/utils/button/Button";
 import { formatInteger, formatList } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
@@ -200,7 +201,11 @@ function StepAction(
     );
   }
   if (step.canSign) {
-    return <SignButton step={step} context={context} />;
+    return (
+      <DesktopWalletTransactionGate forwardable>
+        <SignButton step={step} context={context} />
+      </DesktopWalletTransactionGate>
+    );
   }
 
   const showConnect = step.block === "disconnected" && !context.walletResolving;

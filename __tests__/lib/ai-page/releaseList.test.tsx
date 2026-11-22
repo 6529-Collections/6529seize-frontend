@@ -50,6 +50,7 @@ jest.mock("next/server", () => ({
 }));
 
 import { GET as downloadRoute } from "@/app/ai/download/[...path]/route";
+import AiGuideRoute from "@/app/ai/guide/page";
 import AiRoute from "@/app/ai/page";
 import { GET as feedRoute } from "@/app/ai/releases.json/route";
 import { GET as signatureRoute } from "@/app/ai/releases.json.sig/route";
@@ -68,6 +69,32 @@ const RC3 = "0.1.0-rc.3";
 const DMG = `6529-ai-${RC3}-macos-arm64.dmg`;
 const HOUR = 60 * 60 * 1000;
 const LEGACY_FEED = feedBytes(AI_TEST_FEED);
+// The CUDA packages for 64-bit ARM, which releases carry from rc.4 on.
+const RC4 = "0.1.0-rc.4";
+const ARM_CUDA_DEB = `6529-ai-cuda_${RC4}_arm64.deb`;
+const ARM_CUDA_TARBALL = `6529-ai-${RC4}-linux-arm64-cuda.tar.gz`;
+
+const ARM_CUDA_FILES = [
+  { name: ARM_CUDA_DEB, size: 1_010_000_000, sha256: "a".repeat(64) },
+  { name: ARM_CUDA_TARBALL, size: 1_190_000_000, sha256: "b".repeat(64) },
+];
+
+/** A list with rc.4, which adds both (or those given) to rc.3's files. */
+function rc4List(added = ARM_CUDA_FILES): Record<string, unknown> {
+  const entry = aiListEntry(RC4);
+  return aiList({
+    releases: [
+      {
+        ...entry,
+        files: [
+          ...(entry["files"] as readonly Record<string, unknown>[]),
+          ...added,
+        ],
+      },
+      aiListEntry(RC3),
+    ],
+  });
+}
 
 function found(body: Uint8Array<ArrayBuffer>): AiBucketObject {
   return { state: "found", body, etag: '"e"', lastModified: null };
@@ -275,6 +302,43 @@ describe("6529 AI's release list of format 1", () => {
       }
       expect(mockPresign).toHaveBeenCalledWith(`releases/${RC3}/${DMG}`);
     });
+
+    it("place the CUDA packages for 64-bit ARM by their names, and hand them out", async () => {
+      storeHasList(rc4List());
+
+      const [newest] = (await getAiReleaseFeedSnapshot()).releases;
+      const systemOf = (name: string) => {
+        const file = newest?.files.find((entry) => entry.name === name);
+        return [file?.system, file?.signedBy, file?.signed];
+      };
+
+      expect(systemOf(ARM_CUDA_DEB)).toEqual([
+        "linux-arm64-cuda",
+        "list",
+        null,
+      ]);
+      expect(systemOf(ARM_CUDA_TARBALL)).toEqual([
+        "linux-arm64-cuda",
+        "list",
+        null,
+      ]);
+      // The CPU packages for 64-bit ARM keep their own system.
+      expect(systemOf(`6529-ai_${RC4}_arm64.deb`)).toEqual([
+        "linux-arm64-cpu",
+        "list",
+        null,
+      ]);
+      expect(systemOf(`6529-ai-${RC4}-linux-arm64-cpu.tar.gz`)).toEqual([
+        "linux-arm64-cpu",
+        "list",
+        null,
+      ]);
+      for (const name of [ARM_CUDA_DEB, ARM_CUDA_TARBALL]) {
+        expect((await download(name)).status).toBe(302);
+        expect((await download(RC4, name)).status).toBe(302);
+        expect(mockPresign).toHaveBeenCalledWith(`releases/${RC4}/${name}`);
+      }
+    });
   });
 
   describe("on /ai", () => {
@@ -302,6 +366,45 @@ describe("6529 AI's release list of format 1", () => {
       expect(html).not.toContain("SHA256SUMS.sig");
       expect(html).not.toContain("is an urgent update");
       expect(html).not.toContain("is listed as unsafe");
+    });
+
+    function tabs(html: string): string[] {
+      return [
+        ...html.matchAll(/<button[^>]*role="tab"[^>]*>([^<]*)<\/button>/g),
+      ].map((match) => match[1] ?? "");
+    }
+
+    it("puts the CUDA packages for 64-bit ARM in the Linux switch, after ARM64", async () => {
+      storeHasList(rc4List());
+
+      const html = renderToStaticMarkup(await AiRoute());
+
+      expect(tabs(html)).toEqual([
+        "x86-64",
+        "NVIDIA GPU",
+        "ARM64",
+        "ARM64, NVIDIA GPU",
+      ]);
+      expect(downloadLinks(html)).toEqual(
+        expect.arrayContaining([ARM_CUDA_DEB, ARM_CUDA_TARBALL])
+      );
+      // In its own panel, after the CPU packages for 64-bit ARM.
+      expect(html.indexOf(ARM_CUDA_DEB)).toBeGreaterThan(
+        html.indexOf(`6529-ai-${RC4}-linux-arm64-cpu.tar.gz`)
+      );
+      expect(html.indexOf(ARM_CUDA_TARBALL)).toBeGreaterThan(
+        html.indexOf(ARM_CUDA_DEB)
+      );
+    });
+
+    it("shows rc.3's Linux switch as it was, without them", async () => {
+      storeHasList();
+
+      const html = renderToStaticMarkup(await AiRoute());
+
+      expect(tabs(html)).toEqual(["x86-64", "NVIDIA GPU", "ARM64"]);
+      expect(html).not.toContain("ARM64, NVIDIA GPU");
+      expect(html).not.toContain("arm64-cuda");
     });
 
     it("puts an urgent update first, with its reason and deadline in UTC", async () => {
@@ -409,6 +512,41 @@ describe("6529 AI's release list of format 1", () => {
       expect(html).toContain('href="/ai/releases.json"');
     });
 
+    it("lists the CUDA packages for 64-bit ARM after the ARM64 ones, with the Linux files' signer", async () => {
+      storeHasList(rc4List());
+
+      const html = renderToStaticMarkup(await AiReleasesRoute());
+      const rc4 = html.slice(
+        html.indexOf(`id="${RC4}"`),
+        html.indexOf(`id="${RC3}"`)
+      );
+      const rows = [...rc4.matchAll(/<tr[^>]*>.*?<\/tr>/gs)].map(
+        (match) => match[0]
+      );
+      const row = (name: string) =>
+        rows.find((entry) => entry.includes(`/ai/download/${RC4}/${name}"`));
+
+      for (const [name, what, digit] of [
+        [ARM_CUDA_DEB, "Debian package", "a"],
+        [ARM_CUDA_TARBALL, "Archive", "b"],
+      ] as const) {
+        expect(row(name)).toContain(">Linux, ARM64, NVIDIA GPU<");
+        expect(row(name)).toContain(`>${what}<`);
+        expect(row(name)).toContain(">SHA-256 in the signed list<");
+        expect(row(name)).toContain(`>${digit.repeat(64)}<`);
+      }
+      expect(rows.indexOf(row(ARM_CUDA_DEB)!)).toBe(
+        rows.indexOf(row(`6529-ai_${RC4}_arm64.deb`)!) + 1
+      );
+      expect(rows.indexOf(row(ARM_CUDA_TARBALL)!)).toBe(
+        rows.indexOf(row(`6529-ai-${RC4}-linux-arm64-cpu.tar.gz`)!) + 1
+      );
+      // rc.3 has neither.
+      expect(html.slice(html.indexOf(`id="${RC3}"`))).not.toContain(
+        "ARM64, NVIDIA GPU"
+      );
+    });
+
     it("shows a shortened old entry with what it has, and claims nothing is missing", async () => {
       storeHasList(
         aiList({
@@ -489,6 +627,43 @@ describe("6529 AI's release list of format 1", () => {
 
       expect(html).toContain(text);
       expect(html).not.toContain('href="/ai/releases.json"');
+    });
+  });
+
+  describe("on /ai/guide", () => {
+    const ARM_CUDA_LABEL = "ARM64, NVIDIA GPU";
+
+    it("installs the CUDA packages for 64-bit ARM when the release has them", async () => {
+      storeHasList(rc4List());
+
+      const html = renderToStaticMarkup(await AiGuideRoute());
+
+      expect(html).toContain(`sudo apt install ./${ARM_CUDA_DEB}`);
+      expect(html).toContain(`${ARM_CUDA_LABEL} · cuda_arm64.deb`);
+      expect(html).toContain(`tar -xzf ${ARM_CUDA_TARBALL}`);
+      expect(html).toContain(`${ARM_CUDA_LABEL} · arm64-cuda.tar.gz`);
+      expect(html).toContain(`aria-label="${ARM_CUDA_LABEL}: ${ARM_CUDA_DEB}"`);
+    });
+
+    it("installs only the one a release lists", async () => {
+      storeHasList(rc4List(ARM_CUDA_FILES.slice(0, 1)));
+
+      const html = renderToStaticMarkup(await AiGuideRoute());
+
+      expect(html).toContain(`sudo apt install ./${ARM_CUDA_DEB}`);
+      expect(html).not.toContain(ARM_CUDA_TARBALL);
+      expect(html).not.toContain(`${ARM_CUDA_LABEL} · arm64-cuda.tar.gz`);
+    });
+
+    it("leaves them out for rc.3, which has none", async () => {
+      storeHasList();
+
+      const html = renderToStaticMarkup(await AiGuideRoute());
+
+      expect(html).toContain(`sudo apt install ./6529-ai_${RC3}_arm64.deb`);
+      expect(html).not.toContain(ARM_CUDA_LABEL);
+      expect(html).not.toContain("arm64-cuda");
+      expect(html).not.toContain("cuda_arm64");
     });
   });
 

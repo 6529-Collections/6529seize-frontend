@@ -6,6 +6,11 @@ import {
 import { Status } from "@/components/nextGen/nextgen_entities";
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
+import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: jest.fn(() => false),
+}));
 
 jest.mock(
   "@/components/nextGen/collections/collectionParts/mint/NextGenMintShared",
@@ -368,5 +373,14 @@ describe("NextGenMintBurnWidget", () => {
         })
       );
     });
+  });
+
+  it("offers the website instead of burning with 6529 Desktop browser forwarding", () => {
+    jest.mocked(useIsDesktopBrowserWallet).mockReturnValue(true);
+    renderWidget();
+    expect(screen.getByRole("button")).toHaveTextContent(
+      "Continue in your browser"
+    );
+    expect(screen.getByText(/does not send this transaction/)).toBeVisible();
   });
 });

@@ -1,10 +1,12 @@
 /** Wallet forwarding: the desktop shell's answers to the app page. */
 
 import type { Hex } from "viem";
-import { WALLET_RESULT_FAILURES, isSignature } from "./results";
+import { walletTransactionRulesHash } from "@/lib/desktop/wallet-transactions/hash";
+import { isWalletResultValue, WALLET_RESULT_FAILURES } from "./results";
 import {
   isRecord,
   REQUEST_CODE,
+  TRANSACTION_HASH,
   WALLET_FORWARDING_METHODS,
   type WalletForwardingMethod,
   WALLET_FORWARDING_VERSION,
@@ -19,6 +21,8 @@ const WALLET_BRIDGE_FAILURES = [
   "invalid",
   "unsupported",
   "not-signed-in",
+  /** The wallet reported a transaction the shell could not confirm yet. */
+  "unverified",
 ] as const;
 
 type WalletBridgeFailure = (typeof WALLET_BRIDGE_FAILURES)[number];
@@ -30,6 +34,18 @@ const isBridgeFailure = (value: unknown): value is WalletBridgeFailure =>
 /** A fixed diagnostic word the shell may add to a failure; never data. */
 const REASON = /^[a-z][a-z-]{0,39}$/;
 
+/**
+ * The failures that carry the hash the wallet reported: `unverified` (the
+ * shell could not see the transaction in time, or could not reach a node)
+ * and `failed` with `transaction-mismatch` (the transaction on chain is not
+ * the one requested). The hash is public chain data, never request data.
+ */
+const HASH_REASONS: Readonly<Record<string, WalletBridgeFailure>> = {
+  "transaction-not-visible": "unverified",
+  "rpc-unavailable": "unverified",
+  "transaction-mismatch": "failed",
+};
+
 /** The shell's answer to `window.desktopWallet.request(...)`. */
 export type WalletBridgeResponse =
   | { readonly ok: true; readonly value: Hex }
@@ -38,24 +54,63 @@ export type WalletBridgeResponse =
       readonly code: WalletBridgeFailure;
       /** For example `unverified-signature`, `too-large`. */
       readonly reason?: string;
+      /** Only with the reasons in `HASH_REASONS`. */
+      readonly transactionHash?: Hex;
     };
 
-/** Validate the shell's answer; anything unexpected counts as a failure. */
+/**
+ * The reported hash: kept with the reasons in `HASH_REASONS`, and with any
+ * other failure of a transaction request, so a hash the wallet returned is
+ * never dropped (the app then shows it and asks the user to check it
+ * before trying again).
+ */
+function readTransactionHash(
+  code: WalletBridgeFailure,
+  reason: string | undefined,
+  value: unknown,
+  method: WalletForwardingMethod
+): Hex | undefined {
+  const expected = reason !== undefined && HASH_REASONS[reason] === code;
+  if (!expected && method !== "eth_sendTransaction") return undefined;
+  return typeof value === "string" && TRANSACTION_HASH.test(value)
+    ? (value.toLowerCase() as Hex)
+    : undefined;
+}
+
+/**
+ * Validate the shell's answer to a request of `method`: a signature, or a
+ * transaction hash for `eth_sendTransaction`. Anything unexpected counts
+ * as a failure; a transaction failure keeps any valid reported hash.
+ */
 export function parseWalletBridgeResponse(
-  value: unknown
+  value: unknown,
+  method: WalletForwardingMethod = "personal_sign"
 ): WalletBridgeResponse {
   if (isRecord(value) && value["ok"] === true) {
     const result = value["value"];
-    return isSignature(result)
+    return isWalletResultValue(result, method)
       ? { ok: true, value: result.toLowerCase() as Hex }
       : { ok: false, code: "failed" };
   }
-  const code = isRecord(value) ? value["code"] : undefined;
-  const reason = isRecord(value) ? value["reason"] : undefined;
+  const record = isRecord(value) ? value : {};
+  const rawCode = record["code"];
+  const rawReason = record["reason"];
+  const code = isBridgeFailure(rawCode) ? rawCode : "failed";
+  const reason =
+    typeof rawReason === "string" && REASON.test(rawReason)
+      ? rawReason
+      : undefined;
+  const transactionHash = readTransactionHash(
+    code,
+    reason,
+    record["transactionHash"],
+    method
+  );
   return {
     ok: false,
-    code: isBridgeFailure(code) ? code : "failed",
-    ...(typeof reason === "string" && REASON.test(reason) ? { reason } : {}),
+    code,
+    ...(reason === undefined ? {} : { reason }),
+    ...(transactionHash === undefined ? {} : { transactionHash }),
   };
 }
 
@@ -94,9 +149,26 @@ export function parseWalletBridgeStatus(value: unknown): WalletBridgeStatus {
 }
 
 /**
+ * Whether the shell sends transactions with exactly this website's rules:
+ * `capabilities()` lists `eth_sendTransaction` and reports
+ * `transactionRules` equal to the SHA-256 of this website's canonical rule
+ * table. A shell without them, or with other rules, is sent no transaction.
+ */
+export function walletBridgeSendsTransactions(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    value["version"] === WALLET_FORWARDING_VERSION &&
+    Array.isArray(value["methods"]) &&
+    (value["methods"] as readonly unknown[]).includes("eth_sendTransaction") &&
+    value["transactionRules"] === walletTransactionRulesHash()
+  );
+}
+
+/**
  * The methods the shell forwards, from `window.desktopWallet.capabilities()`
- * (`{ version: 1, methods: [...] }`). Empty when the shell speaks another
- * version or names no method this website forwards.
+ * (`{ version: 1, methods: [...], transactionRules? }`). Empty when the
+ * shell speaks another version or names no method this website forwards;
+ * `eth_sendTransaction` only when `walletBridgeSendsTransactions` holds.
  */
 export function parseWalletBridgeCapabilities(
   value: unknown
@@ -109,7 +181,12 @@ export function parseWalletBridgeCapabilities(
     return [];
   }
   const offered: readonly unknown[] = value["methods"];
-  return WALLET_FORWARDING_METHODS.filter((method) => offered.includes(method));
+  const sendsTransactions = walletBridgeSendsTransactions(value);
+  return WALLET_FORWARDING_METHODS.filter(
+    (method) =>
+      offered.includes(method) &&
+      (method !== "eth_sendTransaction" || sendsTransactions)
+  );
 }
 
 /**

@@ -41,7 +41,7 @@ const isRecordFamily = (value: string): value is RecordFamily =>
 
 /**
  * A principal for ps, pv and bk; for ps also a bare wallet bound to no
- * principal (subscriptions); a lane-defined id for the other families.
+ * principal (subscriptions); an id each family's feature defines.
  */
 function isValidOwner(family: RecordFamily, owner: string): boolean {
   if (!PRINCIPAL_FAMILIES.includes(family)) {
