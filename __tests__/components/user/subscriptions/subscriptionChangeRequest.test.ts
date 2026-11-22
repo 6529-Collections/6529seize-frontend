@@ -47,6 +47,7 @@ const usableGrant = jest.mocked(readUsableDeviceGrant);
 const freshAnchor = jest.mocked(fetchRecordAnchor);
 
 const WALLET = "0x00000000000000000000000000000000000000c1";
+const OTHER_WALLET = "0x00000000000000000000000000000000000000c2";
 const PRINCIPAL = `0x${"c1".padStart(64, "0")}`;
 const CONTRACT = "0x33FD426905F149f8376e227d0C9D3340AaD17aF1";
 const ENDPOINT = `subscriptions/${WALLET}/subscription`;
@@ -188,6 +189,14 @@ describe("postSubscriptionChange", () => {
     [
       "the API names no owner for the wallet",
       () => fetchApi.mockResolvedValue({ anchor: 1000, owners: [] }),
+    ],
+    [
+      "the API names another wallet as the owner",
+      () =>
+        fetchApi.mockResolvedValue({
+          anchor: 1000,
+          owners: [{ wallet: WALLET, owner: OTHER_WALLET }],
+        }),
     ],
     [
       "the API names no height",

@@ -46,6 +46,7 @@ type SubscriptionChange =
 const SIGNED_RECORD_REQUIRED = "SIGNED_RECORD_REQUIRED";
 /** The API's answer to a record older than the change it already holds. */
 const STALE_SIGNED_RECORD = "STALE_SIGNED_RECORD";
+const WALLET = /^0x[0-9a-f]{40}$/;
 const OWNER = /^0x(?:[0-9a-f]{64}|[0-9a-f]{40})$/;
 
 /**
@@ -117,7 +118,9 @@ async function hasUsableGrant(wallet: string): Promise<boolean> {
 /**
  * The owner a wallet's own records use, and the finalized height the API
  * read it at, from one GET /signed-records/owners: the record is signed at
- * that height, so its owner is the one the API names there.
+ * that height, so its owner is the one the API names there. As in
+ * record-owners.ts, a wallet's address counts as its owner only for itself:
+ * an unbound wallet names itself, never another wallet.
  */
 async function ownerAndAnchorOf(
   wallet: string
@@ -135,6 +138,7 @@ async function ownerAndAnchorOf(
   if (
     typeof owner !== "string" ||
     !OWNER.test(owner) ||
+    (WALLET.test(owner) && owner !== wallet) ||
     !Number.isSafeInteger(response.anchor) ||
     response.anchor <= 0
   ) {
