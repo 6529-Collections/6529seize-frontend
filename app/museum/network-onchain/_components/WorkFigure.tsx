@@ -46,14 +46,16 @@ function credit(view: OnchainWorkImageView): string | null {
   if (view.recordedCredit !== null) return view.recordedCredit;
   if (view.artists.length === 0) return null;
   const artists = formatList(locale, view.artists);
+  // A title that already ends a sentence ("Take the Key!") takes no period.
+  const title = /[.!?…]$/u.test(view.title) ? view.title : `${view.title}.`;
   return view.program === null
     ? t(locale, "museum.onchain.image.creditBuiltNoProgram", {
         artists,
-        title: view.title,
+        title,
       })
     : t(locale, "museum.onchain.image.creditBuilt", {
         artists,
-        title: view.title,
+        title,
         program: view.program,
       });
 }
