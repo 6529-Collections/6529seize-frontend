@@ -19,7 +19,7 @@ const buildGif = ({
   readonly frames: number;
   readonly globalColorTable?: boolean;
   readonly localColorTable?: boolean;
-}): Uint8Array => {
+}): Uint8Array<ArrayBuffer> => {
   const bytes: number[] = [
     ...Array.from("GIF89a", (char) => char.charCodeAt(0)),
     ...u16(width),
@@ -118,7 +118,7 @@ describe("getGifAnimatedPreviewIssue", () => {
 });
 
 describe("inspectGifAnimatedPreview", () => {
-  const toFile = (bytes: Uint8Array, type: string) => {
+  const toFile = (bytes: Uint8Array<ArrayBuffer>, type: string) => {
     const file = new File([bytes], "art.gif", { type });
     if (typeof file.arrayBuffer !== "function") {
       Object.defineProperty(file, "arrayBuffer", {
