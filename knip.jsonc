@@ -50,7 +50,10 @@
       "ops/scripts/build-delegation-docs-content.mjs",
       "playwright.config.ts",
       "tests/support/composerSandboxServer.cjs",
-      "services/**/index.{ts,tsx}"
+      "services/**/index.{ts,tsx}",
+      // Signed records: a library other features' call sites import; its public
+      // exports carry `/** @api */`.
+      "lib/signed-records/*.ts"
     ],
 
     // 3) Paths: Knip auto-imports TS path aliases from tsconfig,

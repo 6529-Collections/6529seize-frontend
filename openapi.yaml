@@ -3323,6 +3323,36 @@ paths:
                 $ref: "#/components/schemas/ApiSessionNonceResponse"
         "400":
           description: Invalid request
+  /signed-records/anchor:
+    get:
+      tags:
+        - Authentication
+      summary: The chain height to sign as a signed record's anchor
+      description: >-
+        The latest finalized height of the 6529 chain, read through the chain
+        gateway. Device-signed records (kinds 9-12) carry it as their `anchor`;
+        a submitted record must anchor at most `max_anchor_lag` heights behind
+        the finalized head. Returns 503 while the gateway is unavailable.
+      operationId: getSignedRecordsAnchor
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: signed-records
+        handler:
+          import: "@/api/signed-records/signed-records.handlers"
+          name: handleGetSignedRecordsAnchor
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSignedRecordsAnchor"
+        "503":
+          description: The chain gateway is unavailable
   /device-grants:
     get:
       tags:
@@ -33036,6 +33066,29 @@ components:
           type: integer
           format: int64
           nullable: true
+    ApiSignedRecordsAnchor:
+      type: object
+      required:
+        - anchor
+        - head_height
+        - finalized_time
+        - max_anchor_lag
+      properties:
+        anchor:
+          type: integer
+          format: int64
+          description: The latest finalized height; sign it as the record's anchor.
+        head_height:
+          type: integer
+          format: int64
+        finalized_time:
+          type: integer
+          format: int64
+          description: The finalized block's slot start, epoch milliseconds.
+        max_anchor_lag:
+          type: integer
+          format: int64
+          description: How many heights behind the finalized head a submitted anchor may be.
     ApiDeviceGrantProof:
       type: object
       allOf:
