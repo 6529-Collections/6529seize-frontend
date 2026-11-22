@@ -199,6 +199,12 @@ export const COMPETITION_MESSAGES = {
   "competitions.reload": "Reload latest version",
   "competitions.failure":
     "The request could not be completed. Your input has been preserved. Check the current state before retrying.",
+  "competitions.signatureWalletRequired":
+    "This decision needs a signature from your wallet, and no wallet is connected in this window. Connect your wallet, then try again. Your input has been preserved.",
+  "competitions.signatureCancelled":
+    "The wallet signature was cancelled. Your input has been preserved. Try again and approve the signature in your wallet.",
+  "competitions.signatureFailed":
+    "Your wallet didn’t complete the signature. Your input has been preserved. Open your wallet, finish or reject any waiting request (including one from another 6529 tab or app), then try again.",
   "competitions.required": "Complete the required fields before continuing.",
   "competitions.accessConflict":
     "The decision changed while you were editing. Close and reopen the access editor to use the latest settings.",
