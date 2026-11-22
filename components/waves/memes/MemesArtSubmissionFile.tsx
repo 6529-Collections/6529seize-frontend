@@ -20,6 +20,7 @@ import CommonTabs from "@/components/utils/select/tabs/CommonTabs";
 import FilePreview from "./file-upload/components/FilePreview";
 import UploadArea from "./file-upload/components/UploadArea";
 import BrowserWarning from "./file-upload/components/BrowserWarning";
+import GifAnimatedPreviewNotice from "./file-upload/components/GifAnimatedPreviewNotice";
 
 import useFileUploader from "./file-upload/hooks/useFileUploader";
 import useDragAndDrop from "./file-upload/hooks/useDragAndDrop";
@@ -511,6 +512,7 @@ const MemesArtSubmissionFile: React.FC<MemesArtSubmissionFileProps> = ({
           </div>
         )}
       </div>
+      {showUploadUi && <GifAnimatedPreviewNotice file={currentFile} />}
     </div>
   );
 };

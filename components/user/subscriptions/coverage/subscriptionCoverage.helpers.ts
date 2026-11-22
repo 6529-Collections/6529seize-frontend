@@ -39,6 +39,65 @@ export function formatSubscriptionEth(
   return formatNumber(locale, numericValue, ETH_DISPLAY_OPTIONS);
 }
 
+/**
+ * The API reports `action_required` for zero or one fully funded drop. With
+ * one funded drop the next drop is covered, so it reads as running low.
+ */
+export function getDisplayedSubscriptionCoverageStatus(
+  status: ApiSubscriptionCoverageStatus,
+  fullyFundedDrops: number
+): ApiSubscriptionCoverageStatus {
+  return status === ApiSubscriptionCoverageStatus.ActionRequired &&
+    fullyFundedDrops > 0
+    ? ApiSubscriptionCoverageStatus.RunningLow
+    : status;
+}
+
+/**
+ * True when funding reaches the last drop of the truncated forecast, so the
+ * balance may cover later drops that the forecast does not evaluate.
+ */
+type ForecastEndCoverage = Pick<
+  ApiSubscriptionCoverage,
+  "funded_through" | "fully_funded_drops"
+> & {
+  readonly next_unfunded?: ApiSubscriptionCoverage["next_unfunded"] | undefined;
+  // Older cached or partial payloads can omit the forecast block.
+  readonly forecast?:
+    | Pick<
+        ApiSubscriptionCoverage["forecast"],
+        "forecast_truncated" | "horizon_end_token_id" | "horizon_drop_count"
+      >
+    | undefined;
+};
+
+export function isSubscriptionCoverageFundedToForecastEnd(
+  coverage: ForecastEndCoverage | undefined | null
+): boolean {
+  const horizonEnd = coverage?.forecast?.horizon_end_token_id ?? null;
+  return (
+    !!coverage?.funded_through &&
+    !coverage.next_unfunded &&
+    coverage.fully_funded_drops > 0 &&
+    coverage.forecast?.forecast_truncated === true &&
+    horizonEnd !== null &&
+    coverage.funded_through.token_id === horizonEnd
+  );
+}
+
+/**
+ * True when every scheduled drop in the forecast is funded, so the funded
+ * count is the forecast size and the balance may fund more drops.
+ */
+export function isSubscriptionCoverageForecastFullyFunded(
+  coverage: ForecastEndCoverage | undefined | null
+): boolean {
+  return (
+    isSubscriptionCoverageFundedToForecastEnd(coverage) &&
+    coverage?.fully_funded_drops === coverage?.forecast?.horizon_drop_count
+  );
+}
+
 export function getSubscriptionCoveragePresentation(
   locale: SupportedLocale,
   status: ApiSubscriptionCoverageStatus
@@ -174,7 +233,11 @@ export function getSubscriptionCoverageCompactLine(
     coverage.status !== ApiSubscriptionCoverageStatus.Unknown
   ) {
     parts.push(
-      getFundedDropsLabel(locale, coverage.fully_funded_drops)
+      isSubscriptionCoverageForecastFullyFunded(coverage)
+        ? t(locale, "subscriptions.coverage.summary.nextFundedDrops", {
+            count: formatInteger(locale, coverage.fully_funded_drops),
+          })
+        : getFundedDropsLabel(locale, coverage.fully_funded_drops)
     );
   }
 
