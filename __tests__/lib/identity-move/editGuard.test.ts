@@ -19,46 +19,54 @@ jest.mock("@/config/env", () => {
 const API = "https://api.example.test/api";
 const FREEZE = Date.UTC(2026, 10, 24, 0, 0, 0);
 
-type Request = readonly [method: string, path: string, body?: object];
+interface Request {
+  readonly method: string;
+  readonly path: string;
+  readonly body?: object | undefined;
+}
 
-const attempt =
-  (...[method, path, body]: Request) =>
-  () =>
-    assertIdentityEditAllowed({
-      method,
-      url: `${API}/${path}`,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
+const req = (method: string, path: string, body?: object): Request => ({
+  method,
+  path,
+  body,
+});
 
-const EDITS: ReadonlyArray<Request> = [
-  ["POST", "profiles"],
-  ["POST", "profiles/alice/pfp"],
-  ["POST", "profiles/alice/cic/statements"],
-  ["DELETE", "profiles/alice/cic/statements/42"],
-  ["POST", "profiles/alice/rep/rating"],
-  ["POST", "profiles/0xabc/cic/rating"],
-  ["POST", "profiles/alice/wave"],
-  ["DELETE", "profiles/alice/wave"],
-  ["POST", "ratings"],
-  ["POST", "bulk-rep"],
-  ["POST", "proxies/p1/actions", { action_type: "ALLOCATE_REP", credit_amount: 5 }],
-  ["POST", "proxies/p1/actions", { action_type: "ALLOCATE_CIC" }],
-  ["post", "profiles/"],
+const attempt = (method: string, path: string, body?: object) => () =>
+  assertIdentityEditAllowed({
+    method,
+    url: `${API}/${path}`,
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+
+const EDITS: readonly Request[] = [
+  req("POST", "profiles"),
+  req("POST", "profiles/alice/pfp"),
+  req("POST", "profiles/alice/cic/statements"),
+  req("DELETE", "profiles/alice/cic/statements/42"),
+  req("POST", "profiles/alice/rep/rating"),
+  req("POST", "profiles/0xabc/cic/rating"),
+  req("POST", "profiles/alice/wave"),
+  req("DELETE", "profiles/alice/wave"),
+  req("POST", "ratings"),
+  req("POST", "bulk-rep"),
+  req("POST", "proxies/p1/actions", { action_type: "ALLOCATE_REP", credit_amount: 5 }),
+  req("POST", "proxies/p1/actions", { action_type: "ALLOCATE_CIC" }),
+  req("post", "profiles/"),
 ];
 
-const OTHER_WRITES: ReadonlyArray<Request> = [
-  ["POST", "proxies", { target_id: "bob" }],
-  ["POST", "proxies/p1/actions", { action_type: "CREATE_WAVE" }],
-  ["POST", "proxies/p1/actions/a1/acceptance", { action: "REVOKE" }],
-  ["PUT", "proxies/p1/actions/a1", { credit_amount: 1 }],
-  ["POST", "identities/alice/subscriptions"],
-  ["DELETE", "identities/alice/subscriptions"],
-  ["POST", "waves/w1/rep/rating"],
-  ["POST", "drops/d1/ratings"],
-  ["PUT", "profile-preferences"],
-  ["POST", "auth/login"],
-  ["POST", "ratingsx"],
-  ["POST", "ratings/extra"],
+const OTHER_WRITES: readonly Request[] = [
+  req("POST", "proxies", { target_id: "bob" }),
+  req("POST", "proxies/p1/actions", { action_type: "CREATE_WAVE" }),
+  req("POST", "proxies/p1/actions/a1/acceptance", { action: "REVOKE" }),
+  req("PUT", "proxies/p1/actions/a1", { credit_amount: 1 }),
+  req("POST", "identities/alice/subscriptions"),
+  req("DELETE", "identities/alice/subscriptions"),
+  req("POST", "waves/w1/rep/rating"),
+  req("POST", "drops/d1/ratings"),
+  req("PUT", "profile-preferences"),
+  req("POST", "auth/login"),
+  req("POST", "ratingsx"),
+  req("POST", "ratings/extra"),
 ];
 
 beforeEach(() => {
@@ -72,9 +80,9 @@ afterEach(() => {
 });
 
 describe("identity edits during the move", () => {
-  it.each(EDITS)("refuses %s %s from the freeze", (...request) => {
+  it.each(EDITS)("refuses $method $path from the freeze", ({ method, path, body }) => {
     jest.setSystemTime(FREEZE);
-    expect(attempt(...request)).toThrow(
+    expect(attempt(method, path, body)).toThrow(
       expect.objectContaining({
         name: "IdentityEditingPausedError",
         message: "Paused for the move to the 6529 Network.",
@@ -82,20 +90,20 @@ describe("identity edits during the move", () => {
     );
   });
 
-  it.each(EDITS)("sends %s %s before the freeze", (...request) => {
+  it.each(EDITS)("sends $method $path before the freeze", ({ method, path, body }) => {
     jest.setSystemTime(FREEZE - 1);
-    expect(attempt(...request)).not.toThrow();
+    expect(attempt(method, path, body)).not.toThrow();
   });
 
-  it.each(EDITS)("sends %s %s without a freeze", (...request) => {
+  it.each(EDITS)("sends $method $path without a freeze", ({ method, path, body }) => {
     setIdentityFreezeAt(undefined);
     jest.setSystemTime(FREEZE + 1);
-    expect(attempt(...request)).not.toThrow();
+    expect(attempt(method, path, body)).not.toThrow();
   });
 
-  it.each(OTHER_WRITES)("sends %s %s while frozen", (...request) => {
+  it.each(OTHER_WRITES)("sends $method $path while frozen", ({ method, path, body }) => {
     jest.setSystemTime(FREEZE + 1);
-    expect(attempt(...request)).not.toThrow();
+    expect(attempt(method, path, body)).not.toThrow();
   });
 
   it.each(["GET", "HEAD", "OPTIONS"])("reads with %s while frozen", (method) => {
