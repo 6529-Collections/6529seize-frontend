@@ -196,8 +196,8 @@ async function replaceOnce(
 
 /**
  * A chain or gateway refusal in plain words for the person, or null to keep
- * its own message. Other errors (the wallet's, a document over the size
- * limit) always keep their own message.
+ * its own message. Other errors (the wallet's, for one) always keep their
+ * own message.
  */
 type DescribeError = (error: unknown) => string | null;
 

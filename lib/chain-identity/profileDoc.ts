@@ -111,7 +111,7 @@ const MAX_SIGNATURE_BYTES = encodeCe(PROFILE_DOC_SIGNATURE, {
 const tooLarge = () =>
   new ChainOperationError(
     "rejected",
-    "Your profile would be larger than 524,288 bytes, so it wasn't changed."
+    `Your profile would be larger than ${MAX_DOC_BYTES.toLocaleString("en-US")} bytes. Make it shorter and try again.`
   );
 
 /** The EIP-712 typed data a later document's signature covers. */

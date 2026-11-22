@@ -341,6 +341,27 @@ describe("saving the profile", () => {
     });
   });
 
+  it("refuses a profile over the size limit before the wallet is asked", async () => {
+    const onWalletPrompt = jest.fn();
+    const fields = new Map(
+      ["a", "b", "c", "d", "e", "f", "g", "h"].map((key) => [key, "x".repeat(65_536)])
+    );
+    await expect(
+      prepareProfileReplace(identity(3), fields, {
+        config,
+        wallet: WALLET,
+        sessionKey: null,
+        onWalletPrompt,
+      })
+    ).rejects.toMatchObject({
+      reason: "rejected",
+      message: "Your profile would be larger than 524,288 bytes. Make it shorter and try again.",
+    });
+    expect(onWalletPrompt).not.toHaveBeenCalled();
+    expect(signTypedData).not.toHaveBeenCalled();
+    expect(gateway["uploadDoc"]).not.toHaveBeenCalled();
+  });
+
   it("refuses a transaction draft for another network", async () => {
     (draftOperation as jest.Mock).mockResolvedValue(draftFor(`0x${"cd".repeat(32)}`));
     await expect(

@@ -112,12 +112,17 @@ it("keeps values exactly as given, whitespace included", () => {
 
 it("refuses a document over 524,288 bytes before anything is signed", () => {
   const big = { bio: "x".repeat(65_536), a: "x".repeat(65_536), b: "x".repeat(65_536), c: "x".repeat(65_536), d: "x".repeat(65_536), e: "x".repeat(65_536), f: "x".repeat(65_536), g: "x".repeat(65_536) };
-  expect(() => prepareProfileDoc(doc(big), NONCE)).toThrow(
-    new ChainOperationError(
-      "rejected",
-      "Your profile would be larger than 524,288 bytes, so it wasn't changed."
-    )
-  );
+  let refusal: unknown;
+  try {
+    prepareProfileDoc(doc(big), NONCE);
+  } catch (error) {
+    refusal = error;
+  }
+  expect(refusal).toBeInstanceOf(ChainOperationError);
+  expect(refusal).toMatchObject({
+    reason: "rejected",
+    message: "Your profile would be larger than 524,288 bytes. Make it shorter and try again.",
+  });
   // Exactly at the limit with a wallet's signature: accepted; a byte more
   // is refused before signing.
   const wallet = { keyType: 1, keyId: KEY_ID, signature: `0x${"11".repeat(65)}` } as const;
