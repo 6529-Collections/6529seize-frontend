@@ -114,12 +114,16 @@ is blocked.
   because the current viewer is signed out or missing a profile.
 - Footer shows `Wave is closed`:
   chat is disabled for the current chat-type wave context.
+- Footer shows `You're signed in as a proxy for another profile, so you can't
+  post here.`: the current sign-in acts for another profile, even when the
+  header still shows your own profile (for example after that proxy was
+  removed or your accounts were consolidated). Switch back to your own profile,
+  or sign out and connect again, to post as yourself. This replaces both the
+  chat and the submission footer.
 - Footer shows a chat restriction:
-  `Proxy users cannot participate in chat`,
   `You don't have permission to chat in this wave`, or
   `Chat is currently disabled for this wave`.
 - Footer shows a submission restriction:
-  `Proxy users cannot make submissions`,
   `You don't have permission to submit in this wave`,
   `Submissions haven't started yet`, `Submission period has ended`, or
   `You have reached the maximum number of drops allowed`.

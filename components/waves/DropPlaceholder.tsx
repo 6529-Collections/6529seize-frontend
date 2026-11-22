@@ -5,6 +5,7 @@ import {
   SubmissionRestriction,
 } from "@/hooks/useDropPriviledges";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -85,7 +86,8 @@ function getProfileSetupMessage(
 
 function getChatMessage(
   restriction: ChatRestriction,
-  profileSetupHref: string | undefined
+  profileSetupHref: string | undefined,
+  locale: SupportedLocale
 ): ReactNode {
   switch (restriction) {
     case ChatRestriction.NOT_LOGGED_IN:
@@ -93,7 +95,7 @@ function getChatMessage(
     case ChatRestriction.NEEDS_PROFILE:
       return getProfileSetupMessage(profileSetupHref, "to participate in chat");
     case ChatRestriction.PROXY_USER:
-      return "Proxy users cannot participate in chat";
+      return t(locale, "waves.chat.proxySessionPlaceholder");
     case ChatRestriction.SLOW_MODE:
       return "Slow mode is active. Please wait before posting again";
     case ChatRestriction.NO_PERMISSION:
@@ -107,7 +109,8 @@ function getChatMessage(
 
 function getSubmissionMessage(
   restriction: SubmissionRestriction,
-  profileSetupHref: string | undefined
+  profileSetupHref: string | undefined,
+  locale: SupportedLocale
 ): ReactNode {
   switch (restriction) {
     case SubmissionRestriction.NOT_LOGGED_IN:
@@ -115,7 +118,7 @@ function getSubmissionMessage(
     case SubmissionRestriction.NEEDS_PROFILE:
       return getProfileSetupMessage(profileSetupHref, "to submit in this wave");
     case SubmissionRestriction.PROXY_USER:
-      return "Proxy users cannot make submissions";
+      return t(locale, "waves.chat.proxySessionPlaceholder");
     case SubmissionRestriction.NO_PERMISSION:
       return "You don't have permission to submit in this wave";
     case SubmissionRestriction.NOT_STARTED:
@@ -217,11 +220,15 @@ export default function DropPlaceholder({
     }
 
     if (type === "chat" && chatRestriction !== undefined) {
-      return getChatMessage(chatRestriction, profileSetupHref);
+      return getChatMessage(chatRestriction, profileSetupHref, locale);
     }
 
     if (type === "submission" && submissionRestriction !== undefined) {
-      return getSubmissionMessage(submissionRestriction, profileSetupHref);
+      return getSubmissionMessage(
+        submissionRestriction,
+        profileSetupHref,
+        locale
+      );
     }
 
     if (type === "both") {
@@ -233,6 +240,13 @@ export default function DropPlaceholder({
           profileSetupHref,
           "to participate in this wave"
         );
+      }
+
+      if (
+        chatRestriction === ChatRestriction.PROXY_USER &&
+        submissionRestriction === SubmissionRestriction.PROXY_USER
+      ) {
+        return t(locale, "waves.chat.proxySessionPlaceholder");
       }
 
       return "You cannot participate in this wave at the moment";
