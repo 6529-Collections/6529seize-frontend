@@ -150,7 +150,7 @@ export default function ChainIdentityWallets({
             value={joining}
             autoComplete="off"
             spellCheck={false}
-            placeholder="0x…"
+            placeholder={t(locale, "chainIdentity.addressPlaceholder")}
             disabled={join.busy}
             aria-invalid={joining !== "" && !joiningOk}
             aria-describedby="chain-identity-join-hint"

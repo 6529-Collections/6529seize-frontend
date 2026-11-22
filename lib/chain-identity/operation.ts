@@ -1,4 +1,5 @@
 import { hashTypedData, type Hex } from "viem";
+import { publicEnv } from "@/config/env";
 import {
   chainGateway,
   ChainGatewayError,
@@ -8,6 +9,7 @@ import {
   type ChainTxStatus,
   type ChainTypedData,
 } from "./gateway";
+import { pinnedTypes, type PinnedTypes } from "./typedDataTypes";
 
 /**
  * One operation on the 6529 Network: the gateway drafts it, this file checks
@@ -93,7 +95,7 @@ const INT_TYPE = /^u?int\d*$/;
 
 /** The typed data's message with every integer as a bigint, as viem hashes it. */
 function messageForHashing(
-  types: ChainTypedData["types"],
+  types: PinnedTypes,
   typeName: string,
   value: unknown
 ): unknown {
@@ -120,25 +122,53 @@ function messageForHashing(
   return value;
 }
 
-/** The typed data as viem's signers and hashers take it. */
+const typesFor = (primaryType: string): PinnedTypes => {
+  const types = pinnedTypes(primaryType);
+  if (types === null) {
+    throw new ChainOperationError(
+      "draft_mismatch",
+      "This site doesn't sign that kind of change."
+    );
+  }
+  return types;
+};
+
+/**
+ * The typed data as viem's signers and hashers take it, with this site's
+ * pinned types for the operation: the gateway's own `types` are never used.
+ */
 export function typedDataForSigning(typedData: ChainTypedData) {
-  const { EIP712Domain: _domain, ...types } = typedData.types;
+  const types = typesFor(typedData.primaryType);
   return {
     domain: typedData.domain,
-    types: types as Record<string, { name: string; type: string }[]>,
+    types,
     primaryType: typedData.primaryType,
     message: messageForHashing(
-      typedData.types,
+      types,
       typedData.primaryType,
       typedData.message
     ) as Record<string, unknown>,
   };
 }
 
-/** The EIP-712 digest of the draft's typed data. */
+/** The EIP-712 digest of the draft's message under the pinned types. */
 export function digestOf(typedData: ChainTypedData): Hex {
   return hashTypedData(typedDataForSigning(typedData));
 }
+
+const digestMatches = (draft: ChainDraft): boolean => {
+  try {
+    return digestOf(draft.typedData) === draft.txId.toLowerCase();
+  } catch {
+    return false;
+  }
+};
+
+/** The network the build expects drafts for, when it names one. */
+const expectedNetworkId = (): string | null => {
+  const value = publicEnv.NEXT_PUBLIC_CHAIN_NETWORK_ID?.trim().toLowerCase();
+  return value === undefined || value === "" ? null : value;
+};
 
 /**
  * Throws unless the draft is the operation that was asked for: its body,
@@ -158,9 +188,14 @@ export function verifyDraft(
     request.signer === undefined
       ? null
       : `0x${request.signer.slice(2).toLowerCase().padStart(64, "0")}`;
+  const network = expectedNetworkId();
   const checks = [
     typedData.primaryType === primaryType,
     typedData.domain.name === "6529 Network",
+    typedData.domain.version === "1",
+    network === null || typedData.domain.salt.toLowerCase() === network,
+    // The fee shown before signing is the fee the signature allows.
+    canonical(header["maxFee"]) === draft.fee.maxFee,
     sameValue(request.body, typedData.message["body"]),
     sameValue(request.principal ?? ZERO_WORD, header["principal"]),
     canonical(header["keyType"]) === String(expectedKeyType),
@@ -168,7 +203,7 @@ export function verifyDraft(
       ? sameValue(request.keyId, header["keyId"]) &&
         sameValue(request.authRef, header["authRef"])
       : walletKeyId === null || sameValue(walletKeyId, header["keyId"]),
-    digestOf(typedData) === draft.txId.toLowerCase(),
+    digestMatches(draft),
   ];
   if (checks.some((ok) => !ok)) {
     throw new ChainOperationError(

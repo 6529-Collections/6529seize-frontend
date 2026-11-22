@@ -131,5 +131,6 @@
   "chainIdentity.chainDelegations.walletRecord": "This wallet",
   "chainIdentity.chainDelegations.unknownCollection": "Collection {address}",
   "chainIdentity.chainDelegations.unknownUseCase": "Use case {number}",
-  "chainIdentity.chainDelegations.to": "To {delegate}"
+  "chainIdentity.chainDelegations.to": "To {delegate}",
+  "chainIdentity.addressPlaceholder": "0x…"
 }

@@ -1,17 +1,22 @@
 import {
+  capabilityRevoke,
   createdGrantId,
   createdPrincipalId,
   DELEGATION_SCOPE,
   delegationRevoke,
   delegationSet,
   fundIdentity,
+  handleClaim,
   identityCreate,
   identityJoin,
+  identityRemove,
   normalizeHandle,
+  profileReplace,
   ratingSet,
   sessionKeyGrant,
 } from "@/lib/chain-identity/identityOps";
 import { objectId, repCategoryId } from "@/lib/chain/codec/ids";
+import { pinnedTypes } from "@/lib/chain-identity/typedDataTypes";
 
 const P = `0x${"0a".repeat(32)}` as const;
 const W = "0xAbCdEf0000000000000000000000000000000001" as const;
@@ -163,5 +168,50 @@ describe("operation requests", () => {
         memo: null,
       },
     });
+  });
+});
+
+describe("pinned EIP-712 types", () => {
+  it("cover every operation this site builds, field for field", () => {
+    const delegation = {
+      collection: W,
+      delegate: W,
+      useCase: 1,
+      tokenId: null,
+    };
+    const built = [
+      identityCreate(W, "", null),
+      profileReplace(P, { kind: "wallet", address: W }, 0, "0x01"),
+      handleClaim(P, W, "gm_6529", ""),
+      ratingSet(
+        P,
+        { kind: "wallet", address: W },
+        { matter: "NIC", target: T, category: null, value: 1n, priorVersion: 0 }
+      ),
+      sessionKeyGrant(P, W, {
+        keyId: TX,
+        publicKeyHex: TX,
+        currencyAsset: T,
+        feeBudget: 1n,
+        expiresAtMs: 1,
+      }),
+      capabilityRevoke(P, W, TX, 1),
+      identityJoin(P, W, W),
+      identityRemove(P, W, W),
+      delegationSet(P, W, delegation, 0n),
+      delegationRevoke(P, W, {
+        ...delegation,
+        scope: DELEGATION_SCOPE.IDENTITY,
+        holder: P,
+      }),
+      fundIdentity(W, P, T, 1n),
+    ];
+    for (const { request, primaryType } of built) {
+      const types = pinnedTypes(primaryType);
+      expect(types).not.toBeNull();
+      expect(
+        types?.[`${primaryType}Body`]?.map((field) => field.name)
+      ).toEqual(Object.keys(request.body));
+    }
   });
 });

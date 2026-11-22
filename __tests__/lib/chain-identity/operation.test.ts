@@ -111,3 +111,53 @@ describe("wallet signatures", () => {
     expect(() => normalizeWalletSignature(`0x${r}${lowS}`)).toThrow();
   });
 });
+
+describe("what the signature is bound to", () => {
+  it("hashes with this site's types, not the gateway's", () => {
+    const { request, primaryType } = walletRequest();
+    const draft = ratingDraft();
+    const renamed = {
+      ...draft,
+      typedData: {
+        ...draft.typedData,
+        types: {
+          ...draft.typedData.types,
+          RatingSetBody: [{ name: "value", type: "int64" }],
+        },
+      },
+    };
+    expect(() => verifyDraft(renamed, request, primaryType)).not.toThrow();
+    expect(digestOf(renamed.typedData)).toBe(draft.txId);
+  });
+
+  it("refuses an operation this site doesn't sign", () => {
+    const draft = ratingDraft();
+    const other = {
+      ...draft,
+      typedData: { ...draft.typedData, primaryType: "PolicySet" },
+    };
+    expect(() =>
+      verifyDraft(other, walletRequest().request, "PolicySet")
+    ).toThrow();
+  });
+
+  it("refuses a fee in the signed header other than the one shown", () => {
+    const { request, primaryType } = walletRequest();
+    const draft = ratingDraft();
+    const shownLower = { ...draft, fee: { ...draft.fee, maxFee: "1" } };
+    expect(() => verifyDraft(shownLower, request, primaryType)).toThrow();
+  });
+
+  it("refuses another domain version", () => {
+    const { request, primaryType } = walletRequest();
+    const draft = ratingDraft();
+    const v2 = {
+      ...draft,
+      typedData: {
+        ...draft.typedData,
+        domain: { ...draft.typedData.domain, version: "2" },
+      },
+    };
+    expect(() => verifyDraft(v2, request, primaryType)).toThrow();
+  });
+});

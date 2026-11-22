@@ -21,6 +21,27 @@ export default function ChainActionStatus({
   readonly onConfirm: () => void;
   readonly onCancel: () => void;
 }) {
+  // One live region, present from the first render, so each step is read out.
+  return (
+    <div aria-live="polite" aria-atomic="true">
+      <ChainActionStatusContent
+        state={state}
+        onConfirm={onConfirm}
+        onCancel={onCancel}
+      />
+    </div>
+  );
+}
+
+function ChainActionStatusContent({
+  state,
+  onConfirm,
+  onCancel,
+}: {
+  readonly state: ChainActionState;
+  readonly onConfirm: () => void;
+  readonly onCancel: () => void;
+}) {
   const locale = useBrowserLocale();
 
   if (state.kind === "idle") {
@@ -78,7 +99,7 @@ export default function ChainActionStatus({
     done: "chainIdentity.action.done",
   } as const;
   return (
-    <p role="status" className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300">
+    <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300">
       {t(locale, key[state.kind])}
     </p>
   );

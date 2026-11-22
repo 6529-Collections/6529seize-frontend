@@ -314,7 +314,7 @@ export default function ChainDelegations() {
             id="chain-delegation-delegate"
             className={`${CHAIN_INPUT_CLASS} tw-font-mono`}
             value={delegate}
-            placeholder="0x…"
+            placeholder={t(locale, "chainIdentity.addressPlaceholder")}
             autoComplete="off"
             spellCheck={false}
             onChange={(event) => setDelegate(event.target.value)}

@@ -143,6 +143,9 @@ export const publicEnvSchema = z.object({
   NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY: z.string().optional(),
   // The public chain gateway's base URL (drafts, submits, reads, the
   // profile document store and the drip).
+  // The 6529 Network's NETWORK_ID (the EIP-712 domain salt). When set, a
+  // draft for another network is refused before anything is signed.
+  NEXT_PUBLIC_CHAIN_NETWORK_ID: z.string().optional(),
   NEXT_PUBLIC_CHAIN_GATEWAY_URL: z
     .string()
     .url("NEXT_PUBLIC_CHAIN_GATEWAY_URL must be a valid URL")
