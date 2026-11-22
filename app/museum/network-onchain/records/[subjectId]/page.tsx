@@ -738,6 +738,7 @@ export default async function OnchainMuseumRecordPage({
               release === undefined ? null : release.sourceCommit.slice(2)
             }
             sourcePath={record.documentPath ?? undefined}
+            className="tw-break-words"
             embeddedDocument
           >
             {record.content.text}
