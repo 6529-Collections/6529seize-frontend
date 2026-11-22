@@ -1212,6 +1212,83 @@ describe("funded drops at current settings", () => {
     );
   });
 
+  it("says at least N for a capped count, also to visitors", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage({
+          funded_drops_at_current_settings: 312,
+          funded_drops_at_current_settings_capped: true,
+        })}
+        isLoading={false}
+        isOwner={false}
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "At least 312 drops funded" })
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "At the current mint price and current subscription settings."
+      )
+    ).toBeVisible();
+  });
+
+  it("keeps the forecast headline when the balance funds exactly the forecast", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage({
+          funded_drops_at_current_settings: 24,
+          funded_drops_at_current_settings_capped: false,
+        })}
+        isLoading={false}
+        isOwner
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "Next 24 drops funded" })
+    ).toBeVisible();
+  });
+
+  it("does not show the current-settings count for stale coverage", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage({
+          funded_drops_at_current_settings: 40,
+          funded_drops_at_current_settings_capped: false,
+        })}
+        isLoading={false}
+        isOwner
+        isStale
+      />
+    );
+    expect(
+      screen.queryByRole("heading", { name: "About 40 drops funded" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "At the current mint price and current subscription settings."
+      )
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the selected-drop count in manual mode", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage({
+          mode: ApiSubscriptionCoverageMode.Manual,
+          fully_funded_drops: 3,
+          funded_drops_at_current_settings: 3,
+          funded_drops_at_current_settings_capped: false,
+        })}
+        isLoading={false}
+        isOwner
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "3 drops funded" })
+    ).toBeVisible();
+  });
+
   it("keeps the forecast headline when the backend omits the count", () => {
     render(
       <SubscriptionCoverageSummary

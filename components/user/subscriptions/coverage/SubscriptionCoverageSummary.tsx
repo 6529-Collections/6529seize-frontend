@@ -328,12 +328,12 @@ function CoverageSummaryContent({
     headline = t(locale, headlineKey, {
       token: formatInteger(locale, coverage.next_unfunded.token_id),
     });
-  } else if (fundedAtCurrentSettings)
+  } else if (fundedAtCurrentSettings) {
     headline = getFundedDropsAtCurrentSettingsLabel(
       locale,
       fundedAtCurrentSettings
     );
-  else if (
+  } else if (
     showFundedCount &&
     coverage.fully_funded_drops === DEFAULT_FORECAST_DROP_LIMIT
   )

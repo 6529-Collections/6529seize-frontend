@@ -105,8 +105,10 @@ export interface SubscriptionFundedDropsAtCurrentSettings {
 
 /**
  * The backend's funded-drop count past the forecast horizon, when it reports
- * one and funding reaches the end of the forecast. Older backends omit the
- * field; callers then keep the forecast-window wording.
+ * one, funding reaches the end of the forecast and the count goes beyond the
+ * forecast's funded drops. Otherwise (older backends without the field, manual
+ * mode, or a balance that funds exactly the forecast) callers keep the
+ * forecast-window wording, which is then exact.
  */
 export function getSubscriptionFundedDropsAtCurrentSettings(
   coverage:
@@ -123,7 +125,7 @@ export function getSubscriptionFundedDropsAtCurrentSettings(
   if (
     typeof count !== "number" ||
     !Number.isSafeInteger(count) ||
-    count < (coverage?.fully_funded_drops ?? 0) ||
+    count <= (coverage?.fully_funded_drops ?? 0) ||
     !isSubscriptionCoverageFundedToForecastEnd(coverage)
   ) {
     return null;
@@ -264,6 +266,26 @@ export function getFundedDropsLabel(
   );
 }
 
+function getCompactFundedDropsLabel(
+  locale: SupportedLocale,
+  coverage: ApiSubscriptionCoverage
+): string {
+  const fundedAtCurrentSettings =
+    getSubscriptionFundedDropsAtCurrentSettings(coverage);
+  if (fundedAtCurrentSettings) {
+    return getFundedDropsAtCurrentSettingsLabel(
+      locale,
+      fundedAtCurrentSettings
+    );
+  }
+  if (isSubscriptionCoverageForecastFullyFunded(coverage)) {
+    return t(locale, "subscriptions.coverage.summary.nextFundedDrops", {
+      count: formatInteger(locale, coverage.fully_funded_drops),
+    });
+  }
+  return getFundedDropsLabel(locale, coverage.fully_funded_drops);
+}
+
 export function getSubscriptionCoverageCompactLine(
   locale: SupportedLocale,
   coverage: ApiSubscriptionCoverage
@@ -281,17 +303,7 @@ export function getSubscriptionCoverageCompactLine(
     coverage.status !== ApiSubscriptionCoverageStatus.NoUpcomingSelections &&
     coverage.status !== ApiSubscriptionCoverageStatus.Unknown
   ) {
-    const fundedAtCurrentSettings =
-      getSubscriptionFundedDropsAtCurrentSettings(coverage);
-    parts.push(
-      fundedAtCurrentSettings
-        ? getFundedDropsAtCurrentSettingsLabel(locale, fundedAtCurrentSettings)
-        : isSubscriptionCoverageForecastFullyFunded(coverage)
-        ? t(locale, "subscriptions.coverage.summary.nextFundedDrops", {
-            count: formatInteger(locale, coverage.fully_funded_drops),
-          })
-        : getFundedDropsLabel(locale, coverage.fully_funded_drops)
-    );
+    parts.push(getCompactFundedDropsLabel(locale, coverage));
   }
 
   return parts.join(" · ");

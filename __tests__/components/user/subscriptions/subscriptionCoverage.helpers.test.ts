@@ -176,6 +176,12 @@ describe("subscription coverage helpers", () => {
           funded_drops_at_current_settings: null,
         } as ApiSubscriptionCoverage)
       ).toBeNull();
+      expect(
+        getSubscriptionFundedDropsAtCurrentSettings({
+          ...atForecastEnd,
+          funded_drops_at_current_settings: 24,
+        } as ApiSubscriptionCoverage)
+      ).toBeNull();
     });
   });
 
