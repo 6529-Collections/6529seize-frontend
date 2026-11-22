@@ -11,7 +11,10 @@ import { ApiProfileClassification } from "@/generated/models/ApiProfileClassific
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
-import type { ChainIdentity } from "@/lib/chain-identity/gateway";
+import {
+  ChainGatewayError,
+  type ChainIdentity,
+} from "@/lib/chain-identity/gateway";
 import { PROFILE_DOC_KEYS, type ProfileDoc } from "@/lib/chain-identity/profileDoc";
 import {
   nextProfileFields,
@@ -63,6 +66,18 @@ const draftOf = (doc: ProfileDoc | null): Draft => {
     draft[key] = doc?.fields.get(key) ?? "";
   }
   return draft;
+};
+
+/** Why the current document can't be read, in the person's words. */
+const readErrorKey = (error: unknown) => {
+  const code = error instanceof ChainGatewayError ? error.code : null;
+  if (code === "import_running") {
+    return "chainIdentity.profile.readErrorImport" as const;
+  }
+  if (code === "imported_doc_missing") {
+    return "chainIdentity.profile.readErrorImportedDoc" as const;
+  }
+  return "chainIdentity.profile.readError" as const;
 };
 
 /**
@@ -145,7 +160,7 @@ export default function ChainIdentityProfile({
     >
       {current.isError && (
         <p role="alert" className={`${CHAIN_HINT_CLASS} tw-mb-3`}>
-          {t(locale, "chainIdentity.profile.readError")}
+          {t(locale, readErrorKey(current.error))}
         </p>
       )}
       {current.data?.unreadable === true && (

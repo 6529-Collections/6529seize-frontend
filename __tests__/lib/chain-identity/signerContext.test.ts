@@ -66,3 +66,17 @@ it("gives nothing for a malformed answer", async () => {
   lookup.mockResolvedValueOnce({ read: { height: 5 }, data: { principalId: "0x12" } });
   await expect(signedInChainContext()).resolves.toBeNull();
 });
+
+it("gives nothing when the principal isn't a string", async () => {
+  lookup.mockResolvedValueOnce({ read: { height: 5 }, data: { principalId: 42 } });
+  await expect(signedInChainContext()).resolves.toBeNull();
+  lookup.mockResolvedValueOnce({ read: { height: 5 }, data: {} });
+  await expect(signedInChainContext()).resolves.toBeNull();
+});
+
+it("gives nothing for an anchor that isn't a positive height", async () => {
+  for (const height of [0, -3, 1.5, "1200"]) {
+    lookup.mockResolvedValueOnce({ read: { height }, data: { principalId: PRINCIPAL } });
+    await expect(signedInChainContext()).resolves.toBeNull();
+  }
+});

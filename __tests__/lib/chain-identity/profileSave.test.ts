@@ -195,6 +195,32 @@ describe("saving the profile", () => {
     });
   });
 
+  it("never replaces the imported version 1 on a 404, even after the import", async () => {
+    gateway["getDoc"]!.mockRejectedValue(
+      new ChainGatewayError(404, "not_found", "missing")
+    );
+    // updatedHeight 9: written by the import, which finished at 50.
+    gateway["getMembership"]!.mockResolvedValue({
+      import: { completed: true, doneHeight: 50 },
+    });
+    await expect(readCurrentProfile(identity(1))).rejects.toMatchObject({
+      code: "imported_doc_missing",
+    });
+    // No doneHeight in the answer: treated as imported, to be safe.
+    gateway["getMembership"]!.mockResolvedValue({ import: { completed: true } });
+    await expect(readCurrentProfile(identity(1))).rejects.toMatchObject({
+      code: "imported_doc_missing",
+    });
+    // A version 1 written after the import (IDENTITY_CREATE with a doc) may be replaced.
+    gateway["getMembership"]!.mockResolvedValue({
+      import: { completed: true, doneHeight: 5 },
+    });
+    await expect(readCurrentProfile(identity(1))).resolves.toEqual({
+      doc: null,
+      unreadable: true,
+    });
+  });
+
   it("lets a missing or undecodable document be replaced", async () => {
     gateway["getDoc"]!.mockRejectedValue(
       new ChainGatewayError(404, "not_found", "missing")

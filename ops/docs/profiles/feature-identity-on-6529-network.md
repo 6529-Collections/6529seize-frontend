@@ -36,6 +36,13 @@ switch-on has passed (`NEXT_PUBLIC_IDENTITY_FREEZE_AT` plus 24 hours).
 Before any wallet prompt the page shows the most the change can cost, and
 then waits until the 6529 Network has made the change final.
 
+The profile site builder saves its site's place in the same profile document.
+It changes only the site's own fields and keeps every other field. It signs with this
+browser's key when there is one, without a wallet prompt, and otherwise asks
+the wallet. If someone saved the profile in the meantime, it applies the
+site change to the newer document. It never saves over a profile document it
+can't read.
+
 ## Rules to Know
 
 - A handle is 3 to 15 characters: a to z, 0 to 9 and _.
@@ -53,6 +60,11 @@ then waits until the 6529 Network has made the change final.
   account than the one that must sign.
 - `The 6529 Network is still importing identities.`: the import runs for
   about an hour after the switch-on; try again later.
+- `Your imported profile isn't in 6529's document store yet`: the profile
+  can't be changed until the store has the imported document; try again
+  later.
+- `Your current profile on the 6529 Network can't be read`: save the profile
+  once on this page, then publish the site again.
 
 ## Related Pages
 

@@ -32,7 +32,9 @@ export class ChainOperationError extends Error {
       | "rejected"
       | "failed"
       | "timeout",
-    message: string
+    message: string,
+    /** The chain's result name when it refused the change, e.g. STALE_VERSION. */
+    readonly resultName: string | null = null
   ) {
     super(message);
     this.name = "ChainOperationError";
@@ -196,6 +198,10 @@ export function verifyDraft(
     network === null || typedData.domain.salt.toLowerCase() === network,
     // The fee shown before signing is the fee the signature allows.
     canonical(header["maxFee"]) === draft.fee.maxFee,
+    // The work limit signed is the gateway's (the bound plus its margin),
+    // never one this site set or lowered: below it the chain fails the
+    // change and still takes the fee.
+    canonical(header["maxWork"]) === draft.fee.maxWork,
     sameValue(request.body, typedData.message["body"]),
     sameValue(request.principal ?? ZERO_WORD, header["principal"]),
     canonical(header["keyType"]) === String(expectedKeyType),
@@ -287,7 +293,8 @@ async function awaitFinal(
       const name = status.result?.name ?? "an unknown reason";
       throw new ChainOperationError(
         "failed",
-        `The 6529 Network refused this change: ${name}.`
+        `The 6529 Network refused this change: ${name}.`,
+        status.result?.name ?? null
       );
     }
     if (status?.status === "final") {

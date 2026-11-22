@@ -23,15 +23,17 @@ export async function signedInChainContext(
     wallet,
     signal
   );
-  const principal = answer?.data?.principalId.toLowerCase();
-  const anchor = answer?.read?.height;
+  // The answer is the gateway's JSON: check its types, not just its shape.
+  const principalId: unknown = answer?.data?.principalId;
+  const anchor: unknown = answer?.read?.height;
   if (
-    principal === undefined ||
-    !PRINCIPAL.test(principal) ||
-    anchor === undefined ||
-    !Number.isSafeInteger(anchor)
+    typeof principalId !== "string" ||
+    !PRINCIPAL.test(principalId.toLowerCase()) ||
+    typeof anchor !== "number" ||
+    !Number.isSafeInteger(anchor) ||
+    anchor <= 0
   ) {
     return null;
   }
-  return { principal, anchor };
+  return { principal: principalId.toLowerCase(), anchor };
 }

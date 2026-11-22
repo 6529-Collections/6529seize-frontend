@@ -323,7 +323,13 @@ export const chainGateway = {
   /** The import's state: `import.completed` once every record is written. */
   getMembership: (signal?: AbortSignal) =>
     request<
-      { readonly import?: { readonly completed?: boolean } | null } | undefined
+      | {
+          readonly import?: {
+            readonly completed?: boolean;
+            readonly doneHeight?: number;
+          } | null;
+        }
+      | undefined
     >("GET", "/v1/membership", { signal }),
 
   /** The wallet's identity at the finalized height, with the read stamp. */

@@ -41,9 +41,10 @@ interface CurrentProfile {
  * The identity's current document. A failed fetch, or bytes whose hash
  * isn't the CID, throws: nothing is saved over a document this browser
  * couldn't get. A document the store doesn't have (404) reads as unreadable
- * only once the import has completed: imported documents go into the store
- * around the switch-on, and replacing one before it arrives would lose
- * fields only the import sets (cms.archive). Bytes of the CID that aren't a
+ * only once the import has completed and only when it isn't the imported
+ * version 1 (written at or below the import's doneHeight): replacing an
+ * imported document that hasn't reached the store would lose fields only
+ * the import sets (cms.archive). Bytes of the CID that aren't a
  * ProfileDoc.v1 read as unreadable. The page warns, and saving replaces it.
  */
 export async function readCurrentProfile(
@@ -61,12 +62,26 @@ export async function readCurrentProfile(
     if (!(error instanceof ChainGatewayError) || error.status !== 404) {
       throw error;
     }
-    const membership = await chainGateway.getMembership(signal);
-    if (membership?.import?.completed !== true) {
+    const imported = (await chainGateway.getMembership(signal))?.import;
+    if (imported?.completed !== true) {
       throw new ChainGatewayError(
         503,
         "import_running",
         "The 6529 Network is still importing identities. Try again in a few minutes."
+      );
+    }
+    // The imported document itself (version 1, written by the import) is
+    // never replaced on a 404: it holds fields only the import sets.
+    const doneHeight = imported.doneHeight;
+    if (
+      identity.profile?.version === 1 &&
+      (typeof doneHeight !== "number" ||
+        identity.profile.updatedHeight <= doneHeight)
+    ) {
+      throw new ChainGatewayError(
+        503,
+        "imported_doc_missing",
+        "Your imported profile isn't in the document store yet. Try again later."
       );
     }
     return { doc: null, unreadable: true };

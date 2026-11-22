@@ -1,10 +1,17 @@
 import { ratingDraft, RATER, TARGET, WALLET } from "./chainDraftFixture";
+import { chainGateway } from "@/lib/chain-identity/gateway";
 import {
   digestOf,
   normalizeWalletSignature,
+  runOperation,
   verifyDraft,
 } from "@/lib/chain-identity/operation";
 import { ratingSet } from "@/lib/chain-identity/identityOps";
+
+jest.mock("@/lib/chain-identity/gateway", () => ({
+  ...jest.requireActual("@/lib/chain-identity/gateway"),
+  chainGateway: { draft: jest.fn(), submit: jest.fn(), getTx: jest.fn() },
+}));
 
 const walletRequest = (value = 5n) =>
   ratingSet(
@@ -146,6 +153,59 @@ describe("what the signature is bound to", () => {
     const draft = ratingDraft();
     const shownLower = { ...draft, fee: { ...draft.fee, maxFee: "1" } };
     expect(() => verifyDraft(shownLower, request, primaryType)).toThrow();
+  });
+
+  it("refuses a signed maxWork below the draft's", () => {
+    const { request, primaryType } = walletRequest();
+    const draft = ratingDraft();
+    // The gateway's draft says bound plus margin; the header to be signed
+    // (its digest is the txId) carries less.
+    const workAbove = {
+      ...draft,
+      fee: { ...draft.fee, maxWork: String(124_200 + 100_000) },
+    };
+    expect(() => verifyDraft(workAbove, request, primaryType)).toThrow();
+  });
+
+  it("never signs a session key's REP or NIC below the draft's maxWork", async () => {
+    const keyId = `0x${"33".repeat(32)}` as const;
+    const grantId = `0x${"44".repeat(32)}` as const;
+    const { request, primaryType } = ratingSet(
+      RATER,
+      { kind: "session", keyId, grantId },
+      { matter: "REP", target: TARGET, category: "Art", value: 5n, priorVersion: 0 }
+    );
+    const draft = ratingDraft({ keyType: 2, keyId, authRef: grantId });
+    const sign = jest.fn();
+    (chainGateway.draft as jest.Mock).mockResolvedValue({
+      ...draft,
+      fee: { ...draft.fee, maxWork: String(124_200 + 100_000) },
+    });
+    await expect(
+      runOperation(request, primaryType, { keyType: 2, sign })
+    ).rejects.toMatchObject({ reason: "draft_mismatch" });
+    expect(sign).not.toHaveBeenCalled();
+    expect(chainGateway.submit).not.toHaveBeenCalled();
+  });
+
+  it("never asks the gateway for its own maxWork, fee cap or tip", () => {
+    const keyId = `0x${"33".repeat(32)}` as const;
+    const grantId = `0x${"44".repeat(32)}` as const;
+    for (const actor of [
+      { kind: "wallet", address: WALLET } as const,
+      { kind: "session", keyId, grantId } as const,
+    ]) {
+      const { request } = ratingSet(RATER, actor, {
+        matter: "NIC",
+        target: TARGET,
+        category: null,
+        value: 5n,
+        priorVersion: 0,
+      });
+      for (const key of ["maxWork", "maxFee", "tipPerRu"]) {
+        expect(request).not.toHaveProperty(key);
+      }
+    }
   });
 
   it("refuses another domain version", () => {

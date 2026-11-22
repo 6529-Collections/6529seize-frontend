@@ -134,5 +134,7 @@
   "chainIdentity.chainDelegations.to": "To {delegate}",
   "chainIdentity.addressPlaceholder": "0x…",
   "chainIdentity.action.signingDocument": "Check your wallet: sign your profile first.",
-  "chainIdentity.profile.readError": "Your current profile couldn't be read, so it can't be changed yet. Try again in a minute."
+  "chainIdentity.profile.readError": "Your current profile couldn't be read, so it can't be changed yet. Try again in a minute.",
+  "chainIdentity.profile.readErrorImport": "The 6529 Network is still importing identities. You can change your profile once that is done, usually within an hour.",
+  "chainIdentity.profile.readErrorImportedDoc": "Your imported profile isn't in 6529's document store yet, so it can't be changed. Try again later."
 }
