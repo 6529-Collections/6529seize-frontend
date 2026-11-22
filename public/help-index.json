@@ -5392,6 +5392,7 @@
         "The Memes subscriptions are an optional way to mint eligible Meme Cards remotely without being online at mint time, with estimated gas savings of about 80% for one card and up to 98% for ten cards funded by one ETH transfer.",
         "Subscriptions are not a mintpass and do not create extra allowlist access.",
         "The setup path is: connect a wallet, open the profile Subscriptions tab, add a completely non-refundable ETH balance, choose Automatic or Manual mode, and select or skip upcoming eligible cards.",
+        "The subscription balance pays only for subscription airdrops, used automatically in the phase the subscriber is eligible for. It cannot pay for a card the user mints manually on the minting page, and ETH sent to seize.6529.eth is not refunded.",
         "The /about/subscriptions primary action says Connect to Subscribe when a wallet or profile handoff is needed and Manage when the user can continue to their profile subscription settings.",
         "Users manage their subscription mode, balance, airdrop address, top-ups, upcoming drops, and history under their profile Subscriptions tab.",
         "On desktop, Subscription History is a separate section with Redeemed, Log History and Top Up History pills. Below 1024px, the Subscription History row opens the same tabs and records in the shared bottom sheet. Selection and pagination are preserved during refreshes and resizing.",
