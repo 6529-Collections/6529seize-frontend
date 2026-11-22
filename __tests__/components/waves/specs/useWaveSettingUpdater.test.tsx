@@ -100,3 +100,37 @@ it("closes an unchanged chat edit without authenticating or sending a patch", ()
   expect(auth.requestAuth).not.toHaveBeenCalled();
   expect(close).toHaveBeenCalled();
 });
+
+it("turns admin post deletion on with a single wave patch", async () => {
+  const wave = createMockApiWave({
+    author,
+    wave: { admin_drop_deletion_enabled: false } as ApiWave["wave"],
+  });
+  const { result } = renderHook(() => useWaveSettingUpdater(wave), {
+    wrapper: Wrapper,
+  });
+  const close = jest.fn();
+  act(() => result.current.saveAdminDropDeletion(close, true));
+  await waitFor(() =>
+    expect(updateWaveHub).toHaveBeenCalledWith(wave.id, {
+      admin_drop_deletion_enabled: true,
+    })
+  );
+  expect(close).toHaveBeenCalled();
+  expect(onWaveCreated).toHaveBeenCalled();
+});
+
+it("closes an unchanged admin post deletion edit without sending a patch", () => {
+  const wave = createMockApiWave({
+    author,
+    wave: { admin_drop_deletion_enabled: true } as ApiWave["wave"],
+  });
+  const { result } = renderHook(() => useWaveSettingUpdater(wave), {
+    wrapper: Wrapper,
+  });
+  const close = jest.fn();
+  act(() => result.current.saveAdminDropDeletion(close, true));
+  expect(updateWaveHub).not.toHaveBeenCalled();
+  expect(auth.requestAuth).not.toHaveBeenCalled();
+  expect(close).toHaveBeenCalled();
+});
