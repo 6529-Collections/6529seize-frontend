@@ -12,6 +12,7 @@ import {
 } from "./record-event";
 import { familyWave } from "./record-families";
 import {
+  isWellFormed,
   RECORD_GRANT_SCOPE,
   RECORD_KEY_MAX_BYTES,
   RECORD_TYPE_PATTERN,
@@ -19,7 +20,10 @@ import {
 } from "./record-kinds";
 import { toBase64Url } from "./sealed-crypto";
 
-/** What a caller asks to sign: the kind, stream, refs and body. */
+/**
+ * What a caller asks to sign: the kind, stream, refs and body.
+ * @api
+ */
 export interface RecordDraft {
   readonly kind: RecordKind;
   readonly wave: string;
@@ -27,7 +31,10 @@ export interface RecordDraft {
   readonly body: object | null;
 }
 
-/** A RECORD (kind 9): refs [type] or [type, key]; a null body unsets the key. */
+/**
+ * A RECORD (kind 9): refs [type] or [type, key]; a null body unsets the key.
+ * @api
+ */
 export function recordDraft(
   family: "ps" | "pv",
   owner: string,
@@ -37,6 +44,9 @@ export function recordDraft(
 ): RecordDraft {
   if (!RECORD_TYPE_PATTERN.test(type)) {
     throw new Error(`Invalid record type: ${type}`);
+  }
+  if (key !== null && !isWellFormed(key)) {
+    throw new Error("Record key is not well-formed Unicode");
   }
   if (
     key !== null &&
@@ -52,7 +62,10 @@ export function recordDraft(
   };
 }
 
-/** A SEALED (kind 10) draft from the `c` bytes of sealed-crypto. */
+/**
+ * A SEALED (kind 10) draft from the `c` bytes of sealed-crypto.
+ * @api
+ */
 export function sealedDraft(
   wave: string,
   label: string,
@@ -69,12 +82,45 @@ export function sealedDraft(
   };
 }
 
+/**
+ * A SEALED (kind 10) reference to a payload stored apart: its sha256 and
+ * size (at most 4 MiB). Upload the payload with the same principal's
+ * session that writes this record.
+ * @api
+ */
+export function payloadDraft(
+  wave: string,
+  label: string,
+  sha256: string,
+  size: number
+): RecordDraft {
+  if (!RECORD_TYPE_PATTERN.test(label)) {
+    throw new Error(`Invalid sealed label: ${label}`);
+  }
+  if (
+    !/^0x[0-9a-f]{64}$/.test(sha256) ||
+    !Number.isSafeInteger(size) ||
+    size < 1 ||
+    size > 4 * 1024 * 1024
+  ) {
+    throw new Error("A payload is a sha256 and 1 byte to 4 MiB");
+  }
+  return {
+    kind: RecordKind.SEALED,
+    wave,
+    refs: [label],
+    body: { h: sha256, n: size, v: 1 },
+  };
+}
+
+/** @api */
 export interface SignRecordsOptions {
   /** A finalized chain height, from the anchor source drops use. */
   readonly anchor: number;
   readonly signal?: AbortSignal | undefined;
 }
 
+/** @api */
 export type SignRecordsResult =
   | {
       readonly status: "signed";
@@ -159,6 +205,7 @@ async function signAll(
  * person sees no wallet prompt. Records are always signed: there is no
  * unsigned fallback. The retry prompt and the "turn on signing" grant flow
  * belong to the call sites, which word their own action.
+ * @api
  */
 export async function signRecords(
   drafts: readonly RecordDraft[],

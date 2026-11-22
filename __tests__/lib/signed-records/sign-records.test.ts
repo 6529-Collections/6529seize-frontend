@@ -24,6 +24,7 @@ jest.mock("@/lib/device-signing/own-profile-session", () => ({
 }));
 
 import {
+  payloadDraft,
   recordDraft,
   sealedDraft,
   signRecords,
@@ -110,6 +111,29 @@ describe("signRecords", () => {
     expect(result).toEqual({
       status: "signed",
       events: [follow],
+      grantId: inputs.authRef,
+    });
+  });
+
+  it("signs exactly the backend's unset vector (no body)", async () => {
+    const unset = RECORD_VECTORS.followUnset;
+    jest.useFakeTimers({ now: unset.claimed_time });
+    mockAllocateDeviceSeq.mockResolvedValueOnce(await allocation(unset.seq));
+    const result = await signRecords(
+      [
+        recordDraft(
+          "ps",
+          inputs.principal,
+          "follow",
+          `identity:${inputs.target}`,
+          null
+        ),
+      ],
+      { anchor: unset.anchor }
+    );
+    expect(result).toEqual({
+      status: "signed",
+      events: [unset],
       grantId: inputs.authRef,
     });
   });
@@ -214,6 +238,36 @@ describe("drafts, streams, order and transport", () => {
       family: "cv",
       owner: "group-1",
     });
+    expect(() =>
+      recordDraft("ps", inputs.principal, "follow", "\uD800", {})
+    ).toThrow("well-formed");
+  });
+
+  it("takes a bare wallet as the owner of a public stream only", () => {
+    expect(
+      recordDraft("ps", inputs.author, "subs.mode", null, { automatic: true })
+    ).toEqual({
+      kind: RecordKind.RECORD,
+      wave: `ps/${inputs.author}`,
+      refs: ["subs.mode"],
+      body: { automatic: true },
+    });
+    expect(() => recordDraft("pv", inputs.author, "reader", "k", {})).toThrow(
+      "Invalid pv owner"
+    );
+  });
+
+  it("builds payload references within 4 MiB", () => {
+    const wave = familyWave("pv", inputs.principal);
+    expect(payloadDraft(wave, "cms", `0x${"a".repeat(64)}`, 2048)).toEqual({
+      kind: RecordKind.SEALED,
+      wave,
+      refs: ["cms"],
+      body: { h: `0x${"a".repeat(64)}`, n: 2048, v: 1 },
+    });
+    expect(() =>
+      payloadDraft(wave, "cms", `0x${"a".repeat(64)}`, 5 * 1024 * 1024)
+    ).toThrow("4 MiB");
   });
 
   it("orders like the backend", () => {

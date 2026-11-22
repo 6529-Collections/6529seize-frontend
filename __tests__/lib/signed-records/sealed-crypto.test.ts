@@ -51,7 +51,7 @@ describe("sealed items", () => {
       deviceKey: inputs.deviceKey,
       senderKey,
       items: [{ t: "mute", k: inputs.target, b: {} }],
-      nonce: hexToBytes(inputs.sealNonce),
+      fixedNonceForTests: hexToBytes(inputs.sealNonce),
     });
     expect(bytesToHex(c)).toBe(RECORD_VECTORS.sealedSettings.c);
     expect(c).toEqual(sealedBodyBytes(RECORD_VECTORS.sealedSettings.event));
@@ -97,6 +97,45 @@ describe("sealed items", () => {
         items: [{ t: "mute", k: "x", b: null }],
       })
     ).rejects.toThrow("Unknown sealed class");
+  });
+
+  it("checks items as the backend does: types first, well-formed keys", async () => {
+    const seal = (item: unknown) =>
+      sealItems({
+        wave: PV_WAVE,
+        cls: SealedClass.PROVIDER,
+        gen: 1,
+        deviceKey: inputs.deviceKey,
+        senderKey,
+        items: [item as never],
+      });
+    // A number type would pass the pattern once coerced to "123".
+    await expect(seal({ t: 123, k: "x", b: {} })).rejects.toThrow(
+      "Sealed item"
+    );
+    await expect(seal({ t: "mute", k: 7, b: {} })).rejects.toThrow(
+      "Sealed item"
+    );
+    await expect(seal({ t: "mute", k: "\uD800", b: {} })).rejects.toThrow(
+      "Sealed item"
+    );
+    await expect(seal({ t: "mute", k: "x", b: [] })).rejects.toThrow(
+      "Sealed item"
+    );
+  });
+
+  it("takes a fixed nonce only of 12 bytes", async () => {
+    await expect(
+      sealItems({
+        wave: PV_WAVE,
+        cls: SealedClass.PROVIDER,
+        gen: 1,
+        deviceKey: inputs.deviceKey,
+        senderKey,
+        items: [{ t: "mute", k: "x", b: null }],
+        fixedNonceForTests: new Uint8Array(11),
+      })
+    ).rejects.toThrow("12 bytes");
   });
 
   it("pads to the buckets with a random nonce", async () => {

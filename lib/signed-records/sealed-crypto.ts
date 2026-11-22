@@ -1,5 +1,9 @@
 import { canonicalJson } from "@/lib/device-signing/canonical-json";
-import { RECORD_KEY_MAX_BYTES, RECORD_TYPE_PATTERN } from "./record-kinds";
+import {
+  isWellFormed,
+  RECORD_KEY_MAX_BYTES,
+  RECORD_TYPE_PATTERN,
+} from "./record-kinds";
 
 /**
  * Sealed record contents. A device seals items under its own sender key S
@@ -7,11 +11,13 @@ import { RECORD_KEY_MAX_BYTES, RECORD_TYPE_PATTERN } from "./record-kinds";
  * HKDF-SHA256 / AES-128-GCM) to each reader: 6529.io's provider keys for the
  * PROVIDER class, the person's other devices later. WebCrypto only; the
  * backend's node:crypto version reads and writes the same bytes.
+ * @api
  */
 export const SealedClass = { PROVIDER: 1, OWN: 2 } as const;
 
 const SealedFormat = { ITEMS: 0x01, KEYS: 0x02 } as const;
 
+/** @api */
 export interface SealedItem {
   readonly t: string;
   readonly k: string;
@@ -19,6 +25,7 @@ export interface SealedItem {
   readonly b: Record<string, unknown> | null;
 }
 
+/** @api */
 export interface KeyWrap {
   readonly cls: number;
   readonly gen: number;
@@ -28,6 +35,7 @@ export interface KeyWrap {
   readonly ct: string;
 }
 
+/** @api */
 export interface KeysDocument {
   readonly v: 1;
   readonly dev: string;
@@ -35,6 +43,7 @@ export interface KeysDocument {
   readonly wraps: readonly KeyWrap[];
 }
 
+/** @api */
 export interface ProviderPublicKey {
   readonly id: string;
   readonly publicKey: Uint8Array;
@@ -101,6 +110,7 @@ const fromHex = (hex: string): Uint8Array<ArrayBuffer> => {
 const toHex = (bytes: Uint8Array): string =>
   `0x${Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
 
+/** @api */
 export function toBase64Url(bytes: Uint8Array): string {
   let binary = "";
   for (const byte of bytes) {
@@ -112,6 +122,7 @@ export function toBase64Url(bytes: Uint8Array): string {
     .replace(/=+$/, "");
 }
 
+/** @api */
 export function fromBase64Url(text: string): Uint8Array<ArrayBuffer> {
   const padded = text.replaceAll("-", "+").replaceAll("_", "/");
   const binary = atob(padded + "=".repeat((4 - (padded.length % 4)) % 4));
@@ -196,7 +207,10 @@ async function x25519PrivateFromRaw(raw: Uint8Array): Promise<CryptoKey> {
   );
 }
 
-/** Whether this browser offers X25519 in WebCrypto, which sealing needs. */
+/**
+ * Whether this browser offers X25519 in WebCrypto, which sealing needs.
+ * @api
+ */
 export async function isSealSupported(): Promise<boolean> {
   try {
     const pair = (await subtle().generateKey(X25519, true, [
@@ -211,6 +225,7 @@ export async function isSealSupported(): Promise<boolean> {
 /**
  * One HPKE base-mode seal (sequence 0). `ephemeralPrivateKey` is for test
  * vectors only; real wraps use a fresh key.
+ * @api
  */
 export async function hpkeSealBase(args: {
   readonly recipientPublicKey: Uint8Array;
@@ -305,19 +320,27 @@ async function x25519PublicOfPrivate(raw: Uint8Array): Promise<Uint8Array> {
 
 const utf8Length = (value: string): number => encoder.encode(value).length;
 
-function checkItem(item: SealedItem): SealedItem {
-  const body = item.b;
+/** The same checks as the backend's: types first, so nothing is coerced. */
+function checkItem(value: unknown): SealedItem {
+  const item = value as Partial<SealedItem> | null;
+  const body = item?.b;
   const bodyValid =
-    body === null || (typeof body === "object" && !Array.isArray(body));
+    body === null ||
+    (typeof body === "object" && body !== undefined && !Array.isArray(body));
   if (
+    typeof item !== "object" ||
+    item === null ||
+    typeof item.t !== "string" ||
     !RECORD_TYPE_PATTERN.test(item.t) ||
+    typeof item.k !== "string" ||
+    !isWellFormed(item.k) ||
     utf8Length(item.k) > RECORD_KEY_MAX_BYTES ||
     !bodyValid ||
     Object.keys(item).length !== 3
   ) {
     throw new Error('Sealed item must be {"t","k","b"}');
   }
-  return { t: item.t, k: item.k, b: body };
+  return { t: item.t, k: item.k, b: body ?? null };
 }
 
 function checkClassAndGeneration(cls: number, gen: number): void {
@@ -382,7 +405,10 @@ function unpad(plaintext: Uint8Array): Uint8Array {
   return plaintext.subarray(4, 4 + length);
 }
 
-/** Seals items under a sender key; returns the `c` bytes of a SEALED body. */
+/**
+ * Seals items under a sender key; returns the `c` bytes of a SEALED body.
+ * @api
+ */
 export async function sealItems(args: {
   readonly wave: string;
   readonly cls: number;
@@ -390,8 +416,8 @@ export async function sealItems(args: {
   readonly deviceKey: string;
   readonly senderKey: Uint8Array;
   readonly items: readonly SealedItem[];
-  /** For test vectors only; real seals use a random nonce. */
-  readonly nonce?: Uint8Array | undefined;
+  /** Test vectors only: production seals always take a random nonce. */
+  readonly fixedNonceForTests?: Uint8Array | undefined;
 }): Promise<Uint8Array> {
   checkClassAndGeneration(args.cls, args.gen);
   if (!DEVICE_KEY.test(args.deviceKey)) {
@@ -400,9 +426,15 @@ export async function sealItems(args: {
   if (args.items.length === 0) {
     throw new Error("Nothing to seal");
   }
+  if (
+    args.fixedNonceForTests !== undefined &&
+    args.fixedNonceForTests.length !== NONCE_BYTES
+  ) {
+    throw new Error("A nonce is 12 bytes");
+  }
   const items = args.items.map(checkItem);
   const nonce =
-    args.nonce ??
+    args.fixedNonceForTests ??
     globalThis.crypto.getRandomValues(new Uint8Array(NONCE_BYTES));
   const header = concat(
     new Uint8Array([SealedFormat.ITEMS, args.cls]),
@@ -423,7 +455,10 @@ export async function sealItems(args: {
   return concat(header, new Uint8Array(ct));
 }
 
-/** Opens format 0x01 (the person's own devices, and tests). */
+/**
+ * Opens format 0x01 (the person's own devices, and tests).
+ * @api
+ */
 export async function openSealedItems(args: {
   readonly wave: string;
   readonly bytes: Uint8Array;
@@ -461,12 +496,22 @@ export async function openSealedItems(args: {
   } catch {
     throw new Error("Sealed items do not open with this key");
   }
-  const text = decoder.decode(unpad(plaintext));
-  const doc = JSON.parse(text) as { items?: SealedItem[]; v?: number };
+  let doc: { items?: unknown; v?: unknown };
+  let text: string;
+  try {
+    // Fatal decoding: invalid UTF-8 is refused, never replaced.
+    text = decoder.decode(unpad(plaintext));
+    doc = JSON.parse(text) as { items?: unknown; v?: unknown };
+  } catch {
+    throw new Error("Sealed items are not UTF-8 JSON");
+  }
   if (
+    typeof doc !== "object" ||
+    doc === null ||
     doc.v !== 1 ||
     !Array.isArray(doc.items) ||
     doc.items.length === 0 ||
+    Object.keys(doc).length !== 2 ||
     canonicalJson(doc) !== text
   ) {
     throw new Error('Sealed items must be canonical {"items","v":1}');
@@ -481,10 +526,14 @@ export async function openSealedItems(args: {
 
 // ---- Keys documents (format 0x02) and wraps ----
 
+/** @api */
 export const providerRecipient = (provider: Pick<ProviderPublicKey, "id">) =>
   `svc:${provider.id}`;
 
-/** Wraps a sender key to a provider key, for a `keys` record. */
+/**
+ * Wraps a sender key to a provider key, for a `keys` record.
+ * @api
+ */
 export async function wrapSenderKey(args: {
   readonly wave: string;
   readonly cls: number;
@@ -515,6 +564,7 @@ export async function wrapSenderKey(args: {
   };
 }
 
+/** @api */
 export function encodeKeysDocument(doc: KeysDocument): Uint8Array {
   return concat(
     new Uint8Array([SealedFormat.KEYS]),

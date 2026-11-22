@@ -1,6 +1,7 @@
 /**
  * Record streams are named `<family>/<owner>` in the event's signed `wave`
  * field. A drop's wave never contains `/`, so the two never collide.
+ * @api
  */
 export type RecordFamily =
   | "ps"
@@ -30,12 +31,30 @@ const FAMILIES: readonly RecordFamily[] = [
 
 const PRINCIPAL_FAMILIES: readonly RecordFamily[] = ["ps", "pv", "bk"];
 const PRINCIPAL_ID_PATTERN = /^0x[0-9a-f]{64}$/;
+const WALLET_PATTERN = /^0x[0-9a-f]{40}$/;
 const OWNER_PATTERN = /^[0-9A-Za-z._:-]{1,128}$/;
 
 const isRecordFamily = (value: string): value is RecordFamily =>
   (FAMILIES as readonly string[]).includes(value);
 
-/** Parses a record stream; null for a drop's wave or a malformed stream. */
+/**
+ * A principal for ps, pv and bk; for ps also a bare wallet bound to no
+ * principal (subscriptions); a lane-defined id for the other families.
+ */
+function isValidOwner(family: RecordFamily, owner: string): boolean {
+  if (!PRINCIPAL_FAMILIES.includes(family)) {
+    return OWNER_PATTERN.test(owner);
+  }
+  return (
+    PRINCIPAL_ID_PATTERN.test(owner) ||
+    (family === "ps" && WALLET_PATTERN.test(owner))
+  );
+}
+
+/**
+ * Parses a record stream; null for a drop's wave or a malformed stream.
+ * @api
+ */
 export function parseFamilyWave(wave: string): FamilyWave | null {
   const slash = wave.indexOf("/");
   if (slash < 0 || slash !== wave.lastIndexOf("/")) {
@@ -46,12 +65,10 @@ export function parseFamilyWave(wave: string): FamilyWave | null {
   if (!isRecordFamily(family)) {
     return null;
   }
-  const valid = PRINCIPAL_FAMILIES.includes(family)
-    ? PRINCIPAL_ID_PATTERN.test(owner)
-    : OWNER_PATTERN.test(owner);
-  return valid ? { family, owner } : null;
+  return isValidOwner(family, owner) ? { family, owner } : null;
 }
 
+/** @api */
 export function familyWave(family: RecordFamily, owner: string): string {
   const wave = `${family}/${owner}`;
   if (!parseFamilyWave(wave)) {

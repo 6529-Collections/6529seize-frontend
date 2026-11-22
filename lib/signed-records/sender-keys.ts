@@ -4,6 +4,7 @@ import { createStore, get, set } from "@/lib/storage/idb-keyval";
  * This device's sender keys, one per (device key, sealed class), with a
  * generation that rises on rotation. Raw bytes, so the device can wrap them
  * to its readers again; they live only in this browser's IndexedDB.
+ * @api
  */
 export interface SenderKey {
   readonly deviceKey: string;
@@ -40,16 +41,33 @@ async function withSenderKeyLock<T>(
   );
 }
 
-function newKey(deviceKey: string, cls: number, gen: number): SenderKey {
+/**
+ * A new key's generation is the current Unix second, or one more than the
+ * last one this store knew. If this store is lost while the device key
+ * stays, a new key never reuses a generation 6529.io already holds a key
+ * for (it would refuse the second key).
+ */
+function nextGeneration(previous: number | undefined): number {
+  return Math.max((previous ?? 0) + 1, Math.floor(Date.now() / 1000));
+}
+
+function newKey(
+  deviceKey: string,
+  cls: number,
+  previous: number | undefined
+): SenderKey {
   return {
     deviceKey: deviceKey.toLowerCase(),
     cls,
-    gen,
+    gen: nextGeneration(previous),
     key: globalThis.crypto.getRandomValues(new Uint8Array(32)),
   };
 }
 
-/** This device's current sender key for the class, created on first use. */
+/**
+ * This device's current sender key for the class, created on first use.
+ * @api
+ */
 export async function getOrCreateSenderKey(
   deviceKey: string,
   cls: number
@@ -60,13 +78,16 @@ export async function getOrCreateSenderKey(
     if (existing) {
       return existing;
     }
-    const created = newKey(deviceKey, cls, 1);
+    const created = newKey(deviceKey, cls, undefined);
     await set(id, created, getStore());
     return created;
   });
 }
 
-/** Starts the next generation: after a revoked grant or a provider key change. */
+/**
+ * Starts the next generation: after a revoked grant or a provider key change.
+ * @api
+ */
 export async function rotateSenderKey(
   deviceKey: string,
   cls: number
@@ -74,7 +95,7 @@ export async function rotateSenderKey(
   return await withSenderKeyLock(deviceKey, async () => {
     const id = storageKey(deviceKey, cls);
     const existing = await get<SenderKey>(id, getStore());
-    const rotated = newKey(deviceKey, cls, (existing?.gen ?? 0) + 1);
+    const rotated = newKey(deviceKey, cls, existing?.gen);
     await set(id, rotated, getStore());
     return rotated;
   });

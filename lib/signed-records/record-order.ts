@@ -10,6 +10,7 @@ interface RecordOrderKey {
   readonly eventId: string;
 }
 
+/** @api */
 export function orderKeyOf(event: SignedRecordEvent): RecordOrderKey {
   return {
     anchor: event.anchor,
@@ -25,6 +26,7 @@ const compareValues = <T extends number | string>(a: T, b: T): number => {
   return a < b ? -1 : 1;
 };
 
+/** @api */
 export function compareOrderKeys(a: RecordOrderKey, b: RecordOrderKey): number {
   return (
     compareValues(a.anchor, b.anchor) ||

@@ -6,7 +6,10 @@ import {
 } from "@/lib/device-signing/interim-event";
 import type { RecordKind } from "./record-kinds";
 
-/** A signed record on the wire: the relays' SignedEvent, field for field. */
+/**
+ * A signed record on the wire: the relays' SignedEvent, field for field.
+ * @api
+ */
 export interface SignedRecordEvent {
   readonly id: string;
   readonly kind: RecordKind;
@@ -27,10 +30,15 @@ export interface SignedRecordEvent {
   readonly signature: string;
 }
 
+/** @api */
 export const RECORD_KIND_VERSION = INTERIM_EVENT_KIND_VERSION;
+/** @api */
 export const RECORD_KEY_TYPE = ED25519_KEY_TYPE;
 
-/** The EIP-712 digest of a record's signed fields (its event id). */
+/**
+ * The EIP-712 digest of a record's signed fields (its event id).
+ * @api
+ */
 export function computeRecordEventId(
   event: Omit<SignedRecordEvent, "id" | "signature">
 ): Hex {
@@ -51,9 +59,13 @@ export function computeRecordEventId(
   });
 }
 
+/** @api */
 export const SIGNED_RECORDS_HEADER = "x-6529-signed-records";
 
-/** base64url of the UTF-8 JSON array, for the `x-6529-signed-records` header. */
+/**
+ * base64url of the UTF-8 JSON array, for the `x-6529-signed-records` header.
+ * @api
+ */
 export function encodeSignedRecordsHeader(
   events: readonly SignedRecordEvent[]
 ): string {

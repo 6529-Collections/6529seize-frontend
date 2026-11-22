@@ -49,7 +49,10 @@
       "ops/scripts/build-delegation-docs-content.mjs",
       "playwright.config.ts",
       "tests/support/composerSandboxServer.cjs",
-      "services/**/index.{ts,tsx}"
+      "services/**/index.{ts,tsx}",
+      // Signed records: a library other lanes' call sites import; its public
+      // exports carry `/** @api */`.
+      "lib/signed-records/*.ts"
     ],
 
     // 3) Paths: Knip auto-imports TS path aliases from tsconfig,
@@ -87,10 +90,6 @@
       // optimistic send (A3), whose PR removes these.
       "lib/chat-store/**": ["files", "exports", "types"],
       "lib/action-lifecycle/**": ["files", "exports", "types"],
-      // Signed records (personal settings, subscriptions and admin records on
-      // the relays): the call sites import it in their own PRs, and the first
-      // of them removes this exemption.
-      "lib/signed-records/**": ["files", "exports", "types"],
       // Backend operation-code catalog; several codes are intentionally
       // declared before the tool implements them (see inline comments).
       "components/allowlist-tool/allowlist-tool.types.ts": ["enumMembers"],
