@@ -93,6 +93,7 @@ export type WalletRequestRefusal =
   | "sign-in-message"
   | "unknown-message"
   | "unknown-typed-data"
+  | "unknown-transaction"
   | "wrong-wallet"
   | "wrong-origin"
   | "statement-mismatch"
@@ -331,6 +332,15 @@ function describeTypedData(
   return refuse("unknown-typed-data");
 }
 
+/** The refusal for a request whose description threw. */
+const REFUSAL_ON_ERROR: Readonly<
+  Record<WalletRequest["method"], WalletRequestRefusal>
+> = {
+  personal_sign: "unknown-message",
+  eth_signTypedData_v4: "unknown-typed-data",
+  eth_sendTransaction: "unknown-transaction",
+};
+
 /** The description itself; may throw on odd input (see below). */
 function describeUnchecked(
   request: WalletRequest,
@@ -356,6 +366,10 @@ function describeUnchecked(
       value: { kind: "message", text, format, payloadHash, content },
     };
   }
+  // Transactions are not described here yet, so none is offered.
+  if (request.method === "eth_sendTransaction") {
+    return refuse("unknown-transaction");
+  }
   return describeTypedData(request.typedData, request, pageOrigin);
 }
 
@@ -372,10 +386,6 @@ export function describeWalletRequest(
   try {
     return describeUnchecked(request, pageOrigin);
   } catch {
-    return refuse(
-      request.method === "personal_sign"
-        ? "unknown-message"
-        : "unknown-typed-data"
-    );
+    return refuse(REFUSAL_ON_ERROR[request.method]);
   }
 }
