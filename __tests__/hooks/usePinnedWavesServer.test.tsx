@@ -267,7 +267,7 @@ test.each([0, 1])(
     jest.mocked(getWalletAddress).mockReturnValue("0xabc");
     await mutationFn("wave");
     if (index === 0) {
-      expect(pinnedWavesApi.pinWave).toHaveBeenCalledWith("wave", []);
+      expect(pinnedWavesApi.pinWave).toHaveBeenCalledWith("wave");
     } else {
       expect(pinnedWavesApi.unpinWave).toHaveBeenCalledWith("wave");
     }
@@ -306,7 +306,7 @@ test.each(["pinWave", "unpinWave"] as const)(
     const index = action === "pinWave" ? 0 : 1;
     await useMutationMock.mock.calls[index][0].mutationFn("wave");
     if (action === "pinWave") {
-      expect(pinnedWavesApi.pinWave).toHaveBeenCalledWith("wave", []);
+      expect(pinnedWavesApi.pinWave).toHaveBeenCalledWith("wave");
     } else {
       expect(pinnedWavesApi.unpinWave).toHaveBeenCalledWith("wave");
     }

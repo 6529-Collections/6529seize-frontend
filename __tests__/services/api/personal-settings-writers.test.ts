@@ -158,6 +158,13 @@ interface WriterCase {
   readonly setup?: () => void;
 }
 
+/** GET v2/waves/pinned as the API answers it: each pin with its saved position. */
+const savedPinsAnswer = (pins: [string, number | null][]) =>
+  pins.map(([id, position]) => ({
+    id,
+    context_profile_context: { pinned: true, pinned_position: position },
+  }));
+
 const items = (...list: PersonalChange["items"]): PersonalChange => ({
   follows: [],
   items: list,
@@ -386,17 +393,21 @@ const CASES: readonly WriterCase[] = [
     recordsResult: { enabled: false },
   },
   {
-    name: "pin a wave after the pins shown",
-    write: () => pinnedWavesApi.pinWave("wave-3", ["wave-1", "wave-2"]),
+    name: "pin a wave after the saved pins, writing only the new pin",
+    // The pins as saved, read fresh: positions with room after the last.
+    setup: () =>
+      jest.mocked(commonApiFetch).mockResolvedValue(
+        savedPinsAnswer([
+          ["wave-1", 0],
+          ["wave-2", 1024],
+        ])
+      ),
+    write: () => pinnedWavesApi.pinWave("wave-3"),
     legacy: [
       jest.mocked(commonApiPostWithoutBodyAndResponse),
       { endpoint: "waves/wave-3/pins" },
     ],
-    change: items(
-      { t: "pin", k: "wave-1", b: { pos: 0 } },
-      { t: "pin", k: "wave-2", b: { pos: 1 } },
-      { t: "pin", k: "wave-3", b: { pos: 2 } }
-    ),
+    change: items({ t: "pin", k: "wave-3", b: { pos: 2048 } }),
   },
   {
     name: "unpin a wave",
@@ -405,7 +416,14 @@ const CASES: readonly WriterCase[] = [
     change: items({ t: "pin", k: "wave-1", b: null }),
   },
   {
-    name: "reorder pinned waves",
+    name: "reorder pinned waves, writing only the pin that moves",
+    setup: () =>
+      jest.mocked(commonApiFetch).mockResolvedValue(
+        savedPinsAnswer([
+          ["wave-1", 0],
+          ["wave-2", 1024],
+        ])
+      ),
     write: () =>
       pinnedWavesApi.updateOrder({
         previous_wave_ids: ["wave-1", "wave-2"],
@@ -421,10 +439,8 @@ const CASES: readonly WriterCase[] = [
         },
       },
     ],
-    change: items(
-      { t: "pin", k: "wave-2", b: { pos: 0 } },
-      { t: "pin", k: "wave-1", b: { pos: 1 } }
-    ),
+    // wave-2 keeps its position; wave-1 moves after it.
+    change: items({ t: "pin", k: "wave-1", b: { pos: 2048 } }),
     recordsResult: { wave_ids: ["wave-2", "wave-1"] },
   },
   {

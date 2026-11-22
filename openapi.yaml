@@ -45426,6 +45426,13 @@ components:
           type: boolean
         pinned:
           type: boolean
+        pinned_position:
+          type: integer
+          format: int64
+          nullable: true
+          description: >-
+            Only in GET /v2/waves/pinned: the pin's saved position (pins are
+            shown in ascending position); null while none is saved.
         can_chat:
           type: boolean
         can_reply:

@@ -76,6 +76,127 @@ export const pinItem = (
   b: position === null ? null : { pos: position },
 });
 
+/** A pin as the API saved it: its position, or null when none is saved. */
+export interface SavedPin {
+  readonly id: string;
+  readonly position: number | null;
+}
+
+// New positions leave room, so a later move rewrites one pin.
+const PIN_SPACING = 1024;
+// The highest position a pin record may carry.
+const PIN_POSITION_MAX = 1_000_000;
+
+/**
+ * The saved positions that already rise along the order, as many as
+ * possible (the longest strictly rising subsequence, n <= 100); every
+ * other entry is null.
+ */
+function longestRisingRun(
+  saved: readonly (number | null)[]
+): (number | null)[] {
+  // run[i] is the length of the best run ending at i; from[i] the index
+  // before i in it.
+  const run: number[] = saved.map(() => 0);
+  const from: number[] = saved.map(() => -1);
+  let best = -1;
+  saved.forEach((position, i) => {
+    if (position === null) return;
+    let length = 1;
+    for (let j = 0; j < i; j += 1) {
+      const before = saved[j] ?? null;
+      const through = (run[j] ?? 0) + 1;
+      if (before !== null && before < position && through > length) {
+        length = through;
+        from[i] = j;
+      }
+    }
+    run[i] = length;
+    if (best < 0 || length > (run[best] ?? 0)) best = i;
+  });
+  const kept: (number | null)[] = saved.map(() => null);
+  for (let i = best; i >= 0; i = from[i] ?? -1) {
+    kept[i] = saved[i] ?? null;
+  }
+  return kept;
+}
+
+/**
+ * `count` positions strictly between `below` and `above` (null: no pin on
+ * that side), spread out; after the last pin, PIN_SPACING apart. Null
+ * when they don't fit.
+ */
+function positionsBetween(
+  below: number | null,
+  above: number | null,
+  count: number
+): number[] | null {
+  if (above === null) {
+    const first = below ?? -PIN_SPACING;
+    if (first + PIN_SPACING * count > PIN_POSITION_MAX) return null;
+    return Array.from(
+      { length: count },
+      (_, k) => first + PIN_SPACING * (k + 1)
+    );
+  }
+  const floor = below ?? -1;
+  const step = Math.floor((above - floor) / (count + 1));
+  if (step < 1) return null;
+  return Array.from({ length: count }, (_, k) => floor + step * (k + 1));
+}
+
+/**
+ * Positions that keep as many saved pins as possible and fit the others
+ * between them: the longest run of saved positions already rising along
+ * `order` stays, and each gap gets positions spread between its
+ * neighbours. Null when a gap has no room.
+ */
+function keptPositions(
+  saved: readonly (number | null)[]
+): (number | null)[] | null {
+  const target = longestRisingRun(saved);
+  for (let start = 0; start < target.length; ) {
+    if (target[start] !== null) {
+      start += 1;
+      continue;
+    }
+    let end = start;
+    while (end < target.length && target[end] === null) end += 1;
+    const fill = positionsBetween(
+      start > 0 ? (target[start - 1] ?? null) : null,
+      end < target.length ? (target[end] ?? null) : null,
+      end - start
+    );
+    if (!fill) return null;
+    fill.forEach((position, k) => {
+      target[start + k] = position;
+    });
+    start = end;
+  }
+  return target;
+}
+
+/**
+ * The pin items that put `order` (wave ids, first shown first) in place,
+ * given the positions the API saved: only pins whose position changes. A
+ * new pin has no saved position. When moved pins don't fit between the
+ * kept ones, the whole order is spaced out again.
+ */
+export function pinChanges(
+  order: readonly string[],
+  saved: readonly SavedPin[]
+): SealedItem[] {
+  const savedAt = new Map(saved.map((pin) => [pin.id, pin.position]));
+  const target =
+    keptPositions(order.map((id) => savedAt.get(id) ?? null)) ??
+    order.map((_, index) => index * PIN_SPACING);
+  return order.flatMap((id, index) =>
+    target[index] === (savedAt.get(id) ?? null)
+      ? []
+      : [pinItem(id, target[index] ?? null)]
+  );
+}
+
 /** A wave's notification settings: every drop, and the groups whose mentions notify. */
 export const waveNotifyItem = (
   waveId: string,

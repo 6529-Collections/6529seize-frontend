@@ -16,6 +16,10 @@ import { HttpFile } from '../http/http';
 export class ApiWaveOverviewContextProfileContext {
     'subscribed': boolean;
     'pinned': boolean;
+    /**
+    * Only in GET /v2/waves/pinned: the pin\'s saved position (pins are shown in ascending position); null while none is saved.
+    */
+    'pinned_position'?: number | null;
     'can_chat': boolean;
     /**
     * Whether the profile may reply to drops in this wave. Waves with open replies allow this outside the chat group.
@@ -60,6 +64,12 @@ export class ApiWaveOverviewContextProfileContext {
             "baseName": "pinned",
             "type": "boolean",
             "format": ""
+        },
+        {
+            "name": "pinned_position",
+            "baseName": "pinned_position",
+            "type": "number",
+            "format": "int64"
         },
         {
             "name": "can_chat",
