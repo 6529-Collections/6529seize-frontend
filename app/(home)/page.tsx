@@ -3,10 +3,9 @@ import { publicEnv } from "@/config/env";
 import HomePageContent from "@/components/home/HomePageContent";
 import JsonLdScript from "@/lib/structured-data/json-ld";
 import { buildHomePageJsonLd } from "@/lib/structured-data/site";
+import { DEFAULT_LOCALE } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import type { Metadata } from "next";
-
-const ROOT_PAGE_DESCRIPTION =
-  "A peer-to-peer protocol for network organizations. Decentralized, permissionless, and global. Anyone can fund, build, and coordinate network-scaled organizations or public goods.";
 
 export default function Page() {
   return (
@@ -25,13 +24,14 @@ export function generateMetadata(): Metadata {
     },
     { canonicalPath: "/" }
   );
+  const description = t(DEFAULT_LOCALE, "home.meta.description");
 
   return {
     ...metadata,
-    description: ROOT_PAGE_DESCRIPTION,
+    description,
     openGraph: {
       ...metadata.openGraph,
-      description: ROOT_PAGE_DESCRIPTION,
+      description,
     },
   };
 }

@@ -33,11 +33,11 @@ describe("HeroHeader", () => {
     expect(heading).not.toHaveClass("tw-font-medium");
   });
 
-  it("keeps hyphenated headline words on one line", () => {
+  it("keeps hyphenated headline words together", () => {
     render(<HeroHeader />);
 
     const heading = screen.getByRole("heading", { level: 1 });
-    const unbroken = heading.querySelector(".tw-whitespace-nowrap");
+    const unbroken = heading.querySelector(".tw-inline-block");
 
     expect(heading).toHaveTextContent(
       "A peer-to-peer protocol for network organizations"
