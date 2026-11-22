@@ -160,6 +160,9 @@ async function signAll(
   }
   const events: SignedRecordEvent[] = [];
   let grantId: string | null = null;
+  // Claimed times rise through the batch, so its records order as drafted
+  // even when the batch goes out in several submits.
+  let earliest = options.notBefore ?? 0;
   for (const draft of drafts) {
     if (options.signal?.aborted) {
       throw new DOMException("Signing was cancelled", "AbortError");
@@ -190,12 +193,13 @@ async function signAll(
       auth_ref: grant.id.toLowerCase(),
       seq,
       anchor: options.anchor,
-      claimed_time: Math.max(Date.now(), options.notBefore ?? 0),
+      claimed_time: Math.max(Date.now(), earliest),
       refs: [...draft.refs],
       body: canonical,
       body_hash: bodyHash,
       body_size: bodySize,
     };
+    earliest = fields.claimed_time + 1;
     const id = computeRecordEventId(fields);
     const signature = await signEventId(record.keyPair.privateKey, id);
     events.push({ ...fields, id, signature });

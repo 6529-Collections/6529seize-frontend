@@ -233,6 +233,30 @@ describe("signRecords", () => {
     ).rejects.toThrow("notBefore");
   });
 
+  it("claims rising times through one batch, so its records order as drafted", async () => {
+    jest.useFakeTimers({ now: 1_800_000_000_000 });
+    try {
+      mockAllocateDeviceSeq
+        .mockResolvedValueOnce(await allocation(31))
+        .mockResolvedValueOnce(await allocation(32))
+        .mockResolvedValueOnce(await allocation(33));
+      const draft = recordDraft("ps", inputs.principal, "follow", "k", {});
+      const signed = await signRecords([draft, draft, draft], {
+        anchor: 1,
+        notBefore: 1_800_000_000_005,
+      });
+      if (signed.status !== "signed") {
+        throw new Error("not signed");
+      }
+      // The clock does not move: each record still claims a later time.
+      expect(signed.events.map((event) => event.claimed_time)).toEqual([
+        1_800_000_000_005, 1_800_000_000_006, 1_800_000_000_007,
+      ]);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("needs an anchor and something to sign", async () => {
     const draft = recordDraft("ps", inputs.principal, "follow", "k", {});
     await expect(signRecords([draft], { anchor: 0 })).rejects.toThrow("anchor");
