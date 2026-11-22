@@ -3,8 +3,9 @@ import { commonApiFetch } from "@/services/api/common-api";
 
 /**
  * How long one answer serves later writes. A record may anchor up to
- * `maxAnchorLag` heights (an hour) behind the finalized head, so a minute
- * old anchor is always taken, and a burst of writes asks once.
+ * `maxAnchorLag` heights behind the finalized head: 120 heights, about one
+ * hour of 30-second slots (P61 slotMs). A minute-old anchor is always
+ * taken, and a burst of writes asks once.
  */
 const ANCHOR_REUSE_MS = 60_000;
 

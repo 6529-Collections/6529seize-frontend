@@ -12,7 +12,7 @@ const ANSWER = {
   anchor: 1200,
   head_height: 1203,
   finalized_time: 1_764_000_000_000,
-  max_anchor_lag: 300,
+  max_anchor_lag: 120,
 };
 
 beforeEach(() => {
@@ -26,7 +26,7 @@ describe("fetchRecordAnchor", () => {
     await expect(fetchRecordAnchor(1_000)).resolves.toEqual({
       anchor: 1200,
       finalizedTime: 1_764_000_000_000,
-      maxAnchorLag: 300,
+      maxAnchorLag: 120,
     });
     expect(mockFetch).toHaveBeenCalledWith(
       expect.objectContaining({
