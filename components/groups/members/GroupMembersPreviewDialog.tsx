@@ -31,7 +31,6 @@ import {
   fetchGroupMembersPage,
   GROUP_MEMBERS_SEARCH_MAX_LENGTH,
   getGroupMembersTargetKey,
-  getGroupMembersTargetName,
   type GroupMembersPreviewTarget,
 } from "@/services/api/group-members-api";
 
@@ -282,11 +281,6 @@ export default function GroupMembersPreviewDialog({
     placeholderData: keepPreviousData,
   });
 
-  const targetName = getGroupMembersTargetName(target);
-  const groupName =
-    typeof targetName === "string" && targetName.trim().length > 0
-      ? targetName
-      : t(locale, "waves.create.groups.selectedGroup");
   const totalPages = Math.max(1, Math.ceil((data?.count ?? 0) / PAGE_SIZE));
   const hasMembers = (data?.data.length ?? 0) > 0;
   const showSkeleton = !hasMembers && (isLoading || isFetching);
@@ -297,10 +291,7 @@ export default function GroupMembersPreviewDialog({
 
   return (
     <MobileWrapperDialog
-      title={t(locale, "waves.create.groups.members.dialogTitle", {
-        role: roleLabel,
-        group: groupName,
-      })}
+      title={roleLabel}
       isOpen
       onClose={onClose}
       tall

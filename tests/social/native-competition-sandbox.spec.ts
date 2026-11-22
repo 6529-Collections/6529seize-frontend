@@ -1493,7 +1493,8 @@ async function openLockedSubmissionRules(page: Page, draft: string) {
   await expect(details).toBeFocused();
   await expect(
     details.getByRole("link", {
-      name: "Inspect Sandbox Submission Club group criteria and members",
+      name: "25 users",
+      exact: true,
     })
   ).toBeVisible();
   await page.keyboard.press("Tab");
@@ -3755,11 +3756,22 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(restriction).toContainText(
       "You don't have permission to submit in this wave"
     );
+    const memberCount = restriction.getByRole("link", {
+      name: "25 users",
+      exact: true,
+    });
+    const criteria = "TDH at least 100 and Level at least 1";
+    await expect(memberCount).toBeVisible();
+    await expect(memberCount).toHaveAttribute(
+      "href",
+      "/network?page=1&group=sandbox-submission-club"
+    );
+    await expect(memberCount).toHaveAccessibleDescription(criteria);
+    await expect(memberCount).not.toHaveAttribute("title");
     await expect(
-      restriction.getByRole("link", {
-        name: "Inspect Sandbox Submission Club group criteria and members",
-      })
+      restriction.getByText(criteria, { exact: true })
     ).toBeVisible();
+    await expect(restriction).not.toContainText("Sandbox Submission Club");
     await expect
       .poll(() =>
         restriction
@@ -3832,11 +3844,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.keyboard.press("Space");
     await expect(restriction).toBeFocused();
     await page.keyboard.press("Tab");
-    await expect(
-      restriction.getByRole("link", {
-        name: "Inspect Sandbox Submission Club group criteria and members",
-      })
-    ).toBeFocused();
+    await expect(memberCount).toBeFocused();
     await page.keyboard.press("Tab");
     await expect(
       restriction.getByRole("link", { name: "View submission rules" })
@@ -12391,6 +12399,74 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   });
 
+  test("shows curation group criteria and opens its member list from Wave Configuration", async ({
+    page,
+  }, testInfo) => {
+    const groupId = composerSandboxConstants.previewGroupId;
+    const criteria = "TDH at least 100 and Level at least 1";
+    await installCompetitionApi(page);
+    await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+      route.fulfill({
+        json: [
+          {
+            id: "art-curation",
+            name: "Art",
+            wave_id: WAVE,
+            group_id: groupId,
+            created_at: 1,
+            updated_at: 1,
+            priority_order: 1,
+          },
+        ],
+      })
+    );
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    const waveUrl = page.url();
+    const information = await openWaveInformation(page);
+    const configuration = information.getByRole("tab", {
+      name: "Configuration",
+      exact: true,
+    });
+    await configuration.click();
+    const curations = information
+      .getByRole("heading", { name: "Curations", exact: true })
+      .locator("xpath=ancestor::section[1]");
+    const memberLink = curations.getByRole("link", {
+      name: "Inspect Active collectors group criteria and members: 25 users",
+    });
+    await expect(memberLink.getByText(criteria, { exact: true })).toBeVisible();
+    await expect(memberLink).toHaveAccessibleDescription(criteria);
+    await expect(curations.getByText("Art", { exact: true })).toBeVisible();
+    await expect(
+      curations.getByText("Active collectors", { exact: true })
+    ).toHaveCount(0);
+    await expect(
+      curations.getByRole("button", { name: "Configure Art", exact: true })
+    ).toBeVisible();
+    await expectNoHorizontalOverflow(page);
+    await curations.screenshot({
+      path: testInfo.outputPath("curation-group-criteria.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+
+    await memberLink.focus();
+    await expect(memberLink).toBeFocused();
+    await memberLink.press("Enter");
+    await expect(page).toHaveURL(`/network?page=1&group=${groupId}`, {
+      timeout: LOCAL_SANDBOX_NAVIGATION_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("button", { name: "Clear selected group", exact: true })
+    ).toBeVisible();
+    await page.goBack();
+    await expect(page).toHaveURL(waveUrl);
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await expect(configuration).toHaveAttribute("aria-selected", "true");
+      await expect(memberLink).toBeVisible();
+    }
+  });
+
   test("keeps Cancel in desktop Wave setting popovers", async ({
     page,
   }, testInfo) => {
@@ -12422,6 +12498,53 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(trigger).toBeFocused();
     await trigger.click();
     await expect(checkbox).toBeChecked({ checked });
+  });
+
+  test("opens curator criteria inside one desktop dialog", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name !== "web-desktop-chromium",
+      "Desktop criteria editor coverage."
+    );
+    await installCompetitionApi(page);
+    await page.goto(`/waves/${WAVE}?tab=chat`);
+    await openWaveInformation(page);
+    await page.getByRole("tab", { name: "Configuration", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Create curation", exact: true })
+      .click();
+    const curation = page.getByRole("dialog", {
+      name: "Create curation",
+      exact: true,
+    });
+    await curation
+      .getByRole("textbox", { name: "Name", exact: true })
+      .fill("Art");
+    const editCriteria = curation.getByRole("button", {
+      name: "Edit criteria",
+      exact: true,
+    });
+    await editCriteria.click();
+    const editor = page.getByRole("dialog", {
+      name: "Edit criteria",
+      exact: true,
+    });
+    await expect(
+      editor.getByRole("button", { name: /^Identities/ })
+    ).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(1);
+    await expectNoHorizontalOverflow(page);
+    await page.screenshot({
+      path: testInfo.outputPath("curation-criteria-editor-desktop.png"),
+      animations: "disabled",
+      style: "nextjs-portal { visibility: hidden; }",
+    });
+    await editor.getByRole("button", { name: "Cancel", exact: true }).click();
+    await expect(editCriteria).toBeFocused();
+    await expect(
+      curation.getByRole("textbox", { name: "Name", exact: true })
+    ).toHaveValue("Art");
   });
 
   test("keeps Configuration editors inside the tablet information panel", async ({
@@ -12751,6 +12874,32 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         `**/api/waves/${WAVE}/curations/${curation.id}`,
         async (route) => {
           expect(route.request().method()).toBe("POST");
+          expect(route.request().postDataJSON()).toEqual({
+            name: "Updated art",
+            criteria: {
+              group: {
+                tdh: { min: 200, max: null, inclusion_strategy: "TDH" },
+                cic: {
+                  min: null,
+                  max: null,
+                  direction: "RECEIVED",
+                  user_identity: null,
+                },
+                rep: {
+                  min: null,
+                  max: null,
+                  direction: "RECEIVED",
+                  user_identity: null,
+                  category: null,
+                },
+                level: { min: 1, max: null },
+                owns_nfts: [],
+                identity_addresses: null,
+                excluded_identity_addresses: null,
+              },
+              is_private: true,
+            },
+          });
           writes++;
           if (failSave)
             return route.fulfill({
@@ -12758,7 +12907,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               json: { error: "Sandbox curation save failed" },
             });
           const body = route.request().postDataJSON();
-          curation = { ...curation, name: body.name, group_id: body.group_id };
+          curation = {
+            ...curation,
+            name: body.name,
+            group_id: "curation-criteria",
+          };
           await route.fulfill({ json: curation });
         }
       );
@@ -12791,16 +12944,21 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(
         sheet.getByRole("button", { name: "Create", exact: true })
       ).toBeDisabled();
-      await sheet.getByRole("button", { name: /Active collectors/ }).click();
-      await sheet
-        .getByRole("button", { name: "Change group", exact: true })
-        .click();
-      const groupSearch = sheet.getByRole("textbox", {
-        name: "Search by group name",
+      const editCriteria = sheet.getByRole("button", {
+        name: "Edit criteria",
         exact: true,
       });
-      await expect(groupSearch).toBeVisible();
-      await expect(groupSearch).toBeFocused();
+      await editCriteria.click();
+      const criteriaEditor = sheet.getByRole("group", {
+        name: "Edit criteria",
+        exact: true,
+      });
+      await criteriaEditor.getByRole("button", { name: /^Identities/ }).click();
+      const identitySearch = criteriaEditor.getByPlaceholder(
+        "Search identities to include..."
+      );
+      await identitySearch.click();
+      await expect(identitySearch).toBeFocused();
       await page.evaluate(() => {
         const viewport = globalThis.visualViewport!;
         Object.defineProperty(viewport, "height", {
@@ -12811,7 +12969,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await expect
         .poll(() =>
-          groupSearch.evaluate((element) => {
+          identitySearch.evaluate((element) => {
             const bounds = element.getBoundingClientRect();
             let container = element.parentElement;
             while (
@@ -12835,10 +12993,20 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         viewport.dispatchEvent(new Event("resize"));
       });
       await expect(sheet).toHaveCount(1);
-      await sheet
-        .getByRole("button", { name: "Back to selected group", exact: true })
+      await criteriaEditor
+        .getByRole("button", { name: "Cancel", exact: true })
+        .click();
+      await expect(editCriteria).toBeFocused();
+      await expect(name).toHaveValue("Unsaved curation");
+      await editCriteria.click();
+      await criteriaEditor
+        .getByRole("button", { name: "Save changes", exact: true })
         .click();
       await expect(name).toHaveValue("Unsaved curation");
+      await expect(sheet.getByText("1 explicitly included user")).toBeVisible();
+      await expect(
+        sheet.getByRole("button", { name: "Create", exact: true })
+      ).toBeEnabled();
       await sheet.getByRole("button", { name: "Back", exact: true }).click();
       await expect(create).toBeFocused();
       await expect(configuration).toHaveAttribute("aria-selected", "true");
@@ -12858,7 +13026,42 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(sheet).toHaveAccessibleName("Edit curation");
       await expectSheetTop(sheet, header!.y);
       await expect(name).toHaveValue("Art");
+      await expect(
+        sheet.getByText("Active collectors", { exact: true })
+      ).toBeHidden();
+      await expect(
+        sheet.getByText("25 users", { exact: true }).filter({ visible: true })
+      ).toBeVisible();
+      await expect(
+        sheet.getByText(/TDH at least 100/).filter({ visible: true })
+      ).toBeVisible();
+      await sheet
+        .getByRole("button", { name: "View members", exact: true })
+        .click();
+      const curatorsDialog = page.getByRole("dialog", {
+        name: "Eligible curators",
+        exact: true,
+      });
+      await expect(
+        curatorsDialog.getByText("collector-01", { exact: true })
+      ).toBeVisible();
+      await curatorsDialog
+        .getByRole("button", { name: "Close", exact: true })
+        .click();
+      await expect(sheet).toHaveAccessibleName("Edit curation");
       await name.fill("Updated art");
+      await editCriteria.click();
+      await criteriaEditor.getByRole("button", { name: /^TDH/ }).click();
+      const tdh = criteriaEditor.getByLabel("TDH at least", { exact: true });
+      await expect(tdh).toHaveValue("100");
+      await tdh.fill("200");
+      await criteriaEditor
+        .getByText("Hide criteria and members", { exact: true })
+        .click();
+      await criteriaEditor
+        .getByRole("button", { name: "Save changes", exact: true })
+        .click();
+      await expect(sheet.getByText(/TDH at least 200/)).toBeVisible();
       await sheet.getByRole("button", { name: "Save", exact: true }).click();
       await expect(
         page
@@ -12866,6 +13069,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .filter({ hasText: "Sandbox curation save failed" })
       ).toBeVisible();
       await expect(name).toHaveValue("Updated art");
+      await expect(sheet.getByText(/TDH at least 200/)).toBeVisible();
       await expect(sheet).toHaveAccessibleName("Edit curation");
       failSave = false;
       await sheet.getByRole("button", { name: "Save", exact: true }).click();

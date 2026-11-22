@@ -9,7 +9,8 @@ export type AiInstallerKind =
   | "windows"
   | "linux-x64"
   | "linux-x64-cuda"
-  | "linux-arm64";
+  | "linux-arm64"
+  | "linux-arm64-cuda";
 
 /** File names in code-unit order: technical names, not words to collate. */
 function compareNames(a: string, b: string): number {
@@ -91,6 +92,16 @@ const INSTALLERS: readonly InstallerRule[] = [
     detail: DEB_NEEDS,
     needs: `${DEB_NEEDS}, 64-bit ARM`,
   },
+  // 64-bit ARM with an NVIDIA GPU, such as NVIDIA's DGX Spark.
+  {
+    kind: "linux-arm64-cuda",
+    family: "linux",
+    system: "linux-arm64-cuda",
+    pattern: /_arm64\.deb$/,
+    label: DEB,
+    detail: DEB_NEEDS,
+    needs: `${DEB_NEEDS}, 64-bit ARM, NVIDIA driver 575 or later`,
+  },
 ];
 
 const ARCHIVE_DETAILS: Readonly<Record<AiSystem, string>> = {
@@ -99,6 +110,7 @@ const ARCHIVE_DETAILS: Readonly<Record<AiSystem, string>> = {
   "linux-x86_64-cpu": "Any Linux with systemd",
   "linux-x86_64-cuda": "Any Linux with systemd",
   "linux-arm64-cpu": "Any Linux with systemd",
+  "linux-arm64-cuda": "Any Linux with systemd",
 };
 
 const FAMILY_OF_SYSTEM: Readonly<Record<AiSystem, AiFileFamily>> = {
@@ -107,6 +119,7 @@ const FAMILY_OF_SYSTEM: Readonly<Record<AiSystem, AiFileFamily>> = {
   "linux-x86_64-cpu": "linux",
   "linux-x86_64-cuda": "linux",
   "linux-arm64-cpu": "linux",
+  "linux-arm64-cuda": "linux",
 };
 
 const CHECK_FILES: Readonly<Record<string, string>> = {
@@ -178,7 +191,8 @@ export function groupAiReleaseFiles(release: AiRelease): AiReleaseDownloads {
   }
   const order = INSTALLERS.map((entry) => entry.kind);
   installers.sort((a, b) => order.indexOf(a.kind) - order.indexOf(b.kind));
-  // The archives in the buttons' order (x86-64, CUDA, ARM64), then by name.
+  // The archives in the buttons' order (x86-64, its CUDA, ARM64, its
+  // CUDA), then by name.
   const systemOrder = INSTALLERS.map((entry) => entry.system);
   const rank = (entry: AiFileEntry) => {
     const index = entry.file.system

@@ -1,8 +1,13 @@
-import { publicEnv } from "@/config/env";
+import {
+  getMediaOrigin,
+  PROD_MEDIA_ORIGIN,
+} from "@/lib/media/first-party-media";
 
-const CLOUDFRONT_DOMAIN =
-  publicEnv.NEXT_PUBLIC_CLOUDFRONT_DOMAIN ??
-  "https://d3lqz0a4bldqgf.cloudfront.net";
+/**
+ * Renditions live next to the original, on the same CDN: this build's media
+ * CDN for new uploads and the prod CDN for older ones.
+ */
+const RENDITION_ORIGINS = [...new Set([getMediaOrigin(), PROD_MEDIA_ORIGIN])];
 
 interface VideoConversions {
   readonly MP4_1080P: string;
@@ -14,23 +19,21 @@ interface VideoConversions {
 }
 
 /**
- * Build the "renditions/drops/..." path from the relative path
- */
-function buildRenditionUrl(path: string): string {
-  return `${CLOUDFRONT_DOMAIN}/renditions/drops/${path}`;
-}
-
-/**
  * From an original "drops/..." CloudFront URL, derive HLS / MP4 renditions.
  */
 export function getVideoConversions(
   originalUrl: string
 ): VideoConversions | null {
-  // Must start with "/drops/"
-  const prefix = `${CLOUDFRONT_DOMAIN}/drops/`;
-  if (!originalUrl.startsWith(prefix)) {
+  // Must start with "<media CDN>/drops/"
+  const origin = RENDITION_ORIGINS.find((candidate) =>
+    originalUrl.startsWith(`${candidate}/drops/`)
+  );
+  if (!origin) {
     return null;
   }
+  // Build the "renditions/drops/..." URL from the relative path
+  const buildRenditionUrl = (path: string) =>
+    `${origin}/renditions/drops/${path}`;
 
   // Isolate everything after "/drops/"
   const [_, afterDrops] = originalUrl.split("/drops/");

@@ -16,7 +16,6 @@ export type GroupMembersPreviewTarget =
   | {
       readonly kind: "draft";
       readonly group: ApiCreateGroupDescription;
-      readonly name: string;
       readonly summary: string;
     };
 
@@ -72,12 +71,6 @@ export function getGroupMembersTargetKey(
   return target.kind === "saved"
     ? [target.kind, target.group.id]
     : [target.kind, target.group];
-}
-
-export function getGroupMembersTargetName(
-  target: GroupMembersPreviewTarget
-): string {
-  return target.kind === "saved" ? target.group.name : target.name;
 }
 
 export async function fetchGroupMembersPage({

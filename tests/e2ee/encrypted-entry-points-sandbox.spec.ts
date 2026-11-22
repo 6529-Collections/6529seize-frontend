@@ -53,6 +53,171 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     await closeE2eeUsers(open);
   });
 
+  test("the Messages gear opens privacy settings with independent saves", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    sessions = [alice];
+    const { page } = alice;
+    const preferences = {
+      direct_message_policy: "EVERYONE",
+      direct_message_group_id: null,
+      direct_message_allow_people_i_follow: true,
+      direct_message_group_unavailable: false,
+      notification_level: "ALL",
+      notifications: {
+        direct_messages: true,
+        mentions_replies_quotes: true,
+        reactions_votes_boosts: true,
+        new_followers: true,
+        rep_and_nic: true,
+        subscription_coverage: true,
+      },
+    };
+    const updates: unknown[] = [];
+    let groupCreated = false;
+    await page.route("**/profile-preferences", async (route) => {
+      if (route.request().method() === "PUT") {
+        const update = route.request().postDataJSON() as Partial<
+          typeof preferences
+        >;
+        updates.push(update);
+        const notifications = {
+          ...preferences.notifications,
+          ...update.notifications,
+        };
+        Object.assign(preferences, update, { notifications });
+      }
+      await route.fulfill({ json: preferences });
+    });
+    await page.route("**/groups", async (route) => {
+      if (route.request().method() !== "POST") return route.fallback();
+      const body: unknown = route.request().postDataJSON();
+      expect(body).toMatchObject({
+        is_private: true,
+        group: { level: { min: 20 } },
+      });
+      groupCreated = true;
+      await route.fulfill({ json: { id: "dm-criteria" } });
+    });
+    await page.route("**/groups/dm-criteria/visible", (route) =>
+      route.fulfill({ json: { id: "dm-criteria", visible: true } })
+    );
+
+    await gotoPath(page, ENCRYPTED_ROUTE);
+    const gear = page.getByRole("link", { name: "Message preferences" });
+    await expect(gear).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expect(gear).toHaveAttribute("href", "/preferences?tab=messages");
+    await gear.click();
+    await expect(page).toHaveURL(/\/preferences\?tab=messages$/, {
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    const tabs = page.getByRole("navigation", { name: "Preference sections" });
+    await expect(
+      tabs.getByRole("link", { name: "Messages", exact: true })
+    ).toHaveAttribute("aria-current", "page");
+    await expect(
+      page.getByRole("checkbox", { name: "New followers" })
+    ).toHaveCount(0);
+    await page
+      .getByText("People who meet my criteria", { exact: true })
+      .click();
+    await page.getByRole("button", { name: "Set criteria" }).click();
+    const editor = page.getByRole("dialog", { name: "Who can message you" });
+    await expect(
+      editor.getByRole("button", { name: "Choose group" })
+    ).toHaveCount(0);
+    await expect(editor.getByPlaceholder("Search groups...")).toHaveCount(0);
+    await editor.getByRole("button", { name: "NIC", exact: true }).click();
+    for (const field of [
+      editor.getByLabel("From Identity", { exact: true }),
+      editor.getByRole("spinbutton", { name: "NIC at least" }),
+    ]) {
+      await expect(field).toBeVisible();
+      const colors = await field.evaluate((input) => {
+        let panel = input.parentElement;
+        while (panel) {
+          const background = getComputedStyle(panel).backgroundColor;
+          if (background !== "rgba(0, 0, 0, 0)") {
+            return {
+              panel: background,
+              input: getComputedStyle(input).backgroundColor,
+            };
+          }
+          panel = panel.parentElement;
+        }
+        throw new Error("The criteria field has no surrounding background");
+      });
+      expect(colors.input).not.toBe("rgba(0, 0, 0, 0)");
+      expect(colors.input).not.toBe(colors.panel);
+    }
+    await editor.screenshot({
+      path: testInfo.outputPath("criteria-nic-desktop.png"),
+    });
+    await editor.getByRole("button", { name: "Level", exact: true }).click();
+    const minimumLevel = editor.getByRole("spinbutton", {
+      name: "Level at least",
+    });
+    await minimumLevel.fill("20");
+    const desktopViewport = page.viewportSize();
+    if (desktopViewport) {
+      await editor.screenshot({
+        path: testInfo.outputPath("criteria-desktop.png"),
+      });
+      await page.setViewportSize({ width: 390, height: 844 });
+      await editor.getByRole("button", { name: "Back", exact: true }).click();
+      await editor.getByRole("button", { name: /^Level\b/ }).click();
+      await expect(minimumLevel).toHaveValue("20");
+      const bounds = await editor.boundingBox();
+      expect(bounds?.width).toBeLessThanOrEqual(390);
+      await editor.screenshot({
+        path: testInfo.outputPath("criteria-narrow-viewport.png"),
+      });
+      await page.setViewportSize(desktopViewport);
+    }
+    await editor.getByRole("button", { name: "Done", exact: true }).click();
+    await expect(editor).toHaveCount(0);
+    expect(groupCreated).toBe(false);
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect
+      .poll(() => updates)
+      .toEqual([
+        {
+          direct_message_policy: "GROUP_MEMBERS",
+          direct_message_group_id: "dm-criteria",
+        },
+      ]);
+    expect(groupCreated).toBe(true);
+
+    const notificationsTab = tabs.getByRole("link", {
+      name: "Notifications",
+      exact: true,
+    });
+    await notificationsTab.click();
+    await expect(notificationsTab).toHaveAttribute("aria-current", "page", {
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    await expect(
+      page.getByRole("radio", { name: "People who meet my criteria" })
+    ).toHaveCount(0);
+    await page.getByText("New followers", { exact: true }).click();
+    await expect(
+      page.getByRole("checkbox", { name: "New followers" })
+    ).not.toBeChecked();
+    await page.getByRole("button", { name: "Save", exact: true }).click();
+    await expect
+      .poll(() => updates)
+      .toEqual([
+        {
+          direct_message_policy: "GROUP_MEMBERS",
+          direct_message_group_id: "dm-criteria",
+        },
+        { notifications: { new_followers: false } },
+      ]);
+  });
+
   test("a plaintext DM is labelled and starts an encrypted chat with the same people", async ({
     baseURL,
     browser,
@@ -258,6 +423,45 @@ test.describe("Encrypted chat entry points @medium @local-only @e2ee", () => {
     expect(creationRequests).toHaveLength(1);
     expect(creationRequests[0]).toMatch(/\/e2ee\/groups$/u);
     expect((await e2eeSandboxControls.state(baseURL)).groups).toHaveLength(1);
+  });
+
+  test("the unencrypted composer shows a generic group refusal", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    sessions = [alice];
+    const { page } = alice;
+    await page.clock.setFixedTime(
+      new Date(Date.parse(LEGACY_DM_DELETION_AT) - 60_000)
+    );
+    await page.route("**/api/waves/direct-message/new", (route) =>
+      route.fulfill({
+        status: 403,
+        json: {
+          error:
+            '@carol only accepts new direct messages from members of the group "Meme Holders".',
+          code: "DM_RECIPIENT_GROUP_MEMBERS_ONLY",
+          handle: "carol",
+          group_name: "Meme Holders",
+        },
+      })
+    );
+
+    await gotoPath(page, "/messages/new");
+    await page.getByPlaceholder("Search people", { exact: true }).fill("carol");
+    await page.getByRole("button", { name: /^carol Level\b/u }).click();
+    await expect(enrollmentHeading(page)).toBeVisible({
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    await page
+      .getByRole("button", { name: "Continue unencrypted", exact: true })
+      .click();
+    const form = page.getByRole("form", { name: "New message" });
+    await expect(form.getByRole("alert")).toHaveText(
+      "@carol only accepts new direct messages from members of a group they chose."
+    );
   });
 
   test("DM policy and blocks are shown before creation and enforced at creation", async ({

@@ -66,6 +66,7 @@ const DOWNLOADS: Readonly<
     { kind: "linux-x64", label: "ai.files.linux.x64" },
     { kind: "linux-x64-cuda", label: "ai.files.linux.cuda" },
     { kind: "linux-arm64", label: "ai.files.linux.arm64" },
+    { kind: "linux-arm64-cuda", label: "ai.files.linux.arm64Cuda" },
   ],
 };
 

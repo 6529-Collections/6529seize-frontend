@@ -118,6 +118,30 @@ describe("desktopBrowserWallet", () => {
       expect(isBrowserWalletProfile(ADDRESS)).toBe(false);
     });
 
+    it("keeps sharing a new store read after an earlier read completes", async () => {
+      const earlierRead = Promise.withResolvers<unknown>();
+      const currentRead = Promise.withResolvers<unknown>();
+      store.get
+        .mockReturnValueOnce(earlierRead.promise)
+        .mockReturnValueOnce(currentRead.promise);
+      const earlierLoad = loadBrowserWalletProfiles();
+      await Promise.resolve();
+      __resetDesktopBrowserWalletForTests();
+      const currentLoad = loadBrowserWalletProfiles();
+      await Promise.resolve();
+
+      earlierRead.resolve([ADDRESS]);
+      await earlierLoad;
+      const sharedLoad = loadBrowserWalletProfiles();
+      await Promise.resolve();
+      expect(store.get).toHaveBeenCalledTimes(2);
+
+      currentRead.resolve([OTHER]);
+      await Promise.all([currentLoad, sharedLoad]);
+      expect(isBrowserWalletProfile(OTHER)).toBe(true);
+      expect(isBrowserWalletProfile(ADDRESS)).toBe(false);
+    });
+
     it("clears the store and notifies other subscribers when one throws", async () => {
       subscribeBrowserWalletProfiles(() => {
         throw new Error("listener failed");

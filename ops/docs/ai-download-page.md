@@ -40,7 +40,10 @@ issues in their own lead.
   Downloads. The Mac and Windows cards are one row each, with the system
   needs in the row's grey line; only the Linux card has a header, over
   its x86-64 / NVIDIA GPU / ARM64 switch for the `.deb` and
-  `.tar.gz`. Each file has its badges, size, a "Copy SHA-256" button (the
+  `.tar.gz`, with a fourth choice, ARM64, NVIDIA GPU, for a release that
+  has the CUDA packages for 64-bit ARM (from 0.1.0-rc.4 on). On a phone
+  the switch's choices wrap onto a second line when they don't fit on
+  one. Each file has its badges, size, a "Copy SHA-256" button (the
   hash is never printed on the page, but screen readers get it whole) and
   its download. "Verify your download" is one closed section: checking a
   file against `SHA256SUMS`, checking `SHA256SUMS.sig` with OpenSSL 3 and
@@ -275,11 +278,15 @@ offer nothing, as for the Ed25519 feed. A server that restarts reads both
 again.
 
 **The key.** The bundle's signature must be by a key that
-`lib/ai-page/releaseListKeys.ts` lists. That list is empty: 6529 AI's
-release-list key (secp256k1, in the release-signing account) waits for the
-owner's approval. Until its address and public key are added there, no
-bundle verifies, and `/ai` stays on the Ed25519 feed. The tests sign
-bundles with a test key instead.
+`lib/ai-page/releaseListKeys.ts` lists. It lists one: 6529 AI's
+release-list key, secp256k1 in AWS KMS, alias `alias/6529-ai-releases`,
+in 6529's release-signing account, made on 21 November 2026, address
+`0xe8FA289405f8Bd4227aec6256cCD412aE9d0a37B`. Its public key and address
+are also in 6529 AI's `deploy/release/release-key.pub` and its
+`ai_releases::RELEASE_KEYS`. Until a bundle signed with it is in the
+bucket, `/ai` stays on the Ed25519 feed. A successor key is added there
+beside it before the old one is retired. The tests sign bundles with a
+test key, and check that the site refuses them.
 
 ### The bundle
 
@@ -317,9 +324,10 @@ is JSON: `algorithm` `ed25519-sha256`, `public_key` (64 hex digits) and
 `signature` (128 hex digits), an Ed25519 signature (RFC 8032) over
 SHA-256(`6529 AI releases v1`, a zero byte, the feed's bytes as stored). The
 key it names must be one that `lib/ai-page/feedSigningKeys.ts` lists. That
-file pins 6529 AI's release key in AWS KMS, alias `alias/6529-ai-releases`,
-whose public half is also 6529 AI's `deploy/release/release-key.pub`. A
-successor key is added there beside it before the old one is retired.
+file pins 6529 AI's Ed25519 release key in AWS KMS, alias
+`alias/6529-ai-releases-ed25519`, whose public half is also 6529 AI's
+`deploy/release/release-key-ed25519.pub`. It signed 0.1.0-rc.1's and
+rc.2's feed and signs nothing new.
 
 A missing signature, one that does not verify, a feed larger than 64 KiB,
 a feed whose `format` is not `6529-ai-releases/1`, or one whose `sequence`
@@ -353,8 +361,8 @@ From the bundle, the validator's parser reads each release's `version`,
 
 - the system comes from the file name, as 6529 AI's release tool writes
   it: `-macos-arm64.dmg`, `-windows-x64-setup.exe`, `6529-ai_*_amd64.deb`,
-  `6529-ai-cuda_*_amd64.deb`, `6529-ai_*_arm64.deb` and the three
-  `-linux-*.tar.gz`. A file it can't place, such as `NOTES.md` or
+  `6529-ai-cuda_*_amd64.deb`, `6529-ai_*_arm64.deb`,
+  `6529-ai-cuda_*_arm64.deb` and the four `-linux-*.tar.gz`. A file it can't place, such as `NOTES.md` or
   `SHA256SUMS`, gets no button and no card on `/ai`, and is listed on
   `/ai/releases`;
 - the signer comes from the type, in the release standard's words (R62):
@@ -387,13 +395,18 @@ release stays in the feed, but its files answer 404.
 
 The buttons pick each package by its `system` and its name:
 
-| `system`            | Button            | File         |
-| ------------------- | ----------------- | ------------ |
-| `macos-arm64`       | Mac               | `.dmg`       |
-| `windows-x64`       | Windows           | `-setup.exe` |
-| `linux-x86_64-cpu`  | Linux, x86-64     | `_amd64.deb` |
-| `linux-x86_64-cuda` | Linux, NVIDIA GPU | `_amd64.deb` |
-| `linux-arm64-cpu`   | Linux, ARM64      | `_arm64.deb` |
+| `system`            | Button                   | File         |
+| ------------------- | ------------------------ | ------------ |
+| `macos-arm64`       | Mac                      | `.dmg`       |
+| `windows-x64`       | Windows                  | `-setup.exe` |
+| `linux-x86_64-cpu`  | Linux, x86-64            | `_amd64.deb` |
+| `linux-x86_64-cuda` | Linux, NVIDIA GPU        | `_amd64.deb` |
+| `linux-arm64-cpu`   | Linux, ARM64             | `_arm64.deb` |
+| `linux-arm64-cuda`  | Linux, ARM64, NVIDIA GPU | `_arm64.deb` |
+
+`linux-arm64-cuda` is 64-bit ARM Linux with an NVIDIA GPU and its driver
+575 or later, such as NVIDIA's DGX Spark. Like the x86-64 CUDA package,
+it is in the Linux card's switch and the guide, never the big button.
 
 The big button is the visitor's system, from the User-Agent (and, in
 Chromium, the CPU from its client hints). A Linux visitor whose CPU the

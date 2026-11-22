@@ -50,6 +50,8 @@ jobs:
       ALLOWLIST_API_ENDPOINT: ${{ vars.STAGING_ALLOWLIST_API_ENDPOINT || 'https://allowlist-api.staging.6529.io' }}
       BASE_ENDPOINT: https://staging.6529.io
       DROP_FORGE_TESTNET: "true"
+      # Staging uploads are served from staging's own media CDN.
+      NEXT_PUBLIC_CLOUDFRONT_DOMAIN: https://media.staging.6529.io
       NEXT_PUBLIC_FEATURE_SIGNED_MESSAGES: "true"
       # App device grants use the same approved wording in staging and production.
       NEXT_PUBLIC_FEATURE_APP_DEVICE_GRANTS: "true"

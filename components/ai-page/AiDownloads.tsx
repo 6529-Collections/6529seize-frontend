@@ -30,6 +30,11 @@ const LINUX_VARIANTS: readonly {
   { key: "x64", system: "linux-x86_64-cpu", label: "ai.files.linux.x64" },
   { key: "cuda", system: "linux-x86_64-cuda", label: "ai.files.linux.cuda" },
   { key: "arm64", system: "linux-arm64-cpu", label: "ai.files.linux.arm64" },
+  {
+    key: "arm64-cuda",
+    system: "linux-arm64-cuda",
+    label: "ai.files.linux.arm64Cuda",
+  },
 ];
 
 /** The system a single-file card is for: its name, logo and needs. */

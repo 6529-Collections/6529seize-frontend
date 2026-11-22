@@ -626,7 +626,7 @@
         "An open report can be withdrawn from a separate confirmation state until a moderator resolves it. A successful withdrawal closes the dialog, leaves the post hidden, does not affect other reporters, and permits that profile to report the post later. After a resolved outcome, the same profile cannot report the unchanged post again, while other profiles may still report it independently.",
         "Reporters see only Awaiting review, No action taken, Content removed, or Post deleted outcomes; moderator identity, internal notes, AI details, and other reporters remain private.",
         "Personally hidden posts and posts from blocked authors keep their original layout under a non-interactive blur. Reveal is temporary; Unhide and Unblock persist through the API and update mounted posts immediately.",
-        "Notification, messaging, blocked-profile, and report-history settings are combined at /preferences. Blocked Profiles is available at /preferences?tab=blocked-profiles, Reports is available at /preferences?tab=reports, and the older content-preferences paths resolve to Blocked Profiles.",
+        "Preferences has separate Notifications and Messages tabs. The Messages tab is available at /preferences?tab=messages, Blocked Profiles at /preferences?tab=blocked-profiles, Reports is available at /preferences?tab=reports, and the older content-preferences paths resolve to Blocked Profiles.",
         "The Reports tab lists reports submitted by the current profile, a snapshot of each reported post, its Wave name and picture, and its public review status. The Wave remains linked after removal; visible posts also link to their exact Wave or direct-message context, while media and files stay collapsed by default. Open reports can be withdrawn there; AI assessments, parent evidence, internal notes or reasons, moderator identity, and other reporters are not exposed.",
         "Preferences are profile-scoped. An authenticated wallet without a profile sees a Create profile action instead of a connection prompt, and the controls become available after profile creation.",
         "A blocked profile's avatar and handle in Preferences link to its public profile. Its profile header shows a red-tinted Blocked status beside the handle, keeps Direct Message available to open the message composer, and puts a separate confirmation-backed Unblock action where Follow normally appears. Starting a new conversation with a profile you blocked asks you to unblock it first.",
@@ -3562,7 +3562,8 @@
         "Swipe down from the mobile information panel's handle or header, select Close, tap outside, press Escape, or use Back to return to the original decision, tab, curation and scroll position. The underlying view stays mounted. Scrolling the panel content does not dismiss it; short or canceled header drags return it to its open position.",
         "On mobile, Configuration gear controls open editors inside the information panel. Back, browser Back or Escape returns to Configuration without submitting changes; Save returns after a successful update. Failed saves keep the editor open for retry. Configuration retains its selected tab and scroll position. Close or a downward header swipe dismisses the whole panel.",
         "On tablet-sized layouts, the overlay side panel also keeps these editors inside the panel. Back or Escape returns to the selected information tab.",
-        "In Configuration's Curations section, the plus button creates a curation and a row gear manages an existing curation. Create curation and Edit curation use the same mobile information sheet or tablet panel at its existing height. Group selection stays inside the form. Back discards the draft and returns to Configuration; Close or a downward header swipe dismisses the panel. Successful saves return to Configuration, while a failed save keeps the draft open. Desktop forms remain separate dialogs.",
+        "Each row in Configuration's Curations section shows the assigned group's criteria summary and a member count. Select the count to open the full criteria and current members in Network.",
+        "In Configuration's Curations section, the plus button creates a curation and a row gear manages an existing curation. Who can curate? shows the criteria and eligible member count. Select Edit criteria to adjust the rules and Save changes to return to the form. Create or Save applies the rules to that curation. The forms share the mobile information sheet or tablet panel. Back discards the draft and returns to Configuration. Close or a downward header swipe dismisses the panel. A failed save keeps the draft open.",
         "Selecting a section switches information for the active wave without navigating away from the thread."
       ],
       "canonical_path": "/waves",
@@ -3573,6 +3574,8 @@
         "components/brain/BrainMobile.tsx",
         "components/brain/right-sidebar/WaveContent.tsx",
         "components/brain/mobile/WaveInformationSheet.tsx",
+        "components/brain/my-stream/tabs/MyStreamWaveCurationCreateDialog.tsx",
+        "components/waves/groups/WaveConfigurationCurations.tsx",
         "contexts/WaveInformationContext.tsx",
         "components/competitions/CompetitionVotes.tsx"
       ]
@@ -3884,6 +3887,7 @@
         "Composer availability depends on the wave, groups, permissions, and current state.",
         "Available chat has no permission summary or access-details row above the composer, including when submissions are restricted. Chatting or following a wave does not grant submission or voting access. Existing sign-in, profile, proxy, and moderation guards still apply.",
         "An unavailable Submit drop action in ordinary Rank and Approve Chat headers opens a details card with the restriction reason, submission access group, and View submission rules. Ended submissions retain the lock and say Submission period has ended, with Closed and the closing date when known, followed by a compact submission group row and the rules link. A public group does not reopen submissions; closure is not presented as a failure to meet group requirements. An open card updates when its submission deadline passes and catches up when the page becomes visible again. Enter or Space opens it; Tab reaches its links; Escape closes it and restores focus to the action. Opening rules moves focus to Settings or to the rules content after a route change. A decision selected before entering Chat remains selected in the rules link, including when copied or opened in a new tab. With decision support enabled, group and signing details are loaded on demand from the selected decision or current default; loading or unavailable details keep the rules link usable and never substitute another decision's access settings. Returning to Chat preserves an ordinary text draft in the same browser tab, but does not save attachments or media. Other submission entry surfaces keep their own eligibility displays.",
+        "In the submission restriction card, a public group shows a linked member count with the eligibility criteria below. Hidden and direct-message groups show Private group.",
         "If an authenticated wallet has no profile handle yet, public wave content can stay readable while the composer prompts the user to create a profile before participating."
       ],
       "canonical_path": "/waves",
@@ -6244,28 +6248,34 @@
         "subscription coverage"
       ],
       "facts": [
-        "Profile Preferences lets an authenticated profile choose whether Everyone, People I follow, Members of a group I choose, or Nobody can start a new direct-message conversation.",
-        "Members of a group I choose reuses network groups, so new conversations can require a level, TDH, REP overall or in one category, NIC, NFTs, or specific included and excluded profiles. Choose group picks an existing group or builds one with the Wave access group builder; Save Changes stays disabled until a group is chosen.",
-        "With Members of a group I choose, People I follow can always message me is on by default and also admits followed profiles outside the group. Membership is checked when a conversation starts, so daily TDH and REP changes apply.",
-        "If the chosen group is deleted or hidden, Preferences warns about it and new conversations fall back to People I follow until another group is chosen.",
+        "The Messages tab in Profile Preferences lets an authenticated profile choose whether Everyone, People I follow, People who meet my criteria, or Nobody can start a new direct-message conversation or add them to an encrypted group.",
+        "Set criteria opens the Wave access criteria editor for level, TDH, REP overall or in one category, NIC, NFTs, or specific included and excluded profiles. Choose Done to return to the Messages tab, then Save to apply your choices. Edit criteria opens saved rules for editing.",
+        "With People who meet my criteria, People I follow can always message me is on by default and also allows followed profiles outside your criteria. Eligibility is checked when a conversation starts or a group member is added, so daily TDH and REP changes apply.",
+        "If saved criteria become unavailable, Preferences warns about it and new conversations fall back to People I follow until you save new criteria.",
         "Profiles you block can never start a new direct message with you under any setting, including people you follow. The refused profile sees the generic doesn't-accept-new-direct-messages notice, never a block disclosure.",
-        "When the recipient's direct-message setting refuses a new conversation, the creator sees a notice naming that rule, such as only accepting messages from people they follow or from members of a group they chose; the group is named only when it is public. A refusal caused by the recipient blocking the creator never names a rule or group and shows only the generic doesn't-accept-new-direct-messages notice.",
+        "When the recipient's direct-message setting refuses a new conversation, the creator sees a notice explaining that rule, such as only accepting messages from people they follow or from members of a group they chose. The same group wording applies to public and private groups. A refusal caused by the recipient blocking the creator shows the generic doesn't-accept-new-direct-messages notice.",
         "An authenticated wallet without a profile is directed to Create profile from /preferences; profile-scoped controls become available after setup.",
-        "Direct-message admission preferences apply only to new exact participant sets; existing one-to-one and group conversations remain available.",
+        "Direct-message admission is checked for new conversations and new additions to encrypted chats. Participants can keep messaging in chats they already share.",
         "Every recipient must allow the creator before a new group direct message can be created.",
         "All notifications includes essential notices plus enabled optional categories; Essential only pauses optional in-app notification creation, hides the individual category controls, and preserves their choices.",
         "Direct messages still arrive in Essential only mode, but their optional alerts are paused.",
         "Device push settings remain separate, and a suppressed in-app notification cannot trigger a push.",
+        "Notifications and Messages each have their own Save button. The gear beside the Messages heading in the sidebar and Choose who can message you in encrypted message menus open /preferences?tab=messages.",
         "Profile Preferences is available from the app sidebar, the desktop profile menu, and the Preferences action in the authenticated user's own profile header.",
         "When Preferences is opened from the active profile, desktop users can select Back to profile and mobile-app users can use the standard app-header back arrow. Sidebar, desktop profile-menu, and direct entries omit that profile-return control."
       ],
       "canonical_path": "/preferences",
-      "related_paths": ["/messages", "/notifications"],
+      "related_paths": [
+        "/preferences?tab=messages",
+        "/messages",
+        "/notifications"
+      ],
       "tags": ["profile", "privacy", "direct messages", "notifications"],
       "source_refs": [
         "components/header/AppHeader.tsx",
         "components/header/ProfilePreferencesSettings.tsx",
         "components/header/ProfilePreferencesDirectMessageGroup.tsx",
+        "components/brain/left-sidebar/web/WebDirectMessagesList.tsx",
         "helpers/waves/direct-message-admission.helpers.ts",
         "components/user/user-page-header/UserPageHeaderClient.tsx",
         "ops/docs/notifications/feature-profile-preferences.md",
@@ -7894,12 +7904,19 @@
       "id": "waves.drop.quote-link-cards",
       "kind": "ui_affordance",
       "title": "Wave quote link cards",
-      "aliases": ["quote link", "link preview", "quote card", "drop link card"],
+      "aliases": [
+        "quote link",
+        "link preview",
+        "quote card",
+        "drop link card",
+        "group link preview"
+      ],
       "keywords": ["waves", "drop", "quote", "link", "card", "preview"],
       "facts": [
         "Wave quote link cards are documented under drop actions.",
         "Supported source links and rendering behavior are covered in the quote-link docs.",
         "Direct same-origin /waves/{waveId} links without a serial number can show wave preview cards. Names truncate with an ellipsis when space is limited. Narrow cards put Follow or Following below the wave details; wider cards keep it beside the name.",
+        "Group links in drops show a Network preview. When the group is available, the card shows its membership criteria, creator, and creation date and opens that group in Network.",
         "If a quote card fails, the original link can still be opened or copied where available."
       ],
       "canonical_path": "/waves",
@@ -8182,7 +8199,7 @@
       ],
       "facts": [
         "Filter opens Filter Network with all eight criteria available: Identities, Level, TDH, NIC, Rep, Required NFTs, Collection Access, and xTDH Grant. Desktop keeps a left-side list with Identities open first. Phones and touch tablets open a vertical list; scroll down to reach the remaining rows. Selecting a row opens only its editor. Back returns to the list with the draft preserved and focus restored to the selected row. Configured rows have a checkmark. Close dismisses either step. The mobile sheet uses the available screen height, keeps its height between criteria, and keeps only Create and use new group in a fixed bottom action area. Editors and EMMA allow-list results scroll above the keyboard. The mobile criteria summary scrolls with the content rather than taking space from the editor while typing.",
-        "The summary shows selected criteria as separate tags and View members for valid criteria. On mobile, the summary is a filled card at the end of the category list or editor content. Its tags, member count, and View members scroll together, and long tag lists expand with the card. Only the create action stays fixed at the bottom. Desktop keeps the summary beside the action and scrolls long tag lists within the summary. An incomplete draft keeps the create action disabled; select the information button beside the summary to read Not ready yet. and its guidance. The untouched filter does not open with a warning message. When a group is selected, its name, criteria, count, and View members appear at the top. On mobile this summary is in the list step, reached with Back from an editor. Without a selected group, the sheet starts directly with the criteria list. The filter does not show Before editing or After editing labels. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
+        "The summary shows selected criteria as separate tags and View members for valid criteria. On mobile, the summary is a filled card at the end of the category list or editor content. Its tags, member count, and View members scroll together, and long tag lists expand with the card. Only the create action stays fixed at the bottom. Desktop keeps the summary beside the action and scrolls long tag lists within the summary. An incomplete draft keeps the create action disabled; select the information button beside the summary to read Not ready yet. and its guidance. The untouched filter does not open with a warning message. When a group is selected, its criteria, member count, and View members appear at the top. On mobile this summary is in the list step, reached with Back from an editor. Without a selected group, the sheet starts directly with the criteria list. The filter does not show Before editing or After editing labels. Create and use new group saves the criteria as a new group and immediately applies it to the Network member list. Clear selected group above the results clears the scope.",
         "In Identities > Included, search directly to add identities or use Include me, an EMMA allowlist, or a CSV file. Find an identity to include appears above the Search identities to include... input. Excluded shows Find an identity to exclude above the Search identities to exclude... input. Both tabs omit the empty-selection sentence and empty import messages. Included and Excluded omit the duplicate combined identity count and retain the bottom criteria summary. Individual import counts, file names, limit warnings, and errors remain visible. Neither Included nor Excluded shows No allowlist added. or No CSV file added. when its import sections are empty. On phones and touch tablets, direct identity selection, EMMA, and CSV file appear in distinct stacked sections. The allowlist search and file upload are always visible. Selected source names, imported counts, loading states, errors, retry, and removal remain available. Desktop keeps its existing two-column import layout.",
         "In xTDH Grant, Clear filters appears after entering a collection name or selecting a grantor. Switching status tabs alone does not show it. It clears the grant search fields, keeps the active status tab, and disappears again. It does not remove a selected grant or other Network criteria. On phones and touch tablets, the search fields and grant cards share one scroll area. Load more follows the last loaded card, while Back, Close, and the bottom action stay accessible. Desktop keeps its separate results scroll area.",
         "When a group is already active, reopening the filter prefills its criteria and identity lists. Saving edits creates a new group without mutating the original.",
@@ -10650,6 +10667,7 @@
       "facts": [
         "In the desktop title bar, select App info, then Check for updates. The dialog shows Checking for updates… followed by No updates found, an available-update message, or a check error. Select Check for updates again to retry a failed check. In 0.1.0-rc.2 the title-bar check runs without these status messages.",
         "In 6529 Core, open 6529 Desktop > About in the sidebar for the installed version, OS/architecture, app scheme, app port, IPFS ports, updater status, and App Logs. Opening this page checks for updates and shows any download or installation progress.",
+        "In 6529 Desktop builds that install their own updates (after 0.1.0-rc.2), the info button in the title strip opens About 6529 Desktop: the running version, the update state in the app's words, Last checked, Check now, Update now, Restart to update or Try again when they apply, and two switches, Check for new releases and Install updates automatically (on by default; automatic installs need the first). An install that cannot update by itself shows no switches and links the download page. Before installing it shows the release notes. After a release went back there is no Try again; a later release installs by itself when both switches are on, otherwise use Update now. Restart to update waits while a file is uploading or a drop is being sent.",
         "Use ETH Transactions > the affected worker > Logs for a worker-specific failure. Expand Advanced Options for recovery controls. Logs > Locate opens the log file location; selecting log text enables Copy Selection.",
         "For a TDH issue include both Last Block values, the mismatched field, last calculation time, and the failing worker message. For a missing transfer include a public transaction hash and the expected block; distinguish a local-node mismatch from personal website TDH.",
         "Share only relevant redacted diagnostic lines. Remove RPC API keys/credential URLs, passwords, private keys, and recovery phrases. The bot cannot inspect your filesystem, operate workers, or confirm the node is repaired without observations from you.",
