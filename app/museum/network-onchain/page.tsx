@@ -4,13 +4,21 @@ import { connection } from "next/server";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { cidToText } from "@/lib/museum/onchain/cid";
-import type { OnchainMuseumSnapshot } from "@/lib/museum/onchain/museum";
+import type {
+  OnchainMuseumRecord,
+  OnchainMuseumSnapshot,
+} from "@/lib/museum/onchain/museum";
 import {
+  collectionStatus,
   ONCHAIN_MUSEUM_TEXTS_HREF,
+  workImage,
   type OnchainMuseumView,
 } from "@/lib/museum/onchain/presentation";
 import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";
-import { FilterableGroups } from "./_components/FilterableGroups";
+import {
+  FilterableGroups,
+  type FilterableGroup,
+} from "./_components/FilterableGroups";
 import { onchainMuseumMetadata } from "./_components/metadata";
 import {
   CopyValue,
@@ -26,6 +34,7 @@ import {
 } from "./_components/OnchainParts";
 import { OnchainUnavailable } from "./_components/OnchainUnavailable";
 import { onchainMuseumView } from "./_components/view";
+import { isGenerative, workArtists } from "./_components/WorkFigure";
 
 const locale = DEFAULT_LOCALE;
 const ETHERSCAN = "https://sepolia.etherscan.io";
@@ -338,36 +347,105 @@ function Releases({ view }: Readonly<{ view: OnchainMuseumView }>) {
   );
 }
 
-export default async function OnchainMuseumPage() {
-  await connection();
-  const state = await getOnchainMuseum();
-  if (state.status !== "ready") return <OnchainUnavailable />;
-  const { snapshot } = state;
-  const view = onchainMuseumView(snapshot);
+/** Entity types whose lists stay closed until asked for or filtered. */
+const COLLAPSED_TYPES = new Set(["AGENT", "MEDIA_REFERENCE"]);
+
+/** Works: in the collection, then selected; images first in each. */
+function workGroups(
+  view: OnchainMuseumView,
+  records: readonly OnchainMuseumRecord[]
+): FilterableGroup[] {
+  const held = records.filter(
+    (record) => collectionStatus(record) === "permanent_collection"
+  );
+  const selected = records.filter(
+    (record) => collectionStatus(record) !== "permanent_collection"
+  );
+  const toGroup = (
+    key: string,
+    heading: string,
+    members: readonly OnchainMuseumRecord[]
+  ): FilterableGroup => {
+    const generative = members.some(
+      (record) => workImage(view, record) === null && isGenerative(record)
+    );
+    return {
+      key,
+      anchor: `entities-${key}`,
+      heading,
+      layout: "cards",
+      noImageNote: t(
+        locale,
+        generative
+          ? "museum.onchain.image.generativeList"
+          : "museum.onchain.image.noneList"
+      ),
+      items: members.map((record) =>
+        filterableItem(view, record, workArtists(view, record))
+      ),
+    };
+  };
+  return [
+    ...(held.length === 0
+      ? []
+      : [
+          toGroup(
+            "work-collection",
+            t(locale, "museum.onchain.works.collection"),
+            held
+          ),
+        ]),
+    ...(selected.length === 0
+      ? []
+      : [
+          toGroup(
+            "work-selected",
+            t(locale, "museum.onchain.works.selected"),
+            selected
+          ),
+        ]),
+  ];
+}
+
+function indexGroups(view: OnchainMuseumView): FilterableGroup[] {
   const recordsKicker = t(locale, "museum.onchain.records.heading");
-  const groups = [
-    ...view.entityGroups.map((group) => ({
-      key: group.key,
-      anchor: group.anchor,
-      heading: group.heading,
-      layout: group.key === "WORK" ? ("cards" as const) : ("list" as const),
-      // Works with a published image lead; the order is otherwise kept.
-      items: group.records
-        .map((record) => filterableItem(view, record))
-        .sort(
-          (left, right) =>
-            Number(left.image === undefined) - Number(right.image === undefined)
-        ),
-    })),
+  return [
+    ...view.entityGroups.flatMap((group) =>
+      group.key === "WORK"
+        ? workGroups(view, group.records)
+        : [
+            {
+              key: `entities:${group.key}`,
+              anchor: group.anchor,
+              heading: group.heading,
+              collapsed: COLLAPSED_TYPES.has(group.key),
+              items: group.records.map((record) =>
+                filterableItem(view, record)
+              ),
+            },
+          ]
+    ),
     ...view.recordGroups.map((group) => ({
-      key: group.key,
+      key: `records:${group.key}`,
       anchor: group.anchor,
       heading: group.heading,
       kicker: recordsKicker,
       items: group.records.map((record) => filterableItem(view, record)),
     })),
   ];
-  const leadGroups = view.entityGroups.slice(0, 4);
+}
+
+export default async function OnchainMuseumPage() {
+  await connection();
+  const state = await getOnchainMuseum();
+  if (state.status !== "ready") return <OnchainUnavailable />;
+  const { snapshot } = state;
+  const view = onchainMuseumView(snapshot);
+  const groups = indexGroups(view);
+  const leadGroups = groups
+    .filter((group) => group.kicker === undefined)
+    .slice(0, 4);
+  const firstRecordGroup = groups.find((group) => group.kicker !== undefined);
 
   return (
     <>
@@ -396,7 +474,7 @@ export default async function OnchainMuseumPage() {
             label: group.heading,
           })),
           {
-            href: `#${view.recordGroups[0]?.anchor ?? "verification"}`,
+            href: `#${firstRecordGroup?.anchor ?? "verification"}`,
             label: t(locale, "museum.onchain.jump.records"),
           },
           { href: "#texts", label: t(locale, "museum.onchain.jump.texts") },

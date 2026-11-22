@@ -91,7 +91,7 @@ export function filterCopy(): FilterableGroupsCopy {
       unavailable: t(locale, "museum.onchain.image.unavailable"),
       retry: t(locale, "museum.onchain.image.retry"),
     },
-    noImage: t(locale, "museum.onchain.image.noneShort"),
+    showAll: t(locale, "museum.onchain.filter.showAll"),
     label: t(locale, "museum.onchain.filter.label"),
     placeholder: t(locale, "museum.onchain.filter.placeholder"),
     empty: t(locale, "museum.onchain.filter.empty"),

@@ -55,7 +55,9 @@ test.describe("on-chain Museum preview", () => {
       await expectNoHorizontalOverflow(page);
     }
 
-    const works = page.getByRole("list", { name: /^Works/u });
+    const works = page
+      .getByRole("list", { name: /^Works in the collection/u })
+      .first();
     // Work cards show images only after the browser checks their SHA-256.
     await expect(
       works.getByRole("img", { name: /cobalt blue and warm white/u })
@@ -84,7 +86,7 @@ test.describe("on-chain Museum preview", () => {
       figure.getByRole("img", { name: /cobalt blue and warm white/u })
     ).toBeVisible({ timeout: 60_000 });
     await expect(
-      figure.getByText("Rights: CC BY-NC 4.0", { exact: false })
+      figure.getByText(/No permission is asserted beyond CC BY-NC 4\.0/u)
     ).toBeVisible();
     if (testInfo.project.name === MOBILE_PROJECT) {
       await expectNoHorizontalOverflow(page);

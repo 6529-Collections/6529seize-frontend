@@ -1,0 +1,77 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "profile": "museum",
+  "run_id": "2026-11-22-museum-onchain-preview-images",
+  "candidate": {
+    "commit": "594edd41d481a09b67e6c208ac85d5591a815135",
+    "build": "production"
+  },
+  "scope": {
+    "routes": [
+      "/museum/network-onchain",
+      "/museum/network-onchain/texts",
+      "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "/museum/network-onchain/records/0x1d46fa5daa006262fdbf829ea3505ca494b8aa71cfbaf0c6249c5d9e169bab51",
+      "/museum/network-onchain/records/0x0598b214722c39d064426ba26aa10f6ee6d2575f43ee683beb178da68831c8bc"
+    ],
+    "templates": {
+      "/museum/network-onchain": "Index of the preview: verification summary and contract checks, the two releases, collection entities grouped by type, accession and object records, link to the texts",
+      "/museum/network-onchain/texts": "Index of the 186 release 2 texts grouped by repository folder",
+      "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c": "Record template, PUBLIC_ENTITY of type WORK with a square image from an accession presentation manifest: Vera Molnár and Martin Grasser, Themes and Variations #210",
+      "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085": "Record template, PUBLIC_ENTITY of type ARTIST: Casey Reas",
+      "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687": "Record template, PUBLIC_RELATION: 6529NM-REL-0001",
+      "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858": "Record template, WORK_DESCRIPTION: object 6529NM.2026.001.01",
+      "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972": "Record template, PUBLIC_DOCUMENT (release 2 Markdown text), long essay: Casey Reas collection essay",
+      "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413": "Record template, PUBLIC_DOCUMENT, short text: alt text for accession 6529NM.2026.003",
+      "/museum/network-onchain/records/0x1d46fa5daa006262fdbf829ea3505ca494b8aa71cfbaf0c6249c5d9e169bab51": "Record template, PUBLIC_ENTITY of type WORK with a portrait image from the Keys and Gates program manifest: Take the Key!",
+      "/museum/network-onchain/records/0x0598b214722c39d064426ba26aa10f6ee6d2575f43ee683beb178da68831c8bc": "Record template, PUBLIC_ENTITY of type WORK with no published image: Casey Reas, CENTURY #31"
+    },
+    "audience": "Visitors and reviewers who want to read the 6529 Network Museum's records and texts and see that each one is the exact record the Museum published on Ethereum",
+    "primary_task": "Find a work, artist or text in the Museum's on-chain record, read it, and see that it was verified against the chain",
+    "release_intent": "Add verified images to the unlinked on-chain preview. Release 3 names a file index by rootCid; the page verifies the index against its CID and the chain-verified catalog, reads the presentation manifests from it, and shows each image at 640, 1280 or 2400 px only after the browser has checked the image's SHA-256. Work cards on the index; the principal figure with credit, rights status and no-reuse term on work pages.",
+    "states": ["default"],
+    "viewports": ["1440x1000", "820x1000", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {},
+  "references": [
+    "/museum/network",
+    "/museum/network/works",
+    "/museum/network/artists/casey-reas"
+  ],
+  "decisions": [
+    "The route set is outside /museum/network on purpose: the /museum/network layout loads the GitHub publication for its shell, and this preview trusts only the chain and IPFS. It therefore does not use the Museum shell or navigation.",
+    "Images come only from the presentation manifests (accessions 6529NM.2026.002 and 6529NM.2026.003 and the Keys and Gates program): 22 works. The seven Casey Reas works have no presentation-manifest image (the Museum presents them through live generators, which are not part of this record) and say so on their pages and cards.",
+    "Each image is fetched by CID through 6529's media resolver and shown only after the browser's SHA-256 of the bytes matches the value the chain-verified catalog and the file index both carry. Until then a frame of the image's proportions says the check is running; on a mismatch or failed fetch it says so and offers a retry.",
+    "The record route has 588 instances across 11 record types. The eight record cells are the distinct templates: a work with a square accession image, a work with a portrait program image, a work without an image, an artist entity, a relation, an accession object record (WORK_DESCRIPTION), a long text and a short text.",
+    "Failure states (record hash mismatch, content unavailable, deleted, registry unavailable, image mismatch) are implemented and unit tested but cannot be produced against the live registry, where all records and images verify; only the default state is pinned.",
+    "Console errors in automated-checks.json from requests to localhost:3000 (site settings and cookie consent, refused by CSP) come from the site shell's local API setting on every route of a locally served build and are not part of this change.",
+    "J13 applies because the surface presents chain state. The surface has no wallet prompt, signature or transaction; S1-S6 are judged pass or fail on what is on screen.",
+    "Tiles: each capture has viewport-height tiles (-01.png onward), at most 14 per capture; automated-checks.json marks captures whose tiles stop before the page ends (tilesTruncated) and records verified images (blob: sources) and any image status still shown. The full-page capture (-full.png) and text/<slug>-<viewport>.txt cover the whole page.",
+    "The previous run, 2026-11-22-museum-onchain-preview, accepted the preview without images in round 02; its findings are not carried into this run."
+  ],
+  "evidence_index": {
+    "captures": "evidence/<slug>-<viewport>-full.png full-page captures, evidence/<slug>-<viewport>-NN.png viewport-height tiles, evidence/text/<slug>-<viewport>.txt (text of <main>), evidence/automated-checks.json, evidence/contact-sheet-<viewport>.png",
+    "slugs": {
+      "/museum/network-onchain": "index",
+      "/museum/network-onchain/texts": "texts",
+      "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c": "record-work",
+      "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085": "record-artist",
+      "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687": "record-relation",
+      "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858": "record-work-description",
+      "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972": "record-text-essay",
+      "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413": "record-text-short",
+      "/museum/network-onchain/records/0x1d46fa5daa006262fdbf829ea3505ca494b8aa71cfbaf0c6249c5d9e169bab51": "record-work-portrait",
+      "/museum/network-onchain/records/0x0598b214722c39d064426ba26aa10f6ee6d2575f43ee683beb178da68831c8bc": "record-work-noimage"
+    },
+    "live_build": "Production build of the candidate served at http://localhost:3343 while the round is judged"
+  },
+  "budget": {
+    "repair_batches": 6
+  }
+}

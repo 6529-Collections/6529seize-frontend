@@ -531,23 +531,57 @@ export function worksNamedBy(
 
 export interface OnchainWorkImageView {
   readonly image: OnchainWorkImage;
-  /** The credit line of the media record, else of the object description. */
-  readonly credit: string | null;
+  /**
+   * The credit as the Museum records it: the object description's credit
+   * line, else the media record's own credit. Null when the only credit is
+   * a working label for a Museum-made derivative; build one from the parts.
+   */
+  readonly recordedCredit: string | null;
+  readonly artists: readonly string[];
+  readonly title: string;
+  /** The program or acquisition the work was selected through, if any. */
+  readonly program: string | null;
 }
 
+/** The media record's credit, unless it labels a Museum-made derivative. */
 function mediaCredit(
   view: OnchainMuseumView,
   mediaIds: readonly string[]
 ): string | null {
   for (const id of mediaIds) {
     const media = view.recordById(id);
-    const credit =
+    const profile =
       media === null
         ? null
-        : asRecord(payloadRecord(media, "profile")?.["media"])?.["credit"];
-    if (typeof credit === "string" && credit.trim() !== "") return credit;
+        : asRecord(payloadRecord(media, "profile")?.["media"]);
+    const credit = profile?.["credit"];
+    if (
+      profile?.["media_role"] !== "museum_generated_public_derivative" &&
+      typeof credit === "string" &&
+      credit.trim() !== ""
+    ) {
+      return credit;
+    }
   }
   return null;
+}
+
+/** The credit line of the work's object description, if it has one. */
+function descriptionCredit(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): string | null {
+  for (const id of sourceRecordIds(record)) {
+    const description = view.recordById(id);
+    if (description?.recordType !== "WORK_DESCRIPTION") continue;
+    const credit = payloadString(description, "credit_line");
+    if (credit !== null) return credit;
+  }
+  return null;
+}
+
+function profileIds(record: OnchainMuseumRecord, key: string): string[] {
+  return payloadStrings(payloadRecord(record, "profile")?.[key]);
 }
 
 /**
@@ -573,7 +607,32 @@ export function workImage(
       ? payloadStrings(record.content.payload["media_entity_ids"])
       : []),
   ];
-  return { image, credit: mediaCredit(view, mediaIds) };
+  const resolved = (ids: readonly string[]) =>
+    ids
+      .map((id) => view.resolve(id))
+      .filter((link) => link.href !== null)
+      .map((link) => link.label);
+  return {
+    image,
+    recordedCredit:
+      descriptionCredit(view, record) ?? mediaCredit(view, mediaIds),
+    artists: resolved(profileIds(record, "creator_entity_ids")),
+    title: payloadString(record, "preferred_label") ?? cleanLabel(record.label),
+    program:
+      resolved([
+        ...profileIds(record, "acquisition_entity_ids"),
+        ...profileIds(record, "program_entity_ids"),
+      ])[0] ?? null,
+  };
+}
+
+/** The status of a work in the collection, from its profile. */
+export function collectionStatus(record: OnchainMuseumRecord): string | null {
+  const membership = asRecord(
+    payloadRecord(record, "profile")?.["collection_membership"]
+  );
+  const status = membership?.["status"];
+  return typeof status === "string" ? status : null;
 }
 
 /** Texts whose title names the given title, for a work or an artist. */

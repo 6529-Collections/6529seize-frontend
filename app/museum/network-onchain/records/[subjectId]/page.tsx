@@ -40,7 +40,7 @@ import {
 } from "../../_components/OnchainParts";
 import { OnchainFacts } from "../../_components/OnchainFacts";
 import { OnchainUnavailable } from "../../_components/OnchainUnavailable";
-import { WorkFigure } from "../../_components/WorkFigure";
+import { isGenerative, WorkFigure } from "../../_components/WorkFigure";
 import { onchainMuseumView } from "../../_components/view";
 
 const locale = DEFAULT_LOCALE;
@@ -236,7 +236,9 @@ function workFacts(
   const descriptions = components
     .map((id) => view.recordById(id))
     .filter((item): item is OnchainMuseumRecord => item !== null);
-  for (const description of descriptions) {
+  // With an image, the figure carries the credit line; it is not repeated.
+  const hasFigure = workImage(view, record) !== null;
+  for (const description of hasFigure ? [] : descriptions) {
     const credit = payloadString(description, "credit_line");
     if (credit !== null) {
       facts.push({
@@ -299,7 +301,7 @@ function relationFacts(
   record: OnchainMuseumRecord
 ): Fact[] {
   const type = payloadString(record, "relation_type");
-  const references = linksExcept(
+  const all = linksExcept(
     view,
     payloadStrings(
       record.content?.kind === "json"
@@ -308,6 +310,8 @@ function relationFacts(
     ),
     record
   );
+  const references = all.filter((link) => link.href !== null);
+  const unpublished = all.length - references.length;
   return [
     ...(type === null
       ? []
@@ -319,7 +323,18 @@ function relationFacts(
         ]),
     {
       label: t(locale, "museum.onchain.record.references"),
-      value: <LinkList links={references} />,
+      value: (
+        <>
+          <LinkList links={references} />
+          {unpublished === 0 ? null : (
+            <p className="tw-m-0 tw-mt-2 tw-text-iron-400">
+              {t(locale, "museum.onchain.record.notPublished", {
+                count: unpublished,
+              })}
+            </p>
+          )}
+        </>
+      ),
     },
   ];
 }
@@ -409,7 +424,11 @@ function RelatedTexts({
                   className={LIST_LINK}
                 >
                   {t(locale, "museum.onchain.record.allTexts", {
-                    group: group.heading,
+                    group:
+                      groups.filter((other) => other.heading === group.heading)
+                        .length > 1
+                        ? `${group.heading} (${group.kicker})`
+                        : group.heading,
                   })}
                 </Link>
               </li>
@@ -421,16 +440,21 @@ function RelatedTexts({
   );
 }
 
-function Connections({
-  view,
-  record,
-}: Readonly<{ view: OnchainMuseumView; record: OnchainMuseumRecord }>) {
-  const entityId = payloadString(record, "entity_id");
-  if (entityId === null || record.recordType !== "PUBLIC_ENTITY") return null;
-  const byType = new Map<
-    string,
-    { relation: OnchainMuseumRecord; links: OnchainLink[] }[]
-  >();
+type ConnectionRow = { relation: OnchainMuseumRecord; links: OnchainLink[] };
+
+/**
+ * The page's relations grouped by type, each row naming the published
+ * records it connects to; references outside the registry are only counted.
+ */
+function connectionRows(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord,
+  entityId: string
+): { byType: Map<string, ConnectionRow[]>; unpublished: Set<string> } {
+  const byType = new Map<string, ConnectionRow[]>();
+  // References to Museum records that are not in this registry are counted
+  // once for the page instead of listed by ID.
+  const unpublished = new Set<string>();
   for (const relation of relationsReferencing(view.snapshot, entityId)) {
     const type = payloadString(relation, "relation_type") ?? "UNKNOWN";
     const links = linksExcept(
@@ -442,16 +466,30 @@ function Connections({
       ).filter((id) => id !== entityId),
       record
     );
-    const entityLinks = links.filter((link) => {
+    for (const link of links) {
+      if (link.href === null) unpublished.add(link.id);
+    }
+    const published = links.filter((link) => link.href !== null);
+    const entityLinks = published.filter((link) => {
       const target = link.subjectId === null ? null : view.find(link.subjectId);
-      return target === null || isEntityOrRelation(target);
+      return target !== null && isEntityOrRelation(target);
     });
-    byType.set(type, [
-      ...(byType.get(type) ?? []),
-      { relation, links: entityLinks.length > 0 ? entityLinks : links },
-    ]);
+    const shown = entityLinks.length > 0 ? entityLinks : published;
+    if (shown.length === 0) continue;
+    byType.set(type, [...(byType.get(type) ?? []), { relation, links: shown }]);
   }
-  if (byType.size === 0) return null;
+  return { byType, unpublished };
+}
+
+function Connections({
+  view,
+  record,
+}: Readonly<{ view: OnchainMuseumView; record: OnchainMuseumRecord }>) {
+  const entityId = payloadString(record, "entity_id");
+  if (entityId === null || record.recordType !== "PUBLIC_ENTITY") return null;
+  const { byType, unpublished } = connectionRows(view, record, entityId);
+  if (byType.size === 0 && unpublished.size === 0) return null;
+  const noImage = workImage(view, record) === null;
   return (
     <section aria-labelledby="record-connections" className="tw-mb-10">
       <SectionHeading id="record-connections">
@@ -468,6 +506,11 @@ function Connections({
               >
                 {registryValueLabel("relationType", type)}
               </h3>
+              {type === "ENTITY_HAS_MEDIA" && noImage ? (
+                <p className="tw-m-0 tw-mb-2 tw-text-sm tw-text-iron-400">
+                  {t(locale, "museum.onchain.record.mediaNote")}
+                </p>
+              ) : null}
               <ul
                 aria-labelledby={headingId}
                 className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0"
@@ -493,6 +536,13 @@ function Connections({
           );
         })}
       </div>
+      {unpublished.size === 0 ? null : (
+        <p className="tw-m-0 tw-mt-4 tw-text-sm tw-text-iron-400">
+          {t(locale, "museum.onchain.record.notPublished", {
+            count: unpublished.size,
+          })}
+        </p>
+      )}
     </section>
   );
 }
@@ -549,7 +599,12 @@ function HeadingAside({
       </div>
       {isWork && workImage(view, record) === null ? (
         <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(locale, "museum.onchain.image.none")}
+          {t(
+            locale,
+            isGenerative(record)
+              ? "museum.onchain.image.generative"
+              : "museum.onchain.image.none"
+          )}
           {route?.startsWith("/museum/network/") ? (
             <>
               {" "}

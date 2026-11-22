@@ -41,14 +41,18 @@ export interface FilterableGroup {
   readonly headingHref?: string | undefined;
   /** Cards show each item's image above its title. */
   readonly layout?: "list" | "cards" | undefined;
+  /** In a card group: the sentence above items that have no image. */
+  readonly noImageNote?: string | undefined;
+  /** Collapsed behind "Show all" until the filter is used. */
+  readonly collapsed?: boolean | undefined;
   readonly items: readonly FilterableItem[];
 }
 
 export interface FilterableGroupsCopy {
   readonly image: VerifiedImageCopy;
-  /** Shown in a card whose work has no published image. */
-  readonly noImage: string;
   readonly label: string;
+  /** Contains {count}. */
+  readonly showAll: string;
   readonly placeholder: string;
   readonly empty: string;
   /** Contains {shown} and {total}. */
@@ -92,31 +96,110 @@ function ListRow({ item }: Readonly<{ item: FilterableItem }>) {
 
 function CardRow({
   item,
+  image,
   copy,
-}: Readonly<{ item: FilterableItem; copy: FilterableGroupsCopy }>) {
+}: Readonly<{
+  item: FilterableItem;
+  image: NonNullable<FilterableItem["image"]>;
+  copy: FilterableGroupsCopy;
+}>) {
   return (
     <li className="tw-min-w-0">
-      {item.image === undefined ? (
-        <div className="tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-bg-iron-950 tw-p-3 tw-text-center tw-text-xs tw-leading-5 tw-text-iron-400">
-          {copy.noImage}
-        </div>
-      ) : (
-        <div className="tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-bg-iron-950">
-          <VerifiedImage
-            derivatives={item.image.derivatives}
-            alt={item.image.alt}
-            copy={copy.image}
-            fit="square"
-          />
-        </div>
-      )}
+      <div className="tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-bg-iron-950">
+        <VerifiedImage
+          derivatives={image.derivatives}
+          alt={image.alt}
+          copy={copy.image}
+          fit="square"
+        />
+      </div>
       <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-2">
-        <Link href={item.href} className={`tw-text-sm ${LINK}`}>
-          {item.label}
-        </Link>
+        <span className="tw-min-w-0">
+          <Link href={item.href} className={`tw-text-sm ${LINK}`}>
+            {item.label}
+          </Link>
+          {item.secondary === undefined ? null : (
+            <span className="tw-mt-0.5 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
+              {item.secondary}
+            </span>
+          )}
+        </span>
         <Badge item={item} />
       </div>
     </li>
+  );
+}
+
+/** A card group: works with images as a grid, the rest as a short list. */
+function CardGroup({
+  group,
+  copy,
+}: Readonly<{ group: FilterableGroup; copy: FilterableGroupsCopy }>) {
+  const withImages = group.items.flatMap((item) =>
+    item.image === undefined ? [] : [{ item, image: item.image }]
+  );
+  const without = group.items.filter((item) => item.image === undefined);
+  return (
+    <>
+      {withImages.length === 0 ? null : (
+        <ul
+          aria-labelledby={group.anchor}
+          className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 tw-p-0 sm:tw-grid-cols-3 lg:tw-grid-cols-4"
+        >
+          {withImages.map(({ item, image }) => (
+            <CardRow key={item.key} item={item} image={image} copy={copy} />
+          ))}
+        </ul>
+      )}
+      {without.length === 0 ? null : (
+        <div className="tw-mt-6">
+          {group.noImageNote === undefined ? null : (
+            <p className="tw-m-0 tw-mb-2 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+              {group.noImageNote}
+            </p>
+          )}
+          <ul
+            aria-labelledby={group.anchor}
+            className="tw-m-0 tw-grid tw-list-none tw-gap-x-8 tw-p-0 md:tw-grid-cols-2"
+          >
+            {without.map((item) => (
+              <ListRow key={item.key} item={item} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </>
+  );
+}
+
+function GroupItems({
+  group,
+  copy,
+  filtering,
+}: Readonly<{
+  group: FilterableGroup;
+  copy: FilterableGroupsCopy;
+  filtering: boolean;
+}>) {
+  if (group.layout === "cards") return <CardGroup group={group} copy={copy} />;
+  const list = (
+    <ul
+      aria-labelledby={group.anchor}
+      className="tw-m-0 tw-grid tw-list-none tw-gap-x-8 tw-p-0 md:tw-grid-cols-2"
+    >
+      {group.items.map((item) => (
+        <ListRow key={item.key} item={item} />
+      ))}
+    </ul>
+  );
+  if (group.collapsed !== true || filtering) return list;
+  return (
+    <details>
+      <summary className="tw-cursor-pointer tw-text-sm tw-text-primary-300 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400">
+        {copy.showAll.replace("{count}", String(group.items.length))}
+      </summary>
+      <div className="tw-mt-3">{list}</div>
+    </details>
   );
 }
 
@@ -157,7 +240,8 @@ export function FilterableGroups({
       })),
     [groups, needle]
   );
-  const shown = filtered.reduce((sum, group) => sum + group.items.length, 0);
+  const visible = filtered.filter((group) => group.items.length > 0);
+  const shown = visible.reduce((sum, group) => sum + group.items.length, 0);
   const Heading = headingLevel === 2 ? "h2" : "h3";
 
   return (
@@ -189,56 +273,37 @@ export function FilterableGroups({
       {shown === 0 ? (
         <p className="tw-m-0 tw-text-base tw-text-iron-300">{copy.empty}</p>
       ) : null}
-      {filtered.map((group) =>
-        group.items.length === 0 ? null : (
-          <section
-            key={group.key}
-            aria-labelledby={group.anchor}
-            className="tw-mb-10 tw-scroll-mt-24"
-            id={`${group.anchor}-section`}
+      {visible.map((group, index) => (
+        <section
+          key={group.key}
+          aria-labelledby={group.anchor}
+          className="tw-mb-10 tw-scroll-mt-24"
+          id={`${group.anchor}-section`}
+        >
+          {group.kicker === undefined ||
+          visible[index - 1]?.kicker === group.kicker ? null : (
+            <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-400">
+              {group.kicker}
+            </p>
+          )}
+          <Heading
+            id={group.anchor}
+            className="tw-m-0 tw-mb-3 tw-mt-1 tw-scroll-mt-24 tw-break-words tw-text-xl tw-font-semibold tw-text-iron-50"
           >
-            {group.kicker === undefined ? null : (
-              <p className="tw-m-0 tw-text-xs tw-font-semibold tw-uppercase tw-tracking-[0.14em] tw-text-iron-400">
-                {group.kicker}
-              </p>
-            )}
-            <Heading
-              id={group.anchor}
-              className="tw-m-0 tw-mb-3 tw-mt-1 tw-scroll-mt-24 tw-break-words tw-text-xl tw-font-semibold tw-text-iron-50"
-            >
-              {group.headingHref === undefined ? (
-                group.heading
-              ) : (
-                <Link href={group.headingHref} className={LINK}>
-                  {group.heading}
-                </Link>
-              )}{" "}
-              <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-                ({group.items.length})
-              </span>
-            </Heading>
-            {group.layout === "cards" ? (
-              <ul
-                aria-labelledby={group.anchor}
-                className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 tw-p-0 sm:tw-grid-cols-3 lg:tw-grid-cols-4"
-              >
-                {group.items.map((item) => (
-                  <CardRow key={item.key} item={item} copy={copy} />
-                ))}
-              </ul>
+            {group.headingHref === undefined ? (
+              group.heading
             ) : (
-              <ul
-                aria-labelledby={group.anchor}
-                className="tw-m-0 tw-grid tw-list-none tw-gap-x-8 tw-p-0 md:tw-grid-cols-2"
-              >
-                {group.items.map((item) => (
-                  <ListRow key={item.key} item={item} />
-                ))}
-              </ul>
-            )}
-          </section>
-        )
-      )}
+              <Link href={group.headingHref} className={LINK}>
+                {group.heading}
+              </Link>
+            )}{" "}
+            <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+              ({group.items.length})
+            </span>
+          </Heading>
+          <GroupItems group={group} copy={copy} filtering={needle !== ""} />
+        </section>
+      ))}
     </div>
   );
 }

@@ -49,6 +49,8 @@ export interface OnchainWorkImage {
   readonly derivatives: readonly OnchainImageDerivative[];
   readonly rightsStatus: string | null;
   readonly rightsTerms: readonly string[];
+  /** The manifest's delivery status, such as `approved_for_contextual_museum_display`. */
+  readonly displayStatus: string;
   readonly manifestPath: string;
 }
 
@@ -339,6 +341,7 @@ function imagesOf(
       derivatives,
       rightsStatus: rights.status,
       rightsTerms: rights.terms,
+      displayStatus: status,
       manifestPath: path,
     });
   }
