@@ -12,7 +12,7 @@ page (see [Where the site links it](#where-the-site-links-it)).
 | ------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `/ai`                           | The newest release's downloads, every file with its SHA-256 and publisher, and how to check a file |
 | `/ai/guide`                     | Installing on a Mac, Windows and Linux, and the first chat                                         |
-| `/ai/known-issues`              | What hasn't been tested yet, with workarounds                                                      |
+| `/ai/known-issues`              | Known bugs and limits, the latest fixes, and what hasn't been tested yet                           |
 | `/ai/releases`                  | Every release in the signed list, newest first, each under its version as anchor                   |
 | `/ai/download/<file>`           | For the newest release only, a 302 to a presigned S3 URL that works for 5 minutes                  |
 | `/ai/download/<version>/<file>` | The same, with the newest release's version                                                        |
@@ -109,13 +109,15 @@ issues in their own lead.
   missing. Under the list, links to `/ai/releases.json` and its signature.
 - **Known issues** (`/ai/known-issues`): the untested statement as the
   lead, the day the list last changed, a one-line "Found a problem? Report
-  it" link, then **Known bugs** (each a card: what you see, the fix and
-  its commands, and why in a line), what the newest release fixed
-  (`AI_FIXED_BUGS` and `AI_FIXED_IN` in `knownIssues.ts`, with a link to
-  download it), **Not tested yet** by system, and the full "Report a
-  problem" card at the end. When a release fixes a bug, move it from
-  `AI_KNOWN_BUGS` to `AI_FIXED_BUGS` and set `AI_FIXED_IN`; take out any
-  line on the other pages that describes it.
+  it" link, then **Known bugs and limits** (each a card: what you see,
+  the fix and its commands, and why in a line; a limit is how the release
+  works, such as an install that updates by hand), the fixes of the newest
+  release that lists any (`AI_FIXED_BUGS` and `AI_FIXED_IN` in
+  `knownIssues.ts`, with a link to download it), **Not tested yet** by
+  system, and the full "Report a problem" card at the end. When a release
+  fixes a bug, move it from `AI_KNOWN_BUGS` to `AI_FIXED_BUGS` and set
+  `AI_FIXED_IN`; take out any line on the other pages that describes it. A
+  release that lists no fixes leaves both as they are.
 
 "Report a problem" opens the 6529 AI wave, where testers and the support
 bot answer, and says what to include: the system, the steps, what
@@ -463,10 +465,12 @@ The guide is built from 6529 AI's own install guides
 `<version>` while there is none. Its Windows step names the installer's
 publisher when the feed gives one, and says SmartScreen warns when the
 feed says it is unsigned. The known issues come from those guides' notes
-on what was tested; update them, and `AI_KNOWN_ISSUES_UPDATED`, as 6529
+on what was tested, and the limits from them, from 6529 AI's
+`docs/updates.md`, and from its `docs/install/ipfs.md` and
+`closed-models.md`; update them, and `AI_KNOWN_ISSUES_UPDATED`, as 6529
 AI is tested further.
 
-The test releases so far (`0.1.0-rc.1` and `0.1.0-rc.2`) run models on
+The test releases so far (`0.1.0-rc.1` to `0.1.0-rc.4`) run models on
 the person's own computer only, and their app hides the 6529 AI network.
 So the guide leaves out every network step (models from other providers,
 serving to others, linking an account), and no page mentions the network.
