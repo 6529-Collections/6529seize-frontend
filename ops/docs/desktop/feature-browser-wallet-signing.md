@@ -7,8 +7,9 @@ Parent: [Desktop index](README.md)
 6529 Desktop cannot use browser extensions such as MetaMask or Rabby directly.
 If you signed in with **Use a browser wallet**, 6529 Desktop sends the
 signatures it needs to your web browser, where your browser wallet signs them,
-and brings the answer back to the app. Only signatures are sent this way;
-nothing that sends a transaction, moves funds or approves tokens is.
+and brings the answer back to the app. In builds that support it, a short list
+of 6529 contract transactions (listed below) is sent the same way. Nothing that
+approves tokens, trades or transfers NFTs is.
 
 This works in 6529 Desktop builds that support it. In other builds the account
 menu shows **Authorized only (wallet not connected)** and you connect a wallet
@@ -22,11 +23,46 @@ with **Scan with a phone wallet** instead.
 - Letting this computer send and read encrypted messages.
 - Submitting to The Memes and publishing a profile site.
 
+## Transactions Sent from the Browser
+
+In 6529 Desktop builds that send transactions, these are sent to your browser
+wallet:
+
+- Delegations: register, update and revoke (also as a delegation manager),
+  batches of up to five, and collection or use-case locks.
+- Minting The Memes (also for another wallet) and NextGen.
+- Topping up your Memes subscription balance (up to 10 ETH).
+
 Market trades and validator sessions are not sent to the browser: those pages
 show **Continue in your browser** and open the same page on the website, where
-your browser wallet signs directly. Transactions such as minting, delegation or
-a subscriptions top-up are not available with this connection either; do them
-on the website in your browser.
+your browser wallet signs directly. NFT transfers and NextGen burn-to-mint show
+**Continue in your browser** in place of their send button. In a 6529 Desktop
+build that does not send transactions, the mint, top-up, delegation and
+consolidation buttons show "Update 6529 Desktop, or continue in your browser"
+instead. Any other action that would send a transaction opens a
+**Transaction** dialog with the same choice.
+
+For a transaction, the browser page shows:
+
+- What it does, the contract name with its full address (linked to
+  Etherscan), the network (the Sepolia test network is highlighted), the number
+  of cards or tokens, and the amount in ETH plus the network fee your wallet
+  sets.
+- Everything the transaction sends: every decoded value and the call data.
+- A check that the transaction would go through now. If it would fail, Send is
+  not offered; use **Check again** (mint windows open on time). If the check
+  cannot run, you can **Check again** or **Send anyway**.
+- For a mint, whether the amount matches the current price; if it does not,
+  Send is not offered.
+- For a high-impact transaction (a delegation that lets another wallet act for
+  you, acting as a delegation manager, minting for another wallet, a top-up
+  over 1 ETH), what it changes and an **I understand** box you tick before
+  **Send in wallet**.
+
+The request waits for five minutes. With less than 45 seconds left, Send is not
+offered; start again from 6529 Desktop. After you send, the page shows the
+transaction with a link to Etherscan and returns to 6529 Desktop, which checks
+the transaction on chain before it reports success.
 
 ## User Journey
 
@@ -48,7 +84,8 @@ on the website in your browser.
 4. The browser opens 6529 Desktop again with the answer, and the action
    continues in the app. You can close the browser tab.
 
-The request waits for two minutes. Use **Open the page again** in the dialog if
+A signature request waits for two minutes, a transaction five minutes. Use
+**Open the page again** in the dialog if
 you closed the browser tab (up to three times), or **Cancel** to stop.
 
 ## Safety
@@ -75,6 +112,17 @@ you closed the browser tab (up to three times), or **Cancel** to stop.
   account in your wallet extension.
 - **"The browser page would not sign this request":** use **Continue in your
   browser**.
+- **"6529 Desktop does not send this transaction to your browser wallet":** use
+  **Continue in your browser** and finish on the website.
+- **"Update 6529 Desktop, or continue in your browser":** this 6529 Desktop
+  build does not send transactions. Update it, or finish on the website.
+- **"Your wallet reports it sent the transaction … could not confirm it yet":**
+  do not send it again. Open it with **View on Etherscan** and wait for it.
+- **"The transaction … on chain is not the one 6529 Desktop asked for":** check
+  the transaction on Etherscan and in your wallet.
+- **"A transaction you approved after its request ended was sent":** it was
+  sent even though the request had ended. Check it on Etherscan before you try
+  again.
 - **"The signature could not be checked against your account":** smart-contract
   wallets such as Safe cannot sign here. Use **Continue in your browser**.
 - **"Another signature request is still open":** finish or cancel the open one
@@ -82,13 +130,13 @@ you closed the browser tab (up to three times), or **Cancel** to stop.
 
 ## Localization fallback debt
 
-| Field                     | Current exception                                                                                                                                                    |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route or component        | `/browser-connector` wallet requests (`BrowserWalletRequestPanel`), the in-app `DesktopWalletRequestDialog` and `ContinueInBrowserNotice`                            |
-| Untranslated surface      | All `browserConnector.wallet.*` (including `.schema.*`, `.format.*`, `.refusal.*`) and `desktopWalletRequest.*` copy                                                 |
-| Current fallback behavior | The copy exists only in the `en-US` source dictionary; other locales fall back to `en-US`                                                                            |
-| User impact               | 6529 Desktop users with another locale see this signing flow in English; the signed messages themselves are not translated by design (they are signed byte for byte) |
-| Owner or follow-up        | Frontend localization maintainers; add `en-GB`, `fr-FR`, `es-ES` and `de-DE` entries in the progressive i18n workstream when the new 6529 Desktop is released        |
+| Field                     | Current exception                                                                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | `/browser-connector` wallet requests (`BrowserWalletRequestPanel`), the in-app `DesktopWalletRequestDialog`, `ContinueInBrowserNotice` and `DesktopWalletTransactionGate` |
+| Untranslated surface      | All `browserConnector.wallet.*` (including `.schema.*`, `.format.*`, `.refusal.*`) and `desktopWalletRequest.*` copy                                                      |
+| Current fallback behavior | The copy exists only in the `en-US` source dictionary; other locales fall back to `en-US`                                                                                 |
+| User impact               | 6529 Desktop users with another locale see this signing flow in English; the signed messages themselves are not translated by design (they are signed byte for byte)      |
+| Owner or follow-up        | Frontend localization maintainers; add `en-GB`, `fr-FR`, `es-ES` and `de-DE` entries in the progressive i18n workstream when the new 6529 Desktop is released             |
 
 ## Related Areas
 

@@ -160,11 +160,14 @@ describe("the /ai/use walk-through", () => {
   });
 
   it("leaves out the bugs the newest release fixed", () => {
+    // rc.2's fixes, then rc.3's.
     expect(JSON.stringify(AI_KNOWN_BUGS)).not.toMatch(
-      /Fetch and serve|sign-in|chat title|Vulkan/i
+      /Fetch and serve|sign-in|chat title|Vulkan|freezes|don't fit|keeps restarting/i
     );
-    expect(AI_FIXED_BUGS.join(" ")).toContain("Fetch and serve");
-    expect(JSON.stringify(AI_USE_SECTIONS)).not.toContain("7 days");
+    expect(AI_FIXED_BUGS.join(" ")).toContain("keeps restarting");
+    expect(JSON.stringify(AI_USE_SECTIONS)).not.toMatch(
+      /7 days|freezes|keeps restarting/
+    );
   });
 
   it("puts the contents first, and the sections in order", () => {

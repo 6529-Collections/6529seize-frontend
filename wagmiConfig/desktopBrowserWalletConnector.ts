@@ -13,6 +13,7 @@ import {
 import { ChainNotConfiguredError, createConnector } from "wagmi";
 import {
   parseWalletRequest,
+  toCanonicalTransaction,
   type WalletBridgeResponse,
   type WalletRequest,
   type WalletRequestInput,
@@ -20,6 +21,12 @@ import {
 
 /** wagmi connector id and type for 6529 Desktop wallet forwarding. */
 export const DESKTOP_BROWSER_WALLET_CONNECTOR_ID = "desktopBrowserWallet";
+
+/** A forwarded signature request (this connector sends no transaction). */
+type SignatureRequest = Exclude<
+  WalletRequest,
+  { readonly method: "eth_sendTransaction" }
+>;
 
 /** What the app adds to a request it forwards. */
 export interface PreparedWalletRequest {
@@ -46,7 +53,24 @@ interface DesktopBrowserWalletConnectorOptions {
     request: WalletRequestInput,
     fingerprint: string | null
   ) => Promise<WalletBridgeResponse>;
+  /**
+   * Called when the app asks for a transaction this connector does not
+   * forward, so the app can point to the website.
+   */
+  readonly onTransactionRefused?: () => void;
+  /** Whether the shell sends allow-listed transactions (same rules). */
+  readonly sendsTransactions?: () => boolean;
 }
+
+/**
+ * Wallet methods for transactions that are never forwarded (only
+ * `eth_sendTransaction` is, when the shell sends transactions).
+ */
+const TRANSACTION_METHODS: ReadonlySet<string> = new Set([
+  "wallet_sendTransaction",
+  "eth_signTransaction",
+  "wallet_sendCalls",
+]);
 
 interface ProviderRequest {
   readonly method: string;
@@ -72,6 +96,12 @@ function toProviderError(code: string): Error {
       return new UnsupportedProviderMethodError(
         asError("The browser page will not sign this request.")
       );
+    case "unverified":
+      return new InternalRpcError(
+        asError(
+          "The wallet reported a transaction 6529 Desktop could not confirm yet. Check it before trying again."
+        )
+      );
     default:
       return new InternalRpcError(asError(`Browser signing ${code}.`));
   }
@@ -87,7 +117,7 @@ const sameAddress = (left: string, right: string) =>
  * `[address, json]` with the exact JSON that was validated.
  */
 function toShellInput(
-  request: WalletRequest,
+  request: SignatureRequest,
   typedDataJson: string | null,
   context: string | undefined
 ): WalletRequestInput {
@@ -109,7 +139,7 @@ function toShellInput(
  * message bytes, or the EIP-712 digest of the validated typed data.
  */
 async function recoverSigner(
-  request: WalletRequest,
+  request: SignatureRequest,
   signature: Hex
 ): Promise<Address | null> {
   try {
@@ -136,10 +166,12 @@ async function recoverSigner(
 /**
  * wagmi connector for a 6529 Desktop profile that signed in with a browser
  * wallet. It holds no keys: it reports the signed-in address, answers chain
- * questions itself, and forwards `personal_sign` and `eth_signTypedData_v4`
+ * questions itself, and forwards `personal_sign`, `eth_signTypedData_v4`
+ * and (when the shell sends transactions) allow-listed `eth_sendTransaction`
  * to the user's browser through the desktop shell. Everything else is
- * unsupported, transactions included. A returned signature is accepted only
- * when it recovers to the signed-in address for the exact request.
+ * unsupported. A returned signature is accepted only when it recovers to
+ * the signed-in address for the exact request; a transaction hash only
+ * after the shell found that transaction on chain.
  */
 export function desktopBrowserWalletConnector(
   options: DesktopBrowserWalletConnectorOptions
@@ -168,7 +200,9 @@ export function desktopBrowserWalletConnector(
         { method, params, address, chainId },
         config.chains.map((chain) => chain.id)
       );
-      if (!parsed.ok) throw toProviderError("invalid");
+      if (!parsed.ok || parsed.value.method === "eth_sendTransaction") {
+        throw toProviderError("invalid");
+      }
       const request = parsed.value;
       const prepared = options.prepare(request);
       if (!prepared) throw toProviderError("refused");
@@ -185,6 +219,48 @@ export function desktopBrowserWalletConnector(
       if (!signer || !sameAddress(signer, address)) {
         throw toProviderError("failed");
       }
+      return response.value;
+    };
+
+    /** Refuses a transaction, pointing the app to the website. */
+    const refuseTransaction = (code: "unsupported" | "invalid"): never => {
+      options.onTransactionRefused?.();
+      throw toProviderError(code);
+    };
+
+    /**
+     * Forwards one transaction in canonical form (`{from, to, data,
+     * value}`; gas, fees and nonce are the browser wallet's), only when
+     * the shell sends transactions and the app's allow-list has it. The
+     * shell answers with the hash after it has found the transaction on
+     * chain.
+     */
+    const sendTransaction = async (params: unknown): Promise<Hex> => {
+      const address = boundAddress();
+      if (!address) throw toProviderError("not-signed-in");
+      if (options.sendsTransactions?.() !== true) {
+        return refuseTransaction("unsupported");
+      }
+      const transaction =
+        Array.isArray(params) && params.length === 1
+          ? toCanonicalTransaction(params[0], address)
+          : null;
+      if (!transaction) return refuseTransaction("invalid");
+      const input: WalletRequestInput = {
+        method: "eth_sendTransaction",
+        params: [transaction],
+        address,
+        chainId,
+      };
+      const parsed = parseWalletRequest(
+        input,
+        config.chains.map((chain) => chain.id)
+      );
+      if (!parsed.ok) return refuseTransaction("invalid");
+      // The allow-list check shows its own message when it refuses.
+      if (!options.prepare(parsed.value)) throw toProviderError("refused");
+      const response = await options.runRequest(input, null);
+      if (!response.ok) throw toProviderError(response.code);
       return response.value;
     };
 
@@ -210,7 +286,12 @@ export function desktopBrowserWalletConnector(
           case "personal_sign":
           case "eth_signTypedData_v4":
             return forward(method, params);
+          case "eth_sendTransaction":
+            return sendTransaction(params);
           default:
+            if (TRANSACTION_METHODS.has(method)) {
+              options.onTransactionRefused?.();
+            }
             throw new UnsupportedProviderMethodError(
               asError(`${method} is not available through the browser.`)
             );
