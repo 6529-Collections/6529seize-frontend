@@ -7,10 +7,12 @@ import {
 } from "@/lib/profile-cms/builder/api";
 import {
   makeProfileSitePrimary,
+  ProfileSiteMoveFailed,
   unpublishProfileSite,
 } from "@/lib/profile-cms/builder/pointer-actions";
 import { cmsCidFromHash } from "@/lib/profile-cms/chain/cms-cid";
 import {
+  ProfileDocWriteError,
   registerProfileDocWriter,
   type ProfileDocWriter,
 } from "@/lib/profile-cms/chain/profile-doc-writer";
@@ -146,6 +148,23 @@ describe("profile site pointer actions", () => {
     const other = new Error("conflict");
     jest.mocked(unpublishProfileCmsPackage).mockRejectedValue(other);
     await expect(unpublishProfileSite(record)).rejects.toBe(other);
+  });
+
+  it("fail with the profile tools' own words when the change is refused", async () => {
+    const words = "Switch your wallet to 0x0000…0001 and try again.";
+    registerProfileDocWriter({
+      availableSigners: async () => ["wallet"],
+      replaceProfileDoc: async () => {
+        throw new ProfileDocWriteError("submit_failed", words);
+      },
+    });
+    jest.mocked(unpublishProfileCmsPackage).mockRejectedValue(onChain);
+    const failure = await unpublishProfileSite(record).then(
+      () => null,
+      (error: unknown) => error
+    );
+    expect(failure).toBeInstanceOf(ProfileSiteMoveFailed);
+    expect((failure as Error).message).toBe(words);
   });
 
   it("fail when this browser can't sign profile changes", async () => {

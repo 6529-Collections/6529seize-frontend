@@ -13,6 +13,7 @@ import {
 } from "@/lib/profile-cms/builder/api";
 import {
   makeProfileSitePrimary,
+  ProfileSiteMoveFailed,
   unpublishProfileSite,
 } from "@/lib/profile-cms/builder/pointer-actions";
 import { BuilderActionButton } from "./ProfileCmsBuilderControls";
@@ -37,6 +38,7 @@ export default function ProfileCmsVersionHistoryPanel({
 }) {
   const [revision, setRevision] = useState(0);
   const [mutationFailed, setFailed] = useState(false);
+  const [failureDetail, setFailureDetail] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const [changed, setChanged] = useState(false);
   const [pendingOnChain, setPendingOnChain] = useState(false);
@@ -66,6 +68,7 @@ export default function ProfileCmsVersionHistoryPanel({
     if (!confirmation || !enabled || working || busy) return;
     setWorking(true);
     setFailed(false);
+    setFailureDetail(null);
     setRefused(false);
     setChanged(false);
     setPendingOnChain(false);
@@ -88,7 +91,13 @@ export default function ProfileCmsVersionHistoryPanel({
       onChanged();
     } catch (error) {
       if (isProfileCmsRollbackRefusedError(error)) setRefused(true);
-      else setFailed(true);
+      else {
+        setFailed(true);
+        // The profile tools' own words for a chain change that failed.
+        setFailureDetail(
+          error instanceof ProfileSiteMoveFailed ? error.message : null
+        );
+      }
     } finally {
       setWorking(false);
     }
@@ -115,6 +124,9 @@ export default function ProfileCmsVersionHistoryPanel({
       {mutationFailed ? (
         <p role="alert">
           {t(locale, "profileCms.builder.history.actionFailed")}
+          {failureDetail ? (
+            <span className="tw-mt-1 tw-block">{failureDetail}</span>
+          ) : null}
         </p>
       ) : null}
       {refused ? (

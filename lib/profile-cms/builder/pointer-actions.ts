@@ -83,9 +83,21 @@ function confirmPrimary(
   });
 }
 
+/**
+ * A pointer move on the 6529 chain that didn't go through. The message is
+ * the profile tools' own words (or the builder's when this browser can't
+ * sign), meant to be shown as it is.
+ */
+export class ProfileSiteMoveFailed extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ProfileSiteMoveFailed";
+  }
+}
+
 function outcome(result: ProfileSiteMoveResult): "done" | "pending" {
   if (!result.ok) {
-    throw new Error(result.message);
+    throw new ProfileSiteMoveFailed(result.message);
   }
   return result.confirmed ? "done" : "pending";
 }
