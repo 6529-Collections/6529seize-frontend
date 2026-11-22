@@ -3,12 +3,15 @@
 import { AuthContext } from "@/components/auth/Auth";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import SubscriptionSettingToggle from "./SubscriptionSettingToggle";
+import {
+  postSubscriptionChange,
+  subscriptionSigningToast,
+} from "./subscriptionChangeRequest";
 
 export default function UserPageSubscriptionsEditionPreference(
   props: Readonly<{
@@ -48,7 +51,7 @@ export default function UserPageSubscriptionsEditionPreference(
       interface SubscribeAllEditionsBody {
         subscribe_all_editions: boolean;
       }
-      const response = await commonApiPost<
+      const response = await postSubscriptionChange<
         SubscribeAllEditionsBody,
         SubscribeAllEditionsBody
       >({
@@ -56,6 +59,7 @@ export default function UserPageSubscriptionsEditionPreference(
         body: {
           subscribe_all_editions: allEditions,
         },
+        change: { type: "subs.all-editions", all: allEditions },
       });
       const responseAllEditions = response.subscribe_all_editions;
       setIsAllEditions(responseAllEditions);
@@ -68,12 +72,14 @@ export default function UserPageSubscriptionsEditionPreference(
       });
       props.refresh();
     } catch (e) {
-      setToast({
-        type: "error",
-        title: "Couldn't update edition preference.",
-        description: "Please try again.",
-        details: getToastErrorDetails(e, "Could not set edition preference."),
-      });
+      setToast(
+        subscriptionSigningToast(e, locale) ?? {
+          type: "error",
+          title: "Couldn't update edition preference.",
+          description: "Please try again.",
+          details: getToastErrorDetails(e, "Could not set edition preference."),
+        }
+      );
     } finally {
       setIsUpdatingAllEditions(false);
     }

@@ -3,11 +3,14 @@
 import { AuthContext } from "@/components/auth/Auth";
 import type { SubscriptionDetails } from "@/generated/models/SubscriptionDetails";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import { commonApiPost } from "@/services/api/common-api";
 import { useContext, useEffect, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import SubscriptionSettingToggle from "./SubscriptionSettingToggle";
+import {
+  postSubscriptionChange,
+  subscriptionSigningToast,
+} from "./subscriptionChangeRequest";
 import { formatSubscriptionCoverageDeadline } from "./coverage/subscriptionCoverage.helpers";
 
 export default function UserPageSubscriptionsMode(
@@ -42,7 +45,7 @@ export default function UserPageSubscriptionsMode(
     try {
       const { success } = await requestAuth();
       if (!success) return;
-      const response = await commonApiPost<
+      const response = await postSubscriptionChange<
         SubscribeModeBody,
         SubscribeModeBody
       >({
@@ -50,6 +53,7 @@ export default function UserPageSubscriptionsMode(
         body: {
           automatic: auto,
         },
+        change: { type: "subs.mode", automatic: auto },
       });
       const responseAuto = response.automatic;
       setIsAuto(responseAuto);
@@ -63,12 +67,14 @@ export default function UserPageSubscriptionsMode(
       props.refresh();
     } catch (e) {
       setIsUpdating(false);
-      setToast({
-        type: "error",
-        title: "Couldn't update subscription mode.",
-        description: "Please try again.",
-        details: getToastErrorDetails(e, "Could not set subscription mode."),
-      });
+      setToast(
+        subscriptionSigningToast(e, locale) ?? {
+          type: "error",
+          title: "Couldn't update subscription mode.",
+          description: "Please try again.",
+          details: getToastErrorDetails(e, "Could not set subscription mode."),
+        }
+      );
       return;
     } finally {
       setIsUpdating(false);
