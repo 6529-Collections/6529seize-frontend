@@ -1859,6 +1859,10 @@
       "classification": "crawlable",
       "family": "network"
     },
+    "/network/identity": {
+      "classification": "exempt",
+      "exemptReason": "6529 Network identity page behind NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY: not found in builds without it, and it acts on a connected wallet."
+    },
     "/network/levels": {
       "classification": "crawlable",
       "family": "network"
