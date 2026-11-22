@@ -15,7 +15,7 @@ import { SAFE_TX_BATCH, SAFE_TX_FIELDS, SAFE_TX_PINS } from "./pins";
 const SAFE_TX_FORMAT_VERSION = 1;
 
 /** The table as plain data, before canonical ordering. */
-export function safeTxTable() {
+function safeTxTable() {
   return {
     v: SAFE_TX_FORMAT_VERSION,
     primaryType: "SafeTx",

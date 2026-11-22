@@ -226,7 +226,13 @@ export function checkSafeTx(
       calls = checkBatch(pin, data as Hex);
     }
     if (calls === null) return FAIL;
-    return { ok: true, pin, operation, nonce: BigInt(nonce), calls };
+    return {
+      ok: true,
+      pin,
+      operation: operation === 1 ? 1 : 0,
+      nonce: BigInt(nonce),
+      calls,
+    };
   } catch {
     return FAIL;
   }
