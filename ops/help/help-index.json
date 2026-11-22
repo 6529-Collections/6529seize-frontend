@@ -1376,6 +1376,8 @@
         "nic",
         "network",
         "state",
+        "society",
+        "protocol",
         "coordination",
         "public",
         "goods"
@@ -1383,7 +1385,7 @@
       "facts": [
         "The 6529 FAQ lives at /about/faq.",
         "6529 and 6529.io refer to the same product ecosystem in user questions.",
-        "6529 is building a decentralized network state: a permissionless global network society that funds, builds, and coordinates public-goods work across art, science, culture, and technology.",
+        "6529 is a peer-to-peer protocol for network organizations: decentralized, permissionless, and global, so anyone can fund, build, and coordinate network-scaled organizations or public goods.",
         "In product terms, 6529 is not only an NFT collection site; it is a coordination system built around wallet identity, profiles, The Memes, Meme Lab, Gradients, NextGen, Waves, voting, groups, delegation, REP/CIC reputation, TDH/xTDH network metrics, open data, minting/claims infrastructure, and help tooling such as @help6529.",
         "The long-term goal is nation-scale positive impact.",
         "The core idea is to extend what Bitcoin and Ethereum proved for money and code into human coordination itself, so communities can organize, allocate attention, vote, build, and distribute work permissionlessly.",

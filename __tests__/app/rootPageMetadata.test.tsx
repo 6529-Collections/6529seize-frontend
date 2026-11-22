@@ -3,11 +3,11 @@ import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";
 
 describe("root page metadata", () => {
-  it("uses the network state tagline for descriptions", () => {
+  it("uses the hero tagline for descriptions", () => {
     const metadata = generateMetadata();
     const expectedTitle = getAppEnvironment(publicEnv.BASE_ENDPOINT).title;
     const expectedDescription =
-      "Building a decentralized network state: a decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.";
+      "A peer-to-peer protocol for network organizations. Decentralized, permissionless, and global. Anyone can fund, build, and coordinate network-scaled organizations or public goods.";
 
     expect(metadata.title).toBe(expectedTitle);
     expect(metadata.description).toBe(expectedDescription);

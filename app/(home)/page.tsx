@@ -6,7 +6,7 @@ import { buildHomePageJsonLd } from "@/lib/structured-data/site";
 import type { Metadata } from "next";
 
 const ROOT_PAGE_DESCRIPTION =
-  "Building a decentralized network state: a decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.";
+  "A peer-to-peer protocol for network organizations. Decentralized, permissionless, and global. Anyone can fund, build, and coordinate network-scaled organizations or public goods.";
 
 export default function Page() {
   return (
