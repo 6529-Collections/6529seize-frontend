@@ -95,12 +95,8 @@ test("renders seasons and switches focus", async () => {
   expect(setTdhView).toHaveBeenCalledWith(ApiConsolidatedTdhView.Unboosted);
 
   // Change collector to MEMES to enable seasons dropdown
-  await user.click(
-    screen.getByRole("button", { name: "Collectors: All" })
-  );
-  await user.click(
-    await screen.findByRole("menuitem", { name: "Memes" })
-  );
+  await user.click(screen.getByRole("button", { name: "Collectors: All" }));
+  await user.click(await screen.findByRole("menuitem", { name: "Memes" }));
 
   // Now seasons dropdown should be enabled and we can find S1
   await user.click(screen.getByRole("button", { name: "SZN: All" }));
@@ -187,4 +183,54 @@ test("logs a failed seasons request and keeps the leaderboard usable", async () 
   expect(screen.getByRole("button", { name: "SZN: All" })).toBeInTheDocument();
   expect(screen.getByTestId("cards")).toBeInTheDocument();
   consoleError.mockRestore();
+});
+
+test("names the TDH day when it came from the 6529 Network", async () => {
+  usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
+  fetchUrl.mockImplementation(async (url: string) =>
+    url.includes("/api/blocks")
+      ? {
+          data: [
+            {
+              block_number: 24012345,
+              timestamp: 0,
+              source: "CHAIN",
+              cycle_day: 20782,
+            },
+          ],
+        }
+      : { data: [] }
+  );
+  render(
+    <Leaderboard
+      focus={LeaderboardFocus.TDH}
+      setFocus={jest.fn()}
+      tdhView={ApiConsolidatedTdhView.Boosted}
+      setTdhView={jest.fn()}
+    />
+  );
+  const line = await screen.findByTestId("leaderboard-chain-tdh-day");
+  expect(line).toHaveTextContent("25 Nov 2026, from the 6529 Network");
+  expect(line).toHaveAttribute(
+    "title",
+    "Holdings at Ethereum block 24012345, the last block before 25 Nov 2026 00:00 UTC. Validators agreed on this day's TDH on the 6529 Network."
+  );
+  expect(screen.getByText("TDH day")).toBeInTheDocument();
+});
+
+test("shows no TDH day line for a day 6529.io computed", async () => {
+  usePathnameMock.mockReturnValue("/network/nerd/cards-collected");
+  fetchUrl.mockResolvedValue({
+    data: [{ block_number: 1, timestamp: 0, source: "SITE" }],
+  });
+  render(
+    <Leaderboard
+      focus={LeaderboardFocus.TDH}
+      setFocus={jest.fn()}
+      tdhView={ApiConsolidatedTdhView.Boosted}
+      setTdhView={jest.fn()}
+    />
+  );
+  await waitFor(() => expect(fetchUrl).toHaveBeenCalled());
+  expect(screen.queryByTestId("leaderboard-chain-tdh-day")).toBeNull();
 });

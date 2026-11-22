@@ -1,0 +1,9 @@
+{
+  "tdh.day.label": "TDH day",
+  "tdh.day.date": "{day} {month} {year}",
+  "tdh.day.chain": "{date}, from the 6529 Network",
+  "tdh.day.chainDetail": "Holdings at Ethereum block {block}, the last block before {date} 00:00 UTC. Validators agreed on this day's TDH on the 6529 Network.",
+  "xtdh.frozen.label": "xTDH",
+  "xtdh.frozen.title": "xTDH is frozen",
+  "xtdh.frozen.body": "xTDH stopped changing on {day} at {time} UTC. Everyone keeps the xTDH they had then. New grants and changes to grants wait for one-time grants on the 6529 Network."
+}

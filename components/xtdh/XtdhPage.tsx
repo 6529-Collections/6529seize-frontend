@@ -8,6 +8,7 @@ import { XtdhStats } from "@/components/xtdh/stats";
 import { buildGlobalXtdhStatsContent } from "@/components/xtdh/stats/buildGlobalXtdhStatsContent";
 import { useGlobalTdhStats } from "@/hooks/useGlobalTdhStats";
 
+import XtdhFrozenNotice from "./XtdhFrozenNotice";
 import XtdhReceivedSection from "./received";
 
 export default function XtdhPage(): ReactElement {
@@ -41,6 +42,7 @@ export default function XtdhPage(): ReactElement {
 
   return (
     <div className="tailwind-scope tw-space-y-6">
+      <XtdhFrozenNotice />
       <section className="tw-space-y-4">
         <header className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
           <div>

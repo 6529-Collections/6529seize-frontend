@@ -8,6 +8,8 @@ import UserPageXtdhGranted from "./UserPageXtdhGranted";
 import UserPageXtdhStatsHeader from "./UserPageXtdhStatsHeader";
 import UserPageXtdhReceived from "@/components/xtdh/user/received";
 import { UserXtdhTestModeBanner } from "./UserXtdhTestModeBanner";
+import XtdhFrozenNotice from "@/components/xtdh/XtdhFrozenNotice";
+import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import {
   ArrowUpRightIcon,
   ArrowDownLeftIcon,
@@ -59,7 +61,10 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
     [searchParams]
   );
 
+  const xtdhFrozen = useIdentityEditingPaused();
   const canGrant = useMemo(() => {
+    // From the identity freeze, grants can't be created or changed.
+    if (xtdhFrozen) return false;
     if (!connectedProfile) return false;
     if (activeProfileProxy) return false;
     const connectedHandle = connectedProfile.handle?.toLowerCase() ?? null;
@@ -75,6 +80,7 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
     connectedProfile,
     profile.consolidation_key,
     profile.handle,
+    xtdhFrozen,
   ]);
 
   const handleFilterChange = useCallback(
@@ -122,7 +128,7 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
       className="tailwind-scope tw-group/profile-xtdh tw-flex tw-flex-col tw-gap-6"
       data-typography="profile"
     >
-      <UserXtdhTestModeBanner />
+      {xtdhFrozen ? <XtdhFrozenNotice /> : <UserXtdhTestModeBanner />}
       <UserPageXtdhStatsHeader
         profileId={statsProfileId}
         onOutboundClick={canGrant ? handleOutboundClick : undefined}
