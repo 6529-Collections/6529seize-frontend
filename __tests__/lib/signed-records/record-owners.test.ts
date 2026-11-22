@@ -118,6 +118,26 @@ describe("ownersOfProfiles", () => {
   });
 });
 
+describe("the API's answer", () => {
+  it("takes a wallet as owner only for itself, and only for wallets asked about", async () => {
+    const { ownerOfWallet } = load();
+    mockFetch.mockImplementation(async () => ({
+      anchor: 1,
+      owners: [
+        // Another wallet named as this one's owner, and an answer for a
+        // wallet nobody asked about.
+        { wallet: WALLET_B, owner: WALLET_A },
+        { wallet: WALLET_A, owner: PRINCIPAL_A },
+      ],
+    }));
+    await expect(ownerOfWallet(WALLET_B)).rejects.toThrow(
+      "did not name an owner"
+    );
+    await expect(ownerOfWallet(WALLET_A)).resolves.toBe(PRINCIPAL_A);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
+});
+
 describe("ownerOfWallet", () => {
   it("names a bound wallet's principal and an unbound wallet itself, without a profile lookup", async () => {
     const { ownerOfWallet } = load();

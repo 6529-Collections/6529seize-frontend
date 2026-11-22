@@ -37,12 +37,20 @@ async function requestOwners(wallets: readonly string[]): Promise<void> {
     errorMode: "structured",
   });
   const at = Date.now();
+  const asked = new Set(wallets);
   const owners = Array.isArray(response.owners) ? response.owners : [];
-  // Only well-formed owners are kept (the pattern also turns away a missing
-  // one); a wallet left without one fails the lookup.
+  // Only well-formed owners of wallets asked about are kept (the pattern also
+  // turns away a missing one), and a wallet's own address only as its own
+  // owner: an unbound wallet names itself, never another wallet. A wallet
+  // left without one fails the lookup.
   for (const { wallet, owner } of owners) {
-    if (OWNER.test(owner)) {
-      ownerByWallet.set(String(wallet).toLowerCase(), { value: owner, at });
+    const asWallet = String(wallet).toLowerCase();
+    if (
+      asked.has(asWallet) &&
+      OWNER.test(owner) &&
+      (!WALLET.test(owner) || owner === asWallet)
+    ) {
+      ownerByWallet.set(asWallet, { value: owner, at });
     }
   }
 }
