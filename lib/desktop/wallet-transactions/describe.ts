@@ -122,11 +122,12 @@ function transferCount(args: DecodedArgs): bigint {
   const amounts = asArray(args["amounts"]);
   if (amounts.length > 0) {
     return amounts.reduce<bigint>(
-      (sum, amount) => sum + (asBigint(amount) ?? 0n),
+      (sum, amount) => (typeof amount === "bigint" ? sum + amount : sum),
       0n
     );
   }
-  return asBigint(args["amount"]) ?? 1n;
+  const amount = args["amount"];
+  return typeof amount === "bigint" ? amount : 1n;
 }
 
 function countOf(

@@ -54,6 +54,7 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: jest.fn(() => "viewer:self"),
 }));
 jest.mock("@/hooks/competitions/useCompetitionSignature", () => ({
+  ...jest.requireActual("@/hooks/competitions/useCompetitionSignature"),
   useCompetitionSignatureFor: () => jest.fn(),
 }));
 jest.mock("@/hooks/useBrowserLocale", () => ({

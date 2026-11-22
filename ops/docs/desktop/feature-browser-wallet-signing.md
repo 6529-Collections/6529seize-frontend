@@ -33,16 +33,18 @@ wallet:
 - Minting The Memes (also for another wallet) and NextGen.
 - Topping up your Memes subscription balance (up to 10 ETH).
 - Transferring your 6529 NFTs (The Memes, Meme Lab, 6529 Gradient, NextGen) from
-  your collection, up to 50 different tokens of one collection at a time. Plain
-  ETH sends are not supported.
+  your collection: up to 50 different The Memes or Meme Lab tokens (and up to
+  10,000 copies each) per collection at a time; 6529 Gradient and NextGen
+  tokens go one transaction each. Plain ETH sends are not supported.
 - 6529 Provenance publishing on the pinned Sepolia test registries: opening a
   release, publishing records into it (up to 20 records per transaction; 15 of
   any size always fit) and sealing it.
 
 Market trades and validator sessions are not sent to the browser: those pages
 show **Continue in your browser** and open the same page on the website, where
-your browser wallet signs directly. NextGen burn-to-mint, and a transfer of more
-than 50 different tokens of one collection, show **Continue in your browser**
+your browser wallet signs directly. NextGen burn-to-mint, a transfer of more than 50
+different The Memes or Meme Lab tokens of one collection, and a transfer to your
+own signed-in address, show **Continue in your browser**
 in place of their send button. In a 6529 Desktop build that does not send these
 transactions, the mint, top-up, delegation, consolidation and transfer buttons
 show "Update 6529 Desktop, or continue in your browser" instead. Any other

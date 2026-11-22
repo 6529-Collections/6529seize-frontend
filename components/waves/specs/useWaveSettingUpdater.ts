@@ -93,10 +93,28 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
     [mutating, updateWave, wave]
   );
 
+  const saveAdminDropDeletion = useCallback(
+    (closeEditor: () => void, enabled: boolean) => {
+      if (mutating) {
+        return;
+      }
+
+      if (enabled === wave.wave.admin_drop_deletion_enabled) {
+        closeEditor();
+        return;
+      }
+      updateWave({ admin_drop_deletion_enabled: enabled }, closeEditor).catch(
+        () => undefined
+      );
+    },
+    [mutating, updateWave, wave]
+  );
+
   return {
     canEdit,
     mutating,
     saveChatUpdate,
+    saveAdminDropDeletion,
     setToast,
   };
 };

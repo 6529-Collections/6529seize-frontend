@@ -29,7 +29,10 @@ const ERC1155_CONTRACTS: readonly (readonly [number, string])[] = [
 ];
 
 const BURN_ADDRESS = "0x000000000000000000000000000000000000dead";
-/** Copies of one token in one transfer (a sanity cap). */
+/**
+ * Copies in one entry of a transfer (a sanity cap per amount; the token
+ * contract enforces the balance).
+ */
 const MAX_AMOUNT = "10000";
 /** Different tokens in one batch transfer. */
 const MAX_BATCH_TOKENS = 50;
@@ -107,6 +110,13 @@ function erc1155Rules(chainId: number, to: string): TransactionRule[] {
 
 /** Most different tokens of one contract that one batch transfer may move. */
 export const MAX_TRANSFER_BATCH_TOKENS = MAX_BATCH_TOKENS;
+/** Most copies one transfer entry may move. */
+export const MAX_TRANSFER_AMOUNT = Number(MAX_AMOUNT);
+/** Recipients refused for every contract (besides the sender and contract). */
+export const TRANSFER_RECIPIENT_EXCLUDED: readonly string[] = [
+  `0x${"0".repeat(40)}`,
+  BURN_ADDRESS,
+];
 
 export const TRANSFER_RULES: readonly TransactionRule[] = [
   ...ERC721_CONTRACTS.map(([chainId, to]) => erc721Rule(chainId, to)),

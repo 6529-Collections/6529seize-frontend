@@ -7,7 +7,9 @@ import {
   formatSubscriptionCoverageDate,
   getSubscriptionCoverageActionLabel,
   getSubscriptionCoverageAnchor,
+  getDisplayedSubscriptionCoverageStatus,
   getSubscriptionCoveragePresentation,
+  isSubscriptionCoverageFundedToForecastEnd,
   type SubscriptionCoverageTone,
 } from "@/components/user/subscriptions/coverage/subscriptionCoverage.helpers";
 import { useSubscriptionCoverage } from "@/components/user/subscriptions/coverage/useSubscriptionCoverage";
@@ -351,10 +353,11 @@ export default function UserPageHeaderSubscriptionStatus({
     );
   }
 
-  const presentation = getSubscriptionCoveragePresentation(
-    locale,
-    coverage.status
+  const status = getDisplayedSubscriptionCoverageStatus(
+    coverage.status,
+    coverage.fully_funded_drops
   );
+  const presentation = getSubscriptionCoveragePresentation(locale, status);
   const actionLabel = getSubscriptionCoverageActionLabel(
     locale,
     presentation.action,
@@ -364,10 +367,13 @@ export default function UserPageHeaderSubscriptionStatus({
     presentation.action
   )}`;
   const isUrgentTopUp =
-    coverage.status === ApiSubscriptionCoverageStatus.RunningLow ||
-    coverage.status === ApiSubscriptionCoverageStatus.ActionRequired;
+    status === ApiSubscriptionCoverageStatus.RunningLow ||
+    status === ApiSubscriptionCoverageStatus.ActionRequired;
+  const throughKey = isSubscriptionCoverageFundedToForecastEnd(coverage)
+    ? "subscriptions.coverage.header.atLeastThrough"
+    : "subscriptions.coverage.header.through";
   const secondaryLine = coverage.funded_through
-    ? t(locale, "subscriptions.coverage.header.through", {
+    ? t(locale, throughKey, {
         status: presentation.label,
         token: formatInteger(locale, coverage.funded_through.token_id),
         date: formatSubscriptionCoverageDate(

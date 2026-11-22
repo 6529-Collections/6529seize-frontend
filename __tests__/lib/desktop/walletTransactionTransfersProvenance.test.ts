@@ -38,13 +38,14 @@ describe("canForwardTransfer", () => {
     contract: MEMES,
     tokenId: String(tokenId),
     erc1155: true,
+    quantity: 1,
   });
 
   it("accepts 6529 NFTs on the listed contracts of the chain", () => {
     expect(
       canForwardTransfer(1, [
         memes(1),
-        { contract: GRADIENT, tokenId: "7", erc1155: false },
+        { contract: GRADIENT, tokenId: "7", erc1155: false, quantity: 1 },
       ])
     ).toBe(true);
   });
@@ -53,13 +54,38 @@ describe("canForwardTransfer", () => {
     expect(canForwardTransfer(11_155_111, [memes(1)])).toBe(false);
     expect(
       canForwardTransfer(1, [
-        { contract: "0x1155", tokenId: "1", erc1155: true },
+        { contract: "0x1155", tokenId: "1", erc1155: true, quantity: 1 },
       ])
     ).toBe(false);
     expect(
-      canForwardTransfer(1, [{ contract: MEMES, tokenId: "1", erc1155: false }])
+      canForwardTransfer(1, [
+        { contract: MEMES, tokenId: "1", erc1155: false, quantity: 1 },
+      ])
     ).toBe(false);
     expect(canForwardTransfer(1, [])).toBe(false);
+  });
+
+  it("refuses more copies than one entry may move", () => {
+    expect(canForwardTransfer(1, [{ ...memes(1), quantity: 10_000 }])).toBe(
+      true
+    );
+    expect(canForwardTransfer(1, [{ ...memes(1), quantity: 10_001 }])).toBe(
+      false
+    );
+  });
+
+  it("refuses a recipient the rules refuse", () => {
+    const from = "0x1111111111111111111111111111111111111111";
+    const ok = { from, to: "0x2222222222222222222222222222222222222222" };
+    expect(canForwardTransfer(1, [memes(1)], ok)).toBe(true);
+    for (const to of [
+      from.toUpperCase().replace("0X", "0x"),
+      "0x0000000000000000000000000000000000000000",
+      "0x000000000000000000000000000000000000dEaD",
+      MEMES,
+    ]) {
+      expect(canForwardTransfer(1, [memes(1)], { from, to })).toBe(false);
+    }
   });
 
   it("allows at most 50 different tokens of one ERC-1155 contract", () => {
@@ -147,6 +173,46 @@ describe("provenance helpers", () => {
     expect(formatCid("0x1220ab")).toBe("0x1220ab");
     expect(formatArweaveId(`0x${"00".repeat(32)}`)).toBeNull();
     expect(formatArweaveId(`0x${"ff".repeat(32)}`)).toBe(`${"_".repeat(42)}8`);
+  });
+
+  it("keeps malformed CID bytes in hex", () => {
+    expect(formatCid("0x01")).toBe("0x01");
+    expect(formatCid(`0x01551220${"00".repeat(31)}`)).toBe(
+      `0x01551220${"00".repeat(31)}`
+    );
+  });
+
+  it("uses whichever read confirms the sender and fails only when open", async () => {
+    const safe = "0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68";
+    const failing = (answers: Record<string, unknown>): RegistryReader => ({
+      readContract: jest.fn(async ({ functionName }) => {
+        const answer = answers[functionName];
+        if (answer instanceof Error) throw answer;
+        return answer;
+      }),
+    });
+    const down = new Error("node down");
+    await expect(
+      readPublisherAuthorization(
+        failing({ owner: down, isPublisher: true }),
+        REGISTRY,
+        SENDER
+      )
+    ).resolves.toBe(true);
+    await expect(
+      readPublisherAuthorization(
+        failing({ owner: SENDER, isPublisher: down }),
+        REGISTRY,
+        SENDER
+      )
+    ).resolves.toBe(true);
+    await expect(
+      readPublisherAuthorization(
+        failing({ owner: safe, isPublisher: down }),
+        REGISTRY,
+        SENDER
+      )
+    ).rejects.toThrow("node down");
   });
 
   it("allows a publisher key or the owner, nobody else", async () => {
