@@ -8,8 +8,8 @@ import { t } from "@/i18n/messages";
 /**
  * Says where xTDH stands in its retirement (lib/xtdh/retirement.ts): on the
  * freeze day that it is being retired and grants can't be created or
- * changed, from the switch-on that it was retired. Renders nothing while
- * xTDH is live.
+ * changed, from the identity switch-on that it was retired. Renders nothing
+ * while xTDH is live.
  */
 export default function XtdhRetiredNotice({
   className = "",

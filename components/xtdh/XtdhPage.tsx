@@ -14,7 +14,8 @@ import XtdhRetiredNotice from "./XtdhRetiredNotice";
 
 export default function XtdhPage(): ReactElement {
   const retired = useXtdhRetired();
-  // From the switch-on xTDH is retired: the page says so and shows no figures.
+  // From the identity switch-on xTDH is retired: the page says so and shows
+  // no figures.
   if (retired) {
     return (
       <div className="tailwind-scope tw-space-y-6">

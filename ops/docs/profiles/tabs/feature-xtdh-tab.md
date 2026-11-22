@@ -70,7 +70,7 @@ xTDH is retired when identities move to the 6529 Network
   is shown, and a notice that xTDH is being retired and grants can't be
   created or changed replaces the test-mode banner. The stats and views
   stay. The API refuses grant writes from the freeze as well.
-- From the switch-on, a day later, the tab leaves the profile's tab bar. A
+- From the identity switch-on, a day later, the tab leaves the profile's tab bar. A
   link to `/{user}/xtdh` still opens it, with only the notice that xTDH was
   retired when identities moved to the 6529 Network: no stats, no
   `Granted` or `Received` views.

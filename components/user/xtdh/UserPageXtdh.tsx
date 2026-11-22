@@ -48,7 +48,8 @@ type UserPageXtdhProps = {
 
 export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
   const retirement = useXtdhRetirement();
-  // From the switch-on xTDH is retired: the tab says so and shows no figures.
+  // From the identity switch-on xTDH is retired: the tab says so and shows
+  // no figures.
   if (retirement === "retired") {
     return (
       <div className="tailwind-scope tw-flex tw-flex-col tw-gap-6">

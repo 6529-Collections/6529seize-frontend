@@ -8,7 +8,10 @@ export function useXtdhRetirement(): XtdhRetirement {
   return xtdhRetirementOf(useIdentityMovePhase());
 }
 
-/** Whether xTDH is retired: from the switch-on, no xTDH figures are shown. */
+/**
+ * Whether xTDH is retired: from the identity switch-on, no xTDH figures are
+ * shown.
+ */
 export function useXtdhRetired(): boolean {
   return useXtdhRetirement() === "retired";
 }

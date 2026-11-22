@@ -5,10 +5,11 @@ import type { IdentityMovePhase } from "@/lib/identity-move/schedule";
  * takes no xTDH and no grants over.
  *
  * - `live`: before the freeze, or with no freeze set. xTDH works as before.
- * - `closing`: the day between freeze and switch-on. Grants can't be created
- *   or changed; the xTDH pages say xTDH is being retired.
- * - `retired`: from the switch-on. The site shows no xTDH figures and no
- *   grant controls; the xTDH pages say xTDH was retired.
+ * - `closing`: the day between the freeze and the identity switch-on.
+ *   Grants can't be created or changed; the xTDH pages say xTDH is being
+ *   retired.
+ * - `retired`: from the identity switch-on. The site shows no xTDH figures
+ *   and no grant controls; the xTDH pages say xTDH was retired.
  */
 export type XtdhRetirement = "live" | "closing" | "retired";
 

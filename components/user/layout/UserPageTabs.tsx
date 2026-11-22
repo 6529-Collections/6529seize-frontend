@@ -137,8 +137,8 @@ export default function UserPageTabs({
     resolvedTabFromPath === USER_PAGE_TAB_IDS.SUBSCRIPTIONS &&
     hideNftPurchasing &&
     !mayRedirectFromHiddenTab;
-  // A link to the xTDH tab after the switch-on stays put: the tab is hidden,
-  // and its page says xTDH was retired.
+  // A link to the xTDH tab after the identity switch-on stays put: the tab
+  // is hidden, and its page says xTDH was retired.
   const shouldSuppressXtdhRedirect =
     resolvedTabFromPath === USER_PAGE_TAB_IDS.XTDH && xtdhRetired;
 
