@@ -4167,6 +4167,7 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopConnect.status.walletConnectFailed":
     "Could not open WalletConnect. Try again.",
   "desktopWalletRequest.title": "Signature request",
+  "desktopWalletRequest.transactionTitle": "Transaction",
   "desktopWalletRequest.waiting":
     "Your browser opened a page to sign with your wallet. Finish there; this waits for two minutes.",
   "desktopWalletRequest.code":
@@ -4194,6 +4195,8 @@ export const EN_US_ROOT_MESSAGES = {
     "Trading is not available in 6529 Desktop with a browser wallet. Continue on {site} in your browser.",
   "desktopWalletRequest.notForwarded":
     "6529 Desktop does not send this kind of signature to your browser wallet. Continue on {site} in your browser, where your wallet signs it directly.",
+  "desktopWalletRequest.transactionNotForwarded":
+    "6529 Desktop does not send this transaction to your browser wallet. Continue on {site} in your browser, where your wallet sends it directly.",
   "browserConnector.title": "Sign in to 6529 Desktop",
   "browserConnector.description":
     "Sign in to 6529 Desktop with a browser wallet.",
@@ -4269,6 +4272,105 @@ export const EN_US_ROOT_MESSAGES = {
     "Submit an entry to a 6529 decision.",
   "browserConnector.wallet.refusal.unknown-typed-data":
     "This page will not ask your wallet to sign this request: it is a kind of request 6529 Desktop does not send from here. Continue on {site} in your browser instead.",
+  "browserConnector.tx.intro":
+    "6529 Desktop asks {address} to send this transaction:",
+  "browserConnector.tx.title.delegation.register": "Register a delegation",
+  "browserConnector.tx.title.delegation.registerAsManager":
+    "Register a delegation as a delegation manager",
+  "browserConnector.tx.title.delegation.update": "Update a delegation",
+  "browserConnector.tx.title.delegation.batchRegister":
+    "Register several delegations",
+  "browserConnector.tx.title.delegation.revoke": "Revoke a delegation",
+  "browserConnector.tx.title.delegation.revokeAsManager":
+    "Revoke a delegation as a delegation manager",
+  "browserConnector.tx.title.delegation.batchRevoke":
+    "Revoke several delegations",
+  "browserConnector.tx.title.delegation.lockCollection":
+    "Lock or unlock a collection for delegations",
+  "browserConnector.tx.title.delegation.lockUseCase":
+    "Lock or unlock a use case for delegations",
+  "browserConnector.tx.title.memes.mint": "Mint a The Memes card",
+  "browserConnector.tx.title.memes.mintBatch": "Mint The Memes cards",
+  "browserConnector.tx.title.memes.mintProxy":
+    "Mint The Memes cards for another wallet",
+  "browserConnector.tx.title.nextgen.mint": "Mint NextGen tokens",
+  "browserConnector.tx.title.subscriptions.topUp":
+    "Top up your Memes subscription balance",
+  "browserConnector.tx.contract": "Contract",
+  "browserConnector.tx.contract.delegation": "6529 delegation contract",
+  "browserConnector.tx.contract.memes": "Manifold claim contract for The Memes",
+  "browserConnector.tx.contract.nextgen": "NextGen minter contract",
+  "browserConnector.tx.contract.subscriptions":
+    "6529 subscriptions wallet (seize.6529.eth)",
+  "browserConnector.tx.network": "Network",
+  "browserConnector.tx.network.mainnet": "Ethereum",
+  "browserConnector.tx.network.sepolia": "Sepolia test network",
+  "browserConnector.tx.count": "Number",
+  "browserConnector.tx.value": "Amount",
+  "browserConnector.tx.valueAmount":
+    "{amount} ETH, plus the network fee your wallet sets",
+  "browserConnector.tx.highImpact": "Check this carefully before you send it.",
+  "browserConnector.tx.effect.delegate":
+    "{delegate} can act for this wallet for use case {useCase}.",
+  "browserConnector.tx.effect.onBehalfOf":
+    "You act on behalf of {delegator} as its delegation manager.",
+  "browserConnector.tx.effect.recipient":
+    "You pay, and what you mint goes to {recipient}.",
+  "browserConnector.tx.effect.mintAsDelegate":
+    "You mint as a delegate of {delegator}.",
+  "browserConnector.tx.effect.largeValue": "This sends more than 1 ETH.",
+  "browserConnector.tx.understand": "I understand",
+  "browserConnector.tx.details":
+    "Everything this transaction sends ({function})",
+  "browserConnector.tx.data": "Call data",
+  "browserConnector.tx.proof": "allowlist proof ({count} hashes)",
+  "browserConnector.tx.proofs": "allowlist proofs ({count})",
+  "browserConnector.tx.quoted": "“{text}”",
+  "browserConnector.tx.useCase": "{id} ({name})",
+  "browserConnector.tx.plainTransfer": "plain ETH transfer",
+  "browserConnector.tx.yes": "Yes",
+  "browserConnector.tx.no": "No",
+  "browserConnector.tx.check.checking":
+    "Checking that this transaction would go through…",
+  "browserConnector.tx.check.ok":
+    "Checked: this transaction would go through now.",
+  "browserConnector.tx.check.reverted": "This transaction would fail: {reason}",
+  "browserConnector.tx.check.unavailable":
+    "This transaction could not be checked right now. You can check again or send it anyway.",
+  "browserConnector.tx.check.details": "Details",
+  "browserConnector.tx.check.again": "Check again",
+  "browserConnector.tx.check.sendAnyway": "Send anyway",
+  "browserConnector.tx.price.checking": "Checking the current price…",
+  "browserConnector.tx.price.ok": "The amount matches the current price.",
+  "browserConnector.tx.price.mismatch":
+    "The amount does not match the current price. Start again from 6529 Desktop.",
+  "browserConnector.tx.price.unavailable":
+    "The current price could not be read. Check that the amount is right before you send.",
+  "browserConnector.tx.tooLate":
+    "Less than a minute is left for this request. Start again from 6529 Desktop.",
+  "browserConnector.tx.safety":
+    "6529 never asks for your recovery phrase or password. Your wallet shows the network fee before you confirm.",
+  "browserConnector.tx.send": "Send in wallet",
+  "browserConnector.tx.failed":
+    "Your wallet did not send the transaction. Try again, or decline.",
+  "browserConnector.tx.sent":
+    "Sent. Return to 6529 Desktop. Transaction {hash}",
+  "browserConnector.tx.explorer": "View the transaction on Etherscan",
+  "desktopWalletRequest.transactionWaiting":
+    "Your browser opened a page to send this transaction with your wallet. Finish there; this waits for five minutes.",
+  "desktopWalletRequest.transactionUpdate":
+    "This version of 6529 Desktop cannot send this transaction from your browser wallet. Update 6529 Desktop, or continue on {site} in your browser.",
+  "desktopWalletRequest.transactionUnverified":
+    "Your wallet reports it sent the transaction {hash}. 6529 Desktop could not confirm it yet. Check it in a block explorer before you try again.",
+  "desktopWalletRequest.transactionMismatch":
+    "The transaction {hash} on chain is not the one 6529 Desktop asked for. Check it in a block explorer and in your wallet.",
+  "desktopWalletRequest.lateTransaction":
+    "A transaction you approved after its request ended was sent: {hash}. Check it in a block explorer before you try again.",
+  "desktopWalletRequest.explorer": "View on Etherscan",
+  "browserConnector.wallet.refusal.unknown-transaction":
+    "This page will not ask your wallet to send this transaction: 6529 Desktop does not send it from here. Continue on {site} in your browser instead.",
+  "browserConnector.wallet.refusal.transaction-rule":
+    "This page will not ask your wallet to send this transaction: its details are outside what 6529 Desktop sends from here. Nothing was sent. Continue on {site} in your browser instead.",
   "browserConnector.wallet.refusal.wrong-wallet":
     "This page will not ask your wallet to sign this request: it names a different wallet than the one asked to sign.",
   "browserConnector.wallet.refusal.wrong-origin":

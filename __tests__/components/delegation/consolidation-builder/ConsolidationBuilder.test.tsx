@@ -7,6 +7,11 @@ import {
 import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import type { ComponentProps, ReactNode } from "react";
 import { getAddress } from "viem";
+import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: jest.fn(() => false),
+}));
 
 const mockPolicyState: {
   policy: {
@@ -1113,4 +1118,17 @@ test("uses the settings maximum for wallet rows and does not invent one while un
   expect(
     screen.queryByText("A consolidation can hold up to 3 wallets.")
   ).not.toBeInTheDocument();
+});
+
+test("offers the website instead of signing with 6529 Desktop browser forwarding", () => {
+  jest.mocked(useIsDesktopBrowserWallet).mockReturnValue(true);
+  renderBuilder();
+  addFourthWallet();
+  expect(screen.queryAllByRole("button", { name: /^Sign Step/ })).toHaveLength(
+    0
+  );
+  expect(
+    step(1).getByRole("button", { name: "Continue in your browser" })
+  ).toBeInTheDocument();
+  expect(mockSubmit).not.toHaveBeenCalled();
 });

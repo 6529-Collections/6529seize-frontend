@@ -40,7 +40,10 @@ issues in their own lead.
   Downloads. The Mac and Windows cards are one row each, with the system
   needs in the row's grey line; only the Linux card has a header, over
   its x86-64 / NVIDIA GPU / ARM64 switch for the `.deb` and
-  `.tar.gz`. Each file has its badges, size, a "Copy SHA-256" button (the
+  `.tar.gz`, with a fourth choice, ARM64, NVIDIA GPU, for a release that
+  has the CUDA packages for 64-bit ARM (from 0.1.0-rc.4 on). On a phone
+  the switch's choices wrap onto a second line when they don't fit on
+  one. Each file has its badges, size, a "Copy SHA-256" button (the
   hash is never printed on the page, but screen readers get it whole) and
   its download. "Verify your download" is one closed section: checking a
   file against `SHA256SUMS`, checking `SHA256SUMS.sig` with OpenSSL 3 and
@@ -358,8 +361,8 @@ From the bundle, the validator's parser reads each release's `version`,
 
 - the system comes from the file name, as 6529 AI's release tool writes
   it: `-macos-arm64.dmg`, `-windows-x64-setup.exe`, `6529-ai_*_amd64.deb`,
-  `6529-ai-cuda_*_amd64.deb`, `6529-ai_*_arm64.deb` and the three
-  `-linux-*.tar.gz`. A file it can't place, such as `NOTES.md` or
+  `6529-ai-cuda_*_amd64.deb`, `6529-ai_*_arm64.deb`,
+  `6529-ai-cuda_*_arm64.deb` and the four `-linux-*.tar.gz`. A file it can't place, such as `NOTES.md` or
   `SHA256SUMS`, gets no button and no card on `/ai`, and is listed on
   `/ai/releases`;
 - the signer comes from the type, in the release standard's words (R62):
@@ -392,13 +395,18 @@ release stays in the feed, but its files answer 404.
 
 The buttons pick each package by its `system` and its name:
 
-| `system`            | Button            | File         |
-| ------------------- | ----------------- | ------------ |
-| `macos-arm64`       | Mac               | `.dmg`       |
-| `windows-x64`       | Windows           | `-setup.exe` |
-| `linux-x86_64-cpu`  | Linux, x86-64     | `_amd64.deb` |
-| `linux-x86_64-cuda` | Linux, NVIDIA GPU | `_amd64.deb` |
-| `linux-arm64-cpu`   | Linux, ARM64      | `_arm64.deb` |
+| `system`            | Button                   | File         |
+| ------------------- | ------------------------ | ------------ |
+| `macos-arm64`       | Mac                      | `.dmg`       |
+| `windows-x64`       | Windows                  | `-setup.exe` |
+| `linux-x86_64-cpu`  | Linux, x86-64            | `_amd64.deb` |
+| `linux-x86_64-cuda` | Linux, NVIDIA GPU        | `_amd64.deb` |
+| `linux-arm64-cpu`   | Linux, ARM64             | `_arm64.deb` |
+| `linux-arm64-cuda`  | Linux, ARM64, NVIDIA GPU | `_arm64.deb` |
+
+`linux-arm64-cuda` is 64-bit ARM Linux with an NVIDIA GPU and its driver
+575 or later, such as NVIDIA's DGX Spark. Like the x86-64 CUDA package,
+it is in the Linux card's switch and the guide, never the big button.
 
 The big button is the visitor's system, from the User-Agent (and, in
 Chromium, the CPU from its client hints). A Linux visitor whose CPU the
