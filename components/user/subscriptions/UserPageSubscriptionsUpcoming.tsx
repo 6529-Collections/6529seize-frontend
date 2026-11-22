@@ -10,7 +10,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
 import { useScrollToHashOnMount } from "@/hooks/useScrollToHashOnMount";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import type { ApiSubscriptionCoverage } from "@/generated/models/ApiSubscriptionCoverage";
 import type { NFTSubscription } from "@/generated/models/NFTSubscription";
@@ -20,6 +20,17 @@ import { useMemo, useState, type ReactNode } from "react";
 import MemeSubscriptionRow from "./MemeSubscriptionRow";
 import MintingTodaySubscriptionRow from "./MintingTodaySubscriptionRow";
 import UserPageSubscriptionsSection from "./UserPageSubscriptionsSection";
+import { isSubscriptionCoverageFundedToForecastEnd } from "./coverage/subscriptionCoverage.helpers";
+
+function getFundingBoundaryMessageKey(
+  isLastFunded: boolean,
+  coverage: ApiSubscriptionCoverage | undefined | null
+): MessageKey {
+  if (!isLastFunded) return "subscriptions.coverage.nextUnfunded";
+  return isSubscriptionCoverageFundedToForecastEnd(coverage)
+    ? "subscriptions.coverage.fundedAtLeastThrough"
+    : "subscriptions.coverage.fundedThrough";
+}
 
 const UPCOMING_SKELETON_ROWS = ["first", "second", "third"] as const;
 
@@ -103,9 +114,7 @@ export default function UserPageSubscriptionsUpcoming(
             <div className="tw-mx-4 tw-py-3 tw-text-meta tw-font-normal tw-text-amber-200 md:tw-mx-5">
               {t(
                 locale,
-                isLastFunded
-                  ? "subscriptions.coverage.fundedThrough"
-                  : "subscriptions.coverage.nextUnfunded"
+                getFundingBoundaryMessageKey(isLastFunded, props.coverage)
               )}{" "}
               <Link
                 href={`/the-memes/${subscription.token_id}`}

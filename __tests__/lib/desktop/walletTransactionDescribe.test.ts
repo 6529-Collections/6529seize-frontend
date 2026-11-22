@@ -153,6 +153,33 @@ describe("readExpectedMintValue", () => {
     };
   };
 
+  // `mintCount` is a uint16 in the Manifold ABI, which viem decodes as a
+  // JS number; strict decoding turns every uint into a bigint, so the count
+  // (and the exact price that depends on it) is read for each counted rule.
+  it.each([
+    ["memes.mintBatch public phase accepts", "mintCount", 3n, 3n * 42n],
+    ["memes.mintBatch allowlist accepts", "mintCount", 2n, 2n * 43n],
+    ["memes.mintProxy accepts and is high impact", "mintCount", 1n, 42n],
+    ["nextgen.mint accepts", "_numberOfTokens", 2n, 2n * 5n],
+  ])(
+    "reads the count of %s and prices it",
+    async (name, countArg, count, total) => {
+      const description = describeVector(name);
+      const decoded = description.args.find((arg) => arg.name === countArg);
+      expect(typeof decoded?.value).toBe("bigint");
+      expect(description.count).toBe(count);
+      const client = reader({
+        getClaim: { cost: 40n },
+        MINT_FEE: 2n,
+        MINT_FEE_MERKLE: 3n,
+        getPrice: 5n,
+      });
+      await expect(readExpectedMintValue(client, description)).resolves.toBe(
+        total
+      );
+    }
+  );
+
   it("is (claim cost + fee) x count for The Memes", async () => {
     const description = describeVector("memes.mintBatch public phase accepts");
     const client = reader({ getClaim: { cost: 40n }, MINT_FEE: 2n });
