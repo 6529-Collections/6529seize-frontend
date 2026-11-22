@@ -1,6 +1,7 @@
 import { lookupRetryAfterMs } from "./lookup-reads";
 import { E2eeApiError, asE2eeApiError } from "./api-errors";
 import { buildE2eeApiClient } from "./api-client";
+import { withE2eeRelayReads } from "./relay/relay-api-client";
 import {
   commonApiFetch,
   commonApiPost,
@@ -237,8 +238,12 @@ function requests(account: E2eeApiAccount) {
 
 /**
  * REST client over the common API helpers for one account: a request goes
- * out only while the browser's session is that account's own.
+ * out only while the browser's session is that account's own. While the
+ * server says the relays are primary, ciphertext reads go to the relays and
+ * fall back to these routes (see withE2eeRelayReads).
  */
 export function createE2eeApiClient(account: E2eeApiAccount): E2eeApiClient {
-  return buildE2eeApiClient(requests(account));
+  return withE2eeRelayReads(buildE2eeApiClient(requests(account)), {
+    wallet: account.wallet,
+  });
 }
