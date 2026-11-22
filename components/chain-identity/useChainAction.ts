@@ -23,6 +23,7 @@ export type ChainActionState =
   | { readonly kind: "signingDocument" }
   | { readonly kind: "signing" }
   | { readonly kind: "sending" }
+  | { readonly kind: "held" }
   | { readonly kind: "done" }
   | { readonly kind: "failed"; readonly error: unknown };
 
@@ -37,6 +38,8 @@ interface PreparedChainAction {
   readonly submit?: (draft: ChainDraft, signature: Hex) => Promise<void>;
   /** Runs once the change is final, before the action reads as done. */
   readonly afterFinal?: (draft: ChainDraft) => Promise<void> | void;
+  /** The signature was held for another wallet's: the action ends "held". */
+  readonly held?: boolean;
 }
 
 /**
@@ -120,7 +123,7 @@ export function useChainAction(onDone?: () => void) {
         ]);
       }
       await action.afterFinal?.(action.draft);
-      update({ kind: "done" });
+      update({ kind: action.held === true ? "held" : "done" });
       onDoneRef.current?.();
     } catch (error) {
       update({ kind: "failed", error });

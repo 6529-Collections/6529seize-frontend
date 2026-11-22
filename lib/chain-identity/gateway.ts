@@ -41,7 +41,12 @@ export interface ChainIdentity {
   } | null;
   readonly rep?: { readonly total: string; readonly raters: number };
   readonly nic?: { readonly total: string; readonly raters: number };
-  readonly level?: { readonly level: number } | null;
+  /** `tdh` is the rater's cap: the most REP, and the most NIC, it can give. */
+  readonly level?: {
+    readonly level: number;
+    readonly tdh?: string;
+    readonly tdhDay?: number;
+  } | null;
 }
 
 interface ChainHandle {
@@ -100,6 +105,8 @@ export interface ChainDraftRequest {
   readonly authRef?: Hex;
   readonly body: Readonly<Record<string, unknown>>;
   readonly validForMs?: number;
+  /** The header's nonceLane (0 to 15); 0 when absent. */
+  readonly nonceLane?: number;
 }
 
 export interface ChainSignatureEntry {
@@ -121,6 +128,18 @@ export interface ChainTxStatus {
 interface ChainOps {
   readonly ruleVersion: number;
   readonly currencyAsset: Hex;
+  /**
+   * How long a wallet removed from an identity waits before it can join or
+   * create one again; null or absent when the chain doesn't say.
+   */
+  readonly rejoinWaitMs?: number | null;
+}
+
+/** A wallet's place in the identities: bound, or when it last left one. */
+export interface ChainWalletMembership {
+  readonly wallet: Hex;
+  readonly principalId: Hex | null;
+  readonly leftAt?: { readonly leftMs: number; readonly from: Hex } | null;
 }
 
 export interface ChainDelegationRecord {
@@ -134,15 +153,6 @@ export interface ChainDelegationRecord {
   readonly expiry: string;
   readonly expired: boolean;
   readonly source: "imported" | "set";
-}
-
-interface ChainRatingRow {
-  readonly rater: Hex;
-  readonly target: Hex;
-  readonly matter: string;
-  readonly category: { readonly id: Hex; readonly name: string | null };
-  readonly value: string;
-  readonly updatedHeight: number;
 }
 
 interface ChainStateRecord {
@@ -350,6 +360,13 @@ export const chainGateway = {
       { signal, nullOn404: true }
     ),
 
+  getWalletMembership: (wallet: Hex, signal?: AbortSignal) =>
+    request<ChainWalletMembership>(
+      "GET",
+      `/v1/membership/wallets/${lower(wallet)}`,
+      { signal, query: { at: "head" } }
+    ),
+
   getHandle: (handle: string, signal?: AbortSignal) =>
     request<ChainHandle>(
       "GET",
@@ -369,17 +386,6 @@ export const chainGateway = {
       signal,
       query: { at: "head", limit: 1000 },
     }),
-
-  getRatingsByRater: (
-    principalId: Hex,
-    matter: "rep" | "nic",
-    signal?: AbortSignal
-  ) =>
-    request<readonly ChainRatingRow[]>(
-      "GET",
-      `/v1/ratings/by-rater/${lower(principalId)}`,
-      { signal, query: { at: "head", matter, limit: 1000 } }
-    ),
 
   getState: (key: Hex, signal?: AbortSignal) =>
     request<ChainStateRecord>("GET", `/v1/state/${lower(key)}`, {

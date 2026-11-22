@@ -8,6 +8,13 @@ import { commonApiFetch } from "@/services/api/common-api";
 import type { ApiProfileRepRatesState, RatingStats } from "@/entities/IProfile";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
+import {
+  chainRatingTargetOf,
+  useChainRatingAllowance,
+} from "@/components/chain-identity/useChainRatingAllowance";
+
+/** A chain amount as the forms' numbers; REP and NIC stay far below 2^53. */
+const toFormNumber = (value: bigint): number => Number(value);
 
 export function useRepAllocation({
   profile,
@@ -50,27 +57,45 @@ export function useRepAllocation({
       }),
     enabled: enabled && !!rater,
   });
+  // On the 6529 Network the chain's numbers count: the rater's TDH less what
+  // it has given, and its rating in this category. 6529.io's copy can lag.
+  const chain = useChainRatingAllowance({
+    matter: "REP",
+    target: chainRatingTargetOf(profile),
+    category,
+    enabled,
+  });
+  const chainData = chain.active ? chain.data : undefined;
   const data = allocation.data;
   // Derive the contribution and limits from one query snapshot. Mirroring each
   // value in state briefly paired new credit with an old contribution/limit.
   const repState = useMemo((): RatingStats | null => {
-    if (!category || !data) return null;
-    return (
-      data.rating_stats.find((item) => item.category === category) ?? {
-        category,
-        rating: 0,
-        contributor_count: 0,
-        rater_contribution: 0,
-      }
-    );
-  }, [category, data]);
+    if (!category || (!data && !chainData)) return null;
+    const stats = data?.rating_stats.find(
+      (item) => item.category === category
+    ) ?? {
+      category,
+      rating: 0,
+      contributor_count: 0,
+      rater_contribution: 0,
+    };
+    return chainData
+      ? { ...stats, rater_contribution: toFormNumber(chainData.current) }
+      : stats;
+  }, [category, data, chainData]);
   const repProxy = activeProfileProxy?.actions.find(
     (action) => action.action_type === ApiProfileProxyActionType.AllocateRep
   );
   const proxyAvailableCredit = repProxy
     ? Math.max((repProxy.credit_amount ?? 0) - (repProxy.credit_spent ?? 0), 0)
     : null;
-  const heroAvailableRep = data?.rep_rates_left_for_rater ?? 0;
+  // Before the chain has counted the day's TDH it can't say what is left;
+  // 6529.io's figure stands in, and the chain still checks the change.
+  const chainAvailable = chainData?.available ?? null;
+  const heroAvailableRep =
+    chain.active && chainAvailable !== null
+      ? toFormNumber(chainAvailable)
+      : (data?.rep_rates_left_for_rater ?? 0);
   const currentRep = repState?.rater_contribution ?? 0;
   const minMaxValues = useMemo(() => {
     const minHeroRep = -(Math.abs(currentRep) + heroAvailableRep);
@@ -91,10 +116,13 @@ export function useRepAllocation({
     heroAvailableRep,
     proxyAvailableCredit,
     minMaxValues,
-    isError: allocation.isError,
-    isFetching: allocation.isFetching,
+    isError: allocation.isError || (chain.active && chain.isError),
+    isFetching: allocation.isFetching || (chain.active && chain.isFetching),
     retry: () => {
       void allocation.refetch();
+      if (chain.active) {
+        void chain.refetch();
+      }
     },
   };
 }

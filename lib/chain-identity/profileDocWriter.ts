@@ -201,7 +201,7 @@ async function replaceOnce(
  */
 type DescribeError = (error: unknown) => string | null;
 
-/** The publish lane's error for whatever stopped the change. */
+/** The site builder's error for whatever stopped the change. */
 function writeErrorOf(
   error: unknown,
   signer: ProfileDocSigner,
@@ -217,7 +217,11 @@ function writeErrorOf(
     );
   }
   const name = refusalName(error);
-  if (signer === "session-key" && name !== null && SESSION_KEY_REFUSALS.has(name)) {
+  if (
+    signer === "session-key" &&
+    name !== null &&
+    SESSION_KEY_REFUSALS.has(name)
+  ) {
     return keyUnusable();
   }
   const fromChain =
@@ -232,7 +236,7 @@ function writeErrorOf(
 }
 
 /**
- * The ProfileDocWriter the profile site builder uses (publish lane,
+ * The ProfileDocWriter the profile site builder uses (registered with
  * `registerProfileDocWriter`). Each change reads the current document,
  * applies the builder's edit, signs and stores the next version, and
  * submits PROFILE_REPLACE, waiting until it is final. When someone else

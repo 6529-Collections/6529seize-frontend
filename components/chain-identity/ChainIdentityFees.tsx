@@ -36,6 +36,7 @@ export default function ChainIdentityFees({
   principalId,
   currencyAsset,
   walletBalance,
+  identityBalance,
   onChanged,
 }: {
   readonly wallet: Hex;
@@ -43,6 +44,7 @@ export default function ChainIdentityFees({
   readonly principalId: Hex | null;
   readonly currencyAsset: Hex | null;
   readonly walletBalance: bigint | null;
+  readonly identityBalance: bigint | null;
   readonly onChanged: () => void;
 }) {
   const locale = useBrowserLocale();
@@ -103,6 +105,11 @@ export default function ChainIdentityFees({
       heading={t(locale, "chainIdentity.fees.heading")}
       body={t(locale, "chainIdentity.fees.body")}
     >
+      {principalId !== null && identityBalance === 0n && (
+        <p className="tw-mb-4 tw-mt-0 tw-max-w-3xl tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/5 tw-px-3 tw-py-2 tw-text-sm tw-leading-6 tw-text-iron-100">
+          {t(locale, "chainIdentity.fees.empty")}
+        </p>
+      )}
       <Button
         variant="secondary"
         size="md"
@@ -112,7 +119,10 @@ export default function ChainIdentityFees({
         {t(locale, "chainIdentity.fees.drip")}
       </Button>
       {dripMessage && (
-        <p role="status" className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300">
+        <p
+          role="status"
+          className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-300"
+        >
           {dripMessage}
         </p>
       )}
@@ -121,7 +131,10 @@ export default function ChainIdentityFees({
           <p className="tw-mb-3 tw-mt-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-300">
             {t(locale, "chainIdentity.fees.moveBody")}
           </p>
-          <label htmlFor="chain-identity-move-amount" className={CHAIN_LABEL_CLASS}>
+          <label
+            htmlFor="chain-identity-move-amount"
+            className={CHAIN_LABEL_CLASS}
+          >
             {t(locale, "chainIdentity.fees.moveAmount")}
           </label>
           <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center">

@@ -5,6 +5,10 @@ import { chainGateway } from "./gateway";
 
 const FAMILY_BALANCE = "0901";
 const FAMILY_CAPABILITY = "0301";
+const FAMILY_RATING = "0701";
+const FAMILY_RATER_BUDGET = "0703";
+/** RATING_SET's targetKind for an identity. */
+const TARGET_PRINCIPAL = "01";
 const HOLDER_PRINCIPAL = "01";
 const HOLDER_ADDRESS = "02";
 
@@ -24,8 +28,9 @@ const word = (value: Hex): string => {
 /** An address as the 32-byte word the chain keys an address account by. */
 export const addressWord = (address: Hex): Hex => `0x${word(address)}`;
 
-const DECIMAL = /^\d+$/;
+const DECIMAL = /^-?\d+$/;
 
+/** A record's integer field: a JSON number, or a decimal string past 32 bits. */
 const toBigInt = (value: unknown): bigint => {
   if (typeof value === "bigint") {
     return value;
@@ -37,6 +42,14 @@ const toBigInt = (value: unknown): bigint => {
     return BigInt(value);
   }
   return 0n;
+};
+
+/** A one-byte key field as two hex digits. */
+const byte = (value: number): string => {
+  if (!Number.isInteger(value) || value < 0 || value > 255) {
+    throw new RangeError("expected one byte");
+  }
+  return value.toString(16).padStart(2, "0");
 };
 
 async function readBalance(
@@ -55,8 +68,7 @@ export const readIdentityBalance = (
   principalId: Hex,
   asset: Hex,
   signal?: AbortSignal
-): Promise<bigint> =>
-  readBalance(HOLDER_PRINCIPAL, principalId, asset, signal);
+): Promise<bigint> => readBalance(HOLDER_PRINCIPAL, principalId, asset, signal);
 
 /** A wallet's own address account: the drip pays here. */
 export const readWalletBalance = (
@@ -93,4 +105,43 @@ export async function readGrant(
     version: Number(toBigInt(fields["version"])),
     expiresAtMs,
   };
+}
+
+/**
+ * A rater's REP (matter 1) or NIC (matter 2) rating of an identity in one
+ * category (zero for NIC), as the chain holds it: `Rating[rater, matter,
+ * targetKind, target, category]`. `updatedHeight` is the version RATING_SET's
+ * `priorVersion` must name. Null when there is none.
+ */
+export async function readRating(
+  rater: Hex,
+  matter: number,
+  target: Hex,
+  category: Hex,
+  signal?: AbortSignal
+): Promise<{ readonly value: bigint; readonly updatedHeight: number } | null> {
+  const key: Hex = `0x${FAMILY_RATING}${word(rater)}${byte(matter)}${TARGET_PRINCIPAL}${word(target)}${word(category)}`;
+  const record = await chainGateway.getState(key, signal);
+  const fields = record.valueFields;
+  if (!fields) {
+    return null;
+  }
+  return {
+    value: toBigInt(fields["value"]),
+    updatedHeight: Number(toBigInt(fields["updatedHeight"])),
+  };
+}
+
+/**
+ * What a rater has given in one matter: the sum of its ratings' sizes,
+ * `RaterBudget[rater, matter].spent`, which its TDH caps. 0 when none.
+ */
+export async function readRaterSpent(
+  rater: Hex,
+  matter: number,
+  signal?: AbortSignal
+): Promise<bigint> {
+  const key: Hex = `0x${FAMILY_RATER_BUDGET}${word(rater)}${byte(matter)}`;
+  const record = await chainGateway.getState(key, signal);
+  return toBigInt(record.valueFields?.["spent"]);
 }

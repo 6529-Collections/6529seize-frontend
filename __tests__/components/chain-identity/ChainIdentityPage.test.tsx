@@ -38,16 +38,27 @@ jest.mock("@/lib/chain-identity/signers", () => ({
 jest.mock("@/lib/chain-identity/sessionKey", () => ({
   ...jest.requireActual("@/lib/chain-identity/sessionKey"),
   canHoldSessionKey: async () => true,
-  sessionKeyStore: { read: async () => null, write: jest.fn(), remove: jest.fn() },
+  sessionKeyStore: {
+    read: async () => null,
+    write: jest.fn(),
+    remove: jest.fn(),
+  },
 }));
 
 const gateway = chainGateway as unknown as Record<string, jest.Mock>;
-const draft = { txId: "0x01", unsigned: "0x02", fee: { maxFee: "1000000000000" } };
+const draft = {
+  txId: "0x01",
+  unsigned: "0x02",
+  fee: { maxFee: "1000000000000" },
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockAddress = WALLET;
-  gateway["getOps"]!.mockResolvedValue({ ruleVersion: 6, currencyAsset: ASSET });
+  gateway["getOps"]!.mockResolvedValue({
+    ruleVersion: 6,
+    currencyAsset: ASSET,
+  });
   gateway["getState"]!.mockResolvedValue({
     valueFields: { amount: "2000000000000000000" },
   });
@@ -58,9 +69,13 @@ it("asks for a wallet first", () => {
   mockAddress = undefined;
   render(<ChainIdentityPage />);
   expect(
-    screen.getByText("Connect a wallet to see its identity on the 6529 Network.")
+    screen.getByText(
+      "Connect a wallet to see its identity on the 6529 Network."
+    )
   ).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Connect wallet" })).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Connect wallet" })
+  ).toBeInTheDocument();
 });
 
 it("creates an identity after showing the fee, paid by the wallet", async () => {
@@ -104,27 +119,84 @@ it("refuses a handle the chain doesn't take before drafting anything", async () 
   render(<ChainIdentityPage />);
   const input = await screen.findByLabelText("Handle (optional)");
   fireEvent.change(input, { target: { value: "no-dashes" } });
-  expect(screen.getByText("Not a handle the 6529 Network takes.")).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "Create identity" })).toBeDisabled();
+  expect(
+    screen.getByText(
+      "That isn't a valid handle. Use 3 to 15 characters: a to z, 0 to 9 and _."
+    )
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Create identity" })
+  ).toBeDisabled();
 });
 
 it("shows an identity's sections and its handle", async () => {
   gateway["getIdentityByWallet"]!.mockResolvedValue({
     principalId: PRINCIPAL,
-    handle: "punk",
+    handle: "tester_one",
     wallets: [WALLET],
     profile: null,
   });
   render(<ChainIdentityPage />);
-  expect(await screen.findByText("punk")).toBeInTheDocument();
+  expect(await screen.findByText("tester_one")).toBeInTheDocument();
   for (const heading of [
-    "Chain actions on this browser",
+    "REP and NIC",
     "Handle",
     "Profile",
     "Wallets",
+    "Sign on this browser",
     "Delegations",
   ]) {
     expect(screen.getByRole("heading", { name: heading })).toBeInTheDocument();
   }
-  expect(screen.queryByRole("button", { name: "Remove" })).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Remove" })
+  ).not.toBeInTheDocument();
+});
+
+it("shows the REP and NIC left to give: the TDH less what was given", async () => {
+  gateway["getIdentityByWallet"]!.mockResolvedValue({
+    principalId: PRINCIPAL,
+    handle: "tester_one",
+    wallets: [WALLET],
+    profile: null,
+    level: { level: 12, tdh: "5000", tdhDay: 25 },
+  });
+  gateway["getState"]!.mockImplementation(async (key: string) => {
+    // RaterBudget[principal, matter]: 1,200 REP and no NIC given.
+    if (key === `0x0703${PRINCIPAL.slice(2)}01`) {
+      return { valueFields: { spent: "1200", count: 4 } };
+    }
+    if (key.startsWith("0x0703")) {
+      return { value: null, valueFields: null };
+    }
+    return { valueFields: { amount: "2000000000000000000" } };
+  });
+  render(<ChainIdentityPage />);
+  expect(
+    await screen.findByText(
+      "Your TDH, 5,000, is the most REP you can give across everyone, and the most NIC. To give REP or NIC, open the person's profile page."
+    )
+  ).toBeInTheDocument();
+  expect(await screen.findByText("3,800 of 5,000")).toBeInTheDocument();
+  expect(screen.getByText("5,000 of 5,000")).toBeInTheDocument();
+});
+
+it("says what to do first when the identity has no $fake6529", async () => {
+  gateway["getIdentityByWallet"]!.mockResolvedValue({
+    principalId: PRINCIPAL,
+    handle: null,
+    wallets: [WALLET],
+    profile: null,
+  });
+  gateway["getState"]!.mockImplementation(async (key: string) =>
+    key.startsWith("0x090101")
+      ? { value: null, valueFields: null }
+      : { valueFields: { amount: "2000000000000000000" } }
+  );
+  render(<ChainIdentityPage />);
+  expect(
+    await screen.findByText(
+      "Your identity has no $fake6529 yet, so it can't pay for changes. Get $fake6529 for this wallet, then move it to your identity."
+    )
+  ).toBeInTheDocument();
 });

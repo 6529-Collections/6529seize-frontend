@@ -7,12 +7,18 @@ import {
 } from "@/lib/chain-identity/active";
 import { dripMessage } from "@/lib/chain-identity/drip";
 import { chainGateway } from "@/lib/chain-identity/gateway";
-import { pendingJoins, type PendingJoin } from "@/lib/chain-identity/pendingJoin";
+import {
+  snapshotStartedJoins,
+  startedJoins,
+  type StartedJoin,
+} from "@/lib/chain-identity/pendingJoin";
 import { keepSessionKey, planSession } from "@/lib/chain-identity/session";
 import { sessionKeyStore } from "@/lib/chain-identity/sessionKey";
 import {
   readGrant,
   readIdentityBalance,
+  readRaterSpent,
+  readRating,
   readWalletBalance,
 } from "@/lib/chain-identity/state";
 
@@ -106,6 +112,39 @@ describe("chain state reads", () => {
     );
   });
 
+  it("keys a rating by rater, matter, target kind, target and category", async () => {
+    const target = `0x${"0c".repeat(32)}` as const;
+    const category = `0x${"0d".repeat(32)}` as const;
+    gateway.getState.mockResolvedValue({
+      valueFields: { value: "-250", updatedHeight: 4321 },
+    });
+    await expect(readRating(P, 2, target, category)).resolves.toEqual({
+      value: -250n,
+      updatedHeight: 4321,
+    });
+    // Rating's key (0x0701): rater, matter (one byte), targetKind 1, target, category.
+    expect(gateway.getState).toHaveBeenLastCalledWith(
+      `0x0701${"0a".repeat(32)}0201${"0c".repeat(32)}${"0d".repeat(32)}`,
+      undefined
+    );
+    gateway.getState.mockResolvedValue({ value: null, valueFields: null });
+    await expect(readRating(P, 1, target, category)).resolves.toBeNull();
+  });
+
+  it("reads what a rater has given in a matter, 0 when it has given none", async () => {
+    gateway.getState.mockResolvedValue({
+      valueFields: { spent: "1200", count: 3, raterIndex: 7 },
+    });
+    await expect(readRaterSpent(P, 1)).resolves.toBe(1200n);
+    // RaterBudget's key (0x0703): rater, matter.
+    expect(gateway.getState).toHaveBeenLastCalledWith(
+      `0x0703${"0a".repeat(32)}01`,
+      undefined
+    );
+    gateway.getState.mockResolvedValue({ value: null, valueFields: null });
+    await expect(readRaterSpent(P, 2)).resolves.toBe(0n);
+  });
+
   it("reads a grant as active while ACTIVE and unexpired", async () => {
     gateway.getState.mockResolvedValue({
       valueFields: { status: 2, version: 3, expiresAt: "2000" },
@@ -152,33 +191,36 @@ describe("chain actions on this browser", () => {
   });
 });
 
-describe("the drip and held joins", () => {
+describe("the drip and started joins", () => {
   it("asks the drip with its exact message", () => {
     expect(dripMessage("0x00000000000000000000000000000000000000AA")).toBe(
       "Send $fake6529 for fees to this wallet on the 6529 chain.\n\nWallet: 0x00000000000000000000000000000000000000aa"
     );
   });
 
-  it("holds one join per joining wallet until it expires", () => {
+  it("remembers started joins by id and wallet only, one per joining wallet", () => {
     localStorage.clear();
-    const join = (wallet: string, expiresAtMs: number) =>
+    const join = (wallet: string, txId: string, expiresAtMs: number) =>
       ({
+        txId,
         principalId: P,
         identityWallet: WALLET,
         joiningWallet: wallet,
-        identitySignature: "0x01",
         expiresAtMs,
-        draft: { txId: "0x02" },
-      }) as unknown as PendingJoin;
-    pendingJoins.save(join("0xB", 5_000), 0);
-    pendingJoins.save(join("0xb", 6_000), 0);
-    pendingJoins.save(join("0xC", 1_000), 0);
-    expect(pendingJoins.list(2_000).map((item) => item.joiningWallet)).toEqual([
-      "0xb",
+      }) as StartedJoin;
+    const later = Date.now() + DAY;
+    startedJoins.save(join("0xB", "0x01", later));
+    startedJoins.save(join("0xb", "0x02", later + 1));
+    startedJoins.save(join("0xC", "0x03", later));
+    startedJoins.save(join("0xD", "0x04", Date.now() - 1));
+    expect(snapshotStartedJoins().map((item) => item.txId)).toEqual([
+      "0x02",
+      "0x03",
     ]);
-    pendingJoins.remove("0xB");
-    expect(pendingJoins.list(0).map((item) => item.joiningWallet)).toEqual([
-      "0xC",
-    ]);
+    expect(localStorage.getItem("6529-chain-started-joins")).not.toMatch(
+      /sig|draft|unsigned/
+    );
+    startedJoins.remove("0x02");
+    expect(snapshotStartedJoins().map((item) => item.txId)).toEqual(["0x03"]);
   });
 });

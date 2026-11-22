@@ -30,6 +30,7 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
+import { chainRatingFailureText } from "@/components/chain-identity/chainErrorMessage";
 import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
@@ -425,11 +426,15 @@ function GrantRepForm({
       setToast({
         type: "error",
         title: t(locale, "rep.categories.grant.toast.updateFailed"),
-        description: t(locale, "rep.categories.grant.toast.tryAgain"),
-        details: getToastErrorDetails(
-          error,
-          getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
-        ),
+        ...(chainWrite
+          ? { description: chainRatingFailureText(locale, error) }
+          : {
+              description: t(locale, "rep.categories.grant.toast.tryAgain"),
+              details: getToastErrorDetails(
+                error,
+                getErrorMessage(error, t(locale, GENERIC_ERROR_KEY))
+              ),
+            }),
       });
     },
   });

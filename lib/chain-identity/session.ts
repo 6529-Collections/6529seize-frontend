@@ -18,7 +18,9 @@ import { readGrant } from "./state";
  * changes and REP and NIC ratings, so each rating needs no wallet prompt.
  */
 
-const SESSION_LIFETIME_MS = 30 * 24 * 60 * 60 * 1000;
+/** How long a browser's key lasts, in days. */
+export const SESSION_LIFETIME_DAYS = 30;
+const SESSION_LIFETIME_MS = SESSION_LIFETIME_DAYS * 24 * 60 * 60 * 1000;
 /** The fee budget covers about this many of the grant's own worst-case fee. */
 const FEE_BUDGET_OPERATIONS = 400n;
 /** A key this close to its end is replaced rather than used. */

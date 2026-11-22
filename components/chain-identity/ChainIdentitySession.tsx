@@ -15,6 +15,7 @@ import {
   forgetSessionKey,
   keepSessionKey,
   planSession,
+  SESSION_LIFETIME_DAYS,
   sessionGrantOperation,
   sessionRevokeOperation,
   type SessionPlan,
@@ -136,7 +137,9 @@ export default function ChainIdentitySession({
     <ChainSection
       id="chain-identity-session"
       heading={t(locale, "chainIdentity.session.heading")}
-      body={t(locale, "chainIdentity.session.offBody")}
+      body={t(locale, "chainIdentity.session.offBody", {
+        days: SESSION_LIFETIME_DAYS,
+      })}
     >
       {plan && (
         <p className="tw-mb-3 tw-mt-0 tw-text-sm tw-text-iron-300">

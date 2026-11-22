@@ -5,6 +5,7 @@ import { useContext, useEffect, useId, useRef, useState } from "react";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { AuthContext } from "@/components/auth/Auth";
+import { chainRatingFailureText } from "@/components/chain-identity/chainErrorMessage";
 import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
@@ -223,8 +224,12 @@ function UserPageIdentityHeaderCICRateForm({
       setToast({
         type: "error",
         title: t(locale, "user.rate.updateError"),
-        description: t(locale, "user.rate.tryAgain"),
-        details: getToastErrorDetails(error),
+        ...(chainWrite
+          ? { description: chainRatingFailureText(locale, error) }
+          : {
+              description: t(locale, "user.rate.tryAgain"),
+              details: getToastErrorDetails(error),
+            }),
       });
     } finally {
       setBusy(false);

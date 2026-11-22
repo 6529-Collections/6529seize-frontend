@@ -5,9 +5,11 @@ import { useCallback } from "react";
 import type { Hex } from "viem";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { chainGateway } from "@/lib/chain-identity/gateway";
+import { RATING_MATTER } from "@/lib/chain-identity/identityOps";
 import { usableSessionKey } from "@/lib/chain-identity/session";
 import {
   readIdentityBalance,
+  readRaterSpent,
   readWalletBalance,
 } from "@/lib/chain-identity/state";
 
@@ -46,6 +48,20 @@ export function useChainIdentityData(wallet: Hex | undefined) {
     staleTime: 5_000,
   });
 
+  // What the identity has given in REP and in NIC; its TDH caps each.
+  const given = useQuery({
+    queryKey: [QueryKey.CHAIN_IDENTITY, "given", principalId],
+    queryFn: async ({ signal }) => {
+      const [rep, nic] = await Promise.all([
+        readRaterSpent(principalId as Hex, RATING_MATTER.REP, signal),
+        readRaterSpent(principalId as Hex, RATING_MATTER.NIC, signal),
+      ]);
+      return { rep, nic };
+    },
+    enabled: principalId !== null,
+    staleTime: 5_000,
+  });
+
   const session = useQuery({
     queryKey: [QueryKey.CHAIN_IDENTITY, "session", principalId],
     queryFn: () => usableSessionKey(principalId as Hex),
@@ -59,5 +75,5 @@ export function useChainIdentityData(wallet: Hex | undefined) {
     [queryClient]
   );
 
-  return { identity, ops, balances, session, refresh } as const;
+  return { identity, ops, balances, given, session, refresh } as const;
 }

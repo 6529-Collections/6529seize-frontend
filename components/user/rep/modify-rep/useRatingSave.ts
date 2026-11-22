@@ -1,6 +1,7 @@
 "use client";
 
 import { AuthContext } from "@/components/auth/Auth";
+import { chainRatingFailureText } from "@/components/chain-identity/chainErrorMessage";
 import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
@@ -97,9 +98,7 @@ export function useRatingSave(matter: Matter, rater: string | null = null) {
     const savedProfiles = new Map<string, ApiIdentity>();
     try {
       // On the 6529 Network each rating carries its own signature.
-      const { success } = chainWrite
-        ? { success: true }
-        : await requestAuth();
+      const { success } = chainWrite ? { success: true } : await requestAuth();
       if (!isCurrentSession()) return false;
       if (!success) {
         const message = t(locale, copy.login);
@@ -132,8 +131,12 @@ export function useRatingSave(matter: Matter, rater: string | null = null) {
       setToast({
         type: "error",
         title: message,
-        description: t(locale, copy.retry),
-        details: getToastErrorDetails(cause),
+        ...(chainWrite
+          ? { description: chainRatingFailureText(locale, cause) }
+          : {
+              description: t(locale, copy.retry),
+              details: getToastErrorDetails(cause),
+            }),
       });
       return false;
     } finally {

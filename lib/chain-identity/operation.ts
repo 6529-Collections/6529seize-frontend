@@ -205,6 +205,7 @@ export function verifyDraft(
     sameValue(request.body, typedData.message["body"]),
     sameValue(request.principal ?? ZERO_WORD, header["principal"]),
     canonical(header["keyType"]) === String(expectedKeyType),
+    canonical(header["nonceLane"] ?? 0) === String(request.nonceLane ?? 0),
     expectedKeyType === 2
       ? sameValue(request.keyId, header["keyId"]) &&
         sameValue(request.authRef, header["authRef"])
@@ -276,7 +277,7 @@ const sleep = (ms: number, signal?: AbortSignal) =>
   });
 
 /** Waits until the operation is final, and throws when the chain refused it. */
-async function awaitFinal(
+export async function awaitFinal(
   txId: Hex,
   signal?: AbortSignal
 ): Promise<ChainTxStatus> {

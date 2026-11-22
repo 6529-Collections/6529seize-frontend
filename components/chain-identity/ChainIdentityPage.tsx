@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useSyncExternalStore } from "react";
 import { useAccount, useConfig } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import {
@@ -11,13 +10,11 @@ import {
 import Button from "@/components/utils/button/Button";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
-import {
-  serverPendingJoins,
-  snapshotPendingJoins,
-  subscribePendingJoins,
-} from "@/lib/chain-identity/pendingJoin";
+import type { ChainIdentity } from "@/lib/chain-identity/gateway";
 import { formatFake6529 } from "./chainAmount";
 import { ChainSection, shortHex } from "./chainIdentityUi";
 import ChainIdentityCreate from "./ChainIdentityCreate";
@@ -26,7 +23,7 @@ import ChainIdentityHandle from "./ChainIdentityHandle";
 import ChainIdentityProfile from "./ChainIdentityProfile";
 import ChainIdentitySession from "./ChainIdentitySession";
 import ChainIdentityWallets from "./ChainIdentityWallets";
-import ChainPendingJoins from "./ChainPendingJoins";
+import ChainJoinRequests from "./ChainJoinRequests";
 import { useChainIdentityData } from "./useChainIdentityData";
 
 function SummaryRow({
@@ -53,6 +50,57 @@ function SummaryRow({
   );
 }
 
+const DECIMAL = /^\d+$/;
+
+/**
+ * REP and NIC left to give: the identity's TDH (its `level.tdh`, the cap the
+ * chain checks) less what it has given in each, both from the chain.
+ */
+function ChainRatingSummary({
+  locale,
+  identity,
+  given,
+}: {
+  readonly locale: SupportedLocale;
+  readonly identity: ChainIdentity;
+  readonly given: { readonly rep: bigint; readonly nic: bigint } | undefined;
+}) {
+  const raw = identity.level?.tdh;
+  const tdh = raw !== undefined && DECIMAL.test(raw) ? BigInt(raw) : null;
+  const shown = (value: bigint) => formatInteger(locale, Number(value));
+  const left = (spent: bigint | undefined) => {
+    if (tdh === null || spent === undefined) {
+      return t(locale, "chainIdentity.rating.unknown");
+    }
+    return t(locale, "chainIdentity.rating.left", {
+      left: shown(tdh > spent ? tdh - spent : 0n),
+      tdh: shown(tdh),
+    });
+  };
+  return (
+    <ChainSection
+      id="chain-identity-rating"
+      heading={t(locale, "chainIdentity.rating.heading")}
+      body={
+        tdh === null
+          ? t(locale, "chainIdentity.rating.bodyNoTdh")
+          : t(locale, "chainIdentity.rating.body", { tdh: shown(tdh) })
+      }
+    >
+      <dl className="tw-m-0 tw-grid tw-gap-4 sm:tw-grid-cols-2">
+        <SummaryRow
+          label={t(locale, "chainIdentity.rating.rep")}
+          value={left(given?.rep)}
+        />
+        <SummaryRow
+          label={t(locale, "chainIdentity.rating.nic")}
+          value={left(given?.nic)}
+        />
+      </dl>
+    </ChainSection>
+  );
+}
+
 /**
  * `/network/identity`: the connected wallet's identity on the 6529 Network
  * and every change this site makes there.
@@ -64,13 +112,8 @@ export default function ChainIdentityPage() {
   const { address } = useAccount();
   const { seizeConnect } = useSeizeConnectContext();
   const wallet = address;
-  const { identity, ops, balances, session, refresh } =
+  const { identity, ops, balances, given, session, refresh } =
     useChainIdentityData(wallet);
-  const joins = useSyncExternalStore(
-    subscribePendingJoins,
-    snapshotPendingJoins,
-    serverPendingJoins
-  );
 
   const changed = () => {
     void refresh();
@@ -87,31 +130,19 @@ export default function ChainIdentityPage() {
     </header>
   );
 
-  const pending = (
-    <ChainPendingJoins
-      joins={joins}
-      config={config}
-      connected={wallet}
-      onChanged={changed}
-    />
-  );
-
   if (!wallet) {
     return (
       <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
         {header}
-        <div className="tw-space-y-4">
-          {pending}
-          <ChainSection
-            id="chain-identity-connect"
-            heading={t(locale, "chainIdentity.summary.heading")}
-            body={t(locale, "chainIdentity.connect.body")}
-          >
-            <Button variant="primary" size="md" onClick={seizeConnect}>
-              {t(locale, "chainIdentity.connect.action")}
-            </Button>
-          </ChainSection>
-        </div>
+        <ChainSection
+          id="chain-identity-connect"
+          heading={t(locale, "chainIdentity.summary.heading")}
+          body={t(locale, "chainIdentity.connect.body")}
+        >
+          <Button variant="primary" size="md" onClick={seizeConnect}>
+            {t(locale, "chainIdentity.connect.action")}
+          </Button>
+        </ChainSection>
       </main>
     );
   }
@@ -142,6 +173,8 @@ export default function ChainIdentityPage() {
   }
 
   const current = identity.data;
+  const rejoinWaitMs =
+    typeof ops.data.rejoinWaitMs === "number" ? ops.data.rejoinWaitMs : null;
   const amount = (value: bigint | null | undefined) =>
     value === null || value === undefined
       ? "—"
@@ -153,7 +186,12 @@ export default function ChainIdentityPage() {
     <main className={NETWORK_REFERENCE_PAGE_CLASSES}>
       {header}
       <div className="tw-max-w-4xl tw-space-y-4">
-        {pending}
+        <ChainJoinRequests
+          wallet={wallet}
+          config={config}
+          rejoinWaitMs={rejoinWaitMs}
+          onChanged={changed}
+        />
         <ChainSection
           id="chain-identity-summary"
           heading={t(locale, "chainIdentity.summary.heading")}
@@ -164,7 +202,8 @@ export default function ChainIdentityPage() {
                 <SummaryRow
                   label={t(locale, "chainIdentity.summary.handle")}
                   value={
-                    current.handle ?? t(locale, "chainIdentity.summary.noHandle")
+                    current.handle ??
+                    t(locale, "chainIdentity.summary.noHandle")
                   }
                 />
                 <SummaryRow
@@ -186,12 +225,21 @@ export default function ChainIdentityPage() {
           </dl>
         </ChainSection>
 
+        {current && (
+          <ChainRatingSummary
+            locale={locale}
+            identity={current}
+            given={given.data}
+          />
+        )}
+
         <ChainIdentityFees
           wallet={wallet}
           config={config}
           principalId={current?.principalId ?? null}
           currencyAsset={ops.data.currencyAsset}
           walletBalance={balances.data?.wallet ?? null}
+          identityBalance={balances.data?.identity ?? null}
           onChanged={changed}
         />
 
@@ -205,13 +253,6 @@ export default function ChainIdentityPage() {
 
         {current && (
           <>
-            <ChainIdentitySession
-              wallet={wallet}
-              config={config}
-              principalId={current.principalId}
-              sessionKey={session.data ?? null}
-              onChanged={changed}
-            />
             <ChainIdentityHandle
               wallet={wallet}
               config={config}
@@ -230,8 +271,15 @@ export default function ChainIdentityPage() {
               wallet={wallet}
               config={config}
               identity={current}
+              rejoinWaitMs={rejoinWaitMs}
               onChanged={changed}
-              onJoinHeld={changed}
+            />
+            <ChainIdentitySession
+              wallet={wallet}
+              config={config}
+              principalId={current.principalId}
+              sessionKey={session.data ?? null}
+              onChanged={changed}
             />
             <ChainSection
               id="chain-identity-delegations"
@@ -240,7 +288,7 @@ export default function ChainIdentityPage() {
             >
               <Link
                 href="/safe-collecting"
-                className="tw-text-sm tw-font-semibold tw-text-primary-300 hover:tw-text-primary-200"
+                className="hover:tw-text-primary-200 tw-text-sm tw-font-semibold tw-text-primary-300"
               >
                 {t(locale, "chainIdentity.delegations.link")}
               </Link>

@@ -19,7 +19,11 @@ jest.mock("@/lib/chain-identity/profileSave", () => ({
 const WALLET = "0x00000000000000000000000000000000000000aa" as const;
 const identity = {
   principalId: `0x${"0a".repeat(32)}`,
-  profile: { docCid: `0x01551220${"11".repeat(32)}`, version: 3, updatedHeight: 70 },
+  profile: {
+    docCid: `0x01551220${"11".repeat(32)}`,
+    version: 3,
+    updatedHeight: 70,
+  },
 } as unknown as ChainIdentity;
 
 const renderProfile = () =>
@@ -38,7 +42,7 @@ beforeEach(() => jest.clearAllMocks());
 it.each([
   [
     "import_running",
-    "The 6529 Network is still importing identities. You can change your profile once that is done, usually within an hour.",
+    "The 6529 Network is still importing identities. You can change your profile once that is done.",
   ],
   [
     "imported_doc_missing",
@@ -53,7 +57,9 @@ it.each([
     new ChainGatewayError(503, code, "refused")
   );
   renderProfile();
-  expect(await screen.findByText(text, {}, { timeout: 5_000 })).toBeInTheDocument();
+  expect(
+    await screen.findByText(text, {}, { timeout: 5_000 })
+  ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Save profile" })).toBeDisabled();
 });
 

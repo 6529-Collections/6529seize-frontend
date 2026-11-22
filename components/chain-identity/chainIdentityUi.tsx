@@ -25,6 +25,7 @@ export function ChainSection({
 }) {
   return (
     <section
+      id={id}
       aria-labelledby={`${id}-heading`}
       className="tw-rounded-xl tw-border tw-border-solid tw-border-white/[0.07] tw-bg-iron-950/60 tw-p-4 sm:tw-p-5"
     >

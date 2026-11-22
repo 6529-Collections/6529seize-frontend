@@ -33,7 +33,8 @@ const RECIPIENT_PRINCIPAL = 1;
 const RATING_BUDGET = (1n << 59n).toString();
 const ZERO_WORD: Hex = `0x${"00".repeat(32)}`;
 
-const RATING_MATTER = { REP: 1, NIC: 2 } as const;
+/** RATING_SET's matter codes. */
+export const RATING_MATTER = { REP: 1, NIC: 2 } as const;
 export type RatingMatter = keyof typeof RATING_MATTER;
 
 const signerFields = (
@@ -120,7 +121,10 @@ export function ratingSet(
   }
 ): ChainOperationRequest {
   const category = input.matter === "REP" ? input.category : null;
-  if (input.matter === "REP" && (category === null || !isRepCategoryName(category))) {
+  if (
+    input.matter === "REP" &&
+    (category === null || !isRepCategoryName(category))
+  ) {
     throw new RangeError("not a REP category the 6529 Network takes");
   }
   return operation("RATING_SET", "RatingSet", principal, actor, {
@@ -246,8 +250,7 @@ export const delegationSet = (
   });
 
 export const DELEGATION_SCOPE = { IDENTITY: 1, WALLET: 2 } as const;
-type DelegationScope =
-  (typeof DELEGATION_SCOPE)[keyof typeof DELEGATION_SCOPE];
+type DelegationScope = (typeof DELEGATION_SCOPE)[keyof typeof DELEGATION_SCOPE];
 
 /** DELEGATION_REVOKE: delete a record by its key. */
 export const delegationRevoke = (
@@ -258,14 +261,20 @@ export const delegationRevoke = (
     readonly holder: Hex;
   }
 ): ChainOperationRequest =>
-  operation("DELEGATION_REVOKE", "DelegationRevoke", principal, wallet(signer), {
-    scope: record.scope,
-    holder:
-      record.scope === DELEGATION_SCOPE.WALLET
-        ? addressWord(record.holder)
-        : record.holder.toLowerCase(),
-    ...delegationKey(record),
-  });
+  operation(
+    "DELEGATION_REVOKE",
+    "DelegationRevoke",
+    principal,
+    wallet(signer),
+    {
+      scope: record.scope,
+      holder:
+        record.scope === DELEGATION_SCOPE.WALLET
+          ? addressWord(record.holder)
+          : record.holder.toLowerCase(),
+      ...delegationKey(record),
+    }
+  );
 
 /** BALANCE_TRANSFER from the wallet's own account to its identity. */
 export const fundIdentity = (
