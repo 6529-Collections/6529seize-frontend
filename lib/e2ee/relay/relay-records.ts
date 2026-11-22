@@ -153,10 +153,7 @@ export function contentRefOf(event: RelaySignedEvent): ContentRef | null {
 
 /** SHA-256 of bytes as 0x-hex (content hashes and payload names). */
 export async function sha256Hex(bytes: Uint8Array): Promise<string> {
-  const digest = await crypto.subtle.digest(
-    "SHA-256",
-    bytes.slice().buffer as ArrayBuffer
-  );
+  const digest = await crypto.subtle.digest("SHA-256", bytes.slice().buffer);
   return bytesToHexString(new Uint8Array(digest));
 }
 

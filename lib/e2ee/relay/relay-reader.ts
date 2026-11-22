@@ -22,6 +22,7 @@ import {
   isDeletion,
   isOrdererRecord,
   type RelayItem,
+  type RelaySignedEvent,
   sha256Hex,
 } from "./relay-records";
 
@@ -90,15 +91,20 @@ function rowsOf(
         rows.set(keyOf(op.row, columns), op.row);
         continue;
       }
-      for (const [key, row] of Array.from(rows.entries())) {
-        const matches = Object.entries(op.key).every(
-          ([column, value]) => row[column] === value
-        );
-        if (matches) rows.delete(key);
-      }
+      deleteMatching(rows, op.key);
     }
   }
   return rows;
+}
+
+/** Removes the rows whose columns hold every value the key names. */
+function deleteMatching(rows: Map<string, Row>, key: Row): void {
+  for (const [id, row] of Array.from(rows.entries())) {
+    const matches = Object.entries(key).every(
+      ([column, value]) => row[column] === value
+    );
+    if (matches) rows.delete(id);
+  }
 }
 
 /** A text column's value; anything else in it is a malformed record. */
@@ -222,12 +228,7 @@ export class E2eeRelayReader {
       for (const item of page.items) {
         state.after = Math.max(state.after, item.rseq);
         if (isDeletion(item.event)) {
-          if (!(await isOrdererRecord(item.event, this.settings.ordererKey))) {
-            throw new RelayReadError(
-              `Record ${item.event.id} is not the orderer's`
-            );
-          }
-          deletedIdsOf(item.event).forEach((id) => state.deleted.add(id));
+          await this.takeDeletion(state, item.event);
           continue;
         }
         const record = await this.verified(item);
@@ -239,6 +240,17 @@ export class E2eeRelayReader {
     for (const record of fresh) this.accept(state, record);
     this.streams.set(wave, state);
     return state.records;
+  }
+
+  /** Notes the ids an orderer's DEL names; a DEL from anyone else throws. */
+  private async takeDeletion(
+    state: StreamState,
+    event: RelaySignedEvent
+  ): Promise<void> {
+    if (!(await isOrdererRecord(event, this.settings.ordererKey))) {
+      throw new RelayReadError(`Record ${event.id} is not the orderer's`);
+    }
+    deletedIdsOf(event).forEach((id) => state.deleted.add(id));
   }
 
   private accept(state: StreamState, record: StreamRecord): void {
@@ -291,8 +303,7 @@ export class E2eeRelayReader {
       JSON.stringify([key])
     );
     if (
-      !device ||
-      device["revoked_at"] !== null ||
+      device?.["revoked_at"] !== null ||
       Number(device["expires_at_seconds"]) * 1000 <= this.now()
     ) {
       throw new RelayReadError("The device is not active");

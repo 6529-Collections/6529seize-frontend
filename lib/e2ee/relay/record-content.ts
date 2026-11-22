@@ -96,7 +96,9 @@ function decodeRow(
     throw new RecordContentError("Bad row");
   }
   const row: Record<string, RowValue> = {};
-  for (const [column, value] of Object.entries(raw)) {
+  for (const [column, value] of Object.entries(
+    raw as Record<string, unknown>
+  )) {
     if (
       value === null ||
       typeof value === "string" ||
