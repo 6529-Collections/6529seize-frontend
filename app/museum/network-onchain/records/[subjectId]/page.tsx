@@ -1,19 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
 import { connection } from "next/server";
+import type { ReactNode } from "react";
 import { MuseumMarkdown } from "@/components/museum/MuseumMarkdown";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { MessageKey } from "@/i18n/messages/en-US.complete";
-import type {
-  OnchainMuseumRecord,
-  OnchainMuseumSnapshot,
-} from "@/lib/museum/onchain/museum";
+import type { OnchainMuseumRecord } from "@/lib/museum/onchain/museum";
 import {
-  buildEntityResolver,
-  findOnchainRecord,
+  asRecord,
   ONCHAIN_MUSEUM_BASE_PATH,
   ONCHAIN_MUSEUM_TEXTS_HREF,
   onchainMuseumRecordHref,
@@ -22,37 +18,48 @@ import {
   payloadString,
   payloadStrings,
   relationsReferencing,
-  type OnchainEntityLink,
+  textsNaming,
+  type OnchainLink,
+  type OnchainMuseumView,
 } from "@/lib/museum/onchain/presentation";
 import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";
+import { registryValueLabel } from "../../_components/labels";
 import { onchainMuseumMetadata } from "../../_components/metadata";
 import {
   algorithmLabel,
-  entityTypeLabel,
+  canonicalizationLabel,
+  CopyValue,
   FactList,
   formatCount,
   formatUtcDateTime,
+  LIST_LINK,
   literalLabel,
   Mono,
   PageHeading,
   PayloadTree,
   SectionHeading,
   StateBadge,
+  stateLabel,
+  statusLabel,
   TEXT_LINK,
 } from "../../_components/OnchainParts";
 import { OnchainUnavailable } from "../../_components/OnchainUnavailable";
+import { onchainMuseumView } from "../../_components/view";
 
 const locale = DEFAULT_LOCALE;
 const IPFS_RESOLVER = "https://media.6529.io/ipfs/";
+const ETHERSCAN = "https://sepolia.etherscan.io";
 
 interface OnchainRecordRouteProps {
   readonly params: Promise<{ subjectId: string }>;
 }
 
+type Fact = { label: string; value: ReactNode };
+
 async function loadRecord(
   params: OnchainRecordRouteProps["params"]
 ): Promise<
-  | { snapshot: OnchainMuseumSnapshot; record: OnchainMuseumRecord }
+  | { view: OnchainMuseumView; record: OnchainMuseumRecord }
   | "unavailable"
   | null
 > {
@@ -61,8 +68,9 @@ async function loadRecord(
   if (id === null) return null;
   const state = await getOnchainMuseum();
   if (state.status !== "ready") return "unavailable";
-  const record = findOnchainRecord(state.snapshot, id);
-  return record === null ? null : { snapshot: state.snapshot, record };
+  const view = onchainMuseumView(state.snapshot);
+  const record = view.find(id);
+  return record === null ? null : { view, record };
 }
 
 export async function generateMetadata({
@@ -73,7 +81,7 @@ export async function generateMetadata({
   const title =
     loaded === null || loaded === "unavailable"
       ? t(locale, "museum.onchain.title")
-      : loaded.record.label;
+      : loaded.view.labelOf(loaded.record);
   return onchainMuseumMetadata(title, t(locale, "museum.onchain.description"));
 }
 
@@ -96,19 +104,22 @@ function stateDetail(record: OnchainMuseumRecord): string {
   return t(locale, STATE_DETAIL_KEYS[record.state]);
 }
 
-function EntityLink({ link }: Readonly<{ link: OnchainEntityLink }>) {
+function EntityLink({ link }: Readonly<{ link: OnchainLink }>) {
   return link.href === null ? (
-    <Mono>{link.id}</Mono>
+    <span>
+      <Mono>{link.id}</Mono>{" "}
+      <span className="tw-text-xs tw-text-iron-400">
+        {t(locale, "museum.onchain.record.notInRegistry")}
+      </span>
+    </span>
   ) : (
-    <Link href={link.href} className={TEXT_LINK}>
+    <Link href={link.href} className={LIST_LINK}>
       {link.label}
     </Link>
   );
 }
 
-function EntityLinks({
-  links,
-}: Readonly<{ links: readonly OnchainEntityLink[] }>) {
+function LinkList({ links }: Readonly<{ links: readonly OnchainLink[] }>) {
   return (
     <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
       {links.map((link) => (
@@ -120,27 +131,230 @@ function EntityLinks({
   );
 }
 
-function RecordSummary({
-  record,
-  snapshot,
-}: Readonly<{ record: OnchainMuseumRecord; snapshot: OnchainMuseumSnapshot }>) {
-  if (record.content?.kind !== "json") return null;
-  const resolve = buildEntityResolver(snapshot);
-  const facts: { label: string; value: ReactNode }[] = [];
-  const entityType = payloadString(record, "entity_type");
-  const entityId =
-    payloadString(record, "entity_id") ?? payloadString(record, "record_id");
+function RecordLinks({
+  view,
+  records,
+}: Readonly<{
+  view: OnchainMuseumView;
+  records: readonly OnchainMuseumRecord[];
+}>) {
+  return (
+    <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
+      {records.map((record) => (
+        <li key={record.subjectId}>
+          <Link
+            href={onchainMuseumRecordHref(record.subjectId)}
+            className={LIST_LINK}
+          >
+            {view.labelOf(record)}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Distinct links, without the record the page is about. */
+function linksExcept(
+  view: OnchainMuseumView,
+  ids: readonly string[],
+  self: OnchainMuseumRecord
+): OnchainLink[] {
+  const seen = new Set<string>();
+  const links: OnchainLink[] = [];
+  for (const id of ids) {
+    const link = view.resolve(id);
+    if (link.subjectId?.toLowerCase() === self.subjectId.toLowerCase())
+      continue;
+    const key = link.href ?? link.id;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    links.push(link);
+  }
+  return links;
+}
+
+function profileStrings(record: OnchainMuseumRecord, key: string): string[] {
+  return payloadStrings(payloadRecord(record, "profile")?.[key]);
+}
+
+function workFacts(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): Fact[] {
   const profile = payloadRecord(record, "profile");
-  if (entityType !== null) {
+  const facts: Fact[] = [];
+  const creators = linksExcept(
+    view,
+    profileStrings(record, "creator_entity_ids"),
+    record
+  );
+  if (creators.length > 0) {
     facts.push({
-      label: t(locale, "museum.onchain.record.entityType"),
-      value: entityTypeLabel(entityType),
+      label: t(locale, "museum.onchain.record.creators"),
+      value: <LinkList links={creators} />,
     });
   }
-  if (entityId !== null) {
+  const date = asRecord(profile?.["creation_date"]);
+  if (
+    date?.["status"] === "established" &&
+    typeof date["display"] === "string"
+  ) {
+    facts.push({
+      label: t(locale, "museum.onchain.record.date"),
+      value: date["display"],
+    });
+  }
+  const medium = profile?.["medium"];
+  if (typeof medium === "string" && medium.trim() !== "") {
+    facts.push({
+      label: t(locale, "museum.onchain.record.medium"),
+      value: medium,
+    });
+  }
+  const membership = asRecord(profile?.["collection_membership"]);
+  if (typeof membership?.["status"] === "string") {
+    facts.push({
+      label: t(locale, "museum.onchain.record.collection"),
+      value: statusLabel(membership["status"]),
+    });
+  }
+  const groups: [MessageKey, string][] = [
+    ["museum.onchain.record.accession", "accession_entity_ids"],
+    ["museum.onchain.record.acquisition", "acquisition_entity_ids"],
+    ["museum.onchain.record.project", "project_or_series_entity_ids"],
+  ];
+  for (const [label, key] of groups) {
+    const links = linksExcept(view, profileStrings(record, key), record);
+    if (links.length > 0) {
+      facts.push({
+        label: t(locale, label),
+        value: <LinkList links={links} />,
+      });
+    }
+  }
+  const components = Array.isArray(profile?.["component_references"])
+    ? (profile["component_references"] as unknown[])
+        .map((item) => asRecord(item)?.["record_id"])
+        .filter((id): id is string => typeof id === "string")
+    : [];
+  const descriptions = components
+    .map((id) => view.recordById(id))
+    .filter((item): item is OnchainMuseumRecord => item !== null);
+  for (const description of descriptions) {
+    const credit = payloadString(description, "credit_line");
+    if (credit !== null) {
+      facts.push({
+        label: t(locale, "museum.onchain.record.creditLine"),
+        value: credit,
+      });
+      break;
+    }
+  }
+  const objectRecords = objectRecordsOf(view, record, components);
+  if (objectRecords.length > 0) {
+    facts.push({
+      label: t(locale, "museum.onchain.record.objectRecords"),
+      value: <RecordLinks view={view} records={objectRecords} />,
+    });
+  }
+  return facts;
+}
+
+/**
+ * The work's own object records (description, condition, rights, gift
+ * acceptance): records, not entities, that the work names as its sources.
+ */
+function objectRecordsOf(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord,
+  components: readonly string[]
+): OnchainMuseumRecord[] {
+  const ids = [
+    ...components,
+    ...payloadStrings(
+      record.content?.kind === "json"
+        ? record.content.payload["source_record_ids"]
+        : []
+    ),
+  ];
+  const seen = new Set<string>();
+  const found: OnchainMuseumRecord[] = [];
+  for (const id of ids) {
+    const item = view.recordById(id);
+    if (item === null || isEntityOrRelation(item) || seen.has(item.subjectId)) {
+      continue;
+    }
+    seen.add(item.subjectId);
+    found.push(item);
+  }
+  return found;
+}
+
+function isEntityOrRelation(record: OnchainMuseumRecord): boolean {
+  return (
+    record.recordType === "PUBLIC_ENTITY" ||
+    record.recordType === "PUBLIC_RELATION" ||
+    record.recordType === "PUBLIC_DOCUMENT"
+  );
+}
+
+function relationFacts(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): Fact[] {
+  const type = payloadString(record, "relation_type");
+  const references = linksExcept(
+    view,
+    payloadStrings(
+      record.content?.kind === "json"
+        ? record.content.payload["references"]
+        : []
+    ),
+    record
+  );
+  return [
+    ...(type === null
+      ? []
+      : [
+          {
+            label: t(locale, "museum.onchain.record.relationType"),
+            value: registryValueLabel("relationType", type),
+          },
+        ]),
+    {
+      label: t(locale, "museum.onchain.record.references"),
+      value: <LinkList links={references} />,
+    },
+  ];
+}
+
+function captionFacts(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): Fact[] {
+  if (record.content?.kind !== "json") return [];
+  const entityType = payloadString(record, "entity_type");
+  let facts: Fact[] = [];
+  if (record.recordType === "PUBLIC_RELATION") {
+    facts = relationFacts(view, record);
+  } else if (entityType === "WORK") {
+    facts = workFacts(view, record);
+  }
+  if (record.recordType === "WORK_DESCRIPTION") {
+    const credit = payloadString(record, "credit_line");
+    if (credit !== null)
+      facts.push({
+        label: t(locale, "museum.onchain.record.creditLine"),
+        value: credit,
+      });
+  }
+  const id =
+    payloadString(record, "entity_id") ?? payloadString(record, "record_id");
+  if (id !== null) {
     facts.push({
       label: t(locale, "museum.onchain.record.entityId"),
-      value: <Mono>{entityId}</Mono>,
+      value: <Mono>{id}</Mono>,
     });
   }
   const status =
@@ -149,228 +363,331 @@ function RecordSummary({
   if (status !== null) {
     facts.push({
       label: t(locale, "museum.onchain.record.status"),
-      value: status,
+      value: statusLabel(status),
     });
   }
-  const medium = profile?.["medium"] ?? record.content.payload["medium"];
-  if (typeof medium === "string" && medium.trim() !== "") {
-    facts.push({
-      label: t(locale, "museum.onchain.record.medium"),
-      value: medium,
-    });
-  }
-  const creators = payloadStrings(profile?.["creator_entity_ids"]);
-  if (creators.length > 0) {
-    facts.push({
-      label: t(locale, "museum.onchain.record.creators"),
-      value: <EntityLinks links={creators.map(resolve)} />,
-    });
-  }
-  const relationType = payloadString(record, "relation_type");
-  if (relationType !== null) {
-    facts.push({
-      label: t(locale, "museum.onchain.record.relationType"),
-      value: <Mono>{relationType}</Mono>,
-    });
-    facts.push({
-      label: t(locale, "museum.onchain.record.references"),
-      value: (
-        <EntityLinks
-          links={payloadStrings(record.content.payload["references"]).map(
-            resolve
-          )}
-        />
-      ),
-    });
-  }
-  const relations =
-    entityId !== null && record.recordType === "PUBLIC_ENTITY"
-      ? relationsReferencing(snapshot, entityId)
-      : [];
+  return facts;
+}
 
+/** Texts that name this work or artist, and the text groups it belongs to. */
+function RelatedTexts({
+  view,
+  record,
+}: Readonly<{ view: OnchainMuseumView; record: OnchainMuseumRecord }>) {
+  const entityType = payloadString(record, "entity_type");
+  if (entityType !== "WORK" && entityType !== "ARTIST") return null;
+  const title = payloadString(record, "preferred_label") ?? record.label;
+  const texts = textsNaming(
+    view,
+    title,
+    entityType === "WORK" ? "equals" : "includes"
+  );
+  const ids = new Set([
+    ...payloadStrings(
+      record.content?.kind === "json"
+        ? record.content.payload["source_record_ids"]
+        : []
+    ),
+    ...payloadStrings(
+      asRecord(payloadRecord(record, "profile")?.["collection_membership"])?.[
+        "source_record_ids"
+      ]
+    ),
+  ]);
+  const groups = view.textGroups.filter(
+    (group) => group.contextId !== null && ids.has(group.contextId)
+  );
+  if (texts.length === 0 && groups.length === 0) return null;
   return (
-    <section aria-labelledby="onchain-record-summary" className="tw-mb-10">
-      <SectionHeading id="onchain-record-summary">
-        {t(locale, "museum.onchain.record.summary")}
+    <section aria-labelledby="record-texts" className="tw-mb-10">
+      <SectionHeading id="record-texts">
+        {t(locale, "museum.onchain.record.texts")}
       </SectionHeading>
-      <div className="tw-mt-4">
-        <FactList facts={facts} />
-      </div>
-      {relations.length > 0 ? (
-        <div className="tw-mt-8">
-          <h3
-            id="onchain-record-relations"
-            className="tw-m-0 tw-mb-3 tw-text-lg tw-font-semibold tw-text-iron-50"
-          >
-            {t(locale, "museum.onchain.record.relations")}{" "}
-            <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-              ({formatCount(relations.length)})
-            </span>
-          </h3>
-          <ul
-            aria-labelledby="onchain-record-relations"
-            className="tw-m-0 tw-list-none tw-space-y-3 tw-p-0"
-          >
-            {relations.map((relation) => {
-              const others = payloadStrings(
-                relation.content?.kind === "json"
-                  ? relation.content.payload["references"]
-                  : []
-              ).filter((id) => id !== entityId);
-              return (
-                <li
-                  key={relation.subjectId}
-                  className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-pb-3 tw-text-sm tw-leading-6"
+      <div className="tw-mt-4 tw-space-y-2 tw-text-base">
+        <RecordLinks view={view} records={texts.slice(0, 12)} />
+        {groups.length === 0 ? null : (
+          <ul className="tw-m-0 tw-list-none tw-space-y-1 tw-p-0">
+            {groups.map((group) => (
+              <li key={group.key}>
+                <Link
+                  href={`${ONCHAIN_MUSEUM_TEXTS_HREF}#${group.anchor}`}
+                  className={LIST_LINK}
                 >
-                  <Link
-                    href={onchainMuseumRecordHref(relation.subjectId)}
-                    className={`tw-font-mono ${TEXT_LINK}`}
-                  >
-                    {payloadString(relation, "relation_type") ?? relation.label}
-                  </Link>
-                  {others.length > 0 ? (
-                    <span className="tw-mt-1 tw-flex tw-flex-wrap tw-gap-x-4 tw-gap-y-1">
-                      {others.map((id) => (
-                        <EntityLink key={id} link={resolve(id)} />
-                      ))}
-                    </span>
-                  ) : null}
-                </li>
-              );
-            })}
+                  {t(locale, "museum.onchain.record.allTexts", {
+                    group: group.heading,
+                  })}
+                </Link>
+              </li>
+            ))}
           </ul>
-        </div>
-      ) : null}
+        )}
+      </div>
     </section>
   );
 }
 
-function OnchainFacts({
+function Connections({
+  view,
   record,
-  snapshot,
-}: Readonly<{ record: OnchainMuseumRecord; snapshot: OnchainMuseumSnapshot }>) {
-  const { version } = record;
-  const release = snapshot.registry.releases.find(
-    (item) => item.releaseId === version.releaseId
+}: Readonly<{ view: OnchainMuseumView; record: OnchainMuseumRecord }>) {
+  const entityId = payloadString(record, "entity_id");
+  if (entityId === null || record.recordType !== "PUBLIC_ENTITY") return null;
+  const byType = new Map<
+    string,
+    { relation: OnchainMuseumRecord; links: OnchainLink[] }[]
+  >();
+  for (const relation of relationsReferencing(view.snapshot, entityId)) {
+    const type = payloadString(relation, "relation_type") ?? "UNKNOWN";
+    const links = linksExcept(
+      view,
+      payloadStrings(
+        relation.content?.kind === "json"
+          ? relation.content.payload["references"]
+          : []
+      ).filter((id) => id !== entityId),
+      record
+    );
+    const entityLinks = links.filter((link) => {
+      const target = link.subjectId === null ? null : view.find(link.subjectId);
+      return target === null || isEntityOrRelation(target);
+    });
+    byType.set(type, [
+      ...(byType.get(type) ?? []),
+      { relation, links: entityLinks.length > 0 ? entityLinks : links },
+    ]);
+  }
+  if (byType.size === 0) return null;
+  return (
+    <section aria-labelledby="record-connections" className="tw-mb-10">
+      <SectionHeading id="record-connections">
+        {t(locale, "museum.onchain.record.relations")}
+      </SectionHeading>
+      <div className="tw-mt-4 tw-grid tw-gap-x-10 tw-gap-y-6 md:tw-grid-cols-2">
+        {[...byType.entries()].map(([type, rows]) => {
+          const headingId = `connections-${type.toLowerCase()}`;
+          return (
+            <div key={type} className="tw-min-w-0">
+              <h3
+                id={headingId}
+                className="tw-m-0 tw-mb-2 tw-text-base tw-font-semibold tw-text-iron-100"
+              >
+                {registryValueLabel("relationType", type)}
+              </h3>
+              <ul
+                aria-labelledby={headingId}
+                className="tw-m-0 tw-list-none tw-space-y-2 tw-p-0"
+              >
+                {rows.map(({ relation, links }) => (
+                  <li
+                    key={relation.subjectId}
+                    className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-leading-6"
+                  >
+                    {links.map((link) => (
+                      <EntityLink key={link.id} link={link} />
+                    ))}
+                    <Link
+                      href={onchainMuseumRecordHref(relation.subjectId)}
+                      className="hover:tw-text-primary-200 tw-text-xs tw-text-iron-400 tw-underline tw-decoration-iron-600 tw-underline-offset-4 focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+                    >
+                      {t(locale, "museum.onchain.record.relationRecord")}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
-  const facts = [
+}
+
+function OnchainFacts({ record }: Readonly<{ record: OnchainMuseumRecord }>) {
+  const { version } = record;
+  const field = (key: MessageKey) => t(locale, key);
+  const facts: Fact[] = [
     {
-      label: t(locale, "museum.onchain.field.subject"),
-      value: <Mono>{record.subjectId}</Mono>,
+      label: field("museum.onchain.field.subject"),
+      value: (
+        <CopyValue
+          value={record.subjectId}
+          field={field("museum.onchain.field.subject")}
+        />
+      ),
     },
     {
-      label: t(locale, "museum.onchain.field.recordType"),
+      label: field("museum.onchain.field.recordType"),
       value: <Mono>{literalLabel(record.recordType)}</Mono>,
     },
     {
-      label: t(locale, "museum.onchain.field.schema"),
+      label: field("museum.onchain.field.schema"),
       value: <Mono>{literalLabel(record.schemaLiteral)}</Mono>,
     },
     {
-      label: t(locale, "museum.onchain.field.digest"),
+      label: field("museum.onchain.field.digest"),
       value: (
         <>
           <span className="tw-block tw-text-iron-300">
             {algorithmLabel(version.contentHash.algorithm)}
           </span>
-          <Mono>{version.contentHash.digest}</Mono>
+          <CopyValue
+            value={version.contentHash.digest}
+            field={field("museum.onchain.field.digest")}
+          />
         </>
       ),
     },
     {
-      label: t(locale, "museum.onchain.field.canonicalization"),
-      value: <Mono>{literalLabel(record.canonicalizationLiteral)}</Mono>,
+      label: field("museum.onchain.field.canonicalization"),
+      value: canonicalizationLabel(record.canonicalizationLiteral),
     },
     {
-      label: t(locale, "museum.onchain.field.cid"),
+      label: field("museum.onchain.field.cid"),
       value:
         record.cidText === null ? (
           "-"
         ) : (
-          <a
+          <CopyValue
+            value={record.cidText}
+            field={field("museum.onchain.field.cid")}
             href={`${IPFS_RESOLVER}${record.cidText}`}
-            rel="noreferrer"
-            className={TEXT_LINK}
-          >
-            <Mono>{record.cidText}</Mono>
-          </a>
+          />
         ),
     },
     {
-      label: t(locale, "museum.onchain.field.effectiveAt"),
+      label: field("museum.onchain.field.effectiveAt"),
       value: formatUtcDateTime(version.effectiveAt),
     },
     {
-      label: t(locale, "museum.onchain.field.publishedAt"),
+      label: field("museum.onchain.field.publishedAt"),
       value: formatUtcDateTime(version.publishedAt),
     },
     {
-      label: t(locale, "museum.onchain.field.release"),
-      value:
-        release === undefined
-          ? String(version.releaseId)
-          : `${t(locale, "museum.onchain.releases.item", { id: release.releaseId })}: ${release.label}`,
+      label: field("museum.onchain.field.release"),
+      value: (
+        <Link
+          href={`${ONCHAIN_MUSEUM_BASE_PATH}#releases`}
+          className={TEXT_LINK}
+        >
+          {t(locale, "museum.onchain.releases.item", { id: version.releaseId })}
+        </Link>
+      ),
     },
     {
-      label: t(locale, "museum.onchain.field.sequence"),
+      label: field("museum.onchain.field.sequence"),
       value: formatCount(version.sequence),
     },
     {
-      label: t(locale, "museum.onchain.field.version"),
+      label: field("museum.onchain.field.version"),
       value: t(locale, "museum.onchain.field.versionValue", {
         version: formatCount(version.version),
         count: formatCount(record.versionCount),
       }),
     },
     {
-      label: t(locale, "museum.onchain.field.publisher"),
-      value: <Mono>{version.publisher}</Mono>,
+      label: field("museum.onchain.field.publisher"),
+      value: (
+        <CopyValue
+          value={version.publisher}
+          field={field("museum.onchain.field.publisher")}
+          href={`${ETHERSCAN}/address/${version.publisher}`}
+        />
+      ),
     },
     ...(record.documentPath === null
       ? []
       : [
           {
-            label: t(locale, "museum.onchain.field.path"),
+            label: field("museum.onchain.field.path"),
             value: <Mono>{record.documentPath}</Mono>,
-          },
-        ]),
-    {
-      label: t(locale, "museum.onchain.field.verification"),
-      value: (
-        <span className="tw-flex tw-flex-wrap tw-items-center tw-gap-2">
-          <StateBadge state={record.state} />
-          {record.check === null || record.check === "verified" ? null : (
-            <Mono>{record.check}</Mono>
-          )}
-        </span>
-      ),
-    },
-    ...(record.computedDigest === null
-      ? []
-      : [
-          {
-            label: t(locale, "museum.onchain.field.computedDigest"),
-            value: <Mono>{record.computedDigest}</Mono>,
           },
         ]),
     ...(record.servedBy === null
       ? []
       : [
           {
-            label: t(locale, "museum.onchain.field.servedBy"),
+            label: field("museum.onchain.field.servedBy"),
             value: <Mono>{record.servedBy}</Mono>,
           },
         ]),
+    ...(record.state === "verified"
+      ? []
+      : [
+          {
+            label: field("museum.onchain.field.verification"),
+            value:
+              record.check === null
+                ? stateLabel(record.state)
+                : `${stateLabel(record.state)} (${record.check})`,
+          },
+          ...(record.computedDigest === null
+            ? []
+            : [
+                {
+                  label: field("museum.onchain.field.computedDigest"),
+                  value: <Mono>{record.computedDigest}</Mono>,
+                },
+              ]),
+        ]),
   ];
   return (
-    <section aria-labelledby="onchain-record-facts" className="tw-mb-10">
-      <SectionHeading id="onchain-record-facts">
-        {t(locale, "museum.onchain.record.onchain")}
+    <section aria-labelledby="record-facts" className="tw-mb-10">
+      <SectionHeading id="record-facts">
+        {field("museum.onchain.record.onchain")}
       </SectionHeading>
+      <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+        {field("museum.onchain.record.onchainIntro")}
+      </p>
       <div className="tw-mt-4">
         <FactList facts={facts} />
       </div>
     </section>
+  );
+}
+
+function HeadingAside({
+  view,
+  record,
+}: Readonly<{ view: OnchainMuseumView; record: OnchainMuseumRecord }>) {
+  const group = view.textGroupOf(record);
+  const isWork = payloadString(record, "entity_type") === "WORK";
+  const route = payloadString(record, "canonical_route");
+  return (
+    <div className="tw-mt-5 tw-space-y-3">
+      {group === null ? null : (
+        <p className="tw-m-0 tw-text-base tw-text-iron-200">
+          {t(locale, "museum.onchain.record.partOf")}{" "}
+          <Link
+            href={
+              group.contextHref ??
+              `${ONCHAIN_MUSEUM_TEXTS_HREF}#${group.anchor}`
+            }
+            className={TEXT_LINK}
+          >
+            {group.heading}
+          </Link>
+        </p>
+      )}
+      <div className="tw-flex tw-flex-wrap tw-items-start tw-gap-3">
+        <StateBadge state={record.state} />
+        <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {stateDetail(record)}
+        </p>
+      </div>
+      {isWork ? (
+        <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
+          {t(locale, "museum.onchain.images.note")}
+          {route?.startsWith("/museum/network/") ? (
+            <>
+              {" "}
+              <Link href={route} className={TEXT_LINK}>
+                {t(locale, "museum.onchain.images.link")}
+              </Link>
+            </>
+          ) : null}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -381,12 +698,12 @@ export default async function OnchainMuseumRecordPage({
   const loaded = await loadRecord(params);
   if (loaded === "unavailable") return <OnchainUnavailable />;
   if (loaded === null) notFound();
-  const { snapshot, record } = loaded;
+  const { view, record } = loaded;
   const isDocument = record.recordType === "PUBLIC_DOCUMENT";
-  const entityType = payloadString(record, "entity_type");
-  const release = snapshot.registry.releases.find(
+  const release = view.snapshot.registry.releases.find(
     (item) => item.releaseId === record.version.releaseId
   );
+  const caption = captionFacts(view, record);
 
   return (
     <article data-verification-state={record.state}>
@@ -406,20 +723,9 @@ export default async function OnchainMuseumRecordPage({
         </Link>
       </p>
       <PageHeading
-        eyebrow={
-          entityType === null
-            ? literalLabel(record.recordType)
-            : entityTypeLabel(entityType)
-        }
-        title={record.label}
-        aside={
-          <div className="tw-mt-5 tw-flex tw-flex-wrap tw-items-start tw-gap-3">
-            <StateBadge state={record.state} />
-            <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-300">
-              {stateDetail(record)}
-            </p>
-          </div>
-        }
+        eyebrow={view.kindOf(record)}
+        title={view.labelOf(record)}
+        aside={<HeadingAside view={view} record={record} />}
       />
 
       {record.content?.kind === "markdown" ? (
@@ -439,12 +745,23 @@ export default async function OnchainMuseumRecordPage({
         </section>
       ) : null}
 
-      <RecordSummary record={record} snapshot={snapshot} />
-      <OnchainFacts record={record} snapshot={snapshot} />
+      {caption.length === 0 ? null : (
+        <section aria-labelledby="record-caption" className="tw-mb-10">
+          <SectionHeading id="record-caption">
+            {t(locale, "museum.onchain.record.caption")}
+          </SectionHeading>
+          <div className="tw-mt-4">
+            <FactList facts={caption} />
+          </div>
+        </section>
+      )}
+      <RelatedTexts view={view} record={record} />
+      <Connections view={view} record={record} />
+      <OnchainFacts record={record} />
 
       {record.content?.kind === "json" ? (
-        <section aria-labelledby="onchain-record-payload" className="tw-mb-10">
-          <SectionHeading id="onchain-record-payload">
+        <section aria-labelledby="record-payload" className="tw-mb-10">
+          <SectionHeading id="record-payload">
             {t(locale, "museum.onchain.record.payload")}
           </SectionHeading>
           <details className="tw-mt-4">

@@ -1,31 +1,36 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
-import { compareLocalized } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { cidToText } from "@/lib/museum/onchain/cid";
 import type { OnchainMuseumSnapshot } from "@/lib/museum/onchain/museum";
 import {
-  buildOnchainMuseumIndex,
   ONCHAIN_MUSEUM_TEXTS_HREF,
+  type OnchainMuseumView,
 } from "@/lib/museum/onchain/presentation";
 import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";
+import { FilterableGroups } from "./_components/FilterableGroups";
 import { onchainMuseumMetadata } from "./_components/metadata";
 import {
-  entityTypeLabel,
+  CopyValue,
   FactList,
+  filterableItem,
+  filterCopy,
   formatCount,
   formatUtcDateTime,
-  Mono,
+  JumpNav,
   PageHeading,
-  RecordList,
   SectionHeading,
   TEXT_LINK,
 } from "./_components/OnchainParts";
 import { OnchainUnavailable } from "./_components/OnchainUnavailable";
+import { onchainMuseumView } from "./_components/view";
 
 const locale = DEFAULT_LOCALE;
+const ETHERSCAN = "https://sepolia.etherscan.io";
+const MUSEUM_REPOSITORY =
+  "https://github.com/6529-Collections/6529networkmuseum";
 
 export const metadata: Metadata = onchainMuseumMetadata(
   t(locale, "museum.onchain.title"),
@@ -65,31 +70,43 @@ function CheckRow({
   );
 }
 
-function VerificationSummary({
+function Verification({
   snapshot,
 }: Readonly<{ snapshot: OnchainMuseumSnapshot }>) {
-  const { checks } = snapshot.registry;
+  const { checks, blockNumber, blockTimestamp, registry } = snapshot.registry;
   const total = snapshot.records.length;
   const failures = total - snapshot.counts.verified;
   return (
     <section
-      aria-labelledby="onchain-verification"
+      aria-labelledby="verification"
       className="tw-mb-12 tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-900/60 tw-p-5 sm:tw-p-6"
     >
-      <SectionHeading id="onchain-verification">
-        {t(locale, "museum.onchain.summary.heading")}
+      <SectionHeading id="verification">
+        {t(locale, "museum.onchain.verification.heading")}
       </SectionHeading>
-      <p className="tw-m-0 tw-mt-3 tw-text-lg tw-font-medium tw-text-iron-50">
-        {t(locale, "museum.onchain.summary.records", {
+      <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-200">
+        {t(locale, "museum.onchain.verification.lead")}
+      </p>
+      <p className="tw-m-0 tw-mt-4 tw-text-lg tw-font-medium tw-text-iron-50">
+        {t(locale, "museum.onchain.verification.records", {
           verified: formatCount(snapshot.counts.verified),
           total: formatCount(total),
         })}
       </p>
       <p className="tw-m-0 tw-mt-1 tw-text-sm tw-text-iron-400">
-        {t(locale, "museum.onchain.summary.block", {
-          block: formatCount(snapshot.registry.blockNumber),
-          date: formatUtcDateTime(snapshot.registry.blockTimestamp),
-        })}
+        {t(locale, "museum.onchain.verification.block", {
+          block: formatCount(blockNumber),
+          date: formatUtcDateTime(blockTimestamp),
+        })}{" "}
+        <a
+          href={`${ETHERSCAN}/block/${blockNumber}`}
+          rel="noreferrer"
+          className={TEXT_LINK}
+        >
+          {t(locale, "museum.onchain.verification.blockLink", {
+            block: formatCount(blockNumber),
+          })}
+        </a>
       </p>
       <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-2 tw-p-0 md:tw-grid-cols-2">
         <CheckRow
@@ -116,7 +133,7 @@ function VerificationSummary({
       ) : null}
       {failures > 0 ? (
         <p className="tw-m-0 tw-mt-4 tw-text-sm tw-text-yellow-100">
-          {t(locale, "museum.onchain.summary.failures", {
+          {t(locale, "museum.onchain.verification.failures", {
             count: formatCount(failures),
           })}
         </p>
@@ -125,15 +142,13 @@ function VerificationSummary({
         <FactList
           facts={[
             {
-              label: t(locale, "museum.onchain.field.registry"),
+              label: t(locale, "museum.onchain.verification.registry"),
               value: (
-                <a
-                  href={`https://sepolia.etherscan.io/address/${snapshot.registry.registry}`}
-                  rel="noreferrer"
-                  className={TEXT_LINK}
-                >
-                  <Mono>{snapshot.registry.registry}</Mono>
-                </a>
+                <CopyValue
+                  value={registry}
+                  field={t(locale, "museum.onchain.verification.registry")}
+                  href={`${ETHERSCAN}/address/${registry}`}
+                />
               ),
             },
           ]}
@@ -143,58 +158,119 @@ function VerificationSummary({
   );
 }
 
-function Releases({ snapshot }: Readonly<{ snapshot: OnchainMuseumSnapshot }>) {
+function Releases({ view }: Readonly<{ view: OnchainMuseumView }>) {
+  const { releases } = view.snapshot.registry;
   return (
-    <section aria-labelledby="onchain-releases" className="tw-mb-12">
-      <SectionHeading id="onchain-releases">
+    <section aria-labelledby="releases" className="tw-mb-12">
+      <SectionHeading id="releases">
         {t(locale, "museum.onchain.releases.heading")}
       </SectionHeading>
-      <ol className="tw-m-0 tw-mt-4 tw-grid tw-list-none tw-gap-4 tw-p-0 lg:tw-grid-cols-2">
-        {snapshot.registry.releases.map((release) => (
-          <li
-            key={release.releaseId}
-            className="tw-min-w-0 tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-p-5"
-          >
-            <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
-              {t(locale, "museum.onchain.releases.item", {
-                id: release.releaseId,
-              })}
-            </h3>
-            <p className="tw-m-0 tw-mt-1 tw-break-words tw-text-sm tw-leading-6 tw-text-iron-300">
-              {release.label}
-            </p>
-            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
-              {t(locale, "museum.onchain.releases.records", {
-                count: formatCount(release.recordCount),
-              })}
-              {" · "}
-              {release.isSealed
-                ? t(locale, "museum.onchain.releases.sealed", {
-                    date: formatUtcDateTime(release.sealedAt),
-                  })
-                : t(locale, "museum.onchain.releases.open")}
-            </p>
-            <div className="tw-mt-4">
-              <FactList
-                facts={[
-                  {
-                    label: t(locale, "museum.onchain.releases.sourceCommit"),
-                    value: <Mono>{release.sourceCommit.slice(2)}</Mono>,
-                  },
-                  {
-                    label: t(locale, "museum.onchain.releases.manifest"),
-                    value:
-                      release.manifestCid === "0x" ? (
-                        "-"
-                      ) : (
-                        <Mono>{cidToText(release.manifestCid)}</Mono>
+      <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
+        {t(locale, "museum.onchain.releases.intro")}
+      </p>
+      <ol className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-4 tw-p-0 lg:tw-grid-cols-2">
+        {releases.map((release) => {
+          const records = view.snapshot.records.filter(
+            (record) => record.version.releaseId === release.releaseId
+          );
+          const texts = records.filter(
+            (record) => record.recordType === "PUBLIC_DOCUMENT"
+          ).length;
+          const earlier = releases.find(
+            (other) =>
+              other.releaseId < release.releaseId &&
+              other.manifestCid.toLowerCase() ===
+                release.manifestCid.toLowerCase()
+          );
+          const commit = release.sourceCommit.slice(2);
+          return (
+            <li
+              key={release.releaseId}
+              className="tw-min-w-0 tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-p-5"
+            >
+              <h3 className="tw-m-0 tw-text-lg tw-font-semibold tw-text-iron-50">
+                {t(locale, "museum.onchain.releases.item", {
+                  id: release.releaseId,
+                })}
+              </h3>
+              <p className="tw-m-0 tw-mt-1 tw-text-base tw-text-iron-200">
+                {t(locale, "museum.onchain.releases.contents", {
+                  records: formatCount(records.length - texts),
+                  texts: formatCount(texts),
+                })}
+                {" · "}
+                {release.isSealed
+                  ? t(locale, "museum.onchain.releases.sealed", {
+                      date: formatUtcDateTime(release.sealedAt),
+                    })
+                  : t(locale, "museum.onchain.releases.open")}
+              </p>
+              {earlier === undefined ? null : (
+                <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
+                  {t(locale, "museum.onchain.releases.sameManifest", {
+                    id: earlier.releaseId,
+                  })}
+                </p>
+              )}
+              <div className="tw-mt-4">
+                <FactList
+                  facts={[
+                    {
+                      label: t(locale, "museum.onchain.releases.manifest"),
+                      value:
+                        release.manifestCid === "0x" ? (
+                          "-"
+                        ) : (
+                          <>
+                            <CopyValue
+                              value={cidToText(release.manifestCid)}
+                              field={t(
+                                locale,
+                                "museum.onchain.releases.manifest"
+                              )}
+                              href={`https://media.6529.io/ipfs/${cidToText(release.manifestCid)}`}
+                            />
+                            <span className="tw-mt-1 tw-block tw-text-iron-400">
+                              {t(
+                                locale,
+                                "museum.onchain.releases.manifestHelp"
+                              )}
+                            </span>
+                          </>
+                        ),
+                    },
+                    {
+                      label: t(locale, "museum.onchain.releases.sourceCommit"),
+                      value: (
+                        <>
+                          <a
+                            href={`${MUSEUM_REPOSITORY}/commit/${commit}`}
+                            rel="noreferrer"
+                            className={TEXT_LINK}
+                          >
+                            <code className="tw-font-mono tw-text-[0.8125rem]">
+                              {commit.slice(0, 12)}
+                            </code>
+                          </a>
+                          <span className="tw-mt-1 tw-block tw-text-iron-400">
+                            {t(
+                              locale,
+                              "museum.onchain.releases.sourceCommitHelp"
+                            )}
+                          </span>
+                        </>
                       ),
-                  },
-                ]}
-              />
-            </div>
-          </li>
-        ))}
+                    },
+                    {
+                      label: t(locale, "museum.onchain.releases.label"),
+                      value: release.label,
+                    },
+                  ]}
+                />
+              </div>
+            </li>
+          );
+        })}
       </ol>
     </section>
   );
@@ -205,27 +281,88 @@ export default async function OnchainMuseumPage() {
   const state = await getOnchainMuseum();
   if (state.status !== "ready") return <OnchainUnavailable />;
   const { snapshot } = state;
-  const index = buildOnchainMuseumIndex(snapshot, (left, right) =>
-    compareLocalized(locale, left, right)
-  );
+  const view = onchainMuseumView(snapshot);
+  const recordsKicker = t(locale, "museum.onchain.records.heading");
+  const groups = [
+    ...view.entityGroups.map((group) => ({
+      key: group.key,
+      anchor: group.anchor,
+      heading: group.heading,
+      items: group.records.map((record) => filterableItem(view, record)),
+    })),
+    ...view.recordGroups.map((group) => ({
+      key: group.key,
+      anchor: group.anchor,
+      heading: group.heading,
+      kicker: recordsKicker,
+      items: group.records.map((record) => filterableItem(view, record)),
+    })),
+  ];
+  const leadGroups = view.entityGroups.slice(0, 4);
 
   return (
     <>
       <PageHeading
         eyebrow={t(locale, "museum.onchain.eyebrow")}
         title={t(locale, "museum.onchain.heading")}
-        intro={t(locale, "museum.onchain.intro")}
+        intro={
+          <>
+            <p className="tw-m-0">{t(locale, "museum.onchain.intro")}</p>
+            <p className="tw-m-0 tw-mt-2 tw-text-iron-200">
+              {t(locale, "museum.onchain.summaryLine", {
+                verified: formatCount(snapshot.counts.verified),
+                total: formatCount(snapshot.records.length),
+              })}{" "}
+              <a href="#verification" className={TEXT_LINK}>
+                {t(locale, "museum.onchain.summaryLink")}
+              </a>
+            </p>
+            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(locale, "museum.onchain.images.note")}
+            </p>
+          </>
+        }
       />
-      <VerificationSummary snapshot={snapshot} />
-      <Releases snapshot={snapshot} />
+      <JumpNav
+        links={[
+          ...leadGroups.map((group) => ({
+            href: `#${group.anchor}`,
+            label: group.heading,
+          })),
+          {
+            href: `#${view.recordGroups[0]?.anchor ?? "verification"}`,
+            label: t(locale, "museum.onchain.jump.records"),
+          },
+          { href: "#texts", label: t(locale, "museum.onchain.jump.texts") },
+          {
+            href: "#verification",
+            label: t(locale, "museum.onchain.jump.verification"),
+          },
+        ]}
+      />
 
-      <section aria-labelledby="onchain-texts" className="tw-mb-12">
-        <SectionHeading id="onchain-texts">
+      <section aria-labelledby="collection" className="tw-mb-8">
+        <h2 id="collection" className="tw-sr-only">
+          {t(locale, "museum.onchain.collection.heading")}
+        </h2>
+        <FilterableGroups groups={groups} copy={filterCopy()} />
+        <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
+          {t(locale, "museum.onchain.relations.summary", {
+            count: formatCount(view.relationCount),
+          })}
+        </p>
+      </section>
+
+      <section
+        aria-labelledby="texts"
+        className="tw-mb-12 tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-p-5 sm:tw-p-6"
+      >
+        <SectionHeading id="texts">
           {t(locale, "museum.onchain.texts.heading")}
         </SectionHeading>
         <p className="tw-m-0 tw-mt-3 tw-text-base tw-leading-7 tw-text-iron-300">
           {t(locale, "museum.onchain.texts.summary", {
-            count: formatCount(index.texts.length),
+            count: formatCount(view.texts.length),
           })}{" "}
           <Link href={ONCHAIN_MUSEUM_TEXTS_HREF} className={TEXT_LINK}>
             {t(locale, "museum.onchain.texts.open")}
@@ -233,71 +370,8 @@ export default async function OnchainMuseumPage() {
         </p>
       </section>
 
-      <section aria-labelledby="onchain-collection" className="tw-mb-12">
-        <SectionHeading id="onchain-collection">
-          {t(locale, "museum.onchain.collection.heading")}
-        </SectionHeading>
-        <p className="tw-m-0 tw-mt-3 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
-          {t(locale, "museum.onchain.collection.intro")}{" "}
-          {t(locale, "museum.onchain.relations.summary", {
-            count: formatCount(index.relationCount),
-          })}
-        </p>
-        {index.entityGroups.map((group) => {
-          const id = `onchain-entities-${group.key.toLowerCase()}`;
-          return (
-            <div key={group.key} className="tw-mt-8">
-              <h3
-                id={id}
-                className="tw-m-0 tw-mb-2 tw-text-lg tw-font-semibold tw-text-iron-50"
-              >
-                {entityTypeLabel(group.key)}{" "}
-                <span className="tw-text-sm tw-font-normal tw-text-iron-400">
-                  ({formatCount(group.records.length)})
-                </span>
-              </h3>
-              <RecordList records={group.records} labelledBy={id} />
-            </div>
-          );
-        })}
-      </section>
-
-      <section aria-labelledby="onchain-records" className="tw-mb-12">
-        <SectionHeading id="onchain-records">
-          {t(locale, "museum.onchain.records.heading")}
-        </SectionHeading>
-        {index.recordGroups.map((group) => {
-          const id = `onchain-records-${group.key.toLowerCase()}`;
-          return (
-            <div key={group.key} className="tw-mt-8">
-              <h3
-                id={id}
-                className="tw-m-0 tw-mb-2 tw-break-words tw-font-mono tw-text-base tw-font-semibold tw-text-iron-50"
-              >
-                {group.key}{" "}
-                <span className="tw-font-sans tw-text-sm tw-font-normal tw-text-iron-400">
-                  ({formatCount(group.records.length)})
-                </span>
-              </h3>
-              <RecordList records={group.records} labelledBy={id} />
-            </div>
-          );
-        })}
-      </section>
-
-      {index.unverified.length > 0 ? (
-        <section aria-labelledby="onchain-unverified" className="tw-mb-12">
-          <SectionHeading id="onchain-unverified">
-            {t(locale, "museum.onchain.unverified.heading")}
-          </SectionHeading>
-          <div className="tw-mt-4">
-            <RecordList
-              records={index.unverified}
-              labelledBy="onchain-unverified"
-            />
-          </div>
-        </section>
-      ) : null}
+      <Verification snapshot={snapshot} />
+      <Releases view={view} />
     </>
   );
 }

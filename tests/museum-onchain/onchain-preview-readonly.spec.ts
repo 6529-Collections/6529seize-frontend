@@ -45,7 +45,9 @@ test.describe("on-chain Museum preview", () => {
     expect(total).toBeGreaterThan(0);
     expect(verified).toBe(total);
 
-    const verification = page.getByRole("region", { name: "Verification" });
+    const verification = page.getByRole("region", {
+      name: "How this is checked",
+    });
     await expect(verification.getByText(/: Passed$/u)).toHaveCount(4);
     await expect(verification.getByText(/: Failed$/u)).toHaveCount(0);
 
@@ -80,7 +82,7 @@ test.describe("on-chain Museum preview", () => {
     await waitForRouteReady(page, { timeout: COLD_LOAD_TIMEOUT_MS });
 
     await page
-      .getByRole("list", { name: /^docs\// })
+      .getByRole("list", { name: /^Policies/u })
       .getByRole("link")
       .first()
       .click();
@@ -94,9 +96,7 @@ test.describe("on-chain Museum preview", () => {
     await expect(
       page.getByText("PUBLIC_DOCUMENT", { exact: true }).first()
     ).toBeVisible();
-    await expect(
-      page.getByText("LF_NORMALIZED", { exact: true }).first()
-    ).toBeVisible();
+    await expect(page.getByText(/LF_NORMALIZED/u).first()).toBeVisible();
     await expect(page.getByRole("region", { name: "Text" })).toBeVisible();
     if (testInfo.project.name === MOBILE_PROJECT) {
       await expectNoHorizontalOverflow(page);

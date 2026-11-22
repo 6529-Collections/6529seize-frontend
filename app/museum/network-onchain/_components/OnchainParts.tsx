@@ -1,5 +1,5 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
+import AiCopyButton from "@/components/ai-page/AiCopyButton";
 import { formatInteger, formatUtcDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
@@ -9,30 +9,20 @@ import type {
   OnchainRecordState,
 } from "@/lib/museum/onchain/museum";
 import {
-  humanizeLiteral,
   onchainMuseumRecordHref,
+  type OnchainMuseumView,
 } from "@/lib/museum/onchain/presentation";
+import type { FilterableGroupsCopy, FilterableItem } from "./FilterableGroups";
+import { registryValueLabel } from "./labels";
 
 const locale = DEFAULT_LOCALE;
 
 const FOCUS_RING =
   "focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400";
+/** Links inside sentences. */
 export const TEXT_LINK = `tw-text-primary-300 tw-underline tw-decoration-primary-300/40 tw-underline-offset-4 hover:tw-text-primary-200 ${FOCUS_RING}`;
-
-const ENTITY_TYPE_KEYS: Readonly<Record<string, MessageKey>> = {
-  WORK: "museum.onchain.entityType.WORK",
-  ARTIST: "museum.onchain.entityType.ARTIST",
-  PROJECT_OR_SERIES: "museum.onchain.entityType.PROJECT_OR_SERIES",
-  COLLECTION: "museum.onchain.entityType.COLLECTION",
-  CURATED_ACQUISITION: "museum.onchain.entityType.CURATED_ACQUISITION",
-  ACQUISITION_PROGRAM: "museum.onchain.entityType.ACQUISITION_PROGRAM",
-  ACCESSION: "museum.onchain.entityType.ACCESSION",
-  INSTITUTION: "museum.onchain.entityType.INSTITUTION",
-  ORGANIZATION: "museum.onchain.entityType.ORGANIZATION",
-  AGENT: "museum.onchain.entityType.AGENT",
-  RESEARCH_PUBLICATION: "museum.onchain.entityType.RESEARCH_PUBLICATION",
-  MEDIA_REFERENCE: "museum.onchain.entityType.MEDIA_REFERENCE",
-};
+/** Links that are list entries: the same color and focus as every link here. */
+export const LIST_LINK = `tw-break-words tw-text-primary-300 tw-no-underline hover:tw-text-primary-200 hover:tw-underline ${FOCUS_RING}`;
 
 const STATE_KEYS: Readonly<Record<OnchainRecordState, MessageKey>> = {
   verified: "museum.onchain.state.verified",
@@ -42,18 +32,31 @@ const STATE_KEYS: Readonly<Record<OnchainRecordState, MessageKey>> = {
   deleted: "museum.onchain.state.deleted",
 };
 
-/** Registry literals are identifiers; types without copy fall back to words. */
-export function entityTypeLabel(type: string): string {
-  const key = ENTITY_TYPE_KEYS[type];
-  return key === undefined ? humanizeLiteral(type) : t(locale, key);
-}
+const STATE_TONES: Readonly<Record<OnchainRecordState, string>> = {
+  verified: "tw-border-emerald-400/40 tw-bg-emerald-400/10 tw-text-emerald-200",
+  mismatch: "tw-border-red-400/50 tw-bg-red-400/10 tw-text-red-200",
+  unavailable: "tw-border-yellow-400/40 tw-bg-yellow-400/10 tw-text-yellow-100",
+  unsupported: "tw-border-yellow-400/40 tw-bg-yellow-400/10 tw-text-yellow-100",
+  deleted: "tw-border-iron-500/50 tw-bg-iron-800 tw-text-iron-200",
+};
 
 export function literalLabel(literal: string | null): string {
   return literal ?? t(locale, "museum.onchain.unknown");
 }
 
-function stateLabel(state: OnchainRecordState): string {
+export function stateLabel(state: OnchainRecordState): string {
   return t(locale, STATE_KEYS[state]);
+}
+
+export function statusLabel(value: string): string {
+  return registryValueLabel("status", value);
+}
+
+/** The literal, with its plain name when the messages know it. */
+export function canonicalizationLabel(literal: string | null): string {
+  if (literal === null) return t(locale, "museum.onchain.unknown");
+  const name = registryValueLabel("canonical", literal);
+  return name.includes(literal) ? literal : `${name} · ${literal}`;
 }
 
 export function formatUtcDateTime(seconds: number): string {
@@ -79,18 +82,45 @@ export function algorithmLabel(algorithm: number): string {
   return t(locale, "museum.onchain.algorithm.unknown", { id: algorithm });
 }
 
+export function filterCopy(): FilterableGroupsCopy {
+  return {
+    label: t(locale, "museum.onchain.filter.label"),
+    placeholder: t(locale, "museum.onchain.filter.placeholder"),
+    empty: t(locale, "museum.onchain.filter.empty"),
+    count: t(locale, "museum.onchain.filter.count"),
+  };
+}
+
+/** A list row for a record: its readable label, and a badge only on failure. */
+export function filterableItem(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord,
+  secondary?: string
+): FilterableItem {
+  return {
+    key: record.subjectId,
+    href: onchainMuseumRecordHref(record.subjectId),
+    label: view.labelOf(record),
+    secondary,
+    badge:
+      record.state === "verified"
+        ? undefined
+        : { label: stateLabel(record.state), tone: STATE_TONES[record.state] },
+  };
+}
+
 export function OnchainFrame({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <div className="tailwind-scope tw-min-h-screen tw-min-w-0 tw-overflow-x-clip tw-bg-black tw-text-iron-100">
       <div
         role="note"
-        className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-yellow-400/30 tw-bg-yellow-400/10 tw-px-4 tw-py-3 tw-text-sm tw-leading-6 tw-text-yellow-100 sm:tw-px-6 lg:tw-px-8"
+        className="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-yellow-400/30 tw-bg-yellow-400/10 tw-px-4 tw-py-2 tw-text-[0.8125rem] tw-leading-5 tw-text-yellow-100 sm:tw-px-6 lg:tw-px-8"
       >
         <p className="tw-m-0 tw-mx-auto tw-w-full tw-max-w-[1324px]">
           {t(locale, "museum.onchain.notice")}
         </p>
       </div>
-      <div className="tw-mx-auto tw-w-full tw-min-w-0 tw-max-w-[1324px] tw-px-4 tw-py-8 sm:tw-px-6 sm:tw-py-12 lg:tw-px-8 lg:tw-py-16">
+      <div className="tw-mx-auto tw-w-full tw-min-w-0 tw-max-w-[1324px] tw-px-4 tw-py-6 sm:tw-px-6 sm:tw-py-10 lg:tw-px-8 lg:tw-py-14">
         {children}
       </div>
     </div>
@@ -103,9 +133,9 @@ export function PageHeading({
   intro,
   aside,
 }: Readonly<{
-  eyebrow: string;
+  eyebrow: ReactNode;
   title: string;
-  intro?: string | undefined;
+  intro?: ReactNode;
   aside?: ReactNode;
 }>) {
   return (
@@ -117,9 +147,9 @@ export function PageHeading({
         {title}
       </h1>
       {intro === undefined ? null : (
-        <p className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
+        <div className="tw-m-0 tw-mt-4 tw-max-w-3xl tw-text-base tw-leading-7 tw-text-iron-300">
           {intro}
-        </p>
+        </div>
       )}
       {aside}
     </header>
@@ -133,20 +163,12 @@ export function SectionHeading({
   return (
     <h2
       id={id}
-      className="tw-m-0 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
+      className="tw-m-0 tw-scroll-mt-24 tw-text-2xl tw-font-semibold tw-tracking-tight tw-text-iron-50"
     >
       {children}
     </h2>
   );
 }
-
-const STATE_TONES: Readonly<Record<OnchainRecordState, string>> = {
-  verified: "tw-border-emerald-400/40 tw-bg-emerald-400/10 tw-text-emerald-200",
-  mismatch: "tw-border-red-400/50 tw-bg-red-400/10 tw-text-red-200",
-  unavailable: "tw-border-yellow-400/40 tw-bg-yellow-400/10 tw-text-yellow-100",
-  unsupported: "tw-border-yellow-400/40 tw-bg-yellow-400/10 tw-text-yellow-100",
-  deleted: "tw-border-iron-500/50 tw-bg-iron-800 tw-text-iron-200",
-};
 
 export function StateBadge({ state }: Readonly<{ state: OnchainRecordState }>) {
   return (
@@ -159,61 +181,37 @@ export function StateBadge({ state }: Readonly<{ state: OnchainRecordState }>) {
   );
 }
 
-export function RecordList({
-  records,
-  showPath = false,
-  labelledBy,
-}: Readonly<{
-  records: readonly OnchainMuseumRecord[];
-  showPath?: boolean;
-  labelledBy: string;
-}>) {
+export function JumpNav({
+  links,
+}: Readonly<{ links: readonly { href: string; label: string }[] }>) {
   return (
-    <ul
-      aria-labelledby={labelledBy}
-      className="tw-m-0 tw-grid tw-list-none tw-gap-x-8 tw-gap-y-1 tw-p-0 md:tw-grid-cols-2"
+    <nav
+      aria-label={t(locale, "museum.onchain.jump.label")}
+      className="tw-mb-10"
     >
-      {records.map((record) => (
-        <li
-          key={record.subjectId}
-          className="tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-2"
-        >
-          <span className="tw-min-w-0">
-            <Link
-              href={onchainMuseumRecordHref(record.subjectId)}
-              className={`hover:tw-text-primary-200 tw-break-words tw-text-base tw-text-iron-50 tw-no-underline ${FOCUS_RING}`}
+      <ul className="tw-m-0 tw-flex tw-list-none tw-flex-wrap tw-gap-2 tw-p-0">
+        {links.map((link) => (
+          <li key={link.href}>
+            <a
+              href={link.href}
+              className="hover:tw-text-primary-200 tw-inline-flex tw-min-h-11 tw-items-center tw-rounded-full tw-border tw-border-solid tw-border-iron-700 tw-px-4 tw-text-sm tw-text-iron-100 tw-no-underline hover:tw-border-primary-400 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 sm:tw-min-h-9"
             >
-              {record.label}
-            </Link>
-            {showPath && record.documentPath !== null ? (
-              <span className="tw-mt-0.5 tw-block tw-break-all tw-font-mono tw-text-xs tw-text-iron-500">
-                {record.documentPath}
-              </span>
-            ) : null}
-          </span>
-          {record.state === "verified" ? (
-            <span className="tw-sr-only">{stateLabel(record.state)}</span>
-          ) : (
-            <StateBadge state={record.state} />
-          )}
-        </li>
-      ))}
-    </ul>
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }
 
 export function FactList({
   facts,
-  labelledBy,
 }: Readonly<{
   facts: readonly { label: string; value: ReactNode }[];
-  labelledBy?: string;
 }>) {
   return (
-    <dl
-      aria-labelledby={labelledBy}
-      className="tw-m-0 tw-grid tw-gap-x-6 tw-gap-y-3 sm:tw-grid-cols-[minmax(9rem,12rem)_minmax(0,1fr)]"
-    >
+    <dl className="tw-m-0 tw-grid tw-gap-x-6 tw-gap-y-3 sm:tw-grid-cols-[minmax(9rem,12rem)_minmax(0,1fr)]">
       {facts.map((fact) => (
         <div key={fact.label} className="tw-contents">
           <dt className="tw-text-sm tw-font-medium tw-text-iron-400">
@@ -233,6 +231,34 @@ export function Mono({ children }: Readonly<{ children: ReactNode }>) {
     <code className="tw-break-all tw-font-mono tw-text-[0.8125rem] tw-text-iron-100">
       {children}
     </code>
+  );
+}
+
+/** A hash, address or ID, wrapped anywhere, with a copy control. */
+export function CopyValue({
+  value,
+  field,
+  href,
+}: Readonly<{ value: string; field: string; href?: string | undefined }>) {
+  return (
+    <span className="tw-flex tw-items-start tw-gap-2">
+      <span className="tw-min-w-0 tw-flex-1">
+        {href === undefined ? (
+          <Mono>{value}</Mono>
+        ) : (
+          <a href={href} rel="noreferrer" className={TEXT_LINK}>
+            <Mono>{value}</Mono>
+          </a>
+        )}
+      </span>
+      <AiCopyButton
+        value={value}
+        text={t(locale, "museum.onchain.copy.text")}
+        copiedText={t(locale, "museum.onchain.copy.copied")}
+        failedText={t(locale, "museum.onchain.copy.failed")}
+        label={t(locale, "museum.onchain.copy.label", { field })}
+      />
+    </span>
   );
 }
 
@@ -282,12 +308,29 @@ function PayloadValue({ value }: Readonly<{ value: unknown }>): ReactNode {
   );
 }
 
+/** Every field of a verified record, in a bounded scrolling region. */
 export function PayloadTree({
   payload,
 }: Readonly<{ payload: Record<string, unknown> }>) {
   return (
-    <div className="tw-text-sm tw-leading-6 tw-text-iron-200">
-      <PayloadValue value={payload} />
+    <div>
+      <div className="tw-mb-3">
+        <AiCopyButton
+          value={JSON.stringify(payload, null, 2)}
+          text={t(locale, "museum.onchain.copy.record")}
+          copiedText={t(locale, "museum.onchain.copy.copied")}
+          failedText={t(locale, "museum.onchain.copy.failed")}
+          label={t(locale, "museum.onchain.copy.record")}
+        />
+      </div>
+      {/* A scrollable region must be focusable so keyboard users can scroll it. */}
+      <section
+        tabIndex={0}
+        aria-label={t(locale, "museum.onchain.record.payloadRegion")}
+        className="tw-max-h-[70vh] tw-overflow-y-auto tw-overscroll-contain tw-rounded-lg tw-border tw-border-solid tw-border-iron-800 tw-p-4 tw-text-sm tw-leading-6 tw-text-iron-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"
+      >
+        <PayloadValue value={payload} />
+      </section>
     </div>
   );
 }

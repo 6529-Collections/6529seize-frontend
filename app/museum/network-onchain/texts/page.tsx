@@ -1,23 +1,22 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { connection } from "next/server";
-import { compareLocalized } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import {
-  buildOnchainMuseumIndex,
-  groupOnchainTexts,
-  ONCHAIN_MUSEUM_BASE_PATH,
-} from "@/lib/museum/onchain/presentation";
+import { ONCHAIN_MUSEUM_BASE_PATH } from "@/lib/museum/onchain/presentation";
 import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";
+import { FilterableGroups } from "../_components/FilterableGroups";
 import { onchainMuseumMetadata } from "../_components/metadata";
 import {
+  filterableItem,
+  filterCopy,
   formatCount,
+  JumpNav,
   PageHeading,
-  RecordList,
   TEXT_LINK,
 } from "../_components/OnchainParts";
 import { OnchainUnavailable } from "../_components/OnchainUnavailable";
+import { onchainMuseumView } from "../_components/view";
 
 const locale = DEFAULT_LOCALE;
 
@@ -30,10 +29,15 @@ export default async function OnchainMuseumTextsPage() {
   await connection();
   const state = await getOnchainMuseum();
   if (state.status !== "ready") return <OnchainUnavailable />;
-  const index = buildOnchainMuseumIndex(state.snapshot, (left, right) =>
-    compareLocalized(locale, left, right)
-  );
-  const groups = groupOnchainTexts(index.texts);
+  const view = onchainMuseumView(state.snapshot);
+  const groups = view.textGroups.map((group) => ({
+    key: group.key,
+    anchor: group.anchor,
+    heading: group.heading,
+    kicker: group.heading === group.kicker ? undefined : group.kicker,
+    headingHref: group.contextHref ?? undefined,
+    items: group.records.map((record) => filterableItem(view, record)),
+  }));
 
   return (
     <>
@@ -45,29 +49,26 @@ export default async function OnchainMuseumTextsPage() {
       <PageHeading
         eyebrow={t(locale, "museum.onchain.eyebrow")}
         title={t(locale, "museum.onchain.texts.heading")}
-        intro={t(locale, "museum.onchain.texts.summary", {
-          count: formatCount(index.texts.length),
-        })}
+        intro={
+          <>
+            <p className="tw-m-0">
+              {t(locale, "museum.onchain.texts.summary", {
+                count: formatCount(view.texts.length),
+              })}
+            </p>
+            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-text-iron-400">
+              {t(locale, "museum.onchain.texts.sourceLanguage")}
+            </p>
+          </>
+        }
       />
-      {groups.map((group) => {
-        const id = `onchain-texts-${group.key === "" ? "root" : group.key}`;
-        return (
-          <section key={group.key} aria-labelledby={id} className="tw-mb-10">
-            <h2
-              id={id}
-              className="tw-m-0 tw-mb-2 tw-break-words tw-font-mono tw-text-lg tw-font-semibold tw-text-iron-50"
-            >
-              {group.key === ""
-                ? t(locale, "museum.onchain.texts.root")
-                : `${group.key}/`}{" "}
-              <span className="tw-font-sans tw-text-sm tw-font-normal tw-text-iron-400">
-                ({formatCount(group.records.length)})
-              </span>
-            </h2>
-            <RecordList records={group.records} labelledBy={id} showPath />
-          </section>
-        );
-      })}
+      <JumpNav
+        links={view.textGroups.map((group) => ({
+          href: `#${group.anchor}`,
+          label: group.heading,
+        }))}
+      />
+      <FilterableGroups groups={groups} copy={filterCopy()} headingLevel={2} />
     </>
   );
 }
