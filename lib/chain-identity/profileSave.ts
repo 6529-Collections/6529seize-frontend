@@ -1,6 +1,11 @@
 import type { Hex } from "viem";
 import type { Config } from "wagmi";
-import { chainGateway, type ChainDraft, type ChainIdentity } from "./gateway";
+import {
+  chainGateway,
+  ChainGatewayError,
+  type ChainDraft,
+  type ChainIdentity,
+} from "./gateway";
 import { profileReplace, type ChainActor } from "./identityOps";
 import { chainNetworkId } from "./network";
 import {
@@ -33,9 +38,11 @@ interface CurrentProfile {
 }
 
 /**
- * The identity's current document. A gateway failure throws, so nothing is
- * saved over a document that couldn't be fetched; bytes that aren't the
- * named ProfileDoc read as unreadable, and saving then replaces them.
+ * The identity's current document. A failed fetch, or bytes whose hash
+ * isn't the CID, throws: nothing is saved over a document this browser
+ * couldn't get. A document the store doesn't have (404), or bytes of the
+ * CID that aren't a ProfileDoc.v1, read as unreadable; the page warns, and
+ * saving replaces it.
  */
 export async function readCurrentProfile(
   identity: ChainIdentity,
@@ -45,8 +52,23 @@ export async function readCurrentProfile(
   if (cid === undefined || cid === "0x") {
     return { doc: null, unreadable: false };
   }
-  const bytes = await chainGateway.getDoc(cid, signal);
-  const doc = matchesCid(bytes, cid) ? decodeProfileDoc(bytes) : null;
+  let bytes: Uint8Array;
+  try {
+    bytes = await chainGateway.getDoc(cid, signal);
+  } catch (error) {
+    if (error instanceof ChainGatewayError && error.status === 404) {
+      return { doc: null, unreadable: true };
+    }
+    throw error;
+  }
+  if (!matchesCid(bytes, cid)) {
+    throw new ChainGatewayError(
+      502,
+      "cid_mismatch",
+      "The gateway sent bytes that aren't this profile document."
+    );
+  }
+  const doc = decodeProfileDoc(bytes);
   return { doc, unreadable: doc === null };
 }
 
@@ -60,7 +82,8 @@ export function nextProfileFields(
 ): Map<string, string> {
   const fields = new Map(current?.fields ?? []);
   for (const [key, value] of Object.entries(edits)) {
-    if (value !== undefined) {
+    // An edit typed back to the current value leaves that value untouched.
+    if (value !== undefined && value !== fields.get(key)) {
       fields.set(key, value.trim());
     }
   }

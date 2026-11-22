@@ -1,8 +1,12 @@
-import { hashTypedData } from "viem";
+import { hashTypedData, keccak256, sha256 } from "viem";
 import type { Config } from "wagmi";
 import { getAccount, signTypedData } from "wagmi/actions";
 import { setTestPublicEnv } from "@/__tests__/helpers/testPublicEnv";
-import { chainGateway, type ChainIdentity } from "@/lib/chain-identity/gateway";
+import {
+  chainGateway,
+  ChainGatewayError,
+  type ChainIdentity,
+} from "@/lib/chain-identity/gateway";
 import { chainNetworkId } from "@/lib/chain-identity/network";
 import { draftOperation } from "@/lib/chain-identity/operation";
 import {
@@ -101,6 +105,8 @@ describe("the network a document is signed for", () => {
   });
 
   it("refuses a missing or malformed network", async () => {
+    gateway["getStatus"]!.mockResolvedValue(undefined);
+    await expect(chainNetworkId()).rejects.toThrow("did not say which network");
     gateway["getStatus"]!.mockResolvedValue({});
     await expect(chainNetworkId()).rejects.toThrow("did not say which network");
     gateway["getStatus"]!.mockResolvedValue({ head: { network: "0x1234" } });
@@ -163,14 +169,28 @@ describe("signing a profile document", () => {
 });
 
 describe("saving the profile", () => {
-  it("reads a failed fetch as an error, and other bytes as unreadable", async () => {
+  it("keeps save off for a failed fetch or bytes that aren't the CID", async () => {
     gateway["getDoc"]!.mockRejectedValue(new Error("offline"));
     await expect(readCurrentProfile(identity(3))).rejects.toThrow("offline");
     gateway["getDoc"]!.mockResolvedValue(new Uint8Array([1, 2, 3]));
+    await expect(readCurrentProfile(identity(3))).rejects.toMatchObject({
+      code: "cid_mismatch",
+    });
+  });
+
+  it("lets a missing or undecodable document be replaced", async () => {
+    gateway["getDoc"]!.mockRejectedValue(
+      new ChainGatewayError(404, "not_found", "missing")
+    );
     await expect(readCurrentProfile(identity(3))).resolves.toEqual({
       doc: null,
       unreadable: true,
     });
+    const junk = new Uint8Array([1, 2, 3]);
+    gateway["getDoc"]!.mockResolvedValue(junk);
+    await expect(
+      readCurrentProfile(identity(3, `0x01551220${sha256(junk).slice(2)}`))
+    ).resolves.toEqual({ doc: null, unreadable: true });
     await expect(readCurrentProfile(identity(0, "0x"))).resolves.toEqual({
       doc: null,
       unreadable: false,
@@ -190,7 +210,11 @@ describe("saving the profile", () => {
     };
     expect(
       Object.fromEntries(
-        nextProfileFields(current, { website: " https://a.test ", bio: undefined })
+        nextProfileFields(current, {
+          website: " https://a.test ",
+          bio: undefined,
+          "statement.X.Y.0": " @gm ",
+        })
       )
     ).toEqual({
       bio: "gm\n",
@@ -224,6 +248,24 @@ describe("saving the profile", () => {
     });
     expect(order).toEqual(["prompt", "sign", "upload", "draft"]);
     const [bytes, cid] = gateway["uploadDoc"]!.mock.calls[0]!;
+    // The wallet signed this document: its principal, version and the
+    // keccak256 of every byte before the signature (u32 length, then CE
+    // keyType 1 byte, keyId 32, signature length 4, signature 65).
+    const sigLength = 1 + 32 + 4 + 65;
+    expect(
+      new DataView(bytes.buffer, bytes.byteOffset).getUint32(
+        bytes.length - sigLength - 4
+      )
+    ).toBe(sigLength);
+    const unsignedBytes = bytes.slice(0, bytes.length - 4 - sigLength);
+    expect((signTypedData as jest.Mock).mock.calls[0]![1]).toMatchObject({
+      primaryType: "ProfileDocument",
+      message: {
+        principal: PRINCIPAL,
+        version: 4,
+        docHash: keccak256(unsignedBytes),
+      },
+    });
     const stored = decodeProfileDoc(bytes);
     expect(stored).toMatchObject({ version: 4, prev: CURRENT_CID });
     const { unsigned } = prepareProfileDoc(

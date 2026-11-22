@@ -295,10 +295,13 @@ const lower = (value: string): string => value.toLowerCase();
 export const chainGateway = {
   /** The node's status; each read stamp names the network. */
   getStatus: (signal?: AbortSignal) =>
-    request<{
-      readonly finalized?: { readonly network?: Hex };
-      readonly head?: { readonly network?: Hex };
-    }>("GET", "/v1/status", { signal }),
+    request<
+      | {
+          readonly finalized?: { readonly network?: Hex };
+          readonly head?: { readonly network?: Hex };
+        }
+      | undefined
+    >("GET", "/v1/status", { signal }),
 
   getOps: (signal?: AbortSignal) =>
     request<ChainOps>("GET", "/v1/ops", { signal }),

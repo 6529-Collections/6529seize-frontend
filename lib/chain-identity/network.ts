@@ -14,7 +14,7 @@ export async function chainNetworkId(signal?: AbortSignal): Promise<Hex> {
     expectedNetworkId() ??
     (await chainGateway
       .getStatus(signal)
-      .then((status) => status.finalized?.network ?? status.head?.network));
+      .then((status) => status?.finalized?.network ?? status?.head?.network));
   const value = network?.toLowerCase();
   if (value === undefined || !NETWORK_ID.test(value)) {
     throw new ChainOperationError(
