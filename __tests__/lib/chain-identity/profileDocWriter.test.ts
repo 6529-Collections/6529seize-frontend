@@ -340,25 +340,28 @@ describe("the errors the site builder acts on", () => {
         "STALE_VERSION"
       )
     );
-    const describe = jest.fn((error: unknown) =>
-      error instanceof ChainOperationError ? "Plain words." : null
+    const describe = jest.fn(() => "Plain words.");
+    await expect(
+      chainProfileDocWriter(config, describe).replaceProfileDoc(setSite, "wallet")
+    ).rejects.toEqual(new ProfileDocWriteError("submit_failed", "Plain words."));
+    // The gateway's refusals too.
+    (submitAndAwait as jest.Mock).mockRejectedValue(
+      new ChainGatewayError(422, "inadmissible", "0x1007 INSUFFICIENT_BALANCE, detail 0")
     );
     await expect(
       chainProfileDocWriter(config, describe).replaceProfileDoc(setSite, "wallet")
     ).rejects.toEqual(new ProfileDocWriteError("submit_failed", "Plain words."));
-    // Errors from outside the chain keep their own message.
+    // Errors from outside the chain keep their own message: here the
+    // document size limit (profileDoc.ts signedProfileDoc).
     (prepareProfileReplace as jest.Mock).mockRejectedValueOnce(
-      new Error("The profile document is larger than 524,288 bytes.")
+      new RangeError("a profile document is at most 524,288 bytes")
     );
     await expect(
-      chainProfileDocWriter(config, () => "Something went wrong.").replaceProfileDoc(
-        setSite,
-        "wallet"
-      )
+      chainProfileDocWriter(config, describe).replaceProfileDoc(setSite, "wallet")
     ).rejects.toEqual(
       new ProfileDocWriteError(
         "submit_failed",
-        "The profile document is larger than 524,288 bytes."
+        "a profile document is at most 524,288 bytes"
       )
     );
     // A canceled signature and an unusable key keep their own errors.
