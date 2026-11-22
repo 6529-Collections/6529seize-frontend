@@ -238,7 +238,7 @@ describe("drafts, streams, order and transport", () => {
       family: "cv",
       owner: "0x0a1b",
     });
-    // Lane owners are lowercase hex, as the relays take them.
+    // Owners of the other families are lowercase hex, as the relays take them.
     expect(parseFamilyWave("cv/group-1")).toBeNull();
     expect(() =>
       recordDraft("ps", inputs.principal, "follow", "\uD800", {})

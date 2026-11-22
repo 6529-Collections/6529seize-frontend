@@ -50,7 +50,7 @@
       "playwright.config.ts",
       "tests/support/composerSandboxServer.cjs",
       "services/**/index.{ts,tsx}",
-      // Signed records: a library other lanes' call sites import; its public
+      // Signed records: a library other features' call sites import; its public
       // exports carry `/** @api */`.
       "lib/signed-records/*.ts"
     ],
