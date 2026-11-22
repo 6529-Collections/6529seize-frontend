@@ -101,13 +101,14 @@
     `Loading eligibility...`, or `Eligibility unavailable`.
   - A phase spot that a subscription fills is an airdrop, not a mint: the card
     shows `Nx Airdrop · nothing to mint`, or `Nx Allowlist · Nx Airdrop` when
-    the wallet also has mintable spots in that phase. Only allowlist spots
-    count as eligible spots.
+    the wallet also has mintable spots in that phase. When the distribution
+    reports separate allowlist and airdrop counts, only allowlist spots count
+    as eligible spots; an entry without that split keeps its combined count.
   - When the signed-in profile's subscription is assigned to the active phase,
     the mint panel says that the subscription covers the card and names the
     airdrop wallet, or that the card has been airdropped once it is redeemed.
-    The panel can then show `No spots in current phase for this address`
-    because the subscription used that wallet's spot.
+    When the subscription used the wallet's only spot in the phase, the panel
+    also shows `No spots in current phase for this address`.
 - Airdrops summary:
   - If selected destination has airdrops, the phase area shows `Airdrops: xN`.
 - Minting for another wallet:

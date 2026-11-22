@@ -9,6 +9,19 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+jest.mock(
+  "@/components/manifold-minting/ManifoldMintingSubscriptionNote",
+  () => ({
+    __esModule: true,
+    default: (props: Readonly<{ claim: { tokenId?: number } }>) => (
+      <div
+        data-testid="subscription-note"
+        data-token-id={props.claim.tokenId}
+      />
+    ),
+  })
+);
+
 jest.mock("next/image", () => ({
   __esModule: true,
   default: (props: any) => <img alt={props.alt ?? ""} {...props} />,
@@ -128,6 +141,8 @@ jest.mock("@/hooks/useManifoldClaim", () => {
 
   return {
     __esModule: true,
+    getMemePhaseIdForRootPhase: jest.requireActual("@/hooks/useManifoldClaim")
+      .getMemePhaseIdForRootPhase,
     useManifoldClaim: jest.fn(),
     buildMemesPhases: jest.fn(() => [
       {
@@ -389,6 +404,68 @@ describe("ManifoldMinting phases", () => {
     ).toBeInTheDocument();
     expect(screen.getByText("2 eligible spots")).toBeInTheDocument();
     expect(screen.queryByText("1 eligible spot")).not.toBeInTheDocument();
+    expect(screen.getByText("1x Airdrop · nothing to mint")).toHaveClass(
+      "tw-text-success"
+    );
+    expect(screen.getByTestId("subscription-note")).toHaveAttribute(
+      "data-token-id",
+      "123"
+    );
+  });
+
+  test("matches distribution phases exactly, not by digit", async () => {
+    (globalThis.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: [
+          {
+            airdrops: 0,
+            allowlist: [
+              {
+                phase: "Phase 12",
+                spots: 4,
+                spots_airdrop: 0,
+                spots_allowlist: 4,
+              },
+              {
+                phase: "Phase 2",
+                spots: 1,
+                spots_airdrop: 0,
+                spots_allowlist: 1,
+              },
+            ],
+          },
+        ],
+      }),
+    });
+
+    render(
+      <ManifoldMinting
+        title="Test Meme"
+        contract="0xmemes"
+        chain={{ id: 1 } as any}
+        abi={[]}
+        mint_date={{ toMillis: () => Date.UTC(2026, 2, 18, 17, 40) } as any}
+        mintMetadata={{
+          tokenId: 123,
+          metadata: {
+            name: "Test NFT",
+            description: "Test description",
+            attributes: [],
+            image_url: "test.jpg",
+          },
+        }}
+      />
+    );
+
+    await userEvent.click(screen.getByTestId("mint-widget"));
+
+    expect(await screen.findByText("1 eligible spot")).toBeInTheDocument();
+    expect(screen.queryByText("4 eligible spots")).not.toBeInTheDocument();
+    expect(screen.getAllByText("No eligible spots")).toHaveLength(2);
+    expect(screen.getAllByText("No eligible spots")[0]).toHaveClass(
+      "tw-text-iron-300"
+    );
   });
 
   test("keeps the combined count for phase entries without the spot split", async () => {

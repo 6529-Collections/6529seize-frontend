@@ -5,11 +5,12 @@ import { Time } from "@/helpers/time";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import type { SupportedLocale } from "@/i18n/locales";
 import { formatInteger } from "@/i18n/format";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import type { ManifoldClaim, MemePhase } from "@/hooks/useManifoldClaim";
 import { PUBLIC_PRODUCTION_API_BASE } from "@/services/api/api-endpoints";
 import {
   buildMemesPhases,
+  getMemePhaseIdForRootPhase,
   ManifoldClaimStatus,
 } from "@/hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
@@ -38,6 +39,9 @@ function getMemePhaseCardStatus(
 
   return MemePhaseCardStatus.UPCOMING;
 }
+
+const ELIGIBLE_CLASS_NAME = "tw-font-semibold tw-text-success";
+const MUTED_CLASS_NAME = "tw-text-iron-300";
 
 interface PhaseSpots {
   readonly allowlist: number;
@@ -75,7 +79,7 @@ function getEligibleMintsDetails(
   if (phaseId === "public") {
     const text = t(locale, "theMemes.mint.phaseEligibility.unlimited");
     if (status === MemePhaseCardStatus.ACTIVE) {
-      return { text, className: "tw-font-semibold tw-text-success" };
+      return { text, className: ELIGIBLE_CLASS_NAME };
     }
 
     if (status === MemePhaseCardStatus.UPCOMING) {
@@ -88,14 +92,14 @@ function getEligibleMintsDetails(
   if (eligibilityState === "loading") {
     return {
       text: t(locale, "theMemes.mint.phaseEligibility.loading"),
-      className: "tw-text-iron-300",
+      className: MUTED_CLASS_NAME,
     };
   }
 
   if (eligibilityState === "unavailable") {
     return {
       text: t(locale, "theMemes.mint.phaseEligibility.unavailable"),
-      className: "tw-text-iron-300",
+      className: MUTED_CLASS_NAME,
     };
   }
 
@@ -109,14 +113,14 @@ function getEligibleMintsDetails(
   if (allowlist > 0 && airdrop > 0) {
     return {
       text: t(locale, "theMemes.mint.phaseEligibility.mixed", params),
-      className: "tw-font-semibold tw-text-success",
+      className: ELIGIBLE_CLASS_NAME,
     };
   }
 
   if (airdrop > 0) {
     return {
       text: t(locale, "theMemes.mint.phaseEligibility.airdrop", params),
-      className: "tw-font-semibold tw-text-success",
+      className: ELIGIBLE_CLASS_NAME,
     };
   }
 
@@ -129,31 +133,46 @@ function getEligibleMintsDetails(
           : "theMemes.mint.phaseEligibility.allowlist.many",
         params
       ),
-      className: "tw-font-semibold tw-text-success",
+      className: ELIGIBLE_CLASS_NAME,
     };
   }
 
   return {
     text: t(locale, "theMemes.mint.phaseEligibility.none"),
-    className: "tw-text-iron-300",
+    className: MUTED_CLASS_NAME,
   };
 }
 
-function getPhaseDateLabels(status: MemePhaseCardStatus): {
+const PHASE_STATUS_LABEL_KEY = {
+  [MemePhaseCardStatus.UPCOMING]: "theMemes.mint.phaseCard.status.upcoming",
+  [MemePhaseCardStatus.ACTIVE]: "theMemes.mint.phaseCard.status.active",
+  [MemePhaseCardStatus.COMPLETED]: "theMemes.mint.phaseCard.status.completed",
+} as const satisfies Record<MemePhaseCardStatus, MessageKey>;
+
+function getPhaseDateLabels(
+  locale: SupportedLocale,
+  status: MemePhaseCardStatus
+): {
   start: string;
   end: string;
 } {
   if (status === MemePhaseCardStatus.ACTIVE) {
-    return { start: "Started", end: "Ends" };
+    return {
+      start: t(locale, "theMemes.mint.phaseCard.started"),
+      end: t(locale, "theMemes.mint.phaseCard.ends"),
+    };
   }
 
   if (status === MemePhaseCardStatus.COMPLETED) {
-    return { start: "Started", end: "Ended" };
+    return {
+      start: t(locale, "theMemes.mint.phaseCard.started"),
+      end: t(locale, "theMemes.mint.phaseCard.ended"),
+    };
   }
 
   return {
-    start: "Expected start",
-    end: "Expected end",
+    start: t(locale, "theMemes.mint.phaseCard.expectedStart"),
+    end: t(locale, "theMemes.mint.phaseCard.expectedEnd"),
   };
 }
 
@@ -187,6 +206,7 @@ export default function ManifoldMemesMintingPhases(
     local_timezone: boolean;
   }>
 ) {
+  const locale = useBrowserLocale();
   const [distribution, setDistribution] = useState<Distribution>();
   const [distributionState, setDistributionState] = useState<
     "idle" | "loading" | "ready" | "error"
@@ -262,7 +282,9 @@ export default function ManifoldMemesMintingPhases(
     <div>
       {distribution?.airdrops !== undefined && distribution.airdrops > 0 && (
         <div className="tw-pb-2 tw-text-lg tw-font-bold tw-text-white">
-          Airdrops: x{distribution.airdrops}
+          {t(locale, "theMemes.mint.phaseCard.airdrops", {
+            count: formatInteger(locale, distribution.airdrops),
+          })}
         </div>
       )}
       <div className="tw-grid tw-gap-4 md:tw-grid-cols-12">
@@ -293,11 +315,11 @@ function ManifoldMemesMintingPhase(
   }>
 ) {
   const locale = useBrowserLocale();
-  const eligibleMints = props.distribution?.allowlist.find((phase) =>
-    phase.phase.includes(props.phase.id)
+  const eligibleMints = props.distribution?.allowlist.find(
+    (entry) => getMemePhaseIdForRootPhase(entry.phase) === props.phase.id
   );
   const status = getMemePhaseCardStatus(props.claim, props.phase);
-  const phaseDateLabels = getPhaseDateLabels(status);
+  const phaseDateLabels = getPhaseDateLabels(locale, status);
   let eligibilityState: "loading" | "ready" | "unavailable" = "loading";
   if (props.distributionState === "ready") {
     eligibilityState = "ready";
@@ -349,14 +371,14 @@ function ManifoldMemesMintingPhase(
         </div>
         <div className="tw-mt-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <span className="tw-text-sm tw-font-light tw-text-iron-300">
-            Status
+            {t(locale, "theMemes.mint.phaseCard.statusLabel")}
           </span>
           <span
             className={`tw-text-right tw-font-semibold ${getPhaseStatusClassName(
               status
             )}`}
           >
-            {status}
+            {t(locale, PHASE_STATUS_LABEL_KEY[status])}
           </span>
         </div>
         <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3">

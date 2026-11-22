@@ -4,7 +4,11 @@ import { useAuth } from "@/components/auth/Auth";
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
 import { formatAddress } from "@/helpers/addressFormatting";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { getMemePhaseIdForRootPhase } from "@/hooks/useManifoldClaim";
+import {
+  getMemePhaseIdForRootPhase,
+  ManifoldClaimStatus,
+  type ManifoldClaim,
+} from "@/hooks/useManifoldClaim";
 import { formatInteger } from "@/i18n/format";
 import { t, type MessageKey } from "@/i18n/messages";
 import {
@@ -15,21 +19,12 @@ import { useQuery } from "@tanstack/react-query";
 
 const SUBSCRIPTION_REFRESH_INTERVAL = 60_000;
 
-const PHASE_LABEL_KEY: Readonly<Record<string, MessageKey>> = {
+const PHASE_LABEL_KEY: Readonly<Partial<Record<string, MessageKey>>> = {
   "0": "theMemes.mint.subscriptionAirdrop.phase.phase0",
   "1": "theMemes.mint.subscriptionAirdrop.phase.phase1",
   "2": "theMemes.mint.subscriptionAirdrop.phase.phase2",
   public: "theMemes.mint.subscriptionAirdrop.phase.public",
 };
-
-function getProfileKey(
-  connectedProfile: ReturnType<typeof useAuth>["connectedProfile"]
-): string | undefined {
-  return (
-    connectedProfile?.consolidation_key ??
-    connectedProfile?.wallets?.map((wallet) => wallet.wallet).join("-")
-  );
-}
 
 function getMessageKey(airdropped: boolean, count: number): MessageKey {
   if (airdropped) {
@@ -49,36 +44,42 @@ function getMessageKey(airdropped: boolean, count: number): MessageKey {
  */
 export default function ManifoldMintingSubscriptionNote({
   contract,
-  tokenId,
-  memePhaseId,
+  claim,
 }: Readonly<{
   contract: string;
-  tokenId: number | undefined;
-  memePhaseId: string | undefined;
+  claim: ManifoldClaim;
 }>) {
+  const isOpen =
+    claim.status === ManifoldClaimStatus.ACTIVE && !claim.isFinalized;
+  const tokenId = claim.tokenId;
+  const memePhaseId = isOpen ? claim.memePhase?.id : undefined;
   const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy } = useAuth();
+  // The consolidation key is the key of the finalized subscription row.
   const profileKey = activeProfileProxy
     ? undefined
-    : getProfileKey(connectedProfile);
+    : (connectedProfile?.consolidation_key ?? undefined);
   const phaseLabelKey = memePhaseId ? PHASE_LABEL_KEY[memePhaseId] : undefined;
-  const enabled =
-    !!profileKey &&
-    !!phaseLabelKey &&
-    tokenId !== undefined &&
-    Number.isInteger(tokenId) &&
-    tokenId > 0;
+  const validTokenId =
+    tokenId !== undefined && Number.isInteger(tokenId) && tokenId > 0
+      ? tokenId
+      : null;
+  const enabled = !!profileKey && !!phaseLabelKey && validTokenId !== null;
+  const cacheId = `${profileKey ?? ""}-${contract}-${validTokenId ?? ""}`;
+  const endpoint = [
+    "subscriptions/consolidation/final",
+    encodeURIComponent(profileKey ?? ""),
+    encodeURIComponent(contract),
+    String(validTokenId ?? ""),
+  ].join("/");
 
   const { data: final } = useQuery<NFTFinalSubscription | null>({
     // Shares the cache entry used by the profile Subscriptions tab.
-    queryKey: [
-      "consolidation-final-subscription",
-      `${profileKey}-${contract}-${tokenId}`,
-    ],
+    queryKey: ["consolidation-final-subscription", cacheId],
     queryFn: async ({ signal }) => {
       try {
         return await commonApiFetch<NFTFinalSubscription>({
-          endpoint: `subscriptions/consolidation/final/${profileKey}/${contract}/${tokenId}`,
+          endpoint,
           errorMode: "structured",
           signal,
         });
@@ -96,7 +97,7 @@ export default function ManifoldMintingSubscriptionNote({
     return null;
   }
 
-  const count = Number(final.subscribed_count ?? 0);
+  const count = Number(final.subscribed_count);
   if (
     !Number.isFinite(count) ||
     count <= 0 ||

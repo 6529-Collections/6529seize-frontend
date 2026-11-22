@@ -1,6 +1,10 @@
 import ManifoldMintingSubscriptionNote from "@/components/manifold-minting/ManifoldMintingSubscriptionNote";
 import { useAuth } from "@/components/auth/Auth";
 import type { NFTFinalSubscription } from "@/generated/models/NFTFinalSubscription";
+import {
+  ManifoldClaimStatus,
+  type ManifoldClaim,
+} from "@/hooks/useManifoldClaim";
 import { commonApiFetch } from "@/services/api/common-api";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen, waitFor } from "@testing-library/react";
@@ -40,7 +44,10 @@ function finalSubscription(
   };
 }
 
-function renderNote(memePhaseId: string | undefined, tokenId = 575) {
+function renderNote(
+  memePhaseId: string | undefined,
+  claimOverrides: Partial<ManifoldClaim> = {}
+) {
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   });
@@ -48,8 +55,15 @@ function renderNote(memePhaseId: string | undefined, tokenId = 575) {
     <QueryClientProvider client={queryClient}>
       <ManifoldMintingSubscriptionNote
         contract={CONTRACT}
-        tokenId={tokenId}
-        memePhaseId={memePhaseId}
+        claim={
+          {
+            status: ManifoldClaimStatus.ACTIVE,
+            isFinalized: false,
+            tokenId: 575,
+            memePhase: memePhaseId ? { id: memePhaseId } : undefined,
+            ...claimOverrides,
+          } as ManifoldClaim
+        }
       />
     </QueryClientProvider>
   );
@@ -79,6 +93,24 @@ describe("ManifoldMintingSubscriptionNote", () => {
       expect.objectContaining({
         endpoint: `subscriptions/consolidation/final/${PROFILE_KEY}/${CONTRACT}/575`,
       })
+    );
+  });
+
+  it("encodes the consolidation key as one path segment", async () => {
+    useAuthMock.mockReturnValue({
+      connectedProfile: { consolidation_key: "a/b?c", wallets: [] },
+      activeProfileProxy: null,
+    });
+    commonApiFetchMock.mockResolvedValue(null as never);
+
+    renderNote("1");
+
+    await waitFor(() =>
+      expect(commonApiFetchMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          endpoint: `subscriptions/consolidation/final/a%2Fb%3Fc/${CONTRACT}/575`,
+        })
+      )
     );
   });
 
@@ -147,6 +179,19 @@ describe("ManifoldMintingSubscriptionNote", () => {
 
     await waitFor(() => expect(commonApiFetchMock).toHaveBeenCalled());
     expect(container).toBeEmptyDOMElement();
+  });
+
+  it("does not query when the claim is not open", () => {
+    const upcoming = renderNote("1", {
+      status: ManifoldClaimStatus.UPCOMING,
+    });
+    expect(upcoming.container).toBeEmptyDOMElement();
+    upcoming.unmount();
+
+    const finalized = renderNote("1", { isFinalized: true });
+    expect(finalized.container).toBeEmptyDOMElement();
+
+    expect(commonApiFetchMock).not.toHaveBeenCalled();
   });
 
   it("does not query for a proxy session or an unknown phase", () => {
