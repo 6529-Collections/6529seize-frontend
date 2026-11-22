@@ -137,6 +137,16 @@ export const publicEnvSchema = z.object({
   // such as "2026-11-24T00:00:00Z" (lib/identity-move/schedule.ts). Unset,
   // nothing changes.
   NEXT_PUBLIC_IDENTITY_FREEZE_AT: z.string().optional(),
+  // Identity, profile, handle, REP, NIC, wallet and delegation changes on
+  // the 6529 Network, through this site (lib/chain-identity). On only when
+  // exactly "true" and NEXT_PUBLIC_CHAIN_GATEWAY_URL is set.
+  NEXT_PUBLIC_FEATURE_CHAIN_IDENTITY: z.string().optional(),
+  // The public chain gateway's base URL (drafts, submits, reads, the
+  // profile document store and the drip).
+  NEXT_PUBLIC_CHAIN_GATEWAY_URL: z
+    .string()
+    .url("NEXT_PUBLIC_CHAIN_GATEWAY_URL must be a valid URL")
+    .optional(),
   // End-to-end encrypted chats and poll creation. On only when exactly "true".
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),
   NEXT_PUBLIC_E2EE_POLLS_ENABLED: z.string().optional(),
