@@ -225,16 +225,13 @@ export default function MemeSubscriptionRow(
       }
 
       const subscribe = !subscribed;
-      const response = await postSubscriptionChange<
-        SubscribeBody,
-        SubscribeBody
-      >({
+      const response = await postSubscriptionChange<SubscribeBody>({
         endpoint: `subscriptions/${props.profileKey}/subscription`,
         body: {
           contract: props.subscription.contract,
           token_id: props.subscription.token_id,
           subscribed: subscribe,
-        },
+        } satisfies SubscribeBody,
         change: {
           type: "subs.card",
           contract: props.subscription.contract,
@@ -295,23 +292,21 @@ export default function MemeSubscriptionRow(
         return;
       }
 
-      const response = await postSubscriptionChange<
-        UpdateSubscriptionCountBody,
-        UpdateSubscriptionCountBody
-      >({
-        endpoint: `subscriptions/${props.profileKey}/subscription-count`,
-        body: {
-          contract: props.subscription.contract,
-          token_id: props.subscription.token_id,
-          count: value,
-        },
-        change: {
-          type: "subs.count",
-          contract: props.subscription.contract,
-          tokenId: props.subscription.token_id,
-          count: value,
-        },
-      });
+      const response =
+        await postSubscriptionChange<UpdateSubscriptionCountBody>({
+          endpoint: `subscriptions/${props.profileKey}/subscription-count`,
+          body: {
+            contract: props.subscription.contract,
+            token_id: props.subscription.token_id,
+            count: value,
+          } satisfies UpdateSubscriptionCountBody,
+          change: {
+            type: "subs.count",
+            contract: props.subscription.contract,
+            tokenId: props.subscription.token_id,
+            count: value,
+          },
+        });
       const responseCount = response.count;
       setSelectedCount(responseCount);
       setToast({

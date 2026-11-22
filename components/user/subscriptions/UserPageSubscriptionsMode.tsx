@@ -45,14 +45,11 @@ export default function UserPageSubscriptionsMode(
     try {
       const { success } = await requestAuth();
       if (!success) return;
-      const response = await postSubscriptionChange<
-        SubscribeModeBody,
-        SubscribeModeBody
-      >({
+      const response = await postSubscriptionChange<SubscribeModeBody>({
         endpoint: `subscriptions/${props.profileKey}/subscription-mode`,
         body: {
           automatic: auto,
-        },
+        } satisfies SubscribeModeBody,
         change: { type: "subs.mode", automatic: auto },
       });
       const responseAuto = response.automatic;

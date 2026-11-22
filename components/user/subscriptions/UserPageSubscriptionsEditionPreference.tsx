@@ -51,14 +51,11 @@ export default function UserPageSubscriptionsEditionPreference(
       interface SubscribeAllEditionsBody {
         subscribe_all_editions: boolean;
       }
-      const response = await postSubscriptionChange<
-        SubscribeAllEditionsBody,
-        SubscribeAllEditionsBody
-      >({
+      const response = await postSubscriptionChange<SubscribeAllEditionsBody>({
         endpoint: `subscriptions/${props.profileKey}/subscribe-all-editions`,
         body: {
           subscribe_all_editions: allEditions,
-        },
+        } satisfies SubscribeAllEditionsBody,
         change: { type: "subs.all-editions", all: allEditions },
       });
       const responseAllEditions = response.subscribe_all_editions;

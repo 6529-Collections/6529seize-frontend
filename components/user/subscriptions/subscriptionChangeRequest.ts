@@ -216,12 +216,12 @@ async function signAgainFresh(
   }
 }
 
-function sendChange<B, R>(
+function sendChange<R>(
   endpoint: string,
-  body: B,
+  body: unknown,
   signing: Signing
 ): Promise<R> {
-  return commonApiPost<B, R>({
+  return commonApiPost<unknown, R>({
     endpoint,
     body,
     ...(signing.status === "signed" ? { headers: signing.headers } : {}),
@@ -237,20 +237,21 @@ function sendChange<B, R>(
  * signature can't be had) it goes unsigned, which the API takes until the
  * subscriptions switch; after it, the API's 409 becomes the "turn on signed
  * posts" prompt (no grant) or the "try again" prompt. A record the API holds
- * a newer one for is signed again at a fresh height, once.
+ * a newer one for is signed again at a fresh height, once. The body goes
+ * as given; callers check its shape with `satisfies`.
  */
-export async function postSubscriptionChange<B, R>(params: {
+export async function postSubscriptionChange<R>(params: {
   readonly endpoint: string;
-  readonly body: B;
+  readonly body: unknown;
   readonly change: SubscriptionChange;
 }): Promise<R> {
   const { endpoint, body } = params;
   if (!isSignedSubscriptionsEnabled()) {
-    return commonApiPost<B, R>({ endpoint, body });
+    return commonApiPost<unknown, R>({ endpoint, body });
   }
   const signing = await signedRecordHeaders(params.change);
   try {
-    return await sendChange<B, R>(endpoint, body, signing);
+    return await sendChange<R>(endpoint, body, signing);
   } catch (error) {
     const code = getStructuredApiErrorCode(error);
     if (signing.status !== "signed" && code === SIGNED_RECORD_REQUIRED) {
@@ -261,7 +262,7 @@ export async function postSubscriptionChange<B, R>(params: {
     if (signing.status === "signed" && code === STALE_SIGNED_RECORD) {
       const again = await signAgainFresh(params.change, signing.owner);
       if (again.status === "signed") {
-        return sendChange<B, R>(endpoint, body, again);
+        return sendChange<R>(endpoint, body, again);
       }
     }
     throw error;
