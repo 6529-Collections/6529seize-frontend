@@ -3,10 +3,13 @@ import CompetitionEntryForm from "@/components/competitions/CompetitionEntryForm
 import { getCreateWaveDropRequest } from "@/components/waves/create-wave/services/createWaveDropRequest";
 import { ApiMediaUploadPurpose } from "@/generated/models/ApiMediaUploadPurpose";
 import { createCompetitionEntry } from "@/services/api/competitions-api";
+import { CompetitionSignatureError } from "@/hooks/competitions/useCompetitionSignature";
 
 let mockRequiredMetadata: Array<{ name: string; type: string }> = [];
 let mockTerms: string | null = null;
 let mockAnonymousSubmissions = false;
+let mockSignatureRequired = false;
+const mockSign = jest.fn();
 const mockSnapshot = {
   title: null,
   parts: [
@@ -64,7 +67,7 @@ jest.mock("@/contexts/CompetitionContext", () => ({
         anonymous_submissions: mockAnonymousSubmissions,
         required_metadata: mockRequiredMetadata,
         required_media: [],
-        signature_required: false,
+        signature_required: mockSignatureRequired,
         terms: mockTerms,
       },
       permissions: { submit: true },
@@ -75,7 +78,8 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "author:self",
 }));
 jest.mock("@/hooks/competitions/useCompetitionSignature", () => ({
-  useCompetitionSignature: () => jest.fn(),
+  ...jest.requireActual("@/hooks/competitions/useCompetitionSignature"),
+  useCompetitionSignature: () => mockSign,
 }));
 jest.mock("@/helpers/ProfileHelpers", () => ({
   profileAndConsolidationsToProfileMin: () => ({
@@ -148,6 +152,7 @@ jest.mock("@/services/api/competitions-api", () => ({
 
 beforeEach(() => {
   mockAnonymousSubmissions = false;
+  mockSignatureRequired = false;
 });
 
 it("explains winner disclosure before submitting an anonymous entry", () => {
@@ -174,6 +179,28 @@ it("explains how to recover when an older upload cannot be submitted anonymously
     "Upload your media again, then retry this anonymous submission."
   );
 });
+
+it.each([
+  [
+    "walletNotConnected",
+    "This decision needs a signature from your wallet, and no wallet is connected in this window.",
+  ],
+  ["rejected", "The wallet signature was cancelled."],
+  ["failed", "Your wallet didn’t complete the signature."],
+] as const)(
+  "says what went wrong when the wallet signature step fails (%s)",
+  async (reason, text) => {
+    mockSignatureRequired = true;
+    mockSign.mockRejectedValueOnce(new CompetitionSignatureError(reason));
+    const callsBefore = jest.mocked(createCompetitionEntry).mock.calls.length;
+    render(<CompetitionEntryForm onClose={jest.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(text);
+    expect(alert).toHaveTextContent("Your input has been preserved.");
+    expect(createCompetitionEntry).toHaveBeenCalledTimes(callsBefore);
+  }
+);
 
 it("preserves wave and group mentions in the competition submission command and strips legacy signing fields", async () => {
   render(<CompetitionEntryForm onClose={jest.fn()} />);

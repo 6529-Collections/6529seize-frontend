@@ -8,6 +8,45 @@ import type { ApiCompetitionSignature } from "@/generated/models/ApiCompetitionS
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { buildDecisionSignatureContext } from "@/lib/desktop/walletRequestContext";
 import { rememberWalletRequestContext } from "@/services/desktop/walletRequestContexts";
+import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import type { MessageKey } from "@/i18n/messages";
+
+/**
+ * Why the wallet signature a decision asks for was not made: no wallet is
+ * connected in this window, the wallet declined, or the wallet failed.
+ */
+export class CompetitionSignatureError extends Error {
+  readonly reason: "walletNotConnected" | "rejected" | "failed";
+
+  constructor(
+    reason: CompetitionSignatureError["reason"],
+    options?: { cause?: unknown }
+  ) {
+    super(
+      reason === "walletNotConnected"
+        ? "A connected wallet is required"
+        : "The wallet did not sign the request",
+      options
+    );
+    this.name = "CompetitionSignatureError";
+    this.reason = reason;
+  }
+}
+
+const SIGNATURE_FAILURE_KEYS = {
+  walletNotConnected: "competitions.signatureWalletRequired",
+  rejected: "competitions.signatureCancelled",
+  failed: "competitions.signatureFailed",
+} as const satisfies Record<CompetitionSignatureError["reason"], MessageKey>;
+
+/** The message for a failed signature step, or null for any other failure. */
+export function getCompetitionSignatureFailureKey(
+  error: unknown
+): MessageKey | null {
+  return error instanceof CompetitionSignatureError
+    ? SIGNATURE_FAILURE_KEYS[error.reason]
+    : null;
+}
 
 export function useCompetitionSignature() {
   const { competition } = useCompetition();
@@ -27,7 +66,7 @@ export function useCompetitionSignatureFor(competition: ApiCompetition | null) {
     if (!competition)
       throw new Error("Competition signature scope is required");
     if (!connectedProfile?.id || !address)
-      throw new Error("A connected wallet is required");
+      throw new CompetitionSignatureError("walletNotConnected");
     const message = buildCompetitionSignatureMessage({
       action,
       actorProfileId: activeProfileProxy?.created_by.id ?? connectedProfile.id,
@@ -45,6 +84,13 @@ export function useCompetitionSignatureFor(competition: ApiCompetition | null) {
     rememberWalletRequestContext(message, () =>
       buildDecisionSignatureContext(payload)
     );
-    return { message, signature: await signMessageAsync({ message }) };
+    try {
+      return { message, signature: await signMessageAsync({ message }) };
+    } catch (error) {
+      throw new CompetitionSignatureError(
+        isUserRejectedSigningError(error) ? "rejected" : "failed",
+        { cause: error }
+      );
+    }
   };
 }

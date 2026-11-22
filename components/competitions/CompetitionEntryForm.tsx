@@ -20,7 +20,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { useCompetition } from "@/contexts/CompetitionContext";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
-import { useCompetitionSignature } from "@/hooks/competitions/useCompetitionSignature";
+import {
+  getCompetitionSignatureFailureKey,
+  useCompetitionSignature,
+} from "@/hooks/competitions/useCompetitionSignature";
 import DropEditor, {
   type DropEditorHandles,
 } from "@/components/drops/create/DropEditor";
@@ -44,7 +47,7 @@ import {
   isRejectedCompetitionCommand,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { COMPETITION_BUTTON, COMPETITION_INPUT } from "./CompetitionState";
 import { competitionSubmissionReceiptKey } from "@/helpers/competition-submission.helpers";
 import { getStructuredApiErrorCode } from "@/services/api/common-api";
@@ -63,6 +66,16 @@ function getEntryReferences(
       ? { hide_link_preview: snapshot.hide_link_preview }
       : {}),
   };
+}
+
+/** Says what to fix: the wallet signature step, a media re-upload, or the request. */
+function getEntryFailureKey(error: unknown): MessageKey {
+  const signatureKey = getCompetitionSignatureFailureKey(error);
+  if (signatureKey) return signatureKey;
+  return getStructuredApiErrorCode(error) ===
+    "ANONYMOUS_SUBMISSION_MEDIA_REUPLOAD_REQUIRED"
+    ? "competitions.anonymousMediaReupload"
+    : "competitions.failure";
 }
 
 function isSameIdentity(
@@ -101,9 +114,7 @@ export default function CompetitionEntryForm({
   const terms = acceptedTermsVersion === competition.config_version;
   const [canSubmit, setCanSubmit] = useState(false);
   const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState<"request" | "mediaReupload" | null>(
-    null
-  );
+  const [failed, setFailed] = useState<MessageKey | null>(null);
   const failureDescription = failed ? errorId : undefined;
   const pending = useRef<{
     fingerprint: string;
@@ -250,12 +261,7 @@ export default function CompetitionEntryForm({
       );
     } catch (error) {
       if (isRejectedCompetitionCommand(error)) pending.current = null;
-      setFailed(
-        getStructuredApiErrorCode(error) ===
-          "ANONYMOUS_SUBMISSION_MEDIA_REUPLOAD_REQUIRED"
-          ? "mediaReupload"
-          : "request"
-      );
+      setFailed(getEntryFailureKey(error));
       await invalidateCompetition(client, identity);
     } finally {
       setBusy(false);
@@ -410,12 +416,7 @@ export default function CompetitionEntryForm({
       )}
       {failed && (
         <p id={errorId} role="alert" className="tw-text-sm tw-text-red">
-          {t(
-            locale,
-            failed === "mediaReupload"
-              ? "competitions.anonymousMediaReupload"
-              : "competitions.failure"
-          )}
+          {t(locale, failed)}
         </p>
       )}
       {!competition.permissions.submit && (
