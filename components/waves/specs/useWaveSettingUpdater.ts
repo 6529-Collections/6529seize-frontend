@@ -107,7 +107,7 @@ export const useWaveSettingUpdater = (wave: ApiWave) => {
         () => undefined
       );
     },
-    [mutating, updateWave, wave.wave.admin_drop_deletion_enabled]
+    [mutating, updateWave, wave]
   );
 
   return {
