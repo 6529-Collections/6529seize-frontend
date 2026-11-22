@@ -367,7 +367,7 @@
     "__tests__/components/RevokeDelegationWithSub.test.tsx": 1,
     "__tests__/components/scrollTo/ScrollToButton.test.tsx": 1,
     "__tests__/components/searchModal/SearchModal.test.tsx": 1,
-    "__tests__/components/TableOfLevels.test.tsx": 6,
+    "__tests__/components/TableOfLevels.test.tsx": 3,
     "__tests__/components/the-memes/MemePage.test.tsx": 4,
     "__tests__/components/the-memes/MemePageTimeline.test.tsx": 1,
     "__tests__/components/the-memes/MemeShared.test.tsx": 6,

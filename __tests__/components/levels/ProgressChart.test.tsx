@@ -29,11 +29,14 @@ describe("ProgressChart", () => {
     render(<ProgressChart />);
     expect(
       screen.getByRole("img", {
-        name: /TDH \+ Rep thresholds from Level 0 through Level 100/i,
+        name: /TDH \+ Rep thresholds from Level 0 through Level 200/i,
       })
     ).toBeInTheDocument();
 
     const props = lineMock.mock.calls[0][0];
+    expect(props.data.labels).toHaveLength(201);
+    expect(props.data.labels.at(-1)).toBe(200);
+    expect(props.data.datasets[0].data.at(-1)).toBe(1_262_623_144);
     const options = props.options;
     expect(options.animation).toBeUndefined();
     expect(options.onHover).toBeUndefined();

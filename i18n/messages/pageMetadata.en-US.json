@@ -1,5 +1,5 @@
 {
-  "pageMetadata.networkLevels.description": "Levels combine TDH and Rep into one trust score from 0 to 100. See the thresholds for each level.",
+  "pageMetadata.networkLevels.description": "Levels combine TDH and Rep into one trust score. Levels start at 0 and have no top level. See the thresholds for each level.",
   "pageMetadata.networkActivity.description": "Filterable log of network-wide profile activity, including Rep ratings, handle changes, profile edits and proxies.",
   "pageMetadata.networkDefinitions.description": "Definitions of the collection, activity and TDH metrics used across the 6529 network.",
   "pageMetadata.networkTdhStats.description": "Charts of total network TDH and its daily creation and destruction, with boosted, unboosted and unweighted views.",

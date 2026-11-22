@@ -1,15 +1,10 @@
-import levels from "@/constants/levels.json";
+import { getNextLevelThreshold } from "@/components/levels/levelThresholds";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/network-tdh";
-
-interface LevelData {
-  readonly level: number;
-  readonly threshold: number;
-}
 
 type LevelSummaryProfile =
   | Pick<ApiIdentity, "level" | "rep" | "tdh">
@@ -18,23 +13,15 @@ type LevelSummaryProfile =
 interface LevelProgress {
   readonly combinedTdhRep: number;
   readonly currentLevel: number;
-  readonly nextLevel: LevelData | null;
-  readonly tdhRepNeeded: number | null;
+  readonly nextLevel: number;
+  readonly tdhRepNeeded: number;
 }
-
-const LEVELS = levels as readonly LevelData[];
 
 function getLevelProgress(
   profile: LevelSummaryProfile
 ): LevelProgress | null {
   const { level, rep, tdh } = profile;
-  const isKnownLevel = LEVELS.some((entry) => entry.level === level);
-  if (
-    !Number.isInteger(level) ||
-    !isKnownLevel ||
-    !Number.isFinite(rep) ||
-    !Number.isFinite(tdh)
-  ) {
+  if (!Number.isFinite(rep) || !Number.isFinite(tdh)) {
     return null;
   }
 
@@ -45,15 +32,16 @@ function getLevelProgress(
 
   // The API-assigned profile Level is authoritative. Local thresholds only
   // provide the next target and the remaining TDH + Rep shown beside it.
-  const nextLevel = LEVELS.find((entry) => entry.level > level) ?? null;
+  const next = getNextLevelThreshold(level);
+  if (!next) {
+    return null;
+  }
 
   return {
     combinedTdhRep,
     currentLevel: level,
-    nextLevel,
-    tdhRepNeeded: nextLevel
-      ? Math.max(nextLevel.threshold - combinedTdhRep, 0)
-      : null,
+    nextLevel: next.level,
+    tdhRepNeeded: Math.max(next.threshold - combinedTdhRep, 0),
   };
 }
 
@@ -96,29 +84,18 @@ export default function YourLevelSummary({
           </dd>
         </div>
 
-        {progress.nextLevel ? (
-          <div className="tw-col-span-2 tw-min-w-0 md:tw-col-span-1">
-            <dt className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
-              {t(locale, "network.levels.yourLevel.target", {
-                level: formatInteger(locale, progress.nextLevel.level),
-              })}
-            </dt>
-            <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-iron-100">
-              {t(locale, "network.levels.yourLevel.targetGap", {
-                amount: formatInteger(locale, progress.tdhRepNeeded),
-              })}
-            </dd>
-          </div>
-        ) : (
-          <div className="tw-col-span-2 tw-min-w-0 md:tw-col-span-1">
-            <dt className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
-              {t(locale, "network.levels.yourLevel.highest")}
-            </dt>
-            <dd className="tw-m-0 tw-mt-0.5 tw-min-w-0 tw-text-sm tw-leading-5 tw-text-iron-200">
-              {t(locale, "network.levels.yourLevel.highestDescription")}
-            </dd>
-          </div>
-        )}
+        <div className="tw-col-span-2 tw-min-w-0 md:tw-col-span-1">
+          <dt className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
+            {t(locale, "network.levels.yourLevel.target", {
+              level: formatInteger(locale, progress.nextLevel),
+            })}
+          </dt>
+          <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-iron-100">
+            {t(locale, "network.levels.yourLevel.targetGap", {
+              amount: formatInteger(locale, progress.tdhRepNeeded),
+            })}
+          </dd>
+        </div>
       </dl>
     </section>
   );

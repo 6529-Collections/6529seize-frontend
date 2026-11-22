@@ -79,7 +79,9 @@ export default function LevelsClient() {
                   {m(locale, "network.levels.trust")}
                 </p>
                 <div className="tw-mt-4 tw-space-y-3 tw-text-sm tw-leading-6 tw-text-iron-400">
-                  <p className="tw-m-0">{m(locale, "network.levels.limit")}</p>
+                  <p className="tw-m-0">
+                    {m(locale, "network.levels.noTopLevel")}
+                  </p>
                   <p className="tw-m-0">
                     {m(locale, "network.levels.determinedByTable")}
                   </p>
