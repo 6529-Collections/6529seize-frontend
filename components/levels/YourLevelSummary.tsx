@@ -10,18 +10,25 @@ type LevelSummaryProfile =
   | Pick<ApiIdentity, "level" | "rep" | "tdh">
   | Pick<ApiProfileMin, "level" | "rep" | "tdh">;
 
-interface LevelProgress {
-  readonly combinedTdhRep: number;
-  readonly currentLevel: number;
-  readonly nextLevel: number;
+interface LevelTarget {
+  readonly level: number;
   readonly tdhRepNeeded: number;
 }
 
-function getLevelProgress(
-  profile: LevelSummaryProfile
-): LevelProgress | null {
+interface LevelProgress {
+  readonly combinedTdhRep: number;
+  readonly currentLevel: number;
+  readonly target: LevelTarget | null;
+}
+
+function getLevelProgress(profile: LevelSummaryProfile): LevelProgress | null {
   const { level, rep, tdh } = profile;
-  if (!Number.isFinite(rep) || !Number.isFinite(tdh)) {
+  if (
+    !Number.isInteger(level) ||
+    level < 0 ||
+    !Number.isFinite(rep) ||
+    !Number.isFinite(tdh)
+  ) {
     return null;
   }
 
@@ -32,17 +39,16 @@ function getLevelProgress(
 
   // The API-assigned profile Level is authoritative. Local thresholds only
   // provide the next target and the remaining TDH + Rep shown beside it.
+  // When the score already reaches the next threshold, the API's Level is
+  // behind it (not yet recomputed, or set by an older rule), so no target is
+  // shown. From level 602 up there is no exact next threshold.
   const next = getNextLevelThreshold(level);
-  if (!next) {
-    return null;
-  }
+  const target =
+    next && next.threshold > combinedTdhRep
+      ? { level: next.level, tdhRepNeeded: next.threshold - combinedTdhRep }
+      : null;
 
-  return {
-    combinedTdhRep,
-    currentLevel: level,
-    nextLevel: next.level,
-    tdhRepNeeded: Math.max(next.threshold - combinedTdhRep, 0),
-  };
+  return { combinedTdhRep, currentLevel: level, target };
 }
 
 export default function YourLevelSummary({
@@ -69,7 +75,7 @@ export default function YourLevelSummary({
         >
           {t(locale, "network.levels.yourLevel.title")}
         </h2>
-        <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-primary-300">
+        <p className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-primary-300">
           {formatInteger(locale, progress.currentLevel)}
         </p>
       </div>
@@ -79,23 +85,25 @@ export default function YourLevelSummary({
           <dt className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
             {t(locale, "network.levels.yourLevel.combined")}
           </dt>
-          <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-iron-100">
+          <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-iron-100">
             {formatInteger(locale, progress.combinedTdhRep)}
           </dd>
         </div>
 
-        <div className="tw-col-span-2 tw-min-w-0 md:tw-col-span-1">
-          <dt className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
-            {t(locale, "network.levels.yourLevel.target", {
-              level: formatInteger(locale, progress.nextLevel),
-            })}
-          </dt>
-          <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-leading-5 tw-tabular-nums tw-text-iron-100">
-            {t(locale, "network.levels.yourLevel.targetGap", {
-              amount: formatInteger(locale, progress.tdhRepNeeded),
-            })}
-          </dd>
-        </div>
+        {progress.target && (
+          <div className="tw-col-span-2 tw-min-w-0 md:tw-col-span-1">
+            <dt className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-500">
+              {t(locale, "network.levels.yourLevel.target", {
+                level: formatInteger(locale, progress.target.level),
+              })}
+            </dt>
+            <dd className="tw-m-0 tw-mt-0.5 tw-text-sm tw-font-semibold tw-tabular-nums tw-leading-5 tw-text-iron-100">
+              {t(locale, "network.levels.yourLevel.targetGap", {
+                amount: formatInteger(locale, progress.target.tdhRepNeeded),
+              })}
+            </dd>
+          </div>
+        )}
       </dl>
     </section>
   );

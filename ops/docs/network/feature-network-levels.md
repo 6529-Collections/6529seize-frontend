@@ -7,9 +7,9 @@ Parent: [Network Index](README.md)
 `/network/levels` is the reference page for Level thresholds.
 It maps combined `TDH + Rep` to Levels and shows a threshold table.
 Levels `0` through `100` have set thresholds; Level `100` needs `25,000,000`.
-Above Level `100` there is no top level: each level needs 4% more `TDH + Rep`
-than the one before, rounded down. Level `101` needs `26,000,000` and Level
-`150` needs `177,667,015`. The API assigns Levels by the same rule.
+There is no top level. Above Level `100`, each level needs 4% more
+`TDH + Rep` than the one before, rounded down. Level `101` needs `26,000,000`
+and Level `150` needs `177,667,015`. The API assigns Levels by the same rule.
 When a signed-in active profile is available, the page also summarizes that
 profile's current Level and progress toward the next Level.
 
@@ -85,6 +85,10 @@ profile's current Level and progress toward the next Level.
   not produce a placeholder Level.
 - Every Level has a next Level. At Level `100` and above, the summary shows
   the next Level and the amount needed by the rule above Level `100`.
+- When the profile's `TDH + Rep` already reaches the next Level's threshold,
+  the assigned Level is behind it. The summary then shows the Level and the
+  score without a next target. It does the same from Level `602` up, where
+  thresholds are too large to be exact.
 - On touch or no-hover devices, use the table for exact chart values.
 - On narrow screens, the chart, summary, explanation, and table remain in one
   vertical page flow. The table container can scroll when needed.

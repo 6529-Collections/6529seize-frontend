@@ -1,5 +1,5 @@
 import YourLevelSummary from "@/components/levels/YourLevelSummary";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 
 const renderSummary = (profile: {
   readonly level: number;
@@ -17,12 +17,34 @@ describe("YourLevelSummary", () => {
     expect(summary).toHaveTextContent("25 more TDH + Rep");
   });
 
-  it("does not report a negative amount at an exact next threshold", () => {
+  it("leaves out the target when the score reaches the next threshold", () => {
     renderSummary({ level: 1, rep: 25, tdh: 25 });
 
     const summary = screen.getByRole("region", { name: "Your Level" });
-    const target = within(summary).getByText("To reach Level 2").parentElement;
-    expect(target).toHaveTextContent("0 more TDH + Rep");
+    expect(summary).toHaveTextContent("Your Level1");
+    expect(summary).toHaveTextContent("50");
+    expect(summary).not.toHaveTextContent("To reach Level");
+    expect(summary).not.toHaveTextContent("more TDH + Rep");
+  });
+
+  it("keeps the API's Level 100 when the score is already past Level 101", () => {
+    // The API assigns Levels. Before it applies the rule above 100, a score
+    // of 30,000,000 still comes back as Level 100.
+    renderSummary({ level: 100, rep: 5_000_000, tdh: 25_000_000 });
+
+    const summary = screen.getByRole("region", { name: "Your Level" });
+    expect(summary).toHaveTextContent("Your Level100");
+    expect(summary).toHaveTextContent("30,000,000");
+    expect(summary).not.toHaveTextContent("To reach Level");
+  });
+
+  it("shows the Level and score without a target from Level 602 up", () => {
+    renderSummary({ level: 602, rep: 0, tdh: 8_900_000_000_000_000 });
+
+    const summary = screen.getByRole("region", { name: "Your Level" });
+    expect(summary).toHaveTextContent("Your Level602");
+    expect(summary).toHaveTextContent("8,900,000,000,000,000");
+    expect(summary).not.toHaveTextContent("To reach Level");
   });
 
   it("shows the next Level at Level 100", () => {
@@ -52,8 +74,8 @@ describe("YourLevelSummary", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("does not render a Level that is not a whole number", () => {
-    const { container } = renderSummary({ level: 1.5, rep: 0, tdh: 30 });
+  it.each([1.5, -1])("does not render Level %p", (level) => {
+    const { container } = renderSummary({ level, rep: 0, tdh: 30 });
 
     expect(container).toBeEmptyDOMElement();
   });
