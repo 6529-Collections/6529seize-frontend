@@ -610,6 +610,14 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "traits.invalidBoolean": "Choose Yes or No.",
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
+  "media.gifPreview.guide":
+    "GIFs get an animated preview in Waves and the leaderboard when each frame has at most {pixels} pixels (for example {exampleWidth} × {exampleHeight}), at most {frames} frames, and at most {totalPixels} pixels across all frames.",
+  "media.gifPreview.framePixels":
+    "This GIF is {width} × {height} ({pixels} pixels per frame). Animated previews need at most {limit} pixels per frame, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce its dimensions to keep the preview animated.",
+  "media.gifPreview.frames":
+    "This GIF has {frames} frames. Animated previews need at most {limit} frames, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce the number of frames to keep the preview animated.",
+  "media.gifPreview.totalPixels":
+    "This GIF has {frames} frames of {width} × {height}, {pixels} pixels in total. Animated previews need at most {limit} pixels across all frames, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce its dimensions or frames to keep the preview animated.",
   "identity.connectPrompt":
     "Connect a wallet to confirm the profile submitting this artwork.",
   "identity.unknownProfile": "Unknown profile",
@@ -2224,6 +2232,8 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
 const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
   title: "How Drops are Voted",
   ratingTitle: "How Drops are Rated",
+  creditsLocked:
+    "This decision already has votes, so its voting credit, scope and negative-vote settings can no longer change.",
   rankAdvancedSummary: "Vote limits and behavior",
   approveAdvancedSummary: "Vote limits, behavior, and timing",
   "timeUnit.minutes": "Minutes",
@@ -2386,6 +2396,26 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
     "It will appear in a moment. If it doesn't, refresh the page.",
   repliesOnlyPlaceholder:
     "Only chat members can start new drops here. You can reply to any drop.",
+  proxySessionPlaceholder:
+    "You're signed in as a proxy for another profile, so you can't post here. To post as yourself, switch back to your own profile, or sign out and connect again.",
+  "restriction.slowMode":
+    "Slow mode is active. Please wait before posting again",
+  "restriction.noChatPermission":
+    "You don't have permission to chat in this wave",
+  "restriction.chatDisabled": "Chat is currently disabled for this wave",
+  "restriction.noSubmitPermission":
+    "You don't have permission to submit in this wave",
+  "restriction.submissionsNotStarted": "Submissions haven't started yet",
+  "restriction.submissionsEnded": "Submission period has ended",
+  "restriction.maxDropsReached":
+    "You have reached the maximum number of drops allowed",
+  "restriction.cannotParticipate":
+    "You cannot participate in this wave at the moment",
+  "restriction.unavailable": "Action not available",
+  "profileSetup.link": "Create a profile",
+  "profileSetup.chat": "{link} to participate in chat",
+  "profileSetup.submission": "{link} to submit in this wave",
+  "profileSetup.wave": "{link} to participate in this wave",
   "replyThread.showOne": "Show 1 reply",
   "replyThread.showMany": "Show {count} replies",
   "replyThread.hide": "Hide replies",
@@ -4641,6 +4671,7 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.coverage.basis":
     "Projected from current eligibility, settings, balance, and the published Meme schedule.",
   "subscriptions.coverage.fundedThrough": "Funded through",
+  "subscriptions.coverage.fundedAtLeastThrough": "Funded at least through",
   "subscriptions.coverage.nextUnfunded": "Next unfunded",
   "subscriptions.coverage.summary.nextDrop": "Next drop",
   "subscriptions.coverage.projected": "Projected",
@@ -4673,6 +4704,8 @@ export const EN_US_ROOT_MESSAGES = {
     "One selected drop is fully funded. Add funds to cover more upcoming drops.",
   "subscriptions.coverage.header.through":
     "{status} · through The Memes #{token}, {date}",
+  "subscriptions.coverage.header.atLeastThrough":
+    "{status} · at least through The Memes #{token}, {date}",
   "subscriptions.coverage.header.noFundedThrough": "{status}",
   "subscriptions.page.title": "Subscription minting",
   "subscriptions.page.settingsTitle": "Minting settings",
@@ -4809,6 +4842,39 @@ export const EN_US_ROOT_MESSAGES = {
   "theMemes.mint.transaction.success": "SEIZED!",
   "theMemes.mint.transaction.error": "Transaction failed",
   "theMemes.mint.transaction.errorDetails": "{message}",
+  "theMemes.mint.phaseCard.statusLabel": "Status",
+  "theMemes.mint.phaseCard.status.upcoming": "UPCOMING",
+  "theMemes.mint.phaseCard.status.active": "ACTIVE",
+  "theMemes.mint.phaseCard.status.completed": "COMPLETED",
+  "theMemes.mint.phaseCard.started": "Started",
+  "theMemes.mint.phaseCard.ends": "Ends",
+  "theMemes.mint.phaseCard.ended": "Ended",
+  "theMemes.mint.phaseCard.expectedStart": "Expected start",
+  "theMemes.mint.phaseCard.expectedEnd": "Expected end",
+  "theMemes.mint.phaseCard.airdrops": "Airdrops: x{count}",
+  "theMemes.mint.phaseEligibility.unlimited": "Unlimited spots",
+  "theMemes.mint.phaseEligibility.loading": "Loading eligibility...",
+  "theMemes.mint.phaseEligibility.unavailable": "Eligibility unavailable",
+  "theMemes.mint.phaseEligibility.none": "No eligible spots",
+  "theMemes.mint.phaseEligibility.allowlist.one": "{allowlist} eligible spot",
+  "theMemes.mint.phaseEligibility.allowlist.many":
+    "{allowlist} eligible spots",
+  "theMemes.mint.phaseEligibility.airdrop":
+    "{airdrop}x Airdrop · nothing to mint",
+  "theMemes.mint.phaseEligibility.mixed":
+    "{allowlist}x Allowlist · {airdrop}x Airdrop",
+  "theMemes.mint.subscriptionAirdrop.phase.phase0": "Phase 0",
+  "theMemes.mint.subscriptionAirdrop.phase.phase1": "Phase 1",
+  "theMemes.mint.subscriptionAirdrop.phase.phase2": "Phase 2",
+  "theMemes.mint.subscriptionAirdrop.phase.public": "Public phase",
+  "theMemes.mint.subscriptionAirdrop.pending.one":
+    "{phase}: your subscription covers 1 card. It will be airdropped to {address}, so you do not need to mint it here.",
+  "theMemes.mint.subscriptionAirdrop.pending.many":
+    "{phase}: your subscription covers {count} cards. They will be airdropped to {address}, so you do not need to mint them here.",
+  "theMemes.mint.subscriptionAirdrop.airdropped.one":
+    "{phase}: your subscription card has been airdropped to {address}.",
+  "theMemes.mint.subscriptionAirdrop.airdropped.many":
+    "{phase}: your {count} subscription cards have been airdropped to {address}.",
   "theMemes.card.linkAriaLabel": "View {name}, card #{tokenId}",
   "theMemes.card.metric.unavailable": "-",
   "theMemes.card.metric.editionSize": "Edition Size: {value}",

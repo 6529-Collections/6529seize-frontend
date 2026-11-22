@@ -390,8 +390,19 @@ export default function CreateWaveVoting({
             : "waves.create.voting.title"
         )}
       />
+      {lockVotingCredits && (
+        <p
+          id="create-wave-voting-credits-locked"
+          className="tw-mb-3 tw-mt-0 tw-text-sm tw-leading-5 tw-text-iron-400"
+        >
+          {t(locale, "waves.create.voting.creditsLocked")}
+        </p>
+      )}
       <fieldset
         disabled={lockVotingCredits}
+        aria-describedby={
+          lockVotingCredits ? "create-wave-voting-credits-locked" : undefined
+        }
         className="tw-m-0 tw-min-w-0 tw-border-0 tw-p-0 disabled:tw-opacity-60"
       >
         <div className={VOTING_OPTIONS_GRID_CLASSES}>

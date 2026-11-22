@@ -6,6 +6,14 @@ import { getResolvedAnimationSrc } from "@/components/nft-image/utils/animation-
 import { render, screen, waitFor } from "@testing-library/react";
 import type { ComponentProps } from "react";
 
+jest.mock(
+  "@/components/manifold-minting/ManifoldMintingSubscriptionNote",
+  () => ({
+    __esModule: true,
+    default: () => null,
+  })
+);
+
 jest.mock("next/link", () => ({
   __esModule: true,
   default: ({ href, children }: any) => <a href={href}>{children}</a>,
@@ -96,6 +104,8 @@ jest.mock("@/hooks/useManifoldClaim", () => {
 
   return {
     __esModule: true,
+    getMemePhaseIdForRootPhase: jest.requireActual("@/hooks/useManifoldClaim")
+      .getMemePhaseIdForRootPhase,
     useManifoldClaim: jest.fn(),
     ManifoldClaimStatus: {
       ACTIVE: "active",

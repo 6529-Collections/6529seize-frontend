@@ -216,6 +216,11 @@ tabs. The collection lets you choose a different decision at any time.
   current configuration before signing a replacement request.
 - A rejected wallet signature leaves the action unsubmitted. A temporary
   network failure can be retried without duplicating an accepted action.
+- When a decision needs a wallet signature, the error says which step failed:
+  no wallet is connected in this window (connect it, then retry), the
+  signature was cancelled, or the wallet did not complete it (finish or reject
+  any waiting wallet request, including one from another 6529 tab or app).
+  Your input stays in the form in each case.
 - Credit and group membership are checked when an action is accepted. A
   previously enabled control cannot preserve eligibility after it changes.
 
