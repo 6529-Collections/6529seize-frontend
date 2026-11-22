@@ -111,9 +111,14 @@ function run(
       ...env,
     },
   });
+  const spawnError = result.error as NodeJS.ErrnoException | undefined;
+  if (spawnError !== undefined && spawnError.code !== "ETIMEDOUT") {
+    // bash missing or not startable: a setup problem, not a wrapper result.
+    throw spawnError;
+  }
   return {
     status: result.status,
-    timedOut: result.error !== undefined,
+    timedOut: spawnError?.code === "ETIMEDOUT",
     stdout: result.stdout ?? "",
     stderr: result.stderr ?? "",
   };
@@ -270,6 +275,55 @@ describe("repo command wrappers", () => {
     });
 
     expect(result.stdout.trim()).toBe("depth 5");
+    expect(result.status).toBe(0);
+  });
+
+  it("stay far below the limit when a script starts pnpm again", () => {
+    // What package.json scripts do: the real pnpm runs a script, and the
+    // script calls "pnpm" again, which is the wrapper because the wrapper
+    // folder is first on PATH.
+    const own = makeCheckout("nested", "current");
+    const nestingDir = path.join(sandbox, "nesting");
+    fs.mkdirSync(nestingDir);
+    fs.writeFileSync(
+      path.join(nestingDir, "pnpm"),
+      [
+        "#!/usr/bin/env bash",
+        'if [[ "${1:-}" == "nest" ]]; then',
+        "  exec pnpm report",
+        "fi",
+        'echo "depth ${SEIZE_WRAPPER_DEPTH:-unset}"',
+        "",
+      ].join("\n")
+    );
+    fs.chmodSync(path.join(nestingDir, "pnpm"), 0o755);
+
+    const result = run(path.join(own, "pnpm"), ["nest"], [own, nestingDir]);
+
+    expect(result.timedOut).toBe(false);
+    expect(result.stdout.trim()).toBe("depth 2");
+    expect(result.status).toBe(0);
+  });
+
+  it("do not mistake another tool that mentions the same words for a wrapper", () => {
+    const own = makeCheckout("lookalike", "current");
+    const toolDir = path.join(sandbox, "lookalike-tool");
+    fs.mkdirSync(toolDir);
+    fs.writeFileSync(
+      path.join(toolDir, "pnpm"),
+      [
+        "#!/usr/bin/env bash",
+        "# Notes: 6529-repo-command-wrapper is the marker the repo wrappers use.",
+        "# Direct pnpm usage is blocked in this repository. (quoted from its docs)",
+        'echo "TOOL pnpm $*"',
+        "",
+      ].join("\n")
+    );
+    fs.chmodSync(path.join(toolDir, "pnpm"), 0o755);
+
+    const result = run(path.join(own, "pnpm"), ["--version"], [own, toolDir]);
+
+    expect(result.stdout.trim()).toBe("TOOL pnpm --version");
     expect(result.status).toBe(0);
   });
 

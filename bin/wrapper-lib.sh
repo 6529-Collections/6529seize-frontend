@@ -19,12 +19,13 @@
 # again, so a few nested starts are normal; nothing legitimate comes near this.
 SEIZE_WRAPPER_MAX_DEPTH=32
 
-# Text every wrapper of this repository carries, in this version and in the
-# versions that older checkouts still have.
-SEIZE_WRAPPER_MARKS=(
-  "6529-repo-command-wrapper"
-  "usage is blocked in this repository."
-)
+# How a wrapper of this repository is recognised:
+# - this version carries the marker below as a comment line of its own;
+# - the versions that older checkouts still have print the "blocked" line for
+#   their command name, as a complete echo statement.
+# Both are exact lines of our own files, so another program that merely mentions
+# similar words is not mistaken for a wrapper.
+SEIZE_WRAPPER_MARK_LINE="# 6529-repo-command-wrapper"
 
 seize_wrapper_is_windows() {
   case "$(uname -s 2>/dev/null || true)" in
@@ -53,21 +54,35 @@ seize_wrapper_canonical_dir() {
   printf '%s' "$dir"
 }
 
-# True when the file is one of this repository's command wrappers.
+# seize_wrapper_is_wrapper_file <file> <name>
+# True when the file is one of this repository's command wrappers for <name>.
 seize_wrapper_is_wrapper_file() {
-  local file="$1" mark head_text
-  head_text="$(head -c 4096 "$file" 2>/dev/null || true)"
-  for mark in "${SEIZE_WRAPPER_MARKS[@]}"; do
-    if [[ "$head_text" == *"$mark"* ]]; then
+  local file="$1" name="$2" line count=0
+  local previous_line="echo \"Direct $name usage is blocked in this repository.\" >&2"
+  # Wrappers are short scripts with these lines near the top; real tools are
+  # not read beyond their first lines.
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    line="${line%$''}"
+    if [[ "$line" == "$SEIZE_WRAPPER_MARK_LINE" ]]; then
       return 0
     fi
-  done
+    # Leading spaces only: the statement sits inside an if block.
+    if [[ "${line#"${line%%[![:space:]]*}"}" == "$previous_line" ]]; then
+      return 0
+    fi
+    count=$((count + 1))
+    if ((count >= 40)); then
+      break
+    fi
+  done < <(head -c 4096 "$file" 2>/dev/null || true)
   return 1
 }
 
 # seize_wrapper_resolve <name> <wrapper-dir>
 # Prints the first executable called <name> on PATH that is not in <wrapper-dir>
 # and is not a wrapper of this repository. Prints nothing when there is none.
+# The names tried are the ones bash itself resolves: <name> and <name>.exe
+# (bash does not start .cmd or .bat files by bare name).
 seize_wrapper_resolve() {
   local name="$1" own_dir="$2"
   local own_canonical part part_canonical candidate
@@ -92,7 +107,7 @@ seize_wrapper_resolve() {
       if [[ -n "$own_canonical" && "$part_canonical" == "$own_canonical" ]]; then
         continue
       fi
-      if seize_wrapper_is_wrapper_file "$candidate"; then
+      if seize_wrapper_is_wrapper_file "$candidate" "$name"; then
         continue
       fi
       printf '%s' "$candidate"
