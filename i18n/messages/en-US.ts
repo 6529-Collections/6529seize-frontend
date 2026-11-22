@@ -4028,6 +4028,7 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopConnect.status.walletConnectFailed":
     "Could not open WalletConnect. Try again.",
   "desktopWalletRequest.title": "Signature request",
+  "desktopWalletRequest.transactionTitle": "Transaction",
   "desktopWalletRequest.waiting":
     "Your browser opened a page to sign with your wallet. Finish there; this waits for two minutes.",
   "desktopWalletRequest.code":
@@ -4055,6 +4056,8 @@ export const EN_US_ROOT_MESSAGES = {
     "Trading is not available in 6529 Desktop with a browser wallet. Continue on {site} in your browser.",
   "desktopWalletRequest.notForwarded":
     "6529 Desktop does not send this kind of signature to your browser wallet. Continue on {site} in your browser, where your wallet signs it directly.",
+  "desktopWalletRequest.transactionNotForwarded":
+    "6529 Desktop does not send this transaction to your browser wallet. Continue on {site} in your browser, where your wallet sends it directly.",
   "browserConnector.title": "Sign in to 6529 Desktop",
   "browserConnector.description":
     "Sign in to 6529 Desktop with a browser wallet.",

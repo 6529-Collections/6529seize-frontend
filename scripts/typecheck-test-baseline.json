@@ -108,7 +108,7 @@
     "__tests__/components/CreateDropWrapper.test.tsx": 4,
     "__tests__/components/DefaultWinnerDrop.test.tsx": 15,
     "__tests__/components/delegation/CollectionDelegation.utils.test.ts": 6,
-    "__tests__/components/delegation/DelegationSubmitGroups.test.tsx": 9,
+    "__tests__/components/delegation/DelegationSubmitGroups.test.tsx": 8,
     "__tests__/components/delegation/DelegationWallet.test.tsx": 1,
     "__tests__/components/delegation/NewDelegation.test.tsx": 2,
     "__tests__/components/delegation/NewSubDelegation.test.tsx": 7,

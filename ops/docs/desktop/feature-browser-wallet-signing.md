@@ -24,9 +24,12 @@ with **Scan with a phone wallet** instead.
 
 Market trades and validator sessions are not sent to the browser: those pages
 show **Continue in your browser** and open the same page on the website, where
-your browser wallet signs directly. Transactions such as minting, delegation or
-a subscriptions top-up are not available with this connection either; do them
-on the website in your browser.
+your browser wallet signs directly. Transactions are not sent to the browser
+either: the Memes and NextGen mint buttons, NextGen burn-to-mint, the
+subscriptions top-up, NFT transfers, the delegation center forms and the
+consolidation builder show **Continue in your browser** in place of their send
+button. Any other action that would send a transaction opens a **Transaction**
+dialog with the same choice.
 
 ## User Journey
 
@@ -75,6 +78,8 @@ you closed the browser tab (up to three times), or **Cancel** to stop.
   account in your wallet extension.
 - **"The browser page would not sign this request":** use **Continue in your
   browser**.
+- **"6529 Desktop does not send this transaction to your browser wallet":** use
+  **Continue in your browser** and finish on the website.
 - **"The signature could not be checked against your account":** smart-contract
   wallets such as Safe cannot sign here. Use **Continue in your browser**.
 - **"Another signature request is still open":** finish or cancel the open one
@@ -82,13 +87,13 @@ you closed the browser tab (up to three times), or **Cancel** to stop.
 
 ## Localization fallback debt
 
-| Field                     | Current exception                                                                                                                                                    |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Route or component        | `/browser-connector` wallet requests (`BrowserWalletRequestPanel`), the in-app `DesktopWalletRequestDialog` and `ContinueInBrowserNotice`                            |
-| Untranslated surface      | All `browserConnector.wallet.*` (including `.schema.*`, `.format.*`, `.refusal.*`) and `desktopWalletRequest.*` copy                                                 |
-| Current fallback behavior | The copy exists only in the `en-US` source dictionary; other locales fall back to `en-US`                                                                            |
-| User impact               | 6529 Desktop users with another locale see this signing flow in English; the signed messages themselves are not translated by design (they are signed byte for byte) |
-| Owner or follow-up        | Frontend localization maintainers; add `en-GB`, `fr-FR`, `es-ES` and `de-DE` entries in the progressive i18n workstream when the new 6529 Desktop is released        |
+| Field                     | Current exception                                                                                                                                                         |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Route or component        | `/browser-connector` wallet requests (`BrowserWalletRequestPanel`), the in-app `DesktopWalletRequestDialog`, `ContinueInBrowserNotice` and `DesktopWalletTransactionGate` |
+| Untranslated surface      | All `browserConnector.wallet.*` (including `.schema.*`, `.format.*`, `.refusal.*`) and `desktopWalletRequest.*` copy                                                      |
+| Current fallback behavior | The copy exists only in the `en-US` source dictionary; other locales fall back to `en-US`                                                                                 |
+| User impact               | 6529 Desktop users with another locale see this signing flow in English; the signed messages themselves are not translated by design (they are signed byte for byte)      |
+| Owner or follow-up        | Frontend localization maintainers; add `en-GB`, `fr-FR`, `es-ES` and `de-DE` entries in the progressive i18n workstream when the new 6529 Desktop is released             |
 
 ## Related Areas
 

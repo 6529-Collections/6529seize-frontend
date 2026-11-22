@@ -3,6 +3,9 @@ import { ManifoldClaimStatus, ManifoldPhase } from "@/hooks/useManifoldClaim";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: () => false,
+}));
 jest.mock(
   "@/components/manifold-minting/ManifoldMintingConnect",
   () =>

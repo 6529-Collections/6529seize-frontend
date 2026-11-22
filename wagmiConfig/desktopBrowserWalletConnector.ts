@@ -52,7 +52,20 @@ interface DesktopBrowserWalletConnectorOptions {
     request: WalletRequestInput,
     fingerprint: string | null
   ) => Promise<WalletBridgeResponse>;
+  /**
+   * Called when the app asks to send a transaction, which this connector
+   * does not forward, so the app can point to the website.
+   */
+  readonly onTransactionRefused?: () => void;
 }
+
+/** Wallet methods that send (or sign for sending) a transaction. */
+const TRANSACTION_METHODS: ReadonlySet<string> = new Set([
+  "eth_sendTransaction",
+  "wallet_sendTransaction",
+  "eth_signTransaction",
+  "wallet_sendCalls",
+]);
 
 interface ProviderRequest {
   readonly method: string;
@@ -219,6 +232,9 @@ export function desktopBrowserWalletConnector(
           case "eth_signTypedData_v4":
             return forward(method, params);
           default:
+            if (TRANSACTION_METHODS.has(method)) {
+              options.onTransactionRefused?.();
+            }
             throw new UnsupportedProviderMethodError(
               asError(`${method} is not available through the browser.`)
             );

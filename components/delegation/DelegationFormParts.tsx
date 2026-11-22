@@ -1,5 +1,6 @@
 "use client";
 
+import DesktopWalletTransactionGate from "@/components/desktop/DesktopWalletTransactionGate";
 import Button from "@/components/utils/button/Button";
 import TooltipIconButton from "@/components/common/TooltipIconButton";
 import CustomTooltip from "@/components/utils/tooltip/CustomTooltip";
@@ -522,18 +523,20 @@ export function DelegationSubmitGroups(
               Cancel
             </Button>
           )}
-          <Button
-            type="button"
-            loading={isLoading()}
-            variant={isDestructive ? "destructive" : "primary"}
-            size="lg"
-            onClick={(e) => {
-              e.preventDefault();
-              submitDelegation();
-            }}
-          >
-            {submitBtnLabel ?? "Submit"}
-          </Button>
+          <DesktopWalletTransactionGate>
+            <Button
+              type="button"
+              loading={isLoading()}
+              variant={isDestructive ? "destructive" : "primary"}
+              size="lg"
+              onClick={(e) => {
+                e.preventDefault();
+                submitDelegation();
+              }}
+            >
+              {submitBtnLabel ?? "Submit"}
+            </Button>
+          </DesktopWalletTransactionGate>
         </div>
       </div>
       {(errors.length > 0 || gasError) && (
