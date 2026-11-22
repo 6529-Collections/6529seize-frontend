@@ -388,14 +388,17 @@ export function E2eeTimeline({
   const items: ReactNode[] = [];
   let previousDay: string | null = null;
   messages.forEach((message, index) => {
-    const day = getE2eeDayKey(message.ts, zone);
+    // Moved history is dated by when it was first sent, like its time stamp.
+    const shownTs = message.imported?.createdAt ?? message.ts;
+    const day = getE2eeDayKey(shownTs, zone);
     const newDay = day !== previousDay;
     if (newDay) {
       previousDay = day;
       items.push(
+        // History moved in after newer messages can repeat a day further on.
         <DaySeparator
-          key={`day-${day}`}
-          label={getE2eeDayLabel(locale, message.ts, { zone })}
+          key={`day-${day}-${message.id}`}
+          label={getE2eeDayLabel(locale, shownTs, { zone })}
         />
       );
     }

@@ -784,7 +784,9 @@ offers:
   the member who moved it: 6529 held these messages unencrypted, so the
   encrypted chat cannot prove who wrote them. The author is named from the
   chat's members; one who is not a member shows as **Unknown**, and the
-  original time is never shown as later than the move.
+  original time is never shown as later than the move. The timeline's day
+  dividers also follow the original time, so moved messages sit under the day
+  they were first sent; they keep the order in which they were moved.
   Keep the page open while it runs; you can stop and continue later, and
   nothing is copied twice, even if another member also moves the history.
   Copied messages reach only the people and devices in the encrypted chat at
