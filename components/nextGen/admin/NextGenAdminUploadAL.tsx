@@ -89,6 +89,18 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [uploadError, setUploadError] = useState<string>();
 
+  function buildNextgenAllowlistPayload() {
+    return {
+      collection_id: Number(collectionID),
+      uuid,
+      al_type: type,
+      phase: phaseName,
+      start_time: Number(allowlistStartTime),
+      end_time: Number(allowlistEndTime),
+      mint_price: Number(mintPrice),
+    };
+  }
+
   function clear() {
     setUploadSuccess(false);
     setAllowlistFile(undefined);
@@ -193,18 +205,6 @@ export default function NextGenAdminUploadAL(props: Readonly<Props>) {
       });
     }
   }, [signMessage.data]);
-
-  function buildNextgenAllowlistPayload() {
-    return {
-      collection_id: Number(collectionID),
-      uuid,
-      al_type: type,
-      phase: phaseName,
-      start_time: Number(allowlistStartTime),
-      end_time: Number(allowlistEndTime),
-      mint_price: Number(mintPrice),
-    };
-  }
 
   return (
     <Container className="!tw-p-0">

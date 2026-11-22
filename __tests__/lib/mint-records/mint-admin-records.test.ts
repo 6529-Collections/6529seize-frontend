@@ -3,7 +3,8 @@
  */
 import { installNodeWebCrypto } from "../device-signing/device-signing-test-utils";
 
-const mockEnv: Record<string, string | undefined> = {};
+const mockEnv: { NEXT_PUBLIC_FEATURE_MINT_SIGNED_WRITES?: string | undefined } =
+  {};
 jest.mock("@/config/env", () => {
   const actual = jest.requireActual("@/config/env");
   return {
@@ -47,10 +48,18 @@ const airdrops = {
   },
 };
 
+/** The body of a signed mint record. */
+interface SignedMintBody {
+  readonly action: string;
+  readonly route: string;
+  readonly params: Readonly<Record<string, string>>;
+  readonly request_sha256: string;
+}
+
 /** The record body signed for a request, captured from signRecords. */
 async function signedBody(
   request: Parameters<typeof mintAdminRecordHeaders>[0]
-): Promise<Record<string, unknown>> {
+): Promise<SignedMintBody> {
   mockSignRecords.mockClear();
   await mintAdminRecordHeaders(request);
   return mockSignRecords.mock.calls[0][0][0].body;

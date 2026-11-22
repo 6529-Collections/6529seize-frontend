@@ -36,7 +36,8 @@ export const MINT_ADMIN_ROUTES = {
   claimAction: "POST /minting-claims/actions/:contract/:claim_id",
 } as const;
 
-type MintAdminRoute = (typeof MINT_ADMIN_ROUTES)[keyof typeof MINT_ADMIN_ROUTES];
+type MintAdminRoute =
+  (typeof MINT_ADMIN_ROUTES)[keyof typeof MINT_ADMIN_ROUTES];
 
 export const MINT_USER_ROUTES = {
   collabInvite: "POST /drops/:drop_id/collaborations",
@@ -92,7 +93,7 @@ interface MintRecordContext {
 
 type MintRecordContextSource = () => Promise<MintRecordContext | null>;
 
-let contextSource: MintRecordContextSource = async () => null;
+let contextSource: MintRecordContextSource = () => Promise.resolve(null);
 
 /**
  * Binds where the principal and anchor come from: the signed-records
@@ -198,18 +199,12 @@ async function signedRecordHeaders(
 ): Promise<Record<string, string>> {
   const context = await contextSource();
   if (!context) return {};
-  const draft = recordDraft(
-    "ps",
-    context.principal,
-    type,
-    newRecordKey(),
-    {
-      action: request.action,
-      route: request.route,
-      params: request.params,
-      request_sha256: await mintIntentSha256(request),
-    }
-  );
+  const draft = recordDraft("ps", context.principal, type, newRecordKey(), {
+    action: request.action,
+    route: request.route,
+    params: request.params,
+    request_sha256: await mintIntentSha256(request),
+  });
   const result = await signRecords([draft], { anchor: context.anchor });
   if (result.status !== "signed") return {};
   return { [SIGNED_RECORDS_HEADER]: encodeSignedRecordsHeader(result.events) };
