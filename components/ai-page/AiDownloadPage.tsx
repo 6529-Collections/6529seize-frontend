@@ -52,6 +52,7 @@ const BUTTON_TEXT: Readonly<Record<AiInstallerKind, MessageKey>> = {
   "linux-x64": "ai.download.button.linuxX64",
   "linux-x64-cuda": "ai.download.button.linuxCuda",
   "linux-arm64": "ai.download.button.linuxArm64",
+  "linux-arm64-cuda": "ai.download.button.linuxArm64Cuda",
 };
 
 function toHeroOption(

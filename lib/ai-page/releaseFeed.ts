@@ -24,6 +24,7 @@ const AI_SYSTEMS = [
   "linux-x86_64-cpu",
   "linux-x86_64-cuda",
   "linux-arm64-cpu",
+  "linux-arm64-cuda",
 ] as const;
 
 export type AiSystem = (typeof AI_SYSTEMS)[number];
@@ -429,9 +430,11 @@ const SYSTEM_BY_NAME: readonly (readonly [RegExp, AiSystem])[] = [
   [/^6529-ai-cuda_[^_]+_amd64\.deb$/, "linux-x86_64-cuda"],
   [/^6529-ai_[^_]+_amd64\.deb$/, "linux-x86_64-cpu"],
   [/^6529-ai_[^_]+_arm64\.deb$/, "linux-arm64-cpu"],
+  [/^6529-ai-cuda_[^_]+_arm64\.deb$/, "linux-arm64-cuda"],
   [/-linux-x86_64-cpu\.tar\.gz$/, "linux-x86_64-cpu"],
   [/-linux-x86_64-cuda\.tar\.gz$/, "linux-x86_64-cuda"],
   [/-linux-arm64-cpu\.tar\.gz$/, "linux-arm64-cpu"],
+  [/-linux-arm64-cuda\.tar\.gz$/, "linux-arm64-cuda"],
 ];
 
 /**

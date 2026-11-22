@@ -252,6 +252,37 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
 }
 
 /**
+ * The CUDA packages for 64-bit ARM, such as NVIDIA's DGX Spark, which
+ * releases carry from 0.1.0-rc.4 on: listed only for a release that has
+ * them.
+ */
+function armCudaPackages(
+  release: AiRelease | undefined,
+  version: string
+): AiLinuxPackage[] {
+  if (!release?.files.some((file) => file.system === "linux-arm64-cuda")) {
+    return [];
+  }
+  return [
+    {
+      label: "ARM64, NVIDIA GPU",
+      deb: fileName(
+        release,
+        "linux-arm64-cuda",
+        "_arm64.deb",
+        `6529-ai-cuda_${version}_arm64.deb`
+      ),
+      tarball: fileName(
+        release,
+        "linux-arm64-cuda",
+        ".tar.gz",
+        `6529-ai-${version}-linux-arm64-cuda.tar.gz`
+      ),
+    },
+  ];
+}
+
+/**
  * The guide for each system, with the newest release's file names, or
  * `<version>` in them while there is none.
  */
@@ -317,6 +348,7 @@ export function getAiGuideSystems(
         `6529-ai-${version}-linux-arm64-cpu.tar.gz`
       ),
     },
+    ...armCudaPackages(release, version),
   ];
 
   return [macGuide(dmg), windowsGuide(release, setup), linuxGuide(linux)];
