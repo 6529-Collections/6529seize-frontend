@@ -4,6 +4,9 @@
 
 import type { ValidatorGuidePageSource } from "./guidePageTypes";
 
+const TABLE_HEAD_WHAT_YOU_SEE_WHAT_TO_DO = "| What you see | What to do |";
+const TABLE_RULE_2_COLUMNS = "| --- | --- |";
+
 export const GUIDE_PAGES_PART_2: readonly ValidatorGuidePageSource[] = [
   {
     slug: "troubleshooting",
@@ -13,8 +16,8 @@ export const GUIDE_PAGES_PART_2: readonly ValidatorGuidePageSource[] = [
     lines: [
       "## Connecting",
       "",
-      "| What you see | What to do |",
-      "| --- | --- |",
+      TABLE_HEAD_WHAT_YOU_SEE_WHAT_TO_DO,
+      TABLE_RULE_2_COLUMNS,
       "| Tor **Blocked**, or **Tor can't get through on this network yet** | See below |",
       "| **Waiting for Ethereum** | Usually Tor isn't connected yet: see below. Between 00:00 and about 00:15 UTC it is normal |",
       "| **This computer's clock is off, so it won't sign.** | Turn on automatic date and time in your computer's settings |",
@@ -27,8 +30,8 @@ export const GUIDE_PAGES_PART_2: readonly ValidatorGuidePageSource[] = [
       "",
       "## Signing",
       "",
-      "| What you see | What to do |",
-      "| --- | --- |",
+      TABLE_HEAD_WHAT_YOU_SEE_WHAT_TO_DO,
+      TABLE_RULE_2_COLUMNS,
       "| Today says \"Your authorization doesn't count today.\" | Most often the wallet that signed isn't in your consolidated account, or joined it today. Press **Sign again** and sign with any wallet of the consolidated account that holds your TDH |",
       "| Today says **This computer stopped signing.** and that its key signed on another computer | A copy runs elsewhere. Stop it, then press **Sign again here** and **It's stopped. Sign again here** on the computer you keep |",
       "| A new computer has no chain votes yet | It takes your account's place in the next day's list of validators. Wait until after 00:00 UTC. Account says when |",
@@ -36,8 +39,8 @@ export const GUIDE_PAGES_PART_2: readonly ValidatorGuidePageSource[] = [
       "",
       "## Installing and running",
       "",
-      "| What you see | What to do |",
-      "| --- | --- |",
+      TABLE_HEAD_WHAT_YOU_SEE_WHAT_TO_DO,
+      TABLE_RULE_2_COLUMNS,
       "| Windows setup says **User cancelled installation** | Windows' permission question closed after 2 minutes. Press **Retry**, then **Yes** |",
       "| Windows: an antivirus warns during install | Check that the installer names 6529 Collection LLC ([Signed releases](/validator/guide/keys-and-privacy#signed-releases)), then ask in the wave |",
       "| Windows: **The validator service is not answering** | Press **Restart the validator service** |",
@@ -45,8 +48,8 @@ export const GUIDE_PAGES_PART_2: readonly ValidatorGuidePageSource[] = [
       "",
       "## SSH to a Raspberry Pi",
       "",
-      "| What you see | What to do |",
-      "| --- | --- |",
+      TABLE_HEAD_WHAT_YOU_SEE_WHAT_TO_DO,
+      TABLE_RULE_2_COLUMNS,
       "| `ssh` says **Connection timed out** or can't find `raspberrypi.local` | Use the Pi's address in place of `raspberrypi.local` ([Raspberry Pi step 2](/validator/guide/home-box#raspberry-pi-5)) |",
       "| `ssh` says **Permission denied** | Use the user name and password you set in Imager |",
       "",
@@ -86,7 +89,7 @@ export const GUIDE_PAGES_PART_2: readonly ValidatorGuidePageSource[] = [
     description: "The words this guide uses, in plain terms.",
     lines: [
       "| Word | Means |",
-      "| --- | --- |",
+      TABLE_RULE_2_COLUMNS,
       "| Validator | This program, on your computer |",
       "| Validator key | The key the validator signs with. It is made on your computer and can't move NFTs or funds |",
       "| Authorization | The one message your wallet signs to let validator keys sign for your account. The terminal calls it a grant |",
