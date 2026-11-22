@@ -234,10 +234,12 @@ describe("drafts, streams, order and transport", () => {
       "Invalid pv owner"
     );
     expect(parseFamilyWave("4a1e0e2c-7a7d-4b38-9c0b-2f1d6d1c9a10")).toBeNull();
-    expect(parseFamilyWave("cv/group-1")).toEqual({
+    expect(parseFamilyWave("cv/0x0a1b")).toEqual({
       family: "cv",
-      owner: "group-1",
+      owner: "0x0a1b",
     });
+    // Lane owners are lowercase hex, as the relays take them.
+    expect(parseFamilyWave("cv/group-1")).toBeNull();
     expect(() =>
       recordDraft("ps", inputs.principal, "follow", "\uD800", {})
     ).toThrow("well-formed");

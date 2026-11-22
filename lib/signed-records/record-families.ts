@@ -32,7 +32,9 @@ const FAMILIES: readonly RecordFamily[] = [
 const PRINCIPAL_FAMILIES: readonly RecordFamily[] = ["ps", "pv", "bk"];
 const PRINCIPAL_ID_PATTERN = /^0x[0-9a-f]{64}$/;
 const WALLET_PATTERN = /^0x[0-9a-f]{40}$/;
-const OWNER_PATTERN = /^[0-9A-Za-z._:-]{1,128}$/;
+// dr, dv, cv, bl and md owners: 0x and 1 to 128 lowercase hex digits, as
+// the relays take them.
+const OWNER_PATTERN = /^0x[0-9a-f]{1,128}$/;
 
 const isRecordFamily = (value: string): value is RecordFamily =>
   (FAMILIES as readonly string[]).includes(value);
