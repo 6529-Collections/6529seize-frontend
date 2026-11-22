@@ -3860,6 +3860,14 @@ paths:
                 $ref: "#/components/schemas/ApiCmsSite"
         "401":
           description: Unauthorized - authentication required
+        "410":
+          description: >-
+            Legacy CMS sites are read-only once profile sites follow the 6529
+            chain (code cms_legacy_retired)
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /cms/sites/{site_id}/published-packages:
     post:
       tags:
@@ -3893,6 +3901,14 @@ paths:
           description: Forbidden - only site owners can publish
         "404":
           description: CMS site not found
+        "410":
+          description: >-
+            Legacy CMS sites are read-only once profile sites follow the 6529
+            chain (code cms_legacy_retired)
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /collect/capabilities:
     get:
       tags:
@@ -16007,6 +16023,23 @@ paths:
           description: Missing CMS publish permissions
         "404":
           description: CMS package not found
+        "409":
+          description: >-
+            The pointer changed (expected-current guard). With profile sites on
+            the 6529 chain, publish stores the signed publication record and
+            returns the draft with its publication_cid; the person's
+            PROFILE_REPLACE then makes it primary. Publishing a draft that
+            already has a publication_cid returns it as stored, without
+            signing or uploading again.
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
+        "502":
+          description: >-
+            With profile sites on the 6529 chain: the gateway's document store
+            answered with another CID than the file's (code
+            cms_doc_store_mismatch). Nothing was recorded; publish again.
   /profile-cms/packages/{id}/rollback:
     post:
       tags:
@@ -16047,6 +16080,26 @@ paths:
           description: Missing CMS publish permissions
         "404":
           description: CMS package not found
+        "409":
+          description: >-
+            The pointer changed (expected-current guard), or profile sites are
+            on the 6529 chain and the target passed the check the chain index
+            will run (code cms_pointer_on_chain): move the pointer with
+            PROFILE_REPLACE instead.
+        "422":
+          description: >-
+            Profile sites are on the 6529 chain and the chain index would refuse
+            this version (code cms_rollback_target_refused), so it can't be made
+            the site.
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
+        "503":
+          description: >-
+            Profile sites are on the 6529 chain and this version's files or its
+            Safe signature can't be checked right now (code
+            cms_check_unavailable); try again.
   /profile-cms/packages/{id}/archive:
     post:
       tags:
@@ -16085,6 +16138,10 @@ paths:
           description: Missing CMS publish permissions
         "404":
           description: CMS package not found
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /profile-cms/packages/{id}/export:
     get:
       tags:
@@ -16293,7 +16350,14 @@ paths:
         "404":
           description: CMS package not found
         "409":
-          description: Current primary no longer matches the expected version
+          description: >-
+            The current package does not match the guard, or profile sites are
+            on the 6529 chain (code cms_pointer_on_chain): unpublish with
+            PROFILE_REPLACE instead.
+        "423":
+          description: >-
+            The identity freeze is on (code IDENTITY_FROZEN), while profiles
+            move to the 6529 Network.
   /profile-cms/packages/{id}/agent-grants:
     post:
       tags:
@@ -40991,6 +41055,13 @@ components:
         published_at:
           type: integer
           format: int64
+        publication_cid:
+          type: string
+          description: >-
+            CID (CIDv1, raw codec, sha2-256) of the package's signed publication
+            record, once the package was signed for publishing. With profile
+            sites on the 6529 chain, a draft that has it waits for the person's
+            PROFILE_REPLACE to name it in their ProfileDoc.
     ApiProfileCmsPackageExport:
       type: object
       required:
