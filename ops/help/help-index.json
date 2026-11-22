@@ -11673,6 +11673,47 @@
       ]
     },
     {
+      "id": "desktop.browser-wallet-transactions",
+      "kind": "ui_affordance",
+      "title": "Transactions with a browser wallet in 6529 Desktop",
+      "aliases": [
+        "continue in your browser",
+        "desktop browser wallet mint",
+        "cannot mint in 6529 Desktop",
+        "transaction dialog 6529 Desktop",
+        "browser wallet transaction desktop"
+      ],
+      "keywords": [
+        "desktop",
+        "browser wallet",
+        "transaction",
+        "mint",
+        "delegation",
+        "top up",
+        "transfer",
+        "continue in your browser"
+      ],
+      "facts": [
+        "When a 6529 Desktop profile signed in with Use a browser wallet, 6529 Desktop sends signatures to the web browser but does not send transactions there.",
+        "The Memes and NextGen mint buttons, NextGen burn-to-mint, the subscriptions top-up, NFT transfers, the delegation center forms and the consolidation builder show a Continue in your browser notice in place of their send button.",
+        "Any other action that would send a transaction opens a Transaction dialog that says 6529 Desktop does not send this transaction to your browser wallet, with Continue in your browser and Close.",
+        "Continue in your browser opens the same page on the website in the system browser, where the browser wallet sends the transaction directly. If the browser does not open, the notice says so; open the website yourself.",
+        "With a phone wallet (Scan with a phone wallet) these actions work inside 6529 Desktop as usual."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "related_paths": [
+        "/about/6529-apps"
+      ],
+      "tags": [
+        "desktop",
+        "wallets",
+        "transactions"
+      ],
+      "source_refs": [
+        "ops/docs/desktop/feature-browser-wallet-signing.md"
+      ]
+    },
+    {
       "id": "waves.private-bookmarks",
       "kind": "workflow",
       "title": "Privately bookmark a message",

@@ -67,6 +67,8 @@ type DesktopWalletRequestStatus =
   | { readonly kind: "busy" }
   /** The browser page or the app would not sign it: use the website. */
   | { readonly kind: "refused" }
+  /** A transaction, which forwarding does not send: use the website. */
+  | { readonly kind: "transaction" }
   /** A signature that is not the account's own (a smart-contract wallet). */
   | { readonly kind: "unverified" }
   | { readonly kind: "failed" };
@@ -113,6 +115,11 @@ export function dismissDesktopWalletRequestStatus(): void {
 export function showDesktopWalletRefusal(): void {
   // Never hide a request that is open in the browser.
   if (status.kind !== "waiting") setStatus({ kind: "refused" });
+}
+
+/** Shows that forwarding does not send transactions (decided in the app). */
+export function showDesktopWalletTransactionRefusal(): void {
+  if (status.kind !== "waiting") setStatus({ kind: "transaction" });
 }
 
 const readProfiles = (value: unknown): ReadonlySet<string> =>
@@ -344,7 +351,10 @@ export async function runDesktopWalletRequest(
   }
   try {
     const response = parseWalletBridgeResponse(
-      await bridge.request(request).catch(() => null)
+      await bridge.request(request).catch(() => null),
+      request.method === "eth_sendTransaction"
+        ? "eth_sendTransaction"
+        : "personal_sign"
     );
     return ownerRequest === id ? finish(response) : response;
   } finally {

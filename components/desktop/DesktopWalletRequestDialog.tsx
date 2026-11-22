@@ -31,12 +31,13 @@ const FINISHED_MESSAGES = {
   expired: "desktopWalletRequest.expired",
   busy: "desktopWalletRequest.busy",
   refused: "desktopWalletRequest.refused",
+  transaction: "desktopWalletRequest.transactionNotForwarded",
   unverified: "desktopWalletRequest.unverified",
   failed: "desktopWalletRequest.failed",
 } as const;
 
 /** Statuses after which the website itself is the way forward. */
-const CONTINUE_IN_BROWSER = new Set(["refused", "unverified"]);
+const CONTINUE_IN_BROWSER = new Set(["refused", "transaction", "unverified"]);
 
 interface ReopenState {
   readonly requestCode: string | null;
@@ -88,9 +89,10 @@ function useReopen(requestCode: string | null) {
  * the request code (and the content fingerprint, for drops and decisions)
  * the browser page also shows, and offers to open the page again or cancel.
  * Afterwards it explains a cancelled, expired, busy, refused, unverified or
- * failed request, with "Continue in your browser" where the website is the
- * way forward. Renders nothing when no request is open (always, outside
- * 6529 Desktop with wallet forwarding).
+ * failed request, or a transaction (which forwarding does not send), with
+ * "Continue in your browser" where the website is the way forward. Renders
+ * nothing when no request is open (always, outside 6529 Desktop with wallet
+ * forwarding).
  *
  * It is the top modal layer: shown in the browser's top layer above every
  * app modal, with any focus trap underneath (the Terms of Service modal's,
@@ -191,7 +193,12 @@ export default function DesktopWalletRequestDialog() {
       layered
       locale={locale}
       show
-      title={t(locale, "desktopWalletRequest.title")}
+      title={t(
+        locale,
+        status.kind === "transaction"
+          ? "desktopWalletRequest.transactionTitle"
+          : "desktopWalletRequest.title"
+      )}
       onHide={close}
       footer={footer}
     >
