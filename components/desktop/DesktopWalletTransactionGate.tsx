@@ -13,10 +13,21 @@ import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWa
  */
 export default function DesktopWalletTransactionGate({
   children,
+  className,
 }: {
   readonly children: ReactNode;
+  /** When set, the control or notice is wrapped in a div with this class. */
+  readonly className?: string;
 }) {
   const forwarding = useIsDesktopBrowserWallet();
-  if (forwarding) return <ContinueInBrowserNotice kind="transaction" />;
-  return children;
+  const content = forwarding ? (
+    <ContinueInBrowserNotice kind="transaction" />
+  ) : (
+    children
+  );
+  return className === undefined ? (
+    content
+  ) : (
+    <div className={className}>{content}</div>
+  );
 }

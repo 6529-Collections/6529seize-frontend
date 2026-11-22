@@ -41,4 +41,15 @@ describe("DesktopWalletTransactionGate", () => {
       screen.getByRole("button", { name: "Continue in your browser" })
     ).toBeInTheDocument();
   });
+
+  it("wraps the control or the notice when given a class", () => {
+    forwarding.mockReturnValue(false);
+    const { container } = render(
+      <DesktopWalletTransactionGate className="tw-pt-3">
+        <button type="button">Mint</button>
+      </DesktopWalletTransactionGate>
+    );
+    expect(container.firstElementChild).toHaveClass("tw-pt-3");
+    expect(screen.getByRole("button", { name: "Mint" })).toBeInTheDocument();
+  });
 });

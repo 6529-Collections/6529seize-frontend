@@ -610,24 +610,22 @@ export default function ManifoldMintingWidget(
             )}
           </div>
         </div>
-        <div className="tw-pt-3">
-          <DesktopWalletTransactionGate>
-            <Button
-              variant="action"
-              size="md"
-              fullWidth
-              disabled={
-                mintWrite.isPending ||
-                props.claim.status !== ManifoldClaimStatus.ACTIVE ||
-                safeMintCount <= 0 ||
-                !hasValidMintForAddress
-              }
-              onClick={onMint}
-            >
-              {getButtonText()}
-            </Button>
-          </DesktopWalletTransactionGate>
-        </div>
+        <DesktopWalletTransactionGate className="tw-pt-3">
+          <Button
+            variant="action"
+            size="md"
+            fullWidth
+            disabled={
+              mintWrite.isPending ||
+              props.claim.status !== ManifoldClaimStatus.ACTIVE ||
+              safeMintCount <= 0 ||
+              !hasValidMintForAddress
+            }
+            onClick={onMint}
+          >
+            {getButtonText()}
+          </Button>
+        </DesktopWalletTransactionGate>
         {mintError && !hasOnchainTransactionError && (
           <div className="tw-pt-3 tw-text-base tw-text-red">{mintError}</div>
         )}
