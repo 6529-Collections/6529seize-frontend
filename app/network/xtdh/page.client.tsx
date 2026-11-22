@@ -6,7 +6,7 @@ import {
   NETWORK_REFERENCE_DROPDOWN_ROW_CLASSES,
   NETWORK_REFERENCE_SECTION_HEADING_CLASSES,
 } from "@/components/network/networkPageLayoutClasses";
-import XtdhFrozenNotice from "@/components/xtdh/XtdhFrozenNotice";
+import XtdhRetiredNotice from "@/components/xtdh/XtdhRetiredNotice";
 import { useSetTitle } from "@/contexts/TitleContext";
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -37,7 +37,7 @@ export default function XTDHMainPage() {
         />
 
         <article className="tw-pb-12 tw-pt-4 max-sm:tw-px-1 sm:tw-pt-8">
-          <XtdhFrozenNotice className="tw-mb-6" />
+          <XtdhRetiredNotice className="tw-mb-6" />
           <section
             aria-labelledby="xtdh-overview-heading"
             className={`${EDITORIAL_GRID_CLASSES} tw-pb-8 sm:tw-pb-12`}

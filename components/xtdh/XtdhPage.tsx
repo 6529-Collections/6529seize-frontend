@@ -7,11 +7,26 @@ import { NETWORK_PAGE_TITLE_CLASSES } from "@/components/network/networkPageLayo
 import { XtdhStats } from "@/components/xtdh/stats";
 import { buildGlobalXtdhStatsContent } from "@/components/xtdh/stats/buildGlobalXtdhStatsContent";
 import { useGlobalTdhStats } from "@/hooks/useGlobalTdhStats";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 
-import XtdhFrozenNotice from "./XtdhFrozenNotice";
 import XtdhReceivedSection from "./received";
+import XtdhRetiredNotice from "./XtdhRetiredNotice";
 
 export default function XtdhPage(): ReactElement {
+  const retired = useXtdhRetired();
+  // From the switch-on xTDH is retired: the page says so and shows no figures.
+  if (retired) {
+    return (
+      <div className="tailwind-scope tw-space-y-6">
+        <h1 className={NETWORK_PAGE_TITLE_CLASSES}>xTDH</h1>
+        <XtdhRetiredNotice />
+      </div>
+    );
+  }
+  return <XtdhLivePage />;
+}
+
+function XtdhLivePage(): ReactElement {
   const globalStatsQuery = useGlobalTdhStats();
 
   const statsContent = useMemo(() => {
@@ -42,7 +57,7 @@ export default function XtdhPage(): ReactElement {
 
   return (
     <div className="tailwind-scope tw-space-y-6">
-      <XtdhFrozenNotice />
+      <XtdhRetiredNotice />
       <section className="tw-space-y-4">
         <header className="tw-flex tw-flex-col tw-gap-3 sm:tw-flex-row sm:tw-items-start sm:tw-justify-between">
           <div>

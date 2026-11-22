@@ -10,6 +10,7 @@ import { useSetTitle } from "@/contexts/TitleContext";
 import { useCommunityMetrics } from "@/hooks/useCommunityMetrics";
 import { useCommunityMetricsSeries } from "@/hooks/useCommunityMetricsSeries";
 import { useMintMetrics } from "@/hooks/useMintMetrics";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 import CumulativeMetricCard from "./components/CumulativeMetricCard";
 import MetricCard from "./components/MetricCard";
 import MetricsError from "./components/MetricsError";
@@ -38,6 +39,8 @@ export default function MetricsPageClient() {
   const weeklyQuery = useCommunityMetrics("WEEK");
   const mintQuery = useMintMetrics(50);
   const seriesQuery = useCommunityMetricsSeries();
+  // From the identity switch-on xTDH is retired: no xTDH card.
+  const xtdhRetired = useXtdhRetired();
 
   const isLoading =
     dailyQuery.isLoading || weeklyQuery.isLoading || mintQuery.isLoading;
@@ -172,18 +175,20 @@ export default function MetricsPageClient() {
                   sparklineColor="tw-bg-rose-500"
                   sparklineDates={series?.stepsStartTimes}
                 />
-                <CumulativeMetricCard
-                  title="xTDH Granted"
-                  dailyData={dailyQuery.data.xtdhGranted}
-                  weeklyData={weeklyQuery.data.xtdhGranted}
-                  icon={<XtdhIcon />}
-                  iconBgColor="tw-border-lime-400/20 tw-bg-lime-500/10 tw-text-lime-300"
-                  accentColor="tw-text-lime-400"
-                  unit="xTDH"
-                  sparklineData={series?.xtdhGranted}
-                  sparklineColor="tw-bg-lime-500"
-                  sparklineDates={series?.stepsStartTimes}
-                />
+                {!xtdhRetired && (
+                  <CumulativeMetricCard
+                    title="xTDH Granted"
+                    dailyData={dailyQuery.data.xtdhGranted}
+                    weeklyData={weeklyQuery.data.xtdhGranted}
+                    icon={<XtdhIcon />}
+                    iconBgColor="tw-border-lime-400/20 tw-bg-lime-500/10 tw-text-lime-300"
+                    accentColor="tw-text-lime-400"
+                    unit="xTDH"
+                    sparklineData={series?.xtdhGranted}
+                    sparklineColor="tw-bg-lime-500"
+                    sparklineDates={series?.stepsStartTimes}
+                  />
+                )}
                 <CumulativeMetricCard
                   title="Identities"
                   dailyData={dailyQuery.data.profileCount}

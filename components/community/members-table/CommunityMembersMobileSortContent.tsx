@@ -1,6 +1,7 @@
 import { SortDirection } from "@/entities/ISort";
 import { ApiCommunityMembersSortOption } from "@/generated/models/ApiCommunityMembersSortOption";
 import CommonTableSortIcon from "@/components/user/utils/icons/CommonTableSortIcon";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 import {
   DROPDOWN_CHECKMARK_CLASSES,
   getDropdownOptionStateClasses,
@@ -24,10 +25,17 @@ export default function CommunityMembersMobileSortContent({
   readonly sortDirection: SortDirection;
   readonly onSort: (sort: ApiCommunityMembersSortOption) => void;
 }) {
+  // From the identity switch-on xTDH is retired: no xTDH sort.
+  const xtdhRetired = useXtdhRetired();
+  const options = xtdhRetired
+    ? SORT_OPTIONS.filter(
+        (option) => option.value !== ApiCommunityMembersSortOption.Xtdh
+      )
+    : SORT_OPTIONS;
   return (
     <div className="tw-px-4 tw-py-4">
       <div className="tw-flex tw-flex-col tw-gap-2">
-        {SORT_OPTIONS.map((option) => {
+        {options.map((option) => {
           const isActive = activeSort === option.value;
           const arrowDirection = isActive ? sortDirection : SortDirection.DESC;
           return (

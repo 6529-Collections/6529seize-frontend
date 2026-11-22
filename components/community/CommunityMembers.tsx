@@ -14,6 +14,7 @@ import type { Page } from "@/helpers/Types";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 import { t } from "@/i18n/messages";
 import { commonApiFetch } from "@/services/api/common-api";
 import { useQuery } from "@tanstack/react-query";
@@ -108,6 +109,9 @@ export default function CommunityMembers() {
   const centeredFilterModal = isDesktopViewport && !hasTouchPointer;
 
   const defaultSortBy = ApiCommunityMembersSortOption.Level;
+  // From the identity switch-on xTDH is retired: a sort by xTDH in the URL
+  // reads as the default sort.
+  const xtdhRetired = useXtdhRetired();
   const defaultSortDirection = SortDirection.DESC;
   const defaultPageSize = 50;
   const defaultPage = 1;
@@ -139,16 +143,16 @@ export default function CommunityMembers() {
   const convertSortBy = useCallback(
     (sort: string | null): ApiCommunityMembersSortOption => {
       if (!sort) return defaultSortBy;
-      if (
-        Object.values(ApiCommunityMembersSortOption).includes(
-          sort.toLowerCase() as ApiCommunityMembersSortOption
-        )
-      ) {
-        return sort.toLowerCase() as ApiCommunityMembersSortOption;
+      const value = sort.toLowerCase() as ApiCommunityMembersSortOption;
+      if (xtdhRetired && value === ApiCommunityMembersSortOption.Xtdh) {
+        return defaultSortBy;
+      }
+      if (Object.values(ApiCommunityMembersSortOption).includes(value)) {
+        return value;
       }
       return defaultSortBy;
     },
-    [defaultSortBy]
+    [defaultSortBy, xtdhRetired]
   );
 
   const convertSortDirection = useCallback(

@@ -109,7 +109,7 @@ describe("UserPageXtdh", () => {
     );
   });
 
-  describe("during the identity freeze", () => {
+  describe("as xTDH is retired", () => {
     const own = {
       handle: "alice",
       primary_wallet: "0xabc",
@@ -142,18 +142,32 @@ describe("UserPageXtdh", () => {
       expect(mockGrantedProps).toHaveBeenLastCalledWith(
         expect.objectContaining({ canGrant: true, isSelf: true })
       );
-      expect(screen.queryByTestId("xtdh-frozen-notice")).toBeNull();
+      expect(screen.queryByTestId("xtdh-retired-notice")).toBeNull();
     });
 
-    it("hides grant creation and grant changes and says xTDH is frozen", () => {
+    it("hides grant creation and grant changes on the freeze day", () => {
       setIdentityFreezeAt("2026-11-24T00:00:00Z");
       renderOwnPage();
       expect(mockGrantedProps).toHaveBeenLastCalledWith(
         expect.objectContaining({ canGrant: false, isSelf: false })
       );
-      expect(screen.getByTestId("xtdh-frozen-notice")).toHaveTextContent(
-        "xTDH is frozen"
+      expect(screen.getByTestId("stats-header")).toBeInTheDocument();
+      expect(screen.getByTestId("xtdh-retired-notice")).toHaveTextContent(
+        "xTDH is being retired as identities move to the 6529 Network."
       );
+    });
+
+    it("shows only the retirement notice from the switch-on", () => {
+      setIdentityFreezeAt("2026-11-23T00:00:00Z");
+      renderOwnPage();
+      expect(screen.getByTestId("xtdh-retired-notice")).toHaveTextContent(
+        "xTDH was retired when identities moved to the 6529 Network."
+      );
+      expect(screen.queryByTestId("stats-header")).toBeNull();
+      expect(screen.queryByTestId("granted-view")).toBeNull();
+      expect(screen.queryByTestId("received-view")).toBeNull();
+      expect(screen.queryByRole("button", { name: "Granted" })).toBeNull();
+      expect(mockGrantedProps).not.toHaveBeenCalled();
     });
   });
 });

@@ -17,9 +17,11 @@ import Link from "next/link";
 export default function CommunityMembersMobileCard({
   member,
   rank,
+  showXtdh = true,
 }: {
   readonly member: ApiCommunityMemberOverview;
   readonly rank: number;
+  readonly showXtdh?: boolean;
 }) {
   const isNotProfile = isEthereumAddress(member.detail_view_key);
   const isProfile = !isNotProfile;
@@ -81,14 +83,16 @@ export default function CommunityMembersMobileCard({
           </span>
           <span className="tw-text-xxs tw-text-iron-400">TDH</span>
         </div>
-        <div className="tw-flex tw-items-baseline tw-gap-x-1">
-          <span className="tw-text-xs tw-font-semibold tw-text-iron-50">
-            {member.xtdh === 0
-              ? "-"
-              : formatLargeNumber(Math.round(member.xtdh))}
-          </span>
-          <span className="tw-text-xxs tw-text-iron-400">xTDH</span>
-        </div>
+        {showXtdh && (
+          <div className="tw-flex tw-items-baseline tw-gap-x-1">
+            <span className="tw-text-xs tw-font-semibold tw-text-iron-50">
+              {member.xtdh === 0
+                ? "-"
+                : formatLargeNumber(Math.round(member.xtdh))}
+            </span>
+            <span className="tw-text-xxs tw-text-iron-400">xTDH</span>
+          </div>
+        )}
         <div className="tw-flex tw-items-baseline tw-gap-x-1">
           <span className="tw-text-xs tw-font-semibold tw-text-iron-50">
             {formatNumberWithCommasOrDash(member.rep)}

@@ -4,7 +4,7 @@ import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 
 /** "24 Nov 2026": a UTC day, day first, as the identity move notices write it. */
-export function formatUtcDay(locale: SupportedLocale, ms: number): string {
+function formatUtcDay(locale: SupportedLocale, ms: number): string {
   return t(locale, "tdh.day.date", {
     day: formatUtcDate(locale, ms, { day: "numeric" }),
     month: formatUtcDate(locale, ms, { month: "short" }),

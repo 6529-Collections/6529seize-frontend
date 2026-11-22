@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { useXtdhRetired } from "@/hooks/useXtdhRetirement";
 import { DEFAULT_LOCALE, type SupportedLocale } from "@/i18n/locales";
 import {
   formatUserStatsRowInteger,
@@ -58,6 +59,8 @@ export default function UserStatsRow({
   onFollowersClick,
   locale = DEFAULT_LOCALE,
 }: UserStatsRowProps) {
+  // From the identity switch-on xTDH is retired: the row shows no xTDH.
+  const xtdhRetired = useXtdhRetired();
   const routeHandle = encodeURIComponent(handle.toLowerCase());
   const count = followersCount ?? 0;
   const followerLabel = getUserStatsRowMessage(
@@ -122,28 +125,32 @@ export default function UserStatsRow({
           )}
         </Link>
 
-        <Link
-          href={`/${routeHandle}/xtdh`}
-          aria-label={xtdhLinkLabel}
-          className="tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline"
-        >
-          <span className={`${classes.text} tw-font-semibold tw-text-iron-200`}>
-            {xtdhValue}
-          </span>{" "}
-          <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
-            {getUserStatsRowMessage("user.statsRow.labels.xtdh", {}, locale)}
-          </span>
-          {xtdh_rate > 0 && (
-            <>
-              {" "}
-              <span
-                className={`${rateClasses} tw-font-semibold tw-text-emerald-500`}
-              >
-                +{xtdhRateValue}
-              </span>
-            </>
-          )}
-        </Link>
+        {!xtdhRetired && (
+          <Link
+            href={`/${routeHandle}/xtdh`}
+            aria-label={xtdhLinkLabel}
+            className="tw-no-underline tw-transition tw-duration-300 tw-ease-out desktop-hover:hover:tw-underline"
+          >
+            <span
+              className={`${classes.text} tw-font-semibold tw-text-iron-200`}
+            >
+              {xtdhValue}
+            </span>{" "}
+            <span className={`${classes.text} tw-font-medium tw-text-iron-500`}>
+              {getUserStatsRowMessage("user.statsRow.labels.xtdh", {}, locale)}
+            </span>
+            {xtdh_rate > 0 && (
+              <>
+                {" "}
+                <span
+                  className={`${rateClasses} tw-font-semibold tw-text-emerald-500`}
+                >
+                  +{xtdhRateValue}
+                </span>
+              </>
+            )}
+          </Link>
+        )}
 
         <Link
           href={`/${routeHandle}`}

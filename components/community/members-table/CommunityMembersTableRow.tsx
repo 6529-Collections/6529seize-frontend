@@ -20,9 +20,11 @@ const TABLE_CELL_CLASS_NAME =
 export default function CommunityMembersTableRow({
   member,
   rank,
+  showXtdh = true,
 }: {
   readonly member: ApiCommunityMemberOverview;
   readonly rank: number;
+  readonly showXtdh?: boolean;
 }) {
   const isNotProfile = isEthereumAddress(member.detail_view_key);
   const isProfile = !isNotProfile;
@@ -100,35 +102,39 @@ export default function CommunityMembersTableRow({
           </div>
         </Tooltip>
       </td>
-      <td
-        className={`${TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums ${textColorClass}`}
-      >
-        <span
-          data-tooltip-id={`xtdh-tooltip-${member.detail_view_key}`}
-          className="tw-cursor-default"
+      {showXtdh && (
+        <td
+          className={`${TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums ${textColorClass}`}
         >
-          {member.xtdh === 0 ? "-" : formatLargeNumber(Math.round(member.xtdh))}
-        </span>
-        <Tooltip
-          id={`xtdh-tooltip-${member.detail_view_key}`}
-          place="top"
-          style={{
-            backgroundColor: "#1F2937",
-            color: "white",
-            padding: "8px 12px",
-          }}
-        >
-          <div className="tw-flex tw-flex-col tw-gap-y-1">
-            <span>
-              xTDH: {formatNumberWithCommasOrDash(Math.round(member.xtdh))}
-            </span>
-            <span>
-              xTDH Rate: {member.xtdh_rate > 0 ? "+" : ""}
-              {formatNumberWithCommasOrDash(Math.round(member.xtdh_rate))}
-            </span>
-          </div>
-        </Tooltip>
-      </td>
+          <span
+            data-tooltip-id={`xtdh-tooltip-${member.detail_view_key}`}
+            className="tw-cursor-default"
+          >
+            {member.xtdh === 0
+              ? "-"
+              : formatLargeNumber(Math.round(member.xtdh))}
+          </span>
+          <Tooltip
+            id={`xtdh-tooltip-${member.detail_view_key}`}
+            place="top"
+            style={{
+              backgroundColor: "#1F2937",
+              color: "white",
+              padding: "8px 12px",
+            }}
+          >
+            <div className="tw-flex tw-flex-col tw-gap-y-1">
+              <span>
+                xTDH: {formatNumberWithCommasOrDash(Math.round(member.xtdh))}
+              </span>
+              <span>
+                xTDH Rate: {member.xtdh_rate > 0 ? "+" : ""}
+                {formatNumberWithCommasOrDash(Math.round(member.xtdh_rate))}
+              </span>
+            </div>
+          </Tooltip>
+        </td>
+      )}
       <td
         className={`${TABLE_CELL_CLASS_NAME} tw-text-right tw-tabular-nums ${textColorClass}`}
       >

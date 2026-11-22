@@ -8,8 +8,8 @@ import UserPageXtdhGranted from "./UserPageXtdhGranted";
 import UserPageXtdhStatsHeader from "./UserPageXtdhStatsHeader";
 import UserPageXtdhReceived from "@/components/xtdh/user/received";
 import { UserXtdhTestModeBanner } from "./UserXtdhTestModeBanner";
-import XtdhFrozenNotice from "@/components/xtdh/XtdhFrozenNotice";
-import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
+import XtdhRetiredNotice from "@/components/xtdh/XtdhRetiredNotice";
+import { useXtdhRetirement } from "@/hooks/useXtdhRetirement";
 import {
   ArrowUpRightIcon,
   ArrowDownLeftIcon,
@@ -47,6 +47,24 @@ type UserPageXtdhProps = {
 };
 
 export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
+  const retirement = useXtdhRetirement();
+  // From the switch-on xTDH is retired: the tab says so and shows no figures.
+  if (retirement === "retired") {
+    return (
+      <div className="tailwind-scope tw-flex tw-flex-col tw-gap-6">
+        <XtdhRetiredNotice />
+      </div>
+    );
+  }
+  return (
+    <UserPageXtdhLive profile={profile} grantsOpen={retirement === "live"} />
+  );
+}
+
+function UserPageXtdhLive({
+  profile,
+  grantsOpen,
+}: UserPageXtdhProps & { readonly grantsOpen: boolean }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -61,10 +79,9 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
     [searchParams]
   );
 
-  const xtdhFrozen = useIdentityEditingPaused();
   const canGrant = useMemo(() => {
     // From the identity freeze, grants can't be created or changed.
-    if (xtdhFrozen) return false;
+    if (!grantsOpen) return false;
     if (!connectedProfile) return false;
     if (activeProfileProxy) return false;
     const connectedHandle = connectedProfile.handle?.toLowerCase() ?? null;
@@ -78,9 +95,9 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
   }, [
     activeProfileProxy,
     connectedProfile,
+    grantsOpen,
     profile.consolidation_key,
     profile.handle,
-    xtdhFrozen,
   ]);
 
   const handleFilterChange = useCallback(
@@ -128,7 +145,7 @@ export default function UserPageXtdh({ profile }: UserPageXtdhProps) {
       className="tailwind-scope tw-group/profile-xtdh tw-flex tw-flex-col tw-gap-6"
       data-typography="profile"
     >
-      {xtdhFrozen ? <XtdhFrozenNotice /> : <UserXtdhTestModeBanner />}
+      {grantsOpen ? <UserXtdhTestModeBanner /> : <XtdhRetiredNotice />}
       <UserPageXtdhStatsHeader
         profileId={statsProfileId}
         onOutboundClick={canGrant ? handleOutboundClick : undefined}
