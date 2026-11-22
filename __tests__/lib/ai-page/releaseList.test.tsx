@@ -74,8 +74,13 @@ const RC4 = "0.1.0-rc.4";
 const ARM_CUDA_DEB = `6529-ai-cuda_${RC4}_arm64.deb`;
 const ARM_CUDA_TARBALL = `6529-ai-${RC4}-linux-arm64-cuda.tar.gz`;
 
-/** A list with rc.4, which adds both to rc.3's files, and rc.3. */
-function rc4List(): Record<string, unknown> {
+const ARM_CUDA_FILES = [
+  { name: ARM_CUDA_DEB, size: 1_010_000_000, sha256: "a".repeat(64) },
+  { name: ARM_CUDA_TARBALL, size: 1_190_000_000, sha256: "b".repeat(64) },
+];
+
+/** A list with rc.4, which adds both (or those given) to rc.3's files. */
+function rc4List(added = ARM_CUDA_FILES): Record<string, unknown> {
   const entry = aiListEntry(RC4);
   return aiList({
     releases: [
@@ -83,12 +88,7 @@ function rc4List(): Record<string, unknown> {
         ...entry,
         files: [
           ...(entry["files"] as readonly Record<string, unknown>[]),
-          { name: ARM_CUDA_DEB, size: 1_010_000_000, sha256: "a".repeat(64) },
-          {
-            name: ARM_CUDA_TARBALL,
-            size: 1_190_000_000,
-            sha256: "b".repeat(64),
-          },
+          ...added,
         ],
       },
       aiListEntry(RC3),
@@ -643,6 +643,16 @@ describe("6529 AI's release list of format 1", () => {
       expect(html).toContain(`tar -xzf ${ARM_CUDA_TARBALL}`);
       expect(html).toContain(`${ARM_CUDA_LABEL} · arm64-cuda.tar.gz`);
       expect(html).toContain(`aria-label="${ARM_CUDA_LABEL}: ${ARM_CUDA_DEB}"`);
+    });
+
+    it("installs only the one a release lists", async () => {
+      storeHasList(rc4List(ARM_CUDA_FILES.slice(0, 1)));
+
+      const html = renderToStaticMarkup(await AiGuideRoute());
+
+      expect(html).toContain(`sudo apt install ./${ARM_CUDA_DEB}`);
+      expect(html).not.toContain(ARM_CUDA_TARBALL);
+      expect(html).not.toContain(`${ARM_CUDA_LABEL} · arm64-cuda.tar.gz`);
     });
 
     it("leaves them out for rc.3, which has none", async () => {

@@ -44,6 +44,19 @@ export type AiGuideSystem = {
     | undefined;
 };
 
+/** A file's name in the release; null when the release doesn't list it. */
+function listedFileName(
+  release: AiRelease | undefined,
+  system: AiSystem,
+  ending: string
+): string | null {
+  return (
+    release?.files.find(
+      (file) => file.system === system && file.name.endsWith(ending)
+    )?.name ?? null
+  );
+}
+
 /** A file's name in the release, or the name it has in every release. */
 function fileName(
   release: AiRelease | undefined,
@@ -51,11 +64,7 @@ function fileName(
   ending: string,
   fallback: string
 ): string {
-  return (
-    release?.files.find(
-      (file) => file.system === system && file.name.endsWith(ending)
-    )?.name ?? fallback
-  );
+  return listedFileName(release, system, ending) ?? fallback;
 }
 
 function windowsOpenStep(
@@ -92,8 +101,9 @@ function tarballTail(name: string): string {
 
 type AiLinuxPackage = {
   readonly label: string;
-  readonly deb: string;
-  readonly tarball: string;
+  /** Null for a file the guide leaves out: the release doesn't list it. */
+  readonly deb: string | null;
+  readonly tarball: string | null;
 };
 
 function macGuide(dmg: string): AiGuideSystem {
@@ -200,10 +210,16 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
     steps: [
       {
         text: "In the folder you saved it to, install the package for your computer. `uname -m` prints `x86_64` or `aarch64`.",
-        code: linux.map((row) => ({
-          label: `${row.label} · ${debTail(row.deb)}`,
-          code: `sudo apt install ./${row.deb}`,
-        })),
+        code: linux.flatMap(({ label, deb }) =>
+          deb
+            ? [
+                {
+                  label: `${label} · ${debTail(deb)}`,
+                  code: `sudo apt install ./${deb}`,
+                },
+              ]
+            : []
+        ),
         result:
           "apt asks whether a 6529 validator runs on this computer. Choose **alone**. Pick *validator* only if this computer runs one.",
       },
@@ -240,10 +256,16 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
       title: "Another distribution",
       step: {
         text: "The `.tar.gz` installs the same files on any Linux with systemd. Download it from **Downloads**, then:",
-        code: linux.map((row) => ({
-          label: `${row.label} · ${tarballTail(row.tarball)}`,
-          code: `tar -xzf ${row.tarball}\nsudo ./${row.tarball.replace(/\.tar\.gz$/, "")}/install.sh`,
-        })),
+        code: linux.flatMap(({ label, tarball }) =>
+          tarball
+            ? [
+                {
+                  label: `${label} · ${tarballTail(tarball)}`,
+                  code: `tar -xzf ${tarball}\nsudo ./${tarball.replace(/\.tar\.gz$/, "")}/install.sh`,
+                },
+              ]
+            : []
+        ),
         result:
           "To uninstall, run `sudo /opt/6529-ai/share/uninstall.sh`, with `--purge` to delete your models.",
       },
@@ -253,33 +275,13 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
 
 /**
  * The CUDA packages for 64-bit ARM, such as NVIDIA's DGX Spark, which
- * releases carry from 0.1.0-rc.4 on: listed only for a release that has
- * them.
+ * releases carry from 0.1.0-rc.4 on: each listed only when the release
+ * has it.
  */
-function armCudaPackages(
-  release: AiRelease | undefined,
-  version: string
-): AiLinuxPackage[] {
-  if (!release?.files.some((file) => file.system === "linux-arm64-cuda")) {
-    return [];
-  }
-  return [
-    {
-      label: "ARM64, NVIDIA GPU",
-      deb: fileName(
-        release,
-        "linux-arm64-cuda",
-        "_arm64.deb",
-        `6529-ai-cuda_${version}_arm64.deb`
-      ),
-      tarball: fileName(
-        release,
-        "linux-arm64-cuda",
-        ".tar.gz",
-        `6529-ai-${version}-linux-arm64-cuda.tar.gz`
-      ),
-    },
-  ];
+function armCudaPackages(release: AiRelease | undefined): AiLinuxPackage[] {
+  const deb = listedFileName(release, "linux-arm64-cuda", "_arm64.deb");
+  const tarball = listedFileName(release, "linux-arm64-cuda", ".tar.gz");
+  return deb || tarball ? [{ label: "ARM64, NVIDIA GPU", deb, tarball }] : [];
 }
 
 /**
@@ -348,7 +350,7 @@ export function getAiGuideSystems(
         `6529-ai-${version}-linux-arm64-cpu.tar.gz`
       ),
     },
-    ...armCudaPackages(release, version),
+    ...armCudaPackages(release),
   ];
 
   return [macGuide(dmg), windowsGuide(release, setup), linuxGuide(linux)];
