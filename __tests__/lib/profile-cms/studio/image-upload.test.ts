@@ -10,6 +10,10 @@ import {
 } from "@/lib/profile-cms/studio/image-upload";
 
 jest.mock("@/services/api/common-api", () => ({ commonApiFetch: jest.fn() }));
+let mockMediaOrigin = "https://d3lqz0a4bldqgf.cloudfront.net";
+jest.mock("@/lib/media/first-party-media", () => ({
+  getMediaOrigin: () => mockMediaOrigin,
+}));
 jest.mock("@/services/uploads/multipartUploadCore", () => ({
   multipartUploadCore: jest.fn(),
   getContentType: (file: File) => file.type,
@@ -175,6 +179,36 @@ it.each([
     expect(fetchMock).not.toHaveBeenCalled();
   }
 );
+
+describe("on a build with its own media host", () => {
+  const stagingUrl =
+    "https://media.staging.6529.io/drops/author_test/id/image.png";
+
+  beforeEach(() => {
+    mockMediaOrigin = "https://media.staging.6529.io";
+  });
+  afterEach(() => {
+    mockMediaOrigin = "https://d3lqz0a4bldqgf.cloudfront.net";
+  });
+
+  it("accepts an upload served from that host", async () => {
+    jest
+      .mocked(multipartUploadCore)
+      .mockResolvedValue({ ...completion, media_url: stagingUrl });
+    await expect(uploadCmsStudioImage(options())).resolves.toHaveProperty(
+      "width",
+      640
+    );
+    expect(fetchMock).toHaveBeenCalledWith(stagingUrl, expect.anything());
+  });
+
+  it("refuses an upload URL on the prod CDN", async () => {
+    await expect(uploadCmsStudioImage(options())).rejects.toMatchObject({
+      code: "invalid_response",
+    });
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
 
 it.each([202, 206, 302])(
   "rejects HTTP %s as incomplete final bytes",

@@ -105,6 +105,26 @@ function getDirectiveSources(csp: string, name: string): string[] {
 }
 
 describe("createSecurityHeaders CSP", () => {
+  it("allows the configured user-media CDN for media and frames only when set", () => {
+    const staging = getContentSecurityPolicy({
+      userMediaEndpoint: "https://media.staging.6529.io",
+    });
+    expect(getDirectiveSources(staging, "media-src")).toContain(
+      "https://media.staging.6529.io"
+    );
+    expect(getDirectiveSources(staging, "frame-src")).toContain(
+      "https://media.staging.6529.io"
+    );
+
+    const prod = getContentSecurityPolicy();
+    expect(prod).not.toContain("media.staging.6529.io");
+
+    const insecure = getContentSecurityPolicy({
+      userMediaEndpoint: "http://media.staging.6529.io",
+    });
+    expect(insecure).not.toContain("media.staging.6529.io");
+  });
+
   it("uses scheme-limited connect sources instead of a wildcard host source", () => {
     const connectSrc = getDirectiveSources(
       getContentSecurityPolicy(),
