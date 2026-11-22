@@ -27,11 +27,12 @@ sections:
 
 1. Open `/`.
 2. The Montserrat hero shows a small `6529` label, the headline
-   `Building a decentralized network state`, and the subtitle
-   `A decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology.`
+   `A peer-to-peer protocol for network organizations`, and the subtitle
+   `Decentralized, permissionless, and global. Anyone can fund, build, and coordinate network-scaled organizations or public goods.`
    The hero is a single left-aligned typography block without artwork or
-   illustration. The headline scales with the available width, and the
-   subtitle has a readable line length. No space is reserved for hero images.
+   illustration. The headline scales with the available width without
+   splitting `peer-to-peer` across lines, and the subtitle has a readable line
+   length. No space is reserved for hero images.
 3. Logged-out visitors see two actions beneath the subtitle, in this order:
    - `Connect wallet`, the primary action, opens the existing wallet connection flow.
    - `Start here`, the secondary action, opens `/join-6529`.

@@ -19,18 +19,30 @@ describe("HeroHeader", () => {
     const { container } = render(<HeroHeader />);
 
     const heading = screen.getByRole("heading", {
-      name: "Building a decentralized network state",
+      name: "A peer-to-peer protocol for network organizations",
     });
 
     expect(heading).toBeInTheDocument();
     expect(container.querySelector("img")).toBeNull();
     expect(
       screen.getByText(
-        "A decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
+        "Decentralized, permissionless, and global. Anyone can fund, build, and coordinate network-scaled organizations or public goods."
       )
     ).toBeInTheDocument();
     expect(heading).toHaveClass("tw-font-semibold");
     expect(heading).not.toHaveClass("tw-font-medium");
+  });
+
+  it("keeps hyphenated headline words on one line", () => {
+    render(<HeroHeader />);
+
+    const heading = screen.getByRole("heading", { level: 1 });
+    const unbroken = heading.querySelector(".tw-whitespace-nowrap");
+
+    expect(heading).toHaveTextContent(
+      "A peer-to-peer protocol for network organizations"
+    );
+    expect(unbroken).toHaveTextContent("peer-to-peer");
   });
 
   it("renders a quick link to network health", () => {

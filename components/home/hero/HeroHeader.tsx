@@ -6,6 +6,19 @@ import type { ReactNode } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
+function HeadlineText({ text }: Readonly<{ text: string }>) {
+  // Keep hyphenated words such as "peer-to-peer" from breaking at a hyphen.
+  return text.split(/(\s+)/u).map<ReactNode>((part, position) =>
+    part.includes("-") ? (
+      <span key={`${position}:${part}`} className="tw-whitespace-nowrap">
+        {part}
+      </span>
+    ) : (
+      part
+    )
+  );
+}
+
 export default function HeroHeader({
   children,
 }: {
@@ -34,7 +47,7 @@ export default function HeroHeader({
             6529
           </p>
           <h1 className="tw-mb-0 tw-mt-6 tw-max-w-[1000px] tw-text-balance tw-text-[clamp(2.375rem,10cqw,3.5rem)] tw-font-semibold tw-leading-[1.06] tw-tracking-[-0.05em] tw-text-iron-50 lg:tw-text-[clamp(2.375rem,5.7cqw,4.5rem)]">
-            {t(locale, "home.hero.title")}
+            <HeadlineText text={t(locale, "home.hero.title")} />
           </h1>
           <p className="tw-mb-0 tw-mt-6 tw-max-w-[720px] tw-text-pretty tw-text-base tw-leading-relaxed tw-text-iron-300 md:tw-mt-8 md:tw-text-lg">
             {t(locale, "home.hero.description")}
