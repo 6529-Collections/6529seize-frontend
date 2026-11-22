@@ -219,14 +219,25 @@ export function E2eeTimeline({
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [historyError, setHistoryError] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
-  // The first saved record when an "older" page added nothing before it.
-  const [oldestReachedAt, setOldestReachedAt] = useState<string | null>(null);
+  // The chat and first record shown when an "older" page added nothing.
+  const [oldestReachedAt, setOldestReachedAt] = useState<{
+    readonly g: string;
+    readonly firstId: string | null;
+  } | null>(null);
   const pagingRef = useRef(false);
-  // Rendered after the page settled: an unchanged first record means this
-  // device holds nothing older, so the control would do nothing again.
-  const oldestReached =
+  const firstId = allMessages[0]?.id ?? null;
+  // Any other first record or chat may have older history again: offer the
+  // control until a page shows otherwise.
+  if (
     oldestReachedAt !== null &&
-    allMessages[0]?.id === oldestReachedAt &&
+    (oldestReachedAt.g !== conversation.g ||
+      oldestReachedAt.firstId !== firstId)
+  ) {
+    setOldestReachedAt(null);
+  }
+  const oldestReached =
+    oldestReachedAt?.g === conversation.g &&
+    oldestReachedAt.firstId === firstId &&
     !conversation.historyError;
   const latestLoaded =
     !conversation.lastMessage ||
@@ -259,10 +270,12 @@ export function E2eeTimeline({
       let options = {};
       if (direction !== "latest" && key)
         options = direction === "older" ? { before: key } : { after: key };
-      const firstBefore = allMessages[0]?.id ?? null;
+      const before = { g: conversation.g, firstId };
       await engine.loadHistory(conversation.g, options);
       setHistoryLoaded(true);
-      if (direction === "older") setOldestReachedAt(firstBefore);
+      // Applied in the render that reads the settled page: kept only when
+      // the page left the same first record in place.
+      if (direction === "older") setOldestReachedAt(before);
     } catch {
       setHistoryError(true);
     } finally {
