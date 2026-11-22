@@ -23,14 +23,18 @@ import {
 } from "@/services/api/competitions-api";
 import type { ApiSetCompetitionVoteRequest } from "@/generated/models/ApiSetCompetitionVoteRequest";
 import { useCompetitionViewer } from "@/hooks/competitions/useCompetitionQueries";
-import { useCompetitionSignatureFor } from "@/hooks/competitions/useCompetitionSignature";
+import {
+  getCompetitionSignatureFailureKey,
+  toCompetitionSignatureError,
+  useCompetitionSignatureFor,
+} from "@/hooks/competitions/useCompetitionSignature";
 import {
   newCompetitionRequestKey,
   isRejectedCompetitionCommand,
   isCompetitionAccessError,
 } from "@/helpers/competition.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { t } from "@/i18n/messages";
+import { t, type MessageKey } from "@/i18n/messages";
 import { formatInteger } from "@/i18n/format";
 import { getCompetitionConfigLabel } from "@/helpers/competition-labels.helpers";
 import { CompetitionState } from "./CompetitionState";
@@ -156,7 +160,7 @@ export function CompetitionVoteForm({
     null
   );
   const [busy, setBusy] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [failed, setFailed] = useState<MessageKey | null>(null);
   const [saved, setSaved] = useState(false);
   const [lastVote, setLastVote] = useState<{
     source: string;
@@ -216,7 +220,7 @@ export function CompetitionVoteForm({
       });
     setBusy(true);
     onSubmittingChange?.(true);
-    setFailed(false);
+    setFailed(null);
     setSaved(false);
     try {
       if (!(await requestAuth()).success || !isCurrentActor()) return;
@@ -237,7 +241,9 @@ export function CompetitionVoteForm({
             { value: numeric },
             entryId,
             dropId
-          );
+          ).catch((error: unknown) => {
+            throw toCompetitionSignatureError(error);
+          });
         pending.current = { actor: viewer, body };
       }
       if (!isCurrentActor()) return;
@@ -266,7 +272,9 @@ export function CompetitionVoteForm({
       void invalidateCompetition(client, identity).catch(() => undefined);
     } catch (error) {
       if (isRejectedCompetitionCommand(error)) pending.current = null;
-      setFailed(true);
+      setFailed(
+        getCompetitionSignatureFailureKey(error) ?? "competitions.failure"
+      );
       await credit.refetch();
     } finally {
       setBusy(false);
@@ -445,7 +453,7 @@ export function CompetitionVoteForm({
             role="alert"
             className="tw-mb-0 tw-mt-1 tw-text-xs tw-text-red"
           >
-            {t(locale, "competitions.failure")}
+            {t(locale, failed)}
           </p>
         )}
       </form>
@@ -553,7 +561,7 @@ export function CompetitionVoteForm({
           role="alert"
           className="tw-text-sm tw-text-red"
         >
-          {t(locale, "competitions.failure")}
+          {t(locale, failed)}
         </p>
       )}
       {saved && (

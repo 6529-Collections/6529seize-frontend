@@ -29,6 +29,19 @@ export const isDirectProfileAuthSession = ({
   !hasActiveProxy &&
   (authRole === null || authRole === profileId);
 
+/**
+ * True when the token acts for a profile other than the wallet's own one. The
+ * API treats every such token as a proxy session, even when the matching
+ * received proxy is not (or no longer) listed for the profile.
+ */
+export const isProxyRoleAuthSession = ({
+  authRole,
+  profileId,
+}: {
+  readonly authRole: string | null | undefined;
+  readonly profileId: string | null | undefined;
+}): boolean => Boolean(authRole) && Boolean(profileId) && authRole !== profileId;
+
 /** Finds the received proxy for the token's acting profile without changing state. */
 export const resolveActiveProfileProxy = <
   T extends { readonly created_by: { readonly id: string } },

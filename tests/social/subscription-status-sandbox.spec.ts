@@ -560,8 +560,12 @@ test.describe("Subscription status sandbox @auth @medium @local-only", () => {
             await expect(headline).toHaveText(
               phase === "before" ? "24 drops funded" : "Next 24 drops funded"
             );
-            await expect(overview.getByText(/Funded through/)).toHaveText(
-              "Funded through The Memes #598 · Jan 1, 2027"
+            await expect(
+              overview.getByText(/Funded (at least )?through/)
+            ).toHaveText(
+              phase === "before"
+                ? "Funded through The Memes #598 · Jan 1, 2027"
+                : "Funded at least through The Memes #598 · Jan 1, 2027"
             );
           }
           if (phase !== "before" && name === "mint-paid")

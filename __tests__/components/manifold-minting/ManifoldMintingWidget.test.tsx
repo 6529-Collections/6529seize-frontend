@@ -11,6 +11,11 @@ import {
   useWaitForTransactionReceipt,
   useWriteContract,
 } from "wagmi";
+import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: jest.fn(() => false),
+}));
 
 jest.mock("wagmi");
 
@@ -609,5 +614,19 @@ describe("ManifoldMintingWidget", () => {
     expect(
       await screen.findByRole("dialog", { name: "Confirm in your wallet" })
     ).toBeInTheDocument();
+  });
+
+  it("offers the website instead of minting with 6529 Desktop browser forwarding", async () => {
+    jest.mocked(useIsDesktopBrowserWallet).mockReturnValue(true);
+    const user = userEvent.setup();
+    render(<ManifoldMintingWidget {...baseProps} />);
+    await user.click(screen.getByTestId("connect"));
+    expect(
+      screen.queryByRole("button", { name: /SEIZE x1/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Continue in your browser" })
+    ).toBeInTheDocument();
+    expect(writeContract).not.toHaveBeenCalled();
   });
 });

@@ -5,12 +5,14 @@ import type { Hex } from "viem";
 import {
   useAccount,
   useConfig,
+  useSendTransaction,
   useSignMessage,
   useSignTypedData,
   useSwitchChain,
 } from "wagmi";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
 import { publicEnv } from "@/config/env";
+import { getTransactionLink } from "@/helpers/Helpers";
 import { loadDesktopUrlInPlace } from "@/helpers/desktop-navigation";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -29,6 +31,7 @@ import {
   type WalletRequestRefusal,
 } from "@/lib/desktop/walletRequestDescribe";
 import BrowserWalletRequestContent from "./BrowserWalletRequestContent";
+import BrowserWalletTransactionView from "./BrowserWalletTransactionView";
 
 /** The website's host for this build, for "Continue on {site}" copy. */
 function getWebsiteHost(): string {
@@ -69,6 +72,8 @@ type Step =
       readonly kind: "returned";
       readonly deepLink: string;
       readonly declined: boolean;
+      /** The sent transaction, with its chain, for a transaction request. */
+      readonly transaction?: { readonly hash: Hex; readonly chainId: number };
     };
 
 async function fetchRequestSigner(): Promise<string | null> {
@@ -156,7 +161,10 @@ function Details({
   description,
   locale,
 }: {
-  readonly description: WalletRequestDescription;
+  readonly description: Exclude<
+    WalletRequestDescription,
+    { readonly kind: "transaction" }
+  >;
   readonly locale: Locale;
 }) {
   if (description.kind === "message") {
@@ -207,19 +215,25 @@ function Details({
 
 /**
  * What stands between the user and the wallet prompt: a connected wallet,
- * the requested account, and (for typed data bound to a chain) the
- * requested network. Only then is there a Sign button.
+ * the requested account, and (for typed data bound to a chain, and for
+ * every transaction) the requested network. Only then is there a Sign (or
+ * Send) button; `disabled` holds it back while checks are open.
  */
 function WalletGate({
   locale,
   request,
   signing,
   onSign,
+  disabled = false,
+  describedBy,
 }: {
   readonly locale: Locale;
   readonly request: Request;
   readonly signing: boolean;
   readonly onSign: () => void;
+  readonly disabled?: boolean;
+  /** The id of what explains whether the button is offered. */
+  readonly describedBy?: string;
 }) {
   const { seizeConnect } = useSeizeConnectContext();
   const live = useAccount();
@@ -270,47 +284,83 @@ function WalletGate({
       </>
     );
   }
+  const isTransaction = request.method === "eth_sendTransaction";
   return (
     <button
       type="button"
       className={BUTTON_CLASS}
+      disabled={disabled}
       aria-disabled={signing}
+      aria-describedby={describedBy}
       onClick={() => {
-        if (!signing) onSign();
+        if (!signing && !disabled) onSign();
       }}
     >
-      {t(locale, "browserConnector.wallet.sign")}
+      {t(
+        locale,
+        isTransaction
+          ? "browserConnector.tx.send"
+          : "browserConnector.wallet.sign"
+      )}
     </button>
   );
 }
 
-/** Typed data bound to a chain is signed on that chain only. */
-const needsNetwork = (request: Request, chainId: number | undefined) =>
-  request.method === "eth_signTypedData_v4" &&
-  request.typedData.domain["chainId"] !== undefined &&
-  chainId !== request.chainId;
+/**
+ * A transaction is sent on its chain only; typed data bound to a chain is
+ * signed on that chain only.
+ */
+const needsNetwork = (request: Request, chainId: number | undefined) => {
+  if (request.method === "eth_sendTransaction") {
+    return chainId !== request.chainId;
+  }
+  return (
+    request.method === "eth_signTypedData_v4" &&
+    request.typedData.domain["chainId"] !== undefined &&
+    chainId !== request.chainId
+  );
+};
 
-/** Ask the wallet for exactly what the request describes. */
-function signRequest(
-  request: Request,
-  signMessage: ReturnType<typeof useSignMessage>["signMessageAsync"],
-  signTypedData: ReturnType<typeof useSignTypedData>["signTypedDataAsync"]
-): Promise<Hex> {
+interface WalletActions {
+  readonly signMessage: ReturnType<typeof useSignMessage>["signMessageAsync"];
+  readonly signTypedData: ReturnType<
+    typeof useSignTypedData
+  >["signTypedDataAsync"];
+  readonly sendTransaction: ReturnType<
+    typeof useSendTransaction
+  >["sendTransactionAsync"];
+}
+
+/**
+ * Ask the wallet for exactly what the request describes: a signature, or
+ * the transaction itself (fees and nonce are the wallet's to choose).
+ */
+function signRequest(request: Request, wallet: WalletActions): Promise<Hex> {
   if (request.method === "personal_sign") {
-    return signMessage({
+    return wallet.signMessage({
       account: request.address,
       message: { raw: request.message },
     });
   }
+  if (request.method === "eth_sendTransaction") {
+    const { to, data, value } = request.transaction;
+    return wallet.sendTransaction({
+      account: request.address,
+      chainId: request.chainId,
+      to: to as Hex,
+      data,
+      value: BigInt(value),
+    });
+  }
   // viem derives the domain type from the domain itself.
   const { EIP712Domain: _domainType, ...types } = request.typedData.types;
-  return signTypedData({
+  return wallet.signTypedData({
     account: request.address,
     domain: request.typedData.domain,
     types,
     primaryType: request.typedData.primaryType,
     message: request.typedData.message,
-  } as Parameters<typeof signTypedData>[0]);
+  } as Parameters<WalletActions["signTypedData"]>[0]);
 }
 
 interface PanelMessages {
@@ -331,14 +381,15 @@ function getMessages(
     };
   }
   if (step.kind === "returned") {
+    let key:
+      | "browserConnector.wallet.declined"
+      | "browserConnector.wallet.returned"
+      | "browserConnector.tx.sent" = "browserConnector.wallet.returned";
+    if (step.declined) key = "browserConnector.wallet.declined";
+    else if (step.transaction) key = "browserConnector.tx.sent";
     return {
       alert: null,
-      status: t(
-        locale,
-        step.declined
-          ? "browserConnector.wallet.declined"
-          : "browserConnector.wallet.returned"
-      ),
+      status: t(locale, key, { hash: step.transaction?.hash ?? "" }),
     };
   }
   if (verified.kind === "invalid" || expired) {
@@ -361,11 +412,12 @@ function getMessages(
       status: null,
     };
   }
+  const failedKey =
+    verified.fragment.request.method === "eth_sendTransaction"
+      ? "browserConnector.tx.failed"
+      : "browserConnector.wallet.failed";
   return {
-    alert:
-      step.kind === "failed"
-        ? t(locale, "browserConnector.wallet.failed")
-        : null,
+    alert: step.kind === "failed" ? t(locale, failedKey) : null,
     status:
       step.kind === "signing"
         ? t(locale, "browserConnector.wallet.signing")
@@ -391,6 +443,7 @@ export default function BrowserWalletRequestPanel({
   const live = useAccount();
   const { signMessageAsync } = useSignMessage();
   const { signTypedDataAsync } = useSignTypedData();
+  const { sendTransactionAsync } = useSendTransaction();
   const [step, setStep] = useState<Step>({ kind: "idle" });
 
   const fragment =
@@ -413,7 +466,16 @@ export default function BrowserWalletRequestPanel({
       fragment.envelope.scheme,
       result
     );
-    setStep({ kind: "returned", deepLink, declined });
+    const sent =
+      result.ok && fragment.request.method === "eth_sendTransaction"
+        ? { hash: result.value, chainId: fragment.request.chainId }
+        : undefined;
+    setStep({
+      kind: "returned",
+      deepLink,
+      declined,
+      ...(sent ? { transaction: sent } : {}),
+    });
     loadDesktopUrlInPlace(deepLink);
   };
 
@@ -442,18 +504,24 @@ export default function BrowserWalletRequestPanel({
     const stillCurrent = () => current === attempt.current && !answered.current;
     setStep({ kind: "signing" });
     try {
-      const signature = await signRequest(
-        request,
-        signMessageAsync,
-        signTypedDataAsync
-      );
-      if (!stillCurrent()) return;
-      // A request that ran out while the wallet waited is refused by the app.
-      if (envelope.expiresAt <= Date.now()) {
+      const value = await signRequest(request, {
+        signMessage: signMessageAsync,
+        signTypedData: signTypedDataAsync,
+        sendTransaction: sendTransactionAsync,
+      });
+      const isTransaction = request.method === "eth_sendTransaction";
+      // A sent transaction is on its way whatever happens here: its hash
+      // always goes back (6529 Desktop checks late ones on chain). This page
+      // serves one request; the link carries its id, and the shell takes
+      // one answer per id and checks a later one as a late transaction.
+      if (!isTransaction && !stillCurrent()) return;
+      // A signature that ran out while the wallet waited is refused by the app.
+      if (!isTransaction && envelope.expiresAt <= Date.now()) {
         setStep({ kind: "idle" });
         return;
       }
-      returnToApp({ v: 1, id: envelope.id, ok: true, value: signature }, false);
+      if (isTransaction) answered.current = false;
+      returnToApp({ v: 1, id: envelope.id, ok: true, value }, false);
     } catch (error) {
       if (!stillCurrent()) return;
       if (isUserRejectedSigningError(error)) {
@@ -468,12 +536,27 @@ export default function BrowserWalletRequestPanel({
   let content: React.ReactNode = null;
   if (step.kind === "returned") {
     content = (
-      <a
-        href={step.deepLink}
-        className={`${BUTTON_CLASS} tw-inline-flex tw-items-center tw-justify-center tw-no-underline`}
-      >
-        {t(locale, "browserConnector.openApp")}
-      </a>
+      <>
+        {step.transaction && (
+          <a
+            href={getTransactionLink(
+              step.transaction.chainId,
+              step.transaction.hash
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="tw-break-all tw-font-mono tw-text-sm tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+          >
+            {t(locale, "browserConnector.tx.explorer")}
+          </a>
+        )}
+        <a
+          href={step.deepLink}
+          className={`${BUTTON_CLASS} tw-inline-flex tw-items-center tw-justify-center tw-no-underline`}
+        >
+          {t(locale, "browserConnector.openApp")}
+        </a>
+      </>
     );
   } else if (!expired && verified.kind === "refused") {
     content = (
@@ -485,7 +568,48 @@ export default function BrowserWalletRequestPanel({
         {t(locale, "browserConnector.wallet.tellApp")}
       </button>
     );
-  } else if (!expired && verified.kind === "ready") {
+  } else if (
+    !expired &&
+    verified.kind === "ready" &&
+    verified.description.kind === "transaction" &&
+    verified.fragment.request.method === "eth_sendTransaction"
+  ) {
+    const { request, envelope } = verified.fragment;
+    content = (
+      <BrowserWalletTransactionView
+        locale={locale}
+        request={request}
+        description={verified.description.transaction}
+        expiresAt={envelope.expiresAt}
+      >
+        {(canSend, describedBy) => (
+          <>
+            <WalletGate
+              locale={locale}
+              request={request}
+              signing={step.kind === "signing"}
+              disabled={!canSend}
+              describedBy={describedBy}
+              onSign={() => {
+                sign().catch(() => setStep({ kind: "failed" }));
+              }}
+            />
+            <button
+              type="button"
+              className={SECONDARY_BUTTON_CLASS}
+              onClick={() => decline("rejected")}
+            >
+              {t(locale, "browserConnector.wallet.decline")}
+            </button>
+          </>
+        )}
+      </BrowserWalletTransactionView>
+    );
+  } else if (
+    !expired &&
+    verified.kind === "ready" &&
+    verified.description.kind !== "transaction"
+  ) {
     const { request } = verified.fragment;
     content = (
       <>
