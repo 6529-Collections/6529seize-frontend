@@ -98,6 +98,55 @@ export function isSubscriptionCoverageForecastFullyFunded(
   );
 }
 
+export interface SubscriptionFundedDropsAtCurrentSettings {
+  readonly count: number;
+  readonly capped: boolean;
+}
+
+/**
+ * The backend's funded-drop count past the forecast horizon, when it reports
+ * one and funding reaches the end of the forecast. Older backends omit the
+ * field; callers then keep the forecast-window wording.
+ */
+export function getSubscriptionFundedDropsAtCurrentSettings(
+  coverage:
+    | (ForecastEndCoverage &
+        Pick<
+          ApiSubscriptionCoverage,
+          | "funded_drops_at_current_settings"
+          | "funded_drops_at_current_settings_capped"
+        >)
+    | undefined
+    | null
+): SubscriptionFundedDropsAtCurrentSettings | null {
+  const count = coverage?.funded_drops_at_current_settings;
+  if (
+    typeof count !== "number" ||
+    !Number.isSafeInteger(count) ||
+    count < (coverage?.fully_funded_drops ?? 0) ||
+    !isSubscriptionCoverageFundedToForecastEnd(coverage)
+  ) {
+    return null;
+  }
+  return {
+    count,
+    capped: coverage?.funded_drops_at_current_settings_capped === true,
+  };
+}
+
+export function getFundedDropsAtCurrentSettingsLabel(
+  locale: SupportedLocale,
+  funded: SubscriptionFundedDropsAtCurrentSettings
+): string {
+  return t(
+    locale,
+    funded.capped
+      ? "subscriptions.coverage.summary.fundedDropsAtLeast"
+      : "subscriptions.coverage.summary.fundedDropsAbout",
+    { count: formatInteger(locale, funded.count) }
+  );
+}
+
 export function getSubscriptionCoveragePresentation(
   locale: SupportedLocale,
   status: ApiSubscriptionCoverageStatus
@@ -232,8 +281,12 @@ export function getSubscriptionCoverageCompactLine(
     coverage.status !== ApiSubscriptionCoverageStatus.NoUpcomingSelections &&
     coverage.status !== ApiSubscriptionCoverageStatus.Unknown
   ) {
+    const fundedAtCurrentSettings =
+      getSubscriptionFundedDropsAtCurrentSettings(coverage);
     parts.push(
-      isSubscriptionCoverageForecastFullyFunded(coverage)
+      fundedAtCurrentSettings
+        ? getFundedDropsAtCurrentSettingsLabel(locale, fundedAtCurrentSettings)
+        : isSubscriptionCoverageForecastFullyFunded(coverage)
         ? t(locale, "subscriptions.coverage.summary.nextFundedDrops", {
             count: formatInteger(locale, coverage.fully_funded_drops),
           })

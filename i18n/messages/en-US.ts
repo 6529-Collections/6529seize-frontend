@@ -4407,6 +4407,11 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.history.emptyTopups": "No Top Ups found",
   "subscriptions.history.loading": "Loading {title}",
   "subscriptions.coverage.summary.nextFundedDrops": "Next {count} drops funded",
+  "subscriptions.coverage.summary.fundedDropsAbout": "About {count} drops funded",
+  "subscriptions.coverage.summary.fundedDropsAtLeast":
+    "At least {count} drops funded",
+  "subscriptions.coverage.summary.currentSettingsNote":
+    "At the current mint price and current subscription settings.",
   "subscriptions.coverage.summary.paidTitle": "Subscription paid",
   "subscriptions.coverage.summary.paid":
     "The subscription for {meme} is already paid.",
