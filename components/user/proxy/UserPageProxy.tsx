@@ -7,7 +7,6 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
 import { groupProfileProxies } from "@/helpers/profile-proxy.helpers";
 import { useIdentity } from "@/hooks/useIdentity";
-import { useIdentityEditingPaused } from "@/hooks/useIdentityMovePhase";
 import { commonApiFetch } from "@/services/api/common-api";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useParams } from "next/navigation";
@@ -28,7 +27,6 @@ export default function UserPageProxy({
   const user = (params?.["user"] as string)?.toLowerCase();
   const [mode, setMode] = useState<ProxyMode>(ProxyMode.LIST);
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
-  const identityEditingPaused = useIdentityEditingPaused();
 
   const { profile } = useIdentity({
     handleOrWallet: user,
@@ -78,7 +76,7 @@ export default function UserPageProxy({
   const components: Record<ProxyMode, JSX.Element> = {
     [ProxyMode.LIST]: (
       <ProxyList
-        isSelf={isSelf && !identityEditingPaused}
+        isSelf={isSelf}
         loading={isFetching}
         receivedProfileProxies={profileProxiesFiltered.received}
         grantedProfileProxies={profileProxiesFiltered.granted}

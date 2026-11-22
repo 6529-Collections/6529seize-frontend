@@ -389,7 +389,7 @@ const executeApiRequest = async <T>({
   credentials,
   cache,
 }: ExecuteApiRequestParams): Promise<T> => {
-  assertIdentityEditAllowed({ url, method });
+  assertIdentityEditAllowed({ url, method, body });
   assertWriteMatchesDisplayedWallet({
     url,
     method,

@@ -66,8 +66,16 @@ describe("identity edits through the API helpers during the move", () => {
       () => commonApiDelete({ endpoint: "profiles/alice/cic/statements/1" }),
     ],
     [
-      "proxy action change",
-      () => commonApiPut({ endpoint: "proxies/p/actions/a", body: {} }),
+      "REP proxy action",
+      () =>
+        commonApiPost({
+          endpoint: "proxies/p/actions",
+          body: { action_type: "ALLOCATE_REP", credit_amount: 10 },
+        }),
+    ],
+    [
+      "profile wave change",
+      () => commonApiPut({ endpoint: "profiles/alice/wave", body: {} }),
     ],
     [
       "picture upload",
@@ -101,6 +109,12 @@ describe("identity edits through the API helpers during the move", () => {
     await expect(
       commonApiPost({ endpoint: "drops", body: { text: "gm" } })
     ).resolves.toEqual({ ok: true });
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    await expect(
+      commonApiPost({
+        endpoint: "proxies/p/actions",
+        body: { action_type: "CREATE_WAVE" },
+      })
+    ).resolves.toEqual({ ok: true });
+    expect(fetchMock).toHaveBeenCalledTimes(3);
   });
 });

@@ -36,10 +36,15 @@ switch-on while the page stays open.
   NFTDelegation, which stops counting for 6529.
 - Rep and NIC rating, editing ratings you gave, and group bulk Rep and NIC show
   `Paused for the move to the 6529 Network.` or no edit control.
-- Proxy creation and proxy action edits are hidden. Existing proxies stay listed.
+- `Assign Proxy` and adding a proxy action are hidden: every action the form
+  offers (Allocate Rep, Allocate NIC) gives ratings. Existing proxies stay
+  listed and can still be accepted, rejected, revoked or edited.
 - `Create profile` prompts are hidden.
 - Any of these requests sent anyway is stopped in the browser with
-  `Paused for the move to the 6529 Network.` The 6529.io API refuses them too.
+  `Paused for the move to the 6529 Network.`: every write under the API's
+  `profiles` routes (profile wave included), `ratings`, `bulk-rep`, and new
+  Allocate Rep or Allocate NIC proxy actions. The 6529.io API refuses the same
+  set (`423 IDENTITY_FROZEN`).
 
 Wave and drop ratings, follows, artwork alerts, profile preferences and the
 profile website studio are not affected.

@@ -1,41 +1,61 @@
+import { ApiProfileProxyActionType } from "@/generated/models/ApiProfileProxyActionType";
 import { getBrowserLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { isIdentityEditingPaused } from "./schedule";
 
 const READ_METHODS: ReadonlySet<string> = new Set(["GET", "HEAD", "OPTIONS"]);
 
+const RATING_PROXY_ACTIONS: ReadonlySet<string> = new Set([
+  ApiProfileProxyActionType.AllocateRep,
+  ApiProfileProxyActionType.AllocateCic,
+]);
+
 /**
- * Whether an API path (the segments after `/api/`) changes a profile, handle,
- * classification, picture, banner, statement, REP or NIC rating, or proxy.
- * From the freeze these move to the 6529 Network, and the API refuses them:
- * `profiles`, `profiles/{id}/pfp`, `profiles/{id}/cic/statements[/{id}]`,
- * `profiles/{id}/rep/rating`, `profiles/{id}/cic/rating`, `ratings`,
- * `bulk-rep` and everything under `proxies`.
+ * Proxy actions that give REP or NIC for the grantor. Ratings move to the
+ * 6529 Network, so from the freeze these can't be added; other proxy actions
+ * keep working.
  */
-const isIdentityEditPath = (segments: readonly string[]): boolean => {
-  const [root, , kind, leaf] = segments;
-  if (root === "proxies") {
+export const isRatingProxyAction = (actionType: unknown): boolean =>
+  typeof actionType === "string" && RATING_PROXY_ACTIONS.has(actionType);
+
+const readActionType = (body: unknown): unknown => {
+  if (typeof body !== "string") {
+    return undefined;
+  }
+  try {
+    const parsed: unknown = JSON.parse(body);
+    return typeof parsed === "object" && parsed !== null
+      ? (parsed as { action_type?: unknown }).action_type
+      : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/**
+ * Whether a request changes a profile, handle, classification, picture,
+ * banner, statement, profile wave, REP or NIC rating, or adds a REP or NIC
+ * proxy action. These move to the 6529 Network, and from the freeze the API
+ * refuses them (423 IDENTITY_FROZEN): every write under `profiles`, and
+ * `ratings`, `bulk-rep`, and `proxies/{id}/actions` with ALLOCATE_REP or
+ * ALLOCATE_CIC. `segments` are the path segments after `/api/`.
+ */
+const isIdentityEdit = (
+  segments: readonly string[],
+  body: unknown
+): boolean => {
+  const [root, , leaf] = segments;
+  if (root === "profiles") {
     return true;
   }
   if (root === "ratings" || root === "bulk-rep") {
     return segments.length === 1;
   }
-  if (root !== "profiles") {
-    return false;
-  }
-  if (segments.length === 1) {
-    return true;
-  }
-  if (segments.length === 3) {
-    return kind === "pfp";
-  }
-  if (kind === "cic" && leaf === "statements") {
-    return segments.length <= 5;
-  }
   return (
-    segments.length === 4 &&
-    (kind === "rep" || kind === "cic") &&
-    leaf === "rating"
+    root === "proxies" &&
+    segments.length === 3 &&
+    leaf === "actions" &&
+    isRatingProxyAction(readActionType(body))
   );
 };
 
@@ -65,12 +85,13 @@ class IdentityEditingPausedError extends Error {
 export function assertIdentityEditAllowed(request: {
   readonly url: string;
   readonly method: string;
+  readonly body?: unknown;
 }): void {
   if (READ_METHODS.has(request.method.toUpperCase())) {
     return;
   }
   const segments = getApiPathSegments(request.url);
-  if (segments === null || !isIdentityEditPath(segments)) {
+  if (segments === null || !isIdentityEdit(segments, request.body)) {
     return;
   }
   if (isIdentityEditingPaused()) {
