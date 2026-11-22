@@ -1,4 +1,5 @@
 import type { Hex } from "viem";
+import type { OnchainWorkImage } from "./media";
 import type { OnchainMuseumRecord, OnchainMuseumSnapshot } from "./museum";
 
 export const ONCHAIN_MUSEUM_BASE_PATH = "/museum/network-onchain";
@@ -526,6 +527,53 @@ export function worksNamedBy(
       (item): item is OnchainMuseumRecord =>
         item !== null && payloadString(item, "entity_type") === "WORK"
     );
+}
+
+export interface OnchainWorkImageView {
+  readonly image: OnchainWorkImage;
+  /** The credit line of the media record, else of the object description. */
+  readonly credit: string | null;
+}
+
+function mediaCredit(
+  view: OnchainMuseumView,
+  mediaIds: readonly string[]
+): string | null {
+  for (const id of mediaIds) {
+    const media = view.recordById(id);
+    const credit =
+      media === null
+        ? null
+        : asRecord(payloadRecord(media, "profile")?.["media"])?.["credit"];
+    if (typeof credit === "string" && credit.trim() !== "") return credit;
+  }
+  return null;
+}
+
+/**
+ * A work's verified presentation image: keyed by the work's ID in accession
+ * manifests, by one of its source record IDs in program manifests.
+ */
+export function workImage(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): OnchainWorkImageView | null {
+  if (payloadString(record, "entity_type") !== "WORK") return null;
+  const { images } = view.snapshot.media;
+  const keys = [entityKey(record), ...sourceRecordIds(record)].filter(
+    (key): key is string => key !== null
+  );
+  const image = keys
+    .map((key) => images[key])
+    .find((item) => item !== undefined);
+  if (image === undefined) return null;
+  const mediaIds = [
+    ...(image.mediaEntityId === null ? [] : [image.mediaEntityId]),
+    ...(record.content?.kind === "json"
+      ? payloadStrings(record.content.payload["media_entity_ids"])
+      : []),
+  ];
+  return { image, credit: mediaCredit(view, mediaIds) };
 }
 
 /** Texts whose title names the given title, for a work or an artist. */

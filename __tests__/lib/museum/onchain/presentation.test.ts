@@ -87,6 +87,20 @@ function snapshot(records: OnchainMuseumRecord[]): OnchainMuseumSnapshot {
       createdAt: null,
       releaseIds: [1],
     },
+    media: {
+      index: {
+        state: "absent",
+        releaseId: null,
+        cidText: null,
+        servedBy: null,
+        fileCount: 0,
+        catalogMatches: 0,
+        catalogMismatches: [],
+        cidMismatches: [],
+      },
+      manifests: [],
+      images: {},
+    },
     records,
     counts: {
       verified: records.length,

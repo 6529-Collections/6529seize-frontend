@@ -48,7 +48,7 @@ test.describe("on-chain Museum preview", () => {
     const verification = page.getByRole("region", {
       name: "How this is checked",
     });
-    await expect(verification.getByText(/: Passed$/u)).toHaveCount(4);
+    await expect(verification.getByText(/: Passed$/u)).toHaveCount(5);
     await expect(verification.getByText(/: Failed$/u)).toHaveCount(0);
 
     if (testInfo.project.name === MOBILE_PROJECT) {
@@ -56,7 +56,15 @@ test.describe("on-chain Museum preview", () => {
     }
 
     const works = page.getByRole("list", { name: /^Works/u });
-    await works.getByRole("link").first().click();
+    // Work cards show images only after the browser checks their SHA-256.
+    await expect(
+      works.getByRole("img", { name: /cobalt blue and warm white/u })
+    ).toBeVisible({ timeout: 60_000 });
+    await works
+      .getByRole("link", {
+        name: "Vera Molnár and Martin Grasser, Themes and Variations #210",
+      })
+      .click();
     // A development server compiles the record route on first use.
     await page.waitForURL(RECORD_URL_PATTERN, {
       timeout: COLD_LOAD_TIMEOUT_MS,
@@ -70,6 +78,13 @@ test.describe("on-chain Museum preview", () => {
     ).toBeVisible();
     await expect(
       page.getByText("PUBLIC_ENTITY", { exact: true }).first()
+    ).toBeVisible();
+    const figure = page.getByRole("figure");
+    await expect(
+      figure.getByRole("img", { name: /cobalt blue and warm white/u })
+    ).toBeVisible({ timeout: 60_000 });
+    await expect(
+      figure.getByText("Rights: CC BY-NC 4.0", { exact: false })
     ).toBeVisible();
     if (testInfo.project.name === MOBILE_PROJECT) {
       await expectNoHorizontalOverflow(page);

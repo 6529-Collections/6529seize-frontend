@@ -125,6 +125,18 @@ function Verification({
           passed={snapshot.catalog.state === "verified"}
           label={t(locale, "museum.onchain.check.catalog")}
         />
+        {snapshot.media.index.state === "absent" ? null : (
+          <CheckRow
+            passed={
+              snapshot.media.index.state === "verified" &&
+              snapshot.media.index.catalogMismatches.length === 0 &&
+              snapshot.media.index.cidMismatches.length === 0
+            }
+            label={t(locale, "museum.onchain.check.fileIndex", {
+              count: formatCount(snapshot.media.index.fileCount),
+            })}
+          />
+        )}
       </ul>
       {checks.frozen ? (
         <p className="tw-m-0 tw-mt-3 tw-text-sm tw-text-iron-300">
@@ -158,7 +170,16 @@ function Verification({
   );
 }
 
-function releaseContents(records: number, texts: number): string {
+function releaseContents(
+  records: number,
+  texts: number,
+  indexFiles: number | null
+): string {
+  if (records === 0 && texts === 0 && indexFiles !== null) {
+    return t(locale, "museum.onchain.releases.contentsIndex", {
+      files: formatCount(indexFiles),
+    });
+  }
   if (texts === 0) {
     return t(locale, "museum.onchain.releases.contentsRecords", {
       records: formatCount(records),
@@ -211,7 +232,13 @@ function Releases({ view }: Readonly<{ view: OnchainMuseumView }>) {
                 })}
               </h3>
               <p className="tw-m-0 tw-mt-1 tw-text-base tw-text-iron-200">
-                {releaseContents(records.length - texts, texts)}
+                {releaseContents(
+                  records.length - texts,
+                  texts,
+                  view.snapshot.media.index.releaseId === release.releaseId
+                    ? view.snapshot.media.index.fileCount
+                    : null
+                )}
                 {" · "}
                 {release.isSealed
                   ? t(locale, "museum.onchain.releases.sealed", {
@@ -253,6 +280,31 @@ function Releases({ view }: Readonly<{ view: OnchainMuseumView }>) {
                           </>
                         ),
                     },
+                    ...(release.rootCid === "0x"
+                      ? []
+                      : [
+                          {
+                            label: t(locale, "museum.onchain.releases.rootCid"),
+                            value: (
+                              <>
+                                <CopyValue
+                                  value={cidToText(release.rootCid)}
+                                  field={t(
+                                    locale,
+                                    "museum.onchain.releases.rootCid"
+                                  )}
+                                  href={`https://media.6529.io/ipfs/${cidToText(release.rootCid)}`}
+                                />
+                                <span className="tw-mt-1 tw-block tw-text-iron-400">
+                                  {t(
+                                    locale,
+                                    "museum.onchain.releases.rootCidHelp"
+                                  )}
+                                </span>
+                              </>
+                            ),
+                          },
+                        ]),
                     {
                       label: t(locale, "museum.onchain.releases.sourceCommit"),
                       value: (
@@ -298,7 +350,14 @@ export default async function OnchainMuseumPage() {
       key: group.key,
       anchor: group.anchor,
       heading: group.heading,
-      items: group.records.map((record) => filterableItem(view, record)),
+      layout: group.key === "WORK" ? ("cards" as const) : ("list" as const),
+      // Works with a published image lead; the order is otherwise kept.
+      items: group.records
+        .map((record) => filterableItem(view, record))
+        .sort(
+          (left, right) =>
+            Number(left.image === undefined) - Number(right.image === undefined)
+        ),
     })),
     ...view.recordGroups.map((group) => ({
       key: group.key,
@@ -326,9 +385,6 @@ export default async function OnchainMuseumPage() {
               <a href="#verification" className={TEXT_LINK}>
                 {t(locale, "museum.onchain.summaryLink")}
               </a>
-            </p>
-            <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-400">
-              {t(locale, "museum.onchain.images.note")}
             </p>
           </>
         }

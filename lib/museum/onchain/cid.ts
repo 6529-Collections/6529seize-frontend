@@ -42,3 +42,23 @@ export function cidToText(cid: Hex): string {
   if (bits > 0) output += BASE32_ALPHABET[(buffer << (5 - bits)) & 31];
   return output;
 }
+
+/** The bytes of a multibase base32 CIDv1 (`b...`), or null if it is not one. */
+export function cidFromText(text: string): Hex | null {
+  if (!text.startsWith("b") || text.length < 2) return null;
+  let buffer = 0;
+  let bits = 0;
+  const bytes: number[] = [];
+  for (const char of text.slice(1)) {
+    const value = BASE32_ALPHABET.indexOf(char);
+    if (value === -1) return null;
+    buffer = (buffer << 5) | value;
+    bits += 5;
+    if (bits >= 8) {
+      bytes.push((buffer >>> (bits - 8)) & 0xff);
+      bits -= 8;
+    }
+    buffer &= (1 << bits) - 1;
+  }
+  return bytesToHex(Uint8Array.from(bytes));
+}

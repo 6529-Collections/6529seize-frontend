@@ -62,6 +62,8 @@ export interface RegistryRelease {
   readonly openedBy: Address;
   readonly manifestCid: Hex;
   readonly manifestHash: OnchainHashRef;
+  /** Optional root content ID; `0x` when the release has none. */
+  readonly rootCid: Hex;
   readonly sourceCommit: Hex;
   readonly label: string;
 }
@@ -316,6 +318,7 @@ function toRelease(raw: RegistryRelease): RegistryRelease {
     openedBy: raw.openedBy,
     manifestCid: raw.manifestCid,
     manifestHash: { ...raw.manifestHash },
+    rootCid: raw.rootCid,
     sourceCommit: raw.sourceCommit,
     label: raw.label,
   };

@@ -104,6 +104,7 @@ function snapshot(subjects: RegistrySubject[]): RegistrySnapshot {
           digest: keccak256(CATALOG_BYTES),
           canonicalizationId: JCS_ID,
         },
+        rootCid: "0x",
         sourceCommit: "0x92966f2836ebf2af06edfe0fe2cff25041307c92",
         label: "test",
       },

@@ -19,6 +19,7 @@ import {
   payloadStrings,
   relationsReferencing,
   textsNaming,
+  workImage,
   worksNamedBy,
   type OnchainLink,
   type OnchainMuseumView,
@@ -39,6 +40,7 @@ import {
 } from "../../_components/OnchainParts";
 import { OnchainFacts } from "../../_components/OnchainFacts";
 import { OnchainUnavailable } from "../../_components/OnchainUnavailable";
+import { WorkFigure } from "../../_components/WorkFigure";
 import { onchainMuseumView } from "../../_components/view";
 
 const locale = DEFAULT_LOCALE;
@@ -545,14 +547,14 @@ function HeadingAside({
           {stateDetail(record)}
         </p>
       </div>
-      {isWork ? (
+      {isWork && workImage(view, record) === null ? (
         <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {t(locale, "museum.onchain.images.note")}
+          {t(locale, "museum.onchain.image.none")}
           {route?.startsWith("/museum/network/") ? (
             <>
               {" "}
               <Link href={route} className={TEXT_LINK}>
-                {t(locale, "museum.onchain.images.link")}
+                {t(locale, "museum.onchain.image.siteLink")}
               </Link>
             </>
           ) : null}
@@ -575,6 +577,7 @@ export default async function OnchainMuseumRecordPage({
     (item) => item.releaseId === record.version.releaseId
   );
   const caption = captionFacts(view, record);
+  const image = workImage(view, record);
 
   return (
     <article data-verification-state={record.state}>
@@ -598,6 +601,7 @@ export default async function OnchainMuseumRecordPage({
         title={view.labelOf(record)}
         aside={<HeadingAside view={view} record={record} />}
       />
+      {image === null ? null : <WorkFigure view={image} eager />}
 
       {record.content?.kind === "markdown" ? (
         <section

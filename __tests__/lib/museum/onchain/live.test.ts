@@ -1,6 +1,8 @@
 /**
  * @jest-environment node
  */
+import { sha256 } from "viem";
+import { cidFromText } from "@/lib/museum/onchain/cid";
 import { createCidFetcher } from "@/lib/museum/onchain/ipfs";
 import { buildOnchainMuseum } from "@/lib/museum/onchain/museum";
 import { readRegistrySnapshot } from "@/lib/museum/onchain/registry";
@@ -37,6 +39,12 @@ describe("on-chain Museum against Sepolia", () => {
           counts: museum.counts,
           verifiedByType: Object.fromEntries(byType),
           servedBy: [...new Set(museum.records.map((r) => r.servedBy))],
+          index: {
+            ...museum.media.index,
+            catalogMismatches: museum.media.index.catalogMismatches.length,
+          },
+          manifests: museum.media.manifests,
+          images: Object.keys(museum.media.images).length,
         })}\n`
       );
       expect(registry.checks).toMatchObject({
@@ -46,7 +54,7 @@ describe("on-chain Museum against Sepolia", () => {
         ownerMatches: true,
       });
       expect(museum.catalog.state).toBe("verified");
-      expect(museum.catalog.releaseIds).toEqual([1, 2]);
+      expect(museum.catalog.releaseIds).toEqual([1, 2, 3]);
       expect(museum.records).toHaveLength(588);
       expect(museum.counts.verified).toBe(588);
       expect(byType.get("PUBLIC_DOCUMENT")).toBe(186);
@@ -55,7 +63,44 @@ describe("on-chain Museum against Sepolia", () => {
           (r) => r.recordType === "PUBLIC_DOCUMENT" && r.documentPath === null
         )
       ).toHaveLength(0);
+      expect(museum.media.index).toMatchObject({
+        state: "verified",
+        releaseId: 3,
+        fileCount: 702,
+        catalogMatches: 702,
+        catalogMismatches: [],
+        cidMismatches: [],
+      });
+      expect(museum.media.manifests.map((m) => m.state)).toEqual([
+        "verified",
+        "verified",
+        "verified",
+      ]);
+
+      // What the browser does for each image: fetch the derivative by CID
+      // and compare its SHA-256 with the value anchored through the chain.
+      const fetchCid = createCidFetcher();
+      const derivatives = Object.values(museum.media.images).flatMap(
+        (image) => image.derivatives
+      );
+      let matched = 0;
+      for (const derivative of derivatives) {
+        const cid = cidFromText(derivative.cid);
+        const fetched =
+          cid === null
+            ? null
+            : await fetchCid(
+                cid,
+                (bytes) => sha256(bytes).slice(2) === derivative.sha256
+              );
+        if (fetched?.accepted) matched += 1;
+      }
+      process.stdout.write(
+        `${JSON.stringify({ derivatives: derivatives.length, matched })}
+`
+      );
+      expect(matched).toBe(derivatives.length);
     },
-    180_000
+    300_000
   );
 });

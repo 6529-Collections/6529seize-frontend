@@ -10,6 +10,7 @@ import type {
 } from "@/lib/museum/onchain/museum";
 import {
   onchainMuseumRecordHref,
+  workImage,
   type OnchainMuseumView,
 } from "@/lib/museum/onchain/presentation";
 import type { FilterableGroupsCopy, FilterableItem } from "./FilterableGroups";
@@ -84,6 +85,13 @@ export function algorithmLabel(algorithm: number): string {
 
 export function filterCopy(): FilterableGroupsCopy {
   return {
+    image: {
+      checking: t(locale, "museum.onchain.image.checking"),
+      failed: t(locale, "museum.onchain.image.failed"),
+      unavailable: t(locale, "museum.onchain.image.unavailable"),
+      retry: t(locale, "museum.onchain.image.retry"),
+    },
+    noImage: t(locale, "museum.onchain.image.noneShort"),
     label: t(locale, "museum.onchain.filter.label"),
     placeholder: t(locale, "museum.onchain.filter.placeholder"),
     empty: t(locale, "museum.onchain.filter.empty"),
@@ -97,7 +105,12 @@ export function filterableItem(
   record: OnchainMuseumRecord,
   secondary?: string
 ): FilterableItem {
+  const image = workImage(view, record);
   return {
+    image:
+      image === null
+        ? undefined
+        : { derivatives: image.image.derivatives, alt: image.image.altText },
     key: record.subjectId,
     href: onchainMuseumRecordHref(record.subjectId),
     label: view.labelOf(record),

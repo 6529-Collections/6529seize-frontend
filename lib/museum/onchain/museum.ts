@@ -5,6 +5,7 @@ import {
   RFC8785_JCS_LITERAL,
 } from "./constants";
 import { mapWithConcurrency, type CidFetcher } from "./ipfs";
+import { loadOnchainMedia, type OnchainMediaState } from "./media";
 import type {
   RegistryRelease,
   RegistrySnapshot,
@@ -18,6 +19,20 @@ import {
 } from "./verify";
 
 const CONTENT_CONCURRENCY = 24;
+const NO_MEDIA: OnchainMediaState = {
+  index: {
+    state: "absent",
+    releaseId: null,
+    cidText: null,
+    servedBy: null,
+    fileCount: 0,
+    catalogMatches: 0,
+    catalogMismatches: [],
+    cidMismatches: [],
+  },
+  manifests: [],
+  images: {},
+};
 const decoder = new TextDecoder("utf-8", { fatal: true });
 
 export type OnchainRecordState =
@@ -68,6 +83,8 @@ export interface OnchainMuseumSnapshot {
   readonly loadMs: number;
   readonly registry: Omit<RegistrySnapshot, "subjects">;
   readonly catalog: OnchainCatalogState;
+  /** The file index and presentation manifests; images are checked by the browser. */
+  readonly media: OnchainMediaState;
   readonly records: readonly OnchainMuseumRecord[];
   readonly counts: Readonly<Record<OnchainRecordState, number>>;
 }
@@ -301,6 +318,15 @@ export async function buildOnchainMuseum(
     fetchCid
   );
   const documentPaths = documentPathsBySubject(catalog.payload);
+  const media =
+    catalog.state.state === "verified"
+      ? await loadOnchainMedia(
+          registry.releases,
+          catalog.payload,
+          catalog.state.catalogId,
+          fetchCid
+        )
+      : NO_MEDIA;
   const records = await mapWithConcurrency(
     registry.subjects,
     CONTENT_CONCURRENCY,
@@ -320,6 +346,7 @@ export async function buildOnchainMuseum(
     loadMs: Date.now() - startedAt,
     registry: registryHead,
     catalog: catalog.state,
+    media,
     records,
     counts,
   };

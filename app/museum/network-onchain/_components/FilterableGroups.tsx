@@ -8,6 +8,11 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import {
+  VerifiedImage,
+  type VerifiedImageCopy,
+  type VerifiedImageDerivative,
+} from "./VerifiedImage";
 
 export interface FilterableItem {
   readonly key: string;
@@ -19,6 +24,13 @@ export interface FilterableItem {
   readonly badge?:
     | { readonly label: string; readonly tone: string }
     | undefined;
+  /** A verified presentation image, shown in card groups. */
+  readonly image?:
+    | {
+        readonly derivatives: readonly VerifiedImageDerivative[];
+        readonly alt: string;
+      }
+    | undefined;
 }
 
 export interface FilterableGroup {
@@ -27,10 +39,15 @@ export interface FilterableGroup {
   readonly heading: string;
   readonly kicker?: string | undefined;
   readonly headingHref?: string | undefined;
+  /** Cards show each item's image above its title. */
+  readonly layout?: "list" | "cards" | undefined;
   readonly items: readonly FilterableItem[];
 }
 
 export interface FilterableGroupsCopy {
+  readonly image: VerifiedImageCopy;
+  /** Shown in a card whose work has no published image. */
+  readonly noImage: string;
   readonly label: string;
   readonly placeholder: string;
   readonly empty: string;
@@ -43,6 +60,64 @@ const LINK =
 
 function normalize(value: string): string {
   return value.toLocaleLowerCase().normalize("NFKD").replaceAll(/\p{M}/gu, "");
+}
+
+function Badge({ item }: Readonly<{ item: FilterableItem }>) {
+  return item.badge === undefined ? null : (
+    <span
+      className={`tw-inline-flex tw-shrink-0 tw-items-center tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium ${item.badge.tone}`}
+    >
+      {item.badge.label}
+    </span>
+  );
+}
+
+function ListRow({ item }: Readonly<{ item: FilterableItem }>) {
+  return (
+    <li className="tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-2.5">
+      <span className="tw-min-w-0">
+        <Link href={item.href} className={LINK}>
+          {item.label}
+        </Link>
+        {item.secondary === undefined ? null : (
+          <span className="tw-mt-0.5 tw-block tw-text-sm tw-text-iron-400">
+            {item.secondary}
+          </span>
+        )}
+      </span>
+      <Badge item={item} />
+    </li>
+  );
+}
+
+function CardRow({
+  item,
+  copy,
+}: Readonly<{ item: FilterableItem; copy: FilterableGroupsCopy }>) {
+  return (
+    <li className="tw-min-w-0">
+      {item.image === undefined ? (
+        <div className="tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-bg-iron-950 tw-p-3 tw-text-center tw-text-xs tw-leading-5 tw-text-iron-400">
+          {copy.noImage}
+        </div>
+      ) : (
+        <div className="tw-flex tw-aspect-square tw-w-full tw-items-center tw-justify-center tw-bg-iron-950">
+          <VerifiedImage
+            derivatives={item.image.derivatives}
+            alt={item.image.alt}
+            copy={copy.image}
+            fit="square"
+          />
+        </div>
+      )}
+      <div className="tw-mt-2 tw-flex tw-items-start tw-justify-between tw-gap-2">
+        <Link href={item.href} className={`tw-text-sm ${LINK}`}>
+          {item.label}
+        </Link>
+        <Badge item={item} />
+      </div>
+    </li>
+  );
 }
 
 /**
@@ -142,35 +217,25 @@ export function FilterableGroups({
                 ({group.items.length})
               </span>
             </Heading>
-            <ul
-              aria-labelledby={group.anchor}
-              className="tw-m-0 tw-grid tw-list-none tw-gap-x-8 tw-p-0 md:tw-grid-cols-2"
-            >
-              {group.items.map((item) => (
-                <li
-                  key={item.key}
-                  className="tw-flex tw-min-w-0 tw-items-baseline tw-justify-between tw-gap-3 tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-py-2.5"
-                >
-                  <span className="tw-min-w-0">
-                    <Link href={item.href} className={LINK}>
-                      {item.label}
-                    </Link>
-                    {item.secondary === undefined ? null : (
-                      <span className="tw-mt-0.5 tw-block tw-text-sm tw-text-iron-400">
-                        {item.secondary}
-                      </span>
-                    )}
-                  </span>
-                  {item.badge === undefined ? null : (
-                    <span
-                      className={`tw-inline-flex tw-shrink-0 tw-items-center tw-whitespace-nowrap tw-rounded-md tw-border tw-border-solid tw-px-2 tw-py-0.5 tw-text-xs tw-font-medium ${item.badge.tone}`}
-                    >
-                      {item.badge.label}
-                    </span>
-                  )}
-                </li>
-              ))}
-            </ul>
+            {group.layout === "cards" ? (
+              <ul
+                aria-labelledby={group.anchor}
+                className="tw-m-0 tw-grid tw-list-none tw-grid-cols-2 tw-gap-x-4 tw-gap-y-6 tw-p-0 sm:tw-grid-cols-3 lg:tw-grid-cols-4"
+              >
+                {group.items.map((item) => (
+                  <CardRow key={item.key} item={item} copy={copy} />
+                ))}
+              </ul>
+            ) : (
+              <ul
+                aria-labelledby={group.anchor}
+                className="tw-m-0 tw-grid tw-list-none tw-gap-x-8 tw-p-0 md:tw-grid-cols-2"
+              >
+                {group.items.map((item) => (
+                  <ListRow key={item.key} item={item} />
+                ))}
+              </ul>
+            )}
           </section>
         )
       )}
