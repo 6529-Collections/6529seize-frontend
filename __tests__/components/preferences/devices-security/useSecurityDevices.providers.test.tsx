@@ -142,7 +142,7 @@ describe("useSecurityDevices with the real E2EE context and React Query", () => 
     mockStoredKey = null;
   });
 
-  it("finds this browser's device in storage when no engine runs, and removes its data", async () => {
+  it("finds this browser's device in storage when no engine runs, and leaves its data", async () => {
     // No engine (for example another tab runs it): the context has no
     // store, so useE2ee gives no local device key.
     mockGrants = [grant("own", OWN_SIGNING_KEY)];
@@ -152,9 +152,16 @@ describe("useSecurityDevices with the real E2EE context and React Query", () => 
     await waitFor(() =>
       expect(result.current.thisDevice?.encryptedDms?.status).toBe("active")
     );
+    mockMe = [apiDevice(OWN_DEVICE_KEY, "own", NOW)];
     await act(() => result.current.revoke(result.current.thisDevice!));
     expect(mockRevokeGrant).toHaveBeenCalled();
-    expect(mockRemoveLocal).toHaveBeenCalledTimes(1);
+    expect(mockRemoveLocal).not.toHaveBeenCalled();
+    // The refetched list shows it revoked: removal is offered, not done.
+    await waitFor(() =>
+      expect(result.current.leftoverLocalData?.deviceKey).toBe(
+        OWN_DEVICE_KEY.toLowerCase()
+      )
+    );
   });
 
   it("keeps this browser's data when the stored device is a different one", async () => {

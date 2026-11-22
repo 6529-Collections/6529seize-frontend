@@ -611,6 +611,14 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "traits.invalidBoolean": "Choose Yes or No.",
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
+  "media.gifPreview.guide":
+    "GIFs get an animated preview in Waves and the leaderboard when each frame has at most {pixels} pixels (for example {exampleWidth} × {exampleHeight}), at most {frames} frames, and at most {totalPixels} pixels across all frames.",
+  "media.gifPreview.framePixels":
+    "This GIF is {width} × {height} ({pixels} pixels per frame). Animated previews need at most {limit} pixels per frame, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce its dimensions to keep the preview animated.",
+  "media.gifPreview.frames":
+    "This GIF has {frames} frames. Animated previews need at most {limit} frames, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce the number of frames to keep the preview animated.",
+  "media.gifPreview.totalPixels":
+    "This GIF has {frames} frames of {width} × {height}, {pixels} pixels in total. Animated previews need at most {limit} pixels across all frames, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce its dimensions or frames to keep the preview animated.",
   "identity.connectPrompt":
     "Connect a wallet to confirm the profile submitting this artwork.",
   "identity.unknownProfile": "Unknown profile",
@@ -2225,6 +2233,8 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
 const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
   title: "How Drops are Voted",
   ratingTitle: "How Drops are Rated",
+  creditsLocked:
+    "This decision already has votes, so its voting credit, scope and negative-vote settings can no longer change.",
   rankAdvancedSummary: "Vote limits and behavior",
   approveAdvancedSummary: "Vote limits, behavior, and timing",
   "timeUnit.minutes": "Minutes",
@@ -2387,6 +2397,26 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
     "It will appear in a moment. If it doesn't, refresh the page.",
   repliesOnlyPlaceholder:
     "Only chat members can start new drops here. You can reply to any drop.",
+  proxySessionPlaceholder:
+    "You're signed in as a proxy for another profile, so you can't post here. To post as yourself, switch back to your own profile, or sign out and connect again.",
+  "restriction.slowMode":
+    "Slow mode is active. Please wait before posting again",
+  "restriction.noChatPermission":
+    "You don't have permission to chat in this wave",
+  "restriction.chatDisabled": "Chat is currently disabled for this wave",
+  "restriction.noSubmitPermission":
+    "You don't have permission to submit in this wave",
+  "restriction.submissionsNotStarted": "Submissions haven't started yet",
+  "restriction.submissionsEnded": "Submission period has ended",
+  "restriction.maxDropsReached":
+    "You have reached the maximum number of drops allowed",
+  "restriction.cannotParticipate":
+    "You cannot participate in this wave at the moment",
+  "restriction.unavailable": "Action not available",
+  "profileSetup.link": "Create a profile",
+  "profileSetup.chat": "{link} to participate in chat",
+  "profileSetup.submission": "{link} to submit in this wave",
+  "profileSetup.wave": "{link} to participate in this wave",
   "replyThread.showOne": "Show 1 reply",
   "replyThread.showMany": "Show {count} replies",
   "replyThread.hide": "Hide replies",
@@ -3981,6 +4011,31 @@ export const EN_US_ROOT_MESSAGES = {
   "desktop.appInfo.version": "Version",
   "desktop.appInfo.environment": "Environment",
   "desktop.appInfo.checkUpdates": "Check for updates",
+  "desktop.titleStrip.appInfoState": "App info ({label})",
+  "desktop.update.heading": "Updates",
+  "desktop.update.lastChecked": "Last checked {time}.",
+  "desktop.update.checkNow": "Check now",
+  "desktop.update.updateNow": "Update now",
+  "desktop.update.restart": "Restart to update",
+  "desktop.update.tryAgain": "Try again",
+  "desktop.update.notNow": "Not now",
+  "desktop.update.releaseNotes": "Release notes for {version} on 6529.io",
+  "desktop.update.notesHeading": "What's in {version}",
+  "desktop.busy.uploading": "A file is still uploading",
+  "desktop.busy.sending": "A drop is still being sent",
+  "desktop.update.requested": "6529 Desktop is checking the release list.",
+  "desktop.update.downloadPage": "Download page on 6529.io",
+  "desktop.update.settingCheck": "Check for new releases",
+  "desktop.update.settingAuto": "Install updates automatically",
+  "desktop.update.settingAutoNeedsCheck":
+    "Turn on Check for new releases first.",
+  "desktop.update.settingsFailed":
+    "The setting could not be changed. Try again.",
+  "desktop.update.restartFailed": "6529 Desktop can't restart to update now.",
+  "desktop.update.restartFailedReason":
+    "6529 Desktop can't restart to update now. {reason}",
+  "desktop.update.updateNotStarted":
+    "6529 Desktop didn't start the update. Try again in a moment.",
   "desktop.appInfo.checkingUpdates": "Checking for updates…",
   "desktop.appInfo.noUpdates": "No updates found.",
   "desktop.appInfo.checkFailed": "Couldn’t check for updates. Try again.",
@@ -4004,6 +4059,7 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopConnect.status.walletConnectFailed":
     "Could not open WalletConnect. Try again.",
   "desktopWalletRequest.title": "Signature request",
+  "desktopWalletRequest.transactionTitle": "Transaction",
   "desktopWalletRequest.waiting":
     "Your browser opened a page to sign with your wallet. Finish there; this waits for two minutes.",
   "desktopWalletRequest.code":
@@ -4031,6 +4087,8 @@ export const EN_US_ROOT_MESSAGES = {
     "Trading is not available in 6529 Desktop with a browser wallet. Continue on {site} in your browser.",
   "desktopWalletRequest.notForwarded":
     "6529 Desktop does not send this kind of signature to your browser wallet. Continue on {site} in your browser, where your wallet signs it directly.",
+  "desktopWalletRequest.transactionNotForwarded":
+    "6529 Desktop does not send this transaction to your browser wallet. Continue on {site} in your browser, where your wallet sends it directly.",
   "browserConnector.title": "Sign in to 6529 Desktop",
   "browserConnector.description":
     "Sign in to 6529 Desktop with a browser wallet.",
@@ -4106,6 +4164,105 @@ export const EN_US_ROOT_MESSAGES = {
     "Submit an entry to a 6529 decision.",
   "browserConnector.wallet.refusal.unknown-typed-data":
     "This page will not ask your wallet to sign this request: it is a kind of request 6529 Desktop does not send from here. Continue on {site} in your browser instead.",
+  "browserConnector.tx.intro":
+    "6529 Desktop asks {address} to send this transaction:",
+  "browserConnector.tx.title.delegation.register": "Register a delegation",
+  "browserConnector.tx.title.delegation.registerAsManager":
+    "Register a delegation as a delegation manager",
+  "browserConnector.tx.title.delegation.update": "Update a delegation",
+  "browserConnector.tx.title.delegation.batchRegister":
+    "Register several delegations",
+  "browserConnector.tx.title.delegation.revoke": "Revoke a delegation",
+  "browserConnector.tx.title.delegation.revokeAsManager":
+    "Revoke a delegation as a delegation manager",
+  "browserConnector.tx.title.delegation.batchRevoke":
+    "Revoke several delegations",
+  "browserConnector.tx.title.delegation.lockCollection":
+    "Lock or unlock a collection for delegations",
+  "browserConnector.tx.title.delegation.lockUseCase":
+    "Lock or unlock a use case for delegations",
+  "browserConnector.tx.title.memes.mint": "Mint a The Memes card",
+  "browserConnector.tx.title.memes.mintBatch": "Mint The Memes cards",
+  "browserConnector.tx.title.memes.mintProxy":
+    "Mint The Memes cards for another wallet",
+  "browserConnector.tx.title.nextgen.mint": "Mint NextGen tokens",
+  "browserConnector.tx.title.subscriptions.topUp":
+    "Top up your Memes subscription balance",
+  "browserConnector.tx.contract": "Contract",
+  "browserConnector.tx.contract.delegation": "6529 delegation contract",
+  "browserConnector.tx.contract.memes": "Manifold claim contract for The Memes",
+  "browserConnector.tx.contract.nextgen": "NextGen minter contract",
+  "browserConnector.tx.contract.subscriptions":
+    "6529 subscriptions wallet (seize.6529.eth)",
+  "browserConnector.tx.network": "Network",
+  "browserConnector.tx.network.mainnet": "Ethereum",
+  "browserConnector.tx.network.sepolia": "Sepolia test network",
+  "browserConnector.tx.count": "Number",
+  "browserConnector.tx.value": "Amount",
+  "browserConnector.tx.valueAmount":
+    "{amount} ETH, plus the network fee your wallet sets",
+  "browserConnector.tx.highImpact": "Check this carefully before you send it.",
+  "browserConnector.tx.effect.delegate":
+    "{delegate} can act for this wallet for use case {useCase}.",
+  "browserConnector.tx.effect.onBehalfOf":
+    "You act on behalf of {delegator} as its delegation manager.",
+  "browserConnector.tx.effect.recipient":
+    "You pay, and what you mint goes to {recipient}.",
+  "browserConnector.tx.effect.mintAsDelegate":
+    "You mint as a delegate of {delegator}.",
+  "browserConnector.tx.effect.largeValue": "This sends more than 1 ETH.",
+  "browserConnector.tx.understand": "I understand",
+  "browserConnector.tx.details":
+    "Everything this transaction sends ({function})",
+  "browserConnector.tx.data": "Call data",
+  "browserConnector.tx.proof": "allowlist proof ({count} hashes)",
+  "browserConnector.tx.proofs": "allowlist proofs ({count})",
+  "browserConnector.tx.quoted": "“{text}”",
+  "browserConnector.tx.useCase": "{id} ({name})",
+  "browserConnector.tx.plainTransfer": "plain ETH transfer",
+  "browserConnector.tx.yes": "Yes",
+  "browserConnector.tx.no": "No",
+  "browserConnector.tx.check.checking":
+    "Checking that this transaction would go through…",
+  "browserConnector.tx.check.ok":
+    "Checked: this transaction would go through now.",
+  "browserConnector.tx.check.reverted": "This transaction would fail: {reason}",
+  "browserConnector.tx.check.unavailable":
+    "This transaction could not be checked right now. You can check again or send it anyway.",
+  "browserConnector.tx.check.details": "Details",
+  "browserConnector.tx.check.again": "Check again",
+  "browserConnector.tx.check.sendAnyway": "Send anyway",
+  "browserConnector.tx.price.checking": "Checking the current price…",
+  "browserConnector.tx.price.ok": "The amount matches the current price.",
+  "browserConnector.tx.price.mismatch":
+    "The amount does not match the current price. Start again from 6529 Desktop.",
+  "browserConnector.tx.price.unavailable":
+    "The current price could not be read. Check that the amount is right before you send.",
+  "browserConnector.tx.tooLate":
+    "Less than a minute is left for this request. Start again from 6529 Desktop.",
+  "browserConnector.tx.safety":
+    "6529 never asks for your recovery phrase or password. Your wallet shows the network fee before you confirm.",
+  "browserConnector.tx.send": "Send in wallet",
+  "browserConnector.tx.failed":
+    "Your wallet did not send the transaction. Try again, or decline.",
+  "browserConnector.tx.sent":
+    "Sent. Return to 6529 Desktop. Transaction {hash}",
+  "browserConnector.tx.explorer": "View the transaction on Etherscan",
+  "desktopWalletRequest.transactionWaiting":
+    "Your browser opened a page to send this transaction with your wallet. Finish there; this waits for five minutes.",
+  "desktopWalletRequest.transactionUpdate":
+    "This version of 6529 Desktop cannot send this transaction from your browser wallet. Update 6529 Desktop, or continue on {site} in your browser.",
+  "desktopWalletRequest.transactionUnverified":
+    "Your wallet reports it sent the transaction {hash}. 6529 Desktop could not confirm it yet. Check it in a block explorer before you try again.",
+  "desktopWalletRequest.transactionMismatch":
+    "The transaction {hash} on chain is not the one 6529 Desktop asked for. Check it in a block explorer and in your wallet.",
+  "desktopWalletRequest.lateTransaction":
+    "A transaction you approved after its request ended was sent: {hash}. Check it in a block explorer before you try again.",
+  "desktopWalletRequest.explorer": "View on Etherscan",
+  "browserConnector.wallet.refusal.unknown-transaction":
+    "This page will not ask your wallet to send this transaction: 6529 Desktop does not send it from here. Continue on {site} in your browser instead.",
+  "browserConnector.wallet.refusal.transaction-rule":
+    "This page will not ask your wallet to send this transaction: its details are outside what 6529 Desktop sends from here. Nothing was sent. Continue on {site} in your browser instead.",
   "browserConnector.wallet.refusal.wrong-wallet":
     "This page will not ask your wallet to sign this request: it names a different wallet than the one asked to sign.",
   "browserConnector.wallet.refusal.wrong-origin":
@@ -4457,6 +4614,7 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.coverage.basis":
     "Projected from current eligibility, settings, balance, and the published Meme schedule.",
   "subscriptions.coverage.fundedThrough": "Funded through",
+  "subscriptions.coverage.fundedAtLeastThrough": "Funded at least through",
   "subscriptions.coverage.nextUnfunded": "Next unfunded",
   "subscriptions.coverage.summary.nextDrop": "Next drop",
   "subscriptions.coverage.projected": "Projected",
@@ -4489,6 +4647,8 @@ export const EN_US_ROOT_MESSAGES = {
     "One selected drop is fully funded. Add funds to cover more upcoming drops.",
   "subscriptions.coverage.header.through":
     "{status} · through The Memes #{token}, {date}",
+  "subscriptions.coverage.header.atLeastThrough":
+    "{status} · at least through The Memes #{token}, {date}",
   "subscriptions.coverage.header.noFundedThrough": "{status}",
   "subscriptions.page.title": "Subscription minting",
   "subscriptions.page.settingsTitle": "Minting settings",
@@ -4625,6 +4785,39 @@ export const EN_US_ROOT_MESSAGES = {
   "theMemes.mint.transaction.success": "SEIZED!",
   "theMemes.mint.transaction.error": "Transaction failed",
   "theMemes.mint.transaction.errorDetails": "{message}",
+  "theMemes.mint.phaseCard.statusLabel": "Status",
+  "theMemes.mint.phaseCard.status.upcoming": "UPCOMING",
+  "theMemes.mint.phaseCard.status.active": "ACTIVE",
+  "theMemes.mint.phaseCard.status.completed": "COMPLETED",
+  "theMemes.mint.phaseCard.started": "Started",
+  "theMemes.mint.phaseCard.ends": "Ends",
+  "theMemes.mint.phaseCard.ended": "Ended",
+  "theMemes.mint.phaseCard.expectedStart": "Expected start",
+  "theMemes.mint.phaseCard.expectedEnd": "Expected end",
+  "theMemes.mint.phaseCard.airdrops": "Airdrops: x{count}",
+  "theMemes.mint.phaseEligibility.unlimited": "Unlimited spots",
+  "theMemes.mint.phaseEligibility.loading": "Loading eligibility...",
+  "theMemes.mint.phaseEligibility.unavailable": "Eligibility unavailable",
+  "theMemes.mint.phaseEligibility.none": "No eligible spots",
+  "theMemes.mint.phaseEligibility.allowlist.one": "{allowlist} eligible spot",
+  "theMemes.mint.phaseEligibility.allowlist.many":
+    "{allowlist} eligible spots",
+  "theMemes.mint.phaseEligibility.airdrop":
+    "{airdrop}x Airdrop · nothing to mint",
+  "theMemes.mint.phaseEligibility.mixed":
+    "{allowlist}x Allowlist · {airdrop}x Airdrop",
+  "theMemes.mint.subscriptionAirdrop.phase.phase0": "Phase 0",
+  "theMemes.mint.subscriptionAirdrop.phase.phase1": "Phase 1",
+  "theMemes.mint.subscriptionAirdrop.phase.phase2": "Phase 2",
+  "theMemes.mint.subscriptionAirdrop.phase.public": "Public phase",
+  "theMemes.mint.subscriptionAirdrop.pending.one":
+    "{phase}: your subscription covers 1 card. It will be airdropped to {address}, so you do not need to mint it here.",
+  "theMemes.mint.subscriptionAirdrop.pending.many":
+    "{phase}: your subscription covers {count} cards. They will be airdropped to {address}, so you do not need to mint them here.",
+  "theMemes.mint.subscriptionAirdrop.airdropped.one":
+    "{phase}: your subscription card has been airdropped to {address}.",
+  "theMemes.mint.subscriptionAirdrop.airdropped.many":
+    "{phase}: your {count} subscription cards have been airdropped to {address}.",
   "theMemes.card.linkAriaLabel": "View {name}, card #{tokenId}",
   "theMemes.card.metric.unavailable": "-",
   "theMemes.card.metric.editionSize": "Edition Size: {value}",

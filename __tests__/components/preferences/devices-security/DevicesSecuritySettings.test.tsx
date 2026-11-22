@@ -12,10 +12,7 @@ import {
   type EncryptedDeviceInput,
 } from "@/components/preferences/devices-security/classifyDevices";
 import DevicesSecuritySettings from "@/components/preferences/devices-security/DevicesSecuritySettings";
-import type {
-  LocalCleanup,
-  useSecurityDevices,
-} from "@/components/preferences/devices-security/useSecurityDevices";
+import type { useSecurityDevices } from "@/components/preferences/devices-security/useSecurityDevices";
 import type { ApiDeviceGrant } from "@/generated/models/ApiDeviceGrant";
 
 const NOW = Date.UTC(2026, 10, 9, 15, 0);
@@ -133,10 +130,12 @@ const state = (
   failed: false,
   retry: jest.fn(),
   localKeysUnreadable: false,
+  ownDeviceKnown: true,
   canRevoke: () => true,
   revokeBlocker: () => null,
-  revoke: jest.fn(async () => ({ kind: "none" as const })),
-  retryLocalCleanup: jest.fn(async () => true),
+  revoke: jest.fn(async () => undefined),
+  leftoverLocalData: null,
+  removeLeftoverLocalData: jest.fn(async () => true),
   canRename: () => true,
   rename: jest.fn(async () => undefined),
   signsRevocations: true,
@@ -305,7 +304,7 @@ describe("DevicesSecuritySettings", () => {
           ownEncryptedDeviceKey,
           now: NOW,
         });
-      const revoke = jest.fn(async () => ({ kind: "none" as const }));
+      const revoke = jest.fn(async () => undefined);
       mockState = state({ ...listed(null), revoke, signsRevocations: false });
       const { dialog, rerender } = await openThisBrowserRevoke();
       expect(dialog).toHaveTextContent(
@@ -327,52 +326,60 @@ describe("DevicesSecuritySettings", () => {
         "This device changed while this was open."
       );
       expect(dialog).toHaveTextContent(
-        "the encrypted chats saved here are deleted"
+        "The encrypted chats saved in this browser stay."
       );
     });
   });
 
-  it("offers to remove this browser's data again when a revoke couldn't remove it", async () => {
-    const retryLocalCleanup = jest.fn(async () => true);
+  it("offers to remove this browser's encrypted data after its device was revoked, after a confirmation", async () => {
+    const removeLeftoverLocalData = jest.fn(async () => true);
     mockState = state({
-      revoke: jest.fn(async () => ({
-        kind: "failed" as const,
-        deviceKey: "phone",
-      })),
-      retryLocalCleanup,
+      leftoverLocalData: { deviceKey: "e-this", label: "Brave on Windows" },
+      removeLeftoverLocalData,
     });
     render(<DevicesSecuritySettings />);
+    expect(
+      screen.getByText(
+        "Brave on Windows was revoked, but its encrypted chats are still saved in this browser."
+      )
+    ).toBeInTheDocument();
     fireEvent.click(
-      screen.getByRole("button", { name: "Revoke 6529 app on iPhone" })
+      screen.getByRole("button", {
+        name: "Remove this browser’s encrypted data",
+      })
     );
     const dialog = await screen.findByRole("dialog", {
-      name: "Revoke 6529 app on iPhone?",
+      name: "Remove encrypted messages from this browser?",
     });
+    expect(removeLeftoverLocalData).not.toHaveBeenCalled();
     await act(async () => {
-      fireEvent.click(
-        within(dialog).getByRole("button", { name: "Revoke device" })
-      );
+      fireEvent.click(within(dialog).getByRole("button", { name: "Remove" }));
     });
-    // The revoke itself succeeded; the removal is reported on its own.
-    expect(
-      await screen.findByText("6529 app on iPhone revoked.")
-    ).toBeInTheDocument();
-    const alert = screen
-      .getAllByRole("alert")
-      .find((node) => node.textContent?.includes("couldn’t be removed"))!;
-    expect(alert).toHaveTextContent(
-      "6529 app on iPhone was revoked, but this browser’s encrypted data couldn’t be removed."
+    expect(removeLeftoverLocalData).toHaveBeenCalledWith("e-this");
+  });
+
+  it("says an unsigned revoke of this browser keeps its chats here", async () => {
+    mockState = state({ signsRevocations: false });
+    const user = userEvent.setup();
+    render(<DevicesSecuritySettings />);
+    const thisDevice = screen.getByRole("region", { name: "Brave on Windows" });
+    await user.click(
+      within(thisDevice).getByRole("button", {
+        name: "More actions for this browser",
+      })
     );
-    await act(async () => {
-      fireEvent.click(
-        within(alert).getByRole("button", {
-          name: "Remove this browser’s data",
-        })
-      );
+    await user.click(
+      await screen.findByRole("menuitem", { name: "Revoke this browser…" })
+    );
+    const dialog = await screen.findByRole("dialog", {
+      name: "Revoke this browser?",
     });
-    expect(retryLocalCleanup).toHaveBeenCalledWith("phone");
-    expect(mockState.revoke).toHaveBeenCalledTimes(1);
-    expect(screen.queryByText(/couldn’t be removed/)).toBeNull();
+    expect(dialog).not.toHaveTextContent(
+      "the encrypted chats saved here are deleted"
+    );
+    expect(dialog).toHaveTextContent(
+      "The encrypted chats saved in this browser stay."
+    );
   });
 
   it("asks again instead of revoking when the device changed while its dialog was open", async () => {
@@ -385,7 +392,7 @@ describe("DevicesSecuritySettings", () => {
         ownSigningKeys: [],
         now: NOW,
       });
-    const revoke = jest.fn(async () => ({ kind: "none" as const }));
+    const revoke = jest.fn(async () => undefined);
     mockState = state({ ...listed(false), revoke });
     const { rerender } = render(<DevicesSecuritySettings />);
     fireEvent.click(screen.getByRole("button", { name: "Revoke Laptop" }));
@@ -424,7 +431,7 @@ describe("DevicesSecuritySettings", () => {
   });
 
   it("keeps the dialog open when the row stops offering Revoke before confirm", async () => {
-    const revoke = jest.fn(async () => ({ kind: "none" as const }));
+    const revoke = jest.fn(async () => undefined);
     mockState = state({ revoke });
     const { rerender } = render(<DevicesSecuritySettings />);
     fireEvent.click(
@@ -454,7 +461,7 @@ describe("DevicesSecuritySettings", () => {
       let failRevoke: (error: unknown) => void = () => undefined;
       const revoke = jest.fn(
         () =>
-          new Promise<LocalCleanup>((_, reject) => {
+          new Promise<void>((_, reject) => {
             failRevoke = reject;
           })
       );
@@ -611,6 +618,12 @@ describe("DevicesSecuritySettings", () => {
     expect(
       screen.queryByRole("button", { name: "More actions for this browser" })
     ).toBeNull();
+  });
+
+  it("offers no clean-up until this browser's own encrypted device is known", () => {
+    mockState = state({ ownDeviceKnown: false });
+    render(<DevicesSecuritySettings />);
+    expect(screen.queryByRole("button", { name: "Clean up…" })).toBeNull();
   });
 
   it("says when this browser's keys can't be read, and warns on every revoke", async () => {

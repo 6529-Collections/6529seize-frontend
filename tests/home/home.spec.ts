@@ -1759,10 +1759,12 @@ test.describe("Home Page @smoke @medium @large", () => {
       .first()
       .locator('[data-home-section="Introduction"]');
     const heading = hero.getByRole("heading", { level: 1 });
-    await expect(heading).toHaveText("Building a decentralized network state");
+    await expect(heading).toHaveText(
+      "A peer-to-peer protocol for network organizations"
+    );
     await expect(
       hero.getByText(
-        "A decentralized, permissionless global network that funds, builds, and coordinates public-goods work across art, science, culture, and technology."
+        "Decentralized, permissionless, and global. Anyone can fund, build, and coordinate network-scaled organizations or public goods."
       )
     ).toBeVisible();
     const actions = page
@@ -2078,7 +2080,7 @@ test.describe("Home Page @smoke @medium @large", () => {
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "Building a decentralized network state",
+        name: "A peer-to-peer protocol for network organizations",
       })
     ).toBeVisible();
     await expect(

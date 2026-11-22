@@ -41,6 +41,7 @@ const SYSTEM_TITLES: Readonly<Record<AiSystem, MessageKey>> = {
   "linux-x86_64-cpu": "ai.releases.file.linuxX64",
   "linux-x86_64-cuda": "ai.releases.file.linuxCuda",
   "linux-arm64-cpu": "ai.releases.file.linuxArm64",
+  "linux-arm64-cuda": "ai.releases.file.linuxArm64Cuda",
 };
 
 function toRow(

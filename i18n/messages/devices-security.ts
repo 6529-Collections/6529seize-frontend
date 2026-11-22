@@ -45,11 +45,9 @@ export const DEVICES_SECURITY_MESSAGES = {
     "No other devices. To add one, open 6529 there and turn on signed posts and encrypted DMs. It takes one wallet signature.",
   "devicesSecurity.revokeUnavailable":
     "Open encrypted DMs in this browser to revoke this device here.",
-  "devicesSecurity.localCleanup.failed":
-    "{label} was revoked, but this browser’s encrypted data couldn’t be removed.",
-  "devicesSecurity.localCleanup.retryFailed":
-    "{label} was revoked, but this browser’s encrypted data still couldn’t be removed. Close any other 6529 tabs and try again.",
-  "devicesSecurity.localCleanup.retry": "Remove this browser’s data",
+  "devicesSecurity.localData.body":
+    "{label} was revoked, but its encrypted chats are still saved in this browser.",
+  "devicesSecurity.localData.remove": "Remove this browser’s encrypted data",
   "devicesSecurity.revokeNotNow":
     "This device can’t be revoked from here right now, for example while the device list reloads. Try again in a moment.",
   "devicesSecurity.revokeChanged":
@@ -103,6 +101,8 @@ export const DEVICES_SECURITY_MESSAGES = {
   "devicesSecurity.revoke.posts": "It will stop posting as you.",
   "devicesSecurity.revoke.dms":
     "It will stop receiving encrypted DMs. It deletes the encrypted chats saved on it once it confirms the revocation came from a device of yours.",
+  "devicesSecurity.revoke.keepsHere":
+    "The encrypted chats saved in this browser stay. After revoking, you can remove them here.",
   "devicesSecurity.revoke.otherDeviceChats":
     "Its encrypted DMs are on another device, not this browser: the encrypted chats saved there stay until they’re removed on that device.",
   "devicesSecurity.revoke.after":

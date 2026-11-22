@@ -4,6 +4,11 @@ import userEvent from "@testing-library/user-event";
 import TransferModal from "@/components/nft-transfer/TransferModal";
 import { ContractType } from "@/types/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: jest.fn(() => false),
+}));
 
 jest.mock("@/components/nft-transfer/TransferState", () => ({
   useTransfer: jest.fn(),
@@ -737,5 +742,17 @@ describe("TransferModal", () => {
         /NFT transfers are irreversible once submitted on-chain/i
       )
     ).toBeInTheDocument();
+  });
+
+  it("offers the website instead of transferring with 6529 Desktop browser forwarding", () => {
+    jest.mocked(useIsDesktopBrowserWallet).mockReturnValue(true);
+    openModal();
+    expect(
+      screen.queryByRole("button", { name: /^transfer$/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Continue in your browser" })
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /^cancel$/i })).toBeEnabled();
   });
 });

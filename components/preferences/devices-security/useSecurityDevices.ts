@@ -16,7 +16,6 @@ import { type UseE2eeResult, useE2ee } from "@/hooks/e2ee/useE2ee";
 import type { ApiE2eeDevice } from "@/lib/e2ee/api-types";
 import type { E2eeDeviceInfo, E2eeEngine } from "@/lib/e2ee/types";
 import { useRemoveE2eeLocalData } from "@/components/e2ee/useRemoveE2eeLocalData";
-import { readStoredE2eeDeviceKey } from "@/lib/e2ee/stored-device-key";
 import {
   storedE2eeDeviceKeyQueryKey,
   useStoredE2eeDeviceKey,
@@ -155,24 +154,36 @@ export class DeviceChangedError extends Error {
 }
 
 /**
- * How a revoke ended for this browser's own data: nothing to remove here;
- * removed; or the revoke went through but removing this browser's
- * encrypted data failed (retried with retryLocalCleanup, without revoking
- * again).
+ * This browser's stored encrypted device after it was revoked: an unsigned
+ * revoke leaves its chats saved here until the user removes them.
  */
-export type LocalCleanup =
-  | { readonly kind: "none" }
-  | { readonly kind: "removed" }
-  | { readonly kind: "failed"; readonly deviceKey: string };
+export interface LeftoverLocalData {
+  readonly deviceKey: string;
+  readonly label: string;
+}
+
+/** This browser's stored encrypted device, when the list shows it revoked. */
+function findLeftover(
+  devices: readonly EncryptedDeviceInput[],
+  storedKey: string | null | undefined
+): LeftoverLocalData | null {
+  if (!storedKey) {
+    return null;
+  }
+  const device = devices.find(
+    (item) => item.deviceKey.toLowerCase() === storedKey
+  );
+  const revokedAt = device?.revokedAt ?? null;
+  if (device === undefined || revokedAt === null) {
+    return null;
+  }
+  return { deviceKey: storedKey, label: device.label };
+}
 
 interface RevokeContext {
   readonly engine: E2eeEngine | null;
   readonly engineCanAct: boolean;
   readonly revokeGrant: (grant: ApiDeviceGrant) => Promise<boolean>;
-  /** This browser's encrypted device key from its storage (lowercase). */
-  readonly storedDeviceKey: () => Promise<string | null>;
-  /** Removes local data only while that device is still stored here. */
-  readonly removeLocal: (deviceKey: string) => Promise<boolean>;
   /** After any successful revoke: refresh the lists. */
   readonly afterRevoke: (unsignedDeviceKey: string | null) => void;
 }
@@ -180,22 +191,21 @@ interface RevokeContext {
 /**
  * Revokes one device. With encrypted messages running here the engine
  * signs the encrypted device's revocation (a combined grant ends with it;
- * the engine clears this browser itself). Otherwise the grant is revoked
- * and the server revokes its encrypted device unsigned; if that device is
- * this browser's stored one, its local data is removed (checked again under
- * the engine lock). The revoke and the local removal are reported apart: a
- * failed removal doesn't fail the revoke.
+ * the device verifies it and deletes its own chats, this browser included).
+ * Otherwise the grant is revoked and the server revokes its encrypted
+ * device unsigned; nothing is deleted anywhere, this browser included (it
+ * then offers its own removal, with a confirmation).
  */
 async function revokeSecurityDevice(
   ctx: RevokeContext,
   device: SecurityDevice
-): Promise<LocalCleanup> {
+): Promise<void> {
   const encrypted = device.encryptedDevice;
   const dmsActive = device.encryptedDms?.status === "active";
   if (encrypted && dmsActive && ctx.engine && ctx.engineCanAct) {
     await ctx.engine.revokeDevice(encrypted.deviceKey);
     ctx.afterRevoke(null);
-    return { kind: "none" };
+    return;
   }
   if (!device.grant || device.signedPosts?.status !== "active") {
     throw new DeviceActionUnavailableError();
@@ -203,21 +213,9 @@ async function revokeSecurityDevice(
   if (!(await ctx.revokeGrant(device.grant))) {
     throw new Error("Device grant revoke failed");
   }
-  const unsignedKey =
-    dmsActive && encrypted ? encrypted.deviceKey.toLowerCase() : null;
-  ctx.afterRevoke(unsignedKey);
-  // Only this browser's own encrypted device, not any device whose grant
-  // used an old signing key of this browser: its data isn't here.
-  if (unsignedKey === null || unsignedKey !== (await ctx.storedDeviceKey())) {
-    return { kind: "none" };
-  }
-  try {
-    return (await ctx.removeLocal(unsignedKey))
-      ? { kind: "removed" }
-      : { kind: "none" };
-  } catch {
-    return { kind: "failed", deviceKey: unsignedKey };
-  }
+  ctx.afterRevoke(
+    dmsActive && encrypted ? encrypted.deviceKey.toLowerCase() : null
+  );
 }
 
 interface RenameContext {
@@ -326,13 +324,23 @@ export interface SecurityDevicesState extends ClassifiedDevices {
   readonly retry: () => void;
   /** This browser couldn't read its own keys, so "this device" is unknown. */
   readonly localKeysUnreadable: boolean;
+  /**
+   * This browser's own encrypted device is known, or there can't be one, so
+   * earlier setups can't include it. False while its stored key is read.
+   */
+  readonly ownDeviceKnown: boolean;
   /** Whether a device can be revoked from here right now. */
   readonly canRevoke: (device: SecurityDevice) => boolean;
   /** Why an active device can't be revoked here yet, if that's the reason. */
   readonly revokeBlocker: (device: SecurityDevice) => RevokeBlocker | null;
-  readonly revoke: (device: SecurityDevice) => Promise<LocalCleanup>;
-  /** Removes this browser's data after a revoke whose removal failed. */
-  readonly retryLocalCleanup: (deviceKey: string) => Promise<boolean>;
+  readonly revoke: (device: SecurityDevice) => Promise<void>;
+  /** This browser's revoked encrypted device, whose chats are still here. */
+  readonly leftoverLocalData: LeftoverLocalData | null;
+  /**
+   * Removes this browser's encrypted data while that device is still the
+   * one stored here (after the user confirms).
+   */
+  readonly removeLeftoverLocalData: (deviceKey: string) => Promise<boolean>;
   /** Whether a device can be renamed from here right now. */
   readonly canRename: (device: SecurityDevice) => boolean;
   readonly rename: (device: SecurityDevice, name: string) => Promise<void>;
@@ -388,33 +396,28 @@ export function useSecurityDevices(): SecurityDevicesState {
     encryptionEnabled && listAddress !== null && !engineListed
   );
   const local = useLocalDeviceKeys(listAddress);
-  const storedDeviceKey = useStoredE2eeDeviceKey(profileId, encryptionEnabled);
+  const stored = useStoredE2eeDeviceKey(profileId, encryptionEnabled);
+  const storedDeviceKey = stored.status === "known" ? stored.key : undefined;
   const queryClient = useQueryClient();
   const now = useMinuteClock();
   const labels = useLabelOverrides(engineDevices);
 
   const grants = grantsQuery.data ?? EMPTY_GRANTS;
   const apiDevices = apiDevicesQuery.data ?? EMPTY_API_DEVICES;
+  const encryptedInputs = useMemo(
+    () => (engineListed ? labels.engineInputs : apiDevices.map(fromApi)),
+    [apiDevices, engineListed, labels.engineInputs]
+  );
   const classified = useMemo(
     () =>
       classifyDevices({
         grants,
-        encryptedDevices: engineListed
-          ? labels.engineInputs
-          : apiDevices.map(fromApi),
+        encryptedDevices: encryptedInputs,
         ownSigningKeys: local.publicKeys,
         ownEncryptedDeviceKey: storedDeviceKey,
         now,
       }),
-    [
-      apiDevices,
-      engineListed,
-      grants,
-      labels.engineInputs,
-      local.publicKeys,
-      now,
-      storedDeviceKey,
-    ]
+    [encryptedInputs, grants, local.publicKeys, now, storedDeviceKey]
   );
 
   // Without the encrypted-DMs list a grant can't be told apart from a
@@ -436,19 +439,21 @@ export function useSecurityDevices(): SecurityDevicesState {
     (device.signedPosts?.status === "active" ||
       device.encryptedDms?.status === "active");
 
-  const removeLocalFor = async (deviceKey: string) =>
-    (await removeLocal?.(deviceKey)) === true;
+  const refreshStoredKey = () =>
+    queryClient.invalidateQueries({
+      queryKey: storedE2eeDeviceKeyQueryKey(profileId),
+    });
+  const removeLeftoverLocalData = async (deviceKey: string) => {
+    const removed = (await removeLocal?.(deviceKey)) === true;
+    await refreshStoredKey();
+    return removed;
+  };
   const revoke = (device: SecurityDevice) =>
     revokeSecurityDevice(
       {
         engine,
         engineCanAct,
         revokeGrant,
-        storedDeviceKey: () =>
-          profileId === null
-            ? Promise.resolve(null)
-            : readStoredE2eeDeviceKey(profileId),
-        removeLocal: removeLocalFor,
         afterRevoke: (unsignedDeviceKey) => {
           void grantsQuery.refetch();
           if (unsignedDeviceKey !== null) {
@@ -458,9 +463,7 @@ export function useSecurityDevices(): SecurityDevicesState {
             // Fetch now: a cached list still fresh by staleTime would show
             // the revoked device as on.
             void apiDevicesQuery.refetch();
-            void queryClient.invalidateQueries({
-              queryKey: storedE2eeDeviceKeyQueryKey(profileId),
-            });
+            void refreshStoredKey();
           }
         },
       },
@@ -503,10 +506,13 @@ export function useSecurityDevices(): SecurityDevicesState {
       }
     },
     localKeysUnreadable: local.failed,
+    ownDeviceKnown:
+      !encryptionEnabled || engineListed || stored.status !== "pending",
     canRevoke,
     revokeBlocker,
     revoke,
-    retryLocalCleanup: removeLocalFor,
+    leftoverLocalData: findLeftover(encryptedInputs, storedDeviceKey),
+    removeLeftoverLocalData,
     canRename,
     rename,
     signsRevocations: engineCanAct,

@@ -26,6 +26,7 @@ jest.mock("@/services/api/competitions-api", () => ({
   fetchCompetitionCredits: jest.fn(),
 }));
 jest.mock("@/hooks/competitions/useCompetitionSignature", () => ({
+  ...jest.requireActual("@/hooks/competitions/useCompetitionSignature"),
   useCompetitionSignatureFor: jest.fn(),
 }));
 

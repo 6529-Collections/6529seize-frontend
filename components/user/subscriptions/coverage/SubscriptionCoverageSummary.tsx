@@ -21,6 +21,7 @@ import {
   formatSubscriptionCoverageDate,
   formatSubscriptionCoverageDeadline,
   getFundedDropsLabel,
+  isSubscriptionCoverageFundedToForecastEnd,
 } from "./subscriptionCoverage.helpers";
 
 import {
@@ -443,7 +444,12 @@ function CoverageSummaryContent({
           )}
           {fundedThrough && (
             <p className="tw-mb-0 tw-mt-2 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
-              {t(locale, "subscriptions.coverage.fundedThrough")}{" "}
+              {t(
+                locale,
+                isSubscriptionCoverageFundedToForecastEnd(coverage)
+                  ? "subscriptions.coverage.fundedAtLeastThrough"
+                  : "subscriptions.coverage.fundedThrough"
+              )}{" "}
               <CoveragePoint point={fundedThrough} separator=" · " />
             </p>
           )}
