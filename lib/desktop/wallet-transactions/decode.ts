@@ -131,7 +131,8 @@ export function decodeTransactionData(
   if (!item) return data === "0x" ? {} : null;
   try {
     const decoded = decodeFunctionData({ abi: [item], data });
-    const values: readonly unknown[] = decoded.args;
+    // A function without parameters decodes to no `args`.
+    const values: readonly unknown[] = decoded.args ?? [];
     const encoded = encodeFunctionData({
       abi: [item],
       functionName: item.name,

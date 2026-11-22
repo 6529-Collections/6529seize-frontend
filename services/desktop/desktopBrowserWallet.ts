@@ -9,6 +9,7 @@ import {
   parseWalletBridgeStatus,
   walletBridgeAcceptsContext,
   walletBridgeSendsTransactions,
+  walletBridgeSignsSafeTx,
   type WalletBridgeResponse,
   type WalletForwardingMethod,
   type WalletRequestInput,
@@ -80,6 +81,8 @@ type DesktopWalletRequestStatus =
   | { readonly kind: "transaction" }
   /** This 6529 Desktop does not send transactions: update or use the website. */
   | { readonly kind: "transactionUpdate" }
+  /** This 6529 Desktop does not sign Safe transactions: update or use the website. */
+  | { readonly kind: "safeTxUpdate" }
   /** The wallet reported a hash 6529 Desktop could not confirm yet. */
   | ({ readonly kind: "transactionUnverified" } & SentTransaction)
   /** The transaction on chain differs from the one requested. */
@@ -105,6 +108,8 @@ let ownerFingerprint: string | null = null;
 let acceptsContext = false;
 /** Whether the shell sends transactions with this website's rules. */
 let sendsTransactions = false;
+/** Whether the shell signs Safe transactions with this website's table. */
+let signsSafeTx = false;
 let stopLateTransactions: (() => void) | null = null;
 /** The chain of the open transaction request, for its explorer link. */
 let ownerChainId = 1;
@@ -149,6 +154,15 @@ export function showDesktopWalletTransactionRefusal(): void {
   setStatus({
     kind: sendsTransactions ? "transaction" : "transactionUpdate",
   });
+}
+
+/**
+ * Shows that this 6529 Desktop cannot ask the browser wallet to sign this
+ * Safe transaction (its SafeTx table differs): update or use the website.
+ */
+export function showDesktopWalletSafeTxRefusal(): void {
+  if (status.kind === "waiting") return;
+  setStatus({ kind: "safeTxUpdate" });
 }
 
 const readProfiles = (value: unknown): ReadonlySet<string> =>
@@ -284,6 +298,7 @@ export async function getDesktopWalletMethods(): Promise<
 > {
   acceptsContext = false;
   sendsTransactions = false;
+  signsSafeTx = false;
   const api = getDesktopShellApi();
   const bridge = getDesktopWallet();
   if (!api || !bridge) return [];
@@ -293,10 +308,12 @@ export async function getDesktopWalletMethods(): Promise<
     const capabilities = await bridge.capabilities();
     acceptsContext = walletBridgeAcceptsContext(capabilities);
     sendsTransactions = walletBridgeSendsTransactions(capabilities);
+    signsSafeTx = walletBridgeSignsSafeTx(capabilities);
     return parseWalletBridgeCapabilities(capabilities);
   } catch {
     acceptsContext = false;
     sendsTransactions = false;
+    signsSafeTx = false;
     return [];
   }
 }
@@ -309,6 +326,12 @@ export const desktopWalletSendsTransactions = (): boolean => sendsTransactions;
 
 /** Whether requests may carry `context` (the shell said it accepts it). */
 export const desktopWalletAcceptsContext = (): boolean => acceptsContext;
+
+/**
+ * Whether this 6529 Desktop asks the browser wallet to sign Safe
+ * transactions (it reported this website's SafeTx table).
+ */
+export const desktopWalletSignsSafeTx = (): boolean => signsSafeTx;
 
 const applyShellStatus = (value: unknown) => {
   const shellStatus = parseWalletBridgeStatus(value);
@@ -493,6 +516,7 @@ export function __resetDesktopBrowserWalletForTests(): void {
   ownerFingerprint = null;
   acceptsContext = false;
   sendsTransactions = false;
+  signsSafeTx = false;
   ownerChainId = 1;
   stopLateTransactions?.();
   stopLateTransactions = null;

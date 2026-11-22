@@ -92,6 +92,8 @@ const MEMES = "0x33fd426905f149f8376e227d0c9d3340aad17af1";
 const RECIPIENT = "0xab5801a7d398351b8be11c439e05c5b3259aec9b";
 /** A pinned 6529 Provenance test registry (Sepolia). */
 const PROVENANCE_REGISTRY = "0x0e289576c7565d29018134517309668946ffc912";
+/** The Sepolia test Safe that owns it (pinned for Safe transactions). */
+const TEST_SAFE = "0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68";
 
 /**
  * A shell-signed transaction request: `value` wei to `to` with call data
@@ -354,6 +356,91 @@ test.describe("Desktop wallet request page", () => {
     await expect(main.getByText("0 (a new subject)")).toBeVisible();
     await expect(
       main.getByRole("button", { name: "Send in wallet" })
+    ).toHaveCount(0);
+  });
+
+  test("shows a Safe transaction's governance call for a Safe signer", async ({
+    page,
+    baseURL,
+  }) => {
+    const origin = new URL(baseURL!).origin;
+    await page.route(SIGNER_ROUTE, (route) =>
+      route.fulfill({ json: { signer: shell.address } })
+    );
+    const payload = JSON.stringify({
+      domain: { chainId: 11_155_111, verifyingContract: TEST_SAFE },
+      message: {
+        to: PROVENANCE_REGISTRY,
+        value: "0",
+        data: encodeFunctionData({
+          abi: [parseAbiItem("function registerRecordType(string literal)")],
+          args: ["PUBLIC_DOCUMENT"],
+        }),
+        operation: 0,
+        safeTxGas: "0",
+        baseGas: "0",
+        gasPrice: "0",
+        gasToken: "0x0000000000000000000000000000000000000000",
+        refundReceiver: "0x0000000000000000000000000000000000000000",
+        nonce: "7",
+      },
+      primaryType: "SafeTx",
+      types: {
+        EIP712Domain: [
+          { name: "chainId", type: "uint256" },
+          { name: "verifyingContract", type: "address" },
+        ],
+        SafeTx: [
+          { name: "to", type: "address" },
+          { name: "value", type: "uint256" },
+          { name: "data", type: "bytes" },
+          { name: "operation", type: "uint8" },
+          { name: "safeTxGas", type: "uint256" },
+          { name: "baseGas", type: "uint256" },
+          { name: "gasPrice", type: "uint256" },
+          { name: "gasToken", type: "address" },
+          { name: "refundReceiver", type: "address" },
+          { name: "nonce", type: "uint256" },
+        ],
+      },
+    });
+    const now = Date.now();
+    const bytes = encodeWalletRequestEnvelope({
+      v: 1,
+      id: ID,
+      scheme: "localcore6529",
+      origin,
+      issuedAt: now,
+      expiresAt: now + WALLET_REQUEST_TTL_MS,
+      request: {
+        method: "eth_signTypedData_v4",
+        params: [ADDRESS, payload],
+        address: ADDRESS,
+        chainId: 11_155_111,
+      },
+    });
+    const fragment = buildWalletRequestFragment(
+      bytes,
+      await shell.signMessage({ message: { raw: bytes } })
+    );
+    if (fragment === null) throw new Error("fragment too large");
+
+    await page.goto(`/browser-connector${fragment}`);
+
+    const main = page.getByRole("main");
+    await expect(
+      main.getByText(
+        "Approve a 6529 Provenance governance action as a signer of this Safe"
+      )
+    ).toBeVisible();
+    await expect(main.getByText("1. Register a record type")).toBeVisible();
+    await expect(main.getByText(/“PUBLIC_DOCUMENT”/)).toBeVisible();
+    await expect(main.getByRole("link", { name: TEST_SAFE })).toBeVisible();
+    await expect(
+      main.getByText(/This is a signature, not a transaction/)
+    ).toBeVisible();
+    await expect(
+      main.getByRole("button", { name: "Sign in wallet" })
     ).toHaveCount(0);
   });
 

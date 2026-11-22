@@ -6,7 +6,9 @@ import { shortWalletPayloadHash } from "@/lib/desktop/walletRequestContext";
 import { describeWalletRequest } from "@/lib/desktop/walletRequestDescribe";
 import {
   desktopWalletAcceptsContext,
+  desktopWalletSignsSafeTx,
   showDesktopWalletRefusal,
+  showDesktopWalletSafeTxRefusal,
   showDesktopWalletTransactionRefusal,
 } from "@/services/desktop/desktopBrowserWallet";
 import { takeWalletRequestContext } from "@/services/desktop/walletRequestContexts";
@@ -60,6 +62,11 @@ export function walletForwardingPrecheck(
     } else {
       showDesktopWalletRefusal();
     }
+    return null;
+  }
+  // A Safe transaction goes only to a 6529 Desktop with the same SafeTx table.
+  if (described.value.kind === "safeTx" && !desktopWalletSignsSafeTx()) {
+    showDesktopWalletSafeTxRefusal();
     return null;
   }
   if (

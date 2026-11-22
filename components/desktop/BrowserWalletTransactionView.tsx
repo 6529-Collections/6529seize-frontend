@@ -16,10 +16,6 @@ import { formatDecimalString } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { WalletRequest } from "@/lib/desktop/wallet-forwarding";
 import type {
-  DecodedTuple,
-  DecodedValue,
-} from "@/lib/desktop/wallet-transactions/decode";
-import type {
   TransactionDescription,
   TransactionEffect,
 } from "@/lib/desktop/wallet-transactions/describe";
@@ -28,13 +24,13 @@ import {
   type PriceReader,
   readExpectedMintValue,
 } from "@/lib/desktop/wallet-transactions/price";
-import type { RuleArg } from "@/lib/desktop/wallet-transactions/types";
 import {
   isPublisherCall,
   readPublisherAuthorization,
   type RegistryReader,
 } from "@/lib/desktop/wallet-transactions/provenance";
 import BrowserWalletProvenanceDetails from "./BrowserWalletProvenanceDetails";
+import { formatDecodedValue } from "./walletTransactionFormat";
 import BrowserWalletTransferRecipient from "./BrowserWalletTransferRecipient";
 
 type Locale = ReturnType<typeof useBrowserLocale>;
@@ -263,61 +259,6 @@ function useTooLate(expiresAt: number): boolean {
 
 const formatAddress = (value: string) => getAddress(value);
 
-function formatValue(
-  locale: Locale,
-  type: string,
-  value: DecodedValue,
-  components?: readonly RuleArg[]
-): string {
-  if (type === "bytes32[]" && Array.isArray(value)) {
-    return t(locale, "browserConnector.tx.proof", {
-      count: formatDecimalString(locale, String(value.length)),
-    });
-  }
-  if (type === "bytes32[][]" && Array.isArray(value)) {
-    return t(locale, "browserConnector.tx.proofs", {
-      count: formatDecimalString(locale, String(value.length)),
-    });
-  }
-  if (Array.isArray(value)) {
-    const elementType = type.slice(0, -2);
-    const separator = components === undefined ? ", " : "; ";
-    return (value as readonly DecodedValue[])
-      .map((element) => formatValue(locale, elementType, element, components))
-      .join(separator);
-  }
-  if (components !== undefined) {
-    // A tuple: each field by name, with its own type.
-    const tuple = value as DecodedTuple;
-    const fields = components.map((component) =>
-      t(locale, "browserConnector.tx.field", {
-        name: component.name,
-        value: formatValue(
-          locale,
-          component.type,
-          tuple[component.name] ?? "",
-          component.components
-        ),
-      })
-    );
-    return `(${fields.join(", ")})`;
-  }
-  if (typeof value === "boolean") {
-    return t(
-      locale,
-      value ? "browserConnector.tx.yes" : "browserConnector.tx.no"
-    );
-  }
-  if (typeof value === "bigint") {
-    return formatDecimalString(locale, value.toString());
-  }
-  const text = value as string;
-  if (type === "address") return formatAddress(text);
-  if (type === "string") {
-    return t(locale, "browserConnector.tx.quoted", { text });
-  }
-  return text;
-}
 
 /** A delegation use case by number and its name in the delegation center. */
 const labelForUseCase = (locale: Locale, id: string): string => {
@@ -589,7 +530,7 @@ export default function BrowserWalletTransactionView({
             <div key={arg.name}>
               <dt className="tw-font-mono tw-text-iron-400">{arg.name}</dt>
               <dd className="tw-m-0 tw-break-all tw-font-mono tw-text-iron-100">
-                {formatValue(locale, arg.type, arg.value, arg.components)}
+                {formatDecodedValue(locale, arg.type, arg.value, arg.components)}
               </dd>
             </div>
           ))}
