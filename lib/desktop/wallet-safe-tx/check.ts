@@ -53,7 +53,10 @@ export type SafeTxCheck =
 const FAIL = { ok: false, problem: "safe-tx-rule" } as const;
 const ZERO_ADDRESS = `0x${"0".repeat(40)}`;
 const ADDRESS = /^0x[0-9a-fA-F]{40}$/;
-const HEX_BYTES = /^0x(?:[0-9a-fA-F]{2})*$/;
+const HEX_DIGITS = /^0x[0-9a-fA-F]*$/;
+/** `0x` and whole bytes, any case. */
+const isHexBytes = (value: string): boolean =>
+  HEX_DIGITS.test(value) && value.length % 2 === 0;
 const NONCE = /^(?:0|[1-9]\d{0,15})$/;
 const MAX_SAFE_NONCE = BigInt(Number.MAX_SAFE_INTEGER);
 
@@ -208,7 +211,7 @@ export function checkSafeTx(
       typeof to !== "string" ||
       !ADDRESS.test(to) ||
       typeof data !== "string" ||
-      !HEX_BYTES.test(data) ||
+      !isHexBytes(data) ||
       typeof nonce !== "string" ||
       !NONCE.test(nonce) ||
       BigInt(nonce) > MAX_SAFE_NONCE
@@ -219,10 +222,7 @@ export function checkSafeTx(
     if (operation === 0) {
       const call = checkCall(pin, to, data as Hex, rulesFor(pin));
       calls = call === null ? null : [call];
-    } else if (
-      operation === 1 &&
-      to.toLowerCase() === pin.multiSendCallOnly
-    ) {
+    } else if (operation === 1 && to.toLowerCase() === pin.multiSendCallOnly) {
       calls = checkBatch(pin, data as Hex);
     }
     if (calls === null) return FAIL;

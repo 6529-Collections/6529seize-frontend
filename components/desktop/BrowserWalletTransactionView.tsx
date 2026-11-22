@@ -259,7 +259,6 @@ function useTooLate(expiresAt: number): boolean {
 
 const formatAddress = (value: string) => getAddress(value);
 
-
 /** A delegation use case by number and its name in the delegation center. */
 const labelForUseCase = (locale: Locale, id: string): string => {
   const known = ALL_USE_CASES.find((item) => String(item.use_case) === id);
@@ -530,7 +529,12 @@ export default function BrowserWalletTransactionView({
             <div key={arg.name}>
               <dt className="tw-font-mono tw-text-iron-400">{arg.name}</dt>
               <dd className="tw-m-0 tw-break-all tw-font-mono tw-text-iron-100">
-                {formatDecodedValue(locale, arg.type, arg.value, arg.components)}
+                {formatDecodedValue(
+                  locale,
+                  arg.type,
+                  arg.value,
+                  arg.components
+                )}
               </dd>
             </div>
           ))}

@@ -36,7 +36,9 @@ export function formatDecodedValue(
     const elementType = type.slice(0, -2);
     const separator = components === undefined ? ", " : "; ";
     return (value as readonly DecodedValue[])
-      .map((element) => formatDecodedValue(locale, elementType, element, components))
+      .map((element) =>
+        formatDecodedValue(locale, elementType, element, components)
+      )
       .join(separator);
   }
   if (components !== undefined) {
@@ -45,7 +47,7 @@ export function formatDecodedValue(
     const fields = components.map((component) =>
       t(locale, "browserConnector.tx.field", {
         name: component.name,
-        value: formatValue(
+        value: formatDecodedValue(
           locale,
           component.type,
           tuple[component.name] ?? "",

@@ -4919,8 +4919,7 @@ export const EN_US_ROOT_MESSAGES = {
   "theMemes.mint.phaseEligibility.unavailable": "Eligibility unavailable",
   "theMemes.mint.phaseEligibility.none": "No eligible spots",
   "theMemes.mint.phaseEligibility.allowlist.one": "{allowlist} eligible spot",
-  "theMemes.mint.phaseEligibility.allowlist.many":
-    "{allowlist} eligible spots",
+  "theMemes.mint.phaseEligibility.allowlist.many": "{allowlist} eligible spots",
   "theMemes.mint.phaseEligibility.airdrop":
     "{airdrop}x Airdrop · nothing to mint",
   "theMemes.mint.phaseEligibility.mixed":

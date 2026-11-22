@@ -45,7 +45,10 @@ export const SINGLE_CALL_ONLY: readonly string[] = [
   "governance.acceptOwnership",
 ];
 
-type Call = Pick<TransactionRule, "id" | "selector" | "signature" | "args" | "risk">;
+type Call = Pick<
+  TransactionRule,
+  "id" | "selector" | "signature" | "args" | "risk"
+>;
 
 const CALLS: readonly Call[] = [
   {

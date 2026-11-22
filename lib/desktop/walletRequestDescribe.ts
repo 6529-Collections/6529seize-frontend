@@ -51,7 +51,10 @@ import {
   describeSafeTx,
   type SafeTxDescription,
 } from "@/lib/desktop/wallet-safe-tx/describe";
-import { SAFE_TX_FIELDS, SAFE_TX_PINS } from "@/lib/desktop/wallet-safe-tx/pins";
+import {
+  SAFE_TX_FIELDS,
+  SAFE_TX_PINS,
+} from "@/lib/desktop/wallet-safe-tx/pins";
 import {
   describeWalletTransaction,
   type TransactionDescription,
@@ -376,7 +379,10 @@ function describePinnedSafeTx(
   if (!pinned) return null;
   const checked = checkSafeTx(typedData.domain, typedData.message);
   if (!checked.ok) return refuse("safe-tx-rule");
-  return { ok: true, value: { kind: "safeTx", safeTx: describeSafeTx(checked) } };
+  return {
+    ok: true,
+    value: { kind: "safeTx", safeTx: describeSafeTx(checked) },
+  };
 }
 
 /**

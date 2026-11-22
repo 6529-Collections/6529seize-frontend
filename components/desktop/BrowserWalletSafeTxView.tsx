@@ -194,8 +194,7 @@ export default function BrowserWalletSafeTxView({
   const warned = description.risk !== "normal";
   const canSign = check.kind === "ok" && (!warned || understood);
   const blocked = check.kind !== "ok" && check.kind !== "checking";
-  const queued =
-    check.kind === "ok" && description.nonce > check.currentNonce;
+  const queued = check.kind === "ok" && description.nonce > check.currentNonce;
 
   return (
     <>

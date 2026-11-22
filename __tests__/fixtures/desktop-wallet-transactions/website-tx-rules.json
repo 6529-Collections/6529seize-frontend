@@ -103,7 +103,15 @@
             {
               "arg": "_useCases",
               "is": {
-                "oneOf": ["1", "2", "3", "17", "997", "998", "999"]
+                "oneOf": [
+                  "1",
+                  "2",
+                  "3",
+                  "17",
+                  "997",
+                  "998",
+                  "999"
+                ]
               }
             }
           ]
@@ -131,7 +139,10 @@
               },
               "lenMax": 5,
               "lenMin": 1,
-              "sameLength": ["_delegationAddresses", "_useCases"]
+              "sameLength": [
+                "_delegationAddresses",
+                "_useCases"
+              ]
             },
             "type": "address[]"
           },
@@ -360,7 +371,15 @@
             {
               "arg": "_useCase",
               "is": {
-                "oneOf": ["1", "2", "3", "17", "997", "998", "999"]
+                "oneOf": [
+                  "1",
+                  "2",
+                  "3",
+                  "17",
+                  "997",
+                  "998",
+                  "999"
+                ]
               }
             }
           ]
@@ -686,7 +705,15 @@
             {
               "arg": "_useCase",
               "is": {
-                "oneOf": ["1", "2", "3", "17", "997", "998", "999"]
+                "oneOf": [
+                  "1",
+                  "2",
+                  "3",
+                  "17",
+                  "997",
+                  "998",
+                  "999"
+                ]
               }
             }
           ]
@@ -843,7 +870,9 @@
             "name": "mintIndices",
             "rule": {
               "lenMax": 100,
-              "sameLength": ["merkleProofs"]
+              "sameLength": [
+                "merkleProofs"
+              ]
             },
             "type": "uint32[]"
           },
@@ -914,7 +943,9 @@
             "name": "mintIndices",
             "rule": {
               "lenMax": 100,
-              "sameLength": ["merkleProofs"]
+              "sameLength": [
+                "merkleProofs"
+              ]
             },
             "type": "uint32[]"
           },
@@ -985,7 +1016,9 @@
             "name": "mintIndices",
             "rule": {
               "lenMax": 100,
-              "sameLength": ["merkleProofs"]
+              "sameLength": [
+                "merkleProofs"
+              ]
             },
             "type": "uint32[]"
           },
@@ -1048,7 +1081,9 @@
             "name": "mintIndices",
             "rule": {
               "lenMax": 100,
-              "sameLength": ["merkleProofs"]
+              "sameLength": [
+                "merkleProofs"
+              ]
             },
             "type": "uint32[]"
           },
@@ -1285,7 +1320,9 @@
             "rule": {
               "lenMax": 50,
               "lenMin": 1,
-              "sameLength": ["amounts"]
+              "sameLength": [
+                "amounts"
+              ]
             },
             "type": "uint256[]"
           },
@@ -1344,7 +1381,9 @@
             "rule": {
               "lenMax": 50,
               "lenMin": 1,
-              "sameLength": ["amounts"]
+              "sameLength": [
+                "amounts"
+              ]
             },
             "type": "uint256[]"
           },
@@ -1403,7 +1442,9 @@
             "rule": {
               "lenMax": 50,
               "lenMin": 1,
-              "sameLength": ["amounts"]
+              "sameLength": [
+                "amounts"
+              ]
             },
             "type": "uint256[]"
           },
@@ -1737,7 +1778,10 @@
                   {
                     "name": "algorithm",
                     "rule": {
-                      "oneOf": ["1", "2"]
+                      "oneOf": [
+                        "1",
+                        "2"
+                      ]
                     },
                     "type": "uint16"
                   },
@@ -1826,7 +1870,10 @@
                   {
                     "name": "algorithm",
                     "rule": {
-                      "oneOf": ["1", "2"]
+                      "oneOf": [
+                        "1",
+                        "2"
+                      ]
                     },
                     "type": "uint16"
                   },
@@ -1936,7 +1983,10 @@
                   {
                     "name": "algorithm",
                     "rule": {
-                      "oneOf": ["1", "2"]
+                      "oneOf": [
+                        "1",
+                        "2"
+                      ]
                     },
                     "type": "uint16"
                   },
@@ -2054,7 +2104,10 @@
                   {
                     "name": "algorithm",
                     "rule": {
-                      "oneOf": ["1", "2"]
+                      "oneOf": [
+                        "1",
+                        "2"
+                      ]
                     },
                     "type": "uint16"
                   },

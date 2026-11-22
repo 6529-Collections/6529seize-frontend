@@ -132,7 +132,8 @@ export function decodeTransactionData(
   try {
     const decoded = decodeFunctionData({ abi: [item], data });
     // A function without parameters decodes to no `args`.
-    const values: readonly unknown[] = decoded.args ?? [];
+    const decodedArgs = decoded.args as readonly unknown[] | undefined;
+    const values: readonly unknown[] = decodedArgs ?? [];
     const encoded = encodeFunctionData({
       abi: [item],
       functionName: item.name,

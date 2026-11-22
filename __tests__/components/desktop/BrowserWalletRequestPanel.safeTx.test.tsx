@@ -128,8 +128,12 @@ describe("BrowserWalletRequestPanel: Safe transactions", () => {
         "Approve a 6529 Provenance governance action as a signer of this Safe"
       )
     ).toBeInTheDocument();
-    expect(screen.getByText(/This is a signature, not a transaction/)).toBeInTheDocument();
-    expect(screen.getByText("1. Register a canonicalization")).toBeInTheDocument();
+    expect(
+      screen.getByText(/This is a signature, not a transaction/)
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("1. Register a canonicalization")
+    ).toBeInTheDocument();
     expect(screen.getByText("2. Register a record type")).toBeInTheDocument();
     expect(
       screen.getByText("3. Register a schema (by hash and CID)")
@@ -152,9 +156,7 @@ describe("BrowserWalletRequestPanel: Safe transactions", () => {
     chain();
     render(
       <BrowserWalletRequestPanel
-        hash={await fragmentFor(
-          "governance.freeze alone on the test registry"
-        )}
+        hash={await fragmentFor("governance.freeze alone on the test registry")}
       />
     );
     expect(

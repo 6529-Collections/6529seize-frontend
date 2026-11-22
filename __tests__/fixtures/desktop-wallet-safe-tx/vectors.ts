@@ -289,7 +289,11 @@ function acceptedCases(): Case[] {
     {
       name: "a batch of 16 calls",
       shape: {
-        message: { to: MULTI_SEND, operation: 1, data: batch(registerBatch(16)) },
+        message: {
+          to: MULTI_SEND,
+          operation: 1,
+          data: batch(registerBatch(16)),
+        },
       },
       expect: {
         ok: true,
