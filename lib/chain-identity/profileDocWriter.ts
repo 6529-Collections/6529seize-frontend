@@ -194,7 +194,11 @@ async function replaceOnce(
   return { txId: prepared.draft.txId };
 }
 
-/** A refusal in plain words for the person, or null to keep the error's own message. */
+/**
+ * A chain or gateway refusal in plain words for the person, or null to keep
+ * its own message. Other errors (the wallet's, a document over the size
+ * limit) always keep their own message.
+ */
 type DescribeError = (error: unknown) => string | null;
 
 /** The publish lane's error for whatever stopped the change. */
@@ -216,9 +220,11 @@ function writeErrorOf(
   if (signer === "session-key" && name !== null && SESSION_KEY_REFUSALS.has(name)) {
     return keyUnusable();
   }
+  const fromChain =
+    error instanceof ChainGatewayError || error instanceof ChainOperationError;
   return new ProfileDocWriteError(
     "submit_failed",
-    describe(error) ??
+    (fromChain ? describe(error) : null) ??
       (error instanceof Error && error.message !== ""
         ? error.message
         : "The profile change did not go through.")

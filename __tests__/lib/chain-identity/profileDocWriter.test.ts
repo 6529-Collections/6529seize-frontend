@@ -346,6 +346,21 @@ describe("the errors the site builder acts on", () => {
     await expect(
       chainProfileDocWriter(config, describe).replaceProfileDoc(setSite, "wallet")
     ).rejects.toEqual(new ProfileDocWriteError("submit_failed", "Plain words."));
+    // Errors from outside the chain keep their own message.
+    (prepareProfileReplace as jest.Mock).mockRejectedValueOnce(
+      new Error("The profile document is larger than 524,288 bytes.")
+    );
+    await expect(
+      chainProfileDocWriter(config, () => "Something went wrong.").replaceProfileDoc(
+        setSite,
+        "wallet"
+      )
+    ).rejects.toEqual(
+      new ProfileDocWriteError(
+        "submit_failed",
+        "The profile document is larger than 524,288 bytes."
+      )
+    );
     // A canceled signature and an unusable key keep their own errors.
     (prepareProfileReplace as jest.Mock).mockRejectedValueOnce(
       new UserRejectedRequestError(new Error("User rejected."))
