@@ -564,6 +564,19 @@ describe("DesktopUpdateNotice in a build that installs its own updates", () => {
     );
   });
 
+  it("marks a must-install update with the theme's red, which has no shades", () => {
+    const state = parseDesktopUpdateState({
+      ...STATES.U5,
+      mustUpdate: true,
+      mustUpdateWhy: "unsafe",
+    });
+    if (state === null) throw new Error("the fixture must parse");
+    render(<DesktopUpdatePanel state={state} locale="en-US" />);
+    const box = screen.getByText(STATES.U5.headline).parentElement;
+    expect(box).toHaveClass("tw-border-red/70", "tw-bg-red/10");
+    expect(box?.className).not.toMatch(/red-\d/);
+  });
+
   it("offers Not now on a plain urgent update, not on one the person must install", async () => {
     installAutoHost({ ...STATES.U5, mustUpdate: false, mustUpdateWhy: null });
     const { unmount } = render(<DesktopUpdateNotice />);
