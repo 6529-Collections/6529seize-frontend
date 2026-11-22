@@ -162,7 +162,7 @@ are configured separately in [decision setup](../competitions/feature-manage-com
   Level is still `0`. Other configured criteria still apply. A maximum Level of
   `0` allows only Level `0` profiles.
 - Level bounds include the named Levels. For example, maximum Level `1` includes
-  Level `1` and stops before Level `2`. Levels have no top level, so a Level
+  Level `1` and stops before Level `2`. There is no top level, so a Level
   bound can be above `100`.
 - REP and NIC bounds include both endpoints. Missing rating totals count as
   zero. If a rating rule selects an identity or REP category, or uses ratings

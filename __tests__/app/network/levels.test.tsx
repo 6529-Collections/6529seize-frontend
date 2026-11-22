@@ -69,7 +69,7 @@ describe("LevelsPage (App Router)", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Levels start at zero. Above level 100, each level needs 4% more TDH + Rep than the one before. There is no top level."
+        "Levels start at zero. Above Level 100, each level needs 4% more TDH + Rep than the one before. There is no top level."
       )
     ).toBeInTheDocument();
     expect(
