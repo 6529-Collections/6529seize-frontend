@@ -56,7 +56,7 @@ test.describe("Public rendering remains usable while wallet startup is delayed @
     const initialHtml = await response!.text();
     const initialDocument = load(initialHtml);
     expect(initialDocument("h1").text()).toContain(
-      "Building a decentralized network state"
+      "A peer-to-peer protocol for network organizations"
     );
     expect(initialDocument('a[href="/network/health"]')).toHaveLength(1);
     expect(initialDocument('script[type="application/ld+json"]')).toHaveLength(
@@ -67,7 +67,7 @@ test.describe("Public rendering remains usable while wallet startup is delayed @
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "Building a decentralized network state",
+        name: "A peer-to-peer protocol for network organizations",
       })
     ).toBeVisible();
   });
