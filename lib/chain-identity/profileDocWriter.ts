@@ -1,7 +1,8 @@
-import type { Hex } from "viem";
+import { isAddress, type Hex } from "viem";
 import type { Config } from "wagmi";
 import { getAccount } from "wagmi/actions";
 import { isUserRejectedSigningError } from "@/helpers/wallet-error.helpers";
+import { getWalletAddress } from "@/services/auth/auth.utils";
 import {
   ProfileDocWriteError,
   type ProfileDocSigner,
@@ -17,12 +18,20 @@ import { readGrant } from "./state";
 /**
  * The profile site builder's way to change the profile document: the same
  * save as the profile editor, with the builder's edit applied to the
- * current fields. It may change only the site's own fields.
+ * current fields, for the signed-in profile's identity. It may change only
+ * the site's own two fields.
  */
 
-const SITE_FIELD_PREFIX = "cms.primary.";
-/** Tries in all, the first included, when someone else replaced the profile meanwhile. */
-const ATTEMPTS = 3;
+const SITE_FIELDS = {
+  publication: "cms.primary.publication",
+  package: "cms.primary.package",
+} as const;
+/**
+ * Tries in all, the first included. STALE_VERSION (someone else replaced
+ * the profile meanwhile) fails at execution, so each failed try still costs
+ * its fee: one retry on the newer document, no more.
+ */
+const ATTEMPTS = 2;
 /** Chain refusals that mean this browser's key can't sign the change now. */
 const SESSION_KEY_REFUSALS: ReadonlySet<string> = new Set([
   "KEY_NOT_BOUND",
@@ -36,8 +45,8 @@ const SESSION_KEY_REFUSALS: ReadonlySet<string> = new Set([
 ]);
 const INADMISSIBLE_NAME = /^0x[0-9a-f]{4} ([A-Z_]+)/i;
 
-const connectedWallet = (config: Config): Hex | null =>
-  getAccount(config).address ?? null;
+const short = (address: string): string =>
+  `${address.slice(0, 6)}…${address.slice(-4)}`;
 
 /** The chain's name for why it refused a change, if it gave one. */
 function refusalName(error: unknown): string | null {
@@ -56,25 +65,50 @@ const keyUnusable = () =>
     "This browser's key for the 6529 Network can't sign this change."
   );
 
-async function identityOf(config: Config): Promise<{
+/**
+ * The signed-in profile's identity: the site is the signed-in profile's,
+ * whichever account the wallet app is on.
+ */
+async function signedInIdentity(): Promise<{
   readonly wallet: Hex;
   readonly identity: ChainIdentity;
 }> {
-  const wallet = connectedWallet(config);
-  if (wallet === null) {
+  const wallet = getWalletAddress();
+  if (!wallet || !isAddress(wallet)) {
     throw new ProfileDocWriteError(
       "submit_failed",
-      "Connect your wallet to change your profile on the 6529 Network."
+      "Sign in to change your profile on the 6529 Network."
     );
   }
   const identity = await chainGateway.getIdentityByWallet(wallet);
   if (!identity) {
     throw new ProfileDocWriteError(
       "submit_failed",
-      "This wallet has no identity on the 6529 Network yet."
+      "Your profile has no identity on the 6529 Network yet."
     );
   }
   return { wallet, identity };
+}
+
+/** The connected wallet, when it is one of the identity's wallets. */
+function signingWallet(
+  config: Config,
+  signedIn: Hex,
+  identity: ChainIdentity
+): Hex {
+  const connected = getAccount(config).address;
+  const bound =
+    connected !== undefined &&
+    identity.wallets.some(
+      (wallet) => wallet.toLowerCase() === connected.toLowerCase()
+    );
+  if (!bound) {
+    throw new ProfileDocWriteError(
+      "submit_failed",
+      `Switch your wallet to ${short(signedIn)} and try again.`
+    );
+  }
+  return connected;
 }
 
 /** This browser's key, checked against its grant on the chain; null for the wallet. */
@@ -96,19 +130,29 @@ async function keyFor(
   return key;
 }
 
-/** Throws unless `next` differs from `current` only in the site's fields. */
+/**
+ * Throws unless `next` differs from `current` only in the site's two
+ * fields, and names both or neither.
+ */
 function assertSiteFieldsOnly(
   current: ReadonlyMap<string, string> | null,
   next: ReadonlyMap<string, string>
 ): void {
+  const site: ReadonlySet<string> = new Set(Object.values(SITE_FIELDS));
   const keys = new Set([...(current?.keys() ?? []), ...next.keys()]);
   for (const key of keys) {
-    if (!key.startsWith(SITE_FIELD_PREFIX) && current?.get(key) !== next.get(key)) {
+    if (!site.has(key) && current?.get(key) !== next.get(key)) {
       throw new ProfileDocWriteError(
         "submit_failed",
         `The site builder can't change "${key}" in your profile. Nothing was changed.`
       );
     }
+  }
+  if (next.has(SITE_FIELDS.publication) !== next.has(SITE_FIELDS.package)) {
+    throw new ProfileDocWriteError(
+      "submit_failed",
+      "A site needs both its publication and its package. Nothing was changed."
+    );
   }
 }
 
@@ -117,7 +161,12 @@ async function replaceOnce(
   edit: (current: ReadonlyMap<string, string> | null) => Map<string, string>,
   signer: ProfileDocSigner
 ): Promise<{ readonly txId: string }> {
-  const { wallet, identity } = await identityOf(config);
+  const signedIn = await signedInIdentity();
+  const { identity } = signedIn;
+  const wallet =
+    signer === "wallet"
+      ? signingWallet(config, signedIn.wallet, identity)
+      : signedIn.wallet;
   const sessionKey = await keyFor(identity.principalId, signer);
   const current = await readCurrentProfile(identity);
   if (current.unreadable) {
@@ -175,13 +224,13 @@ function writeErrorOf(
  * applies the builder's edit, signs and stores the next version, and
  * submits PROFILE_REPLACE, waiting until it is final. When someone else
  * replaced the profile meanwhile (STALE_VERSION), it reads the newer
- * document and applies the edit again.
+ * document and applies the edit once more.
  */
 export function chainProfileDocWriter(config: Config): ProfileDocWriter {
   return {
     availableSigners: async () => {
       try {
-        const { identity } = await identityOf(config);
+        const { identity } = await signedInIdentity();
         return (await usableSessionKey(identity.principalId)) === null
           ? ["wallet"]
           : ["session-key", "wallet"];

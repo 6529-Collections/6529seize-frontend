@@ -98,7 +98,7 @@
   "chainIdentity.error.REJOIN_WAIT": "That wallet left an identity less than 30 days ago.",
   "chainIdentity.error.IDENTITY_FULL": "This identity already has 16 wallets.",
   "chainIdentity.error.LAST_WALLET": "The last wallet can't be removed.",
-  "chainIdentity.error.IMPORT_RUNNING": "The 6529 Network is still importing identities. Try again in a few minutes.",
+  "chainIdentity.error.IMPORT_RUNNING": "The 6529 Network is still importing identities. Try again once that is done, usually within an hour.",
   "chainIdentity.error.STALE_VERSION": "This changed since the page loaded. Reload and try again.",
   "chainIdentity.error.NONCE": "Another change from this signer went first. Try again.",
   "chainIdentity.error.EXPIRED": "The transaction expired before it was sent. Try again.",

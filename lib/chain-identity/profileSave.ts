@@ -67,7 +67,7 @@ export async function readCurrentProfile(
       throw new ChainGatewayError(
         503,
         "import_running",
-        "The 6529 Network is still importing identities. Try again in a few minutes."
+        "The 6529 Network is still importing identities. Try again once that is done, usually within an hour."
       );
     }
     // The imported document itself (version 1, written by the import) is

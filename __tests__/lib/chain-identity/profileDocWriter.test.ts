@@ -17,8 +17,10 @@ import {
 import { usableSessionKey } from "@/lib/chain-identity/session";
 import { readGrant } from "@/lib/chain-identity/state";
 import { ProfileDocWriteError } from "@/lib/profile-cms/chain/profile-doc-writer";
+import { getWalletAddress } from "@/services/auth/auth.utils";
 
 jest.mock("wagmi/actions", () => ({ getAccount: jest.fn() }));
+jest.mock("@/services/auth/auth.utils", () => ({ getWalletAddress: jest.fn() }));
 jest.mock("@/lib/chain-identity/gateway", () => ({
   ...jest.requireActual("@/lib/chain-identity/gateway"),
   chainGateway: { getIdentityByWallet: jest.fn() },
@@ -38,7 +40,12 @@ jest.mock("@/lib/chain-identity/state", () => ({ readGrant: jest.fn() }));
 
 const gateway = chainGateway as unknown as Record<string, jest.Mock>;
 const WALLET = "0x00000000000000000000000000000000000000aa";
+/** Bound to the signed-in identity too. */
+const SECOND = "0x00000000000000000000000000000000000000ab";
+/** Bound to another identity. */
+const OTHER = "0x00000000000000000000000000000000000000bb";
 const PRINCIPAL = `0x${"0a".repeat(32)}`;
+const OTHER_PRINCIPAL = `0x${"0b".repeat(32)}`;
 const config = {} as Config;
 const key = {
   principalId: PRINCIPAL,
@@ -54,17 +61,28 @@ const docWith = (entries: [string, string][]) => ({
   unreadable: false,
 });
 const PUBLISHED = "bafkreiexamplepublication";
+const PACKAGE = "bafkreiexamplepackage";
 const setSite = (current: ReadonlyMap<string, string> | null) =>
-  new Map([...(current ?? []), ["cms.primary.publication", PUBLISHED]]);
+  new Map([
+    ...(current ?? []),
+    ["cms.primary.publication", PUBLISHED],
+    ["cms.primary.package", PACKAGE],
+  ]);
 
 beforeEach(() => {
   jest.clearAllMocks();
   txCount = 0;
+  (getWalletAddress as jest.Mock).mockReturnValue(WALLET);
   (getAccount as jest.Mock).mockReturnValue({ address: WALLET });
-  gateway["getIdentityByWallet"]!.mockResolvedValue({
-    principalId: PRINCIPAL,
-    profile: { version: 3, docCid: "0x01", updatedHeight: 90 },
-  });
+  gateway["getIdentityByWallet"]!.mockImplementation(async (wallet: string) =>
+    wallet === OTHER
+      ? { principalId: OTHER_PRINCIPAL, wallets: [OTHER], profile: null }
+      : {
+          principalId: PRINCIPAL,
+          wallets: [WALLET, SECOND],
+          profile: { version: 3, docCid: "0x01", updatedHeight: 90 },
+        }
+  );
   (usableSessionKey as jest.Mock).mockResolvedValue(key);
   (readGrant as jest.Mock).mockResolvedValue({ active: true, version: 1 });
   (readCurrentProfile as jest.Mock).mockResolvedValue(
@@ -96,10 +114,10 @@ describe("the signers this browser offers", () => {
     );
   });
 
-  it("offers nothing without a wallet or an identity", async () => {
-    (getAccount as jest.Mock).mockReturnValue({ address: undefined });
+  it("offers nothing when signed out or without an identity", async () => {
+    (getWalletAddress as jest.Mock).mockReturnValue(null);
     await expect(chainProfileDocWriter(config).availableSigners()).resolves.toEqual([]);
-    (getAccount as jest.Mock).mockReturnValue({ address: WALLET });
+    (getWalletAddress as jest.Mock).mockReturnValue(WALLET);
     gateway["getIdentityByWallet"]!.mockResolvedValue(null);
     await expect(chainProfileDocWriter(config).availableSigners()).resolves.toEqual([]);
   });
@@ -117,6 +135,7 @@ describe("replacing the profile document", () => {
       bio: "gm",
       "cms.archive": "bafkreiarchive",
       "cms.primary.publication": PUBLISHED,
+      "cms.primary.package": PACKAGE,
     });
     expect(signing).toMatchObject({ wallet: WALLET, sessionKey: key });
     expect(submitAndAwait).toHaveBeenCalledWith({ txId: result.txId }, [
@@ -132,6 +151,55 @@ describe("replacing the profile document", () => {
     expect(usableSessionKey).not.toHaveBeenCalled();
   });
 
+  it("changes the signed-in profile's site, whichever account the wallet app is on", async () => {
+    // The wallet app is on a wallet of another identity.
+    (getAccount as jest.Mock).mockReturnValue({ address: OTHER });
+    await expect(
+      chainProfileDocWriter(config).replaceProfileDoc(setSite, "wallet")
+    ).rejects.toEqual(
+      new ProfileDocWriteError(
+        "submit_failed",
+        "Switch your wallet to 0x0000…00aa and try again."
+      )
+    );
+    expect(gateway["getIdentityByWallet"]).toHaveBeenCalledWith(WALLET);
+    expect(gateway["getIdentityByWallet"]).not.toHaveBeenCalledWith(OTHER);
+    expect(prepareProfileReplace).not.toHaveBeenCalled();
+    // The session key signs for the signed-in identity, not the app's account.
+    await chainProfileDocWriter(config).replaceProfileDoc(setSite, "session-key");
+    expect((prepareProfileReplace as jest.Mock).mock.calls[0][0]).toMatchObject({
+      principalId: PRINCIPAL,
+    });
+    expect(usableSessionKey).toHaveBeenCalledWith(PRINCIPAL);
+  });
+
+  it("lets any wallet of the identity sign", async () => {
+    (getAccount as jest.Mock).mockReturnValue({ address: SECOND });
+    await chainProfileDocWriter(config).replaceProfileDoc(setSite, "wallet");
+    expect((prepareProfileReplace as jest.Mock).mock.calls[0][2]).toMatchObject({
+      wallet: SECOND,
+      sessionKey: null,
+    });
+  });
+
+  it("removes both site fields to unpublish", async () => {
+    (readCurrentProfile as jest.Mock).mockResolvedValue(
+      docWith([
+        ["bio", "gm"],
+        ["cms.primary.publication", PUBLISHED],
+        ["cms.primary.package", PACKAGE],
+      ])
+    );
+    await chainProfileDocWriter(config).replaceProfileDoc((current) => {
+      const next = new Map(current ?? []);
+      next.delete("cms.primary.publication");
+      next.delete("cms.primary.package");
+      return next;
+    }, "wallet");
+    const fields = (prepareProfileReplace as jest.Mock).mock.calls[0][1];
+    expect(Object.fromEntries(fields)).toEqual({ bio: "gm" });
+  });
+
   it("gives the edit null when the identity has no document", async () => {
     (readCurrentProfile as jest.Mock).mockResolvedValue({ doc: null, unreadable: false });
     const edit = jest.fn(setSite);
@@ -144,6 +212,11 @@ describe("replacing the profile document", () => {
       (current: ReadonlyMap<string, string> | null) =>
         new Map([...(current ?? []), ["bio", "changed"]]),
       () => new Map([["cms.primary.publication", PUBLISHED]]),
+      (current: ReadonlyMap<string, string> | null) =>
+        new Map([...(current ?? []), ["cms.primary.other", "x"]]),
+      // A publication without its package.
+      (current: ReadonlyMap<string, string> | null) =>
+        new Map([...(current ?? []), ["cms.primary.publication", PUBLISHED]]),
     ]) {
       await expect(
         chainProfileDocWriter(config).replaceProfileDoc(edit, "wallet")
@@ -190,14 +263,14 @@ describe("replacing the profile document", () => {
     expect(result.txId).toBe(`0x${"2".padStart(64, "0")}`);
   });
 
-  it("stops after three conflicts", async () => {
+  it("tries once more after a conflict, not again: each failed try costs a fee", async () => {
     (submitAndAwait as jest.Mock).mockRejectedValue(
       new ChainOperationError("failed", "refused: STALE_VERSION.", "STALE_VERSION")
     );
     await expect(
       chainProfileDocWriter(config).replaceProfileDoc(setSite, "wallet")
     ).rejects.toMatchObject({ code: "submit_failed" });
-    expect(submitAndAwait).toHaveBeenCalledTimes(3);
+    expect(submitAndAwait).toHaveBeenCalledTimes(2);
   });
 });
 

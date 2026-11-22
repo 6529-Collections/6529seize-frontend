@@ -36,11 +36,15 @@ switch-on has passed (`NEXT_PUBLIC_IDENTITY_FREEZE_AT` plus 24 hours).
 Before any wallet prompt the page shows the most the change can cost, and
 then waits until the 6529 Network has made the change final.
 
-The profile site builder saves its site's place in the same profile document.
-It changes only the site's own fields and keeps every other field. It signs with this
-browser's key when there is one, without a wallet prompt, and otherwise asks
-the wallet. If someone saved the profile in the meantime, it applies the
-site change to the newer document. It never saves over a profile document it
+The profile site builder saves its site's place in the same profile document
+of the signed-in profile's identity. It changes only the site's two fields
+and keeps every other field. It signs with this browser's key when there is
+one, without a wallet prompt, and otherwise asks a wallet of that identity
+to sign twice. Each save costs a $fake6529 fee from the identity's balance,
+as a profile save on this page does, but the site builder doesn't show the
+fee before the wallet asks. If someone saved the profile in the meantime,
+the chain refuses the save and still takes its fee; the builder then tries
+once more on the newer document. It never saves over a profile document it
 can't read.
 
 ## Rules to Know
