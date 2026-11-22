@@ -214,14 +214,18 @@ function formatValue(
   }
   const text = value as string;
   if (type === "address") return formatAddress(text);
-  if (type === "string") return `“${text}”`;
+  if (type === "string") {
+    return t(locale, "browserConnector.tx.quoted", { text });
+  }
   return text;
 }
 
 /** A delegation use case by number and its name in the delegation center. */
-const labelForUseCase = (id: string): string => {
+const labelForUseCase = (locale: Locale, id: string): string => {
   const known = ALL_USE_CASES.find((item) => String(item.use_case) === id);
-  return known ? `${id} (${known.display})` : id;
+  return known
+    ? t(locale, "browserConnector.tx.useCase", { id, name: known.display })
+    : id;
 };
 
 function effectText(locale: Locale, effect: TransactionEffect): string {
@@ -229,7 +233,7 @@ function effectText(locale: Locale, effect: TransactionEffect): string {
     case "delegate":
       return t(locale, "browserConnector.tx.effect.delegate", {
         delegate: formatAddress(effect.delegate),
-        useCase: labelForUseCase(effect.useCase),
+        useCase: labelForUseCase(locale, effect.useCase),
       });
     case "onBehalfOf":
       return t(locale, "browserConnector.tx.effect.onBehalfOf", {
@@ -289,8 +293,14 @@ function canSendTransaction(state: {
 }): boolean {
   if (state.tooLate) return false;
   if (state.call === "checking" || state.call === "reverted") return false;
-  if (state.call === "unavailable" && !state.sendAnyway) return false;
   if (state.price === "checking" || state.price === "mismatch") return false;
+  // A check that could not run needs the user's explicit "Send anyway".
+  if (
+    (state.call === "unavailable" || state.price === "unavailable") &&
+    !state.sendAnyway
+  ) {
+    return false;
+  }
   if (state.highImpact && !state.understood) return false;
   return true;
 }
@@ -316,7 +326,8 @@ export default function BrowserWalletTransactionView({
   readonly request: TransactionRequest;
   readonly description: TransactionDescription;
   readonly expiresAt: number;
-  readonly children: (canSend: boolean) => ReactNode;
+  /** The wallet controls; `describedBy` names the checks that gate Send. */
+  readonly children: (canSend: boolean, describedBy: string) => ReactNode;
 }) {
   const [round, setRound] = useState(0);
   const call = useCallCheck(request, round);
@@ -325,6 +336,7 @@ export default function BrowserWalletTransactionView({
   const [understood, setUnderstood] = useState(false);
   const [sendAnyway, setSendAnyway] = useState(false);
   const understandId = useId();
+  const checksId = useId();
   const highImpact = description.risk === "high";
   const testNetwork = description.chainId === SEPOLIA;
   const canSend = canSendTransaction({
@@ -440,7 +452,9 @@ export default function BrowserWalletTransactionView({
       <details className="tw-rounded-lg tw-bg-iron-900 tw-p-3">
         <summary className="tw-cursor-pointer tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400">
           {t(locale, "browserConnector.tx.details", {
-            function: description.functionName ?? "-",
+            function:
+              description.functionName ??
+              t(locale, "browserConnector.tx.plainTransfer"),
           })}
         </summary>
         <dl className="tw-m-0 tw-mt-3 tw-flex tw-flex-col tw-gap-2 tw-text-sm">
@@ -462,19 +476,36 @@ export default function BrowserWalletTransactionView({
           </div>
         </dl>
       </details>
-      <div className="tw-flex tw-flex-col tw-gap-2 tw-text-sm">
-        <p
-          className={`tw-m-0 ${call.kind === "reverted" ? "tw-text-red" : "tw-text-iron-200"}`}
+      <div id={checksId} className="tw-flex tw-flex-col tw-gap-2 tw-text-sm">
+        <div
+          role="status"
+          className="tw-flex tw-flex-col tw-gap-2 tw-text-iron-200 empty:tw-hidden"
         >
-          {callCheckMessage(locale, call)}
-        </p>
-        {priceMessage !== null && (
-          <p
-            className={`tw-m-0 ${price.kind === "mismatch" ? "tw-text-red" : "tw-text-iron-200"}`}
-          >
-            {priceMessage}
-          </p>
-        )}
+          {call.kind !== "reverted" && (
+            <p className="tw-m-0">{callCheckMessage(locale, call)}</p>
+          )}
+          {priceMessage !== null && price.kind !== "mismatch" && (
+            <p className="tw-m-0">{priceMessage}</p>
+          )}
+        </div>
+        <div
+          role="alert"
+          className="tw-flex tw-flex-col tw-gap-2 empty:tw-hidden"
+        >
+          {call.kind === "reverted" && (
+            <p className="tw-m-0 tw-text-red">
+              {callCheckMessage(locale, call)}
+            </p>
+          )}
+          {price.kind === "mismatch" && priceMessage !== null && (
+            <p className="tw-m-0 tw-text-red">{priceMessage}</p>
+          )}
+          {tooLate && (
+            <p className="tw-m-0 tw-text-amber-200">
+              {t(locale, "browserConnector.tx.tooLate")}
+            </p>
+          )}
+        </div>
         {(call.kind === "reverted" || call.kind === "unavailable") &&
           call.raw !== "" && (
             <details>
@@ -501,25 +532,23 @@ export default function BrowserWalletTransactionView({
             {t(locale, "browserConnector.tx.check.again")}
           </button>
         )}
-        {call.kind === "unavailable" && !sendAnyway && (
-          <button
-            type="button"
-            className={CHECK_BUTTON_CLASS}
-            onClick={() => setSendAnyway(true)}
-          >
-            {t(locale, "browserConnector.tx.check.sendAnyway")}
-          </button>
-        )}
-        {tooLate && (
-          <p className="tw-m-0 tw-text-amber-200">
-            {t(locale, "browserConnector.tx.tooLate")}
-          </p>
-        )}
+        {(call.kind === "unavailable" || price.kind === "unavailable") &&
+          !sendAnyway && (
+            <button
+              type="button"
+              className={CHECK_BUTTON_CLASS}
+              onClick={() => setSendAnyway(true)}
+            >
+              {t(locale, "browserConnector.tx.check.sendAnyway")}
+            </button>
+          )}
       </div>
       <p className="tw-m-0 tw-text-sm tw-text-iron-300">
         {t(locale, "browserConnector.tx.safety")}
       </p>
-      <div className="tw-flex tw-flex-wrap tw-gap-3">{children(canSend)}</div>
+      <div className="tw-flex tw-flex-wrap tw-gap-3">
+        {children(canSend, checksId)}
+      </div>
     </>
   );
 }

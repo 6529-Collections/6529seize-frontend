@@ -1273,7 +1273,7 @@ describe("parseWalletBridgeResponse: transactions", () => {
     ).toEqual({ ok: false, code: "failed" });
   });
 
-  it("keeps the reported hash only with its reasons", () => {
+  it("keeps a reported hash with its reasons, and with any transaction failure", () => {
     for (const [code, reason] of [
       ["unverified", "transaction-not-visible"],
       ["unverified", "rpc-unavailable"],
@@ -1291,6 +1291,7 @@ describe("parseWalletBridgeResponse: transactions", () => {
         )
       ).toEqual({ ok: false, code, reason, transactionHash: HASH });
     }
+    // Any failure of a transaction keeps the hash; a signature never does.
     for (const value of [
       {
         ok: false,
@@ -1311,9 +1312,13 @@ describe("parseWalletBridgeResponse: transactions", () => {
         transactionHash: HASH,
       },
       { ok: false, code: "unverified", transactionHash: HASH },
+      { ok: false, code: "expired", transactionHash: HASH },
     ]) {
       expect(
         parseWalletBridgeResponse(value, "eth_sendTransaction")
+      ).toHaveProperty("transactionHash", HASH);
+      expect(
+        parseWalletBridgeResponse(value, "personal_sign")
       ).not.toHaveProperty("transactionHash");
     }
     expect(

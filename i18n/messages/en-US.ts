@@ -4186,6 +4186,9 @@ export const EN_US_ROOT_MESSAGES = {
   "browserConnector.tx.data": "Call data",
   "browserConnector.tx.proof": "allowlist proof ({count} hashes)",
   "browserConnector.tx.proofs": "allowlist proofs ({count})",
+  "browserConnector.tx.quoted": "“{text}”",
+  "browserConnector.tx.useCase": "{id} ({name})",
+  "browserConnector.tx.plainTransfer": "plain ETH transfer",
   "browserConnector.tx.yes": "Yes",
   "browserConnector.tx.no": "No",
   "browserConnector.tx.check.checking":

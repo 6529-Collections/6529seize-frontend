@@ -137,6 +137,28 @@ describe("desktopBrowserWallet: transactions", () => {
     }
   );
 
+  it.each([
+    ["failed", "transaction-not-visible"],
+    ["failed", undefined],
+    ["expired", undefined],
+    ["cancelled", undefined],
+    ["unverified", undefined],
+    ["refused", "transaction-rule"],
+  ])("never hides a reported hash (%s / %s)", async (code, reason) => {
+    bridge.request.mockResolvedValue({
+      ok: false,
+      code,
+      ...(reason === undefined ? {} : { reason }),
+      transactionHash: HASH,
+    });
+    await runDesktopWalletRequest(TRANSACTION);
+    expect(getDesktopWalletRequestStatus()).toEqual({
+      kind: "transactionUnverified",
+      hash: HASH,
+      chainId: 11_155_111,
+    });
+  });
+
   it("explains a transaction the shell refuses by its rules", async () => {
     bridge.request.mockResolvedValue({
       ok: false,
@@ -193,6 +215,7 @@ describe("desktopBrowserWallet: transactions", () => {
       { ok: false, chainId: 1 },
     ]) {
       lateListener?.(event);
+      lateListener?.({ ok: true, value: HASH, chainId: 5 });
     }
     expect(getDesktopWalletRequestStatus()).toEqual({ kind: "idle" });
   });

@@ -1,4 +1,8 @@
-import { checkWalletTransaction } from "@/lib/desktop/wallet-transactions";
+import { EN_US_ROOT_MESSAGES } from "@/i18n/messages/en-US";
+import {
+  checkWalletTransaction,
+  WALLET_TRANSACTION_RULES,
+} from "@/lib/desktop/wallet-transactions";
 import { describeWalletTransaction } from "@/lib/desktop/wallet-transactions/describe";
 import {
   hasReadablePrice,
@@ -22,6 +26,18 @@ function describeVector(name: string) {
   if (!checked.ok) throw new Error(`${name} refused`);
   return describeWalletTransaction(checked, transaction.from, value);
 }
+
+describe("transaction copy", () => {
+  it("has a title and a contract name for every rule", () => {
+    const keys = new Set(Object.keys(EN_US_ROOT_MESSAGES));
+    for (const rule of WALLET_TRANSACTION_RULES) {
+      expect(keys).toContain(`browserConnector.tx.title.${rule.id}`);
+      expect(keys).toContain(
+        `browserConnector.tx.contract.${rule.id.split(".")[0]}`
+      );
+    }
+  });
+});
 
 describe("describeWalletTransaction", () => {
   it("lists no effects for a normal transaction", () => {
@@ -62,6 +78,26 @@ describe("describeWalletTransaction", () => {
     );
     expect(description.count).toBe(2n);
     expect(description.effects).toHaveLength(2);
+  });
+
+  it("lists a repeated effect once", () => {
+    const { transaction } = vector(
+      "delegation.batchRegister accepts consolidation and is high impact"
+    );
+    const value = 0n;
+    const checked = checkWalletTransaction({ ...transaction, value }, 1);
+    if (!checked.ok) throw new Error("refused");
+    const delegates = checked.args["_delegationAddresses"] as string[];
+    const repeated = {
+      ...checked,
+      args: {
+        ...checked.args,
+        _delegationAddresses: [delegates[0]!, delegates[0]!],
+      },
+    };
+    expect(
+      describeWalletTransaction(repeated, transaction.from, value).effects
+    ).toHaveLength(1);
   });
 
   it("names the delegator a manager acts for", () => {

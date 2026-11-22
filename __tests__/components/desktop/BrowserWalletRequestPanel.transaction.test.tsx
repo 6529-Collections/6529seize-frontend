@@ -147,7 +147,7 @@ describe("BrowserWalletRequestPanel: transactions", () => {
   });
 
   it("blocks a transaction that would fail and can check again", async () => {
-    call.mockRejectedValueOnce(
+    call.mockRejectedValue(
       new ExecutionRevertedError({ message: "Claim inactive" })
     );
     render(
@@ -155,16 +155,23 @@ describe("BrowserWalletRequestPanel: transactions", () => {
         hash={await fragmentFor(envelope(SUBSCRIPTIONS, TOP_UP))}
       />
     );
-    expect(
-      await screen.findByText(/This transaction would fail/)
-    ).toBeInTheDocument();
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole("alert")
+          .some((element) =>
+            /This transaction would fail/.test(element.textContent ?? "")
+          )
+      ).toBe(true)
+    );
     expect(sendButton()).toBeDisabled();
+    call.mockResolvedValue({ data: "0x" });
     await userEvent.click(screen.getByRole("button", { name: "Check again" }));
     await waitFor(() => expect(sendButton()).toBeEnabled());
   });
 
   it("lets the user send anyway when the check cannot run", async () => {
-    call.mockRejectedValueOnce(new Error("network down"));
+    call.mockRejectedValue(new Error("network down"));
     render(
       <BrowserWalletRequestPanel
         hash={await fragmentFor(envelope(SUBSCRIPTIONS, TOP_UP))}
@@ -176,6 +183,9 @@ describe("BrowserWalletRequestPanel: transactions", () => {
     expect(sendButton()).toBeDisabled();
     await userEvent.click(screen.getByRole("button", { name: "Send anyway" }));
     expect(sendButton()).toBeEnabled();
+    expect(sendButton()).toHaveAccessibleDescription(
+      /could not be checked right now/
+    );
   });
 
   it("asks for confirmation of a high-impact transaction", async () => {

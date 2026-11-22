@@ -58,12 +58,20 @@ export type WalletBridgeResponse =
       readonly transactionHash?: Hex;
     };
 
+/**
+ * The reported hash: kept with the reasons in `HASH_REASONS`, and with any
+ * other failure of a transaction request, so a hash the wallet returned is
+ * never dropped (the app then shows it and asks the user to check it
+ * before trying again).
+ */
 function readTransactionHash(
   code: WalletBridgeFailure,
   reason: string | undefined,
-  value: unknown
+  value: unknown,
+  method: WalletForwardingMethod
 ): Hex | undefined {
-  if (reason === undefined || HASH_REASONS[reason] !== code) return undefined;
+  const expected = reason !== undefined && HASH_REASONS[reason] === code;
+  if (!expected && method !== "eth_sendTransaction") return undefined;
   return typeof value === "string" && TRANSACTION_HASH.test(value)
     ? (value.toLowerCase() as Hex)
     : undefined;
@@ -72,7 +80,7 @@ function readTransactionHash(
 /**
  * Validate the shell's answer to a request of `method`: a signature, or a
  * transaction hash for `eth_sendTransaction`. Anything unexpected counts
- * as a failure.
+ * as a failure; a transaction failure keeps any valid reported hash.
  */
 export function parseWalletBridgeResponse(
   value: unknown,
@@ -95,7 +103,8 @@ export function parseWalletBridgeResponse(
   const transactionHash = readTransactionHash(
     code,
     reason,
-    record["transactionHash"]
+    record["transactionHash"],
+    method
   );
   return {
     ok: false,

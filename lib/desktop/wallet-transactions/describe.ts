@@ -133,6 +133,12 @@ export function describeWalletTransaction(
     else if (contract === "subscriptions") effects = [{ kind: "largeValue" }];
     else effects = mintEffects(args, from);
   }
+  // A batch can repeat an effect; each is listed once (and keyed by it).
+  const uniqueEffects = [
+    ...new Map(
+      effects.map((effect) => [JSON.stringify(effect), effect])
+    ).values(),
+  ];
   return {
     ruleId: rule.id,
     chainId: rule.chainId,
@@ -149,7 +155,7 @@ export function describeWalletTransaction(
     })),
     value,
     risk,
-    effects,
+    effects: uniqueEffects,
     // A single Memes mint has no count argument.
     count: rule.id === "memes.mint" ? 1n : countOf(args),
   };

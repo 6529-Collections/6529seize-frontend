@@ -62,7 +62,7 @@ const TRANSACTION_KINDS = new Set([
 /** Whether the dialog is about a transaction (titled "Transaction"). */
 const isTransactionStatus = (status: DialogStatus): boolean =>
   TRANSACTION_KINDS.has(status.kind) ||
-  (status.kind === "waiting" && status.transaction);
+  (status.kind === "waiting" && status.transaction === true);
 
 interface ReopenState {
   readonly requestCode: string | null;

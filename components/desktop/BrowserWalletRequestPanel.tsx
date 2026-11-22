@@ -225,12 +225,15 @@ function WalletGate({
   signing,
   onSign,
   disabled = false,
+  describedBy,
 }: {
   readonly locale: Locale;
   readonly request: Request;
   readonly signing: boolean;
   readonly onSign: () => void;
   readonly disabled?: boolean;
+  /** The id of what explains whether the button is offered. */
+  readonly describedBy?: string;
 }) {
   const { seizeConnect } = useSeizeConnectContext();
   const live = useAccount();
@@ -288,6 +291,7 @@ function WalletGate({
       className={BUTTON_CLASS}
       disabled={disabled}
       aria-disabled={signing}
+      aria-describedby={describedBy}
       onClick={() => {
         if (!signing && !disabled) onSign();
       }}
@@ -507,7 +511,9 @@ export default function BrowserWalletRequestPanel({
       });
       const isTransaction = request.method === "eth_sendTransaction";
       // A sent transaction is on its way whatever happens here: its hash
-      // always goes back (6529 Desktop checks late ones on chain).
+      // always goes back (6529 Desktop checks late ones on chain). This page
+      // serves one request; the link carries its id, and the shell takes
+      // one answer per id and checks a later one as a late transaction.
       if (!isTransaction && !stillCurrent()) return;
       // A signature that ran out while the wallet waited is refused by the app.
       if (!isTransaction && envelope.expiresAt <= Date.now()) {
@@ -576,13 +582,14 @@ export default function BrowserWalletRequestPanel({
         description={verified.description.transaction}
         expiresAt={envelope.expiresAt}
       >
-        {(canSend) => (
+        {(canSend, describedBy) => (
           <>
             <WalletGate
               locale={locale}
               request={request}
               signing={step.kind === "signing"}
               disabled={!canSend}
+              describedBy={describedBy}
               onSign={() => {
                 sign().catch(() => setStep({ kind: "failed" }));
               }}

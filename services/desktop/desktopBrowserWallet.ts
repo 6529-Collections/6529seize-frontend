@@ -327,6 +327,8 @@ const applyShellStatus = (value: unknown) => {
 };
 
 const TRANSACTION_HASH = /^0x[0-9a-fA-F]{64}$/;
+/** Chains transactions are forwarded on (Ethereum, Sepolia). */
+const TRANSACTION_CHAINS = new Set([1, 11_155_111]);
 
 /** A late transaction event: the hash it reports and its chain, or null. */
 function readLateTransaction(value: unknown): SentTransaction | null {
@@ -337,7 +339,7 @@ function readLateTransaction(value: unknown): SentTransaction | null {
   return typeof hash === "string" &&
     TRANSACTION_HASH.test(hash) &&
     typeof chainId === "number" &&
-    Number.isSafeInteger(chainId)
+    TRANSACTION_CHAINS.has(chainId)
     ? { hash: hash.toLowerCase(), chainId }
     : null;
 }
@@ -402,12 +404,11 @@ function transactionStatus(
 ): DesktopWalletRequestStatus | null {
   if (response.ok || response.transactionHash === undefined) return null;
   const sent = { hash: response.transactionHash, chainId: ownerChainId };
-  if (response.code === "unverified") {
-    return { kind: "transactionUnverified", ...sent };
-  }
+  // Any answer that names a sent transaction shows it (never a plain
+  // failure), so the user checks it before trying again.
   return response.reason === "transaction-mismatch"
     ? { kind: "transactionMismatch", ...sent }
-    : null;
+    : { kind: "transactionUnverified", ...sent };
 }
 
 function finish(response: WalletBridgeResponse): WalletBridgeResponse {
