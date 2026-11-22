@@ -56,9 +56,10 @@ can't read.
 - Your TDH is the most REP you can give across everyone, and the most NIC.
   You can always lower a rating. The REP and NIC forms on profile pages show
   what is left, read from the 6529 Network.
-- A removed wallet waits before it can join or create another identity. The
-  wait is the 6529 Network's rule; the page shows its end date before you
-  sign, and when you check a wallet to add.
+- A removed wallet can rejoin its identity at any time, but waits before it
+  can join a different identity or create one. The wait is the 6529
+  Network's rule; the page shows its end date before you sign, and when you
+  check a wallet to add.
 - The 6529 Network caps how many wallets an identity holds.
 - The browser's key stays in this browser and can't be copied out. Turn it
   off on this page to end it on the 6529 Network.

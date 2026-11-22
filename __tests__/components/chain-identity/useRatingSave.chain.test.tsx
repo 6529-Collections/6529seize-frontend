@@ -16,7 +16,12 @@ jest.mock("@/services/api/common-api", () => ({
 const requestAuth = jest.fn(async () => ({ success: true }));
 const setToast = jest.fn();
 const onProfileRepModify = jest.fn(async () => undefined);
-const profile = { id: "p1", handle: "punk", query: "punk", display: "punk" };
+const profile = {
+  id: "p1",
+  handle: "rated_one",
+  query: "rated_one",
+  display: "rated_one",
+};
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <AuthContext.Provider
@@ -70,7 +75,7 @@ it("keeps 6529.io's own rating request before the switch-on", async () => {
   });
   expect(requestAuth).toHaveBeenCalled();
   expect(commonApiPost).toHaveBeenCalledWith({
-    endpoint: "profiles/punk/rep/rating",
+    endpoint: "profiles/rated_one/rep/rating",
     body: { amount: 25, category: "Art" },
   });
 });

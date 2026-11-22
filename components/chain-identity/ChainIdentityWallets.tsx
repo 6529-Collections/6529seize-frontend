@@ -83,6 +83,8 @@ export default function ChainIdentityWallets({
   const { requestAuth } = useAuth();
   const [joining, setJoining] = useState("");
   const [removing, setRemoving] = useState<Hex | null>(null);
+  // The wallet the join being signed adds: fixed when "Add wallet" is clicked.
+  const [joinTarget, setJoinTarget] = useState<Hex | null>(null);
   const remove = useChainAction(onChanged);
   const join = useChainAction(() => setJoining(""));
   const started = useSyncExternalStore(
@@ -109,7 +111,12 @@ export default function ChainIdentityWallets({
   });
   const readiness =
     typedOk && membership.data
-      ? joinReadiness(membership.data, rejoinWaitMs, Date.now())
+      ? joinReadiness(
+          membership.data,
+          rejoinWaitMs,
+          Date.now(),
+          identity.principalId
+        )
       : null;
   const mine =
     readiness?.kind === "bound" &&
@@ -174,6 +181,7 @@ export default function ChainIdentityWallets({
       return;
     }
     const target = typed.toLowerCase() as Hex;
+    setJoinTarget(target);
     void join.prepare(async () => {
       // The relay keeps the first signature for this wallet's 6529.io session.
       const { success } = await requestAuth();
@@ -291,7 +299,7 @@ export default function ChainIdentityWallets({
                 autoComplete="off"
                 spellCheck={false}
                 placeholder={t(locale, "chainIdentity.addressPlaceholder")}
-                disabled={join.busy}
+                disabled={join.busy || join.state.kind === "confirm"}
                 aria-invalid={typed !== "" && !canJoin}
                 aria-describedby="chain-identity-join-hint"
                 onChange={(event) => setJoining(event.target.value)}
@@ -319,11 +327,11 @@ export default function ChainIdentityWallets({
         <ChainActionStatus
           state={join.state}
           note={
-            typedOk
-              ? t(locale, "chainIdentity.wallets.joinNote", {
-                  wallet: shortHex(typed),
+            joinTarget === null
+              ? undefined
+              : t(locale, "chainIdentity.wallets.joinNote", {
+                  wallet: shortHex(joinTarget),
                 })
-              : undefined
           }
           onConfirm={() => void join.confirm()}
           onCancel={join.cancel}

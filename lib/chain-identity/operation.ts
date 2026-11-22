@@ -31,7 +31,8 @@ export class ChainOperationError extends Error {
       | "signer_mismatch"
       | "rejected"
       | "failed"
-      | "timeout",
+      | "timeout"
+      | "pending",
     message: string,
     /** The chain's result name when it refused the change, e.g. STALE_VERSION. */
     readonly resultName: string | null = null

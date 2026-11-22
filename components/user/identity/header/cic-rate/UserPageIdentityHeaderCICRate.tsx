@@ -393,7 +393,7 @@ function UserPageIdentityHeaderCICRateForm({
 export default function UserPageIdentityHeaderCICRate(props: NicRateProps) {
   const identity =
     props.profile.query ?? props.profile.handle ?? props.profile.display;
-  const ratingState = useNicRatingState(identity);
+  const ratingState = useNicRatingState(identity, true, props.profile);
   return (
     <UserPageIdentityHeaderCICRateForm {...props} ratingState={ratingState} />
   );

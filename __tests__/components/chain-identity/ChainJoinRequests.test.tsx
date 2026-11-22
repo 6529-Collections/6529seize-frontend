@@ -135,7 +135,7 @@ it("says why when the chain refuses the join through the relay", async () => {
   );
   expect(
     await screen.findByText(
-      "Nothing changed. That wallet left an identity too recently to join one again yet."
+      "Nothing changed. That wallet left another identity recently. It has to wait before it joins a different identity or creates one."
     )
   ).toBeInTheDocument();
   expect(awaitFinal).not.toHaveBeenCalled();
@@ -208,7 +208,43 @@ it("tells the joiner who can send a held join again when the network can't be re
   );
   expect(
     await screen.findByText(
-      "Nothing changed. Your signature is saved, but 6529.io couldn't reach the 6529 Network. The wallet that asked can send it again from its identity page."
+      "Your signature is saved, but 6529.io couldn't reach the 6529 Network. The wallet that asked can send it again from its identity page."
     )
+  ).toBeInTheDocument();
+});
+
+it("says the asking identity, not this wallet, is short of $fake6529", async () => {
+  relay["sign"]!.mockResolvedValue({
+    ...heldJoin(),
+    status: "FAILED",
+    last_error:
+      "The 6529 Network refused the operation: 0x0305 FEE_UNCOVERED, detail 0",
+  });
+  renderRequests();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review and sign" })
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Sign with wallet" })
+  );
+  expect(
+    await screen.findByText(
+      "tester_one doesn't have enough $fake6529 for the fee. One of its wallets can add some, then you can sign again."
+    )
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("link", { name: "Get $fake6529 for fees." })
+  ).not.toBeInTheDocument();
+});
+
+it("lets this wallet rejoin the identity it left without waiting", async () => {
+  gateway["getWalletMembership"]!.mockResolvedValue({
+    wallet: JOINING_WALLET,
+    principalId: null,
+    leftAt: { leftMs: Date.now() - 1_000, from: JOIN_PRINCIPAL },
+  });
+  renderRequests();
+  expect(
+    await screen.findByRole("button", { name: "Review and sign" })
   ).toBeInTheDocument();
 });

@@ -85,7 +85,7 @@ it("says before signing when a removed wallet can join again, from the chain's w
     );
     expect(
       await screen.findByText(
-        "After this, 0x000000…0000dd can't join or create an identity until Nov 26, 2026, 12:00 PM."
+        "After this, 0x000000…0000dd can't join another identity or create one until Nov 26, 2026, 12:00 PM. It can rejoin yours at any time."
       )
     ).toBeInTheDocument();
     expect(
@@ -171,7 +171,7 @@ it("signs a join first and leaves it with 6529.io's relay for the new wallet", a
   ).toBeInTheDocument();
   expect(
     screen.getByText(
-      "Finish or cancel the join waiting for 0x000000…0000bb first."
+      "Finish or withdraw the join waiting for 0x000000…0000bb first."
     )
   ).toBeInTheDocument();
   expect(
@@ -185,4 +185,57 @@ it("signs a join first and leaves it with 6529.io's relay for the new wallet", a
       expiresAtMs: JOIN_EXPIRES_AT,
     },
   ]);
+});
+
+it("lets a wallet that left this identity rejoin at once, and holds one that left another", async () => {
+  gateway["getWalletMembership"]!.mockResolvedValue({
+    wallet: JOINING_WALLET,
+    principalId: null,
+    leftAt: { leftMs: Date.now() - 1_000, from: JOIN_PRINCIPAL },
+  });
+  const view = renderWallets([IDENTITY_WALLET]);
+  fireEvent.change(screen.getByLabelText("Wallet address"), {
+    target: { value: JOINING_WALLET },
+  });
+  expect(await screen.findByText("That wallet can join.")).toBeInTheDocument();
+  view.unmount();
+
+  gateway["getWalletMembership"]!.mockResolvedValue({
+    wallet: JOINING_WALLET,
+    principalId: null,
+    leftAt: { leftMs: Date.now() - 1_000, from: `0x${"0c".repeat(32)}` },
+  });
+  renderWallets([IDENTITY_WALLET]);
+  fireEvent.change(screen.getByLabelText("Wallet address"), {
+    target: { value: JOINING_WALLET },
+  });
+  expect(
+    await screen.findByText(
+      /^That wallet left another identity on .+\. It can join yours after .+\.$/
+    )
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Add wallet" })).toBeDisabled();
+});
+
+it("keeps the wallet being added fixed while the fee is shown", async () => {
+  gateway["draft"]!.mockResolvedValue(joinDraft());
+  (draftOperation as jest.Mock).mockImplementation(
+    jest.requireActual("@/lib/chain-identity/operation").draftOperation
+  );
+  gateway["getWalletMembership"]!.mockResolvedValue({
+    wallet: JOINING_WALLET,
+    principalId: null,
+    leftAt: null,
+  });
+  renderWallets([IDENTITY_WALLET]);
+  const input = screen.getByLabelText("Wallet address");
+  fireEvent.change(input, { target: { value: JOINING_WALLET } });
+  await screen.findByText("That wallet can join.");
+  fireEvent.click(screen.getByRole("button", { name: "Add wallet" }));
+  expect(
+    await screen.findByText(
+      "You sign first, with this wallet. Then 0x000000…0000bb signs."
+    )
+  ).toBeInTheDocument();
+  expect(input).toBeDisabled();
 });

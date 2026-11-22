@@ -53,7 +53,7 @@ export default function ChainIdentityCreate({
     staleTime: 5_000,
   });
   const readiness = membership.data
-    ? joinReadiness(membership.data, rejoinWaitMs, Date.now())
+    ? joinReadiness(membership.data, rejoinWaitMs, Date.now(), null)
     : null;
   const waiting = readiness?.kind === "waiting" ? readiness : null;
   const [handle, setHandle] = useState("");

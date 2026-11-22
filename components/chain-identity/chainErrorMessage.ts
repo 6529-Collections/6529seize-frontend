@@ -36,6 +36,10 @@ const KNOWN_NAMES = new Set([
   "NO_RATER_IDENTITY",
   "NO_TARGET_IDENTITY",
   "NO_WALLET",
+  "NOT_YET_VALID",
+  "OP_NOT_GRANTED",
+  "PENDING_CAP",
+  "PRINCIPAL_RECONCILING",
   "NONCE",
   "NONCE_WINDOW",
   "NOT_DELEGATOR",
@@ -148,7 +152,11 @@ export function chainFailureText(
   if (reason === null) {
     return t(locale, "chainIdentity.action.declined");
   }
-  if (error instanceof ChainOperationError && error.reason === "timeout") {
+  // Sent or kept, not refused: the reason says where it stands.
+  if (
+    error instanceof ChainOperationError &&
+    (error.reason === "timeout" || error.reason === "pending")
+  ) {
     return reason;
   }
   return error instanceof ChainOperationError && error.reason === "failed"

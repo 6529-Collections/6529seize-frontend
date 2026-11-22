@@ -2,7 +2,11 @@
 
 import { AuthContext } from "@/components/auth/Auth";
 import { useSeizeConnectContext } from "@/components/auth/SeizeConnectContext";
-import { CHAIN_RATING_ALLOWANCE_KEY } from "@/components/chain-identity/useChainRatingAllowance";
+import {
+  CHAIN_RATING_ALLOWANCE_KEY,
+  chainRatingTargetOf,
+} from "@/components/chain-identity/useChainRatingAllowance";
+import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import type { ApiProfileRaterCicState } from "@/entities/IProfile";
 import { useChainIdentityActive } from "@/hooks/useIdentityMovePhase";
@@ -14,7 +18,16 @@ import type { Hex } from "viem";
 
 const isWallet = (value: string): boolean => /^0x[0-9a-fA-F]{40}$/.test(value);
 
-export function useNicRatingState(identity: string, enabled = true) {
+/**
+ * The rater's NIC state for one profile. `profile`, when the caller has it,
+ * lets the 6529 Network path find the profile's identity as the rating
+ * writer does: by handle, checked against the profile's wallets.
+ */
+export function useNicRatingState(
+  identity: string,
+  enabled = true,
+  profile?: ApiIdentity
+) {
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useContext(AuthContext);
   const chainActive = useChainIdentityActive();
@@ -54,9 +67,11 @@ export function useNicRatingState(identity: string, enabled = true) {
         wallet as Hex,
         {
           matter: "NIC",
-          target: isWallet(identity)
-            ? { wallets: [identity] }
-            : { handle: identity },
+          target: profile
+            ? chainRatingTargetOf(profile)
+            : isWallet(identity)
+              ? { wallets: [identity] }
+              : { handle: identity },
           category: null,
         },
         signal

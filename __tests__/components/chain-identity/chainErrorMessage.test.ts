@@ -24,7 +24,7 @@ describe("the 6529 Network's refusals in plain words", () => {
     );
     expect(chainRefusalName(legacy)).toBe("LEGACY_EXPIRED");
     expect(chainErrorMessage(L, legacy)).toBe(
-      "The 6529 Network refused this change. Its reason code is LEGACY_EXPIRED."
+      "The 6529 Network refused this change. Its reason code is LEGACY_EXPIRED. Reload the page and try again."
     );
   });
 
@@ -44,7 +44,9 @@ describe("the 6529 Network's refusals in plain words", () => {
           "0x210E REJOIN_WAIT, detail 1"
         )
       )
-    ).toBe("That wallet left an identity too recently to join one again yet.");
+    ).toBe(
+      "That wallet left another identity recently. It has to wait before it joins a different identity or creates one."
+    );
     // The relay words a refusal its own way, with the chain's code inside.
     expect(
       chainErrorMessage(

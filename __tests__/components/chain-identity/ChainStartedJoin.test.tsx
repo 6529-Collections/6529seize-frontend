@@ -9,6 +9,7 @@ import {
   type StartedJoin,
 } from "@/lib/chain-identity/pendingJoin";
 import { chainRelay } from "@/lib/chain-identity/relay";
+import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import {
   heldJoin,
   IDENTITY_WALLET,
@@ -162,4 +163,47 @@ it("sends a fully signed join again after the network was unreachable, or withdr
   fireEvent.click(screen.getByRole("button", { name: "Withdraw" }));
   await waitFor(() => expect(relay["cancel"]).toHaveBeenCalledWith(op.tx_id));
   expect(snapshotStartedJoins()).toEqual([]);
+});
+
+it("ends a sent join the network no longer knows once it has expired", async () => {
+  const expiredJoin = { ...join, expiresAtMs: Date.now() - 1_000 };
+  gateway["getTx"]!.mockResolvedValue(null);
+  const client = new QueryClient({
+    defaultOptions: { queries: { retry: false } },
+  });
+  // The relay's answer from before the expiry is still in the cache.
+  client.setQueryData([QueryKey.CHAIN_IDENTITY, "relay", op.tx_id], {
+    ...op,
+    status: "SUBMITTED",
+  });
+  render(
+    <QueryClientProvider client={client}>
+      <ul>
+        <ChainStartedJoin
+          join={expiredJoin}
+          identity={identity([IDENTITY_WALLET])}
+          onChanged={jest.fn()}
+        />
+      </ul>
+    </QueryClientProvider>
+  );
+  expect(
+    await screen.findByText(
+      "This join has ended: it expired, or a wallet withdrew it."
+    )
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Take off this list" })
+  ).toBeInTheDocument();
+});
+
+it("words a refusal the network didn't name as the general one", async () => {
+  relay["get"]!.mockResolvedValue({ ...op, status: "SUBMITTED" });
+  gateway["getTx"]!.mockResolvedValue({ status: "failed" });
+  renderRow();
+  expect(
+    await screen.findByText(
+      "The join didn't go through, and its fee was still charged to your identity. Something went wrong. Try again."
+    )
+  ).toBeInTheDocument();
 });

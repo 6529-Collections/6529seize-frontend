@@ -93,25 +93,56 @@ describe("the joining wallet checks a held join", () => {
 
 describe("whether a wallet can join", () => {
   const DAY = 86_400_000;
-  it("follows the chain: bound, waiting after it left, or free", () => {
+  const ELSEWHERE: Hex = `0x${"0c".repeat(32)}`;
+  it("follows the chain: bound, waiting after it left another identity, or free", () => {
     expect(
-      joinReadiness({ wallet: OTHER, principalId: JOIN_PRINCIPAL }, DAY, 0)
+      joinReadiness(
+        { wallet: OTHER, principalId: JOIN_PRINCIPAL },
+        DAY,
+        0,
+        ELSEWHERE
+      )
     ).toEqual({ kind: "bound", principalId: JOIN_PRINCIPAL });
     const left = {
       wallet: OTHER,
       principalId: null,
       leftAt: { leftMs: 1_000, from: JOIN_PRINCIPAL },
     };
-    expect(joinReadiness(left, DAY, 2_000)).toEqual({
+    expect(joinReadiness(left, DAY, 2_000, ELSEWHERE)).toEqual({
       kind: "waiting",
       leftMs: 1_000,
       untilMs: 1_000 + DAY,
     });
-    expect(joinReadiness(left, DAY, 1_000 + DAY)).toEqual({ kind: "free" });
+    expect(joinReadiness(left, DAY, 1_000 + DAY, ELSEWHERE)).toEqual({
+      kind: "free",
+    });
     // Without the chain's wait the page claims none; the chain still checks.
-    expect(joinReadiness(left, null, 2_000)).toEqual({ kind: "free" });
+    expect(joinReadiness(left, null, 2_000, ELSEWHERE)).toEqual({
+      kind: "free",
+    });
     expect(
-      joinReadiness({ wallet: OTHER, principalId: null, leftAt: null }, DAY, 0)
+      joinReadiness(
+        { wallet: OTHER, principalId: null, leftAt: null },
+        DAY,
+        0,
+        ELSEWHERE
+      )
     ).toEqual({ kind: "free" });
+  });
+
+  it("lets a wallet rejoin the identity it left at once, but not create one", () => {
+    const left = {
+      wallet: OTHER,
+      principalId: null,
+      leftAt: { leftMs: 1_000, from: JOIN_PRINCIPAL },
+    };
+    // IDENTITY_JOIN waives the wait for the identity the wallet left.
+    expect(joinReadiness(left, DAY, 2_000, JOIN_PRINCIPAL)).toEqual({
+      kind: "free",
+    });
+    // IDENTITY_CREATE never does.
+    expect(joinReadiness(left, DAY, 2_000, null)).toMatchObject({
+      kind: "waiting",
+    });
   });
 });

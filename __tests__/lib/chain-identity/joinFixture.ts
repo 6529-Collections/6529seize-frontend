@@ -8,7 +8,9 @@ export const JOIN_PRINCIPAL: Hex = `0x${"0a".repeat(32)}`;
 export const IDENTITY_WALLET: Hex =
   "0x00000000000000000000000000000000000000aa";
 export const JOINING_WALLET: Hex = "0x00000000000000000000000000000000000000bb";
-export const JOIN_EXPIRES_AT = 1_798_761_600_000;
+/** A day from when the tests start, on a whole second. */
+export const JOIN_EXPIRES_AT =
+  Math.floor(Date.now() / 1000) * 1000 + 24 * 60 * 60 * 1000;
 
 const word = (address: Hex): Hex => `0x${"00".repeat(12)}${address.slice(2)}`;
 

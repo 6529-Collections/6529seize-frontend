@@ -19,6 +19,7 @@ export default function ChainActionStatus({
   onCancel,
   note,
   feeText,
+  feeShortfallText,
 }: {
   readonly state: ChainActionState;
   readonly onConfirm: () => void;
@@ -27,6 +28,8 @@ export default function ChainActionStatus({
   readonly note?: string | undefined;
   /** The fee line, when the payer isn't this wallet or its identity. */
   readonly feeText?: ((amount: string) => string) | undefined;
+  /** What to say when the payer is short of $fake6529, if not this page's. */
+  readonly feeShortfallText?: string | undefined;
 }) {
   // One live region, present from the first render, so each step is read out.
   return (
@@ -37,6 +40,7 @@ export default function ChainActionStatus({
         onCancel={onCancel}
         note={note}
         feeText={feeText}
+        feeShortfallText={feeShortfallText}
       />
     </div>
   );
@@ -48,12 +52,14 @@ function ChainActionStatusContent({
   onCancel,
   note,
   feeText,
+  feeShortfallText,
 }: {
   readonly state: ChainActionState;
   readonly onConfirm: () => void;
   readonly onCancel: () => void;
   readonly note?: string | undefined;
   readonly feeText?: ((amount: string) => string) | undefined;
+  readonly feeShortfallText?: string | undefined;
 }) {
   const locale = useBrowserLocale();
 
@@ -100,10 +106,18 @@ function ChainActionStatusContent({
   }
 
   if (state.kind === "failed") {
+    const short = isFeeShortfall(state.error);
+    if (short && feeShortfallText !== undefined) {
+      return (
+        <p role="alert" className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-error">
+          {feeShortfallText}
+        </p>
+      );
+    }
     return (
       <p role="alert" className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-error">
         {chainFailureText(locale, state.error)}
-        {isFeeShortfall(state.error) && (
+        {short && (
           <>
             {" "}
             <Link

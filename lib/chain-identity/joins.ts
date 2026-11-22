@@ -141,24 +141,33 @@ export type JoinReadiness =
     };
 
 /**
- * A wallet can join when it belongs to no identity and, if it left one,
- * `rejoinWaitMs` has passed since (both from the chain's answers).
+ * A wallet can join an identity when it belongs to none and, if it left
+ * another identity, `rejoinWaitMs` has passed since (both from the chain's
+ * answers). It can rejoin the identity it left at any time. `joining` is the
+ * identity it would join; null for creating one, where the wait always holds.
  */
 export function joinReadiness(
   membership: ChainWalletMembership,
   rejoinWaitMs: number | null | undefined,
-  nowMs: number
+  nowMs: number,
+  joining: Hex | null
 ): JoinReadiness {
   if (membership.principalId) {
     return { kind: "bound", principalId: membership.principalId };
   }
-  const leftMs = membership.leftAt?.leftMs;
+  const left = membership.leftAt;
   if (
-    typeof leftMs === "number" &&
+    left &&
+    typeof left.leftMs === "number" &&
     typeof rejoinWaitMs === "number" &&
-    leftMs + rejoinWaitMs > nowMs
+    left.leftMs + rejoinWaitMs > nowMs &&
+    (joining === null || left.from.toLowerCase() !== joining.toLowerCase())
   ) {
-    return { kind: "waiting", leftMs, untilMs: leftMs + rejoinWaitMs };
+    return {
+      kind: "waiting",
+      leftMs: left.leftMs,
+      untilMs: left.leftMs + rejoinWaitMs,
+    };
   }
   return { kind: "free" };
 }

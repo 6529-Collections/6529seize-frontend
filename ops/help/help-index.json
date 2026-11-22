@@ -2354,7 +2354,7 @@
         "Your TDH is the most REP you can give across everyone, and the most NIC. The page and the REP and NIC forms on profile pages show what is left, read from the 6529 Network.",
         "Sign on this browser: the wallet signs once to give this browser a key for 30 days that signs REP, NIC and profile changes without a wallet prompt each time.",
         "Adding a wallet needs both wallets: the identity's wallet signs first, and 6529.io holds that signature. The new wallet then signs in to 6529.io, on any device, opens /network/identity and signs the request there.",
-        "Removing a wallet shows, before signing, the date until which that wallet can't join or create an identity, from the 6529 Network's rule.",
+        "Removing a wallet shows, before signing, the date until which that wallet can't join another identity or create one, from the 6529 Network's rule. It can rejoin the same identity at any time.",
         "The Delegation Center landing page lists, registers and revokes delegations on the 6529 Network."
       ],
       "canonical_path": "/network/identity",

@@ -12,7 +12,11 @@ import { formatDate } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
-import { chainGateway } from "@/lib/chain-identity/gateway";
+import {
+  chainGateway,
+  type ChainDraft,
+  type ChainWalletMembership,
+} from "@/lib/chain-identity/gateway";
 import {
   heldJoinDraft,
   joinRequester,
@@ -64,7 +68,7 @@ async function signThroughRelay(
   }
   if (op.status !== "SUBMITTED") {
     throw new ChainOperationError(
-      "rejected",
+      "pending",
       t(locale, "chainIdentity.requests.unreachable")
     );
   }
@@ -75,14 +79,16 @@ function JoinRequestCard({
   op,
   wallet,
   config,
-  readiness,
+  walletState,
+  rejoinWaitMs,
   onChanged,
 }: {
   readonly op: RelayOperation;
   readonly wallet: Hex;
   readonly config: Config;
   /** Null while it is read; undefined when it couldn't be (the chain decides). */
-  readonly readiness: JoinReadiness | null | undefined;
+  readonly walletState: ChainWalletMembership | null | undefined;
+  readonly rejoinWaitMs: number | null;
   readonly onChanged: () => void;
 }) {
   const locale = useBrowserLocale();
@@ -97,12 +103,28 @@ function JoinRequestCard({
     enabled: op.principal !== null,
     staleTime: 30_000,
   });
-  let checked = true;
+  let checkedDraft: ChainDraft | null = null;
   try {
-    heldJoinDraft(op, wallet);
+    checkedDraft = heldJoinDraft(op, wallet);
   } catch {
-    checked = false;
+    checkedDraft = null;
   }
+  const checked = checkedDraft !== null;
+  // The wallet may rejoin the identity it left at once; any other waits.
+  let readiness: JoinReadiness | null | undefined =
+    walletState === undefined ? undefined : null;
+  if (walletState) {
+    readiness = joinReadiness(
+      walletState,
+      rejoinWaitMs,
+      Date.now(),
+      op.principal
+    );
+  }
+  // The signed header's expiry, not the relay's copy of it.
+  const expiresAtMs = checkedDraft
+    ? Number(checkedDraft.envelope.header["expiresAt"])
+    : op.expires_at;
 
   const sign = () => {
     void action.prepare(() =>
@@ -136,7 +158,7 @@ function JoinRequestCard({
   } else if (readiness?.kind === "bound") {
     blocked = t(locale, "chainIdentity.requests.bound");
   } else if (readiness?.kind === "waiting") {
-    blocked = t(locale, "chainIdentity.create.waiting", {
+    blocked = t(locale, "chainIdentity.requests.waiting", {
       left: formatDate(locale, readiness.leftMs, DATE_TIME),
       until: formatDate(locale, readiness.untilMs, DATE_TIME),
     });
@@ -155,7 +177,7 @@ function JoinRequestCard({
         {t(locale, "chainIdentity.requests.from", {
           identity: name,
           wallet: requester ? shortHex(requester) : "",
-          date: formatDate(locale, op.expires_at, DATE_TIME),
+          date: formatDate(locale, expiresAtMs, DATE_TIME),
         })}
       </p>
       {blocked && (
@@ -184,6 +206,9 @@ function JoinRequestCard({
       <ChainActionStatus
         state={action.state}
         note={t(locale, "chainIdentity.requests.joinNote", { identity: name })}
+        feeShortfallText={t(locale, "chainIdentity.requests.feeShortfall", {
+          identity: name,
+        })}
         feeText={(amount) =>
           t(locale, "chainIdentity.requests.feeFromIdentity", { amount })
         }
@@ -239,11 +264,12 @@ export default function ChainJoinRequests({
     enabled: mine.length > 0,
     staleTime: 5_000,
   });
-  let readiness: JoinReadiness | null | undefined = null;
+  // Null while it is read; undefined when it couldn't be (the chain decides).
+  let walletState: ChainWalletMembership | null | undefined = null;
   if (membership.data) {
-    readiness = joinReadiness(membership.data, rejoinWaitMs, Date.now());
+    walletState = membership.data;
   } else if (membership.isError) {
-    readiness = undefined;
+    walletState = undefined;
   }
 
   const changed = () => {
@@ -308,7 +334,8 @@ export default function ChainJoinRequests({
             op={op}
             wallet={wallet}
             config={config}
-            readiness={readiness}
+            walletState={walletState}
+            rejoinWaitMs={rejoinWaitMs}
             onChanged={changed}
           />
         ))}

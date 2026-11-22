@@ -32,7 +32,7 @@ const httpStatus = (error: unknown): number | null => {
   return typeof status === "number" ? status : null;
 };
 
-type RowActions = "withdraw" | "retry" | "signIn" | "dismiss" | "none";
+type RowActions = "withdraw" | "retry" | "signIn" | "dismiss";
 
 /**
  * One join this browser started, as 6529.io's relay holds it: waiting for
@@ -77,8 +77,13 @@ export default function ChainStartedJoin({
     queryFn: ({ signal }) => chainGateway.getTx(join.txId, signal),
     enabled: status === "SUBMITTED" && !joined,
     refetchInterval: (query) => {
-      const txStatus = query.state.data?.status;
-      return txStatus === "final" || txStatus === "failed" ? false : TX_POLL_MS;
+      const data = query.state.data;
+      // Final, refused, or gone from the network after the join expired.
+      const settled =
+        data?.status === "final" ||
+        data?.status === "failed" ||
+        (data === null && join.expiresAtMs <= Date.now());
+      return settled ? false : TX_POLL_MS;
     },
   });
   const txStatus = tx.data?.status;
@@ -116,11 +121,13 @@ export default function ChainStartedJoin({
   const allSigned = relay.data?.signers.every((entry) => entry.signed) ?? false;
   const readError = relay.isError ? httpStatus(relay.error) : null;
 
-  // Expired before it was read, unknown to the relay, or withdrawn.
+  // Expired unsent, unknown to the relay, withdrawn, or sent and then
+  // unknown to the network after it expired.
   const ended =
-    (expired && status === undefined) ||
+    (expired && status !== "SUBMITTED") ||
     (relay.isError && readError === 404) ||
-    status === "CANCELLED";
+    status === "CANCELLED" ||
+    (status === "SUBMITTED" && expired && tx.data === null);
 
   let text: string;
   let actions: RowActions;
@@ -135,16 +142,17 @@ export default function ChainStartedJoin({
     actions = "dismiss";
   } else if (status === "SUBMITTED" && txStatus === "failed") {
     text = t(locale, "chainIdentity.wallets.startedRefused", {
-      reason:
-        chainErrorMessage(
-          locale,
-          new ChainOperationError("failed", "", tx.data?.result?.name ?? null)
-        ) ?? "",
+      reason: tx.data?.result?.name
+        ? (chainErrorMessage(
+            locale,
+            new ChainOperationError("failed", "", tx.data.result.name)
+          ) ?? "")
+        : t(locale, "chainIdentity.error.generic"),
     });
     actions = "dismiss";
   } else if (status === "SUBMITTED") {
     text = t(locale, "chainIdentity.wallets.startedSent", { wallet });
-    actions = "none";
+    actions = "dismiss";
   } else if (status === "FAILED") {
     text = t(locale, "chainIdentity.wallets.startedFailed", {
       reason:
@@ -166,61 +174,66 @@ export default function ChainStartedJoin({
   return (
     <li className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/5 tw-p-3">
       <p className="tw-m-0 tw-text-sm tw-text-iron-200">{text}</p>
-      {actions !== "none" && (
-        <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
-          {actions === "retry" && (
-            <Button
-              variant="primary"
-              size="sm"
-              disabled={busy}
-              onClick={() =>
-                void run(async () => {
-                  await chainRelay.retry(join.txId);
-                  await relay.refetch();
-                })
-              }
-            >
-              {t(locale, "chainIdentity.wallets.sendAgain")}
-            </Button>
-          )}
-          {actions === "signIn" && (
-            <Button
-              variant="primary"
-              size="sm"
-              disabled={busy}
-              onClick={() =>
-                void run(async () => {
-                  await requestAuth();
-                  await relay.refetch();
-                })
-              }
-            >
-              {t(locale, "chainIdentity.requests.signInAction")}
-            </Button>
-          )}
-          {(actions === "withdraw" || actions === "retry") && (
-            <Button
-              variant="secondary"
-              size="sm"
-              disabled={busy}
-              onClick={() =>
-                void run(async () => {
-                  await chainRelay.cancel(join.txId);
-                  dismiss();
-                })
-              }
-            >
-              {t(locale, "chainIdentity.wallets.withdraw")}
-            </Button>
-          )}
-          {(actions === "dismiss" ||
-            actions === "signIn" ||
-            actionError !== null) && (
-            <Button variant="secondary" size="sm" onClick={dismiss}>
-              {t(locale, "chainIdentity.wallets.dismiss")}
-            </Button>
-          )}
-        </div>
+      <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
+        {actions === "retry" && (
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={busy}
+            onClick={() =>
+              void run(async () => {
+                await chainRelay.retry(join.txId);
+                await relay.refetch();
+              })
+            }
+          >
+            {t(locale, "chainIdentity.wallets.sendAgain")}
+          </Button>
+        )}
+        {actions === "signIn" && (
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={busy}
+            onClick={() =>
+              void run(async () => {
+                await requestAuth();
+                await relay.refetch();
+              })
+            }
+          >
+            {t(locale, "chainIdentity.requests.signInAction")}
+          </Button>
+        )}
+        {(actions === "withdraw" || actions === "retry") && (
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={busy}
+            onClick={() =>
+              void run(async () => {
+                await chainRelay.cancel(join.txId);
+                dismiss();
+              })
+            }
+          >
+            {t(locale, "chainIdentity.wallets.withdraw")}
+          </Button>
+        )}
+        {(actions === "dismiss" ||
+          actions === "signIn" ||
+          actionError !== null) && (
+          <Button variant="secondary" size="sm" onClick={dismiss}>
+            {t(locale, "chainIdentity.wallets.dismiss")}
+          </Button>
+        )}
+      </div>
+      {actions === "withdraw" && (
+        <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
+          {t(locale, "chainIdentity.wallets.withdrawNote", {
+            date: formatDate(locale, join.expiresAtMs, DATE_TIME),
+          })}
+        </p>
       )}
       {actionError && (
         <p role="alert" className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-error">
