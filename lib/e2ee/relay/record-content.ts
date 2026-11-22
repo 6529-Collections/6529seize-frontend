@@ -21,13 +21,7 @@ export class MissingBytes {
   ) {}
 }
 
-type RowValue =
-  | string
-  | number
-  | boolean
-  | null
-  | Uint8Array
-  | MissingBytes;
+type RowValue = string | number | boolean | null | Uint8Array | MissingBytes;
 
 export type Row = Readonly<Record<string, RowValue>>;
 

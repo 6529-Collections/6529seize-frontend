@@ -157,7 +157,12 @@ export class RelayConnection {
     after: number,
     limit: number
   ): Promise<{ readonly items: RelayItem[]; readonly more: boolean }> {
-    const res = (await this.request({ t: "HIST", wave, after, limit })) as Frame;
+    const res = (await this.request({
+      t: "HIST",
+      wave,
+      after,
+      limit,
+    })) as Frame;
     const items = Array.isArray(res["items"])
       ? (res["items"] as RelayItem[])
       : [];

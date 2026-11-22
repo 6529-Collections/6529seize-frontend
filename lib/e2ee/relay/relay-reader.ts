@@ -122,7 +122,9 @@ export class E2eeRelayReader {
   }
 
   private async connect(): Promise<RelayConnection> {
-    const existing = this.connection ? await this.connection.catch(() => null) : null;
+    const existing = this.connection
+      ? await this.connection.catch(() => null)
+      : null;
     if (existing?.isOpen) return existing;
     const auth = await this.settings.auth();
     if (!auth) throw new RelayReadError("No device grant for relay reads");
@@ -152,7 +154,9 @@ export class E2eeRelayReader {
   }
 
   close(): void {
-    void this.connection?.then((connection) => connection.close()).catch(() => undefined);
+    void this.connection
+      ?.then((connection) => connection.close())
+      .catch(() => undefined);
     this.connection = null;
   }
 
@@ -200,7 +204,11 @@ export class E2eeRelayReader {
   private accept(state: StreamState, record: StreamRecord): void {
     const last = state.records[state.records.length - 1];
     if (last && record.pos <= last.pos) {
-      if (state.records.some((r) => r.pos === record.pos && r.hash === record.hash)) {
+      if (
+        state.records.some(
+          (r) => r.pos === record.pos && r.hash === record.hash
+        )
+      ) {
         return;
       }
       throw new RelayReadError("Two records at one position");
@@ -288,7 +296,10 @@ export class E2eeRelayReader {
     const device = input.deviceKey.toLowerCase();
     const records = await this.read(`cv/${group}`);
     const log = Array.from(rowsOf(records, "e2ee_log").values());
-    const highest = log.reduce((max, row) => Math.max(max, Number(row["seq"])), 0);
+    const highest = log.reduce(
+      (max, row) => Math.max(max, Number(row["seq"])),
+      0
+    );
     if (highest < input.lastSeq) {
       throw new RelayReadError("The relays are behind 6529.io for this group");
     }
