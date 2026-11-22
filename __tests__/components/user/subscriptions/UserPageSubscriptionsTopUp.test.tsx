@@ -20,6 +20,11 @@ import {
 } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { parseEther } from "viem";
+import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: jest.fn(() => false),
+}));
 
 const sendTransaction: {
   data: `0x${string}` | undefined;
@@ -1032,5 +1037,19 @@ describe("UserPageSubscriptionsTopUp hash anchor", () => {
 
     expect(await screen.findByRole("dialog", { name: "Top up" })).toBeVisible();
     expect(scrollIntoView).not.toHaveBeenCalled();
+  });
+
+  it("offers the website instead of sending with 6529 Desktop browser forwarding", async () => {
+    jest.mocked(useIsDesktopBrowserWallet).mockReturnValue(true);
+    const user = userEvent.setup();
+    render(<UserPageSubscriptionsTopUp />);
+    await user.click(screen.getByRole("radio", { name: "1 Card" }));
+    expect(
+      screen.queryByRole("button", { name: "Top up 0.06529 ETH" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Continue in your browser" })
+    ).toBeInTheDocument();
+    expect(sendTransaction.sendTransaction).not.toHaveBeenCalled();
   });
 });

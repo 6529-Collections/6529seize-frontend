@@ -310,8 +310,16 @@ export interface DesktopWallet {
   readonly reopen: () => Promise<void>;
   /** `{ pending: false }` or `{ pending: true, code, method, expiresAt }`. */
   readonly status: () => Promise<unknown>;
-  /** `{ version, methods }`: what this shell forwards. */
+  /** `{ version, methods, context?, transactionRules? }`: what it forwards. */
   readonly capabilities: () => Promise<unknown>;
   /** Calls back with the status when a request starts or ends. */
   readonly onStatusChange: (callback: (status: unknown) => void) => () => void;
+  /**
+   * Calls back when a transaction approved after its request ended was
+   * sent (`{ ok, value | transactionHash, chainId }`). Optional: builds
+   * without transaction forwarding do not define it.
+   */
+  readonly onLateTransaction?: (
+    callback: (event: unknown) => void
+  ) => () => void;
 }

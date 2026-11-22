@@ -1,5 +1,6 @@
 "use client";
 
+import DesktopWalletTransactionGate from "@/components/desktop/DesktopWalletTransactionGate";
 import {
   useCallback,
   useEffect,
@@ -719,20 +720,24 @@ function SubscriptionTopUpForm({
         {t(locale, "subscriptions.topUp.chooseAmount")}
       </p>
       {topUpContent}
-      <Button
-        type="button"
-        variant="primary"
-        size="lg"
-        loading={isSending}
-        disabled={isSendDisabled}
-        onClick={() => handleSend(Date.now())}
-        aria-label={submitLabel}
-        fullWidth
-        className="tw-mt-5 !tw-text-[15px] md:!tw-text-sm"
-      >
-        <BoltIcon className="tw-size-4" aria-hidden="true" />
-        {submitLabel}
-      </Button>
+      <div className="tw-mt-5">
+        <DesktopWalletTransactionGate forwardable>
+          <Button
+            type="button"
+            variant="primary"
+            size="lg"
+            loading={isSending}
+            disabled={isSendDisabled}
+            onClick={() => handleSend(Date.now())}
+            aria-label={submitLabel}
+            fullWidth
+            className="!tw-text-[15px] md:!tw-text-sm"
+          >
+            <BoltIcon className="tw-size-4" aria-hidden="true" />
+            {submitLabel}
+          </Button>
+        </DesktopWalletTransactionGate>
+      </div>
       <div className="tw-mb-0 tw-mt-3 tw-flex tw-flex-wrap tw-items-center tw-justify-center tw-gap-1 tw-text-meta tw-font-normal tw-leading-5 tw-text-iron-500">
         {t(locale, "subscriptions.topUp.sendingTo")}{" "}
         <span className="tw-font-semibold tw-text-iron-300">

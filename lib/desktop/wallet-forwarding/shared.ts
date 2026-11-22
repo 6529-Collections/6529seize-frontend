@@ -4,16 +4,30 @@ import { type Address, type Hex, isAddress } from "viem";
 
 export const WALLET_FORWARDING_VERSION = 1;
 
-/** How long the user has to answer in the browser. */
+/** How long the user has to answer a signature request in the browser. */
 export const WALLET_REQUEST_TTL_MS = 120_000;
+
+/**
+ * How long the user has to answer a transaction in the browser: opening
+ * the browser, connecting, reviewing, the call check and the wallet's own
+ * confirmation take longer than a signature.
+ */
+export const WALLET_TRANSACTION_TTL_MS = 300_000;
 
 /** The wallet methods that may be forwarded; everything else is refused. */
 export const WALLET_FORWARDING_METHODS = [
   "personal_sign",
   "eth_signTypedData_v4",
+  "eth_sendTransaction",
 ] as const;
 
 export type WalletForwardingMethod = (typeof WALLET_FORWARDING_METHODS)[number];
+
+/** The longest lifetime a request for `method` may have. */
+export const walletRequestTtlMs = (method: unknown): number =>
+  method === "eth_sendTransaction"
+    ? WALLET_TRANSACTION_TTL_MS
+    : WALLET_REQUEST_TTL_MS;
 
 /** The link schemes 6529 Desktop builds register (local, staging, production). */
 export const DESKTOP_SCHEMES = [
@@ -32,11 +46,14 @@ export const MAX_TYPED_DATA_TYPES = 32;
 export const MAX_TYPED_DATA_FIELDS = 64;
 /** What a `personal_sign` request's `context` may carry, in UTF-8 bytes. */
 export const MAX_CONTEXT_BYTES = 16 * 1024;
+/** A transaction's call data, in bytes (the fragment cap may be lower). */
+export const MAX_TRANSACTION_DATA_BYTES = 10 * 1024;
 
 /** 32 random bytes, base64url without padding. */
 export const REQUEST_ID = /^[A-Za-z0-9_-]{43}$/;
 const HEX_DIGITS = /^0x[0-9a-fA-F]*$/;
 export const SIGNATURE = /^0x[0-9a-fA-F]{130}$/;
+export const TRANSACTION_HASH = /^0x[0-9a-fA-F]{64}$/;
 export const REQUEST_CODE = /^[0-9A-F]{3}-[0-9A-F]{3}$/;
 export const TYPE_NAME = /^[A-Za-z_$][A-Za-z0-9_$]{0,63}$/;
 const ARRAY_SUFFIX = /\[\d{0,4}\]$/;
@@ -54,6 +71,27 @@ interface WalletTypedData {
   readonly primaryType: string;
   readonly message: Readonly<Record<string, unknown>>;
 }
+
+/**
+ * A transaction in its canonical form: exactly these keys in this order,
+ * addresses and data as lower-case hex (data in whole bytes, `0x` when
+ * empty), and the value in wei as a minimal lower-case hex quantity
+ * (`0x0` when none). Fees, gas and nonce are the wallet's to choose.
+ */
+export interface WalletTransactionParams {
+  readonly from: string;
+  readonly to: string;
+  readonly data: Hex;
+  readonly value: Hex;
+}
+
+/** The keys of a transaction, in canonical order. */
+export const WALLET_TRANSACTION_KEYS: readonly string[] = [
+  "from",
+  "to",
+  "data",
+  "value",
+];
 
 export interface WalletRequestBase {
   /** Checksummed signer, equal to the signer named in the parameters. */
@@ -77,11 +115,16 @@ export type WalletRequest =
   | (WalletRequestBase & {
       readonly method: "eth_signTypedData_v4";
       readonly typedData: WalletTypedData;
+    })
+  | (WalletRequestBase & {
+      readonly method: "eth_sendTransaction";
+      readonly transaction: WalletTransactionParams;
     });
 
 /**
  * What the app page hands to the shell (and the envelope carries). These
- * keys and no others; `context` only with `personal_sign`.
+ * keys and no others; `context` only with `personal_sign`. A transaction's
+ * `params` is `[WalletTransactionParams]`.
  */
 export interface WalletRequestInput {
   readonly method: string;

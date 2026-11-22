@@ -1376,6 +1376,8 @@
         "nic",
         "network",
         "state",
+        "society",
+        "protocol",
         "coordination",
         "public",
         "goods"
@@ -1383,7 +1385,7 @@
       "facts": [
         "The 6529 FAQ lives at /about/faq.",
         "6529 and 6529.io refer to the same product ecosystem in user questions.",
-        "6529 is building a decentralized network state: a permissionless global network society that funds, builds, and coordinates public-goods work across art, science, culture, and technology.",
+        "6529 is a peer-to-peer protocol for network organizations: decentralized, permissionless, and global, so anyone can fund, build, and coordinate network-scaled organizations or public goods.",
         "In product terms, 6529 is not only an NFT collection site; it is a coordination system built around wallet identity, profiles, The Memes, Meme Lab, Gradients, NextGen, Waves, voting, groups, delegation, REP/CIC reputation, TDH/xTDH network metrics, open data, minting/claims infrastructure, and help tooling such as @help6529.",
         "The long-term goal is nation-scale positive impact.",
         "The core idea is to extend what Bitcoin and Ethereum proved for money and code into human coordination itself, so communities can organize, allocate attention, vote, build, and distribute work permissionlessly.",
@@ -11669,6 +11671,40 @@
         "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/ops/docs/native-four-wallet-consolidation.md",
         "https://github.com/6529-Collections/6529-core/blob/2e8b4b2c2e3f5464b9c3639fcbe5fd817b648ed3/electron-src/scheduled-tasks/workers/tdh-worker/index.ts"
       ]
+    },
+    {
+      "id": "desktop.browser-wallet-transactions",
+      "kind": "ui_affordance",
+      "title": "Transactions with a browser wallet in 6529 Desktop",
+      "aliases": [
+        "continue in your browser",
+        "desktop browser wallet mint",
+        "cannot mint in 6529 Desktop",
+        "transaction dialog 6529 Desktop",
+        "browser wallet transaction desktop"
+      ],
+      "keywords": [
+        "desktop",
+        "browser wallet",
+        "transaction",
+        "mint",
+        "delegation",
+        "top up",
+        "transfer",
+        "continue in your browser"
+      ],
+      "facts": [
+        "When a 6529 Desktop profile signed in with Use a browser wallet, builds that send transactions open a browser page for delegations (register, update, revoke, batches of up to five, locks), The Memes and NextGen mints, and Memes subscription top-ups up to 10 ETH. Your browser wallet sends them.",
+        "The browser page shows what the transaction does, the contract with its full address, the network, the amount in ETH plus the network fee, every decoded value, a check that it would go through now, and for mints whether the amount matches the current price.",
+        "A transaction that would fail is not offered; use Check again. If the check cannot run, Check again or Send anyway. High-impact transactions (delegations that let another wallet act for you, acting as a delegation manager, minting for another wallet, top-ups over 1 ETH) need I understand before Send in wallet.",
+        "The request waits five minutes; with under 45 seconds left Send is not offered. After sending, 6529 Desktop checks the transaction on chain. If it cannot confirm it yet, it shows the hash with View on Etherscan: do not send it again.",
+        "NFT transfers and NextGen burn-to-mint show Continue in your browser instead of their send button. A 6529 Desktop build without transaction support shows Update 6529 Desktop, or continue in your browser. Other transactions open a Transaction dialog with Continue in your browser.",
+        "With a phone wallet (Scan with a phone wallet) these actions work inside 6529 Desktop as usual."
+      ],
+      "canonical_path": "/about/6529-apps",
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop", "wallets", "transactions"],
+      "source_refs": ["ops/docs/desktop/feature-browser-wallet-signing.md"]
     },
     {
       "id": "waves.private-bookmarks",
