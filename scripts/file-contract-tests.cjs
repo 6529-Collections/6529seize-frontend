@@ -86,6 +86,10 @@ const CONTRACTS = [
     test: "__tests__/scripts/runner-benchmark-workflow.test.ts",
     inputs: [/^\.github\/workflows\/runner-benchmark(?:-candidate)?\.yml$/u],
   },
+  {
+    test: "__tests__/playwright/chromiumSandbox.test.ts",
+    inputs: [/^tests\/.*\.[cm]?[jt]sx?$/u, /^playwright\.config\.ts$/u],
+  },
 ];
 
 const SELECTION_INPUTS = new Set([
