@@ -43,6 +43,12 @@ describe("the identity's wallet starts a join", () => {
     });
   });
 
+  it("keeps the join's window within the chain's one day, with the gateway's minute of lead", () => {
+    const DAY = 86_400_000;
+    const GATEWAY_LEAD_MS = 60_000;
+    expect(JOIN_VALID_MS + GATEWAY_LEAD_MS).toBeLessThanOrEqual(DAY);
+  });
+
   it("refuses a draft for another wallet or another nonceLane", async () => {
     gateway.draft.mockResolvedValue(joinDraft({ joining: OTHER }));
     await expect(

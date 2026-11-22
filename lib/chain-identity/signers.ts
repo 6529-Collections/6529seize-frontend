@@ -23,7 +23,9 @@ function assertConnectedWallet(config: Config, address: Hex): Hex {
   if (connected?.toLowerCase() !== address.toLowerCase()) {
     throw new ChainOperationError(
       "signer_mismatch",
-      `Switch your wallet to ${short(address)} and try again.`
+      `Switch your wallet to ${short(address)} and try again.`,
+      "WRONG_WALLET",
+      { wallet: short(address) }
     );
   }
   return address;

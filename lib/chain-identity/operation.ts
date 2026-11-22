@@ -35,7 +35,9 @@ export class ChainOperationError extends Error {
       | "stated",
     message: string,
     /** The chain's result name when it refused the change, e.g. STALE_VERSION. */
-    readonly resultName: string | null = null
+    readonly resultName: string | null = null,
+    /** Values for the plain sentence the page shows for this error. */
+    readonly values: Readonly<Record<string, string>> = {}
   ) {
     super(message);
     this.name = "ChainOperationError";
@@ -230,7 +232,8 @@ export function normalizeWalletSignature(signature: Hex): Hex {
   if (hex.length !== 130) {
     throw new ChainOperationError(
       "rejected",
-      "The wallet returned a signature the 6529 Network can't use."
+      "The wallet returned a signature the 6529 Network can't use.",
+      "BAD_WALLET_SIGNATURE"
     );
   }
   const r = hex.slice(0, 64);

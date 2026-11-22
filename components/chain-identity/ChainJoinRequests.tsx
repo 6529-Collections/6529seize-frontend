@@ -62,16 +62,14 @@ async function signThroughRelay(
   });
   if (op.status === "FAILED") {
     onEnded();
-    // The relay words the chain's refusal itself: only its code and detail
-    // are read from it, never shown as they are.
-    const refusal = new Error(op.last_error ?? "");
-    const name = chainRefusalName(refusal);
+    // The relay words the chain's refusal itself: only its code is read
+    // from it, and the reason is put from this wallet's side.
+    const name = chainRefusalName(new Error(op.last_error ?? ""));
     throw new ChainOperationError(
-      "rejected",
-      name === null
-        ? t(locale, "chainIdentity.requests.refused")
-        : refusal.message,
-      name
+      "stated",
+      t(locale, "chainIdentity.requests.refusedBecause", {
+        reason: joinerReason(locale, name, identity),
+      })
     );
   }
   if (op.status !== "SUBMITTED") {
@@ -111,8 +109,21 @@ function joinerReason(
       return t(locale, "chainIdentity.requests.mustWait");
     case "IDENTITY_FULL":
       return t(locale, "chainIdentity.requests.full", { identity });
+    case "FEE_UNCOVERED":
+    case "INSUFFICIENT_BALANCE":
+      return t(locale, "chainIdentity.requests.feeShortfall", { identity });
+    case "NONCE":
+    case "NONCE_WINDOW":
+    case "REPLACEMENT_UNDERPRICED":
+      return t(locale, "chainIdentity.requests.otherChangeFirst", {
+        identity,
+      });
+    case "EXPIRED":
+    case "EXPIRED_AT_EXECUTION":
+    case "MEMPOOL_TTL":
+      return t(locale, "chainIdentity.requests.expired");
     default:
-      return t(locale, "chainIdentity.error.generic");
+      return t(locale, "chainIdentity.requests.refused");
   }
 }
 
@@ -205,9 +216,20 @@ function JoinRequestCard({
     }
   };
 
+  // The relay names the identity; the chain would refuse a requester that
+  // isn't one of its wallets, so the card doesn't claim the identity asked.
+  const requesterInIdentity =
+    requester !== null &&
+    (identity.data?.wallets ?? []).some(
+      (item) => item.toLowerCase() === requester.toLowerCase()
+    );
   let blocked: string | null = null;
   if (!checked) {
     blocked = t(locale, "chainIdentity.requests.notJoin");
+  } else if (identity.isSuccess && !requesterInIdentity) {
+    blocked = t(locale, "chainIdentity.requests.notFromIdentity", {
+      identity: name,
+    });
   } else if (readiness?.kind === "bound") {
     blocked = t(locale, "chainIdentity.requests.bound");
   } else if (readiness?.kind === "waiting") {
@@ -230,16 +252,19 @@ function JoinRequestCard({
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300">{blocked}</p>
       )}
       <div className="tw-mt-3 tw-flex tw-flex-wrap tw-gap-2">
-        {blocked === null && readiness !== null && !ended && (
-          <Button
-            variant="primary"
-            size="sm"
-            disabled={action.busy || action.state.kind === "confirm"}
-            onClick={sign}
-          >
-            {t(locale, "chainIdentity.requests.review")}
-          </Button>
-        )}
+        {blocked === null &&
+          readiness !== null &&
+          identity.isSuccess &&
+          !ended && (
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={action.busy || action.state.kind === "confirm"}
+              onClick={sign}
+            >
+              {t(locale, "chainIdentity.requests.review")}
+            </Button>
+          )}
         <Button
           variant="secondary"
           size="sm"
@@ -252,9 +277,6 @@ function JoinRequestCard({
       <ChainActionStatus
         state={action.state}
         note={t(locale, "chainIdentity.requests.joinNote", { identity: name })}
-        feeShortfallText={t(locale, "chainIdentity.requests.feeShortfall", {
-          identity: name,
-        })}
         feeText={(amount) =>
           t(locale, "chainIdentity.requests.feeFromIdentity", { amount })
         }

@@ -27,6 +27,7 @@ jest.mock("@/lib/chain-identity/gateway", () => ({
   chainGateway: { getTx: jest.fn() },
 }));
 jest.mock("@/lib/chain-identity/relay", () => ({
+  ...jest.requireActual("@/lib/chain-identity/relay"),
   chainRelay: { get: jest.fn(), retry: jest.fn(), cancel: jest.fn() },
 }));
 
@@ -207,3 +208,17 @@ it("words a refusal the network didn't name as the general one", async () => {
     )
   ).toBeInTheDocument();
 });
+
+it("ends a sent join the network dropped after it had held it", async () => {
+  relay["get"]!.mockResolvedValue({ ...op, status: "SUBMITTED" });
+  gateway["getTx"]!.mockResolvedValueOnce({ status: "pending" });
+  gateway["getTx"]!.mockResolvedValue(null);
+  renderRow();
+  expect(
+    await screen.findByText(
+      "The 6529 Network dropped this join before taking it. Take it off this list to start again.",
+      {},
+      { timeout: 8000 }
+    )
+  ).toBeInTheDocument();
+}, 15000);

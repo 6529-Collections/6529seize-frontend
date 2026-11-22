@@ -7,6 +7,7 @@ import {
 } from "@/components/chain-identity/chainErrorMessage";
 import { ChainGatewayError } from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { ChainRelayError } from "@/lib/chain-identity/relay";
 
 const L = "en-US" as const;
 
@@ -62,7 +63,7 @@ describe("the 6529 Network's refusals in plain words", () => {
   it("says what went wrong with the gateway itself", () => {
     expect(
       chainErrorMessage(L, new ChainGatewayError(0, "network", "no answer"))
-    ).toBe("The 6529 Network gateway did not answer. Try again in a minute.");
+    ).toBe("The 6529 Network didn't answer. Try again in a minute.");
     expect(
       chainErrorMessage(L, new ChainGatewayError(429, "rate_limited", "slow"))
     ).toBe("Too many requests. Wait a minute and try again.");
@@ -134,5 +135,41 @@ describe("a fee the chain wouldn't take, by its cause", () => {
       "This browser's key has used up its fee budget. Turn its key off and on again on your identity page."
     );
     expect(isFeeShortfall(refusal((0x100 + 5) * 0x10000))).toBe(false);
+  });
+});
+
+describe("errors that aren't the 6529 Network's", () => {
+  it("words 6529.io's relay as 6529.io, never as the network", () => {
+    expect(chainErrorMessage(L, new ChainRelayError(401, "x"))).toBe(
+      "Sign in to 6529.io with this wallet, then try again."
+    );
+    expect(chainErrorMessage(L, new ChainRelayError(404, "x"))).toBe(
+      "This request is no longer open: it was withdrawn, it expired, or it already went through."
+    );
+    expect(chainErrorMessage(L, new ChainRelayError(502, "x"))).toBe(
+      "6529.io couldn't reach the 6529 Network. Try again in a minute."
+    );
+    expect(chainErrorMessage(L, new ChainRelayError(503, "x"))).toBe(
+      "6529.io isn't answering right now. Try again in a minute."
+    );
+  });
+
+  it("words this site's own refusals from the copy file", () => {
+    expect(
+      chainErrorMessage(
+        L,
+        new ChainOperationError("signer_mismatch", "x", "WRONG_WALLET", {
+          wallet: "0x0000…00aa",
+        })
+      )
+    ).toBe("Switch your wallet app to 0x0000…00aa and try again.");
+    expect(
+      chainErrorMessage(L, new ChainOperationError("draft_mismatch", "x"))
+    ).toBe(
+      "6529.io couldn't confirm this change before signing, so nothing was signed. Try again."
+    );
+    expect(chainErrorMessage(L, new ChainOperationError("timeout", "x"))).toBe(
+      "The change was sent but isn't final yet. Check again in a few minutes."
+    );
   });
 });

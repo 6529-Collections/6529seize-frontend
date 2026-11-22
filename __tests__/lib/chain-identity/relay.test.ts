@@ -74,3 +74,19 @@ it("lists, reads, signs, retries and cancels held operations", async () => {
     errorMode: "structured",
   });
 });
+
+it("turns any failed relay call into a ChainRelayError with its status", async () => {
+  jest
+    .mocked(commonApiPost)
+    .mockRejectedValueOnce(
+      Object.assign(new Error("Forbidden"), { status: 403 })
+    );
+  await expect(
+    chainRelay.sign(joinDraft().txId, { role: 4, key_type: 1, sig: SIG })
+  ).rejects.toMatchObject({ name: "ChainRelayError", status: 403 });
+  jest.mocked(commonApiFetch).mockRejectedValueOnce(new Error("offline"));
+  await expect(chainRelay.waiting()).rejects.toMatchObject({
+    name: "ChainRelayError",
+    status: 0,
+  });
+});

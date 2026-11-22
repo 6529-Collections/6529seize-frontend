@@ -3,6 +3,7 @@ import { t, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
 import { ChainGatewayError } from "@/lib/chain-identity/gateway";
 import { ChainOperationError } from "@/lib/chain-identity/operation";
+import { ChainRelayError } from "@/lib/chain-identity/relay";
 
 /**
  * The 6529 Network's refusals in plain words. The chain names each refusal
@@ -12,6 +13,7 @@ import { ChainOperationError } from "@/lib/chain-identity/operation";
 const KNOWN_NAMES = new Set([
   "ADDRESS_BOUND",
   "BAD_SIGNATURE",
+  "BAD_WALLET_SIGNATURE",
   "CATEGORY_NOT_FOUND",
   "CLUSTER_BOUND",
   "DELEGATION_ABSENT",
@@ -62,6 +64,7 @@ const KNOWN_NAMES = new Set([
   "UNDERPRICED",
   "VALIDITY_TOO_LONG",
   "WORK_EXHAUSTED",
+  "WRONG_WALLET",
   "WRONG_NETWORK",
 ]);
 
@@ -144,6 +147,27 @@ export const isFeeShortfall = (error: unknown): boolean => {
   return name !== null && FEE_NAMES.has(refusalKey(error, name));
 };
 
+/** 6529.io's relay, not the 6529 Network, answered with an error. */
+function relayErrorMessage(
+  locale: SupportedLocale,
+  error: ChainRelayError
+): string {
+  const { status } = error;
+  if (status === 401 || status === 403) {
+    return t(locale, "chainIdentity.error.relaySignIn");
+  }
+  if (status === 400 || status === 404 || status === 409) {
+    return t(locale, "chainIdentity.error.relayClosed");
+  }
+  if (status === 502) {
+    return t(locale, "chainIdentity.error.relayNoNetwork");
+  }
+  if (status === 0 || status >= 500) {
+    return t(locale, "chainIdentity.error.relayDown");
+  }
+  return t(locale, "chainIdentity.error.generic");
+}
+
 /** The reason to show, or null when the person declined in the wallet. */
 export function chainErrorMessage(
   locale: SupportedLocale,
@@ -152,11 +176,16 @@ export function chainErrorMessage(
   if (isUserRejection(error)) {
     return null;
   }
+  if (error instanceof ChainRelayError) {
+    return relayErrorMessage(locale, error);
+  }
   const name = chainRefusalName(error);
   if (name !== null) {
     const key = refusalKey(error, name);
+    const values =
+      error instanceof ChainOperationError ? error.values : undefined;
     return KNOWN_NAMES.has(key)
-      ? t(locale, `chainIdentity.error.${key}` as MessageKey)
+      ? t(locale, `chainIdentity.error.${key}` as MessageKey, values)
       : t(locale, "chainIdentity.error.refused", { name });
   }
   const status = statusOf(error);
@@ -171,6 +200,15 @@ export function chainErrorMessage(
   }
   if (status !== null && status >= 500) {
     return t(locale, "chainIdentity.error.busy");
+  }
+  if (
+    error instanceof ChainOperationError &&
+    error.reason === "draft_mismatch"
+  ) {
+    return t(locale, "chainIdentity.error.draftMismatch");
+  }
+  if (error instanceof ChainOperationError && error.reason === "timeout") {
+    return t(locale, "chainIdentity.error.notFinalYet");
   }
   if (error instanceof ChainOperationError) {
     // These messages are this site's own, already in plain words.

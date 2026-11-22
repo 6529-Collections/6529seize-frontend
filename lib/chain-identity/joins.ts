@@ -12,8 +12,13 @@ import type { RelayOperation } from "./relay";
 export const ROLE_SIGNER = 0;
 export const ROLE_JOINER = 4;
 
-/** How long the joining wallet has to sign: the relay keeps it up to 7 days. */
-export const JOIN_VALID_MS = 24 * 60 * 60 * 1000;
+/**
+ * How long the joining wallet has to sign. The chain takes a transaction
+ * whose window (expiresAt less notBefore) is at most a day, and the gateway
+ * starts the window a minute early, so the window asked for stays well
+ * below a day.
+ */
+export const JOIN_VALID_MS = 23 * 60 * 60 * 1000;
 
 /**
  * Held joins sign with nonceLane 1, so the identity's wallet can make other

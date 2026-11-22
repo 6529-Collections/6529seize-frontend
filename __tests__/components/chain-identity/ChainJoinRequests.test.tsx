@@ -12,9 +12,11 @@ import { chainRelay } from "@/lib/chain-identity/relay";
 import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import {
   heldJoin,
+  IDENTITY_WALLET,
   JOIN_PRINCIPAL,
   JOINING_WALLET,
 } from "../../lib/chain-identity/joinFixture";
+import { ChainRelayError } from "@/lib/chain-identity/relay";
 
 const mockRequestAuth = jest.fn(async () => ({ success: true }));
 jest.mock("@/components/auth/authContext", () => ({
@@ -33,6 +35,7 @@ jest.mock("@/lib/chain-identity/operation", () => ({
   awaitFinal: jest.fn(async () => ({ status: "final" })),
 }));
 jest.mock("@/lib/chain-identity/relay", () => ({
+  ...jest.requireActual("@/lib/chain-identity/relay"),
   chainRelay: { waiting: jest.fn(), sign: jest.fn(), cancel: jest.fn() },
 }));
 jest.mock("@/lib/chain-identity/signers", () => ({
@@ -67,6 +70,7 @@ beforeEach(() => {
   gateway["getIdentity"]!.mockResolvedValue({
     principalId: JOIN_PRINCIPAL,
     handle: "tester_one",
+    wallets: [IDENTITY_WALLET],
   });
   gateway["getWalletMembership"]!.mockResolvedValue({
     wallet: JOINING_WALLET,
@@ -100,7 +104,7 @@ it("signs a held join after showing who asks and the fee, then waits for the cha
   ).toBeInTheDocument();
   expect(
     screen.getByText(
-      "Sign only if you asked for this from your own identity. Once this wallet joins an identity, its NFTs count toward that identity's TDH, that identity's delegations cover it, and any of that identity's wallets can remove it."
+      "Sign only if you asked for this from your own identity. Once this wallet joins an identity, its NFTs count toward that identity's TDH, that identity's delegations (where airdrops go, for example) apply to it, and any of that identity's wallets can remove it."
     )
   ).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Review and sign" }));
@@ -138,7 +142,7 @@ it("says why when the chain refuses the join through the relay", async () => {
   );
   expect(
     await screen.findByText(
-      "Nothing changed. That wallet left another identity recently. It has to wait before it joins a different identity or creates one."
+      "The 6529 Network refused the join. This wallet left another identity too recently to join this one yet."
     )
   ).toBeInTheDocument();
   expect(awaitFinal).not.toHaveBeenCalled();
@@ -232,7 +236,7 @@ it("says the asking identity, not this wallet, is short of $fake6529", async () 
   );
   expect(
     await screen.findByText(
-      "tester_one doesn't have enough $fake6529 for the fee."
+      "The 6529 Network refused the join. tester_one doesn't have enough $fake6529 for the fee."
     )
   ).toBeInTheDocument();
   expect(
@@ -275,6 +279,41 @@ it("says from this wallet's side why a join the chain ran didn't go through", as
   expect(
     await screen.findByText(
       "The join didn't go through, and tester_one paid the fee for it. tester_one has as many wallets as the 6529 Network allows."
+    )
+  ).toBeInTheDocument();
+});
+
+it("won't say an identity asked when the asking wallet isn't one of its wallets", async () => {
+  gateway["getIdentity"]!.mockResolvedValue({
+    principalId: JOIN_PRINCIPAL,
+    handle: "tester_one",
+    wallets: [`0x${"55".repeat(20)}`],
+  });
+  renderRequests();
+  expect(
+    await screen.findByText(
+      "The wallet that asked isn't one of tester_one's wallets, so this request can't be signed."
+    )
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Review and sign" })
+  ).not.toBeInTheDocument();
+});
+
+it("says a request that closed since the list was read is no longer open", async () => {
+  relay["sign"]!.mockRejectedValue(
+    new ChainRelayError(400, "The operation is not open")
+  );
+  renderRequests();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review and sign" })
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Sign with wallet" })
+  );
+  expect(
+    await screen.findByText(
+      "Nothing changed. This request is no longer open: it was withdrawn, it expired, or it already went through."
     )
   ).toBeInTheDocument();
 });

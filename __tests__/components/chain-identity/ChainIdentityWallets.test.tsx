@@ -27,6 +27,7 @@ jest.mock("@/lib/chain-identity/operation", () => ({
   draftOperation: jest.fn(),
 }));
 jest.mock("@/lib/chain-identity/relay", () => ({
+  ...jest.requireActual("@/lib/chain-identity/relay"),
   chainRelay: { hold: jest.fn(async () => ({})), get: jest.fn() },
 }));
 jest.mock("@/lib/chain-identity/signers", () => ({

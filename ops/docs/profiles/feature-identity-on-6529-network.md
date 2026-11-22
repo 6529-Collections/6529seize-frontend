@@ -63,7 +63,7 @@ can't read.
 - The 6529 Network caps how many wallets an identity holds.
 - The browser's key stays in this browser and can't be copied out. Turn it
   off on this page to end it on the 6529 Network.
-- An added wallet has 24 hours to sign. 6529.io holds the first signature
+- An added wallet has 23 hours to sign. 6529.io holds the first signature
   until then. A wallet starts one join at a time.
 
 ## Troubleshooting
