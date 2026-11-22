@@ -303,7 +303,13 @@ describe("DelegationSubmitGroups", () => {
     render(
       <DelegationSubmitGroups
         title="T"
-        writeParams={{ foo: "bar", functionName: "registerDelegationAddress" }}
+        writeParams={
+          {
+            functionName: "registerDelegationAddress",
+          } as React.ComponentProps<
+            typeof DelegationSubmitGroups
+          >["writeParams"]
+        }
         showCancel={true}
         gasError={undefined}
         validate={() => []}
