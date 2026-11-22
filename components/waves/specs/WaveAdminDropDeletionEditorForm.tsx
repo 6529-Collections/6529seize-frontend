@@ -29,7 +29,6 @@ export default function WaveAdminDropDeletionEditorForm({
       <label className="tw-flex tw-cursor-pointer tw-items-start tw-gap-2 tw-text-sm tw-text-iron-100">
         <input
           type="checkbox"
-          autoFocus
           checked={checked}
           disabled={disabled}
           aria-describedby={descriptionId}

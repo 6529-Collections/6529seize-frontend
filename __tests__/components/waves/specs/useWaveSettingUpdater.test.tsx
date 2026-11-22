@@ -1,5 +1,6 @@
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { act, renderHook, waitFor } from "@testing-library/react";
+import { ApiUpdateWaveHubRequest } from "@/generated/models/ApiUpdateWaveHubRequest";
 import { useWaveSettingUpdater } from "@/components/waves/specs/useWaveSettingUpdater";
 import { updateWaveHub } from "@/services/api/wave-hub-api";
 import { AuthContext } from "@/components/auth/Auth";
@@ -111,13 +112,38 @@ it("turns admin post deletion on with a single wave patch", async () => {
   });
   const close = jest.fn();
   act(() => result.current.saveAdminDropDeletion(close, true));
+  // Top-level field of the generated wave settings patch request.
+  const expectedPatch = {
+    admin_drop_deletion_enabled: true,
+  } satisfies ApiUpdateWaveHubRequest;
+  expect(
+    ApiUpdateWaveHubRequest.getAttributeTypeMap().map(({ name }) => name)
+  ).toContain("admin_drop_deletion_enabled");
   await waitFor(() =>
-    expect(updateWaveHub).toHaveBeenCalledWith(wave.id, {
-      admin_drop_deletion_enabled: true,
-    })
+    expect(updateWaveHub).toHaveBeenCalledWith(wave.id, expectedPatch)
   );
   expect(close).toHaveBeenCalled();
   expect(onWaveCreated).toHaveBeenCalled();
+});
+
+it("keeps the admin post deletion editor open when saving fails", async () => {
+  jest.mocked(updateWaveHub).mockRejectedValueOnce(new Error("rejected"));
+  const wave = createMockApiWave({
+    author,
+    wave: { admin_drop_deletion_enabled: false } as ApiWave["wave"],
+  });
+  const { result } = renderHook(() => useWaveSettingUpdater(wave), {
+    wrapper: Wrapper,
+  });
+  const close = jest.fn();
+  act(() => result.current.saveAdminDropDeletion(close, true));
+  await waitFor(() =>
+    expect(auth.setToast).toHaveBeenCalledWith(
+      expect.objectContaining({ type: "error" })
+    )
+  );
+  expect(close).not.toHaveBeenCalled();
+  expect(onWaveCreated).not.toHaveBeenCalled();
 });
 
 it("closes an unchanged admin post deletion edit without sending a patch", () => {
