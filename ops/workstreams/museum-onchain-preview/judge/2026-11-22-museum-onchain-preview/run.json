@@ -3,7 +3,7 @@
   "profile": "museum",
   "run_id": "2026-11-22-museum-onchain-preview",
   "candidate": {
-    "commit": "659f4de4c307e11150ccf95e6af75175717ef426",
+    "commit": "f93b7b3f39f45dbfb7e42a5b6090e3e0be011e34",
     "build": "production"
   },
   "scope": {
