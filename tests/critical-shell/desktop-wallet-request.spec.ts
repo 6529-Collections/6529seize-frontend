@@ -90,8 +90,6 @@ const SUBSCRIPTIONS = "0xcaac2b43b1b40edbfaddb5aebde9a90a27e1a3be";
 const MEMES = "0x33fd426905f149f8376e227d0c9d3340aad17af1";
 /** A placeholder transfer recipient. */
 const RECIPIENT = "0xab5801a7d398351b8be11c439e05c5b3259aec9b";
-/** A pinned 6529 Provenance test registry (Sepolia). */
-const PROVENANCE_REGISTRY = "0x0e289576c7565d29018134517309668946ffc912";
 
 /**
  * A shell-signed transaction request: `value` wei to `to` with call data
@@ -250,6 +248,9 @@ test.describe("Desktop wallet request page", () => {
     ).toHaveCount(0);
   });
 
+  // Sepolia-only page variants (provenance publishing, Safe transactions)
+  // are covered by the Jest panel tests: this build configures mainnet only
+  // (no DROP_FORGE_TESTNET), so the page cannot show a Sepolia request here.
   test("shows an NFT transfer's recipient in full with its confirmation", async ({
     page,
     baseURL,
@@ -293,65 +294,6 @@ test.describe("Desktop wallet request page", () => {
         name: "I checked that this is the right recipient. Transfers cannot be undone.",
       })
     ).not.toBeChecked();
-    await expect(
-      main.getByRole("button", { name: "Send in wallet" })
-    ).toHaveCount(0);
-  });
-
-  test("shows each record of a provenance publish", async ({
-    page,
-    baseURL,
-  }) => {
-    const origin = new URL(baseURL!).origin;
-    await page.route(SIGNER_ROUTE, (route) =>
-      route.fulfill({ json: { signer: shell.address } })
-    );
-    const word = (byte: string) => `0x${byte.repeat(32)}` as Hex;
-
-    await page.goto(
-      `/browser-connector${await signedTransactionFragment(
-        origin,
-        PROVENANCE_REGISTRY,
-        0n,
-        encodeFunctionData({
-          abi: [
-            parseAbiItem(
-              "function publish(uint32 releaseId,(bytes32 subjectId,bytes32 recordType,bytes32 schemaId,(uint16 algorithm,bytes32 digest,bytes32 canonicalizationId) contentHash,uint64 effectiveAt,bytes cid,bytes32 arweaveId,string label,uint32 expectedVersion)[] records)"
-            ),
-          ],
-          args: [
-            3,
-            [
-              {
-                subjectId: word("a1"),
-                recordType: word("b2"),
-                schemaId: word("c3"),
-                contentHash: {
-                  algorithm: 2,
-                  digest: word("11"),
-                  canonicalizationId: word("22"),
-                },
-                effectiveAt: 1_795_000_000n,
-                cid: `0x01551220${"ab".repeat(32)}`,
-                arweaveId: word("00"),
-                label: "",
-                expectedVersion: 0,
-              },
-            ],
-          ],
-        }),
-        11_155_111
-      )}`
-    );
-
-    const main = page.getByRole("main");
-    await expect(
-      main.getByText("Publish records to 6529 Provenance")
-    ).toBeVisible();
-    await expect(main.getByText("Sepolia test network")).toBeVisible();
-    await expect(main.getByText("Record 1")).toBeVisible();
-    await expect(main.getByText(word("a1"))).toBeVisible();
-    await expect(main.getByText("0 (a new subject)")).toBeVisible();
     await expect(
       main.getByRole("button", { name: "Send in wallet" })
     ).toHaveCount(0);
