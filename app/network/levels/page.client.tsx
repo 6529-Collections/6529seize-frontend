@@ -2,6 +2,7 @@
 
 import { AboutContentsDropdown } from "@/components/about/AboutContentsDropdown";
 import { useAuth } from "@/components/auth/Auth";
+import { LAST_LEVEL_LISTED } from "@/components/levels/levelThresholds";
 import ProgressChart from "@/components/levels/ProgressChart";
 import TableOfLevels from "@/components/levels/TableOfLevels";
 import YourLevelSummary from "@/components/levels/YourLevelSummary";
@@ -13,6 +14,7 @@ import {
 } from "@/components/network/networkPageLayoutClasses";
 import { useSetTitle } from "@/contexts/TitleContext";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { formatInteger } from "@/i18n/format";
 import type { SupportedLocale } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import "@/i18n/namespaces/network-tdh";
@@ -83,7 +85,9 @@ export default function LevelsClient() {
                     {m(locale, "network.levels.noTopLevel")}
                   </p>
                   <p className="tw-m-0">
-                    {m(locale, "network.levels.determinedByTable")}
+                    {t(locale, "network.levels.tableRange", {
+                      level: formatInteger(locale, LAST_LEVEL_LISTED),
+                    })}
                   </p>
                   <p className="tw-m-0">
                     {m(locale, "network.levels.adjustments")}

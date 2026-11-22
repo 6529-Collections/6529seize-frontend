@@ -72,7 +72,13 @@ describe("LevelsPage (App Router)", () => {
         "Levels start at zero. Above level 100, each level needs 4% more TDH + Rep than the one before. There is no top level."
       )
     ).toBeInTheDocument();
+    expect(
+      screen.getByText("The table below lists levels 0 to 200.")
+    ).toBeInTheDocument();
     expect(screen.queryByText(/capped at 100/i)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/determined by the table/i)
+    ).not.toBeInTheDocument();
   });
 
   it("shows the authenticated active profile summary", () => {
