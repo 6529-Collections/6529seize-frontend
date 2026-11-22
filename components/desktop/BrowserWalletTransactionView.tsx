@@ -477,17 +477,17 @@ export default function BrowserWalletTransactionView({
         </dl>
       </details>
       <div id={checksId} className="tw-flex tw-flex-col tw-gap-2 tw-text-sm">
-        <div
-          role="status"
+        <output
+          aria-live="polite"
           className="tw-flex tw-flex-col tw-gap-2 tw-text-iron-200 empty:tw-hidden"
         >
           {call.kind !== "reverted" && (
-            <p className="tw-m-0">{callCheckMessage(locale, call)}</p>
+            <span className="tw-block">{callCheckMessage(locale, call)}</span>
           )}
           {priceMessage !== null && price.kind !== "mismatch" && (
-            <p className="tw-m-0">{priceMessage}</p>
+            <span className="tw-block">{priceMessage}</span>
           )}
-        </div>
+        </output>
         <div
           role="alert"
           className="tw-flex tw-flex-col tw-gap-2 empty:tw-hidden"
