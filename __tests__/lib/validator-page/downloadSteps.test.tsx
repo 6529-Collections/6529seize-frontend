@@ -1,11 +1,7 @@
 /** @jest-environment node */
 import { renderToStaticMarkup } from "react-dom/server";
 
-import {
-  ValidatorFeedback,
-  ValidatorSwitch,
-  ValidatorUpgrade,
-} from "@/components/validator-page/ValidatorSections";
+import { ValidatorFeedback } from "@/components/validator-page/ValidatorSections";
 import ValidatorSteps from "@/components/validator-page/ValidatorSteps";
 import type { VisitorSystem } from "@/lib/validator-page/detectSystem";
 
@@ -30,10 +26,10 @@ describe("the steps for the app", () => {
   });
 
   it.each(["windows", "mac", "linux"] as const)(
-    "offers the sign-in link on %s for a wallet in another browser",
+    "offers the one-time link on %s for a wallet in another browser",
     (system) => {
       expect(steps(system)).toContain(
-        "If your wallet is in another browser, press Copy sign-in link and open the link there."
+        "If your wallet is in another browser, press Copy a one-time link and open the link there."
       );
     }
   );
@@ -59,49 +55,4 @@ describe("the steps for the app", () => {
       "Don&#x27;t post raw logs or status files: they show your keys and your account."
     );
   });
-
-  it("shows the upgrade from rc.9 in the open, with an id a link can name", () => {
-    const upgrade = renderToStaticMarkup(
-      <ValidatorUpgrade newest="0.1.0-rc.10" />
-    );
-    expect(upgrade).toMatch(
-      /^<section id="upgrading" aria-labelledby="upgrading-title"/
-    );
-    expect(upgrade).toContain(">Upgrading from rc.9</h2>");
-    // The Mac steps from rc.9 and from rc.8, numbered, with the command to
-    // copy.
-    expect(upgrade.match(/<li/g)).toHaveLength(6);
-    expect(upgrade).toContain(
-      ">If you&#x27;re upgrading from rc.8 or older</h3>"
-    );
-    expect(upgrade).toContain(
-      "launchctl bootout gui/$(id -u)/io.6529.validator.agent</code>"
-    );
-    expect(upgrade).toContain("<strong");
-    expect(upgrade).not.toContain("<details");
-  });
-
-  it("shows Sunday's switch in the open, with an id a link can name", () => {
-    const sunday = renderToStaticMarkup(
-      <ValidatorSwitch newest="0.1.0-rc.10" />
-    );
-    expect(sunday).toMatch(
-      /^<section id="sundays-switch" aria-labelledby="sundays-switch-title"/
-    );
-    expect(sunday).toContain(">Sunday&#x27;s switch</h2>");
-  });
-
-  // Merged before the signed list offers rc.10, or left after rc.11 is out,
-  // a note would describe a release the page doesn't offer.
-  it.each([["0.1.0-rc.9"], ["0.1.0-rc.11"], [undefined]])(
-    "shows no rc.10 note while the offered release is %s",
-    (newest) => {
-      expect(renderToStaticMarkup(<ValidatorUpgrade newest={newest} />)).toBe(
-        ""
-      );
-      expect(renderToStaticMarkup(<ValidatorSwitch newest={newest} />)).toBe(
-        ""
-      );
-    }
-  );
 });

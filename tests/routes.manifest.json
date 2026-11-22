@@ -2191,6 +2191,9 @@
     "/validator/guide": {
       "classification": "auth"
     },
+    "/validator/guide/[page]": {
+      "classification": "auth"
+    },
     "/validator/hardware": {
       "classification": "auth"
     },
