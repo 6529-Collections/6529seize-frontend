@@ -4222,6 +4222,42 @@
       ]
     },
     {
+      "id": "waves.admin-post-deletion-setting",
+      "kind": "ui_affordance",
+      "title": "Let wave admins delete posts",
+      "aliases": [
+        "admins can delete posts",
+        "allow admins to delete posts",
+        "delete spam in my wave",
+        "no delete option as admin",
+        "remove someone's post from my wave"
+      ],
+      "keywords": [
+        "waves",
+        "configuration",
+        "admins",
+        "delete",
+        "posts",
+        "moderation",
+        "spam"
+      ],
+      "facts": [
+        "Wave Configuration shows `Admins can delete posts` below the Admins row in Access, with the value On or Off.",
+        "The wave creator and admins can select its gear, check or clear `Allow admins to delete posts`, and save. Other viewers see the value without a gear.",
+        "When the setting is on, the wave creator and admins see Delete in the post menu for anyone's post. When it is off, only the author can delete a top-level post.",
+        "People can always delete their own posts. With open replies, reply deletion follows the separate open-replies rule.",
+        "The setting is chosen during wave creation and is on by default there. Older waves created with it off keep it off until an editor turns it on."
+      ],
+      "canonical_path": "/waves",
+      "related_paths": ["/waves?create=wave"],
+      "tags": ["waves", "configuration", "settings", "moderation"],
+      "source_refs": [
+        "components/waves/specs/WaveAdminDropDeletion.tsx",
+        "hooks/drops/useDropInteractionRules.ts",
+        "ops/docs/waves/sidebars/feature-right-sidebar-group-management.md"
+      ]
+    },
+    {
       "id": "waves.chat-status-settings",
       "kind": "ui_affordance",
       "title": "Wave chat status settings",
