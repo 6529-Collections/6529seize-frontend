@@ -8,6 +8,8 @@ export const DEVICES_SECURITY_MESSAGES = {
     "Switch to your own profile to manage devices and backup.",
   "devicesSecurity.localUnreadable":
     "This browser couldn’t read its own keys, so it can’t tell which device below is this one. Check names and dates before you revoke.",
+  "devicesSecurity.ownDeviceUnreadable":
+    "This browser couldn’t read its saved encrypted-messages device, so Clean up and removing this browser’s encrypted data aren’t available yet.",
   "devicesSecurity.loading": "Loading devices",
   "devicesSecurity.error": "Couldn’t load your devices.",
   "devicesSecurity.retry": "Try again",

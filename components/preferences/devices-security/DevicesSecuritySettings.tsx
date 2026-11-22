@@ -149,6 +149,16 @@ export default function DevicesSecuritySettings() {
             {t(locale, "devicesSecurity.localUnreadable")}
           </output>
         ) : null}
+        {security.ownDeviceUnreadable ? (
+          <div className="tw-flex tw-flex-wrap tw-items-center tw-gap-3 tw-rounded-lg tw-border tw-border-solid tw-border-iron-700 tw-bg-iron-900 tw-px-3 tw-py-2">
+            <output className="tw-block tw-text-sm tw-text-iron-200">
+              {t(locale, "devicesSecurity.ownDeviceUnreadable")}
+            </output>
+            <Button variant="secondary" size="sm" onClick={security.retry}>
+              {t(locale, "devicesSecurity.retry")}
+            </Button>
+          </div>
+        ) : null}
         {security.failed ? (
           <div
             role="alert"
