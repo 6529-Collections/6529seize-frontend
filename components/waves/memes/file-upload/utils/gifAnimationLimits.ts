@@ -16,7 +16,6 @@ const MAX_INSPECTED_BYTES = 256 * 1024 * 1024;
 const GIF_HEADER_LENGTH = 13;
 const EXTENSION_INTRODUCER = 0x21;
 const IMAGE_SEPARATOR = 0x2c;
-const TRAILER = 0x3b;
 
 export interface GifAnimationInfo {
   readonly width: number;
@@ -43,6 +42,27 @@ const skipSubBlocks = (bytes: Uint8Array, start: number): number | null => {
   return null;
 };
 
+type GifBlockStep =
+  | { readonly next: number; readonly frame: boolean }
+  | null;
+
+/** Steps over one extension or image block; null at the trailer or bad data. */
+const stepGifBlock = (bytes: Uint8Array, index: number): GifBlockStep => {
+  const marker = bytes[index];
+  if (marker === EXTENSION_INTRODUCER) {
+    const next = skipSubBlocks(bytes, index + 2);
+    return next === null ? null : { next, frame: false };
+  }
+  if (marker !== IMAGE_SEPARATOR) return null;
+  const packedIndex = index + 9;
+  if (packedIndex >= bytes.length) return null;
+  // Descriptor (10 bytes), local color table, LZW minimum code size.
+  const dataStart = index + 10 + colorTableBytes(bytes[packedIndex]!) + 1;
+  const next = skipSubBlocks(bytes, dataStart);
+  // A truncated image still counts: its descriptor was read.
+  return { next: next ?? bytes.length, frame: true };
+};
+
 /**
  * Reads the logical screen size and counts image frames. Returns null for
  * anything that is not a readable GIF. A truncated file reports the frames
@@ -61,23 +81,11 @@ export function parseGifAnimationInfo(
 
   let index = GIF_HEADER_LENGTH + colorTableBytes(bytes[10]!);
   let frames = 0;
-  while (index < bytes.length) {
-    const marker = bytes[index]!;
-    if (marker === TRAILER) break;
-    let next: number | null = null;
-    if (marker === EXTENSION_INTRODUCER) {
-      next = skipSubBlocks(bytes, index + 2);
-    } else if (marker === IMAGE_SEPARATOR) {
-      const packedIndex = index + 9;
-      if (packedIndex >= bytes.length) break;
-      frames += 1;
-      // Descriptor (10 bytes), local color table, LZW minimum code size.
-      const dataStart =
-        index + 10 + colorTableBytes(bytes[packedIndex]!) + 1;
-      next = skipSubBlocks(bytes, dataStart);
-    }
-    if (next === null) break;
-    index = next;
+  let step = stepGifBlock(bytes, index);
+  while (step !== null) {
+    if (step.frame) frames += 1;
+    index = step.next;
+    step = index < bytes.length ? stepGifBlock(bytes, index) : null;
   }
 
   return frames === 0 ? null : { width, height, frames };
