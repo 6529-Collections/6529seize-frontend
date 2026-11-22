@@ -32,7 +32,7 @@ interface WalletTransaction {
 /** Why a transaction is not forwarded (fixed words, never data). */
 type WalletTransactionProblem = "unknown-transaction" | "transaction-rule";
 
-type WalletTransactionCheck =
+export type WalletTransactionCheck =
   | {
       readonly ok: true;
       readonly rule: TransactionRule;

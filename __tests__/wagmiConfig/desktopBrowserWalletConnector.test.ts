@@ -28,7 +28,10 @@ const typedData = {
   message: { text: "hello" },
 } as const;
 
-function setup(address: string | null = wallet.address) {
+function setup(
+  address: string | null = wallet.address,
+  sendsTransactions = false
+) {
   const emit = jest.fn();
   const runRequest = jest.fn();
   const onTransactionRefused = jest.fn();
@@ -40,6 +43,7 @@ function setup(address: string | null = wallet.address) {
     prepare,
     runRequest,
     onTransactionRefused,
+    sendsTransactions: () => sendsTransactions,
   })({
     chains: [mainnet, sepolia],
     emitter: { emit },
@@ -282,5 +286,99 @@ describe("desktopBrowserWalletConnector", () => {
     await expect(
       request(connector, "personal_sign", [toHex("hi"), wallet.address])
     ).rejects.toMatchObject({ code: expected });
+  });
+
+  describe("eth_sendTransaction", () => {
+    const HASH = `0x${"cd".repeat(32)}`;
+    const TO = "0xCaAc2b43b1b40eDBFAdDB5aebde9A90a27E1A3be";
+    const viemTransaction = (overrides: Record<string, unknown> = {}) => ({
+      from: wallet.address,
+      to: TO,
+      value: "0x0e8f",
+      ...overrides,
+    });
+
+    it("forwards the canonical transaction and returns the hash", async () => {
+      const { connector, runRequest, prepare } = setup(wallet.address, true);
+      runRequest.mockResolvedValue({ ok: true, value: HASH });
+      await expect(
+        request(connector, "eth_sendTransaction", [viemTransaction()])
+      ).resolves.toBe(HASH);
+      expect(runRequest).toHaveBeenCalledWith(
+        {
+          method: "eth_sendTransaction",
+          params: [
+            {
+              from: wallet.address.toLowerCase(),
+              to: TO.toLowerCase(),
+              data: "0x",
+              value: "0xe8f",
+            },
+          ],
+          address: wallet.address,
+          chainId: 1,
+        },
+        null
+      );
+      expect(prepare).toHaveBeenCalledWith(
+        expect.objectContaining({ method: "eth_sendTransaction" })
+      );
+    });
+
+    it("points to the website when this 6529 Desktop sends no transactions", async () => {
+      const { connector, runRequest, onTransactionRefused } = setup();
+      await expect(
+        request(connector, "eth_sendTransaction", [viemTransaction()])
+      ).rejects.toMatchObject({ code: 4200 });
+      expect(onTransactionRefused).toHaveBeenCalledTimes(1);
+      expect(runRequest).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ["gas", { gas: "0x5208" }],
+      ["fees", { maxFeePerGas: "0x1" }],
+      ["another sender", { from: stranger.address }],
+      ["no recipient", { to: undefined }],
+    ])("refuses a transaction with %s", async (_name, overrides) => {
+      const { connector, runRequest, onTransactionRefused } = setup(
+        wallet.address,
+        true
+      );
+      await expect(
+        request(connector, "eth_sendTransaction", [viemTransaction(overrides)])
+      ).rejects.toMatchObject({ code: 4200 });
+      expect(onTransactionRefused).toHaveBeenCalledTimes(1);
+      expect(runRequest).not.toHaveBeenCalled();
+    });
+
+    it("stops when the app's allow-list refuses it", async () => {
+      const { connector, runRequest, prepare } = setup(wallet.address, true);
+      prepare.mockReturnValue(null);
+      await expect(
+        request(connector, "eth_sendTransaction", [viemTransaction()])
+      ).rejects.toMatchObject({ code: 4200 });
+      expect(runRequest).not.toHaveBeenCalled();
+    });
+
+    it("reports a transaction the shell could not confirm as an error", async () => {
+      const { connector, runRequest } = setup(wallet.address, true);
+      runRequest.mockResolvedValue({
+        ok: false,
+        code: "unverified",
+        reason: "transaction-not-visible",
+        transactionHash: HASH,
+      });
+      await expect(
+        request(connector, "eth_sendTransaction", [viemTransaction()])
+      ).rejects.toMatchObject({ code: -32603 });
+    });
+
+    it("never forwards wallet_sendTransaction", async () => {
+      const { connector, runRequest } = setup(wallet.address, true);
+      await expect(
+        request(connector, "wallet_sendTransaction", [viemTransaction()])
+      ).rejects.toMatchObject({ code: 4200 });
+      expect(runRequest).not.toHaveBeenCalled();
+    });
   });
 });

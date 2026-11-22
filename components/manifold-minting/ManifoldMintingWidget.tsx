@@ -610,7 +610,7 @@ export default function ManifoldMintingWidget(
             )}
           </div>
         </div>
-        <DesktopWalletTransactionGate className="tw-pt-3">
+        <DesktopWalletTransactionGate forwardable className="tw-pt-3">
           <Button
             variant="action"
             size="md"

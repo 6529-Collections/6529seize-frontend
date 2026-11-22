@@ -12,6 +12,7 @@ import {
 const MESSAGES = {
   signature: "desktopWalletRequest.notForwarded",
   transaction: "desktopWalletRequest.transactionNotForwarded",
+  transactionUpdate: "desktopWalletRequest.transactionUpdate",
 } as const;
 
 /**

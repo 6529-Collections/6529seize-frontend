@@ -146,5 +146,6 @@ test("offers the website instead of minting with 6529 Desktop browser forwarding
   expect(
     screen.getByRole("button", { name: "Continue in your browser" })
   ).toBeInTheDocument();
-  expect(screen.getByText(/does not send this transaction/)).toBeVisible();
+  // Minting is forwardable: a build that sends no transactions asks for an update.
+  expect(screen.getByText(/Update 6529 Desktop/)).toBeVisible();
 });
