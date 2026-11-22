@@ -9,6 +9,7 @@ import { ApiXTdhGrantTargetTokenMode } from "../../generated/models/ApiXTdhGrant
 import { fetchWaveDiscoveryPage } from "./waveDiscoveryPagination";
 import type { ApiXTdhGrantTokensPage } from "../../generated/models/ApiXTdhGrantTokensPage";
 import { expectUrlState } from "../support/urlState";
+import { readXtdhRetirement } from "../support/xtdhRetirement";
 import { mediaResolverUrlPattern } from "../support/mediaResolverHosts";
 import { installSurfaceSimulation } from "../support/surfaceSimulation";
 import { expectCompetitionScroll } from "../support/competitionScroll";
@@ -192,6 +193,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("keeps received collection loading rows aligned with loaded content", async ({
     page,
   }) => {
+    test.skip(
+      (await readXtdhRetirement(page)) === "retired",
+      "xTDH is retired: the profile's xTDH tab has no received view"
+    );
     let releaseCollections: () => void;
     const collectionsReady = new Promise<void>((resolve) => {
       releaseCollections = resolve;
@@ -272,6 +277,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("loads granted collection metadata through the desktop batch proxy fallback", async ({
     page,
   }) => {
+    test.skip(
+      (await readXtdhRetirement(page)) === "retired",
+      "xTDH is retired: the profile's xTDH tab has no granted view"
+    );
     const address = "0xa94161fbe69e08ff5a36dfafa61bdf29dd2fb928";
     // Keep grants stable without creating any real grant. Metadata uses the real
     // backend in deployed environments; local/PR coverage controls that boundary.
@@ -363,6 +372,10 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
   test("renders grant thumbnails from both Alchemy CDNs with an intentional failure fallback", async ({
     page,
   }) => {
+    test.skip(
+      (await readXtdhRetirement(page)) === "retired",
+      "xTDH is retired: the profile's xTDH tab has no granted view"
+    );
     const alchemyThumbnail =
       "https://nft2-cdn.alchemy.com/cdn-cgi/image/width=250,height=250,fit=scale-down/eth-mainnet/a3062b74e1b4d79fdab0ca1ec5a92615";
     const cloudinaryThumbnail =
@@ -3173,11 +3186,22 @@ test.describe("Waves and profile read-only coverage @surface @medium @large @rea
 
   for (const tab of PROFILE_TAB_PATHS) {
     test(`renders ${tab.path} read-only`, async ({ page }) => {
+      const xtdhRetired =
+        tab.path === `/${PROFILE_HANDLE}/xtdh` &&
+        (await readXtdhRetirement(page)) === "retired";
       await gotoReady(page, tab.path);
 
       await expectUrlState(page, (url) => url.pathname === tab.path);
       await expect(page).toHaveTitle(tab.title);
-      await expectProfileShell(page, tab.activeTab);
+      if (xtdhRetired) {
+        // From the identity switch-on xTDH is retired: its tab leaves the tab
+        // bar, and a link to it shows only the retirement notice.
+        await expect(
+          page.getByRole("region", { name: "xTDH", exact: true })
+        ).toHaveAttribute("data-xtdh-retirement", "retired");
+      } else {
+        await expectProfileShell(page, tab.activeTab);
+      }
       await expectProfileTabLinks(page);
     });
   }
