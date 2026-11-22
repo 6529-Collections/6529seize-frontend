@@ -77,7 +77,12 @@ export function DesktopUpdateHeadline({
         </p>
       )}
       {lastChecked && (
-        <p className="tw-m-0 tw-mt-1 tw-text-xs tw-text-iron-400">
+        <p
+          className={`tw-m-0 tw-mt-1 tw-text-xs ${
+            // The red tint lightens the box, so the dimmer grey would lose contrast.
+            tone === "alert" ? "tw-text-iron-300" : "tw-text-iron-400"
+          }`}
+        >
           {lastChecked}
         </p>
       )}
