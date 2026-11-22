@@ -69,7 +69,7 @@ describe("relay records written by the backend", () => {
     ]);
   });
 
-  it("computes the relay AUTH digest as P28's tagged hash", () => {
+  it("computes the relay AUTH digest as the relays' tagged hash", () => {
     const input = {
       net: "6529-interim-test",
       relayId: "relay-test",

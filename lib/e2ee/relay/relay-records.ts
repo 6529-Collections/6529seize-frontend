@@ -140,7 +140,7 @@ export async function sha256Hex(bytes: Uint8Array): Promise<string> {
   return bytesToHexString(new Uint8Array(digest));
 }
 
-/** A relay auth challenge's digest (P28's tagged hash, relay-inbox). */
+/** A relay auth challenge's digest: the relays' tagged hash. */
 export function relayAuthDigest(input: {
   readonly net: string;
   readonly relayId: string;

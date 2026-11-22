@@ -4,7 +4,7 @@ import { relayAuthDigest } from "./relay-records";
 
 /**
  * A read-only CRP v1 client (the relays' WebSocket protocol, JSON text
- * frames `{"t": ...}`) with relay-inbox's AUTH and binary payload frames.
+ * frames `{"t": ...}`) with the relays' AUTH and binary payload frames.
  * It reads streams page by page and payloads by hash; it never publishes.
  */
 export interface CrpTransport {
