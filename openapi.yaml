@@ -3323,6 +3323,92 @@ paths:
                 $ref: "#/components/schemas/ApiSessionNonceResponse"
         "400":
           description: Invalid request
+  /signed-records:
+    post:
+      tags:
+        - Authentication
+      summary: Save personal settings as device-signed records
+      description: >-
+        Personal settings (follows, mutes, blocks, hidden drops, bookmarks,
+        artwork alerts, pinned waves, wave notifications, preferences, mention
+        shortcuts, push settings, EULA consent) as signed records: kind 9
+        RECORD in the person's public `ps` stream, kind 10 SEALED in the
+        private `pv` stream, sealed to the person's devices and 6529.io's
+        provider key. Each record is verified (grant, signature, an anchor at
+        most `max_anchor_lag` heights behind the finalized head, the clock)
+        and must belong to the signed-in profile. A device's `keys` record
+        travels with every submit that carries sealed settings. Answers each
+        record's outcome in order, with the mode that took them: only
+        `primary` changes settings. 409 PERSONAL_RECORDS_OFF until the backend
+        mode is shadow or primary; 409 PERSONAL_RECORDS_SHADOW in shadow mode
+        for a submit not marked `companion`; 503 PERSONAL_SETTINGS_PAUSED while
+        settings are frozen. Not available to proxies.
+      operationId: submitSignedRecords
+      security:
+        - bearerAuth: []
+      x-6529-router:
+        enabled: true
+        auth: required
+        cache: false
+        typeImportGroup: signed-records
+        handler:
+          import: "@/api/signed-records/signed-records.handlers"
+          name: handleSubmitSignedRecords
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApiSubmitSignedRecordsRequest"
+      responses:
+        "200":
+          description: Each record's outcome, in the order sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSubmitSignedRecordsResponse"
+        "400":
+          description: The body is not 1 to 16 records
+        "401":
+          description: Authentication required
+        "403":
+          description: Not available to proxies
+        "409":
+          description: Settings are not saved as signed records in this mode
+        "503":
+          description: Settings are paused, or the chain gateway is unavailable
+  /signed-records/mode:
+    get:
+      tags:
+        - Authentication
+      summary: How personal settings are saved now
+      description: >-
+        The backend's personal-records mode (legacy, shadow or primary),
+        whether settings are frozen, the provider keys sealed settings are
+        wrapped to, the wallet 6529.io reads private streams as, and, for a
+        signed-in caller, the stream owner their records use (their principal
+        id, or their wallet while it is bound to none; null when the chain
+        gateway is unavailable). Clients cache it for a minute and read it
+        again after a 409.
+      operationId: getSignedRecordsMode
+      security:
+        - bearerAuth: []
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: optional
+        cache: false
+        typeImportGroup: signed-records
+        handler:
+          import: "@/api/signed-records/signed-records.handlers"
+          name: handleGetSignedRecordsMode
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSignedRecordsMode"
   /signed-records/owners:
     get:
       tags:
@@ -32473,6 +32559,162 @@ components:
           type: integer
           format: int64
           nullable: true
+    ApiSignedRecordEvent:
+      type: object
+      description: A device-signed record (the interim event, kinds 9 to 12).
+      required:
+        - id
+        - kind
+        - kind_version
+        - wave
+        - author
+        - key_type
+        - device_key
+        - auth_ref
+        - seq
+        - anchor
+        - claimed_time
+        - refs
+        - body
+        - body_hash
+        - body_size
+        - signature
+      properties:
+        id:
+          type: string
+          description: EIP-712 event id, 0x + 64 hex.
+        kind:
+          type: integer
+          description: 9 RECORD, 10 SEALED, 11 LOG, 12 DEL.
+        kind_version:
+          type: integer
+        wave:
+          type: string
+          description: The stream, <family>/<owner>, e.g. ps/0x<principal>.
+        author:
+          type: string
+          description: Lowercase grant wallet.
+        key_type:
+          type: integer
+          description: 2 for Ed25519.
+        device_key:
+          type: string
+        auth_ref:
+          type: string
+          description: Grant id.
+        seq:
+          type: integer
+          format: int64
+        anchor:
+          type: integer
+          format: int64
+        claimed_time:
+          type: integer
+          format: int64
+        refs:
+          type: array
+          items:
+            type: string
+        body:
+          type: string
+          nullable: true
+          description: Canonical JSON exactly as hashed, null when the record has no body.
+        body_hash:
+          type: string
+        body_size:
+          type: integer
+        signature:
+          type: string
+          description: Ed25519 over the event id, 0x + 128 hex.
+    ApiSubmitSignedRecordsRequest:
+      type: object
+      required:
+        - events
+      properties:
+        events:
+          type: array
+          minItems: 1
+          maxItems: 16
+          items:
+            $ref: "#/components/schemas/ApiSignedRecordEvent"
+        companion:
+          type: boolean
+          description: >-
+            True when the records follow today's request for the same change
+            (shadow mode). In shadow mode only companions are taken.
+    ApiSignedRecordResult:
+      type: object
+      required:
+        - id
+        - outcome
+      properties:
+        id:
+          type: string
+          nullable: true
+        outcome:
+          type: string
+          description: >-
+            applied (indexed), stale (a newer change is already indexed),
+            logged (a keys or reader record), rejected (failed verification),
+            refused (verified, not accepted).
+        reason:
+          type: string
+          description: The verify reason (rejected) or why it was refused.
+        code:
+          type: string
+          description: Today's rule code, when a rule refused it (e.g. BLOCKED).
+        detail:
+          type: string
+    ApiSubmitSignedRecordsResponse:
+      type: object
+      required:
+        - mode
+        - results
+      properties:
+        mode:
+          type: string
+          description: shadow or primary.
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiSignedRecordResult"
+    ApiSignedRecordsProviderKey:
+      type: object
+      required:
+        - id
+        - public_key
+      properties:
+        id:
+          type: string
+        public_key:
+          type: string
+          description: X25519 public key, 0x + 64 hex.
+    ApiSignedRecordsMode:
+      type: object
+      required:
+        - mode
+        - frozen
+        - owner
+        - site_reader
+        - provider_keys
+      properties:
+        mode:
+          type: string
+          description: legacy, shadow or primary.
+        frozen:
+          type: boolean
+        owner:
+          type: string
+          nullable: true
+          description: The signed-in caller's stream owner, or null.
+        site_reader:
+          type: string
+          nullable: true
+          description: The wallet 6529.io reads pv streams as; name it in a reader record.
+        provider_keys:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiSignedRecordsProviderKey"
     ApiSignedRecordsOwner:
       type: object
       required:

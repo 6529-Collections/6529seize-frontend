@@ -389,7 +389,10 @@ function usePinnedWaveMutations(
   const pinMutation = useMutation<void, Error, string, MutationContext>({
     mutationFn: (waveId) => {
       assertCurrentPinViewer(viewerIdentityKey, primaryProfileId);
-      return pinnedWavesApi.pinWave(waveId);
+      const pinnedIds = (
+        queryClient.getQueryData<SidebarWave[]>(pinnedWavesQueryKey) ?? []
+      ).map((wave) => wave.id);
+      return pinnedWavesApi.pinWave(waveId, pinnedIds);
     },
     onMutate: (waveId: string) =>
       optimisticallyPinWave(

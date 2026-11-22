@@ -12,11 +12,8 @@ import type { ApiArtistArtworkAlert } from "@/generated/models/ApiArtistArtworkA
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  commonApiDelete,
-  commonApiFetch,
-  commonApiPost,
-} from "@/services/api/common-api";
+import { setArtworkAlert } from "@/services/api/artwork-alerts-api";
+import { commonApiFetch } from "@/services/api/common-api";
 
 export default function useArtistArtworkAlert(
   handle: string,
@@ -66,13 +63,7 @@ export default function useArtistArtworkAlert(
       });
       if (!success || !mounted.current)
         throw new Error(t(locale, "artworkAlerts.sessionChanged"));
-      if (enabled)
-        return commonApiPost<undefined, ApiArtistArtworkAlert>({
-          endpoint,
-          body: undefined,
-        });
-      await commonApiDelete({ endpoint });
-      return { enabled: false };
+      return setArtworkAlert(handle, enabled);
     },
     onSuccess: (result) => {
       queryClient.setQueryData(queryKey, result);

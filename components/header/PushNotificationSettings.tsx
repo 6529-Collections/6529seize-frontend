@@ -5,7 +5,8 @@ import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrappe
 import { getStableDeviceId } from "@/components/notifications/stable-device-id";
 import Button from "@/components/utils/button/Button";
 import type { ApiPushNotificationSettings } from "@/generated/models/ApiPushNotificationSettings";
-import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
+import { savePushNotificationSettings } from "@/services/api/push-notification-settings-api";
 import { useMutation } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Toggle from "react-toggle";
@@ -141,13 +142,7 @@ export default function PushNotificationSettings({
   const { mutateAsync: saveSettings, isPending: isSaving } = useMutation({
     mutationFn: async () => {
       if (!deviceId || !currentSettings) return;
-      return await commonApiPut<
-        ApiPushNotificationSettings,
-        ApiPushNotificationSettings
-      >({
-        endpoint: `push-notifications/settings/${deviceId}`,
-        body: currentSettings,
-      });
+      return await savePushNotificationSettings(deviceId, currentSettings);
     },
     onSuccess: () => {
       setOriginalSettings(currentSettings);

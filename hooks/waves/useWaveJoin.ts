@@ -4,17 +4,15 @@ import { useContext, useRef, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/components/auth/Auth";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { WAVE_DEFAULT_SUBSCRIPTION_ACTIONS } from "@/components/react-query-wrapper/utils/query-utils";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveSubscriptionActions } from "@/generated/models/ApiWaveSubscriptionActions";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useRecordWaveSidebarMembership } from "./useWaveSidebarMembership";
 import { t } from "@/i18n/messages";
 import {
-  commonApiDeleteWithBody,
-  commonApiPost,
-} from "@/services/api/common-api";
+  setWaveFollowing,
+  subscribeToAllWaveDrops,
+} from "@/services/api/wave-follow-api";
 
 type WaveJoinTarget = Pick<ApiWave, "id" | "subscribed_actions">;
 
@@ -34,13 +32,11 @@ interface WaveJoinControls {
   readonly toggle: () => Promise<boolean>;
 }
 
-const getSubscriptionEndpoint = (waveId: string) =>
-  `waves/${waveId}/subscriptions`;
-
 /**
- * The single join/leave code path for waves. It checks the session, calls the
- * subscription API, then updates every wave and sidebar cache through
- * `onWaveFollowChange`, so each Join control stays in sync.
+ * The single join/leave code path for waves. It checks the session, saves
+ * the follow (today's subscription API or a signed record), then updates
+ * every wave and sidebar cache through `onWaveFollowChange`, so each Join
+ * control stays in sync.
  */
 export function useWaveJoin(
   wave: WaveJoinTarget,
@@ -75,23 +71,14 @@ export function useWaveJoin(
 
   const joinMutation = useMutation({
     mutationFn: async () => {
-      await commonApiPost<
-        ApiWaveSubscriptionActions,
-        ApiWaveSubscriptionActions
-      >({
-        endpoint: getSubscriptionEndpoint(wave.id),
-        body: { actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS },
-      });
+      await setWaveFollowing(wave.id, true);
       // The join is recorded as soon as the server accepts it; the optional
       // all-messages subscription below must not undo or misreport it.
       recordMembership(wave.id, true);
       onWaveFollowChange({ waveId: wave.id, following: true });
       if (subscribeToAllDrops) {
         try {
-          await commonApiPost({
-            endpoint: `notifications/wave-subscription/${wave.id}`,
-            body: {},
-          });
+          await subscribeToAllWaveDrops(wave.id);
         } catch (error) {
           showError(
             "waves.join.allMessagesErrorTitle",
@@ -105,13 +92,7 @@ export function useWaveJoin(
 
   const leaveMutation = useMutation({
     mutationFn: async () => {
-      await commonApiDeleteWithBody<
-        ApiWaveSubscriptionActions,
-        ApiWaveSubscriptionActions
-      >({
-        endpoint: getSubscriptionEndpoint(wave.id),
-        body: { actions: WAVE_DEFAULT_SUBSCRIPTION_ACTIONS },
-      });
+      await setWaveFollowing(wave.id, false);
       // Record only after the final subscription request succeeds.
       recordMembership(wave.id, false);
       onWaveFollowChange({ waveId: wave.id, following: false });

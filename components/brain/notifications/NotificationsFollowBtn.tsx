@@ -7,20 +7,15 @@ import {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
 import Button from "@/components/utils/button/Button";
-import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import {
-  commonApiDeleteWithBody,
-  commonApiPost,
-} from "@/services/api/common-api";
+import { setIdentityFollowing } from "@/services/api/identity-follow-api";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { useMutation } from "@tanstack/react-query";
 import type { FC } from "react";
 import { useContext, useState } from "react";
 import {
-  DEFAULT_SUBSCRIPTION_BODY,
   FollowBtnCheckIcon,
   FollowBtnPlusIcon,
 } from "./notificationsFollowShared";
@@ -51,13 +46,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
       if (!handle) {
         throw new Error("Missing profile handle.");
       }
-      await commonApiPost<
-        ApiIdentitySubscriptionActions,
-        ApiIdentitySubscriptionActions
-      >({
-        endpoint: `identities/${handle}/subscriptions`,
-        body: DEFAULT_SUBSCRIPTION_BODY,
-      });
+      await setIdentityFollowing(handle, true);
     },
     onSuccess: () => {
       onIdentityFollowChange();
@@ -80,13 +69,7 @@ const NotificationsFollowBtn: FC<NotificationsFollowBtnProps> = ({
       if (!handle) {
         throw new Error("Missing profile handle.");
       }
-      await commonApiDeleteWithBody<
-        ApiIdentitySubscriptionActions,
-        ApiIdentitySubscriptionActions
-      >({
-        endpoint: `identities/${handle}/subscriptions`,
-        body: DEFAULT_SUBSCRIPTION_BODY,
-      });
+      await setIdentityFollowing(handle, false);
     },
     onSuccess: () => {
       onIdentityFollowChange();

@@ -1,10 +1,9 @@
 import { useAuth } from "@/components/auth/Auth";
-import type { ApiUpdateWaveNotificationPreferencesRequest } from "@/generated/models/ApiUpdateWaveNotificationPreferencesRequest";
+import type { ApiDropGroupMention } from "@/generated/models/ApiDropGroupMention";
 import type { ApiWave } from "@/generated/models/ApiWave";
-import type { ApiWaveNotificationPreferences } from "@/generated/models/ApiWaveNotificationPreferences";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useWaveNotificationSubscription } from "@/hooks/useWaveNotificationSubscription";
-import { commonApiPost } from "@/services/api/common-api";
+import { updateWaveNotificationPreferences } from "@/services/api/wave-follow-api";
 import { useCallback, useMemo, useState } from "react";
 import {
   BROADCAST_MENTION_PREFERENCE,
@@ -44,19 +43,16 @@ export function useWavePreferenceSettings(wave: ApiWave) {
       target,
       errorMessage,
     }: {
-      readonly body: ApiUpdateWaveNotificationPreferencesRequest;
+      readonly body: {
+        readonly subscribed: boolean;
+        readonly enabled_group_notifications: readonly ApiDropGroupMention[];
+      };
       readonly target: NotificationLoadingTarget;
       readonly errorMessage: string;
     }) => {
       setLoadingTarget(target);
       try {
-        await commonApiPost<
-          ApiUpdateWaveNotificationPreferencesRequest,
-          ApiWaveNotificationPreferences
-        >({
-          endpoint: `notifications/wave-subscription/${wave.id}`,
-          body,
-        });
+        await updateWaveNotificationPreferences(wave.id, body);
         await refetch();
       } catch (error) {
         setToast({

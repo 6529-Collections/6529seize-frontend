@@ -9,11 +9,8 @@ import type { ApiIdentityMuteState } from "@/generated/models/ApiIdentityMuteSta
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import {
-  commonApiDelete,
-  commonApiFetch,
-  commonApiPost,
-} from "@/services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
+import { setIdentityMuted } from "@/services/api/identity-mute-api";
 
 const INVALIDATE_ON_MUTE_QUERY_KEYS: QueryKey[] = [
   QueryKey.IDENTITY_NOTIFICATIONS,
@@ -67,19 +64,8 @@ export default function useProfileMute(handle: string) {
   };
 
   const muteMutation = useMutation({
-    mutationFn: async (nextMuted: boolean): Promise<ApiIdentityMuteState> => {
-      if (nextMuted) {
-        return await commonApiPost<undefined, ApiIdentityMuteState>({
-          endpoint: `/identities/${encodedIdentityKey}/mute`,
-          body: undefined,
-        });
-      }
-
-      await commonApiDelete({
-        endpoint: `/identities/${encodedIdentityKey}/mute`,
-      });
-      return { muted: false };
-    },
+    mutationFn: (nextMuted: boolean): Promise<ApiIdentityMuteState> =>
+      setIdentityMuted(identityKey, nextMuted),
     onSuccess: (state) => {
       queryClient.setQueryData(identityMuteQueryKey, state);
       invalidateMuteSideEffects();

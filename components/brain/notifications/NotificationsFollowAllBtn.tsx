@@ -7,13 +7,11 @@ import {
   UserFollowBtnSize,
 } from "@/components/user/utils/UserFollowBtn";
 import Button from "@/components/utils/button/Button";
-import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import type { ApiProfileMin } from "@/generated/models/ApiProfileMin";
-import { commonApiPost } from "@/services/api/common-api";
+import { setIdentityFollowing } from "@/services/api/identity-follow-api";
 import type { FC } from "react";
 import { useContext, useMemo, useState } from "react";
 import {
-  DEFAULT_SUBSCRIPTION_BODY,
   FollowBtnCheckIcon,
   FollowBtnPlusIcon,
 } from "./notificationsFollowShared";
@@ -65,15 +63,7 @@ const NotificationsFollowAllBtn: FC<NotificationsFollowAllBtnProps> = ({
     }
     try {
       const results = await Promise.allSettled(
-        handlesToFollow.map((handle) =>
-          commonApiPost<
-            ApiIdentitySubscriptionActions,
-            ApiIdentitySubscriptionActions
-          >({
-            endpoint: `identities/${handle}/subscriptions`,
-            body: DEFAULT_SUBSCRIPTION_BODY,
-          })
-        )
+        handlesToFollow.map((handle) => setIdentityFollowing(handle, true))
       );
       const hasFulfilled = results.some((r) => r.status === "fulfilled");
       const rejected = results.filter(
