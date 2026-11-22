@@ -15,12 +15,12 @@ import { HttpFile } from '../http/http';
 
 export class ApiSignedRecordsAnchor {
     /**
-    * The latest finalized height; sign it as the record's anchor.
+    * The latest finalized height; sign it as the record\'s anchor.
     */
     'anchor': number;
     'head_height': number;
     /**
-    * The finalized block's slot start, epoch milliseconds.
+    * The finalized block\'s slot start, epoch milliseconds.
     */
     'finalized_time': number;
     /**
