@@ -11,25 +11,14 @@ import { ApiProfileClassification } from "@/generated/models/ApiProfileClassific
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
-import { chainGateway, type ChainIdentity } from "@/lib/chain-identity/gateway";
-import { profileReplace, type ChainActor } from "@/lib/chain-identity/identityOps";
-import { draftOperation } from "@/lib/chain-identity/operation";
-import { chainNetworkId } from "@/lib/chain-identity/network";
+import type { ChainIdentity } from "@/lib/chain-identity/gateway";
+import { PROFILE_DOC_KEYS, type ProfileDoc } from "@/lib/chain-identity/profileDoc";
 import {
-  decodeProfileDoc,
-  matchesCid,
-  prepareProfileDoc,
-  PROFILE_DOC_KEYS,
-  profileDocumentTypedData,
-  signedProfileDoc,
-  type ProfileDoc,
-} from "@/lib/chain-identity/profileDoc";
+  nextProfileFields,
+  prepareProfileReplace,
+  readCurrentProfile,
+} from "@/lib/chain-identity/profileSave";
 import type { StoredSessionKey } from "@/lib/chain-identity/sessionKey";
-import {
-  sessionSigner,
-  signProfileDocument,
-  walletSigner,
-} from "@/lib/chain-identity/signers";
 import ChainActionStatus from "./ChainActionStatus";
 import {
   CHAIN_HINT_CLASS,
@@ -76,24 +65,6 @@ const draftOf = (doc: ProfileDoc | null): Draft => {
   return draft;
 };
 
-/** The identity's current profile document, or null when it has none. */
-async function readCurrentDoc(
-  identity: ChainIdentity,
-  signal?: AbortSignal
-): Promise<{ readonly doc: ProfileDoc | null; readonly unreadable: boolean }> {
-  const cid = identity.profile?.docCid;
-  if (!cid || cid === "0x") {
-    return { doc: null, unreadable: false };
-  }
-  try {
-    const bytes = await chainGateway.getDoc(cid, signal);
-    const doc = matchesCid(bytes, cid) ? decodeProfileDoc(bytes) : null;
-    return { doc, unreadable: doc === null };
-  } catch {
-    return { doc: null, unreadable: true };
-  }
-}
-
 /**
  * PROFILE_REPLACE: writes a new profile document with the edited fields and
  * every other field kept, stores it with the gateway, and points the
@@ -115,7 +86,7 @@ export default function ChainIdentityProfile({
   const locale = useBrowserLocale();
   const current = useQuery({
     queryKey: [QueryKey.CHAIN_IDENTITY, "doc", identity.profile?.docCid ?? null],
-    queryFn: ({ signal }) => readCurrentDoc(identity, signal),
+    queryFn: ({ signal }) => readCurrentProfile(identity, signal),
     staleTime: 60_000,
   });
   // Only what the person changed; the rest reads from the current document.
@@ -130,55 +101,23 @@ export default function ChainIdentityProfile({
     setEdits((previous) => ({ ...previous, [key]: value }));
 
   const start = () => {
-    void action.prepare(async () => {
-      const previous = current.data?.doc ?? null;
-      const fields = new Map(previous?.fields ?? []);
-      for (const key of EDITED) {
-        fields.set(key, draft[key]);
-      }
-      // A later document carries the signature of a key that can replace
-      // the profile (P37 4.2): the session key, or the wallet (a first prompt).
-      const version = (previous?.version ?? 0) + 1;
-      const { unsigned, docHash } = prepareProfileDoc({
-        principal: identity.principalId,
-        version,
-        prev: identity.profile?.docCid ?? "0x",
+    if (!current.data) {
+      return;
+    }
+    const fields = nextProfileFields(current.data.doc, edits);
+    void action.prepare(async (progress) => {
+      const { draft: prepared, signer } = await prepareProfileReplace(
+        identity,
         fields,
-      });
-      const signature = await signProfileDocument(
-        config,
-        sessionKey
-          ? { kind: "session", record: sessionKey }
-          : { kind: "wallet", address: wallet },
-        profileDocumentTypedData(
-          await chainNetworkId(),
-          identity.principalId,
-          version,
-          docHash
-        )
+        {
+          config,
+          wallet,
+          sessionKey,
+          onWalletPrompt: progress.walletPrompt,
+          onDocumentSigned: progress.preparing,
+        }
       );
-      const { bytes, cid } = signedProfileDoc(unsigned, signature);
-      await chainGateway.uploadDoc(bytes, cid);
-      const actor: ChainActor = sessionKey
-        ? {
-            kind: "session",
-            keyId: sessionKey.keyId,
-            grantId: sessionKey.grantId,
-          }
-        : { kind: "wallet", address: wallet };
-      const operation = profileReplace(
-        identity.principalId,
-        actor,
-        identity.profile?.version ?? 0,
-        cid
-      );
-      return {
-        draft: await draftOperation(operation.request, operation.primaryType),
-        signer: sessionKey
-          ? sessionSigner(sessionKey)
-          : walletSigner(config, wallet),
-        payer: "identity",
-      };
+      return { draft: prepared, signer, payer: "identity" };
     });
   };
 
@@ -204,7 +143,12 @@ export default function ChainIdentityProfile({
       heading={t(locale, "chainIdentity.profile.heading")}
       body={t(locale, "chainIdentity.profile.body")}
     >
-      {current.data?.unreadable && (
+      {current.isError && (
+        <p role="alert" className={`${CHAIN_HINT_CLASS} tw-mb-3`}>
+          {t(locale, "chainIdentity.profile.readError")}
+        </p>
+      )}
+      {current.data?.unreadable === true && (
         <p className={`${CHAIN_HINT_CLASS} tw-mb-3`}>
           {t(locale, "chainIdentity.profile.unreadable")}
         </p>

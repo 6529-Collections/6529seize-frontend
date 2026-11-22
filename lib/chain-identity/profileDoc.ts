@@ -39,6 +39,8 @@ const PROFILE_DOC = struct("ProfileDoc", [
 ]);
 
 const SCHEMA = "6529.ProfileDoc.v1";
+/** P37 4.2: a whole document is at most 524,288 bytes. */
+const MAX_DOC_BYTES = 524_288;
 const CID_PREFIX = "0x01551220";
 
 type ProfileDocValue = ValueOf<typeof PROFILE_DOC>;
@@ -134,6 +136,9 @@ export function signedProfileDoc(
   signature: ProfileDocSignature
 ): { readonly bytes: Uint8Array; readonly cid: Hex } {
   const sig = encodeCe(PROFILE_DOC_SIGNATURE, signature);
+  if (unsigned.length + 4 + sig.length > MAX_DOC_BYTES) {
+    throw new RangeError("a profile document is at most 524,288 bytes");
+  }
   const out = new Uint8Array(unsigned.length + 4 + sig.length);
   out.set(unsigned, 0);
   new DataView(out.buffer).setUint32(unsigned.length, sig.length);
@@ -141,13 +146,13 @@ export function signedProfileDoc(
   return { bytes: out, cid: profileDocCid(out) };
 }
 
-/** The document's bytes and CID, with an empty signature. Empty values are left out. */
+/** The document's bytes and CID, with an empty signature. */
 function encodeProfileDoc(
   doc: ProfileDoc,
   nonce: Hex = randomNonce()
 ): { readonly bytes: Uint8Array; readonly cid: Hex } {
+  // Values are written exactly as given; only empty ones are left out.
   const fields = [...doc.fields.entries()]
-    .map(([key, value]) => [key, value.trim()] as const)
     .filter(([, value]) => value.length > 0)
     .sort(([a], [b]) => compareKeys(a, b))
     .map(([key, value]) => ({ key, value }));

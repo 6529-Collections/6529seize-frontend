@@ -1,5 +1,12 @@
 import { hashTypedData, keccak256, sha256 } from "viem";
 import {
+  domainSeparator,
+  encodeType,
+  hashStruct,
+  typedDataDigest,
+} from "@/lib/chain/codec/eip712";
+import { bytes32, struct, u32 } from "@/lib/chain/codec/schema";
+import {
   decodeProfileDoc,
   matchesCid,
   prepareProfileDoc,
@@ -73,30 +80,49 @@ it("names the signed document by CIDv1, raw codec, sha2-256", () => {
 });
 
 it("signs ProfileDocument(principal, version, docHash) in the 6529 Network domain", () => {
-  const typed = profileDocumentTypedData(NETWORK, PRINCIPAL, 3, KEY_ID);
-  expect(typed.domain).toEqual({
-    name: "6529 Network",
-    version: "1",
-    salt: NETWORK,
-  });
-  expect(hashTypedData(typed)).toBe(
-    hashTypedData({
-      ...typed,
-      types: {
-        ProfileDocument: [
-          { name: "principal", type: "bytes32" },
-          { name: "version", type: "uint32" },
-          { name: "docHash", type: "bytes32" },
-        ],
-      },
+  // Built with the chain codec's own EIP-712 code, apart from viem.
+  const PROFILE_DOCUMENT = struct("ProfileDocument", [
+    ["principal", bytes32],
+    ["version", u32],
+    ["docHash", bytes32],
+  ]);
+  expect(encodeType(PROFILE_DOCUMENT)).toBe(
+    "ProfileDocument(bytes32 principal,uint32 version,bytes32 docHash)"
+  );
+  const expected = typedDataDigest(
+    domainSeparator({ name: "6529 Network", version: "1", salt: NETWORK }),
+    hashStruct(PROFILE_DOCUMENT, {
+      principal: PRINCIPAL,
+      version: 3,
+      docHash: KEY_ID,
     })
   );
+  expect(
+    hashTypedData(profileDocumentTypedData(NETWORK, PRINCIPAL, 3, KEY_ID))
+  ).toBe(expected);
+});
+
+it("keeps values exactly as given, whitespace included", () => {
+  const { bytes } = signed({ bio: "gm\n", displayName: " punk " });
+  const decoded = decodeProfileDoc(bytes);
+  expect(decoded?.fields.get("bio")).toBe("gm\n");
+  expect(decoded?.fields.get("displayName")).toBe(" punk ");
+});
+
+it("refuses a document over 524,288 bytes", () => {
+  const { unsigned } = prepareProfileDoc(
+    doc({ bio: "x".repeat(65_536), a: "x".repeat(65_536), b: "x".repeat(65_536), c: "x".repeat(65_536), d: "x".repeat(65_536), e: "x".repeat(65_536), f: "x".repeat(65_536), g: "x".repeat(65_536) }),
+    NONCE
+  );
+  expect(() =>
+    signedProfileDoc(unsigned, { keyType: 2, keyId: KEY_ID, signature: SIGNATURE })
+  ).toThrow(RangeError);
 });
 
 it("leaves out empty values, sorts keys bytewise and keeps unknown keys", () => {
   const { bytes } = signed({
     website: "https://example.test",
-    bio: "  ",
+    bio: "",
     banner1: "#000000",
     "cms.archive": "bafkexample",
   });

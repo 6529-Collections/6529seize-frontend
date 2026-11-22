@@ -20,6 +20,7 @@ export type ChainActionState =
       readonly payer: ChainFeePayer;
       readonly keyType: 1 | 2;
     }
+  | { readonly kind: "signingDocument" }
   | { readonly kind: "signing" }
   | { readonly kind: "sending" }
   | { readonly kind: "done" }
@@ -40,8 +41,10 @@ interface PreparedChainAction {
 
 /**
  * One change on the 6529 Network, step by step: prepare (draft and check),
- * show the fee, sign, wait until final. The wallet is never asked before
- * the person has seen the fee and confirmed.
+ * show the fee, sign, wait until final. The transaction is never signed
+ * before the person has seen its fee and confirmed. A profile save also
+ * has its document signed while it is prepared, right after the person
+ * clicks save; `prepare` reports that step so the page can say so.
  */
 export function useChainAction(onDone?: () => void) {
   const [state, setState] = useState<ChainActionState>({ kind: "idle" });
@@ -68,11 +71,19 @@ export function useChainAction(onDone?: () => void) {
 
   const prepare = useCallback(
     /** `make` gives null when there turns out to be nothing to sign. */
-    async (make: () => Promise<PreparedChainAction | null>) => {
+    async (
+      make: (progress: {
+        readonly walletPrompt: () => void;
+        readonly preparing: () => void;
+      }) => Promise<PreparedChainAction | null>
+    ) => {
       prepared.current = null;
       update({ kind: "preparing" });
       try {
-        const action = await make();
+        const action = await make({
+          walletPrompt: () => update({ kind: "signingDocument" }),
+          preparing: () => update({ kind: "preparing" }),
+        });
         if (action === null) {
           update({ kind: "idle" });
           return;
@@ -123,6 +134,7 @@ export function useChainAction(onDone?: () => void) {
 
   const busy =
     state.kind === "preparing" ||
+    state.kind === "signingDocument" ||
     state.kind === "signing" ||
     state.kind === "sending";
 

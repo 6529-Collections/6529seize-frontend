@@ -132,5 +132,7 @@
   "chainIdentity.chainDelegations.unknownCollection": "Collection {address}",
   "chainIdentity.chainDelegations.unknownUseCase": "Use case {number}",
   "chainIdentity.chainDelegations.to": "To {delegate}",
-  "chainIdentity.addressPlaceholder": "0x…"
+  "chainIdentity.addressPlaceholder": "0x…",
+  "chainIdentity.action.signingDocument": "Check your wallet: sign your profile first.",
+  "chainIdentity.profile.readError": "Your current profile couldn't be read, so it can't be changed yet. Try again in a minute."
 }

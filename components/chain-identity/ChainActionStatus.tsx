@@ -94,6 +94,7 @@ function ChainActionStatusContent({
 
   const key = {
     preparing: "chainIdentity.action.preparing",
+    signingDocument: "chainIdentity.action.signingDocument",
     signing: "chainIdentity.action.signing",
     sending: "chainIdentity.action.sending",
     done: "chainIdentity.action.done",
