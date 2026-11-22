@@ -41,7 +41,7 @@ interface StreamState {
   readonly records: StreamRecord[];
 }
 
-export interface RelayReaderSettings {
+interface RelayReaderSettings {
   readonly urls: readonly string[];
   readonly net: string;
   readonly ordererKey: string;
