@@ -117,3 +117,27 @@ describe("ownersOfProfiles", () => {
     );
   });
 });
+
+describe("ownerOfWallet", () => {
+  it("names a bound wallet's principal and an unbound wallet itself, without a profile lookup", async () => {
+    const { ownerOfWallet } = load();
+    await expect(
+      ownerOfWallet(WALLET_A.toUpperCase().replace("0X", "0x"))
+    ).resolves.toBe(PRINCIPAL_A);
+    await expect(ownerOfWallet(WALLET_B)).resolves.toBe(WALLET_B);
+    expect(
+      mockFetch.mock.calls.some(([request]) =>
+        request.endpoint.startsWith("identities/")
+      )
+    ).toBe(false);
+  });
+
+  it("fails for a value that is not a wallet, and when the API names no owner", async () => {
+    const { ownerOfWallet } = load();
+    await expect(ownerOfWallet("alice")).rejects.toThrow("not an address");
+    mockFetch.mockImplementation(async () => ({ anchor: 1, owners: [] }));
+    await expect(ownerOfWallet(WALLET_B)).rejects.toThrow(
+      "did not name an owner"
+    );
+  });
+});

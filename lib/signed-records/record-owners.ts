@@ -99,6 +99,19 @@ export async function ownersOfProfiles(
 }
 
 /**
+ * The owner a wallet's own records use: the principal it is bound to, or the
+ * wallet itself while it is bound to none.
+ * @api
+ */
+export async function ownerOfWallet(wallet: string): Promise<string> {
+  const [owner] = await ownersOfWallets([wallet]);
+  if (!owner) {
+    throw new Error("The API did not name an owner for the wallet");
+  }
+  return owner;
+}
+
+/**
  * The owner of one profile (handle, wallet or profile id).
  * @api
  */
