@@ -544,6 +544,9 @@ function DraftForm({
       ref={formRef}
       className="tw-mx-auto tw-flex tw-w-full tw-max-w-[680px] tw-flex-1 tw-flex-col tw-gap-6"
       aria-labelledby="competition-draft-title"
+      aria-describedby={
+        lockedRules ? "competition-draft-rules-locked" : undefined
+      }
     >
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
         <h1
@@ -558,7 +561,10 @@ function DraftForm({
         {t(locale, "competitions.overlap")}
       </p>
       {lockedRules && (
-        <p className="tw-m-0 tw-text-sm tw-text-iron-400">
+        <p
+          id="competition-draft-rules-locked"
+          className="tw-m-0 tw-text-sm tw-text-iron-400"
+        >
           {t(locale, "competitions.rulesLockedAfterEntries")}
         </p>
       )}

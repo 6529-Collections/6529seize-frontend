@@ -175,6 +175,11 @@ describe("CreateWaveVoting", () => {
         "This decision already has votes, so its voting credit, scope and negative-vote settings can no longer change."
       )
     ).toBeVisible();
+    expect(
+      screen.getAllByRole("radio")[0]!.closest("fieldset")
+    ).toHaveAccessibleDescription(
+      "This decision already has votes, so its voting credit, scope and negative-vote settings can no longer change."
+    );
     openAdvancedSettings();
     expect(mockNegativeVotingToggle.mock.lastCall?.[0].isDisabled).toBe(true);
     expect(screen.getByTestId("time-weighted")).toBeEnabled();

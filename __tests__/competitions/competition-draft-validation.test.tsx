@@ -370,10 +370,10 @@ it("keeps sibling rule editing locked after accepted entries", () => {
     />
   );
   expect(
-    screen.getByText(
-      "This decision already has entries, so its credit, signing, submission, timing, result and outcome rules can no longer change. Access, name, description and presentation can still be edited."
-    )
-  ).toBeInTheDocument();
+    screen.getByRole("region", { name: "Edit decision" })
+  ).toHaveAccessibleDescription(
+    "This decision already has entries, so its credit, signing, submission, timing, result and outcome rules can no longer change. Access, name, description and presentation can still be edited."
+  );
   for (let step = 0; step < 2; step++)
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
   expect(screen.getByText("RULES", { exact: true })).toBeInTheDocument();
