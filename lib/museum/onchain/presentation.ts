@@ -32,6 +32,7 @@ const ENTITY_GROUP_ORDER = [
   "acquisition",
   "program",
   "accession",
+  "lot",
   "object",
   "collection",
   "group",
@@ -201,10 +202,18 @@ function buildGraph(snapshot: OnchainMuseumSnapshot): Graph {
   return { refSubject, bySubject, edges, about };
 }
 
+interface EntityRoles {
+  /** Agents a work is created by. */
+  readonly creators: ReadonlySet<string>;
+  /** Collections something holds. */
+  readonly held: ReadonlySet<string>;
+  /** Sets whose members are all objects: accession lots. */
+  readonly lots: ReadonlySet<string>;
+}
+
 function entityGroupKey(
   record: OnchainMuseumRecord,
-  creators: ReadonlySet<string>,
-  held: ReadonlySet<string>
+  { creators, held, lots }: EntityRoles
 ): string | null {
   if (record.profile === null || familyOf(record) !== "PRV_ENTITY") return null;
   const { kind } = record.profile;
@@ -215,6 +224,7 @@ function entityGroupKey(
     return held.has(record.subjectId) ? "collection" : "project";
   }
   if (kind === "set") {
+    if (lots.has(record.subjectId)) return "lot";
     return identifiersOf(record, "accession_number").length > 0
       ? "accession"
       : "acquisition";
@@ -222,13 +232,29 @@ function entityGroupKey(
   return kind;
 }
 
-/** Agents a work is created by, and collections something holds. */
+function isLot(record: OnchainMuseumRecord, graph: Graph): boolean {
+  const members = bodyOf(record)["members"];
+  return (
+    record.profile?.kind === "set" &&
+    Array.isArray(members) &&
+    members.length > 0 &&
+    members.every((member) => {
+      const id = graph.refSubject(member);
+      const item = id === null ? undefined : graph.bySubject.get(id);
+      return item?.profile?.kind === "object";
+    })
+  );
+}
+
 function entityRoles(
   records: readonly OnchainMuseumRecord[],
   graph: Graph
-): { creators: Set<string>; held: Set<string> } {
+): EntityRoles {
   const creators = new Set<string>();
   const held = new Set<string>();
+  const lots = new Set(
+    records.filter((record) => isLot(record, graph)).map((r) => r.subjectId)
+  );
   for (const record of records) {
     if (record.profile?.kind !== "work" || familyOf(record) !== "PRV_ENTITY") {
       continue;
@@ -255,7 +281,7 @@ function entityRoles(
       }
     }
   }
-  return { creators, held };
+  return { creators, held, lots };
 }
 
 interface Labels {
@@ -424,11 +450,11 @@ export function buildOnchainMuseumView(
 ): OnchainMuseumView {
   const { records } = snapshot;
   const graph = buildGraph(snapshot);
-  const { creators, held } = entityRoles(records, graph);
+  const roles = entityRoles(records, graph);
   const groupKeys = new Map<string, string | null>();
   const groupKeyOf = (record: OnchainMuseumRecord) => {
     if (!groupKeys.has(record.subjectId)) {
-      groupKeys.set(record.subjectId, entityGroupKey(record, creators, held));
+      groupKeys.set(record.subjectId, entityGroupKey(record, roles));
     }
     return groupKeys.get(record.subjectId) ?? null;
   };
