@@ -73,29 +73,6 @@ const manifest = file(
 );
 
 const CATALOG_ID = "6529NM-PUBCAT-test";
-const catalog = {
-  catalog_id: CATALOG_ID,
-  assembly_documents: [
-    {
-      path: manifestPath,
-      sha256: `sha256:${manifest.digest}`,
-      file_size: manifest.bytes.length,
-    },
-  ],
-  media_assets: [
-    {
-      path: imagePath(640),
-      sha256: `sha256:${image640.digest}`,
-      file_size: image640.bytes.length,
-    },
-    {
-      path: imagePath(1280),
-      sha256: `sha256:${image1280.digest}`,
-      file_size: image1280.bytes.length,
-    },
-  ],
-};
-
 function indexOf(
   files: Record<string, { sha256: string; bytes: number; cid: string }>
 ) {
@@ -166,11 +143,9 @@ describe("cidFromText", () => {
 });
 
 describe("loadOnchainMedia", () => {
-  it("verifies the index, cross-checks the catalog and reads the manifest", async () => {
+  it("verifies the index against its CID and reads the manifest", async () => {
     const media = await loadOnchainMedia(
       [release(1, "0x"), release(3, goodIndex.cid)],
-      catalog,
-      CATALOG_ID,
       fetcher({
         [goodIndex.cid.toLowerCase()]: goodIndex.bytes,
         [manifest.cid.toLowerCase()]: manifest.bytes,
@@ -180,8 +155,6 @@ describe("loadOnchainMedia", () => {
       state: "verified",
       releaseId: 3,
       fileCount: 3,
-      catalogMatches: 3,
-      catalogMismatches: [],
       cidMismatches: [],
     });
     expect(media.manifests).toEqual([
@@ -217,15 +190,13 @@ describe("loadOnchainMedia", () => {
   it("refuses an index whose bytes do not match its CID", async () => {
     const media = await loadOnchainMedia(
       [release(3, goodIndex.cid)],
-      catalog,
-      CATALOG_ID,
       fetcher({ [goodIndex.cid.toLowerCase()]: encoder.encode("{}") })
     );
     expect(media.index.state).toBe("mismatch");
     expect(media.images).toEqual({});
   });
 
-  it("drops index entries that disagree with the catalog or their CID", async () => {
+  it("drops index entries whose raw CID names other bytes", async () => {
     const forged = indexOf({
       [manifestPath]: {
         sha256: manifest.digest,
@@ -245,26 +216,36 @@ describe("loadOnchainMedia", () => {
     });
     const media = await loadOnchainMedia(
       [release(3, forged.cid)],
-      catalog,
-      CATALOG_ID,
       fetcher({
         [forged.cid.toLowerCase()]: forged.bytes,
         [manifest.cid.toLowerCase()]: manifest.bytes,
       })
     );
-    expect(media.index.catalogMismatches).toEqual([imagePath(640)]);
     expect(media.index.cidMismatches).toEqual([imagePath(1280)]);
-    // The manifest still verifies, but no derivative survives.
+    // The manifest still verifies, but no derivative survives: the 640 px
+    // entry names a SHA-256 the manifest does not, the 1280 px one is dropped.
     expect(media.images).toEqual({});
   });
 
-  it("reports no index when no release names one", async () => {
-    const media = await loadOnchainMedia(
-      [release(1, "0x")],
-      catalog,
-      CATALOG_ID,
-      fetcher({})
+  it("refuses an index that is not in RFC 8785 form", async () => {
+    const pretty = file(
+      encoder.encode(
+        JSON.stringify(
+          JSON.parse(new TextDecoder().decode(goodIndex.bytes)),
+          null,
+          2
+        )
+      )
     );
+    const media = await loadOnchainMedia(
+      [release(3, pretty.cid)],
+      fetcher({ [pretty.cid.toLowerCase()]: pretty.bytes })
+    );
+    expect(media.index.state).toBe("mismatch");
+  });
+
+  it("reports no index when no release names one", async () => {
+    const media = await loadOnchainMedia([release(1, "0x")], fetcher({}));
     expect(media.index.state).toBe("absent");
   });
 });

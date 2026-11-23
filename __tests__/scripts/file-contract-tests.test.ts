@@ -87,6 +87,15 @@ describe("filesystem contract selection", () => {
     ]);
   });
 
+  it("selects the startup script's hash pin when a script in public/validator changes", () => {
+    expect(
+      selectFileContractTests(["public/validator/cloud-init-v1.sh"])
+    ).toEqual(["__tests__/lib/validator-page/cloudInit.test.ts"]);
+    expect(
+      selectFileContractTests(["public/validator/app-today.webp"])
+    ).toEqual([]);
+  });
+
   it("selects the first-load budget contract when the budget file changes", () => {
     expect(selectFileContractTests(["scripts/perf-budget.json"])).toEqual([
       "__tests__/scripts/perf-budget.test.ts",
