@@ -5,6 +5,7 @@ import {
   HASH_ALGORITHM_SHA256,
   LF_NORMALIZED_LITERAL,
   RAW_BYTES_LF_LITERAL,
+  RAW_BYTES_LITERAL,
   RFC8785_JCS_LITERAL,
 } from "./constants";
 import { canonicalizeJson, canonicalizeJsonBytes } from "./jcs";
@@ -108,6 +109,10 @@ function canonicalBytes(
   if (literal === RFC8785_JCS_LITERAL) return jcsBytes(input);
   if (literal === LF_NORMALIZED_LITERAL || literal === RAW_BYTES_LF_LITERAL) {
     return lfBytes(input);
+  }
+  if (literal === RAW_BYTES_LITERAL) {
+    if (input.kind === "bytes") return input.bytes;
+    return input.kind === "text" ? encoder.encode(input.text) : "unsupported";
   }
   return "unsupported";
 }

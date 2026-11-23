@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/config/registries.ts at commit 8496bfbb6347c265ec74c7e361612d97ccdaf731.
+// Copied from 6529-Collections/6529-provenance-app src/config/registries.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import type { Address } from "viem";
@@ -16,7 +16,7 @@ export interface RegistryPin {
   name: string;
 }
 
-/** Safe v1.4.1 test Safe, 2 of 3, that owns both Sepolia registries. */
+/** Safe v1.4.1 test Safe, 2 of 3, that owns the three Sepolia registries. */
 export const SEPOLIA_TEST_SAFE: Address = "0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68";
 
 export const registryPins: readonly RegistryPin[] = [
@@ -31,6 +31,12 @@ export const registryPins: readonly RegistryPin[] = [
     registry: "0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850",
     safe: SEPOLIA_TEST_SAFE,
     name: "Sepolia Museum catalog registry",
+  },
+  {
+    chainId: 11155111,
+    registry: "0xFF4d580292E85A9532E7653fadFD53F97cdA6B5e",
+    safe: SEPOLIA_TEST_SAFE,
+    name: "Sepolia Museum profile registry",
   },
 ];
 

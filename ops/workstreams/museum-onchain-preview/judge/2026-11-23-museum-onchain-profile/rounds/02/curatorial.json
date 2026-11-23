@@ -1,0 +1,518 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "ad734e90af",
+  "coverage": [
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-portrait-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-portrait-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-portrait-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-noimage-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-noimage-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-noimage-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x660601ba82f5de584629bb9d5f4fa3bc77a8fa149fab40bd9204c75330e6e171",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-object-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x660601ba82f5de584629bb9d5f4fa3bc77a8fa149fab40bd9204c75330e6e171",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-object-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x660601ba82f5de584629bb9d5f4fa3bc77a8fa149fab40bd9204c75330e6e171",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-object-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x27ef6b7d3082c4ca26fc1cbab18ef8ba7066658bd07f7a482573d968fce4db88",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-digital-object-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x27ef6b7d3082c4ca26fc1cbab18ef8ba7066658bd07f7a482573d968fce4db88",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-digital-object-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x27ef6b7d3082c4ca26fc1cbab18ef8ba7066658bd07f7a482573d968fce4db88",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-digital-object-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xc81ac531cb09ca290458992c05dd822c115e38a09d196513f8dc5a736bd02b03",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xc81ac531cb09ca290458992c05dd822c115e38a09d196513f8dc5a736bd02b03",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xc81ac531cb09ca290458992c05dd822c115e38a09d196513f8dc5a736bd02b03",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xb75094e65e53cf03c43558ca8c5772bcf0eb6b577b5bc34d0387bcc2ba771512",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-rights-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xb75094e65e53cf03c43558ca8c5772bcf0eb6b577b5bc34d0387bcc2ba771512",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-rights-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xb75094e65e53cf03c43558ca8c5772bcf0eb6b577b5bc34d0387bcc2ba771512",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-rights-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5d1c1d501d1fd3c522748bb04d249bf6cded2a59e952223390312a62313503ed",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-decision-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5d1c1d501d1fd3c522748bb04d249bf6cded2a59e952223390312a62313503ed",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-decision-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5d1c1d501d1fd3c522748bb04d249bf6cded2a59e952223390312a62313503ed",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-decision-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xab30738b6d04e421c7d674ac0bb251c77c4aa9963b35da8847310a68908d5ed8",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-observation-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xab30738b6d04e421c7d674ac0bb251c77c4aa9963b35da8847310a68908d5ed8",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-observation-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xab30738b6d04e421c7d674ac0bb251c77c4aa9963b35da8847310a68908d5ed8",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-observation-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x7c4f3fef02861d9e5d0e4d4508e2a08905d8e69161b4eb511b27301ff2598964",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-declaration-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x7c4f3fef02861d9e5d0e4d4508e2a08905d8e69161b4eb511b27301ff2598964",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-declaration-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x7c4f3fef02861d9e5d0e4d4508e2a08905d8e69161b4eb511b27301ff2598964",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-declaration-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xdf7210988d05711157492a2ba0358cd9d3b8c424a6bffd98dbb9ba6b7a9c1521",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xdf7210988d05711157492a2ba0358cd9d3b8c424a6bffd98dbb9ba6b7a9c1521",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xdf7210988d05711157492a2ba0358cd9d3b8c424a6bffd98dbb9ba6b7a9c1521",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x958cf32f4402d4bd580ebd1357016522b88baf58d639288486d6f6a2e52bd97a",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x958cf32f4402d4bd580ebd1357016522b88baf58d639288486d6f6a2e52bd97a",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x958cf32f4402d4bd580ebd1357016522b88baf58d639288486d6f6a2e52bd97a",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/index-1440x1000-01.png",
+        "evidence/index-1440x1000-02.png",
+        "evidence/record-work-1440x1000-01.png"
+      ],
+      "findings": [
+        "C-001"
+      ],
+      "note": "Index leads with a plain holdings summary and accession groups with dated captions; finding and reading a work is clear."
+    },
+    "J14": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/contact-sheet-1440x1000.png",
+        "evidence/index-1440x1000-02.png",
+        "evidence/record-artist-1440x1000-01.png",
+        "evidence/record-work-noimage-1440x1000-01.png"
+      ],
+      "findings": [
+        "C-001",
+        "C-002",
+        "C-003",
+        "C-005",
+        "C-006"
+      ],
+      "note": "Accession-grouped index, consistent caption fields and a catalogued artist page read as a publication; two P3 caption details remain."
+    }
+  },
+  "checks": {
+    "M1": "pass",
+    "M2": "pass",
+    "M3": "pass",
+    "M4": "pass"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": [
+        "J14",
+        "J01"
+      ],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain · default · 1440x1000, 820x1000, 390x844 · en-US",
+      "evidence": "evidence/index-1440x1000-02.png",
+      "observation": "Index now groups the 13 works under three accession headings with counts; photographs and the Molnar work carry artist and year; masonry columns leave no band under a row. Casey Reas works list artist only because the record's date is not established.",
+      "consequence": "None remaining for this finding.",
+      "change": "None.",
+      "acceptance_check": "Met in substance: accession groupings, artist and year where the record has one, no empty band under a row.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-002",
+      "targets": [
+        "J14"
+      ],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51 · default · all viewports · en-US",
+      "evidence": "evidence/text/record-artist-1440x1000.txt",
+      "observation": "Artist page lists the seven works under 'Works (7)' with accession numbers, separate from 'Creator of (5)'; count matches the index. Years are absent where the record gives none.",
+      "consequence": "None remaining for this finding.",
+      "change": "None.",
+      "acceptance_check": "Met: works with accession numbers under a works heading, projects separate, count 7 matches the index.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-003",
+      "targets": [
+        "J14",
+        "M2"
+      ],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817 and the work records · default · all viewports · en-US",
+      "evidence": "evidence/text/record-work-portrait-1440x1000.txt",
+      "observation": "Take the Key!, Themes and Variations #210 and CENTURY #31 show Date, Medium, Note on the medium, Credit line in the same order, with explicit 'Not established' or 'Not recorded' values; caveats sit in a separate 'Note on the medium' row.",
+      "consequence": "None remaining for this finding.",
+      "change": "None.",
+      "acceptance_check": "Met: same labelled fields in the same order; no Medium value contains a caveat.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-004",
+      "targets": [
+        "J14"
+      ],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain/texts · default · all viewports · en-US",
+      "evidence": "evidence/text/texts-1440x1000.txt",
+      "observation": "Each text row now shows its kind (Essay, Catalogue entry, Report) and within each accession group essays appear before catalogue entries and reports; 'The System in Seven States' is marked Essay.",
+      "consequence": "None remaining for this finding.",
+      "change": "None.",
+      "acceptance_check": "Met: each row shows its kind, essays precede reports, and the named essay is identifiable as an essay.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-005",
+      "targets": [
+        "J14"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290 · default · 1440x1000 · en-US",
+      "evidence": "evidence/record-work-1440x1000-01.png",
+      "observation": "The Molnar caption names artist, title, year, venue and licence but still does not say the image is a still of a live generator.",
+      "consequence": "Minor: a visitor may take the still for the work.",
+      "change": "Add 'Still image of the live work' to the caption.",
+      "acceptance_check": "Caption names the image as a still of the live work.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "C-006",
+      "targets": [
+        "M2",
+        "J14"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da · default · all viewports · en-US",
+      "evidence": "evidence/record-work-noimage-1440x1000-01.png",
+      "observation": "CENTURY #31 shows Date 'Not established in the Museum's record' while the Museum's own text for it is titled 'Casey Reas, CENTURY #31, 2021' and is listed on the artist page.",
+      "consequence": "A reader sees a date the Museum prints elsewhere reported as missing.",
+      "change": "Show the date from the record if one exists, or state that the catalogue text gives 2021.",
+      "acceptance_check": "The work record's Date matches the date in its catalogue entry title or says why it differs.",
+      "admission": "regression",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Principal images shown whole at native aspect ratio (square Molnar, portrait Take the Key!) at all three widths",
+    "Generative works with no still say so plainly and show no fallback panel",
+    "Test-registry banner on every page keeps holdings and status honest",
+    "'Not in the collection' stated on the record of selected works",
+    "Credit line, rights and license wording on work records",
+    "Essay text set in a readable measure with the verification line above it",
+    "Texts list showing kind per row with essays first",
+    "Honest test-fixture banner on every page",
+    "Index summary sentence stating 13 works held and 16 selected",
+    "Accession-grouped index with counts and year captions",
+    "Caption fields in one order with explicit 'Not recorded' values",
+    "Separate 'Note on the medium' row"
+  ]
+}

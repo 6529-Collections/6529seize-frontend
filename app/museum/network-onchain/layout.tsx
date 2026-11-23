@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { connection } from "next/server";
 import type { ReactNode } from "react";
+import { getMuseumOnchainFixtureRoot } from "@/config/museumPublicationEnv.server";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { onchainMuseumMetadata } from "./_components/metadata";
@@ -13,8 +15,13 @@ export const metadata: Metadata = onchainMuseumMetadata(
   t(DEFAULT_LOCALE, "museum.onchain.description")
 );
 
-export default function OnchainMuseumLayout({
+export default async function OnchainMuseumLayout({
   children,
 }: Readonly<{ children: ReactNode }>) {
-  return <OnchainFrame>{children}</OnchainFrame>;
+  await connection();
+  return (
+    <OnchainFrame fixture={getMuseumOnchainFixtureRoot() !== null}>
+      {children}
+    </OnchainFrame>
+  );
 }
