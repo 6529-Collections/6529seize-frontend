@@ -43,6 +43,7 @@ function usePreflight(
   // The result belongs to this request and signer (and round).
   const result = useCheckResult(
     `${requestKey}:${signer}`,
+    client,
     client
       ? async (): Promise<Check> => {
           try {

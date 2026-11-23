@@ -120,6 +120,7 @@ function useCallCheck(request: TransactionRequest, round: number): CallCheck {
   const { transaction } = request;
   const result = useCheckResult(
     requestKey(request),
+    client,
     client ? () => runCallCheck(client, transaction) : null,
     round
   );
@@ -154,6 +155,7 @@ function usePriceCheck(
   const readable = hasReadablePrice(description);
   const result = useCheckResult(
     requestKey(request),
+    client,
     client && readable ? () => runPriceCheck(client, description) : null,
     round
   );
@@ -192,6 +194,7 @@ function useSenderCheck(
   const needed = isPublisherCall(description);
   const result = useCheckResult(
     requestKey(request),
+    client,
     client && needed ? () => runSenderCheck(client, request) : null,
     round
   );
