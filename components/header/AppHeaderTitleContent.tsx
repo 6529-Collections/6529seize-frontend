@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRightIcon } from "@heroicons/react/24/outline";
 import { WaveTrustSignals } from "@/components/waves/WaveTrustSignals";
 import type { ReactNode } from "react";
 import { PlaintextDmEncryptionNotice } from "@/components/e2ee/plaintext/PlaintextDmEncryptionNotice";
@@ -101,14 +100,8 @@ export default function HeaderTitleContent({
                 className={`tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-font-medium tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${phoneWave ? "tw-min-h-11" : "tw-min-h-6"}`}
               >
                 {phoneWave ? (
-                  <span className="tw-flex tw-w-full tw-min-w-0 tw-items-center tw-gap-1">
-                    <span className="tw-line-clamp-2 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-leading-tight">
-                      {displayWave.name}
-                    </span>
-                    <ChevronRightIcon
-                      className="tw-size-3.5 tw-shrink-0 tw-text-iron-400"
-                      aria-hidden="true"
-                    />
+                  <span className="tw-line-clamp-2 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-leading-tight">
+                    {displayWave.name}
                   </span>
                 ) : (
                   <span className="tw-w-full tw-truncate tw-text-sm tw-font-medium">

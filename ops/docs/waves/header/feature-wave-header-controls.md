@@ -43,7 +43,7 @@ use up to two compact columns, with each label beside its icon and value.
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
 
-On phones, select the wave name or its chevron to open `About` as a full-screen
+On phones, select the wave name to open `About` as a full-screen
 view sliding in from the right. Use the top-left Back chevron, swipe right,
 press Escape, or use the device's Back action to return to the thread with its
 selected section and scroll position preserved. Vertical gestures scroll the
@@ -72,7 +72,7 @@ visible beside the main actions. Columns of 640–767px keep the description tea
 with compact submission icons; wider columns restore the submission labels.
 
 On phones, the conversation has one top bar with Back, the wave avatar and
-available score, the name and details chevron, `Join` when available, and
+available score tucked beneath the avatar, the wave name, `Join` when available, and
 `More wave actions`. The site menu and global search are on the Waves list.
 `More wave actions` opens a sheet with Wave details, message search, the
 available submission or `How to Submit` controls, time-zone options, sharing,

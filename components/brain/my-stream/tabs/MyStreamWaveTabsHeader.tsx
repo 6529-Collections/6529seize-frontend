@@ -12,7 +12,6 @@ import {
   ArrowLeftIcon,
   CheckIcon,
   ChevronDoubleLeftIcon,
-  ChevronRightIcon,
   InformationCircleIcon,
   ChevronDownIcon,
   LinkIcon,
@@ -257,18 +256,12 @@ function MyStreamWaveHeaderIdentity({
               aria-label={t(locale, "waves.information.open", {
                 name: wave.name,
               })}
-              className={`tw-max-w-full tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-medium tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${isPhoneWave ? "tw-flex tw-min-h-11 tw-items-center tw-gap-1 tw-leading-tight" : "tw-block tw-min-h-6 tw-truncate tw-leading-6"}`}
+              className={`tw-max-w-full tw-rounded tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-sm tw-font-medium tw-text-inherit focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${isPhoneWave ? "tw-flex tw-min-h-11 tw-items-center tw-leading-tight" : "tw-block tw-min-h-6 tw-truncate tw-leading-6"}`}
             >
               {isPhoneWave ? (
-                <>
-                  <span className="tw-line-clamp-2 tw-min-w-0 tw-break-words">
-                    {wave.name}
-                  </span>
-                  <ChevronRightIcon
-                    className="tw-size-3.5 tw-shrink-0 tw-text-iron-400"
-                    aria-hidden="true"
-                  />
-                </>
+                <span className="tw-line-clamp-2 tw-min-w-0 tw-break-words">
+                  {wave.name}
+                </span>
               ) : (
                 wave.name
               )}
