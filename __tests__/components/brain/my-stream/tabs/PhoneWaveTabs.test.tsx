@@ -20,6 +20,71 @@ const EXAMPLE_TABS: PhoneWaveTab[] = [
 ];
 
 describe("PhoneWaveTabs", () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it.each([4, 5])(
+    "shows all %i sections with Chat first and no More",
+    (count) => {
+      const tabs: PhoneWaveTab[] = [
+        { key: "faq", label: "FAQ", onSelect: jest.fn() },
+        { key: "settings", label: "Settings", onSelect: jest.fn() },
+        EXAMPLE_TABS[0]!,
+        EXAMPLE_TABS.at(-1)!,
+        { key: "curation:art", label: "Art", onSelect: jest.fn() },
+      ].slice(0, count);
+      const settingsRef = jest.fn();
+      render(
+        <PhoneWaveTabs
+          tabs={tabs}
+          primaryKeys={PRIMARY_KEYS}
+          activeKey="settings"
+          settingsKey="settings"
+          settingsRef={settingsRef}
+        />
+      );
+
+      const buttons = screen.getAllByRole("button");
+      expect(buttons).toHaveLength(count);
+      expect(buttons[0]).toHaveTextContent("Chat");
+      expect(screen.queryByRole("button", { name: "More" })).toBeNull();
+      const settings = screen.getByRole("button", { name: "Settings" });
+      expect(settings).toHaveAttribute("aria-current", "true");
+      expect(settingsRef).toHaveBeenLastCalledWith(settings);
+    }
+  );
+
+  it("keeps curations visible ahead of reference tabs regardless of their position", () => {
+    const manage = jest.fn();
+    const select = jest.fn();
+    const tabs: PhoneWaveTab[] = [
+      { key: "faq", label: "FAQ", onSelect: jest.fn() },
+      { key: "settings", label: "Settings", onSelect: jest.fn() },
+      {
+        key: "curation:art",
+        label: "Art",
+        onSelect: select,
+        action: <button onClick={manage}>Manage Art</button>,
+      },
+      EXAMPLE_TABS[0]!,
+      { key: "curation:photos", label: "Photos", onSelect: jest.fn() },
+      EXAMPLE_TABS.at(-1)!,
+    ];
+    render(
+      <PhoneWaveTabs tabs={tabs} primaryKeys={PRIMARY_KEYS} activeKey="chat" />
+    );
+
+    const art = screen.getByRole("button", { name: "Art", exact: true });
+    fireEvent.click(art);
+    expect(select).toHaveBeenCalledTimes(1);
+    const action = screen.getByRole("button", { name: "Manage Art" });
+    expect(art.contains(action)).toBe(false);
+    fireEvent.click(action);
+    expect(manage).toHaveBeenCalledTimes(1);
+    expect(screen.getByRole("button", { name: "Photos" })).toBeVisible();
+    expect(screen.queryByRole("button", { name: "FAQ" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Settings" })).toBeNull();
+  });
+
   it("keeps the only section compact and selected", () => {
     render(
       <PhoneWaveTabs
@@ -52,10 +117,39 @@ describe("PhoneWaveTabs", () => {
     );
     fireEvent.click(screen.getByRole("button", { name: "More" }));
     const sheet = await screen.findByRole("dialog", { name: "Wave sections" });
-    expect(within(sheet).getByRole("button", { name: "Polls" })).toBeVisible();
-    expect(within(sheet).getByRole("button", { name: "FAQ" })).toBeVisible();
+    expect(
+      within(sheet)
+        .getAllByRole("button")
+        .filter((button) => button.textContent)
+        .map((button) => button.textContent)
+    ).toEqual(["Polls", "FAQ", "Decisions4"]);
     fireEvent.click(within(sheet).getByRole("button", { name: "Decisions 4" }));
     expect(EXAMPLE_TABS.at(-1)?.onSelect).toHaveBeenCalledTimes(1);
+  });
+
+  it("lists overflowing curations before reference and setup sections", async () => {
+    const tabs: PhoneWaveTab[] = [
+      EXAMPLE_TABS[5]!,
+      ...EXAMPLE_TABS.filter((tab) => tab.key !== "faq"),
+      { key: "curation:art", label: "Art", onSelect: jest.fn() },
+    ];
+    render(
+      <PhoneWaveTabs
+        tabs={tabs}
+        primaryKeys={PRIMARY_KEYS}
+        activeKey="curation:art"
+      />
+    );
+    const more = screen.getByRole("button", { name: "Art", exact: true });
+    expect(more).toHaveAttribute("aria-current", "true");
+    fireEvent.click(more);
+    const sheet = await screen.findByRole("dialog", { name: "Wave sections" });
+    expect(
+      within(sheet)
+        .getAllByRole("button")
+        .filter((button) => button.textContent)
+        .map((button) => button.textContent)
+    ).toEqual(["Polls", "Art", "FAQ", "Decisions4"]);
   });
 
   it("shows the active overflow label and decision count on the trigger", () => {

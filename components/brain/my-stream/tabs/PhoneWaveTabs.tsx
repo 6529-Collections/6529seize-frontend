@@ -11,7 +11,8 @@ import { t } from "@/i18n/messages";
 
 const TAB_LAYOUT =
   "tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-0.5 tw-py-1.5 tw-text-center tw-text-xs tw-leading-4";
-const TAB_LABEL = "tw-min-w-0 tw-whitespace-normal tw-break-words";
+const TAB_LABEL =
+  "tw-line-clamp-2 tw-min-w-0 tw-whitespace-normal tw-break-words";
 
 export interface PhoneWaveTab {
   readonly key: string;
@@ -31,39 +32,49 @@ interface PhoneWaveTabsProps {
   readonly primaryKeys: readonly string[];
   readonly activeKey: string;
   readonly settingsRef?: Ref<HTMLButtonElement> | undefined;
+  readonly settingsKey?: string | undefined;
 }
 
 function TabBadge({ tab }: { readonly tab: PhoneWaveTab }) {
   return tab.badge ?? <TabCountBadge count={tab.badgeCount} variant="wave" />;
 }
 
-/** Wave sections beyond the four primary destinations stay reachable in one sheet. */
+/** Small waves show every section; larger waves keep everyday destinations first. */
 export default function PhoneWaveTabs({
   tabs,
   primaryKeys,
   activeKey,
   settingsRef,
+  settingsKey,
 }: PhoneWaveTabsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const dialogId = useId();
   const locale = useBrowserLocale();
   const more = t(locale, "wave.navigation.more");
   const sections = t(locale, "wave.navigation.waveSections");
-  const primary = primaryKeys
-    .flatMap((key) => {
-      const tab = tabs.find((option) => option.key === key);
-      return tab ? [tab] : [];
-    })
-    .slice(0, 4);
-  const secondary = tabs.filter(
-    (tab) => !primary.some((visible) => visible.key === tab.key)
+  const everyday = primaryKeys.flatMap((key) => {
+    const tab = tabs.find((option) => option.key === key);
+    return tab ? [tab] : [];
+  });
+  everyday.push(
+    ...tabs.filter(
+      (tab) =>
+        (tab.curationId !== undefined || tab.key.startsWith("curation:")) &&
+        !primaryKeys.includes(tab.key)
+    )
   );
+  const everydayKeys = new Set(everyday.map((tab) => tab.key));
+  const reference = tabs.filter((tab) => !everydayKeys.has(tab.key));
+  const showAll = tabs.length <= 5;
+  const primary = showAll ? [...everyday, ...reference] : everyday.slice(0, 4);
+  const secondary = showAll ? [] : [...everyday.slice(4), ...reference];
   const activeSecondary = secondary.find((tab) => tab.key === activeKey);
   const hasTabPanels = primary.some((tab) => tab.panelId);
   const primaryTabWidth =
     tabs.length === 1
-      ? "tw-min-w-11 tw-flex-none tw-px-3"
-      : "tw-min-w-0 tw-flex-auto tw-px-1";
+      ? "tw-min-w-11 tw-flex-none"
+      : "tw-min-w-0 tw-flex-1 tw-basis-0";
+  const primaryTabPadding = tabs.length === 1 ? "tw-px-3" : "tw-px-0";
 
   return (
     <>
@@ -78,23 +89,44 @@ export default function PhoneWaveTabs({
         >
           {primary.map((tab) => {
             const selected = tab.key === activeKey;
-            return (
+            const hasAction =
+              tab.action !== null &&
+              tab.action !== undefined &&
+              tab.action !== false;
+            const buttonLayout = hasAction
+              ? "tw-min-w-0 tw-flex-1 tw-px-0"
+              : `${primaryTabWidth} ${primaryTabPadding}`;
+            const button = (
               <TabButton
                 key={tab.key}
+                ref={tab.key === settingsKey ? settingsRef : undefined}
                 type="button"
                 role={tab.panelId ? "tab" : undefined}
                 aria-selected={tab.panelId ? selected : undefined}
                 aria-controls={tab.panelId}
                 aria-current={!tab.panelId && selected ? "true" : undefined}
                 data-wave-tab-value={tab.key.toLowerCase()}
-                className={`${TAB_LAYOUT} ${primaryTabWidth} ${getUnderlineTabClasses({ active: selected })}`}
+                data-curation-id={tab.curationId}
+                className={`${TAB_LAYOUT} ${buttonLayout} ${getUnderlineTabClasses({ active: selected })}`}
                 onClick={tab.onSelect}
                 onPointerEnter={tab.onIntent}
                 onFocus={tab.onIntent}
               >
+                {tab.leadingIcon}
                 <span className={TAB_LABEL}>{tab.label}</span>
                 <TabBadge tab={tab} />
               </TabButton>
+            );
+            return hasAction ? (
+              <div
+                key={tab.key}
+                className={`tw-flex tw-items-center ${primaryTabWidth}`}
+              >
+                {button}
+                {tab.action}
+              </div>
+            ) : (
+              button
             );
           })}
         </div>
@@ -110,9 +142,7 @@ export default function PhoneWaveTabs({
             className={`${TAB_LAYOUT} tw-w-1/4 tw-min-w-0 tw-flex-none tw-px-1 ${getUnderlineTabClasses({ active: Boolean(activeSecondary) })}`}
             onClick={() => setIsOpen(true)}
           >
-            <span className={`tw-line-clamp-2 ${TAB_LABEL}`}>
-              {activeSecondary?.label ?? more}
-            </span>
+            <span className={TAB_LABEL}>{activeSecondary?.label ?? more}</span>
             {activeSecondary && <TabBadge tab={activeSecondary} />}
             <ChevronDownIcon
               aria-hidden="true"

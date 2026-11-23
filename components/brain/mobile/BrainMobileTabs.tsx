@@ -523,6 +523,7 @@ const BrainMobileTabs: React.FC<BrainMobileTabsProps> = ({
         primaryKeys={PHONE_PRIMARY_VIEWS}
         activeKey={tabs.find((tab) => tab.active)?.key ?? ""}
         settingsRef={showSettingsTab ? setConfigurationButtonRef : undefined}
+        settingsKey={BrainView.CONFIGURATION}
       />
     );
   };

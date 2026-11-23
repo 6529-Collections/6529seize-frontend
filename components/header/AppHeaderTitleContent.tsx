@@ -100,7 +100,7 @@ export default function HeaderTitleContent({
                 className={`tw-flex tw-w-full tw-min-w-0 tw-flex-col tw-items-start tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-font-medium tw-text-iron-50 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${phoneWave ? "tw-min-h-11" : "tw-min-h-6"}`}
               >
                 {phoneWave ? (
-                  <span className="tw-line-clamp-2 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-leading-tight">
+                  <span className="tw-line-clamp-2 tw-min-w-0 tw-break-words tw-text-sm tw-font-medium tw-leading-[18px]">
                     {displayWave.name}
                   </span>
                 ) : (

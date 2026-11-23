@@ -7,7 +7,7 @@ wave sections such as `Chat`, `Leaderboard`, `Sales`, `Winners`, and other
 wave-dependent views. Named curations also appear here: each opens a selected
 collection of posts from the wave. The selected decision shares this row with Chat and renders directly below
 it. Published decisions use the same row whether selected by default or an
-explicit link. The order is **Chat**, decision views, **Settings**, then
+explicit link. On wider layouts, the order is **Chat**, decision views, **Settings**, then
 **Decisions** when available, then named curations. **Settings** is the last
 decision tab. **Votes** contains **My Votes**, **All votes**, and **Activity**,
 all tied to the selected decision. See [Decisions](../competitions/feature-competitions.md)
@@ -171,12 +171,15 @@ A divider separates the wave identity and header actions from the main tab row.
 - Eligible readers can use `View results` on an open unanswered poll to inspect
   counts and percentages before voting, then return to `Vote` while the poll is
   still open.
-- Phones show Chat and up to three other primary tabs. On Main Stage,
-  these are `Chat`, `Leaderboard`, `Winners`, and `Votes` when available.
-  `More` opens the remaining sections, including FAQ, Settings and Decisions
-  with its count. When a section in the sheet is active, its name appears
-  on the More button. Eligible creation actions are in `More wave actions`
-  in the header.
+- Phones show all available sections when there are five or fewer, with `Chat`
+  first and no `More` button. For larger waves, the row shows `Chat` and up to
+  three other everyday sections, including Leaderboard, Winners, Votes, Polls,
+  Sales and named curations as available. Reference and setup sections such as
+  FAQ, Settings and Decisions stay in `More`. Everyday sections that do not fit
+  appear first in that sheet, before reference and setup sections.
+  When a section in the sheet is active, its name and available count appear
+  in the active More slot. Visible web curation tabs retain their management
+  controls. Eligible creation actions are in `More wave actions` in the header.
 - On wider layouts, swipe or scroll horizontally through overflowing tabs.
   The edge cue follows the scroll position, and the active tab scrolls into
   view when it is hidden.

@@ -73,7 +73,8 @@ with compact submission icons; wider columns restore the submission labels.
 
 On phones, the conversation has one top bar with Back, the wave avatar and
 available score tucked beneath the avatar, the wave name, `Join` when available, and
-`More wave actions`. The site menu and global search are on the Waves list.
+`More wave actions`. The wave name uses up to two lines, with an ellipsis only
+when it exceeds the second line. The site menu and global search are on the Waves list.
 `More wave actions` opens a sheet with Wave details, message search, the
 available submission or `How to Submit` controls, time-zone options, sharing,
 and the eligible `New curation` and `New subwave` actions. Direct messages keep

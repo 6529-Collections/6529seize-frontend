@@ -5878,7 +5878,18 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         .poll(() =>
           title.evaluate((element) => element.getBoundingClientRect().height)
         )
-        .toBe(24);
+        .toBe(width < 768 ? 44 : 24);
+      if (width < 768) {
+        const text = title.locator("span").first();
+        await expect(text).toHaveCSS("font-size", "14px");
+        await expect(text).toHaveCSS("line-height", "18px");
+        await expect(text).toHaveCSS("-webkit-line-clamp", "2");
+        await expect
+          .poll(() =>
+            text.evaluate((element) => element.getBoundingClientRect().height)
+          )
+          .toBe(36);
+      }
       await expect
         .poll(() =>
           parent.evaluate(
@@ -9817,6 +9828,106 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath("phone-wave-tabs-320.png"),
+      });
+    });
+
+    test(`shows five phone sections directly and overflows activities before setup (${surface})`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Phone tab roles and curation controls."
+      );
+      const app = surface !== "web";
+      const sandbox = await installCompetitionApi(page);
+      sandbox.clearCompetitions();
+      if (app) await installSurfaceSimulation(page.context(), surface, baseURL);
+      const curations = ["Art", "Photos", "Important", "Highlights"].map(
+        (name, index) => ({
+          id: `phone-role-${index}`,
+          name,
+          wave_id: WAVE,
+          group_id: composerSandboxConstants.previewGroupId,
+          created_at: 1,
+          updated_at: 1,
+          priority_order: index + 1,
+        })
+      );
+      let curationCount = 3;
+      await page.route(`**/api/waves/${WAVE}/curations`, (route) =>
+        route.fulfill({ json: curations.slice(0, curationCount) })
+      );
+      await page.setViewportSize({ width: 320, height: 844 });
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      await dismissNextDevTools(page);
+      const row = phoneWaveTabs(page);
+      const tabRole = app ? "button" : "tab";
+      await expect(row.getByRole(tabRole)).toHaveText([
+        "Chat",
+        "Art",
+        "Photos",
+        "Important",
+        "Decisions",
+      ]);
+      await expect(phoneWaveMore(page)).toHaveCount(0);
+      await expect(
+        row
+          .getByRole(tabRole, { name: "Chat", exact: true })
+          .locator("span")
+          .first()
+      ).toHaveCSS("height", "16px");
+      await expect(
+        row
+          .getByRole(tabRole, { name: "Decisions", exact: true })
+          .locator("span")
+          .first()
+      ).toHaveCSS("height", "16px");
+      await expectNoHorizontalOverflow(page);
+      await row.getByRole(tabRole, { name: "Photos", exact: true }).click();
+      await expect(page).toHaveURL(/curation=phone-role-1/);
+      if (!app) {
+        const curationMenu = row
+          .getByRole("tab", { name: "Art", exact: true })
+          .locator("..")
+          .getByRole("button", { name: "Curation options", exact: true });
+        await curationMenu.click();
+        await expect(
+          page.getByRole("menuitem", { name: "Edit Curation", exact: true })
+        ).toBeVisible();
+        await page.keyboard.press("Escape");
+        await expect(page.getByRole("menu")).toHaveCount(0);
+        await expect(curationMenu).toBeFocused();
+      }
+      await page.screenshot({
+        path: testInfo.outputPath("five-phone-sections.png"),
+        animations: "disabled",
+      });
+
+      await row.getByRole(tabRole, { name: "Chat", exact: true }).click();
+      await expect(page).not.toHaveURL(/curation=/);
+      curationCount = 4;
+      await page.reload();
+      await expect(
+        row.getByRole(tabRole).and(page.locator(":not([data-wave-phone-more])"))
+      ).toHaveText(["Chat", "Art", "Photos", "Important"]);
+      const more = phoneWaveMore(page);
+      await more.click();
+      const sections = phoneWaveSections(page);
+      await expect(sections.locator("[data-wave-tab-value]")).toHaveText([
+        "Highlights",
+        "Decisions",
+      ]);
+      await sections
+        .getByRole("button", { name: "Highlights", exact: true })
+        .click();
+      await expect(page).toHaveURL(/curation=phone-role-3/);
+      await expect(more).toHaveText("Highlights");
+      await expect(more).toHaveAttribute("aria-current", "true");
+      await expectNoHorizontalOverflow(page);
+      await page.screenshot({
+        path: testInfo.outputPath("six-phone-sections.png"),
+        animations: "disabled",
       });
     });
   }
