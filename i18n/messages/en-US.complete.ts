@@ -6,6 +6,7 @@ import { MUSEUM_MESSAGES } from "@/i18n/namespaces/museum";
 import { MUSEUM_ONCHAIN_MESSAGES } from "@/i18n/namespaces/museum-onchain";
 import { NETWORK_TDH_MESSAGES } from "@/i18n/namespaces/network-tdh";
 import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-tdh-consolidation";
+import { PROVENANCE_GOVERNANCE_MESSAGES } from "@/i18n/namespaces/provenance-governance";
 import { VALIDATOR_AUTHORIZE_MESSAGES } from "@/i18n/namespaces/validator-authorize";
 import { VALIDATOR_FILES_MESSAGES } from "@/i18n/namespaces/validator-files";
 
@@ -29,6 +30,7 @@ export const EN_US_MESSAGES = {
   ...MUSEUM_ONCHAIN_MESSAGES,
   ...NETWORK_TDH_MESSAGES,
   ...NETWORK_TDH_CONSOLIDATION_MESSAGES,
+  ...PROVENANCE_GOVERNANCE_MESSAGES,
   ...VALIDATOR_AUTHORIZE_MESSAGES,
   ...VALIDATOR_FILES_MESSAGES,
 } as const;

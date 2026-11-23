@@ -2071,6 +2071,10 @@
     "/preferences": {
       "classification": "auth"
     },
+    "/provenance/governance": {
+      "classification": "exempt",
+      "exemptReason": "Unlinked noindex tool for signers of the Sepolia test provenance registries' owner Safe; covered by the manual provenance-governance pack and Jest, not route sampling."
+    },
     "/rememes": {
       "classification": "crawlable",
       "family": "collections"

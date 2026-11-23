@@ -100,6 +100,7 @@ const READONLY_SPECS = {
   museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
   museumDataArchitecture: ["tests/museum/data-architecture-readonly.spec.ts"],
   museumRights: ["tests/museum/rights-readonly.spec.ts"],
+  provenanceGovernance: ["tests/provenance/governance-readonly.spec.ts"],
   museumOnchainPreview: [
     "tests/museum-onchain/onchain-preview-readonly.spec.ts",
   ],
@@ -402,6 +403,17 @@ const PACKS = [
     ),
     triggers: ["pr-ci", "manual"],
   }),
+  // Reads the live Sepolia registry and Safe from the browser, so it runs on
+  // request rather than gating PR CI on a public RPC endpoint.
+  {
+    ...localReadonlyPack(
+      "test:e2e:provenance-governance",
+      "Unlinked provenance governance page: Sepolia Safe reads and SafeTx building without a wallet.",
+      READONLY_SPECS.provenanceGovernance,
+      { timeoutMinutes: 15 }
+    ),
+    triggers: ["manual"],
+  },
   // Reads the live Sepolia registry and 6529 IPFS, so it runs on request
   // rather than gating PR CI on a public RPC endpoint.
   {
