@@ -6844,7 +6844,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(checkmark).toHaveCSS("opacity", "1");
     await row.hover();
     await expect(checkmark).toHaveCSS("opacity", "1");
-    await checkbox.check();
+    await row.click({ position: { x: 8, y: 8 } });
     await expect(
       panel.getByRole("button", { name: "Done", exact: true })
     ).toBeVisible();
@@ -6916,6 +6916,20 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(
       row.getByRole("heading").locator("..").getByText("1st", { exact: true })
     ).toBeVisible();
+    const titleButton = (await row
+      .getByRole("heading")
+      .getByRole("button")
+      .boundingBox())!;
+    const rank = (await row
+      .getByRole("heading")
+      .locator("..")
+      .getByText("1st", { exact: true })
+      .locator("..")
+      .boundingBox())!;
+    expect(rank.x - titleButton.x - titleButton.width).toBeGreaterThanOrEqual(
+      7
+    );
+    expect(rank.x - titleButton.x - titleButton.width).toBeLessThanOrEqual(9);
     const picture = (await row
       .getByRole("button", { name: /^Open / })
       .boundingBox())!;
@@ -6946,7 +6960,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .locator("[data-tooltip-content]")
     ).toHaveCount(0);
     expect(stats.y).toBeGreaterThanOrEqual(author.y + author.height + 8);
-    expect(Math.abs(stats.x - author.x)).toBeLessThanOrEqual(1);
+    // The profile image starts at the same left edge as the title row's media icon.
+    expect(Math.abs(stats.x - titleRow.x)).toBeLessThanOrEqual(1);
     expect(field.x).toBeGreaterThan(stats.x);
     expect(field.y).toBeLessThan(picture.y + picture.height);
     expect(stats.y).toBeLessThan(picture.y + picture.height);

@@ -155,12 +155,17 @@ describe("MyStreamWaveMyVote", () => {
     (target) => {
       const onDropClick = jest.fn();
       const onToggleCheck = jest.fn();
+      const onEnterSelection = jest.fn();
       const { rerender } = render(
-        <MyStreamWaveMyVote
-          drop={drop}
-          onDropClick={onDropClick}
-          onToggleCheck={onToggleCheck}
-        />
+        <div tabIndex={-1}>
+          <MyStreamWaveMyVote
+            isSelecting={false}
+            onEnterSelection={onEnterSelection}
+            drop={drop}
+            onDropClick={onDropClick}
+            onToggleCheck={onToggleCheck}
+          />
+        </div>
       );
       const targets = {
         row: screen.getByRole("article", { name: "Drop Title" }),
@@ -170,17 +175,32 @@ describe("MyStreamWaveMyVote", () => {
 
       fireEvent.click(targets[target]);
 
+      expect(onEnterSelection).toHaveBeenCalledTimes(1);
+      expect(onToggleCheck).not.toHaveBeenCalled();
+      expect(onDropClick).not.toHaveBeenCalled();
+      rerender(
+        <div tabIndex={-1}>
+          <MyStreamWaveMyVote
+            drop={drop}
+            onDropClick={onDropClick}
+            onToggleCheck={onToggleCheck}
+          />
+        </div>
+      );
+      fireEvent.click(targets[target]);
       expect(onToggleCheck).toHaveBeenCalledTimes(1);
       expect(onToggleCheck).toHaveBeenCalledWith("d1");
       expect(onDropClick).not.toHaveBeenCalled();
 
       rerender(
-        <MyStreamWaveMyVote
-          drop={drop}
-          onDropClick={onDropClick}
-          onToggleCheck={onToggleCheck}
-          isChecked
-        />
+        <div tabIndex={-1}>
+          <MyStreamWaveMyVote
+            drop={drop}
+            onDropClick={onDropClick}
+            onToggleCheck={onToggleCheck}
+            isChecked
+          />
+        </div>
       );
       expect(screen.getByRole("checkbox")).toBeChecked();
       fireEvent.click(targets[target]);

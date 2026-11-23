@@ -364,11 +364,15 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     const control = target.closest(
       "a, button, input, select, textarea, label, [role='button'], [role='link'], [role='checkbox'], [role='dialog'], [tabindex], [contenteditable='true'], [data-vote-controls]"
     );
-    if (control && control !== event.currentTarget) {
+    if (
+      control &&
+      control !== event.currentTarget &&
+      event.currentTarget.contains(control)
+    ) {
       return;
     }
 
-    if (isSelecting) handleSelectionChange();
+    if (!mobile || isSelecting) handleSelectionChange();
   };
 
   const handleExplainVote = (voteTotal: number, voteChange: number) => {
@@ -533,7 +537,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
             )}
             <h3
               id={titleId}
-              className="tw-m-0 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-1 tw-items-center"
+              className={`tw-m-0 tw-flex tw-min-h-6 tw-min-w-0 tw-items-center ${mobile ? "tw-flex-1" : "tw-flex-initial"}`}
             >
               <button
                 data-my-vote-open
@@ -559,7 +563,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           </div>
           <MyVoteAuthor author={drop.author} mobile={mobile} />
           {!mobile && (
-            <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-pl-8">
+            <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1">
               {voteStats}
             </div>
           )}
