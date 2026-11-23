@@ -46,6 +46,15 @@ import {
   type WalletMessageFormat,
 } from "@/lib/desktop/walletMessageFormats";
 import { checkWalletTransaction } from "@/lib/desktop/wallet-transactions";
+import { checkSafeTx } from "@/lib/desktop/wallet-safe-tx/check";
+import {
+  describeSafeTx,
+  type SafeTxDescription,
+} from "@/lib/desktop/wallet-safe-tx/describe";
+import {
+  SAFE_TX_FIELDS,
+  SAFE_TX_PINS,
+} from "@/lib/desktop/wallet-safe-tx/pins";
 import {
   describeWalletTransaction,
   type TransactionDescription,
@@ -95,6 +104,11 @@ export type WalletRequestDescription =
   | {
       readonly kind: "transaction";
       readonly transaction: TransactionDescription;
+    }
+  | {
+      /** A pinned Safe's governance transaction, for a Safe signer. */
+      readonly kind: "safeTx";
+      readonly safeTx: SafeTxDescription;
     };
 
 export type WalletRequestRefusal =
@@ -104,6 +118,7 @@ export type WalletRequestRefusal =
   | "unknown-typed-data"
   | "unknown-transaction"
   | "transaction-rule"
+  | "safe-tx-rule"
   | "wrong-wallet"
   | "wrong-origin"
   | "statement-mismatch"
@@ -339,7 +354,35 @@ function describeTypedData(
       return describeProfileSitePublish(typedData);
     }
   }
+  if (primaryType === "SafeTx") {
+    const safeTx = describePinnedSafeTx(typedData);
+    if (safeTx !== null) return safeTx;
+  }
   return refuse("unknown-typed-data");
+}
+
+/**
+ * A Safe transaction for a pinned Safe (exact SafeTx schema and domain),
+ * checked against the SafeTx rules (`@/lib/desktop/wallet-safe-tx`); null
+ * when the typed data is not a pinned Safe's SafeTx at all.
+ */
+function describePinnedSafeTx(
+  typedData: TypedData
+): DescribedWalletRequest | null {
+  const pinned = SAFE_TX_PINS.some((pin) =>
+    hasSchema(
+      typedData,
+      { chainId: pin.chainId, verifyingContract: pin.safe },
+      { SafeTx: SAFE_TX_FIELDS }
+    )
+  );
+  if (!pinned) return null;
+  const checked = checkSafeTx(typedData.domain, typedData.message);
+  if (!checked.ok) return refuse("safe-tx-rule");
+  return {
+    ok: true,
+    value: { kind: "safeTx", safeTx: describeSafeTx(checked) },
+  };
 }
 
 /**

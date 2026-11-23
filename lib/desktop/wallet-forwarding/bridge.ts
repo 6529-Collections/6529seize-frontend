@@ -1,6 +1,7 @@
 /** Wallet forwarding: the desktop shell's answers to the app page. */
 
 import type { Hex } from "viem";
+import { walletSafeTxHash } from "@/lib/desktop/wallet-safe-tx/hash";
 import { walletTransactionRulesHash } from "@/lib/desktop/wallet-transactions/hash";
 import { isWalletResultValue, WALLET_RESULT_FAILURES } from "./results";
 import {
@@ -161,6 +162,22 @@ export function walletBridgeSendsTransactions(value: unknown): boolean {
     Array.isArray(value["methods"]) &&
     (value["methods"] as readonly unknown[]).includes("eth_sendTransaction") &&
     value["transactionRules"] === walletTransactionRulesHash()
+  );
+}
+
+/**
+ * Whether the shell asks the browser wallet to sign Safe transactions with
+ * exactly this website's SafeTx table: `capabilities()` lists
+ * `eth_signTypedData_v4` and reports `safeTx` equal to the SHA-256 of this
+ * website's canonical SafeTx table. Otherwise no Safe transaction is sent.
+ */
+export function walletBridgeSignsSafeTx(value: unknown): boolean {
+  return (
+    isRecord(value) &&
+    value["version"] === WALLET_FORWARDING_VERSION &&
+    Array.isArray(value["methods"]) &&
+    (value["methods"] as readonly unknown[]).includes("eth_signTypedData_v4") &&
+    value["safeTx"] === walletSafeTxHash()
   );
 }
 

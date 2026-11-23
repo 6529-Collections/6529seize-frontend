@@ -4325,12 +4325,69 @@ export const EN_US_ROOT_MESSAGES = {
   "browserConnector.tx.title.nextgen.mint": "Mint NextGen tokens",
   "browserConnector.tx.title.subscriptions.topUp":
     "Top up your Memes subscription balance",
+  "browserConnector.tx.title.nft.transfer721": "Transfer an NFT",
+  "browserConnector.tx.title.nft.transfer1155": "Transfer NFTs",
+  "browserConnector.tx.title.nft.batchTransfer1155": "Transfer several NFTs",
+  "browserConnector.tx.title.provenance.openRelease":
+    "Open a 6529 Provenance release",
+  "browserConnector.tx.title.provenance.publish":
+    "Publish records to 6529 Provenance",
+  "browserConnector.tx.title.provenance.sealRelease":
+    "Seal a 6529 Provenance release",
   "browserConnector.tx.contract": "Contract",
   "browserConnector.tx.contract.delegation": "6529 delegation contract",
   "browserConnector.tx.contract.memes": "Manifold claim contract for The Memes",
   "browserConnector.tx.contract.nextgen": "NextGen minter contract",
   "browserConnector.tx.contract.subscriptions":
     "6529 subscriptions wallet (seize.6529.eth)",
+  "browserConnector.tx.contract.nft": "6529 NFT contract",
+  "browserConnector.tx.contract.provenance": "6529 Provenance registry",
+  "browserConnector.tx.transfer.recipient":
+    "Recipient: the NFTs go to this address",
+  "browserConnector.tx.transfer.identity": "6529 profile: {name}",
+  "browserConnector.tx.transfer.identityChecking":
+    "Looking up the 6529 profile for this address…",
+  "browserConnector.tx.transfer.identityNone":
+    "No 6529 profile was found for this address.",
+  "browserConnector.tx.transfer.identityUnavailable":
+    "The 6529 profile for this address could not be looked up.",
+  "browserConnector.tx.transfer.identityNote":
+    "The profile comes from 6529 profile data. It is not part of the transaction: check the address itself.",
+  "browserConnector.tx.transfer.contract":
+    "This address is a contract. If it cannot handle NFTs, they can be lost. Send only if you know this contract accepts them.",
+  "browserConnector.tx.transfer.codeUnavailable":
+    "It could not be checked whether this address is a contract.",
+  "browserConnector.tx.transfer.confirm":
+    "I checked that this is the right recipient. Transfers cannot be undone.",
+  "browserConnector.tx.sender.checking":
+    "Checking that this wallet may publish to this registry…",
+  "browserConnector.tx.sender.ok":
+    "Checked: this wallet may publish to this registry.",
+  "browserConnector.tx.sender.denied":
+    "This wallet is neither a publisher nor the owner of this registry, so the transaction would fail. Start again from 6529 Desktop with an authorized wallet.",
+  "browserConnector.tx.sender.unavailable":
+    "It could not be checked whether this wallet may publish. You can check again or send it anyway.",
+  "browserConnector.tx.provenance.none": "None",
+  "browserConnector.tx.provenance.digest": "Hash",
+  "browserConnector.tx.provenance.digestValue": "{algorithm} {digest}",
+  "browserConnector.tx.provenance.manifestCid": "Manifest CID",
+  "browserConnector.tx.provenance.rootCid": "Root CID",
+  "browserConnector.tx.provenance.arweaveId": "Arweave ID",
+  "browserConnector.tx.provenance.sourceCommit": "Source commit",
+  "browserConnector.tx.provenance.label": "Label",
+  "browserConnector.tx.provenance.release": "Release",
+  "browserConnector.tx.provenance.expectedCount": "Expected record count",
+  "browserConnector.tx.provenance.record": "Record {position}",
+  "browserConnector.tx.provenance.subject": "Subject ID",
+  "browserConnector.tx.provenance.recordType": "Record type ID",
+  "browserConnector.tx.provenance.schema": "Schema ID",
+  "browserConnector.tx.provenance.cid": "CID",
+  "browserConnector.tx.provenance.expectedVersion":
+    "Versions before this record",
+  "browserConnector.tx.provenance.newSubject": "0 (a new subject)",
+  "browserConnector.tx.provenance.effectiveAt": "Effective time",
+  "browserConnector.tx.provenance.effectiveAtValue":
+    "{time} UTC, as the publisher states it",
   "browserConnector.tx.network": "Network",
   "browserConnector.tx.network.mainnet": "Ethereum",
   "browserConnector.tx.network.sepolia": "Sepolia test network",
@@ -4355,6 +4412,7 @@ export const EN_US_ROOT_MESSAGES = {
   "browserConnector.tx.proof": "allowlist proof ({count} hashes)",
   "browserConnector.tx.proofs": "allowlist proofs ({count})",
   "browserConnector.tx.quoted": "“{text}”",
+  "browserConnector.tx.field": "{name}: {value}",
   "browserConnector.tx.useCase": "{id} ({name})",
   "browserConnector.tx.plainTransfer": "plain ETH transfer",
   "browserConnector.tx.yes": "Yes",
@@ -4398,6 +4456,70 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopWalletRequest.explorer": "View on Etherscan",
   "browserConnector.wallet.refusal.unknown-transaction":
     "This page will not ask your wallet to send this transaction: 6529 Desktop does not send it from here. Continue on {site} in your browser instead.",
+  "browserConnector.wallet.refusal.safe-tx-rule":
+    "This page will not ask your wallet to sign this Safe transaction: its details are outside what 6529 Desktop sends from here. Nothing was signed. Continue on {site} in your browser instead.",
+  "desktopWalletRequest.safeTxUpdate":
+    "This version of 6529 Desktop cannot ask your browser wallet to sign this Safe transaction. Update 6529 Desktop, or continue on {site} in your browser.",
+  "browserConnector.safeTx.title":
+    "Approve a 6529 Provenance governance action as a signer of this Safe",
+  "browserConnector.safeTx.signatureOnly":
+    "This is a signature, not a transaction. It does not cost gas. The action happens when enough signers approve and someone executes it.",
+  "browserConnector.safeTx.safe": "Safe",
+  "browserConnector.safeTx.safeName": "6529 Provenance test Safe",
+  "browserConnector.safeTx.safeThreshold":
+    "6529 Provenance test Safe ({threshold} of {owners} signers)",
+  "browserConnector.safeTx.nonce": "Safe transaction number (nonce)",
+  "browserConnector.safeTx.queued":
+    "(queued: the Safe is at {current}; earlier ones must run first)",
+  "browserConnector.safeTx.callTitle": "{position}. {action}",
+  "browserConnector.safeTx.registry.provenanceTest":
+    "6529 Provenance test registry",
+  "browserConnector.safeTx.registry.museumCatalog":
+    "6529 Network Museum catalog registry (test)",
+  "browserConnector.safeTx.call.governance.registerCanonicalization":
+    "Register a canonicalization",
+  "browserConnector.safeTx.call.governance.registerRecordType":
+    "Register a record type",
+  "browserConnector.safeTx.call.governance.registerSchema":
+    "Register a schema (by hash and CID)",
+  "browserConnector.safeTx.call.governance.setPublisher":
+    "Grant or revoke a publisher key",
+  "browserConnector.safeTx.call.governance.deleteVersion":
+    "Delete a record version",
+  "browserConnector.safeTx.call.governance.deleteVersions":
+    "Delete a range of record versions",
+  "browserConnector.safeTx.call.governance.deleteSubject":
+    "Delete a subject and all its versions",
+  "browserConnector.safeTx.call.governance.freeze":
+    "Freeze the registry for good",
+  "browserConnector.safeTx.call.governance.declareSuccessor":
+    "Declare a successor registry (this also freezes it)",
+  "browserConnector.safeTx.call.governance.transferOwnership":
+    "Start transferring ownership of the registry",
+  "browserConnector.safeTx.call.governance.acceptOwnership":
+    "Accept ownership of the registry for this Safe",
+  "browserConnector.safeTx.high":
+    "This grants a key the right to publish records in the registry. Check the key before you sign.",
+  "browserConnector.safeTx.critical":
+    "This changes who controls the registry, freezes it or removes records. It cannot be undone once executed. Check every value before you sign.",
+  "browserConnector.safeTx.understand":
+    "I checked this action and want to approve it",
+  "browserConnector.safeTx.check.finished": "Checks finished.",
+  "browserConnector.safeTx.check.blocked": "Not offered for signing: {reason}",
+  "browserConnector.safeTx.check.checking":
+    "Checking the Safe and the registry on chain…",
+  "browserConnector.safeTx.check.ok":
+    "Checked: the Safe owns the registry, your wallet is one of its signers, and the transaction number is not used.",
+  "browserConnector.safeTx.check.unavailable":
+    "The Safe and the registry could not be checked right now, so nothing is offered to sign. Check again.",
+  "browserConnector.safeTx.check.notOwner":
+    "The registry {registry} is not owned by this Safe, so nothing is offered to sign.",
+  "browserConnector.safeTx.check.notPendingOwner":
+    "This Safe is not the pending owner of the registry {registry}, so it cannot accept ownership.",
+  "browserConnector.safeTx.check.notSigner":
+    "Your wallet is not one of this Safe's signers, so nothing is offered to sign.",
+  "browserConnector.safeTx.check.usedNonce":
+    "The Safe has already used this transaction number (it is at {nonce}). Start again from 6529 Desktop.",
   "browserConnector.wallet.refusal.transaction-rule":
     "This page will not ask your wallet to send this transaction: its details are outside what 6529 Desktop sends from here. Nothing was sent. Continue on {site} in your browser instead.",
   "browserConnector.wallet.refusal.wrong-wallet":
@@ -4937,8 +5059,7 @@ export const EN_US_ROOT_MESSAGES = {
   "theMemes.mint.phaseEligibility.unavailable": "Eligibility unavailable",
   "theMemes.mint.phaseEligibility.none": "No eligible spots",
   "theMemes.mint.phaseEligibility.allowlist.one": "{allowlist} eligible spot",
-  "theMemes.mint.phaseEligibility.allowlist.many":
-    "{allowlist} eligible spots",
+  "theMemes.mint.phaseEligibility.allowlist.many": "{allowlist} eligible spots",
   "theMemes.mint.phaseEligibility.airdrop":
     "{airdrop}x Airdrop · nothing to mint",
   "theMemes.mint.phaseEligibility.mixed":

@@ -373,6 +373,30 @@ describe("desktopBrowserWalletConnector", () => {
       ).rejects.toMatchObject({ code: -32603 });
     });
 
+    it("reports the forwarding data cap as a capability per chain", async () => {
+      const sending = setup(wallet.address, true);
+      const limits = {
+        desktopForwarding: { maxTransactionDataBytes: 10_240 },
+      };
+      await expect(
+        request(sending.connector, "wallet_getCapabilities", [wallet.address])
+      ).resolves.toEqual({ "0x1": limits, "0xaa36a7": limits });
+      await expect(
+        sending.connector.connect({ withCapabilities: true } as never)
+      ).resolves.toMatchObject({
+        accounts: [
+          {
+            address: wallet.address,
+            capabilities: { "0x1": limits, "0xaa36a7": limits },
+          },
+        ],
+      });
+      const older = setup(wallet.address, false);
+      await expect(
+        request(older.connector, "wallet_getCapabilities", [wallet.address])
+      ).resolves.toEqual({});
+    });
+
     it("never forwards wallet_sendTransaction", async () => {
       const { connector, runRequest } = setup(wallet.address, true);
       await expect(

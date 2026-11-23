@@ -31,6 +31,7 @@ import {
   type WalletRequestRefusal,
 } from "@/lib/desktop/walletRequestDescribe";
 import BrowserWalletRequestContent from "./BrowserWalletRequestContent";
+import BrowserWalletSafeTxView from "./BrowserWalletSafeTxView";
 import BrowserWalletTransactionView from "./BrowserWalletTransactionView";
 
 /** The website's host for this build, for "Continue on {site}" copy. */
@@ -163,7 +164,7 @@ function Details({
 }: {
   readonly description: Exclude<
     WalletRequestDescription,
-    { readonly kind: "transaction" }
+    { readonly kind: "transaction" | "safeTx" }
   >;
   readonly locale: Locale;
 }) {
@@ -608,7 +609,43 @@ export default function BrowserWalletRequestPanel({
   } else if (
     !expired &&
     verified.kind === "ready" &&
-    verified.description.kind !== "transaction"
+    verified.description.kind === "safeTx"
+  ) {
+    const { request } = verified.fragment;
+    content = (
+      <BrowserWalletSafeTxView
+        locale={locale}
+        signer={request.address}
+        description={verified.description.safeTx}
+      >
+        {(canSign, describedBy) => (
+          <>
+            <WalletGate
+              locale={locale}
+              request={request}
+              signing={step.kind === "signing"}
+              disabled={!canSign}
+              describedBy={describedBy}
+              onSign={() => {
+                sign().catch(() => setStep({ kind: "failed" }));
+              }}
+            />
+            <button
+              type="button"
+              className={SECONDARY_BUTTON_CLASS}
+              onClick={() => decline("rejected")}
+            >
+              {t(locale, "browserConnector.wallet.decline")}
+            </button>
+          </>
+        )}
+      </BrowserWalletSafeTxView>
+    );
+  } else if (
+    !expired &&
+    verified.kind === "ready" &&
+    verified.description.kind !== "transaction" &&
+    verified.description.kind !== "safeTx"
   ) {
     const { request } = verified.fragment;
     content = (
