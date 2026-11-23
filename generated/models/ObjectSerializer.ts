@@ -696,6 +696,8 @@ export * from '../models/ApiProfileCmsAgentSchemaBundleSourcePacketTypesInner';
 export * from '../models/ApiProfileCmsAgentSourcePacket';
 export * from '../models/ApiProfileCmsAgentSourcePacketSafety';
 export * from '../models/ApiProfileCmsAgentSourcePacketValidationDiagnostics';
+export * from '../models/ApiProfileCmsChainDocument';
+export * from '../models/ApiProfileCmsChainDocuments';
 export * from '../models/ApiProfileCmsPackage';
 export * from '../models/ApiProfileCmsPackageExport';
 export * from '../models/ApiProfileCmsPackageStatus';
@@ -1703,7 +1705,9 @@ import { ApiProfileCmsAgentSchemaBundleSourcePacketTypesInner , ApiProfileCmsAge
 import { ApiProfileCmsAgentSourcePacket, ApiProfileCmsAgentSourcePacketSchemaEnum       , ApiProfileCmsAgentSourcePacketVisibilityEnum          } from '../models/ApiProfileCmsAgentSourcePacket';
 import { ApiProfileCmsAgentSourcePacketSafety } from '../models/ApiProfileCmsAgentSourcePacketSafety';
 import { ApiProfileCmsAgentSourcePacketValidationDiagnostics } from '../models/ApiProfileCmsAgentSourcePacketValidationDiagnostics';
-import { ApiProfileCmsPackage                } from '../models/ApiProfileCmsPackage';
+import { ApiProfileCmsChainDocument } from '../models/ApiProfileCmsChainDocument';
+import { ApiProfileCmsChainDocuments } from '../models/ApiProfileCmsChainDocuments';
+import { ApiProfileCmsPackage                 } from '../models/ApiProfileCmsPackage';
 import { ApiProfileCmsPackageExport                 } from '../models/ApiProfileCmsPackageExport';
 import { ApiProfileCmsPackageStatus } from '../models/ApiProfileCmsPackageStatus';
 import { ApiProfileCmsPackageStorageUploadResult } from '../models/ApiProfileCmsPackageStorageUploadResult';
@@ -2963,6 +2967,8 @@ let typeMap: {[index: string]: any} = {
     "ApiProfileCmsAgentSourcePacket": ApiProfileCmsAgentSourcePacket,
     "ApiProfileCmsAgentSourcePacketSafety": ApiProfileCmsAgentSourcePacketSafety,
     "ApiProfileCmsAgentSourcePacketValidationDiagnostics": ApiProfileCmsAgentSourcePacketValidationDiagnostics,
+    "ApiProfileCmsChainDocument": ApiProfileCmsChainDocument,
+    "ApiProfileCmsChainDocuments": ApiProfileCmsChainDocuments,
     "ApiProfileCmsPackage": ApiProfileCmsPackage,
     "ApiProfileCmsPackageExport": ApiProfileCmsPackageExport,
     "ApiProfileCmsPackageStorageUploadResult": ApiProfileCmsPackageStorageUploadResult,

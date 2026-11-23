@@ -16026,20 +16026,35 @@ paths:
         "409":
           description: >-
             The pointer changed (expected-current guard). With profile sites on
-            the 6529 chain, publish stores the signed publication record and
-            returns the draft with its publication_cid; the person's
-            PROFILE_REPLACE then makes it primary. Publishing a draft that
-            already has a publication_cid returns it as stored, without
-            signing or uploading again.
+            the 6529 chain, publish records the signed publication record and
+            returns the draft with its publication_cid and, in
+            chain_documents, the content core and the record; the person's
+            browser uploads both to the gateway's document store, and the
+            person's PROFILE_REPLACE then makes it primary. Publishing a draft
+            that already has a publication_cid returns it as stored, with its
+            chain_documents, without signing again.
+        "413":
+          description: >-
+            With profile sites on the 6529 chain: the content core or the
+            publication record is larger than the gateway's document store
+            takes, 2 MiB a file (code cms_chain_document_too_large). Nothing
+            was recorded.
         "423":
           description: >-
             The identity freeze is on (code IDENTITY_FROZEN), while profiles
             move to the 6529 Network.
         "502":
           description: >-
-            With profile sites on the 6529 chain: the gateway's document store
-            answered with another CID than the file's (code
-            cms_doc_store_mismatch). Nothing was recorded; publish again.
+            With profile sites on the 6529 chain, when the draft's publication
+            record was recorded earlier (a second publish, or another click
+            that recorded first): the record read back from storage doesn't
+            match its CID (code cms_publication_mismatch).
+        "503":
+          description: >-
+            With profile sites on the 6529 chain, when the draft's publication
+            record was recorded earlier (a second publish, or another click
+            that recorded first): the record can't be read from storage now
+            (code cms_check_unavailable). Publish again shortly.
   /profile-cms/packages/{id}/rollback:
     post:
       tags:
@@ -41009,6 +41024,34 @@ components:
                 type: string
             generated_for_external_agents:
               type: boolean
+    ApiProfileCmsChainDocument:
+      type: object
+      required:
+        - cid
+        - bytes_base64
+      properties:
+        cid:
+          type: string
+          description: The file's CID (CIDv1, raw codec, sha2-256).
+        bytes_base64:
+          type: string
+          description: The file's bytes, base64.
+    ApiProfileCmsChainDocuments:
+      type: object
+      description: >-
+        Only in a publish answer with profile sites on the 6529 chain: the two
+        files the person's browser uploads to the gateway's document store,
+        each with its CID, before the PROFILE_REPLACE that names them. With
+        the package, the answer stays under 5 MB for a package at the 2 MiB
+        storage cap.
+      required:
+        - content_core
+        - publication
+      properties:
+        content_core:
+          $ref: "#/components/schemas/ApiProfileCmsChainDocument"
+        publication:
+          $ref: "#/components/schemas/ApiProfileCmsChainDocument"
     ApiProfileCmsPackage:
       type: object
       required:
@@ -41064,6 +41107,8 @@ components:
             record, once the package was signed for publishing. With profile
             sites on the 6529 chain, a draft that has it waits for the person's
             PROFILE_REPLACE to name it in their ProfileDoc.
+        chain_documents:
+          $ref: "#/components/schemas/ApiProfileCmsChainDocuments"
     ApiProfileCmsPackageExport:
       type: object
       required:
