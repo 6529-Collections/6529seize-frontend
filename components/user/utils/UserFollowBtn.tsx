@@ -8,7 +8,6 @@ import {
 import { AuthContext } from "@/components/auth/Auth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
-import type { ApiIdentitySubscriptionStatus } from "@/generated/models/ApiIdentitySubscriptionStatus";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
   commonApiDeleteWithBody,
@@ -31,10 +30,6 @@ import { t } from "@/i18n/messages";
 import UserMuteButton from "./UserMuteButton";
 import UserFollowingMenu from "./UserFollowingMenu";
 import { ArrowsRightLeftIcon, NoSymbolIcon } from "@heroicons/react/24/outline";
-
-// Existing API deployments return only actions until reverse-follow support rolls out.
-type FollowStatus = ApiIdentitySubscriptionActions &
-  Partial<Pick<ApiIdentitySubscriptionStatus, "follows_viewer">>;
 
 const FOLLOW_ACTIONS = Object.values(
   ApiIdentitySubscriptionTargetAction
@@ -231,16 +226,18 @@ export default function UserFollowBtn({
     !activeProfileProxy
   );
   const endpoint = `identities/${encodeURIComponent(handle)}/subscriptions`;
-  const { data: subscriptions, isFetching } = useQuery<FollowStatus>({
-    queryKey: statusKey,
-    queryFn: ({ signal }) => commonApiFetch<FollowStatus>({ endpoint, signal }),
-    enabled:
-      canReadStatus &&
-      showFollowButton &&
-      !blocked &&
-      !blockStateLoading &&
-      !unblockPending,
-  });
+  const { data: subscriptions, isFetching } =
+    useQuery<ApiIdentitySubscriptionActions>({
+      queryKey: statusKey,
+      queryFn: ({ signal }) =>
+        commonApiFetch<ApiIdentitySubscriptionActions>({ endpoint, signal }),
+      enabled:
+        canReadStatus &&
+        showFollowButton &&
+        !blocked &&
+        !blockStateLoading &&
+        !unblockPending,
+    });
   const isInitialStatusLoading =
     blockStateLoading ||
     unblockPending ||
@@ -281,10 +278,13 @@ export default function UserFollowBtn({
     onSuccess: async ({ actions }, { key }) => {
       await queryClient.cancelQueries({ queryKey: key, exact: true });
       // The write response only changes the outgoing actions; keep any known reverse status.
-      queryClient.setQueryData<FollowStatus>(key, (previous) => ({
-        ...previous,
-        actions,
-      }));
+      queryClient.setQueryData<ApiIdentitySubscriptionActions>(
+        key,
+        (previous) => ({
+          ...previous,
+          actions,
+        })
+      );
       onIdentityFollowChange();
     },
     onError: (error, { unfollow }) => {

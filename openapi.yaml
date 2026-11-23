@@ -13190,7 +13190,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiIdentitySubscriptionStatus"
+                $ref: "#/components/schemas/ApiIdentitySubscriptionActions"
         "404":
           description: Identity not found
     post:
@@ -36138,19 +36138,12 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
-    ApiIdentitySubscriptionStatus:
-      type: object
-      required:
-        - actions
-        - follows_viewer
-      properties:
-        actions:
-          type: array
-          items:
-            $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
         follows_viewer:
           type: boolean
-          description: Whether the requested identity follows the authenticated viewer.
+          readOnly: true
+          description: >-
+            Returned by GET only. Indicates whether the requested identity
+            follows the authenticated viewer.
     ApiIdentitySubscriptionTargetAction:
       type: string
       enum:
