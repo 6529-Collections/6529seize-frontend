@@ -18,11 +18,10 @@ import { ComposerSendButton } from "@/components/waves/ComposerSendButton";
 import { isE2eePollCreationEnabled } from "@/config/e2eeEnv";
 import { E2eePollComposer, E2eePollComposerButton } from "./E2eePollComposer";
 import useCapacitor from "@/hooks/useCapacitor";
+import useIsMobileScreen from "@/hooks/isMobileScreen";
 import { useBlurOnNativeKeyboardDismiss } from "@/hooks/useBlurOnNativeKeyboardDismiss";
 import { useDismissMobileComposer } from "@/hooks/useDismissMobileComposer";
 import {
-  COMPOSER_ACTION_BUTTON_CLASS_NAME,
-  COMPOSER_ACTION_IDLE_CLASS_NAME,
   COMPOSER_ACTION_ICON_CLASS_NAME,
   COMPOSER_ROW_GAP_CLASS_NAME,
   COMPOSER_ROW_PADDING_CLASS_NAME,
@@ -61,6 +60,10 @@ import {
 } from "./useE2eeComposerParts";
 import { isSafeInlineImageMime } from "@/lib/e2ee/media";
 import { E2eeGifAttachmentPicker } from "./E2eeGifAttachmentPicker";
+import {
+  E2eeComposerActionButton,
+  E2eeComposerActionTray,
+} from "./E2eeComposerActions";
 
 /** Thumbnails are drawn at twice their 48 px box for sharp displays. */
 const THUMBNAIL_PX = 96;
@@ -449,6 +452,7 @@ export function E2eeComposer({
 }: E2eeComposerProps) {
   const locale = useBrowserLocale();
   const { isCapacitor } = useCapacitor();
+  const isMobile = useIsMobileScreen();
   const dismissMobileComposer = useDismissMobileComposer();
   const listboxId = useId();
   const textareaId = inputId ?? `${listboxId}-input`;
@@ -464,6 +468,12 @@ export function E2eeComposer({
   const [gifPending, setGifPending] = useState(false);
   const [pollOpen, setPollOpen] = useState(false);
   const pollButtonRef = useRef<HTMLButtonElement>(null);
+  const actionsToggleRef = useRef<HTMLButtonElement>(null);
+  const composerRowRef = useRef<HTMLDivElement>(null);
+  const [actionsOpenFor, setActionsOpenFor] = useState<string | null>(null);
+  const showActionsToggle = isMobile && editing === null;
+  const actionsExpanded =
+    showActionsToggle && actionsOpenFor === conversation.g;
   const createPoll =
     isE2eePollCreationEnabled() && !editing
       ? engine.createPoll?.bind(engine, conversation.g)
@@ -471,8 +481,34 @@ export function E2eeComposer({
   const showPoll = pollOpen && createPoll !== undefined;
   const mentions = useMentionPicker(conversation.members, selfProfileId);
 
+  useEffect(() => {
+    if (!actionsExpanded) return;
+    const closeOnOutsidePointer = (event: PointerEvent) => {
+      if (
+        event.target instanceof Node &&
+        !composerRowRef.current?.contains(event.target)
+      ) {
+        setActionsOpenFor(null);
+      }
+    };
+    document.addEventListener("pointerdown", closeOnOutsidePointer, true);
+    return () =>
+      document.removeEventListener("pointerdown", closeOnOutsidePointer, true);
+  }, [actionsExpanded]);
+
+  const selectAction = () => {
+    if (showActionsToggle) {
+      actionsToggleRef.current?.focus({ preventScroll: true });
+      setActionsOpenFor(null);
+    }
+  };
+
   if (editing && pollOpen) {
     setPollOpen(false);
+  }
+
+  if (editing && actionsOpenFor !== null) {
+    setActionsOpenFor(null);
   }
 
   // Attachments switched off server-side drop anything already picked.
@@ -652,9 +688,9 @@ export function E2eeComposer({
           onCreate={createPoll}
           onClose={() => {
             setPollOpen(false);
-            globalThis.requestAnimationFrame(() =>
-              pollButtonRef.current?.focus()
-            );
+            globalThis.requestAnimationFrame(() => {
+              (actionsToggleRef.current ?? pollButtonRef.current)?.focus();
+            });
           }}
         />
       )}
@@ -676,7 +712,26 @@ export function E2eeComposer({
           <UploadingFiles locale={locale} files={uploading} />
         ) : null}
         <div
-          className={`tw-relative tw-flex tw-items-end ${COMPOSER_ROW_GAP_CLASS_NAME} ${COMPOSER_ROW_PADDING_CLASS_NAME}`}
+          ref={composerRowRef}
+          className={`tw-relative tw-items-end ${showActionsToggle ? "tw-grid tw-grid-cols-[auto_minmax(0,1fr)_auto]" : "tw-flex"} ${COMPOSER_ROW_GAP_CLASS_NAME} ${COMPOSER_ROW_PADDING_CLASS_NAME}`}
+          onBlur={(event) => {
+            if (
+              actionsExpanded &&
+              event.relatedTarget &&
+              !event.currentTarget.contains(event.relatedTarget)
+            ) {
+              setActionsOpenFor(null);
+            }
+          }}
+          onKeyDown={(event) => {
+            if (
+              actionsExpanded &&
+              event.key === "Escape" &&
+              !event.defaultPrevented
+            ) {
+              selectAction();
+            }
+          }}
         >
           {mentions.open ? (
             <MentionList
@@ -687,8 +742,15 @@ export function E2eeComposer({
               label={t(locale, "e2ee.composer.mentions.label")}
             />
           ) : null}
-          {editing === null ? (
-            <>
+          {editing === null && (
+            <E2eeComposerActionTray
+              compact={showActionsToggle}
+              expanded={actionsExpanded}
+              toggleRef={actionsToggleRef}
+              onToggle={() =>
+                setActionsOpenFor(actionsExpanded ? null : conversation.g)
+              }
+            >
               {canAttach && (
                 <input
                   ref={fileInputRef}
@@ -700,24 +762,32 @@ export function E2eeComposer({
                   onChange={onFilesChosen}
                 />
               )}
-              <DropActionTooltip content={t(locale, "e2ee.composer.attach")}>
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  aria-label={t(locale, "e2ee.composer.attach")}
-                  disabled={!attachmentsEnabled}
-                  className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-50`}
-                >
-                  <PaperClipIcon
-                    aria-hidden="true"
-                    className={COMPOSER_ACTION_ICON_CLASS_NAME}
-                  />
-                </button>
-              </DropActionTooltip>
+              <E2eeComposerActionButton
+                tooltip={t(locale, "e2ee.composer.attach")}
+                compactLabel={
+                  showActionsToggle
+                    ? t(locale, "e2ee.composer.attachShort")
+                    : undefined
+                }
+                onClick={() => {
+                  selectAction();
+                  fileInputRef.current?.click();
+                }}
+                disabled={!attachmentsEnabled}
+              >
+                <PaperClipIcon
+                  aria-hidden="true"
+                  className={COMPOSER_ACTION_ICON_CLASS_NAME}
+                />
+              </E2eeComposerActionButton>
               {createPoll && (
                 <E2eePollComposerButton
                   buttonRef={pollButtonRef}
-                  onClick={() => setPollOpen(true)}
+                  compact={showActionsToggle}
+                  onClick={() => {
+                    selectAction();
+                    setPollOpen(true);
+                  }}
                 />
               )}
               {canAttach && !isUploading && (
@@ -726,10 +796,12 @@ export function E2eeComposer({
                   onAttach={(file) => addFiles([file])}
                   onError={setError}
                   onPendingChange={setGifPending}
+                  compact={showActionsToggle}
+                  onAction={selectAction}
                 />
               )}
-            </>
-          ) : null}
+            </E2eeComposerActionTray>
+          )}
           <div className="tw-relative tw-min-w-0 tw-flex-1">
             <label className="tw-sr-only" htmlFor={textareaId}>
               {t(locale, "e2ee.composer.label")}
@@ -738,6 +810,7 @@ export function E2eeComposer({
               ref={editorRef}
               value={text}
               onChange={(value) => {
+                if (value !== text) setActionsOpenFor(null);
                 setText(value);
                 setError(null);
               }}
