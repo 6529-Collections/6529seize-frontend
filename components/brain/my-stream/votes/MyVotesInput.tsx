@@ -11,7 +11,12 @@ import {
   MY_VOTES_FADE_TRANSITION,
 } from "./myVotesMotion";
 
-interface MyVotesMobileInputProps {
+export const MY_VOTES_INPUT_LAYOUT =
+  "tw-col-span-3 tw-row-start-3 tw-w-full tw-min-w-0 [&_input]:tw-text-sm @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-span-2 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-center @[54rem]/my-vote:tw-col-start-5 @[54rem]/my-vote:tw-row-span-1";
+
+interface MyVotesInputProps {
+  readonly className?: string | undefined;
+  readonly alwaysShowHelper?: boolean | undefined;
   readonly id: string;
   readonly label: string;
   readonly value: string;
@@ -35,7 +40,9 @@ interface MyVotesMobileInputProps {
 }
 
 /** Presentation shared by My Votes adapters; the adapter owns voting rules. */
-export function MyVotesMobileInput({
+export function MyVotesInput({
+  className = MY_VOTES_INPUT_LAYOUT,
+  alwaysShowHelper = false,
   id,
   label,
   value,
@@ -56,7 +63,7 @@ export function MyVotesMobileInput({
   onBlur,
   onSubmit,
   onExplain,
-}: MyVotesMobileInputProps) {
+}: MyVotesInputProps) {
   const locale = useBrowserLocale();
   const reduceMotion = useReducedMotion();
   const explainTooltipId = useId();
@@ -71,7 +78,7 @@ export function MyVotesMobileInput({
       inputRef.current?.focus({ preventScroll: true });
     }
   }, [changed, busy]);
-  const showHelper = focused || !valid || !!error;
+  const showHelper = alwaysShowHelper || focused || !valid || !!error;
   const helperId = `${id}-helper`;
   const errorId = `${id}-error`;
   const describedBy = [showHelper ? helperId : null, error ? errorId : null]
@@ -82,7 +89,7 @@ export function MyVotesMobileInput({
     <>
       <form
         data-vote-controls
-        className="tw-col-span-3 tw-row-start-3 tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-2 tw-gap-y-1"
+        className={`tw-grid tw-w-full tw-min-w-0 tw-cursor-default tw-grid-cols-[minmax(0,1fr)_auto] tw-items-start tw-gap-x-2 tw-gap-y-1 ${className}`}
         onSubmit={(event) => {
           event.preventDefault();
           if (changed && valid && !disabled && !busy) onSubmit();

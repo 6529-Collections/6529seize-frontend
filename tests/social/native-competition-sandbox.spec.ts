@@ -5842,11 +5842,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       name: "Save vote",
       exact: true,
     });
-    if (testInfo.project.name === "web-mobile-chromium") {
-      await expect(savedVoteButton).toHaveCount(0);
-    } else {
-      await expect(savedVoteButton).toBeDisabled();
-    }
+    await expect(savedVoteButton).toHaveCount(0);
     expect(sandbox.requests).toHaveLength(1);
     expect(sandbox.requests[0]?.path).toContain(
       "/alpha/entries/entry-alpha/votes/me"
@@ -6808,6 +6804,136 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   });
 
+  test("matches My Votes editing and selection on desktop with hover shortcuts", async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      Boolean(testInfo.project.use.hasTouch),
+      "Mouse hover is a desktop shortcut."
+    );
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    const sandbox = await installCompetitionApi(page);
+    sandbox.setVote("alpha", 25);
+    await page.goto(ROOT + "/alpha?tab=votes");
+    await dismissNextDevTools(page);
+    const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
+    const row = panel.getByRole("article").first();
+    const input = myVotesInput(row);
+    const save = row.getByRole("button", { name: "Save vote", exact: true });
+    const helper = row.getByText(/^Enter a whole number/);
+    const checkbox = row.getByRole("checkbox");
+    const checkmark = checkbox.locator("..").locator('[aria-hidden="true"]');
+    await expect(input).toHaveValue("25");
+    await expect(panel.getByText(/^Available in wave\s*75$/)).toBeVisible();
+    await expect(
+      panel.getByRole("button", { name: "Select", exact: true })
+    ).toBeVisible();
+    await expect(
+      panel.getByRole("button", { name: "Select all", exact: true })
+    ).toHaveCount(0);
+    await expect(save).toHaveCount(0);
+    await expect(helper).toBeVisible();
+    await page.mouse.move(0, 0);
+    await expect(checkmark).toHaveCSS("opacity", "0");
+    await row.hover();
+    await expect(checkmark).toHaveCSS("opacity", "1");
+    await checkbox.check();
+    await expect(
+      panel.getByRole("button", { name: "Done", exact: true })
+    ).toBeVisible();
+    await expect(
+      panel.getByRole("button", { name: "Deselect all", exact: true })
+    ).toBeVisible();
+    await page.mouse.move(0, 0);
+    await expect(checkmark).toHaveCSS("opacity", "1");
+    await expect(checkbox).toBeChecked();
+    await panel
+      .getByRole("button", { name: "Reset 1 vote", exact: true })
+      .click();
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: "Cancel", exact: true })
+      .click();
+    expect(sandbox.requests).toHaveLength(0);
+    await panel.getByRole("button", { name: "Done", exact: true }).click();
+    await expect(checkbox).not.toBeChecked();
+    await checkbox.focus();
+    await expect(checkmark).toHaveCSS("opacity", "1");
+    await checkbox.press("Space");
+    await expect(checkbox).toBeChecked();
+    await panel.getByRole("button", { name: "Done", exact: true }).click();
+    await input.focus();
+    await expect(helper).toBeVisible();
+    await input.press("Enter");
+    expect(sandbox.requests).toHaveLength(0);
+    await input.fill("40");
+    await expect(save).toBeVisible();
+    await input.press("Enter");
+    await expect(save).toHaveCount(0);
+    expect(sandbox.requests).toHaveLength(1);
+    expect(sandbox.requests[0]?.body).toMatchObject({ value: 40 });
+    await input.fill("9999");
+    await row.getByRole("heading").getByRole("button").focus();
+    await expect(input).toHaveValue("9,999");
+    await expect(helper).toBeVisible();
+    await input.focus();
+    await expect(input).toHaveValue("9999");
+    await input.fill("40");
+    await expect(input).toHaveValue("40");
+    await row.getByRole("heading").getByRole("button").focus();
+    await expect(helper).toBeVisible();
+    await expect(save).toHaveCount(0);
+    await expect(row.getByText("Total", { exact: true })).toHaveCSS(
+      "font-size",
+      "13px"
+    );
+    await expect(row.getByText("1 voter", { exact: true })).toHaveCSS(
+      "font-size",
+      "13px"
+    );
+    await expect(
+      row.getByRole("heading").locator("..").getByText("1st", { exact: true })
+    ).toBeVisible();
+    const picture = (await row
+      .getByRole("button", { name: /^Open / })
+      .boundingBox())!;
+    const field = (await input.boundingBox())!;
+    const stats = (await row
+      .getByText("Total", { exact: true })
+      .boundingBox())!;
+    const titleRow = (await row
+      .getByRole("heading")
+      .locator("..")
+      .boundingBox())!;
+    const author = (await row
+      .getByRole("link", { name: "playwright", exact: true })
+      .boundingBox())!;
+    expect(author.y - (titleRow.y + titleRow.height)).toBeGreaterThanOrEqual(
+      16
+    );
+    expect(author.y + author.height).toBeLessThanOrEqual(
+      picture.y + picture.height + 1
+    );
+    await expect(
+      row.getByRole("heading").locator("..").locator("[data-tooltip-content]")
+    ).toHaveCount(1);
+    await expect(
+      row
+        .getByRole("button", { name: /^Open / })
+        .locator("..")
+        .locator("[data-tooltip-content]")
+    ).toHaveCount(0);
+    expect(field.x).toBeGreaterThan(stats.x);
+    expect(field.y).toBeLessThan(picture.y + picture.height);
+    expect(stats.y).toBeLessThan(picture.y + picture.height);
+    await page.mouse.move(0, 0);
+    await panel.screenshot({
+      path: testInfo.outputPath("my-votes-desktop.png"),
+      animations: "disabled",
+    });
+    await expectNoHorizontalOverflow(page);
+  });
+
   test.describe("My Votes mobile presentation", () => {
     for (const surface of ["mobile web", "iOS app", "Android app"] as const) {
       test(`edits and selects compact votes in ${surface}`, async ({
@@ -7099,41 +7225,38 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           : [320, 390, 430, 639, 640, 767, 768, 960, 1200, 1600, 1920];
       for (const width of widths) {
         await page.setViewportSize({ width, height: 1000 });
-        await expect(input).toHaveAttribute(
-          "type",
-          width < 1024 ? "text" : "number"
-        );
+        await expect(input).toHaveAttribute("type", "text");
         await input.fill("12345678");
         await input.press("Shift+Tab");
         await page.keyboard.press("Tab");
         await expect(input).toBeFocused();
-        await expect(input).toHaveCSS("outline-color", "rgba(0, 0, 0, 0)");
         expect(
           await input.evaluate(
             (element) => getComputedStyle(element.parentElement!).boxShadow
           )
         ).toMatch(/inset.*2px/);
-        if (width < 1024) {
-          await expect(input).toHaveAttribute("type", "text");
-          const thumbnail = row.getByRole("button", { name: /^Open / });
-          expect((await thumbnail.boundingBox())!.width).toBe(56);
-          expect((await thumbnail.boundingBox())!.height).toBe(56);
-          await expect(explain).toHaveCSS("border-width", "0px");
-          expect((await explain.boundingBox())!.height).toBeGreaterThanOrEqual(
-            44
-          );
-          expect((await input.boundingBox())!.height).toBeGreaterThanOrEqual(
-            44
-          );
-          const field = (await input.boundingBox())!;
-          const action = (await explain.boundingBox())!;
-          expect(Math.abs(field.y - action.y)).toBeLessThanOrEqual(1);
-          await expect(
-            controls.getByText(/^Enter a whole number/)
-          ).toBeVisible();
-          await expectNoHorizontalOverflow(page);
-          continue;
-        }
+        const thumbnail = row.getByRole("button", { name: /^Open / });
+        const thumbnailSize = width < 1024 ? 56 : 96;
+        expect((await thumbnail.boundingBox())!.width).toBe(thumbnailSize);
+        expect((await thumbnail.boundingBox())!.height).toBe(thumbnailSize);
+        await expect(explain).toHaveCSS("border-width", "0px");
+        await expect(input).toHaveCSS(
+          "font-size",
+          width < 1024 ? "16px" : "14px"
+        );
+        const field = (await input.boundingBox())!;
+        const action = (await explain.boundingBox())!;
+        expect(field.height).toBeGreaterThanOrEqual(44);
+        expect(action.height).toBeGreaterThanOrEqual(44);
+        expect(Math.abs(field.y - action.y)).toBeLessThanOrEqual(1);
+        await expect(controls.getByText(/^Enter a whole number/)).toBeVisible();
+        await expect(row.getByRole("heading").getByRole("button")).toHaveCSS(
+          "white-space",
+          "nowrap"
+        );
+        await expect(
+          row.getByRole("link", { name: "playwright", exact: true })
+        ).toHaveCSS("white-space", "nowrap");
         const boxes = await controls.evaluate((form) => {
           const bounds = form.getBoundingClientRect();
           return [...form.querySelectorAll("input, button, p")].map(
@@ -7142,129 +7265,29 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
               return {
                 left: rect.left - bounds.left,
                 right: bounds.right - rect.right,
-                width: rect.width,
-                height: rect.height,
                 clipped: element.scrollWidth > element.clientWidth + 1,
               };
             }
           );
         });
-        for (const box of boxes) {
+        for (const box of width >= 1024 ? boxes : []) {
           expect(box.left).toBeGreaterThanOrEqual(-1);
           expect(box.right).toBeGreaterThanOrEqual(-1);
-          expect(box.clipped).toBe(false);
+          expect(box.clipped, JSON.stringify({ width, ...box })).toBe(false);
         }
-        expect((await input.boundingBox())!.width).toBeLessThanOrEqual(144);
-        const contentWidth = await row.evaluate((element) => {
-          const style = getComputedStyle(element);
-          return (
-            element.clientWidth -
-            parseFloat(style.paddingLeft) -
-            parseFloat(style.paddingRight)
-          );
-        });
-        const thumbnail = await row
-          .getByRole("button", { name: /^Open / })
-          .boundingBox();
-        const title = await row.getByRole("heading").boundingBox();
-        const thumbnailSize =
-          contentWidth >= 736 ? 96 : contentWidth >= 512 ? 80 : 64;
-        expect(thumbnail!.width).toBe(thumbnailSize);
-        expect(thumbnail!.height).toBe(thumbnailSize);
-        expect(title!.x).toBeGreaterThanOrEqual(
-          thumbnail!.x + thumbnail!.width
+        const contentWidth = await row.evaluate(
+          (element) => element.clientWidth - 32
         );
-        expect(Math.abs(title!.y - thumbnail!.y)).toBeLessThanOrEqual(1);
-        await expect(row.getByRole("heading").getByRole("button")).toHaveCSS(
-          "white-space",
-          "nowrap"
-        );
-        await expect(
-          row.getByRole("link", { name: "playwright", exact: true })
-        ).toHaveCSS("white-space", "nowrap");
-        for (const action of [
-          explain,
-          controls.getByRole("button", { name: "Save vote", exact: true }),
-        ]) {
-          await expect(action).toHaveCSS("white-space", "nowrap");
-        }
-        const saveInset = await controls
-          .getByRole("button", { name: "Save vote", exact: true })
-          .evaluate((button) => {
-            if (!(button instanceof HTMLButtonElement)) {
-              throw new Error("Expected Save vote to be an HTML button");
-            }
-            const bounds = button.getBoundingClientRect();
-            const visibleButton =
-              button.firstElementChild!.getBoundingClientRect();
-            const group = button.parentElement!.getBoundingClientRect();
-            return {
-              top: visibleButton.top - group.top,
-              bottom: group.bottom - visibleButton.bottom,
-              height: bounds.height,
-              visibleHeight: visibleButton.height,
-              label: button.innerText,
-              creditGap:
-                bounds.left -
-                button.previousElementSibling!.getBoundingClientRect().right,
-            };
-          });
-        expect(saveInset.top).toBeGreaterThanOrEqual(4);
-        expect(saveInset.bottom).toBeGreaterThanOrEqual(4);
-        expect(saveInset.creditGap).toBeGreaterThanOrEqual(12);
-        expect(saveInset.creditGap).toBeLessThanOrEqual(16);
-        if (contentWidth < 736) {
-          expect(saveInset.height).toBeGreaterThanOrEqual(44);
-          expect(saveInset.visibleHeight).toBe(36);
-          expect(saveInset.label).toBe("Save vote");
-          await expect(explain).toHaveCSS("border-radius", "8px");
-          await expect(explain).toHaveCSS("border-width", "1px");
-          await expect(explain).toHaveCSS("padding-left", "12px");
-          const inputBounds = (await input.boundingBox())!;
-          const explainBounds = (await explain.boundingBox())!;
-          expect(inputBounds.height).toBeGreaterThanOrEqual(44);
-          expect(explainBounds.height).toBe(36);
-          expect(
-            await explain.evaluate((button) =>
-              parseFloat(getComputedStyle(button, "::after").height)
-            )
-          ).toBeGreaterThanOrEqual(44);
-          await expect(input).toHaveCSS("font-size", "16px");
-        } else {
-          expect(saveInset.label).toBe("Save vote");
-        }
-        const inputBounds = (await input.boundingBox())!;
-        const explainBounds = (await explain.boundingBox())!;
-        const controlsWidth = (await controls.boundingBox())!.width;
-        if (controlsWidth >= 384) {
-          expect(
-            Math.abs(
-              inputBounds.y +
-                inputBounds.height / 2 -
-                (explainBounds.y + explainBounds.height / 2)
-            )
-          ).toBeLessThanOrEqual(1);
-          const saveBounds = (await controls
-            .getByRole("button", { name: "Save vote", exact: true })
-            .boundingBox())!;
-          expect(explainBounds.x).toBeGreaterThanOrEqual(
-            saveBounds.x + saveBounds.width + 8
+        if (width >= 1024 && contentWidth >= 864) {
+          const picture = (await thumbnail.boundingBox())!;
+          const heading = (await row.getByRole("heading").boundingBox())!;
+          // The title, stats and edit controls occupy the same desktop row.
+          expect(heading.y).toBeGreaterThanOrEqual(picture.y);
+          expect(heading.y + heading.height).toBeLessThanOrEqual(
+            picture.y + picture.height
           );
-          const rangeBounds = (await controls
-            .getByText(/^Enter a whole number between/)
-            .boundingBox())!;
-          expect(rangeBounds.y).toBeGreaterThanOrEqual(
-            Math.max(
-              inputBounds.y + inputBounds.height,
-              explainBounds.y + explainBounds.height
-            )
-          );
-        } else {
-          // Narrow phone rows keep complete action labels and the full number
-          // readable by placing Explain beside the hint below the field.
-          expect(explainBounds.y).toBeGreaterThanOrEqual(
-            inputBounds.y + inputBounds.height
-          );
+          expect(field.y).toBeLessThan(picture.y + picture.height);
+          expect(field.x).toBeGreaterThan(heading.x + heading.width);
         }
         await expectNoHorizontalOverflow(page);
       }
@@ -7284,9 +7307,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(error).toBeVisible();
       await expect(input).toHaveAttribute(
         "aria-describedby",
-        (page.viewportSize()?.width ?? 0) < 1024
-          ? /competition-vote-entry-alpha-error/
-          : /competition-vote-error-entry-alpha/
+        /competition-vote-entry-alpha-error/
       );
       await expect(input).toHaveValue("25");
       await expectNoHorizontalOverflow(page);

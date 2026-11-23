@@ -52,7 +52,10 @@ import {
 import SingleWaveDropVoteSlider from "@/components/waves/drop/SingleWaveDropVoteSlider";
 import { WAVE_VOTING_LABELS } from "@/helpers/waves/waves.constants";
 import { updateCompetitionVoteInCache } from "@/components/react-query-wrapper/utils/updateCompetitionVoteInCache";
-import { MyVotesMobileInput } from "@/components/brain/my-stream/votes/MyVotesMobileInput";
+import {
+  MyVotesInput,
+  MY_VOTES_INPUT_LAYOUT,
+} from "@/components/brain/my-stream/votes/MyVotesInput";
 import { triggerVoteSuccessHaptic } from "@/helpers/vote-haptics";
 
 const COMPACT_VOTE_LAYOUT =
@@ -93,7 +96,8 @@ export function CompetitionVoteForm({
   budgetEnabled = true,
   budgetVisibilityRef,
   compact = false,
-  mobileMyVotes = false,
+  myVotes = false,
+  mobile = false,
   modeControl,
   hidden,
   voteMode = "numeric",
@@ -124,7 +128,8 @@ export function CompetitionVoteForm({
       }
     | undefined;
   readonly compact?: boolean;
-  readonly mobileMyVotes?: boolean;
+  readonly myVotes?: boolean;
+  readonly mobile?: boolean;
   readonly modeControl?: ReactNode;
   readonly hidden?: boolean | undefined;
   readonly voteMode?: SingleWaveDropVoteMode | undefined;
@@ -274,7 +279,7 @@ export function CompetitionVoteForm({
         });
         void reply?.onVoteApplied();
         onVoteSuccess?.();
-        if (mobileMyVotes) triggerVoteSuccessHaptic();
+        if (myVotes) triggerVoteSuccessHaptic();
       }
       void invalidateCompetition(client, identity).catch(() => undefined);
     } catch (error) {
@@ -307,13 +312,13 @@ export function CompetitionVoteForm({
         {t(locale, "competitions.signIn")}
       </p>
     );
-  if (credit.isPending && compact && mobileMyVotes)
+  if (credit.isPending && compact && myVotes)
     return (
       <div
         ref={budgetVisibilityRef}
         role="status"
         aria-label={t(locale, "competitions.loading")}
-        className="tw-col-span-3 tw-row-start-3 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-2"
+        className={`tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-2 ${mobile ? "tw-col-span-3 tw-row-start-3" : MY_VOTES_INPUT_LAYOUT}`}
         aria-busy="true"
         aria-live="off"
       >
@@ -359,13 +364,19 @@ export function CompetitionVoteForm({
         }}
       />
     );
-  if (compact && mobileMyVotes)
+  if (compact && myVotes)
     return (
       <div
         ref={budgetVisibilityRef}
-        className="tw-col-span-3 tw-row-start-3 tw-min-w-0"
+        className={
+          mobile
+            ? "tw-col-span-3 tw-row-start-3 tw-min-w-0"
+            : MY_VOTES_INPUT_LAYOUT
+        }
       >
-        <MyVotesMobileInput
+        <MyVotesInput
+          className=""
+          alwaysShowHelper={!mobile}
           id={voteInputId}
           label={voteValueLabel}
           value={value}

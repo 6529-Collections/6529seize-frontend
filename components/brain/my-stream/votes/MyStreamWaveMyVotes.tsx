@@ -45,7 +45,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   const mobileViewport = useIsMobileLayoutViewport();
   const mobile = isApp || mobileViewport;
   const [selectionMode, setSelectionMode] = useState(false);
-  const isSelecting = !mobile || selectionMode;
+  const isSelecting = selectionMode;
   const [isResettingVotes, setIsResettingVotes] = useState(false);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({

@@ -203,7 +203,7 @@ it("keeps Explain disabled and restores zero after an empty mobile draft when no
         dropId="drop"
         disabled={false}
         compact
-        mobileMyVotes
+        myVotes
         onExplainVote={explain}
       />
     </QueryClientProvider>

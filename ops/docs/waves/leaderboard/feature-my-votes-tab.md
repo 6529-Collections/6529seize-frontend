@@ -78,16 +78,17 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    `You haven't voted on any submissions in this wave yet.`
 3. Review each row: preview, title, rank (when available), author, total vote
    value, voter count, and your current vote input.
-4. On mobile web below 1024px and in the app, choose `Select` to show checkboxes
-   and `Select all`. Holding a card also enters selection and selects that card;
-   scrolling cancels the hold. `Done` leaves selection and clears selected rows.
-   On desktop, selection controls remain visible. In selection mode, click a row
+4. Choose `Select` to show checkboxes and `Select all`. On mobile, holding a
+   card also enters selection and selects that card; scrolling cancels the hold.
+   Desktop checkboxes also appear when you hover over or focus a row. Checking
+   one enters selection mode. `Done` leaves selection and clears selected rows.
+   In selection mode, click a row
    outside its controls to select or deselect it. Artwork and title buttons open
    the drop, including with `Enter` or `Space`. Vote controls and profile links
    keep their own actions; selecting text does not toggle the row.
-5. Edit a vote, then submit with `Save vote` (`Vote` on legacy rows) or `Enter`.
-   On mobile, the save action appears only when the number differs from the
-   saved vote and disappears after saving or restoring the saved number.
+5. Edit a vote, then submit with `Save vote` or `Enter`. The save action appears
+   only when the number differs from the saved vote and disappears after saving
+   or restoring the saved number.
 6. Optional: select `Explain vote` to open an inline reply composer prefilled as
    `Vote rationale (...)`.
 7. With selection active, select rows by clicking outside their controls, using
@@ -99,11 +100,11 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 
 ## Common Scenarios
 
-On mobile web below 1024px and in the app, cards keep the thumbnail beside the title and author. Checkboxes appear only in selection mode. Rank sits beside the title, with totals and voters below. The amount and **Explain vote** remain side by side, with range help underneath only on focus or error. Controls keep 44-pixel tap targets and inputs use 16-pixel text. Titles and author names stay on one line with an ellipsis when needed. Wide desktop rows keep the existing control group to the right of the artwork and details, with persistent range help and the styled explanation tooltip. **Explain vote** is unavailable for a saved vote of zero and is omitted when you cannot chat in the wave. Opening it does not save a vote: review and send the public reply separately.
+On mobile web below 1024px and in the app, cards keep the thumbnail beside the title and author. Checkboxes appear only in selection mode. Rank sits beside the title, with totals and voters below. The amount and **Explain vote** remain side by side, with range help underneath only on focus or error. Controls keep 44-pixel tap targets and inputs use 16-pixel text. Titles and author names stay on one line with an ellipsis when needed. Desktop uses the same labels and editing behavior, with larger 96px artwork and the reusable media-type icon beside the title. The title and author have more vertical room. Where space permits, artwork, title and author, stats, the filled vote field, and quiet **Explain vote** text share one row. Rank stays beside the title, totals and voters use matching text sizes, and range help stays visible on desktop so focus changes do not move it. **Explain vote** is unavailable for a saved vote of zero and is omitted when you cannot chat in the wave. Opening it does not save a vote: review and send the public reply separately.
 
 - Rows use a subtle charcoal background. Hovering an unselected row lightens
   it further. Hovering or focusing the title highlights it in blue.
-- Mobile shows `Available in wave` above the bordered sorting control and
+- `Available in wave` appears above the bordered sorting control and
   trailing `Select` / `Done` action, on the same surface as the list.
 - Mobile cards use a square-cropped 56px thumbnail with a small media badge.
   Opening the artwork retains its full presentation. Rank sits beside the title;
@@ -175,9 +176,8 @@ On mobile web below 1024px and in the app, cards keep the thumbnail beside the t
 - `Explain vote` uses standard chat replies; it does not create a separate rationale
   object or require dedicated backend support.
 - Vote totals, available votes, and maximum values use locale-aware number
-  formatting. Mobile vote fields and legacy fields show grouped values at rest
-  and plain digits while editing. Desktop competition fields retain their
-  existing numeric input.
+  formatting. Vote fields show grouped values at rest and plain digits while
+  editing on desktop, mobile web, and in the app.
 - Reduced motion removes selection movement and save scaling; fades remain.
 - Decision links use `tab=votes`; `voteTab=mine`, `voteTab=all`, or `voteTab=activity` preserves the subtab on reload and Back/Forward. Older `tab=voters` links open All votes.
 

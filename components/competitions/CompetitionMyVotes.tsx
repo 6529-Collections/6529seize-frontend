@@ -113,8 +113,9 @@ function UnavailableVote({
         disabled={disabled}
         budgetEnabled={visible}
         onSubmittingChange={onSubmittingChange}
-        compact={mobile}
-        mobileMyVotes={mobile}
+        compact
+        myVotes
+        mobile={mobile}
       />
     </article>
   );
@@ -189,7 +190,7 @@ function ScopedCompetitionMyVotes({
   const isMobileViewport = useIsMobileLayoutViewport();
   const mobile = isApp || isMobileViewport;
   const [selectionMode, setSelectionMode] = useState(false);
-  const isSelecting = !mobile || selectionMode;
+  const isSelecting = selectionMode;
   const locale = useBrowserLocale();
   const [sort, setSort] = useLocalPreference<ApiCompetitionMyVotesSort>(
     `competitionMyVotesSort_${competition.wave_id}_${competition.id}_${viewer ?? "anonymous"}`,
@@ -483,7 +484,8 @@ function ScopedCompetitionMyVotes({
                   dropId={vote.drop_id}
                   disabled={isClosed || resetting}
                   compact
-                  mobileMyVotes={mobile}
+                  myVotes
+                  mobile={mobile}
                   onSubmittingChange={onSubmittingChange}
                   onExplainVote={
                     entryDrop.wave.authenticated_user_eligible_to_chat !==

@@ -1,23 +1,26 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
-import { MyVotesMobileInput } from "@/components/brain/my-stream/votes/MyVotesMobileInput";
+import { MyVotesInput } from "@/components/brain/my-stream/votes/MyVotesInput";
 
 function Input({
   failed = false,
   initial = 13202,
   busy = false,
+  alwaysShowHelper = false,
   onSave,
 }: {
   readonly failed?: boolean;
   readonly initial?: number;
   readonly busy?: boolean;
+  readonly alwaysShowHelper?: boolean;
   readonly onSave?: () => void;
 }) {
   const [value, setValue] = useState(String(initial));
   const [current, setCurrent] = useState(initial);
   const valid = /^-?\d+$/.test(value) && Math.abs(Number(value)) <= 20000;
   return (
-    <MyVotesMobileInput
+    <MyVotesInput
+      alwaysShowHelper={alwaysShowHelper}
       id="vote"
       label="Your vote"
       value={value}
@@ -79,6 +82,19 @@ it("formats at rest, edits plain digits and only shows Save for a changed number
       screen.queryByRole("button", { name: "Save vote" })
     ).not.toBeInTheDocument()
   );
+});
+
+it("keeps desktop range help visible before, during and after editing", () => {
+  render(<Input alwaysShowHelper />);
+  const input = screen.getByRole("textbox", { name: "Your vote" });
+  const helper = screen.getByText(/^Enter a whole number/);
+  expect(helper).toBeVisible();
+  fireEvent.focus(input);
+  expect(helper).toBeVisible();
+  fireEvent.change(input, { target: { value: "14000" } });
+  fireEvent.blur(input);
+  expect(helper).toBeVisible();
+  expect(input).toHaveAccessibleDescription(helper.textContent!);
 });
 
 it.each([

@@ -158,7 +158,7 @@ function MyVoteAuthor({
       className={
         mobile
           ? "tw-flex tw-min-w-0 tw-items-start tw-gap-2"
-          : "tw-mt-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 @[46rem]/my-vote:tw-mt-3"
+          : "tw-mt-4 tw-flex tw-min-w-0 tw-items-center tw-gap-2"
       }
     >
       <div className="tw-relative tw-size-6 tw-flex-shrink-0 tw-overflow-hidden tw-rounded-md tw-bg-iron-800 tw-ring-1 tw-ring-white/10">
@@ -272,9 +272,7 @@ function MyVoteVoters({
           ))}
         </div>
       )}
-      <span
-        className={`tw-whitespace-nowrap tw-font-normal tw-leading-5 tw-text-iron-300 ${mobile ? "tw-text-[13px]" : "tw-text-sm"}`}
-      >
+      <span className="tw-whitespace-nowrap tw-text-[13px] tw-font-normal tw-leading-5 tw-text-iron-300">
         <span className="tw-font-semibold">
           {formatInteger(locale, drop.raters_count)}
         </span>{" "}
@@ -323,13 +321,13 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   const resolvedMediaMimeType =
     artWork?.mime_type ?? curationPreviewMedia?.mimeType ?? DEFAULT_MIME_TYPE;
   const badgeMimeType = artWork?.mime_type ?? curationPreviewMedia?.mimeType;
-  const isSelected = (!mobile || isSelecting) && !isVotingClosed && isChecked;
+  const isSelected = isSelecting && !isVotingClosed && isChecked;
   const isSelectionDisabled = isVotingClosed || isResetting || !onToggleCheck;
   const selectionInputId = `my-vote-reset-selection-${drop.id}`;
   const mobileSelectionWidth = isSelecting ? 44 : 0;
   const desktopGridColumns = isVotingClosed
-    ? "@[46rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)]"
-    : "@[46rem]/my-vote:tw-grid-cols-[28px_96px_minmax(0,1fr)_25rem]";
+    ? "@[54rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_8rem]"
+    : "@[46rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_22rem] @[54rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_8rem_22rem]";
   const titleId = `my-vote-title-${drop.id}`;
   const longPress = useMyVoteLongPress(
     mobile && !isSelecting && !isSelectionDisabled,
@@ -344,9 +342,9 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   };
 
   const handleSelectionChange = () => {
-    if (!isSelectionDisabled && (!mobile || isSelecting)) {
-      onToggleCheck(drop.id);
-    }
+    if (isSelectionDisabled) return;
+    if (!isSelecting && !mobile) onEnterSelection?.();
+    else if (isSelecting) onToggleCheck(drop.id);
   };
 
   // Row clicks extend the native checkbox's pointer target.
@@ -370,7 +368,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       return;
     }
 
-    handleSelectionChange();
+    if (isSelecting) handleSelectionChange();
   };
 
   const handleExplainVote = (voteTotal: number, voteChange: number) => {
@@ -382,7 +380,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       aria-labelledby={titleId}
       onClick={handleRowClick}
       {...longPress}
-      className={`tw-px-4 tw-py-4 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none ${mobile ? "" : "sm:tw-py-6"} ${
+      className={`tw-group/my-vote tw-px-4 tw-py-4 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none ${
         isSelectionDisabled ? "" : "tw-cursor-pointer"
       } ${isSelected ? "tw-bg-primary-500/10" : "tw-bg-iron-950"} ${
         !isSelected && !isSelectionDisabled
@@ -394,18 +392,18 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         className={
           mobile
             ? "tw-grid tw-grid-cols-[auto_64px_minmax(0,1fr)] tw-gap-y-2"
-            : `tw-grid tw-grid-cols-[28px_64px_minmax(0,1fr)] tw-gap-x-2 tw-gap-y-3 @[32rem]/my-vote:tw-grid-cols-[28px_80px_minmax(0,1fr)] @[32rem]/my-vote:tw-gap-x-4 ${desktopGridColumns}`
+            : `tw-grid tw-grid-cols-[44px_96px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-3 @[54rem]/my-vote:tw-items-center ${desktopGridColumns}`
         }
       >
         <motion.div
-          animate={{ width: mobile ? mobileSelectionWidth : 28 }}
+          animate={{ width: mobile ? mobileSelectionWidth : 44 }}
           transition={
             reduceMotion ? { duration: 0 } : MY_VOTES_SPATIAL_TRANSITION
           }
           className={
             mobile
               ? "tw-col-start-1 tw-row-start-1 tw-overflow-hidden"
-              : "tw-flex tw-h-16 tw-items-center tw-justify-center @[32rem]/my-vote:tw-row-span-2 @[32rem]/my-vote:tw-h-20 @[46rem]/my-vote:tw-h-24"
+              : "tw-col-start-1 tw-row-start-1 tw-flex tw-h-24 tw-items-center tw-justify-center"
           }
         >
           <AnimatePresence initial={false}>
@@ -440,7 +438,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                   </span>
                   <span
                     aria-hidden="true"
-                    className={`tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-transition-colors tw-duration-200 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-offset-2 peer-focus-visible:tw-outline-primary-400 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
+                    className={`tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-transition-colors tw-duration-200 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-offset-2 peer-focus-visible:tw-outline-primary-400 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${!mobile && !isSelecting ? "tw-opacity-0 group-focus-within/my-vote:tw-opacity-100 group-hover/my-vote:tw-opacity-100" : ""} ${
                       isSelected
                         ? "tw-border-primary-500 tw-bg-primary-500 tw-text-white"
                         : "tw-border-iron-500 tw-bg-transparent tw-text-transparent"
@@ -471,7 +469,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           className={
             mobile
               ? "tw-relative tw-col-start-2 tw-row-start-1 tw-size-14 [&_img]:!tw-object-cover [&_video]:!tw-object-cover"
-              : "tw-relative tw-size-16 @[32rem]/my-vote:tw-row-span-2 @[32rem]/my-vote:tw-size-20 @[46rem]/my-vote:tw-size-24"
+              : "tw-relative tw-col-start-2 tw-row-start-1 tw-size-24"
           }
         >
           <button
@@ -537,8 +535,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 {dropTitle}
               </button>
             </h3>
-            {mobile && typeof drop.rank === "number" && (
-              <div className="tw-flex tw-min-h-11 tw-shrink-0 tw-items-end tw-pb-1">
+            {typeof drop.rank === "number" && (
+              <div
+                className={`tw-flex tw-shrink-0 ${mobile ? "tw-min-h-11 tw-items-end tw-pb-1" : "tw-min-h-6 tw-items-center"}`}
+              >
                 <SingleWaveDropPosition
                   rank={drop.rank}
                   variant="simple"
@@ -554,22 +554,14 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           className={
             mobile
               ? "tw-col-span-3 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-[13px]"
-              : "tw-col-span-3 tw-row-start-2 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-2 @[32rem]/my-vote:tw-col-span-1 @[32rem]/my-vote:tw-col-start-3 @[32rem]/my-vote:tw-self-start @[46rem]/my-vote:tw-min-h-8 @[46rem]/my-vote:tw-gap-x-4"
+              : "tw-col-span-3 tw-row-start-2 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 @[32rem]/my-vote:tw-col-span-1 @[32rem]/my-vote:tw-col-start-3 @[54rem]/my-vote:tw-col-start-4 @[54rem]/my-vote:tw-row-start-1 @[54rem]/my-vote:tw-flex-col @[54rem]/my-vote:tw-items-start"
           }
         >
           <MyStreamWaveMyVoteVotes
             drop={drop}
             winningThreshold={winningThreshold}
-            mobile={mobile}
           />
           <MyVoteVoters drop={drop} mobile={mobile} />
-          {!mobile && typeof drop.rank === "number" && (
-            <SingleWaveDropPosition
-              rank={drop.rank}
-              variant="simple"
-              size="sm"
-            />
-          )}
         </div>
 
         {!isVotingClosed &&

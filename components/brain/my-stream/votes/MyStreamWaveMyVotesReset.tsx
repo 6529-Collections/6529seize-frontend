@@ -192,19 +192,36 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
     </button>
   );
 
+  const resetActions = (
+    <div className="tw-flex tw-items-center tw-gap-2">
+      <button
+        type="button"
+        onClick={handleResetClick}
+        className={buttonClassName}
+        disabled={isResetting}
+        aria-label={resetButtonAriaLabel}
+      >
+        <span className={COMPACT_ACTION_CONTENT_CLASS}>
+          {isResetting
+            ? t(locale, "waves.myVotes.resetting")
+            : resetButtonLabel}
+        </span>
+      </button>
+      {selectedCount > 0 && (
+        <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
+          {selectedLabel}
+        </output>
+      )}
+    </div>
+  );
+
   return (
     <>
       <div
         className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-3 ${mobile ? "tw-bg-iron-950 tw-pt-3" : ""}`}
       >
-        <div
-          className={
-            mobile
-              ? "tw-flex tw-flex-col tw-gap-1 tw-px-4"
-              : "tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-px-2 sm:tw-px-4"
-          }
-        >
-          {mobile && typeof availableVotes === "number" && (
+        <div className="tw-flex tw-flex-col tw-gap-1 tw-px-4">
+          {typeof availableVotes === "number" && (
             <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
               {t(locale, "waves.myVotes.availableInWave")}{" "}
               <span className="tw-font-semibold !tw-tabular-nums tw-text-iron-100">
@@ -212,22 +229,19 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
               </span>
             </p>
           )}
-          <div
-            className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2 ${mobile ? "tw-w-full tw-justify-between" : ""}`}
-          >
+          <div className="tw-flex tw-w-full tw-min-w-0 tw-flex-wrap tw-items-center tw-justify-between tw-gap-2">
             <div
-              className={
-                mobile
-                  ? "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2"
-                  : "tw-contents"
-              }
+              className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2 ${mobile ? "" : "tw-flex-wrap"}`}
             >
-              <div className={mobile ? "tw-min-w-0" : "tw-contents"}>
-                {toolbarContent}
-              </div>
-              {mobile && showResetControls && isSelecting && selectAllButton}
+              <div className="tw-min-w-0">{toolbarContent}</div>
+              {showResetControls && isSelecting && selectAllButton}
+              {!mobile &&
+                showResetControls &&
+                isSelecting &&
+                showResetActions &&
+                resetActions}
             </div>
-            {mobile && showResetControls && onToggleSelection && (
+            {showResetControls && onToggleSelection && (
               <button
                 type="button"
                 onClick={onToggleSelection}
@@ -243,46 +257,10 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                 )}
               </button>
             )}
-            {showResetControls &&
-              (!mobile || isSelecting) &&
-              (!mobile || showResetActions) && (
-                <div
-                  className={`tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${mobile ? "tw-basis-full" : ""}`}
-                >
-                  {!mobile && selectAllButton}
-                  {showResetActions && (
-                    <div className="tw-flex tw-items-center tw-gap-2">
-                      <button
-                        type="button"
-                        onClick={handleResetClick}
-                        className={buttonClassName}
-                        disabled={isResetting}
-                        aria-label={resetButtonAriaLabel}
-                      >
-                        <span className={COMPACT_ACTION_CONTENT_CLASS}>
-                          {isResetting
-                            ? t(locale, "waves.myVotes.resetting")
-                            : resetButtonLabel}
-                        </span>
-                      </button>
-                      {selectedCount > 0 && (
-                        <output className="tw-whitespace-nowrap tw-text-sm tw-leading-5 tw-text-iron-400">
-                          {selectedLabel}
-                        </output>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
+            {mobile && showResetControls && isSelecting && showResetActions && (
+              <div className="tw-basis-full">{resetActions}</div>
+            )}
           </div>
-          {!mobile && typeof availableVotes === "number" && (
-            <p className="tw-m-0 tw-whitespace-nowrap tw-text-left tw-text-xs tw-leading-5 tw-text-iron-500">
-              {t(locale, "waves.myVotes.availableInWave")}{" "}
-              <span className="tw-font-semibold !tw-tabular-nums tw-text-iron-200">
-                {formatInteger(locale, availableVotes)}
-              </span>
-            </p>
-          )}
         </div>
 
         <div className="tw-px-2 sm:tw-px-4">

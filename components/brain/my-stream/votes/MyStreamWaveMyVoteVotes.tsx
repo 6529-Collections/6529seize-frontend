@@ -6,14 +6,12 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
 interface MyStreamWaveMyVoteVotesProps {
-  readonly mobile?: boolean;
   readonly drop: ExtendedDrop;
   readonly winningThreshold?: number | null | undefined;
 }
 
 const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
   drop,
-  mobile = false,
   winningThreshold,
 }) => {
   const locale = useBrowserLocale();
@@ -22,9 +20,7 @@ const MyStreamWaveMyVoteVotes: React.FC<MyStreamWaveMyVoteVotesProps> = ({
     typeof winningThreshold === "number" && winningThreshold > 0;
 
   return (
-    <div
-      className={`tw-flex tw-min-h-6 tw-items-center tw-gap-x-1.5 tw-leading-5 ${mobile ? "tw-text-[13px] [&_span]:!tw-text-[13px]" : "tw-text-sm"}`}
-    >
+    <div className="tw-flex tw-min-h-6 tw-items-center tw-gap-x-1.5 tw-text-[13px] tw-leading-5 [&_span]:!tw-text-[13px]">
       <span className="tw-text-iron-400">
         {t(locale, "waves.myVotes.total")}
       </span>

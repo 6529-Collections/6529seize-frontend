@@ -277,10 +277,10 @@ describe("effective App PR CI plan", () => {
   });
   it.each([
     "components/waves/leaderboard/WaveMySubmissions.tsx",
-    "components/brain/my-stream/votes/MyVotesMobileInput.tsx",
+    "components/brain/my-stream/votes/MyVotesInput.tsx",
     "components/brain/my-stream/votes/MyStreamWaveMyVote.tsx",
     "components/brain/my-stream/votes/useMyVoteLongPress.ts",
-    "__tests__/components/brain/my-stream/votes/MyVotesMobileInput.test.tsx",
+    "__tests__/components/brain/my-stream/votes/MyVotesInput.test.tsx",
     "helpers/vote-haptics.ts",
     "components/waves/leaderboard/MySubmissionsButton.tsx",
     "components/waves/leaderboard/MySubmissionsDialog.tsx",
