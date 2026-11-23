@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/publish.ts at commit 8496bfbb6347c265ec74c7e361612d97ccdaf731.
+// Copied from 6529-Collections/6529-provenance-app src/publish.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import { isAddressEqual, size, type Address, type Hex, type PublicClient } from "viem";
@@ -59,8 +59,7 @@ export async function readSenderCapability(
     return STANDARD_SENDER;
   }
   const chain = (caps as Record<string, unknown> | null)?.[`0x${chainId.toString(16)}`] as
-    | { desktopForwarding?: { maxTransactionDataBytes?: unknown } }
-    | undefined;
+    { desktopForwarding?: { maxTransactionDataBytes?: unknown } } | undefined;
   const max = chain?.desktopForwarding?.maxTransactionDataBytes;
   if (typeof max !== "number" || !Number.isInteger(max) || max <= 0) return STANDARD_SENDER;
   return { ...DESKTOP_FORWARDED_SENDER, maxCalldataBytes: max };
