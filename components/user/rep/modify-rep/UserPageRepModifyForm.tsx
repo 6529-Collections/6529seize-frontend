@@ -8,6 +8,7 @@ import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import { getStringAsNumberOrZero } from "@/helpers/Helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { chainRatingBlockedText } from "@/components/chain-identity/chainErrorMessage";
+import ChainRatingNote from "@/components/chain-identity/ChainRatingNote";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import { t, tRich } from "@/i18n/messages";
 import { useContext, useEffect, useId, useState } from "react";
@@ -78,6 +79,7 @@ export default function UserPageRepModifyForm({
             heroAvailableCredit={heroAvailableRep}
             isLoading={!repState}
           />
+          <ChainRatingNote />
         </div>
         {!repState && !isError && (
           <output className="tw-sr-only">

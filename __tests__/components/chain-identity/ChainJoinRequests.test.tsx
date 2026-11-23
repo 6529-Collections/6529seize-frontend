@@ -441,3 +441,21 @@ it("asks to sign in again when 6529.io's session has ended", async () => {
   ).toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
 });
+
+it("takes a declined request off the page, even after a look at its fee", async () => {
+  relay["cancel"]!.mockImplementation(async () => {
+    relay["waiting"]!.mockResolvedValue([]);
+    return { ...heldJoin(), status: "CANCELLED" };
+  });
+  renderRequests();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review and sign" })
+  );
+  fireEvent.click(await screen.findByRole("button", { name: "Cancel" }));
+  fireEvent.click(screen.getByRole("button", { name: "Decline" }));
+  await waitFor(() =>
+    expect(
+      screen.queryByRole("button", { name: "Decline" })
+    ).not.toBeInTheDocument()
+  );
+});

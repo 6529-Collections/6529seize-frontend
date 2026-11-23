@@ -167,6 +167,7 @@ function JoinRequestCard({
   rejoinWaitMs,
   onChanged,
   onActive,
+  onGone,
 }: {
   readonly op: RelayOperation;
   readonly wallet: Hex;
@@ -177,6 +178,8 @@ function JoinRequestCard({
   readonly onChanged: () => void;
   /** Keeps the card on the page while its join is under way. */
   readonly onActive: (op: RelayOperation) => void;
+  /** Takes a declined request off the page. */
+  readonly onGone: (txId: Hex) => void;
 }) {
   const locale = useBrowserLocale();
   const action = useChainAction(onChanged);
@@ -269,6 +272,8 @@ function JoinRequestCard({
         () => setUnsent(true)
       );
       setUnsent(false);
+      // The first try's error no longer stands.
+      action.cancel();
       setResendText(t(locale, "chainIdentity.action.done"));
       onChanged();
     } catch (error) {
@@ -283,6 +288,7 @@ function JoinRequestCard({
     setDeclineError(null);
     try {
       await chainRelay.cancel(op.tx_id);
+      onGone(op.tx_id);
       onChanged();
     } catch (error) {
       setDeclineError(chainErrorMessage(locale, error));
@@ -554,6 +560,11 @@ export default function ChainJoinRequests({
             walletState={walletState}
             rejoinWaitMs={rejoinWaitMs}
             onActive={keep}
+            onGone={(txId) =>
+              setKept((current) =>
+                current.filter((item) => item.tx_id !== txId)
+              )
+            }
             onChanged={changed}
           />
         ))}

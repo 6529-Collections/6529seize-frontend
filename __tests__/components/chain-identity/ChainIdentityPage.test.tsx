@@ -110,7 +110,7 @@ it("creates an identity after showing the fee, paid by the wallet", async () => 
   expect(await screen.findByText("2 $fake6529")).toBeInTheDocument();
 
   fireEvent.change(screen.getByLabelText("Handle (optional)"), {
-    target: { value: "GM_6529" },
+    target: { value: "Tester_Two" },
   });
   // The handle is checked on the chain before the button opens.
   expect(await screen.findByText("Available.")).toBeInTheDocument();
@@ -126,7 +126,7 @@ it("creates an identity after showing the fee, paid by the wallet", async () => 
       opType: "IDENTITY_CREATE",
       principal: null,
       signer: WALLET,
-      body: { legacyId: null, handle: "gm_6529", profileDocCid: "0x" },
+      body: { legacyId: null, handle: "tester_two", profileDocCid: "0x" },
     }),
     "IdentityCreate"
   );

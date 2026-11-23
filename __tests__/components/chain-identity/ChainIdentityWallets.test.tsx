@@ -106,7 +106,7 @@ it("warns when removing the wallet in use, and claims no wait the chain didn't g
   );
   expect(
     await screen.findByText(
-      "This is the wallet you are using now. After this, 0x000000…0000aa no longer signs for your identity. Its NFTs stop counting toward your identity's TDH; if the REP or NIC you have given then adds up to more than your TDH, the 6529 Network scales your ratings down."
+      "This is the wallet you are using now. Afterwards it no longer signs for your identity: manage it from one of its other wallets. After this, 0x000000…0000aa no longer signs for your identity. Its NFTs stop counting toward your identity's TDH; if the REP or NIC you have given then adds up to more than your TDH, the 6529 Network scales your ratings down."
     )
   ).toBeInTheDocument();
 });

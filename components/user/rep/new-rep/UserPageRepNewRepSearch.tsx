@@ -41,6 +41,7 @@ import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { RATING_INPUT_SURFACE_CLASS } from "@/components/user/utils/rate/ratingInputStyles";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
+import ChainRatingNote from "@/components/chain-identity/ChainRatingNote";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
 import {
   HELP_BOT_CREDIT_REP_CATEGORY,
@@ -540,6 +541,7 @@ function GrantRepForm({
           overAllowance={overAllowance}
           id={availableRepId}
         />
+        <ChainRatingNote />
         <form onSubmit={onSearchSubmit} className="tw-relative tw-w-full">
           <label htmlFor="search-rep" className="tw-sr-only">
             {t(locale, "rep.categories.grant.searchPlaceholder")}

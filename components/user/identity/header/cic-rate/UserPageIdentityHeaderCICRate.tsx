@@ -9,6 +9,7 @@ import {
   chainRatingBlockedText,
   chainRatingFailureText,
 } from "@/components/chain-identity/chainErrorMessage";
+import ChainRatingNote from "@/components/chain-identity/ChainRatingNote";
 import { useChainRatingWriter } from "@/components/chain-identity/useChainRatingWriter";
 import { commonApiPost } from "@/services/api/common-api";
 import { useMutation } from "@tanstack/react-query";
@@ -291,6 +292,7 @@ function UserPageIdentityHeaderCICRateForm({
           currentCICState?.cic_ratings_left_to_give_by_rater ?? 0
         }
       />
+      <ChainRatingNote />
       {isError && (
         <div role="alert" className="tw-mt-3 tw-text-sm tw-text-iron-300">
           <p>{blocked ?? t(locale, "user.rate.loadError")}</p>

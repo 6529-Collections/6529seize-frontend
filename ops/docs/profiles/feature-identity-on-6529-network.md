@@ -36,8 +36,11 @@ plus 24 hours). Before that the page says when changes open.
 | Sign on this browser        | The wallet signs once to give this browser a key for 30 days that signs REP, NIC and profile changes without a wallet prompt                               | The identity, within the budget shown   |
 | Delegations                 | Registers and revokes delegations with the Delegation Center's collections and use cases, for the identity or one wallet                                   | The identity, or the wallet for its own |
 
-Before any wallet prompt the page shows the most the change can cost, and
-then waits until the 6529 Network has made the change final.
+Before a transaction is signed, the page shows the most it can cost, and
+then waits until the 6529 Network has made the change final. Signing the
+profile document and signing in to 6529.io cost nothing. REP and NIC given
+on profile pages show no fee step: the form says that the fee comes from the
+identity's $fake6529.
 
 The profile site builder saves its site's place in the same profile document
 of the signed-in profile's identity. It changes only the site's two fields

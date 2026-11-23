@@ -167,8 +167,11 @@ function relayErrorMessage(
   error: ChainRelayError
 ): string {
   const { status } = error;
-  if (status === 401 || status === 403) {
+  if (status === 401) {
     return t(locale, "chainIdentity.error.relaySignIn");
+  }
+  if (status === 403) {
+    return t(locale, "chainIdentity.error.relayNotYours");
   }
   if (status === 400 && error.hold) {
     return t(locale, "chainIdentity.error.relayHoldRefused");
