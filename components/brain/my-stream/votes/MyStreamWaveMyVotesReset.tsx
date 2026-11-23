@@ -247,7 +247,7 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                 onClick={onToggleSelection}
                 disabled={isResetting}
                 aria-pressed={isSelecting}
-                className="tw-ml-auto tw-min-h-11 tw-min-w-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+                className="tw-ml-auto tw-min-h-11 tw-min-w-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-font-medium tw-text-iron-300 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 enabled:tw-cursor-pointer disabled:tw-opacity-50 enabled:desktop-hover:hover:tw-bg-iron-900/50 enabled:desktop-hover:hover:tw-text-iron-100 motion-reduce:tw-transition-none"
               >
                 {t(
                   locale,

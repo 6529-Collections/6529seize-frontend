@@ -6836,7 +6836,11 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     ).toHaveCount(0);
     await expect(save).toHaveCount(0);
     await expect(helper).toBeVisible();
+    const select = panel.getByRole("button", { name: "Select", exact: true });
+    await select.hover();
+    await expect(select).toHaveCSS("background-color", "rgba(28, 28, 33, 0.5)");
     await page.mouse.move(0, 0);
+    await expect(select).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
     await expect(checkmark).toHaveCSS("opacity", "1");
     await row.hover();
     await expect(checkmark).toHaveCSS("opacity", "1");
@@ -6844,6 +6848,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(
       panel.getByRole("button", { name: "Done", exact: true })
     ).toBeVisible();
+    const done = panel.getByRole("button", { name: "Done", exact: true });
+    await done.hover();
+    await expect(done).toHaveCSS("background-color", "rgba(28, 28, 33, 0.5)");
     await expect(
       panel.getByRole("button", { name: "Deselect all", exact: true })
     ).toBeVisible();
@@ -7126,8 +7133,16 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             request.path.endsWith("/votes/me")
           )
         ).toHaveLength(1);
-        await select.focus();
-        await select.press("Enter");
+        if (testInfo.project.use.hasTouch) await select.tap();
+        else {
+          await select.focus();
+          await select.press("Enter");
+        }
+        if (testInfo.project.use.hasTouch) {
+          await expect(
+            panel.getByRole("button", { name: "Done", exact: true })
+          ).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+        }
         await expect(row.getByRole("checkbox")).toBeVisible();
         await expect(
           panel.getByRole("button", { name: "Select all", exact: true })
@@ -7171,7 +7186,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .click();
         await expect(input).toHaveValue("-40");
         await capture("selected");
-        await panel.getByRole("button", { name: "Done", exact: true }).click();
+        const done = panel.getByRole("button", { name: "Done", exact: true });
+        if (testInfo.project.use.hasTouch) await done.tap();
+        else await done.click();
+        if (testInfo.project.use.hasTouch) {
+          await expect(select).toHaveCSS(
+            "background-color",
+            "rgba(0, 0, 0, 0)"
+          );
+        }
         await expect(row.getByRole("checkbox")).toHaveCount(0);
         await expect(reset).toHaveCount(0);
         const bounds = (await row.getByRole("heading").boundingBox())!;

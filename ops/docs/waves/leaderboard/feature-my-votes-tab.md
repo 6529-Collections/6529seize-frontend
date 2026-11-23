@@ -103,6 +103,8 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 
 On mobile web below 1024px and in the app, cards keep the thumbnail beside the title and author. Checkboxes appear only in selection mode. Rank sits beside the title, with totals and voters below. The amount and **Explain vote** remain side by side, with range help underneath only on focus or error. Controls keep 44-pixel tap targets and inputs use 16-pixel text. Titles and author names stay on one line with an ellipsis when needed. Desktop uses the same labels and editing behavior, with larger 96px artwork and the reusable media-type icon beside the title. The title and author have more vertical room, with Total and voters together beneath the handle. Where space permits, artwork, title and author, stats, the filled vote field, and a bordered **Explain vote** button share one row. Desktop **Save vote** uses a solid fill when a changed amount is ready to save. Rank stays beside the title, totals and voters use matching text sizes, and range help stays visible on desktop so focus changes do not move it. **Explain vote** is unavailable for a saved vote of zero and is omitted when you cannot chat in the wave. Opening it does not save a vote: review and send the public reply separately.
 
+- `Select` and `Done` highlight on mouse hover; tapping them on touch devices
+  does not retain the hover highlight.
 - Rows use a subtle charcoal background. Hovering an unselected row lightens
   it further. Hovering or focusing the title highlights it in blue.
 - `Available in wave` appears above the bordered sorting control and
