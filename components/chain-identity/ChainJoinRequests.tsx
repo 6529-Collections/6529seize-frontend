@@ -40,6 +40,7 @@ import {
 } from "./chainErrorMessage";
 import { ChainSection, shortHex } from "./chainIdentityUi";
 import { useChainAction } from "./useChainAction";
+import { useChainClock } from "./useChainClock";
 
 const DATE_TIME: Intl.DateTimeFormatOptions = {
   dateStyle: "medium",
@@ -159,6 +160,85 @@ function joinerReason(
   }
 }
 
+/** The held join checked for this wallet, or null when it can't be. */
+function checkedJoin(op: RelayOperation, wallet: Hex): ChainDraft | null {
+  try {
+    return heldJoinDraft(op, wallet);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Whether this wallet can join the request's identity: null while its state
+ * is read, undefined when it couldn't be (the chain decides). It may rejoin
+ * the identity it left at once; any other waits.
+ */
+function readinessFor(
+  walletState: ChainWalletMembership | null | undefined,
+  rejoinWaitMs: number | null,
+  nowMs: number,
+  principal: Hex | null
+): JoinReadiness | null | undefined {
+  if (walletState === undefined) {
+    return undefined;
+  }
+  return walletState === null
+    ? null
+    : joinReadiness(walletState, rejoinWaitMs, nowMs, principal);
+}
+
+/** The identity's handle, or its short id as it reads in a sentence. */
+function identityNames(
+  locale: SupportedLocale,
+  principal: Hex | null,
+  handle: string | null | undefined
+): IdentityNames {
+  if (handle) {
+    return { start: handle, mid: handle };
+  }
+  const id = principal ? shortHex(principal) : "";
+  return {
+    start: t(locale, "chainIdentity.requests.noHandleStart", { id }),
+    mid: t(locale, "chainIdentity.requests.noHandle", { id }),
+  };
+}
+
+/** Why the request can't be signed here, or null when it can. */
+function blockedReason(
+  locale: SupportedLocale,
+  input: {
+    readonly checked: boolean;
+    readonly expired: boolean;
+    readonly stranger: boolean;
+    readonly readiness: JoinReadiness | null | undefined;
+    readonly names: IdentityNames;
+  }
+): string | null {
+  const { readiness } = input;
+  if (!input.checked) {
+    return t(locale, "chainIdentity.requests.notJoin");
+  }
+  if (input.expired) {
+    return t(locale, "chainIdentity.requests.expired");
+  }
+  if (input.stranger) {
+    return t(locale, "chainIdentity.requests.notFromIdentity", {
+      identity: input.names.mid,
+    });
+  }
+  if (readiness?.kind === "bound") {
+    return t(locale, "chainIdentity.requests.bound");
+  }
+  if (readiness?.kind === "waiting") {
+    return t(locale, "chainIdentity.requests.waiting", {
+      left: formatDate(locale, readiness.leftMs, DATE_TIME),
+      until: formatDate(locale, readiness.untilMs, DATE_TIME),
+    });
+  }
+  return null;
+}
+
 function JoinRequestCard({
   op,
   wallet,
@@ -199,38 +279,19 @@ function JoinRequestCard({
     enabled: op.principal !== null,
     staleTime: 30_000,
   });
-  let checkedDraft: ChainDraft | null = null;
-  try {
-    checkedDraft = heldJoinDraft(op, wallet);
-  } catch {
-    checkedDraft = null;
-  }
-  const checked = checkedDraft !== null;
-  // The wallet may rejoin the identity it left at once; any other waits.
-  let readiness: JoinReadiness | null | undefined =
-    walletState === undefined ? undefined : null;
-  if (walletState) {
-    readiness = joinReadiness(
-      walletState,
-      rejoinWaitMs,
-      Date.now(),
-      op.principal
-    );
-  }
+  const nowMs = useChainClock();
+  const checkedDraft = checkedJoin(op, wallet);
+  const readiness = readinessFor(
+    walletState,
+    rejoinWaitMs,
+    nowMs,
+    op.principal
+  );
   // The signed header's expiry, not the relay's copy of it.
   const expiresAtMs = checkedDraft
     ? Number(checkedDraft.envelope.header["expiresAt"])
     : op.expires_at;
-
-  const shortId = op.principal ? shortHex(op.principal) : "";
-  const names: IdentityNames = identity.data?.handle
-    ? { start: identity.data.handle, mid: identity.data.handle }
-    : {
-        start: t(locale, "chainIdentity.requests.noHandleStart", {
-          id: shortId,
-        }),
-        mid: t(locale, "chainIdentity.requests.noHandle", { id: shortId }),
-      };
+  const names = identityNames(locale, op.principal, identity.data?.handle);
 
   const sign = () => {
     onActive(op);
@@ -304,23 +365,13 @@ function JoinRequestCard({
     (identity.data?.wallets ?? []).some(
       (item) => item.toLowerCase() === requester.toLowerCase()
     );
-  let blocked: string | null = null;
-  if (!checked) {
-    blocked = t(locale, "chainIdentity.requests.notJoin");
-  } else if (expiresAtMs <= Date.now()) {
-    blocked = t(locale, "chainIdentity.requests.expired");
-  } else if (identity.isSuccess && !requesterInIdentity) {
-    blocked = t(locale, "chainIdentity.requests.notFromIdentity", {
-      identity: names.mid,
-    });
-  } else if (readiness?.kind === "bound") {
-    blocked = t(locale, "chainIdentity.requests.bound");
-  } else if (readiness?.kind === "waiting") {
-    blocked = t(locale, "chainIdentity.requests.waiting", {
-      left: formatDate(locale, readiness.leftMs, DATE_TIME),
-      until: formatDate(locale, readiness.untilMs, DATE_TIME),
-    });
-  }
+  const blocked = blockedReason(locale, {
+    checked: checkedDraft !== null,
+    expired: expiresAtMs <= nowMs,
+    stranger: identity.isSuccess && !requesterInIdentity,
+    readiness,
+    names,
+  });
 
   return (
     <li className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/5 tw-p-3">

@@ -19,6 +19,7 @@ import {
   JOIN_VALID_MS,
   joinReadiness,
   ROLE_SIGNER,
+  type JoinReadiness,
 } from "@/lib/chain-identity/joins";
 import {
   ChainOperationError,
@@ -43,6 +44,7 @@ import {
   shortHex,
 } from "./chainIdentityUi";
 import { useChainAction } from "./useChainAction";
+import { useChainClock } from "./useChainClock";
 
 const DATE_TIME: Intl.DateTimeFormatOptions = {
   dateStyle: "medium",
@@ -59,6 +61,65 @@ const joinWindow = (locale: SupportedLocale): string =>
     unit: "hour",
     unitDisplay: "long",
   }).format(JOIN_VALID_MS / 3_600_000);
+
+/** What the chain says about the wallet typed under "Add a wallet". */
+function addWalletHint(
+  locale: SupportedLocale,
+  input: {
+    readonly typed: string;
+    readonly typedOk: boolean;
+    readonly readiness: JoinReadiness | null;
+    readonly principalId: Hex;
+    readonly checking: boolean;
+    readonly error: unknown;
+  }
+): string | null {
+  const { readiness } = input;
+  if (input.typed !== "" && !input.typedOk) {
+    return t(locale, "chainIdentity.wallets.addInvalid");
+  }
+  if (input.typedOk && input.checking && readiness === null) {
+    return t(locale, "chainIdentity.wallets.checking");
+  }
+  if (readiness?.kind === "bound") {
+    return sameWallet(readiness.principalId, input.principalId)
+      ? t(locale, "chainIdentity.wallets.readyMine")
+      : t(locale, "chainIdentity.wallets.readyBound");
+  }
+  if (readiness?.kind === "waiting") {
+    return t(locale, "chainIdentity.wallets.readyWaiting", {
+      left: formatDate(locale, readiness.leftMs, DATE_TIME),
+      until: formatDate(locale, readiness.untilMs, DATE_TIME),
+    });
+  }
+  if (readiness?.kind === "free") {
+    return t(locale, "chainIdentity.wallets.readyFree");
+  }
+  return input.error === null ? null : chainErrorMessage(locale, input.error);
+}
+
+/** What removing a wallet does, said before the wallet signs. */
+function removeWalletNote(
+  locale: SupportedLocale,
+  input: {
+    readonly removing: Hex;
+    readonly wallet: Hex;
+    readonly rejoinWaitMs: number | null;
+    readonly nowMs: number;
+  }
+): string {
+  const target = shortHex(input.removing);
+  const effect =
+    input.rejoinWaitMs === null
+      ? t(locale, "chainIdentity.wallets.removeNoteNoWait", { wallet: target })
+      : t(locale, "chainIdentity.wallets.removeNote", {
+          wallet: target,
+          date: formatDate(locale, input.nowMs + input.rejoinWaitMs, DATE_TIME),
+        });
+  return sameWallet(input.removing, input.wallet)
+    ? `${t(locale, "chainIdentity.wallets.removeSelf")} ${effect}`
+    : effect;
+}
 
 /**
  * The identity's wallets: IDENTITY_REMOVE for any of them but the last, and
@@ -92,10 +153,11 @@ export default function ChainIdentityWallets({
     snapshotStartedJoins,
     serverStartedJoins
   ).filter((item) => sameWallet(item.principalId, identity.principalId));
+  const nowMs = useChainClock();
   // One held join per wallet: its nonce would clash with a second one's.
   const waiting = started.find(
     (item) =>
-      sameWallet(item.identityWallet, wallet) && item.expiresAtMs > Date.now()
+      sameWallet(item.identityWallet, wallet) && item.expiresAtMs > nowMs
   );
 
   const typed = joining.trim();
@@ -114,36 +176,22 @@ export default function ChainIdentityWallets({
       ? joinReadiness(
           membership.data,
           rejoinWaitMs,
-          Date.now(),
+          nowMs,
           identity.principalId
         )
       : null;
-  const mine =
-    readiness?.kind === "bound" &&
-    sameWallet(readiness.principalId, identity.principalId);
   const canJoin =
     typedOk && readiness?.kind === "free" && waiting === undefined;
   const canRemove = identity.wallets.length > 1;
 
-  let readinessText: string | null = null;
-  if (typed !== "" && !typedOk) {
-    readinessText = t(locale, "chainIdentity.wallets.addInvalid");
-  } else if (typedOk && membership.isFetching && readiness === null) {
-    readinessText = t(locale, "chainIdentity.wallets.checking");
-  } else if (mine) {
-    readinessText = t(locale, "chainIdentity.wallets.readyMine");
-  } else if (readiness?.kind === "bound") {
-    readinessText = t(locale, "chainIdentity.wallets.readyBound");
-  } else if (readiness?.kind === "waiting") {
-    readinessText = t(locale, "chainIdentity.wallets.readyWaiting", {
-      left: formatDate(locale, readiness.leftMs, DATE_TIME),
-      until: formatDate(locale, readiness.untilMs, DATE_TIME),
-    });
-  } else if (readiness?.kind === "free") {
-    readinessText = t(locale, "chainIdentity.wallets.readyFree");
-  } else if (membership.isError) {
-    readinessText = chainErrorMessage(locale, membership.error);
-  }
+  const readinessText = addWalletHint(locale, {
+    typed,
+    typedOk,
+    readiness,
+    principalId: identity.principalId,
+    checking: membership.isFetching,
+    error: membership.isError ? membership.error : null,
+  });
 
   const startRemove = (target: Hex) => {
     setRemoving(target);
@@ -157,24 +205,15 @@ export default function ChainIdentityWallets({
     });
   };
 
-  const removeNote = (() => {
-    if (removing === null) {
-      return undefined;
-    }
-    const target = shortHex(removing);
-    const effect =
-      rejoinWaitMs === null
-        ? t(locale, "chainIdentity.wallets.removeNoteNoWait", {
-            wallet: target,
-          })
-        : t(locale, "chainIdentity.wallets.removeNote", {
-            wallet: target,
-            date: formatDate(locale, Date.now() + rejoinWaitMs, DATE_TIME),
-          });
-    return sameWallet(removing, wallet)
-      ? `${t(locale, "chainIdentity.wallets.removeSelf")} ${effect}`
-      : effect;
-  })();
+  const removeNote =
+    removing === null
+      ? undefined
+      : removeWalletNote(locale, {
+          removing,
+          wallet,
+          rejoinWaitMs,
+          nowMs,
+        });
 
   const startJoin = () => {
     if (!canJoin) {

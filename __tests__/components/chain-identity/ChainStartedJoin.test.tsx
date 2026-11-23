@@ -161,6 +161,10 @@ it("sends a fully signed join again after the network was unreachable, or withdr
   ).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Send again" }));
   await waitFor(() => expect(relay["retry"]).toHaveBeenCalledWith(op.tx_id));
+  // The row is busy until the relay is read again.
+  await waitFor(() =>
+    expect(screen.getByRole("button", { name: "Withdraw" })).toBeEnabled()
+  );
   fireEvent.click(screen.getByRole("button", { name: "Withdraw" }));
   await waitFor(() => expect(relay["cancel"]).toHaveBeenCalledWith(op.tx_id));
   expect(snapshotStartedJoins()).toEqual([]);

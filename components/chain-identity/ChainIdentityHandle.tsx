@@ -30,6 +30,12 @@ const STATUS_COPY: Record<string, MessageKey> = {
   invalid: "chainIdentity.handle.invalid",
 };
 
+/** An available handle reads as free, a lapsed reservation included. */
+const statusOf = (answer: {
+  readonly available: boolean;
+  readonly status: string;
+}): string => (answer.available ? "free" : answer.status);
+
 /** HANDLE_CLAIM: take a free handle; the identity pays. */
 export default function ChainIdentityHandle({
   wallet,
@@ -67,9 +73,7 @@ export default function ChainIdentityHandle({
     availability.data?.available === true;
   const answered =
     availability.data !== undefined && handle === normalizeHandle(input)
-      ? STATUS_COPY[
-          availability.data.available ? "free" : availability.data.status
-        ]
+      ? STATUS_COPY[statusOf(availability.data)]
       : undefined;
   const statusKey = invalid ? STATUS_COPY["invalid"] : answered;
 

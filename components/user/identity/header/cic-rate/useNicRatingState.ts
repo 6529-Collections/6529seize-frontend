@@ -18,6 +18,14 @@ import type { Hex } from "viem";
 
 const isWallet = (value: string): boolean => /^0x[0-9a-fA-F]{40}$/.test(value);
 
+/** The profile as the chain finds it: by the whole profile when given. */
+function nicTargetOf(identity: string, profile: ApiIdentity | undefined) {
+  if (profile) {
+    return chainRatingTargetOf(profile);
+  }
+  return isWallet(identity) ? { wallets: [identity] } : { handle: identity };
+}
+
 /**
  * The rater's NIC state for one profile. `profile`, when the caller has it,
  * lets the 6529 Network path find the profile's identity as the rating
@@ -67,11 +75,7 @@ export function useNicRatingState(
         wallet as Hex,
         {
           matter: "NIC",
-          target: profile
-            ? chainRatingTargetOf(profile)
-            : isWallet(identity)
-              ? { wallets: [identity] }
-              : { handle: identity },
+          target: nicTargetOf(identity, profile),
           category: null,
         },
         signal
@@ -82,7 +86,7 @@ export function useNicRatingState(
         allowance.available === null
           ? ((
               await commonApiFetch<ApiProfileRaterCicState>({
-                endpoint: `profiles/${encodeURIComponent(identity)}/cic/rating/${wallet}`,
+                endpoint: `profiles/${encodeURIComponent(identity)}/cic/rating/${wallet ?? ""}`,
                 signal,
               })
             ).cic_ratings_left_to_give_by_rater ?? null)

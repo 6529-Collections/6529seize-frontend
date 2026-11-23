@@ -214,7 +214,21 @@ export function chainErrorMessage(
       ? t(locale, `chainIdentity.error.${key}` as MessageKey, values)
       : t(locale, "chainIdentity.error.refused", { name });
   }
-  const status = statusOf(error);
+  const byStatus = gatewayStatusMessage(locale, statusOf(error));
+  if (byStatus !== null) {
+    return byStatus;
+  }
+  if (error instanceof ChainOperationError) {
+    return siteRefusalMessage(locale, error);
+  }
+  return t(locale, "chainIdentity.error.generic");
+}
+
+/** The gateway's own answers that aren't the chain's refusals. */
+function gatewayStatusMessage(
+  locale: SupportedLocale,
+  status: number | null
+): string | null {
   if (status === 413) {
     return t(locale, "chainIdentity.error.tooLarge");
   }
@@ -227,20 +241,22 @@ export function chainErrorMessage(
   if (status !== null && status >= 500) {
     return t(locale, "chainIdentity.error.busy");
   }
-  if (
-    error instanceof ChainOperationError &&
-    error.reason === "draft_mismatch"
-  ) {
+  return null;
+}
+
+/** This site's own refusals, from the copy file where it has a sentence. */
+function siteRefusalMessage(
+  locale: SupportedLocale,
+  error: ChainOperationError
+): string {
+  if (error.reason === "draft_mismatch") {
     return t(locale, "chainIdentity.error.draftMismatch");
   }
-  if (error instanceof ChainOperationError && error.reason === "timeout") {
+  if (error.reason === "timeout") {
     return t(locale, "chainIdentity.error.notFinalYet");
   }
-  if (error instanceof ChainOperationError) {
-    // These messages are this site's own, already in plain words.
-    return error.message;
-  }
-  return t(locale, "chainIdentity.error.generic");
+  // These messages are this site's own, already in plain words.
+  return error.message;
 }
 
 /**

@@ -50,7 +50,7 @@ async function findChainIdentity(
     if (
       byHandle &&
       (wallets.length === 0 ||
-        (byHandle.wallets ?? []).some((wallet) =>
+        byHandle.wallets.some((wallet) =>
           wallets.includes(wallet.toLowerCase())
         ))
     ) {
@@ -131,12 +131,16 @@ export async function readRatingAllowance(
     readRating(rater.principalId, matter, target.principalId, category, signal),
   ]);
   const cap = decimal(rater.level?.tdh);
+  let available: bigint | null = null;
+  if (cap !== null) {
+    available = cap > spent ? cap - spent : 0n;
+  }
   return {
     rater: rater.principalId,
     target: target.principalId,
     cap,
     spent,
-    available: cap === null ? null : cap > spent ? cap - spent : 0n,
+    available,
     current: rating?.value ?? 0n,
     version: rating?.updatedHeight ?? 0,
   };

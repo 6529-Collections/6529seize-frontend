@@ -162,11 +162,11 @@ export function joinReadiness(
   }
   const left = membership.leftAt;
   if (
-    left &&
-    typeof left.leftMs === "number" &&
+    typeof left?.leftMs === "number" &&
     typeof rejoinWaitMs === "number" &&
     left.leftMs + rejoinWaitMs > nowMs &&
-    (joining === null || left.from.toLowerCase() !== joining.toLowerCase())
+    // Creating (joining null) always waits; rejoining the same one doesn't.
+    left.from.toLowerCase() !== joining?.toLowerCase()
   ) {
     return {
       kind: "waiting",

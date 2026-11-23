@@ -391,7 +391,9 @@ it("names an identity with no handle so it reads in a sentence", async () => {
       /^The identity 0x0a0a0a…0a0a0a asks to add this wallet\./
     )
   ).toBeInTheDocument();
-  fireEvent.click(screen.getByRole("button", { name: "Review and sign" }));
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review and sign" })
+  );
   expect(
     await screen.findByText("This wallet joins the identity 0x0a0a0a…0a0a0a.")
   ).toBeInTheDocument();

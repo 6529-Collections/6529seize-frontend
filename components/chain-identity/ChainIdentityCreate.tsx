@@ -8,6 +8,7 @@ import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import Button from "@/components/utils/button/Button";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDate } from "@/i18n/format";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import "@/i18n/namespaces/chain-identity";
 import { chainGateway } from "@/lib/chain-identity/gateway";
@@ -27,11 +28,55 @@ import {
   ChainSection,
 } from "./chainIdentityUi";
 import { useChainAction } from "./useChainAction";
+import { useChainClock } from "./useChainClock";
 
 const DATE_TIME: Intl.DateTimeFormatOptions = {
   dateStyle: "medium",
   timeStyle: "short",
 };
+
+/** What the chain says about the handle typed into Create, in words. */
+function createHandleHint(
+  locale: SupportedLocale,
+  normalized: string | null,
+  availability: {
+    readonly isError: boolean;
+    readonly error: unknown;
+    readonly data?:
+      | {
+          readonly handle: string;
+          readonly available: boolean;
+          readonly status: string;
+        }
+      | undefined;
+  }
+): string {
+  if (normalized === null) {
+    return t(locale, "chainIdentity.handle.invalid");
+  }
+  if (normalized === "") {
+    return t(locale, "chainIdentity.handle.hint");
+  }
+  if (availability.isError) {
+    return (
+      chainErrorMessage(locale, availability.error) ??
+      t(locale, "chainIdentity.error.generic")
+    );
+  }
+  const answer = availability.data;
+  if (answer?.handle !== normalized) {
+    return t(locale, "chainIdentity.handle.hint");
+  }
+  if (answer.available) {
+    return t(locale, "chainIdentity.handle.available");
+  }
+  return t(
+    locale,
+    answer.status === "reserved"
+      ? "chainIdentity.handle.reserved"
+      : "chainIdentity.handle.claimed"
+  );
+}
 
 /** IDENTITY_CREATE for a wallet with no identity; its own account pays. */
 export default function ChainIdentityCreate({
@@ -53,8 +98,9 @@ export default function ChainIdentityCreate({
     queryFn: ({ signal }) => chainGateway.getWalletMembership(wallet, signal),
     staleTime: 5_000,
   });
+  const nowMs = useChainClock();
   const readiness = membership.data
-    ? joinReadiness(membership.data, rejoinWaitMs, Date.now(), null)
+    ? joinReadiness(membership.data, rejoinWaitMs, nowMs, null)
     : null;
   const waiting = readiness?.kind === "waiting" ? readiness : null;
   const [handle, setHandle] = useState("");
@@ -74,23 +120,7 @@ export default function ChainIdentityCreate({
     !wanted ||
     (availability.data?.handle === normalized &&
       availability.data.available === true);
-  let handleHint = t(locale, "chainIdentity.handle.hint");
-  if (normalized === null) {
-    handleHint = t(locale, "chainIdentity.handle.invalid");
-  } else if (wanted && availability.isError) {
-    handleHint =
-      chainErrorMessage(locale, availability.error) ??
-      t(locale, "chainIdentity.error.generic");
-  } else if (wanted && availability.data?.handle === normalized) {
-    handleHint = t(
-      locale,
-      availability.data.available
-        ? "chainIdentity.handle.available"
-        : availability.data.status === "reserved"
-          ? "chainIdentity.handle.reserved"
-          : "chainIdentity.handle.claimed"
-    );
-  }
+  const handleHint = createHandleHint(locale, normalized, availability);
 
   const start = () => {
     if (normalized === null || !handleOk) {
