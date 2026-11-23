@@ -9,7 +9,6 @@ import { commonApiFetch } from "@/services/api/common-api";
 import RepCategorySearchDropdown from "./RepCategorySearchDropdown";
 import { getRandomObjectId } from "@/helpers/AllowlistToolHelpers";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
-import { isHelpBotCreditRepCategory } from "./repCategoryConstants";
 export enum RepCategorySearchSize {
   SM = "SM",
   MD = "MD",
@@ -107,20 +106,12 @@ export default function RepCategorySearch({
     }
 
     if (disableInputCategoryAsValue) {
-      return (data ?? []).filter((item) => !isHelpBotCreditRepCategory(item));
-    }
-    if (isHelpBotCreditRepCategory(debouncedValue)) {
-      return [];
+      return data ?? [];
     }
     if (!data?.length) {
       return [debouncedValue];
     }
-    return [
-      debouncedValue,
-      ...data.filter(
-        (i) => i !== debouncedValue && !isHelpBotCreditRepCategory(i)
-      ),
-    ];
+    return [debouncedValue, ...data.filter((i) => i !== debouncedValue)];
   }, [data, debouncedValue, disableInputCategoryAsValue]);
 
   return (
