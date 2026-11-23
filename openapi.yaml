@@ -13186,7 +13186,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApiIdentitySubscriptionActions"
+                $ref: "#/components/schemas/ApiIdentitySubscriptionStatus"
         "404":
           description: Identity not found
     post:
@@ -36124,6 +36124,19 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
+    ApiIdentitySubscriptionStatus:
+      type: object
+      required:
+        - actions
+        - follows_viewer
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
+        follows_viewer:
+          type: boolean
+          description: Whether this identity follows the authenticated profile.
     ApiIdentitySubscriptionTargetAction:
       type: string
       enum:
