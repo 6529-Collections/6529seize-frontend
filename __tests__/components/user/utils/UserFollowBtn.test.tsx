@@ -9,6 +9,7 @@ import {
   useQuery,
 } from "@tanstack/react-query";
 import { AuthContext, type AuthContextType } from "@/components/auth/Auth";
+import { createMockAuthContext } from "@/__tests__/utils/testContexts";
 import { QueryKey } from "@/components/react-query-wrapper/query-keys";
 import { ReactQueryWrapperContext } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import {
@@ -32,6 +33,7 @@ jest.mock("@/services/api/common-api", () => ({
 const useQueryMock = useQuery as jest.Mock;
 const commonApiPostMock = commonApiPost as jest.Mock;
 const commonApiDeleteWithBodyMock = commonApiDeleteWithBody as jest.Mock;
+const commonApiFetchMock = commonApiFetch as jest.Mock;
 
 describe("UserFollowBtn", () => {
   beforeEach(() => {
@@ -103,6 +105,8 @@ describe("UserFollowBtn", () => {
     following,
     followsViewer = false,
     liveStatus = false,
+    isDirectProfileSession = true,
+    initialFollowing = false,
     requestSuccess = true,
     onDirectMessage,
     directMessageLoading,
@@ -113,6 +117,8 @@ describe("UserFollowBtn", () => {
     readonly following: boolean;
     readonly followsViewer?: boolean | undefined;
     readonly liveStatus?: boolean | undefined;
+    readonly isDirectProfileSession?: boolean | undefined;
+    readonly initialFollowing?: boolean | undefined;
     readonly requestSuccess?: boolean | undefined;
     readonly onDirectMessage?: jest.Mock | undefined;
     readonly directMessageLoading?: boolean | undefined;
@@ -125,7 +131,7 @@ describe("UserFollowBtn", () => {
       follows_viewer: followsViewer,
     };
     if (liveStatus) {
-      jest.mocked(commonApiFetch).mockResolvedValue(status);
+      commonApiFetchMock.mockResolvedValue(status);
       useQueryMock.mockImplementation(
         jest.requireActual<typeof import("@tanstack/react-query")>(
           "@tanstack/react-query"
@@ -147,15 +153,11 @@ describe("UserFollowBtn", () => {
     render(
       <QueryClientProvider client={queryClient}>
         <AuthContext.Provider
-          value={
-            {
-              setToast,
-              requestAuth,
-              connectedProfile: { id: "viewer" },
-              isAuthenticated: true,
-              isDirectProfileSession: true,
-            } as AuthContextType
-          }
+          value={createMockAuthContext({
+            setToast,
+            requestAuth,
+            isDirectProfileSession,
+          })}
         >
           <ReactQueryWrapperContext.Provider
             value={{ onIdentityFollowChange: jest.fn() } as any}
@@ -168,6 +170,7 @@ describe("UserFollowBtn", () => {
               showMuteButton={false}
               blocked={blocked}
               onUnblock={onUnblock}
+              initialFollowing={initialFollowing}
             />
           </ReactQueryWrapperContext.Provider>
         </AuthContext.Provider>
@@ -231,6 +234,21 @@ describe("UserFollowBtn", () => {
     expect(
       await screen.findByRole("button", { name: "Follow back" })
     ).toBeEnabled();
+    expect(commonApiFetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the notification's outgoing follow state in a non-direct session", () => {
+    setup({
+      following: false,
+      followsViewer: true,
+      liveStatus: true,
+      isDirectProfileSession: false,
+      initialFollowing: true,
+    });
+
+    const trigger = screen.getByRole("button", { name: "Following" });
+    expect(trigger).not.toHaveAccessibleDescription();
+    expect(commonApiFetchMock).not.toHaveBeenCalled();
   });
 
   it("describes a mutual follow and supports keyboard dismissal", async () => {

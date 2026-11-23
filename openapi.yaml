@@ -13174,6 +13174,10 @@ paths:
         - Identities
       summary: Get subscribed actions to identity for authenticated user.
       operationId: getIdentitySubscriptions
+      description: >-
+        Returns the authenticated viewer's subscription actions for the
+        requested identity and whether that identity follows the viewer. POST
+        and DELETE responses return the updated actions only.
       parameters:
         - name: id
           in: path
@@ -36136,7 +36140,7 @@ components:
             $ref: "#/components/schemas/ApiIdentitySubscriptionTargetAction"
         follows_viewer:
           type: boolean
-          description: Whether this identity follows the authenticated profile.
+          description: Whether the requested identity follows the authenticated viewer.
     ApiIdentitySubscriptionTargetAction:
       type: string
       enum:

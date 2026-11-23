@@ -17,7 +17,7 @@ import { HttpFile } from '../http/http';
 export class ApiIdentitySubscriptionStatus {
     'actions': Array<ApiIdentitySubscriptionTargetAction>;
     /**
-    * Whether this identity follows the authenticated profile.
+    * Whether the requested identity follows the authenticated viewer.
     */
     'follows_viewer': boolean;
 

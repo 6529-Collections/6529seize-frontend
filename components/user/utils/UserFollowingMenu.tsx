@@ -31,6 +31,7 @@ export default function UserFollowingMenu({
   readonly onUnfollow: () => void;
 }) {
   const tooltipId = useId();
+  const statusDescriptionId = `${tooltipId}-description`;
 
   return (
     <Menu as="div" className="tw-relative tw-shrink-0">
@@ -43,11 +44,16 @@ export default function UserFollowingMenu({
             className={className}
             disabled={busy}
             aria-busy={busy || undefined}
-            aria-description={status}
+            aria-describedby={status ? statusDescriptionId : undefined}
             data-tooltip-id={tooltipId}
           >
             {children}
           </MenuButton>
+          {status && (
+            <span id={statusDescriptionId} className="tw-sr-only">
+              {status}
+            </span>
+          )}
           {status && (
             <Tooltip
               id={tooltipId}

@@ -26,6 +26,7 @@ import { Tooltip } from "react-tooltip";
 import Button from "@/components/utils/button/Button";
 import type { ButtonSize } from "@/components/utils/button/buttonStyles";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import UserMuteButton from "./UserMuteButton";
 import UserFollowingMenu from "./UserFollowingMenu";
@@ -94,7 +95,12 @@ function FollowStateIcon({
     );
   }
   if (mutual) {
-    return <ArrowsRightLeftIcon aria-hidden="true" className="tw-size-4" />;
+    return (
+      <ArrowsRightLeftIcon
+        aria-hidden="true"
+        className={FOLLOW_BTN_SVG_CLASSES[size]}
+      />
+    );
   }
   if (following) {
     return (
@@ -133,6 +139,30 @@ function FollowStateIcon({
       />
     </svg>
   );
+}
+
+function getFollowButtonLabel(
+  locale: SupportedLocale,
+  {
+    blocked,
+    following,
+    followsViewer,
+    followLabel,
+    followingLabel,
+  }: {
+    readonly blocked: boolean;
+    readonly following: boolean;
+    readonly followsViewer: boolean;
+    readonly followLabel?: string | undefined;
+    readonly followingLabel?: string | undefined;
+  }
+): string {
+  if (blocked) return t(locale, "profile.follow.unblock");
+  if (following) {
+    return followingLabel ?? t(locale, "notifications.followButton.following");
+  }
+  if (followsViewer) return t(locale, "profile.follow.followBack");
+  return followLabel ?? t(locale, "notifications.followButton.follow");
 }
 
 export default function UserFollowBtn({
@@ -218,20 +248,17 @@ export default function UserFollowBtn({
 
   const following =
     !blocked &&
-    (subscriptions
-      ? subscriptions.actions.length > 0
-      : canReadStatus && initialFollowing);
+    (subscriptions ? subscriptions.actions.length > 0 : initialFollowing);
   const followsViewer =
     canReadStatus && !blocked && subscriptions?.follows_viewer === true;
   const mutual = following && followsViewer;
-  let label = followLabel ?? t(locale, "notifications.followButton.follow");
-  if (blocked) {
-    label = t(locale, "profile.follow.unblock");
-  } else if (following) {
-    label = followingLabel ?? t(locale, "notifications.followButton.following");
-  } else if (followsViewer) {
-    label = t(locale, "profile.follow.followBack");
-  }
+  const label = getFollowButtonLabel(locale, {
+    blocked,
+    following,
+    followsViewer,
+    followLabel,
+    followingLabel,
+  });
 
   const followMutation = useMutation({
     mutationFn: ({
@@ -253,6 +280,7 @@ export default function UserFollowBtn({
     },
     onSuccess: async ({ actions }, { key }) => {
       await queryClient.cancelQueries({ queryKey: key, exact: true });
+      // The write response only changes the outgoing actions; keep any known reverse status.
       queryClient.setQueryData<FollowStatus>(key, (previous) => ({
         ...previous,
         actions,
