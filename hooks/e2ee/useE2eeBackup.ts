@@ -22,3 +22,18 @@ export function useE2eeBackup(): UseE2eeBackupResult {
   );
   return { manager: backup, snapshot };
 }
+
+/**
+ * Whether encrypted backup is off, for a hint such as the Devices & security
+ * tab's dot. Reads the loaded engine's backup (nothing when encrypted
+ * messages aren't running: no request, no storage) and re-renders only when
+ * the answer changes, not on every backup progress update.
+ */
+export function useE2eeBackupOff(): boolean {
+  const { backup } = useE2eeContext();
+  return useSyncExternalStore(
+    backup ? backup.subscribe : noopSubscribe,
+    () => backup?.getSnapshot().phase === "off",
+    () => false
+  );
+}
