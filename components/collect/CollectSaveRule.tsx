@@ -15,6 +15,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import {
   collectRuleDeadlineFromPlan,
+  collectRuleErrorMessage,
   collectRuleTargetsFromPlan,
 } from "./collect-rules.helpers";
 import { marketAmount } from "./market.adapters";
@@ -153,12 +154,10 @@ export default function CollectSaveRule({
       )}
       {(prepare.isError || save.isError) && (
         <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
-          {t(
-            locale,
-            prepare.isError
-              ? "collect.rules.refreshPlan"
-              : "collect.rules.error"
-          )}
+          {prepare.isError
+            ? t(locale, "collect.rules.refreshPlan")
+            : (collectRuleErrorMessage(save.error) ??
+              t(locale, "collect.rules.error"))}
         </p>
       )}
     </section>

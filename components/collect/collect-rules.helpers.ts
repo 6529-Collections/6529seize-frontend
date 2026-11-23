@@ -5,7 +5,25 @@ import type { ApiCollectRuleTarget } from "@/generated/models/ApiCollectRuleTarg
 import type { ApiMarketTradeOrder } from "@/generated/models/ApiMarketTradeOrder";
 import { ApiMarketKind } from "@/generated/models/ApiMarketKind";
 import type { ApiMarketPrepareRequest } from "@/generated/models/ApiMarketPrepareRequest";
+import { PersonalRecordsError } from "@/lib/personal-records/personal-records-errors";
+import {
+  getStructuredApiErrorBody,
+  getStructuredApiErrorCode,
+} from "@/services/api/common-api";
 import { MARKET_ZERO } from "./market-validation";
+
+/**
+ * What the person can do about a failed rule change, or null for the
+ * generic message: a signed record's refusal (turn on signing, paused,
+ * the API's reason), or a pending purchase to recover first, which may
+ * name the nonce to replace.
+ */
+export function collectRuleErrorMessage(error: unknown): string | null {
+  if (error instanceof PersonalRecordsError) return error.message;
+  if (getStructuredApiErrorCode(error) !== "RULE_PENDING") return null;
+  const message = getStructuredApiErrorBody(error)?.["error"];
+  return typeof message === "string" && message.trim() ? message : null;
+}
 
 export function collectRuleDeadlineFromPlan(
   plan: Pick<ApiCollectPlan, "updated_at">
