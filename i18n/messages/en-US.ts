@@ -993,6 +993,8 @@ const WAVE_MY_VOTES_MESSAGES = objectMessages("waves.myVotes", {
   "limit.maximum": "{label} is {value} {credit}.",
   "limit.minimum": "Minimum is {value} {credit}.",
   selectAll: "Select all",
+  select: "Select",
+  doneSelecting: "Done",
   deselectAll: "Deselect all",
   resetVotes: "Reset votes",
   resetting: "Resetting…",

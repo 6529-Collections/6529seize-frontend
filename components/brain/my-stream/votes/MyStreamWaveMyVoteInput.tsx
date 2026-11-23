@@ -19,9 +19,12 @@ import { t } from "@/i18n/messages";
 import Button from "@/components/utils/button/Button";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
+import { MyVotesMobileInput } from "./MyVotesMobileInput";
+import { triggerVoteSuccessHaptic } from "@/helpers/vote-haptics";
 
 interface MyStreamWaveMyVoteInputProps {
   readonly drop: ExtendedDrop;
+  readonly mobile?: boolean;
   readonly isResetting?: boolean | undefined;
   readonly isVotingClosed?: boolean | undefined;
   readonly onExplainVote?:
@@ -66,6 +69,7 @@ const getRationaleVoteChange = (
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
   drop,
+  mobile = false,
   isResetting = false,
   isVotingClosed = false,
   onExplainVote,
@@ -166,12 +170,12 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     ? `${maxRatingId} ${voteLimitMessageId}`
     : maxRatingId;
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (rawValue: string) => {
     if (isVotingClosed) {
       return;
     }
 
-    const inputValue = e.target.value.replaceAll(",", "").trim();
+    const inputValue = rawValue.replaceAll(",", "").trim();
     if (inputValue === "") {
       setVoteLimitMessage(null);
       setVoteDraftValue("");
@@ -253,6 +257,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
           ? undefined
           : connectedProfile?.handle,
       });
+      if (mobile) triggerVoteSuccessHaptic();
     },
     onError: (error) => {
       setToast({
@@ -339,6 +344,32 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     onExplainVote(liveCurrentVoteValue, currentRationaleVoteChange);
   };
 
+  if (mobile)
+    return (
+      <MyVotesMobileInput
+        id={voteInputId}
+        label={`${t(locale, "waves.myVotes.yourVotes")} ${t(locale, "waves.myVotes.inCredit", { credit: voteLabel })}`}
+        value={voteValue}
+        currentVote={liveCurrentVoteValue}
+        unit={voteLabel}
+        min={minRating}
+        valid={hasValidVoteValue && !isVoteValueOutOfRange}
+        disabled={isResetting || isVotingClosed}
+        busy={isProcessing}
+        helperText={`${maxRatingLabel} ${formatInteger(locale, liveMaxRating)}`}
+        error={displayedVoteLimitMessage}
+        saveLabel={t(locale, "waves.myVotes.vote")}
+        saveAriaLabel={t(locale, "waves.myVotes.submitVote")}
+        explainLabel={t(locale, "waves.voteRationale.explainAriaLabel")}
+        explainDescription={t(locale, "waves.voteRationale.savedDescription")}
+        canExplain={canExplainVote}
+        onChange={handleInputChange}
+        onBlur={handleBlur}
+        onSubmit={() => void handleSubmit()}
+        onExplain={onExplainVote ? handleExplainVote : undefined}
+      />
+    );
+
   return (
     <div
       data-vote-controls
@@ -363,7 +394,7 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
             }}
             type="text"
             value={displayVoteValue}
-            onChange={handleInputChange}
+            onChange={(event) => handleInputChange(event.target.value)}
             onFocus={() => setIsVoteInputFocused(true)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}

@@ -39,6 +39,8 @@ export const ES_ES_MESSAGES = {
   "waves.historyGap.retry": "No se pudieron cargar los mensajes. Reintentar",
 
   "waves.myVotes.sort": "Ordenar por",
+  "waves.myVotes.select": "Seleccionar",
+  "waves.myVotes.doneSelecting": "Listo",
   "waves.myVotes.sort.voteAmount": "Tu cantidad de votos",
   "waves.myVotes.sort.leaderboard": "Posición en la clasificación",
   "waves.myVotes.sort.lastVoted": "Último voto",

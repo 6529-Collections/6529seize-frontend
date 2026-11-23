@@ -21,6 +21,8 @@ import { ActiveDropAction } from "@/types/dropInteractionTypes";
 import { getVoteRationaleReplyMarkdown } from "@/helpers/waves/vote-rationale.helpers";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+import useDeviceInfo from "@/hooks/useDeviceInfo";
+import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 interface MyStreamWaveMyVotesProps {
   readonly wave: ApiWave;
@@ -39,6 +41,11 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
   onDropClick,
 }) => {
   const locale = useBrowserLocale();
+  const { isApp } = useDeviceInfo();
+  const mobileViewport = useIsMobileLayoutViewport();
+  const mobile = isApp || mobileViewport;
+  const [selectionMode, setSelectionMode] = useState(false);
+  const isSelecting = !mobile || selectionMode;
   const [isResettingVotes, setIsResettingVotes] = useState(false);
   const { drops, fetchNextPage, hasNextPage, isFetching, isFetchingNextPage } =
     useWaveDropsLeaderboard({
@@ -170,6 +177,12 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
         <div className="tw-mt-4">
           {!isVotingControlsLocked && (
             <MyStreamWaveMyVotesReset
+              mobile={mobile}
+              isSelecting={isSelecting}
+              onToggleSelection={() => {
+                setSelectionMode(!selectionMode);
+                setCheckedDrops(new Set());
+              }}
               waveId={wave.id}
               haveDrops={!!drops.length}
               availableVotes={
@@ -192,6 +205,12 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
                 className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800"
               >
                 <MyStreamWaveMyVote
+                  mobile={mobile}
+                  isSelecting={isSelecting}
+                  onEnterSelection={() => {
+                    setSelectionMode(true);
+                    setCheckedDrops((current) => new Set(current).add(drop.id));
+                  }}
                   drop={drop}
                   onDropClick={onDropClick}
                   onExplainVote={

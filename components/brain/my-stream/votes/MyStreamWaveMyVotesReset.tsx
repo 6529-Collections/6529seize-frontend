@@ -24,6 +24,9 @@ import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
 interface MyStreamWaveMyVotesResetProps {
+  readonly mobile?: boolean;
+  readonly isSelecting?: boolean;
+  readonly onToggleSelection?: (() => void) | undefined;
   readonly toolbarContent?: React.ReactNode;
   readonly resetVote?: ((dropId: string) => Promise<void>) | undefined;
   readonly waveId: string;
@@ -40,6 +43,9 @@ interface MyStreamWaveMyVotesResetProps {
 const DEFAULT_DROP_RATE_CATEGORY = "Rep";
 
 const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
+  mobile = false,
+  isSelecting = true,
+  onToggleSelection,
   waveId,
   toolbarContent,
   resetVote,
@@ -170,12 +176,48 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
 
   return (
     <>
-      <div className="tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-3">
-        <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-px-2 sm:tw-px-4">
-          <div className="tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2">
+      <div
+        className={`tw-border-0 tw-border-b tw-border-solid tw-border-iron-800 tw-pb-3 ${mobile ? "tw-bg-iron-950 tw-pt-3" : ""}`}
+      >
+        <div
+          className={
+            mobile
+              ? "tw-flex tw-flex-col tw-gap-1 tw-px-4"
+              : "tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-x-4 tw-gap-y-2 tw-px-2 sm:tw-px-4"
+          }
+        >
+          {mobile && typeof availableVotes === "number" && (
+            <p className="tw-m-0 tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(locale, "waves.myVotes.availableInWave")}{" "}
+              <span className="tw-font-semibold !tw-tabular-nums tw-text-iron-100">
+                {formatInteger(locale, availableVotes)}
+              </span>
+            </p>
+          )}
+          <div
+            className={`tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-2 ${mobile ? "tw-w-full tw-justify-between" : ""}`}
+          >
             {toolbarContent}
-            {showResetControls && (
-              <>
+            {mobile && showResetControls && onToggleSelection && (
+              <button
+                type="button"
+                onClick={onToggleSelection}
+                disabled={isResetting}
+                aria-pressed={isSelecting}
+                className="tw-ml-auto tw-min-h-11 tw-min-w-11 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-sm tw-font-medium tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+              >
+                {t(
+                  locale,
+                  isSelecting
+                    ? "waves.myVotes.doneSelecting"
+                    : "waves.myVotes.select"
+                )}
+              </button>
+            )}
+            {showResetControls && (!mobile || isSelecting) && (
+              <div
+                className={`tw-flex tw-flex-wrap tw-items-center tw-gap-2 ${mobile ? "tw-basis-full" : ""}`}
+              >
                 <button
                   type="button"
                   onClick={onToggleSelectAll}
@@ -215,10 +257,10 @@ const MyStreamWaveMyVotesReset: React.FC<MyStreamWaveMyVotesResetProps> = ({
                     )}
                   </div>
                 )}
-              </>
+              </div>
             )}
           </div>
-          {typeof availableVotes === "number" && (
+          {!mobile && typeof availableVotes === "number" && (
             <p className="tw-m-0 tw-whitespace-nowrap tw-text-left tw-text-xs tw-leading-5 tw-text-iron-500">
               {t(locale, "waves.myVotes.availableInWave")}{" "}
               <span className="tw-font-semibold !tw-tabular-nums tw-text-iron-200">

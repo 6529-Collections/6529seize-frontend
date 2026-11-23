@@ -48,6 +48,18 @@ const entryDropId = (id: string) =>
     ? "00000000-0000-4000-8000-000000000532"
     : "00000000-0000-4000-8000-000000000533";
 const ROOT = `/waves/${WAVE}/decisions`;
+if (process.env["PLAYWRIGHT_MY_VOTES_VIDEO"] === "1") test.use({ video: "on" });
+
+function myVotesInput(scope: Locator | Page) {
+  return scope
+    .getByRole("textbox", { name: "Your vote", exact: true })
+    .or(scope.getByRole("spinbutton", { name: "Your vote", exact: true }));
+}
+
+async function enterMyVotesSelection(panel: Locator) {
+  const select = panel.getByRole("button", { name: "Select", exact: true });
+  if (await select.isVisible()) await select.click();
+}
 
 async function expectNumericVoteAppearance(input: Locator) {
   await expect(input).toHaveCSS("background-color", "rgb(28, 28, 33)");
@@ -3100,10 +3112,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(
       page.getByRole("tabpanel", { name: "My Votes", exact: true })
     ).toBeVisible();
-    const vote = page.getByRole("spinbutton", {
-      name: "Your vote",
-      exact: true,
-    });
+    const vote = myVotesInput(page);
     await vote.fill("3");
     await page.getByRole("button", { name: "Save vote", exact: true }).click();
     await expect
@@ -4694,7 +4703,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       await expect(
         page.getByRole("tab", { name: "My Votes", exact: true })
       ).toHaveCSS("font-weight", "500");
-      await expect(row.getByRole("spinbutton")).toHaveCSS(
+      await expect(myVotesInput(row)).toHaveCSS(
         "font-variant-numeric",
         "tabular-nums"
       );
@@ -4769,6 +4778,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         name: "Reset votes",
         exact: true,
       });
+      await enterMyVotesSelection(panel);
       await expect(selectAll).toBeVisible();
       await expect(
         panel
@@ -5082,6 +5092,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
     const reset = panel.getByRole("button", { name: /^Reset / });
     await expect(reset).toHaveCount(0);
+    await enterMyVotesSelection(panel);
     const sortBeforeSelection = (await sort.boundingBox())!;
     const selectBeforeSelection = (await selectAll.boundingBox())!;
     const firstCheckbox = panel
@@ -5238,8 +5249,8 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       name: "Sorted artwork 51",
       exact: true,
     });
-    await newest.getByRole("spinbutton", { name: "Your vote" }).fill("4");
-    await edited.getByRole("spinbutton", { name: "Your vote" }).fill("99");
+    await myVotesInput(newest).fill("4");
+    await myVotesInput(edited).fill("99");
     await edited
       .getByRole("button", { name: "Save vote", exact: true })
       .click();
@@ -5250,10 +5261,9 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(panel.getByRole("article").first()).toHaveAccessibleName(
       "Sorted artwork 51"
     );
-    await expect(
-      newest.getByRole("spinbutton", { name: "Your vote" })
-    ).toHaveValue("4");
+    await expect(myVotesInput(newest)).toHaveValue("4");
     await expect(sort).toHaveAccessibleName("Sort by: Last voted");
+    await enterMyVotesSelection(panel);
     await edited.getByRole("checkbox").check();
     await selectSort("vote_amount");
     await expect(panel.getByRole("article").first()).toHaveAccessibleName(
@@ -5335,10 +5345,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
     await page.goto(`${ROOT}/alpha?tab=votes`);
     const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
-    const vote = panel.getByRole("spinbutton", {
-      name: "Your vote",
-      exact: true,
-    });
+    const vote = myVotesInput(panel);
     await expect(vote).toHaveValue("25");
     await expect(panel.getByText(/^Available in wave\s*75$/)).toBeVisible();
     expect(creditReads).toBe(1);
@@ -5458,9 +5465,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await page.goto(`${ROOT}/alpha?tab=votes`);
     const panel = page.getByRole("tabpanel", { name: "My Votes", exact: true });
     await expect(panel.getByRole("article")).toHaveCount(50);
-    await expect(
-      panel.getByRole("spinbutton", { name: "Your vote", exact: true }).first()
-    ).toBeVisible();
+    await expect(myVotesInput(panel).first()).toBeVisible();
     expect(budgetEntries.size).toBeGreaterThan(0);
     expect(budgetEntries.size).toBeLessThan(50);
     expect(listReads[0]!.searchParams.get("include")).toBe("cards");
@@ -5473,9 +5478,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
       unavailable.getByText("Your vote: 1", { exact: true })
     ).toBeVisible();
     await unavailable.scrollIntoViewIfNeeded();
-    await expect(
-      unavailable.getByRole("spinbutton", { name: "Your vote", exact: true })
-    ).toBeVisible();
+    await expect(myVotesInput(unavailable)).toBeVisible();
     await panel
       .getByRole("button", { name: "Load more", exact: true })
       .scrollIntoViewIfNeeded();
@@ -5804,7 +5807,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await waveTabStrip(page)
       .getByRole("tab", { name: "Votes", exact: true })
       .click();
-    const voteInput = page.getByRole("spinbutton", { name: "Your vote" });
+    const voteInput = myVotesInput(page);
     await expect(
       page.getByRole("button", {
         name: "Use an existing drop",
@@ -5897,9 +5900,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await waveTabStrip(page)
       .getByRole("tab", { name: "Votes", exact: true })
       .click();
-    await expect(
-      page.getByRole("spinbutton", { name: "Your vote" })
-    ).toHaveValue("0");
+    await expect(myVotesInput(page)).toHaveValue("0");
     await expect(
       page.getByText("Immutable alpha entry content", { exact: true })
     ).toHaveCount(0);
@@ -5920,9 +5921,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       })
     ).toHaveAttribute("aria-selected", "true");
-    await expect(
-      page.getByRole("spinbutton", { name: "Your vote" })
-    ).toHaveCount(0);
+    await expect(myVotesInput(page)).toHaveCount(0);
     await page.goForward();
     await expect(page).toHaveURL(/beta\?tab=votes$/);
     await expect(
@@ -5931,9 +5930,7 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
         exact: true,
       })
     ).toHaveAttribute("aria-selected", "true");
-    await expect(
-      page.getByRole("spinbutton", { name: "Your vote" })
-    ).toHaveValue("0");
+    await expect(myVotesInput(page)).toHaveValue("0");
     expect(await readPublicPreviewCount()).toBe(0);
     await page.getByRole("tab", { name: "Chat", exact: true }).click();
     await expect(page).toHaveURL(
@@ -6805,7 +6802,138 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   });
 
-  test("keeps compact vote controls readable across row breakpoints and save errors", async ({
+  test.describe("My Votes mobile presentation", () => {
+    for (const surface of ["mobile web", "iOS app", "Android app"] as const) {
+      test(`edits and selects compact votes in ${surface}`, async ({
+        page,
+      }, testInfo) => {
+        await page.setViewportSize({ width: 390, height: 844 });
+        if (surface !== "mobile web") {
+          await installSurfaceSimulation(
+            page.context(),
+            surface === "iOS app"
+              ? "capacitor-ios-sim"
+              : "capacitor-android-sim",
+            testInfo.project.use.baseURL
+          );
+          await page.emulateMedia({ reducedMotion: "reduce" });
+        }
+        const sandbox = await installCompetitionApi(page);
+        sandbox.setVote("alpha", 25);
+        await page.goto(`${ROOT}/alpha?tab=votes`);
+        await dismissNextDevTools(page);
+        const panel = page.getByRole("tabpanel", {
+          name: "My Votes",
+          exact: true,
+        });
+        const row = panel.getByRole("article").first();
+        const input = row.getByRole("textbox", {
+          name: "Your vote",
+          exact: true,
+        });
+        await expect(input).toHaveValue("25");
+        await expect(input).toHaveAttribute("inputmode", "text");
+        await expect(panel.getByRole("checkbox")).toHaveCount(0);
+        await expect(
+          panel.getByRole("button", { name: "Select all", exact: true })
+        ).toHaveCount(0);
+        await expect(
+          row.getByRole("button", { name: "Save vote", exact: true })
+        ).toHaveCount(0);
+        await expect(row.getByText(/^Enter a whole number/)).toHaveCount(0);
+        const balance = panel.getByText(/^Available in wave\s*75$/);
+        const select = panel.getByRole("button", {
+          name: "Select",
+          exact: true,
+        });
+        await expect(balance).toBeVisible();
+        expect((await balance.boundingBox())!.y).toBeLessThan(
+          (await select.boundingBox())!.y
+        );
+        await page.screenshot({
+          path: testInfo.outputPath("my-votes-mobile-rest.png"),
+          fullPage: true,
+        });
+        await input.press("Enter");
+        expect(sandbox.requests).toHaveLength(0);
+        await input.focus();
+        await expect(row.getByText(/^Enter a whole number/)).toBeVisible();
+        await input.fill("40");
+        await expect(
+          row.getByRole("button", { name: "Save vote", exact: true })
+        ).toBeEnabled();
+        await input.fill("25");
+        await expect(
+          row.getByRole("button", { name: "Save vote", exact: true })
+        ).toHaveCount(0);
+        await input.fill("-40");
+        await row
+          .getByRole("button", { name: "Save vote", exact: true })
+          .click();
+        await expect(input).toHaveValue("-40");
+        await expect(
+          row.getByRole("button", { name: "Save vote", exact: true })
+        ).toHaveCount(0);
+        expect(
+          sandbox.requests.filter((request) =>
+            request.path.endsWith("/votes/me")
+          )
+        ).toHaveLength(1);
+        await select.click();
+        await expect(row.getByRole("checkbox")).toBeVisible();
+        await expect(
+          panel.getByRole("button", { name: "Select all", exact: true })
+        ).toBeVisible();
+        await row.getByRole("checkbox").check();
+        const reset = panel.getByRole("button", {
+          name: "Reset 1 vote",
+          exact: true,
+        });
+        await expect(reset).toBeEnabled();
+        await reset.click();
+        const confirmation = page.getByRole("dialog");
+        await expect(
+          confirmation.getByRole("heading", {
+            name: "Reset 1 vote?",
+            exact: true,
+          })
+        ).toBeVisible();
+        await expect(
+          confirmation.getByRole("button", { name: "Reset vote", exact: true })
+        ).toBeVisible();
+        await confirmation
+          .getByRole("button", { name: "Cancel", exact: true })
+          .click();
+        await expect(input).toHaveValue("-40");
+        await page.screenshot({
+          path: testInfo.outputPath("my-votes-mobile-selected.png"),
+          fullPage: true,
+        });
+        await panel.getByRole("button", { name: "Done", exact: true }).click();
+        await expect(row.getByRole("checkbox")).toHaveCount(0);
+        await expect(reset).toHaveCount(0);
+        const bounds = (await row.getByRole("heading").boundingBox())!;
+        const touch = await page.context().newCDPSession(page);
+        try {
+          await touch.send("Input.dispatchTouchEvent", {
+            type: "touchStart",
+            touchPoints: [{ x: bounds.x + 8, y: bounds.y + 8 }],
+          });
+          await expect(row.getByRole("checkbox")).toBeChecked();
+        } finally {
+          await touch.send("Input.dispatchTouchEvent", {
+            type: "touchEnd",
+            touchPoints: [],
+          });
+          await touch.detach();
+        }
+        await expect(row.getByRole("checkbox")).toBeChecked();
+        await expectNoHorizontalOverflow(page);
+      });
+    }
+  });
+
+  test("keeps My Votes controls readable across row breakpoints and save errors", async ({
     page,
   }, testInfo) => {
     const sandbox = await installCompetitionApi(page);
@@ -6846,7 +6974,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       expect(
         Math.abs((await row.boundingBox())!.height - loadingHeight)
       ).toBeLessThanOrEqual(4);
-      const input = controls.getByRole("spinbutton", { name: "Your vote" });
+      const input = myVotesInput(controls);
       const explain = controls.getByRole("button", {
         name: "Explain vote",
         exact: true,
@@ -6855,9 +6983,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       const widths =
         testInfo.project.name === "web-mobile-chromium"
           ? [320, 390, 430]
-          : [639, 640, 767, 768, 960, 1200, 1600, 1920];
+          : [320, 390, 430, 639, 640, 767, 768, 960, 1200, 1600, 1920];
       for (const width of widths) {
         await page.setViewportSize({ width, height: 1000 });
+        await expect(input).toHaveAttribute(
+          "type",
+          width < 1024 ? "text" : "number"
+        );
         await input.fill("12345678");
         await input.press("Shift+Tab");
         await page.keyboard.press("Tab");
@@ -6868,6 +7000,27 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             (element) => getComputedStyle(element.parentElement!).boxShadow
           )
         ).toMatch(/inset.*2px/);
+        if (width < 1024) {
+          await expect(input).toHaveAttribute("type", "text");
+          const thumbnail = row.getByRole("button", { name: /^Open / });
+          expect((await thumbnail.boundingBox())!.width).toBe(56);
+          expect((await thumbnail.boundingBox())!.height).toBe(56);
+          await expect(explain).toHaveCSS("border-width", "0px");
+          expect((await explain.boundingBox())!.height).toBeGreaterThanOrEqual(
+            44
+          );
+          expect((await input.boundingBox())!.height).toBeGreaterThanOrEqual(
+            44
+          );
+          const field = (await input.boundingBox())!;
+          const action = (await explain.boundingBox())!;
+          expect(Math.abs(field.y - action.y)).toBeLessThanOrEqual(1);
+          await expect(
+            controls.getByText(/^Enter a whole number/)
+          ).toBeVisible();
+          await expectNoHorizontalOverflow(page);
+          continue;
+        }
         const boxes = await controls.evaluate((form) => {
           const bounds = form.getBoundingClientRect();
           return [...form.querySelectorAll("input, button, p")].map(
@@ -7018,7 +7171,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await expect(error).toBeVisible();
       await expect(input).toHaveAttribute(
         "aria-describedby",
-        /competition-vote-error-entry-alpha/
+        (page.viewportSize()?.width ?? 0) < 1024
+          ? /competition-vote-entry-alpha-error/
+          : /competition-vote-error-entry-alpha/
       );
       await expect(input).toHaveValue("25");
       await expectNoHorizontalOverflow(page);

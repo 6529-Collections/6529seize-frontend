@@ -76,15 +76,20 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    `You haven't voted on any submissions in this wave yet.`
 3. Review each row: preview, title, rank (when available), author, total vote
    value, voter count, and your current vote input.
-4. Optional: click a row outside its controls to select or deselect its vote for
-   reset. Use its artwork or title buttons to open the drop in the current wave
-   route, including with `Enter` or `Space`. Checkboxes, vote controls, and
-   profile links keep their own actions; selecting text does not toggle the row.
-5. Edit a vote, then submit with `Vote` or `Enter`.
+4. On mobile web below 1024px and in the app, choose `Select` to show checkboxes
+   and `Select all`. Holding a card also enters selection and selects that card;
+   scrolling cancels the hold. `Done` leaves selection and clears selected rows.
+   On desktop, selection controls remain visible. In selection mode, click a row
+   outside its controls to select or deselect it. Artwork and title buttons open
+   the drop, including with `Enter` or `Space`. Vote controls and profile links
+   keep their own actions; selecting text does not toggle the row.
+5. Edit a vote, then submit with `Save vote` (`Vote` on legacy rows) or `Enter`.
+   On mobile, the save action appears only when the number differs from the
+   saved vote and disappears after saving or restoring the saved number.
 6. Optional: select `Explain vote` to open an inline reply composer prefilled as
    `Vote rationale (...)`.
-7. Select rows by clicking outside their controls, using the checkboxes beside
-   the artwork, or using `Select all` / `Deselect all`,
+7. With selection active, select rows by clicking outside their controls, using
+   the checkboxes beside the artwork, or using `Select all` / `Deselect all`,
    then `Reset votes`. Review the selected count in the confirmation dialog
    and confirm to set those votes to `0`, or cancel without changing them.
 8. Scroll to the bottom to load more rows.
@@ -92,19 +97,28 @@ while each profile loads. The placeholders stay still when reduced motion is ena
 
 ## Common Scenarios
 
-On phones, the checkbox, a small artwork thumbnail, and the title with its author share the first line. Vote totals, voters, and rank appear below; long totals can wrap. Rows have 16-pixel side padding. Titles and author names stay on one line with an ellipsis when needed; action labels stay on one line. The amount and **Explain vote** sit side by side when space allows, with the allowed range underneath. In narrower rows, **Explain vote** sits beside the range below the amount. Tablet rows use a larger thumbnail with details beside it and controls below. On tablet and wide desktop rows, **Explain vote** stays immediately to the right of the amount control, with the allowed range underneath. Wide desktop rows keep this control group to the right of the artwork and details. Phone and tablet buttons use compact 36-pixel faces inside 44-pixel tap targets, keeping their existing **Save vote** (or **Vote** on legacy rows) and **Explain vote** labels. Inputs remain 44 pixels tall on phones and tablets, with 16-pixel text. Hovering or focusing **Explain vote** shows a styled tooltip explaining that it posts a public reply. Longer range hints can wrap. **Explain vote** is unavailable for a saved vote of zero and is omitted when you cannot chat in the wave. Opening it does not save a vote: review and send the public reply separately.
+On mobile web below 1024px and in the app, cards keep the thumbnail beside the title and author. Checkboxes appear only in selection mode. Rank sits beside the title, with totals and voters below. The amount and **Explain vote** remain side by side, with range help underneath only on focus or error. Controls keep 44-pixel tap targets and inputs use 16-pixel text. Titles and author names stay on one line with an ellipsis when needed. Wide desktop rows keep the existing control group to the right of the artwork and details, with persistent range help and the styled explanation tooltip. **Explain vote** is unavailable for a saved vote of zero and is omitted when you cannot chat in the wave. Opening it does not save a vote: review and send the public reply separately.
 
 - Rows use a subtle charcoal background. Hovering an unselected row lightens
   it further. Hovering or focusing the title highlights it in blue.
+- Mobile shows `Available in wave` above the bordered sorting control and
+  trailing `Select` / `Done` action, on the same surface as the list.
+- Mobile cards use a square-cropped 56px thumbnail with a small media badge.
+  Opening the artwork retains its full presentation. Rank sits beside the title;
+  totals and voter counts use matching 13px text.
+- Mobile vote fields use a filled surface and a focus ring. `Explain vote` is a
+  text action beside the field. Range help appears on focus or when invalid;
+  server errors remain visible after leaving the field. The negative-vote field
+  uses a keyboard with a minus sign.
 - Selecting a row checks its checkbox for reset; it does not change the vote
   until you confirm `Reset votes`.
 - Vote input accepts numeric text, including temporary empty and `-` while you
   edit.
-- Values outside the row's min/max range are clamped while editing, with a
-  message explaining the applicable limit. Review the adjusted value before
-  submitting it.
-- `Vote` is enabled only when the input is valid and changed.
-- `Vote` shows a spinner while the row request is running.
+- Competition fields keep out-of-range drafts visible and disable saving until
+  corrected. Legacy fields clamp to their limit and show the applicable limit;
+  review the adjusted value before submitting it.
+- The save action is enabled only when the input is valid and changed.
+- The save action indicates that the row request is running.
 - `Explain vote` opens the normal drop reply composer and does not submit or change a
   vote by itself.
 - The prefilled reply includes the user's vote total at time of posting. If the
@@ -159,7 +173,10 @@ On phones, the checkbox, a small artwork thumbnail, and the title with its autho
 - `Explain vote` uses standard chat replies; it does not create a separate rationale
   object or require dedicated backend support.
 - Vote totals, available votes, and maximum values use locale-aware number
-  formatting. Focusing a vote input shows its editable digits without grouping.
+  formatting. Mobile vote fields and legacy fields show grouped values at rest
+  and plain digits while editing. Desktop competition fields retain their
+  existing numeric input.
+- Reduced motion removes selection movement and save scaling; fades remain.
 - Decision links use `tab=votes`; `voteTab=mine`, `voteTab=all`, or `voteTab=activity` preserves the subtab on reload and Back/Forward. Older `tab=voters` links open All votes.
 
 ## Related Pages
