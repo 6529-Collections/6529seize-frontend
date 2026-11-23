@@ -1,18 +1,68 @@
-import { PlusIcon } from "@heroicons/react/24/outline";
+import { PaperClipIcon, PlusIcon } from "@heroicons/react/24/outline";
 import {
   useId,
+  useRef,
+  type ChangeEvent,
   type ComponentPropsWithRef,
   type ReactNode,
   type Ref,
 } from "react";
 import {
   COMPOSER_ACTION_BUTTON_CLASS_NAME,
+  COMPOSER_ACTION_ICON_CLASS_NAME,
   COMPOSER_ACTION_IDLE_CLASS_NAME,
 } from "@/components/waves/composerPresentation";
 import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
+
+export function E2eeComposerAttachButton({
+  compact,
+  enabled,
+  onFilesChosen,
+  onSelect,
+}: {
+  readonly compact: boolean;
+  readonly enabled: boolean;
+  readonly onFilesChosen: (event: ChangeEvent<HTMLInputElement>) => void;
+  readonly onSelect: () => void;
+}) {
+  const locale = useBrowserLocale();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  return (
+    <>
+      {enabled && (
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          tabIndex={-1}
+          aria-hidden="true"
+          className="tw-hidden"
+          onChange={onFilesChosen}
+        />
+      )}
+      <E2eeComposerActionButton
+        tooltip={t(locale, "e2ee.composer.attach")}
+        compactLabel={
+          compact ? t(locale, "e2ee.composer.attachShort") : undefined
+        }
+        onClick={() => {
+          onSelect();
+          fileInputRef.current?.click();
+        }}
+        disabled={!enabled}
+      >
+        <PaperClipIcon
+          aria-hidden="true"
+          className={COMPOSER_ACTION_ICON_CLASS_NAME}
+        />
+      </E2eeComposerActionButton>
+    </>
+  );
+}
 
 export function E2eeComposerActionTray({
   compact,
@@ -30,7 +80,7 @@ export function E2eeComposerActionTray({
   const locale = useBrowserLocale();
   const actionsId = useId();
   const compactTrayClass = expanded
-    ? "tw-col-span-2 tw-col-start-2 tw-row-start-2 tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-start tw-gap-x-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-p-2"
+    ? "tw-col-span-2 tw-col-start-2 tw-row-start-2 tw-mx-0 tw-mb-0 tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-start tw-gap-x-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-p-2"
     : "tw-hidden";
 
   return (
@@ -61,17 +111,18 @@ export function E2eeComposerActionTray({
         </button>
       )}
       {/* Keep the GIF picker and its download mounted while collapsed. */}
-      <div
+      <fieldset
         id={actionsId}
         hidden={compact && !expanded}
-        role={compact ? "group" : undefined}
-        aria-label={
-          compact ? t(locale, "waves.composer.actions.label") : undefined
-        }
         className={compact ? compactTrayClass : "tw-contents"}
       >
+        {compact && (
+          <legend className="tw-sr-only">
+            {t(locale, "waves.composer.actions.label")}
+          </legend>
+        )}
         {children}
-      </div>
+      </fieldset>
     </>
   );
 }

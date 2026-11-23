@@ -163,10 +163,19 @@ it("keeps the GIF picker and cancellation working with the mobile tray collapsed
     expect(screen.getByRole("button", { name: "Add GIF" })).toHaveTextContent(
       "GIF"
     );
-    chooseGif();
+    fireEvent.click(screen.getByRole("button", { name: "Add GIF" }));
     expect(
       screen.getByRole("button", { name: "Show composer actions" })
     ).toHaveFocus();
+
+    const picker = screen.getByRole("dialog", { name: "GIF search" });
+    const selectGif = screen.getByRole("button", { name: "Select test GIF" });
+    act(() => selectGif.focus());
+    fireEvent.pointerDown(selectGif);
+    expect(picker).toBeVisible();
+    expect(selectGif).toHaveFocus();
+    fireEvent.click(selectGif);
+
     expect(screen.getByRole("button", { name: "Send" })).toBeDisabled();
     const signal = mockDownload.mock.calls[0]![1];
 
@@ -179,6 +188,37 @@ it("keeps the GIF picker and cancellation working with the mobile tray collapsed
     expect(screen.queryByText("giphy.gif")).not.toBeInTheDocument();
     expect(composerText(input!)).toBe("Keep this draft");
     expect(screen.getByRole("button", { name: "Send" })).toBeEnabled();
+  } finally {
+    viewport.restore();
+  }
+});
+
+it("dismisses the mobile action group on Escape, focus leaving, or an outside tap", () => {
+  const viewport = jest.replaceProperty(window, "innerWidth", 390);
+  try {
+    setup();
+    const toggle = screen.getByRole("button", {
+      name: "Show composer actions",
+    });
+    const open = () => {
+      fireEvent.click(toggle);
+      return screen.getByRole("group", { name: "Composer actions" });
+    };
+
+    const tray = open();
+    fireEvent.keyDown(screen.getByRole("button", { name: "Add GIF" }), {
+      key: "Escape",
+    });
+    expect(toggle).toHaveFocus();
+    expect(tray).not.toBeVisible();
+
+    open();
+    fireEvent.focusOut(toggle, { relatedTarget: document.body });
+    expect(tray).not.toBeVisible();
+
+    open();
+    fireEvent.pointerDown(document.body);
+    expect(tray).not.toBeVisible();
   } finally {
     viewport.restore();
   }
