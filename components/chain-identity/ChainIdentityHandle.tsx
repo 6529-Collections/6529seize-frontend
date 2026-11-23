@@ -67,7 +67,9 @@ export default function ChainIdentityHandle({
     availability.data?.available === true;
   const answered =
     availability.data !== undefined && handle === normalizeHandle(input)
-      ? STATUS_COPY[availability.data.status]
+      ? STATUS_COPY[
+          availability.data.available ? "free" : availability.data.status
+        ]
       : undefined;
   const statusKey = invalid ? STATUS_COPY["invalid"] : answered;
 
@@ -96,7 +98,10 @@ export default function ChainIdentityHandle({
       heading={t(locale, "chainIdentity.handle.heading")}
       body={t(locale, "chainIdentity.handle.body")}
     >
-      <label htmlFor="chain-identity-handle-input" className={CHAIN_LABEL_CLASS}>
+      <label
+        htmlFor="chain-identity-handle-input"
+        className={CHAIN_LABEL_CLASS}
+      >
         {t(locale, "chainIdentity.handle.label")}
       </label>
       <div className="tw-flex tw-flex-col tw-gap-2 sm:tw-flex-row sm:tw-items-center">
@@ -115,7 +120,9 @@ export default function ChainIdentityHandle({
         <Button
           variant="primary"
           size="md"
-          disabled={!available || action.busy || action.state.kind === "confirm"}
+          disabled={
+            !available || action.busy || action.state.kind === "confirm"
+          }
           onClick={start}
         >
           {t(locale, "chainIdentity.handle.action")}

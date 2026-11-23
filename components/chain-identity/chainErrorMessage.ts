@@ -28,6 +28,7 @@ const KNOWN_NAMES = new Set([
   "GRANT_NOT_LIVE",
   "HANDLE_RESERVED",
   "HANDLE_TAKEN",
+  "IDENTITY_FEE_SHORT",
   "IDENTITY_FULL",
   "IDENTITY_HELD",
   "IMPORT_RUNNING",
@@ -70,7 +71,11 @@ const KNOWN_NAMES = new Set([
 ]);
 
 /** Names that mean the payer had too little $fake6529. */
-const FEE_NAMES = new Set(["FEE_UNCOVERED", "INSUFFICIENT_BALANCE"]);
+const FEE_NAMES = new Set([
+  "FEE_UNCOVERED",
+  "IDENTITY_FEE_SHORT",
+  "INSUFFICIENT_BALANCE",
+]);
 
 /** "0x2101 ADDRESS_BOUND, detail 1", as the gateway and the relay word it. */
 const NAMED_CODE = /\b0x[0-9a-fA-F]{4} ([A-Z][A-Z0-9_]+)\b/;
@@ -254,6 +259,13 @@ export function chainFailureText(
   if (
     error instanceof ChainOperationError &&
     (error.reason === "timeout" || error.reason === "stated")
+  ) {
+    return reason;
+  }
+  // 6529.io didn't answer: it may already hold the signature or have sent it.
+  if (
+    error instanceof ChainRelayError &&
+    (error.status === 0 || error.status >= 500)
   ) {
     return reason;
   }

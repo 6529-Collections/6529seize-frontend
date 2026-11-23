@@ -8,9 +8,13 @@ import {
   type ChainActor,
   type RatingMatter,
 } from "./identityOps";
-import { ChainOperationError, runOperation } from "./operation";
+import {
+  ChainOperationError,
+  draftOperation,
+  submitAndAwait,
+} from "./operation";
 import { usableSessionKey } from "./session";
-import { readRaterSpent, readRating } from "./state";
+import { readIdentityBalance, readRaterSpent, readRating } from "./state";
 import { sessionSigner, walletSigner } from "./signers";
 
 /** A 6529.io profile as the chain finds it: by handle, else by its wallets. */
@@ -191,10 +195,30 @@ export async function writeChainRating(
     value: input.value,
     priorVersion: allowance.version,
   });
-  await runOperation(
+  const signer = key ? sessionSigner(key) : walletSigner(config, raterWallet);
+  const draft = await draftOperation(
     operation.request,
     operation.primaryType,
-    key ? sessionSigner(key) : walletSigner(config, raterWallet),
+    signal
+  );
+  // The identity pays the rating's fee: say so before any wallet prompt
+  // when its balance can't cover the most the fee can be.
+  const { currencyAsset } = await chainGateway.getOps(signal);
+  const balance = await readIdentityBalance(
+    allowance.rater,
+    currencyAsset,
+    signal
+  );
+  if (balance < BigInt(draft.fee.maxFee)) {
+    throw notRated(
+      "Your identity doesn't have enough $fake6529 for this rating's fee.",
+      "IDENTITY_FEE_SHORT"
+    );
+  }
+  const sig = await signer.sign(draft);
+  await submitAndAwait(
+    draft,
+    [{ role: 0, keyType: signer.keyType, sig }],
     signal
   );
 }

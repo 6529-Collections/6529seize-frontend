@@ -2,7 +2,7 @@ import type { Hex } from "viem";
 import type { Config } from "wagmi";
 import { repCategoryId } from "@/lib/chain/codec/ids";
 import { chainGateway } from "@/lib/chain-identity/gateway";
-import { runOperation } from "@/lib/chain-identity/operation";
+import { draftOperation, submitAndAwait } from "@/lib/chain-identity/operation";
 import {
   readRatingAllowance,
   withinAllowance,
@@ -10,22 +10,32 @@ import {
 } from "@/lib/chain-identity/ratings";
 import { usableSessionKey } from "@/lib/chain-identity/session";
 import { sessionSigner, walletSigner } from "@/lib/chain-identity/signers";
-import { readRaterSpent, readRating } from "@/lib/chain-identity/state";
+import {
+  readIdentityBalance,
+  readRaterSpent,
+  readRating,
+} from "@/lib/chain-identity/state";
 
 jest.mock("@/lib/chain-identity/gateway", () => ({
   ...jest.requireActual("@/lib/chain-identity/gateway"),
   chainGateway: {
     getIdentityByWallet: jest.fn(),
     getIdentityByHandle: jest.fn(),
+    getOps: jest.fn(),
   },
 }));
 jest.mock("@/lib/chain-identity/state", () => ({
   readRating: jest.fn(),
   readRaterSpent: jest.fn(),
+  readIdentityBalance: jest.fn(),
 }));
 jest.mock("@/lib/chain-identity/operation", () => ({
   ...jest.requireActual("@/lib/chain-identity/operation"),
-  runOperation: jest.fn(async () => ({ draft: {}, status: {} })),
+  draftOperation: jest.fn(async () => ({
+    txId: `0x${"77".repeat(32)}`,
+    fee: { maxFee: "100" },
+  })),
+  submitAndAwait: jest.fn(async () => ({ status: "final" })),
 }));
 jest.mock("@/lib/chain-identity/session", () => ({
   usableSessionKey: jest.fn(),
@@ -57,6 +67,11 @@ beforeEach(() => {
   );
   gateway["getIdentityByHandle"]!.mockResolvedValue({ principalId: TARGET });
   (readRaterSpent as jest.Mock).mockResolvedValue(900n);
+  (readIdentityBalance as jest.Mock).mockResolvedValue(10_000n);
+  gateway["getOps"]!.mockResolvedValue({
+    ruleVersion: 6,
+    currencyAsset: `0x${"0f".repeat(32)}`,
+  });
   (readRating as jest.Mock).mockResolvedValue({
     value: 50n,
     updatedHeight: 77,
@@ -123,7 +138,7 @@ it("rates with this browser's key, no wallet prompt, at the current version", as
   await rate();
   expect(sessionSigner).toHaveBeenCalledWith(key);
   expect(walletSigner).not.toHaveBeenCalled();
-  const [request, primaryType] = (runOperation as jest.Mock).mock.calls[0];
+  const [request, primaryType] = (draftOperation as jest.Mock).mock.calls[0];
   expect(primaryType).toBe("RatingSet");
   expect(request).toMatchObject({
     principal: RATER,
@@ -144,7 +159,7 @@ it("asks the wallet when this browser has no key", async () => {
   (usableSessionKey as jest.Mock).mockResolvedValue(null);
   await rate();
   expect(walletSigner).toHaveBeenCalledWith(config, WALLET);
-  expect((runOperation as jest.Mock).mock.calls[0][0]).toMatchObject({
+  expect((draftOperation as jest.Mock).mock.calls[0][0]).toMatchObject({
     keyType: 1,
     signer: WALLET,
   });
@@ -155,13 +170,13 @@ it("refuses past the TDH cap before anything is signed", async () => {
   await expect(rate(151n)).rejects.toMatchObject({
     resultName: "OVER_RATING_BUDGET",
   });
-  expect(runOperation).not.toHaveBeenCalled();
+  expect(submitAndAwait).not.toHaveBeenCalled();
 });
 
 it("refuses a rating of the rater's own identity", async () => {
   gateway["getIdentityByHandle"]!.mockResolvedValue({ principalId: RATER });
   await expect(rate()).rejects.toMatchObject({ resultName: "SELF_RATING" });
-  expect(runOperation).not.toHaveBeenCalled();
+  expect(submitAndAwait).not.toHaveBeenCalled();
 });
 
 it("finds the target by its wallets when it has no handle on the chain", async () => {
@@ -189,7 +204,7 @@ it("finds the target by its wallets when it has no handle on the chain", async (
     `0x${"00".repeat(32)}`,
     undefined
   );
-  expect((runOperation as jest.Mock).mock.calls[0][0].body).toMatchObject({
+  expect((draftOperation as jest.Mock).mock.calls[0][0].body).toMatchObject({
     matter: 2,
     target: TARGET,
     value: "-4",
@@ -207,7 +222,7 @@ it("says so when the rater or the target has no identity", async () => {
   await expect(rate()).rejects.toMatchObject({
     resultName: "NO_TARGET_IDENTITY",
   });
-  expect(runOperation).not.toHaveBeenCalled();
+  expect(submitAndAwait).not.toHaveBeenCalled();
 });
 
 it("doesn't rate the holder of a handle that left the profile's wallets", async () => {
@@ -230,7 +245,33 @@ it("doesn't rate the holder of a handle that left the profile's wallets", async 
     category: null,
     value: 3n,
   });
-  expect((runOperation as jest.Mock).mock.calls[0][0].body).toMatchObject({
+  expect((draftOperation as jest.Mock).mock.calls[0][0].body).toMatchObject({
     target: TARGET,
   });
+});
+
+it("says the identity can't pay the fee before anything is signed", async () => {
+  const sign = jest.fn();
+  (usableSessionKey as jest.Mock).mockResolvedValue(null);
+  (walletSigner as jest.Mock).mockReturnValue({ keyType: 1, sign });
+  (readIdentityBalance as jest.Mock).mockResolvedValue(99n);
+  await expect(rate()).rejects.toMatchObject({
+    resultName: "IDENTITY_FEE_SHORT",
+  });
+  expect(sign).not.toHaveBeenCalled();
+  expect(submitAndAwait).not.toHaveBeenCalled();
+});
+
+it("signs and sends once the identity covers the fee", async () => {
+  const sign = jest.fn(async () => "0x5151");
+  (usableSessionKey as jest.Mock).mockResolvedValue(null);
+  (walletSigner as jest.Mock).mockReturnValue({ keyType: 1, sign });
+  (readIdentityBalance as jest.Mock).mockResolvedValue(100n);
+  await rate();
+  expect(sign).toHaveBeenCalled();
+  expect(submitAndAwait).toHaveBeenCalledWith(
+    expect.objectContaining({ fee: { maxFee: "100" } }),
+    [{ role: 0, keyType: 1, sig: "0x5151" }],
+    undefined
+  );
 });

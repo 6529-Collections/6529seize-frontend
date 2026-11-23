@@ -179,6 +179,7 @@
   "chainIdentity.error.HANDLE_RESERVED": "That handle is reserved.",
   "chainIdentity.error.HANDLE_TAKEN": "That handle is taken.",
   "chainIdentity.error.IDENTITY_FULL": "Your identity has as many wallets as the 6529 Network allows. Remove one to add another.",
+  "chainIdentity.error.IDENTITY_FEE_SHORT": "Your identity doesn't have enough $fake6529 for this rating's fee.",
   "chainIdentity.error.IDENTITY_HELD": "This identity is on hold on the 6529 Network and can't change right now. Try again later.",
   "chainIdentity.error.IMPORT_RUNNING": "The 6529 Network is still importing identities. Try again once that is done.",
   "chainIdentity.error.INSUFFICIENT_BALANCE": "Not enough $fake6529 for this.",

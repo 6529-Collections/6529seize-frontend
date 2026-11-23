@@ -176,3 +176,14 @@ describe("errors that aren't the 6529 Network's", () => {
     );
   });
 });
+
+it("tells a profile page's rater, before any prompt, that the identity can't pay", () => {
+  expect(
+    chainRatingFailureText(
+      L,
+      new ChainOperationError("rejected", "x", "IDENTITY_FEE_SHORT")
+    )
+  ).toBe(
+    "Nothing changed. Your identity doesn't have enough $fake6529 for this rating's fee. Get $fake6529 for fees on your identity page."
+  );
+});
