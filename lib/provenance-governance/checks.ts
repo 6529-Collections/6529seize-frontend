@@ -4,7 +4,7 @@ import type {
 } from "@/lib/provenance-core/governance";
 
 /** A reason signing is blocked, as a message key with its values. */
-export type SigningProblem =
+type SigningProblem =
   | { key: "provenance.governance.sign.problem.owner" }
   | { key: "provenance.governance.sign.problem.pendingOwner" }
   | { key: "provenance.governance.sign.problem.signer" }

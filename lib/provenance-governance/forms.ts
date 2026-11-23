@@ -73,7 +73,7 @@ export const emptyDraft = (kind: GovernanceKind): GovernanceDraft => ({
   reason: "",
 });
 
-export type FormProblemKey =
+type FormProblemKey =
   | "provenance.governance.form.error.literal"
   | "provenance.governance.form.error.cid"
   | "provenance.governance.form.error.digest"
@@ -83,7 +83,7 @@ export type FormProblemKey =
   | "provenance.governance.form.error.range"
   | "provenance.governance.form.error.reason";
 
-export type DraftResult =
+type DraftResult =
   | { ok: true; action: Action }
   | {
       ok: false;

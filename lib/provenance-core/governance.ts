@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/governance.ts at commit a01790eb709958ed2367e1fd4345a4c559b08330.
+// Copied from 6529-Collections/6529-provenance-app src/governance.ts at commit 171ab352f90bb56f3e2248d4fd5b8e69b2a39092.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import {
