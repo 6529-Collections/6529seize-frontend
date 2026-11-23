@@ -17,6 +17,7 @@ import {
   type E2eeEngineSnapshot,
   type E2eeEngineStore,
 } from "./e2eeEngineStore";
+import { isE2eeReadSyncEnabled } from "@/config/e2eeReadSyncEnv";
 import { getE2eeErrorCode } from "./e2eeErrors";
 
 /** How long a stopping engine may finish in-flight writes before the lock goes. */
@@ -139,6 +140,7 @@ export function startE2eeEngineRun(input: E2eeEngineRunInput): E2eeEngineRun {
       onStateConflict: () => {
         void yieldToOtherTab();
       },
+      readSync: isE2eeReadSyncEnabled(),
     });
   };
 

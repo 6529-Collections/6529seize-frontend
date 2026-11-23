@@ -46,13 +46,26 @@ export function startNewChain(local: BackupLocalState): void {
   local.chain = { ...local.chain, restart: true };
   local.groupPrints = {};
   local.messagePrints = {};
+  local.readsSent = {};
 }
 
-/** Records whose fingerprint differs from what this device uploaded. */
+/**
+ * Records whose fingerprint differs from what this device uploaded, and,
+ * with `withReads`, read positions further than the ones it uploaded.
+ */
 export function changedHistory(
   history: BackupHistory,
-  local: BackupLocalState
+  local: BackupLocalState,
+  withReads: boolean
 ): BackupHistory {
+  const sent = local.readsSent ?? {};
+  const reads = withReads
+    ? Object.fromEntries(
+        Object.entries(history.reads ?? {}).filter(
+          ([g, seq]) => seq > (sent[g] ?? 0)
+        )
+      )
+    : {};
   return {
     groups: history.groups.filter(
       (group) => local.groupPrints[group.g] !== fingerprint(group)
@@ -62,5 +75,6 @@ export function changedHistory(
         local.messagePrints[messageKey(message.g, message.id)] !==
         fingerprint(message)
     ),
+    ...(Object.keys(reads).length > 0 ? { reads } : {}),
   };
 }
