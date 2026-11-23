@@ -211,10 +211,10 @@ export default function MobileNavigationView({
     if (previousPage.current.key === activePageKey) return;
     const backwards = pageDepth < previousPage.current.depth;
     previousPage.current = { key: activePageKey, depth: pageDepth };
-    const start = backwards
-      ? -globalThis.innerWidth * 0.25
-      : globalThis.innerWidth;
-    x.set(reducedMotion ? 0 : start);
+    // Back reveals the parent in place; only a newly opened editor slides in.
+    x.stop();
+    x.set(reducedMotion || backwards ? 0 : globalThis.innerWidth);
+    if (backwards) return;
     const animation = animate(x, 0, transition);
     return () => animation.stop();
   }, [activePageKey, pageDepth, reducedMotion, transition, x]);

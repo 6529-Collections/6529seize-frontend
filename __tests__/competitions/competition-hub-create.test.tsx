@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 import CompetitionHub from "@/components/competitions/CompetitionHub";
 
 let mockCanCreate = true;
+let mockIsPhone = false;
 
 jest.mock("@/helpers/competition.helpers", () => ({
   ...jest.requireActual("@/helpers/competition.helpers"),
@@ -22,7 +23,7 @@ jest.mock("@/hooks/useDeviceInfo", () => ({
 }));
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
-  default: () => false,
+  default: () => mockIsPhone,
 }));
 
 it.each([
@@ -44,5 +45,22 @@ it.each([
     } else {
       expect(action).toBeNull();
     }
+  }
+);
+
+it.each([true, false])(
+  "offers New decision in an empty phone collection only with creation permission (%s)",
+  (canCreate) => {
+    mockCanCreate = canCreate;
+    mockIsPhone = true;
+    render(<CompetitionHub waveId="wave" embedded />);
+    const action = screen.queryByRole("link", {
+      name: "New decision",
+      exact: true,
+    });
+    if (canCreate)
+      expect(action).toHaveAttribute("href", "/waves/wave/decisions/new");
+    else expect(action).not.toBeInTheDocument();
+    mockIsPhone = false;
   }
 );

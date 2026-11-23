@@ -2963,7 +2963,21 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
           : "Main Stage submission eligibility";
         const expectSubmissionAvailable = async () => {
           if (phone) {
-            await expect(submit).toHaveCount(0);
+            const hasContextualHelp =
+              !eligible &&
+              new URL(page.url()).searchParams.get("tab") === "leaderboard";
+            await expect(submit).toHaveCount(hasContextualHelp ? 1 : 0);
+            if (hasContextualHelp) {
+              await expect(submit).toBeInViewport({ ratio: 1 });
+              await submit.click();
+              await expect(
+                page.getByText("Unlock submissions", { exact: true })
+              ).toBeVisible();
+              await page.keyboard.press("Escape");
+              await expect(
+                page.getByText("Unlock submissions", { exact: true })
+              ).toBeHidden();
+            }
             const menu = await openPhoneWaveActions(page);
             await expect(findSubmission(menu)).toBeInViewport({ ratio: 1 });
             await expect(
@@ -3082,13 +3096,16 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
               .locator("header")
               .filter({ has: identity });
             await expect(
-              header.getByRole("button", { name: /^Wave score 96/ })
+              header.locator('span[aria-label^="Wave score 96"]')
             ).toBeInViewport({ ratio: 1 });
+            await expect(
+              header.getByRole("button", { name: /^Wave score 96/ })
+            ).toHaveCount(0);
             await expect(
               header.getByRole("button", { name: /^Join / })
             ).toBeInViewport({ ratio: 1 });
             await expect(moreActions).toBeInViewport({ ratio: 1 });
-            await expect(submit).toHaveCount(0);
+            await expect(submit).toHaveCount(eligible ? 0 : 1);
             await expectNoHorizontalOverflow(page);
           }
         }
@@ -5672,6 +5689,89 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     });
   }
   for (const surface of ["web", "ios", "android"] as const) {
+    test(`keeps the parent information view stationary when returning from editors on ${surface}`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Phone navigation motion coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      const sandbox = await installCompetitionApi(page, true);
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      await openWaveInformation(page);
+      const sheet = page.getByRole("dialog");
+      const parentTitle = "About Local Composer Sandbox Wave";
+      for (const editor of ["Edit wave name", "Edit Chat access"]) {
+        if (editor === "Edit Chat access")
+          await sheet
+            .getByRole("tab", { name: "Configuration", exact: true })
+            .click();
+        for (const method of ["swipe", "button"] as const) {
+          await sheet
+            .getByRole("button", { name: editor, exact: true })
+            .click();
+          await expect(sheet).toHaveAccessibleName(
+            editor === "Edit wave name" ? "Rename wave" : editor
+          );
+          const observer = await sheet.evaluateHandle((dialog, title) => {
+            const positions: number[] = [];
+            let frame = 0;
+            const sample = () => {
+              const headerTitle = dialog.querySelector("header h2");
+              const surface = dialog.querySelector(
+                "[data-mobile-navigation-view]"
+              );
+              if (headerTitle?.textContent === title && surface)
+                positions.push(surface.getBoundingClientRect().x);
+              frame = requestAnimationFrame(sample);
+            };
+            frame = requestAnimationFrame(sample);
+            return {
+              stop: () => cancelAnimationFrame(frame),
+              read: async () => {
+                for (let i = 0; i < 20; i++)
+                  await new Promise<void>((resolve) =>
+                    requestAnimationFrame(() => resolve())
+                  );
+                return positions;
+              },
+            };
+          }, parentTitle);
+          try {
+            if (method === "swipe") await swipeInformationBack(page, sheet);
+            else
+              await sheet
+                .getByRole("button", { name: "Back", exact: true })
+                .click();
+            await expect(sheet).toHaveAccessibleName(parentTitle);
+            const positions = await observer.evaluate((state) => state.read());
+            expect(positions.length).toBeGreaterThan(5);
+            expect(
+              Math.max(...positions.map(Math.abs)),
+              `${editor} via ${method}: parent motion`
+            ).toBeLessThanOrEqual(1);
+            await expect(
+              sheet.getByRole("tab", {
+                name: editor === "Edit wave name" ? "About" : "Configuration",
+                exact: true,
+              })
+            ).toHaveAttribute("aria-selected", "true");
+          } finally {
+            await observer.evaluate((state) => state.stop());
+            await observer.dispose();
+          }
+        }
+      }
+      expect(sandbox.requests).toEqual([]);
+    });
+
     test(`catches and settles the wave-details spring without bounce on ${surface}`, async ({
       page,
       baseURL,
@@ -9989,15 +10089,36 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       await page.setViewportSize({ width: 320, height: 844 });
       await expect(row).toBeVisible();
       const bounds = await row.evaluate((element) => ({
-        overflow: element.scrollWidth - element.clientWidth,
         minimumTargetHeight: Math.min(
           ...[...element.querySelectorAll("button")].map(
             (button) => button.getBoundingClientRect().height
           )
         ),
       }));
-      expect(bounds.overflow).toBe(0);
       expect(bounds.minimumTargetHeight).toBeGreaterThanOrEqual(44);
+      const chat = row.getByRole(app ? "button" : "tab", {
+        name: "Chat",
+        exact: true,
+      });
+      const chatBounds = await chat.boundingBox();
+      expect(chatBounds!.width).toBeLessThan(64);
+      await expect(more).toBeInViewport({ ratio: 1 });
+      const ink = await more
+        .locator("[data-wave-tab-label]")
+        .evaluate((label) => {
+          const text = document.createRange();
+          text.selectNodeContents(label);
+          const underline = getComputedStyle(label, "::after");
+          return {
+            textWidth: text.getBoundingClientRect().width,
+            inkWidth: Number.parseFloat(underline.width),
+            inkHeight: Number.parseFloat(underline.height),
+            lines: text.getClientRects().length,
+          };
+        });
+      expect(ink.inkWidth).toBeCloseTo(ink.textWidth, 0);
+      expect(ink.inkHeight).toBe(2);
+      expect(ink.lines).toBe(1);
       await expectNoHorizontalOverflow(page);
       await page.screenshot({
         path: testInfo.outputPath("phone-wave-tabs-320.png"),
@@ -10049,13 +10170,13 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByRole(tabRole, { name: "Chat", exact: true })
           .locator("span")
           .first()
-      ).toHaveCSS("height", "16px");
+      ).toHaveCSS("white-space", "nowrap");
       await expect(
         row
           .getByRole(tabRole, { name: "Decisions", exact: true })
           .locator("span")
           .first()
-      ).toHaveCSS("height", "16px");
+      ).toHaveCSS("white-space", "nowrap");
       await expectNoHorizontalOverflow(page);
       await row.getByRole(tabRole, { name: "Photos", exact: true }).click();
       await expect(page).toHaveURL(/curation=phone-role-1/);
@@ -10292,7 +10413,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       : page.getByRole("menu");
     await expect(
       createOptions.getByText("New decision", { exact: true })
-    ).toHaveCount(0);
+    ).toHaveCount(app ? 1 : 0);
     await expect(
       createOptions.getByText("New curation", { exact: true })
     ).toBeVisible();
@@ -10350,7 +10471,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(page.getByRole("dialog")).toHaveCount(1);
     await expect(createOptions).toBeHidden();
     const cancelCuration = curationDialog.getByRole("button", {
-      name: "Cancel",
+      name: app ? "Close" : "Cancel",
       exact: true,
     });
     await expect(cancelCuration).toBeVisible();
@@ -13120,6 +13241,114 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
   });
 
   for (const surface of ["web", "ios", "android"] as const) {
+    test(`groups phone wave actions and preserves contextual creation on ${surface}`, async ({
+      page,
+      baseURL,
+    }, testInfo) => {
+      test.skip(
+        testInfo.project.name !== "web-mobile-chromium",
+        "Phone action sheet coverage."
+      );
+      if (surface !== "web")
+        await installSurfaceSimulation(
+          page.context(),
+          surface === "ios" ? "capacitor-ios-sim" : "capacitor-android-sim",
+          baseURL
+        );
+      const sandbox = await installCompetitionApi(page, true);
+      const parent = await (
+        await page.request.get(
+          `${getSandboxApiOrigin(baseURL)}/api/waves/${WAVE}`
+        )
+      ).json();
+      parent.wave.admin_group.group = {
+        id: composerSandboxConstants.previewGroupId,
+        name: "Active collectors",
+        is_hidden: false,
+      };
+      parent.has_subwaves = false;
+      await page.route(`**/api/waves/${WAVE}`, (route) =>
+        route.fulfill({ json: parent })
+      );
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      let menu = await openPhoneWaveActions(page);
+      const ids = await menu
+        .locator("[data-menu-item-id]")
+        .evaluateAll((elements) =>
+          elements.map((element) => element.getAttribute("data-menu-item-id"))
+        );
+      expect(ids.slice(0, 3)).toEqual([
+        "wave-details",
+        "search-messages",
+        "wave-link",
+      ]);
+      expect(ids.slice(-3)).toEqual([
+        "create-curation",
+        "create-subwave",
+        "create-decision",
+      ]);
+      await expect(menu.getByRole("separator")).toHaveCount(2);
+      const utcToggle = menu.getByRole("button", {
+        name: "Show times in UTC for now",
+        exact: true,
+      });
+      await expect(utcToggle).toHaveAttribute("aria-pressed", "false");
+      await utcToggle.click();
+      await expect(menu).toHaveCount(0);
+      menu = await openPhoneWaveActions(page);
+      await expect(utcToggle).toHaveAttribute("aria-pressed", "true");
+      await expect(utcToggle.locator("svg")).toHaveCount(2);
+      await page.screenshot({
+        path: testInfo.outputPath(`phone-actions-grouped-${surface}.png`),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
+      await utcToggle.click();
+      menu = await openPhoneWaveActions(page);
+      await menu
+        .getByRole("button", { name: "New decision", exact: true })
+        .click();
+      await expect(page).toHaveURL(new RegExp(`${ROOT}/new$`));
+      await expect(
+        page.getByRole("heading", { name: "New decision", exact: true })
+      ).toBeVisible();
+      await page.goto(`/waves/${WAVE}?tab=chat`);
+      if (surface !== "web") {
+        // The existing subwave bar belongs to the native app shell.
+        await page
+          .getByRole("button", { name: "New subwave", exact: true })
+          .click();
+        const subwave = page.getByRole("dialog", {
+          name: 'Create subwave of "Local Composer Sandbox Wave"',
+          exact: true,
+        });
+        await expect(subwave).toBeVisible();
+        await subwave
+          .getByRole("button", { name: "Close", exact: true })
+          .click();
+        await expect(subwave).toHaveCount(0);
+      }
+      sandbox.clearCompetitions();
+      await page.goto(ROOT);
+      const collection = page.getByRole("region", {
+        name: "Decisions",
+        exact: true,
+      });
+      const newDecision = collection.getByRole("link", {
+        name: "New decision",
+        exact: true,
+      });
+      await expect(newDecision).toBeVisible();
+      await page.screenshot({
+        path: testInfo.outputPath(`phone-decisions-empty-${surface}.png`),
+        animations: "disabled",
+        style: "nextjs-portal { visibility: hidden; }",
+      });
+      await newDecision.click();
+      await expect(page).toHaveURL(new RegExp(`${ROOT}/new$`));
+      expect(sandbox.requests).toEqual([]);
+    });
+
     test(`renames a wave within the ${surface} information sheet`, async ({
       page,
       baseURL,

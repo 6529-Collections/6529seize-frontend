@@ -23,6 +23,9 @@ Entry behavior differs by wave type:
 ## Entry Surfaces
 
 - Open a wave and select `Leaderboard`.
+- On phones, when submission is unavailable, a quiet `How to Submit` link at
+  the top opens the existing restriction or Main Stage nomination guidance.
+  The corresponding action remains in `More wave actions`.
 - Standard waves:
   - Header `Drop` is shown only when logged in and eligible.
   - Empty list shows `Drop` in the `No drops to show` card.

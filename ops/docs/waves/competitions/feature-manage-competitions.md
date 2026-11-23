@@ -13,6 +13,11 @@ Open **Decisions**, then **+ Decision** beside its filter pills, or use
 
 ## Entry Points
 
+On phones, eligible administrators can also choose **New decision** from
+**More wave actions**. An empty Decisions list offers **New decision** in the
+empty state. Both open the same setup editor as **+ Decision** and require
+the existing decision creation permission.
+
 Creating a wave opens its shared
 chat without creating a decision. Wave administrators can add decisions
 afterward; decision setup is separate from wave creation.

@@ -352,7 +352,6 @@ export default function MyStreamWaveTabsHeader({
   const { connectedProfile, activeProfileProxy } = useAuth();
   const { open: openSearch, trigger: searchTrigger } =
     useOpenMyStreamWaveSearch();
-  const displayTimeZoneMenuItem = useDisplayTimeZoneMenuItem();
 
   // Warm the wave search modal from the visitor's first interaction (or when
   // idle), so the first open does not wait on the network. The chunk stays out
@@ -364,6 +363,9 @@ export default function MyStreamWaveTabsHeader({
   const isDirectMessage = getWaveIsDirectMessage(wave);
   const isCompactWave = isCompact && !isDirectMessage;
   const isPhoneWave = !isApp && isCompactWave;
+  const displayTimeZoneMenuItem = useDisplayTimeZoneMenuItem({
+    checkable: isPhoneWave,
+  });
   const backLayout = isCompactWave ? "back-compact" : "back";
   const [headerRef, { width: headerWidth }] = useMeasure<HTMLElement>();
   const isNarrow = isCompactWave && (headerWidth === 0 || headerWidth < 400);

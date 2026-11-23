@@ -1,10 +1,18 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import MyStreamWaveCreateActionsMenu from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
 import { useAuth } from "@/components/auth/Auth";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 
 const createWaveModalMock = jest.fn();
+const mockPush = jest.fn();
+jest.mock("next/navigation", () => ({ useRouter: () => ({ push: mockPush }) }));
+let mockCanCreateDecision = false;
+jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
+  useCompetitionHub: () => ({
+    data: { permissions: { create_competition: mockCanCreateDecision } },
+  }),
+}));
 jest.mock("@/hooks/useIsMobileLayoutViewport", () => ({
   __esModule: true,
   default: jest.fn(),
@@ -97,6 +105,7 @@ const createWave = ({
 describe("MyStreamWaveCreateActionsMenu", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCanCreateDecision = false;
     jest.mocked(useIsMobileLayoutViewport).mockReturnValue(false);
     mockedUseAuth.mockReturnValue({
       connectedProfile: { handle: "alice" },
@@ -118,9 +127,7 @@ describe("MyStreamWaveCreateActionsMenu", () => {
     expect(
       screen.getByRole("button", { name: /^New curation/ })
     ).toBeInTheDocument();
-    expect(
-      screen.queryByRole("button", { name: /^New decision/ })
-    ).toBeNull();
+    expect(screen.queryByRole("button", { name: /^New decision/ })).toBeNull();
     await userEvent.click(screen.getByRole("button", { name: /^New subwave/ }));
 
     expect(screen.getByTestId("subwave-modal")).toBeInTheDocument();
@@ -220,6 +227,35 @@ describe("MyStreamWaveCreateActionsMenu", () => {
       screen.getByRole("button", { name: "Open create menu" })
     ).toHaveClass("tw-min-h-11");
   });
+
+  it.each([true, false])(
+    "uses the existing decision creation permission in the phone menu (%s)",
+    async (allowed) => {
+      mockCanCreateDecision = allowed;
+      render(
+        <MyStreamWaveCreateActionsMenu
+          wave={createWave()}
+          variant="mobile"
+          onCreated={jest.fn()}
+        />
+      );
+      await userEvent.click(
+        screen.getByRole("button", { name: "Open create menu" })
+      );
+      const decision = screen.queryByRole("button", {
+        name: "New decision",
+        exact: true,
+      });
+      if (allowed) {
+        await userEvent.click(decision!);
+        await waitFor(() =>
+          expect(mockPush).toHaveBeenCalledWith(
+            "/waves/parent-wave/decisions/new"
+          )
+        );
+      } else expect(decision).not.toBeInTheDocument();
+    }
+  );
 
   it("opens a concise sheet on mobile web and hands off after it closes", async () => {
     jest.mocked(useIsMobileLayoutViewport).mockReturnValue(true);

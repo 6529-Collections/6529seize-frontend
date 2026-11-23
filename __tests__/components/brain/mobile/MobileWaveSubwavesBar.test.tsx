@@ -6,6 +6,15 @@ import { useWaveSubwavesMap } from "@/hooks/useWaveSubwaves";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiWaveOverview } from "@/generated/models/ApiWaveOverview";
 import type { SidebarWave } from "@/types/waves.types";
+import type { CompactMenuItem } from "@/components/compact-menu";
+
+let mockCreateItems: CompactMenuItem[] = [];
+jest.mock(
+  "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu",
+  () => ({
+    useWaveCreateMenuActions: () => ({ items: mockCreateItems, dialogs: null }),
+  })
+);
 
 const mockRegisterRef = jest.fn();
 const mockSetActiveWave = jest.fn();
@@ -151,6 +160,7 @@ const createSubwave = (
 describe("MobileWaveSubwavesBar", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCreateItems = [];
     mockActiveWaveId = "root-wave";
     mockAddress = "0xABC";
     mockActiveProfileProxy = { id: "proxy-1" };
@@ -193,6 +203,22 @@ describe("MobileWaveSubwavesBar", () => {
       parentWaveIds: [],
       viewerIdentityKey: "0xabc:proxy:proxy-1",
     });
+  });
+
+  it("opens the existing New subwave action for an eligible admin even before the first subwave", async () => {
+    const open = jest.fn();
+    mockCreateItems = [
+      { id: "create-subwave", label: "New subwave", onSelect: open },
+    ];
+    render(<MobileWaveSubwavesBar wave={createApiWave()} />);
+    await userEvent.click(
+      screen.getByRole("button", { name: "New subwave", exact: true })
+    );
+    expect(open).toHaveBeenCalledTimes(1);
+    expect(
+      screen.getByRole("button", { name: "Open Main" })
+    ).toBeInTheDocument();
+    expect(mockSetActiveWave).not.toHaveBeenCalled();
   });
 
   it("renders Main and each subwave for a root wave with subwaves", () => {

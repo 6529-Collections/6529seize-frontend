@@ -8,6 +8,7 @@ import {
   ChatBubbleLeftRightIcon,
   PlusIcon,
   RectangleStackIcon,
+  TrophyIcon,
 } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
 import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
@@ -24,6 +25,9 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import useIsMobileLayoutViewport from "@/hooks/useIsMobileLayoutViewport";
 import { t } from "@/i18n/messages";
 import MyStreamWaveCurationCreateDialog from "./MyStreamWaveCurationCreateDialog";
+import { useCompetitionHub } from "@/hooks/competitions/useCompetitionQueries";
+import { getCompetitionRoute } from "@/helpers/competition.helpers";
+import { useRouter } from "next/navigation";
 
 interface MyStreamWaveCreateActionsMenuProps {
   readonly wave: ApiWave;
@@ -37,10 +41,11 @@ export function useWaveCreateMenuActions({
   mobile,
 }: {
   readonly wave: ApiWave | undefined;
-  readonly onCreated: (curationId: string) => void;
+  readonly onCreated?: ((curationId: string) => void) | undefined;
   readonly mobile: boolean;
 }) {
   const { connectedProfile, activeProfileProxy } = useAuth();
+  const router = useRouter();
   const locale = useBrowserLocale();
   const [action, setAction] = useState<{
     readonly waveId: string;
@@ -53,6 +58,14 @@ export function useWaveCreateMenuActions({
   };
   const closeAction = () => setAction(null);
   const isDirectMessage = wave ? isWaveDirectMessage(wave.id, wave) : false;
+  const competitionHub = useCompetitionHub(
+    wave?.id ?? "",
+    mobile && Boolean(wave) && !isDirectMessage
+  );
+  const canCreateDecision =
+    mobile &&
+    !isDirectMessage &&
+    competitionHub.data?.permissions.create_competition === true;
   const waveConfig = wave?.wave as ApiWave["wave"] | null | undefined;
   const parentAdminGroup = waveConfig?.admin_group as
     | ApiWave["wave"]["admin_group"]
@@ -125,6 +138,20 @@ export function useWaveCreateMenuActions({
           },
         ]
       : []),
+    ...(canCreateDecision && wave
+      ? [
+          {
+            id: "create-decision",
+            iconClassName,
+            icon: (
+              <TrophyIcon className={iconSizeClassName} aria-hidden="true" />
+            ),
+            label: t(locale, "competitions.new"),
+            onSelect: () => router.push(getCompetitionRoute(wave.id, "new")),
+            deferUntilClosed: true,
+          },
+        ]
+      : []),
   ];
 
   const dialogs = (
@@ -134,7 +161,7 @@ export function useWaveCreateMenuActions({
           wave={wave}
           isOpen
           onClose={closeAction}
-          onSaved={(curation) => onCreated(curation.id)}
+          onSaved={(curation) => onCreated?.(curation.id)}
         />
       )}
 

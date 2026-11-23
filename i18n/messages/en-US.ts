@@ -1668,6 +1668,8 @@ const WAVE_JOIN_MESSAGES = objectMessages("waves.join", {
 } as const);
 
 const WAVE_DROP_ELIGIBILITY_MESSAGES = objectMessages("waves.dropEligibility", {
+  howToSubmit: "How to Submit",
+  approvalLocked: "Approval controls are locked",
   loginRequired: "Please log in to make submissions",
   ended: "Submission period has ended",
 } as const);

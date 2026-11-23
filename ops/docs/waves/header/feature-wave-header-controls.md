@@ -77,9 +77,17 @@ available score tucked beneath the avatar, the wave name, `Join` when available,
 when it exceeds the second line. Tapping the avatar or name opens details. The
 header score has no phone popover; tap Score in details statistics for its
 breakdown and Learn more. The site menu and global search are on the Waves list.
-`More wave actions` opens a sheet with Wave details, message search, the
-available submission or `How to Submit` controls, time-zone options, sharing,
-and the eligible `New curation` and `New subwave` actions. Direct messages keep
+`More wave actions` opens a sheet grouped with thin dividers:
+
+1. Wave details, Search messages, and the existing sharing action.
+2. The available submission or `How to Submit` control, `Show times in UTC for now`,
+   and other existing view controls. The UTC action shows a checkmark when UTC is active;
+   selecting it again restores the saved time setting.
+3. Eligible administrator actions: `New curation`, `New subwave`, and `New decision`.
+
+The native app's subwave bar also offers `New subwave` to eligible administrators, including
+before the first subwave is created. These entries open the same existing creation
+flows and keep their original permission checks. Direct messages keep
 their own header and do not show Wave Score.
 
 On desktop and tablets the top-right controls start with `Join` when the viewer has not joined the

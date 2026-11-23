@@ -180,9 +180,20 @@ function CompetitionCollection({ hub }: { readonly hub: ApiWaveV3 }) {
         ))}
       </ul>
     ) : (
-      <output className="tw-block tw-text-sm tw-text-iron-400">
-        {t(locale, "competitions.empty")}
-      </output>
+      <div className="tw-space-y-3">
+        <output className="tw-block tw-text-sm tw-text-iron-400">
+          {t(locale, "competitions.empty")}
+        </output>
+        {canCreateCompetition && (isApp || isMobileViewport) && (
+          <Link
+            href={getCompetitionRoute(hub.id, "new")}
+            className={`${createClassName} tw-inline-flex tw-items-center tw-gap-1.5`}
+          >
+            <PlusIcon aria-hidden="true" className="tw-size-4" />
+            {t(locale, "competitions.new")}
+          </Link>
+        )}
+      </div>
     );
   const filters: CompetitionCollectionFilter[] = ["active", "history"];
   if (hub.permissions.administer) filters.push("drafts");

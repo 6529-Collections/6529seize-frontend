@@ -56,8 +56,10 @@ Opening desktop/tablet `More wave actions` keeps focus on its trigger instead of
 automatically focusing a time option. Press Tab to enter the controls; keyboard
 focus remains visible, and Escape closes the popover.
 
-On phones, `More wave actions` and the press-and-hold post menu offer `Show times in UTC for now` and, while on, `Show times in {setting}
-again`. Phones show no chip in the header; converted times carry their zone
+On phones, `More wave actions` keeps the label `Show times in UTC for now`
+and shows a checkmark when UTC is active. Select the same row again to restore
+the saved setting. The press-and-hold post menu retains `Show times in UTC for now`
+and, while on, `Show times in {setting} again`. Phones show no chip in the header; converted times carry their zone
 name, such as `UTC`.
 
 ## What Follows the Display Zone

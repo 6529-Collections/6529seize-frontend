@@ -13,6 +13,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { useWaveSubwavesMap } from "@/hooks/useWaveSubwaves";
 import { t } from "@/i18n/messages";
 import type { SidebarWave, SidebarWaveContributor } from "@/types/waves.types";
+import { PlusIcon } from "@heroicons/react/24/outline";
+import { useWaveCreateMenuActions } from "@/components/brain/my-stream/tabs/MyStreamWaveCreateActionsMenu";
 
 interface MobileWaveSubwavesBarProps {
   readonly wave: ApiWave;
@@ -144,6 +146,13 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
   const { address } = useSeizeConnectContext();
   const { activeProfileProxy } = useAuth();
   const locale = useBrowserLocale();
+  const { items: createItems, dialogs } = useWaveCreateMenuActions({
+    wave,
+    mobile: true,
+  });
+  const newSubwave = createItems.find(
+    (item) => item.id === "create-subwave" && item.kind !== "section"
+  );
   const currentWaveId = activeWave.id ?? wave.id;
   const isDirectMessage =
     wave.wave.type === ApiWaveType.Chat &&
@@ -189,7 +198,10 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
 
   const shouldRender =
     !isDirectMessage &&
-    (isSubwave || wave.has_subwaves === true || fetchedSubwaves.length > 0);
+    (isSubwave ||
+      wave.has_subwaves === true ||
+      fetchedSubwaves.length > 0 ||
+      Boolean(newSubwave));
 
   useEffect(() => {
     if (!shouldRender) {
@@ -297,8 +309,19 @@ function MobileWaveSubwavesBar({ wave }: MobileWaveSubwavesBarProps) {
               </button>
             );
           })}
+          {newSubwave && newSubwave.kind !== "section" && (
+            <button
+              type="button"
+              onClick={newSubwave.onSelect}
+              className="tw-flex tw-min-h-11 tw-shrink-0 tw-items-center tw-gap-1.5 tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 active:tw-text-white"
+            >
+              <PlusIcon aria-hidden="true" className="tw-size-4" />
+              {t(locale, "waves.create.actions.newSubwave")}
+            </button>
+          )}
         </div>
       )}
+      {dialogs}
     </div>
   );
 }

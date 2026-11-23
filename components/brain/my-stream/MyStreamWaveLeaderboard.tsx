@@ -43,6 +43,9 @@ import {
   FULL_APPROVAL_WAVE_DECISIONS_PAGE_SIZE,
   useWaveDecisions,
 } from "@/hooks/waves/useWaveDecisions";
+import WaveLeaderboardSubmissionHelp from "@/components/waves/leaderboard/WaveLeaderboardSubmissionHelp";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { t } from "@/i18n/messages";
 
 interface MyStreamWaveLeaderboardProps {
   readonly wave: ApiWave;
@@ -251,6 +254,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   onDropClick,
 }) => {
   const leaderboardContainerRef = useRef<HTMLDivElement | null>(null);
+  const locale = useBrowserLocale();
   const { connectedProfile, activeProfileProxy } = useContext(AuthContext);
   const {
     isApproveWave,
@@ -289,7 +293,7 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
 
   const isLoggedIn = Boolean(connectedProfile?.handle);
-  const { canCreateDrop } = useMemo(
+  const { canCreateDrop, restrictionMessage } = useMemo(
     () =>
       getWaveDropEligibility({
         isLoggedIn,
@@ -399,6 +403,9 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
     ? retryApprovalDecisionPointsLoad
     : null;
   const canOpenCreateDrop = canCreateDrop && !isApprovalVotingControlsLocked;
+  const submissionHelpReason = isApprovalVotingControlsLocked
+    ? t(locale, "waves.dropEligibility.approvalLocked")
+    : restrictionMessage;
   const [createDropUiState, setCreateDropUiState] = useState<CreateDropUiState>(
     () => ({
       waveId: wave.id,
@@ -538,6 +545,13 @@ const MyStreamWaveLeaderboard: React.FC<MyStreamWaveLeaderboardProps> = ({
       className={containerClassName}
       style={leaderboardViewStyle}
     >
+      {!canOpenCreateDrop && (
+        <WaveLeaderboardSubmissionHelp
+          wave={wave}
+          nomination={isMemesWave && !participation.isEligible}
+          reason={submissionHelpReason}
+        />
+      )}
       <div
         className={`tw-flex tw-min-w-0 tw-flex-grow ${
           isMemesWave

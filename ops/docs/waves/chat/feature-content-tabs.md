@@ -172,7 +172,10 @@ A divider separates the wave identity and header actions from the main tab row.
   counts and percentages before voting, then return to `Vote` while the poll is
   still open.
 - Phones show all available sections when there are five or fewer, with `Chat`
-  first and no `More` button. For larger waves, the row shows `Chat` and up to
+  first and no `More` button. Tabs stay compact and left-aligned, whether there
+  is one section or several. The blue underline matches the selected label's
+  width. Long rows scroll horizontally rather than stretching or wrapping labels;
+  the active tab scrolls into view. For larger waves, the row shows `Chat` and up to
   three other everyday sections, including Leaderboard, Winners, Votes, Polls,
   Sales and named curations as available. Reference and setup sections such as
   FAQ, Settings and Decisions stay in `More`. Everyday sections that do not fit

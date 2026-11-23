@@ -305,13 +305,21 @@ function AnnouncementRegion({ text }: { readonly text: string }) {
  * tap switches to UTC (or local time) for this tab, a second tap switches
  * back.
  */
-export function useDisplayTimeZoneMenuItem(): CompactMenuItem {
+export function useDisplayTimeZoneMenuItem({
+  checkable = false,
+}: { readonly checkable?: boolean } = {}): CompactMenuItem {
   const locale = useBrowserLocale();
   const state = useDisplayTimeZoneState();
   const { setting, alternative, isOverridden } = getSwitchChoices(
     state,
     locale
   );
+  const toggleState = checkable
+    ? {
+        label: t(locale, "displayTimeZone.menu.useUtc"),
+        checked: state.effectivePreference === UTC_TIME_ZONE_PREFERENCE,
+      }
+    : {};
 
   if (isOverridden) {
     return {
@@ -319,6 +327,7 @@ export function useDisplayTimeZoneMenuItem(): CompactMenuItem {
       label: t(locale, "displayTimeZone.menu.reset", { zone: setting.name }),
       icon: <ClockIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />,
       onSelect: () => state.setOverride(null),
+      ...toggleState,
     };
   }
   return {
@@ -331,5 +340,6 @@ export function useDisplayTimeZoneMenuItem(): CompactMenuItem {
     ),
     icon: <ClockIcon className="tw-h-4 tw-w-4 tw-flex-shrink-0" />,
     onSelect: () => state.setOverride(alternative.preference),
+    ...toggleState,
   };
 }

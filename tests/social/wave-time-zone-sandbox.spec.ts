@@ -285,7 +285,9 @@ test.describe("Display time zone @auth @local-only", () => {
       testInfo.project.name === "web-mobile-chromium" ? [320, 375, 430] : [375];
     for (const width of phoneWidths) {
       await page.setViewportSize({ width, height: 900 });
-      await expect(score).toBeInViewport({ ratio: 1 });
+      const phoneScore = header.locator('span[aria-label^="Wave score"]');
+      await expect(phoneScore).toBeInViewport({ ratio: 1 });
+      await expect(score).toHaveCount(0);
       await expect(
         header.getByRole("button", {
           name: "Search messages in this wave",
@@ -303,8 +305,10 @@ test.describe("Display time zone @auth @local-only", () => {
             const row = button.closest("h1")?.parentElement;
             const score = button
               .closest("header")
-              ?.querySelector('button[aria-label^="Wave score"]');
-            const avatar = row?.parentElement?.parentElement?.firstElementChild;
+              ?.querySelector('span[aria-label^="Wave score"]');
+            const avatar = row
+              ?.closest("header")
+              ?.querySelector('button[aria-label="Open wave details"] > div');
             if (!score || !avatar) return false;
             const nameBox = button.getBoundingClientRect();
             const scoreBox = score.getBoundingClientRect();
@@ -363,9 +367,12 @@ test.describe("Display time zone @auth @local-only", () => {
     // Phones show the date only for older posts, but still use the selected zone.
     await expect(seededPostTime(page)).toHaveText("Apr 22, 2024");
     await openPhoneActions();
-    await actions
-      .getByRole("button", { name: "Show times in local time again" })
-      .click();
+    const utcToggle = actions.getByRole("button", {
+      name: "Show times in UTC for now",
+    });
+    await expect(utcToggle).toHaveAttribute("aria-pressed", "true");
+    await expect(utcToggle.locator("svg")).toHaveCount(2);
+    await utcToggle.click();
     await expect(actions).toHaveCount(0);
     await expect(seededPostTime(page)).toHaveText("Apr 21, 2024");
     await openPhoneActions();

@@ -113,7 +113,7 @@ export default function PhoneWaveHeaderActions({
 }) {
   const information = useWaveInformation();
   const locale = useBrowserLocale();
-  const timeZone = useDisplayTimeZoneMenuItem();
+  const timeZone = useDisplayTimeZoneMenuItem({ checkable: true });
   const [isSubmissionHelpOpen, setIsSubmissionHelpOpen] = useState(false);
   const { items: createItems, dialogs } = useWaveCreateMenuActions({
     wave: createNavigation?.waveId === wave.id ? wave : undefined,
