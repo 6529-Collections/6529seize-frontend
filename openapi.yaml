@@ -3323,6 +3323,76 @@ paths:
                 $ref: "#/components/schemas/ApiSessionNonceResponse"
         "400":
           description: Invalid request
+  /signed-records/owners:
+    get:
+      tags:
+        - Authentication
+      summary: The stream owner each wallet's records use
+      description: >-
+        For each wallet, the owner that names it in signed records: its
+        principal id at the latest finalized height, or the wallet itself
+        while it is bound to no principal. Clients use it for the targets of
+        follows, mutes, blocks, artwork alerts and mention shortcuts. 1 to 50
+        wallets. 503 while the chain gateway is unavailable.
+      operationId: getSignedRecordsOwners
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: signed-records
+        handler:
+          import: "@/api/signed-records/signed-records.handlers"
+          name: handleGetSignedRecordsOwners
+      parameters:
+        - name: wallets
+          in: query
+          required: true
+          description: Comma-separated wallets, 0x + 40 hex.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSignedRecordsOwners"
+        "400":
+          description: Not 1 to 50 wallets
+        "503":
+          description: The chain gateway is unavailable
+  /signed-records/anchor:
+    get:
+      tags:
+        - Authentication
+      summary: The chain height to sign as a signed record's anchor
+      description: >-
+        The latest finalized height of the 6529 chain, read through the chain
+        gateway. Device-signed records (kinds 9-12) carry it as their `anchor`;
+        a submitted record must anchor at most `max_anchor_lag` heights behind
+        the finalized head. Returns 503 while the gateway is unavailable.
+      operationId: getSignedRecordsAnchor
+      security:
+        - {}
+      x-6529-router:
+        enabled: true
+        auth: none
+        cache: false
+        typeImportGroup: signed-records
+        handler:
+          import: "@/api/signed-records/signed-records.handlers"
+          name: handleGetSignedRecordsAnchor
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiSignedRecordsAnchor"
+        "503":
+          description: The chain gateway is unavailable
   /device-grants:
     get:
       tags:
@@ -32403,6 +32473,55 @@ components:
           type: integer
           format: int64
           nullable: true
+    ApiSignedRecordsOwner:
+      type: object
+      required:
+        - wallet
+        - owner
+      properties:
+        wallet:
+          type: string
+          description: Lowercase wallet.
+        owner:
+          type: string
+          description: Its principal id, or the wallet while it is bound to none.
+    ApiSignedRecordsOwners:
+      type: object
+      required:
+        - anchor
+        - owners
+      properties:
+        anchor:
+          type: integer
+          format: int64
+          description: The finalized height the owners were read at.
+        owners:
+          type: array
+          items:
+            $ref: "#/components/schemas/ApiSignedRecordsOwner"
+    ApiSignedRecordsAnchor:
+      type: object
+      required:
+        - anchor
+        - head_height
+        - finalized_time
+        - max_anchor_lag
+      properties:
+        anchor:
+          type: integer
+          format: int64
+          description: The latest finalized height; sign it as the record's anchor.
+        head_height:
+          type: integer
+          format: int64
+        finalized_time:
+          type: integer
+          format: int64
+          description: The finalized block's slot start, epoch milliseconds.
+        max_anchor_lag:
+          type: integer
+          format: int64
+          description: How many heights behind the finalized head a submitted anchor may be.
     ApiDeviceGrantProof:
       type: object
       allOf:
@@ -43038,6 +43157,31 @@ components:
           nullable: true
         forecast:
           $ref: "#/components/schemas/ApiSubscriptionCoverageForecast"
+        funded_drops_at_current_settings:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 312
+          nullable: true
+          description: >-
+            Consecutive fully funded intended drops beginning with the immediate
+            next intended drop, counted past the forecast horizon. It assumes the
+            current mint price, eligibility count and subscription settings
+            (mode, edition preference and stored per-drop selections) stay as
+            they are, and that each later calendar drop is one Meme. Equal to
+            fully_funded_drops when the horizon has an unfunded intended drop or
+            in manual mode (no drop is intended until selected). Counting stops
+            at 312 (two years of drops); see
+            funded_drops_at_current_settings_capped. Null when the balance could
+            not be allocated (unknown, not set up, no eligibility or no
+            selections). Absent from older API versions.
+        funded_drops_at_current_settings_capped:
+          type: boolean
+          nullable: true
+          description: >-
+            True when funded_drops_at_current_settings stopped at its 312-drop
+            maximum, so the balance funds at least that many drops. Null when
+            funded_drops_at_current_settings is null.
     ApiSubscriptionCoverageDeadlineBasis:
       type: string
       enum:

@@ -86,6 +86,16 @@ const CONTRACTS = [
     test: "__tests__/scripts/runner-benchmark-workflow.test.ts",
     inputs: [/^\.github\/workflows\/runner-benchmark(?:-candidate)?\.yml$/u],
   },
+  {
+    test: "__tests__/playwright/chromiumSandbox.test.ts",
+    inputs: [/^tests\/.*\.[cm]?[jt]sx?$/u, /^playwright\.config\.ts$/u],
+  },
+  {
+    // The validator's cloud startup script: its SHA-256 is pinned, and a
+    // published script never changes.
+    test: "__tests__/lib/validator-page/cloudInit.test.ts",
+    inputs: [/^public\/validator\/[^/]+\.sh$/u],
+  },
 ];
 
 const SELECTION_INPUTS = new Set([

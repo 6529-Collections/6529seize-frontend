@@ -1,0 +1,2269 @@
+{
+  "sha256": "bf678532e061fc22eaa13a5e2ee87479b01010a9ed0f89311cafcb35099c0836",
+  "canonical": {
+    "rules": [
+      {
+        "args": [
+          {
+            "name": "_collectionAddresses",
+            "rule": {
+              "each": {
+                "oneOf": [
+                  "0x8888888888888888888888888888888888888888",
+                  "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                  "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+                  "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+                ]
+              },
+              "lenMax": 5,
+              "lenMin": 1,
+              "sameLength": [
+                "_delegationAddresses",
+                "_expiryDates",
+                "_useCases",
+                "_allTokens",
+                "_tokenIds"
+              ]
+            },
+            "type": "address[]"
+          },
+          {
+            "name": "_delegationAddresses",
+            "rule": {
+              "each": {
+                "notEqual": "$from",
+                "notZero": true
+              }
+            },
+            "type": "address[]"
+          },
+          {
+            "name": "_expiryDates",
+            "rule": {
+              "each": {
+                "uintMax": "64060588800"
+              }
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "_useCases",
+            "rule": {
+              "each": {
+                "oneOf": [
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                  "10",
+                  "11",
+                  "12",
+                  "13",
+                  "14",
+                  "15",
+                  "16",
+                  "17",
+                  "997",
+                  "998",
+                  "999"
+                ]
+              }
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "_allTokens",
+            "rule": {
+              "any": true
+            },
+            "type": "bool[]"
+          },
+          {
+            "name": "_tokenIds",
+            "rule": {
+              "each": {
+                "zeroIf": {
+                  "arg": "_allTokens",
+                  "equals": true
+                }
+              }
+            },
+            "type": "uint256[]"
+          }
+        ],
+        "chainId": 1,
+        "id": "delegation.batchRegister",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "_useCases",
+              "is": {
+                "oneOf": [
+                  "1",
+                  "2",
+                  "3",
+                  "17",
+                  "997",
+                  "998",
+                  "999"
+                ]
+              }
+            }
+          ]
+        },
+        "selector": "0x9bccd56c",
+        "signature": "batchDelegations(address[],address[],uint256[],uint256[],bool[],uint256[])",
+        "to": "0x2202cb9c00487e7e8ef21e6d8e914b32e709f43d",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_collectionAddresses",
+            "rule": {
+              "each": {
+                "oneOf": [
+                  "0x8888888888888888888888888888888888888888",
+                  "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                  "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+                  "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+                ]
+              },
+              "lenMax": 5,
+              "lenMin": 1,
+              "sameLength": [
+                "_delegationAddresses",
+                "_useCases"
+              ]
+            },
+            "type": "address[]"
+          },
+          {
+            "name": "_delegationAddresses",
+            "rule": {
+              "any": true
+            },
+            "type": "address[]"
+          },
+          {
+            "name": "_useCases",
+            "rule": {
+              "each": {
+                "oneOf": [
+                  "1",
+                  "2",
+                  "3",
+                  "4",
+                  "5",
+                  "6",
+                  "7",
+                  "8",
+                  "9",
+                  "10",
+                  "11",
+                  "12",
+                  "13",
+                  "14",
+                  "15",
+                  "16",
+                  "17",
+                  "997",
+                  "998",
+                  "999"
+                ]
+              }
+            },
+            "type": "uint256[]"
+          }
+        ],
+        "chainId": 1,
+        "id": "delegation.batchRevoke",
+        "risk": "normal",
+        "selector": "0xf793b96e",
+        "signature": "batchRevocations(address[],address[],uint256[])",
+        "to": "0x2202cb9c00487e7e8ef21e6d8e914b32e709f43d",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_collectionAddress",
+            "rule": {
+              "oneOf": [
+                "0x8888888888888888888888888888888888888888",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+                "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+              ]
+            },
+            "type": "address"
+          },
+          {
+            "name": "_status",
+            "rule": {
+              "any": true
+            },
+            "type": "bool"
+          }
+        ],
+        "chainId": 1,
+        "id": "delegation.lockCollection",
+        "risk": "normal",
+        "selector": "0xd6a0a3d5",
+        "signature": "setCollectionLock(address,bool)",
+        "to": "0x2202cb9c00487e7e8ef21e6d8e914b32e709f43d",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_collectionAddress",
+            "rule": {
+              "oneOf": [
+                "0x8888888888888888888888888888888888888888",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+                "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+              ]
+            },
+            "type": "address"
+          },
+          {
+            "name": "_useCase",
+            "rule": {
+              "oneOf": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "997",
+                "998",
+                "999"
+              ]
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_status",
+            "rule": {
+              "any": true
+            },
+            "type": "bool"
+          }
+        ],
+        "chainId": 1,
+        "id": "delegation.lockUseCase",
+        "risk": "normal",
+        "selector": "0xa4fa0303",
+        "signature": "setCollectionUsecaseLock(address,uint256,bool)",
+        "to": "0x2202cb9c00487e7e8ef21e6d8e914b32e709f43d",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_collectionAddress",
+            "rule": {
+              "oneOf": [
+                "0x8888888888888888888888888888888888888888",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+                "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+              ]
+            },
+            "type": "address"
+          },
+          {
+            "name": "_delegationAddress",
+            "rule": {
+              "notEqual": "$from",
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_expiryDate",
+            "rule": {
+              "uintMax": "64060588800"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_useCase",
+            "rule": {
+              "oneOf": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "997",
+                "998",
+                "999"
+              ]
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_allTokens",
+            "rule": {
+              "any": true
+            },
+            "type": "bool"
+          },
+          {
+            "name": "_tokenId",
+            "rule": {
+              "zeroIf": {
+                "arg": "_allTokens",
+                "equals": true
+              }
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "delegation.register",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "_useCase",
+              "is": {
+                "oneOf": [
+                  "1",
+                  "2",
+                  "3",
+                  "17",
+                  "997",
+                  "998",
+                  "999"
+                ]
+              }
+            }
+          ]
+        },
+        "selector": "0x2a243ce7",
+        "signature": "registerDelegationAddress(address,address,uint256,uint256,bool,uint256)",
+        "to": "0x2202cb9c00487e7e8ef21e6d8e914b32e709f43d",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_delegatorAddress",
+            "rule": {
+              "notEqual": "$from",
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_collectionAddress",
+            "rule": {
+              "oneOf": [
+                "0x8888888888888888888888888888888888888888",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+                "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+              ]
+            },
+            "type": "address"
+          },
+          {
+            "name": "_delegationAddress",
+            "rule": {
+              "notEqual": "$from",
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_expiryDate",
+            "rule": {
+              "uintMax": "64060588800"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_useCase",
+            "rule": {
+              "oneOf": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "997",
+                "998",
+                "999"
+              ]
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_allTokens",
+            "rule": {
+              "any": true
+            },
+            "type": "bool"
+          },
+          {
+            "name": "_tokenId",
+            "rule": {
+              "zeroIf": {
+                "arg": "_allTokens",
+                "equals": true
+              }
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "delegation.registerAsManager",
+        "risk": "high",
+        "selector": "0x4b402f27",
+        "signature": "registerDelegationAddressUsingSubDelegation(address,address,address,uint256,uint256,bool,uint256)",
+        "to": "0x2202cb9c00487e7e8ef21e6d8e914b32e709f43d",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_collectionAddress",
+            "rule": {
+              "oneOf": [
+                "0x8888888888888888888888888888888888888888",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+                "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+              ]
+            },
+            "type": "address"
+          },
+          {
+            "name": "_delegationAddress",
+            "rule": {
+              "any": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_useCase",
+            "rule": {
+              "oneOf": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "997",
+                "998",
+                "999"
+              ]
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "delegation.revoke",
+        "risk": "normal",
+        "selector": "0x66ff484d",
+        "signature": "revokeDelegationAddress(address,address,uint256)",
+        "to": "0x2202cb9c00487e7e8ef21e6d8e914b32e709f43d",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_delegatorAddress",
+            "rule": {
+              "notEqual": "$from",
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_collectionAddress",
+            "rule": {
+              "oneOf": [
+                "0x8888888888888888888888888888888888888888",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+                "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+              ]
+            },
+            "type": "address"
+          },
+          {
+            "name": "_delegationAddress",
+            "rule": {
+              "any": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_useCase",
+            "rule": {
+              "oneOf": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "997",
+                "998",
+                "999"
+              ]
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "delegation.revokeAsManager",
+        "risk": "normal",
+        "selector": "0x7ed01e12",
+        "signature": "revokeDelegationAddressUsingSubdelegation(address,address,address,uint256)",
+        "to": "0x2202cb9c00487e7e8ef21e6d8e914b32e709f43d",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_collectionAddress",
+            "rule": {
+              "oneOf": [
+                "0x8888888888888888888888888888888888888888",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+                "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+              ]
+            },
+            "type": "address"
+          },
+          {
+            "name": "_olddelegationAddress",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_newdelegationAddress",
+            "rule": {
+              "notEqual": "$from",
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_expiryDate",
+            "rule": {
+              "uintMax": "64060588800"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_useCase",
+            "rule": {
+              "oneOf": [
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "10",
+                "11",
+                "12",
+                "13",
+                "14",
+                "15",
+                "16",
+                "17",
+                "997",
+                "998",
+                "999"
+              ]
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_allTokens",
+            "rule": {
+              "any": true
+            },
+            "type": "bool"
+          },
+          {
+            "name": "_tokenId",
+            "rule": {
+              "zeroIf": {
+                "arg": "_allTokens",
+                "equals": true
+              }
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "delegation.update",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "_useCase",
+              "is": {
+                "oneOf": [
+                  "1",
+                  "2",
+                  "3",
+                  "17",
+                  "997",
+                  "998",
+                  "999"
+                ]
+              }
+            }
+          ]
+        },
+        "selector": "0x850e8e06",
+        "signature": "updateDelegationAddress(address,address,address,uint256,uint256,bool,uint256)",
+        "to": "0x2202cb9c00487e7e8ef21e6d8e914b32e709f43d",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "creatorContractAddress",
+            "rule": {
+              "equals": "0x33fd426905f149f8376e227d0c9d3340aad17af1"
+            },
+            "type": "address"
+          },
+          {
+            "name": "instanceId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "mintIndex",
+            "rule": {
+              "any": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "merkleProof",
+            "rule": {
+              "lenMax": 32
+            },
+            "type": "bytes32[]"
+          },
+          {
+            "name": "mintFor",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 1,
+        "id": "memes.mint",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "mintFor",
+              "is": {
+                "notEqual": "$from"
+              }
+            }
+          ]
+        },
+        "selector": "0xfa2b068f",
+        "signature": "mint(address,uint256,uint32,bytes32[],address)",
+        "to": "0x26bbea7803dcac346d5f5f135b57cf2c752a02be",
+        "value": {
+          "max": "200000000000000000",
+          "min": "1"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "creatorContractAddress",
+            "rule": {
+              "equals": "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c"
+            },
+            "type": "address"
+          },
+          {
+            "name": "instanceId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "mintIndex",
+            "rule": {
+              "any": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "merkleProof",
+            "rule": {
+              "lenMax": 32
+            },
+            "type": "bytes32[]"
+          },
+          {
+            "name": "mintFor",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "memes.mint",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "mintFor",
+              "is": {
+                "notEqual": "$from"
+              }
+            }
+          ]
+        },
+        "selector": "0xfa2b068f",
+        "signature": "mint(address,uint256,uint32,bytes32[],address)",
+        "to": "0x26bbea7803dcac346d5f5f135b57cf2c752a02be",
+        "value": {
+          "max": "200000000000000000",
+          "min": "1"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "creatorContractAddress",
+            "rule": {
+              "equals": "0x33fd426905f149f8376e227d0c9d3340aad17af1"
+            },
+            "type": "address"
+          },
+          {
+            "name": "instanceId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "mintCount",
+            "rule": {
+              "uintMax": "100",
+              "uintMin": "1"
+            },
+            "type": "uint16"
+          },
+          {
+            "name": "mintIndices",
+            "rule": {
+              "lenMax": 100,
+              "sameLength": [
+                "merkleProofs"
+              ]
+            },
+            "type": "uint32[]"
+          },
+          {
+            "name": "merkleProofs",
+            "rule": {
+              "each": {
+                "lenMax": 32
+              },
+              "lenMax": 100
+            },
+            "type": "bytes32[][]"
+          },
+          {
+            "name": "mintFor",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 1,
+        "id": "memes.mintBatch",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "mintFor",
+              "is": {
+                "notEqual": "$from"
+              }
+            }
+          ]
+        },
+        "selector": "0x26c858a4",
+        "signature": "mintBatch(address,uint256,uint16,uint32[],bytes32[][],address)",
+        "to": "0x26bbea7803dcac346d5f5f135b57cf2c752a02be",
+        "value": {
+          "maxPerUnit": "200000000000000000",
+          "min": "1",
+          "unitsArg": "mintCount"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "creatorContractAddress",
+            "rule": {
+              "equals": "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c"
+            },
+            "type": "address"
+          },
+          {
+            "name": "instanceId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "mintCount",
+            "rule": {
+              "uintMax": "100",
+              "uintMin": "1"
+            },
+            "type": "uint16"
+          },
+          {
+            "name": "mintIndices",
+            "rule": {
+              "lenMax": 100,
+              "sameLength": [
+                "merkleProofs"
+              ]
+            },
+            "type": "uint32[]"
+          },
+          {
+            "name": "merkleProofs",
+            "rule": {
+              "each": {
+                "lenMax": 32
+              },
+              "lenMax": 100
+            },
+            "type": "bytes32[][]"
+          },
+          {
+            "name": "mintFor",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "memes.mintBatch",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "mintFor",
+              "is": {
+                "notEqual": "$from"
+              }
+            }
+          ]
+        },
+        "selector": "0x26c858a4",
+        "signature": "mintBatch(address,uint256,uint16,uint32[],bytes32[][],address)",
+        "to": "0x26bbea7803dcac346d5f5f135b57cf2c752a02be",
+        "value": {
+          "maxPerUnit": "200000000000000000",
+          "min": "1",
+          "unitsArg": "mintCount"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "creatorContractAddress",
+            "rule": {
+              "equals": "0x33fd426905f149f8376e227d0c9d3340aad17af1"
+            },
+            "type": "address"
+          },
+          {
+            "name": "instanceId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "mintCount",
+            "rule": {
+              "uintMax": "100",
+              "uintMin": "1"
+            },
+            "type": "uint16"
+          },
+          {
+            "name": "mintIndices",
+            "rule": {
+              "lenMax": 100,
+              "sameLength": [
+                "merkleProofs"
+              ]
+            },
+            "type": "uint32[]"
+          },
+          {
+            "name": "merkleProofs",
+            "rule": {
+              "each": {
+                "lenMax": 32
+              },
+              "lenMax": 100
+            },
+            "type": "bytes32[][]"
+          },
+          {
+            "name": "mintFor",
+            "rule": {
+              "notEqual": "$from",
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 1,
+        "id": "memes.mintProxy",
+        "risk": "high",
+        "selector": "0x07591acc",
+        "signature": "mintProxy(address,uint256,uint16,uint32[],bytes32[][],address)",
+        "to": "0x26bbea7803dcac346d5f5f135b57cf2c752a02be",
+        "value": {
+          "maxPerUnit": "200000000000000000",
+          "min": "1",
+          "unitsArg": "mintCount"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "creatorContractAddress",
+            "rule": {
+              "equals": "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c"
+            },
+            "type": "address"
+          },
+          {
+            "name": "instanceId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "mintCount",
+            "rule": {
+              "uintMax": "100",
+              "uintMin": "1"
+            },
+            "type": "uint16"
+          },
+          {
+            "name": "mintIndices",
+            "rule": {
+              "lenMax": 100,
+              "sameLength": [
+                "merkleProofs"
+              ]
+            },
+            "type": "uint32[]"
+          },
+          {
+            "name": "merkleProofs",
+            "rule": {
+              "each": {
+                "lenMax": 32
+              },
+              "lenMax": 100
+            },
+            "type": "bytes32[][]"
+          },
+          {
+            "name": "mintFor",
+            "rule": {
+              "notEqual": "$from",
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "memes.mintProxy",
+        "risk": "high",
+        "selector": "0x07591acc",
+        "signature": "mintProxy(address,uint256,uint16,uint32[],bytes32[][],address)",
+        "to": "0x26bbea7803dcac346d5f5f135b57cf2c752a02be",
+        "value": {
+          "maxPerUnit": "200000000000000000",
+          "min": "1",
+          "unitsArg": "mintCount"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_collectionID",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_numberOfTokens",
+            "rule": {
+              "uintMax": "100",
+              "uintMin": "1"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_maxAllowance",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_tokenData",
+            "rule": {
+              "lenMax": 1024,
+              "readableText": true
+            },
+            "type": "string"
+          },
+          {
+            "name": "_mintTo",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "merkleProof",
+            "rule": {
+              "lenMax": 32
+            },
+            "type": "bytes32[]"
+          },
+          {
+            "name": "_delegator",
+            "rule": {
+              "any": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_saltfun_o",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "nextgen.mint",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "_mintTo",
+              "is": {
+                "notEqual": "$from"
+              }
+            },
+            {
+              "arg": "_delegator",
+              "is": {
+                "notZero": true
+              }
+            }
+          ]
+        },
+        "selector": "0xb047168f",
+        "signature": "mint(uint256,uint256,uint256,string,address,bytes32[],address,uint256)",
+        "to": "0x6113fd2c91514e84e6149c6ede47f2e09545253a",
+        "value": {
+          "maxPerUnit": "1000000000000000000",
+          "min": "0",
+          "unitsArg": "_numberOfTokens"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "_collectionID",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_numberOfTokens",
+            "rule": {
+              "uintMax": "100",
+              "uintMin": "1"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_maxAllowance",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "_tokenData",
+            "rule": {
+              "lenMax": 1024,
+              "readableText": true
+            },
+            "type": "string"
+          },
+          {
+            "name": "_mintTo",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "merkleProof",
+            "rule": {
+              "lenMax": 32
+            },
+            "type": "bytes32[]"
+          },
+          {
+            "name": "_delegator",
+            "rule": {
+              "any": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "_saltfun_o",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "nextgen.mint",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "_mintTo",
+              "is": {
+                "notEqual": "$from"
+              }
+            },
+            {
+              "arg": "_delegator",
+              "is": {
+                "notZero": true
+              }
+            }
+          ]
+        },
+        "selector": "0xb047168f",
+        "signature": "mint(uint256,uint256,uint256,string,address,bytes32[],address,uint256)",
+        "to": "0xada9027eaf134038d3731f677241c4351b799eb4",
+        "value": {
+          "maxPerUnit": "1000000000000000000",
+          "min": "0",
+          "unitsArg": "_numberOfTokens"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "ids",
+            "rule": {
+              "lenMax": 50,
+              "lenMin": 1,
+              "sameLength": [
+                "amounts"
+              ]
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "amounts",
+            "rule": {
+              "each": {
+                "uintMax": "10000",
+                "uintMin": "1"
+              }
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.batchTransfer1155",
+        "risk": "transfer",
+        "selector": "0x2eb2c2d6",
+        "signature": "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)",
+        "to": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "ids",
+            "rule": {
+              "lenMax": 50,
+              "lenMin": 1,
+              "sameLength": [
+                "amounts"
+              ]
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "amounts",
+            "rule": {
+              "each": {
+                "uintMax": "10000",
+                "uintMin": "1"
+              }
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.batchTransfer1155",
+        "risk": "transfer",
+        "selector": "0x2eb2c2d6",
+        "signature": "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)",
+        "to": "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "ids",
+            "rule": {
+              "lenMax": 50,
+              "lenMin": 1,
+              "sameLength": [
+                "amounts"
+              ]
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "amounts",
+            "rule": {
+              "each": {
+                "uintMax": "10000",
+                "uintMin": "1"
+              }
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "nft.batchTransfer1155",
+        "risk": "transfer",
+        "selector": "0x2eb2c2d6",
+        "signature": "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)",
+        "to": "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "id",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "amount",
+            "rule": {
+              "uintMax": "10000",
+              "uintMin": "1"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.transfer1155",
+        "risk": "transfer",
+        "selector": "0xf242432a",
+        "signature": "safeTransferFrom(address,address,uint256,uint256,bytes)",
+        "to": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "id",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "amount",
+            "rule": {
+              "uintMax": "10000",
+              "uintMin": "1"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.transfer1155",
+        "risk": "transfer",
+        "selector": "0xf242432a",
+        "signature": "safeTransferFrom(address,address,uint256,uint256,bytes)",
+        "to": "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "id",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "amount",
+            "rule": {
+              "uintMax": "10000",
+              "uintMin": "1"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "nft.transfer1155",
+        "risk": "transfer",
+        "selector": "0xf242432a",
+        "signature": "safeTransferFrom(address,address,uint256,uint256,bytes)",
+        "to": "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "tokenId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.transfer721",
+        "risk": "transfer",
+        "selector": "0x42842e0e",
+        "signature": "safeTransferFrom(address,address,uint256)",
+        "to": "0x0c58ef43ff3032005e472cb5709f8908acb00205",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x45882f9bc325e14fbb298a1df930c43a874b83ae"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "tokenId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.transfer721",
+        "risk": "transfer",
+        "selector": "0x42842e0e",
+        "signature": "safeTransferFrom(address,address,uint256)",
+        "to": "0x45882f9bc325e14fbb298a1df930c43a874b83ae",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x60671e59a349589ad74be6cd643003a0abb38cc3"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "tokenId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "nft.transfer721",
+        "risk": "transfer",
+        "selector": "0x42842e0e",
+        "signature": "safeTransferFrom(address,address,uint256)",
+        "to": "0x60671e59a349589ad74be6cd643003a0abb38cc3",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "components": [
+              {
+                "name": "manifestCid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "components": [
+                  {
+                    "name": "algorithm",
+                    "rule": {
+                      "oneOf": [
+                        "1",
+                        "2"
+                      ]
+                    },
+                    "type": "uint16"
+                  },
+                  {
+                    "name": "digest",
+                    "rule": {
+                      "notZero": true
+                    },
+                    "type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationId",
+                    "rule": {
+                      "any": true
+                    },
+                    "type": "bytes32"
+                  }
+                ],
+                "name": "manifestHash",
+                "rule": {
+                  "any": true
+                },
+                "type": "(uint16,bytes32,bytes32)"
+              },
+              {
+                "name": "rootCid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "name": "arweaveId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "sourceCommit",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes20"
+              },
+              {
+                "name": "label",
+                "rule": {
+                  "lenMax": 128,
+                  "readableText": true
+                },
+                "type": "string"
+              }
+            ],
+            "name": "header",
+            "rule": {
+              "any": true
+            },
+            "type": "(bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string)"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.openRelease",
+        "risk": "normal",
+        "selector": "0xe2fb5f87",
+        "signature": "openRelease((bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string))",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "components": [
+              {
+                "name": "manifestCid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "components": [
+                  {
+                    "name": "algorithm",
+                    "rule": {
+                      "oneOf": [
+                        "1",
+                        "2"
+                      ]
+                    },
+                    "type": "uint16"
+                  },
+                  {
+                    "name": "digest",
+                    "rule": {
+                      "notZero": true
+                    },
+                    "type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationId",
+                    "rule": {
+                      "any": true
+                    },
+                    "type": "bytes32"
+                  }
+                ],
+                "name": "manifestHash",
+                "rule": {
+                  "any": true
+                },
+                "type": "(uint16,bytes32,bytes32)"
+              },
+              {
+                "name": "rootCid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "name": "arweaveId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "sourceCommit",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes20"
+              },
+              {
+                "name": "label",
+                "rule": {
+                  "lenMax": 128,
+                  "readableText": true
+                },
+                "type": "string"
+              }
+            ],
+            "name": "header",
+            "rule": {
+              "any": true
+            },
+            "type": "(bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string)"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.openRelease",
+        "risk": "normal",
+        "selector": "0xe2fb5f87",
+        "signature": "openRelease((bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string))",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "releaseId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "components": [
+              {
+                "name": "subjectId",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "recordType",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "schemaId",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "name": "algorithm",
+                    "rule": {
+                      "oneOf": [
+                        "1",
+                        "2"
+                      ]
+                    },
+                    "type": "uint16"
+                  },
+                  {
+                    "name": "digest",
+                    "rule": {
+                      "notZero": true
+                    },
+                    "type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationId",
+                    "rule": {
+                      "any": true
+                    },
+                    "type": "bytes32"
+                  }
+                ],
+                "name": "contentHash",
+                "rule": {
+                  "any": true
+                },
+                "type": "(uint16,bytes32,bytes32)"
+              },
+              {
+                "name": "effectiveAt",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "uint64"
+              },
+              {
+                "name": "cid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "name": "arweaveId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "label",
+                "rule": {
+                  "lenMax": 128,
+                  "readableText": true
+                },
+                "type": "string"
+              },
+              {
+                "name": "expectedVersion",
+                "rule": {
+                  "any": true
+                },
+                "type": "uint32"
+              }
+            ],
+            "name": "records",
+            "rule": {
+              "lenMax": 20,
+              "lenMin": 1
+            },
+            "type": "(bytes32,bytes32,bytes32,(uint16,bytes32,bytes32),uint64,bytes,bytes32,string,uint32)[]"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.publish",
+        "risk": "normal",
+        "selector": "0x19f8e2c2",
+        "signature": "publish(uint32,(bytes32,bytes32,bytes32,(uint16,bytes32,bytes32),uint64,bytes,bytes32,string,uint32)[])",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "releaseId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "components": [
+              {
+                "name": "subjectId",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "recordType",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "schemaId",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "name": "algorithm",
+                    "rule": {
+                      "oneOf": [
+                        "1",
+                        "2"
+                      ]
+                    },
+                    "type": "uint16"
+                  },
+                  {
+                    "name": "digest",
+                    "rule": {
+                      "notZero": true
+                    },
+                    "type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationId",
+                    "rule": {
+                      "any": true
+                    },
+                    "type": "bytes32"
+                  }
+                ],
+                "name": "contentHash",
+                "rule": {
+                  "any": true
+                },
+                "type": "(uint16,bytes32,bytes32)"
+              },
+              {
+                "name": "effectiveAt",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "uint64"
+              },
+              {
+                "name": "cid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "name": "arweaveId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "label",
+                "rule": {
+                  "lenMax": 128,
+                  "readableText": true
+                },
+                "type": "string"
+              },
+              {
+                "name": "expectedVersion",
+                "rule": {
+                  "any": true
+                },
+                "type": "uint32"
+              }
+            ],
+            "name": "records",
+            "rule": {
+              "lenMax": 20,
+              "lenMin": 1
+            },
+            "type": "(bytes32,bytes32,bytes32,(uint16,bytes32,bytes32),uint64,bytes,bytes32,string,uint32)[]"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.publish",
+        "risk": "normal",
+        "selector": "0x19f8e2c2",
+        "signature": "publish(uint32,(bytes32,bytes32,bytes32,(uint16,bytes32,bytes32),uint64,bytes,bytes32,string,uint32)[])",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "releaseId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "expectedRecordCount",
+            "rule": {
+              "any": true
+            },
+            "type": "uint32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.sealRelease",
+        "risk": "normal",
+        "selector": "0xe672920c",
+        "signature": "sealRelease(uint32,uint32)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "releaseId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "expectedRecordCount",
+            "rule": {
+              "any": true
+            },
+            "type": "uint32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.sealRelease",
+        "risk": "normal",
+        "selector": "0xe672920c",
+        "signature": "sealRelease(uint32,uint32)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [],
+        "chainId": 1,
+        "id": "subscriptions.topUp",
+        "risk": {
+          "highIf": [
+            {
+              "valueAbove": "1000000000000000000"
+            }
+          ]
+        },
+        "selector": null,
+        "signature": null,
+        "to": "0xcaac2b43b1b40edbfaddb5aebde9a90a27e1a3be",
+        "value": {
+          "max": "10000000000000000000",
+          "min": "1"
+        }
+      }
+    ],
+    "v": 1
+  }
+}

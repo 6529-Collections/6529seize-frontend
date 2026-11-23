@@ -2,6 +2,7 @@ import {
   getAuthSessionRole,
   isAuthSessionForProfile,
   isDirectProfileAuthSession,
+  isProxyRoleAuthSession,
   resolveActiveProfileProxy,
 } from "@/components/auth/auth-session-scope";
 import { getAuthJwt } from "@/services/auth/auth.utils";
@@ -150,5 +151,17 @@ describe("authenticated actor before a mutation", () => {
       jest.mocked(getAuthJwt).mockReturnValue(value);
       expect(isAuthSessionForProfile(scope)).toBe(false);
     }
+  });
+});
+
+describe("proxy role session", () => {
+  it.each([
+    ["foreign role", "profile-2", "profile-1", true],
+    ["own profile role", "profile-1", "profile-1", false],
+    ["legacy null role", null, "profile-1", false],
+    ["unavailable token", undefined, "profile-1", false],
+    ["profile not loaded", "profile-2", undefined, false],
+  ] as const)("%s", (_label, authRole, profileId, expected) => {
+    expect(isProxyRoleAuthSession({ authRole, profileId })).toBe(expected);
   });
 });

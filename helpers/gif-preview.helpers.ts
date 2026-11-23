@@ -1,8 +1,6 @@
 import { getScaledImageUri, type ImageScale } from "@/helpers/image.helpers";
-import {
-  IMAGE_RESIZE_CDN_ORIGIN,
-  SCALABLE_IMAGE_PREFIXES,
-} from "@/helpers/image-resize-cdn";
+import { SCALABLE_IMAGE_PREFIXES } from "@/helpers/image-resize-cdn";
+import { isFirstPartyMediaOrigin } from "@/lib/media/first-party-media";
 
 /** Match the pathname, never a query parameter that happens to end in .gif. */
 export function isGifImageUrl(url: string): boolean {
@@ -18,7 +16,7 @@ export function isUploadedDropGif(url: string): boolean {
   try {
     const { origin, pathname, username, password } = new URL(url);
     return (
-      origin === IMAGE_RESIZE_CDN_ORIGIN &&
+      isFirstPartyMediaOrigin(origin) &&
       !username &&
       !password &&
       pathname.startsWith("/drops/") &&

@@ -65,6 +65,11 @@ jest.mock(
       mockUsePublicProfileModerationStatus(profileId),
   })
 );
+let mockAuthRole: string | null | undefined;
+jest.mock("@/components/auth/auth-session-scope", () => ({
+  ...jest.requireActual("@/components/auth/auth-session-scope"),
+  getAuthSessionRole: () => mockAuthRole,
+}));
 const mockUseAuth = jest.fn<MockAuthState, []>(() => ({}));
 jest.mock("@/components/auth/Auth", () => ({
   useAuth: () => mockUseAuth(),
@@ -568,6 +573,35 @@ describe("PrivilegedDropCreator", () => {
       "data-profile-setup-href",
       ""
     );
+  });
+
+  it("treats a token acting for another profile as a proxy session", () => {
+    mockAuthRole = "delegating-profile";
+    mockUseAuth.mockReturnValue({
+      connectedProfile: { id: "own-profile", handle: "me" },
+      activeProfileProxy: null,
+      fetchingProfile: false,
+    });
+    mockPriv.mockReturnValue({
+      submissionRestriction: null,
+      chatRestriction: null,
+    });
+
+    try {
+      renderPrivilegedDropCreator();
+      expect(mockPriv).toHaveBeenCalledWith(
+        expect.objectContaining({ isProxy: true })
+      );
+
+      mockPriv.mockClear();
+      mockAuthRole = "own-profile";
+      renderPrivilegedDropCreator();
+      expect(mockPriv).toHaveBeenCalledWith(
+        expect.objectContaining({ isProxy: false })
+      );
+    } finally {
+      mockAuthRole = undefined;
+    }
   });
 
   it("keeps chat composer visible during slow mode cooldown", () => {

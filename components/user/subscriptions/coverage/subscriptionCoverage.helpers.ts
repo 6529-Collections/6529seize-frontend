@@ -39,6 +39,116 @@ export function formatSubscriptionEth(
   return formatNumber(locale, numericValue, ETH_DISPLAY_OPTIONS);
 }
 
+/**
+ * The API reports `action_required` for zero or one fully funded drop. With
+ * one funded drop the next drop is covered, so it reads as running low.
+ */
+export function getDisplayedSubscriptionCoverageStatus(
+  status: ApiSubscriptionCoverageStatus,
+  fullyFundedDrops: number
+): ApiSubscriptionCoverageStatus {
+  return status === ApiSubscriptionCoverageStatus.ActionRequired &&
+    fullyFundedDrops > 0
+    ? ApiSubscriptionCoverageStatus.RunningLow
+    : status;
+}
+
+/**
+ * True when funding reaches the last drop of the truncated forecast, so the
+ * balance may cover later drops that the forecast does not evaluate.
+ */
+type ForecastEndCoverage = Pick<
+  ApiSubscriptionCoverage,
+  "funded_through" | "fully_funded_drops"
+> & {
+  readonly next_unfunded?: ApiSubscriptionCoverage["next_unfunded"] | undefined;
+  // Older cached or partial payloads can omit the forecast block.
+  readonly forecast?:
+    | Pick<
+        ApiSubscriptionCoverage["forecast"],
+        "forecast_truncated" | "horizon_end_token_id" | "horizon_drop_count"
+      >
+    | undefined;
+};
+
+export function isSubscriptionCoverageFundedToForecastEnd(
+  coverage: ForecastEndCoverage | undefined | null
+): boolean {
+  const horizonEnd = coverage?.forecast?.horizon_end_token_id ?? null;
+  return (
+    !!coverage?.funded_through &&
+    !coverage.next_unfunded &&
+    coverage.fully_funded_drops > 0 &&
+    coverage.forecast?.forecast_truncated === true &&
+    horizonEnd !== null &&
+    coverage.funded_through.token_id === horizonEnd
+  );
+}
+
+/**
+ * True when every scheduled drop in the forecast is funded, so the funded
+ * count is the forecast size and the balance may fund more drops.
+ */
+export function isSubscriptionCoverageForecastFullyFunded(
+  coverage: ForecastEndCoverage | undefined | null
+): boolean {
+  return (
+    isSubscriptionCoverageFundedToForecastEnd(coverage) &&
+    coverage?.fully_funded_drops === coverage?.forecast?.horizon_drop_count
+  );
+}
+
+interface SubscriptionFundedDropsAtCurrentSettings {
+  readonly count: number;
+  readonly capped: boolean;
+}
+
+/**
+ * The backend's funded-drop count past the forecast horizon, when it reports
+ * one, funding reaches the end of the forecast and the count goes beyond the
+ * forecast's funded drops. Otherwise (older backends without the field, manual
+ * mode, or a balance that funds exactly the forecast) callers keep the
+ * forecast-window wording, which is then exact.
+ */
+export function getSubscriptionFundedDropsAtCurrentSettings(
+  coverage:
+    | (ForecastEndCoverage &
+        Pick<
+          ApiSubscriptionCoverage,
+          | "funded_drops_at_current_settings"
+          | "funded_drops_at_current_settings_capped"
+        >)
+    | undefined
+    | null
+): SubscriptionFundedDropsAtCurrentSettings | null {
+  const count = coverage?.funded_drops_at_current_settings;
+  if (
+    typeof count !== "number" ||
+    !Number.isSafeInteger(count) ||
+    count <= (coverage?.fully_funded_drops ?? 0) ||
+    !isSubscriptionCoverageFundedToForecastEnd(coverage)
+  ) {
+    return null;
+  }
+  return {
+    count,
+    capped: coverage?.funded_drops_at_current_settings_capped === true,
+  };
+}
+
+export function getFundedDropsAtCurrentSettingsLabel(
+  locale: SupportedLocale,
+  funded: SubscriptionFundedDropsAtCurrentSettings
+): string {
+  return t(
+    locale,
+    funded.capped
+      ? "subscriptions.coverage.summary.fundedDropsAtLeast"
+      : "subscriptions.coverage.summary.fundedDropsAbout",
+    { count: formatInteger(locale, funded.count) }
+  );
+}
+
 export function getSubscriptionCoveragePresentation(
   locale: SupportedLocale,
   status: ApiSubscriptionCoverageStatus
@@ -156,6 +266,26 @@ export function getFundedDropsLabel(
   );
 }
 
+function getCompactFundedDropsLabel(
+  locale: SupportedLocale,
+  coverage: ApiSubscriptionCoverage
+): string {
+  const fundedAtCurrentSettings =
+    getSubscriptionFundedDropsAtCurrentSettings(coverage);
+  if (fundedAtCurrentSettings) {
+    return getFundedDropsAtCurrentSettingsLabel(
+      locale,
+      fundedAtCurrentSettings
+    );
+  }
+  if (isSubscriptionCoverageForecastFullyFunded(coverage)) {
+    return t(locale, "subscriptions.coverage.summary.nextFundedDrops", {
+      count: formatInteger(locale, coverage.fully_funded_drops),
+    });
+  }
+  return getFundedDropsLabel(locale, coverage.fully_funded_drops);
+}
+
 export function getSubscriptionCoverageCompactLine(
   locale: SupportedLocale,
   coverage: ApiSubscriptionCoverage
@@ -173,9 +303,7 @@ export function getSubscriptionCoverageCompactLine(
     coverage.status !== ApiSubscriptionCoverageStatus.NoUpcomingSelections &&
     coverage.status !== ApiSubscriptionCoverageStatus.Unknown
   ) {
-    parts.push(
-      getFundedDropsLabel(locale, coverage.fully_funded_drops)
-    );
+    parts.push(getCompactFundedDropsLabel(locale, coverage));
   }
 
   return parts.join(" · ");

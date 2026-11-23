@@ -16,7 +16,7 @@ const SECTIONS: readonly {
   readonly label: string;
 }[] = [
   { key: "download", href: "/validator", label: "Download" },
-  { key: "guide", href: "/validator/guide", label: "Tester guide" },
+  { key: "guide", href: "/validator/guide", label: "Guide" },
   { key: "hardware", href: "/validator/hardware", label: "Hardware" },
   {
     key: "known-issues",

@@ -12,7 +12,7 @@ page (see [Where the site links it](#where-the-site-links-it)).
 | ------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `/ai`                           | The newest release's downloads, every file with its SHA-256 and publisher, and how to check a file |
 | `/ai/guide`                     | Installing on a Mac, Windows and Linux, and the first chat                                         |
-| `/ai/known-issues`              | What hasn't been tested yet, with workarounds                                                      |
+| `/ai/known-issues`              | Known bugs and limits, the latest fixes, and what hasn't been tested yet                           |
 | `/ai/releases`                  | Every release in the signed list, newest first, each under its version as anchor                   |
 | `/ai/download/<file>`           | For the newest release only, a 302 to a presigned S3 URL that works for 5 minutes                  |
 | `/ai/download/<version>/<file>` | The same, with the newest release's version                                                        |
@@ -40,7 +40,10 @@ issues in their own lead.
   Downloads. The Mac and Windows cards are one row each, with the system
   needs in the row's grey line; only the Linux card has a header, over
   its x86-64 / NVIDIA GPU / ARM64 switch for the `.deb` and
-  `.tar.gz`. Each file has its badges, size, a "Copy SHA-256" button (the
+  `.tar.gz`, with a fourth choice, ARM64, NVIDIA GPU, for a release that
+  has the CUDA packages for 64-bit ARM (from 0.1.0-rc.4 on). On a phone
+  the switch's choices wrap onto a second line when they don't fit on
+  one. Each file has its badges, size, a "Copy SHA-256" button (the
   hash is never printed on the page, but screen readers get it whole) and
   its download. "Verify your download" is one closed section: checking a
   file against `SHA256SUMS`, checking `SHA256SUMS.sig` with OpenSSL 3 and
@@ -106,13 +109,15 @@ issues in their own lead.
   missing. Under the list, links to `/ai/releases.json` and its signature.
 - **Known issues** (`/ai/known-issues`): the untested statement as the
   lead, the day the list last changed, a one-line "Found a problem? Report
-  it" link, then **Known bugs** (each a card: what you see, the fix and
-  its commands, and why in a line), what the newest release fixed
-  (`AI_FIXED_BUGS` and `AI_FIXED_IN` in `knownIssues.ts`, with a link to
-  download it), **Not tested yet** by system, and the full "Report a
-  problem" card at the end. When a release fixes a bug, move it from
-  `AI_KNOWN_BUGS` to `AI_FIXED_BUGS` and set `AI_FIXED_IN`; take out any
-  line on the other pages that describes it.
+  it" link, then **Known bugs and limits** (each a card: what you see,
+  the fix and its commands, and why in a line; a limit is how the release
+  works, such as an install that updates by hand), the fixes of the newest
+  release that lists any (`AI_FIXED_BUGS` and `AI_FIXED_IN` in
+  `knownIssues.ts`, with a link to download it), **Not tested yet** by
+  system, and the full "Report a problem" card at the end. When a release
+  fixes a bug, move it from `AI_KNOWN_BUGS` to `AI_FIXED_BUGS` and set
+  `AI_FIXED_IN`; take out any line on the other pages that describes it. A
+  release that lists no fixes leaves both as they are.
 
 "Report a problem" opens the 6529 AI wave, where testers and the support
 bot answer, and says what to include: the system, the steps, what
@@ -275,11 +280,15 @@ offer nothing, as for the Ed25519 feed. A server that restarts reads both
 again.
 
 **The key.** The bundle's signature must be by a key that
-`lib/ai-page/releaseListKeys.ts` lists. That list is empty: 6529 AI's
-release-list key (secp256k1, in the release-signing account) waits for the
-owner's approval. Until its address and public key are added there, no
-bundle verifies, and `/ai` stays on the Ed25519 feed. The tests sign
-bundles with a test key instead.
+`lib/ai-page/releaseListKeys.ts` lists. It lists one: 6529 AI's
+release-list key, secp256k1 in AWS KMS, alias `alias/6529-ai-releases`,
+in 6529's release-signing account, made on 21 November 2026, address
+`0xe8FA289405f8Bd4227aec6256cCD412aE9d0a37B`. Its public key and address
+are also in 6529 AI's `deploy/release/release-key.pub` and its
+`ai_releases::RELEASE_KEYS`. Until a bundle signed with it is in the
+bucket, `/ai` stays on the Ed25519 feed. A successor key is added there
+beside it before the old one is retired. The tests sign bundles with a
+test key, and check that the site refuses them.
 
 ### The bundle
 
@@ -317,9 +326,10 @@ is JSON: `algorithm` `ed25519-sha256`, `public_key` (64 hex digits) and
 `signature` (128 hex digits), an Ed25519 signature (RFC 8032) over
 SHA-256(`6529 AI releases v1`, a zero byte, the feed's bytes as stored). The
 key it names must be one that `lib/ai-page/feedSigningKeys.ts` lists. That
-file pins 6529 AI's release key in AWS KMS, alias `alias/6529-ai-releases`,
-whose public half is also 6529 AI's `deploy/release/release-key.pub`. A
-successor key is added there beside it before the old one is retired.
+file pins 6529 AI's Ed25519 release key in AWS KMS, alias
+`alias/6529-ai-releases-ed25519`, whose public half is also 6529 AI's
+`deploy/release/release-key-ed25519.pub`. It signed 0.1.0-rc.1's and
+rc.2's feed and signs nothing new.
 
 A missing signature, one that does not verify, a feed larger than 64 KiB,
 a feed whose `format` is not `6529-ai-releases/1`, or one whose `sequence`
@@ -353,8 +363,8 @@ From the bundle, the validator's parser reads each release's `version`,
 
 - the system comes from the file name, as 6529 AI's release tool writes
   it: `-macos-arm64.dmg`, `-windows-x64-setup.exe`, `6529-ai_*_amd64.deb`,
-  `6529-ai-cuda_*_amd64.deb`, `6529-ai_*_arm64.deb` and the three
-  `-linux-*.tar.gz`. A file it can't place, such as `NOTES.md` or
+  `6529-ai-cuda_*_amd64.deb`, `6529-ai_*_arm64.deb`,
+  `6529-ai-cuda_*_arm64.deb` and the four `-linux-*.tar.gz`. A file it can't place, such as `NOTES.md` or
   `SHA256SUMS`, gets no button and no card on `/ai`, and is listed on
   `/ai/releases`;
 - the signer comes from the type, in the release standard's words (R62):
@@ -387,13 +397,18 @@ release stays in the feed, but its files answer 404.
 
 The buttons pick each package by its `system` and its name:
 
-| `system`            | Button            | File         |
-| ------------------- | ----------------- | ------------ |
-| `macos-arm64`       | Mac               | `.dmg`       |
-| `windows-x64`       | Windows           | `-setup.exe` |
-| `linux-x86_64-cpu`  | Linux, x86-64     | `_amd64.deb` |
-| `linux-x86_64-cuda` | Linux, NVIDIA GPU | `_amd64.deb` |
-| `linux-arm64-cpu`   | Linux, ARM64      | `_arm64.deb` |
+| `system`            | Button                   | File         |
+| ------------------- | ------------------------ | ------------ |
+| `macos-arm64`       | Mac                      | `.dmg`       |
+| `windows-x64`       | Windows                  | `-setup.exe` |
+| `linux-x86_64-cpu`  | Linux, x86-64            | `_amd64.deb` |
+| `linux-x86_64-cuda` | Linux, NVIDIA GPU        | `_amd64.deb` |
+| `linux-arm64-cpu`   | Linux, ARM64             | `_arm64.deb` |
+| `linux-arm64-cuda`  | Linux, ARM64, NVIDIA GPU | `_arm64.deb` |
+
+`linux-arm64-cuda` is 64-bit ARM Linux with an NVIDIA GPU and its driver
+575 or later, such as NVIDIA's DGX Spark. Like the x86-64 CUDA package,
+it is in the Linux card's switch and the guide, never the big button.
 
 The big button is the visitor's system, from the User-Agent (and, in
 Chromium, the CPU from its client hints). A Linux visitor whose CPU the
@@ -450,10 +465,12 @@ The guide is built from 6529 AI's own install guides
 `<version>` while there is none. Its Windows step names the installer's
 publisher when the feed gives one, and says SmartScreen warns when the
 feed says it is unsigned. The known issues come from those guides' notes
-on what was tested; update them, and `AI_KNOWN_ISSUES_UPDATED`, as 6529
+on what was tested, and the limits from them, from 6529 AI's
+`docs/updates.md`, and from its `docs/install/ipfs.md` and
+`closed-models.md`; update them, and `AI_KNOWN_ISSUES_UPDATED`, as 6529
 AI is tested further.
 
-The test releases so far (`0.1.0-rc.1` and `0.1.0-rc.2`) run models on
+The test releases so far (`0.1.0-rc.1` to `0.1.0-rc.4`) run models on
 the person's own computer only, and their app hides the 6529 AI network.
 So the guide leaves out every network step (models from other providers,
 serving to others, linking an account), and no page mentions the network.

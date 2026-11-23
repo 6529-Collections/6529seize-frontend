@@ -16,18 +16,16 @@ test("shows title, message and details, and triggers close", async () => {
   expect(close).toHaveBeenCalled();
 });
 
-test("can hide the abuse-filter details for reserved categories", () => {
+test("can hide the abuse-filter details for local validation errors", () => {
   const close = jest.fn();
   render(
     <UserPageRepNewRepError
-      msg="Help6529 Credits is managed by help6529."
+      msg="Use at least 3 characters."
       showDetails={false}
       closeError={close}
     />
   );
 
-  expect(
-    screen.getByText("Help6529 Credits is managed by help6529.")
-  ).toBeInTheDocument();
+  expect(screen.getByText("Use at least 3 characters.")).toBeInTheDocument();
   expect(screen.queryByText(/AI filter/)).not.toBeInTheDocument();
 });

@@ -3,6 +3,7 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { AppWalletModalShell } from "@/components/app-wallets/AppWalletModalShell";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { getTransactionLink } from "@/helpers/Helpers";
 import { t } from "@/i18n/messages";
 import {
   continueInBrowser,
@@ -31,12 +32,39 @@ const FINISHED_MESSAGES = {
   expired: "desktopWalletRequest.expired",
   busy: "desktopWalletRequest.busy",
   refused: "desktopWalletRequest.refused",
+  transaction: "desktopWalletRequest.transactionNotForwarded",
+  transactionUpdate: "desktopWalletRequest.transactionUpdate",
+  safeTxUpdate: "desktopWalletRequest.safeTxUpdate",
+  transactionUnverified: "desktopWalletRequest.transactionUnverified",
+  transactionMismatch: "desktopWalletRequest.transactionMismatch",
+  lateTransaction: "desktopWalletRequest.lateTransaction",
   unverified: "desktopWalletRequest.unverified",
   failed: "desktopWalletRequest.failed",
 } as const;
 
 /** Statuses after which the website itself is the way forward. */
-const CONTINUE_IN_BROWSER = new Set(["refused", "unverified"]);
+const CONTINUE_IN_BROWSER = new Set([
+  "refused",
+  "transaction",
+  "transactionUpdate",
+  "safeTxUpdate",
+  "unverified",
+]);
+
+type DialogStatus = ReturnType<typeof getDesktopWalletRequestStatus>;
+
+const TRANSACTION_KINDS = new Set([
+  "transaction",
+  "transactionUpdate",
+  "transactionUnverified",
+  "transactionMismatch",
+  "lateTransaction",
+]);
+
+/** Whether the dialog is about a transaction (titled "Transaction"). */
+const isTransactionStatus = (status: DialogStatus): boolean =>
+  TRANSACTION_KINDS.has(status.kind) ||
+  (status.kind === "waiting" && status.transaction === true);
 
 interface ReopenState {
   readonly requestCode: string | null;
@@ -88,9 +116,10 @@ function useReopen(requestCode: string | null) {
  * the request code (and the content fingerprint, for drops and decisions)
  * the browser page also shows, and offers to open the page again or cancel.
  * Afterwards it explains a cancelled, expired, busy, refused, unverified or
- * failed request, with "Continue in your browser" where the website is the
- * way forward. Renders nothing when no request is open (always, outside
- * 6529 Desktop with wallet forwarding).
+ * failed request, or a transaction (which forwarding does not send), with
+ * "Continue in your browser" where the website is the way forward. Renders
+ * nothing when no request is open (always, outside 6529 Desktop with wallet
+ * forwarding).
  *
  * It is the top modal layer: shown in the browser's top layer above every
  * app modal, with any focus trap underneath (the Terms of Service modal's,
@@ -118,7 +147,20 @@ export default function DesktopWalletRequestDialog() {
     const key = openFailed
       ? "desktopWalletRequest.openFailed"
       : FINISHED_MESSAGES[status.kind];
-    finishedMessage = t(locale, key, { site: getWebsiteHost() });
+    finishedMessage = t(locale, key, {
+      site: getWebsiteHost(),
+      hash: "hash" in status ? status.hash : "",
+    });
+  }
+
+  let waitingMessage: string | null = null;
+  if (waiting) {
+    waitingMessage = t(
+      locale,
+      status.transaction
+        ? "desktopWalletRequest.transactionWaiting"
+        : "desktopWalletRequest.waiting"
+    );
   }
 
   const close = () => {
@@ -155,6 +197,16 @@ export default function DesktopWalletRequestDialog() {
   } else if (finished) {
     footer = (
       <>
+        {"hash" in status && (
+          <a
+            href={getTransactionLink(status.chainId, status.hash)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`${SECONDARY_CLASS} tw-inline-flex tw-items-center tw-no-underline`}
+          >
+            {t(locale, "desktopWalletRequest.explorer")}
+          </a>
+        )}
         {CONTINUE_IN_BROWSER.has(status.kind) && (
           <button
             type="button"
@@ -191,7 +243,12 @@ export default function DesktopWalletRequestDialog() {
       layered
       locale={locale}
       show
-      title={t(locale, "desktopWalletRequest.title")}
+      title={t(
+        locale,
+        isTransactionStatus(status)
+          ? "desktopWalletRequest.transactionTitle"
+          : "desktopWalletRequest.title"
+      )}
       onHide={close}
       footer={footer}
     >
@@ -207,7 +264,7 @@ export default function DesktopWalletRequestDialog() {
           aria-atomic="true"
           className="tw-block tw-text-sm tw-text-iron-200 empty:tw-hidden"
         >
-          {waiting ? t(locale, "desktopWalletRequest.waiting") : null}
+          {waitingMessage}
         </output>
         {waiting && (
           <>

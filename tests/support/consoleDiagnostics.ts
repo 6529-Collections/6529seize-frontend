@@ -36,13 +36,48 @@ export function getActionableConsoleErrors(
   );
 }
 
+const WEBKIT_CANCELLED_FETCH_ERROR =
+  /^Fetch API cannot load \S+ due to access control checks\.(?:\n|$)/;
+const NAVIGATION_CANCELLED_LOAD = / Load request cancelled /;
+const CORS_REJECTION = /Access-Control-Allow-Origin/;
+
+// When a navigation tears down a page, Linux WebKit can report an in-flight
+// cross-origin fetch as "Fetch API cannot load <url> due to access control
+// checks" even though no CORS check failed. Treat that message as a
+// cancellation only when the page shows navigation-cancelled loads and no
+// real CORS rejection, which WebKit always reports with an
+// Access-Control-Allow-Origin console error and request failure.
+function isNavigationCancelledFetch(
+  pageError: string,
+  diagnostics: PageDiagnostics
+) {
+  if (!WEBKIT_CANCELLED_FETCH_ERROR.test(pageError)) {
+    return false;
+  }
+  const networkFailures = diagnostics.networkFailures ?? [];
+  return (
+    networkFailures.some((failure) =>
+      NAVIGATION_CANCELLED_LOAD.test(failure)
+    ) &&
+    !networkFailures.some((failure) => CORS_REJECTION.test(failure)) &&
+    !diagnostics.consoleErrors.some((message) => CORS_REJECTION.test(message))
+  );
+}
+
+function getActionablePageErrors(diagnostics: PageDiagnostics) {
+  return diagnostics.pageErrors.filter(
+    (pageError) => !isNavigationCancelledFetch(pageError, diagnostics)
+  );
+}
+
 export function assertNoPageErrors(diagnostics: PageDiagnostics) {
-  if (diagnostics.pageErrors.length === 0) {
+  const actionable = getActionablePageErrors(diagnostics);
+  if (actionable.length === 0) {
     return;
   }
 
   throw new Error(
-    `Unexpected browser page error(s):\n${diagnostics.pageErrors.join("\n")}`
+    `Unexpected browser page error(s):\n${actionable.join("\n")}`
   );
 }
 
