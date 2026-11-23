@@ -6,6 +6,7 @@ import { t } from "@/i18n/messages";
 import { cidToText } from "@/lib/museum/onchain/cid";
 import type { OnchainMuseumRecord } from "@/lib/museum/onchain/museum";
 import {
+  bodyText,
   familyOf,
   identifiersOf,
   ONCHAIN_MUSEUM_TEXTS_HREF,
@@ -15,6 +16,7 @@ import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";
 import {
   collectionOf,
   isGenerative,
+  memberships,
   workImage,
 } from "@/lib/museum/onchain/works";
 import {
@@ -245,10 +247,18 @@ function workGroups(
   const selected = records.filter(
     (record) => collectionOf(view, record) === null
   );
+  // Works in the collection, by the accession that brought them in.
+  const byAccession = new Map<string, OnchainMuseumRecord[]>();
+  for (const record of held) {
+    const accession = memberships(view, record, "accession")[0];
+    const key = accession === undefined ? "" : view.labelOf(accession);
+    byAccession.set(key, [...(byAccession.get(key) ?? []), record]);
+  }
   const toGroup = (
     key: string,
     heading: string,
-    members: readonly OnchainMuseumRecord[]
+    members: readonly OnchainMuseumRecord[],
+    kicker?: string
   ): FilterableGroup => {
     const generative = members.some(
       (record) => workImage(view, record) === null && isGenerative(record)
@@ -257,6 +267,7 @@ function workGroups(
       key,
       anchor: `entities-${key}`,
       heading,
+      kicker,
       layout: "cards",
       noImageNote: t(
         locale,
@@ -265,20 +276,20 @@ function workGroups(
           : "museum.onchain.image.noneList"
       ),
       items: members.map((record) =>
-        filterableItem(view, record, workArtists(view, record))
+        filterableItem(view, record, workCaption(view, record))
       ),
     };
   };
+  const collectionKicker = t(locale, "museum.onchain.works.collection");
   return [
-    ...(held.length === 0
-      ? []
-      : [
-          toGroup(
-            "work-collection",
-            t(locale, "museum.onchain.works.collection"),
-            held
-          ),
-        ]),
+    ...[...byAccession.entries()].map(([accession, members], index) =>
+      toGroup(
+        index === 0 ? "work-collection" : `work-collection-${index + 1}`,
+        accession === "" ? collectionKicker : accession,
+        members,
+        collectionKicker
+      )
+    ),
     ...(selected.length === 0
       ? []
       : [
@@ -289,6 +300,17 @@ function workGroups(
           ),
         ]),
   ];
+}
+
+/** A card's second line: the artists and, when recorded, the year. */
+function workCaption(
+  view: OnchainMuseumView,
+  record: OnchainMuseumRecord
+): string | undefined {
+  const parts = [workArtists(view, record), bodyText(record, "date")].filter(
+    (part): part is string => part !== undefined && part !== null
+  );
+  return parts.length === 0 ? undefined : parts.join(", ");
 }
 
 function indexGroups(view: OnchainMuseumView): FilterableGroup[] {
@@ -332,9 +354,12 @@ export default async function OnchainMuseumPage() {
   const { snapshot } = state;
   const view = onchainMuseumView(snapshot);
   const groups = indexGroups(view);
-  const leadGroups = groups
-    .filter((group) => group.kicker === undefined)
-    .slice(0, 4);
+  const leadGroups = [
+    ...groups.filter((group) => group.key === "work-collection"),
+    ...groups.filter(
+      (group) => group.kicker === undefined && group.key !== "work-collection"
+    ),
+  ].slice(0, 4);
   const firstRecordGroup = groups.find((group) => group.kicker !== undefined);
   const works = view.entityGroups.find((group) => group.key === "work");
   const held = (works?.records ?? []).filter(
@@ -346,7 +371,10 @@ export default async function OnchainMuseumPage() {
     <>
       <PageHeading
         eyebrow={t(locale, "museum.onchain.eyebrow")}
-        title={t(locale, "museum.onchain.heading")}
+        title={t(
+          locale,
+          fixture ? "museum.onchain.headingFixture" : "museum.onchain.heading"
+        )}
         intro={
           <>
             <p className="tw-m-0">
@@ -375,6 +403,7 @@ export default async function OnchainMuseumPage() {
         }
       />
       <JumpNav
+        id="sections"
         links={[
           ...leadGroups.map((group) => ({
             href: `#${group.anchor}`,
@@ -396,7 +425,14 @@ export default async function OnchainMuseumPage() {
         <h2 id="collection" className="tw-sr-only">
           {t(locale, "museum.onchain.collection.heading")}
         </h2>
-        <FilterableGroups groups={groups} copy={filterCopy()} />
+        <FilterableGroups
+          groups={groups}
+          copy={filterCopy()}
+          backLink={{
+            href: "#sections",
+            label: t(locale, "museum.onchain.jump.back"),
+          }}
+        />
         <p className="tw-m-0 tw-max-w-3xl tw-text-sm tw-leading-6 tw-text-iron-400">
           {t(locale, "museum.onchain.relations.summary", {
             count: formatCount(view.relationCount),

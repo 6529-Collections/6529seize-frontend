@@ -1,6 +1,8 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
+import Link from "next/link";
 import { formatList } from "@/i18n/format";
+import { onchainMuseumRecordHref } from "@/lib/museum/onchain/fields";
 import type { OnchainMuseumRecord } from "@/lib/museum/onchain/museum";
 import type { OnchainMuseumView } from "@/lib/museum/onchain/presentation";
 import {
@@ -8,6 +10,7 @@ import {
   type OnchainRightsView,
   type OnchainWorkImageView,
 } from "@/lib/museum/onchain/works";
+import { TEXT_LINK } from "./OnchainParts";
 import { VerifiedImage, type VerifiedImageCopy } from "./VerifiedImage";
 
 const locale = DEFAULT_LOCALE;
@@ -61,7 +64,7 @@ function rightsLine(
   const licence = recorded?.licence ?? null;
   if (licence !== null) {
     if (recorded?.status === "restricted") {
-      return t(locale, "museum.onchain.image.rightsRestricted");
+      return t(locale, "museum.onchain.image.rightsRestricted", { licence });
     }
     if (creditText?.includes(licence) === true) return null;
     if (recorded?.status === "licensed") {
@@ -72,6 +75,23 @@ function rightsLine(
   const lead = manifestStatus.split(";")[0]?.trim() ?? "";
   if (lead !== "" && creditText?.includes(lead) === true) return null;
   return t(locale, "museum.onchain.image.rights", { status: manifestStatus });
+}
+
+/** The manifest's reuse terms, unless the caption already names the license. */
+function termsLine(
+  terms: readonly string[],
+  named: readonly (string | null)[]
+): string | null {
+  if (terms.length === 0) return t(locale, "museum.onchain.image.noTerms");
+  const text = terms.join(" ");
+  const licence = /CC [A-Z-]+ \d\.\d/u.exec(text)?.[0];
+  if (
+    licence !== undefined &&
+    named.some((line) => line?.includes(licence) === true)
+  ) {
+    return null;
+  }
+  return text;
 }
 
 /**
@@ -89,8 +109,10 @@ export function WorkFigure({
     largest === undefined ? 1 : largest.width / largest.height;
   const creditText = credit(view);
   const rights = rightsLine(view.rights, image.rightsStatus, creditText);
+  const terms = termsLine(image.rightsTerms, [creditText, rights]);
+  const statement = view.rights[0]?.record;
   return (
-    <figure className="tw-m-0 tw-mb-10 tw-max-w-4xl">
+    <figure className="tw-m-0 tw-mb-10 tw-max-w-6xl lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_18rem] lg:tw-items-end lg:tw-gap-8">
       {/* Tall works keep their whole height in view: width follows 80vh. */}
       <div style={{ maxWidth: `calc(80vh * ${aspectRatio.toFixed(4)})` }}>
         <VerifiedImage
@@ -100,16 +122,29 @@ export function WorkFigure({
           eager={eager}
         />
       </div>
-      <figcaption className="tw-mt-3 tw-max-w-3xl tw-space-y-1 tw-text-sm tw-leading-6 tw-text-iron-300">
+      <figcaption className="tw-mt-3 tw-max-w-3xl tw-space-y-1 tw-text-sm tw-leading-6 tw-text-iron-300 lg:tw-mt-0">
         {creditText === null ? null : (
           <p className="tw-m-0 tw-text-iron-100">{creditText}</p>
         )}
-        {rights === null ? null : <p className="tw-m-0">{rights}</p>}
-        <p className="tw-m-0 tw-text-iron-400">
-          {image.rightsTerms.length === 0
-            ? t(locale, "museum.onchain.image.noTerms")
-            : image.rightsTerms.join(" ")}
-        </p>
+        {rights === null ? null : (
+          <p className="tw-m-0">
+            {rights}
+            {statement === undefined ? null : (
+              <>
+                {" "}
+                <Link
+                  href={onchainMuseumRecordHref(statement.subjectId)}
+                  className={TEXT_LINK}
+                >
+                  {t(locale, "museum.onchain.image.rightsLink")}
+                </Link>
+              </>
+            )}
+          </p>
+        )}
+        {terms === null ? null : (
+          <p className="tw-m-0 tw-text-iron-400">{terms}</p>
+        )}
       </figcaption>
     </figure>
   );

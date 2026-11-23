@@ -210,12 +210,15 @@ export function FilterableGroups({
   copy,
   headingLevel = 3,
   afterFilter,
+  backLink,
 }: Readonly<{
   groups: readonly FilterableGroup[];
   copy: FilterableGroupsCopy;
   headingLevel?: 2 | 3;
   /** Rendered between the filter and the groups, such as a jump row. */
   afterFilter?: ReactNode;
+  /** A link after each group back to the page's section list. */
+  backLink?: { readonly href: string; readonly label: string };
 }>) {
   const inputId = useId();
   const [query, setQuery] = useState("");
@@ -299,6 +302,13 @@ export function FilterableGroups({
             </span>
           </Heading>
           <GroupItems group={group} copy={copy} filtering={needle !== ""} />
+          {backLink === undefined ? null : (
+            <p className="tw-m-0 tw-mt-3 tw-text-sm">
+              <a href={backLink.href} className={LINK}>
+                {backLink.label}
+              </a>
+            </p>
+          )}
         </section>
       ))}
     </div>

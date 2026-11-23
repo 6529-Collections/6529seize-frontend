@@ -189,6 +189,13 @@ const LEAD_KEYS = [
   "museum.onchain.verification.images",
 ] as const;
 
+function expectedKey(fixture: boolean, releases: number) {
+  if (fixture) return "museum.onchain.check.expectedFixture" as const;
+  return releases === 1
+    ? ("museum.onchain.check.expectedOne" as const)
+    : ("museum.onchain.check.expected" as const);
+}
+
 /** How the page checks what it shows, and the result of each check. */
 export function Verification({ view }: Readonly<{ view: OnchainMuseumView }>) {
   const { snapshot } = view;
@@ -263,16 +270,10 @@ export function Verification({ view }: Readonly<{ view: OnchainMuseumView }>) {
         />
         <CheckRow
           passed={snapshot.expected.matches}
-          label={t(
-            locale,
-            snapshot.expected.releases === 1
-              ? "museum.onchain.check.expectedOne"
-              : "museum.onchain.check.expected",
-            {
-              records: formatCount(snapshot.expected.records),
-              releases: formatCount(snapshot.expected.releases),
-            }
-          )}
+          label={t(locale, expectedKey(fixture, snapshot.expected.releases), {
+            records: formatCount(snapshot.expected.records),
+            releases: formatCount(snapshot.expected.releases),
+          })}
         />
         {index.state === "absent" ? null : (
           <CheckRow

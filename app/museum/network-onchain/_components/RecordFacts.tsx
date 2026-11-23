@@ -25,7 +25,6 @@ import {
   memberships,
   objectRecordsOf,
   workForEntity,
-  workImage,
 } from "@/lib/museum/onchain/works";
 import { registryValueLabel } from "./labels";
 import {
@@ -95,6 +94,23 @@ function linksFact(
 
 function textFact(key: MessageKey, value: string | null): Fact[] {
   return value === null ? [] : [{ label: t(locale, key), value }];
+}
+
+/**
+ * The medium as the Museum records it. A clause after the first semicolon is
+ * a note about the medium, shown on its own line with its words unchanged.
+ */
+function mediumFacts(medium: string | null): Fact[] {
+  const [lead, ...rest] = (medium ?? "").split(/;\s*/u);
+  const note = rest.join("; ");
+  return [
+    ...recordedFact("museum.onchain.record.medium", lead ? lead : null),
+    ...(note === ""
+      ? []
+      : [
+          { label: t(locale, "museum.onchain.record.mediumNote"), value: note },
+        ]),
+  ];
 }
 
 /** A caption field every work shows, saying so when the record has none. */
@@ -179,20 +195,33 @@ function workFacts(
   record: OnchainMuseumRecord
 ): Fact[] {
   const collection = collectionOf(view, record);
-  // With an image, the figure carries the credit line; it is not repeated.
-  const credit =
-    workImage(view, record) === null ? creditLineOf(view, record) : undefined;
+  const acquisitions = memberships(view, record, "acquisition");
+  const acquisitionLabels = new Set(
+    acquisitions.map((item) => view.labelOf(item))
+  );
+  // A program named like the acquisition it produced is listed once.
+  const programs = memberships(view, record, "program").filter(
+    (item) => !acquisitionLabels.has(view.labelOf(item))
+  );
   return [
     ...linksFact(
       view,
       "museum.onchain.record.creators",
       creatorsOf(view, record)
     ),
-    ...recordedFact("museum.onchain.record.date", bodyText(record, "date")),
-    ...recordedFact("museum.onchain.record.medium", mediumOf(record)),
-    ...(credit === undefined
-      ? []
-      : recordedFact("museum.onchain.record.creditLine", credit)),
+    {
+      label: t(locale, "museum.onchain.record.date"),
+      value: bodyText(record, "date") ?? (
+        <span className="tw-text-iron-400">
+          {t(locale, "museum.onchain.record.dateNotEstablished")}
+        </span>
+      ),
+    },
+    ...mediumFacts(mediumOf(record)),
+    ...recordedFact(
+      "museum.onchain.record.creditLine",
+      creditLineOf(view, record)
+    ),
     {
       label: t(locale, "museum.onchain.record.collection"),
       value:
@@ -207,16 +236,8 @@ function workFacts(
       "museum.onchain.record.accession",
       memberships(view, record, "accession")
     ),
-    ...linksFact(
-      view,
-      "museum.onchain.record.acquisition",
-      memberships(view, record, "acquisition")
-    ),
-    ...linksFact(
-      view,
-      "museum.onchain.record.program",
-      memberships(view, record, "program")
-    ),
+    ...linksFact(view, "museum.onchain.record.acquisition", acquisitions),
+    ...linksFact(view, "museum.onchain.record.program", programs),
     ...linksFact(
       view,
       "museum.onchain.record.project",

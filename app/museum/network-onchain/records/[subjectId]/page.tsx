@@ -14,6 +14,7 @@ import {
   bodyText,
   documentPath,
   familyOf,
+  identifiersOf,
   museumExtString,
   ONCHAIN_MUSEUM_BASE_PATH,
   ONCHAIN_MUSEUM_TEXTS_HREF,
@@ -212,6 +213,21 @@ function connectionGroups(
   return groups;
 }
 
+/** A work's year and accession number, beside its name in a list. */
+function WorkDetail({
+  view,
+  record,
+}: Readonly<{ view: OnchainMuseumView; record: OnchainMuseumRecord }>) {
+  if (view.groupKeyOf(record) !== "work") return null;
+  const parts = [
+    bodyText(record, "date"),
+    identifiersOf(record, "accession_number")[0] ?? null,
+  ].filter((part): part is string => part !== null);
+  return parts.length === 0 ? null : (
+    <span className="tw-text-iron-400">{parts.join(" · ")}</span>
+  );
+}
+
 function Connections({
   view,
   record,
@@ -235,7 +251,10 @@ function Connections({
                 id={headingId}
                 className="tw-m-0 tw-mb-2 tw-text-base tw-font-semibold tw-text-iron-100"
               >
-                {registryValueLabel("connection", key)}
+                {registryValueLabel("connection", key)}{" "}
+                <span className="tw-text-sm tw-font-normal tw-text-iron-400">
+                  ({edges.length})
+                </span>
               </h3>
               {key === "documents.in" && noImage ? (
                 <p className="tw-m-0 tw-mb-2 tw-text-sm tw-text-iron-400">
@@ -252,6 +271,9 @@ function Connections({
                     className="tw-flex tw-flex-wrap tw-items-baseline tw-gap-x-3 tw-gap-y-1 tw-text-sm tw-leading-6"
                   >
                     <EntityLink link={view.resolveRef(edge.otherRef)} />
+                    {edge.other === null ? null : (
+                      <WorkDetail view={view} record={edge.other} />
+                    )}
                     <Link
                       href={onchainMuseumRecordHref(edge.relation.subjectId)}
                       className="hover:tw-text-primary-200 tw-text-xs tw-text-iron-400 tw-underline tw-decoration-iron-600 tw-underline-offset-4 focus-visible:tw-rounded-sm focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400"

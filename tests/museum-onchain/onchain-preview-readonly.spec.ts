@@ -97,9 +97,13 @@ test.describe("on-chain Museum preview", () => {
     await expect(
       figure.getByRole("img", { name: /cobalt blue and warm white/u })
     ).toBeVisible({ timeout: 60_000 });
-    await expect(figure.getByText(/^Rights: CC BY-NC 4\.0/u)).toBeVisible();
+    // The credit names the license; the rights line says some uses are
+    // refused and links to the PRV_RIGHTS record.
     await expect(
-      figure.getByText(/No permission is asserted beyond CC BY-NC 4\.0/u)
+      figure.getByText(/^CC BY-NC 4\.0, with some uses refused\./u)
+    ).toBeVisible();
+    await expect(
+      figure.getByRole("link", { name: "Full rights statement" })
     ).toBeVisible();
     if (testInfo.project.name === MOBILE_PROJECT) {
       await expectNoHorizontalOverflow(page);

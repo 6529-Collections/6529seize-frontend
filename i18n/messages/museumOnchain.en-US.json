@@ -1,5 +1,5 @@
 {
-  "museum.onchain.title": "6529 Network Museum on Ethereum (preview)",
+  "museum.onchain.title": "6529 Network Museum, on-chain preview",
   "museum.onchain.description": "An unlinked test that reads the 6529 Network Museum from a ProvenanceRegistry contract on the Sepolia test network and shows each record only after its bytes match the chain.",
   "museum.onchain.notice": "Test preview, read from a Sepolia test registry and IPFS. Not the Museum's record on Ethereum mainnet.",
   "museum.onchain.eyebrow": "6529 Network Museum · on-chain preview",
@@ -47,7 +47,7 @@
   "museum.onchain.texts.heading": "Texts",
   "museum.onchain.texts.summary": "{count} texts: essays, accession and program texts, policies and the Museum's working documents.",
   "museum.onchain.texts.open": "Read the texts",
-  "museum.onchain.texts.title": "Texts on Ethereum (preview)",
+  "museum.onchain.texts.title": "Texts, 6529 Network Museum on-chain preview",
   "museum.onchain.texts.description": "The 6529 Network Museum's texts, each named by a record in the Sepolia test registry and checked by SHA-256.",
   "museum.onchain.texts.sourceLanguage": "Texts appear in the language the Museum published them in.",
   "museum.onchain.textGroup.accession": "Accession",
@@ -215,7 +215,7 @@
   "museum.onchain.canonical.RAW_BYTES": "Bytes as stored",
   "museum.onchain.image.rights": "Rights: {status}",
   "museum.onchain.image.rightsLicensed": "Rights: licensed under {licence}.",
-  "museum.onchain.image.rightsRestricted": "Some uses are refused; see the rights statement.",
+  "museum.onchain.image.rightsRestricted": "{licence}, with some uses refused.",
   "museum.onchain.entityGroup.work": "Works",
   "museum.onchain.entityGroup.artist": "Artists",
   "museum.onchain.entityGroup.project": "Projects and series",
@@ -327,5 +327,11 @@
   "museum.onchain.record.program": "Acquisition program",
   "museum.onchain.record.pageOn": "Page on {host}",
   "museum.onchain.connection.created_by.in.work": "Works",
-  "museum.onchain.datedStatement": "{kind}, {date}"
+  "museum.onchain.datedStatement": "{kind}, {date}",
+  "museum.onchain.headingFixture": "The Museum's records, from a test preview",
+  "museum.onchain.check.expectedFixture": "The fixture holds the {records} records of the Museum's release",
+  "museum.onchain.image.rightsLink": "Full rights statement",
+  "museum.onchain.record.dateNotEstablished": "Not established in the Museum's record",
+  "museum.onchain.record.mediumNote": "Note on the medium",
+  "museum.onchain.jump.back": "Back to the sections"
 }

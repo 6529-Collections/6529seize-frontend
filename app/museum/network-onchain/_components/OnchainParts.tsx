@@ -197,11 +197,16 @@ export function StateBadge({ state }: Readonly<{ state: OnchainRecordState }>) {
 
 export function JumpNav({
   links,
-}: Readonly<{ links: readonly { href: string; label: string }[] }>) {
+  id,
+}: Readonly<{
+  links: readonly { href: string; label: string }[];
+  id?: string;
+}>) {
   return (
     <nav
+      id={id}
       aria-label={t(locale, "museum.onchain.jump.label")}
-      className="tw-mb-10"
+      className="tw-mb-10 tw-scroll-mt-24"
     >
       <ul className="tw-m-0 tw-flex tw-list-none tw-gap-2 tw-overflow-x-auto tw-p-0 tw-pb-1 sm:tw-flex-wrap sm:tw-overflow-visible sm:tw-pb-0">
         {links.map((link) => (
