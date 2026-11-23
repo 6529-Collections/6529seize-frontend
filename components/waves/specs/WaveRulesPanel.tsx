@@ -5,7 +5,6 @@ import type {
 import WaveRulesGroupMembersLink from "@/components/waves/specs/WaveRulesGroupMembersLink";
 import type { WaveRuleRow } from "@/helpers/waves/wave-rules.shared";
 import { waveRightPanelText } from "@/helpers/waves/wave-right-panel.helpers";
-import Link from "next/link";
 import type { ReactNode } from "react";
 
 interface WaveRulesPanelProps {
@@ -131,27 +130,10 @@ export default function WaveRulesPanel({
       return renderedValue;
     }
 
-    if (!row.valueHref) {
-      return row.value;
-    }
-
-    if (row.valueGroupId) {
-      return (
-        <WaveRulesGroupMembersLink
-          groupId={row.valueGroupId}
-          href={row.valueHref}
-        />
-      );
-    }
-
-    return (
-      <Link
-        href={row.valueHref}
-        title={row.value}
-        className="tw-inline-flex tw-min-h-11 tw-max-w-full tw-cursor-pointer tw-items-center tw-justify-end tw-break-words tw-rounded-md tw-text-right tw-text-iron-50 tw-underline tw-underline-offset-2 tw-transition-colors tw-duration-200 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-300 desktop-hover:hover:tw-decoration-2 sm:tw-min-h-9"
-      >
-        {row.value}
-      </Link>
+    return row.valueGroupId ? (
+      <WaveRulesGroupMembersLink groupId={row.valueGroupId} />
+    ) : (
+      row.value
     );
   };
 

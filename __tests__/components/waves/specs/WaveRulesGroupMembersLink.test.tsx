@@ -74,12 +74,7 @@ describe("WaveRulesGroupMembersLink", () => {
       next: false,
       data: [],
     });
-    renderWithQueryClient(
-      <WaveRulesGroupMembersLink
-        groupId="group-1"
-        href="/network?page=1&group=group-1"
-      />
-    );
+    renderWithQueryClient(<WaveRulesGroupMembersLink groupId="group-1" />);
 
     await screen.findByText(label);
     const criteria = await screen.findByText(
@@ -113,19 +108,11 @@ describe("WaveRulesGroupMembersLink", () => {
       .mockReturnValueOnce(nextMembers.promise);
 
     const { rerender } = renderWithQueryClient(
-      <WaveRulesGroupMembersLink
-        groupId="group-1"
-        href="/network?page=1&group=group-1"
-      />
+      <WaveRulesGroupMembersLink groupId="group-1" />
     );
     await screen.findByText("365 users");
 
-    rerender(
-      <WaveRulesGroupMembersLink
-        groupId="group-2"
-        href="/network?page=1&group=group-2"
-      />
-    );
+    rerender(<WaveRulesGroupMembersLink groupId="group-2" />);
 
     expect(screen.queryByText("365 users")).not.toBeInTheDocument();
 

@@ -29,10 +29,6 @@ export default function WaveGroupMembersScope({
   }
 
   return (
-    <WaveRulesGroupMembersLink
-      groupId={groupId}
-      groupDetails={groupDetails}
-      href={`/network?page=1&group=${encodeURIComponent(groupId)}`}
-    />
+    <WaveRulesGroupMembersLink groupId={groupId} groupDetails={groupDetails} />
   );
 }

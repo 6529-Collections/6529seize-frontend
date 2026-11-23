@@ -36,8 +36,7 @@ const rules: WaveRules = {
           id: "chat-access",
           label: "Chat access",
           value: "Artists",
-          valueHref: "/network?page=1&group=artists",
-          valueGroupId: "artists",
+          valueGroupId: "artists & curators",
         },
         {
           id: "admin",
@@ -63,7 +62,10 @@ describe("WaveRulesPanel", () => {
     const link = await screen.findByRole("link", {
       name: "12 users",
     });
-    expect(link).toHaveAttribute("href", "/network?page=1&group=artists");
+    expect(link).toHaveAttribute(
+      "href",
+      "/network?page=1&group=artists%20%26%20curators"
+    );
     expect(link).toHaveClass("tw-min-h-11");
     expect(link).toHaveClass("desktop-hover:hover:tw-text-primary-300");
     expect(link.closest("dd")?.parentElement).toHaveClass("tw-items-center");

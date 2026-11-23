@@ -3,10 +3,10 @@ import WaveGroupMembersScope from "@/components/waves/specs/groups/group/WaveGro
 
 jest.mock("@/components/waves/specs/WaveRulesGroupMembersLink", () => ({
   __esModule: true,
-  default: ({ groupId, href }: { groupId: string; href: string }) => (
-    <a href={href} data-testid="members-summary" data-group-id={groupId}>
+  default: ({ groupId }: { groupId: string }) => (
+    <span data-testid="members-summary" data-group-id={groupId}>
       12 users
-    </a>
+    </span>
   ),
 }));
 
@@ -15,9 +15,8 @@ describe("WaveGroupMembersScope", () => {
     render(<WaveGroupMembersScope group={{ id: "1", is_hidden: false }} />);
 
     const summary = screen.getByTestId("members-summary");
-    expect(summary).toHaveAttribute("href", "/network?page=1&group=1");
     expect(summary).toHaveAttribute("data-group-id", "1");
-    expect(summary).toHaveAccessibleName("12 users");
+    expect(summary).toHaveTextContent("12 users");
   });
 
   it("renders the member count and criteria for an available direct-message group", () => {
@@ -33,7 +32,6 @@ describe("WaveGroupMembersScope", () => {
     );
 
     const summary = screen.getByTestId("members-summary");
-    expect(summary).toHaveAttribute("href", "/network?page=1&group=dm-1");
     expect(summary).toHaveAttribute("data-group-id", "dm-1");
   });
 

@@ -601,7 +601,6 @@ describe("wave-rules.helpers", () => {
         })
       ).toEqual({
         value: "Selected group",
-        valueHref: "/network?page=1&group=artists%20%26%20curators",
         valueGroupId: "artists & curators",
       });
     }
