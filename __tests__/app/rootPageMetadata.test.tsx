@@ -1,3 +1,11 @@
+jest.mock("@/config/serverEnv", () => ({
+  isHomeDropClientFixtureEnabled: () => false,
+}));
+jest.mock("next/server", () => ({ connection: jest.fn() }));
+jest.mock("@/app/(home)/homeDrop.server", () => ({
+  getInitialHomeDrop: jest.fn(),
+}));
+
 import { generateMetadata } from "@/app/(home)/page";
 import { getAppEnvironment } from "@/config/appEnvironment";
 import { publicEnv } from "@/config/env";

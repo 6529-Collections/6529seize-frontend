@@ -15,7 +15,13 @@ import { Time } from "@/helpers/time";
 import { getMemesMintingRoots } from "@/services/api/memes-minting-claims-api";
 import { usePageVisible } from "@/hooks/usePageVisibility";
 import { MemesMintingRootsContext } from "@/contexts/MemesMintingRootsContext";
+import {
+  getMemesManifoldPhaseId,
+  isManifoldDropComplete,
+} from "@/helpers/memes-manifold-phase.helpers";
 import { isAddress, type Abi } from "viem";
+
+export { getMemePhaseIdForRootPhase } from "@/helpers/memes-manifold-phase.helpers";
 
 export enum ManifoldClaimStatus {
   UPCOMING = "upcoming",
@@ -104,38 +110,6 @@ function toValidatedTokenId(value: unknown): number {
     return 0;
   }
   return Number(parsed);
-}
-
-function normalizePhaseName(value: string): string {
-  return value.replaceAll(/\s+/g, "").toLowerCase();
-}
-
-function normalizeHexValue(value: string | null | undefined): string {
-  return (value ?? "").trim().toLowerCase();
-}
-
-export function getMemePhaseIdForRootPhase(
-  phase: string | null | undefined
-): string | undefined {
-  const normalizedPhase = normalizePhaseName(phase ?? "");
-
-  if (normalizedPhase === "phase0") {
-    return "0";
-  }
-
-  if (normalizedPhase === "phase1") {
-    return "1";
-  }
-
-  if (normalizedPhase === "phase2") {
-    return "2";
-  }
-
-  if (normalizedPhase === "publicphase" || normalizedPhase === "public") {
-    return "public";
-  }
-
-  return undefined;
 }
 
 export function buildMemesPhases(mintDate: Time = Time.now()): MemePhase[] {
@@ -271,8 +245,11 @@ function buildClaimFromReadData({
   const remaining = Number(claimData.totalMax) - Number(claimData.total);
   const isSoldOut = remaining <= 0;
   const isFinalized = isSoldOut || status === ManifoldClaimStatus.ENDED;
-  const isDropComplete =
-    isSoldOut || (status === ManifoldClaimStatus.ENDED && !nextMemePhase);
+  const isDropComplete = isManifoldDropComplete(
+    remaining,
+    status === ManifoldClaimStatus.ENDED,
+    !!nextMemePhase
+  );
 
   return {
     identifier,
@@ -334,20 +311,6 @@ export function useManifoldClaim({
     return ManifoldClaimStatus.ENDED;
   }, []);
 
-  const getScheduledMemePhase = useCallback(
-    (phase: ManifoldPhase, start: number, end: number) => {
-      const memePhases = buildMemesPhases(Time.seconds(start));
-
-      if (phase === ManifoldPhase.PUBLIC) {
-        return memePhases.find((mp) => mp.id === "public");
-      }
-
-      const endTime = Time.seconds(end);
-      return memePhases.find((mp) => mp.end.gte(endTime));
-    },
-    []
-  );
-
   const getMemePhase = useCallback(
     (
       phase: ManifoldPhase,
@@ -359,36 +322,18 @@ export function useManifoldClaim({
         return undefined;
       }
 
-      const memePhases = buildMemesPhases(Time.seconds(start));
-      const scheduledPhase = getScheduledMemePhase(phase, start, end);
-
-      if (phase === ManifoldPhase.PUBLIC) {
-        return memePhases.find((mp) => mp.id === "public");
-      }
-
-      if (
-        memesRootsState.status !== "success" ||
-        memesRootsState.roots.length === 0
-      ) {
-        return scheduledPhase;
-      }
-
-      const matchedRoot = memesRootsState.roots.find(
-        (root) =>
-          normalizeHexValue(root.merkle_root) === normalizeHexValue(merkleRoot)
-      );
-      const phaseId = getMemePhaseIdForRootPhase(matchedRoot?.phase);
-
-      if (!phaseId) {
-        return scheduledPhase;
-      }
-
-      return (
-        memePhases.find((memePhase) => memePhase.id === phaseId) ??
-        scheduledPhase
+      const phaseId = getMemesManifoldPhaseId({
+        isPublic: phase === ManifoldPhase.PUBLIC,
+        merkleRoot,
+        start,
+        end,
+        roots: memesRootsState.roots,
+      });
+      return buildMemesPhases(Time.seconds(start)).find(
+        (memePhase) => memePhase.id === phaseId
       );
     },
-    [contract, getScheduledMemePhase, memesRootsState]
+    [contract, memesRootsState]
   );
 
   const getNextMemePhase = useCallback(

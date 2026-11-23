@@ -55,7 +55,11 @@ function NowMintingCountdownContent({
 }) {
   switch (state.type) {
     case "loading":
-      return <NowMintingCountdownLoading />;
+      return variant === "home" ? (
+        <div aria-hidden="true" className="tw-h-[182px] md:tw-h-[190px]" />
+      ) : (
+        <NowMintingCountdownLoading />
+      );
     case "error":
     case "sold_out":
     case "finalized":

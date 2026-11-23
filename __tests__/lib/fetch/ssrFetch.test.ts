@@ -143,6 +143,19 @@ describe("ssrFetch", () => {
     });
   });
 
+  it("uses server access for shared public reads without reading visitor credentials", async () => {
+    mockServerStagingApiKey = "server-staging-key";
+    const { publicSsrFetch } = await loadSsrFetch();
+
+    await publicSsrFetch("https://api.example.test/api/public-feed");
+
+    expect(mockGetAppCommonHeaders).not.toHaveBeenCalled();
+    const headers = sentRequest().headers;
+    expect(headers.get("Authorization")).toBeNull();
+    expect(headers.get("x-6529-auth")).toBe("server-staging-key");
+    expect(headers.get("x-6529-internal-signature")).toBe("request-signature");
+  });
+
   describe("server-held staging access", () => {
     it("sends the server staging key when no access value is present", async () => {
       mockServerStagingApiKey = "server-staging-key";

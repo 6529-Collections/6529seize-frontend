@@ -53,10 +53,10 @@ Use this page for visibility rules, state switches, and route targets.
 ## User Journey
 
 1. Open `/`.
-2. The top slot shows a loading placeholder until the initial artwork,
-   mint-status, and next-winner checks finish. It then displays the selected
-   artwork without briefly showing the previous drop first. Already loaded
-   artwork stays visible during background refreshes.
+2. The initial homepage shows the resolved drop when its data is available.
+   If the initial checks take longer, the rest of the page is visible and the
+   drop slot stays hidden until the browser resolves it. Already loaded
+   artwork stays visible during background refreshes of the same drop.
 3. The top slot then chooses one mode:
    - `Latest Drop` while the current mint is active and for the configured
      grace period after its scheduled end, or when no next winner is available.
@@ -233,8 +233,10 @@ provides another future result. It describes the voting result, not minting.
 
 - If the latest artwork data fails to load, the top slot shows an error and
   a `Try again` button. The button shows `Trying again…` during the retry.
-- A mint-status failure does not hide the artwork. Mint-dependent stats show
-  `Unavailable`, and the countdown shows its error state until status recovers.
+- If a mint-status check fails after the artwork is displayed, mint-dependent
+  stats show `Unavailable` and the countdown shows its error state. If an
+  upcoming winner exists and the initial mint status is unknown, the slot waits
+  for confirmation before showing a card.
 - Loaded artwork stays visible during background refreshes, including a
   refresh that fails. The homepage switches to `Next Drop` only after mint
   completion is confirmed, the grace period has elapsed, and a winner is ready.

@@ -46,6 +46,7 @@ export function useWaveDecisions({
   const {
     data,
     isError,
+    isFetchedAfterMount,
     error,
     refetch,
     isFetching,
@@ -149,6 +150,7 @@ export function useWaveDecisions({
   return {
     decisionPoints,
     isError,
+    isFetchedAfterMount,
     error,
     refetch,
     isFetching,

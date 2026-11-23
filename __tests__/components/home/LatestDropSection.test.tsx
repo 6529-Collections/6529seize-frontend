@@ -1,4 +1,6 @@
+import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import LatestDropSection from "@/components/home/now-minting/LatestDropSection";
+import { renderToStaticMarkup } from "react-dom/server";
 import { fireEvent, render, screen } from "@testing-library/react";
 
 const mockUseLatestDropTransitionReady = jest.fn();
@@ -25,18 +27,8 @@ jest.mock("@/components/home/now-minting/useLatestDropTransitionReady", () => ({
 
 jest.mock("@/components/home/now-minting/NowMintingSection", () => ({
   __esModule: true,
-  default: ({
-    nft,
-    isFetching,
-  }: {
-    readonly nft?: { readonly id: number };
-    readonly isFetching: boolean;
-  }) => (
-    <div
-      data-testid="latest-drop"
-      data-token-id={nft?.id}
-      data-loading={!nft && isFetching}
-    >
+  default: ({ nft }: { readonly nft: { readonly id: number } }) => (
+    <div data-testid="latest-drop" data-token-id={nft.id}>
       Latest Drop
     </div>
   ),
@@ -91,13 +83,7 @@ describe("LatestDropSection", () => {
 
       render(<LatestDropSection mintStatus={mockUseNowMintingStatus()} />);
 
-      expect(screen.getByTestId("latest-drop")).not.toHaveAttribute(
-        "data-token-id"
-      );
-      expect(screen.getByTestId("latest-drop")).toHaveAttribute(
-        "data-loading",
-        "true"
-      );
+      expect(screen.queryByTestId("latest-drop")).not.toBeInTheDocument();
       expect(screen.queryByTestId("next-drop")).not.toBeInTheDocument();
     }
   );
@@ -107,13 +93,7 @@ describe("LatestDropSection", () => {
     const { rerender } = render(
       <LatestDropSection mintStatus={mockUseNowMintingStatus()} />
     );
-    expect(screen.getByTestId("latest-drop")).not.toHaveAttribute(
-      "data-token-id"
-    );
-    expect(screen.getByTestId("latest-drop")).toHaveAttribute(
-      "data-loading",
-      "true"
-    );
+    expect(screen.queryByTestId("latest-drop")).not.toBeInTheDocument();
 
     mockUseLatestDropTransitionReady.mockReturnValue(true);
     rerender(<LatestDropSection mintStatus={mockUseNowMintingStatus()} />);
@@ -122,6 +102,84 @@ describe("LatestDropSection", () => {
       "next-drop"
     );
     expect(screen.queryByTestId("latest-drop")).not.toBeInTheDocument();
+  });
+
+  it("puts the server-selected Next Drop in the initial HTML with queries pending", () => {
+    mockUseNextMintDrop.mockReturnValue({ nextMint: null, isLoading: true });
+    const html = renderToStaticMarkup(
+      <LatestDropSection
+        initialDrop={{
+          kind: "next",
+          mintNumber: 536,
+          drop: { id: "server-winner" } as ApiDropV2View,
+        }}
+        mintStatus={{
+          ...mockUseNowMintingStatus(),
+          nft: undefined,
+          isFetching: true,
+          isStatusLoading: true,
+        }}
+      />
+    );
+
+    expect(html).toContain('data-drop-id="server-winner"');
+    expect(html).toContain("Next Drop");
+    expect(html).not.toContain("Latest Drop");
+  });
+
+  it("keeps the server selection when the browser starts from pre-transition cached data", () => {
+    mockUseNextMintDrop.mockReturnValue({
+      nextMint: null,
+      isLoading: false,
+      isFetchedAfterMount: false,
+    });
+    render(
+      <LatestDropSection
+        initialDrop={{
+          kind: "next",
+          mintNumber: 536,
+          drop: { id: "server-winner" } as ApiDropV2View,
+        }}
+        mintStatus={{ ...mockUseNowMintingStatus(), isDropComplete: false }}
+      />
+    );
+    expect(screen.getByTestId("next-drop")).toHaveAttribute(
+      "data-drop-id",
+      "server-winner"
+    );
+    expect(screen.queryByTestId("latest-drop")).not.toBeInTheDocument();
+  });
+
+  it("retains the server-selected card during a failed browser refresh and advances when the latest mint changes", () => {
+    const mintStatus = mockUseNowMintingStatus();
+    mockUseNextMintDrop.mockReturnValue({ nextMint: null, isError: true });
+    const { rerender } = render(
+      <LatestDropSection
+        initialDrop={{
+          kind: "next",
+          mintNumber: 536,
+          drop: { id: "server-winner" } as ApiDropV2View,
+        }}
+        mintStatus={{ ...mintStatus, isStatusError: true }}
+      />
+    );
+    expect(screen.getByTestId("next-drop")).toHaveAttribute(
+      "data-drop-id",
+      "server-winner"
+    );
+    expect(screen.queryByTestId("latest-drop")).not.toBeInTheDocument();
+
+    mockUseNextMintDrop.mockReturnValue({ nextMint: null, isLoading: false });
+    rerender(
+      <LatestDropSection
+        mintStatus={{ ...mintStatus, nft: { id: 537 }, isDropComplete: false }}
+      />
+    );
+    expect(screen.getByTestId("latest-drop")).toHaveAttribute(
+      "data-token-id",
+      "537"
+    );
+    expect(screen.queryByTestId("next-drop")).not.toBeInTheDocument();
   });
 
   it("keeps an active latest drop visible during a background refresh", () => {
@@ -142,7 +200,6 @@ describe("LatestDropSection", () => {
     });
     rerender(<LatestDropSection mintStatus={mockUseNowMintingStatus()} />);
     expect(screen.getByTestId("latest-drop")).toBe(artwork);
-    expect(artwork).toHaveAttribute("data-loading", "false");
   });
 
   it("keeps a confirmed next drop mounted while data refreshes", () => {
@@ -197,10 +254,6 @@ describe("LatestDropSection", () => {
       "data-token-id",
       "536"
     );
-    expect(screen.getByTestId("latest-drop")).toHaveAttribute(
-      "data-loading",
-      "false"
-    );
   });
 
   it("waits again when a different mint arrives without its status", () => {
@@ -214,13 +267,7 @@ describe("LatestDropSection", () => {
       isStatusLoading: true,
     });
     rerender(<LatestDropSection mintStatus={mockUseNowMintingStatus()} />);
-    expect(screen.getByTestId("latest-drop")).not.toHaveAttribute(
-      "data-token-id"
-    );
-    expect(screen.getByTestId("latest-drop")).toHaveAttribute(
-      "data-loading",
-      "true"
-    );
+    expect(screen.queryByTestId("latest-drop")).not.toBeInTheDocument();
   });
 
   it("offers recovery after an initial artwork failure", () => {
@@ -254,17 +301,15 @@ describe("LatestDropSection", () => {
     );
   });
 
-  it("shows a skeleton only while the artwork itself is initially loading", () => {
+  it("omits the slot while artwork is initially loading", () => {
     mockUseNowMintingStatus.mockReturnValue({
       nft: undefined,
       isFetching: true,
       isDropComplete: false,
     });
     render(<LatestDropSection mintStatus={mockUseNowMintingStatus()} />);
-    expect(screen.getByTestId("latest-drop")).toHaveAttribute(
-      "data-loading",
-      "true"
-    );
+    expect(screen.queryByTestId("latest-drop")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("next-drop")).not.toBeInTheDocument();
   });
 
   it("keeps the latest drop during the post-mint grace period", () => {

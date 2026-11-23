@@ -5,7 +5,6 @@ interface NowMintingStatsItemProps {
   readonly label: ReactNode;
   readonly value?: ReactNode;
   readonly status?: "active" | "upcoming" | "ended" | undefined;
-  readonly isLoading?: boolean;
   readonly allowWrap?: boolean;
   readonly compactLabelSize?: "default" | "large";
 }
@@ -15,7 +14,6 @@ export default function NowMintingStatsItem({
   label,
   value,
   status,
-  isLoading,
   allowWrap,
   compactLabelSize = "default",
 }: NowMintingStatsItemProps) {
@@ -42,19 +40,15 @@ export default function NowMintingStatsItem({
       >
         {label}
       </span>
-      {isLoading ? (
-        <span className="tw-h-6 tw-w-20 tw-rounded tw-bg-iron-800 motion-safe:tw-animate-pulse" />
-      ) : (
-        <span
-          className={`${getValueColor()} ${
-            appearance === "compact"
-              ? "tw-text-sm tw-font-medium tw-tabular-nums tw-tracking-[-0.01em]"
-              : "tw-font-mono tw-text-sm tw-font-medium md:tw-text-base"
-          } ${allowWrap ? "tw-whitespace-normal" : "tw-whitespace-nowrap"}`}
-        >
-          {value}
-        </span>
-      )}
+      <span
+        className={`${getValueColor()} ${
+          appearance === "compact"
+            ? "tw-text-sm tw-font-medium tw-tabular-nums tw-tracking-[-0.01em]"
+            : "tw-font-mono tw-text-sm tw-font-medium md:tw-text-base"
+        } ${allowWrap ? "tw-whitespace-normal" : "tw-whitespace-nowrap"}`}
+      >
+        {value}
+      </span>
     </div>
   );
 }

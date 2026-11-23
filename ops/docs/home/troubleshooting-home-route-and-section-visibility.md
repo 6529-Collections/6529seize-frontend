@@ -39,9 +39,8 @@ This page covers:
 ## Common Scenarios
 
 - `Latest Drop` or `Next Drop` missing:
-  - Top slot starts with a loading placeholder while mint/status and
-    next-winner checks resolve.
-  - After load, it resolves to `Latest Drop`, `Next Drop`, or hidden.
+  - The selected drop usually appears on the initial page. If mint status or
+    next-winner data is still pending, the slot stays hidden until it resolves.
   - `Next Drop` shows only when the current mint is ended and a next winner
     exists.
   - If there is no current mint and no eligible next winner, the top slot stays

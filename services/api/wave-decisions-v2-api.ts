@@ -160,8 +160,15 @@ export async function fetchWaveDecisionsV2({
     params,
     ...(signal ? { signal } : {}),
   });
-  const waveMin = getWaveMin(wave, waveId);
+  return mapWaveDecisionsV2(data, waveId, wave);
+}
 
+export function mapWaveDecisionsV2(
+  data: ApiWaveDecisionsPageV2,
+  waveId: string,
+  wave?: ApiWave | ApiWaveMin
+): ApiWaveDecisionsPage {
+  const waveMin = getWaveMin(wave, waveId);
   return {
     data: data.data.map((decision) =>
       mapDecisionPointV2({ decision, wave: waveMin })

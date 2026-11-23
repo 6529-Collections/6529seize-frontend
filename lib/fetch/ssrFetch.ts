@@ -171,7 +171,7 @@ const withServerKeyRedirectGuard = (
 };
 
 const createSsrFetch =
-  (includeWalletAuth: boolean): typeof fetch =>
+  (includeWalletAuth: boolean, includeRequestAuth = true): typeof fetch =>
   async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
     if (Reflect.has(globalThis, "window")) {
       return originalFetch(input, init);
@@ -249,19 +249,21 @@ const createSsrFetch =
     );
     enhancedHeaders.set("x-6529-internal-waf-signature", wafSignature);
 
-    try {
-      const appHeaders = await getAppCommonHeaders();
-      Object.entries(appHeaders).forEach(([key, value]) => {
-        if (!includeWalletAuth && key.toLowerCase() === "authorization") {
-          return;
-        }
-        enhancedHeaders.set(key, value);
-      });
-    } catch (error) {
-      console.warn(
-        `[SSR Fetch] [PATH: ${path}] Failed to get app common headers:`,
-        error instanceof Error ? error.message : error
-      );
+    if (includeRequestAuth) {
+      try {
+        const appHeaders = await getAppCommonHeaders();
+        Object.entries(appHeaders).forEach(([key, value]) => {
+          if (!includeWalletAuth && key.toLowerCase() === "authorization") {
+            return;
+          }
+          enhancedHeaders.set(key, value);
+        });
+      } catch (error) {
+        console.warn(
+          `[SSR Fetch] [PATH: ${path}] Failed to get app common headers:`,
+          error instanceof Error ? error.message : error
+        );
+      }
     }
 
     return fetchApiWithDeadline(
@@ -274,9 +276,11 @@ const createSsrFetch =
 
 const enhancedFetch = createSsrFetch(true);
 const anonymousSsrFetch = createSsrFetch(false);
+// Shared public data may use server credentials, but never visitor credentials.
+const publicSsrFetch = createSsrFetch(false, false);
 
 if (globalThis.window === undefined) {
   globalThis.fetch = enhancedFetch;
 }
 
-export { anonymousSsrFetch, enhancedFetch as ssrFetch };
+export { anonymousSsrFetch, enhancedFetch as ssrFetch, publicSsrFetch };
