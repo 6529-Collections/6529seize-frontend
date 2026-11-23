@@ -2498,7 +2498,6 @@ const WAVE_STORM_COMPOSER_MESSAGES = objectMessages("waves.stormComposer", {
 
 const WAVE_CHAT_SETTINGS_MESSAGES = objectMessages("waves.chatSettings", {
   "access.public": "Public",
-  "access.inspectGroup": "Inspect {groupName} group criteria and members",
   "access.label": "Chat access",
   "access.privateGroup": "Private group",
   "access.unavailableGroup": "Group unavailable",

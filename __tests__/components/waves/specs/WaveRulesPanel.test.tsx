@@ -1,8 +1,10 @@
 import WaveRulesPanel from "@/components/waves/specs/WaveRulesPanel";
 import type { WaveRules } from "@/helpers/waves/wave-rules.helpers";
+import { getWaveChatAccessRow } from "@/helpers/waves/wave-rules.shared";
 import type Link from "next/link";
 import type { ComponentProps } from "react";
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
+import { renderWithQueryClient } from "@/__tests__/utils/reactQuery";
 
 jest.mock("next/link", () => ({
   __esModule: true,
@@ -13,19 +15,33 @@ jest.mock("next/link", () => ({
   ),
 }));
 
+jest.mock("@/services/api/group-members-api", () => ({
+  fetchSavedGroupMembersPage: jest.fn().mockResolvedValue({
+    count: 12,
+    page: 1,
+    next: false,
+    data: [],
+  }),
+}));
+jest.mock("@/services/api/common-api", () => ({
+  commonApiFetch: jest.fn().mockResolvedValue(null),
+}));
+
 const rules: WaveRules = {
   automatic: [
     {
       id: "access",
       title: "Access",
       rows: [
-        {
-          id: "chat-access",
-          label: "Chat access",
-          value: "Artists",
-          valueHref: "/network?page=1&group=artists",
-          valueLinkLabel: "Inspect Artists group criteria and members",
-        },
+        getWaveChatAccessRow({
+          scope: {
+            group: {
+              id: "artists & curators",
+              name: "Artists",
+              is_hidden: false,
+            },
+          },
+        }),
         {
           id: "admin",
           label: "Admins",
@@ -42,22 +58,28 @@ const rules: WaveRules = {
 };
 
 describe("WaveRulesPanel", () => {
-  it("renders visible groups as accessible links and private groups as text", () => {
-    render(<WaveRulesPanel rules={rules} showCustomRules={false} />);
+  it("renders visible groups as accessible links and private groups as text", async () => {
+    renderWithQueryClient(
+      <WaveRulesPanel rules={rules} showCustomRules={false} />
+    );
 
-    const link = screen.getByRole("link", {
-      name: "Inspect Artists group criteria and members",
+    const link = await screen.findByRole("link", {
+      name: "12 users",
     });
-    expect(link).toHaveAttribute("href", "/network?page=1&group=artists");
+    expect(link).toHaveAttribute(
+      "href",
+      "/network?page=1&group=artists%20%26%20curators"
+    );
     expect(link).toHaveClass("tw-min-h-11");
     expect(link).toHaveClass("desktop-hover:hover:tw-text-primary-300");
     expect(link.closest("dd")?.parentElement).toHaveClass("tw-items-center");
     expect(screen.getByText("Private group")).toBeInTheDocument();
+    expect(screen.queryByText("Artists")).not.toBeInTheDocument();
     expect(screen.getAllByRole("link")).toHaveLength(1);
   });
 
   it("supports an interactive value for a create-wave rule row", () => {
-    render(
+    renderWithQueryClient(
       <WaveRulesPanel
         rules={rules}
         showCustomRules={false}
@@ -75,7 +97,7 @@ describe("WaveRulesPanel", () => {
   });
 
   it("shows display guidelines without a display-only label", () => {
-    render(
+    renderWithQueryClient(
       <WaveRulesPanel
         rules={{
           ...rules,
@@ -97,7 +119,7 @@ describe("WaveRulesPanel", () => {
   });
 
   it("keeps the requires-acceptance label for binding rules", () => {
-    render(
+    renderWithQueryClient(
       <WaveRulesPanel
         rules={{
           ...rules,
