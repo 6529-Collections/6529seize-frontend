@@ -1,7 +1,7 @@
 import type { E2eeConversation } from "./types";
 
 interface DmIdentity {
-  readonly kind: "dm" | "group";
+  readonly kind: "dm" | "group" | "self";
   readonly admins: readonly string[];
   readonly members: readonly { readonly profileId: string | null }[];
 }

@@ -44,7 +44,7 @@ describe("RepCategorySearch", () => {
     expect(dropdownProps.categories).toEqual(["art", "Art"]);
   });
 
-  it("filters the reserved Help6529 Credits category", () => {
+  it("offers Help6529 Credits like any other category", () => {
     (useQuery as jest.Mock).mockReturnValue({
       data: ["Help6529 Credits", "Art"],
     });
@@ -59,7 +59,7 @@ describe("RepCategorySearch", () => {
     act(() => {
       jest.runAllTimers();
     });
-    expect(dropdownProps.categories).toEqual([]);
+    expect(dropdownProps.categories).toEqual(["Help6529 Credits", "Art"]);
   });
 
   it("closes after focus leaves the whole search control", () => {

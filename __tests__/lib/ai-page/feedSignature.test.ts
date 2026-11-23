@@ -33,7 +33,7 @@ describe("the pinned 6529 AI release key", () => {
     expect(AI_FEED_SIGNING_KEYS).toEqual([RELEASE_KEY]);
   });
 
-  it("is the key in 6529 AI's release-key.pub", () => {
+  it("is the key in 6529 AI's release-key-ed25519.pub", () => {
     expect(ed25519PublicKeyPem(RELEASE_KEY)).toBe(
       "-----BEGIN PUBLIC KEY-----\n" +
         "MCowBQYDK2VwAyEAWPt4VqaC5jUsTgP2XrgP6UaPTHLJa5p3Cf8r4318d8Q=\n" +

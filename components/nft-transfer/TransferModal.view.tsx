@@ -1,3 +1,4 @@
+import DesktopWalletTransactionGate from "@/components/desktop/DesktopWalletTransactionGate";
 import Image from "next/image";
 import RecipientSelector from "@/components/common/RecipientSelector";
 import CircleLoader, {
@@ -350,6 +351,7 @@ export function HeaderRight({
 export function FooterActions({
   flow,
   canConfirm,
+  forwardable = false,
   onCancel,
   onConfirm,
   onClose,
@@ -358,6 +360,8 @@ export function FooterActions({
 }: {
   readonly flow: FlowState;
   readonly canConfirm: boolean;
+  /** Whether 6529 Desktop's browser-wallet forwarding sends this transfer. */
+  readonly forwardable?: boolean;
   readonly onCancel: () => void;
   readonly onConfirm: () => void;
   readonly onClose: () => void;
@@ -367,23 +371,20 @@ export function FooterActions({
   if (flow === "review") {
     return (
       <div className="tw-flex tw-items-center tw-gap-2">
-        <Button
-          type="button"
-          onClick={onCancel}
-          variant="secondary"
-          size="md"
-        >
+        <Button type="button" onClick={onCancel} variant="secondary" size="md">
           {translate(locale, "transfer.modal.cancel")}
         </Button>
-        <Button
-          type="button"
-          disabled={!canConfirm}
-          onClick={onConfirm}
-          variant="primary"
-          size="md"
-        >
-          {translate(locale, "transfer.modal.transfer")}
-        </Button>
+        <DesktopWalletTransactionGate forwardable={forwardable}>
+          <Button
+            type="button"
+            disabled={!canConfirm}
+            onClick={onConfirm}
+            variant="primary"
+            size="md"
+          >
+            {translate(locale, "transfer.modal.transfer")}
+          </Button>
+        </DesktopWalletTransactionGate>
       </div>
     );
   }
@@ -391,24 +392,14 @@ export function FooterActions({
   const anyPending = anyTxsPending(txs);
   if (anyPending) {
     return (
-      <Button
-        type="button"
-        disabled
-        variant="secondary"
-        size="md"
-      >
+      <Button type="button" disabled variant="secondary" size="md">
         {translate(locale, "transfer.modal.processing")}
       </Button>
     );
   }
 
   return (
-    <Button
-      type="button"
-      onClick={onClose}
-      variant="primary"
-      size="md"
-    >
+    <Button type="button" onClick={onClose} variant="primary" size="md">
       {translate(locale, "common.close")}
     </Button>
   );

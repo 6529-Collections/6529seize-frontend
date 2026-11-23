@@ -6,7 +6,10 @@ import { shortWalletPayloadHash } from "@/lib/desktop/walletRequestContext";
 import { describeWalletRequest } from "@/lib/desktop/walletRequestDescribe";
 import {
   desktopWalletAcceptsContext,
+  desktopWalletSignsSafeTx,
   showDesktopWalletRefusal,
+  showDesktopWalletSafeTxRefusal,
+  showDesktopWalletTransactionRefusal,
 } from "@/services/desktop/desktopBrowserWallet";
 import { takeWalletRequestContext } from "@/services/desktop/walletRequestContexts";
 import type { PreparedWalletRequest } from "@/wagmiConfig/desktopBrowserWalletConnector";
@@ -42,7 +45,8 @@ function contextFor(
 /**
  * The browser page's allow-list, applied before the shell is asked: a
  * request the page would refuse (a message or typed data it cannot
- * describe) shows "Continue in your browser" instead of opening the page.
+ * describe, a transaction outside the transaction rules) shows "Continue
+ * in your browser" instead of opening the page.
  * For a drop or decision signature it adds the content behind the payload
  * hash when it can, and the short fingerprint the waiting dialog shows.
  * The connector has already validated the request itself.
@@ -53,7 +57,16 @@ export function walletForwardingPrecheck(
   const origin = globalThis.location.origin;
   const described = describeWalletRequest(request, origin);
   if (!described.ok) {
-    showDesktopWalletRefusal();
+    if (request.method === "eth_sendTransaction") {
+      showDesktopWalletTransactionRefusal();
+    } else {
+      showDesktopWalletRefusal();
+    }
+    return null;
+  }
+  // A Safe transaction goes only to a 6529 Desktop with the same SafeTx table.
+  if (described.value.kind === "safeTx" && !desktopWalletSignsSafeTx()) {
+    showDesktopWalletSafeTxRefusal();
     return null;
   }
   if (

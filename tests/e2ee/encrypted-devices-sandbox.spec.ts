@@ -12,11 +12,13 @@ import {
 import {
   confirmDialog,
   enroll,
+  enrollButton,
   enrollmentHeading,
   ENCRYPTED_ROUTE,
   expectEnrollmentCard,
   expectMessage,
   gotoPath,
+  conversationListRow,
   messageRow,
   notice,
   NO_BACKUP_WARNING,
@@ -25,11 +27,20 @@ import {
   sendMessage,
   startChat,
 } from "../support/e2ee/e2eeUi";
+import { DEVICES_SECURITY_MESSAGES } from "../../i18n/messages/devices-security";
 import { e2eeMessage, NEW_DEVICE_NOTICE } from "../support/e2ee/e2eeCopy";
 import { isMobileWebProject } from "../support/surfaceSimulation";
 
+/** First visit compiles routes and loads the MLS WebAssembly module. */
+const FIRST_LOAD_TIMEOUT_MS = 120_000;
+
 /** Other members add a new device after a random 5-30 s delay (8.4). */
 const DEVICE_ADD_TIMEOUT_MS = 30_000 + 2 * E2EE_SYNC_TIMEOUT_MS;
+/**
+ * A new device waits 2 minutes to be added to its siblings' self group
+ * before it makes its own (P60 §2 rule 1); then a sync pass carries it.
+ */
+const SELF_GROUP_JOIN_TIMEOUT_MS = 2 * 60_000 + 2 * E2EE_SYNC_TIMEOUT_MS;
 
 /**
  * Several devices per person in real browsers, each with its own storage
@@ -110,16 +121,27 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     await expectMessage(bobPhone.page, "Both of your devices get this.");
     await expectMessage(bobLaptop.page, "Both of your devices get this.");
 
-    // The devices page lists both; the laptop revokes the phone.
+    // The former devices page opens Devices & security, which lists both:
+    // this browser pinned, the phone as another device. The laptop revokes
+    // the phone.
     await gotoPath(bobLaptop.page, `${ENCRYPTED_ROUTE}/devices`);
-    const active = activeDeviceRows(bobLaptop.page);
-    await expect(active).toHaveCount(2, { timeout: E2EE_UI_TIMEOUT_MS });
-    // Exact: the verified hint also says "…checked on this device."
-    const thisDeviceBadge = bobLaptop.page.getByText("This device", {
-      exact: true,
+    await expect(bobLaptop.page).toHaveURL(/\/preferences\?tab=security$/u, {
+      timeout: E2EE_UI_TIMEOUT_MS,
     });
-    await expect(active.filter({ has: thisDeviceBadge })).toHaveCount(1);
-    const phoneRow = active.filter({ hasNot: thisDeviceBadge });
+    await expect(thisDeviceCard(bobLaptop.page)).toHaveCount(1, {
+      timeout: E2EE_UI_TIMEOUT_MS,
+    });
+    // Encrypted messages are running in this tab (the backup card shows its
+    // real state), so the revoke signs with this device and members see
+    // the removal. Before that, Revoke goes through the grant instead.
+    await expect(
+      bobLaptop.page
+        .getByRole("main")
+        .getByRole("region", { name: /^Encrypted backup/u })
+        .getByRole("button", { name: e2eeMessage("e2ee.backup.action.turnOn") })
+    ).toBeVisible({ timeout: FIRST_LOAD_TIMEOUT_MS });
+    const phoneRow = revocableDeviceRows(bobLaptop.page);
+    await expect(phoneRow).toHaveCount(1, { timeout: E2EE_UI_TIMEOUT_MS });
     const revokePhone = phoneRow.getByRole("button", { name: /^Revoke /u });
     const revokeLabel = await revokePhone.getAttribute("aria-label");
     const phoneLabel = revokeLabel?.replace(/^Revoke /u, "") ?? "";
@@ -127,17 +149,29 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     await revokePhone.click();
     // The combined sign-in granted the phone both permissions, so revoking
     // it ends both.
-    await confirmDialog(
+    const dialog = confirmDialog(
       bobLaptop.page,
-      e2eeMessage("e2ee.devices.revokeCombinedTitle", { label: phoneLabel })
-    )
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.revoke.title"].replace(
+        "{label}",
+        phoneLabel
+      )
+    );
+    await expect(dialog).toContainText(
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.revoke.bothSigned"]
+    );
+    await dialog
       .getByRole("button", { name: e2eeMessage("e2ee.devices.revokeConfirm") })
       .click();
-    await expect(activeDeviceRows(bobLaptop.page)).toHaveCount(1, {
+    await expect(revocableDeviceRows(bobLaptop.page)).toHaveCount(0, {
       timeout: E2EE_UI_TIMEOUT_MS,
     });
     await expect(
-      bobLaptop.page.getByRole("heading", { name: "Revoked devices" })
+      bobLaptop.page.getByRole("button", {
+        name: new RegExp(
+          `^${DEVICES_SECURITY_MESSAGES["devicesSecurity.history.title"]}`,
+          "u"
+        ),
+      })
     ).toBeVisible();
 
     // The revoked phone falls back to enrollment; the others see the removal.
@@ -155,6 +189,100 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
     expect(alice.signatureCount()).toBe(1);
     expect(bobPhone.signatureCount()).toBe(1);
     expect(bobLaptop.signatureCount()).toBe(1);
+  });
+
+  test("reading a chat on one device clears its unread badge on the other (D175)", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    test.skip(
+      process.env["NEXT_PUBLIC_E2EE_READ_SYNC"] === "false",
+      "Read-state sync is off for this run."
+    );
+    test.setTimeout(600_000);
+    const users = await resetE2eeSandbox(baseURL);
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    const bobPhone = await openE2eeUser(
+      browser,
+      testInfo,
+      baseURL,
+      users.bob,
+      "bob phone"
+    );
+    const bobLaptop = await openE2eeUser(
+      browser,
+      testInfo,
+      baseURL,
+      users.bob,
+      "bob laptop"
+    );
+    sessions = [alice, bobPhone, bobLaptop];
+    await enroll(alice);
+    await enroll(bobPhone);
+    await enroll(bobLaptop);
+    // Both of Bob's devices are enrolled, so both join the chat at once.
+    await startChat(alice, ["bob"]);
+    await openConversationFromList(bobPhone.page, "alice");
+    await openConversationFromList(bobLaptop.page, "alice");
+
+    await gotoPath(bobPhone.page, ENCRYPTED_ROUTE);
+    await gotoPath(bobLaptop.page, ENCRYPTED_ROUTE);
+    await sendMessage(alice.page, "Read me on one device.");
+    for (const device of [bobPhone, bobLaptop]) {
+      await expect(unreadBadge(device.page, "alice")).toHaveCount(1, {
+        timeout: E2EE_SYNC_TIMEOUT_MS,
+      });
+    }
+
+    // Reading on the laptop, then leaving the page, sends the position. The
+    // laptop first waits to be added to the phone's self group and makes its
+    // own if that stalls (P60 §2); the sandbox has no WebSocket hints that
+    // would add it at once, so allow for that wait.
+    await openConversationFromList(bobLaptop.page, "alice");
+    await expectMessage(bobLaptop.page, "Read me on one device.");
+    await hidePage(bobLaptop.page);
+    await expect(unreadBadge(bobPhone.page, "alice")).toHaveCount(0, {
+      timeout: SELF_GROUP_JOIN_TIMEOUT_MS,
+    });
+
+    // A newer message stays unread on the phone.
+    await sendMessage(alice.page, "And this one is new.");
+    await expect(unreadBadge(bobPhone.page, "alice")).toHaveCount(1, {
+      timeout: E2EE_SYNC_TIMEOUT_MS,
+    });
+  });
+
+  test("Devices & security starts encrypted messages on a cold visit", async ({
+    baseURL,
+    browser,
+  }, testInfo) => {
+    const users = await resetE2eeSandbox(baseURL);
+    // A fresh browser that never opened encrypted messages: no enrollment
+    // marker, no visit to /messages. The tab itself must start the engine.
+    const alice = await openE2eeUser(browser, testInfo, baseURL, users.alice);
+    sessions = [alice];
+    await gotoPath(alice.page, "/preferences?tab=security");
+    const backup = alice.page
+      .getByRole("main")
+      .getByRole("region", { name: /^Encrypted backup/u });
+    // A real state, not "Checking your backup…": encrypted DMs are off here.
+    await expect(backup).toContainText(
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.backup.needsDms"],
+      { timeout: FIRST_LOAD_TIMEOUT_MS }
+    );
+    await backup.getByRole("button", { name: /^Turn on/u }).click();
+    await enrollButton(alice.page).click();
+    // After the one signature, the card is the backup itself, off.
+    await expect(
+      backup.getByRole("button", {
+        name: e2eeMessage("e2ee.backup.action.turnOn"),
+      })
+    ).toBeVisible({ timeout: E2EE_UI_TIMEOUT_MS });
+    await expect(backup).toContainText(
+      DEVICES_SECURITY_MESSAGES["devicesSecurity.backup.pill.off"]
+    );
+    await expect(thisDeviceCard(alice.page)).toHaveCount(1);
+    expect(alice.signatureCount()).toBe(1);
   });
 
   test("cleared browser storage re-enrolls once and starts without the old history", async ({
@@ -205,8 +333,32 @@ test.describe("Encrypted messages devices @medium @local-only @e2ee", () => {
   });
 });
 
-function activeDeviceRows(page: Page) {
-  // The active list is the first list on the devices page.
+/** The unread-count badge of a chat in the list (its screen-reader text). */
+function unreadBadge(page: Page, title: string) {
+  return conversationListRow(page, title).getByText(/\d+ unread messages?/u);
+}
+
+/**
+ * The page goes to the background, as when the user switches devices or
+ * apps: the engine sends read positions still waiting (P60 §4).
+ */
+async function hidePage(page: Page) {
+  await page.evaluate(() => {
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      get: () => "hidden",
+    });
+    document.dispatchEvent(new Event("visibilitychange"));
+  });
+}
+
+/** This browser's pinned card on Devices & security (its one chip). */
+function thisDeviceCard(page: Page) {
+  return page.getByRole("main").getByText("This device", { exact: true });
+}
+
+/** Other active devices (incl. earlier setups): rows with a Revoke button. */
+function revocableDeviceRows(page: Page) {
   return page
     .getByRole("main")
     .getByRole("listitem")

@@ -218,34 +218,26 @@ describe("a feed with no urgent release", () => {
 describe("rc.10's feed: rc.10 of normal severity above an urgent rc.9", () => {
   beforeEach(() => serveFeed(RC10_FEED));
 
-  it("the download page offers rc.10 with no urgent notice, then Sunday's switch and the upgrade from rc.9", async () => {
+  it("the download page offers rc.10 with no urgent notice, and links the setup guide", async () => {
     const html = renderToStaticMarkup(await ValidatorRoute());
     expect(linkedVersions(html)).toEqual(["0.1.0-rc.10"]);
     expect(text(html)).toContain("Test release 0.1.0-rc.10 ");
     expect(html).not.toContain('id="urgent"');
-    const sunday = html.indexOf('id="sundays-switch"');
-    const upgrade = html.indexOf('id="upgrading"');
-    expect(sunday).toBeGreaterThan(-1);
-    expect(upgrade).toBeGreaterThan(sunday);
-    expect(text(html)).toContain(
-      "If you run rc.8 or older, update before Sunday 8 November, 00:00 UTC, to rc.9 or rc.10."
-    );
-    expect(text(html)).toContain("Upgrading from rc.9");
+    expect(html).toContain('href="/validator/guide"');
+    // The old tester notes are gone from the page.
+    expect(html).not.toContain('id="sundays-switch"');
+    expect(html).not.toContain('id="upgrading"');
   });
 
-  it("the guide opens with Sunday's switch, then the upgrade from rc.9", async () => {
+  it("the guide's start page leads with the paths to choose from", async () => {
     const html = renderToStaticMarkup(await ValidatorGuideRoute());
-    const sunday = html.indexOf('id="sundays-switch"');
-    const upgrade = html.indexOf('id="upgrading"');
-    expect(sunday).toBeGreaterThan(-1);
-    expect(upgrade).toBeGreaterThan(sunday);
-  });
-
-  it("the guide's version line names the feed's rc.10 commit", async () => {
-    const html = renderToStaticMarkup(await ValidatorGuideRoute());
-    expect(html).toContain(
-      `validator 0.1.0-rc.10 (${RC10_COMMIT_FULL.slice(0, 7)}, TDH v1.4)`
-    );
+    expect(text(html)).toContain("Set up a 6529 validator");
+    const paths = html.indexOf('id="choose-your-path"');
+    expect(paths).toBeGreaterThan(-1);
+    expect(
+      html.indexOf('href="/validator/guide/your-computer"')
+    ).toBeGreaterThan(paths);
+    expect(html).toContain('href="/validator/guide/home-box"');
   });
 
   it("the releases page marks rc.10 Latest and offers only rc.10", async () => {

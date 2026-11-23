@@ -398,6 +398,8 @@ export interface E2eeEngine {
   ignoreDevice(deviceKey: string): Promise<void>;
   revokeDevice(deviceKey: string): Promise<void>;
   renameThisDevice(label: string): Promise<void>; // local label only is fine
+  /** Renames one of this profile's devices on the server and reloads the list. */
+  renameDevice(deviceKey: string, label: string): Promise<void>;
 }
 
 export interface E2eeEngineDeps {
@@ -433,6 +435,12 @@ export interface E2eeEngineDeps {
     listener: (event: { type: string; data: unknown }) => void
   ) => () => void; // WS events
   now?: () => number;
+  /**
+   * Monotonic milliseconds for durations that must not follow changes to
+   * the device clock (the self-group claim budget). Defaults to `now` when
+   * that is given (tests), else performance.now().
+   */
+  monotonic?: () => number;
   storage?: E2eeStorage; // default IndexedDB; tests inject memory
   loadWasm?: () => Promise<WasmModule>; // default fetch public/e2ee wasm
 }
@@ -467,6 +475,12 @@ export interface E2eeEngineExtraDeps {
   onStateConflict?: () => void;
   /** Encrypted-backup local state; wiped with the device (default IndexedDB). */
   backupState?: BackupStateStore;
+  /**
+   * Read-state sync between this profile's own devices (D175, P60): create
+   * a self group and send read positions. Joining self groups and applying
+   * what siblings send happen either way.
+   */
+  readSync?: boolean;
 }
 
 export type E2eeEngineOptions = E2eeEngineDeps & E2eeEngineExtraDeps;
@@ -482,6 +496,8 @@ export interface E2eeEngineExt extends E2eeEngine {
   setOpenConversation(g: string | null): void;
   /** Resolves when no operation or background task is in flight. */
   idle(): Promise<void>;
+  /** Sends unsent read positions now (the page or app is going away). */
+  flushReadSync(): Promise<void>;
   /**
    * Stops taking in new history (sync, polling, wake events) until
    * resumeIncoming(), and resolves once work in flight has settled: a final

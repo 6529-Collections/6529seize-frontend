@@ -1,16 +1,11 @@
 import { asE2eeApiError } from "../api-errors";
-import type {
-  ApiE2eeDevice,
-  ApiE2eeKeyPackageStatus,
-  ApiE2eeMe,
-} from "../api-types";
+import type { ApiE2eeDevice, ApiE2eeMe } from "../api-types";
 import { digestBytes, revokeDigest } from "../digests";
 import {
   buildGrant,
   buildGrantTypedData,
   computeGrantId,
   credentialIdentity,
-  E2EE_CIPHERSUITE,
 } from "../grant";
 import { MlsClient } from "../mls-adapter";
 import {
@@ -36,19 +31,18 @@ import {
   isE2eeSignatureRejection,
 } from "./errors";
 import {
+  ensureKeyPackages,
+  ONE_TIME_POOL,
+  uploadKeyPackages,
+} from "./key-packages";
+import {
   isTrustedOwnRevoker,
   ownDeviceNeedsApproval,
   withOwnWallet,
 } from "./trust";
 
-/** Contract 2 + 8.8: one wallet prompt per device; KeyPackage pool upkeep. */
+/** Contract 2 + 8.8: one wallet prompt per device. */
 
-const ONE_TIME_POOL = 30;
-const ONE_TIME_REFILL_BELOW = 10;
-const MAX_ONE_TIME = 100;
-const ONE_TIME_LIFETIME_S = 30 * 86_400;
-const LAST_RESORT_LIFETIME_S = 90 * 86_400;
-const LAST_RESORT_ROTATE_MS = 30 * DAY_MS;
 /** Reuse a stored-but-unregistered grant only while it has this much left. */
 const MIN_REUSABLE_GRANT_MS = 7 * DAY_MS;
 /** 8.8: renewal is offered in the grant's last 14 days. */
@@ -222,58 +216,6 @@ async function createDevice(ctx: EngineContext): Promise<StoredDevice> {
   return device;
 }
 
-async function uploadKeyPackages(
-  ctx: EngineContext,
-  count: number,
-  lastResort: boolean
-): Promise<ApiE2eeKeyPackageStatus> {
-  const mls = requireMls(ctx);
-  const device = requireDevice(ctx);
-  const packages = mls.createKeyPackages(
-    count,
-    lastResort,
-    lastResort ? LAST_RESORT_LIFETIME_S : ONE_TIME_LIFETIME_S,
-    E2EE_CIPHERSUITE
-  );
-  // Persist the private halves BEFORE the public halves leave the device.
-  await checkpoint(ctx);
-  const status = await ctx.api.uploadKeyPackages(device.deviceKey, {
-    key_packages: packages.map((item) => ({
-      data: item.data,
-      last_resort: lastResort,
-      expires_at: item.expires_at,
-    })),
-  });
-  if (lastResort) {
-    device.lastResortAt = ctx.now();
-    await checkpoint(ctx, { device, skipWasm: true });
-  }
-  return status;
-}
-
-/** Refills one-time KeyPackages below 10 and rotates the last-resort one. */
-async function ensureKeyPackages(
-  ctx: EngineContext,
-  status: ApiE2eeKeyPackageStatus | null
-): Promise<void> {
-  const device = requireDevice(ctx);
-  const available = status?.one_time_available ?? 0;
-  if (available < ONE_TIME_REFILL_BELOW) {
-    const count = Math.min(ONE_TIME_POOL - available, MAX_ONE_TIME - available);
-    if (count > 0) {
-      await uploadKeyPackages(ctx, count, false);
-    }
-  }
-  const lastResortMissing =
-    status?.last_resort_expires_at === null || status === null;
-  const lastResortStale =
-    device.lastResortAt === null ||
-    ctx.now() - device.lastResortAt >= LAST_RESORT_ROTATE_MS;
-  if (lastResortMissing || lastResortStale) {
-    await uploadKeyPackages(ctx, 1, true);
-  }
-}
-
 /** A pending device enrolled by a combined sign-in grant (NC8). */
 export const hasLoginGrant = (
   device: StoredDevice | null
@@ -419,8 +361,8 @@ async function renewGrant(ctx: EngineContext): Promise<void> {
   delete device.loginGrantId;
   mls.setCredential(credentialIdentity(device.wallet, device.grantId));
   await checkpoint(ctx, { device });
-  await uploadKeyPackages(ctx, ONE_TIME_POOL, false);
-  await uploadKeyPackages(ctx, 1, true);
+  await uploadKeyPackages(ctx, { oneTime: ONE_TIME_POOL, lastResort: false });
+  await uploadKeyPackages(ctx, { oneTime: 0, lastResort: true });
 }
 
 /**
@@ -741,6 +683,14 @@ export async function refreshMe(
         : "unverified",
     };
   }
+  ctx.ownDevices = me.devices;
+  ctx.listedAt = { wall: ctx.now(), mono: ctx.monotonic() };
+  ctx.ownKeyPackages = new Map(
+    me.key_packages.map((item) => [
+      item.device_key.toLowerCase(),
+      item.last_resort_expires_at,
+    ])
+  );
   if (ctx.device?.provisioned) {
     const status = me.key_packages.find(
       (item) => item.device_key.toLowerCase() === ownKey

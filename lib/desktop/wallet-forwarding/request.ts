@@ -29,6 +29,7 @@ import {
   WRONG_CHAIN,
 } from "./shared";
 import { fitsWalletRequestFragment } from "./size";
+import { parseTransactionRequest } from "./transaction";
 
 /**
  * A `personal_sign` request's optional `context`: non-empty text of at most
@@ -151,6 +152,22 @@ function parseTypedData(
   };
 }
 
+function parseByMethod(
+  method: WalletForwardingMethod,
+  params: readonly unknown[],
+  base: WalletRequestBase,
+  context: unknown
+): Parsed<WalletRequest, WalletRequestProblem> {
+  switch (method) {
+    case "personal_sign":
+      return parsePersonalSign(params, base, context);
+    case "eth_signTypedData_v4":
+      return parseTypedData(params, base);
+    case "eth_sendTransaction":
+      return parseTransactionRequest(params, base);
+  }
+}
+
 /**
  * Validate a wallet request from the app page (EIP-1193 `method` and
  * `params`), bound to the signed-in `address` and the app's `chainId`.
@@ -197,14 +214,16 @@ function parseUnchecked(
   }
   if (!Array.isArray(params)) return fail(INVALID_PARAMS);
   const base: WalletRequestBase = { address: getAddress(address), chainId };
-  // Context describes a message's payload hash; typed data has none.
+  // Context describes a message's payload hash; nothing else has one.
   if (method !== "personal_sign" && context !== undefined) {
     return fail(INVALID_PARAMS);
   }
-  const parsed =
-    (method as WalletForwardingMethod) === "personal_sign"
-      ? parsePersonalSign(params, base, context)
-      : parseTypedData(params, base);
+  const parsed = parseByMethod(
+    method as WalletForwardingMethod,
+    params,
+    base,
+    context
+  );
   // A request the browser page could never open is refused up front.
   if (parsed.ok && !fitsWalletRequestFragment(input)) return fail(TOO_LARGE);
   return parsed;

@@ -4,10 +4,12 @@ import type { WagmiAdapter } from "@reown/appkit-adapter-wagmi";
 import { useEffect } from "react";
 import { isDesktopShell } from "@/helpers/desktop-shell";
 import {
+  desktopWalletSendsTransactions,
   getDesktopWalletMethods,
   isBrowserWalletProfile,
   loadBrowserWalletProfiles,
   runDesktopWalletRequest,
+  showDesktopWalletTransactionRefusal,
   watchDesktopWalletStatus,
 } from "@/services/desktop/desktopBrowserWallet";
 import { logErrorSecurely } from "@/utils/error-sanitizer";
@@ -65,6 +67,8 @@ export function useDesktopBrowserWalletConnector(
           },
           prepare: precheck,
           runRequest: runDesktopWalletRequest,
+          onTransactionRefused: showDesktopWalletTransactionRefusal,
+          sendsTransactions: desktopWalletSendsTransactions,
         })
       );
       wagmiConfig._internal.connectors.setState((connectors) => [

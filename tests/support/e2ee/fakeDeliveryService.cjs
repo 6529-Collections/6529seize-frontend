@@ -309,12 +309,20 @@ function createFakeDeliveryService(options = {}) {
     loginGrants: new Map(),
     subscribers: new Map(),
     faults: [],
+    /**
+     * The server's KeyPackage claim limits, off unless a test sets them:
+     * { perProfile, perTargetDevice, windowMs } (fixed clock windows).
+     */
+    claimLimits: null,
+    claimCounters: new Map(),
     tamper: null,
     requests: [],
     nextId: 1,
     attachmentsEnabled: options.attachmentsEnabled !== false,
     // D172 transition window: v1 grants are honoured while it is open.
     v1GrantsAccepted: options.v1GrantsAccepted !== false,
+    // An API from before replace_one_time refuses the field (unknown key).
+    replaceOneTime: options.replaceOneTime !== false,
   };
 
   const id = (prefix) => `${prefix}${s.nextId++}`;
@@ -656,9 +664,30 @@ function createFakeDeliveryService(options = {}) {
     if (new Set(lastResortSuites).size !== lastResortSuites.length) {
       fail(400, "E2EE_BAD_REQUEST");
     }
+    const replace = body.replace_one_time;
+    if (
+      replace !== undefined &&
+      (!s.replaceOneTime || typeof replace !== "boolean")
+    ) {
+      fail(400, "E2EE_BAD_REQUEST");
+    }
     const pool = s.keyPackages.get(deviceKey);
     // Retention (7.2): KeyPackages are pruned at expiry.
     pool.oneTime = pool.oneTime.filter((kp) => kp.expires_at > now() / 1000);
+    // An updated client replaces its own unclaimed one-time KeyPackages of
+    // the uploaded suites; claimed and last-resort ones are untouched.
+    const uploaded = new Set(parsed.map((item) => item.suite));
+    const kept =
+      replace === true
+        ? pool.oneTime.filter((kp) => !uploaded.has(kp.suite))
+        : pool.oneTime;
+    if (
+      kept.length + parsed.filter((item) => !item.last_resort).length >
+      MAX_ONE_TIME
+    ) {
+      fail(409, "E2EE_TOO_LARGE");
+    }
+    pool.oneTime = kept;
     for (const item of parsed) {
       const kp = {
         data: item.data,
@@ -762,6 +791,13 @@ function createFakeDeliveryService(options = {}) {
     return decide(callerProfileId, targetProfileId, suite).status;
   }
 
+  function lastResortKeyPackage(deviceKey, suite) {
+    const lastResort = s.keyPackages.get(deviceKey)?.lastResort.get(suite);
+    return lastResort && lastResort.expires_at > now() / 1000
+      ? { data: lastResort.data, last_resort: true }
+      : null;
+  }
+
   function popKeyPackage(deviceKey, suite) {
     const pool = s.keyPackages.get(deviceKey);
     if (!pool) {
@@ -774,11 +810,17 @@ function createFakeDeliveryService(options = {}) {
       const [oneTime] = pool.oneTime.splice(index, 1);
       return { data: oneTime.data, last_resort: false };
     }
-    const lastResort = pool.lastResort.get(suite);
-    if (lastResort && lastResort.expires_at > t) {
-      return { data: lastResort.data, last_resort: true };
-    }
-    return null;
+    return lastResortKeyPackage(deviceKey, suite);
+  }
+
+  /** Counts one hit in a fixed window; true while within `limit`. */
+  function withinClaimLimit(key, limit) {
+    const windowMs = s.claimLimits.windowMs;
+    const t = now();
+    const counter = `${key}:${t - (t % windowMs)}`;
+    const hits = (s.claimCounters.get(counter) || 0) + 1;
+    s.claimCounters.set(counter, hits);
+    return hits <= limit;
   }
 
   function claim(profileId, body) {
@@ -788,6 +830,13 @@ function createFakeDeliveryService(options = {}) {
     const suite = body.ciphersuite ?? claimerDevice.grant.ciphersuite;
     if (!canJoin(claimerDevice, suite)) {
       fail(400, "E2EE_BAD_REQUEST");
+    }
+    // Like the server: every claim counts against the claimer's profile.
+    if (
+      s.claimLimits &&
+      !withinClaimLimit(`claim:${profileId}`, s.claimLimits.perProfile)
+    ) {
+      fail(429, "E2EE_RATE_LIMITED");
     }
     const group = body.group ? s.groups.get(lower(body.group)) : null;
     const claimerInGroup = group ? group.roster.has(claimer) : false;
@@ -811,7 +860,17 @@ function createFakeDeliveryService(options = {}) {
         if (wanted && !wanted.has(device.device_key)) {
           continue;
         }
-        const kp = popKeyPackage(device.device_key, suite);
+        // Past the per-device claim limit the server hands out the
+        // last-resort KeyPackage instead of a one-time one.
+        const limited =
+          s.claimLimits &&
+          !withinClaimLimit(
+            `claimed:${device.device_key}`,
+            s.claimLimits.perTargetDevice
+          );
+        const kp = limited
+          ? lastResortKeyPackage(device.device_key, suite)
+          : popKeyPackage(device.device_key, suite);
         if (kp) {
           keyPackages.push({
             device,
@@ -1686,6 +1745,19 @@ function createFakeDeliveryService(options = {}) {
       s.loginGrants.set(id, { message, signature, wallet, revoked: false });
       return id;
     },
+    /**
+     * When the device a combined sign-in grant enrolled was revoked, or
+     * null. Like the backend, revoking that device ends the grant too.
+     */
+    loginGrantRevokedAt(grantId) {
+      const id = lower(grantId);
+      for (const device of s.devices.values()) {
+        if (device.grant_id === id && device.revoked_at !== null) {
+          return device.revoked_at;
+        }
+      }
+      return null;
+    },
     /** NC8: the wallet's session revoked the grant (DN1 device list). */
     revokeLoginGrant(grantId) {
       const stored = s.loginGrants.get(lower(grantId));
@@ -1709,6 +1781,14 @@ function createFakeDeliveryService(options = {}) {
     },
     clearFaults() {
       s.faults = [];
+    },
+    /** Applies the server's KeyPackage claim limits (fixed clock windows). */
+    limitClaims(limits) {
+      s.claimLimits = limits;
+    },
+    /** false: an API from before replace_one_time, which refuses it (400). */
+    setReplaceOneTime(enabled) {
+      s.replaceOneTime = enabled;
     },
     /**
      * Holds matching POSTs until released (FIFO), to force races such as two

@@ -257,19 +257,26 @@ describe("the /ai pages", () => {
     storeHasSignedFeed();
     const html = renderToStaticMarkup(await AiKnownIssuesRoute());
     expect(html).toContain(">Known issues</h1>");
-    expect(html).toContain("Updated November 17, 2026");
+    expect(html).toContain("Updated November 22, 2026");
     for (const text of [
-      "Tested only on a cloud Mac (M2, macOS 15.8.2).",
+      "Tested only on a cloud Mac (M1, macOS 15.8.3).",
       "Not tested with a GPU.",
       "Tested only on Ubuntu 22.04 and 24.04.",
-      ">Known bugs</h2>",
+      "and the ARM64 ones only on an NVIDIA T4G. Nobody has run them on a DGX Spark.",
+      ">Known bugs and limits</h2>",
       ">Not tested yet</h2>",
       "A model about as big as the computer&#x27;s memory can take many minutes",
-      "Fixed in 0.1.0-rc.2",
-      "The sign-in to the page lasts through a restart of the service.",
+      "nemotron-3-nano-omni-30b</code> can&#x27;t run",
+      "On a standard account, the Mac app doesn&#x27;t update itself.",
+      "Fixed in 0.1.0-rc.3",
+      "A model that keeps restarting shows why its engine stopped.",
     ]) {
       expect(html).toContain(text);
     }
+    // A card's fix links the download page.
+    expect(html).toMatch(/href="\/ai"[^>]*>download page<\/a>/);
+    // rc.2's fixes gave way to rc.3's.
+    expect(html).not.toContain("Fixed in 0.1.0-rc.2");
   });
 
   it("send a problem report to the 6529 AI wave", async () => {
