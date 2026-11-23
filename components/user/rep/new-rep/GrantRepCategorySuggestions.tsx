@@ -1,4 +1,3 @@
-import { isHelpBotCreditRepCategory } from "@/components/utils/input/rep-category/repCategoryConstants";
 import type { RatingStats } from "@/entities/IProfile";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
@@ -20,12 +19,7 @@ export default function GrantRepCategorySuggestions({
 }) {
   const locale = useBrowserLocale();
   const assigned = useMemo(
-    () =>
-      ratings?.filter(
-        (item) =>
-          item.rater_contribution !== 0 &&
-          !isHelpBotCreditRepCategory(item.category)
-      ),
+    () => ratings?.filter((item) => item.rater_contribution !== 0),
     [ratings]
   );
   const normalizedSearch = selectedCategory

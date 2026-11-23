@@ -300,7 +300,6 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.label": "Search REP categories",
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
-  "helpBotReserved.error": "{category} is managed by help6529.",
   "edit.loading": "Loading your Rep allowance…",
   "edit.loadError": "Couldn't load your Rep allowance.",
   "edit.retry": "Try again",
