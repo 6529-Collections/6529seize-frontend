@@ -315,6 +315,7 @@ export function CompetitionVoteForm({
         aria-label={t(locale, "competitions.loading")}
         className="tw-col-span-3 tw-row-start-3 tw-grid tw-grid-cols-[minmax(0,1fr)_auto] tw-gap-2"
         aria-busy="true"
+        aria-live="off"
       >
         <div className="tw-h-11 tw-animate-pulse tw-rounded-lg tw-bg-iron-900 motion-reduce:tw-animate-none" />
         {onExplainVote && (

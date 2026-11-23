@@ -29,6 +29,8 @@ export const EN_GB_MESSAGES = {
 
   "waves.myVotes.sort": "Sort by",
   "waves.myVotes.select": "Select",
+  "waves.myVotes.yourVotesInCredit": "Your votes in {credit}",
+  "waves.myVotes.maxRating": "{label} {value}",
   "waves.myVotes.doneSelecting": "Done",
   "waves.myVotes.sort.voteAmount": "Your vote amount",
   "waves.myVotes.sort.leaderboard": "Leaderboard position",

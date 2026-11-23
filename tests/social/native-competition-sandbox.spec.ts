@@ -6850,9 +6850,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         expect((await balance.boundingBox())!.y).toBeLessThan(
           (await select.boundingBox())!.y
         );
-        await page.screenshot({
+        await panel.screenshot({
           path: testInfo.outputPath("my-votes-mobile-rest.png"),
-          fullPage: true,
+          animations: "disabled",
         });
         await input.press("Enter");
         expect(sandbox.requests).toHaveLength(0);
@@ -6879,7 +6879,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
             request.path.endsWith("/votes/me")
           )
         ).toHaveLength(1);
-        await select.click();
+        await select.focus();
+        await select.press("Enter");
         await expect(row.getByRole("checkbox")).toBeVisible();
         await expect(
           panel.getByRole("button", { name: "Select all", exact: true })
@@ -6905,9 +6906,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByRole("button", { name: "Cancel", exact: true })
           .click();
         await expect(input).toHaveValue("-40");
-        await page.screenshot({
+        await panel.screenshot({
           path: testInfo.outputPath("my-votes-mobile-selected.png"),
-          fullPage: true,
+          animations: "disabled",
         });
         await panel.getByRole("button", { name: "Done", exact: true }).click();
         await expect(row.getByRole("checkbox")).toHaveCount(0);
@@ -6963,6 +6964,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         name: "Loading decision…",
       });
       await expect(skeleton).toBeVisible();
+      if (testInfo.project.use.hasTouch)
+        await expect(skeleton).toHaveAttribute("aria-live", "off");
       const loadingHeight = (await row.boundingBox())!.height;
       releaseCredits();
       const controls = page

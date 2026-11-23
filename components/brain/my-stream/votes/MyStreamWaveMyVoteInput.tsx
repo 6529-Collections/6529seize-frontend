@@ -348,7 +348,9 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
     return (
       <MyVotesMobileInput
         id={voteInputId}
-        label={`${t(locale, "waves.myVotes.yourVotes")} ${t(locale, "waves.myVotes.inCredit", { credit: voteLabel })}`}
+        label={t(locale, "waves.myVotes.yourVotesInCredit", {
+          credit: voteLabel,
+        })}
         value={voteValue}
         currentVote={liveCurrentVoteValue}
         unit={voteLabel}
@@ -356,7 +358,10 @@ const MyStreamWaveMyVoteInput: React.FC<MyStreamWaveMyVoteInputProps> = ({
         valid={hasValidVoteValue && !isVoteValueOutOfRange}
         disabled={isResetting || isVotingClosed}
         busy={isProcessing}
-        helperText={`${maxRatingLabel} ${formatInteger(locale, liveMaxRating)}`}
+        helperText={t(locale, "waves.myVotes.maxRating", {
+          label: maxRatingLabel,
+          value: formatInteger(locale, liveMaxRating),
+        })}
         error={displayedVoteLimitMessage}
         saveLabel={t(locale, "waves.myVotes.vote")}
         saveAriaLabel={t(locale, "waves.myVotes.submitVote")}

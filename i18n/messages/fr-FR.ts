@@ -42,6 +42,8 @@ export const FR_FR_MESSAGES = {
 
   "waves.myVotes.sort": "Trier par",
   "waves.myVotes.select": "Sélectionner",
+  "waves.myVotes.yourVotesInCredit": "Vos votes en {credit}",
+  "waves.myVotes.maxRating": "{label} {value}",
   "waves.myVotes.doneSelecting": "Terminé",
   "waves.myVotes.sort.voteAmount": "Votre nombre de votes",
   "waves.myVotes.sort.leaderboard": "Position au classement",

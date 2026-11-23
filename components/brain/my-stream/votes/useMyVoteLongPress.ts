@@ -41,6 +41,7 @@ export function useMyVoteLongPress(enabled: boolean, onSelect: () => void) {
       }, DEFAULT_LONG_PRESS_DURATION_MS);
     },
     onPointerMove: (event: PointerEvent<HTMLElement>) => {
+      if (!timer.current) return;
       if (
         Math.hypot(
           event.clientX - origin.current.x,
