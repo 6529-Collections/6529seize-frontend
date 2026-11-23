@@ -6300,7 +6300,11 @@
         "When Preferences is opened from the active profile, desktop users can select Back to profile and mobile-app users can use the standard app-header back arrow. Sidebar, desktop profile-menu, and direct entries omit that profile-return control."
       ],
       "canonical_path": "/preferences",
-      "related_paths": ["/preferences?tab=messages", "/messages", "/notifications"],
+      "related_paths": [
+        "/preferences?tab=messages",
+        "/messages",
+        "/notifications"
+      ],
       "tags": ["profile", "privacy", "direct messages", "notifications"],
       "source_refs": [
         "components/header/AppHeader.tsx",
@@ -7933,7 +7937,13 @@
       "id": "waves.drop.quote-link-cards",
       "kind": "ui_affordance",
       "title": "Wave quote link cards",
-      "aliases": ["quote link", "link preview", "quote card", "drop link card", "group link preview"],
+      "aliases": [
+        "quote link",
+        "link preview",
+        "quote card",
+        "drop link card",
+        "group link preview"
+      ],
       "keywords": ["waves", "drop", "quote", "link", "card", "preview"],
       "facts": [
         "Wave quote link cards are documented under drop actions.",
@@ -11733,28 +11743,25 @@
         "delegation",
         "top up",
         "transfer",
+        "send nft",
+        "provenance",
+        "publish records",
         "continue in your browser"
       ],
       "facts": [
-        "When a 6529 Desktop profile signed in with Use a browser wallet, builds that send transactions open a browser page for delegations (register, update, revoke, batches of up to five, locks), The Memes and NextGen mints, and Memes subscription top-ups up to 10 ETH. Your browser wallet sends them.",
+        "When a 6529 Desktop profile signed in with Use a browser wallet, builds that send transactions open a browser page for delegations (register, update, revoke, batches of up to five, locks), The Memes and NextGen mints, Memes subscription top-ups up to 10 ETH, transfers of your 6529 NFTs (The Memes, Meme Lab, 6529 Gradient, NextGen; up to 50 different The Memes or Meme Lab tokens per collection at a time, Gradient and NextGen one transaction each), and 6529 Provenance publishing on the Sepolia test registries (open a release, publish up to 20 records per transaction, seal it). Your browser wallet sends them. Plain ETH sends are not supported.",
         "The browser page shows what the transaction does, the contract with its full address, the network, the amount in ETH plus the network fee, every decoded value, a check that it would go through now, and for mints whether the amount matches the current price.",
         "A transaction that would fail is not offered; use Check again. If the check cannot run, Check again or Send anyway. High-impact transactions (delegations that let another wallet act for you, acting as a delegation manager, minting for another wallet, top-ups over 1 ETH) need I understand before Send in wallet.",
         "The request waits five minutes; with under 45 seconds left Send is not offered. After sending, 6529 Desktop checks the transaction on chain. If it cannot confirm it yet, it shows the hash with View on Etherscan: do not send it again.",
-        "NFT transfers and NextGen burn-to-mint show Continue in your browser instead of their send button. A 6529 Desktop build without transaction support shows Update 6529 Desktop, or continue in your browser. Other transactions open a Transaction dialog with Continue in your browser.",
+        "For an NFT transfer the page shows the recipient's full address in groups of four characters, the 6529 profile it belongs to (from 6529 profile data, not part of the transaction), a warning when the address is a contract, and a box to tick: I checked that this is the right recipient. Transfers cannot be undone.",
+        "For provenance publishing the page shows the release and every record (subject, record type, schema, content hash, CID, the version it follows, 0 meaning a new subject, the effective time the publisher states) and checks that your wallet is a publisher or the owner of the registry; otherwise Send is not offered.",
+        "NextGen burn-to-mint, transfers of more than 50 different The Memes or Meme Lab tokens of one collection, and transfers to your own signed-in address show Continue in your browser instead of their send button. A 6529 Desktop build without this transaction support shows Update 6529 Desktop, or continue in your browser. Other transactions open a Transaction dialog with Continue in your browser.",
         "With a phone wallet (Scan with a phone wallet) these actions work inside 6529 Desktop as usual."
       ],
       "canonical_path": "/about/6529-apps",
-      "related_paths": [
-        "/about/6529-apps"
-      ],
-      "tags": [
-        "desktop",
-        "wallets",
-        "transactions"
-      ],
-      "source_refs": [
-        "ops/docs/desktop/feature-browser-wallet-signing.md"
-      ]
+      "related_paths": ["/about/6529-apps"],
+      "tags": ["desktop", "wallets", "transactions"],
+      "source_refs": ["ops/docs/desktop/feature-browser-wallet-signing.md"]
     },
     {
       "id": "waves.private-bookmarks",

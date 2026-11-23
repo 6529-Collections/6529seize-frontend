@@ -9,17 +9,29 @@
 
 import {
   type AbiFunction,
+  type AbiParameter,
   decodeFunctionData,
   encodeFunctionData,
   type Hex,
 } from "viem";
-import type { TransactionRule } from "./types";
+import type { RuleArg, TransactionRule } from "./types";
 
 /**
- * A decoded argument: addresses and fixed bytes as lower-case hex, uints
- * as bigint, bools, strings, and arrays of those.
+ * A decoded argument: addresses and bytes as lower-case hex, uints as
+ * bigint, bools, strings, arrays of those, and tuples as records by field
+ * name.
  */
-export type DecodedValue = string | bigint | boolean | readonly DecodedValue[];
+export type DecodedValue =
+  | string
+  | bigint
+  | boolean
+  | readonly DecodedValue[]
+  | DecodedTuple;
+
+/** A decoded tuple: its fields by name. */
+export interface DecodedTuple {
+  readonly [field: string]: DecodedValue;
+}
 
 /** Decoded arguments by ABI parameter name. */
 export type DecodedArgs = Readonly<Record<string, DecodedValue>>;
@@ -28,27 +40,72 @@ export type DecodedArgs = Readonly<Record<string, DecodedValue>>;
 const functionName = (signature: string): string =>
   signature.slice(0, signature.indexOf("("));
 
+const isTupleType = (type: string): boolean => type.startsWith("(");
+
+/** The viem ABI parameter for a rule argument (tuples by their components). */
+function abiParameter(arg: RuleArg): AbiParameter {
+  if (!isTupleType(arg.type)) return { name: arg.name, type: arg.type };
+  return {
+    name: arg.name,
+    type: arg.type.endsWith("[]") ? "tuple[]" : "tuple",
+    components: (arg.components ?? []).map(abiParameter),
+  };
+}
+
 function abiItem(rule: TransactionRule): AbiFunction | null {
   if (rule.signature === null) return null;
   return {
     type: "function",
     name: functionName(rule.signature),
-    inputs: rule.args.map(({ name, type }) => ({ name, type })),
+    inputs: rule.args.map(abiParameter),
     outputs: [],
     stateMutability: "payable",
   };
 }
 
+/** A decoded tuple (viem gives named components as an object). */
+function normalizeTuple(
+  value: unknown,
+  components: readonly RuleArg[]
+): DecodedTuple {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError("Expected a tuple");
+  }
+  const record = value as Readonly<Record<string, unknown>>;
+  const out: Record<string, DecodedValue> = Object.create(null) as Record<
+    string,
+    DecodedValue
+  >;
+  for (const component of components) {
+    out[component.name] = normalize(
+      record[component.name],
+      component.type,
+      component.components
+    );
+  }
+  return out;
+}
+
 /**
- * A decoded value by its ABI type: addresses and fixed bytes lower-cased,
- * small uints as bigint, strings exactly as decoded.
+ * A decoded value by its ABI type: addresses and bytes lower-cased, small
+ * uints as bigint, strings exactly as decoded, tuples by field name.
  */
-function normalize(value: unknown, type: string): DecodedValue {
+function normalize(
+  value: unknown,
+  type: string,
+  components?: readonly RuleArg[]
+): DecodedValue {
   if (type.endsWith("[]")) {
     if (!Array.isArray(value)) throw new TypeError("Expected an array");
     const elementType = type.slice(0, -2);
-    return value.map((element) => normalize(element, elementType));
+    return value.map((element) => normalize(element, elementType, components));
   }
+  if (isTupleType(type)) return normalizeTuple(value, components ?? []);
+  return normalizeAtom(value, type);
+}
+
+/** An atomic value: uints as bigint, bools, strings, lower-case hex. */
+function normalizeAtom(value: unknown, type: string): DecodedValue {
   if (type.startsWith("uint")) {
     if (typeof value === "number") return BigInt(value);
     if (typeof value === "bigint") return value;
@@ -87,7 +144,7 @@ export function decodeTransactionData(
       DecodedValue
     >;
     rule.args.forEach((arg, index) => {
-      args[arg.name] = normalize(values[index], arg.type);
+      args[arg.name] = normalize(values[index], arg.type, arg.components);
     });
     return args;
   } catch {

@@ -1,5 +1,5 @@
 {
-  "sha256": "edf631841158de7e2c793a2b3595c0916f88df58ba5cd68ce1cefade941e456a",
+  "sha256": "bf678532e061fc22eaa13a5e2ee87479b01010a9ed0f89311cafcb35099c0836",
   "canonical": {
     "rules": [
       {
@@ -1257,6 +1257,938 @@
           "maxPerUnit": "1000000000000000000",
           "min": "0",
           "unitsArg": "_numberOfTokens"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "ids",
+            "rule": {
+              "lenMax": 50,
+              "lenMin": 1,
+              "sameLength": ["amounts"]
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "amounts",
+            "rule": {
+              "each": {
+                "uintMax": "10000",
+                "uintMin": "1"
+              }
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.batchTransfer1155",
+        "risk": "transfer",
+        "selector": "0x2eb2c2d6",
+        "signature": "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)",
+        "to": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "ids",
+            "rule": {
+              "lenMax": 50,
+              "lenMin": 1,
+              "sameLength": ["amounts"]
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "amounts",
+            "rule": {
+              "each": {
+                "uintMax": "10000",
+                "uintMin": "1"
+              }
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.batchTransfer1155",
+        "risk": "transfer",
+        "selector": "0x2eb2c2d6",
+        "signature": "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)",
+        "to": "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "ids",
+            "rule": {
+              "lenMax": 50,
+              "lenMin": 1,
+              "sameLength": ["amounts"]
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "amounts",
+            "rule": {
+              "each": {
+                "uintMax": "10000",
+                "uintMin": "1"
+              }
+            },
+            "type": "uint256[]"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "nft.batchTransfer1155",
+        "risk": "transfer",
+        "selector": "0x2eb2c2d6",
+        "signature": "safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)",
+        "to": "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x33fd426905f149f8376e227d0c9d3340aad17af1"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "id",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "amount",
+            "rule": {
+              "uintMax": "10000",
+              "uintMin": "1"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.transfer1155",
+        "risk": "transfer",
+        "selector": "0xf242432a",
+        "signature": "safeTransferFrom(address,address,uint256,uint256,bytes)",
+        "to": "0x33fd426905f149f8376e227d0c9d3340aad17af1",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "id",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "amount",
+            "rule": {
+              "uintMax": "10000",
+              "uintMin": "1"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.transfer1155",
+        "risk": "transfer",
+        "selector": "0xf242432a",
+        "signature": "safeTransferFrom(address,address,uint256,uint256,bytes)",
+        "to": "0x4db52a61dc491e15a2f78f5ac001c14ffe3568cb",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "id",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "amount",
+            "rule": {
+              "uintMax": "10000",
+              "uintMin": "1"
+            },
+            "type": "uint256"
+          },
+          {
+            "name": "data",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "nft.transfer1155",
+        "risk": "transfer",
+        "selector": "0xf242432a",
+        "signature": "safeTransferFrom(address,address,uint256,uint256,bytes)",
+        "to": "0xb84170c1073c7292ed108c3f0d1d2a1f304caa2c",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x0c58ef43ff3032005e472cb5709f8908acb00205"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "tokenId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.transfer721",
+        "risk": "transfer",
+        "selector": "0x42842e0e",
+        "signature": "safeTransferFrom(address,address,uint256)",
+        "to": "0x0c58ef43ff3032005e472cb5709f8908acb00205",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x45882f9bc325e14fbb298a1df930c43a874b83ae"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "tokenId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 1,
+        "id": "nft.transfer721",
+        "risk": "transfer",
+        "selector": "0x42842e0e",
+        "signature": "safeTransferFrom(address,address,uint256)",
+        "to": "0x45882f9bc325e14fbb298a1df930c43a874b83ae",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "from",
+            "rule": {
+              "equals": "$from"
+            },
+            "type": "address"
+          },
+          {
+            "name": "to",
+            "rule": {
+              "noneOf": [
+                "$from",
+                "0x000000000000000000000000000000000000dead",
+                "0x60671e59a349589ad74be6cd643003a0abb38cc3"
+              ],
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "tokenId",
+            "rule": {
+              "any": true
+            },
+            "type": "uint256"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "nft.transfer721",
+        "risk": "transfer",
+        "selector": "0x42842e0e",
+        "signature": "safeTransferFrom(address,address,uint256)",
+        "to": "0x60671e59a349589ad74be6cd643003a0abb38cc3",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "components": [
+              {
+                "name": "manifestCid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "components": [
+                  {
+                    "name": "algorithm",
+                    "rule": {
+                      "oneOf": ["1", "2"]
+                    },
+                    "type": "uint16"
+                  },
+                  {
+                    "name": "digest",
+                    "rule": {
+                      "notZero": true
+                    },
+                    "type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationId",
+                    "rule": {
+                      "any": true
+                    },
+                    "type": "bytes32"
+                  }
+                ],
+                "name": "manifestHash",
+                "rule": {
+                  "any": true
+                },
+                "type": "(uint16,bytes32,bytes32)"
+              },
+              {
+                "name": "rootCid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "name": "arweaveId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "sourceCommit",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes20"
+              },
+              {
+                "name": "label",
+                "rule": {
+                  "lenMax": 128,
+                  "readableText": true
+                },
+                "type": "string"
+              }
+            ],
+            "name": "header",
+            "rule": {
+              "any": true
+            },
+            "type": "(bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string)"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.openRelease",
+        "risk": "normal",
+        "selector": "0xe2fb5f87",
+        "signature": "openRelease((bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string))",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "components": [
+              {
+                "name": "manifestCid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "components": [
+                  {
+                    "name": "algorithm",
+                    "rule": {
+                      "oneOf": ["1", "2"]
+                    },
+                    "type": "uint16"
+                  },
+                  {
+                    "name": "digest",
+                    "rule": {
+                      "notZero": true
+                    },
+                    "type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationId",
+                    "rule": {
+                      "any": true
+                    },
+                    "type": "bytes32"
+                  }
+                ],
+                "name": "manifestHash",
+                "rule": {
+                  "any": true
+                },
+                "type": "(uint16,bytes32,bytes32)"
+              },
+              {
+                "name": "rootCid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "name": "arweaveId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "sourceCommit",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes20"
+              },
+              {
+                "name": "label",
+                "rule": {
+                  "lenMax": 128,
+                  "readableText": true
+                },
+                "type": "string"
+              }
+            ],
+            "name": "header",
+            "rule": {
+              "any": true
+            },
+            "type": "(bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string)"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.openRelease",
+        "risk": "normal",
+        "selector": "0xe2fb5f87",
+        "signature": "openRelease((bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string))",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "releaseId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "components": [
+              {
+                "name": "subjectId",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "recordType",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "schemaId",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "name": "algorithm",
+                    "rule": {
+                      "oneOf": ["1", "2"]
+                    },
+                    "type": "uint16"
+                  },
+                  {
+                    "name": "digest",
+                    "rule": {
+                      "notZero": true
+                    },
+                    "type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationId",
+                    "rule": {
+                      "any": true
+                    },
+                    "type": "bytes32"
+                  }
+                ],
+                "name": "contentHash",
+                "rule": {
+                  "any": true
+                },
+                "type": "(uint16,bytes32,bytes32)"
+              },
+              {
+                "name": "effectiveAt",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "uint64"
+              },
+              {
+                "name": "cid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "name": "arweaveId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "label",
+                "rule": {
+                  "lenMax": 128,
+                  "readableText": true
+                },
+                "type": "string"
+              },
+              {
+                "name": "expectedVersion",
+                "rule": {
+                  "any": true
+                },
+                "type": "uint32"
+              }
+            ],
+            "name": "records",
+            "rule": {
+              "lenMax": 20,
+              "lenMin": 1
+            },
+            "type": "(bytes32,bytes32,bytes32,(uint16,bytes32,bytes32),uint64,bytes,bytes32,string,uint32)[]"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.publish",
+        "risk": "normal",
+        "selector": "0x19f8e2c2",
+        "signature": "publish(uint32,(bytes32,bytes32,bytes32,(uint16,bytes32,bytes32),uint64,bytes,bytes32,string,uint32)[])",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "releaseId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "components": [
+              {
+                "name": "subjectId",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "recordType",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "schemaId",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "components": [
+                  {
+                    "name": "algorithm",
+                    "rule": {
+                      "oneOf": ["1", "2"]
+                    },
+                    "type": "uint16"
+                  },
+                  {
+                    "name": "digest",
+                    "rule": {
+                      "notZero": true
+                    },
+                    "type": "bytes32"
+                  },
+                  {
+                    "name": "canonicalizationId",
+                    "rule": {
+                      "any": true
+                    },
+                    "type": "bytes32"
+                  }
+                ],
+                "name": "contentHash",
+                "rule": {
+                  "any": true
+                },
+                "type": "(uint16,bytes32,bytes32)"
+              },
+              {
+                "name": "effectiveAt",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "uint64"
+              },
+              {
+                "name": "cid",
+                "rule": {
+                  "lenMax": 64
+                },
+                "type": "bytes"
+              },
+              {
+                "name": "arweaveId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "label",
+                "rule": {
+                  "lenMax": 128,
+                  "readableText": true
+                },
+                "type": "string"
+              },
+              {
+                "name": "expectedVersion",
+                "rule": {
+                  "any": true
+                },
+                "type": "uint32"
+              }
+            ],
+            "name": "records",
+            "rule": {
+              "lenMax": 20,
+              "lenMin": 1
+            },
+            "type": "(bytes32,bytes32,bytes32,(uint16,bytes32,bytes32),uint64,bytes,bytes32,string,uint32)[]"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.publish",
+        "risk": "normal",
+        "selector": "0x19f8e2c2",
+        "signature": "publish(uint32,(bytes32,bytes32,bytes32,(uint16,bytes32,bytes32),uint64,bytes,bytes32,string,uint32)[])",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "releaseId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "expectedRecordCount",
+            "rule": {
+              "any": true
+            },
+            "type": "uint32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.sealRelease",
+        "risk": "normal",
+        "selector": "0xe672920c",
+        "signature": "sealRelease(uint32,uint32)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "releaseId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "expectedRecordCount",
+            "rule": {
+              "any": true
+            },
+            "type": "uint32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "provenance.sealRelease",
+        "risk": "normal",
+        "selector": "0xe672920c",
+        "signature": "sealRelease(uint32,uint32)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
         }
       },
       {
