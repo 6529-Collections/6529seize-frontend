@@ -6880,6 +6880,19 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           );
         });
         expect(Math.abs(panelGap)).toBeLessThanOrEqual(1);
+        const surfaceColors = await panel.evaluate((element) => {
+          let surface = element.parentElement;
+          while (surface && getComputedStyle(surface).overflowY !== "auto") {
+            surface = surface.parentElement;
+          }
+          const card = element.querySelector("article");
+          if (!surface || !card) throw new Error("My Votes surface is missing");
+          return {
+            surface: getComputedStyle(surface).backgroundColor,
+            card: getComputedStyle(card).backgroundColor,
+          };
+        });
+        expect(surfaceColors.surface).toBe(surfaceColors.card);
         const thumbnail = (await row
           .getByRole("button", { name: /^Open / })
           .boundingBox())!;
@@ -6910,6 +6923,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           thumbnail.y + thumbnail.height
         );
         await capture("rest");
+        await page.screenshot({
+          path: testInfo.outputPath("my-votes-full-height.png"),
+          animations: "disabled",
+        });
         await input.press("Enter");
         expect(sandbox.requests).toHaveLength(0);
         await input.focus();
