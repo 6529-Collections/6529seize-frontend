@@ -12,7 +12,7 @@ import {
 } from "./myVotesMotion";
 
 export const MY_VOTES_INPUT_LAYOUT =
-  "tw-col-span-3 tw-row-start-3 tw-w-full tw-min-w-0 [&_input]:tw-text-sm @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-span-2 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-center @[54rem]/my-vote:tw-col-start-5 @[54rem]/my-vote:tw-row-span-1";
+  "tw-col-span-3 tw-row-start-2 tw-w-full tw-min-w-0 [&_input]:tw-text-sm @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-center";
 
 interface MyVotesInputProps {
   readonly className?: string | undefined;

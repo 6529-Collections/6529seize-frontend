@@ -326,8 +326,8 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
   const selectionInputId = `my-vote-reset-selection-${drop.id}`;
   const mobileSelectionWidth = isSelecting ? 44 : 0;
   const desktopGridColumns = isVotingClosed
-    ? "@[54rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_8rem]"
-    : "@[46rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_22rem] @[54rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_8rem_22rem]";
+    ? ""
+    : "@[46rem]/my-vote:tw-grid-cols-[44px_96px_minmax(0,1fr)_22rem]";
   const titleId = `my-vote-title-${drop.id}`;
   const longPress = useMyVoteLongPress(
     mobile && !isSelecting && !isSelectionDisabled,
@@ -375,6 +375,16 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
     onExplainVote?.(drop, voteTotal, voteChange);
   };
 
+  const voteStats = (
+    <>
+      <MyStreamWaveMyVoteVotes
+        drop={drop}
+        winningThreshold={winningThreshold}
+      />
+      <MyVoteVoters drop={drop} mobile={mobile} />
+    </>
+  );
+
   return (
     <article // NOSONAR -- S1082/S6847: the native checkbox provides keyboard selection.
       aria-labelledby={titleId}
@@ -392,7 +402,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
         className={
           mobile
             ? "tw-grid tw-grid-cols-[auto_64px_minmax(0,1fr)] tw-gap-y-2"
-            : `tw-grid tw-grid-cols-[44px_96px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-3 @[54rem]/my-vote:tw-items-center ${desktopGridColumns}`
+            : `tw-grid tw-grid-cols-[44px_96px_minmax(0,1fr)] tw-gap-x-3 tw-gap-y-2 ${desktopGridColumns}`
         }
       >
         <motion.div
@@ -548,21 +558,18 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
             )}
           </div>
           <MyVoteAuthor author={drop.author} mobile={mobile} />
+          {!mobile && (
+            <div className="tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-pl-8">
+              {voteStats}
+            </div>
+          )}
         </div>
 
-        <div
-          className={
-            mobile
-              ? "tw-col-span-3 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-[13px]"
-              : "tw-col-span-3 tw-row-start-2 tw-flex tw-min-h-6 tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 @[32rem]/my-vote:tw-col-span-1 @[32rem]/my-vote:tw-col-start-3 @[54rem]/my-vote:tw-col-start-4 @[54rem]/my-vote:tw-row-start-1 @[54rem]/my-vote:tw-flex-col @[54rem]/my-vote:tw-items-start"
-          }
-        >
-          <MyStreamWaveMyVoteVotes
-            drop={drop}
-            winningThreshold={winningThreshold}
-          />
-          <MyVoteVoters drop={drop} mobile={mobile} />
-        </div>
+        {mobile && (
+          <div className="tw-col-span-3 tw-row-start-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-center tw-gap-x-3 tw-gap-y-1 tw-text-[13px]">
+            {voteStats}
+          </div>
+        )}
 
         {!isVotingClosed &&
           (voteInput ?? (

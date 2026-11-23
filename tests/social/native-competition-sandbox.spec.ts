@@ -6923,6 +6923,8 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         .locator("..")
         .locator("[data-tooltip-content]")
     ).toHaveCount(0);
+    expect(stats.y).toBeGreaterThanOrEqual(author.y + author.height + 8);
+    expect(Math.abs(stats.x - author.x)).toBeLessThanOrEqual(1);
     expect(field.x).toBeGreaterThan(stats.x);
     expect(field.y).toBeLessThan(picture.y + picture.height);
     expect(stats.y).toBeLessThan(picture.y + picture.height);
