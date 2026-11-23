@@ -35,7 +35,8 @@ participation drop in the wave.
    - **Agree** closes the dialog and sends the pending message.
    - **Decline** closes the dialog without sending and keeps the draft.
 5. After agreeing, the guidelines dialog does not interrupt later messages
-   from that profile in the same wave.
+   from that profile in the same wave, including after switching to another
+   wave and back.
 
 ## Common Scenarios
 
