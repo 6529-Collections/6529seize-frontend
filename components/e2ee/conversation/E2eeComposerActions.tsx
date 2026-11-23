@@ -1,4 +1,5 @@
-import { PaperClipIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { PaperClipIcon } from "@heroicons/react/24/outline";
+import { motion, useReducedMotion } from "framer-motion";
 import {
   useId,
   useRef,
@@ -12,6 +13,14 @@ import {
   COMPOSER_ACTION_ICON_CLASS_NAME,
   COMPOSER_ACTION_IDLE_CLASS_NAME,
 } from "@/components/waves/composerPresentation";
+import {
+  COMPACT_COMPOSER_ACTION_SLOT_CLASS_NAME,
+  COMPACT_COMPOSER_ACTION_TRAY_CLASS_NAME,
+  CompactComposerActionButton,
+  CompactComposerActionToggle,
+  CompactComposerActionTrayContents,
+  getCompactComposerTrayMotion,
+} from "@/components/waves/CompactComposerActions";
 import DropActionTooltip from "@/components/waves/drops/DropActionTooltip";
 
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
@@ -79,50 +88,55 @@ export function E2eeComposerActionTray({
 }) {
   const locale = useBrowserLocale();
   const actionsId = useId();
-  const compactTrayClass = expanded
-    ? "tw-col-span-2 tw-col-start-2 tw-row-start-2 tw-mx-0 tw-mb-0 tw-mt-2 tw-flex tw-min-w-0 tw-flex-wrap tw-items-start tw-gap-x-5 tw-rounded-xl tw-border tw-border-solid tw-border-white/10 tw-bg-iron-950/95 tw-p-2"
-    : "tw-hidden";
+  const prefersReducedMotion = useReducedMotion();
+  const shouldAnimate = compact && !prefersReducedMotion;
+  const trayMotion = getCompactComposerTrayMotion(shouldAnimate);
+  const collapsed = compact && !expanded;
 
   return (
     <>
       {compact && (
-        <button
-          ref={toggleRef}
-          type="button"
-          aria-label={t(
-            locale,
-            expanded
-              ? "waves.composer.actions.hide"
-              : "waves.composer.actions.show"
-          )}
-          aria-expanded={expanded}
-          aria-controls={actionsId}
-          onClick={onToggle}
-          className={`tw-col-start-1 tw-row-start-1 tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-border tw-border-solid focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 ${
-            expanded
-              ? "tw-border-primary-400/20 tw-bg-primary-500/10 tw-text-primary-300"
-              : "tw-border-white/10 tw-bg-iron-800 tw-text-iron-300"
-          }`}
+        <div
+          className={`tw-row-start-1 ${COMPACT_COMPOSER_ACTION_SLOT_CLASS_NAME}`}
         >
-          <PlusIcon
-            aria-hidden="true"
-            className={`tw-size-5 tw-transition-transform motion-reduce:tw-transition-none ${expanded ? "tw-rotate-45" : ""}`}
+          <CompactComposerActionToggle
+            ref={toggleRef}
+            label={t(
+              locale,
+              expanded
+                ? "waves.composer.actions.hide"
+                : "waves.composer.actions.show"
+            )}
+            trayId={actionsId}
+            expanded={expanded}
+            shouldAnimate={shouldAnimate}
+            onClick={onToggle}
           />
-        </button>
+        </div>
       )}
       {/* Keep the GIF picker and its download mounted while collapsed. */}
-      <fieldset
+      <motion.fieldset
         id={actionsId}
-        hidden={compact && !expanded}
-        className={compact ? compactTrayClass : "tw-contents"}
+        aria-hidden={collapsed || undefined}
+        inert={collapsed || undefined}
+        initial={false}
+        animate={collapsed ? trayMotion.exit : trayMotion.animate}
+        transition={trayMotion.transition}
+        className={
+          compact
+            ? `tw-row-start-2 tw-m-0 tw-min-w-0 tw-border-0 tw-p-0 ${COMPACT_COMPOSER_ACTION_TRAY_CLASS_NAME}`
+            : "tw-contents"
+        }
       >
         {compact && (
           <legend className="tw-sr-only">
             {t(locale, "waves.composer.actions.label")}
           </legend>
         )}
-        {children}
-      </fieldset>
+        <CompactComposerActionTrayContents inline={!compact}>
+          {children}
+        </CompactComposerActionTrayContents>
+      </motion.fieldset>
     </>
   );
 }
@@ -138,32 +152,27 @@ export function E2eeComposerActionButton({
   readonly compactLabel?: string | undefined;
   readonly children: ReactNode;
 }) {
-  const buttonClassName = compactLabel
-    ? "tw-group tw-flex tw-min-w-11 tw-max-w-24 tw-flex-col tw-items-center tw-gap-1.5 tw-rounded-xl tw-border-0 tw-bg-transparent tw-px-1 tw-py-2 tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-    : `${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME}`;
-
   return (
     <DropActionTooltip content={tooltip}>
-      <button
-        {...props}
-        type="button"
-        aria-label={tooltip}
-        disabled={disabled}
-        className={`${buttonClassName} disabled:tw-cursor-not-allowed disabled:tw-opacity-50`}
-      >
-        {compactLabel ? (
-          <>
-            <span className="tw-flex tw-size-10 tw-items-center tw-justify-center tw-rounded-full tw-bg-iron-800 group-hover:tw-bg-iron-700">
-              {children}
-            </span>
-            <span className="tw-text-center tw-text-[11px] tw-font-medium tw-leading-4">
-              {compactLabel}
-            </span>
-          </>
-        ) : (
-          children
-        )}
-      </button>
+      {compactLabel ? (
+        <CompactComposerActionButton
+          {...props}
+          aria-label={tooltip}
+          disabled={disabled}
+          label={compactLabel}
+          icon={children}
+        />
+      ) : (
+        <button
+          {...props}
+          type="button"
+          aria-label={tooltip}
+          disabled={disabled}
+          className={`${COMPOSER_ACTION_BUTTON_CLASS_NAME} ${COMPOSER_ACTION_IDLE_CLASS_NAME} disabled:tw-cursor-not-allowed disabled:tw-opacity-50`}
+        >
+          {children}
+        </button>
+      )}
     </DropActionTooltip>
   );
 }
