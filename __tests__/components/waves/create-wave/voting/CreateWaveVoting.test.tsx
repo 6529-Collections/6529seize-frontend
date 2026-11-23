@@ -170,12 +170,27 @@ describe("CreateWaveVoting", () => {
     render(<CreateWaveVoting {...baseProps} lockVotingCredits />);
     for (const input of screen.getAllByRole("radio"))
       expect(input).toBeDisabled();
+    expect(
+      screen.getByText(
+        "This decision already has votes, so its voting credit, scope and negative-vote settings can no longer change."
+      )
+    ).toBeVisible();
+    expect(
+      screen.getAllByRole("radio")[0]!.closest("fieldset")
+    ).toHaveAccessibleDescription(
+      "This decision already has votes, so its voting credit, scope and negative-vote settings can no longer change."
+    );
     openAdvancedSettings();
     expect(mockNegativeVotingToggle.mock.lastCall?.[0].isDisabled).toBe(true);
     expect(screen.getByTestId("time-weighted")).toBeEnabled();
     expect(
       screen.getByRole("spinbutton", { name: "Vote cap per identity" })
     ).toBeEnabled();
+  });
+
+  it("does not explain a credit lock while credits are editable", () => {
+    render(<CreateWaveVoting {...baseProps} />);
+    expect(screen.queryByText(/already has votes/)).not.toBeInTheDocument();
   });
 
   it("returns null when no selected type", () => {

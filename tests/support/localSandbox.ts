@@ -1,4 +1,10 @@
-import { expect, type BrowserContext, type Page } from "@playwright/test";
+import {
+  expect,
+  type BrowserContext,
+  type Page,
+  type Route,
+} from "@playwright/test";
+import { blockedRpcResponseBody } from "./blockedRpcResponse";
 
 export type SandboxRequest = {
   readonly method: string;
@@ -122,15 +128,24 @@ export async function installLocalSandboxBrowserMutationGuard(
     const request = route.request();
     const method = request.method().toUpperCase();
 
-    if (SAFE_LOCAL_SANDBOX_METHODS.has(method)) {
-      await route.continue();
-      return;
-    }
-
     let url: URL;
     try {
       url = new URL(request.url());
     } catch {
+      await route.continue();
+      return;
+    }
+
+    // Preflights and writes to known SDK endpoints are answered locally.
+    if (
+      isAllowedBlockedExternalWrite(url) &&
+      (method === "OPTIONS" || !SAFE_LOCAL_SANDBOX_METHODS.has(method))
+    ) {
+      await fulfillBlockedExternalWrite(route, url, method);
+      return;
+    }
+
+    if (SAFE_LOCAL_SANDBOX_METHODS.has(method)) {
       await route.continue();
       return;
     }
@@ -152,11 +167,6 @@ export async function installLocalSandboxBrowserMutationGuard(
       }
 
       await route.continue();
-      return;
-    }
-
-    if (isAllowedBlockedExternalWrite(url)) {
-      await route.abort("blockedbyclient");
       return;
     }
 
@@ -251,6 +261,37 @@ function isSameLoopbackOrigin(actual: URL, expected: URL) {
     isLoopbackHostname(actual.hostname) &&
     isLoopbackHostname(expected.hostname)
   );
+}
+
+// Answer blocked SDK traffic instead of aborting it. Recent WebKit builds log
+// an aborted cross-origin fetch ("... due to access control checks") as a page
+// error even when the app handles the failure. The app still sees a failed
+// call, and nothing leaves the machine.
+async function fulfillBlockedExternalWrite(
+  route: Route,
+  url: URL,
+  method: string
+) {
+  const request = route.request();
+  const headers = {
+    "access-control-allow-origin": (await request.headerValue("origin")) ?? "*",
+    "access-control-allow-credentials": "true",
+    "access-control-allow-methods": "GET, POST, OPTIONS",
+    "access-control-allow-headers":
+      (await request.headerValue("access-control-request-headers")) ??
+      "content-type",
+    vary: "Origin",
+  };
+  if (method !== "OPTIONS" && url.hostname === "rpc.walletconnect.org") {
+    await route.fulfill({
+      status: 200,
+      headers,
+      contentType: "application/json",
+      body: JSON.stringify(blockedRpcResponseBody(request.postData())),
+    });
+    return;
+  }
+  await route.fulfill({ status: 204, headers });
 }
 
 // Exact-match blocked SDK chatter stays non-fatal; any unknown external write fails.

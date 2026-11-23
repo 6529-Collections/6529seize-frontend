@@ -1,0 +1,116 @@
+{
+  "description": "Signed records v1 vectors: kinds 9 and 10, sealed items, a provider key wrap, and RFC 9180 A.1.1 for the HPKE code. Computed with node:crypto and ethers, apart from the module they test.",
+  "rfc9180A1": {
+    "info": "0x4f6465206f6e2061204772656369616e2055726e",
+    "skEm": "0x52c4a758a802cd8b936eceea314432798d5baf2d7e9235dc084ab1b9cfa2f736",
+    "pkEm": "0x37fda3567bdbd628e88668c3c8d7e97d1d1253b6d4ea6d44c150f741f1bf4431",
+    "skRm": "0x4612c550263fc8ad58375df3f557aac531d26850903e55a9f23f21d8534e8ac8",
+    "pkRm": "0x3948cfe0ad1ddb695d780e59077195da6c56506b027329794ab02bca80815c4d",
+    "pt": "0x4265617574792069732074727574682c20747275746820626561757479",
+    "aad": "0x436f756e742d30",
+    "ct": "0xf938558b5d72f1a23810b4be2ab4f84331acc02fc97babc53a52ae8218a355a96d8770ac83d07bea87e13c512a"
+  },
+  "inputs": {
+    "ed25519Seed": "0x9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60",
+    "deviceKey": "0xd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+    "author": "0x1111111111111111111111111111111111111111",
+    "authRef": "0xe0b23044ded5e97599cd0d3f4ae0234df6aa13c90c633a9f12d9f597ea7f20bc",
+    "principal": "0x0000000000000000000000000000000000000000000000000000000000000001",
+    "target": "0x0000000000000000000000000000000000000000000000000000000000000002",
+    "senderKey": "0x000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "sealNonce": "0x000102030405060708090a0b",
+    "providerKeyId": "6529io-test",
+    "providerPrivateKey": "0x4612c550263fc8ad58375df3f557aac531d26850903e55a9f23f21d8534e8ac8",
+    "providerPublicKey": "0x3948cfe0ad1ddb695d780e59077195da6c56506b027329794ab02bca80815c4d",
+    "wrapEphemeralPrivateKey": "0x52c4a758a802cd8b936eceea314432798d5baf2d7e9235dc084ab1b9cfa2f736"
+  },
+  "followRecord": {
+    "id": "0xbc8f95d5e1fc7fdff7a150f3af632645f21e6eb78ba1b867c84534afe1e99d97",
+    "kind": 9,
+    "kind_version": 1,
+    "wave": "ps/0x0000000000000000000000000000000000000000000000000000000000000001",
+    "author": "0x1111111111111111111111111111111111111111",
+    "key_type": 2,
+    "device_key": "0xd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+    "auth_ref": "0xe0b23044ded5e97599cd0d3f4ae0234df6aa13c90c633a9f12d9f597ea7f20bc",
+    "seq": 1795694700000,
+    "anchor": 1000,
+    "claimed_time": 1795694700007,
+    "refs": [
+      "follow",
+      "identity:0x0000000000000000000000000000000000000000000000000000000000000002"
+    ],
+    "body": "{\"actions\":[\"DROP_CREATED\"]}",
+    "body_hash": "0x815de38e162f7712776e89d97f8810cd7110bcf57cf18ea91906cdd5053a90a8",
+    "body_size": 28,
+    "signature": "0x27c7608f3f7c07d8e68f68fbdaf95558552743c49999311aee34a5ca003567e783efbad1b467e78008a1e5d62b8c6820fe9deb547f9beb476282e395926d8b00"
+  },
+  "followUnset": {
+    "id": "0x86a1f7c73323ad91bf3bd602ddfdf05b0805d70977dd1ebf70b9d735e4bd6dc2",
+    "kind": 9,
+    "kind_version": 1,
+    "wave": "ps/0x0000000000000000000000000000000000000000000000000000000000000001",
+    "author": "0x1111111111111111111111111111111111111111",
+    "key_type": 2,
+    "device_key": "0xd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+    "auth_ref": "0xe0b23044ded5e97599cd0d3f4ae0234df6aa13c90c633a9f12d9f597ea7f20bc",
+    "seq": 1795694700001,
+    "anchor": 1001,
+    "claimed_time": 1795694760000,
+    "refs": [
+      "follow",
+      "identity:0x0000000000000000000000000000000000000000000000000000000000000002"
+    ],
+    "body": null,
+    "body_hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+    "body_size": 0,
+    "signature": "0x28c60248eae762b5f97ce98661828830b539cbab9c59d51d64e732bb8d00dd4e89caa69874f95b459177a94b4b677521a99d993c661a66319bb4b59e47eb690e"
+  },
+  "sealedSettings": {
+    "event": {
+      "id": "0x8b32bb56bd220320a658f36bd40e868f38c8b82df2ad830a69d069e21cf2da12",
+      "kind": 10,
+      "kind_version": 1,
+      "wave": "pv/0x0000000000000000000000000000000000000000000000000000000000000001",
+      "author": "0x1111111111111111111111111111111111111111",
+      "key_type": 2,
+      "device_key": "0xd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+      "auth_ref": "0xe0b23044ded5e97599cd0d3f4ae0234df6aa13c90c633a9f12d9f597ea7f20bc",
+      "seq": 1795694700002,
+      "anchor": 1000,
+      "claimed_time": 1795694700009,
+      "refs": ["settings"],
+      "body": "{\"c\":\"AQEAAAAB11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURoAAQIDBAUGBwgJCguziG6huCcI2aITjlTcgHJ0c5e9_lumn5IiXJgsnZ7-HyWDpQQT5jxOm9Vtzoba_K1u4ngh8f6NBKxjQqIKElVTFNTmB18iLnLjFgcP6sU1QmF1d6PTV0OGfAow9OXe1P1Dv1QiLiT3nrZ-D9XbB2RZe1ZjZ2EGa8ptcRY-rUtvdtRNOGRtqyLFMIbzUybrNPCR8qhiQP786doK8jJVEACSiWcFuR89fsvPaVbMWtfYEcgc1xrH4icKtPDJsNTio89sw5kojnyPv4ePWudODC6Y11yJ6eAOCCA_RcwGQhqrYwyCTTRNII484n6AIy0bXSIMp-dAsTq1pHkmbJgJ8NeHn_mmWLWrOlYTvu7Aae_lcw\",\"v\":1}",
+      "body_hash": "0x052e6059a6e029cd9ef9aa269b45c46300af35c1007d49bfc8ff0dac7d765959",
+      "body_size": 444,
+      "signature": "0x5019a1ce36ad81197a4806b2da80ce9b63cc56c8459fb9eceaa37a3f39459d6f11c69f7930458dc5961bf08221a17cd563928609610f9cca4e5bd248a17a450e"
+    },
+    "c": "0x010100000001d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a000102030405060708090a0bb3886ea1b82708d9a2138e54dc8072747397bdfe5ba69f92225c982c9d9efe1f2583a50413e63c4e9bd56dce86dafcad6ee27821f1fe8d04ac6342a20a12555314d4e6075f222e72e316070feac53542617577a3d35743867c0a30f4e5ded4fd43bf54222e24f79eb67e0fd5db0764597b56636761066bca6d71163ead4b6f76d44d38646dab22c53086f35326eb34f091f2a86240fefce9da0af23255100092896705b91f3d7ecbcf6956cc5ad7d811c81cd71ac7e2270ab4f0c9b0d4e2a3cf6cc399288e7c8fbf878f5ae74e0c2e98d75c89e9e00e08203f45cc06421aab630c824d344d208e3ce27e80232d1b5d220ca7e740b13ab5a479266c9809f0d7879ff9a658b5ab3a5613beeec069efe573",
+    "aesKey": "0x3aa3bb54b4e20c877a5da8a3d0a2d0ebf234c21ed907dcd83cd0a1e751861823",
+    "plaintextLength": 256,
+    "itemsJson": "{\"items\":[{\"b\":{},\"k\":\"0x0000000000000000000000000000000000000000000000000000000000000002\",\"t\":\"mute\"}],\"v\":1}"
+  },
+  "keys": {
+    "event": {
+      "id": "0xf01f406e28c86499cbac9014cf628409863a44fa488fe0d4e54f0c41936149e2",
+      "kind": 10,
+      "kind_version": 1,
+      "wave": "pv/0x0000000000000000000000000000000000000000000000000000000000000001",
+      "author": "0x1111111111111111111111111111111111111111",
+      "key_type": 2,
+      "device_key": "0xd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+      "auth_ref": "0xe0b23044ded5e97599cd0d3f4ae0234df6aa13c90c633a9f12d9f597ea7f20bc",
+      "seq": 1795694700003,
+      "anchor": 1000,
+      "claimed_time": 1795694700008,
+      "refs": ["keys"],
+      "body": "{\"c\":\"AnsiYm94IjpudWxsLCJkZXYiOiIweGQ3NWE5ODAxODJiMTBhYjdkNTRiZmVkM2M5NjQwNzNhMGVlMTcyZjNkYWE2MjMyNWFmMDIxYTY4ZjcwNzUxMWEiLCJ2IjoxLCJ3cmFwcyI6W3siY2xzIjoxLCJjdCI6IlNuYzFyTVlRSjMwTTNYRzF0R1ZIR3c0U1V2dEl0SWFQTzBqQVg5QWtuQ09KR052U001S2hCeXVPam5lZHhteGIiLCJlbmMiOiJOXzJqVm52YjFpam9obWpEeU5mcGZSMFNVN2JVNm0xRXdWRDNRZkdfUkRFIiwiZnJvbSI6IjB4ZDc1YTk4MDE4MmIxMGFiN2Q1NGJmZWQzYzk2NDA3M2EwZWUxNzJmM2RhYTYyMzI1YWYwMjFhNjhmNzA3NTExYSIsImdlbiI6MSwidG8iOiJzdmM6NjUyOWlvLXRlc3QifV19\",\"v\":1}",
+      "body_hash": "0x4695330d515b52f38268c2062772aa72568a335aa3a17746a0d1154f99bb4e1d",
+      "body_size": 474,
+      "signature": "0xc9cf95bc1a0ff0cf04a16a348b3d4c5febe6e625344f20401cf4d37adfecf15102d117fb9b95aa318c8ac5c8a20e43434fbb296487afe72d0546efb18ff1f20c"
+    },
+    "wrapInfo": "6529.PersonalKeyWrap.v1|pv/0x0000000000000000000000000000000000000000000000000000000000000001|1|1|0xd75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a|svc:6529io-test",
+    "enc": "0x37fda3567bdbd628e88668c3c8d7e97d1d1253b6d4ea6d44c150f741f1bf4431",
+    "ct": "0x4a7735acc610277d0cdd71b5b465471b0e1252fb48b4868f3b48c05fd0249c238918dbd23392a1072b8e8e779dc66c5b"
+  }
+}

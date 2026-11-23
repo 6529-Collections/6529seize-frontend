@@ -18,6 +18,23 @@ describe("shared Next config", () => {
     });
   });
 
+  it("permanently redirects the former encrypted devices page to Devices & security where encrypted messages exist", async () => {
+    const redirect = {
+      source: "/messages/encrypted/devices",
+      destination: "/preferences?tab=security",
+      permanent: true,
+    };
+    const enabled = { ...publicEnv, NEXT_PUBLIC_E2EE_DM_ENABLED: "true" };
+    expect(await sharedConfig(enabled, "").redirects?.()).toContainEqual(
+      redirect
+    );
+    // Off: the page answers 404 like every encrypted route.
+    const disabled = { ...publicEnv, NEXT_PUBLIC_E2EE_DM_ENABLED: "false" };
+    expect(await sharedConfig(disabled, "").redirects?.()).not.toContainEqual(
+      redirect
+    );
+  });
+
   it("keeps React Strict Mode disabled by explicit migration policy", () => {
     expect(sharedConfig(publicEnv, "").reactStrictMode).toBe(false);
   });

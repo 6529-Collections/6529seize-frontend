@@ -71,6 +71,8 @@ const seizeConnect = jest.fn();
 const signMessageAsync = jest.fn();
 const signTypedDataAsync = jest.fn();
 const switchChainAsync = jest.fn();
+const sendTransactionAsync = jest.fn();
+const publicClient = { call: jest.fn(), readContract: jest.fn() };
 const assign = jest.fn();
 
 jest.mock("wagmi", () => ({
@@ -79,6 +81,8 @@ jest.mock("wagmi", () => ({
   useSignMessage: () => ({ signMessageAsync }),
   useSignTypedData: () => ({ signTypedDataAsync }),
   useSwitchChain: () => ({ switchChainAsync }),
+  useSendTransaction: () => ({ sendTransactionAsync }),
+  usePublicClient: () => publicClient,
 }));
 const mockChains = [{ id: 1 }];
 jest.mock("@/components/auth/SeizeConnectContext", () => ({

@@ -204,7 +204,7 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
     needs: [
       "systemd and glibc 2.34 or later: Ubuntu 22.04, Debian 12, Fedora 35, RHEL 9 or newer.",
       "x86-64 with AVX2, or 64-bit ARM with ARMv8.2: AWS Graviton 2 or later, Ampere Altra, Raspberry Pi 5.",
-      "For the CUDA package, NVIDIA's driver 575 or later.",
+      "For a CUDA package, x86-64 or ARM64, NVIDIA's driver 575 or later.",
       "0.3 GB for the app (1.7 GB with CUDA), and room for models.",
     ],
     steps: [
@@ -246,7 +246,7 @@ function linuxGuide(linux: readonly AiLinuxPackage[]): AiGuideSystem {
     },
     log: { label: "Terminal", code: "journalctl -u 6529-ai" },
     uninstall: {
-      text: "Remove keeps your models and settings; purge deletes them. Use `6529-ai-cuda` for the CUDA package.",
+      text: "Remove keeps your models and settings; purge deletes them. For a CUDA package, x86-64 or ARM64, use `6529-ai-cuda`.",
       code: [
         { label: "Keep models", code: "sudo apt remove 6529-ai" },
         { label: "Delete models", code: "sudo apt purge 6529-ai" },
