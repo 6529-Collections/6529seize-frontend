@@ -5,6 +5,7 @@ import {
   VALIDATOR_FEEDBACK_TEMPLATE,
   VALIDATOR_FEEDBACK_WAVE,
   VALIDATOR_FEEDBACK_WAVE_HREF,
+  VALIDATOR_HARDWARE_HREF,
 } from "@/lib/validator-page/content/pageText";
 import CopyChecksumButton from "./CopyChecksumButton";
 import { BODY, LINK, SECTION_HEADING } from "./validatorStyles";
@@ -29,7 +30,7 @@ export function ValidatorNeeds() {
         </li>
       </ul>
       <Link
-        href="/validator/hardware"
+        href={VALIDATOR_HARDWARE_HREF}
         className={`tw-mt-4 tw-inline-flex tw-items-center tw-gap-1.5 ${LINK}`}
       >
         Hardware guide
