@@ -30,6 +30,63 @@ async function expectFocusedAmountWithoutSelection(amount: Locator) {
     .toBe(true);
 }
 
+async function expectGrantTransitionFinished(grant: Locator) {
+  await expect
+    .poll(async () => {
+      const [content, footer, height] = await Promise.all([
+        grant.getByTestId("grant-rep-content").boundingBox(),
+        grant.getByTestId("grant-rep-footer").boundingBox(),
+        grant
+          .getByTestId("grant-rep-layout")
+          .evaluate((element) => Number.parseFloat(element.style.height)),
+      ]);
+      // Use the animated height; the rendered height can be viewport-clamped.
+      return content && footer
+        ? Math.abs(content.height + footer.height - height)
+        : Infinity;
+    })
+    .toBeLessThan(0.1);
+  await expect
+    .poll(() =>
+      grant.getByTestId("grant-rep-layout").evaluate((layout) => {
+        const panel = layout.closest(".mobile-wrapper-dialog")!;
+        let element: Element | null = panel;
+        while (element) {
+          if (
+            element
+              .getAnimations({ subtree: element === panel })
+              .some((animation) => animation.playState === "running")
+          )
+            return true;
+          element = element.parentElement;
+        }
+        return false;
+      })
+    )
+    .toBe(false);
+}
+
+async function expectCompactGrantLayout(grant: Locator) {
+  // Actions follow visible content by 16px, including when the body scrolls.
+  await expect
+    .poll(async () => {
+      const [content, body, action] = await Promise.all([
+        grant.getByTestId("grant-rep-content").boundingBox(),
+        grant.getByTestId("grant-rep-body").boundingBox(),
+        grant
+          .getByTestId("grant-rep-footer")
+          .getByRole("button")
+          .first()
+          .boundingBox(),
+      ]);
+      if (!content || !body || !action) return Infinity;
+      return Math.round(
+        action.y - Math.min(content.y + content.height, body.y + body.height)
+      );
+    })
+    .toBe(16);
+}
+
 async function seedSession(page: Page, role: string | null) {
   const address = "0x0000000000000000000000000000000000000529";
   const jwt = [
@@ -422,11 +479,14 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await installCategories(page, getSandboxApiOrigin(baseURL));
   });
 
-  test("keeps Grant Rep fixed while selecting assigned chips and searching without saving", async ({
+  test("keeps Grant Rep compact while selecting assigned chips and searching without saving", async ({
     page,
     baseURL,
+    isMobile,
   }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
+    const chooseCategory = (button: Locator) =>
+      isMobile ? button.tap() : button.click();
     let allocationReads = 0;
     let writes = 0;
     let searches = 0;
@@ -547,44 +607,18 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByText("Type at least 3 characters.", { exact: true })
     ).toBeVisible();
-    await expect
-      .poll(() =>
-        surface.evaluate((panel) => {
-          let element: Element | null = panel;
-          while (element) {
-            if (
-              element
-                .getAnimations()
-                .some((animation) => animation.playState === "running")
-            )
-              return true;
-            element = element.parentElement;
-          }
-          return false;
-        })
-      )
-      .toBe(false);
-    const initialBox = await surface.boundingBox();
-    expect(initialBox).not.toBeNull();
-    const expectFixedLayout = async () => {
-      const box = await surface.boundingBox();
-      expect(box).not.toBeNull();
-      if (initialBox && box) {
-        expect(box.height).toBeCloseTo(initialBox.height, 0);
-        expect(box.y).toBeCloseTo(initialBox.y, 0);
-      }
-    };
+    await expectGrantTransitionFinished(grant);
+    await expectCompactGrantLayout(grant);
     expect(searches).toBe(0);
-    await page
-      .getByRole("dialog", { name: "Grant Rep", exact: true })
-      .locator(".mobile-wrapper-dialog")
-      .screenshot({ path: testInfo.outputPath("grant-rep-category-step.png") });
+    await surface.screenshot({
+      path: testInfo.outputPath("grant-rep-category-step.png"),
+    });
     await search.fill("mus");
     await expect(own.getByRole("button")).toHaveCount(0);
     await expect(
       grant.getByRole("button", { name: "Music", exact: true })
     ).toBeVisible();
-    await expectFixedLayout();
+    await expectCompactGrantLayout(grant);
     await expect(
       grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeEnabled();
@@ -592,7 +626,18 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByRole("button", { name: "mus", exact: true })
     ).toHaveCount(0);
-    await grant.getByRole("button", { name: "Music", exact: true }).click();
+    const musicSuggestion = grant.getByRole("button", {
+      name: "Music",
+      exact: true,
+    });
+    if (isMobile) {
+      await musicSuggestion.tap();
+    } else {
+      await musicSuggestion.hover();
+      await page.mouse.down();
+      await expect(search).toBeFocused();
+      await page.mouse.up();
+    }
     await expect(search).toBeEditable();
     await expect(amount).toHaveValue("35");
     await expectFocusedAmountWithoutSelection(amount);
@@ -629,9 +674,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByText("Type at least 3 characters.", { exact: true })
     ).toBeVisible();
-    await own
-      .getByRole("button", { name: "Research -25", exact: true })
-      .click();
+    await chooseCategory(
+      own.getByRole("button", { name: "Research -25", exact: true })
+    );
     await expect(search).toHaveValue("Research");
     await expect(search).toBeEditable();
     await expect(amount).toHaveValue("-25");
@@ -684,14 +729,14 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByRole("button", { name: "Save", exact: true })
     ).toBeEnabled();
-    await expectFixedLayout();
+    await expectCompactGrantLayout(grant);
     await grant
       .getByRole("button", { name: "Change category", exact: true })
       .click();
     await amount.fill("45");
-    await own
-      .getByRole("button", { name: "Artist 1,000", exact: true })
-      .click();
+    await chooseCategory(
+      own.getByRole("button", { name: "Artist 1,000", exact: true })
+    );
     await expect(amount).toHaveValue("45");
     await expectFocusedAmountWithoutSelection(amount);
     await expect(
@@ -703,10 +748,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     expect(writes).toBe(0);
     await expectNoHorizontalOverflow(page);
     await expectAxeClean(page);
-    await page
-      .getByRole("dialog", { name: "Grant Rep", exact: true })
-      .locator(".mobile-wrapper-dialog")
-      .screenshot({ path: testInfo.outputPath("grant-rep-two-step.png") });
+    await surface.screenshot({
+      path: testInfo.outputPath("grant-rep-two-step.png"),
+    });
   });
 
   test("opens Grant Rep without chip groups when no REP is assigned", async ({
@@ -785,6 +829,33 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByRole("button", { name: "Cancel", exact: true })
     ).toBeVisible();
+    await expectCompactGrantLayout(grant);
+    const amount = grant.getByRole("textbox", {
+      name: "Your total REP for this category",
+      exact: true,
+    });
+    const search = grant.getByRole("textbox", {
+      name: "Category to grant REP for",
+      exact: true,
+    });
+    const action = grant.getByRole("button", { name: "Cancel", exact: true });
+    await expectGrantTransitionFinished(grant);
+    const initialAmount = await amount.boundingBox();
+    const initialAction = await action.boundingBox();
+    await search.click();
+    await expect(
+      grant.getByText("Type at least 3 characters.", { exact: true })
+    ).toBeVisible();
+    await expectCompactGrantLayout(grant);
+    await expect
+      .poll(async () => (await amount.boundingBox())?.y)
+      .toBeCloseTo(initialAmount!.y, 0);
+    expect((await action.boundingBox())!.y).toBeCloseTo(initialAction!.y, 0);
+    await amount.click();
+    await expect(
+      grant.getByText("Type at least 3 characters.", { exact: true })
+    ).toBeHidden();
+    await expect(amount).toBeFocused();
     await expectNoHorizontalOverflow(page);
     await page
       .getByRole("dialog", { name: "Grant Rep", exact: true })
@@ -794,6 +865,116 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       });
     await grant.getByRole("button", { name: "Cancel", exact: true }).click();
     await expect(grant).toBeHidden();
+  });
+
+  test("keeps Grant Rep actions reachable with long assigned lists and feedback in a short viewport", async ({
+    page,
+    baseURL,
+    isMobile,
+  }, testInfo) => {
+    const api = getSandboxApiOrigin(baseURL);
+    const ratings = Array.from({ length: 12 }, (_, index) => ({
+      category: `Assigned category ${index}`,
+      rating: 100,
+      contributor_count: 1,
+      rater_contribution: index + 1,
+    }));
+    await page.route(
+      `${api}/api/profiles/${TARGET}/rep/ratings/received?*`,
+      (route) =>
+        route.fulfill({ json: { ...allowance, rating_stats: ratings } })
+    );
+    await page.route(
+      (url) =>
+        /^\/api\/+rep\/categories(?:\/availability)?$/.test(url.pathname),
+      (route) => {
+        const url = new URL(route.request().url());
+        return route.fulfill({
+          json: url.pathname.endsWith("/availability")
+            ? url.searchParams.get("param") !== "Unavailable category"
+            : [],
+        });
+      }
+    );
+    await page.route(`${api}/api/profiles/${TARGET}/rep/rating`, (route) =>
+      route.fulfill({
+        status: 400,
+        json: { message: "Layout test save error" },
+      })
+    );
+    await openProfile(page);
+    await page.getByRole("button", { name: "Grant Rep", exact: true }).click();
+    const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
+    const search = grant.getByRole("textbox", {
+      name: "Category to grant REP for",
+      exact: true,
+    });
+    const amount = grant.getByRole("textbox", {
+      name: "Your total REP for this category",
+      exact: true,
+    });
+    const assigned = grant.getByRole("group", {
+      name: "You assigned",
+      exact: true,
+    });
+    await expect(assigned.getByRole("button")).toHaveCount(12);
+    expect(
+      await assigned.evaluate((group) => {
+        const list = group.lastElementChild!;
+        return list.scrollHeight > list.clientHeight;
+      })
+    ).toBe(true);
+    await assigned
+      .getByRole("button", { name: "Assigned category 11 12", exact: true })
+      .click();
+    await expect(amount).toHaveValue("12");
+    await expectCompactGrantLayout(grant);
+    await amount.fill("13");
+    await grant.getByRole("button", { name: "Save", exact: true }).click();
+    await expect(
+      grant.getByText("Layout test save error", { exact: true })
+    ).toBeVisible();
+    await expectCompactGrantLayout(grant);
+    await grant
+      .getByRole("button", { name: "Dismiss error", exact: true })
+      .click();
+    await search.fill("Unavailable category");
+    await expect(search).toHaveAttribute("aria-invalid", "true");
+    await expectCompactGrantLayout(grant);
+    await search.fill("MemesNominee");
+    await expect(search).toHaveAttribute("aria-invalid", "false");
+    await expect(grant.getByText(/50,000/)).toBeVisible();
+    await amount.click();
+    await page.setViewportSize({ width: isMobile ? 320 : 1280, height: 520 });
+    const cancel = grant.getByRole("button", { name: "Cancel", exact: true });
+    await expect(cancel).toBeInViewport();
+    await expect(
+      grant.getByRole("button", { name: "Grant Rep", exact: true })
+    ).toBeInViewport();
+    expect(
+      await grant
+        .getByTestId("grant-rep-body")
+        .evaluate((body) => body.scrollHeight > body.clientHeight)
+    ).toBe(true);
+    await amount.scrollIntoViewIfNeeded();
+    await expect(amount).toBeInViewport();
+    await expect(cancel).toBeInViewport();
+    await expectGrantTransitionFinished(grant);
+    const scrolledAmount = await amount.boundingBox();
+    await amount.fill("50");
+    await expect(amount).toBeFocused();
+    await expectGrantTransitionFinished(grant);
+    expect(
+      Math.abs((await amount.boundingBox())!.y - scrolledAmount!.y)
+    ).toBeLessThanOrEqual(1);
+    await expect(cancel).toBeInViewport();
+    await expectNoHorizontalOverflow(page);
+    await page
+      .getByRole("dialog", { name: "Grant Rep", exact: true })
+      .locator(".mobile-wrapper-dialog")
+      .screenshot({
+        path: testInfo.outputPath("grant-rep-short-viewport.png"),
+      });
   });
 
   test("grants first REP from the pinned You row and refreshes the tag and header totals", async ({
@@ -2226,6 +2407,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       })
       .click();
     const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
+    const loading = grant.getByText("Loading ratings…", { exact: true });
+    await expect(loading).toBeVisible();
+    expect((await loading.boundingBox())!.height).toBeLessThanOrEqual(24);
+    await expectCompactGrantLayout(grant);
     await expectDesktopRatingPosition(page, "Grant Rep");
     await grant
       .getByRole("textbox", { name: "Category to grant REP for", exact: true })

@@ -55,6 +55,11 @@ notification filters remain effective.
 The `profiles.identity-tab` record covers the existing-category Rep editor,
 its desktop inline panel and mobile sheet, pinned You contribution, owner Given
 category editing, permission rules, allowance loading, retry action and dismissal.
+Grant Rep fits its visible content without reserving blank space for search
+results or rating details. Search suggestions float below the category field;
+real content changes resize the dialog with a short transition that respects
+reduced motion. Short viewports scroll inside while actions stay reachable.
+
 Grant Rep uses one label across layouts. A typed category is ready after it
 passes validation. Suggestions use the displayed spelling, and the field stays
 editable after a suggestion is picked. Category saves keep the category open;

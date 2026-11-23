@@ -30,7 +30,7 @@ export default function GrantRepCategorySuggestions({
   );
   if (!ratings)
     return (
-      <output className="tw-mt-4 tw-block tw-h-[70px] tw-text-xs tw-text-iron-400">
+      <output className="tw-mt-4 tw-block tw-text-xs tw-leading-5 tw-text-iron-400">
         {t(locale, "user.rate.loading")}
       </output>
     );
