@@ -34,6 +34,7 @@ import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import ChainActionStatus from "./ChainActionStatus";
 import {
   chainErrorMessage,
+  chainFailureText,
   chainRefusalName,
   feeRefusalCause,
 } from "./chainErrorMessage";
@@ -51,19 +52,24 @@ const signedInAs = (wallet: Hex): boolean =>
   getWalletAddress()?.toLowerCase() === wallet.toLowerCase() &&
   getAuthJwt() !== null;
 
-/** Sends this wallet's signature through the relay and waits for the chain. */
-async function signThroughRelay(
+/** The identity's name at the start of a sentence, and inside one. */
+interface IdentityNames {
+  readonly start: string;
+  readonly mid: string;
+}
+
+/**
+ * What the relay did with a complete join: refused it for good (`onEnded`),
+ * couldn't reach the chain (`onUnsent`; the signatures are kept), or sent
+ * it, and then the wait until the chain has run it.
+ */
+async function settleRelayed(
   locale: SupportedLocale,
-  txId: Hex,
-  signature: Hex,
-  identity: string,
-  onEnded: () => void
+  op: RelayOperation,
+  names: IdentityNames,
+  onEnded: () => void,
+  onUnsent: () => void
 ): Promise<void> {
-  const op = await chainRelay.sign(txId, {
-    role: ROLE_JOINER,
-    key_type: 1,
-    sig: signature,
-  });
   if (op.status === "FAILED") {
     onEnded();
     // The relay words the chain's refusal itself: only its code is read
@@ -75,28 +81,30 @@ async function signThroughRelay(
         reason: joinerReason(
           locale,
           chainRefusalName(refusal),
-          identity,
+          names,
           feeRefusalCause(refusal)
         ),
       })
     );
   }
   if (op.status !== "SUBMITTED") {
+    onUnsent();
     throw new ChainOperationError(
       "stated",
       t(locale, "chainIdentity.requests.unreachable")
     );
   }
   try {
-    await awaitFinal(txId);
+    await awaitFinal(op.tx_id);
   } catch (error) {
     // The chain ran the join and it failed: say it from this wallet's side.
     if (error instanceof ChainOperationError && error.reason === "failed") {
+      onEnded();
       throw new ChainOperationError(
         "stated",
         t(locale, "chainIdentity.requests.failedInBlock", {
-          identity,
-          reason: joinerReason(locale, error.resultName, identity),
+          identity: names.mid,
+          reason: joinerReason(locale, error.resultName, names),
         })
       );
     }
@@ -108,9 +116,10 @@ async function signThroughRelay(
 function joinerReason(
   locale: SupportedLocale,
   name: string | null,
-  identity: string,
+  names: IdentityNames,
   feeCause: ReturnType<typeof feeRefusalCause> = null
 ): string {
+  const identity = names.start;
   switch (name) {
     case "ADDRESS_BOUND":
     case "CLUSTER_BOUND":
@@ -135,8 +144,18 @@ function joinerReason(
     case "EXPIRED_AT_EXECUTION":
     case "MEMPOOL_TTL":
       return t(locale, "chainIdentity.requests.expired");
-    default:
+    case "KEY_NOT_BOUND":
+      return t(locale, "chainIdentity.requests.askerLeft", {
+        identity: names.mid,
+      });
+    case "IDENTITY_HELD":
+    case "PRINCIPAL_INACTIVE":
+    case "PRINCIPAL_RECONCILING":
+      return t(locale, "chainIdentity.requests.identityBusy", { identity });
+    case null:
       return t(locale, "chainIdentity.requests.refused");
+    default:
+      return t(locale, "chainIdentity.requests.refusedCode", { name });
   }
 }
 
@@ -147,6 +166,7 @@ function JoinRequestCard({
   walletState,
   rejoinWaitMs,
   onChanged,
+  onActive,
 }: {
   readonly op: RelayOperation;
   readonly wallet: Hex;
@@ -155,9 +175,15 @@ function JoinRequestCard({
   readonly walletState: ChainWalletMembership | null | undefined;
   readonly rejoinWaitMs: number | null;
   readonly onChanged: () => void;
+  /** Keeps the card on the page while its join is under way. */
+  readonly onActive: (op: RelayOperation) => void;
 }) {
   const locale = useBrowserLocale();
   const action = useChainAction(onChanged);
+  // Both signatures are with 6529.io, which couldn't reach the chain yet.
+  const [unsent, setUnsent] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendText, setResendText] = useState<string | null>(null);
   const [declining, setDeclining] = useState(false);
   const [declineError, setDeclineError] = useState<string | null>(null);
   // The relay refused it for good: this request can't be signed again.
@@ -194,26 +220,62 @@ function JoinRequestCard({
     : op.expires_at;
 
   const shortId = op.principal ? shortHex(op.principal) : "";
-  let name = shortId;
-  if (identity.data?.handle) {
-    name = identity.data.handle;
-  } else if (identity.isSuccess) {
-    name = t(locale, "chainIdentity.requests.noHandle", { id: shortId });
-  }
+  const names: IdentityNames = identity.data?.handle
+    ? { start: identity.data.handle, mid: identity.data.handle }
+    : {
+        start: t(locale, "chainIdentity.requests.noHandleStart", {
+          id: shortId,
+        }),
+        mid: t(locale, "chainIdentity.requests.noHandle", { id: shortId }),
+      };
 
   const sign = () => {
+    onActive(op);
     void action.prepare(() =>
       Promise.resolve({
         // Checked again here: what the wallet signs is exactly this join.
         draft: heldJoinDraft(op, wallet),
         signer: walletSigner(config, wallet),
         payer: "identity",
-        submit: (draft, signature) =>
-          signThroughRelay(locale, draft.txId, signature, name, () =>
-            setEnded(true)
-          ),
+        submit: async (draft, signature) => {
+          const relayed = await chainRelay.sign(draft.txId, {
+            role: ROLE_JOINER,
+            key_type: 1,
+            sig: signature,
+          });
+          await settleRelayed(
+            locale,
+            relayed,
+            names,
+            () => setEnded(true),
+            () => setUnsent(true)
+          );
+        },
       })
     );
+  };
+
+  // The relay takes a retry from any of the join's signers.
+  const resend = async () => {
+    setResending(true);
+    setResendText(null);
+    try {
+      const relayed = await chainRelay.retry(op.tx_id);
+      await settleRelayed(
+        locale,
+        relayed,
+        names,
+        () => setEnded(true),
+        () => setUnsent(true)
+      );
+      setUnsent(false);
+      setResendText(t(locale, "chainIdentity.action.done"));
+      onChanged();
+    } catch (error) {
+      setResendText(chainFailureText(locale, error));
+    } finally {
+      setResending(false);
+    }
   };
 
   const decline = async () => {
@@ -239,9 +301,11 @@ function JoinRequestCard({
   let blocked: string | null = null;
   if (!checked) {
     blocked = t(locale, "chainIdentity.requests.notJoin");
+  } else if (expiresAtMs <= Date.now()) {
+    blocked = t(locale, "chainIdentity.requests.expired");
   } else if (identity.isSuccess && !requesterInIdentity) {
     blocked = t(locale, "chainIdentity.requests.notFromIdentity", {
-      identity: name,
+      identity: names.mid,
     });
   } else if (readiness?.kind === "bound") {
     blocked = t(locale, "chainIdentity.requests.bound");
@@ -261,7 +325,10 @@ function JoinRequestCard({
             ? "chainIdentity.requests.fromStranger"
             : "chainIdentity.requests.from",
           {
-            identity: name,
+            identity:
+              identity.isSuccess && !requesterInIdentity
+                ? names.mid
+                : names.start,
             wallet: requester ? shortHex(requester) : "",
             date: formatDate(locale, expiresAtMs, DATE_TIME),
           }
@@ -274,7 +341,8 @@ function JoinRequestCard({
         {blocked === null &&
           readiness !== null &&
           identity.isSuccess &&
-          !ended && (
+          !ended &&
+          !unsent && (
             <Button
               variant="primary"
               size="sm"
@@ -284,18 +352,32 @@ function JoinRequestCard({
               {t(locale, "chainIdentity.requests.review")}
             </Button>
           )}
-        <Button
-          variant="secondary"
-          size="sm"
-          disabled={action.busy || declining}
-          onClick={() => void decline()}
-        >
-          {t(locale, "chainIdentity.requests.decline")}
-        </Button>
+        {unsent && !ended && (
+          <Button
+            variant="primary"
+            size="sm"
+            disabled={resending}
+            onClick={() => void resend()}
+          >
+            {t(locale, "chainIdentity.wallets.sendAgain")}
+          </Button>
+        )}
+        {!unsent && !ended && action.state.kind !== "done" && (
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={action.busy || declining}
+            onClick={() => void decline()}
+          >
+            {t(locale, "chainIdentity.requests.decline")}
+          </Button>
+        )}
       </div>
       <ChainActionStatus
         state={action.state}
-        note={t(locale, "chainIdentity.requests.joinNote", { identity: name })}
+        note={t(locale, "chainIdentity.requests.joinNote", {
+          identity: names.mid,
+        })}
         feeText={(amount) =>
           t(locale, "chainIdentity.requests.feeFromIdentity", { amount })
         }
@@ -305,6 +387,14 @@ function JoinRequestCard({
       {ended && (
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300">
           {t(locale, "chainIdentity.requests.ended")}
+        </p>
+      )}
+      {resendText && (
+        <p
+          role="status"
+          className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300"
+        >
+          {resendText}
         </p>
       )}
       {declineError && (
@@ -335,6 +425,15 @@ export default function ChainJoinRequests({
   const locale = useBrowserLocale();
   const { requestAuth } = useAuth();
   const [, setSignInTick] = useState(0);
+  // Requests this wallet started to sign stay on the page: once signed, the
+  // relay stops listing them, before the chain has answered.
+  const [kept, setKept] = useState<readonly RelayOperation[]>([]);
+  const keep = (op: RelayOperation) =>
+    setKept((current) =>
+      current.some((item) => item.tx_id === op.tx_id)
+        ? current
+        : [...current, op]
+    );
   const signedIn = signedInAs(wallet);
   const requests = useQuery({
     queryKey: [QueryKey.CHAIN_IDENTITY, "join-requests", wallet.toLowerCase()],
@@ -342,7 +441,7 @@ export default function ChainJoinRequests({
     enabled: signedIn,
     refetchInterval: REQUESTS_POLL_MS,
   });
-  const mine = (requests.data ?? []).filter((op) =>
+  const listed = (requests.data ?? []).filter((op) =>
     op.signers.some(
       (entry) =>
         entry.role === ROLE_JOINER &&
@@ -350,6 +449,10 @@ export default function ChainJoinRequests({
         entry.signer.toLowerCase() === wallet.toLowerCase()
     )
   );
+  const mine = [
+    ...listed,
+    ...kept.filter((op) => !listed.some((item) => item.tx_id === op.tx_id)),
+  ];
   const membership = useQuery({
     queryKey: [QueryKey.CHAIN_IDENTITY, "membership", wallet.toLowerCase()],
     queryFn: ({ signal }) => chainGateway.getWalletMembership(wallet, signal),
@@ -380,6 +483,28 @@ export default function ChainJoinRequests({
           size="sm"
           onClick={() =>
             void requestAuth().then(() => setSignInTick((tick) => tick + 1))
+          }
+        >
+          {t(locale, "chainIdentity.requests.signInAction")}
+        </Button>
+      </div>
+    );
+  }
+
+  const listStatus = (requests.error as { status?: unknown } | null)?.status;
+  if (requests.isError && (listStatus === 401 || listStatus === 403)) {
+    return (
+      <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-white/[0.07] tw-px-4 tw-py-3 sm:tw-flex-row sm:tw-items-center sm:tw-justify-between">
+        <p className="tw-m-0 tw-text-sm tw-text-iron-300">
+          {t(locale, "chainIdentity.requests.signIn")}
+        </p>
+        <Button
+          variant="secondary"
+          size="sm"
+          onClick={() =>
+            void requestAuth().then(() => {
+              void requests.refetch();
+            })
           }
         >
           {t(locale, "chainIdentity.requests.signInAction")}
@@ -428,6 +553,7 @@ export default function ChainJoinRequests({
             config={config}
             walletState={walletState}
             rejoinWaitMs={rejoinWaitMs}
+            onActive={keep}
             onChanged={changed}
           />
         ))}

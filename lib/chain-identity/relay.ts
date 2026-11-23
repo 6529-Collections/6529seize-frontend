@@ -48,27 +48,30 @@ export class ChainRelayError extends Error {
   constructor(
     /** The HTTP status; 0 when 6529.io didn't answer. */
     readonly status: number,
-    message: string
+    message: string,
+    /** Whether the call was the first signature's hold. */
+    readonly hold = false
   ) {
     super(message);
     this.name = "ChainRelayError";
   }
 }
 
-const relayError = (error: unknown): ChainRelayError => {
+const relayError = (error: unknown, hold: boolean): ChainRelayError => {
   const status = (error as { status?: unknown } | null)?.status;
   return new ChainRelayError(
     typeof status === "number" ? status : 0,
-    error instanceof Error ? error.message : String(error)
+    error instanceof Error ? error.message : String(error),
+    hold
   );
 };
 
 /** Runs one relay call; any failure is a ChainRelayError. */
-async function relayCall<T>(call: () => Promise<T>): Promise<T> {
+async function relayCall<T>(call: () => Promise<T>, hold = false): Promise<T> {
   try {
     return await call();
   } catch (error) {
-    throw relayError(error);
+    throw relayError(error, hold);
   }
 }
 
@@ -84,28 +87,30 @@ export const chainRelay = {
    * other signers sign. The signers are the draft's own list.
    */
   hold: (draft: ChainDraft, signatures: readonly RelaySignature[]) =>
-    relayCall(() =>
-      commonApiPost<unknown, RelayOperation>({
-        endpoint: pendingPath(),
-        errorMode: "structured",
-        body: {
-          tx_id: draft.txId.toLowerCase(),
-          op_type: draft.opName ?? draft.opType,
-          principal:
-            (
-              draft.envelope.header["principal"] as Hex | undefined
-            )?.toLowerCase() ?? null,
-          unsigned: draft.unsigned,
-          typed_data: draft.typedData,
-          expires_at: toNumber(draft.envelope.header["expiresAt"]),
-          required: draft.signatures.map((entry) => ({
-            role: entry.role,
-            key_type: entry.keyType,
-            signer: entry.signer?.toLowerCase(),
-          })),
-          signatures,
-        },
-      })
+    relayCall(
+      () =>
+        commonApiPost<unknown, RelayOperation>({
+          endpoint: pendingPath(),
+          errorMode: "structured",
+          body: {
+            tx_id: draft.txId.toLowerCase(),
+            op_type: draft.opName ?? draft.opType,
+            principal:
+              (
+                draft.envelope.header["principal"] as Hex | undefined
+              )?.toLowerCase() ?? null,
+            unsigned: draft.unsigned,
+            typed_data: draft.typedData,
+            expires_at: toNumber(draft.envelope.header["expiresAt"]),
+            required: draft.signatures.map((entry) => ({
+              role: entry.role,
+              key_type: entry.keyType,
+              signer: entry.signer?.toLowerCase(),
+            })),
+            signatures,
+          },
+        }),
+      true
     ),
 
   /** Operations waiting for the signed-in wallet's signature. */

@@ -146,6 +146,9 @@ describe("errors that aren't the 6529 Network's", () => {
     expect(chainErrorMessage(L, new ChainRelayError(404, "x"))).toBe(
       "This request is no longer open: it was withdrawn, it expired, or it already went through."
     );
+    expect(chainErrorMessage(L, new ChainRelayError(400, "x", true))).toBe(
+      "6529.io couldn't keep this request. Try again, or sign with another wallet app."
+    );
     expect(chainErrorMessage(L, new ChainRelayError(502, "x"))).toBe(
       "6529.io couldn't reach the 6529 Network. Try again in a minute."
     );

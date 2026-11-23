@@ -325,7 +325,11 @@ export default function ChainIdentityWallets({
           </>
         )}
         <ChainActionStatus
-          state={join.state}
+          state={
+            join.state.kind === "held" && waiting === undefined
+              ? { kind: "idle" }
+              : join.state
+          }
           note={
             joinTarget === null
               ? undefined

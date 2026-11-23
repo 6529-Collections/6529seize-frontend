@@ -170,6 +170,9 @@ function relayErrorMessage(
   if (status === 401 || status === 403) {
     return t(locale, "chainIdentity.error.relaySignIn");
   }
+  if (status === 400 && error.hold) {
+    return t(locale, "chainIdentity.error.relayHoldRefused");
+  }
   if (status === 400 || status === 404 || status === 409) {
     return t(locale, "chainIdentity.error.relayClosed");
   }

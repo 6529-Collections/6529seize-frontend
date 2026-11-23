@@ -19,6 +19,7 @@ import { joinReadiness } from "@/lib/chain-identity/joins";
 import { draftOperation } from "@/lib/chain-identity/operation";
 import { walletSigner } from "@/lib/chain-identity/signers";
 import ChainActionStatus from "./ChainActionStatus";
+import { chainErrorMessage } from "./chainErrorMessage";
 import {
   CHAIN_HINT_CLASS,
   CHAIN_INPUT_CLASS,
@@ -76,6 +77,10 @@ export default function ChainIdentityCreate({
   let handleHint = t(locale, "chainIdentity.handle.hint");
   if (normalized === null) {
     handleHint = t(locale, "chainIdentity.handle.invalid");
+  } else if (wanted && availability.isError) {
+    handleHint =
+      chainErrorMessage(locale, availability.error) ??
+      t(locale, "chainIdentity.error.generic");
   } else if (wanted && availability.data?.handle === normalized) {
     handleHint = t(
       locale,

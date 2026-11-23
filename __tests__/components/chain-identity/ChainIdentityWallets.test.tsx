@@ -86,7 +86,7 @@ it("says before signing when a removed wallet can join again, from the chain's w
     );
     expect(
       await screen.findByText(
-        "After this, 0x000000…0000dd can't join another identity or create one until Nov 26, 2026, 12:00 PM. It can rejoin yours at any time."
+        "After this, 0x000000…0000dd can't join another identity or create one until Nov 26, 2026, 12:00 PM. It can rejoin yours at any time. Its NFTs stop counting toward your identity's TDH; if the REP or NIC you have given then adds up to more than your TDH, the 6529 Network scales your ratings down."
       )
     ).toBeInTheDocument();
     expect(
@@ -106,7 +106,7 @@ it("warns when removing the wallet in use, and claims no wait the chain didn't g
   );
   expect(
     await screen.findByText(
-      "This is the wallet you are using now. After this, 0x000000…0000aa no longer signs for your identity."
+      "This is the wallet you are using now. After this, 0x000000…0000aa no longer signs for your identity. Its NFTs stop counting toward your identity's TDH; if the REP or NIC you have given then adds up to more than your TDH, the 6529 Network scales your ratings down."
     )
   ).toBeInTheDocument();
 });

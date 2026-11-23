@@ -64,13 +64,13 @@ can't read.
 - The browser's key stays in this browser and can't be copied out. Turn it
   off on this page to end it on the 6529 Network.
 - An added wallet has 23 hours to sign. 6529.io holds the first signature
-  until then. A wallet starts one join at a time.
+  until then. From one browser, a wallet starts one join at a time.
 
 ## Troubleshooting
 
 - `Not enough $fake6529 to pay the fee.`: get $fake6529 for fees, and move
   some to your identity for its own changes.
-- `Switch your wallet to … and try again.`: the wallet app is on another
+- `Switch your wallet app to … and try again.`: the wallet app is on another
   account than the one that must sign.
 - `The 6529 Network is still importing identities.`: the import runs after
   the switch-on; try again once it is done.

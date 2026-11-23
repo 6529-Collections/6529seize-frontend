@@ -14,6 +14,7 @@ import {
   heldJoin,
   IDENTITY_WALLET,
   JOIN_PRINCIPAL,
+  joinDraft,
   JOINING_WALLET,
 } from "../../lib/chain-identity/joinFixture";
 import { ChainRelayError } from "@/lib/chain-identity/relay";
@@ -36,7 +37,12 @@ jest.mock("@/lib/chain-identity/operation", () => ({
 }));
 jest.mock("@/lib/chain-identity/relay", () => ({
   ...jest.requireActual("@/lib/chain-identity/relay"),
-  chainRelay: { waiting: jest.fn(), sign: jest.fn(), cancel: jest.fn() },
+  chainRelay: {
+    waiting: jest.fn(),
+    sign: jest.fn(),
+    cancel: jest.fn(),
+    retry: jest.fn(),
+  },
 }));
 jest.mock("@/lib/chain-identity/signers", () => ({
   walletSigner: () => ({ keyType: 1, sign: async () => "0x5252" }),
@@ -215,7 +221,7 @@ it("tells the joiner who can send a held join again when the network can't be re
   );
   expect(
     await screen.findByText(
-      "Your signature is saved, but 6529.io couldn't reach the 6529 Network. The wallet that asked can send it again from its identity page."
+      "Your signature is saved, but 6529.io couldn't reach the 6529 Network. Send it again in a minute."
     )
   ).toBeInTheDocument();
 });
@@ -341,4 +347,97 @@ it("tells the joining wallet when fees rose while the request waited", async () 
       "The 6529 Network refused the join. Fees rose past the most the request allowed while it waited."
     )
   ).toBeInTheDocument();
+});
+
+it("keeps the card after signing, though the relay stops listing it, and sends a kept join again", async () => {
+  relay["sign"]!.mockImplementation(async () => {
+    // Once signed, the relay no longer lists the request for this wallet.
+    relay["waiting"]!.mockResolvedValue([]);
+    return {
+      ...heldJoin(),
+      last_error: "The 6529 Network could not be reached: timeout",
+    };
+  });
+  relay["retry"]!.mockResolvedValue({ ...heldJoin(), status: "SUBMITTED" });
+  renderRequests();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review and sign" })
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Sign with wallet" })
+  );
+  expect(
+    await screen.findByText(
+      "Your signature is saved, but 6529.io couldn't reach the 6529 Network. Send it again in a minute."
+    )
+  ).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Send again" }));
+  await waitFor(() =>
+    expect(relay["retry"]).toHaveBeenCalledWith(heldJoin().tx_id)
+  );
+  expect(awaitFinal).toHaveBeenCalledWith(heldJoin().tx_id);
+  expect(await screen.findByText("Done.")).toBeInTheDocument();
+});
+
+it("names an identity with no handle so it reads in a sentence", async () => {
+  gateway["getIdentity"]!.mockResolvedValue({
+    principalId: JOIN_PRINCIPAL,
+    handle: null,
+    wallets: [IDENTITY_WALLET],
+  });
+  renderRequests();
+  expect(
+    await screen.findByText(
+      /^The identity 0x0a0a0a…0a0a0a asks to add this wallet\./
+    )
+  ).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Review and sign" }));
+  expect(
+    await screen.findByText("This wallet joins the identity 0x0a0a0a…0a0a0a.")
+  ).toBeInTheDocument();
+});
+
+it("gives the chain's reason code when no sentence fits the joining wallet", async () => {
+  relay["sign"]!.mockResolvedValue({
+    ...heldJoin(),
+    status: "FAILED",
+    last_error:
+      "The 6529 Network refused the operation: 0x1009 WORK_EXHAUSTED, detail 0",
+  });
+  renderRequests();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review and sign" })
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Sign with wallet" })
+  );
+  expect(
+    await screen.findByText(
+      "The 6529 Network refused the join. Its reason code is WORK_EXHAUSTED."
+    )
+  ).toBeInTheDocument();
+});
+
+it("won't offer to sign a request that has expired", async () => {
+  relay["waiting"]!.mockResolvedValue([
+    heldJoin(joinDraft({ expiresAt: Date.now() - 60_000 })),
+  ]);
+  renderRequests();
+  expect(
+    await screen.findByText("The request expired before it went through.")
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Review and sign" })
+  ).not.toBeInTheDocument();
+});
+
+it("asks to sign in again when 6529.io's session has ended", async () => {
+  relay["waiting"]!.mockRejectedValue(new ChainRelayError(401, "Unauthorized"));
+  renderRequests();
+  expect(
+    await screen.findByText(
+      "Asked to add this wallet to an identity? Sign in to 6529.io with it to see the request."
+    )
+  ).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
 });

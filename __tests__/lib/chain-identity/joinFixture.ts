@@ -19,7 +19,11 @@ const word = (address: Hex): Hex => `0x${"00".repeat(12)}${address.slice(2)}`;
  * signs as role 0, the joining wallet as role 4, with nonceLane 1.
  */
 export function joinDraft(
-  options: { readonly joining?: Hex; readonly nonceLane?: number } = {}
+  options: {
+    readonly joining?: Hex;
+    readonly nonceLane?: number;
+    readonly expiresAt?: number;
+  } = {}
 ): ChainDraft {
   const joining = options.joining ?? JOINING_WALLET;
   const header = {
@@ -31,7 +35,7 @@ export function joinDraft(
     nonceLane: options.nonceLane ?? 1,
     nonce: "0",
     notBefore: "1764000000000",
-    expiresAt: String(JOIN_EXPIRES_AT),
+    expiresAt: String(options.expiresAt ?? JOIN_EXPIRES_AT),
     ethRefNumber: "0",
     ethRefHash: `0x${"00".repeat(32)}`,
     feeMode: 3,

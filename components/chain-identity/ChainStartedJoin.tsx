@@ -68,7 +68,7 @@ export default function ChainStartedJoin({
     // A 4xx answer (signed out, unknown, ended) won't change by asking again.
     retry: (failures, error) => {
       const status = httpStatus(error);
-      return failures < 1 && (status === null || status >= 500);
+      return failures < 1 && (status === null || status === 0 || status >= 500);
     },
   });
   const status = relay.data?.status;

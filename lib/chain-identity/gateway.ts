@@ -119,7 +119,7 @@ export interface ChainTxStatus {
   readonly status: "final" | "in_block" | "failed" | "pending";
   readonly height?: number;
   readonly result?: {
-    readonly code: number;
+    readonly code: number | string;
     readonly name: string;
     readonly detail: number;
   };
