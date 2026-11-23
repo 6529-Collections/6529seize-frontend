@@ -18,13 +18,12 @@ it("exposes the new test release and Desktop Classic as distinct apps", () => {
 
   const testRelease = screen.getByRole("link", {
     name: "6529 Desktop",
-    exact: true,
   });
   expect(testRelease).toHaveAttribute("href", "/desktop");
   expect(testRelease).toHaveAccessibleDescription(
     "Test release for Windows and Apple silicon Macs."
   );
   expect(
-    screen.getByRole("heading", { name: "6529 Desktop Classic", exact: true })
+    screen.getByRole("heading", { name: "6529 Desktop Classic" })
   ).toBeVisible();
 });

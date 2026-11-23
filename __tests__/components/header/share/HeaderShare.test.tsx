@@ -1099,7 +1099,7 @@ describe("HeaderShare", () => {
           });
           if (target === "desktop") {
             await userEvent.click(
-              screen.getByRole("button", { name: appName, exact: true })
+              screen.getByRole("button", { name: appName })
             );
           }
           if (isClassic) {
@@ -1119,7 +1119,6 @@ describe("HeaderShare", () => {
           expect(
             screen.getByRole("dialog", {
               name: `Connect ${appName}`,
-              exact: true,
             })
           ).toBeVisible();
           if (isClassic) {
@@ -1206,7 +1205,6 @@ describe("HeaderShare", () => {
           expect(
             screen.getByRole("button", {
               name: appName,
-              exact: true,
             })
           ).toHaveAttribute("aria-pressed", "true");
         } finally {
@@ -1516,7 +1514,7 @@ describe("HeaderShare", () => {
         screen.getByRole("button", { name: "6529 Mobile" })
       ).toHaveAttribute("aria-pressed", "true");
       expect(
-        screen.getByRole("button", { name: "6529 Desktop", exact: true })
+        screen.getByRole("button", { name: "6529 Desktop" })
       ).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: "6529 Desktop Classic" })
@@ -1766,11 +1764,12 @@ describe("HeaderShare", () => {
 
         await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
         await userEvent.click(
-          await screen.findByRole("button", { name: appName, exact: true })
+          await screen.findByRole("button", { name: appName })
         );
-        expect(
-          screen.getByRole("button", { name: appName, exact: true })
-        ).toHaveAttribute("aria-pressed", "true");
+        expect(screen.getByRole("button", { name: appName })).toHaveAttribute(
+          "aria-pressed",
+          "true"
+        );
 
         mockUseElectron.mockReturnValue(true);
         rerender(
@@ -1783,7 +1782,7 @@ describe("HeaderShare", () => {
           screen.queryByRole("button", { name: "6529 Desktop Classic" })
         ).toBeNull();
         expect(
-          screen.queryByRole("button", { name: "6529 Desktop", exact: true })
+          screen.queryByRole("button", { name: "6529 Desktop" })
         ).toBeNull();
         expect(
           screen.getByRole("button", { name: "6529 Mobile" })
@@ -2224,13 +2223,12 @@ describe("HeaderShare", () => {
         renderWithProviders(<HeaderShare />);
         await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
         await userEvent.click(
-          screen.getByRole("button", { name: "6529 Desktop", exact: true })
+          screen.getByRole("button", { name: "6529 Desktop" })
         );
         await chooseConnectOnly();
 
         const launch = await screen.findByRole("link", {
           name: "Open in 6529 Desktop",
-          exact: true,
         });
         expect(launch).toHaveAttribute(
           "href",
@@ -2256,13 +2254,12 @@ describe("HeaderShare", () => {
         renderWithProviders(<HeaderShare />);
         await userEvent.click(screen.getByRole("button", { name: "QR Code" }));
         await userEvent.click(
-          screen.getByRole("button", { name: "6529 Desktop", exact: true })
+          screen.getByRole("button", { name: "6529 Desktop" })
         );
 
         expect(
           screen.getByRole("link", {
             name: "Open in 6529 Desktop",
-            exact: true,
           })
         ).toHaveAttribute("href", "core6529://navigate/waves");
         expect(

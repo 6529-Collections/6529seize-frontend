@@ -678,7 +678,7 @@ describe("HeaderSearchModal", () => {
       fireEvent.change(getSearchInput(), { target: { value: query } });
 
       expect(
-        await screen.findByRole("link", { name: "6529 Desktop", exact: true })
+        await screen.findByRole("link", { name: "6529 Desktop" })
       ).toHaveAttribute("href", "/desktop");
     }
   );
