@@ -47,6 +47,11 @@ it("does not turn missing date boundaries into timestamps", () => {
 
 it("ignores old Group name filter links", () => {
   expect(
-    readCheckFilters(new URLSearchParams({ subject_type: "GROUP_NAME" }))
+    readCheckFilters(
+      new URLSearchParams({
+        subject_type: "GROUP_NAME",
+        trigger: "KNOWN_SAFE_PERSONAL_NAME",
+      })
+    )
   ).toEqual({});
 });

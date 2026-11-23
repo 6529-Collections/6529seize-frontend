@@ -17,6 +17,8 @@ jest.mock("next/link", () => ({
 jest.mock("@/services/api/group-members-api", () => ({
   fetchSavedGroupMembersPage: jest.fn().mockResolvedValue({
     count: 12,
+    page: 1,
+    next: false,
     data: [],
   }),
 }));

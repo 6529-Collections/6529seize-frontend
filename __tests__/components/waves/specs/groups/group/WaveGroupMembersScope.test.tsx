@@ -11,12 +11,8 @@ jest.mock("@/components/waves/specs/WaveRulesGroupMembersLink", () => ({
 }));
 
 describe("WaveGroupMembersScope", () => {
-  it("renders the member count and criteria presentation", () => {
-    render(
-      <WaveGroupMembersScope
-        group={{ id: "1", name: "Group", is_hidden: false }}
-      />
-    );
+  it("renders the member count and criteria for a visible group with just an ID", () => {
+    render(<WaveGroupMembersScope group={{ id: "1", is_hidden: false }} />);
 
     const summary = screen.getByTestId("members-summary");
     expect(summary).toHaveAttribute("href", "/network?page=1&group=1");
@@ -59,6 +55,13 @@ describe("WaveGroupMembersScope", () => {
     render(<WaveGroupMembersScope group={{ is_hidden: false }} />);
 
     expect(screen.getByText("Group unavailable")).toBeInTheDocument();
+    expect(screen.queryByTestId("members-summary")).not.toBeInTheDocument();
+  });
+
+  it("preserves the private fallback for a hidden community group", () => {
+    render(<WaveGroupMembersScope group={{ is_hidden: true }} />);
+
+    expect(screen.getByText("Private group")).toBeInTheDocument();
     expect(screen.queryByTestId("members-summary")).not.toBeInTheDocument();
   });
 });

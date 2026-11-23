@@ -50,7 +50,7 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.description":
     "Review saved checks, decisions and evaluator failures across the platform.",
   "checks.policyNotice":
-    "Public-facing text uses a stricter policy for REP categories, About text and group names. Wave safety applies to posts and reports.",
+    "Public-facing text uses a stricter policy for REP categories and About text. Wave safety applies to posts and reports.",
   "checks.privateNotice":
     "6529 Dev Team group members only. Evidence is private and may contain harmful content. Links and media are shown as text until you choose to open them.",
   "checks.count.needs_review": "Items needing review",
