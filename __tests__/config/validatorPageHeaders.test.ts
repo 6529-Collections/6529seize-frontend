@@ -28,10 +28,21 @@ describe("validator download pages stay out of search engines", () => {
     "/validator/releases",
     "/validator/releases.json",
     "/validator/download/0.1.0-test.1/SHA256SUMS",
+    "/validator/cloud-init-v1.sh",
   ])("sends noindex, nofollow on %s", async (path) => {
     const response = await getResponse(path);
     expect(response.headers.get("x-robots-tag")).toBe("noindex, nofollow");
     expect(response.headers.get("content-security-policy")).toBeTruthy();
+  });
+
+  it("serves the cloud startup script as plain text, never as a page", async () => {
+    const response = await getResponse("/validator/cloud-init-v1.sh");
+    // Exactly as configured: the test helper's own default for a response
+    // with no type is "text/plain;charset=UTF-8".
+    expect(response.headers.get("content-type")).toBe(
+      "text/plain; charset=utf-8"
+    );
+    expect(response.headers.get("x-content-type-options")).toBe("nosniff");
   });
 
   it("leaves other production pages indexable", async () => {
@@ -44,10 +55,7 @@ describe("validator download pages stay out of search engines", () => {
     "/validator/guide",
     "/validator/hardware",
     "/validator/releases",
-  ])(
-    "keeps %s out of the sitemap",
-    (path) => {
-      expect(shouldExcludeSitemapPath(path)).toBe(true);
-    }
-  );
+  ])("keeps %s out of the sitemap", (path) => {
+    expect(shouldExcludeSitemapPath(path)).toBe(true);
+  });
 });
