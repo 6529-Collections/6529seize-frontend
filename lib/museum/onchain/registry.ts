@@ -11,12 +11,8 @@ import { PROVENANCE_REGISTRY_READ_ABI as abi } from "./abi";
 import {
   ERC165_INTERFACE_ID,
   ERC165_INVALID_INTERFACE_ID,
-  ONCHAIN_MUSEUM_CHAIN_ID,
-  ONCHAIN_MUSEUM_EXPECTED_CODE_HASH,
-  ONCHAIN_MUSEUM_EXPECTED_OWNER,
-  ONCHAIN_MUSEUM_REGISTRY,
-  ONCHAIN_MUSEUM_RPC_URL,
-  PROVENANCE_REGISTRY_INTERFACE_ID,
+  ONCHAIN_MUSEUM_REGISTRY_PLACEHOLDER,
+  ONCHAIN_MUSEUM_SOURCE,
 } from "./constants";
 import type { OnchainHashRef } from "./verify";
 
@@ -164,7 +160,7 @@ function countRequest(counter: Counter, body: unknown): void {
 
 function createOnchainMuseumClient(
   counter: Counter,
-  rpcUrl: string = ONCHAIN_MUSEUM_RPC_URL
+  rpcUrl: string = ONCHAIN_MUSEUM_SOURCE.rpcUrl
 ): PublicClient {
   return createPublicClient({
     chain: sepolia,
@@ -237,7 +233,7 @@ function splitter(results: readonly ReadResult[]) {
 }
 
 const call = (functionName: string, args?: readonly unknown[]): Call => ({
-  address: ONCHAIN_MUSEUM_REGISTRY,
+  address: ONCHAIN_MUSEUM_SOURCE.registry,
   abi,
   functionName,
   ...(args === undefined ? {} : { args }),
@@ -266,7 +262,7 @@ async function readHead(
   blockNumber: bigint
 ): Promise<HeadReads> {
   const head = await readMany(rpc, blockNumber, [
-    call("supportsInterface", [PROVENANCE_REGISTRY_INTERFACE_ID]),
+    call("supportsInterface", [ONCHAIN_MUSEUM_SOURCE.build.interfaceId]),
     call("supportsInterface", [ERC165_INTERFACE_ID]),
     call("supportsInterface", [ERC165_INVALID_INTERFACE_ID]),
     call("owner"),
@@ -500,6 +496,17 @@ async function readDetails(
 export async function readRegistrySnapshot(
   client?: PublicClient
 ): Promise<RegistrySnapshot> {
+  const {
+    registry,
+    chainId: expectedChainId,
+    owner,
+    build,
+  } = ONCHAIN_MUSEUM_SOURCE;
+  if (
+    registry.toLowerCase() === ONCHAIN_MUSEUM_REGISTRY_PLACEHOLDER.toLowerCase()
+  ) {
+    throw new Error("registry_address_pending");
+  }
   const counter: Counter = { httpRequests: 0, ethCalls: 0 };
   const rpc = client ?? createOnchainMuseumClient(counter);
 
@@ -507,9 +514,9 @@ export async function readRegistrySnapshot(
   const blockNumber = block.number;
   const [chainId, code] = await Promise.all([
     rpc.getChainId(),
-    rpc.getCode({ address: ONCHAIN_MUSEUM_REGISTRY, blockNumber }),
+    rpc.getCode({ address: registry, blockNumber }),
   ]);
-  if (chainId !== ONCHAIN_MUSEUM_CHAIN_ID) {
+  if (chainId !== expectedChainId) {
     throw new Error("registry_wrong_chain");
   }
   const codeHash = code === undefined || code === "0x" ? null : keccak256(code);
@@ -518,21 +525,18 @@ export async function readRegistrySnapshot(
   const details = await readDetails(rpc, blockNumber, listing);
 
   return {
-    registry: ONCHAIN_MUSEUM_REGISTRY,
+    registry,
     blockNumber: Number(blockNumber),
     blockTimestamp: Number(block.timestamp),
     checks: {
       chainId,
       codeHash,
       codeHashMatches:
-        codeHash?.toLowerCase() ===
-        ONCHAIN_MUSEUM_EXPECTED_CODE_HASH.toLowerCase(),
+        codeHash?.toLowerCase() === build.runtimeCodeHash.toLowerCase(),
       supportsRegistryInterface: head.supportsRegistryInterface,
       erc165Conforms: head.erc165Conforms,
       owner: head.owner,
-      ownerMatches:
-        head.owner.toLowerCase() ===
-        ONCHAIN_MUSEUM_EXPECTED_OWNER.toLowerCase(),
+      ownerMatches: head.owner.toLowerCase() === owner.toLowerCase(),
       frozen: head.frozen,
       successor: head.successor,
     },

@@ -8,11 +8,9 @@ import type {
   OnchainMuseumRecord,
   OnchainRecordState,
 } from "@/lib/museum/onchain/museum";
-import {
-  onchainMuseumRecordHref,
-  workImage,
-  type OnchainMuseumView,
-} from "@/lib/museum/onchain/presentation";
+import { onchainMuseumRecordHref } from "@/lib/museum/onchain/fields";
+import { type OnchainMuseumView } from "@/lib/museum/onchain/presentation";
+import { workImage } from "@/lib/museum/onchain/works";
 import type { FilterableGroupsCopy, FilterableItem } from "./FilterableGroups";
 import { registryValueLabel } from "./labels";
 
@@ -27,6 +25,7 @@ export const LIST_LINK = `tw-break-words tw-text-primary-300 tw-no-underline hov
 
 const STATE_KEYS: Readonly<Record<OnchainRecordState, MessageKey>> = {
   verified: "museum.onchain.state.verified",
+  nonconforming: "museum.onchain.state.nonconforming",
   mismatch: "museum.onchain.state.mismatch",
   unavailable: "museum.onchain.state.unavailable",
   unsupported: "museum.onchain.state.unsupported",
@@ -35,6 +34,7 @@ const STATE_KEYS: Readonly<Record<OnchainRecordState, MessageKey>> = {
 
 const STATE_TONES: Readonly<Record<OnchainRecordState, string>> = {
   verified: "tw-border-emerald-400/40 tw-bg-emerald-400/10 tw-text-emerald-200",
+  nonconforming: "tw-border-red-400/50 tw-bg-red-400/10 tw-text-red-200",
   mismatch: "tw-border-red-400/50 tw-bg-red-400/10 tw-text-red-200",
   unavailable: "tw-border-yellow-400/40 tw-bg-yellow-400/10 tw-text-yellow-100",
   unsupported: "tw-border-yellow-400/40 tw-bg-yellow-400/10 tw-text-yellow-100",
@@ -47,10 +47,6 @@ export function literalLabel(literal: string | null): string {
 
 export function stateLabel(state: OnchainRecordState): string {
   return t(locale, STATE_KEYS[state]);
-}
-
-export function statusLabel(value: string): string {
-  return registryValueLabel("status", value);
 }
 
 /** The literal, with its plain name when the messages know it. */

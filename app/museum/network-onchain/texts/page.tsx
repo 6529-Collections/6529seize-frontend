@@ -5,9 +5,10 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { OnchainMuseumRecord } from "@/lib/museum/onchain/museum";
 import {
+  documentPath,
   ONCHAIN_MUSEUM_BASE_PATH,
-  type OnchainMuseumView,
-} from "@/lib/museum/onchain/presentation";
+} from "@/lib/museum/onchain/fields";
+import { type OnchainMuseumView } from "@/lib/museum/onchain/presentation";
 import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";
 import {
   FilterableGroups,
@@ -50,7 +51,7 @@ function withDistinctTitles(
       view,
       record,
       (counts.get(view.labelOf(record)) ?? 0) > 1
-        ? fileTitle(record.documentPath)
+        ? fileTitle(documentPath(record))
         : undefined
     )
   );

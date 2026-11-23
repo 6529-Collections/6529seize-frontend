@@ -12,6 +12,9 @@ generated
 *.generated.*
 native/mls-wasm/target
 lib/museum/generative-studies/minted-indexes/*.json
+# Exact payload and text bytes, hashed by the on-chain Museum tests.
+__tests__/fixtures/museum-onchain-profile/payloads
+__tests__/fixtures/museum-onchain-profile/texts
 # Written by 6529 AI's build_models_page.py and replaced as a whole.
 lib/ai-page/content/models/*.json
 coverage

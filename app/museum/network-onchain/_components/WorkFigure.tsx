@@ -2,12 +2,12 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import { formatList } from "@/i18n/format";
 import type { OnchainMuseumRecord } from "@/lib/museum/onchain/museum";
+import type { OnchainMuseumView } from "@/lib/museum/onchain/presentation";
 import {
-  payloadRecord,
-  payloadStrings,
-  type OnchainMuseumView,
+  creatorsOf,
+  type OnchainRightsView,
   type OnchainWorkImageView,
-} from "@/lib/museum/onchain/presentation";
+} from "@/lib/museum/onchain/works";
 import { registryValueLabel } from "./labels";
 import { VerifiedImage, type VerifiedImageCopy } from "./VerifiedImage";
 
@@ -22,23 +22,12 @@ function verifiedImageCopy(): VerifiedImageCopy {
   };
 }
 
-/** A work whose medium the record describes as generative software. */
-export function isGenerative(record: OnchainMuseumRecord): boolean {
-  const medium = payloadRecord(record, "profile")?.["medium"];
-  return typeof medium === "string" && /generative/iu.test(medium);
-}
-
 /** The work's artists, in the record's order, as one phrase. */
 export function workArtists(
   view: OnchainMuseumView,
   record: OnchainMuseumRecord
 ): string | undefined {
-  const names = payloadStrings(
-    payloadRecord(record, "profile")?.["creator_entity_ids"]
-  )
-    .map((id) => view.resolve(id))
-    .filter((link) => link.href !== null)
-    .map((link) => link.label);
+  const names = creatorsOf(view, record).map((item) => view.labelOf(item));
   return names.length === 0 ? undefined : formatList(locale, names);
 }
 
@@ -60,15 +49,29 @@ function credit(view: OnchainWorkImageView): string | null {
       });
 }
 
-/** The rights status, unless the credit already states it. */
+/**
+ * The rights the registry records for the work (PRV_RIGHTS), else the
+ * presentation manifest's rights status, unless the credit already states it.
+ */
 function rightsLine(
-  status: string | null,
+  rights: readonly OnchainRightsView[],
+  manifestStatus: string | null,
   creditText: string | null
 ): string | null {
-  if (status === null) return null;
-  const lead = status.split(";")[0]?.trim() ?? "";
+  const recorded = rights.find((item) => item.licence !== null);
+  const licence = recorded?.licence ?? null;
+  if (licence !== null) {
+    if (recorded?.status === "licensed") {
+      return t(locale, "museum.onchain.image.rightsLicensed", { licence });
+    }
+    if (recorded?.status === "restricted") {
+      return t(locale, "museum.onchain.image.rightsRestricted", { licence });
+    }
+  }
+  if (manifestStatus === null) return null;
+  const lead = manifestStatus.split(";")[0]?.trim() ?? "";
   if (lead !== "" && creditText?.includes(lead) === true) return null;
-  return t(locale, "museum.onchain.image.rights", { status });
+  return t(locale, "museum.onchain.image.rights", { status: manifestStatus });
 }
 
 /**
@@ -85,7 +88,7 @@ export function WorkFigure({
   const aspectRatio =
     largest === undefined ? 1 : largest.width / largest.height;
   const creditText = credit(view);
-  const rights = rightsLine(image.rightsStatus, creditText);
+  const rights = rightsLine(view.rights, image.rightsStatus, creditText);
   return (
     <figure className="tw-m-0 tw-mb-10 tw-max-w-4xl">
       {/* Tall works keep their whole height in view: width follows 80vh. */}

@@ -4,7 +4,10 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import type { OnchainMuseumRecord } from "@/lib/museum/onchain/museum";
-import { ONCHAIN_MUSEUM_BASE_PATH } from "@/lib/museum/onchain/presentation";
+import {
+  documentPath,
+  ONCHAIN_MUSEUM_BASE_PATH,
+} from "@/lib/museum/onchain/fields";
 import {
   algorithmLabel,
   canonicalizationLabel,
@@ -25,11 +28,66 @@ const ETHERSCAN = "https://sepolia.etherscan.io";
 
 type Fact = { label: string; value: ReactNode };
 
+/** The text a PRV_DOCUMENT names: its content ID, SHA-256 and size. */
+function textFacts(record: OnchainMuseumRecord): Fact[] {
+  const { text } = record;
+  if (text === null) return [];
+  const field = (key: MessageKey) => t(locale, key);
+  return [
+    ...(text.cidText === null
+      ? []
+      : [
+          {
+            label: field("museum.onchain.field.textCid"),
+            value: (
+              <CopyValue
+                value={text.cidText}
+                field={field("museum.onchain.field.textCid")}
+                href={`${IPFS_RESOLVER}${text.cidText}`}
+              />
+            ),
+          },
+        ]),
+    ...(text.sha256 === null
+      ? []
+      : [
+          {
+            label: field("museum.onchain.field.textDigest"),
+            value: (
+              <>
+                <span className="tw-block tw-text-iron-300">
+                  {algorithmLabel(2)}
+                  {text.byteSize === null
+                    ? null
+                    : ` · ${t(locale, "museum.onchain.field.bytes", {
+                        count: formatCount(text.byteSize),
+                      })}`}
+                </span>
+                <CopyValue
+                  value={text.sha256}
+                  field={field("museum.onchain.field.textDigest")}
+                />
+              </>
+            ),
+          },
+        ]),
+    ...(text.servedBy === null
+      ? []
+      : [
+          {
+            label: field("museum.onchain.field.textServedBy"),
+            value: <Mono>{text.servedBy}</Mono>,
+          },
+        ]),
+  ];
+}
+
 /** The values the registry stores for a record, as stored. */
 export function OnchainFacts({
   record,
 }: Readonly<{ record: OnchainMuseumRecord }>) {
   const { version } = record;
+  const path = documentPath(record);
   const field = (key: MessageKey) => t(locale, key);
   const facts: Fact[] = [
     {
@@ -120,12 +178,13 @@ export function OnchainFacts({
         />
       ),
     },
-    ...(record.documentPath === null
+    ...textFacts(record),
+    ...(path === null
       ? []
       : [
           {
             label: field("museum.onchain.field.path"),
-            value: <Mono>{record.documentPath}</Mono>,
+            value: <Mono>{path}</Mono>,
           },
         ]),
     ...(record.servedBy === null

@@ -1,10 +1,8 @@
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { MUSEUM_ONCHAIN_MESSAGES } from "@/i18n/namespaces/museum-onchain";
-import type {
-  OnchainLabeler,
-  OnchainTextGroupKind,
-} from "@/lib/museum/onchain/presentation";
+import type { OnchainLabeler } from "@/lib/museum/onchain/presentation";
+import type { OnchainTextGroupKind } from "@/lib/museum/onchain/texts";
 
 const locale = DEFAULT_LOCALE;
 
@@ -13,8 +11,9 @@ function isKey(key: string): key is MessageKey {
 }
 
 /**
- * Copy for a registry value. A value the messages do not list is shown as
- * itself, labelled, so a new type stays visible without being misnamed.
+ * Copy for a registry or profile value. A value the messages do not list is
+ * shown as itself, labelled, so a new kind stays visible without being
+ * misnamed.
  */
 export function registryValueLabel(prefix: string, value: string): string {
   const key = `museum.onchain.${prefix}.${value}`;
@@ -38,12 +37,32 @@ const TEXT_GROUP_KEYS: Readonly<Record<OnchainTextGroupKind, MessageKey>> = {
   other: "museum.onchain.textGroup.other",
 };
 
+function relationPhrase(kind: string, source: string, target: string): string {
+  const key = `museum.onchain.relation.${kind}`;
+  return isKey(key)
+    ? t(locale, key, { source, target })
+    : t(locale, "museum.onchain.relation.other", { source, target });
+}
+
+/** A family's kind, falling back to the family's own name. */
+function recordKindLabel(
+  prefix: "recordKind" | "recordKinds",
+  family: string,
+  kind: string
+): string {
+  const key = `museum.onchain.${prefix}.${family}.${kind}`;
+  return isKey(key) ? t(locale, key) : registryValueLabel("family", family);
+}
+
 export const onchainLabeler: OnchainLabeler = {
-  entityTypePlural: (type) => registryValueLabel("entityType", type),
-  entityTypeSingular: (type) => registryValueLabel("entitySingular", type),
-  recordType: (literal) => registryValueLabel("recordType", literal),
-  recordTypePlural: (literal) =>
-    registryValueLabel("recordTypePlural", literal),
-  relationType: (type) => registryValueLabel("relationType", type),
+  entityGroup: (key) => registryValueLabel("entityGroup", key),
+  entitySingular: (key) => registryValueLabel("entity", key),
+  family: (recordType) => registryValueLabel("family", recordType),
+  recordKind: (family, kind) => recordKindLabel("recordKind", family, kind),
+  recordKindPlural: (family, kind) =>
+    recordKindLabel("recordKinds", family, kind),
+  documentKind: (kind) => registryValueLabel("documentKind", kind),
+  relation: relationPhrase,
   textGroup: (kind) => t(locale, TEXT_GROUP_KEYS[kind]),
+  unverifiedGroup: () => t(locale, "museum.onchain.unverified.heading"),
 };
