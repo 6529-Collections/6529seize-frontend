@@ -16,7 +16,7 @@ type NextMintDropState = {
   readonly isFetching: boolean;
   readonly isLoading: boolean;
   readonly isError: boolean;
-  readonly hasRefreshedWinner: boolean;
+  readonly isFetchedAfterMount: boolean;
 };
 
 export const useNextMintDrop = ({
@@ -72,11 +72,10 @@ export const useNextMintDrop = ({
     isSettingsLoaded: isLoaded,
     isFetching: isFetching || (!isLoaded && !!waveId),
     isLoading: (!isLoaded && !loadError) || (!!waveId && isLoading),
-    hasRefreshedWinner:
-      (isLoaded && !waveId) ||
-      (winnerRequestScope === undefined
+    isFetchedAfterMount:
+      winnerRequestScope === undefined
         ? isFetchedAfterMount
-        : hasLoadedDecisions),
+        : hasLoadedDecisions,
     isError: (!isLoaded && !!loadError) || (!!waveId && isError),
   };
 };

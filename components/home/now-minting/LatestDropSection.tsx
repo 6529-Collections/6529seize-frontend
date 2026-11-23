@@ -40,7 +40,7 @@ export default function LatestDropSection({
     nextMint,
     isLoading: isNextMintLoading,
     isError: isNextMintError,
-    hasRefreshedWinner,
+    isFetchedAfterMount: hasRefreshedWinner,
   } = useNextMintDrop({ winnerRequestScope });
   const hasHydrated = useHasHydrated();
   const [clientSelection, setClientSelection] = useState<{

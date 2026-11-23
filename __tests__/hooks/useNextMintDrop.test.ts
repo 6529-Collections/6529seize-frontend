@@ -98,13 +98,13 @@ it("waits for the homepage request even when an older shared request completes",
 
   await act(async () => sharedRequest.resolve(emptyPage));
   await waitFor(() =>
-    expect(shared.result.current.hasRefreshedWinner).toBe(true)
+    expect(shared.result.current.isFetchedAfterMount).toBe(true)
   );
-  expect(homepage.result.current.hasRefreshedWinner).toBe(false);
+  expect(homepage.result.current.isFetchedAfterMount).toBe(false);
   expect(homepage.result.current.isLoading).toBe(true);
 
   await act(async () => homepageRequest.resolve(emptyPage));
   await waitFor(() =>
-    expect(homepage.result.current.hasRefreshedWinner).toBe(true)
+    expect(homepage.result.current.isFetchedAfterMount).toBe(true)
   );
 });

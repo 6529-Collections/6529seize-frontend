@@ -138,7 +138,7 @@ describe("LatestDropSection", () => {
     mockUseNextMintDrop.mockReturnValue({
       nextMint: null,
       isLoading: false,
-      hasRefreshedWinner: false,
+      isFetchedAfterMount: false,
     });
     render(
       <LatestDropSection
@@ -163,7 +163,7 @@ describe("LatestDropSection", () => {
       mockUseLatestDropTransitionReady.mockReturnValue(true);
       mockUseNextMintDrop.mockReturnValue({
         nextMint: { id: "cached-winner" },
-        hasRefreshedWinner: false,
+        isFetchedAfterMount: false,
       });
       const mintStatus = mockUseNowMintingStatus();
       const initialDrop =
@@ -192,7 +192,7 @@ describe("LatestDropSection", () => {
 
       mockUseNextMintDrop.mockReturnValue({
         nextMint: { id: "fresh-winner" },
-        hasRefreshedWinner: true,
+        isFetchedAfterMount: true,
       });
       rerender(
         <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
@@ -215,7 +215,7 @@ describe("LatestDropSection", () => {
     } as HomeDropSelection;
     mockUseNextMintDrop.mockReturnValue({
       nextMint: { id: "cached-winner" },
-      hasRefreshedWinner: false,
+      isFetchedAfterMount: false,
     });
     const { rerender } = render(
       <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
@@ -241,7 +241,7 @@ describe("LatestDropSection", () => {
 
     mockUseNextMintDrop.mockReturnValue({
       nextMint: { id: "fresh-winner" },
-      hasRefreshedWinner: true,
+      isFetchedAfterMount: true,
     });
     rerender(
       <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
