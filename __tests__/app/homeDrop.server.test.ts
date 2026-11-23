@@ -137,6 +137,30 @@ it("keeps Latest Drop between mint phases even after the grace deadline", async 
   });
 });
 
+it.each([false, true])(
+  "keeps the card selection accurate during a winner outage (mint complete: %s)",
+  async (complete) => {
+    mockFetch
+      .mockResolvedValueOnce(Response.json(latest))
+      .mockResolvedValueOnce(Response.json({}, { status: 503 }));
+    if (!complete) {
+      mockReadClaim.mockResolvedValue([
+        1n,
+        {
+          total: 50,
+          totalMax: 100,
+          startDate: 1,
+          endDate: transitionTime / 1000 + 60,
+          merkleRoot: `0x${"0".repeat(64)}`,
+        },
+      ]);
+    }
+    await expect(getInitialHomeDrop()).resolves.toEqual(
+      complete ? null : { kind: "latest", nft: latest }
+    );
+  }
+);
+
 it("leaves the slot empty when mint completion could not be checked", async () => {
   mockReadClaim.mockRejectedValue(new Error("Unavailable"));
   await expect(getInitialHomeDrop()).resolves.toBeNull();

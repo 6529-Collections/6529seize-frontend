@@ -36,8 +36,12 @@ test.describe("Initial homepage HTML", () => {
   }) => {
     await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    const main = page.locator("main").first();
-    const labelledCards = main.locator("[data-home-drop]");
+    const main = page.getByRole("main").first();
+    await expect(main).toBeAttached();
+    const labelledCards = page
+      .getByRole("main")
+      .first()
+      .locator("[data-home-drop]");
     const headings = main.getByText(/^(Latest Drop|Next Drop)$/, {
       exact: true,
     });
@@ -1832,6 +1836,8 @@ test.describe("Home Page @smoke @medium @large", () => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
     if (isDesktopWebProject(testInfo.project.name)) {
       const dropTitle = page
+        .getByRole("main")
+        .first()
         .locator("[data-home-drop]")
         .locator(
           '[data-home-action="Open artwork"], [data-home-action="Open drop"]'

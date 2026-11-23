@@ -36,15 +36,14 @@ const SETTINGS_TTL_MS = 60_000;
 
 // Each read tracks only its most recent key, with a shared in-flight request.
 // Keep the cached data separate from the clock-based selection.
-function cacheHomeRead<K, T>(read: (key: K) => Promise<T>, ttl: number) {
+function cacheHomeRead<K extends string | number | null, T>(
+  read: (key: K) => Promise<T>,
+  ttl: number
+) {
   let cached: { key: K; result: Promise<T>; expiresAt: number } | undefined;
 
   return (key: K): Promise<T> => {
-    if (
-      cached?.expiresAt !== undefined &&
-      cached.expiresAt > Date.now() &&
-      cached.key === key
-    ) {
+    if (cached?.key === key && cached.expiresAt > Date.now()) {
       return cached.result;
     }
 
@@ -112,7 +111,7 @@ const getWinnerForWave = cacheHomeRead(async (waveId: string) => {
 }, PUBLIC_DATA_TTL_MS);
 
 async function getNextWinner() {
-  const waveId = await getMainStageWaveId(undefined);
+  const waveId = await getMainStageWaveId(null);
   return waveId ? getWinnerForWave(waveId) : null;
 }
 
@@ -180,16 +179,17 @@ async function isMintComplete(tokenId: number): Promise<boolean> {
 }
 
 async function selectHomeDrop(): Promise<HomeDropSelection | null> {
-  const nft = await getLatestArtwork(undefined);
+  const nft = await getLatestArtwork(null);
   const transitionTime = getLatestDropTransitionTime(nft.id);
   if (transitionTime === null) return null;
   if (Date.now() < transitionTime) return { kind: "latest", nft };
 
-  const [complete, winner] = await Promise.all([
-    isMintComplete(nft.id),
-    getNextWinner(),
-  ]);
-  return complete && winner
+  const nextWinner = getNextWinner().catch(() => undefined);
+  if (!(await isMintComplete(nft.id))) return { kind: "latest", nft };
+
+  const winner = await nextWinner;
+  if (winner === undefined) return null;
+  return winner
     ? { kind: "next", mintNumber: nft.id, drop: winner }
     : { kind: "latest", nft };
 }

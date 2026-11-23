@@ -23,6 +23,7 @@ export default function LatestDropSection({
   const {
     nft,
     isFetching,
+    status,
     isDropComplete,
     isStatusLoading,
     isStatusError,
@@ -47,11 +48,14 @@ export default function LatestDropSection({
   const resolvedDrop =
     clientSelection?.seed === initialDrop ? clientSelection.drop : initialDrop;
 
+  const isLatestConfirmed =
+    isLatestDropTransitionReady === false && status !== null;
   const isDecisionLoading =
     isStatusLoading ||
-    isNextMintLoading ||
-    isLatestDropTransitionReady === null;
-  const hasUnconfirmedWinner = isNextMintError || (isStatusError && !!nextMint);
+    isLatestDropTransitionReady === null ||
+    (!isLatestConfirmed && isNextMintLoading);
+  const hasUnconfirmedWinner =
+    !isLatestConfirmed && (isNextMintError || (isStatusError && !!nextMint));
 
   const resolvedMintNumber =
     resolvedDrop?.kind === "next"

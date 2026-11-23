@@ -153,6 +153,7 @@ describe("ssrFetch", () => {
     const headers = sentRequest().headers;
     expect(headers.get("Authorization")).toBeNull();
     expect(headers.get("x-6529-auth")).toBe("server-staging-key");
+    expect(headers.get("x-6529-internal-id")).toBe("client-id");
     expect(headers.get("x-6529-internal-signature")).toBe("request-signature");
   });
 

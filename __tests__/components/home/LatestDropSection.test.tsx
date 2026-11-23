@@ -50,6 +50,7 @@ describe("LatestDropSection", () => {
       nft: { id: 536 },
       isFetching: false,
       isDropComplete: true,
+      status: "ended",
       isStatusLoading: false,
       error: null,
       refetch: mockRefetch,
@@ -71,6 +72,7 @@ describe("LatestDropSection", () => {
         nft: { id: 536 },
         isFetching: false,
         isDropComplete: false,
+        status: null,
         isStatusLoading: pending === "mint status",
       });
       mockUseNextMintDrop.mockReturnValue({
@@ -180,6 +182,33 @@ describe("LatestDropSection", () => {
       "537"
     );
     expect(screen.queryByTestId("next-drop")).not.toBeInTheDocument();
+  });
+
+  it("shows a confirmed active mint when the winner lookup fails", () => {
+    mockUseNextMintDrop.mockReturnValue({ nextMint: null, isError: true });
+    render(
+      <LatestDropSection
+        mintStatus={{
+          ...mockUseNowMintingStatus(),
+          status: "active",
+          isDropComplete: false,
+        }}
+      />
+    );
+
+    expect(screen.getByTestId("latest-drop")).toHaveAttribute(
+      "data-token-id",
+      "536"
+    );
+  });
+
+  it("keeps the slot empty if the winner lookup fails after the grace period", () => {
+    mockUseLatestDropTransitionReady.mockReturnValue(true);
+    mockUseNextMintDrop.mockReturnValue({ nextMint: null, isError: true });
+    render(<LatestDropSection mintStatus={mockUseNowMintingStatus()} />);
+
+    expect(screen.queryByText("Latest Drop")).not.toBeInTheDocument();
+    expect(screen.queryByText("Next Drop")).not.toBeInTheDocument();
   });
 
   it("keeps an active latest drop visible during a background refresh", () => {

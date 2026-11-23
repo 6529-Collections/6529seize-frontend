@@ -237,6 +237,9 @@ provides another future result. It describes the voting result, not minting.
   stats show `Unavailable` and the countdown shows its error state. If an
   upcoming winner exists and the initial mint status is unknown, the slot waits
   for confirmation before showing a card.
+- The homepage can still show an active mint if the winner lookup fails.
+  After the grace period, a completed mint needs a successful winner lookup
+  to choose the first card.
 - Loaded artwork stays visible during background refreshes, including a
   refresh that fails. The homepage switches to `Next Drop` only after mint
   completion is confirmed, the grace period has elapsed, and a winner is ready.

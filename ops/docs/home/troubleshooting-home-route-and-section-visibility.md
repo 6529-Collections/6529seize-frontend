@@ -39,8 +39,8 @@ This page covers:
 ## Common Scenarios
 
 - `Latest Drop` or `Next Drop` missing:
-  - The selected drop usually appears on the initial page. If mint status or
-    next-winner data is still pending, the slot stays hidden until it resolves.
+  - The selected drop usually appears on the initial page. If the homepage
+    cannot yet choose a drop, the slot stays hidden until it has enough data.
   - `Next Drop` shows only when the current mint is ended and a next winner
     exists.
   - If there is no current mint and no eligible next winner, the top slot stays
