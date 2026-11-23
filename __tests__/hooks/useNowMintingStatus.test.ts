@@ -38,3 +38,16 @@ it("settles initial status loading when the claim request fails", () => {
   expect(result.current.isStatusError).toBe(true);
   expect(result.current.isDropComplete).toBe(false);
 });
+
+it("holds tentative allowlist completion until the phase has been checked", () => {
+  (useManifoldClaim as jest.Mock).mockReturnValue({
+    claim: { identifier: 563, isDropComplete: true, status: "ended" },
+    isCompletionPending: true,
+    isError: false,
+  });
+
+  const { result } = renderHook(useNowMintingStatus);
+  expect(result.current.isStatusLoading).toBe(true);
+  expect(result.current.status).toBeNull();
+  expect(result.current.isDropComplete).toBe(false);
+});

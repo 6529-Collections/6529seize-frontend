@@ -36,10 +36,12 @@ export enum ManifoldPhase {
 
 type MemesRootsState =
   | {
+      identifier?: number;
       status: "idle" | "loading" | "error";
       roots: null;
     }
   | {
+      identifier: number;
       status: "success";
       roots: MintingClaimsRootItem[];
     };
@@ -170,7 +172,10 @@ interface ManifoldClaimReadValues {
   readonly walletMax?: unknown;
   readonly storageProtocol?: unknown;
 }
+type ResolvedManifoldClaim = ManifoldClaim & { isCompletionPending: boolean };
+
 interface UseManifoldClaimResult {
+  isCompletionPending: boolean;
   claim: ManifoldClaim | undefined;
   isFetching: boolean;
   isError: boolean;
@@ -193,7 +198,9 @@ function buildClaimFromReadData({
   getStatus,
   getMemePhase,
   getNextMemePhase,
+  awaitMemeRoots,
 }: {
+  readonly awaitMemeRoots: boolean;
   readonly data: unknown;
   readonly readMethod: ManifoldClaimReadMethod;
   readonly identifier: number;
@@ -208,7 +215,7 @@ function buildClaimFromReadData({
     memePhase: MemePhase | undefined,
     start: number
   ) => MemePhase | undefined;
-}): ManifoldClaim | undefined {
+}): ResolvedManifoldClaim | undefined {
   const readData = data as {
     readonly claim?: unknown;
     readonly instanceId?: unknown;
@@ -274,6 +281,8 @@ function buildClaimFromReadData({
     nextMemePhase,
     isFinalized,
     isDropComplete,
+    isCompletionPending:
+      awaitMemeRoots && !publicMerkle && !isSoldOut && isDropComplete,
     isSoldOut,
     isError: false,
   };
@@ -290,7 +299,7 @@ export function useManifoldClaim({
   const rootsScope = useContext(MemesMintingRootsContext);
   const readMethod: ManifoldClaimReadMethod =
     chainId === mainnet.id ? "getClaimForToken" : "getClaim";
-  const [claim, setClaim] = useState<ManifoldClaim | undefined>();
+  const [claim, setClaim] = useState<ResolvedManifoldClaim | undefined>();
   const [phaseBoundary, setPhaseBoundary] = useState(0);
   const isPageVisible = usePageVisible();
   const [refetchInterval, setRefetchInterval] = useState<number>(
@@ -311,6 +320,13 @@ export function useManifoldClaim({
     return ManifoldClaimStatus.ENDED;
   }, []);
 
+  const currentMemeRoots =
+    memesRootsState.identifier === identifier ? memesRootsState : undefined;
+  const awaitMemeRoots =
+    areEqualAddresses(contract, MEMES_CONTRACT) &&
+    currentMemeRoots?.status !== "success" &&
+    currentMemeRoots?.status !== "error";
+
   const getMemePhase = useCallback(
     (
       phase: ManifoldPhase,
@@ -327,13 +343,13 @@ export function useManifoldClaim({
         merkleRoot,
         start,
         end,
-        roots: memesRootsState.roots,
+        roots: currentMemeRoots?.roots ?? null,
       });
       return buildMemesPhases(Time.seconds(start)).find(
         (memePhase) => memePhase.id === phaseId
       );
     },
-    [contract, memesRootsState]
+    [contract, currentMemeRoots]
   );
 
   const getNextMemePhase = useCallback(
@@ -392,6 +408,7 @@ export function useManifoldClaim({
 
     let isMounted = true;
     setMemesRootsState({
+      identifier,
       status: "loading",
       roots: null,
     });
@@ -405,6 +422,7 @@ export function useManifoldClaim({
         }
 
         setMemesRootsState({
+          identifier,
           status: "success",
           roots: Array.isArray(roots) ? roots : [],
         });
@@ -415,6 +433,7 @@ export function useManifoldClaim({
         }
 
         setMemesRootsState({
+          identifier,
           status: "error",
           roots: null,
         });
@@ -438,6 +457,7 @@ export function useManifoldClaim({
       getStatus,
       getMemePhase,
       getNextMemePhase,
+      awaitMemeRoots,
     });
 
     if (!newClaim) {
@@ -457,6 +477,7 @@ export function useManifoldClaim({
     getMemePhase,
     getNextMemePhase,
     getStatus,
+    awaitMemeRoots,
     phaseBoundary,
     isPageVisible,
   ]);
@@ -492,6 +513,7 @@ export function useManifoldClaim({
 
   return {
     claim: claimWithError,
+    isCompletionPending: claim?.isCompletionPending ?? false,
     isFetching: readContract.isFetching,
     isError: !!readContract.error,
     refetch: async () => {

@@ -152,6 +152,53 @@ describe("LatestDropSection", () => {
     expect(screen.queryByTestId("latest-drop")).not.toBeInTheDocument();
   });
 
+  it.each(["latest", "next"] as const)(
+    "keeps a server-selected %s card until the cached winner is refreshed",
+    (kind) => {
+      mockUseLatestDropTransitionReady.mockReturnValue(true);
+      mockUseNextMintDrop.mockReturnValue({
+        nextMint: { id: "cached-winner" },
+        isFetchedAfterMount: false,
+      });
+      const mintStatus = mockUseNowMintingStatus();
+      const initialDrop =
+        kind === "latest"
+          ? { kind, nft: mintStatus.nft }
+          : {
+              kind,
+              mintNumber: 536,
+              drop: { id: "server-winner" } as ApiDropV2View,
+            };
+      const { rerender } = render(
+        <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
+      );
+      if (kind === "latest") {
+        expect(screen.getByTestId("latest-drop")).toHaveAttribute(
+          "data-token-id",
+          "536"
+        );
+        expect(screen.queryByTestId("next-drop")).not.toBeInTheDocument();
+      } else {
+        expect(screen.getByTestId("next-drop")).toHaveAttribute(
+          "data-drop-id",
+          "server-winner"
+        );
+      }
+
+      mockUseNextMintDrop.mockReturnValue({
+        nextMint: { id: "fresh-winner" },
+        isFetchedAfterMount: true,
+      });
+      rerender(
+        <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
+      );
+      expect(screen.getByTestId("next-drop")).toHaveAttribute(
+        "data-drop-id",
+        "fresh-winner"
+      );
+    }
+  );
+
   it("retains the server-selected card during a failed browser refresh and advances when the latest mint changes", () => {
     const mintStatus = mockUseNowMintingStatus();
     mockUseNextMintDrop.mockReturnValue({ nextMint: null, isError: true });
@@ -184,8 +231,12 @@ describe("LatestDropSection", () => {
     expect(screen.queryByTestId("next-drop")).not.toBeInTheDocument();
   });
 
-  it("shows a confirmed active mint when the winner lookup fails", () => {
-    mockUseNextMintDrop.mockReturnValue({ nextMint: null, isError: true });
+  it("shows a confirmed active mint when the grace clock has elapsed and the winner lookup fails", () => {
+    mockUseLatestDropTransitionReady.mockReturnValue(true);
+    mockUseNextMintDrop.mockReturnValue({
+      nextMint: { id: "cached-winner" },
+      isError: true,
+    });
     render(
       <LatestDropSection
         mintStatus={{

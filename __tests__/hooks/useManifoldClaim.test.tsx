@@ -7,8 +7,10 @@ import {
   useManifoldClaim,
 } from "@/hooks/useManifoldClaim";
 import { getMemesMintingRoots } from "@/services/api/memes-minting-claims-api";
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { useReadContract } from "wagmi";
+import type { MintingClaimsRootItem } from "@/generated/models/MintingClaimsRootItem";
+import { createDeferredPromise } from "../utils/deferredPromise";
 
 jest.mock("wagmi", () => ({ useReadContract: jest.fn() }));
 jest.mock("@/services/api/memes-minting-claims-api", () => ({
@@ -246,6 +248,56 @@ test("keeps memes drops active across phased allowlists", async () => {
   expect(result.current.claim?.isDropComplete).toBe(false);
   expect(result.current.claim?.nextMemePhase?.id).toBe(phase1.id);
   expect(mockRead.mock.lastCall?.[0].query.enabled).toBe(true);
+});
+
+test("marks tentative completion pending until an ended allowlist's roots resolve", async () => {
+  const [phase0, , , publicPhase] = buildMemesPhases(
+    Time.fromString("2024-07-03T00:00:00.000Z")
+  );
+  const now = publicPhase.end.plusMinutes(15);
+  const merkleRoot = `0x${"1".repeat(64)}`;
+  jest.spyOn(Date, "now").mockReturnValue(now.toMillis());
+  mockRead.mockReturnValue({
+    data: [
+      7n,
+      {
+        total: 153n,
+        totalMax: 328n,
+        startDate: BigInt(phase0.start.toSeconds()),
+        endDate: BigInt(now.toSeconds() - 60),
+        merkleRoot,
+      },
+    ],
+    isFetching: false,
+    error: null,
+  });
+  const roots = createDeferredPromise<MintingClaimsRootItem[]>();
+  mockGetMemesMintingRoots.mockReturnValueOnce(roots.promise);
+
+  const { result } = renderHook(() =>
+    useManifoldClaim({
+      chainId: 1,
+      contract: MEMES_CONTRACT,
+      proxy: "0x2",
+      abi: [],
+      identifier: 1,
+    })
+  );
+  expect(result.current.isCompletionPending).toBe(true);
+
+  await act(async () => {
+    roots.resolve([
+      {
+        phase: "Phase 0",
+        merkle_root: merkleRoot,
+        addresses_count: 1,
+        total_spots: 1,
+      },
+    ]);
+  });
+  expect(result.current.claim?.nextMemePhase?.id).toBe("1");
+  expect(result.current.claim?.isDropComplete).toBe(false);
+  expect(result.current.isCompletionPending).toBe(false);
 });
 
 test("maps memes phase from roots using the onchain merkle root", async () => {

@@ -19,7 +19,9 @@ type NextMintDropState = {
   readonly isFetchedAfterMount: boolean;
 };
 
-export const useNextMintDrop = (): NextMintDropState => {
+export const useNextMintDrop = ({
+  refreshWinnerOnMount = false,
+}: { readonly refreshWinnerOnMount?: boolean } = {}): NextMintDropState => {
   const { seizeSettings, isLoaded, loadError } = useSeizeSettings();
   const waveId = seizeSettings.memes_wave_id;
   const { wave } = useWaveById(waveId, {
@@ -36,6 +38,7 @@ export const useNextMintDrop = (): NextMintDropState => {
     waveId: waveId ?? "",
     enabled: !!waveId,
     pageSize: 1,
+    ...(refreshWinnerOnMount ? { refetchOnMount: "always" } : {}),
   });
 
   const latestDecision = decisionPoints[decisionPoints.length - 1];

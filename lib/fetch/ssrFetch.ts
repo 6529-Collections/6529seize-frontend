@@ -170,6 +170,26 @@ const withServerKeyRedirectGuard = (
   };
 };
 
+const applyViewerAuth = async (
+  headers: Headers,
+  includeWalletAuth: boolean,
+  path: string
+): Promise<void> => {
+  try {
+    const appHeaders = await getAppCommonHeaders();
+    Object.entries(appHeaders).forEach(([key, value]) => {
+      if (includeWalletAuth || key.toLowerCase() !== "authorization") {
+        headers.set(key, value);
+      }
+    });
+  } catch (error) {
+    console.warn(
+      `[SSR Fetch] [PATH: ${path}] Failed to get app common headers:`,
+      error instanceof Error ? error.message : error
+    );
+  }
+};
+
 const createSsrFetch =
   (includeWalletAuth: boolean, includeRequestAuth = true): typeof fetch =>
   async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
@@ -250,20 +270,7 @@ const createSsrFetch =
     enhancedHeaders.set("x-6529-internal-waf-signature", wafSignature);
 
     if (includeRequestAuth) {
-      try {
-        const appHeaders = await getAppCommonHeaders();
-        Object.entries(appHeaders).forEach(([key, value]) => {
-          if (!includeWalletAuth && key.toLowerCase() === "authorization") {
-            return;
-          }
-          enhancedHeaders.set(key, value);
-        });
-      } catch (error) {
-        console.warn(
-          `[SSR Fetch] [PATH: ${path}] Failed to get app common headers:`,
-          error instanceof Error ? error.message : error
-        );
-      }
+      await applyViewerAuth(enhancedHeaders, includeWalletAuth, path);
     }
 
     return fetchApiWithDeadline(

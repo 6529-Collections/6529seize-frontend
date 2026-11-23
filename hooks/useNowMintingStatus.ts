@@ -24,7 +24,11 @@ export type NowMintingStatus = {
 
 export const useNowMintingStatus = (): NowMintingStatus => {
   const { nft, isFetching, error, refetch } = useNowMinting();
-  const { claim, isError } = useManifoldClaim({
+  const {
+    claim,
+    isError,
+    isCompletionPending = false,
+  } = useManifoldClaim({
     chainId: mainnet.id,
     contract: MEMES_CONTRACT,
     proxy: MANIFOLD_LAZY_CLAIM_CONTRACT,
@@ -36,9 +40,10 @@ export const useNowMintingStatus = (): NowMintingStatus => {
   return {
     nft,
     isFetching,
-    status: currentClaim?.status ?? null,
-    isDropComplete: currentClaim?.isDropComplete ?? false,
-    isStatusLoading: !!nft && !currentClaim && !isError,
+    status: isCompletionPending ? null : (currentClaim?.status ?? null),
+    isDropComplete:
+      !isCompletionPending && (currentClaim?.isDropComplete ?? false),
+    isStatusLoading: !!nft && (currentClaim ? isCompletionPending : !isError),
     isStatusError: !!nft && !currentClaim && isError,
     error,
     refetch,

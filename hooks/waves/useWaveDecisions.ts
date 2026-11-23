@@ -13,6 +13,7 @@ interface UseWaveDecisionsProps {
   readonly enabled?: boolean | undefined;
   readonly loadAllPages?: boolean | undefined;
   readonly pageSize?: number | undefined;
+  readonly refetchOnMount?: "always" | undefined;
 }
 
 const DEFAULT_PAGE = 1;
@@ -41,6 +42,7 @@ export function useWaveDecisions({
   enabled = true,
   loadAllPages = false,
   pageSize,
+  refetchOnMount,
 }: UseWaveDecisionsProps) {
   const resolvedPageSize = getValidPageSize(pageSize);
   const {
@@ -83,6 +85,7 @@ export function useWaveDecisions({
       lastPage.next ? lastPage.page + 1 : undefined,
     enabled,
     staleTime: DEFAULT_STALE_TIME,
+    ...(refetchOnMount !== undefined ? { refetchOnMount } : {}),
   });
 
   useEffect(() => {
