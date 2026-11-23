@@ -6,21 +6,18 @@ import { WaveGroupType } from "@/components/waves/specs/groups/group/WaveGroup.t
 interface WaveAccessGroupsProps {
   readonly wave: ApiWave;
   readonly includeCompetition?: boolean;
-  readonly display?: "group" | "members" | undefined;
 }
 
 export default function WaveAccessGroups({
   wave,
-  display = "group",
   includeCompetition = true,
 }: WaveAccessGroupsProps) {
-  const groups = (
-    <>
+  return (
+    <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/5">
       <WaveGroup
         scope={wave.visibility.scope}
         type={WaveGroupType.VIEW}
         wave={wave}
-        showMembersSummary={display === "members"}
       />
       {includeCompetition && wave.wave.type !== ApiWaveType.Chat && (
         <>
@@ -28,13 +25,11 @@ export default function WaveAccessGroups({
             scope={wave.participation.scope}
             type={WaveGroupType.DROP}
             wave={wave}
-            showMembersSummary={display === "members"}
           />
           <WaveGroup
             scope={wave.voting.scope}
             type={WaveGroupType.VOTE}
             wave={wave}
-            showMembersSummary={display === "members"}
           />
         </>
       )}
@@ -42,24 +37,12 @@ export default function WaveAccessGroups({
         scope={wave.chat.scope}
         type={WaveGroupType.CHAT}
         wave={wave}
-        showMembersSummary={display === "members"}
       />
       <WaveGroup
         scope={wave.wave.admin_group}
         type={WaveGroupType.ADMIN}
         wave={wave}
-        showMembersSummary={display === "members"}
       />
-    </>
+    </div>
   );
-
-  if (display === "members") {
-    return (
-      <div className="tw-divide-x-0 tw-divide-y tw-divide-solid tw-divide-white/5">
-        {groups}
-      </div>
-    );
-  }
-
-  return groups;
 }
