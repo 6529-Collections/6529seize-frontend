@@ -32,78 +32,58 @@ async function expectFocusedAmountWithoutSelection(amount: Locator) {
 
 async function expectGrantTransitionFinished(grant: Locator) {
   await expect
-    .poll(() =>
-      grant
-        .getByRole("textbox", {
-          name: "Your total REP for this category",
-          exact: true,
-        })
-        .evaluate((input) => {
-          const body = input.closest("form")!.parentElement!.parentElement!;
-          const animation = body.parentElement!;
-          const contentHeight =
-            body.firstElementChild!.getBoundingClientRect().height;
-          const footerHeight =
-            body.nextElementSibling!.getBoundingClientRect().height;
-          // Height uses a JS-driven animation; CSS animations alone miss it.
-          return Math.abs(
-            contentHeight +
-              footerHeight -
-              Number.parseFloat(animation.style.height)
-          );
-        })
-    )
+    .poll(async () => {
+      const [content, footer, height] = await Promise.all([
+        grant.getByTestId("grant-rep-content").boundingBox(),
+        grant.getByTestId("grant-rep-footer").boundingBox(),
+        grant
+          .getByTestId("grant-rep-layout")
+          .evaluate((element) => Number.parseFloat(element.style.height)),
+      ]);
+      // Use the animated height; the rendered height can be viewport-clamped.
+      return content && footer
+        ? Math.abs(content.height + footer.height - height)
+        : Infinity;
+    })
     .toBeLessThan(0.1);
   await expect
     .poll(() =>
-      grant
-        .getByRole("textbox", {
-          name: "Your total REP for this category",
-          exact: true,
-        })
-        .evaluate((input) => {
-          const panel = input.closest(".mobile-wrapper-dialog")!;
-          let element: Element | null = panel;
-          while (element) {
-            if (
-              element
-                .getAnimations({ subtree: element === panel })
-                .some((animation) => animation.playState === "running")
-            )
-              return true;
-            element = element.parentElement;
-          }
-          return false;
-        })
+      grant.getByTestId("grant-rep-layout").evaluate((layout) => {
+        const panel = layout.closest(".mobile-wrapper-dialog")!;
+        let element: Element | null = panel;
+        while (element) {
+          if (
+            element
+              .getAnimations({ subtree: element === panel })
+              .some((animation) => animation.playState === "running")
+          )
+            return true;
+          element = element.parentElement;
+        }
+        return false;
+      })
     )
     .toBe(false);
 }
 
 async function expectCompactGrantLayout(grant: Locator) {
-  // The buttons follow the visible content with the normal 16px section gap.
-  // A fixed editing height would leave extra unused space in this measurement.
+  // Actions follow visible content by 16px, including when the body scrolls.
   await expect
-    .poll(() =>
-      grant
-        .getByRole("textbox", {
-          name: "Your total REP for this category",
-          exact: true,
-        })
-        .evaluate((input) => {
-          const content = input.closest("form")!.parentElement!;
-          const body = content.parentElement!;
-          const footer = body.nextElementSibling!;
-          const contentBottom = Math.max(
-            ...Array.from(content.children)
-              .filter((child) => child.getBoundingClientRect().height > 0)
-              .map((child) => child.getBoundingClientRect().bottom)
-          );
-          return Math.round(
-            footer.querySelector("button")!.getBoundingClientRect().top -
-              Math.min(contentBottom, body.getBoundingClientRect().bottom)
-          );
-        })
-    )
+    .poll(async () => {
+      const [content, body, action] = await Promise.all([
+        grant.getByTestId("grant-rep-content").boundingBox(),
+        grant.getByTestId("grant-rep-body").boundingBox(),
+        grant
+          .getByTestId("grant-rep-footer")
+          .getByRole("button")
+          .first()
+          .boundingBox(),
+      ]);
+      if (!content || !body || !action) return Infinity;
+      return Math.round(
+        action.y - Math.min(content.y + content.height, body.y + body.height)
+      );
+    })
     .toBe(16);
 }
 
@@ -502,8 +482,11 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
   test("keeps Grant Rep compact while selecting assigned chips and searching without saving", async ({
     page,
     baseURL,
+    isMobile,
   }, testInfo) => {
     const api = getSandboxApiOrigin(baseURL);
+    const chooseCategory = (button: Locator) =>
+      isMobile ? button.tap() : button.click();
     let allocationReads = 0;
     let writes = 0;
     let searches = 0;
@@ -643,7 +626,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByRole("button", { name: "mus", exact: true })
     ).toHaveCount(0);
-    await grant.getByRole("button", { name: "Music", exact: true }).click();
+    await chooseCategory(
+      grant.getByRole("button", { name: "Music", exact: true })
+    );
     await expect(search).toBeEditable();
     await expect(amount).toHaveValue("35");
     await expectFocusedAmountWithoutSelection(amount);
@@ -680,9 +665,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await expect(
       grant.getByText("Type at least 3 characters.", { exact: true })
     ).toBeVisible();
-    await own
-      .getByRole("button", { name: "Research -25", exact: true })
-      .click();
+    await chooseCategory(
+      own.getByRole("button", { name: "Research -25", exact: true })
+    );
     await expect(search).toHaveValue("Research");
     await expect(search).toBeEditable();
     await expect(amount).toHaveValue("-25");
@@ -740,9 +725,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       .getByRole("button", { name: "Change category", exact: true })
       .click();
     await amount.fill("45");
-    await own
-      .getByRole("button", { name: "Artist 1,000", exact: true })
-      .click();
+    await chooseCategory(
+      own.getByRole("button", { name: "Artist 1,000", exact: true })
+    );
     await expect(amount).toHaveValue("45");
     await expectFocusedAmountWithoutSelection(amount);
     await expect(
@@ -958,10 +943,9 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       grant.getByRole("button", { name: "Grant Rep", exact: true })
     ).toBeInViewport();
     expect(
-      await amount.evaluate((input) => {
-        const body = input.closest("form")!.parentElement!.parentElement!;
-        return body.scrollHeight > body.clientHeight;
-      })
+      await grant
+        .getByTestId("grant-rep-body")
+        .evaluate((body) => body.scrollHeight > body.clientHeight)
     ).toBe(true);
     await amount.scrollIntoViewIfNeeded();
     await expect(amount).toBeInViewport();
@@ -2405,6 +2389,10 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
       })
       .click();
     const grant = page.getByRole("dialog", { name: "Grant Rep", exact: true });
+    const loading = grant.getByText("Loading ratings…", { exact: true });
+    await expect(loading).toBeVisible();
+    expect((await loading.boundingBox())!.height).toBeLessThanOrEqual(24);
+    await expectCompactGrantLayout(grant);
     await expectDesktopRatingPosition(page, "Grant Rep");
     await grant
       .getByRole("textbox", { name: "Category to grant REP for", exact: true })

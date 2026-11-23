@@ -132,7 +132,10 @@ function GrantRepForm({
   // Measure natural content separately so the footer stays pinned when the body scrolls.
   const [contentRef, { height: contentHeight }] = useMeasure<HTMLDivElement>();
   const [footerRef, { height: footerHeight }] = useMeasure<HTMLDivElement>();
-  const layoutHeight = contentHeight + footerHeight;
+  const layoutHeight =
+    contentHeight > 0 && footerHeight > 0
+      ? contentHeight + footerHeight
+      : "auto";
   const amountInputId = useId();
   const amountFormId = useId();
   const availableRepId = useId();
@@ -499,12 +502,16 @@ function GrantRepForm({
   return (
     <motion.div
       initial={false}
-      animate={{ height: layoutHeight || "auto" }}
+      animate={{ height: layoutHeight }}
+      data-testid="grant-rep-layout"
       transition={layoutTransition}
       className="tw-flex tw-max-h-[calc(100dvh-12rem)] tw-min-h-0 tw-max-w-full tw-flex-col tw-overflow-hidden"
     >
-      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 sm:tw-px-6">
-        <div ref={contentRef}>
+      <div
+        data-testid="grant-rep-body"
+        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 sm:tw-px-6"
+      >
+        <div ref={contentRef} data-testid="grant-rep-content">
           <GrantRepStats
             available={heroAvailableRep}
             assigned={overview?.authenticated_user_contribution ?? 0}
@@ -677,7 +684,7 @@ function GrantRepForm({
               invalid={amountReady && !isValidValue}
             />
             {amountReady && (
-              <div role="status">
+              <output className="tw-block">
                 <UserRateAdjustmentHelper
                   inLineValues
                   originalValue={currentRep}
@@ -688,7 +695,7 @@ function GrantRepForm({
                   valueLayout="inline"
                   variant="summary"
                 />
-              </div>
+              </output>
             )}
           </motion.form>
           <GrantRepSubmissionGuidance
@@ -716,7 +723,11 @@ function GrantRepForm({
           )}
         </div>
       </div>
-      <div ref={footerRef} className="tw-shrink-0">
+      <div
+        ref={footerRef}
+        data-testid="grant-rep-footer"
+        className="tw-shrink-0"
+      >
         <motion.div
           layout="position"
           transition={layoutTransition}
