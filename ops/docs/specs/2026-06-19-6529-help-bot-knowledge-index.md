@@ -30,7 +30,7 @@ short landscape iPhone chat viewports.
 
 The signing, encrypted-messages and connection-sharing records cover the shared
 permission consent flow, separate or combined grants, shared server device names,
-renewal versus revocation, Desktop secure sharing's Coming soon gate, and exact
+renewal versus revocation, Desktop's production connection and staging launch, and exact
 local notification previews without an in-app cooldown. Composer help describes
 the shared rich-text editor, inline custom emojis, mobile Return/Send and keyboard
 clearance, while encrypted GIF/Poll/Storm remain unavailable. Notification help

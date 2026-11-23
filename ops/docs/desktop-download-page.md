@@ -6,9 +6,8 @@ Parent: [Documentation](README.md)
 
 `/desktop` is where people download 6529 Desktop's test release: the
 6529.io experience as an installed app for Windows (64-bit) and macOS
-(Apple silicon). No menu, header, footer, search result or other page links
-it yet, as for [6529 AI](ai-download-page.md): the owner looks at it first,
-then adds the link. It has no password.
+(Apple silicon). Open the test-release card on [6529 Apps](navigation/feature-6529-apps-page.md)
+or search for **6529 Desktop** in site search.
 
 | Route                                | What it serves                                                                                                    |
 | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
@@ -28,8 +27,7 @@ matters, with a link to the known issues.
 The pages send `noindex, nofollow` (their metadata, and the `X-Robots-Tag`
 header that `config/nextConfig.ts` sets on `/desktop/:path*`), and
 `next-sitemap.config.ts` leaves them out of the sitemap. The 6529 Help Bot
-corpus (`ops/help/help-index.json`) and the header search leave them out
-too, until the owner links the section. Page views under `/desktop` are not
+and header search link to the download page. Page views under `/desktop` are not
 counted as profile views (`services/analytics/pageClassification.ts`).
 
 The code is in `app/desktop/`, `components/desktop-page/` and
@@ -141,9 +139,10 @@ wave, a subwave of Ministry of Validation, with a report template: the
 system and its version, the app version shown in the title bar, what you
 did, what happened, and a screenshot.
 
-## Link it from the site
+## Connect an account
 
-When the owner has seen it: add the menu or page link, add the section to
-the Help Bot corpus and the header search, and decide whether the pages
-should be found by search engines (the `X-Robots-Tag` rule in
-`config/nextConfig.ts`, the sitemap exclusions and each page's metadata).
+On 6529.io, open the account menu, select **Connect Device**, and choose
+**6529 Desktop**. Choose **Connect only** or **Connect with Post Signing & DM
+Encryption**, then open the link and accept the connection in the app. On
+staging, **Open in 6529 Desktop** opens Waves in the installed app. For account
+connection, use [Connect Device on 6529.io](navigation/feature-share-modal.md#connect-device).

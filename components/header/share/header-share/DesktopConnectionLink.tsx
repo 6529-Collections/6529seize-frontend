@@ -34,9 +34,11 @@ export function DesktopConnectionVersionNotice({
 
 export function DesktopConnectionLink({
   url,
+  classic,
   showVersionNotice = false,
 }: {
   readonly url: string;
+  readonly classic: boolean;
   readonly showVersionNotice?: boolean;
 }) {
   return (
@@ -51,7 +53,7 @@ export function DesktopConnectionLink({
         priority
         loading="eager"
         src="/6529Core.png"
-        alt={t(HEADER_SHARE_LOCALE, "headerShare.core.alt")}
+        alt={classic ? t(HEADER_SHARE_LOCALE, "headerShare.core.alt") : ""}
         width={124}
         height={124}
         className="tw-unselectable"
@@ -60,10 +62,13 @@ export function DesktopConnectionLink({
         <span className="tw-inline-flex tw-items-center tw-justify-center tw-gap-2 tw-rounded-md tw-border tw-border-solid tw-border-iron-200 tw-bg-iron-50 tw-px-4 tw-py-2 tw-text-sm tw-font-medium tw-text-iron-900 tw-transition-colors group-hover:tw-border-white group-hover:tw-bg-white group-hover:tw-text-black">
           <FontAwesomeSvgIcon icon={faExternalLink} aria-hidden="true" />
           <span className="tw-whitespace-nowrap">
-            {t(HEADER_SHARE_LOCALE, "headerShare.core.open")}
+            {t(
+              HEADER_SHARE_LOCALE,
+              classic ? "headerShare.core.open" : "headerShare.social.desktop"
+            )}
           </span>
         </span>
-        {showVersionNotice && <DesktopConnectionVersionNotice />}
+        {classic && showVersionNotice && <DesktopConnectionVersionNotice />}
       </div>
     </a>
   );
