@@ -28,7 +28,9 @@ independent and do not sync.
 ## Entry Points
 
 - Use the thread-header thumbtack (`Pin wave` / `Unpin wave`).
-- Use the thumbtack on a non-DM row in the left Waves list.
+- On desktop, use the thumbtack on a non-DM row in the left Waves list.
+- On touch screens in the native app and mobile web, swipe a top-level wave row
+  right to pin or unpin it, or hold it still for the `Pin wave` / `Unpin wave` menu.
 - In native app small-screen mode, opening a wave or DM thread adds or refreshes
   that thread in the shortcuts rail. Use `x` to remove a chip.
 
@@ -37,10 +39,12 @@ independent and do not sync.
 1. Open `/waves/{waveId}` and select `Pin wave` from the header or wave row.
 2. The wave appears in the `Pinned` collection. Use its tab beside `Joined` and `All`.
 3. Drag a wave row to change its position in `Pinned`. On a touch screen, hold
-   the row briefly before dragging. With a keyboard, focus the wave and press
+   briefly, then move vertically to start dragging. Holding still opens the
+   pin/unpin menu instead. With a keyboard, focus the wave and press
    Space, use the arrow keys to move it, then press Space again to save. The
    order syncs across devices. New pins and re-pins go to the bottom.
-4. Unpin from either control to remove it from the `Pinned` collection.
+4. Unpin from the header, desktop row control, touch swipe, or touch menu to
+   remove it from the `Pinned` collection.
 5. If 100 ordinary waves are already pinned, pinning is blocked until you unpin one.
 6. In native app small-screen mode, opened threads are added to local shortcuts
    (newest first, max 20).
@@ -56,8 +60,22 @@ independent and do not sync.
 - The same control flips label by state (`Pin wave` vs `Unpin wave`).
 - Pin/unpin controls are disabled while that wave request is in progress.
 - In desktop expanded sidebars, row pin and unpin controls collapse while idle
-  and appear on row hover or direct keyboard focus on the pin control; on touch
-  devices, they remain visible.
+  and appear on row hover or direct keyboard focus on the pin control.
+- On touch, dragging right reveals a small round pin or unpin icon. It turns
+  white after about 64px. Release while it is white to toggle the pin; release
+  earlier, or drag back below the threshold before release, to leave it unchanged.
+  The row returns to its original position either way. Vertical scrolling does
+  not trigger pinning.
+- Holding a row still for about half a second dims the surrounding list and
+  opens one `Pin wave` or `Unpin wave` action. The menu appears below the row,
+  or above it when needed to clear the bottom navigation. Tap outside to close.
+  Neither gesture opens the wave. An ordinary tap still opens it.
+- On touch, pinned rows in `All` and `Joined` show a muted pin beside the score.
+  This is a status mark. `Pinned` omits it because every row is already pinned.
+- Touch gestures require a connected profile handle without an active proxy.
+  They do not apply to subwave rows, DMs, or the collapsed desktop rail.
+  The thread-header pin remains available without gestures.
+- Reduced Motion uses fades without the row lift or swipe translation.
 - The row control's `Pin` / `Unpin` hover label renders above the sidebar, so
   it stays fully readable on the first row under the `All` / `Pinned` /
   `Joined` filter. Touch devices do not show the hover label.

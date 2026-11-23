@@ -35,7 +35,8 @@ profile menu. Mobile web and native apps open page sharing from the app header.
   `Connect Device`. The account menu distinguishes wallet connection from
   device connection with a full-width divider inside the connection-actions
   section and stronger section boundaries around the pair.
-- Native app: select the page-share icon in the app header on supported routes.
+- Native app: on the Waves list, select `More` then `Share page`. On other
+  supported routes, select the page-share icon in the app header.
   When a wave is active, use its arrow-style share action inside the `More`
   menu instead of a separate page-share icon.
 

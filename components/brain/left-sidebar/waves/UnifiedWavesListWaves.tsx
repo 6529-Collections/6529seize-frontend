@@ -435,6 +435,7 @@ const UnifiedWavesListWaves = forwardRef<
           wave={row.wave}
           onHover={onHover}
           showPin={showPin && row.depth === 0}
+          showPinnedStatus={!isDirectMessage && !isPinnedCollection}
           isDirectMessage={isDirectMessage}
           depth={row.depth}
           canExpand={row.canExpand}

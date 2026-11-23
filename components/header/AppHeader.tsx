@@ -640,7 +640,14 @@ export default function AppHeader() {
 
   return (
     <div className="tw-w-full tw-bg-black tw-pt-[env(safe-area-inset-top,0px)] tw-text-iron-50">
-      <div className="tw-flex tw-h-16 tw-items-center tw-justify-between tw-gap-x-2 tw-px-4">
+      <div
+        className={clsx(
+          "tw-h-16 tw-items-center tw-gap-x-2 tw-px-4",
+          isWavesDirectory
+            ? "tw-flex min-[360px]:tw-grid min-[360px]:tw-grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)]"
+            : "tw-flex tw-justify-between"
+        )}
+      >
         <div className="tw-flex tw-h-10 tw-w-10 tw-flex-shrink-0 tw-items-center tw-justify-center">
           {showBackButton ? (
             <BackButton
@@ -673,7 +680,6 @@ export default function AppHeader() {
         <div
           className={clsx(
             "tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-2",
-            isWavesDirectory && "min-[360px]:tw-pl-[88px]",
             isInsideWave ? "tw-justify-start" : "tw-justify-center"
           )}
         >
@@ -698,6 +704,7 @@ export default function AppHeader() {
           <div
             className={clsx(
               "tw-flex tw-flex-shrink-0 tw-items-center tw-justify-end",
+              isWavesDirectory && "tw-justify-self-end",
               (isInsideWave && isWavesRoute) ||
                 (isMessagesRoute && !isInsideWave)
                 ? "tw-gap-x-2"

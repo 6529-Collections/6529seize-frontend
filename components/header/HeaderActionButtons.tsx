@@ -47,12 +47,16 @@ function HeaderActionButtonsContent() {
 
   if (showWaveButton) {
     const onCreateWave = openWave;
+    const label =
+      isApp && isOnWavesRoute
+        ? t(locale, "waves.sidebar.createWave")
+        : "Create Wave";
 
     return (
       <button
         type="button"
-        aria-label="Create Wave"
-        title="Create Wave"
+        aria-label={label}
+        title={label}
         onClick={onCreateWave}
         className={baseButtonClasses}
       >

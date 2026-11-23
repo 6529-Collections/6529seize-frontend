@@ -1,19 +1,13 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
-import { useAuth } from "@/components/auth/Auth";
+import React, { useEffect, useState } from "react";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
 import IconButton from "@/components/utils/button/IconButton";
 import type { IconButtonLayout } from "@/components/utils/button/iconButtonLayouts";
-import {
-  usePinnedWavesServer,
-  MAX_PINNED_WAVES,
-} from "@/hooks/usePinnedWavesServer";
-import { getToastErrorDetails } from "@/helpers/toast.helpers";
+import { useSidebarWavePin } from "@/hooks/useSidebarWavePin";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import useIsTouchDevice from "@/hooks/useIsTouchDevice";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
-import { formatInteger } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 
 interface BrainLeftSidebarWavePinProps {
@@ -57,22 +51,19 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
   compact = false,
   className,
 }) => {
-  const { pinnedIds, isOperationInProgress, canPinWave, pinWave, unpinWave } =
-    usePinnedWavesServer();
-  const { setToast, connectedProfile, activeProfileProxy } = useAuth();
+  const {
+    canManage,
+    isProcessing: isCurrentlyProcessing,
+    canPinCurrentWave,
+    pinnedIdsKey,
+    pinLimit,
+    togglePin,
+  } = useSidebarWavePin(waveId, isPinned);
   const isTouchDevice = useIsTouchDevice();
   const locale = useBrowserLocale();
-  const pinLimit = formatInteger(locale, MAX_PINNED_WAVES);
   const [maxLimitTooltipRequest, setMaxLimitTooltipRequest] =
     useState<MaxLimitTooltipRequest | null>(null);
 
-  // Check if this specific wave operation is in progress
-  const isCurrentlyProcessing = isOperationInProgress(waveId);
-  const pinnedIdsKey = useMemo(() => pinnedIds.join("|"), [pinnedIds]);
-  const canPinCurrentWave = useMemo(
-    () => canPinWave(waveId),
-    [canPinWave, waveId]
-  );
   const showMaxLimitTooltip =
     maxLimitTooltipRequest?.waveId === waveId &&
     maxLimitTooltipRequest.pinnedIdsKey === pinnedIdsKey &&
@@ -86,7 +77,7 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     return () => clearTimeout(timer);
   }, [showMaxLimitTooltip]);
 
-  if (!connectedProfile?.handle || activeProfileProxy) {
+  if (!canManage) {
     return null;
   }
 
@@ -94,45 +85,9 @@ const BrainLeftSidebarWavePin: React.FC<BrainLeftSidebarWavePinProps> = ({
     e.stopPropagation();
     e.preventDefault();
 
-    // Don't proceed if operation is already in progress
-    if (isCurrentlyProcessing) {
-      return;
-    }
-
-    try {
-      if (isPinned) {
-        await unpinWave(waveId);
-        setMaxLimitTooltipRequest(null);
-      } else {
-        const canPin = canPinWave(waveId);
-
-        if (canPin) {
-          await pinWave(waveId);
-        } else {
-          setMaxLimitTooltipRequest({ waveId, pinnedIdsKey });
-          setToast({
-            type: "error",
-            message: t(locale, "waves.sidebar.pinControl.limitMessage", {
-              count: pinLimit,
-            }),
-          });
-        }
-      }
-    } catch (error) {
-      console.error("Error updating wave pin status:", error);
-
-      setToast({
-        type: "error",
-        title: t(
-          locale,
-          isPinned
-            ? "waves.sidebar.pinControl.unpinErrorTitle"
-            : "waves.sidebar.pinControl.pinErrorTitle"
-        ),
-        description: t(locale, "waves.sidebar.pinControl.retryDescription"),
-        details: getToastErrorDetails(error),
-      });
-    }
+    const result = await togglePin();
+    if (result === "limit") setMaxLimitTooltipRequest({ waveId, pinnedIdsKey });
+    if (result === "updated") setMaxLimitTooltipRequest(null);
   };
 
   // Desktop rows reveal the pin on row hover or direct keyboard focus.

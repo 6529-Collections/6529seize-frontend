@@ -5,7 +5,6 @@ import {
   KeyboardCode,
   KeyboardSensor,
   MouseSensor,
-  TouchSensor,
   closestCenter,
   useSensor,
   useSensors,
@@ -36,6 +35,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { PinnedWaveLinkContext } from "./PinnedWaveLinkContext";
 import { SidebarWaveTreeRowTransition } from "./SidebarWaveTreeRowTransition";
+import { PinnedWaveTouchSensor } from "./PinnedWaveTouchSensor";
 
 interface PinnedWaveGroup {
   readonly id: string;
@@ -194,9 +194,7 @@ function SidebarPinnedWaves({
   const [status, setStatus] = useState<"saved" | "error" | null>(null);
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(TouchSensor, {
-      activationConstraint: { delay: 200, tolerance: 8 },
-    }),
+    useSensor(PinnedWaveTouchSensor, { delay: 200 }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
       keyboardCodes: {

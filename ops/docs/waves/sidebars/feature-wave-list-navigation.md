@@ -13,7 +13,9 @@ Wave and DM rows in the left list control which thread is open.
   the animation to finish.
 - Click the body of the active row to clear selection and return to section
   home.
-- Row pin and subwave expand/collapse buttons remain separate controls.
+- Desktop row pin and subwave expand/collapse buttons remain separate controls.
+  Touch rows use [swipe or hold to pin/unpin](feature-pinned-wave-controls.md);
+  those gestures do not open the wave.
 - On expanded rows, pin/unpin sits in the trailing metadata cluster before the
   wave score instead of beside the wave name, keeping the score at the far
   right.
@@ -53,7 +55,9 @@ Wave and DM rows in the left list control which thread is open.
   left and the same search icon on the right, without personal collection controls.
 - The `Waves` heading is plain text. Header actions sit at the far right:
   feed, then create on desktop and mobile web. The native app keeps its heading,
-  Create Wave, Search 6529 and More in the top bar.
+  the `Create wave` plus button, `Search 6529` and `More` in the top bar.
+  `More` opens a sheet containing `Profile Waves Feed` and `Share page`.
+  `Share page` opens the existing native share sheet.
 - Select the feed icon to open Profile Waves Feed. On desktop, it clears the
   selected wave; on mobile web, it opens `/waves?view=profile-feed`.
   In the native app, select `More` then `Profile Waves Feed` to open that feed.
@@ -77,7 +81,8 @@ Wave and DM rows in the left list control which thread is open.
   `Retry`. Expired lists refresh automatically; newly created or newly accessible
   waves appear on refresh. Access permissions are checked for every batch.
 - `Pinned` uses the profile's saved order. Drag the wave row, or touch and hold
-  the row briefly before dragging on a touch screen. With a keyboard, focus the
+  briefly then move vertically on a touch screen. A stationary hold opens the
+  pin/unpin menu. With a keyboard, focus the
   wave, press Space, use the arrow keys, and press Space again to save. A wave's
   subwaves move with it.
 - Joined waves load in batches without skipping a wave when new activity moves
@@ -152,7 +157,7 @@ on hover and show a dark hover surface; their resting header surface is transpar
   Desktop sidebar buttons keep a compact visible surface on touch screens,
   with a larger invisible tap area.
 - In the native app, the Waves directory has one heading in the top bar, with
-  Create Wave, Search 6529 and a vertical More icon beside it. Search stays
+  Create wave, Search 6529 and a vertical More icon beside it. Search stays
   directly visible; More contains Profile Waves Feed and, when page sharing is
   enabled, Share page.
   Find a wave stays beside the collection controls. Subwave

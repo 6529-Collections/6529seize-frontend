@@ -78,6 +78,14 @@ profile and native-shell packs.
 
 ## Pack registry
 
+The native competition pack's wave-loading sandbox covers touch row pin/unpin
+with real browser input, release reversal, native scrolling, menu clearance,
+All/Joined status marks, ordinary tap navigation, and saved Pinned order.
+Stationary holds open the pin menu; touch reordering starts after a brief hold
+followed by vertical movement. The existing desktop drag and keyboard contracts
+remain covered. Gesture, row action, pin status, and touch sensor changes select
+this pack through the effective CI planner.
+
 The reaction sandbox covers live count and profile-list updates, desktop tooltip
 and dialog overflow, recoverable detail-read failures, and mobile long press.
 It uses synthetic local data and checks that hidden lists do not refetch.

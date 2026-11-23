@@ -68,7 +68,7 @@ describe("HeaderActionButtons", () => {
     const push = jest.fn();
     (useRt as jest.Mock).mockReturnValue({ push, replace: jest.fn() });
     render(<HeaderActionButtons />);
-    await userEvent.click(screen.getByRole("button", { name: "Create Wave" }));
+    await userEvent.click(screen.getByRole("button", { name: "Create wave" }));
     expect(push).toHaveBeenCalledWith("/waves/create");
   });
 

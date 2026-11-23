@@ -5,6 +5,7 @@ import {
   MagnifyingGlassIcon,
 } from "@heroicons/react/24/outline";
 import { CompactMenu, type CompactMenuItem } from "@/components/compact-menu";
+import CompactMenuMobileBottomSheet from "@/components/compact-menu/CompactMenuMobileBottomSheet";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useKey } from "react-use";
@@ -30,6 +31,7 @@ import LazyHeaderSearchModal, {
 interface HeaderSearchButtonProps {
   readonly wave: ApiWave | null;
   readonly additionalMenuItems?: readonly CompactMenuItem[] | undefined;
+  readonly morePresentation?: "dropdown" | "sheet";
 }
 
 type OpenSearch = "site" | "wave" | null;
@@ -37,6 +39,7 @@ type OpenSearch = "site" | "wave" | null;
 export default function HeaderSearchButton({
   wave,
   additionalMenuItems,
+  morePresentation = "dropdown",
 }: HeaderSearchButtonProps) {
   const [openSearch, setOpenSearch] = useState<OpenSearch>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -104,6 +107,20 @@ export default function HeaderSearchButton({
   const buttonLabel = wave
     ? t(locale, "waves.drops.searchModal.inputLabel", { waveName: wave.name })
     : t(locale, "headerSearch.inputLabel");
+  const moreLabel = t(locale, "headerShare.social.more");
+  const sheetItems: CompactMenuItem[] = (additionalMenuItems ?? []).map(
+    (item) => {
+      if (item.kind === "section" || !item.href) return item;
+      const href = item.href;
+      return {
+        ...item,
+        onSelect: () => {
+          item.onSelect?.();
+          router.push(href);
+        },
+      };
+    }
+  );
   return (
     <div className="tailwind-scope tw-flex tw-items-center tw-gap-0.5 tw-self-center">
       <IconButton
@@ -123,7 +140,19 @@ export default function HeaderSearchButton({
           strokeWidth={isApp ? 2 : 1.5}
         />
       </IconButton>
-      {additionalMenuItems && (
+      {additionalMenuItems && morePresentation === "sheet" && (
+        <CompactMenuMobileBottomSheet
+          title={moreLabel}
+          ariaLabel={moreLabel}
+          disabled={!hasHydrated}
+          items={sheetItems}
+          trigger={
+            <EllipsisVerticalIcon aria-hidden="true" className="tw-size-5" />
+          }
+          triggerClassName="tw-flex tw-size-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-black tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+        />
+      )}
+      {additionalMenuItems && morePresentation === "dropdown" && (
         <CompactMenu
           aria-label={t(locale, "headerShare.social.more")}
           disabled={!hasHydrated}

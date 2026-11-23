@@ -7,6 +7,13 @@ created: 2026-06-19
 
 # 6529 Help Bot Knowledge Index
 
+The Waves record covers touch-only row pinning: swipe right and release while
+armed, reverse below the threshold to cancel, or hold still for the single
+Pin/Unpin menu. It includes the All/Joined pin status mark, bottom-navigation
+clearance, pin-limit toast, top-level personal-view eligibility, and the existing
+thread-header alternative. Pinned reordering requires a brief hold followed by
+vertical movement; stationary holding opens the menu.
+
 The `waves.discovery` record covers plain-text description previews, retained
 media, visible Worth Checking Out edges and minimum artwork tint, full-height Active
 Votes artwork, wrapping metrics and neutral zero-submission status without a
@@ -364,6 +371,13 @@ and smaller-layout field menu. Keep these instructions aligned with the header.
 The drop-actions record covers current reactor names in desktop tooltips and
 Reactions dialogs, touch long press, live count updates, and closing and reopening
 details to retry a failed names request without reloading the thread.
+
+The Waves navigation record distinguishes the mobile web and native headers.
+Mobile web keeps its site header, feed icon and labeled `Create wave` button.
+The native list keeps the `Create wave` plus button, `Search 6529` and `More`
+visible in the header. The `More` sheet contains `Profile Waves Feed` and
+`Share page`; page sharing uses the existing native share sheet. Both surfaces
+use the same feed icon and action names.
 
 ## Problem Statement
 
