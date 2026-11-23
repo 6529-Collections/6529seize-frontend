@@ -18,7 +18,10 @@ import {
   isManifoldDropComplete,
 } from "@/helpers/memes-manifold-phase.helpers";
 import { getLatestDropTransitionTime } from "@/helpers/mint-visibility.helpers";
-import { getRenderableWaveDecisionWinners } from "@/helpers/waves/wave-decision.helpers";
+import {
+  getRenderableWaveDecisionWinners,
+  prepareWaveDecisionPoint,
+} from "@/helpers/waves/wave-decision.helpers";
 import { isPublicNonDirectMessageWave } from "@/helpers/waves/wave.helpers";
 import { getEthereumMainnetClient } from "@/lib/ethereum/mainnetClient";
 import {
@@ -103,8 +106,9 @@ const getWinnerForWave = cacheHomeRead(async (waveId: string) => {
   if (wave.id !== waveId || !isPublicNonDirectMessageWave(wave)) return null;
 
   const [latestDecision] = mapWaveDecisionsV2(decisions, waveId, wave).data;
+  if (!latestDecision) return null;
   const winner = getRenderableWaveDecisionWinners(
-    latestDecision?.winners ?? []
+    prepareWaveDecisionPoint(latestDecision, waveId).winners
   )[0];
   const drop = (winner?.drop ?? null) as ApiDropV2View | null;
   return drop?.moderation?.can_view === false ? null : drop;

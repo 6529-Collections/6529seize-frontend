@@ -61,7 +61,7 @@ beforeEach(async () => {
     },
   ]);
   mockMapDecisions.mockReturnValue({
-    data: [{ winners: [{ drop: mockWinner }] }],
+    data: [{ decision_time: 1, winners: [{ place: 1, drop: mockWinner }] }],
   });
 
   // Each worker has its own public data cache.
@@ -91,6 +91,26 @@ it("uses the same grace deadline on the server and reuses cached reads across vi
   expect(results).toEqual([expected, expected]);
   expect(mockReadClaim).toHaveBeenCalledTimes(1);
   expect(mockFetch).toHaveBeenCalledTimes(4);
+});
+
+it("selects the first-place artwork even when the API sends it second", async () => {
+  mockMapDecisions.mockReturnValue({
+    data: [
+      {
+        decision_time: 1,
+        winners: [
+          { place: 2, drop: { id: "runner-up" } },
+          { place: 1, drop: mockWinner },
+        ],
+      },
+    ],
+  });
+
+  await expect(getInitialHomeDrop()).resolves.toEqual({
+    kind: "next",
+    mintNumber: latest.id,
+    drop: mockWinner,
+  });
 });
 
 it("keeps Latest Drop when the completed mint has no next winner", async () => {

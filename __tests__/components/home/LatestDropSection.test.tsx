@@ -1,5 +1,6 @@
 import type { ApiDropV2View } from "@/services/api/drop-v2-view.types";
 import LatestDropSection from "@/components/home/now-minting/LatestDropSection";
+import type { HomeDropSelection } from "@/components/home/now-minting/homeDropSelection";
 import { renderToStaticMarkup } from "react-dom/server";
 import { fireEvent, render, screen } from "@testing-library/react";
 
@@ -13,7 +14,7 @@ jest.mock("@/hooks/useBrowserLocale", () => ({
 }));
 
 jest.mock("@/hooks/useNextMintDrop", () => ({
-  useNextMintDrop: () => mockUseNextMintDrop(),
+  useNextMintDrop: (props: unknown) => mockUseNextMintDrop(props),
 }));
 
 jest.mock("@/hooks/useNowMintingStatus", () => ({
@@ -27,9 +28,13 @@ jest.mock("@/components/home/now-minting/useLatestDropTransitionReady", () => ({
 
 jest.mock("@/components/home/now-minting/NowMintingSection", () => ({
   __esModule: true,
-  default: ({ nft }: { readonly nft: { readonly id: number } }) => (
+  default: ({
+    nft,
+  }: {
+    readonly nft: { readonly id: number; readonly name?: string };
+  }) => (
     <div data-testid="latest-drop" data-token-id={nft.id}>
-      Latest Drop
+      {nft.name ?? "Latest Drop"}
     </div>
   ),
 }));
@@ -133,7 +138,7 @@ describe("LatestDropSection", () => {
     mockUseNextMintDrop.mockReturnValue({
       nextMint: null,
       isLoading: false,
-      isFetchedAfterMount: false,
+      hasRefreshedWinner: false,
     });
     render(
       <LatestDropSection
@@ -158,7 +163,7 @@ describe("LatestDropSection", () => {
       mockUseLatestDropTransitionReady.mockReturnValue(true);
       mockUseNextMintDrop.mockReturnValue({
         nextMint: { id: "cached-winner" },
-        isFetchedAfterMount: false,
+        hasRefreshedWinner: false,
       });
       const mintStatus = mockUseNowMintingStatus();
       const initialDrop =
@@ -187,7 +192,7 @@ describe("LatestDropSection", () => {
 
       mockUseNextMintDrop.mockReturnValue({
         nextMint: { id: "fresh-winner" },
-        isFetchedAfterMount: true,
+        hasRefreshedWinner: true,
       });
       rerender(
         <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
@@ -198,6 +203,54 @@ describe("LatestDropSection", () => {
       );
     }
   );
+
+  it("keeps Latest through grace after receiving updated details for the same mint", () => {
+    const mintStatus = {
+      ...mockUseNowMintingStatus(),
+      nft: { id: 536, name: "Updated artwork" },
+    };
+    const initialDrop = {
+      kind: "latest",
+      nft: { id: 536, name: "Server artwork" },
+    } as HomeDropSelection;
+    mockUseNextMintDrop.mockReturnValue({
+      nextMint: { id: "cached-winner" },
+      hasRefreshedWinner: false,
+    });
+    const { rerender } = render(
+      <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
+    );
+    expect(screen.getByTestId("latest-drop")).toHaveTextContent(
+      "Updated artwork"
+    );
+    expect(mockUseNextMintDrop).toHaveBeenLastCalledWith({
+      winnerRequestScope: undefined,
+    });
+
+    mockUseLatestDropTransitionReady.mockReturnValue(true);
+    rerender(
+      <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
+    );
+    expect(mockUseNextMintDrop).toHaveBeenLastCalledWith({
+      winnerRequestScope: expect.stringMatching(/:536$/),
+    });
+    expect(screen.queryByTestId("next-drop")).not.toBeInTheDocument();
+    expect(screen.getByTestId("latest-drop")).toHaveTextContent(
+      "Updated artwork"
+    );
+
+    mockUseNextMintDrop.mockReturnValue({
+      nextMint: { id: "fresh-winner" },
+      hasRefreshedWinner: true,
+    });
+    rerender(
+      <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
+    );
+    expect(screen.getByTestId("next-drop")).toHaveAttribute(
+      "data-drop-id",
+      "fresh-winner"
+    );
+  });
 
   it("retains the server-selected card during a failed browser refresh and advances when the latest mint changes", () => {
     const mintStatus = mockUseNowMintingStatus();

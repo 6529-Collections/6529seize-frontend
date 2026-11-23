@@ -16,12 +16,14 @@ type NextMintDropState = {
   readonly isFetching: boolean;
   readonly isLoading: boolean;
   readonly isError: boolean;
-  readonly isFetchedAfterMount: boolean;
+  readonly hasRefreshedWinner: boolean;
 };
 
 export const useNextMintDrop = ({
-  refreshWinnerOnMount = false,
-}: { readonly refreshWinnerOnMount?: boolean } = {}): NextMintDropState => {
+  winnerRequestScope,
+}: {
+  readonly winnerRequestScope?: string | undefined;
+} = {}): NextMintDropState => {
   const { seizeSettings, isLoaded, loadError } = useSeizeSettings();
   const waveId = seizeSettings.memes_wave_id;
   const { wave } = useWaveById(waveId, {
@@ -34,11 +36,12 @@ export const useNextMintDrop = ({
     isLoading,
     isError,
     isFetchedAfterMount,
+    hasLoadedDecisions,
   } = useWaveDecisions({
     waveId: waveId ?? "",
     enabled: !!waveId,
     pageSize: 1,
-    ...(refreshWinnerOnMount ? { refetchOnMount: "always" } : {}),
+    requestScope: winnerRequestScope,
   });
 
   const latestDecision = decisionPoints[decisionPoints.length - 1];
@@ -69,7 +72,11 @@ export const useNextMintDrop = ({
     isSettingsLoaded: isLoaded,
     isFetching: isFetching || (!isLoaded && !!waveId),
     isLoading: (!isLoaded && !loadError) || (!!waveId && isLoading),
-    isFetchedAfterMount,
+    hasRefreshedWinner:
+      (isLoaded && !waveId) ||
+      (winnerRequestScope === undefined
+        ? isFetchedAfterMount
+        : hasLoadedDecisions),
     isError: (!isLoaded && !!loadError) || (!!waveId && isError),
   };
 };

@@ -13,7 +13,7 @@ interface UseWaveDecisionsProps {
   readonly enabled?: boolean | undefined;
   readonly loadAllPages?: boolean | undefined;
   readonly pageSize?: number | undefined;
-  readonly refetchOnMount?: "always" | undefined;
+  readonly requestScope?: string | undefined;
 }
 
 const DEFAULT_PAGE = 1;
@@ -42,7 +42,7 @@ export function useWaveDecisions({
   enabled = true,
   loadAllPages = false,
   pageSize,
-  refetchOnMount,
+  requestScope,
 }: UseWaveDecisionsProps) {
   const resolvedPageSize = getValidPageSize(pageSize);
   const {
@@ -58,7 +58,14 @@ export function useWaveDecisions({
     isFetchNextPageError,
     isFetchingNextPage,
   } = useInfiniteQuery({
-    queryKey: [QueryKey.WAVE_DECISIONS, { waveId, pageSize: resolvedPageSize }],
+    queryKey: [
+      QueryKey.WAVE_DECISIONS,
+      {
+        waveId,
+        pageSize: resolvedPageSize,
+        ...(requestScope !== undefined ? { requestScope } : {}),
+      },
+    ],
     queryFn: async ({
       pageParam,
       signal,
@@ -78,6 +85,7 @@ export function useWaveDecisions({
           page_size: resolvedPageSize.toString(),
         },
         signal,
+        ...(requestScope !== undefined ? { cache: "no-store" } : {}),
       });
     },
     initialPageParam: DEFAULT_PAGE,
@@ -85,7 +93,6 @@ export function useWaveDecisions({
       lastPage.next ? lastPage.page + 1 : undefined,
     enabled,
     staleTime: DEFAULT_STALE_TIME,
-    ...(refetchOnMount !== undefined ? { refetchOnMount } : {}),
   });
 
   useEffect(() => {
@@ -154,6 +161,7 @@ export function useWaveDecisions({
     decisionPoints,
     isError,
     isFetchedAfterMount,
+    hasLoadedDecisions: data !== undefined,
     error,
     refetch,
     isFetching,

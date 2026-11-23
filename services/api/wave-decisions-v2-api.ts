@@ -29,6 +29,7 @@ interface FetchWaveDecisionsV2Props {
   readonly params: Record<string, string>;
   readonly wave?: ApiWave | ApiWaveMin | undefined;
   readonly signal?: AbortSignal | undefined;
+  readonly cache?: RequestCache | undefined;
 }
 
 const getDecisionWinningContext = ({
@@ -154,11 +155,13 @@ export async function fetchWaveDecisionsV2({
   params,
   wave,
   signal,
+  cache,
 }: FetchWaveDecisionsV2Props): Promise<ApiWaveDecisionsPage> {
   const data = await commonApiFetch<ApiWaveDecisionsPageV2>({
     endpoint: `v2/waves/${waveId}/decisions`,
     params,
     ...(signal ? { signal } : {}),
+    ...(cache ? { cache } : {}),
   });
   return mapWaveDecisionsV2(data, waveId, wave);
 }

@@ -5,7 +5,7 @@ import type { NowMintingStatus } from "@/hooks/useNowMintingStatus";
 import { useHasHydrated } from "@/hooks/useHasHydrated";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { useState } from "react";
+import { useId, useState } from "react";
 import LatestDropNextMintSection from "./LatestDropNextMintSection";
 import NowMintingSection from "./NowMintingSection";
 import {
@@ -24,16 +24,24 @@ export default function LatestDropSection({
 }) {
   const locale = useBrowserLocale();
   const { nft, isFetching, isDropComplete, error, refetch } = mintStatus;
-  const {
-    nextMint,
-    isLoading: isNextMintLoading,
-    isError: isNextMintError,
-    isFetchedAfterMount: isWinnerFetchedAfterMount,
-  } = useNextMintDrop({ refreshWinnerOnMount: initialDrop !== null });
   const isLatestDropTransitionReady = useLatestDropTransitionReady({
     isDropComplete,
     mintNumber: nft?.id,
   });
+  const isMintCompleteAndGraceElapsed =
+    isDropComplete && isLatestDropTransitionReady === true;
+  const winnerRequestId = useId();
+  // A winner request shared with other consumers may have started before grace.
+  const winnerRequestScope =
+    initialDrop && nft && isMintCompleteAndGraceElapsed
+      ? `${winnerRequestId}:${nft.id}`
+      : undefined;
+  const {
+    nextMint,
+    isLoading: isNextMintLoading,
+    isError: isNextMintError,
+    hasRefreshedWinner,
+  } = useNextMintDrop({ winnerRequestScope });
   const hasHydrated = useHasHydrated();
   const [clientSelection, setClientSelection] = useState<{
     readonly seed: HomeDropSelection | null;
@@ -41,6 +49,8 @@ export default function LatestDropSection({
   } | null>(null);
   const resolvedDrop =
     clientSelection?.seed === initialDrop ? clientSelection.drop : initialDrop;
+  const initialMintNumber =
+    initialDrop?.kind === "next" ? initialDrop.mintNumber : initialDrop?.nft.id;
 
   const isDecisionReady = canResolveHomeDrop({
     mintStatus,
@@ -56,10 +66,10 @@ export default function LatestDropSection({
           nextMint,
           resolvedDrop,
           hasServerSelection:
-            resolvedDrop === initialDrop && initialDrop !== null,
-          isMintCompleteAndGraceElapsed:
-            isDropComplete && isLatestDropTransitionReady === true,
-          isWinnerFetchedAfterMount,
+            initialMintNumber === nft.id &&
+            initialDrop?.kind === resolvedDrop?.kind,
+          isMintCompleteAndGraceElapsed,
+          hasRefreshedWinner,
         })
       : resolvedDrop;
 

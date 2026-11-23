@@ -38,17 +38,17 @@ function shouldKeepCurrentDrop({
   kind,
   hasServerSelection,
   isMintCompleteAndGraceElapsed,
-  isWinnerFetchedAfterMount,
+  hasRefreshedWinner,
   nextMint,
 }: {
   readonly kind: HomeDropSelection["kind"];
   readonly hasServerSelection: boolean;
   readonly isMintCompleteAndGraceElapsed: boolean;
-  readonly isWinnerFetchedAfterMount: boolean;
+  readonly hasRefreshedWinner: boolean;
   readonly nextMint: ApiDropV2View | null;
 }): boolean {
   if (!isMintCompleteAndGraceElapsed) return kind === "next";
-  if (isWinnerFetchedAfterMount) return false;
+  if (hasRefreshedWinner) return false;
 
   // A cached winner or an empty cache can predate the server's decision.
   return hasServerSelection || (kind === "next" && nextMint === null);
@@ -60,14 +60,14 @@ export function resolveHomeDrop({
   resolvedDrop,
   hasServerSelection,
   isMintCompleteAndGraceElapsed,
-  isWinnerFetchedAfterMount,
+  hasRefreshedWinner,
 }: {
   readonly nft: ApiMemesExtendedData;
   readonly nextMint: ApiDropV2View | null;
   readonly resolvedDrop: HomeDropSelection | null;
   readonly hasServerSelection: boolean;
   readonly isMintCompleteAndGraceElapsed: boolean;
-  readonly isWinnerFetchedAfterMount: boolean;
+  readonly hasRefreshedWinner: boolean;
 }): HomeDropSelection {
   const resolvedMintNumber =
     resolvedDrop?.kind === "next"
@@ -85,7 +85,7 @@ export function resolveHomeDrop({
       kind: resolvedDrop.kind,
       hasServerSelection,
       isMintCompleteAndGraceElapsed,
-      isWinnerFetchedAfterMount,
+      hasRefreshedWinner,
       nextMint,
     })
   ) {
