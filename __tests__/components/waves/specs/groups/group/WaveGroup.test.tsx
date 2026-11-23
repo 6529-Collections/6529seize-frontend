@@ -12,12 +12,6 @@ jest.mock(
   () => () => <div data-testid="edit" />
 );
 jest.mock(
-  "@/components/waves/specs/groups/group/WaveGroupScope",
-  () =>
-    ({ group }: any) =>
-      group ? <div data-testid="scope" /> : <span>Public</span>
-);
-jest.mock(
   "@/components/waves/specs/groups/group/WaveGroupMembersScope",
   () => () => <div data-testid="members-scope" />
 );
@@ -57,10 +51,9 @@ describe("WaveGroup", () => {
 
   it("shows the gear menu and member summary when the viewer can administer the wave", () => {
     const scope = { group: { is_direct_message: false } } as any;
-    const { container } = render(
-      <WaveGroup {...baseProps} scope={scope} showMembersSummary />,
-      { wrapper }
-    );
+    const { container } = render(<WaveGroup {...baseProps} scope={scope} />, {
+      wrapper,
+    });
 
     expect(screen.getByTestId("edit")).toBeInTheDocument();
     expect(screen.getByTestId("members-scope")).toBeInTheDocument();

@@ -3,45 +3,20 @@ import WaveGroupMembersScope from "@/components/waves/specs/groups/group/WaveGro
 
 jest.mock("@/components/waves/specs/WaveRulesGroupMembersLink", () => ({
   __esModule: true,
-  default: ({
-    groupId,
-    groupName,
-    href,
-    linkLabel,
-  }: {
-    groupId: string;
-    groupName: string;
-    href: string;
-    linkLabel: string;
-  }) => (
-    <a
-      href={href}
-      aria-label={linkLabel}
-      data-testid="members-summary"
-      data-group-id={groupId}
-    >
-      {groupName} members
-    </a>
+  default: ({ groupId }: { groupId: string }) => (
+    <span data-testid="members-summary" data-group-id={groupId}>
+      12 users
+    </span>
   ),
 }));
-jest.mock("@/components/waves/specs/groups/group/WaveGroupScope", () => () => (
-  <span data-testid="fallback-scope" />
-));
 
 describe("WaveGroupMembersScope", () => {
-  it("renders the member count and criteria presentation", () => {
-    render(
-      <WaveGroupMembersScope
-        group={{ id: "1", name: "Group", is_hidden: false }}
-      />
-    );
+  it("renders the member count and criteria for a visible group with just an ID", () => {
+    render(<WaveGroupMembersScope group={{ id: "1", is_hidden: false }} />);
 
     const summary = screen.getByTestId("members-summary");
-    expect(summary).toHaveAttribute("href", "/network?page=1&group=1");
     expect(summary).toHaveAttribute("data-group-id", "1");
-    expect(summary).toHaveAccessibleName(
-      "Inspect Group group criteria and members"
-    );
+    expect(summary).toHaveTextContent("12 users");
   });
 
   it("renders the member count and criteria for an available direct-message group", () => {
@@ -57,9 +32,7 @@ describe("WaveGroupMembersScope", () => {
     );
 
     const summary = screen.getByTestId("members-summary");
-    expect(summary).toHaveAttribute("href", "/network?page=1&group=dm-1");
     expect(summary).toHaveAttribute("data-group-id", "dm-1");
-    expect(screen.queryByTestId("fallback-scope")).not.toBeInTheDocument();
   });
 
   it("preserves the private fallback for a hidden direct-message group", () => {
@@ -72,14 +45,21 @@ describe("WaveGroupMembersScope", () => {
       />
     );
 
-    expect(screen.getByTestId("fallback-scope")).toBeInTheDocument();
+    expect(screen.getByText("Private group")).toBeInTheDocument();
     expect(screen.queryByTestId("members-summary")).not.toBeInTheDocument();
   });
 
-  it("preserves the private and unavailable scope fallbacks", () => {
+  it("preserves the unavailable fallback when the group has no ID", () => {
+    render(<WaveGroupMembersScope group={{ is_hidden: false }} />);
+
+    expect(screen.getByText("Group unavailable")).toBeInTheDocument();
+    expect(screen.queryByTestId("members-summary")).not.toBeInTheDocument();
+  });
+
+  it("preserves the private fallback for a hidden community group", () => {
     render(<WaveGroupMembersScope group={{ is_hidden: true }} />);
 
-    expect(screen.getByTestId("fallback-scope")).toBeInTheDocument();
+    expect(screen.getByText("Private group")).toBeInTheDocument();
     expect(screen.queryByTestId("members-summary")).not.toBeInTheDocument();
   });
 });
