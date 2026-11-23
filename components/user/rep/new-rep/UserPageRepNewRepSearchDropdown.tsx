@@ -70,10 +70,12 @@ export default function UserPageRepNewRepSearchDropdown({
             "tw-border-iron-700/60 tw-bg-transparent tw-text-iron-300 hover:tw-border-iron-600 hover:tw-bg-iron-800/60";
         }
 
+        // Safari can blur the search before the suggestion click fires.
         return (
           <button
             key={category}
             type="button"
+            onMouseDown={(event) => event.preventDefault()}
             onClick={(event) => {
               event.stopPropagation();
               onRepSelect(category);
