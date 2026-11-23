@@ -20,6 +20,7 @@ function Input({
   const valid = /^-?\d+$/.test(value) && Math.abs(Number(value)) <= 20000;
   return (
     <MyVotesInput
+      mobile={!alwaysShowHelper}
       alwaysShowHelper={alwaysShowHelper}
       id="vote"
       label="Your vote"

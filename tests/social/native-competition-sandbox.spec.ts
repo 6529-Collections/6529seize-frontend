@@ -6871,6 +6871,15 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(sandbox.requests).toHaveLength(0);
     await input.fill("40");
     await expect(save).toBeVisible();
+    await expect(
+      row
+        .getByRole("button", { name: "Save vote", exact: true })
+        .locator("span")
+    ).toHaveCSS("background-color", "rgb(63, 105, 252)");
+    await row.screenshot({
+      path: testInfo.outputPath("my-votes-desktop-editing.png"),
+      animations: "disabled",
+    });
     await input.press("Enter");
     await expect(save).toHaveCount(0);
     expect(sandbox.requests).toHaveLength(1);
@@ -7252,7 +7261,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         const thumbnailSize = width < 1024 ? 56 : 96;
         expect((await thumbnail.boundingBox())!.width).toBe(thumbnailSize);
         expect((await thumbnail.boundingBox())!.height).toBe(thumbnailSize);
-        await expect(explain).toHaveCSS("border-width", "0px");
+        await expect(explain).toHaveCSS(
+          "border-width",
+          width < 1024 ? "0px" : "1px"
+        );
         await expect(input).toHaveCSS(
           "font-size",
           width < 1024 ? "16px" : "14px"

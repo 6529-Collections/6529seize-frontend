@@ -375,6 +375,7 @@ export function CompetitionVoteForm({
         }
       >
         <MyVotesInput
+          mobile={mobile}
           className=""
           alwaysShowHelper={!mobile}
           id={voteInputId}

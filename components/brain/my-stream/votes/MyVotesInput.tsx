@@ -5,6 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatInteger } from "@/i18n/format";
 import BodyPortalTooltip from "@/components/utils/tooltip/BodyPortalTooltip";
+import Button from "@/components/utils/button/Button";
 import { TOOLTIP_STYLES } from "@/helpers/tooltip.helpers";
 import {
   MY_VOTES_EFFECT_TRANSITION,
@@ -15,6 +16,7 @@ export const MY_VOTES_INPUT_LAYOUT =
   "tw-col-span-3 tw-row-start-2 tw-w-full tw-min-w-0 [&_input]:tw-text-sm @[32rem]/my-vote:tw-col-span-2 @[32rem]/my-vote:tw-col-start-2 @[46rem]/my-vote:tw-col-span-1 @[46rem]/my-vote:tw-col-start-4 @[46rem]/my-vote:tw-row-start-1 @[46rem]/my-vote:tw-self-center";
 
 interface MyVotesInputProps {
+  readonly mobile: boolean;
   readonly className?: string | undefined;
   readonly alwaysShowHelper?: boolean | undefined;
   readonly id: string;
@@ -41,6 +43,7 @@ interface MyVotesInputProps {
 
 /** Presentation shared by My Votes adapters; the adapter owns voting rules. */
 export function MyVotesInput({
+  mobile,
   className = MY_VOTES_INPUT_LAYOUT,
   alwaysShowHelper = false,
   id,
@@ -147,25 +150,45 @@ export function MyVotesInput({
                     ? MY_VOTES_FADE_TRANSITION
                     : MY_VOTES_EFFECT_TRANSITION
                 }
-                className="tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-px-2 tw-text-xs tw-font-semibold tw-text-primary-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+                className={`tw-min-h-11 tw-min-w-11 tw-shrink-0 tw-whitespace-nowrap tw-rounded-md tw-border-0 tw-bg-transparent tw-text-xs tw-font-semibold focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50 ${mobile ? "tw-px-2 tw-text-primary-300" : "tw-px-0 tw-py-1 tw-text-white"}`}
               >
-                {saveLabel}
+                {mobile ? (
+                  saveLabel
+                ) : (
+                  <span className="tw-flex tw-h-9 tw-items-center tw-justify-center tw-rounded-md tw-bg-primary-500 tw-px-2">
+                    {saveLabel}
+                  </span>
+                )}
               </motion.button>
             )}
           </AnimatePresence>
         </div>
-        {onExplain && (
-          <button
-            type="button"
-            disabled={!canExplain || busy || disabled}
-            onClick={onExplain}
-            data-tooltip-id={explainTooltipId}
-            data-tooltip-content={explainDescription}
-            className="tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
-          >
-            {explainLabel}
-          </button>
-        )}
+        {onExplain &&
+          (mobile ? (
+            <button
+              type="button"
+              disabled={!canExplain || busy || disabled}
+              onClick={onExplain}
+              data-tooltip-id={explainTooltipId}
+              data-tooltip-content={explainDescription}
+              className="tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+            >
+              {explainLabel}
+            </button>
+          ) : (
+            <Button
+              type="button"
+              variant="tertiary"
+              size="sm"
+              disabled={!canExplain || busy || disabled}
+              onClick={onExplain}
+              data-tooltip-id={explainTooltipId}
+              data-tooltip-content={explainDescription}
+              className="!tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap !tw-px-3 !tw-text-xs !tw-font-medium"
+            >
+              {explainLabel}
+            </Button>
+          ))}
         {showHelper && (
           <p
             id={helperId}
