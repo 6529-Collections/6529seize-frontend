@@ -71,8 +71,11 @@ The profile header appears on profile routes under `/{user}` and shows:
    - subscription coverage remains a separate status and navigation surface:
      a subtle row beneath Preferences on desktop layouts, and a full-width
      subtle row below the identity block on smaller layouts
-   - other profile, signed-in viewer with handle, and target profile with
-     handle: follow/unfollow button
+   - Choose **Follow** to follow a profile. **Follow back** appears when that
+     profile already follows you.
+   - **Following** shows opposing arrows when you both follow each other.
+     Hover over or focus the button to see **You follow each other**. Select
+     **Following** to see the relationship and choose **Unfollow**.
    - **Profile actions → Artwork alerts** independently opts into new Main Stage
      artwork submissions by that artist; the menu shows On with a check mark when enabled.
      Signed-in viewers see it for profiles with an artist activity badge, or

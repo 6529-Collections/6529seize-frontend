@@ -6,7 +6,7 @@ import {
   ReactQueryWrapperContext,
 } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import { AuthContext } from "@/components/auth/Auth";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import {
@@ -24,8 +24,16 @@ import { faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "react-tooltip";
 import Button from "@/components/utils/button/Button";
 import type { ButtonSize } from "@/components/utils/button/buttonStyles";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { t } from "@/i18n/messages";
 import UserMuteButton from "./UserMuteButton";
-import { NoSymbolIcon } from "@heroicons/react/24/outline";
+import UserFollowingMenu from "./UserFollowingMenu";
+import { ArrowsRightLeftIcon, NoSymbolIcon } from "@heroicons/react/24/outline";
+
+const FOLLOW_ACTIONS = Object.values(
+  ApiIdentitySubscriptionTargetAction
+).filter((action) => action !== ApiIdentitySubscriptionTargetAction.DropVoted);
 
 export enum UserFollowBtnSize {
   SMALL = "SMALL",
@@ -61,11 +69,13 @@ function FollowStateIcon({
   loading,
   blocked,
   following,
+  mutual,
   size,
 }: {
   readonly loading: boolean;
   readonly blocked: boolean;
   readonly following: boolean;
+  readonly mutual: boolean;
   readonly size: UserFollowBtnSize;
 }) {
   if (loading) {
@@ -76,6 +86,14 @@ function FollowStateIcon({
       <NoSymbolIcon
         className={FOLLOW_BTN_SVG_CLASSES[size]}
         aria-hidden="true"
+      />
+    );
+  }
+  if (mutual) {
+    return (
+      <ArrowsRightLeftIcon
+        aria-hidden="true"
+        className={FOLLOW_BTN_SVG_CLASSES[size]}
       />
     );
   }
@@ -118,6 +136,30 @@ function FollowStateIcon({
   );
 }
 
+function getFollowButtonLabel(
+  locale: SupportedLocale,
+  {
+    blocked,
+    following,
+    followsViewer,
+    followLabel,
+    followingLabel,
+  }: {
+    readonly blocked: boolean;
+    readonly following: boolean;
+    readonly followsViewer: boolean;
+    readonly followLabel?: string | undefined;
+    readonly followingLabel?: string | undefined;
+  }
+): string {
+  if (blocked) return t(locale, "profile.follow.unblock");
+  if (following) {
+    return followingLabel ?? t(locale, "notifications.followButton.following");
+  }
+  if (followsViewer) return t(locale, "profile.follow.followBack");
+  return followLabel ?? t(locale, "notifications.followButton.follow");
+}
+
 export default function UserFollowBtn({
   handle,
   size = UserFollowBtnSize.MEDIUM,
@@ -130,6 +172,10 @@ export default function UserFollowBtn({
   unblockPending = false,
   onUnblock,
   beforeFollowAction,
+  insideHoverCard = false,
+  followLabel,
+  followingLabel,
+  initialFollowing = false,
 }: {
   readonly handle: string;
   readonly size?: UserFollowBtnSize | undefined;
@@ -142,7 +188,13 @@ export default function UserFollowBtn({
   readonly unblockPending?: boolean | undefined;
   readonly onUnblock?: (() => void) | undefined;
   readonly beforeFollowAction?: ReactNode | undefined;
+  readonly insideHoverCard?: boolean | undefined;
+  readonly followLabel?: string | undefined;
+  readonly followingLabel?: string | undefined;
+  readonly initialFollowing?: boolean | undefined;
 }) {
+  const locale = useBrowserLocale();
+  const queryClient = useQueryClient();
   const { onIdentityFollowChange } = useContext(ReactQueryWrapperContext);
   const {
     setToast,
@@ -157,63 +209,94 @@ export default function UserFollowBtn({
     useState<boolean>(false);
   const directMessageMutatingRef = useRef(false);
 
+  const statusKey = [
+    QueryKey.IDENTITY_FOLLOWING_ACTIONS,
+    handle,
+    {
+      identityId: connectedProfile?.id ?? null,
+      proxyId: activeProfileProxy?.id ?? null,
+      isAuthenticated: isAuthenticated === true,
+      isDirectProfileSession: isDirectProfileSession === true,
+    },
+  ] as const;
+  const canReadStatus = Boolean(
+    connectedProfile?.id &&
+    isAuthenticated &&
+    isDirectProfileSession &&
+    !activeProfileProxy
+  );
+  const endpoint = `identities/${encodeURIComponent(handle)}/subscriptions`;
   const { data: subscriptions, isFetching } =
     useQuery<ApiIdentitySubscriptionActions>({
-      queryKey: [
-        QueryKey.IDENTITY_FOLLOWING_ACTIONS,
-        handle,
-        {
-          identityId: connectedProfile?.id ?? null,
-          proxyId: activeProfileProxy?.id ?? null,
-          isAuthenticated: isAuthenticated === true,
-          isDirectProfileSession: isDirectProfileSession === true,
-        },
-      ],
-      queryFn: async ({ signal }) =>
-        await commonApiFetch<ApiIdentitySubscriptionActions>({
-          endpoint: `/identities/${handle}/subscriptions`,
-          signal,
-        }),
-      enabled: !blocked && !blockStateLoading && !unblockPending,
+      queryKey: statusKey,
+      queryFn: ({ signal }) =>
+        commonApiFetch<ApiIdentitySubscriptionActions>({ endpoint, signal }),
+      enabled:
+        canReadStatus &&
+        showFollowButton &&
+        !blocked &&
+        !blockStateLoading &&
+        !unblockPending,
     });
   const isInitialStatusLoading =
     blockStateLoading ||
     unblockPending ||
     (!blocked && isFetching && subscriptions === undefined);
 
-  const following = !blocked && (subscriptions?.actions.length ?? 0) > 0;
-  let label = "Follow";
-  let actionAriaLabel = "Follow";
-  if (blocked) {
-    label = "Unblock";
-    actionAriaLabel = `Unblock ${handle}`;
-  } else if (following) {
-    label = "Following";
-    actionAriaLabel = "Unfollow";
-  }
+  const following =
+    !blocked &&
+    (subscriptions ? subscriptions.actions.length > 0 : initialFollowing);
+  const followsViewer =
+    canReadStatus && !blocked && subscriptions?.follows_viewer === true;
+  const mutual = following && followsViewer;
+  const label = getFollowButtonLabel(locale, {
+    blocked,
+    following,
+    followsViewer,
+    followLabel,
+    followingLabel,
+  });
 
   const followMutation = useMutation({
-    mutationFn: async () => {
-      await commonApiPost<
+    mutationFn: ({
+      unfollow,
+      targetEndpoint,
+    }: {
+      readonly unfollow: boolean;
+      readonly targetEndpoint: string;
+      readonly key: typeof statusKey;
+    }) => {
+      const send = unfollow ? commonApiDeleteWithBody : commonApiPost;
+      return send<
         ApiIdentitySubscriptionActions,
         ApiIdentitySubscriptionActions
       >({
-        endpoint: `identities/${handle}/subscriptions`,
-        body: {
-          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
-            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
-          ),
-        },
+        endpoint: targetEndpoint,
+        body: { actions: FOLLOW_ACTIONS },
       });
     },
-    onSuccess: () => {
+    onSuccess: async ({ actions }, { key }) => {
+      await queryClient.cancelQueries({ queryKey: key, exact: true });
+      // The write response only changes the outgoing actions; keep any known reverse status.
+      queryClient.setQueryData<ApiIdentitySubscriptionActions>(
+        key,
+        (previous) => ({
+          ...previous,
+          actions,
+        })
+      );
       onIdentityFollowChange();
     },
-    onError: (error) => {
+    onError: (error, { unfollow }) => {
       setToast({
         type: "error",
-        title: "Couldn't follow this profile.",
-        description: "Please try again.",
+        title: t(
+          locale,
+          unfollow
+            ? "profile.follow.error.unfollow"
+            : "profile.follow.error.follow"
+        ),
+        description: t(locale, "profile.follow.error.retry"),
         details: getToastErrorDetails(error),
       });
     },
@@ -222,52 +305,31 @@ export default function UserFollowBtn({
     },
   });
 
-  const unFollowMutation = useMutation({
-    mutationFn: async () => {
-      await commonApiDeleteWithBody<
-        ApiIdentitySubscriptionActions,
-        ApiIdentitySubscriptionActions
-      >({
-        endpoint: `identities/${handle}/subscriptions`,
-        body: {
-          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
-            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
-          ),
-        },
-      });
-    },
-    onSuccess: () => {
-      onIdentityFollowChange();
-    },
-    onError: (error) => {
-      setToast({
-        type: "error",
-        title: "Couldn't unfollow this profile.",
-        description: "Please try again.",
-        details: getToastErrorDetails(error),
-      });
-    },
-    onSettled: () => {
-      setMutating(false);
-    },
-  });
-
-  const onFollow = async (): Promise<void> => {
+  const changeFollow = async (unfollow: boolean): Promise<void> => {
     if (blocked) {
       onUnblock?.();
       return;
     }
     setMutating(true);
-    const { success } = await requestAuth();
-    if (!success) {
-      setMutating(false);
-      return;
+    try {
+      const { success } = await requestAuth();
+      if (success) {
+        followMutation.mutate({
+          unfollow,
+          targetEndpoint: endpoint,
+          key: statusKey,
+        });
+        return;
+      }
+    } catch (error) {
+      setToast({
+        type: "error",
+        title: t(locale, "profile.follow.error.authenticate"),
+        description: t(locale, "profile.follow.error.retry"),
+        details: getToastErrorDetails(error),
+      });
     }
-    if (following) {
-      unFollowMutation.mutate();
-      return;
-    }
-    followMutation.mutate();
+    setMutating(false);
   };
 
   const isDirectMessagePending =
@@ -295,6 +357,20 @@ export default function UserFollowBtn({
 
   const directMessageTooltipId = `dm-${handle}`;
   const actionLoading = mutating || isInitialStatusLoading;
+  const buttonClassName =
+    size === UserFollowBtnSize.MEDIUM ? "!tw-text-[13px]" : undefined;
+  const actionContent = (
+    <>
+      <FollowStateIcon
+        loading={actionLoading}
+        blocked={blocked}
+        following={following}
+        mutual={mutual}
+        size={size}
+      />
+      <span>{label}</span>
+    </>
+  );
 
   return (
     <div className="tw-flex tw-items-center tw-gap-x-2">
@@ -338,31 +414,36 @@ export default function UserFollowBtn({
         />
       )}
       {beforeFollowAction}
-      {showFollowButton ? (
+      {showFollowButton && following && (
+        <UserFollowingMenu
+          size={FOLLOW_BUTTON_SIZES[size]}
+          className={buttonClassName}
+          busy={actionLoading}
+          status={mutual ? t(locale, "profile.follow.mutualStatus") : undefined}
+          unfollowLabel={t(locale, "profile.follow.unfollow")}
+          insideHoverCard={insideHoverCard}
+          onUnfollow={() => void changeFollow(true)}
+        >
+          {actionContent}
+        </UserFollowingMenu>
+      )}
+      {showFollowButton && !following && (
         <Button
-          onClick={onFollow}
+          onClick={() => void changeFollow(false)}
           disabled={actionLoading || (blocked && !onUnblock)}
           aria-busy={actionLoading || undefined}
-          aria-label={actionAriaLabel}
-          variant={
-            blocked || following || isInitialStatusLoading
-              ? "secondary"
-              : "primary"
+          aria-label={
+            blocked
+              ? t(locale, "profile.follow.unblockProfile", { handle })
+              : undefined
           }
+          variant={blocked || isInitialStatusLoading ? "secondary" : "primary"}
           size={FOLLOW_BUTTON_SIZES[size]}
-          className={
-            size === UserFollowBtnSize.MEDIUM ? "!tw-text-[13px]" : undefined
-          }
+          className={buttonClassName}
         >
-          <FollowStateIcon
-            loading={actionLoading}
-            blocked={blocked}
-            following={following}
-            size={size}
-          />
-          <span>{label}</span>
+          {actionContent}
         </Button>
-      ) : null}
+      )}
     </div>
   );
 }
