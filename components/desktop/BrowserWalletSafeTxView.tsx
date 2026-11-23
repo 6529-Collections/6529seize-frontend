@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useId, useState } from "react";
+import { type ReactNode, useId, useState } from "react";
 import { getAddress } from "viem";
 import { usePublicClient } from "wagmi";
 import { getAddressEtherscanLink } from "@/helpers/Helpers";
@@ -16,6 +16,7 @@ import {
   type SafeReader,
   type SafeTxPreflight,
 } from "@/lib/desktop/wallet-safe-tx/preflight";
+import { useCheckResult, useScopedFlag } from "./requestScopedState";
 import { formatDecodedValue } from "./walletTransactionFormat";
 
 type Locale = ReturnType<typeof useBrowserLocale>;
@@ -28,49 +29,45 @@ type Check =
   | { readonly kind: "unavailable" }
   | SafeTxPreflight;
 
-interface Tagged {
-  readonly key: string;
-  readonly result: Check;
-}
-
 /**
  * The Safe and registries read from the chain before Sign; `round` reads
  * again. Every failure (including an unreachable node) blocks Sign.
  */
 function usePreflight(
+  requestKey: string,
   description: SafeTxDescription,
   signer: string,
   round: number
 ): Check {
   const client = usePublicClient({ chainId: description.chainId });
-  const [tagged, setTagged] = useState<Tagged | null>(null);
-  const key = String(round);
-  useEffect(() => {
-    if (!client) return undefined;
-    let active = true;
-    const run = async () => {
-      let result: Check;
-      try {
-        result = await readSafeTxPreflight(
-          client as unknown as SafeReader,
-          description,
-          signer
-        );
-      } catch {
-        result = { kind: "unavailable" };
-      }
-      if (active) setTagged({ key, result });
-    };
-    void run();
-    return () => {
-      active = false;
-    };
-  }, [client, description, signer, key]);
+  // The result belongs to this request and signer (and round).
+  const result = useCheckResult(
+    `${requestKey}:${signer}`,
+    client,
+    client
+      ? async (): Promise<Check> => {
+          try {
+            return await readSafeTxPreflight(
+              client as unknown as SafeReader,
+              description,
+              signer
+            );
+          } catch {
+            return { kind: "unavailable" };
+          }
+        }
+      : null,
+    round
+  );
   if (!client) return { kind: "unavailable" };
-  return tagged?.key === key ? tagged.result : { kind: "checking" };
+  return result ?? { kind: "checking" };
 }
 
-function checkMessage(locale: Locale, check: Check): string {
+function checkMessage(
+  locale: Locale,
+  check: Check,
+  acceptsOwnership: boolean
+): string {
   switch (check.kind) {
     case "checking":
       return t(locale, "browserConnector.safeTx.check.checking");
@@ -91,7 +88,13 @@ function checkMessage(locale: Locale, check: Check): string {
         nonce: formatDecimalString(locale, check.currentNonce.toString()),
       });
     case "ok":
-      return t(locale, "browserConnector.safeTx.check.ok");
+      // acceptOwnership is checked against the pending owner, not the owner.
+      return t(
+        locale,
+        acceptsOwnership
+          ? "browserConnector.safeTx.check.okPendingOwner"
+          : "browserConnector.safeTx.check.ok"
+      );
   }
 }
 
@@ -176,21 +179,28 @@ const CHECK_BUTTON_CLASS =
 export default function BrowserWalletSafeTxView({
   locale,
   signer,
+  requestKey,
   description,
   children,
 }: {
   readonly locale: Locale;
   /** The address asked to sign. */
   readonly signer: string;
+  /** The request's exact content (its typed data JSON): its identity. */
+  readonly requestKey: string;
   readonly description: SafeTxDescription;
   readonly children: (canSign: boolean, describedBy: string) => ReactNode;
 }) {
   const [round, setRound] = useState(0);
-  const check = usePreflight(description, signer, round);
-  const [understood, setUnderstood] = useState(false);
+  const check = usePreflight(requestKey, description, signer, round);
+  // The acknowledgement belongs to this request and signer.
+  const [understood, setUnderstood] = useScopedFlag(`${requestKey}:${signer}`);
   const understandId = useId();
   const checksId = useId();
   const safe = getAddress(description.safe);
+  const acceptsOwnership = description.calls.some(
+    (call) => call.ruleId === "governance.acceptOwnership"
+  );
   const warned = description.risk !== "normal";
   const canSign = check.kind === "ok" && (!warned || understood);
   const blocked = check.kind !== "ok" && check.kind !== "checking";
@@ -304,13 +314,13 @@ export default function BrowserWalletSafeTxView({
         <output aria-live="polite" className="tw-block tw-text-iron-200">
           {blocked
             ? t(locale, "browserConnector.safeTx.check.finished")
-            : checkMessage(locale, check)}
+            : checkMessage(locale, check, acceptsOwnership)}
         </output>
         <div role="alert" className="empty:tw-hidden">
           {blocked && (
             <p key={round} className="tw-m-0 tw-font-semibold tw-text-red">
               {t(locale, "browserConnector.safeTx.check.blocked", {
-                reason: checkMessage(locale, check),
+                reason: checkMessage(locale, check, acceptsOwnership),
               })}
             </p>
           )}
