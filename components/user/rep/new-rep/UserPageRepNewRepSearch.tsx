@@ -16,8 +16,13 @@ import {
   useRef,
   useState,
 } from "react";
-import { useClickAway, useDebounce, useKeyPressEvent } from "react-use";
-import { AnimatePresence, motion } from "framer-motion";
+import {
+  useClickAway,
+  useDebounce,
+  useKeyPressEvent,
+  useMeasure,
+} from "react-use";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import type { ApiRepOverview } from "@/generated/models/ApiRepOverview";
 import UserPageRepNewRepSearchDropdown from "./UserPageRepNewRepSearchDropdown";
@@ -123,6 +128,15 @@ function GrantRepForm({
   readonly amountContext: string;
 }) {
   const locale = useBrowserLocale();
+  const reducedMotion = useReducedMotion();
+  const layoutTransition = {
+    duration: reducedMotion ? 0 : 0.18,
+    ease: "easeOut",
+  } as const;
+  // Measure natural content separately so the footer stays pinned when the body scrolls.
+  const [contentRef, { height: contentHeight }] = useMeasure<HTMLDivElement>();
+  const [footerRef, { height: footerHeight }] = useMeasure<HTMLDivElement>();
+  const layoutHeight = contentHeight + footerHeight;
   const amountInputId = useId();
   const amountFormId = useId();
   const availableRepId = useId();
@@ -305,7 +319,7 @@ function GrantRepForm({
 
   const [isOpen, setIsOpen] = useState(false);
 
-  const listRef = useRef<HTMLDivElement>(null);
+  const listRef = useRef<HTMLFormElement>(null);
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
@@ -514,234 +528,260 @@ function GrantRepForm({
   };
 
   return (
-    <div className="tw-flex tw-h-[440px] tw-max-h-[calc(100dvh-12rem)] tw-min-h-0 tw-max-w-full tw-flex-col md:tw-h-[392px]">
-      <div
-        ref={listRef}
-        className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 sm:tw-px-6"
-      >
-        <GrantRepStats
-          available={heroAvailableRep}
-          assigned={overview?.authenticated_user_contribution ?? 0}
-          profileName={profile.query ?? profile.handle ?? profile.display}
-          overAllowance={overAllowance}
-          id={availableRepId}
-        />
-        <form onSubmit={onSearchSubmit} className="tw-relative tw-w-full">
-          <label htmlFor="search-rep" className="tw-sr-only">
-            {t(locale, "rep.categories.grant.searchPlaceholder")}
-          </label>
-          <div className="tw-relative tw-w-full">
-            <svg
-              className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-1/2 tw-h-4 tw-w-4 -tw-translate-y-1/2 tw-text-iron-500"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              aria-hidden="true"
-            >
-              <path
-                fillRule="evenodd"
-                d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <input
-              ref={searchInputRef}
-              id="search-rep"
-              name="search-rep"
-              type="text"
-              required
-              autoComplete="off"
-              autoCapitalize="none"
-              autoCorrect="off"
-              spellCheck={false}
-              value={repSearch}
-              disabled={mutating}
-              onChange={handleRepSearchChange}
-              onFocus={() => {
-                if (!selectedCategory) setIsOpen(true);
-              }}
-              aria-invalid={categorySelectionInvalid || !!typedCategoryError}
-              aria-describedby={[
-                submissionGuidanceId,
-                categorySelectionInvalid && categoryErrorId,
-                typedCategoryError && typedCategoryErrorId,
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              className={`${RATING_INPUT_SURFACE_CLASS} tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none`}
-              placeholder={t(locale, "rep.categories.grant.searchPlaceholder")}
-            />
-            {selectedCategory ? (
-              <button
-                type="button"
-                disabled={mutating}
-                aria-label={t(locale, "rep.categories.grant.changeCategory")}
-                onClick={() => {
-                  selectionRequest.current++;
-                  amountFocusSource.current = null;
-                  setSelectedCategory(null);
-                  setRepSearch("");
-                  setAmountDraft(null);
-                  setError(null);
-                  setIsOpen(true);
-                  searchInputRef.current?.focus();
-                }}
-                className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
-              >
-                <XMarkIcon aria-hidden="true" className="tw-size-4" />
-              </button>
-            ) : (
-              (checkingAvailability ||
-                (shouldCheckAvailability && availability.isFetching)) && (
-                <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
-                  <CircleLoader />
-                </div>
-              )
-            )}
-          </div>
-          {typedCategoryError && (
-            <p
-              id={typedCategoryErrorId}
-              role="alert"
-              className="tw-mb-0 tw-mt-2 tw-break-words tw-text-xs tw-leading-5 tw-text-error"
-            >
-              {typedCategoryError}
-            </p>
-          )}
-          <AnimatePresence initial={false}>
-            {showSearchDropdown && (
-              <motion.div
-                initial={{ opacity: 0, y: -4 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -4 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
-                className="tw-mt-2 tw-will-change-transform"
-              >
-                <div className="tw-max-h-20 tw-overflow-y-auto tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
-                  <UserPageRepNewRepSearchDropdown
-                    categories={categoriesToDisplay}
-                    state={repSearchState}
-                    minSearchLength={SEARCH_LENGTH.MIN}
-                    maxSearchLength={SEARCH_LENGTH.MAX}
-                    onRepSelect={onRepSelect}
-                  />
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </form>
-        {!isError && (
-          <GrantRepCategorySuggestions
-            ratings={ratingStats}
-            search={repSearch}
-            selectedCategory={selectedCategory}
-            disabled={mutating}
-            onSelect={(category) => {
-              void onRepSelect(category, true);
+    <motion.div
+      initial={false}
+      animate={{ height: layoutHeight || "auto" }}
+      transition={layoutTransition}
+      className="tw-flex tw-max-h-[calc(100dvh-12rem)] tw-min-h-0 tw-max-w-full tw-flex-col tw-overflow-hidden"
+    >
+      <div className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 sm:tw-px-6">
+        <div ref={contentRef}>
+          <GrantRepStats
+            available={heroAvailableRep}
+            assigned={overview?.authenticated_user_contribution ?? 0}
+            profileName={profile.query ?? profile.handle ?? profile.display}
+            overAllowance={overAllowance}
+            id={availableRepId}
+          />
+          <form
+            ref={listRef}
+            onSubmit={onSearchSubmit}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget))
+                setIsOpen(false);
             }}
-          />
-        )}
-        <form
-          id={amountFormId}
-          className="tw-mt-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void onGrantRep();
-          }}
-        >
-          <label
-            htmlFor={amountInputId}
-            className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+            className="tw-relative tw-w-full"
           >
-            {t(locale, "rep.categories.grant.amountLabel")}
-          </label>
-          <p
-            id={`${amountInputId}-hint`}
-            className="tw-mb-2 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-500"
-          >
-            {t(locale, "user.rate.totalHelp")}
-          </p>
-          <UserPageRateInput
-            inputRef={focusSelectedAmount}
-            value={amountStr}
-            onChange={setAmountStr}
-            minMax={minMaxValues}
-            isProxy={!!activeProfileProxy}
-            clampOnBlur={false}
-            variant="form"
-            inputId={amountInputId}
-            disabled={mutating}
-            placeholder="0"
-            descriptionId={`${availableRepId} ${amountInputId}-hint`}
-            invalid={amountReady && !isValidValue}
-          />
-          <div
-            role="status"
-            aria-hidden={!amountReady}
-            className={!amountReady ? "tw-invisible" : undefined}
-          >
-            <UserRateAdjustmentHelper
-              inLineValues
-              originalValue={currentRep}
-              adjustedValue={isRatingValue(amountStr) ? amountNum : currentRep}
-              adjustmentType="Rep"
-              valueLayout="inline"
-              variant="summary"
+            <label htmlFor="search-rep" className="tw-sr-only">
+              {t(locale, "rep.categories.grant.searchPlaceholder")}
+            </label>
+            <div className="tw-relative tw-w-full">
+              <svg
+                className="tw-pointer-events-none tw-absolute tw-left-4 tw-top-1/2 tw-h-4 tw-w-4 -tw-translate-y-1/2 tw-text-iron-500"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <input
+                ref={searchInputRef}
+                id="search-rep"
+                name="search-rep"
+                type="text"
+                required
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                value={repSearch}
+                disabled={mutating}
+                onChange={handleRepSearchChange}
+                onFocus={() => {
+                  if (!selectedCategory) setIsOpen(true);
+                }}
+                aria-invalid={categorySelectionInvalid || !!typedCategoryError}
+                aria-describedby={[
+                  submissionGuidanceId,
+                  categorySelectionInvalid && categoryErrorId,
+                  typedCategoryError && typedCategoryErrorId,
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                className={`${RATING_INPUT_SURFACE_CLASS} tw-block tw-h-[46px] tw-w-full tw-appearance-none tw-bg-iron-900 tw-py-3 tw-pl-11 tw-pr-10 tw-text-sm tw-font-normal tw-text-iron-100 tw-caret-primary-400 tw-ring-1 tw-transition-colors tw-duration-150 placeholder:tw-text-iron-500 focus:tw-outline-none focus:tw-ring-primary-400 motion-reduce:tw-transition-none`}
+                placeholder={t(
+                  locale,
+                  "rep.categories.grant.searchPlaceholder"
+                )}
+              />
+              {selectedCategory ? (
+                <button
+                  type="button"
+                  disabled={mutating}
+                  aria-label={t(locale, "rep.categories.grant.changeCategory")}
+                  onClick={() => {
+                    selectionRequest.current++;
+                    amountFocusSource.current = null;
+                    setSelectedCategory(null);
+                    setRepSearch("");
+                    setAmountDraft(null);
+                    setError(null);
+                    setIsOpen(true);
+                    searchInputRef.current?.focus();
+                  }}
+                  className="tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-w-11 tw-items-center tw-justify-center tw-rounded-lg tw-border-0 tw-bg-transparent tw-text-iron-400 hover:tw-text-iron-100 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400"
+                >
+                  <XMarkIcon aria-hidden="true" className="tw-size-4" />
+                </button>
+              ) : (
+                (checkingAvailability ||
+                  (shouldCheckAvailability && availability.isFetching)) && (
+                  <div className="tw-pointer-events-none tw-absolute tw-inset-y-0 tw-right-0 tw-flex tw-items-center tw-pr-3">
+                    <CircleLoader />
+                  </div>
+                )
+              )}
+            </div>
+            {typedCategoryError && (
+              <p
+                id={typedCategoryErrorId}
+                role="alert"
+                className="tw-mb-0 tw-mt-2 tw-break-words tw-text-xs tw-leading-5 tw-text-error"
+              >
+                {typedCategoryError}
+              </p>
+            )}
+            <AnimatePresence initial={false}>
+              {showSearchDropdown && (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{
+                    duration: reducedMotion ? 0 : 0.15,
+                    ease: "easeOut",
+                  }}
+                  className="tw-absolute tw-inset-x-0 tw-top-full tw-z-10 tw-mt-2 tw-shadow-lg tw-shadow-black/30"
+                >
+                  <div className="tw-max-h-20 tw-overflow-y-auto tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
+                    <UserPageRepNewRepSearchDropdown
+                      categories={categoriesToDisplay}
+                      state={repSearchState}
+                      minSearchLength={SEARCH_LENGTH.MIN}
+                      maxSearchLength={SEARCH_LENGTH.MAX}
+                      onRepSelect={onRepSelect}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </form>
+          {!isError && (
+            <GrantRepCategorySuggestions
+              ratings={ratingStats}
+              search={repSearch}
+              selectedCategory={selectedCategory}
+              disabled={mutating}
+              onSelect={(category) => {
+                void onRepSelect(category, true);
+              }}
             />
-          </div>
-        </form>
-        <GrantRepSubmissionGuidance
-          id={submissionGuidanceId}
-          selectedCategory={activeCategory}
-          categoriesToDisplay={categoriesToDisplay}
-        />
+          )}
+          <motion.form
+            layout="position"
+            transition={layoutTransition}
+            id={amountFormId}
+            className="tw-mt-6"
+            onSubmit={(event) => {
+              event.preventDefault();
+              void onGrantRep();
+            }}
+          >
+            <label
+              htmlFor={amountInputId}
+              className="tw-mb-1 tw-block tw-text-sm tw-font-medium tw-text-iron-200"
+            >
+              {t(locale, "rep.categories.grant.amountLabel")}
+            </label>
+            <p
+              id={`${amountInputId}-hint`}
+              className="tw-mb-2 tw-mt-0 tw-text-xs tw-leading-5 tw-text-iron-500"
+            >
+              {t(locale, "user.rate.totalHelp")}
+            </p>
+            <UserPageRateInput
+              inputRef={focusSelectedAmount}
+              value={amountStr}
+              onChange={setAmountStr}
+              minMax={minMaxValues}
+              isProxy={!!activeProfileProxy}
+              clampOnBlur={false}
+              variant="form"
+              inputId={amountInputId}
+              disabled={mutating}
+              placeholder="0"
+              descriptionId={`${availableRepId} ${amountInputId}-hint`}
+              invalid={amountReady && !isValidValue}
+            />
+            {amountReady && (
+              <div role="status">
+                <UserRateAdjustmentHelper
+                  inLineValues
+                  originalValue={currentRep}
+                  adjustedValue={
+                    isRatingValue(amountStr) ? amountNum : currentRep
+                  }
+                  adjustmentType="Rep"
+                  valueLayout="inline"
+                  variant="summary"
+                />
+              </div>
+            )}
+          </motion.form>
+          <GrantRepSubmissionGuidance
+            id={submissionGuidanceId}
+            selectedCategory={activeCategory}
+            categoriesToDisplay={categoriesToDisplay}
+          />
 
-        {isError && (
-          <div role="alert" className="tw-mt-3 tw-text-xs tw-text-iron-400">
-            {t(locale, "rep.categories.edit.loadError")}{" "}
-            <Button variant="ghost" size="sm" onClick={retry}>
-              {t(locale, "rep.categories.edit.retry")}
-            </Button>
-          </div>
-        )}
-        {formError && (
-          <div id={categoryErrorId} className="tw-mt-3 tw-pb-2">
-            <UserPageRepNewRepError
-              msg={formError.message}
-              showDetails={formError.showDetails}
-              closeError={() => setError(null)}
-            />
-          </div>
-        )}
+          {isError && (
+            <div role="alert" className="tw-mt-3 tw-text-xs tw-text-iron-400">
+              {t(locale, "rep.categories.edit.loadError")}{" "}
+              <Button variant="ghost" size="sm" onClick={retry}>
+                {t(locale, "rep.categories.edit.retry")}
+              </Button>
+            </div>
+          )}
+          {formError && (
+            <div id={categoryErrorId} className="tw-mt-3 tw-pb-2">
+              <UserPageRepNewRepError
+                msg={formError.message}
+                showDetails={formError.showDetails}
+                closeError={() => setError(null)}
+              />
+            </div>
+          )}
+        </div>
       </div>
-      <div className="tw-flex tw-shrink-0 tw-flex-col tw-gap-2 tw-px-4 tw-pt-4 sm:tw-px-6 md:tw-flex-row md:tw-justify-end md:tw-gap-3">
-        {onCancel && (
+      <div ref={footerRef} className="tw-shrink-0">
+        <motion.div
+          layout="position"
+          transition={layoutTransition}
+          className="tw-flex tw-flex-col tw-gap-2 tw-px-4 tw-pt-4 sm:tw-px-6 md:tw-flex-row md:tw-justify-end md:tw-gap-3"
+        >
+          {onCancel && (
+            <Button
+              onClick={onCancel}
+              disabled={mutating}
+              variant="ghost"
+              size="md"
+              className="tw-min-h-11 tw-w-full md:tw-w-auto"
+            >
+              {t(locale, "rep.categories.grant.actions.cancel")}
+            </Button>
+          )}
           <Button
-            onClick={onCancel}
-            disabled={mutating}
-            variant="ghost"
+            disabled={isGrantDisabled}
+            type="submit"
+            form={amountFormId}
+            loading={mutating}
+            variant="action"
             size="md"
             className="tw-min-h-11 tw-w-full md:tw-w-auto"
           >
-            {t(locale, "rep.categories.grant.actions.cancel")}
+            {t(
+              locale,
+              currentRep !== 0
+                ? "rep.categories.edit.save"
+                : "rep.categories.grant.actions.grant"
+            )}
           </Button>
-        )}
-        <Button
-          disabled={isGrantDisabled}
-          type="submit"
-          form={amountFormId}
-          loading={mutating}
-          variant="action"
-          size="md"
-          className="tw-min-h-11 tw-w-full md:tw-w-auto"
-        >
-          {t(
-            locale,
-            currentRep !== 0
-              ? "rep.categories.edit.save"
-              : "rep.categories.grant.actions.grant"
-          )}
-        </Button>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 }

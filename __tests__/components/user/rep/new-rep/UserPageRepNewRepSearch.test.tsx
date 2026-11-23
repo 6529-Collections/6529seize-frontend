@@ -383,10 +383,7 @@ describe("UserPageRepNewRepSearch", () => {
         name: "Your total REP for this category",
       });
       const cancel = screen.getByRole("button", { name: "Cancel" });
-      const adjustment = screen
-        .getByText("Current Rep:")
-        .closest('[role="status"]');
-      expect(adjustment).toHaveAttribute("aria-hidden", "true");
+      expect(screen.queryByText("Current Rep:")).not.toBeInTheDocument();
       if (focus === "cancel") {
         await user.type(amount, "15");
         await user.tab();
@@ -402,7 +399,7 @@ describe("UserPageRepNewRepSearch", () => {
         },
       });
       rerender(<UserPageRepNewRepSearch {...props} />);
-      expect(adjustment).toHaveAttribute("aria-hidden", "false");
+      expect(screen.getByText("Current Rep:")).toBeVisible();
       if (focus === "cancel") {
         expect(cancel).toHaveFocus();
         expect(amount).toHaveValue("15");
@@ -796,11 +793,7 @@ describe("UserPageRepNewRepSearch", () => {
     ).toHaveAttribute("placeholder", "0");
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeEnabled();
-    const adjustment = screen
-      .getByText("Current Rep:")
-      .closest('[role="status"]');
-    expect(adjustment).toHaveAttribute("aria-hidden", "true");
-    expect(adjustment).toHaveClass("tw-invisible");
+    expect(screen.queryByText("Current Rep:")).not.toBeInTheDocument();
   });
 
   it.each(["25", "0", "-25"])(

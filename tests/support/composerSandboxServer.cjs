@@ -3188,6 +3188,19 @@ function handleSharedPostFeedFixture(pathname, url, res) {
 // The profile document and the browser can read the same saved fixture.
 function handleProfileRepFixture(pathname, res) {
   if (sandboxProfileRepRating === null) return false;
+  if (pathname === "/api/profiles/following-artist-0/rep/ratings/received") {
+    return writeJsonResponse(res, {
+      rep_rates_left_for_rater: 80,
+      rating_stats: [
+        {
+          category: "Artist",
+          rating: sandboxProfileRepRating,
+          contributor_count: 1,
+          rater_contribution: sandboxProfileRepRating,
+        },
+      ],
+    });
+  }
   const rating = {
     total_rep: sandboxProfileRepRating,
     contributor_count: 1,
