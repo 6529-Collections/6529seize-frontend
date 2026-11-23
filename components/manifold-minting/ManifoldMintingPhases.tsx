@@ -2,10 +2,15 @@
 
 import type { Distribution } from "@/entities/IDistribution";
 import { Time } from "@/helpers/time";
+import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import type { SupportedLocale } from "@/i18n/locales";
+import { formatInteger } from "@/i18n/format";
+import { t, type MessageKey } from "@/i18n/messages";
 import type { ManifoldClaim, MemePhase } from "@/hooks/useManifoldClaim";
 import { PUBLIC_PRODUCTION_API_BASE } from "@/services/api/api-endpoints";
 import {
   buildMemesPhases,
+  getMemePhaseIdForRootPhase,
   ManifoldClaimStatus,
 } from "@/hooks/useManifoldClaim";
 import { useEffect, useState } from "react";
@@ -35,82 +40,139 @@ function getMemePhaseCardStatus(
   return MemePhaseCardStatus.UPCOMING;
 }
 
+const ELIGIBLE_CLASS_NAME = "tw-font-semibold tw-text-success";
+const MUTED_CLASS_NAME = "tw-text-iron-300";
+
+interface PhaseSpots {
+  readonly allowlist: number;
+  readonly airdrop: number;
+}
+
+function getPhaseSpots(
+  entry: Distribution["allowlist"][number] | undefined
+): PhaseSpots | undefined {
+  if (!entry) {
+    return undefined;
+  }
+  const toCount = (value: unknown) => {
+    const count = Number(value ?? 0);
+    return Number.isFinite(count) && count > 0 ? count : 0;
+  };
+  // A subscription fills the subscriber's spot in this phase with an airdrop,
+  // so only allowlist spots can be minted on this page.
+  const allowlist = toCount(entry.spots_allowlist);
+  const airdrop = toCount(entry.spots_airdrop);
+  if (allowlist === 0 && airdrop === 0) {
+    // Entries without the split keep their combined count as mint spots.
+    return { allowlist: toCount(entry.spots), airdrop: 0 };
+  }
+  return { allowlist, airdrop };
+}
+
 function getEligibleMintsDetails(
+  locale: SupportedLocale,
   phaseId: string,
-  eligibleSpots: number | undefined,
+  spots: PhaseSpots | undefined,
   status: MemePhaseCardStatus,
   eligibilityState: "loading" | "ready" | "unavailable"
 ): { text: string; className: string } {
   if (phaseId === "public") {
+    const text = t(locale, "theMemes.mint.phaseEligibility.unlimited");
     if (status === MemePhaseCardStatus.ACTIVE) {
-      return {
-        text: "Unlimited spots",
-        className: "tw-font-semibold tw-text-success",
-      };
+      return { text, className: ELIGIBLE_CLASS_NAME };
     }
 
     if (status === MemePhaseCardStatus.UPCOMING) {
-      return {
-        text: "Unlimited spots",
-        className: "tw-font-semibold tw-text-primary-300",
-      };
+      return { text, className: "tw-font-semibold tw-text-primary-300" };
     }
 
-    return {
-      text: "Unlimited spots",
-      className: "tw-font-semibold tw-text-red/75",
-    };
+    return { text, className: "tw-font-semibold tw-text-red/75" };
   }
 
   if (eligibilityState === "loading") {
     return {
-      text: "Loading eligibility...",
-      className: "tw-text-iron-300",
+      text: t(locale, "theMemes.mint.phaseEligibility.loading"),
+      className: MUTED_CLASS_NAME,
     };
   }
 
   if (eligibilityState === "unavailable") {
     return {
-      text: "Eligibility unavailable",
-      className: "tw-text-iron-300",
+      text: t(locale, "theMemes.mint.phaseEligibility.unavailable"),
+      className: MUTED_CLASS_NAME,
     };
   }
 
-  if (eligibleSpots === undefined) {
+  const allowlist = spots?.allowlist ?? 0;
+  const airdrop = spots?.airdrop ?? 0;
+  const params = {
+    allowlist: formatInteger(locale, allowlist),
+    airdrop: formatInteger(locale, airdrop),
+  };
+
+  if (allowlist > 0 && airdrop > 0) {
     return {
-      text: "No eligible spots",
-      className: "tw-text-iron-300",
+      text: t(locale, "theMemes.mint.phaseEligibility.mixed", params),
+      className: ELIGIBLE_CLASS_NAME,
     };
   }
 
-  if (eligibleSpots === 0) {
+  if (airdrop > 0) {
     return {
-      text: "No eligible spots",
-      className: "tw-text-iron-300",
+      text: t(locale, "theMemes.mint.phaseEligibility.airdrop", params),
+      className: ELIGIBLE_CLASS_NAME,
+    };
+  }
+
+  if (allowlist > 0) {
+    return {
+      text: t(
+        locale,
+        allowlist === 1
+          ? "theMemes.mint.phaseEligibility.allowlist.one"
+          : "theMemes.mint.phaseEligibility.allowlist.many",
+        params
+      ),
+      className: ELIGIBLE_CLASS_NAME,
     };
   }
 
   return {
-    text: `${eligibleSpots} eligible spot${eligibleSpots > 1 ? "s" : ""}`,
-    className: "tw-font-semibold tw-text-success",
+    text: t(locale, "theMemes.mint.phaseEligibility.none"),
+    className: MUTED_CLASS_NAME,
   };
 }
 
-function getPhaseDateLabels(status: MemePhaseCardStatus): {
+const PHASE_STATUS_LABEL_KEY = {
+  [MemePhaseCardStatus.UPCOMING]: "theMemes.mint.phaseCard.status.upcoming",
+  [MemePhaseCardStatus.ACTIVE]: "theMemes.mint.phaseCard.status.active",
+  [MemePhaseCardStatus.COMPLETED]: "theMemes.mint.phaseCard.status.completed",
+} as const satisfies Record<MemePhaseCardStatus, MessageKey>;
+
+function getPhaseDateLabels(
+  locale: SupportedLocale,
+  status: MemePhaseCardStatus
+): {
   start: string;
   end: string;
 } {
   if (status === MemePhaseCardStatus.ACTIVE) {
-    return { start: "Started", end: "Ends" };
+    return {
+      start: t(locale, "theMemes.mint.phaseCard.started"),
+      end: t(locale, "theMemes.mint.phaseCard.ends"),
+    };
   }
 
   if (status === MemePhaseCardStatus.COMPLETED) {
-    return { start: "Started", end: "Ended" };
+    return {
+      start: t(locale, "theMemes.mint.phaseCard.started"),
+      end: t(locale, "theMemes.mint.phaseCard.ended"),
+    };
   }
 
   return {
-    start: "Expected start",
-    end: "Expected end",
+    start: t(locale, "theMemes.mint.phaseCard.expectedStart"),
+    end: t(locale, "theMemes.mint.phaseCard.expectedEnd"),
   };
 }
 
@@ -144,6 +206,7 @@ export default function ManifoldMemesMintingPhases(
     local_timezone: boolean;
   }>
 ) {
+  const locale = useBrowserLocale();
   const [distribution, setDistribution] = useState<Distribution>();
   const [distributionState, setDistributionState] = useState<
     "idle" | "loading" | "ready" | "error"
@@ -219,7 +282,9 @@ export default function ManifoldMemesMintingPhases(
     <div>
       {distribution?.airdrops !== undefined && distribution.airdrops > 0 && (
         <div className="tw-pb-2 tw-text-lg tw-font-bold tw-text-white">
-          Airdrops: x{distribution.airdrops}
+          {t(locale, "theMemes.mint.phaseCard.airdrops", {
+            count: formatInteger(locale, distribution.airdrops),
+          })}
         </div>
       )}
       <div className="tw-grid tw-gap-4 md:tw-grid-cols-12">
@@ -249,11 +314,12 @@ function ManifoldMemesMintingPhase(
     local_timezone: boolean;
   }>
 ) {
-  const eligibleMints = props.distribution?.allowlist.find((phase) =>
-    phase.phase.includes(props.phase.id)
+  const locale = useBrowserLocale();
+  const eligibleMints = props.distribution?.allowlist.find(
+    (entry) => getMemePhaseIdForRootPhase(entry.phase) === props.phase.id
   );
   const status = getMemePhaseCardStatus(props.claim, props.phase);
-  const phaseDateLabels = getPhaseDateLabels(status);
+  const phaseDateLabels = getPhaseDateLabels(locale, status);
   let eligibilityState: "loading" | "ready" | "unavailable" = "loading";
   if (props.distributionState === "ready") {
     eligibilityState = "ready";
@@ -261,8 +327,9 @@ function ManifoldMemesMintingPhase(
     eligibilityState = "unavailable";
   }
   const eligibleMintsDetails = getEligibleMintsDetails(
+    locale,
     props.phase.id,
-    eligibleMints?.spots,
+    getPhaseSpots(eligibleMints),
     status,
     eligibilityState
   );
@@ -304,14 +371,14 @@ function ManifoldMemesMintingPhase(
         </div>
         <div className="tw-mt-4 tw-flex tw-items-center tw-justify-between tw-gap-3">
           <span className="tw-text-sm tw-font-light tw-text-iron-300">
-            Status
+            {t(locale, "theMemes.mint.phaseCard.statusLabel")}
           </span>
           <span
             className={`tw-text-right tw-font-semibold ${getPhaseStatusClassName(
               status
             )}`}
           >
-            {status}
+            {t(locale, PHASE_STATUS_LABEL_KEY[status])}
           </span>
         </div>
         <div className="tw-mt-3 tw-flex tw-items-center tw-justify-between tw-gap-3">

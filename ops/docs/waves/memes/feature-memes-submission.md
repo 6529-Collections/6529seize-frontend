@@ -132,6 +132,15 @@ reached), select the header restriction control to see the reason, then use
   take longer.
 - After a file is selected, the preview surface keeps a `Change` control for
   clearing the current upload and picking another file.
+- Below the `Upload File` panel, a size guide explains when GIFs get an
+  animated preview in Waves and the leaderboard: at most `8,388,608` pixels per
+  frame (for example `2,048 × 4,096`), at most `120` frames, and at most
+  `268,435,456` pixels across all frames. After an animated GIF is selected,
+  the app reads its dimensions and frame count and replaces the guide with a
+  warning when that check finds a limit exceeded. If the file cannot be read,
+  the guide stays. The warning names the GIF's numbers,
+  says the preview will be a still image until someone opens it in HD, and
+  that the GIF can still be submitted. It does not block submission.
 - A submission is a decision entry, so uploaded artwork, supporting media,
   preview images and promo videos keep the artist's original files, including
   embedded details such as location, camera details, capture time and file

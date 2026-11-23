@@ -2,6 +2,7 @@ import {
   formatSubscriptionCoverageDate,
   formatSubscriptionCoverageDeadline,
   formatSubscriptionEth,
+  getDisplayedSubscriptionCoverageStatus,
   getFundedDropsLabel,
 } from "@/components/user/subscriptions/coverage/subscriptionCoverage.helpers";
 import { ApiSubscriptionCoverageStatus } from "@/generated/models/ApiSubscriptionCoverageStatus";
@@ -30,8 +31,11 @@ export default function NotificationSubscriptionCoverage({
 }>) {
   const locale = useBrowserLocale();
   const context = notification.additional_context;
-  const isUrgent =
-    context.status === ApiSubscriptionCoverageStatus.ActionRequired;
+  const status = getDisplayedSubscriptionCoverageStatus(
+    context.status,
+    context.fully_funded_drops
+  );
+  const isUrgent = status === ApiSubscriptionCoverageStatus.ActionRequired;
   const profileHref = `/${encodeURIComponent(
     context.profile_handle
   )}/subscriptions#profile-subscriptions-top-up`;
@@ -68,7 +72,7 @@ export default function NotificationSubscriptionCoverage({
             <NotificationTimestamp createdAt={notification.created_at} />
           </div>
           <p className="tw-mb-0 tw-mt-1 tw-text-sm tw-leading-5 tw-text-iron-300">
-            {t(locale, getMessageKey(context.status))}
+            {t(locale, getMessageKey(status))}
           </p>
           <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-leading-5 tw-text-iron-400">
             {runwayText}

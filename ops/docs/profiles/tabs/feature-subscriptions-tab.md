@@ -109,7 +109,21 @@ On the web and Android, the tab appears after the page loads.
    Running low. Action required is red only when the immediate selected drop is
    not fully funded. Plan a top up is neutral, and Running low is amber. Visitors
    see factual headings and no owner instructions, deadlines or actions.
-   Funded through appears when at least one drop is funded. A supplied top-up
+   Funded through appears when at least one drop is funded. When funding reaches
+   the last drop of the 24-drop forecast with no unfunded drop, the balance may
+   cover later drops, so the line reads Funded at least through, the Upcoming
+   Drops boundary uses the same words, the profile header says at least
+   through, and the compact home line says Next 24 drops funded. The profile
+   header and coverage notification show one funded drop as Running low, like
+   the card.
+   When the API also reports how many drops the balance funds past the
+   forecast (at the current mint price and current settings), the headline and
+   the compact home line show that count as About N drops funded, or At least
+   N drops funded when the count reached its 312-drop maximum, with the note
+   At the current mint price and current subscription settings. This applies
+   only when the count is larger than the forecast's funded drops; a balance
+   that funds exactly the forecast, Manual mode and older API responses keep
+   the existing wording. Stale coverage never shows it. A supplied top-up
    deadline keeps its highlighted background, bold full date/time and original
    Top up by wording ending in to receive The Memes #N. When the immediate drop
    is not covered, the owner's heading says Today's mint isn't covered only on
@@ -280,6 +294,10 @@ On the web and Android, the tab appears after the page loads.
 - `Automatic` mode does not expire when the balance runs out. The forecast says
   what the current balance funds; it does not claim that the mode itself runs
   until a date.
+- The subscription balance pays only for subscription airdrops, used
+  automatically in the phase the subscriber is eligible for. It cannot pay for
+  a card minted manually on the minting page, and it is not refunded; About >
+  Subscription Minting says this in the Fill Balance step.
 - `mint capacity` is the raw floor of balance divided by the subscription mint
   price. `Forecast use` is the capacity allocated within the current intended
   drop horizon.

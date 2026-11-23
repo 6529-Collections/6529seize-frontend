@@ -114,7 +114,7 @@ function normalizeHexValue(value: string | null | undefined): string {
   return (value ?? "").trim().toLowerCase();
 }
 
-function getMemePhaseIdForRootPhase(
+export function getMemePhaseIdForRootPhase(
   phase: string | null | undefined
 ): string | undefined {
   const normalizedPhase = normalizePhaseName(phase ?? "");

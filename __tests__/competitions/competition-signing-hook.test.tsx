@@ -1,5 +1,9 @@
 import { renderHook } from "@testing-library/react";
-import { useCompetitionSignature } from "@/hooks/competitions/useCompetitionSignature";
+import {
+  getCompetitionSignatureFailureKey,
+  toCompetitionSignatureError,
+  useCompetitionSignature,
+} from "@/hooks/competitions/useCompetitionSignature";
 import { useAuth } from "@/components/auth/Auth";
 const signMessageAsync = jest.fn().mockResolvedValue("0xsignature");
 jest.mock("wagmi", () => ({ useSignMessage: () => ({ signMessageAsync }) }));
@@ -44,5 +48,43 @@ describe("competition wallet identity", () => {
     await expect(
       result.current("VOTE_SET", { value: 1 }, "entry", "drop")
     ).rejects.toThrow("A connected wallet is required");
+  });
+  it("tells a declined wallet signature apart from other wallet failures", async () => {
+    jest.mocked(useAuth).mockReturnValue({
+      connectedProfile: { id: "author" },
+      activeProfileProxy: null,
+    } as ReturnType<typeof useAuth>);
+    const { result } = renderHook(() => useCompetitionSignature());
+    signMessageAsync.mockRejectedValueOnce({ code: 4001 });
+    const raw = await result
+      .current("VOTE_SET", { value: 1 }, "entry", "drop")
+      .catch((error: unknown) => error);
+    // Other callers still receive the wallet's own error.
+    expect(raw).toEqual({ code: 4001 });
+    const declined = toCompetitionSignatureError(raw);
+    expect(getCompetitionSignatureFailureKey(declined)).toBe(
+      "competitions.signatureCancelled"
+    );
+    signMessageAsync.mockRejectedValueOnce(new Error("Request expired"));
+    const failed = await result
+      .current("VOTE_SET", { value: 1 }, "entry", "drop")
+      .catch((error: unknown) => toCompetitionSignatureError(error));
+    expect(getCompetitionSignatureFailureKey(failed)).toBe(
+      "competitions.signatureFailed"
+    );
+  });
+  it("names a missing wallet connection as its own failure", async () => {
+    jest.mocked(useAuth).mockReturnValue({
+      connectedProfile: null,
+      activeProfileProxy: null,
+    } as ReturnType<typeof useAuth>);
+    const { result } = renderHook(() => useCompetitionSignature());
+    const error = await result
+      .current("VOTE_SET", { value: 1 }, "entry", "drop")
+      .catch((caught: unknown) => caught);
+    expect(getCompetitionSignatureFailureKey(error)).toBe(
+      "competitions.signatureWalletRequired"
+    );
+    expect(getCompetitionSignatureFailureKey(new Error("other"))).toBeNull();
   });
 });

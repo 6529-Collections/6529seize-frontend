@@ -6,7 +6,7 @@ export type PreferencesRouteTab =
   | "messages"
   | "blocked-profiles"
   | "reports"
-  | "devices"
+  | "security"
   | "time-zone";
 
 export const getPreferencesHref = ({
