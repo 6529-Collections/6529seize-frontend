@@ -1,5 +1,5 @@
 // The known issues at /validator/known-issues, rendered as Markdown. Built from the tester package (KNOWN-ISSUES.md).
-// Release facts still to fill have the form {{RC10_...}}; the page tests allow only the ones they name as still to fill.
+// Release facts still to fill have the form {{RC10_...}}; the page tests allow none, so fill each one before merging.
 // If rc.10's join tests show a join problem, add it under Joining the network and renumber.
 
 const joinMarkdown = (lines: readonly string[]) => lines.join("\n");
