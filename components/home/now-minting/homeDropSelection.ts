@@ -13,22 +13,22 @@ export type HomeDropSelection =
 
 export function canResolveHomeDrop({
   mintStatus,
-  isTransitionReady,
+  transitionReadiness,
   nextMint,
   isNextMintLoading,
   isNextMintError,
 }: {
   readonly mintStatus: NowMintingStatus;
-  readonly isTransitionReady: boolean | null;
+  readonly transitionReadiness: boolean | null;
   readonly nextMint: ApiDropV2View | null;
   readonly isNextMintLoading: boolean;
   readonly isNextMintError: boolean;
 }): boolean {
   const { isDropComplete, isStatusLoading, isStatusError, status } = mintStatus;
-  if (isStatusLoading || isTransitionReady === null) return false;
+  if (isStatusLoading || transitionReadiness === null) return false;
 
   // An active mint or an unfinished grace period is enough to choose Latest.
-  if (status !== null && (!isDropComplete || !isTransitionReady)) return true;
+  if (status !== null && (!isDropComplete || !transitionReadiness)) return true;
   return (
     !isNextMintLoading && !isNextMintError && (!isStatusError || !nextMint)
   );
@@ -37,17 +37,17 @@ export function canResolveHomeDrop({
 function shouldKeepCurrentDrop({
   kind,
   hasServerSelection,
-  isTransitionReady,
+  isMintCompleteAndGraceElapsed,
   isWinnerFetchedAfterMount,
   nextMint,
 }: {
   readonly kind: HomeDropSelection["kind"];
   readonly hasServerSelection: boolean;
-  readonly isTransitionReady: boolean;
+  readonly isMintCompleteAndGraceElapsed: boolean;
   readonly isWinnerFetchedAfterMount: boolean;
   readonly nextMint: ApiDropV2View | null;
 }): boolean {
-  if (!isTransitionReady) return kind === "next";
+  if (!isMintCompleteAndGraceElapsed) return kind === "next";
   if (isWinnerFetchedAfterMount) return false;
 
   // A cached winner or an empty cache can predate the server's decision.
@@ -59,14 +59,14 @@ export function resolveHomeDrop({
   nextMint,
   resolvedDrop,
   hasServerSelection,
-  isTransitionReady,
+  isMintCompleteAndGraceElapsed,
   isWinnerFetchedAfterMount,
 }: {
   readonly nft: ApiMemesExtendedData;
   readonly nextMint: ApiDropV2View | null;
   readonly resolvedDrop: HomeDropSelection | null;
   readonly hasServerSelection: boolean;
-  readonly isTransitionReady: boolean;
+  readonly isMintCompleteAndGraceElapsed: boolean;
   readonly isWinnerFetchedAfterMount: boolean;
 }): HomeDropSelection {
   const resolvedMintNumber =
@@ -84,7 +84,7 @@ export function resolveHomeDrop({
     shouldKeepCurrentDrop({
       kind: resolvedDrop.kind,
       hasServerSelection,
-      isTransitionReady,
+      isMintCompleteAndGraceElapsed,
       isWinnerFetchedAfterMount,
       nextMint,
     })
@@ -92,7 +92,7 @@ export function resolveHomeDrop({
     return resolvedDrop;
   }
   const shouldShowNext = shouldShowNextMintInLatestDrop({
-    isMintEnded: isTransitionReady,
+    isMintEnded: isMintCompleteAndGraceElapsed,
     nextMintExists: !!nextMint,
   });
   if (shouldShowNext && nextMint) {

@@ -44,7 +44,7 @@ export default function LatestDropSection({
 
   const isDecisionReady = canResolveHomeDrop({
     mintStatus,
-    isTransitionReady: isLatestDropTransitionReady,
+    transitionReadiness: isLatestDropTransitionReady,
     nextMint,
     isNextMintLoading,
     isNextMintError,
@@ -57,7 +57,7 @@ export default function LatestDropSection({
           resolvedDrop,
           hasServerSelection:
             resolvedDrop === initialDrop && initialDrop !== null,
-          isTransitionReady:
+          isMintCompleteAndGraceElapsed:
             isDropComplete && isLatestDropTransitionReady === true,
           isWinnerFetchedAfterMount,
         })

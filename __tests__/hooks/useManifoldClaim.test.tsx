@@ -254,6 +254,9 @@ test("marks tentative completion pending until an ended allowlist's roots resolv
   const [phase0, , , publicPhase] = buildMemesPhases(
     Time.fromString("2024-07-03T00:00:00.000Z")
   );
+  if (!phase0 || !publicPhase) {
+    throw new Error("Expected the phase 0 and public mint windows.");
+  }
   const now = publicPhase.end.plusMinutes(15);
   const merkleRoot = `0x${"1".repeat(64)}`;
   jest.spyOn(Date, "now").mockReturnValue(now.toMillis());
