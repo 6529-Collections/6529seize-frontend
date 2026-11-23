@@ -534,6 +534,7 @@ const WAVE_NAVIGATION_MESSAGES = objectMessages("wave.navigation", {
   loadingSection: "Loading section…",
   about: "About",
   waveSections: "Wave sections",
+  more: "More",
   appSections: "App sections",
   loadingSections: "Loading wave sections",
   fallbackCuration: "Curation",
@@ -2999,6 +3000,8 @@ const COMMON_MESSAGES = objectMessages("common", {
   back: "Back",
   close: "Close",
   expandEditor: "Expand editor",
+  expandSheet: "Expand sheet",
+  collapseSheet: "Collapse sheet",
 } as const);
 
 const IDENTITY_FILTER_MESSAGES = objectMessages("identityFilter", {

@@ -16,10 +16,12 @@ import { useBoostedDropsDisplayPreference } from "@/hooks/useBoostedDropsDisplay
 import type { WaveViewMode } from "@/hooks/useWaveViewMode";
 import { MyStreamWaveTab } from "@/types/waves.types";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
+import { useWaveCreateMenuActions } from "./MyStreamWaveCreateActionsMenu";
 import type { ChatSubmitDropAction } from "../chatSubmitDrop.types";
 import WaveHeaderRestrictionButton, {
   WAVE_HEADER_RESTRICTION_BUTTON_CLASS,
 } from "@/components/waves/header/WaveHeaderRestrictionButton";
+import { COMPACT_WAVE_ACTION_CLASSES } from "./CompactWaveActions";
 import MyStreamWaveTabsHeader, {
   type MyStreamWaveTabsHeaderActionContext,
 } from "./MyStreamWaveTabsHeader";
@@ -47,6 +49,12 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
   chatSubmitDropAction = null,
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
+  const { items: createItems, dialogs: createDialogs } =
+    useWaveCreateMenuActions({
+      wave,
+      onCreated: onSelectCuration,
+      mobile: true,
+    });
   const breakpoint = useBreakpoint();
   const showBackButton = breakpoint !== "LG";
   const isCompact = breakpoint === "S";
@@ -60,6 +68,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
     activeContentTab: headerActiveContentTab,
     tooltipId,
     isCondensed,
+    selectPhoneAction,
   }: MyStreamWaveTabsHeaderActionContext) => {
     const action = chatSubmitDropAction;
     const showChatSubmitDropAction =
@@ -70,6 +79,20 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
       ? (action.restrictionMessage ?? action.label)
       : null;
     const chatSubmitDropTitle = chatSubmitDropTooltip ?? undefined;
+    const menuClass = `${COMPACT_WAVE_ACTION_CLASSES} tw-text-iron-300`;
+
+    if (showChatSubmitDropAction && action.canOpen && selectPhoneAction) {
+      return (
+        <button
+          type="button"
+          className={menuClass}
+          onClick={() => selectPhoneAction(action.onOpen)}
+        >
+          <PlusIcon className="tw-size-4 tw-shrink-0" aria-hidden="true" />
+          <span>{action.label}</span>
+        </button>
+      );
+    }
 
     return (
       <>
@@ -79,9 +102,14 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
             reason={chatSubmitDropTooltip ?? action.label}
             accessWave={action.accessWave}
             onViewRules={action.onViewRules}
-            className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
+            className={
+              selectPhoneAction
+                ? `${menuClass} !tw-justify-start`
+                : WAVE_HEADER_RESTRICTION_BUTTON_CLASS
+            }
           >
             <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+            {selectPhoneAction && <span>{action.label}</span>}
           </WaveHeaderRestrictionButton>
         )}
         {showChatSubmitDropAction && action.canOpen && (
@@ -121,6 +149,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
 
   const renderHeaderOverflowMenuItems = ({
     isCompact: headerIsCompact,
+    isPhoneWave,
   }: MyStreamWaveTabsHeaderActionContext): CompactMenuItem[] => {
     const items: CompactMenuItem[] = headerIsCompact
       ? getBoostedDropsDisplayPreferenceMenuItems({
@@ -143,6 +172,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
       });
     }
 
+    if (isPhoneWave) items.push(...createItems);
     return items;
   };
 
@@ -168,6 +198,7 @@ const MyStreamWaveTabsDefault: React.FC<MyStreamWaveTabsDefaultProps> = ({
           onSelectCuration={onSelectCuration}
         />
       </div>
+      {createDialogs}
     </div>
   );
 };

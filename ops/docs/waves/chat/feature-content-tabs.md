@@ -171,17 +171,17 @@ A divider separates the wave identity and header actions from the main tab row.
 - Eligible readers can use `View results` on an open unanswered poll to inspect
   counts and percentages before voting, then return to `Vote` while the poll is
   still open.
-- On mobile, `Create` stays outside the horizontally scrolling tab list so
-  creation actions remain reachable on narrow screens. Selecting an action
-  closes the sheet before opening its form; dismissing the sheet leaves the
-  current view unchanged.
-- On narrow web layouts, an edge fade and chevron appear when additional tabs
-  are available off-screen. The cue follows the current scroll position and can
-  be tapped to move through the tab row.
-- When many curations overflow the row, scroll horizontally to reach them.
-  Touch layouts support swiping the tab row, and the active tab scrolls into
-  view when it is hidden. In the app, selecting an already visible tab keeps
-  the row in place instead of centering it again.
+- Phones show Chat and up to three other primary tabs. On Main Stage,
+  these are `Chat`, `Leaderboard`, `Winners`, and `Votes` when available.
+  `More` opens the remaining sections, including FAQ, Settings and Decisions
+  with its count. When a section in the sheet is active, its name appears
+  on the More button. Eligible creation actions are in `More wave actions`
+  in the header.
+- On wider layouts, swipe or scroll horizontally through overflowing tabs.
+  The edge cue follows the scroll position, and the active tab scrolls into
+  view when it is hidden.
+- On phones, filters and sub-tabs scroll with Leaderboard, Winners and Votes
+  content while the top bar and main tab row stay in place.
 - A shared wave URL with a valid `?curation={curationId}` opens that curation
   directly.
 

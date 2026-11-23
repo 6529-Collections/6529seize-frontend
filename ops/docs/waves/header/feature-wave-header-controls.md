@@ -38,23 +38,19 @@ use up to two compact columns, with each label beside its icon and value.
 ## Entry Points
 
 1. Open an active wave, select the `Show right sidebar` icon in the desktop/tablet
-   header or `Wave details` on compact web, then select `About`.
+   header or `Wave details` in `More wave actions` on phones, then select `About`.
 2. Use the top-right control row (`Join` / `Joined`, notification controls).
 3. Use header controls near the wave title, avatar, and metadata.
 4. Open the owner options menu (`⋮`) when available.
 
-On phones, select the wave name to open `About`. Swipe down from the sheet's
-handle or header, use `Close`, tap outside, press Escape, or use the device’s
-Back action to return to the thread.
+On phones, select the wave name or its chevron to open `About` halfway up
+the screen. Drag the handle up to expand it. Swipe down from the handle or
+header, use `Close`, tap outside, press Escape, or use the device’s Back
+action to return to the thread.
 The main `About` sheet has a Close control; Back controls inside subviews return
 to their parent view.
 
 ## Conversation Header
-
-In the native app's compact header, the parent-wave link sits directly above
-the wave name beside the avatar. Long names truncate within the available space
-so they do not overlap the header actions. A hidden or absent description leaves
-no extra row in this identity block.
 
 At desktop and tablet widths (768px and above), the conversation header groups
 its avatar, parent-wave link, name, and a short one-line description preview into a compact
@@ -74,21 +70,15 @@ An active temporary time override keeps its zone indicator and undo control
 visible beside the main actions. Columns of 640–767px keep the description teaser
 with compact submission icons; wider columns restore the submission labels.
 
-On mobile web, the name stays centered beside the avatar and the available score
-stays visible. Narrow headers show the score as a small badge on the avatar,
-leaving more room for the name. `Join` keeps its white surface, text label,
-accessible name and plus icon. Search and `Wave details` stay directly visible
-beside `More wave actions`, with one-click access. The header remains on one row
-without horizontal scrolling. The avatar and title retain their regular sizes;
-very narrow columns use tighter utility spacing. Direct messages do not show a
-Wave Score.
+On phones, the conversation has one top bar with Back, the wave avatar and
+available score, the name and details chevron, `Join` when available, and
+`More wave actions`. The site menu and global search are on the Waves list.
+`More wave actions` opens a sheet with Wave details, message search, the
+available submission or `How to Submit` controls, time-zone options, sharing,
+and the eligible `New curation` and `New subwave` actions. Direct messages keep
+their own header and do not show Wave Score.
 
-In narrow Main Stage headers, `How to Submit` is inside `More wave actions` and
-opens the existing nomination and eligibility guidance in a sheet. Eligible
-submission actions remain directly visible. Wider headers retain the direct
-submission-help lock. Selecting the Wave name still opens `About`.
-
-The top-right controls start with `Join` when the viewer has not joined the
+On desktop and tablets the top-right controls start with `Join` when the viewer has not joined the
 wave, then Add REP for eligible viewers, followed by the
 create/submit action when available, search, `More wave actions`,
 and the right-sidebar toggle. Gallery/chat eligibility and the original action
@@ -105,16 +95,10 @@ the same hover-label styling as Profile Waves Feed.
 
 Unavailable submission actions show a lock icon at every width. Hover, focus,
 or select the lock to read the full restriction reason. The Memes `How to Submit`
-helper keeps its label when space allows and opens nomination guidance. In a
-narrow center column and on phones it uses a transparent, borderless lock icon,
-with `How to Submit` retained as its accessible name. The native app's nomination
-helper uses the same borderless treatment. Its lock matches Search and More's
-resting icon color and brightens on hover, since it opens guidance rather than
-acting as a disabled button. Other restricted submission controls
-keep their bordered surfaces.
-On the web, the Main Stage submit/help control sits before message search.
-Compact web keeps Search directly visible before More; narrow Main Stage
-headers move submission help into More.
+helper keeps its label when space allows and opens nomination guidance. On phones these controls are available from `More wave actions`.
+On desktop and tablets, the Main Stage submit/help control sits before message
+search. A narrow center column uses a compact lock with the original
+accessible name. Other restricted controls keep their bordered surfaces.
 Add/Edit REP sits beside `Join` when both controls are shown.
 
 ### Join Call to Action

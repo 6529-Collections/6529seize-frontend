@@ -11,7 +11,9 @@ import { useContentTab } from "@/components/brain/ContentTabContext";
 import MemesArtSubmissionModal from "@/components/waves/memes/LazyMemesArtSubmissionModal";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MyStreamWaveDesktopTabs from "../MyStreamWaveDesktopTabs";
-import MyStreamWaveCreateActionsMenu from "./MyStreamWaveCreateActionsMenu";
+import MyStreamWaveCreateActionsMenu, {
+  useWaveCreateMenuActions,
+} from "./MyStreamWaveCreateActionsMenu";
 import MyStreamWaveTabsHeader, {
   type MyStreamWaveTabsHeaderActionContext,
 } from "./MyStreamWaveTabsHeader";
@@ -31,6 +33,12 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   onSelectCuration,
 }) => {
   const { activeContentTab, setActiveContentTab } = useContentTab();
+  const { items: createItems, dialogs: createDialogs } =
+    useWaveCreateMenuActions({
+      wave,
+      onCreated: onSelectCuration,
+      mobile: true,
+    });
   const [isMemesModalOpen, setIsMemesModalOpen] = useState(false);
   const [isSubmissionHelpOpen, setIsSubmissionHelpOpen] = useState(false);
   const { participation } = useWave(wave);
@@ -50,19 +58,26 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
   const renderHeaderTrailingActions = ({
     isCondensed,
     isNarrow,
+    selectPhoneAction,
   }: MyStreamWaveTabsHeaderActionContext) =>
     isNarrow && hasSubmissionHelp ? null : (
       <MyStreamWaveTabsMemeSubmit
-        handleMemesSubmit={handleMemesSubmit}
+        handleMemesSubmit={
+          selectPhoneAction
+            ? () => selectPhoneAction(handleMemesSubmit)
+            : handleMemesSubmit
+        }
         wave={wave}
         iconOnly={isCondensed}
+        phoneMenu={selectPhoneAction !== undefined}
       />
     );
 
   const renderHeaderOverflowMenuItems = ({
     isNarrow,
-  }: MyStreamWaveTabsHeaderActionContext): CompactMenuItem[] =>
-    isNarrow && hasSubmissionHelp
+    isPhoneWave,
+  }: MyStreamWaveTabsHeaderActionContext): CompactMenuItem[] => [
+    ...(isNarrow && hasSubmissionHelp
       ? [
           {
             id: "submission-help",
@@ -72,7 +87,9 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
             deferUntilClosed: true,
           },
         ]
-      : [];
+      : []),
+    ...(isPhoneWave ? createItems : []),
+  ];
 
   return (
     <>
@@ -109,6 +126,7 @@ const MyStreamWaveTabsMeme: React.FC<MyStreamWaveTabsMemeProps> = ({
           )}
         </div>
       </div>
+      {createDialogs}
       <MemesArtSubmissionModal
         isOpen={isMemesModalOpen}
         wave={wave}

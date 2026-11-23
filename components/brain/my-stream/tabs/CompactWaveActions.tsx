@@ -6,23 +6,35 @@ import type { CompactMenuItem } from "@/components/compact-menu";
 import CommonDropdownItemsMobileWrapper from "@/components/utils/select/dropdown/CommonDropdownItemsMobileWrapper";
 import { EllipsisVerticalIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useRef, useState, type Ref } from "react";
+import { useState, type ReactNode, type Ref } from "react";
 import { createPortal } from "react-dom";
 
-const COMPACT_ACTION_CLASSES =
+export const COMPACT_WAVE_ACTION_CLASSES =
   "tw-flex tw-min-h-12 tw-w-full tw-select-none tw-items-center tw-gap-x-4 tw-rounded-xl tw-border-0 tw-bg-iron-950 tw-p-4 tw-text-left tw-text-base tw-font-semibold tw-transition-colors tw-duration-200 focus-visible:tw-outline-none focus-visible:tw-ring-2 focus-visible:tw-ring-primary-400 active:tw-bg-iron-800 disabled:tw-cursor-not-allowed disabled:tw-opacity-60";
 
 export default function CompactWaveActions({
   items,
   triggerRef,
   compactTrigger = false,
+  phone = false,
+  renderAdditionalControls,
 }: {
   readonly items: readonly CompactMenuItem[];
   readonly triggerRef?: Ref<HTMLButtonElement> | undefined;
   readonly compactTrigger?: boolean | undefined;
+  readonly phone?: boolean | undefined;
+  readonly renderAdditionalControls?:
+    | ((select: (action: () => void) => void) => ReactNode)
+    | undefined;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const pendingActionRef = useRef<(() => void) | null>(null);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
+  const toolbarLayout = compactTrigger ? "toolbar-compact" : "toolbar";
+
+  const selectAfterClose = (action: () => void) => {
+    setPendingAction(() => action);
+    setIsOpen(false);
+  };
 
   const handleAction = (
     item: Exclude<CompactMenuItem, { readonly kind: "section" }>
@@ -33,7 +45,7 @@ export default function CompactWaveActions({
 
     setIsOpen(false);
     if (item.deferUntilClosed) {
-      pendingActionRef.current = item.onSelect ?? null;
+      setPendingAction(() => item.onSelect ?? null);
     } else {
       item.onSelect?.();
     }
@@ -49,11 +61,15 @@ export default function CompactWaveActions({
             label="More wave actions"
             hideOnDesktopHover={false}
             onAfterLeave={() => {
-              const action = pendingActionRef.current;
-              pendingActionRef.current = null;
-              action?.();
+              setPendingAction(null);
+              pendingAction?.();
             }}
           >
+            {renderAdditionalControls && (
+              <li className="empty:tw-hidden">
+                {renderAdditionalControls(selectAfterClose)}
+              </li>
+            )}
             {items.map((item) => {
               if (item.kind === "section") {
                 return (
@@ -81,7 +97,7 @@ export default function CompactWaveActions({
                   <span className="tw-flex-1">{item.label}</span>
                 </>
               );
-              const className = `${COMPACT_ACTION_CLASSES} ${stateClasses} ${item.className ?? ""}`;
+              const className = `${COMPACT_WAVE_ACTION_CLASSES} ${stateClasses} ${item.className ?? ""}`;
 
               return (
                 <li key={item.id} className="tw-list-none">
@@ -136,7 +152,8 @@ export default function CompactWaveActions({
         aria-expanded={isOpen}
         data-compact-wave-actions-trigger="true"
         onClick={() => setIsOpen(true)}
-        layout={compactTrigger ? "toolbar-compact" : "toolbar"}
+        size={phone ? 44 : undefined}
+        layout={phone ? undefined : toolbarLayout}
       >
         <EllipsisVerticalIcon className="tw-size-5 tw-flex-shrink-0" />
       </IconButton>

@@ -17,11 +17,9 @@ const SEED_INSTANT = "2024-04-22T00:00:00.000Z";
 
 /**
  * Display time zone (privacy): wave times can show in UTC instead of the
- * device zone, from the wave header switch or the phone post menu (this tab
- * only) or from Preferences > Time Zone (saved on the device). Browser-only
- * risks covered here: a real non-UTC device zone, the stored choice applying
- * after hydration without errors, the switch surviving a reload in the tab,
- * and a phone header that keeps the wave title visible.
+ * device zone from the wave header, the phone post menu, or Preferences >
+ * Time Zone. These browser checks cover a non-UTC device zone, hydration,
+ * persistence across a tab reload, and a readable phone wave title.
  */
 /** The seeded post's time, found by its machine-readable UTC instant. */
 function seededPostTime(page: Page) {
@@ -50,7 +48,7 @@ test.describe("Display time zone @auth @local-only", () => {
   }, testInfo) => {
     test.skip(
       testInfo.project.name !== "web-desktop-chromium",
-      "The desktop More popover contains the time radio choices; phones use their existing overflow action."
+      "The desktop More popover contains the time radio choices. The phone wave menu uses a single action."
     );
     await page.goto(`/waves/${WAVE}`);
     const seededTime = seededPostTime(page);
@@ -293,13 +291,15 @@ test.describe("Display time zone @auth @local-only", () => {
           name: "Search messages in this wave",
           exact: true,
         })
-      ).toBeInViewport({ ratio: 1 });
+      ).toHaveCount(0);
       await expect(
         header.getByRole("button", { name: "Wave details", exact: true })
-      ).toBeInViewport({ ratio: 1 });
+      ).toHaveCount(0);
+      await expect(more).toBeInViewport({ ratio: 1 });
+      await expect(name).toBeInViewport({ ratio: 1 });
       await expect
         .poll(() =>
-          name.evaluate((button, expectBadge) => {
+          name.evaluate((button) => {
             const row = button.closest("h1")?.parentElement;
             const score = button
               .closest("header")
@@ -311,19 +311,10 @@ test.describe("Display time zone @auth @local-only", () => {
             const avatarBox = avatar.getBoundingClientRect();
             return (
               nameBox.width >= 16 &&
-              (expectBadge
-                ? avatar.contains(score) &&
-                  scoreBox.left >= avatarBox.left &&
-                  scoreBox.right <= avatarBox.right + 5 &&
-                  scoreBox.bottom <= avatarBox.bottom + 7
-                : !avatar.contains(score) &&
-                  scoreBox.x >= nameBox.right &&
-                  Math.abs(
-                    nameBox.y +
-                      nameBox.height / 2 -
-                      scoreBox.y -
-                      scoreBox.height / 2
-                  ) <= 1) &&
+              avatar.contains(score) &&
+              scoreBox.left >= avatarBox.left &&
+              scoreBox.right <= avatarBox.right + 5 &&
+              scoreBox.bottom <= avatarBox.bottom + 7 &&
               Math.abs(
                 nameBox.y +
                   nameBox.height / 2 -
@@ -331,7 +322,7 @@ test.describe("Display time zone @auth @local-only", () => {
                   avatarBox.height / 2
               ) <= 1
             );
-          }, width <= 375)
+          })
         )
         .toBe(true);
       await expectNoHorizontalOverflow(page);
@@ -345,17 +336,17 @@ test.describe("Display time zone @auth @local-only", () => {
         exact: true,
       })
     ).toHaveCount(0);
-    await more.click();
     const actions = page.getByRole("dialog", {
       name: "More wave actions",
       exact: true,
     });
-    await expect(
-      actions.getByRole("button", {
-        name: "Search messages in this wave",
-        exact: true,
-      })
-    ).toHaveCount(0);
+    async function openPhoneActions() {
+      await more.click();
+      await expect(
+        actions.getByRole("heading", { name: "More wave actions", exact: true })
+      ).toBeVisible();
+    }
+    await openPhoneActions();
     await expect(
       actions.getByRole("button", {
         name: "Switch to gallery view",
@@ -364,7 +355,21 @@ test.describe("Display time zone @auth @local-only", () => {
     ).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(actions).toHaveCount(0);
-    const search = header.getByRole("button", {
+    await openPhoneActions();
+    await actions
+      .getByRole("button", { name: "Show times in UTC for now" })
+      .click();
+    await expect(actions).toHaveCount(0);
+    // Phones show the date only for older posts, but still use the selected zone.
+    await expect(seededPostTime(page)).toHaveText("Apr 22, 2024");
+    await openPhoneActions();
+    await actions
+      .getByRole("button", { name: "Show times in local time again" })
+      .click();
+    await expect(actions).toHaveCount(0);
+    await expect(seededPostTime(page)).toHaveText("Apr 21, 2024");
+    await openPhoneActions();
+    const search = actions.getByRole("button", {
       name: "Search messages in this wave",
       exact: true,
     });
@@ -380,16 +385,21 @@ test.describe("Display time zone @auth @local-only", () => {
     await expect(searchInput).toHaveAttribute("aria-expanded", "false");
     await page.keyboard.press("Escape");
     await expect(searchInput).toBeHidden();
-    await expect(search).toBeFocused();
-    await header
+    await expect(more).toBeFocused();
+    await openPhoneActions();
+    await actions
       .getByRole("button", { name: "Wave details", exact: true })
       .click();
     await expect(actions).toHaveCount(0);
+    const details = page.getByRole("dialog", {
+      name: "About Local Composer Sandbox Wave",
+      exact: true,
+    });
     await expect(
-      page.getByRole(
-        testInfo.project.name === "web-mobile-chromium" ? "tab" : "button",
-        { name: "About", exact: true }
-      )
+      details.getByRole("tab", { name: "About", exact: true })
+    ).toBeVisible();
+    await expect(
+      details.getByRole("button", { name: "Add Wave REP to this wave" })
     ).toBeVisible();
     await page.keyboard.press("Escape");
     await expectNoHorizontalOverflow(page);

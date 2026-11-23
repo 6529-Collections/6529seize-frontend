@@ -23,12 +23,21 @@ export interface HeaderWaveDropAction {
   readonly onOpen: () => void;
 }
 
+export interface HeaderWaveCreateNavigation {
+  readonly waveId: string;
+  readonly onCreated: (curationId: string) => void;
+}
+
 interface HeaderContextType {
   headerRef: RefObject<HTMLDivElement | null>;
   setHeaderRef: (ref: HTMLDivElement | null) => void;
   refState: HTMLDivElement | null;
   waveDropAction: HeaderWaveDropAction | null;
   setWaveDropAction: (action: HeaderWaveDropAction | null) => void;
+  waveCreateNavigation: HeaderWaveCreateNavigation | null;
+  setWaveCreateNavigation: (
+    navigation: HeaderWaveCreateNavigation | null
+  ) => void;
   requestSubmissionRulesFocus: (waveId: string) => void;
   consumeSubmissionRulesFocus: (waveId: string) => boolean;
 }
@@ -44,6 +53,8 @@ export const HeaderProvider: React.FC<{ children: ReactNode }> = ({
   const [refState, setRefState] = useState<HTMLDivElement | null>(null);
   const [waveDropAction, setWaveDropAction] =
     useState<HeaderWaveDropAction | null>(null);
+  const [waveCreateNavigation, setWaveCreateNavigation] =
+    useState<HeaderWaveCreateNavigation | null>(null);
   const submissionRulesFocusWaveIdRef = useRef<string | null>(null);
 
   /** Keep a rules focus request across a Wave-to-competition route change. */
@@ -75,6 +86,8 @@ export const HeaderProvider: React.FC<{ children: ReactNode }> = ({
       refState: refState,
       waveDropAction,
       setWaveDropAction,
+      waveCreateNavigation,
+      setWaveCreateNavigation,
       requestSubmissionRulesFocus,
       consumeSubmissionRulesFocus,
     }),
@@ -82,6 +95,7 @@ export const HeaderProvider: React.FC<{ children: ReactNode }> = ({
       setHeaderRef,
       refState,
       waveDropAction,
+      waveCreateNavigation,
       requestSubmissionRulesFocus,
       consumeSubmissionRulesFocus,
     ]

@@ -2,6 +2,8 @@
 
 import { useCallback, useId, useMemo, useRef, useState } from "react";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
 import { t } from "@/i18n/messages";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import MobileWrapperDialog from "@/components/mobile-wrapper-dialog/MobileWrapperDialog";
@@ -24,6 +26,7 @@ export default function WaveInformationSheet({
   readonly onClose: () => void;
 }) {
   const locale = useBrowserLocale();
+  const isPhone = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
   const information = useWaveInformation();
   const [tab, setTab] = useState(information?.request?.tab ?? SidebarTab.ABOUT);
   const [mode, setMode] = useState(Mode.CONTENT);
@@ -79,6 +82,11 @@ export default function WaveInformationSheet({
       showHeaderDivider={false}
       tall
       fixedHeight={!isCompactSubview}
+      expandableHeight={
+        isPhone &&
+        !subviewOpen &&
+        wave.chat.scope.group?.is_direct_message !== true
+      }
       fitVisualViewport
       noPadding
       headerClassName="tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-white/[0.06] tw-py-4"

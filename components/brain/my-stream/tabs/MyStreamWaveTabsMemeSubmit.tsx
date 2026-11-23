@@ -16,6 +16,7 @@ import WaveHeaderRestrictionButton, {
   WAVE_HEADER_RESTRICTION_BUTTON_CLASS,
 } from "@/components/waves/header/WaveHeaderRestrictionButton";
 import MainStageNominationPopover from "./MainStageNominationPopover";
+import { COMPACT_WAVE_ACTION_CLASSES } from "./CompactWaveActions";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { useWave, SubmissionStatus } from "@/hooks/useWave";
 import { useCountdown } from "@/hooks/useCountdown";
@@ -26,6 +27,7 @@ interface MyStreamWaveTabsMemeSubmitProps {
   readonly wave: ApiWave;
   readonly handleMemesSubmit: () => void;
   readonly iconOnly?: boolean;
+  readonly phoneMenu?: boolean | undefined;
 }
 
 const HEADER_ACTION_BUTTON_CLASS = `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-h-8 tw-min-w-8 tw-max-w-[2rem] tw-whitespace-nowrap tw-text-xs sm:tw-min-w-0 sm:tw-max-w-[11.5rem] lg:tw-max-w-[13.5rem] xl:tw-max-w-none`;
@@ -97,6 +99,7 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   wave,
   handleMemesSubmit,
   iconOnly = false,
+  phoneMenu = false,
 }) => {
   // Get wave information including participation status
   const waveInfo = useWave(wave);
@@ -125,6 +128,10 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   const openingTime = waveInfo.participation.startTime;
   const closingTime = waveInfo.participation.endTime;
 
+  const restrictedClass = phoneMenu
+    ? `${COMPACT_WAVE_ACTION_CLASSES} !tw-justify-start tw-text-iron-300`
+    : WAVE_HEADER_RESTRICTION_BUTTON_CLASS;
+
   // Closed state - submissions have ended
   if (isClosed) {
     const tooltipText = closingTime
@@ -135,11 +142,12 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <WaveHeaderRestrictionButton
         label="Submissions Closed"
         reason={tooltipText}
-        className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
+        className={restrictedClass}
         data-testid="closed"
         data-full-width="false"
       >
         <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+        {phoneMenu && <span>Submissions Closed</span>}
       </WaveHeaderRestrictionButton>
     );
   }
@@ -154,11 +162,12 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <WaveHeaderRestrictionButton
         label="Submissions Open Soon"
         reason={tooltipText}
-        className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
+        className={restrictedClass}
         data-testid="info"
         data-full-width="false"
       >
         <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+        {phoneMenu && <span>Submissions Open Soon</span>}
       </WaveHeaderRestrictionButton>
     );
   }
@@ -206,11 +215,12 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <WaveHeaderRestrictionButton
         label="Submission Limit Reached"
         reason={tooltipText}
-        className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
+        className={restrictedClass}
         data-testid="info"
         data-full-width="false"
       >
         <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+        {phoneMenu && <span>Submission Limit Reached</span>}
       </WaveHeaderRestrictionButton>
     );
   }
@@ -277,9 +287,10 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
       <WaveHeaderRestrictionButton
         label="Submission Unavailable"
         reason={tooltipText}
-        className={WAVE_HEADER_RESTRICTION_BUTTON_CLASS}
+        className={restrictedClass}
       >
         <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+        {phoneMenu && <span>Submission Unavailable</span>}
       </WaveHeaderRestrictionButton>
     );
   }
@@ -298,6 +309,23 @@ const MyStreamWaveTabsMemeSubmit: React.FC<MyStreamWaveTabsMemeSubmitProps> = ({
   } else if (isEndingSoon) {
     activeIcon = (
       <ClockIcon className="tw-size-4 tw-flex-shrink-0 tw-text-amber-400" />
+    );
+  }
+
+  if (phoneMenu) {
+    return (
+      <button
+        type="button"
+        onClick={handleMemesSubmit}
+        title={tooltipText}
+        className={`${COMPACT_WAVE_ACTION_CLASSES} tw-text-iron-300`}
+      >
+        {activeIcon}
+        <span>{activeLabelFull}</span>
+        {hasLimitedRemaining && (
+          <span className="tw-text-iron-400">{remainingSubmissionCount}</span>
+        )}
+      </button>
     );
   }
 

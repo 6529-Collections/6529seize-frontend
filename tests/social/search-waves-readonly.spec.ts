@@ -1,4 +1,5 @@
 import type { Locator, Page, Route, TestInfo } from "@playwright/test";
+import { PHONE_WAVES_LAYOUT_QUERY } from "../../constants/waves-layout";
 
 import {
   expect,
@@ -537,12 +538,10 @@ async function openLocalWaveSearchModal(page: Page) {
   await installLocalActiveWaveSearchFixture(page);
   await gotoReady(page, `/waves?wave=${LOCAL_ACTIVE_WAVE_ID}`);
 
-  await page
-    .getByRole("button", {
-      exact: true,
-      name: "Search messages in this wave",
-    })
-    .click();
+  const searchAction = await getWaveSearchAction(page, NAVIGATION_TIMEOUT_MS);
+  if (!searchAction)
+    throw new Error("Expected search in the local fixture wave.");
+  await searchAction.click();
   const searchInput = page.locator("#wave-drops-search-input");
   // The search modal loads on demand, so the first open waits for its chunk.
   await expect(searchInput).toBeVisible({ timeout: NAVIGATION_TIMEOUT_MS });
@@ -586,22 +585,41 @@ async function getRecentPublicWavePaths(page: Page) {
   return paths;
 }
 
+async function getWaveSearchAction(page: Page, timeout = 5000) {
+  const phone = await page.evaluate(
+    (query) => globalThis.matchMedia(query).matches,
+    PHONE_WAVES_LAYOUT_QUERY
+  );
+  const trigger = page.getByRole("button", {
+    exact: true,
+    name: phone ? "More wave actions" : "Search messages in this wave",
+  });
+  const hasTrigger = await trigger
+    .waitFor({ state: "visible", timeout })
+    .then(() => true)
+    .catch(() => false);
+  if (!hasTrigger) return null;
+  if (!phone) return trigger;
+
+  await trigger.click();
+  const sheet = page.getByRole("dialog", {
+    name: "More wave actions",
+    exact: true,
+  });
+  await expect(
+    sheet.getByRole("heading", { name: "More wave actions", exact: true })
+  ).toBeVisible();
+  return sheet.getByRole("button", { name: /^Search messages in .+$/ });
+}
+
 async function openSearchOnFirstWaveWithSearch(page: Page) {
   const candidateWavePaths = await getRecentPublicWavePaths(page);
 
   for (const wavePath of candidateWavePaths.slice(0, 6)) {
     await gotoReady(page, wavePath);
 
-    const searchMessagesButton = page.getByRole("button", {
-      exact: true,
-      name: "Search messages in this wave",
-    });
-    const hasWaveSearch = await searchMessagesButton
-      .waitFor({ state: "visible", timeout: 5000 })
-      .then(() => true)
-      .catch(() => false);
-
-    if (hasWaveSearch) {
+    const searchMessagesButton = await getWaveSearchAction(page);
+    if (searchMessagesButton) {
       await searchMessagesButton.click();
       const searchInput = page.locator("#wave-drops-search-input");
       await expect(searchInput).toBeVisible({

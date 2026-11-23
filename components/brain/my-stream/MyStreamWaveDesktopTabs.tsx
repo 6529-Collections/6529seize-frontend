@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useRef } from "react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import {
   closestCenter,
   DndContext,
@@ -50,6 +52,7 @@ import { MyStreamWaveTab } from "@/types/waves.types";
 import { useContentTab, type SetActiveContentTab } from "../ContentTabContext";
 import MyStreamActionTooltip from "./MyStreamActionTooltip";
 import MyStreamWaveCreateActionsMenu from "./tabs/MyStreamWaveCreateActionsMenu";
+import PhoneWaveTabs from "./tabs/PhoneWaveTabs";
 import MyStreamWaveCurationTabMenu from "./tabs/MyStreamWaveCurationTabMenu";
 import MobileTabsScrollControls from "./MobileTabsScrollControls";
 import { useWaveFeatureUsage } from "@/hooks/useWaveFeatureUsage";
@@ -108,6 +111,16 @@ const getEffectiveProfileCurationId = ({
 
   return curations[0]?.id ?? null;
 };
+
+const PHONE_PRIMARY_TABS = [
+  MyStreamWaveTab.CHAT,
+  MyStreamWaveTab.LEADERBOARD,
+  MyStreamWaveTab.SUBMISSIONS,
+  MyStreamWaveTab.WINNERS,
+  MyStreamWaveTab.MY_VOTES,
+  MyStreamWaveTab.POLLS,
+  MyStreamWaveTab.SALES,
+] as const;
 
 const AUTO_EXPAND_LIMIT = 5;
 const TRAILING_TABS = [
@@ -275,6 +288,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
   const searchParams = useSearchParams();
   const { ref: featureUsageRef } = useWaveFeatureUsage("wave_tabs", wave.id);
   const pathname = usePathname();
+  const phoneViewport = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
   const prefetchChat = useWaveChatPrefetch();
 
   const locale = useBrowserLocale();
@@ -294,8 +308,11 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     isMemesWave,
     isCurationWave,
     isRankWave,
+    isDm,
     pauses: { filterDecisionsDuringPauses },
   } = useWave(wave);
+  const phoneWaveLayout =
+    phoneViewport && pathname.startsWith("/waves/") && !isDm;
   const waveApproveLabels = useApproveWaveCustomTabLabels(wave);
   const nativePresentation = useMemo(
     () =>
@@ -537,6 +554,13 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
 
     setActiveTab(key as MyStreamWaveTab);
   };
+  const selectTab = (key: string) => {
+    if (key.startsWith("curation:")) {
+      onSelectCuration(getCurationIdFromTabKey(key));
+      return;
+    }
+    selectStandardTab(key);
+  };
   const curationTabKeys = useMemo(
     () => curations.map((curation) => getCurationTabKey(curation.id)),
     [curations]
@@ -597,6 +621,26 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
     return null;
   }
 
+  if (phoneWaveLayout) {
+    return (
+      <div
+        ref={featureUsageRef}
+        data-competition-navigation={flat ? "flat" : undefined}
+        className="tw-flex tw-w-full tw-min-w-0 tw-px-2"
+      >
+        <PhoneWaveTabs
+          key={wave.id}
+          tabs={options.map((option) => ({
+            ...option,
+            onSelect: () => selectTab(option.key),
+          }))}
+          primaryKeys={PHONE_PRIMARY_TABS}
+          activeKey={activeKey}
+        />
+      </div>
+    );
+  }
+
   return (
     <div
       data-competition-navigation={flat ? "flat" : undefined}
@@ -614,14 +658,7 @@ const MyStreamWaveDesktopTabs: React.FC<MyStreamWaveDesktopTabsProps> = ({
               transition
               options={options}
               activeKey={activeKey}
-              onSelect={(key) => {
-                if (key.startsWith("curation:")) {
-                  onSelectCuration(getCurationIdFromTabKey(key));
-                  return;
-                }
-
-                selectStandardTab(key);
-              }}
+              onSelect={selectTab}
             />
           </div>
         </div>

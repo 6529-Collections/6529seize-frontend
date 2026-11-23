@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
+import { PHONE_WAVES_LAYOUT_QUERY } from "@/constants/waves-layout";
+import { getWaveIdFromPathname } from "@/helpers/navigation.helpers";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { SIDEBAR_WIDTHS } from "../../constants/sidebar";
 import { useSidebarController } from "../../hooks/useSidebarController";
 import { SidebarProvider, useSidebarState } from "../../hooks/useSidebarState";
@@ -30,6 +33,9 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
   } = useSidebarController();
   const { isRightSidebarOpen } = useSidebarState();
   const pathname = usePathname();
+  const isPhoneWidth = useMediaQuery(PHONE_WAVES_LAYOUT_QUERY);
+  const showSiteHeader =
+    isSmall && !(isPhoneWidth && getWaveIdFromPathname(pathname));
   const smallWebOverflow =
     pathname === "/the-memes" || /^\/the-memes\/\d+\/?$/.test(pathname)
       ? "tw-overflow-x-clip"
@@ -77,7 +83,7 @@ const WebLayoutContent = ({ children, isSmall = false }: WebLayoutProps) => {
       data-sidebar-ready={isSidebarReady}
     >
       <SmallScreenLayoutHeader
-        active={isSmall}
+        active={showSiteHeader}
         onMenuToggle={toggleCollapsed}
         isMenuOpen={isOffcanvasOpen}
       />
