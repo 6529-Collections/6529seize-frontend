@@ -35,7 +35,9 @@ export function E2eeRemoveLocalData() {
         confirmLabel={t(locale, "e2ee.enroll.removeLocalConfirm")}
         destructive
         errorFallbackKey="e2ee.enroll.removeLocalFailed"
-        onConfirm={remove}
+        onConfirm={async () => {
+          await remove();
+        }}
         onClose={() => setOpen(false)}
       />
     </div>

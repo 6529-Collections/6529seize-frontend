@@ -1,0 +1,2840 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "initialOwner",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "id": "0x965f2406",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "canonicalizationId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "CanonicalizationAlreadyRegistered",
+    "signature": "CanonicalizationAlreadyRegistered(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0xaa5ccb72",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "declared",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "computed",
+        "type": "bytes32"
+      }
+    ],
+    "name": "DocumentHashMismatch",
+    "signature": "DocumentHashMismatch(bytes32,bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0x87de4bfe",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "name": "DocumentTooLarge",
+    "signature": "DocumentTooLarge(uint256)",
+    "type": "error"
+  },
+  {
+    "id": "0xc2e5347d",
+    "inputs": [],
+    "name": "EmptyBatch",
+    "signature": "EmptyBatch()",
+    "type": "error"
+  },
+  {
+    "id": "0x94666f0d",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "count",
+        "type": "uint256"
+      }
+    ],
+    "name": "IndexOutOfRange",
+    "signature": "IndexOutOfRange(uint256,uint256)",
+    "type": "error"
+  },
+  {
+    "id": "0x8e4c8aa6",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "InvalidAddress",
+    "signature": "InvalidAddress(address)",
+    "type": "error"
+  },
+  {
+    "id": "0x6823746c",
+    "inputs": [
+      {
+        "internalType": "bytes",
+        "name": "cid",
+        "type": "bytes"
+      }
+    ],
+    "name": "InvalidCid",
+    "signature": "InvalidCid(bytes)",
+    "type": "error"
+  },
+  {
+    "id": "0xb9fb57e8",
+    "inputs": [],
+    "name": "InvalidEffectiveAt",
+    "signature": "InvalidEffectiveAt()",
+    "type": "error"
+  },
+  {
+    "id": "0x84705003",
+    "inputs": [
+      {
+        "internalType": "uint16",
+        "name": "algorithm",
+        "type": "uint16"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "digest",
+        "type": "bytes32"
+      }
+    ],
+    "name": "InvalidHash",
+    "signature": "InvalidHash(uint16,bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0x5a048b0b",
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "literal",
+        "type": "string"
+      }
+    ],
+    "name": "InvalidLiteral",
+    "signature": "InvalidLiteral(string)",
+    "type": "error"
+  },
+  {
+    "id": "0xd5be818f",
+    "inputs": [],
+    "name": "InvalidSubject",
+    "signature": "InvalidSubject()",
+    "type": "error"
+  },
+  {
+    "id": "0x4f9c97ea",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "fromVersion",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "toVersion",
+        "type": "uint32"
+      }
+    ],
+    "name": "InvalidVersionRange",
+    "signature": "InvalidVersionRange(bytes32,uint32,uint32)",
+    "type": "error"
+  },
+  {
+    "id": "0x57ffeaad",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "length",
+        "type": "uint256"
+      }
+    ],
+    "name": "LabelTooLong",
+    "signature": "LabelTooLong(uint256)",
+    "type": "error"
+  },
+  {
+    "id": "0x9e341f9b",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "NoCurrentVersion",
+    "signature": "NoCurrentVersion(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0x8739088d",
+    "inputs": [],
+    "name": "NoStorageLocation",
+    "signature": "NoStorageLocation()",
+    "type": "error"
+  },
+  {
+    "id": "0x245aecd3",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "NotOwner",
+    "signature": "NotOwner(address)",
+    "type": "error"
+  },
+  {
+    "id": "0xa09b9a43",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "NotPendingOwner",
+    "signature": "NotPendingOwner(address)",
+    "type": "error"
+  },
+  {
+    "id": "0xe35593b5",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "caller",
+        "type": "address"
+      }
+    ],
+    "name": "NotPublisher",
+    "signature": "NotPublisher(address)",
+    "type": "error"
+  },
+  {
+    "id": "0x0660f356",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "fromVersion",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "toVersion",
+        "type": "uint32"
+      }
+    ],
+    "name": "NothingToDelete",
+    "signature": "NothingToDelete(bytes32,uint32,uint32)",
+    "type": "error"
+  },
+  {
+    "id": "0xb955708d",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "publisher",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "authorized",
+        "type": "bool"
+      }
+    ],
+    "name": "PublisherUnchanged",
+    "signature": "PublisherUnchanged(address,bool)",
+    "type": "error"
+  },
+  {
+    "id": "0x29bc8698",
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "expected",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "actual",
+        "type": "uint32"
+      }
+    ],
+    "name": "RecordCountMismatch",
+    "signature": "RecordCountMismatch(uint32,uint32)",
+    "type": "error"
+  },
+  {
+    "id": "0xf2042b85",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "recordTypeId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "RecordTypeAlreadyRegistered",
+    "signature": "RecordTypeAlreadyRegistered(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0x5daca0e9",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "expected",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "actual",
+        "type": "bytes32"
+      }
+    ],
+    "name": "RecordTypeMismatch",
+    "signature": "RecordTypeMismatch(bytes32,bytes32,bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0xb81274ce",
+    "inputs": [],
+    "name": "RegistryFrozen",
+    "signature": "RegistryFrozen()",
+    "type": "error"
+  },
+  {
+    "id": "0xd1071567",
+    "inputs": [],
+    "name": "RegistryFull",
+    "signature": "RegistryFull()",
+    "type": "error"
+  },
+  {
+    "id": "0x7f426f41",
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "openReleaseId",
+        "type": "uint32"
+      }
+    ],
+    "name": "ReleaseNotOpen",
+    "signature": "ReleaseNotOpen(uint32,uint32)",
+    "type": "error"
+  },
+  {
+    "id": "0xcd5f9dd4",
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      }
+    ],
+    "name": "ReleaseStillOpen",
+    "signature": "ReleaseStillOpen(uint32)",
+    "type": "error"
+  },
+  {
+    "id": "0xfbad885d",
+    "inputs": [],
+    "name": "SSTORE2WriteFailed",
+    "signature": "SSTORE2WriteFailed()",
+    "type": "error"
+  },
+  {
+    "id": "0x70008c6a",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "schemaId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "SchemaAlreadyRegistered",
+    "signature": "SchemaAlreadyRegistered(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0xf78564b5",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "SubjectIsDeleted",
+    "signature": "SubjectIsDeleted(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0xc547efd3",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "UnchangedRecord",
+    "signature": "UnchangedRecord(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0x7d6ada6f",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "canonicalizationId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "UnknownCanonicalization",
+    "signature": "UnknownCanonicalization(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0xd2ed37ea",
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "deletionId",
+        "type": "uint32"
+      }
+    ],
+    "name": "UnknownDeletion",
+    "signature": "UnknownDeletion(uint32)",
+    "type": "error"
+  },
+  {
+    "id": "0x6e68cd01",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "recordTypeId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "UnknownRecordType",
+    "signature": "UnknownRecordType(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0x6e3f6927",
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      }
+    ],
+    "name": "UnknownRelease",
+    "signature": "UnknownRelease(uint32)",
+    "type": "error"
+  },
+  {
+    "id": "0x2a1e5d0e",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "schemaId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "UnknownSchema",
+    "signature": "UnknownSchema(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0x475b8e67",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "UnknownSubject",
+    "signature": "UnknownSubject(bytes32)",
+    "type": "error"
+  },
+  {
+    "id": "0x4baaaea4",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "version",
+        "type": "uint32"
+      }
+    ],
+    "name": "UnknownVersion",
+    "signature": "UnknownVersion(bytes32,uint32)",
+    "type": "error"
+  },
+  {
+    "id": "0xa696ce6d",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "version",
+        "type": "uint32"
+      }
+    ],
+    "name": "VersionAlreadyDeleted",
+    "signature": "VersionAlreadyDeleted(bytes32,uint32)",
+    "type": "error"
+  },
+  {
+    "id": "0xdc3e1bf4",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "expected",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "actual",
+        "type": "uint32"
+      }
+    ],
+    "name": "VersionMismatch",
+    "signature": "VersionMismatch(bytes32,uint32,uint32)",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "id": "0x069b0daed79a1d48380e5ce7b87f216face373e4a3a2a02df8ce036857bc4925",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "canonicalizationId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "literal",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "specCid",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "registeredAt",
+        "type": "uint40"
+      }
+    ],
+    "name": "CanonicalizationRegistered",
+    "signature": "CanonicalizationRegistered(bytes32,string,bytes,uint40)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0x761c6025e88b29e1538d1e7ed666eba8505ae08aa3fce07834ac53d51f3734a6",
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "frozenAt",
+        "type": "uint40"
+      }
+    ],
+    "name": "Frozen",
+    "signature": "Frozen(uint40)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0x648949aa6ef134f2af2f94e8ad5e891b0eb4ace35ce9c5d92bd1699c1508cb43",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "ownerIndex",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "since",
+        "type": "uint40"
+      }
+    ],
+    "name": "OwnerChanged",
+    "signature": "OwnerChanged(address,address,uint32,uint40)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0x38d16b8cac22d99fc7c124b9cd0de2d3fa1faef420bfe791d8c362d765e22700",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "pendingOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferStarted",
+    "signature": "OwnershipTransferStarted(address,address)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0x0e23ee231e4019104caa584486890914b3296926e2395adc89e0ebc7c601e2df",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "publisher",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "bool",
+        "name": "authorized",
+        "type": "bool"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "changeIndex",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "changedAt",
+        "type": "uint40"
+      }
+    ],
+    "name": "PublisherSet",
+    "signature": "PublisherSet(address,bool,uint32,uint40)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0x8c67a539fd2066fe85f373583a05656f6637985a40fb3a928e981117c85f17e1",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "recordType",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint32",
+            "name": "version",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "sequence",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "releaseId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "schemaId",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "contentHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint64",
+            "name": "effectiveAt",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint40",
+            "name": "publishedAt",
+            "type": "uint40"
+          },
+          {
+            "internalType": "address",
+            "name": "publisher",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "deleted",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "deletionId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes",
+            "name": "cid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "arweaveId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IProvenanceRegistry.Version",
+        "name": "record",
+        "type": "tuple"
+      }
+    ],
+    "name": "RecordPublished",
+    "signature": "RecordPublished(bytes32,bytes32,uint32,(uint32,uint32,uint32,bytes32,(uint16,bytes32,bytes32),uint64,uint40,address,bool,uint32,bytes,bytes32,string))",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0x18a83688d20ba488b057cff565bb3bbd57349049e6159543eacdb8897348309e",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "recordTypeId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "literal",
+        "type": "string"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "registeredAt",
+        "type": "uint40"
+      }
+    ],
+    "name": "RecordTypeRegistered",
+    "signature": "RecordTypeRegistered(bytes32,string,uint40)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0xfd6201dee5282e70715666746caf898a991eb5c5db6696e9bc68c72f9cb84d45",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "openedBy",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "firstSequence",
+        "type": "uint32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "manifestCid",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "manifestHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes",
+            "name": "rootCid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "arweaveId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes20",
+            "name": "sourceCommit",
+            "type": "bytes20"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IProvenanceRegistry.ReleaseInput",
+        "name": "header",
+        "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "openedAt",
+        "type": "uint40"
+      }
+    ],
+    "name": "ReleaseOpened",
+    "signature": "ReleaseOpened(uint32,address,uint32,(bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string),uint40)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0x24c6c0b0784634b47c1369adc8e812075c2d766a5bcc601d65c9916a3c080e2b",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "recordCount",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "sealedAt",
+        "type": "uint40"
+      }
+    ],
+    "name": "ReleaseSealed",
+    "signature": "ReleaseSealed(uint32,uint32,uint40)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0x19625925af1a1b6ec9e1202d2d0301a1175a43151f03d8e431489e54afde7b5b",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "schemaId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "literal",
+        "type": "string"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint16",
+            "name": "algorithm",
+            "type": "uint16"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "digest",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "canonicalizationId",
+            "type": "bytes32"
+          }
+        ],
+        "indexed": false,
+        "internalType": "struct IProvenanceRegistry.HashRef",
+        "name": "documentHash",
+        "type": "tuple"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "cid",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "address[]",
+        "name": "chunks",
+        "type": "address[]"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes",
+        "name": "document",
+        "type": "bytes"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "registeredAt",
+        "type": "uint40"
+      }
+    ],
+    "name": "SchemaRegistered",
+    "signature": "SchemaRegistered(bytes32,string,(uint16,bytes32,bytes32),bytes,address[],bytes,uint40)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0xd44256bf2ea295a4559639854a9fa14846f40e453cc8cd4ced6959922e55da1b",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint32",
+        "name": "deletionId",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "versionCount",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "deletedCount",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "reasonDigest",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "deletedAt",
+        "type": "uint40"
+      }
+    ],
+    "name": "SubjectDeleted",
+    "signature": "SubjectDeleted(bytes32,uint32,uint32,uint32,bytes32,uint40)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0xdd321306ca6df6bb811a98d8553907cc13d8b854fd64c8fbe5f3237a16b55090",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "successor",
+        "type": "address"
+      }
+    ],
+    "name": "SuccessorDeclared",
+    "signature": "SuccessorDeclared(address)",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "id": "0x643cd960f7a71acc5d414923895f08574d89b0741ed8900474ac7bc481e99273",
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "indexed": true,
+        "internalType": "uint32",
+        "name": "deletionId",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "fromVersion",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "toVersion",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint32",
+        "name": "deletedCount",
+        "type": "uint32"
+      },
+      {
+        "indexed": false,
+        "internalType": "bytes32",
+        "name": "reasonDigest",
+        "type": "bytes32"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint40",
+        "name": "deletedAt",
+        "type": "uint40"
+      }
+    ],
+    "name": "VersionsDeleted",
+    "signature": "VersionsDeleted(bytes32,uint32,uint32,uint32,uint32,bytes32,uint40)",
+    "type": "event"
+  },
+  {
+    "id": "0x79ba5097",
+    "inputs": [],
+    "name": "acceptOwnership",
+    "outputs": [],
+    "signature": "acceptOwnership()",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0xecb70f3c",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "canonicalizationId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "canonicalization",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "literal",
+            "type": "string"
+          },
+          {
+            "internalType": "bytes",
+            "name": "specCid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "uint40",
+            "name": "registeredAt",
+            "type": "uint40"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.Canonicalization",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "canonicalization(bytes32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x51ce00c6",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "canonicalizationAt",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "signature": "canonicalizationAt(uint256)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x3dc2f21a",
+    "inputs": [],
+    "name": "canonicalizationCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "signature": "canonicalizationCount()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x75b03455",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "current",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint32",
+            "name": "version",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "sequence",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "releaseId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "schemaId",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "contentHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint64",
+            "name": "effectiveAt",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint40",
+            "name": "publishedAt",
+            "type": "uint40"
+          },
+          {
+            "internalType": "address",
+            "name": "publisher",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "deleted",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "deletionId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes",
+            "name": "cid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "arweaveId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.Version",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "current(bytes32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x731fa208",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "successorRegistry",
+        "type": "address"
+      }
+    ],
+    "name": "declareSuccessor",
+    "outputs": [],
+    "signature": "declareSuccessor(address)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0xcb1efbf1",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "reasonDigest",
+        "type": "bytes32"
+      }
+    ],
+    "name": "deleteSubject",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "deletionId",
+        "type": "uint32"
+      }
+    ],
+    "signature": "deleteSubject(bytes32,bytes32)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0x9c43494f",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "version",
+        "type": "uint32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "reasonDigest",
+        "type": "bytes32"
+      }
+    ],
+    "name": "deleteVersion",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "deletionId",
+        "type": "uint32"
+      }
+    ],
+    "signature": "deleteVersion(bytes32,uint32,bytes32)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0x0e9e6c6e",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "fromVersion",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "toVersion",
+        "type": "uint32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "reasonDigest",
+        "type": "bytes32"
+      }
+    ],
+    "name": "deleteVersions",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "deletionId",
+        "type": "uint32"
+      }
+    ],
+    "signature": "deleteVersions(bytes32,uint32,uint32,bytes32)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0xe88f576c",
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "deletionId",
+        "type": "uint32"
+      }
+    ],
+    "name": "deletion",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "subjectId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "reasonDigest",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "fromVersion",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "toVersion",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "deletedCount",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bool",
+            "name": "wholeSubject",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint40",
+            "name": "deletedAt",
+            "type": "uint40"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.Deletion",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "deletion(uint32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x12e13263",
+    "inputs": [],
+    "name": "deletionCount",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "signature": "deletionCount()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x62a5af3b",
+    "inputs": [],
+    "name": "freeze",
+    "outputs": [],
+    "signature": "freeze()",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0x054f7d9c",
+    "inputs": [],
+    "name": "frozen",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "signature": "frozen()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x364e18bb",
+    "inputs": [],
+    "name": "frozenAt",
+    "outputs": [
+      {
+        "internalType": "uint40",
+        "name": "",
+        "type": "uint40"
+      }
+    ],
+    "signature": "frozenAt()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x8b87079a",
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      }
+    ],
+    "name": "getRelease",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint32",
+            "name": "releaseId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bool",
+            "name": "isSealed",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint40",
+            "name": "openedAt",
+            "type": "uint40"
+          },
+          {
+            "internalType": "uint40",
+            "name": "sealedAt",
+            "type": "uint40"
+          },
+          {
+            "internalType": "uint32",
+            "name": "firstSequence",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "recordCount",
+            "type": "uint32"
+          },
+          {
+            "internalType": "address",
+            "name": "openedBy",
+            "type": "address"
+          },
+          {
+            "internalType": "bytes",
+            "name": "manifestCid",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "manifestHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes",
+            "name": "rootCid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "arweaveId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes20",
+            "name": "sourceCommit",
+            "type": "bytes20"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.Release",
+        "name": "release",
+        "type": "tuple"
+      }
+    ],
+    "signature": "getRelease(uint32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x6edceec2",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "version",
+        "type": "uint32"
+      }
+    ],
+    "name": "getVersion",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint32",
+            "name": "version",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "sequence",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "releaseId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "schemaId",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "contentHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint64",
+            "name": "effectiveAt",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint40",
+            "name": "publishedAt",
+            "type": "uint40"
+          },
+          {
+            "internalType": "address",
+            "name": "publisher",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "deleted",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "deletionId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes",
+            "name": "cid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "arweaveId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.Version",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "getVersion(bytes32,uint32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x71ac8669",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "fromVersion",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "limit",
+        "type": "uint32"
+      }
+    ],
+    "name": "getVersions",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint32",
+            "name": "version",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "sequence",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "releaseId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "schemaId",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "contentHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint64",
+            "name": "effectiveAt",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint40",
+            "name": "publishedAt",
+            "type": "uint40"
+          },
+          {
+            "internalType": "address",
+            "name": "publisher",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "deleted",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "deletionId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes",
+            "name": "cid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "arweaveId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.Version[]",
+        "name": "page",
+        "type": "tuple[]"
+      }
+    ],
+    "signature": "getVersions(bytes32,uint32,uint32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x41859ac8",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "isPublisher",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "signature": "isPublisher(address)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x79feb107",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "latest",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "uint32",
+            "name": "version",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "sequence",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "releaseId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "schemaId",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "contentHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint64",
+            "name": "effectiveAt",
+            "type": "uint64"
+          },
+          {
+            "internalType": "uint40",
+            "name": "publishedAt",
+            "type": "uint40"
+          },
+          {
+            "internalType": "address",
+            "name": "publisher",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "deleted",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "deletionId",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bytes",
+            "name": "cid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "arweaveId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.Version",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "latest(bytes32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0xe2fb5f87",
+    "inputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes",
+            "name": "manifestCid",
+            "type": "bytes"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "manifestHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes",
+            "name": "rootCid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "arweaveId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes20",
+            "name": "sourceCommit",
+            "type": "bytes20"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.ReleaseInput",
+        "name": "header",
+        "type": "tuple"
+      }
+    ],
+    "name": "openRelease",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      }
+    ],
+    "signature": "openRelease((bytes,(uint16,bytes32,bytes32),bytes,bytes32,bytes20,string))",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0xcac91a3f",
+    "inputs": [],
+    "name": "openReleaseId",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "signature": "openReleaseId()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x8da5cb5b",
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "signature": "owner()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x24359879",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "ownerAt",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint40",
+            "name": "since",
+            "type": "uint40"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.OwnerRecord",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "ownerAt(uint256)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x0db02622",
+    "inputs": [],
+    "name": "ownerCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "signature": "ownerCount()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0xe30c3978",
+    "inputs": [],
+    "name": "pendingOwner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "signature": "pendingOwner()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x19f8e2c2",
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      },
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "subjectId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "recordType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "schemaId",
+            "type": "bytes32"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "contentHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "uint64",
+            "name": "effectiveAt",
+            "type": "uint64"
+          },
+          {
+            "internalType": "bytes",
+            "name": "cid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "arweaveId",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "label",
+            "type": "string"
+          },
+          {
+            "internalType": "uint32",
+            "name": "expectedVersion",
+            "type": "uint32"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.RecordInput[]",
+        "name": "records",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "publish",
+    "outputs": [],
+    "signature": "publish(uint32,(bytes32,bytes32,bytes32,(uint16,bytes32,bytes32),uint64,bytes,bytes32,string,uint32)[])",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0x0248317c",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "publisherChangeAt",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "address",
+            "name": "publisher",
+            "type": "address"
+          },
+          {
+            "internalType": "bool",
+            "name": "authorized",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint40",
+            "name": "changedAt",
+            "type": "uint40"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.PublisherChange",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "publisherChangeAt(uint256)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x803873a1",
+    "inputs": [],
+    "name": "publisherChangeCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "signature": "publisherChangeCount()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0xe9dd1747",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "recordTypeId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "recordType",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "literal",
+            "type": "string"
+          },
+          {
+            "internalType": "uint40",
+            "name": "registeredAt",
+            "type": "uint40"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.RecordType",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "recordType(bytes32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x5cbb2d2e",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "recordTypeAt",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "signature": "recordTypeAt(uint256)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x217f6634",
+    "inputs": [],
+    "name": "recordTypeCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "signature": "recordTypeCount()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0xe2fb0b20",
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "literal",
+        "type": "string"
+      },
+      {
+        "internalType": "bytes",
+        "name": "specCid",
+        "type": "bytes"
+      }
+    ],
+    "name": "registerCanonicalization",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "canonicalizationId",
+        "type": "bytes32"
+      }
+    ],
+    "signature": "registerCanonicalization(string,bytes)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0x4725e130",
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "literal",
+        "type": "string"
+      }
+    ],
+    "name": "registerRecordType",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "recordTypeId",
+        "type": "bytes32"
+      }
+    ],
+    "signature": "registerRecordType(string)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0xdad47848",
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "literal",
+        "type": "string"
+      },
+      {
+        "components": [
+          {
+            "internalType": "uint16",
+            "name": "algorithm",
+            "type": "uint16"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "digest",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "bytes32",
+            "name": "canonicalizationId",
+            "type": "bytes32"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.HashRef",
+        "name": "documentHash",
+        "type": "tuple"
+      },
+      {
+        "internalType": "bytes",
+        "name": "cid",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes",
+        "name": "document",
+        "type": "bytes"
+      }
+    ],
+    "name": "registerSchema",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "schemaId",
+        "type": "bytes32"
+      }
+    ],
+    "signature": "registerSchema(string,(uint16,bytes32,bytes32),bytes,bytes)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0xb8d08db2",
+    "inputs": [],
+    "name": "releaseCount",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "signature": "releaseCount()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x072b9cf2",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "schemaId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "schema",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "string",
+            "name": "literal",
+            "type": "string"
+          },
+          {
+            "components": [
+              {
+                "internalType": "uint16",
+                "name": "algorithm",
+                "type": "uint16"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "digest",
+                "type": "bytes32"
+              },
+              {
+                "internalType": "bytes32",
+                "name": "canonicalizationId",
+                "type": "bytes32"
+              }
+            ],
+            "internalType": "struct IProvenanceRegistry.HashRef",
+            "name": "documentHash",
+            "type": "tuple"
+          },
+          {
+            "internalType": "bytes",
+            "name": "cid",
+            "type": "bytes"
+          },
+          {
+            "internalType": "address[]",
+            "name": "chunks",
+            "type": "address[]"
+          },
+          {
+            "internalType": "uint32",
+            "name": "documentLength",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint40",
+            "name": "registeredAt",
+            "type": "uint40"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.Schema",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "schema(bytes32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x01d853bf",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "schemaAt",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "signature": "schemaAt(uint256)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x00839e67",
+    "inputs": [],
+    "name": "schemaCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "signature": "schemaCount()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0xedb076c1",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "schemaId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "schemaDocument",
+    "outputs": [
+      {
+        "internalType": "bytes",
+        "name": "document",
+        "type": "bytes"
+      }
+    ],
+    "signature": "schemaDocument(bytes32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0xe672920c",
+    "inputs": [
+      {
+        "internalType": "uint32",
+        "name": "releaseId",
+        "type": "uint32"
+      },
+      {
+        "internalType": "uint32",
+        "name": "expectedRecordCount",
+        "type": "uint32"
+      }
+    ],
+    "name": "sealRelease",
+    "outputs": [],
+    "signature": "sealRelease(uint32,uint32)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0x2b67b289",
+    "inputs": [],
+    "name": "sequenceCount",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "signature": "sequenceCount()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x618bb079",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "publisher",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "authorized",
+        "type": "bool"
+      }
+    ],
+    "name": "setPublisher",
+    "outputs": [],
+    "signature": "setPublisher(address,bool)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "id": "0xcfe965df",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "subjectId",
+        "type": "bytes32"
+      }
+    ],
+    "name": "subject",
+    "outputs": [
+      {
+        "components": [
+          {
+            "internalType": "bytes32",
+            "name": "recordType",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "versionCount",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "firstSequence",
+            "type": "uint32"
+          },
+          {
+            "internalType": "bool",
+            "name": "deleted",
+            "type": "bool"
+          },
+          {
+            "internalType": "uint32",
+            "name": "liveVersionCount",
+            "type": "uint32"
+          },
+          {
+            "internalType": "uint32",
+            "name": "deletionId",
+            "type": "uint32"
+          }
+        ],
+        "internalType": "struct IProvenanceRegistry.Subject",
+        "name": "",
+        "type": "tuple"
+      }
+    ],
+    "signature": "subject(bytes32)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x18a3c48f",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
+      }
+    ],
+    "name": "subjectAt",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "signature": "subjectAt(uint256)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x639a2e10",
+    "inputs": [],
+    "name": "subjectCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "signature": "subjectCount()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x358da205",
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "offset",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "limit",
+        "type": "uint256"
+      }
+    ],
+    "name": "subjects",
+    "outputs": [
+      {
+        "internalType": "bytes32[]",
+        "name": "ids",
+        "type": "bytes32[]"
+      }
+    ],
+    "signature": "subjects(uint256,uint256)",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x6ff968c3",
+    "inputs": [],
+    "name": "successor",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "signature": "successor()",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "id": "0x01ffc9a7",
+    "inputs": [
+      {
+        "internalType": "bytes4",
+        "name": "interfaceId",
+        "type": "bytes4"
+      }
+    ],
+    "name": "supportsInterface",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "signature": "supportsInterface(bytes4)",
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "id": "0xf2fde38b",
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "signature": "transferOwnership(address)",
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
+]

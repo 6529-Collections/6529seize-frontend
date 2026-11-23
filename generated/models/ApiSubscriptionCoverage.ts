@@ -52,6 +52,14 @@ export class ApiSubscriptionCoverage {
     'minimum_top_up': ApiSubscriptionCoverageMinimumTopUp | null;
     'recommended_top_up': ApiSubscriptionCoverageRecommendedTopUp | null;
     'forecast': ApiSubscriptionCoverageForecast;
+    /**
+    * Consecutive fully funded intended drops beginning with the immediate next intended drop, counted past the forecast horizon. It assumes the current mint price, eligibility count and subscription settings (mode, edition preference and stored per-drop selections) stay as they are, and that each later calendar drop is one Meme. Equal to fully_funded_drops when the horizon has an unfunded intended drop or in manual mode (no drop is intended until selected). Counting stops at 312 (two years of drops); see funded_drops_at_current_settings_capped. Null when the balance could not be allocated (unknown, not set up, no eligibility or no selections). Absent from older API versions.
+    */
+    'funded_drops_at_current_settings'?: number | null;
+    /**
+    * True when funded_drops_at_current_settings stopped at its 312-drop maximum, so the balance funds at least that many drops. Null when funded_drops_at_current_settings is null.
+    */
+    'funded_drops_at_current_settings_capped'?: boolean | null;
 
     static readonly discriminator: string | undefined = undefined;
 
@@ -152,6 +160,18 @@ export class ApiSubscriptionCoverage {
             "name": "forecast",
             "baseName": "forecast",
             "type": "ApiSubscriptionCoverageForecast",
+            "format": ""
+        },
+        {
+            "name": "funded_drops_at_current_settings",
+            "baseName": "funded_drops_at_current_settings",
+            "type": "number",
+            "format": "int64"
+        },
+        {
+            "name": "funded_drops_at_current_settings_capped",
+            "baseName": "funded_drops_at_current_settings_capped",
+            "type": "boolean",
             "format": ""
         }    ];
 

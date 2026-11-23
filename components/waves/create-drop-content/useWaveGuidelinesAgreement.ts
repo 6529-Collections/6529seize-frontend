@@ -26,6 +26,16 @@ const hasPostedInWave = (wave: ApiWave): boolean =>
   (wave.metrics.your_drops_count ?? 0) > 0 ||
   wave.metrics.your_participation_drops_count > 0;
 
+/**
+ * Wave and profile scopes that sent a chat message during this page session.
+ * Kept outside the hook because the cached wave keeps its pre-post
+ * `your_drops_count` until it is refetched, so a composer that remounts in
+ * the meantime would otherwise ask again before the next message. A reload
+ * refetches the wave, whose metrics then count the message. Only written
+ * from client event handlers.
+ */
+const chatSubmittedScopeKeys = new Set<string>();
+
 export function useWaveGuidelinesAgreement({
   profileId,
   wave,
@@ -40,7 +50,6 @@ export function useWaveGuidelinesAgreement({
     readonly scopeKey: string;
     readonly promise: Promise<WaveGuidelinesAgreementResult>;
   } | null>(null);
-  const satisfiedScopeKeysRef = useRef(new Set<string>());
   const [dialogState, setDialogState] = useState<GuidelinesDialogState | null>(
     null
   );
@@ -86,7 +95,7 @@ export function useWaveGuidelinesAgreement({
       if (
         dropType !== ApiDropType.Chat ||
         hasPostedInWave(wave) ||
-        satisfiedScopeKeysRef.current.has(scopeKey)
+        chatSubmittedScopeKeys.has(scopeKey)
       ) {
         return Promise.resolve("accepted");
       }
@@ -149,7 +158,7 @@ export function useWaveGuidelinesAgreement({
   }, [settlePendingDecision]);
 
   const markChatSubmitted = useCallback(() => {
-    satisfiedScopeKeysRef.current.add(scopeKey);
+    chatSubmittedScopeKeys.add(scopeKey);
   }, [scopeKey]);
 
   return {

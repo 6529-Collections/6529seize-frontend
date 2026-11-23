@@ -939,8 +939,11 @@ describe("CreateDrop", () => {
         data_value: "Be thoughtful and stay on topic.",
       },
     ]);
+    // Sent-message memory lasts for the page session, so this test uses a
+    // wave no earlier test posted in.
     const guidelinesWave = {
       ...wave,
+      id: "guidelines-first-message",
       metrics: {
         your_drops_count: 0,
         your_participation_drops_count: 0,
@@ -998,9 +1001,71 @@ describe("CreateDrop", () => {
     expect(fetchWaveMetadataMock).toHaveBeenCalledTimes(2);
   });
 
+  it("does not ask again after a first message when the composer remounts", async () => {
+    fetchWaveMetadataMock.mockResolvedValue([
+      {
+        id: 1,
+        data_key: "wave_display.rules.custom",
+        data_value: "Be thoughtful and stay on topic.",
+      },
+    ]);
+    // The cached wave keeps reporting no messages from the viewer until it is
+    // refetched, so a remounted composer receives the same metrics.
+    const staleWave = {
+      ...wave,
+      id: "guidelines-remount",
+      metrics: {
+        your_drops_count: 0,
+        your_participation_drops_count: 0,
+      },
+    } as any;
+    const renderComposer = () => (
+      <AuthContext.Provider
+        value={
+          {
+            connectedProfile: { id: "profile-remount" },
+            setToast: jest.fn(),
+          } as any
+        }
+      >
+        <ReactQueryWrapperContext.Provider
+          value={{ waitAndInvalidateDrops: jest.fn() } as any}
+        >
+          <CreateDrop
+            activeDrop={null}
+            onCancelReplyQuote={() => {}}
+            onDropAddedToQueue={jest.fn()}
+            wave={staleWave}
+            dropId={null}
+            fixedDropMode={"CHAT" as any}
+            privileges={{ chatRestriction: null } as any}
+          />
+        </ReactQueryWrapperContext.Provider>
+      </AuthContext.Provider>
+    );
+
+    const firstComposer = render(renderComposer());
+    await userEvent.click(screen.getByText("submit current mode"));
+    expect(
+      await screen.findByRole("dialog", { name: "Wave guidelines" })
+    ).toBeVisible();
+    await userEvent.click(screen.getByRole("button", { name: "Agree" }));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(1));
+    firstComposer.unmount();
+
+    render(renderComposer());
+    await userEvent.click(screen.getByText("submit current mode"));
+    await waitFor(() => expect(commonApiPostMock).toHaveBeenCalledTimes(2));
+    expect(
+      screen.queryByRole("dialog", { name: "Wave guidelines" })
+    ).not.toBeInTheDocument();
+    expect(fetchWaveMetadataMock).toHaveBeenCalledTimes(1);
+  });
+
   it("keeps a first message when current guidelines cannot be loaded", async () => {
     const setToast = jest.fn();
     fetchWaveMetadataMock.mockRejectedValue(new Error("network unavailable"));
+    const loadErrorWave = { ...wave, id: "guidelines-load-error" } as any;
 
     render(
       <AuthContext.Provider
@@ -1018,7 +1083,7 @@ describe("CreateDrop", () => {
             activeDrop={null}
             onCancelReplyQuote={() => {}}
             onDropAddedToQueue={jest.fn()}
-            wave={wave}
+            wave={loadErrorWave}
             dropId={null}
             fixedDropMode={"CHAT" as any}
             privileges={{ chatRestriction: null } as any}
