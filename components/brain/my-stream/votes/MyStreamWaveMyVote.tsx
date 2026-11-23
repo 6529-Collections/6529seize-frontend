@@ -390,7 +390,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
       aria-labelledby={titleId}
       onClick={handleRowClick}
       {...longPress}
-      className={`tw-group/my-vote tw-px-4 tw-py-4 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none ${
+      className={`tw-px-4 tw-py-4 tw-transition-colors tw-duration-200 tw-@container/my-vote motion-reduce:tw-transition-none ${
         isSelectionDisabled ? "" : "tw-cursor-pointer"
       } ${isSelected ? "tw-bg-primary-500/10" : "tw-bg-iron-950"} ${
         !isSelected && !isSelectionDisabled
@@ -448,7 +448,7 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                   </span>
                   <span
                     aria-hidden="true"
-                    className={`tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-transition-colors tw-duration-200 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-offset-2 peer-focus-visible:tw-outline-primary-400 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${!mobile && !isSelecting ? "tw-opacity-0 group-focus-within/my-vote:tw-opacity-100 group-hover/my-vote:tw-opacity-100" : ""} ${
+                    className={`tw-flex tw-size-5 tw-items-center tw-justify-center tw-rounded-md tw-border tw-border-solid tw-transition-colors tw-duration-200 peer-focus-visible:tw-outline peer-focus-visible:tw-outline-2 peer-focus-visible:tw-outline-offset-2 peer-focus-visible:tw-outline-primary-400 peer-disabled:tw-opacity-50 motion-reduce:tw-transition-none ${
                       isSelected
                         ? "tw-border-primary-500 tw-bg-primary-500 tw-text-white"
                         : "tw-border-iron-500 tw-bg-transparent tw-text-transparent"

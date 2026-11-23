@@ -78,10 +78,11 @@ while each profile loads. The placeholders stay still when reduced motion is ena
    `You haven't voted on any submissions in this wave yet.`
 3. Review each row: preview, title, rank (when available), author, total vote
    value, voter count, and your current vote input.
-4. Choose `Select` to show checkboxes and `Select all`. On mobile, holding a
-   card also enters selection and selects that card; scrolling cancels the hold.
-   Desktop checkboxes also appear when you hover over or focus a row. Checking
-   one enters selection mode. `Done` leaves selection and clears selected rows.
+4. Choose `Select` to enter selection and show `Select all`. Mobile also reveals
+   checkboxes. Holding a mobile card enters selection and selects that card;
+   scrolling cancels the hold.
+   Desktop checkboxes remain visible at rest. Checking one enters selection
+   mode. `Done` leaves selection and clears selected rows.
    In selection mode, click a row
    outside its controls to select or deselect it. Artwork and title buttons open
    the drop, including with `Enter` or `Space`. Vote controls and profile links

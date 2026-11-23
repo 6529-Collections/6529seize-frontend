@@ -6804,12 +6804,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     });
   });
 
-  test("matches My Votes editing and selection on desktop with hover shortcuts", async ({
+  test("matches My Votes editing with persistent desktop checkboxes", async ({
     page,
   }, testInfo) => {
     test.skip(
       Boolean(testInfo.project.use.hasTouch),
-      "Mouse hover is a desktop shortcut."
+      "Desktop presentation is covered in the mouse profile."
     );
     await page.setViewportSize({ width: 1920, height: 1080 });
     const sandbox = await installCompetitionApi(page);
@@ -6837,7 +6837,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     await expect(save).toHaveCount(0);
     await expect(helper).toBeVisible();
     await page.mouse.move(0, 0);
-    await expect(checkmark).toHaveCSS("opacity", "0");
+    await expect(checkmark).toHaveCSS("opacity", "1");
     await row.hover();
     await expect(checkmark).toHaveCSS("opacity", "1");
     await checkbox.check();
@@ -6860,6 +6860,9 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
     expect(sandbox.requests).toHaveLength(0);
     await panel.getByRole("button", { name: "Done", exact: true }).click();
     await expect(checkbox).not.toBeChecked();
+    await input.focus();
+    await page.mouse.move(0, 0);
+    await expect(checkmark).toHaveCSS("opacity", "1");
     await checkbox.focus();
     await expect(checkmark).toHaveCSS("opacity", "1");
     await checkbox.press("Space");
