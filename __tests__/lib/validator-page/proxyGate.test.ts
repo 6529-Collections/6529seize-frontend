@@ -1,7 +1,10 @@
 /** @jest-environment node */
 import { NextRequest } from "next/server";
 
-import { createAccessCookieValue } from "@/lib/validator-page/accessGate";
+import {
+  createAccessCookieValue,
+  VALIDATOR_PUBLIC_PATHS,
+} from "@/lib/validator-page/accessGate";
 import { handleValidatorPageGate } from "@/lib/validator-page/proxyGate";
 
 const PASSWORD = "test-only-password-2";
@@ -95,8 +98,25 @@ describe("handleValidatorPageGate", () => {
     "/validator/releases.json.sig",
     "/validator/unlock",
     "/validator/authorize",
+    "/validator/cloud-init-v1.sh",
   ])("keeps %s open without a cookie", (path) => {
     expect(handleValidatorPageGate(request(path), path)).toBeUndefined();
+  });
+
+  it("opens these four paths and no other", () => {
+    expect([...VALIDATOR_PUBLIC_PATHS].sort()).toEqual([
+      "/validator/authorize",
+      "/validator/cloud-init-v1.sh",
+      "/validator/releases.json",
+      "/validator/releases.json.sig",
+    ]);
+  });
+
+  it("locks a startup script name that 6529.io doesn't publish", () => {
+    const path = "/validator/cloud-init-v9.sh";
+    expect(rewriteTarget(handleValidatorPageGate(request(path), path))).toBe(
+      "https://6529.io/validator/locked"
+    );
   });
 
   it("locks a path below the authorize page", () => {

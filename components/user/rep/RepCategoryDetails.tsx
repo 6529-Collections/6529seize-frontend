@@ -3,7 +3,6 @@
 import { AuthContext } from "@/components/auth/Auth";
 import { QueryKey } from "@/components/react-query-wrapper/ReactQueryWrapper";
 import Button from "@/components/utils/button/Button";
-import { isHelpBotCreditRepCategory } from "@/components/utils/input/rep-category/repCategoryConstants";
 import useKeyboardFocusScroll from "@/components/waves/create-wave/hooks/useKeyboardFocusScroll";
 import type { ApiIdentity } from "@/generated/models/ApiIdentity";
 import type { ApiProfileProxy } from "@/generated/models/ApiProfileProxy";
@@ -55,21 +54,17 @@ type Contributor = {
 
 function canEditCategory(
   direction: RepDirection,
-  category: string,
   profile: ApiIdentity,
   viewer: ApiIdentity | null,
   proxy: ApiProfileProxy | null
 ) {
   if (direction === "given")
     return canManageGivenRatings(profile, viewer, proxy);
-  return (
-    !isHelpBotCreditRepCategory(category) &&
-    getCanEditRep({
-      myProfile: viewer,
-      targetProfile: profile,
-      activeProfileProxy: proxy,
-    })
-  );
+  return getCanEditRep({
+    myProfile: viewer,
+    targetProfile: profile,
+    activeProfileProxy: proxy,
+  });
 }
 
 function getOwnContributor(
@@ -306,7 +301,6 @@ export default function RepCategoryDetails({
     activeProfileProxy?.created_by.primary_address;
   const canEdit = canEditCategory(
     direction,
-    category.category,
     profile,
     connectedProfile,
     activeProfileProxy

@@ -1,0 +1,729 @@
+{
+  "sha256": "9f7c0ade24904a2d4ac22052ba4b5ad5f4172738e28781677da6c3953ca438e1",
+  "canonical": {
+    "batch": {
+      "max": 16,
+      "min": 2
+    },
+    "fields": [
+      {
+        "name": "to",
+        "type": "address"
+      },
+      {
+        "name": "value",
+        "type": "uint256"
+      },
+      {
+        "name": "data",
+        "type": "bytes"
+      },
+      {
+        "name": "operation",
+        "type": "uint8"
+      },
+      {
+        "name": "safeTxGas",
+        "type": "uint256"
+      },
+      {
+        "name": "baseGas",
+        "type": "uint256"
+      },
+      {
+        "name": "gasPrice",
+        "type": "uint256"
+      },
+      {
+        "name": "gasToken",
+        "type": "address"
+      },
+      {
+        "name": "refundReceiver",
+        "type": "address"
+      },
+      {
+        "name": "nonce",
+        "type": "uint256"
+      }
+    ],
+    "pins": [
+      {
+        "chainId": 11155111,
+        "multiSendCallOnly": "0x9641d764fc13c8b624c04430c7356c1c7c8102e2",
+        "registries": [
+          "0x0e289576c7565d29018134517309668946ffc912",
+          "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850"
+        ],
+        "safe": "0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68"
+      }
+    ],
+    "primaryType": "SafeTx",
+    "rules": [
+      {
+        "args": [],
+        "chainId": 11155111,
+        "id": "governance.acceptOwnership",
+        "risk": "high",
+        "selector": "0x79ba5097",
+        "signature": "acceptOwnership()",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [],
+        "chainId": 11155111,
+        "id": "governance.acceptOwnership",
+        "risk": "high",
+        "selector": "0x79ba5097",
+        "signature": "acceptOwnership()",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "successorRegistry",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.declareSuccessor",
+        "risk": "high",
+        "selector": "0x731fa208",
+        "signature": "declareSuccessor(address)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "successorRegistry",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.declareSuccessor",
+        "risk": "high",
+        "selector": "0x731fa208",
+        "signature": "declareSuccessor(address)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "subjectId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "bytes32"
+          },
+          {
+            "name": "reasonDigest",
+            "rule": {
+              "any": true
+            },
+            "type": "bytes32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.deleteSubject",
+        "risk": "high",
+        "selector": "0xcb1efbf1",
+        "signature": "deleteSubject(bytes32,bytes32)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "subjectId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "bytes32"
+          },
+          {
+            "name": "reasonDigest",
+            "rule": {
+              "any": true
+            },
+            "type": "bytes32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.deleteSubject",
+        "risk": "high",
+        "selector": "0xcb1efbf1",
+        "signature": "deleteSubject(bytes32,bytes32)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "subjectId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "bytes32"
+          },
+          {
+            "name": "version",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "reasonDigest",
+            "rule": {
+              "any": true
+            },
+            "type": "bytes32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.deleteVersion",
+        "risk": "high",
+        "selector": "0x9c43494f",
+        "signature": "deleteVersion(bytes32,uint32,bytes32)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "subjectId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "bytes32"
+          },
+          {
+            "name": "version",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "reasonDigest",
+            "rule": {
+              "any": true
+            },
+            "type": "bytes32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.deleteVersion",
+        "risk": "high",
+        "selector": "0x9c43494f",
+        "signature": "deleteVersion(bytes32,uint32,bytes32)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "subjectId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "bytes32"
+          },
+          {
+            "name": "fromVersion",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "toVersion",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "reasonDigest",
+            "rule": {
+              "any": true
+            },
+            "type": "bytes32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.deleteVersions",
+        "risk": "high",
+        "selector": "0x0e9e6c6e",
+        "signature": "deleteVersions(bytes32,uint32,uint32,bytes32)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "subjectId",
+            "rule": {
+              "notZero": true
+            },
+            "type": "bytes32"
+          },
+          {
+            "name": "fromVersion",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "toVersion",
+            "rule": {
+              "notZero": true
+            },
+            "type": "uint32"
+          },
+          {
+            "name": "reasonDigest",
+            "rule": {
+              "any": true
+            },
+            "type": "bytes32"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.deleteVersions",
+        "risk": "high",
+        "selector": "0x0e9e6c6e",
+        "signature": "deleteVersions(bytes32,uint32,uint32,bytes32)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [],
+        "chainId": 11155111,
+        "id": "governance.freeze",
+        "risk": "high",
+        "selector": "0x62a5af3b",
+        "signature": "freeze()",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [],
+        "chainId": 11155111,
+        "id": "governance.freeze",
+        "risk": "high",
+        "selector": "0x62a5af3b",
+        "signature": "freeze()",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "literal",
+            "rule": {
+              "readableAscii": true
+            },
+            "type": "string"
+          },
+          {
+            "name": "specCid",
+            "rule": {
+              "lenMax": 128
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.registerCanonicalization",
+        "risk": "normal",
+        "selector": "0xe2fb0b20",
+        "signature": "registerCanonicalization(string,bytes)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "literal",
+            "rule": {
+              "readableAscii": true
+            },
+            "type": "string"
+          },
+          {
+            "name": "specCid",
+            "rule": {
+              "lenMax": 128
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.registerCanonicalization",
+        "risk": "normal",
+        "selector": "0xe2fb0b20",
+        "signature": "registerCanonicalization(string,bytes)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "literal",
+            "rule": {
+              "readableAscii": true
+            },
+            "type": "string"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.registerRecordType",
+        "risk": "normal",
+        "selector": "0x4725e130",
+        "signature": "registerRecordType(string)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "literal",
+            "rule": {
+              "readableAscii": true
+            },
+            "type": "string"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.registerRecordType",
+        "risk": "normal",
+        "selector": "0x4725e130",
+        "signature": "registerRecordType(string)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "literal",
+            "rule": {
+              "readableAscii": true
+            },
+            "type": "string"
+          },
+          {
+            "components": [
+              {
+                "name": "algorithm",
+                "rule": {
+                  "oneOf": [
+                    "1",
+                    "2"
+                  ]
+                },
+                "type": "uint16"
+              },
+              {
+                "name": "digest",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "canonicalizationId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              }
+            ],
+            "name": "documentHash",
+            "rule": {
+              "any": true
+            },
+            "type": "(uint16,bytes32,bytes32)"
+          },
+          {
+            "name": "cid",
+            "rule": {
+              "lenMax": 128
+            },
+            "type": "bytes"
+          },
+          {
+            "name": "document",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.registerSchema",
+        "risk": "normal",
+        "selector": "0xdad47848",
+        "signature": "registerSchema(string,(uint16,bytes32,bytes32),bytes,bytes)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "literal",
+            "rule": {
+              "readableAscii": true
+            },
+            "type": "string"
+          },
+          {
+            "components": [
+              {
+                "name": "algorithm",
+                "rule": {
+                  "oneOf": [
+                    "1",
+                    "2"
+                  ]
+                },
+                "type": "uint16"
+              },
+              {
+                "name": "digest",
+                "rule": {
+                  "notZero": true
+                },
+                "type": "bytes32"
+              },
+              {
+                "name": "canonicalizationId",
+                "rule": {
+                  "any": true
+                },
+                "type": "bytes32"
+              }
+            ],
+            "name": "documentHash",
+            "rule": {
+              "any": true
+            },
+            "type": "(uint16,bytes32,bytes32)"
+          },
+          {
+            "name": "cid",
+            "rule": {
+              "lenMax": 128
+            },
+            "type": "bytes"
+          },
+          {
+            "name": "document",
+            "rule": {
+              "emptyBytes": true
+            },
+            "type": "bytes"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.registerSchema",
+        "risk": "normal",
+        "selector": "0xdad47848",
+        "signature": "registerSchema(string,(uint16,bytes32,bytes32),bytes,bytes)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "publisher",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "authorized",
+            "rule": {
+              "any": true
+            },
+            "type": "bool"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.setPublisher",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "authorized",
+              "is": {
+                "equals": true
+              }
+            }
+          ]
+        },
+        "selector": "0x618bb079",
+        "signature": "setPublisher(address,bool)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "publisher",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          },
+          {
+            "name": "authorized",
+            "rule": {
+              "any": true
+            },
+            "type": "bool"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.setPublisher",
+        "risk": {
+          "highIf": [
+            {
+              "arg": "authorized",
+              "is": {
+                "equals": true
+              }
+            }
+          ]
+        },
+        "selector": "0x618bb079",
+        "signature": "setPublisher(address,bool)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "newOwner",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.transferOwnership",
+        "risk": "high",
+        "selector": "0xf2fde38b",
+        "signature": "transferOwnership(address)",
+        "to": "0x0e289576c7565d29018134517309668946ffc912",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      },
+      {
+        "args": [
+          {
+            "name": "newOwner",
+            "rule": {
+              "notZero": true
+            },
+            "type": "address"
+          }
+        ],
+        "chainId": 11155111,
+        "id": "governance.transferOwnership",
+        "risk": "high",
+        "selector": "0xf2fde38b",
+        "signature": "transferOwnership(address)",
+        "to": "0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
+        "value": {
+          "max": "0",
+          "min": "0"
+        }
+      }
+    ],
+    "singleCallOnly": [
+      "governance.deleteVersion",
+      "governance.deleteVersions",
+      "governance.deleteSubject",
+      "governance.freeze",
+      "governance.declareSuccessor",
+      "governance.transferOwnership",
+      "governance.acceptOwnership"
+    ],
+    "v": 1
+  }
+}

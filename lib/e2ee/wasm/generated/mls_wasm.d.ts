@@ -72,6 +72,12 @@ export function epochCommitment(g: string, epoch: number, group_context_hash: st
 export function hTag(name: string): string;
 
 /**
+ * A KeyPackage's suite and whether it supports self groups (JSON), after
+ * validating it. Lets the engine skip devices a self group cannot admit.
+ */
+export function keyPackageInfo(data: Uint8Array): string;
+
+/**
  * `H("6529.MlsMessageSig.v1", bytes32 g, uint32 epoch, bytes32 keccak256(body))`.
  */
 export function messageDigest(g: string, epoch: number, body: Uint8Array): string;
@@ -105,6 +111,7 @@ export interface InitOutput {
     readonly entryDigest: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number) => void;
     readonly epochCommitment: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly hTag: (a: number, b: number, c: number) => void;
+    readonly keyPackageInfo: (a: number, b: number, c: number) => void;
     readonly messageDigest: (a: number, b: number, c: number, d: number, e: number, f: number) => void;
     readonly mlsdevice_acceptStaged: (a: number, b: number, c: number, d: number) => void;
     readonly mlsdevice_acceptWelcome: (a: number, b: number, c: number, d: number) => void;

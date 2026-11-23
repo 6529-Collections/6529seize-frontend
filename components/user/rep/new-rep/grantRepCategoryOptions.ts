@@ -1,4 +1,3 @@
-import { isHelpBotCreditRepCategory } from "@/components/utils/input/rep-category/repCategoryConstants";
 import {
   isMemesNomineeSearchPrefix,
   MEMES_NOMINEE_CATEGORY,
@@ -25,8 +24,7 @@ export function getGrantRepCategoriesToDisplay({
       (category) =>
         category !== search &&
         (!shouldSurfaceSubmissionCategory ||
-          category !== MEMES_NOMINEE_CATEGORY) &&
-        !isHelpBotCreditRepCategory(category)
+          category !== MEMES_NOMINEE_CATEGORY)
     )
   );
 

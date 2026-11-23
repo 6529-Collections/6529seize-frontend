@@ -134,6 +134,35 @@ function detailButton(page: Page, name: string) {
   return mainButton(page, name).last();
 }
 
+// Empty when filters that wrap below the title start flush with it and, from
+// 390px, both filters share one row; otherwise a description of the
+// misalignment. Tolerance is half a pixel.
+async function filterAlignmentProblem(
+  title: Locator,
+  collection: Locator,
+  activity: Locator,
+  width: number
+) {
+  const titleBounds = await title.boundingBox();
+  const collectionBounds = await collection.boundingBox();
+  if (!titleBounds || !collectionBounds)
+    return "title or filter is not laid out";
+  if (
+    collectionBounds.y >= titleBounds.y + titleBounds.height &&
+    Math.abs(collectionBounds.x - titleBounds.x) >= 0.5
+  ) {
+    return `wrapped filters start at x=${collectionBounds.x}, title at x=${titleBounds.x}`;
+  }
+  if (width >= 390) {
+    const activityBounds = await activity.boundingBox();
+    if (!activityBounds) return "activity filter is not laid out";
+    if (Math.abs(collectionBounds.y - activityBounds.y) >= 0.5) {
+      return `filters sit on different rows: y=${collectionBounds.y} and y=${activityBounds.y}`;
+    }
+  }
+  return "";
+}
+
 async function expectCollectionTitle(
   page: Page,
   projectName: string,
@@ -162,6 +191,11 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
       name: "Activity type: All activity",
       exact: true,
     });
+    const title = page.getByRole("heading", {
+      level: 1,
+      name: "NFT Activity",
+      exact: true,
+    });
     for (const width of [320, 390, 1280]) {
       await page.setViewportSize({ width, height: 844 });
       for (const trigger of [collection, activity]) {
@@ -170,20 +204,16 @@ test.describe("NextGen and collections read-only coverage @surface @medium @larg
         await expect(trigger).toHaveCSS("font-size", "12px");
       }
       await expectNoHorizontalOverflow(page);
-      const titleBounds = await page
-        .getByRole("heading", { level: 1, name: "NFT Activity", exact: true })
-        .boundingBox();
-      const collectionBounds = await collection.boundingBox();
-      expect(titleBounds).not.toBeNull();
-      expect(collectionBounds).not.toBeNull();
-      if (collectionBounds!.y >= titleBounds!.y + titleBounds!.height) {
-        expect(collectionBounds!.x).toBeCloseTo(titleBounds!.x, 0);
-      }
-      if (width >= 390) {
-        const activityBounds = await activity.boundingBox();
-        expect(activityBounds).not.toBeNull();
-        expect(collectionBounds!.y).toBeCloseTo(activityBounds!.y, 0);
-      }
+      // The filter row switches between its desktop and mobile alignment when
+      // the page re-renders after the resize, so wait for the layout to settle.
+      await expect
+        .poll(
+          () => filterAlignmentProblem(title, collection, activity, width),
+          {
+            message: `NFT activity filters align with the title at ${width}px`,
+          }
+        )
+        .toBe("");
     }
   });
 

@@ -55,6 +55,11 @@ notification filters remain effective.
 The `profiles.identity-tab` record covers the existing-category Rep editor,
 its desktop inline panel and mobile sheet, pinned You contribution, owner Given
 category editing, permission rules, allowance loading, retry action and dismissal.
+Grant Rep fits its visible content without reserving blank space for search
+results or rating details. Search suggestions float below the category field;
+real content changes resize the dialog with a short transition that respects
+reduced motion. Short viewports scroll inside while actions stay reachable.
+
 Grant Rep uses one label across layouts. A typed category is ready after it
 passes validation. Suggestions use the displayed spelling, and the field stays
 editable after a suggestion is picked. Category saves keep the category open;
@@ -635,11 +640,10 @@ navigation because the frontend owns:
 The backend should own caching, retrieval, embeddings when added, job
 orchestration, LLM calls, message reactions, and bot replies.
 
-The backend also owns Help6529 Credit accounting. The V1 public behavior is
-indexed here so users can ask about it: the credit category is `Help6529
-Credits`, each bot question costs 1 REP in that category, signup grants 5,
-profile setup grants 5, and daily activity grants 5 when a user sends any
-message that day. Automatic daily activity grants do not have a balance cap.
+Asking help6529 is free. It no longer uses Help6529 Credits. The
+`help-bot.credits` record gives that answer, which matches the backend's reply
+to credit questions. If the backend charges for questions again, update this
+record in the same change.
 
 ## Agent Maintenance Contract
 

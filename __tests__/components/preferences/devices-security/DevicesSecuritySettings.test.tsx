@@ -131,6 +131,7 @@ const state = (
   retry: jest.fn(),
   localKeysUnreadable: false,
   ownDeviceKnown: true,
+  ownDeviceUnreadable: false,
   canRevoke: () => true,
   revokeBlocker: () => null,
   revoke: jest.fn(async () => undefined),
@@ -618,6 +619,22 @@ describe("DevicesSecuritySettings", () => {
     expect(
       screen.queryByRole("button", { name: "More actions for this browser" })
     ).toBeNull();
+  });
+
+  it("says when this browser's encrypted device can't be read, with a retry", () => {
+    const retry = jest.fn();
+    mockState = state({
+      ownDeviceKnown: false,
+      ownDeviceUnreadable: true,
+      retry,
+    });
+    render(<DevicesSecuritySettings />);
+    expect(
+      screen.getByText(/couldn’t read its saved encrypted-messages device/)
+    ).toBeVisible();
+    expect(screen.queryByRole("button", { name: "Clean up…" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Try again" }));
+    expect(retry).toHaveBeenCalled();
   });
 
   it("offers no clean-up until this browser's own encrypted device is known", () => {
