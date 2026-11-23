@@ -13,16 +13,6 @@ const COMMIT = RC10_COMMIT_FULL.slice(0, 7);
 // From rc.10's light-client checkpoint: a new install must start before it.
 const FRESH_INSTALL_UNTIL = "2026-11-23 03:30 UTC";
 const LIGHT_CLIENT_CHECKPOINT = "2026-11-07 11:02 UTC";
-// rc.10's join tests: the day, and the minutes to ready through Tor and with
-// Tor off. fill-rc10.sh fills them, here and on the pages.
-const JOIN_DATE = "7 November";
-const JOIN_TOR = "21";
-const JOIN_TOR_OFF = "16";
-// The facts above that are still placeholders. The pages may hold these and
-// no other placeholder; once they are filled, none at all.
-const STILL_TO_FILL = [JOIN_DATE, JOIN_TOR, JOIN_TOR_OFF].filter((fact) =>
-  fact.startsWith("{{")
-);
 
 const knownIssue = (number: number) =>
   VALIDATOR_KNOWN_ISSUES_MARKDOWN.split("\n").find((line) =>
@@ -31,16 +21,11 @@ const knownIssue = (number: number) =>
 
 describe("validator page text", () => {
   // A release fact still to fill reads {{RC10_...}}, as the tester package's
-  // drafts read <UPPER_CASE>. Only the ones STILL_TO_FILL names may be left;
-  // fill them with fill-rc10.sh before merging.
+  // drafts read <UPPER_CASE>. Fill each one before merging.
   it.each([["known issues", VALIDATOR_KNOWN_ISSUES_MARKDOWN]])(
-    "the %s hold no release fact still to fill but rc.10's join tests",
+    "the %s hold no release fact still to fill",
     (_name, text) => {
-      const rest = STILL_TO_FILL.reduce(
-        (left, fact) => left.split(fact).join(""),
-        text
-      );
-      expect(rest).not.toMatch(/\{\{|\}\}|<[A-Z][A-Z0-9_]*>/);
+      expect(text).not.toMatch(/\{\{|\}\}|<[A-Z][A-Z0-9_]*>/);
     }
   );
 

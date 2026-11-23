@@ -1,4 +1,5 @@
 /** @jest-environment node */
+import { getMarkdownSections } from "@/components/validator-page/ValidatorMarkdown";
 import { VALIDATOR_GUIDE_PAGES } from "@/lib/validator-page/content/guidePages";
 import { VALIDATOR_HARDWARE_HREF } from "@/lib/validator-page/content/pageText";
 
@@ -18,7 +19,10 @@ describe("/validator/hardware", () => {
     const homeBox = VALIDATOR_GUIDE_PAGES.find(
       (page) => page.slug === "home-box"
     );
-    expect(homeBox?.markdown.split("\n")).toContain("## What to buy");
+    // The id the page gives that heading, by the page's own rule.
+    expect(
+      getMarkdownSections(homeBox?.markdown ?? "").map((section) => section.id)
+    ).toContain("what-to-buy");
   });
 
   it("redirects permanently to that section", async () => {

@@ -240,8 +240,7 @@ while the release the pages offer is the one it names (`forVersion`).
 
 A release fact that is not known when the text is written, such as the
 day of a release's join tests, is written `{{RC10_JOIN_DATE}}` and the like.
-The page tests allow only the placeholders `STILL_TO_FILL` in
-`content.test.ts` names, so fill each one, everywhere it appears (the tests
-too), before merging. Testers
+The page tests allow no placeholder, so fill each one, everywhere it
+appears, before merging. Testers
 post their results in the Ministry of Validation wave with the template in
 `pageText.ts`, and post no logs or status files.
