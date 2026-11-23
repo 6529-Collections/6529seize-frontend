@@ -107,7 +107,7 @@ export function MyVotesMobileInput({
               focused || !hasNumber ? value : formatInteger(locale, numeric)
             }
             disabled={disabled || busy}
-            aria-invalid={!valid || !!error || undefined}
+            aria-invalid={!valid || !!error}
             aria-describedby={describedBy || undefined}
             onFocus={() => setFocused(true)}
             onBlur={() => {

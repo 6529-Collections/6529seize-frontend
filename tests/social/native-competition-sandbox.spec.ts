@@ -5838,9 +5838,15 @@ test.describe("Native competition sandbox @auth @medium @local-only", () => {
     await expect(voteInput).toHaveAttribute("aria-invalid", "false");
     await page.getByRole("button", { name: "Save vote", exact: true }).click();
     await expect(voteInput).toHaveValue("25");
-    await expect(
-      page.getByRole("button", { name: "Save vote", exact: true })
-    ).toBeDisabled();
+    const savedVoteButton = page.getByRole("button", {
+      name: "Save vote",
+      exact: true,
+    });
+    if (testInfo.project.name === "web-mobile-chromium") {
+      await expect(savedVoteButton).toHaveCount(0);
+    } else {
+      await expect(savedVoteButton).toBeDisabled();
+    }
     expect(sandbox.requests).toHaveLength(1);
     expect(sandbox.requests[0]?.path).toContain(
       "/alpha/entries/entry-alpha/votes/me"
