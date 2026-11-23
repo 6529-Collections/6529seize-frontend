@@ -15,6 +15,7 @@ export default function WaveGroupMembersScope({
 
   // The waves API viewer-scopes private groups: unauthorized viewers receive
   // only an is_hidden stub, while eligible DM participants receive the group.
+  // A DM stub without an ID also keeps the private-group label.
   if (group.is_hidden || !groupId) {
     return (
       <span className="tw-py-0.5 tw-font-medium tw-text-iron-50">

@@ -600,7 +600,6 @@ describe("wave-rules.helpers", () => {
           fallback: "Anyone",
         })
       ).toEqual({
-        value: "Selected group",
         valueGroupId: "artists & curators",
       });
     }

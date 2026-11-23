@@ -1,5 +1,6 @@
 import WaveRulesPanel from "@/components/waves/specs/WaveRulesPanel";
 import type { WaveRules } from "@/helpers/waves/wave-rules.helpers";
+import { getWaveChatAccessRow } from "@/helpers/waves/wave-rules.shared";
 import type Link from "next/link";
 import type { ComponentProps } from "react";
 import { screen } from "@testing-library/react";
@@ -32,12 +33,15 @@ const rules: WaveRules = {
       id: "access",
       title: "Access",
       rows: [
-        {
-          id: "chat-access",
-          label: "Chat access",
-          value: "Artists",
-          valueGroupId: "artists & curators",
-        },
+        getWaveChatAccessRow({
+          scope: {
+            group: {
+              id: "artists & curators",
+              name: "Artists",
+              is_hidden: false,
+            },
+          },
+        }),
         {
           id: "admin",
           label: "Admins",
@@ -70,6 +74,7 @@ describe("WaveRulesPanel", () => {
     expect(link).toHaveClass("desktop-hover:hover:tw-text-primary-300");
     expect(link.closest("dd")?.parentElement).toHaveClass("tw-items-center");
     expect(screen.getByText("Private group")).toBeInTheDocument();
+    expect(screen.queryByText("Artists")).not.toBeInTheDocument();
     expect(screen.getAllByRole("link")).toHaveLength(1);
   });
 

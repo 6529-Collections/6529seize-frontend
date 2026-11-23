@@ -26,13 +26,15 @@ import {
   type DisplayTimeZone,
 } from "@/lib/display-time-zone/displayTimeZone";
 
-export interface WaveRuleRow {
+type WaveRuleValue =
+  | { readonly value: string; readonly valueGroupId?: never }
+  | { readonly valueGroupId: string; readonly value?: never };
+
+export type WaveRuleRow = WaveRuleValue & {
   readonly id: string;
   readonly label: string;
-  readonly value: string;
-  readonly valueGroupId?: string | undefined;
   readonly description?: string | undefined;
-}
+};
 
 export interface WaveRuleSection {
   readonly id: string;
@@ -188,7 +190,7 @@ export const getScopeRuleValue = ({
 }: {
   readonly scope: ApiWaveScope | null | undefined;
   readonly fallback: string;
-}): Pick<WaveRuleRow, "value" | "valueGroupId"> => {
+}): WaveRuleValue => {
   const group = scope?.group;
   if (!group) return { value: fallback };
   if (group.is_hidden || group.is_direct_message)
@@ -197,10 +199,7 @@ export const getScopeRuleValue = ({
   const groupId = group.id?.trim();
   if (!groupId) return { value: UNAVAILABLE_GROUP_LABEL };
 
-  return {
-    value: t(DEFAULT_LOCALE, "waves.create.groups.selectedGroup"),
-    valueGroupId: groupId,
-  };
+  return { valueGroupId: groupId };
 };
 
 export const getChatStatusRow = ({
@@ -218,14 +217,10 @@ export const getChatStatusRow = ({
   ),
 });
 
-const getChatAccessRow = ({
-  value,
-  valueGroupId,
-}: Pick<WaveRuleRow, "value" | "valueGroupId">): WaveRuleRow => ({
+const getChatAccessRow = (value: WaveRuleValue): WaveRuleRow => ({
   id: "chat-access",
   label: t(DEFAULT_LOCALE, "waves.chatSettings.access.label"),
-  value,
-  valueGroupId,
+  ...value,
 });
 
 export const getCreateGroupLabel = ({
