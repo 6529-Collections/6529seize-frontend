@@ -1,4 +1,3 @@
-import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import type { ApiIntRange } from "@/generated/models/ApiIntRange";
 import { ApiWaveCreditScope } from "@/generated/models/ApiWaveCreditScope";
@@ -27,15 +26,15 @@ import {
   type DisplayTimeZone,
 } from "@/lib/display-time-zone/displayTimeZone";
 
-export interface WaveRuleRow {
+type WaveRuleValue =
+  | { readonly value: string; readonly valueGroupId?: never }
+  | { readonly valueGroupId: string; readonly value?: never };
+
+export type WaveRuleRow = WaveRuleValue & {
   readonly id: string;
   readonly label: string;
-  readonly value: string;
-  readonly valueHref?: string | undefined;
-  readonly valueGroupId?: string | undefined;
-  readonly valueLinkLabel?: string | undefined;
   readonly description?: string | undefined;
-}
+};
 
 export interface WaveRuleSection {
   readonly id: string;
@@ -185,79 +184,22 @@ const formatDurationList = (durations: readonly number[]): string =>
     .map((duration) => formatDuration(duration) ?? "Immediate")
     .join(", ");
 
-const getGroupName = (
-  group: ApiGroup | ApiGroupFull | null | undefined
-): string | null => {
-  const name = group?.name?.trim();
-  if (name !== undefined && name.length > 0) {
-    return name;
-  }
-
-  return null;
-};
-
-const getScopeLabel = ({
-  scope,
-  fallback,
-}: {
-  readonly scope: ApiWaveScope | null | undefined;
-  readonly fallback: string;
-}): string => {
-  if (scope?.group === null || scope?.group === undefined) {
-    return fallback;
-  }
-
-  if (scope.group.is_hidden || scope.group.is_direct_message) {
-    return PRIVATE_GROUP_LABEL;
-  }
-
-  return getGroupName(scope.group) ?? UNAVAILABLE_GROUP_LABEL;
-};
-
-const getScopeLink = (
-  scope: ApiWaveScope | null | undefined
-): string | undefined => {
-  const group = scope?.group;
-  const groupId = group?.id?.trim();
-  const groupName = group?.name?.trim();
-  if (
-    !group ||
-    group.is_hidden ||
-    group.is_direct_message ||
-    !groupId ||
-    !groupName
-  ) {
-    return undefined;
-  }
-
-  return `/network?page=1&group=${encodeURIComponent(groupId)}`;
-};
-
 export const getScopeRuleValue = ({
   scope,
   fallback,
 }: {
   readonly scope: ApiWaveScope | null | undefined;
   readonly fallback: string;
-}): Pick<
-  WaveRuleRow,
-  "value" | "valueHref" | "valueGroupId" | "valueLinkLabel"
-> => {
-  const value = getScopeLabel({ scope, fallback });
-  const valueHref = getScopeLink(scope);
-  const groupId = scope?.group?.id?.trim();
-  const groupName = scope?.group?.name?.trim();
+}): WaveRuleValue => {
+  const group = scope?.group;
+  if (!group) return { value: fallback };
+  if (group.is_hidden || group.is_direct_message)
+    return { value: PRIVATE_GROUP_LABEL };
 
-  return {
-    value,
-    valueHref,
-    valueGroupId: valueHref ? groupId : undefined,
-    valueLinkLabel: valueHref
-      ? t(DEFAULT_LOCALE, "waves.chatSettings.access.inspectGroup", {
-          groupName: groupName ?? value,
-        })
-      : undefined,
-  };
+  const groupId = group.id?.trim();
+  if (!groupId) return { value: UNAVAILABLE_GROUP_LABEL };
+
+  return { valueGroupId: groupId };
 };
 
 export const getChatStatusRow = ({
@@ -275,21 +217,10 @@ export const getChatStatusRow = ({
   ),
 });
 
-const getChatAccessRow = ({
-  value,
-  valueHref,
-  valueGroupId,
-  valueLinkLabel,
-}: Pick<
-  WaveRuleRow,
-  "value" | "valueHref" | "valueGroupId" | "valueLinkLabel"
->): WaveRuleRow => ({
+const getChatAccessRow = (value: WaveRuleValue): WaveRuleRow => ({
   id: "chat-access",
   label: t(DEFAULT_LOCALE, "waves.chatSettings.access.label"),
-  value,
-  valueHref,
-  valueGroupId,
-  valueLinkLabel,
+  ...value,
 });
 
 export const getCreateGroupLabel = ({

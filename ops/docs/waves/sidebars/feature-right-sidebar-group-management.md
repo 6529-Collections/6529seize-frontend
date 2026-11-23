@@ -137,7 +137,8 @@ Users can:
 - Available group inspection is accessible to read-only wave viewers; it does
   not depend on wave edit permission. An authenticated private-group member or
   creator can inspect that group's criteria and members. Configuration shows
-  the current `1 user` or `X users` count instead of the generated group name.
+  the current `1 user` or `X users` count. The same count appears in the
+  link tooltip and screen-reader label for access and curation groups.
 - Eligible direct-message participants get the same member count and criteria
   summary for their DM access groups. The generated direct-message group name
   is not used as the visible value.
