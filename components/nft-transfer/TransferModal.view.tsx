@@ -351,6 +351,7 @@ export function HeaderRight({
 export function FooterActions({
   flow,
   canConfirm,
+  forwardable = false,
   onCancel,
   onConfirm,
   onClose,
@@ -359,6 +360,8 @@ export function FooterActions({
 }: {
   readonly flow: FlowState;
   readonly canConfirm: boolean;
+  /** Whether 6529 Desktop's browser-wallet forwarding sends this transfer. */
+  readonly forwardable?: boolean;
   readonly onCancel: () => void;
   readonly onConfirm: () => void;
   readonly onClose: () => void;
@@ -371,7 +374,7 @@ export function FooterActions({
         <Button type="button" onClick={onCancel} variant="secondary" size="md">
           {translate(locale, "transfer.modal.cancel")}
         </Button>
-        <DesktopWalletTransactionGate>
+        <DesktopWalletTransactionGate forwardable={forwardable}>
           <Button
             type="button"
             disabled={!canConfirm}

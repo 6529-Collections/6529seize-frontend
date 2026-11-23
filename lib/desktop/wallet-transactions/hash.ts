@@ -2,7 +2,7 @@
  * Wallet transactions for 6529 Desktop: the canonical form of the rules.
  *
  * Canonical JSON: UTF-8, no whitespace, object keys sorted by code unit,
- * arrays in order, rules sorted by `id` then `chainId`, wrapped as
+ * arrays in order, rules sorted by `id`, `chainId`, then `to`, wrapped as
  * `{"rules":[...],"v":1}`. 6529 Desktop keeps the same table and reports
  * the SHA-256 of this text as `transactionRules` in its capabilities; the
  * website forwards transactions only when the two hashes are equal.
@@ -38,7 +38,8 @@ export function canonicalTransactionRulesJson(
   rules: readonly TransactionRule[] = WALLET_TRANSACTION_RULES
 ): string {
   const ordered = [...rules].sort(
-    (a, b) => byCodeUnit(a.id, b.id) || a.chainId - b.chainId
+    (a, b) =>
+      byCodeUnit(a.id, b.id) || a.chainId - b.chainId || byCodeUnit(a.to, b.to)
   );
   return JSON.stringify(
     canonicalize({ v: RULES_FORMAT_VERSION, rules: ordered })

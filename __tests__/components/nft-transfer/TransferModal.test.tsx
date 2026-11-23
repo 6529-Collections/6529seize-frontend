@@ -5,9 +5,13 @@ import TransferModal from "@/components/nft-transfer/TransferModal";
 import { ContractType } from "@/types/enums";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useIsDesktopBrowserWallet } from "@/hooks/desktop/useIsDesktopBrowserWallet";
+import { desktopWalletSendsTransactions } from "@/services/desktop/desktopBrowserWallet";
 
 jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
   useIsDesktopBrowserWallet: jest.fn(() => false),
+}));
+jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
+  desktopWalletSendsTransactions: jest.fn(() => false),
 }));
 
 jest.mock("@/components/nft-transfer/TransferState", () => ({
@@ -44,6 +48,7 @@ jest.mock("@/helpers/server.helpers", () => ({
 }));
 jest.mock("wagmi", () => ({
   useAccount: jest.fn(),
+  useChainId: jest.fn(() => 1),
   usePublicClient: jest.fn(),
   useWalletClient: jest.fn(),
   useEnsAddress: jest.fn(() => ({
@@ -754,5 +759,73 @@ describe("TransferModal", () => {
       screen.getByRole("button", { name: "Continue in your browser" })
     ).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /^cancel$/i })).toBeEnabled();
+  });
+
+  describe("with 6529 Desktop browser forwarding and 6529 NFTs", () => {
+    const memes = (tokenId: number) => ({
+      key: `MEMES:${tokenId}`,
+      contract: "0x33FD426905F149f8376e227d0C9D3340AaD17aF1",
+      contractType: ContractType.ERC1155,
+      tokenId,
+      qty: 1,
+      max: 1,
+      title: `Memes ${tokenId}`,
+      thumbUrl: "https://example.com/thumb.png",
+      label: `MEMES #${tokenId}`,
+    });
+    const gradient = {
+      key: "GRADIENT:7",
+      contract: "0x0C58Ef43fF3032005e472cB5709f8908aCb00205",
+      contractType: ContractType.ERC721,
+      tokenId: 7,
+      qty: 1,
+      max: 1,
+      title: "Gradient 7",
+      thumbUrl: "https://example.com/thumb-7.png",
+      label: "GRADIENT #7",
+    };
+    const select = (items: readonly ReturnType<typeof memes>[]) =>
+      mockUseTransfer.mockReturnValue({
+        selected: new Map(items.map((item) => [item.key, item])),
+        totalQty: items.length,
+      });
+
+    beforeEach(() => {
+      jest.mocked(useIsDesktopBrowserWallet).mockReturnValue(true);
+    });
+
+    it("offers the transfer when this 6529 Desktop sends it", () => {
+      jest.mocked(desktopWalletSendsTransactions).mockReturnValue(true);
+      select([memes(10), gradient]);
+      openModal();
+      expect(
+        screen.getByRole("button", { name: /^transfer$/i })
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: "Continue in your browser" })
+      ).not.toBeInTheDocument();
+    });
+
+    it("asks to update an older 6529 Desktop", () => {
+      jest.mocked(desktopWalletSendsTransactions).mockReturnValue(false);
+      select([memes(10)]);
+      openModal();
+      expect(
+        screen.queryByRole("button", { name: /^transfer$/i })
+      ).not.toBeInTheDocument();
+      expect(screen.getByText(/Update 6529 Desktop/)).toBeInTheDocument();
+    });
+
+    it("points to the website for more tokens than one batch moves", () => {
+      jest.mocked(desktopWalletSendsTransactions).mockReturnValue(true);
+      select(Array.from({ length: 51 }, (_, index) => memes(index + 1)));
+      openModal();
+      expect(
+        screen.queryByRole("button", { name: /^transfer$/i })
+      ).not.toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: "Continue in your browser" })
+      ).toBeInTheDocument();
+    });
   });
 });
