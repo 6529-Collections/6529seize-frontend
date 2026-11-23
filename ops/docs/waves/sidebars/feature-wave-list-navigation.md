@@ -161,8 +161,8 @@ on hover and show a dark hover surface; their resting header surface is transpar
   directly visible; More contains Profile Waves Feed and, when page sharing is
   enabled, Share page.
   Find a wave stays beside the collection controls. Subwave
-  toggles use an indented text control; Pin remains directly available on
-  eligible rows.
+  toggles use an indented, bordered button with rounded corners; Pin remains
+  directly available on eligible rows.
 - Each heading has a separate `View all` link aligned to the right, available
   even when collapsed. Active Votes opens `/discover?view=active-votes`;
   Worth Checking Out opens `/discover?view=recommendations&sort=QUALITY`.
