@@ -28,11 +28,15 @@ interface StoredKeysRecord {
   readonly event: SignedRecordEvent;
 }
 
+/** Sorts strings by code unit: the same everywhere, unlike a locale. */
+const byCodeUnit = (a: string, b: string): number =>
+  a < b ? -1 : Number(a > b);
+
 /** The provider keys as one comparable string, in id order. */
 const providersOf = (scope: KeysRecordScope): string =>
   scope.providerKeys
     .map((key) => `${key.id}=${key.publicKey.toLowerCase()}`)
-    .sort()
+    .sort(byCodeUnit)
     .join(",");
 
 const storageKey = (deviceKey: string) =>
