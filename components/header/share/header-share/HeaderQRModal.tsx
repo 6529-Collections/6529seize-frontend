@@ -125,6 +125,18 @@ function HeaderQRModal({
   const [connectionShareRevision, setConnectionShareRevision] = useState(0);
   const [closingDisplayState, setClosingDisplayState] =
     useState<ShareDisplayState | null>(null);
+  const [previousShow, setPreviousShow] = useState(show);
+  if (previousShow !== show) {
+    setPreviousShow(show);
+    if (!show) {
+      const nextStatus: ConnectionShareStatus =
+        hasValidWalletAuth || hasWalletAddress
+          ? "legacy-auth"
+          : "unauthenticated";
+      setUnavailableMobileConnectionShare(nextStatus);
+      setUnavailableDesktopConnectionShare(nextStatus);
+    }
+  }
 
   const closeModal = useCallback(() => {
     setClosingDisplayState({
@@ -590,12 +602,6 @@ function HeaderQRModal({
       connectionShareAbortRef.current?.abort();
       connectionShareAbortRef.current = null;
       connectionShareRefreshPendingRef.current = false;
-      const nextStatus: ConnectionShareStatus =
-        hasValidWalletAuth || hasWalletAddress
-          ? "legacy-auth"
-          : "unauthenticated";
-      setUnavailableMobileConnectionShare(nextStatus);
-      setUnavailableDesktopConnectionShare(nextStatus);
       return;
     }
 
