@@ -70,7 +70,13 @@ import {
   unhideDrop,
 } from "@/services/api/content-moderation-api";
 import { updateDropBookmark } from "@/services/api/drop-bookmarks-api";
+import {
+  createCollectRule,
+  setCollectRulePaused,
+} from "@/services/api/collect-rules-api";
 import { saveEulaConsent } from "@/services/api/eula-consent-api";
+import type { ApiCollectRule } from "@/generated/models/ApiCollectRule";
+import type { ApiCollectRuleDefinition } from "@/generated/models/ApiCollectRuleDefinition";
 import { setIdentityFollowing } from "@/services/api/identity-follow-api";
 import { setIdentityMuted } from "@/services/api/identity-mute-api";
 import {
@@ -107,6 +113,48 @@ const modeOf = (mode: PersonalRecordsMode["mode"]): PersonalRecordsMode => ({
 });
 
 const IDENTITY_ACTIONS = ["WAVE_CREATED", "DROP_CREATED", "DROP_REPLIED"];
+
+const RULE_ID = "d9ae3ffc-6cff-4a29-b997-7908c632c121";
+const RULE_TERMS: ApiCollectRuleDefinition = {
+  profile_id: "profile-1",
+  funding_wallet: "0x00000000000000000000000000000000000000b1",
+  recipient: "0x00000000000000000000000000000000000000b1",
+  plan_id: "plan-1",
+  analysis_id: "analysis-1",
+  targets: [
+    {
+      asset_key: "1:0x0000000000000000000000000000000000000abc:7",
+      target_quantity: "2",
+      maximum_unit_price_wei: "100",
+    },
+  ],
+  max_total_cost_wei: "1000",
+  max_gas_reserve_wei: "50",
+  expires_at: 2_000_000_000_000,
+  max_actions: 2,
+};
+const PAGE_TERMS: ApiCollectRuleDefinition = {
+  ...RULE_TERMS,
+  funding_wallet: "0x000000000000000000000000000000000000AbCd",
+  recipient: "0x000000000000000000000000000000000000AbCd",
+  targets: [
+    {
+      asset_key: "1:0x0000000000000000000000000000000000000abc:9",
+      target_quantity: "1",
+      maximum_unit_price_wei: "100",
+    },
+    ...RULE_TERMS.targets,
+  ],
+};
+// As the API answers it: fields the terms don't carry are left out.
+const SAVED_RULE = {
+  id: RULE_ID,
+  revision: 3,
+  definition: {
+    ...RULE_TERMS,
+    targets: [{ ...RULE_TERMS.targets[0], label: "Card 7" }],
+  },
+} as unknown as ApiCollectRule;
 
 const CURRENT_PREFERENCES: ApiProfilePreferences = {
   direct_message_policy: ApiProfilePreferencesDirectMessagePolicyEnum.Everyone,
@@ -648,6 +696,85 @@ const CASES: readonly WriterCase[] = [
       k: "device-1",
       b: { version: ApiEulaVersion._20260824, platform: "ios" },
     }),
+  },
+  {
+    name: "save a Collect rule",
+    write: () => createCollectRule(RULE_TERMS, RULE_ID),
+    legacy: [
+      jest.mocked(commonApiPost),
+      {
+        endpoint: "collect/rules",
+        body: RULE_TERMS,
+        headers: { "Idempotency-Key": RULE_ID },
+        errorMode: "structured",
+      },
+    ],
+    // The rule id is the caller's key: a retry repeats the same record.
+    change: items({
+      t: "collect.rule",
+      k: RULE_ID,
+      b: { definition: RULE_TERMS, paused: false },
+    }),
+    recordsResult: null,
+  },
+  {
+    // As the page builds them: the wallet as it reports it (EIP-55 mixed
+    // case), targets in the plan's order. Signed as they are; the API
+    // compares terms in its stored form, so a retry still matches.
+    name: "save a Collect rule from a checksummed wallet, targets unsorted",
+    write: () => createCollectRule(PAGE_TERMS, RULE_ID),
+    legacy: [
+      jest.mocked(commonApiPost),
+      {
+        endpoint: "collect/rules",
+        body: PAGE_TERMS,
+        headers: { "Idempotency-Key": RULE_ID },
+        errorMode: "structured",
+      },
+    ],
+    change: items({
+      t: "collect.rule",
+      k: RULE_ID,
+      b: { definition: PAGE_TERMS, paused: false },
+    }),
+    recordsResult: null,
+  },
+  {
+    name: "pause a Collect rule",
+    write: () => setCollectRulePaused(SAVED_RULE, true),
+    legacy: [
+      jest.mocked(commonApiPost),
+      {
+        endpoint: `collect/rules/${RULE_ID}/pause`,
+        body: { expected_revision: 3, paused: true },
+        errorMode: "structured",
+      },
+    ],
+    // With the saved terms, field by field.
+    change: items({
+      t: "collect.rule",
+      k: RULE_ID,
+      b: { definition: RULE_TERMS, paused: true },
+    }),
+    recordsResult: null,
+  },
+  {
+    name: "resume a Collect rule",
+    write: () => setCollectRulePaused(SAVED_RULE, false),
+    legacy: [
+      jest.mocked(commonApiPost),
+      {
+        endpoint: `collect/rules/${RULE_ID}/pause`,
+        body: { expected_revision: 3, paused: false },
+        errorMode: "structured",
+      },
+    ],
+    change: items({
+      t: "collect.rule",
+      k: RULE_ID,
+      b: { definition: RULE_TERMS, paused: false },
+    }),
+    recordsResult: null,
   },
 ];
 

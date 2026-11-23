@@ -1,3 +1,4 @@
+import type { ApiCollectRuleDefinition } from "@/generated/models/ApiCollectRuleDefinition";
 import type { SealedItem } from "@/lib/signed-records/sealed-crypto";
 
 /**
@@ -256,4 +257,43 @@ export const eulaItem = (
   t: "eula",
   k: deviceId,
   b: { version: consent.version, platform: consent.platform },
+});
+
+/**
+ * A Collect rule's terms as saved, field by field: a pause or resume
+ * record carries them unchanged, and the API refuses a record whose terms
+ * differ from the saved ones.
+ */
+const collectRuleTerms = (
+  definition: ApiCollectRuleDefinition
+): Record<string, unknown> => ({
+  profile_id: definition.profile_id,
+  funding_wallet: definition.funding_wallet,
+  recipient: definition.recipient,
+  plan_id: definition.plan_id,
+  analysis_id: definition.analysis_id,
+  targets: definition.targets.map((target) => ({
+    asset_key: target.asset_key,
+    target_quantity: target.target_quantity,
+    maximum_unit_price_wei: target.maximum_unit_price_wei,
+  })),
+  max_total_cost_wei: definition.max_total_cost_wei,
+  max_gas_reserve_wei: definition.max_gas_reserve_wei,
+  expires_at: definition.expires_at,
+  max_actions: definition.max_actions,
+});
+
+/**
+ * A Collect rule as a private item: `collect.rule` keyed by the rule id,
+ * with its terms and whether it is paused. The first record creates the
+ * rule (active); later ones pause or resume it.
+ */
+export const collectRuleItem = (
+  ruleId: string,
+  definition: ApiCollectRuleDefinition,
+  paused: boolean
+): SealedItem => ({
+  t: "collect.rule",
+  k: ruleId,
+  b: { definition: collectRuleTerms(definition), paused },
 });

@@ -13,9 +13,9 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import { formatDate } from "@/i18n/format";
 import {
-  pauseCollectRule,
   prepareCollectRule,
   reconcileCollectRule,
+  setCollectRulePaused,
 } from "@/services/api/collect-rules-api";
 import {
   fetchMarketOperation,
@@ -25,6 +25,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useId, useRef, useState } from "react";
 import CollectAssetReference from "./CollectAssetReference";
 import {
+  collectRuleErrorMessage,
   collectRuleRemaining,
   collectRuleTrade,
 } from "./collect-rules.helpers";
@@ -67,10 +68,7 @@ export default function CollectRuleCard({
     mutationFn: (action: "pause" | "resume" | "reconcile") =>
       action === "reconcile"
         ? reconcileCollectRule(rule.id)
-        : pauseCollectRule(rule.id, {
-            expected_revision: rule.revision,
-            paused: action === "pause",
-          }),
+        : setCollectRulePaused(rule, action === "pause"),
     onSuccess: onUpdated,
   });
   const inspect = useMutation({
@@ -124,6 +122,12 @@ export default function CollectRuleCard({
   const active =
     rule.state === ApiCollectRuleStateEnum.Active && !rule.pending_review;
   const stateLabel = t(locale, `collect.rules.state.${rule.state}`);
+  // The error of the action that failed last: a pause refused earlier
+  // must not hide a later prepare's reason (a nonce to replace).
+  const lastFailure =
+    [update, prepare, inspect]
+      .filter((mutation) => mutation.isError)
+      .sort((a, b) => b.submittedAt - a.submittedAt)[0] ?? null;
   return (
     <article className="tw-space-y-4 tw-rounded-xl tw-border tw-border-solid tw-border-iron-800 tw-bg-iron-900/30 tw-p-5">
       <div className="tw-flex tw-flex-wrap tw-items-center tw-justify-between tw-gap-3">
@@ -284,9 +288,10 @@ export default function CollectRuleCard({
           {t(locale, "collect.rules.refresh")}
         </Button>
       </div>
-      {(prepare.isError || update.isError || inspect.isError) && (
+      {lastFailure && (
         <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
-          {t(locale, "collect.rules.error")}
+          {collectRuleErrorMessage(lastFailure.error) ??
+            t(locale, "collect.rules.error")}
         </p>
       )}
     </article>
