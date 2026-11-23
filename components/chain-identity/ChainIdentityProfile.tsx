@@ -15,7 +15,10 @@ import {
   ChainGatewayError,
   type ChainIdentity,
 } from "@/lib/chain-identity/gateway";
-import { PROFILE_DOC_KEYS, type ProfileDoc } from "@/lib/chain-identity/profileDoc";
+import {
+  PROFILE_DOC_KEYS,
+  type ProfileDoc,
+} from "@/lib/chain-identity/profileDoc";
 import {
   nextProfileFields,
   prepareProfileReplace,
@@ -100,7 +103,11 @@ export default function ChainIdentityProfile({
 }) {
   const locale = useBrowserLocale();
   const current = useQuery({
-    queryKey: [QueryKey.CHAIN_IDENTITY, "doc", identity.profile?.docCid ?? null],
+    queryKey: [
+      QueryKey.CHAIN_IDENTITY,
+      "doc",
+      identity.profile?.docCid ?? null,
+    ],
     queryFn: ({ signal }) => readCurrentProfile(identity, signal),
     staleTime: 60_000,
   });
@@ -111,6 +118,12 @@ export default function ChainIdentityProfile({
     setEdits({});
     onChanged();
   });
+
+  // Saving with nothing changed would still cost a fee.
+  const saved = draftOf(current.data?.doc ?? null);
+  const edited = Object.entries(edits).some(
+    ([key, value]) => saved[key as EditedKey] !== value
+  );
 
   const set = (key: EditedKey, value: string) =>
     setEdits((previous) => ({ ...previous, [key]: value }));
@@ -215,7 +228,12 @@ export default function ChainIdentityProfile({
         <Button
           variant="primary"
           size="md"
-          disabled={action.busy || !current.data || action.state.kind === "confirm"}
+          disabled={
+            action.busy ||
+            !current.data ||
+            !edited ||
+            action.state.kind === "confirm"
+          }
           onClick={start}
         >
           {t(locale, "chainIdentity.profile.action")}

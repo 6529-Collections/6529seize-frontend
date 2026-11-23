@@ -27,6 +27,7 @@ import {
 import { draftOperation } from "@/lib/chain-identity/operation";
 import { walletSigner } from "@/lib/chain-identity/signers";
 import ChainActionStatus from "./ChainActionStatus";
+import { chainErrorMessage } from "./chainErrorMessage";
 import {
   CHAIN_HINT_CLASS,
   CHAIN_INPUT_CLASS,
@@ -122,8 +123,31 @@ export default function ChainDelegations() {
     );
   }
 
+  // A failed read isn't "no delegations": registering again would pay a
+  // fee for a record that may exist, and without the identity a new record
+  // would silently be the wallet's alone.
+  if (records.isError || identity.isError) {
+    return (
+      <ChainSection
+        id="chain-delegations"
+        heading={t(locale, "chainIdentity.chainDelegations.heading")}
+        body={t(locale, "chainIdentity.chainDelegations.body")}
+      >
+        <p role="alert" className="tw-m-0 tw-text-sm tw-text-iron-300">
+          {chainErrorMessage(locale, records.error ?? identity.error) ??
+            t(locale, "chainIdentity.readError")}
+        </p>
+        <div className="tw-mt-3">
+          <Button variant="secondary" size="sm" onClick={() => void refresh()}>
+            {t(locale, "chainIdentity.retry")}
+          </Button>
+        </div>
+      </ChainSection>
+    );
+  }
+
   const register = () => {
-    if (expiry === null || !formOk) {
+    if (expiry === null || !formOk || identity.isPending) {
       return;
     }
     void setAction.prepare(async () => {
@@ -202,9 +226,13 @@ export default function ChainDelegations() {
                   <span className="tw-text-iron-400">
                     {" · "}
                     {collectionName(record.collection) ??
-                      t(locale, "chainIdentity.chainDelegations.unknownCollection", {
-                        address: shortHex(record.collection),
-                      })}
+                      t(
+                        locale,
+                        "chainIdentity.chainDelegations.unknownCollection",
+                        {
+                          address: shortHex(record.collection),
+                        }
+                      )}
                     {" · "}
                     {t(locale, "chainIdentity.chainDelegations.to", {
                       delegate: shortHex(record.delegate),
@@ -229,7 +257,10 @@ export default function ChainDelegations() {
                   aria-label={t(
                     locale,
                     "chainIdentity.chainDelegations.revokeLabel",
-                    { useCase: useCaseLabel, delegate: shortHex(record.delegate) }
+                    {
+                      useCase: useCaseLabel,
+                      delegate: shortHex(record.delegate),
+                    }
                   )}
                   onClick={() => revoke(record)}
                 >
@@ -273,7 +304,10 @@ export default function ChainDelegations() {
           </fieldset>
         )}
         <div>
-          <label htmlFor="chain-delegation-collection" className={CHAIN_LABEL_CLASS}>
+          <label
+            htmlFor="chain-delegation-collection"
+            className={CHAIN_LABEL_CLASS}
+          >
             {t(locale, "chainIdentity.chainDelegations.collection")}
           </label>
           <select
@@ -290,7 +324,10 @@ export default function ChainDelegations() {
           </select>
         </div>
         <div>
-          <label htmlFor="chain-delegation-use-case" className={CHAIN_LABEL_CLASS}>
+          <label
+            htmlFor="chain-delegation-use-case"
+            className={CHAIN_LABEL_CLASS}
+          >
             {t(locale, "chainIdentity.chainDelegations.useCase")}
           </label>
           <select
@@ -307,7 +344,10 @@ export default function ChainDelegations() {
           </select>
         </div>
         <div className="sm:tw-col-span-2">
-          <label htmlFor="chain-delegation-delegate" className={CHAIN_LABEL_CLASS}>
+          <label
+            htmlFor="chain-delegation-delegate"
+            className={CHAIN_LABEL_CLASS}
+          >
             {t(locale, "chainIdentity.chainDelegations.delegate")}
           </label>
           <input
@@ -393,7 +433,12 @@ export default function ChainDelegations() {
         <Button
           variant="primary"
           size="md"
-          disabled={!formOk || setAction.busy || setAction.state.kind === "confirm"}
+          disabled={
+            !formOk ||
+            identity.isPending ||
+            setAction.busy ||
+            setAction.state.kind === "confirm"
+          }
           onClick={register}
         >
           {t(locale, "chainIdentity.chainDelegations.set")}

@@ -107,3 +107,19 @@ it("registers a delegation for the whole identity by default, never expiring", a
     )
   ).toBeInTheDocument();
 });
+
+it("says a failed read, never 'no delegations', and offers no form until it reads", async () => {
+  gateway["getDelegationsOfWallet"]!.mockRejectedValue(
+    Object.assign(new Error("no answer"), { status: 0 })
+  );
+  render(<ChainDelegations />);
+  expect(
+    await screen.findByRole("button", { name: "Try again" })
+  ).toBeInTheDocument();
+  expect(
+    screen.queryByText("No delegations on the 6529 Network for this wallet.")
+  ).not.toBeInTheDocument();
+  expect(
+    screen.queryByRole("button", { name: "Register delegation" })
+  ).not.toBeInTheDocument();
+});

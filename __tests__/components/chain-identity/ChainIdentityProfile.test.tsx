@@ -94,3 +94,25 @@ it("sends only the edited field over the current document", async () => {
     website: "https://b.test",
   });
 });
+
+it("keeps save off until a field differs from the saved profile: it would still cost a fee", async () => {
+  (readCurrentProfile as jest.Mock).mockResolvedValue({
+    doc: {
+      principal: identity.principalId,
+      version: 3,
+      prev: "0x",
+      fields: new Map([["website", "https://a.test"]]),
+    },
+    unreadable: false,
+  });
+  renderProfile();
+  const website = await screen.findByLabelText("Website");
+  await waitFor(() => expect(website).toHaveValue("https://a.test"));
+  const save = screen.getByRole("button", { name: "Save profile" });
+  expect(save).toBeDisabled();
+  fireEvent.change(website, { target: { value: "https://b.test" } });
+  expect(save).toBeEnabled();
+  // Typed back to what is saved: nothing to save again.
+  fireEvent.change(website, { target: { value: "https://a.test" } });
+  expect(save).toBeDisabled();
+});
