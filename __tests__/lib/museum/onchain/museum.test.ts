@@ -1,258 +1,244 @@
 /**
  * @jest-environment node
  */
-import { hexToBytes, keccak256, sha256, toBytes, type Hex } from "viem";
-import vectors from "@/__tests__/fixtures/provenance-museum-vectors.json";
-import { rawCidFromSha256 } from "@/lib/museum/onchain/cid";
-import { canonicalizeJsonBytes } from "@/lib/museum/onchain/jcs";
-import type { CidFetcher } from "@/lib/museum/onchain/ipfs";
+import { keccak256, toBytes, type Hex } from "viem";
+import {
+  fixtureRecord,
+  fixtureStore,
+  payloadBytes,
+  policiesTextCid,
+  profileFixture,
+  storeFetcher,
+} from "@/__tests__/fixtures/museum-onchain-profile";
+import { fixtureRegistrySnapshot } from "@/lib/museum/onchain/fixture";
 import { buildOnchainMuseum } from "@/lib/museum/onchain/museum";
+import { profileSubjectId } from "@/lib/museum/onchain/profile";
 import type {
   RegistrySnapshot,
   RegistrySubject,
-  RegistryVersion,
 } from "@/lib/museum/onchain/registry";
 
-const JCS_ID = keccak256(toBytes("RFC8785_JCS"));
-const LF_ID = keccak256(toBytes("LF_NORMALIZED"));
-const ENTITY_TYPE = keccak256(toBytes("PUBLIC_ENTITY"));
-const DOCUMENT_TYPE = keccak256(toBytes("PUBLIC_DOCUMENT"));
-const SCHEMA = keccak256(toBytes("PUBLIC_ENTITY_V1"));
-const PUBLISHER = "0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68";
+const encoder = new TextEncoder();
 
-const DOC_PATH = "docs/example.md";
-const DOC_TEXT = "# Example\n\nA text.\n";
-const DOC_BYTES = new TextEncoder().encode(DOC_TEXT);
-
-const CATALOG_PAYLOAD = {
-  catalog_id: "6529NM-PUBCAT-test",
-  created_at: "2026-08-23T15:12:19.650Z",
-  assembly_documents: [{ path: DOC_PATH, sha256: "sha256:unused" }],
-};
-const CATALOG_BYTES = canonicalizeJsonBytes(CATALOG_PAYLOAD);
-const CATALOG_CID = rawCidFromSha256(sha256(CATALOG_BYTES));
-
-function version(
-  overrides: Partial<RegistryVersion> &
-    Pick<RegistryVersion, "contentHash" | "cid">
-): RegistryVersion {
-  return {
-    version: 1,
-    sequence: 1,
-    releaseId: 1,
-    schemaId: SCHEMA,
-    effectiveAt: 1785652200,
-    publishedAt: 1795353444,
-    publisher: PUBLISHER,
-    deleted: false,
-    deletionId: 0,
-    arweaveId: `0x${"00".repeat(32)}`,
-    label: "",
-    ...overrides,
-  };
+function registry(): RegistrySnapshot {
+  return fixtureRegistrySnapshot(profileFixture);
 }
 
-function subject(
-  subjectId: Hex,
-  recordType: Hex,
-  value: RegistryVersion
+function build(
+  snapshot: RegistrySnapshot = registry(),
+  store: Map<string, Uint8Array> = fixtureStore()
+) {
+  return buildOnchainMuseum(snapshot, storeFetcher(store), 0, "fixture");
+}
+
+function subjectOf(
+  snapshot: RegistrySnapshot,
+  localId: string
 ): RegistrySubject {
+  const { subjectId } = fixtureRecord(localId);
+  const subject = snapshot.subjects.find(
+    (item) => item.subjectId.toLowerCase() === subjectId.toLowerCase()
+  );
+  if (subject === undefined) throw new Error(localId);
+  return subject;
+}
+
+function replaceSubject(
+  snapshot: RegistrySnapshot,
+  localId: string,
+  change: (subject: RegistrySubject) => RegistrySubject
+): RegistrySnapshot {
+  const target = subjectOf(snapshot, localId);
   return {
-    subjectId,
-    recordType,
-    versionCount: 1,
-    liveVersionCount: value.deleted ? 0 : 1,
-    deleted: value.deleted,
-    deletionId: value.deletionId,
-    version: value,
+    ...snapshot,
+    subjects: snapshot.subjects.map((item) =>
+      item === target ? change(item) : item
+    ),
   };
 }
 
-const [work, relation] = vectors.records;
-const docSubject = keccak256(
-  toBytes(`6529networkmuseum.subject.public_document.v1:${DOC_PATH}`)
-);
-
-function snapshot(subjects: RegistrySubject[]): RegistrySnapshot {
-  return {
-    registry: "0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850",
-    blockNumber: 1,
-    blockTimestamp: 1,
-    checks: {
-      chainId: 11155111,
-      codeHash: null,
-      codeHashMatches: true,
-      supportsRegistryInterface: true,
-      erc165Conforms: true,
-      owner: PUBLISHER,
-      ownerMatches: true,
-      frozen: false,
-      successor: "0x0000000000000000000000000000000000000000",
-    },
-    releases: [
-      {
-        releaseId: 1,
-        isSealed: true,
-        openedAt: 1,
-        sealedAt: 2,
-        firstSequence: 1,
-        recordCount: subjects.length,
-        openedBy: PUBLISHER,
-        manifestCid: CATALOG_CID,
-        manifestHash: {
-          algorithm: 1,
-          digest: keccak256(CATALOG_BYTES),
-          canonicalizationId: JCS_ID,
-        },
-        rootCid: "0x",
-        sourceCommit: "0x92966f2836ebf2af06edfe0fe2cff25041307c92",
-        label: "test",
-      },
-    ],
-    recordTypes: {
-      [ENTITY_TYPE]: "PUBLIC_ENTITY",
-      [DOCUMENT_TYPE]: "PUBLIC_DOCUMENT",
-    },
-    canonicalizations: { [JCS_ID]: "RFC8785_JCS", [LF_ID]: "LF_NORMALIZED" },
-    schemas: {},
-    deletions: [],
-    subjects,
-    rpc: { httpRequests: 0, ethCalls: 0 },
-  };
+async function recordOf(
+  snapshot: RegistrySnapshot,
+  localId: string,
+  store?: Map<string, Uint8Array>
+) {
+  const museum = await build(snapshot, store);
+  const { subjectId } = fixtureRecord(localId);
+  const record = museum.records.find(
+    (item) => item.subjectId.toLowerCase() === subjectId.toLowerCase()
+  );
+  if (record === undefined) throw new Error(localId);
+  return { museum, record };
 }
 
-function fetcherFor(store: Record<string, Uint8Array>): CidFetcher {
-  return async (cid, accept) => {
-    const bytes = store[cid.toLowerCase()];
-    if (bytes === undefined) return null;
-    return { bytes, host: "media.6529.io", accepted: accept?.(bytes) ?? true };
-  };
-}
-
-describe("buildOnchainMuseum", () => {
-  const workBytes = hexToBytes(work!.payloadJcs as Hex);
-  const workVersion = version({
-    contentHash: {
-      algorithm: 1,
-      digest: work!.keccak256 as Hex,
-      canonicalizationId: JCS_ID,
-    },
-    cid: work!.cid as Hex,
-  });
-  const docVersion = version({
-    releaseId: 2,
-    contentHash: {
-      algorithm: 2,
-      digest: sha256(DOC_BYTES),
-      canonicalizationId: LF_ID,
-    },
-    cid: rawCidFromSha256(sha256(DOC_BYTES)),
-    label: "Example",
-  });
-  const relationVersion = version({
-    contentHash: {
-      algorithm: 1,
-      digest: relation!.keccak256 as Hex,
-      canonicalizationId: JCS_ID,
-    },
-    cid: relation!.cid as Hex,
-  });
-
-  it("attaches content only to records whose bytes match the chain", async () => {
-    const tampered = new TextEncoder().encode(
-      new TextDecoder()
-        .decode(hexToBytes(relation!.payloadJcs as Hex))
-        .replace("asserted", "rejected!")
-    );
-    const museum = await buildOnchainMuseum(
-      snapshot([
-        subject(work!.subjectId as Hex, ENTITY_TYPE, workVersion),
-        subject(docSubject, DOCUMENT_TYPE, docVersion),
-        subject(relation!.subjectId as Hex, ENTITY_TYPE, relationVersion),
-        subject(
-          keccak256(toBytes("missing")),
-          ENTITY_TYPE,
-          version({
-            contentHash: {
-              algorithm: 1,
-              digest: keccak256(toBytes("x")),
-              canonicalizationId: JCS_ID,
-            },
-            cid: rawCidFromSha256(sha256(toBytes("x"))),
-          })
-        ),
-        subject(
-          keccak256(toBytes("deleted")),
-          ENTITY_TYPE,
-          version({
-            deleted: true,
-            deletionId: 1,
-            contentHash: {
-              algorithm: 1,
-              digest: keccak256(toBytes("y")),
-              canonicalizationId: JCS_ID,
-            },
-            cid: "0x",
-          })
-        ),
-      ]),
-      fetcherFor({
-        [CATALOG_CID.toLowerCase()]: CATALOG_BYTES,
-        [(work!.cid as string).toLowerCase()]: workBytes,
-        [docVersion.cid.toLowerCase()]: DOC_BYTES,
-        [(relation!.cid as string).toLowerCase()]: tampered,
-      })
-    );
-
-    expect(museum.catalog).toMatchObject({
+describe("buildOnchainMuseum with profile records", () => {
+  it("verifies every fixture record, the declaration and the text", async () => {
+    const museum = await build();
+    expect(museum.counts.verified).toBe(profileFixture.records.length);
+    expect(museum.source).toBe("fixture");
+    expect(museum.declaration).toMatchObject({
       state: "verified",
-      catalogId: "6529NM-PUBCAT-test",
-      releaseIds: [1],
+      ns: "6529networkmuseum",
+      profileVersion: "PRV_PROFILE_V1.0",
+      subjectDerivation: "v1",
+      registry: "eip155:11155111:0x0000000000000000000000000000000000000000",
+      predecessor: "eip155:11155111:0xee91c45a1893fbb45ce8eea170ef05d8d85bb850",
     });
-    expect(museum.counts).toEqual({
-      verified: 2,
-      mismatch: 1,
-      unavailable: 1,
-      unsupported: 0,
-      deleted: 1,
-    });
-    const [entity, document, mismatch, missing, deleted] = museum.records;
-    expect(entity).toMatchObject({
+    const document = museum.records.find(
+      (record) => record.profile?.localId === "6529NM-DOC-0001"
+    );
+    expect(document?.text).toMatchObject({
       state: "verified",
-      recordType: "PUBLIC_ENTITY",
-      label: "Vera Molnár and Martin Grasser, Themes and Variations #210",
-      cidText: work!.cidText,
-      servedBy: "media.6529.io",
+      byteSize: 681,
+      mediaType: "text/markdown",
     });
-    expect(entity!.content?.kind).toBe("json");
-    expect(document).toMatchObject({
-      state: "verified",
-      documentPath: DOC_PATH,
-      content: { kind: "markdown", text: DOC_TEXT },
-      label: "Example",
+    expect(document?.text?.text).toMatch(/^# /u);
+    expect(document?.label).toBe("Policies and governing sources");
+    // Fifteen of the release's 589 records.
+    expect(museum.expected).toEqual({
+      releases: 1,
+      records: 589,
+      matches: false,
     });
-    expect(mismatch).toMatchObject({ state: "mismatch", content: null });
-    expect(missing).toMatchObject({ state: "unavailable", content: null });
-    expect(deleted).toMatchObject({ state: "deleted", content: null });
   });
 
-  it("does not trust a catalog whose bytes miss the manifest hash", async () => {
-    const museum = await buildOnchainMuseum(
-      snapshot([subject(docSubject, DOCUMENT_TYPE, docVersion)]),
-      fetcherFor({
-        [CATALOG_CID.toLowerCase()]: canonicalizeJsonBytes({
-          catalog_id: "forged",
-        }),
-        [docVersion.cid.toLowerCase()]: DOC_BYTES,
-      })
+  it("derives each subject ID from the payload's namespace, family and local ID", async () => {
+    const museum = await build();
+    for (const record of museum.records) {
+      const { profile } = record;
+      expect(profile).not.toBeNull();
+      expect(
+        profileSubjectId(profile!.ns, profile!.recordType, profile!.localId)
+      ).toBe(record.subjectId.toLowerCase());
+    }
+    expect(
+      keccak256(
+        toBytes("6529networkmuseum.subject.prv_entity.v1:6529NM-W-0001")
+      )
+    ).toBe(fixtureRecord("6529NM-W-0001").subjectId);
+  });
+
+  it("withholds a forged payload served for a record's content ID", async () => {
+    const store = fixtureStore();
+    const { rawCid } = fixtureRecord("6529NM-W-0001");
+    const forged = new TextDecoder()
+      .decode(payloadBytes("6529NM-W-0001"))
+      .replace('"en":"CENTURY #31"', '"en":"CENTURY #32"');
+    store.set(rawCid.toLowerCase(), encoder.encode(forged));
+    const { museum, record } = await recordOf(
+      registry(),
+      "6529NM-W-0001",
+      store
     );
-    expect(museum.catalog).toMatchObject({
+    expect(record).toMatchObject({
       state: "mismatch",
-      catalogId: null,
+      check: "digest_mismatch",
+      content: null,
+      profile: null,
     });
-    expect(museum.records[0]).toMatchObject({
-      state: "verified",
-      documentPath: null,
+    expect(museum.counts.mismatch).toBe(1);
+  });
+
+  it("withholds a verified payload that the registry filed under another subject", async () => {
+    const artist = fixtureRecord("6529NM-ART-0001");
+    const snapshot = replaceSubject(registry(), "6529NM-W-0001", (subject) => ({
+      ...subject,
+      version: {
+        ...subject.version,
+        contentHash: {
+          ...subject.version.contentHash,
+          digest: artist.contentHash,
+        },
+        cid: artist.rawCid,
+        effectiveAt: artist.effectiveAt,
+      },
+    }));
+    const { record } = await recordOf(snapshot, "6529NM-W-0001");
+    expect(record).toMatchObject({
+      state: "nonconforming",
+      check: "subject_id",
+      content: null,
     });
+  });
+
+  it("checks the schema and effective time against the registry version", async () => {
+    const wrongTime = replaceSubject(
+      registry(),
+      "6529NM-W-0001",
+      (subject) => ({
+        ...subject,
+        version: {
+          ...subject.version,
+          effectiveAt: subject.version.effectiveAt + 1,
+        },
+      })
+    );
+    expect((await recordOf(wrongTime, "6529NM-W-0001")).record.check).toBe(
+      "effective_at"
+    );
+    const schemaId: Hex = keccak256(toBytes("PRV_ENTITY_V2.0"));
+    const base = registry();
+    const wrongSchema = replaceSubject(
+      {
+        ...base,
+        schemas: {
+          ...base.schemas,
+          [schemaId]: {
+            ...Object.values(base.schemas)[0]!,
+            schemaId,
+            literal: "PRV_ENTITY_V2.0",
+          },
+        },
+      },
+      "6529NM-W-0001",
+      (subject) => ({ ...subject, version: { ...subject.version, schemaId } })
+    );
+    expect((await recordOf(wrongSchema, "6529NM-W-0001")).record.check).toBe(
+      "schema"
+    );
+  });
+
+  it("rejects a declaration that names another registry", async () => {
+    const snapshot = {
+      ...registry(),
+      registry: "0xee91c45A1893fbb45ce8EeA170eF05d8d85bb850" as const,
+    };
+    const { museum, record } = await recordOf(snapshot, "declaration");
+    expect(museum.declaration.state).toBe("mismatch");
+    expect(record).toMatchObject({
+      state: "nonconforming",
+      check: "declaration",
+    });
+  });
+
+  it("shows a document's facts but not a text whose bytes do not match", async () => {
+    const store = fixtureStore();
+    store.set(policiesTextCid.toLowerCase(), encoder.encode("# Forged\n"));
+    const { record } = await recordOf(registry(), "6529NM-DOC-0001", store);
+    expect(record.state).toBe("mismatch");
+    expect(record.check).toBe("text_mismatch");
+    expect(record.text?.text).toBeNull();
+    expect(record.profile?.kind).toBe("finding_aid");
+  });
+
+  it("reports a text no gateway serves as unavailable", async () => {
+    const store = fixtureStore();
+    store.delete(policiesTextCid.toLowerCase());
+    const { record } = await recordOf(registry(), "6529NM-DOC-0001", store);
+    expect(record).toMatchObject({
+      state: "unavailable",
+      check: "text_unavailable",
+    });
+  });
+
+  it("does not fetch a deleted version", async () => {
+    const snapshot = replaceSubject(registry(), "6529NM-W-0001", (subject) => ({
+      ...subject,
+      deleted: true,
+      version: { ...subject.version, deleted: true, deletionId: 1 },
+    }));
+    const { record } = await recordOf(snapshot, "6529NM-W-0001");
+    expect(record.state).toBe("deleted");
+    expect(record.content).toBeNull();
   });
 });

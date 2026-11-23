@@ -1,7 +1,9 @@
 import "server-only";
 import { cache } from "react";
 import { publicEnv } from "@/config/env";
+import { getMuseumOnchainFixtureRoot } from "@/config/museumPublicationEnv.server";
 import { getMediaResolverSource } from "@/lib/media/decentralized-media";
+import { loadFixtureSource } from "./fixture.server";
 import { createCidFetcher } from "./ipfs";
 import { buildOnchainMuseum, type OnchainMuseumSnapshot } from "./museum";
 import { readRegistrySnapshot } from "./registry";
@@ -25,11 +27,21 @@ let inFlight: Promise<OnchainMuseumLoadState> | undefined;
 async function loadFresh(): Promise<OnchainMuseumLoadState> {
   const startedAt = Date.now();
   try {
-    const registry = await readRegistrySnapshot();
-    const fetchCid = createCidFetcher(
+    const networkFetcher = createCidFetcher(
       getMediaResolverSource(publicEnv.MEDIA_RESOLVER_ENDPOINT)
     );
-    const snapshot = await buildOnchainMuseum(registry, fetchCid, startedAt);
+    const fixtureRoot = getMuseumOnchainFixtureRoot();
+    const snapshot =
+      fixtureRoot === null
+        ? await buildOnchainMuseum(
+            await readRegistrySnapshot(),
+            networkFetcher,
+            startedAt
+          )
+        : await loadFixtureSource(fixtureRoot, networkFetcher).then(
+            ({ registry, fetchCid }) =>
+              buildOnchainMuseum(registry, fetchCid, startedAt, "fixture")
+          );
     lastReady = snapshot;
     return { status: "ready", snapshot };
   } catch (error) {

@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/recordsImport.ts at commit 8496bfbb6347c265ec74c7e361612d97ccdaf731.
+// Copied from 6529-Collections/6529-provenance-app src/recordsImport.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import { bytesToHex, isHex, keccak256, toHex, type Hex } from "viem";
@@ -10,7 +10,7 @@ import { canonicalize, canonicalizationKind, hashBytes } from "./verify";
 /**
  * A record as a release file lists it. IDs can be given as literals ("PUBLIC_ENTITY") or as
  * 32-byte hex; a subject as hex or as the text its ID is the keccak256 of; a CID as text or hex.
- * expectedVersion may be left out: the app then reads each subject's version count from the
+ * expectedVersion may be left out: the package then reads each subject's version count from the
  * registry when it builds the batch.
  */
 export interface RecordRow {
@@ -49,7 +49,7 @@ export function parseRecordRows(text: string): ParsedRecord[] {
   try {
     json = JSON.parse(text);
   } catch (e) {
-    throw new Error(`The records file is not JSON: ${(e as Error).message}`);
+    throw new Error(`The records file is not JSON: ${(e as Error).message}`, { cause: e });
   }
   const rows = Array.isArray(json) ? json : (json as { records?: unknown })?.records;
   if (!Array.isArray(rows))

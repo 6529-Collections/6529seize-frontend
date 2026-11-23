@@ -5,9 +5,10 @@ import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
 import type { OnchainMuseumRecord } from "@/lib/museum/onchain/museum";
 import {
+  documentPath,
   ONCHAIN_MUSEUM_BASE_PATH,
-  type OnchainMuseumView,
-} from "@/lib/museum/onchain/presentation";
+} from "@/lib/museum/onchain/fields";
+import type { OnchainMuseumView } from "@/lib/museum/onchain/presentation";
 import { getOnchainMuseum } from "@/lib/museum/onchain/runtime.server";
 import {
   FilterableGroups,
@@ -45,15 +46,36 @@ function withDistinctTitles(
     const label = view.labelOf(record);
     counts.set(label, (counts.get(label) ?? 0) + 1);
   }
-  return records.map((record) =>
-    filterableItem(
-      view,
-      record,
-      (counts.get(view.labelOf(record)) ?? 0) > 1
-        ? fileTitle(record.documentPath)
-        : undefined
-    )
-  );
+  return [...records]
+    .sort((left, right) => kindRank(left) - kindRank(right))
+    .map((record) => {
+      const file =
+        (counts.get(view.labelOf(record)) ?? 0) > 1
+          ? fileTitle(documentPath(record))
+          : undefined;
+      const kind = view.kindOf(record);
+      return filterableItem(
+        view,
+        record,
+        file === undefined ? kind : `${kind} · ${file}`
+      );
+    });
+}
+
+/** Essays and catalogue entries before the working documents. */
+const KIND_ORDER = [
+  "essay",
+  "catalogue_entry",
+  "program_text",
+  "dossier",
+  "finding_aid",
+  "policy_text",
+  "report",
+];
+
+function kindRank(record: OnchainMuseumRecord): number {
+  const index = KIND_ORDER.indexOf(record.profile?.kind ?? "");
+  return index === -1 ? KIND_ORDER.length : index;
 }
 
 function fileTitle(path: string | null): string | undefined {
