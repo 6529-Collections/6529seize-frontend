@@ -470,6 +470,9 @@ export const baseGlobalIgnores = Object.freeze([
   "**/public",
   "**/coverage",
   "**/generated",
+  // A copy of @6529-collections/provenance-core, linted in its own repository and
+  // replaced by the npm package once published (see lib/provenance-core/README.md).
+  "lib/provenance-core/**",
   // Rust crate for the MLS WebAssembly module (cargo target dir, bench tool).
   "native/**",
   // Bundled from config/env.schema.ts by scripts/build-env-schema.cjs.
@@ -556,6 +559,7 @@ export const createEslintConfig = ({
     {
       files: [
         "ops/scripts/publish-delegation-docs-content.mjs",
+        "ops/scripts/sync-provenance-core.mjs",
         "ops/workstreams/**/scripts/**/*.{js,cjs,mjs}",
         "standalone/standalone-memes-mint/scripts/**/*.{js,cjs,mjs}",
       ],

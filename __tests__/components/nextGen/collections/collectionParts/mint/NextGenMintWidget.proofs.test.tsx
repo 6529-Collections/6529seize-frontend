@@ -11,6 +11,9 @@ const mockState = {
   mintCount: 1,
 };
 
+jest.mock("@/hooks/desktop/useIsDesktopBrowserWallet", () => ({
+  useIsDesktopBrowserWallet: () => false,
+}));
 jest.mock("@/components/nextGen/nextgen_helpers", () => ({
   useMintSharedState: () => ({
     proofResponse: [],

@@ -22,6 +22,12 @@ interface RemoveProfileDeps {
   readonly storage?: E2eeStorage | undefined;
   readonly backupState?: BackupStateStore | undefined;
   readonly locks?: LockManager | null | undefined;
+  /**
+   * Remove only this device's data (a revoked device's key): the stored
+   * device and the backup state are each removed only while they belong to
+   * it, so a device set up in between is never removed.
+   */
+  readonly onlyDeviceKey?: string | undefined;
 }
 
 const noop = () => undefined;
@@ -29,12 +35,13 @@ const noop = () => undefined;
 /**
  * Deletes one profile's encrypted-messages data. Takes the profile's engine
  * lock first, so the tab that runs its engine stops before the delete and
- * cannot write the state back afterwards.
+ * cannot write the state back afterwards. With `onlyDeviceKey`, false when
+ * nothing of that device was here (nothing is removed).
  */
 export async function removeE2eeProfileLocalData(
   profileId: string,
   deps: RemoveProfileDeps = {}
-): Promise<void> {
+): Promise<boolean> {
   const lease = await acquireE2eeEngineLock({
     profileId,
     takeOver: true,
@@ -46,8 +53,21 @@ export async function removeE2eeProfileLocalData(
   try {
     const storage =
       deps.storage ?? (isIndexedDbAvailable() ? getDefaultE2eeStorage() : null);
-    await storage?.clearProfile(profileId);
-    await (deps.backupState ?? getDefaultBackupStateStore()).delete(profileId);
+    const backupState = deps.backupState ?? getDefaultBackupStateStore();
+    const key = deps.onlyDeviceKey;
+    if (key === undefined) {
+      await storage?.clearProfile(profileId);
+      await backupState.delete(profileId);
+      return true;
+    }
+    // Each checked in the same write as its delete, not only under the lock
+    // (a lease without Web Locks is advisory), so a replacement device and
+    // its backup state stay. Checked apart: a retry after the device was
+    // cleared but its backup state wasn't still removes that state.
+    const cleared =
+      (await storage?.clearProfileIfDevice(profileId, key)) === true;
+    const backupDeleted = await backupState.deleteIfDevice(profileId, key);
+    return cleared || backupDeleted;
   } finally {
     lease.release();
   }

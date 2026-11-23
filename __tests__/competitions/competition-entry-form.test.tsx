@@ -7,6 +7,8 @@ import { createCompetitionEntry } from "@/services/api/competitions-api";
 let mockRequiredMetadata: Array<{ name: string; type: string }> = [];
 let mockTerms: string | null = null;
 let mockAnonymousSubmissions = false;
+let mockSignatureRequired = false;
+const mockSign = jest.fn();
 const mockSnapshot = {
   title: null,
   parts: [
@@ -64,7 +66,7 @@ jest.mock("@/contexts/CompetitionContext", () => ({
         anonymous_submissions: mockAnonymousSubmissions,
         required_metadata: mockRequiredMetadata,
         required_media: [],
-        signature_required: false,
+        signature_required: mockSignatureRequired,
         terms: mockTerms,
       },
       permissions: { submit: true },
@@ -75,7 +77,8 @@ jest.mock("@/hooks/competitions/useCompetitionQueries", () => ({
   useCompetitionViewer: () => "author:self",
 }));
 jest.mock("@/hooks/competitions/useCompetitionSignature", () => ({
-  useCompetitionSignature: () => jest.fn(),
+  ...jest.requireActual("@/hooks/competitions/useCompetitionSignature"),
+  useCompetitionSignature: () => mockSign,
 }));
 jest.mock("@/helpers/ProfileHelpers", () => ({
   profileAndConsolidationsToProfileMin: () => ({
@@ -148,6 +151,7 @@ jest.mock("@/services/api/competitions-api", () => ({
 
 beforeEach(() => {
   mockAnonymousSubmissions = false;
+  mockSignatureRequired = false;
 });
 
 it("explains winner disclosure before submitting an anonymous entry", () => {
@@ -172,6 +176,28 @@ it("explains how to recover when an older upload cannot be submitted anonymously
   fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Upload your media again, then retry this anonymous submission."
+  );
+});
+
+it("says the wallet did not complete the signature when signing fails", async () => {
+  mockSignatureRequired = true;
+  mockSign.mockRejectedValueOnce(new Error("Request expired"));
+  const callsBefore = jest.mocked(createCompetitionEntry).mock.calls.length;
+  render(<CompetitionEntryForm onClose={jest.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+  const alert = await screen.findByRole("alert");
+  expect(alert).toHaveTextContent("Your wallet didn’t complete the signature.");
+  expect(alert).toHaveTextContent("Your input has been preserved.");
+  expect(createCompetitionEntry).toHaveBeenCalledTimes(callsBefore);
+});
+
+it("reads a wallet's own rejection as a cancelled signature", async () => {
+  mockSignatureRequired = true;
+  mockSign.mockRejectedValueOnce({ code: 4001 });
+  render(<CompetitionEntryForm onClose={jest.fn()} />);
+  fireEvent.click(screen.getByRole("button", { name: "Submit an entry" }));
+  expect(await screen.findByRole("alert")).toHaveTextContent(
+    "The wallet signature was cancelled."
   );
 });
 

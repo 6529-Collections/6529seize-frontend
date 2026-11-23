@@ -17,8 +17,10 @@
  *    While a request is open the shell reports a `WalletBridgeStatus` with
  *    the short code the browser page also shows.
  *
- * Version 1 forwards signatures only: `personal_sign` and
- * `eth_signTypedData_v4`. Nothing that sends a transaction is forwarded.
+ * Version 1 forwards `personal_sign`, `eth_signTypedData_v4` and, when
+ * the shell reports the same transaction rules as this website (see
+ * `@/lib/desktop/wallet-transactions`), `eth_sendTransaction` for the
+ * allow-listed 6529 contract calls. A transaction's answer is its hash.
  *
  * This module holds only types and pure helpers for those three hops. Every
  * value that crosses a hop is untrusted and is validated here.
@@ -26,11 +28,13 @@
 
 export {
   WALLET_REQUEST_TTL_MS,
+  WALLET_TRANSACTION_TTL_MS,
   type WalletForwardingMethod,
   type WalletRequest,
   type WalletRequestInput,
 } from "./shared";
 export { parseWalletRequest } from "./request";
+export { toCanonicalTransaction } from "./transaction";
 export { fitsWalletRequestFragment } from "./size";
 export { readWalletMessageText } from "./messageText";
 export * from "./envelope";
