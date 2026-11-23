@@ -145,21 +145,20 @@ describe("WebKit navigation-cancelled fetches", () => {
   });
 
   it("still fails on other page errors alongside a cancelled fetch", () => {
-    expect(() =>
+    let thrown: unknown;
+    try {
       assertNoPageErrors(
         pageDiagnostics(
           [cancelledFetch, "TypeError: boom\n    at render"],
           [navigationCancelled]
         )
-      )
-    ).toThrow(/TypeError: boom/);
-    expect(() =>
-      assertNoPageErrors(
-        pageDiagnostics(
-          [cancelledFetch, "TypeError: boom\n    at render"],
-          [navigationCancelled]
-        )
-      )
-    ).not.toThrow(/access control checks/);
+      );
+    } catch (error) {
+      thrown = error;
+    }
+    expect(thrown).toBeInstanceOf(Error);
+    const message = (thrown as Error).message;
+    expect(message).toContain("TypeError: boom");
+    expect(message).not.toContain("access control checks");
   });
 });
