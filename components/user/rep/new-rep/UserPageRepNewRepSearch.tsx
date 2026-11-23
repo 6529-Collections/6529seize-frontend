@@ -125,8 +125,8 @@ function GrantRepForm({
 }) {
   const locale = useBrowserLocale();
   const reducedMotion = useReducedMotion();
-  const layoutTransition = {
-    duration: reducedMotion ? 0 : 0.18,
+  const transition = {
+    duration: reducedMotion ? 0 : 0.15,
     ease: "easeOut",
   } as const;
   // Measure natural content separately so the footer stays pinned when the body scrolls.
@@ -504,7 +504,7 @@ function GrantRepForm({
       initial={false}
       animate={{ height: layoutHeight }}
       data-testid="grant-rep-layout"
-      transition={layoutTransition}
+      transition={transition}
       className="tw-flex tw-max-h-[calc(100dvh-12rem)] tw-min-h-0 tw-max-w-full tw-flex-col tw-overflow-hidden"
     >
       <motion.div
@@ -615,13 +615,10 @@ function GrantRepForm({
             <AnimatePresence initial={false}>
               {showSearchDropdown && (
                 <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{
-                    duration: reducedMotion ? 0 : 0.15,
-                    ease: "easeOut",
-                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={transition}
                   className="tw-absolute tw-inset-x-0 tw-top-full tw-z-10 tw-mt-2 tw-shadow-lg tw-shadow-black/30"
                 >
                   <div className="tw-max-h-20 tw-overflow-y-auto tw-rounded-lg tw-bg-iron-900 tw-p-2 tw-ring-1 tw-ring-inset tw-ring-iron-800/60">
@@ -649,8 +646,8 @@ function GrantRepForm({
             />
           )}
           <motion.form
-            layout="position"
-            transition={layoutTransition}
+            layout={reducedMotion ? false : "position"}
+            transition={transition}
             id={amountFormId}
             className="tw-mt-6"
             onSubmit={(event) => {
