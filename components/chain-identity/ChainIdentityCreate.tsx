@@ -59,9 +59,36 @@ export default function ChainIdentityCreate({
   const [handle, setHandle] = useState("");
   const action = useChainAction(onChanged);
   const normalized = handle.trim() === "" ? "" : normalizeHandle(handle);
+  // A taken or reserved handle fails inside the transaction, fee paid, so
+  // it is checked first.
+  const availability = useQuery({
+    queryKey: [QueryKey.CHAIN_IDENTITY, "handle", normalized],
+    queryFn: ({ signal }) =>
+      chainGateway.getHandle(normalized as string, signal),
+    enabled: normalized !== null && normalized !== "",
+    staleTime: 5_000,
+  });
+  const wanted = normalized !== null && normalized !== "";
+  const handleOk =
+    !wanted ||
+    (availability.data?.handle === normalized &&
+      availability.data.available === true);
+  let handleHint = t(locale, "chainIdentity.handle.hint");
+  if (normalized === null) {
+    handleHint = t(locale, "chainIdentity.handle.invalid");
+  } else if (wanted && availability.data?.handle === normalized) {
+    handleHint = t(
+      locale,
+      availability.data.available
+        ? "chainIdentity.handle.available"
+        : availability.data.status === "reserved"
+          ? "chainIdentity.handle.reserved"
+          : "chainIdentity.handle.claimed"
+    );
+  }
 
   const start = () => {
-    if (normalized === null) {
+    if (normalized === null || !handleOk) {
       return;
     }
     void action.prepare(async () => {
@@ -98,10 +125,12 @@ export default function ChainIdentityCreate({
         aria-invalid={normalized === null}
         onChange={(event) => setHandle(event.target.value)}
       />
-      <p id="chain-identity-create-handle-hint" className={CHAIN_HINT_CLASS}>
-        {normalized === null
-          ? t(locale, "chainIdentity.handle.invalid")
-          : t(locale, "chainIdentity.handle.hint")}
+      <p
+        id="chain-identity-create-handle-hint"
+        aria-live="polite"
+        className={CHAIN_HINT_CLASS}
+      >
+        {handleHint}
       </p>
       {waiting && (
         <p className="tw-mb-0 tw-mt-3 tw-text-sm tw-text-iron-200">
@@ -118,6 +147,7 @@ export default function ChainIdentityCreate({
           disabled={
             action.busy ||
             normalized === null ||
+            !handleOk ||
             waiting !== null ||
             action.state.kind === "confirm"
           }

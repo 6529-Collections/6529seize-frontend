@@ -209,16 +209,22 @@ it("words a refusal the network didn't name as the general one", async () => {
   ).toBeInTheDocument();
 });
 
-it("ends a sent join the network dropped after it had held it", async () => {
+it("keeps waiting while the network doesn't know a sent join that hasn't expired", async () => {
   relay["get"]!.mockResolvedValue({ ...op, status: "SUBMITTED" });
   gateway["getTx"]!.mockResolvedValueOnce({ status: "pending" });
   gateway["getTx"]!.mockResolvedValue(null);
   renderRow();
   expect(
     await screen.findByText(
-      "The 6529 Network dropped this join before taking it. Take it off this list to start again.",
-      {},
-      { timeout: 8000 }
+      "Both wallets signed. Waiting for the 6529 Network to add 0x000000…0000bb."
+    )
+  ).toBeInTheDocument();
+  await waitFor(() => expect(gateway["getTx"]).toHaveBeenCalledTimes(2), {
+    timeout: 8000,
+  });
+  expect(
+    screen.getByText(
+      "Both wallets signed. Waiting for the 6529 Network to add 0x000000…0000bb."
     )
   ).toBeInTheDocument();
 }, 15000);

@@ -69,6 +69,13 @@ beforeEach(() => {
     valueFields: { amount: "2000000000000000000" },
   });
   (draftOperation as jest.Mock).mockResolvedValue(draft);
+  gateway["getHandle"]!.mockImplementation(async (handle: string) => ({
+    handle,
+    valid: true,
+    available: true,
+    status: "free",
+    principalId: null,
+  }));
 });
 
 it("says changes open at the switch-on, and reads nothing, before it", () => {
@@ -105,6 +112,8 @@ it("creates an identity after showing the fee, paid by the wallet", async () => 
   fireEvent.change(screen.getByLabelText("Handle (optional)"), {
     target: { value: "GM_6529" },
   });
+  // The handle is checked on the chain before the button opens.
+  expect(await screen.findByText("Available.")).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Create identity" }));
 
   expect(
@@ -217,4 +226,23 @@ it("says what to do first when the identity has no $fake6529", async () => {
       "Your identity has no $fake6529 yet, so it can't pay for changes. Get $fake6529 for this wallet, then move it to your identity."
     )
   ).toBeInTheDocument();
+});
+
+it("won't create an identity with a handle the chain says is taken", async () => {
+  gateway["getIdentityByWallet"]!.mockResolvedValue(null);
+  gateway["getHandle"]!.mockResolvedValue({
+    handle: "tester_one",
+    valid: true,
+    available: false,
+    status: "claimed",
+    principalId: `0x${"0c".repeat(32)}`,
+  });
+  render(<ChainIdentityPage />);
+  fireEvent.change(await screen.findByLabelText("Handle (optional)"), {
+    target: { value: "tester_one" },
+  });
+  expect(await screen.findByText("Taken.")).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: "Create identity" })
+  ).toBeDisabled();
 });

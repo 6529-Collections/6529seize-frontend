@@ -72,8 +72,6 @@ export default function ChainStartedJoin({
     },
   });
   const status = relay.data?.status;
-  // The network held the join once; a later "unknown" means it dropped it.
-  const seenInNetwork = useRef(false);
   const tx = useQuery({
     queryKey: [QueryKey.CHAIN_IDENTITY, "tx", join.txId],
     queryFn: ({ signal }) => chainGateway.getTx(join.txId, signal),
@@ -84,16 +82,11 @@ export default function ChainStartedJoin({
       const settled =
         data?.status === "final" ||
         data?.status === "failed" ||
-        (data === null &&
-          (seenInNetwork.current || join.expiresAtMs <= Date.now()));
+        (data === null && join.expiresAtMs <= Date.now());
       return settled ? false : TX_POLL_MS;
     },
   });
   const txStatus = tx.data?.status;
-  if (txStatus === "pending" || txStatus === "in_block") {
-    seenInNetwork.current = true;
-  }
-  const dropped = tx.data === null && seenInNetwork.current;
 
   useEffect(() => {
     if (txStatus === "final" && !refreshed.current) {
@@ -146,9 +139,6 @@ export default function ChainStartedJoin({
     actions = "signIn";
   } else if (relay.isError) {
     text = t(locale, "chainIdentity.wallets.startedUnknown");
-    actions = "dismiss";
-  } else if (status === "SUBMITTED" && dropped) {
-    text = t(locale, "chainIdentity.wallets.startedDropped");
     actions = "dismiss";
   } else if (status === "SUBMITTED" && txStatus === "failed") {
     text = t(locale, "chainIdentity.wallets.startedRefused", {
@@ -243,6 +233,7 @@ export default function ChainStartedJoin({
       {(actions === "withdraw" || actions === "retry") && (
         <p className="tw-mb-0 tw-mt-2 tw-text-xs tw-text-iron-400">
           {t(locale, "chainIdentity.wallets.withdrawNote", {
+            wallet,
             date: formatDate(locale, join.expiresAtMs, DATE_TIME),
           })}
         </p>

@@ -126,6 +126,20 @@ const refusalDetail = (error: unknown): number | null => {
   return match?.[1] === undefined ? null : Number(match[1]);
 };
 
+/** Why the chain wouldn't take the fee: FEE_UNCOVERED's three causes. */
+export function feeRefusalCause(
+  error: unknown
+): "limit" | "key" | "balance" | null {
+  if (chainRefusalName(error) !== "FEE_UNCOVERED") {
+    return null;
+  }
+  const detail = refusalDetail(error);
+  if (detail === FEE_LIMIT_DETAIL) {
+    return "limit";
+  }
+  return detail === FEE_KEY_DETAIL ? "key" : "balance";
+}
+
 /** FEE_UNCOVERED split by its cause; other names as they are. */
 const refusalKey = (error: unknown, name: string): string => {
   if (name !== "FEE_UNCOVERED") {

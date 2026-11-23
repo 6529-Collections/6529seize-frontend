@@ -104,7 +104,7 @@ it("signs a held join after showing who asks and the fee, then waits for the cha
   ).toBeInTheDocument();
   expect(
     screen.getByText(
-      "Sign only if you asked for this from your own identity. Once this wallet joins an identity, its NFTs count toward that identity's TDH, that identity's delegations (where airdrops go, for example) apply to it, and any of that identity's wallets can remove it."
+      "Sign only if you asked for this from your own identity. Once this wallet joins an identity, its NFTs count toward that identity's TDH, that identity's delegations (where airdrops go, for example) apply to it, and any of that identity's wallets can revoke this wallet's delegations or remove it."
     )
   ).toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Review and sign" }));
@@ -296,6 +296,11 @@ it("won't say an identity asked when the asking wallet isn't one of its wallets"
     )
   ).toBeInTheDocument();
   expect(
+    screen.getByText(
+      "A wallet that isn't one of tester_one's wallets asks to add this wallet. Signed by 0x000000…0000aa."
+    )
+  ).toBeInTheDocument();
+  expect(
     screen.queryByRole("button", { name: "Review and sign" })
   ).not.toBeInTheDocument();
 });
@@ -314,6 +319,26 @@ it("says a request that closed since the list was read is no longer open", async
   expect(
     await screen.findByText(
       "Nothing changed. This request is no longer open: it was withdrawn, it expired, or it already went through."
+    )
+  ).toBeInTheDocument();
+});
+
+it("tells the joining wallet when fees rose while the request waited", async () => {
+  relay["sign"]!.mockResolvedValue({
+    ...heldJoin(),
+    status: "FAILED",
+    last_error: `/v1/submit: inadmissible: 0x0305 FEE_UNCOVERED, detail ${(0x100 + 13) * 0x10000}: the fee limit`,
+  });
+  renderRequests();
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Review and sign" })
+  );
+  fireEvent.click(
+    await screen.findByRole("button", { name: "Sign with wallet" })
+  );
+  expect(
+    await screen.findByText(
+      "The 6529 Network refused the join. Fees rose past the most the request allowed while it waited."
     )
   ).toBeInTheDocument();
 });

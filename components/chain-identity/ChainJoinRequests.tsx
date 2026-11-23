@@ -32,7 +32,11 @@ import { chainRelay, type RelayOperation } from "@/lib/chain-identity/relay";
 import { walletSigner } from "@/lib/chain-identity/signers";
 import { getAuthJwt, getWalletAddress } from "@/services/auth/auth.utils";
 import ChainActionStatus from "./ChainActionStatus";
-import { chainErrorMessage, chainRefusalName } from "./chainErrorMessage";
+import {
+  chainErrorMessage,
+  chainRefusalName,
+  feeRefusalCause,
+} from "./chainErrorMessage";
 import { ChainSection, shortHex } from "./chainIdentityUi";
 import { useChainAction } from "./useChainAction";
 
@@ -64,11 +68,16 @@ async function signThroughRelay(
     onEnded();
     // The relay words the chain's refusal itself: only its code is read
     // from it, and the reason is put from this wallet's side.
-    const name = chainRefusalName(new Error(op.last_error ?? ""));
+    const refusal = new Error(op.last_error ?? "");
     throw new ChainOperationError(
       "stated",
       t(locale, "chainIdentity.requests.refusedBecause", {
-        reason: joinerReason(locale, name, identity),
+        reason: joinerReason(
+          locale,
+          chainRefusalName(refusal),
+          identity,
+          feeRefusalCause(refusal)
+        ),
       })
     );
   }
@@ -99,7 +108,8 @@ async function signThroughRelay(
 function joinerReason(
   locale: SupportedLocale,
   name: string | null,
-  identity: string
+  identity: string,
+  feeCause: ReturnType<typeof feeRefusalCause> = null
 ): string {
   switch (name) {
     case "ADDRESS_BOUND":
@@ -110,6 +120,9 @@ function joinerReason(
     case "IDENTITY_FULL":
       return t(locale, "chainIdentity.requests.full", { identity });
     case "FEE_UNCOVERED":
+      return feeCause === "limit"
+        ? t(locale, "chainIdentity.requests.feeRose")
+        : t(locale, "chainIdentity.requests.feeShortfall", { identity });
     case "INSUFFICIENT_BALANCE":
       return t(locale, "chainIdentity.requests.feeShortfall", { identity });
     case "NONCE":
@@ -242,11 +255,17 @@ function JoinRequestCard({
   return (
     <li className="tw-rounded-lg tw-border tw-border-solid tw-border-primary-400/30 tw-bg-primary-400/5 tw-p-3">
       <p className="tw-m-0 tw-text-sm tw-text-iron-200">
-        {t(locale, "chainIdentity.requests.from", {
-          identity: name,
-          wallet: requester ? shortHex(requester) : "",
-          date: formatDate(locale, expiresAtMs, DATE_TIME),
-        })}
+        {t(
+          locale,
+          identity.isSuccess && !requesterInIdentity
+            ? "chainIdentity.requests.fromStranger"
+            : "chainIdentity.requests.from",
+          {
+            identity: name,
+            wallet: requester ? shortHex(requester) : "",
+            date: formatDate(locale, expiresAtMs, DATE_TIME),
+          }
+        )}
       </p>
       {blocked && (
         <p className="tw-mb-0 tw-mt-2 tw-text-sm tw-text-iron-300">{blocked}</p>
