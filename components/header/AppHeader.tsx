@@ -580,7 +580,7 @@ export default function AppHeader() {
   let rightActions: ReactNode;
   if (isPhoneWave) {
     rightActions = activeWave && (
-      <div className="tw-flex tw-shrink-0 tw-items-center tw-gap-1">
+      <div className="tw-ml-2 tw-flex tw-shrink-0 tw-items-center tw-gap-1">
         <WaveJoinCta wave={activeWave} variant="app-header" />
         <PhoneWaveHeaderActions
           key={activeWave.id}

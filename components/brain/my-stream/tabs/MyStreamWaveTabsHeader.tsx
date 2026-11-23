@@ -559,7 +559,7 @@ export default function MyStreamWaveTabsHeader({
     <>
       <header
         ref={headerRef}
-        className={`${isPhoneWave ? "tw-flex tw-min-h-14 tw-items-center tw-justify-between tw-gap-1 tw-px-2 tw-pb-1 tw-pt-[max(0.25rem,env(safe-area-inset-top))]" : headerClassName} tw-flex-nowrap tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-@container/wave-header ${showDescriptionPreview ? headerMinHeight : ""}`}
+        className={`${isPhoneWave ? "tw-flex tw-min-h-14 tw-items-center tw-justify-between tw-gap-3 tw-px-2 tw-pb-1 tw-pt-[max(0.25rem,env(safe-area-inset-top))]" : headerClassName} tw-flex-nowrap tw-border-x-0 tw-border-b tw-border-t-0 tw-border-solid tw-border-iron-800 tw-@container/wave-header ${showDescriptionPreview ? headerMinHeight : ""}`}
       >
         <div
           className={`tw-flex tw-min-w-0 tw-flex-1 tw-items-center tw-gap-x-2 ${isCondensed || isCompactWave ? "tw-self-center" : "tw-self-start tw-pt-0.5"}`}
