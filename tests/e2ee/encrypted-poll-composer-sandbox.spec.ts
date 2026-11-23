@@ -8,6 +8,7 @@ import {
   composer,
   enroll,
   messageRow,
+  openComposerActions,
   openMessageActions,
   sendMessage,
   startChat,
@@ -38,6 +39,7 @@ test.describe("Encrypted poll composer @medium @local-only @e2ee", () => {
       const page = alice.page;
       await composer(page).fill("An unfinished chat message");
       const create = page.getByRole("button", { name: "Create poll" });
+      await openComposerActions(page);
       await create.click();
 
       const form = page.getByRole("form", { name: "Create poll" });
@@ -84,7 +86,14 @@ test.describe("Encrypted poll composer @medium @local-only @e2ee", () => {
       await form.getByRole("button", { name: "Remove poll" }).click();
       await expect(form).toBeHidden();
       await expect(composer(page)).toHaveText("An unfinished chat message");
-      await expect(create).toBeFocused();
+      const showActions = page.getByRole("button", {
+        name: "Show composer actions",
+        exact: true,
+      });
+      await expect(
+        testInfo.project.use.isMobile ? showActions : create
+      ).toBeFocused();
+      await openComposerActions(page);
       await create.click();
       const actions = await openMessageActions(
         page,
