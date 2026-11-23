@@ -6923,6 +6923,29 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           thumbnail.y + thumbnail.height
         );
         await capture("rest");
+        await panel.getByRole("button", { name: /^Sort by:/ }).click();
+        const sortSheet = page.getByRole("dialog", {
+          name: "Sort by",
+          exact: true,
+        });
+        const firstOption = sortSheet.getByRole("button", {
+          name: "Your vote amount",
+          exact: true,
+        });
+        await expect(firstOption).toBeVisible();
+        const headerBounds = (await sortSheet
+          .getByTestId("mobile-dialog-header")
+          .boundingBox())!;
+        const firstOptionBounds = (await firstOption.boundingBox())!;
+        expect(
+          firstOptionBounds.y - headerBounds.y - headerBounds.height
+        ).toBeGreaterThanOrEqual(12);
+        await sortSheet.locator(".mobile-wrapper-dialog").screenshot({
+          path: testInfo.outputPath("my-votes-sort-spacing.png"),
+          animations: "disabled",
+        });
+        await page.keyboard.press("Escape");
+        await expect(sortSheet).toHaveCount(0);
         await page.screenshot({
           path: testInfo.outputPath("my-votes-full-height.png"),
           animations: "disabled",
