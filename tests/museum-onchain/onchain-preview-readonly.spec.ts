@@ -58,15 +58,16 @@ test.describe("on-chain Museum preview", () => {
     const works = page
       .getByRole("list", { name: /^Works in the collection/u })
       .first();
-    // Work cards show images only after the browser checks their SHA-256.
+    // Work cards load their images as they near the viewport, and show them
+    // only after the browser checks their SHA-256.
+    const molnar = works.getByRole("link", {
+      name: "Vera Molnár and Martin Grasser, Themes and Variations #210",
+    });
+    await molnar.scrollIntoViewIfNeeded();
     await expect(
       works.getByRole("img", { name: /cobalt blue and warm white/u })
     ).toBeVisible({ timeout: 60_000 });
-    await works
-      .getByRole("link", {
-        name: "Vera Molnár and Martin Grasser, Themes and Variations #210",
-      })
-      .click();
+    await molnar.click();
     // A development server compiles the record route on first use.
     await page.waitForURL(RECORD_URL_PATTERN, {
       timeout: COLD_LOAD_TIMEOUT_MS,

@@ -24,3 +24,9 @@
 - Repair batch 2: work cards follow each image's proportion with no letterbox, in one
   column below 480 px; "1 Museum record" is singular. Round 01 evidence moved to
   `evidence-round-01/`.
+- Score: `accepted`, label `judge-accepted (uncalibrated)`, total 8.5, every dimension
+  at 8.5, every check passing, no open required finding. Open P3: V-004 (in a grid row
+  a tall portrait card sets the row height, leaving space under landscape cards).
+- After acceptance the Playwright spec scrolls to a work card before expecting its image,
+  because cards load images as they near the viewport; the spec change touches no
+  product code.
