@@ -19,6 +19,10 @@ import {
   type ApiMemeCollaborationInvitation,
 } from "@/generated/models/ApiMemeCollaborationInvitation";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import {
+  MINT_USER_ROUTES,
+  mintUserRecordHeaders,
+} from "@/lib/mint-records/mint-admin-records";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import Button from "@/components/utils/button/Button";
@@ -69,12 +73,21 @@ export function MemeCollaborationPanel({
     try {
       const { success } = await requestAuth();
       if (!success) return;
+      const body: ApiMemeCollaborationInviteRequest = {
+        collaborator_ids: profiles.map((profile) => profile.id),
+      };
       const updated = await commonApiPost<
         ApiMemeCollaborationInviteRequest,
         ApiMemeCollaborationState
       >({
         endpoint: `drops/${dropId}/collaborations`,
-        body: { collaborator_ids: profiles.map((profile) => profile.id) },
+        body,
+        headers: await mintUserRecordHeaders({
+          action: "collab.invite",
+          route: MINT_USER_ROUTES.collabInvite,
+          params: { drop_id: dropId },
+          body,
+        }),
       });
       queryClient.setQueryData(queryKey, updated);
       setSelected((current) =>
@@ -119,20 +132,27 @@ export function MemeCollaborationPanel({
     try {
       const { success } = await requestAuth();
       if (!success) return;
+      const body: ApiMemeCollaborationResponseRequest = {
+        action,
+        artwork_hash: data.artwork_hash,
+        terms_version: data.terms_version,
+        ...(action === ApiMemeCollaborationResponseRequestActionEnum.Accept &&
+        consent
+          ? { artist_name: consent.artist_name }
+          : {}),
+      };
       const updated = await commonApiPost<
         ApiMemeCollaborationResponseRequest,
         ApiMemeCollaborationState
       >({
         endpoint: `drops/${dropId}/collaborations/${invitation.id}/response`,
-        body: {
-          action,
-          artwork_hash: data.artwork_hash,
-          terms_version: data.terms_version,
-          ...(action === ApiMemeCollaborationResponseRequestActionEnum.Accept &&
-          consent
-            ? { artist_name: consent.artist_name }
-            : {}),
-        },
+        body,
+        headers: await mintUserRecordHeaders({
+          action: "collab.respond",
+          route: MINT_USER_ROUTES.collabRespond,
+          params: { drop_id: dropId, invitation_id: invitation.id },
+          body,
+        }),
       });
       queryClient.setQueryData(queryKey, updated);
       setReviewingId(null);

@@ -145,6 +145,7 @@ it("requires reviewing the terms and sends consent for the exact artwork version
         artwork_hash: pending.artwork_hash,
         terms_version: pending.terms_version,
       },
+      headers: {},
     })
   );
   await waitFor(() =>
@@ -319,6 +320,8 @@ it("lets the author invite collaborators on an existing unmanaged artwork withou
     expect(postMock).toHaveBeenCalledWith({
       endpoint: "drops/drop/collaborations",
       body: { collaborator_ids: ["C"] },
+      // No mint.user record while signed writes are off.
+      headers: {},
     })
   );
 });
@@ -534,6 +537,7 @@ it("cancels a pending invitation and updates its status in management", async ()
         artwork_hash: pending.artwork_hash,
         terms_version: pending.terms_version,
       },
+      headers: {},
     })
   );
   expect(await screen.findByText("Invitation cancelled")).toBeVisible();

@@ -10,6 +10,10 @@ import { useSeizeSettings } from "@/contexts/SeizeSettingsContext";
 import { buildCsv } from "@/helpers/csv-export.helpers";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { commonApiFetch } from "@/services/api/common-api";
+import {
+  MINT_ADMIN_ROUTES,
+  mintAdminRecordHeaders,
+} from "@/lib/mint-records/mint-admin-records";
 import { PUBLIC_SUBSCRIPTIONS_PHASE_ID } from "./constants";
 import {
   ReviewDistributionPlanTableItemType,
@@ -117,6 +121,16 @@ const download = async (
 ) => {
   return await commonApiFetch<SubscriptionResult>({
     endpoint: `subscriptions/allowlists/${contract}/${tokenId}/${planId}/${phaseId}`,
+    headers: await mintAdminRecordHeaders({
+      action: phaseId === "public" ? "dist.public" : "dist.phase",
+      route: MINT_ADMIN_ROUTES.distPhase,
+      params: {
+        contract,
+        token_id: tokenId,
+        allowlist_id: planId,
+        phase_id: phaseId,
+      },
+    }),
   })
     .then((response) => {
       processResults(phaseName, response);

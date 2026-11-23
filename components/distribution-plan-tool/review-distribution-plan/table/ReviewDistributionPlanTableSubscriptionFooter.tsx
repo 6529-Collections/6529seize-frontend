@@ -13,6 +13,10 @@ import { PhaseAirdrop } from "@/generated/models/PhaseAirdrop";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
 import { fetchAllPages } from "@/services/6529api";
 import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import {
+  MINT_ADMIN_ROUTES,
+  mintAdminRecordHeaders,
+} from "@/lib/mint-records/mint-admin-records";
 import { getAuthJwt, getStagingAuth } from "@/services/auth/auth.utils";
 import { uploadDistributionPhotos } from "@/services/distribution/distributionPhotoUpload";
 import {
@@ -213,6 +217,12 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       await commonApiPost({
         endpoint: `subscriptions/allowlists/${contract}/${tokenId}/${planId}/reset`,
         body: {},
+        headers: await mintAdminRecordHeaders({
+          action: "dist.reset",
+          route: MINT_ADMIN_ROUTES.distReset,
+          params: { contract, token_id: tokenId, allowlist_id: planId },
+          body: {},
+        }),
       });
       setToast({
         type: "success",
@@ -244,6 +254,12 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       >({
         endpoint: `distributions/${contract}/${tokenId}/normalize`,
         body: {},
+        headers: await mintAdminRecordHeaders({
+          action: "dist.normalize",
+          route: MINT_ADMIN_ROUTES.distNormalize,
+          params: { contract, id: tokenId },
+          body: {},
+        }),
       });
 
       if (response.success) {
@@ -285,6 +301,12 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
       >({
         endpoint: `distributions/${contract}/${tokenId}/github-upload`,
         body: {},
+        headers: await mintAdminRecordHeaders({
+          action: "card.published",
+          route: MINT_ADMIN_ROUTES.distGithubUpload,
+          params: { contract, id: tokenId },
+          body: {},
+        }),
       });
       setGithubUploadResult(response);
     } catch (error: unknown) {
@@ -382,6 +404,15 @@ export function ReviewDistributionPlanTableSubscriptionFooter() {
         >({
           endpoint: `distributions/${contract}/${tokenId}/${phase}-airdrops`,
           body: { csv: csvContent },
+          headers: await mintAdminRecordHeaders({
+            action: "dist.airdrops",
+            route:
+              phase === "artist"
+                ? MINT_ADMIN_ROUTES.distArtistAirdrops
+                : MINT_ADMIN_ROUTES.distTeamAirdrops,
+            params: { contract, id: tokenId },
+            body: { csv: csvContent },
+          }),
         });
 
         if (response.success) {
