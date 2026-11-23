@@ -17,6 +17,16 @@ describe("AboutSubscriptions", () => {
     ).toBeInTheDocument();
   });
 
+  it("says what the subscription balance can pay for", () => {
+    render(<AboutSubscriptions />);
+
+    expect(
+      screen.getByText(
+        "The balance pays only for subscription airdrops, used automatically in the phase you are eligible for. It cannot pay for a card you mint yourself on the minting page."
+      )
+    ).toBeInTheDocument();
+  });
+
   it("links to the subscriptions report", () => {
     render(<AboutSubscriptions />);
 

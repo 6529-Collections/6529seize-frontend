@@ -1,4 +1,8 @@
 import { isAuthResolving } from "@/components/auth/authResolution";
+import {
+  getAuthSessionRole,
+  isProxyRoleAuthSession,
+} from "@/components/auth/auth-session-scope";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import type { ApiDrop } from "@/generated/models/ApiDrop";
 import {
@@ -162,7 +166,13 @@ export default function PrivilegedDropCreator({
   const { submissionRestriction, chatRestriction } = useDropPrivileges({
     isLoggedIn: hasProfile || isProfileLoadingForWallet,
     needsProfile: shouldOfferProfileSetup,
-    isProxy: !!activeProfileProxy,
+    // A proxy-role token without a listed received proxy still can't post.
+    isProxy:
+      !!activeProfileProxy ||
+      isProxyRoleAuthSession({
+        authRole: getAuthSessionRole(),
+        profileId: connectedProfile?.id,
+      }),
     canChat,
     canDrop: wave.participation.authenticated_user_eligible,
     chatDisabled: !wave.chat.enabled,

@@ -780,6 +780,8 @@ export * from '../models/ApiSetDropReplyCollapseRequest';
 export * from '../models/ApiSetPinnedDropRequest';
 export * from '../models/ApiSetProfileWaveRequest';
 export * from '../models/ApiSignedRecordsAnchor';
+export * from '../models/ApiSignedRecordsOwner';
+export * from '../models/ApiSignedRecordsOwners';
 export * from '../models/ApiStartMultipartMediaUploadResponse';
 export * from '../models/ApiSubmissionDropContext';
 export * from '../models/ApiSubmissionDropStatus';
@@ -1785,13 +1787,15 @@ import { ApiSetDropReplyCollapseRequest } from '../models/ApiSetDropReplyCollaps
 import { ApiSetPinnedDropRequest } from '../models/ApiSetPinnedDropRequest';
 import { ApiSetProfileWaveRequest } from '../models/ApiSetProfileWaveRequest';
 import { ApiSignedRecordsAnchor } from '../models/ApiSignedRecordsAnchor';
+import { ApiSignedRecordsOwner } from '../models/ApiSignedRecordsOwner';
+import { ApiSignedRecordsOwners } from '../models/ApiSignedRecordsOwners';
 import { ApiStartMultipartMediaUploadResponse     } from '../models/ApiStartMultipartMediaUploadResponse';
 import { ApiSubmissionDropContext        } from '../models/ApiSubmissionDropContext';
 import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
 import { ApiSubmissionDropVotingContextProfileContext } from '../models/ApiSubmissionDropVotingContextProfileContext';
 import { ApiSubmitProfileCmsAgentProposalRequest } from '../models/ApiSubmitProfileCmsAgentProposalRequest';
-import { ApiSubscriptionCoverage                 } from '../models/ApiSubscriptionCoverage';
+import { ApiSubscriptionCoverage                   } from '../models/ApiSubscriptionCoverage';
 import { ApiSubscriptionCoverageDeadlineBasis } from '../models/ApiSubscriptionCoverageDeadlineBasis';
 import { ApiSubscriptionCoverageEligibilityBasis } from '../models/ApiSubscriptionCoverageEligibilityBasis';
 import { ApiSubscriptionCoverageForecast           } from '../models/ApiSubscriptionCoverageForecast';
@@ -3038,6 +3042,8 @@ let typeMap: {[index: string]: any} = {
     "ApiSetPinnedDropRequest": ApiSetPinnedDropRequest,
     "ApiSetProfileWaveRequest": ApiSetProfileWaveRequest,
     "ApiSignedRecordsAnchor": ApiSignedRecordsAnchor,
+    "ApiSignedRecordsOwner": ApiSignedRecordsOwner,
+    "ApiSignedRecordsOwners": ApiSignedRecordsOwners,
     "ApiStartMultipartMediaUploadResponse": ApiStartMultipartMediaUploadResponse,
     "ApiSubmissionDropContext": ApiSubmissionDropContext,
     "ApiSubmissionDropVoting": ApiSubmissionDropVoting,

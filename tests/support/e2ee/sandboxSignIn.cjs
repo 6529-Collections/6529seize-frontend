@@ -278,7 +278,18 @@ function createSandboxSignIn({ walletUser, getDeliveryService, now = Date.now })
       owner === null
         ? grant.wallet === String(wallet || "").toLowerCase()
         : walletUser(grant.wallet)?.profileId === owner;
-    return { status: 200, body: grants.filter(own).reverse() };
+    // The backend revokes a combined grant with the device it enrolled.
+    const withRevocation = (grant) => {
+      const revokedAt =
+        grant.revoked_at ??
+        getDeliveryService().loginGrantRevokedAt?.(grant.id) ??
+        null;
+      return revokedAt === null ? grant : { ...grant, revoked_at: revokedAt };
+    };
+    return {
+      status: 200,
+      body: grants.filter(own).reverse().map(withRevocation),
+    };
   }
 
   return { issueNonce, login, listGrants, reset };
