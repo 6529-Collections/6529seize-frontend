@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# 6529-repo-command-wrapper
 
 set -euo pipefail
 
@@ -14,20 +15,14 @@ if [[ "${SEIZE_6529_COMMAND:-0}" != "1" && "${SEIZE_SECURE_INSTALL:-0}" != "1" ]
   exit 1
 fi
 
-clean_path=""
-IFS=':' read -r -a path_parts <<< "${PATH:-}"
-for part in "${path_parts[@]}"; do
-  if [[ -z "$part" || "$part" == "$SCRIPT_DIR" ]]; then
-    continue
-  fi
-  if [[ -z "$clean_path" ]]; then
-    clean_path="$part"
-  else
-    clean_path="${clean_path}:$part"
-  fi
-done
+# shellcheck source=bin/wrapper-lib.sh
+source "$SCRIPT_DIR/wrapper-lib.sh"
 
-REAL_PNPM="$(PATH="$clean_path" command -v pnpm || true)"
+seize_wrapper_enter pnpm
+
+# Never a wrapper of this repository: not this one in any PATH spelling, and
+# not the one of another checkout. See bin/wrapper-lib.sh.
+REAL_PNPM="$(seize_wrapper_resolve pnpm "$SCRIPT_DIR")"
 
 if [[ -z "$REAL_PNPM" ]]; then
   echo "Unable to locate the real pnpm binary outside the repo wrapper path." >&2

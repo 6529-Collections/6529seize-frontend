@@ -12,15 +12,27 @@ import { clearE2eeLocalMarkers } from "./e2eeLocalState";
  * back), then the engine starts again with nothing saved. It works whatever
  * the engine's state, for example while it is stopped.
  */
-export function useRemoveE2eeLocalData(): (() => Promise<void>) | null {
+export function useRemoveE2eeLocalData():
+  | ((onlyDeviceKey?: string) => Promise<boolean>)
+  | null {
   const { profileId, restart } = useE2ee();
-  const remove = useCallback(async () => {
-    if (!profileId) {
-      return;
-    }
-    await removeE2eeProfileLocalData(profileId);
-    clearE2eeLocalMarkers(profileId);
-    restart();
-  }, [profileId, restart]);
+  const remove = useCallback(
+    async (onlyDeviceKey?: string) => {
+      if (!profileId) {
+        return false;
+      }
+      // With a device key: only while that is still this browser's device.
+      const removed =
+        onlyDeviceKey === undefined
+          ? await removeE2eeProfileLocalData(profileId)
+          : await removeE2eeProfileLocalData(profileId, { onlyDeviceKey });
+      if (removed !== false) {
+        clearE2eeLocalMarkers(profileId);
+        restart();
+      }
+      return removed !== false;
+    },
+    [profileId, restart]
+  );
   return profileId ? remove : null;
 }

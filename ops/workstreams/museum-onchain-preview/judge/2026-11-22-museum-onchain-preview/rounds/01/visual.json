@@ -1,0 +1,421 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "659f4de4c307e11150ccf95e6af75175717ef426",
+  "coverage": [
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J02": {
+      "score": 8,
+      "evidence": [
+        "evidence/judge-visual-r01-index-top-390.png",
+        "evidence/judge-visual-r01-texts-filter-390.png"
+      ],
+      "findings": ["V-008"],
+      "note": "Jump row and live title filters work on index and texts; duplicate chip labels on texts remain."
+    },
+    "J03": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/judge-visual-r01-index-top-390.png",
+        "evidence/record-work-1440x1000-full.png"
+      ],
+      "findings": [],
+      "note": "Titles and Verified badge lead on every route; h1 within the first 400px at 390."
+    },
+    "J04": {
+      "score": 8,
+      "evidence": ["evidence/contact-sheet-1440x1000.png"],
+      "findings": [],
+      "note": "Native dark iron tokens, no hype styling; text and tables only by run decision, nothing faked."
+    },
+    "J05": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/judge-visual-r01-work-copy-390.png",
+        "evidence/judge-visual-r01-disclosure-390.png"
+      ],
+      "findings": [],
+      "note": "Record page sections are clear; relations are sentence case without self links; disclosure bounded."
+    },
+    "J06": {
+      "score": 8.5,
+      "evidence": ["evidence/record-work-1440x1000-full.png"],
+      "findings": [],
+      "note": "One link treatment across pages; copy buttons beside hashes; mono enums remain only as stored values in On-chain facts."
+    },
+    "J08": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/judge-visual-r01-disclosure-open-1440.png",
+        "evidence/judge-visual-r01-focus-1440.png"
+      ],
+      "findings": ["V-008"],
+      "note": "Jump anchors, filters, back links and copy all work; disclosure opens by keyboard Enter."
+    },
+    "J09": {
+      "score": 8,
+      "evidence": ["evidence/record-work-1440x1000-full.png"],
+      "findings": [],
+      "note": "Only default pinned; empty filter state reads \"Nothing matches this filter.\""
+    },
+    "J10": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/contact-sheet-390x844.png",
+        "evidence/judge-visual-r01-index-top-390.png"
+      ],
+      "findings": [],
+      "note": "No horizontal overflow (scrollWidth 390); notice compact; chips wrap cleanly; link rows still short (about 20px) but acceptable."
+    },
+    "J11": {
+      "score": 8,
+      "evidence": ["evidence/automated-checks.json"],
+      "findings": [],
+      "note": "No overflow or broken images; console errors are the local settings endpoint only (run decision)."
+    },
+    "J13": {
+      "score": 8,
+      "evidence": [
+        "evidence/index-1440x1000-01.png",
+        "evidence/judge-visual-r01-work-copy-390.png"
+      ],
+      "findings": [],
+      "note": "Verification summary plain; addresses and hashes now copyable. S1-S6 judged on screen: no wallet prompt, signature or transaction."
+    }
+  },
+  "checks": {
+    "S1": "pass",
+    "S2": "pass",
+    "S3": "pass",
+    "S4": "pass",
+    "S5": "pass",
+    "S6": "pass"
+  },
+  "findings": [
+    {
+      "id": "V-001",
+      "targets": ["J10", "J03"],
+      "severity": "P1",
+      "status": "resolved",
+      "where": "/museum/network-onchain (all routes) · default · 390x844",
+      "evidence": "evidence/contact-sheet-390x844.png",
+      "observation": "The preview notice is a 168px, 5 line block in large type beside a 96px shell rail; the first screen of every route shows only the notice and the first eyebrow, and the title is cut by the fold or below it (record-work title starts near y=440).",
+      "consequence": "Mobile visitors see no content on arrival and may read it as an error page; reading width is about 278px.",
+      "change": "Set the notice in small type (about 13px, 2 to 3 lines) with tighter padding and keep the wording, so the h1 begins within the first 400px.",
+      "acceptance_check": "At 390x844 the h1 is fully visible above y=600 on index, texts and every record page, with the notice still present.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "At 390 the notice is 3 lines at small type; measured h1 bottoms: index 220, texts 227, work 323, artist 211, relation 398, work-description 286, essay 248, short 211, all above y=600."
+    },
+    {
+      "id": "V-002",
+      "targets": ["J02", "J05"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain · default · all viewports",
+      "evidence": "evidence/index-1440x1000-full.png",
+      "observation": "The index runs through Verification, Releases, Texts, then 11 entity groups and 8 object-record groups as one continuous list of 183 links, with no jump list or anchors; object groups use raw enum headings such as CONDITION_REPORT and GIFT_ACCEPTANCE_AUTHORIZATION.",
+      "consequence": "The primary task (find a work or artist) means scrolling several screens with no way to jump, especially on mobile; raw enum headings read as database output.",
+      "change": "Add a compact in-page jump row under the intro (Works, Artists, Projects, Accessions, Object records, Texts) with anchor ids, and use readable group names (for example Condition reports) with the enum as secondary text.",
+      "acceptance_check": "A jump row reaches each group in one tap or click at all three widths, and no group heading shows UPPER_SNAKE_CASE.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Jump row of 7 chips with working anchors (Works target lands at top 96px under the header) at 390, 820 and 1440; no UPPER_SNAKE group headings found on index."
+    },
+    {
+      "id": "V-003",
+      "targets": ["J02"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain/texts · default · all viewports",
+      "evidence": "evidence/texts-1440x1000-full.png",
+      "observation": "186 texts are shown as long lists with no filter or search field, grouped by repository folder (docs/, policies/) in mono.",
+      "consequence": "Finding one text means scanning up to 186 rows; the folder grouping reflects the repository, not how a visitor looks for a text.",
+      "change": "Add a client-side filter input above the lists (title and path) and a jump list for the folders; keep the path as secondary text.",
+      "acceptance_check": "Typing part of a title narrows the list live; the field is reachable by keyboard and visible at 390px.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Filter by title on texts: typing \"system\" narrows 194 to 6 live at 390, 820 and 1440; folder jump chips present; input reachable and visible at 390."
+    },
+    {
+      "id": "V-004",
+      "targets": ["J06", "J05", "J02"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain/records/0x679e... (record-work) · default · 1440x1000",
+      "evidence": "evidence/record-work-1440x1000-01.png",
+      "observation": "The Relations list repeats the same link text per row (\"Themes and Variations #210\" in six of eight relations) under mono UPPER_SNAKE labels such as CURATED_ACQUISITION_BRINGS_TOGETHER_WORK; each row is two or three underlined links with no marker of which is the current record.",
+      "consequence": "The reader cannot tell what each link is or why it matters; repeated labels look like duplicates.",
+      "change": "Show each relation as a readable phrase (\"Created by Vera Molnar\"), omit or mute the link to the current record, and keep the enum as small secondary text.",
+      "acceptance_check": "No relation row links to the current record; relation labels are sentence case; no row has two links with identical text.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Record-work relations are grouped by sentence-case labels (Artist and work, Acquisition, Accession...); no link to the current record (0 self links); the repeated link text is gone."
+    },
+    {
+      "id": "V-005",
+      "targets": ["J06", "J08"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain and /texts · default · 1440x1000",
+      "evidence": "evidence/index-820x1000-03.png",
+      "observation": "Entity and text links on the index and texts pages are plain white text with a hairline divider and no underline or color, while links on record pages are blue and underlined.",
+      "consequence": "Link affordance changes between pages; index rows look like a static list until hovered.",
+      "change": "Use one link treatment (the token used on record pages) on index and texts rows, with hover and visible focus.",
+      "acceptance_check": "Index, texts and record links share the same color and focus ring.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Index, texts and record links all compute rgb(132,173,255) with underline treatment; entity lists on index render blue."
+    },
+    {
+      "id": "V-006",
+      "targets": ["J05", "J08", "J10"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "record-work-description, \"Show every field of the verified record\" open · 390x844 and 1440x1000",
+      "evidence": "evidence/judge-visual-disclosure-open-390.png",
+      "observation": "Opening the disclosure inserts about 19,800 characters, making the page about 26,000px tall at 390; there is no inner scroll container, copy control or way back to the section start.",
+      "consequence": "On mobile the disclosure buries the footer; the reader must scroll thousands of pixels to leave.",
+      "change": "Put the expanded record in a bounded scrollable region (max-height about 70vh) with a copy control, and add a Hide link at its end.",
+      "acceptance_check": "With the disclosure open the page grows by no more than about 1.5 viewports at 390; the content can be copied in one action.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Opened disclosure is a labelled scroll region 591px tall at 390 (page grows 2491 to 3153, under 1 viewport) and 698px at 1440; \"Copy the record as JSON\" button present."
+    },
+    {
+      "id": "V-007",
+      "targets": ["J06", "J13"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "record pages · default · 390x844",
+      "evidence": "evidence/record-work-390x844-04.png",
+      "observation": "Hashes, IPFS IDs and addresses wrap mid-string in mono with no copy or explorer affordance.",
+      "consequence": "Hard to compare or copy a value on a phone.",
+      "change": "Use break-all with a copy button for the hash, content ID and publisher rows.",
+      "acceptance_check": "Each hash row has a copy control at 390px and no row clips.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Copy buttons on Subject ID, Content hash, IPFS content ID and Publisher; clicking copies the value and shows \"Copied\"; rows wrap inside the column at 390 with no clipping."
+    },
+    {
+      "id": "V-008",
+      "targets": ["J02", "J08"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network-onchain/texts · default · all viewports",
+      "evidence": "evidence/judge-visual-r01-texts-filter-390.png",
+      "observation": "The new folder jump chips on the texts page show identical labels: \"Keys and Gates\" three times and the two \"Institutional practice\" variants differ only after the middle dot. At 390 the 12 chips fill almost two screens before the filter input.",
+      "consequence": "A visitor cannot tell which of three identical chips goes where; on a phone the jump row delays the filter.",
+      "change": "Make each chip label unique (append the folder or count, for example \"Keys and Gates (docs/gates)\") and keep the row to one or two lines on mobile, or place the filter above the chips.",
+      "acceptance_check": "No two chips on the texts jump row share a label, and at 390 the filter input is visible within the first 1000px.",
+      "admission": "regression",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Verification card with plain-language checks and finalized block time on the index",
+    "Verified badge plus one-sentence explanation directly under each record title",
+    "Essay reading column (about 770px, comfortable line length) and typographic rhythm of text records",
+    "Clean tablet layout with two-column lists and no overflow at any width",
+    "Dark iron-token palette with restrained blue accents and no decorative chrome",
+    "Back links on record pages and the working index to texts to record and back flow",
+    "Visible keyboard focus on the disclosure summary",
+    "Jump row with working anchors and live title filters on index and texts",
+    "Bounded scroll region and Copy as JSON for the full record",
+    "Copy buttons with Copied feedback on hash rows",
+    "Compact preview notice at 390",
+    "Grouped sentence-case Connections on record pages"
+  ]
+}
