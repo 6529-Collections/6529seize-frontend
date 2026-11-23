@@ -3,6 +3,7 @@ import { AI_DOWNLOAD_MESSAGES } from "@/i18n/namespaces/ai-download";
 import { ARTWORK_DOCUMENTATION_MESSAGES } from "@/i18n/namespaces/artwork-documentation";
 import { DESKTOP_DOWNLOAD_MESSAGES } from "@/i18n/namespaces/desktop-download";
 import { MUSEUM_MESSAGES } from "@/i18n/namespaces/museum";
+import { MUSEUM_ONCHAIN_MESSAGES } from "@/i18n/namespaces/museum-onchain";
 import { NETWORK_TDH_MESSAGES } from "@/i18n/namespaces/network-tdh";
 import { NETWORK_TDH_CONSOLIDATION_MESSAGES } from "@/i18n/namespaces/network-tdh-consolidation";
 import { PROVENANCE_GOVERNANCE_MESSAGES } from "@/i18n/namespaces/provenance-governance";
@@ -26,6 +27,7 @@ export const EN_US_MESSAGES = {
   ...ARTWORK_DOCUMENTATION_MESSAGES,
   ...DESKTOP_DOWNLOAD_MESSAGES,
   ...MUSEUM_MESSAGES,
+  ...MUSEUM_ONCHAIN_MESSAGES,
   ...NETWORK_TDH_MESSAGES,
   ...NETWORK_TDH_CONSOLIDATION_MESSAGES,
   ...PROVENANCE_GOVERNANCE_MESSAGES,

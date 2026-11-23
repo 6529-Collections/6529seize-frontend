@@ -1,0 +1,351 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "f93b7b3f39f45dbfb7e42a5b6090e3e0be011e34",
+  "coverage": [
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/index-1440x1000-full.png",
+        "evidence/record-text-short-1440x1000-full.png",
+        "evidence/texts-1440x1000-full.png"
+      ],
+      "findings": ["E-008"],
+      "note": "Release cards now describe their contents in plain words with the catalog and repository commit explained; the alt text names its work; only identical row titles in the texts groups and the 'Wave status observation' label remain."
+    },
+    "J12": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/record-relation-1440x1000-full.png",
+        "evidence/index-1440x1000-full.png"
+      ],
+      "findings": [],
+      "note": "Record, relation, status and entity labels resolve through museumOnchain messages with a labeled fallback; dates and numbers follow en-US and the source-language note shows. Unchanged by repair batch 2."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": ["I2", "J07"],
+      "severity": "P1",
+      "status": "resolved",
+      "where": "/museum/network-onchain/records/* (relation, work-description, text, work) and the index \u00c2\u00b7 default \u00c2\u00b7 all viewports \u00c2\u00b7 en-US",
+      "evidence": "evidence/record-relation-390x844-01.png",
+      "observation": "The eyebrow shows the schema enum (PUBLIC_RELATION, WORK_DESCRIPTION, PUBLIC_DOCUMENT). The relation record's H1 is the ID 6529NM-REL-0001. Relation rows are headed ARTIST_CREATES_WORK, PROJECT_CONTEXTUALIZES_WORK and INSTITUTION_HOLDS_COLLECTION in monospace. The index groups accession records under ACCESSION_LOT, CONDITION_REPORT, GIFT_ACCEPTANCE_AUTHORIZATION and WAVE_STATUS_OBSERVATION. Status reads 'published' or 'reviewed' in raw lowercase.",
+      "consequence": "The reader sees the registry's internal vocabulary as headlines and cannot tell what a record is without decoding it. The page reads as a database dump, not a museum publication.",
+      "change": "Map each record type and relation type to plain language through message keys (for example 'Relation', 'Condition report', 'Gift acceptance', 'Creator of', 'Holds collection'). Give relation records a readable title built from their references and keep 6529NM-REL-0001 as a secondary identifier. Capitalize status.",
+      "acceptance_check": "No UPPERCASE_UNDERSCORE enum is visible outside the 'On-chain facts' block on the index or any pinned record route. The relation record's H1 is a phrase naming its subjects.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-002",
+      "targets": ["I2", "J07"],
+      "severity": "P1",
+      "status": "resolved",
+      "where": "/museum/network-onchain/texts and text records \u00c2\u00b7 default \u00c2\u00b7 390x844, 820x1000, 1440x1000 \u00c2\u00b7 en-US",
+      "evidence": "evidence/texts-390x844-02.png",
+      "observation": "Texts are grouped by repository folder (Repository root, docs/, policies/, records/) and every title carries its repo path underneath, for example docs/data-architecture/casey-reas-implementation.md, which wraps mid-word on mobile. Text records repeat the path as a 'Source path' row. 156 of 186 texts sit in one 'records/' group.",
+      "consequence": "Folder names and file paths are developer structure, not public headlines. Readers cannot browse by subject and most texts are one undifferentiated list.",
+      "change": "Group by what a reader looks for (Policies, texts for each accession, artist essays, data architecture, institutional practice) with message-backed labels, keyed on the folder. Show the path only inside the on-chain facts block, not in list rows.",
+      "acceptance_check": "No list row on the texts index shows a file path or '.md' at any viewport. Group headings are plain-language labels and no group exceeds about 25 items without a sub-heading.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-003",
+      "targets": ["I2", "J07"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain \u00c2\u00b7 default \u00c2\u00b7 1440x1000 \u00c2\u00b7 en-US",
+      "evidence": "evidence/index-1440x1000-01.png",
+      "observation": "Round 02: release cards read 'The Museum's 402 catalog records...' and 'The Museum's 186 texts, each a record of its own'; no PUBLIC_DOCUMENT or Test label; 'Catalog content ID' and 'Museum repository commit' each carry a help line; the shared catalog is stated (evidence/text/index-1440x1000.txt).",
+      "consequence": "Registry labels and git terms leak into the public page. The identical manifest on two releases looks like a mistake, and the reader cannot tell what 'manifest' or 'source commit' proves.",
+      "change": "Show a plain description per release ('Release 1: the Museum's 402 catalog records', 'Release 2: the Museum's 186 texts') and keep the on-chain label in the facts. Add one sentence: 'Both releases list the same catalog manifest.' Explain 'Manifest' and 'Source commit' in a line each.",
+      "acceptance_check": "Release cards contain no enum or test-label wording. The shared manifest is stated as intended. A reviewer can say what the manifest is from the page alone.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-004",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "work, artist and relation records, text records \u00c2\u00b7 default \u00c2\u00b7 all viewports \u00c2\u00b7 en-US",
+      "evidence": "evidence/record-work-1440x1000-01.png",
+      "observation": "Round 02: the alt-text record now shows 'About Vera Moln\u00e1r and Martin Grasser, Themes and Variations #210' under its title (evidence/text/record-text-short-1440x1000.txt); work and artist pages already had grouped relations with no self-title rows.",
+      "consequence": "The reader cannot learn from a work page who made it, how it was acquired or what the linked records are. Untitled short texts are unusable out of context.",
+      "change": "Render relations as grouped lists under plain headings ('Created by', 'Part of project', 'Acquired through', 'Media'), drop the page's own title from its rows, and label ID-only links by record type ('Condition report 6529NM.2026.003.COND.01'). Prefix short text titles with their subject when the record names one ('Alt text: Themes and Variations #210').",
+      "acceptance_check": "On the work and artist pages no row repeats the page's own title as a link target and no link text is a bare ID. The alt-text page names the work it describes.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-005",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain and /texts, all records \u00c2\u00b7 default \u00c2\u00b7 1440x1000 \u00c2\u00b7 en-US",
+      "evidence": "evidence/index-1440x1000-full.png",
+      "observation": "Every list row ends in a 'Verified' badge (hundreds on the index, 186 on texts). Each record page repeats the state three times: the badge, the explanatory sentence, and 'Verification: Verified', with 'Computed hash' equal to 'Content hash' directly above.",
+      "consequence": "A state shared by every row carries no information and buries the exception that would matter. The duplicated hash adds noise to the facts list.",
+      "change": "Keep the '588 of 588 records verified' summary and show a badge only on rows that are not verified. On a record, state verification once and show 'Computed hash' only when it differs from the stored hash.",
+      "acceptance_check": "Verified rows on the index and texts pages show no badge. A record page states verification once. An unverifiable record still shows its state prominently.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-006",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain \u00c2\u00b7 default \u00c2\u00b7 1440x1000 \u00c2\u00b7 en-US",
+      "evidence": "evidence/index-1440x1000-01.png",
+      "observation": "Verification checks use unexplained terms: 'ProvenanceRegistry v1.0.0-rc.1', 'IProvenanceRegistry interface (ERC-165)', 'finalized block', 'digest', 'content ID', 'RFC8785_JCS', 'Keccak-256'. The intro says 'Its text is fetched' although most records are JSON. The block number and registry address are not linked to an explorer.",
+      "consequence": "Visitors cannot tell what is checked or why it matters. The claims are accurate but not inspectable by a non-specialist.",
+      "change": "Lead with one sentence: 'Each record's bytes are fetched from IPFS and hashed; the hash must equal the one stored in the contract.' Keep technical names as detail, link the registry and block to the Sepolia explorer, and change 'Its text' to 'Its content'.",
+      "acceptance_check": "A non-engineer can state from the Verification card and intro what is checked. The registry address and block link to an explorer.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-007",
+      "targets": ["J12", "J07"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "all record routes \u00c2\u00b7 default \u00c2\u00b7 en-US",
+      "evidence": "evidence/record-relation-1440x1000-full.png",
+      "observation": "Entity types and states come from message keys, but record type, relation type, schema, canonicalization, status and medium render straight from record values with no message mapping.",
+      "consequence": "In any other locale the labels most readers see would stay English and unmapped, so localization cannot be shown for the surface's own labels.",
+      "change": "Add message keys for each record type, relation type and status, falling back to a labeled raw value only for unknown codes. Keep record prose in its source language and say so on the page.",
+      "acceptance_check": "Every enum value on the pinned routes resolves through museumOnchain messages. An unknown code renders as a labeled raw value.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-008",
+      "targets": ["J07"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network-onchain/texts and relation record \u00c2\u00b7 default \u00c2\u00b7 all viewports \u00c2\u00b7 en-US",
+      "evidence": "evidence/texts-1440x1000.txt",
+      "observation": "Round 02, unchanged: under 'Proposed gift: Conflict at Its Edges' three rows are still titled 'Conflict at Its Edges' (plus two 'Conflict at its edges') and the Keys and Gates groups repeat titles (evidence/text/texts-1440x1000.txt). The GOV IDs on the relation record are now labeled 'a Museum record not published in this registry', which resolves that half.",
+      "consequence": "Identical row titles cannot be told apart before opening; an unexplained ID reads as a broken link.",
+      "change": "Add the record's own subtitle or kind to duplicate titles in the same group.",
+      "acceptance_check": "No two rows in one texts group share a title without a distinguishing detail.",
+      "admission": "regression",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Test-preview notice at the top of every page: names Sepolia and IPFS and says plainly it is not the Museum's record on mainnet",
+    "'588 of 588 records verified' with block number and UTC time, an exact and checkable claim",
+    "Contract check list with Passed/Failed per check",
+    "Record pages that lead with the title and one-line verification result and keep hashes, CID and addresses under 'On-chain facts' in monospace",
+    "Failure copy ('shown without content', 'No IPFS gateway served the bytes') that says what happened and what is shown",
+    "Texts rendered from verified Markdown with footnotes and italics intact in a readable measure",
+    "Plain-language group labels and eyebrows on the texts index and records",
+    "Verification card lead sentence plus Etherscan links for block and registry",
+    "Silent verified rows, with the 588 of 588 summary carrying the claim",
+    "Release cards that say what each release holds, with help lines for catalog ID and repository commit",
+    "Alt text record that names the work it describes"
+  ]
+}
