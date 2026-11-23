@@ -104,7 +104,7 @@ function CardRow({
   copy: FilterableGroupsCopy;
 }>) {
   return (
-    <li className="tw-min-w-0">
+    <li className="tw-mb-6 tw-min-w-0 tw-break-inside-avoid">
       <VerifiedImage
         derivatives={image.derivatives}
         alt={image.alt}
@@ -141,7 +141,7 @@ function CardGroup({
       {withImages.length === 0 ? null : (
         <ul
           aria-labelledby={group.anchor}
-          className="tw-m-0 tw-grid tw-list-none tw-grid-cols-1 tw-items-start tw-gap-x-4 tw-gap-y-6 tw-p-0 min-[480px]:tw-grid-cols-2 sm:tw-grid-cols-3 lg:tw-grid-cols-4"
+          className="tw-m-0 tw-list-none tw-columns-1 tw-gap-x-4 tw-p-0 min-[480px]:tw-columns-2 sm:tw-columns-3 lg:tw-columns-4"
         >
           {withImages.map(({ item, image }) => (
             <CardRow key={item.key} item={item} image={image} copy={copy} />
@@ -210,12 +210,15 @@ export function FilterableGroups({
   copy,
   headingLevel = 3,
   afterFilter,
+  backLink,
 }: Readonly<{
   groups: readonly FilterableGroup[];
   copy: FilterableGroupsCopy;
   headingLevel?: 2 | 3;
   /** Rendered between the filter and the groups, such as a jump row. */
   afterFilter?: ReactNode;
+  /** A link after each group back to the page's section list. */
+  backLink?: { readonly href: string; readonly label: string };
 }>) {
   const inputId = useId();
   const [query, setQuery] = useState("");
@@ -299,6 +302,13 @@ export function FilterableGroups({
             </span>
           </Heading>
           <GroupItems group={group} copy={copy} filtering={needle !== ""} />
+          {backLink === undefined ? null : (
+            <p className="tw-m-0 tw-mt-3 tw-text-sm">
+              <a href={backLink.href} className={LINK}>
+                {backLink.label}
+              </a>
+            </p>
+          )}
         </section>
       ))}
     </div>

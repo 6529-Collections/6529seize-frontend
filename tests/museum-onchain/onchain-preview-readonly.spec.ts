@@ -8,7 +8,8 @@ import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
 
 // The unlinked on-chain Museum preview reads the Sepolia ProvenanceRegistry
 // and 6529 IPFS on the server. A cold load reads the whole registry, so the
-// first navigation gets a long timeout.
+// first navigation gets a long timeout. A server started with
+// MUSEUM_ONCHAIN_FIXTURE_ROOT reads a local copy of the release instead.
 const INDEX_PATH = "/museum/network-onchain";
 const TEXTS_PATH = "/museum/network-onchain/texts";
 const COLD_LOAD_TIMEOUT_MS = 120_000;
@@ -19,7 +20,7 @@ const RECORD_URL_PATTERN =
 test.describe("on-chain Museum preview", () => {
   test.describe.configure({ timeout: 240_000 });
 
-  test("verifies every record against the chain and opens a verified record", async ({
+  test("verifies every profile record against the chain and opens a verified work", async ({
     page,
   }, testInfo) => {
     page.setDefaultNavigationTimeout(COLD_LOAD_TIMEOUT_MS);
@@ -29,7 +30,8 @@ test.describe("on-chain Museum preview", () => {
     await expect(
       page.getByRole("heading", {
         level: 1,
-        name: "The Museum, read from the chain",
+        // On fixtures the heading says the page is a test preview.
+        name: /^(?:The Museum, read from the chain|The Museum's records, from a test preview)$/u,
       })
     ).toBeVisible();
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
@@ -48,15 +50,27 @@ test.describe("on-chain Museum preview", () => {
     const verification = page.getByRole("region", {
       name: "How this is checked",
     });
-    await expect(verification.getByText(/: Passed$/u)).toHaveCount(5);
+    // Six checks pass; on fixtures the three contract checks are not run.
+    await expect(
+      verification.getByText(/: (?:Passed|Not checked: read from fixtures)$/u)
+    ).toHaveCount(6);
+    await expect(verification.getByText(/: Passed$/u)).not.toHaveCount(0);
     await expect(verification.getByText(/: Failed$/u)).toHaveCount(0);
+    await expect(
+      verification.getByRole("heading", { name: "Registry declaration" })
+    ).toBeVisible();
+    await expect(
+      verification.getByText("6529networkmuseum", { exact: true })
+    ).toBeVisible();
 
     if (testInfo.project.name === MOBILE_PROJECT) {
       await expectNoHorizontalOverflow(page);
     }
 
     const works = page
-      .getByRole("list", { name: /^Works in the collection/u })
+      // Works in the collection are grouped by the accession that brought
+      // them in.
+      .getByRole("list", { name: /accession 6529NM\.2026\.003/u })
       .first();
     // Work cards load their images as they near the viewport, and show them
     // only after the browser checks their SHA-256.
@@ -80,21 +94,28 @@ test.describe("on-chain Museum preview", () => {
       page.getByRole("heading", { level: 2, name: "On-chain facts" })
     ).toBeVisible();
     await expect(
-      page.getByText("PUBLIC_ENTITY", { exact: true }).first()
+      page.getByText("PRV_ENTITY", { exact: true }).first()
     ).toBeVisible();
     const figure = page.getByRole("figure");
     await expect(
       figure.getByRole("img", { name: /cobalt blue and warm white/u })
     ).toBeVisible({ timeout: 60_000 });
+    // The credit names the license; the rights line says some uses are
+    // refused and links to the PRV_RIGHTS record.
     await expect(
-      figure.getByText(/No permission is asserted beyond CC BY-NC 4\.0/u)
+      figure.getByText(/^CC BY-NC 4\.0, with some uses refused\./u)
+    ).toBeVisible();
+    await expect(
+      figure.getByRole("link", { name: "Full rights statement" })
     ).toBeVisible();
     if (testInfo.project.name === MOBILE_PROJECT) {
       await expectNoHorizontalOverflow(page);
     }
   });
 
-  test("renders a verified text from release 2", async ({ page }, testInfo) => {
+  test("renders a verified text that a PRV_DOCUMENT record names", async ({
+    page,
+  }, testInfo) => {
     page.setDefaultNavigationTimeout(COLD_LOAD_TIMEOUT_MS);
     await gotoDocumentWithTransientRetry(page, TEXTS_PATH);
     await waitForRouteReady(page, { timeout: COLD_LOAD_TIMEOUT_MS });
@@ -112,9 +133,9 @@ test.describe("on-chain Museum preview", () => {
       page.getByText("Verified", { exact: true }).first()
     ).toBeVisible();
     await expect(
-      page.getByText("PUBLIC_DOCUMENT", { exact: true }).first()
+      page.getByText("PRV_DOCUMENT", { exact: true }).first()
     ).toBeVisible();
-    await expect(page.getByText(/LF_NORMALIZED/u).first()).toBeVisible();
+    await expect(page.getByText("Text content ID").first()).toBeVisible();
     await expect(page.getByRole("region", { name: "Text" })).toBeVisible();
     if (testInfo.project.name === MOBILE_PROJECT) {
       await expectNoHorizontalOverflow(page);

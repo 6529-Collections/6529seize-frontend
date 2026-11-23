@@ -1,11 +1,12 @@
-// Copied from 6529-Collections/6529-provenance-app src/config/chains.ts at commit 8496bfbb6347c265ec74c7e361612d97ccdaf731.
+// Copied from 6529-Collections/6529-provenance-app src/config/chains.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import { defineChain, type Chain } from "viem";
 import { mainnet, sepolia } from "viem/chains";
 
 /** A local Anvil node, usually a fork of Sepolia started with --chain-id 31337. */
-export const anvil = defineChain({
+// Annotated so the emitted declaration names only viem's public types.
+export const anvil: Chain & { readonly id: 31337 } = defineChain({
   id: 31337,
   name: "Anvil (local)",
   nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
@@ -14,7 +15,11 @@ export const anvil = defineChain({
   testnet: true,
 });
 
-export const supportedChains = [sepolia, mainnet, anvil] as const satisfies readonly Chain[];
+export const supportedChains: readonly [typeof sepolia, typeof mainnet, typeof anvil] = [
+  sepolia,
+  mainnet,
+  anvil,
+] as const;
 export type SupportedChainId = (typeof supportedChains)[number]["id"];
 
 /**

@@ -1,0 +1,92 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "profile": "museum",
+  "run_id": "2026-11-23-museum-onchain-profile",
+  "candidate": {
+    "commit": "ad734e90af",
+    "build": "production"
+  },
+  "scope": {
+    "routes": [
+      "/museum/network-onchain",
+      "/museum/network-onchain/texts",
+      "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290",
+      "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817",
+      "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da",
+      "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51",
+      "/museum/network-onchain/records/0x660601ba82f5de584629bb9d5f4fa3bc77a8fa149fab40bd9204c75330e6e171",
+      "/museum/network-onchain/records/0x27ef6b7d3082c4ca26fc1cbab18ef8ba7066658bd07f7a482573d968fce4db88",
+      "/museum/network-onchain/records/0xc81ac531cb09ca290458992c05dd822c115e38a09d196513f8dc5a736bd02b03",
+      "/museum/network-onchain/records/0xb75094e65e53cf03c43558ca8c5772bcf0eb6b577b5bc34d0387bcc2ba771512",
+      "/museum/network-onchain/records/0x5d1c1d501d1fd3c522748bb04d249bf6cded2a59e952223390312a62313503ed",
+      "/museum/network-onchain/records/0xab30738b6d04e421c7d674ac0bb251c77c4aa9963b35da8847310a68908d5ed8",
+      "/museum/network-onchain/records/0x7c4f3fef02861d9e5d0e4d4508e2a08905d8e69161b4eb511b27301ff2598964",
+      "/museum/network-onchain/records/0xdf7210988d05711157492a2ba0358cd9d3b8c424a6bffd98dbb9ba6b7a9c1521",
+      "/museum/network-onchain/records/0x958cf32f4402d4bd580ebd1357016522b88baf58d639288486d6f6a2e52bd97a"
+    ],
+    "templates": {
+      "/museum/network-onchain": "Index: works in and not in the collection with verified images, artists, projects, acquisitions, programs, accessions, accessioned objects, collections, institutions, publications, people, media references, object records (decisions, rights, observations), link to the texts, How this is checked (profile hashing, subject IDs, texts, images, six contract and release checks, the registry declaration) and the release",
+      "/museum/network-onchain/texts": "Index of the 186 PRV_DOCUMENT texts grouped by the Museum folder they come from",
+      "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290": "PRV_ENTITY work with a square accession image and a PRV_RIGHTS licence: Vera Molnár and Martin Grasser, Themes and Variations #210",
+      "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817": "PRV_ENTITY work with a portrait program image found through its digital object's file: Take the Key!",
+      "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da": "PRV_ENTITY work with no published image (generative): Casey Reas, CENTURY #31",
+      "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51": "PRV_ENTITY agent shown as an artist: Casey Reas",
+      "/museum/network-onchain/records/0x660601ba82f5de584629bb9d5f4fa3bc77a8fa149fab40bd9204c75330e6e171": "PRV_ENTITY object (accessioned object 6529NM.2026.001.01)",
+      "/museum/network-onchain/records/0x27ef6b7d3082c4ca26fc1cbab18ef8ba7066658bd07f7a482573d968fce4db88": "PRV_ENTITY digital_object with a file in body.media",
+      "/museum/network-onchain/records/0xc81ac531cb09ca290458992c05dd822c115e38a09d196513f8dc5a736bd02b03": "PRV_RELATION held_by",
+      "/museum/network-onchain/records/0xb75094e65e53cf03c43558ca8c5772bcf0eb6b577b5bc34d0387bcc2ba771512": "PRV_RIGHTS licence for CENTURY #31",
+      "/museum/network-onchain/records/0x5d1c1d501d1fd3c522748bb04d249bf6cded2a59e952223390312a62313503ed": "PRV_DECISION accession for lot 6529NM.2026.001",
+      "/museum/network-onchain/records/0xab30738b6d04e421c7d674ac0bb251c77c4aa9963b35da8847310a68908d5ed8": "PRV_OBSERVATION api_status with a URL target",
+      "/museum/network-onchain/records/0x7c4f3fef02861d9e5d0e4d4508e2a08905d8e69161b4eb511b27301ff2598964": "PRV_REGISTRY declaration",
+      "/museum/network-onchain/records/0xdf7210988d05711157492a2ba0358cd9d3b8c424a6bffd98dbb9ba6b7a9c1521": "PRV_DOCUMENT essay, long text: Casey Reas collection essay",
+      "/museum/network-onchain/records/0x958cf32f4402d4bd580ebd1357016522b88baf58d639288486d6f6a2e52bd97a": "PRV_DOCUMENT report, short text: alt text for accession 6529NM.2026.003"
+    },
+    "audience": "Visitors and reviewers who want to read the 6529 Network Museum's records and texts and see that each one is the exact record the Museum published on Ethereum",
+    "primary_task": "Find a work, artist or text in the Museum's on-chain record, read it, and see how it was checked against the chain",
+    "release_intent": "Read the Museum from a new Sepolia registry whose 589 records use the 6529 provenance profile v1 (PRV_ENTITY, PRV_RELATION, PRV_DOCUMENT, PRV_RIGHTS, PRV_DECISION, PRV_OBSERVATION, PRV_REGISTRY). The same pages as before, with record handling decided by profile family and kind, the registry declaration shown where the page explains its source, texts read through PRV_DOCUMENT records, and How this is checked rewritten for profile hashing and subject IDs.",
+    "states": ["default"],
+    "viewports": ["1440x1000", "820x1000", "390x844"],
+    "locales": ["en-US"]
+  },
+  "not_applicable": {},
+  "references": [
+    "/museum/network",
+    "/museum/network/works",
+    "/museum/network/artists/casey-reas"
+  ],
+  "decisions": [
+    "The new registry is not deployed yet. The build reads local fixtures: the release's 589 exact payloads served as a registry snapshot would be, with texts, the file index, manifests and images fetched from 6529 IPFS and checked as on the live route. The page says it reads fixtures, the block line is replaced by that notice, and the contract checks describe the fixture. This is a known, intended difference from the live page.",
+    "The route set is outside /museum/network on purpose: this preview trusts only the chain and IPFS, so it does not use the Museum shell or navigation.",
+    "Images come only from the presentation manifests the file index lists: 22 works. The seven Casey Reas works have no image (the Museum presents them through live generators) and say so.",
+    "The record route has 589 instances across 7 families and 27 kinds. The thirteen record cells are the distinct templates.",
+    "Failure states (hash mismatch, record filed under another subject, text mismatch or unavailable, deleted, registry unavailable, image mismatch) are implemented and unit tested; only the default state is pinned.",
+    "Console errors from requests to localhost:3000 (site settings and cookie consent, refused by CSP) come from the site shell's local API setting on every route of a locally served build and are not part of this change.",
+    "J13 applies because the surface presents chain state. It has no wallet prompt, signature or transaction; S1-S6 are judged on what is on screen.",
+    "Tiles: each capture has viewport-height tiles (-01.png onward), at most 14; automated-checks.json marks truncated tiles, verified images (blob: sources) and any image status still shown. The full-page capture (-full.png) and text/<slug>-<viewport>.txt cover the whole page. Contact-sheet cells are cut at 2400 px.",
+    "Earlier runs judged the previous registry's pages; their findings are not carried into this run."
+  ],
+  "evidence_index": {
+    "captures": "evidence/<slug>-<viewport>-full.png, evidence/<slug>-<viewport>-NN.png tiles, evidence/text/<slug>-<viewport>.txt, evidence/automated-checks.json, evidence/contact-sheet-<viewport>.png",
+    "slugs": {
+      "/museum/network-onchain": "index",
+      "/museum/network-onchain/texts": "texts",
+      "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290": "record-work",
+      "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817": "record-work-portrait",
+      "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da": "record-work-noimage",
+      "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51": "record-artist",
+      "/museum/network-onchain/records/0x660601ba82f5de584629bb9d5f4fa3bc77a8fa149fab40bd9204c75330e6e171": "record-object",
+      "/museum/network-onchain/records/0x27ef6b7d3082c4ca26fc1cbab18ef8ba7066658bd07f7a482573d968fce4db88": "record-digital-object",
+      "/museum/network-onchain/records/0xc81ac531cb09ca290458992c05dd822c115e38a09d196513f8dc5a736bd02b03": "record-relation",
+      "/museum/network-onchain/records/0xb75094e65e53cf03c43558ca8c5772bcf0eb6b577b5bc34d0387bcc2ba771512": "record-rights",
+      "/museum/network-onchain/records/0x5d1c1d501d1fd3c522748bb04d249bf6cded2a59e952223390312a62313503ed": "record-decision",
+      "/museum/network-onchain/records/0xab30738b6d04e421c7d674ac0bb251c77c4aa9963b35da8847310a68908d5ed8": "record-observation",
+      "/museum/network-onchain/records/0x7c4f3fef02861d9e5d0e4d4508e2a08905d8e69161b4eb511b27301ff2598964": "record-declaration",
+      "/museum/network-onchain/records/0xdf7210988d05711157492a2ba0358cd9d3b8c424a6bffd98dbb9ba6b7a9c1521": "record-text-essay",
+      "/museum/network-onchain/records/0x958cf32f4402d4bd580ebd1357016522b88baf58d639288486d6f6a2e52bd97a": "record-text-short"
+    },
+    "live_build": "Production build of the candidate served at http://localhost:3343 with fixture data while the round is judged"
+  },
+  "budget": {
+    "repair_batches": 6
+  }
+}

@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/verify.ts at commit 8496bfbb6347c265ec74c7e361612d97ccdaf731.
+// Copied from 6529-Collections/6529-provenance-app src/verify.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import { bytesToHex, hexToBytes, keccak256, sha256, type Hex } from "viem";
@@ -106,9 +106,20 @@ export type CidCheck =
   | { status: "absent" }
   | { status: "invalid"; reason: string };
 
+/**
+ * What the digest covers. `whole`: every fetched byte went into the canonical bytes. `member`: only
+ * the JSON value at `canonical.pointer` did, and the rest of the file, such as an envelope around a
+ * payload, is not checked by this result.
+ */
+export type VerifyScope = "whole" | "member";
+
 export interface VerifyResult {
-  /** True when the digest of the canonical bytes equals the registry's digest. */
+  /**
+   * True when the digest of the canonical bytes equals the registry's digest. Read it with `scope`:
+   * a match with scope `member` says nothing about the file outside that member.
+   */
   digestMatch: boolean;
+  scope: VerifyScope;
   computedDigest: Hex;
   expectedDigest: Hex;
   algorithm: number;
@@ -148,8 +159,10 @@ function checkCid(cidHex: Hex | undefined, canonicalBytes: Uint8Array): CidCheck
  *
  * For JCS, when the whole document does not match and no pointer was given, the check tries each
  * top-level member of a JSON object, because institutions often serve a record inside a wrapper
- * (for example an envelope with the hashed value under "payload"). The result names the member
- * that matched; nothing about a particular institution's format is assumed.
+ * (for example an envelope with the hashed value under "payload"). The result then has scope
+ * `member` and names the member in `canonical.pointer`. Only that member is verified: a file with a
+ * genuine payload and a forged envelope still matches, so a caller that shows the envelope's fields
+ * must not present them as verified. Nothing about a particular institution's format is assumed.
  */
 export function verifyBytes(fetched: Uint8Array, expected: Expected, pointer?: string): VerifyResult {
   const kind = canonicalizationKind(expected.canonicalizationLiteral);
@@ -161,6 +174,7 @@ export function verifyBytes(fetched: Uint8Array, expected: Expected, pointer?: s
     const digestMatch = computedDigest.toLowerCase() === expected.digest.toLowerCase();
     return {
       digestMatch,
+      scope: p === "" ? "whole" : "member",
       computedDigest,
       expectedDigest: expected.digest,
       algorithm: expected.algorithm,
@@ -175,6 +189,7 @@ export function verifyBytes(fetched: Uint8Array, expected: Expected, pointer?: s
 
   const failed = (error: string): VerifyResult => ({
     digestMatch: false,
+    scope: pointer ? "member" : "whole",
     computedDigest: "0x",
     expectedDigest: expected.digest,
     algorithm: expected.algorithm,
