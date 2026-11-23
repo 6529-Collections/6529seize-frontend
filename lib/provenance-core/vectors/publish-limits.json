@@ -511,9 +511,40 @@
       "name": "Desktop forwarded wallet",
       "limits": {
         "maxCalldataBytes": 10240,
-        "maxRecordsPerCall": 100
+        "maxRecordsPerCall": 20
       },
       "maxRecords": 17
     }
-  ]
+  ],
+  "smallRecords": {
+    "description": "The same records with empty labels. Even then 10 KiB holds fewer than 20 valid records, so the forwarded wallet's 20-record limit does not bind first.",
+    "limits": {
+      "maxCalldataBytes": 10240,
+      "maxRecordsPerCall": 20
+    },
+    "maxRecords": 19
+  },
+  "capabilities": {
+    "description": "wallet_getCapabilities answers and the sender limits read from them (readSenderCapability, chain 11155111).",
+    "cases": [
+      {
+        "answer": {
+          "0xaa36a7": {
+            "desktopForwarding": {
+              "maxTransactionDataBytes": 10240
+            }
+          }
+        },
+        "maxCalldataBytes": 10240,
+        "maxRecordsPerCall": 20,
+        "setsGas": false
+      },
+      {
+        "answer": {},
+        "maxCalldataBytes": 65536,
+        "maxRecordsPerCall": 100,
+        "setsGas": true
+      }
+    ]
+  }
 }

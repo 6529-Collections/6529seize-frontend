@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/simulate.ts at commit 117e850026f6e1d754e76a687e526f51cceca4a0.
+// Copied from 6529-Collections/6529-provenance-app src/simulate.ts at commit a01790eb709958ed2367e1fd4345a4c559b08330.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import {
@@ -39,7 +39,7 @@ export interface SimCall {
   to: Address;
   data: Hex;
   /** The transaction's gas limit. Under Glamsterdam a transaction can need a limit well above its gas used. */
-  gas?: bigint;
+  gas?: bigint | undefined;
 }
 
 export interface SimResult {
@@ -47,7 +47,7 @@ export interface SimResult {
   gasUsed: bigint;
   logs: Log[];
   returnData: Hex;
-  error?: string;
+  error?: string | undefined;
 }
 
 export interface TxSimulation {
@@ -55,17 +55,17 @@ export interface TxSimulation {
   ok: boolean;
   gasUsed: bigint;
   events: { name: string; args: Record<string, unknown> }[];
-  error?: string;
+  error?: string | undefined;
   /** For a failed Safe transaction, the action that reverted when the calls ran one by one. */
-  failedAction?: { index: number; description: string; error: string };
-  safeTx?: SafeTx;
-  safeTxHash?: Hex;
+  failedAction?: { index: number; description: string; error: string } | undefined;
+  safeTx?: SafeTx | undefined;
+  safeTxHash?: Hex | undefined;
 }
 
 export interface PlanSimulation {
   method: "eth_simulateV1";
   block: bigint;
-  gasLimit?: bigint;
+  gasLimit?: bigint | undefined;
   txs: TxSimulation[];
 }
 

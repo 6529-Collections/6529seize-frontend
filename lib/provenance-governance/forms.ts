@@ -89,7 +89,7 @@ export type DraftResult =
       ok: false;
       field: keyof GovernanceDraft;
       key: FormProblemKey;
-      detail?: string;
+      detail?: string | undefined;
     };
 
 const isBytes32 = (s: string): s is Hex => isHex(s) && s.length === 66;

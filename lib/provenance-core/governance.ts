@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/governance.ts at commit 117e850026f6e1d754e76a687e526f51cceca4a0.
+// Copied from 6529-Collections/6529-provenance-app src/governance.ts at commit a01790eb709958ed2367e1fd4345a4c559b08330.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import {
@@ -32,10 +32,11 @@ import {
  * Governance: the calls the owner Safe signs. Publishing (openRelease, publish, sealRelease) is
  * not governance; a publisher key sends it as ordinary transactions (see publish.ts).
  *
- * The rules match the SafeTx schema 6529 Desktop's wallet forwarding enforces: each high-impact
- * call is its own SafeTx (operation 0 to the registry); normal calls go 2 to 16 at a time through
- * MultiSendCallOnly (operation 1); value, safeTxGas, baseGas and gasPrice are 0; gasToken and
- * refundReceiver are the zero address; the nonce fits in 2^53 - 1; data is at most 7,756 bytes.
+ * The rules match the SafeTx schema 6529 Desktop's wallet forwarding enforces: the deletes,
+ * freeze, declareSuccessor, transferOwnership and acceptOwnership are single-call SafeTxs
+ * (operation 0 to the registry); other calls go 2 to 16 at a time through MultiSendCallOnly
+ * (operation 1); value, safeTxGas, baseGas and gasPrice are 0; gasToken and refundReceiver are the
+ * zero address; the nonce fits in 2^53 - 1; the typed data is at most 16 Ki characters of JSON.
  */
 
 export type GovernanceRisk = "high" | "normal";
@@ -54,14 +55,30 @@ const GOVERNANCE_KINDS = new Set<Action["kind"]>([
   "acceptOwnership",
 ]);
 
-/** Largest SafeTx data the Desktop signing schema accepts (16 Ki characters of typed data). */
-export const MAX_SAFETX_DATA_BYTES = 7756;
+/** Largest eth_signTypedData_v4 JSON, in characters, that the Desktop signing schema accepts. */
+export const MAX_TYPED_DATA_CHARS = 16 * 1024;
 export const MAX_BATCH_CALLS = 16;
 export const MIN_BATCH_CALLS = 2;
 const MAX_CID_BYTES = 128;
 const MAX_NONCE = 2n ** 53n - 1n;
 
-/** High impact: deletions, freeze, successor, ownership, and granting a publisher key. */
+const ZERO32 = `0x${"00".repeat(32)}`;
+
+/** Calls that must be a SafeTx of their own, never inside a batch. */
+export const SINGLE_CALL_ONLY: ReadonlySet<Action["kind"]> = new Set([
+  "deleteVersion",
+  "deleteVersions",
+  "deleteSubject",
+  "freeze",
+  "declareSuccessor",
+  "transferOwnership",
+  "acceptOwnership",
+]);
+
+/**
+ * High impact: deletions, freeze, successor, ownership, and granting a publisher key. Granting a
+ * key is high impact but may share a batch; the other high-impact calls are single-call only.
+ */
 export function riskOf(a: Action): GovernanceRisk {
   if (a.kind === "setPublisher") return a.authorized ? "high" : "normal";
   return a.kind.startsWith("register") ? "normal" : "high";
@@ -84,14 +101,22 @@ export function governanceCallProblem(a: Action): string | undefined {
       if (literalProblem(a.literal)) return literalProblem(a.literal);
       if (a.documentHash.algorithm !== 1 && a.documentHash.algorithm !== 2)
         return "The document hash algorithm is 1 or 2.";
+      if (a.documentHash.digest.toLowerCase() === ZERO32) return "The document digest is zero.";
       if (size(a.cid) > MAX_CID_BYTES) return "The schema CID is over 128 bytes.";
       if (a.document !== "0x")
         return "Register the schema by hash and CID only; its document is not stored on-chain from a SafeTx.";
       return undefined;
     case "setPublisher":
       return isAddressEqual(a.publisher, zeroAddress) ? "The publisher is the zero address." : undefined;
+    case "deleteVersion":
+      if (a.subjectId.toLowerCase() === ZERO32) return "The subject ID is zero.";
+      return a.version === 0 ? "Versions are numbered from 1." : undefined;
     case "deleteVersions":
+      if (a.subjectId.toLowerCase() === ZERO32) return "The subject ID is zero.";
+      if (a.fromVersion === 0 || a.toVersion === 0) return "Versions are numbered from 1.";
       return a.fromVersion > a.toVersion ? "The first version is after the last." : undefined;
+    case "deleteSubject":
+      return a.subjectId.toLowerCase() === ZERO32 ? "The subject ID is zero." : undefined;
     case "declareSuccessor":
       return isAddressEqual(a.successor, zeroAddress) ? "The successor is the zero address." : undefined;
     case "transferOwnership":
@@ -110,9 +135,9 @@ export interface GovernanceSafeTx {
 
 /**
  * Turns governance calls into SafeTxs for one pinned registry, in order, with consecutive nonces
- * from `nonce`. A high-impact call always gets a SafeTx of its own. Consecutive normal calls share
- * a MultiSendCallOnly batch while it stays within 16 calls and 7,756 data bytes; a lone normal
- * call goes directly. Throws on a call that is not governance or breaks a rule.
+ * from `nonce`. A single-call-only call always gets a SafeTx of its own. Other consecutive calls
+ * share a MultiSendCallOnly batch while it stays within 16 calls and 16 Ki characters of typed
+ * data; a lone call goes directly. Throws on a call that is not governance or breaks a rule.
  */
 export function buildGovernanceSafeTxs(
   pin: RegistryPin,
@@ -130,16 +155,16 @@ export function buildGovernanceSafeTxs(
     batch = [];
   };
   for (const a of actions) {
-    if (riskOf(a) === "high") {
+    if (SINGLE_CALL_ONLY.has(a.kind)) {
       flush();
       groups.push([a]);
       continue;
     }
     const next = [...batch, a];
-    if (next.length > MAX_BATCH_CALLS || dataBytes(pin.registry, next) > MAX_SAFETX_DATA_BYTES) flush();
+    if (next.length > MAX_BATCH_CALLS || typedDataChars(pin, next) > MAX_TYPED_DATA_CHARS) flush();
     batch.push(a);
-    if (dataBytes(pin.registry, batch) > MAX_SAFETX_DATA_BYTES) {
-      throw new Error(`${describeAction(a)} alone is over ${MAX_SAFETX_DATA_BYTES} bytes of SafeTx data.`);
+    if (typedDataChars(pin, batch) > MAX_TYPED_DATA_CHARS) {
+      throw new Error(`${describeAction(a)} alone is over ${MAX_TYPED_DATA_CHARS} characters of typed data.`);
     }
   }
   flush();
@@ -157,14 +182,13 @@ export function buildGovernanceSafeTxs(
   });
 }
 
-function dataBytes(registry: Address, actions: readonly Action[]): number {
-  if (actions.length === 1) return size(encodeAction(actions[0]!));
-  return size(
-    safeTxFor(
-      actions.map((a) => ({ to: registry, value: 0n, data: encodeAction(a) })),
-      0n,
-    ).data,
+// Measured with the largest nonce the schema allows, so a SafeTx that fits here fits at any nonce.
+function typedDataChars(pin: RegistryPin, actions: readonly Action[]): number {
+  const tx = safeTxFor(
+    actions.map((a) => ({ to: pin.registry, value: 0n, data: encodeAction(a) })),
+    MAX_NONCE,
   );
+  return safeTxTypedDataJson(pin.chainId, pin.safe, tx).length;
 }
 
 export interface DecodedCall {
@@ -185,8 +209,9 @@ export function checkGovernanceSafeTx(pin: RegistryPin, tx: SafeTx): string[] {
     out.push("gasToken and refundReceiver must be the zero address");
   }
   if (tx.nonce < 0n || tx.nonce > MAX_NONCE) out.push("nonce is outside 0 to 2^53 - 1");
-  if (size(tx.data) > MAX_SAFETX_DATA_BYTES)
-    out.push(`data is ${size(tx.data)} bytes, over ${MAX_SAFETX_DATA_BYTES}`);
+  const chars = safeTxTypedDataJson(pin.chainId, pin.safe, tx).length;
+  if (chars > MAX_TYPED_DATA_CHARS)
+    out.push(`the typed data is ${chars} characters, over ${MAX_TYPED_DATA_CHARS}`);
   try {
     decodeGovernanceSafeTx(pin, tx);
   } catch (e) {
@@ -237,8 +262,8 @@ export function decodeGovernanceSafeTx(pin: RegistryPin, tx: SafeTx): DecodedCal
     if (c.value !== 0n) throw new Error(`inner call ${i + 1} sends value`);
     return decodeOne(c.data);
   });
-  const high = calls.find((c) => c.risk === "high");
-  if (high) throw new Error(`${high.functionName} is high impact and must be a SafeTx of its own`);
+  const single = calls.find((c) => SINGLE_CALL_ONLY.has(c.action.kind));
+  if (single) throw new Error(`${single.functionName} must be a SafeTx of its own`);
   return calls;
 }
 

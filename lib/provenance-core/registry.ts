@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/registry.ts at commit 117e850026f6e1d754e76a687e526f51cceca4a0.
+// Copied from 6529-Collections/6529-provenance-app src/registry.ts at commit a01790eb709958ed2367e1fd4345a4c559b08330.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import { keccak256, type Address, type ContractFunctionReturnType, type Hex, type PublicClient } from "viem";
@@ -43,13 +43,13 @@ async function multi<T>(
 
 export interface RegistryCheck {
   hasCode: boolean;
-  codeHash?: Hex;
+  codeHash?: Hex | undefined;
   codeBytes: number;
-  build?: KnownBuild;
+  build?: KnownBuild | undefined;
   /** supportsInterface results; undefined when the call reverted. */
-  erc165?: boolean;
-  invalidIdRejected?: boolean;
-  interfaces: { build: KnownBuild; supported?: boolean }[];
+  erc165?: boolean | undefined;
+  invalidIdRejected?: boolean | undefined;
+  interfaces: { build: KnownBuild; supported?: boolean | undefined }[];
 }
 
 /** Checks an address the way docs/integrators.md describes: ERC-165 detection, then the runtime code hash. */
@@ -227,7 +227,7 @@ export function literalIndex(r: Registrations | undefined): Map<string, string> 
 export interface SubjectSummary {
   id: Hex;
   subject: Subject;
-  latest?: Version;
+  latest?: Version | undefined;
 }
 
 export async function readSubjectPage(

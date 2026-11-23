@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/dryrun.ts at commit 117e850026f6e1d754e76a687e526f51cceca4a0.
+// Copied from 6529-Collections/6529-provenance-app src/dryrun.ts at commit a01790eb709958ed2367e1fd4345a4c559b08330.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import type { Address, PublicClient } from "viem";
@@ -121,13 +121,15 @@ export interface DryRun {
   gasLimit: bigint;
   txs: DryRunTx[];
   /** The whole plan run in one request, in order. Undefined when it was not attempted. */
-  sequence?: {
-    ok: boolean;
-    stoppedAt?: number;
-    cumulativeGas: bigint;
-    error?: string;
-    likelyCapped: boolean;
-  };
+  sequence?:
+    | {
+        ok: boolean;
+        stoppedAt?: number | undefined;
+        cumulativeGas: bigint;
+        error?: string | undefined;
+        likelyCapped: boolean;
+      }
+    | undefined;
   sealProblems: string[];
 }
 

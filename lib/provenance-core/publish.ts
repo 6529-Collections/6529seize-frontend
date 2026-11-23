@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/publish.ts at commit 117e850026f6e1d754e76a687e526f51cceca4a0.
+// Copied from 6529-Collections/6529-provenance-app src/publish.ts at commit a01790eb709958ed2367e1fd4345a4c559b08330.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import { isAddressEqual, size, type Address, type Hex, type PublicClient } from "viem";
@@ -31,13 +31,40 @@ export const STANDARD_SENDER: SenderCapability = {
   setsGas: true,
 };
 
-/** A browser wallet forwarded by 6529 Desktop: 10 KiB of calldata (about 15 records), no gas fields. */
+/**
+ * A browser wallet forwarded by 6529 Desktop: at most 10 KiB of calldata and 20 records per
+ * publish call, and no gas, fee or nonce fields (the wallet estimates gas). Desktop reports its
+ * calldata cap through wallet_getCapabilities; readSenderCapability reads it.
+ */
 export const DESKTOP_FORWARDED_SENDER: SenderCapability = {
   maxCalldataBytes: 10 * 1024,
-  maxRecordsPerCall: 100,
+  maxRecordsPerCall: 20,
   maxOpenReleaseBytes: 4 * 1024,
   setsGas: false,
 };
+
+/**
+ * The sending wallet's limits. 6529 Desktop's forwarding connector answers wallet_getCapabilities
+ * with {"0xaa36a7": {desktopForwarding: {maxTransactionDataBytes: 10240}}}; any other wallet, or a
+ * wallet that does not support the method, is a standard sender.
+ */
+export async function readSenderCapability(
+  provider: Eip1193Provider,
+  chainId: number,
+): Promise<SenderCapability> {
+  let caps: unknown;
+  try {
+    caps = await provider.request({ method: "wallet_getCapabilities" });
+  } catch {
+    return STANDARD_SENDER;
+  }
+  const chain = (caps as Record<string, unknown> | null)?.[`0x${chainId.toString(16)}`] as
+    | { desktopForwarding?: { maxTransactionDataBytes?: unknown } }
+    | undefined;
+  const max = chain?.desktopForwarding?.maxTransactionDataBytes;
+  if (typeof max !== "number" || !Number.isInteger(max) || max <= 0) return STANDARD_SENDER;
+  return { ...DESKTOP_FORWARDED_SENDER, maxCalldataBytes: max };
+}
 
 export interface PublishTx {
   index: number;
@@ -71,7 +98,7 @@ export interface PlanPublishInput {
   seal: boolean;
   gasLimit: bigint;
   capability: SenderCapability;
-  onProgress?: (message: string) => void;
+  onProgress?: ((message: string) => void) | undefined;
 }
 
 /** Throws unless `from` is an authorized publisher key or the owner (rule REL-1). */

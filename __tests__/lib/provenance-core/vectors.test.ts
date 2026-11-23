@@ -31,6 +31,7 @@ import {
 } from "@/lib/provenance-core/governance";
 import { jcsBytes } from "@/lib/provenance-core/jcs";
 import { maxRecordsWithin } from "@/lib/provenance-core/pack";
+import { readSenderCapability } from "@/lib/provenance-core/publish";
 import {
   encodeMultiSendTransactions,
   safeTxHash,
@@ -50,16 +51,16 @@ const dec = new TextDecoder();
 
 type TxJson = Record<string, string | number>;
 const txOf = (t: TxJson): SafeTx => ({
-  to: t.to as Address,
-  value: BigInt(t.value!),
-  data: t.data as Hex,
-  operation: Number(t.operation) as 0 | 1,
-  safeTxGas: BigInt(t.safeTxGas!),
-  baseGas: BigInt(t.baseGas!),
-  gasPrice: BigInt(t.gasPrice!),
-  gasToken: t.gasToken as Address,
-  refundReceiver: t.refundReceiver as Address,
-  nonce: BigInt(t.nonce!),
+  to: t["to"] as Address,
+  value: BigInt(t["value"]!),
+  data: t["data"] as Hex,
+  operation: Number(t["operation"]) as 0 | 1,
+  safeTxGas: BigInt(t["safeTxGas"]!),
+  baseGas: BigInt(t["baseGas"]!),
+  gasPrice: BigInt(t["gasPrice"]!),
+  gasToken: t["gasToken"] as Address,
+  refundReceiver: t["refundReceiver"] as Address,
+  nonce: BigInt(t["nonce"]!),
 });
 
 describe("vectors/jcs.json", () => {
@@ -171,9 +172,9 @@ describe("vectors/safe.json", () => {
   for (const c of f.multiSend) {
     it(`MultiSend: ${c.name}`, () => {
       const calls = c.calls.map((x: TxJson) => ({
-        to: x.to as Address,
-        value: BigInt(x.value!),
-        data: x.data as Hex,
+        to: x["to"] as Address,
+        value: BigInt(x["value"]!),
+        data: x["data"] as Hex,
       }));
       expect(`0x8d80ff0a${c.data.slice(10)}`).toBe(c.data);
       expect(c.data.toLowerCase()).toContain(
@@ -185,8 +186,14 @@ describe("vectors/safe.json", () => {
 
 describe("vectors/governance.json", () => {
   const f = load("governance.json");
+  it("records the Desktop limits", () => {
+    expect(f.maxTypedDataChars).toBe(16384);
+  });
   for (const c of f.cases) {
     it(`${c.valid ? "accepts" : "refuses"}: ${c.name}`, () => {
+      expect(
+        safeTxTypedDataJson(f.pin.chainId, f.pin.safe, txOf(c.tx)).length
+      ).toBe(c.typedDataChars);
       expect(
         checkGovernanceSafeTx(f.pin as RegistryPin, txOf(c.tx)).length === 0
       ).toBe(c.valid);
@@ -212,4 +219,23 @@ describe("vectors/publish-limits.json", () => {
         c.maxRecords
       )
     );
+  it("small records: 10 KiB binds before the 20-record limit", () => {
+    const small = records.map((r) => ({ ...r, label: "" }));
+    expect(maxRecordsWithin(f.releaseId, small, 0, f.smallRecords.limits)).toBe(
+      f.smallRecords.maxRecords
+    );
+  });
+  for (const c of f.capabilities.cases) {
+    it(`capability from ${JSON.stringify(c.answer)}`, async () => {
+      const cap = await readSenderCapability(
+        { request: async () => c.answer },
+        11155111
+      );
+      expect([
+        cap.maxCalldataBytes,
+        cap.maxRecordsPerCall,
+        cap.setsGas,
+      ]).toEqual([c.maxCalldataBytes, c.maxRecordsPerCall, c.setsGas]);
+    });
+  }
 });

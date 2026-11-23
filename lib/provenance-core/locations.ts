@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/locations.ts at commit 117e850026f6e1d754e76a687e526f51cceca4a0.
+// Copied from 6529-Collections/6529-provenance-app src/locations.ts at commit a01790eb709958ed2367e1fd4345a4c559b08330.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import type { Hex } from "viem";
@@ -18,7 +18,7 @@ import { cidToString } from "./cid";
  */
 export interface Location {
   url: string;
-  pointer?: string;
+  pointer?: string | undefined;
 }
 
 export interface LocationTarget {
@@ -32,10 +32,14 @@ export type Resolver = (t: LocationTarget) => Location | undefined;
 
 interface Entry {
   url: string;
-  pointer?: string;
+  pointer?: string | undefined;
 }
 
-export function parseLocations(text: string): { resolve: Resolver; count: number; description?: string } {
+export function parseLocations(text: string): {
+  resolve: Resolver;
+  count: number;
+  description?: string | undefined;
+} {
   let json: unknown;
   try {
     json = JSON.parse(text);
@@ -44,7 +48,13 @@ export function parseLocations(text: string): { resolve: Resolver; count: number
   }
   if (!json || typeof json !== "object" || Array.isArray(json))
     throw new Error("The locations file is a JSON object.");
-  const o = json as Record<string, unknown>;
+  const o = json as {
+    description?: unknown;
+    pointer?: unknown;
+    template?: unknown;
+    entries?: unknown;
+    base?: unknown;
+  };
   const description = typeof o.description === "string" ? o.description : undefined;
   const defaultPointer = typeof o.pointer === "string" ? o.pointer : undefined;
 

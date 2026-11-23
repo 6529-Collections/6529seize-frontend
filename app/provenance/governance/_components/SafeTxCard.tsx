@@ -14,6 +14,7 @@ import {
   checkBeforeSigning,
   decodeGovernanceSafeTx,
   proposeToTxService,
+  riskOf,
   type DecodedCall,
   type Eip1193Provider,
   type GovernanceCheck,
@@ -348,9 +349,15 @@ export default function SafeTxCard({
   const id = useId();
   const decoded = useMemo(() => decodeGovernanceSafeTx(pin, g.tx), [pin, g]);
   const high = g.risk === "high";
-  const first = g.actions[0];
-  const warning =
-    high && first !== undefined ? WARNING_KEYS[first.kind] : undefined;
+  // A batch can grant a publisher key, so warn for every high-impact call it holds, once each.
+  const warnings = [
+    ...new Set(
+      g.actions
+        .filter((a) => riskOf(a) === "high")
+        .map((a) => WARNING_KEYS[a.kind])
+        .filter((k): k is MessageKey => k !== undefined)
+    ),
+  ];
   const simText = sim === undefined ? undefined : simMessage(sim);
 
   return (
@@ -384,14 +391,15 @@ export default function SafeTxCard({
           })}
         </span>
       </div>
-      {warning === undefined ? null : (
+      {warnings.map((warning) => (
         <p
+          key={warning}
           role="note"
           className="tw-m-0 tw-rounded-lg tw-border tw-border-solid tw-border-error/50 tw-bg-error/10 tw-p-3 tw-text-sm tw-text-iron-50"
         >
           {tr(warning)}
         </p>
-      )}
+      ))}
       <p className="tw-m-0 tw-text-sm tw-text-iron-300">
         {g.tx.operation === 1
           ? tr("provenance.governance.safeTx.batch", { count: decoded.length })

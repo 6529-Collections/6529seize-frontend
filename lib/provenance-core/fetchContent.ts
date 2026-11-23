@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/fetchContent.ts at commit 117e850026f6e1d754e76a687e526f51cceca4a0.
+// Copied from 6529-Collections/6529-provenance-app src/fetchContent.ts at commit a01790eb709958ed2367e1fd4345a4c559b08330.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import { arweaveIdToString, cidToString } from "./cid";
@@ -23,8 +23,8 @@ export const MAX_CONTENT_BYTES = 32 * 1024 * 1024;
 export interface FetchAttempt {
   url: string;
   ok: boolean;
-  status?: number;
-  error?: string;
+  status?: number | undefined;
+  error?: string | undefined;
 }
 
 export interface Fetched {
@@ -114,8 +114,8 @@ export async function fetchFirst(urls: readonly string[], timeoutMs?: number): P
 }
 
 export interface ContentSource {
-  cid?: Hex;
-  arweaveId?: Hex;
+  cid?: Hex | undefined;
+  arweaveId?: Hex | undefined;
 }
 
 export interface FetchContentOptions {

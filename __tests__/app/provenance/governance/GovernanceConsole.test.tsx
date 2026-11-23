@@ -125,6 +125,30 @@ describe("GovernanceConsole", () => {
     expect(card.getByText("TYPE_B")).toBeInTheDocument();
   });
 
+  it("batches a publisher grant with a registration and warns for the grant", async () => {
+    const user = userEvent.setup();
+    render(<GovernanceConsole />);
+    await screen.findByText("Matches the pinned Safe");
+    await user.type(screen.getByLabelText("Literal"), "TYPE_A");
+    await user.click(screen.getByRole("button", { name: "Add call" }));
+    await user.selectOptions(screen.getByLabelText("Call"), "setPublisher");
+    await user.type(screen.getByLabelText("Publisher key address"), OWNERS[1]!);
+    await user.click(screen.getByRole("button", { name: "Add call" }));
+    await user.click(
+      screen.getByRole("button", { name: "Build Safe transactions" })
+    );
+    const cards = await screen.findAllByTestId("governance-safetx");
+    expect(cards).toHaveLength(1);
+    const card = within(cards[0]!);
+    expect(card.getByText("High impact")).toBeInTheDocument();
+    expect(
+      card.getByText("2 calls in one batch through MultiSendCallOnly")
+    ).toBeInTheDocument();
+    expect(
+      card.getByText(/A publisher key can open releases/)
+    ).toBeInTheDocument();
+  });
+
   it("shows why a form field is refused", async () => {
     const user = userEvent.setup();
     render(<GovernanceConsole />);

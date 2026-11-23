@@ -44,9 +44,9 @@ run("governance flow on a fork", () => {
       ],
       safe.nonce
     );
-    expect(txs.map((g) => [g.risk, g.tx.operation])).toEqual([
-      ["normal", 1],
-      ["high", 0],
+    // A publisher grant is high impact but may share a batch (6529 Desktop's SafeTx schema).
+    expect(txs.map((g) => [g.risk, g.tx.operation, g.actions.length])).toEqual([
+      ["high", 1, 3],
     ]);
 
     const signer = safe.owners[0] as Address;
@@ -67,7 +67,7 @@ run("governance flow on a fork", () => {
       txs.map((g) => ({ actions: g.actions })),
       30_000_000n
     );
-    expect(sim.txs.map((t) => t.ok)).toEqual([true, true]);
+    expect(sim.txs.map((t) => t.ok)).toEqual([true]);
     expect(sim.txs.map((t) => t.safeTxHash)).toEqual(txs.map((g) => g.hash));
 
     const wallet = {
