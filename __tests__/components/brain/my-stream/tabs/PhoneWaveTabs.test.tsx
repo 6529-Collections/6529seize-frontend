@@ -20,6 +20,24 @@ const EXAMPLE_TABS: PhoneWaveTab[] = [
 ];
 
 describe("PhoneWaveTabs", () => {
+  it("keeps the only section compact and selected", () => {
+    render(
+      <PhoneWaveTabs
+        tabs={EXAMPLE_TABS.slice(0, 1)}
+        primaryKeys={PRIMARY_KEYS}
+        activeKey="chat"
+      />
+    );
+
+    const chat = screen.getByRole("button", { name: "Chat" });
+    expect(chat).toHaveClass("tw-flex-none");
+    expect(chat).not.toHaveClass("tw-flex-auto");
+    expect(chat).toHaveAttribute("aria-current", "true");
+    expect(
+      screen.queryByRole("button", { name: "More" })
+    ).not.toBeInTheDocument();
+  });
+
   it("keeps four primary sections and offers every other section in the sheet", async () => {
     render(
       <PhoneWaveTabs

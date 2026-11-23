@@ -10,7 +10,7 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 
 const TAB_LAYOUT =
-  "tw-flex tw-min-h-11 tw-min-w-0 tw-items-center tw-justify-center tw-gap-0.5 tw-px-1 tw-py-1.5 tw-text-center tw-text-xs tw-leading-4";
+  "tw-flex tw-min-h-11 tw-items-center tw-justify-center tw-gap-0.5 tw-py-1.5 tw-text-center tw-text-xs tw-leading-4";
 const TAB_LABEL = "tw-min-w-0 tw-whitespace-normal tw-break-words";
 
 export interface PhoneWaveTab {
@@ -60,6 +60,10 @@ export default function PhoneWaveTabs({
   );
   const activeSecondary = secondary.find((tab) => tab.key === activeKey);
   const hasTabPanels = primary.some((tab) => tab.panelId);
+  const primaryTabWidth =
+    tabs.length === 1
+      ? "tw-min-w-11 tw-flex-none tw-px-3"
+      : "tw-min-w-0 tw-flex-auto tw-px-1";
 
   return (
     <>
@@ -83,7 +87,7 @@ export default function PhoneWaveTabs({
                 aria-controls={tab.panelId}
                 aria-current={!tab.panelId && selected ? "true" : undefined}
                 data-wave-tab-value={tab.key.toLowerCase()}
-                className={`${TAB_LAYOUT} tw-flex-auto ${getUnderlineTabClasses({ active: selected })}`}
+                className={`${TAB_LAYOUT} ${primaryTabWidth} ${getUnderlineTabClasses({ active: selected })}`}
                 onClick={tab.onSelect}
                 onPointerEnter={tab.onIntent}
                 onFocus={tab.onIntent}
@@ -103,7 +107,7 @@ export default function PhoneWaveTabs({
             aria-current={activeSecondary ? "true" : undefined}
             aria-controls={isOpen ? dialogId : undefined}
             data-wave-phone-more=""
-            className={`${TAB_LAYOUT} tw-w-1/4 tw-flex-none ${getUnderlineTabClasses({ active: Boolean(activeSecondary) })}`}
+            className={`${TAB_LAYOUT} tw-w-1/4 tw-min-w-0 tw-flex-none tw-px-1 ${getUnderlineTabClasses({ active: Boolean(activeSecondary) })}`}
             onClick={() => setIsOpen(true)}
           >
             <span className={`tw-line-clamp-2 ${TAB_LABEL}`}>

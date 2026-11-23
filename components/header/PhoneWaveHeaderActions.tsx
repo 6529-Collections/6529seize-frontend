@@ -1,6 +1,5 @@
 "use client";
 
-import clsx from "clsx";
 import { useState } from "react";
 import {
   InformationCircleIcon,
@@ -46,57 +45,56 @@ export const HeaderDropActionButton = ({
     return null;
   }
 
-  const title = action.restrictionMessage ?? action.label;
-  const menuActionClass = `${COMPACT_WAVE_ACTION_CLASSES} !tw-justify-start tw-text-iron-300`;
-  const label = inMenu ? action.label : action.compactLabel;
-
-  if (!action.canOpen) {
-    if (action.restrictionKind === "memes-nomination") {
-      return (
-        <MainStageNominationPopover>
-          <button
-            type="button"
-            aria-label={action.label}
-            aria-haspopup="dialog"
-            className={clsx(
-              "tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400",
-              inMenu
-                ? menuActionClass
-                : `${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 desktop-hover:hover:tw-text-white`
-            )}
-          >
-            <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-            <span className={inMenu ? undefined : "tw-sr-only"}>{label}</span>
-          </button>
-        </MainStageNominationPopover>
-      );
-    }
-
+  if (action.canOpen) {
     return (
-      <WaveHeaderRestrictionButton
-        label={action.label}
-        reason={title}
-        accessWave={action.accessWave}
-        onViewRules={action.onViewRules}
-        className={inMenu ? menuActionClass : HEADER_RESTRICTION_BUTTON_CLASS}
+      <Button
+        onClick={action.onOpen}
+        size={null}
+        title={action.restrictionMessage ?? action.label}
+        aria-label={action.label}
+        className="tw-size-9 tw-min-w-9 tw-p-0"
       >
-        <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
-        <span className={inMenu ? undefined : "tw-sr-only"}>{label}</span>
-      </WaveHeaderRestrictionButton>
+        <PlusIcon className="tw-size-5 tw-flex-shrink-0" />
+        <span className="tw-sr-only">{action.compactLabel}</span>
+      </Button>
     );
   }
 
+  if (action.restrictionKind === "memes-nomination") {
+    return (
+      <MainStageNominationPopover>
+        <button
+          type="button"
+          aria-label={action.label}
+          aria-haspopup="dialog"
+          className={`tw-flex tw-cursor-pointer tw-items-center tw-justify-center tw-transition tw-duration-150 tw-ease-out focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 ${COMPACT_ACTION_TOUCH_TARGET_CLASS} tw-size-9 tw-min-w-9 tw-rounded-lg tw-border-0 tw-bg-transparent tw-p-0 tw-text-iron-300 desktop-hover:hover:tw-text-white`}
+        >
+          <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+          <span className="tw-sr-only">{action.compactLabel}</span>
+        </button>
+      </MainStageNominationPopover>
+    );
+  }
+
+  const buttonClass = inMenu
+    ? `${COMPACT_WAVE_ACTION_CLASSES} !tw-justify-start tw-text-iron-300`
+    : HEADER_RESTRICTION_BUTTON_CLASS;
+
   return (
-    <Button
-      onClick={action.onOpen}
-      size={null}
-      title={title}
-      aria-label={action.label}
-      className="tw-size-9 tw-min-w-9 tw-p-0"
+    <WaveHeaderRestrictionButton
+      label={action.label}
+      reason={action.restrictionMessage ?? action.label}
+      accessWave={action.accessWave}
+      onViewRules={action.onViewRules}
+      className={buttonClass}
     >
-      <PlusIcon className="tw-size-5 tw-flex-shrink-0" />
-      <span className={inMenu ? undefined : "tw-sr-only"}>{label}</span>
-    </Button>
+      <LockClosedIcon className="tw-size-4 tw-flex-shrink-0" />
+      {inMenu ? (
+        <span>{action.label}</span>
+      ) : (
+        <span className="tw-sr-only">{action.compactLabel}</span>
+      )}
+    </WaveHeaderRestrictionButton>
   );
 };
 
