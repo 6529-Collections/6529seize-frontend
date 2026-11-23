@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/provenance-governance";
 import { useMemo, useState } from "react";
 import type { Action } from "@/lib/provenance-core/actions";
 import { describeAction } from "@/lib/provenance-core/actions";

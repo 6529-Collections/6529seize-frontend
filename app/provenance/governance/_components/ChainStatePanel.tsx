@@ -1,3 +1,4 @@
+import "@/i18n/namespaces/provenance-governance";
 import type { RegistryPin } from "@/lib/provenance-core/config/registries";
 import type { ChainLoad, ChainState } from "./useChainState";
 import { BUTTON, CARD, ERROR_TEXT, MONO, sameAddress, tr } from "./ui";

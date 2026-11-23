@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/provenance-governance";
 import { useId, useMemo, useState } from "react";
 import { useAccount } from "wagmi";
 import type { Address, Hex, PublicClient } from "viem";

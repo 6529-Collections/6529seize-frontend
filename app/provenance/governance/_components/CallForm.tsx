@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/provenance-governance";
 import { useId, useState } from "react";
 import type { MessageKey } from "@/i18n/messages/en-US.complete";
 import type { Action } from "@/lib/provenance-core/actions";

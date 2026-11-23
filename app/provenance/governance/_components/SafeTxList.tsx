@@ -1,5 +1,6 @@
 "use client";
 
+import "@/i18n/namespaces/provenance-governance";
 import { useState } from "react";
 import type { PublicClient } from "viem";
 import type { RegistryPin } from "@/lib/provenance-core/config/registries";

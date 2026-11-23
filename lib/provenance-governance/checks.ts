@@ -1,3 +1,4 @@
+import "@/i18n/namespaces/provenance-governance";
 import type {
   GovernanceCheck,
   GovernanceSafeTx,
