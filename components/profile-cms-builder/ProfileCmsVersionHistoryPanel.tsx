@@ -7,11 +7,15 @@ import { formatInteger, formatDate } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { SupportedLocale } from "@/i18n/locales";
 import {
+  isProfileCmsRollbackRefusedError,
   listProfileCmsPackagesForProfile,
-  rollbackProfileCmsPackage,
-  unpublishProfileCmsPackage,
   type ProfileCmsPackageRecord,
 } from "@/lib/profile-cms/builder/api";
+import {
+  makeProfileSitePrimary,
+  ProfileSiteMoveFailed,
+  unpublishProfileSite,
+} from "@/lib/profile-cms/builder/pointer-actions";
 import { BuilderActionButton } from "./ProfileCmsBuilderControls";
 import ProfileCmsRecoveryLink from "./ProfileCmsRecoveryLink";
 
@@ -34,8 +38,11 @@ export default function ProfileCmsVersionHistoryPanel({
 }) {
   const [revision, setRevision] = useState(0);
   const [mutationFailed, setFailed] = useState(false);
+  const [failureDetail, setFailureDetail] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
   const [changed, setChanged] = useState(false);
+  const [pendingOnChain, setPendingOnChain] = useState(false);
+  const [refused, setRefused] = useState(false);
   const [confirmation, setConfirmation] = useState<{
     record: ProfileCmsPackageRecord;
     action: "restore" | "unpublish";
@@ -61,6 +68,10 @@ export default function ProfileCmsVersionHistoryPanel({
     if (!confirmation || !enabled || working || busy) return;
     setWorking(true);
     setFailed(false);
+    setFailureDetail(null);
+    setRefused(false);
+    setChanged(false);
+    setPendingOnChain(false);
     const expected = confirmation.primary;
     const request = {
       expected_current_package_id: expected?.id ?? null,
@@ -69,18 +80,24 @@ export default function ProfileCmsVersionHistoryPanel({
         : {}),
     };
     try {
-      if (confirmation.action === "unpublish")
-        await unpublishProfileCmsPackage(confirmation.record.id, {
-          expected_current_package_id: confirmation.record.id,
-          expected_current_package_hash: confirmation.record.packageHash,
-        });
-      else await rollbackProfileCmsPackage(confirmation.record.id, request);
+      const outcome =
+        confirmation.action === "unpublish"
+          ? await unpublishProfileSite(confirmation.record)
+          : await makeProfileSitePrimary(confirmation.record, request);
       setConfirmation(null);
-      setChanged(true);
+      setChanged(outcome === "done");
+      setPendingOnChain(outcome === "pending");
       setRevision((value) => value + 1);
       onChanged();
-    } catch {
-      setFailed(true);
+    } catch (error) {
+      if (isProfileCmsRollbackRefusedError(error)) setRefused(true);
+      else {
+        setFailed(true);
+        // The profile tools' own words for a chain change that failed.
+        setFailureDetail(
+          error instanceof ProfileSiteMoveFailed ? error.message : null
+        );
+      }
     } finally {
       setWorking(false);
     }
@@ -107,10 +124,23 @@ export default function ProfileCmsVersionHistoryPanel({
       {mutationFailed ? (
         <p role="alert">
           {t(locale, "profileCms.builder.history.actionFailed")}
+          {failureDetail ? (
+            <span className="tw-mt-1 tw-block">{failureDetail}</span>
+          ) : null}
+        </p>
+      ) : null}
+      {refused ? (
+        <p role="alert">
+          {t(locale, "profileCms.builder.history.rollbackRefused")}
         </p>
       ) : null}
       {changed ? (
         <p role="status">{t(locale, "profileCms.builder.history.changed")}</p>
+      ) : null}
+      {pendingOnChain ? (
+        <p role="status">
+          {t(locale, "profileCms.builder.history.pendingOnChain")}
+        </p>
       ) : null}
       {loading ? (
         <p role="status">{t(locale, "profileCms.builder.history.loading")}</p>

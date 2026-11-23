@@ -18,7 +18,12 @@ import {
 import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 import { bindCmsDraftIdentity } from "./identity";
 import { enrichWalletGalleryImageDimensions } from "./gallery-media";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import {
+  commonApiFetch,
+  commonApiPost,
+  getStructuredApiErrorBody,
+  getStructuredApiErrorStatus,
+} from "@/services/api/common-api";
 
 // The wire contract is defined in openapi.yaml. Publishing uses persisted
 // package data and storage receipts through builder/publish.ts.
@@ -275,6 +280,50 @@ export async function unpublishProfileCmsPackage(
     errorMode: "structured",
   });
   return normalizeProfileCmsPackageRecord(response);
+}
+
+/**
+ * True when 6529.io refuses a pointer move because profile sites follow the
+ * person's ProfileDoc on the 6529 chain: the move is a PROFILE_REPLACE.
+ */
+export function isProfileCmsPointerOnChainError(error: unknown): boolean {
+  return getStructuredApiErrorBody(error)?.["code"] === "cms_pointer_on_chain";
+}
+
+/**
+ * True when 6529.io refuses a rollback on the 6529 chain because the chain
+ * index would refuse that version (its signed publication fails the checks),
+ * so moving the pointer to it would take the site offline.
+ */
+export function isProfileCmsRollbackRefusedError(error: unknown): boolean {
+  return (
+    getStructuredApiErrorBody(error)?.["code"] === "cms_rollback_target_refused"
+  );
+}
+
+/**
+ * The package hash 6529.io serves as the handle's primary site, or null when
+ * it serves none. Backing endpoint: `GET profile-cms/:handle/primary`.
+ */
+export async function getProfileCmsPrimaryPackageHash(
+  handle: string
+): Promise<string | null> {
+  try {
+    const response = await commonApiFetch<{ readonly package_hash?: unknown }>({
+      endpoint: `profile-cms/${encodeURIComponent(handle)}/primary`,
+      includeWalletAuth: false,
+      cache: "no-store",
+      errorMode: "structured",
+    });
+    return typeof response.package_hash === "string"
+      ? response.package_hash
+      : null;
+  } catch (error) {
+    if (getStructuredApiErrorStatus(error) === 404) {
+      return null;
+    }
+    throw error;
+  }
 }
 
 export async function requestProfileCmsGallerySnapshot({

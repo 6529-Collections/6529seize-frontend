@@ -75,6 +75,8 @@ export const ES_ES_MESSAGES = {
     "Solicita y revisa una captura de las carteras antes de guardar o publicar esta galería.",
   "profileCms.builder.publish.savedNotCurrent":
     "Esta publicación firmada está guardada, pero no es el sitio activo. Revisa el historial de versiones antes de cambiar el sitio.",
+  "profileCms.builder.publish.pendingOnChain":
+    "Enviado a 6529 Network. Tu sitio web cambia cuando la red lo confirma:",
   "profileCms.builder.gallery.snapshot.warning.unmeasuredImages":
     "No se han podido verificar las dimensiones de algunas imágenes. Esas obras conservan sus datos NFT sin imagen en la publicación. Actualiza la captura para reintentarlo.",
   "profileCms.builder.json.pending":
@@ -145,6 +147,10 @@ export const ES_ES_MESSAGES = {
     "Hash del manifiesto: {hash}",
   "profileCms.builder.publish.error.publishFailed":
     "La publicación ha fallado. Inténtalo de nuevo.",
+  "profileCms.builder.publish.error.chainUnavailable":
+    "Este navegador aún no puede firmar cambios de perfil en 6529 Network.",
+  "profileCms.builder.publish.error.chainFailed":
+    "Tu cambio de perfil en 6529 Network no se completó. Inténtalo de nuevo.",
   "profileCms.builder.history.title": "Historial de versiones",
   "profileCms.builder.history.refresh": "Actualizar",
   "profileCms.builder.history.loading": "Cargando…",
@@ -182,6 +188,10 @@ export const ES_ES_MESSAGES = {
     "Este paquete contiene un sitio personalizado. Usa JSON o Agente para editarlo conservando todas las páginas y recursos.",
   "profileCms.builder.history.changed":
     "El sitio público se ha actualizado. Los visitantes pueden tardar unos segundos en ver el cambio.",
+  "profileCms.builder.history.pendingOnChain":
+    "Enviado a 6529 Network. 6529.io aún no muestra el cambio; actualiza el historial de versiones en un minuto.",
+  "profileCms.builder.history.rollbackRefused":
+    "Esta versión no puede ser el sitio en 6529 Network: su publicación firmada no supera las comprobaciones. Cárgala y publícala como una versión nueva.",
   "profileCms.builder.publish.error.stale":
     "El borrador o la cartera ha cambiado. Inicia la publicación de nuevo.",
   "navigation.primary.loading.home": "Cargando inicio",

@@ -6,6 +6,8 @@
 //   3. storage      -> upload canonical JSON, get the persisted receipt
 //   4. sign         -> build EIP-712 typed data and request a wallet signature
 //   5. publish      -> POST the signature + chain metadata
+//   6. (profile sites on the 6529 chain) the person's PROFILE_REPLACE names
+//      the signed publication in their ProfileDoc; 6529.io indexes it
 //
 // The typed data is constructed field-for-field to match the backend domain and
 // `ProfileCmsPublish` type in
@@ -16,6 +18,7 @@ import type { CmsPackageV1 } from "@/lib/profile-cms/protocol/v1";
 import { getCmsPublicPath } from "@/lib/profile-cms/runtime/routes";
 import {
   getProfileCmsPackageById,
+  getProfileCmsPrimaryPackageHash,
   listProfileCmsPackagesForProfile,
   publishProfileCmsPackage,
   runProfileCmsBuilderAction,
@@ -24,6 +27,11 @@ import {
   type ProfileCmsPublishRequest,
   type ProfileCmsStorageReceipt,
 } from "@/lib/profile-cms/builder/api";
+import { cmsCidFromHash } from "@/lib/profile-cms/chain/cms-cid";
+import {
+  moveProfileSitePointer,
+  waitForProfileSitePrimary,
+} from "@/lib/profile-cms/chain/move-site-pointer";
 
 // EIP-712 domain — must match PROFILE_CMS_PUBLISH_EIP712_DOMAIN_NAME/VERSION.
 export const PROFILE_CMS_PUBLISH_DOMAIN_NAME = "6529 Profile CMS";
@@ -96,7 +104,9 @@ type ProfileCmsPublishErrorCode =
   | "deadline_expired"
   | "publish_conflict"
   | "storage_pending"
-  | "publish_failed";
+  | "publish_failed"
+  | "chain_unavailable"
+  | "chain_failed";
 
 /**
  * Context prepared once (save + validate + upload) and reused across
@@ -132,6 +142,8 @@ export type ProfileCmsPublishSuccess = {
   readonly isCurrent: boolean;
   readonly published: ProfileCmsPackageRecord;
   readonly publishedUrl: string;
+  /** The PROFILE_REPLACE is submitted, but 6529.io does not serve it yet. */
+  readonly pendingOnChain?: boolean | undefined;
 };
 
 export type ProfileCmsPublishFailure = {
@@ -575,6 +587,12 @@ async function submitProfileCmsPublish(
 ): Promise<ProfileCmsPublishResult> {
   try {
     const published = await publishProfileCmsPackage(context.draftId, request);
+    // Only a draft signed for the chain: a retry can return a published or
+    // superseded record that has a publication CID too, and moving the
+    // pointer to it would be a rollback nobody asked for.
+    if (published.publicationCid && published.status === "draft") {
+      return await moveSignedProfileSite(context, published, request, baseUrl);
+    }
     return {
       ok: true,
       published,
@@ -616,6 +634,54 @@ async function submitProfileCmsPublish(
       signedRequest: request,
     };
   }
+}
+
+/**
+ * With profile sites on the 6529 chain, 6529.io stores the signed publication
+ * and the person's PROFILE_REPLACE makes it the primary site.
+ */
+async function moveSignedProfileSite(
+  context: ProfileCmsPublishContext,
+  signed: ProfileCmsPackageRecord,
+  request: ProfileCmsPublishRequest,
+  baseUrl?: string
+): Promise<ProfileCmsPublishResult> {
+  const moved = await moveProfileSitePointer({
+    pointer: {
+      publication: signed.publicationCid as string,
+      package: cmsCidFromHash(signed.packageHash),
+    },
+    confirm: () =>
+      waitForProfileSitePrimary({
+        expectedPackageHash: signed.packageHash,
+        fetchPrimaryPackageHash: () =>
+          getProfileCmsPrimaryPackageHash(signed.profileHandle),
+      }),
+  });
+  if (!moved.ok) {
+    return {
+      ok: false,
+      step: "publish",
+      code: moved.code,
+      message: moved.message,
+      context,
+      signedRequest: request,
+    };
+  }
+  const published = moved.confirmed
+    ? await getProfileCmsPackageById(signed.id).catch(() => signed)
+    : signed;
+  return {
+    ok: true,
+    published,
+    isCurrent: moved.confirmed,
+    pendingOnChain: !moved.confirmed,
+    publishedUrl: getProfileCmsPublishedUrl(
+      signed.profileHandle,
+      baseUrl,
+      context.publicPath
+    ),
+  };
 }
 
 function isStoragePendingError(

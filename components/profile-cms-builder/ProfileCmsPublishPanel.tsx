@@ -293,12 +293,7 @@ function PublishResultBanner({
         role="status"
       >
         <p className="tw-font-semibold">
-          {t(
-            locale,
-            result.isCurrent === false
-              ? "profileCms.builder.publish.savedNotCurrent"
-              : "profileCms.builder.publish.success"
-          )}
+          {t(locale, getPublishSuccessKey(result))}
         </p>
         <a
           className="tw-mt-2 tw-inline-block tw-break-all tw-font-mono tw-text-xs tw-text-green tw-underline"
@@ -324,6 +319,10 @@ function PublishResultBanner({
       <p className="tw-font-semibold">
         {t(locale, getPublishErrorKey(result.code))}
       </p>
+      {result.code === "chain_failed" && result.message ? (
+        // The profile tools' own words for why the change didn't go through.
+        <p className="tw-mt-1">{result.message}</p>
+      ) : null}
     </div>
   );
 }
@@ -480,5 +479,20 @@ function getPublishErrorKey(
       return "profileCms.builder.publish.error.publishFailed";
     case "storage_pending":
       return "profileCms.builder.publish.error.storagePending";
+    case "chain_unavailable":
+      return "profileCms.builder.publish.error.chainUnavailable";
+    case "chain_failed":
+      return "profileCms.builder.publish.error.chainFailed";
   }
+}
+
+function getPublishSuccessKey(
+  result: Extract<ProfileCmsPublishResult, { ok: true }>
+): Parameters<typeof t>[1] {
+  if (result.pendingOnChain) {
+    return "profileCms.builder.publish.pendingOnChain";
+  }
+  return result.isCurrent === false
+    ? "profileCms.builder.publish.savedNotCurrent"
+    : "profileCms.builder.publish.success";
 }
