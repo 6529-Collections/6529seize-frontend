@@ -157,7 +157,7 @@ function MyVoteAuthor({
     <div
       className={
         mobile
-          ? "tw-flex tw-min-w-0 tw-items-center tw-gap-2"
+          ? "tw-flex tw-min-w-0 tw-items-start tw-gap-2"
           : "tw-mt-2 tw-flex tw-min-w-0 tw-items-center tw-gap-2 @[46rem]/my-vote:tw-mt-3"
       }
     >
@@ -188,7 +188,7 @@ function MyVoteAuthor({
               );
             }}
             title={author.handle ?? author.primary_address}
-            className={`tw-block tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-underline motion-reduce:tw-transition-none ${mobile ? "tw-min-h-11 tw-py-3" : ""}`}
+            className={`tw-block tw-truncate tw-text-sm tw-font-semibold tw-leading-5 tw-text-iron-200 tw-no-underline tw-transition-colors tw-duration-200 desktop-hover:hover:tw-underline motion-reduce:tw-transition-none ${mobile ? "tw-min-h-11 tw-pt-0.5" : ""}`}
           >
             {author.handle ?? author.primary_address}
           </Link>
@@ -510,7 +510,10 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
           )}
         </div>
 
-        <div className="tw-col-start-3 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col">
+        {/* Reuse the card's top padding for the title's 44px touch target. */}
+        <div
+          className={`tw-col-start-3 tw-row-start-1 tw-flex tw-min-w-0 tw-flex-col ${mobile ? "-tw-mt-4" : ""}`}
+        >
           <div className="tw-flex tw-min-w-0 tw-items-start tw-gap-2">
             {!mobile && (
               <MediaTypeBadge
@@ -529,13 +532,13 @@ const MyStreamWaveMyVote: React.FC<MyStreamWaveMyVoteProps> = ({
                 type="button"
                 onClick={handleOpenDrop}
                 title={dropTitle}
-                className={`tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100 tw-transition-colors tw-duration-200 focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400 motion-reduce:tw-transition-none ${mobile ? "tw-min-h-11" : ""}`}
+                className={`tw-max-w-full tw-truncate tw-border-0 tw-bg-transparent tw-p-0 tw-text-left tw-text-base tw-font-semibold tw-leading-6 tw-text-iron-100 tw-transition-colors tw-duration-200 focus-visible:tw-rounded-sm focus-visible:tw-text-primary-400 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-offset-2 focus-visible:tw-outline-primary-400 desktop-hover:hover:tw-text-primary-400 motion-reduce:tw-transition-none ${mobile ? "tw-min-h-11 tw-pb-1 tw-pt-4" : ""}`}
               >
                 {dropTitle}
               </button>
             </h3>
             {mobile && typeof drop.rank === "number" && (
-              <div className="tw-flex tw-min-h-11 tw-shrink-0 tw-items-center">
+              <div className="tw-flex tw-min-h-11 tw-shrink-0 tw-items-end tw-pb-1">
                 <SingleWaveDropPosition
                   rank={drop.rank}
                   variant="simple"

@@ -8,6 +8,8 @@ Use the compact sorting control beside **Select all**. It opens a dropdown on
 desktop and the shared bottom sheet below 1024px and in the app.
 The control shows the current order, with **Available in wave** on the same
 toolbar when a wave-wide balance is available. The controls wrap on narrow screens.
+On mobile, the balance sits above the controls. **Select** / **Done** stays on
+the right; while selecting, **Select all** sits beside the sorting control.
 **Reset votes** and the selected count appear only after you select a row;
 clearing the selection hides them again. Choose an order:
 

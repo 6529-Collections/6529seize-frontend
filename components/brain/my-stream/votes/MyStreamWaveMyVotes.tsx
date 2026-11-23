@@ -174,7 +174,7 @@ const MyStreamWaveMyVotes: React.FC<MyStreamWaveMyVotesProps> = ({
           </p>
         </div>
       ) : (
-        <div className="tw-mt-4">
+        <div className={mobile ? undefined : "tw-mt-4"}>
           {!isVotingControlsLocked && (
             <MyStreamWaveMyVotesReset
               mobile={mobile}

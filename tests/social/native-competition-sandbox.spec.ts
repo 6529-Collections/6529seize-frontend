@@ -6832,6 +6832,20 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           name: "My Votes",
           exact: true,
         });
+        const capture = async (state: "rest" | "selected") => {
+          const contentBounds = (await panel.boundingBox())!;
+          const surfaceBounds = (await panel.locator("..").boundingBox())!;
+          await page.screenshot({
+            path: testInfo.outputPath(`my-votes-mobile-${state}.png`),
+            clip: {
+              x: contentBounds.x,
+              y: surfaceBounds.y,
+              width: contentBounds.width,
+              height: surfaceBounds.height,
+            },
+            animations: "disabled",
+          });
+        };
         const row = panel.getByRole("article").first();
         const input = row.getByRole("textbox", {
           name: "Your vote",
@@ -6853,13 +6867,49 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           exact: true,
         });
         await expect(balance).toBeVisible();
+        await expect(select).toHaveCSS("color", "rgb(206, 207, 212)");
         expect((await balance.boundingBox())!.y).toBeLessThan(
           (await select.boundingBox())!.y
         );
-        await panel.screenshot({
-          path: testInfo.outputPath("my-votes-mobile-rest.png"),
-          animations: "disabled",
+        const panelGap = await panel.evaluate((element) => {
+          const strip = element.parentElement?.firstElementChild;
+          if (!strip) throw new Error("Vote tabs are missing");
+          return (
+            element.getBoundingClientRect().top -
+            strip.getBoundingClientRect().bottom
+          );
         });
+        expect(Math.abs(panelGap)).toBeLessThanOrEqual(1);
+        const thumbnail = (await row
+          .getByRole("button", { name: /^Open / })
+          .boundingBox())!;
+        const title = row.getByRole("heading").getByRole("button");
+        const author = row.getByRole("link", {
+          name: "playwright",
+          exact: true,
+        });
+        for (const target of [title, author]) {
+          expect((await target.boundingBox())!.height).toBeGreaterThanOrEqual(
+            44
+          );
+        }
+        const textBounds = await row
+          .locator("h3 button, a")
+          .evaluateAll((elements) =>
+            elements.slice(0, 2).map((element) => {
+              const range = document.createRange();
+              range.selectNodeContents(element);
+              const bounds = range.getBoundingClientRect();
+              return { top: bounds.top, bottom: bounds.bottom };
+            })
+          );
+        expect(textBounds[1]!.top).toBeGreaterThanOrEqual(
+          textBounds[0]!.bottom
+        );
+        expect(textBounds[1]!.bottom).toBeLessThanOrEqual(
+          thumbnail.y + thumbnail.height
+        );
+        await capture("rest");
         await input.press("Enter");
         expect(sandbox.requests).toHaveLength(0);
         await input.focus();
@@ -6891,6 +6941,23 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
         await expect(
           panel.getByRole("button", { name: "Select all", exact: true })
         ).toBeVisible();
+        const selectAll = panel.getByRole("button", {
+          name: "Select all",
+          exact: true,
+        });
+        const sort = panel.getByRole("button", { name: /^Sort by:/ });
+        for (const width of [320, 390]) {
+          await page.setViewportSize({ width, height: 844 });
+          const sortBounds = (await sort.boundingBox())!;
+          const selectAllBounds = (await selectAll.boundingBox())!;
+          expect(
+            Math.abs(sortBounds.y - selectAllBounds.y)
+          ).toBeLessThanOrEqual(1);
+          expect(selectAllBounds.x).toBeGreaterThanOrEqual(
+            sortBounds.x + sortBounds.width
+          );
+          await expectNoHorizontalOverflow(page);
+        }
         await row.getByRole("checkbox").check();
         const reset = panel.getByRole("button", {
           name: "Reset 1 vote",
@@ -6912,10 +6979,7 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
           .getByRole("button", { name: "Cancel", exact: true })
           .click();
         await expect(input).toHaveValue("-40");
-        await panel.screenshot({
-          path: testInfo.outputPath("my-votes-mobile-selected.png"),
-          animations: "disabled",
-        });
+        await capture("selected");
         await panel.getByRole("button", { name: "Done", exact: true }).click();
         await expect(row.getByRole("checkbox")).toHaveCount(0);
         await expect(reset).toHaveCount(0);
