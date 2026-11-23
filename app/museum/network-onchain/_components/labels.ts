@@ -1,3 +1,4 @@
+import { formatUtcDate } from "@/i18n/format";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t, type MessageKey } from "@/i18n/messages";
 import { MUSEUM_ONCHAIN_MESSAGES } from "@/i18n/namespaces/museum-onchain";
@@ -63,6 +64,15 @@ export const onchainLabeler: OnchainLabeler = {
     recordKindLabel("recordKinds", family, kind),
   documentKind: (kind) => registryValueLabel("documentKind", kind),
   relation: relationPhrase,
+  dated: (kind, isoDate) =>
+    t(locale, "museum.onchain.datedStatement", {
+      kind,
+      date: formatUtcDate(locale, Date.parse(isoDate), {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }),
+    }),
   textGroup: (kind) => t(locale, TEXT_GROUP_KEYS[kind]),
   unverifiedGroup: () => t(locale, "museum.onchain.unverified.heading"),
 };

@@ -3,6 +3,7 @@ import {
   cleanLabel,
   documentPath,
   identifiersOf,
+  museumExt,
   onchainMuseumRecordHref,
   push,
   slug,
@@ -107,6 +108,12 @@ export function textGroupKey(path: string | null): TextGroupKey {
   return { kind: "other", contextId: null };
 }
 
+function payloadStringList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((item): item is string => typeof item === "string")
+    : [];
+}
+
 function normalizeTitle(value: string): string {
   return cleanLabel(value)
     .toLocaleLowerCase("en-US")
@@ -135,6 +142,16 @@ function contextEntity(
   const named =
     sets.find((record) => record.profile?.localId !== contextId) ?? sets[0];
   if (named !== undefined) return named;
+  // A proposed gift has no subject of its own; the acquisition that came of
+  // it names the proposal among its sources (a display detail in `ext`).
+  const acquisition = records.find(
+    (record) =>
+      record.profile?.kind === "set" &&
+      payloadStringList(museumExt(record)?.["source_record_ids"]).includes(
+        contextId
+      )
+  );
+  if (acquisition !== undefined) return acquisition;
   const counts = new Map<string, number>();
   for (const text of texts) {
     const id = graph.refSubject(text.profile?.about[0]?.ref);

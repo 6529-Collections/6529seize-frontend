@@ -17,33 +17,47 @@ import {
 const locale = DEFAULT_LOCALE;
 const ETHERSCAN = "https://sepolia.etherscan.io";
 
+type CheckResult = "pass" | "fail" | "skip";
+
+const CHECK_TONES: Readonly<Record<CheckResult, string>> = {
+  pass: "tw-bg-emerald-400/20 tw-text-emerald-200",
+  fail: "tw-bg-red-400/20 tw-text-red-200",
+  skip: "tw-bg-iron-700 tw-text-iron-300",
+};
+const CHECK_MARKS: Readonly<Record<CheckResult, string>> = {
+  pass: "✓",
+  fail: "!",
+  skip: "–",
+};
+const CHECK_RESULT_KEYS = {
+  pass: "museum.onchain.check.pass",
+  fail: "museum.onchain.check.fail",
+  skip: "museum.onchain.check.skip",
+} as const;
+
 function CheckRow({
   passed,
   label,
-}: Readonly<{ passed: boolean; label: string }>) {
+  skipped = false,
+}: Readonly<{ passed: boolean; label: string; skipped?: boolean }>) {
+  let result: CheckResult = passed ? "pass" : "fail";
+  if (skipped) result = "skip";
   return (
     <li
-      data-check={passed ? "pass" : "fail"}
+      data-check={result}
       className="tw-flex tw-items-start tw-gap-3 tw-text-sm tw-leading-6"
     >
       <span
         aria-hidden="true"
-        className={`tw-mt-0.5 tw-inline-flex tw-size-5 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-xs tw-font-bold ${
-          passed
-            ? "tw-bg-emerald-400/20 tw-text-emerald-200"
-            : "tw-bg-red-400/20 tw-text-red-200"
-        }`}
+        className={`tw-mt-0.5 tw-inline-flex tw-size-5 tw-shrink-0 tw-items-center tw-justify-center tw-rounded-full tw-text-xs tw-font-bold ${CHECK_TONES[result]}`}
       >
-        {passed ? "✓" : "!"}
+        {CHECK_MARKS[result]}
       </span>
       <span className="tw-text-iron-100">
         {label}
-        <span className="tw-sr-only">
+        <span className={result === "skip" ? "tw-text-iron-400" : "tw-sr-only"}>
           {": "}
-          {t(
-            locale,
-            passed ? "museum.onchain.check.pass" : "museum.onchain.check.fail"
-          )}
+          {t(locale, CHECK_RESULT_KEYS[result])}
         </span>
       </span>
     </li>
@@ -182,6 +196,7 @@ export function Verification({ view }: Readonly<{ view: OnchainMuseumView }>) {
   const total = snapshot.records.length;
   const failures = total - snapshot.counts.verified;
   const { index } = snapshot.media;
+  const fixture = snapshot.source === "fixture";
   return (
     <section
       aria-labelledby="verification"
@@ -227,16 +242,19 @@ export function Verification({ view }: Readonly<{ view: OnchainMuseumView }>) {
       <ul className="tw-m-0 tw-mt-5 tw-grid tw-list-none tw-gap-2 tw-p-0 md:tw-grid-cols-2">
         <CheckRow
           passed={checks.codeHashMatches}
+          skipped={fixture}
           label={t(locale, "museum.onchain.check.codeHash", {
             tag: ONCHAIN_MUSEUM_SOURCE.build.tag,
           })}
         />
         <CheckRow
           passed={checks.supportsRegistryInterface && checks.erc165Conforms}
+          skipped={fixture}
           label={t(locale, "museum.onchain.check.interface")}
         />
         <CheckRow
           passed={checks.ownerMatches}
+          skipped={fixture}
           label={t(locale, "museum.onchain.check.owner")}
         />
         <CheckRow
@@ -279,7 +297,7 @@ export function Verification({ view }: Readonly<{ view: OnchainMuseumView }>) {
           })}
         </p>
       ) : null}
-      <div className="tw-mt-5">
+      <div className={fixture ? "tw-hidden" : "tw-mt-5"}>
         <FactList
           facts={[
             {

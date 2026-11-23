@@ -8,7 +8,6 @@ import {
   type OnchainRightsView,
   type OnchainWorkImageView,
 } from "@/lib/museum/onchain/works";
-import { registryValueLabel } from "./labels";
 import { VerifiedImage, type VerifiedImageCopy } from "./VerifiedImage";
 
 const locale = DEFAULT_LOCALE;
@@ -61,11 +60,12 @@ function rightsLine(
   const recorded = rights.find((item) => item.licence !== null);
   const licence = recorded?.licence ?? null;
   if (licence !== null) {
+    if (recorded?.status === "restricted") {
+      return t(locale, "museum.onchain.image.rightsRestricted");
+    }
+    if (creditText?.includes(licence) === true) return null;
     if (recorded?.status === "licensed") {
       return t(locale, "museum.onchain.image.rightsLicensed", { licence });
-    }
-    if (recorded?.status === "restricted") {
-      return t(locale, "museum.onchain.image.rightsRestricted", { licence });
     }
   }
   if (manifestStatus === null) return null;
@@ -105,16 +105,10 @@ export function WorkFigure({
           <p className="tw-m-0 tw-text-iron-100">{creditText}</p>
         )}
         {rights === null ? null : <p className="tw-m-0">{rights}</p>}
-        <p className="tw-m-0">
-          {registryValueLabel("image.display", image.displayStatus)}
-        </p>
         <p className="tw-m-0 tw-text-iron-400">
           {image.rightsTerms.length === 0
             ? t(locale, "museum.onchain.image.noTerms")
             : image.rightsTerms.join(" ")}
-        </p>
-        <p className="tw-m-0 tw-text-xs tw-text-iron-500">
-          {t(locale, "museum.onchain.image.verifiedNote")}
         </p>
       </figcaption>
     </figure>

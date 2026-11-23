@@ -66,6 +66,8 @@ export interface OnchainLabeler {
   /** Plural heading of a family's kind, such as "Condition reports". */
   recordKindPlural(recordType: string, kind: string): string;
   documentKind(kind: string): string;
+  /** A statement with no named subject, by its kind and date. */
+  dated(kind: string, isoDate: string): string;
   /** A relation read as a phrase: "CENTURY #31, by Casey Reas". */
   relation(kind: string, source: string, target: string): string;
   textGroup(kind: OnchainTextGroupKind): string;
@@ -363,6 +365,14 @@ function buildLabels(
     const subject = aboutRefs(record)
       .map(recordLabel)
       .find((item) => item !== null);
+    const observedTo = bodyOf(record)["observed_to"];
+    if (
+      (subject === undefined || subject === null) &&
+      typeof observedTo === "string"
+    ) {
+      labels.set(record.subjectId, labeler.dated(kindOf(record), observedTo));
+      continue;
+    }
     labels.set(
       record.subjectId,
       subject === undefined || subject === null

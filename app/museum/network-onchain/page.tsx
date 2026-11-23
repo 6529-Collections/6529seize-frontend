@@ -119,12 +119,16 @@ function Releases({ view }: Readonly<{ view: OnchainMuseumView }>) {
                     ? view.snapshot.media.index.fileCount
                     : null
                 )}
-                {" · "}
-                {release.isSealed
-                  ? t(locale, "museum.onchain.releases.sealed", {
-                      date: formatUtcDateTime(release.sealedAt),
-                    })
-                  : t(locale, "museum.onchain.releases.open")}
+                {view.snapshot.source === "fixture" ? null : (
+                  <>
+                    {" · "}
+                    {release.isSealed
+                      ? t(locale, "museum.onchain.releases.sealed", {
+                          date: formatUtcDateTime(release.sealedAt),
+                        })
+                      : t(locale, "museum.onchain.releases.open")}
+                  </>
+                )}
               </p>
               {earlier === undefined ? null : (
                 <p className="tw-m-0 tw-mt-2 tw-text-sm tw-leading-6 tw-text-iron-300">
@@ -332,6 +336,11 @@ export default async function OnchainMuseumPage() {
     .filter((group) => group.kicker === undefined)
     .slice(0, 4);
   const firstRecordGroup = groups.find((group) => group.kicker !== undefined);
+  const works = view.entityGroups.find((group) => group.key === "work");
+  const held = (works?.records ?? []).filter(
+    (record) => collectionOf(view, record) !== null
+  ).length;
+  const fixture = snapshot.source === "fixture";
 
   return (
     <>
@@ -340,7 +349,19 @@ export default async function OnchainMuseumPage() {
         title={t(locale, "museum.onchain.heading")}
         intro={
           <>
-            <p className="tw-m-0">{t(locale, "museum.onchain.intro")}</p>
+            <p className="tw-m-0">
+              {t(locale, "museum.onchain.holdings", {
+                held: formatCount(held),
+                selected: formatCount((works?.records.length ?? 0) - held),
+                texts: formatCount(view.texts.length),
+              })}
+            </p>
+            <p className="tw-m-0 tw-mt-2">
+              {t(
+                locale,
+                fixture ? "museum.onchain.introFixture" : "museum.onchain.intro"
+              )}
+            </p>
             <p className="tw-m-0 tw-mt-2 tw-text-iron-200">
               {t(locale, "museum.onchain.summaryLine", {
                 verified: formatCount(snapshot.counts.verified),
@@ -383,10 +404,7 @@ export default async function OnchainMuseumPage() {
         </p>
       </section>
 
-      <section
-        aria-labelledby="texts"
-        className="tw-mb-12 tw-rounded-2xl tw-border tw-border-solid tw-border-white/10 tw-p-5 sm:tw-p-6"
-      >
+      <section aria-labelledby="texts" className="tw-mb-12">
         <SectionHeading id="texts">
           {t(locale, "museum.onchain.texts.heading")}
         </SectionHeading>

@@ -107,7 +107,15 @@ const TEXT_DETAIL_KEYS = {
   text_reference: "museum.onchain.stateDetail.textUnsupported",
 } as const satisfies Record<string, MessageKey>;
 
-function stateDetail(record: OnchainMuseumRecord): string {
+function stateDetail(record: OnchainMuseumRecord, fixture: boolean): string {
+  if (record.state === "verified" && fixture) {
+    return t(
+      locale,
+      record.text === null
+        ? "museum.onchain.stateDetail.verifiedFixture"
+        : "museum.onchain.stateDetail.verifiedTextFixture"
+    );
+  }
   if (record.state === "verified") {
     const cid =
       record.cidMatches === true
@@ -131,10 +139,16 @@ function workTextGroups(view: OnchainMuseumView, record: OnchainMuseumRecord) {
       memberships(view, record, key).map((item) => item.subjectId)
     )
   );
-  return view.textGroups.filter(
-    (group) =>
-      group.contextSubjectId !== null && contexts.has(group.contextSubjectId)
-  );
+  // One link per context: a program's texts sit in several folders.
+  const seen = new Set<string>();
+  return view.textGroups.filter((group) => {
+    const context = group.contextSubjectId;
+    if (context === null || !contexts.has(context) || seen.has(context)) {
+      return false;
+    }
+    seen.add(context);
+    return true;
+  });
 }
 
 /** Texts that name this work or artist, and the text groups it belongs to. */
@@ -167,11 +181,7 @@ function RelatedTexts({
                   className={LIST_LINK}
                 >
                   {t(locale, "museum.onchain.record.allTexts", {
-                    group:
-                      groups.filter((other) => other.heading === group.heading)
-                        .length > 1
-                        ? `${group.heading} (${group.kicker})`
-                        : group.heading,
+                    group: group.heading,
                   })}
                 </Link>
               </li>
@@ -190,7 +200,13 @@ function connectionGroups(
 ): Map<string, OnchainEdge[]> {
   const groups = new Map<string, OnchainEdge[]>();
   for (const edge of view.edgesOf(record)) {
-    const key = `${edge.kind}.${edge.direction}`;
+    // What an artist created splits into works and everything else.
+    const works =
+      edge.kind === "created_by" &&
+      edge.direction === "in" &&
+      edge.other !== null &&
+      view.groupKeyOf(edge.other) === "work";
+    const key = works ? "created_by.in.work" : `${edge.kind}.${edge.direction}`;
     groups.set(key, [...(groups.get(key) ?? []), edge]);
   }
   return groups;
@@ -299,7 +315,7 @@ function HeadingAside({
       <div className="tw-flex tw-flex-wrap tw-items-start tw-gap-3">
         <StateBadge state={record.state} />
         <p className="tw-m-0 tw-min-w-0 tw-flex-1 tw-text-sm tw-leading-6 tw-text-iron-300">
-          {stateDetail(record)}
+          {stateDetail(record, view.snapshot.source === "fixture")}
         </p>
       </div>
       {isWork && workImage(view, record) === null ? (
@@ -396,7 +412,10 @@ export default async function OnchainMuseumRecordPage({
       )}
       <RelatedTexts view={view} record={record} />
       <Connections view={view} record={record} />
-      <OnchainFacts record={record} />
+      <OnchainFacts
+        record={record}
+        fixture={view.snapshot.source === "fixture"}
+      />
 
       {record.content === null ? null : (
         <section aria-labelledby="record-payload" className="tw-mb-10">

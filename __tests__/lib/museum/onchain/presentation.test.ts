@@ -37,6 +37,7 @@ const labeler: OnchainLabeler = {
   recordKindPlural: (family, kind) => `${family}/${kind}s`,
   documentKind: (kind) => `document:${kind}`,
   relation: (kind, source, target) => `${source} [${kind}] ${target}`,
+  dated: (kind, isoDate) => `${kind} ${isoDate.slice(0, 10)}`,
   textGroup: (kind) => `texts:${kind}`,
   unverifiedGroup: () => "unverified",
 };

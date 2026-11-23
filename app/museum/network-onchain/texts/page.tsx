@@ -46,15 +46,36 @@ function withDistinctTitles(
     const label = view.labelOf(record);
     counts.set(label, (counts.get(label) ?? 0) + 1);
   }
-  return records.map((record) =>
-    filterableItem(
-      view,
-      record,
-      (counts.get(view.labelOf(record)) ?? 0) > 1
-        ? fileTitle(documentPath(record))
-        : undefined
-    )
-  );
+  return [...records]
+    .sort((left, right) => kindRank(left) - kindRank(right))
+    .map((record) => {
+      const file =
+        (counts.get(view.labelOf(record)) ?? 0) > 1
+          ? fileTitle(documentPath(record))
+          : undefined;
+      const kind = view.kindOf(record);
+      return filterableItem(
+        view,
+        record,
+        file === undefined ? kind : `${kind} · ${file}`
+      );
+    });
+}
+
+/** Essays and catalogue entries before the working documents. */
+const KIND_ORDER = [
+  "essay",
+  "catalogue_entry",
+  "program_text",
+  "dossier",
+  "finding_aid",
+  "policy_text",
+  "report",
+];
+
+function kindRank(record: OnchainMuseumRecord): number {
+  const index = KIND_ORDER.indexOf(record.profile?.kind ?? "");
+  return index === -1 ? KIND_ORDER.length : index;
 }
 
 function fileTitle(path: string | null): string | undefined {

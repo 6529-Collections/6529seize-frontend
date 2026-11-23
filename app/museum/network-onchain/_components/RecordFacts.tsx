@@ -97,6 +97,20 @@ function textFact(key: MessageKey, value: string | null): Fact[] {
   return value === null ? [] : [{ label: t(locale, key), value }];
 }
 
+/** A caption field every work shows, saying so when the record has none. */
+function recordedFact(key: MessageKey, value: string | null): Fact[] {
+  return [
+    {
+      label: t(locale, key),
+      value: value ?? (
+        <span className="tw-text-iron-400">
+          {t(locale, "museum.onchain.record.notRecorded")}
+        </span>
+      ),
+    },
+  ];
+}
+
 /** A reference shown as a link to its record, or as the URI it names. */
 function RefValue({
   view,
@@ -106,8 +120,10 @@ function RefValue({
   if (record !== null) return <RecordLinks view={view} records={[record]} />;
   if (typeof value === "string" && value.startsWith("https://")) {
     return (
-      <a href={value} rel="noreferrer" className={`tw-break-all ${TEXT_LINK}`}>
-        {value}
+      <a href={value} rel="noreferrer" className={TEXT_LINK}>
+        {t(locale, "museum.onchain.record.pageOn", {
+          host: new URL(value).hostname,
+        })}
       </a>
     );
   }
@@ -165,15 +181,18 @@ function workFacts(
   const collection = collectionOf(view, record);
   // With an image, the figure carries the credit line; it is not repeated.
   const credit =
-    workImage(view, record) === null ? creditLineOf(view, record) : null;
+    workImage(view, record) === null ? creditLineOf(view, record) : undefined;
   return [
     ...linksFact(
       view,
       "museum.onchain.record.creators",
       creatorsOf(view, record)
     ),
-    ...textFact("museum.onchain.record.date", bodyText(record, "date")),
-    ...textFact("museum.onchain.record.medium", mediumOf(record)),
+    ...recordedFact("museum.onchain.record.date", bodyText(record, "date")),
+    ...recordedFact("museum.onchain.record.medium", mediumOf(record)),
+    ...(credit === undefined
+      ? []
+      : recordedFact("museum.onchain.record.creditLine", credit)),
     {
       label: t(locale, "museum.onchain.record.collection"),
       value:
@@ -188,17 +207,22 @@ function workFacts(
       "museum.onchain.record.accession",
       memberships(view, record, "accession")
     ),
-    ...linksFact(view, "museum.onchain.record.acquisition", [
-      ...memberships(view, record, "acquisition"),
-      ...memberships(view, record, "program"),
-    ]),
+    ...linksFact(
+      view,
+      "museum.onchain.record.acquisition",
+      memberships(view, record, "acquisition")
+    ),
+    ...linksFact(
+      view,
+      "museum.onchain.record.program",
+      memberships(view, record, "program")
+    ),
     ...linksFact(
       view,
       "museum.onchain.record.project",
       memberships(view, record, "project")
     ),
     ...identifierFacts(record),
-    ...textFact("museum.onchain.record.creditLine", credit),
     ...linksFact(
       view,
       "museum.onchain.record.objectRecords",
@@ -427,10 +451,14 @@ export function captionFacts(
   else facts = statementFacts(view, record);
   return [
     ...facts,
-    {
-      label: t(locale, "museum.onchain.record.entityId"),
-      value: <Mono>{profile.localId}</Mono>,
-    },
+    ...(family === "PRV_REGISTRY"
+      ? []
+      : [
+          {
+            label: t(locale, "museum.onchain.record.entityId"),
+            value: <Mono>{profile.localId}</Mono>,
+          },
+        ]),
     {
       label: t(locale, "museum.onchain.record.status"),
       value: registryValueLabel("status", profile.status),
