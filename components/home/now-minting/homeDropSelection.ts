@@ -11,6 +11,12 @@ export type HomeDropSelection =
       readonly drop: ApiDropV2View;
     };
 
+export function getHomeDropMintNumber(
+  drop: HomeDropSelection | null
+): number | undefined {
+  return drop?.kind === "next" ? drop.mintNumber : drop?.nft.id;
+}
+
 export function canResolveHomeDrop({
   mintStatus,
   transitionReadiness,
@@ -69,10 +75,7 @@ export function resolveHomeDrop({
   readonly isMintCompleteAndGraceElapsed: boolean;
   readonly hasRefreshedWinner: boolean;
 }): HomeDropSelection {
-  const resolvedMintNumber =
-    resolvedDrop?.kind === "next"
-      ? resolvedDrop.mintNumber
-      : resolvedDrop?.nft.id;
+  const resolvedMintNumber = getHomeDropMintNumber(resolvedDrop);
   if (resolvedDrop && nft.id < (resolvedMintNumber ?? 0)) {
     return resolvedDrop;
   }

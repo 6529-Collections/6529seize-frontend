@@ -10,6 +10,7 @@ import LatestDropNextMintSection from "./LatestDropNextMintSection";
 import NowMintingSection from "./NowMintingSection";
 import {
   canResolveHomeDrop,
+  getHomeDropMintNumber,
   resolveHomeDrop,
   type HomeDropSelection,
 } from "./homeDropSelection";
@@ -49,8 +50,7 @@ export default function LatestDropSection({
   } | null>(null);
   const resolvedDrop =
     clientSelection?.seed === initialDrop ? clientSelection.drop : initialDrop;
-  const initialMintNumber =
-    initialDrop?.kind === "next" ? initialDrop.mintNumber : initialDrop?.nft.id;
+  const initialMintNumber = getHomeDropMintNumber(initialDrop);
 
   const isDecisionReady = canResolveHomeDrop({
     mintStatus,

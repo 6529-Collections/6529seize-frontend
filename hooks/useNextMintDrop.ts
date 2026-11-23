@@ -72,6 +72,7 @@ export const useNextMintDrop = ({
     isSettingsLoaded: isLoaded,
     isFetching: isFetching || (!isLoaded && !!waveId),
     isLoading: (!isLoaded && !loadError) || (!!waveId && isLoading),
+    // The homepage uses a fresh query scope and waits for a successful response.
     isFetchedAfterMount:
       winnerRequestScope === undefined
         ? isFetchedAfterMount
