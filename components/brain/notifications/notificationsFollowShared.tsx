@@ -1,13 +1,5 @@
 import type { UserFollowBtnSize } from "@/components/user/utils/UserFollowBtn";
 import { FOLLOW_BTN_SVG_CLASSES } from "@/components/user/utils/UserFollowBtn";
-import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
-import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
-
-export const DEFAULT_SUBSCRIPTION_BODY: ApiIdentitySubscriptionActions = {
-  actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
-    (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
-  ),
-};
 
 export function FollowBtnCheckIcon() {
   return (

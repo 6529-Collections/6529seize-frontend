@@ -9,12 +9,8 @@ import { AuthContext } from "@/components/auth/Auth";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import { getToastErrorDetails } from "@/helpers/toast.helpers";
-import {
-  commonApiDeleteWithBody,
-  commonApiFetch,
-  commonApiPost,
-} from "@/services/api/common-api";
-import { ApiIdentitySubscriptionTargetAction } from "@/generated/models/ApiIdentitySubscriptionTargetAction";
+import { commonApiFetch } from "@/services/api/common-api";
+import { setIdentityFollowing } from "@/services/api/identity-follow-api";
 import CircleLoader, {
   CircleLoaderSize,
 } from "@/components/distribution-plan-tool/common/CircleLoader";
@@ -194,17 +190,7 @@ export default function UserFollowBtn({
 
   const followMutation = useMutation({
     mutationFn: async () => {
-      await commonApiPost<
-        ApiIdentitySubscriptionActions,
-        ApiIdentitySubscriptionActions
-      >({
-        endpoint: `identities/${handle}/subscriptions`,
-        body: {
-          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
-            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
-          ),
-        },
-      });
+      await setIdentityFollowing(handle, true);
     },
     onSuccess: () => {
       onIdentityFollowChange();
@@ -224,17 +210,7 @@ export default function UserFollowBtn({
 
   const unFollowMutation = useMutation({
     mutationFn: async () => {
-      await commonApiDeleteWithBody<
-        ApiIdentitySubscriptionActions,
-        ApiIdentitySubscriptionActions
-      >({
-        endpoint: `identities/${handle}/subscriptions`,
-        body: {
-          actions: Object.values(ApiIdentitySubscriptionTargetAction).filter(
-            (i) => i !== ApiIdentitySubscriptionTargetAction.DropVoted
-          ),
-        },
-      });
+      await setIdentityFollowing(handle, false);
     },
     onSuccess: () => {
       onIdentityFollowChange();

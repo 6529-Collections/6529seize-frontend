@@ -779,15 +779,21 @@ export * from '../models/ApiSetCompetitionVoteRequest';
 export * from '../models/ApiSetDropReplyCollapseRequest';
 export * from '../models/ApiSetPinnedDropRequest';
 export * from '../models/ApiSetProfileWaveRequest';
+export * from '../models/ApiSignedRecordEvent';
+export * from '../models/ApiSignedRecordResult';
 export * from '../models/ApiSignedRecordsAnchor';
+export * from '../models/ApiSignedRecordsMode';
 export * from '../models/ApiSignedRecordsOwner';
 export * from '../models/ApiSignedRecordsOwners';
+export * from '../models/ApiSignedRecordsProviderKey';
 export * from '../models/ApiStartMultipartMediaUploadResponse';
 export * from '../models/ApiSubmissionDropContext';
 export * from '../models/ApiSubmissionDropStatus';
 export * from '../models/ApiSubmissionDropVoting';
 export * from '../models/ApiSubmissionDropVotingContextProfileContext';
 export * from '../models/ApiSubmitProfileCmsAgentProposalRequest';
+export * from '../models/ApiSubmitSignedRecordsRequest';
+export * from '../models/ApiSubmitSignedRecordsResponse';
 export * from '../models/ApiSubscriptionCoverage';
 export * from '../models/ApiSubscriptionCoverageDeadlineBasis';
 export * from '../models/ApiSubscriptionCoverageEligibilityBasis';
@@ -1786,15 +1792,21 @@ import { ApiSetCompetitionVoteRequest } from '../models/ApiSetCompetitionVoteReq
 import { ApiSetDropReplyCollapseRequest } from '../models/ApiSetDropReplyCollapseRequest';
 import { ApiSetPinnedDropRequest } from '../models/ApiSetPinnedDropRequest';
 import { ApiSetProfileWaveRequest } from '../models/ApiSetProfileWaveRequest';
+import { ApiSignedRecordEvent } from '../models/ApiSignedRecordEvent';
+import { ApiSignedRecordResult } from '../models/ApiSignedRecordResult';
 import { ApiSignedRecordsAnchor } from '../models/ApiSignedRecordsAnchor';
+import { ApiSignedRecordsMode } from '../models/ApiSignedRecordsMode';
 import { ApiSignedRecordsOwner } from '../models/ApiSignedRecordsOwner';
 import { ApiSignedRecordsOwners } from '../models/ApiSignedRecordsOwners';
+import { ApiSignedRecordsProviderKey } from '../models/ApiSignedRecordsProviderKey';
 import { ApiStartMultipartMediaUploadResponse     } from '../models/ApiStartMultipartMediaUploadResponse';
 import { ApiSubmissionDropContext        } from '../models/ApiSubmissionDropContext';
 import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
 import { ApiSubmissionDropVotingContextProfileContext } from '../models/ApiSubmissionDropVotingContextProfileContext';
 import { ApiSubmitProfileCmsAgentProposalRequest } from '../models/ApiSubmitProfileCmsAgentProposalRequest';
+import { ApiSubmitSignedRecordsRequest } from '../models/ApiSubmitSignedRecordsRequest';
+import { ApiSubmitSignedRecordsResponse } from '../models/ApiSubmitSignedRecordsResponse';
 import { ApiSubscriptionCoverage                   } from '../models/ApiSubscriptionCoverage';
 import { ApiSubscriptionCoverageDeadlineBasis } from '../models/ApiSubscriptionCoverageDeadlineBasis';
 import { ApiSubscriptionCoverageEligibilityBasis } from '../models/ApiSubscriptionCoverageEligibilityBasis';
@@ -3041,14 +3053,20 @@ let typeMap: {[index: string]: any} = {
     "ApiSetDropReplyCollapseRequest": ApiSetDropReplyCollapseRequest,
     "ApiSetPinnedDropRequest": ApiSetPinnedDropRequest,
     "ApiSetProfileWaveRequest": ApiSetProfileWaveRequest,
+    "ApiSignedRecordEvent": ApiSignedRecordEvent,
+    "ApiSignedRecordResult": ApiSignedRecordResult,
     "ApiSignedRecordsAnchor": ApiSignedRecordsAnchor,
+    "ApiSignedRecordsMode": ApiSignedRecordsMode,
     "ApiSignedRecordsOwner": ApiSignedRecordsOwner,
     "ApiSignedRecordsOwners": ApiSignedRecordsOwners,
+    "ApiSignedRecordsProviderKey": ApiSignedRecordsProviderKey,
     "ApiStartMultipartMediaUploadResponse": ApiStartMultipartMediaUploadResponse,
     "ApiSubmissionDropContext": ApiSubmissionDropContext,
     "ApiSubmissionDropVoting": ApiSubmissionDropVoting,
     "ApiSubmissionDropVotingContextProfileContext": ApiSubmissionDropVotingContextProfileContext,
     "ApiSubmitProfileCmsAgentProposalRequest": ApiSubmitProfileCmsAgentProposalRequest,
+    "ApiSubmitSignedRecordsRequest": ApiSubmitSignedRecordsRequest,
+    "ApiSubmitSignedRecordsResponse": ApiSubmitSignedRecordsResponse,
     "ApiSubscriptionCoverage": ApiSubscriptionCoverage,
     "ApiSubscriptionCoverageForecast": ApiSubscriptionCoverageForecast,
     "ApiSubscriptionCoverageMinimumTopUp": ApiSubscriptionCoverageMinimumTopUp,

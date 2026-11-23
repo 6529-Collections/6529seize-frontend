@@ -8,7 +8,15 @@ import type { ApiContentModerationReportResponse } from "@/generated/models/ApiC
 import type { ApiContentModerationReportWithdrawalResponse } from "@/generated/models/ApiContentModerationReportWithdrawalResponse";
 import type { ApiContentModerationUserReport } from "@/generated/models/ApiContentModerationUserReport";
 import type { ApiContentModeratorAccess } from "@/generated/models/ApiContentModeratorAccess";
+import type { ApiIdentitySubscriptionActions } from "@/generated/models/ApiIdentitySubscriptionActions";
 import type { ApiModerationAccess } from "@/generated/models/ApiModerationAccess";
+import {
+  flagItem,
+  identityFollow,
+  personalChange,
+} from "@/lib/personal-records/personal-record-changes";
+import { ownerOfProfile } from "@/lib/personal-records/record-owners";
+import { savePersonalSetting } from "@/lib/personal-records/save-personal-setting";
 import {
   commonApiDelete,
   commonApiDeleteWithResponse,
@@ -25,29 +33,72 @@ export const fetchBlockedProfiles = (): Promise<ApiBlockedProfile[]> =>
     errorMode: "structured",
   });
 
+/** Whether the signed-in profile follows this one, read before a block unfollows it. */
+const isFollowing = async (profileId: string): Promise<boolean> =>
+  (
+    await commonApiFetch<ApiIdentitySubscriptionActions>({
+      endpoint: `identities/${profileId}/subscriptions`,
+    })
+  ).actions.length > 0;
+
+/**
+ * Blocks a profile: today's route, or a private `block` item keyed by the
+ * profile's owner, with the follow's unset in the same submit when the
+ * signed-in profile follows it.
+ */
 export const blockProfile = (profileId: string): Promise<void> =>
-  commonApiPut<Record<string, never>, unknown>({
-    endpoint: `content-moderation/profiles/${profileId}/block`,
-    body: {},
-  }).then(() => undefined);
+  savePersonalSetting<void, boolean>({
+    legacy: () =>
+      commonApiPut<Record<string, never>, unknown>({
+        endpoint: `content-moderation/profiles/${profileId}/block`,
+        body: {},
+      }).then(() => undefined),
+    snapshot: () => isFollowing(profileId),
+    change: async (following) => {
+      const owner = await ownerOfProfile(profileId);
+      return personalChange({
+        follows: following ? [identityFollow(owner, false)] : [],
+        items: [flagItem("block", owner, true)],
+      });
+    },
+    recordsResult: () => undefined,
+  });
 
 export const unblockProfile = (profileId: string): Promise<void> =>
-  commonApiDelete({
-    endpoint: `content-moderation/profiles/${profileId}/block`,
-    errorMode: "structured",
+  savePersonalSetting({
+    legacy: () =>
+      commonApiDelete({
+        endpoint: `content-moderation/profiles/${profileId}/block`,
+        errorMode: "structured",
+      }),
+    change: async () =>
+      personalChange({
+        items: [flagItem("block", await ownerOfProfile(profileId), false)],
+      }),
+    recordsResult: () => undefined,
+  });
+
+const setDropHidden = (dropId: string, hidden: boolean): Promise<void> =>
+  savePersonalSetting({
+    legacy: () =>
+      hidden
+        ? commonApiPut<Record<string, never>, unknown>({
+            endpoint: `content-moderation/drops/${dropId}/hide`,
+            body: {},
+          }).then(() => undefined)
+        : commonApiDelete({
+            endpoint: `content-moderation/drops/${dropId}/hide`,
+            errorMode: "structured",
+          }),
+    change: () => personalChange({ items: [flagItem("hide", dropId, hidden)] }),
+    recordsResult: () => undefined,
   });
 
 export const hideDrop = (dropId: string): Promise<void> =>
-  commonApiPut<Record<string, never>, unknown>({
-    endpoint: `content-moderation/drops/${dropId}/hide`,
-    body: {},
-  }).then(() => undefined);
+  setDropHidden(dropId, true);
 
 export const unhideDrop = (dropId: string): Promise<void> =>
-  commonApiDelete({
-    endpoint: `content-moderation/drops/${dropId}/hide`,
-    errorMode: "structured",
-  });
+  setDropHidden(dropId, false);
 
 export const reportDrop = (
   dropId: string,

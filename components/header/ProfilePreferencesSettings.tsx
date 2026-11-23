@@ -23,7 +23,8 @@ import {
 } from "@/generated/models/ApiUpdateProfilePreferences";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
-import { commonApiFetch, commonApiPut } from "@/services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
+import { saveProfilePreferences } from "@/services/api/profile-preferences-api";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   AnimatePresence,
@@ -186,10 +187,7 @@ function useSaveProfilePreferences(
     mutationFn: async (body: ApiUpdateProfilePreferences) => {
       const update = prepare ? await prepare(body) : body;
       if (update === null) return null;
-      return commonApiPut<ApiUpdateProfilePreferences, ApiProfilePreferences>({
-        endpoint: "profile-preferences",
-        body: update,
-      });
+      return saveProfilePreferences(update);
     },
     onSuccess: (saved) => {
       if (!saved) return;

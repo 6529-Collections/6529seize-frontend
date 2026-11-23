@@ -12,7 +12,8 @@ import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
 import type { ApiEulaConsent } from "@/generated/models/ApiEulaConsent";
 import type { ApiSaveEulaConsentRequest } from "@/generated/models/ApiSaveEulaConsentRequest";
-import { commonApiFetch, commonApiPost } from "@/services/api/common-api";
+import { commonApiFetch } from "@/services/api/common-api";
+import { saveEulaConsent } from "@/services/api/eula-consent-api";
 import { getApiAccessPath } from "@/services/auth/api-access-redirect";
 import LogoIcon from "@/components/common/icons/LogoIcon";
 import { EULAConsentContext } from "./useEULAConsent";
@@ -245,11 +246,7 @@ export const EULAConsentProvider: React.FC<EULAConsentProviderProps> = ({
         platform: "ios",
         eula_version: CURRENT_EULA_VERSION,
       };
-      await commonApiPost({
-        endpoint: "policies/eula-consent",
-        body,
-        errorMode: "structured",
-      });
+      await saveEulaConsent(body);
       Cookies.set(CONSENT_EULA_COOKIE, CURRENT_EULA_VERSION, {
         expires: EULA_VALIDITY_DAYS,
       });
