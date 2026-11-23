@@ -16,10 +16,6 @@ import { formatDecimalString } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { WalletRequest } from "@/lib/desktop/wallet-forwarding";
 import type {
-  DecodedTuple,
-  DecodedValue,
-} from "@/lib/desktop/wallet-transactions/decode";
-import type {
   TransactionDescription,
   TransactionEffect,
 } from "@/lib/desktop/wallet-transactions/describe";
@@ -28,13 +24,14 @@ import {
   type PriceReader,
   readExpectedMintValue,
 } from "@/lib/desktop/wallet-transactions/price";
-import type { RuleArg } from "@/lib/desktop/wallet-transactions/types";
 import {
   isPublisherCall,
   readPublisherAuthorization,
   type RegistryReader,
 } from "@/lib/desktop/wallet-transactions/provenance";
 import BrowserWalletProvenanceDetails from "./BrowserWalletProvenanceDetails";
+import { useCheckResult, useScopedFlag } from "./requestScopedState";
+import { formatDecodedValue } from "./walletTransactionFormat";
 import BrowserWalletTransferRecipient from "./BrowserWalletTransferRecipient";
 
 type Locale = ReturnType<typeof useBrowserLocale>;
@@ -88,11 +85,9 @@ function isRevert(error: unknown): boolean {
   );
 }
 
-/** A check's result, tagged with the inputs it was made for. */
-interface Tagged<T> {
-  readonly key: string;
-  readonly result: T;
-}
+/** A request's identity: its chain and exact transaction. */
+const requestKey = ({ chainId, transaction }: TransactionRequest): string =>
+  `${chainId}:${transaction.from}:${transaction.to}:${transaction.data}:${transaction.value}`;
 
 /** Runs one call check (never throws). */
 async function runCallCheck(
@@ -122,23 +117,15 @@ async function runCallCheck(
  */
 function useCallCheck(request: TransactionRequest, round: number): CallCheck {
   const client = usePublicClient({ chainId: request.chainId });
-  const [tagged, setTagged] = useState<Tagged<CallCheck> | null>(null);
   const { transaction } = request;
-  const key = `${round}:${transaction.to}:${transaction.data}:${transaction.value}`;
-  useEffect(() => {
-    if (!client) return undefined;
-    let active = true;
-    const run = async () => {
-      const result = await runCallCheck(client, transaction);
-      if (active) setTagged({ key, result });
-    };
-    void run();
-    return () => {
-      active = false;
-    };
-  }, [client, transaction, key]);
+  const result = useCheckResult(
+    requestKey(request),
+    client,
+    client ? () => runCallCheck(client, transaction) : null,
+    round
+  );
   if (!client) return { kind: "unavailable", raw: "" };
-  return tagged?.key === key ? tagged.result : { kind: "checking" };
+  return result ?? { kind: "checking" };
 }
 
 /** Runs one price check (never throws). */
@@ -166,23 +153,15 @@ function usePriceCheck(
 ): PriceCheck {
   const client = usePublicClient({ chainId: request.chainId });
   const readable = hasReadablePrice(description);
-  const [tagged, setTagged] = useState<Tagged<PriceCheck> | null>(null);
-  const key = String(round);
-  useEffect(() => {
-    if (!client || !readable) return undefined;
-    let active = true;
-    const run = async () => {
-      const result = await runPriceCheck(client, description);
-      if (active) setTagged({ key, result });
-    };
-    void run();
-    return () => {
-      active = false;
-    };
-  }, [client, readable, description, key]);
+  const result = useCheckResult(
+    requestKey(request),
+    client,
+    client && readable ? () => runPriceCheck(client, description) : null,
+    round
+  );
   if (!readable) return { kind: "none" };
   if (!client) return { kind: "unavailable" };
-  return tagged?.key === key ? tagged.result : { kind: "checking" };
+  return result ?? { kind: "checking" };
 }
 
 /** Runs one sender check (never throws). */
@@ -213,23 +192,15 @@ function useSenderCheck(
 ): SenderCheck {
   const client = usePublicClient({ chainId: request.chainId });
   const needed = isPublisherCall(description);
-  const [tagged, setTagged] = useState<Tagged<SenderCheck> | null>(null);
-  const key = String(round);
-  useEffect(() => {
-    if (!client || !needed) return undefined;
-    let active = true;
-    const run = async () => {
-      const result = await runSenderCheck(client, request);
-      if (active) setTagged({ key, result });
-    };
-    void run();
-    return () => {
-      active = false;
-    };
-  }, [client, needed, request, key]);
+  const result = useCheckResult(
+    requestKey(request),
+    client,
+    client && needed ? () => runSenderCheck(client, request) : null,
+    round
+  );
   if (!needed) return { kind: "none" };
   if (!client) return { kind: "unavailable" };
-  return tagged?.key === key ? tagged.result : { kind: "checking" };
+  return result ?? { kind: "checking" };
 }
 
 function senderCheckMessage(locale: Locale, check: SenderCheck): string | null {
@@ -262,62 +233,6 @@ function useTooLate(expiresAt: number): boolean {
 }
 
 const formatAddress = (value: string) => getAddress(value);
-
-function formatValue(
-  locale: Locale,
-  type: string,
-  value: DecodedValue,
-  components?: readonly RuleArg[]
-): string {
-  if (type === "bytes32[]" && Array.isArray(value)) {
-    return t(locale, "browserConnector.tx.proof", {
-      count: formatDecimalString(locale, String(value.length)),
-    });
-  }
-  if (type === "bytes32[][]" && Array.isArray(value)) {
-    return t(locale, "browserConnector.tx.proofs", {
-      count: formatDecimalString(locale, String(value.length)),
-    });
-  }
-  if (Array.isArray(value)) {
-    const elementType = type.slice(0, -2);
-    const separator = components === undefined ? ", " : "; ";
-    return (value as readonly DecodedValue[])
-      .map((element) => formatValue(locale, elementType, element, components))
-      .join(separator);
-  }
-  if (components !== undefined) {
-    // A tuple: each field by name, with its own type.
-    const tuple = value as DecodedTuple;
-    const fields = components.map((component) =>
-      t(locale, "browserConnector.tx.field", {
-        name: component.name,
-        value: formatValue(
-          locale,
-          component.type,
-          tuple[component.name] ?? "",
-          component.components
-        ),
-      })
-    );
-    return `(${fields.join(", ")})`;
-  }
-  if (typeof value === "boolean") {
-    return t(
-      locale,
-      value ? "browserConnector.tx.yes" : "browserConnector.tx.no"
-    );
-  }
-  if (typeof value === "bigint") {
-    return formatDecimalString(locale, value.toString());
-  }
-  const text = value as string;
-  if (type === "address") return formatAddress(text);
-  if (type === "string") {
-    return t(locale, "browserConnector.tx.quoted", { text });
-  }
-  return text;
-}
 
 /** A delegation use case by number and its name in the delegation center. */
 const labelForUseCase = (locale: Locale, id: string): string => {
@@ -437,8 +352,9 @@ export default function BrowserWalletTransactionView({
   const price = usePriceCheck(request, description, round);
   const sender = useSenderCheck(request, description, round);
   const tooLate = useTooLate(expiresAt);
-  const [understood, setUnderstood] = useState(false);
-  const [sendAnyway, setSendAnyway] = useState(false);
+  // Both belong to this request: a new request starts unconfirmed.
+  const [understood, setUnderstood] = useScopedFlag(requestKey(request));
+  const [sendAnyway, setSendAnyway] = useScopedFlag(requestKey(request));
   const understandId = useId();
   const checksId = useId();
   const transfer = description.risk === "transfer";
@@ -589,7 +505,12 @@ export default function BrowserWalletTransactionView({
             <div key={arg.name}>
               <dt className="tw-font-mono tw-text-iron-400">{arg.name}</dt>
               <dd className="tw-m-0 tw-break-all tw-font-mono tw-text-iron-100">
-                {formatValue(locale, arg.type, arg.value, arg.components)}
+                {formatDecodedValue(
+                  locale,
+                  arg.type,
+                  arg.value,
+                  arg.components
+                )}
               </dd>
             </div>
           ))}
