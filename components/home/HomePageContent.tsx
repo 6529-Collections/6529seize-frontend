@@ -12,15 +12,21 @@ import { LatestDropSection } from "./now-minting";
 import { useHomepageTracking } from "./useHomepageTracking";
 import { MemesMintingRootsProvider } from "@/contexts/MemesMintingRootsContext";
 
-export default function HomePageContent() {
+import type { HomeDropSelection } from "./now-minting/homeDropSelection";
+
+interface HomePageContentProps {
+  readonly initialDrop: HomeDropSelection | null;
+}
+
+export default function HomePageContent({ initialDrop }: HomePageContentProps) {
   return (
     <MemesMintingRootsProvider>
-      <HomePageSections />
+      <HomePageSections initialDrop={initialDrop} />
     </MemesMintingRootsProvider>
   );
 }
 
-function HomePageSections() {
+function HomePageSections({ initialDrop }: HomePageContentProps) {
   const { connectionState, hasValidWalletAuth } = useSeizeConnectContext();
   const mintStatus = useNowMintingStatus();
   const { rootRef, onClickCapture } = useHomepageTracking(hasValidWalletAuth);
@@ -37,7 +43,7 @@ function HomePageSections() {
       className="tw-overflow-x-hidden tw-border-y-0 tw-border-l-0 tw-border-r tw-border-solid tw-border-iron-800"
     >
       <HeroHeader>{showNewcomerIntro && <HomeNewcomerIntro />}</HeroHeader>
-      <LatestDropSection mintStatus={mintStatus} />
+      <LatestDropSection initialDrop={initialDrop} mintStatus={mintStatus} />
       {showNewcomerIntro && <HomeHowToStart />}
       <HomePageTextSection />
       <NextMintLeadingSection />

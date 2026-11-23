@@ -1,21 +1,7 @@
 "use client";
 
-import { getMintTimelineDetails } from "@/components/meme-calendar/meme-calendar.helpers";
-import { HOME_LATEST_DROP_GRACE_PERIOD_MINUTES } from "@/helpers/mint-visibility.helpers";
+import { getLatestDropTransitionTime } from "@/helpers/mint-visibility.helpers";
 import { useEffect, useMemo, useState } from "react";
-
-const MINUTE_IN_MILLISECONDS = 60_000;
-
-export function getLatestDropTransitionTime(mintNumber: number): number | null {
-  if (!Number.isSafeInteger(mintNumber) || mintNumber < 1) {
-    return null;
-  }
-
-  const mintEndTime = getMintTimelineDetails(mintNumber).mintEndUtc.getTime();
-  return (
-    mintEndTime + HOME_LATEST_DROP_GRACE_PERIOD_MINUTES * MINUTE_IN_MILLISECONDS
-  );
-}
 
 export function useLatestDropTransitionReady({
   isDropComplete,
