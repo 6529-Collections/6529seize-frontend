@@ -34,7 +34,6 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.operation.CLASSIFY": "Classify",
   "checks.profileStatus": "Profile posting status",
   "checks.trigger.PUBLIC_FIELD": "Public-facing text check",
-  "checks.trigger.KNOWN_SAFE_PERSONAL_NAME": "Known personal name",
   "checks.trigger.PROFILE_SUSPENDED": "Suspension gate",
   "checks.trigger.MANUAL_OVERRIDE": "Human override",
   "checks.trigger.REPEATED_IDENTICAL_CONTENT": "Repeated identical content",
@@ -51,7 +50,7 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.description":
     "Review saved checks, decisions and evaluator failures across the platform.",
   "checks.policyNotice":
-    "Public-facing text uses a stricter policy for REP categories, About text and group names. Wave safety applies to posts and reports.",
+    "Public-facing text uses a stricter policy for REP categories and About text. Wave safety applies to posts and reports.",
   "checks.privateNotice":
     "6529 Dev Team group members only. Evidence is private and may contain harmful content. Links and media are shown as text until you choose to open them.",
   "checks.count.needs_review": "Items needing review",
@@ -79,7 +78,6 @@ export const MODERATION_CHECK_MESSAGES = {
   "checks.clearFilters": "Clear filters",
   "checks.subject.REP_CATEGORY": "REP category",
   "checks.subject.PROFILE_BIO": "About text",
-  "checks.subject.GROUP_NAME": "Group name",
   "checks.subject.DROP": "Post",
   "checks.outcome.ALLOW": "Allowed",
   "checks.outcome.REJECT": "Rejected",

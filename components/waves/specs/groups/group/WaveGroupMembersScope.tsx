@@ -3,7 +3,6 @@ import type { ApiGroup } from "@/generated/models/ApiGroup";
 import type { ApiGroupFull } from "@/generated/models/ApiGroupFull";
 import { DEFAULT_LOCALE } from "@/i18n/locales";
 import { t } from "@/i18n/messages";
-import WaveGroupScope from "./WaveGroupScope";
 
 export default function WaveGroupMembersScope({
   group,
@@ -13,23 +12,24 @@ export default function WaveGroupMembersScope({
   readonly groupDetails?: ApiGroupFull | undefined;
 }) {
   const groupId = group.id?.trim();
-  const groupName = group.name?.trim();
 
   // The waves API viewer-scopes private groups: unauthorized viewers receive
   // only an is_hidden stub, while eligible DM participants receive the group.
-  if (group.is_hidden || !groupId || !groupName) {
-    return <WaveGroupScope group={group} />;
+  // A DM stub without an ID also keeps the private-group label.
+  if (group.is_hidden || !groupId) {
+    return (
+      <span className="tw-py-0.5 tw-font-medium tw-text-iron-50">
+        {t(
+          DEFAULT_LOCALE,
+          group.is_hidden || group.is_direct_message
+            ? "waves.chatSettings.access.privateGroup"
+            : "waves.chatSettings.access.unavailableGroup"
+        )}
+      </span>
+    );
   }
 
   return (
-    <WaveRulesGroupMembersLink
-      groupId={groupId}
-      groupName={groupName}
-      groupDetails={groupDetails}
-      href={`/network?page=1&group=${encodeURIComponent(groupId)}`}
-      linkLabel={t(DEFAULT_LOCALE, "waves.chatSettings.access.inspectGroup", {
-        groupName,
-      })}
-    />
+    <WaveRulesGroupMembersLink groupId={groupId} groupDetails={groupDetails} />
   );
 }
