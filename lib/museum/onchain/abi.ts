@@ -1,8 +1,8 @@
 import { parseAbi } from "viem";
 
 /**
- * The read functions of `IProvenanceRegistry` (tag `v1.0.0-rc.1`) this route
- * uses. Struct layouts match the interface field for field.
+ * The read functions of `IProvenanceRegistry` (tag `v1.0.0-rc.2`, the same
+ * interface as `v1.0.0-rc.1`) this route uses. Struct layouts match the interface field for field.
  */
 export const PROVENANCE_REGISTRY_READ_ABI = parseAbi([
   "struct HashRef { uint16 algorithm; bytes32 digest; bytes32 canonicalizationId; }",

@@ -1,0 +1,526 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "77d78369a5",
+  "coverage": [
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/index-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/index-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/index-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/texts-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/texts-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/texts-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x31319b05e3ca5dfcb48fcf40eb1ccfd8bdb74de165cb83869021e9e93ad71290",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-portrait-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-portrait-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65869cc503cc5fb4de77f15fd68b1c74515ec239b4f88cecc61eb6b820824817",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-portrait-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-noimage-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-noimage-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xca2d2a9343ca8ae989c46aabbbf4cd3783944214cb65cf7307bf388a0b37d2da",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-noimage-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-artist-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-artist-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9c14ef75f511dd4e936931bd24cc8253a2fcd2b82bfdb8ddc586147a6afecd51",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-artist-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x660601ba82f5de584629bb9d5f4fa3bc77a8fa149fab40bd9204c75330e6e171",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-object-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x660601ba82f5de584629bb9d5f4fa3bc77a8fa149fab40bd9204c75330e6e171",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-object-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x660601ba82f5de584629bb9d5f4fa3bc77a8fa149fab40bd9204c75330e6e171",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-object-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x27ef6b7d3082c4ca26fc1cbab18ef8ba7066658bd07f7a482573d968fce4db88",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-digital-object-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x27ef6b7d3082c4ca26fc1cbab18ef8ba7066658bd07f7a482573d968fce4db88",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-digital-object-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x27ef6b7d3082c4ca26fc1cbab18ef8ba7066658bd07f7a482573d968fce4db88",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-digital-object-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xc81ac531cb09ca290458992c05dd822c115e38a09d196513f8dc5a736bd02b03",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-relation-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xc81ac531cb09ca290458992c05dd822c115e38a09d196513f8dc5a736bd02b03",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-relation-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xc81ac531cb09ca290458992c05dd822c115e38a09d196513f8dc5a736bd02b03",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-relation-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xb75094e65e53cf03c43558ca8c5772bcf0eb6b577b5bc34d0387bcc2ba771512",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-rights-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xb75094e65e53cf03c43558ca8c5772bcf0eb6b577b5bc34d0387bcc2ba771512",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-rights-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xb75094e65e53cf03c43558ca8c5772bcf0eb6b577b5bc34d0387bcc2ba771512",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-rights-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5d1c1d501d1fd3c522748bb04d249bf6cded2a59e952223390312a62313503ed",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-decision-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5d1c1d501d1fd3c522748bb04d249bf6cded2a59e952223390312a62313503ed",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-decision-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5d1c1d501d1fd3c522748bb04d249bf6cded2a59e952223390312a62313503ed",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-decision-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xab30738b6d04e421c7d674ac0bb251c77c4aa9963b35da8847310a68908d5ed8",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-observation-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xab30738b6d04e421c7d674ac0bb251c77c4aa9963b35da8847310a68908d5ed8",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-observation-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xab30738b6d04e421c7d674ac0bb251c77c4aa9963b35da8847310a68908d5ed8",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-observation-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x7c4f3fef02861d9e5d0e4d4508e2a08905d8e69161b4eb511b27301ff2598964",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-declaration-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x7c4f3fef02861d9e5d0e4d4508e2a08905d8e69161b4eb511b27301ff2598964",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-declaration-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x7c4f3fef02861d9e5d0e4d4508e2a08905d8e69161b4eb511b27301ff2598964",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-declaration-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xdf7210988d05711157492a2ba0358cd9d3b8c424a6bffd98dbb9ba6b7a9c1521",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-essay-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xdf7210988d05711157492a2ba0358cd9d3b8c424a6bffd98dbb9ba6b7a9c1521",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-essay-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0xdf7210988d05711157492a2ba0358cd9d3b8c424a6bffd98dbb9ba6b7a9c1521",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-essay-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x958cf32f4402d4bd580ebd1357016522b88baf58d639288486d6f6a2e52bd97a",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-short-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x958cf32f4402d4bd580ebd1357016522b88baf58d639288486d6f6a2e52bd97a",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-short-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x958cf32f4402d4bd580ebd1357016522b88baf58d639288486d6f6a2e52bd97a",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-short-390x844.txt"
+    }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 8.0,
+      "evidence": [
+        "evidence/text/index-1440x1000.txt",
+        "evidence/text/record-work-1440x1000.txt",
+        "evidence/text/texts-1440x1000.txt",
+        "evidence/record-work-390x844-02.png"
+      ],
+      "findings": [
+        "E-001",
+        "E-004",
+        "E-005"
+      ],
+      "note": "Fixture framing, record-field labels, texts grouping and the index opening are now plain and truthful; the headline and page titles still say the chain was read, one registry check shows Passed, and two small caption/label repeats remain."
+    },
+    "J12": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/text/index-390x844.txt",
+        "evidence/text/texts-1440x1000.txt"
+      ],
+      "findings": [],
+      "note": "Carried forward: en-US only, message-backed copy, locale-formatted dates, notice that texts stay in their published language."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "fail"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": [
+        "I3",
+        "J07"
+      ],
+      "severity": "P1",
+      "status": "open",
+      "where": "/museum/network-onchain headline and all page titles · default · all viewports · en-US; How this is checked · contract checks",
+      "evidence": "evidence/text/index-1440x1000.txt",
+      "observation": "Most of the round-00 problem is fixed: the banner says 'Test preview, read from local fixtures ... Not read from Sepolia or from Ethereum mainnet', the intro says 'nothing here was read from a chain', the Verified line says 'Read from fixtures, not from a chain', and three contract checks read 'Not checked: read from fixtures'. What remains: the h1 on the index is still 'The Museum, read from the chain' directly above the sentence that denies it (document titles read '6529 Network Museum on Ethereum (preview)' and 'Texts on Ethereum (preview)'), and the check 'The registry holds the 589 records the Museum published, in one release' shows a green Passed although no registry was read (the file-index and declaration checks run against fixture data and are fair).",
+      "consequence": "The first thing a reviewer reads still claims a chain read, and one Passed mark states a fact about a registry that was not queried.",
+      "change": "In fixture mode make the h1 'The Museum, from a test preview' (or 'The Museum's records') and the titles 'Preview from local fixtures'; show the registry-holds-589-records check as 'Not checked: read from fixtures' (or reword it to 'The release lists 589 records' if that is what ran). Keep 'read from the chain' for the registry-present branch.",
+      "acceptance_check": "With fixtures, no h1, page title or Passed mark states or implies a chain or registry read; the live branch copy is unchanged.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-002",
+      "targets": [
+        "I1"
+      ],
+      "severity": "P1",
+      "status": "resolved",
+      "where": "record routes and index Releases section · default · all viewports · en-US",
+      "evidence": "evidence/text/record-work-1440x1000.txt",
+      "observation": "Resolved. The block now reads 'The values the release's record list gives for this record. Publication time, order and publisher exist only once the record is on-chain.' No record page shows Published, Sequence, Publisher or 'as stored'; the release row reads '403 records and 186 texts' with no Sealed time.",
+      "consequence": "Synthesized publication dates and sequence numbers read as real on-chain history that a reviewer would cite.",
+      "change": "In fixture mode label the block 'Values from the fixture' and show Published, Sealed, Sequence and Publisher as 'Not on-chain yet' or omit them; keep 'as stored' for live reads only.",
+      "acceptance_check": "No record page or release row shows a Published or Sealed time, or the 'as stored' line, unless the value came from the registry.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-003",
+      "targets": [
+        "I2",
+        "J07"
+      ],
+      "severity": "P1",
+      "status": "resolved",
+      "where": "record-text-essay, texts, record-observation, record-declaration · default · all viewports · en-US",
+      "evidence": "evidence/text/texts-1440x1000.txt",
+      "observation": "Resolved. No Source path field, no 'declaration' Museum ID, no RFC8785_JCS code and no UUID URL appear on the 15 routes; text groups are headed 'Accession', 'Proposed gift: Conflict at Its Edges' and 'Acquisition program'; the observation is titled 'Status observation, Aug 8, 2026' and shows 'Page on 6529.io'. 'WP-3 source register' and 'WP-1 schema and vocabulary dependencies' remain as titles, but they are the published record titles and shown as recorded.",
+      "consequence": "Visitors meet working-package codes and file paths as headings and titles and cannot tell what 6529NM-PG-2026-001 or WP-3 is.",
+      "change": "Drop Source path from the visible fields (keep it in the copyable JSON). Name the proposed-gift groups by the work, e.g. 'Proposed gift: Conflict at Its Edges' and 'Proposed gift: Themes and Variations #210'. Title observations by what they observed ('Status observation, 8 Aug 2026') with the ID secondary. Show the link target as a labelled link ('Wave drop on 6529.io'). Remove the raw RFC8785_JCS code and the 'declaration' ID from visible rows.",
+      "acceptance_check": "No repository path, WP-/PG- code or bare UUID URL appears as a heading, title or field value on the 15 routes; text group headings name an object.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-004",
+      "targets": [
+        "J07"
+      ],
+      "severity": "P3",
+      "status": "open",
+      "where": "texts and record-work-portrait · default · all viewports · en-US",
+      "evidence": "evidence/text/record-work-portrait-1440x1000.txt",
+      "observation": "Partly fixed: every text row now carries its kind (Essay, Catalogue entry, Dossier, Report) and the work page offers one 'All texts for Keys and Gates'. Left over: Take the Key! still lists 'Acquisition: Keys and Gates' and 'Acquisition program: Keys and Gates' as two identical values, and the texts page jump list still has three entries 'Acquisition program: Keys and Gates', 'Acquisition program . works: Keys and Gates', 'Acquisition program . artists: Keys and Gates' that differ only by a middle dot.",
+      "consequence": "A reader sees the same value twice and wonders whether the two lines mean different things.",
+      "change": "Show one 'Acquisition' line when acquisition and program have the same title; label the jump-list entries 'Keys and Gates: program texts / works / artists'.",
+      "acceptance_check": "Take the Key! shows Keys and Gates once in About this record; texts jump entries differ in their leading words, not only in a middle dot.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-005",
+      "targets": [
+        "J07"
+      ],
+      "severity": "P2",
+      "status": "open",
+      "where": "record-work and record-work-portrait · default · all viewports · en-US",
+      "evidence": "evidence/record-work-390x844-02.png",
+      "observation": "Improved: the per-image SHA-256 paragraph and 'Approved for contextual display' are gone and 'Statement type' is now 'Source of statement'. Still, under the Themes and Variations image the license is stated twice (credit line 'Licensed under CC BY-NC 4.0.' and 'No permission is asserted beyond CC BY-NC 4.0; reuse must preserve attribution, remain noncommercial and comply with the license.'), and 'Some uses are refused; see the rights statement.' does not say which. At 390 px the caption runs to seven lines.",
+      "consequence": "The credit line is still buried in a caption that repeats the license and points elsewhere for the actual limits.",
+      "change": "Credit line, then one line: 'CC BY-NC 4.0: attribution required, noncommercial use only.' Drop the 'No permission is asserted beyond' sentence or fold it into that line; keep the link to the rights statement as 'Full rights statement'.",
+      "acceptance_check": "Each image page names the license once in the caption and the caption is three lines or fewer at 390 px.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-006",
+      "targets": [
+        "J07"
+      ],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "record-work-portrait, record-work-noimage, record-decision, record-object · default · all viewports · en-US",
+      "evidence": "evidence/text/record-work-noimage-1440x1000.txt",
+      "observation": "Resolved by the run record's scope: Medium caveats, 'Casey REAS' in the credit line, artist name forms and the decision Statement (with its ISO acceptance date) are text inside published records, which pages show as recorded. Any correction belongs in the source records, not the page.",
+      "consequence": "Mixed caveats, handles and casing make the record look unfinished and inconsistent across pages.",
+      "change": "Keep Medium to the medium and show caveats on a separate 'Note' line; use the artist's display name on every page (handle in parentheses once); set the Statement to a short sentence ('7 objects accessioned by donation, accepted 1 Aug 2026') with the numbers as links. If the source record is the cause, fix the record, not the page.",
+      "acceptance_check": "Medium holds only medium; one name per artist across work, artist and texts pages; the decision statement is two lines or fewer at 1440 px.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "E-007",
+      "targets": [
+        "J07"
+      ],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain · default · all viewports · en-US",
+      "evidence": "evidence/index-1440x1000-01.png",
+      "observation": "Resolved. The opening paragraph reads 'holds 13 works in its collection and has selected 16 more through its acquisitions and programs. 186 texts describe them.' with verification second; the section is headed 'Decisions, rights and observations'.",
+      "consequence": "A visitor who wants to find a work gets a verification explanation first, and the label 'Object records' misdescribes its contents.",
+      "change": "Lead with a sentence of real counts ('13 works in the collection, 16 selected for Keys and Gates, 186 texts') and put the verification sentence second. Rename 'Object records' to 'Decisions, rights and condition reports'.",
+      "acceptance_check": "The first paragraph names the collection and its counts; the 'Object records' heading names the record kinds it contains.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "The notice that texts appear in the language the Museum published them in",
+    "Plain verification steps in How this is checked, with the worked subject-ID example",
+    "Honest 'no still image of this work' copy for generative works, with a link to the Museum site",
+    "Separation of 'Works in the collection' from 'Works selected, not in the collection' and the 'Not in the collection' field",
+    "Record-kind labels (Accession decision, Condition report, Rights statement) and relation labels such as Created by and Documented by",
+    "Distinct states and copy for mismatch, unavailable and deleted records",
+    "The index opening that gives the collection counts before the verification explanation",
+    "The banner and Verified line that say plainly the preview reads fixtures, not a chain",
+    "'Not checked: read from fixtures' on the unrun contract checks",
+    "The On-chain facts note that publication time, order and publisher exist only once on-chain",
+    "Text rows that show their kind (Essay, Catalogue entry, Dossier, Report)"
+  ]
+}

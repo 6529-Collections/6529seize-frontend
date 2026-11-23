@@ -1,12 +1,12 @@
 import { recoverLoadedIdentities } from "./identity-recovery";
 import {
   findSavedImport,
+  getSavedAttachment,
   getSavedMessage,
   loadSavedHistory,
   requireSavedMessage,
 } from "./history-read";
 import type { HistoryPageOptions } from "../history-order";
-import { downloadMedia, localBlobType } from "../media";
 import type { PollDefinition } from "../payload";
 import { getDefaultBackupStateStore } from "../backup/state";
 import type { BackupHistory } from "../backup/format";
@@ -22,7 +22,6 @@ import {
   checkpoint,
   clearStoredState,
   requireGroup,
-  requireMls,
   type EngineContext,
 } from "./context";
 import { ConversationCreator } from "./conversation-creation";
@@ -429,9 +428,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     }
   }
 
-  flushReadSync(): Promise<void> {
-    return this.readSync.flushNow();
-  }
+  flushReadSync = (): Promise<void> => this.readSync.flushNow();
 
   async idle(): Promise<void> {
     for (let round = 0; round < 50; round += 1) {
@@ -703,22 +700,7 @@ class E2eeEngineImpl implements E2eeEngineExt {
     signal?: AbortSignal
   ): Promise<Blob> {
     this.requireReady();
-    const message = await this.ctx.queue.run(() => this.ownMessage(g, id));
-    const attachment = message.attachments.find(
-      (att) => att.blob.toLowerCase() === blob.toLowerCase()
-    );
-    if (!attachment) {
-      throw new E2eeError("E2EE_NO_ATTACHMENT");
-    }
-    const bytes = await downloadMedia({
-      api: this.ctx.api,
-      deviceKey: requireMls(this.ctx).deviceKey(),
-      attachment,
-      ...(signal ? { signal } : {}),
-    });
-    return new Blob([bytes.slice().buffer], {
-      type: localBlobType(attachment.mime),
-    });
+    return getSavedAttachment(this.ctx, g, id, blob, signal);
   }
 
   // -- encrypted history backup ---------------------------------------------

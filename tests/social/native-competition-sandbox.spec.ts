@@ -12489,10 +12489,12 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       .getByRole("heading", { name: "Curations", exact: true })
       .locator("xpath=ancestor::section[1]");
     const memberLink = curations.getByRole("link", {
-      name: "Inspect Active collectors group criteria and members: 25 users",
+      name: "25 users",
+      exact: true,
     });
     await expect(memberLink.getByText(criteria, { exact: true })).toBeVisible();
     await expect(memberLink).toHaveAccessibleDescription(criteria);
+    await expect(memberLink).toHaveAttribute("title", "25 users");
     await expect(curations.getByText("Art", { exact: true })).toBeVisible();
     await expect(
       curations.getByText("Active collectors", { exact: true })
@@ -13294,9 +13296,10 @@ ${"Additional terms for review.\n\n".repeat(30)}End of submission terms.`,
       });
       await configuration.click();
       const memberLink = sheet.getByRole("link", {
-        name: /^Inspect Active collectors group criteria and members:/,
+        name: /^[\d,]+ users?$/,
       });
       await expect(memberLink).toBeVisible();
+      await expect(memberLink).toHaveAttribute("title", /^[\d,]+ users?$/);
       const scrollTop = await memberLink.evaluate((element) => {
         let parent = element.parentElement;
         while (parent && getComputedStyle(parent).overflowY !== "auto")

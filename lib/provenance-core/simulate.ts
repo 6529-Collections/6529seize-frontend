@@ -1,4 +1,4 @@
-// Copied from 6529-Collections/6529-provenance-app src/simulate.ts at commit 8496bfbb6347c265ec74c7e361612d97ccdaf731.
+// Copied from 6529-Collections/6529-provenance-app src/simulate.ts at commit 512b6629470e06981905f3a94cff3f381d181478.
 // Do not edit here: change the package and run ops/scripts/sync-provenance-core.mjs.
 // Replaced by @6529-collections/provenance-core from npm once that is published.
 import {
@@ -192,9 +192,12 @@ export function planCalls(registry: Address, actor: Actor, plan: readonly Planne
   );
   const signatures = approvedHashSignatures([owner]);
   return {
-    calls: safeTxs.map(
-      (tx): SimCall => ({ from: owner, to: actor.safe, data: encodeExecTransaction(tx, signatures), gas }),
-    ),
+    calls: safeTxs.map((tx): SimCall => ({
+      from: owner,
+      to: actor.safe,
+      data: encodeExecTransaction(tx, signatures),
+      gas,
+    })),
     safeTxs,
     // Threshold 1, so one owner's approval (msg.sender, v = 1) satisfies execTransaction.
     overrides: {
@@ -234,9 +237,12 @@ export async function simulatePlan(
   if (firstFail !== -1 && actor.kind === "safe") {
     const prior = plan.slice(0, firstFail).flatMap((t) => t.actions);
     const failing = plan[firstFail]!.actions;
-    const direct = [...prior, ...failing].map(
-      (a): SimCall => ({ from: actor.safe, to: registry, data: encodeAction(a), gas: gasLimit }),
-    );
+    const direct = [...prior, ...failing].map((a): SimCall => ({
+      from: actor.safe,
+      to: registry,
+      data: encodeAction(a),
+      gas: gasLimit,
+    }));
     try {
       const diag = await simulateSequence(client, direct, undefined, block);
       const k = diag.results.slice(prior.length).findIndex((r) => !r.ok);

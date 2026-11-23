@@ -33,11 +33,7 @@ export default function WaveConfigurationSections({
       <WavePanelSection
         title={waveRightPanelText("waves.sidebar.rightPanel.settings.access")}
       >
-        <WaveAccessGroups
-          wave={wave}
-          display="members"
-          includeCompetition={false}
-        />
+        <WaveAccessGroups wave={wave} includeCompetition={false} />
         <WaveAdminDropDeletion wave={wave} />
       </WavePanelSection>
 
