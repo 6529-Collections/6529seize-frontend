@@ -41,9 +41,9 @@ function cacheHomeRead<K, T>(read: (key: K) => Promise<T>, ttl: number) {
 
   return (key: K): Promise<T> => {
     if (
-      cached?.key === key &&
-      cached !== undefined &&
-      cached.expiresAt > Date.now()
+      cached?.expiresAt !== undefined &&
+      cached.expiresAt > Date.now() &&
+      cached.key === key
     ) {
       return cached.result;
     }
