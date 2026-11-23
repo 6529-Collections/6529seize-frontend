@@ -100,6 +100,9 @@ const READONLY_SPECS = {
   museumInsideSystem: ["tests/museum/inside-system-readonly.spec.ts"],
   museumDataArchitecture: ["tests/museum/data-architecture-readonly.spec.ts"],
   museumRights: ["tests/museum/rights-readonly.spec.ts"],
+  museumOnchainPreview: [
+    "tests/museum-onchain/onchain-preview-readonly.spec.ts",
+  ],
 };
 
 function localPack(scriptKey, description, specs, tweaks = {}) {
@@ -399,6 +402,17 @@ const PACKS = [
     ),
     triggers: ["pr-ci", "manual"],
   }),
+  // Reads the live Sepolia registry and 6529 IPFS, so it runs on request
+  // rather than gating PR CI on a public RPC endpoint.
+  {
+    ...localReadonlyPack(
+      "test:e2e:museum-onchain-preview",
+      "Unlinked on-chain Museum preview: Sepolia registry reads and hash-verified records.",
+      READONLY_SPECS.museumOnchainPreview,
+      { timeoutMinutes: 20 }
+    ),
+    triggers: ["manual"],
+  },
   museumPack({
     ...localReadonlyPack(
       "test:e2e:museum-inside-system",

@@ -1,0 +1,350 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "5b50e37792bee5465869668ae633ce8ad2f8cd7d",
+  "coverage": [
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/index-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/index-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/index-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/texts-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/texts-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/texts-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-artist-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-artist-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-artist-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-relation-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-relation-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-relation-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-description-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-description-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-description-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-essay-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-essay-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-essay-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-short-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-short-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-text-short-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x1d46fa5daa006262fdbf829ea3505ca494b8aa71cfbaf0c6249c5d9e169bab51",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-portrait-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x1d46fa5daa006262fdbf829ea3505ca494b8aa71cfbaf0c6249c5d9e169bab51",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-portrait-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x1d46fa5daa006262fdbf829ea3505ca494b8aa71cfbaf0c6249c5d9e169bab51",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-portrait-390x844.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x0598b214722c39d064426ba26aa10f6ee6d2575f43ee683beb178da68831c8bc",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-noimage-1440x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x0598b214722c39d064426ba26aa10f6ee6d2575f43ee683beb178da68831c8bc",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-noimage-820x1000.txt"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x0598b214722c39d064426ba26aa10f6ee6d2575f43ee683beb178da68831c8bc",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/text/record-work-noimage-390x844.txt"
+    }
+  ],
+  "dimensions": {
+    "J07": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/text/index-1440x1000.txt",
+        "evidence/text/record-work-1440x1000.txt",
+        "evidence/text/record-work-portrait-1440x1000.txt",
+        "evidence/text/record-work-noimage-1440x1000.txt"
+      ],
+      "findings": ["E-001", "E-002", "E-003", "E-004"],
+      "note": "Copy unchanged in substance from round 01 apart from the repair: \"Also connected to 1 Museum record that is not published in this registry\" is now singular on the no-image work. Index, work, relation, text and artist pages read as plain museum language with the Sepolia test status stated. Minor wording left, not required: \"reviewed display authority\" and \"presentation manifest\" in the portrait rights lines, \"(Acquisition program · works)\" link labels, \"Take the Key! presentation record\" as a Media label, and source casing \"Casey REAS\" in stored credit lines."
+    },
+    "J12": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/text/index-390x844.txt",
+        "evidence/text/record-work-390x844.txt"
+      ],
+      "findings": [],
+      "note": "Only en-US is pinned. Text is identical across the three viewports on nine routes (the essay differs only in how its table is extracted); UI copy is message-backed, dates and counts follow en-US, the \"1 record\" singular is correct, and texts stay in their published language with a note saying so."
+    }
+  },
+  "checks": {
+    "I1": "pass",
+    "I2": "pass",
+    "I3": "pass"
+  },
+  "findings": [
+    {
+      "id": "E-001",
+      "targets": ["I2", "J07"],
+      "severity": "P1",
+      "status": "resolved",
+      "where": "/museum/network-onchain/records/0x1d46...bab51 (also record-relation, record-work-noimage) · default · 1440x1000 · en-US",
+      "evidence": "evidence/text/record-work-portrait-1440x1000.txt",
+      "observation": "Under Connections each relation is preceded by a bare Museum ID such as \"6529NM-AP-01-OUT-001 (a Museum record not published in this registry)\", five times on Take the Key!. The relation page lists \"6529NM-GOV-1052156\" and \"6529NM-GOV-1052812\" the same way, and every row ends in \"relation record\".",
+      "consequence": "Visitors read repository identifiers and a registry-internal parenthetical in place of names; the page exposes internal IDs and implementation language, and the real connections are hard to scan.",
+      "change": "Show a connection only by the names of the records published in the registry. For an unpublished counterpart, drop the line, or show one muted line per page: \"Also connects to 1 Museum record not in this registry\". Replace \"relation record\" with a link label such as \"View relation\".",
+      "acceptance_check": "No bare 6529NM-* ID or \"(a Museum record not published in this registry)\" appears in the Connections list on the three pages; the unpublished counterpart is summarized once in plain words; every row names the thing it connects to.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Connections on Take the Key!, the relation page and the other work pages show names and a \"View relation\" link; unpublished counterparts are one plain line (\"Also connected to 2 Museum records that are not published in this registry.\"). No bare 6529NM-* ID in Connections."
+    },
+    {
+      "id": "E-002",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain/records/0x1d46...bab51 · default · all viewports · en-US",
+      "evidence": "evidence/text/record-work-portrait-1440x1000.txt",
+      "observation": "The image caption on the portrait work reads \"GulYildiz — Take the Key!; Keys and Gates presentation record\" and the page gives no rights status or credit for the figure, while the square work shows credit, rights and a no-reuse term. \"presentation record\" is the name of a catalog media record, not a caption.",
+      "consequence": "The caption reads as a database label, and the figure has no stated rights status, so the principal image is less accountable than the square work.",
+      "change": "Build the caption from artist, title and program, for example \"GulYildiz, Take the Key!. Keys and Gates acquisition program\". Where the manifest has no rights text, say \"Rights status: not stated in the Museum's record\".",
+      "acceptance_check": "The portrait work caption has no \"presentation record\" wording and shows a rights line in the same pattern as the square work.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Portrait caption is now \"GulYildiz, Take the Key! Selected through Keys and Gates.\" with an approval line and a rights line (\"The presentation manifest states no reuse terms.\"), matching the square work pattern."
+    },
+    {
+      "id": "E-003",
+      "targets": ["J07"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain/records/0x679e5d5d...b34c, 0x1d46...bab51 · default · all viewports · en-US",
+      "evidence": "evidence/text/record-work-1440x1000.txt",
+      "observation": "The square work states \"Licensed under CC BY-NC 4.0\" in the caption, again in the Rights line and again in the credit line, with the credit line nearly repeating the caption. The portrait work lists \"All texts for Keys and Gates\" three times in a row. The index repeats the eyebrow \"OBJECT RECORDS\" above each of seven groups.",
+      "consequence": "Repetition makes a short record read as long and hides the one line that matters, the no-reuse term.",
+      "change": "Keep the caption to artist, title, date. Keep the Rights line and the no-reuse sentence once. Show the credit line once as such. De-duplicate text links by target. Show one \"Object records\" heading with group subheads.",
+      "acceptance_check": "Each rights phrase appears at most twice per work page, no link label repeats in one list, and the index has one \"Object records\" heading.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Licence phrase appears twice on the square work (caption, no-reuse sentence), no separate credit-line repeat; the three text links on the portrait work now carry distinct labels; index has one \"Object records\" heading with group subheads."
+    },
+    {
+      "id": "E-004",
+      "targets": ["J07", "I3"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain · default · all viewports · en-US",
+      "evidence": "evidence/text/index-1440x1000.txt",
+      "observation": "The intro says hashes matched \"the one the Museum stored in its Ethereum registry\" and the heading says \"read from the chain\", while the registry is a Sepolia test contract (the banner and verification block say so). The Media references group shows catalog labels such as \"…downstream-accession-reviewed historical proposal image\", \"Casey retained preservation evidence manifest\" and \"…presentation record\". \"People and agents (21)\" repeats the 23 Artists with different casing (\"Casey REAS\" and \"Casey Reas\").",
+      "consequence": "The lead sentence overstates which registry was read, and the long lists expose workflow jargon and duplicate names.",
+      "change": "Intro: \"…matched the hash the Museum stored in a test registry on the Sepolia network.\" Collapse Media references and People and agents into a closed disclosure with counts, or remove them from the index; do not alter titles.",
+      "acceptance_check": "The intro names the Sepolia test registry; Media references and People and agents do not list as open link walls on the index.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Intro now names the test registry on Sepolia; Media references (40) and People and agents (21) are closed disclosures with counts, Artists list no longer duplicated by an open wall."
+    }
+  ],
+  "preserve": [
+    "Top banner stating the Sepolia test status on every route",
+    "Plain \"How this is checked\" lead and the five named checks with Passed results",
+    "Counts that reconcile (588 = 402 + 186; 233 further records; 29 works = 22 images + 7 without)",
+    "Honest \"No image of this work is in the Museum's published media\" with a link to the Museum site",
+    "Rights line plus the no-reuse sentence on the square work",
+    "On-chain facts block shown as stored, kept below the record",
+    "Texts page note that texts stay in their published language",
+    "Connections as names with \"View relation\" plus one plain line for unpublished counterparts",
+    "Portrait caption and rights lines built from artist, title and program",
+    "Closed disclosures for Media references and People and agents",
+    "Intro naming the Sepolia test registry",
+    "Singular \"1 Museum record\" on the no-image work page",
+    "Card text on the index stays names only: work title then artist, with one plain note for generative works without a still image"
+  ]
+}

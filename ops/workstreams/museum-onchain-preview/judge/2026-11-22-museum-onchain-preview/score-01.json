@@ -1,0 +1,32 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "run_id": "2026-11-22-museum-onchain-preview",
+  "calibration": "uncalibrated",
+  "decision": "repair",
+  "label": null,
+  "round": 1,
+  "file": "01",
+  "candidate": "659f4de4c307e11150ccf95e6af75175717ef426",
+  "total": 8.236,
+  "applicable_weight": 110,
+  "failed_floors": ["J07"],
+  "failed_checks": [],
+  "open_required": ["V-008", "E-003", "E-004"],
+  "unverified": {
+    "coverage": [],
+    "dimensions": [],
+    "checks": []
+  },
+  "errors": [],
+  "budget": {
+    "repair_batches": 6,
+    "used": 1,
+    "remaining": 5,
+    "no_progress_streak": 0,
+    "recovery_batch": false
+  },
+  "best": {
+    "round": 1,
+    "candidate": "659f4de4c307e11150ccf95e6af75175717ef426"
+  }
+}
