@@ -65,7 +65,7 @@ async function upgrade(session: E2eeUserSession) {
     timeout: E2EE_UI_TIMEOUT_MS,
   });
   await expect(
-    page.getByRole("link", { name: "Devices for encrypted messages" })
+    page.getByRole("link", { name: E2EE_MESSAGES["e2ee.devices.open"] })
   ).toBeVisible();
   expect(session.signatureCount()).toBe(before + 1);
 }

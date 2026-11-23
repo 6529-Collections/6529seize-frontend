@@ -115,7 +115,15 @@ On the web and Android, the tab appears after the page loads.
    Drops boundary uses the same words, the profile header says at least
    through, and the compact home line says Next 24 drops funded. The profile
    header and coverage notification show one funded drop as Running low, like
-   the card. A supplied top-up
+   the card.
+   When the API also reports how many drops the balance funds past the
+   forecast (at the current mint price and current settings), the headline and
+   the compact home line show that count as About N drops funded, or At least
+   N drops funded when the count reached its 312-drop maximum, with the note
+   At the current mint price and current subscription settings. This applies
+   only when the count is larger than the forecast's funded drops; a balance
+   that funds exactly the forecast, Manual mode and older API responses keep
+   the existing wording. Stale coverage never shows it. A supplied top-up
    deadline keeps its highlighted background, bold full date/time and original
    Top up by wording ending in to receive The Memes #N. When the immediate drop
    is not covered, the owner's heading says Today's mint isn't covered only on

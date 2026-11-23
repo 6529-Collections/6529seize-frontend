@@ -1,0 +1,390 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "594edd41d481a09b67e6c208ac85d5591a815135",
+  "coverage": [
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x1d46fa5daa006262fdbf829ea3505ca494b8aa71cfbaf0c6249c5d9e169bab51",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-portrait-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x1d46fa5daa006262fdbf829ea3505ca494b8aa71cfbaf0c6249c5d9e169bab51",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-portrait-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x1d46fa5daa006262fdbf829ea3505ca494b8aa71cfbaf0c6249c5d9e169bab51",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-portrait-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x0598b214722c39d064426ba26aa10f6ee6d2575f43ee683beb178da68831c8bc",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-noimage-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x0598b214722c39d064426ba26aa10f6ee6d2575f43ee683beb178da68831c8bc",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-noimage-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x0598b214722c39d064426ba26aa10f6ee6d2575f43ee683beb178da68831c8bc",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-noimage-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J02": {
+      "score": 8,
+      "evidence": ["evidence/judge-visual-index-jump-artists.png"],
+      "findings": ["V-001"],
+      "note": "Jump row, sticky filter and texts link give a clear route; filter leaves Accessions visible with a 0-of-169 count."
+    },
+    "J03": {
+      "score": 8,
+      "evidence": [
+        "evidence/index-1440x1000-03.png",
+        "evidence/record-work-1440x1000-01.png"
+      ],
+      "findings": ["V-002"],
+      "note": "Principal figure dominates work pages; seven equal-weight empty tiles dilute the end of the works grid."
+    },
+    "J04": {
+      "score": 8.5,
+      "evidence": ["evidence/contact-sheet-1440x1000.png"],
+      "findings": [],
+      "note": "Dark, restrained, art-led; no casino, SaaS or faux-science styling."
+    },
+    "J05": {
+      "score": 8,
+      "evidence": ["evidence/index-1440x1000-03.png"],
+      "findings": ["V-002"],
+      "note": "Dense scannable grid and fact tables; seven blank tiles use full card space for no content."
+    },
+    "J06": {
+      "score": 8,
+      "evidence": [
+        "evidence/judge-visual-work-full-record-open.png",
+        "evidence/record-work-1440x1000-02.png"
+      ],
+      "findings": [],
+      "note": "Consistent type roles; caption tiers and mono facts align. Fixed-square card frames letterbox images."
+    },
+    "J08": {
+      "score": 8,
+      "evidence": [
+        "evidence/judge-visual-work-copy.png",
+        "evidence/judge-visual-index-focus.png"
+      ],
+      "findings": ["V-001"],
+      "note": "Copy shows Copied, disclosure opens, back returns, focus ring visible; filter contradicts its own count."
+    },
+    "J09": {
+      "score": 7.5,
+      "evidence": [
+        "evidence/judge-visual-index-filter-empty.png",
+        "evidence/judge-visual-portrait-slow-1500.png"
+      ],
+      "findings": ["V-001"],
+      "note": "Checking and no-image states are deliberate; filter no-match state is inconsistent."
+    },
+    "J10": {
+      "score": 8,
+      "evidence": [
+        "evidence/index-390x844-03.png",
+        "evidence/record-work-390x844-02.png"
+      ],
+      "findings": [],
+      "note": "No overflow at 820 or 390; works grid is two small columns at 390 inside the shell sidebar."
+    },
+    "J11": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/judge-visual-index-slow.png",
+        "evidence/judge-visual-portrait-slow-1500.png"
+      ],
+      "findings": [],
+      "note": "Checking frames hold the final box so images swap in without layout jump."
+    },
+    "J13": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/record-work-1440x1000-02.png",
+        "evidence/judge-visual-work-full-record-open.png"
+      ],
+      "findings": [],
+      "note": "Chain state is plain: test-registry banner, Verified chip, SHA-256 note, hashes on request."
+    }
+  },
+  "checks": {
+    "S1": "pass",
+    "S2": "pass",
+    "S3": "pass",
+    "S4": "pass",
+    "S5": "pass",
+    "S6": "pass"
+  },
+  "findings": [
+    {
+      "id": "V-001",
+      "targets": ["J09", "J08", "J02"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network-onchain \u00b7 default \u00b7 1440x1000 \u00b7 en-US",
+      "evidence": "evidence/judge-visual-index-filter-empty.png",
+      "observation": "Typing \"zzzzq\" in Filter by title shows \"0 of 169 shown\" and \"Nothing matches this filter.\" while the Accessions group (3 links) stays listed above it. With \"cent\" the Accessions and Media references groups also stay.",
+      "consequence": "The count and message say nothing matched while records are still shown, so the filter looks broken and visitors cannot trust what it hides.",
+      "change": "Apply the title filter to every group (accessions, media references, object records) or state which groups are not filtered; the count must equal the visible links.",
+      "acceptance_check": "For a query that matches nothing, no entity link is visible besides the Nothing matches message; for \"cent\" the count equals the number of visible links.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-002",
+      "targets": ["J03", "J05"],
+      "severity": "P2",
+      "status": "open",
+      "where": "/museum/network-onchain \u00b7 works grid \u00b7 1440x1000 \u00b7 en-US",
+      "evidence": "evidence/index-1440x1000-03.png",
+      "observation": "Seven works without an image render as full-size grey tiles reading \"No published image\", the same size as the artworks, in two rows at the end of the grid.",
+      "consequence": "A quarter of the grid is blank boxes that look like failed loads, and they pull the eye from the verified artworks.",
+      "change": "Move the seven works to a compact text list under the grid with one sentence that they are presented through live generators, or render them as small text-only cards.",
+      "acceptance_check": "The works grid contains only image cards; works without images are listed as text no taller than one line each, at all three viewports.",
+      "admission": "baseline",
+      "reopen_reason": null
+    },
+    {
+      "id": "V-003",
+      "targets": ["J06", "J10"],
+      "severity": "P3",
+      "status": "open",
+      "where": "/museum/network-onchain \u00b7 works grid \u00b7 390x844 \u00b7 en-US",
+      "evidence": "evidence/index-390x844-03.png",
+      "observation": "Cards are fixed squares with dark bands above and below landscape images; at 390 px two columns of about 131 px show the art small.",
+      "consequence": "Landscape works read as boxed thumbnails and detail is hard to judge.",
+      "change": "Optional: let the frame follow the image proportion, or use one column below 480 px.",
+      "acceptance_check": "Landscape images show without grey bands.",
+      "admission": "baseline",
+      "reopen_reason": null
+    }
+  ],
+  "preserve": [
+    "Checking frame with \"Checking this image against the chain...\" that holds the final box",
+    "Principal figure with credit, rights and no-reuse lines and the SHA-256 note on work pages",
+    "Sticky title filter and jump row",
+    "Test-registry banner on every route",
+    "Verified chip and On-chain facts with Copy buttons and Full record disclosure",
+    "Single-column reading width on text records",
+    "No horizontal overflow at 1440, 820 or 390"
+  ]
+}

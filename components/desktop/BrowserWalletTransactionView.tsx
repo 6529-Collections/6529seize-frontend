@@ -15,7 +15,10 @@ import type { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { formatDecimalString } from "@/i18n/format";
 import { t } from "@/i18n/messages";
 import type { WalletRequest } from "@/lib/desktop/wallet-forwarding";
-import type { DecodedValue } from "@/lib/desktop/wallet-transactions/decode";
+import type {
+  DecodedTuple,
+  DecodedValue,
+} from "@/lib/desktop/wallet-transactions/decode";
 import type {
   TransactionDescription,
   TransactionEffect,
@@ -25,6 +28,14 @@ import {
   type PriceReader,
   readExpectedMintValue,
 } from "@/lib/desktop/wallet-transactions/price";
+import type { RuleArg } from "@/lib/desktop/wallet-transactions/types";
+import {
+  isPublisherCall,
+  readPublisherAuthorization,
+  type RegistryReader,
+} from "@/lib/desktop/wallet-transactions/provenance";
+import BrowserWalletProvenanceDetails from "./BrowserWalletProvenanceDetails";
+import BrowserWalletTransferRecipient from "./BrowserWalletTransferRecipient";
 
 type Locale = ReturnType<typeof useBrowserLocale>;
 type MessageKey = Parameters<typeof t>[1];
@@ -50,6 +61,14 @@ type PriceCheck =
   | { readonly kind: "none" }
   | { readonly kind: "ok" }
   | { readonly kind: "mismatch" }
+  | { readonly kind: "unavailable" };
+
+/** For a provenance publisher call: whether the sender may publish. */
+type SenderCheck =
+  | { readonly kind: "checking" }
+  | { readonly kind: "none" }
+  | { readonly kind: "ok" }
+  | { readonly kind: "denied" }
   | { readonly kind: "unavailable" };
 
 function shortMessage(error: unknown): string {
@@ -166,6 +185,68 @@ function usePriceCheck(
   return tagged?.key === key ? tagged.result : { kind: "checking" };
 }
 
+/** Runs one sender check (never throws). */
+async function runSenderCheck(
+  client: NonNullable<ReturnType<typeof usePublicClient>>,
+  request: TransactionRequest
+): Promise<SenderCheck> {
+  try {
+    const allowed = await readPublisherAuthorization(
+      client as unknown as RegistryReader,
+      getAddress(request.transaction.to),
+      getAddress(request.transaction.from)
+    );
+    return { kind: allowed ? "ok" : "denied" };
+  } catch {
+    return { kind: "unavailable" };
+  }
+}
+
+/**
+ * For a provenance publisher call, whether the sender is an authorized
+ * publisher key or the registry's owner now (read from the chain).
+ */
+function useSenderCheck(
+  request: TransactionRequest,
+  description: TransactionDescription,
+  round: number
+): SenderCheck {
+  const client = usePublicClient({ chainId: request.chainId });
+  const needed = isPublisherCall(description);
+  const [tagged, setTagged] = useState<Tagged<SenderCheck> | null>(null);
+  const key = String(round);
+  useEffect(() => {
+    if (!client || !needed) return undefined;
+    let active = true;
+    const run = async () => {
+      const result = await runSenderCheck(client, request);
+      if (active) setTagged({ key, result });
+    };
+    void run();
+    return () => {
+      active = false;
+    };
+  }, [client, needed, request, key]);
+  if (!needed) return { kind: "none" };
+  if (!client) return { kind: "unavailable" };
+  return tagged?.key === key ? tagged.result : { kind: "checking" };
+}
+
+function senderCheckMessage(locale: Locale, check: SenderCheck): string | null {
+  switch (check.kind) {
+    case "checking":
+      return t(locale, "browserConnector.tx.sender.checking");
+    case "ok":
+      return t(locale, "browserConnector.tx.sender.ok");
+    case "denied":
+      return t(locale, "browserConnector.tx.sender.denied");
+    case "unavailable":
+      return t(locale, "browserConnector.tx.sender.unavailable");
+    case "none":
+      return null;
+  }
+}
+
 /** True once less than `MIN_SEND_TIME_MS` is left. */
 function useTooLate(expiresAt: number): boolean {
   const cutoff = expiresAt - MIN_SEND_TIME_MS;
@@ -185,7 +266,8 @@ const formatAddress = (value: string) => getAddress(value);
 function formatValue(
   locale: Locale,
   type: string,
-  value: DecodedValue
+  value: DecodedValue,
+  components?: readonly RuleArg[]
 ): string {
   if (type === "bytes32[]" && Array.isArray(value)) {
     return t(locale, "browserConnector.tx.proof", {
@@ -199,9 +281,26 @@ function formatValue(
   }
   if (Array.isArray(value)) {
     const elementType = type.slice(0, -2);
+    const separator = components === undefined ? ", " : "; ";
     return (value as readonly DecodedValue[])
-      .map((element) => formatValue(locale, elementType, element))
-      .join(", ");
+      .map((element) => formatValue(locale, elementType, element, components))
+      .join(separator);
+  }
+  if (components !== undefined) {
+    // A tuple: each field by name, with its own type.
+    const tuple = value as DecodedTuple;
+    const fields = components.map((component) =>
+      t(locale, "browserConnector.tx.field", {
+        name: component.name,
+        value: formatValue(
+          locale,
+          component.type,
+          tuple[component.name] ?? "",
+          component.components
+        ),
+      })
+    );
+    return `(${fields.join(", ")})`;
   }
   if (typeof value === "boolean") {
     return t(
@@ -287,6 +386,7 @@ function canSendTransaction(state: {
   readonly call: CallCheck["kind"];
   readonly sendAnyway: boolean;
   readonly price: PriceCheck["kind"];
+  readonly sender: SenderCheck["kind"];
   readonly highImpact: boolean;
   readonly understood: boolean;
   readonly tooLate: boolean;
@@ -294,9 +394,12 @@ function canSendTransaction(state: {
   if (state.tooLate) return false;
   if (state.call === "checking" || state.call === "reverted") return false;
   if (state.price === "checking" || state.price === "mismatch") return false;
+  if (state.sender === "checking" || state.sender === "denied") return false;
   // A check that could not run needs the user's explicit "Send anyway".
   if (
-    (state.call === "unavailable" || state.price === "unavailable") &&
+    (state.call === "unavailable" ||
+      state.price === "unavailable" ||
+      state.sender === "unavailable") &&
     !state.sendAnyway
   ) {
     return false;
@@ -332,22 +435,30 @@ export default function BrowserWalletTransactionView({
   const [round, setRound] = useState(0);
   const call = useCallCheck(request, round);
   const price = usePriceCheck(request, description, round);
+  const sender = useSenderCheck(request, description, round);
   const tooLate = useTooLate(expiresAt);
   const [understood, setUnderstood] = useState(false);
   const [sendAnyway, setSendAnyway] = useState(false);
   const understandId = useId();
   const checksId = useId();
-  const highImpact = description.risk === "high";
+  const transfer = description.risk === "transfer";
   const testNetwork = description.chainId === SEPOLIA;
   const canSend = canSendTransaction({
     call: call.kind,
     sendAnyway,
     price: price.kind,
-    highImpact,
+    sender: sender.kind,
+    // A transfer's recipient box counts as its confirmation.
+    highImpact: description.risk !== "normal",
     understood,
     tooLate,
   });
   const priceMessage = priceCheckMessage(locale, price);
+  const senderMessage = senderCheckMessage(locale, sender);
+  const unavailable =
+    call.kind === "unavailable" ||
+    price.kind === "unavailable" ||
+    sender.kind === "unavailable";
   const contractAddress = formatAddress(description.to);
 
   return (
@@ -420,7 +531,23 @@ export default function BrowserWalletTransactionView({
           </dd>
         </div>
       </dl>
-      {highImpact && (
+      {transfer && description.recipient !== null && (
+        <BrowserWalletTransferRecipient
+          locale={locale}
+          chainId={description.chainId}
+          recipient={description.recipient}
+          confirmed={understood}
+          onConfirmedChange={setUnderstood}
+          checkboxId={understandId}
+        />
+      )}
+      {description.contract === "provenance" && (
+        <BrowserWalletProvenanceDetails
+          locale={locale}
+          description={description}
+        />
+      )}
+      {description.risk === "high" && (
         <div className="tw-flex tw-flex-col tw-gap-2 tw-rounded-lg tw-border tw-border-solid tw-border-amber-400/60 tw-bg-amber-950/40 tw-p-3 tw-text-amber-100">
           <p className="tw-m-0 tw-font-semibold">
             {t(locale, "browserConnector.tx.highImpact")}
@@ -462,7 +589,7 @@ export default function BrowserWalletTransactionView({
             <div key={arg.name}>
               <dt className="tw-font-mono tw-text-iron-400">{arg.name}</dt>
               <dd className="tw-m-0 tw-break-all tw-font-mono tw-text-iron-100">
-                {formatValue(locale, arg.type, arg.value)}
+                {formatValue(locale, arg.type, arg.value, arg.components)}
               </dd>
             </div>
           ))}
@@ -487,6 +614,9 @@ export default function BrowserWalletTransactionView({
           {priceMessage !== null && price.kind !== "mismatch" && (
             <span className="tw-block">{priceMessage}</span>
           )}
+          {senderMessage !== null && sender.kind !== "denied" && (
+            <span className="tw-block">{senderMessage}</span>
+          )}
         </output>
         <div
           role="alert"
@@ -499,6 +629,9 @@ export default function BrowserWalletTransactionView({
           )}
           {price.kind === "mismatch" && priceMessage !== null && (
             <p className="tw-m-0 tw-text-red">{priceMessage}</p>
+          )}
+          {sender.kind === "denied" && senderMessage !== null && (
+            <p className="tw-m-0 tw-text-red">{senderMessage}</p>
           )}
           {tooLate && (
             <p className="tw-m-0 tw-text-amber-200">
@@ -518,9 +651,9 @@ export default function BrowserWalletTransactionView({
             </details>
           )}
         {(call.kind === "reverted" ||
-          call.kind === "unavailable" ||
           price.kind === "mismatch" ||
-          price.kind === "unavailable") && (
+          sender.kind === "denied" ||
+          unavailable) && (
           <button
             type="button"
             className={CHECK_BUTTON_CLASS}
@@ -532,16 +665,15 @@ export default function BrowserWalletTransactionView({
             {t(locale, "browserConnector.tx.check.again")}
           </button>
         )}
-        {(call.kind === "unavailable" || price.kind === "unavailable") &&
-          !sendAnyway && (
-            <button
-              type="button"
-              className={CHECK_BUTTON_CLASS}
-              onClick={() => setSendAnyway(true)}
-            >
-              {t(locale, "browserConnector.tx.check.sendAnyway")}
-            </button>
-          )}
+        {unavailable && !sendAnyway && (
+          <button
+            type="button"
+            className={CHECK_BUTTON_CLASS}
+            onClick={() => setSendAnyway(true)}
+          >
+            {t(locale, "browserConnector.tx.check.sendAnyway")}
+          </button>
+        )}
       </div>
       <p className="tw-m-0 tw-text-sm tw-text-iron-300">
         {t(locale, "browserConnector.tx.safety")}

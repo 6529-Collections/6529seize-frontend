@@ -1,0 +1,30 @@
+{
+  "description": "LF_NORMALIZED and RAW_BYTES_LF: CRLF and lone CR become LF, byte by byte.",
+  "cases": [
+    {
+      "name": "CRLF",
+      "input": "0x610d0a620d0a",
+      "output": "0x610a620a"
+    },
+    {
+      "name": "lone CR",
+      "input": "0x610d620d",
+      "output": "0x610a620a"
+    },
+    {
+      "name": "CR CR LF",
+      "input": "0x610d0d0a62",
+      "output": "0x610a0a62"
+    },
+    {
+      "name": "already LF",
+      "input": "0x610a620a",
+      "output": "0x610a620a"
+    },
+    {
+      "name": "no line ending",
+      "input": "0x616263",
+      "output": "0x616263"
+    }
+  ]
+}

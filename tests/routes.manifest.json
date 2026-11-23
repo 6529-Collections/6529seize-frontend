@@ -1513,6 +1513,18 @@
       "classification": "crawlable",
       "family": "museum-publication"
     },
+    "/museum/network-onchain": {
+      "classification": "exempt",
+      "exemptReason": "Unlinked noindex test preview of the Network Museum read from the Sepolia ProvenanceRegistry and IPFS; covered by the manual museum-onchain-preview pack, not route sampling."
+    },
+    "/museum/network-onchain/records/[subjectId]": {
+      "classification": "exempt",
+      "exemptReason": "Unlinked noindex test preview of the Network Museum read from the Sepolia ProvenanceRegistry and IPFS; covered by the manual museum-onchain-preview pack, not route sampling."
+    },
+    "/museum/network-onchain/texts": {
+      "classification": "exempt",
+      "exemptReason": "Unlinked noindex test preview of the Network Museum read from the Sepolia ProvenanceRegistry and IPFS; covered by the manual museum-onchain-preview pack, not route sampling."
+    },
     "/museum/network/about": {
       "classification": "crawlable",
       "family": "museum-publication"
@@ -2122,6 +2134,10 @@
     },
     "/preferences": {
       "classification": "auth"
+    },
+    "/provenance/governance": {
+      "classification": "exempt",
+      "exemptReason": "Unlinked noindex tool for signers of the Sepolia test provenance registries' owner Safe; covered by the manual provenance-governance pack and Jest, not route sampling."
     },
     "/rememes": {
       "classification": "crawlable",

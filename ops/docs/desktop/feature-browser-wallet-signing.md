@@ -8,8 +8,8 @@ Parent: [Desktop index](README.md)
 If you signed in with **Use a browser wallet**, 6529 Desktop sends the
 signatures it needs to your web browser, where your browser wallet signs them,
 and brings the answer back to the app. In builds that support it, a short list
-of 6529 contract transactions (listed below) is sent the same way. Nothing that
-approves tokens, trades or transfers NFTs is.
+of 6529 contract transactions (listed below), including transfers of your 6529
+NFTs, is sent the same way. Nothing that approves tokens or trades is.
 
 This works in 6529 Desktop builds that support it. In other builds the account
 menu shows **Authorized only (wallet not connected)** and you connect a wallet
@@ -32,15 +32,24 @@ wallet:
   batches of up to five, and collection or use-case locks.
 - Minting The Memes (also for another wallet) and NextGen.
 - Topping up your Memes subscription balance (up to 10 ETH).
+- Transferring your 6529 NFTs (The Memes, Meme Lab, 6529 Gradient, NextGen) from
+  your collection: up to 50 different The Memes or Meme Lab tokens (and up to
+  10,000 copies each) per collection at a time; 6529 Gradient and NextGen
+  tokens go one transaction each. Plain ETH sends are not supported.
+- 6529 Provenance publishing on the pinned Sepolia test registries: opening a
+  release, publishing records into it (up to 20 records per transaction; 15 of
+  any size always fit) and sealing it.
 
 Market trades and validator sessions are not sent to the browser: those pages
 show **Continue in your browser** and open the same page on the website, where
-your browser wallet signs directly. NFT transfers and NextGen burn-to-mint show
-**Continue in your browser** in place of their send button. In a 6529 Desktop
-build that does not send transactions, the mint, top-up, delegation and
-consolidation buttons show "Update 6529 Desktop, or continue in your browser"
-instead. Any other action that would send a transaction opens a
-**Transaction** dialog with the same choice.
+your browser wallet signs directly. NextGen burn-to-mint, a transfer of more than 50
+different The Memes or Meme Lab tokens of one collection, and a transfer to your
+own signed-in address, show **Continue in your browser**
+in place of their send button. In a 6529 Desktop build that does not send these
+transactions, the mint, top-up, delegation, consolidation and transfer buttons
+show "Update 6529 Desktop, or continue in your browser" instead. Any other
+action that would send a transaction opens a **Transaction** dialog with the
+same choice.
 
 For a transaction, the browser page shows:
 
@@ -58,6 +67,17 @@ For a transaction, the browser page shows:
   you, acting as a delegation manager, minting for another wallet, a top-up
   over 1 ETH), what it changes and an **I understand** box you tick before
   **Send in wallet**.
+- For an NFT transfer, the recipient's full address in groups of four
+  characters, the 6529 profile it belongs to (from 6529 profile data, not part
+  of the transaction), a warning when the address is a contract, and a box
+  ("I checked that this is the right recipient. Transfers cannot be undone.")
+  you tick before **Send in wallet**.
+- For provenance publishing, the release and every record (subject, record
+  type, schema, content hash, CID, the version it follows, with 0 marked as a
+  new subject, and the effective time the publisher states), the release header
+  when opening, or the expected record count when sealing; and a check that your
+  wallet is a publisher or the owner of the registry. If it is neither, Send is
+  not offered.
 
 The request waits for five minutes. With less than 45 seconds left, Send is not
 offered; start again from 6529 Desktop. After you send, the page shows the

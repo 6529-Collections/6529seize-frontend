@@ -34,3 +34,6 @@ yarn.lock
 
 # Route inventory uses deterministic JSON.stringify output.
 tests/routes.manifest.json
+
+# A copy of @6529-collections/provenance-core; see lib/provenance-core/README.md.
+lib/provenance-core/
