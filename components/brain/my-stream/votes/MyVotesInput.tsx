@@ -41,6 +41,49 @@ interface MyVotesInputProps {
   readonly onExplain?: (() => void) | undefined;
 }
 
+function MyVotesExplainButton({
+  mobile,
+  disabled,
+  onExplain,
+  tooltipId,
+  label,
+  description,
+}: {
+  readonly mobile: boolean;
+  readonly disabled: boolean;
+  readonly onExplain: () => void;
+  readonly tooltipId: string;
+  readonly label: string;
+  readonly description: string;
+}) {
+  const props = {
+    type: "button" as const,
+    disabled,
+    onClick: onExplain,
+    "data-tooltip-id": tooltipId,
+    "data-tooltip-content": description,
+  };
+  if (mobile)
+    return (
+      <button
+        {...props}
+        className="tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
+      >
+        {label}
+      </button>
+    );
+  return (
+    <Button
+      {...props}
+      variant="tertiary"
+      size="sm"
+      className="!tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap !tw-px-3 !tw-text-xs !tw-font-medium"
+    >
+      {label}
+    </Button>
+  );
+}
+
 /** Presentation shared by My Votes adapters; the adapter owns voting rules. */
 export function MyVotesInput({
   mobile,
@@ -163,32 +206,16 @@ export function MyVotesInput({
             )}
           </AnimatePresence>
         </div>
-        {onExplain &&
-          (mobile ? (
-            <button
-              type="button"
-              disabled={!canExplain || busy || disabled}
-              onClick={onExplain}
-              data-tooltip-id={explainTooltipId}
-              data-tooltip-content={explainDescription}
-              className="tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap tw-rounded-lg tw-border-0 tw-bg-transparent tw-px-1 tw-text-xs tw-font-medium tw-text-iron-300 focus-visible:tw-outline focus-visible:tw-outline-2 focus-visible:tw-outline-primary-400 disabled:tw-opacity-50"
-            >
-              {explainLabel}
-            </button>
-          ) : (
-            <Button
-              type="button"
-              variant="tertiary"
-              size="sm"
-              disabled={!canExplain || busy || disabled}
-              onClick={onExplain}
-              data-tooltip-id={explainTooltipId}
-              data-tooltip-content={explainDescription}
-              className="!tw-min-h-11 tw-min-w-11 tw-whitespace-nowrap !tw-px-3 !tw-text-xs !tw-font-medium"
-            >
-              {explainLabel}
-            </Button>
-          ))}
+        {onExplain && (
+          <MyVotesExplainButton
+            mobile={mobile}
+            disabled={!canExplain || busy || disabled}
+            onExplain={onExplain}
+            tooltipId={explainTooltipId}
+            label={explainLabel}
+            description={explainDescription}
+          />
+        )}
         {showHelper && (
           <p
             id={helperId}
