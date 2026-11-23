@@ -950,6 +950,15 @@ test.describe("Profile REP edit dialog @auth @medium @local-only", () => {
     await amount.scrollIntoViewIfNeeded();
     await expect(amount).toBeInViewport();
     await expect(cancel).toBeInViewport();
+    await expectGrantTransitionFinished(grant);
+    const scrolledAmount = await amount.boundingBox();
+    await amount.fill("50");
+    await expect(amount).toBeFocused();
+    await expectGrantTransitionFinished(grant);
+    expect(
+      Math.abs((await amount.boundingBox())!.y - scrolledAmount!.y)
+    ).toBeLessThanOrEqual(1);
+    await expect(cancel).toBeInViewport();
     await expectNoHorizontalOverflow(page);
     await page
       .getByRole("dialog", { name: "Grant Rep", exact: true })

@@ -507,7 +507,8 @@ function GrantRepForm({
       transition={layoutTransition}
       className="tw-flex tw-max-h-[calc(100dvh-12rem)] tw-min-h-0 tw-max-w-full tw-flex-col tw-overflow-hidden"
     >
-      <div
+      <motion.div
+        layoutScroll
         data-testid="grant-rep-body"
         className="tw-min-h-0 tw-flex-1 tw-overflow-y-auto tw-px-4 sm:tw-px-6"
       >
@@ -722,17 +723,13 @@ function GrantRepForm({
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
       <div
         ref={footerRef}
         data-testid="grant-rep-footer"
         className="tw-shrink-0"
       >
-        <motion.div
-          layout="position"
-          transition={layoutTransition}
-          className="tw-flex tw-flex-col tw-gap-2 tw-px-4 tw-pt-4 sm:tw-px-6 md:tw-flex-row md:tw-justify-end md:tw-gap-3"
-        >
+        <div className="tw-flex tw-flex-col tw-gap-2 tw-px-4 tw-pt-4 sm:tw-px-6 md:tw-flex-row md:tw-justify-end md:tw-gap-3">
           {onCancel && (
             <Button
               onClick={onCancel}
@@ -760,7 +757,7 @@ function GrantRepForm({
                 : "rep.categories.grant.actions.grant"
             )}
           </Button>
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   );
