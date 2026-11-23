@@ -635,11 +635,10 @@ navigation because the frontend owns:
 The backend should own caching, retrieval, embeddings when added, job
 orchestration, LLM calls, message reactions, and bot replies.
 
-The backend also owns Help6529 Credit accounting. The V1 public behavior is
-indexed here so users can ask about it: the credit category is `Help6529
-Credits`, each bot question costs 1 REP in that category, signup grants 5,
-profile setup grants 5, and daily activity grants 5 when a user sends any
-message that day. Automatic daily activity grants do not have a balance cap.
+Asking help6529 is free. It no longer uses Help6529 Credits. The
+`help-bot.credits` record gives that answer, which matches the backend's reply
+to credit questions. If the backend charges for questions again, update this
+record in the same change.
 
 ## Agent Maintenance Contract
 
