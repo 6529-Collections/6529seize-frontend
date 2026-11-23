@@ -8,7 +8,11 @@ import {
   signAndPublishProfileCms,
   type ProfileCmsPublishContext,
 } from "@/lib/profile-cms/builder/publish";
-import { cmsCidFromHash } from "@/lib/profile-cms/chain/cms-cid";
+import { sha256 } from "js-sha256";
+import {
+  cmsCidFromBytes,
+  cmsCidFromHash,
+} from "@/lib/profile-cms/chain/cms-cid";
 import {
   ProfileDocWriteError,
   registerProfileDocWriter,
@@ -24,9 +28,12 @@ jest.mock("@/lib/profile-cms/builder/api", () => ({
   uploadProfileCmsPackageStorage: jest.fn(),
 }));
 
-const PACKAGE_HASH = `sha256:${"2".repeat(64)}`;
-const PUBLICATION_CID =
-  "bafkreie5cyyazg2mwjwk7foh6qhhev4ize3dkpz5656e6ty6sjn4zyfzjq";
+// The signed site's two files: its content core (the package hash is its
+// SHA-256) and its publication record.
+const CORE_BYTES = new TextEncoder().encode('{"core":"of the signed site"}');
+const PUBLICATION_BYTES = new TextEncoder().encode("{}");
+const PACKAGE_HASH = `sha256:${sha256(CORE_BYTES)}`;
+const PUBLICATION_CID = cmsCidFromBytes(PUBLICATION_BYTES);
 
 const context: ProfileCmsPublishContext = {
   draftId: "draft-1",
@@ -59,19 +66,31 @@ const signedDraft: ProfileCmsPackageRecord = {
   createdAt: "2026-11-25T00:00:00.000Z",
   updatedAt: "2026-11-25T00:00:00.000Z",
   publicationCid: PUBLICATION_CID,
+  chainDocuments: {
+    contentCore: { cid: cmsCidFromHash(PACKAGE_HASH), bytes: CORE_BYTES },
+    publication: { cid: PUBLICATION_CID, bytes: PUBLICATION_BYTES },
+  },
 };
 
-function writerRecording(outcome?: Error) {
+function writerRecording(outcome?: Error, uploadOutcome?: Error) {
   const docs: Record<string, string>[] = [];
+  const uploads: string[] = [];
+  const steps: string[] = [];
   const writer: ProfileDocWriter = {
     availableSigners: async () => ["session-key", "wallet"],
     replaceProfileDoc: async (edit) => {
+      steps.push("replace");
       if (outcome) throw outcome;
       docs.push(Object.fromEntries(edit(new Map([["bio", "kept"]]))));
       return { txId: `0x${"cd".repeat(32)}` };
     },
+    uploadDocuments: async (documents) => {
+      steps.push("upload");
+      if (uploadOutcome) throw uploadOutcome;
+      uploads.push(...documents.map((document) => document.cid));
+    },
   };
-  return { writer, docs };
+  return { writer, docs, uploads, steps };
 }
 
 function publish() {
@@ -180,6 +199,135 @@ describe("publishing with profile sites on the 6529 chain", () => {
       ok: false,
       code: "chain_unavailable",
     });
+  });
+
+  it("uploads the publish answer's files before the PROFILE_REPLACE that names them", async () => {
+    const { writer, uploads, steps } = writerRecording();
+    registerProfileDocWriter(writer);
+    jest
+      .mocked(getProfileCmsPrimaryPackageHash)
+      .mockResolvedValue(PACKAGE_HASH);
+    jest
+      .mocked(getProfileCmsPackageById)
+      .mockResolvedValue(signedDraft as never);
+
+    const result = await publish();
+
+    expect(uploads).toEqual([cmsCidFromHash(PACKAGE_HASH), PUBLICATION_CID]);
+    expect(steps).toEqual(["upload", "replace"]);
+    expect(result).toMatchObject({ ok: true });
+  });
+
+  it("signs nothing when the document store refuses the files, and keeps the signed request", async () => {
+    const { writer, steps } = writerRecording(
+      undefined,
+      new ProfileDocWriteError(
+        "upload_refused",
+        "Too many files at once. Try again in a few minutes."
+      )
+    );
+    registerProfileDocWriter(writer);
+
+    const result = await publish();
+
+    expect(steps).toEqual(["upload"]);
+    expect(result).toMatchObject({
+      ok: false,
+      step: "publish",
+      code: "chain_upload_failed",
+      message: "Too many files at once. Try again in a few minutes.",
+      signedRequest: expect.objectContaining({ signature: expect.any(String) }),
+    });
+  });
+
+  it("uploads and names the files on a retry after a refused upload", async () => {
+    const { writer, uploads, steps, docs } = writerRecording();
+    registerProfileDocWriter(writer);
+    const upload = writer.uploadDocuments.bind(writer);
+    let first = true;
+    writer.uploadDocuments = async (documents) => {
+      if (first) {
+        first = false;
+        steps.push("upload");
+        throw new ProfileDocWriteError(
+          "upload_refused",
+          "6529's document store couldn't take the files right now. Try again later."
+        );
+      }
+      return upload(documents);
+    };
+    jest
+      .mocked(getProfileCmsPrimaryPackageHash)
+      .mockResolvedValue(PACKAGE_HASH);
+    jest
+      .mocked(getProfileCmsPackageById)
+      .mockResolvedValue(signedDraft as never);
+
+    expect(await publish()).toMatchObject({
+      ok: false,
+      code: "chain_upload_failed",
+    });
+    // The retry publishes again: 6529.io returns the recorded files.
+    expect(await publish()).toMatchObject({ ok: true });
+    expect(uploads).toEqual([cmsCidFromHash(PACKAGE_HASH), PUBLICATION_CID]);
+    expect(steps).toEqual(["upload", "upload", "replace"]);
+    expect(docs).toHaveLength(1);
+  });
+
+  it.each([
+    [
+      "a package hash other than the one signed",
+      { packageHash: `sha256:${"3".repeat(64)}` },
+    ],
+    [
+      "a content core other than the signed package's",
+      {
+        chainDocuments: {
+          ...signedDraft.chainDocuments!,
+          contentCore: {
+            cid: cmsCidFromBytes(PUBLICATION_BYTES),
+            bytes: PUBLICATION_BYTES,
+          },
+        },
+      },
+    ],
+    [
+      "a publication record other than the one recorded",
+      {
+        chainDocuments: {
+          ...signedDraft.chainDocuments!,
+          publication: { cid: cmsCidFromHash(PACKAGE_HASH), bytes: CORE_BYTES },
+        },
+      },
+    ],
+  ])("uploads and signs nothing for %s", async (_label, change) => {
+    const { writer, steps } = writerRecording();
+    registerProfileDocWriter(writer);
+    jest
+      .mocked(publishProfileCmsPackage)
+      .mockResolvedValue({ ...signedDraft, ...change });
+
+    expect(await publish()).toMatchObject({
+      ok: false,
+      code: "chain_upload_failed",
+      message:
+        "6529.io's answer doesn't match the site you signed. Try publishing again.",
+    });
+    expect(steps).toEqual([]);
+  });
+
+  it("uploads and signs nothing for a chain answer without its files", async () => {
+    const { writer, steps } = writerRecording();
+    registerProfileDocWriter(writer);
+    jest
+      .mocked(publishProfileCmsPackage)
+      .mockResolvedValue({ ...signedDraft, chainDocuments: undefined });
+
+    expect(await publish()).toMatchObject({
+      ok: false,
+      code: "chain_upload_failed",
+    });
+    expect(steps).toEqual([]);
   });
 
   it("keeps the old path when 6529.io moves the pointer itself", async () => {

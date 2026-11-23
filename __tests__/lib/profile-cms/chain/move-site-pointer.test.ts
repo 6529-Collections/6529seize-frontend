@@ -1,5 +1,7 @@
+import { cmsCidFromBytes } from "@/lib/profile-cms/chain/cms-cid";
 import {
   moveProfileSitePointer,
+  uploadProfileSiteFiles,
   waitForProfileSitePrimary,
 } from "@/lib/profile-cms/chain/move-site-pointer";
 import {
@@ -36,9 +38,70 @@ function fakeWriter(
       docs.push(Object.fromEntries(next));
       return { txId: TX_ID };
     },
+    uploadDocuments: async () => undefined,
   };
   return { writer, docs, used };
 }
+
+function file(text: string) {
+  const bytes = new TextEncoder().encode(text);
+  return { cid: cmsCidFromBytes(bytes), bytes };
+}
+
+describe("uploadProfileSiteFiles", () => {
+  it("uploads the files, each checked against its CID, through the writer", async () => {
+    const { writer } = fakeWriter(["session-key"]);
+    const uploaded: string[] = [];
+    writer.uploadDocuments = async (documents) => {
+      uploaded.push(...documents.map((document) => document.cid));
+    };
+    const files = [file("core"), file("publication")];
+
+    await expect(uploadProfileSiteFiles({ files, writer })).resolves.toEqual({
+      ok: true,
+    });
+    expect(uploaded).toEqual(files.map((it) => it.cid));
+  });
+
+  it("uploads nothing when a file doesn't match its CID", async () => {
+    const { writer } = fakeWriter(["session-key"]);
+    const uploadDocuments = jest.fn();
+    writer.uploadDocuments = uploadDocuments;
+
+    const result = await uploadProfileSiteFiles({
+      files: [{ ...file("core"), bytes: new TextEncoder().encode("other") }],
+      writer,
+    });
+
+    expect(result).toMatchObject({ ok: false, code: "upload_failed" });
+    expect(uploadDocuments).not.toHaveBeenCalled();
+  });
+
+  it("keeps the writer's words for a refused upload", async () => {
+    const { writer } = fakeWriter(["session-key"]);
+    writer.uploadDocuments = async () => {
+      throw new ProfileDocWriteError(
+        "upload_too_large",
+        "A file is larger than 2 MiB, the most the document store takes."
+      );
+    };
+
+    await expect(
+      uploadProfileSiteFiles({ files: [file("core")], writer })
+    ).resolves.toEqual({
+      ok: false,
+      code: "upload_failed",
+      message:
+        "A file is larger than 2 MiB, the most the document store takes.",
+    });
+  });
+
+  it("is unavailable without profile tools", async () => {
+    await expect(
+      uploadProfileSiteFiles({ files: [file("core")], writer: null })
+    ).resolves.toMatchObject({ ok: false, code: "chain_unavailable" });
+  });
+});
 
 describe("moveProfileSitePointer", () => {
   afterEach(() => registerProfileDocWriter(null));

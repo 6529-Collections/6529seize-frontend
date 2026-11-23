@@ -149,6 +149,8 @@ export const ES_ES_MESSAGES = {
     "La publicación ha fallado. Inténtalo de nuevo.",
   "profileCms.builder.publish.error.chainUnavailable":
     "Este navegador aún no puede firmar cambios de perfil en 6529 Network.",
+  "profileCms.builder.publish.error.chainUploadFailed":
+    "No se pudieron enviar los archivos de tu sitio a 6529 Network.",
   "profileCms.builder.publish.error.chainFailed":
     "Tu cambio de perfil en 6529 Network no se completó. Inténtalo de nuevo.",
   "profileCms.builder.history.title": "Historial de versiones",

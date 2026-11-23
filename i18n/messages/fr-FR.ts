@@ -152,6 +152,8 @@ export const FR_FR_MESSAGES = {
     "La publication a échoué. Veuillez réessayer.",
   "profileCms.builder.publish.error.chainUnavailable":
     "Ce navigateur ne peut pas encore signer de modifications de profil sur le 6529 Network.",
+  "profileCms.builder.publish.error.chainUploadFailed":
+    "Les fichiers de votre site n’ont pas pu être envoyés au 6529 Network.",
   "profileCms.builder.publish.error.chainFailed":
     "Votre modification de profil sur le 6529 Network n’a pas abouti. Veuillez réessayer.",
   "profileCms.builder.history.title": "Historique des versions",

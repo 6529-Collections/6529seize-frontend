@@ -151,6 +151,8 @@ export const DE_DE_MESSAGES = {
     "Die Veröffentlichung ist fehlgeschlagen. Bitte versuche es erneut.",
   "profileCms.builder.publish.error.chainUnavailable":
     "Dieser Browser kann noch keine Profiländerungen im 6529 Network signieren.",
+  "profileCms.builder.publish.error.chainUploadFailed":
+    "Die Dateien deiner Seite konnten nicht an das 6529 Network gesendet werden.",
   "profileCms.builder.publish.error.chainFailed":
     "Deine Profiländerung im 6529 Network ist nicht durchgegangen. Bitte versuche es erneut.",
   "profileCms.builder.history.title": "Versionsverlauf",

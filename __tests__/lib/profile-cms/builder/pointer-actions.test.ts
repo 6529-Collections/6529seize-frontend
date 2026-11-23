@@ -51,6 +51,7 @@ function recordingWriter() {
       );
       return { txId: "0x01" };
     },
+    uploadDocuments: async () => undefined,
   };
   registerProfileDocWriter(writer);
   return docs;
@@ -157,6 +158,7 @@ describe("profile site pointer actions", () => {
       replaceProfileDoc: async () => {
         throw new ProfileDocWriteError("submit_failed", words);
       },
+      uploadDocuments: async () => undefined,
     });
     jest.mocked(unpublishProfileCmsPackage).mockRejectedValue(onChain);
     const failure = await unpublishProfileSite(record).then(

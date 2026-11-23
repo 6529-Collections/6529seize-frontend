@@ -30,6 +30,7 @@ import {
 import { cmsCidFromHash } from "@/lib/profile-cms/chain/cms-cid";
 import {
   moveProfileSitePointer,
+  uploadProfileSiteFiles,
   waitForProfileSitePrimary,
 } from "@/lib/profile-cms/chain/move-site-pointer";
 
@@ -106,6 +107,7 @@ type ProfileCmsPublishErrorCode =
   | "storage_pending"
   | "publish_failed"
   | "chain_unavailable"
+  | "chain_upload_failed"
   | "chain_failed";
 
 /**
@@ -637,8 +639,9 @@ async function submitProfileCmsPublish(
 }
 
 /**
- * With profile sites on the 6529 chain, 6529.io stores the signed publication
- * and the person's PROFILE_REPLACE makes it the primary site.
+ * With profile sites on the 6529 chain, 6529.io records the signed
+ * publication and returns its files; this browser uploads them, and the
+ * person's PROFILE_REPLACE makes it the primary site.
  */
 async function moveSignedProfileSite(
   context: ProfileCmsPublishContext,
@@ -646,10 +649,49 @@ async function moveSignedProfileSite(
   request: ProfileCmsPublishRequest,
   baseUrl?: string
 ): Promise<ProfileCmsPublishResult> {
+  // The files the ProfileDoc will name go to the gateway's document store
+  // first, from this browser; nothing is signed if they can't. They must be
+  // the files of what the person signed: the package hash they signed and
+  // the publication record 6529.io recorded for it.
+  const documents = signed.chainDocuments;
+  if (
+    !documents ||
+    signed.packageHash !== context.packageHash ||
+    documents.contentCore.cid !== cmsCidFromHash(context.packageHash) ||
+    documents.publication.cid !== signed.publicationCid
+  ) {
+    return {
+      ok: false,
+      step: "publish",
+      code: "chain_upload_failed",
+      message: documents
+        ? "6529.io's answer doesn't match the site you signed. Try publishing again."
+        : "6529.io's answer has no files to send to the 6529 Network. Try publishing again.",
+      context,
+      signedRequest: request,
+    };
+  }
+  const uploaded = await uploadProfileSiteFiles({
+    files: [documents.contentCore, documents.publication],
+  });
+  if (!uploaded.ok) {
+    return {
+      ok: false,
+      step: "publish",
+      code:
+        uploaded.code === "upload_failed"
+          ? "chain_upload_failed"
+          : uploaded.code,
+      message: uploaded.message,
+      context,
+      signedRequest: request,
+    };
+  }
   const moved = await moveProfileSitePointer({
+    // Exactly the files just uploaded.
     pointer: {
-      publication: signed.publicationCid as string,
-      package: cmsCidFromHash(signed.packageHash),
+      publication: documents.publication.cid,
+      package: documents.contentCore.cid,
     },
     confirm: () =>
       waitForProfileSitePrimary({
