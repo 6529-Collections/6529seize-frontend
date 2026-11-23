@@ -1839,7 +1839,7 @@ import { ApiSubmissionDropStatus } from '../models/ApiSubmissionDropStatus';
 import { ApiSubmissionDropVoting } from '../models/ApiSubmissionDropVoting';
 import { ApiSubmissionDropVotingContextProfileContext } from '../models/ApiSubmissionDropVotingContextProfileContext';
 import { ApiSubmitProfileCmsAgentProposalRequest } from '../models/ApiSubmitProfileCmsAgentProposalRequest';
-import { ApiSubscriptionCoverage                 } from '../models/ApiSubscriptionCoverage';
+import { ApiSubscriptionCoverage                   } from '../models/ApiSubscriptionCoverage';
 import { ApiSubscriptionCoverageDeadlineBasis } from '../models/ApiSubscriptionCoverageDeadlineBasis';
 import { ApiSubscriptionCoverageEligibilityBasis } from '../models/ApiSubscriptionCoverageEligibilityBasis';
 import { ApiSubscriptionCoverageForecast           } from '../models/ApiSubscriptionCoverageForecast';

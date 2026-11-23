@@ -1165,3 +1165,145 @@ describe("funding that reaches the forecast end", () => {
     );
   });
 });
+
+describe("funded drops at current settings", () => {
+  function forecastEndCoverage(
+    overrides: Parameters<typeof subscriptionCoverageFixture>[0] = {}
+  ) {
+    return subscriptionCoverageFixture({
+      status: ApiSubscriptionCoverageStatus.Covered,
+      fully_funded_drops: 24,
+      funded_through: {
+        token_id: 598,
+        mint_at: new Date("2027-01-01T15:40:00Z"),
+      },
+      next_unfunded: null,
+      forecast: {
+        ...subscriptionCoverageFixture().forecast,
+        horizon_drop_count: 24,
+        horizon_end_token_id: 598,
+        forecast_truncated: true,
+      },
+      ...overrides,
+    });
+  }
+
+  it("shows the real count with the current-settings note when the backend sends it", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage({
+          funded_drops_at_current_settings: 40,
+          funded_drops_at_current_settings_capped: false,
+        })}
+        isLoading={false}
+        isOwner
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "About 40 drops funded" })
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "At the current mint price and current subscription settings."
+      )
+    ).toBeVisible();
+    expect(screen.getByText(/Funded at least through/)).toHaveTextContent(
+      "Funded at least through The Memes #598 · Jan 1, 2027"
+    );
+  });
+
+  it("says at least N for a capped count, also to visitors", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage({
+          funded_drops_at_current_settings: 312,
+          funded_drops_at_current_settings_capped: true,
+        })}
+        isLoading={false}
+        isOwner={false}
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "At least 312 drops funded" })
+    ).toBeVisible();
+    expect(
+      screen.getByText(
+        "At the current mint price and current subscription settings."
+      )
+    ).toBeVisible();
+  });
+
+  it("keeps the forecast headline when the balance funds exactly the forecast", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage({
+          funded_drops_at_current_settings: 24,
+          funded_drops_at_current_settings_capped: false,
+        })}
+        isLoading={false}
+        isOwner
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "Next 24 drops funded" })
+    ).toBeVisible();
+  });
+
+  it("does not show the current-settings count for stale coverage", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage({
+          funded_drops_at_current_settings: 40,
+          funded_drops_at_current_settings_capped: false,
+        })}
+        isLoading={false}
+        isOwner
+        isStale
+      />
+    );
+    expect(
+      screen.queryByRole("heading", { name: "About 40 drops funded" })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        "At the current mint price and current subscription settings."
+      )
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the selected-drop count in manual mode", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage({
+          mode: ApiSubscriptionCoverageMode.Manual,
+          fully_funded_drops: 3,
+          funded_drops_at_current_settings: 3,
+          funded_drops_at_current_settings_capped: false,
+        })}
+        isLoading={false}
+        isOwner
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "3 drops funded" })
+    ).toBeVisible();
+  });
+
+  it("keeps the forecast headline when the backend omits the count", () => {
+    render(
+      <SubscriptionCoverageSummary
+        coverage={forecastEndCoverage()}
+        isLoading={false}
+        isOwner
+      />
+    );
+    expect(
+      screen.getByRole("heading", { name: "Next 24 drops funded" })
+    ).toBeVisible();
+    expect(
+      screen.queryByText(
+        "At the current mint price and current subscription settings."
+      )
+    ).not.toBeInTheDocument();
+  });
+});

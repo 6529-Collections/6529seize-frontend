@@ -32,7 +32,14 @@ export interface BackupStateStore {
   get(profileId: string): Promise<BackupLocalState | null>;
   put(state: BackupLocalState): Promise<void>;
   delete(profileId: string): Promise<void>;
+  /**
+   * delete, only while the state belongs to `deviceKey`: checked in the same
+   * write, so a replacement device's state stays. True when it was deleted.
+   */
+  deleteIfDevice(profileId: string, deviceKey: string): Promise<boolean>;
 }
+
+const sameKey = (a: string, b: string) => a.toLowerCase() === b.toLowerCase();
 
 class MemoryBackupStateStore implements BackupStateStore {
   private readonly states = new Map<string, BackupLocalState>();
@@ -66,6 +73,15 @@ class MemoryBackupStateStore implements BackupStateStore {
   delete(profileId: string): Promise<void> {
     this.states.delete(profileId);
     return Promise.resolve();
+  }
+
+  deleteIfDevice(profileId: string, deviceKey: string): Promise<boolean> {
+    const state = this.states.get(profileId);
+    if (!state || !sameKey(state.deviceKey, deviceKey)) {
+      return Promise.resolve(false);
+    }
+    this.states.delete(profileId);
+    return Promise.resolve(true);
   }
 }
 
@@ -166,6 +182,31 @@ class IndexedDbBackupStateStore implements BackupStateStore {
 
   async delete(profileId: string): Promise<void> {
     await this.run("readwrite", (store) => store.delete(profileId));
+  }
+
+  async deleteIfDevice(profileId: string, deviceKey: string): Promise<boolean> {
+    const db = await this.open();
+    const tx = db.transaction(STORE, "readwrite");
+    const store = tx.objectStore(STORE);
+    const read = store.get(profileId) as IDBRequest<
+      BackupLocalState | undefined
+    >;
+    // Set from the request callback below.
+    const outcome = { deleted: false };
+    read.onsuccess = () => {
+      if (read.result && sameKey(read.result.deviceKey, deviceKey)) {
+        store.delete(profileId);
+        outcome.deleted = true;
+      }
+    };
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve();
+      tx.onerror = () =>
+        reject(tx.error ?? new Error("IndexedDB write failed"));
+      tx.onabort = () =>
+        reject(tx.error ?? new Error("IndexedDB write aborted"));
+    });
+    return outcome.deleted;
   }
 }
 

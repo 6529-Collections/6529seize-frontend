@@ -57,6 +57,7 @@ import { searchHistory } from "./history-search";
 import { latestReadSeq } from "./history";
 import { PollActions } from "./polls";
 import { previewReport, sendReport } from "./report";
+import { renameEngineDevice } from "./rename";
 import { queueImported, queueMessage, queueTargeted } from "./send";
 import {
   createContext,
@@ -798,16 +799,14 @@ class E2eeEngineImpl implements E2eeEngineExt {
 
   async renameThisDevice(label: string): Promise<void> {
     const device = this.ctx.device;
-    if (!device) {
-      throw new E2eeError("E2EE_NOT_READY");
-    }
-    await this.ctx.queue.run(async () => {
-      if (this.ctx.disposed) throw new E2eeError("E2EE_NOT_READY");
-      // A superseded tab must stop before changing the account's device name.
-      await checkpoint(this.ctx, { skipWasm: true });
-      if (this.isDisposed()) throw new E2eeError("E2EE_NOT_READY");
-      await this.ctx.api.renameDevice(device.deviceKey, label);
-    });
+    if (!device) throw new E2eeError("E2EE_NOT_READY");
+    await this.renameDevice(device.deviceKey, label);
+  }
+
+  async renameDevice(deviceKey: string, label: string): Promise<void> {
+    await renameEngineDevice(this.ctx, deviceKey, label);
+    // The list (and every other open device of the profile, on its next
+    // sync) shows the new name.
     await this.refreshMe();
   }
 }

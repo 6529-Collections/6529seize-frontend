@@ -67,6 +67,7 @@ import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
+import { DEVICES_SECURITY_MESSAGES } from "@/i18n/messages/devices-security";
 import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
 import { LEGACY_BROWSER_MESSAGES } from "@/i18n/messages/legacy-browser";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
@@ -4799,6 +4800,11 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.history.emptyTopups": "No Top Ups found",
   "subscriptions.history.loading": "Loading {title}",
   "subscriptions.coverage.summary.nextFundedDrops": "Next {count} drops funded",
+  "subscriptions.coverage.summary.fundedDropsAbout": "About {count} drops funded",
+  "subscriptions.coverage.summary.fundedDropsAtLeast":
+    "At least {count} drops funded",
+  "subscriptions.coverage.summary.currentSettingsNote":
+    "At the current mint price and current subscription settings.",
   "subscriptions.coverage.summary.paidTitle": "Subscription paid",
   "subscriptions.coverage.summary.paid":
     "The subscription for {meme} is already paid.",
@@ -5905,6 +5911,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...THE_MEMES_MINT_PROGRESS_MESSAGES,
   ...CONTENT_MODERATION_MESSAGES,
   ...SIGNED_MESSAGES_MESSAGES,
+  ...DEVICES_SECURITY_MESSAGES,
   ...MODERATION_CHECK_MESSAGES,
   ...EN_US_RECEIPT_MESSAGES,
   "collect.selection.processing": "Processing",

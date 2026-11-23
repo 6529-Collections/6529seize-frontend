@@ -20,7 +20,9 @@ import { t, tRich, type MessageKey } from "@/i18n/messages";
 import {
   formatSubscriptionCoverageDate,
   formatSubscriptionCoverageDeadline,
+  getFundedDropsAtCurrentSettingsLabel,
   getFundedDropsLabel,
+  getSubscriptionFundedDropsAtCurrentSettings,
   isSubscriptionCoverageFundedToForecastEnd,
 } from "./subscriptionCoverage.helpers";
 
@@ -306,6 +308,10 @@ function CoverageSummaryContent({
       isStale ||
       deadlinePassed ||
       paymentUnavailable);
+  const fundedAtCurrentSettings =
+    showFundedCount && !isStale
+      ? getSubscriptionFundedDropsAtCurrentSettings(coverage)
+      : null;
   let headline = presentation.label;
   if (paid) headline = t(locale, "subscriptions.coverage.summary.paidTitle");
   else if (paymentUnavailable) headline = presentation.label;
@@ -322,6 +328,11 @@ function CoverageSummaryContent({
     headline = t(locale, headlineKey, {
       token: formatInteger(locale, coverage.next_unfunded.token_id),
     });
+  } else if (fundedAtCurrentSettings) {
+    headline = getFundedDropsAtCurrentSettingsLabel(
+      locale,
+      fundedAtCurrentSettings
+    );
   } else if (
     showFundedCount &&
     coverage.fully_funded_drops === DEFAULT_FORECAST_DROP_LIMIT
@@ -451,6 +462,11 @@ function CoverageSummaryContent({
                   : "subscriptions.coverage.fundedThrough"
               )}{" "}
               <CoveragePoint point={fundedThrough} separator=" · " />
+            </p>
+          )}
+          {fundedAtCurrentSettings && (
+            <p className="tw-mb-0 tw-mt-1 tw-text-pretty tw-text-sm tw-leading-6 tw-text-iron-400">
+              {t(locale, "subscriptions.coverage.summary.currentSettingsNote")}
             </p>
           )}
           {deadline && coverage?.next_unfunded && (

@@ -45,10 +45,11 @@ describe("E2EE sandbox sign-in challenges", () => {
   const account = privateKeyToAccount(generatePrivateKey());
   const profileId = "00000000-0000-4000-8000-00000000e2e1";
   const storeLoginGrant = jest.fn();
+  const loginGrantRevokedAt = jest.fn((): number | null => null);
   const signIn = createSandboxSignIn({
     walletUser: (wallet: string) =>
       wallet === account.address.toLowerCase() ? { profileId } : null,
-    getDeliveryService: () => ({ storeLoginGrant }),
+    getDeliveryService: () => ({ storeLoginGrant, loginGrantRevokedAt }),
     now: () => NOW,
   });
 
@@ -176,6 +177,11 @@ describe("E2EE sandbox sign-in challenges", () => {
     });
     expect(signIn.listGrants(account.address.toLowerCase()).body).toEqual([
       body.device_grant,
+    ]);
+    // Like the backend, revoking the device it enrolled ends the grant.
+    loginGrantRevokedAt.mockReturnValueOnce(NOW + 1);
+    expect(signIn.listGrants(account.address.toLowerCase()).body).toEqual([
+      { ...body.device_grant, revoked_at: NOW + 1 },
     ]);
     // A challenge is used once.
     await expect(

@@ -77,6 +77,25 @@ describe("E2EE engine: local state", () => {
     );
   });
 
+  it("renames another device of the profile and reloads its own list at once", async () => {
+    const world = await createWorld();
+    const alice = await addUser(world, "alice");
+    const laptop = await startDevice(world, "alice", alice.account);
+    alice.devices.push(laptop);
+    await settle(world);
+    const laptopKey = laptop.engine.getThisDevice()?.deviceKey ?? "";
+    expect(laptopKey).not.toBe("");
+
+    await alice.primary.engine.renameDevice(laptopKey, "Work laptop");
+
+    // No sync needed on the renaming device: its list was reloaded.
+    expect(
+      alice.primary.engine
+        .getDevices()
+        .find((device) => device.deviceKey === laptopKey)?.label
+    ).toBe("Work laptop");
+  });
+
   it("wiping a revoked device also deletes its encrypted-backup state", async () => {
     const world = await createWorld();
     const alice = await addUser(world, "alice");
