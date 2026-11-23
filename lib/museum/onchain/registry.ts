@@ -11,7 +11,6 @@ import { PROVENANCE_REGISTRY_READ_ABI as abi } from "./abi";
 import {
   ERC165_INTERFACE_ID,
   ERC165_INVALID_INTERFACE_ID,
-  ONCHAIN_MUSEUM_REGISTRY_PLACEHOLDER,
   ONCHAIN_MUSEUM_SOURCE,
 } from "./constants";
 import type { OnchainHashRef } from "./verify";
@@ -502,11 +501,6 @@ export async function readRegistrySnapshot(
     owner,
     build,
   } = ONCHAIN_MUSEUM_SOURCE;
-  if (
-    registry.toLowerCase() === ONCHAIN_MUSEUM_REGISTRY_PLACEHOLDER.toLowerCase()
-  ) {
-    throw new Error("registry_address_pending");
-  }
   const counter: Counter = { httpRequests: 0, ethCalls: 0 };
   const rpc = client ?? createOnchainMuseumClient(counter);
 

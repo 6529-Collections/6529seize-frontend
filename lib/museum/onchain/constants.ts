@@ -1,17 +1,18 @@
-import { zeroAddress, zeroHash, type Address, type Hex } from "viem";
+import type { Address, Hex } from "viem";
 
 /**
- * Set after deployment: the Sepolia `ProvenanceRegistry` that holds the
- * Museum catalog as 6529 provenance profile v1 records. Until it is set,
- * the route reports the registry as unavailable.
+ * The Sepolia `ProvenanceRegistry` that holds the Museum catalog as 6529
+ * provenance profile v1 records, deployed from tag `v1.0.0-rc.2`.
  */
-export const ONCHAIN_MUSEUM_REGISTRY_PLACEHOLDER: Address = zeroAddress;
+const ONCHAIN_MUSEUM_REGISTRY: Address =
+  "0xFF4d580292E85A9532E7653fadFD53F97cdA6B5e";
 
 /**
- * Set after the `v1.0.0-rc.2` tag: keccak256 of that build's runtime code.
- * The registry has no immutables, so every deployment of a build shares it.
+ * keccak256 of the runtime code of tag `v1.0.0-rc.2`. The registry has no
+ * immutables, so every deployment of a build shares it.
  */
-const ONCHAIN_MUSEUM_CODE_HASH_PLACEHOLDER: Hex = zeroHash;
+const ONCHAIN_MUSEUM_CODE_HASH: Hex =
+  "0xcda6420e706dcdcea09342b20168921b35f50ca3d87413665b700370f9fc50a9";
 
 /**
  * Every trust anchor of the route, in one place. The registry address and
@@ -23,11 +24,11 @@ const ONCHAIN_MUSEUM_CODE_HASH_PLACEHOLDER: Hex = zeroHash;
 export const ONCHAIN_MUSEUM_SOURCE = {
   chainId: 11155111,
   rpcUrl: "https://ethereum-sepolia-rpc.publicnode.com",
-  registry: ONCHAIN_MUSEUM_REGISTRY_PLACEHOLDER,
+  registry: ONCHAIN_MUSEUM_REGISTRY,
   owner: "0x87BD1Be4FbDEf9251C318b4870542217AA2AdB68" as Address,
   build: {
     tag: "v1.0.0-rc.2",
-    runtimeCodeHash: ONCHAIN_MUSEUM_CODE_HASH_PLACEHOLDER,
+    runtimeCodeHash: ONCHAIN_MUSEUM_CODE_HASH,
     interfaceId: "0x5d79f565" as Hex,
   },
   expected: { releases: 1, records: 589 },
