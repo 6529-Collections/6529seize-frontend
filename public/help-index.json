@@ -3106,14 +3106,13 @@
       "id": "help-bot.credits",
       "kind": "business_rule",
       "title": "Help6529 Credits",
-      "link_label": "Help6529 Credits",
+      "link_label": "Waves",
       "aliases": [
         "help6529 credits",
         "help bot credits",
         "helpbot credits",
         "how do i get help6529 credits",
         "how do i get help bot credits",
-        "why can't i ask help6529",
         "low battery reaction",
         "no help6529 credits"
       ],
@@ -3123,23 +3122,18 @@
         "bot",
         "credits",
         "credit",
-        "rep",
+        "free",
         "battery",
         "low",
-        "question",
-        "activity"
+        "question"
       ],
       "facts": [
-        "Help6529 Credits are REP in the `Help6529 Credits` category.",
-        "Each Help6529 question costs 1 Help6529 Credit REP.",
-        "Automatic grants use the configured Help6529 credit grant amount for signup, profile setup, and daily activity when the user sends any message that day.",
-        "Automatic daily activity grants do not have a balance cap.",
-        "Help6529 Credits is a reserved REP category managed by help6529; normal users cannot grant REP in this category.",
-        "The bot checks the user's Help6529 Credits category balance before answering."
+        "Asking help6529 is free.",
+        "It no longer uses Help6529 Credits."
       ],
-      "canonical_path": "/rep/categories/Help6529%20Credits",
+      "canonical_path": "/waves",
       "related_paths": ["/waves"],
-      "tags": ["help-bot", "credits", "rep"],
+      "tags": ["help-bot", "credits"],
       "source_refs": [
         "ops/docs/specs/2026-06-19-6529-help-bot-knowledge-index.md"
       ]
@@ -3656,7 +3650,7 @@
         "In guided creation, Guidelines is directly before Description. Chat subwaves enter it after Access, Perpetual Ranking after Voting, and scheduled Rank and Approve after Outcomes. Standalone Chat uses Optional settings on its first screen instead of a separate Guidelines step.",
         "Generated rules summarize the wave setup. Chat rules focus on wave type, access, and chat settings; Rank and Approve rules also include timing, submissions, voting and approval; configured outcomes appear in the decision’s Settings.",
         "Creators use the Chat guidelines section and Add chat guidelines... textbox to add guidelines. The subtitle explains that users see them when sending their first chat message. Guidelines are saved as wave metadata and also shown under Guidelines in the wave rules panel.",
-        "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message; Decline keeps the draft and shows the guidelines again on the next attempt.",
+        "When a wave has guidelines, a profile with no prior chat messages or participation drops in that wave reviews them before its first chat message is sent. Agree sends the pending message, and later messages from that profile in the wave are not interrupted; Decline keeps the draft and shows the guidelines again on the next attempt.",
         "For Rank and Approve waves, creators add Rules that require acceptance in Drops under Submission requirements. The textbox sits below the simultaneous-submission limit. Entering rules requires signing; empty or whitespace-only text does not. The section stays open, and navigating between steps preserves the text. These rules use the existing participation terms and wallet-signature submit flow.",
         "Wave admins can edit Chat guidelines later from Configuration. For Rank and Approve waves, admins can also edit acceptance-required rules there.",
         "Participants can review decision rules in the selected decision’s Settings tab. Wave Configuration in the information panel contains wave access and chat settings."
@@ -3878,7 +3872,7 @@
         "The wave composer is where users post drops and replies inside a wave.",
         "Signed-out viewers of a public wave can choose the blue Sign in to 6529 to post button in the footer. New here? Sign a message with your wallet to get started explains the wallet signature, with no transaction or gas fees. The existing wallet chooser and sign-in dialog handle authentication. Posting access is checked again after sign-in, and wallets without a profile still need profile setup.",
         "If a wave has guidelines and the profile has posted neither a chat message nor a participation drop there, submitting its first chat message opens a Wave guidelines dialog before the message is sent.",
-        "Agree sends the pending first message and prevents repeat prompts in that wave. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
+        "Agree sends the pending first message and prevents repeat prompts in that wave, including after switching to another wave and back. Decline or dismissing the dialog does not send the message, keeps the draft, and shows the guidelines again on the next submit attempt.",
         "Composer docs cover markdown, mentions, NFT hashtag references, curation URLs, media uploads, and Enter-key behavior.",
         "On desktop, Enter sends a chat message and keeps focus in the empty composer so you can immediately type the next message; Shift+Enter adds a line. On mobile web and in the app, Return does not submit, and an accepted Send removes input focus and dismisses the keyboard.",
         "Type @ followed by at least three handle characters to find profiles to tag. Individual profile suggestions show a small round level badge beside the handle, including level 0. Global mentions and Quick Tags have no level badge.",
@@ -5440,6 +5434,7 @@
         "Coverage is Covered at 7 or more consecutive fully funded intended drops, Plan a top up at 4 to 6, Running low at 2 to 3, and Action required at 0 to 1. These existing thresholds are unchanged.",
         "When available, Funded through identifies the funded-through Meme and full date. Upcoming Drops shows one amber Funded through boundary after the last funded drop, or Next unfunded before the supplied next unfunded drop when there is no funded-through point. Selection switches and visitor subscription statuses keep their existing meaning. Next unfunded stays in the summary facts when no deadline line already names the same drop. Owners see the supplied top-up deadline once in the summary; Top up shows the recommended amount and funding projection without repeating the deadline. Original date formats, including years and UTC cutoff times, are preserved.",
         "When funding reaches the last drop of the 24-drop forecast and no unfunded drop is identified, the balance may cover later drops: the card and Upcoming Drops say Funded at least through, the profile header says at least through, and the compact line says Next 24 drops funded. One funded drop shows as Running low in the card, profile header and coverage notification.",
+        "When the balance funds every drop in the 24-drop forecast in Automatic mode, the card headline and compact line show how many drops it funds in total at the current mint price and current subscription settings, as About N drops funded (At least 312 drops funded at the maximum), when that is more than the forecast shows. Manual mode keeps the count of selected drops.",
         "If an eligible card is unavailable, no card is airdropped and the unused balance stays available.",
         "The About Subscriptions overview links to the Subscriptions Report for aggregate subscribed and redeemed subscription counts."
       ],
@@ -6634,7 +6629,7 @@
         "The Identity tab surfaces profile identity, REP behavior, NIC ratings, NIC statements, and activity log behavior where available.",
         "REP categories initially show five tags. The unfilled, outlined +N more button reveals 10 additional categories at a time; it becomes Load more when another server page is needed. Received and Given keep their expanded counts separately while on the same profile.",
         "On mobile, grouped text-only REP, NIC, and ID Statements buttons switch sections without changing the profile URL. The buttons have no numbers. REP and NIC show Received/Given beside the content heading and the selected total below. The statement count appears inside ID Statements.",
-        "Grant Rep keeps a fixed layout starting with plain aligned summary rows above category search, without a separate filled background. Your available REP and Your REP assigned to the profile are always visible, including when the assigned total is zero. Search, You assigned pills when you have existing contributions, the amount label and field, a Current Rep / Adjustment row, primary action and Cancel stay in place. Pills match profile REP tags and keep a neutral highlight on the selected category; after selection all assigned pills remain available. Type a category name of at least three characters and pause for validation. Matching categories appear as optional suggestions above the amount section. Picking a suggestion uses its exact spelling. Category names are case-sensitive, so artist and Artist can hold separate ratings. If the typed name fails validation, the reason appears below the category field. Focusing an empty search or choosing Change category shows Type at least 3 characters without searching the network. On this profile stays removed; open a profile category tag to grant or edit REP inline. The amount is editable with placeholder 0 while Grant Rep waits for a validated category and its rating data. If you type an amount first, the draft stays when a category passes validation or you pick a suggestion. Switching between ready categories shows the new category's saved total or zero. Picking a suggestion moves focus to the amount when rating data is ready if focus is still on the category control. The total-rating hint matches Rate NIC. Rate NIC focuses its amount on desktop only, without opening the keyboard on phones. The category field stays editable after you pick a suggestion. Change category clears it and resets the draft. Your available REP and its value in the top summary turn rose with an over-budget draft while saving stays disabled. Over-budget input is retained on blur for correction. Current Rep stays on the left below the amount input and Adjustment on the right when the category's rating data is ready, including before the amount changes. The row reserves space while rating data loads. Adjustment is the proposed total minus the saved amount: emerald for an increase, rose for a decrease, and neutral iron for zero. Invalid input keeps the adjustment neutral until a valid number is entered. The button says Save for an existing contribution or Grant Rep for a new one, and enables only for a valid changed amount. Enter in the amount field submits the same action. Cancel stays available. Desktop places Cancel then Save or Grant Rep at the bottom right; mobile stacks them full width in that order, at matching heights. The modal keeps its height; short viewports and long lists scroll inside. Similarly named categories stay separate and selectable.",
+        "Grant Rep fits its visible content, starting with plain aligned summary rows above category search, without a separate filled background. Your available REP and Your REP assigned to the profile are always visible, including when the assigned total is zero. Search, You assigned pills when you have existing contributions, the amount label and field, a Current Rep / Adjustment row when ready, primary action and Cancel remain available. Actions follow visible content with compact section spacing and no reserved blank area. Pills match profile REP tags and keep a neutral highlight on the selected category; after selection all assigned pills remain available. Type a category name of at least three characters and pause for validation. Matching categories appear in a floating panel below search without moving the amount or actions; focusing the amount or actions closes it. Picking a suggestion uses its exact spelling. Category names are case-sensitive, so artist and Artist can hold separate ratings. If the typed name fails validation, the reason appears below the category field. Focusing an empty search or choosing Change category shows Type at least 3 characters without searching the network. On this profile stays removed; open a profile category tag to grant or edit REP inline. The amount is editable with placeholder 0 while Grant Rep waits for a validated category and its rating data. If you type an amount first, the draft stays when a category passes validation or you pick a suggestion. Switching between ready categories shows the new category's saved total or zero. Picking a suggestion moves focus to the amount when rating data is ready if focus is still on the category control. The total-rating hint matches Rate NIC. Rate NIC focuses its amount on desktop only, without opening the keyboard on phones. The category field stays editable after you pick a suggestion. Change category clears it and resets the draft. Your available REP and its value in the top summary turn rose with an over-budget draft while saving stays disabled. Over-budget input is retained on blur for correction. Current Rep stays on the left below the amount input and Adjustment on the right when the category's rating data is ready, including before the amount changes. The row is omitted while rating data loads. Adjustment is the proposed total minus the saved amount: emerald for an increase, rose for a decrease, and neutral iron for zero. Invalid input keeps the adjustment neutral until a valid number is entered. The button says Save for an existing contribution or Grant Rep for a new one, and enables only for a valid changed amount. Enter in the amount field submits the same action. Cancel stays available. Desktop places Cancel then Save or Grant Rep at the bottom right; mobile stacks them full width in that order, at matching heights. The modal resizes briefly when visible content changes, respecting reduced motion; short viewports and long lists scroll inside while actions remain reachable. Similarly named categories stay separate and selectable.",
         "On desktop, Grant Rep, Rate NIC and REP contributor lists retain their top alignment about 14% down the viewport. NIC lists start about 10% down, are at most 560px wide and 80% of the viewport height, and scroll inside while the owner footer stays visible. Mobile keeps the draggable bottom sheets and safe-area padding.",
         "The REP categories summary says You assigned: with the same grouped integer format as Total REP, without a plus sign and with a minus sign only for negative values. The summary stays to the left of Grant Rep at every screen size. On mobile and medium screens the pair sits at the right of the category heading; when space is tight, the whole pair wraps below with the same order and an 8px gap. The You assigned summary is plain information with no chevron, click action or hover state. Grant Rep is the only header entry point to the modal, which lists your assigned categories and amounts.",
         "The exact MemesNominee category pill is marked as counting toward the 50,000 REP submission requirement and is surfaced first when the typed value differs only by capitalization, spacing, punctuation, or Unicode width. Exact MemesNominee confirms the requirement in green. A validated look-alike shows an amber note explaining that it remains a separate category.",
@@ -11736,14 +11731,22 @@
         "delegation",
         "top up",
         "transfer",
+        "send nft",
+        "provenance",
+        "publish records",
+        "safe transaction",
+        "safe signer",
         "continue in your browser"
       ],
       "facts": [
-        "When a 6529 Desktop profile signed in with Use a browser wallet, builds that send transactions open a browser page for delegations (register, update, revoke, batches of up to five, locks), The Memes and NextGen mints, and Memes subscription top-ups up to 10 ETH. Your browser wallet sends them.",
+        "When a 6529 Desktop profile signed in with Use a browser wallet, builds that send transactions open a browser page for delegations (register, update, revoke, batches of up to five, locks), The Memes and NextGen mints, Memes subscription top-ups up to 10 ETH, transfers of your 6529 NFTs (The Memes, Meme Lab, 6529 Gradient, NextGen; up to 50 different The Memes or Meme Lab tokens per collection at a time, Gradient and NextGen one transaction each), and 6529 Provenance publishing on the Sepolia test registries (open a release, publish up to 20 records per transaction, seal it). Your browser wallet sends them. Plain ETH sends are not supported.",
         "The browser page shows what the transaction does, the contract with its full address, the network, the amount in ETH plus the network fee, every decoded value, a check that it would go through now, and for mints whether the amount matches the current price.",
         "A transaction that would fail is not offered; use Check again. If the check cannot run, Check again or Send anyway. High-impact transactions (delegations that let another wallet act for you, acting as a delegation manager, minting for another wallet, top-ups over 1 ETH) need I understand before Send in wallet.",
         "The request waits five minutes; with under 45 seconds left Send is not offered. After sending, 6529 Desktop checks the transaction on chain. If it cannot confirm it yet, it shows the hash with View on Etherscan: do not send it again.",
-        "NFT transfers and NextGen burn-to-mint show Continue in your browser instead of their send button. A 6529 Desktop build without transaction support shows Update 6529 Desktop, or continue in your browser. Other transactions open a Transaction dialog with Continue in your browser.",
+        "For an NFT transfer the page shows the recipient's full address in groups of four characters, the 6529 profile it belongs to (from 6529 profile data, not part of the transaction), a warning when the address is a contract, and a box to tick: I checked that this is the right recipient. Transfers cannot be undone.",
+        "For provenance publishing the page shows the release and every record (subject, record type, schema, content hash, CID, the version it follows, 0 meaning a new subject, the effective time the publisher states) and checks that your wallet is a publisher or the owner of the registry; otherwise Send is not offered.",
+        "Signers of the 6529 Provenance test Safe (Sepolia) can approve governance actions through the browser page: registering canonicalizations, record types and schemas, granting or revoking publisher keys (batches of 2 to 16), and, one at a time with a warning and a confirmation box, deletions, freezing, declaring a successor and ownership changes. The page checks that the Safe owns the registry (for accepting ownership: that the Safe is its pending owner), that your wallet is a Safe signer and that the Safe transaction number is unused before it offers Sign in wallet. It is a signature, not a transaction, and costs no gas.",
+        "NextGen burn-to-mint, transfers of more than 50 different The Memes or Meme Lab tokens of one collection, and transfers to your own signed-in address show Continue in your browser instead of their send button. A 6529 Desktop build without this transaction support shows Update 6529 Desktop, or continue in your browser. Other transactions open a Transaction dialog with Continue in your browser.",
         "With a phone wallet (Scan with a phone wallet) these actions work inside 6529 Desktop as usual."
       ],
       "canonical_path": "/about/6529-apps",

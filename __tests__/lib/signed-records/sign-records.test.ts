@@ -202,6 +202,61 @@ describe("signRecords", () => {
     });
   });
 
+  it("claims a time no earlier than notBefore", async () => {
+    jest.useFakeTimers({ now: 1_800_000_000_000 });
+    try {
+      mockAllocateDeviceSeq
+        .mockResolvedValueOnce(await allocation(21))
+        .mockResolvedValueOnce(await allocation(22));
+      const draft = recordDraft("ps", inputs.principal, "follow", "k", {});
+      const later = await signRecords([draft], {
+        anchor: 1,
+        notBefore: 1_800_000_090_000,
+      });
+      const now = await signRecords([draft], {
+        anchor: 1,
+        notBefore: 1_700_000_000_000,
+      });
+      if (later.status !== "signed" || now.status !== "signed") {
+        throw new Error("not signed");
+      }
+      expect(later.events[0]!.claimed_time).toBe(1_800_000_090_000);
+      expect(now.events[0]!.claimed_time).toBe(1_800_000_000_000);
+    } finally {
+      jest.useRealTimers();
+    }
+    await expect(
+      signRecords([recordDraft("ps", inputs.principal, "follow", "k", {})], {
+        anchor: 1,
+        notBefore: 1.5,
+      })
+    ).rejects.toThrow("notBefore");
+  });
+
+  it("claims rising times through one batch, so its records order as drafted", async () => {
+    jest.useFakeTimers({ now: 1_800_000_000_000 });
+    try {
+      mockAllocateDeviceSeq
+        .mockResolvedValueOnce(await allocation(31))
+        .mockResolvedValueOnce(await allocation(32))
+        .mockResolvedValueOnce(await allocation(33));
+      const draft = recordDraft("ps", inputs.principal, "follow", "k", {});
+      const signed = await signRecords([draft, draft, draft], {
+        anchor: 1,
+        notBefore: 1_800_000_000_005,
+      });
+      if (signed.status !== "signed") {
+        throw new Error("not signed");
+      }
+      // The clock does not move: each record still claims a later time.
+      expect(signed.events.map((event) => event.claimed_time)).toEqual([
+        1_800_000_000_005, 1_800_000_000_006, 1_800_000_000_007,
+      ]);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it("needs an anchor and something to sign", async () => {
     const draft = recordDraft("ps", inputs.principal, "follow", "k", {});
     await expect(signRecords([draft], { anchor: 0 })).rejects.toThrow("anchor");

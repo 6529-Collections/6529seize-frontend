@@ -3,8 +3,9 @@ import { memberProfileIds, resolveProfiles } from "./setup";
 import { E2eeError } from "./errors";
 import type { ImportedPayload } from "../imported-payload";
 import type { HistoryPageOptions } from "../history-order";
+import { downloadMedia, localBlobType } from "../media";
 import type { E2eeMessage } from "../types";
-import { requireGroup, type EngineContext } from "./context";
+import { requireGroup, requireMls, type EngineContext } from "./context";
 import {
   historyAround,
   loadHistoryPage,
@@ -82,4 +83,30 @@ export async function requireSavedMessage(
   }
   trimHistory(requireGroup(ctx, g), ctx.openConversation === g.toLowerCase());
   return message;
+}
+
+/** Downloads and decrypts attachment `blob` of saved message `id` in `g`. */
+export async function getSavedAttachment(
+  ctx: EngineContext,
+  g: string,
+  id: string,
+  blob: string,
+  signal?: AbortSignal
+): Promise<Blob> {
+  const message = await ctx.queue.run(() => requireSavedMessage(ctx, g, id));
+  const attachment = message.attachments.find(
+    (att) => att.blob.toLowerCase() === blob.toLowerCase()
+  );
+  if (!attachment) {
+    throw new E2eeError("E2EE_NO_ATTACHMENT");
+  }
+  const bytes = await downloadMedia({
+    api: ctx.api,
+    deviceKey: requireMls(ctx).deviceKey(),
+    attachment,
+    ...(signal ? { signal } : {}),
+  });
+  return new Blob([bytes.slice().buffer], {
+    type: localBlobType(attachment.mime),
+  });
 }

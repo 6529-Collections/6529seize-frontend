@@ -55,20 +55,23 @@ let mockApiQueryEnabled: boolean | undefined;
 // This browser's stored encrypted device (the one identity source).
 let mockStoredKey: string | null = null;
 let mockStoredPending = false;
+let mockStoredFailed = false;
+const mockInvalidateQueries = jest.fn();
 jest.mock("@/lib/e2ee/stored-device-key", () => ({
   readStoredE2eeDeviceKey: async () => mockStoredKey,
 }));
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (options: { enabled?: boolean; queryKey: readonly unknown[] }) => {
     if (options.queryKey[0] === "E2EE_STORED_DEVICE_KEY") {
-      return mockStoredPending
-        ? { data: undefined, isSuccess: false, isError: false }
-        : { data: mockStoredKey, isSuccess: true, isError: false };
+      if (mockStoredPending || mockStoredFailed) {
+        return { data: undefined, isSuccess: false, isError: mockStoredFailed };
+      }
+      return { data: mockStoredKey, isSuccess: true, isError: false };
     }
     mockApiQueryEnabled = options.enabled;
     return mockApiQuery;
   },
-  useQueryClient: () => ({ invalidateQueries: jest.fn() }),
+  useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
 }));
 const mockApiPost = jest.fn();
 jest.mock("@/services/api/common-api", () => ({
@@ -135,6 +138,7 @@ describe("useSecurityDevices", () => {
     jest.clearAllMocks();
     mockStoredKey = null;
     mockStoredPending = false;
+    mockStoredFailed = false;
     mockAuth = {
       activeProfileProxy: null,
       isAuthenticated: true,
@@ -634,6 +638,18 @@ describe("useSecurityDevices", () => {
     mockStoredPending = false;
     rerender();
     expect(result.current.ownDeviceKnown).toBe(true);
+  });
+
+  it("treats an unreadable stored device as unknown, and retry reads it again", () => {
+    mockStoredFailed = true;
+    const { result } = renderHook(() => useSecurityDevices());
+    expect(result.current.ownDeviceKnown).toBe(false);
+    expect(result.current.ownDeviceUnreadable).toBe(true);
+    mockInvalidateQueries.mockClear();
+    result.current.retry();
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["E2EE_STORED_DEVICE_KEY", "profile-1"],
+    });
   });
 
   it("has no own encrypted device to wait for with encrypted messages off", () => {

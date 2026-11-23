@@ -7,6 +7,8 @@
  * `WALLET_TRANSACTION_RULES` without changing the existing ones.
  */
 
+import { PROVENANCE_RULES } from "./provenance-rules";
+import { TRANSFER_RULES } from "./transfer-rules";
 import { type ArgRule, FROM, type TransactionRule } from "./types";
 
 const MAINNET = 1;
@@ -394,4 +396,6 @@ export const WALLET_TRANSACTION_RULES: readonly TransactionRule[] = [
   nextgenMintRule(MAINNET, NEXTGEN_MINTER),
   nextgenMintRule(SEPOLIA, NEXTGEN_MINTER_SEPOLIA),
   ...SUBSCRIPTION_RULES,
+  ...TRANSFER_RULES,
+  ...PROVENANCE_RULES,
 ];

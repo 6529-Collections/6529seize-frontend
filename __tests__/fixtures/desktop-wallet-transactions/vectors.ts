@@ -15,6 +15,8 @@ import {
   numberToHex,
   parseAbiItem,
 } from "viem";
+import { provenanceCases } from "./vectors-provenance";
+import { transferCases } from "./vectors-transfers";
 
 /** Public development account (Hardhat/Anvil account 0), the sender. */
 export const VECTOR_FROM = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
@@ -40,7 +42,7 @@ export type VectorExpectation =
   | {
       readonly ok: true;
       readonly ruleId: string;
-      readonly risk: "normal" | "high";
+      readonly risk: "normal" | "high" | "transfer";
     }
   | {
       readonly ok: false;
@@ -140,7 +142,7 @@ function nonCanonicalProofOffset(data: Hex): Hex {
   return `${withOffset}${"0".repeat(64)}${tail}` as Hex;
 }
 
-interface Case {
+export interface Case {
   readonly name: string;
   readonly chainId?: number;
   readonly to: string;
@@ -752,6 +754,8 @@ export function buildWalletTransactionVectors(): WalletTransactionVector[] {
     ...nextgenCases(SEPOLIA, NEXTGEN_MINTER_SEPOLIA),
     ...subscriptionCases(),
     ...otherCases(),
+    ...transferCases(),
+    ...provenanceCases(),
   ].map((item) => ({
     name: item.name,
     chainId: item.chainId ?? MAINNET,

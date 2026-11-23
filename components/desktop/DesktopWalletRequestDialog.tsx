@@ -34,6 +34,7 @@ const FINISHED_MESSAGES = {
   refused: "desktopWalletRequest.refused",
   transaction: "desktopWalletRequest.transactionNotForwarded",
   transactionUpdate: "desktopWalletRequest.transactionUpdate",
+  safeTxUpdate: "desktopWalletRequest.safeTxUpdate",
   transactionUnverified: "desktopWalletRequest.transactionUnverified",
   transactionMismatch: "desktopWalletRequest.transactionMismatch",
   lateTransaction: "desktopWalletRequest.lateTransaction",
@@ -46,6 +47,7 @@ const CONTINUE_IN_BROWSER = new Set([
   "refused",
   "transaction",
   "transactionUpdate",
+  "safeTxUpdate",
   "unverified",
 ]);
 
