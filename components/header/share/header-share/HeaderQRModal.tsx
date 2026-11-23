@@ -594,11 +594,8 @@ function HeaderQRModal({
         hasValidWalletAuth || hasWalletAddress
           ? "legacy-auth"
           : "unauthenticated";
-      setMobileConnectionShareStatus(nextStatus);
-      setDesktopConnectionShareStatus(nextStatus);
-      setShareConnectionAppUrl("");
-      setShareConnectionDesktopPath("");
-      setShareConnectionSrc("");
+      setUnavailableMobileConnectionShare(nextStatus);
+      setUnavailableDesktopConnectionShare(nextStatus);
       return;
     }
 
