@@ -5,6 +5,7 @@ import { meebits445Headers } from "./meebits445Headers";
 import { openGraphProxyImageHeaders } from "./openGraphProxyImageHeaders";
 import { profileCmsAssetProxyHeaders } from "./profileCmsAssetProxyHeaders";
 import { staticAssetCacheHeaders } from "./staticAssetCacheHeaders";
+import { validatorCloudInitHeaders } from "./validatorCloudInitHeaders";
 import {
   versionReloadImageHeaders,
   versionUpdateRocketImageHeaders,
@@ -336,6 +337,7 @@ export function sharedConfig(
         versionReloadImageHeaders,
         versionUpdateRocketImageHeaders,
         e2eeAssetCacheHeaders,
+        validatorCloudInitHeaders,
         {
           // Connection links carry one-time credentials in the query string.
           // Later entries override the site-wide same-origin policy above.
