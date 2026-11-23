@@ -134,8 +134,9 @@ function detailButton(page: Page, name: string) {
   return mainButton(page, name).last();
 }
 
-// Empty when the filters wrap flush with the title and, from 390px, share one
-// row; otherwise a description of the misalignment. Tolerance is half a pixel.
+// Empty when filters that wrap below the title start flush with it and, from
+// 390px, both filters share one row; otherwise a description of the
+// misalignment. Tolerance is half a pixel.
 async function filterAlignmentProblem(
   title: Locator,
   collection: Locator,
