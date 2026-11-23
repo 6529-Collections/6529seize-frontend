@@ -148,7 +148,8 @@ profile you sign out of, or for every profile with Sign Out All Profiles.
 - `/messages/encrypted`: your encrypted chats on this device.
 - `/messages/encrypted/new`: start a direct message or a group.
 - `/messages/encrypted/{chat}`: one chat. The address is a random chat handle.
-- `/messages/encrypted/devices`: devices that can read your encrypted messages.
+- `/messages/encrypted/devices`: redirects to Preferences → **Devices & security**
+  (`/preferences?tab=security`), where devices and encrypted backup live.
 - The **Encrypted** section sits above **Direct messages** in the messages
   side pane on the web and on the app's Messages screen. Select the open chat
   again in the side pane to return to the encrypted inbox.
@@ -158,7 +159,7 @@ profile you sign out of, or for every profile with Sign Out All Profiles.
 
 ## Turning it on
 
-Open the setup action in the account menu, Preferences → **Device Permissions**,
+Open the setup action in the account menu, Preferences → **Devices & security**,
 or the composer notice. Each opens the same permission dialog. The initial
 `/messages/encrypted` page presents the same explanation inline, without the
 **Encrypted messages / End-to-end encrypted** header until encryption is ready.
@@ -193,7 +194,7 @@ When encryption is included, the card explains all of the following:
 - History lives on your devices. Losing every copy, or clearing the last
   device's data, loses that history unless you have an
   [encrypted backup](#encrypted-backup) and its recovery code.
-- Permissions can be revoked in Preferences → **Device Permissions**.
+- Permissions can be revoked in Preferences → **Devices & security**.
 
 Selecting a setup entry does not immediately open the wallet. Review the card,
 then select its **Sign** button. A disconnected wallet is connected first and
@@ -238,7 +239,7 @@ existing encryption device keeps its keys and saved history. Expiry stops its
 authorization; it does not erase saved history by itself. If local keys/data
 were removed, renewal cannot recreate them: restore a backup where available.
 
-Preferences → **Device Permissions** identifies each grant's permissions and
+Preferences → **Devices & security** identifies each grant's permissions and
 explains what **Revoke** will disable. Revoking a combined grant disables both
 Signed Posts and Encrypted DMs; a separate grant disables only its own permission.
 These are not separate revoke switches within a combined grant. When
@@ -330,7 +331,7 @@ appear.
   **Sign to enable both**, and a combined sign-in can carry the upgrade
   without another prompt. The card shows "Couldn’t upgrade encrypted messages.
   Try again." if the upgrade fails. The setup dialog, the account-menu entry
-  and the Preferences → **Device Permissions** button also read **Upgrade
+  and the Preferences → **Devices & security** button also read **Upgrade
   encrypted messages** while the upgrade is pending.
 - **Earlier conversations.** Chats started before the move are read-only:
   their messages stay readable and searchable, but you can’t send, edit, react,
@@ -467,7 +468,10 @@ appear.
 A chat opens at its newest saved messages. **Load older messages** reads the
 previous part of this device's history; **Load newer messages** moves forward
 again. **New messages** returns to the latest messages. Incoming messages do
-not move you away from older history you are reading.
+not move you away from older history you are reading. When this device holds nothing
+older, the button is replaced by **No older messages on this device.** Messages
+from before this device joined a chat are not on it unless they are restored
+from an encrypted backup.
 
 Photos load when you approach them while scrolling. Moving away can release
 them from memory; returning to a photo may download it again. This does not
@@ -572,22 +576,58 @@ time your device sees someone. Compare safety codes and check the wallets in
 
 ## Devices
 
-`/messages/encrypted/devices` lists every device of your profile that can read
-your encrypted messages, marks **This device**, and shows each device's
-platform, when it was added, when it was last active (**Active now** for this
-device), the date it expires, and whether its wallet signature was verified on
-this device. You can rename any unrevoked
-device belonging to your profile from any authenticated browser or app. The name
-is saved on the server and appears on your other devices after their lists refresh;
-linked signing and encryption entries share that name. You can also revoke any
-device, including this one. Revoking this device opens its own
+Preferences → **Devices & security** (`/preferences?tab=security`; the old
+`/messages/encrypted/devices` and `?tab=devices` links lead there) lists every
+device of your profile once, whether it can sign posts, read encrypted DMs or
+both. The encrypted inbox header's **Devices & security** button opens it, and
+opening the tab starts encrypted messages in that browser so backup can show.
+
+- **This device** is pinned first, with its permissions as chips (a missing one
+  shows dashed, for example **Encrypted DMs off**, next to a **Turn on…**
+  button), **Active now**, the date it expires and its wallet. **Rename**
+  changes its name on the server for all your devices.
+- **Other devices** lists the rest, each with its permissions, when it was set
+  up, when it was last active and when it expires, where its signing
+  permission was authorized (**Authorized from**, for example 6529.io), and
+  **Revoke**. A device whose wallet signature couldn't be checked says so.
+- **Earlier setups of this browser** groups devices with the same name as this
+  browser that haven't been active since it was set up, usually this browser
+  before it lost its saved keys. **Clean up…** lists them with their dates,
+  all selected, and revokes the ones that stay selected; one that only
+  becomes eligible while it's open is listed unselected. With encrypted
+  messages on in this browser, it warns that each selected device with
+  encrypted DMs deletes the encrypted chats saved on it once it confirms
+  the revocation. A selected device that changes while it runs, or stops
+  being an earlier setup while it still has access, isn't revoked: the
+  dialog names it and stays open for a new confirm. If encrypted messages
+  start or stop in this browser meanwhile, the rest wait for a new confirm
+  too.
+- **Revoked or expired in the last 30 days** stays collapsed to one line;
+  expanded, each ended device is one row.
+- **What these permissions mean** explains both permissions.
+
+**Revoke** asks first, naming the device, what stops and what happens to the
+encrypted chats saved on it; posts it signed stay verifiable. If the device
+changes while the dialog is open (for example its encrypted DMs are linked
+meanwhile), confirming revokes nothing: the dialog shows what will stop now
+and asks you to confirm again. If the device can't be revoked from here when
+you confirm (for example while the device list reloads), the dialog says so
+and stays open. A revoke deletes encrypted chats only when encrypted messages
+run in the browser you revoke from, which signs it: a revoke of a device whose
+encrypted DMs are on another device says that device keeps its chats, and one
+this browser can't sign never deletes anything here. When this browser's own
+encrypted device was revoked that way, a notice says its encrypted chats are
+still saved in this browser and offers **Remove this browser’s encrypted
+data**, which asks first and removes them only while that device is still the
+one saved here. Revoking this device opens its own
 **Revoke this browser?** dialog: it names the browser you're using, says what
 stops, and with backup on says that only messages included in your last
 backup can be restored. With backup off it warns
 that the encrypted chats in this browser can't be restored afterwards and
-offers **Set up backup first**. Revoking it removes its encrypted messages and
-keys from this browser right away and shows the card to turn encrypted
-messages on again. Your device's data is removed only when
+offers **Set up backup first**. Revoked with encrypted messages running here,
+it removes its encrypted messages and keys from this browser right away and
+shows the card to turn encrypted messages on again; revoked without them, it
+says the chats stay and offers their removal afterwards. Your device's data is removed only when
 the revocation verifies on it (it came from that device, or from a device of
 yours this device trusts). If 6529.io lists this device as revoked but the
 revocation can't be confirmed, the device stops sending and receiving
@@ -621,10 +661,17 @@ timeline.
 
 ## Encrypted backup
 
-The **Encrypted backup** section on `/messages/encrypted/devices` keeps an
-encrypted copy of your message history so you can restore it on a new device.
+The **Encrypted backup** card comes first on **Devices & security**. Its pill
+reads **On**, **Off**, **Backing up**, **Not on this device** (a backup from
+another device exists), **Unknown** or **Not available**, and the tab shows an
+amber dot while backup is off. With backup off the card explains the risk and
+the three steps, with **Set up backup**. Until encrypted messages run in this
+browser it says why instead: loading, open in another tab (**Use here**),
+couldn't start (**Try again**), unsupported browser, or **Turn on encrypted
+DMs** first. Backup keeps an encrypted copy of your message history so you can
+restore it on a new device.
 
-- **Turn on backup** shows a recovery code once: 14 groups of 4 letters and
+- **Set up backup** shows a recovery code once: 14 groups of 4 letters and
   numbers. Select **Copy code** or **Download as text file**, store it
   somewhere safe (for example a password manager), tick **I saved my recovery
   code somewhere safe**, then select **Turn on backup**. Closing the dialog
@@ -784,7 +831,9 @@ offers:
   the member who moved it: 6529 held these messages unencrypted, so the
   encrypted chat cannot prove who wrote them. The author is named from the
   chat's members; one who is not a member shows as **Unknown**, and the
-  original time is never shown as later than the move.
+  original time is never shown as later than the move. The timeline's day
+  dividers also follow the original time, so moved messages sit under the day
+  they were first sent; they keep the order in which they were moved.
   Keep the page open while it runs; you can stop and continue later, and
   nothing is copied twice, even if another member also moves the history.
   Copied messages reach only the people and devices in the encrypted chat at

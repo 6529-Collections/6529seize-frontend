@@ -1434,6 +1434,20 @@ describe("parseWalletBridgeCapabilities", () => {
     }
   });
 
+  it("sends no transaction through a 6529 Desktop with the step 2 rules", () => {
+    // The hash 6529 Desktop reports for the rules before NFT transfers and
+    // provenance publishing: such a build must ask the user to update.
+    const stepTwo = {
+      version: 1,
+      methods: ["personal_sign", "eth_sendTransaction"],
+      transactionRules:
+        "edf631841158de7e2c793a2b3595c0916f88df58ba5cd68ce1cefade941e456a",
+    };
+    expect(walletTransactionRulesHash()).not.toBe(stepTwo.transactionRules);
+    expect(walletBridgeSendsTransactions(stepTwo)).toBe(false);
+    expect(parseWalletBridgeCapabilities(stepTwo)).toEqual(["personal_sign"]);
+  });
+
   it("returns nothing for another version or a malformed answer", () => {
     for (const value of [
       undefined,

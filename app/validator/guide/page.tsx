@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
+import { notFound } from "next/navigation";
 import { connection } from "next/server";
 
 import ValidatorGuidePage from "@/components/validator-page/ValidatorGuidePage";
-import { detectFromUserAgent } from "@/lib/validator-page/detectSystem";
+import { VALIDATOR_GUIDE_PAGES } from "@/lib/validator-page/content/guidePages";
 import {
   getLockedView,
   getValidatorMetadata,
 } from "@/lib/validator-page/pageAccess";
-import {
-  getOfferedRelease,
-  getReleaseFeedSnapshot,
-} from "@/lib/validator-page/releaseFeed";
-import { getDebNames } from "@/lib/validator-page/releaseFiles";
+
+const START = VALIDATOR_GUIDE_PAGES.find((page) => page.slug === "");
 
 export default async function ValidatorGuideRoute() {
   await connection();
@@ -20,21 +17,13 @@ export default async function ValidatorGuideRoute() {
   if (locked) {
     return locked;
   }
-  const [snapshot, requestHeaders] = await Promise.all([
-    getReleaseFeedSnapshot(),
-    headers(),
-  ]);
-  const release = getOfferedRelease(snapshot.releases);
-  return (
-    <ValidatorGuidePage
-      platform={detectFromUserAgent(requestHeaders.get("user-agent"))}
-      debs={getDebNames(release)}
-      newest={release?.version}
-    />
-  );
+  if (!START) {
+    notFound();
+  }
+  return <ValidatorGuidePage page={START} />;
 }
 
 export const metadata: Metadata = getValidatorMetadata(
-  "Tester guide | 6529 Validator",
-  "Set up the 6529 validator in three steps."
+  "Guide | 6529 Validator",
+  START?.description ?? "The 6529 validator's setup guide."
 );

@@ -86,6 +86,8 @@ const PUBLIC_ETHEREUM_RPC_HOSTS = new Set([
   "eth.drpc.org",
   "eth.llamarpc.com",
   "ethereum-rpc.publicnode.com",
+  // The provenance governance page reads the Sepolia test registry and Safe.
+  "ethereum-sepolia-rpc.publicnode.com",
   "rpc.flashbots.net",
 ]);
 const SAFE_ETHEREUM_RPC_METHODS = new Set([

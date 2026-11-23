@@ -50,6 +50,7 @@ import worldTimeZonesMessages from "@/i18n/messages/worldTimeZones.en-US.json";
 import wavesRightPanelMessages from "@/i18n/messages/wavesRightPanel.en-US.json";
 import { QR_SCANNER_MESSAGES } from "@/i18n/messages/qr-scanner";
 import { CAPACITOR_CONNECT_MESSAGES } from "@/i18n/messages/capacitor-connect";
+import { DEVICES_SECURITY_MESSAGES } from "@/i18n/messages/devices-security";
 import { E2EE_MESSAGES } from "@/i18n/messages/e2ee";
 import { LEGACY_BROWSER_MESSAGES } from "@/i18n/messages/legacy-browser";
 import { EN_US_PAGINATION_MESSAGES } from "@/i18n/messages/pagination";
@@ -283,7 +284,6 @@ const REP_CATEGORY_MESSAGES = objectMessages("rep.categories", {
   "search.label": "Search REP categories",
   "search.placeholder": "Type a category name",
   "search.resultsLabel": "REP category search results",
-  "helpBotReserved.error": "{category} is managed by help6529.",
   "edit.loading": "Loading your Rep allowance…",
   "edit.loadError": "Couldn't load your Rep allowance.",
   "edit.retry": "Try again",
@@ -611,6 +611,14 @@ const MEMES_SUBMISSION_MESSAGES = objectMessages("memes.submission", {
   "traits.invalidBoolean": "Choose Yes or No.",
   "media.missingUpload": "Select artwork or choose Interactive HTML.",
   "media.missingInteractive": "Enter a valid hash or choose Upload File.",
+  "media.gifPreview.guide":
+    "GIFs get an animated preview in Waves and the leaderboard when each frame has at most {pixels} pixels (for example {exampleWidth} × {exampleHeight}), at most {frames} frames, and at most {totalPixels} pixels across all frames.",
+  "media.gifPreview.framePixels":
+    "This GIF is {width} × {height} ({pixels} pixels per frame). Animated previews need at most {limit} pixels per frame, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce its dimensions to keep the preview animated.",
+  "media.gifPreview.frames":
+    "This GIF has {frames} frames. Animated previews need at most {limit} frames, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce the number of frames to keep the preview animated.",
+  "media.gifPreview.totalPixels":
+    "This GIF has {frames} frames of {width} × {height}, {pixels} pixels in total. Animated previews need at most {limit} pixels across all frames, so in Waves and the leaderboard it will show as a still image until someone opens it in HD. You can still submit it, or reduce its dimensions or frames to keep the preview animated.",
   "identity.connectPrompt":
     "Connect a wallet to confirm the profile submitting this artwork.",
   "identity.unknownProfile": "Unknown profile",
@@ -2225,6 +2233,8 @@ const WAVE_CREATE_RULES_MESSAGES = objectMessages("waves.create.rules", {
 const WAVE_CREATE_VOTING_MESSAGES = objectMessages("waves.create.voting", {
   title: "How Drops are Voted",
   ratingTitle: "How Drops are Rated",
+  creditsLocked:
+    "This decision already has votes, so its voting credit, scope and negative-vote settings can no longer change.",
   rankAdvancedSummary: "Vote limits and behavior",
   approveAdvancedSummary: "Vote limits, behavior, and timing",
   "timeUnit.minutes": "Minutes",
@@ -2387,6 +2397,26 @@ const WAVE_CHAT_MESSAGES = objectMessages("waves.chat", {
     "It will appear in a moment. If it doesn't, refresh the page.",
   repliesOnlyPlaceholder:
     "Only chat members can start new drops here. You can reply to any drop.",
+  proxySessionPlaceholder:
+    "You're signed in as a proxy for another profile, so you can't post here. To post as yourself, switch back to your own profile, or sign out and connect again.",
+  "restriction.slowMode":
+    "Slow mode is active. Please wait before posting again",
+  "restriction.noChatPermission":
+    "You don't have permission to chat in this wave",
+  "restriction.chatDisabled": "Chat is currently disabled for this wave",
+  "restriction.noSubmitPermission":
+    "You don't have permission to submit in this wave",
+  "restriction.submissionsNotStarted": "Submissions haven't started yet",
+  "restriction.submissionsEnded": "Submission period has ended",
+  "restriction.maxDropsReached":
+    "You have reached the maximum number of drops allowed",
+  "restriction.cannotParticipate":
+    "You cannot participate in this wave at the moment",
+  "restriction.unavailable": "Action not available",
+  "profileSetup.link": "Create a profile",
+  "profileSetup.chat": "{link} to participate in chat",
+  "profileSetup.submission": "{link} to submit in this wave",
+  "profileSetup.wave": "{link} to participate in this wave",
   "replyThread.showOne": "Show 1 reply",
   "replyThread.showMany": "Show {count} replies",
   "replyThread.hide": "Hide replies",
@@ -4158,12 +4188,69 @@ export const EN_US_ROOT_MESSAGES = {
   "browserConnector.tx.title.nextgen.mint": "Mint NextGen tokens",
   "browserConnector.tx.title.subscriptions.topUp":
     "Top up your Memes subscription balance",
+  "browserConnector.tx.title.nft.transfer721": "Transfer an NFT",
+  "browserConnector.tx.title.nft.transfer1155": "Transfer NFTs",
+  "browserConnector.tx.title.nft.batchTransfer1155": "Transfer several NFTs",
+  "browserConnector.tx.title.provenance.openRelease":
+    "Open a 6529 Provenance release",
+  "browserConnector.tx.title.provenance.publish":
+    "Publish records to 6529 Provenance",
+  "browserConnector.tx.title.provenance.sealRelease":
+    "Seal a 6529 Provenance release",
   "browserConnector.tx.contract": "Contract",
   "browserConnector.tx.contract.delegation": "6529 delegation contract",
   "browserConnector.tx.contract.memes": "Manifold claim contract for The Memes",
   "browserConnector.tx.contract.nextgen": "NextGen minter contract",
   "browserConnector.tx.contract.subscriptions":
     "6529 subscriptions wallet (seize.6529.eth)",
+  "browserConnector.tx.contract.nft": "6529 NFT contract",
+  "browserConnector.tx.contract.provenance": "6529 Provenance registry",
+  "browserConnector.tx.transfer.recipient":
+    "Recipient: the NFTs go to this address",
+  "browserConnector.tx.transfer.identity": "6529 profile: {name}",
+  "browserConnector.tx.transfer.identityChecking":
+    "Looking up the 6529 profile for this address…",
+  "browserConnector.tx.transfer.identityNone":
+    "No 6529 profile was found for this address.",
+  "browserConnector.tx.transfer.identityUnavailable":
+    "The 6529 profile for this address could not be looked up.",
+  "browserConnector.tx.transfer.identityNote":
+    "The profile comes from 6529 profile data. It is not part of the transaction: check the address itself.",
+  "browserConnector.tx.transfer.contract":
+    "This address is a contract. If it cannot handle NFTs, they can be lost. Send only if you know this contract accepts them.",
+  "browserConnector.tx.transfer.codeUnavailable":
+    "It could not be checked whether this address is a contract.",
+  "browserConnector.tx.transfer.confirm":
+    "I checked that this is the right recipient. Transfers cannot be undone.",
+  "browserConnector.tx.sender.checking":
+    "Checking that this wallet may publish to this registry…",
+  "browserConnector.tx.sender.ok":
+    "Checked: this wallet may publish to this registry.",
+  "browserConnector.tx.sender.denied":
+    "This wallet is neither a publisher nor the owner of this registry, so the transaction would fail. Start again from 6529 Desktop with an authorized wallet.",
+  "browserConnector.tx.sender.unavailable":
+    "It could not be checked whether this wallet may publish. You can check again or send it anyway.",
+  "browserConnector.tx.provenance.none": "None",
+  "browserConnector.tx.provenance.digest": "Hash",
+  "browserConnector.tx.provenance.digestValue": "{algorithm} {digest}",
+  "browserConnector.tx.provenance.manifestCid": "Manifest CID",
+  "browserConnector.tx.provenance.rootCid": "Root CID",
+  "browserConnector.tx.provenance.arweaveId": "Arweave ID",
+  "browserConnector.tx.provenance.sourceCommit": "Source commit",
+  "browserConnector.tx.provenance.label": "Label",
+  "browserConnector.tx.provenance.release": "Release",
+  "browserConnector.tx.provenance.expectedCount": "Expected record count",
+  "browserConnector.tx.provenance.record": "Record {position}",
+  "browserConnector.tx.provenance.subject": "Subject ID",
+  "browserConnector.tx.provenance.recordType": "Record type ID",
+  "browserConnector.tx.provenance.schema": "Schema ID",
+  "browserConnector.tx.provenance.cid": "CID",
+  "browserConnector.tx.provenance.expectedVersion":
+    "Versions before this record",
+  "browserConnector.tx.provenance.newSubject": "0 (a new subject)",
+  "browserConnector.tx.provenance.effectiveAt": "Effective time",
+  "browserConnector.tx.provenance.effectiveAtValue":
+    "{time} UTC, as the publisher states it",
   "browserConnector.tx.network": "Network",
   "browserConnector.tx.network.mainnet": "Ethereum",
   "browserConnector.tx.network.sepolia": "Sepolia test network",
@@ -4188,6 +4275,7 @@ export const EN_US_ROOT_MESSAGES = {
   "browserConnector.tx.proof": "allowlist proof ({count} hashes)",
   "browserConnector.tx.proofs": "allowlist proofs ({count})",
   "browserConnector.tx.quoted": "“{text}”",
+  "browserConnector.tx.field": "{name}: {value}",
   "browserConnector.tx.useCase": "{id} ({name})",
   "browserConnector.tx.plainTransfer": "plain ETH transfer",
   "browserConnector.tx.yes": "Yes",
@@ -4231,6 +4319,72 @@ export const EN_US_ROOT_MESSAGES = {
   "desktopWalletRequest.explorer": "View on Etherscan",
   "browserConnector.wallet.refusal.unknown-transaction":
     "This page will not ask your wallet to send this transaction: 6529 Desktop does not send it from here. Continue on {site} in your browser instead.",
+  "browserConnector.wallet.refusal.safe-tx-rule":
+    "This page will not ask your wallet to sign this Safe transaction: its details are outside what 6529 Desktop sends from here. Nothing was signed. Continue on {site} in your browser instead.",
+  "desktopWalletRequest.safeTxUpdate":
+    "This version of 6529 Desktop cannot ask your browser wallet to sign this Safe transaction. Update 6529 Desktop, or continue on {site} in your browser.",
+  "browserConnector.safeTx.title":
+    "Approve a 6529 Provenance governance action as a signer of this Safe",
+  "browserConnector.safeTx.signatureOnly":
+    "This is a signature, not a transaction. It does not cost gas. The action happens when enough signers approve and someone executes it.",
+  "browserConnector.safeTx.safe": "Safe",
+  "browserConnector.safeTx.safeName": "6529 Provenance test Safe",
+  "browserConnector.safeTx.safeThreshold":
+    "6529 Provenance test Safe ({threshold} of {owners} signers)",
+  "browserConnector.safeTx.nonce": "Safe transaction number (nonce)",
+  "browserConnector.safeTx.queued":
+    "(queued: the Safe is at {current}; earlier ones must run first)",
+  "browserConnector.safeTx.callTitle": "{position}. {action}",
+  "browserConnector.safeTx.registry.provenanceTest":
+    "6529 Provenance test registry",
+  "browserConnector.safeTx.registry.museumCatalog":
+    "6529 Network Museum catalog registry (test)",
+  "browserConnector.safeTx.call.governance.registerCanonicalization":
+    "Register a canonicalization",
+  "browserConnector.safeTx.call.governance.registerRecordType":
+    "Register a record type",
+  "browserConnector.safeTx.call.governance.registerSchema":
+    "Register a schema (by hash and CID)",
+  "browserConnector.safeTx.call.governance.setPublisher":
+    "Grant or revoke a publisher key",
+  "browserConnector.safeTx.call.governance.deleteVersion":
+    "Delete a record version",
+  "browserConnector.safeTx.call.governance.deleteVersions":
+    "Delete a range of record versions",
+  "browserConnector.safeTx.call.governance.deleteSubject":
+    "Delete a subject and all its versions",
+  "browserConnector.safeTx.call.governance.freeze":
+    "Freeze the registry for good",
+  "browserConnector.safeTx.call.governance.declareSuccessor":
+    "Declare a successor registry (this also freezes it)",
+  "browserConnector.safeTx.call.governance.transferOwnership":
+    "Start transferring ownership of the registry",
+  "browserConnector.safeTx.call.governance.acceptOwnership":
+    "Accept ownership of the registry for this Safe",
+  "browserConnector.safeTx.high":
+    "This grants a key the right to publish records in the registry. Check the key before you sign.",
+  "browserConnector.safeTx.critical":
+    "This changes who controls the registry, freezes it or removes records. It cannot be undone once executed. Check every value before you sign.",
+  "browserConnector.safeTx.understand":
+    "I checked this action and want to approve it",
+  "browserConnector.safeTx.check.finished": "Checks finished.",
+  "browserConnector.safeTx.check.blocked": "Not offered for signing: {reason}",
+  "browserConnector.safeTx.check.checking":
+    "Checking the Safe and the registry on chain…",
+  "browserConnector.safeTx.check.ok":
+    "Checked: the Safe owns the registry, your wallet is one of its signers, and the transaction number is not used.",
+  "browserConnector.safeTx.check.okPendingOwner":
+    "Checked: the Safe is the registry's pending owner, your wallet is one of its signers, and the transaction number is not used.",
+  "browserConnector.safeTx.check.unavailable":
+    "The Safe and the registry could not be checked right now, so nothing is offered to sign. Check again.",
+  "browserConnector.safeTx.check.notOwner":
+    "The registry {registry} is not owned by this Safe, so nothing is offered to sign.",
+  "browserConnector.safeTx.check.notPendingOwner":
+    "This Safe is not the pending owner of the registry {registry}, so it cannot accept ownership.",
+  "browserConnector.safeTx.check.notSigner":
+    "Your wallet is not one of this Safe's signers, so nothing is offered to sign.",
+  "browserConnector.safeTx.check.usedNonce":
+    "The Safe has already used this transaction number (it is at {nonce}). Start again from 6529 Desktop.",
   "browserConnector.wallet.refusal.transaction-rule":
     "This page will not ask your wallet to send this transaction: its details are outside what 6529 Desktop sends from here. Nothing was sent. Continue on {site} in your browser instead.",
   "browserConnector.wallet.refusal.wrong-wallet":
@@ -4510,6 +4664,12 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.history.emptyTopups": "No Top Ups found",
   "subscriptions.history.loading": "Loading {title}",
   "subscriptions.coverage.summary.nextFundedDrops": "Next {count} drops funded",
+  "subscriptions.coverage.summary.fundedDropsAbout":
+    "About {count} drops funded",
+  "subscriptions.coverage.summary.fundedDropsAtLeast":
+    "At least {count} drops funded",
+  "subscriptions.coverage.summary.currentSettingsNote":
+    "At the current mint price and current subscription settings.",
   "subscriptions.coverage.summary.paidTitle": "Subscription paid",
   "subscriptions.coverage.summary.paid":
     "The subscription for {meme} is already paid.",
@@ -4584,6 +4744,7 @@ export const EN_US_ROOT_MESSAGES = {
   "subscriptions.coverage.basis":
     "Projected from current eligibility, settings, balance, and the published Meme schedule.",
   "subscriptions.coverage.fundedThrough": "Funded through",
+  "subscriptions.coverage.fundedAtLeastThrough": "Funded at least through",
   "subscriptions.coverage.nextUnfunded": "Next unfunded",
   "subscriptions.coverage.summary.nextDrop": "Next drop",
   "subscriptions.coverage.projected": "Projected",
@@ -4616,6 +4777,8 @@ export const EN_US_ROOT_MESSAGES = {
     "One selected drop is fully funded. Add funds to cover more upcoming drops.",
   "subscriptions.coverage.header.through":
     "{status} · through The Memes #{token}, {date}",
+  "subscriptions.coverage.header.atLeastThrough":
+    "{status} · at least through The Memes #{token}, {date}",
   "subscriptions.coverage.header.noFundedThrough": "{status}",
   "subscriptions.page.title": "Subscription minting",
   "subscriptions.page.settingsTitle": "Minting settings",
@@ -4752,6 +4915,38 @@ export const EN_US_ROOT_MESSAGES = {
   "theMemes.mint.transaction.success": "SEIZED!",
   "theMemes.mint.transaction.error": "Transaction failed",
   "theMemes.mint.transaction.errorDetails": "{message}",
+  "theMemes.mint.phaseCard.statusLabel": "Status",
+  "theMemes.mint.phaseCard.status.upcoming": "UPCOMING",
+  "theMemes.mint.phaseCard.status.active": "ACTIVE",
+  "theMemes.mint.phaseCard.status.completed": "COMPLETED",
+  "theMemes.mint.phaseCard.started": "Started",
+  "theMemes.mint.phaseCard.ends": "Ends",
+  "theMemes.mint.phaseCard.ended": "Ended",
+  "theMemes.mint.phaseCard.expectedStart": "Expected start",
+  "theMemes.mint.phaseCard.expectedEnd": "Expected end",
+  "theMemes.mint.phaseCard.airdrops": "Airdrops: x{count}",
+  "theMemes.mint.phaseEligibility.unlimited": "Unlimited spots",
+  "theMemes.mint.phaseEligibility.loading": "Loading eligibility...",
+  "theMemes.mint.phaseEligibility.unavailable": "Eligibility unavailable",
+  "theMemes.mint.phaseEligibility.none": "No eligible spots",
+  "theMemes.mint.phaseEligibility.allowlist.one": "{allowlist} eligible spot",
+  "theMemes.mint.phaseEligibility.allowlist.many": "{allowlist} eligible spots",
+  "theMemes.mint.phaseEligibility.airdrop":
+    "{airdrop}x Airdrop · nothing to mint",
+  "theMemes.mint.phaseEligibility.mixed":
+    "{allowlist}x Allowlist · {airdrop}x Airdrop",
+  "theMemes.mint.subscriptionAirdrop.phase.phase0": "Phase 0",
+  "theMemes.mint.subscriptionAirdrop.phase.phase1": "Phase 1",
+  "theMemes.mint.subscriptionAirdrop.phase.phase2": "Phase 2",
+  "theMemes.mint.subscriptionAirdrop.phase.public": "Public phase",
+  "theMemes.mint.subscriptionAirdrop.pending.one":
+    "{phase}: your subscription covers 1 card. It will be airdropped to {address}, so you do not need to mint it here.",
+  "theMemes.mint.subscriptionAirdrop.pending.many":
+    "{phase}: your subscription covers {count} cards. They will be airdropped to {address}, so you do not need to mint them here.",
+  "theMemes.mint.subscriptionAirdrop.airdropped.one":
+    "{phase}: your subscription card has been airdropped to {address}.",
+  "theMemes.mint.subscriptionAirdrop.airdropped.many":
+    "{phase}: your {count} subscription cards have been airdropped to {address}.",
   "theMemes.card.linkAriaLabel": "View {name}, card #{tokenId}",
   "theMemes.card.metric.unavailable": "-",
   "theMemes.card.metric.editionSize": "Edition Size: {value}",
@@ -5565,6 +5760,7 @@ export const EN_US_ROOT_MESSAGES = {
   ...THE_MEMES_MINT_PROGRESS_MESSAGES,
   ...CONTENT_MODERATION_MESSAGES,
   ...SIGNED_MESSAGES_MESSAGES,
+  ...DEVICES_SECURITY_MESSAGES,
   ...MODERATION_CHECK_MESSAGES,
   ...EN_US_RECEIPT_MESSAGES,
   "collect.selection.processing": "Processing",

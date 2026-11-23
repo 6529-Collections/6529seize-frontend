@@ -1,0 +1,328 @@
+{
+  "rubric_version": "fe-polish-judge/2.0",
+  "candidate": "f93b7b3f39f45dbfb7e42a5b6090e3e0be011e34",
+  "coverage": [
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/index-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/texts",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/texts-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x679e5d5d3ba5319ec829712587487f2be970587d62e5fb25275d3b484fa7b34c",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x65972485c660a4799d3558c272e83fb4ffe2aeb58e0dd8f86a4e8dd48390d085",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-artist-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x48a32954ad64b535f7ee5583e54976660772f0db78c818418c0e70b69a647687",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-relation-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x352029effa923cda1261aa1b392ace8385d968a112c15fd71ab07c18182eb858",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-work-description-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x9301f1d271983375344e5d15b24aa50c46a13872c20ed94b4e7b593ea54fa972",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-essay-390x844-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "1440x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-1440x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "820x1000",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-820x1000-full.png"
+    },
+    {
+      "route": "/museum/network-onchain/records/0x5fb51657d569d5232b7910e267c657a471df3c0096e09d5e0af11a440ccd2413",
+      "state": "default",
+      "viewport": "390x844",
+      "locale": "en-US",
+      "status": "verified",
+      "evidence": "evidence/record-text-short-390x844-full.png"
+    }
+  ],
+  "dimensions": {
+    "J01": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/index-1440x1000-full.png",
+        "evidence/record-work-1440x1000-full.png"
+      ],
+      "findings": [],
+      "note": "Index leads with title, filter and the Works list; a work record leads with its caption, object records and texts. No change from round 01."
+    },
+    "J14": {
+      "score": 8.5,
+      "evidence": [
+        "evidence/record-work-1440x1000-full.png",
+        "evidence/texts-1440x1000-full.png",
+        "evidence/contact-sheet-390x844.png"
+      ],
+      "findings": [],
+      "note": "Captioned records with credit lines, truthful absence of images stated above the fold, texts attributed to their accession; art itself is absent by owner decision."
+    }
+  },
+  "checks": {
+    "M1": "pass",
+    "M2": "pass",
+    "M3": "pass",
+    "M4": "pass"
+  },
+  "findings": [
+    {
+      "id": "C-001",
+      "targets": ["M1", "J14"],
+      "severity": "P1",
+      "status": "resolved",
+      "where": "/museum/network-onchain/records/0x679e...7b34c (Work) and index Works list · default · all viewports · en-US",
+      "evidence": "evidence/record-work-1440x1000-full.png",
+      "observation": "The principal work, Themes and Variations #210, appears as a title, a Verified badge and a metadata table. No image, no placeholder and no statement that the image is absent. The index lists 29 works as text only. The run record explains the choice, but a visitor sees nothing that does.",
+      "consequence": "A museum record of an artwork with no sight of the artwork, and silence about why, reads as broken or unfinished; visitors cannot tell whether the work has an image at all.",
+      "change": "Either show the work image once its hash is pinned and verified (owner decision), or state on each Work record and the index, in plain words, where the image is and why it is not shown, for example \"Image not shown here. The image file is not stored on-chain yet; its SHA-256 is in the catalog.\" Link to the live generator and official preview records that already exist as relations.",
+      "acceptance_check": "On a Work record at 1440, 820 and 390, a visitor reads a one-sentence reason for the missing image above the fold, or sees the verified image whole at its aspect ratio.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Work page and index now state in one sentence above the fold, at 1440, 820 and 390, that images are not shown and why, with a link to the Museum site."
+    },
+    {
+      "id": "C-002",
+      "targets": ["J14", "J01"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "Work, Artist and Accession object records · default · all viewports · en-US",
+      "evidence": "evidence/record-work-1440x1000-full.png",
+      "observation": "A work page gives type, ID, status, medium and creators, then 8 relations grouped by relation name. There is no date, edition, dimensions, credit line or rights, and no link to the work object record (CENTURY #31, 6529NM.2026.001.01), its description or any text about it. The artist page has no biography or works summary, only 12 relations. The object record shows only ID, status and medium, with a caveat sentence about determinism.",
+      "consequence": "Visitors get provenance of bytes but no captioning or scholarship; the content that makes a work worth reading is absent, and the related texts exist elsewhere without being connected.",
+      "change": "Give Work and Artist pages a museum caption block above the relations: title, creators, medium, date, accession and credit line where the record has them, plus a \"Read about this work\" link to its description and relevant text. Show only fields present in the record; omit empty ones. Rename the Relations list headings to the people and objects they connect (Artists, Acquisition, Accession, Media).",
+      "acceptance_check": "A Work page shows a caption (title, creators, medium, accession) and a link to its related text before the relations; the Artist page links to each of their works and texts.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Work page now has a caption block (artists, date, medium, status, accession, acquisition, credit line) and Texts links; artist page lists its works and texts."
+    },
+    {
+      "id": "C-003",
+      "targets": ["J01", "J14"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain · default · all viewports · en-US",
+      "evidence": "evidence/index-1440x1000-full.png",
+      "observation": "The index opens with a verification panel, releases and manifests before any work or artist. The collection is long flat lists: 29 works, 23 artists, then the same names again as 21 \"People and agents\" (with \"Casey REAS\" and \"Casey Reas\" as two records), 40 media references and more. There is no search or filter and nothing is featured.",
+      "consequence": "A visitor who wants to find a work or artist must scroll past chain machinery and scan repeated names; the Museum subject comes second to its proof.",
+      "change": "Lead with the Works and Artists lists under a short plain title, and move Verification and Releases below them or into a collapsed \"How this was verified\" section. Collapse the People list, Media references and other low-interest types, and add a title filter for the lists.",
+      "acceptance_check": "At 1440 and 390, the first screen after the banner shows the title and the beginning of the Works list; every entity list can be reached without scrolling past the release manifests.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Index opens with title, chips, filter and the Works list; verification and releases come after the collections."
+    },
+    {
+      "id": "C-004",
+      "targets": ["M3", "J14"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain · Releases · default · all viewports · en-US",
+      "evidence": "evidence/index-1440x1000-full.png",
+      "observation": "Release 1 (402 records) and Release 2 (186 records) both show the identical manifest ID bafkreibyypezpiipzrkl5edpftxwlls7ft4zn7cwsxowdhabpke33zanna and the same source commit. Release 2 is titled \"Test: the catalog's 186 Markdown texts as PUBLIC_DOCUMENT records\".",
+      "consequence": "Two different releases with one manifest looks like an error, or confuses what each release contains; a reader of an institutional record cannot tell which is true.",
+      "change": "Confirm from the chain whether Release 2 has its own manifest. If it does, show it. If the manifest is shared by design, say so in one line under Release 2, for example \"Same manifest as release 1; this release adds the texts.\" Drop \"Test:\" from the release title and leave it to the banner.",
+      "acceptance_check": "Releases 1 and 2 show distinct manifest IDs, or a visible sentence explains why they match.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Release 2 now says it shares release 1 catalog and adds the texts."
+    },
+    {
+      "id": "C-005",
+      "targets": ["J14"],
+      "severity": "P2",
+      "status": "resolved",
+      "where": "/museum/network-onchain/texts and PUBLIC_DOCUMENT records · default · all viewports · en-US",
+      "evidence": "evidence/texts-1440x1000-full.png",
+      "observation": "The 186 texts are grouped by repository folder (Repository root, docs/, policies/) and each row carries its file path. Scholarship on the works (The System in Seven States) sits in the same list as CONTRIBUTING.md, data-architecture notes and policies. The essay page shows no author, date or related work, and is labelled \"PUBLIC_DOCUMENT\". The short text appears as \"Alt text\" with no mention of which work it describes.",
+      "consequence": "Essays about art, institutional policy and developer documentation read as one undifferentiated shelf; the reader cannot find the essays or know who wrote them and what they describe.",
+      "change": "Group texts by kind (Essays and research, Policies, Programs, Documentation) using the record fields, and show author and date when present. Title a text with the subject it belongs to (\"Alt text, Vera Molnar accession 6529NM.2026.003\"). Keep the file path in the on-chain facts only.",
+      "acceptance_check": "The texts index lists essays about works first under their own heading, without file paths as row labels; the Alt text page names its accession.",
+      "admission": "baseline",
+      "reopen_reason": null,
+      "resolution": "Texts are grouped by accession and program with titles, no file paths as labels; Alt text names its accession; paths only in on-chain facts."
+    },
+    {
+      "id": "C-006",
+      "targets": ["J14"],
+      "severity": "P3",
+      "status": "resolved",
+      "where": "/museum/network-onchain/texts · default · all viewports · en-US",
+      "evidence": "evidence/texts-1440x1000-full.png",
+      "observation": "Group headings repeat: Conflict at Its Edges and Keys and Gates each appear three times in the chip row, and essays share accession groups with certificates and reviews. The essay record gives no author or date.",
+      "consequence": "A reader cannot tell the three groups apart from the chips and must scan for essays.",
+      "change": "Prefix chips with the group kind (Accession, Proposed gift, Program) and, when the record has them, show author and date on essays.",
+      "acceptance_check": "Chips are distinguishable by label alone.",
+      "admission": "resolved_unverified",
+      "reopen_reason": null,
+      "resolution": "Texts chips are now distinguishable by label (accession names carry the accession number; Keys and Gates variants carry works/artists; the proposed gift chip is unique); essay and alt text pages name their accession and, for alt text, the work they describe."
+    }
+  ],
+  "preserve": [
+    "The test-preview banner on every page states plainly that this is Sepolia and not mainnet",
+    "Verified badge with the one-sentence explanation of what was checked",
+    "Large work and artist titles with the Museum ID and status kept secondary",
+    "Readable essay line length and heading hierarchy on the essay record",
+    "Collapsed \"Show every field of the verified record\" and on-chain facts after the content",
+    "One-sentence image-absence statement above the fold on index and Work pages",
+    "Work caption block with credit line, and Texts and object-record links",
+    "Release 2 sentence explaining the shared catalog",
+    "Title filter and jump chips on index and texts"
+  ]
+}

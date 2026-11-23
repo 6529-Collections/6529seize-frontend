@@ -12,8 +12,14 @@ import {
 } from "@/lib/desktop/walletRequestContext";
 import {
   desktopWalletAcceptsContext,
+  desktopWalletSignsSafeTx,
   showDesktopWalletRefusal,
+  showDesktopWalletSafeTxRefusal,
 } from "@/services/desktop/desktopBrowserWallet";
+import {
+  buildSafeTxVectors,
+  SAFE_TX_SIGNER,
+} from "@/__tests__/fixtures/desktop-wallet-safe-tx/vectors";
 import { walletForwardingPrecheck } from "@/services/desktop/walletForwardingPrecheck";
 import {
   __resetWalletRequestContextsForTests,
@@ -24,7 +30,9 @@ import { buildDropSignatureMessage } from "@/services/wallet-signatures/structur
 jest.mock("@/helpers/desktop-shell", () => ({ isDesktopShell: jest.fn() }));
 jest.mock("@/services/desktop/desktopBrowserWallet", () => ({
   desktopWalletAcceptsContext: jest.fn(),
+  desktopWalletSignsSafeTx: jest.fn(() => false),
   showDesktopWalletRefusal: jest.fn(),
+  showDesktopWalletSafeTxRefusal: jest.fn(),
 }));
 
 const ADDRESS = "0x1111111111111111111111111111111111111111";
@@ -116,5 +124,28 @@ describe("walletForwardingPrecheck", () => {
   it("refuses what the page would refuse", () => {
     expect(walletForwardingPrecheck(requestFor("free text"))).toBeNull();
     expect(showDesktopWalletRefusal).toHaveBeenCalledTimes(1);
+  });
+
+  it("sends a Safe transaction only to a 6529 Desktop with the same table", () => {
+    const vector = buildSafeTxVectors().find(
+      (item) => item.name === "a batch of registrations on both registries"
+    )!;
+    const parsed = parseWalletRequest(
+      {
+        method: "eth_signTypedData_v4",
+        params: [SAFE_TX_SIGNER, vector.payload],
+        address: SAFE_TX_SIGNER,
+        chainId: vector.chainId,
+      },
+      [vector.chainId]
+    );
+    if (!parsed.ok) throw new Error(parsed.problem);
+    jest.mocked(desktopWalletSignsSafeTx).mockReturnValue(false);
+    expect(walletForwardingPrecheck(parsed.value)).toBeNull();
+    expect(showDesktopWalletSafeTxRefusal).toHaveBeenCalled();
+    jest.mocked(desktopWalletSignsSafeTx).mockReturnValue(true);
+    expect(walletForwardingPrecheck(parsed.value)).toEqual({
+      fingerprint: null,
+    });
   });
 });

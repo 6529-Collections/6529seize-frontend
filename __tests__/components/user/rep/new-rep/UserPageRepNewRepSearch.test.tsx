@@ -383,10 +383,7 @@ describe("UserPageRepNewRepSearch", () => {
         name: "Your total REP for this category",
       });
       const cancel = screen.getByRole("button", { name: "Cancel" });
-      const adjustment = screen
-        .getByText("Current Rep:")
-        .closest('[role="status"]');
-      expect(adjustment).toHaveAttribute("aria-hidden", "true");
+      expect(screen.queryByText("Current Rep:")).not.toBeInTheDocument();
       if (focus === "cancel") {
         await user.type(amount, "15");
         await user.tab();
@@ -402,7 +399,7 @@ describe("UserPageRepNewRepSearch", () => {
         },
       });
       rerender(<UserPageRepNewRepSearch {...props} />);
-      expect(adjustment).toHaveAttribute("aria-hidden", "false");
+      expect(screen.getByText("Current Rep:")).toBeVisible();
       if (focus === "cancel") {
         expect(cancel).toHaveFocus();
         expect(amount).toHaveValue("15");
@@ -796,11 +793,7 @@ describe("UserPageRepNewRepSearch", () => {
     ).toHaveAttribute("placeholder", "0");
     expect(screen.getByRole("button", { name: "Grant Rep" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Cancel" })).toBeEnabled();
-    const adjustment = screen
-      .getByText("Current Rep:")
-      .closest('[role="status"]');
-    expect(adjustment).toHaveAttribute("aria-hidden", "true");
-    expect(adjustment).toHaveClass("tw-invisible");
+    expect(screen.queryByText("Current Rep:")).not.toBeInTheDocument();
   });
 
   it.each(["25", "0", "-25"])(
@@ -1138,5 +1131,67 @@ describe("UserPageRepNewRepSearch", () => {
         showSubmissionSuggestion: true,
       })
     ).toEqual(["top artist"]);
+  });
+
+  it("offers, checks and grants Help6529 Credits like any other category", async () => {
+    expect(
+      getGrantRepCategoriesToDisplay({
+        search: "Help",
+        categories: ["Help6529 Credits"],
+        showSubmissionSuggestion: true,
+      })
+    ).toEqual(["Help6529 Credits"]);
+
+    const user = userEvent.setup();
+    const onSuccess = jest.fn();
+    mockAllocation.mockImplementation(({ category }) => ({
+      ...allocation,
+      repState: category
+        ? { category, rating: 0, contributor_count: 0, rater_contribution: 0 }
+        : null,
+    }));
+    jest.mocked(commonApiPost).mockResolvedValueOnce(undefined);
+    function Harness() {
+      const auth = useContext(AuthContext);
+      const queries = useContext(ReactQueryWrapperContext);
+      return (
+        <AuthContext
+          value={{ ...auth, requestAuth: async () => ({ success: true }) }}
+        >
+          <ReactQueryWrapperContext
+            value={{ ...queries, onProfileRepModify: async () => {} }}
+          >
+            <UserPageRepNewRepSearch
+              overview={null}
+              profile={{ query: "recipient" } as ApiIdentity}
+              onSuccess={onSuccess}
+            />
+          </ReactQueryWrapperContext>
+        </AuthContext>
+      );
+    }
+    render(<Harness />);
+    const search = screen.getByRole("textbox", {
+      name: "Category to grant REP for",
+    });
+    const amount = screen.getByRole("textbox", {
+      name: "Your total REP for this category",
+    });
+    await user.type(search, "Help6529 Credits");
+    await waitFor(() => expect(amount).toHaveValue("0"));
+    expect(commonApiFetch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        endpoint: "rep/categories/availability?param=Help6529+Credits",
+      })
+    );
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    await user.clear(amount);
+    await user.type(amount, "25");
+    await user.click(screen.getByRole("button", { name: "Grant Rep" }));
+    await waitFor(() => expect(onSuccess).toHaveBeenCalledTimes(1));
+    expect(commonApiPost).toHaveBeenCalledWith({
+      endpoint: "profiles/recipient/rep/rating",
+      body: { amount: 25, category: "Help6529 Credits" },
+    });
   });
 });

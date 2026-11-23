@@ -153,6 +153,9 @@ export const publicEnvSchema = z.object({
   // End-to-end encrypted chats and poll creation. On only when exactly "true".
   NEXT_PUBLIC_E2EE_DM_ENABLED: z.string().optional(),
   NEXT_PUBLIC_E2EE_POLLS_ENABLED: z.string().optional(),
+  // Encrypted read-state sync between a user's own devices (D175, P60). On
+  // only when exactly "true"; off by default in every build.
+  NEXT_PUBLIC_E2EE_READ_SYNC: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_API_ENABLED: z.string().optional(),
   NEXT_PUBLIC_PROFILE_CMS_BUILDER_ENABLED: z.string().optional(),
   NEXT_PUBLIC_CLOUDFRONT_DOMAIN: z.string().optional(),

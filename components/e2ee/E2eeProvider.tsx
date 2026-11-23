@@ -38,9 +38,11 @@ import {
   setE2eeEnrollmentMarker,
 } from "./e2eeLocalState";
 import E2eeDesktopNotices from "./E2eeDesktopNotices";
+import { useE2eeEngineRequested } from "./e2eeEngineRequest";
 import { E2eeSignOutPromptHost } from "./signout/E2eeSignOutPromptHost";
 import { useE2eeEngineDeps } from "./useE2eeEngineDeps";
 import { useLoginE2eePrefetch } from "./useLoginE2eePrefetch";
+import { useE2eeReadSyncFlush } from "./useE2eeReadSyncFlush";
 
 interface E2eeProviderProps {
   readonly children: ReactNode;
@@ -192,9 +194,11 @@ function E2eeProviderEnabled({
     window.addEventListener(DEVICE_SETUP_EVENT, start);
     return () => window.removeEventListener(DEVICE_SETUP_EVENT, start);
   }, [requestEngine]);
+  const engineRequested = useE2eeEngineRequested();
   const wantsEngine =
     isEncryptedMessagesPathname(pathname) ||
     hasMarker ||
+    engineRequested ||
     (sessionKey !== null && sessionKey === setupSession);
 
   // Each profile/wallet session gets a new generation, so an engine from an
@@ -348,6 +352,8 @@ function E2eeProviderEnabled({
     sessionKey,
     takeOverHere,
   ]);
+
+  useE2eeReadSyncFlush(value.engine);
 
   return (
     <E2eeContext.Provider value={value}>

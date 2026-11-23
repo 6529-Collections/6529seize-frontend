@@ -49,7 +49,11 @@
       "ops/scripts/build-delegation-docs-content.mjs",
       "playwright.config.ts",
       "tests/support/composerSandboxServer.cjs",
-      "services/**/index.{ts,tsx}"
+      "services/**/index.{ts,tsx}",
+      // Signed records: a library other features' call sites import; its public
+      // exports carry `/** @api */`.
+      "lib/signed-records/*.ts",
+      "ops/scripts/sync-provenance-core.mjs" // documented copy CLI for lib/provenance-core/
     ],
 
     // 3) Paths: Knip auto-imports TS path aliases from tsconfig,
@@ -71,6 +75,9 @@
       "generated/**": ["exports", "types", "enumMembers"], // ignore only these issue kinds
       // wasm-bindgen glue of the MLS module (scripts/build-mls-wasm.cjs).
       "lib/e2ee/wasm/generated/**": ["exports", "types"],
+      // A copy of the @6529-collections/provenance-core package (lib/provenance-core/README.md):
+      // its whole public API is kept, used here or not, until the npm package replaces the copy.
+      "lib/provenance-core/**": ["files", "exports", "types"],
       // Chain codec written against 6529chain's target design (Speed Demon
       // W6 C1). No app importer yet; its focused Jest contracts, which knip
       // excludes, are the consumers. The `decisions` data-source adapter

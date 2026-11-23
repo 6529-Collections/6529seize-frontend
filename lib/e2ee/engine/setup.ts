@@ -78,9 +78,15 @@ export function createContext(options: E2eeEngineOptions): EngineContext {
     disposed: false,
     incomingPaused: false,
     lastMeAt: 0,
+    ownKeyPackages: new Map(),
+    ownDevices: [],
+    listedAt: null,
+    monotonic: options.monotonic ?? options.now ?? (() => performance.now()),
+    poolReplaceRefused: false,
     lastWakeAt: 0,
     openConversation: null,
     openUntil: 0,
+    readSync: null,
   };
   holder.ctx = ctx;
   return ctx;

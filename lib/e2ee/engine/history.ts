@@ -153,6 +153,28 @@ export function updateHistorySummary(
   runtime.record.history = summary;
 }
 
+/**
+ * Unread and mention counts from saved history at the record's read
+ * position, after the position moved without a local read (D175). Call it
+ * after a checkpoint, so saved history holds every message.
+ */
+export async function recountUnread(
+  ctx: EngineContext,
+  runtime: GroupRuntime
+): Promise<void> {
+  const history = runtime.record.history;
+  if (history) {
+    const fresh = await ctx.storage.historySummary(
+      ctx.profileId,
+      runtime.record.g,
+      runtime.record.readSeq
+    );
+    history.unread = fresh.unread;
+    history.mentions = fresh.mentions;
+  }
+  ctx.store.touch(runtime.record.g);
+}
+
 /** A page can become visible before its checkpoint refreshes the summary. */
 export function latestReadSeq(runtime: GroupRuntime): number {
   let latest = runtime.record.history?.maxSeq ?? runtime.record.cursor;

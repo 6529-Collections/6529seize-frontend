@@ -3,6 +3,7 @@
 import { useWaveConfiguration } from "@/hooks/waves/useWaveConfiguration";
 import type { ApiWave } from "@/generated/models/ApiWave";
 import { ApiWaveType } from "@/generated/models/ApiWaveType";
+import WaveAdminDropDeletion from "@/components/waves/specs/WaveAdminDropDeletion";
 import WaveChatReplies from "@/components/waves/specs/WaveChatReplies";
 import WaveChatStatus from "@/components/waves/specs/WaveChatStatus";
 import WaveDisableLinks from "@/components/waves/specs/WaveDisableLinks";
@@ -37,6 +38,7 @@ export default function WaveConfigurationSections({
           display="members"
           includeCompetition={false}
         />
+        <WaveAdminDropDeletion wave={wave} />
       </WavePanelSection>
 
       {showChatSection && (

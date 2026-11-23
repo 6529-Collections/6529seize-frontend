@@ -1,6 +1,7 @@
 import type { LookupReads } from "../lookup-reads";
 import { trimHistory, updateHistorySummary, cacheMessage } from "./history";
 import type { E2eeApiClient } from "../api";
+import type { ApiE2eeDevice } from "../api-types";
 import { MlsClient } from "../mls-adapter";
 import type {
   StoredDevice,
@@ -56,9 +57,53 @@ export interface EngineContext {
    */
   incomingPaused: boolean;
   lastMeAt: number;
+  /**
+   * Own devices' last-resort KeyPackage expiry (s) as GET /e2ee/me last
+   * listed it: a sibling that replaced it may have updated (P60 §2 rule 6).
+   */
+  ownKeyPackages: Map<string, number | null>;
+  /**
+   * The profile's devices as GET /e2ee/me last listed them (at `lastMeAt`),
+   * revoked ones of the last 90 days included: the self-group claim budget
+   * is shared out from it (self-group-budget.ts).
+   */
+  ownDevices: ApiE2eeDevice[];
+  /**
+   * When `ownDevices` was listed: this device's clock then, and monotonic
+   * time then (self-group-budget.ts).
+   */
+  listedAt: { wall: number; mono: number } | null;
+  /** Monotonic milliseconds (EngineOptions.monotonic). */
+  readonly monotonic: () => number;
+  /**
+   * The API refused `replace_one_time` (it predates the field): this run
+   * keeps the usual upkeep and does not ask again.
+   */
+  poolReplaceRefused: boolean;
   lastWakeAt: number;
   openConversation: string | null;
   openUntil: number;
+  /** Read-state sync (D175, P60); set once the engine is built. */
+  readSync: ReadSyncHooks | null;
+}
+
+/**
+ * What log processing tells read-state sync (engine/read-sync.ts). Calls
+ * run inside the serial queue and must not wait on it.
+ */
+export interface ReadSyncHooks {
+  /** A decrypted payload of a self group. */
+  receive(
+    runtime: GroupRuntime,
+    body: Uint8Array,
+    senderDeviceKey: string
+  ): void;
+  /** This profile's own message, sent from another device, at `seq`. */
+  ownMessage(runtime: GroupRuntime, seq: number): void;
+  /** This device committed adds of own devices to a self group. */
+  devicesAdded(g: string): void;
+  /** This device joined a group through a Welcome. */
+  joined(runtime: GroupRuntime): void;
 }
 
 /** Read afresh after awaits; disposal can happen while a read is in flight. */

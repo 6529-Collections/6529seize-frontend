@@ -46,6 +46,7 @@ import {
 } from "@/hooks/useManifoldClaim";
 import { useIdentity } from "@/hooks/useIdentity";
 import { useNftPurchasingVisibility } from "@/hooks/useNftPurchasingVisibility";
+import ManifoldMintingSubscriptionNote from "./ManifoldMintingSubscriptionNote";
 import ManifoldMintingWidget from "./ManifoldMintingWidget";
 import type {
   ArweaveAttribute,
@@ -536,7 +537,15 @@ export default function ManifoldMinting(props: Readonly<Props>) {
             chainId={props.chain.id}
           />
         </div>
-        <div className="tw-pt-3">{printMint()}</div>
+        <div className="tw-pt-3">
+          {printMint()}
+          {!hideNftPurchasing && mintForAddress && (
+            <ManifoldMintingSubscriptionNote
+              contract={props.contract}
+              claim={manifoldClaim}
+            />
+          )}
+        </div>
       </div>
     );
   }

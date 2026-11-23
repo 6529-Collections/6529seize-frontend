@@ -9,6 +9,7 @@ import {
   within,
 } from "@testing-library/react";
 import { E2eeConversationView } from "@/components/e2ee/conversation/E2eeConversationView";
+import { E2eeTimeline } from "@/components/e2ee/conversation/E2eeTimeline";
 import type { E2eeConversation, E2eeMessage } from "@/lib/e2ee/types";
 import {
   ALICE_ID,
@@ -28,6 +29,7 @@ import { SPLIT_VIEW_BANNER } from "../../../tests/support/e2ee/e2eeCopy";
 // jsdom has no element scrolling.
 Element.prototype.scrollTo = jest.fn();
 Element.prototype.scrollIntoView = jest.fn();
+Element.prototype.scrollBy = jest.fn();
 
 const mockPush = jest.fn();
 const mockBlock = jest.fn(async () => undefined);
@@ -161,10 +163,21 @@ describe("E2eeConversationView", () => {
   it("announces paging progress, completion and failure while retaining the control", async () => {
     const engine = renderView();
     let resolve: (() => void) | undefined;
+    const earlier = message({ id: "m0", seq: 0, ts: Date.UTC(2026, 9, 11) });
+    let found: E2eeMessage[] = [earlier];
     engine.loadHistory = jest.fn(
       () =>
         new Promise<void>((done) => {
-          resolve = done;
+          resolve = () => {
+            // An older page puts its records before the current first one.
+            if (found.length > 0) {
+              engine.update({
+                messages: { [GROUP_G]: [...found, ...timeline] },
+              });
+              found = [];
+            }
+            done();
+          };
         })
     );
     // The fixture engine now exposes paging; publish a fresh snapshot.
@@ -188,17 +201,10 @@ describe("E2eeConversationView", () => {
       "status"
     );
     expect(older).toBeEnabled();
-    fireEvent.click(older);
-    expect(screen.getByText("Loading messages…")).toHaveAttribute(
-      "role",
-      "status"
-    );
-    expect(screen.queryByText("Messages loaded.")).toBeNull();
-    await act(async () => resolve?.());
-    expect(screen.getByText("Messages loaded.")).toHaveAttribute(
-      "role",
-      "status"
-    );
+    // A page that added older records keeps the control.
+    expect(
+      screen.queryByText("No older messages on this device.")
+    ).not.toBeInTheDocument();
     engine.loadHistory = jest.fn().mockRejectedValue(new Error("Read failed"));
     fireEvent.click(older);
     await waitFor(() =>
@@ -208,6 +214,114 @@ describe("E2eeConversationView", () => {
     );
     expect(screen.queryByText("Messages loaded.")).toBeNull();
     expect(older).toBeEnabled();
+    expect(
+      screen.queryByText("No older messages on this device.")
+    ).not.toBeInTheDocument();
+  });
+
+  it("replaces the older-messages control once this device has nothing older", async () => {
+    const engine = renderView();
+    engine.loadHistory = jest.fn(async () => undefined);
+    act(() =>
+      engine.update({
+        conversations: [conversation({ updatedAt: Date.now() })],
+      })
+    );
+    const older = await screen.findByRole("button", {
+      name: "Load older messages",
+    });
+    fireEvent.click(older);
+    expect(
+      await screen.findByText("No older messages on this device.")
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: "Load older messages" })
+    ).toBeNull();
+    expect(engine.loadHistory).toHaveBeenCalledWith(GROUP_G, {
+      before: expect.anything(),
+    });
+    // A message received later is newer: the start of history stays reached.
+    act(() =>
+      engine.update({
+        messages: {
+          [GROUP_G]: [
+            ...timeline,
+            message({ id: "incoming", seq: 10, text: "incoming" }),
+          ],
+        },
+      })
+    );
+    expect(
+      screen.getByText("No older messages on this device.")
+    ).toBeInTheDocument();
+  });
+
+  it.each([
+    [
+      "older records saved later on this device",
+      [message({ id: "m0", seq: 0, text: "restored" }), ...timeline],
+    ],
+    ["a page that drops the first record", timeline.slice(1)],
+  ])(
+    "offers the older-messages control again after %s",
+    async (_case, next) => {
+      const engine = renderView();
+      engine.loadHistory = jest.fn(async () => undefined);
+      act(() =>
+        engine.update({
+          conversations: [conversation({ updatedAt: Date.now() })],
+        })
+      );
+      fireEvent.click(
+        await screen.findByRole("button", { name: "Load older messages" })
+      );
+      await screen.findByText("No older messages on this device.");
+      act(() => engine.update({ messages: { [GROUP_G]: next } }));
+      expect(
+        await screen.findByRole("button", { name: "Load older messages" })
+      ).toBeEnabled();
+      expect(
+        screen.queryByText("No older messages on this device.")
+      ).not.toBeInTheDocument();
+    }
+  );
+
+  it("does not carry the start-of-history note to another chat", async () => {
+    const engine = createFakeE2eeEngine();
+    engine.loadHistory = jest.fn(async () => undefined);
+    const props = {
+      messages: timeline,
+      engine,
+      selfProfileId: SELF_ID,
+      canAct: true,
+      actions: {
+        onReply: jest.fn(),
+        onEdit: jest.fn(),
+        onDelete: jest.fn(),
+        onReport: jest.fn(),
+        onBlock: jest.fn(),
+        onToggleMute: jest.fn(),
+        muted: false,
+        onReact: jest.fn(),
+        onJumpTo: jest.fn(),
+      },
+    };
+    const view = render(
+      <E2eeTimeline {...props} conversation={conversation()} />
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Load older messages" })
+    );
+    await screen.findByText("No older messages on this device.");
+    view.rerender(
+      <E2eeTimeline {...props} conversation={conversation({ g: DM_G })} />
+    );
+    expect(
+      screen.getByRole("button", { name: "Load older messages" })
+    ).toBeEnabled();
+    expect(
+      screen.queryByText("No older messages on this device.")
+    ).not.toBeInTheDocument();
   });
 
   it("renders the header with name, members and the encryption badge", () => {
