@@ -3948,7 +3948,6 @@ export const EN_US_ROOT_MESSAGES = {
   "headerShare.menu.app": "App",
   "headerShare.menu.mobile": "6529 Mobile",
   "headerShare.menu.desktop": "6529 Desktop Classic",
-  "apps.newDesktop.title": "6529 Desktop",
   "desktop.profiles.restoreError":
     "Your saved profiles could not be opened. You can browse signed out, or restart 6529 Desktop and allow access to the system keychain to restore them.",
   "desktop.profiles.restart": "Restart to restore profiles",
