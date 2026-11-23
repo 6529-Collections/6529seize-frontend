@@ -77,9 +77,11 @@ export function useWaveCreateMenuActions({
   const actionLabel = (label: string, description: string) => (
     <span className="tw-flex tw-flex-col tw-gap-0.5">
       <span className={ACTION_LABEL_CLASSES}>{label}</span>
-      <span className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
-        {description}
-      </span>
+      {!mobile && (
+        <span className="tw-text-xs tw-font-normal tw-leading-4 tw-text-iron-400">
+          {description}
+        </span>
+      )}
     </span>
   );
   const menuItems: CompactMenuItem[] = [
