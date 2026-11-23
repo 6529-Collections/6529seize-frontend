@@ -96,15 +96,23 @@ function textFact(key: MessageKey, value: string | null): Fact[] {
   return value === null ? [] : [{ label: t(locale, key), value }];
 }
 
+/** Words that mark a clause as a caveat about the record, not a medium. */
+const CAVEAT =
+  /unverified|not (?:yet )?(?:been )?(?:independently )?verified|not established/iu;
+
 /**
- * The medium as the Museum records it. A clause after the first semicolon is
- * a note about the medium, shown on its own line with its words unchanged.
+ * The medium as the Museum records it. When the clauses after the first
+ * semicolon are a caveat about the record, they are shown on their own line
+ * with their words unchanged; a list of media stays whole.
  */
 function mediumFacts(medium: string | null): Fact[] {
-  const [lead, ...rest] = (medium ?? "").split(/;\s*/u);
+  const [lead = "", ...rest] = (medium ?? "").split(/;\s*/u);
   const note = rest.join("; ");
+  if (note === "" || !CAVEAT.test(note)) {
+    return recordedFact("museum.onchain.record.medium", medium);
+  }
   return [
-    ...recordedFact("museum.onchain.record.medium", lead ? lead : null),
+    ...recordedFact("museum.onchain.record.medium", lead === "" ? null : lead),
     ...(note === ""
       ? []
       : [

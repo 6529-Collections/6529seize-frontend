@@ -112,7 +112,7 @@ export function WorkFigure({
   const terms = termsLine(image.rightsTerms, [creditText, rights]);
   const statement = view.rights[0]?.record;
   return (
-    <figure className="tw-m-0 tw-mb-10 tw-max-w-6xl lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_18rem] lg:tw-items-end lg:tw-gap-8">
+    <figure className="tw-m-0 tw-mb-10 tw-max-w-6xl lg:tw-grid lg:tw-grid-cols-[minmax(0,1fr)_18rem] lg:tw-items-start lg:tw-gap-8">
       {/* Tall works keep their whole height in view: width follows 80vh. */}
       <div style={{ maxWidth: `calc(80vh * ${aspectRatio.toFixed(4)})` }}>
         <VerifiedImage
