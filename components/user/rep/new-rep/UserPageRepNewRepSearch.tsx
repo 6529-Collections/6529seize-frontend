@@ -37,10 +37,6 @@ import UserPageRateInput from "@/components/user/utils/rate/UserPageRateInput";
 import { RATING_INPUT_SURFACE_CLASS } from "@/components/user/utils/rate/ratingInputStyles";
 import UserRateAdjustmentHelper from "@/components/user/utils/rate/UserRateAdjustmentHelper";
 import { useRepAllocation } from "@/hooks/useRepAllocation";
-import {
-  HELP_BOT_CREDIT_REP_CATEGORY,
-  isHelpBotCreditRepCategory,
-} from "@/components/utils/input/rep-category/repCategoryConstants";
 import { getRepCategoryViolation } from "@/components/utils/input/rep-category/repCategoryValidation";
 import { useBrowserLocale } from "@/hooks/useBrowserLocale";
 import { t } from "@/i18n/messages";
@@ -143,11 +139,6 @@ function GrantRepForm({
   const { onProfileRepModify } = useContext(ReactQueryWrapperContext);
   const { requestAuth, setToast, connectedProfile, activeProfileProxy } =
     useContext(AuthContext);
-  const helpBotCreditRepCategoryError = t(
-    locale,
-    "rep.categories.helpBotReserved.error",
-    { category: HELP_BOT_CREDIT_REP_CATEGORY }
-  );
 
   const [repSearch, setRepSearch] = useState<string>("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -180,14 +171,10 @@ function GrantRepForm({
     debouncedSearchLength <= SEARCH_LENGTH.MAX;
 
   const typedCategoryViolation = getRepCategoryViolation(typedCategory);
-  const typedCategoryReserved = isHelpBotCreditRepCategory(typedCategory);
   const isDebouncedCategory =
     !selectedCategory && typedCategory === debouncedCategory;
   const shouldCheckAvailability =
-    isDebouncedCategory &&
-    matchingSearchLength &&
-    !typedCategoryReserved &&
-    !typedCategoryViolation;
+    isDebouncedCategory && matchingSearchLength && !typedCategoryViolation;
   const availability = useQuery({
     ...categoryAvailabilityOptions(typedCategory),
     enabled: shouldCheckAvailability,
@@ -207,9 +194,7 @@ function GrantRepForm({
   );
   let typedCategoryError: string | null = null;
   if (isDebouncedCategory && !categorySelectionInvalid) {
-    if (typedCategoryReserved) {
-      typedCategoryError = helpBotCreditRepCategoryError;
-    } else if (typedCategoryViolation) {
+    if (typedCategoryViolation) {
       typedCategoryError = t(locale, typedCategoryViolation.key, {
         ...typedCategoryViolation.params,
       });
@@ -309,22 +294,10 @@ function GrantRepForm({
   useClickAway(listRef, () => setIsOpen(false));
   useKeyPressEvent("Escape", () => setIsOpen(false));
 
-  const showHelpBotCreditRepCategoryError = () => {
-    setError({
-      message: helpBotCreditRepCategoryError,
-      field: "category",
-      showDetails: false,
-    });
-  };
-
   const onRepSelect = async (rep: string, knownCategory = false) => {
     const category = rep.trim();
     if (mutating || selectedCategory === category) return;
     const request = ++selectionRequest.current;
-    if (isHelpBotCreditRepCategory(category)) {
-      showHelpBotCreditRepCategoryError();
-      return;
-    }
     // Mirror the server's category rules locally so the user sees the exact
     // broken rule, localized and instantly, instead of a server error blob.
     // Runs before the search-length guard below so the over-length and
@@ -432,10 +405,6 @@ function GrantRepForm({
 
   const onGrantRep = async () => {
     if (isGrantDisabled || !activeCategory || !profile.query) return;
-    if (isHelpBotCreditRepCategory(activeCategory)) {
-      showHelpBotCreditRepCategoryError();
-      return;
-    }
     const amount = Number.parseInt(amountStr, 10);
     if (Number.isNaN(amount)) return;
     setMutating(true);
