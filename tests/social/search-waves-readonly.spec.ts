@@ -8,6 +8,7 @@ import {
   waitForRouteReady,
 } from "../testHelpers";
 import { gotoDocumentWithTransientRetry } from "../support/routeReadiness";
+import { expectUrlState } from "../support/urlState";
 
 const NAVIGATION_TIMEOUT_MS = 15000;
 const GLOBAL_SEARCH_QUERY = "wave score";
@@ -1145,7 +1146,7 @@ test.describe("Search and wave-detail read-only coverage @surface @medium @large
     const desktop = page.getByRole("option", { name: /^6529 Desktop\b/ });
     await expect(desktop).toHaveAttribute("href", "/desktop");
     await desktop.click();
-    await expect(page).toHaveURL(/\/desktop$/);
+    await expectUrlState(page, (url) => url.pathname === "/desktop");
     await expect(
       page.getByRole("heading", { level: 1, name: "6529 Desktop", exact: true })
     ).toBeVisible();
