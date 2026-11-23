@@ -1017,6 +1017,7 @@ test.describe("Home Page @smoke @medium @large", () => {
   test.beforeEach(async ({ page }) => {
     // Layout and hover assertions must not depend on a live voting round.
     await installComingUpFixture(page);
+    await installCompletedMintStatus(page);
     await page.route(comingUpLeaderboardPattern, (route) =>
       route.fulfill({ json: comingUpLeaderboard })
     );
@@ -1027,7 +1028,6 @@ test.describe("Home Page @smoke @medium @large", () => {
   test("hero keeps the approved copy and actions in a responsive typography layout @smoke", async ({
     page,
   }, testInfo) => {
-    await installCompletedMintStatus(page);
     await page.reload({ waitUntil: "domcontentloaded" });
     const hero = page
       .getByRole("main")

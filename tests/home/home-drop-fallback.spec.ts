@@ -5,6 +5,7 @@ import {
   comingUpLeaderboardPattern,
   comingUpSettings,
   comingUpWave,
+  installActiveMintStatus,
   installComingUpFixture,
   installCompletedMintStatus,
   installLoadingTestArtwork,
@@ -480,7 +481,8 @@ test("homepage selects Next Drop without flashing the previous heading or artwor
 test("homepage artwork request has a visible failure and retry @smoke @medium @large", async ({
   page,
 }) => {
-  await installLoadingTestArtwork(page);
+  await installComingUpFixture(page);
+  await installCompletedMintStatus(page);
   let failing = true;
   await page.route("**/api/memes_latest", (route) =>
     failing
@@ -511,6 +513,7 @@ test("Coming Up does not mislabel the current artwork while Latest Drop is delay
   page,
 }) => {
   await installComingUpFixture(page);
+  await installActiveMintStatus(page);
   await page.route(comingUpLeaderboardPattern, (route) =>
     route.fulfill({ json: comingUpLeaderboard })
   );

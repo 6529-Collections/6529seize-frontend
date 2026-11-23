@@ -40,17 +40,43 @@ export async function installCompletedMintStatus(
   ready: Promise<void> = Promise.resolve(),
   tokenId = loadingTestArtwork.id
 ) {
+  await installMintStatus(page, { total: 328, endDate: 2, tokenId, ready });
+}
+
+export async function installActiveMintStatus(page: Page) {
+  await installMintStatus(page, {
+    total: 100,
+    endDate: Math.floor(Date.now() / 1000) + 3600,
+    tokenId: loadingTestArtwork.id,
+    ready: Promise.resolve(),
+  });
+}
+
+async function installMintStatus(
+  page: Page,
+  {
+    total,
+    endDate,
+    tokenId,
+    ready,
+  }: {
+    readonly total: number;
+    readonly endDate: number;
+    readonly tokenId: number;
+    readonly ready: Promise<void>;
+  }
+) {
   const claimResult = encodeFunctionResult({
     abi: MEMES_MANIFOLD_PROXY_ABI,
     functionName: "getClaimForToken",
     result: [
       1n,
       {
-        total: 328,
+        total,
         totalMax: 328,
         walletMax: 0,
         startDate: 1,
-        endDate: 2,
+        endDate,
         storageProtocol: 0,
         merkleRoot: zeroHash,
         location: "",
