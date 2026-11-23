@@ -32,7 +32,7 @@ export function useRepAllocation({
   minMaxValues: { readonly min: number; readonly max: number };
   isError: boolean;
   /** The 6529 Network read's error, for words a retry can't fix. */
-  chainError: unknown;
+  chainError?: unknown;
   isFetching: boolean;
   retry: () => void;
 } {

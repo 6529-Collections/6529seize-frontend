@@ -135,9 +135,11 @@ export function heldJoinDraft(
   return draft;
 }
 
-/** Whether an id from an answer is `id`, read defensively. */
-const sameId = (value: unknown, id: string): boolean =>
-  typeof value === "string" && value.toLowerCase() === id.toLowerCase();
+/** Whether two ids from answers are the same, read defensively: a missing id is never the same. */
+const sameId = (value: unknown, id: unknown): boolean =>
+  typeof value === "string" &&
+  typeof id === "string" &&
+  value.toLowerCase() === id.toLowerCase();
 
 /** Whether a wallet can join an identity now, by the chain's rules. */
 export type JoinReadiness =
